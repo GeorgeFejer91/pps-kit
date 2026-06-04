@@ -1,0 +1,138 @@
+{
+  "name": "Study 5 PPS design",
+  "sofa_file": "assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa",
+  "noises": [
+    {
+      "label": "Pink frontal",
+      "noise_type": "pink",
+      "azimuth_deg": 0.0,
+      "elevation_deg": 0.0,
+      "gain": 1.0
+    },
+    {
+      "label": "Blue frontal",
+      "noise_type": "blue",
+      "azimuth_deg": 0.0,
+      "elevation_deg": 0.0,
+      "gain": 1.0
+    },
+    {
+      "label": "White frontal",
+      "noise_type": "white",
+      "azimuth_deg": 0.0,
+      "elevation_deg": 0.0,
+      "gain": 1.0
+    },
+    {
+      "label": "Brown frontal",
+      "noise_type": "brown",
+      "azimuth_deg": 0.0,
+      "elevation_deg": 0.0,
+      "gain": 1.0
+    }
+  ],
+  "custom_looming_files": [],
+  "prestimulus_files": [],
+  "trajectory": {
+    "start_radius_m": 1.1,
+    "end_radius_m": 0.1,
+    "path_direction": "approach",
+    "path_length_m": 1.0,
+    "propagation_speed_mps": 0.3333333333333333,
+    "azimuth_start_deg": 0.0,
+    "azimuth_end_deg": 0.0,
+    "elevation_deg": 0.0,
+    "padding_pre_s": 0.5,
+    "padding_post_s": 0.5,
+    "sample_rate": 44100,
+    "use_inverse_square": true
+  },
+  "protocol": {
+    "repetitions_per_condition": 1,
+    "soa_values_ms": [
+      300,
+      800,
+      1500,
+      2200,
+      2700
+    ],
+    "spatial_values_cm": [
+      100.0,
+      83.3,
+      60.0,
+      36.7,
+      20.0
+    ],
+    "pair_spatial_values_with_soas": true,
+    "auditory_motion_directions": [
+      "looming"
+    ],
+    "tactile_sites": [
+      "hand"
+    ],
+    "catch_trial_percentage": 10.0,
+    "catch_trials_exact": null,
+    "include_baseline_trials": true,
+    "baseline_soa_values_ms": [],
+    "respiratory_phases": [
+      "Inhale",
+      "Exhale"
+    ],
+    "blocks": 6,
+    "block_specs": [
+      {
+        "label": "Block 1",
+        "stimulus_types": [
+          "Audio-Tactile",
+          "Baseline",
+          "Catch"
+        ]
+      },
+      {
+        "label": "Block 2",
+        "stimulus_types": [
+          "Audio-Tactile",
+          "Baseline",
+          "Catch"
+        ]
+      },
+      {
+        "label": "Block 3",
+        "stimulus_types": [
+          "Audio-Tactile",
+          "Baseline",
+          "Catch"
+        ]
+      },
+      {
+        "label": "Block 4",
+        "stimulus_types": [
+          "Audio-Tactile",
+          "Baseline",
+          "Catch"
+        ]
+      },
+      {
+        "label": "Block 5",
+        "stimulus_types": [
+          "Audio-Tactile",
+          "Baseline",
+          "Catch"
+        ]
+      },
+      {
+        "label": "Block 6",
+        "stimulus_types": [
+          "Audio-Tactile",
+          "Baseline",
+          "Catch"
+        ]
+      }
+    ],
+    "trial_randomization_strategy": "no_immediate_repeats",
+    "block_order_randomization": "counterbalanced_rotation",
+    "max_consecutive_same_trial_type": 2,
+    "participants": 50,
+    "random_seed": 20250604
+  }
+}

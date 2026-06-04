@@ -1,0 +1,62 @@
+{
+  "template_id": "canzoneri_2012_dynamic_sounds",
+  "title": "Dynamic sounds capture PPS boundaries",
+  "citation": "Canzoneri, E., Magosso, E., & Serino, A. (2012). Dynamic sounds capture the boundaries of peripersonal space representation in humans. PLoS ONE, 7(9), e44306.",
+  "source_url": "https://pubmed.ncbi.nlm.nih.gov/23028516/",
+  "doi": "10.1371/journal.pone.0044306",
+  "verification_status": "partial",
+  "notes": "Canonical dynamic audio-tactile PPS task. Core timing and distance values are verified from accessible abstracts/snippets and later replications; exact block/repetition counts should be confirmed against the full paper before preregistered replication.",
+  "design": {
+    "name": "Canzoneri 2012 dynamic audio-tactile PPS",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Pink moving sound",
+        "noise_type": "pink",
+        "azimuth_deg": 0.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0
+      }
+    ],
+    "trajectory": {
+      "start_radius_m": 1.1,
+      "end_radius_m": 0.1,
+      "path_direction": "approach",
+      "path_length_m": 1.0,
+      "propagation_speed_mps": 0.3333333333333333,
+      "azimuth_start_deg": 0.0,
+      "azimuth_end_deg": 0.0,
+      "elevation_deg": 0.0,
+      "padding_pre_s": 0.0,
+      "padding_post_s": 0.0,
+      "sample_rate": 44100,
+      "use_inverse_square": true
+    },
+    "protocol": {
+      "repetitions_per_condition": 15,
+      "soa_values_ms": [300, 800, 1500, 2200, 2700],
+      "spatial_values_cm": [100.0, 83.3, 60.0, 36.7, 20.0],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": ["looming", "receding"],
+      "tactile_sites": ["right index finger"],
+      "catch_trial_percentage": 10.0,
+      "catch_trials_exact": null,
+      "include_baseline_trials": true,
+      "baseline_soa_values_ms": [300, 2700],
+      "respiratory_phases": ["Any"],
+      "blocks": 1,
+      "participants": 17,
+      "random_seed": 20120928
+    }
+  },
+  "provenance": [
+    {
+      "field": "SOA values",
+      "source": "PubMed/PMC abstract and accessible snippets report T1-T5 as 300, 800, 1500, 2200, and 2700 ms."
+    },
+    {
+      "field": "movement",
+      "source": "Later replications describe the Canzoneri procedure as 10-110 cm dynamic sound over 3000 ms."
+    }
+  ]
+}

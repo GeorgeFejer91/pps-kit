@@ -1,0 +1,54 @@
+﻿[paths]
+stimuli_dir = "artifacts/stimuli/10.Participant_Sequences"
+instructions_dir = "assets/breathing"
+click_sound = "assets/click/mouse_click_tone_1200Hz_50ms.wav"
+tactile_test_stimulus = "artifacts/stimuli/1. TactileStimuli/tactile_stimulus_0ms.wav"
+recordings_dir = "local_data/loopback_recordings"
+demographics_dir = "local_data/demographics"
+settings_file = "local_data/experiment_settings.json"
+decode_output_dir = "artifacts/decoded"
+analysis_output_dir = "artifacts/analysis"
+
+[stimulus_generation]
+participants = 50
+use_pregenerated_looming = false
+looming_version = "v1-padded"
+root_dir = "artifacts/stimuli"
+input_dir = "assets"
+output_dir = "artifacts/stimuli"
+
+[runner]
+participant_id = "P001"
+audio_device = ""
+audio_output_channel = 1
+tactile_output_channel = 2
+response_device = "mouse"
+response_rule = "respond_to_tactile_ignore_sound"
+enable_loopback_recording = true
+loopback_device = ""
+background_music = ""
+
+[decoder]
+reference_sequence_root = "artifacts/stimuli/10.Participant_Sequences"
+click_tone = "assets/click/mouse_click_tone_1200Hz_50ms.wav"
+looming_root = "artifacts/stimuli/2. LoomingStimuli"
+breathing_dir = "assets/breathing"
+
+[analysis]
+sample_input = "data/sample/audio_tactile_with_facilitation_preregistered_2p5sd.csv"
+output_dir = "artifacts/analysis"
+rt_min_ms = 100
+rt_max_ms = 1500
+outlier_rule = "preregistered_2p5sd"
+baseline_correction = "tactile_only"
+pps_fit_model = "summary_smoke"
+
+[spoken_assets]
+engine = "kokoro-onnx"
+voice = "af_sarah"
+target_seconds = 4.0
+target_sample_rate = 44100
+
+[stimulus_design]
+design_file = "configs/stimulus_design.generated.json"
+example_design_file = "configs/stimulus_design.example.json"

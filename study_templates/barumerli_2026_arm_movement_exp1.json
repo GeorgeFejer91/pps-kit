@@ -1,0 +1,62 @@
+{
+  "template_id": "barumerli_2026_arm_movement_exp1",
+  "title": "Looming/receding PPS during arm movement, Experiment 1",
+  "citation": "Barumerli, R., Geronazzo, M., & Cesari, P. (2026). Somatotopy-independent reduction of audio-tactile intersensory facilitation for looming sounds within the peripersonal space during arm movements execution. Scientific Reports.",
+  "source_url": "https://www.nature.com/articles/s41598-026-36796-5",
+  "doi": "10.1038/s41598-026-36796-5",
+  "verification_status": "verified",
+  "notes": "Template captures Experiment 1 audio-tactile block structure. Motor/static hand-status blocks are represented in notes and should be counterbalanced as separate condition blocks.",
+  "design": {
+    "name": "Barumerli 2026 Experiment 1 arm movement PPS",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Pink two-speaker motion",
+        "noise_type": "pink",
+        "azimuth_deg": 0.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0
+      }
+    ],
+    "trajectory": {
+      "start_radius_m": 1.1,
+      "end_radius_m": 0.1,
+      "path_direction": "approach",
+      "path_length_m": 1.0,
+      "propagation_speed_mps": 0.3333333333333333,
+      "azimuth_start_deg": 0.0,
+      "azimuth_end_deg": 0.0,
+      "elevation_deg": 0.0,
+      "padding_pre_s": 0.0,
+      "padding_post_s": 0.0,
+      "sample_rate": 44100,
+      "use_inverse_square": true
+    },
+    "protocol": {
+      "repetitions_per_condition": 15,
+      "soa_values_ms": [300, 800, 1500, 2200, 2700],
+      "spatial_values_cm": [100.0, 83.3, 60.0, 36.7, 20.0],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": ["looming", "receding"],
+      "tactile_sites": ["right index finger", "chest"],
+      "catch_trial_percentage": 9.64,
+      "catch_trials_exact": 16,
+      "include_baseline_trials": true,
+      "baseline_soa_values_ms": [300, 2700],
+      "respiratory_phases": ["Any"],
+      "blocks": 4,
+      "participants": 31,
+      "random_seed": 20260401
+    }
+  },
+  "provenance": [
+    {
+      "field": "audio-tactile counts",
+      "source": "Methods report 15 trials for each 2 sound directions x 5 distances plus 16 catch trials per audio-tactile block."
+    },
+    {
+      "field": "SOA values",
+      "source": "Methods report T1-T5 as 300, 800, 1500, 2200, and 2700 ms."
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "peripersonal-space-toolkit"
+version = "0.1.0"
+description = "Windows-ready audio-tactile peripersonal-space experiment toolkit."
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
+license = { text = "MIT" }
+authors = [{ name = "George Fejer" }]
+dependencies = [
+  "numpy>=2.0",
+  "scipy>=1.12",
+  "soundfile>=0.13.1",
+  "sounddevice>=0.4.7",
+  "sofar>=1.1",
+  "pyaudiowpatch>=0.2.12; platform_system == 'Windows'",
+  "pynput>=1.7.7",
+]
+
+[project.optional-dependencies]
+tts = ["kokoro-onnx==0.5.0", "soundfile>=0.13.1"]
+mp3 = ["pydub>=0.25.1"]
+dev = ["pytest>=8.0", "build>=1.2", "Pillow>=10.0"]
+
+[project.scripts]
+pps-generate = "peripersonal_space_toolkit.cli:generate"
+pps-run = "peripersonal_space_toolkit.cli:run"
+pps-decode = "peripersonal_space_toolkit.cli:decode"
+pps-analyze = "peripersonal_space_toolkit.cli:analyze"
+pps-design = "peripersonal_space_toolkit.designer_app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

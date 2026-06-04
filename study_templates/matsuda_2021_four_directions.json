@@ -1,0 +1,62 @@
+{
+  "template_id": "matsuda_2021_four_directions",
+  "title": "Front, rear, left, and right audio-tactile PPS",
+  "citation": "Matsuda, Y., et al. (2021). Peripersonal space in the front, rear, left and right directions for audio-tactile multisensory integration. Scientific Reports.",
+  "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8163804/",
+  "doi": "10.1038/s41598-021-92008-6",
+  "verification_status": "verified",
+  "notes": "Four body-relative direction blocks. The template represents one direction block; duplicate with azimuth/body orientation changes for front, rear, left, and right.",
+  "design": {
+    "name": "Matsuda 2021 four-direction PPS block",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Pink speaker motion",
+        "noise_type": "pink",
+        "azimuth_deg": 0.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0
+      }
+    ],
+    "trajectory": {
+      "start_radius_m": 1.1,
+      "end_radius_m": 0.1,
+      "path_direction": "approach",
+      "path_length_m": 1.0,
+      "propagation_speed_mps": 0.3333333333333333,
+      "azimuth_start_deg": 0.0,
+      "azimuth_end_deg": 0.0,
+      "elevation_deg": 0.0,
+      "padding_pre_s": 0.0,
+      "padding_post_s": 0.0,
+      "sample_rate": 44100,
+      "use_inverse_square": true
+    },
+    "protocol": {
+      "repetitions_per_condition": 10,
+      "soa_values_ms": [300, 800, 1500, 2200, 2700],
+      "spatial_values_cm": [100.0, 83.3, 60.0, 36.7, 20.0],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": ["approaching", "receding"],
+      "tactile_sites": ["chest"],
+      "catch_trial_percentage": 30.0,
+      "catch_trials_exact": 60,
+      "include_baseline_trials": true,
+      "baseline_soa_values_ms": [-700, 3700],
+      "respiratory_phases": ["Any"],
+      "blocks": 4,
+      "participants": 20,
+      "random_seed": 20210501
+    }
+  },
+  "provenance": [
+    {
+      "field": "block composition",
+      "source": "Methods report one block as 100 bimodal, 40 unimodal, and 60 catch trials."
+    },
+    {
+      "field": "stimuli",
+      "source": "Methods report 3000 ms pink noise moving between 10 and 110 cm with T1-T5 at 300-2700 ms."
+    }
+  ]
+}

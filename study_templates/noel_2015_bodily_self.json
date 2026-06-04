@@ -1,0 +1,62 @@
+{
+  "template_id": "noel_2015_bodily_self",
+  "title": "PPS as the space of the bodily self",
+  "citation": "Noel, J.-P., Pfeiffer, C., Blanke, O., & Serino, A. (2015). Peripersonal space as the space of the bodily self. Cognition, 144, 49-57.",
+  "source_url": "https://noel-lab.org/wp-content/uploads/2024/05/noet-et-al-cognition-2015.pdf",
+  "doi": "10.1016/j.cognition.2015.07.012",
+  "verification_status": "verified",
+  "notes": "Audio-tactile PPS task intermingled with full-body-illusion stroking. The template captures the PPS trial schedule; FBI stroking and front/back experimental context must be configured in the lab protocol.",
+  "design": {
+    "name": "Noel 2015 full-body-illusion PPS",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Looming sound",
+        "noise_type": "pink",
+        "azimuth_deg": 0.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0
+      }
+    ],
+    "trajectory": {
+      "start_radius_m": 0.9,
+      "end_radius_m": 0.15,
+      "path_direction": "approach",
+      "path_length_m": 0.75,
+      "propagation_speed_mps": 0.6578947368421053,
+      "azimuth_start_deg": 0.0,
+      "azimuth_end_deg": 0.0,
+      "elevation_deg": 0.0,
+      "padding_pre_s": 0.0,
+      "padding_post_s": 0.0,
+      "sample_rate": 44100,
+      "use_inverse_square": true
+    },
+    "protocol": {
+      "repetitions_per_condition": 12,
+      "soa_values_ms": [190, 380, 570, 760, 950, 1140],
+      "spatial_values_cm": [15.0, 30.0, 45.0, 60.0, 75.0, 90.0],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": ["looming"],
+      "tactile_sites": ["chest"],
+      "catch_trial_percentage": 12.5,
+      "catch_trials_exact": 12,
+      "include_baseline_trials": true,
+      "baseline_soa_values_ms": [190, 1140],
+      "respiratory_phases": ["Any"],
+      "blocks": 2,
+      "participants": 19,
+      "random_seed": 20150722
+    }
+  },
+  "provenance": [
+    {
+      "field": "trial counts",
+      "source": "Methods lines report 72 PPS trials, 24 baseline trials, and 12 catch trials per block."
+    },
+    {
+      "field": "SOAs and distances",
+      "source": "Methods lines report six sound distances D6-D1 with tactile timing corresponding to the spatial dimension."
+    }
+  ]
+}

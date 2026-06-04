@@ -1,0 +1,61 @@
+{
+  "engine": "kokoro-onnx",
+  "model": "kokoro-v1.0.int8.onnx",
+  "voices": "voices-v1.0.bin",
+  "voice": "af_sarah",
+  "speed": 0.92,
+  "lang": "en-us",
+  "target_sample_rate": 44100,
+  "target_seconds": 4.0,
+  "files": {
+    "Inhale-2-3-4-hold_FIXED.wav": {
+      "text": "Inhale. Two. Three. Four. Hold.",
+      "sample_rate": 44100,
+      "frames": 176400,
+      "seconds": 4.0,
+      "sha256": "eb4d9d5b36529f84bb34a6904eaa1777640543d03297d8fbc82a47f3fc2b9c43"
+    },
+    "Exhale-2-3-4-hold_FIXED.wav": {
+      "text": "Exhale. Two. Three. Four. Hold.",
+      "sample_rate": 44100,
+      "frames": 176400,
+      "seconds": 4.0,
+      "sha256": "5df2ff47964a3137c2702eeb7f57f1f3ad0fa9b6557ce93a6ff7a121815ca841"
+    },
+    "General_Instructions.wav": {
+      "text": "Follow the breathing count. Click when you feel the vibration.",
+      "sample_rate": 44100,
+      "frames": 176400,
+      "seconds": 4.0,
+      "sha256": "0188918f0e2a89f593e046de0a457b8630296a42cd4aa21e4d74cb6c3361d4a5"
+    },
+    "Pre-Block_Instruction.wav": {
+      "text": "Get ready. The next block will begin after your click.",
+      "sample_rate": 44100,
+      "frames": 176400,
+      "seconds": 4.0,
+      "sha256": "614fd5de117435dca55ced798bd588eb31d2407dc463cb86f06425ea18b84cdd"
+    },
+    "Post-Block_Instruction.wav": {
+      "text": "Block complete. Please rest and wait for the next block.",
+      "sample_rate": 44100,
+      "frames": 176400,
+      "seconds": 4.0,
+      "sha256": "2333f866461eb147d1dcec3dce186fba8aeeffa29193b1417bdcc9f633501aa2"
+    },
+    "InterimMessage.wav": {
+      "text": "Halfway point. Take a short rest before continuing.",
+      "sample_rate": 44100,
+      "frames": 176400,
+      "seconds": 4.0,
+      "sha256": "6c24bc7f656055e8c7dd8fa0b35fc33ea11f70e21c8da38a736cc104e46e1c55"
+    },
+    "FinishMessage.wav": {
+      "text": "Experiment complete. Please wait for the researcher.",
+      "sample_rate": 44100,
+      "frames": 176400,
+      "seconds": 4.0,
+      "sha256": "e91d1fa1ed708878f705b1bef60333fe46fb7773cefea152b3783e5cf74fbc0d"
+    }
+  }
+}

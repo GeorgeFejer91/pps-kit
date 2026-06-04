@@ -1,0 +1,10 @@
+﻿cff-version: 1.2.0
+message: "If you use this toolkit, please cite the repository and the associated Study 5 manuscript."
+title: "Peripersonal Space Toolkit"
+authors:
+  - family-names: "Fejer"
+    given-names: "George"
+version: "0.1.0"
+date-released: "2026-06-04"
+license: "MIT"
+repository-code: "https://github.com/GeorgeFejer91/peripersonal-space-toolkit"
