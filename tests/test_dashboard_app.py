@@ -194,6 +194,7 @@ def test_dashboard_static_assets_are_packaged():
     assert "pageFromLocation" in app_js
     assert "replaceRouteForPage" in app_js
     assert "enforceExternalLinkTargets" in app_js
+    assert 'id="download-software" class="button-link primary-link" href="https://github.com/GeorgeFejer91/pps-kit/releases" target="_blank" rel="noopener noreferrer"' in html
     assert "renderHardwarePixelArt" in app_js
     assert 'data-hardware-pixel="komplete-audio6"' in html
     assert 'data-hardware-pixel="woojer-strap-4"' in html
