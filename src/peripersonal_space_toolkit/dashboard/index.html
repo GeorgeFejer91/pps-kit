@@ -893,4 +893,115 @@
         </div>
         <section id="downloads-installer" class="info-segment" aria-labelledby="downloads-installer-title">
           <div class="info-segment-heading">
-            <span class="segment-k
+            <span class="segment-kicker">Primary</span>
+            <h2 id="downloads-installer-title">Installer</h2>
+          </div>
+          <div class="download-page-grid single">
+            <article class="info-card download-card primary-download">
+            <h2>Windows Downloader</h2>
+            <p>Small GitHub-hosted bootstrapper published through GitHub Releases after a reviewed Windows package build.</p>
+            <a id="download-software" class="button-link primary-link" href="https://github.com/GeorgeFejer91/pps-kit/releases" target="_blank" rel="noopener noreferrer">Open Installer Releases</a>
+          </article>
+          </div>
+        </section>
+        <section id="downloads-package" class="info-segment" aria-labelledby="downloads-package-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Lab Bundle</span>
+            <h2 id="downloads-package-title">Offline Package</h2>
+          </div>
+          <div class="download-page-grid single">
+            <article class="info-card download-card">
+            <h2>Offline Lab Package</h2>
+            <p>Heavyweight release payload hosted outside GitHub for labs that need the full packaged toolkit bundle.</p>
+            <a id="download-full-package" class="button-link secondary-link" href="https://zenodo.org/search?q=%22peripersonal-space-toolkit%22">Open Full Package Search</a>
+          </article>
+          </div>
+        </section>
+        <section id="downloads-source" class="info-segment" aria-labelledby="downloads-source-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Source</span>
+            <h2 id="downloads-source-title">Repository</h2>
+          </div>
+          <div class="download-page-grid single">
+            <article class="info-card download-card">
+            <h2>Source Repository</h2>
+            <p>Browse source, issues, release notes, and development documentation on GitHub.</p>
+            <a class="button-link" href="https://github.com/GeorgeFejer91/pps-kit">Open GitHub Repository</a>
+          </article>
+          </div>
+        </section>
+        <section id="downloads-companion" class="info-segment" aria-labelledby="downloads-companion-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Local Companion</span>
+            <h2 id="downloads-companion-title">Local Companion</h2>
+          </div>
+          <div class="download-page-grid single">
+            <article class="info-card download-card">
+            <h2>Local Companion</h2>
+            <p>After installing, start the trusted local companion before using hosted dashboard actions.</p>
+            <code>windows\Start_Website_Companion.bat</code>
+          </article>
+          </div>
+        </section>
+      </section>
+
+    </main>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="segment-info-modal" class="modal-backdrop" hidden>
+    <div class="modal-card segment-info-card" role="dialog" aria-modal="true" aria-labelledby="segment-info-modal-title">
+      <div class="modal-heading">
+        <div>
+          <div id="segment-info-kicker" class="segment-kicker">Segment</div>
+          <h2 id="segment-info-modal-title">Segment Description</h2>
+        </div>
+        <button id="segment-info-modal-close" class="icon-action" type="button" aria-label="Close">X</button>
+      </div>
+      <div class="segment-info-grid">
+        <section>
+          <h3>Purpose</h3>
+          <p id="segment-info-purpose"></p>
+        </section>
+        <section>
+          <h3>Your Inputs</h3>
+          <p id="segment-info-inputs"></p>
+        </section>
+        <section>
+          <h3>Backend Work</h3>
+          <p id="segment-info-backend"></p>
+        </section>
+        <section>
+          <h3>Used Next</h3>
+          <p id="segment-info-next"></p>
+        </section>
+      </div>
+    </div>
+  </div>
+  <div id="customize-modal" class="modal-backdrop" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="customize-modal-title">
+      <form id="customize-form">
+        <div class="modal-heading">
+          <div>
+            <div class="segment-kicker">New Custom Study</div>
+            <h2 id="customize-modal-title">Name This Study</h2>
+          </div>
+          <button id="customize-modal-close" class="icon-action" type="button" aria-label="Close">X</button>
+        </div>
+        <div class="field-row">
+          <label for="customize-study-name">Study name</label>
+          <input id="customize-study-name" type="text" autocomplete="off" required>
+        </div>
+        <p id="customize-source-label" class="modal-source"></p>
+        <p id="customize-error" class="modal-error" role="alert" hidden></p>
+        <div class="modal-actions">
+          <button id="customize-cancel" type="button">Cancel</button>
+          <button id="customize-submit" class="primary" type="submit">Create Study</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="hardware_pixel_art.js?v=20260615-hardware-arch-side"></script>
+  <script src="app.js?v=20260615-hardware-arch-side"></script>
+</body>
+</html>
