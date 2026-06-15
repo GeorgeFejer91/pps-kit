@@ -173,12 +173,12 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    assert 'href="styles.css?v=20260615-hardware-pixels"' in html
-    assert 'src="hardware_pixel_art.js?v=20260615-hardware-pixels"' in html
-    assert 'src="app.js?v=20260615-hardware-pixels"' in html
-    assert "index.html?page=toolkit&v=20260615-hardware-pixels" in public_index
-    assert "index.html?page=documentation&v=20260615-hardware-pixels" in public_docs
-    assert "index.html?page=downloads&v=20260615-hardware-pixels" in public_download
+    assert 'href="styles.css?v=20260615-static-preloads"' in html
+    assert 'src="hardware_pixel_art.js?v=20260615-static-preloads"' in html
+    assert 'src="app.js?v=20260615-static-preloads"' in html
+    assert "index.html?page=toolkit&v=20260615-static-preloads" in public_index
+    assert "index.html?page=documentation&v=20260615-static-preloads" in public_docs
+    assert "index.html?page=downloads&v=20260615-static-preloads" in public_download
     assert 'data-page-tab="toolkit"' in html
     assert 'data-page-tab="documentation"' in html
     assert 'data-page-tab="downloads"' in html
@@ -507,6 +507,14 @@ def test_dashboard_static_assets_are_packaged():
     assert "min_max" in app_js
     assert "isCompanionDashboardOrigin" in app_js
     assert "http://127.0.0.1:8766" in app_js
+    assert "STATIC_PRELOAD_INVENTORY_PATH" in app_js
+    assert "study_templates/" in app_js
+    assert "staticStateForTemplate" in app_js
+    assert "DEFAULT_STUDY_TEMPLATE_ID = \"study5_box_breathing_pps\"" in app_js
+    assert "Loaded Study 5 and committed preload assets from GitHub" in app_js
+    assert "Start the local companion backend to create, bake, save, prepare, or open local experiment files." in app_js
+    assert "Open Asset" in app_js
+    assert "staticPreviewAssetForLabel" in app_js
     assert "Remove trial sequence row" in app_js
     assert "renderProtocolSummary" in app_js
     assert "Row label" not in app_js

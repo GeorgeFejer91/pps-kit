@@ -12,6 +12,15 @@ experiment software runs locally on the research PC.
 - The local companion backend runs on the PC at `http://127.0.0.1:8766`.
 - The hosted page calls the companion API for design state, render jobs, session
   preparation, audio stress tests, and native Focus Mode launch.
+- If the local companion is not running, the hosted dashboard falls back to a
+  static read-only profile mode backed by committed GitHub assets. It loads the
+  preload inventory from `assets/preloads/preload_inventory.json`, loads study
+  profile design JSON from `study_templates/`, and opens on the Study 5
+  `study5_box_breathing_pps` profile by default. In this mode researchers can
+  inspect existing profile parameters, source inventories, trajectory previews,
+  and browser-play committed WAV assets. Creating new custom studies, importing
+  files, baking new looming stimuli, materializing trial/block/session files, or
+  opening Focus Mode still requires the local companion.
 - Segment 6 passes the prepared run setup to the local backend. Native Focus
   Mode owns participant metadata and runtime options; live LSL/event markers,
   local marker mirrors, trigger dictionaries, `events.csv`, and analysis CSVs

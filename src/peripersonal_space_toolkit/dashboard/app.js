@@ -3,6 +3,13 @@ let viewerReady = false;
 const activePolls = new Set();
 let activeNavFrame = 0;
 const CUSTOM_TEMPLATE_ID = "__custom__";
+const DEFAULT_STUDY_TEMPLATE_ID = "study5_box_breathing_pps";
+const STATIC_RESOURCE_VERSION = "20260615-static-preloads";
+const STATIC_REPO_ROOT = new URL("../../../", document.currentScript?.src || window.location.href).href;
+const STATIC_PRELOAD_INVENTORY_PATH = "assets/preloads/preload_inventory.json";
+const STATIC_TEMPLATE_DIR = "study_templates/";
+const STATIC_COMPANION_REQUIRED_MESSAGE =
+  "Start the local companion backend to create, bake, save, prepare, or open local experiment files.";
 const PROFILE_RECREATION_NOTICE =
   "Be aware: this is not the exact stimulus set used in the original study. This preload recreates the study's reported parameters within this interface, using the toolkit's local rendering and bundled profile assets.";
 const WORKFLOW_STEPS = ["study", "stimulus", "trials", "baseline", "block", "schedule", "run"];
@@ -236,6 +243,11 @@ let trialPoolDraftSourceHash = "";
 let trialPoolDraftInitialized = false;
 let runSequencePreviewTimer = null;
 let activePage = "toolkit";
+let staticModeActive = false;
+let staticModeReason = "";
+let staticPreloadInventory = null;
+let staticTemplatesCache = null;
+const staticTemplateCache = new Map();
 const PAGE_TABS = ["toolkit", "documentation", "downloads"];
 const PAGE_ROUTE_ALIASES = {
   "": "toolkit",
@@ -253,11 +265,15 @@ const PAGE_ROUTE_SEGMENTS = {
 };
 
 async function api(path, options = {}) {
+  const { skipStaticGuard = false, ...fetchOptions } = options;
+  if (staticModeActive && !skipStaticGuard) {
+    throw new Error(STATIC_COMPANION_REQUIRED_MESSAGE);
+  }
   let response;
   try {
     response = await fetch(apiUrl(path), {
       headers: { "Content-Type": "application/json" },
-      ...options
+      ...fetchOptions
     });
   } catch (error) {
     setConnectionStatus(false);
@@ -283,6 +299,23 @@ async function api(path, options = {}) {
 function apiUrl(path) {
   if (/^https?:\/\//i.test(path)) return path;
   return `${apiBase}${path}`;
+}
+
+function staticResourceUrl(path) {
+  const cleanPath = String(path || "").trim().replace(/\\/g, "/").replace(/^\/+/, "");
+  if (!cleanPath) return "";
+  if (/^https?:\/\//i.test(cleanPath)) return cleanPath;
+  return new URL(cleanPath, STATIC_REPO_ROOT).href;
+}
+
+async function fetchStaticJson(path) {
+  const url = new URL(path, STATIC_REPO_ROOT);
+  url.searchParams.set("v", STATIC_RESOURCE_VERSION);
+  const response = await fetch(url.href, { headers: { "Accept": "application/json" } });
+  if (!response.ok) {
+    throw new Error(`Static preload asset unavailable: ${path}`);
+  }
+  return response.json();
 }
 
 function isLocalDashboardOrigin() {
@@ -311,11 +344,11 @@ function saveApiBase(value) {
   $("backend-url").value = apiBase || (companionOrigin ? window.location.origin : LOCAL_BACKEND_DEFAULT);
 }
 
-function setConnectionStatus(connected) {
+function setConnectionStatus(connected, label = "") {
   const status = $("connection-status");
   if (!status) return;
-  status.textContent = connected ? "connected" : "disconnected";
-  status.className = `status-label ${connected ? "ready" : "required"}`;
+  status.textContent = label || (connected ? "connected" : "disconnected");
+  status.className = `status-label ${connected ? "ready" : label ? "optional" : "required"}`;
 }
 
 function clone(value) {
@@ -438,18 +471,573 @@ function formatList(items) {
   return (items || []).join(", ");
 }
 
+async function loadStaticInventory() {
+  if (!staticPreloadInventory) {
+    staticPreloadInventory = await fetchStaticJson(STATIC_PRELOAD_INVENTORY_PATH);
+    staticPreloadInventory.profiles = Array.isArray(staticPreloadInventory.profiles)
+      ? staticPreloadInventory.profiles
+      : [];
+  }
+  return staticPreloadInventory;
+}
+
+function staticInventoryProfile(templateId, inventory = staticPreloadInventory) {
+  return (inventory?.profiles || []).find((entry) => entry.template_id === templateId) || null;
+}
+
+async function loadStaticTemplateData(templateId) {
+  const cleanId = String(templateId || "").trim();
+  if (!/^[a-z0-9_]+$/i.test(cleanId)) {
+    throw new Error(`Static template id is not valid: ${cleanId}`);
+  }
+  if (!staticTemplateCache.has(cleanId)) {
+    staticTemplateCache.set(cleanId, fetchStaticJson(`${STATIC_TEMPLATE_DIR}${cleanId}.json`));
+  }
+  return clone(await staticTemplateCache.get(cleanId));
+}
+
+async function loadStaticTemplates() {
+  if (staticTemplatesCache) return staticTemplatesCache;
+  const inventory = await loadStaticInventory();
+  const loaded = await Promise.all(
+    (inventory.profiles || []).map(async (entry) => {
+      const status = staticProfileAssetStatus(entry.template_id, inventory);
+      try {
+        const data = await loadStaticTemplateData(entry.template_id);
+        return staticTemplatePayload(data, status);
+      } catch (_error) {
+        return staticTemplatePayloadFromInventory(entry, status);
+      }
+    })
+  );
+  staticTemplatesCache = loaded.sort((left, right) => {
+    const leftDefault = left.template_id !== DEFAULT_STUDY_TEMPLATE_ID ? 1 : 0;
+    const rightDefault = right.template_id !== DEFAULT_STUDY_TEMPLATE_ID ? 1 : 0;
+    if (leftDefault !== rightDefault) return leftDefault - rightDefault;
+    const leftVerified = left.verification_status !== "verified" ? 1 : 0;
+    const rightVerified = right.verification_status !== "verified" ? 1 : 0;
+    if (leftVerified !== rightVerified) return leftVerified - rightVerified;
+    return String(left.title || "").localeCompare(String(right.title || ""));
+  });
+  return staticTemplatesCache;
+}
+
+function staticProfileAssetStatus(templateId, inventory = staticPreloadInventory) {
+  const entry = staticInventoryProfile(templateId, inventory);
+  if (!entry) {
+    return {
+      template_id: templateId,
+      status: "not_indexed",
+      ready: false,
+      asset_mode: "not_indexed",
+      retrieval_strategy: "generate_on_local_companion",
+      profile_manifest: "",
+      profile_parameters_manifest: "",
+      visible_variant_label: "",
+      variant_display: templateId,
+      recreation_status: {},
+      runner_readiness: "",
+      profile_checks_passed: false,
+      segment_0_to_4_profile_checks_passed: false,
+      finished_profile: false,
+      segment_6_launchable: false,
+      profile_completion_status: "unfinished_preload",
+      primary_recreation_category: "",
+      missing_parameter_count: 0,
+      unsupported_structure_count: 0,
+      local_only: true,
+      asset_count: 0,
+      ready_asset_count: 0,
+      assets: [],
+      catalog_segments: [],
+      message: "No static preload entry exists for this profile."
+    };
+  }
+  const assets = (entry.assets || []).map((asset) => {
+    const path = String(asset.path || asset.local_path || "").replace(/\\/g, "/");
+    return {
+      label: String(asset.label || path.split("/").pop() || "Asset"),
+      path,
+      url: asset.url || staticResourceUrl(path),
+      exists: Boolean(path),
+      sha256: asset.sha256 || "",
+      expected_sha256: asset.sha256 || "",
+      sha256_ok: Boolean(asset.sha256),
+      duration_s: asset.duration_s,
+      sample_rate: asset.sample_rate,
+      channels: asset.channels,
+      source_kind: asset.source_kind || "",
+      noise_type: asset.noise_type || "",
+      tone_type: asset.tone_type || asset.noise_type || "",
+      motion_mode: asset.motion_mode || "",
+      render_mode: asset.render_mode || "",
+      include_tactile: asset.include_tactile,
+      trajectory_snapshot: asset.trajectory_snapshot || {}
+    };
+  });
+  const status = assets.length ? "ready" : "recipe_only";
+  const runnerReadiness = entry.runner_readiness || entry.recreation_status?.runner_readiness || "";
+  const profileChecksPassed = Boolean(entry.profile_checks_passed ?? entry.recreation_status?.profile_checks_passed);
+  const segmentGatePassed = Boolean(entry.segment_0_to_4_profile_checks_passed ?? entry.recreation_status?.segment_0_to_4_profile_checks_passed);
+  const finishedProfile = runnerReadiness === "ready" && profileChecksPassed && segmentGatePassed;
+  return {
+    template_id: templateId,
+    status,
+    ready: status === "ready",
+    asset_mode: entry.asset_mode || "bundled_local",
+    retrieval_strategy: entry.retrieval_strategy || "bundled_or_download_from_github_pages",
+    profile_manifest: entry.profile_manifest || "",
+    profile_parameters_manifest: entry.profile_parameters_manifest || "",
+    visible_variant_label: entry.visible_variant_label || "",
+    variant_display: entry.variant_display || entry.title || templateId,
+    recreation_status: clone(entry.recreation_status || {}),
+    runner_readiness: runnerReadiness,
+    profile_checks_passed: profileChecksPassed,
+    segment_0_to_4_profile_checks_passed: segmentGatePassed,
+    finished_profile: finishedProfile,
+    segment_6_launchable: finishedProfile,
+    profile_completion_status: finishedProfile ? "finished_segment_6_launchable" : "unfinished_preload",
+    primary_recreation_category: entry.primary_recreation_category || entry.recreation_status?.primary_category || "",
+    missing_parameter_count: Number(entry.missing_parameter_count ?? entry.recreation_status?.missing_parameter_count ?? 0),
+    unsupported_structure_count: Number(entry.unsupported_structure_count ?? entry.recreation_status?.unsupported_structure_count ?? 0),
+    local_only: Boolean(entry.local_only ?? true),
+    asset_count: assets.length,
+    ready_asset_count: assets.length,
+    assets,
+    catalog_segments: clone(entry.catalog_segments || []),
+    message: status === "ready"
+      ? "Static GitHub preload assets are available for browser inspection."
+      : (entry.message || "This profile is indexed, but its assets require the local companion.")
+  };
+}
+
+function staticTemplatePayload(data, status) {
+  const payload = {
+    template_id: data.template_id,
+    title: data.title || status.variant_display || data.template_id,
+    citation_label: staticCitationLabel(data),
+    citation: data.citation || "",
+    bibtex: staticBibtex(data),
+    csl_json: staticCslJson(data),
+    doi: data.doi || "",
+    source_url: data.source_url || "",
+    verification_status: data.verification_status || "unverified",
+    notes: data.notes || ""
+  };
+  return attachStaticProfileStatus(payload, status);
+}
+
+function staticTemplatePayloadFromInventory(entry, status) {
+  return attachStaticProfileStatus({
+    template_id: entry.template_id,
+    title: entry.title || entry.variant_display || entry.template_id,
+    citation_label: `${entry.variant_display || entry.title || entry.template_id} [static preload]`,
+    citation: entry.title || "",
+    bibtex: "",
+    csl_json: "",
+    doi: "",
+    source_url: entry.profile_manifest || "",
+    verification_status: entry.recreation_status?.gui_recreatable ? "verified" : "indexed",
+    notes: entry.message || ""
+  }, status);
+}
+
+function attachStaticProfileStatus(payload, status) {
+  return {
+    ...payload,
+    preload_asset_status: status,
+    profile_parameters_manifest: status.profile_parameters_manifest,
+    recreation_status: clone(status.recreation_status || {}),
+    runner_readiness: status.runner_readiness || "",
+    profile_checks_passed: Boolean(status.profile_checks_passed),
+    segment_0_to_4_profile_checks_passed: Boolean(status.segment_0_to_4_profile_checks_passed),
+    finished_profile: Boolean(status.finished_profile),
+    segment_6_launchable: Boolean(status.segment_6_launchable),
+    profile_completion_status: status.profile_completion_status || "unfinished_preload",
+    primary_recreation_category: status.primary_recreation_category || "",
+    missing_parameter_count: Number(status.missing_parameter_count || 0),
+    unsupported_structure_count: Number(status.unsupported_structure_count || 0)
+  };
+}
+
+function staticCitationLabel(data) {
+  const citation = String(data.citation || "").replace(/\s+/g, " ").trim();
+  const match = citation.match(/^(.+?)\s*\((\d{4})\)[.,]?\s*(.*)$/);
+  if (!match) return `${data.title || data.template_id} [${data.verification_status || "unverified"}]`;
+  const rest = String(match[3] || "").trim();
+  const title = (rest.split(/\.\s+/)[0] || data.title || "").replace(/[. ]+$/g, "");
+  return `${match[1].replace(/[ ,.]+$/g, "")} (${match[2]}) - ${title || data.title} [${data.verification_status || "unverified"}]`;
+}
+
+function staticBibtex(data) {
+  return `@misc{${data.template_id},\n  title = {${data.title || data.template_id}},\n  note = {PPS Toolkit static study profile},\n}\n`;
+}
+
+function staticCslJson(data) {
+  return JSON.stringify({
+    id: data.template_id,
+    type: "document",
+    title: data.title || data.template_id,
+    URL: data.source_url || "",
+    note: `PPS Toolkit static study profile; verification status: ${data.verification_status || "unverified"}`
+  }, null, 2);
+}
+
+async function staticStateForTemplate(templateId) {
+  const cleanId = String(templateId || DEFAULT_STUDY_TEMPLATE_ID).trim();
+  if (!cleanId || cleanId === CUSTOM_TEMPLATE_ID) {
+    throw new Error("Start the local companion backend before creating custom studies.");
+  }
+  const inventory = await loadStaticInventory();
+  const templates = await loadStaticTemplates();
+  const data = await loadStaticTemplateData(cleanId);
+  const status = staticProfileAssetStatus(cleanId, inventory);
+  const design = normalizeStaticTemplateDesign(data, status);
+  const project = staticProjectPayload(design, status);
+  return {
+    static_mode: true,
+    static_mode_reason: staticModeReason,
+    design,
+    design_path: "",
+    project,
+    custom_projects: [],
+    participant_id: "P001",
+    templates,
+    selected_template: cleanId,
+    custom_workflow: {
+      is_custom: false,
+      ready_to_prepare: Boolean(status.finished_profile),
+      current_step: "run",
+      steps: [],
+      missing: status.finished_profile ? [] : [status.message || "This static profile is not launchable yet."]
+    },
+    trajectory_controls: staticTrajectoryControls(design),
+    viewer_payload: staticViewerPayload(design),
+    protocol_summary: {},
+    trial_preview: [],
+    participant_orders: staticParticipantOrders(design),
+    validation: [],
+    render: staticRenderStatus(status),
+    project_segments: staticProjectSegments(status),
+    trial_sequence_bake: {},
+    trial_file_bake: {},
+    trial_pool_bake: {},
+    block_csv_preview: status.finished_profile ? { accepted: true, blocks: [], block_count: Number(design.protocol?.blocks || 0) } : {},
+    run_sequence_setup: staticRunSetupPreview(design, status),
+    preload_inventory: status,
+    preflight: {
+      render_ready: Boolean(status.ready),
+      errors: [],
+      warnings: status.ready ? [] : [status.message || "Static preload assets are not ready."]
+    },
+    session: null,
+    jobs: []
+  };
+}
+
+function normalizeStaticTemplateDesign(data, status) {
+  const design = clone(data.design || {});
+  design.study_profile_id = data.template_id || "";
+  design.study_profile_title = data.title || "";
+  design.study_profile_notes = data.notes || "";
+  design.study_profile_reference_parameters = clone(data.reference_parameters || {});
+  design.noises = Array.isArray(design.noises) ? design.noises : [];
+  design.custom_looming_files = Array.isArray(design.custom_looming_files) ? design.custom_looming_files : [];
+  design.prestimulus_files = Array.isArray(design.prestimulus_files) ? design.prestimulus_files : [];
+  design.trajectory = design.trajectory || {};
+  design.protocol = {
+    repetitions_per_condition: 1,
+    trial_pool_repetition_defaults: {},
+    soa_values_ms: [],
+    spatial_values_cm: [],
+    pair_spatial_values_with_soas: false,
+    auditory_motion_directions: ["looming"],
+    tactile_sites: ["hand"],
+    include_catch_trials: false,
+    catch_trial_percentage: 0,
+    include_baseline_trials: false,
+    baseline_strategy: "none",
+    baseline_trial_percentage: 0,
+    baseline_soa_values_ms: [],
+    baseline_custom_trial_mode: "tactile_only",
+    respiratory_phases: ["Inhale", "Exhale"],
+    blocks: 1,
+    block_specs: [],
+    trial_strips: [],
+    trial_randomization_strategy: "no_immediate_repeats",
+    block_order_randomization: "counterbalanced_rotation",
+    max_consecutive_same_trial_type: 2,
+    participants: 1,
+    random_seed: 20250604,
+    ...(design.protocol || {})
+  };
+  hydrateStaticSourceAssets(design, status);
+  return design;
+}
+
+function hydrateStaticSourceAssets(design, status) {
+  const assetsByLabel = new Map();
+  for (const asset of status.assets || []) {
+    assetsByLabel.set(normalizeSourceKey(asset.label), asset);
+  }
+  for (const noise of design.noises || []) {
+    const asset = assetsByLabel.get(normalizeSourceKey(noise.label));
+    if (!asset) continue;
+    noise.prebaked_path = noise.prebaked_path || asset.path;
+    noise.noise_type = noise.noise_type || asset.noise_type || asset.tone_type || "pink";
+    noise.motion_mode = noise.motion_mode || asset.motion_mode || "looming";
+    noise.trajectory_snapshot = Object.keys(noise.trajectory_snapshot || {}).length
+      ? noise.trajectory_snapshot
+      : clone(asset.trajectory_snapshot || {});
+  }
+  for (const source of design.custom_looming_files || []) {
+    const asset = assetsByLabel.get(normalizeSourceKey(source.label));
+    if (!asset) continue;
+    source.path = source.path || asset.path;
+    source.tone_type = source.tone_type || asset.tone_type || asset.noise_type || "custom_audio";
+    source.motion_mode = source.motion_mode || asset.motion_mode || "looming";
+    source.trajectory_snapshot = Object.keys(source.trajectory_snapshot || {}).length
+      ? source.trajectory_snapshot
+      : clone(asset.trajectory_snapshot || {});
+  }
+}
+
+function staticProjectPayload(design, status) {
+  return {
+    project_id: `static_profile_${design.study_profile_id || DEFAULT_STUDY_TEMPLATE_ID}`,
+    project_kind: "profile",
+    project_label: design.study_profile_title || design.name || "Static profile",
+    source_template_id: design.study_profile_id || "",
+    created_at: "",
+    registry_root: "",
+    project_dir: "",
+    profile_dir: "",
+    segment_folders: Object.fromEntries(Object.values(STEP_SEGMENT_FOLDERS).map((folder) => [folder, ""])),
+    shared_tactile_path: "",
+    preload_profile_manifest: status.profile_manifest || "",
+    preload_profile_parameters_manifest: status.profile_parameters_manifest || ""
+  };
+}
+
+function staticProjectSegments(status) {
+  const profileGate = Boolean(status.profile_checks_passed && status.segment_0_to_4_profile_checks_passed);
+  const launchable = Boolean(status.finished_profile && status.segment_6_launchable);
+  const segment = (folderName, ready, message, extra = {}) => ({
+    folder_name: folderName,
+    folder_path: "",
+    status: ready ? "ready" : "static_only",
+    message,
+    last_validation_message: ready ? "" : message,
+    manifest_exists: ready,
+    ...extra
+  });
+  return {
+    "0_profile": segment("0_profile", true, "Static profile metadata loaded from GitHub assets."),
+    "1_core_audio_ingredients": segment(
+      "1_core_audio_ingredients",
+      Boolean(status.ready),
+      status.ready ? "Static source assets are available online." : "Profile source assets require the local companion."
+    ),
+    "2_trial_sequence_designs": segment(
+      "2_trial_sequence_designs",
+      profileGate,
+      profileGate ? "Trial sequence parameters loaded from the static profile." : "This profile has not passed the Segment 0-4 gate."
+    ),
+    "3_tactile_and_baseline_trials": segment(
+      "3_tactile_and_baseline_trials",
+      profileGate,
+      profileGate ? "Baseline and tactile parameters loaded from the static profile." : "This profile has not passed the Segment 0-4 gate."
+    ),
+    "4_trial_repetition_pool": segment(
+      "4_trial_repetition_pool",
+      profileGate,
+      profileGate ? "Trial-pool parameters loaded from the static profile." : "This profile has not passed the Segment 0-4 gate."
+    ),
+    "5_block_csv_preview": segment(
+      "5_block_csv_preview",
+      launchable,
+      launchable ? "Block CSVs are materialized by the local companion when the profile is launched." : "This profile is not Segment 6 launchable yet.",
+      { accepted: launchable }
+    ),
+    "6_experiment_run_setup": segment(
+      "6_experiment_run_setup",
+      launchable,
+      launchable ? "Start the local companion to materialize and open this finished profile." : "This profile is not Segment 6 launchable yet."
+    )
+  };
+}
+
+function staticTrajectoryControls(design) {
+  const trajectory = design.trajectory || {};
+  const start = staticTrajectoryPoint(trajectory, "start");
+  const end = staticTrajectoryPoint(trajectory, "end");
+  const movementDuration = Number(trajectory.propagation_speed_mps) > 0
+    ? Number(trajectory.path_length_m || distance3d(start, end)) / Number(trajectory.propagation_speed_mps)
+    : Number(trajectory.movement_duration_s || 3);
+  return {
+    start_distance_cm: Math.round(staticPointRadius(start) * 10000) / 100,
+    end_distance_cm: Math.round(staticPointRadius(end) * 10000) / 100,
+    start_rotation_deg: Math.round(staticPointRotation(start) * 10000) / 10000,
+    end_rotation_deg: Math.round(staticPointRotation(end) * 10000) / 10000,
+    start_height_cm: Math.round(Number(start.z_m || 0) * 10000) / 100,
+    end_height_cm: Math.round(Number(end.z_m || 0) * 10000) / 100,
+    movement_duration_s: Math.round((Number.isFinite(movementDuration) ? movementDuration : 3) * 10000) / 10000,
+    start_hold_s: Number(trajectory.padding_pre_s ?? 0.5),
+    end_hold_s: Number(trajectory.padding_post_s ?? 0.5)
+  };
+}
+
+function staticTrajectoryPoint(trajectory, prefix) {
+  const x = trajectory[`${prefix}_x_m`];
+  const y = trajectory[`${prefix}_y_m`];
+  const z = trajectory[`${prefix}_z_m`];
+  if (Number.isFinite(Number(x)) && Number.isFinite(Number(y))) {
+    return { x_m: Number(x), y_m: Number(y), z_m: Number(z || 0) };
+  }
+  const radius = Number(trajectory[`${prefix}_radius_m`] ?? (prefix === "start" ? trajectory.start_radius_m : trajectory.end_radius_m) ?? 0);
+  const azimuth = Number(trajectory[prefix === "start" ? "azimuth_start_deg" : "azimuth_end_deg"] || 0);
+  return pointFromDistanceRotation(radius * 100, azimuth);
+}
+
+function staticPointRadius(point) {
+  return Math.sqrt(Number(point.x_m || 0) ** 2 + Number(point.y_m || 0) ** 2 + Number(point.z_m || 0) ** 2);
+}
+
+function staticPointRotation(point) {
+  return normalizeRotationDeg(Math.atan2(Number(point.x_m || 0), Number(point.y_m || 0)) * 180 / Math.PI);
+}
+
+function staticViewerPayload(design) {
+  const controls = staticTrajectoryControls(design);
+  const start = pointFromDistanceRotation(controls.start_distance_cm, controls.start_rotation_deg);
+  const end = pointFromDistanceRotation(controls.end_distance_cm, controls.end_rotation_deg);
+  const source_trajectories = [];
+  for (const noise of design.noises || []) {
+    const row = sourceTrajectoryRow({
+      label: noise.label || "Generated noise",
+      sourceKind: "generated_noise",
+      toneType: noise.noise_type || "pink",
+      localPath: noise.prebaked_path || "",
+      snapshot: noise.trajectory_snapshot || {}
+    });
+    if (row) source_trajectories.push(row);
+  }
+  for (const source of design.custom_looming_files || []) {
+    const row = sourceTrajectoryRow({
+      label: source.label || "Custom source",
+      sourceKind: "imported_audio",
+      toneType: source.tone_type || "custom_audio",
+      localPath: source.path || "",
+      snapshot: source.trajectory_snapshot || {}
+    });
+    if (row) source_trajectories.push(row);
+  }
+  return {
+    preview_mode: "2d",
+    radius_m: Math.max(0.1, controls.start_distance_cm / 100, controls.end_distance_cm / 100, maxSourceTrajectoryRadius(source_trajectories)),
+    path_length_m: distance3d(start, end),
+    movement_duration_s: controls.movement_duration_s,
+    start,
+    end,
+    source_trajectories
+  };
+}
+
+function staticRenderStatus(status) {
+  return {
+    render_dir: "",
+    manifest_path: status.profile_manifest || "",
+    manifest_exists: Boolean(status.profile_manifest),
+    status: status.ready ? "static_preload" : status.status || "missing",
+    render_engine: "static-github-preload",
+    wav_count: status.assets?.length || 0,
+    wavs: (status.assets || []).map((asset) => ({
+      label: asset.label,
+      path: asset.path,
+      sha256: asset.sha256 || asset.expected_sha256 || "",
+      duration_s: asset.duration_s,
+      sample_rate: asset.sample_rate,
+      channels: asset.channels,
+      source_kind: asset.source_kind,
+      noise_type: asset.noise_type,
+      tone_type: asset.tone_type,
+      trajectory_snapshot: asset.trajectory_snapshot || {}
+    }))
+  };
+}
+
+function staticRunSetupPreview(design, status) {
+  const runSetup = design.study_profile_reference_parameters?.dashboard_run_setup || {};
+  const experimentStructure = runSetup.experiment_structure || (design.study_profile_id === DEFAULT_STUDY_TEMPLATE_ID ? "pre_post" : "single");
+  const participantCount = Number(design.protocol?.participants || 1);
+  const blockCount = Number(design.protocol?.blocks || design.protocol?.block_specs?.length || 1);
+  const partCount = experimentStructure === "pre_post" ? 2 : 1;
+  const rows = [];
+  for (let index = 1; index <= Math.min(participantCount, 12); index += 1) {
+    const participant = `P${String(index).padStart(3, "0")}`;
+    const order = Array.from({ length: blockCount }, (_item, blockIndex) => `Block ${blockIndex + 1}`).join(" -> ");
+    rows.push({ participant, part: partCount === 2 ? "Part 1 / Part 2" : "Single", block_count: blockCount, block_order: order });
+  }
+  return {
+    ready: Boolean(status.finished_profile),
+    prepared: Boolean(status.finished_profile),
+    experiment_structure: experimentStructure,
+    participant_count: participantCount,
+    parts_per_participant: partCount,
+    total_block_runs: participantCount * partCount * blockCount,
+    rows,
+    seed: runSetup.seed || design.protocol?.random_seed || 0,
+    instruction_profile: runSetup.instruction_profile || {},
+    message: status.finished_profile
+      ? "Static profile loaded; start the local companion to materialize and open the runner."
+      : (status.message || "This static profile is not launchable yet.")
+  };
+}
+
+function staticParticipantOrders(design) {
+  const blockCount = Number(design.protocol?.blocks || design.protocol?.block_specs?.length || 1);
+  const blocks = Array.from({ length: blockCount }, (_item, index) => `Block ${index + 1}`);
+  const participants = Number(design.protocol?.participants || 1);
+  return Array.from({ length: Math.min(participants, 80) }, (_item, index) => ({
+    participant: `P${String(index + 1).padStart(3, "0")}`,
+    block_order: blocks.join(" -> ")
+  }));
+}
+
+async function loadStaticState(fallbackError = null) {
+  staticModeReason = fallbackError?.message || "";
+  const selected = state?.selected_template && state.selected_template !== CUSTOM_TEMPLATE_ID
+    ? state.selected_template
+    : DEFAULT_STUDY_TEMPLATE_ID;
+  state = await staticStateForTemplate(selected);
+  staticModeActive = true;
+  setConnectionStatus(false, "static profile");
+  renderAll();
+  updateViewer();
+  showToast("Loaded Study 5 and committed preload assets from GitHub. Start the local companion for local generation or runner launch.");
+  return true;
+}
+
 async function loadState() {
   try {
-    state = await api("/api/state");
+    state = await api("/api/state", { skipStaticGuard: true });
+    staticModeActive = false;
+    staticModeReason = "";
     renderAll();
     updateViewer();
   } catch (error) {
-    reportError(error);
+    try {
+      await loadStaticState(error);
+    } catch (staticError) {
+      console.error(staticError);
+      reportError(error);
+    }
   }
 }
 
 function renderAll() {
   if (!state) return;
+  document.body.classList.toggle("static-dashboard-mode", staticModeActive);
   renderHeader();
   renderPageTabs();
   renderProfileMode();
@@ -647,7 +1235,7 @@ function renderProfileMode() {
   const button = $("edit-profile-rail");
   if (!status || !button) return;
   const readonly = isProfileReadonlyMode();
-  status.textContent = readonly ? "profile run mode" : "custom edit mode";
+  status.textContent = staticModeActive && readonly ? "static profile" : readonly ? "profile run mode" : "custom edit mode";
   status.className = `status-label ${readonly ? "required" : "ready"}`;
   button.textContent = readonly ? "Edit As New Study" : "Editing Custom Study";
   button.disabled = !readonly;
@@ -743,7 +1331,7 @@ function renderPreloadAssetStatus() {
   const ready = Boolean(status.ready);
   badge.hidden = false;
   badge.textContent = ready
-    ? `${status.ready_asset_count || status.asset_count || 0} local assets`
+    ? `${status.ready_asset_count || status.asset_count || 0} ${staticModeActive ? "online" : "local"} assets`
     : value === "recipe_only"
       ? "recipe only"
       : value.replace(/_/g, " ");
@@ -1102,6 +1690,9 @@ function readJsonField(field) {
 
 function sourceFolderAction(path) {
   if (!path) return "";
+  if (staticModeActive) {
+    return `<a class="source-folder-link" href="${escapeAttr(staticResourceUrl(path))}" target="_blank" rel="noopener noreferrer">Open Asset</a>`;
+  }
   return `<button type="button" class="source-folder-link" data-open-folder="${escapeAttr(path)}">Open Folder</button>`;
 }
 
@@ -2790,6 +3381,7 @@ async function previewSourceLabel(button) {
   if (!label) return;
   state.design.protocol = state.design.protocol || {};
   state.design.protocol.trial_strips = collectTrialStrips();
+  const staticAsset = staticModeActive ? staticPreviewAssetForLabel(label) : null;
   const payload = collectPayload();
   payload.label = label;
   button.disabled = true;
@@ -2798,6 +3390,19 @@ async function previewSourceLabel(button) {
   const contextReady = audioContext?.resume().catch(() => {});
   let started = false;
   try {
+    if (staticAsset?.url) {
+      button.disabled = false;
+      await playSourcePreviewAudio(
+        staticAsset.url,
+        button,
+        audioContext,
+        contextReady,
+        Number(staticAsset.duration_s || 0)
+      );
+      started = true;
+      showToast(`Soundcheck: ${staticAsset.label || label}`);
+      return;
+    }
     const preview = await api("/api/audio/preview-source", {
       method: "POST",
       body: JSON.stringify(payload)
@@ -2819,6 +3424,40 @@ async function previewSourceLabel(button) {
     if (!started) button.classList.remove("playing");
     button.disabled = false;
   }
+}
+
+function staticPreviewAssetForLabel(label) {
+  const target = normalizeSourceKey(label);
+  if (!target) return null;
+  const inventoryAssets = state?.preload_inventory?.assets || [];
+  for (const asset of inventoryAssets) {
+    if (normalizeSourceKey(asset.label) === target) {
+      return {
+        label: asset.label,
+        url: asset.url || staticResourceUrl(asset.path),
+        duration_s: asset.duration_s
+      };
+    }
+  }
+  for (const noise of state?.design?.noises || []) {
+    if (normalizeSourceKey(noise.label) === target && noise.prebaked_path) {
+      return {
+        label: noise.label,
+        url: staticResourceUrl(noise.prebaked_path),
+        duration_s: noise.duration_s || 0
+      };
+    }
+  }
+  for (const source of [...(state?.design?.custom_looming_files || []), ...(state?.design?.prestimulus_files || [])]) {
+    if (normalizeSourceKey(source.label) === target && source.path) {
+      return {
+        label: source.label,
+        url: staticResourceUrl(source.path),
+        duration_s: source.target_duration_s || source.duration_s || 0
+      };
+    }
+  }
+  return null;
 }
 
 function getSourcePreviewAudioContext() {
@@ -3582,6 +4221,20 @@ async function loadTemplate() {
   const select = $("template-select");
   const id = select.value;
   if (!id) return;
+  if (staticModeActive) {
+    if (id === CUSTOM_TEMPLATE_ID) {
+      renderStudy();
+      showToast("Start the local companion backend before creating custom studies.");
+      return;
+    }
+    state = await staticStateForTemplate(id);
+    staticModeActive = true;
+    setConnectionStatus(false, "static profile");
+    renderAll();
+    updateViewer();
+    showToast("Static profile loaded from committed GitHub assets");
+    return;
+  }
   templateLoadInFlight = true;
   select.disabled = true;
   try {
@@ -3643,6 +4296,10 @@ function defaultCustomStudyName() {
 
 function openCustomizeModal() {
   if (!state || !isProfileReadonlyMode()) return;
+  if (staticModeActive) {
+    showToast("Start the local companion backend before creating a local editable study.");
+    return;
+  }
   const modal = $("customize-modal");
   const input = $("customize-study-name");
   const source = $("customize-source-label");
