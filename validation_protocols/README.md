@@ -37,6 +37,7 @@ Run the protocols in this order when doing a full timing audit:
 7. `protocols/07_one_block_actual_experimental_condition_validation.md`
 8. `protocols/08_missed_trial_topup_stress.md`
 9. `protocols/09_recording_layer_alignment_validation.md`
+11. `protocols/11_exhaustive_emulated_participant_runner_stress_test.md`
 
 For a first hardware/data-collection confidence check, run protocol 0 before
 using real experiment stimuli. For next-phase runner, latency, LSL, and
@@ -46,6 +47,12 @@ they are not the accepted evidence source for next-phase experimental claims.
 Do not report new formal latency, channel-skew, response, or LSL/XDF
 reliability numbers from synthetic-only runs once actual experimental block
 validation has started.
+
+Protocol 11 is the pre-participant operational stress matrix. It keeps the real
+packaged Focus Mode / `SessionRunnerController` workflow under test while using
+controlled emulated response plans to audit launch paths, session resolution,
+stimulus assembly, response pairing, top-up behavior, capture options, output
+analysis, and operator failure modes.
 
 ## Scripts
 
@@ -71,6 +78,8 @@ python .\validation_protocols\scripts\compare_response_timing_strategies.py --ev
 python .\validation_protocols\scripts\run_session_runner_click_path_stress.py --count 25 --interval-s 0.02
 python .\validation_protocols\scripts\run_one_block_trial_runner_realtime_stress.py --output-dir artifacts\validation_runs\one_block_trial_runner_realtime_current
 python .\validation_protocols\scripts\run_topup_missed_trial_stress.py --output-dir artifacts\validation_runs\topup_missed_trial_stress_current
+python .\validation_protocols\scripts\run_study5_end_to_end_ui_mouse_validation.py --packaged-standalone-app
+python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py --participant-id P001 --mouse-backend pynput
 python .\validation_protocols\scripts\run_focus_mode_click_path_stress.py --output-dir artifacts\validation_runs\focus_mode_click_path_current --count 10 --offscreen
 python .\validation_protocols\scripts\run_visible_runner_os_click_stress.py --output-dir artifacts\validation_runs\visible_runner_os_click_stress_current --count 10 --interval-s 0.05 --armed
 python .\validation_protocols\scripts\run_one_block_actual_condition_validation.py --run-setup-manifest local_data\dashboard_projects\0_study_project_registry\profile_pfeiffer_2018_lateral_perihead_left_to_right\6_experiment_run_setup\experiment_run_setup_manifest.json --device 31 --audio-gain 0.005 --tactile-gain 0.05
@@ -151,6 +160,12 @@ Separate these quantities in every report:
   XDF mirrors, analysis CSVs, and optional local audio evidence WAV capture;
   `events.csv` remains always on. The retired legacy Tk runner is historical
   validation coverage only, not an operator launch path.
+- Exhaustive emulated-participant runner stress: whether the packaged Focus
+  Mode / `SessionRunnerController` workflow survives controlled launch,
+  cache/prewarm, stimulus, response-boundary, instruction, top-up, capture,
+  analysis, LSL/trigger, and operator-failure scenarios with emulated response
+  plans. This is pre-participant operational evidence, not hardware latency,
+  Woojer mechanical-onset, or scientific PPS evidence.
 - Actual-block direct loopback evidence: whether the same actual one-block
   session's source block WAV and direct electrical capture recover stable
   channel alignment and paired inter-channel skew without clipping. Absolute

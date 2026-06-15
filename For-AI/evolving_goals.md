@@ -2,6 +2,10 @@
 
 This file is the dated project memory. Add a new dated entry when a chat or implementation changes project direction, product behavior, or release constraints.
 
+## 2026-06-16
+
+- Formalized `validation_protocols/protocols/11_exhaustive_emulated_participant_runner_stress_test.md` as the next pre-participant operational validation checklist. Protocol 11 keeps the real packaged Focus Mode / `SessionRunnerController` workflow under test while using controlled emulated response plans to cover launch/session resolution, stimulus assembly, sample-exact event schedules, response-boundary pairing, instruction continuation, part-aware top-up, analysis outputs, LSL/trigger options, capture-off combinations, and operator failure modes. Use non-participant IDs and ignored validation output folders only; treat passing Protocol 11 as software/operations evidence, not hardware latency, Woojer mechanical-onset, participant-comprehension, or scientific PPS evidence.
+
 ## 2026-06-14
 
 - The public documentation tab now has an `Emulatable Studies` segment listing the five published papers that currently yield six runner-ready published profiles from the Segment 0-4 gate: Matsuda 2021, Lamia 2026 Experiments 1-2, Noel 2015, Pfeiffer 2018, and Serino 2015 Experiment 1. Display DOI URLs as citation text, but link them to the resolved publisher pages rather than to `doi.org`; the Matsuda preload/template DOI is corrected to `10.1038/s41598-021-90784-5`.
