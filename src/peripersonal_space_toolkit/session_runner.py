@@ -2415,6 +2415,9 @@ class SessionRunnerController:
         if multi_part and part_label:
             outputs[f"topup_block_manifest_part{part_label}"] = csv_path
             outputs[f"topup_block_manifest_json_part{part_label}"] = json_path
+            outputs[f"topup_block_wav_part{part_label}"] = wav_path
+        else:
+            outputs["topup_block_wav"] = wav_path
         return block, outputs
 
     def _create_audio_engine(self) -> Any:
@@ -2450,6 +2453,15 @@ class SessionRunnerController:
                 match = re.search(r"part([^_]+)_manifest", part_json.stem)
                 key = f"topup_block_manifest_json_part{match.group(1)}" if match else part_json.stem
                 topup_outputs[key] = part_json
+            topup_block_dir = self.package.session_dir / "blocks"
+            for topup_wav in sorted(topup_block_dir.glob("*topup_missed_trials.wav")):
+                match = re.search(r"_part([^_]+)_topup", topup_wav.stem)
+                if match:
+                    topup_outputs[f"topup_block_wav_part{match.group(1)}"] = topup_wav
+                elif "topup_block_wav" not in topup_outputs:
+                    topup_outputs["topup_block_wav"] = topup_wav
+                else:
+                    topup_outputs[topup_wav.stem] = topup_wav
         events_csv = self.package.session_dir / "events.csv"
         events_xdf = self.package.session_dir / "events.xdf"
         lsl_markers_csv = self.package.session_dir / "lsl_markers.csv"
