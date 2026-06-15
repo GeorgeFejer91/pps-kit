@@ -506,6 +506,47 @@ code {
   font-size: 17px;
 }
 
+/* PPS intro: video + paragraph side by side, video height tracks text height */
+.pps-intro-layout {
+  display: flex;
+  align-items: stretch;
+  gap: 20px;
+  margin-bottom: 14px;
+}
+
+.pps-intro-video {
+  flex-shrink: 0;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  overflow: hidden;
+  min-width: 180px;
+}
+
+.pps-intro-video iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.pps-intro-lede {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  align-self: center;
+}
+
+@media (max-width: 600px) {
+  .pps-intro-layout {
+    flex-direction: column;
+  }
+
+  .pps-intro-video {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+  }
+}
+
 .doc-list {
   max-width: 940px;
   margin: 0 0 14px;
@@ -901,6 +942,33 @@ code {
 
 .arch-hw-dep-link:hover {
   text-decoration: underline;
+}
+
+.arch-hw-dep-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 6px;
+  border: 1px solid #c0d4c8;
+  border-radius: 5px;
+  background: #f0f5f2;
+}
+
+.arch-hw-dep-grid .arch-hw-dep-link {
+  display: block;
+  padding: 5px 7px;
+  border: 1px solid #c0d4c8;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 11px;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.arch-hw-dep-grid .arch-hw-dep-link:hover {
+  background: #e4ede9;
+  text-decoration: none;
 }
 
 /* Output nodes: text left, pixel art right */

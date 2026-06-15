@@ -122,6 +122,17 @@ The designer currently covers:
 - protocol CSV export
 - `Render Looming WAVs`, which writes a 3DTI-compatible render config, trajectory/QC CSV, manifest, and generated WAVs. If the native 3DTI executable is available it is used; otherwise the bundled Python SOFA/FABIAN reference renderer produces the WAVs from the same saved trajectory/SOA config.
 
+## Binaural Rendering
+
+Binaural spatialization is achieved by convolving sound sources with head-related transfer functions (HRTFs) stored in the Spatially Oriented Format for Acoustics (SOFA), an AES-standardized container for spatial acoustic measurements (AES69-2022). The toolkit uses the FABIAN/TU Berlin HRIR dataset as its rendering reference, converting source trajectories—defined by azimuth, distance, looming duration, and timing parameters—into two-channel WAV files in which channels 1 and 2 carry the left and right auditory streams. All rendering decisions are captured in manifests recording trajectory samples, file hashes, and quality-control summaries to support post-hoc auditability.
+
+The native rendering engine derives from the 3D Tune-In Toolkit (3DTI), an open-source C++ library for real-time binaural spatialisation (Cuevas-Rodriguez et al., 2019, PLOS ONE, DOI: 10.1371/journal.pone.0211899). The 3DTI authors have since migrated the core algorithms to the Binaural Rendering Toolbox (BRT Library), which the toolkit adopts as its primary forward-facing renderer while preserving 3DTI-compatible configurations and pinned source snapshots to maintain reproducibility for data collected under the earlier rendering path.
+
+### References
+
+- Cuevas-Rodriguez, M., Picinali, L., Gonzalez-Toledo, D., Garre, C., de la Rubia-Cuestas, E., Molina-Tanco, L., & Reyes-Lecuona, A. (2019). 3D Tune-In Toolkit: An open-source library for real-time binaural spatialisation. *PLOS ONE*, 14(3), e0211899. https://doi.org/10.1371/journal.pone.0211899
+- Audio Engineering Society. (2022). *AES69-2022: AES standard for file exchange — Spatial acoustic data file format* (SOFA).
+
 ## Output Files
 
 The default saved design path is:

@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260615-audiogram-emulatable-studies">
+  <link rel="stylesheet" href="styles.css?v=20260615-pps-intro-layout">
 </head>
 <body>
   <div class="app-shell">
@@ -540,11 +540,13 @@
             <span class="segment-kicker">Background</span>
             <h2 id="docs-pps-title">What Is Peripersonal Space</h2>
           </div>
-          <div style="position:relative;width:100%;padding-bottom:56.25%;margin-bottom:1.5rem;border-radius:8px;overflow:hidden;">
-            <iframe style="position:absolute;inset:0;width:100%;height:100%;border:0;" src="https://www.youtube.com/embed/elfbiCzUVSA" title="What is Peripersonal Space?" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-          </div>
           <p class="info-lede">Peripersonal space is the multisensory region immediately surrounding the body within which stimuli are processed differently from those beyond arm's reach. It was first characterized by Rizzolatti et al. (<a href="https://www.sciencedirect.com/science/article/pii/0166432881900528" target="_blank" rel="noopener noreferrer">1981a</a>, <a href="https://www.sciencedirect.com/science/article/pii/016643288190053X" target="_blank" rel="noopener noreferrer">1981b</a>) in studies of periarcuate neurons, cells in the ventral premotor cortex and putamen that respond to both tactile stimulation of the body surface and nearby external stimuli, and has since been linked to defensive behavior, tool use, and bodily self-awareness.</p>
-          <p class="info-lede">The standard behavioral approach for measuring peripersonal space in humans is the audio-tactile interaction task. In the canonical version reported by Canzoneri et al. (<a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0044306" target="_blank" rel="noopener noreferrer">2012</a>), participants respond to body-surface tactile stimuli while auditory stimuli approach from varying distances; tactile response times are faster when the sound is near the body. This distance-dependent facilitation profile serves as a behavioral index of the spatial boundary of an individual's peripersonal space representation. Despite the paradigm's widespread adoption, standardized implementations are lacking and task parameters are rarely shared across labs.</p>
+          <div class="pps-intro-layout">
+            <div class="pps-intro-video">
+              <iframe src="https://www.youtube.com/embed/elfbiCzUVSA" title="What is Peripersonal Space?" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+            <p class="info-lede pps-intro-lede">The standard behavioral approach for measuring peripersonal space in humans is the audio-tactile interaction task. In the canonical version reported by Canzoneri et al. (<a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0044306" target="_blank" rel="noopener noreferrer">2012</a>), participants respond to body-surface tactile stimuli while auditory stimuli approach from varying distances; tactile response times are faster when the sound is near the body. This distance-dependent facilitation profile serves as a behavioral index of the spatial boundary of an individual's peripersonal space representation. Despite the paradigm's widespread adoption, standardized implementations are lacking and task parameters are rarely shared across labs.</p>
+          </div>
         </section>
 
         <hr class="doc-segment-rule" aria-hidden="true">
@@ -630,7 +632,6 @@
                   <strong>SOFA/FABIAN HRIR</strong>
                   <p>Head-related transfer functions stored in SOFA format provide the binaural reference used to spatialize looming audio along the researcher-defined trajectory.</p>
                   <div class="arch-hw-dep">
-                    <span class="arch-hw-dep-label">Links</span>
                     <a class="arch-hw-dep-link" href="https://www.sofaconventions.org/mediawiki/index.php/SOFA_%28Spatially_Oriented_Format_for_Acoustics%29" target="_blank" rel="noopener noreferrer">SOFA Conventions</a>
                   </div>
                 </article>
@@ -639,8 +640,7 @@
                   <span class="arch-node-kicker">Native Path</span>
                   <strong>3DTI and BRT Renderer</strong>
                   <p>Open-source C++ spatial audio engine rendering moving binaural sources from the same trajectory decisions passed through the Python backend.</p>
-                  <div class="arch-hw-dep">
-                    <span class="arch-hw-dep-label">Links</span>
+                  <div class="arch-hw-dep-grid">
                     <a class="arch-hw-dep-link" href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0211899" target="_blank" rel="noopener noreferrer">Original PLOS ONE Publication</a>
                     <a class="arch-hw-dep-link" href="https://github.com/3DTune-In/3dti_AudioToolkit" target="_blank" rel="noopener noreferrer">Original AudioToolkit GitHub</a>
                     <a class="arch-hw-dep-link" href="https://github.com/GrupoDiana/BRTLibrary" target="_blank" rel="noopener noreferrer">BRT Library GitHub</a>
