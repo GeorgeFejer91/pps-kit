@@ -564,6 +564,50 @@ code {
   padding: 14px;
 }
 
+.info-card-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+.info-card-link:hover,
+.info-card-link:focus-visible {
+  border-color: #8eb5a3;
+  box-shadow: 0 8px 22px rgba(32, 58, 46, 0.12);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.publication-card {
+  border-color: #a6c1b5;
+  background: #f5faf7;
+}
+
+.recommended-card {
+  border-color: #96c8b1;
+  background: #eff8f3;
+}
+
+.card-kicker,
+.card-link-label {
+  display: block;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.card-kicker {
+  margin-bottom: 7px;
+}
+
+.card-link-label {
+  margin-top: 12px;
+  text-transform: none;
+}
+
 .info-card h2 {
   margin: 0 0 8px;
   font-size: 16px;

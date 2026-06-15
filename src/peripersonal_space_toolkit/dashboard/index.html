@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260615-docs-3dti">
+  <link rel="stylesheet" href="styles.css?v=20260615-docs-3dti-brt">
 </head>
 <body>
   <div class="app-shell">
@@ -625,36 +625,42 @@
             <span class="segment-kicker">Native Renderer</span>
             <h2 id="docs-3dti-title">3DTI Rendering Toolkit</h2>
           </div>
-          <p class="info-copy">3DTI, the 3D Tune-In Toolkit, is the open-source C++ spatial-audio renderer that this project treats as the preferred native rendering route when the approved toolkit files are available. It was developed within the 3D Tune-In project and supports real-time binaural spatialisation, moving sound sources, room/reverberation features, and hearing-loss/hearing-aid simulation modules. In PPS Toolkit, the dashboard still only collects design decisions; the local Python companion decides whether to render with the native 3DTI route or with the Python SOFA/FABIAN reference path and records that choice in manifests.</p>
+          <p class="info-copy">3DTI, the 3D Tune-In Toolkit, is the original open-source C++ spatial-audio renderer that established the binaural rendering path used by this project. The original 3DTI repository now points developers to the newer BRT Library, the Binaural Rendering Toolbox, because the authors migrated the algorithms there and recommend BRT for ongoing support. PPS Toolkit therefore treats the original 3DTI repository as publication/provenance history and uses the newer BRT lineage as the forward-facing recommended GitHub source, while preserving existing 3DTI-compatible configs and pinned source snapshots for reproducibility.</p>
           <div class="info-card-grid">
-            <article class="info-card">
-              <h2>3DTI Project Page</h2>
-              <p>Official 3D Tune-In page describing the toolkit, its binaural spatialisation features, test apps, wrappers, and release links.</p>
-              <a class="button-link" href="https://www.3d-tune-in.eu/toolkit-developers">Open 3DTI Toolkit Page</a>
-            </article>
-            <article class="info-card">
-              <h2>AudioToolkit Repository</h2>
-              <p>Primary GitHub repository for the 3D Tune-In AudioToolkit source, documentation, releases, license, and related wrapper links.</p>
-              <a class="button-link" href="https://github.com/3DTune-In/3dti_AudioToolkit">Open GitHub Repository</a>
-            </article>
-            <article class="info-card">
+            <a class="info-card info-card-link publication-card" href="https://doi.org/10.1371/journal.pone.0211899" aria-label="Open original 3DTI PLOS ONE publication">
+              <span class="card-kicker">Original Publication</span>
+              <h2>3D Tune-In Toolkit: An open-source library for real-time binaural spatialisation</h2>
+              <p>María Cuevas-Rodríguez, Lorenzo Picinali, Daniel González-Toledo, Carlos Garre, Ernesto de la Rubia-Cuestas, Luis Molina-Tanco, Arcadio Reyes-Lecuona.</p>
+              <p>Published March 11, 2019. DOI: 10.1371/journal.pone.0211899</p>
+              <span class="card-link-label">Open PLOS ONE publication</span>
+            </a>
+            <a class="info-card info-card-link" href="https://github.com/3DTune-In/3dti_AudioToolkit" aria-label="Open original 3DTI AudioToolkit GitHub repository">
+              <span class="card-kicker">Original GitHub</span>
+              <h2>3DTI AudioToolkit</h2>
+              <p>The original 3D Tune-In AudioToolkit repository linked from the 2019 PLOS ONE publication and preserved here as renderer provenance.</p>
+              <span class="card-link-label">Open original AudioToolkit repository</span>
+            </a>
+            <a class="info-card info-card-link recommended-card" href="https://github.com/GrupoDiana/BRTLibrary" aria-label="Open newer author-recommended BRT Library GitHub repository">
+              <span class="card-kicker">Newer Recommended GitHub</span>
+              <h2>BRT Library</h2>
+              <p>This is the newer Binaural Rendering Toolbox repository. The 3DTI authors state that the original algorithms have migrated to BRT and recommend transitioning to BRT for ongoing support; this is the newer GitHub line we use for forward-facing renderer work.</p>
+              <span class="card-link-label">Open BRT Library repository</span>
+            </a>
+            <a class="info-card info-card-link" href="https://www.3d-tune-in.eu/toolkit-developers" aria-label="Open official 3DTI Toolkit project page">
+              <span class="card-kicker">Project Page</span>
+              <h2>3DTI Toolkit Page</h2>
+              <p>Official 3D Tune-In page describing the toolkit, binaural spatialisation features, test apps, wrappers, releases, and project background.</p>
+              <span class="card-link-label">Open 3DTI Toolkit page</span>
+            </a>
+            <a class="info-card info-card-link" href="https://github.com/3DTune-In" aria-label="Open 3D Tune-In GitHub organization">
+              <span class="card-kicker">Original GitHub Organization</span>
               <h2>3D Tune-In GitHub</h2>
-              <p>GitHub organization containing the AudioToolkit, Unity wrapper, VST plugins, JavaScript wrapper, examples, and supporting packages.</p>
-              <a class="button-link" href="https://github.com/3DTune-In">Open GitHub Organization</a>
-            </article>
-            <article class="info-card">
-              <h2>Original PLOS ONE Paper</h2>
-              <p>Cuevas-Rodriguez et al. (2019), "3D Tune-In Toolkit: An open-source library for real-time binaural spatialisation."</p>
-              <a class="button-link" href="https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0211899">Open PLOS Publication</a>
-            </article>
-            <article class="info-card">
-              <h2>Toolkit Releases</h2>
-              <p>GitHub releases for toolkit source packages, test applications, resources, and integration assets referenced by the 3DTI project.</p>
-              <a class="button-link" href="https://github.com/3DTune-In/3dti_AudioToolkit/releases">Open GitHub Releases</a>
-            </article>
+              <p>Organization containing the original AudioToolkit, Unity wrapper, VST plugins, JavaScript wrapper, examples, releases, and supporting packages.</p>
+              <span class="card-link-label">Open 3D Tune-In organization</span>
+            </a>
             <article class="info-card">
               <h2>PPS Toolkit Boundary</h2>
-              <p>3DTI is a rendering dependency/provenance layer. It is not a browser dependency, participant timing engine, or place to store local experiment data.</p>
+              <p>3DTI/BRT is a rendering dependency and provenance layer. It is not a browser dependency, participant timing engine, or place to store local experiment data.</p>
             </article>
           </div>
         </section>
@@ -889,6 +895,6 @@
       </form>
     </div>
   </div>
-  <script src="app.js?v=20260615-docs-3dti"></script>
+  <script src="app.js?v=20260615-docs-3dti-brt"></script>
 </body>
 </html>
