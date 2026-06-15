@@ -217,6 +217,9 @@ let pendingAudioImportMode = "preserve";
 let pendingInstructionSlot = "";
 let pendingBakeRecipe = null;
 let activeTrialRowPreviewAudio = null;
+let activeSourcePreviewAudio = null;
+let activeSourcePreviewNode = null;
+let sourcePreviewAudioContext = null;
 let customizeModalReturnFocus = null;
 let segmentInfoModalReturnFocus = null;
 let trialPoolRepetitionDraft = {
@@ -334,6 +337,7 @@ function setWorkflowDisabled(control, disabled) {
 
 function profileReadonlyControlAllowed(control) {
   if (!control) return false;
+  if (control.matches?.("[data-preview-source-label]")) return true;
   return Boolean(
     control.id
     && (control.id.startsWith("open-") || control.id === "prepare-experiment")
@@ -2435,8 +2439,11 @@ function renderAudioPoolBlock(element) {
     <div class="sequence-label-list" data-sequence-label-list>
       ${labels.map((label) => `
         <span class="sequence-label-chip">
-          ${escapeHtml(label)}
-          <button type="button" data-remove-box-label="${escapeAttr(label)}" title="Remove label" aria-label="Remove ${escapeAttr(label)}">x</button>
+          <span class="sequence-label-chip-text">${escapeHtml(label)}</span>
+          <span class="sequence-label-chip-actions">
+            <button type="button" class="sequence-label-preview" data-preview-source-label="${escapeAttr(label)}" title="Play ${escapeAttr(label)}" aria-label="Play ${escapeAttr(label)}">&#128266;</button>
+            <button type="button" class="sequence-label-remove" data-remove-box-label="${escapeAttr(label)}" title="Remove label" aria-label="Remove ${escapeAttr(label)}">x</button>
+          </span>
           <input data-element-field="source_labels" type="hidden" value="${escapeAttr(label)}">
         </span>
       `).join("") || `<span class="sequence-label-empty">No labels selected</span>`}
@@ -2632,6 +2639,91 @@ async function previewFilmstripRow(button) {
     if (!started) button.classList.remove("playing");
     button.disabled = false;
   }
+}
+
+async function previewSourceLabel(button) {
+  const label = button.dataset.previewSourceLabel || "";
+  if (!label) return;
+  state.design.protocol = state.design.protocol || {};
+  state.design.protocol.trial_strips = collectTrialStrips();
+  const payload = collectPayload();
+  payload.label = label;
+  button.disabled = true;
+  button.classList.add("playing");
+  const audioContext = getSourcePreviewAudioContext();
+  const contextReady = audioContext?.resume().catch(() => {});
+  let started = false;
+  try {
+    const preview = await api("/api/audio/preview-source", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+    button.disabled = false;
+    await playSourcePreviewAudio(apiUrl(`${preview.url}?v=${Date.now()}`), button, audioContext, contextReady);
+    started = true;
+    showToast(`Soundcheck: ${preview.label || label}`);
+  } catch (error) {
+    button.classList.remove("playing");
+    throw error;
+  } finally {
+    if (!started) button.classList.remove("playing");
+    button.disabled = false;
+  }
+}
+
+function getSourcePreviewAudioContext() {
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return null;
+  if (!sourcePreviewAudioContext) {
+    sourcePreviewAudioContext = new AudioContextClass();
+  }
+  return sourcePreviewAudioContext;
+}
+
+function stopActiveSourcePreview() {
+  if (activeSourcePreviewNode) {
+    try {
+      activeSourcePreviewNode.stop();
+    } catch (_error) {
+      // Already stopped.
+    }
+    activeSourcePreviewNode.disconnect();
+    activeSourcePreviewNode = null;
+  }
+  if (activeSourcePreviewAudio) {
+    activeSourcePreviewAudio.pause();
+    activeSourcePreviewAudio = null;
+  }
+}
+
+async function playSourcePreviewAudio(url, button, audioContext, contextReady) {
+  stopActiveSourcePreview();
+  if (audioContext) {
+    if (contextReady) await Promise.race([contextReady, delay(250)]);
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Preview audio unavailable: ${response.status}`);
+    const buffer = await audioContext.decodeAudioData(await response.arrayBuffer());
+    const node = audioContext.createBufferSource();
+    node.buffer = buffer;
+    node.connect(audioContext.destination);
+    activeSourcePreviewNode = node;
+    node.addEventListener("ended", () => {
+      if (activeSourcePreviewNode === node) {
+        activeSourcePreviewNode = null;
+      }
+      button.classList.remove("playing");
+    }, { once: true });
+    node.start();
+    return;
+  }
+  const audio = new Audio(url);
+  activeSourcePreviewAudio = audio;
+  audio.addEventListener("ended", () => button.classList.remove("playing"), { once: true });
+  audio.addEventListener("pause", () => button.classList.remove("playing"), { once: true });
+  audio.play().catch((error) => {
+    button.classList.remove("playing");
+    showToast(error.message || String(error));
+  });
 }
 
 function setTrialStrips(strips) {
@@ -4503,6 +4595,11 @@ function wireEvents() {
     const previewButton = event.target.closest?.("[data-preview-strip]");
     if (previewButton) {
       previewFilmstripRow(previewButton).catch(reportError);
+      return;
+    }
+    const sourcePreviewButton = event.target.closest?.("[data-preview-source-label]");
+    if (sourcePreviewButton) {
+      previewSourceLabel(sourcePreviewButton).catch(reportError);
       return;
     }
     if (event.target.matches("[data-open-folder]")) {

@@ -52,12 +52,29 @@ def build_manifest(
     source_tag: str,
     source_commit: str,
     zenodo_doi: str,
+    package_inventory: Path | None = None,
     payload_kind: str = "offline_lab_windows_x64",
     platform: str = "windows-amd64",
 ) -> dict:
     payload = payload.resolve()
     if not payload.is_file():
         raise FileNotFoundError(f"Payload does not exist: {payload}")
+    inventory_payload: dict | None = None
+    if package_inventory is not None:
+        package_inventory = package_inventory.resolve()
+        if not package_inventory.is_file():
+            raise FileNotFoundError(f"Package inventory does not exist: {package_inventory}")
+        inventory_data = json.loads(package_inventory.read_text(encoding="utf-8"))
+        summary = inventory_data.get("summary", {})
+        inventory_payload = {
+            "schema": inventory_data.get("schema", ""),
+            "filename": package_inventory.name,
+            "path_in_payload": package_inventory.name,
+            "sha256": sha256_file(package_inventory),
+            "item_count": summary.get("item_count", 0),
+            "required_item_count": summary.get("required_item_count", 0),
+            "missing_required_count": summary.get("missing_required_count", 0),
+        }
     return {
         "schema": MANIFEST_SCHEMA,
         "project": "peripersonal-space-toolkit",
@@ -75,6 +92,7 @@ def build_manifest(
                 "size_bytes": payload.stat().st_size,
                 "sha256": sha256_file(payload),
                 "platform": platform,
+                "package_inventory": inventory_payload,
                 "contains": [
                     "PPSExperimentRunner.exe",
                     "local HTML dashboard and companion launchers",
@@ -121,6 +139,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--source-tag", default="", help="Git release tag. Defaults to v<version>.")
     parser.add_argument("--source-commit", default="", help="Git source commit. Defaults to current HEAD when available.")
     parser.add_argument("--zenodo-doi", default="", help="Versioned Zenodo DOI or concept DOI.")
+    parser.add_argument("--package-inventory", type=Path, default=None, help="Generated package inventory included in the payload.")
     parser.add_argument("--payload-kind", default="offline_lab_windows_x64")
     parser.add_argument("--platform", default="windows-amd64")
     args = parser.parse_args(argv)
@@ -134,6 +153,7 @@ def main(argv: list[str] | None = None) -> int:
         source_tag=source_tag,
         source_commit=source_commit,
         zenodo_doi=args.zenodo_doi,
+        package_inventory=args.package_inventory,
         payload_kind=args.payload_kind,
         platform=args.platform,
     )

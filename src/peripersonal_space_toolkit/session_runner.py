@@ -642,6 +642,261 @@ def claim_prepared_session(
     return None
 
 
+def prepared_session_asset_status(
+    run_setup_manifest_path: Path,
+    participant_id: str,
+    *,
+    state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT,
+    session_root: Path = DEFAULT_SESSION_ROOT,
+) -> dict[str, Any]:
+    """Return a read-only status for a participant's prepared local audio package."""
+    run_setup = Path(run_setup_manifest_path).resolve()
+    participant = sanitize_participant_id(participant_id)
+    if not participant:
+        return {
+            "participant_id": "",
+            "generated": False,
+            "status": "not_generated",
+            "session_manifest_path": "",
+            "message": "Participant ID is required.",
+            "source": "",
+            **_participant_data_collection_status(run_setup, ""),
+        }
+
+    run_setup_hash = _run_setup_queue_hash(run_setup)
+    fallback_message = ""
+    data_status = _participant_data_collection_status(run_setup, participant, session_root=session_root)
+    queue_data = _load_prepared_session_queue(state_root)
+    for entry in reversed(list(queue_data.get("entries", []))):
+        if str(entry.get("participant_id") or "") != participant:
+            continue
+        if str(entry.get("run_setup_manifest_path") or "") != str(run_setup):
+            continue
+        status = str(entry.get("status") or "").strip().lower()
+        if str(entry.get("run_setup_sha256") or "") != run_setup_hash:
+            fallback_message = "Prepared queue entry is stale."
+            continue
+        manifest_path = Path(str(entry.get("session_manifest_path") or ""))
+        if status == "preparing":
+            return {
+                "participant_id": participant,
+                "generated": False,
+                "status": "preparing",
+                "session_manifest_path": str(manifest_path) if manifest_path else "",
+                "message": str(entry.get("message") or "Preparing audio assets."),
+                "source": "prepared_session_queue",
+                **data_status,
+            }
+        if status == "failed":
+            fallback_message = str(entry.get("message") or "Previous generation failed.")
+            continue
+        if status in {"ready", "claimed"}:
+            valid, message = _prepared_session_manifest_ready_for_run_setup(manifest_path, run_setup, participant)
+            if valid:
+                return {
+                    "participant_id": participant,
+                    "generated": True,
+                    "status": "ready" if status == "ready" else "generated",
+                    "session_manifest_path": str(manifest_path.resolve()),
+                    "message": message,
+                    "source": "prepared_session_queue",
+                    **data_status,
+                }
+            fallback_message = message
+
+    scanned = _scan_prepared_session_manifest(run_setup, participant, session_root=session_root)
+    if scanned is not None:
+        manifest_path, message = scanned
+        return {
+            "participant_id": participant,
+            "generated": True,
+            "status": "generated",
+            "session_manifest_path": str(manifest_path.resolve()),
+            "message": message,
+            "source": "session_scan",
+            **data_status,
+        }
+
+    return {
+        "participant_id": participant,
+        "generated": False,
+        "status": "not_generated",
+        "session_manifest_path": "",
+        "message": fallback_message or "No prepared local audio package found.",
+        "source": "",
+        **data_status,
+    }
+
+
+def prepared_session_asset_statuses(
+    run_setup_manifest_path: Path,
+    participant_ids: Iterable[str],
+    *,
+    state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT,
+    session_root: Path = DEFAULT_SESSION_ROOT,
+) -> dict[str, dict[str, Any]]:
+    """Return prepared-package status for multiple participants."""
+    return {
+        sanitize_participant_id(participant_id): prepared_session_asset_status(
+            run_setup_manifest_path,
+            participant_id,
+            state_root=state_root,
+            session_root=session_root,
+        )
+        for participant_id in participant_ids
+        if sanitize_participant_id(participant_id)
+    }
+
+
+def _prepared_session_manifest_ready_for_run_setup(
+    manifest_path: Path,
+    run_setup_manifest_path: Path,
+    participant_id: str,
+) -> tuple[bool, str]:
+    if not manifest_path or not _path_exists(manifest_path):
+        return False, "Prepared session manifest is missing."
+    try:
+        package = load_run_package(manifest_path)
+    except Exception as exc:
+        return False, str(exc)
+    if package.participant_id != participant_id:
+        return False, "Prepared session participant does not match."
+    source_path = package.source_run_setup_manifest_path
+    if source_path is None or Path(source_path).resolve() != Path(run_setup_manifest_path).resolve():
+        return False, "Prepared session belongs to a different run setup."
+    if not package.blocks:
+        return False, "Prepared session has no blocks."
+    for block in package.blocks:
+        wav_path = _session_package_path(package, block.wav_path)
+        manifest = _session_package_path(package, block.manifest_path)
+        if not _path_exists(wav_path):
+            return False, f"Prepared block WAV is missing: {wav_path}"
+        if not _path_exists(manifest):
+            return False, f"Prepared block manifest is missing: {manifest}"
+    return True, "Prepared local audio package is available."
+
+
+def _scan_prepared_session_manifest(
+    run_setup_manifest_path: Path,
+    participant_id: str,
+    *,
+    session_root: Path = DEFAULT_SESSION_ROOT,
+) -> tuple[Path, str] | None:
+    root = Path(session_root)
+    if not _path_exists(root):
+        return None
+    candidates = sorted(
+        root.glob(f"{participant_id}_*/session_manifest.json"),
+        key=lambda path: path.stat().st_mtime if _path_exists(path) else 0.0,
+        reverse=True,
+    )
+    for manifest_path in candidates:
+        valid, message = _prepared_session_manifest_ready_for_run_setup(manifest_path, run_setup_manifest_path, participant_id)
+        if valid:
+            return manifest_path, message
+    return None
+
+
+def _participant_data_collection_status(
+    run_setup_manifest_path: Path,
+    participant_id: str,
+    *,
+    session_root: Path = DEFAULT_SESSION_ROOT,
+) -> dict[str, Any]:
+    base = {
+        "data_collected": False,
+        "data_collection_status": "not_collected",
+        "data_session_manifest_path": "",
+        "data_session_dir": "",
+        "data_collection_message": "No completed participant data found.",
+    }
+    participant = sanitize_participant_id(participant_id)
+    if not participant:
+        base["data_collection_message"] = "Participant ID is required."
+        return base
+    root = Path(session_root)
+    if not _path_exists(root):
+        return base
+    candidates = sorted(
+        root.glob(f"{participant}_*/session_manifest.json"),
+        key=lambda path: path.stat().st_mtime if _path_exists(path) else 0.0,
+        reverse=True,
+    )
+    for manifest_path in candidates:
+        package = _load_matching_session_package(manifest_path, run_setup_manifest_path, participant)
+        if package is None:
+            continue
+        collected, message = _session_package_has_completed_data(package)
+        if collected:
+            return {
+                "data_collected": True,
+                "data_collection_status": "collected",
+                "data_session_manifest_path": str(package.manifest_path.resolve()),
+                "data_session_dir": str(package.session_dir.resolve()),
+                "data_collection_message": message,
+            }
+        if message:
+            base["data_collection_status"] = "incomplete"
+            base["data_collection_message"] = message
+            base["data_session_manifest_path"] = str(package.manifest_path.resolve())
+            base["data_session_dir"] = str(package.session_dir.resolve())
+    return base
+
+
+def _load_matching_session_package(
+    manifest_path: Path,
+    run_setup_manifest_path: Path,
+    participant_id: str,
+) -> RunPackage | None:
+    if not manifest_path or not _path_exists(manifest_path):
+        return None
+    try:
+        package = load_run_package(manifest_path)
+    except Exception:
+        return None
+    if package.participant_id != participant_id:
+        return None
+    source_path = package.source_run_setup_manifest_path
+    if source_path is None or Path(source_path).resolve() != Path(run_setup_manifest_path).resolve():
+        return None
+    if not package.blocks:
+        return None
+    return package
+
+
+def _session_package_has_completed_data(package: RunPackage) -> tuple[bool, str]:
+    events_csv = Path(package.session_dir) / "events.csv"
+    if not _path_exists(events_csv):
+        return False, ""
+    try:
+        with events_csv.open(newline="", encoding="utf-8-sig") as handle:
+            for row in csv.DictReader(handle):
+                if str(row.get("event_type") or "").strip() != "session_end":
+                    continue
+                payload = _json_loads_dict(row.get("payload_json"))
+                completed = payload.get("completed", row.get("completed"))
+                interrupted = payload.get("interrupted", row.get("interrupted"))
+                if _truthy(completed) and not _truthy(interrupted):
+                    return True, "Completed participant data found."
+                return False, "Participant data exists, but the session did not complete."
+    except Exception as exc:
+        return False, f"Participant data status could not be read: {exc}"
+    return False, "Participant data exists, but no completed session_end marker was found."
+
+
+def _json_loads_dict(value: Any) -> dict[str, Any]:
+    try:
+        payload = json.loads(str(value or "{}"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _session_package_path(package: RunPackage, value: Path) -> Path:
+    path = Path(value)
+    return path if path.is_absolute() else Path(package.session_dir) / path
+
+
 def next_segment_participant(run_setup_manifest_path: Path, participant_id: str) -> str | None:
     participants = segment_run_setup_participants(run_setup_manifest_path)
     current = sanitize_participant_id(participant_id)
@@ -1223,7 +1478,11 @@ class SessionRunnerController:
             if engine is None:
                 engine = self._create_audio_engine()
                 self.audio_engine = engine
-            standard_blocks = list(self.package.blocks)
+            standard_blocks = [block for block in self.package.blocks if not _truthy(block.metadata.get("is_topup_block"))]
+            display_by_block, topup_display_by_part, display_block_count = _run_playback_numbering(
+                standard_blocks,
+                include_topup_slots=self.topup_ledger is not None,
+            )
             if not self._play_instruction_slot(
                 engine,
                 "before_experiment",
@@ -1281,9 +1540,12 @@ class SessionRunnerController:
 
                 def _progress(elapsed_s: float, current_block: RunBlock = block) -> None:
                     if progress_callback:
+                        display_index = display_by_block.get(current_block.index, current_block.index)
                         progress_callback(
                             {
                                 "block_index": current_block.index,
+                                "display_block_index": display_index,
+                                "play_order_index": display_index,
                                 "block_label": current_block.label,
                                 "elapsed_s": float(elapsed_s),
                                 "duration_s": current_block.duration_s,
@@ -1291,7 +1553,10 @@ class SessionRunnerController:
                                 "part_number": _block_part_number(current_block),
                                 "phase": str(current_block.metadata.get("phase") or ""),
                                 "phase_label": str(current_block.metadata.get("phase_label") or current_block.metadata.get("phase") or ""),
-                                "block_count": len(standard_blocks),
+                                "block_count": display_block_count,
+                                "display_block_count": display_block_count,
+                                "standard_block_index": current_block.index,
+                                "standard_block_count": len(standard_blocks),
                                 "is_topup": False,
                             }
                         )
@@ -1300,8 +1565,10 @@ class SessionRunnerController:
                     progress_callback,
                     block,
                     schedule,
-                    total_blocks=len(standard_blocks),
+                    total_blocks=display_block_count,
                     is_topup=False,
+                    display_block_index=display_by_block.get(block.index, block.index),
+                    display_block_count=display_block_count,
                 )
                 self._active_block = block
                 self._accepting_responses = True
@@ -1372,6 +1639,8 @@ class SessionRunnerController:
                         event_callback=event_callback,
                         part_number=_block_part_number(block),
                         phase_label=str(block.metadata.get("phase_label") or block.metadata.get("phase") or ""),
+                        display_block_index=topup_display_by_part.get(_block_part_key(block)),
+                        display_block_count=display_block_count,
                     )
                     if not topup_ok:
                         interrupted = True
@@ -1602,6 +1871,8 @@ class SessionRunnerController:
         event_callback: EventCallback | None,
         part_number: int | str | None = None,
         phase_label: str = "",
+        display_block_index: int | None = None,
+        display_block_count: int | None = None,
     ) -> bool:
         if self.topup_ledger is None:
             return True
@@ -1614,7 +1885,13 @@ class SessionRunnerController:
             self._persist_topup_state(part_number=part_number)
             return True
         try:
-            block, manifest_outputs = self._materialize_topup_block(misses, part_number=part_number, phase_label=phase_label)
+            block, manifest_outputs = self._materialize_topup_block(
+                misses,
+                part_number=part_number,
+                phase_label=phase_label,
+                display_block_index=display_block_index,
+                display_block_count=display_block_count,
+            )
         except Exception as exc:
             self.events.log("topup_block_materialize_failed", missed_trial_count=len(misses), part_number="" if part_number is None else _part_suffix(part_number), phase_label=phase_label, message=str(exc))
             self._run_warnings.append(f"Top-up block could not be materialized: {exc}")
@@ -1688,9 +1965,19 @@ class SessionRunnerController:
 
         def _progress(elapsed_s: float, current_block: RunBlock = block) -> None:
             if progress_callback:
+                current_display_index = _as_int(
+                    current_block.metadata.get("display_block_index", current_block.metadata.get("play_order_index")),
+                    default=current_block.index,
+                )
+                current_display_count = _as_int(
+                    current_block.metadata.get("display_block_count"),
+                    default=len(self.package.blocks),
+                )
                 progress_callback(
                     {
                         "block_index": current_block.index,
+                        "display_block_index": current_display_index,
+                        "play_order_index": current_display_index,
                         "block_label": current_block.label,
                         "elapsed_s": float(elapsed_s),
                         "duration_s": current_block.duration_s,
@@ -1698,7 +1985,10 @@ class SessionRunnerController:
                         "part_number": _block_part_number(current_block),
                         "phase": str(current_block.metadata.get("phase") or ""),
                         "phase_label": str(current_block.metadata.get("phase_label") or current_block.metadata.get("phase") or ""),
-                        "block_count": len(self.package.blocks),
+                        "block_count": current_display_count,
+                        "display_block_count": current_display_count,
+                        "standard_block_index": "",
+                        "standard_block_count": sum(1 for item in self.package.blocks if not _truthy(item.metadata.get("is_topup_block"))),
                         "is_topup": True,
                     }
                 )
@@ -1707,8 +1997,10 @@ class SessionRunnerController:
             progress_callback,
             block,
             schedule,
-            total_blocks=len(self.package.blocks),
+            total_blocks=_as_int(block.metadata.get("display_block_count"), default=len(self.package.blocks)),
             is_topup=True,
+            display_block_index=_as_int(block.metadata.get("display_block_index"), default=block.index),
+            display_block_count=_as_int(block.metadata.get("display_block_count"), default=len(self.package.blocks)),
         )
         self._active_block = block
         self._accepting_responses = True
@@ -1827,6 +2119,8 @@ class SessionRunnerController:
         *,
         part_number: int | str | None = None,
         phase_label: str = "",
+        display_block_index: int | None = None,
+        display_block_count: int | None = None,
     ) -> tuple[RunBlock, dict[str, Path]]:
         try:
             import numpy as np
@@ -1885,6 +2179,8 @@ class SessionRunnerController:
             raise ValueError("No missed tactile rows were available for top-up block generation.")
 
         block_index = max((block.index for block in self.package.blocks), default=0) + 1
+        display_index = _as_int(display_block_index, default=block_index)
+        display_count = _as_int(display_block_count, default=display_index)
         part_label = _part_suffix(part_number)
         multi_part = len(_package_part_numbers(self.package)) > 1
         block_label = f"Part {part_label} top-up missed tactile trials" if multi_part and part_label else "Top-up missed tactile trials"
@@ -1987,6 +2283,9 @@ class SessionRunnerController:
                     "part_number": "" if part_number is None else part_label,
                     "phase_label": phase_label,
                     "block_index": block_index,
+                    "display_block_index": display_index,
+                    "play_order_index": display_index,
+                    "display_block_count": display_count,
                     "block_label": block_label,
                     "row_order": row_order,
                     "missed_trial_count": len(misses),
@@ -2010,6 +2309,9 @@ class SessionRunnerController:
             metadata={
                 "execution_mode": "topup_block_wavs",
                 "is_topup_block": True,
+                "display_block_index": display_index,
+                "play_order_index": display_index,
+                "display_block_count": display_count,
                 "part_number": _as_int(_row_value(trial_rows[0], "Part_Number", default=1), default=1) if trial_rows else 1,
                 "sample_rate_hz": sample_rate,
                 "channels": target_channels,
@@ -2222,7 +2524,26 @@ def _part_suffix(value: Any) -> str:
 
 
 def _package_part_numbers(package: RunPackage) -> set[str]:
-    return {_block_part_key(block) for block in package.blocks if not bool(block.metadata.get("is_topup_block"))}
+    return {_block_part_key(block) for block in package.blocks if not _truthy(block.metadata.get("is_topup_block"))}
+
+
+def _run_playback_numbering(
+    standard_blocks: list[RunBlock],
+    *,
+    include_topup_slots: bool,
+) -> tuple[dict[int, int], dict[str, int], int]:
+    """Return UI play-order numbers for standard blocks and part-end top-up slots."""
+    display_by_block: dict[int, int] = {}
+    topup_by_part: dict[str, int] = {}
+    display_index = 0
+    for index, block in enumerate(standard_blocks):
+        display_index += 1
+        display_by_block[block.index] = display_index
+        next_block = standard_blocks[index + 1] if index + 1 < len(standard_blocks) else None
+        if include_topup_slots and (next_block is None or _block_part_key(next_block) != _block_part_key(block)):
+            display_index += 1
+            topup_by_part[_block_part_key(block)] = display_index
+    return display_by_block, topup_by_part, display_index
 
 
 def _coerce_capture_options(
@@ -2411,9 +2732,13 @@ def _emit_block_schedule_progress(
     *,
     total_blocks: int,
     is_topup: bool,
+    display_block_index: int | None = None,
+    display_block_count: int | None = None,
 ) -> None:
     if progress_callback is None:
         return
+    display_index = _as_int(display_block_index, default=block.index)
+    display_count = _as_int(display_block_count, default=max(0, int(total_blocks or 0)))
     progress_callback(
         {
             "ui_event": "block_schedule",
@@ -2421,8 +2746,13 @@ def _emit_block_schedule_progress(
             "phase": str(block.metadata.get("phase") or ""),
             "phase_label": str(block.metadata.get("phase_label") or block.metadata.get("phase") or ""),
             "block_index": block.index,
+            "display_block_index": display_index,
+            "play_order_index": display_index,
             "block_label": block.label,
-            "block_count": max(0, int(total_blocks or 0)),
+            "block_count": display_count,
+            "display_block_count": display_count,
+            "standard_block_index": "" if is_topup else block.index,
+            "standard_block_count": "",
             "duration_s": block.duration_s,
             "is_topup": bool(is_topup),
             "block_schedule_perf_counter": time.perf_counter(),

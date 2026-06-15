@@ -1,6 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 from pathlib import Path
+from importlib.util import find_spec
 
 from PyInstaller.utils.hooks import collect_data_files
 
@@ -18,6 +19,15 @@ datas = collect_data_files(
         "viewer/vendor/three/*",
     ],
 )
+
+pyside_spec = find_spec("PySide6")
+if pyside_spec and pyside_spec.submodule_search_locations:
+    pyside_root = Path(list(pyside_spec.submodule_search_locations)[0])
+    for plugin_name in ("platforms", "styles", "imageformats", "iconengines"):
+        plugin_dir = pyside_root / "plugins" / plugin_name
+        if plugin_dir.exists():
+            datas.append((str(plugin_dir), f"PySide6/plugins/{plugin_name}"))
+
 for source, target in (
     (root / "assets" / "preloads", "assets/preloads"),
     (root / "assets" / "breathing", "assets/breathing"),
@@ -32,7 +42,7 @@ a = Analysis(
     pathex=[str(src_root)],
     binaries=[],
     datas=datas,
-    hiddenimports=["PySide6.QtTest", "soundfile"],
+    hiddenimports=["PySide6.QtTest", "pyautogui", "pynput.mouse", "soundfile"],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

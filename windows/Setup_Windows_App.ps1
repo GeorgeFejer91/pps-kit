@@ -16,7 +16,14 @@ if (-not (Test-Path $Venv)) {
 
 $Python = Join-Path $Venv "Scripts\python.exe"
 & $Python -m pip install --upgrade pip
-& $Python -m pip install -e "${Root}[tts,gui,lsl,web,dev]"
+& $Python -m pip install -e "${Root}[tts,gui,lsl,web,xdf,dev,package]"
+if ($LASTEXITCODE -ne 0) {
+    throw "Dependency installation failed with exit code $LASTEXITCODE"
+}
+& $Python (Join-Path $Root "tools\check_qt_runtime.py")
+if ($LASTEXITCODE -ne 0) {
+    throw "Qt runtime preflight failed. Recreate .venv with a standard Python install or rerun setup after fixing PySide6."
+}
 
 New-Item -ItemType Directory -Force (Join-Path $Root "artifacts") | Out-Null
 New-Item -ItemType Directory -Force (Join-Path $Root "local_data\loopback_recordings") | Out-Null
