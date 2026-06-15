@@ -455,6 +455,12 @@ code {
   line-height: 1.25;
 }
 
+#documentation-page .info-segment {
+  margin: 18px 0;
+  padding-top: 18px;
+  border-top: 1px solid #d7e2dc;
+}
+
 .placeholder-copy {
   margin: 0;
   max-width: 860px;
@@ -733,19 +739,20 @@ code {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 150px;
+  min-height: 126px;
   border: 1px solid #d4ddd6;
   border-radius: 6px;
   background: #f6faf7;
   overflow: hidden;
+  padding: 10px;
 }
 
 .hardware-pixel-frame canvas {
   display: block;
-  width: 100%;
+  width: min(100%, 240px);
+  max-width: 240px;
   height: auto;
-  max-height: 190px;
-  image-rendering: pixelated;
+  image-rendering: auto;
 }
 
 .info-card code {

@@ -173,12 +173,12 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    assert 'href="styles.css?v=20260615-static-preloads"' in html
-    assert 'src="hardware_pixel_art.js?v=20260615-static-preloads"' in html
-    assert 'src="app.js?v=20260615-static-preloads"' in html
-    assert "index.html?page=toolkit&v=20260615-static-preloads" in public_index
-    assert "index.html?page=documentation&v=20260615-static-preloads" in public_docs
-    assert "index.html?page=downloads&v=20260615-static-preloads" in public_download
+    assert 'href="styles.css?v=20260615-hardware-doc-fit"' in html
+    assert 'src="hardware_pixel_art.js?v=20260615-hardware-doc-fit"' in html
+    assert 'src="app.js?v=20260615-hardware-doc-fit"' in html
+    assert "index.html?page=toolkit&v=20260615-hardware-doc-fit" in public_index
+    assert "index.html?page=documentation&v=20260615-hardware-doc-fit" in public_docs
+    assert "index.html?page=downloads&v=20260615-hardware-doc-fit" in public_download
     assert 'data-page-tab="toolkit"' in html
     assert 'data-page-tab="documentation"' in html
     assert 'data-page-tab="downloads"' in html
@@ -202,6 +202,9 @@ def test_dashboard_static_assets_are_packaged():
     assert '"komplete-audio6"' in hardware_pixel_js
     assert '"woojer-strap-4"' in hardware_pixel_js
     assert ".hardware-pixel-frame" in styles_css
+    assert "width: min(100%, 240px)" in styles_css
+    assert "#documentation-page .info-segment" in styles_css
+    assert "border-top: 1px solid #d7e2dc" in styles_css
     assert 'id="audio-file-input"' in html
     assert 'id="zoom-in-camera"' in html
     assert 'id="zoom-out-camera"' in html
