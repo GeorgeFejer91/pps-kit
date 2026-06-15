@@ -451,12 +451,17 @@ function renderAll() {
 
 function pageFromHash() {
   const hash = String(window.location.hash || "").replace(/^#/, "");
-  return PAGE_TABS.includes(hash) ? hash : "";
+  if (PAGE_TABS.includes(hash)) return hash;
+  const target = hash ? $(hash) : null;
+  const panel = target?.closest("[data-page-panel]");
+  const page = panel?.dataset.pagePanel || "";
+  return PAGE_TABS.includes(page) ? page : "";
 }
 
 function setActivePage(page, options = {}) {
   const nextPage = PAGE_TABS.includes(page) ? page : "toolkit";
   activePage = nextPage;
+  document.body.dataset.activePage = nextPage;
   document.body.classList.toggle("info-page-active", nextPage !== "toolkit");
   for (const button of document.querySelectorAll("[data-page-tab]")) {
     const active = button.dataset.pageTab === nextPage;
@@ -467,6 +472,7 @@ function setActivePage(page, options = {}) {
     panel.hidden = panel.dataset.pagePanel !== nextPage;
     panel.classList.toggle("active", panel.dataset.pagePanel === nextPage);
   }
+  syncRailForPage(nextPage);
   if (options.updateHash) {
     const nextHash = nextPage === "toolkit" ? "" : `#${nextPage}`;
     if (window.location.hash !== nextHash) {
@@ -479,12 +485,43 @@ function setActivePage(page, options = {}) {
   updateActiveNav();
 }
 
+function syncRailForPage(page) {
+  for (const group of document.querySelectorAll("[data-rail-page]")) {
+    const active = group.dataset.railPage === page;
+    group.hidden = !active;
+    group.classList.toggle("active", active);
+  }
+}
+
+function setActivePageSection(sectionId) {
+  if (!sectionId) return;
+  for (const link of document.querySelectorAll("[data-page-section-link]")) {
+    link.classList.toggle(
+      "active",
+      link.dataset.pageSectionPage === activePage && link.dataset.pageSectionLink === sectionId
+    );
+  }
+}
+
+function scrollToHashTarget() {
+  const hash = String(window.location.hash || "").replace(/^#/, "");
+  if (!hash || PAGE_TABS.includes(hash)) return;
+  const target = $(hash);
+  if (!target) return;
+  setActivePageSection(hash);
+  window.requestAnimationFrame(() => {
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.setTimeout(() => setActivePageSection(hash), 350);
+  });
+}
+
 function renderPageTabs() {
   setActivePage(activePage);
 }
 
 function initializePageTabs() {
   setActivePage(pageFromHash() || "toolkit");
+  scrollToHashTarget();
 }
 
 function renderHeader() {
@@ -4019,6 +4056,35 @@ function scrollToStep(stepId) {
 }
 
 function updateActiveNav() {
+  if (activePage !== "toolkit") {
+    for (const link of document.querySelectorAll("[data-step-link]")) {
+      link.classList.remove("active");
+    }
+    const pageLinks = [...document.querySelectorAll(`[data-page-section-page="${cssEscape(activePage)}"]`)];
+    let activeSection = pageLinks[0]?.dataset.pageSectionLink || "";
+    const viewportTop = 96;
+    for (const link of pageLinks) {
+      const target = $(link.dataset.pageSectionLink);
+      if (!target) continue;
+      if (target.getBoundingClientRect().top <= viewportTop) {
+        activeSection = link.dataset.pageSectionLink;
+      }
+    }
+    const hashSection = String(window.location.hash || "").replace(/^#/, "");
+    if (pageLinks.some((link) => link.dataset.pageSectionLink === hashSection)) {
+      activeSection = hashSection;
+    }
+    for (const link of document.querySelectorAll("[data-page-section-link]")) {
+      link.classList.toggle(
+        "active",
+        link.dataset.pageSectionPage === activePage && link.dataset.pageSectionLink === activeSection
+      );
+    }
+    return;
+  }
+  for (const link of document.querySelectorAll("[data-page-section-link]")) {
+    link.classList.remove("active");
+  }
   let active = "study";
   const viewportTop = 96;
   for (const stepId of WORKFLOW_STEPS) {
@@ -4401,9 +4467,27 @@ function wireEvents() {
   for (const button of document.querySelectorAll("[data-page-tab]")) {
     button.addEventListener("click", () => setActivePage(button.dataset.pageTab, { updateHash: true, scrollTop: true }));
   }
+  for (const link of document.querySelectorAll("[data-page-section-link]")) {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      const targetId = link.dataset.pageSectionLink;
+      const page = link.dataset.pageSectionPage;
+      setActivePage(page, { updateHash: false, scrollTop: false });
+      const target = $(targetId);
+      if (target) {
+        history.replaceState(null, "", `${window.location.pathname}${window.location.search}#${targetId}`);
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        setActivePageSection(targetId);
+        window.setTimeout(() => setActivePageSection(targetId), 350);
+      }
+    });
+  }
   window.addEventListener("hashchange", () => {
     const nextPage = pageFromHash();
-    if (nextPage) setActivePage(nextPage, { scrollTop: true });
+    if (nextPage) {
+      setActivePage(nextPage, { scrollTop: false });
+      scrollToHashTarget();
+    }
   });
   for (const button of document.querySelectorAll("[data-segment-info]")) {
     button.addEventListener("click", () => openSegmentInfoModal(button.dataset.segmentInfo, button));
