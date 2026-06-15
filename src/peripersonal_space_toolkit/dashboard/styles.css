@@ -650,6 +650,141 @@ code {
   transform: translateY(-50%);
 }
 
+/* ── Layered architecture diagram ─────────────────────────────────────── */
+.arch-diagram {
+  display: grid;
+  gap: 0;
+  margin-bottom: 20px;
+}
+
+.arch-tier {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.arch-tier-label {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  text-align: right;
+  line-height: 1.25;
+  padding-right: 4px;
+}
+
+.arch-tier-nodes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+
+.arch-tier-nodes-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.arch-tier-nodes-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.arch-node {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 14px;
+}
+
+.arch-node-icon {
+  width: 26px;
+  height: 26px;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+
+.arch-node-icon svg {
+  display: block;
+  width: 26px;
+  height: 26px;
+}
+
+.arch-node-kicker {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--primary);
+  margin-bottom: 3px;
+}
+
+.arch-node strong {
+  display: block;
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 0;
+}
+
+.arch-node p {
+  margin: 5px 0 0;
+  font-size: 12.5px;
+  color: #37433b;
+  line-height: 1.45;
+}
+
+.arch-node-resource {
+  background: #f5faf7;
+  border-color: #a6c1b5;
+}
+.arch-node-resource .arch-node-icon { color: #2d7a5c; }
+
+.arch-node-runner {
+  background: #eff8f3;
+  border-color: #96c8b1;
+}
+.arch-node-runner .arch-node-icon { color: #1d6647; }
+.arch-node-runner .arch-node-kicker { color: #1d6647; }
+
+.arch-node-hw {
+  background: #f8f9f7;
+  border-color: #c8d5cc;
+}
+.arch-node-hw .arch-node-icon { color: #4a5c52; }
+.arch-node-hw .arch-node-kicker { color: #4a5c52; }
+
+.arch-vconnect {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 10px;
+  height: 28px;
+}
+
+.arch-vconnect-line {
+  position: relative;
+}
+
+.arch-vconnect-line::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 4px;
+  left: 50%;
+  width: 2px;
+  background: #86a897;
+  transform: translateX(-50%);
+}
+
+.arch-vconnect-line::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid #86a897;
+  transform: translateX(-50%);
+}
+/* ── / Layered architecture diagram ───────────────────────────────────── */
+
 .runner-interface-card {
   border-color: #96c8b1;
   background: #eff8f3;
@@ -3201,8 +3336,18 @@ body.modal-open {
   .flow-row,
   .flow-branch-grid,
   .runner-route-grid,
-  .workflow-summary-grid {
+  .workflow-summary-grid,
+  .arch-tier-nodes-2,
+  .arch-tier-nodes-3 {
     grid-template-columns: 1fr;
+  }
+
+  .arch-tier {
+    grid-template-columns: 72px 1fr;
+  }
+
+  .arch-vconnect {
+    grid-template-columns: 72px 1fr;
   }
 
   .flow-connector {
@@ -3219,179 +3364,4 @@ body.modal-open {
     border-right: 5px solid transparent;
     border-bottom: 0;
     border-left: 5px solid transparent;
-    transform: translateX(50%);
-  }
-
-  .source-action-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .baseline-option-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .count-strip {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .run-instruction-slot {
-    grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto auto;
-  }
-
-  .bake-panel {
-    grid-template-columns: minmax(180px, 1fr) 110px auto;
-  }
-
-  .bake-panel .status-label {
-    justify-self: start;
-  }
-
-  .source-card-fields {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .audio-source-fields {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .stimulus-pool-columns {
-    grid-template-columns: 1fr;
-  }
-
-  .workspace-splitter {
-    display: none;
-  }
-}
-
-@media (max-width: 760px) {
-  :root {
-    --rail-width: 184px;
-  }
-
-  .rail {
-    inset: 8px auto 8px 8px;
-    padding: 12px 8px;
-    gap: 12px;
-  }
-
-  .rail nav a,
-  .rail-nav-group a {
-    padding: 7px 6px;
-    font-size: 12px;
-  }
-
-  .workspace {
-    margin-left: calc(var(--rail-width) + 18px);
-    padding: 10px;
-  }
-
-  .segment-info-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .stimulus-pool-column .source-card-list {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .topbar {
-    height: auto;
-    align-items: flex-start;
-  }
-
-  .site-tab-list {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .site-tab {
-    min-width: 0;
-    flex: 1;
-    padding-inline: 7px;
-  }
-
-  .segment-zero-status-card {
-    grid-template-columns: 1fr;
-  }
-
-  .segment-zero-status-actions {
-    justify-content: flex-start;
-  }
-
-  .split-fields {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .trial-decision-fields {
-    grid-template-columns: 1fr;
-  }
-
-  .block-control-panel .trial-decision-fields,
-  .baseline-tactile-panel .tactile-decision-fields,
-  .baseline-tactile-panel .baseline-option-grid,
-  .count-strip,
-  .mixer-row,
-  .run-decision-grid,
-  .capture-option-grid,
-  .run-instruction-slot {
-    grid-template-columns: 1fr;
-  }
-
-  .capture-option-note {
-    justify-self: start;
-  }
-
-  .source-action-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .baseline-option-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .bake-panel {
-    grid-template-columns: 1fr;
-  }
-
-  .source-card-fields {
-    grid-template-columns: 1fr;
-  }
-
-  .audio-source-fields {
-    grid-template-columns: 1fr;
-  }
-
-  .filmstrip-row-header {
-    grid-template-columns: 1fr;
-  }
-
-  .filmstrip-row-body {
-    flex-direction: column;
-  }
-
-  .trial-condition-field {
-    flex-basis: auto;
-    width: 100%;
-  }
-
-  .filmstrip-sequence {
-    width: 100%;
-  }
-
-  .filmstrip-element {
-    min-width: 210px;
-  }
-
-}
-
-@media (max-width: 520px) {
-  .rail {
-    position: static;
-    width: auto;
-    max-height: none;
-    margin: 8px;
-  }
-
-  .workspace {
-    margin-left: 0;
-  }
-}
+    transform: trans
