@@ -241,6 +241,8 @@ def test_session_runner_plays_approved_topup_block_and_writes_final_outcomes(tmp
     assert Path(engine.played[1]).name == "Block_02_topup_missed_trials.wav"
     assert result.analysis_outputs["topup_ledger_csv"].exists()
     assert result.analysis_outputs["topup_block_manifest"].exists()
+    assert result.analysis_outputs["topup_block_wav"].exists()
+    assert result.analysis_outputs["topup_block_wav"].parent == package.session_dir / "blocks"
     final_outcomes = result.analysis_outputs["final_trial_outcomes"]
     assert final_outcomes.exists()
     with final_outcomes.open(newline="", encoding="utf-8") as handle:
@@ -305,6 +307,10 @@ def test_session_runner_plays_one_topup_at_end_of_each_part(tmp_path: Path):
     assert "part2_topup" in Path(engine.played[3]).name
     assert result.analysis_outputs["topup_block_manifest_part1"].exists()
     assert result.analysis_outputs["topup_block_manifest_part2"].exists()
+    assert result.analysis_outputs["topup_block_wav_part1"].exists()
+    assert result.analysis_outputs["topup_block_wav_part2"].exists()
+    assert result.analysis_outputs["topup_block_wav_part1"].parent == package.session_dir / "blocks"
+    assert result.analysis_outputs["topup_block_wav_part2"].parent == package.session_dir / "blocks"
     part1_rows = list(csv.DictReader(result.analysis_outputs["topup_block_manifest_part1"].open(encoding="utf-8")))
     part2_rows = list(csv.DictReader(result.analysis_outputs["topup_block_manifest_part2"].open(encoding="utf-8")))
     assert {row["Part_Number"] for row in part1_rows} == {"1"}
