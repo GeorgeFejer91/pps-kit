@@ -37,6 +37,10 @@ python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py
 python .\validation_protocols\scripts\run_study5_end_to_end_ui_mouse_validation.py `
   --packaged-standalone-app
 
+python .\validation_protocols\scripts\run_focus_runner_layout_validation.py `
+  --offscreen `
+  --output-dir artifacts\validation_runs\focus_runner_layout_current
+
 python .\validation_protocols\scripts\run_one_block_actual_condition_validation.py `
   --run-setup-manifest local_data\dashboard_projects\0_study_project_registry\profile_pfeiffer_2018_lateral_perihead_left_to_right\6_experiment_run_setup\experiment_run_setup_manifest.json `
   --device 31 `
@@ -58,6 +62,28 @@ python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py
   --audio-mode hardware `
   --strict-study5-readiness
 ```
+
+If the local packaged executable is quarantined or blocked by endpoint
+protection, use source mode only as an interim hardware/capture diagnostic:
+
+```powershell
+python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py `
+  --runner-mode source `
+  --participant-id P001 `
+  --mouse-backend pynput `
+  --audio-mode hardware `
+  --strict-study5-readiness
+```
+
+Source mode runs the same Focus Mode and `SessionRunnerController` code through
+`windows/focus_runner_entry.py`, but it does not satisfy the packaged-runner
+launch requirement.
+
+If `sounddevice` enumeration is unstable across processes, pass the currently
+verified Komplete ASIO output index with `--audio-device-index N`. The harness
+forwards this as `PPS_AUDIO_DEVICE_INDEX`; use it only after confirming the
+index with `pps-audio-stress --device-query "Komplete Audio ASIO" --dry-run
+--channels 4`.
 
 Run the deterministic response-boundary matrix before the broader packaged or
 hardware-backed scenarios. It prepares a real Segment 5/6-style session package,
@@ -246,6 +272,21 @@ failure mode.
 
 ### Operator Controls And Failure Modes
 
+- [ ] Run `run_focus_runner_layout_validation.py --offscreen` and verify every
+  standard screen scenario passes nonblank screenshots, embedded
+  `layout_validation_failures()`, text visibility, splitter geometry, and
+  keyboard shortcut-map checks.
+- [ ] Confirm the `Experiment Control` panel starts at or above the adaptive
+  profile height, spans the full lower workspace, and keeps the block order,
+  top-up draft, tactile timeline, progress, and event labels visible without
+  clipping or overlap.
+- [ ] Confirm constrained screens switch operator details to tabs, ordinary and
+  wide screens keep resizable splitters, and all panel handles remain large
+  enough to drag.
+- [ ] Exercise keyboard controls for automation and operator fallback: Space,
+  Return, and Enter for start/continue; Ctrl+P for pause/resume; Ctrl+Shift+S
+  for stop; Alt+1/Alt+2 for part selection; Ctrl+T for top-up preview; and
+  Ctrl+W for closing after a stopped/completed run.
 - [ ] Pause/resume logs `operator_pause` and `operator_resume` and does not
   corrupt later analysis.
 - [ ] Stop mid-block logs `operator_stop`, `session_end interrupted=true`,
@@ -268,6 +309,9 @@ for each scenario:
   This keeps standard capture enabled, captures a Focus Mode screenshot, writes
   compatibility launch/preparation reports, and invokes the strict Study 5
   readiness audit over the generated validation folder.
+- Focus Mode adaptive layout and keyboard-control validation across the current
+  PC available screen plus compact, laptop, desktop, and wide scenarios. The
+  canonical gate is `run_focus_runner_layout_validation.py --offscreen`.
 - One-block actual-condition emulation with real audio hardware and OS-click
   responses. This may pass `audit_protocol11_study5_readiness.py` as scoped
   local-recorder/XDF evidence, but it does not satisfy the final full-session
@@ -297,6 +341,9 @@ An accepted Protocol 11 report should include:
 - top-up ledger and final-outcome reconciliation when top-up is enabled;
 - capture-option settings and resulting output file inventory;
 - explicit pass/fail status for each checklist section;
+- the Focus Mode layout validation report, including `Experiment Control`
+  height/placement, adaptive splitters/tabs, nonblank screenshots, text
+  visibility, and keyboard shortcut-map checks;
 - the `audit_protocol11_study5_readiness.py` output for Study 5 runs, including
   XDF loadability, local audio-evidence WAV/sidecar checks, response-marker
   pulse recovery, screenshot validation, analysis RT agreement, and whether the

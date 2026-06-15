@@ -1513,6 +1513,8 @@ def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_pa
             str(runner),
             "--audio-mode",
             "hardware",
+            "--audio-device-index",
+            "28",
             "--strict-study5-readiness",
             "--participant-id",
             "P001",
@@ -1528,6 +1530,7 @@ def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_pa
     assert harness._standard_capture_requested(strict_args)
     assert "PPS_FOCUS_VALIDATION_REALTIME_AUDIO" not in strict_env
     assert strict_env["PPS_FOCUS_VALIDATION_PARTICIPANT_EMULATOR"] == "1"
+    assert strict_env["PPS_AUDIO_DEVICE_INDEX"] == "28"
 
     legacy_args = harness.build_arg_parser().parse_args(["--runner", str(runner)])
     legacy_command = harness._build_runner_command(legacy_args, runner=runner, screenshot_path=screenshot)
@@ -1535,6 +1538,24 @@ def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_pa
     assert "--no-lsl" in legacy_command
     assert "--no-internal-xdf" in legacy_command
     assert "--no-backup-recording" in legacy_command
+
+    source_args = harness.build_arg_parser().parse_args(
+        [
+            "--runner-mode",
+            "source",
+            "--audio-mode",
+            "hardware",
+            "--standard-capture",
+        ]
+    )
+    source_command = harness._build_runner_command(source_args, runner=runner, screenshot_path=screenshot)
+    source_env = harness._configure_validation_env(source_args, output_dir=tmp_path, focus_report_path=tmp_path / "focus_validation_report.json")
+
+    assert source_command[0] == sys.executable
+    assert source_command[1].endswith("windows\\focus_runner_entry.py") or source_command[1].endswith("windows/focus_runner_entry.py")
+    assert "--no-lsl" not in source_command
+    assert source_env["SD_ENABLE_ASIO"] == "1"
+    assert str(REPO_ROOT / "src") in source_env["PYTHONPATH"]
 
     with pytest.raises(ValueError, match="requires --audio-mode hardware"):
         harness.main(["--runner", str(runner), "--strict-study5-readiness"])

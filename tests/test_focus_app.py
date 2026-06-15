@@ -193,6 +193,10 @@ def test_focus_layout_renderer_preserves_legibility_baselines():
     assert constrained.response_panel_side >= constrained.target_min_height
     assert constrained.target_min_height >= 76
     assert constrained.target_max_height == constrained.target_min_height
+    assert constrained.experiment_control_min_height >= 152
+    assert constrained.experiment_control_initial_height >= constrained.experiment_control_min_height
+    assert compact.experiment_control_initial_height > constrained.experiment_control_initial_height
+    assert standard.experiment_control_initial_height > compact.experiment_control_initial_height
     assert constrained.right_stack_mode == "tabs"
     assert compact.right_stack_mode == "resizable"
     assert standard.right_stack_mode == "resizable"
@@ -632,6 +636,7 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     assert window.target_button.maximumHeight() == profile.target_min_height
     assert window.include_name_lsl_checkbox.minimumHeight() >= profile.button_min_height + 8
     assert window.output_summary.minimumHeight() == profile.output_min_height
+    assert window.processing_panel.minimumHeight() == profile.experiment_control_min_height
     assert window.response_panel.minimumWidth() == profile.response_panel_side
     assert window.response_panel.minimumHeight() == profile.response_panel_side
     assert window.response_panel.maximumWidth() == profile.response_panel_side
@@ -671,6 +676,7 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     assert window.target_button.geometry().height() == profile.target_min_height
     assert window.start_button.geometry().height() >= profile.button_min_height
     assert window.output_summary.geometry().height() >= profile.output_min_height
+    assert window.processing_panel.geometry().height() >= profile.experiment_control_min_height
     response_rect = _widget_rect(window.response_panel, window.dialog)
     output_rect = _widget_rect(window.output_panel, window.dialog)
     response_cell_rect = _widget_rect(window.response_cell, window.dialog)
@@ -682,6 +688,7 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     assert output_rect["right"] <= response_cell_rect["right"]
     assert processing_rect["y"] >= run_rect["bottom"]
     assert processing_rect["width"] >= workspace_rect["width"] - 8
+    assert not window.layout_validation_failures()
     window.dialog.close()
 
 
@@ -759,6 +766,150 @@ def test_focus_mode_primary_shortcut_starts_when_not_editing(tmp_path: Path):
     app.processEvents()
     window._handle_primary_action_shortcut()
     assert starts == [True]
+    window.dialog.close()
+
+
+def test_focus_mode_operator_keyboard_shortcuts_control_ui(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_focus_preview_session_manifest(tmp_path))
+    window = focus_app.FocusModeWindow(q, package, enable_missed_trial_topup=True)
+    window.dialog.show()
+    window.dialog.activateWindow()
+    window.dialog.setFocus(q["Qt"].FocusReason.ShortcutFocusReason)
+    app.processEvents()
+
+    shortcut_map = window.keyboard_shortcut_map()
+    assert shortcut_map["pause_resume"] == ["Ctrl+P"]
+    assert shortcut_map["stop"] == ["Ctrl+Shift+S"]
+    assert shortcut_map["select_part_2"] == ["Alt+2"]
+    assert set(window.operator_action_shortcuts) >= {
+        "pause_resume",
+        "stop",
+        "close",
+        "select_part_1",
+        "select_part_2",
+        "select_topup_preview",
+    }
+
+    class FakeController:
+        def __init__(self) -> None:
+            self.calls: list[str] = []
+
+        def pause(self) -> None:
+            self.calls.append("pause")
+
+        def resume(self) -> None:
+            self.calls.append("resume")
+
+        def stop(self) -> None:
+            self.calls.append("stop")
+
+    fake = FakeController()
+    window.controller = fake  # type: ignore[assignment]
+    window.pause_button.setEnabled(True)
+    window.stop_button.setEnabled(True)
+    ctrl = q["Qt"].KeyboardModifier.ControlModifier
+    ctrl_shift = q["Qt"].KeyboardModifier.ControlModifier | q["Qt"].KeyboardModifier.ShiftModifier
+    alt = q["Qt"].KeyboardModifier.AltModifier
+
+    QTest.keyClick(window.dialog, q["Qt"].Key.Key_P, ctrl)
+    app.processEvents()
+    QTest.keyClick(window.dialog, q["Qt"].Key.Key_P, ctrl)
+    app.processEvents()
+    QTest.keyClick(window.dialog, q["Qt"].Key.Key_S, ctrl_shift)
+    app.processEvents()
+
+    assert fake.calls == ["pause", "resume", "stop"]
+
+    QTest.keyClick(window.dialog, q["Qt"].Key.Key_2, alt)
+    app.processEvents()
+    assert window.selected_part_key == "2"
+
+    QTest.keyClick(window.dialog, q["Qt"].Key.Key_T, ctrl)
+    app.processEvents()
+    selected = window._run_plan_item_by_number(window.selected_display_block_index or 0)
+    assert selected is not None
+    assert selected["kind"] == "topup"
+    window.dialog.close()
+
+
+def test_focus_mode_hardware_start_injects_ui_thread_audio_engine(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    window = focus_app.FocusModeWindow(q, package)
+    window.dialog.show()
+    app.processEvents()
+
+    class FakeEngine:
+        def __init__(self) -> None:
+            self.shutdown_count = 0
+
+        def shutdown(self) -> None:
+            self.shutdown_count += 1
+
+    fake_engine = FakeEngine()
+    created_on_threads: list[str] = []
+    injected_engines: list[object] = []
+
+    def fake_create_engine() -> FakeEngine:
+        created_on_threads.append(threading.current_thread().name)
+        return fake_engine
+
+    class FakeController:
+        def __init__(self, package_obj, *, audio_engine=None, capture_options=None, **_kwargs):
+            self.package = package_obj
+            self.audio_engine = audio_engine
+            self.capture_options = capture_options
+            injected_engines.append(audio_engine)
+
+        def run(self, *, progress_callback=None, event_callback=None):
+            return SimpleNamespace(
+                completed=True,
+                interrupted=False,
+                summary_text="done",
+                session_dir=self.package.session_dir,
+                events_csv=self.package.session_dir / "events.csv",
+                events_xdf=self.package.session_dir / "events.xdf",
+                lsl_markers_csv=None,
+                lsl_markers_xdf=None,
+                trigger_dictionary_path=None,
+                session_metadata_path=None,
+                recording_paths=[],
+                warnings=[],
+                capture_options=(self.capture_options.as_dict() if self.capture_options is not None else {}),
+            )
+
+    monkeypatch.setattr(window, "_create_real_audio_engine_on_ui_thread", fake_create_engine)
+    monkeypatch.setattr(focus_app, "SessionRunnerController", FakeController)
+
+    window.start()
+    assert created_on_threads == [threading.current_thread().name]
+    assert injected_engines == [fake_engine]
+    assert window.thread is not None
+    window.thread.join(timeout=2)
+    assert not window.thread.is_alive()
+    window._drain()
+
+    assert window.result is not None
+    assert window.result.completed is True
+    assert fake_engine.shutdown_count == 1
     window.dialog.close()
 
 

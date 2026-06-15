@@ -55,7 +55,7 @@ REQUIRED_TEXT_COMMON = {
 REQUIRED_TEXT_DATA = {"Participant Setup", "Session"}
 REQUIRED_TEXT_INSTRUCTIONS_FULL = "5 clip(s) preloaded"
 REQUIRED_TEXT_INSTRUCTIONS_COMPACT = "5 clips"
-REQUIRED_TEXT_SETTINGS = {"Recording"}
+REQUIRED_TEXT_OPERATOR_PANEL = "Data Logging / Experiment Settings"
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -276,6 +276,8 @@ def _audit_window(
 ) -> dict[str, Any]:
     profile = window.layout_profile
     failures: list[str] = []
+    embedded_snapshot = window.layout_validation_snapshot()
+    embedded_failures = list(window.layout_validation_failures())
     font_families = set(q["QFontDatabase"].families())
     font_family = focus_app._qt_font_family(q)
     if font_families and font_family not in font_families:
@@ -284,19 +286,34 @@ def _audit_window(
     required_text = set(REQUIRED_TEXT_COMMON)
     if profile.screen_class != "constrained":
         required_text.update({"Block Order", "Stimulus / Tactile / Click Timeline", "Progress"})
-    if profile.right_stack_mode == "tabs" and layout_variant == "settings_tab":
-        required_text.update(REQUIRED_TEXT_SETTINGS)
-    elif profile.right_stack_mode == "tabs":
+    if profile.right_stack_mode == "tabs":
         required_text.update(REQUIRED_TEXT_DATA)
         required_text.add(REQUIRED_TEXT_INSTRUCTIONS_COMPACT if profile.compact else REQUIRED_TEXT_INSTRUCTIONS_FULL)
     else:
         required_text.update(REQUIRED_TEXT_DATA)
-        required_text.update(REQUIRED_TEXT_SETTINGS)
-        required_text.update({"Data Selection", "Settings"})
+        required_text.add(REQUIRED_TEXT_OPERATOR_PANEL)
         required_text.add(REQUIRED_TEXT_INSTRUCTIONS_COMPACT if profile.compact else REQUIRED_TEXT_INSTRUCTIONS_FULL)
     missing = sorted(required_text - texts)
     if missing:
         failures.append(f"Missing visible runner text: {missing}")
+
+    required_shortcuts = {
+        "start_or_continue": {"Space", "Return", "Enter"},
+        "pause_resume": {"Ctrl+P"},
+        "stop": {"Ctrl+Shift+S"},
+        "close": {"Ctrl+W"},
+        "select_part_1": {"Alt+1"},
+        "select_part_2": {"Alt+2"},
+        "select_topup_preview": {"Ctrl+T"},
+    }
+    shortcut_map = {
+        str(name): {str(item) for item in values}
+        for name, values in dict(embedded_snapshot.get("keyboard_shortcuts") or {}).items()
+    }
+    for name, expected in required_shortcuts.items():
+        actual = shortcut_map.get(name, set())
+        if not expected.issubset(actual):
+            failures.append(f"Keyboard shortcut map for {name} is {sorted(actual)}, expected {sorted(expected)}.")
 
     if window.dialog.width() > profile.available_width or window.dialog.height() > profile.available_height:
         failures.append(
@@ -325,8 +342,9 @@ def _audit_window(
     else:
         critical_widgets["data_selection_panel"] = window.data_selection_panel
         critical_widgets["settings_panel"] = window.settings_panel
-    if window.instruction_plan_widget.isVisible():
-        critical_widgets["instruction_plan_widget"] = window.instruction_plan_widget
+    instruction_widget = getattr(window, "instruction_plan_widget", None) or getattr(window, "instruction_legend_widget", None)
+    if instruction_widget is not None and instruction_widget.isVisible():
+        critical_widgets["instruction_widget"] = instruction_widget
     if window.topup_draft_widget.isVisible():
         critical_widgets["topup_draft_widget"] = window.topup_draft_widget
     widget_metrics: dict[str, dict[str, int]] = {}
@@ -360,6 +378,12 @@ def _audit_window(
     workspace_rect = _widget_rect(window.dialog, window.workspace_splitter)
     if widget_metrics["processing_panel"]["width"] < workspace_rect["width"] - 8:
         failures.append("Experiment Control does not span the full lower workspace width.")
+    if widget_metrics["processing_panel"]["height"] < profile.experiment_control_min_height:
+        failures.append(
+            "Experiment Control height "
+            f"{widget_metrics['processing_panel']['height']} is below profile minimum "
+            f"{profile.experiment_control_min_height}."
+        )
 
     for segment_name in ("response_panel", "data_selection_panel", "settings_panel", "processing_panel", "output_panel"):
         if segment_name not in widget_metrics:
@@ -396,11 +420,15 @@ def _audit_window(
                 "count": int(tabs.count()),
                 "current_index": int(tabs.currentIndex()),
             }
-            if tabs.count() < 2:
-                failures.append("Constrained operator tab set does not expose both Data Selection and Settings.")
+            if tabs.count() < 1:
+                failures.append("Constrained operator tab set does not expose the merged Data Logging / Experiment Settings panel.")
 
     text_failures, text_metrics = _audit_text_widgets(window)
     failures.extend(text_failures)
+    for failure in embedded_failures:
+        embedded_message = f"Embedded layout audit: {failure}"
+        if embedded_message not in failures:
+            failures.append(embedded_message)
 
     screenshot = _inspect_image(screenshot_path)
     if not screenshot["nonblank"]:
@@ -432,6 +460,7 @@ def _audit_window(
         },
         "widgets": widget_metrics,
         "splitters": splitter_metrics,
+        "embedded_layout_snapshot": embedded_snapshot,
         "text_widgets_checked": len(text_metrics),
         "screenshot": screenshot,
         "visible_text_count": len(texts),
@@ -519,7 +548,7 @@ def main(argv: list[str] | None = None) -> int:
     scenarios: list[dict[str, Any]] = []
     for label, width, height, show_mode in _scenario_list(app, args.screen):
         profile = render_focus_layout_profile(width, height)
-        variants = ("default", "settings_tab", "processing_tall") if profile.right_stack_mode == "tabs" else DEFAULT_LAYOUT_VARIANTS
+        variants = ("default", "processing_tall") if profile.right_stack_mode == "tabs" else DEFAULT_LAYOUT_VARIANTS
         for variant in variants:
             window = focus_app.FocusModeWindow(
                 q,

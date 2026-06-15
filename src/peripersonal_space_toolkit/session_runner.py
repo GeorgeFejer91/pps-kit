@@ -2426,8 +2426,11 @@ class SessionRunnerController:
         if device_idx is None:
             raise RuntimeError("No usable audio output device was found.\n" + audio_runtime_preflight_message())
         engine = AudioEngine(device_idx)
-        if CLICK_SOUND:
-            engine.load_click_sound(CLICK_SOUND)
+        if CLICK_SOUND and not engine.load_click_sound(CLICK_SOUND):
+            raise RuntimeError(
+                "Audio output stream could not be opened for the tactile response-marker path. "
+                "Check the selected ASIO device and restart the runner."
+            )
         return engine
 
     def _write_outputs(self) -> None:

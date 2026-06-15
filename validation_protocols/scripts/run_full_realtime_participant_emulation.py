@@ -21,6 +21,7 @@ from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+SRC_ROOT = REPO_ROOT / "src"
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
@@ -72,8 +73,12 @@ def _standard_capture_requested(args: argparse.Namespace) -> bool:
 
 
 def _build_runner_command(args: argparse.Namespace, *, runner: Path, screenshot_path: Path) -> list[str]:
-    command = [
-        str(runner),
+    if args.runner_mode == "source":
+        command = [sys.executable, str(REPO_ROOT / "windows" / "focus_runner_entry.py")]
+    else:
+        command = [str(runner)]
+    command.extend(
+        [
         "--profile",
         str(args.profile),
         "--participant-id",
@@ -82,7 +87,8 @@ def _build_runner_command(args: argparse.Namespace, *, runner: Path, screenshot_
         "--enable-missed-trial-topup",
         "--validation-screenshot",
         str(screenshot_path),
-    ]
+        ]
+    )
     if not _standard_capture_requested(args):
         command.extend(["--no-lsl", "--no-internal-xdf", "--no-backup-recording"])
     else:
@@ -98,6 +104,13 @@ def _build_runner_command(args: argparse.Namespace, *, runner: Path, screenshot_
 def _configure_validation_env(args: argparse.Namespace, *, output_dir: Path, focus_report_path: Path) -> dict[str, str]:
     env = os.environ.copy()
     env.pop("QT_QPA_PLATFORM", None)
+    env.setdefault("SD_ENABLE_ASIO", "1")
+    if args.runner_mode == "source":
+        existing_pythonpath = env.get("PYTHONPATH", "")
+        paths = [str(SRC_ROOT)]
+        if existing_pythonpath:
+            paths.append(existing_pythonpath)
+        env["PYTHONPATH"] = os.pathsep.join(paths)
     if args.audio_mode == "validation-realtime":
         env["PPS_FOCUS_VALIDATION_REALTIME_AUDIO"] = "1"
         env["PPS_FOCUS_VALIDATION_AUDIO_CHUNK_FRAMES"] = str(int(args.validation_audio_chunk_frames))
@@ -114,6 +127,8 @@ def _configure_validation_env(args: argparse.Namespace, *, output_dir: Path, foc
     env["PPS_FOCUS_VALIDATION_REPORT"] = str(focus_report_path)
     env["PPS_FOCUS_DISABLE_PREWARM"] = "1"
     env["PPS_PROTOCOL11_OUTPUT_DIR"] = str(output_dir)
+    if args.audio_device_index is not None:
+        env["PPS_AUDIO_DEVICE_INDEX"] = str(int(args.audio_device_index))
     return env
 
 
@@ -151,7 +166,9 @@ def _write_launch_and_preparation_reports(
             "command": command,
             "profile_id": str(args.profile),
             "participant_id": str(args.participant_id),
+            "runner_mode": str(args.runner_mode),
             "audio_mode": str(args.audio_mode),
+            "audio_device_index": args.audio_device_index,
             "standard_capture_requested": _standard_capture_requested(args),
             "strict_study5_readiness_requested": bool(args.strict_study5_readiness),
             "started_at": started_at,
@@ -226,6 +243,7 @@ def _write_markdown(path: Path, report: dict[str, Any]) -> None:
         f"- Passed: `{report.get('passed')}`",
         f"- UI ready for data collection: `{report.get('ui_ready_for_data_collection')}`",
         f"- Runner exe: `{report.get('runner')}`",
+        f"- Runner mode: `{report.get('runner_mode')}`",
         f"- Audio mode: `{audio_mode}`",
         f"- Standard capture requested: `{report.get('standard_capture_requested')}`",
         f"- Strict Study 5 readiness requested: `{report.get('strict_study5_readiness_requested')}`",
@@ -248,7 +266,14 @@ def _write_markdown(path: Path, report: dict[str, Any]) -> None:
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def _evaluate_focus_report(focus_report_path: Path, *, process_wall_s: float, exit_code: int | None) -> tuple[dict[str, Any], list[str]]:
+def _evaluate_focus_report(
+    focus_report_path: Path,
+    *,
+    process_wall_s: float,
+    exit_code: int | None,
+    audio_mode: str = "validation-realtime",
+    runner_mode: str = "packaged",
+) -> tuple[dict[str, Any], list[str]]:
     failures: list[str] = []
     focus = _read_json(focus_report_path)
     if not focus:
@@ -315,11 +340,13 @@ def _evaluate_focus_report(focus_report_path: Path, *, process_wall_s: float, ex
 
     planned_misses = int(plan.get("planned_miss_count") or 0)
     planned_standard = int(plan.get("standard_tactile_cue_count") or 0)
+    runner_label = "packaged runner" if runner_mode == "packaged" else "source runner"
     if exit_code != 0:
-        failures.append(f"Packaged runner exited with code {exit_code}.")
+        failures.append(f"{runner_label.capitalize()} exited with code {exit_code}.")
     if not focus.get("completed"):
         failures.append("Focus Mode did not report completed=True.")
-    if not focus.get("validation_audio_realtime"):
+    hardware_realtime = str(audio_mode) == "hardware"
+    if not hardware_realtime and not focus.get("validation_audio_realtime"):
         failures.append("The run did not use the realtime validation audio engine.")
     if expected_duration_s > 0 and process_wall_s < expected_duration_s * 0.90:
         failures.append(
@@ -352,6 +379,9 @@ def _evaluate_focus_report(focus_report_path: Path, *, process_wall_s: float, ex
 
     evaluation = {
         "focus_report": str(focus_report_path),
+        "runner_mode": runner_mode,
+        "audio_mode": audio_mode,
+        "hardware_audio_realtime": hardware_realtime,
         "session_manifest": str(session_manifest),
         "session_dir": str(session_dir),
         "events_csv": str(events_csv),
@@ -382,6 +412,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run full realtime packaged runner participant-emulation evaluation.")
     parser.add_argument("--output-dir", type=Path, default=None)
     parser.add_argument("--runner", type=Path, default=REPO_ROOT / "dist" / "PPSExperimentRunner" / "PPSExperimentRunner.exe")
+    parser.add_argument(
+        "--runner-mode",
+        default="packaged",
+        choices=["packaged", "source"],
+        help="packaged launches dist/PPSExperimentRunner.exe; source launches windows/focus_runner_entry.py through Python.",
+    )
     parser.add_argument("--profile", default=STUDY5_TEMPLATE_ID)
     parser.add_argument("--participant-id", default="P001")
     parser.add_argument("--timeout-s", type=float, default=5400.0)
@@ -405,6 +441,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--standard-capture",
         action="store_true",
         help="Leave standard LSL, local XDF, trigger dictionary, analysis CSV, and local audio-evidence recording enabled.",
+    )
+    parser.add_argument(
+        "--audio-device-index",
+        type=int,
+        default=None,
+        help="Validation override passed as PPS_AUDIO_DEVICE_INDEX to force a specific sounddevice output index.",
     )
     parser.add_argument("--no-lsl", action="store_true", help="With --standard-capture, still disable live LSL outlets.")
     parser.add_argument("--no-internal-xdf", action="store_true", help="With --standard-capture, still disable events.xdf.")
@@ -431,7 +473,7 @@ def main(argv: list[str] | None = None) -> int:
     output_dir = (args.output_dir or _default_output_dir()).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     runner = args.runner.resolve()
-    if not runner.is_file():
+    if args.runner_mode == "packaged" and not runner.is_file():
         raise FileNotFoundError(f"Packaged runner exe was not found: {runner}")
     focus_report_path = output_dir / "focus_validation_report.json"
     screenshot_path = output_dir / "focus_screenshot.png"
@@ -462,6 +504,8 @@ def main(argv: list[str] | None = None) -> int:
         focus_report_path,
         process_wall_s=process_wall_s,
         exit_code=exit_code,
+        audio_mode=str(args.audio_mode),
+        runner_mode=str(args.runner_mode),
     )
     focus = _annotate_focus_report(focus_report_path, args=args)
     if focus:
@@ -496,9 +540,11 @@ def main(argv: list[str] | None = None) -> int:
         "schema": SCHEMA,
         "created_at": datetime.now().isoformat(timespec="seconds"),
         "runner": str(runner),
+        "runner_mode": str(args.runner_mode),
         "command": command,
         "audio_mode": str(args.audio_mode),
         "standard_capture_requested": _standard_capture_requested(args),
+        "audio_device_index": args.audio_device_index,
         "strict_study5_readiness_requested": bool(args.strict_study5_readiness),
         "process_exit_code": exit_code,
         "process_wall_s": process_wall_s,

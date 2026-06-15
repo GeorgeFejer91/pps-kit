@@ -13,6 +13,7 @@ import sys
 import threading
 import time
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, Callable
 
 from .app_assets import apply_qt_app_icon, set_windows_app_user_model_id
@@ -2575,6 +2576,7 @@ class FocusModeWindow:
         self.controller_factory = controller_factory
         self.messages: queue.Queue[tuple[str, Any]] = queue.Queue()
         self.controller: SessionRunnerController | None = None
+        self._owned_audio_engine: Any | None = None
         self.thread: threading.Thread | None = None
         self.result: Any | None = None
         self.exit_code = 1
@@ -2596,6 +2598,7 @@ class FocusModeWindow:
         self.validation_topup_approval_records: list[dict[str, Any]] = []
         self.planned_tactile_cue_count = 0
         self.primary_action_shortcuts: list[Any] = []
+        self.operator_action_shortcuts: dict[str, list[Any]] = {}
         self.all_block_plan_items: list[dict[str, Any]] = []
         self.block_plan_items: list[dict[str, Any]] = []
         self.instruction_plan_items: list[dict[str, Any]] = []
@@ -2909,7 +2912,7 @@ class FocusModeWindow:
 
         processing_panel, progress_layout = _panel(q, "Experiment Control", profile=profile)
         self.processing_panel = processing_panel
-        processing_panel_min_height = 148 if profile.screen_class == "constrained" else (190 if profile.compact else 240)
+        processing_panel_min_height = profile.experiment_control_min_height
         processing_panel.setMinimumHeight(processing_panel_min_height)
         processing_panel.setMinimumWidth(360 if profile.compact else 420)
         progress_layout.setSpacing(profile.panel_spacing)
@@ -3016,14 +3019,14 @@ class FocusModeWindow:
             remaining_width = max(620, profile.window_width - response_column_width)
             self.run_splitter.setSizes([response_column_width, remaining_width])
         top_height = response_stack_height
-        lower_height = processing_panel_min_height
-        self.workspace_splitter.setSizes([top_height, lower_height])
+        self.workspace_splitter.setSizes([top_height, profile.experiment_control_initial_height])
 
         self.timer = q["QTimer"](self.dialog)
         self.timer.timeout.connect(self._drain)
         self.timer.start(100)
         self.dialog.finished.connect(lambda _code: self._stop())
         self._refresh_run_plan(select_default=True)
+        self._install_operator_action_shortcuts()
 
     def _timeline_display_state(self) -> TactileTimelineState:
         if self.preview_display_block_index is not None:
@@ -3680,6 +3683,162 @@ class FocusModeWindow:
             except Exception:
                 pass
 
+    def keyboard_shortcut_map(self) -> dict[str, list[str]]:
+        return {
+            "start_or_continue": ["Space", "Return", "Enter"],
+            "pause_resume": ["Ctrl+P"],
+            "stop": ["Ctrl+Shift+S"],
+            "close": ["Ctrl+W"],
+            "select_part_1": ["Alt+1"],
+            "select_part_2": ["Alt+2"],
+            "select_topup_preview": ["Ctrl+T"],
+        }
+
+    def _install_operator_action_shortcuts(self) -> None:
+        q = self.q
+
+        def _add(name: str, sequence: str, callback: Callable[[], None]) -> None:
+            shortcut = q["QShortcut"](q["QKeySequence"](sequence), self.dialog)
+            shortcut.setContext(q["Qt"].ShortcutContext.WindowShortcut)
+            shortcut.activated.connect(callback)
+            self.operator_action_shortcuts.setdefault(name, []).append(shortcut)
+
+        for sequence in self.keyboard_shortcut_map()["pause_resume"]:
+            _add("pause_resume", sequence, self._handle_pause_resume_shortcut)
+        for sequence in self.keyboard_shortcut_map()["stop"]:
+            _add("stop", sequence, self._handle_stop_shortcut)
+        for sequence in self.keyboard_shortcut_map()["close"]:
+            _add("close", sequence, self._handle_close_shortcut)
+        for sequence in self.keyboard_shortcut_map()["select_part_1"]:
+            _add("select_part_1", sequence, lambda key="1": self._handle_part_shortcut(key))
+        for sequence in self.keyboard_shortcut_map()["select_part_2"]:
+            _add("select_part_2", sequence, lambda key="2": self._handle_part_shortcut(key))
+        for sequence in self.keyboard_shortcut_map()["select_topup_preview"]:
+            _add("select_topup_preview", sequence, self._handle_topup_preview_shortcut)
+
+    def _handle_pause_resume_shortcut(self) -> None:
+        if self.pause_button.isEnabled():
+            self._toggle_pause()
+
+    def _handle_stop_shortcut(self) -> None:
+        if self.stop_button.isEnabled():
+            self._stop()
+
+    def _handle_close_shortcut(self) -> None:
+        if self.close_button.isEnabled():
+            self._close()
+
+    def _handle_part_shortcut(self, part_key: str) -> None:
+        button = getattr(self, "part_buttons", {}).get(str(part_key))
+        if button is not None and button.isEnabled():
+            self._select_part_key(str(part_key), preview_first=True)
+
+    def _handle_topup_preview_shortcut(self) -> None:
+        if self._topup_slots_enabled_for_plan():
+            self._select_current_part_topup_slot()
+
+    def _dialog_relative_rect(self, widget: Any) -> dict[str, int]:
+        top_left = widget.mapTo(self.dialog, widget.rect().topLeft())
+        bottom_right = widget.mapTo(self.dialog, widget.rect().bottomRight())
+        return {
+            "x": int(top_left.x()),
+            "y": int(top_left.y()),
+            "right": int(bottom_right.x()),
+            "bottom": int(bottom_right.y()),
+            "width": int(widget.width()),
+            "height": int(widget.height()),
+        }
+
+    def layout_validation_snapshot(self) -> dict[str, Any]:
+        widgets = {
+            "target_button": self.target_button,
+            "response_panel": self.response_panel,
+            "output_panel": self.output_panel,
+            "output_summary": self.output_summary,
+            "processing_panel": self.processing_panel,
+            "part_selector_widget": self.part_selector_widget,
+            "block_plan_widget": self.block_plan_widget,
+            "tactile_timeline_widget": self.tactile_timeline_widget,
+            "start_button": self.start_button,
+            "pause_button": self.pause_button,
+            "stop_button": self.stop_button,
+            "close_button": self.close_button,
+        }
+        if getattr(self, "data_selection_panel", None) is not None:
+            widgets["data_selection_panel"] = self.data_selection_panel
+        if getattr(self, "settings_panel", None) is not None:
+            widgets["settings_panel"] = self.settings_panel
+        splitter_metrics = {}
+        for name in ("workspace_splitter", "run_splitter"):
+            splitter = getattr(self, name, None)
+            if splitter is not None:
+                splitter_metrics[name] = {
+                    "width": int(splitter.width()),
+                    "height": int(splitter.height()),
+                    "count": int(splitter.count()),
+                    "handle_width": int(splitter.handleWidth()),
+                }
+        if self.operator_tabs is not None:
+            splitter_metrics["operator_tabs"] = {
+                "width": int(self.operator_tabs.width()),
+                "height": int(self.operator_tabs.height()),
+                "count": int(self.operator_tabs.count()),
+                "current_index": int(self.operator_tabs.currentIndex()),
+            }
+        return {
+            "dialog": {"width": int(self.dialog.width()), "height": int(self.dialog.height())},
+            "layout_profile": self.layout_profile.as_dict(),
+            "widgets": {name: self._dialog_relative_rect(widget) for name, widget in widgets.items() if widget is not None},
+            "splitters": splitter_metrics,
+            "keyboard_shortcuts": self.keyboard_shortcut_map(),
+            "adaptive_mechanisms": {
+                "right_stack_mode": self.layout_profile.right_stack_mode,
+                "operator_tabs": self.operator_tabs is not None,
+                "resizable_workspace_splitter": self.workspace_splitter is not None,
+                "resizable_run_splitter": self.run_splitter is not None,
+            },
+        }
+
+    def layout_validation_failures(self) -> list[str]:
+        snapshot = self.layout_validation_snapshot()
+        profile = self.layout_profile
+        dialog = snapshot["dialog"]
+        widgets = snapshot["widgets"]
+        failures: list[str] = []
+        if dialog["width"] > profile.available_width or dialog["height"] > profile.available_height:
+            failures.append(
+                f"window {dialog['width']}x{dialog['height']} exceeds available "
+                f"{profile.available_width}x{profile.available_height}"
+            )
+        for name, rect in widgets.items():
+            if rect["x"] < 0 or rect["y"] < 0 or rect["right"] > dialog["width"] or rect["bottom"] > dialog["height"]:
+                failures.append(f"{name} is clipped outside the dialog: {rect}")
+        target = widgets.get("target_button", {})
+        if target and (target.get("width") != profile.target_min_height or target.get("height") != profile.target_min_height):
+            failures.append(f"target_button does not match fixed {profile.target_min_height}px square: {target}")
+        processing = widgets.get("processing_panel", {})
+        if processing and processing.get("height", 0) < profile.experiment_control_min_height:
+            failures.append(
+                "processing_panel is shorter than the profile minimum "
+                f"{profile.experiment_control_min_height}px: {processing}"
+            )
+        if processing:
+            workspace_width = int(getattr(self.workspace_splitter, "width", lambda: 0)())
+            if workspace_width and processing.get("width", 0) < workspace_width - 8:
+                failures.append(f"processing_panel does not span the lower workspace width: {processing}")
+        response = widgets.get("response_panel", {})
+        output = widgets.get("output_panel", {})
+        if response and output and output.get("y", 0) < response.get("bottom", 0):
+            failures.append("output_panel is not positioned under response_panel")
+        required_shortcut_names = set(self.keyboard_shortcut_map())
+        installed_shortcut_names = {"start_or_continue"} | {
+            name for name, shortcuts in self.operator_action_shortcuts.items() if shortcuts
+        }
+        missing_shortcuts = sorted(required_shortcut_names - installed_shortcut_names)
+        if missing_shortcuts:
+            failures.append(f"missing installed keyboard shortcuts: {missing_shortcuts}")
+        return failures
+
     def _keyboard_focus_is_pre_run_input(self) -> bool:
         focus = self.q["QApplication"].focusWidget()
         if focus is None:
@@ -3711,6 +3870,54 @@ class FocusModeWindow:
         self._set_primary_action_shortcuts_enabled(False)
         return True
 
+    def _create_real_audio_engine_on_ui_thread(self) -> Any:
+        from .audio_routing import audio_runtime_preflight_message
+        from .runner import CLICK_SOUND, AudioEngine, find_output_device
+
+        device_idx, _device_name, _is_preferred = find_output_device()
+        if device_idx is None:
+            raise RuntimeError("No usable audio output device was found.\n" + audio_runtime_preflight_message())
+        engine = AudioEngine(device_idx)
+        try:
+            if CLICK_SOUND and not engine.load_click_sound(CLICK_SOUND):
+                raise RuntimeError(
+                    "The tactile response-marker output stream could not be opened. "
+                    "Check the selected Komplete ASIO device and restart Focus Mode."
+                )
+            return engine
+        except Exception:
+            if hasattr(engine, "shutdown"):
+                engine.shutdown()
+            raise
+
+    def _shutdown_owned_audio_engine(self) -> None:
+        engine = self._owned_audio_engine
+        self._owned_audio_engine = None
+        if engine is not None and hasattr(engine, "shutdown"):
+            try:
+                engine.shutdown()
+            except Exception:
+                pass
+
+    def _handle_startup_failure(self, message: str) -> None:
+        result = SimpleNamespace(
+            completed=False,
+            interrupted=True,
+            summary_text="Run could not start.",
+            session_dir=self.package.session_dir,
+            events_csv=self.package.session_dir / "events.csv",
+            events_xdf=self.package.session_dir / "events.xdf",
+            lsl_markers_csv=None,
+            lsl_markers_xdf=None,
+            trigger_dictionary_path=None,
+            session_metadata_path=None,
+            recording_paths=[],
+            warnings=[message],
+            capture_options=self.capture_options.as_dict(),
+        )
+        self.event_label.setText(message)
+        self._handle_done(result)
+
     def start(self) -> None:
         if self.thread is not None and self.thread.is_alive():
             return
@@ -3731,8 +3938,15 @@ class FocusModeWindow:
                 instruction_continue_callback=self._request_instruction_continue,
             )
         else:
+            try:
+                self._shutdown_owned_audio_engine()
+                self._owned_audio_engine = self._create_real_audio_engine_on_ui_thread()
+            except Exception as exc:
+                self._handle_startup_failure(f"Audio initialization failed: {exc}")
+                return
             self.controller = SessionRunnerController(
                 self.package,
+                audio_engine=self._owned_audio_engine,
                 capture_options=self.capture_options,
                 enable_topup=self.enable_missed_trial_topup,
                 runner_metadata=runner_metadata,
@@ -4154,6 +4368,7 @@ class FocusModeWindow:
             lines.append("Warnings:")
             lines.extend(f"  {warning}" for warning in result.warnings)
         self.output_summary.setPlainText("\n".join(line for line in lines if line))
+        self._shutdown_owned_audio_engine()
         self.timer.stop()
 
     def grab_screenshot(self, path: Path) -> None:
