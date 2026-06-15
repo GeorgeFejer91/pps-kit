@@ -952,6 +952,53 @@ def _status_is_generated_without_data(status: dict[str, Any]) -> bool:
     return bool(status.get("generated")) and not bool(status.get("data_collected"))
 
 
+def _package_participant_ids(package: Any) -> list[str]:
+    participants: list[str] = []
+    run_setup = getattr(package, "source_run_setup_manifest_path", None)
+    if run_setup:
+        try:
+            participants = segment_run_setup_participants(Path(run_setup))
+        except Exception:
+            participants = []
+    current = str(getattr(package, "participant_id", "") or "").strip()
+    if current and current not in participants:
+        participants.insert(0, current)
+    return [participant for participant in participants if str(participant or "").strip()]
+
+
+def _package_participant_statuses(package: Any, participants: list[str]) -> dict[str, dict[str, Any]]:
+    statuses: dict[str, dict[str, Any]] = {}
+    run_setup = getattr(package, "source_run_setup_manifest_path", None)
+    if run_setup and participants:
+        run_setup_path = Path(run_setup)
+        if run_setup_path.is_file():
+            try:
+                statuses = prepared_session_asset_statuses(
+                    run_setup_path,
+                    participants,
+                    state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+                )
+            except Exception:
+                statuses = {}
+    current = str(getattr(package, "participant_id", "") or "").strip()
+    if current:
+        current_status = statuses.get(current, {})
+        statuses[current] = {
+            **current_status,
+            "participant_id": current,
+            "generated": True,
+            "status": "ready",
+            "session_manifest_path": str(getattr(package, "manifest_path", "") or ""),
+            "message": "Current runner participant package is loaded.",
+            "data_collected": bool(current_status.get("data_collected")),
+            "data_collection_status": current_status.get("data_collection_status", "not_collected"),
+            "data_session_manifest_path": current_status.get("data_session_manifest_path", ""),
+            "data_session_dir": current_status.get("data_session_dir", ""),
+            "data_collection_message": current_status.get("data_collection_message", ""),
+        }
+    return statuses
+
+
 def prepare_profile_audio_assets(
     profile_id: str,
     participant_ids: list[str],
@@ -1753,6 +1800,7 @@ class FocusModeWindow:
         self._pre_run_controls: list[Any] = []
         self._prewarm_thread: threading.Thread | None = None
         self._prewarm_started = False
+        self._participant_combo_updating = False
         self._run_active = False
         self._run_paused = False
         self._timeline_perf_anchor: float | None = None
@@ -1914,8 +1962,12 @@ class FocusModeWindow:
         data_panel_min_height = 178 if profile.screen_class == "constrained" else max(250, profile.response_panel_side)
         data_panel.setMinimumHeight(data_panel_min_height)
         data_layout.addWidget(_subtitle(q, "Participant Setup"))
-        self.participant_code_input = q["QLineEdit"](self.package.participant_id)
-        self.participant_code_input.setPlaceholderText("Participant code")
+        self.participant_code_combo = q["QComboBox"]()
+        self.participant_code_combo.setObjectName("runnerParticipantCombo")
+        self.participant_code_combo.setEditable(False)
+        self.participant_code_combo.setToolTip("Select a prepared participant profile from the run setup.")
+        self._populate_participant_code_combo(self.package.participant_id)
+        self.participant_code_combo.currentIndexChanged.connect(self._participant_selection_changed)
         self.participant_name_input = q["QLineEdit"]("")
         self.participant_name_input.setPlaceholderText("Participant name")
         self.include_name_lsl_checkbox = q["QCheckBox"]("Include name in LSL/session markers (opt-in)")
@@ -1959,7 +2011,7 @@ class FocusModeWindow:
             setup_fields.addWidget(key, row, column)
             setup_fields.addWidget(widget, row, column + 1, 1, column_span)
 
-        _add_setup_field(0, 0, "Code", self.participant_code_input)
+        _add_setup_field(0, 0, "Participant", self.participant_code_combo)
         _add_setup_field(0, 2, "Age", self.age_input)
         _add_setup_field(1, 0, "Name", self.participant_name_input, column_span=3)
         _add_setup_field(2, 0, "Handedness", self.handedness_combo)
@@ -1970,7 +2022,7 @@ class FocusModeWindow:
         data_layout.addWidget(self.include_name_lsl_checkbox)
         self._pre_run_controls.extend(
             [
-                self.participant_code_input,
+                self.participant_code_combo,
                 self.participant_name_input,
                 self.include_name_lsl_checkbox,
                 self.age_input,
@@ -1997,18 +2049,19 @@ class FocusModeWindow:
             session_grid.addWidget(val, row, column + 1, 1, column_span)
             return val
 
-        _add_session_metric(0, 0, "Participant", self.package.participant_id)
+        self.session_participant_value = _add_session_metric(0, 0, "Participant", self.package.participant_id)
         self.session_blocks_value = _add_session_metric(0, 2, "Blocks", str(len(self.package.blocks)))
         instruction_summary = _instruction_profile_summary(self.package)
         if profile.compact:
             instruction_summary = instruction_summary.replace(" clip(s) preloaded", " clips")
-        _add_session_metric(1, 0, "Duration", _format_duration(_package_duration(self.package)))
-        _add_session_metric(1, 2, "Instruction clips", instruction_summary)
-        session_value = _add_session_metric(2, 0, "Session", self.package.session_id, column_span=3)
-        session_value.setToolTip(f"Session: {self.package.session_id}\nFolder: {self.package.session_dir}")
+        self.session_duration_value = _add_session_metric(1, 0, "Duration", _format_duration(_package_duration(self.package)))
+        self.session_instruction_value = _add_session_metric(1, 2, "Instruction clips", instruction_summary)
+        self.session_value = _add_session_metric(2, 0, "Session", self.package.session_id, column_span=3)
+        self.session_value.setToolTip(f"Session: {self.package.session_id}\nFolder: {self.package.session_dir}")
+        self.folder_value = None
         if not profile.compact:
-            folder_value = _add_session_metric(3, 0, "Folder", _short_folder_label(self.package.session_dir), column_span=3)
-            folder_value.setToolTip(str(self.package.session_dir))
+            self.folder_value = _add_session_metric(3, 0, "Folder", _short_folder_label(self.package.session_dir), column_span=3)
+            self.folder_value.setToolTip(str(self.package.session_dir))
             run_plan_row = 4
         else:
             run_plan_row = 3
@@ -2170,6 +2223,171 @@ class FocusModeWindow:
         self.dialog.finished.connect(lambda _code: self._stop())
         self._refresh_run_plan()
 
+    def _populate_participant_code_combo(self, preferred: str = "") -> None:
+        if not hasattr(self, "participant_code_combo"):
+            return
+        participants = _package_participant_ids(self.package)
+        statuses = _package_participant_statuses(self.package, participants)
+        current = str(preferred or getattr(self.package, "participant_id", "") or "").strip()
+        self._participant_combo_updating = True
+        try:
+            self.participant_code_combo.blockSignals(True)
+            self.participant_code_combo.clear()
+            for participant in participants:
+                clean_participant = str(participant or "").strip()
+                if not clean_participant:
+                    continue
+                status = statuses.get(clean_participant, {})
+                item_index = self.participant_code_combo.count()
+                self.participant_code_combo.addItem(
+                    profile_participant_dropdown_label(clean_participant, status),
+                    clean_participant,
+                )
+                tooltip = str(
+                    status.get("data_collection_message")
+                    or status.get("message")
+                    or "Participant profile from this run setup."
+                )
+                self.participant_code_combo.setItemData(
+                    item_index,
+                    tooltip,
+                    self.q["Qt"].ItemDataRole.ToolTipRole,
+                )
+                if status.get("data_collected"):
+                    self.participant_code_combo.setItemData(
+                        item_index,
+                        self.q["QBrush"](self.q["QColor"]("#15803d")),
+                        self.q["Qt"].ItemDataRole.ForegroundRole,
+                    )
+            index = self.participant_code_combo.findData(current)
+            self.participant_code_combo.setCurrentIndex(index if index >= 0 else 0)
+        finally:
+            self.participant_code_combo.blockSignals(False)
+            self._participant_combo_updating = False
+
+    def _selected_participant_code(self) -> str:
+        if hasattr(self, "participant_code_combo"):
+            selected = str(self.participant_code_combo.currentData() or "").strip()
+            if selected:
+                return selected
+        return str(getattr(self.package, "participant_id", "") or "").strip()
+
+    def _participant_selection_changed(self, _index: int) -> None:
+        if self._participant_combo_updating:
+            return
+        selected = self._selected_participant_code()
+        current = str(getattr(self.package, "participant_id", "") or "").strip()
+        if not selected or selected == current:
+            return
+        if self._run_active or self.controller is not None or (self.thread is not None and self.thread.is_alive()):
+            if hasattr(self, "event_label"):
+                self.event_label.setText("Participant can be changed before starting a run.")
+            self._populate_participant_code_combo(current)
+            return
+        self._switch_participant_package(selected)
+
+    def _switch_participant_package(self, participant_id: str) -> None:
+        selected = str(participant_id or "").strip()
+        current = str(getattr(self.package, "participant_id", "") or "").strip()
+        run_setup = getattr(self.package, "source_run_setup_manifest_path", None)
+        if not selected or selected == current:
+            self._populate_participant_code_combo(current)
+            return
+        if not run_setup:
+            self.event_label.setText("Participant switching needs a Segment 6 run setup source.")
+            self._populate_participant_code_combo(current)
+            return
+        run_setup_path = Path(run_setup)
+        if not run_setup_path.exists():
+            self.event_label.setText(f"Participant switching unavailable: setup missing at {run_setup_path}")
+            self._populate_participant_code_combo(current)
+            return
+
+        app = self.q["QApplication"].instance()
+
+        def _set_progress(message: str) -> None:
+            if hasattr(self, "event_label"):
+                self.event_label.setText(message)
+            if app is not None:
+                app.processEvents()
+
+        def _progress(payload: dict[str, Any]) -> None:
+            message = str(payload.get("message") or "Preparing participant package")
+            _set_progress(f"{selected}: {message}")
+
+        _set_progress(f"Loading participant {selected}")
+        try:
+            self.q["QApplication"].setOverrideCursor(self.q["QCursor"](self.q["Qt"].CursorShape.WaitCursor))
+            package = prepare_segment_run_package(
+                run_setup_path,
+                selected,
+                session_root=DEFAULT_SESSION_ROOT,
+                progress_callback=_progress,
+            )
+        except Exception as exc:
+            self.event_label.setText(f"Could not load participant {selected}: {exc}")
+            self._populate_participant_code_combo(current)
+            return
+        finally:
+            try:
+                self.q["QApplication"].restoreOverrideCursor()
+            except Exception:
+                pass
+
+        self.package = package
+        self._clear_participant_details()
+        self._refresh_loaded_package_display()
+        self._populate_participant_code_combo(self.package.participant_id)
+        self.event_label.setText(f"Participant {self.package.participant_id} ready")
+
+    def _clear_participant_details(self) -> None:
+        if hasattr(self, "participant_name_input"):
+            self.participant_name_input.clear()
+        if hasattr(self, "age_input"):
+            self.age_input.clear()
+        if hasattr(self, "include_name_lsl_checkbox"):
+            self.include_name_lsl_checkbox.setChecked(False)
+        for combo_name in ("handedness_combo", "gender_combo"):
+            combo = getattr(self, combo_name, None)
+            if combo is not None:
+                combo.setCurrentIndex(0)
+
+    def _refresh_loaded_package_display(self) -> None:
+        profile = self.layout_profile
+        participant_label = (
+            f"ID {self.package.participant_id}" if profile.compact else f"Participant {self.package.participant_id}"
+        )
+        self.dialog.setWindowTitle(f"PPS Experiment Runner - {self.package.participant_id}")
+        self.participant_chip.setText(participant_label)
+        self.participant_chip.setToolTip(f"Participant {self.package.participant_id}")
+        self.part_chip.setText("Part -")
+        self.run_state_chip.setText("Ready")
+        self.timeline_state.clear()
+        self._timeline_perf_anchor = None
+        self.planned_tactile_cue_count = 0
+        self.active_display_block_index = None
+        self.completed_display_block_indices.clear()
+        self.recenter_records.clear()
+        self.progress.setValue(0)
+        self.progress_label.setText("Waiting to start")
+        self.prewarm_label.setText("Next participant: idle")
+        self._prewarm_started = False
+        self._prewarm_thread = None
+        self.output_summary.setPlainText("Session outputs will appear here after the run.")
+        self.session_participant_value.setText(self.package.participant_id)
+        self.session_duration_value.setText(_format_duration(_package_duration(self.package)))
+        instruction_summary = _instruction_profile_summary(self.package)
+        if profile.compact:
+            instruction_summary = instruction_summary.replace(" clip(s) preloaded", " clips")
+        self.session_instruction_value.setText(instruction_summary)
+        self.session_value.setText(self.package.session_id)
+        self.session_value.setToolTip(f"Session: {self.package.session_id}\nFolder: {self.package.session_dir}")
+        if self.folder_value is not None:
+            self.folder_value.setText(_short_folder_label(self.package.session_dir))
+            self.folder_value.setToolTip(str(self.package.session_dir))
+        self._refresh_run_plan()
+        self._update_tactile_timeline_display()
+
     def _topup_slots_enabled_for_plan(self) -> bool:
         if hasattr(self, "topup_checkbox"):
             try:
@@ -2211,7 +2429,7 @@ class FocusModeWindow:
 
     def _runner_metadata(self) -> dict[str, Any]:
         return {
-            "participant_code": self.participant_code_input.text().strip() or self.package.participant_id,
+            "participant_code": self._selected_participant_code() or self.package.participant_id,
             "participant_name": self.participant_name_input.text().strip(),
             "include_name_in_lsl": bool(self.include_name_lsl_checkbox.isChecked()),
             "age_years": self.age_input.text().strip(),

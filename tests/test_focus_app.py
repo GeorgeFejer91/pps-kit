@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import sys
 import time
@@ -16,24 +17,30 @@ from peripersonal_space_toolkit.focus_layout import (
 from peripersonal_space_toolkit.session_runner import RUN_PACKAGE_SCHEMA, SessionCaptureOptions, load_run_package
 
 
-def _write_minimal_session_manifest(tmp_path: Path) -> Path:
-    session_dir = tmp_path / "P001_20260613_120000"
+def _write_minimal_session_manifest(
+    tmp_path: Path,
+    *,
+    participant_id: str = "P001",
+    source_run_setup_manifest_path: Path | None = None,
+) -> Path:
+    session_dir = tmp_path / f"{participant_id}_20260613_120000"
     session_dir.mkdir()
     manifest_path = session_dir / "session_manifest.json"
+    payload = {
+        "schema": RUN_PACKAGE_SCHEMA,
+        "participant_id": participant_id,
+        "session_id": f"{participant_id}_20260613_120000",
+        "created_at": "2026-06-13T12:00:00",
+        "design_path": "design.json",
+        "protocol_path": "protocol_schedule.csv",
+        "render_manifest_path": "",
+        "execution_mode": "participant_block_wavs",
+        "blocks": [],
+    }
+    if source_run_setup_manifest_path is not None:
+        payload["source_run_setup_manifest_path"] = str(source_run_setup_manifest_path)
     manifest_path.write_text(
-        """{
-  "schema": "%s",
-  "participant_id": "P001",
-  "session_id": "P001_20260613_120000",
-  "created_at": "2026-06-13T12:00:00",
-  "design_path": "design.json",
-  "protocol_path": "protocol_schedule.csv",
-  "render_manifest_path": "",
-  "execution_mode": "participant_block_wavs",
-  "blocks": []
-}
-"""
-        % RUN_PACKAGE_SCHEMA,
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
     return manifest_path
@@ -170,6 +177,11 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert "Backup WAV (Belts and Suspenders)" in joined
     assert "Top up missed tactile trials at part end" in joined
     assert "CLICK" in joined
+    assert window.participant_code_combo.objectName() == "runnerParticipantCombo"
+    assert not window.participant_code_combo.isEditable()
+    assert window.participant_code_combo.currentData() == "P001"
+    placeholders = [line.placeholderText() for line in window.dialog.findChildren(q["QLineEdit"])]
+    assert "Participant code" not in placeholders
     assert window.include_name_lsl_checkbox.objectName() == "nameSharingCheckbox"
     assert "(opt-in)" in window.include_name_lsl_checkbox.text()
     assert window.include_name_lsl_checkbox.minimumHeight() >= window.layout_profile.button_min_height + 8
@@ -192,6 +204,82 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert target_image.width == target_image.height == window.target_button.width()
     assert len(target_colors) >= 4
     assert target_image.getpixel((target_image.width // 2, target_image.height // 2)) != target_image.getpixel((4, 4))
+    window.dialog.close()
+
+
+def test_focus_mode_participant_dropdown_switches_loaded_package(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    run_setup = tmp_path / "6_experiment_run_setup" / "experiment_run_setup_manifest.json"
+    run_setup.parent.mkdir(parents=True)
+    run_setup.write_text("{}", encoding="utf-8")
+    package_p001 = load_run_package(
+        _write_minimal_session_manifest(tmp_path, participant_id="P001", source_run_setup_manifest_path=run_setup)
+    )
+    package_p002 = load_run_package(
+        _write_minimal_session_manifest(tmp_path, participant_id="P002", source_run_setup_manifest_path=run_setup)
+    )
+    prepared: list[str] = []
+
+    monkeypatch.setattr(focus_app, "segment_run_setup_participants", lambda _path: ["P001", "P002"])
+    monkeypatch.setattr(
+        focus_app,
+        "prepared_session_asset_statuses",
+        lambda _path, _participants, **_kwargs: {
+            "P001": {
+                "participant_id": "P001",
+                "generated": True,
+                "status": "ready",
+                "data_collected": False,
+                "message": "Ready.",
+            },
+            "P002": {
+                "participant_id": "P002",
+                "generated": True,
+                "status": "ready",
+                "data_collected": True,
+                "data_collection_message": "Completed participant data found.",
+                "message": "Ready.",
+            },
+        },
+    )
+
+    def fake_prepare_segment_run_package(run_setup_path, participant_id, **_kwargs):
+        assert run_setup_path == run_setup
+        prepared.append(participant_id)
+        return package_p002
+
+    monkeypatch.setattr(focus_app, "prepare_segment_run_package", fake_prepare_segment_run_package)
+
+    window = focus_app.FocusModeWindow(q, package_p001)
+    window.dialog.show()
+    app.processEvents()
+
+    combo = window.participant_code_combo
+    assert combo.count() == 2
+    p002_index = combo.findData("P002")
+    assert p002_index >= 0
+    assert focus_app.DATA_COLLECTED_MARK in combo.itemText(p002_index)
+    assert combo.itemData(p002_index, q["Qt"].ItemDataRole.ForegroundRole) is not None
+
+    combo.setCurrentIndex(p002_index)
+    app.processEvents()
+
+    assert prepared == ["P002"]
+    assert window.package.participant_id == "P002"
+    assert window._runner_metadata()["participant_code"] == "P002"
+    assert window.session_participant_value.text() == "P002"
+    assert "P002" in window.dialog.windowTitle()
+    assert window.participant_name_input.text() == ""
+    assert not window.include_name_lsl_checkbox.isChecked()
+    assert window.progress_label.text() == "Waiting to start"
     window.dialog.close()
 
 
@@ -245,6 +333,7 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     for widget in (
         window.target_button,
         window.response_panel,
+        window.participant_code_combo,
         window.include_name_lsl_checkbox,
         window.start_button,
         window.pause_button,
