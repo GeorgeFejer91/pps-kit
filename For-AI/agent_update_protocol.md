@@ -39,11 +39,19 @@ Every change to the new HTML/dashboard web GUI must be reflected on the online w
 
 The canonical public dashboard URL is `https://ppskit.qzz.io/`. The GitHub Pages fallback URL is `https://georgefejer91.github.io/pps-kit/`, and the repository/code URL is `https://github.com/GeorgeFejer91/pps-kit`.
 
+Public route ownership is part of the product contract:
+
+- Toolkit/app route: `https://ppskit.qzz.io/`
+- Documentation route: `https://ppskit.qzz.io/documentation`
+- Download route: `https://ppskit.qzz.io/download`
+
+Keep the matching GitHub Pages fallback routes available at `https://georgefejer91.github.io/pps-kit/`, `https://georgefejer91.github.io/pps-kit/documentation`, and `https://georgefejer91.github.io/pps-kit/download`. The visible tab label may say `Downloads`, but the public route should remain singular `/download` unless the user explicitly changes this contract.
+
 Do not reintroduce the old project Pages URL `https://georgefejer91.github.io/peripersonal-space-toolkit/` except as migration or historical context. The repository name controls the project Pages fallback path, so the GitHub repository should remain named `pps-kit` while this public URL contract is active.
 
 The root `CNAME` file is part of the Pages contract. It must be named exactly `CNAME`, contain only one bare domain, and currently contain only `ppskit.qzz.io` with no protocol, path, or second domain. The DNS provider must point the `ppskit.qzz.io` subdomain to the default GitHub Pages domain `georgefejer91.github.io` without appending the repository name. If additional domains are ever needed, use DNS/provider redirects rather than adding multiple lines to `CNAME`.
 
-For hosted companion access, CORS origins are origins only: keep `https://ppskit.qzz.io` and `https://georgefejer91.github.io` allowed, but do not include `/pps-kit/` in an origin. When changing public URLs, update repository references, release-manifest URLs, dashboard links, preloaded asset URLs, human docs, CORS tests, and this `For-AI/` rule together.
+For hosted companion access, CORS origins are origins only: keep `https://ppskit.qzz.io` and `https://georgefejer91.github.io` allowed, but do not include paths such as `/pps-kit/`, `/documentation`, or `/download` in an origin. When changing public URLs or tab routes, update repository references, release-manifest URLs, dashboard links, preloaded asset URLs, human docs, CORS tests, static deep-link handling, and this `For-AI/` rule together.
 
 ## Required GitHub Publishing
 
