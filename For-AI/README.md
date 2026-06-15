@@ -24,7 +24,7 @@ The toolkit currently centers on:
 - deidentified sample-data analysis
 - a stimulus/trial designer for configurable audio-tactile PPS paradigms
 - preloadable published-study templates
-- a tracked installer package source plus a validated offline-download package inventory
+- a tracked lightweight downloader package source plus a validated repo-shaped install payload contract
 - a Qt runtime preflight that prevents packaging the runner without the Windows `qwindows.dll` platform plugin
 - public-release safeguards that keep participant data, generated outputs, models, SOFA/HRIR files, and third-party assets out of Git
 - a project-local skill workflow for safely changing the HTML dashboard as a local software orchestrator
@@ -38,7 +38,7 @@ Every future AI agent should:
 3. When changing the HTML dashboard, keep the packaged local dashboard and the online/static GitHub Pages dashboard synchronized in the same change set; update and verify both before finalizing.
 4. Preserve the public domain and route contract in `agent_update_protocol.md`: `https://ppskit.qzz.io/` is the toolkit route, `/documentation` is documentation, `/download` is downloads, `https://georgefejer91.github.io/pps-kit/` is the GitHub Pages fallback, and the old `/peripersonal-space-toolkit/` Pages path should not be reintroduced.
 5. Treat `segment_registry_contract.md` as authoritative for Segments 0-3 unless the user explicitly asks to revise that contract.
-6. Preserve the tracked installer package definition in `windows/installer_package_inventory.v1.json` and the release boundary in `download_package_inventory.md` when changing packaging.
+6. Preserve the tracked downloader package definition in `windows/installer_package_inventory.v1.json` and the single-file downloader/install-payload boundary in `download_package_inventory.md` when changing packaging.
 7. Update the relevant `For-AI/` files before finalizing substantive work.
 8. State in the final response whether `For-AI/` was updated or why no update was needed.
 
