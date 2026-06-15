@@ -324,6 +324,35 @@ QCheckBox {{
     font-weight: 700;
     min-height: {profile.input_min_height}px;
 }}
+QCheckBox#nameSharingCheckbox {{
+    background: {colors["primary_soft"]};
+    color: {colors["text"]};
+    border: 2px solid #9fd0bd;
+    border-radius: 7px;
+    padding: 8px 10px;
+    spacing: 10px;
+    font-weight: 900;
+    min-height: {max(profile.button_min_height + 8, profile.input_min_height + 12)}px;
+}}
+QCheckBox#nameSharingCheckbox:hover {{
+    background: #f4fbf8;
+    border-color: {colors["primary"]};
+}}
+QCheckBox#nameSharingCheckbox::indicator {{
+    width: 18px;
+    height: 18px;
+    border: 2px solid {colors["primary"]};
+    border-radius: 4px;
+    background: {colors["surface"]};
+}}
+QCheckBox#nameSharingCheckbox::indicator:checked {{
+    background: {colors["primary"]};
+    border-color: {colors["primary"]};
+}}
+QCheckBox#nameSharingCheckbox::indicator:disabled {{
+    background: {colors["disabled"]};
+    border-color: {colors["disabled_text"]};
+}}
 """
 
 

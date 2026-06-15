@@ -165,6 +165,9 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert "Backup WAV (Belts and Suspenders)" in joined
     assert "Top up missed tactile trials at part end" in joined
     assert "CLICK" in joined
+    assert window.include_name_lsl_checkbox.objectName() == "nameSharingCheckbox"
+    assert "(opt-in)" in window.include_name_lsl_checkbox.text()
+    assert window.include_name_lsl_checkbox.minimumHeight() >= window.layout_profile.button_min_height + 8
 
     screenshot = tmp_path / "focus_mode_shell.png"
     assert window.dialog.grab().save(str(screenshot))
@@ -219,10 +222,12 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     assert window.target_button.maximumWidth() == profile.target_min_height
     assert window.target_button.minimumHeight() == profile.target_min_height
     assert window.target_button.maximumHeight() == profile.target_min_height
+    assert window.include_name_lsl_checkbox.minimumHeight() >= profile.button_min_height + 8
     assert window.output_summary.minimumHeight() == profile.output_min_height
 
     for widget in (
         window.target_button,
+        window.include_name_lsl_checkbox,
         window.start_button,
         window.pause_button,
         window.stop_button,
