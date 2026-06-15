@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260615-doc-lines">
+  <link rel="stylesheet" href="styles.css?v=20260615-hardware-arch">
 </head>
 <body>
   <div class="app-shell">
@@ -646,25 +646,37 @@
 
             <div class="arch-tier">
               <div class="arch-tier-label">Hardware</div>
-              <div class="arch-tier-nodes arch-tier-nodes-3">
-                <article class="arch-node arch-node-hw">
+              <div class="arch-hw-layout">
+                <article class="arch-node arch-node-hw arch-hw-top">
                   <div class="arch-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
                   <span class="arch-node-kicker">Audio Interface</span>
                   <strong>Komplete Audio 6 MK2</strong>
                   <p>ASIO multichannel interface clocking all three output channels from one synchronized sample clock. Operated as a single device rather than separate Windows endpoints.</p>
+                  <div class="hardware-pixel-frame arch-hw-pixel" aria-hidden="true">
+                    <canvas data-hardware-pixel="komplete-audio6"></canvas>
+                  </div>
                 </article>
-                <article class="arch-node arch-node-hw">
-                  <div class="arch-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg></div>
-                  <span class="arch-node-kicker">Channels 1 and 2</span>
-                  <strong>Headphones</strong>
-                  <p>Binaural left and right auditory streams delivered to the participant. The looming sound approaches along the researcher-defined spatial trajectory.</p>
-                </article>
-                <article class="arch-node arch-node-hw">
-                  <div class="arch-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
-                  <span class="arch-node-kicker">Channel 3</span>
-                  <strong>Woojer Strap 4</strong>
-                  <p>Wired analog tactile transducer receiving the audio-encoded tactile cue on output 3. The tactile onset is a direct function of the SOA schedule and shares the same hardware clock as the auditory channels.</p>
-                </article>
+                <div class="arch-hw-arrows">
+                  <span class="arch-hw-arrow-left">Channels 1 + 2</span>
+                  <span class="arch-hw-arrow-right">Channel 3</span>
+                </div>
+                <div class="arch-hw-outputs">
+                  <article class="arch-node arch-node-hw">
+                    <div class="arch-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg></div>
+                    <span class="arch-node-kicker">Channels 1 and 2</span>
+                    <strong>Headphones</strong>
+                    <p>Binaural left and right auditory streams delivered to the participant. The looming sound approaches along the researcher-defined spatial trajectory.</p>
+                  </article>
+                  <article class="arch-node arch-node-hw">
+                    <div class="arch-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+                    <span class="arch-node-kicker">Channel 3</span>
+                    <strong>Woojer Strap 4</strong>
+                    <p>Wired analog tactile transducer receiving the audio-encoded tactile cue on output 3. The tactile onset is a direct function of the SOA schedule and shares the same hardware clock as the auditory channels.</p>
+                    <div class="hardware-pixel-frame arch-hw-pixel" aria-hidden="true">
+                      <canvas data-hardware-pixel="woojer-strap-4"></canvas>
+                    </div>
+                  </article>
+                </div>
               </div>
             </div>
 
@@ -985,7 +997,7 @@
       </form>
     </div>
   </div>
-  <script src="hardware_pixel_art.js?v=20260615-doc-lines"></script>
-  <script src="app.js?v=20260615-doc-lines"></script>
+  <script src="hardware_pixel_art.js?v=20260615-hardware-arch"></script>
+  <script src="app.js?v=20260615-hardware-arch"></script>
 </body>
 </html>

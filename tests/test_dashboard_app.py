@@ -173,12 +173,12 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    assert 'href="styles.css?v=20260615-doc-lines"' in html
-    assert 'src="hardware_pixel_art.js?v=20260615-doc-lines"' in html
-    assert 'src="app.js?v=20260615-doc-lines"' in html
-    assert "index.html?page=toolkit&v=20260615-doc-lines" in public_index
-    assert "index.html?page=documentation&v=20260615-doc-lines" in public_docs
-    assert "index.html?page=downloads&v=20260615-doc-lines" in public_download
+    assert 'href="styles.css?v=20260615-hardware-arch"' in html
+    assert 'src="hardware_pixel_art.js?v=20260615-hardware-arch"' in html
+    assert 'src="app.js?v=20260615-hardware-arch"' in html
+    assert "index.html?page=toolkit&v=20260615-hardware-arch" in public_index
+    assert "index.html?page=documentation&v=20260615-hardware-arch" in public_docs
+    assert "index.html?page=downloads&v=20260615-hardware-arch" in public_download
     assert 'data-page-tab="toolkit"' in html
     assert 'data-page-tab="documentation"' in html
     assert 'data-page-tab="downloads"' in html
@@ -199,6 +199,8 @@ def test_dashboard_static_assets_are_packaged():
     assert "renderHardwarePixelArt" in app_js
     assert 'data-hardware-pixel="komplete-audio6"' in html
     assert 'data-hardware-pixel="woojer-strap-4"' in html
+    assert 'class="arch-hw-layout"' in html
+    assert ".arch-hw-outputs" in styles_css
     assert "window.HARDWARE_PIXEL_ART" in hardware_pixel_js
     assert '"komplete-audio6"' in hardware_pixel_js
     assert '"woojer-strap-4"' in hardware_pixel_js

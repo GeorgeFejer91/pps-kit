@@ -756,6 +756,132 @@ code {
 .arch-node-hw .arch-node-icon { color: #4a5c52; }
 .arch-node-hw .arch-node-kicker { color: #4a5c52; }
 
+/* Hardware tier stacked layout: interface on top, outputs below */
+.arch-hw-layout {
+  display: grid;
+  grid-template-rows: auto auto auto;
+  gap: 0;
+}
+
+.arch-hw-top {
+  margin-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom: none;
+}
+
+.arch-hw-arrows {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 32px;
+  position: relative;
+  background: #f0f4f1;
+  border-left: 1px solid #c8d5cc;
+  border-right: 1px solid #c8d5cc;
+}
+
+.arch-hw-arrow-left,
+.arch-hw-arrow-right {
+  display: flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #4a5c52;
+  letter-spacing: 0.04em;
+  position: relative;
+}
+
+.arch-hw-arrow-left {
+  justify-content: flex-start;
+  padding-left: 14px;
+  border-right: 1px solid #c8d5cc;
+}
+
+.arch-hw-arrow-right {
+  justify-content: flex-end;
+  padding-right: 14px;
+}
+
+/* Arrow stems and heads */
+.arch-hw-arrow-left::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(50% - 8px);
+  height: 1px;
+  background: #7a9c8a;
+  transform: translateX(-100%) translateY(-50%);
+}
+
+.arch-hw-arrow-left::after {
+  content: '';
+  position: absolute;
+  left: calc(50% - calc(50% - 8px) - 5px);
+  top: 50%;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-right: 5px solid #7a9c8a;
+  transform: translateY(-50%);
+}
+
+.arch-hw-arrow-right::before {
+  content: '';
+  position: absolute;
+  right: 50%;
+  top: 50%;
+  width: calc(50% - 8px);
+  height: 1px;
+  background: #7a9c8a;
+  transform: translateX(100%) translateY(-50%);
+}
+
+.arch-hw-arrow-right::after {
+  content: '';
+  position: absolute;
+  right: calc(50% - calc(50% - 8px) - 5px);
+  top: 50%;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 5px solid #7a9c8a;
+  transform: translateY(-50%);
+}
+
+.arch-hw-outputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.arch-hw-outputs .arch-node-hw:first-child {
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: none;
+}
+
+.arch-hw-outputs .arch-node-hw:last-child {
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+/* Pixel art image embedded in arch node */
+.arch-node-hw .arch-hw-pixel {
+  margin-top: 10px;
+  min-height: 80px;
+  padding: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.arch-node-hw .arch-hw-pixel canvas {
+  width: min(100%, 160px);
+  max-width: 160px;
+}
+
 .arch-vconnect {
   display: grid;
   grid-template-columns: 96px 1fr;
@@ -3347,6 +3473,23 @@ body.modal-open {
   .arch-tier-nodes-2,
   .arch-tier-nodes-3 {
     grid-template-columns: 1fr;
+  }
+
+  .arch-hw-outputs {
+    grid-template-columns: 1fr;
+  }
+
+  .arch-hw-outputs .arch-node-hw:first-child {
+    border-bottom: none;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: 1px solid #c8d5cc;
+  }
+
+  .arch-hw-outputs .arch-node-hw:last-child {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-left: 1px solid #c8d5cc;
   }
 
   .arch-tier {
