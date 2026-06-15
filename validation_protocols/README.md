@@ -79,8 +79,10 @@ python .\validation_protocols\scripts\run_session_runner_click_path_stress.py --
 python .\validation_protocols\scripts\run_one_block_trial_runner_realtime_stress.py --output-dir artifacts\validation_runs\one_block_trial_runner_realtime_current
 python .\validation_protocols\scripts\run_topup_missed_trial_stress.py --output-dir artifacts\validation_runs\topup_missed_trial_stress_current
 python .\validation_protocols\scripts\run_study5_end_to_end_ui_mouse_validation.py --packaged-standalone-app
+python .\validation_protocols\scripts\run_focus_runner_layout_validation.py --offscreen --output-dir artifacts\validation_runs\focus_runner_layout_current
 python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py --participant-id P001 --mouse-backend pynput
 python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py --participant-id P001 --mouse-backend pynput --audio-mode hardware --strict-study5-readiness
+python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py --runner-mode source --participant-id P001 --mouse-backend pynput --audio-mode hardware --strict-study5-readiness
 python .\validation_protocols\scripts\run_protocol11_controlled_response_matrix.py --output-dir artifacts\validation_runs\protocol11_controlled_response_matrix_current
 python .\validation_protocols\scripts\run_protocol11_capture_options_matrix.py --output-dir artifacts\validation_runs\protocol11_capture_options_matrix_current
 python .\validation_protocols\scripts\validate_protocol11_emulated_runner_artifacts.py --session-dir local_data\sessions\P001_YYYYMMDD_HHMMSS --response-plan artifacts\validation_runs\protocol11_response_plan.json
@@ -165,6 +167,15 @@ Separate these quantities in every report:
   XDF mirrors, analysis CSVs, and optional local audio evidence WAV capture;
   `events.csv` remains always on. The retired legacy Tk runner is historical
   validation coverage only, not an operator launch path.
+- Focus Mode adaptive layout and keyboard controls: whether the native runner
+  fits the current PC screen plus compact, laptop, desktop, and wide scenarios
+  without clipped text, overlapping controls, or unusable splitters. The layout
+  validation harness consumes the runner's embedded `layout_validation_snapshot`
+  and `layout_validation_failures()` methods, checks that `Experiment Control`
+  starts at the adaptive profile height and spans the lower workspace, verifies
+  constrained-screen operator tabs versus resizable splitters, captures
+  nonblank screenshots, and confirms the automation shortcut map for
+  start/continue, pause/resume, stop, close, part selection, and top-up preview.
 - Exhaustive emulated-participant runner stress: whether the packaged Focus
   Mode / `SessionRunnerController` workflow survives controlled launch,
   cache/prewarm, stimulus, response-boundary, instruction, top-up, capture,
@@ -195,7 +206,14 @@ Separate these quantities in every report:
   rehearsal. The final Study 5 command is
   `run_full_realtime_participant_emulation.py --audio-mode hardware --strict-study5-readiness`;
   strict mode refuses fake audio and refuses disabling LSL, internal XDF, or
-  local audio-evidence recording. This is
+  local audio-evidence recording. If the local packaged exe is blocked by
+  endpoint protection, `--runner-mode source` may be used as an interim
+  hardware/capture diagnostic through `windows/focus_runner_entry.py`, but it
+  does not satisfy the packaged-runner launch requirement. If Komplete ASIO
+  device indices are unstable across processes, confirm the current 4-channel
+  route with `pps-audio-stress --device-query "Komplete Audio ASIO" --dry-run
+  --channels 4` and pass that index with `--audio-device-index N`; the harness
+  forwards it as `PPS_AUDIO_DEVICE_INDEX`. This is
   pre-participant operational evidence, not hardware latency, Woojer
   mechanical-onset, or scientific PPS evidence.
 - Actual-block direct loopback evidence: whether the same actual one-block

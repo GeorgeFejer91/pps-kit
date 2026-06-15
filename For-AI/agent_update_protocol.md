@@ -15,8 +15,9 @@ Every AI agent working in this repository must:
 7. Before finalizing, decide whether the work was substantive.
 8. If substantive, update the relevant `For-AI/` file.
 9. For any GUI or runner workflow claim, run or add an end-user mouse-click validation before finalizing. The accepted proof must emulate a user clicking visible controls through the workflow, not only call backend APIs or direct helper functions.
-10. Commit the completed change set and push it to GitHub before finalizing. Keep the commit scoped to the intended work and do not stage unrelated pre-existing worktree changes. If authentication, network, branch protection, or conflicts block the push, report the exact blocker and leave the work ready to push.
-11. In the final response, state whether `For-AI/` was updated and whether the change was pushed.
+10. For any visual, layout, sizing, placement, typography, or screen-adaptation decision, run a separate rendered UI or screenshot-based verification before finalizing. Treat visual proof as its own validation layer in addition to unit/backend tests and mouse-click workflow tests.
+11. Commit the completed change set and push it to GitHub before finalizing. Keep the commit scoped to the intended work and do not stage unrelated pre-existing worktree changes. If authentication, network, branch protection, or conflicts block the push, report the exact blocker and leave the work ready to push.
+12. In the final response, state whether `For-AI/` was updated and whether the change was pushed.
 
 ## What Counts As Substantive
 
@@ -68,6 +69,16 @@ The HTML dashboard, whether launched locally or served from GitHub Pages, is onl
 Final validation for GUI/runner behavior must include user-style mouse-click emulation across the relevant visible controls. A workflow is not considered UI-ready merely because unit tests pass, manifests exist, or backend APIs can be called directly. The validation artifact should prove that the intended operator can complete the path by clicking buttons, selectors, and continuation controls in the UI. For Study 5 and finished-profile claims, this means validating the Segment 6 handoff and the standalone Experiment Runner profile-selection path with mouse-click behavior through Focus Mode completion. Hardware/audio-latency evidence can be separate, but UI usability proof by mouse-click emulation is mandatory.
 
 Prefer background/offscreen mouse-event validation for automated GUI checks unless the user explicitly asks for a visible OS-cursor test. Visible Win32/OS-click validations can steal focus and interrupt the research PC; treat them as opt-in diagnostic tests. Background validation is acceptable when it sends real Qt/browser mouse events to the same controls and writes an artifact proving selector/button clicks, Focus Mode start/continuation clicks, session completion, and event counts.
+
+## Required Visual Verification
+
+Visual and layout decisions require a separate rendered UI or screenshot-based
+verification. Unit tests, style diffs, geometry calculations, and backend
+assertions are not enough to finalize changes that affect what an operator sees.
+The verification should render the actual relevant UI state, save screenshots or
+an equivalent visual artifact under an ignored validation folder, and explicitly
+check for nonblank output, clipping, overlap, text visibility, panel placement,
+and adaptive behavior across the target screen sizes when screen size matters.
 
 ## Preload Catalog Storage Rule
 

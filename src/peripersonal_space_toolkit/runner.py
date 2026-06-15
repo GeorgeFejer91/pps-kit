@@ -347,6 +347,7 @@ def find_output_device():
     """Find the best output device.
 
     Preference order:
+    0. PPS_AUDIO_DEVICE_INDEX override for validation/lab diagnostics.
     1. Komplete Audio ASIO endpoint with >=3 outputs for binaural+tactile.
     2. Any ASIO endpoint with >=3 outputs.
     3. Any non-ASIO endpoint with >=3 outputs.
@@ -354,6 +355,25 @@ def find_output_device():
     5. System default output device.
     """
     devices = sd.query_devices()
+
+    override = os.environ.get("PPS_AUDIO_DEVICE_INDEX", "").strip()
+    if override:
+        try:
+            override_idx = int(override)
+            dev = sd.query_devices(override_idx)
+            hostapi = _hostapi_name_for_device(dev)
+            if int(dev.get("max_output_channels", 0)) >= BINAURAL_TACTILE_CHANNELS:
+                print(
+                    "Audio device override: "
+                    f"[{override_idx}] {dev.get('name', '')} ({hostapi}, {dev.get('max_output_channels', 0)} out)"
+                )
+                return override_idx, dev["name"], "komplete" in str(dev.get("name", "")).lower()
+            print(
+                "Warning: PPS_AUDIO_DEVICE_INDEX does not expose enough outputs: "
+                f"[{override_idx}] {dev.get('name', '')} ({hostapi}, {dev.get('max_output_channels', 0)} out)"
+            )
+        except Exception as exc:
+            print(f"Warning: Ignoring invalid PPS_AUDIO_DEVICE_INDEX={override!r}: {exc}")
 
     def output_candidates(min_channels):
         rows = []
@@ -529,6 +549,10 @@ class AudioEngine:
             and int(samplerate) == int(self._click_sr)
             and int(channels) == int(self.runtime_output_channels)
         )
+
+    def persistent_output_ready(self) -> bool:
+        """Return whether the shared click/block/instruction output stream is live."""
+        return self._click_stream is not None and bool(getattr(self._click_stream, "active", False))
 
     def _close_persistent_output(self):
         if self._click_stream is not None:
@@ -712,8 +736,7 @@ class AudioEngine:
             data = np.ascontiguousarray(data)
             self._click_data = data
             self._click_sr = sr
-            self._init_click_stream()
-            return True
+            return bool(self._init_click_stream())
         except Exception as e:
             print(f"ERROR: Failed to load click sound: {e}")
             return False
@@ -892,7 +915,7 @@ class AudioEngine:
         """Initialize persistent low-latency click stream with optimized settings."""
         if self._click_data is None:
             print("DEBUG: _init_click_stream - no click data loaded")
-            return
+            return False
         try:
             print(f"DEBUG: Initializing click stream on device {self.device_idx}, sr={self._click_sr}, latency={CLICK_LATENCY}")
             try:
@@ -916,10 +939,13 @@ class AudioEngine:
                     raise
             self._click_stream.start()
             print(f"DEBUG: Click stream started successfully, active={self._click_stream.active}")
+            return self.persistent_output_ready()
         except Exception as e:
             print(f"ERROR: Click stream init failed: {e}")
             import traceback
             traceback.print_exc()
+            self._click_stream = None
+            return False
     
     def trigger_click(self, metadata=None, marker_gain=None):
         """Trigger instant click playback."""
