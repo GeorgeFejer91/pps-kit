@@ -653,14 +653,20 @@
                     <span class="arch-node-kicker">Audio Interface</span>
                     <strong>Komplete Audio 6 MK2</strong>
                     <p>ASIO multichannel interface clocking all three output channels from one synchronized sample clock. Operated as a single device rather than separate Windows endpoints.</p>
+                    <div class="arch-hw-dep">
+                      <span class="arch-hw-dep-label">Software dependency</span>
+                      <a class="arch-hw-dep-link" href="https://support.native-instruments.com/hc/en-us/articles/360001194217-Installing-the-ASIO-Driver-for-KOMPLETE-AUDIO-1-2-6-MK2-Windows" target="_blank" rel="noopener">Komplete Audio ASIO Driver</a>
+                    </div>
                   </div>
-                  <div class="hardware-pixel-frame arch-hw-pixel" aria-hidden="true">
-                    <canvas data-hardware-pixel="komplete-audio6"></canvas>
-                  </div>
+                  <a class="arch-hw-pixel-link" href="https://www.native-instruments.com/en/products/komplete/audio-interfaces/komplete-audio-6/" target="_blank" rel="noopener" aria-label="Open Native Instruments Komplete Audio 6 MK2 product page">
+                    <div class="hardware-pixel-frame arch-hw-pixel">
+                      <canvas data-hardware-pixel="komplete-audio6"></canvas>
+                    </div>
+                  </a>
                 </article>
-                <div class="arch-hw-connector" aria-hidden="true">
-                  <div class="arch-hw-branch"><span class="arch-hw-label">Channels 1+2</span></div>
-                  <div class="arch-hw-branch"><span class="arch-hw-label">Channel 3</span></div>
+                <div class="arch-hw-arrows" aria-hidden="true">
+                  <div class="arch-hw-arrow"><span class="arch-hw-label">Channels 1+2</span></div>
+                  <div class="arch-hw-arrow"><span class="arch-hw-label">Channel 3</span></div>
                 </div>
                 <div class="arch-hw-outputs">
                   <article class="arch-node arch-node-hw">
@@ -676,9 +682,11 @@
                       <strong>Woojer Strap 4</strong>
                       <p>Wired analog tactile transducer receiving the audio-encoded tactile cue on output 3. The tactile onset is a direct function of the SOA schedule and shares the same hardware clock as the auditory channels.</p>
                     </div>
-                    <div class="hardware-pixel-frame arch-hw-pixel" aria-hidden="true">
-                      <canvas data-hardware-pixel="woojer-strap-4"></canvas>
-                    </div>
+                    <a class="arch-hw-pixel-link" href="https://www.woojer.com/products/strap-4" target="_blank" rel="noopener" aria-label="Open Woojer Strap 4 product page">
+                      <div class="hardware-pixel-frame arch-hw-pixel">
+                        <canvas data-hardware-pixel="woojer-strap-4"></canvas>
+                      </div>
+                    </a>
                   </article>
                 </div>
               </div>
@@ -697,11 +705,8 @@
           <p class="info-copy">The validated lab route runs on Windows and delivers auditory and tactile stimuli through a single synchronized multichannel ASIO output stream using the Native Instruments Komplete Audio 6 MK2 interface. Channels 1 and 2 route binaural left and right audio to participant headphones while channel 3 drives a Woojer Strap 4 connected as a wired analog load, removing the timing variability introduced by Bluetooth. The tactile signal is not a separate conversion path but a conventional audio waveform written to output 3 and routed into the Woojer's wired analog auxiliary input, whose transducer converts low-frequency signal energy into vibrotactile stimulation. Encoding the tactile cue as an audio channel keeps its onset timing under exactly the same software and hardware control as the auditory channels, making the stimulus onset asynchrony between sound and touch a direct function of the SOA schedule.</p>
           <p class="info-copy">Latency was measured using a direct electrical loopback in which the three output channels were patched back into the Komplete Audio 6 MK2's own analog inputs via TRS cables, and a calibration pulse train was played while the return signal was simultaneously recorded. Comparing transmitted and received pulse timing gives the round-trip delay per channel. The physical-minus-digital latency of 33.462 ms is the time between when the software schedules a sample and when that signal appears at the physical output, stable to within 0.013 ms standard deviation across 20 recovered pulses. The critical finding for audio-tactile research is the inter-channel skew. The left and right audio channels are synchronized to within 0.023 ms of each other, and the tactile drive channel deviates from the audio channels by only 0.011 ms. These sub-millisecond differences are possible because the Komplete Audio 6 MK2, operated through its ASIO driver as a single multichannel device, clocks all three outputs from the same sample clock and renders them within the same output buffer, a result that cannot be replicated by routing stimuli through separate Windows stereo endpoints.</p>
           <div class="info-card-grid hardware-card-grid">
-            <a class="info-card info-card-link hardware-pixel-card" href="https://www.native-instruments.com/en/products/komplete/audio-interfaces/komplete-audio-6/specifications/" aria-label="Open Native Instruments Komplete Audio producer page">
+            <a class="info-card info-card-link" href="https://www.native-instruments.com/en/products/komplete/audio-interfaces/komplete-audio-6/specifications/" aria-label="Open Native Instruments Komplete Audio producer page">
               <span class="card-kicker">Audio Interface</span>
-              <div class="hardware-pixel-frame" aria-hidden="true">
-                <canvas data-hardware-pixel="komplete-audio6"></canvas>
-              </div>
               <h2>Komplete Audio 6 MK2</h2>
               <p>The lab route uses Native Instruments Komplete Audio 6 MK2 as the synchronized multichannel ASIO interface.</p>
               <span class="card-link-label">Open Native Instruments page</span>
@@ -711,11 +716,8 @@
               <p>Use the official Komplete Audio ASIO Driver on Windows. The stereo Windows endpoints are legacy diagnostic paths, not the validated 3-channel route.</p>
               <a class="button-link" href="https://support.native-instruments.com/hc/en-us/articles/360001194217-Installing-the-ASIO-Driver-for-KOMPLETE-AUDIO-1-2-6-MK2-Windows">Open ASIO Install Guide</a>
             </article>
-            <a class="info-card info-card-link hardware-pixel-card" href="https://www.woojer.com/products/strap-4" aria-label="Open Woojer Strap 4 producer page">
+            <a class="info-card info-card-link" href="https://www.woojer.com/products/strap-4" aria-label="Open Woojer Strap 4 producer page">
               <span class="card-kicker">Tactile Endpoint</span>
-              <div class="hardware-pixel-frame" aria-hidden="true">
-                <canvas data-hardware-pixel="woojer-strap-4"></canvas>
-              </div>
               <h2>Woojer Strap 4</h2>
               <p>Treated as a wired analog endpoint from Komplete output 3. Bluetooth is not used for timing-sensitive tactile work.</p>
               <span class="card-link-label">Open Woojer Strap 4</span>
@@ -862,24 +864,25 @@
         <section id="docs-data-boundary" class="info-segment" aria-labelledby="docs-data-boundary-title">
           <div class="info-segment-heading">
             <span class="segment-kicker">Public Release</span>
-            <h2 id="docs-data-boundary-title">Data, Privacy, and Publication Boundary</h2>
+            <h2 id="docs-data-boundary-title">MIT License Disclaimer</h2>
           </div>
-          <p class="info-copy">The public repository contains the toolkit source, documentation, deidentified sample files, safe templates, and release metadata; nothing that could identify participants or violate third-party redistribution terms is included. All data generated during experiments, including session WAVs, response CSVs, raw recordings, and validation artifacts, is written to ignored local folders such as local_data/ and artifacts/, which are excluded from version control. The hosted dashboard is a front end only, connecting exclusively to the trusted local companion at 127.0.0.1 and transmitting no researcher or participant data externally. SOFA/HRIR files, vendor documentation, and proprietary stimuli require attribution and licensing review before any redistribution.</p>
+          <p class="info-copy">PPS Toolkit is released under the MIT License. Permission is granted to use, copy, modify, merge, publish, distribute, sublicense, and sell copies of the software, provided the copyright notice and permission notice stay with the software. The software is provided as is, without warranty of any kind, including implied warranties of merchantability, fitness for a particular purpose, or noninfringement. The authors and copyright holders are not liable for claims, damages, or other liability arising from use of the toolkit.</p>
           <div class="info-card-grid">
             <article class="info-card">
+              <h2>License Scope</h2>
+              <p>The MIT License covers the toolkit code and included project materials. It does not grant rights to redistribute third-party assets, vendor software, or external datasets.</p>
+            </article>
+            <article class="info-card">
               <h2>Local Data</h2>
-              <p>Generated designs, sessions, participant outputs, and validation artifacts are written locally under ignored folders such as <code>local_data/</code> and <code>artifacts/</code>.</p>
+              <p>Generated designs, sessions, participant outputs, and validation artifacts stay local under ignored folders such as <code>local_data/</code> and <code>artifacts/</code>.</p>
             </article>
             <article class="info-card">
-              <h2>Hosted Dashboard</h2>
-              <p>The GitHub Pages dashboard is a front end only. It connects to <code>127.0.0.1</code> after the user starts the trusted local companion.</p>
-            </article>
-            <article class="info-card">
-              <h2>Third-Party Assets</h2>
-              <p>SOFA/HRIR files, vendor manuals, background audio, and proprietary stimuli require attribution and redistribution review before release packaging.</p>
+              <h2>No Warranty</h2>
+              <p>Researchers are responsible for validating timing, hardware routing, ethics approvals, and local data-handling procedures before using the toolkit for data collection.</p>
             </article>
           </div>
           <div class="doc-link-row">
+            <a class="button-link" href="../../../LICENSE">Open MIT License</a>
             <a class="button-link" href="../../../docs/PRIVACY_RELEASE.md">Open Privacy Guide</a>
             <a class="button-link" href="../../../docs/PPS_DOWNLOADS.md">Open Download Notes</a>
           </div>
