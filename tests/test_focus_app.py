@@ -739,6 +739,70 @@ def test_launcher_uses_participant_dropdown_instead_of_text_entry():
     assert errors == []
 
 
+def test_audio_dependency_dialog_retry_accepts_after_asio_detected(monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+        from peripersonal_space_toolkit.audio_routing import AudioRuntimeReadiness
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    errors: list[BaseException] = []
+
+    missing = AudioRuntimeReadiness(
+        ready=False,
+        publication_ready=False,
+        severity="error",
+        summary="Audio preflight: Komplete Audio ASIO is missing.",
+        details=("ASIO is visible, but no output exposes at least three synchronized channels.",),
+        actions=(),
+        sounddevice_available=True,
+        sounddevice_version="0.4.7",
+        asio_hostapi_present=True,
+        preferred_devices=(),
+        fallback_devices=(),
+    )
+    ready = AudioRuntimeReadiness(
+        ready=True,
+        publication_ready=True,
+        severity="ok",
+        summary="Audio preflight: validated Komplete multichannel ASIO output is visible.",
+        details=("[3] Komplete Audio ASIO Driver (ASIO, 6 out)",),
+        actions=(),
+        sounddevice_available=True,
+        sounddevice_version="0.4.7",
+        asio_hostapi_present=True,
+        preferred_devices=("[3] Komplete Audio ASIO Driver (ASIO, 6 out)",),
+        fallback_devices=(),
+    )
+    monkeypatch.setattr(focus_app, "assess_audio_runtime_readiness", lambda: ready)
+
+    def click_retry() -> None:
+        try:
+            dialogs = [widget for widget in app.topLevelWidgets() if widget.objectName() == "audioDependencyDialog"]
+            assert dialogs
+            dialog = dialogs[0]
+            labels = _collect_widget_texts(dialog, q["QLabel"])
+            assert any("Komplete Audio ASIO driver required" in label for label in labels)
+            assert any("Retry Audio Detection" in label for label in labels)
+            retry = dialog.findChild(q["QPushButton"], "retryAudioDetectionButton")
+            assert retry is not None
+            QTest.mouseClick(retry, q["Qt"].MouseButton.LeftButton)
+        except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
+            errors.append(exc)
+            for widget in app.topLevelWidgets():
+                if widget.objectName() == "audioDependencyDialog":
+                    widget.reject()
+
+    q["QTimer"].singleShot(50, click_retry)
+    assert focus_app._show_audio_dependency_dialog(q, readiness=missing) is True
+    assert errors == []
+
+
 def test_launcher_generate_range_button_prepares_requested_range(monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:

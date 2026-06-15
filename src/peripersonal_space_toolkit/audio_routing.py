@@ -20,6 +20,7 @@ from dataclasses import dataclass
 import importlib.metadata as metadata
 import os
 import re
+import sys
 from typing import Any
 
 import numpy as np
@@ -34,6 +35,15 @@ LEGACY_TACTILE_CHANNEL = 1
 SPATIAL_TACTILE_CHANNEL = 2
 MIN_SOUNDDEVICE_VERSION = "0.4.7"
 NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL = "https://www.native-instruments.com/en/support/downloads/drivers-other-files/"
+NI_KOMPLETE_AUDIO_DRIVER_DOWNLOAD_URL = (
+    "https://www.native-instruments.com/fileadmin/drivers/audiohardware/"
+    "NativeInstruments_UsbAudio_v5.22.0_2021-09-01_setup.zip"
+)
+NI_KOMPLETE_AUDIO_DRIVER_INSTALL_GUIDE_URL = (
+    "https://support.native-instruments.com/hc/en-us/articles/"
+    "360001194217-Installing-the-ASIO-Driver-for-KOMPLETE-AUDIO-1-2-6-MK2-Windows"
+)
+NI_KOMPLETE_AUDIO_DRIVER_LABEL = "Komplete Audio 6 MK2 Driver 5.22.0 - Windows 10"
 FLEXASIO_RELEASES_URL = "https://github.com/dechamps/FlexASIO/releases"
 STEINBERG_BUILTIN_ASIO_DRIVER_URL = (
     "https://helpcenter.steinberg.de/hc/en-us/articles/"
@@ -66,6 +76,7 @@ class AudioRuntimeReadiness:
     asio_hostapi_present: bool
     preferred_devices: tuple[str, ...]
     fallback_devices: tuple[str, ...]
+    komplete_asio_driver_registered: bool = False
 
     def message(self) -> str:
         lines = [self.summary]
@@ -99,11 +110,66 @@ def _sounddevice_version(sd_module: Any | None) -> str:
         return ""
 
 
+def komplete_asio_driver_registered() -> bool:
+    """Return whether the native NI Komplete ASIO driver is registered in Windows."""
+    if sys.platform != "win32":
+        return False
+    try:
+        import winreg
+    except Exception:
+        return False
+    for root_path in (r"SOFTWARE\ASIO\Komplete Audio ASIO Driver", r"SOFTWARE\WOW6432Node\ASIO\Komplete Audio ASIO Driver"):
+        try:
+            with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, root_path):
+                return True
+        except OSError:
+            continue
+    return False
+
+
+def komplete_audio_asio_install_steps() -> tuple[str, ...]:
+    """Return experimenter-facing steps for restoring the validated ASIO route."""
+    return (
+        "Disconnect the Komplete Audio 6 MK2 USB cable.",
+        f"Open the Native Instruments driver page ({NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL}) and download '{NI_KOMPLETE_AUDIO_DRIVER_LABEL}'.",
+        "Extract the downloaded ZIP, run setup.exe, and follow the installer prompts.",
+        "Reconnect the Komplete Audio 6 MK2 after the installer completes.",
+        "Click Retry Audio Detection in PPSExperimentRunner.exe, or restart the runner.",
+        "When 'Komplete Audio ASIO Driver' appears, PPS automatically selects that native multichannel route.",
+    )
+
+
+def komplete_audio_asio_reconnect_steps() -> tuple[str, ...]:
+    """Return repair steps for a registered driver whose hardware route is absent."""
+    return (
+        "Reconnect or power-cycle the Komplete Audio 6 MK2 USB interface.",
+        "Wait for Windows to finish enumerating the audio interface.",
+        "Click Retry Audio Detection in PPSExperimentRunner.exe.",
+        "If the route still does not appear, restart Windows once, then reopen PPSExperimentRunner.exe.",
+        "When 'Komplete Audio ASIO Driver' appears, PPS automatically selects that native multichannel route.",
+    )
+
+
+def komplete_audio_asio_install_message() -> str:
+    """Return a concise repair message with official NI links."""
+    return "\n".join(
+        (
+            "The native Komplete Audio ASIO driver is required for PPS participant timing.",
+            f"Driver page: {NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL}",
+            f"Install guide: {NI_KOMPLETE_AUDIO_DRIVER_INSTALL_GUIDE_URL}",
+            "",
+            "Steps:",
+            *[f"{index}. {step}" for index, step in enumerate(komplete_audio_asio_install_steps(), start=1)],
+        )
+    )
+
+
 def assess_audio_runtime_readiness(
     *,
     sounddevice_module: Any | None = None,
     device_query: str = "Komplete",
     min_output_channels: int = BINAURAL_TACTILE_CHANNELS,
+    komplete_asio_registered: bool | None = None,
 ) -> AudioRuntimeReadiness:
     """Assess whether the validated multichannel ASIO playback route is visible.
 
@@ -113,6 +179,11 @@ def assess_audio_runtime_readiness(
     substitutes.
     """
     os.environ.setdefault("SD_ENABLE_ASIO", "1")
+    registry_present = (
+        komplete_asio_driver_registered()
+        if komplete_asio_registered is None and sounddevice_module is None
+        else bool(komplete_asio_registered)
+    )
     if sounddevice_module is None:
         try:
             import sounddevice as sounddevice_module  # type: ignore[import-not-found]
@@ -132,6 +203,7 @@ def assess_audio_runtime_readiness(
                 asio_hostapi_present=False,
                 preferred_devices=(),
                 fallback_devices=(),
+                komplete_asio_driver_registered=registry_present,
             )
 
     sd = sounddevice_module
@@ -149,6 +221,7 @@ def assess_audio_runtime_readiness(
             asio_hostapi_present=False,
             preferred_devices=(),
             fallback_devices=(),
+            komplete_asio_driver_registered=registry_present,
         )
 
     try:
@@ -167,6 +240,7 @@ def assess_audio_runtime_readiness(
             asio_hostapi_present=False,
             preferred_devices=(),
             fallback_devices=(),
+            komplete_asio_driver_registered=registry_present,
         )
 
     def hostapi_name(device_info: Any) -> str:
@@ -213,6 +287,7 @@ def assess_audio_runtime_readiness(
             asio_hostapi_present=asio_hostapi_present,
             preferred_devices=tuple(preferred),
             fallback_devices=tuple(asio_fallbacks + non_asio_multichannel + stereo_komplete),
+            komplete_asio_driver_registered=registry_present,
         )
 
     if asio_fallbacks:
@@ -231,6 +306,7 @@ def assess_audio_runtime_readiness(
             asio_hostapi_present=asio_hostapi_present,
             preferred_devices=(),
             fallback_devices=tuple(asio_fallbacks + non_asio_multichannel + stereo_komplete),
+            komplete_asio_driver_registered=registry_present,
         )
 
     details: list[str] = []
@@ -238,10 +314,15 @@ def assess_audio_runtime_readiness(
         details.append(f"Only a stereo Komplete endpoint is visible: {stereo_komplete[0]}")
     elif non_asio_multichannel:
         details.append(f"Non-ASIO multichannel output is visible, but not valid for PPS timing claims: {non_asio_multichannel[0]}")
+    elif registry_present:
+        details.append(
+            "Komplete Audio ASIO Driver is registered in Windows, but the interface is not exposing a usable 3+ channel ASIO device yet."
+        )
     elif not asio_hostapi_present:
         details.append("No ASIO host API is visible to sounddevice.")
     else:
         details.append("ASIO is visible, but no output exposes at least three synchronized channels.")
+    actions = komplete_audio_asio_reconnect_steps() if registry_present else komplete_audio_asio_install_steps()
 
     return AudioRuntimeReadiness(
         ready=False,
@@ -249,15 +330,13 @@ def assess_audio_runtime_readiness(
         severity="error",
         summary="Audio preflight: Komplete Audio ASIO is missing or not exposing a 3+ channel output.",
         details=tuple(details),
-        actions=(
-            f"Install the official Native Instruments Komplete Audio 6 MK2 Windows driver from {NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL}, then restart PPSExperimentRunner.exe.",
-            f"FlexASIO ({FLEXASIO_RELEASES_URL}) can be cached as an optional diagnostic fallback, but it does not replace the native Komplete ASIO timing route.",
-        ),
+        actions=actions,
         sounddevice_available=True,
         sounddevice_version=version,
         asio_hostapi_present=asio_hostapi_present,
         preferred_devices=(),
         fallback_devices=tuple(non_asio_multichannel + stereo_komplete),
+        komplete_asio_driver_registered=registry_present,
     )
 
 
