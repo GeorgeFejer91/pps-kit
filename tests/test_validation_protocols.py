@@ -1282,6 +1282,58 @@ def test_response_marker_loopback_comparison_recovers_physical_marker_trace(tmp_
     assert (tmp_path / "comparison" / "response_marker_loopback_pairs.csv").exists()
 
 
+def test_response_marker_loopback_auto_widens_for_digital_audio_evidence_preroll(tmp_path: Path):
+    compare = _load_script("compare_response_marker_loopback.py")
+    sample_rate = 44100
+    offset_samples = 7000
+    marker_samples = [10000, 24000, 38000]
+    events_csv = tmp_path / "events.csv"
+    recording = tmp_path / "Block_01_audio_evidence.wav"
+
+    rows = []
+    for event_id, sample in enumerate(marker_samples, start=1):
+        rows.append(
+            {
+                "event_id": event_id,
+                "event_type": "response_marker_start",
+                "unix_time": f"{event_id:.9f}",
+                "monotonic_time": f"{event_id:.9f}",
+                "payload_json": json.dumps(
+                    {
+                        "sample_index": sample,
+                        "mouse_event_id": event_id - 1,
+                        "block_number": 1,
+                        "timestamp_quality": "dac_time_sample_exact",
+                        "marker_gain": 0.05,
+                    }
+                ),
+            }
+        )
+    _write_csv(events_csv, rows)
+
+    capture = np.zeros((52000, 3), dtype=np.float32)
+    for sample in marker_samples:
+        start = sample + offset_samples
+        capture[start : start + 64, 2] = 0.05
+    sf.write(recording, capture, sample_rate)
+
+    report = compare.compare_loopback(
+        events_csv=events_csv,
+        recordings=[recording],
+        output_dir=tmp_path / "digital_comparison",
+        tactile_channel_1based=3,
+        search_pre_ms=10.0,
+        search_post_ms=150.0,
+        min_peak=0.005,
+    )
+
+    assert report["passed"]
+    assert report["detected_marker_count"] == 3
+    assert report["offset_ms"]["median_ms"] == pytest.approx(offset_samples / sample_rate * 1000.0)
+    assert report["blocks"][0]["recording_role"] == "digital_audio_evidence"
+    assert report["blocks"][0]["search_window_ms"]["post"] >= 300.0
+
+
 def test_recording_layer_alignment_compares_digital_physical_and_lsl(tmp_path: Path):
     compare = _load_script("compare_recording_layers.py")
     sample_rate = 1000

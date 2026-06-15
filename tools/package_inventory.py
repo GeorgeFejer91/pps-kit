@@ -186,6 +186,13 @@ INVENTORY_ITEMS: list[dict[str, Any]] = [
         "source": "tracked",
     },
     {
+        "path": "assets/click",
+        "kind": "audio_asset_tree",
+        "role": "tactile-channel response marker and click-tone WAV assets",
+        "required": True,
+        "source": "tracked",
+    },
+    {
         "path": "assets/tactile/default_tactile_cue.wav",
         "kind": "audio_asset",
         "role": "default tactile channel cue",

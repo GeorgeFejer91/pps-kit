@@ -388,7 +388,7 @@ def _write_markdown(path: Path, report: dict[str, Any]) -> None:
 
 
 def _session_default_paths(session_dir: Path) -> dict[str, Path | None]:
-    recordings = sorted((session_dir / "recordings").glob("*.wav"))
+    recordings = list(dict.fromkeys([*sorted(session_dir.glob("*.wav")), *sorted((session_dir / "recordings").glob("*.wav"))]))
     digital = next((path for path in recordings if "audio_evidence" in path.name.lower() or "output" in path.name.lower()), None)
     physical = next((path for path in recordings if "physical" in path.name.lower()), None)
     if physical is None:

@@ -170,6 +170,13 @@
       "source": "tracked"
     },
     {
+      "kind": "audio_asset_tree",
+      "path": "assets/click",
+      "required": true,
+      "role": "tactile-channel response marker and click-tone WAV assets",
+      "source": "tracked"
+    },
+    {
       "kind": "audio_asset",
       "path": "assets/tactile/default_tactile_cue.wav",
       "required": true,
@@ -261,10 +268,10 @@
   "schema": "pps-installer-package-inventory.v1",
   "stage_root": "",
   "summary": {
-    "item_count": 36,
+    "item_count": 37,
     "missing_required_count": 0,
     "optional_absent_count": 0,
     "optional_item_count": 2,
-    "required_item_count": 34
+    "required_item_count": 35
   }
 }

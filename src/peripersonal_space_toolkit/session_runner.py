@@ -1152,10 +1152,8 @@ def prepare_segment_run_package(
     session_dir = Path(session_root) / session_id
     block_dir = session_dir / "blocks"
     analysis_dir = session_dir / "analysis"
-    recordings_dir = session_dir / "recordings"
     block_dir.mkdir(parents=True, exist_ok=True)
     analysis_dir.mkdir(parents=True, exist_ok=True)
-    recordings_dir.mkdir(parents=True, exist_ok=True)
     _emit_prepare_progress(
         progress_callback,
         "Preparing Segment 6 setup",
@@ -1538,7 +1536,7 @@ class SessionRunnerController:
                         manifest_path=str(block.manifest_path),
                         scheduled_event_count=len(schedule),
                     )
-                recording_path = self.package.session_dir / "recordings" / f"Block_{block.index:02d}_{_slug(block.label)}_audio_evidence.wav"
+                recording_path = self.package.session_dir / f"Block_{block.index:02d}_{_slug(block.label)}_audio_evidence.wav"
                 recording_started = self._start_backup_recording(engine, recording_path, block)
 
                 def _progress(elapsed_s: float, current_block: RunBlock = block) -> None:
@@ -2047,7 +2045,7 @@ class SessionRunnerController:
                 manifest_path=str(block.manifest_path),
                 scheduled_event_count=len(schedule),
             )
-        recording_path = self.package.session_dir / "recordings" / f"Block_{block.index:02d}_{_slug(block.label)}_audio_evidence.wav"
+        recording_path = self.package.session_dir / f"Block_{block.index:02d}_{_slug(block.label)}_audio_evidence.wav"
         recording_started = self._start_backup_recording(engine, recording_path, block)
 
         def _progress(elapsed_s: float, current_block: RunBlock = block) -> None:

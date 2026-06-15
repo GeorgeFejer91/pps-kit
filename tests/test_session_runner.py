@@ -863,6 +863,8 @@ def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
     assert "marker_minus_mouse_ms" in qc_text
     assert "0.05" in events_text
     assert result.recording_paths
+    assert result.recording_paths[0].parent == package.session_dir
+    assert result.recording_paths[0].name.endswith("_audio_evidence.wav")
 
 
 def test_session_runner_emits_tactile_timeline_schedule_progress(tmp_path: Path):
