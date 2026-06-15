@@ -66,7 +66,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--no-lsl", action="store_true", help="Do not create live LSL marker outlets for this run.")
     parser.add_argument("--no-internal-xdf", action="store_true", help="Do not write the local events.xdf mirror.")
     parser.add_argument("--no-analysis-csv", action="store_true", help="Do not write immediate analysis CSV outputs.")
-    parser.add_argument("--no-backup-recording", action="store_true", help="Do not write the local full-audio evidence WAV.")
+    parser.add_argument("--no-backup-recording", action="store_true", help="Do not write the optional fail-safe local recording WAV.")
     parser.add_argument("--enable-missed-trial-topup", action="store_true", help="Prepare and request approval for one final missed-trial top-up block.")
     parser.add_argument("--validation-screenshot", type=Path, help=argparse.SUPPRESS)
     parser.add_argument("--validation-auto-close-ms", type=int, default=None, help=argparse.SUPPRESS)
@@ -168,6 +168,38 @@ def _float_or_none(value: Any) -> float | None:
 
 def _package_duration(package: Any) -> float:
     return sum(float(block.duration_s) for block in package.blocks)
+
+
+def _format_file_size(num_bytes: float) -> str:
+    value = max(0.0, float(num_bytes or 0.0))
+    if value >= 1024**3:
+        return f"{value / 1024**3:.1f} GB"
+    if value >= 1024**2:
+        return f"{value / 1024**2:.1f} MB"
+    if value >= 1024:
+        return f"{value / 1024:.1f} KB"
+    return f"{int(round(value))} B"
+
+
+def _estimated_backup_recording_size(package: Any) -> str:
+    total_bytes = 0.0
+    for block in getattr(package, "blocks", []) or []:
+        metadata = _block_metadata(block)
+        duration_s = max(0.0, float(getattr(block, "duration_s", 0.0) or 0.0))
+        sample_rate_value = _float_or_none(metadata.get("sample_rate_hz") or metadata.get("sample_rate"))
+        channel_value = _float_or_none(metadata.get("channels"))
+        sample_rate = int(sample_rate_value) if sample_rate_value is not None and sample_rate_value > 0 else 48_000
+        channels = int(channel_value) if channel_value is not None and channel_value > 0 else 3
+        total_bytes += duration_s * max(1, sample_rate) * max(1, channels) * 4
+        total_bytes += 44
+    return _format_file_size(total_bytes)
+
+
+def _backup_recording_checkbox_text(package: Any) -> str:
+    return (
+        "Save additional fail-safe local recording\n"
+        f"(LSL logging remains standard; estimated extra file: ~{_estimated_backup_recording_size(package)})"
+    )
 
 
 def _block_metadata(block: Any) -> dict[str, Any]:
@@ -496,9 +528,9 @@ def _create_tactile_timeline_widget(
             if profile is not None and profile.screen_class == "constrained":
                 minimum_height = 42
             elif profile is not None and profile.compact:
-                minimum_height = 78
+                minimum_height = 90
             else:
-                minimum_height = 116
+                minimum_height = 132
             self.setMinimumHeight(minimum_height)
 
         def paintEvent(self, _event: Any) -> None:  # noqa: N802 - Qt API
@@ -516,20 +548,20 @@ def _create_tactile_timeline_widget(
                 timeline_state = state_provider() if state_provider is not None else state
                 duration = max(0.001, float(timeline_state.duration_s or 0.0))
                 if height < 55:
-                    row_offsets = (2, 10, 18, 26, 34)
+                    row_offsets = (1, 8, 15, 22, 29, 36)
                 elif very_compact_rows:
-                    row_offsets = (3, 14, 25, 36, 47)
+                    row_offsets = (3, 14, 25, 36, 47, 58)
                 elif compact_rows:
-                    row_offsets = (3, 18, 33, 48, 63)
+                    row_offsets = (3, 17, 31, 45, 59, 73)
                 else:
-                    row_offsets = (5, 26, 50, 74, 98)
-                rows = [(label, top_margin + offset) for label, offset in zip(("Instr", "Resp", "Type", "Tactile", "Clicks"), row_offsets)]
+                    row_offsets = (5, 25, 47, 69, 91, 113)
+                rows = [(label, top_margin + offset) for label, offset in zip(("Instr", "Resp", "Type", "SOA", "Tactile", "Clicks"), row_offsets)]
 
                 painter.fillRect(self.rect(), q["QColor"]("#f8f9f6"))
                 label_pen = q["QPen"](q["QColor"]("#647067"))
                 painter.setPen(label_pen)
                 for label, row_y in rows:
-                    painter.drawText(4, row_y - 8, label_width - 8, 18, int(q["Qt"].AlignmentFlag.AlignRight), label)
+                    painter.drawText(4, max(0, row_y - 7), label_width - 8, 14 if height < 55 else 18, int(q["Qt"].AlignmentFlag.AlignRight), label)
                     guide_pen = q["QPen"](q["QColor"]("#d9dfd6"))
                     guide_pen.setWidth(1)
                     painter.setPen(guide_pen)
@@ -564,7 +596,24 @@ def _create_tactile_timeline_widget(
                         return "#dcefeb"
                     return palette[fallback_index % len(palette)]
 
-                row_height = 8 if very_compact_rows else (12 if compact_rows else 16)
+                def _soa_color(value: str) -> str:
+                    try:
+                        soa = float(str(value).strip())
+                    except (TypeError, ValueError):
+                        return "#f1f5f9"
+                    if soa <= 0:
+                        return "#e4e7eb"
+                    if soa <= 300:
+                        return "#dce7f4"
+                    if soa <= 800:
+                        return "#dcefeb"
+                    if soa <= 1500:
+                        return "#f4e2b8"
+                    if soa <= 2200:
+                        return "#eadcf0"
+                    return "#f0dddd"
+
+                row_height = 6 if height < 55 else (8 if very_compact_rows else (12 if compact_rows else 16))
 
                 for segment in timeline_state.instruction_segments:
                     x1 = _x(segment.start_s)
@@ -587,6 +636,7 @@ def _create_tactile_timeline_widget(
                         (
                             (segment.clip_label or "Resp", rows[1][1] - row_height // 2, clip_color),
                             (segment.trial_label or segment.family or "Type", rows[2][1] - row_height // 2, trial_color),
+                            (f"{segment.soa_ms} ms" if segment.soa_ms else "SOA", rows[3][1] - row_height // 2, _soa_color(segment.soa_ms)),
                         )
                     ):
                         painter.setPen(q["QPen"](q["QColor"]("#bcc7bd")))
@@ -594,7 +644,7 @@ def _create_tactile_timeline_widget(
                         painter.drawRoundedRect(x1, y, max(2, x2 - x1), row_height, 4, 4)
                         if x2 - x1 >= 34:
                             painter.setPen(q["QPen"](q["QColor"]("#202621")))
-                            painter.drawText(x1 + 3, y + 1, max(1, x2 - x1 - 6), row_height - 2, int(q["Qt"].AlignmentFlag.AlignVCenter), _short(text, 16 if row_index else 20))
+                            painter.drawText(x1 + 3, y + 1, max(1, x2 - x1 - 6), row_height - 2, int(q["Qt"].AlignmentFlag.AlignVCenter), _short(text, 12 if row_index == 2 else (16 if row_index else 20)))
 
                 for cue in timeline_state.cues:
                     status = timeline_state.cue_status(cue)
@@ -605,7 +655,7 @@ def _create_tactile_timeline_widget(
                         "upcoming": "#d9dfd6",
                     }.get(status, "#d9dfd6")
                     x = _x(cue.time_s)
-                    line_y = rows[3][1]
+                    line_y = rows[4][1]
                     radius = 5 if status == "next" else 4
                     marker_pen = q["QPen"](q["QColor"]("#202621" if status == "next" else "#bcc7bd"))
                     marker_pen.setWidth(1)
@@ -617,7 +667,7 @@ def _create_tactile_timeline_widget(
                 click_pen.setWidth(2)
                 painter.setPen(click_pen)
                 painter.setBrush(q["QBrush"](q["QColor"]("#dce7f4")))
-                click_y = rows[4][1]
+                click_y = rows[5][1]
                 for marker in timeline_state.click_markers:
                     x = _x(marker.time_s)
                     painter.drawRect(x - 4, click_y - 4, 8, 8)
@@ -639,29 +689,97 @@ def _create_block_plan_widget(q: dict[str, Any], owner: Any) -> Any:
             super().__init__()
             profile = getattr(owner, "layout_profile", None)
             self._compact = bool(profile is not None and profile.screen_class == "constrained")
-            self.setMinimumHeight(30 if self._compact else 58)
+            self.setMinimumHeight(36 if self._compact else 62)
             self.setCursor(q["Qt"].CursorShape.PointingHandCursor)
             self.setMouseTracking(True)
 
-        def _column_count(self, width: int, count: int) -> int:
+        def _instruction_slots_for_block_item(self, item: dict[str, Any]) -> list[dict[str, Any]]:
+            handler = getattr(owner, "_instruction_slots_for_item", None)
+            if not callable(handler):
+                return []
+            return [dict(slot) for slot in list(handler(item) or [])]
+
+        def _visual_groups(self) -> list[list[dict[str, Any]]]:
+            groups: list[list[dict[str, Any]]] = []
+            for item in list(getattr(owner, "block_plan_items", []) or []):
+                plan_item = dict(item)
+                group: list[dict[str, Any]] = []
+                if str(plan_item.get("kind") or "") == "standard":
+                    slots = self._instruction_slots_for_block_item(plan_item)
+                    before_slots = [
+                        slot
+                        for slot in slots
+                        if str(slot.get("slot") or "") in {"before_experiment", "before_each_block"}
+                    ]
+                    after_slots = [
+                        slot
+                        for slot in slots
+                        if str(slot.get("slot") or "") not in {"before_experiment", "before_each_block"}
+                    ]
+                    for slot in before_slots:
+                        group.append(
+                            {
+                                "entry_kind": "instruction",
+                                "placement": "before",
+                                "block_number": int(plan_item.get("number") or 0),
+                                **dict(slot),
+                            }
+                        )
+                group.append({"entry_kind": "block", **plan_item})
+                if str(plan_item.get("kind") or "") == "standard":
+                    for slot in after_slots:
+                        group.append(
+                            {
+                                "entry_kind": "instruction",
+                                "placement": "after",
+                                "block_number": int(plan_item.get("number") or 0),
+                                **dict(slot),
+                            }
+                        )
+                groups.append(group)
+            return groups
+
+        def _entry_size(self, entry: dict[str, Any]) -> tuple[int, int]:
+            if str(entry.get("entry_kind") or "") == "instruction":
+                return (10 if self._compact else 13, 16 if self._compact else 20)
+            return (48 if self._compact else 68, 28 if self._compact else 32)
+
+        def _layout_items_for_width(self, width: int) -> tuple[list[dict[str, Any]], int]:
+            groups = self._visual_groups()
+            if not groups:
+                return [], 36 if self._compact else 58
             margin = 8
-            gap = 5
-            min_width = 36 if self._compact else 42
-            available = max(min_width, int(width) - (2 * margin))
-            return max(1, min(max(1, count), int((available + gap) / (min_width + gap))))
+            gap = 4 if self._compact else 5
+            row_height = 28 if self._compact else 32
+            right_edge = max(margin + 1, int(width) - margin)
+            available = max(1, right_edge - margin)
+            x = margin
+            y = margin
+            layout_items: list[dict[str, Any]] = []
+
+            def _wrap_row() -> None:
+                nonlocal x, y
+                x = margin
+                y += row_height + gap
+
+            for group in groups:
+                group_width = sum(self._entry_size(entry)[0] for entry in group) + gap * max(0, len(group) - 1)
+                if x > margin and group_width <= available and x + group_width > right_edge:
+                    _wrap_row()
+                for entry in group:
+                    entry_width, entry_height = self._entry_size(entry)
+                    if x > margin and x + entry_width > right_edge:
+                        _wrap_row()
+                    item_y = y + max(0, int((row_height - entry_height) / 2))
+                    layout_entry = dict(entry)
+                    layout_entry.update({"x": x, "y": item_y, "width": entry_width, "height": entry_height})
+                    layout_items.append(layout_entry)
+                    x += entry_width + gap
+            target_height = max(36 if self._compact else 58, y + row_height + margin)
+            return layout_items, target_height
 
         def refresh_layout_height(self) -> None:
-            items = list(getattr(owner, "block_plan_items", []) or [])
-            if not items:
-                target_height = 36 if self._compact else 58
-            else:
-                margin = 8
-                gap = 5
-                box_height = 28 if self._compact else 32
-                columns = self._column_count(max(1, int(self.width())), len(items))
-                rows = max(1, int(math.ceil(len(items) / columns)))
-                target_height = (2 * margin) + (rows * box_height) + ((rows - 1) * gap)
-                target_height = max(36 if self._compact else 58, target_height)
+            _items, target_height = self._layout_items_for_width(max(1, int(self.width())))
             if int(self.minimumHeight()) != int(target_height):
                 self.setMinimumHeight(int(target_height))
                 self.updateGeometry()
@@ -671,35 +789,12 @@ def _create_block_plan_widget(q: dict[str, Any], owner: Any) -> Any:
             self.refresh_layout_height()
 
         def _layout_items(self) -> list[dict[str, Any]]:
-            items = list(getattr(owner, "block_plan_items", []) or [])
-            if not items:
-                return []
-            width = max(1, int(self.width()))
-            margin = 8
-            gap = 5
-            count = len(items)
-            columns = self._column_count(width, count)
-            rows = max(1, int(math.ceil(count / columns)))
-            box_height = 28 if self._compact else 32
-            available_width = max(1, width - (2 * margin) - (gap * (columns - 1)))
-            box_width = max(32 if self._compact else 38, int(available_width / columns))
-            layout_items: list[dict[str, Any]] = []
-            for index, item in enumerate(items):
-                row = int(index / columns)
-                column = index % columns
-                x = margin + column * (box_width + gap)
-                y = margin + row * (box_height + gap)
-                if y + box_height > max(self.height(), self.minimumHeight()) - 2:
-                    box_height = max(20, int((max(self.height(), self.minimumHeight()) - (2 * margin) - (gap * (rows - 1))) / rows))
-                    y = margin + row * (box_height + gap)
-                entry = dict(item)
-                entry.update({"x": x, "y": y, "width": box_width, "height": box_height})
-                layout_items.append(entry)
-            return layout_items
+            items, _target_height = self._layout_items_for_width(max(1, int(self.width())))
+            return items
 
         def item_center(self, number: int) -> Any:
             for item in self._layout_items():
-                if int(item.get("number") or 0) == int(number):
+                if str(item.get("entry_kind") or "") == "block" and int(item.get("number") or 0) == int(number):
                     return q["QPoint"](
                         int(item["x"]) + int(item["width"]) // 2,
                         int(item["y"]) + int(item["height"]) // 2,
@@ -725,13 +820,19 @@ def _create_block_plan_widget(q: dict[str, Any], owner: Any) -> Any:
                 point = event.pos()
             item = self._item_at(point)
             if item is not None:
-                label = str(item.get("label") or "")
-                display = str(item.get("display_label") or f"Block {item.get('part_block_number') or item.get('number')}")
-                part = _part_button_label(str(item.get("part_key") or ""))
-                detail = f"{part} {display}"
-                if label and label != display:
-                    detail = f"{detail}: {label}"
-                self.setToolTip(detail)
+                if str(item.get("entry_kind") or "") == "instruction":
+                    label = str(item.get("display_label") or item.get("label") or "Instruction")
+                    mode = str(item.get("continue_mode") or "").replace("_", " ")
+                    duration = float(item.get("duration_s") or 0.0)
+                    self.setToolTip(f"{label} | {duration:.1f}s | {mode}".strip(" |"))
+                else:
+                    label = str(item.get("label") or "")
+                    display = str(item.get("display_label") or f"Block {item.get('part_block_number') or item.get('number')}")
+                    part = _part_button_label(str(item.get("part_key") or ""))
+                    detail = f"{part} {display}"
+                    if label and label != display:
+                        detail = f"{detail}: {label}"
+                    self.setToolTip(detail)
             super().mouseMoveEvent(event)
 
         def mousePressEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
@@ -741,7 +842,7 @@ def _create_block_plan_widget(q: dict[str, Any], owner: Any) -> Any:
                 except AttributeError:
                     point = event.pos()
                 item = self._item_at(point)
-                if item is not None:
+                if item is not None and str(item.get("entry_kind") or "") == "block":
                     handler = getattr(owner, "_select_block_plan_item", None)
                     if callable(handler):
                         handler(int(item.get("number") or 0))
@@ -774,11 +875,17 @@ def _create_block_plan_widget(q: dict[str, Any], owner: Any) -> Any:
                             break
 
                 for item in self._layout_items():
-                    number = int(item.get("number") or 0)
                     x = int(item["x"])
                     y = int(item["y"])
                     box_width = int(item["width"])
                     box_height = int(item["height"])
+                    if str(item.get("entry_kind") or "") == "instruction":
+                        color = str(item.get("color") or _instruction_slot_color(str(item.get("slot") or "")))
+                        painter.setPen(q["QPen"](q["QColor"]("#7d8b80")))
+                        painter.setBrush(q["QBrush"](q["QColor"](color)))
+                        painter.drawRoundedRect(x, y, box_width, box_height, 4, 4)
+                        continue
+                    number = int(item.get("number") or 0)
                     kind = str(item.get("kind") or "")
                     display_number = int(item.get("part_block_number") or number)
                     if number == active:
@@ -827,32 +934,62 @@ def _create_block_plan_widget(q: dict[str, Any], owner: Any) -> Any:
     return BlockPlanWidget()
 
 
-def _create_instruction_plan_widget(q: dict[str, Any], owner: Any) -> Any:
-    class InstructionPlanWidget(q["QWidget"]):
+def _create_instruction_legend_widget(q: dict[str, Any], owner: Any) -> Any:
+    class InstructionLegendWidget(q["QWidget"]):
         def __init__(self) -> None:
             super().__init__()
             profile = getattr(owner, "layout_profile", None)
-            self._compact = bool(profile is not None and profile.screen_class == "constrained")
-            self.setMinimumHeight(28 if self._compact else 32)
+            self._compact = bool(profile is not None and profile.compact)
+            self.setMinimumHeight(34 if self._compact else 44)
             self.setMouseTracking(True)
 
-        def _layout_items(self) -> list[dict[str, Any]]:
-            items = [dict(item) for item in list(getattr(owner, "instruction_plan_items", []) or [])]
-            if not items:
-                return []
-            margin = 8
-            gap = 6
-            width = max(1, int(self.width()))
-            box_height = 18 if self._compact else 22
-            available = max(1, width - (2 * margin) - (gap * (len(items) - 1)))
-            box_width = max(62 if self._compact else 84, int(available / len(items)))
+        def _items(self) -> list[dict[str, Any]]:
+            return [dict(item) for item in _enabled_instruction_slots(getattr(owner, "package", None))]
+
+        def _layout_items_for_width(self, width: int) -> tuple[list[dict[str, Any]], int]:
+            raw_items = self._items()
+            if not raw_items:
+                return [], 30 if self._compact else 36
+            margin = 4
+            gap = 8
+            row_gap = 5
+            swatch = 10 if self._compact else 12
+            row_height = 18 if self._compact else 20
+            right_edge = max(margin + 1, int(width) - margin)
+            x = margin
+            y = margin
             layout_items: list[dict[str, Any]] = []
-            for index, item in enumerate(items):
-                x = margin + index * (box_width + gap)
+            metrics = self.fontMetrics()
+            for item in raw_items:
+                label = str(item.get("display_label") or item.get("label") or "Instruction")
+                try:
+                    text_width = int(metrics.horizontalAdvance(label))
+                except AttributeError:
+                    text_width = int(metrics.width(label))
+                entry_width = min(max(swatch + 6 + text_width, 70 if self._compact else 82), 150)
+                if x > margin and x + entry_width > right_edge:
+                    x = margin
+                    y += row_height + row_gap
                 entry = dict(item)
-                entry.update({"x": x, "y": margin, "width": box_width, "height": box_height})
+                entry.update({"x": x, "y": y, "width": entry_width, "height": row_height, "swatch": swatch})
                 layout_items.append(entry)
-            return layout_items
+                x += entry_width + gap
+            target_height = max(34 if self._compact else 44, y + row_height + margin)
+            return layout_items, target_height
+
+        def refresh_layout_height(self) -> None:
+            _items, target = self._layout_items_for_width(max(1, int(self.width())))
+            if int(self.minimumHeight()) != int(target):
+                self.setMinimumHeight(int(target))
+                self.updateGeometry()
+
+        def resizeEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
+            super().resizeEvent(event)
+            self.refresh_layout_height()
+
+        def _layout_items(self) -> list[dict[str, Any]]:
+            items, _target = self._layout_items_for_width(max(1, int(self.width())))
+            return items
 
         def mouseMoveEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
             try:
@@ -862,8 +999,12 @@ def _create_instruction_plan_widget(q: dict[str, Any], owner: Any) -> Any:
             px = int(point.x())
             py = int(point.y())
             for item in self._layout_items():
-                if int(item["x"]) <= px <= int(item["x"]) + int(item["width"]) and int(item["y"]) <= py <= int(item["y"]) + int(item["height"]):
-                    label = str(item.get("label") or item.get("display_label") or "")
+                x = int(item["x"])
+                y = int(item["y"])
+                width = int(item["width"])
+                height = int(item["height"])
+                if x <= px <= x + width and y <= py <= y + height:
+                    label = str(item.get("label") or item.get("display_label") or "Instruction")
                     mode = str(item.get("continue_mode") or "").replace("_", " ")
                     duration = float(item.get("duration_s") or 0.0)
                     self.setToolTip(f"{label} | {duration:.1f}s | {mode}".strip(" |"))
@@ -883,19 +1024,26 @@ def _create_instruction_plan_widget(q: dict[str, Any], owner: Any) -> Any:
                 for item in items:
                     x = int(item["x"])
                     y = int(item["y"])
-                    width = int(item["width"])
                     height = int(item["height"])
+                    swatch = int(item["swatch"])
                     color = str(item.get("color") or _instruction_slot_color(str(item.get("slot") or "")))
-                    painter.setPen(q["QPen"](q["QColor"]("#bcc7bd")))
+                    painter.setPen(q["QPen"](q["QColor"]("#7d8b80")))
                     painter.setBrush(q["QBrush"](q["QColor"](color)))
-                    painter.drawRoundedRect(x, y, width, height, 5, 5)
-                    painter.setPen(q["QPen"](q["QColor"]("#ffffff")))
+                    painter.drawRoundedRect(x, y + max(0, (height - swatch) // 2), swatch, swatch, 3, 3)
+                    painter.setPen(q["QPen"](q["QColor"]("#202621")))
                     text = str(item.get("display_label") or item.get("label") or "Instruction")
-                    painter.drawText(x + 4, y + 1, width - 8, height - 2, int(q["Qt"].AlignmentFlag.AlignCenter), text)
+                    painter.drawText(
+                        x + swatch + 5,
+                        y,
+                        max(1, int(item["width"]) - swatch - 5),
+                        height,
+                        int(q["Qt"].AlignmentFlag.AlignVCenter),
+                        text,
+                    )
             finally:
                 painter.end()
 
-    return InstructionPlanWidget()
+    return InstructionLegendWidget()
 
 
 def _create_topup_draft_widget(q: dict[str, Any], owner: Any) -> Any:
@@ -2432,11 +2580,13 @@ class FocusModeWindow:
             else:
                 self.run_splitter.addWidget(panel)
 
-        data_panel_title = "" if profile.right_stack_mode == "tabs" else "Data Selection"
+        settings_title = "Data Logging / Experiment Settings"
+        data_panel_title = "" if profile.right_stack_mode == "tabs" else settings_title
         data_panel, data_layout = _panel(q, data_panel_title, profile=profile)
         self.data_selection_panel = data_panel
-        data_panel.setMinimumWidth(320 if profile.compact else 360)
-        data_panel_min_height = 178 if profile.screen_class == "constrained" else max(250, profile.response_panel_side)
+        self.settings_panel = data_panel
+        data_panel.setMinimumWidth(380 if profile.compact else 460)
+        data_panel_min_height = 248 if profile.screen_class == "constrained" else max(290, profile.response_panel_side)
         data_panel.setMinimumHeight(data_panel_min_height)
         data_layout.addWidget(_subtitle(q, "Participant Setup"))
         self.participant_code_combo = q["QComboBox"]()
@@ -2546,50 +2696,28 @@ class FocusModeWindow:
         session_grid.setColumnStretch(1, 1)
         session_grid.setColumnStretch(3, 1)
         data_layout.addLayout(session_grid)
-        data_layout.addStretch(1)
-        _add_operator_panel("Data Selection", data_panel)
-
-        settings_panel_title = "" if profile.right_stack_mode == "tabs" else "Settings"
-        settings_panel, settings_layout = _panel(q, settings_panel_title, profile=profile)
-        self.settings_panel = settings_panel
-        settings_panel.setMinimumWidth(240 if profile.compact else 270)
-        settings_panel_min_height = 128 if profile.screen_class == "constrained" else max(180, profile.response_panel_side)
-        settings_panel.setMinimumHeight(settings_panel_min_height)
-        settings_layout.addWidget(_subtitle(q, "Recording"))
-        chip_grid = q["QGridLayout"]()
-        chip_grid.setContentsMargins(0, 0, 0, 0)
-        chip_grid.setHorizontalSpacing(6)
-        chip_grid.setVerticalSpacing(6)
-        recording_chips = [("events.csv on", True)]
-        recording_chips.extend(
-            [
-                (label if enabled else f"{label} off", bool(enabled))
-                for label, enabled in (
-                    ("LSL/event protocol", self.capture_options.enable_lsl),
-                    ("local marker mirror", self.capture_options.write_lsl_marker_mirror),
-                    ("trigger dictionary", self.capture_options.write_trigger_dictionary),
-                    ("events.xdf", self.capture_options.write_internal_xdf),
-                    ("analysis CSVs", self.capture_options.write_analysis_csvs),
-                )
-            ]
+        data_layout.addWidget(_subtitle(q, "Instruction Map"))
+        self.instruction_legend_widget = _create_instruction_legend_widget(q, self)
+        data_layout.addWidget(self.instruction_legend_widget)
+        data_layout.addWidget(_subtitle(q, "Data Logging"))
+        self.backup_recording_checkbox = q["QCheckBox"](_backup_recording_checkbox_text(self.package))
+        self.backup_recording_checkbox.setObjectName("failSafeRecordingCheckbox")
+        self.backup_recording_checkbox.setToolTip(
+            "LSL/event logging remains standard. This adds per-block fail-safe local recording WAVs on this computer."
         )
-        columns = max(1, int(profile.recording_chip_columns))
-        for index, (label, enabled) in enumerate(recording_chips):
-            chip = _chip(q, label, tone="ok" if enabled else "off")
-            chip_grid.addWidget(chip, index // columns, index % columns)
-        settings_layout.addLayout(chip_grid)
-        self.backup_recording_checkbox = q["QCheckBox"]("Backup WAV (Belts and Suspenders)")
-        self.backup_recording_checkbox.setToolTip("Belts and Suspenders: save local full-audio backup WAV")
+        self.backup_recording_checkbox.setMinimumHeight(max(profile.button_min_height + 18, profile.input_min_height + 22))
         self.backup_recording_checkbox.setChecked(bool(self.capture_options.start_backup_recording))
+        data_layout.addWidget(self.backup_recording_checkbox)
+        data_layout.addWidget(_subtitle(q, "Experiment Settings"))
         self.topup_checkbox = q["QCheckBox"]("Top up missed tactile trials at part end")
         self.topup_checkbox.setToolTip("Top up missed tactile trials at end of each part")
+        self.topup_checkbox.setMinimumHeight(profile.input_min_height)
         self.topup_checkbox.setChecked(bool(self.enable_missed_trial_topup))
         self.topup_checkbox.stateChanged.connect(lambda _state: self._refresh_run_plan(select_default=True))
-        settings_layout.addWidget(self.backup_recording_checkbox)
-        settings_layout.addWidget(self.topup_checkbox)
-        settings_layout.addStretch(1)
+        data_layout.addWidget(self.topup_checkbox)
         self._pre_run_controls.extend([self.backup_recording_checkbox, self.topup_checkbox])
-        _add_operator_panel("Settings", settings_panel)
+        data_layout.addStretch(1)
+        _add_operator_panel(settings_title, data_panel)
 
         self.processing_splitter = None
 
@@ -2616,8 +2744,6 @@ class FocusModeWindow:
             part_selector_layout.addWidget(button)
         part_selector_layout.addStretch(1)
         progress_layout.addWidget(self.part_selector_widget)
-        self.instruction_plan_widget = _create_instruction_plan_widget(q, self)
-        progress_layout.addWidget(self.instruction_plan_widget)
         self.block_plan_widget = _create_block_plan_widget(q, self)
         progress_layout.addWidget(self.block_plan_widget)
         self.block_preview_label = q["QLabel"]("Block preview: live schedule")
@@ -2691,20 +2817,13 @@ class FocusModeWindow:
             self.run_splitter.setStretchFactor(1, 1)
         else:
             self.run_splitter.setStretchFactor(1, 2)
-            self.run_splitter.setStretchFactor(2, 1)
 
         response_column_width = profile.response_panel_side + max(12, profile.root_spacing)
         if profile.right_stack_mode == "tabs":
             self.run_splitter.setSizes([response_column_width, max(420, profile.window_width - response_column_width)])
         else:
             remaining_width = max(620, profile.window_width - response_column_width)
-            self.run_splitter.setSizes(
-                [
-                    response_column_width,
-                    max(360, int(remaining_width * 0.58)),
-                    max(260, int(remaining_width * 0.42)),
-                ]
-            )
+            self.run_splitter.setSizes([response_column_width, remaining_width])
         top_height = response_stack_height
         lower_height = processing_panel_min_height
         self.workspace_splitter.setSizes([top_height, lower_height])
@@ -2808,9 +2927,9 @@ class FocusModeWindow:
         elif profile.screen_class == "constrained":
             target = 42
         elif profile.compact:
-            target = 78
+            target = 90
         else:
-            target = 116
+            target = 132
         if int(self.tactile_timeline_widget.minimumHeight()) != int(target):
             self.tactile_timeline_widget.setMinimumHeight(int(target))
             self.tactile_timeline_widget.updateGeometry()
@@ -2881,11 +3000,16 @@ class FocusModeWindow:
 
     def _set_instruction_plan_for_item(self, item: dict[str, Any] | None) -> None:
         self.instruction_plan_items = self._instruction_slots_for_item(item or {}) if item else _enabled_instruction_slots(self.package)
-        if hasattr(self, "instruction_plan_widget"):
-            self.instruction_plan_widget.setVisible(
-                bool(self.instruction_plan_items) and self.layout_profile.screen_class != "constrained"
-            )
-            self.instruction_plan_widget.update()
+        if hasattr(self, "instruction_legend_widget"):
+            refresh_height = getattr(self.instruction_legend_widget, "refresh_layout_height", None)
+            if callable(refresh_height):
+                refresh_height()
+            self.instruction_legend_widget.update()
+        if hasattr(self, "block_plan_widget"):
+            refresh_height = getattr(self.block_plan_widget, "refresh_layout_height", None)
+            if callable(refresh_height):
+                refresh_height()
+            self.block_plan_widget.update()
 
     def _select_default_block_preview(self) -> None:
         if self._run_active:
@@ -3191,6 +3315,8 @@ class FocusModeWindow:
         if self.folder_value is not None:
             self.folder_value.setText(_short_folder_label(self.package.session_dir))
             self.folder_value.setToolTip(str(self.package.session_dir))
+        if hasattr(self, "backup_recording_checkbox"):
+            self.backup_recording_checkbox.setText(_backup_recording_checkbox_text(self.package))
         self._refresh_run_plan(select_default=True)
         self._update_tactile_timeline_display()
 
