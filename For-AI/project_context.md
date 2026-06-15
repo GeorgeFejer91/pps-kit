@@ -120,3 +120,5 @@ Full Study 5 packaged-runner UI readiness evidence now includes the evaluation-o
 ## Privacy And Publication Boundary
 
 The public repo is a toolkit plus deidentified sample-data package. It is not a full study archive. Before publishing, run the release audit and tests. Do not weaken release safeguards without a clear reason and corresponding documentation update.
+
+Public documentation should present the MIT License boundary explicitly: toolkit code and included project materials are MIT-licensed and provided without warranty, while participant outputs, local generated artifacts, third-party assets, vendor software, and external datasets remain outside that license grant unless separate rights are documented.
