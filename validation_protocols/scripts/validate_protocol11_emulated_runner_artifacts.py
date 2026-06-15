@@ -682,14 +682,30 @@ def _audit_outputs(
     lsl_xdf = session_dir / "lsl_markers.xdf"
     trigger_json = session_dir / "trigger_dictionary.json"
     summary_txt = session_dir / "analysis_summary.txt"
-    _criterion(criteria, "data_outputs_analysis", "events_csv_written", events_csv.is_file(), str(events_csv), required=capture_options.get("write_events_csv", True))
-    _criterion(criteria, "data_outputs_analysis", "events_xdf_written_when_enabled", events_xdf.is_file(), str(events_xdf), required=capture_options.get("write_internal_xdf", True))
+    if capture_options.get("write_events_csv", True):
+        _criterion(criteria, "data_outputs_analysis", "events_csv_written", events_csv.is_file(), str(events_csv))
+    else:
+        _criterion(criteria, "data_outputs_analysis", "events_csv_absent_when_disabled", not events_csv.exists(), str(events_csv), required=False)
+    if capture_options.get("write_internal_xdf", True):
+        _criterion(criteria, "data_outputs_analysis", "events_xdf_written_when_enabled", events_xdf.is_file(), str(events_xdf))
+    else:
+        _criterion(criteria, "data_outputs_analysis", "events_xdf_absent_when_disabled", not events_xdf.exists(), str(events_xdf), required=False)
     _criterion(criteria, "data_outputs_analysis", "analysis_summary_written", summary_txt.is_file(), str(summary_txt), required=capture_options.get("write_analysis_csvs", True))
     analysis_required = capture_options.get("write_analysis_csvs", True)
     missing_analysis = [name for name, path in analysis_paths.items() if path is None or not path.is_file()]
-    _criterion(criteria, "data_outputs_analysis", "analysis_csv_family_written", not missing_analysis, ",".join(missing_analysis), required=analysis_required)
-    _criterion(criteria, "lsl_trigger_codes", "lsl_marker_mirrors_written_when_enabled", lsl_csv.is_file() and lsl_xdf.is_file(), f"{lsl_csv}; {lsl_xdf}", required=capture_options.get("write_lsl_marker_mirror", True))
-    _criterion(criteria, "lsl_trigger_codes", "trigger_dictionary_written_when_enabled", trigger_json.is_file(), str(trigger_json), required=capture_options.get("write_trigger_dictionary", True))
+    if analysis_required:
+        _criterion(criteria, "data_outputs_analysis", "analysis_csv_family_written", not missing_analysis, ",".join(missing_analysis))
+    else:
+        present_analysis = [name for name, path in analysis_paths.items() if path is not None and path.is_file()]
+        _criterion(criteria, "data_outputs_analysis", "analysis_csv_family_absent_when_disabled", not present_analysis, ",".join(present_analysis), required=False)
+    if capture_options.get("write_lsl_marker_mirror", True):
+        _criterion(criteria, "lsl_trigger_codes", "lsl_marker_mirrors_written_when_enabled", lsl_csv.is_file() and lsl_xdf.is_file(), f"{lsl_csv}; {lsl_xdf}")
+    else:
+        _criterion(criteria, "lsl_trigger_codes", "lsl_marker_mirrors_absent_when_disabled", not lsl_csv.exists() and not lsl_xdf.exists(), f"{lsl_csv}; {lsl_xdf}", required=False)
+    if capture_options.get("write_trigger_dictionary", True):
+        _criterion(criteria, "lsl_trigger_codes", "trigger_dictionary_written_when_enabled", trigger_json.is_file(), str(trigger_json))
+    else:
+        _criterion(criteria, "lsl_trigger_codes", "trigger_dictionary_absent_when_disabled", not trigger_json.exists(), str(trigger_json), required=False)
 
 
 def _audit_lsl_and_triggers(criteria: list[Criterion], *, session_dir: Path, events: list[dict[str, Any]], capture_options: dict[str, bool]) -> None:

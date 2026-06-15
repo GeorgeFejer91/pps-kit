@@ -1082,6 +1082,54 @@ def test_protocol11_controlled_response_matrix_exercises_boundary_pairing(tmp_pa
     assert Path(report["artifact_audit_json"]).exists()
 
 
+def test_protocol11_capture_options_matrix_respects_output_toggles(tmp_path: Path):
+    matrix = _load_script("run_protocol11_capture_options_matrix.py")
+
+    report = matrix.run_matrix(
+        output_dir=tmp_path,
+        participant_id="P011",
+        sample_rate=44100,
+        trial_count=2,
+        trial_duration_s=0.25,
+    )
+
+    assert report["passed"]
+    variants = {variant["name"]: variant for variant in report["variants"]}
+    assert set(variants) == {
+        "standard_all_local",
+        "events_only_no_recording",
+        "xdf_without_events_csv",
+        "analysis_without_xdf_or_lsl",
+        "marker_mirror_only",
+    }
+    standard = variants["standard_all_local"]
+    assert standard["file_inventory"]["events_csv"]["exists"]
+    assert standard["file_inventory"]["events_xdf"]["exists"]
+    assert standard["file_inventory"]["lsl_markers_xdf"]["exists"]
+    assert standard["file_inventory"]["trigger_dictionary_json"]["exists"]
+    assert standard["file_inventory"]["analysis_csv_count"] > 0
+    assert standard["recording_paths"]
+
+    events_only = variants["events_only_no_recording"]
+    assert events_only["file_inventory"]["events_csv"]["exists"]
+    assert not events_only["file_inventory"]["events_xdf"]["exists"]
+    assert not events_only["file_inventory"]["lsl_markers_csv"]["exists"]
+    assert events_only["file_inventory"]["analysis_csv_count"] == 0
+    assert events_only["checks"]["recording_disabled_logged"]
+
+    xdf_only = variants["xdf_without_events_csv"]
+    assert not xdf_only["file_inventory"]["events_csv"]["exists"]
+    assert xdf_only["file_inventory"]["events_xdf"]["exists"]
+
+    marker_only = variants["marker_mirror_only"]
+    assert not marker_only["file_inventory"]["events_csv"]["exists"]
+    assert marker_only["file_inventory"]["lsl_markers_csv"]["exists"]
+    assert marker_only["file_inventory"]["lsl_markers_xdf"]["exists"]
+    assert marker_only["file_inventory"]["trigger_dictionary_json"]["exists"]
+    assert marker_only["file_inventory"]["analysis_csv_count"] == 0
+    assert (tmp_path / "protocol11_capture_options_matrix_variants.csv").exists()
+
+
 def test_topup_missed_trial_stress_rescues_intentional_misses(tmp_path: Path):
     stress = _load_script("run_topup_missed_trial_stress.py")
 

@@ -81,6 +81,7 @@ python .\validation_protocols\scripts\run_topup_missed_trial_stress.py --output-
 python .\validation_protocols\scripts\run_study5_end_to_end_ui_mouse_validation.py --packaged-standalone-app
 python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py --participant-id P001 --mouse-backend pynput
 python .\validation_protocols\scripts\run_protocol11_controlled_response_matrix.py --output-dir artifacts\validation_runs\protocol11_controlled_response_matrix_current
+python .\validation_protocols\scripts\run_protocol11_capture_options_matrix.py --output-dir artifacts\validation_runs\protocol11_capture_options_matrix_current
 python .\validation_protocols\scripts\validate_protocol11_emulated_runner_artifacts.py --session-dir local_data\sessions\P001_YYYYMMDD_HHMMSS --response-plan artifacts\validation_runs\protocol11_response_plan.json
 python .\validation_protocols\scripts\run_focus_mode_click_path_stress.py --output-dir artifacts\validation_runs\focus_mode_click_path_current --count 10 --offscreen
 python .\validation_protocols\scripts\run_visible_runner_os_click_stress.py --output-dir artifacts\validation_runs\visible_runner_os_click_stress_current --count 10 --interval-s 0.05 --armed
@@ -171,7 +172,10 @@ Separate these quantities in every report:
   runs `SessionRunnerController`, exercises instruction target clicks, catch
   and baseline rows, out-of-target and double clicks, +99 ms/+100 ms/+3.0 s/
   >3.0 s response pairing, and a click exactly at the next `trial_start`, then
-  feeds the resulting session to the artifact gate. `validate_protocol11_emulated_runner_artifacts.py`
+  feeds the resulting session to the artifact gate. `run_protocol11_capture_options_matrix.py`
+  is the local output-policy gate for capture variants: it verifies events-only,
+  internal-XDF-only, analysis-without-XDF/LSL, marker-mirror-only, and standard
+  local-recording-enabled sessions. `validate_protocol11_emulated_runner_artifacts.py`
   is the offline artifact gate for completed scenarios: it consumes a session
   folder and response plan keyed by `trial_uid`, then verifies the written
   WAV/manifests, events, timing QC, analysis CSVs, marker mirrors, trigger

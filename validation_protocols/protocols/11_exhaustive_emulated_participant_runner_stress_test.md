@@ -58,6 +58,15 @@ python .\validation_protocols\scripts\run_protocol11_controlled_response_matrix.
   --output-dir artifacts\validation_runs\protocol11_controlled_response_matrix_current
 ```
 
+Run the capture-options matrix to verify the runner's durable output policies
+across events-only, internal-XDF-only, analysis-without-XDF/LSL,
+marker-mirror-only, and standard local-recording-enabled sessions:
+
+```powershell
+python .\validation_protocols\scripts\run_protocol11_capture_options_matrix.py `
+  --output-dir artifacts\validation_runs\protocol11_capture_options_matrix_current
+```
+
 After each scenario writes a real runner session folder, run the offline
 Protocol 11 artifact gate with the scenario's controlled response plan:
 
@@ -236,6 +245,9 @@ for each scenario:
 - Top-up adversarial run across two parts with approval accepted, denied, and
   failed.
 - Capture-options matrix with LSL, XDF, trigger, and analysis toggles.
+  `run_protocol11_capture_options_matrix.py` is the canonical fast local
+  output-policy gate; it does not replace realtime Study 5 hardware/XDF/local
+  recorder validation.
 - Fault-injection matrix for missing assets, bad hashes, missing LSL, stopped
   run, and instruction errors.
 - Generality run on at least one published non-Study-5 profile.
