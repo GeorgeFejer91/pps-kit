@@ -971,6 +971,69 @@ code {
 }
 /* ── / Layered architecture diagram ───────────────────────────────────── */
 
+/* ── Audiogram figure ─────────────────────────────────────────────────── */
+.audiogram-figure {
+  margin: 18px 0 22px;
+  padding: 0;
+  display: block;
+}
+
+.audiogram-figure .audiogram-frame {
+  display: block;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #253a2e;
+  box-shadow: 0 2px 8px rgba(14, 22, 18, 0.18);
+  line-height: 0;
+}
+
+.audiogram-figure .audiogram-frame svg,
+.audiogram-figure .audiogram-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.audiogram-figcaption {
+  margin-top: 7px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.audiogram-figcaption .audiogram-figcaption-label {
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #4a6458;
+  white-space: nowrap;
+}
+/* Audiogram nested inside an arch-node card - bleed to card edges */
+.arch-node .audiogram-figure {
+  margin: 12px -14px -14px;
+  width: calc(100% + 28px);
+}
+
+.arch-node .audiogram-figure .audiogram-frame {
+  border-radius: 0 0 7px 7px;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  border-top: 1px solid #1e3028;
+  box-shadow: none;
+}
+
+.arch-node .audiogram-figure .audiogram-figcaption {
+  padding: 0 14px;
+  margin-top: 6px;
+}
+/* ── / Audiogram figure ───────────────────────────────────────────────── */
+
 .runner-interface-card {
   border-color: #96c8b1;
   background: #eff8f3;
@@ -3783,4 +3846,69 @@ body.modal-open {
     grid-template-columns: 1fr;
   }
 
-  .fil
+  .filmstrip-row-header {
+    grid-template-columns: 1fr;
+  }
+
+  .filmstrip-row-body {
+    flex-direction: column;
+  }
+
+  .trial-condition-field {
+    flex-basis: auto;
+    width: 100%;
+  }
+
+  .filmstrip-sequence {
+    width: 100%;
+  }
+
+  .filmstrip-element {
+    min-width: 210px;
+  }
+
+}
+
+@media (max-width: 520px) {
+  .rail {
+    position: static;
+    width: auto;
+    max-height: none;
+    margin: 8px;
+  }
+
+  .workspace {
+    margin-left: 0;
+  }
+}
+
+/* Publication reference list */
+.pub-reference-list {
+  margin: 0 0 14px;
+  padding-left: 24px;
+  list-style: decimal;
+  color: #2e3932;
+  line-height: 1.6;
+}
+
+.pub-reference-list li {
+  font-size: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid #e4ebe6;
+}
+
+.pub-reference-list li:last-child {
+  border-bottom: none;
+}
+
+.pub-doi-link {
+  display: inline;
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 12.5px;
+  word-break: break-all;
+}
+
+.pub-doi-link:hover {
+  text-decoration: underline;
+}

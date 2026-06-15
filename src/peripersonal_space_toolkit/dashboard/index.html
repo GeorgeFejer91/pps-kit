@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260615-emulatable-studies-layout">
+  <link rel="stylesheet" href="styles.css?v=20260615-audiogram-emulatable-studies">
 </head>
 <body>
   <div class="app-shell">
@@ -540,7 +540,11 @@
             <span class="segment-kicker">Background</span>
             <h2 id="docs-pps-title">What Is Peripersonal Space</h2>
           </div>
-          <p class="info-lede">Peripersonal space is the multisensory region of space immediately surrounding the body within which stimuli are processed differently from those beyond arm's reach. First described as a distinct neural zone in primate neurophysiology by Rizzolatti, Scandolara, Matelli, and Gentilucci's 1981 Behavioural Brain Research companion papers on <a href="https://www.sciencedirect.com/science/article/pii/0166432881900528">somatosensory responses</a> and <a href="https://www.sciencedirect.com/science/article/pii/016643288190053X">visual responses</a> of periarcuate neurons, it is defined by neurons in areas such as the ventral premotor cortex and the putamen that respond both to tactile stimulation of the body surface and to nearby external stimuli. This dual sensory tuning makes peripersonal space representation inherently multisensory and links it to functions ranging from defensive behavior and tool use to bodily self-awareness. A widely used behavioral paradigm for mapping the spatial boundary of peripersonal space is the audio-tactile interaction task, with one canonical human PPS version reported in <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0044306">Canzoneri, Magosso, and Serino's 2012 PLOS ONE dynamic-sounds study</a>: participants respond to tactile stimuli delivered to the body while auditory stimuli approach from varying distances, tactile response times are systematically faster when the approaching sound is near the body, and this facilitation profile is taken as a behavioral index of the spatial extent and weighting of an individual's peripersonal space representation. Despite being a well-studied phenomenon, the field lacks standardized norms for how such experiments should be implemented, and the scripts, timing parameters, and stimuli used to construct published tasks are rarely made available.</p>
+          <div style="position:relative;width:100%;padding-bottom:56.25%;margin-bottom:1.5rem;border-radius:8px;overflow:hidden;">
+            <iframe style="position:absolute;inset:0;width:100%;height:100%;border:0;" src="https://www.youtube.com/embed/elfbiCzUVSA" title="What is Peripersonal Space?" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+          <p class="info-lede">Peripersonal space is the multisensory region immediately surrounding the body within which stimuli are processed differently from those beyond arm's reach. It was first characterized by Rizzolatti et al. (<a href="https://www.sciencedirect.com/science/article/pii/0166432881900528" target="_blank" rel="noopener noreferrer">1981a</a>, <a href="https://www.sciencedirect.com/science/article/pii/016643288190053X" target="_blank" rel="noopener noreferrer">1981b</a>) in studies of periarcuate neurons, cells in the ventral premotor cortex and putamen that respond to both tactile stimulation of the body surface and nearby external stimuli, and has since been linked to defensive behavior, tool use, and bodily self-awareness.</p>
+          <p class="info-lede">The standard behavioral approach for measuring peripersonal space in humans is the audio-tactile interaction task. In the canonical version reported by Canzoneri et al. (<a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0044306" target="_blank" rel="noopener noreferrer">2012</a>), participants respond to body-surface tactile stimuli while auditory stimuli approach from varying distances; tactile response times are faster when the sound is near the body. This distance-dependent facilitation profile serves as a behavioral index of the spatial boundary of an individual's peripersonal space representation. Despite the paradigm's widespread adoption, standardized implementations are lacking and task parameters are rarely shared across labs.</p>
         </section>
 
         <hr class="doc-segment-rule" aria-hidden="true">
@@ -560,44 +564,14 @@
             <span class="segment-kicker">Published Profiles</span>
             <h2 id="docs-emulatable-studies-title">Studies Currently Emulatable From Published Parameters</h2>
           </div>
-          <p class="info-copy">The toolkit can currently recreate six published study profiles whose reported parameters pass the Segment 0-4 profile gate and can be materialized for native runner handoff. Those profiles come from the five publications below; the 2026 arm-movement publication contributes two emulatable experiment profiles. DOI URLs are shown in citation form, but each DOI link opens the resolved publisher page rather than a doi.org resolver URL.</p>
-          <div class="info-card-grid">
-            <article class="info-card">
-              <span class="card-kicker">Four-direction peri-trunk PPS</span>
-              <h2>Matsuda 2021</h2>
-              <p>Matsuda, Y., Sugimoto, M., Inami, M., &amp; Kitazaki, M. (2021). Peripersonal space in the front, rear, left and right directions for audio-tactile multisensory integration. <em>Scientific Reports, 11</em>, Article 11303.</p>
-              <p>Toolkit profile: <code>matsuda_2021_four_directions</code></p>
-              <a class="button-link publication-doi-link" href="https://www.nature.com/articles/s41598-021-90784-5">https://doi.org/10.1038/s41598-021-90784-5</a>
-            </article>
-            <article class="info-card">
-              <span class="card-kicker">Arm movement PPS</span>
-              <h2>Lamia 2026</h2>
-              <p>Lamia, P., Shabani, N., &amp; Candidi, M. (2026). Somatotopy-independent reduction of audio-tactile intersensory facilitation for looming sounds within the peripersonal space during arm movements execution. <em>Scientific Reports, 16</em>, Article 7133.</p>
-              <p>Toolkit profiles: <code>barumerli_2026_arm_movement_exp1</code> and <code>barumerli_2026_arm_movement_exp2</code></p>
-              <a class="button-link publication-doi-link" href="https://www.nature.com/articles/s41598-026-36796-5">https://doi.org/10.1038/s41598-026-36796-5</a>
-            </article>
-            <article class="info-card">
-              <span class="card-kicker">Bodily self PPS</span>
-              <h2>Noel 2015</h2>
-              <p>Noel, J.-P., Pfeiffer, C., Blanke, O., &amp; Serino, A. (2015). Peripersonal space as the space of the bodily self. <em>Cognition, 144</em>, 49-57.</p>
-              <p>Toolkit profile: <code>noel_2015_bodily_self</code></p>
-              <a class="button-link publication-doi-link" href="https://www.sciencedirect.com/science/article/pii/S001002771530038X">https://doi.org/10.1016/j.cognition.2015.07.012</a>
-            </article>
-            <article class="info-card">
-              <span class="card-kicker">Lateral peri-head PPS</span>
-              <h2>Pfeiffer 2018</h2>
-              <p>Pfeiffer, C., Noel, J. P., Serino, A., &amp; Blanke, O. (2018). Vestibular modulation of peripersonal space boundaries. <em>European Journal of Neuroscience, 47</em>(7), 800-811.</p>
-              <p>Toolkit profile: <code>pfeiffer_2018_lateral_perihead_left_to_right</code></p>
-              <a class="button-link publication-doi-link" href="https://onlinelibrary.wiley.com/doi/10.1111/ejn.13872">https://doi.org/10.1111/ejn.13872</a>
-            </article>
-            <article class="info-card">
-              <span class="card-kicker">Peri-trunk PPS</span>
-              <h2>Serino 2015</h2>
-              <p>Serino, A., Noel, J. P., Galli, G., Canzoneri, E., Marmaroli, P., Lissek, H., &amp; Blanke, O. (2015). Body part-centered and full body-centered peripersonal space representations. <em>Scientific Reports, 5</em>, Article 18603.</p>
-              <p>Toolkit profile: <code>serino_2015_peri_trunk_exp1</code></p>
-              <a class="button-link publication-doi-link" href="https://www.nature.com/articles/srep18603">https://doi.org/10.1038/srep18603</a>
-            </article>
-          </div>
+          <p class="info-copy">The toolkit can currently recreate six study profiles whose reported parameters pass the Segment 0–4 profile gate and can be materialized for native runner handoff, drawn from the five publications below.</p>
+          <ol class="pub-reference-list">
+            <li>Matsuda, Y., Sugimoto, M., Inami, M., &amp; Kitazaki, M. (2021). Peripersonal space in the front, rear, left and right directions for audio-tactile multisensory integration. <em>Scientific Reports, 11</em>, Article 11303. <a class="pub-doi-link" href="https://www.nature.com/articles/s41598-021-90784-5" target="_blank" rel="noopener">https://doi.org/10.1038/s41598-021-90784-5</a></li>
+            <li>Lamia, P., Shabani, N., &amp; Candidi, M. (2026). Somatotopy-independent reduction of audio-tactile intersensory facilitation for looming sounds within the peripersonal space during arm movements execution. <em>Scientific Reports, 16</em>, Article 7133. <a class="pub-doi-link" href="https://www.nature.com/articles/s41598-026-36796-5" target="_blank" rel="noopener">https://doi.org/10.1038/s41598-026-36796-5</a></li>
+            <li>Noel, J.-P., Pfeiffer, C., Blanke, O., &amp; Serino, A. (2015). Peripersonal space as the space of the bodily self. <em>Cognition, 144</em>, 49–57. <a class="pub-doi-link" href="https://www.sciencedirect.com/science/article/pii/S001002771530038X" target="_blank" rel="noopener">https://doi.org/10.1016/j.cognition.2015.07.012</a></li>
+            <li>Pfeiffer, C., Noel, J. P., Serino, A., &amp; Blanke, O. (2018). Vestibular modulation of peripersonal space boundaries. <em>European Journal of Neuroscience, 47</em>(7), 800–811. <a class="pub-doi-link" href="https://onlinelibrary.wiley.com/doi/10.1111/ejn.13872" target="_blank" rel="noopener">https://doi.org/10.1111/ejn.13872</a></li>
+            <li>Serino, A., Noel, J. P., Galli, G., Canzoneri, E., Marmaroli, P., Lissek, H., &amp; Blanke, O. (2015). Body part-centered and full body-centered peripersonal space representations. <em>Scientific Reports, 5</em>, Article 18603. <a class="pub-doi-link" href="https://www.nature.com/articles/srep18603" target="_blank" rel="noopener">https://doi.org/10.1038/srep18603</a></li>
+          </ol>
         </section>
 
         <hr class="doc-segment-rule" aria-hidden="true">
@@ -618,6 +592,11 @@
                   <span class="arch-node-kicker">UI Layer</span>
                   <strong>Dashboard</strong>
                   <p>Researcher-facing interface for study profile, trajectory, timing, SOA, and trial-structure decisions. Hosted on GitHub Pages and connected to the local backend via localhost.</p>
+                  <div class="arch-hw-dep">
+                    <span class="arch-hw-dep-label">Links</span>
+                    <a class="arch-hw-dep-link" href="https://georgefejer91.github.io/pps-kit/" target="_blank" rel="noopener noreferrer">GitHub Pages</a>
+                    <a class="arch-hw-dep-link" href="https://github.com/GeorgeFejer91/pps-kit" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
+                  </div>
                 </article>
               </div>
             </div>
@@ -632,6 +611,10 @@
                   <span class="arch-node-kicker">Orchestration</span>
                   <strong>Python Companion</strong>
                   <p>Validates researcher decisions, writes project folders and manifests, and calls render and session preparation routines. Runs entirely on the lab PC and is not accessible externally.</p>
+                  <div class="arch-hw-dep">
+                    <span class="arch-hw-dep-label">Links</span>
+                    <a class="arch-hw-dep-link" href="https://github.com/GeorgeFejer91/pps-kit" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
+                  </div>
                 </article>
               </div>
             </div>
@@ -646,12 +629,23 @@
                   <span class="arch-node-kicker">Reference Path</span>
                   <strong>SOFA/FABIAN HRIR</strong>
                   <p>Head-related transfer functions stored in SOFA format provide the binaural reference used to spatialize looming audio along the researcher-defined trajectory.</p>
+                  <div class="arch-hw-dep">
+                    <span class="arch-hw-dep-label">Links</span>
+                    <a class="arch-hw-dep-link" href="https://www.sofaconventions.org/mediawiki/index.php/SOFA_%28Spatially_Oriented_Format_for_Acoustics%29" target="_blank" rel="noopener noreferrer">SOFA Conventions</a>
+                  </div>
                 </article>
                 <article class="arch-node arch-node-resource">
                   <div class="arch-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/><path d="M19.07 4.93a10 10 0 010 14.14"/></svg></div>
                   <span class="arch-node-kicker">Native Path</span>
                   <strong>3DTI and BRT Renderer</strong>
                   <p>Open-source C++ spatial audio engine rendering moving binaural sources from the same trajectory decisions passed through the Python backend.</p>
+                  <div class="arch-hw-dep">
+                    <span class="arch-hw-dep-label">Links</span>
+                    <a class="arch-hw-dep-link" href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0211899" target="_blank" rel="noopener noreferrer">Original PLOS ONE Publication</a>
+                    <a class="arch-hw-dep-link" href="https://github.com/3DTune-In/3dti_AudioToolkit" target="_blank" rel="noopener noreferrer">Original AudioToolkit GitHub</a>
+                    <a class="arch-hw-dep-link" href="https://github.com/GrupoDiana/BRTLibrary" target="_blank" rel="noopener noreferrer">BRT Library GitHub</a>
+                    <a class="arch-hw-dep-link" href="https://www.3d-tune-in.eu/toolkit-developers" target="_blank" rel="noopener noreferrer">3D Tune-In Toolkit Page</a>
+                  </div>
                 </article>
               </div>
             </div>
@@ -686,6 +680,15 @@
                   <span class="arch-node-kicker">Experiment Runner</span>
                   <strong>PPSExperimentRunner.exe</strong>
                   <p>Native Windows application that opens the prepared session package and plays the three-channel ASIO stream to the lab hardware. Owns all timing-sensitive playback and response recording entirely outside the browser.</p>
+                  <figure class="audiogram-figure" aria-label="Audiogram of an example looming stimulus trial">
+                    <div class="audiogram-frame">
+                      <img src="audiogram_looming_trial.svg" alt="Waveform display of a three-channel looming trial WAV showing Channel 1 Left Audio and Channel 2 Right Audio with growing amplitude, and Channel 3 Tactile Drive with burst onset at the SOA" width="820" height="300">
+                    </div>
+                    <figcaption class="audiogram-figcaption">
+                      <span class="audiogram-figcaption-label">Fig.</span>
+                      Three-channel WAV stream routed to the Komplete Audio 6 MK2. Ch 1 and Ch 2 carry binaural left and right audio with amplitude growing as the source approaches. Ch 3 carries the tactile drive signal, onset offset by the SOA schedule. All channels share one hardware sample clock.
+                    </figcaption>
+                  </figure>
                 </article>
               </div>
             </div>
@@ -751,49 +754,7 @@
             <h2 id="docs-hardware-title">Hardware Specifications and Latency Evidence</h2>
           </div>
           <p class="info-copy">The validated lab route runs on Windows and delivers auditory and tactile stimuli through a single synchronized multichannel ASIO output stream using the Native Instruments Komplete Audio 6 MK2 interface. Channels 1 and 2 route binaural left and right audio to participant headphones while channel 3 drives a Woojer Strap 4 connected as a wired analog load, removing the timing variability introduced by Bluetooth. The tactile signal is not a separate conversion path but a conventional audio waveform written to output 3 and routed into the Woojer's wired analog auxiliary input, whose transducer converts low-frequency signal energy into vibrotactile stimulation. Encoding the tactile cue as an audio channel keeps its onset timing under exactly the same software and hardware control as the auditory channels, making the stimulus onset asynchrony between sound and touch a direct function of the SOA schedule.</p>
-          <p class="info-copy">Latency was measured using a direct electrical loopback in which the three output channels were patched back into the Komplete Audio 6 MK2's own analog inputs via TRS cables, and a calibration pulse train was played while the return signal was simultaneously recorded. Comparing transmitted and received pulse timing gives the round-trip delay per channel. The physical-minus-digital latency of 33.462 ms is the time between when the software schedules a sample and when that signal appears at the physical output, stable to within 0.013 ms standard deviation across 20 recovered pulses. The critical finding for audio-tactile research is the inter-channel skew. The left and right audio channels are synchronized to within 0.023 ms of each other, and the tactile drive channel deviates from the audio channels by only 0.011 ms. These sub-millisecond differences are possible because the Komplete Audio 6 MK2, operated through its ASIO driver as a single multichannel device, clocks all three outputs from the same sample clock and renders them within the same output buffer, a result that cannot be replicated by routing stimuli through separate Windows stereo endpoints.</p>
-          <div class="info-card-grid hardware-card-grid">
-            <a class="info-card info-card-link" href="https://www.native-instruments.com/en/products/komplete/audio-interfaces/komplete-audio-6/specifications/" aria-label="Open Native Instruments Komplete Audio producer page">
-              <span class="card-kicker">Audio Interface</span>
-              <h2>Komplete Audio 6 MK2</h2>
-              <p>The lab route uses Native Instruments Komplete Audio 6 MK2 as the synchronized multichannel ASIO interface.</p>
-              <span class="card-link-label">Open Native Instruments page</span>
-            </a>
-            <article class="info-card">
-              <h2>Komplete ASIO Driver</h2>
-              <p>Use the official Komplete Audio ASIO Driver on Windows. The stereo Windows endpoints are legacy diagnostic paths, not the validated 3-channel route.</p>
-              <a class="button-link" href="https://support.native-instruments.com/hc/en-us/articles/360001194217-Installing-the-ASIO-Driver-for-KOMPLETE-AUDIO-1-2-6-MK2-Windows">Open ASIO Install Guide</a>
-            </article>
-            <a class="info-card info-card-link" href="https://www.woojer.com/products/strap-4" aria-label="Open Woojer Strap 4 producer page">
-              <span class="card-kicker">Tactile Endpoint</span>
-              <h2>Woojer Strap 4</h2>
-              <p>Treated as a wired analog endpoint from Komplete output 3. Bluetooth is not used for timing-sensitive tactile work.</p>
-              <span class="card-link-label">Open Woojer Strap 4</span>
-            </a>
-          </div>
-          <div class="metric-grid" aria-label="Current latency validation summary">
-            <div class="metric-card">
-              <span>Physical-minus-digital latency</span>
-              <strong>33.462 +/- 0.013 ms</strong>
-            </div>
-            <div class="metric-card">
-              <span>Right-minus-left skew</span>
-              <strong>0.023 ms</strong>
-            </div>
-            <div class="metric-card">
-              <span>Tactile-minus-audio skew</span>
-              <strong>0.011 ms</strong>
-            </div>
-            <div class="metric-card">
-              <span>Response marker recovery</span>
-              <strong>20/20 pulses</strong>
-            </div>
-          </div>
-          <div class="doc-link-row">
-            <a class="button-link" href="../../../docs/hardware_setup.md">Open Hardware Setup</a>
-            <a class="button-link" href="../../../docs/HARDWARE_VENDOR_DOCS.md">Open Vendor Notes</a>
-            <a class="button-link" href="../../../docs/EXPERIMENT_LATENCY_VALIDATION.md">Open Latency Protocol</a>
-          </div>
+          <p class="info-copy">Latency was measured using a direct electrical loopback in which the three output channels were patched back into the Komplete Audio 6 MK2's own analog inputs via TRS cables, and a calibration pulse train was played while the return signal was simultaneously recorded. Comparing transmitted and received pulse timing gives the round-trip delay per channel. The physical-minus-digital latency is 33.462 &plusmn; 0.013 ms across 20 recovered pulses, representing the time between when the software schedules a sample and when that signal appears at the physical output. All 20 response marker pulses were recovered. The critical finding for audio-tactile research is the inter-channel skew: the left and right audio channels are synchronized to within 0.023 ms of each other, and the tactile drive channel deviates from the audio channels by only 0.011 ms. These sub-millisecond differences are possible because the Komplete Audio 6 MK2, operated through its ASIO driver as a single multichannel device, clocks all three outputs from the same sample clock and renders them within the same output buffer; this result cannot be replicated by routing stimuli through separate Windows stereo endpoints. The full loopback protocol is documented in <a href="../../../docs/EXPERIMENT_LATENCY_VALIDATION.md">the latency validation report</a>.</p>
         </section>
 
         <hr class="doc-segment-rule" aria-hidden="true">
@@ -1052,7 +1013,7 @@
       </form>
     </div>
   </div>
-  <script src="hardware_pixel_art.js?v=20260615-emulatable-studies-layout"></script>
-  <script src="app.js?v=20260615-emulatable-studies-layout"></script>
+  <script src="hardware_pixel_art.js?v=20260615-audiogram-emulatable-studies"></script>
+  <script src="app.js?v=20260615-audiogram-emulatable-studies"></script>
 </body>
 </html>
