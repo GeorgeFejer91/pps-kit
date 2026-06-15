@@ -29,6 +29,7 @@ def test_tracked_installer_inventory_matches_tool_definition():
     assert all("exists" not in item for item in tracked["items"])
     required_paths = {item["path"] for item in tracked["items"] if item["required"]}
     assert "dist/PPSExperimentRunner/_internal/PySide6/plugins/platforms/qwindows.dll" in required_paths
+    assert "assets/click" in required_paths
 
 
 def test_package_inventory_reports_missing_required_items(tmp_path: Path):

@@ -85,6 +85,15 @@ Current ASIO policy:
 - A green installer state does not by itself prove audio readiness. The
   experiment runner must still run sounddevice/ASIO preflight and tell the
   experimenter when the native Komplete 3+ channel ASIO route is missing.
+- The packaged runner entry point must set `SD_ENABLE_ASIO=1` before importing
+  `peripersonal_space_toolkit.focus_app` or any module that might import
+  `sounddevice`. Without this import-order guard, python-sounddevice can lock
+  the frozen app into a non-ASIO PortAudio backend even though source validation
+  tools can see the Komplete ASIO route.
+- The Komplete ASIO route may need an even stream width. The runner should use
+  a 4-channel ASIO stream when the native driver exposes 4+ outputs, while still
+  routing auditory left/right to outputs 1/2, tactile stimuli and response
+  marker click tone to output 3, and keeping output 4 silent.
 
 The downloader must materialize a complete program repository into the chosen
 install folder. At minimum the installed folder must include:
@@ -98,6 +107,9 @@ install folder. At minimum the installed folder must include:
 - App identity assets under `src/peripersonal_space_toolkit/assets/`.
 - Preload catalogs and readiness ledgers under `assets/preloads/`, including `preload_inventory.json` and `profile_recreation_status.json`.
 - Study 5 and shared audio assets: `assets/breathing/` and `assets/tactile/default_tactile_cue.wav`.
+- Tactile-channel response marker/click assets under `assets/click/`; the
+  click-tone WAV is emitted into physical output 3 by the runner and must be
+  included in the packaged exe resources and downloader payload.
 - The redistributable FABIAN/TU SOFA file and manifest under `assets/0. Head-Related Impulse Response (HRIR) model/`.
 - `study_templates/`, `configs/`, and `data/sample/`.
 - User docs, release docs, licenses, citation metadata, and third-party attribution: `docs/`, `README.md`, `LICENSE`, `THIRD_PARTY_LICENSES.md`, and `CITATION.cff`.
@@ -117,7 +129,7 @@ Optional but preferred when available:
 
 1. Install dependencies into `.venv` with the Windows setup path or `python -m pip install -e ".[tts,gui,web,lsl,xdf,validation,dev,package]"`. The GUI extra is pinned to PySide6 6.7.x because newer PySide6 releases have broken Qt imports in the current Anaconda-based lab venv.
 2. Run tests and release audit before packaging.
-3. Build the packaged runner with `windows/Build_Experiment_Runner_Exe.ps1`. This must run `tools/check_qt_runtime.py` before and after PyInstaller so broken PySide6 imports or missing `qwindows.dll` fail the build.
+3. Build the packaged runner with `windows/Build_Experiment_Runner_Exe.ps1`. This must run `tools/check_qt_runtime.py` before and after PyInstaller so broken PySide6 imports or missing `qwindows.dll` fail the build. After building, verify the packaged exe, not just source Python, can open `Komplete Audio ASIO Driver` through the real runner path because ASIO depends on the frozen entrypoint setting `SD_ENABLE_ASIO=1` before any sounddevice import.
 4. Build or stage the offline/local HTML GUI exe entrypoint that starts the companion and opens the dashboard.
 5. Stage the repo-shaped program directory and all dependency/runtime payloads that the downloader will install.
 6. Let `tools/package_inventory.py --strict` validate the staged repository-shaped package and write `pps_package_inventory.v1.json`.

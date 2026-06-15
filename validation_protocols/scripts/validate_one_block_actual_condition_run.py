@@ -142,10 +142,12 @@ def _timing_qc_path(session_dir: Path, manifest: dict[str, Any]) -> Path | None:
 
 
 def _find_recordings(session_dir: Path) -> list[Path]:
+    recordings: list[Path] = []
+    recordings.extend(sorted(session_dir.glob("*.wav")))
     recordings_dir = session_dir / "recordings"
-    if not recordings_dir.exists():
-        return []
-    return sorted(recordings_dir.glob("*.wav"))
+    if recordings_dir.exists():
+        recordings.extend(sorted(recordings_dir.glob("*.wav")))
+    return list(dict.fromkeys(recordings))
 
 
 def _xdf_summary(path: Path) -> dict[str, Any]:

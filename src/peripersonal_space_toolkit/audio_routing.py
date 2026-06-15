@@ -365,8 +365,14 @@ def audio_output_channels_for_channels(channels: int) -> tuple[int, ...]:
     return SPATIAL_AUDIO_CHANNELS if channels >= BINAURAL_TACTILE_CHANNELS else LEGACY_AUDIO_CHANNELS
 
 
-def preferred_runtime_output_channels(max_output_channels: int) -> int:
-    """Prefer a single 3-channel stream when the device supports it."""
+def preferred_runtime_output_channels(max_output_channels: int, hostapi_name: str = "") -> int:
+    """Return the synchronized stream width to request from the output device.
+
+    ASIO drivers are often happier with even channel counts. The validated PPS
+    route still uses outputs 1/2/3; output 4 is silent padding when available.
+    """
+    if max_output_channels >= 4 and str(hostapi_name or "").strip().lower() == "asio":
+        return 4
     return BINAURAL_TACTILE_CHANNELS if max_output_channels >= BINAURAL_TACTILE_CHANNELS else LEGACY_STEREO_CHANNELS
 
 

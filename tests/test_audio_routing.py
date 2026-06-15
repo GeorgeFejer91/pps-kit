@@ -11,6 +11,8 @@ from peripersonal_space_toolkit.audio_routing import (
     komplete_audio_asio_install_message,
     komplete_audio_asio_install_steps,
     prepare_block_audio_for_output,
+    preferred_runtime_output_channels,
+    tactile_output_channel_for_channels,
     tactile_probe_for_output,
 )
 from peripersonal_space_toolkit.audio_device_stress import _sounddevice_latency
@@ -152,7 +154,22 @@ def test_binaural_tactile_render_can_pad_silent_fourth_channel():
     prepared = prepare_block_audio_for_output(source, output_channels=4)
 
     assert prepared.channels == 4
+    assert prepared.tactile_channel == 2
     np.testing.assert_array_equal(prepared.data, np.array([[0.1, 0.2, 0.3, 0.0]], dtype=np.float32))
+
+
+def test_komplete_asio_prefers_silent_fourth_channel_padding():
+    assert preferred_runtime_output_channels(6, "ASIO") == 4
+    assert tactile_output_channel_for_channels(4) == 2
+
+    instruction = center_audio_for_output(np.array([[0.5], [0.25]], dtype=np.float32), output_channels=4)
+    np.testing.assert_array_equal(
+        instruction,
+        np.array([[0.5, 0.5, 0.0, 0.0], [0.25, 0.25, 0.0, 0.0]], dtype=np.float32),
+    )
+
+    tactile_probe = tactile_probe_for_output(np.array([1.0], dtype=np.float32), output_channels=4)
+    np.testing.assert_array_equal(tactile_probe, np.array([[0.0, 0.0, 1.0, 0.0]], dtype=np.float32))
 
 
 def test_volume_scaling_uses_binaural_audio_pair_and_tactile_channel():

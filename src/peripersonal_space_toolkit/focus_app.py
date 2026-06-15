@@ -85,7 +85,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
 def _require_qt() -> dict[str, Any]:
     try:
         from PySide6.QtCore import QPoint, QTimer, Qt, QUrl, Signal
-        from PySide6.QtGui import QBrush, QColor, QCursor, QDesktopServices, QFontDatabase, QIcon, QPainter, QPen
+        from PySide6.QtGui import QBrush, QColor, QCursor, QDesktopServices, QFontDatabase, QIcon, QKeySequence, QPainter, QPen, QShortcut
         from PySide6.QtWidgets import (
             QApplication,
             QCheckBox,
@@ -124,6 +124,7 @@ def _require_qt() -> dict[str, Any]:
         "QHBoxLayout": QHBoxLayout,
         "QFontDatabase": QFontDatabase,
         "QIcon": QIcon,
+        "QKeySequence": QKeySequence,
         "QLabel": QLabel,
         "QLineEdit": QLineEdit,
         "QMessageBox": QMessageBox,
@@ -132,6 +133,7 @@ def _require_qt() -> dict[str, Any]:
         "QPoint": QPoint,
         "QProgressBar": QProgressBar,
         "QPushButton": QPushButton,
+        "QShortcut": QShortcut,
         "Signal": Signal,
         "QSizePolicy": QSizePolicy,
         "QSplitter": QSplitter,
@@ -161,6 +163,25 @@ def _enable_standard_window_controls(q: dict[str, Any], dialog: Any) -> None:
     dialog.setWindowFlags(_standard_window_flags(q))
     if hasattr(dialog, "setSizeGripEnabled"):
         dialog.setSizeGripEnabled(True)
+
+
+def _widget_screen_center(widget: Any) -> tuple[int, int, str]:
+    if sys.platform == "win32":
+        try:
+            import ctypes
+            from ctypes import wintypes
+
+            hwnd = int(widget.winId())
+            rect = wintypes.RECT()
+            if hwnd and ctypes.windll.user32.GetWindowRect(hwnd, ctypes.byref(rect)):
+                width = int(rect.right - rect.left)
+                height = int(rect.bottom - rect.top)
+                if width > 0 and height > 0:
+                    return int(rect.left + width / 2), int(rect.top + height / 2), "win32_get_window_rect"
+        except Exception:
+            pass
+    center = widget.mapToGlobal(widget.rect().center())
+    return int(center.x()), int(center.y()), "qt_map_to_global"
 
 
 def _format_duration(seconds: float) -> str:
@@ -755,6 +776,7 @@ def _create_tactile_timeline_widget(
                             painter.setPen(q["QPen"](q["QColor"]("#202621")))
                             painter.drawText(x1 + 3, y + 1, max(1, x2 - x1 - 6), row_height - 2, int(q["Qt"].AlignmentFlag.AlignVCenter), _short(text, 12 if row_index == 2 else (16 if row_index else 20)))
 
+                tactile_y = rows[4][1]
                 for cue in timeline_state.cues:
                     status = timeline_state.cue_status(cue)
                     color = {
@@ -764,25 +786,27 @@ def _create_tactile_timeline_widget(
                         "upcoming": "#d9dfd6",
                     }.get(status, "#d9dfd6")
                     x = _x(cue.time_s)
-                    line_y = rows[4][1]
                     radius = 5 if status == "next" else 4
                     marker_pen = q["QPen"](q["QColor"]("#202621" if status == "next" else "#bcc7bd"))
                     marker_pen.setWidth(1)
                     painter.setPen(marker_pen)
                     painter.setBrush(q["QBrush"](q["QColor"](color)))
-                    painter.drawEllipse(x - radius, line_y - radius, radius * 2, radius * 2)
+                    painter.drawEllipse(x - radius, tactile_y - radius, radius * 2, radius * 2)
 
                 click_y = rows[5][1]
                 for marker in timeline_state.click_markers:
                     x = _x(marker.time_s)
                     response_click = str(getattr(marker, "response_status", "") or "") == "tactile_response"
-                    pen_color = "#0f5f48" if response_click else "#9a3412"
-                    fill_color = "#b8ead7" if response_click else "#fed7aa"
+                    pen_color = "#065f46" if response_click else "#9a3412"
+                    fill_color = "#10b981" if response_click else "#f97316"
                     click_pen = q["QPen"](q["QColor"](pen_color))
                     click_pen.setWidth(2)
                     painter.setPen(click_pen)
                     painter.setBrush(q["QBrush"](q["QColor"](fill_color)))
-                    painter.drawRect(x - 4, click_y - 4, 8, 8)
+                    click_radius = 4 if not very_compact_rows else 3
+                    painter.drawEllipse(x - click_radius, click_y - click_radius, click_radius * 2, click_radius * 2)
+                    overlay_radius = 3 if not very_compact_rows else 2
+                    painter.drawEllipse(x - overlay_radius, tactile_y - overlay_radius, overlay_radius * 2, overlay_radius * 2)
 
                 cursor_x = _x(timeline_state.elapsed_s)
                 cursor_pen = q["QPen"](q["QColor"]("#b91c1c"))
@@ -2205,6 +2229,7 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
     pending: list[dict[str, Any]] = []
     start_clicked = {"value": False}
     miss_keys: set[str] | None = None
+    instruction_attempts: dict[int, tuple[int, float]] = {}
 
     def _ensure_miss_plan() -> set[str]:
         nonlocal miss_keys
@@ -2258,23 +2283,66 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
         return miss_keys
 
     def _target_center() -> tuple[int, int]:
-        center = window.target_button.mapToGlobal(window.target_button.rect().center())
-        return int(center.x()), int(center.y())
+        x, y, _source = _widget_screen_center(window.target_button)
+        return x, y
+
+    def _activate_widget_for_os_click(widget: Any) -> None:
+        try:
+            window.dialog.raise_()
+            window.dialog.activateWindow()
+            widget.setFocus(q["Qt"].FocusReason.MouseFocusReason)
+            q["QApplication"].processEvents()
+            time.sleep(0.02)
+        except Exception:
+            pass
+
+    def _press_primary_key(label: str) -> str:
+        try:
+            window.dialog.raise_()
+            window.dialog.activateWindow()
+            window.dialog.setFocus(q["Qt"].FocusReason.ShortcutFocusReason)
+            q["QApplication"].processEvents()
+            time.sleep(0.02)
+        except Exception:
+            pass
+        if backend_requested == "pyautogui":
+            try:
+                import pyautogui  # type: ignore
+
+                pyautogui.FAILSAFE = False
+                pyautogui.PAUSE = 0
+                pyautogui.press("space")
+                return "pyautogui_space"
+            except Exception as exc:
+                records.append({"label": "pyautogui_keyboard_unavailable", "source": label, "message": str(exc), "timestamp_unix": time.time()})
+        if backend_requested == "win32" and not window._offscreen_platform():
+            try:
+                import ctypes
+
+                ctypes.windll.user32.keybd_event(0x20, 0, 0, 0)
+                ctypes.windll.user32.keybd_event(0x20, 0, 0x0002, 0)
+                return "win32_space"
+            except Exception as exc:
+                records.append({"label": "win32_keyboard_unavailable", "source": label, "message": str(exc), "timestamp_unix": time.time()})
+        QTest.keyClick(window.dialog, q["Qt"].Key.Key_Space)
+        return "qtest_space"
 
     def _click_widget(widget: Any, label: str, *, preferred_backend: str = "qtest") -> str:
         if widget is None or not widget.isEnabled():
             return "skipped_disabled"
         backend_used = preferred_backend
-        if widget is not window.target_button or label.startswith("instruction:"):
+        if preferred_backend == "qtest" or window._offscreen_platform():
             QTest.mouseClick(widget, q["Qt"].MouseButton.LeftButton)
             return "qtest_control"
+        _activate_widget_for_os_click(widget)
         if preferred_backend == "pyautogui":
             try:
                 import pyautogui  # type: ignore
 
                 pyautogui.FAILSAFE = False
-                center = widget.mapToGlobal(widget.rect().center())
-                pyautogui.click(int(center.x()), int(center.y()))
+                pyautogui.PAUSE = 0
+                x, y, _source = _widget_screen_center(widget)
+                pyautogui.click(int(x), int(y))
                 return "pyautogui"
             except Exception as exc:
                 records.append({"label": "pyautogui_backend_unavailable", "message": str(exc), "timestamp_unix": time.time()})
@@ -2284,8 +2352,8 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
                 from pynput.mouse import Button, Controller
 
                 mouse = Controller()
-                center = widget.mapToGlobal(widget.rect().center())
-                mouse.position = (int(center.x()), int(center.y()))
+                x, y, _source = _widget_screen_center(widget)
+                mouse.position = (int(x), int(y))
                 mouse.press(Button.left)
                 mouse.release(Button.left)
                 return "pynput"
@@ -2296,10 +2364,7 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
             try:
                 import ctypes
 
-                x, y = _target_center() if widget is window.target_button else (
-                    int(widget.mapToGlobal(widget.rect().center()).x()),
-                    int(widget.mapToGlobal(widget.rect().center()).y()),
-                )
+                x, y = _target_center() if widget is window.target_button else _widget_screen_center(widget)[:2]
                 ctypes.windll.user32.SetCursorPos(int(x), int(y))
                 ctypes.windll.user32.mouse_event(0x0002, 0, 0, 0, 0)
                 ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
@@ -2313,11 +2378,16 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
         request = window.pending_instruction_request
         if request is None:
             return
+        request_id = id(request)
+        attempt_count, last_attempt = instruction_attempts.get(request_id, (0, 0.0))
+        now = time.perf_counter()
+        if attempt_count >= 5 or (attempt_count > 0 and now - last_attempt < 0.5):
+            return
+        instruction_attempts[request_id] = (attempt_count + 1, now)
         context = dict(request.get("context") or {})
         mode = str(context.get("mode") or "click")
         label = str(context.get("instruction_label") or "instruction")
-        widget = window.instruction_button if mode == "button" else window.target_button
-        backend = _click_widget(widget, f"instruction: {label}", preferred_backend=backend_requested)
+        backend = _press_primary_key(f"instruction: {label}")
         records.append(
             {
                 "label": f"instruction_continue:{label}",
@@ -2392,7 +2462,7 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
             q["QTimer"].singleShot(1000, window.dialog.accept)
             return
         if not start_clicked["value"] and window.start_button.isEnabled():
-            backend = _click_widget(window.start_button, "Start Run", preferred_backend=backend_requested)
+            backend = _press_primary_key("Start Run")
             start_clicked["value"] = True
             records.append({"label": "Start Run", "backend": backend, "timestamp_unix": time.time()})
         _continue_instruction_if_needed()
@@ -2523,6 +2593,7 @@ class FocusModeWindow:
         self._last_recenter_backend_warning = ""
         self.validation_topup_approval_records: list[dict[str, Any]] = []
         self.planned_tactile_cue_count = 0
+        self.primary_action_shortcuts: list[Any] = []
         self.all_block_plan_items: list[dict[str, Any]] = []
         self.block_plan_items: list[dict[str, Any]] = []
         self.instruction_plan_items: list[dict[str, Any]] = []
@@ -2652,6 +2723,7 @@ class FocusModeWindow:
         controls.setColumnStretch(0, 1)
         controls.setColumnStretch(1, 1)
         response_layout.addLayout(controls)
+        self._install_primary_action_shortcuts()
         response_cell_layout.addWidget(response_panel, 0, q["Qt"].AlignmentFlag.AlignTop | q["Qt"].AlignmentFlag.AlignHCenter)
 
         output_panel, output_layout = _panel(q, "Output Summary", profile=profile)
@@ -3585,6 +3657,53 @@ class FocusModeWindow:
             except Exception:
                 pass
 
+    def _install_primary_action_shortcuts(self) -> None:
+        q = self.q
+        for sequence in ("Space", "Return", "Enter"):
+            shortcut = q["QShortcut"](q["QKeySequence"](sequence), self.dialog)
+            shortcut.setContext(q["Qt"].ShortcutContext.WindowShortcut)
+            shortcut.activated.connect(self._handle_primary_action_shortcut)
+            self.primary_action_shortcuts.append(shortcut)
+        self._set_primary_action_shortcuts_enabled(True)
+
+    def _set_primary_action_shortcuts_enabled(self, enabled: bool) -> None:
+        for shortcut in getattr(self, "primary_action_shortcuts", []):
+            try:
+                shortcut.setEnabled(bool(enabled))
+            except Exception:
+                pass
+
+    def _keyboard_focus_is_pre_run_input(self) -> bool:
+        focus = self.q["QApplication"].focusWidget()
+        if focus is None:
+            return False
+        input_types = (
+            self.q["QLineEdit"],
+            self.q["QTextEdit"],
+            self.q["QComboBox"],
+            self.q["QCheckBox"],
+        )
+        return isinstance(focus, input_types)
+
+    def _handle_primary_action_shortcut(self) -> None:
+        if self.pending_instruction_request is not None:
+            self._approve_pending_instruction_continue(source="keyboard")
+            return
+        if self.start_button.isEnabled() and not self._keyboard_focus_is_pre_run_input():
+            self.start()
+
+    def _approve_pending_instruction_continue(self, *, source: str) -> bool:
+        if self.pending_instruction_request is None:
+            return False
+        self.pending_instruction_request["approved"] = True
+        self.pending_instruction_request["event"].set()
+        self.pending_instruction_request = None
+        self.instruction_button.setVisible(False)
+        self.target_button.setEnabled(True)
+        self.event_label.setText(f"Instruction continuation logged ({source})")
+        self._set_primary_action_shortcuts_enabled(False)
+        return True
+
     def start(self) -> None:
         if self.thread is not None and self.thread.is_alive():
             return
@@ -3614,6 +3733,7 @@ class FocusModeWindow:
                 instruction_continue_callback=self._request_instruction_continue,
             )
         self.start_button.setEnabled(False)
+        self._set_primary_action_shortcuts_enabled(False)
         self._freeze_pre_run_controls()
         self.pause_button.setEnabled(True)
         self.stop_button.setEnabled(True)
@@ -3649,15 +3769,8 @@ class FocusModeWindow:
 
     def _click(self) -> None:
         if self.pending_instruction_request is not None:
-            context = dict(self.pending_instruction_request.get("context") or {})
-            if context.get("mode") == "click":
-                self.pending_instruction_request["approved"] = True
-                self.pending_instruction_request["event"].set()
-                self.pending_instruction_request = None
-                self.instruction_button.setVisible(False)
-                self.target_button.setEnabled(True)
-                self.event_label.setText("Instruction continuation logged")
-                return
+            self._approve_pending_instruction_continue(source="click target")
+            return
         if self.controller is None:
             self.event_label.setText("Start the run before logging responses.")
             return
@@ -3668,14 +3781,7 @@ class FocusModeWindow:
         self.event_label.setText("Participant click logged")
 
     def _continue_instruction_button(self) -> None:
-        if self.pending_instruction_request is None:
-            return
-        self.pending_instruction_request["approved"] = True
-        self.pending_instruction_request["event"].set()
-        self.pending_instruction_request = None
-        self.instruction_button.setVisible(False)
-        self.target_button.setEnabled(True)
-        self.event_label.setText("Instruction continuation logged")
+        self._approve_pending_instruction_continue(source="button")
 
     def _toggle_pause(self) -> None:
         if self.controller is None:
@@ -3814,9 +3920,9 @@ class FocusModeWindow:
         self.tactile_timeline_widget.update()
 
     def _move_cursor_to_target(self, cue: TactileTimelineCue) -> None:
-        center = self.target_button.mapToGlobal(self.target_button.rect().center())
+        x, y, coordinate_source = _widget_screen_center(self.target_button)
         offscreen = self._offscreen_platform()
-        mode = "recorded_intent" if offscreen else self._move_os_cursor_to_global_center(int(center.x()), int(center.y()))
+        mode = "recorded_intent" if offscreen else self._move_os_cursor_to_global_center(x, y)
         record = {
             "cue_id": cue.cue_id,
             "trial_number": cue.trial_number,
@@ -3824,8 +3930,9 @@ class FocusModeWindow:
             "time_s": cue.time_s,
             "elapsed_s": self.timeline_state.elapsed_s,
             "mode": mode,
-            "x": int(center.x()),
-            "y": int(center.y()),
+            "coordinate_source": coordinate_source,
+            "x": x,
+            "y": y,
         }
         if self._last_recenter_backend_warning:
             record["backend_warning"] = self._last_recenter_backend_warning
@@ -3950,15 +4057,15 @@ class FocusModeWindow:
         self.pending_instruction_request = payload
         mode = str(context.get("mode") or "click")
         label = str(context.get("instruction_label") or "instruction")
+        self.target_button.setEnabled(True)
         if mode == "button":
-            self.target_button.setEnabled(False)
             self.instruction_button.setText(str(context.get("button_label") or "Continue"))
             self.instruction_button.setVisible(True)
-            self.event_label.setText(f"Use the runner button to continue after {label}.")
+            self.event_label.setText(f"Click the target, press Space/Enter, or use Continue after {label}.")
         else:
-            self.target_button.setEnabled(True)
             self.instruction_button.setVisible(False)
-            self.event_label.setText(f"Click the target to continue after {label}.")
+            self.event_label.setText(f"Click the target or press Space/Enter to continue after {label}.")
+        self._set_primary_action_shortcuts_enabled(True)
 
     def _handle_topup_approval(self, payload: dict[str, Any]) -> None:
         q = self.q
@@ -4018,6 +4125,7 @@ class FocusModeWindow:
         self.pause_button.setEnabled(False)
         self.stop_button.setEnabled(False)
         self.start_button.setEnabled(False)
+        self._set_primary_action_shortcuts_enabled(False)
         self.progress.setValue(1000 if result.completed else self.progress.value())
         self.run_state_chip.setText("Complete" if result.completed else "Interrupted")
         self.progress_label.setText("Complete" if result.completed else "Interrupted")

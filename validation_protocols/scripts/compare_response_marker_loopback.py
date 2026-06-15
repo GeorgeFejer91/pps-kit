@@ -29,6 +29,7 @@ SCHEMA = "pps-response-marker-loopback-comparison.v1"
 MIN_DETECTION_RATE = 0.95
 MAX_P95_RESIDUAL_MS = 2.0
 MAX_ABS_RESIDUAL_MS = 5.0
+DIGITAL_EVIDENCE_MIN_SEARCH_POST_MS = 300.0
 
 
 def _default_output_dir() -> Path:
@@ -253,8 +254,16 @@ def compare_recording(
         "offset_ms": offset_stats,
         "abs_residual_ms": residual_stats,
         "threshold_profile": profile,
+        "search_window_ms": {
+            "pre": float(search_pre_ms),
+            "post": float(search_post_ms),
+        },
         "pairs": pairs,
     }
+
+
+def _is_digital_audio_evidence(path: Path) -> bool:
+    return "audio_evidence" in path.name.lower()
 
 
 def _write_pairs_csv(path: Path, blocks: list[dict[str, Any]]) -> None:
@@ -310,18 +319,24 @@ def compare_loopback(
     output_dir.mkdir(parents=True, exist_ok=True)
     events = _read_events(events_csv)
     markers = _response_markers(events)
-    blocks = [
-        compare_recording(
+    blocks: list[dict[str, Any]] = []
+    for recording in recordings:
+        recording_search_post_ms = float(search_post_ms)
+        recording_role = "physical_loopback"
+        if _is_digital_audio_evidence(recording):
+            recording_search_post_ms = max(recording_search_post_ms, DIGITAL_EVIDENCE_MIN_SEARCH_POST_MS)
+            recording_role = "digital_audio_evidence"
+        block = compare_recording(
             recording,
             markers,
             tactile_channel_1based=tactile_channel_1based,
             search_pre_ms=search_pre_ms,
-            search_post_ms=search_post_ms,
+            search_post_ms=recording_search_post_ms,
             min_peak=min_peak,
             min_gap_ms=min_gap_ms,
         )
-        for recording in recordings
-    ]
+        block["recording_role"] = recording_role
+        blocks.append(block)
     comparable = [block for block in blocks if block.get("status") != "skipped"]
     expected = sum(int(block.get("expected_marker_count", 0) or 0) for block in comparable)
     detected = sum(int(block.get("detected_marker_count", 0) or 0) for block in comparable)
@@ -362,6 +377,7 @@ def compare_loopback(
             "This compares electrical/tactile-channel loopback pulses against logged response_marker_start sample indices.",
             "It estimates recording/hardware offset and residual jitter; it does not measure Woojer mechanical vibration onset.",
             "A physical recording is required before this can prove physical response-marker recovery.",
+            "Digital audio-evidence WAVs can include recorder pre-roll, so their pairing window is widened automatically.",
         ],
     }
     (output_dir / "response_marker_loopback_report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
@@ -371,7 +387,7 @@ def compare_loopback(
 
 
 def _recordings_from_session(session_dir: Path) -> list[Path]:
-    recordings = sorted((session_dir / "recordings").glob("*.wav"))
+    recordings = list(dict.fromkeys([*sorted(session_dir.glob("*.wav")), *sorted((session_dir / "recordings").glob("*.wav"))]))
     physical = [
         path
         for path in recordings

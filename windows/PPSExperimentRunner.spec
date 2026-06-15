@@ -31,6 +31,7 @@ if pyside_spec and pyside_spec.submodule_search_locations:
 for source, target in (
     (root / "assets" / "preloads", "assets/preloads"),
     (root / "assets" / "breathing", "assets/breathing"),
+    (root / "assets" / "click", "assets/click"),
     (root / "assets" / "tactile", "assets/tactile"),
     (root / "study_templates", "study_templates"),
 ):

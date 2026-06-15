@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import threading
 import time
 from pathlib import Path
 from types import SimpleNamespace
@@ -559,16 +560,35 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
         1
         for y in range(timeline_image.height)
         for x in range(timeline_image.width)
-        if pixels[x, y][0] < 60 and pixels[x, y][1] > 70 and pixels[x, y][2] < 110
+        if pixels[x, y][0] < 90 and pixels[x, y][1] > 110 and pixels[x, y][2] < 170
     )
     off_cue_click_pixels = sum(
         1
         for y in range(timeline_image.height)
         for x in range(timeline_image.width)
-        if 120 < pixels[x, y][0] < 180 and pixels[x, y][1] < 100 and pixels[x, y][2] < 70
+        if pixels[x, y][0] > 180 and 70 < pixels[x, y][1] < 150 and pixels[x, y][2] < 90
+    )
+    height = timeline_image.height
+    if height < 55:
+        tactile_y = 3 + 29
+    elif height < 84:
+        tactile_y = 3 + 47
+    elif height < 96:
+        tactile_y = 6 + 59
+    else:
+        tactile_y = 10 + 91
+    cue_band_click_pixels = sum(
+        1
+        for y in range(max(0, tactile_y - 5), min(timeline_image.height, tactile_y + 6))
+        for x in range(timeline_image.width)
+        if (
+            (pixels[x, y][0] < 90 and pixels[x, y][1] > 110 and pixels[x, y][2] < 170)
+            or (pixels[x, y][0] > 180 and 70 < pixels[x, y][1] < 150 and pixels[x, y][2] < 90)
+        )
     )
     assert cue_linked_click_pixels > 8
     assert off_cue_click_pixels > 8
+    assert cue_band_click_pixels > 8
     window.dialog.close()
 
 
@@ -659,6 +679,83 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     assert output_rect["right"] <= response_cell_rect["right"]
     assert processing_rect["y"] >= run_rect["bottom"]
     assert processing_rect["width"] >= workspace_rect["width"] - 8
+    window.dialog.close()
+
+
+def test_focus_mode_instruction_continue_accepts_target_click_and_keyboard(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    window = focus_app.FocusModeWindow(q, package)
+    window.dialog.show()
+    app.processEvents()
+
+    click_event = threading.Event()
+    click_payload = {
+        "context": {"mode": "button", "instruction_label": "General instructions", "button_label": "Continue"},
+        "approved": False,
+        "event": click_event,
+    }
+    window._handle_instruction_continue(click_payload)
+    assert window.target_button.isEnabled()
+    assert window.instruction_button.isVisible()
+
+    window._click()
+
+    assert click_payload["approved"] is True
+    assert click_event.is_set()
+    assert window.pending_instruction_request is None
+
+    keyboard_event = threading.Event()
+    keyboard_payload = {
+        "context": {"mode": "click", "instruction_label": "Pre-block"},
+        "approved": False,
+        "event": keyboard_event,
+    }
+    window._handle_instruction_continue(keyboard_payload)
+
+    window._handle_primary_action_shortcut()
+
+    assert keyboard_payload["approved"] is True
+    assert keyboard_event.is_set()
+    assert window.pending_instruction_request is None
+    window.dialog.close()
+
+
+def test_focus_mode_primary_shortcut_starts_when_not_editing(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    window = focus_app.FocusModeWindow(q, package)
+    window.dialog.show()
+    app.processEvents()
+
+    starts: list[bool] = []
+    window.start = lambda: starts.append(True)  # type: ignore[method-assign]
+
+    window.participant_name_input.setFocus()
+    app.processEvents()
+    window._handle_primary_action_shortcut()
+    assert starts == []
+
+    window.start_button.setFocus()
+    app.processEvents()
+    window._handle_primary_action_shortcut()
+    assert starts == [True]
     window.dialog.close()
 
 

@@ -69,6 +69,7 @@ from .session_analysis import analyze_session_events, format_analysis_summary, w
 from .session_events import SessionEventLogger
 from .output_evidence import OutputEvidenceRecorder
 from .timing_events import TimingEventHub, TriggerDictionary
+from .runtime_paths import repo_root
 
 # Try to import pyaudiowpatch for legacy WASAPI diagnostics. Normal runner
 # evidence recording uses the callback output tap because ASIO playback can
@@ -119,7 +120,7 @@ except Exception as e:
 # =============================================================================
 # CONFIGURATION
 # =============================================================================
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = repo_root()
 STIMULI_DIR = str(REPO_ROOT / "artifacts" / "stimuli" / "10.Participant_Sequences")
 CLICK_SOUND = str(REPO_ROOT / "assets" / "click" / "mouse_click_tone_1200Hz_50ms.wav")
 
@@ -427,7 +428,7 @@ class AudioEngine:
         self.device_info = sd.query_devices(device_idx) if device_idx is not None else {}
         self.device_hostapi = _hostapi_name_for_device(self.device_info) if self.device_info else ""
         self.max_output_channels = int(self.device_info.get("max_output_channels", 0)) if self.device_info else 0
-        self.runtime_output_channels = preferred_runtime_output_channels(self.max_output_channels)
+        self.runtime_output_channels = preferred_runtime_output_channels(self.max_output_channels, self.device_hostapi)
         self.tactile_output_channel = tactile_output_channel_for_channels(self.runtime_output_channels)
         self.stop_flag = False
         self.paused = False
