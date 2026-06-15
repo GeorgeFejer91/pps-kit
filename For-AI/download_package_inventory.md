@@ -16,6 +16,13 @@ The repo should contain the installer package source, not heavyweight release bi
 
 `dist/` stays ignored. Release binaries are attached to GitHub/Zenodo releases, not committed to the source repo.
 
+Do not point the public download page directly at
+`https://github.com/GeorgeFejer91/pps-kit/releases/latest/download/PPS-Toolkit-Downloader.exe`
+until a public GitHub Release actually contains that asset and the matching
+`pps_download_manifest.v1.json`. Before that release exists, link the installer
+card to `https://github.com/GeorgeFejer91/pps-kit/releases` so the website does
+not expose a dead direct-download button.
+
 ## Required Offline Package Contents
 
 The offline ZIP must include:
