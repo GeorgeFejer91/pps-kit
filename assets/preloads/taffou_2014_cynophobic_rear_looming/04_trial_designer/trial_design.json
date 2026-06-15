@@ -17,7 +17,31 @@
     20
   ],
   "custom_clip_assets": [],
-  "trial_strips": [],
+  "trial_strips": [
+    {
+      "strip_id": "taffou-rear-looming-row",
+      "label": "Rear-field looming animal-sound trial",
+      "audio_tactile_percentage": 100.0,
+      "catch_percentage": 0.0,
+      "baseline_percentage": 0.0,
+      "elements": [
+        {
+          "element_id": "taffou-rear-looming-source",
+          "kind": "looming_stimulus",
+          "label": "Rear-field animal sound",
+          "source_label": "Dog growl threatening placeholder",
+          "source_labels": [
+            "Dog growl threatening placeholder",
+            "Dog growl threatening placeholder - rear right looming",
+            "Sheep bleat non-threatening placeholder",
+            "Sheep bleat non-threatening placeholder - rear right looming"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    }
+  ],
   "prestimulus_files": [],
-  "preview_trial_count": 208
+  "preview_trial_count": 640
 }

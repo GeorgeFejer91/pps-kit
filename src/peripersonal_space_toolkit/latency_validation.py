@@ -14,6 +14,7 @@ import json
 import math
 import os
 import re
+import sys
 import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
@@ -32,6 +33,8 @@ DEFAULT_LATENCY_S = 0.010
 DEFAULT_BLOCKSIZE = 256
 DEFAULT_OUTPUT_DIR = Path("artifacts") / "latency_validation"
 DEFAULT_BASELINE_DIR = Path("local_data") / "latency_baselines"
+SAFE_HARDWARE_AMPLITUDE_DEFAULT = 0.05
+SAFE_HARDWARE_AMPLITUDE_MAX = 0.10
 
 CHANNEL_LABELS = ("left_audio", "right_audio", "tactile_drive", "aux_4")
 
@@ -146,7 +149,7 @@ def make_calibration_stimulus(
     post_roll_s: float = 1.0,
     pulse_interval_s: float = 0.5,
     pulse_duration_s: float = 0.010,
-    amplitude: float = 0.20,
+    amplitude: float = SAFE_HARDWARE_AMPLITUDE_DEFAULT,
 ) -> tuple[np.ndarray, list[PlannedPulse]]:
     """Return a deterministic multichannel pulse train and planned events."""
 
@@ -305,7 +308,9 @@ def summarize_latency_validation(
         detected_count = len(detected)
         detection_rate = detected_count / planned_count if planned_count else 0.0
         median_latency = _nan_float(np.median(latencies)) if latencies.size else math.nan
+        mean_latency, sd_latency = _mean_sd(latencies)
         residuals = np.abs(latencies - median_latency) if latencies.size else np.array([], dtype=np.float64)
+        mean_residual, sd_residual = _mean_sd(residuals)
         p95_jitter = _nan_float(np.percentile(residuals, 95)) if residuals.size else math.nan
         max_jitter = _nan_float(np.max(residuals)) if residuals.size else math.nan
         drift = _drift_ms_per_min(times, latencies)
@@ -315,7 +320,11 @@ def summarize_latency_validation(
             "planned_count": planned_count,
             "detected_count": detected_count,
             "detection_rate": detection_rate,
+            "mean_latency_ms": mean_latency,
+            "sd_latency_ms": sd_latency,
             "median_latency_ms": median_latency,
+            "mean_abs_residual_jitter_ms": mean_residual,
+            "sd_abs_residual_jitter_ms": sd_residual,
             "p95_residual_jitter_ms": p95_jitter,
             "max_residual_jitter_ms": max_jitter,
             "drift_ms_per_min": drift,
@@ -662,7 +671,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     cal.add_argument("--pulse-count", type=int, default=30)
     cal.add_argument("--pulse-interval-s", type=float, default=0.5)
     cal.add_argument("--pulse-duration-s", type=float, default=0.010)
-    cal.add_argument("--amplitude", type=float, default=0.20)
+    cal.add_argument("--amplitude", type=float, default=SAFE_HARDWARE_AMPLITUDE_DEFAULT)
     cal.add_argument("--establish-baseline", action="store_true")
 
     session = sub.add_parser("validate-session", help="Validate available loopback recordings for a session.")
@@ -693,6 +702,17 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _run_calibrate(args: argparse.Namespace) -> int:
+    if args.amplitude <= 0:
+        print("--amplitude must be positive.", file=sys.stderr)
+        return 2
+    if args.amplitude > SAFE_HARDWARE_AMPLITUDE_MAX:
+        print(
+            f"Refusing hardware playback amplitude {args.amplitude}; "
+            f"latency validation caps direct-loopback playback at {SAFE_HARDWARE_AMPLITUDE_MAX}. "
+            "Use lower input gain or a safer hardware patch instead of raising the digital test level.",
+            file=sys.stderr,
+        )
+        return 2
     run_dir = _timestamped_output_dir(args.output_dir)
     thresholds = ValidationThresholds()
     stimulus, planned_events = make_calibration_stimulus(
@@ -868,6 +888,16 @@ def _nan_float(value: Any) -> float:
     return result if math.isfinite(result) else math.nan
 
 
+def _mean_sd(values: Any) -> tuple[float, float]:
+    arr = np.asarray(list(values), dtype=np.float64)
+    arr = arr[np.isfinite(arr)]
+    if arr.size == 0:
+        return math.nan, math.nan
+    mean = _nan_float(np.mean(arr))
+    sd = _nan_float(np.std(arr, ddof=1)) if arr.size > 1 else 0.0
+    return mean, sd
+
+
 def _drift_ms_per_min(times_s: np.ndarray, latencies_ms: np.ndarray) -> float:
     if times_s.size < 2 or latencies_ms.size < 2:
         return 0.0
@@ -932,10 +962,16 @@ def _skew_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
             lr.append(abs(channels[1] - channels[0]))
         if 0 in channels and 1 in channels and 2 in channels:
             tactile.append(abs(channels[2] - ((channels[0] + channels[1]) / 2.0)))
+    lr_mean, lr_sd = _mean_sd(lr)
+    tactile_mean, tactile_sd = _mean_sd(tactile)
     return {
         "left_right_pairs": len(lr),
+        "left_right_mean_abs_skew_ms": lr_mean,
+        "left_right_sd_abs_skew_ms": lr_sd,
         "left_right_median_abs_skew_ms": _nan_float(np.median(lr)) if lr else math.nan,
         "tactile_audio_pairs": len(tactile),
+        "tactile_audio_mean_abs_skew_ms": tactile_mean,
+        "tactile_audio_sd_abs_skew_ms": tactile_sd,
         "tactile_audio_median_abs_skew_ms": _nan_float(np.median(tactile)) if tactile else math.nan,
     }
 

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PPS Local Dashboard</title>
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=20260615-dashboard-sync">
 </head>
 <body>
   <div class="app-shell">
@@ -15,21 +15,29 @@
         <div class="brand-subtitle">Local researcher dashboard</div>
       </div>
       <nav aria-label="Dashboard sections">
-        <a href="#study" data-step-link="study"><span>0 Profile</span><strong class="decision-state not-ready" data-step-state="study" aria-label="Profile not ready" title="Profile not ready">X</strong></a>
+        <a href="#study" data-step-link="study"><span>0 Preload</span><strong class="decision-state not-ready" data-step-state="study" aria-label="Preload not ready" title="Preload not ready">X</strong></a>
         <a href="#stimulus" data-step-link="stimulus"><span>1 Stimuli</span><strong class="decision-state not-ready" data-step-state="stimulus" aria-label="Stimuli not ready" title="Stimuli not ready">X</strong></a>
-        <a href="#baseline" data-step-link="baseline"><span>2 Baseline</span><strong class="decision-state not-ready" data-step-state="baseline" aria-label="Baseline not ready" title="Baseline not ready">X</strong></a>
-        <a href="#trials" data-step-link="trials"><span>3 Sequence</span><strong class="decision-state not-ready" data-step-state="trials" aria-label="Sequence not ready" title="Sequence not ready">X</strong></a>
-        <a href="#block" data-step-link="block"><span>4 Blocks</span><strong class="decision-state not-ready" data-step-state="block" aria-label="Blocks not ready" title="Blocks not ready">X</strong></a>
-        <a href="#run" data-step-link="run"><span>5 Run Setup</span><strong class="decision-state not-ready" data-step-state="run" aria-label="Run setup not ready" title="Run setup not ready">X</strong></a>
-        <a href="#review" data-step-link="review"><span>6 Review</span><strong class="decision-state not-ready" data-step-state="review" aria-label="Review not ready" title="Review not ready">X</strong></a>
+        <a href="#trials" data-step-link="trials"><span>2 Sequence</span><strong class="decision-state not-ready" data-step-state="trials" aria-label="Sequence not ready" title="Sequence not ready">X</strong></a>
+        <a href="#baseline" data-step-link="baseline"><span>3 Tactile</span><strong class="decision-state not-ready" data-step-state="baseline" aria-label="Tactile not ready" title="Tactile not ready">X</strong></a>
+        <a href="#block" data-step-link="block"><span>4 Pool</span><strong class="decision-state not-ready" data-step-state="block" aria-label="Trial pool not ready" title="Trial pool not ready">X</strong></a>
+        <a href="#schedule" data-step-link="schedule"><span>5 Blocks</span><strong class="decision-state not-ready" data-step-state="schedule" aria-label="Block CSV preview not ready" title="Block CSV preview not ready">X</strong></a>
+        <a href="#run" data-step-link="run"><span>6 Prepare Experiment</span><strong class="decision-state not-ready" data-step-state="run" aria-label="Prepare experiment not ready" title="Prepare experiment not ready">X</strong></a>
       </nav>
+      <div class="profile-mode-panel" aria-label="Profile editing mode">
+        <div class="layout-title">Study Mode</div>
+        <span id="profile-mode-status" class="status-label">checking</span>
+        <button id="edit-profile-rail" type="button">Edit As New Study</button>
+      </div>
       <div class="companion-panel" aria-label="Local companion backend">
         <div class="layout-title">Local Companion</div>
         <span id="connection-status" class="status-label required">checking</span>
         <label for="backend-url">Backend URL</label>
         <input id="backend-url" type="url" autocomplete="off">
         <button id="connect-backend" type="button">Connect</button>
-        <a id="download-software" class="button-link" href="https://github.com/GeorgeFejer91/peripersonal-space-toolkit/archive/refs/heads/main.zip">Download Software</a>
+        <div class="download-links">
+          <a id="download-software" class="button-link" href="https://github.com/GeorgeFejer91/peripersonal-space-toolkit/releases/latest/download/PPS-Toolkit-Downloader.exe">Download Installer</a>
+          <a id="download-full-package" class="button-link secondary-link" href="https://zenodo.org/search?q=%22peripersonal-space-toolkit%22">Full Package</a>
+        </div>
       </div>
       <div class="rail-note">
         <span>Qt UI remains available as</span>
@@ -53,7 +61,8 @@
       <section class="decision-segment" aria-labelledby="study-segment-title">
         <div class="segment-heading">
           <span class="segment-kicker">Segment 0</span>
-          <h2 id="study-segment-title">Profile Decision</h2>
+          <h2 id="study-segment-title">Choose or Create Study</h2>
+          <button class="segment-info-button" type="button" data-segment-info="study" aria-label="About Segment 0: Choose or Create Study">About</button>
         </div>
         <div class="main-column">
           <section id="study" class="panel" data-step-panel="study" data-resizable-panel data-panel-id="study">
@@ -71,8 +80,14 @@
               <label for="design-name">Design name</label>
               <input id="design-name" type="text" autocomplete="off">
             </div>
+            <div class="field-row">
+              <label for="existing-custom-project">Existing custom study</label>
+              <select id="existing-custom-project"></select>
+            </div>
             <div class="step-footer">
-              <button type="button" class="primary" data-continue-step="study">Continue To Stimulus</button>
+              <button id="load-custom-project" type="button">Open Custom Study</button>
+              <button id="apply-profile-project" type="button" class="primary">Apply Profile / Create Project Folder</button>
+              <button id="open-profile-folder" type="button" disabled>Open Folder</button>
             </div>
           </section>
         </div>
@@ -81,11 +96,11 @@
       <section class="decision-segment" aria-labelledby="stimulus-segment-title">
         <div class="segment-heading">
           <span class="segment-kicker">Segment 1</span>
-          <h2 id="stimulus-segment-title">Looming Stimuli Builder</h2>
+          <h2 id="stimulus-segment-title">Build Looming Stimuli</h2>
+          <button class="segment-info-button" type="button" data-segment-info="stimulus" aria-label="About Segment 1: Build Looming Stimuli">About</button>
         </div>
         <section class="stimulus-grid">
-          <div class="main-column">
-          <section id="stimulus" class="panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus">
+          <section id="stimulus" class="panel stimulus-trajectory-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus">
             <div class="panel-heading">
               <div class="panel-title">Trajectory And Source <span class="step-badge" data-step-badge="stimulus"></span></div>
               <input id="preview-mode" type="hidden" value="2d">
@@ -124,7 +139,30 @@
                 <input id="end-hold" type="number" min="0" max="30" step="0.1">
               </div>
             </div>
+          </section>
 
+          <div class="workspace-splitter" data-resize-gutter="workspace" role="separator" aria-label="Resize trajectory and preview columns" aria-orientation="vertical" tabindex="0"></div>
+
+          <section class="panel preview-panel stimulus-preview-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="trajectory-preview">
+            <div class="panel-heading">
+              <div>Trajectory Preview</div>
+              <div class="preview-actions">
+                <div class="segmented-control" aria-label="Trajectory preview mode">
+                  <button id="preview-mode-2d" type="button" class="mode-toggle active" data-preview-mode="2d">2D</button>
+                  <button id="preview-mode-3d" type="button" class="mode-toggle" data-preview-mode="3d">3D</button>
+                </div>
+                <div class="zoom-control" aria-label="Trajectory preview zoom">
+                  <button id="zoom-out-camera" type="button" title="Zoom out" aria-label="Zoom out">-</button>
+                  <button id="zoom-in-camera" type="button" title="Zoom in" aria-label="Zoom in">+</button>
+                </div>
+                <button id="fit-radius-camera" type="button">Fit Radius</button>
+                <button id="reset-camera" type="button">Reset Camera</button>
+              </div>
+            </div>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="../viewer/index.html?v=source-trajectory-inventory"></iframe>
+          </section>
+
+          <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
             <div class="source-module" aria-label="Stimulus source selection">
               <div class="source-module-heading">
                 <span>Stimulus Type Selection</span>
@@ -155,283 +193,375 @@
                   <label for="bake-gain">Gain</label>
                   <input id="bake-gain" type="number" min="0.01" step="0.05" value="1">
                 </div>
-                <button id="bake-stimulus" type="button" class="primary">Bake Stimulus</button>
+                <button id="bake-stimulus" type="button" class="primary">Bake Ingredient</button>
                 <span id="bake-status" class="status-label required">No source staged</span>
               </div>
             </div>
 
-            <div class="table-toolbar">
-              <span>Baked generated stimuli</span>
+            <div class="stimulus-pool-columns">
+              <div class="stimulus-pool-column">
+                <div class="table-toolbar">
+                  <span>Baked generated stimuli</span>
+                </div>
+                <div class="source-card-list" id="noise-list"></div>
+              </div>
+              <div class="stimulus-pool-column">
+                <div class="table-toolbar">
+                  <span>Local stimulus clips</span>
+                </div>
+                <div class="source-card-list" id="audio-list"></div>
+              </div>
             </div>
-            <div class="source-card-list" id="noise-list"></div>
-
-            <div class="table-toolbar">
-              <span>Local stimulus clips</span>
-            </div>
-            <div class="source-card-list" id="audio-list"></div>
             <div class="step-footer">
-              <button type="button" class="primary" data-continue-step="stimulus">Continue To Baseline</button>
+              <button id="open-ingredient-folder" type="button" disabled>Open Folder</button>
+              <button type="button" class="primary" data-continue-step="stimulus">Continue To Trial Sequence</button>
             </div>
           </section>
-          </div>
-
-          <div class="workspace-splitter" data-resize-gutter="workspace" role="separator" aria-label="Resize stimulus preview column" aria-orientation="vertical" tabindex="0"></div>
-          <aside class="stimulus-side-column">
-          <section class="panel preview-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="trajectory-preview">
-            <div class="panel-heading">
-              <div>Trajectory Preview</div>
-              <div class="preview-actions">
-                <div class="segmented-control" aria-label="Trajectory preview mode">
-                  <button id="preview-mode-2d" type="button" class="mode-toggle active" data-preview-mode="2d">2D</button>
-                  <button id="preview-mode-3d" type="button" class="mode-toggle" data-preview-mode="3d">3D</button>
-                </div>
-                <div class="zoom-control" aria-label="Trajectory preview zoom">
-                  <button id="zoom-out-camera" type="button" title="Zoom out" aria-label="Zoom out">-</button>
-                  <button id="zoom-in-camera" type="button" title="Zoom in" aria-label="Zoom in">+</button>
-                </div>
-                <button id="fit-radius-camera" type="button">Fit Radius</button>
-                <button id="reset-camera" type="button">Reset Camera</button>
-              </div>
-            </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="../viewer/index.html?v=source-trajectory-inventory"></iframe>
-          </section>
-
-            <section id="stimulus-feedback" class="panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-feedback">
-              <div class="panel-heading">
-                <div>Backend Feedback</div>
-                <span id="stimulus-render-status" class="status-label">checking</span>
-              </div>
-              <div id="stimulus-feedback-summary" class="status-list"></div>
-              <div id="stimulus-feedback-list" class="job-list compact"></div>
-            </section>
-          </aside>
-        </section>
-      </section>
-
-      <section class="decision-segment" aria-labelledby="baseline-segment-title">
-        <div class="segment-heading">
-          <span class="segment-kicker">Segment 2</span>
-          <h2 id="baseline-segment-title">Baseline Strategy</h2>
-        </div>
-        <section id="baseline" class="panel" data-step-panel="baseline" data-resizable-panel data-panel-id="baseline">
-          <div class="panel-heading">
-            <div class="panel-title">Baseline Trial Design <span class="step-badge" data-step-badge="baseline"></span></div>
-            <span id="baseline-status" class="status-label">checking</span>
-          </div>
-          <div class="baseline-state-fields" aria-hidden="true">
-            <input id="baseline-enabled" class="state-only" type="checkbox" tabindex="-1">
-            <input id="baseline-percent" type="hidden">
-            <input id="catch-percent" type="hidden">
-            <input id="baseline-soa-values" type="hidden" autocomplete="off">
-            <select id="baseline-strategy" class="state-only" aria-hidden="true" tabindex="-1">
-              <option value="none">No baseline trials</option>
-              <option value="tactile_only">Matched SOA anchors</option>
-              <option value="soa_zero">Sound onset / min SOA</option>
-              <option value="sound_offset">Sound offset / max SOA</option>
-              <option value="custom">Custom timing anchors</option>
-            </select>
-          </div>
-          <fieldset id="baseline-options" class="baseline-option-grid baseline-strategy-only" aria-label="Baseline strategy">
-            <label class="baseline-option-card" data-baseline-option="none">
-              <input type="checkbox" name="baseline-option" value="none">
-              <span class="baseline-option-title">No baseline trials</span>
-              <span class="baseline-option-copy">Use only the audio-tactile and catch rows defined later in the block-design step.</span>
-              <em>No tactile-only anchors</em>
-            </label>
-            <label class="baseline-option-card" data-baseline-option="tactile_only">
-              <input type="checkbox" name="baseline-option" value="tactile_only">
-              <span class="baseline-option-title">Matched SOA anchors</span>
-              <span class="baseline-option-copy">Tactile-only rows use the same timing anchors as the SOA values in the randomizer.</span>
-              <em>Paper-style full timing baseline</em>
-            </label>
-            <label class="baseline-option-card" data-baseline-option="soa_zero">
-              <input type="checkbox" name="baseline-option" value="soa_zero">
-              <span class="baseline-option-title">Sound onset / min SOA</span>
-              <span class="baseline-option-copy">Uses the earliest/synchronous tactile anchor at auditory onset.</span>
-              <em>Synchronous timing control</em>
-            </label>
-            <label class="baseline-option-card" data-baseline-option="sound_offset">
-              <input type="checkbox" name="baseline-option" value="sound_offset">
-              <span class="baseline-option-title">Sound offset / max SOA</span>
-              <span class="baseline-option-copy">Uses the late tactile anchor at the end of the selected sound window.</span>
-              <em>Late/end-anchor control</em>
-            </label>
-            <label class="baseline-option-card" data-baseline-option="custom">
-              <input type="checkbox" name="baseline-option" value="custom">
-              <span class="baseline-option-title">Custom timing anchors</span>
-              <span class="baseline-option-copy">Use profile-specific tactile-only timing anchors carried by the design/template.</span>
-              <em>Profile-defined anchors</em>
-            </label>
-          </fieldset>
-          <div class="step-footer">
-            <button type="button" class="primary" data-continue-step="baseline">Continue To Trial Sequence</button>
-          </div>
         </section>
       </section>
 
       <section class="decision-segment" aria-labelledby="trials-segment-title">
         <div class="segment-heading">
-          <span class="segment-kicker">Segment 3</span>
+          <span class="segment-kicker">Segment 2</span>
           <h2 id="trials-segment-title">Trial Sequence Design</h2>
+          <button class="segment-info-button" type="button" data-segment-info="trials" aria-label="About Segment 2: Trial Sequence Design">About</button>
         </div>
         <section id="trials" class="panel" data-step-panel="trials" data-resizable-panel data-panel-id="trials">
-          <div class="panel-heading">
-            <div class="panel-title">Single-Trial Sequence Assembly <span class="step-badge" data-step-badge="trials"></span></div>
-          </div>
+          <span class="state-only step-badge" data-step-badge="trials"></span>
           <div class="trial-sequence-state-fields" aria-hidden="true">
             <input id="soa-values" type="hidden">
           </div>
-          <div class="trial-snippet-module" aria-label="Custom clip source imports">
-            <div class="source-module-heading">
-              <span>Custom Clips</span>
-              <div class="source-card-actions">
-                <span id="snippet-counts" class="status-label">0 clips</span>
-              </div>
-            </div>
+          <div class="trial-snippet-module state-only" aria-label="Custom clip source imports">
+            <span id="snippet-counts" class="status-label">0 clips</span>
             <input id="audio-file-input" type="file" accept=".wav,audio/wav,audio/x-wav,audio/mpeg,audio/mp3" hidden>
             <div class="source-card-list" id="snippet-list"></div>
           </div>
           <div class="filmstrip-editor" aria-label="Single-trial sequence builder">
-            <div class="source-module-heading">
-              <span>Trial Sequence Rows</span>
-              <button id="add-strip-row" class="icon-action" type="button" title="Add trial sequence row" aria-label="Add trial sequence row">+</button>
-            </div>
             <div id="filmstrip-list" class="filmstrip-list"></div>
           </div>
-          <div class="step-footer">
-            <button type="button" class="primary" data-continue-step="trials">Continue To Trial-Block Design</button>
+          <div class="action-row segment-bake-actions">
+            <button id="bake-trial-sequences" type="button" class="primary">Bake Trial Sequences</button>
+            <span id="trial-sequence-bake-status" class="status-label">waiting</span>
+            <button id="open-trial-sequence-folder" type="button" disabled>Open Folder</button>
           </div>
+          <div class="step-footer">
+            <button type="button" class="primary" data-continue-step="trials">Continue To Baseline And Tactile</button>
+          </div>
+        </section>
+      </section>
+
+      <section class="decision-segment" aria-labelledby="baseline-segment-title">
+        <div class="segment-heading">
+          <span class="segment-kicker">Segment 3</span>
+          <h2 id="baseline-segment-title">Baseline and Tactile Trial Design</h2>
+          <button class="segment-info-button" type="button" data-segment-info="baseline" aria-label="About Segment 3: Baseline and Tactile Trial Design">About</button>
+        </div>
+        <section id="baseline" class="baseline-tactile-workbench" data-step-panel="baseline">
+          <section class="panel baseline-tactile-panel" data-step-panel="baseline" data-resizable-panel data-panel-id="baseline-tactile-design">
+            <div class="panel-heading">
+              <div class="panel-title">Tactile Timing <span class="step-badge" data-step-badge="baseline"></span></div>
+              <span id="baseline-status" class="status-label required">required</span>
+            </div>
+
+            <div class="baseline-state-fields" aria-hidden="true">
+              <input id="baseline-enabled" class="state-only" type="checkbox" tabindex="-1">
+              <select id="baseline-strategy" class="state-only" aria-hidden="true" tabindex="-1">
+                <option value="none">No baseline trials</option>
+                <option value="min_anchor">Minimum SOA anchor</option>
+                <option value="max_anchor">Maximum SOA anchor</option>
+                <option value="min_max">Minimum + maximum SOA anchors</option>
+                <option value="tactile_only">Full SOA tactile-only</option>
+                <option value="custom">Custom timings</option>
+                <option value="soa_zero">Legacy sound onset</option>
+                <option value="sound_offset">Legacy sound offset</option>
+              </select>
+            </div>
+
+            <div class="split-fields tactile-decision-fields">
+              <div class="field-row wide-field">
+                <label for="block-soa-values">SOA values ms</label>
+                <input id="block-soa-values" type="text" autocomplete="off" placeholder="500, 1000, 2700">
+              </div>
+            </div>
+
+            <label class="inline-toggle catch-trial-toggle" for="include-catch-trials">
+              <input id="include-catch-trials" type="checkbox">
+              <span>Include Catch Trials (audio only)</span>
+            </label>
+
+            <fieldset id="baseline-options" class="baseline-option-grid" aria-label="Baseline strategy">
+              <label class="baseline-option-card" data-baseline-option="none">
+                <input type="checkbox" name="baseline-option" value="none">
+                <span class="baseline-option-title">No baseline</span>
+                <span class="baseline-option-copy">Create only audio-tactile trial files.</span>
+              </label>
+              <label class="baseline-option-card" data-baseline-option="min_anchor">
+                <input type="checkbox" name="baseline-option" value="min_anchor">
+                <span class="baseline-option-title">Minimum SOA anchor</span>
+                <span class="baseline-option-copy">Keep the trial audio and add tactile at the first entered SOA.</span>
+              </label>
+              <label class="baseline-option-card" data-baseline-option="max_anchor">
+                <input type="checkbox" name="baseline-option" value="max_anchor">
+                <span class="baseline-option-title">Maximum SOA anchor</span>
+                <span class="baseline-option-copy">Keep the trial audio and add tactile at the last entered SOA.</span>
+              </label>
+              <label class="baseline-option-card" data-baseline-option="tactile_only">
+                <input type="checkbox" name="baseline-option" value="tactile_only">
+                <span class="baseline-option-title">Full SOA tactile-only</span>
+                <span class="baseline-option-copy">Preserve fixed clips and jitter, silence looming segments, and add tactile at every SOA.</span>
+              </label>
+              <label class="baseline-option-card baseline-custom" data-baseline-option="custom">
+                <input type="checkbox" name="baseline-option" value="custom">
+                <span class="baseline-option-title">Custom timings</span>
+                <span class="baseline-option-copy">Enter custom SOAs and choose whether custom baselines are tactile-only or audio-tactile.</span>
+              </label>
+            </fieldset>
+
+            <div id="baseline-custom-controls" class="baseline-custom-controls" hidden>
+              <div class="field-row">
+                <label for="baseline-soa-values">Custom baseline SOAs ms</label>
+                <textarea id="baseline-soa-values" rows="3" autocomplete="off" placeholder="500, 1000, 2700"></textarea>
+              </div>
+              <label class="inline-toggle" for="baseline-custom-audio-tactile">
+                <input id="baseline-custom-audio-tactile" type="checkbox">
+                <span>Custom baselines keep full trial audio</span>
+              </label>
+            </div>
+
+            <div class="action-row baseline-bake-actions">
+              <button id="bake-trial-files" type="button" class="primary">Bake Baseline/Tactile Trials</button>
+              <span id="trial-file-bake-status" class="status-label">waiting</span>
+            </div>
+
+            <div class="step-footer">
+              <button type="button" class="primary" data-continue-step="baseline">Continue To Trial Repetition Pool</button>
+            </div>
+          </section>
+
+          <section class="panel baseline-output-panel" data-step-panel="baseline" data-resizable-panel data-panel-id="baseline-tactile-output">
+            <div class="panel-heading">
+              <div>Trial File Oversight</div>
+              <button id="open-trial-file-folder" type="button" disabled>Open Folder</button>
+            </div>
+            <div id="baseline-count-strip" class="count-strip"></div>
+            <div id="baseline-factor-tree" class="composition-tree" aria-label="Baseline and tactile file factor tree"></div>
+          </section>
         </section>
       </section>
 
       <section class="decision-segment" aria-labelledby="block-segment-title">
         <div class="segment-heading">
           <span class="segment-kicker">Segment 4</span>
-          <h2 id="block-segment-title">Trial-Block Design</h2>
+          <h2 id="block-segment-title">Trial Repetition Pool</h2>
+          <button class="segment-info-button" type="button" data-segment-info="block" aria-label="About Segment 4: Trial Repetition Pool">About</button>
         </div>
-        <section id="block" class="panel" data-step-panel="block" data-resizable-panel data-panel-id="block-design">
-          <div class="panel-heading">
-            <div class="panel-title">Block-Level Counterbalancing <span class="step-badge" data-step-badge="block"></span></div>
-            <button id="export-protocol-note" type="button" disabled>Preview Only</button>
-          </div>
-          <div class="split-fields trial-decision-fields">
-            <div class="field-row">
-              <label for="repetitions">Repetitions</label>
-              <input id="repetitions" type="number" min="1" max="100" step="1">
+        <section id="block" class="block-workbench" data-step-panel="block">
+          <section class="panel block-control-panel" data-step-panel="block" data-resizable-panel data-panel-id="block-design">
+            <div class="panel-heading">
+              <div class="panel-title">Repetition Controls <span class="step-badge" data-step-badge="block"></span></div>
             </div>
-            <div class="field-row">
-              <label for="blocks">Blocks</label>
-              <input id="blocks" type="number" min="1" max="100" step="1">
-            </div>
-            <div class="field-row wide-field">
-              <label for="block-soa-values">SOA values ms</label>
-              <input id="block-soa-values" type="text" autocomplete="off">
-            </div>
-          </div>
-          <div id="protocol-summary" class="summary-grid"></div>
-          <div class="step-footer">
-            <button type="button" class="primary" data-continue-step="block">Continue To Run Prep</button>
-          </div>
-        </section>
 
-        <section class="panel" data-step-panel="block" data-resizable-panel data-panel-id="trial-preview">
+            <div id="protocol-summary" class="count-strip trial-pool-calculator"></div>
+
+            <div class="split-fields trial-decision-fields trial-pool-global-controls">
+              <div class="field-row">
+                <label for="repetitions">Set all folders to</label>
+                <input id="repetitions" type="number" min="0" max="100" step="0.5">
+              </div>
+              <button id="apply-trial-pool-repetitions" type="button">Apply To Folders</button>
+            </div>
+
+            <input id="blocks" type="hidden" value="1">
+            <input id="baseline-percent" type="hidden" value="0">
+            <input id="catch-percent" type="hidden" value="0">
+            <div id="row-mix-overrides" class="state-only"></div>
+
+            <div id="trial-pool-folder-list" class="trial-pool-folder-list"></div>
+
+            <div class="action-row segment-bake-actions">
+              <button id="bake-trial-pool" type="button" class="primary">Bake Trial Pool CSV</button>
+              <span id="trial-pool-bake-status" class="status-label">waiting</span>
+              <button id="open-trial-pool-folder" type="button" disabled>Open Folder</button>
+            </div>
+
+            <div class="step-footer">
+              <button type="button" class="primary" data-continue-step="block">Continue To Block CSV Preview</button>
+            </div>
+          </section>
+
+          <section class="panel composition-oversight-panel" data-step-panel="block" data-resizable-panel data-panel-id="composition-oversight">
+            <div class="panel-heading">
+              <div>Pool Oversight</div>
+            </div>
+            <div id="composition-tree" class="composition-sliders" aria-label="Trial pool family percentages"></div>
+            <div id="trial-pool-duration-calculus" class="duration-calculus" aria-label="Trial pool duration calculation"></div>
+          </section>
+        </section>
+      </section>
+
+      <section class="decision-segment" aria-labelledby="schedule-segment-title">
+        <div class="segment-heading">
+          <span class="segment-kicker">Segment 5</span>
+          <h2 id="schedule-segment-title">Generate and Review Blocks</h2>
+          <button class="segment-info-button" type="button" data-segment-info="schedule" aria-label="About Segment 5: Generate and Review Blocks">About</button>
+        </div>
+        <section id="schedule" class="panel block-csv-preview-panel" data-step-panel="schedule" data-resizable-panel data-panel-id="block-csv-preview">
           <div class="panel-heading">
-            <div>Trial Preview</div>
-            <span id="trial-count" class="muted"></span>
+            <div class="panel-title">Block CSV Preview <span class="step-badge" data-step-badge="schedule"></span></div>
+            <span id="block-csv-bake-status" class="status-label">waiting</span>
           </div>
-          <div class="scroll-table">
-            <table class="data-table" id="trial-table">
-              <thead>
-                <tr>
-                  <th>Block</th>
-                  <th>Trial</th>
-                  <th>Type</th>
-                  <th>Trial Type</th>
-                  <th>SOA</th>
-                  <th>Space</th>
-                  <th>Site</th>
-                  <th>Sequence</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
+
+          <div class="split-fields block-csv-controls">
+            <div class="field-row">
+              <label for="block-count">Blocks</label>
+              <input id="block-count" type="number" min="1" max="200" step="1">
+            </div>
+          </div>
+
+          <div class="block-build-progress" aria-label="Block CSV creation progress">
+            <div class="block-build-progress-header">
+              <strong>Block CSV bake</strong>
+              <span id="block-build-progress-label">waiting</span>
+            </div>
+            <div id="block-build-progress-track" class="block-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span id="block-build-progress-fill" class="block-progress-fill"></span>
+            </div>
+            <div class="block-build-progress-meta">
+              <span id="block-build-progress-count">0 / 0 blocks</span>
+              <span id="block-build-progress-percent">0%</span>
+            </div>
+          </div>
+
+          <div id="block-csv-preview-list" class="block-csv-preview-list" aria-label="Generated block CSV previews">
+            <div class="summary-text">No block CSVs yet.</div>
+          </div>
+
+          <div class="step-footer block-csv-decision-actions">
+            <button id="regenerate-block-csvs" type="button">Regenerate Blocks</button>
+            <button id="accept-block-csvs" type="button" class="primary">Accept Blocks</button>
           </div>
         </section>
       </section>
 
       <section class="decision-segment" aria-labelledby="run-segment-title">
         <div class="segment-heading">
-          <span class="segment-kicker">Segment 5</span>
-          <h2 id="run-segment-title">Run Setup</h2>
+          <span class="segment-kicker">Segment 6</span>
+          <h2 id="run-segment-title">Prepare Experiment</h2>
+          <button class="segment-info-button" type="button" data-segment-info="run" aria-label="About Segment 6: Prepare Experiment">About</button>
         </div>
         <section class="run-grid">
           <section id="run" class="panel" data-step-panel="run" data-resizable-panel data-panel-id="run">
             <div class="panel-heading">
-              <div class="panel-title">Run Setup <span class="step-badge" data-step-badge="run"></span></div>
-              <span id="readiness-pill" class="status-label">checking</span>
+              <div class="panel-title">Experiment-Level Parameters <span class="step-badge" data-step-badge="run"></span></div>
+              <span id="run-sequence-status" class="status-label">checking</span>
             </div>
-            <div class="field-row">
-              <label for="participants">Participants</label>
-              <input id="participants" type="number" min="1" max="500" step="1">
+            <div class="run-decision-grid" aria-label="Experiment-level parameters">
+              <div class="field-row">
+                <label for="participants">Planned participants</label>
+                <input id="participants" type="number" min="1" max="500" step="1">
+              </div>
+              <div class="field-row">
+                <label>Experiment parts</label>
+                <div class="segmented-control run-mode-control" role="radiogroup" aria-label="Experiment parts">
+                  <label>
+                    <input type="radio" name="experiment-structure" value="single" checked>
+                    <span>1 part</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="experiment-structure" value="pre_post">
+                    <span>2 parts</span>
+                  </label>
+                </div>
+              </div>
             </div>
-            <div class="field-row">
-              <label for="participant-id">Participant ID</label>
-              <input id="participant-id" type="text" autocomplete="off">
+            <section class="run-instructions-panel" aria-label="Preload instruction audio clips">
+              <div class="run-preview-toolbar">
+                <div class="panel-subtitle">Preload Instruction Audio Clips</div>
+                <span id="run-instructions-summary" class="status-label">checking</span>
+              </div>
+              <div id="run-instruction-slots" class="run-instruction-slots"></div>
+            </section>
+            <div class="run-preview-toolbar">
+              <div class="panel-subtitle">Block Permutation Preview</div>
+              <span id="run-sequence-summary" class="status-label">waiting</span>
             </div>
-            <div id="readiness-list" class="status-list"></div>
-            <div class="action-row">
-              <button id="render-action" type="button">Render</button>
-              <button id="prepare-action" type="button">Prepare</button>
-              <button id="stress-action" type="button">Stress Audio</button>
-              <button id="focus-action" type="button" class="primary">Start Native Focus</button>
+            <div class="scroll-table compact run-sequence-table-wrap">
+              <table class="data-table" id="run-sequence-table">
+                <thead>
+                  <tr>
+                    <th>Participant</th>
+                    <th>Part</th>
+                    <th>Blocks</th>
+                    <th>Block order</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
             </div>
-            <div class="step-footer">
-              <button type="button" class="primary" data-continue-step="run">Continue To Review</button>
+            <div class="step-footer run-sequence-actions">
+              <button id="regenerate-run-sequence" type="button">Regenerate Sequence</button>
+              <button id="prepare-experiment" type="button" class="primary">Save Design and Start Experiment Runner</button>
             </div>
           </section>
-
-          <div class="workspace-splitter table-splitter" data-resize-gutter="tables" role="separator" aria-label="Resize run review column" aria-orientation="vertical" tabindex="0"></div>
-
-          <div class="run-side-stack">
-            <section class="panel" data-step-panel="run" data-resizable-panel data-panel-id="participant-orders">
-              <div class="panel-heading">
-                <div>Participant Orders</div>
-                <span id="order-count" class="muted"></span>
-              </div>
-              <div class="scroll-table compact">
-                <table class="data-table" id="order-table">
-                  <thead>
-                    <tr>
-                      <th>Participant</th>
-                      <th>Block order</th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-            </section>
-          </div>
         </section>
       </section>
 
-      <section class="decision-segment" aria-labelledby="review-segment-title">
-        <div class="segment-heading">
-          <span class="segment-kicker">Segment 6</span>
-          <h2 id="review-segment-title">Review</h2>
-        </div>
-        <section id="review" class="panel" data-step-panel="review" data-resizable-panel data-panel-id="review">
-          <div class="panel-heading">
-            <div class="panel-title">Review <span class="step-badge" data-step-badge="review"></span></div>
-            <button id="refresh-jobs" type="button">Refresh Jobs</button>
-          </div>
-          <div id="session-summary" class="summary-text"></div>
-          <div id="job-list" class="job-list"></div>
-        </section>
-      </section>
     </main>
   </div>
 
   <div id="toast" role="status" aria-live="polite"></div>
-  <script src="app.js"></script>
+  <div id="segment-info-modal" class="modal-backdrop" hidden>
+    <div class="modal-card segment-info-card" role="dialog" aria-modal="true" aria-labelledby="segment-info-modal-title">
+      <div class="modal-heading">
+        <div>
+          <div id="segment-info-kicker" class="segment-kicker">Segment</div>
+          <h2 id="segment-info-modal-title">Segment Description</h2>
+        </div>
+        <button id="segment-info-modal-close" class="icon-action" type="button" aria-label="Close">X</button>
+      </div>
+      <div class="segment-info-grid">
+        <section>
+          <h3>Purpose</h3>
+          <p id="segment-info-purpose"></p>
+        </section>
+        <section>
+          <h3>Your Inputs</h3>
+          <p id="segment-info-inputs"></p>
+        </section>
+        <section>
+          <h3>Backend Work</h3>
+          <p id="segment-info-backend"></p>
+        </section>
+        <section>
+          <h3>Used Next</h3>
+          <p id="segment-info-next"></p>
+        </section>
+      </div>
+    </div>
+  </div>
+  <div id="customize-modal" class="modal-backdrop" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="customize-modal-title">
+      <form id="customize-form">
+        <div class="modal-heading">
+          <div>
+            <div class="segment-kicker">New Custom Study</div>
+            <h2 id="customize-modal-title">Name This Study</h2>
+          </div>
+          <button id="customize-modal-close" class="icon-action" type="button" aria-label="Close">X</button>
+        </div>
+        <div class="field-row">
+          <label for="customize-study-name">Study name</label>
+          <input id="customize-study-name" type="text" autocomplete="off" required>
+        </div>
+        <p id="customize-source-label" class="modal-source"></p>
+        <p id="customize-error" class="modal-error" role="alert" hidden></p>
+        <div class="modal-actions">
+          <button id="customize-cancel" type="button">Cancel</button>
+          <button id="customize-submit" class="primary" type="submit">Create Study</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="app.js?v=20260615-dashboard-sync"></script>
 </body>
 </html>

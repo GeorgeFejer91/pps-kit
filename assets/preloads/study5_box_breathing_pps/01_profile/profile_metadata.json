@@ -13,9 +13,9 @@
     "instruction_assets_bundled": true,
     "custom_clips_preloaded": true,
     "instruction_duration_s": 4.0,
-    "default_instruction_asset_variant": "british_kokoro",
-    "inhale_instruction_asset": "assets/breathing/british_kokoro/Inhale-2-3-4-hold_FIXED.wav",
-    "exhale_instruction_asset": "assets/breathing/british_kokoro/Exhale-2-3-4-hold_FIXED.wav",
+    "default_instruction_asset_variant": "original_study5",
+    "inhale_instruction_asset": "assets/breathing/original_study5/Inhale-2-3-4-hold_FIXED.wav",
+    "exhale_instruction_asset": "assets/breathing/original_study5/Exhale-2-3-4-hold_FIXED.wav",
     "instruction_asset_variants": {
       "british_kokoro": {
         "label": "British Kokoro voice",
@@ -34,16 +34,16 @@
       {
         "label": "Inhale instruction",
         "phase": "Inhale",
-        "variant": "british_kokoro",
-        "path": "assets/breathing/british_kokoro/Inhale-2-3-4-hold_FIXED.wav",
+        "variant": "original_study5",
+        "path": "assets/breathing/original_study5/Inhale-2-3-4-hold_FIXED.wav",
         "duration_s": 4.0,
         "default": true
       },
       {
         "label": "Exhale instruction",
         "phase": "Exhale",
-        "variant": "british_kokoro",
-        "path": "assets/breathing/british_kokoro/Exhale-2-3-4-hold_FIXED.wav",
+        "variant": "original_study5",
+        "path": "assets/breathing/original_study5/Exhale-2-3-4-hold_FIXED.wav",
         "duration_s": 4.0,
         "default": true
       }
@@ -71,7 +71,7 @@
   "provenance": [
     {
       "field": "instruction assets",
-      "source": "Bundled owned Study 5 breathing instruction WAVs include both assets/breathing/british_kokoro generated with Kokoro ONNX using the British English bf_emma voice and assets/breathing/original_study5 decoded from the original local Study 5 instruction MP3s. The default preload uses the British Kokoro pair, while the original Study 5 inhale/exhale clips are exposed as alternate fixed-audio sources."
+      "source": "Bundled owned Study 5 breathing instruction WAVs include both assets/breathing/british_kokoro generated with Kokoro ONNX using the British English bf_emma voice and assets/breathing/original_study5 decoded from the original local Study 5 instruction MP3s. The default Study 5 preload now uses the original Study 5 inhale/exhale clips, while the British Kokoro pair remains available as an alternate fixed-audio source."
     },
     {
       "field": "prebaked looming assets",

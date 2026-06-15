@@ -1,12 +1,12 @@
 # Published Audio-Tactile PPS Stress Test
 
-Status: working audit for converting published audio-tactile peripersonal-space paradigms into preloadable study profiles.
+Status: working audit for converting published audio-tactile peripersonal-space paradigms into preloadable study profiles. The stricter runnable-profile gate now lives in `docs/PUBLISHED_STUDY_RECREATION_STATUS.md`; the broader literature coverage ledger lives in `docs/AUDIOTACTILE_PPS_LITERATURE_COVERAGE_AUDIT.md`.
 
 ## Result
 
-The current preload library contains 20 JSON profiles in `study_templates/`. A profile is considered preloadable when it loads through `load_templates()`, validates without unsupported field warnings, and can generate a trial schedule from the current data model. This does not mean exact replication. Profiles marked `partial` are runnable scaffolds with explicit missing parameters.
+The current preload library contains 21 JSON profiles in `study_templates/`. A profile is considered runnable for exact toolkit recreation only when its `01_profile/profile_parameters_manifest.json` passes the profile checks. Loading through `load_templates()` or having generated preload WAVs is not sufficient by itself.
 
-The strongest current coverage is the Canzoneri-style dynamic audio-tactile family: a moving task-irrelevant sound, speeded tactile detection, SOA/distance mapping, baseline or catch trials, and RT-based PPS estimation. The weakest coverage is for studies whose key manipulation is not a simple stimulus schedule: intervention phases, social context, locomotion/VR state, clinical/prosthesis state, speaker-array crossfades, licensed ecological audio, exact Unity/VR state, or body-scaled distance units.
+The strongest current coverage is the Canzoneri-style dynamic audio-tactile family: a moving task-irrelevant sound, speeded tactile detection, SOA/distance mapping, baseline or catch trials, and RT-based PPS estimation. Current standardization gaps should be interpreted narrowly as PPS-task execution constraints: unsupported trial families, baseline/catch logic, audio rendering or source-asset types, tactile/response mappings, core timing/repetition rules, body-relative coordinate systems, or apparatus geometry. Clinical populations, interventions, non-audiotactile stimuli, and experimental contexts are notes only unless they change those audiotactile task mechanics.
 
 ## Parameter Groups
 
@@ -14,35 +14,35 @@ The audit separates parameters into four groups so the GUI does not become a lon
 
 | Group | Examples | GUI policy |
 |---|---|---|
-| Core visible controls | start/end distance and rotation, movement duration/speed/path length, SOA values, spatial values, repetitions, catch count, baseline on/off, blocks | Keep visible in the main tabs. |
-| Profile-level advanced metadata | catch subtype, baseline subtype, target probability, ITI/jitter policy, response rule, block factor filters, intervention phase labels, analysis rule | Store in profile/design metadata and show in a read-only `Profile details` checklist; edit only in grouped advanced panels. |
+| Core visible controls | start/end distance and rotation, movement duration/speed/path length, SOA values, spatial values, repetitions, catch count, baseline on/off | Keep visible in the main tabs. |
+| Profile-level advanced metadata | catch subtype, baseline subtype, target probability, ITI/jitter policy, response rule, analysis rule | Store in profile/design metadata; edit only in grouped advanced panels if the toolkit later exposes them. |
 | Renderer/hardware metadata | fixed HRTF resource, 3DTI/FABIAN version, channel layout, tactile output channel, audio sample rate | Keep under the hood; surface status and warnings only. |
-| Deferred apparatus metadata | VR scene, treadmill/wheelchair training, social partner/mannequin context, clinical prosthesis state, licensed audio assets | Store as provenance/gap notes until the runner can operationalize them. |
+| Deferred context metadata | VR scene, treadmill/wheelchair training, social partner/mannequin context, clinical prosthesis state | Store as provenance notes, not blockers, unless they require a different audio-tactile task execution. |
 
 ## Per-Study Audit
 
 | Profile | Trial families | SOA/spatial contract | Jitter/procedure contract | Current gap |
 |---|---|---|---|---|
-| `canzoneri_2012_dynamic_sounds` | Bimodal IN/OUT target trials, tactile-only T0/T6 controls, auditory-only catch trials | T1-T5 at 300, 800, 1500, 2200, 2700 ms from sound onset; T0/T6 during 1000 ms pre/post silence | Original paper reports randomized trials, two blocks, 8 target repetitions per temporal delay, 76 catch trials | Current baseline model cannot duplicate direction-coupled tactile-only T0/T6 rows exactly. |
-| `canzoneri_2013_tool_use_reshaping` | Canonical dynamic PPS measurement before/after tool-use training | Canzoneri-family T1-T5 scaffold | Intervention phase order and tool-use/control assignment are study-level factors | Needs ordered phase/intervention support. |
-| `canzoneri_2013_amputation_prosthesis` | Canonical dynamic PPS measurement across clinical/prosthesis states | Canzoneri-family T1-T5 scaffold | Clinical group and prosthesis-worn state are not trial randomization factors | Needs session/group metadata and tested-limb factor support. |
-| `serino_2015_toolless_sync_training` | Bimodal IN/OUT target trials plus auditory-only catch trials | T1-T5 at 300, 800, 1500, 2200, 2700 ms | Synchronous versus asynchronous far-audio/hand-tactile training before PPS measurement | Needs training-phase scheduler. |
-| `teneggi_2013_social_face_pps` | Face tactile detection with approaching/receding sound labels | Five distance samples inherited from the social PPS method | Social/economic-game session context changes PPS boundary | Needs social partner/mannequin/cooperation condition metadata. |
-| `ferri_2015_artificial_looming_valence` | Bimodal emotional artificial looming sounds, catch/baseline scaffold | Canzoneri-family five SOA/distance samples | Valence is a sound-condition factor; exact randomization and gain envelope need source materials | Needs licensed/validated sound assets and envelope metadata. |
+| `canzoneri_2012_dynamic_sounds` | Bimodal IN/OUT target trials, tactile-only T0/T6 controls, auditory-only catch trials | T1-T5 at 300, 800, 1500, 2200, 2700 ms from sound onset; T0/T6 during 1000 ms pre/post silence | Original paper reports 8 target repetitions per temporal delay and 76 catch trials; randomization and two-block procedure are not acceptance blockers | Current baseline model cannot duplicate direction-coupled tactile-only T0/T6 rows exactly. |
+| `canzoneri_2013_tool_use_reshaping` | Canonical dynamic PPS measurement before/after tool-use training | Canzoneri-family T1-T5 scaffold | Training/control context is non-blocking for the PPS-task profile | Needs exact trial count and ITI table from the paper. |
+| `canzoneri_2013_amputation_prosthesis` | Canonical dynamic PPS measurement across prosthesis states | Canzoneri-family T1-T5 scaffold | Clinical/prosthesis context is non-blocking for the PPS-task profile | Needs exact trial count and tactile calibration table. |
+| `serino_2015_toolless_sync_training` | Bimodal IN/OUT target trials plus auditory-only catch trials | T1-T5 at 300, 800, 1500, 2200, 2700 ms | Training context is non-blocking for the PPS-task profile | Needs electrocutaneous tactile calibration and voice-key response capture details. |
+| `teneggi_2013_social_face_pps` | Face tactile detection with approaching/receding sound labels | Five distance samples inherited from the social PPS method | Social/economic-game context is non-blocking for the PPS-task profile | Needs exact distance/timing table from supplement. |
+| `ferri_2015_artificial_looming_valence` | Bimodal emotional artificial looming sounds, catch/baseline scaffold | Canzoneri-family five SOA/distance samples | Valence is a sound-condition factor; exact gain envelope needs source materials | Needs licensed/validated sound assets and envelope metadata. |
 | `ferri_2015_ecological_looming_valence` | Ecological negative/neutral/positive looming labels | Canzoneri-family five SOA/distance samples | Same as artificial variant, with more asset dependence | Needs import manifest and license/provenance checks for ecological audio. |
-| `serino_2015_peri_trunk_exp1` | Trunk tactile, looming/receding, baseline/catch scaffold | Six distances from far to near; SOAs stored as profile values | Two-speaker crossfade approximates continuous motion | Needs speaker-array/crossfade renderer mode for exact physical replication. |
-| `serino_2015_front_back_trunk_exp2` | Front/back trunk tactile with pass-through sound directions | Seven distance samples along front-back axis | Direction and tactile body side are block factors | Needs block filters for direction, tactile side, and front/back body mapping. |
+| `serino_2015_peri_trunk_exp1` | Trunk tactile, looming/receding, baseline/catch scaffold | Six distances from far to near; SOAs stored as profile values | Original two-speaker apparatus is reconstructed as a binaural near-far trajectory | Current profile passes the Segment 0-4 PPS-task recreation gate. |
+| `serino_2015_front_back_trunk_exp2` | Front/back trunk tactile with pass-through sound directions | Seven distance samples along front-back axis | Direction and tactile body side are task coordinates | Needs physical 16-speaker array support and the 13-distance internal schedule. |
 | `serino_2015_peri_hand_exp3` | Hand tactile, looming/receding, baseline/catch scaffold | Five hand-centered distances | Lateral hand coordinate is not a first-class GUI field | Needs body-part anchored coordinate frames. |
-| `galli_2015_wheelchair_full_body` | Front/back trunk tactile PPS with baseline/catch scaffold | Six timing/distance samples | Wheelchair training and navigation state are outside current runner | Needs intervention/session phase support and wheelchair-state metadata. |
-| `noel_2015_bodily_self` | Full-body-illusion context plus chest tactile PPS schedule | Six SOA/distance samples | FBI stroking context and self-location manipulation are not trial families | Needs protocol-phase metadata, not extra renderer controls. |
-| `noel_2015_walking_full_body_action` | Standing/walking full-body PPS scaffold | Five distance samples from extended walking PPS report | Walking/treadmill/optic-flow conditions are not runner states | Needs locomotion/visual-context condition metadata. |
-| `matsuda_2021_four_directions` | Bimodal, unimodal, and catch trials in four direction blocks | Tbefore/Tafter plus T1-T5; T1-T5 are 300, 800, 1500, 2200, 2700 ms | Four direction blocks, randomized trials, counterbalanced block order, breaks after 50 trials | Needs block-specific direction filters and explicit break schedule. |
+| `galli_2015_wheelchair_full_body` | Front/back trunk tactile PPS with baseline/catch scaffold | Six timing/distance samples | Wheelchair context is non-blocking for the PPS-task profile | Needs speaker-array Gaussian amplitude control. |
+| `noel_2015_bodily_self` | Full-body-illusion context plus chest tactile PPS schedule | Six SOA/distance samples | Full-body-illusion context is non-blocking for the PPS-task profile | Current profile passes the PPS-task recreation gate. |
+| `noel_2015_walking_full_body_action` | Standing/walking full-body PPS scaffold | Five distance samples from extended walking PPS report | Walking/treadmill/optic-flow context is non-blocking for the PPS-task profile | Needs exact sound distances and trial counts. |
+| `matsuda_2021_four_directions` | Bimodal, unimodal, and catch trials in four direction blocks | Tbefore/Tafter plus T1-T5; T1-T5 are 300, 800, 1500, 2200, 2700 ms | Four body-relative directions are encoded as profile source trajectories | Current profile passes the PPS-task recreation gate. |
 | `taffou_2014_cynophobic_rear_looming` | Dog/sheep rear-field audio-tactile, baseline, catch scaffold | Tbefore/T1-T5/Tafter-style timing with rear-left/rear-right hemispaces | Threat category and hemifield are block/trial factors | Needs licensed audio assets and HRTF/source-specific provenance. |
-| `tonelli_2019_echolocation` | Seven-speaker audio-tactile, tactile-only, and catch scaffold | Seven SOA/distance samples from a lateral speaker array | Echolocation training state and apparatus-specific timing are not modeled | Needs speaker-array mode and intervention/session factor. |
+| `tonelli_2019_echolocation` | Seven-speaker audio-tactile, tactile-only, and catch scaffold | Seven SOA/distance samples from a lateral speaker array | Echolocation training context is non-blocking for the PPS-task profile | Needs seven-speaker switching/timing support. |
 | `lerner_2021_3d_audio_tactile_boundary` | Dynamic and flat 3D audio with tactile belt events | Six body-scaled distances based on arm length | Twelve source directions are prebaked into local trajectory assets; subject-specific head/arm measures and Unity behavior remain metadata | Needs body-scaled distance units and exact Unity/3D Tune-In condition logic. |
-| `barumerli_2026_arm_movement_exp1` | Looming/receding audio-tactile blocks, catch, baseline | T1-T5 at 300, 800, 1500, 2200, 2700 ms | Motor/static hand-status blocks are condition factors | Needs block-factor filters and arm-movement state metadata. |
-| `barumerli_2026_arm_movement_exp2` | Looming/receding audio-tactile blocks, catch, full baseline SOA set | T1-T5 at 800, 1300, 2000, 2700, 3200 ms | Same as Experiment 1 with longer sound duration | Needs block-factor filters and explicit generated-sound duration lock. |
-| `pfeiffer_2018_lateral_perihead_left_to_right` | Trajectory/noise profile for the local simulator reference | Lateral X trajectory with profile-derived distance-at-tactile values | Reference script includes its own head model and level equations | Needs final native 3DTI/native-reference comparison before calling it acoustically equivalent. |
+| `barumerli_2026_arm_movement_exp1` | Looming/receding audio-tactile blocks, catch, baseline | T1-T5 at 300, 800, 1500, 2200, 2700 ms | Motor/static hand-status is non-blocking for the PPS-task profile | Current profile passes the PPS-task recreation gate. |
+| `barumerli_2026_arm_movement_exp2` | Looming/receding audio-tactile blocks, catch, full baseline SOA set | T1-T5 at 800, 1300, 2000, 2700, 3200 ms | Same as Experiment 1 with longer sound duration | Current profile passes the PPS-task recreation gate. |
+| `pfeiffer_2018_lateral_perihead_left_to_right` | Trajectory/noise profile for the local simulator reference | Lateral X trajectory with profile-derived distance-at-tactile values | Reference script includes its own head model and level equations | Current profile passes the PPS-task recreation gate, while exact acoustic equivalence remains provenance-scoped. |
 
 ## Deferred Candidate Studies
 
@@ -68,21 +68,17 @@ Add `pre_sound_silence_ms`, `post_sound_silence_ms`, `iti_policy`, `iti_min_ms`,
 
 3. `BlockFactorSpec`
 
-Current blocks only filter trial types. Add optional filters for motion direction, noise label, tactile site, body-relative direction, baseline subtype, catch subtype, and phase. This covers Matsuda-style direction blocks, Barumerli movement blocks, front/back body mapping, and valence blocks without adding separate GUI controls for each paper.
+Current blocks only filter trial types. Add optional filters for motion direction, noise label, tactile site, body-relative direction, baseline subtype, and catch subtype. This covers Matsuda-style direction blocks, Lamia-style looming/receding blocks, front/back body mapping, and valence sound blocks without adding separate GUI controls for each paper.
 
-4. `PhaseSpec`
-
-Add ordered phases such as `calibration`, `pre_training`, `training`, `post_training`, `pre_test`, and `post_test`. This should be a collapsed advanced panel because most users will load it from a profile rather than author it manually.
-
-5. `TactileStimulusSpec`
+4. `TactileStimulusSpec`
 
 Add tactile modality, duration, frequency, pulse width, amplitude/intensity, calibration rule, and output channel. The main GUI can display one sentence such as `100 us electrical pulse, threshold calibrated`; exact values belong in profile details.
 
-6. `DistanceUnitSpec`
+5. `DistanceUnitSpec`
 
 Add absolute cm/m, percent arm length, arm-length multiplier, and body-landmark reference. This is required for Lerner-style 3D body-scaled boundaries and should not alter the simple cm controls unless a profile needs it.
 
-7. `AnalysisSpec`
+6. `AnalysisSpec`
 
 Add RT min/max, outlier rule, baseline correction, PPS fit model, sigmoid bounds, and grouping variables. This belongs in an Analysis tab or read-only profile checklist until the analysis workflow is implemented.
 
@@ -91,10 +87,10 @@ Add RT min/max, outlier rule, baseline correction, PPS fit model, sigmoid bounds
 The main UI should remain profile-driven:
 
 - `Study profile` loads all rare study-specific assumptions.
-- `Core controls` stay visible: endpoint geometry, sound duration/speed, SOAs, spatial values, repetitions, catch/baseline count, blocks, participants.
+- `Core controls` stay visible: endpoint geometry, sound duration/speed, SOAs, spatial values, repetitions, catch/baseline count, and participants.
 - `Profile details` shows read-only trial-family, timing, jitter/ITI, tactile, response, and analysis assumptions.
 - `Advanced overrides` is collapsed and grouped by Timing, Trial Families, Blocks, Tactile, and Analysis.
-- `Exact replication checklist` flags missing source assets, unsupported phases, unverified jitter/ITI, and renderer mismatches.
+- `Exact replication checklist` flags missing source assets, unsupported trial/baseline/audio/tactile/response mechanics, unverified jitter/ITI, missing repetition counts, and renderer mismatches.
 
 This preserves the simple workflow while making the replication contract explicit enough for preregistration, Zenodo archiving, and later publication review.
 

@@ -71,6 +71,25 @@
       "trial_randomization_strategy": "no_immediate_repeats",
       "block_order_randomization": "counterbalanced_rotation",
       "max_consecutive_same_trial_type": 2,
+      "trial_strips": [
+        {
+          "strip_id": "canzoneri-tool-use-dynamic-sound-row",
+          "label": "Dynamic sound PPS trial",
+          "audio_tactile_percentage": 100.0,
+          "catch_percentage": 0.0,
+          "baseline_percentage": 0.0,
+          "elements": [
+            {
+              "element_id": "canzoneri-tool-use-moving-sound",
+              "kind": "looming_stimulus",
+              "label": "Pink moving sound",
+              "source_label": "",
+              "source_labels": [],
+              "randomized": true
+            }
+          ]
+        }
+      ],
       "participants": 16,
       "random_seed": 20130501
     }

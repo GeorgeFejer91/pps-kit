@@ -27,11 +27,13 @@ mp3 = ["pydub>=0.25.1"]
 gui = ["PySide6>=6.7,<7"]
 lsl = ["pylsl>=1.16"]
 web = ["fastapi>=0.110,<1", "uvicorn>=0.27,<1"]
+xdf = ["pyxdf>=1.17"]
+validation = ["pylsl>=1.16", "pyxdf>=1.17", "pytest>=8.0", "build>=1.2", "Pillow>=10.0", "httpx>=0.27"]
 dev = ["pytest>=8.0", "build>=1.2", "Pillow>=10.0", "httpx>=0.27"]
+package = ["pyinstaller>=6.0,<7"]
 
 [project.scripts]
 pps-generate = "peripersonal_space_toolkit.cli:generate"
-pps-run = "peripersonal_space_toolkit.cli:run"
 pps-render-design = "peripersonal_space_toolkit.cli:render_design"
 pps-decode = "peripersonal_space_toolkit.cli:decode"
 pps-analyze = "peripersonal_space_toolkit.cli:analyze"
@@ -39,7 +41,6 @@ pps-design = "peripersonal_space_toolkit.qt_designer_app:main"
 pps-audio-stress = "peripersonal_space_toolkit.audio_device_stress:main"
 pps-latency-validate = "peripersonal_space_toolkit.latency_validation:main"
 pps-dashboard = "peripersonal_space_toolkit.dashboard_app:main"
-pps-focus = "peripersonal_space_toolkit.focus_app:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

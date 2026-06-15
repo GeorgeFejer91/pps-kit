@@ -47,8 +47,32 @@ windows\Launch_HTML_Dashboard.bat
 
 The dashboard opens in your default browser from `127.0.0.1`. It is a local
 researcher-facing UI for study/profile selection, custom designs, trajectory
-controls, trial assembly, render, prepare, audio stress, native Focus Mode
-launch, and review.
+controls, trial assembly, render, prepare, audio stress, packaged experiment
+runner launch, and review.
+
+Build the active native participant runner:
+
+```powershell
+.\windows\Build_Experiment_Runner_Exe.ps1
+```
+
+This creates `dist\PPSExperimentRunner\PPSExperimentRunner.exe` with the PPS
+Toolkit icon embedded. `windows\Launch_Experiment_Runner.bat` only activates
+this packaged exe. `focus_app.py` is importable for the exe and validation
+harnesses, but direct Python/module runner invocation exits with retirement
+guidance instead of opening Focus Mode.
+
+Optional: build the lightweight release downloader and offline-lab distribution
+manifest:
+
+```powershell
+.\windows\Build_PPS_Downloader.ps1
+python tools\make_download_manifest.py --payload dist\PPS-Toolkit-v0.1.0-offline-lab-windows-x64.zip --payload-url "https://zenodo.org/records/<record>/files/PPS-Toolkit-v0.1.0-offline-lab-windows-x64.zip?download=1"
+```
+
+`PPS-Toolkit-Downloader.exe` is the small GitHub-hosted bootstrapper and must
+stay below 100 MiB. The heavyweight offline lab ZIP belongs on Zenodo and is
+verified by `pps_download_manifest.v1.json` before extraction or launch.
 
 The same HTML interface can also be published as a static GitHub Pages site.
 In that mode, start the trusted local companion backend first:
@@ -70,11 +94,11 @@ Open the Qt stimulus designer for comparison:
 windows\Launch_Stimulus_Designer.bat
 ```
 
-Run the legacy locked Study 5 participant app directly only when you need that
-compatibility path:
+Run the native Focus Mode participant app directly when you want to reopen the
+latest prepared dashboard experiment:
 
 ```bat
-windows\Launch_PPS_App.bat
+windows\Launch_Experiment_Runner.bat
 ```
 
 The designer can preload bundled study profiles from `study_templates\`; the current catalog contains the unpublished Study 5 workflow plus 20 published-study profiles. Each profile has a matching local preload folder under `assets\preloads\<template_id>\` with segment metadata and prebaked auditory-only looming WAVs while the standardized FABIAN HRIR renderer resource stays under the hood. See [docs/PARADIGM_LIBRARY.md](docs/PARADIGM_LIBRARY.md) and [docs/PUBLISHED_PARADIGM_STRESS_TEST.md](docs/PUBLISHED_PARADIGM_STRESS_TEST.md).
@@ -95,14 +119,19 @@ windows\Regenerate_Spoken_Assets.bat
 
 The Kokoro model files download into `models\kokoro\`, which is ignored by Git. Only the generated study WAV files and manifest are intended for publication.
 
+Segment 2 owns within-trial inhale/exhale clips. Segment 6 now has a separate
+**Preload Instruction Audio Clips** panel for run-level messages before the
+experiment, before/after each block, between conditions, and after the
+experiment. Custom clips are imported by the local backend into the active
+project's Segment 6 instruction library, saved into the run setup manifest, and
+copied into each participant session under `instructions\`.
+
 ## Public Commands
 
 ```powershell
 pps-generate --dry-run
 pps-generate --participants 50
 pps-dashboard
-pps-run --list-devices
-pps-run
 pps-design
 pps-audio-stress --device-query Komplete
 pps-latency-validate specs
@@ -110,14 +139,18 @@ pps-latency-validate calibrate --establish-baseline
 pps-render-design --design study_templates\pfeiffer_2018_lateral_perihead_left_to_right.json --output-dir artifacts\rendered_pfeiffer --seed 2018
 pps-decode --input-dir local_data\loopback_recordings
 pps-analyze --sample
-pps-focus --session-manifest local_data\sessions\P001_YYYYMMDD_HHMMSS\session_manifest.json
 ```
 
 `pps-render-design` writes a render config, trajectory samples, QC CSV, manifest, and generated WAVs. It uses the native 3DTI executable when available; otherwise it uses the bundled Python SOFA/FABIAN reference renderer and marks the manifest as `rendered_reference`.
 
 `pps-latency-validate` writes the Komplete/Woojer wiring plan and runs electrical loopback validation for the synchronized output 1/2/3 route. See [docs/EXPERIMENT_LATENCY_VALIDATION.md](docs/EXPERIMENT_LATENCY_VALIDATION.md).
 
-`pps-dashboard` starts a local-only browser dashboard at `127.0.0.1` for researcher-facing design, render, prepare, and review decisions. The dashboard uses a fixed one-page navigation rail, adjustable preview/panel sizing controls, and a sequential custom-design workflow that blocks run actions until the minimum runnable experiment profile is filled in. The existing Qt designer remains available as `pps-design`; the timing-sensitive participant Focus Mode remains native/Python-backed through `pps-focus`.
+`pps-dashboard` starts a local-only browser dashboard at `127.0.0.1` for researcher-facing design, render, prepare, and review decisions. The dashboard uses a fixed one-page navigation rail, adjustable preview/panel sizing controls, and a sequential custom-design workflow that blocks run actions until the minimum runnable experiment profile is filled in. The existing Qt designer remains available as `pps-design`; the only active operator experiment runner is the packaged native `dist\PPSExperimentRunner\PPSExperimentRunner.exe`.
+
+`PPSExperimentRunner.exe` can reopen the last launchable dashboard experiment
+from the ignored local resume ledger in `local_data\dashboard_state\`. Explicit
+`--session-manifest` still wins, followed by the last launchable experiment, the
+latest prepared Segment 6 setup, and then manual file selection.
 
 Verify the bundled Pfeiffer-style profile and render handoff:
 
@@ -139,6 +172,16 @@ notes, and a `bundle_manifest.json` with SHA256 hashes. It excludes local runtim
 data, generated render outputs, downloaded model files, and private reference
 archives.
 
+## Download Distribution
+
+Finished Windows releases use a two-layer download strategy. GitHub hosts the
+lightweight `PPS-Toolkit-Downloader.exe`; Zenodo hosts the heavyweight
+`PPS-Toolkit-vX.Y.Z-offline-lab-windows-x64.zip`. The downloader reads
+`pps_download_manifest.v1.json`, downloads the Zenodo payload, verifies SHA256,
+extracts to `%LOCALAPPDATA%\PPS Toolkit\versions\vX.Y.Z`, creates shortcuts, and
+launches the dashboard only after verification. See
+[docs/PPS_DOWNLOADS.md](docs/PPS_DOWNLOADS.md).
+
 ## Repository Layout
 
 ```text
@@ -157,6 +200,7 @@ study_templates\         Literature-backed preloadable study profiles
 tests\                   Smoke and release-readiness tests
 third_party\             Pinned third-party source snapshots and renderer wrapper boundary
 tools\                   Asset generation and release audit scripts
+validation_protocols\    Internal lab stress-test protocols, scripts, and templates
 windows\                 Ready-to-use Windows setup and launch scripts
 ```
 

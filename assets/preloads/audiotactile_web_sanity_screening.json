@@ -1,0 +1,88 @@
+{
+  "schema": "pps-audiotactile-web-sanity-screening.v1",
+  "screened_on": "2026-06-13",
+  "screening_scope": "Manual live-web sanity screen for currently visible search results using audiotactile, audio-tactile, auditory-tactile, and looming-sound PPS wording. The screen is used to catch newly indexed papers, current PDFs, and adjacent auditory-only or non-audiotactile PPS hits.",
+  "queries": [
+    "\"audiotactile\" \"peripersonal space\"",
+    "\"audio-tactile\" \"peripersonal space\"",
+    "\"auditory-tactile\" \"peripersonal space\"",
+    "\"looming sound\" tactile \"peripersonal space\""
+  ],
+  "screened_count": 8,
+  "linked_existing_count": 5,
+  "updated_coverage_count": 1,
+  "adjacent_out_of_scope_count": 1,
+  "excluded_review_count": 1,
+  "records": [
+    {
+      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6095214/",
+      "title": "Audio-Tactile and Peripersonal Space Processing Around the Trunk in Human Parietal and Temporal Cortex: An Intracranial EEG Study",
+      "screening_decision": "linked_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "ieeg_trunk_2018"
+      ],
+      "reason": "Live web result is an already tracked audiotactile PPS task with iEEG context; the endpoint is context unless an event-trigger contract is required."
+    },
+    {
+      "source_url": "https://dael.euracoustics.org/confs/fa2025/data/articles/000866.pdf",
+      "title": "The Impact of Looming Sound Duration on Peripersonal Space Measurement",
+      "screening_decision": "updated_coverage_ledger_parameters",
+      "linked_literature_record_ids": [
+        "looming_duration_2025"
+      ],
+      "reason": "Full PDF exposes the PPS-task parameters that were previously marked for extraction: 2 s and 3 s looming pink-noise tasks, seven tactile delays per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, start distances, and 50 cm/s movement speed. Remaining issue is toolkit support for tactile waveform/frequency and exact HRTF/rendering provenance."
+    },
+    {
+      "source_url": "https://nin.nl/publications/multisensory-integration-in-peripersonal-space-indexes-consciousness-states-in-sleep-and-disorders-of-consciousness/",
+      "title": "Multisensory integration in peripersonal space indexes consciousness states in sleep and disorders of consciousness",
+      "screening_decision": "linked_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "cell_reports_medicine_2026_consciousness"
+      ],
+      "reason": "Live web result confirms the already tracked task-free audiotactile near/far PPS EEG record; sleep and clinical endpoints are context, while near/far structure and any required trigger contract remain task-mechanics issues."
+    },
+    {
+      "source_url": "https://www.nature.com/articles/s41598-026-48067-4",
+      "title": "Semantic processing and individual suggestibility modulate motor preparation and perceived distance for looming sounds entering the peripersonal space",
+      "screening_decision": "excluded_adjacent_auditory_only_pps",
+      "linked_literature_record_ids": [
+        "barumerli_2026_semantic_looming_auditory_only"
+      ],
+      "reason": "The task uses looming sounds, motor preparation, distance estimates, and affective ratings, but no tactile stimulus or tactile response; it is adjacent auditory-only PPS, not an audiotactile PPS task profile."
+    },
+    {
+      "source_url": "https://pubmed.ncbi.nlm.nih.gov/20621120/",
+      "title": "Audiotactile interactions in front and rear space",
+      "screening_decision": "excluded_review_no_distinct_task_profile",
+      "linked_literature_record_ids": [],
+      "reason": "Occelli, Spence, and Zampini (2011) is a review of front/rear audiotactile interactions, not a distinct published experimental task profile to recreate."
+    },
+    {
+      "source_url": "https://pubmed.ncbi.nlm.nih.gov/38319398/",
+      "title": "Comparison of peripersonal space in front and rear spaces",
+      "screening_decision": "linked_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "teraoka_2024_front_rear"
+      ],
+      "reason": "Live search result is the already tracked 2024 front/rear vibrotactile-plus-auditory-probe PPS task."
+    },
+    {
+      "source_url": "https://link.springer.com/article/10.1007/s00221-019-05469-3",
+      "title": "Enhanced audio-tactile multisensory interaction in a peripersonal task after echolocation",
+      "screening_decision": "linked_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "tonelli_2019_echolocation"
+      ],
+      "reason": "Live search result is the existing Tonelli 2019 echolocation template/ledger record; its blocker remains the seven-speaker switching/timing structure."
+    },
+    {
+      "source_url": "https://pubmed.ncbi.nlm.nih.gov/29461657/",
+      "title": "Vestibular modulation of peripersonal space boundaries",
+      "screening_decision": "linked_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "pfeiffer_2018_vestibular"
+      ],
+      "reason": "Live search result is the existing Pfeiffer 2018 vestibular/peri-head audio-tactile profile represented by the current lateral peri-head preload."
+    }
+  ]
+}

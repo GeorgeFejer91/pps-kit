@@ -6,7 +6,7 @@
   "doi": "10.1038/srep18603",
   "source_url": "https://www.nature.com/articles/srep18603",
   "verification_status": "partial",
-  "notes": "Peri-hand branch of the Serino body-part mapping series. Lateralized hand placement is stored in notes but not yet a GUI coordinate field.",
+  "notes": "Peri-hand branch of the Serino body-part mapping series. The original two-speaker analog setup is treated as apparatus provenance and recreated as a binaural moving-sound trajectory; lateralized hand placement is stored in notes but not yet a GUI coordinate field.",
   "reference_parameters": {
     "distances_cm": [
       93,
@@ -16,9 +16,9 @@
       5
     ],
     "repetitions_reported": 16,
+    "analog_apparatus_recreation": "Original near/far speakers are modeled as the reported moving-sound trajectory in the binaural renderer.",
     "implementation_gaps": [
-      "lateralized hand coordinate",
-      "two-speaker intensity crossfade"
+      "lateralized hand coordinate"
     ]
   },
   "provenance": [

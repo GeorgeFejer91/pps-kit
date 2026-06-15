@@ -46,17 +46,16 @@ The `Render Looming WAVs` action and `pps-render-design` create one WAV per nois
 
 ## 4. Run The Experiment
 
-For the current Qt-designed experiment, use the `Experiment Runner` tab. It prepares `local_data\sessions\<participant_id>_<timestamp>\`, writes the design, protocol schedule, session manifest, per-block manifests/WAVs, event CSV/XDF, and immediate analysis outputs.
+For the current designed experiment, use the HTML dashboard Segment 6 handoff to native Focus Mode. It prepares `local_data\sessions\<participant_id>_<timestamp>\`, writes the design, protocol schedule, session manifest, per-block manifests/WAVs, event CSV/XDF, internal LSL marker mirrors, and immediate analysis outputs.
 
-The primary reaction-time source is the direct event/LSL timing stream. Physical loopback recordings are retained as backup QC, including the low-gain tactile-channel response marker for recovering mouse-click timing if event logging fails.
+The primary reaction-time source is the callback-derived event/LSL timing stream. The optional local audio evidence WAV records the runner's mixed output buffers, including the low-gain tactile-channel response marker. Physical loopback recordings are validation-only references for proving how closely the event/LSL and audio-evidence layers match the physical outputs.
 
-The legacy runner remains available for the locked Study 5 flow:
+The locked Study 5 flow now runs through the dashboard Segment 6 handoff and
+native Focus Mode:
 
 ```bat
-windows\Launch_PPS_App.bat
+windows\Launch_Experiment_Runner.bat --participant-id P001
 ```
-
-Use `--stimuli-dir`, `--instructions-dir`, `--recordings-dir`, or `--background-music` to override paths for a specific lab setup.
 
 ## 5. Decode Recordings
 

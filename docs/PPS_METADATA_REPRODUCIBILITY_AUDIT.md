@@ -100,11 +100,11 @@ Current trajectory duration is derived from path length, speed, and padding, whi
 
 2. Auditory envelope and gain law
 
-Add controls for constant intensity, linear rising intensity, inverse-square, two-speaker crossfade, custom start/end SPL, and custom gain curve. This is essential for Canzoneri, Ferri, Barumerli, and speaker-array variants.
+Add controls for constant intensity, linear rising intensity, inverse-square, custom start/end SPL, and custom gain curve. Two-speaker analog setups should be reconstructed from reported trajectory/timing parameters with the binaural renderer rather than added as a separate audio-source type; exact original gain/envelope files remain provenance when author-stimulus equivalence is required. This is most important for Canzoneri/Ferri-style gain envelopes and true speaker-array variants.
 
 3. Spatial rendering mode
 
-If the app later supports multiple rendering setups, add an internal protocol/rendering profile for physical speakers, stereo crossfade, SOFA/HRIR binaural, HMD/ambisonic, imported baked audio, and intensity-only looming. For the current workflow, the FABIAN/TU SOFA HRIR source remains fixed under the hood.
+If the app later supports multiple rendering setups, add an internal protocol/rendering profile for physical multi-speaker arrays, analog-apparatus provenance/gain envelopes, SOFA/HRIR binaural, HMD/ambisonic, imported baked audio, and intensity-only looming. For the current workflow, the FABIAN/TU SOFA HRIR source remains fixed under the hood.
 
 4. Tactile stimulus specification
 
@@ -124,7 +124,7 @@ Add prestimulus interval, inter-trial interval distribution, response window, an
 
 8. Block-level factor assignment
 
-Current blocks define which trial types are allowed. Add block-specific factors: allowed noise types, motion directions, body sites, azimuths/directions, SOA sets, and baseline/catch policy. This would let the GUI reproduce Matsuda-style directional blocks and Barumerli-style condition blocks cleanly.
+Current blocks define which trial types are allowed. Add block-specific factors only when they affect PPS task execution: allowed noise types, motion directions, body sites, azimuths/directions, SOA sets, and baseline/catch policy. This would let the toolkit reproduce Matsuda-style directional blocks, Lamia-style looming/receding source factors, front/back body mapping, and valence sound factors without treating clinical/intervention context as a blocker.
 
 9. Body-scaled distance mode
 
@@ -150,13 +150,13 @@ Add file hash, sample rate, duration, channel count, license/provenance, and val
 
 | Study | GUI-ready variables available | GUI-relevant missing fields |
 |---|---|---|
-| Canzoneri, Magosso & Serino (2012) | noise type, duration, near/far trajectory, SOAs, repetitions, catch count, tactile site, tactile pulse duration, sigmoid model | exact noise files, near speaker coordinate, gain/crossfade equation, C.I.R.O script, randomization seed/order, latency values |
+| Canzoneri, Magosso & Serino (2012) | noise type, duration, near/far trajectory, SOAs, repetitions, catch count, tactile site, tactile pulse duration, sigmoid model | direction-coupled T0/T6 baseline subtype, exact original gain/envelope files, C.I.R.O script, latency values |
 | Noel et al. (2015) | front/back trajectory labels, velocity, SOAs, distances, tactile site, baseline/catch counts, response device | exact audio rendering files, randomization, tactile calibration, latency, full baseline subtype details |
 | Ferri et al. (2015) | affective/custom sounds, 3000 ms duration, tactile site, 10 SOAs, catch counts, sigmoid boundary | proprietary IADS assets, exact artificial sounds, envelope/gain curve, randomization, Matlab/Cogent scripts, latency |
 | Matsuda et al. (2021) | direction blocks, approach/recede, SOAs, chest tactile site, trial counts, block counterbalancing | exact Unity audio settings, assets, tactile stim specs, randomization seed/order, latency |
 | Lerner, Tahar, Bar, Koren & Flash (2021) | 3D azimuth/elevation/radius, SOFA/HRIR-like spatialization, pink noise, 5.5 s duration, 22 cm/s speed, sternum tactile site, arm-length-scaled distances, sigmoid fit | Unity/MATLAB scripts, 3D Tune-In parameter files, HRIR/ITD values, exact trial table, randomization, latency, tactile calibration values |
 | Tonelli et al. (2019) | seven distances, white-noise motion, 3 s duration, neck tactile site, catch/unimodal counts, response mode | exact speaker-control code, white-noise files, ITI distribution, randomization, latency |
-| Barumerli, Geronazzo & Cesari (2026), Exp. 1/2 | duration, SOAs, approach/recede, tactile body sites, repetitions, catch counts, baseline SOAs, block factors, GLMM/linear analysis need | exact samples, E-Prime scripts, envelope equation/SPL details, randomization, latency |
+| Lamia, Shabani & Candidi (2026), Exp. 1/2 | duration, SOAs, approach/recede, tactile body sites, repetitions, catch counts, baseline SOAs, GLMM/linear analysis need | exact samples, E-Prime scripts, envelope equation/SPL details, randomization, latency |
 | Holmes et al. (2020) | static near/far template fields, response rules, trial counts, public code/data claim | depends on OSF completeness; less useful for dynamic looming generation |
 
 ## GUI Metadata To Store Per Saved Experiment
@@ -181,4 +181,4 @@ The saved design package should contain only GUI-operational metadata:
 - Matsuda et al. (2021), Scientific Reports: https://www.nature.com/articles/s41598-021-90784-5
 - Lerner, Tahar, Bar, Koren & Flash (2021), Frontiers in Virtual Reality: https://doi.org/10.3389/frvir.2021.644214
 - Tonelli et al. (2019), Experimental Brain Research: https://link.springer.com/article/10.1007/s00221-019-05469-3
-- Barumerli, Geronazzo & Cesari (2026), Scientific Reports: https://www.nature.com/articles/s41598-026-36796-5
+- Lamia, Shabani & Candidi (2026), Scientific Reports: https://www.nature.com/articles/s41598-026-36796-5

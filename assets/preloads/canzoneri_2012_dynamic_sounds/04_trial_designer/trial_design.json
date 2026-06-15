@@ -17,7 +17,29 @@
     20.0
   ],
   "custom_clip_assets": [],
-  "trial_strips": [],
+  "trial_strips": [
+    {
+      "strip_id": "canzoneri-2012-dynamic-sound-row",
+      "label": "Dynamic sound PPS trial",
+      "audio_tactile_percentage": 100.0,
+      "catch_percentage": 0.0,
+      "baseline_percentage": 0.0,
+      "elements": [
+        {
+          "element_id": "canzoneri-2012-moving-sound",
+          "kind": "looming_stimulus",
+          "label": "Pink moving sound",
+          "source_label": "Pink moving sound",
+          "source_labels": [
+            "Pink moving sound",
+            "Pink moving sound - receding"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    }
+  ],
   "prestimulus_files": [],
-  "preview_trial_count": 172
+  "preview_trial_count": 80
 }

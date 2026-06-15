@@ -62,6 +62,7 @@ ALLOWED_WAV_PREFIXES = {
     Path("assets") / "breathing",
     Path("assets") / "click",
     Path("assets") / "preloads",
+    Path("assets") / "tactile",
 }
 SPOKEN_ASSETS = [
     "Inhale-2-3-4-hold_FIXED.wav",
@@ -112,7 +113,7 @@ def check_required_files() -> list[str]:
         "configs/experiment.example.toml",
         "configs/stimulus_design.example.json",
         "windows/Setup_Windows_App.ps1",
-        "windows/Launch_PPS_App.bat",
+        "windows/Launch_Experiment_Runner.bat",
         "windows/Launch_Stimulus_Designer.bat",
         "windows/Create_Desktop_Shortcut.ps1",
         "docs/hardware_setup.md",
@@ -133,6 +134,7 @@ def check_required_files() -> list[str]:
         "assets/breathing/british_kokoro/spoken_assets_manifest.json",
         "assets/breathing/original_study5/spoken_assets_manifest.json",
         "assets/click/mouse_click_tone_1200Hz_50ms.wav",
+        "assets/tactile/default_tactile_cue.wav",
         "assets/master_blocks/Master_Block_1.csv",
         "assets/master_blocks/Master_Block_2.csv",
         "assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa",

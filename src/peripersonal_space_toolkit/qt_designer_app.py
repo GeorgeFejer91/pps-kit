@@ -5,16 +5,15 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import queue
 import subprocess
 import sys
-import threading
 from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
 from . import render_backend
 from .app_assets import apply_qt_app_icon, set_windows_app_user_model_id
+from .focus_launch import build_focus_runner_command, resolve_packaged_focus_runner
 from .design import (
     DEFAULT_SOFA_FILE,
     DEFAULT_TRAJECTORY_PLANE_HEIGHT_M,
@@ -58,8 +57,6 @@ from .session_runner import (
     DEFAULT_RENDER_DIR,
     DEFAULT_SESSION_ROOT,
     RunPackage,
-    SessionRunResult,
-    SessionRunnerController,
     prepare_run_package,
     preflight_run_package,
     rendered_wavs,
@@ -684,26 +681,23 @@ def runner_launch_command(
     list_devices: bool = False,
     python_executable: str | None = None,
 ) -> list[str]:
-    command = [
-        python_executable or sys.executable,
-        "-m",
-        "peripersonal_space_toolkit.runner",
-        "--stimuli-dir",
-        str(stimuli_dir),
-        "--instructions-dir",
-        str(instructions_dir),
-        "--settings-file",
-        str(settings_file),
-        "--demographics-dir",
-        str(demographics_dir),
-        "--recordings-dir",
-        str(recordings_dir),
-    ]
-    if background_music is not None and str(background_music).strip():
-        command.extend(["--background-music", str(background_music)])
     if list_devices:
-        command.append("--list-devices")
-    return command
+        return [
+            python_executable or sys.executable,
+            "-m",
+            "peripersonal_space_toolkit.audio_device_stress",
+            "--dry-run",
+            "--device-query",
+            "Komplete",
+        ]
+    _ = (stimuli_dir, instructions_dir, background_music, settings_file, demographics_dir, recordings_dir)
+    runner_exe = resolve_packaged_focus_runner()
+    if runner_exe is None:
+        raise FileNotFoundError(
+            "The active experiment runner is the packaged PPSExperimentRunner.exe. "
+            "Build it with windows\\Build_Experiment_Runner_Exe.ps1 before launching a participant run."
+        )
+    return [str(runner_exe), "--launcher"]
 
 
 class QtStimulusDesigner:
@@ -727,8 +721,6 @@ class QtStimulusDesigner:
         self._loading_block_table = False
         self.runner_render_dir = DEFAULT_RENDER_DIR
         self.current_run_package: RunPackage | None = None
-        self.current_run_result: SessionRunResult | None = None
-        self.focus_controller: SessionRunnerController | None = None
         self.layout_settings = self.qt["QSettings"](LAYOUT_SETTINGS_ORG, LAYOUT_SETTINGS_APP)
         self._splitters: dict[str, Any] = {}
         self._applying_splitter_state = False
@@ -1654,7 +1646,6 @@ class QtStimulusDesigner:
             self._refresh_runner_status()
             return
         self.current_run_package = package
-        self.current_run_result = None
         self.status_label.setText(f"Prepared session {package.session_id}")
         self._append_runner_review(
             "\n".join(
@@ -1724,7 +1715,12 @@ class QtStimulusDesigner:
             self.qt["QMessageBox"].warning(self.window, "Start Focus Mode", message)
             self._refresh_runner_status()
             return
-        self._open_focus_dialog(self.current_run_package)
+        try:
+            launch_command = build_focus_runner_command(self.current_run_package.manifest_path, manual_start=True)
+            subprocess.Popen(launch_command.command, cwd=REPO_ROOT)
+            self._append_runner_review(f"Opened active experiment runner: {launch_command.runner_binary}")
+        except Exception as exc:
+            self.qt["QMessageBox"].warning(self.window, "Start Focus Mode", str(exc))
 
     def _append_runner_review(self, text: str) -> None:
         if hasattr(self, "runner_review"):
@@ -1736,107 +1732,6 @@ class QtStimulusDesigner:
     def _render_looming_wavs_for_runner(self, checked: bool = False) -> None:
         _ = checked
         self._render_looming_wavs(output_dir=self.runner_render_dir, prompt_for_output=False)
-
-    def _open_focus_dialog(self, package: RunPackage) -> None:
-        q = self.qt
-        dialog = q["QDialog"](self.window)
-        dialog.setWindowTitle(f"PPS Focus Mode - {package.participant_id}")
-        dialog.setModal(True)
-        dialog.resize(960, 640)
-        layout = q["QVBoxLayout"](dialog)
-        layout.setContentsMargins(18, 18, 18, 18)
-        layout.setSpacing(12)
-
-        title = q["QLabel"](f"Participant {package.participant_id}")
-        title.setAlignment(q["Qt"].AlignmentFlag.AlignCenter)
-        layout.addWidget(title)
-
-        progress_label = q["QLabel"]("Ready")
-        progress_label.setAlignment(q["Qt"].AlignmentFlag.AlignCenter)
-        layout.addWidget(progress_label)
-
-        progress = q["QProgressBar"]()
-        progress.setRange(0, 1000)
-        progress.setValue(0)
-        layout.addWidget(progress)
-
-        target = q["QPushButton"]("Click")
-        target.setObjectName("primaryButton")
-        target.setMinimumHeight(260)
-        layout.addWidget(target, 1)
-
-        controls = q["QHBoxLayout"]()
-        pause_button = q["QPushButton"]("Pause")
-        stop_button = q["QPushButton"]("Stop")
-        controls.addStretch(1)
-        controls.addWidget(pause_button)
-        controls.addWidget(stop_button)
-        controls.addStretch(1)
-        layout.addLayout(controls)
-
-        messages: queue.Queue[tuple[str, Any]] = queue.Queue()
-        controller = SessionRunnerController(package)
-        self.focus_controller = controller
-
-        def _run() -> None:
-            result = controller.run(
-                progress_callback=lambda payload: messages.put(("progress", payload)),
-                event_callback=lambda message: messages.put(("event", message)),
-            )
-            messages.put(("done", result))
-
-        thread = threading.Thread(target=_run, daemon=True)
-
-        def _click() -> None:
-            controller.log_click(in_target=True)
-
-        def _toggle_pause() -> None:
-            if pause_button.text() == "Pause":
-                controller.pause()
-                pause_button.setText("Resume")
-                progress_label.setText("Paused")
-            else:
-                controller.resume()
-                pause_button.setText("Pause")
-
-        def _stop() -> None:
-            controller.stop()
-            progress_label.setText("Stopping")
-
-        target.clicked.connect(_click)
-        pause_button.clicked.connect(_toggle_pause)
-        stop_button.clicked.connect(_stop)
-
-        timer = q["QTimer"](dialog)
-
-        def _drain() -> None:
-            while not messages.empty():
-                kind, payload = messages.get_nowait()
-                if kind == "progress":
-                    duration = float(payload.get("duration_s") or 0.0)
-                    elapsed = float(payload.get("elapsed_s") or 0.0)
-                    value = int(max(0.0, min(1.0, elapsed / duration)) * 1000) if duration > 0 else 0
-                    progress.setValue(value)
-                    progress_label.setText(
-                        f"Block {payload.get('block_index')}: {payload.get('block_label')}  {elapsed:.1f}/{duration:.1f}s"
-                    )
-                elif kind == "event":
-                    progress_label.setText(str(payload))
-                elif kind == "done":
-                    self.current_run_result = payload
-                    self._append_runner_review(payload.summary_text)
-                    self._refresh_runner_status()
-                    progress_label.setText("Complete" if payload.completed else "Interrupted")
-                    timer.stop()
-                    dialog.accept()
-
-        timer.timeout.connect(_drain)
-        timer.start(100)
-        thread.start()
-        if hasattr(dialog, "showFullScreen"):
-            dialog.showFullScreen()
-        dialog.exec()
-        self.focus_controller = None
 
     def _set_table_values(self, table: Any, rows: list[list[str]]) -> None:
         table.setRowCount(len(rows))
@@ -2073,7 +1968,6 @@ class QtStimulusDesigner:
             return
         if hasattr(self, "current_run_package"):
             self.current_run_package = None
-            self.current_run_result = None
         self._update_path_summary()
         self._update_viewer()
         self._update_protocol_summary()
@@ -2403,7 +2297,6 @@ class QtStimulusDesigner:
         self.status_label.setText(f"3DTI render status: {result.status}")
         self.runner_render_dir = output_path
         self.current_run_package = None
-        self.current_run_result = None
         if hasattr(self, "runner_render_dir_label"):
             self.runner_render_dir_label.setText(str(output_path))
         if result.status == "backend_missing":

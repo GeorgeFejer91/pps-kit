@@ -101,7 +101,9 @@ class SessionEventLogger:
         count = 0
         for index, row in enumerate(rows, start=1):
             trial_number = _coerce_int(row.get("Trial_Number"), default=index)
-            trial_start_s = (trial_number - 1) * trial_duration_s
+            trial_start_s = _coerce_float(row.get("Trial_Start_S"), default=(trial_number - 1) * trial_duration_s)
+            current_trial_duration_s = _coerce_float(row.get("Trial_Duration_S"), default=trial_duration_s)
+            trial_end_s = _coerce_float(row.get("Trial_End_S"), default=trial_start_s + current_trial_duration_s)
             common = _trial_payload(
                 row,
                 participant_id=participant_id,
@@ -122,18 +124,22 @@ class SessionEventLogger:
 
             trial_type = str(row.get("Trial_Type", "")).strip()
             soa_ms = _coerce_float(row.get("SOA_ms"), default=0.0)
+            looming_relative_s = _coerce_float(row.get("Looming_Onset_S"), default=stimulus_segment_onset_s)
+            tactile_relative_s = _coerce_float(row.get("Tactile_Onset_S"), default=stimulus_segment_onset_s + (soa_ms / 1000.0))
+            response_relative_s = _coerce_float(row.get("Response_Window_Onset_S"), default=looming_relative_s)
             if trial_type in {"Audio-Tactile", "Catch"}:
                 count += self._log_planned(
                     "looming_onset",
                     block_start_unix,
                     block_start_monotonic,
-                    trial_start_s + stimulus_segment_onset_s,
-                    relative_time_s=trial_start_s + stimulus_segment_onset_s,
+                    trial_start_s + looming_relative_s,
+                    relative_time_s=trial_start_s + looming_relative_s,
                     stimulus_modality="audio",
+                    planned_sample_index=row.get("Looming_Onset_Sample", ""),
                     **common,
                 )
             if trial_type in {"Audio-Tactile", "Baseline"}:
-                tactile_onset_s = trial_start_s + stimulus_segment_onset_s + (soa_ms / 1000.0)
+                tactile_onset_s = trial_start_s + tactile_relative_s
                 count += self._log_planned(
                     "tactile_onset",
                     block_start_unix,
@@ -141,15 +147,35 @@ class SessionEventLogger:
                     tactile_onset_s,
                     relative_time_s=tactile_onset_s,
                     stimulus_modality="tactile",
+                    planned_sample_index=row.get("Tactile_Onset_Sample", ""),
                     **common,
                 )
             count += self._log_planned(
                 "stimulus_window_onset",
                 block_start_unix,
                 block_start_monotonic,
-                trial_start_s + stimulus_segment_onset_s,
-                relative_time_s=trial_start_s + stimulus_segment_onset_s,
+                trial_start_s + response_relative_s,
+                relative_time_s=trial_start_s + response_relative_s,
                 stimulus_modality=("audio+tactile" if trial_type == "Audio-Tactile" else trial_type.lower()),
+                planned_sample_index=row.get("Response_Window_Onset_Sample", ""),
+                **common,
+            )
+            count += self._log_planned(
+                "response_window_onset",
+                block_start_unix,
+                block_start_monotonic,
+                trial_start_s + response_relative_s,
+                relative_time_s=trial_start_s + response_relative_s,
+                planned_sample_index=row.get("Response_Window_Onset_Sample", ""),
+                **common,
+            )
+            count += self._log_planned(
+                "trial_end",
+                block_start_unix,
+                block_start_monotonic,
+                trial_end_s,
+                relative_time_s=trial_end_s,
+                planned_sample_index=row.get("Trial_End_Sample", ""),
                 **common,
             )
         return count
@@ -167,6 +193,7 @@ class SessionEventLogger:
             unix_time=block_start_unix + offset_s,
             monotonic_time=block_start_monotonic + offset_s,
             planned=True,
+            timestamp_quality="block_anchor_fallback",
             **payload,
         )
         return 1

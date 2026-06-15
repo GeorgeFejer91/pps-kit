@@ -2,6 +2,7 @@
   "schema": "pps-preload-profile-assets.v1",
   "template_id": "lerner_2021_3d_audio_tactile_boundary",
   "title": "Lerner 2021 3D audio-tactile PPS boundary",
+  "visible_variant_label": "",
   "asset_mode": "bundled_local",
   "retrieval_strategy": "bundled_or_download_from_github_pages",
   "local_only": true,
@@ -32,6 +33,18 @@
       "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/05_run_setup"
     }
   ],
+  "profile_parameters_manifest": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/01_profile/profile_parameters_manifest.json",
+  "recreation_status": {
+    "primary_category": "toolkit_structural_gap",
+    "category_label": "Toolkit structural gap",
+    "runner_readiness": "blocked_unsupported_toolkit_structure",
+    "profile_checks_passed": false,
+    "gui_recreatable": false,
+    "segment_0_to_4_profile_checks_passed": false,
+    "segment_1_to_6_materializable": false,
+    "missing_parameter_count": 1,
+    "unsupported_structure_count": 2
+  },
   "render_contract": {
     "stage": "auditory_looming_prebake",
     "engine": "python-sofa-reference",

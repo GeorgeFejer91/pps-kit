@@ -27,6 +27,7 @@ def _compact_design():
         pair_spatial_values_with_soas=True,
         auditory_motion_directions=["looming"],
         tactile_sites=["hand"],
+        include_catch_trials=False,
         catch_trial_percentage=0.0,
         include_baseline_trials=False,
         respiratory_phases=["Inhale"],
@@ -58,35 +59,84 @@ def _client(tmp_path: Path) -> TestClient:
     return TestClient(create_app(controller))
 
 
-def test_dashboard_static_assets_include_baseline_segment():
+def test_dashboard_static_assets_keep_numbered_baseline_and_block_segments():
     dashboard_files = files("peripersonal_space_toolkit.dashboard")
     html = dashboard_files.joinpath("index.html").read_text(encoding="utf-8")
     app_js = dashboard_files.joinpath("app.js").read_text(encoding="utf-8")
 
-    assert "Baseline Strategy" in html
+    assert "Baseline and Tactile Trial Design" in html
+    assert "Trial Repetition Pool" in html
+    assert "Repetition Controls" in html
+    assert "Segment 3" in html
+    assert "Segment 4" in html
+    assert "Segment 5" in html
+    assert "Segment 6" in html
+    assert "Segment 7" not in html
+    assert "Decision stage" not in html
     assert 'data-step-link="baseline"' in html
+    assert 'data-step-link="schedule"' in html
+    assert html.index("Trial Sequence Design") < html.index("Baseline and Tactile Trial Design")
+    assert html.index("Baseline and Tactile Trial Design") < html.index("Trial Repetition Pool")
+    assert html.index("Trial Repetition Pool") < html.index("Generate and Review Blocks")
+    assert html.index('id="schedule"') < html.index('id="run"')
     assert 'id="baseline-enabled"' in html
     assert 'id="baseline-strategy"' in html
     assert 'id="baseline-options"' in html
     assert 'id="baseline-percent"' in html
     assert 'id="catch-percent"' in html
     assert 'id="baseline-soa-values"' in html
-    assert "No baseline trials" in html
+    assert 'id="single-baseline-anchor"' not in html
+    assert 'id="composition-tree"' in html
+    assert 'class="composition-sliders"' in html
+    assert 'id="trial-pool-duration-calculus"' in html
+    assert 'id="row-mix-overrides"' in html
+    assert "Pool Preview" not in html
+    assert 'id="trial-table"' not in html
+    assert 'id="trial-pool-duration-summary"' not in html
+    assert 'id="trial-pool-output-summary"' not in html
+    assert "No baseline" in html
     assert 'type="checkbox" name="baseline-option"' in html
     assert "Use baseline trials" not in html
-    assert "Matched SOA anchors" in html
-    assert "Sound onset / min SOA" in html
-    assert "Sound offset / max SOA" in html
+    assert "Minimum SOA anchor" in html
+    assert "Maximum SOA anchor" in html
+    assert "Full SOA tactile-only" in html
+    assert "Custom timings" in html
+    assert 'id="baseline-custom-audio-tactile"' in html
+    assert 'id="bake-trial-files"' in html
+    assert 'id="baseline-factor-tree"' in html
+    assert 'id="trial-file-output-summary"' not in html
     assert "Trial Sequence Design" in html
-    assert "Trial-Block Design" in html
+    assert "percent-mixer" not in html
+    assert "Bake Trial Pool CSV" in html
+    assert "Regenerate Blocks" in html
+    assert "Accept Blocks" in html
+    assert 'name="experiment-structure"' in html
+    assert "Planned participants" in html
+    assert "Prepare Experiment" in html
+    assert "Run Setup" not in html
+    assert "Block Permutation Preview" in html
+    assert "Save Design and Start Experiment Runner" in html
+    assert "Prepare Experiment + Open Runner" not in html
+    assert 'id="participant-id"' not in html
+    assert 'id="render-action"' not in html
+    assert 'id="prepare-action"' not in html
+    assert 'data-step-link="review"' not in html
+    assert 'id="review"' not in html
+    assert 'id="block-count"' in html
+    assert 'id="block-build-progress-track"' in html
+    assert 'id="block-csv-preview-list"' in html
+    assert "count-strip" in html
     assert "Default baseline %" not in html
     assert "Default catch %" not in html
-    assert "Continue To Baseline" in html
-    assert html.index("Baseline Strategy") < html.index("Trial Sequence Design") < html.index("Trial-Block Design")
+    assert "Continue To Baseline And Tactile" in html
     assert "BASELINE_STRATEGY_NOTES" in app_js
     assert "renderBaseline" in app_js
     assert "baselineCountEstimate" in app_js
     assert "blockCompositionEstimate" in app_js
+    assert "renderCompositionTree" in app_js
+    assert "renderRowMixOverrides" in app_js
+    assert "renderLiveTrialPreviewTables" in app_js
+    assert "min_max" in app_js
     assert "baseline_trial_percentage" in app_js
 
 

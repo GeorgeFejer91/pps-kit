@@ -110,6 +110,25 @@
       "trial_randomization_strategy": "no_immediate_repeats",
       "block_order_randomization": "counterbalanced_rotation",
       "max_consecutive_same_trial_type": 2,
+      "trial_strips": [
+        {
+          "strip_id": "taffou-rear-looming-row",
+          "label": "Rear-field looming animal-sound trial",
+          "audio_tactile_percentage": 100.0,
+          "catch_percentage": 0.0,
+          "baseline_percentage": 0.0,
+          "elements": [
+            {
+              "element_id": "taffou-rear-looming-source",
+              "kind": "looming_stimulus",
+              "label": "Rear-field animal sound",
+              "source_label": "Dog growl threatening placeholder",
+              "source_labels": ["Dog growl threatening placeholder", "Sheep bleat non-threatening placeholder"],
+              "randomized": true
+            }
+          ]
+        }
+      ],
       "participants": 30,
       "random_seed": 20140903
     }

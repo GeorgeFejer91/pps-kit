@@ -1,0 +1,1969 @@
+{
+  "schema": "pps-audiotactile-openalex-candidate-screening.v1",
+  "screened_on": "2026-06-13",
+  "source_triage_file": "artifacts/literature_audit/openalex_broad_candidate_triage.json",
+  "screening_scope": "Detailed accountability screen for all 103 OpenAlex candidate-like hits from the broad audio-tactile peripersonal-space route. The coverage ledger promotes peer-reviewed or otherwise paper-level audiotactile PPS task records; preprints, theses, source projects, corrections, and conference-only abstracts are linked or documented but not always counted as separate paper-level tasks.",
+  "candidate_like_count": 103,
+  "linked_or_promoted_count": 47,
+  "unlinked_excluded_or_grey_count": 56,
+  "decision_counts": {
+    "duplicate_or_supporting_source_linked_to_coverage_record": 10,
+    "excluded_auditory_only_no_tactile_pps": 7,
+    "excluded_non_pps_audiotactile_or_haptic": 13,
+    "excluded_review_theory_or_model": 11,
+    "excluded_visual_tactile_or_non_auditory_pps": 16,
+    "grey_literature_or_source_not_counted": 9,
+    "linked_to_coverage_ledger": 34,
+    "promoted_to_coverage_ledger": 3
+  },
+  "records": [
+    {
+      "rank": 1,
+      "openalex_id": "https://openalex.org/W2789345779",
+      "year": 2018,
+      "doi": "10.1093/cercor/bhy156",
+      "title": "Audio-Tactile and Peripersonal Space Processing Around the Trunk in Human Parietal and Temporal Cortex: An Intracranial EEG Study",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "ieeg_trunk_2018"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 2,
+      "openalex_id": "https://openalex.org/W1996403482",
+      "year": 2012,
+      "doi": "10.1371/journal.pone.0044306",
+      "title": "Dynamic Sounds Capture the Boundaries of Peripersonal Space Representation in Humans",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "canzoneri_2012_dynamic_sounds"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 5,
+      "openalex_id": "https://openalex.org/W3165701902",
+      "year": 2021,
+      "doi": "10.1038/s41598-021-90784-5",
+      "title": "Peripersonal space in the front, rear, left and right directions for audio-tactile multisensory integration",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "matsuda_2021_four_directions"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 6,
+      "openalex_id": "https://openalex.org/W2097823092",
+      "year": 2007,
+      "doi": "10.1111/j.1467-9280.2007.01952.x",
+      "title": "Extended Multisensory Space in Blind Cane Users",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "serino_2007_blind_cane_users"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 7,
+      "openalex_id": "https://openalex.org/W2126468072",
+      "year": 2013,
+      "doi": "10.1038/srep02844",
+      "title": "Amputation and prosthesis implantation shape body and peripersonal space representations",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "canzoneri_2013_amputation_prosthesis"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 9,
+      "openalex_id": "https://openalex.org/W2148347447",
+      "year": 2011,
+      "doi": "10.1162/jocn_a_00006",
+      "title": "Fronto-parietal Areas Necessary for a Multisensory Representation of Peripersonal Space in Humans: An rTMS Study",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "serino_2011_rtms"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 10,
+      "openalex_id": "https://openalex.org/W2951237179",
+      "year": 2018,
+      "doi": "10.1101/249078",
+      "title": "Audio-tactile and peripersonal space processing around the trunk in human parietal and temporal cortex: an intracranial EEG study",
+      "type": "preprint",
+      "linked_literature_record_ids": [
+        "ieeg_trunk_2018"
+      ],
+      "screening_decision": "duplicate_or_supporting_source_linked_to_coverage_record",
+      "reason": "Candidate-like hit is a preprint, source project, correction, or alternate venue for an already tracked task.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 11,
+      "openalex_id": "https://openalex.org/W2068206128",
+      "year": 2015,
+      "doi": "10.3389/fnbeh.2015.00004",
+      "title": "Extending peripersonal space representation without tool-use: evidence from a combined behavioral-computational approach",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "serino_2015_toolless_sync_training"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 14,
+      "openalex_id": "https://openalex.org/W2790390894",
+      "year": 2018,
+      "doi": "10.1111/ejn.13872",
+      "title": "Vestibular modulation of peripersonal space boundaries",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "pfeiffer_2018_vestibular"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 15,
+      "openalex_id": "https://openalex.org/W2083831004",
+      "year": 2015,
+      "doi": "10.1016/j.neuropsychologia.2015.03.001",
+      "title": "Emotion-inducing approaching sounds shape the boundaries of multisensory peripersonal space",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "ferri_2015_ecological_valence"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": false,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 19,
+      "openalex_id": "https://openalex.org/W2791331226",
+      "year": 2018,
+      "doi": "10.3389/fict.2017.00031",
+      "title": "Peripersonal Space: An Index of Multisensory Body–Environment Interactions in Real, Virtual, and Mixed Realities",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "serino_2018_mixed_reality_pps"
+      ],
+      "screening_decision": "promoted_to_coverage_ledger",
+      "reason": "Candidate-like hit was promoted to a literature coverage record in this audit pass.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 20,
+      "openalex_id": "https://openalex.org/W2794401066",
+      "year": 2018,
+      "doi": "10.1152/jn.00652.2017",
+      "title": "Neural adaptation accounts for the dynamic resizing of peripersonal space: evidence from a psychophysical-computational approach",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "noel_2018_neural_adaptation"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 21,
+      "openalex_id": "https://openalex.org/W2950692404",
+      "year": 2019,
+      "doi": "10.1038/s41598-019-45224-w",
+      "title": "Enlarged representation of peripersonal space in pregnancy",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "pregnancy_2019"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 22,
+      "openalex_id": "https://openalex.org/W4282984143",
+      "year": 2022,
+      "doi": "10.1093/schbul/sbac067",
+      "title": "Tool-use Extends Peripersonal Space Boundaries in Schizophrenic Patients",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "schizophrenia_tool_use_2022"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 23,
+      "openalex_id": "https://openalex.org/W3083098065",
+      "year": 2020,
+      "doi": "10.1016/j.neuropsychologia.2020.107622",
+      "title": "Effect of tool-use observation on metric body representation and peripersonal space",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "ferroni_2020_tool_observation"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 24,
+      "openalex_id": "https://openalex.org/W1571569979",
+      "year": 2009,
+      "doi": "",
+      "title": "Peripersonal space : a multisensory interface for body-objects interactions",
+      "type": "preprint",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_review_theory_or_model",
+      "reason": "Historical/theoretical PPS overview, not a distinct audiotactile PPS task profile.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 25,
+      "openalex_id": "https://openalex.org/W3112885279",
+      "year": 2020,
+      "doi": "10.3389/fnins.2020.586605",
+      "title": "Peripersonal Space and Bodily Self-Consciousness: Implications for Psychological Trauma-Related Disorders",
+      "type": "review",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_review_theory_or_model",
+      "reason": "Review/trauma implications article, not a new participant task.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": true,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 26,
+      "openalex_id": "https://openalex.org/W2767126095",
+      "year": 2017,
+      "doi": "10.1007/s00221-017-5115-0",
+      "title": "Peripersonal space boundaries around the lower limbs",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "lower_limb_pps_2017"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": true
+      }
+    },
+    {
+      "rank": 27,
+      "openalex_id": "https://openalex.org/W2469309653",
+      "year": 2015,
+      "doi": "10.1523/jneurosci.1696-15.2015",
+      "title": "Intertrial Variability in the Premotor Cortex Accounts for Individual Differences in Peripersonal Space",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "ferri_2015_jneurosci_itv"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": false,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 29,
+      "openalex_id": "https://openalex.org/W2953453766",
+      "year": 2019,
+      "doi": "10.1038/s41598-019-45084-4",
+      "title": "Identifying peripersonal space boundaries in newborns",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "newborn_boundaries_2019"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 30,
+      "openalex_id": "https://openalex.org/W2975031761",
+      "year": 2019,
+      "doi": "10.1177/0956797619869337",
+      "title": "Remapping Peripersonal Space by Using Foot-Sole Vibrations Without Any Body Movement",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "footsole_vibration_2019"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 31,
+      "openalex_id": "https://openalex.org/W2910615113",
+      "year": 2019,
+      "doi": "10.1007/s00221-019-05469-3",
+      "title": "Enhanced audio-tactile multisensory interaction in a peripersonal task after echolocation",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "tonelli_2019_echolocation"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 32,
+      "openalex_id": "https://openalex.org/W2039384099",
+      "year": 2015,
+      "doi": "10.1523/jneurosci.3031-14.2015",
+      "title": "Impact Prediction by Looming Visual Stimuli Enhances Tactile Detection",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "reason": "Looming visual stimulus with tactile detection; no auditory PPS task component to profile.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 34,
+      "openalex_id": "https://openalex.org/W2340644275",
+      "year": 2016,
+      "doi": "10.1101/048108",
+      "title": "Unconscious integration of multisensory bodily inputs in the peripersonal space shapes bodily self-consciousness",
+      "type": "preprint",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "reason": "Visual/tactile bodily-self task preprint; no auditory PPS task component.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 41,
+      "openalex_id": "https://openalex.org/W3162785522",
+      "year": 2021,
+      "doi": "10.1093/oso/9780198851738.003.0005",
+      "title": "Visuo-tactile predictive mechanisms of peripersonal space",
+      "type": "book-chapter",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_review_theory_or_model",
+      "reason": "Book chapter on visuo-tactile predictive mechanisms, not a distinct task profile.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": true,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 51,
+      "openalex_id": "https://openalex.org/W4391301580",
+      "year": 2024,
+      "doi": "10.1038/s41598-024-52383-y",
+      "title": "Reshaping the peripersonal space in virtual reality",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "reason": "VR tool-use reshaping study uses a visuo-tactile detection task.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 53,
+      "openalex_id": "https://openalex.org/W2966089568",
+      "year": 2019,
+      "doi": "10.17605/osf.io/73x59",
+      "title": "Audio-tactile peripersonal space",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "holmes_2020_four_experiments"
+      ],
+      "screening_decision": "duplicate_or_supporting_source_linked_to_coverage_record",
+      "reason": "Candidate-like hit is a preprint, source project, correction, or alternate venue for an already tracked task.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 54,
+      "openalex_id": "https://openalex.org/W3207668658",
+      "year": 2021,
+      "doi": "10.1038/s41598-021-00048-5",
+      "title": "Frontal and parietal background connectivity and their dynamic changes account for individual differences in the multisensory representation of peripersonal space",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "spadone_2021_connectivity"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 56,
+      "openalex_id": "https://openalex.org/W4295786654",
+      "year": 2022,
+      "doi": "10.1371/journal.pcbi.1010464",
+      "title": "A normative model of peripersonal space encoding as performing impact prediction",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_review_theory_or_model",
+      "reason": "Computational/normative model without a distinct participant PPS task to recreate.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 57,
+      "openalex_id": "https://openalex.org/W3087957230",
+      "year": 2020,
+      "doi": "10.1111/ejn.14981",
+      "title": "From statistical regularities in multisensory inputs to peripersonal space representation and body ownership: Insights from a neural network model",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_review_theory_or_model",
+      "reason": "Neural network/modeling article; behavioral evidence is not a distinct audiotactile PPS profile.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 61,
+      "openalex_id": "https://openalex.org/W4399383770",
+      "year": 2024,
+      "doi": "10.1177/17470218241261645",
+      "title": "Lost in time and space? Multisensory processing of peripersonal space and time perception in people with frequent experiences of depersonalisation",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "depersonalisation_2024"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 64,
+      "openalex_id": "https://openalex.org/W3112008143",
+      "year": 2020,
+      "doi": "10.1016/j.cortex.2020.11.021",
+      "title": "How ageing shapes body and space representations: A comparison study between healthy young and older adults",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "ageing_2021"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 65,
+      "openalex_id": "https://openalex.org/W4309650799",
+      "year": 2022,
+      "doi": "10.1038/s41598-022-21469-w",
+      "title": "Multisensory-driven facilitation within the peripersonal space is modulated by the expectations about stimulus location on the body",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "rossi_sebastiano_2022_visuotactile"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 66,
+      "openalex_id": "https://openalex.org/W4283219815",
+      "year": 2022,
+      "doi": "10.1007/s00221-022-06387-7",
+      "title": "Peripersonal space around the upper and the lower limbs",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "reason": "Upper/lower-limb PPS study uses visuo-tactile crossmodal congruency.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 67,
+      "openalex_id": "https://openalex.org/W3093819135",
+      "year": 2020,
+      "doi": "10.3389/fpsyt.2020.578401",
+      "title": "Visual-Tactile Spatial Multisensory Interaction in Adults With Autism and Schizophrenia",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "reason": "Clinical multisensory study uses visual-tactile tasks, not audiotactile PPS.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 68,
+      "openalex_id": "https://openalex.org/W4315607558",
+      "year": 2023,
+      "doi": "10.1016/j.isci.2023.105955",
+      "title": "My social comfort zone: Attachment anxiety shapes peripersonal and interpersonal space",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "reason": "Attachment/interpersonal-space study uses a visuo-tactile augmented-reality PPS task.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 69,
+      "openalex_id": "https://openalex.org/W4394621896",
+      "year": 2024,
+      "doi": "10.3390/bs14040306",
+      "title": "Mindfulness Affects the Boundaries of Bodily Self-Representation: The Effect of Focused-Attention Meditation in Fading the Boundary of Peripersonal Space",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "mindfulness_pps_2024"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 70,
+      "openalex_id": "https://openalex.org/W4377138521",
+      "year": 2023,
+      "doi": "10.31234/osf.io/t8h6a",
+      "title": "Lost in time and space? Multisensory processing of peripersonal space and time perception in Depersonalisation",
+      "type": "preprint",
+      "linked_literature_record_ids": [
+        "depersonalisation_2024"
+      ],
+      "screening_decision": "duplicate_or_supporting_source_linked_to_coverage_record",
+      "reason": "Candidate-like hit is a preprint, source project, correction, or alternate venue for an already tracked task.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 71,
+      "openalex_id": "https://openalex.org/W3012811981",
+      "year": 2020,
+      "doi": "10.1007/s00426-020-01316-1",
+      "title": "Lower limb peripersonal space and the desire to amputate a leg",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "reason": "Lower-limb BIID study uses visuo-tactile interaction, not audiotactile PPS.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 72,
+      "openalex_id": "https://openalex.org/W2954256390",
+      "year": 2019,
+      "doi": "10.1038/s41598-019-45755-2",
+      "title": "Reaching measures and feedback effects in auditory peripersonal space",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_auditory_only_no_tactile_pps",
+      "reason": "Auditory reachability/distance-perception task without tactile target trials.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 74,
+      "openalex_id": "https://openalex.org/W4225379894",
+      "year": 2022,
+      "doi": "10.1007/s00221-022-06324-8",
+      "title": "Peripersonal Space from a multisensory perspective: the distinct effect of the visual and tactile components of Visuo-Tactile stimuli",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "reason": "Article is explicitly about visual and tactile components of visuo-tactile stimuli.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": true
+      }
+    },
+    {
+      "rank": 75,
+      "openalex_id": "https://openalex.org/W2994928343",
+      "year": 2019,
+      "doi": "10.1145/3366550.3372248",
+      "title": "Tactile and kinesthetic feedbacks improve distance perception in virtual reality",
+      "type": "preprint",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_non_pps_audiotactile_or_haptic",
+      "reason": "VR haptic-distance feedback study, not a PPS boundary audiotactile task.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 82,
+      "openalex_id": "https://openalex.org/W2105698102",
+      "year": 2004,
+      "doi": "10.1093/cercor/bhh197",
+      "title": "Grabbing Your Ear: Rapid Auditory–Somatosensory Multisensory Interactions in Low-level Sensory Cortices Are Not Constrained by Stimulus Alignment",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_non_pps_audiotactile_or_haptic",
+      "reason": "Auditory-somatosensory cortex study, but not a PPS boundary/profile task.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 84,
+      "openalex_id": "https://openalex.org/W2741401303",
+      "year": 2017,
+      "doi": "10.1109/whc.2017.7989970",
+      "title": "Vibration on the soles of the feet evoking a sensation of walking expands peripersonal space",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "amemiya_2017_pseudowalking_footsole"
+      ],
+      "screening_decision": "promoted_to_coverage_ledger",
+      "reason": "Candidate-like hit was promoted to a literature coverage record in this audit pass.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 86,
+      "openalex_id": "https://openalex.org/W4387499801",
+      "year": 2023,
+      "doi": "10.1007/s10055-023-00854-4",
+      "title": "Shaping the auditory peripersonal space with motor planning in immersive virtual reality",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_auditory_only_no_tactile_pps",
+      "reason": "Auditory peripersonal-space/motor-planning task without tactile target trials.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": false,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 90,
+      "openalex_id": "https://openalex.org/W4226339455",
+      "year": 2022,
+      "doi": "10.1115/1.4054277",
+      "title": "Spatial Manipulation in Virtual Peripersonal Space: A Study of Motor Strategies",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_non_pps_audiotactile_or_haptic",
+      "reason": "Virtual peripersonal-space motor strategy study, not an audiotactile PPS profile.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 91,
+      "openalex_id": "https://openalex.org/W2952155892",
+      "year": 2019,
+      "doi": "10.1371/journal.pone.0210045",
+      "title": "Experimentally induced pain does not influence updating of peripersonal space and body representations following tool-use",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "reason": "Pain/tool-use update study does not expose an audiotactile PPS task in the screened record.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 94,
+      "openalex_id": "https://openalex.org/W3012381479",
+      "year": 2020,
+      "doi": "10.1007/s00221-020-05771-5",
+      "title": "Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size",
+      "type": "review",
+      "linked_literature_record_ids": [
+        "holmes_2020_four_experiments"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": true,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 99,
+      "openalex_id": "https://openalex.org/W4408399766",
+      "year": 2025,
+      "doi": "10.1109/tvcg.2025.3549884",
+      "title": "Influence of Haptic Feedback on Perception of Threat and Peripersonal Space in Social VR",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_non_pps_audiotactile_or_haptic",
+      "reason": "Social-VR haptic threat/peripersonal-space study, not an audio-plus-tactile PPS readout.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 102,
+      "openalex_id": "https://openalex.org/W4417137741",
+      "year": 2025,
+      "doi": "10.1016/j.cortex.2025.11.015",
+      "title": "Functional organization of distance-dependent audio-tactile integration is different in rear and front spaces",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "amiel_2025_front_rear"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 105,
+      "openalex_id": "https://openalex.org/W2963041952",
+      "year": 2019,
+      "doi": "10.1016/j.nicl.2019.101940",
+      "title": "Peri-personal space encoding in patients with disorders of consciousness and cognitive-motor dissociation",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "disorders_consciousness_2019"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 115,
+      "openalex_id": "https://openalex.org/W4382359755",
+      "year": 2019,
+      "doi": "10.53829/ntr201911fa4",
+      "title": "Creating a Walking Sensation for the Seated--A Sensation of Pseudo-walking Expands Peripersonal Space",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "amemiya_2017_pseudowalking_footsole"
+      ],
+      "screening_decision": "duplicate_or_supporting_source_linked_to_coverage_record",
+      "reason": "Candidate-like hit is a preprint, source project, correction, or alternate venue for an already tracked task.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 117,
+      "openalex_id": "https://openalex.org/W4395663083",
+      "year": 2024,
+      "doi": "10.1016/j.isci.2024.109820",
+      "title": "Localizing 3D motion through the fingertips: Following in the footsteps of elephants",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_non_pps_audiotactile_or_haptic",
+      "reason": "Audio-tactile/haptic motion-localization task, not a PPS boundary or tactile-detection profile.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 119,
+      "openalex_id": "https://openalex.org/W2803698664",
+      "year": 2017,
+      "doi": "",
+      "title": "Peripersonal space representation in the first year of life: a behavioural and electroencephalographic investigation of the perception of unimodal and multimodal events taking place in the space surrounding the body",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "grey_literature_or_source_not_counted",
+      "reason": "Thesis/doctoral source about infancy PPS; relevant source trail, but not a separate peer-reviewed paper-level task beyond newborn records.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 126,
+      "openalex_id": "https://openalex.org/W1663421206",
+      "year": 2015,
+      "doi": "10.4036/iis.2015.a.04",
+      "title": "Visuotactile Peripersonal Space in Healthy Humans: Evidence from Crossmodal Congruency and Redundant Target Effects",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "reason": "Visuotactile PPS article without auditory task stimuli.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 131,
+      "openalex_id": "https://openalex.org/W4416925575",
+      "year": 2025,
+      "doi": "10.1073/pnas.2516229122",
+      "title": "Interoception vs. Exteroception: Cardiac interoception competes with tactile perception, yet also facilitates self-relevance encoding",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "interoception_exteroception_2025"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 136,
+      "openalex_id": "https://openalex.org/W4383755350",
+      "year": 2023,
+      "doi": "10.21203/rs.3.rs-3101264/v1",
+      "title": "Reshaping the Peripersonal Space in Virtual Reality",
+      "type": "preprint",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "reason": "Preprint duplicate/route for a visuo-tactile VR reshaping study.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 137,
+      "openalex_id": "https://openalex.org/W3119521158",
+      "year": 2021,
+      "doi": "10.1038/s41598-020-79767-0",
+      "title": "Auditory roughness elicits defense reactions",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "taffou_2021_auditory_roughness"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 141,
+      "openalex_id": "https://openalex.org/W4386347460",
+      "year": 2023,
+      "doi": "10.1007/s10339-023-01154-0",
+      "title": "Beyond peripersonal boundaries: insights from crossmodal interactions",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_review_theory_or_model",
+      "reason": "Crossmodal-interaction overview/adjacent article, not a distinct audiotactile PPS task profile.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 143,
+      "openalex_id": "https://openalex.org/W2904604938",
+      "year": 2018,
+      "doi": "10.1101/500587",
+      "title": "Experimentally induced pain does not influence updating of peripersonal space and body representations following tool-use",
+      "type": "preprint",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "reason": "Preprint route for pain/tool-use visual-tactile PPS update study.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 150,
+      "openalex_id": "https://openalex.org/W3150805847",
+      "year": 2021,
+      "doi": "10.1007/s00221-021-06072-1",
+      "title": "When two worlds collide: the influence of an obstacle in peripersonal space on multisensory encoding",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "reason": "Obstacle/multisensory encoding study does not expose a recreatable audiotactile PPS task in the screened record.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 155,
+      "openalex_id": "https://openalex.org/W3161956225",
+      "year": 2021,
+      "doi": "10.3389/frvir.2021.644214",
+      "title": "VR Setup to Assess Peripersonal Space Audio-Tactile 3D Boundaries",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "lerner_2021_3d_boundary"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 159,
+      "openalex_id": "https://openalex.org/W4412653566",
+      "year": 2025,
+      "doi": "10.1007/s00221-025-07132-6",
+      "title": "Transfer of peripersonal space to a virtual body in young adults and exploration of adult age differences",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "reason": "Virtual-body transfer study uses visuo-tactile PPS task.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 163,
+      "openalex_id": "https://openalex.org/W2052293563",
+      "year": 2011,
+      "doi": "10.3389/fpsyg.2011.00077",
+      "title": "Organization, Maturation, and Plasticity of Multisensory Integration: Insights from Computational Modeling Studies",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_review_theory_or_model",
+      "reason": "Computational modeling review, not a distinct task profile.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 175,
+      "openalex_id": "https://openalex.org/W7117955263",
+      "year": 2025,
+      "doi": "",
+      "title": "The self and peripersonal space: a novel two-phase audio-tactile paradigm and its implication for defensive boundaries",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "novel_two_phase_audio_tactile_2025"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 178,
+      "openalex_id": "https://openalex.org/W7127180722",
+      "year": 2026,
+      "doi": "10.1038/s41598-026-36796-5",
+      "title": "Somatotopy-independent reduction of audio-tactile intersensory facilitation for looming sounds within the peripersonal space during arm movements execution",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "lamia_2026_arm_movement"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 189,
+      "openalex_id": "https://openalex.org/W3123782949",
+      "year": 2018,
+      "doi": "",
+      "title": "Audio-Tactile and Peripersonal Space Processing Around the Trunk in Human Parietal and Temporal Cortex: An Intracranial EEG Study",
+      "type": "preprint",
+      "linked_literature_record_ids": [
+        "ieeg_trunk_2018"
+      ],
+      "screening_decision": "duplicate_or_supporting_source_linked_to_coverage_record",
+      "reason": "Candidate-like hit is a preprint, source project, correction, or alternate venue for an already tracked task.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 196,
+      "openalex_id": "https://openalex.org/W4391521015",
+      "year": 2024,
+      "doi": "10.31234/osf.io/fde8c",
+      "title": "Localizing 3D motion through fingertips : following in the footsteps of elephants",
+      "type": "preprint",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_non_pps_audiotactile_or_haptic",
+      "reason": "Preprint duplicate of non-PPS 3D fingertip motion-localization study.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 213,
+      "openalex_id": "https://openalex.org/W7161640689",
+      "year": 2026,
+      "doi": "10.1038/s41598-026-52809-9",
+      "title": "Correction: Somatotopy-independent reduction of audio-tactile intersensory facilitation for looming sounds within the peripersonal space during arm movements execution",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "lamia_2026_arm_movement"
+      ],
+      "screening_decision": "duplicate_or_supporting_source_linked_to_coverage_record",
+      "reason": "Candidate-like hit is a preprint, source project, correction, or alternate venue for an already tracked task.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 242,
+      "openalex_id": "https://openalex.org/W2560363600",
+      "year": 2016,
+      "doi": "10.1007/s00702-016-1663-x",
+      "title": "An exploratory cohort study of sensory extinction in acute stroke: prevalence, risk factors, and time course",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_non_pps_audiotactile_or_haptic",
+      "reason": "Clinical sensory-extinction cohort, not an audiotactile PPS task profile.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 247,
+      "openalex_id": "https://openalex.org/W3162525472",
+      "year": 2020,
+      "doi": "10.5075/epfl-thesis-7965",
+      "title": "Flight of mind: Sensorimotor and multisensory embodiment with aviation robotics, flight simulator, and virtual reality",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "grey_literature_or_source_not_counted",
+      "reason": "Dissertation source with mixed embodiment studies; not counted as a separate published paper-level PPS task.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 260,
+      "openalex_id": "https://openalex.org/W4306677254",
+      "year": 2022,
+      "doi": "10.3389/frvir.2022.954587",
+      "title": "First insights in perception of feet and lower-body stimuli for proximity and collision feedback in 3D user interfaces",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_non_pps_audiotactile_or_haptic",
+      "reason": "3D UI proximity/collision feedback study, not an audiotactile PPS boundary task.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 292,
+      "openalex_id": "https://openalex.org/W4402665903",
+      "year": 2024,
+      "doi": "10.3390/mti8090082",
+      "title": "Music as a Tool for Affiliative Bonding: A Second-Person Approach to Musical Engagement",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_non_pps_audiotactile_or_haptic",
+      "reason": "Music/social bonding article, not a PPS tactile-detection task profile.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 298,
+      "openalex_id": "https://openalex.org/W858310107",
+      "year": 2011,
+      "doi": "",
+      "title": "Extended peripersonal space in professional fencers",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "serino_2011_professional_fencers"
+      ],
+      "screening_decision": "promoted_to_coverage_ledger",
+      "reason": "Candidate-like hit was promoted to a literature coverage record in this audit pass.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 313,
+      "openalex_id": "https://openalex.org/W7117952674",
+      "year": 2023,
+      "doi": "",
+      "title": "The effects of focused-attention meditation on peripersonal space",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "mindfulness_pps_2024"
+      ],
+      "screening_decision": "duplicate_or_supporting_source_linked_to_coverage_record",
+      "reason": "Candidate-like hit is a preprint, source project, correction, or alternate venue for an already tracked task.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 317,
+      "openalex_id": "https://openalex.org/W2904230469",
+      "year": 2018,
+      "doi": "10.1101/492017",
+      "title": "Maternal brain gain: enlarged representation of the peripersonal space in pregnancy",
+      "type": "preprint",
+      "linked_literature_record_ids": [
+        "pregnancy_2019"
+      ],
+      "screening_decision": "duplicate_or_supporting_source_linked_to_coverage_record",
+      "reason": "Candidate-like hit is a preprint, source project, correction, or alternate venue for an already tracked task.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 331,
+      "openalex_id": "https://openalex.org/W7113535374",
+      "year": 2025,
+      "doi": "",
+      "title": "The spatial reach of affective touch: a new perspective on social peripersonal space",
+      "type": "preprint",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_non_pps_audiotactile_or_haptic",
+      "reason": "Affective-touch/social PPS preprint, not an auditory-plus-tactile PPS task profile in the screened record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 332,
+      "openalex_id": "https://openalex.org/W4416632435",
+      "year": 2025,
+      "doi": "10.31234/osf.io/etvb6_v1",
+      "title": "The spatial reach of affective touch: a new perspective on social peripersonal space",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_non_pps_audiotactile_or_haptic",
+      "reason": "Affective-touch/social PPS article/preprint route, not an auditory-plus-tactile PPS task profile.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 385,
+      "openalex_id": "https://openalex.org/W179281037",
+      "year": 2009,
+      "doi": "10.15168/11572_368342",
+      "title": "Assessing audiotactile interactions: Spatiotemporal factors and role of visual experience",
+      "type": "dissertation",
+      "linked_literature_record_ids": [],
+      "screening_decision": "grey_literature_or_source_not_counted",
+      "reason": "Dissertation on audiotactile interactions; useful source trail but not counted as a separate published PPS paper.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 387,
+      "openalex_id": "https://openalex.org/W7117316674",
+      "year": 2025,
+      "doi": "10.61782/fa.2025.0866",
+      "title": "The Impact of Looming Sound Duration on Peripersonal Space Measurement",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "looming_duration_2025"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 401,
+      "openalex_id": "https://openalex.org/W779103744",
+      "year": 2006,
+      "doi": "10.5287/ora-koy2xw66n",
+      "title": "Multisensory aspects of the spatial cuing of driver attention",
+      "type": "dissertation",
+      "linked_literature_record_ids": [],
+      "screening_decision": "grey_literature_or_source_not_counted",
+      "reason": "Dissertation on driver attention/spatial cueing; no separate published audiotactile PPS profile.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 404,
+      "openalex_id": "https://openalex.org/W2971854567",
+      "year": 2019,
+      "doi": "10.1101/756783",
+      "title": "Capturing the dynamics of peripersonal space by integrating sound propagation properties and expectancy effects",
+      "type": "preprint",
+      "linked_literature_record_ids": [
+        "hobeika_2020_methods"
+      ],
+      "screening_decision": "duplicate_or_supporting_source_linked_to_coverage_record",
+      "reason": "Candidate-like hit is a preprint, source project, correction, or alternate venue for an already tracked task.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 405,
+      "openalex_id": "https://openalex.org/W4386190955",
+      "year": 2023,
+      "doi": "10.31219/osf.io/t5xfa",
+      "title": "Peripersonal space (PPS) as a multisensory interface between the individual and the environment, defining the space of the self - author copy",
+      "type": "preprint",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_review_theory_or_model",
+      "reason": "Author-copy overview/position text, not a separate participant task profile.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 408,
+      "openalex_id": "https://openalex.org/W7113098063",
+      "year": 2019,
+      "doi": "",
+      "title": "Tactile and Kinesthetic Feedbacks Improve Distance Perception in Virtual Reality",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_non_pps_audiotactile_or_haptic",
+      "reason": "Duplicate route for VR haptic-distance feedback, not a PPS audiotactile task.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 410,
+      "openalex_id": "https://openalex.org/W3047489274",
+      "year": 2020,
+      "doi": "10.1101/2020.08.04.236380",
+      "title": "Action planning and affective states within the auditory peripersonal space",
+      "type": "preprint",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_auditory_only_no_tactile_pps",
+      "reason": "Auditory peripersonal-space action-planning preprint without tactile target trials.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": false,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 412,
+      "openalex_id": "https://openalex.org/W4414043955",
+      "year": 2025,
+      "doi": "10.1101/2025.09.02.673729",
+      "title": "The Proximity Prediction Hypothesis: How predictive coding of CT-touch explains Autonomous Sensory Meridian Response and its therapeutic applications",
+      "type": "preprint",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_review_theory_or_model",
+      "reason": "ASMR/proximity-prediction preprint, not a PPS tactile-detection task.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 413,
+      "openalex_id": "https://openalex.org/W4415494687",
+      "year": 2025,
+      "doi": "10.3389/fnbeh.2025.1688172",
+      "title": "The Proximity Prediction Hypothesis: How predictive coding of CT-touch explains Autonomous Sensory Meridian Response and its therapeutic applications",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_review_theory_or_model",
+      "reason": "ASMR/proximity-prediction article, not a PPS tactile-detection task.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 414,
+      "openalex_id": "https://openalex.org/W3040715953",
+      "year": 2019,
+      "doi": "",
+      "title": "Bodily self-consciousness in Autism Spectrum Disorder: investigating the relationship between interoception, self-representation and empathy",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "grey_literature_or_source_not_counted",
+      "reason": "Thesis/source route for autism bodily-self work; paper-level autism task is already tracked separately.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 419,
+      "openalex_id": "https://openalex.org/W7128866677",
+      "year": 2026,
+      "doi": "",
+      "title": "Investigation of the dynamic modulations of peripersonal space: evidence from clinical conditions and mindfulness-based practices on the plasticity of the self",
+      "type": "dissertation",
+      "linked_literature_record_ids": [],
+      "screening_decision": "grey_literature_or_source_not_counted",
+      "reason": "Dissertation compiling clinical/mindfulness PPS work; paper-level outputs are tracked separately where available.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 421,
+      "openalex_id": "https://openalex.org/W7128508398",
+      "year": 2026,
+      "doi": "10.3758/s13414-026-03230-x",
+      "title": "No effect of the short-term learning of object trajectories on multisensory perception within the peripersonal space",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "reason": "Object-trajectory learning study uses a visuo-tactile PPS task.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 423,
+      "openalex_id": "https://openalex.org/W4282969665",
+      "year": 2022,
+      "doi": "10.31234/osf.io/r93nc",
+      "title": "My Social Comfort Zone: Attachment Anxiety Shapes Peripersonal and Interpersonal Space",
+      "type": "preprint",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "reason": "Preprint route for attachment/interpersonal-space visuo-tactile PPS study.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 434,
+      "openalex_id": "https://openalex.org/W4411721650",
+      "year": 2025,
+      "doi": "10.1101/2025.06.25.660685",
+      "title": "Interoception vs. Exteroception: Cardiac interoception competes with tactile perception, yet also facilitates self-relevance encoding",
+      "type": "preprint",
+      "linked_literature_record_ids": [
+        "interoception_exteroception_2025"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 436,
+      "openalex_id": "https://openalex.org/W2954379789",
+      "year": 2019,
+      "doi": "",
+      "title": "FingerSight: A Vibrotactile Wearable Ring to Help the Blind Locate and Reach Objects in Peripersonal Space",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_non_pps_audiotactile_or_haptic",
+      "reason": "Wearable visual-to-tactile assistive device study, not an audiotactile PPS task.",
+      "flags": {
+        "has_audio": false,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 437,
+      "openalex_id": "https://openalex.org/W4323045496",
+      "year": 2023,
+      "doi": "10.31234/osf.io/9nfqz",
+      "title": "Modulation of auditory peripersonal space by approaching and receding sources moving in discrete steps",
+      "type": "preprint",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_auditory_only_no_tactile_pps",
+      "reason": "Auditory reachability/peripersonal-space task without tactile target trials.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": false,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 451,
+      "openalex_id": "https://openalex.org/W4389000467",
+      "year": 2023,
+      "doi": "10.1007/s00221-023-06740-4",
+      "title": "Back and front peripersonal space: behavioural and EMG evidence of top–down and bottom–up mechanisms",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_auditory_only_no_tactile_pps",
+      "reason": "Auditory front/back distance and EMG/blink study without tactile target trials.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": false,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 455,
+      "openalex_id": "https://openalex.org/W3156286530",
+      "year": 2017,
+      "doi": "",
+      "title": "Interplay between multisensory integration and social interaction in auditory space.",
+      "type": "preprint",
+      "linked_literature_record_ids": [],
+      "screening_decision": "grey_literature_or_source_not_counted",
+      "reason": "Thesis/preprint source on social interaction in auditory space; paper-level social tasks are tracked separately where available.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 460,
+      "openalex_id": "https://openalex.org/W7154988888",
+      "year": 2026,
+      "doi": "10.1038/s41598-026-48067-4",
+      "title": "Semantic processing and individual suggestibility modulate motor preparation and perceived distance for looming sounds entering the peripersonal space",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_auditory_only_no_tactile_pps",
+      "reason": "Looming-sound motor-preparation task uses auditory stimuli and EMG/distance judgments, not tactile targets.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 476,
+      "openalex_id": "https://openalex.org/W4414748804",
+      "year": 2025,
+      "doi": "10.3390/s25196072",
+      "title": "Using Android Smartphones to Collect Precise Measures of Reaction Times to Multisensory Stimuli",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "smartphone_rt_methods_2025"
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "reason": "Candidate-like hit corresponds to a tracked coverage-ledger record.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 504,
+      "openalex_id": "https://openalex.org/W1999537864",
+      "year": 2012,
+      "doi": "10.1163/187847612x647676",
+      "title": "Plasticity in multisensory body representations after amputation and prosthesis implantation",
+      "type": "article",
+      "linked_literature_record_ids": [
+        "canzoneri_2013_amputation_prosthesis"
+      ],
+      "screening_decision": "duplicate_or_supporting_source_linked_to_coverage_record",
+      "reason": "Candidate-like hit is a preprint, source project, correction, or alternate venue for an already tracked task.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 512,
+      "openalex_id": "https://openalex.org/W7160970142",
+      "year": 2026,
+      "doi": "",
+      "title": "\"Spatiotemporal Dynamics underlying Multi-sensory Processing inthe context of Motor Activity and Social Perception",
+      "type": "dissertation",
+      "linked_literature_record_ids": [],
+      "screening_decision": "grey_literature_or_source_not_counted",
+      "reason": "Dissertation compiling motor/social PPS studies; not counted as a separate published paper-level task.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 574,
+      "openalex_id": "https://openalex.org/W4412024138",
+      "year": 2025,
+      "doi": "10.1101/2025.06.30.662313",
+      "title": "Motor Planning Sensitivity to Affective Looming Sounds Within The Peri-personal Space: An Interplay of Exogenous and Endogenous Influences",
+      "type": "preprint",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_auditory_only_no_tactile_pps",
+      "reason": "Preprint route for auditory-only looming-sound motor-planning task.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 578,
+      "openalex_id": "https://openalex.org/W2764304205",
+      "year": 2017,
+      "doi": "",
+      "title": "EEG paradigms as a supplemental tool to behavioral assessments of DOC",
+      "type": "article",
+      "linked_literature_record_ids": [],
+      "screening_decision": "grey_literature_or_source_not_counted",
+      "reason": "Conference/abstract-like DOC EEG paradigm record; no separate paper-level audiotactile PPS method beyond tracked DOC records.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    },
+    {
+      "rank": 591,
+      "openalex_id": "https://openalex.org/W7162826538",
+      "year": 2025,
+      "doi": "",
+      "title": "ASMR, from Theory to Therapeutics: Exploring the neural mechanism and clinical potential of Autonomous Sensory Meridian Response",
+      "type": "other",
+      "linked_literature_record_ids": [],
+      "screening_decision": "excluded_review_theory_or_model",
+      "reason": "ASMR thesis/theory route, not an experimental PPS tactile-detection paper.",
+      "flags": {
+        "has_audio": true,
+        "has_tactile": true,
+        "has_pps": true,
+        "is_review_like": false,
+        "is_visual_only_flag": false
+      }
+    }
+  ]
+}

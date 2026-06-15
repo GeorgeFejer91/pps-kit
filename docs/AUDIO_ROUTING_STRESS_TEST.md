@@ -99,7 +99,8 @@ The stress test writes CSV and JSON results under `artifacts\audio_device_stress
 
 ## Local Result
 
-On the tested workstation, `pps-run --list-devices` showed:
+On the tested workstation, the device listing and `pps-audio-stress` dry-run
+showed:
 
 - `Komplete Audio ASIO Driver | ASIO | out:6` marked `spatial-ok`
 - `Output 1/2`, `Output 3/4`, and SPDIF Komplete Windows endpoints marked
@@ -134,8 +135,9 @@ Recommended runtime route:
 
 ## QC Limitation
 
-The current WASAPI loopback recorder captures the Windows `Output 1/2` endpoint.
-It may not capture an ASIO multichannel stream. For full rendered-stimulus QC,
-use a hardware loopback from the physical outputs back into an input interface,
-or record the rendered WAV plus the runner manifest and use the software stress
-test as the device-open validation.
+WASAPI loopback captures Windows endpoints such as `Output 1/2`; it may not
+capture an ASIO multichannel stream. For publication-grade route validation,
+use physical electrical loopback from the actual outputs back into matched
+inputs. For normal participant runs, the optional local audio evidence WAV is a
+software safety copy of the runner's mixed output buffers, while event timing
+comes from callback-derived `events.csv`/LSL marker records.

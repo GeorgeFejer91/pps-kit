@@ -101,6 +101,25 @@
       "trial_randomization_strategy": "no_immediate_repeats",
       "block_order_randomization": "fixed",
       "max_consecutive_same_trial_type": 2,
+      "trial_strips": [
+        {
+          "strip_id": "serino-front-back-trunk-row",
+          "label": "Front/back trunk moving-sound trial",
+          "audio_tactile_percentage": 100.0,
+          "catch_percentage": 0.0,
+          "baseline_percentage": 0.0,
+          "elements": [
+            {
+              "element_id": "serino-front-back-moving-sound",
+              "kind": "looming_stimulus",
+              "label": "Front-back moving sound",
+              "source_label": "",
+              "source_labels": [],
+              "randomized": true
+            }
+          ]
+        }
+      ],
       "participants": 16,
       "random_seed": 20151224
     }

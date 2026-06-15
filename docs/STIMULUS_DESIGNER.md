@@ -31,7 +31,8 @@ pps-design
 The dashboard is served from `127.0.0.1` and is a local browser UI only. It
 keeps the same Python design, rendering, session-preparation, audio-stress, and
 native Focus Mode backends; it does not move validated participant timing into
-browser JavaScript.
+browser JavaScript. Segment 6 prepares the participant session package and then
+launches the packaged `PPSExperimentRunner.exe`.
 
 The HTML dashboard is organized as a one-page workflow with a fixed floating
 left navigation rail. The rail is navigation and companion-status only; panel
@@ -39,13 +40,13 @@ sizing happens directly in the workspace through draggable snapping splitters
 and panel-edge handles, so researchers can resize the working panels without
 using abstract slider controls.
 
-The one-page workflow uses sequential decision segments: profile selection,
-looming-stimulus building, trial design, baseline strategy, run setup, and
-review. The baseline segment is separate because baseline tactics depend on the
-current event rows, selected stimuli, SOAs, repetitions, blocks, and catch
-percentage. It lets researchers choose no baseline, tactile-only timing anchors,
-SOA 0, sound-offset/end anchors, or custom baseline timings, then shows live
-baseline-count and experiment-duration estimates before session preparation.
+The one-page workflow uses sequential decision segments: study/profile
+selection, looming-stimulus building, trial sequence design, baseline/tactile
+trial generation, trial-pool repetition, block CSV review, and Segment 6
+experiment preparation. Segment 6 includes **Preload Instruction Audio Clips**
+for run-level messages before the experiment, around block/condition
+transitions, and after the experiment; within-trial instruction snippets remain
+owned by Segment 2.
 
 The dashboard can also be served as a GitHub Pages site. In that mode, start
 `windows\Start_Website_Companion.bat` on the research PC and use the left-rail
@@ -56,6 +57,11 @@ The browser interface is only an orchestrator. It does not upload local
 stimulus files or experiment outputs online. Audio selected in the dashboard is
 imported by the local companion backend and stored in ignored local data before
 being used by the render/session pipeline.
+
+Segment 6 instruction-audio imports are local-only as well. They are decoded to
+WAV where possible, stored under the active project's
+`6_experiment_run_setup\instruction_library\`, saved with continuation settings
+in the run setup manifest, and copied into each prepared participant session.
 
 Preload profiles use a local file-cabinet catalog under `assets\preloads\<template_id>\`.
 The folder names mirror the HTML dashboard stages: `01_profile`,
@@ -77,8 +83,11 @@ All three tabs use nested Qt split panels. Drag the splitter handles to resize p
 The Qt UI uses a modern Fusion-styled control skin instead of native Windows chrome. Inputs, tables, tabs, buttons, scrollbars, and splitter handles are styled consistently, while trajectory start/end, timing, preview, trial conditions, trial families, block assembly, schedule previews, runner readiness, and runner review panes each have distinct tinted panels. The colors are functional signposts, not saved experiment parameters.
 
 The designer uses the packaged PPS Toolkit icon for the window/taskbar entry.
-The Windows launcher prefers `pythonw.exe` when available so the GUI opens
-without a separate Python console window.
+The native participant runner now uses a light PySide Focus Mode shell with the
+same visual identity. `windows\Build_Experiment_Runner_Exe.ps1` packages it as
+`dist\PPSExperimentRunner\PPSExperimentRunner.exe`; launchers activate that exe
+only. `focus_app.py` imports remain internal to that exe and validation
+harnesses; direct Python/module launch is retired.
 
 The designer currently covers:
 
@@ -94,7 +103,8 @@ The designer currently covers:
 - an HTML-dashboard baseline strategy segment for baseline tactic, baseline timing anchors, baseline proportion, live trial-count feedback, and duration estimates
 - compact OpenSesame-style trial assembly controls that define condition factors, trial families, and which stimulus types are allowed in each block: audio-tactile, baseline, and catch
 - live trial-table and participant block-order previews before protocol CSV export
-- runner controls that prepare a participant run package from the current design, stress-test the preferred audio route, open Focus Mode, write event CSV/XDF outputs, and produce immediate response/QC CSVs
+- runner controls that prepare a participant run package from the current design, open the native Focus Mode app shell, collect participant/runtime metadata there, stress-test the preferred audio route, write standard event/LSL mirror/XDF/analysis outputs, and optionally save a local full-audio evidence WAV
+- Segment 6 **Preload Instruction Audio Clips** controls for before-experiment, before-block, after-block, between-condition, and after-experiment messages with click, timed-delay, or runner-button continuation
 - seeded trial randomization with balanced shuffle, no-immediate-repeat, or ordered strategies
 - participant-level block order assignment using fixed order, seeded random permutation, or counterbalanced rotation
 - auditory motion directions, tactile body sites, baseline-specific SOAs, and exact catch-trial counts for paradigms that report fixed trial counts
@@ -147,15 +157,26 @@ The Experiment Runner tab uses `artifacts\qt_runner_render\` as its default rend
 - `local_data\sessions\<participant_id>_<timestamp>\protocol_schedule.csv`
 - `local_data\sessions\<participant_id>_<timestamp>\session_manifest.json`
 - per-block manifest CSVs and runnable concatenated WAVs under `blocks\`
-- `events.csv`, `events.xdf`, `analysis_summary.txt`, `timing_qc.csv`, and analysis CSVs after Focus Mode runs
+- `events.csv`, `events.xdf`, `lsl_markers.csv`, `lsl_markers.xdf`, `trigger_dictionary.json`, `analysis_summary.txt`, `timing_qc.csv`, and analysis CSVs after Focus Mode runs
 
-Reaction-time analysis now treats direct event timing as primary. Focus Mode logs mouse clicks immediately through the local event logger and optional `PPSMarkers` LSL stream. Planned tactile onsets are anchored to `audio_sample_zero`, which is emitted by the audio callback when the first block sample reaches the output buffer. A low-gain response marker pulse is also written to the tactile output channel for physical loopback QC; this marker is intended to be visible in recordings but below vibration threshold, and is not the primary RT source.
+Reaction-time analysis now treats direct event timing as primary. Focus Mode logs mouse clicks immediately through the local event logger, the internal `PPSMarkersV2`/`PPSTriggerCodes` marker mirror, and optional external LSL streams. Planned tactile onsets are anchored to `audio_sample_zero`, which is emitted by the audio callback when the first block sample reaches the output buffer. A low-gain response marker pulse is also written to the tactile output channel for physical loopback QC; this marker is intended to be visible in validation recordings but below vibration threshold, and is not the primary RT source.
 
-The preferred backup is hardware loopback from the physical outputs. The runner records per-block loopback files when the configured audio engine exposes recording support; WASAPI loopback remains a diagnostic fallback and may not capture ASIO multichannel playback.
+The optional full-audio safety copy is a local digital output evidence WAV written from the already-mixed output buffers, after routing, gain, clipping limits, and tactile-channel mouse-click marker injection. It is not a physical latency measurement. Physical electrical loopback is retained as an internal validation reference for publication-quality timing checks, while WASAPI loopback remains diagnostic only for ASIO routes that may bypass Windows endpoint recording.
 
-`pps-run` remains available as the legacy compatibility runner. The local HTML
-dashboard is now the primary researcher workflow for pilot runs of the currently
-designed experiment, with the Qt Experiment Runner retained for comparison.
+The local HTML dashboard is now the primary researcher workflow for pilot runs
+of the currently designed experiment, and its final runner action starts native
+PySide Focus Mode through the packaged `PPSExperimentRunner.exe`. Segment 6
+prepares the participant/block-order manifest and then hands off runtime
+decisions to Focus Mode. `events.csv`, local
+`PPSMarkersV2`/`PPSTriggerCodes` mirrors, trigger dictionaries, and analysis
+CSVs are standard runner outputs; live LSL is always attempted. Focus Mode
+collects participant metadata, writes `session_metadata.json`, and lets the
+operator choose the optional local full-audio evidence WAV plus optional
+missed-trial top-up at the end of each experiment part. When missed-trial
+top-up is enabled, Focus Mode keeps a live tactile miss ledger, prepares one
+shortened top-up block at the relevant part boundary, asks the operator for
+approval before playing it, and marks any row-structure filler trials as QC-only
+so they are excluded from primary rescue analysis.
 
 The HTML dashboard covers the same researcher-facing decision layer: published
 profile selection, custom manual designs, stimulus controls, noise/custom-audio

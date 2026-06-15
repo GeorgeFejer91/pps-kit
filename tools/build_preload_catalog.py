@@ -33,16 +33,25 @@ from peripersonal_space_toolkit.design import (
     cartesian_to_spherical,
     design_from_dict,
     design_to_dict,
+    expand_trial_strip_source_labels,
     save_design,
     trajectory_endpoints_xyz,
 )
 from peripersonal_space_toolkit.preload_inventory import INVENTORY_SCHEMA, sha256_file
+from peripersonal_space_toolkit.profile_recreation import (
+    build_profile_parameters_manifest,
+    build_profile_recreation_status,
+    profile_variant_labels,
+    render_profile_recreation_status_markdown,
+)
 from peripersonal_space_toolkit.templates import StudyTemplate, load_templates
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE_DIR = REPO_ROOT / "study_templates"
 PRELOAD_ROOT = REPO_ROOT / "assets" / "preloads"
+RECREATION_STATUS_PATH = PRELOAD_ROOT / "profile_recreation_status.json"
+RECREATION_STATUS_DOC = REPO_ROOT / "docs" / "PUBLISHED_STUDY_RECREATION_STATUS.md"
 BUILD_ROOT = REPO_ROOT / "artifacts" / "preload_catalog_build"
 BASE_URL = "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads"
 SEGMENTS = [
@@ -62,9 +71,23 @@ def main() -> int:
     PRELOAD_ROOT.mkdir(parents=True, exist_ok=True)
     BUILD_ROOT.mkdir(parents=True, exist_ok=True)
 
+    templates = load_templates(TEMPLATE_DIR)
+    variant_labels = profile_variant_labels(templates)
     profiles = []
-    for template in load_templates(TEMPLATE_DIR):
-        profiles.append(build_profile_catalog(template, force=args.force))
+    profile_parameter_manifests = []
+    for template in templates:
+        profile, profile_parameters = build_profile_catalog(
+            template,
+            force=args.force,
+            variant_label=variant_labels.get(template.template_id, ""),
+        )
+        profiles.append(profile)
+        profile_parameter_manifests.append(profile_parameters)
+
+    recreation_status = build_profile_recreation_status(profile_parameter_manifests)
+    write_json(RECREATION_STATUS_PATH, recreation_status)
+    RECREATION_STATUS_DOC.parent.mkdir(parents=True, exist_ok=True)
+    RECREATION_STATUS_DOC.write_text(render_profile_recreation_status_markdown(recreation_status), encoding="utf-8")
 
     inventory = {
         "schema": INVENTORY_SCHEMA,
@@ -90,7 +113,7 @@ def main() -> int:
     return 0
 
 
-def build_profile_catalog(template: StudyTemplate, *, force: bool) -> dict[str, Any]:
+def build_profile_catalog(template: StudyTemplate, *, force: bool, variant_label: str = "") -> tuple[dict[str, Any], dict[str, Any]]:
     profile_dir = PRELOAD_ROOT / template.template_id
     for folder, _label in SEGMENTS:
         (profile_dir / folder).mkdir(parents=True, exist_ok=True)
@@ -98,15 +121,27 @@ def build_profile_catalog(template: StudyTemplate, *, force: bool) -> dict[str, 
     design = design_from_dict(design_to_dict(template.design))
     source_assets = build_stimulus_assets(template, design, profile_dir, force=force)
     write_segment_metadata(template, design, profile_dir, source_assets)
+    profile_parameters = build_profile_parameters_manifest(
+        template,
+        source_assets=source_assets,
+        profile_dir=profile_dir,
+        variant_label=variant_label,
+    )
+    profile_parameters_path = profile_dir / "01_profile" / "profile_parameters_manifest.json"
+    write_json(profile_parameters_path, profile_parameters)
+    recreation_status = profile_parameters["recreation_status"]
 
     manifest = {
         "schema": "pps-preload-profile-assets.v1",
         "template_id": template.template_id,
         "title": template.title,
+        "visible_variant_label": variant_label,
         "asset_mode": "bundled_local",
         "retrieval_strategy": "bundled_or_download_from_github_pages",
         "local_only": True,
         "catalog_segments": catalog_segments(profile_dir),
+        "profile_parameters_manifest": rel(profile_parameters_path),
+        "recreation_status": recreation_status,
         "render_contract": {
             "stage": "auditory_looming_prebake",
             "engine": "python-sofa-reference",
@@ -122,18 +157,32 @@ def build_profile_catalog(template: StudyTemplate, *, force: bool) -> dict[str, 
     }
     write_json(profile_dir / "preload_manifest.json", manifest)
 
-    return {
+    profile_entry = {
         "template_id": template.template_id,
         "title": template.title,
+        "visible_variant_label": variant_label,
+        "variant_display": profile_parameters["variant_display"],
         "asset_mode": "bundled_local",
         "retrieval_strategy": "bundled_or_download_from_github_pages",
         "profile_manifest": rel(profile_dir / "preload_manifest.json"),
+        "profile_parameters_manifest": rel(profile_parameters_path),
+        "recreation_status": recreation_status,
+        "runner_readiness": recreation_status["runner_readiness"],
+        "profile_checks_passed": recreation_status["profile_checks_passed"],
+        "segment_0_to_4_profile_checks_passed": recreation_status["segment_0_to_4_profile_checks_passed"],
+        "finished_profile": recreation_status["finished_profile"],
+        "segment_6_launchable": recreation_status["segment_6_launchable"],
+        "profile_completion_status": recreation_status["profile_completion_status"],
+        "primary_recreation_category": recreation_status["primary_category"],
+        "missing_parameter_count": recreation_status["missing_parameter_count"],
+        "unsupported_structure_count": recreation_status["unsupported_structure_count"],
         "local_only": True,
         "source_recipe_count": len(source_assets),
         "catalog_segments": catalog_segments(profile_dir),
         "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
         "assets": source_assets,
     }
+    return profile_entry, profile_parameters
 
 
 def build_stimulus_assets(
@@ -445,7 +494,12 @@ def refresh_radius_from_xyz(trajectory: Any) -> None:
 
 
 def write_segment_metadata(template: StudyTemplate, design: Any, profile_dir: Path, source_assets: list[dict[str, Any]]) -> None:
-    design_payload = design_to_dict(design)
+    metadata_design = design_from_dict(design_to_dict(design))
+    expand_trial_strip_source_labels(
+        metadata_design,
+        [str(asset.get("label") or "") for asset in source_assets],
+    )
+    design_payload = design_to_dict(metadata_design)
     profile = {
         "schema": "pps-preload-profile-segment.v1",
         "template_id": template.template_id,
@@ -519,20 +573,29 @@ def write_segment_metadata(template: StudyTemplate, design: Any, profile_dir: Pa
             "custom_clip_assets": template.reference_parameters.get("custom_clip_assets", []),
             "trial_strips": design_payload["protocol"].get("trial_strips", []),
             "prestimulus_files": design_payload.get("prestimulus_files", []),
-            "preview_trial_count": len(block_trial_rows(design)),
+            "preview_trial_count": len(block_trial_rows(metadata_design)),
         },
     )
+    run_setup_defaults = {
+        "schema": "pps-preload-run-setup-segment.v1",
+        "template_id": template.template_id,
+        "blocks": protocol.blocks,
+        "participants": protocol.participants,
+        "random_seed": protocol.random_seed,
+        "trial_randomization_strategy": protocol.trial_randomization_strategy,
+        "block_order_randomization": protocol.block_order_randomization,
+    }
+    dashboard_run_setup = template.reference_parameters.get("dashboard_run_setup")
+    if isinstance(dashboard_run_setup, dict):
+        if "experiment_structure" in dashboard_run_setup:
+            run_setup_defaults["experiment_structure"] = dashboard_run_setup["experiment_structure"]
+        if "seed" in dashboard_run_setup:
+            run_setup_defaults["seed"] = dashboard_run_setup["seed"]
+        if "instruction_profile" in dashboard_run_setup:
+            run_setup_defaults["instruction_profile"] = dashboard_run_setup["instruction_profile"]
     write_json(
         profile_dir / "05_run_setup" / "run_defaults.json",
-        {
-            "schema": "pps-preload-run-setup-segment.v1",
-            "template_id": template.template_id,
-            "blocks": protocol.blocks,
-            "participants": protocol.participants,
-            "random_seed": protocol.random_seed,
-            "trial_randomization_strategy": protocol.trial_randomization_strategy,
-            "block_order_randomization": protocol.block_order_randomization,
-        },
+        run_setup_defaults,
     )
 
 

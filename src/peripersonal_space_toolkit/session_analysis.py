@@ -5,20 +5,24 @@ from __future__ import annotations
 import csv
 import math
 import statistics
+import warnings as py_warnings
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable
 
 import numpy as np
-from scipy.optimize import curve_fit
+from scipy.optimize import OptimizeWarning, curve_fit
 
 
 @dataclass
 class SessionAnalysisResult:
     response_rows: list[dict[str, Any]] = field(default_factory=list)
+    final_outcome_rows: list[dict[str, Any]] = field(default_factory=list)
     summary_rows: list[dict[str, Any]] = field(default_factory=list)
     curve_rows: list[dict[str, Any]] = field(default_factory=list)
     fit_rows: list[dict[str, Any]] = field(default_factory=list)
+    model_fit_rows: list[dict[str, Any]] = field(default_factory=list)
+    model_comparison_rows: list[dict[str, Any]] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
 
 
@@ -26,8 +30,10 @@ def analyze_session_events(events: Iterable[Any], *, min_rt_s: float = 0.1, max_
     rows = sorted((_as_row(event) for event in events), key=lambda row: (_as_float(row.get("unix_time"), 0.0), row.get("event_id", 0)))
     result = SessionAnalysisResult()
     result.response_rows = _pair_tactile_responses(rows, min_rt_s=min_rt_s, max_rt_s=max_rt_s)
-    result.summary_rows = _summarize_responses(result.response_rows)
-    result.curve_rows, result.fit_rows, curve_warnings = _build_pps_curves(result.response_rows)
+    result.final_outcome_rows = _build_final_outcomes(result.response_rows)
+    analysis_rows = result.final_outcome_rows or result.response_rows
+    result.summary_rows = _summarize_responses(analysis_rows)
+    result.curve_rows, result.fit_rows, result.model_fit_rows, result.model_comparison_rows, curve_warnings = _build_pps_curves(analysis_rows)
     result.warnings.extend(curve_warnings)
     if not result.response_rows:
         result.warnings.append("No tactile response rows could be reconstructed from the event stream.")
@@ -39,14 +45,22 @@ def write_analysis_csvs(result: SessionAnalysisResult, output_dir: str | Path, s
     output_dir.mkdir(parents=True, exist_ok=True)
     outputs = {
         "responses": output_dir / f"{stem}_responses.csv",
+        "analysis_ready_trials": output_dir / f"{stem}_analysis_ready_trials.csv",
+        "final_trial_outcomes": output_dir / f"{stem}_final_trial_outcomes.csv",
         "summary": output_dir / f"{stem}_summary.csv",
         "curves": output_dir / f"{stem}_pps_curve_points.csv",
         "fits": output_dir / f"{stem}_sigmoid_fits.csv",
+        "model_fits": output_dir / f"{stem}_model_fits.csv",
+        "model_fit_comparison": output_dir / f"{stem}_model_fit_comparison.csv",
     }
     _write_rows(outputs["responses"], result.response_rows)
+    _write_rows(outputs["analysis_ready_trials"], result.final_outcome_rows or result.response_rows)
+    _write_rows(outputs["final_trial_outcomes"], result.final_outcome_rows)
     _write_rows(outputs["summary"], result.summary_rows)
     _write_rows(outputs["curves"], result.curve_rows)
     _write_rows(outputs["fits"], result.fit_rows)
+    _write_rows(outputs["model_fits"], result.model_fit_rows)
+    _write_rows(outputs["model_fit_comparison"], result.model_comparison_rows)
     return outputs
 
 
@@ -70,6 +84,11 @@ def format_analysis_summary(result: SessionAnalysisResult) -> str:
             lines.append(f"- {fit.get('scope', '')}: boundary {boundary} ms, slope {slope}, R2 {r2}")
     else:
         lines.append("No sigmoid fit yet; at least four usable SOA points are needed per condition.")
+    if result.model_comparison_rows:
+        lines.append("")
+        lines.append("Best model by AIC")
+        for row in result.model_comparison_rows[:8]:
+            lines.append(f"- {row.get('scope', '')}: {row.get('best_model', '')}, R2 {_fmt(row.get('best_r2'), 3)}")
     if result.warnings:
         lines.append("")
         lines.append("Warnings")
@@ -97,6 +116,8 @@ def _pair_tactile_responses(events: list[dict[str, Any]], *, min_rt_s: float, ma
         for candidate in clicks:
             click_time = _as_float(candidate.get("unix_time"), 0.0)
             if candidate.get("event_id") in used_click_ids:
+                continue
+            if not _same_trial_context(tactile, candidate):
                 continue
             if onset + min_rt_s <= click_time <= limit:
                 click = candidate
@@ -130,13 +151,96 @@ def _response_base(event: dict[str, Any]) -> dict[str, Any]:
         "condition": condition,
         "part_number": part_number if part_number is not None else "",
         "block_number": _as_int(_field(event, "block_number", "Block_Number"), ""),
+        "block_label": _field(event, "block_label", "Block_Label"),
         "trial_number": _as_int(_field(event, "trial_number", "Trial_Number"), ""),
+        "trial_uid": _field(event, "trial_uid", "Trial_UID"),
         "trial_type": _field(event, "trial_type", "Trial_Type"),
+        "family": _field(event, "family", "Family"),
+        "row_label": _field(event, "row_label", "Row_Label", "Row"),
         "soa_ms": _as_int(_field(event, "soa_ms", "SOA_ms"), ""),
         "noise_type": _field(event, "noise_type", "Noise_Type"),
         "respiratory_phase": _field(event, "respiratory_phase", "Respiratory_Phase"),
         "stimulus_modality": _field(event, "stimulus_modality"),
+        "is_topup": _truthy(_field(event, "is_topup", "Is_Topup")),
+        "topup_role": str(_field(event, "topup_role", "Topup_Role") or "").strip().lower(),
+        "source_trial_uid": _field(event, "source_trial_uid", "Source_Trial_UID", "Original_Trial_UID"),
+        "primary_analysis_included": _primary_analysis_included(event),
+        "topup_attempt_number": _field(event, "topup_attempt_number", "Topup_Attempt_Number"),
     }
+
+
+def _same_trial_context(tactile: dict[str, Any], click: dict[str, Any]) -> bool:
+    """Prevent later-block/top-up clicks from being credited to earlier trials."""
+    tactile_block = _field(tactile, "block_number", "Block_Number")
+    click_block = _field(click, "block_number", "Block_Number")
+    if tactile_block not in (None, "") and click_block not in (None, ""):
+        if str(_as_int(tactile_block, tactile_block)) != str(_as_int(click_block, click_block)):
+            return False
+
+    tactile_part = _field(tactile, "part_number", "Part_Number")
+    click_part = _field(click, "part_number", "Part_Number")
+    if tactile_part not in (None, "") and click_part not in (None, ""):
+        if str(_as_int(tactile_part, tactile_part)) != str(_as_int(click_part, click_part)):
+            return False
+
+    return True
+
+
+def _build_final_outcomes(response_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    originals: list[dict[str, Any]] = []
+    rescue_by_source: dict[str, dict[str, Any]] = {}
+    orphan_rescues: list[dict[str, Any]] = []
+    for row in response_rows:
+        is_topup = _truthy(row.get("is_topup"))
+        role = str(row.get("topup_role") or "").strip().lower()
+        if is_topup and role == "filler":
+            continue
+        if is_topup and role == "rescue":
+            source_uid = str(row.get("source_trial_uid") or "").strip()
+            if source_uid:
+                rescue_by_source[source_uid] = row
+            else:
+                orphan_rescues.append(row)
+            continue
+        originals.append(row)
+
+    final_rows: list[dict[str, Any]] = []
+    original_uids = {str(row.get("trial_uid") or "") for row in originals}
+    for row in originals:
+        final = dict(row)
+        trial_uid = str(row.get("trial_uid") or "")
+        rescue = rescue_by_source.get(trial_uid)
+        final["original_hit"] = bool(row.get("hit"))
+        final["rescued_in_topup"] = False
+        final["topup_trial_uid"] = ""
+        final["topup_click_event_id"] = ""
+        final["topup_rt_ms"] = ""
+        final["final_outcome_source"] = "original"
+        final["analysis_exclude_reason"] = "" if _truthy(row.get("primary_analysis_included", True)) else "primary_analysis_included_false"
+        if rescue is not None and not bool(row.get("hit")):
+            final["rescued_in_topup"] = True
+            final["topup_trial_uid"] = rescue.get("trial_uid", "")
+            final["topup_click_event_id"] = rescue.get("click_event_id", "")
+            final["topup_rt_ms"] = rescue.get("rt_ms", "")
+            final["topup_hit"] = bool(rescue.get("hit"))
+            final["hit"] = bool(rescue.get("hit"))
+            final["click_unix_time"] = rescue.get("click_unix_time", "") if rescue.get("hit") else ""
+            final["click_event_id"] = rescue.get("click_event_id", "") if rescue.get("hit") else ""
+            final["rt_ms"] = rescue.get("rt_ms", "") if rescue.get("hit") else ""
+            final["final_outcome_source"] = "topup_rescue"
+        final_rows.append(final)
+
+    for rescue in orphan_rescues:
+        source_uid = str(rescue.get("source_trial_uid") or "")
+        if source_uid and source_uid in original_uids:
+            continue
+        final = dict(rescue)
+        final["final_outcome_source"] = "topup_rescue_orphan"
+        final["rescued_in_topup"] = True
+        final["original_hit"] = ""
+        final["topup_trial_uid"] = rescue.get("trial_uid", "")
+        final_rows.append(final)
+    return final_rows
 
 
 def _summarize_responses(response_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -175,7 +279,9 @@ def _summarize_responses(response_rows: list[dict[str, Any]]) -> list[dict[str, 
     return summary
 
 
-def _build_pps_curves(response_rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[str]]:
+def _build_pps_curves(
+    response_rows: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[str]]:
     baseline = _baseline_means(response_rows)
     audio_rows = [row for row in response_rows if row.get("trial_type") == "Audio-Tactile" and row.get("rt_ms") not in (None, "")]
     groups: dict[tuple[Any, ...], list[dict[str, Any]]] = {}
@@ -185,6 +291,8 @@ def _build_pps_curves(response_rows: list[dict[str, Any]]) -> tuple[list[dict[st
 
     curve_rows: list[dict[str, Any]] = []
     fit_rows: list[dict[str, Any]] = []
+    model_fit_rows: list[dict[str, Any]] = []
+    model_comparison_rows: list[dict[str, Any]] = []
     warnings: list[str] = []
     for key, rows in sorted(groups.items(), key=lambda item: tuple(str(part) for part in item[0])):
         condition, phase, noise = key
@@ -221,15 +329,34 @@ def _build_pps_curves(response_rows: list[dict[str, Any]]) -> tuple[list[dict[st
             )
             xs.append(float(soa))
             ys.append(float(y))
+        scope = _scope(condition, phase, noise)
+        model_rows = _fit_model_family(np.asarray(xs), np.asarray(ys), scope=scope, condition=condition, phase=phase, noise=noise, metric=metric)
+        model_fit_rows.extend(model_rows)
+        if model_rows:
+            best = sorted(model_rows, key=lambda row: _as_float(row.get("aic"), math.inf))[0]
+            model_comparison_rows.append(
+                {
+                    "scope": scope,
+                    "condition": condition,
+                    "respiratory_phase": phase,
+                    "noise_type": noise,
+                    "fit_metric": metric,
+                    "n_points": best.get("n_points", ""),
+                    "best_model": best.get("model", ""),
+                    "best_aic": best.get("aic", ""),
+                    "best_r2": best.get("r2", ""),
+                    "candidate_models": ";".join(str(row.get("model", "")) for row in sorted(model_rows, key=lambda item: str(item.get("model", "")))),
+                }
+            )
         if len(xs) >= 4:
             fit = _fit_sigmoid(np.asarray(xs), np.asarray(ys))
             if fit:
-                fit_rows.append({"scope": _scope(condition, phase, noise), "condition": condition, "respiratory_phase": phase, "noise_type": noise, "fit_metric": metric, **fit})
+                fit_rows.append({"scope": scope, "condition": condition, "respiratory_phase": phase, "noise_type": noise, "fit_metric": metric, **fit})
             else:
-                warnings.append(f"Sigmoid fit did not converge for {_scope(condition, phase, noise)}.")
+                warnings.append(f"Sigmoid fit did not converge for {scope}.")
         elif xs:
-            warnings.append(f"Only {len(xs)} SOA point(s) for {_scope(condition, phase, noise)}; sigmoid fit skipped.")
-    return curve_rows, fit_rows, warnings
+            warnings.append(f"Only {len(xs)} SOA point(s) for {scope}; sigmoid fit skipped.")
+    return curve_rows, fit_rows, model_fit_rows, model_comparison_rows, warnings
 
 
 def _baseline_means(response_rows: list[dict[str, Any]]) -> dict[tuple[Any, ...], float]:
@@ -266,19 +393,101 @@ def _fit_sigmoid(x: np.ndarray, y: np.ndarray) -> dict[str, float] | None:
     p0 = [lower0, upper0, x00, direction * 0.004]
     bounds = ([-np.inf, -np.inf, float(np.min(x)), -1.0], [np.inf, np.inf, float(np.max(x)), 1.0])
     try:
-        params, _ = curve_fit(_sigmoid, x, y, p0=p0, bounds=bounds, maxfev=20000)
+        with py_warnings.catch_warnings():
+            py_warnings.simplefilter("ignore", OptimizeWarning)
+            params, _ = curve_fit(_sigmoid, x, y, p0=p0, bounds=bounds, maxfev=20000)
     except Exception:
         return None
     predicted = _sigmoid(x, *params)
-    ss_res = float(np.sum((y - predicted) ** 2))
-    ss_tot = float(np.sum((y - np.mean(y)) ** 2))
-    r2 = 1.0 - (ss_res / ss_tot) if ss_tot else 1.0
+    metrics = _fit_metrics(y, predicted, parameter_count=4)
     return {
         "lower": float(params[0]),
         "upper": float(params[1]),
         "pps_boundary_soa_ms": float(params[2]),
         "slope": float(params[3]),
-        "r2": r2,
+        **metrics,
+    }
+
+
+def _fit_model_family(
+    x: np.ndarray,
+    y: np.ndarray,
+    *,
+    scope: str,
+    condition: Any,
+    phase: Any,
+    noise: Any,
+    metric: str,
+) -> list[dict[str, Any]]:
+    if len(x) < 2 or len(set(x.tolist())) < 2:
+        return []
+    rows: list[dict[str, Any]] = []
+    linear = _fit_linear_model(x, y)
+    if linear is not None:
+        rows.append(_model_row("linear", linear, scope, condition, phase, noise, metric, len(x), parameter_count=2))
+    if np.all(x > 0):
+        logarithmic = _fit_log_model(x, y)
+        if logarithmic is not None:
+            rows.append(_model_row("logarithmic_decay", logarithmic, scope, condition, phase, noise, metric, len(x), parameter_count=2))
+    sigmoid = _fit_sigmoid(x, y)
+    if sigmoid is not None:
+        rows.append(_model_row("sigmoid", sigmoid, scope, condition, phase, noise, metric, len(x), parameter_count=4))
+    return rows
+
+
+def _fit_linear_model(x: np.ndarray, y: np.ndarray) -> dict[str, float] | None:
+    try:
+        slope, intercept = np.polyfit(x, y, 1)
+    except Exception:
+        return None
+    predicted = intercept + slope * x
+    metrics = _fit_metrics(y, predicted, parameter_count=2)
+    return {"intercept": float(intercept), "slope": float(slope), **metrics}
+
+
+def _fit_log_model(x: np.ndarray, y: np.ndarray) -> dict[str, float] | None:
+    try:
+        slope, intercept = np.polyfit(np.log(x), y, 1)
+    except Exception:
+        return None
+    predicted = intercept + slope * np.log(x)
+    metrics = _fit_metrics(y, predicted, parameter_count=2)
+    return {"intercept": float(intercept), "log_slope": float(slope), **metrics}
+
+
+def _fit_metrics(y: np.ndarray, predicted: np.ndarray, *, parameter_count: int) -> dict[str, float]:
+    residual = y - predicted
+    rss = float(np.sum(residual**2))
+    n = int(len(y))
+    ss_tot = float(np.sum((y - np.mean(y)) ** 2))
+    r2 = 1.0 - (rss / ss_tot) if ss_tot else 1.0
+    rmse = math.sqrt(rss / n) if n else math.nan
+    aic = n * math.log(max(rss / max(n, 1), 1e-12)) + (2 * parameter_count) if n else math.inf
+    return {"rss": rss, "rmse": rmse, "r2": r2, "aic": aic}
+
+
+def _model_row(
+    model: str,
+    fit: dict[str, Any],
+    scope: str,
+    condition: Any,
+    phase: Any,
+    noise: Any,
+    metric: str,
+    n_points: int,
+    *,
+    parameter_count: int,
+) -> dict[str, Any]:
+    return {
+        "scope": scope,
+        "condition": condition,
+        "respiratory_phase": phase,
+        "noise_type": noise,
+        "fit_metric": metric,
+        "model": model,
+        "n_points": n_points,
+        "parameter_count": parameter_count,
+        **fit,
     }
 
 
@@ -324,6 +533,13 @@ def _truthy(value: Any) -> bool:
     if value in (None, ""):
         return False
     return str(value).strip().lower() not in {"0", "false", "no", "none"}
+
+
+def _primary_analysis_included(row: dict[str, Any]) -> bool:
+    value = _field(row, "primary_analysis_included", "Primary_Analysis_Included")
+    if value in (None, ""):
+        return not (_truthy(_field(row, "is_topup", "Is_Topup")) and str(_field(row, "topup_role", "Topup_Role")).strip().lower() == "filler")
+    return _truthy(value)
 
 
 def _as_float(value: Any, default: float) -> float:

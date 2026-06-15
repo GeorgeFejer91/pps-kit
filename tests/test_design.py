@@ -864,10 +864,10 @@ def test_runner_asset_status_and_launch_command(tmp_path: Path):
     assert status["ready"] is True
     assert status["participants"] == 1
     assert status["block_wavs"] == 1
-    assert command[:3] == ["python-test", "-m", "peripersonal_space_toolkit.runner"]
-    assert "--stimuli-dir" in command
-    assert str(stimuli) in command
-    assert command[-1] == "--list-devices"
+    assert command[:3] == ["python-test", "-m", "peripersonal_space_toolkit.audio_device_stress"]
+    assert "--dry-run" in command
+    assert "--device-query" in command
+    assert "Komplete" in command
 
 
 def test_all_study_templates_load_and_summarize():

@@ -57,16 +57,21 @@ def generate(argv: list[str] | None = None) -> int:
     return 0
 
 
-def run(argv: list[str] | None = None) -> int:
-    from . import runner
-
-    return runner.main(argv)
-
-
 def render_design(argv: list[str] | None = None) -> int:
     from . import render_backend
 
     return render_backend.main(argv)
+
+
+def run(argv: list[str] | None = None) -> int:
+    _ = argv
+    print(
+        "The legacy `pps-run` participant runner has been retired as a public entry point.\n"
+        "Use the active packaged experiment runner: "
+        "`dist\\PPSExperimentRunner\\PPSExperimentRunner.exe` or `windows\\Launch_Experiment_Runner.bat`."
+    )
+    print("For device checks, use `pps-audio-stress --dry-run --device-query Komplete`.")
+    return 2
 
 
 def decode(argv: list[str] | None = None) -> int:

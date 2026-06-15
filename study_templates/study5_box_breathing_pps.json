@@ -12,9 +12,9 @@
     "instruction_assets_bundled": true,
     "custom_clips_preloaded": true,
     "instruction_duration_s": 4.0,
-    "default_instruction_asset_variant": "british_kokoro",
-    "inhale_instruction_asset": "assets/breathing/british_kokoro/Inhale-2-3-4-hold_FIXED.wav",
-    "exhale_instruction_asset": "assets/breathing/british_kokoro/Exhale-2-3-4-hold_FIXED.wav",
+    "default_instruction_asset_variant": "original_study5",
+    "inhale_instruction_asset": "assets/breathing/original_study5/Inhale-2-3-4-hold_FIXED.wav",
+    "exhale_instruction_asset": "assets/breathing/original_study5/Exhale-2-3-4-hold_FIXED.wav",
     "instruction_asset_variants": {
       "british_kokoro": {
         "label": "British Kokoro voice",
@@ -33,20 +33,99 @@
       {
         "label": "Inhale instruction",
         "phase": "Inhale",
-        "variant": "british_kokoro",
-        "path": "assets/breathing/british_kokoro/Inhale-2-3-4-hold_FIXED.wav",
+        "variant": "original_study5",
+        "path": "assets/breathing/original_study5/Inhale-2-3-4-hold_FIXED.wav",
         "duration_s": 4.0,
         "default": true
       },
       {
         "label": "Exhale instruction",
         "phase": "Exhale",
-        "variant": "british_kokoro",
-        "path": "assets/breathing/british_kokoro/Exhale-2-3-4-hold_FIXED.wav",
+        "variant": "original_study5",
+        "path": "assets/breathing/original_study5/Exhale-2-3-4-hold_FIXED.wav",
         "duration_s": 4.0,
         "default": true
       }
     ],
+    "dashboard_run_setup": {
+      "experiment_structure": "pre_post",
+      "seed": 20256604,
+      "instruction_profile": {
+        "schema": "pps-run-instructions.v1",
+        "slots": [
+          {
+            "slot": "before_experiment",
+            "label": "General instructions",
+            "enabled": true,
+            "required": false,
+            "path": "assets/breathing/original_study5/General_Instructions.wav",
+            "duration_s": 85.707755,
+            "sample_rate": 44100,
+            "channels": 1,
+            "continue_mode": "click",
+            "delay_s": 0.0,
+            "button_label": "Start experiment",
+            "source": "original_study5"
+          },
+          {
+            "slot": "before_each_block",
+            "label": "Pre-block instruction",
+            "enabled": true,
+            "required": false,
+            "path": "assets/breathing/original_study5/Pre-Block_Instruction.wav",
+            "duration_s": 8.418073,
+            "sample_rate": 44100,
+            "channels": 1,
+            "continue_mode": "delay",
+            "delay_s": 0.0,
+            "button_label": "Start block",
+            "source": "original_study5"
+          },
+          {
+            "slot": "after_each_block",
+            "label": "Post-block instruction",
+            "enabled": true,
+            "required": false,
+            "path": "assets/breathing/original_study5/Post-Block_Instruction.wav",
+            "duration_s": 8.829388,
+            "sample_rate": 44100,
+            "channels": 1,
+            "continue_mode": "click",
+            "delay_s": 0.0,
+            "button_label": "Next block",
+            "source": "original_study5"
+          },
+          {
+            "slot": "between_conditions",
+            "label": "Condition transition",
+            "enabled": true,
+            "required": false,
+            "path": "assets/breathing/original_study5/InterimMessage.wav",
+            "duration_s": 10.109388,
+            "sample_rate": 44100,
+            "channels": 1,
+            "continue_mode": "button",
+            "delay_s": 0.0,
+            "button_label": "Start next condition",
+            "source": "original_study5"
+          },
+          {
+            "slot": "after_experiment",
+            "label": "Finish message",
+            "enabled": true,
+            "required": false,
+            "path": "assets/breathing/original_study5/FinishMessage.wav",
+            "duration_s": 7.000816,
+            "sample_rate": 44100,
+            "channels": 1,
+            "continue_mode": "delay",
+            "delay_s": 0.0,
+            "button_label": "Finish",
+            "source": "original_study5"
+          }
+        ]
+      }
+    },
     "trial_unit_duration_s": 8.0,
     "looming_stimulus_window_s": 4.0,
     "looming_assets_bundled": true,
@@ -108,7 +187,7 @@
     "prestimulus_files": [
       {
         "label": "Inhale instruction",
-        "path": "assets/breathing/british_kokoro/Inhale-2-3-4-hold_FIXED.wav",
+        "path": "assets/breathing/original_study5/Inhale-2-3-4-hold_FIXED.wav",
         "target_duration_s": 4.0,
         "render_mode": "preserve",
         "gain": 1.0,
@@ -121,7 +200,7 @@
       },
       {
         "label": "Exhale instruction",
-        "path": "assets/breathing/british_kokoro/Exhale-2-3-4-hold_FIXED.wav",
+        "path": "assets/breathing/original_study5/Exhale-2-3-4-hold_FIXED.wav",
         "target_duration_s": 4.0,
         "render_mode": "preserve",
         "gain": 1.0,
@@ -149,15 +228,24 @@
     },
     "protocol": {
       "repetitions_per_condition": 1,
+      "trial_pool_repetition_defaults": {
+        "default": 3.0,
+        "audio_tactile": 3.0,
+        "baseline": 1.5,
+        "catch": 3.0
+      },
       "soa_values_ms": [300, 800, 1500, 2200, 2700],
       "spatial_values_cm": [100.0, 83.3, 60.0, 36.7, 20.0],
       "pair_spatial_values_with_soas": true,
       "auditory_motion_directions": ["looming"],
       "tactile_sites": ["hand"],
-      "catch_trial_percentage": 10.0,
+      "include_catch_trials": true,
+      "catch_trial_percentage": 0.0,
       "catch_trials_exact": null,
-      "include_baseline_trials": false,
+      "include_baseline_trials": true,
+      "baseline_strategy": "tactile_only",
       "baseline_soa_values_ms": [],
+      "baseline_custom_trial_mode": "tactile_only",
       "respiratory_phases": ["Inhale", "Exhale"],
       "blocks": 6,
       "block_specs": [
@@ -190,8 +278,8 @@
         {
           "strip_id": "study5-inhale-row",
           "label": "Inhale trial type",
-          "audio_tactile_percentage": 90.0,
-          "catch_percentage": 10.0,
+          "audio_tactile_percentage": 100.0,
+          "catch_percentage": 0.0,
           "baseline_percentage": 0.0,
           "elements": [
             {
@@ -215,8 +303,8 @@
         {
           "strip_id": "study5-exhale-row",
           "label": "Exhale trial type",
-          "audio_tactile_percentage": 90.0,
-          "catch_percentage": 10.0,
+          "audio_tactile_percentage": 100.0,
+          "catch_percentage": 0.0,
           "baseline_percentage": 0.0,
           "elements": [
             {
@@ -248,7 +336,7 @@
   "provenance": [
     {
       "field": "instruction assets",
-      "source": "Bundled owned Study 5 breathing instruction WAVs include both assets/breathing/british_kokoro generated with Kokoro ONNX using the British English bf_emma voice and assets/breathing/original_study5 decoded from the original local Study 5 instruction MP3s. The default preload uses the British Kokoro pair, while the original Study 5 inhale/exhale clips are exposed as alternate fixed-audio sources."
+      "source": "Bundled owned Study 5 breathing instruction WAVs include both assets/breathing/british_kokoro generated with Kokoro ONNX using the British English bf_emma voice and assets/breathing/original_study5 decoded from the original local Study 5 instruction MP3s. The default Study 5 preload now uses the original Study 5 inhale/exhale clips, while the British Kokoro pair remains available as an alternate fixed-audio source."
     },
     {
       "field": "prebaked looming assets",

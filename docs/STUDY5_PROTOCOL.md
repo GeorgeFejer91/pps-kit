@@ -19,7 +19,25 @@ This toolkit packages the audio-tactile peripersonal-space task used for Study 5
 
 ## Respiratory Phases
 
-The public assets include both British Kokoro `bf_emma` instruction WAVs and the original Study 5 instruction audio decoded from local lab MP3 assets. The default preload uses the British 4-second inhale/exhale pair, and the original Study 5 inhale/exhale pair is exposed as alternate fixed audio for the Trial Designer. The generator combines whichever 4-second inhale/exhale instruction pair is selected with stimulus segments to create 8-second trials.
+The public assets include both British Kokoro `bf_emma` instruction WAVs and the original Study 5 instruction audio decoded from local lab MP3 assets. The default Study 5 preload uses the original 4-second inhale/exhale pair, and the British Kokoro pair remains available as alternate fixed audio. The generator combines whichever 4-second inhale/exhale instruction pair is selected with stimulus segments to create 8-second trials.
+
+## Preload Instruction Audio Clips
+
+Study 5 also preloads run-level instruction audio in Segment 6 under **Preload
+Instruction Audio Clips**. These clips are separate from the 4-second
+inhale/exhale within-trial clips:
+
+- before experiment: `General_Instructions.wav`, 85.708 s
+- before each block: `Pre-Block_Instruction.wav`, 8.418 s
+- after each block: `Post-Block_Instruction.wav`, 8.829 s
+- between conditions: `InterimMessage.wav`, 10.109 s
+- after experiment: `FinishMessage.wav`, 7.001 s
+
+The dashboard saves these choices in the Segment 6 run setup profile, publishes
+them into `experiment_run_setup_manifest.json`, and copies enabled clips into
+each participant session's `instructions\` folder. Focus Mode logs
+`instruction_start`, `instruction_end`, and `instruction_continue` events; a
+click used only to continue an instruction is not counted as a trial response.
 
 ## Prebaked Looming Assets
 
@@ -32,6 +50,10 @@ The preload asset inventory lives at `assets/preloads/preload_inventory.json`, w
 The HTML dashboard profile `study5_box_breathing_pps` is the unpublished local Study 5 preload. It is separate from published-study profiles such as Canzoneri et al. (2012) and preloads both instruction variants, bundled 4-second auditory-only looming source WAVs, and the default `Inhale instruction | Looming Stimulus` and `Exhale instruction | Looming Stimulus` within-block trial type rows. The rows are logged as `trial_type_label` values and scheduled sequentially top-to-bottom, so Study 5 plays the inhale trial type followed by the exhale trial type. Instruction snippet loading and selection belong in the Trial Designer segment, not in the Looming Stimuli Builder.
 
 This profile is the default dashboard startup profile. Fresh launches and scratch-custom startup states initialize from Study 5 so the current lab workflow is ready without selecting a profile manually.
+
+Study 5 defaults to a two-condition Segment 6 run setup. The saved CSV keeps
+the internal phases as `pre` and `post` for analysis compatibility, while the
+dashboard labels them as Condition 1 and Condition 2.
 
 ## Data Outputs
 

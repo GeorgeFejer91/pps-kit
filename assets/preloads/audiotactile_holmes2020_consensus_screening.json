@@ -1,0 +1,375 @@
+{
+  "schema": "pps-audiotactile-holmes2020-consensus-screening.v1",
+  "screened_on": "2026-06-13",
+  "source": {
+    "citation": "Holmes, N. P., Martin, D., Mitchell, W., Noorani, Z., & Thorne, A. (2020). Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. Experimental Brain Research.",
+    "doi": "10.1007/s00221-020-05771-5",
+    "supplement_file": "artifacts/literature_audit/holmes_2020_MOESM4.ods",
+    "reported_article_count": 23,
+    "reported_relevant_experiment_count": 46,
+    "parsed_past_sheet_experiment_rows": 49,
+    "screened_experiment_family_records": 27,
+    "excluded_parser_or_reference_artifact_rows": 3
+  },
+  "screening_rule": "Use Holmes et al. (2020) as the consensus older-corpus anchor. Link every relevant experiment family to an existing coverage record or current template. Rows that appear in the parsed supplement but exceed the paper's stated 46 relevant experiments are marked as reference/parser artifacts rather than new PPS task requirements.",
+  "records": [
+    {
+      "source_label": "Kitagawa et al. (2005)",
+      "holmes_experiments": [
+        "2"
+      ],
+      "decision": "consensus_candidate_requires_toolkit_structure",
+      "linked_literature_record_ids": [
+        "kitagawa_2005_sound_complexity"
+      ],
+      "reason": "Static near/far and tactile discrimination/localization task family is not first-class in the toolkit."
+    },
+    {
+      "source_label": "Serino et al. (2007)",
+      "holmes_experiments": [
+        "1"
+      ],
+      "decision": "consensus_candidate_requires_toolkit_structure",
+      "linked_literature_record_ids": [
+        "serino_2007_blind_cane_users"
+      ],
+      "reason": "Static near/far weak-target Go/NoGo PPS task requires unsupported task family and response logic."
+    },
+    {
+      "source_label": "Serino et al. (2009)",
+      "holmes_experiments": [
+        "1",
+        "2"
+      ],
+      "decision": "consensus_neurophysiology_context",
+      "linked_literature_record_ids": [
+        "serino_2009_tms"
+      ],
+      "reason": "Relevant audiotactile PPS stimulation with TMS/MEP context; not a current standalone behavioral runner target."
+    },
+    {
+      "source_label": "Tajadura-Jimenez et al. (2009)",
+      "holmes_experiments": [
+        "1"
+      ],
+      "decision": "consensus_candidate_requires_toolkit_structure",
+      "linked_literature_record_ids": [
+        "tajadura_jimenez_2009_visual_deprivation"
+      ],
+      "reason": "Audiotactile lateralization/posture task requires tactile localization/discrimination and body-coordinate response support."
+    },
+    {
+      "source_label": "Bassolino et al. (2010)",
+      "holmes_experiments": [
+        "1",
+        "2"
+      ],
+      "decision": "consensus_candidate_requires_toolkit_structure",
+      "linked_literature_record_ids": [
+        "bassolino_2010_mouse_use"
+      ],
+      "reason": "Static near/far hand/tool-space PPS task is not yet represented as a toolkit profile."
+    },
+    {
+      "source_label": "Serino et al. (2011)",
+      "holmes_experiments": [
+        "1a",
+        "1b",
+        "2"
+      ],
+      "decision": "consensus_candidate_requires_toolkit_structure",
+      "linked_literature_record_ids": [
+        "serino_2011_rtms"
+      ],
+      "reason": "Static near/far PPS task with rTMS context requires unsupported static/GoNoGo profile support."
+    },
+    {
+      "source_label": "Avenanti et al. (2012)",
+      "holmes_experiments": [
+        "1"
+      ],
+      "decision": "consensus_neurophysiology_context",
+      "linked_literature_record_ids": [
+        "avenanti_2012_motor_cortex"
+      ],
+      "reason": "Motor-evoked-potential endpoint is outside the current behavioral runner unless trigger profiles become in scope."
+    },
+    {
+      "source_label": "Canzoneri et al. (2012)",
+      "holmes_experiments": [
+        "1"
+      ],
+      "decision": "consensus_current_blocked_profile",
+      "linked_literature_record_ids": [
+        "canzoneri_2012_dynamic_sounds"
+      ],
+      "current_template_ids": [
+        "canzoneri_2012_dynamic_sounds"
+      ],
+      "reason": "Profile exists but direction-coupled tactile-only baselines, exact gain files, voice-key capture, and tactile calibration block exact recreation."
+    },
+    {
+      "source_label": "Canzoneri et al. (2013a)",
+      "holmes_experiments": [
+        "1a",
+        "3"
+      ],
+      "decision": "consensus_current_blocked_profile",
+      "linked_literature_record_ids": [
+        "canzoneri_2013_tool_use_reshaping"
+      ],
+      "current_template_ids": [
+        "canzoneri_2013_tool_use_reshaping"
+      ],
+      "reason": "Profile exists; exact trial count and ITI table still need extraction."
+    },
+    {
+      "source_label": "Canzoneri et al. (2013b)",
+      "holmes_experiments": [
+        "2",
+        "3"
+      ],
+      "decision": "consensus_current_blocked_profile",
+      "linked_literature_record_ids": [
+        "canzoneri_2013_amputation_prosthesis"
+      ],
+      "current_template_ids": [
+        "canzoneri_2013_amputation_prosthesis"
+      ],
+      "reason": "Profile exists; exact trial count and tactile calibration table still need extraction."
+    },
+    {
+      "source_label": "Cimmino et al. (2013)",
+      "holmes_experiments": [
+        "1",
+        "4"
+      ],
+      "decision": "consensus_candidate_requires_toolkit_structure",
+      "linked_literature_record_ids": [
+        "cimmino_2013_surgical_arm_elongation"
+      ],
+      "reason": "Static near/far PPS task is not yet represented as a toolkit profile."
+    },
+    {
+      "source_label": "Teneggi et al. (2013)",
+      "holmes_experiments": [
+        "1",
+        "2",
+        "3"
+      ],
+      "decision": "consensus_current_blocked_profile",
+      "linked_literature_record_ids": [
+        "teneggi_2013_social_face"
+      ],
+      "current_template_ids": [
+        "teneggi_2013_social_face_pps"
+      ],
+      "reason": "Profile exists; exact distance/timing table from supplement still needs extraction."
+    },
+    {
+      "source_label": "Teramoto et al. (2013)",
+      "holmes_experiments": [
+        "1",
+        "2"
+      ],
+      "decision": "consensus_candidate_requires_toolkit_structure",
+      "linked_literature_record_ids": [
+        "teramoto_2013_visual_deprivation"
+      ],
+      "reason": "Audiotactile information-processing task requires tactile response-mapping support."
+    },
+    {
+      "source_label": "Ferri et al. (2015A)",
+      "holmes_experiments": [
+        "2"
+      ],
+      "decision": "consensus_current_blocked_profile",
+      "linked_literature_record_ids": [
+        "ferri_2015_artificial_valence"
+      ],
+      "current_template_ids": [
+        "ferri_2015_artificial_looming_valence"
+      ],
+      "reason": "Profile exists; exact auditory files and gain envelope still need extraction."
+    },
+    {
+      "source_label": "Ferri et al. (2015B)",
+      "holmes_experiments": [
+        "1",
+        "2"
+      ],
+      "decision": "consensus_current_blocked_profile",
+      "linked_literature_record_ids": [
+        "ferri_2015_ecological_valence"
+      ],
+      "current_template_ids": [
+        "ferri_2015_ecological_looming_valence"
+      ],
+      "reason": "Profile exists; ecological sound assets and amplitude envelopes still need extraction/licensing."
+    },
+    {
+      "source_label": "Galli et al. (2015)",
+      "holmes_experiments": [
+        "1",
+        "2",
+        "3"
+      ],
+      "decision": "consensus_current_blocked_profile",
+      "linked_literature_record_ids": [
+        "galli_2015_wheelchair"
+      ],
+      "current_template_ids": [
+        "galli_2015_wheelchair_full_body"
+      ],
+      "reason": "Profile exists; speaker-array Gaussian amplitude control is not modeled."
+    },
+    {
+      "source_label": "Maister et al. (2015)",
+      "holmes_experiments": [
+        "1"
+      ],
+      "decision": "consensus_candidate_needs_full_text_audit",
+      "linked_literature_record_ids": [
+        "maister_2015_shared_sensory"
+      ],
+      "reason": "Candidate PPS task; exact audiotactile parameters need extraction."
+    },
+    {
+      "source_label": "Noel et al. (2015a)",
+      "holmes_experiments": [
+        "1",
+        "2"
+      ],
+      "decision": "consensus_current_runnable_profile",
+      "linked_literature_record_ids": [
+        "noel_2015_bodily_self"
+      ],
+      "current_template_ids": [
+        "noel_2015_bodily_self"
+      ],
+      "reason": "Current profile passes the audiotactile task recreation gate."
+    },
+    {
+      "source_label": "Noel et al. (2015b)",
+      "holmes_experiments": [
+        "1"
+      ],
+      "decision": "consensus_current_blocked_profile",
+      "linked_literature_record_ids": [
+        "noel_2015_walking"
+      ],
+      "current_template_ids": [
+        "noel_2015_walking_full_body_action"
+      ],
+      "reason": "Profile exists; exact sound distances and trial counts still need extraction."
+    },
+    {
+      "source_label": "Serino et al. (2015)",
+      "holmes_experiments": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "decision": "consensus_partly_templated_requires_toolkit_structure",
+      "linked_literature_record_ids": [
+        "serino_2015_peri_trunk_exp1",
+        "serino_2015_front_back_trunk_exp2",
+        "serino_2015_peri_hand_exp3",
+        "serino_2015_exps_4_to_6"
+      ],
+      "current_template_ids": [
+        "serino_2015_peri_trunk_exp1",
+        "serino_2015_front_back_trunk_exp2",
+        "serino_2015_peri_hand_exp3"
+      ],
+      "reason": "Experiment 1 is now profile-check runnable via analog-apparatus trajectory reconstruction; Experiments 2-3 are templated but still blocked by multi-speaker/body-coordinate issues, and Experiments 4-6 still need extraction."
+    },
+    {
+      "source_label": "Ardizzi & Ferri (2018)",
+      "holmes_experiments": [
+        "1"
+      ],
+      "decision": "consensus_candidate_needs_full_text_audit",
+      "linked_literature_record_ids": [
+        "ardizzi_ferri_2018_interoceptive"
+      ],
+      "reason": "Likely dynamic PPS task; extract task parameters separate from interoception context."
+    },
+    {
+      "source_label": "Hobeika et al. (2018)",
+      "holmes_experiments": [
+        "1"
+      ],
+      "decision": "consensus_candidate_requires_toolkit_structure",
+      "linked_literature_record_ids": [
+        "hobeika_2018_anisotropy"
+      ],
+      "reason": "Lateral PPS task requires body-coordinate and exact trajectory/timing extraction."
+    },
+    {
+      "source_label": "Noel et al. (2018a)",
+      "holmes_experiments": [
+        "1"
+      ],
+      "decision": "consensus_candidate_needs_full_text_audit",
+      "linked_literature_record_ids": [
+        "noel_2018_neural_adaptation"
+      ],
+      "reason": "Determine whether the psychophysical-computational task is a new runner profile or analysis variant."
+    },
+    {
+      "source_label": "Pfeiffer et al. (2018a)",
+      "holmes_experiments": [
+        "1",
+        "2",
+        "3"
+      ],
+      "decision": "consensus_current_runnable_profile",
+      "linked_literature_record_ids": [
+        "pfeiffer_2018_vestibular"
+      ],
+      "current_template_ids": [
+        "pfeiffer_2018_lateral_perihead_left_to_right"
+      ],
+      "reason": "Current lateral peri-head profile passes the audiotactile task recreation gate."
+    },
+    {
+      "source_label": "Tonelli et al. (2019)",
+      "holmes_experiments": [
+        "1",
+        "2",
+        "3"
+      ],
+      "decision": "consensus_current_blocked_profile",
+      "linked_literature_record_ids": [
+        "tonelli_2019_echolocation"
+      ],
+      "current_template_ids": [
+        "tonelli_2019_echolocation"
+      ],
+      "reason": "Profile exists; seven-speaker switching/timing support is missing."
+    },
+    {
+      "source_label": "van der Linden (2014)",
+      "holmes_experiments": [
+        "1"
+      ],
+      "decision": "consensus_excluded_reference_or_parser_artifact",
+      "linked_literature_record_ids": [],
+      "reason": "Appears in the parsed supplement beyond the paper's stated 46 relevant experiments; keep as a parser/reference artifact until manually bibliographically verified."
+    },
+    {
+      "source_label": "Middlebrooks (2015/2014)",
+      "holmes_experiments": [
+        "1",
+        "46"
+      ],
+      "decision": "consensus_excluded_reference_or_parser_artifact",
+      "linked_literature_record_ids": [],
+      "reason": "Rows appear to be reference/table artifacts beyond the paper's stated relevant-experiment count, not additional audiotactile PPS task profiles."
+    }
+  ]
+}

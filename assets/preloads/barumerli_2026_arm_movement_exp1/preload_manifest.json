@@ -2,6 +2,7 @@
   "schema": "pps-preload-profile-assets.v1",
   "template_id": "barumerli_2026_arm_movement_exp1",
   "title": "Looming/receding PPS during arm movement, Experiment 1",
+  "visible_variant_label": "A",
   "asset_mode": "bundled_local",
   "retrieval_strategy": "bundled_or_download_from_github_pages",
   "local_only": true,
@@ -32,6 +33,18 @@
       "path": "assets/preloads/barumerli_2026_arm_movement_exp1/05_run_setup"
     }
   ],
+  "profile_parameters_manifest": "assets/preloads/barumerli_2026_arm_movement_exp1/01_profile/profile_parameters_manifest.json",
+  "recreation_status": {
+    "primary_category": "gui_recreatable",
+    "category_label": "GUI-recreatable",
+    "runner_readiness": "ready",
+    "profile_checks_passed": true,
+    "gui_recreatable": true,
+    "segment_0_to_4_profile_checks_passed": true,
+    "segment_1_to_6_materializable": true,
+    "missing_parameter_count": 0,
+    "unsupported_structure_count": 0
+  },
   "render_contract": {
     "stage": "auditory_looming_prebake",
     "engine": "python-sofa-reference",
@@ -40,9 +53,9 @@
   },
   "assets": [
     {
-      "label": "Pink two-speaker motion",
-      "path": "assets/preloads/barumerli_2026_arm_movement_exp1/02_looming_stimuli/looming_Pink_two-speaker_motion.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/barumerli_2026_arm_movement_exp1/02_looming_stimuli/looming_Pink_two-speaker_motion.wav",
+      "label": "Pink moving sound",
+      "path": "assets/preloads/barumerli_2026_arm_movement_exp1/02_looming_stimuli/looming_Pink_moving_sound.wav",
+      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/barumerli_2026_arm_movement_exp1/02_looming_stimuli/looming_Pink_moving_sound.wav",
       "sha256": "7d8d5c6c71dc0491670e571ab7838c1058165c9e791a5be02fb99a79a3bcb39c",
       "duration_s": 3.0,
       "sample_rate": 44100,
@@ -56,7 +69,7 @@
       "include_tactile": false,
       "trajectory_snapshot": {
         "schema": "pps-stimulus-trajectory.v1",
-        "label": "Pink two-speaker motion",
+        "label": "Pink moving sound",
         "source_kind": "generated_noise",
         "noise_type": "pink",
         "start_distance_cm": 110.0,
@@ -82,9 +95,9 @@
       }
     },
     {
-      "label": "Pink two-speaker motion - receding",
-      "path": "assets/preloads/barumerli_2026_arm_movement_exp1/02_looming_stimuli/looming_Pink_two-speaker_motion_-_receding.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/barumerli_2026_arm_movement_exp1/02_looming_stimuli/looming_Pink_two-speaker_motion_-_receding.wav",
+      "label": "Pink moving sound - receding",
+      "path": "assets/preloads/barumerli_2026_arm_movement_exp1/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/barumerli_2026_arm_movement_exp1/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
       "sha256": "0c72667d446067c197b4b0fabbaf04eb5b0a80502179356e347616a23d6fb65e",
       "duration_s": 3.0,
       "sample_rate": 44100,
@@ -98,7 +111,7 @@
       "include_tactile": false,
       "trajectory_snapshot": {
         "schema": "pps-stimulus-trajectory.v1",
-        "label": "Pink two-speaker motion - receding",
+        "label": "Pink moving sound - receding",
         "source_kind": "generated_noise",
         "noise_type": "pink",
         "start_distance_cm": 10.0,

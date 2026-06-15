@@ -2,6 +2,7 @@
   "schema": "pps-preload-profile-assets.v1",
   "template_id": "noel_2015_bodily_self",
   "title": "PPS as the space of the bodily self",
+  "visible_variant_label": "",
   "asset_mode": "bundled_local",
   "retrieval_strategy": "bundled_or_download_from_github_pages",
   "local_only": true,
@@ -32,6 +33,18 @@
       "path": "assets/preloads/noel_2015_bodily_self/05_run_setup"
     }
   ],
+  "profile_parameters_manifest": "assets/preloads/noel_2015_bodily_self/01_profile/profile_parameters_manifest.json",
+  "recreation_status": {
+    "primary_category": "gui_recreatable",
+    "category_label": "GUI-recreatable",
+    "runner_readiness": "ready",
+    "profile_checks_passed": true,
+    "gui_recreatable": true,
+    "segment_0_to_4_profile_checks_passed": true,
+    "segment_1_to_6_materializable": true,
+    "missing_parameter_count": 0,
+    "unsupported_structure_count": 0
+  },
   "render_contract": {
     "stage": "auditory_looming_prebake",
     "engine": "python-sofa-reference",

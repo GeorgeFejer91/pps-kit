@@ -6,6 +6,11 @@
   "doi": "10.1007/s00221-019-05469-3",
   "verification_status": "partial",
   "notes": "Seven-speaker looming apparatus on the participant's left side. Total counts are verified; exact temporal delays depend on the apparatus timing and should be checked from the full methods/figure before exact replication.",
+  "reference_parameters": {
+    "implementation_gaps": [
+      "apparatus-specific seven-speaker switching/timing details"
+    ]
+  },
   "design": {
     "name": "Tonelli 2019 echolocation PPS",
     "sofa_file": "",
@@ -45,6 +50,25 @@
       "baseline_soa_values_ms": [-500, 3500],
       "respiratory_phases": ["Any"],
       "blocks": 1,
+      "trial_strips": [
+        {
+          "strip_id": "tonelli-echolocation-array-row",
+          "label": "Echolocation array PPS trial",
+          "audio_tactile_percentage": 100.0,
+          "catch_percentage": 0.0,
+          "baseline_percentage": 0.0,
+          "elements": [
+            {
+              "element_id": "tonelli-array-looming-source",
+              "kind": "looming_stimulus",
+              "label": "Moving sound array",
+              "source_label": "",
+              "source_labels": [],
+              "randomized": true
+            }
+          ]
+        }
+      ],
       "participants": 44,
       "random_seed": 20190101
     }

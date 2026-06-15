@@ -25,9 +25,42 @@ Create a desktop shortcut:
 ```
 
 The shortcut uses the packaged PPS Toolkit icon and opens the standard local
-browser dashboard. The Qt designer and native Focus Mode also set the same icon
-at runtime so their window/taskbar entries do not fall back to the generic
-Python icon.
+browser dashboard. It also creates a `PPS Experiment Runner` shortcut that opens
+the standalone Experiment Runner picker for resuming a session, choosing a
+session manifest, or launching a finished study/profile preset. The Qt designer
+and native Focus Mode set the same icon at runtime so their window/taskbar
+entries do not fall back to the generic Python icon.
+
+Build the native participant runner as a Windows program when you want the
+runner to appear as its own app rather than as Python:
+
+```powershell
+.\windows\Build_Experiment_Runner_Exe.ps1
+```
+
+The build writes `dist\PPSExperimentRunner\PPSExperimentRunner.exe` as an
+onedir PyInstaller app with no console window and the packaged PPS Toolkit icon
+embedded. This exe is the only active operator experiment runner. The
+`windows\Launch_Experiment_Runner.bat` wrapper only activates that exe and
+fails with build instructions if it is missing; it does not fall back to a
+Python module runner, and direct module launch exits with retirement guidance.
+With no batch arguments, the wrapper opens the standalone
+Experiment Runner picker (`--launcher`). Running `PPSExperimentRunner.exe`
+directly with no arguments auto-opens the last valid launchable session/run
+setup ready for the researcher to click `Start Run`; `--launcher` forces the
+picker.
+
+For finished public releases, build the lightweight downloader separately:
+
+```powershell
+.\windows\Build_PPS_Downloader.ps1
+```
+
+That creates a small `dist\PPS-Toolkit-Downloader.exe` intended for GitHub
+release upload. The full offline lab ZIP is built separately and hosted on
+Zenodo; the downloader verifies its SHA256 from `pps_download_manifest.v1.json`
+before extracting to `%LOCALAPPDATA%\PPS Toolkit\versions\`. See
+[PPS Download Distribution](PPS_DOWNLOADS.md).
 
 Open the Qt stimulus design layer for comparison:
 
@@ -35,11 +68,11 @@ Open the Qt stimulus design layer for comparison:
 windows\Launch_Stimulus_Designer.bat
 ```
 
-Run the legacy locked Study 5 participant app directly only when that
-compatibility path is needed:
+Run the native Focus Mode participant app directly when reopening a prepared
+dashboard experiment or choosing a finished study/profile preset:
 
 ```bat
-windows\Launch_PPS_App.bat
+windows\Launch_Experiment_Runner.bat
 ```
 
 The HTML dashboard is the standard researcher-facing interface. It runs as a
@@ -62,13 +95,18 @@ See [GitHub Pages Dashboard](GITHUB_PAGES_DASHBOARD.md).
 Useful launch variants:
 
 ```bat
-windows\Launch_PPS_App.bat --stimuli-dir artifacts\stimuli\10.Participant_Sequences
-windows\Launch_PPS_App.bat --background-music C:\path\to\licensed_music.wav
-windows\Launch_PPS_App.bat --recordings-dir D:\PPS_Recordings
 windows\Launch_HTML_Dashboard.bat --port 8770
 windows\Launch_HTML_Dashboard.bat --no-browser
+windows\Launch_Experiment_Runner.bat --participant-id P001
+dist\PPSExperimentRunner\PPSExperimentRunner.exe --launcher
 windows\Start_Website_Companion.bat --web-origin https://example.github.io
 ```
+
+Segment 6 in the dashboard includes **Preload Instruction Audio Clips** for
+run-level messages before/after the experiment, before/after blocks, and between
+conditions. Imported clips are stored locally under the active project, copied
+into prepared participant sessions, and played by Focus Mode through the
+auditory channels only.
 
 ## Audio Device Check
 
@@ -82,7 +120,7 @@ For rendered binaural+tactile files, run the silent routing stress test:
 windows\Stress_Audio_Device.bat
 ```
 
-The locked Study 5 runner uses the original stereo routing:
+The retired two-channel Study 5 WAV layout used the original stereo routing:
 
 - left channel: tactile/vibration output
 - right channel: auditory stimulus output
@@ -104,8 +142,10 @@ blocks, background audio, and click/tactile feedback into that stream. This is
 required because the Komplete ASIO driver is effectively single-client in this
 setup.
 
-The app also supports WASAPI loopback recording on Windows when `pyaudiowpatch` is available.
+Focus Mode can optionally write a local full-audio evidence WAV from the mixed output buffers. This is the normal data-heavy software safety copy for experiment runs; WASAPI loopback remains an optional diagnostic on Windows and may not capture ASIO multichannel playback.
 
 ## Local Data
 
-The app writes runtime settings, demographics, and loopback recordings under `local_data\` by default. That folder is ignored by Git and should not be published.
+The app writes runtime settings, demographics, session outputs, event logs, LSL marker mirrors, and optional audio evidence WAVs under `local_data\` by default. That folder is ignored by Git and should not be published.
+The resume ledger lives in `local_data\dashboard_state\` as append-only
+`experiment_activity_log.jsonl` plus the fast pointer `last_experiment.v1.json`.

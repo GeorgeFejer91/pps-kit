@@ -9,6 +9,11 @@ experiment software runs locally on the research PC.
 - The local companion backend runs on the PC at `http://127.0.0.1:8766`.
 - The hosted page calls the companion API for design state, render jobs, session
   preparation, audio stress tests, and native Focus Mode launch.
+- Segment 6 passes the prepared run setup to the local backend. Native Focus
+  Mode owns participant metadata and runtime options; live LSL/event markers,
+  local marker mirrors, trigger dictionaries, `events.csv`, and analysis CSVs
+  are standard runner outputs, while the full-audio evidence WAV remains an
+  optional runner checkbox.
 - File imports are local companion actions. Selected stimulus audio is copied
   into ignored local data on the research PC; it is not uploaded to GitHub
   Pages or any online service.
@@ -47,9 +52,11 @@ status and lets the user set the backend URL if a non-default port is used.
 ## Safety Boundary
 
 A public website cannot silently install Python, packages, audio drivers, or
-experiment dependencies. The dashboard includes a `Download Software` link for
-the repository package, but setup still happens through the local Windows setup
-script or an installer in a future release.
+experiment dependencies. The dashboard includes a `Download Installer` link for
+the small GitHub-hosted PPS downloader plus a secondary full-package link for
+the Zenodo-hosted offline lab ZIP. Installation still happens locally on the
+research PC, and the downloader verifies `pps_download_manifest.v1.json` hashes
+before extracting or launching software.
 
 The companion backend allows the default project GitHub Pages origin
 (`https://georgefejer91.github.io`). For forks or institutional Pages domains,

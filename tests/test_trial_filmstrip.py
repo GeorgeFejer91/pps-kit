@@ -38,6 +38,7 @@ def _filmstrip_design(source_count: int = 4):
         pair_spatial_values_with_soas=False,
         auditory_motion_directions=["looming"],
         tactile_sites=["hand"],
+        include_catch_trials=False,
         catch_trial_percentage=0.0,
         include_baseline_trials=False,
         respiratory_phases=[],
@@ -83,7 +84,7 @@ def test_trial_strips_round_trip_and_interleave_within_block_event_sequences():
     assert all(" | " in row["sequence_labels"] for row in rows)
 
 
-def test_trial_sequence_jitter_is_balanced_without_multiplying_soa_conditions():
+def test_trial_sequence_jitter_multiplies_sequence_variants():
     design = _filmstrip_design(source_count=1)
     design.protocol.soa_values_ms = [100, 200, 300, 400]
     for strip in design.protocol.trial_strips:
@@ -94,18 +95,18 @@ def test_trial_sequence_jitter_is_balanced_without_multiplying_soa_conditions():
 
     rows = [row for row in block_trial_rows(design) if row["trial_type"] == "Audio-Tactile"]
 
-    assert len(rows) == 2 * 1 * 4
+    assert len(rows) == 2 * 1 * 2 * 4
     assert {row["jitter_labels"] for row in rows} == {"Jitter"}
     assert {row["jitter_values_ms"] for row in rows} == {"500", "700"}
     assert {row["jitter_total_ms"] for row in rows} == {500, 700}
     for label in {"Inhale trial type", "Exhale trial type"}:
         label_values = [row["jitter_values_ms"] for row in rows if row["trial_type_label"] == label]
-        assert label_values.count("500") == 2
-        assert label_values.count("700") == 2
+        assert label_values.count("500") == 4
+        assert label_values.count("700") == 4
     assert all("Jitter (" in row["sequence_labels"] for row in rows)
 
 
-def test_trial_sequence_can_hold_repeated_randomizer_events_in_one_row():
+def test_trial_sequence_crosses_repeated_audio_and_jitter_boxes_in_one_row():
     design = _filmstrip_design(source_count=2)
     design.protocol.trial_strips = [design.protocol.trial_strips[0]]
     design.protocol.soa_values_ms = [100, 200]
@@ -121,11 +122,12 @@ def test_trial_sequence_can_hold_repeated_randomizer_events_in_one_row():
 
     rows = [row for row in block_trial_rows(design) if row["trial_type"] == "Audio-Tactile"]
 
-    assert len(rows) == 1 * 2 * 2
+    assert len(rows) == 1 * 2 * 2 * 2 * 2 * 2
     assert all(row["sequence_labels"].count("Jitter") == 2 for row in rows)
     assert all("Inhale | Jitter" in row["sequence_labels"] for row in rows)
     assert all("Exhale | Jitter" in row["sequence_labels"] for row in rows)
-    assert {row["jitter_values_ms"] for row in rows} == {"500; 1100", "700; 2700"}
+    assert {row["jitter_values_ms"] for row in rows} == {"500; 1100", "500; 2700", "700; 1100", "700; 2700"}
+    assert {row["sequence_source_labels"] for row in rows} == {"Pink; Pink", "Pink; Blue", "Blue; Pink", "Blue; Blue"}
 
 
 def test_trial_strips_repetitions_and_catches_disable_tactile():
@@ -205,6 +207,20 @@ def test_trial_strips_sound_offset_baseline_uses_stimulus_window_timing():
     assert baselines
     assert {row["soa_ms"] for row in baselines} == {4000}
     assert {row["baseline_strategy"] for row in baselines} == {"sound_offset"}
+
+
+def test_trial_strips_min_max_baseline_uses_first_and_last_soas():
+    design = _filmstrip_design(source_count=4)
+    design.protocol.include_baseline_trials = True
+    design.protocol.baseline_strategy = "min_max"
+    design.protocol.baseline_trial_percentage = 20
+
+    rows = block_trial_rows(design)
+    baselines = [row for row in rows if row["trial_type"] == "Baseline"]
+
+    assert len(baselines) == 10
+    assert {row["soa_ms"] for row in baselines} == {100, 500}
+    assert {row["baseline_strategy"] for row in baselines} == {"min_max"}
 
 
 def test_filmstrip_protocol_csv_and_block_manifest_include_sequence_columns(tmp_path: Path):

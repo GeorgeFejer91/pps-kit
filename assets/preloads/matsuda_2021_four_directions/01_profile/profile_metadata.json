@@ -6,7 +6,7 @@
   "doi": "10.1038/s41598-021-92008-6",
   "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8163804/",
   "verification_status": "verified",
-  "notes": "Four body-relative direction blocks. The template represents one direction block; duplicate with azimuth/body orientation changes for front, rear, left, and right.",
+  "notes": "Four body-relative direction blocks. The template represents one direction block; duplicate with azimuth/body orientation changes for front, rear, left, and right. Speaker apparatus references are treated as original analog setup provenance while the profile recreates reported motion with the binaural renderer.",
   "reference_parameters": {},
   "provenance": [
     {

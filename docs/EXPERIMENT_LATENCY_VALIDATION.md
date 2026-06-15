@@ -164,3 +164,43 @@ Session validation aligns block recordings by the first detected tactile event
 and checks intra-block residual timing. It is useful as a QC layer for existing
 session recordings, but absolute electrical latency should be established with
 `pps-latency-validate calibrate`.
+
+## Callback-Derived LSL Timing Checklist
+
+Use this checklist after a participant session has been prepared from Segment 5
+and Segment 6 and before relying on LSL markers for EEG alignment.
+
+1. Prepare one participant session through the dashboard/runner so the session
+   folder contains participant block CSVs with `Trial_Start_Sample`,
+   `Looming_Onset_Sample`, `Tactile_Onset_Sample`,
+   `Response_Window_Onset_Sample`, and `Trial_End_Sample`.
+2. Start LabRecorder or the lab EEG recorder before block playback and confirm
+   both LSL streams are visible:
+   - `PPSMarkersV2` for rich reconstructable string markers.
+   - `PPSTriggerCodes` for numeric trigger codes.
+3. Play a short block or use a prepared dry-run participant. Do not use
+   trial-by-trial WAV playback; the validated runner path is one continuous
+   WAV per block.
+4. After playback, inspect the participant session folder and verify:
+   - `events.csv` contains callback-derived trial/stimulus rows with
+     `timestamp_quality = dac_time_sample_exact` whenever PortAudio DAC timing
+     was available.
+   - `lsl_markers.csv` mirrors each LSL marker attempt with `event_code`,
+     `trigger_key`, `lsl_timestamp`, `sample_index`, and `trial_uid`.
+   - `lsl_markers.xdf` stores the same internal rich/numeric marker records in
+     XDF form so local reconstruction does not depend on an external recorder.
+   - `trigger_dictionary.json` maps every numeric EEG trigger code back to a
+     deterministic `trigger_key`.
+   - Optional `*_audio_evidence.wav` files contain the runner's mixed output
+     buffers, including tactile-channel response marker clicks, but are not a
+     physical loopback measurement.
+   - `timing_qc.csv` contains response marker versus mouse-click deltas for
+     participant clicks.
+5. If `timestamp_quality` falls back to `callback_stream_time_estimated` or
+   `callback_perf_fallback`, keep the run for software debugging but treat it as
+   weaker timing evidence than a `dac_time_sample_exact` run.
+6. If hardware loopback is connected, compare the physical tactile/audio
+   onsets in the loopback recording against `Tactile_Onset_Sample` and
+   `response_marker_start` from the logs. Large systematic offsets should be
+   documented as route latency; large jitter should be fixed before collecting
+   participant data.

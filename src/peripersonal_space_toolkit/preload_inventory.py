@@ -12,8 +12,10 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+from .runtime_paths import repo_root
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+
+REPO_ROOT = repo_root()
 INVENTORY_RELATIVE_PATH = Path("assets") / "preloads" / "preload_inventory.json"
 INVENTORY_SCHEMA = "pps-preload-asset-inventory.v1"
 
@@ -81,6 +83,21 @@ def profile_asset_status(
     else:
         status = "hash_mismatch"
 
+    runner_readiness = entry.get(
+        "runner_readiness",
+        (entry.get("recreation_status") or {}).get("runner_readiness", ""),
+    )
+    profile_checks_passed = bool(
+        entry.get("profile_checks_passed", (entry.get("recreation_status") or {}).get("profile_checks_passed", False))
+    )
+    segment_gate_passed = bool(
+        entry.get(
+            "segment_0_to_4_profile_checks_passed",
+            (entry.get("recreation_status") or {}).get("segment_0_to_4_profile_checks_passed", False),
+        )
+    )
+    finished_profile = runner_readiness == "ready" and profile_checks_passed and segment_gate_passed
+
     return {
         "template_id": template_id,
         "status": status,
@@ -88,6 +105,30 @@ def profile_asset_status(
         "asset_mode": entry.get("asset_mode", "recipe_only"),
         "retrieval_strategy": entry.get("retrieval_strategy", "generate_on_local_companion"),
         "profile_manifest": entry.get("profile_manifest", ""),
+        "profile_parameters_manifest": entry.get("profile_parameters_manifest", ""),
+        "visible_variant_label": entry.get("visible_variant_label", ""),
+        "variant_display": entry.get("variant_display", entry.get("title", "")),
+        "recreation_status": dict(entry.get("recreation_status") or {}),
+        "runner_readiness": runner_readiness,
+        "profile_checks_passed": profile_checks_passed,
+        "segment_0_to_4_profile_checks_passed": segment_gate_passed,
+        "finished_profile": finished_profile,
+        "segment_6_launchable": finished_profile,
+        "profile_completion_status": "finished_segment_6_launchable" if finished_profile else "unfinished_preload",
+        "primary_recreation_category": entry.get(
+            "primary_recreation_category",
+            (entry.get("recreation_status") or {}).get("primary_category", ""),
+        ),
+        "missing_parameter_count": int(
+            entry.get("missing_parameter_count")
+            or (entry.get("recreation_status") or {}).get("missing_parameter_count")
+            or 0
+        ),
+        "unsupported_structure_count": int(
+            entry.get("unsupported_structure_count")
+            or (entry.get("recreation_status") or {}).get("unsupported_structure_count")
+            or 0
+        ),
         "local_only": bool(entry.get("local_only", True)),
         "asset_count": len(assets),
         "ready_asset_count": sum(1 for asset in assets if asset["exists"] and asset.get("sha256_ok") is not False),
@@ -175,6 +216,19 @@ def _default_status(template_id: str, inventory: dict[str, Any]) -> dict[str, An
         "asset_mode": policy.get("asset_mode", "not_indexed"),
         "retrieval_strategy": policy.get("retrieval_strategy", "generate_on_local_companion"),
         "profile_manifest": "",
+        "profile_parameters_manifest": "",
+        "visible_variant_label": "",
+        "variant_display": template_id,
+        "recreation_status": {},
+        "runner_readiness": "",
+        "profile_checks_passed": False,
+        "segment_0_to_4_profile_checks_passed": False,
+        "finished_profile": False,
+        "segment_6_launchable": False,
+        "profile_completion_status": "unfinished_preload",
+        "primary_recreation_category": "",
+        "missing_parameter_count": 0,
+        "unsupported_structure_count": 0,
         "local_only": True,
         "asset_count": 0,
         "ready_asset_count": 0,

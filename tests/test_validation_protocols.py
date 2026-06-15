@@ -1,0 +1,1367 @@
+from __future__ import annotations
+
+import csv
+import importlib.util
+import json
+import sys
+from pathlib import Path
+
+import numpy as np
+import pytest
+import soundfile as sf
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SCRIPT_DIR = REPO_ROOT / "validation_protocols" / "scripts"
+
+
+def _load_script(name: str):
+    path = SCRIPT_DIR / name
+    spec = importlib.util.spec_from_file_location(path.stem, path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    sys.modules[path.stem] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
+    assert rows
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer.writeheader()
+        for row in rows:
+            writer.writerow(row)
+
+
+def test_dummy_pulse_stimulus_has_coded_three_channel_shape(tmp_path: Path):
+    make = _load_script("make_dummy_pulse_stimulus.py")
+
+    stimulus, rows, manifest = make.build_dummy_pulse_stimulus(sample_rate=1000, intervals_ms=[300, 800], amplitude=0.2)
+    paths = make.write_dummy_pulse_files(tmp_path, stimulus=stimulus, planned_rows=rows, manifest=manifest)
+
+    assert stimulus.shape[1] == 3
+    assert len({row["pulse_index"] for row in rows}) == 3
+    assert len(rows) == 9
+    assert rows[0]["expected_sample_index"] == 1000
+    assert rows[3]["expected_sample_index"] == 1300
+    assert paths["wav"].exists()
+    assert not np.allclose(stimulus[:, 0], stimulus[:, 1])
+    assert not np.allclose(stimulus[:, 1], stimulus[:, 2])
+
+
+def test_dummy_pulse_stimulus_supports_channel_specific_amplitudes(tmp_path: Path):
+    make = _load_script("make_dummy_pulse_stimulus.py")
+
+    channel_amplitudes = make.parse_channel_amplitudes(
+        "1:0.01,2:0.02,3:0.03",
+        default_amplitude=0.2,
+        channel_count=3,
+    )
+    stimulus, rows, manifest = make.build_dummy_pulse_stimulus(
+        sample_rate=1000,
+        intervals_ms=[300],
+        amplitude=0.2,
+        channel_amplitudes=channel_amplitudes,
+    )
+    make.write_dummy_pulse_files(tmp_path, stimulus=stimulus, planned_rows=rows, manifest=manifest)
+
+    assert np.max(np.abs(stimulus), axis=0).tolist() == pytest.approx([0.01, 0.02, 0.03])
+    assert manifest["channel_amplitudes"] == {"1": 0.01, "2": 0.02, "3": 0.03}
+    assert [row["amplitude"] for row in rows[:3]] == [0.01, 0.02, 0.03]
+    assert make.channel_amplitude_for(manifest, 0) == pytest.approx(0.01)
+
+
+def test_dummy_pulse_comparison_recovers_latency_and_identity(tmp_path: Path):
+    make = _load_script("make_dummy_pulse_stimulus.py")
+    compare = _load_script("compare_dummy_pulse_recordings.py")
+    sample_rate = 1000
+    stimulus, rows, manifest = make.build_dummy_pulse_stimulus(sample_rate=sample_rate, intervals_ms=[300, 800], amplitude=0.2)
+    make.write_dummy_pulse_files(tmp_path, stimulus=stimulus, planned_rows=rows, manifest=manifest)
+
+    delays = [10, 11, 12]
+    capture = np.zeros((stimulus.shape[0] + 64, 3), dtype=np.float32)
+    for channel, delay in enumerate(delays):
+        capture[delay : delay + stimulus.shape[0], channel] = stimulus[:, channel]
+    sf.write(tmp_path / "direct_loopback_capture.wav", capture, sample_rate)
+
+    report = compare.compare_run(tmp_path)
+
+    assert report["passed"]
+    direct = report["captures"][0]
+    assert direct["capture"] == "direct_loopback"
+    assert [row["best_identity_source_channel"] for row in direct["channel_summaries"]] == [0, 1, 2]
+    assert direct["skew_summary"]["left_right_median_abs_skew_ms"] == 1.0
+    assert direct["skew_summary"]["tactile_audio_median_abs_skew_ms"] <= 2.0
+
+
+def test_woojer_mechanical_onset_comparison_recovers_known_sensor_delay(tmp_path: Path):
+    make = _load_script("make_dummy_pulse_stimulus.py")
+    woojer = _load_script("compare_woojer_mechanical_onset.py")
+    sample_rate = 1000
+    sensor_delay_samples = 25
+    stimulus, rows, manifest = make.build_dummy_pulse_stimulus(
+        sample_rate=sample_rate,
+        intervals_ms=[300, 800],
+        amplitude=0.2,
+    )
+    make.write_dummy_pulse_files(tmp_path, stimulus=stimulus, planned_rows=rows, manifest=manifest)
+
+    recording = np.zeros((stimulus.shape[0] + 128, 4), dtype=np.float32)
+    recording[:, 2] = np.pad(stimulus[:, 2], (10, 128 - 10))[: recording.shape[0]]
+    recording[:, 3] = np.pad(stimulus[:, 2] * 0.25, (10 + sensor_delay_samples, 128 - 10 - sensor_delay_samples))[
+        : recording.shape[0]
+    ]
+    sf.write(tmp_path / "woojer_sensor_recording.wav", recording, sample_rate)
+
+    report = woojer.compare_mechanical_onset(
+        planned_pulses_csv=tmp_path / "planned_pulses.csv",
+        electrical_recording=tmp_path / "woojer_sensor_recording.wav",
+        sensor_recording=tmp_path / "woojer_sensor_recording.wav",
+        output_dir=tmp_path / "woojer_report",
+        electrical_channel_1based=3,
+        sensor_channel_1based=4,
+        min_sensor_peak=0.001,
+    )
+
+    assert report["passed"]
+    assert report["electrical_detected_count"] == 3
+    assert report["sensor_detected_count"] == 3
+    assert report["electrical_minus_planned_ms"]["mean_ms"] == pytest.approx(10.0)
+    assert report["mechanical_minus_electrical_ms"]["mean_ms"] == pytest.approx(25.0)
+    assert report["mechanical_minus_electrical_ms"]["sd_ms"] == pytest.approx(0.0)
+    assert (tmp_path / "woojer_report" / "woojer_mechanical_onset_report.json").exists()
+
+
+def test_dummy_pulse_comparison_flags_wrong_channel_identity(tmp_path: Path):
+    make = _load_script("make_dummy_pulse_stimulus.py")
+    compare = _load_script("compare_dummy_pulse_recordings.py")
+    sample_rate = 1000
+    stimulus, rows, manifest = make.build_dummy_pulse_stimulus(sample_rate=sample_rate, intervals_ms=[300, 800], amplitude=0.2)
+    make.write_dummy_pulse_files(tmp_path, stimulus=stimulus, planned_rows=rows, manifest=manifest)
+
+    capture = np.zeros((stimulus.shape[0] + 64, 3), dtype=np.float32)
+    capture[10 : 10 + stimulus.shape[0], 0] = stimulus[:, 1]
+    capture[10 : 10 + stimulus.shape[0], 1] = stimulus[:, 0]
+    capture[10 : 10 + stimulus.shape[0], 2] = stimulus[:, 2]
+    sf.write(tmp_path / "direct_loopback_capture.wav", capture, sample_rate)
+
+    report = compare.compare_run(tmp_path)
+
+    assert not report["passed"]
+    identities = [row["best_identity_source_channel"] for row in report["captures"][0]["channel_summaries"]]
+    assert identities[:2] == [1, 0]
+
+
+def test_dummy_pulse_comparison_uses_planned_windows_not_early_artifacts(tmp_path: Path):
+    make = _load_script("make_dummy_pulse_stimulus.py")
+    compare = _load_script("compare_dummy_pulse_recordings.py")
+    sample_rate = 1000
+    stimulus, rows, manifest = make.build_dummy_pulse_stimulus(sample_rate=sample_rate, intervals_ms=[300, 800], amplitude=0.2)
+    make.write_dummy_pulse_files(tmp_path, stimulus=stimulus, planned_rows=rows, manifest=manifest)
+
+    delay = 10
+    capture = np.zeros((stimulus.shape[0] + 64, 3), dtype=np.float32)
+    capture[delay : delay + stimulus.shape[0], :] = stimulus
+    early = np.zeros_like(capture)
+    early[100 : 100 + 40, 0] = 0.2
+    capture[:, 0] += early[:, 0]
+    sf.write(tmp_path / "direct_loopback_capture.wav", capture, sample_rate)
+
+    report = compare.compare_run(tmp_path)
+    left = report["captures"][0]["channel_summaries"][0]
+
+    assert report["passed"]
+    assert left["median_latency_ms"] == pytest.approx(10.0)
+    assert left["p95_abs_residual_ms"] == pytest.approx(0.0)
+
+
+def test_actual_block_loopback_comparison_recovers_channel_skew(tmp_path: Path):
+    compare = _load_script("compare_actual_block_loopback.py")
+    sample_rate = 1000
+    source = np.zeros((220, 3), dtype=np.float32)
+    source[20:80, 0] = np.sin(np.linspace(0, np.pi * 4, 60)).astype(np.float32) * 0.2
+    source[20:80, 1] = np.sin(np.linspace(0, np.pi * 4, 60)).astype(np.float32) * 0.2
+    source[40:60, 2] = 0.2
+    source[120:180, 0] = source[20:80, 0]
+    source[120:180, 1] = source[20:80, 1]
+    source[140:160, 2] = 0.2
+    capture = np.zeros((source.shape[0] + 32, 3), dtype=np.float32)
+    delays = [10, 11, 12]
+    for channel, delay in enumerate(delays):
+        capture[delay : delay + source.shape[0], channel] = source[:, channel]
+    source_wav = tmp_path / "source_block.wav"
+    capture_wav = tmp_path / "capture.wav"
+    sf.write(source_wav, source, sample_rate)
+    sf.write(capture_wav, capture, sample_rate)
+    block_csv = tmp_path / "block.csv"
+    _write_csv(
+        block_csv,
+        [
+            {
+                "Trial_Number": 1,
+                "Trial_UID": "T001",
+                "Trial_Type": "Audio-Tactile",
+                "Trial_Start_Sample": 0,
+                "Trial_End_Sample": 100,
+            },
+            {
+                "Trial_Number": 2,
+                "Trial_UID": "T002",
+                "Trial_Type": "Audio-Tactile",
+                "Trial_Start_Sample": 100,
+                "Trial_End_Sample": 200,
+            },
+        ],
+    )
+
+    report = compare.compare_loopback(
+        source_wav=source_wav,
+        capture_wav=capture_wav,
+        block_csv=block_csv,
+        output_dir=tmp_path / "report",
+        min_capture_peak=0.001,
+    )
+
+    assert report["passed"]
+    assert report["interchannel_skew_ms"]["right_minus_left"]["mean_ms"] == pytest.approx(1.0)
+    assert report["interchannel_skew_ms"]["tactile_minus_audio_mean"]["mean_ms"] == pytest.approx(1.5)
+    assert (tmp_path / "report" / "actual_block_loopback_report.json").exists()
+
+
+def test_lsl_marker_probe_normalizes_rich_v2_and_compact_samples():
+    probe = _load_script("lsl_marker_probe.py")
+
+    rich = probe.parse_marker_sample(
+        [
+            "2.0",
+            "event-1",
+            "tactile_onset",
+            "1005",
+            "trial:01:001:T001:tactile_onset",
+            "S001",
+            "P001",
+            "1",
+            "T001",
+            "44100",
+            "dac_time_sample_exact",
+            '{"trial_uid":"T001"}',
+        ]
+    )
+    compact = probe.parse_marker_sample(
+        [
+            "dummy_pulse",
+            "run_pulse_001",
+            '{"block_number":2,"participant_id":"P001","sample_index":1000}',
+        ]
+    )
+
+    assert rich["event_type"] == "tactile_onset"
+    assert rich["event_code"] == "1005"
+    assert rich["trigger_key"].startswith("trial:")
+    assert rich["timestamp_quality"] == "dac_time_sample_exact"
+    assert compact["event_type"] == "dummy_pulse"
+    assert compact["block_index"] == 2
+    assert compact["participant_id"] == "P001"
+    assert compact["sample_index"] == 1000
+
+
+def test_lsl_local_reconciliation_matches_rich_and_numeric_streams(tmp_path: Path):
+    reconcile_mod = _load_script("reconcile_lsl_with_local_events.py")
+    events_csv = tmp_path / "events.csv"
+    rich_csv = tmp_path / "rich_probe.csv"
+    numeric_csv = tmp_path / "numeric_probe.csv"
+    lsl_markers_csv = tmp_path / "lsl_markers.csv"
+    output_dir = tmp_path / "reconciliation"
+    event_payloads = [
+        {
+            "event_code": 30,
+            "trigger_key": "response:mouse_click",
+            "session_id": "S001",
+            "participant_id": "P001",
+            "timestamp_quality": "software_log",
+        },
+        {
+            "event_code": 31,
+            "trigger_key": "response:marker_start",
+            "session_id": "S001",
+            "participant_id": "P001",
+            "sample_index": 44100,
+            "timestamp_quality": "dac_time_sample_exact",
+        },
+    ]
+    _write_csv(
+        events_csv,
+        [
+            {
+                "event_id": "1",
+                "event_type": "mouse_click",
+                "unix_time": "100.0",
+                "monotonic_time": "10.0",
+                "payload_json": json.dumps(event_payloads[0]),
+            },
+            {
+                "event_id": "2",
+                "event_type": "response_marker_start",
+                "unix_time": "100.008",
+                "monotonic_time": "10.008",
+                "payload_json": json.dumps(event_payloads[1]),
+            },
+            {
+                "event_id": "3",
+                "event_type": "trial_start",
+                "unix_time": "101.0",
+                "monotonic_time": "11.0",
+                "payload_json": json.dumps({"planned": True, "event_code": 1000}),
+            },
+        ],
+    )
+    _write_csv(
+        rich_csv,
+        [
+            {
+                "arrival_lsl_clock": "10.001",
+                "sample_lsl_timestamp": "10.000",
+                "arrival_minus_sample_ms": "1.000",
+                "marker_version": "2.0",
+                "event_id": "1",
+                "event_type": "mouse_click",
+                "event_code": "30",
+                "trigger_key": "response:mouse_click",
+                "session_id": "S001",
+                "participant_id": "P001",
+                "block_index": "",
+                "trial_uid": "",
+                "sample_index": "",
+                "timestamp_quality": "software_log",
+                "payload_json": json.dumps(event_payloads[0]),
+                "raw_sample_json": "[]",
+            },
+            {
+                "arrival_lsl_clock": "10.003",
+                "sample_lsl_timestamp": "10.008",
+                "arrival_minus_sample_ms": "-5.000",
+                "marker_version": "2.0",
+                "event_id": "2",
+                "event_type": "response_marker_start",
+                "event_code": "31",
+                "trigger_key": "response:marker_start",
+                "session_id": "S001",
+                "participant_id": "P001",
+                "block_index": "",
+                "trial_uid": "",
+                "sample_index": "44100",
+                "timestamp_quality": "dac_time_sample_exact",
+                "payload_json": json.dumps(event_payloads[1]),
+                "raw_sample_json": "[]",
+            },
+        ],
+    )
+    _write_csv(
+        numeric_csv,
+        [
+            {
+                "arrival_lsl_clock": "10.001",
+                "sample_lsl_timestamp": "10.000",
+                "arrival_minus_sample_ms": "1.000",
+                "marker_version": "",
+                "event_id": "",
+                "event_type": "",
+                "event_code": "30",
+                "trigger_key": "",
+                "session_id": "",
+                "participant_id": "",
+                "block_index": "",
+                "trial_uid": "",
+                "sample_index": "",
+                "timestamp_quality": "",
+                "payload_json": "",
+                "raw_sample_json": '["30"]',
+            },
+            {
+                "arrival_lsl_clock": "10.003",
+                "sample_lsl_timestamp": "10.008",
+                "arrival_minus_sample_ms": "-5.000",
+                "marker_version": "",
+                "event_id": "",
+                "event_type": "",
+                "event_code": "31",
+                "trigger_key": "",
+                "session_id": "",
+                "participant_id": "",
+                "block_index": "",
+                "trial_uid": "",
+                "sample_index": "",
+                "timestamp_quality": "",
+                "payload_json": "",
+                "raw_sample_json": '["31"]',
+            },
+        ],
+    )
+    _write_csv(
+        lsl_markers_csv,
+        [
+            {
+                "event_id": "1",
+                "event_type": "mouse_click",
+                "event_code": "30",
+                "trigger_key": "response:mouse_click",
+                "lsl_timestamp": "10.000",
+                "timestamp_quality": "software_log",
+                "sample_index": "",
+                "block_index": "",
+                "trial_uid": "",
+                "pushed_to_lsl": "True",
+                "payload_json": json.dumps(event_payloads[0]),
+            },
+            {
+                "event_id": "2",
+                "event_type": "response_marker_start",
+                "event_code": "31",
+                "trigger_key": "response:marker_start",
+                "lsl_timestamp": "10.008",
+                "timestamp_quality": "dac_time_sample_exact",
+                "sample_index": "44100",
+                "block_index": "",
+                "trial_uid": "",
+                "pushed_to_lsl": "True",
+                "payload_json": json.dumps(event_payloads[1]),
+            },
+        ],
+    )
+
+    report = reconcile_mod.reconcile(
+        events_csv=events_csv,
+        rich_lsl_probe_csv=rich_csv,
+        numeric_lsl_probe_csv=numeric_csv,
+        lsl_markers_csv=lsl_markers_csv,
+        output_dir=output_dir,
+    )
+
+    assert report["passed"]
+    assert report["rich"]["actual_local_event_count"] == 2
+    assert report["rich"]["rich_lsl_sample_count"] == 2
+    assert report["rich"]["field_mismatch_count"] == 0
+    assert report["numeric"]["observed_code_counts"] == {"30": 1, "31": 1}
+    assert (output_dir / "lsl_local_reconciliation_report.md").exists()
+    assert (output_dir / "lsl_local_reconciliation_mismatches.csv").read_text(encoding="utf-8").count("\n") == 1
+
+
+def test_response_timing_strategy_comparison_quantifies_lsl_arrival_delay(tmp_path: Path):
+    compare_mod = _load_script("compare_response_timing_strategies.py")
+    events_csv = tmp_path / "events.csv"
+    rich_csv = tmp_path / "rich_probe.csv"
+    output_dir = tmp_path / "strategy"
+    _write_csv(
+        events_csv,
+        [
+            {
+                "event_id": "1",
+                "event_type": "mouse_click",
+                "unix_time": "100.0",
+                "monotonic_time": "10.000",
+                "payload_json": json.dumps({"click_index": 1}),
+            },
+            {
+                "event_id": "2",
+                "event_type": "response_marker_start",
+                "unix_time": "100.008",
+                "monotonic_time": "10.008",
+                "payload_json": json.dumps({"mouse_event_id": 1, "click_index": 1, "planned_marker_delay_ms": "8.0"}),
+            },
+            {
+                "event_id": "3",
+                "event_type": "mouse_click",
+                "unix_time": "101.0",
+                "monotonic_time": "11.000",
+                "payload_json": json.dumps({"click_index": 2}),
+            },
+            {
+                "event_id": "4",
+                "event_type": "response_marker_start",
+                "unix_time": "101.008",
+                "monotonic_time": "11.008",
+                "payload_json": json.dumps({"mouse_event_id": 3, "click_index": 2, "planned_marker_delay_ms": "8.0"}),
+            },
+        ],
+    )
+    _write_csv(
+        rich_csv,
+        [
+            {
+                "arrival_lsl_clock": "10.0004",
+                "sample_lsl_timestamp": "10.0001",
+                "arrival_minus_sample_ms": "0.3",
+                "marker_version": "2.0",
+                "event_id": "1",
+                "event_type": "mouse_click",
+                "event_code": "30",
+                "trigger_key": "control:mouse_click",
+                "session_id": "S001",
+                "participant_id": "P001",
+                "block_index": "",
+                "trial_uid": "",
+                "sample_index": "",
+                "timestamp_quality": "software_log",
+                "payload_json": "{}",
+                "raw_sample_json": "[]",
+            },
+            {
+                "arrival_lsl_clock": "10.0030",
+                "sample_lsl_timestamp": "10.0080",
+                "arrival_minus_sample_ms": "-5.0",
+                "marker_version": "2.0",
+                "event_id": "2",
+                "event_type": "response_marker_start",
+                "event_code": "31",
+                "trigger_key": "control:response_marker_start",
+                "session_id": "S001",
+                "participant_id": "P001",
+                "block_index": "1",
+                "trial_uid": "",
+                "sample_index": "37",
+                "timestamp_quality": "dac_time_sample_exact",
+                "payload_json": "{}",
+                "raw_sample_json": "[]",
+            },
+            {
+                "arrival_lsl_clock": "11.0006",
+                "sample_lsl_timestamp": "11.0002",
+                "arrival_minus_sample_ms": "0.4",
+                "marker_version": "2.0",
+                "event_id": "3",
+                "event_type": "mouse_click",
+                "event_code": "30",
+                "trigger_key": "control:mouse_click",
+                "session_id": "S001",
+                "participant_id": "P001",
+                "block_index": "",
+                "trial_uid": "",
+                "sample_index": "",
+                "timestamp_quality": "software_log",
+                "payload_json": "{}",
+                "raw_sample_json": "[]",
+            },
+            {
+                "arrival_lsl_clock": "11.0032",
+                "sample_lsl_timestamp": "11.0080",
+                "arrival_minus_sample_ms": "-4.8",
+                "marker_version": "2.0",
+                "event_id": "4",
+                "event_type": "response_marker_start",
+                "event_code": "31",
+                "trigger_key": "control:response_marker_start",
+                "session_id": "S001",
+                "participant_id": "P001",
+                "block_index": "1",
+                "trial_uid": "",
+                "sample_index": "74",
+                "timestamp_quality": "dac_time_sample_exact",
+                "payload_json": "{}",
+                "raw_sample_json": "[]",
+            },
+        ],
+    )
+
+    report = compare_mod.compare_strategies(
+        events_csv=events_csv,
+        rich_lsl_probe_csv=rich_csv,
+        output_dir=output_dir,
+    )
+
+    assert report["passed"]
+    assert report["paired_click_marker_count"] == 2
+    assert report["metrics"]["local_marker_minus_mouse_ms"]["median_ms"] == pytest.approx(8.0)
+    assert report["metrics"]["lsl_mouse_arrival_minus_local_mouse_ms"]["median_ms"] == pytest.approx(0.5)
+    assert report["metrics"]["marker_lsl_arrival_minus_sample_ms"]["median_ms"] == pytest.approx(-4.9)
+    assert (output_dir / "response_timing_strategy_pairs.csv").exists()
+
+
+def test_mouse_response_timing_stress_links_clicks_and_markers(tmp_path: Path):
+    stress = _load_script("run_mouse_response_timing_stress.py")
+
+    report = stress.run_stress(
+        output_dir=tmp_path,
+        count=3,
+        interval_s=0.001,
+        start_delay_s=0.0,
+        planned_marker_delay_ms=8.0,
+        callback_lead_ms=5.805,
+        sample_rate=44100,
+        blocksize=256,
+        marker_gain=0.08,
+        enable_lsl=False,
+        warmup_s=0.0,
+        realtime=False,
+        flush_each=True,
+    )
+
+    assert report["passed"]
+    assert report["mouse_click_count"] == 3
+    assert report["response_marker_start_count"] == 3
+    assert report["response_timestamp_quality_counts"] == {"dac_time_sample_exact": 3}
+    assert report["marker_minus_mouse_ms"]["median_ms"] == pytest.approx(8.0)
+    timing_qc = (tmp_path / "timing_qc.csv").read_text(encoding="utf-8")
+    assert "delay_clock" in timing_qc
+    assert "monotonic" in timing_qc
+
+
+def test_dummy_output_route_sweep_refuses_hot_hardware_amplitude(tmp_path: Path):
+    sweep = _load_script("run_dummy_output_route_sweep.py")
+
+    with pytest.raises(ValueError, match="Refusing hardware playback amplitude"):
+        sweep.run_sweep(
+            output_dir=tmp_path,
+            device=None,
+            device_query="Komplete",
+            sample_rate=44100,
+            intervals_ms=[300, 800],
+            pre_roll_s=1.0,
+            post_roll_s=1.0,
+            amplitude=0.20,
+            input_channels=6,
+            output_channels=3,
+            sweep_output_count=3,
+            latency_s=0.010,
+            blocksize=256,
+            allow_non_asio=False,
+            capture_tail_s=0.5,
+            search_pre_ms=25.0,
+            search_post_ms=200.0,
+        )
+
+
+def test_dummy_output_route_sweep_refuses_selector_count_above_open_outputs(tmp_path: Path):
+    sweep = _load_script("run_dummy_output_route_sweep.py")
+
+    with pytest.raises(ValueError, match="sweep_output_count cannot exceed output_channels"):
+        sweep.run_sweep(
+            output_dir=tmp_path,
+            device=None,
+            device_query="Komplete",
+            sample_rate=44100,
+            intervals_ms=[300, 800],
+            pre_roll_s=1.0,
+            post_roll_s=1.0,
+            amplitude=0.05,
+            input_channels=6,
+            output_channels=3,
+            sweep_output_count=4,
+            latency_s=0.010,
+            blocksize=256,
+            allow_non_asio=False,
+            capture_tail_s=0.5,
+            search_pre_ms=25.0,
+            search_post_ms=200.0,
+        )
+
+
+def test_dummy_signal_level_qc_flags_visible_but_not_baseline_channel(tmp_path: Path):
+    make = _load_script("make_dummy_pulse_stimulus.py")
+    levels = _load_script("analyze_dummy_signal_levels.py")
+    sample_rate = 1000
+    stimulus, rows, manifest = make.build_dummy_pulse_stimulus(
+        sample_rate=sample_rate,
+        intervals_ms=[300, 800],
+        amplitude=0.05,
+    )
+    manifest["output_channels"] = 3
+    make.write_dummy_pulse_files(tmp_path, stimulus=stimulus, planned_rows=rows, manifest=manifest)
+
+    rng = np.random.default_rng(123)
+    gains = [1.0, 0.01, 1.0]
+    for output_channel, gain in enumerate(gains):
+        capture = rng.normal(0.0, 1e-6, size=(stimulus.shape[0] + 128, 3)).astype(np.float32)
+        capture[: stimulus.shape[0], output_channel] += stimulus[:, output_channel] * gain
+        sf.write(tmp_path / f"output_{output_channel + 1}_capture.wav", capture, sample_rate)
+
+    report = levels.analyze_run(tmp_path)
+
+    assert report["all_visible_above_noise"]
+    assert not report["all_accepted_for_latency_baseline"]
+    assert report["channels"][0]["accepted_for_latency_baseline"]
+    assert report["channels"][1]["visible_above_noise"]
+    assert not report["channels"][1]["accepted_for_latency_baseline"]
+    assert report["channels"][2]["accepted_for_latency_baseline"]
+
+
+def test_validation_evidence_audit_uses_publication_facing_baseline_boundary(tmp_path: Path):
+    audit_mod = _load_script("build_validation_evidence_audit.py")
+
+    paths = {
+        "audio_stress": tmp_path / "audio_stress.json",
+        "dummy_comparison": tmp_path / "dummy_comparison.json",
+        "dummy_route_sweep": tmp_path / "dummy_route_sweep.json",
+        "dummy_signal_qc": tmp_path / "dummy_signal_qc.json",
+        "safe_calibration": tmp_path / "safe_calibration.json",
+        "lsl_reconciliation": tmp_path / "lsl_reconciliation.json",
+        "response_strategy": tmp_path / "response_strategy.json",
+        "mouse_response": tmp_path / "mouse_response.json",
+        "session_runner_click_path": tmp_path / "session_runner_click_path.json",
+        "visible_runner_os_click": tmp_path / "visible_runner_os_click.json",
+        "actual_condition_one_block": tmp_path / "actual_condition_one_block.json",
+        "recording_layer_alignment": tmp_path / "recording_layer_alignment.json",
+        "pc_software_requirements": tmp_path / "pc_software_requirements.json",
+        "labrecorder_xdf": tmp_path / "labrecorder_xdf.json",
+        "report_pdf": tmp_path / "latency_reliability_validations.pdf",
+    }
+
+    payloads = {
+        "audio_stress": {"recommendation": {"status": "spatial_ready"}},
+        "dummy_comparison": {"captures": []},
+        "dummy_route_sweep": {"expected_identity_route_passed": False},
+        "dummy_signal_qc": {"all_accepted_for_latency_baseline": False},
+        "safe_calibration": {"passed": False, "channel_summaries": []},
+        "lsl_reconciliation": {
+            "passed": True,
+            "rich": {"compared_event_count": 2, "rich_lsl_sample_count": 2, "field_mismatch_count": 0},
+            "numeric": {"numeric_lsl_sample_count": 2},
+        },
+        "response_strategy": {
+            "passed": True,
+            "metrics": {
+                "lsl_mouse_sample_minus_local_mouse_ms": {"median_ms": 0.067},
+                "lsl_mouse_arrival_minus_local_mouse_ms": {"median_ms": 0.339},
+                "local_marker_minus_mouse_ms": {"median_ms": 8.0},
+            },
+        },
+        "mouse_response": {"passed": True, "mouse_click_count": 2, "response_marker_start_count": 2},
+        "session_runner_click_path": {
+            "passed": True,
+            "mouse_click_count": 2,
+            "response_marker_start_count": 2,
+            "marker_minus_mouse_ms": {"median_ms": 8.1, "max_ms": 8.3},
+        },
+        "visible_runner_os_click": {
+            "passed": True,
+            "armed": True,
+            "requested_click_count": 2,
+            "mouse_click_count": 2,
+            "response_marker_start_count": 2,
+            "in_target_mouse_click_count": 2,
+            "during_playback_mouse_click_count": 2,
+            "marker_minus_mouse_ms": {"median_ms": 8.2},
+        },
+        "actual_condition_one_block": {
+            "passed": False,
+            "evidence_level": "development_or_fixture",
+            "trial_count": 5,
+            "analysis_ready_trial_count": 5,
+            "xdf": {"loaded": True, "sample_count": 43},
+            "lsl_marker_count": 43,
+            "suspicious_non_actual_sources": ["segment_fixture"],
+        },
+        "recording_layer_alignment": {
+            "passed": True,
+            "audio": {
+                "physical_minus_digital_latency_ms": {"mean_ms": 33.46, "sd_ms": 0.01, "median_ms": 33.47, "p95_ms": 33.47, "min_ms": 33.45, "max_ms": 33.47},
+                "interchannel_skew": {"right_minus_left_ms": -0.023, "tactile_minus_audio_mean_ms": 0.011},
+                "digital_metadata": {"dropped_buffer_count": 0, "clipped_channels_1based": []},
+            },
+            "internal_lsl": {
+                "event_count": 146,
+                "marker_count": 146,
+                "missing_marker_event_ids": [],
+                "extra_marker_event_ids": [],
+                "duplicate_event_ids": [],
+                "lsl_timestamp_error_ms": {"p95_ms": 0.0},
+            },
+            "response_marker_loopback": {
+                "expected_marker_count": 20,
+                "detected_marker_count": 20,
+                "abs_residual_ms": {"p95_ms": 0.0},
+            },
+            "external_lsl": {"checked": False},
+        },
+        "pc_software_requirements": {
+            "summary": {
+                "missing_runtime_packages": [],
+                "missing_validation_packages": [],
+                "missing_external_tools": [],
+                "komplete_asio_registry_present": True,
+                "komplete_asio_sounddevice_ready": True,
+            }
+        },
+        "labrecorder_xdf": {
+            "passed": True,
+            "comparison": {
+                "passed": True,
+                "expected_marker_count": 2,
+                "rich_xdf_sample_count": 2,
+                "numeric_xdf_sample_count": 2,
+                "missing_event_ids": [],
+                "field_mismatches": [],
+                "timestamp_delta_xdf_minus_local_marker_ms": {"mean_ms": -0.005},
+            },
+        },
+    }
+    for key, payload in payloads.items():
+        paths[key].write_text(json.dumps(payload), encoding="utf-8")
+    paths["report_pdf"].write_bytes(b"%PDF-1.4\n")
+
+    audit = audit_mod.build_audit(paths)
+    evidence_blob = json.dumps(audit, sort_keys=True).lower()
+
+    assert audit["completion_gate"]["complete"] is False
+    assert "One 3-channel WAV routes to the intended physical channel identities" in audit["completion_gate"]["reason"]
+    assert "Publication-grade all-channel electrical latency/skew baseline" in audit["completion_gate"]["reason"]
+    assert "channel 2" not in evidence_blob
+    assert "tactile-left" not in evidence_blob
+    assert "publication-selected all-channel route identity dataset" in evidence_blob
+    assert "exploratory route/level setup captures are excluded" in evidence_blob
+    assert "windows validation pc software dependencies" in evidence_blob
+    assert "external labrecorder xdf preserves" in evidence_blob
+    assert "visible tk runner os-click stress passed=true" in evidence_blob
+    assert "one actual prepared experimental block" in evidence_blob
+    assert "physical-minus-digital latency" in evidence_blob
+    assert audit["status_counts"]["proven"] >= 5
+
+
+def test_validation_evidence_audit_resolves_latest_visible_runner_click(tmp_path: Path):
+    audit_mod = _load_script("build_validation_evidence_audit.py")
+    run_root = tmp_path / "artifacts" / "validation_runs"
+    older = run_root / "visible_runner_os_click_stress_20260101_000000"
+    newer = run_root / "visible_runner_os_click_stress_20260101_000001"
+    older.mkdir(parents=True)
+    newer.mkdir(parents=True)
+    (older / "visible_runner_os_click_report.json").write_text(
+        json.dumps({"passed": False, "requested_click_count": 1}),
+        encoding="utf-8",
+    )
+    (newer / "visible_runner_os_click_report.json").write_text(
+        json.dumps({"passed": True, "requested_click_count": 3}),
+        encoding="utf-8",
+    )
+
+    paths = audit_mod.resolve_artifact_paths(tmp_path)
+
+    assert paths["visible_runner_os_click"] == newer / "visible_runner_os_click_report.json"
+
+
+def test_validation_evidence_audit_resolves_latest_route_sweep(tmp_path: Path):
+    audit_mod = _load_script("build_validation_evidence_audit.py")
+    run_root = tmp_path / "artifacts" / "validation_runs"
+    older = run_root / "final_functional_route_sweep_20260101_000000"
+    newer = run_root / "final_functional_route_sweep_20260101_000001"
+    older.mkdir(parents=True)
+    newer.mkdir(parents=True)
+    (older / "dummy_output_route_sweep_report.json").write_text(
+        json.dumps({"expected_identity_route_passed": False, "amplitude": 0.05, "outputs": []}),
+        encoding="utf-8",
+    )
+    (newer / "dummy_output_route_sweep_report.json").write_text(
+        json.dumps(
+            {
+                "expected_identity_route_passed": False,
+                "amplitude": 0.05,
+                "outputs": [
+                    {"output_channel_1based": 1, "expected_input_1based": 1, "detected_inputs_1based": [1], "identity_ok": True},
+                    {"output_channel_1based": 2, "expected_input_1based": 2, "detected_inputs_1based": [], "identity_ok": False},
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    (newer / "dummy_signal_level_qc.json").write_text(
+        json.dumps(
+            {
+                "all_visible_above_noise": True,
+                "all_accepted_for_latency_baseline": False,
+                "channels": [
+                    {
+                        "output_channel_1based": 1,
+                        "expected_input_channel_1based": 1,
+                        "median_pulse_peak": 0.4,
+                        "visible_above_noise": True,
+                        "accepted_for_latency_baseline": True,
+                        "clipped": False,
+                    },
+                    {
+                        "output_channel_1based": 2,
+                        "expected_input_channel_1based": 2,
+                        "median_pulse_peak": 0.006,
+                        "visible_above_noise": True,
+                        "accepted_for_latency_baseline": False,
+                        "clipped": False,
+                    },
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    paths = audit_mod.resolve_artifact_paths(tmp_path)
+
+    assert paths["dummy_route_sweep"] == newer / "dummy_output_route_sweep_report.json"
+    assert paths["dummy_signal_qc"] == newer / "dummy_signal_level_qc.json"
+
+
+def test_pc_software_requirements_audit_records_dependency_sections():
+    audit_mod = _load_script("audit_pc_software_requirements.py")
+
+    audit = audit_mod.build_audit()
+    package_names = {row["package"] for row in audit["python_packages"]}
+    tool_names = {row["name"] for row in audit["external_tools"]}
+    driver_names = {row["name"] for row in audit["windows_drivers"]}
+
+    assert audit["schema"] == "pps-pc-software-requirements-audit.v1"
+    assert "sounddevice" in package_names
+    assert "pylsl" in package_names
+    assert "pyxdf" in package_names
+    assert "LabRecorder" in tool_names
+    assert any("Komplete Audio 6" in name for name in driver_names)
+    assert "komplete_asio_sounddevice_ready" in audit["summary"]
+
+
+def test_labrecorder_xdf_comparison_matches_rich_and_numeric_samples():
+    labrec = _load_script("run_labrecorder_lsl_xdf_stress.py")
+    marker_rows = [
+        {
+            "event_id": "1",
+            "event_type": "session_start",
+            "event_code": "1",
+            "trigger_key": "control:session_start",
+            "block_index": "",
+            "trial_uid": "",
+            "sample_index": "",
+            "timestamp_quality": "software_log",
+            "lsl_timestamp": "10.000000000",
+            "pushed_to_lsl": "True",
+            "payload_json": json.dumps({"session_id": "S", "participant_id": "P"}),
+        },
+        {
+            "event_id": "2",
+            "event_type": "test_marker",
+            "event_code": "50",
+            "trigger_key": "control:test_marker",
+            "block_index": "1",
+            "trial_uid": "T001",
+            "sample_index": "44100",
+            "timestamp_quality": "software_log",
+            "lsl_timestamp": "10.050000000",
+            "pushed_to_lsl": "True",
+            "payload_json": json.dumps({"session_id": "S", "participant_id": "P"}),
+        },
+    ]
+    rich_rows = [
+        {**marker_rows[0], "session_id": "S", "participant_id": "P", "sample_lsl_timestamp": "10.000000000"},
+        {**marker_rows[1], "session_id": "S", "participant_id": "P", "sample_lsl_timestamp": "10.050000000"},
+    ]
+    numeric_rows = [
+        {"event_code": "1", "sample_lsl_timestamp": "10.000000000"},
+        {"event_code": "50", "sample_lsl_timestamp": "10.050000000"},
+    ]
+
+    report = labrec.compare_xdf_to_local(rich_rows=rich_rows, numeric_rows=numeric_rows, marker_rows=marker_rows)
+
+    assert report["passed"]
+    assert report["expected_marker_count"] == 2
+    assert report["rich_xdf_sample_count"] == 2
+    assert report["numeric_xdf_sample_count"] == 2
+    assert report["field_mismatches"] == []
+    assert report["timestamp_delta_xdf_minus_local_marker_ms"]["max_ms"] == pytest.approx(0.0)
+
+
+def test_session_runner_click_path_stress_uses_controller_log_click(tmp_path: Path):
+    stress = _load_script("run_session_runner_click_path_stress.py")
+
+    report = stress.run_stress(
+        output_dir=tmp_path,
+        count=3,
+        interval_s=0.001,
+        start_delay_s=0.0,
+        planned_marker_delay_ms=8.0,
+        sample_rate=44100,
+        block_hold_s=0.1,
+    )
+
+    assert report["passed"]
+    assert report["mouse_click_count"] == 3
+    assert report["response_marker_start_count"] == 3
+    assert report["linked_pair_count"] == 3
+    assert report["response_timestamp_quality_counts"] == {"dac_time_sample_exact": 3}
+    assert report["marker_minus_mouse_ms"]["median_ms"] == pytest.approx(8.0, abs=0.75)
+    assert (tmp_path / "session_runner_click_pairs.csv").exists()
+
+
+def test_one_block_trial_runner_realtime_stress_writes_analysis_ready_outputs(tmp_path: Path):
+    pytest.importorskip("pyxdf")
+    stress = _load_script("run_one_block_trial_runner_realtime_stress.py")
+
+    report = stress.run_stress(
+        output_dir=tmp_path,
+        participant_id="P001",
+        trial_count=2,
+        sample_rate=44100,
+        trial_duration_s=0.45,
+        blocksize=256,
+        enable_lsl=False,
+        response_marker_delay_ms=8.0,
+    )
+
+    assert report["passed"]
+    assert report["event_type_counts"]["trial_end"] == 2
+    assert report["event_type_counts"]["mouse_click"] == 2
+    assert report["analysis_ready_trial_count"] == 2
+    assert report["analysis_ready_hit_count"] == 2
+    assert report["xdf"]["loaded"]
+    assert Path(report["analysis_ready_trials_csv"]).exists()
+    assert (tmp_path / "analysis_ready_trials.csv").exists()
+
+
+def test_topup_missed_trial_stress_rescues_intentional_misses(tmp_path: Path):
+    stress = _load_script("run_topup_missed_trial_stress.py")
+
+    report = stress.run_stress(
+        output_dir=tmp_path,
+        participant_id="P001",
+        scenarios=["row_imbalanced_misses"],
+        block_count=1,
+        trials_per_block=4,
+        sample_rate=44100,
+        trial_duration_s=0.45,
+        blocksize=256,
+        enable_lsl=False,
+        response_marker_delay_ms=8.0,
+    )
+
+    assert report["passed"]
+    scenario = report["scenario_reports"][0]
+    assert scenario["topup_played_after_standard"]
+    assert scenario["expected_missed_count"] == 2
+    assert scenario["topup_rescue_count"] == 2
+    assert scenario["topup_filler_count"] >= 1
+    assert scenario["final_rescued_count"] == 2
+    assert scenario["checks"]["rescue_manifest_matches_misses"]
+    assert Path(scenario["ledger_csv"]).exists()
+    assert Path(scenario["topup_manifest_csv"]).exists()
+    assert Path(scenario["final_trial_outcomes_csv"]).exists()
+
+
+def _write_one_block_actual_condition_fixture(tmp_path: Path, *, suspicious: bool = False) -> Path:
+    session_dir = tmp_path / "P001_20260612_180000"
+    block_dir = session_dir / "blocks"
+    analysis_dir = session_dir / "analysis"
+    recordings_dir = session_dir / "recordings"
+    block_dir.mkdir(parents=True)
+    analysis_dir.mkdir()
+    recordings_dir.mkdir()
+
+    sample_rate = 1000
+    wav = np.zeros((1500, 3), dtype=np.float32)
+    wav[100:120, 0] = 0.01
+    wav[150:170, 2] = 0.01
+    block_wav = block_dir / "Block_01_from_study5.csv.wav"
+    sf.write(block_wav, wav, sample_rate)
+    sf.write(recordings_dir / "Block_01_loopback.wav", wav, sample_rate)
+
+    block_csv = block_dir / "Block_01_from_study5.csv"
+    noise_type = "validation_rect_pulse" if suspicious else "looming_noise"
+    source_label = "Validation pulse | SOA 50 ms" if suspicious else "Study 5 looming source | SOA 50 ms"
+    _write_csv(
+        block_csv,
+        [
+            {
+                "Trial_UID": "P001_B01_T001",
+                "Trial_Number": 1,
+                "Trial_Type": "Audio-Tactile",
+                "SOA_ms": 50,
+                "Noise_Type": noise_type,
+                "Respiratory_Phase": "Inhale",
+                "Sequence_Labels": source_label,
+            },
+            {
+                "Trial_UID": "P001_B01_T002",
+                "Trial_Number": 2,
+                "Trial_Type": "Audio-Tactile",
+                "SOA_ms": 150,
+                "Noise_Type": noise_type,
+                "Respiratory_Phase": "Exhale",
+                "Sequence_Labels": source_label,
+            },
+            {
+                "Trial_UID": "P001_B01_T003",
+                "Trial_Number": 3,
+                "Trial_Type": "Catch",
+                "SOA_ms": 0,
+                "Noise_Type": noise_type,
+                "Respiratory_Phase": "Inhale",
+                "Sequence_Labels": source_label,
+            },
+        ],
+    )
+
+    source_manifest = (
+        tmp_path / "segment_fixture" / "6_experiment_run_setup" / "experiment_run_setup_manifest.json"
+        if suspicious
+        else tmp_path / "dashboard_project" / "6_experiment_run_setup" / "experiment_run_setup_manifest.json"
+    )
+    source_manifest.parent.mkdir(parents=True)
+    source_manifest.write_text(json.dumps({"schema": "pps-experiment-run-setup.v1"}), encoding="utf-8")
+
+    manifest = {
+        "schema": "pps-run-session.v1",
+        "participant_id": "P001",
+        "session_id": "P001_20260612_180000",
+        "execution_mode": "participant_block_wavs",
+        "source_run_setup_manifest_path": str(source_manifest),
+        "blocks": [
+            {
+                "index": 1,
+                "label": "Study 5 Block 01",
+                "manifest_path": str(block_csv),
+                "wav_path": str(block_wav),
+                "trial_count": 3,
+                "duration_s": 1.5,
+                "metadata": {
+                    "execution_mode": "participant_block_wavs",
+                    "source_block_csv_path": str(block_csv),
+                    "sample_rate_hz": sample_rate,
+                    "channels": 3,
+                },
+            }
+        ],
+        "outputs": {
+            "events_csv": str(session_dir / "events.csv"),
+            "events_xdf": str(session_dir / "events.xdf"),
+            "lsl_markers_csv": str(session_dir / "lsl_markers.csv"),
+            "trigger_dictionary_json": str(session_dir / "trigger_dictionary.json"),
+            "analysis_dir": str(analysis_dir),
+        },
+    }
+    (session_dir / "session_manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    (session_dir / "trigger_dictionary.json").write_text(json.dumps({"trial:01": 1000}), encoding="utf-8")
+
+    events = []
+    event_id = 1
+
+    def add(event_type: str, mono: float, payload: dict[str, object] | None = None) -> int:
+        nonlocal event_id
+        payload = dict(payload or {})
+        events.append(
+            {
+                "event_id": event_id,
+                "event_type": event_type,
+                "unix_time": 1000.0 + mono,
+                "monotonic_time": mono,
+                "payload_json": json.dumps(payload),
+            }
+        )
+        event_id += 1
+        return event_id - 1
+
+    add("session_start", 0.000)
+    add("block_start", 0.001)
+    add("recording_start", 0.002)
+    for trial_index, onset in enumerate([0.100, 0.600], start=1):
+        base = {
+            "timestamp_quality": "dac_time_sample_exact",
+            "trial_number": trial_index,
+            "trial_uid": f"P001_B01_T{trial_index:03d}",
+            "sample_index": int(onset * sample_rate),
+        }
+        add("trial_start", onset, base)
+        add("looming_onset", onset + 0.050, base)
+        add("tactile_onset", onset + 0.100, base)
+        add("response_window_onset", onset + 0.100, base)
+        mouse_id = add("mouse_click", onset + 0.300, {"in_target": True, "during_playback": True})
+        add("response_marker_start", onset + 0.308, {**base, "mouse_event_id": mouse_id})
+        add("trial_end", onset + 0.400, base)
+    catch_base = {
+        "timestamp_quality": "dac_time_sample_exact",
+        "trial_number": 3,
+        "trial_uid": "P001_B01_T003",
+        "sample_index": 1100,
+    }
+    add("trial_start", 1.100, catch_base)
+    add("looming_onset", 1.150, catch_base)
+    add("response_window_onset", 1.150, catch_base)
+    add("trial_end", 1.400, catch_base)
+    add("recording_end", 1.100)
+    add("block_end", 1.101)
+    add("session_end", 1.102)
+    _write_csv(session_dir / "events.csv", events)
+    _write_csv(session_dir / "lsl_markers.csv", [{"event_id": row["event_id"], "event_type": row["event_type"]} for row in events])
+    _write_csv(
+        analysis_dir / "P001_20260612_180000_analysis_ready_trials.csv",
+        [
+            {"trial_number": 1, "hit": True, "rt_ms": 200.0, "soa_ms": 50},
+            {"trial_number": 2, "hit": True, "rt_ms": 200.0, "soa_ms": 150},
+        ],
+    )
+    _write_csv(
+        analysis_dir / "P001_20260612_180000_timing_qc.csv",
+        [
+            {"mouse_event_id": 9, "response_marker_event_id": 10, "marker_minus_mouse_ms": 8.0},
+            {"mouse_event_id": 16, "response_marker_event_id": 17, "marker_minus_mouse_ms": 8.0},
+        ],
+    )
+    return session_dir
+
+
+def test_actual_condition_one_block_validator_accepts_real_looking_session(tmp_path: Path):
+    validator = _load_script("validate_one_block_actual_condition_run.py")
+    session_dir = _write_one_block_actual_condition_fixture(tmp_path)
+
+    report = validator.validate_session(session_dir, require_xdf=False)
+
+    assert report["passed"]
+    assert report["evidence_level"] == "actual_experimental_condition_one_block"
+    assert report["trial_count"] == 3
+    assert report["analysis_ready_trial_count"] == 2
+    assert report["expected_event_type_counts"]["looming_onset"] == 3
+    assert report["expected_event_type_counts"]["tactile_onset"] == 2
+    assert report["event_type_counts"]["tactile_onset"] == 2
+    assert (session_dir / "analysis" / "actual_condition_validation" / "one_block_actual_condition_validation.json").exists()
+
+
+def test_actual_condition_one_block_validator_rejects_dummy_fixture_sources(tmp_path: Path):
+    validator = _load_script("validate_one_block_actual_condition_run.py")
+    session_dir = _write_one_block_actual_condition_fixture(tmp_path, suspicious=True)
+
+    report = validator.validate_session(session_dir, require_xdf=False)
+
+    actual_source = next(row for row in report["criteria"] if row["key"] == "actual_experiment_sources")
+    assert not report["passed"]
+    assert not actual_source["passed"]
+    assert report["suspicious_non_actual_sources"]
+
+
+def test_response_marker_loopback_comparison_recovers_physical_marker_trace(tmp_path: Path):
+    compare = _load_script("compare_response_marker_loopback.py")
+    sample_rate = 1000
+    offset_samples = 33
+    marker_samples = [100, 250, 410, 590, 760]
+    events_csv = tmp_path / "events.csv"
+    recording = tmp_path / "Block_01_loopback.wav"
+
+    rows = []
+    event_id = 1
+    for index, sample in enumerate(marker_samples, start=1):
+        rows.append(
+            {
+                "event_id": event_id,
+                "event_type": "response_marker_start",
+                "unix_time": f"{index:.9f}",
+                "monotonic_time": f"{index:.9f}",
+                "payload_json": json.dumps(
+                    {
+                        "sample_index": sample,
+                        "mouse_event_id": event_id - 1,
+                        "block_number": 1,
+                        "timestamp_quality": "dac_time_sample_exact",
+                        "marker_gain": 0.05,
+                    }
+                ),
+            }
+        )
+        event_id += 1
+    _write_csv(events_csv, rows)
+
+    capture = np.zeros((1000, 3), dtype=np.float32)
+    for sample in marker_samples:
+        start = sample + offset_samples
+        capture[start : start + 20, 2] = 0.05
+    sf.write(recording, capture, sample_rate)
+
+    report = compare.compare_loopback(
+        events_csv=events_csv,
+        recordings=[recording],
+        output_dir=tmp_path / "comparison",
+        tactile_channel_1based=3,
+        search_pre_ms=5.0,
+        search_post_ms=80.0,
+        min_peak=0.005,
+    )
+
+    assert report["passed"]
+    assert report["expected_marker_count"] == 5
+    assert report["detected_marker_count"] == 5
+    assert report["offset_ms"]["median_ms"] == pytest.approx(33.0)
+    assert report["abs_residual_ms"]["max_ms"] == pytest.approx(0.0)
+    assert (tmp_path / "comparison" / "response_marker_loopback_pairs.csv").exists()
+
+
+def test_recording_layer_alignment_compares_digital_physical_and_lsl(tmp_path: Path):
+    compare = _load_script("compare_recording_layers.py")
+    sample_rate = 1000
+    digital = np.zeros((800, 3), dtype=np.float32)
+    digital[100:130, 0] = 0.1
+    digital[140:170, 1] = 0.1
+    digital[300:305, 2] = 0.08
+    physical = np.zeros((850, 3), dtype=np.float32)
+    physical[20 : 20 + digital.shape[0], :] = digital
+    digital_wav = tmp_path / "Block_01_audio_evidence.wav"
+    physical_wav = tmp_path / "Block_01_physical_loopback.wav"
+    sf.write(digital_wav, digital, sample_rate)
+    sf.write(physical_wav, physical, sample_rate)
+    (tmp_path / "Block_01_audio_evidence.output_evidence.json").write_text(
+        json.dumps(
+            {
+                "mode": "digital_output_evidence_wav",
+                "sample_rate": sample_rate,
+                "channels": 3,
+                "frames": int(digital.shape[0]),
+                "dropped_buffer_count": 0,
+                "clipped_channels_1based": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    events = [
+        {
+            "event_id": 1,
+            "event_type": "audio_sample_zero",
+            "unix_time": 1.0,
+            "monotonic_time": 1.0,
+            "payload_json": json.dumps({"block_index": 1, "sample_index": 0, "sample_rate": sample_rate}),
+        },
+        {
+            "event_id": 2,
+            "event_type": "tactile_onset",
+            "unix_time": 1.3,
+            "monotonic_time": 1.3,
+            "payload_json": json.dumps({"block_index": 1, "sample_index": 300, "sample_rate": sample_rate, "trial_uid": "T001"}),
+        },
+        {
+            "event_id": 3,
+            "event_type": "response_marker_start",
+            "unix_time": 1.3,
+            "monotonic_time": 1.3,
+            "payload_json": json.dumps({"block_index": 1, "sample_index": 300, "sample_rate": sample_rate, "mouse_event_id": 4}),
+        },
+    ]
+    markers = [
+        {
+            "event_id": row["event_id"],
+            "event_type": row["event_type"],
+            "event_code": 20 + int(row["event_id"]),
+            "trigger_key": f"control:{row['event_type']}",
+            "lsl_timestamp": 1000.0 + (0.3 if row["event_id"] in {2, 3} else 0.0),
+            "timestamp_quality": "dac_time_sample_exact",
+            "sample_index": 300 if row["event_id"] in {2, 3} else 0,
+            "block_index": 1,
+            "trial_uid": "T001" if row["event_id"] in {2, 3} else "",
+            "pushed_to_lsl": True,
+            "payload_json": row["payload_json"],
+        }
+        for row in events
+    ]
+    events_csv = tmp_path / "events.csv"
+    lsl_csv = tmp_path / "lsl_markers.csv"
+    _write_csv(events_csv, events)
+    _write_csv(lsl_csv, markers)
+
+    report = compare.compare_layers(
+        physical_wav=physical_wav,
+        digital_wav=digital_wav,
+        events_csv=events_csv,
+        lsl_markers_csv=lsl_csv,
+        output_dir=tmp_path / "comparison",
+    )
+
+    assert report["passed"]
+    assert report["audio"]["physical_minus_digital_latency_ms"]["mean_ms"] == pytest.approx(20.0)
+    assert report["audio"]["interchannel_skew"]["right_minus_left_ms"] == pytest.approx(0.0)
+    assert report["internal_lsl"]["missing_marker_event_ids"] == []
+    assert report["internal_lsl"]["lsl_timestamp_error_ms"]["p95_ms"] == pytest.approx(0.0)

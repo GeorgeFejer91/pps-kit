@@ -17,7 +17,29 @@
     20
   ],
   "custom_clip_assets": [],
-  "trial_strips": [],
+  "trial_strips": [
+    {
+      "strip_id": "ferri-artificial-looming-valence-row",
+      "label": "Artificial looming valence trial",
+      "audio_tactile_percentage": 100.0,
+      "catch_percentage": 0.0,
+      "baseline_percentage": 0.0,
+      "elements": [
+        {
+          "element_id": "ferri-artificial-looming-source",
+          "kind": "looming_stimulus",
+          "label": "Artificial looming source",
+          "source_label": "Negative artificial 1/f2 looming",
+          "source_labels": [
+            "Negative artificial 1/f2 looming",
+            "Neutral artificial 1/f looming"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    }
+  ],
   "prestimulus_files": [],
-  "preview_trial_count": 200
+  "preview_trial_count": 120
 }

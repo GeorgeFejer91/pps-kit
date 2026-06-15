@@ -1,5 +1,5 @@
 ﻿"""
-PPS Breathing Experiment Runner - With WASAPI Loopback Recording
+PPS Breathing Experiment Runner - With Digital Output Evidence Recording
 =================================================================
 - Sequential block playback (1-6) with manual override
 - Legacy Study 5 routing: WAV right -> Output 1 audio, WAV left -> Output 2 tactile
@@ -7,12 +7,24 @@ PPS Breathing Experiment Runner - With WASAPI Loopback Recording
 - Low-latency mouse click tone (tactile only)
 - Dedicated click area with 8-second recentering
 - Global pause/resume: Ctrl+Alt+P
-- WASAPI loopback recording of each block for verification
+- optional local WAV recording of the exact multichannel output buffers
 """
+
+if __name__ == "__main__":
+    import sys as _sys
+
+    print(
+        "The legacy Tk participant runner has been retired as a public entry point.\n"
+        "Use the active packaged experiment runner: "
+        "`dist\\PPSExperimentRunner\\PPSExperimentRunner.exe` or `windows\\Launch_Experiment_Runner.bat`."
+    )
+    print("For device checks, use `pps-audio-stress --dry-run --device-query Komplete`.")
+    _sys.exit(2)
 
 import tkinter as tk
 from tkinter import ttk, messagebox
 import os
+import sys
 
 # Enable the ASIO-enabled PortAudio DLL from python-sounddevice when available.
 # This must be set before importing sounddevice. The Komplete Audio ASIO driver
@@ -29,6 +41,7 @@ import time
 import json
 import ctypes
 import argparse
+import subprocess
 from pathlib import Path
 
 from .audio_routing import (
@@ -40,12 +53,29 @@ from .audio_routing import (
     tactile_output_channel_for_channels,
     tactile_probe_for_output,
 )
+from .session_runner import (
+    DEFAULT_SESSION_ROOT,
+    RESPONSE_MARKER_GAIN,
+    SessionCaptureOptions,
+    _block_event_schedules,
+    _write_timing_qc_csv,
+    find_latest_dashboard_run_setup,
+    prepare_all_segment_run_packages,
+    prepare_segment_run_package,
+    segment_run_setup_participants,
+)
+from .session_analysis import analyze_session_events, format_analysis_summary, write_analysis_csvs
+from .session_events import SessionEventLogger
+from .output_evidence import OutputEvidenceRecorder
+from .timing_events import TimingEventHub, TriggerDictionary
 
-# Try to import pyaudiowpatch for WASAPI loopback recording
+# Try to import pyaudiowpatch for legacy WASAPI diagnostics. Normal runner
+# evidence recording uses the callback output tap because ASIO playback can
+# bypass the Windows endpoint that WASAPI records.
 try:
     import pyaudiowpatch as pyaudio_wp
     PYAUDIOWPATCH_AVAILABLE = True
-    print("pyaudiowpatch imported successfully - WASAPI loopback recording available")
+    print("pyaudiowpatch imported successfully - legacy WASAPI diagnostics available")
 except ImportError as e:
     print(f"WARNING: pyaudiowpatch not available: {e}")
     print("  Install with: pip install pyaudiowpatch")
@@ -56,7 +86,6 @@ except ImportError as e:
 # =============================================================================
 # Try to set process priority to high for better audio timing
 try:
-    import sys
     if sys.platform == 'win32':
         # Set process priority to HIGH_PRIORITY_CLASS
         kernel32 = ctypes.windll.kernel32
@@ -121,6 +150,8 @@ DEMOGRAPHICS_DIR = str(REPO_ROOT / "local_data" / "demographics")
 
 # Loopback recording output folder
 RECORDINGS_DIR = str(REPO_ROOT / "local_data" / "loopback_recordings")
+SESSION_ROOT = str(DEFAULT_SESSION_ROOT)
+RUN_SETUP_MANIFEST = ""
 
 
 def configure_runtime_paths(args):
@@ -128,10 +159,21 @@ def configure_runtime_paths(args):
     global STIMULI_DIR, CLICK_SOUND, INSTRUCTIONS_DIR, GENERAL_INSTRUCTIONS
     global PRE_BLOCK_INSTRUCTIONS, POST_BLOCK_INSTRUCTIONS, BACKGROUND_MUSIC
     global INTERIM_MESSAGE, FINISH_MESSAGE, TACTILE_TEST_STIMULUS
-    global SETTINGS_FILE, DEMOGRAPHICS_DIR, RECORDINGS_DIR
+    global SETTINGS_FILE, DEMOGRAPHICS_DIR, RECORDINGS_DIR, SESSION_ROOT, RUN_SETUP_MANIFEST
 
     if args.stimuli_dir:
         STIMULI_DIR = str(args.stimuli_dir)
+    if args.session_root:
+        SESSION_ROOT = str(args.session_root)
+    if args.run_setup_manifest:
+        RUN_SETUP_MANIFEST = str(args.run_setup_manifest)
+    elif args.latest_dashboard_setup:
+        latest = find_latest_dashboard_run_setup()
+        RUN_SETUP_MANIFEST = str(latest) if latest else ""
+    elif not args.stimuli_dir:
+        latest = find_latest_dashboard_run_setup()
+        if latest:
+            RUN_SETUP_MANIFEST = str(latest)
     if args.click_sound:
         CLICK_SOUND = str(args.click_sound)
     if args.instructions_dir:
@@ -155,12 +197,16 @@ def configure_runtime_paths(args):
     Path(SETTINGS_FILE).parent.mkdir(parents=True, exist_ok=True)
     Path(DEMOGRAPHICS_DIR).mkdir(parents=True, exist_ok=True)
     Path(RECORDINGS_DIR).mkdir(parents=True, exist_ok=True)
+    Path(SESSION_ROOT).mkdir(parents=True, exist_ok=True)
 
 
 def build_arg_parser():
     parser = argparse.ArgumentParser(description="Launch the Windows PPS experiment app.")
     parser.add_argument("--list-devices", action="store_true", help="List audio devices and exit.")
     parser.add_argument("--stimuli-dir", type=Path, help="Participant sequence directory.")
+    parser.add_argument("--run-setup-manifest", type=Path, help="Prepared Segment 6 experiment_run_setup_manifest.json.")
+    parser.add_argument("--latest-dashboard-setup", action="store_true", help="Use the newest prepared dashboard Segment 6 setup.")
+    parser.add_argument("--session-root", type=Path, help="Directory for generated participant sessions.")
     parser.add_argument("--click-sound", type=Path, help="Click-tone WAV path.")
     parser.add_argument("--instructions-dir", type=Path, help="Directory containing generated 4-second instruction WAVs.")
     parser.add_argument("--background-music", type=Path, help="Optional background music file.")
@@ -211,7 +257,11 @@ def load_settings():
     defaults = {
         "volume": 50,           # Background music volume
         "audio_volume": 100,    # Audio output volume (Output 1/2 for binaural)
-        "tactile_volume": 100   # Tactile output volume (Output 3 for spatial files)
+        "tactile_volume": 100,  # Tactile output volume (Output 3 for spatial files)
+        "enable_lsl": True,
+        "write_internal_xdf": True,
+        "write_analysis_csvs": True,
+        "start_backup_recording": True,
     }
     try:
         if os.path.exists(SETTINGS_FILE):
@@ -408,6 +458,7 @@ class AudioEngine:
         self._block_progress_callback = None
         self._audio_event_callback = None
         self._audio_sample_zero_emitted = False
+        self._block_event_schedule = None
 
         # Instruction playback state (callback-based)
         self._instr_data = None
@@ -424,7 +475,14 @@ class AudioEngine:
         # Current playback state
         self.elapsed_time = 0.0
 
-        # WASAPI loopback recording state
+        # Digital output evidence recording state. This captures the exact
+        # multichannel output buffers sent by the callback, including low-gain
+        # tactile-channel response markers.
+        self._output_evidence = OutputEvidenceRecorder()
+        self._output_evidence_summary = {}
+
+        # Legacy WASAPI diagnostic state. Kept for operator diagnostics only;
+        # not used as the core ASIO multichannel recording path.
         self._recording_pyaudio = None     # PyAudio instance for recording
         self._recording_stream = None       # Recording stream
         self._recording_data = []           # Recorded audio chunks
@@ -444,7 +502,8 @@ class AudioEngine:
             f"latency block={BLOCK_STREAM_LATENCY}s click={CLICK_LATENCY}"
         )
 
-        # Initialize WASAPI loopback device if available
+        # Initialize WASAPI diagnostics if available. The user-facing backup
+        # recording path is the digital output evidence tap.
         if PYAUDIOWPATCH_AVAILABLE and ENABLE_LOOPBACK_RECORDING:
             self._init_wasapi_loopback()
 
@@ -564,141 +623,75 @@ class AudioEngine:
             return False
 
     def start_recording(self, output_path=None):
-        """Start WASAPI loopback recording.
+        """Start local digital output evidence recording.
 
         Args:
-            output_path: Intended save path (stored for use if recording is interrupted)
+            output_path: WAV path for the exact mixed output-buffer copy.
         """
-        if not PYAUDIOWPATCH_AVAILABLE or not ENABLE_LOOPBACK_RECORDING:
+        if output_path is None:
+            print("ERROR: Digital output evidence recording requires an output path")
             return False
-
-        if self._recording_stream is not None:
-            print("Recording already active")
-            return True
-
-        if self._loopback_device_info is None:
-            print("ERROR: No loopback device available")
-            return False
-
+        metadata = {
+            "device_index": self.device_idx,
+            "device_name": str(self.device_info.get("name", "")),
+            "hostapi": self.device_hostapi,
+            "runtime_output_channels": self.runtime_output_channels,
+            "tactile_output_channel_1based": self.tactile_output_channel + 1,
+            "audio_volume": float(self.audio_volume),
+            "tactile_volume": float(self.tactile_volume),
+            "sample_rate_hz": int(self._block_sr or self._click_sr or 44100),
+        }
         try:
-            # Clear any previous recording data and store path
-            with self._recording_lock:
-                self._recording_data.clear()
+            started = self._output_evidence.start(output_path, metadata=metadata)
+            self._recording_active = bool(started)
             self._recording_output_path = output_path
             self._recording_start_time = time.time()
-
-            def recording_callback(in_data, frame_count, time_info, status):
-                """Callback to capture audio data."""
-                if status:
-                    print(f"Recording status: {status}")
-
-                # Convert bytes to numpy array
-                audio_data = np.frombuffer(in_data, dtype=np.float32)
-
-                with self._recording_lock:
-                    self._recording_data.append(audio_data.copy())
-
-                return (None, pyaudio_wp.paContinue)
-
-            self._recording_stream = self._recording_pyaudio.open(
-                format=pyaudio_wp.paFloat32,
-                channels=self._recording_channels,
-                rate=self._recording_sr,
-                input=True,
-                input_device_index=self._loopback_device_info["index"],
-                frames_per_buffer=RECORDING_BUFFER_SIZE,
-                stream_callback=recording_callback
-            )
-
-            self._recording_stream.start_stream()
-            self._recording_active = True
-            print("WASAPI loopback recording started")
-            return True
-
+            print(f"Digital output evidence recording started: {output_path}")
+            return bool(started)
         except Exception as e:
-            print(f"ERROR starting WASAPI recording: {e}")
+            print(f"ERROR starting digital output evidence recording: {e}")
             import traceback
             traceback.print_exc()
             return False
 
     def stop_recording(self, output_path=None, interrupted=False):
-        """Stop WASAPI recording and save to file.
-
-        Args:
-            output_path: Path to save WAV file (None = use stored path, or don't save)
-            interrupted: If True, modify filename to indicate early stop with duration
-
-        Returns:
-            numpy array of recorded audio, or None on error
-        """
-        if self._recording_stream is None:
+        """Stop local digital output evidence recording and save it to WAV."""
+        if not self._output_evidence.active:
             print("Recording not active")
             return None
-
         try:
-            self._recording_stream.stop_stream()
-            self._recording_stream.close()
-            self._recording_stream = None
+            summary = self._output_evidence.stop(interrupted=interrupted)
+            self._output_evidence_summary = dict(summary)
             self._recording_active = False
-            print("WASAPI recording stopped")
-
-            # Concatenate all recorded chunks
-            with self._recording_lock:
-                if not self._recording_data:
-                    print("Warning: No audio data recorded")
-                    self._recording_output_path = None
-                    self._recording_start_time = None
-                    return None
-
-                recorded_audio = np.concatenate(self._recording_data)
-                self._recording_data.clear()
-
-            # Reshape to stereo if needed
-            if self._recording_channels > 1:
-                recorded_audio = recorded_audio.reshape(-1, self._recording_channels)
-
-            duration = len(recorded_audio) / self._recording_sr
-            print(f"Recorded {duration:.1f} seconds of audio")
-
-            # Determine save path
-            save_path = output_path or self._recording_output_path
-
-            if save_path:
-                # If interrupted, modify the filename to include duration
-                if interrupted:
-                    # Convert duration to mm-ss format
-                    mins = int(duration) // 60
-                    secs = int(duration) % 60
-                    duration_str = f"{mins:02d}m{secs:02d}s"
-
-                    # Insert "_STOPPED_AT_{duration}" before the extension
-                    base, ext = os.path.splitext(save_path)
-                    save_path = f"{base}_STOPPED_AT_{duration_str}{ext}"
-                    print(f"Recording was interrupted at {duration_str}")
-
-                # Ensure directory exists
-                os.makedirs(os.path.dirname(save_path), exist_ok=True)
-                sf.write(save_path, recorded_audio, self._recording_sr)
-                print(f"Recording saved: {save_path}")
-
-            # Clear stored path
             self._recording_output_path = None
             self._recording_start_time = None
-
-            return recorded_audio
-
+            print(
+                "Digital output evidence saved: "
+                f"{summary.get('path')} ({summary.get('duration_s', 0):.1f}s, "
+                f"dropped_buffers={summary.get('dropped_buffer_count')})"
+            )
+            path = str(summary.get("path") or output_path or "")
+            if path:
+                try:
+                    data, _sample_rate = sf.read(path, dtype="float32", always_2d=True)
+                    return data
+                except Exception:
+                    return None
+            return None
         except Exception as e:
-            print(f"ERROR stopping recording: {e}")
+            print(f"ERROR stopping digital output evidence recording: {e}")
             import traceback
             traceback.print_exc()
             return None
 
     def is_recording(self):
         """Check if recording is currently active."""
-        return self._recording_active
+        return bool(self._output_evidence.active or self._recording_active)
 
     def get_recording_duration(self):
         """Get current recording duration in seconds."""
+        if self._output_evidence.active:
+            return self._output_evidence.elapsed_s
         if self._recording_start_time is None:
             return 0.0
         return time.time() - self._recording_start_time
@@ -736,13 +729,19 @@ class AudioEngine:
         except Exception:
             return None
 
+    def _record_output_evidence_buffer(self, outdata, *, sample_rate=None):
+        """Copy the final callback output buffer into the local evidence recorder."""
+        if not getattr(self, "_output_evidence", None) or not self._output_evidence.active:
+            return
+        self._output_evidence.write_buffer(outdata, sample_rate=sample_rate or self._block_sr or self._click_sr)
+
     def _emit_audio_event(self, event_type, time_info=None, **payload):
         callback = self._audio_event_callback
         if callback is None:
             return
         payload.setdefault("event_type", event_type)
-        payload.setdefault("unix_time", time.time())
-        payload.setdefault("monotonic_time", time.perf_counter())
+        payload.setdefault("callback_perf_counter", time.perf_counter())
+        payload.setdefault("callback_unix_time", time.time())
         payload.setdefault("stream_output_buffer_dac_time", self._stream_time_value(time_info, "outputBufferDacTime"))
         payload.setdefault("stream_current_time", self._stream_time_value(time_info, "currentTime"))
         payload.setdefault("stream_input_buffer_adc_time", self._stream_time_value(time_info, "inputBufferAdcTime"))
@@ -759,16 +758,42 @@ class AudioEngine:
             "audio_sample_zero",
             time_info,
             sample_index=0,
+            buffer_start_sample=0,
+            sample_offset_in_buffer=0,
             sample_rate=self._block_sr,
             output_channels=self.runtime_output_channels,
             tactile_output_channel=self.tactile_output_channel,
         )
+
+    def _emit_scheduled_block_events(self, buffer_start_sample, frames, time_info=None):
+        schedule = self._block_event_schedule
+        if schedule is None:
+            return False
+        emitted = False
+        for scheduled_event in schedule.consume_buffer(buffer_start_sample, frames):
+            sample_offset = max(0, int(scheduled_event.sample_index) - int(buffer_start_sample))
+            payload = dict(scheduled_event.payload)
+            payload.update(
+                sample_index=int(scheduled_event.sample_index),
+                buffer_start_sample=int(buffer_start_sample),
+                sample_offset_in_buffer=int(sample_offset),
+                sample_rate=self._block_sr,
+                trigger_key=scheduled_event.trigger_key,
+                output_channels=self.runtime_output_channels,
+                tactile_output_channel=self.tactile_output_channel,
+            )
+            self._emit_audio_event(scheduled_event.event_type, time_info, **payload)
+            if scheduled_event.event_type == "audio_sample_zero":
+                self._audio_sample_zero_emitted = True
+            emitted = True
+        return emitted
 
     def _click_callback(self, outdata, frames, time_info, status):
         """Persistent output callback: background/instructions/blocks plus tactile click overlay."""
         if status:
             print(f"Click stream status: {status}")
         outdata.fill(0)
+        block_buffer_start_sample = None
 
         if hasattr(self, "bg_music_data") and not getattr(self, "bg_music_stop", True):
             try:
@@ -810,7 +835,11 @@ class AudioEngine:
                         self._block_finished.set()
                     else:
                         n = min(frames, remaining)
-                        if n > 0 and self._block_pos == 0:
+                        block_buffer_start_sample = self._block_pos
+                        if n > 0 and self._block_event_schedule is not None:
+                            event_frames = n + 1 if self._block_pos + n >= len(self._block_data) else n
+                            self._emit_scheduled_block_events(block_buffer_start_sample, event_frames, time_info)
+                        elif n > 0 and self._block_pos == 0:
                             self._emit_audio_sample_zero_once(time_info)
                         outdata[:n] += apply_output_volumes(
                             self._block_data[self._block_pos:self._block_pos + n],
@@ -824,6 +853,7 @@ class AudioEngine:
 
         if not self._click_active or self._click_data is None:
             np.clip(outdata, -1.0, 1.0, out=outdata)
+            self._record_output_evidence_buffer(outdata, sample_rate=self._block_sr if self._block_data is not None else self._click_sr)
             return
 
         with self._click_lock:
@@ -834,11 +864,14 @@ class AudioEngine:
                 tactile_channel = min(tactile_output_channel_for_channels(outdata.shape[1]), outdata.shape[1] - 1)
                 if self._click_pos == 0:
                     metadata = dict(self._click_metadata or {})
+                    marker_sample_rate = self._block_sr if block_buffer_start_sample is not None else self._click_sr
                     self._emit_audio_event(
                         "response_marker_start",
                         time_info,
-                        sample_index=max(0, self._block_pos - frames),
-                        sample_rate=self._click_sr,
+                        sample_index=block_buffer_start_sample if block_buffer_start_sample is not None else "",
+                        buffer_start_sample=block_buffer_start_sample if block_buffer_start_sample is not None else "",
+                        sample_offset_in_buffer=0,
+                        sample_rate=marker_sample_rate,
                         marker_channel=tactile_channel,
                         marker_gain=self._click_gain if self._click_gain is not None else self.tactile_volume,
                         **metadata,
@@ -851,6 +884,7 @@ class AudioEngine:
                 self._click_metadata = {}
                 self._click_gain = None
         np.clip(outdata, -1.0, 1.0, out=outdata)
+        self._record_output_evidence_buffer(outdata, sample_rate=self._block_sr if self._block_data is not None else self._click_sr)
 
     def _init_click_stream(self):
         """Initialize persistent low-latency click stream with optimized settings."""
@@ -914,11 +948,13 @@ class AudioEngine:
 
         if self._block_data is None or self.stop_flag:
             outdata.fill(0)
+            self._record_output_evidence_buffer(outdata, sample_rate=self._block_sr)
             return
 
         # Handle pause - output silence but don't advance position
         if self.paused:
             outdata.fill(0)
+            self._record_output_evidence_buffer(outdata, sample_rate=self._block_sr)
             return
 
         with self._block_lock:
@@ -928,10 +964,15 @@ class AudioEngine:
                 # Playback finished
                 outdata.fill(0)
                 self._block_finished.set()
+                self._record_output_evidence_buffer(outdata, sample_rate=self._block_sr)
                 return
 
             n = min(frames, remaining)
-            if n > 0 and self._block_pos == 0:
+            buffer_start_sample = self._block_pos
+            if n > 0 and self._block_event_schedule is not None:
+                event_frames = n + 1 if self._block_pos + n >= len(self._block_data) else n
+                self._emit_scheduled_block_events(buffer_start_sample, event_frames, time_info)
+            elif n > 0 and self._block_pos == 0:
                 self._emit_audio_sample_zero_once(time_info)
             # Apply volume in real time for instant slider response.
             outdata[:n] = apply_output_volumes(
@@ -948,8 +989,9 @@ class AudioEngine:
             # Check if finished
             if self._block_pos >= len(self._block_data):
                 self._block_finished.set()
+        self._record_output_evidence_buffer(outdata, sample_rate=self._block_sr)
 
-    def play_block(self, path, progress_callback=None, audio_event_callback=None) -> bool:
+    def play_block(self, path, progress_callback=None, audio_event_callback=None, block_event_schedule=None) -> bool:
         """Play a block WAV file with callback-based streaming for timing stability.
 
         Supported layouts:
@@ -992,6 +1034,9 @@ class AudioEngine:
             self._block_progress_callback = progress_callback
             self._audio_event_callback = audio_event_callback
             self._audio_sample_zero_emitted = False
+            self._block_event_schedule = block_event_schedule
+            if self._block_event_schedule is not None and hasattr(self._block_event_schedule, "reset"):
+                self._block_event_schedule.reset()
 
             with self._block_lock:
                 self._block_data = prepared.data
@@ -1026,6 +1071,7 @@ class AudioEngine:
                 with self._block_lock:
                     self._block_data = None
                 self._audio_event_callback = None
+                self._block_event_schedule = None
 
                 return not self.stop_flag
 
@@ -1088,6 +1134,7 @@ class AudioEngine:
 
             self._restart_persistent_output()
             self._audio_event_callback = None
+            self._block_event_schedule = None
             return not self.stop_flag
 
         except Exception as e:
@@ -1096,6 +1143,7 @@ class AudioEngine:
             traceback.print_exc()
             self._restart_persistent_output()
             self._audio_event_callback = None
+            self._block_event_schedule = None
             return False
     
     def pause(self):
@@ -1134,7 +1182,12 @@ class AudioEngine:
                 pass
             self._instr_stream = None
 
-        # Stop any active recording and SAVE it with interrupted marker
+        # Stop any active output evidence recording and save it as interrupted.
+        if self._output_evidence.active:
+            print("Saving interrupted digital output evidence recording...")
+            self.stop_recording(interrupted=True)
+
+        # Stop any legacy diagnostic recording and SAVE it with interrupted marker
         if self._recording_stream is not None:
             print("Saving interrupted recording...")
             self.stop_recording(interrupted=True)
@@ -1143,7 +1196,11 @@ class AudioEngine:
         """Full shutdown - close all streams including click stream and recording."""
         self.stop()
 
-        # Stop any active recording
+        # Stop any active output evidence recording.
+        if self._output_evidence.active:
+            self.stop_recording(interrupted=True)
+
+        # Stop any active legacy diagnostic recording
         if self._recording_stream is not None:
             try:
                 self._recording_stream.stop_stream()
@@ -1432,8 +1489,41 @@ class ClickTarget(tk.Canvas):
     
     def get_center_coords(self):
         """Get screen coordinates of center."""
-        return (self.winfo_rootx() + self.center, 
+        return (self.winfo_rootx() + self.center,
                 self.winfo_rooty() + self.center)
+
+    def get_mouse_bounds(self):
+        """Get click-target bounds in the same coordinate space as pynput."""
+        x1 = self.winfo_rootx()
+        y1 = self.winfo_rooty()
+        x2 = x1 + self.winfo_width()
+        y2 = y1 + self.winfo_height()
+        scale = self._mouse_coordinate_scale()
+        return (
+            int(round(x1 * scale)),
+            int(round(y1 * scale)),
+            int(round(x2 * scale)),
+            int(round(y2 * scale)),
+        )
+
+    def _mouse_coordinate_scale(self):
+        """Return Windows DPI scale between Tk logical coords and OS mouse coords."""
+        if sys.platform != "win32":
+            return 1.0
+        scales = [1.0]
+        try:
+            dpi = ctypes.windll.user32.GetDpiForWindow(int(self.winfo_id()))
+            if dpi:
+                scales.append(max(0.5, float(dpi) / 96.0))
+        except Exception:
+            pass
+        try:
+            factor = ctypes.windll.shcore.GetScaleFactorForDevice(0)
+            if factor:
+                scales.append(max(0.5, float(factor) / 100.0))
+        except Exception:
+            pass
+        return max(scales)
 
 
 # =============================================================================
@@ -1443,8 +1533,9 @@ class PPSExperimentApp:
     def __init__(self, root):
         self.root = root
         self.root.title("PPS Experiment Runner")
-        self.root.geometry("1200x850")  # Wide window: left panel controls, right panel click area + demographics
-        self.root.resizable(False, False)
+        self.root.geometry("1200x960")
+        self.root.minsize(1050, 760)
+        self.root.resizable(True, True)
 
         # Load saved settings
         self.settings = load_settings()
@@ -1456,6 +1547,19 @@ class PPSExperimentApp:
         # State
         self.participant_id = None
         self.participant_folder = None
+        self.current_run_package = None
+        self.run_setup_manifest = RUN_SETUP_MANIFEST
+        self.run_event_logger = None
+        self.run_events = None
+        self.block_schedules = {}
+        self.trigger_dictionary = None
+        self._run_block_by_path = {}
+        self._active_run_block = None
+        self._active_block_start_unix = 0.0
+        self._active_block_start_monotonic = 0.0
+        self._active_planned_logged = False
+        self._accepting_segment_responses = False
+        self._session_outputs_written = False
         self.current_part = 1  # 1 or 2 (Part1 or Part2)
         self.part1_files = []  # Block files for Part 1
         self.part2_files = []  # Block files for Part 2
@@ -1467,6 +1571,7 @@ class PPSExperimentApp:
         self.is_instruction_playing = False  # True when instruction audio is playing
         self.awaiting_click_to_start = False  # True when waiting for click to start next block
         self.demographics_completed = False  # True when demographics have been saved
+        self._operator_stop_requested = False
         
         # Audio engine
         self.device_idx, self.device_name, is_komplete = find_output_device()
@@ -1536,6 +1641,15 @@ class PPSExperimentApp:
     
     def _scan_participants(self):
         """Scan for all Pxx folders (dynamically detects any participant number)."""
+        if self.run_setup_manifest:
+            try:
+                participants = segment_run_setup_participants(Path(self.run_setup_manifest))
+                print(f"Segment 6 runner setup loaded: {self.run_setup_manifest}")
+                return participants
+            except Exception as exc:
+                print(f"ERROR: Could not read Segment 6 run setup: {exc}")
+                return []
+
         participants = []
         if not os.path.exists(STIMULI_DIR):
             print(f"ERROR: Stimuli directory not found: {STIMULI_DIR}")
@@ -1553,8 +1667,8 @@ class PPSExperimentApp:
         """Find block WAV files in a folder.
 
         Looks for block number in filename patterns like:
-        - P01_PPS_part1_1f_concatenated.wav â†’ Block 1 (number after 'part1_' or 'part2_')
-        - 1.wav, 1a_concatenated.wav â†’ Block 1 (leading digit)
+        - P01_PPS_part1_1f_concatenated.wav -> Block 1 (number after 'part1_' or 'part2_')
+        - 1.wav, 1a_concatenated.wav -> Block 1 (leading digit)
         Returns list of found block files (may have None for missing blocks).
         """
         import re
@@ -1606,6 +1720,281 @@ class PPSExperimentApp:
         except Exception as e:
             print(f"Warning: Could not read WAV duration: {e}")
             return DEFAULT_BLOCK_DURATION
+
+    def _run_source_summary(self) -> str:
+        if self.run_setup_manifest:
+            path = Path(self.run_setup_manifest)
+            try:
+                project_name = path.parents[1].name
+            except IndexError:
+                project_name = path.parent.name
+            return f"Prepared setup: {project_name} / {path.name}"
+        return f"Legacy stimuli folder: {STIMULI_DIR}"
+
+    def _runtime_status_summary(self) -> str:
+        if self.run_events is not None:
+            lsl = "LSL: active" if self.run_events.lsl_status.enabled else f"LSL: {self.run_events.lsl_status.message}"
+        else:
+            lsl = "LSL: armed after participant selection" if self._capture_options().enable_lsl else "LSL: disabled"
+        evidence_allowed = self._capture_options().start_backup_recording
+        evidence = "Audio evidence WAV: on" if evidence_allowed else "Audio evidence WAV: off"
+        buffer = f"Buffer: {AUDIO_BLOCKSIZE} frames, latency {int(STREAM_LATENCY * 1000)} ms"
+        return f"{lsl} | {evidence} | {buffer}"
+
+    def _capture_options(self) -> SessionCaptureOptions:
+        def _var(name: str, default: bool) -> bool:
+            variable = getattr(self, name, None)
+            if variable is None:
+                return bool(self.settings.get(name.replace("_var", ""), default))
+            try:
+                return bool(variable.get())
+            except Exception:
+                return default
+
+        return SessionCaptureOptions(
+            enable_lsl=_var("enable_lsl_var", True),
+            write_internal_xdf=_var("write_internal_xdf_var", True),
+            write_analysis_csvs=_var("write_analysis_csvs_var", True),
+            start_backup_recording=_var("start_backup_recording_var", True),
+        )
+
+    def _on_capture_option_changed(self) -> None:
+        options = self._capture_options()
+        self.settings.update(options.as_dict())
+        save_settings(self.settings)
+        if hasattr(self, "runtime_status_label"):
+            self.runtime_status_label.config(text=self._runtime_status_summary())
+
+    def _set_event_stream_status(self, text: str) -> None:
+        if not hasattr(self, "event_stream_label"):
+            return
+        def update() -> None:
+            self.event_stream_label.config(text=text)
+        if threading.current_thread() is threading.main_thread():
+            try:
+                update()
+            except RuntimeError:
+                pass
+            return
+        try:
+            self.root.after(0, update)
+        except RuntimeError:
+            pass
+
+    def _current_session_folder(self) -> Path | None:
+        if self.current_run_package is not None:
+            return Path(self.current_run_package.session_dir)
+        if self.participant_folder:
+            return Path(self.participant_folder)
+        return None
+
+    def _open_session_folder(self):
+        folder = self._current_session_folder()
+        if folder is None or not folder.exists():
+            messagebox.showwarning("No Session Folder", "Select a participant and prepare a session first.")
+            return
+        try:
+            os.startfile(str(folder))  # type: ignore[attr-defined]
+        except AttributeError:
+            subprocess.Popen(["explorer.exe", str(folder)])
+        except Exception as exc:
+            messagebox.showerror("Open Folder Failed", str(exc))
+
+    def _format_block_order_summary(self) -> str:
+        if self.current_run_package is None:
+            if self.participant_folder:
+                return f"Legacy folder: {self.participant_folder}"
+            return "No session prepared."
+
+        def _part_summary(part_number: int, files: list[str]) -> str:
+            if not files:
+                return f"Part {part_number}: none"
+            names = [Path(path).stem for path in files[:4]]
+            suffix = "" if len(files) <= 4 else f" + {len(files) - 4} more"
+            return f"Part {part_number}: {len(files)} blocks ({', '.join(names)}{suffix})"
+
+        return " | ".join([_part_summary(1, self.part1_files), _part_summary(2, self.part2_files)])
+
+    def _initialize_segment_event_logging(self):
+        if self.current_run_package is None:
+            self.run_event_logger = None
+            self.run_events = None
+            return
+        package = self.current_run_package
+        self.run_event_logger = SessionEventLogger(package.participant_id)
+        self.run_event_logger.session_id = package.session_id
+        self.block_schedules = _block_event_schedules(package)
+        self.trigger_dictionary = TriggerDictionary.from_schedules(self.block_schedules.values())
+        self.run_events = TimingEventHub(
+            self.run_event_logger,
+            enable_lsl=self._capture_options().enable_lsl,
+            session_id=package.session_id,
+            participant_id=package.participant_id,
+            trigger_dictionary=self.trigger_dictionary,
+        )
+        self._session_outputs_written = False
+        self.run_events.log(
+            "session_start",
+            session_dir=str(package.session_dir),
+            session_manifest=str(package.manifest_path),
+            execution_mode=package.execution_mode,
+            lsl_enabled=self.run_events.lsl_status.enabled,
+            lsl_message=self.run_events.lsl_status.message,
+            capture_options=self._capture_options().as_dict(),
+        )
+        if hasattr(self, "runtime_status_label"):
+            self.runtime_status_label.config(text=self._runtime_status_summary())
+        self._set_event_stream_status("Event stream: session armed, waiting for block playback")
+
+    def _segment_event_metadata(self, block) -> dict[str, object]:
+        metadata = dict(getattr(block, "metadata", {}) or {})
+        return {
+            f"block_{key}": value
+            for key, value in metadata.items()
+            if isinstance(key, str) and key and isinstance(value, (str, int, float, bool))
+        }
+
+    def _find_run_block_for_path(self, block_path: str | Path):
+        try:
+            return self._run_block_by_path.get(str(Path(block_path).resolve()))
+        except Exception:
+            return None
+
+    def _trial_duration_default(self, block) -> float:
+        trial_count = int(getattr(block, "trial_count", 0) or 0)
+        duration = float(getattr(block, "duration_s", 0.0) or 0.0)
+        if trial_count > 0 and duration > 0:
+            return duration / trial_count
+        return DEFAULT_BLOCK_DURATION
+
+    def _handle_segment_audio_event(self, payload: dict[str, object]):
+        if self.run_events is None or self.run_event_logger is None or self._active_run_block is None:
+            return
+        event_payload = dict(payload)
+        event_type = str(event_payload.get("event_type", "audio_event"))
+        event_payload.setdefault("block_number", self._active_run_block.index)
+        event_payload.setdefault("block_index", self._active_run_block.index)
+        event_payload.setdefault("block_label", self._active_run_block.label)
+        event_payload.setdefault("block_path", str(self._active_run_block.wav_path))
+        event_payload.update(self._segment_event_metadata(self._active_run_block))
+        if event_type == "audio_sample_zero":
+            self._accepting_segment_responses = True
+        self.run_events.enqueue_callback_event(event_payload)
+
+    def _has_segment_event(self, event_type: str, block_number: int) -> bool:
+        if self.run_event_logger is None:
+            return False
+        return any(
+            event.event_type == event_type
+            and str(event.payload.get("block_number", event.payload.get("block_index", ""))) == str(block_number)
+            for event in self.run_event_logger.events
+        )
+
+    def _log_block_anchor_fallback_events(self):
+        if self.run_event_logger is None or self._active_run_block is None:
+            return
+        self.run_event_logger.extend_planned_block_events(
+            self._active_run_block.manifest_path,
+            block_start_unix=self._active_block_start_unix,
+            block_start_monotonic=self._active_block_start_monotonic,
+            participant_id=self.current_run_package.participant_id if self.current_run_package else self.participant_id,
+            part_number=int(self._active_run_block.metadata.get("part_number", self.current_part)),
+            block_number=self._active_run_block.index,
+            trial_duration_s=self._trial_duration_default(self._active_run_block),
+            stimulus_segment_onset_s=0.0,
+        )
+
+    def _fallback_segment_planned_events_if_needed(self):
+        if (
+            self.run_events is None
+            or self.run_event_logger is None
+            or self._active_run_block is None
+        ):
+            return
+        self.run_events.flush_callback_events()
+        if self._has_segment_event("audio_sample_zero", self._active_run_block.index):
+            return
+        self.run_events.log(
+            "timing_anchor_fallback",
+            block_number=self._active_run_block.index,
+            block_index=self._active_run_block.index,
+            block_label=self._active_run_block.label,
+            reason="audio_sample_zero was not emitted by the audio engine",
+            timestamp_quality="block_anchor_fallback",
+        )
+        self._log_block_anchor_fallback_events()
+
+    def _record_segment_mouse_click(self, x=None, y=None, *, in_target=True):
+        if self.run_events is None:
+            return None
+        during_playback = bool(self.is_playing and self._accepting_segment_responses)
+        event = self.run_events.log(
+            "mouse_click",
+            x=x if x is not None else "",
+            y=y if y is not None else "",
+            in_target=bool(in_target),
+            during_playback=during_playback,
+            block_number=self._active_run_block.index if self._active_run_block else "",
+            block_label=self._active_run_block.label if self._active_run_block else "",
+            push_lsl=False,
+        )
+        self._set_event_stream_status("Event stream: mouse_click logged")
+        if during_playback:
+            return {
+                "mouse_event_id": event.event_id,
+                "mouse_event_unix_time": event.unix_time,
+                "mouse_event_monotonic_time": event.monotonic_time,
+                "_deferred_lsl_event": event,
+            }
+        self.run_events.push_deferred_event_marker(event)
+        return None
+
+    def _write_segment_event_outputs(self, *, completed: bool = False, interrupted: bool = False):
+        if self.current_run_package is None or self.run_event_logger is None or self.run_events is None:
+            return
+        if self._session_outputs_written:
+            return
+        self.run_events.flush_callback_events()
+        package = self.current_run_package
+        if completed or interrupted:
+            self.run_events.log("session_end", completed=bool(completed), interrupted=bool(interrupted))
+        events_csv = package.session_dir / "events.csv"
+        events_xdf = package.session_dir / "events.xdf"
+        lsl_markers_csv = package.session_dir / "lsl_markers.csv"
+        lsl_markers_xdf = package.session_dir / "lsl_markers.xdf"
+        trigger_dictionary_path = package.session_dir / "trigger_dictionary.json"
+        self.run_event_logger.write_csv(events_csv)
+        options = self._capture_options()
+        if options.write_internal_xdf:
+            self.run_event_logger.write_xdf(
+                events_xdf,
+                metadata={
+                    "participant_id": package.participant_id,
+                    "session_id": package.session_id,
+                    "session_manifest": str(package.manifest_path),
+                    "lsl_status": dict(self.run_events.lsl_status.__dict__),
+                    "capture_options": options.as_dict(),
+                },
+            )
+        if options.write_lsl_marker_mirror:
+            self.run_events.write_lsl_markers_csv(lsl_markers_csv)
+            self.run_events.write_lsl_markers_xdf(lsl_markers_xdf)
+        if options.write_trigger_dictionary:
+            self.run_events.write_trigger_dictionary(trigger_dictionary_path)
+        analysis = analyze_session_events(self.run_event_logger.events)
+        if options.write_analysis_csvs:
+            outputs = write_analysis_csvs(analysis, package.session_dir / "analysis", package.session_id)
+            outputs["timing_qc"] = _write_timing_qc_csv(
+                self.run_event_logger.events,
+                package.session_dir / "analysis" / f"{package.session_id}_timing_qc.csv",
+            )
+        summary = format_analysis_summary(analysis)
+        (package.session_dir / "analysis_summary.txt").write_text(summary + "\n", encoding="utf-8")
+        self._session_outputs_written = True
+        if hasattr(self, "runtime_status_label"):
+            self.runtime_status_label.config(text=self._runtime_status_summary())
+        self._set_event_stream_status(f"Event stream: wrote {len(self.run_event_logger.events)} events to session folder")
+        print(f"Segment runner events written: {events_csv}")
     
     def _build_ui(self):
         """Build the GUI with two-column layout."""
@@ -1614,7 +2003,7 @@ class PPSExperimentApp:
         main.pack(fill='both', expand=True)
 
         # Title
-        ttk.Label(main, text="PPS Breathing Experiment",
+        ttk.Label(main, text="PPS Experiment Runner",
                  font=('Arial', 18, 'bold')).pack(pady=(0, 10))
 
         # Two-column layout: left panel (controls) and right panel (click area + demographics)
@@ -1622,8 +2011,9 @@ class PPSExperimentApp:
         columns.pack(fill='both', expand=True)
 
         # LEFT PANEL - Controls
-        left_panel = ttk.Frame(columns)
-        left_panel.pack(side='left', fill='both', expand=False, padx=(0, 10))
+        left_panel = ttk.Frame(columns, width=520)
+        left_panel.pack(side='left', fill='y', expand=False, padx=(0, 10))
+        left_panel.pack_propagate(False)
 
         # RIGHT PANEL - Click area + Demographics
         right_panel = ttk.Frame(columns)
@@ -1633,12 +2023,63 @@ class PPSExperimentApp:
         # LEFT PANEL CONTENTS
         # =====================================================================
 
+        # === Dashboard Setup / Runtime Mode ===
+        setup_frame = ttk.LabelFrame(left_panel, text="Runner Source", padding=8)
+        setup_frame.pack(fill='x', pady=3)
+
+        mode_text = (
+            "Mode: Segment 5/6 participant block WAVs"
+            if self.run_setup_manifest
+            else "Mode: legacy participant WAV folder"
+        )
+        ttk.Label(setup_frame, text=mode_text, foreground='blue').pack(anchor='w')
+        source_text = self._run_source_summary()
+        self.run_source_label = ttk.Label(setup_frame, text=source_text, wraplength=390, foreground='gray')
+        self.run_source_label.pack(anchor='w', pady=(3, 0))
+        route_text = f"Audio route: {self.device_name or 'not detected'}"
+        self.audio_route_label = ttk.Label(setup_frame, text=route_text, wraplength=390, foreground='gray')
+        self.audio_route_label.pack(anchor='w', pady=(3, 0))
+        self.runtime_status_label = ttk.Label(
+            setup_frame,
+            text=self._runtime_status_summary(),
+            wraplength=490,
+            foreground='gray',
+        )
+        self.runtime_status_label.pack(anchor='w', pady=(3, 0))
+        self.event_stream_label = ttk.Label(
+            setup_frame,
+            text="Event stream: waiting for participant session",
+            wraplength=490,
+            foreground='gray',
+        )
+        self.event_stream_label.pack(anchor='w', pady=(3, 0))
+
+        capture_frame = ttk.LabelFrame(left_panel, text="Recording", padding=8)
+        capture_frame.pack(fill='x', pady=3)
+        self.enable_lsl_var = tk.BooleanVar(value=bool(self.settings.get("enable_lsl", True)))
+        self.write_internal_xdf_var = tk.BooleanVar(value=bool(self.settings.get("write_internal_xdf", True)))
+        self.write_analysis_csvs_var = tk.BooleanVar(value=bool(self.settings.get("write_analysis_csvs", True)))
+        self.start_backup_recording_var = tk.BooleanVar(value=bool(self.settings.get("start_backup_recording", True)))
+        for text, variable in (
+            ("LSL streams", self.enable_lsl_var),
+            ("events.xdf", self.write_internal_xdf_var),
+            ("analysis CSVs", self.write_analysis_csvs_var),
+            ("audio evidence WAV", self.start_backup_recording_var),
+        ):
+            ttk.Checkbutton(
+                capture_frame,
+                text=text,
+                variable=variable,
+                command=self._on_capture_option_changed,
+            ).pack(side='left', padx=(0, 12))
+        ttk.Label(capture_frame, text="CSV on", foreground='gray').pack(side='left', padx=(4, 0))
+
         # === General Instructions ===
         instr_frame = ttk.LabelFrame(left_panel, text="Instructions", padding=8)
         instr_frame.pack(fill='x', pady=3)
 
         self.general_instr_btn = ttk.Button(
-            instr_frame, text="â–¶ Play General Instructions",
+            instr_frame, text="Play General Instructions",
             command=self._play_general_instructions, width=25
         )
         self.general_instr_btn.pack(side='left', padx=5)
@@ -1654,7 +2095,7 @@ class PPSExperimentApp:
         bg_row.pack(fill='x')
 
         self.bg_music_btn = ttk.Button(
-            bg_row, text="â–¶ Play", command=self._toggle_background_music, width=10
+            bg_row, text="Play", command=self._toggle_background_music, width=10
         )
         self.bg_music_btn.pack(side='left', padx=5)
 
@@ -1719,7 +2160,7 @@ class PPSExperimentApp:
         test_row = ttk.Frame(vol_frame)
         test_row.pack(fill='x', pady=(8, 2))
         self.test_tactile_btn = ttk.Button(
-            test_row, text="ðŸ”Š Test Tactile (SOA 0)",
+            test_row, text="Test Tactile (SOA 0)",
             command=self._test_tactile_stimulus
         )
         self.test_tactile_btn.pack(side='left')
@@ -1742,6 +2183,31 @@ class PPSExperimentApp:
 
         self.status_label = ttk.Label(row, text="No participant", foreground='gray')
         self.status_label.pack(side='left', padx=10)
+
+        self.generate_all_btn = ttk.Button(
+            pf,
+            text="Generate All Sessions",
+            command=self._generate_all_participant_sessions,
+            state="normal" if self.run_setup_manifest else "disabled",
+        )
+        self.generate_all_btn.pack(anchor='w', pady=(8, 0))
+
+        participant_actions = ttk.Frame(pf)
+        participant_actions.pack(fill='x', pady=(8, 0))
+        self.open_session_btn = ttk.Button(
+            participant_actions,
+            text="Open Session Folder",
+            command=self._open_session_folder,
+            state="disabled",
+        )
+        self.open_session_btn.pack(side='left')
+        self.block_order_label = ttk.Label(
+            pf,
+            text="No session prepared.",
+            wraplength=390,
+            foreground='gray',
+        )
+        self.block_order_label.pack(anchor='w', pady=(6, 0))
 
         # === Part Selector ===
         self.part_frame = tk.Frame(left_panel, bg='#000000', padx=15, pady=8)
@@ -1795,16 +2261,31 @@ class PPSExperimentApp:
         btn_row = ttk.Frame(bf)
         btn_row.pack(fill='x', pady=(8, 0))
 
-        self.play_btn = ttk.Button(btn_row, text="â–¶ Play Block", command=self._play_block,
+        self.play_btn = ttk.Button(btn_row, text="Play Block", command=self._play_block,
                                    state='disabled', width=12)
         self.play_btn.pack(side='left', padx=5)
 
-        self.next_btn = ttk.Button(btn_row, text="Next Block â†’", command=self._next_block,
+        self.next_btn = ttk.Button(btn_row, text="Next Block", command=self._next_block,
                                    state='disabled', width=12)
         self.next_btn.pack(side='left', padx=5)
 
         self.pause_label = ttk.Label(btn_row, text="", foreground='orange')
         self.pause_label.pack(side='left', padx=10)
+
+        aux_btn_row = ttk.Frame(bf)
+        aux_btn_row.pack(fill='x', pady=(6, 0))
+        self.pause_control_btn = ttk.Button(
+            aux_btn_row, text="Pause / Resume", command=self._toggle_pause, state='disabled', width=16
+        )
+        self.pause_control_btn.pack(side='left', padx=5)
+        self.stop_btn = ttk.Button(
+            aux_btn_row, text="Stop Block", command=self._stop_current_block, state='disabled', width=12
+        )
+        self.stop_btn.pack(side='left', padx=5)
+        self.test_marker_btn = ttk.Button(
+            aux_btn_row, text="Send Test Marker", command=self._send_test_marker, state='disabled', width=16
+        )
+        self.test_marker_btn.pack(side='left', padx=5)
 
         # === Progress ===
         prog_frame = ttk.LabelFrame(left_panel, text="Progress", padding=8)
@@ -1817,9 +2298,27 @@ class PPSExperimentApp:
         self.progress_bar.pack(pady=5)
 
         # === Info ===
-        self.info_label = ttk.Label(left_panel, text="Shortcut: Ctrl+Alt+P to pause/resume",
-                                   foreground='blue', font=('Arial', 9))
+        self.info_label = ttk.Label(
+            left_panel,
+            text="Shortcut: Ctrl+Alt+P to pause/resume",
+            foreground='blue',
+            font=('Arial', 9),
+            wraplength=490,
+        )
         self.info_label.pack(pady=5)
+
+        # Keep the operational controls in the first visible window area.
+        for widget in (capture_frame, instr_frame, bg_frame, vol_frame, pf, self.part_frame, bf, prog_frame, self.info_label):
+            widget.pack_forget()
+        capture_frame.pack(fill='x', pady=3)
+        pf.pack(fill='x', pady=3)
+        self.part_frame.pack(fill='x', pady=3)
+        bf.pack(fill='x', pady=3)
+        prog_frame.pack(fill='x', pady=3)
+        instr_frame.pack(fill='x', pady=3)
+        vol_frame.pack(fill='x', pady=3)
+        bg_frame.pack(fill='x', pady=3)
+        self.info_label.pack(fill='x', pady=5)
 
         # =====================================================================
         # RIGHT PANEL CONTENTS
@@ -1827,7 +2326,7 @@ class PPSExperimentApp:
 
         # === Click Target (top of right panel) ===
         cf = ttk.LabelFrame(right_panel, text="Click Area (Participant Response)", padding=10)
-        cf.pack(pady=5, anchor='n')
+        cf.pack(pady=5, padx=10, anchor='nw')
 
         self.click_target = ClickTarget(cf)
         self.click_target.pack()
@@ -1860,7 +2359,7 @@ class PPSExperimentApp:
         gender_row.pack(fill='x', pady=3)
         ttk.Label(gender_row, text="Gender:", width=12).pack(side='left')
         self.demo_gender_var = tk.StringVar()
-        gender_options = ["mÃ¤nnlich", "weiblich", "ander", "prefer not to say"]
+        gender_options = ["male", "female", "other", "prefer not to say"]
         self.demo_gender_combo = ttk.Combobox(
             gender_row, textvariable=self.demo_gender_var,
             values=gender_options, width=18, state='readonly'
@@ -1883,7 +2382,7 @@ class PPSExperimentApp:
         save_row = ttk.Frame(demo_frame)
         save_row.pack(fill='x', pady=(10, 3))
         self.save_demo_btn = ttk.Button(
-            save_row, text="ðŸ’¾ Save Demographics",
+            save_row, text="Save Demographics",
             command=self._save_demographics, width=20
         )
         self.save_demo_btn.pack(side='left')
@@ -1897,10 +2396,17 @@ class PPSExperimentApp:
         """Set initial state: only participant selection enabled."""
         # Disable everything except participant selection
         self.general_instr_btn['state'] = 'disabled'
+        if hasattr(self, "generate_all_btn"):
+            self.generate_all_btn["state"] = "normal" if self.run_setup_manifest else "disabled"
+        if hasattr(self, "open_session_btn"):
+            self.open_session_btn["state"] = "disabled"
         self.block_combo['state'] = 'disabled'
         self.jump_btn['state'] = 'disabled'
         self.play_btn['state'] = 'disabled'
         self.next_btn['state'] = 'disabled'
+        self.pause_control_btn['state'] = 'disabled'
+        self.stop_btn['state'] = 'disabled'
+        self.test_marker_btn['state'] = 'disabled'
         self.bg_music_btn['state'] = 'disabled'
         self.part1_btn['state'] = 'disabled'
         self.part2_btn['state'] = 'disabled'
@@ -1912,6 +2418,8 @@ class PPSExperimentApp:
         self.save_demo_btn['state'] = 'disabled'
         # Show guidance
         self.info_label.config(text="Step 1: Select a participant to begin")
+        if hasattr(self, "block_order_label"):
+            self.block_order_label.config(text="No session prepared.", foreground='gray')
 
     def _enable_demographics_only(self):
         """Enable demographics section after participant is selected."""
@@ -1933,6 +2441,7 @@ class PPSExperimentApp:
             self.block_combo['state'] = 'readonly'
             self.jump_btn['state'] = 'normal'
             self.play_btn['state'] = 'normal'
+            self.test_marker_btn['state'] = 'normal'
             self._update_block_display()
         self.info_label.config(text="Ready. Click 'Play Block' or use mouse click to start.")
 
@@ -1944,6 +2453,9 @@ class PPSExperimentApp:
         self.jump_btn['state'] = 'disabled'
         self.play_btn['state'] = 'disabled'
         self.next_btn['state'] = 'disabled'
+        self.pause_control_btn['state'] = 'disabled'
+        self.stop_btn['state'] = 'disabled'
+        self.test_marker_btn['state'] = 'disabled'
 
     def _enable_controls_after_instruction(self):
         """Re-enable GUI controls after instruction playback."""
@@ -1955,6 +2467,7 @@ class PPSExperimentApp:
                 self.block_combo['state'] = 'readonly'
                 self.jump_btn['state'] = 'normal'
                 self.play_btn['state'] = 'normal'
+                self.test_marker_btn['state'] = 'normal'
                 self._update_block_display()
 
     def _play_general_instructions(self):
@@ -1968,7 +2481,7 @@ class PPSExperimentApp:
 
         self.is_instruction_playing = True
         self._disable_all_controls()
-        self.instr_status_label.config(text="â–¶ Playing instructions...", foreground='green')
+        self.instr_status_label.config(text="Playing instructions...", foreground='green')
         print("Playing General Instructions...")
 
         # Auto-start background music when audio plays
@@ -1983,7 +2496,7 @@ class PPSExperimentApp:
         """Handle instruction playback completion."""
         self.is_instruction_playing = False
         self._enable_controls_after_instruction()
-        self.instr_status_label.config(text="âœ“ Instructions complete", foreground='gray')
+        self.instr_status_label.config(text="Instructions complete", foreground='gray')
         print("General Instructions finished")
 
     def _toggle_background_music(self):
@@ -2001,7 +2514,7 @@ class PPSExperimentApp:
                     pass
                 self.bg_music_stream = None
             self.bg_music_playing = False
-            self.bg_music_btn.config(text="â–¶ Play")
+            self.bg_music_btn.config(text="Play")
             self.bg_status_label.config(text="Stopped", foreground='gray')
             print("Background music stopped")
         else:
@@ -2018,8 +2531,8 @@ class PPSExperimentApp:
 
             if self.bg_music_stream:
                 self.bg_music_playing = True
-                self.bg_music_btn.config(text="â¹ Stop")
-                self.bg_status_label.config(text="â™ª Playing", foreground='green')
+                self.bg_music_btn.config(text="Stop")
+                self.bg_status_label.config(text="Playing", foreground='green')
             else:
                 self.bg_status_label.config(text="Error", foreground='red')
 
@@ -2044,8 +2557,8 @@ class PPSExperimentApp:
 
         if self.bg_music_stream:
             self.bg_music_playing = True
-            self.bg_music_btn.config(text="â¹ Stop")
-            self.bg_status_label.config(text="â™ª Playing", foreground='green')
+            self.bg_music_btn.config(text="Stop")
+            self.bg_status_label.config(text="Playing", foreground='green')
             print("Background music auto-started")
 
     def _on_volume_change(self, value):
@@ -2127,7 +2640,7 @@ class PPSExperimentApp:
                     )
                 except Exception:
                     if self.audio and probe.shape[1] == 3 and self.audio._promote_runtime_to_four_channels():
-                        probe = tactile_probe_for_output(data, self.audio.runtime_output_channels, tactile_volume)
+                        probe = tactile_probe_for_output(data, self.audio.runtime_output_channels, self.audio.tactile_volume)
                         stream = sd.OutputStream(
                             samplerate=sr,
                             channels=probe.shape[1],
@@ -2174,7 +2687,7 @@ class PPSExperimentApp:
 
         # Save the demographics
         if save_demographics(self.participant_id, demographics):
-            self.demo_status_label.config(text="âœ“ Saved!", foreground='green')
+            self.demo_status_label.config(text="Saved", foreground='green')
             self.demographics_completed = True
             # Enable all experiment controls now that demographics are complete
             self._enable_all_experiment_controls()
@@ -2183,7 +2696,7 @@ class PPSExperimentApp:
             # Clear status after 3 seconds
             self.root.after(3000, lambda: self.demo_status_label.config(text=""))
         else:
-            self.demo_status_label.config(text="âœ— Save failed", foreground='red')
+            self.demo_status_label.config(text="Save failed", foreground='red')
 
     def _load_demographics_for_participant(self, participant_id):
         """Load and display demographics for a participant if they exist."""
@@ -2214,6 +2727,16 @@ class PPSExperimentApp:
         pid = self.participant_var.get()
         if not pid:
             return
+
+        if self.run_setup_manifest:
+            self._prepare_segment_participant(pid)
+            return
+
+        self.current_run_package = None
+        self.run_event_logger = None
+        self.run_events = None
+        self._run_block_by_path = {}
+        self._session_outputs_written = False
 
         folder = os.path.join(STIMULI_DIR, pid)
         if not os.path.exists(folder):
@@ -2249,7 +2772,11 @@ class PPSExperimentApp:
         self.current_block = 0
 
         # Update display
-        self.status_label.config(text=f"âœ“ {pid} loaded", foreground='green')
+        self.status_label.config(text=f"OK {pid} loaded", foreground='green')
+        if hasattr(self, "open_session_btn"):
+            self.open_session_btn["state"] = "normal"
+        if hasattr(self, "block_order_label"):
+            self.block_order_label.config(text=self._format_block_order_summary(), foreground='gray')
         self._update_block_display()
         self._update_part_display()
 
@@ -2268,6 +2795,94 @@ class PPSExperimentApp:
 
         print(f"Selected participant: {pid} (path: {folder})")
         print(f"  Part1: {len(self.part1_files)} blocks, Part2: {len(self.part2_files)} blocks")
+
+    def _prepare_segment_participant(self, pid):
+        """Generate/load one participant session from the Segment 5/6 dashboard manifests."""
+        try:
+            package = prepare_segment_run_package(
+                Path(self.run_setup_manifest),
+                pid,
+                session_root=Path(SESSION_ROOT),
+            )
+        except Exception as exc:
+            messagebox.showerror("Session Prepare Error", str(exc))
+            self.status_label.config(text="Prepare failed", foreground='red')
+            return
+
+        self.current_run_package = package
+        self.participant_id = package.participant_id
+        self.participant_folder = str(package.session_dir)
+        self._run_block_by_path = {str(block.wav_path.resolve()): block for block in package.blocks}
+        self._initialize_segment_event_logging()
+        self.current_part = 1
+        self.current_block = 0
+        self.part1_files = [
+            str(block.wav_path)
+            for block in package.blocks
+            if str(block.metadata.get("phase") or "single").lower() in {"single", "pre"}
+        ]
+        self.part2_files = [
+            str(block.wav_path)
+            for block in package.blocks
+            if str(block.metadata.get("phase") or "").lower() == "post"
+        ]
+        self.block_files = self.part1_files
+        missing1 = [i + 1 for i, path in enumerate(self.part1_files) if not os.path.exists(path)]
+        if not self.part1_files or missing1:
+            messagebox.showerror("Error", f"Prepared Part1 block files are missing: {missing1 if missing1 else 'No files found'}")
+            return
+
+        self.status_label.config(text=f"OK {pid} prepared", foreground='green')
+        if hasattr(self, "open_session_btn"):
+            self.open_session_btn["state"] = "normal"
+        if hasattr(self, "block_order_label"):
+            self.block_order_label.config(text=self._format_block_order_summary(), foreground='gray')
+        self._update_block_display()
+        self._update_part_display()
+        self._load_demographics_for_participant(package.participant_id)
+        self._enable_demographics_only()
+        if self.demographics_completed:
+            self._enable_all_experiment_controls()
+            self._start_mouse_listener()
+        self.info_label.config(text=f"Session ready: {package.session_dir.name}")
+        print(f"Prepared participant session: {package.manifest_path}")
+        print(f"  Part1: {len(self.part1_files)} blocks, Part2: {len(self.part2_files)} blocks")
+
+    def _generate_all_participant_sessions(self):
+        """Generate every participant session from Segment 6 on demand."""
+        if not self.run_setup_manifest:
+            messagebox.showwarning("No Segment 6 Setup", "Open the runner from a prepared dashboard setup first.")
+            return
+        self.generate_all_btn["state"] = "disabled"
+        self.status_label.config(text="Generating all...", foreground='blue')
+
+        def worker():
+            try:
+                packages = prepare_all_segment_run_packages(
+                    Path(self.run_setup_manifest),
+                    session_root=Path(SESSION_ROOT),
+                )
+                self.root.after(
+                    0,
+                    lambda: self._on_generate_all_finished(packages=packages, error=None),
+                )
+            except Exception as exc:
+                self.root.after(
+                    0,
+                    lambda exc=exc: self._on_generate_all_finished(packages=[], error=exc),
+                )
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def _on_generate_all_finished(self, *, packages, error):
+        self.generate_all_btn["state"] = "normal" if self.run_setup_manifest else "disabled"
+        if error is not None:
+            self.status_label.config(text="Bulk generation failed", foreground='red')
+            messagebox.showerror("Bulk Generation Error", str(error))
+            return
+        self.status_label.config(text=f"Generated {len(packages)} sessions", foreground='green')
+        if packages:
+            self.info_label.config(text=f"Generated sessions under {packages[0].session_dir.parent}")
     
     def _update_block_display(self):
         """Update block counter display."""
@@ -2348,6 +2963,8 @@ class PPSExperimentApp:
 
         self._update_part_display()
         self._update_block_display()
+        if hasattr(self, "block_order_label"):
+            self.block_order_label.config(text=self._format_block_order_summary(), foreground='gray')
         print(f"Manually switched to Part {part_num}")
 
     def _jump_to_block(self):
@@ -2409,7 +3026,7 @@ class PPSExperimentApp:
     def _start_actual_block_playback(self, block_path, block_num):
         """Start the actual block audio playback (after pre-block instruction).
 
-        Also starts WASAPI loopback recording if enabled.
+        Also starts local digital output evidence recording if enabled.
         """
         # Stop any existing recentering (from awaiting click phase) before starting fresh
         self._stop_recentering()
@@ -2417,25 +3034,58 @@ class PPSExperimentApp:
         self.is_instruction_playing = False
         self.is_playing = True
         self.is_paused = False
+        self._operator_stop_requested = False
         self.awaiting_click_to_start = False  # Clear the awaiting state
 
         # Update UI
         self.click_target.set_active(True)
         self.pause_label.config(text="")
+        self.pause_control_btn['state'] = 'normal'
+        self.stop_btn['state'] = 'normal'
+        self.test_marker_btn['state'] = 'normal'
 
         # Prepare recording path
-        recording_enabled = (PYAUDIOWPATCH_AVAILABLE and ENABLE_LOOPBACK_RECORDING
+        recording_enabled = (self._capture_options().start_backup_recording
+                            and PYAUDIOWPATCH_AVAILABLE and ENABLE_LOOPBACK_RECORDING
                             and self.audio is not None)
         recording_path = None
+        self._active_run_block = self._find_run_block_for_path(block_path)
+        self._active_planned_logged = False
+        self._accepting_segment_responses = False
+        self._active_block_start_unix = time.time()
+        self._active_block_start_monotonic = time.perf_counter()
+        block_event_schedule = None
+        if self.run_events is not None and self._active_run_block is not None:
+            block_event_schedule = self.block_schedules.get(self._active_run_block.index)
+            self.run_events.log(
+                "block_start",
+                unix_time=self._active_block_start_unix,
+                monotonic_time=self._active_block_start_monotonic,
+                block_number=self._active_run_block.index,
+                block_index=self._active_run_block.index,
+                block_label=self._active_run_block.label,
+                block_path=str(self._active_run_block.wav_path),
+                trial_count=self._active_run_block.trial_count,
+                **self._segment_event_metadata(self._active_run_block),
+            )
+            if block_event_schedule is not None:
+                self.run_events.log(
+                    "block_schedule_loaded",
+                    block_number=self._active_run_block.index,
+                    block_index=self._active_run_block.index,
+                    block_label=self._active_run_block.label,
+                    block_path=str(self._active_run_block.wav_path),
+                    manifest_path=str(self._active_run_block.manifest_path),
+                    scheduled_event_count=len(block_event_schedule),
+                )
 
         if recording_enabled:
             # Get the original block filename for metadata
             block_filename = os.path.basename(block_path)
             block_name = os.path.splitext(block_filename)[0]
 
-            # Create recording filename with full metadata
-            # Format: {ParticipantID}_Part{X}_Block{Y}_{OriginalBlockName}_recording.wav
-            recording_filename = f"{self.participant_id}_Part{self.current_part}_Block{block_num}_{block_name}_recording.wav"
+            # Create local audio-evidence filename with full metadata.
+            recording_filename = f"{self.participant_id}_Part{self.current_part}_Block{block_num}_{block_name}_audio_evidence.wav"
 
             # Create participant subfolder in recordings directory
             participant_recordings_dir = os.path.join(RECORDINGS_DIR, self.participant_id)
@@ -2462,24 +3112,41 @@ class PPSExperimentApp:
             # Start recording BEFORE playback (with small pre-buffer)
             # Pass recording_path so it's stored for interrupted saves
             if recording_enabled:
-                print("Starting WASAPI loopback recording...")
+                print("Starting digital output evidence recording...")
                 if not self.audio.start_recording(output_path=recording_path):
                     print("WARNING: Failed to start recording, continuing without it")
                 else:
-                    # Small delay to ensure recording is capturing
+                    # Small delay to ensure the output evidence tap is active.
                     time.sleep(RECORDING_PRE_BUFFER_SEC)
 
             def on_progress(elapsed):
                 self.root.after(0, lambda: self._update_progress(elapsed))
 
-            success = self.audio.play_block(block_path, progress_callback=on_progress)
+            success = self.audio.play_block(
+                block_path,
+                progress_callback=on_progress,
+                audio_event_callback=self._handle_segment_audio_event if self._active_run_block is not None else None,
+                block_event_schedule=block_event_schedule,
+            )
+            if self.run_events is not None:
+                self.run_events.flush_callback_events()
+            self._fallback_segment_planned_events_if_needed()
 
             # Stop recording AFTER playback and save (only if still recording)
             # Note: If user stopped early, stop() already called stop_recording(interrupted=True)
             if recording_enabled and self.audio.is_recording():
-                print("Stopping WASAPI recording (complete)...")
+                print("Stopping digital output evidence recording (complete)...")
                 self.audio.stop_recording(recording_path, interrupted=False)
 
+            if self.run_events is not None and self._active_run_block is not None:
+                self.run_events.log(
+                    "block_end",
+                    block_number=self._active_run_block.index,
+                    block_label=self._active_run_block.label,
+                    completed=bool(success),
+                )
+            self._accepting_segment_responses = False
+            self._active_run_block = None
             self.root.after(0, lambda: self._on_block_finished(success))
 
         threading.Thread(target=play_thread, daemon=True).start()
@@ -2504,9 +3171,21 @@ class PPSExperimentApp:
         self.is_playing = False
         self.is_paused = False
         self.pause_label.config(text="")
+        self.pause_control_btn['state'] = 'disabled'
+        self.stop_btn['state'] = 'disabled'
 
         block_num = self.current_block + 1
         print(f"Finished block {block_num}")
+
+        if not success or self._operator_stop_requested:
+            self._operator_stop_requested = False
+            self._stop_recentering()
+            self._stop_mouse_lock()
+            self.awaiting_click_to_start = False
+            self.click_target.set_active(False)
+            self.info_label.config(text=f"Block {block_num} stopped. Press 'Play Block' to restart it.")
+            self._enable_controls_after_instruction()
+            return
 
         # Play post-block instruction
         if os.path.exists(POST_BLOCK_INSTRUCTIONS):
@@ -2610,6 +3289,7 @@ class PPSExperimentApp:
         self._enable_controls_after_instruction()
         self.next_btn['state'] = 'disabled'
         self.play_btn['state'] = 'disabled'
+        self._write_segment_event_outputs(completed=True, interrupted=False)
         print(f"Experiment complete! ({part_text})")
     
     def _toggle_pause(self):
@@ -2632,8 +3312,44 @@ class PPSExperimentApp:
             self.is_paused = True
             self.audio.pause()
             self._pause_recentering()
-            self.pause_label.config(text="â¸ PAUSED")
+            self.pause_label.config(text="PAUSED")
             print(f"Paused block {block_num} at t = {elapsed:.1f}s")
+
+    def _stop_current_block(self):
+        """Stop current block playback and return controls to the operator."""
+        if not self.audio or not (self.is_playing or self.is_instruction_playing):
+            return
+        self._operator_stop_requested = True
+        if self.run_events is not None:
+            self.run_events.log(
+                "operator_stop",
+                block_number=self._active_run_block.index if self._active_run_block else "",
+                block_label=self._active_run_block.label if self._active_run_block else "",
+            )
+        self.info_label.config(text="Stopping current block...")
+        self.audio.stop()
+
+    def _send_test_marker(self):
+        """Send a visible operator test marker and tactile marker pulse."""
+        marker_metadata = None
+        if self.run_events is not None:
+            event = self.run_events.log(
+                "test_marker",
+                block_number=self._active_run_block.index if self._active_run_block else "",
+                block_index=self._active_run_block.index if self._active_run_block else "",
+                block_label=self._active_run_block.label if self._active_run_block else "",
+                during_playback=bool(self.is_playing),
+            )
+            marker_metadata = {
+                "mouse_event_id": event.event_id,
+                "mouse_event_unix_time": event.unix_time,
+                "mouse_event_monotonic_time": event.monotonic_time,
+                "operator_marker": True,
+            }
+            self._set_event_stream_status("Event stream: test_marker logged")
+        if self.audio:
+            self.audio.trigger_click(metadata=marker_metadata, marker_gain=RESPONSE_MARKER_GAIN if marker_metadata else None)
+        self.info_label.config(text="Test marker sent.")
     
     # -------------------------------------------------------------------------
     # Mouse Recentering
@@ -2757,10 +3473,17 @@ class PPSExperimentApp:
 
             # Check if click is within click target area
             click_in_target = self._is_click_in_target(x, y)
+            response_metadata = self._record_segment_mouse_click(x, y, in_target=click_in_target)
 
             # Always play click tone for any click (zero-lag feedback)
             if self.audio:
-                self.audio.trigger_click()
+                if response_metadata:
+                    deferred_event = response_metadata.pop("_deferred_lsl_event", None)
+                    self.audio.trigger_click(metadata=response_metadata, marker_gain=RESPONSE_MARKER_GAIN)
+                    if deferred_event is not None and self.run_events is not None:
+                        self.run_events.push_deferred_event_marker(deferred_event)
+                else:
+                    self.audio.trigger_click()
                 if click_in_target:
                     self.root.after(0, self.click_target.flash)
 
@@ -2774,6 +3497,13 @@ class PPSExperimentApp:
     def _is_click_in_target(self, x, y):
         """Check if screen coordinates are within the click target area."""
         try:
+            # pynput reports OS mouse coordinates. On DPI-scaled Windows
+            # desktops, Tk widget positions can be logical coordinates, so use
+            # the ClickTarget's DPI-adjusted bounds and keep the unscaled check
+            # as a fallback for non-scaled or DPI-aware environments.
+            mx1, my1, mx2, my2 = self.click_target.get_mouse_bounds()
+            if mx1 <= x <= mx2 and my1 <= y <= my2:
+                return True
             tx = self.click_target.winfo_rootx()
             ty = self.click_target.winfo_rooty()
             tw = self.click_target.winfo_width()
@@ -2830,6 +3560,7 @@ class PPSExperimentApp:
     # -------------------------------------------------------------------------
     def _on_close(self):
         """Clean up on window close."""
+        self._write_segment_event_outputs(completed=False, interrupted=bool(self.run_event_logger and not self._session_outputs_written))
         # Stop background music
         if self.bg_music_stream:
             try:
@@ -2851,37 +3582,14 @@ class PPSExperimentApp:
 # MAIN
 # =============================================================================
 def main(argv=None):
-    args = build_arg_parser().parse_args(argv)
-    configure_runtime_paths(args)
-
-    # List devices mode
-    if args.list_devices:
-        print("\n=== Audio Devices ===")
-        for i, dev in enumerate(sd.query_devices()):
-            out_ch = dev['max_output_channels']
-            in_ch = dev['max_input_channels']
-            if out_ch > 0 or in_ch > 0:
-                hostapi = _hostapi_name_for_device(dev)
-                flags = []
-                if out_ch >= BINAURAL_TACTILE_CHANNELS:
-                    flags.append("spatial-ok")
-                elif out_ch >= 2:
-                    flags.append("legacy-only")
-                if hostapi.lower() == "asio":
-                    flags.append("asio")
-                flag_text = f" [{' '.join(flags)}]" if flags else ""
-                sr = dev.get("default_samplerate", "")
-                low = dev.get("default_low_output_latency", "")
-                print(
-                    f"[{i}] {dev['name']} | {hostapi} | out:{out_ch}, in:{in_ch}, "
-                    f"sr:{sr}, low_out:{low}{flag_text}"
-                )
-        return 0
-    
-    root = tk.Tk()
-    app = PPSExperimentApp(root)
-    root.mainloop()
-    return 0
+    _ = build_arg_parser().parse_args(argv)
+    print(
+        "The legacy Tk participant runner has been retired as a public entry point.\n"
+        "Use the active packaged experiment runner: "
+        "`dist\\PPSExperimentRunner\\PPSExperimentRunner.exe` or `windows\\Launch_Experiment_Runner.bat`."
+    )
+    print("For device checks, use `pps-audio-stress --dry-run --device-query Komplete`.")
+    return 2
 
 
 if __name__ == "__main__":

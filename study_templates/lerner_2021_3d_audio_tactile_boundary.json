@@ -125,6 +125,25 @@
       "trial_randomization_strategy": "no_immediate_repeats",
       "block_order_randomization": "counterbalanced_rotation",
       "max_consecutive_same_trial_type": 2,
+      "trial_strips": [
+        {
+          "strip_id": "lerner-3d-boundary-source-row",
+          "label": "3D boundary source trial",
+          "audio_tactile_percentage": 100.0,
+          "catch_percentage": 0.0,
+          "baseline_percentage": 0.0,
+          "elements": [
+            {
+              "element_id": "lerner-3d-boundary-source",
+              "kind": "looming_stimulus",
+              "label": "3D audio-tactile source",
+              "source_label": "Dynamic pink 3D sound",
+              "source_labels": ["Dynamic pink 3D sound", "Flat white 3D sound"],
+              "randomized": true
+            }
+          ]
+        }
+      ],
       "participants": 8,
       "random_seed": 20210513
     }
