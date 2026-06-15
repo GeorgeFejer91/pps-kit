@@ -1450,6 +1450,8 @@ class SessionRunnerController:
         self._instruction_continue_event: threading.Event | None = None
         self._instruction_continue_source = ""
         self._instruction_wait_context: dict[str, Any] = {}
+        self._progress_callback: ProgressCallback | None = None
+        self._topup_draft_signature = ""
 
     def run(
         self,
@@ -1461,6 +1463,7 @@ class SessionRunnerController:
         interrupted = False
         owns_engine = self.audio_engine is None
         engine = self.audio_engine
+        self._progress_callback = progress_callback
         session_metadata_path = self._write_session_metadata()
         self._lsl_session_metadata = _redact_session_metadata_for_lsl(self._session_metadata)
         self.events.log(
@@ -1539,6 +1542,7 @@ class SessionRunnerController:
                 recording_started = self._start_backup_recording(engine, recording_path, block)
 
                 def _progress(elapsed_s: float, current_block: RunBlock = block) -> None:
+                    self._emit_topup_draft(progress_callback, expire=True, now_unix=block_start_unix + float(elapsed_s or 0.0))
                     if progress_callback:
                         display_index = display_by_block.get(current_block.index, current_block.index)
                         progress_callback(
@@ -1679,6 +1683,7 @@ class SessionRunnerController:
             self.events.log("session_error", message=str(exc))
             self._emit(event_callback, f"Run error: {exc}")
         finally:
+            self._progress_callback = None
             self._write_outputs()
             if owns_engine and self.audio_engine is not None and hasattr(self.audio_engine, "shutdown"):
                 self.audio_engine.shutdown()
@@ -1718,6 +1723,7 @@ class SessionRunnerController:
         if self.topup_ledger is None:
             return
         self.topup_ledger.observe_event(event)
+        self._emit_topup_draft(self._progress_callback, expire=False)
 
     def _persist_topup_state(self, *, part_number: int | str | None = None) -> None:
         if self.topup_ledger is None:
@@ -1727,6 +1733,87 @@ class SessionRunnerController:
         self._analysis_outputs.update(outputs)
         key = "topup_block_manifest_draft" if part_number is None else f"topup_block_manifest_part{_part_suffix(part_number)}_draft"
         self._analysis_outputs[key] = draft_path
+
+    def _emit_topup_draft(
+        self,
+        progress_callback: ProgressCallback | None,
+        *,
+        expire: bool,
+        part_number: int | str | None = None,
+        now_unix: float | None = None,
+    ) -> None:
+        if self.topup_ledger is None or progress_callback is None:
+            return
+        if expire:
+            self.topup_ledger.expire_due(float(now_unix if now_unix is not None else time.time()))
+        payload = self._topup_draft_payload(part_number=part_number)
+        signature = json.dumps(
+            {
+                "summary": payload.get("summary", {}),
+                "missed": [
+                    (
+                        item.get("part_number", ""),
+                        item.get("block_number", ""),
+                        item.get("trial_number", ""),
+                        item.get("trial_uid", ""),
+                        item.get("status", ""),
+                    )
+                    for item in payload.get("missed_trials", [])
+                ],
+            },
+            sort_keys=True,
+        )
+        if signature == self._topup_draft_signature:
+            return
+        self._topup_draft_signature = signature
+        try:
+            progress_callback(payload)
+        except Exception:
+            return
+
+    def _topup_draft_payload(self, *, part_number: int | str | None = None) -> dict[str, Any]:
+        if self.topup_ledger is None:
+            return {
+                "ui_event": "topup_draft",
+                "topup_enabled": False,
+                "part_number": "" if part_number is None else _part_suffix(part_number),
+                "summary": {},
+                "missed_trials": [],
+            }
+        entries = self.topup_ledger.missed_entries(include_topup=False)
+        if part_number is not None:
+            selected_part = _part_suffix(part_number)
+            entries = [entry for entry in entries if _part_suffix(getattr(entry, "part_number", "")) == selected_part]
+        missed_trials = [
+            {
+                "ledger_id": getattr(entry, "ledger_id", ""),
+                "status": getattr(entry, "status", ""),
+                "part_number": _part_suffix(getattr(entry, "part_number", "")),
+                "phase_label": getattr(entry, "phase_label", ""),
+                "block_number": getattr(entry, "block_number", ""),
+                "block_label": getattr(entry, "block_label", ""),
+                "trial_number": getattr(entry, "trial_number", ""),
+                "trial_uid": getattr(entry, "trial_uid", ""),
+                "trial_type": getattr(entry, "trial_type", ""),
+                "family": getattr(entry, "family", ""),
+                "row_label": getattr(entry, "row_label", ""),
+                "respiratory_phase": getattr(entry, "respiratory_phase", ""),
+                "soa_ms": getattr(entry, "soa_ms", ""),
+                "noise_type": getattr(entry, "noise_type", ""),
+                "sequence_labels": getattr(entry, "sequence_labels", ""),
+                "miss_reason": getattr(entry, "miss_reason", ""),
+            }
+            for entry in entries
+        ]
+        summary = self.topup_ledger.summary()
+        return {
+            "ui_event": "topup_draft",
+            "topup_enabled": True,
+            "part_number": "" if part_number is None else _part_suffix(part_number),
+            "summary": summary,
+            "missed_trial_count": len(missed_trials),
+            "missed_trials": missed_trials,
+        }
 
     def _instruction_slot(self, slot_name: str) -> dict[str, Any] | None:
         profile = _normalize_instruction_profile(self.package.instruction_profile)
@@ -2781,6 +2868,25 @@ def _timeline_payload_label(payload: dict[str, Any], *keys: str) -> str:
     return ""
 
 
+def _timeline_trial_type_label(payload: dict[str, Any]) -> str:
+    family = str(payload.get("family") or payload.get("Family") or "").strip()
+    trial_type = _timeline_payload_label(payload, "Trial_Type", "trial_type")
+    topup_role = _timeline_payload_label(payload, "topup_role", "Topup_Role")
+    if _truthy(payload.get("is_topup", payload.get("Is_Topup", False))):
+        role = topup_role.replace("_", " ").strip().title()
+        return f"Top-up {role}".strip() if role else "Top-up"
+    key = (trial_type or family).strip().lower().replace("-", "_").replace(" ", "_")
+    labels = {
+        "audio_tactile": "Audio-tactile",
+        "audiotactile": "Audio-tactile",
+        "baseline": "Baseline",
+        "catch": "Catch",
+        "catch_trial": "Catch",
+        "audio_only": "Catch",
+    }
+    return labels.get(key, trial_type or family or "Trial")
+
+
 def _timeline_tactile_events(schedule: BlockEventSchedule | None) -> list[dict[str, Any]]:
     if schedule is None:
         return []
@@ -2793,6 +2899,7 @@ def _timeline_tactile_events(schedule: BlockEventSchedule | None) -> list[dict[s
         if not math.isfinite(relative_time) or relative_time < 0:
             continue
         family = str(payload.get("family") or payload.get("Family") or "").strip()
+        trial_type_label = _timeline_trial_type_label(payload)
         row_label = _timeline_payload_label(
             payload,
             "Respiratory_Phase",
@@ -2814,7 +2921,7 @@ def _timeline_tactile_events(schedule: BlockEventSchedule | None) -> list[dict[s
                 "soa_ms": str(payload.get("soa_ms") or payload.get("SOA_ms") or ""),
                 "family": family,
                 "row_label": row_label,
-                "trial_label": row_label,
+                "trial_label": trial_type_label,
                 "clip_label": _timeline_payload_label(
                     payload,
                     "Fixed_Audio_Labels",
@@ -2877,8 +2984,8 @@ def _timeline_trial_segments(schedule: BlockEventSchedule | None) -> list[dict[s
             next_uid = sorted_uids[index + 1] if index + 1 < len(sorted_uids) else ""
             next_start = starts.get(next_uid, {}).get("start_s")
             end_s = float(next_start) if next_start not in (None, "") else start_s + 8.0
-        trial_type = _timeline_payload_label(payload, "Trial_Type", "trial_type")
-        trial_label = _timeline_payload_label(
+        trial_type = _timeline_trial_type_label(payload)
+        respiratory_label = _timeline_payload_label(
             payload,
             "Respiratory_Phase",
             "respiratory_phase",
@@ -2912,8 +3019,8 @@ def _timeline_trial_segments(schedule: BlockEventSchedule | None) -> list[dict[s
                 "start_s": start_s,
                 "end_s": float(end_s),
                 "start_sample_index": int(start.get("sample_index", 0)),
-                "clip_label": clip_label or trial_type or "Trial",
-                "trial_label": trial_label or trial_type or "Trial",
+                "clip_label": respiratory_label or clip_label or "Trial",
+                "trial_label": trial_type or "Trial",
                 "family": str(payload.get("family") or payload.get("Family") or ""),
                 "trial_type": trial_type,
             }

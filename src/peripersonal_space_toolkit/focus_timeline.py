@@ -37,6 +37,15 @@ class TimelineTrialSegment:
 
 
 @dataclass
+class TimelineInstructionSegment:
+    slot: str
+    label: str
+    start_s: float
+    end_s: float
+    color: str = ""
+
+
+@dataclass
 class TimelineClickMarker:
     click_id: int
     time_s: float
@@ -55,6 +64,7 @@ class TactileTimelineState:
         self.duration_s = 0.0
         self.elapsed_s = 0.0
         self.active = False
+        self.instruction_segments: list[TimelineInstructionSegment] = []
         self.cues: list[TactileTimelineCue] = []
         self.trial_segments: list[TimelineTrialSegment] = []
         self.click_markers: list[TimelineClickMarker] = []
@@ -67,6 +77,7 @@ class TactileTimelineState:
         block_index: Any = "",
         block_label: Any = "",
         duration_s: Any = 0.0,
+        instruction_segments: list[dict[str, Any]] | None = None,
         tactile_events: list[dict[str, Any]] | None = None,
         trial_segments: list[dict[str, Any]] | None = None,
     ) -> None:
@@ -77,6 +88,24 @@ class TactileTimelineState:
         self.duration_s = max(0.0, _float(duration_s, default=0.0))
         self.elapsed_s = 0.0
         self.active = True
+        instructions: list[TimelineInstructionSegment] = []
+        for segment in instruction_segments or []:
+            start_s = _float(segment.get("start_s"), default=math.nan)
+            end_s = _float(segment.get("end_s"), default=math.nan)
+            if not math.isfinite(start_s) or start_s < 0:
+                continue
+            if not math.isfinite(end_s) or end_s <= start_s:
+                end_s = start_s + 0.001
+            instructions.append(
+                TimelineInstructionSegment(
+                    slot=str(segment.get("slot") or "").strip(),
+                    label=str(segment.get("label") or segment.get("slot") or "Instruction").strip(),
+                    start_s=start_s,
+                    end_s=end_s,
+                    color=str(segment.get("color") or "").strip(),
+                )
+            )
+        self.instruction_segments = sorted(instructions, key=lambda item: (item.start_s, item.end_s, item.slot))
         cues: list[TactileTimelineCue] = []
         for index, event in enumerate(tactile_events or [], start=1):
             time_s = _float(event.get("time_s"), default=math.nan)
@@ -129,6 +158,7 @@ class TactileTimelineState:
         self.duration_s = 0.0
         self.elapsed_s = 0.0
         self.active = False
+        self.instruction_segments = []
         self.cues = []
         self.trial_segments = []
         self.click_markers = []

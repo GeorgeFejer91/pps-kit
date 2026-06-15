@@ -718,6 +718,7 @@ class _MockAudioEngine:
         self.marker_gain = None
         self.recordings: list[str] = []
         self.on_audio_started = None
+        self.progress_values = [0.0, 0.01]
 
     def play_block(self, path: str, progress_callback=None, audio_event_callback=None, block_event_schedule=None) -> bool:
         self.played.append(path)
@@ -772,8 +773,8 @@ class _MockAudioEngine:
                     }
                 )
         if progress_callback:
-            progress_callback(0.0)
-            progress_callback(0.01)
+            for value in self.progress_values:
+                progress_callback(value)
         return not self.stopped
 
     def play_instruction(self, path: str, on_complete=None) -> bool:
@@ -892,13 +893,40 @@ def test_session_runner_emits_tactile_timeline_schedule_progress(tmp_path: Path)
     assert tactile_events[0]["family"] == "audio_tactile"
     assert tactile_events[0]["soa_ms"] == "10"
     assert tactile_events[0]["row_label"] == "Inhale"
-    assert tactile_events[0]["trial_label"] == "Inhale"
+    assert tactile_events[0]["trial_label"] == "Audio-tactile"
     assert tactile_events[0]["clip_label"]
     trial_segments = schedule["trial_segments"]
     assert len(trial_segments) >= 1
     assert trial_segments[0]["trial_number"] == 1
-    assert trial_segments[0]["trial_label"] == "Inhale"
+    assert trial_segments[0]["clip_label"] == "Inhale"
+    assert trial_segments[0]["trial_label"] == "Audio-tactile"
     assert trial_segments[0]["start_s"] < trial_segments[0]["end_s"]
+
+
+def test_session_runner_emits_live_topup_draft_after_response_window(tmp_path: Path):
+    run_manifest = _segment_run_setup_fixture(tmp_path)
+    package = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=tmp_path / "sessions",
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+    engine = _MockAudioEngine()
+    engine.progress_values = [0.0, 4.0]
+    controller = SessionRunnerController(package, audio_engine=engine, enable_topup=True)
+    progress: list[dict[str, object]] = []
+
+    result = controller.run(progress_callback=progress.append, event_callback=lambda _message: None)
+
+    assert result.completed
+    draft_payloads = [payload for payload in progress if payload.get("ui_event") == "topup_draft"]
+    assert draft_payloads
+    final_draft = draft_payloads[-1]
+    assert final_draft["topup_enabled"] is True
+    assert final_draft["missed_trial_count"] == 1
+    missed = final_draft["missed_trials"][0]
+    assert missed["trial_type"] == "Audio-Tactile"
+    assert missed["respiratory_phase"] == "Inhale"
 
 
 def test_session_runner_logs_instruction_events_without_trial_response(tmp_path: Path):

@@ -83,7 +83,11 @@ def _write_manifest(output_dir: Path) -> Path:
             "wav_path": str(session_dir / "blocks" / f"block_{index:02d}.wav"),
             "trial_count": 34,
             "duration_s": 272.0,
-            "metadata": {"phase_label": "Condition 1" if index <= 6 else "Condition 2"},
+            "metadata": {
+                "part_number": 1 if index <= 6 else 2,
+                "phase": "pre" if index <= 6 else "post",
+                "phase_label": "Condition 1" if index <= 6 else "Condition 2",
+            },
         }
         for index in range(1, 13)
     ]
@@ -307,6 +311,7 @@ def _audit_window(
         "stop_button": window.stop_button,
         "close_button": window.close_button,
         "output_summary": window.output_summary,
+        "part_selector_widget": window.part_selector_widget,
         "block_plan_widget": window.block_plan_widget,
         "tactile_timeline_widget": window.tactile_timeline_widget,
         "response_panel": window.response_panel,
@@ -320,6 +325,10 @@ def _audit_window(
     else:
         critical_widgets["data_selection_panel"] = window.data_selection_panel
         critical_widgets["settings_panel"] = window.settings_panel
+    if window.instruction_plan_widget.isVisible():
+        critical_widgets["instruction_plan_widget"] = window.instruction_plan_widget
+    if window.topup_draft_widget.isVisible():
+        critical_widgets["topup_draft_widget"] = window.topup_draft_widget
     widget_metrics: dict[str, dict[str, int]] = {}
     for name, widget in critical_widgets.items():
         rect = _widget_rect(window.dialog, widget)

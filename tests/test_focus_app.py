@@ -77,8 +77,10 @@ def _write_focus_preview_block_csv(path: Path, *, block_offset: int = 0) -> None
 def _write_focus_preview_session_manifest(tmp_path: Path) -> Path:
     block_1_csv = tmp_path / "block_01.csv"
     block_2_csv = tmp_path / "block_02.csv"
+    block_3_csv = tmp_path / "block_03.csv"
     _write_focus_preview_block_csv(block_1_csv)
     _write_focus_preview_block_csv(block_2_csv, block_offset=10)
+    _write_focus_preview_block_csv(block_3_csv, block_offset=20)
     blocks = [
         {
             "index": 1,
@@ -98,8 +100,30 @@ def _write_focus_preview_session_manifest(tmp_path: Path) -> Path:
             "duration_s": 16.0,
             "metadata": {"part_number": 1, "phase": "pre", "phase_label": "Condition 1", "sample_rate_hz": 1000},
         },
+        {
+            "index": 3,
+            "label": "Block 03",
+            "manifest_path": str(block_3_csv),
+            "wav_path": str(tmp_path / "block_03.wav"),
+            "trial_count": 2,
+            "duration_s": 16.0,
+            "metadata": {"part_number": 2, "phase": "post", "phase_label": "Condition 2", "sample_rate_hz": 1000},
+        },
     ]
-    return _write_minimal_session_manifest(tmp_path, blocks=blocks)
+    manifest = _write_minimal_session_manifest(tmp_path, blocks=blocks)
+    payload = json.loads(manifest.read_text(encoding="utf-8"))
+    payload["instruction_profile"] = {
+        "schema": "pps-run-instructions.v1",
+        "slots": [
+            {"slot": "before_experiment", "label": "General", "enabled": True, "path": "general.wav", "duration_s": 85.7, "continue_mode": "button"},
+            {"slot": "before_block", "label": "Pre-Block", "enabled": True, "path": "pre_block.wav", "duration_s": 8.4, "continue_mode": "click"},
+            {"slot": "after_block", "label": "Post-Block", "enabled": True, "path": "post_block.wav", "duration_s": 8.8, "continue_mode": "click"},
+            {"slot": "between_conditions", "label": "Interim", "enabled": True, "path": "interim.wav", "duration_s": 10.1, "continue_mode": "button"},
+            {"slot": "after_experiment", "label": "Finish", "enabled": True, "path": "finish.wav", "duration_s": 7.0, "continue_mode": "button"},
+        ],
+    }
+    manifest.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return manifest
 
 
 def test_focus_mode_run_plan_numbers_topup_slots_by_play_order():
@@ -123,9 +147,9 @@ def test_focus_mode_run_plan_numbers_topup_slots_by_play_order():
     assert "6 Block 06" in plan
     assert "7 Top-up if needed" in plan
     assert "Part 02:" in plan
-    assert "8 Block 07" in plan
-    assert "13 Block 12" in plan
-    assert "14 Top-up if needed" in plan
+    assert "1 Block 07" in plan
+    assert "6 Block 12" in plan
+    assert "7 Top-up if needed" in plan
     assert focus_app._run_plan_total(package, include_topup_slots=True) == 14
 
 
@@ -228,6 +252,8 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert "Participant Setup" in joined
     assert "Recording" in joined
     assert "Experiment Control" in joined
+    assert "Part 1" in joined
+    assert "Part 2" in joined
     if window.layout_profile.screen_class != "constrained":
         assert "Block Order" in joined
         assert "Stimulus / Tactile / Click Timeline" in joined
@@ -243,6 +269,9 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert window.participant_code_combo.objectName() == "runnerParticipantCombo"
     assert not window.participant_code_combo.isEditable()
     assert window.participant_code_combo.currentData() == "P001"
+    assert window.part_buttons["1"].isEnabled()
+    assert not window.part_buttons["2"].isEnabled()
+    assert window.preview_display_block_index is None
     placeholders = [line.placeholderText() for line in window.dialog.findChildren(q["QLineEdit"])]
     assert "Participant code" not in placeholders
     assert window.include_name_lsl_checkbox.objectName() == "nameSharingCheckbox"
@@ -374,6 +403,14 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
     window.dialog.show()
     app.processEvents()
 
+    assert window.selected_part_key == "1"
+    assert window.part_buttons["1"].isEnabled()
+    assert window.part_buttons["2"].isEnabled()
+    assert window.preview_display_block_index == 1
+    assert [segment.clip_label for segment in window.timeline_preview_state.trial_segments] == ["Inhale", "Exhale"]
+    assert [segment.trial_label for segment in window.timeline_preview_state.trial_segments] == ["Audio-tactile", "Baseline"]
+    assert [segment.label for segment in window.timeline_preview_state.instruction_segments] == ["General", "Pre-block", "Post-block"]
+
     QTest.mouseClick(
         window.block_plan_widget,
         q["Qt"].MouseButton.LeftButton,
@@ -385,7 +422,8 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
     assert window.selected_display_block_index == 1
     assert window.preview_display_block_index == 1
     assert window._timeline_display_state() is window.timeline_preview_state
-    assert [segment.trial_label for segment in window.timeline_preview_state.trial_segments] == ["Inhale", "Exhale"]
+    assert [segment.clip_label for segment in window.timeline_preview_state.trial_segments] == ["Inhale", "Exhale"]
+    assert [segment.trial_label for segment in window.timeline_preview_state.trial_segments] == ["Audio-tactile", "Baseline"]
     assert [cue.soa_ms for cue in window.timeline_preview_state.cues] == ["300", "800"]
     assert "Block preview: Block 1 | 2 trials | 2 tactile cues" in window.block_preview_label.text()
 
@@ -401,6 +439,34 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
     assert window.preview_display_block_index == 3
     assert not window.timeline_preview_state.trial_segments
     assert "top-up" in window.block_preview_label.text()
+
+    window._handle_topup_draft(
+        {
+            "ui_event": "topup_draft",
+            "missed_trials": [
+                {
+                    "part_number": "1",
+                    "block_number": "1",
+                    "trial_number": "2",
+                    "trial_uid": "T002",
+                    "trial_type": "Baseline",
+                    "family": "baseline",
+                    "respiratory_phase": "Exhale",
+                    "soa_ms": "800",
+                }
+            ],
+        }
+    )
+    app.processEvents()
+    assert len(window._visible_topup_draft_items()) == 1
+    assert "1 missed trial(s) in draft" in window.block_preview_label.text()
+
+    QTest.mouseClick(window.part_buttons["2"], q["Qt"].MouseButton.LeftButton)
+    app.processEvents()
+    assert window.selected_part_key == "2"
+    assert [item["part_block_number"] for item in window.block_plan_items] == [1, 2]
+    assert window.preview_display_block_index == 4
+    assert "Condition 2" in window.timeline_preview_state.phase_label
 
     window._handle_block_schedule(
         {
@@ -421,16 +487,16 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
                     "trial_uid": "T001",
                     "start_s": 0.0,
                     "end_s": 8.0,
-                    "clip_label": "Frontal looming",
-                    "trial_label": "Inhale",
+                    "clip_label": "Inhale",
+                    "trial_label": "Audio-tactile",
                 },
                 {
                     "trial_number": 2,
                     "trial_uid": "T002",
                     "start_s": 8.0,
                     "end_s": 16.0,
-                    "clip_label": "Baseline",
-                    "trial_label": "Exhale",
+                    "clip_label": "Exhale",
+                    "trial_label": "Baseline",
                 },
             ],
         }
@@ -514,10 +580,17 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
         window.close_button,
         window.processing_panel,
         window.output_panel,
+        window.part_selector_widget,
+        window.part_buttons["1"],
+        window.part_buttons["2"],
         window.block_plan_widget,
         window.output_summary,
         window.tactile_timeline_widget,
     ]
+    if window.topup_draft_widget.isVisible():
+        visible_widgets.append(window.topup_draft_widget)
+    if window.instruction_plan_widget.isVisible():
+        visible_widgets.append(window.instruction_plan_widget)
     if window.block_preview_label.isVisible():
         visible_widgets.append(window.block_preview_label)
     for widget in visible_widgets:
