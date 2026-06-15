@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260615-dashboard-sync">
+  <link rel="stylesheet" href="styles.css?v=20260615-dashboard-tabs">
 </head>
 <body>
   <div class="app-shell">
@@ -24,21 +24,12 @@
         <a href="#schedule" data-step-link="schedule"><span>5 Blocks</span><strong class="decision-state not-ready" data-step-state="schedule" aria-label="Block CSV preview not ready" title="Block CSV preview not ready">X</strong></a>
         <a href="#run" data-step-link="run"><span>6 Prepare Experiment</span><strong class="decision-state not-ready" data-step-state="run" aria-label="Prepare experiment not ready" title="Prepare experiment not ready">X</strong></a>
       </nav>
-      <div class="profile-mode-panel" aria-label="Profile editing mode">
-        <div class="layout-title">Study Mode</div>
-        <span id="profile-mode-status" class="status-label">checking</span>
-        <button id="edit-profile-rail" type="button">Edit As New Study</button>
-      </div>
       <div class="companion-panel" aria-label="Local companion backend">
         <div class="layout-title">Local Companion</div>
         <span id="connection-status" class="status-label required">checking</span>
         <label for="backend-url">Backend URL</label>
         <input id="backend-url" type="url" autocomplete="off">
         <button id="connect-backend" type="button">Connect</button>
-        <div class="download-links">
-          <a id="download-software" class="button-link" href="https://github.com/GeorgeFejer91/peripersonal-space-toolkit/releases/latest/download/PPS-Toolkit-Downloader.exe">Download Installer</a>
-          <a id="download-full-package" class="button-link secondary-link" href="https://zenodo.org/search?q=%22peripersonal-space-toolkit%22">Full Package</a>
-        </div>
       </div>
       <div class="rail-note">
         <span>Qt UI remains available as</span>
@@ -47,18 +38,15 @@
     </aside>
 
     <main class="workspace">
-      <header class="topbar">
-        <div>
-          <div class="product-label">HTML dashboard</div>
-          <div id="design-title" class="design-title">Loading...</div>
-        </div>
-        <div class="top-actions">
-          <span id="workflow-pill" class="status-label">checking</span>
-          <button id="refresh-state" type="button">Refresh</button>
-          <button id="apply-design" type="button" class="primary">Apply Design</button>
-        </div>
+      <header class="topbar site-tabs" aria-label="Primary dashboard pages">
+        <nav class="site-tab-list" aria-label="Dashboard tabs">
+          <button class="site-tab active" type="button" data-page-tab="toolkit" aria-selected="true">PPS Toolkit</button>
+          <button class="site-tab" type="button" data-page-tab="documentation" aria-selected="false">Documentation</button>
+          <button class="site-tab" type="button" data-page-tab="downloads" aria-selected="false">Downloads</button>
+        </nav>
       </header>
 
+      <div id="toolkit-page" class="page-view toolkit-page active" data-page-panel="toolkit">
       <section class="decision-segment" aria-labelledby="study-segment-title">
         <div class="segment-heading">
           <span class="segment-kicker">Segment 0</span>
@@ -70,6 +58,19 @@
             <div class="panel-heading">
               <div class="panel-title">Study Profile <span class="step-badge" data-step-badge="study"></span></div>
               <span id="preload-asset-status" class="status-label">inventory</span>
+            </div>
+            <div class="segment-zero-status-card" aria-label="Active study controls">
+              <div class="active-design-block">
+                <div class="product-label">Active design</div>
+                <div id="design-title" class="design-title">Loading...</div>
+              </div>
+              <div class="segment-zero-status-actions">
+                <span id="workflow-pill" class="status-label">checking</span>
+                <span id="profile-mode-status" class="status-label">checking</span>
+                <button id="refresh-state" type="button">Refresh</button>
+                <button id="edit-profile-rail" type="button">Edit As New Study</button>
+                <button id="apply-design" type="button" class="primary">Apply Design</button>
+              </div>
             </div>
             <div class="field-row">
               <label for="template-select">Study/profile preload</label>
@@ -506,6 +507,75 @@
           </section>
         </section>
       </section>
+      </div>
+
+      <section id="documentation-page" class="page-view info-page" data-page-panel="documentation" hidden>
+        <div class="info-page-heading">
+          <span class="segment-kicker">Documentation</span>
+          <h1>PPS Toolkit Reference</h1>
+        </div>
+        <div class="info-card-grid">
+          <article class="info-card">
+            <h2>Windows App</h2>
+            <p>Install, launch, and operate the dashboard and packaged experiment runner on a research PC.</p>
+            <a class="button-link" href="../../../docs/WINDOWS_APP.md">Open Windows App Guide</a>
+          </article>
+          <article class="info-card">
+            <h2>Dashboard Workflow</h2>
+            <p>Review how the browser dashboard works as a local orchestrator for profile setup, stimulus baking, block generation, and native runner handoff.</p>
+            <a class="button-link" href="../../../docs/GITHUB_PAGES_DASHBOARD.md">Open Dashboard Guide</a>
+          </article>
+          <article class="info-card">
+            <h2>Stimulus Designer</h2>
+            <p>Inspect the stimulus-design concepts that sit behind trajectory, source, trial sequence, tactile, and baseline controls.</p>
+            <a class="button-link" href="../../../docs/STIMULUS_DESIGNER.md">Open Stimulus Guide</a>
+          </article>
+          <article class="info-card">
+            <h2>Published Profiles</h2>
+            <p>Check the current status of published-study recreations and which audiotactile PPS task mechanics are supported.</p>
+            <a class="button-link" href="../../../docs/PUBLISHED_STUDY_RECREATION_STATUS.md">Open Profile Status</a>
+          </article>
+          <article class="info-card">
+            <h2>Hardware Setup</h2>
+            <p>Review audio routing, tactile-channel expectations, and validation boundaries for laboratory hardware.</p>
+            <a class="button-link" href="../../../docs/hardware_setup.md">Open Hardware Setup</a>
+          </article>
+          <article class="info-card">
+            <h2>Privacy Boundary</h2>
+            <p>Review what is safe for public release and what must remain in ignored local experiment folders.</p>
+            <a class="button-link" href="../../../docs/PRIVACY_RELEASE.md">Open Privacy Guide</a>
+          </article>
+        </div>
+      </section>
+
+      <section id="downloads-page" class="page-view info-page" data-page-panel="downloads" hidden>
+        <div class="info-page-heading">
+          <span class="segment-kicker">Downloads</span>
+          <h1>Install and Run Locally</h1>
+        </div>
+        <div class="download-page-grid">
+          <article class="info-card download-card primary-download">
+            <h2>Windows Downloader</h2>
+            <p>Small GitHub-hosted bootstrapper that installs the verified offline lab package on the research PC.</p>
+            <a id="download-software" class="button-link primary-link" href="https://github.com/GeorgeFejer91/peripersonal-space-toolkit/releases/latest/download/PPS-Toolkit-Downloader.exe">Download Installer</a>
+          </article>
+          <article class="info-card download-card">
+            <h2>Offline Lab Package</h2>
+            <p>Heavyweight release payload hosted outside GitHub for labs that need the full packaged toolkit bundle.</p>
+            <a id="download-full-package" class="button-link secondary-link" href="https://zenodo.org/search?q=%22peripersonal-space-toolkit%22">Open Full Package Search</a>
+          </article>
+          <article class="info-card download-card">
+            <h2>Source Repository</h2>
+            <p>Browse source, issues, release notes, and development documentation on GitHub.</p>
+            <a class="button-link" href="https://github.com/GeorgeFejer91/peripersonal-space-toolkit">Open GitHub Repository</a>
+          </article>
+          <article class="info-card download-card">
+            <h2>Local Companion</h2>
+            <p>After installing, start the trusted local companion before using hosted dashboard actions.</p>
+            <code>windows\Start_Website_Companion.bat</code>
+          </article>
+        </div>
+      </section>
 
     </main>
   </div>
@@ -563,6 +633,6 @@
       </form>
     </div>
   </div>
-  <script src="app.js?v=20260615-dashboard-sync"></script>
+  <script src="app.js?v=20260615-dashboard-tabs"></script>
 </body>
 </html>

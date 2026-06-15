@@ -6,6 +6,9 @@ experiment software runs locally on the research PC.
 ## Architecture
 
 - GitHub Pages serves the visible dashboard UI.
+- The hosted shell has three top tabs: `PPS Toolkit` for the Segment 0-6
+  experiment workflow, `Documentation` for local/reference guides, and
+  `Downloads` for installer/package links.
 - The local companion backend runs on the PC at `http://127.0.0.1:8766`.
 - The hosted page calls the companion API for design state, render jobs, session
   preparation, audio stress tests, and native Focus Mode launch.

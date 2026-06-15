@@ -167,8 +167,16 @@ def test_dashboard_static_assets_are_packaged():
     app_js = dashboard_files.joinpath("app.js").read_text(encoding="utf-8")
     styles_css = dashboard_files.joinpath("styles.css").read_text(encoding="utf-8")
     viewer_js = viewer_files.joinpath("trajectory-viewer.js").read_text(encoding="utf-8")
-    assert 'href="styles.css?v=20260615-dashboard-sync"' in html
-    assert 'src="app.js?v=20260615-dashboard-sync"' in html
+    assert 'href="styles.css?v=20260615-dashboard-tabs"' in html
+    assert 'src="app.js?v=20260615-dashboard-tabs"' in html
+    assert 'data-page-tab="toolkit"' in html
+    assert 'data-page-tab="documentation"' in html
+    assert 'data-page-tab="downloads"' in html
+    assert 'class="site-tab-brand"' not in html
+    assert "Researcher Workspace" not in html
+    assert 'id="documentation-page"' in html
+    assert 'id="downloads-page"' in html
+    assert 'id="toolkit-page"' in html
     assert 'src="../viewer/index.html?v=source-trajectory-inventory"' in html
     assert 'id="audio-file-input"' in html
     assert 'id="zoom-in-camera"' in html
@@ -188,6 +196,8 @@ def test_dashboard_static_assets_are_packaged():
     assert 'id="segment-info-modal-close"' in html
     assert html.count('data-segment-info="') == 7
     assert "SEGMENT_INFO" in app_js
+    assert "setActivePage" in app_js
+    assert "info-page-active" in styles_css
     assert "openSegmentInfoModal" in app_js
     assert "closeSegmentInfoModal" in app_js
     assert "Purpose" in html

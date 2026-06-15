@@ -229,6 +229,8 @@ let trialPoolRepetitionDraft = {
 let trialPoolDraftSourceHash = "";
 let trialPoolDraftInitialized = false;
 let runSequencePreviewTimer = null;
+let activePage = "toolkit";
+const PAGE_TABS = ["toolkit", "documentation", "downloads"];
 
 async function api(path, options = {}) {
   let response;
@@ -428,6 +430,7 @@ async function loadState() {
 function renderAll() {
   if (!state) return;
   renderHeader();
+  renderPageTabs();
   renderProfileMode();
   renderStudy();
   renderStimulus();
@@ -438,6 +441,44 @@ function renderAll() {
   renderPreviewTables();
   renderSegmentRegistryOutputs();
   renderWorkflow();
+}
+
+function pageFromHash() {
+  const hash = String(window.location.hash || "").replace(/^#/, "");
+  return PAGE_TABS.includes(hash) ? hash : "";
+}
+
+function setActivePage(page, options = {}) {
+  const nextPage = PAGE_TABS.includes(page) ? page : "toolkit";
+  activePage = nextPage;
+  document.body.classList.toggle("info-page-active", nextPage !== "toolkit");
+  for (const button of document.querySelectorAll("[data-page-tab]")) {
+    const active = button.dataset.pageTab === nextPage;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", String(active));
+  }
+  for (const panel of document.querySelectorAll("[data-page-panel]")) {
+    panel.hidden = panel.dataset.pagePanel !== nextPage;
+    panel.classList.toggle("active", panel.dataset.pagePanel === nextPage);
+  }
+  if (options.updateHash) {
+    const nextHash = nextPage === "toolkit" ? "" : `#${nextPage}`;
+    if (window.location.hash !== nextHash) {
+      history.replaceState(null, "", `${window.location.pathname}${window.location.search}${nextHash}`);
+    }
+  }
+  if (options.scrollTop) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  updateActiveNav();
+}
+
+function renderPageTabs() {
+  setActivePage(activePage);
+}
+
+function initializePageTabs() {
+  setActivePage(pageFromHash() || "toolkit");
 }
 
 function renderHeader() {
@@ -4208,6 +4249,13 @@ function wireEvents() {
     saveApiBase($("backend-url").value);
     loadState().catch(reportError);
   });
+  for (const button of document.querySelectorAll("[data-page-tab]")) {
+    button.addEventListener("click", () => setActivePage(button.dataset.pageTab, { updateHash: true, scrollTop: true }));
+  }
+  window.addEventListener("hashchange", () => {
+    const nextPage = pageFromHash();
+    if (nextPage) setActivePage(nextPage, { scrollTop: true });
+  });
   for (const button of document.querySelectorAll("[data-segment-info]")) {
     button.addEventListener("click", () => openSegmentInfoModal(button.dataset.segmentInfo, button));
   }
@@ -4434,6 +4482,7 @@ function wireEvents() {
         scrollToStep(state.custom_workflow?.current_step || "study");
       } else {
         event.preventDefault();
+        setActivePage("toolkit", { updateHash: true });
         scrollToStep(stepId);
       }
     });
@@ -4546,4 +4595,5 @@ function reportError(error) {
 loadApiBase();
 loadResizableLayoutSettings();
 wireEvents();
+initializePageTabs();
 loadState().catch(reportError);
