@@ -537,21 +537,7 @@
             <span class="segment-kicker">Project</span>
             <h2 id="docs-overview-title">Project In A Nutshell</h2>
           </div>
-          <p class="info-lede">The Peripersonal Space Toolkit is a local-first research program for designing, validating, and running audio-tactile peripersonal-space experiments. It turns a study profile or custom design into spatialized looming audio, tactile timing schedules, block CSVs, participant session packages, and native experiment-runner outputs that can be inspected and reproduced.</p>
-          <div class="info-card-grid">
-            <article class="info-card">
-              <h2>What The Website Is</h2>
-              <p>This dashboard is the user interface and orchestration layer. It collects researcher decisions, previews study structure, and asks the local companion to do work on the research PC.</p>
-            </article>
-            <article class="info-card">
-              <h2>What The Backend Does</h2>
-              <p>The local Python companion handles file imports, stimulus rendering, project folders, session preparation, audio-device checks, and native runner launch. Timing-sensitive work stays out of browser JavaScript.</p>
-            </article>
-            <article class="info-card">
-              <h2>Who It Is For</h2>
-              <p>The main audience is cognitive neuroscience and psychology labs that need reusable audio-tactile PPS designs without editing Python scripts for every experiment.</p>
-            </article>
-          </div>
+          <p class="info-lede">Peripersonal space — the region of space immediately surrounding the body — is a well-established construct in cognitive neuroscience, yet the field lacks consistent norms for experimental design and rarely makes the scripts, timing parameters, or stimuli used to construct tasks publicly available. The Peripersonal Space Toolkit addresses this gap by providing a graphical interface for designing audio-tactile peripersonal space experiments with binaural spatialized sound, either from scratch or by loading parameter sets extracted from published studies. It is not a reproduction of any specific study's stimuli — those are rarely released by authors — but rather an infrastructure for making experimental decisions explicit, auditable, and shareable across labs. The toolkit targets cognitive neuroscience and psychology researchers who need reusable, version-controlled audio-tactile PPS designs without writing custom Python scripts for every experiment.</p>
         </section>
 
         <section id="docs-architecture" class="info-segment" aria-labelledby="docs-architecture-title">
@@ -559,7 +545,7 @@
             <span class="segment-kicker">Software Flow</span>
             <h2 id="docs-architecture-title">Architecture Flow</h2>
           </div>
-          <p class="info-copy">The website is a researcher-facing control surface. It collects choices, then asks the local companion and renderer stack to create files on the lab PC.</p>
+          <p class="info-copy">The toolkit is organized as a three-layer system: a browser-based dashboard that collects all researcher decisions, a local Python companion that validates those decisions and produces project files on the lab PC, and a native experiment runner that owns all timing-sensitive playback during data collection. The dashboard acts as an interface between researcher intent and the local computing environment; it never generates stimuli or controls experiment timing directly. All generated files and participant data remain on the lab machine, and the hosted dashboard connects only to a trusted local companion running at 127.0.0.1.</p>
           <div class="architecture-flow" aria-label="PPS Toolkit rendering architecture flow">
             <div class="flow-row">
               <article class="flow-node">
@@ -638,13 +624,7 @@
             <span class="segment-kicker">Stimulus Model</span>
             <h2 id="docs-spatialization-title">SOFA/FABIAN And Spatialized Looming Stimuli</h2>
           </div>
-          <p class="info-copy">SOFA, the Spatially Oriented Format for Acoustics, stores spatial acoustic measurements such as head-related transfer functions. In this toolkit, the bundled FABIAN/TU SOFA HRIR resource is the standard binaural rendering reference, and the dashboard keeps it under the hood so routine experiment design focuses on trajectory, timing, and trial structure.</p>
-          <ol class="doc-list">
-            <li>The researcher chooses a study profile or custom design, then defines source material, looming duration, start/end distance, direction, rotation, and timing choices.</li>
-            <li>The local backend converts those decisions into trajectory samples and render metadata rather than relying on filenames or browser-only state.</li>
-            <li>The renderer creates binaural auditory material for channels 1 and 2, while tactile cue placement is introduced later from the SOA schedule into channel 3.</li>
-            <li>Generated manifests record the render config, trajectory samples, tactile events, file hashes, and quality-control summaries so the stimulus path can be audited.</li>
-          </ol>
+          <p class="info-copy">Binaural spatialization in the toolkit uses head-related transfer functions (HRTFs) stored in the SOFA format (Spatially Oriented Format for Acoustics), an AES-standardized container for spatial acoustic measurements. The bundled FABIAN/TU Berlin HRIR dataset serves as the binaural rendering reference: researchers define source trajectory, looming duration, start and end distances, azimuth, and timing parameters through the interface, and the local backend converts these into binaural WAV files in which channels 1 and 2 carry the left and right auditory streams respectively. Tactile timing is handled separately through a stimulus onset asynchrony (SOA) schedule that drives a third analog output channel, and all rendering decisions are captured in manifests that record trajectory samples, tactile events, file hashes, and quality-control summaries for post-hoc auditability.</p>
           <div class="info-card-grid">
             <article class="info-card">
               <h2>SOFA Standard</h2>
@@ -669,7 +649,7 @@
             <span class="segment-kicker">Native Renderer</span>
             <h2 id="docs-3dti-title">3DTI Rendering Toolkit</h2>
           </div>
-          <p class="info-copy">3DTI, the 3D Tune-In Toolkit, is the original open-source C++ spatial-audio renderer that established the binaural rendering path used by this project. The original 3DTI repository now points developers to the newer BRT Library, the Binaural Rendering Toolbox, because the authors migrated the algorithms there and recommend BRT for ongoing support. PPS Toolkit therefore treats the original 3DTI repository as publication/provenance history and uses the newer BRT lineage as the forward-facing recommended GitHub source, while preserving existing 3DTI-compatible configs and pinned source snapshots for reproducibility.</p>
+          <p class="info-copy">The native binaural rendering path traces to the 3D Tune-In Toolkit (3DTI), an open-source C++ spatial audio library originally described by Cuevas-Rodríguez and colleagues (PLOS ONE, 2019). The 3DTI authors have since migrated the core algorithms to the Binaural Rendering Toolbox (BRT Library), which is now their recommended repository for ongoing development; PPS Toolkit adopts BRT as the primary forward-facing renderer while preserving 3DTI-compatible configurations and pinned source snapshots to support reproducibility of any work conducted under the earlier rendering path.</p>
           <div class="info-card-grid">
             <a class="info-card info-card-link publication-card" href="https://doi.org/10.1371/journal.pone.0211899" aria-label="Open original 3DTI PLOS ONE publication">
               <span class="card-kicker">Original Publication</span>
@@ -714,7 +694,8 @@
             <span class="segment-kicker">Lab Route</span>
             <h2 id="docs-hardware-title">Hardware Specifications And Latency Evidence</h2>
           </div>
-          <p class="info-copy">The validated lab route is Windows-first and uses one synchronized multichannel ASIO output path. The current wiring convention is channel 1 to left auditory output, channel 2 to right auditory output, and channel 3 to the tactile drive path.</p>
+          <p class="info-copy">The validated lab hardware route runs on Windows and delivers auditory and tactile stimuli through a single synchronized multichannel ASIO output stream using the Native Instruments Komplete Audio 6 MK2 interface. Channels 1 and 2 route binaural left and right audio to participant headphones; channel 3 drives the tactile endpoint — a Woojer Strap 4 connected as a wired analog load — to avoid the timing variability of Bluetooth. Loopback measurements show a physical-minus-digital latency of 33.462 ± 0.013 ms, with an audio-tactile channel skew of 0.011 ms and a left-right channel skew of −0.023 ms; these figures validate the electrical signal path and do not account for mechanical vibration onset at the Woojer transducer, which requires a separate accelerometer or contact microphone to measure.</p>
+          <p class="info-copy">Latency was measured using a direct electrical loopback: the three output channels of the Komplete Audio 6 MK2 were patched back into its own analog inputs via TRS cables, and a calibration pulse train was played while the return signal was simultaneously recorded. Comparing transmitted and received pulse timing yields the round-trip delay per channel. The physical-minus-digital figure of 33.462 ms is the time between when the software schedules a sample and when that signal appears at the physical output; the ±0.013 ms standard deviation across 20 recovered pulses indicates that this delay is highly stable. The critical result for audio-tactile research is the inter-channel skew: the left and right audio channels are synchronized to within −0.023 ms of each other, and the tactile drive channel deviates from the audio channels by only 0.011 ms. These sub-millisecond differences are possible because the Komplete Audio 6 MK2, operated through its ASIO driver as a single multichannel device rather than as separate Windows audio endpoints, clocks all three outputs from the same sample clock and renders them within the same output buffer. The tactile signal is not a separate conversion path: it is a conventional audio waveform written to output channel 3 and routed into the wired analog auxiliary input of the Woojer Strap 4, whose transducer converts low-frequency signal energy into vibrotactile stimulation. Encoding the tactile cue as an audio channel in this way keeps its onset timing under exactly the same software and hardware control as the auditory channels, making the stimulus onset asynchrony between sound and touch a direct function of the SOA schedule rather than an unknown system-level variable.</p>
           <div class="info-card-grid hardware-card-grid">
             <a class="info-card info-card-link hardware-pixel-card" href="https://www.native-instruments.com/en/products/komplete/audio-interfaces/komplete-audio-6/specifications/" aria-label="Open Native Instruments Komplete Audio producer page">
               <span class="card-kicker">Audio Interface</span>
@@ -758,7 +739,7 @@
               <strong>20/20 pulses</strong>
             </div>
           </div>
-          <p class="doc-callout">Boundary: these results validate the electrical audio/tactile-drive route through direct loopback. They do not measure mechanical Woojer vibration onset; that requires an external vibration sensor, accelerometer, or contact microphone.</p>
+
           <div class="doc-link-row">
             <a class="button-link" href="../../../docs/hardware_setup.md">Open Hardware Setup</a>
             <a class="button-link" href="../../../docs/HARDWARE_VENDOR_DOCS.md">Open Vendor Notes</a>
@@ -771,7 +752,7 @@
             <span class="segment-kicker">Design Workflow</span>
             <h2 id="docs-designer-title">How The Experiment Designer Works</h2>
           </div>
-          <p class="info-copy">The Experiment Designer is a segmented workflow. It starts with study/profile selection, then moves through stimulus ingredients, trial sequences, tactile/baseline files, repetition pools, block CSV previews, and final experiment setup. Each segment is meant to own one decision layer and one set of local files/manifests.</p>
+          <p class="info-copy">The Experiment Designer is a linear seven-segment workflow in which each segment owns a distinct decision layer and produces its own set of local files and manifests. Beginning with study or profile selection (Segment 0), the researcher progresses through defining auditory ingredients such as looming trajectories and source materials (Segment 1), assembling those into trial sequences (Segment 2), adding tactile timing via SOA schedules with baseline and catch-trial logic (Segment 3), setting repetition counts to build a trial-pool CSV (Segment 4), generating and inspecting block CSVs (Segment 5), and finally preparing participant block orders for handoff to the native runner (Segment 6). This sequential structure ensures every file produced at each stage is traceable to the decisions that generated it, supporting both design transparency and replication.</p>
           <div class="workflow-summary-grid">
             <div><strong>0 Preload</strong><span>Choose a published profile or custom project.</span></div>
             <div><strong>1 Stimuli</strong><span>Create or import reusable auditory ingredients.</span></div>
@@ -792,13 +773,7 @@
             <span class="segment-kicker">Native Runtime</span>
             <h2 id="docs-runner-title">How The Experiment Runner Works</h2>
           </div>
-          <p class="info-copy">The Experiment Runner is the native Focus Mode application launched from the prepared Segment 6 setup. It owns timing-sensitive playback, participant metadata, response logging, LSL/event markers, optional local audio evidence WAVs, top-up behavior, and session outputs.</p>
-          <ul class="doc-list">
-            <li>Segment 6 prepares the run setup and selected participant session package.</li>
-            <li>The runner opens the packaged <code>PPSExperimentRunner.exe</code>, not a browser timing loop.</li>
-            <li>Playback uses the validated ASIO route with one persistent output stream for auditory and tactile channels.</li>
-            <li>Session folders receive event CSVs, local XDF/marker mirrors, trigger dictionaries, timing QC, analysis-ready trial rows, and summary outputs.</li>
-          </ul>
+          <p class="info-copy">The Experiment Runner is a native Windows application (<code>PPSExperimentRunner.exe</code>) launched from the Segment 6 setup package, entirely separate from the browser dashboard, and responsible for all timing-sensitive work during data collection. It opens the prepared session package, plays the three-channel ASIO stream to the lab hardware, and records participant responses and event markers; all playback timing is handled natively to avoid the latency variability inherent in browser JavaScript execution. Session output folders contain event CSVs, XDF and marker mirrors for Lab Streaming Layer (LSL) integrations, trigger dictionaries, timing quality-control reports, and analysis-ready trial rows.</p>
           <div class="doc-link-row">
             <a class="button-link" href="../../../docs/WINDOWS_APP.md">Open Windows App Guide</a>
             <a class="button-link" href="../../../docs/AUDIO_ROUTING_STRESS_TEST.md">Open Audio Stress Notes</a>
@@ -810,7 +785,7 @@
             <span class="segment-kicker">Public Release</span>
             <h2 id="docs-data-boundary-title">Data, Privacy, And Publication Boundary</h2>
           </div>
-          <p class="info-copy">The public repository contains the toolkit, documentation, deidentified samples, safe templates, and release metadata. Participant data, generated participant WAVs, raw recordings, local validation artifacts, downloaded model caches, and unreviewed third-party assets stay in ignored local folders.</p>
+          <p class="info-copy">The public repository contains the toolkit source, documentation, deidentified sample files, safe templates, and release metadata; nothing that could identify participants or violate third-party redistribution terms is included. All data generated during experiments — session WAVs, response CSVs, raw recordings, and validation artifacts — is written to ignored local folders (such as <code>local_data/</code> and <code>artifacts/</code>) that are excluded from version control. The hosted dashboard is a front end only, connecting exclusively to the trusted local companion at 127.0.0.1 and transmitting no researcher or participant data externally. SOFA/HRIR files, vendor documentation, and proprietary stimuli require attribution and licensing review before any redistribution.</p>
           <div class="info-card-grid">
             <article class="info-card">
               <h2>Local Data</h2>
