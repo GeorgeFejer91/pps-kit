@@ -2645,16 +2645,9 @@ def _write_variant_wav_lossless(path: Path, chunks: list[dict[str, Any]], silenc
     segment_paths: list[Path] = []
     path_digest = hashlib.sha256(str(path).encode("utf-8")).hexdigest()[:10]
     sample_rate = 0
-    channels = 0
-    for index, chunk in enumerate(chunks, start=1):
+    target_channels = 2
+    for chunk in chunks:
         if chunk.get("kind") == "jitter":
-            if not sample_rate:
-                sample_rate = 44100
-            if not channels:
-                channels = 2
-            silence_path = silence_dir / f"seg_{index:02d}_{path_digest}_silence.wav"
-            _write_silence_wav(silence_path, float(chunk.get("duration_s") or 0.0), sample_rate, channels)
-            segment_paths.append(silence_path)
             continue
         source_path = Path(chunk["path"])
         if not _path_exists(source_path):
@@ -2662,20 +2655,30 @@ def _write_variant_wav_lossless(path: Path, chunks: list[dict[str, Any]], silenc
         info = sf.info(_soundfile_path(source_path))
         if not sample_rate:
             sample_rate = int(info.samplerate)
-        if not channels:
-            channels = int(info.channels)
-        if int(info.samplerate) == sample_rate and int(info.channels) == channels and abs(float(chunk.get("gain", 1.0)) - 1.0) < 0.0001:
+    if not sample_rate:
+        sample_rate = 44100
+    for index, chunk in enumerate(chunks, start=1):
+        if chunk.get("kind") == "jitter":
+            silence_path = silence_dir / f"seg_{index:02d}_{path_digest}_silence.wav"
+            _write_silence_wav(silence_path, float(chunk.get("duration_s") or 0.0), sample_rate, target_channels)
+            segment_paths.append(silence_path)
+            continue
+        source_path = Path(chunk["path"])
+        info = sf.info(_soundfile_path(source_path))
+        if int(info.samplerate) == sample_rate and int(info.channels) == target_channels and abs(float(chunk.get("gain", 1.0)) - 1.0) < 0.0001:
             segment_paths.append(source_path)
         else:
             data, rate = sf.read(_soundfile_path(source_path), dtype="float32", always_2d=True)
             if int(rate) != sample_rate:
                 divisor = math.gcd(sample_rate, int(rate))
                 data = signal.resample_poly(data, sample_rate // divisor, int(rate) // divisor, axis=0)
-            if data.shape[1] < channels:
-                pad = np.zeros((data.shape[0], channels - data.shape[1]), dtype=data.dtype)
+            if data.shape[1] == 1 and target_channels == 2:
+                data = np.repeat(data, 2, axis=1)
+            elif data.shape[1] < target_channels:
+                pad = np.zeros((data.shape[0], target_channels - data.shape[1]), dtype=data.dtype)
                 data = np.concatenate([data, pad], axis=1)
-            elif data.shape[1] > channels:
-                data = data[:, :channels]
+            elif data.shape[1] > target_channels:
+                data = data[:, :target_channels]
             data = data * max(0.0, float(chunk.get("gain", 1.0)))
             segment_path = silence_dir / f"seg_{index:02d}_{path_digest}.wav"
             sf.write(_soundfile_path(segment_path), data, sample_rate, subtype="PCM_16")
@@ -2689,11 +2692,13 @@ def _write_variant_wav_lossless(path: Path, chunks: list[dict[str, Any]], silenc
         if int(rate) != sample_rate:
             divisor = math.gcd(sample_rate, int(rate))
             data = signal.resample_poly(data, sample_rate // divisor, int(rate) // divisor, axis=0)
-        if data.shape[1] < channels:
-            pad = np.zeros((data.shape[0], channels - data.shape[1]), dtype=data.dtype)
+        if data.shape[1] == 1 and target_channels == 2:
+            data = np.repeat(data, 2, axis=1)
+        elif data.shape[1] < target_channels:
+            pad = np.zeros((data.shape[0], target_channels - data.shape[1]), dtype=data.dtype)
             data = np.concatenate([data, pad], axis=1)
-        elif data.shape[1] > channels:
-            data = data[:, :channels]
+        elif data.shape[1] > target_channels:
+            data = data[:, :target_channels]
         audio_chunks.append(data)
     if not audio_chunks:
         raise ValueError("No audio segments were available for this trial-sequence variant.")
@@ -3740,6 +3745,10 @@ def _validate_trial_sequence_manifest(manifest: dict[str, Any], *, design: Stimu
         except Exception as exc:
             errors.append(str(exc))
             continue
+        variant_path = Path(str(variant.get("file_path") or ""))
+        variant_info = _audio_file_info(variant_path)
+        if int(variant_info["channels"]) != 2:
+            errors.append(f"Segment 2 sequence variant is not stereo/binaural audio: {variant_path.name}.")
         segments = _variant_segments(variant)
         if not segments:
             errors.append(f"Segment 2 variant has no component timing registry: {variant.get('variant_key') or variant.get('file_path')}.")
@@ -3796,8 +3805,8 @@ def _validate_tactile_trial_manifest(manifest: dict[str, Any], *, design: Stimul
         info = _audio_file_info(path)
         family = str(item.get("family") or "").strip()
         if family == "catch":
-            if int(info["channels"]) >= 3:
-                errors.append(f"Segment 3 catch trial file is not audio-only: {path.name}.")
+            if int(info["channels"]) != 2:
+                errors.append(f"Segment 3 catch trial file is not stereo/binaural audio-only: {path.name}.")
         elif int(info["channels"]) != 3:
             errors.append(f"Segment 3 tactile/baseline trial file is not 3-channel: {path.name}.")
         expected_duration = int(item.get("duration_ms") or 0)
@@ -4359,14 +4368,25 @@ def _write_three_channel_trial_wav(output_path: Path, source_audio_path: Path, t
             merged, _rate = sf.read(_soundfile_path(output_path), dtype="float32", always_2d=True)
             expected_tactile = float(np.max(np.abs(tactile))) if tactile.size else 0.0
             merged_tactile = float(np.max(np.abs(merged[:, 2]))) if merged.shape[1] > 2 else 0.0
-            if expected_tactile <= 0.00001 or merged_tactile > 0.00001:
+            audio_diff = float(np.max(np.abs(merged[:, :2] - source_data))) if merged.shape[1] >= 2 else float("inf")
+            tactile_diff = float(np.max(np.abs(merged[:, 2] - tactile))) if merged.shape[1] > 2 else float("inf")
+            pcm_tolerance = 2.0 / 32768.0
+            if (
+                merged.shape[1] == 3
+                and (expected_tactile <= 0.00001 or merged_tactile > 0.00001)
+                and audio_diff <= pcm_tolerance
+                and tactile_diff <= pcm_tolerance
+            ):
                 return float(source_data.shape[0] / sample_rate) if sample_rate else 0.0, "ffmpeg"
         except Exception:
             pass
     combined = np.column_stack([source_data, tactile])
-    peak = float(np.max(np.abs(combined))) if combined.size else 0.0
-    if peak > 0.99:
-        combined = combined / peak * 0.99
+    audio_peak = float(np.max(np.abs(combined[:, :2]))) if combined.size else 0.0
+    if audio_peak > 0.99:
+        combined[:, :2] = combined[:, :2] / audio_peak * 0.99
+    tactile_peak = float(np.max(np.abs(combined[:, 2]))) if combined.size else 0.0
+    if tactile_peak > 0.99:
+        combined[:, 2] = combined[:, 2] / tactile_peak * 0.99
     sf.write(_soundfile_path(output_path), combined, sample_rate, subtype="PCM_16")
     return float(combined.shape[0] / sample_rate) if sample_rate else 0.0, "python_soundfile"
 

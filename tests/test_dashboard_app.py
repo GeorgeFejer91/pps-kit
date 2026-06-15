@@ -1137,6 +1137,9 @@ def test_dashboard_validates_full_study5_segment0_to_3_pipeline(tmp_path: Path):
     sequence_manifest = _read_json_file(sequence_done["result"]["manifest_path"])
     assert sequence_manifest["schema"] == "pps-trial-sequence-variants.v1"
     assert len(sequence_manifest["rows"]) == 2
+    for item in sequence_manifest["variants"]:
+        sequence_audio, _sr = sf.read(dashboard_app._soundfile_path(item["file_path"]), dtype="float32", always_2d=True)
+        assert sequence_audio.shape[1] == 2
     assert any(
         "inhale_instruction4000ms" in Path(item["file_path"]).name
         and "pink_frontal_looming4000ms" in Path(item["file_path"]).name
@@ -1180,7 +1183,8 @@ def test_dashboard_validates_full_study5_segment0_to_3_pipeline(tmp_path: Path):
             assert dashboard_app._path_exists(leaf_path)
     tactile_manifest = _read_json_file(tactile_done["result"]["manifest_path"])
     baseline_row = next(item for item in tactile_manifest["files"] if item["family"] == "baseline")
-    catch_row = next(item for item in tactile_manifest["files"] if item["family"] == "catch")
+    catch_rows = [item for item in tactile_manifest["files"] if item["family"] == "catch"]
+    catch_row = catch_rows[0]
     baseline_wav, baseline_sr = sf.read(dashboard_app._soundfile_path(baseline_row["file_path"]), dtype="float32", always_2d=True)
     catch_wav, catch_sr = sf.read(dashboard_app._soundfile_path(catch_row["file_path"]), dtype="float32", always_2d=True)
     assert baseline_sr == baseline_row["sample_rate_hz"]
@@ -1190,8 +1194,9 @@ def test_dashboard_validates_full_study5_segment0_to_3_pipeline(tmp_path: Path):
     assert np.max(np.abs(baseline_wav[:, :2])) == pytest.approx(0.0)
     assert np.max(np.abs(baseline_wav[:, 2])) > 0.01
     assert catch_sr == catch_row["sample_rate_hz"]
-    assert 1 <= catch_wav.shape[1] < 3
+    assert catch_wav.shape[1] == 2
     assert catch_row["channels"] == catch_wav.shape[1]
+    assert all(item["channels"] == 2 for item in catch_rows)
     assert catch_row["baseline_mode"] == "audio_only"
     assert catch_row["tactile_channel"] == ""
     assert "catch_trials" in catch_row["file_path"]
@@ -1901,6 +1906,116 @@ def test_dashboard_batch_bakes_trial_sequence_row_variant_folders(tmp_path: Path
     assert report.exists()
     report_data = json.loads(report.read_text(encoding="utf-8"))
     assert report_data["schema"] == "pps-segment-validation-report.v1"
+
+
+def test_dashboard_sequence_bake_preserves_stereo_looming_after_mono_instruction(tmp_path: Path):
+    client = _client(tmp_path)
+    custom = client.post("/api/templates/__custom__/load").json()
+    sample_rate = 44100
+    fixed_frames = 256
+    looming_frames = 512
+
+    custom["design"]["name"] = "Mono first stereo sequence"
+    custom = client.post("/api/design", json={"design": custom["design"]}).json()
+    mono_instruction = np.linspace(0.05, 0.25, fixed_frames, dtype=np.float32)[:, None]
+    stereo_looming = np.column_stack(
+        [
+            np.linspace(0.10, 0.30, looming_frames, dtype=np.float32),
+            np.linspace(-0.30, -0.10, looming_frames, dtype=np.float32),
+        ]
+    )
+    inhale = _register_segment1_wav(
+        client,
+        custom["design"],
+        "Inhale",
+        mono_instruction,
+        sample_rate=sample_rate,
+        motion_mode="stationary",
+        source_kind="test_fixed_audio",
+    )
+    looming = _register_segment1_wav(
+        client,
+        custom["design"],
+        "Pink",
+        stereo_looming,
+        sample_rate=sample_rate,
+        motion_mode="looming",
+        source_kind="test_looming_audio",
+    )
+    custom["design"]["noises"] = [{"label": "Pink", "noise_type": "pink", "prebaked_path": str(looming)}]
+    custom["design"]["prestimulus_files"] = [
+        {
+            "label": "Inhale",
+            "path": str(inhale),
+            "target_duration_s": fixed_frames / sample_rate,
+            "render_mode": "preserve",
+            "motion_mode": "stationary",
+        }
+    ]
+    custom["design"]["protocol"]["soa_values_ms"] = [1]
+    custom["design"]["protocol"]["spatial_values_cm"] = [100.0]
+    custom["design"]["protocol"]["include_catch_trials"] = True
+    custom["design"]["protocol"]["include_baseline_trials"] = False
+    custom["design"]["protocol"]["trial_strips"] = [
+        {
+            "strip_id": "row-1",
+            "label": "Inhale pink",
+            "elements": [
+                {"kind": "fixed_audio", "label": "Instruction", "source_labels": ["Inhale"], "randomized": True},
+                {"kind": "looming_stimulus", "label": "Looming Stimulus", "source_labels": ["Pink"], "randomized": True},
+            ],
+        }
+    ]
+
+    sequence_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "P001",
+            "design": custom["design"],
+            "bake_recipe": {"kind": "trial_sequence_batch", "label": "2_trial_sequence_designs"},
+        },
+    ).json()
+    sequence_done = _wait_job(client, sequence_job["job_id"])
+    assert sequence_done["status"] == "succeeded"
+    sequence_manifest = _read_json_file(sequence_done["result"]["manifest_path"])
+    sequence_path = Path(sequence_manifest["variants"][0]["file_path"])
+    sequence_audio, sequence_sr = sf.read(dashboard_app._soundfile_path(sequence_path), dtype="float32", always_2d=True)
+    instruction_source, _ = sf.read(dashboard_app._soundfile_path(inhale), dtype="float32", always_2d=True)
+    looming_source, _ = sf.read(dashboard_app._soundfile_path(looming), dtype="float32", always_2d=True)
+
+    assert sequence_sr == sample_rate
+    assert sequence_audio.shape == (fixed_frames + looming_frames, 2)
+    assert np.max(np.abs(sequence_audio[:fixed_frames, 0] - instruction_source[:, 0])) <= 1 / 32768
+    assert np.max(np.abs(sequence_audio[:fixed_frames, 1] - instruction_source[:, 0])) <= 1 / 32768
+    assert np.max(np.abs(sequence_audio[fixed_frames:, 0] - looming_source[:, 0])) <= 1 / 32768
+    assert np.max(np.abs(sequence_audio[fixed_frames:, 1] - looming_source[:, 1])) <= 1 / 32768
+    assert np.max(np.abs(sequence_audio[fixed_frames:, 0] - sequence_audio[fixed_frames:, 1])) > 0.05
+
+    tactile_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "P001",
+            "design": custom["design"],
+            "bake_recipe": {"kind": "audiotactile_trial_batch", "label": "3_tactile_and_baseline_trials"},
+        },
+    ).json()
+    tactile_done = _wait_job(client, tactile_job["job_id"])
+    assert tactile_done["status"] == "succeeded"
+    tactile_manifest = _read_json_file(tactile_done["result"]["manifest_path"])
+    catch_row = next(item for item in tactile_manifest["files"] if item["family"] == "catch")
+    audio_row = next(item for item in tactile_manifest["files"] if item["family"] == "audio_tactile")
+    catch_audio, catch_sr = sf.read(dashboard_app._soundfile_path(catch_row["file_path"]), dtype="float32", always_2d=True)
+    audio_tactile, audio_sr = sf.read(dashboard_app._soundfile_path(audio_row["file_path"]), dtype="float32", always_2d=True)
+
+    assert catch_sr == sample_rate
+    assert catch_row["channels"] == 2
+    assert catch_audio.shape == sequence_audio.shape
+    assert np.max(np.abs(catch_audio - sequence_audio)) <= 1 / 32768
+    assert audio_sr == sample_rate
+    assert audio_row["channels"] == 3
+    assert audio_tactile.shape[1] == 3
+    assert np.max(np.abs(audio_tactile[:, :2] - sequence_audio)) <= 2 / 32768
+    assert np.max(np.abs(audio_tactile[:, 2])) > 0.01
 
 
 def test_dashboard_previews_each_segment2_source_label(tmp_path: Path):

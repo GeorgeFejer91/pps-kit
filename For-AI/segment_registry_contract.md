@@ -148,6 +148,7 @@ Filename convention:
 - Keep the manifest authoritative for exact timing, segment order, source paths, hashes, and generated output paths.
 - Segment 2 must validate that every referenced audio label resolves to a registered Segment 1 ingredient with matching path, hash, duration, and channel count before writing outputs.
 - Segment 2 must be baked explicitly before Segment 3. Its manifest should carry a design signature so the state API can mark it stale if rows or source-label choices change.
+- Segment 2 sequence WAVs are always stereo/binaural audio-only outputs for downstream trial creation. Mono ingredients are centered by duplicating them to channels 1 and 2, stereo ingredients preserve both channels, wider inputs are trimmed to the first auditory pair, and jitter/silence boxes are written as stereo silence. The sequence bake must not let a mono first box collapse later stereo looming assets into mono.
 
 Example:
 
@@ -187,7 +188,7 @@ Segment 3 turns Segment 2 sequence designs into final trial WAV assets: 3-channe
   - Channel 3: tactile cue channel.
 - The tactile cue must always be placed in channel 3 for tactile-bearing trial files.
 - Baseline trials still contain the tactile cue in channel 3. If the baseline strategy calls for silent audio, channels 1 and 2 are silent while channel 3 carries the tactile cue.
-- Catch trial files are the exception: they are audio-only copies of Segment 2 sequence WAVs and do not carry a tactile cue.
+- Catch trial files are the exception: they are stereo/binaural audio-only copies of Segment 2 sequence WAVs and do not carry a tactile cue.
 
 ### Folder And File Operations
 
