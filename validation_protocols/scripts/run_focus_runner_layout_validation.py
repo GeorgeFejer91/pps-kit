@@ -42,11 +42,9 @@ REQUIRED_TEXT_COMMON = {
     "Native Focus Mode",
     "Experiment Running",
     "Participant Response",
-    "Data Processing",
-    "Progress",
+    "Experiment Control",
     "Output Summary",
     "Part -",
-    "Live Tactile Timeline",
     "Next tactile: no block schedule",
     "CLICK",
     "Start Run",
@@ -280,6 +278,8 @@ def _audit_window(
         failures.append(f"Selected Qt font {font_family!r} is not available to this platform.")
     texts = _collect_texts(window.dialog)
     required_text = set(REQUIRED_TEXT_COMMON)
+    if profile.screen_class != "constrained":
+        required_text.update({"Block Order", "Stimulus / Tactile / Click Timeline", "Progress"})
     if profile.right_stack_mode == "tabs" and layout_variant == "settings_tab":
         required_text.update(REQUIRED_TEXT_SETTINGS)
     elif profile.right_stack_mode == "tabs":
@@ -307,6 +307,7 @@ def _audit_window(
         "stop_button": window.stop_button,
         "close_button": window.close_button,
         "output_summary": window.output_summary,
+        "block_plan_widget": window.block_plan_widget,
         "tactile_timeline_widget": window.tactile_timeline_widget,
         "response_panel": window.response_panel,
         "processing_panel": window.processing_panel,

@@ -2758,8 +2758,27 @@ def _emit_block_schedule_progress(
             "block_schedule_perf_counter": time.perf_counter(),
             "block_schedule_unix_time": time.time(),
             "tactile_events": _timeline_tactile_events(schedule),
+            "trial_segments": _timeline_trial_segments(schedule),
         }
     )
+
+
+def _timeline_relative_time(event: Any, payload: dict[str, Any]) -> float:
+    relative_time = _as_float(payload.get("relative_time_s"), default=math.nan)
+    if math.isfinite(relative_time):
+        return relative_time
+    sample_rate = _as_float(payload.get("sample_rate", payload.get("Sample_Rate_Hz")), default=0.0)
+    return float(event.sample_index) / sample_rate if sample_rate > 0 else math.nan
+
+
+def _timeline_payload_label(payload: dict[str, Any], *keys: str) -> str:
+    for key in keys:
+        value = payload.get(key)
+        if value not in (None, ""):
+            text = str(value).strip()
+            if text:
+                return text
+    return ""
 
 
 def _timeline_tactile_events(schedule: BlockEventSchedule | None) -> list[dict[str, Any]]:
@@ -2770,13 +2789,22 @@ def _timeline_tactile_events(schedule: BlockEventSchedule | None) -> list[dict[s
         if event.event_type != "tactile_onset":
             continue
         payload = dict(event.payload)
-        relative_time = _as_float(payload.get("relative_time_s"), default=math.nan)
-        if not math.isfinite(relative_time):
-            sample_rate = _as_float(payload.get("sample_rate", payload.get("Sample_Rate_Hz")), default=0.0)
-            relative_time = float(event.sample_index) / sample_rate if sample_rate > 0 else math.nan
+        relative_time = _timeline_relative_time(event, payload)
         if not math.isfinite(relative_time) or relative_time < 0:
             continue
         family = str(payload.get("family") or payload.get("Family") or "").strip()
+        row_label = _timeline_payload_label(
+            payload,
+            "Respiratory_Phase",
+            "respiratory_phase",
+            "row_label",
+            "Row_Label",
+            "Trial_Type_Label",
+            "trial_type_label",
+            "Trial_Strip_Label",
+            "trial_strip_label",
+            "Row",
+        )
         tactile_events.append(
             {
                 "trial_number": _as_int(payload.get("trial_number", payload.get("Trial_Number")), default=len(tactile_events) + 1),
@@ -2785,7 +2813,23 @@ def _timeline_tactile_events(schedule: BlockEventSchedule | None) -> list[dict[s
                 "sample_index": int(event.sample_index),
                 "soa_ms": str(payload.get("soa_ms") or payload.get("SOA_ms") or ""),
                 "family": family,
-                "row_label": str(payload.get("row_label") or payload.get("Row_Label") or payload.get("Row") or ""),
+                "row_label": row_label,
+                "trial_label": row_label,
+                "clip_label": _timeline_payload_label(
+                    payload,
+                    "Fixed_Audio_Labels",
+                    "fixed_audio_labels",
+                    "Sequence_Labels",
+                    "sequence_labels",
+                    "Sequence_Source_Labels",
+                    "sequence_source_labels",
+                    "Sequence_Variant_Label",
+                    "sequence_variant_label",
+                    "Noise_Label",
+                    "noise_label",
+                    "Trial_Type",
+                    "trial_type",
+                ),
             }
         )
     return sorted(
@@ -2796,6 +2840,85 @@ def _timeline_tactile_events(schedule: BlockEventSchedule | None) -> list[dict[s
             str(item.get("trial_uid") or ""),
         ),
     )
+
+
+def _timeline_trial_segments(schedule: BlockEventSchedule | None) -> list[dict[str, Any]]:
+    if schedule is None:
+        return []
+    starts: dict[str, dict[str, Any]] = {}
+    ends: dict[str, float] = {}
+    fallback_order: list[str] = []
+    for event in getattr(schedule, "events", []):
+        if event.event_type not in {"trial_start", "trial_end"}:
+            continue
+        payload = dict(event.payload)
+        trial_uid = str(payload.get("trial_uid") or payload.get("Trial_UID") or "").strip()
+        if not trial_uid:
+            trial_uid = f"trial_{_as_int(payload.get('trial_number', payload.get('Trial_Number')), default=len(fallback_order) + 1):03d}"
+        relative_time = _timeline_relative_time(event, payload)
+        if not math.isfinite(relative_time) or relative_time < 0:
+            continue
+        if event.event_type == "trial_start":
+            if trial_uid not in fallback_order:
+                fallback_order.append(trial_uid)
+            starts[trial_uid] = {"payload": payload, "start_s": relative_time, "sample_index": int(event.sample_index)}
+        else:
+            ends[trial_uid] = relative_time
+    segments: list[dict[str, Any]] = []
+    sorted_uids = sorted(fallback_order, key=lambda uid: starts.get(uid, {}).get("start_s", 0.0))
+    for index, trial_uid in enumerate(sorted_uids):
+        start = starts.get(trial_uid)
+        if not start:
+            continue
+        payload = dict(start["payload"])
+        start_s = float(start["start_s"])
+        end_s = ends.get(trial_uid)
+        if end_s is None or end_s <= start_s:
+            next_uid = sorted_uids[index + 1] if index + 1 < len(sorted_uids) else ""
+            next_start = starts.get(next_uid, {}).get("start_s")
+            end_s = float(next_start) if next_start not in (None, "") else start_s + 8.0
+        trial_type = _timeline_payload_label(payload, "Trial_Type", "trial_type")
+        trial_label = _timeline_payload_label(
+            payload,
+            "Respiratory_Phase",
+            "respiratory_phase",
+            "Trial_Type_Label",
+            "trial_type_label",
+            "Trial_Strip_Label",
+            "trial_strip_label",
+            "Row_Label",
+            "row_label",
+            "Row",
+        )
+        clip_label = _timeline_payload_label(
+            payload,
+            "Fixed_Audio_Labels",
+            "fixed_audio_labels",
+            "Sequence_Labels",
+            "sequence_labels",
+            "Sequence_Source_Labels",
+            "sequence_source_labels",
+            "Sequence_Variant_Label",
+            "sequence_variant_label",
+            "Noise_Label",
+            "noise_label",
+            "Noise_Type",
+            "noise_type",
+        )
+        segments.append(
+            {
+                "trial_number": _as_int(payload.get("trial_number", payload.get("Trial_Number")), default=index + 1),
+                "trial_uid": trial_uid,
+                "start_s": start_s,
+                "end_s": float(end_s),
+                "start_sample_index": int(start.get("sample_index", 0)),
+                "clip_label": clip_label or trial_type or "Trial",
+                "trial_label": trial_label or trial_type or "Trial",
+                "family": str(payload.get("family") or payload.get("Family") or ""),
+                "trial_type": trial_type,
+            }
+        )
+    return segments
 
 
 def _topup_source_index(

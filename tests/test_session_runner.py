@@ -892,6 +892,13 @@ def test_session_runner_emits_tactile_timeline_schedule_progress(tmp_path: Path)
     assert tactile_events[0]["family"] == "audio_tactile"
     assert tactile_events[0]["soa_ms"] == "10"
     assert tactile_events[0]["row_label"] == "Inhale"
+    assert tactile_events[0]["trial_label"] == "Inhale"
+    assert tactile_events[0]["clip_label"]
+    trial_segments = schedule["trial_segments"]
+    assert len(trial_segments) >= 1
+    assert trial_segments[0]["trial_number"] == 1
+    assert trial_segments[0]["trial_label"] == "Inhale"
+    assert trial_segments[0]["start_s"] < trial_segments[0]["end_s"]
 
 
 def test_session_runner_logs_instruction_events_without_trial_response(tmp_path: Path):

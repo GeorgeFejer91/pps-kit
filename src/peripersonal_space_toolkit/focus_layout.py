@@ -70,8 +70,8 @@ def render_focus_layout_profile(
     available_width: int,
     available_height: int,
     *,
-    target_width: int = 1120,
-    target_height: int = 720,
+    target_width: int = 3840,
+    target_height: int = 900,
     min_width: int = 820,
     min_height: int = 520,
 ) -> FocusLayoutProfile:
@@ -95,8 +95,8 @@ def render_focus_layout_profile(
     else:
         screen_class = "standard"
 
-    target_square_size = 88 if constrained else (96 if compact else 104)
-    response_panel_side = 276 if constrained else (304 if compact else (328 if spacious else 316))
+    target_square_size = 76 if constrained else (96 if compact else 104)
+    response_panel_side = 236 if constrained else (304 if compact else (328 if spacious else 316))
 
     return FocusLayoutProfile(
         screen_class=screen_class,
@@ -116,10 +116,10 @@ def render_focus_layout_profile(
         app_title_font_pt=17.0 if constrained else (18.0 if compact else 20.0),
         section_title_font_pt=11.0 if constrained else 12.0,
         chip_font_pt=8.5 if constrained else 9.0,
-        button_min_height=32 if constrained else 34,
+        button_min_height=30 if constrained else 34,
         button_padding_y=6 if compact else 7,
         button_padding_x=10 if compact else 13,
-        input_min_height=28 if constrained else 30,
+        input_min_height=26 if constrained else 30,
         input_padding_y=6 if compact else 7,
         input_padding_x=8 if compact else 9,
         progress_min_height=18 if constrained else 20,

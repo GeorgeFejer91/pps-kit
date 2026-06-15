@@ -12,6 +12,26 @@ def test_tactile_timeline_state_loads_and_labels_cues():
         block_index=7,
         block_label="Block 07",
         duration_s=20.0,
+        trial_segments=[
+            {
+                "trial_number": 1,
+                "trial_uid": "T001",
+                "start_s": 0.0,
+                "end_s": 8.0,
+                "clip_label": "White noise",
+                "trial_label": "Inhale",
+                "family": "audio_tactile",
+            },
+            {
+                "trial_number": 2,
+                "trial_uid": "T002",
+                "start_s": 8.0,
+                "end_s": 16.0,
+                "clip_label": "Baseline",
+                "trial_label": "Exhale",
+                "family": "baseline",
+            },
+        ],
         tactile_events=[
             {
                 "trial_number": 2,
@@ -39,7 +59,11 @@ def test_tactile_timeline_state_loads_and_labels_cues():
     assert state.block_index == "7"
     assert [cue.trial_number for cue in state.cues] == [1, 2]
     assert [cue.family for cue in state.cues] == ["audio_tactile", "baseline"]
+    assert [segment.trial_label for segment in state.trial_segments] == ["Inhale", "Exhale"]
     assert state.next_cue().trial_uid == "T001"
+    click = state.record_click(4.6)
+    assert click.trial_uid == "T001"
+    assert state.click_count() == 1
 
 
 def test_tactile_recenter_controller_fires_once_per_due_cue():
