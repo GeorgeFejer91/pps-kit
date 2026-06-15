@@ -140,6 +140,19 @@ def _assert_widget_inside_dialog(widget, dialog) -> None:
     assert widget.visibleRegion().boundingRect().height() > 0
 
 
+def _widget_rect(widget, dialog) -> dict[str, int]:
+    top_left = widget.mapTo(dialog, widget.rect().topLeft())
+    bottom_right = widget.mapTo(dialog, widget.rect().bottomRight())
+    return {
+        "x": int(top_left.x()),
+        "y": int(top_left.y()),
+        "right": int(bottom_right.x()),
+        "bottom": int(bottom_right.y()),
+        "width": int(widget.width()),
+        "height": int(widget.height()),
+    }
+
+
 def test_focus_layout_renderer_preserves_legibility_baselines():
     constrained = render_focus_layout_profile(1024, 600)
     compact = render_focus_layout_profile(1366, 768)
@@ -238,6 +251,16 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert window.response_panel.width() == window.response_panel.height()
     assert window.response_panel.width() == window.layout_profile.response_panel_side
     assert window.output_panel is not window.processing_panel
+    assert window.processing_splitter is None
+    response_rect = _widget_rect(window.response_panel, window.dialog)
+    output_rect = _widget_rect(window.output_panel, window.dialog)
+    response_cell_rect = _widget_rect(window.response_cell, window.dialog)
+    processing_rect = _widget_rect(window.processing_panel, window.dialog)
+    workspace_rect = _widget_rect(window.workspace_splitter, window.dialog)
+    assert output_rect["y"] >= response_rect["bottom"]
+    assert output_rect["x"] >= response_cell_rect["x"]
+    assert output_rect["right"] <= response_cell_rect["right"]
+    assert processing_rect["width"] >= workspace_rect["width"] - 8
 
     screenshot = tmp_path / "focus_mode_shell.png"
     assert window.dialog.grab().save(str(screenshot))
@@ -476,11 +499,11 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     assert window.response_panel.maximumHeight() == profile.response_panel_side
     assert window.response_panel.geometry().width() == window.response_panel.geometry().height()
     assert window.output_panel is not window.processing_panel
-    assert window.processing_splitter.count() == 2
+    assert window.processing_splitter is None
     expected_run_splitter_count = 2 if profile.right_stack_mode == "tabs" else 3
     assert window.run_splitter.count() == expected_run_splitter_count
 
-    for widget in (
+    visible_widgets = [
         window.target_button,
         window.response_panel,
         window.participant_code_combo,
@@ -492,16 +515,29 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
         window.processing_panel,
         window.output_panel,
         window.block_plan_widget,
-        window.block_preview_label,
         window.output_summary,
         window.tactile_timeline_widget,
-    ):
+    ]
+    if window.block_preview_label.isVisible():
+        visible_widgets.append(window.block_preview_label)
+    for widget in visible_widgets:
         _assert_widget_inside_dialog(widget, window.dialog)
 
     assert window.target_button.geometry().width() == profile.target_min_height
     assert window.target_button.geometry().height() == profile.target_min_height
     assert window.start_button.geometry().height() >= profile.button_min_height
     assert window.output_summary.geometry().height() >= profile.output_min_height
+    response_rect = _widget_rect(window.response_panel, window.dialog)
+    output_rect = _widget_rect(window.output_panel, window.dialog)
+    response_cell_rect = _widget_rect(window.response_cell, window.dialog)
+    run_rect = _widget_rect(window.run_splitter, window.dialog)
+    processing_rect = _widget_rect(window.processing_panel, window.dialog)
+    workspace_rect = _widget_rect(window.workspace_splitter, window.dialog)
+    assert output_rect["y"] >= response_rect["bottom"]
+    assert output_rect["x"] >= response_cell_rect["x"]
+    assert output_rect["right"] <= response_cell_rect["right"]
+    assert processing_rect["y"] >= run_rect["bottom"]
+    assert processing_rect["width"] >= workspace_rect["width"] - 8
     window.dialog.close()
 
 

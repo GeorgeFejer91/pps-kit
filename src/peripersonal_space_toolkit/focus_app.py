@@ -320,6 +320,8 @@ def _panel(q: dict[str, Any], title: str, *, profile: FocusLayoutProfile | None 
     if title:
         heading = q["QLabel"](title)
         heading.setObjectName("sectionTitle")
+        input_min_height = profile.input_min_height if profile is not None else DEFAULT_FOCUS_LAYOUT_PROFILE.input_min_height
+        heading.setMinimumHeight(max(16, input_min_height - 8))
         layout.addWidget(heading)
     return frame, layout
 
@@ -366,7 +368,13 @@ def _create_tactile_timeline_widget(
     class TactileTimelineWidget(q["QWidget"]):
         def __init__(self) -> None:
             super().__init__()
-            self.setMinimumHeight(84 if profile is not None and profile.screen_class == "constrained" else 116)
+            if profile is not None and profile.screen_class == "constrained":
+                minimum_height = 52
+            elif profile is not None and profile.compact:
+                minimum_height = 96
+            else:
+                minimum_height = 116
+            self.setMinimumHeight(minimum_height)
 
         def paintEvent(self, _event: Any) -> None:  # noqa: N802 - Qt API
             painter = q["QPainter"](self)
@@ -377,11 +385,17 @@ def _create_tactile_timeline_widget(
                 label_width = 58
                 right_margin = 12
                 compact_rows = height < 108
-                top_margin = 6 if compact_rows else 10
+                very_compact_rows = height < 78
+                top_margin = 4 if very_compact_rows else (6 if compact_rows else 10)
                 usable = max(1, width - label_width - right_margin)
                 timeline_state = state_provider() if state_provider is not None else state
                 duration = max(0.001, float(timeline_state.duration_s or 0.0))
-                row_offsets = (3, 22, 41, 60) if compact_rows else (5, 31, 58, 86)
+                if very_compact_rows:
+                    row_offsets = (4, 18, 32, 46)
+                elif compact_rows:
+                    row_offsets = (3, 22, 41, 60)
+                else:
+                    row_offsets = (5, 31, 58, 86)
                 rows = [(label, top_margin + offset) for label, offset in zip(("Clip", "Trial", "Tactile", "Clicks"), row_offsets)]
 
                 painter.fillRect(self.rect(), q["QColor"]("#f8f9f6"))
@@ -421,7 +435,7 @@ def _create_tactile_timeline_widget(
                         return "#f4e2b8"
                     return palette[fallback_index % len(palette)]
 
-                row_height = 16 if compact_rows else 18
+                row_height = 12 if very_compact_rows else (16 if compact_rows else 18)
                 for index, segment in enumerate(timeline_state.trial_segments):
                     x1 = _x(segment.start_s)
                     x2 = max(x1 + 2, _x(segment.end_s))
@@ -470,7 +484,7 @@ def _create_tactile_timeline_widget(
                 cursor_pen = q["QPen"](q["QColor"]("#b91c1c"))
                 cursor_pen.setWidth(3)
                 painter.setPen(cursor_pen)
-                painter.drawLine(cursor_x, 4, cursor_x, min(height - 4, rows[-1][1] + 14))
+                painter.drawLine(cursor_x, 4, cursor_x, min(height - 4, rows[-1][1] + (10 if very_compact_rows else 14)))
             finally:
                 painter.end()
 
@@ -483,7 +497,7 @@ def _create_block_plan_widget(q: dict[str, Any], owner: Any) -> Any:
             super().__init__()
             profile = getattr(owner, "layout_profile", None)
             self._compact = bool(profile is not None and profile.screen_class == "constrained")
-            self.setMinimumHeight(36 if self._compact else 58)
+            self.setMinimumHeight(30 if self._compact else 58)
             self.setCursor(q["Qt"].CursorShape.PointingHandCursor)
             self.setMouseTracking(True)
 
@@ -2023,7 +2037,7 @@ class FocusModeWindow:
         response_cell = q["QWidget"]()
         response_cell_layout = q["QVBoxLayout"](response_cell)
         response_cell_layout.setContentsMargins(0, 0, 0, 0)
-        response_cell_layout.setSpacing(0)
+        response_cell_layout.setSpacing(max(6, profile.root_spacing))
         response_cell.setMinimumWidth(profile.response_panel_side)
         response_cell.setMinimumHeight(profile.response_panel_side)
         response_cell.setSizePolicy(q["QSizePolicy"].Policy.Minimum, q["QSizePolicy"].Policy.Expanding)
@@ -2077,6 +2091,24 @@ class FocusModeWindow:
         controls.setColumnStretch(1, 1)
         response_layout.addLayout(controls)
         response_cell_layout.addWidget(response_panel, 0, q["Qt"].AlignmentFlag.AlignTop | q["Qt"].AlignmentFlag.AlignHCenter)
+
+        output_panel, output_layout = _panel(q, "Output Summary", profile=profile)
+        self.output_panel = output_panel
+        output_panel_min_height = 64 if profile.screen_class == "constrained" else (116 if profile.compact else 126)
+        output_panel_max_height = 100 if profile.screen_class == "constrained" else (160 if profile.compact else 180)
+        output_panel.setMinimumHeight(output_panel_min_height)
+        output_panel.setMaximumHeight(output_panel_max_height)
+        output_panel.setMinimumWidth(profile.response_panel_side)
+        output_layout.setSpacing(profile.panel_spacing)
+        self.output_summary = q["QTextEdit"]()
+        self.output_summary.setReadOnly(True)
+        self.output_summary.setMinimumHeight(profile.output_min_height)
+        self.output_summary.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Expanding)
+        self.output_summary.setPlainText("Session outputs will appear here after the run.")
+        output_layout.addWidget(self.output_summary)
+        response_cell_layout.addWidget(output_panel)
+        response_stack_height = profile.response_panel_side + output_panel_min_height + max(6, profile.root_spacing)
+        response_cell.setMinimumHeight(response_stack_height)
         response_cell_layout.addStretch(1)
         self.run_splitter.addWidget(response_cell)
 
@@ -2257,13 +2289,12 @@ class FocusModeWindow:
         self._pre_run_controls.extend([self.backup_recording_checkbox, self.topup_checkbox])
         _add_operator_panel("Settings", settings_panel)
 
-        self.processing_splitter = q["QSplitter"](q["Qt"].Orientation.Horizontal)
-        self.processing_splitter.setChildrenCollapsible(False)
-        self.processing_splitter.setHandleWidth(max(7, profile.root_spacing))
+        self.processing_splitter = None
 
         processing_panel, progress_layout = _panel(q, "Experiment Control", profile=profile)
         self.processing_panel = processing_panel
-        processing_panel.setMinimumHeight(170 if profile.screen_class == "constrained" else 190)
+        processing_panel_min_height = 148 if profile.screen_class == "constrained" else (190 if profile.compact else 240)
+        processing_panel.setMinimumHeight(processing_panel_min_height)
         processing_panel.setMinimumWidth(360 if profile.compact else 420)
         progress_layout.setSpacing(profile.panel_spacing)
         if profile.screen_class != "constrained":
@@ -2274,6 +2305,8 @@ class FocusModeWindow:
         self.block_preview_label.setObjectName("mutedLabel")
         self.block_preview_label.setWordWrap(True)
         progress_layout.addWidget(self.block_preview_label)
+        if profile.screen_class == "constrained":
+            self.block_preview_label.setVisible(False)
         if profile.screen_class != "constrained":
             progress_layout.addWidget(_subtitle(q, "Stimulus / Tactile / Click Timeline"))
         timeline_status = q["QWidget"]()
@@ -2325,21 +2358,7 @@ class FocusModeWindow:
             self.event_label.setVisible(False)
             self.prewarm_label.setVisible(False)
         progress_layout.addStretch(1)
-        self.processing_splitter.addWidget(processing_panel)
-
-        output_panel, output_layout = _panel(q, "Output Summary", profile=profile)
-        self.output_panel = output_panel
-        output_panel.setMinimumHeight(170 if profile.screen_class == "constrained" else 190)
-        output_panel.setMinimumWidth(260 if profile.compact else 320)
-        output_layout.setSpacing(profile.panel_spacing)
-        self.output_summary = q["QTextEdit"]()
-        self.output_summary.setReadOnly(True)
-        self.output_summary.setMinimumHeight(profile.output_min_height)
-        self.output_summary.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Expanding)
-        self.output_summary.setPlainText("Session outputs will appear here after the run.")
-        output_layout.addWidget(self.output_summary)
-        self.processing_splitter.addWidget(output_panel)
-        self.workspace_splitter.addWidget(self.processing_splitter)
+        self.workspace_splitter.addWidget(processing_panel)
 
         self.workspace_splitter.setStretchFactor(0, 1)
         self.workspace_splitter.setStretchFactor(1, 1)
@@ -2349,10 +2368,8 @@ class FocusModeWindow:
         else:
             self.run_splitter.setStretchFactor(1, 2)
             self.run_splitter.setStretchFactor(2, 1)
-        self.processing_splitter.setStretchFactor(0, 2)
-        self.processing_splitter.setStretchFactor(1, 1)
 
-        response_column_width = profile.response_panel_side + max(8, profile.root_spacing)
+        response_column_width = profile.response_panel_side + max(12, profile.root_spacing)
         if profile.right_stack_mode == "tabs":
             self.run_splitter.setSizes([response_column_width, max(420, profile.window_width - response_column_width)])
         else:
@@ -2364,10 +2381,9 @@ class FocusModeWindow:
                     max(260, int(remaining_width * 0.42)),
                 ]
             )
-        top_height = max(profile.response_panel_side, int(profile.window_height * (0.54 if profile.right_stack_mode != "tabs" else 0.48)))
-        lower_height = max(180 if profile.screen_class == "constrained" else 210, profile.window_height - top_height)
+        top_height = response_stack_height
+        lower_height = processing_panel_min_height
         self.workspace_splitter.setSizes([top_height, lower_height])
-        self.processing_splitter.setSizes([max(440, int(profile.window_width * 0.58)), max(320, int(profile.window_width * 0.42))])
 
         self.timer = q["QTimer"](self.dialog)
         self.timer.timeout.connect(self._drain)

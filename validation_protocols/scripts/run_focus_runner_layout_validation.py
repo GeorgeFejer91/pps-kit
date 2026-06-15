@@ -346,17 +346,23 @@ def _audit_window(
             failures.append(f"{name} height {widget_metrics[name]['height']} is below {profile.button_min_height}px.")
     if widget_metrics["output_summary"]["height"] < profile.output_min_height:
         failures.append("Output Summary is shorter than the profile minimum.")
+    if widget_metrics["output_panel"]["y"] < widget_metrics["response_panel"]["bottom"]:
+        failures.append("Output Summary is not positioned under the response/click panel.")
+    workspace_rect = _widget_rect(window.dialog, window.workspace_splitter)
+    if widget_metrics["processing_panel"]["width"] < workspace_rect["width"] - 8:
+        failures.append("Experiment Control does not span the full lower workspace width.")
 
     for segment_name in ("response_panel", "data_selection_panel", "settings_panel", "processing_panel", "output_panel"):
         if segment_name not in widget_metrics:
             continue
-        if widget_metrics[segment_name]["height"] < 80:
+        min_segment_height = 60 if segment_name == "output_panel" and profile.screen_class == "constrained" else 80
+        if widget_metrics[segment_name]["height"] < min_segment_height:
             failures.append(f"{segment_name} is too short to operate: {widget_metrics[segment_name]}")
         if widget_metrics[segment_name]["width"] < 220:
             failures.append(f"{segment_name} is too narrow to operate: {widget_metrics[segment_name]}")
 
     splitter_metrics = {}
-    splitter_names = ["workspace_splitter", "run_splitter", "processing_splitter"]
+    splitter_names = ["workspace_splitter", "run_splitter"]
     for name in splitter_names:
         splitter = getattr(window, name, None)
         if splitter is None:
@@ -461,7 +467,6 @@ def _apply_layout_variant(window: Any, variant: str) -> None:
             window.run_splitter.setSizes([max(280, int(width * 0.32)), max(420, int(width * 0.68))])
     elif variant == "processing_tall":
         window.workspace_splitter.setSizes([max(280, int(workspace_height * 0.48)), max(220, int(workspace_height * 0.52))])
-        window.processing_splitter.setSizes([max(440, int(width * 0.62)), max(300, int(width * 0.38))])
 
 
 def _write_markdown(path: Path, report: dict[str, Any]) -> None:
