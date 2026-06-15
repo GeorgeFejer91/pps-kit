@@ -38,8 +38,12 @@ if ($LASTEXITCODE -eq 0) {
     if (Test-Path -LiteralPath $AuditJson) {
         $Audit = Get-Content -Raw -LiteralPath $AuditJson | ConvertFrom-Json
         if (-not $Audit.summary.komplete_asio_sounddevice_ready) {
-            Write-Warning "Komplete Audio ASIO is not visible as a 3+ channel sounddevice output. Opening the official Native Instruments driver page."
-            Start-Process $DriverUrl
+            if ($Audit.summary.komplete_asio_registry_present) {
+                Write-Warning "Komplete Audio ASIO driver is registered, but the interface is not visible as a 3+ channel sounddevice output. Reconnect or power-cycle the Komplete Audio 6 MK2, then rerun the audio stress check."
+            } else {
+                Write-Warning "Komplete Audio ASIO driver is not installed. Opening the official Native Instruments driver page; install the Komplete Audio 6 MK2 Driver, reconnect the interface, then rerun setup or the runner audio preflight."
+                Start-Process $DriverUrl
+            }
         }
     }
 }

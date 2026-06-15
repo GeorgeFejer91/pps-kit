@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+from html import escape
 import json
 import math
 import os
@@ -15,7 +16,14 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .app_assets import apply_qt_app_icon, set_windows_app_user_model_id
-from .audio_routing import NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL, assess_audio_runtime_readiness
+from .audio_routing import (
+    NI_KOMPLETE_AUDIO_DRIVER_INSTALL_GUIDE_URL,
+    NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL,
+    AudioRuntimeReadiness,
+    assess_audio_runtime_readiness,
+    komplete_audio_asio_reconnect_steps,
+    komplete_audio_asio_install_steps,
+)
 from .focus_layout import (
     FocusLayoutProfile,
     render_focus_layout_profile,
@@ -203,6 +211,104 @@ def _backup_recording_checkbox_text(package: Any) -> str:
         "Save additional fail-safe local recording\n"
         f"(LSL logging remains standard; estimated extra file: ~{_estimated_backup_recording_size(package)})"
     )
+
+
+def _audio_dependency_dialog_html(readiness: AudioRuntimeReadiness) -> str:
+    detail_items = "".join(f"<li>{escape(item)}</li>" for item in readiness.details)
+    steps = komplete_audio_asio_reconnect_steps() if readiness.komplete_asio_driver_registered else komplete_audio_asio_install_steps()
+    step_items = "".join(f"<li>{escape(step)}</li>" for step in steps)
+    sounddevice = escape(readiness.sounddevice_version or "not detected")
+    hostapi_state = "visible" if readiness.asio_hostapi_present else "not visible"
+    return (
+        "<h2>Komplete Audio ASIO driver required</h2>"
+        "<p>PPS needs the native <b>Komplete Audio ASIO Driver</b> so left, right, "
+        "and tactile output share one synchronized multichannel device.</p>"
+        f"<p><b>Status:</b> {escape(readiness.summary)}</p>"
+        f"<p><b>sounddevice:</b> {sounddevice}<br><b>ASIO host API:</b> {hostapi_state}</p>"
+        f"<ul>{detail_items}</ul>"
+        "<p><b>What to do next:</b></p>"
+        f"<ol>{step_items}</ol>"
+        "<p>"
+        f"Driver page: <a href=\"{NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL}\">{NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL}</a><br>"
+        f"Install guide: <a href=\"{NI_KOMPLETE_AUDIO_DRIVER_INSTALL_GUIDE_URL}\">{NI_KOMPLETE_AUDIO_DRIVER_INSTALL_GUIDE_URL}</a>"
+        "</p>"
+        "<p>After the installer finishes and the interface is reconnected, click "
+        "<b>Retry Audio Detection</b>. PPS will automatically select "
+        "<b>Komplete Audio ASIO Driver</b> when it appears.</p>"
+    )
+
+
+def _show_audio_dependency_dialog(
+    q: dict[str, Any],
+    *,
+    parent: Any | None = None,
+    readiness: AudioRuntimeReadiness | None = None,
+) -> bool:
+    """Show a repair dialog and return True once native Komplete ASIO is ready."""
+    current: dict[str, AudioRuntimeReadiness] = {"readiness": readiness or assess_audio_runtime_readiness()}
+    if current["readiness"].publication_ready:
+        return True
+
+    dialog = q["QDialog"](parent)
+    dialog.setObjectName("audioDependencyDialog")
+    _enable_standard_window_controls(q, dialog)
+    dialog.setWindowTitle("Audio Driver Required")
+    dialog.resize(780, 560)
+    dialog.setMinimumSize(640, 460)
+    dialog.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
+
+    layout = q["QVBoxLayout"](dialog)
+    layout.setContentsMargins(18, 18, 18, 18)
+    layout.setSpacing(12)
+
+    instructions = q["QLabel"]()
+    instructions.setObjectName("audioDependencyInstructions")
+    instructions.setWordWrap(True)
+    instructions.setOpenExternalLinks(True)
+    instructions.setTextInteractionFlags(q["Qt"].TextInteractionFlag.TextBrowserInteraction)
+    layout.addWidget(instructions)
+
+    status = q["QLabel"]("")
+    status.setObjectName("audioDependencyStatus")
+    status.setWordWrap(True)
+    layout.addWidget(status)
+
+    buttons = q["QHBoxLayout"]()
+    open_driver = q["QPushButton"]("Open Native Instruments Driver Page")
+    open_driver.setObjectName("openKompleteDriverPageButton")
+    open_guide = q["QPushButton"]("Open Install Guide")
+    open_guide.setObjectName("openKompleteInstallGuideButton")
+    retry = q["QPushButton"]("Retry Audio Detection")
+    retry.setObjectName("retryAudioDetectionButton")
+    close = q["QPushButton"]("Close")
+    close.setObjectName("closeAudioDependencyDialogButton")
+    buttons.addWidget(open_driver)
+    buttons.addWidget(open_guide)
+    buttons.addStretch(1)
+    buttons.addWidget(retry)
+    buttons.addWidget(close)
+    layout.addLayout(buttons)
+
+    def _render() -> None:
+        ready = current["readiness"]
+        instructions.setText(_audio_dependency_dialog_html(ready))
+        if ready.publication_ready:
+            status.setText("Komplete Audio ASIO Driver detected. PPS will use it automatically.")
+        else:
+            status.setText("Waiting for Komplete Audio ASIO Driver. Install/reconnect the interface, then retry detection.")
+
+    def _retry() -> None:
+        current["readiness"] = assess_audio_runtime_readiness()
+        _render()
+        if current["readiness"].publication_ready:
+            dialog.accept()
+
+    open_driver.clicked.connect(lambda: q["QDesktopServices"].openUrl(q["QUrl"](NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL)))
+    open_guide.clicked.connect(lambda: q["QDesktopServices"].openUrl(q["QUrl"](NI_KOMPLETE_AUDIO_DRIVER_INSTALL_GUIDE_URL)))
+    retry.clicked.connect(_retry)
+    close.clicked.connect(dialog.reject)
+    _render()
+    return dialog.exec() == q["QDialog"].DialogCode.Accepted and current["readiness"].publication_ready
 
 
 def _block_metadata(block: Any) -> dict[str, Any]:
@@ -3964,6 +4070,11 @@ def run_focus_window(
     app.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
     validation_engine: _ValidationFastAudioEngine | None = None
     controller_factory: Callable[..., Any] | None = None
+    validation_audio_requested = _env_flag("PPS_FOCUS_VALIDATION_REALTIME_AUDIO") or _env_flag("PPS_FOCUS_VALIDATION_FAST_AUDIO")
+    if not validation_audio_requested:
+        readiness = assess_audio_runtime_readiness()
+        if not readiness.publication_ready and not _show_audio_dependency_dialog(q, readiness=readiness):
+            return 2
     if _env_flag("PPS_FOCUS_VALIDATION_REALTIME_AUDIO"):
         validation_engine = _ValidationFastAudioEngine(
             chunk_frames=max(64, _env_int("PPS_FOCUS_VALIDATION_AUDIO_CHUNK_FRAMES") or 4096),
@@ -4072,9 +4183,11 @@ def run_launcher_window(
     asset_controls.addWidget(range_button)
     panel_layout.addLayout(asset_controls)
 
+    readiness_state: dict[str, AudioRuntimeReadiness | None] = {"readiness": None}
     show_driver_button = False
     try:
-        readiness = None if initial_message else assess_audio_runtime_readiness()
+        readiness_state["readiness"] = None if initial_message else assess_audio_runtime_readiness()
+        readiness = readiness_state["readiness"]
         launcher_message = initial_message or (readiness.message() if readiness is not None else "")
         show_driver_button = bool(readiness is not None and not readiness.publication_ready)
     except Exception as exc:
@@ -4084,11 +4197,10 @@ def run_launcher_window(
     message.setObjectName("mutedLabel")
     message.setWordWrap(True)
     panel_layout.addWidget(message)
-    driver_button = q["QPushButton"]("Open Audio Driver Page")
+    driver_button = q["QPushButton"]("Audio Driver Instructions")
     driver_button.setObjectName("secondaryButton")
-    driver_button.setToolTip("Open the official Native Instruments driver page in the default browser.")
+    driver_button.setToolTip("Show Komplete Audio ASIO install steps and retry audio detection.")
     driver_button.setVisible(show_driver_button)
-    driver_button.clicked.connect(lambda: q["QDesktopServices"].openUrl(q["QUrl"](NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL)))
     panel_layout.addWidget(driver_button)
     progress = q["QProgressBar"]()
     progress.setRange(0, 1000)
@@ -4123,6 +4235,31 @@ def run_launcher_window(
     preparation_cancel = threading.Event()
     preparation_thread: dict[str, threading.Thread | None] = {"thread": None}
     participant_statuses: dict[str, dict[str, Any]] = {}
+
+    def _refresh_launcher_audio_preflight() -> AudioRuntimeReadiness | None:
+        try:
+            readiness_state["readiness"] = assess_audio_runtime_readiness()
+            readiness = readiness_state["readiness"]
+            message.setText(readiness.message())
+            driver_button.setVisible(not readiness.publication_ready)
+            return readiness
+        except Exception as exc:
+            readiness_state["readiness"] = None
+            message.setText(f"Audio preflight could not run: {exc}")
+            driver_button.setVisible(True)
+            return None
+
+    def _open_audio_dependency_dialog() -> None:
+        readiness = readiness_state["readiness"] or assess_audio_runtime_readiness()
+        if _show_audio_dependency_dialog(q, parent=dialog, readiness=readiness):
+            message.setText(assess_audio_runtime_readiness().message())
+            driver_button.setVisible(False)
+        else:
+            _refresh_launcher_audio_preflight()
+
+    driver_button.clicked.connect(_open_audio_dependency_dialog)
+    if show_driver_button and not initial_message:
+        q["QTimer"].singleShot(100, _open_audio_dependency_dialog)
 
     def _current_profile() -> str:
         return str(profile_combo.currentData() or "")

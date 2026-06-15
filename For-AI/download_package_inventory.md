@@ -68,6 +68,17 @@ Current ASIO policy:
 - Native Instruments Komplete Audio ASIO Driver is proprietary. PPS may point to
   or open the official NI driver page, but must not bundle or mirror the driver
   installer unless written redistribution permission is recorded in the manifest.
+- Treat the Komplete driver dependency as a state machine in installers and the
+  runner: (1) registry absent means open the official NI driver page and show the
+  install guide; (2) registry present but `sounddevice` route absent means ask the
+  user to reconnect or power-cycle the Komplete Audio 6 MK2 and retry detection;
+  (3) `Komplete Audio ASIO Driver` visible with at least three outputs means PPS
+  automatically selects that native multichannel route.
+- The required user-facing instructions are: disconnect the interface, download
+  `Komplete Audio 6 MK2 Driver 5.22.0 - Windows 10` from the NI drivers page,
+  extract the ZIP, run `setup.exe`, reconnect the interface, and click Retry
+  Audio Detection or restart the runner. Package/downloader UI should reuse these
+  same words rather than inventing a parallel flow.
 - FlexASIO may be declared as an optional diagnostic fallback from Etienne
   Dechamps' GitHub release with pinned SHA256. It is not the validated
   publication timing route for synchronized left/right/tactile output.
@@ -116,9 +127,16 @@ Optional but preferred when available:
 10. Test from the public download page on a clean Windows folder. The proof must show the single downloader exe downloading content, installing into a user-chosen location, creating/opening the offline HTML GUI exe, and launching `PPSExperimentRunner.exe`.
 11. On a clean Windows lab PC without Komplete ASIO, verify the downloader/setup
     opens the official NI driver page, reports provider action required, and the
-    runner launcher shows an audio dependency message plus an "Open Audio Driver
-    Page" action. After installing the NI driver, rerun the PC audit and
+    runner launcher shows an audio dependency message plus an `Audio Driver
+    Instructions` action with official links and Retry Audio Detection. After
+    installing the NI driver, rerun the PC audit and
     `pps-audio-stress --device-query Komplete --channels 3`.
+12. On a Windows lab PC where the NI driver is installed but the interface is
+    unplugged or not enumerated, verify setup/runner messaging switches to the
+    reconnect/power-cycle/retry path and does not keep telling the user to
+    download the driver. After the interface appears, the runner should proceed
+    automatically from Retry Audio Detection without requiring manual device
+    selection.
 
 ## Do Not Package
 

@@ -8,6 +8,8 @@ from peripersonal_space_toolkit.audio_routing import (
     assess_audio_runtime_readiness,
     apply_output_volumes,
     center_audio_for_output,
+    komplete_audio_asio_install_message,
+    komplete_audio_asio_install_steps,
     prepare_block_audio_for_output,
     tactile_probe_for_output,
 )
@@ -57,6 +59,31 @@ def test_audio_preflight_flags_komplete_stereo_without_asio_route():
     assert readiness.publication_ready is False
     assert "Only a stereo Komplete endpoint" in readiness.message()
     assert NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL in readiness.message()
+    assert "Retry Audio Detection" in readiness.message()
+    assert "automatically selects" in readiness.message()
+
+
+def test_komplete_asio_install_message_has_actionable_steps_and_links():
+    steps = komplete_audio_asio_install_steps()
+    message = komplete_audio_asio_install_message()
+
+    assert steps[0].startswith("Disconnect the Komplete Audio 6 MK2")
+    assert any("setup.exe" in step for step in steps)
+    assert any("Retry Audio Detection" in step for step in steps)
+    assert "Driver page:" in message
+    assert NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL in message
+
+
+def test_audio_preflight_distinguishes_registered_driver_without_visible_interface():
+    sd = FakeSoundDevice([{"name": "ASIO"}], [])
+
+    readiness = assess_audio_runtime_readiness(sounddevice_module=sd, komplete_asio_registered=True)
+
+    assert readiness.ready is False
+    assert readiness.komplete_asio_driver_registered is True
+    assert "registered in Windows" in readiness.message()
+    assert "Reconnect or power-cycle" in readiness.message()
+    assert "automatically selects" in readiness.message()
 
 
 def test_audio_preflight_allows_generic_asio_only_as_unvalidated_fallback():
