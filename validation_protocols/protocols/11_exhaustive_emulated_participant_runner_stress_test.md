@@ -47,6 +47,20 @@ python .\validation_protocols\scripts\run_topup_missed_trial_stress.py `
   --output-dir artifacts\validation_runs\topup_missed_trial_stress_current
 ```
 
+After each scenario writes a real runner session folder, run the offline
+Protocol 11 artifact gate with the scenario's controlled response plan:
+
+```powershell
+python .\validation_protocols\scripts\validate_protocol11_emulated_runner_artifacts.py `
+  --session-dir local_data\sessions\P001_YYYYMMDD_HHMMSS `
+  --response-plan artifacts\validation_runs\protocol11_response_plan.json `
+  --output-dir artifacts\validation_runs\protocol11_artifact_audit_current
+```
+
+The response plan may be JSON or CSV. The minimum plan is keyed by
+`trial_uid`; JSON plans may also declare expected capture options,
+instruction slots, top-up behavior, and operator failure-mode expectations.
+
 When a checklist item has no dedicated harness yet, record it as a missing
 automation gap before changing runtime code. Add runner code only when the gap
 exposes experiment-correctness risk, missing observability, or an operator
