@@ -14,6 +14,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -28,12 +29,13 @@ type InstallOptions struct {
 }
 
 type InstallResult struct {
-	Manifest    DownloadManifest
-	Payload     Payload
-	InstallDir  string
-	PayloadPath string
-	LaunchPath  string
-	Reused      bool
+	Manifest                 DownloadManifest
+	Payload                  Payload
+	InstallDir               string
+	PayloadPath              string
+	LaunchPath               string
+	Reused                   bool
+	ExternalDependencyStatus []ExternalDependencyStatus
 }
 
 type ProgressEvent struct {
@@ -44,6 +46,17 @@ type ProgressEvent struct {
 }
 
 type ProgressFunc func(ProgressEvent)
+
+var openExternalURL = openURL
+
+type ExternalDependencyStatus struct {
+	Kind       string
+	Label      string
+	Status     string
+	Path       string
+	Message    string
+	ProviderURL string
+}
 
 func InstallFromManifest(ctx context.Context, options InstallOptions, progress ProgressFunc) (InstallResult, error) {
 	if progress == nil {
@@ -78,7 +91,11 @@ func InstallFromManifest(ctx context.Context, options InstallOptions, progress P
 	payloadPath := filepath.Join(downloadDir, payload.Filename)
 
 	if !options.Force && existingInstallLooksValid(installDir, payload) {
-		result := InstallResult{Manifest: manifest, Payload: payload, InstallDir: installDir, PayloadPath: payloadPath, Reused: true}
+		dependencyStatuses, err := handleExternalDependencies(ctx, manifest.ExternalDependencies, downloadDir, progress)
+		if err != nil {
+			return InstallResult{}, err
+		}
+		result := InstallResult{Manifest: manifest, Payload: payload, InstallDir: installDir, PayloadPath: payloadPath, Reused: true, ExternalDependencyStatus: dependencyStatuses}
 		result.LaunchPath = resolveLaunchPath(installDir, manifest)
 		if options.Launch {
 			_ = launchEntrypoint(result.LaunchPath)
@@ -91,7 +108,7 @@ func InstallFromManifest(ctx context.Context, options InstallOptions, progress P
 		return InstallResult{}, fmt.Errorf("create download dir: %w", err)
 	}
 	progress(ProgressEvent{Stage: "download", Message: "Downloading offline lab package", Total: payload.SizeBytes})
-	if err := ensurePayload(ctx, payload, payloadPath, progress); err != nil {
+	if err := ensurePayload(ctx, payload, payloadPath, "Downloading offline lab package", progress); err != nil {
 		return InstallResult{}, err
 	}
 	progress(ProgressEvent{Stage: "verify", Message: "Verifying SHA256"})
@@ -136,7 +153,11 @@ func InstallFromManifest(ctx context.Context, options InstallOptions, progress P
 		return InstallResult{}, fmt.Errorf("finalize install dir: %w", err)
 	}
 
-	result := InstallResult{Manifest: manifest, Payload: payload, InstallDir: installDir, PayloadPath: payloadPath}
+	dependencyStatuses, err := handleExternalDependencies(ctx, manifest.ExternalDependencies, downloadDir, progress)
+	if err != nil {
+		return InstallResult{}, err
+	}
+	result := InstallResult{Manifest: manifest, Payload: payload, InstallDir: installDir, PayloadPath: payloadPath, ExternalDependencyStatus: dependencyStatuses}
 	result.LaunchPath = resolveLaunchPath(installDir, manifest)
 	if options.CreateShortcuts {
 		progress(ProgressEvent{Stage: "shortcuts", Message: "Creating shortcuts"})
@@ -152,6 +173,60 @@ func InstallFromManifest(ctx context.Context, options InstallOptions, progress P
 	}
 	progress(ProgressEvent{Stage: "ready", Message: "PPS Toolkit is installed", Total: 1, Downloaded: 1})
 	return result, nil
+}
+
+func handleExternalDependencies(ctx context.Context, dependencies []ExternalDependency, downloadDir string, progress ProgressFunc) ([]ExternalDependencyStatus, error) {
+	statuses := make([]ExternalDependencyStatus, 0, len(dependencies))
+	for _, dependency := range dependencies {
+		label := strings.TrimSpace(dependency.Label)
+		if label == "" {
+			label = dependency.Kind
+		}
+		if !dependency.AutoDownload {
+			statuses = append(statuses, ExternalDependencyStatus{
+				Kind:        dependency.Kind,
+				Label:       label,
+				Status:      "provider_action_required",
+				ProviderURL: dependency.ProviderPageURL,
+				Message:     fmt.Sprintf("%s must be installed from the provider source: %s", label, dependency.ProviderPageURL),
+			})
+			progress(ProgressEvent{Stage: "external-dependency", Message: fmt.Sprintf("%s requires provider install: %s", label, dependency.ProviderPageURL)})
+			_ = openExternalURL(dependency.ProviderPageURL)
+			continue
+		}
+		if !dependency.RedistributionPermitted {
+			return statuses, fmt.Errorf("refusing to auto-download %s without redistribution permission", label)
+		}
+		externalDir := filepath.Join(downloadDir, "external")
+		if err := os.MkdirAll(externalDir, 0o755); err != nil {
+			return statuses, fmt.Errorf("create external dependency cache: %w", err)
+		}
+		path := filepath.Join(externalDir, dependency.Filename)
+		payload := Payload{
+			Kind:      dependency.Kind,
+			Label:     label,
+			Filename:  dependency.Filename,
+			URL:       dependency.DownloadURL,
+			SizeBytes: dependency.SizeBytes,
+			SHA256:    dependency.SHA256,
+		}
+		progress(ProgressEvent{Stage: "external-dependency", Message: "Downloading " + label, Total: dependency.SizeBytes})
+		if err := ensurePayload(ctx, payload, path, "Downloading "+label, progress); err != nil {
+			return statuses, err
+		}
+		if err := verifyFileSHA256(path, dependency.SHA256); err != nil {
+			return statuses, err
+		}
+		statuses = append(statuses, ExternalDependencyStatus{
+			Kind:        dependency.Kind,
+			Label:       label,
+			Status:      "downloaded_verified",
+			Path:        path,
+			ProviderURL: dependency.ProviderPageURL,
+			Message:     fmt.Sprintf("%s downloaded and SHA256-verified. Run the installer if Windows prompts are required.", label),
+		})
+	}
+	return statuses, nil
 }
 
 func readSource(ctx context.Context, source string) ([]byte, error) {
@@ -178,7 +253,7 @@ func readSource(ctx context.Context, source string) ([]byte, error) {
 	return os.ReadFile(source)
 }
 
-func ensurePayload(ctx context.Context, payload Payload, outputPath string, progress ProgressFunc) error {
+func ensurePayload(ctx context.Context, payload Payload, outputPath string, message string, progress ProgressFunc) error {
 	if pathExists(outputPath) && verifyFileSHA256(outputPath, payload.SHA256) == nil {
 		progress(ProgressEvent{Stage: "download", Message: "Reusing previously downloaded verified package", Downloaded: payload.SizeBytes, Total: payload.SizeBytes})
 		return nil
@@ -186,7 +261,7 @@ func ensurePayload(ctx context.Context, payload Payload, outputPath string, prog
 	partPath := outputPath + ".part"
 	var lastErr error
 	for attempt := 1; attempt <= 3; attempt++ {
-		lastErr = downloadOnce(ctx, payload, partPath, progress)
+		lastErr = downloadOnce(ctx, payload, partPath, message, progress)
 		if lastErr == nil {
 			if err := os.Rename(partPath, outputPath); err != nil {
 				return fmt.Errorf("finalize download: %w", err)
@@ -198,7 +273,7 @@ func ensurePayload(ctx context.Context, payload Payload, outputPath string, prog
 	return lastErr
 }
 
-func downloadOnce(ctx context.Context, payload Payload, partPath string, progress ProgressFunc) error {
+func downloadOnce(ctx context.Context, payload Payload, partPath string, message string, progress ProgressFunc) error {
 	var start int64
 	if stat, err := os.Stat(partPath); err == nil {
 		start = stat.Size()
@@ -245,7 +320,7 @@ func downloadOnce(ctx context.Context, payload Payload, partPath string, progres
 				return err
 			}
 			written += int64(n)
-			progress(ProgressEvent{Stage: "download", Message: "Downloading offline lab package", Downloaded: written, Total: total})
+			progress(ProgressEvent{Stage: "download", Message: message, Downloaded: written, Total: total})
 		}
 		if readErr == io.EOF {
 			break
@@ -408,6 +483,25 @@ func launchEntrypoint(path string) error {
 		return exec.Command("cmd", "/c", "start", "", path).Start()
 	}
 	return exec.Command(path).Start()
+}
+
+func openURL(rawURL string) error {
+	rawURL = strings.TrimSpace(rawURL)
+	if rawURL == "" {
+		return nil
+	}
+	parsed, err := url.Parse(rawURL)
+	if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") {
+		return fmt.Errorf("refusing to open non-http URL: %s", rawURL)
+	}
+	switch runtime.GOOS {
+	case "windows":
+		return exec.Command("rundll32", "url.dll,FileProtocolHandler", rawURL).Start()
+	case "darwin":
+		return exec.Command("open", rawURL).Start()
+	default:
+		return exec.Command("xdg-open", rawURL).Start()
+	}
 }
 
 func pathExists(path string) bool {

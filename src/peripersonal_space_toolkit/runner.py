@@ -46,6 +46,7 @@ from pathlib import Path
 
 from .audio_routing import (
     BINAURAL_TACTILE_CHANNELS,
+    audio_runtime_preflight_message,
     apply_output_volumes,
     center_audio_for_output,
     prepare_block_audio_for_output,
@@ -1577,7 +1578,7 @@ class PPSExperimentApp:
         self.device_idx, self.device_name, is_komplete = find_output_device()
         if self.device_idx is None:
             print("ERROR: Could not find any audio output device")
-            messagebox.showerror("Audio Error", "Could not find any audio output device")
+            messagebox.showerror("Audio Error", audio_runtime_preflight_message())
         elif is_komplete:
             print(f"Komplete Audio 6 found: [{self.device_idx}] {self.device_name}")
         else:

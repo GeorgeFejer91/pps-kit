@@ -74,3 +74,29 @@ func TestParseDownloadManifestRejectsIncompletePackageInventory(t *testing.T) {
 		t.Fatal("ParseDownloadManifest accepted an inventory with missing required items")
 	}
 }
+
+func TestParseDownloadManifestRejectsExternalAutoDownloadWithoutPermission(t *testing.T) {
+	_, err := ParseDownloadManifest([]byte(`{
+	  "schema": "pps-download-manifest.v1",
+	  "version": "0.1.0",
+	  "payloads": [{
+	    "kind": "offline_lab_windows_x64",
+	    "filename": "x.zip",
+	    "url": "https://example.test/x.zip",
+	    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	  }],
+	  "external_dependencies": [{
+	    "kind": "native_driver",
+	    "label": "Native driver",
+	    "provider_page_url": "https://provider.example/drivers",
+	    "download_url": "https://mirror.example/native-driver.exe",
+	    "filename": "native-driver.exe",
+	    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+	    "redistribution_permitted": false,
+	    "auto_download": true
+	  }]
+	}`))
+	if err == nil {
+		t.Fatal("ParseDownloadManifest accepted auto_download without redistribution permission")
+	}
+}

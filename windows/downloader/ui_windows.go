@@ -266,9 +266,23 @@ func (u *uiState) refreshDone() {
 		return
 	}
 	setWindowText(u.status, "PPS Toolkit is ready.")
-	setWindowText(u.percent, result.InstallDir)
+	setWindowText(u.percent, result.InstallDir+externalDependencySuffix(result.ExternalDependencyStatus))
 	procSendMessage.Call(uintptr(u.progress), pbmSetPos, 100, 0)
 	procEnableWindow.Call(uintptr(u.launchButton), 1)
+}
+
+func externalDependencySuffix(statuses []ExternalDependencyStatus) string {
+	for _, status := range statuses {
+		if status.Status == "provider_action_required" {
+			return " - install audio driver from provider page"
+		}
+	}
+	for _, status := range statuses {
+		if status.Status == "downloaded_verified" {
+			return " - external dependency cached"
+		}
+	}
+	return ""
 }
 
 func createChild(className string, text string, style uintptr, x int, y int, width int, height int, parent syscall.Handle, id uintptr) syscall.Handle {
