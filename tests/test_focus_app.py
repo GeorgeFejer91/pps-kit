@@ -103,14 +103,14 @@ def test_focus_layout_renderer_preserves_legibility_baselines():
     assert constrained.body_font_pt >= 10.5
     assert constrained.button_min_height >= 32
     assert constrained.target_min_height >= 88
-    assert constrained.target_max_height <= 110
+    assert constrained.target_max_height == constrained.target_min_height
     assert constrained.right_stack_mode == "tabs"
     assert compact.right_stack_mode == "tabs"
     assert standard.right_stack_mode == "resizable"
     assert constrained.recording_chip_columns == 2
     assert standard.recording_chip_columns == 3
     assert standard.target_min_height > constrained.target_min_height
-    assert standard.target_max_height <= 140
+    assert standard.target_max_height == standard.target_min_height
 
     contrasts = focus_palette_contrast_report()
     assert contrasts["text_on_background"] >= 7.0
@@ -173,6 +173,14 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert image.width >= 900
     assert image.height >= 600
     assert min(stat.stddev) > 2.0
+
+    target_screenshot = tmp_path / "focus_mode_target.png"
+    assert window.target_button.grab().save(str(target_screenshot))
+    target_image = Image.open(target_screenshot).convert("RGB")
+    target_colors = target_image.getcolors(maxcolors=100_000) or []
+    assert target_image.width == target_image.height == window.target_button.width()
+    assert len(target_colors) >= 4
+    assert target_image.getpixel((target_image.width // 2, target_image.height // 2)) != target_image.getpixel((4, 4))
     window.dialog.close()
 
 
@@ -207,8 +215,10 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
 
     assert window.dialog.width() <= available_width
     assert window.dialog.height() <= available_height
-    assert window.target_button.minimumHeight() >= profile.target_min_height
-    assert window.target_button.maximumHeight() == profile.target_max_height
+    assert window.target_button.minimumWidth() == profile.target_min_height
+    assert window.target_button.maximumWidth() == profile.target_min_height
+    assert window.target_button.minimumHeight() == profile.target_min_height
+    assert window.target_button.maximumHeight() == profile.target_min_height
     assert window.output_summary.minimumHeight() == profile.output_min_height
 
     for widget in (
@@ -222,8 +232,8 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     ):
         _assert_widget_inside_dialog(widget, window.dialog)
 
-    assert window.target_button.geometry().height() >= profile.target_min_height
-    assert window.target_button.geometry().height() <= profile.target_max_height
+    assert window.target_button.geometry().width() == profile.target_min_height
+    assert window.target_button.geometry().height() == profile.target_min_height
     assert window.start_button.geometry().height() >= profile.button_min_height
     assert window.output_summary.geometry().height() >= profile.output_min_height
     window.dialog.close()

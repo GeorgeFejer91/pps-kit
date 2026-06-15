@@ -72,7 +72,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 def _require_qt() -> dict[str, Any]:
     try:
-        from PySide6.QtCore import QTimer, Qt
+        from PySide6.QtCore import QTimer, Qt, Signal
         from PySide6.QtGui import QBrush, QColor, QCursor, QFontDatabase, QIcon, QPainter, QPen
         from PySide6.QtWidgets import (
             QApplication,
@@ -118,6 +118,7 @@ def _require_qt() -> dict[str, Any]:
         "QPen": QPen,
         "QProgressBar": QProgressBar,
         "QPushButton": QPushButton,
+        "Signal": Signal,
         "QSizePolicy": QSizePolicy,
         "QSplitter": QSplitter,
         "QTabWidget": QTabWidget,
@@ -383,6 +384,98 @@ def _create_tactile_timeline_widget(q: dict[str, Any], state: TactileTimelineSta
                 painter.end()
 
     return TactileTimelineWidget()
+
+
+def _create_response_target_button(q: dict[str, Any], profile: FocusLayoutProfile) -> Any:
+    class BullseyeTargetButton(q["QWidget"]):
+        clicked = q["Signal"]()
+
+        def __init__(self) -> None:
+            super().__init__()
+            self._pressed = False
+            self.setObjectName("targetButton")
+            self.setAccessibleName("CLICK response target")
+            self.setToolTip("Participant response target")
+            self.setFixedSize(profile.target_min_height, profile.target_min_height)
+            self.setSizePolicy(q["QSizePolicy"].Policy.Fixed, q["QSizePolicy"].Policy.Fixed)
+            self.setCursor(q["Qt"].CursorShape.PointingHandCursor)
+            self.setMouseTracking(True)
+
+        def text(self) -> str:
+            return "CLICK"
+
+        def paintEvent(self, _event: Any) -> None:  # noqa: N802 - Qt API
+            painter = q["QPainter"](self)
+            try:
+                painter.setRenderHint(q["QPainter"].RenderHint.Antialiasing, True)
+                rect = self.rect().adjusted(1, 1, -2, -2)
+                enabled = bool(self.isEnabled())
+                pressed = enabled and self._pressed
+                hovered = enabled and bool(self.underMouse())
+                background = "#e9f4ef" if pressed else ("#ffffff" if hovered else "#f8f9f6")
+                border = "#246b55" if (pressed or hovered) else "#bcc7bd"
+                if not enabled:
+                    background = "#eef0eb"
+                    border = "#d7ded5"
+
+                border_pen = q["QPen"](q["QColor"](border))
+                border_pen.setWidth(2)
+                painter.setPen(border_pen)
+                painter.setBrush(q["QBrush"](q["QColor"](background)))
+                painter.drawRoundedRect(rect, 6, 6)
+
+                side = max(1, min(rect.width(), rect.height()))
+                center = rect.center()
+                cx = int(center.x())
+                cy = int(center.y())
+                outer = max(24, int(side * 0.34))
+                middle = max(14, int(side * 0.22))
+                inner = max(6, int(side * 0.09))
+                ring_color = "#8c2f2f" if enabled else "#9ba59d"
+                accent_color = "#246b55" if enabled else "#9ba59d"
+                fill_color = "#ffffff" if enabled else "#f4f5f1"
+
+                painter.setBrush(q["QBrush"](q["QColor"](fill_color)))
+                ring_pen = q["QPen"](q["QColor"](ring_color))
+                ring_pen.setWidth(3)
+                painter.setPen(ring_pen)
+                painter.drawEllipse(cx - outer, cy - outer, outer * 2, outer * 2)
+
+                accent_pen = q["QPen"](q["QColor"](accent_color))
+                accent_pen.setWidth(3)
+                painter.setPen(accent_pen)
+                painter.drawEllipse(cx - middle, cy - middle, middle * 2, middle * 2)
+
+                painter.setPen(q["QPen"](q["QColor"](ring_color)))
+                painter.setBrush(q["QBrush"](q["QColor"](ring_color)))
+                painter.drawEllipse(cx - inner, cy - inner, inner * 2, inner * 2)
+            finally:
+                painter.end()
+
+        def mousePressEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
+            if self.isEnabled() and event.button() == q["Qt"].MouseButton.LeftButton:
+                self._pressed = True
+                self.update()
+                event.accept()
+                return
+            super().mousePressEvent(event)
+
+        def mouseReleaseEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
+            was_pressed = self._pressed
+            self._pressed = False
+            self.update()
+            if self.isEnabled() and was_pressed and event.button() == q["Qt"].MouseButton.LeftButton:
+                try:
+                    point = event.position().toPoint()
+                except AttributeError:
+                    point = event.pos()
+                if self.rect().contains(point):
+                    self.clicked.emit()
+                event.accept()
+                return
+            super().mouseReleaseEvent(event)
+
+    return BullseyeTargetButton()
 
 
 def _combo(q: dict[str, Any], values: list[tuple[str, str]], *, current: str = "") -> Any:
@@ -1597,14 +1690,10 @@ class FocusModeWindow:
         self.response_panel = response_panel
         response_panel.setMinimumWidth(360 if profile.screen_class == "constrained" else 430)
         response_layout.addWidget(_subtitle(q, "Participant Response"))
-        self.target_button = q["QPushButton"]("CLICK")
-        self.target_button.setObjectName("targetButton")
-        self.target_button.setMinimumHeight(profile.target_min_height)
-        self.target_button.setMaximumHeight(profile.target_max_height)
-        self.target_button.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Fixed)
+        self.target_button = _create_response_target_button(q, profile)
         self.target_button.setEnabled(False)
         self.target_button.clicked.connect(self._click)
-        response_layout.addWidget(self.target_button, 1)
+        response_layout.addWidget(self.target_button, 0, q["Qt"].AlignmentFlag.AlignHCenter)
         response_layout.addStretch(1)
         self.instruction_button = q["QPushButton"]("Continue")
         self.instruction_button.setObjectName("primaryButton")

@@ -332,6 +332,13 @@ def _audit_window(
             f"CLICK target height {widget_metrics['target_button']['height']} is below "
             f"{profile.target_min_height}px."
         )
+    if widget_metrics["target_button"]["width"] != widget_metrics["target_button"]["height"]:
+        failures.append(f"CLICK target is not square: {widget_metrics['target_button']}.")
+    if widget_metrics["target_button"]["height"] != profile.target_min_height:
+        failures.append(
+            f"CLICK target size {widget_metrics['target_button']['width']}x{widget_metrics['target_button']['height']} "
+            f"does not match fixed profile size {profile.target_min_height}px."
+        )
     for name in ("start_button", "pause_button", "stop_button", "close_button"):
         if widget_metrics[name]["height"] < profile.button_min_height:
             failures.append(f"{name} height {widget_metrics[name]['height']} is below {profile.button_min_height}px.")

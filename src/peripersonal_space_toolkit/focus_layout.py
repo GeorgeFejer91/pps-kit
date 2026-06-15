@@ -94,6 +94,8 @@ def render_focus_layout_profile(
     else:
         screen_class = "standard"
 
+    target_square_size = 88 if constrained else (96 if compact else 104)
+
     return FocusLayoutProfile(
         screen_class=screen_class,
         available_width=width,
@@ -119,8 +121,8 @@ def render_focus_layout_profile(
         input_padding_y=6 if compact else 7,
         input_padding_x=8 if compact else 9,
         progress_min_height=18 if constrained else 20,
-        target_min_height=88 if constrained else (100 if compact else 112),
-        target_max_height=110 if constrained else (124 if compact else 140),
+        target_min_height=target_square_size,
+        target_max_height=target_square_size,
         target_font_pt=18.0 if constrained else (19.0 if compact else 20.0),
         output_min_height=48 if constrained else (56 if compact else 60),
         output_max_height=72 if constrained else (84 if compact else 90),
@@ -279,10 +281,12 @@ QPushButton#dangerButton {{
     color: {colors["danger"]};
 }}
 QPushButton#targetButton {{
-    min-height: {profile.target_min_height}px;
+    min-width: 0px;
+    min-height: 0px;
     background: {colors["input"]};
     border: 2px solid {colors["border_strong"]};
     color: {colors["text"]};
+    padding: 0px;
     font-size: {profile.target_font_pt:g}pt;
     font-weight: 900;
 }}
