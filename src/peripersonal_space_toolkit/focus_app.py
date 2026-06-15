@@ -1686,9 +1686,27 @@ class FocusModeWindow:
         self.run_splitter.setHandleWidth(max(7, profile.root_spacing))
         self.workspace_splitter.addWidget(self.run_splitter)
 
+        response_cell = q["QWidget"]()
+        response_cell_layout = q["QVBoxLayout"](response_cell)
+        response_cell_layout.setContentsMargins(0, 0, 0, 0)
+        response_cell_layout.setSpacing(0)
+        response_cell.setMinimumWidth(profile.response_panel_side)
+        response_cell.setMinimumHeight(profile.response_panel_side)
+        response_cell.setSizePolicy(q["QSizePolicy"].Policy.Minimum, q["QSizePolicy"].Policy.Expanding)
+        self.response_cell = response_cell
+
         response_panel, response_layout = _panel(q, "Experiment Running", profile=profile)
         self.response_panel = response_panel
-        response_panel.setMinimumWidth(360 if profile.screen_class == "constrained" else 430)
+        response_panel.setFixedSize(profile.response_panel_side, profile.response_panel_side)
+        response_panel.setSizePolicy(q["QSizePolicy"].Policy.Fixed, q["QSizePolicy"].Policy.Fixed)
+        compact_response_margin = max(8, profile.panel_margin - 2)
+        response_layout.setContentsMargins(
+            compact_response_margin,
+            compact_response_margin,
+            compact_response_margin,
+            compact_response_margin,
+        )
+        response_layout.setSpacing(max(5, profile.panel_spacing - 1))
         response_layout.addWidget(_subtitle(q, "Participant Response"))
         self.target_button = _create_response_target_button(q, profile)
         self.target_button.setEnabled(False)
@@ -1701,7 +1719,6 @@ class FocusModeWindow:
         self.instruction_button.clicked.connect(self._continue_instruction_button)
         response_layout.addWidget(self.instruction_button)
 
-        controls = q["QHBoxLayout"]()
         self.start_button = q["QPushButton"]("Start Run")
         self.start_button.setObjectName("primaryButton")
         self.pause_button = q["QPushButton"]("Pause")
@@ -1714,13 +1731,20 @@ class FocusModeWindow:
         self.pause_button.clicked.connect(self._toggle_pause)
         self.stop_button.clicked.connect(self._stop)
         self.close_button.clicked.connect(self._close)
-        controls.addWidget(self.start_button)
-        controls.addWidget(self.pause_button)
-        controls.addWidget(self.stop_button)
-        controls.addStretch(1)
-        controls.addWidget(self.close_button)
+        controls = q["QGridLayout"]()
+        controls.setContentsMargins(0, 0, 0, 0)
+        controls.setHorizontalSpacing(6)
+        controls.setVerticalSpacing(6)
+        controls.addWidget(self.start_button, 0, 0)
+        controls.addWidget(self.pause_button, 0, 1)
+        controls.addWidget(self.stop_button, 1, 0)
+        controls.addWidget(self.close_button, 1, 1)
+        controls.setColumnStretch(0, 1)
+        controls.setColumnStretch(1, 1)
         response_layout.addLayout(controls)
-        self.run_splitter.addWidget(response_panel)
+        response_cell_layout.addWidget(response_panel, 0, q["Qt"].AlignmentFlag.AlignTop | q["Qt"].AlignmentFlag.AlignHCenter)
+        response_cell_layout.addStretch(1)
+        self.run_splitter.addWidget(response_cell)
 
         self.operator_splitter = None
         self.operator_tabs = None
@@ -1728,24 +1752,23 @@ class FocusModeWindow:
             self.operator_tabs = q["QTabWidget"]()
             self.operator_tabs.setDocumentMode(True)
             self.operator_tabs.setMinimumWidth(300)
+            try:
+                self.operator_tabs.tabBar().setMovable(True)
+            except Exception:
+                pass
             self.run_splitter.addWidget(self.operator_tabs)
-        else:
-            self.operator_splitter = q["QSplitter"](q["Qt"].Orientation.Vertical)
-            self.operator_splitter.setChildrenCollapsible(False)
-            self.operator_splitter.setHandleWidth(max(7, profile.root_spacing))
-            self.operator_splitter.setMinimumWidth(300 if profile.screen_class == "constrained" else 360)
-            self.run_splitter.addWidget(self.operator_splitter)
 
         def _add_operator_panel(title_text: str, panel: Any) -> None:
             if self.operator_tabs is not None:
                 self.operator_tabs.addTab(panel, title_text)
             else:
-                self.operator_splitter.addWidget(panel)
+                self.run_splitter.addWidget(panel)
 
         data_panel_title = "" if profile.right_stack_mode == "tabs" else "Data Selection"
         data_panel, data_layout = _panel(q, data_panel_title, profile=profile)
         self.data_selection_panel = data_panel
-        data_panel_min_height = 178 if profile.screen_class == "constrained" else (260 if profile.compact else 238)
+        data_panel.setMinimumWidth(320 if profile.compact else 360)
+        data_panel_min_height = 178 if profile.screen_class == "constrained" else max(250, profile.response_panel_side)
         data_panel.setMinimumHeight(data_panel_min_height)
         data_layout.addWidget(_subtitle(q, "Participant Setup"))
         self.participant_code_input = q["QLineEdit"](self.package.participant_id)
@@ -1856,7 +1879,8 @@ class FocusModeWindow:
         settings_panel_title = "" if profile.right_stack_mode == "tabs" else "Settings"
         settings_panel, settings_layout = _panel(q, settings_panel_title, profile=profile)
         self.settings_panel = settings_panel
-        settings_panel_min_height = 128 if profile.screen_class == "constrained" else (190 if profile.compact else 184)
+        settings_panel.setMinimumWidth(240 if profile.compact else 270)
+        settings_panel_min_height = 128 if profile.screen_class == "constrained" else max(180, profile.response_panel_side)
         settings_panel.setMinimumHeight(settings_panel_min_height)
         settings_layout.addWidget(_subtitle(q, "Recording"))
         chip_grid = q["QGridLayout"]()
@@ -1894,16 +1918,14 @@ class FocusModeWindow:
         self._pre_run_controls.extend([self.backup_recording_checkbox, self.topup_checkbox])
         _add_operator_panel("Settings", settings_panel)
 
-        processing_panel, processing_layout = _panel(q, "Data Processing", profile=profile)
-        self.processing_panel = processing_panel
-        processing_panel.setMinimumHeight(210 if profile.screen_class == "constrained" else 220)
         self.processing_splitter = q["QSplitter"](q["Qt"].Orientation.Horizontal)
         self.processing_splitter.setChildrenCollapsible(False)
         self.processing_splitter.setHandleWidth(max(7, profile.root_spacing))
 
-        progress_widget = q["QWidget"]()
-        progress_layout = q["QVBoxLayout"](progress_widget)
-        progress_layout.setContentsMargins(0, 0, 0, 0)
+        processing_panel, progress_layout = _panel(q, "Data Processing", profile=profile)
+        self.processing_panel = processing_panel
+        processing_panel.setMinimumHeight(170 if profile.screen_class == "constrained" else 190)
+        processing_panel.setMinimumWidth(360 if profile.compact else 420)
         progress_layout.setSpacing(profile.panel_spacing)
         progress_layout.addWidget(_subtitle(q, "Live Tactile Timeline"))
         timeline_status = q["QWidget"]()
@@ -1942,28 +1964,49 @@ class FocusModeWindow:
         self.prewarm_label.setWordWrap(True)
         progress_layout.addWidget(self.prewarm_label)
         progress_layout.addStretch(1)
-        self.processing_splitter.addWidget(progress_widget)
+        self.processing_splitter.addWidget(processing_panel)
 
-        output_widget = q["QWidget"]()
-        output_layout = q["QVBoxLayout"](output_widget)
-        output_layout.setContentsMargins(0, 0, 0, 0)
+        output_panel, output_layout = _panel(q, "Output Summary", profile=profile)
+        self.output_panel = output_panel
+        output_panel.setMinimumHeight(170 if profile.screen_class == "constrained" else 190)
+        output_panel.setMinimumWidth(260 if profile.compact else 320)
         output_layout.setSpacing(profile.panel_spacing)
-        output_layout.addWidget(_subtitle(q, "Output Summary"))
         self.output_summary = q["QTextEdit"]()
         self.output_summary.setReadOnly(True)
         self.output_summary.setMinimumHeight(profile.output_min_height)
         self.output_summary.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Expanding)
         self.output_summary.setPlainText("Session outputs will appear here after the run.")
         output_layout.addWidget(self.output_summary)
-        self.processing_splitter.addWidget(output_widget)
-        processing_layout.addWidget(self.processing_splitter, 1)
-        self.workspace_splitter.addWidget(processing_panel)
+        self.processing_splitter.addWidget(output_panel)
+        self.workspace_splitter.addWidget(self.processing_splitter)
 
-        self.run_splitter.setSizes([max(520, int(profile.window_width * 0.62)), max(340, int(profile.window_width * 0.38))])
-        if self.operator_splitter is not None:
-            self.operator_splitter.setSizes([max(210, int(profile.window_height * 0.45)), max(150, int(profile.window_height * 0.28))])
-        self.workspace_splitter.setSizes([max(300, int(profile.window_height * 0.58)), max(210, int(profile.window_height * 0.34))])
-        self.processing_splitter.setSizes([max(260, int(profile.window_width * 0.28)), max(520, int(profile.window_width * 0.72))])
+        self.workspace_splitter.setStretchFactor(0, 1)
+        self.workspace_splitter.setStretchFactor(1, 1)
+        self.run_splitter.setStretchFactor(0, 0)
+        if profile.right_stack_mode == "tabs":
+            self.run_splitter.setStretchFactor(1, 1)
+        else:
+            self.run_splitter.setStretchFactor(1, 2)
+            self.run_splitter.setStretchFactor(2, 1)
+        self.processing_splitter.setStretchFactor(0, 2)
+        self.processing_splitter.setStretchFactor(1, 1)
+
+        response_column_width = profile.response_panel_side + max(8, profile.root_spacing)
+        if profile.right_stack_mode == "tabs":
+            self.run_splitter.setSizes([response_column_width, max(420, profile.window_width - response_column_width)])
+        else:
+            remaining_width = max(620, profile.window_width - response_column_width)
+            self.run_splitter.setSizes(
+                [
+                    response_column_width,
+                    max(360, int(remaining_width * 0.58)),
+                    max(260, int(remaining_width * 0.42)),
+                ]
+            )
+        top_height = max(profile.response_panel_side, int(profile.window_height * (0.54 if profile.right_stack_mode != "tabs" else 0.48)))
+        lower_height = max(180 if profile.screen_class == "constrained" else 210, profile.window_height - top_height)
+        self.workspace_splitter.setSizes([top_height, lower_height])
+        self.processing_splitter.setSizes([max(440, int(profile.window_width * 0.58)), max(320, int(profile.window_width * 0.42))])
 
         self.timer = q["QTimer"](self.dialog)
         self.timer.timeout.connect(self._drain)

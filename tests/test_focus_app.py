@@ -102,15 +102,17 @@ def test_focus_layout_renderer_preserves_legibility_baselines():
     assert constrained.window_height <= 600
     assert constrained.body_font_pt >= 10.5
     assert constrained.button_min_height >= 32
+    assert constrained.response_panel_side >= constrained.target_min_height
     assert constrained.target_min_height >= 88
     assert constrained.target_max_height == constrained.target_min_height
     assert constrained.right_stack_mode == "tabs"
-    assert compact.right_stack_mode == "tabs"
+    assert compact.right_stack_mode == "resizable"
     assert standard.right_stack_mode == "resizable"
     assert constrained.recording_chip_columns == 2
     assert standard.recording_chip_columns == 3
     assert standard.target_min_height > constrained.target_min_height
     assert standard.target_max_height == standard.target_min_height
+    assert standard.response_panel_side > constrained.response_panel_side
 
     contrasts = focus_palette_contrast_report()
     assert contrasts["text_on_background"] >= 7.0
@@ -168,6 +170,9 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert window.include_name_lsl_checkbox.objectName() == "nameSharingCheckbox"
     assert "(opt-in)" in window.include_name_lsl_checkbox.text()
     assert window.include_name_lsl_checkbox.minimumHeight() >= window.layout_profile.button_min_height + 8
+    assert window.response_panel.width() == window.response_panel.height()
+    assert window.response_panel.width() == window.layout_profile.response_panel_side
+    assert window.output_panel is not window.processing_panel
 
     screenshot = tmp_path / "focus_mode_shell.png"
     assert window.dialog.grab().save(str(screenshot))
@@ -224,14 +229,26 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     assert window.target_button.maximumHeight() == profile.target_min_height
     assert window.include_name_lsl_checkbox.minimumHeight() >= profile.button_min_height + 8
     assert window.output_summary.minimumHeight() == profile.output_min_height
+    assert window.response_panel.minimumWidth() == profile.response_panel_side
+    assert window.response_panel.minimumHeight() == profile.response_panel_side
+    assert window.response_panel.maximumWidth() == profile.response_panel_side
+    assert window.response_panel.maximumHeight() == profile.response_panel_side
+    assert window.response_panel.geometry().width() == window.response_panel.geometry().height()
+    assert window.output_panel is not window.processing_panel
+    assert window.processing_splitter.count() == 2
+    expected_run_splitter_count = 2 if profile.right_stack_mode == "tabs" else 3
+    assert window.run_splitter.count() == expected_run_splitter_count
 
     for widget in (
         window.target_button,
+        window.response_panel,
         window.include_name_lsl_checkbox,
         window.start_button,
         window.pause_button,
         window.stop_button,
         window.close_button,
+        window.processing_panel,
+        window.output_panel,
         window.output_summary,
         window.tactile_timeline_widget,
     ):

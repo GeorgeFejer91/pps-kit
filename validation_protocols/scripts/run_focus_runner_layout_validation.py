@@ -310,6 +310,7 @@ def _audit_window(
         "tactile_timeline_widget": window.tactile_timeline_widget,
         "response_panel": window.response_panel,
         "processing_panel": window.processing_panel,
+        "output_panel": window.output_panel,
     }
     if profile.right_stack_mode == "tabs" and layout_variant == "settings_tab":
         critical_widgets["settings_panel"] = window.settings_panel
@@ -345,7 +346,7 @@ def _audit_window(
     if widget_metrics["output_summary"]["height"] < profile.output_min_height:
         failures.append("Output Summary is shorter than the profile minimum.")
 
-    for segment_name in ("response_panel", "data_selection_panel", "settings_panel", "processing_panel"):
+    for segment_name in ("response_panel", "data_selection_panel", "settings_panel", "processing_panel", "output_panel"):
         if segment_name not in widget_metrics:
             continue
         if widget_metrics[segment_name]["height"] < 80:
@@ -355,8 +356,6 @@ def _audit_window(
 
     splitter_metrics = {}
     splitter_names = ["workspace_splitter", "run_splitter", "processing_splitter"]
-    if profile.right_stack_mode != "tabs":
-        splitter_names.append("operator_splitter")
     for name in splitter_names:
         splitter = getattr(window, name, None)
         if splitter is None:
@@ -365,6 +364,7 @@ def _audit_window(
         splitter_metrics[name] = {
             "width": int(splitter.width()),
             "height": int(splitter.height()),
+            "count": int(splitter.count()),
             "handle_width": int(splitter.handleWidth()),
         }
         if splitter.handleWidth() < 6:
@@ -447,18 +447,20 @@ def _apply_layout_variant(window: Any, variant: str) -> None:
     width = max(1, int(window.dialog.width()))
     height = max(1, int(window.dialog.height()))
     workspace_height = max(1, int(window.workspace_splitter.height()))
-    run_height = max(1, int(window.run_splitter.height()))
     tabs = getattr(window, "operator_tabs", None)
     if variant == "settings_tab" and tabs is not None:
         tabs.setCurrentIndex(1)
         return
     if variant == "operator_wide":
-        window.run_splitter.setSizes([max(420, int(width * 0.52)), max(360, int(width * 0.48))])
-        if getattr(window, "operator_splitter", None) is not None:
-            window.operator_splitter.setSizes([max(210, int(run_height * 0.58)), max(150, int(run_height * 0.42))])
+        if window.run_splitter.count() >= 3:
+            response_width = max(getattr(window.layout_profile, "response_panel_side", 280), int(width * 0.24))
+            remaining_width = max(1, width - response_width)
+            window.run_splitter.setSizes([response_width, int(remaining_width * 0.68), int(remaining_width * 0.32)])
+        else:
+            window.run_splitter.setSizes([max(280, int(width * 0.32)), max(420, int(width * 0.68))])
     elif variant == "processing_tall":
-        window.workspace_splitter.setSizes([max(320, int(workspace_height * 0.68)), max(170, int(workspace_height * 0.32))])
-        window.processing_splitter.setSizes([max(280, int(width * 0.34)), max(440, int(width * 0.66))])
+        window.workspace_splitter.setSizes([max(280, int(workspace_height * 0.48)), max(220, int(workspace_height * 0.52))])
+        window.processing_splitter.setSizes([max(440, int(width * 0.62)), max(300, int(width * 0.38))])
 
 
 def _write_markdown(path: Path, report: dict[str, Any]) -> None:

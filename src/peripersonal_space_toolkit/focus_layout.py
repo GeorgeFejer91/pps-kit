@@ -52,6 +52,7 @@ class FocusLayoutProfile:
     input_padding_y: int
     input_padding_x: int
     progress_min_height: int
+    response_panel_side: int
     target_min_height: int
     target_max_height: int
     target_font_pt: float
@@ -95,6 +96,7 @@ def render_focus_layout_profile(
         screen_class = "standard"
 
     target_square_size = 88 if constrained else (96 if compact else 104)
+    response_panel_side = 276 if constrained else (304 if compact else (328 if spacious else 316))
 
     return FocusLayoutProfile(
         screen_class=screen_class,
@@ -121,13 +123,14 @@ def render_focus_layout_profile(
         input_padding_y=6 if compact else 7,
         input_padding_x=8 if compact else 9,
         progress_min_height=18 if constrained else 20,
+        response_panel_side=response_panel_side,
         target_min_height=target_square_size,
         target_max_height=target_square_size,
         target_font_pt=18.0 if constrained else (19.0 if compact else 20.0),
         output_min_height=48 if constrained else (56 if compact else 60),
         output_max_height=72 if constrained else (84 if compact else 90),
         recording_chip_columns=3 if width >= 1080 else 2,
-        right_stack_mode="tabs" if constrained or height <= 860 else "resizable",
+        right_stack_mode="tabs" if constrained else "resizable",
         compact=compact,
     )
 
