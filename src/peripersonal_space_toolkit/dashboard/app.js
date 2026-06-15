@@ -1,6 +1,7 @@
 let state = null;
 let viewerReady = false;
 const activePolls = new Set();
+let activeNavFrame = 0;
 const CUSTOM_TEMPLATE_ID = "__custom__";
 const PROFILE_RECREATION_NOTICE =
   "Be aware: this is not the exact stimulus set used in the original study. This preload recreates the study's reported parameters within this interface, using the toolkit's local rendering and bundled profile assets.";
@@ -483,6 +484,10 @@ function setActivePage(page, options = {}) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
   updateActiveNav();
+  if (options.scrollTop && nextPage !== "toolkit") {
+    const firstPageLink = document.querySelector(`[data-page-section-page="${cssEscape(nextPage)}"]`);
+    setActivePageSection(firstPageLink?.dataset.pageSectionLink || "");
+  }
 }
 
 function syncRailForPage(page) {
@@ -4099,6 +4104,14 @@ function updateActiveNav() {
   }
 }
 
+function scheduleActiveNavUpdate() {
+  if (activeNavFrame) return;
+  activeNavFrame = window.requestAnimationFrame(() => {
+    activeNavFrame = 0;
+    updateActiveNav();
+  });
+}
+
 function loadResizableLayoutSettings() {
   applySplitSetting("sideWidth", Number(localStorage.getItem(splitStorageKey("sideWidth"))) || SPLIT_DEFAULTS.sideWidth, false);
   applySplitSetting("ordersWidth", Number(localStorage.getItem(splitStorageKey("ordersWidth"))) || SPLIT_DEFAULTS.ordersWidth, false);
@@ -4489,6 +4502,7 @@ function wireEvents() {
       scrollToHashTarget();
     }
   });
+  window.addEventListener("scroll", scheduleActiveNavUpdate, { passive: true });
   for (const button of document.querySelectorAll("[data-segment-info]")) {
     button.addEventListener("click", () => openSegmentInfoModal(button.dataset.segmentInfo, button));
   }

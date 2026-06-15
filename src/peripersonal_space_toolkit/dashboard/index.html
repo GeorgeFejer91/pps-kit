@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260615-dashboard-tabs-segment2-soundcheck-rail">
+  <link rel="stylesheet" href="styles.css?v=20260615-public-docs-rail">
 </head>
 <body>
   <div class="app-shell">
@@ -26,10 +26,13 @@
       </nav>
       <nav class="rail-nav-group" aria-label="Documentation sections" data-rail-page="documentation" hidden>
         <div class="rail-nav-kicker">Documentation</div>
-        <a href="#docs-overview" data-page-section-link="docs-overview" data-page-section-page="documentation"><span>Overview</span></a>
-        <a href="#docs-guides" data-page-section-link="docs-guides" data-page-section-page="documentation"><span>Guides</span></a>
-        <a href="#docs-validation" data-page-section-link="docs-validation" data-page-section-page="documentation"><span>Validation Notes</span></a>
-        <a href="#docs-publication" data-page-section-link="docs-publication" data-page-section-page="documentation"><span>Publication Boundary</span></a>
+        <a href="#docs-overview" data-page-section-link="docs-overview" data-page-section-page="documentation"><span>Nutshell</span></a>
+        <a href="#docs-architecture" data-page-section-link="docs-architecture" data-page-section-page="documentation"><span>Architecture</span></a>
+        <a href="#docs-spatialization" data-page-section-link="docs-spatialization" data-page-section-page="documentation"><span>Spatialization</span></a>
+        <a href="#docs-hardware" data-page-section-link="docs-hardware" data-page-section-page="documentation"><span>Hardware</span></a>
+        <a href="#docs-designer" data-page-section-link="docs-designer" data-page-section-page="documentation"><span>Designer</span></a>
+        <a href="#docs-runner" data-page-section-link="docs-runner" data-page-section-page="documentation"><span>Runner</span></a>
+        <a href="#docs-data-boundary" data-page-section-link="docs-data-boundary" data-page-section-page="documentation"><span>Data Boundary</span></a>
       </nav>
       <nav class="rail-nav-group" aria-label="Download sections" data-rail-page="downloads" hidden>
         <div class="rail-nav-kicker">Downloads</div>
@@ -526,66 +529,208 @@
       <section id="documentation-page" class="page-view info-page" data-page-panel="documentation" hidden>
         <div class="info-page-heading">
           <span class="segment-kicker">Documentation</span>
-          <h1>PPS Toolkit Reference</h1>
+          <h1>PPS Toolkit Public Documentation</h1>
         </div>
         <section id="docs-overview" class="info-segment" aria-labelledby="docs-overview-title">
           <div class="info-segment-heading">
-            <span class="segment-kicker">Placeholder</span>
-            <h2 id="docs-overview-title">Overview</h2>
+            <span class="segment-kicker">Project</span>
+            <h2 id="docs-overview-title">Project In A Nutshell</h2>
           </div>
-          <p class="placeholder-copy">Landing copy for the documentation overview will summarize the toolkit workflow, supported study-profile modes, and local companion boundary.</p>
-        </section>
-        <section id="docs-guides" class="info-segment" aria-labelledby="docs-guides-title">
-          <div class="info-segment-heading">
-            <span class="segment-kicker">Guides</span>
-            <h2 id="docs-guides-title">Reference Guides</h2>
-          </div>
+          <p class="info-lede">The Peripersonal Space Toolkit is a local-first research program for designing, validating, and running audio-tactile peripersonal-space experiments. It turns a study profile or custom design into spatialized looming audio, tactile timing schedules, block CSVs, participant session packages, and native experiment-runner outputs that can be inspected and reproduced.</p>
           <div class="info-card-grid">
-          <article class="info-card">
-            <h2>Windows App</h2>
-            <p>Install, launch, and operate the dashboard and packaged experiment runner on a research PC.</p>
-            <a class="button-link" href="../../../docs/WINDOWS_APP.md">Open Windows App Guide</a>
-          </article>
-          <article class="info-card">
-            <h2>Dashboard Workflow</h2>
-            <p>Review how the browser dashboard works as a local orchestrator for profile setup, stimulus baking, block generation, and native runner handoff.</p>
-            <a class="button-link" href="../../../docs/GITHUB_PAGES_DASHBOARD.md">Open Dashboard Guide</a>
-          </article>
-          <article class="info-card">
-            <h2>Stimulus Designer</h2>
-            <p>Inspect the stimulus-design concepts that sit behind trajectory, source, trial sequence, tactile, and baseline controls.</p>
-            <a class="button-link" href="../../../docs/STIMULUS_DESIGNER.md">Open Stimulus Guide</a>
-          </article>
-          <article class="info-card">
-            <h2>Published Profiles</h2>
-            <p>Check the current status of published-study recreations and which audiotactile PPS task mechanics are supported.</p>
-            <a class="button-link" href="../../../docs/PUBLISHED_STUDY_RECREATION_STATUS.md">Open Profile Status</a>
-          </article>
-          <article class="info-card">
-            <h2>Hardware Setup</h2>
-            <p>Review audio routing, tactile-channel expectations, and validation boundaries for laboratory hardware.</p>
+            <article class="info-card">
+              <h2>What The Website Is</h2>
+              <p>This dashboard is the user interface and orchestration layer. It collects researcher decisions, previews study structure, and asks the local companion to do work on the research PC.</p>
+            </article>
+            <article class="info-card">
+              <h2>What The Backend Does</h2>
+              <p>The local Python companion handles file imports, stimulus rendering, project folders, session preparation, audio-device checks, and native runner launch. Timing-sensitive work stays out of browser JavaScript.</p>
+            </article>
+            <article class="info-card">
+              <h2>Who It Is For</h2>
+              <p>The main audience is cognitive neuroscience and psychology labs that need reusable audio-tactile PPS designs without editing Python scripts for every experiment.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="docs-architecture" class="info-segment" aria-labelledby="docs-architecture-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Software Layers</span>
+            <h2 id="docs-architecture-title">Architecture And Dependencies</h2>
+          </div>
+          <p class="info-copy">The project should be understood as a UI layer sitting on top of a Python experiment engine. The dashboard provides the visible workflow; the package code owns rendering, audio routing, validation, runner setup, and analysis outputs.</p>
+          <div class="info-card-grid">
+            <article class="info-card">
+              <h2>Science And Audio</h2>
+              <p><code>numpy</code>, <code>scipy</code>, <code>soundfile</code>, and <code>sounddevice</code> support numerical audio work, WAV I/O, and low-latency playback. <code>sofar</code> and <code>netCDF4</code> support SOFA/HRIR resources.</p>
+            </article>
+            <article class="info-card">
+              <h2>UI And Companion</h2>
+              <p>The browser dashboard talks to a local <code>FastAPI</code> and <code>Uvicorn</code> companion. The native desktop runner uses <code>PySide6</code> through the packaged <code>PPSExperimentRunner.exe</code>.</p>
+            </article>
+            <article class="info-card">
+              <h2>Timing And Recording</h2>
+              <p><code>pylsl</code> and <code>pyxdf</code> support marker streams and XDF reconstruction. Windows diagnostics may use <code>pyaudiowpatch</code>, but the validated multichannel experiment route uses ASIO.</p>
+            </article>
+            <article class="info-card">
+              <h2>Packaging</h2>
+              <p><code>PyInstaller</code> builds the native runner. The public release path uses a small Windows downloader plus a verified offline lab package.</p>
+            </article>
+            <article class="info-card">
+              <h2>Rendering Resources</h2>
+              <p>The current binaural workflow uses the bundled FABIAN/TU SOFA HRIR resource and can produce outputs through the native 3DTI route or the Python SOFA/FABIAN reference renderer.</p>
+            </article>
+            <article class="info-card">
+              <h2>Deep References</h2>
+              <p>Detailed setup and operating notes live in the repository documentation.</p>
+              <a class="button-link" href="../../../docs/WINDOWS_PC_SOFTWARE_REQUIREMENTS.md">Open Software Requirements</a>
+            </article>
+          </div>
+        </section>
+
+        <section id="docs-spatialization" class="info-segment" aria-labelledby="docs-spatialization-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Stimulus Model</span>
+            <h2 id="docs-spatialization-title">SOFA/FABIAN And Spatialized Looming Stimuli</h2>
+          </div>
+          <p class="info-copy">SOFA, the Spatially Oriented Format for Acoustics, stores spatial acoustic measurements such as head-related transfer functions. In this toolkit, the bundled FABIAN/TU SOFA HRIR resource is the standard binaural rendering reference, and the dashboard keeps it under the hood so routine experiment design focuses on trajectory, timing, and trial structure.</p>
+          <ol class="doc-list">
+            <li>The researcher chooses a study profile or custom design, then defines source material, looming duration, start/end distance, direction, rotation, and timing choices.</li>
+            <li>The local backend converts those decisions into trajectory samples and render metadata rather than relying on filenames or browser-only state.</li>
+            <li>The renderer creates binaural auditory material for channels 1 and 2, while tactile cue placement is introduced later from the SOA schedule into channel 3.</li>
+            <li>Generated manifests record the render config, trajectory samples, tactile events, file hashes, and quality-control summaries so the stimulus path can be audited.</li>
+          </ol>
+          <div class="info-card-grid">
+            <article class="info-card">
+              <h2>SOFA Standard</h2>
+              <p>SOFA is an AES-standardized format for spatial acoustic data, including HRTFs and binaural room impulse responses.</p>
+              <a class="button-link" href="https://www.sofaconventions.org/mediawiki/index.php/SOFA_%28Spatially_Oriented_Format_for_Acoustics%29">Open SOFA Conventions</a>
+            </article>
+            <article class="info-card">
+              <h2>Stimulus Designer Notes</h2>
+              <p>Detailed design outputs include render configs, trajectory CSVs, tactile-event CSVs, manifests, QC rows, and rendered looming WAVs.</p>
+              <a class="button-link" href="../../../docs/STIMULUS_DESIGNER.md">Open Stimulus Designer Docs</a>
+            </article>
+            <article class="info-card">
+              <h2>Replication Workflow</h2>
+              <p>Saved designs keep parameters explicit so published profiles and custom variants can be reviewed before data collection.</p>
+              <a class="button-link" href="../../../docs/REPLICATION.md">Open Replication Notes</a>
+            </article>
+          </div>
+        </section>
+
+        <section id="docs-hardware" class="info-segment" aria-labelledby="docs-hardware-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Lab Route</span>
+            <h2 id="docs-hardware-title">Hardware Specifications And Latency Evidence</h2>
+          </div>
+          <p class="info-copy">The validated lab route is Windows-first and uses one synchronized multichannel ASIO output path. The current wiring convention is channel 1 to left auditory output, channel 2 to right auditory output, and channel 3 to the tactile drive path.</p>
+          <div class="info-card-grid">
+            <article class="info-card">
+              <h2>Komplete Audio 6 MK2</h2>
+              <p>The lab route uses Native Instruments Komplete Audio 6 MK2 as the synchronized multichannel interface.</p>
+              <a class="button-link" href="https://www.native-instruments.com/en/support/downloads/drivers-other-files/">Open NI Drivers Page</a>
+            </article>
+            <article class="info-card">
+              <h2>Komplete ASIO Driver</h2>
+              <p>Use the official Komplete Audio ASIO Driver on Windows. The stereo Windows endpoints are legacy/diagnostic paths, not the validated 3-channel route.</p>
+              <a class="button-link" href="https://support.native-instruments.com/hc/en-us/articles/360001194217-Installing-the-ASIO-Driver-for-KOMPLETE-AUDIO-1-2-6-MK2-Windows">Open ASIO Install Guide</a>
+            </article>
+            <article class="info-card">
+              <h2>Woojer Strap</h2>
+              <p>The tactile target is treated as a wired analog endpoint from Komplete output 3. Bluetooth should not be used for timing-sensitive tactile work.</p>
+              <a class="button-link" href="https://www.woojer.com/products/strap-4">Open Woojer Strap 4</a>
+            </article>
+          </div>
+          <div class="metric-grid" aria-label="Current latency validation summary">
+            <div class="metric-card">
+              <span>Physical-minus-digital latency</span>
+              <strong>33.462 +/- 0.013 ms</strong>
+            </div>
+            <div class="metric-card">
+              <span>Right-minus-left skew</span>
+              <strong>-0.023 ms</strong>
+            </div>
+            <div class="metric-card">
+              <span>Tactile-minus-audio skew</span>
+              <strong>0.011 ms</strong>
+            </div>
+            <div class="metric-card">
+              <span>Response marker recovery</span>
+              <strong>20/20 pulses</strong>
+            </div>
+          </div>
+          <p class="doc-callout">Boundary: these results validate the electrical audio/tactile-drive route through direct loopback. They do not measure mechanical Woojer vibration onset; that requires an external vibration sensor, accelerometer, or contact microphone.</p>
+          <div class="doc-link-row">
             <a class="button-link" href="../../../docs/hardware_setup.md">Open Hardware Setup</a>
-          </article>
-          <article class="info-card">
-            <h2>Privacy Boundary</h2>
-            <p>Review what is safe for public release and what must remain in ignored local experiment folders.</p>
+            <a class="button-link" href="../../../docs/HARDWARE_VENDOR_DOCS.md">Open Vendor Notes</a>
+            <a class="button-link" href="../../../docs/EXPERIMENT_LATENCY_VALIDATION.md">Open Latency Protocol</a>
+          </div>
+        </section>
+
+        <section id="docs-designer" class="info-segment" aria-labelledby="docs-designer-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Design Workflow</span>
+            <h2 id="docs-designer-title">How The Experiment Designer Works</h2>
+          </div>
+          <p class="info-copy">The Experiment Designer is a segmented workflow. It starts with study/profile selection, then moves through stimulus ingredients, trial sequences, tactile/baseline files, repetition pools, block CSV previews, and final experiment setup. Each segment is meant to own one decision layer and one set of local files/manifests.</p>
+          <div class="workflow-summary-grid">
+            <div><strong>0 Preload</strong><span>Choose a published profile or custom project.</span></div>
+            <div><strong>1 Stimuli</strong><span>Create or import reusable auditory ingredients.</span></div>
+            <div><strong>2 Sequence</strong><span>Arrange ingredients into within-trial rows and variants.</span></div>
+            <div><strong>3 Tactile</strong><span>Add SOAs, baseline logic, catch files, and channel-3 tactile cues.</span></div>
+            <div><strong>4 Pool</strong><span>Set repetition counts and write the trial-pool CSV.</span></div>
+            <div><strong>5 Blocks</strong><span>Generate, inspect, and accept block CSVs.</span></div>
+            <div><strong>6 Prepare</strong><span>Create participant block orders and hand off to the native runner.</span></div>
+          </div>
+          <div class="doc-link-row">
+            <a class="button-link" href="../../../docs/GITHUB_PAGES_DASHBOARD.md">Open Dashboard Guide</a>
+            <a class="button-link" href="../../../docs/PUBLISHED_STUDY_RECREATION_STATUS.md">Open Profile Status</a>
+          </div>
+        </section>
+
+        <section id="docs-runner" class="info-segment" aria-labelledby="docs-runner-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Native Runtime</span>
+            <h2 id="docs-runner-title">How The Experiment Runner Works</h2>
+          </div>
+          <p class="info-copy">The Experiment Runner is the native Focus Mode application launched from the prepared Segment 6 setup. It owns timing-sensitive playback, participant metadata, response logging, LSL/event markers, optional local audio evidence WAVs, top-up behavior, and session outputs.</p>
+          <ul class="doc-list">
+            <li>Segment 6 prepares the run setup and selected participant session package.</li>
+            <li>The runner opens the packaged <code>PPSExperimentRunner.exe</code>, not a browser timing loop.</li>
+            <li>Playback uses the validated ASIO route with one persistent output stream for auditory and tactile channels.</li>
+            <li>Session folders receive event CSVs, local XDF/marker mirrors, trigger dictionaries, timing QC, analysis-ready trial rows, and summary outputs.</li>
+          </ul>
+          <div class="doc-link-row">
+            <a class="button-link" href="../../../docs/WINDOWS_APP.md">Open Windows App Guide</a>
+            <a class="button-link" href="../../../docs/AUDIO_ROUTING_STRESS_TEST.md">Open Audio Stress Notes</a>
+          </div>
+        </section>
+
+        <section id="docs-data-boundary" class="info-segment" aria-labelledby="docs-data-boundary-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Public Release</span>
+            <h2 id="docs-data-boundary-title">Data, Privacy, And Publication Boundary</h2>
+          </div>
+          <p class="info-copy">The public repository contains the toolkit, documentation, deidentified samples, safe templates, and release metadata. Participant data, generated participant WAVs, raw recordings, local validation artifacts, downloaded model caches, and unreviewed third-party assets stay in ignored local folders.</p>
+          <div class="info-card-grid">
+            <article class="info-card">
+              <h2>Local Data</h2>
+              <p>Generated designs, sessions, participant outputs, and validation artifacts are written locally under ignored folders such as <code>local_data/</code> and <code>artifacts/</code>.</p>
+            </article>
+            <article class="info-card">
+              <h2>Hosted Dashboard</h2>
+              <p>The GitHub Pages dashboard is still only a front end. It connects to <code>127.0.0.1</code> after the user starts the trusted local companion.</p>
+            </article>
+            <article class="info-card">
+              <h2>Third-Party Assets</h2>
+              <p>SOFA/HRIR files, vendor manuals, background audio, and proprietary stimuli require attribution and redistribution review before release packaging.</p>
+            </article>
+          </div>
+          <div class="doc-link-row">
             <a class="button-link" href="../../../docs/PRIVACY_RELEASE.md">Open Privacy Guide</a>
-          </article>
+            <a class="button-link" href="../../../docs/PPS_DOWNLOADS.md">Open Download Notes</a>
           </div>
-        </section>
-        <section id="docs-validation" class="info-segment" aria-labelledby="docs-validation-title">
-          <div class="info-segment-heading">
-            <span class="segment-kicker">Placeholder</span>
-            <h2 id="docs-validation-title">Validation Notes</h2>
-          </div>
-          <p class="placeholder-copy">This section will collect concise validation summaries for GUI click paths, runner behavior, timing layers, and hardware-loopback evidence.</p>
-        </section>
-        <section id="docs-publication" class="info-segment" aria-labelledby="docs-publication-title">
-          <div class="info-segment-heading">
-            <span class="segment-kicker">Placeholder</span>
-            <h2 id="docs-publication-title">Publication Boundary</h2>
-          </div>
-          <p class="placeholder-copy">This section will explain which files belong in Git, which outputs stay local, and how hosted dashboard use keeps experiment operations on the research PC.</p>
         </section>
       </section>
 
@@ -636,7 +781,7 @@
         <section id="downloads-companion" class="info-segment" aria-labelledby="downloads-companion-title">
           <div class="info-segment-heading">
             <span class="segment-kicker">Local Companion</span>
-            <h2 id="downloads-companion-title">Backend Placeholder</h2>
+            <h2 id="downloads-companion-title">Local Companion</h2>
           </div>
           <div class="download-page-grid single">
             <article class="info-card download-card">
@@ -704,6 +849,6 @@
       </form>
     </div>
   </div>
-  <script src="app.js?v=20260615-dashboard-tabs-segment2-soundcheck-rail"></script>
+  <script src="app.js?v=20260615-public-docs-rail"></script>
 </body>
 </html>

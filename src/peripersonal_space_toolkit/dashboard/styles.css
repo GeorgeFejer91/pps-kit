@@ -466,6 +466,81 @@ code {
   line-height: 1.5;
 }
 
+.info-lede,
+.info-copy {
+  max-width: 920px;
+  margin: 0 0 14px;
+  color: #2e3932;
+  line-height: 1.55;
+}
+
+.info-lede {
+  font-size: 17px;
+}
+
+.doc-list {
+  max-width: 940px;
+  margin: 0 0 14px;
+  padding-left: 22px;
+  color: #334039;
+  line-height: 1.55;
+}
+
+.doc-list li + li {
+  margin-top: 7px;
+}
+
+.doc-callout {
+  max-width: 920px;
+  margin: 12px 0 14px;
+  border: 1px solid #c5d4ca;
+  border-left: 4px solid var(--primary);
+  border-radius: 7px;
+  background: #eef4f0;
+  color: #2c3a33;
+  padding: 12px 14px;
+  line-height: 1.5;
+}
+
+.doc-link-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 10px;
+}
+
+.metric-grid,
+.workflow-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--panel-gap);
+  margin: 14px 0;
+}
+
+.metric-card,
+.workflow-summary-grid > div {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  padding: 12px;
+}
+
+.metric-card span,
+.workflow-summary-grid span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.metric-card strong,
+.workflow-summary-grid strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text);
+}
+
 .info-card-grid,
 .download-page-grid {
   display: grid;
@@ -2941,7 +3016,9 @@ body.modal-open {
   .block-workbench,
   .run-grid,
   .info-card-grid,
-  .download-page-grid {
+  .download-page-grid,
+  .metric-grid,
+  .workflow-summary-grid {
     grid-template-columns: 1fr;
   }
 
