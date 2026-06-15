@@ -77,6 +77,18 @@ python .\validation_protocols\scripts\validate_protocol11_emulated_runner_artifa
   --output-dir artifacts\validation_runs\protocol11_artifact_audit_current
 ```
 
+For Study 5 participant-readiness claims, aggregate the packaged-runner
+evidence folder with the Study 5 readiness audit. Use the strict flags for the
+final gate; without them, the same script may pass a scoped one-block ASIO
+rehearsal while still reporting `full_study5_realtime_ready=false`.
+
+```powershell
+python .\validation_protocols\scripts\audit_protocol11_study5_readiness.py `
+  --artifact-dir artifacts\validation_runs\full_study5_realtime_current `
+  --require-full-study5 `
+  --require-realtime
+```
+
 The response plan may be JSON or CSV. The minimum plan is keyed by
 `trial_uid`; JSON plans may also declare expected capture options,
 instruction slots, instruction-click actions, top-up behavior, and operator
@@ -237,8 +249,13 @@ Run these as separate validation scenarios and write a machine-readable report
 for each scenario:
 
 - Full Study 5 packaged realtime emulation with randomized hits and misses.
+  Finish this scenario by running
+  `audit_protocol11_study5_readiness.py --require-full-study5 --require-realtime`
+  over the generated validation folder.
 - One-block actual-condition emulation with real audio hardware and OS-click
-  responses.
+  responses. This may pass `audit_protocol11_study5_readiness.py` as scoped
+  local-recorder/XDF evidence, but it does not satisfy the final full-session
+  gate.
 - Boundary-response synthetic run with deterministic early, late, double, and
   out-of-target clicks. The canonical fast software gate is
   `run_protocol11_controlled_response_matrix.py`.
@@ -264,5 +281,9 @@ An accepted Protocol 11 report should include:
 - top-up ledger and final-outcome reconciliation when top-up is enabled;
 - capture-option settings and resulting output file inventory;
 - explicit pass/fail status for each checklist section;
+- the `audit_protocol11_study5_readiness.py` output for Study 5 runs, including
+  XDF loadability, local audio-evidence WAV/sidecar checks, response-marker
+  pulse recovery, screenshot validation, analysis RT agreement, and whether the
+  artifact is truly full Study 5 realtime evidence;
 - a short evidence-boundary note separating emulated software proof from
   physical timing, mechanical onset, and participant-facing scientific claims.

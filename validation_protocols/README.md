@@ -83,6 +83,7 @@ python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py
 python .\validation_protocols\scripts\run_protocol11_controlled_response_matrix.py --output-dir artifacts\validation_runs\protocol11_controlled_response_matrix_current
 python .\validation_protocols\scripts\run_protocol11_capture_options_matrix.py --output-dir artifacts\validation_runs\protocol11_capture_options_matrix_current
 python .\validation_protocols\scripts\validate_protocol11_emulated_runner_artifacts.py --session-dir local_data\sessions\P001_YYYYMMDD_HHMMSS --response-plan artifacts\validation_runs\protocol11_response_plan.json
+python .\validation_protocols\scripts\audit_protocol11_study5_readiness.py --artifact-dir artifacts\validation_runs\full_study5_realtime_current --require-full-study5 --require-realtime
 python .\validation_protocols\scripts\run_focus_mode_click_path_stress.py --output-dir artifacts\validation_runs\focus_mode_click_path_current --count 10 --offscreen
 python .\validation_protocols\scripts\run_visible_runner_os_click_stress.py --output-dir artifacts\validation_runs\visible_runner_os_click_stress_current --count 10 --interval-s 0.05 --armed
 python .\validation_protocols\scripts\run_one_block_actual_condition_validation.py --run-setup-manifest local_data\dashboard_projects\0_study_project_registry\profile_pfeiffer_2018_lateral_perihead_left_to_right\6_experiment_run_setup\experiment_run_setup_manifest.json --device 31 --audio-gain 0.005 --tactile-gain 0.05
@@ -179,7 +180,16 @@ Separate these quantities in every report:
   is the offline artifact gate for completed scenarios: it consumes a session
   folder and response plan keyed by `trial_uid`, then verifies the written
   WAV/manifests, events, timing QC, analysis CSVs, marker mirrors, trigger
-  dictionary, top-up files, and declared capture options. This is
+  dictionary, top-up files, and declared capture options.
+  `audit_protocol11_study5_readiness.py` is the higher-level Study 5 evidence
+  aggregator for packaged realtime runs: it parses `events.xdf` and
+  `lsl_markers.xdf`, reconciles event and marker CSV layers, verifies
+  `trigger_dictionary.json`, checks nonblank Focus Mode screenshots, audits
+  block WAV geometry and manifest sample columns, checks the Komplete ASIO
+  4-channel local audio-evidence WAV/sidecar, consumes the response-marker
+  loopback report, verifies the analysis CSV family and RT tolerance against
+  the emulated click plan, and reports whether the artifact is a full Study 5
+  realtime run or only a scoped rehearsal. This is
   pre-participant operational evidence, not hardware latency, Woojer
   mechanical-onset, or scientific PPS evidence.
 - Actual-block direct loopback evidence: whether the same actual one-block

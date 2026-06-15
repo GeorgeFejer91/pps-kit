@@ -1130,6 +1130,413 @@ def test_protocol11_capture_options_matrix_respects_output_toggles(tmp_path: Pat
     assert (tmp_path / "protocol11_capture_options_matrix_variants.csv").exists()
 
 
+def test_protocol11_study5_readiness_auditor_checks_xdf_audio_and_scope(tmp_path: Path):
+    pytest.importorskip("pyxdf")
+    from PIL import Image
+
+    src_root = REPO_ROOT / "src"
+    if str(src_root) not in sys.path:
+        sys.path.insert(0, str(src_root))
+    from peripersonal_space_toolkit.session_events import SessionEventLogger
+    from peripersonal_space_toolkit.timing_events import TimingEventHub
+
+    auditor = _load_script("audit_protocol11_study5_readiness.py")
+
+    artifact_dir = tmp_path / "real_asio_fixture"
+    session_dir = artifact_dir / "session_one_block"
+    blocks_dir = session_dir / "blocks"
+    analysis_dir = session_dir / "analysis"
+    marker_dir = artifact_dir / "response_marker_audio_evidence_validation_default_after_patch"
+    blocks_dir.mkdir(parents=True)
+    analysis_dir.mkdir()
+    marker_dir.mkdir()
+
+    participant_id = "PVAL001"
+    session_id = "PVAL001_study5_fixture"
+    block_label = "Study 5 realtime fixture block"
+    sample_rate = 1000
+    block_rows = [
+        {
+            "Trial_Number": 1,
+            "Trial_UID": "T001",
+            "Trial_Type": "Audio-Tactile",
+            "Family": "audio_tactile",
+            "SOA_ms": 200,
+            "Trial_Start_S": "0.000000000",
+            "Looming_Onset_S": "0.200000000",
+            "Tactile_Onset_S": "0.400000000",
+            "Response_Window_Onset_S": "0.200000000",
+            "Trial_End_S": "1.000000000",
+            "Trial_Duration_S": "1.000000000",
+            "Sample_Rate_Hz": sample_rate,
+            "Channels": 3,
+            "Trial_Start_Sample": 0,
+            "Looming_Onset_Sample": 200,
+            "Tactile_Onset_Sample": 400,
+            "Response_Window_Onset_Sample": 200,
+            "Trial_End_Sample": 1000,
+        },
+        {
+            "Trial_Number": 2,
+            "Trial_UID": "T002",
+            "Trial_Type": "Baseline",
+            "Family": "baseline",
+            "SOA_ms": "",
+            "Trial_Start_S": "1.000000000",
+            "Looming_Onset_S": "",
+            "Tactile_Onset_S": "0.300000000",
+            "Response_Window_Onset_S": "0.300000000",
+            "Trial_End_S": "2.000000000",
+            "Trial_Duration_S": "1.000000000",
+            "Sample_Rate_Hz": sample_rate,
+            "Channels": 3,
+            "Trial_Start_Sample": 1000,
+            "Looming_Onset_Sample": "",
+            "Tactile_Onset_Sample": 1300,
+            "Response_Window_Onset_Sample": 1300,
+            "Trial_End_Sample": 2000,
+        },
+        {
+            "Trial_Number": 3,
+            "Trial_UID": "T003",
+            "Trial_Type": "Catch",
+            "Family": "catch",
+            "SOA_ms": "",
+            "Trial_Start_S": "2.000000000",
+            "Looming_Onset_S": "0.200000000",
+            "Tactile_Onset_S": "",
+            "Response_Window_Onset_S": "0.200000000",
+            "Trial_End_S": "3.000000000",
+            "Trial_Duration_S": "1.000000000",
+            "Sample_Rate_Hz": sample_rate,
+            "Channels": 3,
+            "Trial_Start_Sample": 2000,
+            "Looming_Onset_Sample": 2200,
+            "Tactile_Onset_Sample": "",
+            "Response_Window_Onset_Sample": 2200,
+            "Trial_End_Sample": 3000,
+        },
+    ]
+    block_csv = blocks_dir / "Block_01_from_study5_fixture.csv"
+    _write_csv(block_csv, block_rows)
+
+    block_audio = np.zeros((3000, 3), dtype=np.float32)
+    block_audio[200:230, 0:2] = 0.25
+    block_audio[400:430, 2] = 0.5
+    block_audio[1300:1330, 2] = 0.5
+    block_audio[2200:2230, 0:2] = 0.25
+    block_wav = blocks_dir / "Block_01_from_study5_fixture.wav"
+    sf.write(block_wav, block_audio, sample_rate)
+
+    evidence_audio = np.zeros((3000, 4), dtype=np.float32)
+    evidence_audio[:, :3] = block_audio
+    evidence_wav = session_dir / "fixture_audio_evidence.wav"
+    sf.write(evidence_wav, evidence_audio, sample_rate)
+    evidence_sidecar = {
+        "schema": "pps-digital-output-evidence.v1",
+        "mode": "digital_output_evidence_wav",
+        "device_name": "Komplete Audio ASIO Driver",
+        "hostapi": "ASIO",
+        "runtime_output_channels": 4,
+        "tactile_output_channel_1based": 3,
+        "sample_rate": sample_rate,
+        "sample_rate_hz": sample_rate,
+        "channels": 4,
+        "frames": 3000,
+        "duration_s": 3.0,
+        "peak_by_channel": [0.25, 0.25, 0.5, 0.0],
+        "clipped_channels_1based": [],
+        "dropped_buffer_count": 0,
+        "interrupted": False,
+        "path": str(evidence_wav),
+    }
+    (session_dir / "fixture_audio_evidence.output_evidence.json").write_text(json.dumps(evidence_sidecar), encoding="utf-8")
+
+    manifest = {
+        "schema": "pps-runner-session-manifest.v1",
+        "session_id": session_id,
+        "participant_id": participant_id,
+        "session_dir": str(session_dir),
+        "validation_context": {"profile_id": "study5_box_breathing_pps"},
+        "outputs": {"analysis_dir": str(analysis_dir)},
+        "blocks": [
+            {
+                "label": block_label,
+                "wav_path": str(block_wav),
+                "manifest_path": str(block_csv),
+                "trial_count": 3,
+                "duration_s": 3.0,
+                "metadata": {"sample_rate_hz": sample_rate, "channels": 3, "source_block_label": "Study 5 fixture"},
+            }
+        ],
+    }
+    (session_dir / "session_manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    metadata = {
+        "schema": "pps-runner-session-metadata.v1",
+        "session_id": session_id,
+        "participant": {"participant_id": participant_id},
+        "experiment": {
+            "template_id": "study5_box_breathing_pps",
+            "parts_per_participant": 2,
+            "instruction_profile": {"slots": [{"source": "original_study5"}]},
+            "run_setup_snapshot": {"blocks_per_part": 6},
+        },
+    }
+    (session_dir / "session_metadata.json").write_text(json.dumps(metadata), encoding="utf-8")
+    (session_dir / "analysis_summary.txt").write_text("fixture analysis summary\n", encoding="utf-8")
+    (session_dir / "design.json").write_text("{}", encoding="utf-8")
+    (session_dir / "protocol_schedule.csv").write_text("block,trial\n1,1\n", encoding="utf-8")
+
+    logger = SessionEventLogger(participant_id)
+    hub = TimingEventHub(logger, enable_lsl=False, session_id=session_id, participant_id=participant_id)
+
+    capture_options = {
+        "enable_lsl": True,
+        "start_backup_recording": True,
+        "write_analysis_csvs": True,
+        "write_events_csv": True,
+        "write_internal_xdf": True,
+        "write_lsl_marker_mirror": True,
+        "write_trigger_dictionary": True,
+    }
+
+    def log_event(event_type: str, seconds: float, **payload):
+        payload.setdefault("lsl_timestamp", seconds)
+        return hub.log(event_type, unix_time=1000.0 + seconds, monotonic_time=500.0 + seconds, **payload)
+
+    log_event("session_start", 0.0, capture_options=capture_options)
+    log_event("block_start", 0.1, block_number=1, block_label=block_label)
+    log_event("block_schedule_loaded", 0.11, block_index=1, block_number=1, block_label=block_label)
+    log_event("recording_start", 0.12, block_number=1, block_label=block_label)
+    log_event(
+        "audio_sample_zero",
+        0.13,
+        block_index=1,
+        block_number=1,
+        block_label=block_label,
+        sample_index=0,
+        sample_rate=sample_rate,
+        timestamp_quality="dac_time_sample_exact",
+        timestamp_anchor="audio_sample_zero",
+    )
+
+    mouse_marker_pairs = []
+    for row in block_rows:
+        trial_number = int(row["Trial_Number"])
+        trial_uid = str(row["Trial_UID"])
+        start_sample = int(row["Trial_Start_Sample"])
+        start_s = start_sample / sample_rate
+        common = {
+            "block_index": 1,
+            "block_number": 1,
+            "block_label": block_label,
+            "trial_number": trial_number,
+            "trial_uid": trial_uid,
+            "sample_rate": sample_rate,
+            "timestamp_quality": "dac_time_sample_exact",
+            "timestamp_anchor": "audio_sample_zero",
+        }
+        log_event(
+            "trial_start",
+            1.0 + start_s,
+            **common,
+            sample_index=start_sample,
+            planned_sample_index=start_sample,
+            trigger_key=f"trial:01:{trial_number:03d}:{trial_uid}:trial_start",
+        )
+        if row["Looming_Onset_Sample"] != "":
+            sample = int(row["Looming_Onset_Sample"])
+            log_event(
+                "looming_onset",
+                1.0 + sample / sample_rate,
+                **common,
+                sample_index=sample,
+                planned_sample_index=sample,
+                trigger_key=f"trial:01:{trial_number:03d}:{trial_uid}:looming_onset",
+            )
+        if row["Tactile_Onset_Sample"] != "":
+            sample = int(row["Tactile_Onset_Sample"])
+            log_event(
+                "tactile_onset",
+                1.0 + sample / sample_rate,
+                **common,
+                sample_index=sample,
+                planned_sample_index=sample,
+                trigger_key=f"trial:01:{trial_number:03d}:{trial_uid}:tactile_onset",
+            )
+            mouse = log_event("mouse_click", 1.0 + sample / sample_rate + 0.15, block_number=1, block_label=block_label, trial_uid=trial_uid)
+            marker = log_event(
+                "response_marker_start",
+                1.0 + sample / sample_rate + 0.17,
+                block_number=1,
+                block_label=block_label,
+                mouse_event_id=mouse.event_id,
+                sample_index=sample + 170,
+                sample_rate=sample_rate,
+                timestamp_quality="dac_time_sample_exact",
+                timestamp_anchor="audio_sample_zero",
+            )
+            mouse_marker_pairs.append((mouse.event_id, marker.event_id, trial_uid))
+        response_sample = int(row["Response_Window_Onset_Sample"])
+        log_event(
+            "response_window_onset",
+            1.0 + response_sample / sample_rate,
+            **common,
+            sample_index=response_sample,
+            planned_sample_index=response_sample,
+            trigger_key=f"trial:01:{trial_number:03d}:{trial_uid}:response_window_onset",
+        )
+        end_sample = int(row["Trial_End_Sample"])
+        log_event(
+            "trial_end",
+            1.0 + end_sample / sample_rate,
+            **common,
+            sample_index=end_sample,
+            planned_sample_index=end_sample,
+            trigger_key=f"trial:01:{trial_number:03d}:{trial_uid}:trial_end",
+        )
+
+    log_event("recording_end", 4.2, block_number=1, block_label=block_label)
+    log_event("block_end", 4.3, block_number=1, block_label=block_label, completed=True)
+    log_event("session_end", 4.4, completed=True, interrupted=False)
+
+    logger.write_csv(session_dir / "events.csv")
+    logger.write_xdf(session_dir / "events.xdf")
+    hub.write_lsl_markers_csv(session_dir / "lsl_markers.csv")
+    hub.write_lsl_markers_xdf(session_dir / "lsl_markers.xdf")
+    hub.write_trigger_dictionary(session_dir / "trigger_dictionary.json")
+
+    analysis_rows = [
+        {"trial_uid": trial_uid, "hit": "True", "rt_ms": "150.0", "primary_analysis_included": "True", "trial_type": "Audio-Tactile"}
+        for _mouse_id, _marker_id, trial_uid in mouse_marker_pairs
+    ]
+    for suffix in ("responses", "analysis_ready_trials", "final_trial_outcomes"):
+        _write_csv(analysis_dir / f"{session_id}_{suffix}.csv", analysis_rows)
+    _write_csv(analysis_dir / f"{session_id}_summary.csv", [{"participant_id": participant_id, "n": 2, "hits": 2, "hit_rate": 1.0}])
+    _write_csv(analysis_dir / f"{session_id}_pps_curve_points.csv", [{"soa_ms": 200, "n": 1, "mean_rt_ms": 150.0}])
+    _write_csv(analysis_dir / f"{session_id}_model_fits.csv", [{"model": "linear", "n_points": 1, "aic": 0.0}])
+    _write_csv(analysis_dir / f"{session_id}_model_fit_comparison.csv", [{"best_model": "linear", "best_aic": 0.0}])
+    (analysis_dir / f"{session_id}_sigmoid_fits.csv").write_text("empty\n", encoding="utf-8")
+    _write_csv(
+        analysis_dir / f"{session_id}_timing_qc.csv",
+        [
+            {
+                "mouse_event_id": mouse_id,
+                "response_marker_event_id": marker_id,
+                "marker_minus_mouse_ms": 20.0,
+                "block_number": 1,
+                "block_label": block_label,
+            }
+            for mouse_id, marker_id, _trial_uid in mouse_marker_pairs
+        ],
+    )
+
+    focus_report = {
+        "schema": "pps-focus-mode-packaged-validation.v1",
+        "completed": True,
+        "exit_code": 0,
+        "session_dir": str(session_dir),
+        "session_manifest": str(session_dir / "session_manifest.json"),
+        "validation_audio_realtime": True,
+        "planned_tactile_cue_count": 2,
+        "cursor_recenter_count": 2,
+        "validation_mouse_clicks": [
+            {
+                "label": "participant_emulator_plan",
+                "standard_tactile_cue_count": 2,
+                "planned_miss_count": 0,
+            },
+            *[
+                {
+                    "action": "standard_click",
+                    "trial_uid": trial_uid,
+                    "actual_delay_ms": 150.0,
+                    "backend": "pyautogui",
+                    "label": "tactile_response_click",
+                }
+                for _mouse_id, _marker_id, trial_uid in mouse_marker_pairs
+            ],
+        ],
+    }
+    (artifact_dir / "focus_validation_report.json").write_text(json.dumps(focus_report), encoding="utf-8")
+    (artifact_dir / "packaged_runner_process_launch.json").write_text(
+        json.dumps(
+            {
+                "schema": "pps-packaged-real-asio-process-launch.v1",
+                "pid": 123,
+                "exe": "dist/PPSExperimentRunner/PPSExperimentRunner.exe",
+                "session_manifest": str(session_dir / "session_manifest.json"),
+                "mouse_backend": "pyautogui",
+            }
+        ),
+        encoding="utf-8",
+    )
+    (artifact_dir / "preparation_report.json").write_text(json.dumps({"schema": "pps-real-asio-ui-validation-prep.v1", "session_dir": str(session_dir)}), encoding="utf-8")
+
+    image = Image.new("RGB", (12, 12), color=(8, 12, 18))
+    image.putpixel((6, 6), (220, 240, 255))
+    image.save(artifact_dir / "focus_screenshot.png")
+    image.save(artifact_dir / "live_desktop_after_first_cues.png")
+
+    (artifact_dir / "lsl_xdf_audio_reconciliation_report.json").write_text(
+        json.dumps(
+            {
+                "schema": "pps-lsl-xdf-audio-reconciliation.v1",
+                "passed": True,
+                "criteria": {
+                    "events_xdf_loadable": True,
+                    "lsl_markers_xdf_loadable": True,
+                    "events_and_lsl_marker_ids_match": True,
+                    "event_types_match_between_csv_layers": True,
+                    "event_codes_match_between_csv_layers": True,
+                    "trigger_keys_match_between_csv_layers": True,
+                    "xdf_and_audio_evidence_share_session_folder": True,
+                    "audio_evidence_is_komplete_asio": True,
+                    "audio_evidence_is_four_channel_runtime": True,
+                    "tactile_channel_is_output_3": True,
+                    "silent_output_4_confirmed": True,
+                    "no_audio_drops_or_interrupts": True,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (marker_dir / "response_marker_loopback_report.json").write_text(
+        json.dumps(
+            {
+                "schema": "pps-response-marker-loopback.v1",
+                "passed": True,
+                "expected_marker_count": 2,
+                "detected_marker_count": 2,
+                "detection_rate": 1.0,
+                "abs_residual_ms": {"count": 2, "p95_ms": 0.0, "max_ms": 0.0},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = auditor.audit_readiness(artifact_dir, output_dir=tmp_path / "readiness_audit")
+
+    assert report["passed"]
+    assert not report["full_study5_realtime_ready"]
+    assert report["sections"]["lsl_xdf_trigger_logging"]["passed"]
+    assert report["sections"]["local_recorder_audio_evidence"]["passed"]
+    assert report["sections"]["analysis_outputs"]["passed"]
+    assert report["scope"] == "one_block_study5_real_asio_rehearsal"
+
+    strict = auditor.audit_readiness(
+        artifact_dir,
+        output_dir=tmp_path / "readiness_audit_strict",
+        require_full_study5=True,
+        require_realtime=True,
+    )
+
+    assert not strict["passed"]
+    assert strict["scope_summary"]["validation_audio_realtime"]
+    assert any(item["name"] == "artifact_is_full_study5_when_required" and not item["passed"] for item in strict["criteria"])
+    assert (tmp_path / "readiness_audit" / "protocol11_study5_readiness_audit.json").exists()
+
+
 def test_topup_missed_trial_stress_rescues_intentional_misses(tmp_path: Path):
     stress = _load_script("run_topup_missed_trial_stress.py")
 
