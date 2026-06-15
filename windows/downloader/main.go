@@ -50,6 +50,11 @@ func run(args []string) int {
 		return 1
 	}
 	fmt.Printf("Installed PPS Toolkit %s at %s\n", result.Manifest.Version, result.InstallDir)
+	for _, status := range result.ExternalDependencyStatus {
+		if strings.TrimSpace(status.Message) != "" {
+			fmt.Printf("[%s] %s\n", status.Status, status.Message)
+		}
+	}
 	return 0
 }
 

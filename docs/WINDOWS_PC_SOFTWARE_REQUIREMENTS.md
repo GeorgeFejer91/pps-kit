@@ -35,6 +35,17 @@ python -m pip install -e ".[mp3,tts]"
 The `mp3` extra only installs Python-side MP3 helpers. If MP3 import/export is
 needed, install `ffmpeg` separately and document the installed build.
 
+The Windows source setup script installs the PPS Python/runtime package as one
+environment, then runs the PC software audit:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\windows\Setup_Windows_App.ps1
+```
+
+If the audit cannot see the native Komplete Audio ASIO route, setup opens the
+official Native Instruments driver page in the default browser and leaves the
+audit report under `artifacts/validation_runs/setup_pc_software_requirements/`.
+
 ## Python Packages
 
 | Package | Requirement | Needed for |
@@ -64,10 +75,27 @@ from the NI driver page or Native Access:
 - Current lab PC audit: ASIO registry entry present and visible to
   `sounddevice` as a 6-input / 6-output ASIO device.
 
+The PPS release downloader and setup scripts may open the official provider page
+for this driver. They must not mirror, bundle, or silently redistribute the NI
+driver installer unless written redistribution permission is recorded in the
+release manifest. The expected operator workflow is:
+
+1. Let the downloader/setup open the NI driver page, or open the page above.
+2. Download `Komplete Audio 6 MK2 Driver 5.22.0 - Windows 10` or the current
+   NI-listed successor.
+3. Disconnect the interface, run `setup.exe` from the downloaded ZIP, reconnect
+   the interface, restart `PPSExperimentRunner.exe`, and re-run the PC audit.
+
 For publication-grade timing, use the native NI ASIO endpoint. Do not substitute
 ASIO4ALL, FlexASIO, Voicemeeter, MME, DirectSound, or separate WASAPI stereo
 endpoints for the experiment player. Those can be diagnostic tools, but they do
 not prove one synchronized left/right/tactile multichannel output route.
+
+FlexASIO is an optional open-source diagnostic fallback published by Etienne
+Dechamps at <https://github.com/dechamps/FlexASIO/releases>. The PPS download
+manifest may cache the pinned FlexASIO installer from its GitHub release with
+SHA-256 verification, but the runner still marks it as an unvalidated fallback
+until route identity, latency, and interchannel skew are revalidated.
 
 ## External LSL/XDF Recording Tool
 

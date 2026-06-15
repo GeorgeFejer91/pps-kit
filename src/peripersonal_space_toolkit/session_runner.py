@@ -2419,10 +2419,11 @@ class SessionRunnerController:
 
     def _create_audio_engine(self) -> Any:
         from .runner import CLICK_SOUND, AudioEngine, find_output_device
+        from .audio_routing import audio_runtime_preflight_message
 
         device_idx, _device_name, _is_preferred = find_output_device()
         if device_idx is None:
-            raise RuntimeError("No usable audio output device was found.")
+            raise RuntimeError("No usable audio output device was found.\n" + audio_runtime_preflight_message())
         engine = AudioEngine(device_idx)
         if CLICK_SOUND:
             engine.load_click_sound(CLICK_SOUND)

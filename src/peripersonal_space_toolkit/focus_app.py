@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .app_assets import apply_qt_app_icon, set_windows_app_user_model_id
+from .audio_routing import NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL, assess_audio_runtime_readiness
 from .focus_layout import (
     FocusLayoutProfile,
     render_focus_layout_profile,
@@ -75,8 +76,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 def _require_qt() -> dict[str, Any]:
     try:
-        from PySide6.QtCore import QPoint, QTimer, Qt, Signal
-        from PySide6.QtGui import QBrush, QColor, QCursor, QFontDatabase, QIcon, QPainter, QPen
+        from PySide6.QtCore import QPoint, QTimer, Qt, QUrl, Signal
+        from PySide6.QtGui import QBrush, QColor, QCursor, QDesktopServices, QFontDatabase, QIcon, QPainter, QPen
         from PySide6.QtWidgets import (
             QApplication,
             QCheckBox,
@@ -107,6 +108,7 @@ def _require_qt() -> dict[str, Any]:
         "QColor": QColor,
         "QComboBox": QComboBox,
         "QCursor": QCursor,
+        "QDesktopServices": QDesktopServices,
         "QDialog": QDialog,
         "QFileDialog": QFileDialog,
         "QFrame": QFrame,
@@ -128,6 +130,7 @@ def _require_qt() -> dict[str, Any]:
         "QTabWidget": QTabWidget,
         "QTextEdit": QTextEdit,
         "QTimer": QTimer,
+        "QUrl": QUrl,
         "QVBoxLayout": QVBoxLayout,
         "QWidget": QWidget,
         "Qt": Qt,
@@ -4069,10 +4072,24 @@ def run_launcher_window(
     asset_controls.addWidget(range_button)
     panel_layout.addLayout(asset_controls)
 
-    message = q["QLabel"](initial_message or "Ready")
+    show_driver_button = False
+    try:
+        readiness = None if initial_message else assess_audio_runtime_readiness()
+        launcher_message = initial_message or (readiness.message() if readiness is not None else "")
+        show_driver_button = bool(readiness is not None and not readiness.publication_ready)
+    except Exception as exc:
+        launcher_message = initial_message or f"Audio preflight could not run: {exc}"
+        show_driver_button = not bool(initial_message)
+    message = q["QLabel"](launcher_message or "Ready")
     message.setObjectName("mutedLabel")
     message.setWordWrap(True)
     panel_layout.addWidget(message)
+    driver_button = q["QPushButton"]("Open Audio Driver Page")
+    driver_button.setObjectName("secondaryButton")
+    driver_button.setToolTip("Open the official Native Instruments driver page in the default browser.")
+    driver_button.setVisible(show_driver_button)
+    driver_button.clicked.connect(lambda: q["QDesktopServices"].openUrl(q["QUrl"](NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL)))
+    panel_layout.addWidget(driver_button)
     progress = q["QProgressBar"]()
     progress.setRange(0, 1000)
     progress.setValue(0)

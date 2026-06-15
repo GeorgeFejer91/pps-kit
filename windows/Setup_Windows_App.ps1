@@ -30,6 +30,23 @@ New-Item -ItemType Directory -Force (Join-Path $Root "local_data\loopback_record
 New-Item -ItemType Directory -Force (Join-Path $Root "local_data\sessions") | Out-Null
 New-Item -ItemType Directory -Force (Join-Path $Root "local_data\demographics") | Out-Null
 
+$DriverUrl = "https://www.native-instruments.com/en/support/downloads/drivers-other-files/"
+$AuditDir = Join-Path $Root "artifacts\validation_runs\setup_pc_software_requirements"
+& $Python (Join-Path $Root "validation_protocols\scripts\audit_pc_software_requirements.py") --output-dir $AuditDir
+if ($LASTEXITCODE -eq 0) {
+    $AuditJson = Join-Path $AuditDir "pc_software_requirements_audit.json"
+    if (Test-Path -LiteralPath $AuditJson) {
+        $Audit = Get-Content -Raw -LiteralPath $AuditJson | ConvertFrom-Json
+        if (-not $Audit.summary.komplete_asio_sounddevice_ready) {
+            Write-Warning "Komplete Audio ASIO is not visible as a 3+ channel sounddevice output. Opening the official Native Instruments driver page."
+            Start-Process $DriverUrl
+        }
+    }
+}
+else {
+    Write-Warning "PC software audit failed. Continue setup, then run validation_protocols\scripts\audit_pc_software_requirements.py manually."
+}
+
 Write-Host ""
 Write-Host "Setup complete."
 Write-Host "Run windows\Launch_HTML_Dashboard.bat to open the standard local browser dashboard."

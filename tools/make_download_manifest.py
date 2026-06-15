@@ -15,6 +15,10 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = REPO_ROOT / "dist" / "pps_download_manifest.v1.json"
 MANIFEST_SCHEMA = "pps-download-manifest.v1"
+NI_DRIVER_PAGE_URL = "https://www.native-instruments.com/en/support/downloads/drivers-other-files/"
+FLEXASIO_URL = "https://github.com/dechamps/FlexASIO/releases/download/flexasio-1.10b/FlexASIO-1.10b.exe"
+FLEXASIO_SHA256 = "fe496bcc08d6c421c6244c8a60ac7b538560bda138000fd1a54ab8ebce031209"
+FLEXASIO_SIZE_BYTES = 13749698
 
 
 def project_version() -> str:
@@ -121,6 +125,49 @@ def build_manifest(
                 "label": "PPS Toolkit Windows Guide",
                 "path": "docs/WINDOWS_APP.md",
                 "shortcut": False,
+            },
+        ],
+        "external_dependencies": [
+            {
+                "kind": "native_instruments_komplete_audio_asio",
+                "label": "Native Instruments Komplete Audio ASIO Driver",
+                "required_for": "validated synchronized 3-channel PPS playback",
+                "provider": "Native Instruments",
+                "provider_page_url": NI_DRIVER_PAGE_URL,
+                "license_policy": (
+                    "Provider proprietary driver. PPS Toolkit may point to the official provider source, "
+                    "but must not mirror or redistribute the installer unless written redistribution permission is recorded."
+                ),
+                "redistribution_permitted": False,
+                "auto_download": False,
+                "install_instructions": [
+                    "Open the provider page.",
+                    "Download Komplete Audio 6 MK2 Driver 5.22.0 - Windows 10 or the current provider-listed successor.",
+                    "Disconnect the interface, run setup.exe from the downloaded ZIP, reconnect the interface, and restart PPSExperimentRunner.exe.",
+                ],
+                "notes": "This is the publication-grade route for one hardware-clocked left/right/tactile output stream.",
+            },
+            {
+                "kind": "flexasio_optional_fallback",
+                "label": "FlexASIO optional diagnostic fallback",
+                "required_for": "diagnostic fallback only; not publication timing validation",
+                "provider": "Etienne Dechamps",
+                "provider_page_url": "https://github.com/dechamps/FlexASIO/releases",
+                "download_url": FLEXASIO_URL,
+                "filename": "FlexASIO-1.10b.exe",
+                "size_bytes": FLEXASIO_SIZE_BYTES,
+                "sha256": FLEXASIO_SHA256,
+                "license_policy": (
+                    "FlexASIO source is MIT-licensed; ASIO trademark and SDK terms remain governed by Steinberg. "
+                    "The installer is cached from the publisher GitHub release with SHA256 verification."
+                ),
+                "redistribution_permitted": True,
+                "auto_download": True,
+                "install_instructions": [
+                    "Run the cached FlexASIO installer only for diagnostic fallback when no native vendor ASIO driver is available.",
+                    "Revalidate route identity, latency, and interchannel skew before using any fallback in a study.",
+                ],
+                "notes": "FlexASIO wraps Windows audio APIs through PortAudio and does not replace the native Komplete Audio ASIO route.",
             },
         ],
         "uninstall": {

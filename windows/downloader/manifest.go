@@ -12,15 +12,16 @@ const manifestSchema = "pps-download-manifest.v1"
 const defaultPayloadKind = "offline_lab_windows_x64"
 
 type DownloadManifest struct {
-	Schema       string       `json:"schema"`
-	Project      string       `json:"project"`
-	Version      string       `json:"version"`
-	SourceTag    string       `json:"source_tag"`
-	SourceCommit string       `json:"source_commit"`
-	ZenodoDOI    string       `json:"zenodo_doi"`
-	CreatedUTC   string       `json:"created_utc"`
-	Payloads     []Payload    `json:"payloads"`
-	Entrypoints  []Entrypoint `json:"entrypoints"`
+	Schema               string               `json:"schema"`
+	Project              string               `json:"project"`
+	Version              string               `json:"version"`
+	SourceTag            string               `json:"source_tag"`
+	SourceCommit         string               `json:"source_commit"`
+	ZenodoDOI            string               `json:"zenodo_doi"`
+	CreatedUTC           string               `json:"created_utc"`
+	Payloads             []Payload            `json:"payloads"`
+	Entrypoints          []Entrypoint         `json:"entrypoints"`
+	ExternalDependencies []ExternalDependency `json:"external_dependencies,omitempty"`
 }
 
 type Payload struct {
@@ -50,6 +51,23 @@ type Entrypoint struct {
 	Label    string `json:"label"`
 	Path     string `json:"path"`
 	Shortcut bool   `json:"shortcut"`
+}
+
+type ExternalDependency struct {
+	Kind                    string   `json:"kind"`
+	Label                   string   `json:"label"`
+	RequiredFor             string   `json:"required_for"`
+	Provider                string   `json:"provider"`
+	ProviderPageURL         string   `json:"provider_page_url"`
+	DownloadURL             string   `json:"download_url,omitempty"`
+	Filename                string   `json:"filename,omitempty"`
+	SizeBytes               int64    `json:"size_bytes,omitempty"`
+	SHA256                  string   `json:"sha256,omitempty"`
+	LicensePolicy           string   `json:"license_policy"`
+	RedistributionPermitted bool     `json:"redistribution_permitted"`
+	AutoDownload            bool     `json:"auto_download"`
+	InstallInstructions     []string `json:"install_instructions,omitempty"`
+	Notes                   string   `json:"notes,omitempty"`
 }
 
 func ParseDownloadManifest(data []byte) (DownloadManifest, error) {
@@ -98,6 +116,31 @@ func (m DownloadManifest) Validate() error {
 			}
 			if payload.PackageInventory.MissingRequiredCount != 0 {
 				return fmt.Errorf("payload %q package inventory reports %d missing required item(s)", payload.Kind, payload.PackageInventory.MissingRequiredCount)
+			}
+		}
+	}
+	for _, dependency := range m.ExternalDependencies {
+		if strings.TrimSpace(dependency.Kind) == "" {
+			return errors.New("external dependency kind is required")
+		}
+		if strings.TrimSpace(dependency.ProviderPageURL) == "" {
+			return fmt.Errorf("external dependency %q is missing provider_page_url", dependency.Kind)
+		}
+		if dependency.AutoDownload {
+			if !dependency.RedistributionPermitted {
+				return fmt.Errorf("external dependency %q requests auto_download without redistribution permission", dependency.Kind)
+			}
+			if strings.TrimSpace(dependency.DownloadURL) == "" {
+				return fmt.Errorf("external dependency %q requests auto_download without download_url", dependency.Kind)
+			}
+			if strings.TrimSpace(dependency.Filename) == "" {
+				return fmt.Errorf("external dependency %q requests auto_download without filename", dependency.Kind)
+			}
+			if len(dependency.SHA256) != 64 {
+				return fmt.Errorf("external dependency %q requests auto_download without a 64-character SHA256", dependency.Kind)
+			}
+			if dependency.SizeBytes < 0 {
+				return fmt.Errorf("external dependency %q has a negative size", dependency.Kind)
 			}
 		}
 	}

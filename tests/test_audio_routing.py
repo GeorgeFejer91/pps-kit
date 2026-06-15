@@ -4,12 +4,83 @@ import numpy as np
 import pytest
 
 from peripersonal_space_toolkit.audio_routing import (
+    NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL,
+    assess_audio_runtime_readiness,
     apply_output_volumes,
     center_audio_for_output,
     prepare_block_audio_for_output,
     tactile_probe_for_output,
 )
 from peripersonal_space_toolkit.audio_device_stress import _sounddevice_latency
+
+
+class FakeSoundDevice:
+    __version__ = "0.4.7"
+
+    def __init__(self, hostapis, devices):
+        self._hostapis = hostapis
+        self._devices = devices
+
+    def query_hostapis(self):
+        return self._hostapis
+
+    def query_devices(self):
+        return self._devices
+
+
+def _device(name: str, hostapi: int, outputs: int):
+    return {"name": name, "hostapi": hostapi, "max_output_channels": outputs, "max_input_channels": 0}
+
+
+def test_audio_preflight_accepts_native_komplete_multichannel_asio():
+    sd = FakeSoundDevice(
+        [{"name": "Windows WASAPI"}, {"name": "ASIO"}],
+        [_device("Komplete Audio ASIO Driver", 1, 6)],
+    )
+
+    readiness = assess_audio_runtime_readiness(sounddevice_module=sd)
+
+    assert readiness.ready is True
+    assert readiness.publication_ready is True
+    assert "validated Komplete" in readiness.summary
+
+
+def test_audio_preflight_flags_komplete_stereo_without_asio_route():
+    sd = FakeSoundDevice(
+        [{"name": "Windows WASAPI"}],
+        [_device("Output 1/2 (Komplete Audio 6 MK2)", 0, 2)],
+    )
+
+    readiness = assess_audio_runtime_readiness(sounddevice_module=sd)
+
+    assert readiness.ready is False
+    assert readiness.publication_ready is False
+    assert "Only a stereo Komplete endpoint" in readiness.message()
+    assert NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL in readiness.message()
+
+
+def test_audio_preflight_allows_generic_asio_only_as_unvalidated_fallback():
+    sd = FakeSoundDevice(
+        [{"name": "ASIO"}],
+        [_device("FlexASIO", 0, 4)],
+    )
+
+    readiness = assess_audio_runtime_readiness(sounddevice_module=sd)
+
+    assert readiness.ready is True
+    assert readiness.publication_ready is False
+    assert "fallback" in readiness.message().lower()
+    assert "publication timing evidence" in readiness.message()
+
+
+def test_audio_preflight_rejects_old_sounddevice_version():
+    sd = FakeSoundDevice([{"name": "ASIO"}], [_device("Komplete Audio ASIO Driver", 0, 6)])
+    sd.__version__ = "0.4.6"
+
+    readiness = assess_audio_runtime_readiness(sounddevice_module=sd)
+
+    assert readiness.ready is False
+    assert "too old" in readiness.summary
 
 
 def test_legacy_study5_stereo_swaps_tactile_and_audio_channels():

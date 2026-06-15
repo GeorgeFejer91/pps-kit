@@ -54,6 +54,27 @@ GitHub Releases whenever possible so the public download path stays GitHub-based
 If an external upstream URL is unavoidable, the manifest must include the URL,
 hash, license/provenance note, and whether the payload is required or optional.
 
+External PC dependencies that are not PPS payloads belong under the manifest's
+`external_dependencies` list. The downloader may auto-download and locally cache
+an external installer only when all of these are true: the provider/source URL is
+declared, the filename/size/SHA256 are pinned, and the manifest records that
+redistribution or automated caching is permitted. If the license does not grant
+redistribution or mirroring rights, the downloader must not fetch from a PPS
+mirror; it should open the official provider page in the user's default browser
+and record `provider_action_required`.
+
+Current ASIO policy:
+
+- Native Instruments Komplete Audio ASIO Driver is proprietary. PPS may point to
+  or open the official NI driver page, but must not bundle or mirror the driver
+  installer unless written redistribution permission is recorded in the manifest.
+- FlexASIO may be declared as an optional diagnostic fallback from Etienne
+  Dechamps' GitHub release with pinned SHA256. It is not the validated
+  publication timing route for synchronized left/right/tactile output.
+- A green installer state does not by itself prove audio readiness. The
+  experiment runner must still run sounddevice/ASIO preflight and tell the
+  experimenter when the native Komplete 3+ channel ASIO route is missing.
+
 The downloader must materialize a complete program repository into the chosen
 install folder. At minimum the installed folder must include:
 
@@ -93,6 +114,11 @@ Optional but preferred when available:
 8. Build `PPS-Toolkit-Downloader.exe` with the final manifest URL embedded; fail the build if it is 100 MiB or larger.
 9. Attach the downloader, manifest, and any GitHub-hosted dependency/runtime/repo payloads to the GitHub Release.
 10. Test from the public download page on a clean Windows folder. The proof must show the single downloader exe downloading content, installing into a user-chosen location, creating/opening the offline HTML GUI exe, and launching `PPSExperimentRunner.exe`.
+11. On a clean Windows lab PC without Komplete ASIO, verify the downloader/setup
+    opens the official NI driver page, reports provider action required, and the
+    runner launcher shows an audio dependency message plus an "Open Audio Driver
+    Page" action. After installing the NI driver, rerun the PC audit and
+    `pps-audio-stress --device-query Komplete --channels 3`.
 
 ## Do Not Package
 

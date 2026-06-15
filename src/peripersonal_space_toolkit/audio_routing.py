@@ -17,6 +17,10 @@ These helpers keep the two layouts explicit and testable.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import importlib.metadata as metadata
+import os
+import re
+from typing import Any
 
 import numpy as np
 
@@ -28,6 +32,13 @@ SPATIAL_AUDIO_CHANNELS = (0, 1)
 LEGACY_AUDIO_CHANNELS = (0,)
 LEGACY_TACTILE_CHANNEL = 1
 SPATIAL_TACTILE_CHANNEL = 2
+MIN_SOUNDDEVICE_VERSION = "0.4.7"
+NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL = "https://www.native-instruments.com/en/support/downloads/drivers-other-files/"
+FLEXASIO_RELEASES_URL = "https://github.com/dechamps/FlexASIO/releases"
+STEINBERG_BUILTIN_ASIO_DRIVER_URL = (
+    "https://helpcenter.steinberg.de/hc/en-us/articles/"
+    "17863730844946-Steinberg-built-in-ASIO-Driver-information-download"
+)
 
 
 @dataclass(frozen=True)
@@ -38,6 +49,221 @@ class PreparedBlockAudio:
     source_channels: int
     audio_channels: tuple[int, ...]
     tactile_channel: int
+
+
+@dataclass(frozen=True)
+class AudioRuntimeReadiness:
+    """User-facing audio dependency and route diagnosis."""
+
+    ready: bool
+    publication_ready: bool
+    severity: str
+    summary: str
+    details: tuple[str, ...]
+    actions: tuple[str, ...]
+    sounddevice_available: bool
+    sounddevice_version: str
+    asio_hostapi_present: bool
+    preferred_devices: tuple[str, ...]
+    fallback_devices: tuple[str, ...]
+
+    def message(self) -> str:
+        lines = [self.summary]
+        if self.details:
+            lines.extend(self.details)
+        if self.actions:
+            lines.append("Next steps: " + " ".join(self.actions))
+        return "\n".join(line for line in lines if line)
+
+
+def _version_parts(value: str) -> tuple[int, ...]:
+    return tuple(int(part) for part in re.findall(r"\d+", value)[:4])
+
+
+def _version_at_least(value: str, minimum: str) -> bool:
+    actual = _version_parts(value)
+    required = _version_parts(minimum)
+    if not actual:
+        return False
+    length = max(len(actual), len(required))
+    return actual + (0,) * (length - len(actual)) >= required + (0,) * (length - len(required))
+
+
+def _sounddevice_version(sd_module: Any | None) -> str:
+    version = str(getattr(sd_module, "__version__", "") or "")
+    if version:
+        return version
+    try:
+        return metadata.version("sounddevice")
+    except metadata.PackageNotFoundError:
+        return ""
+
+
+def assess_audio_runtime_readiness(
+    *,
+    sounddevice_module: Any | None = None,
+    device_query: str = "Komplete",
+    min_output_channels: int = BINAURAL_TACTILE_CHANNELS,
+) -> AudioRuntimeReadiness:
+    """Assess whether the validated multichannel ASIO playback route is visible.
+
+    The publication-grade route is the native Komplete Audio ASIO endpoint with
+    at least three outputs so left/right/tactile samples share one hardware
+    clock. Generic ASIO wrappers are reported as fallbacks, not as validation
+    substitutes.
+    """
+    os.environ.setdefault("SD_ENABLE_ASIO", "1")
+    if sounddevice_module is None:
+        try:
+            import sounddevice as sounddevice_module  # type: ignore[import-not-found]
+        except Exception as exc:
+            return AudioRuntimeReadiness(
+                ready=False,
+                publication_ready=False,
+                severity="error",
+                summary="Audio preflight: Python sounddevice is not installed or cannot load.",
+                details=(f"Import error: {exc}",),
+                actions=(
+                    'Install the full PPS runtime package: python -m pip install -e ".[gui,web,lsl,validation]".',
+                    f"Then install the official Komplete Audio ASIO driver from {NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL}.",
+                ),
+                sounddevice_available=False,
+                sounddevice_version="",
+                asio_hostapi_present=False,
+                preferred_devices=(),
+                fallback_devices=(),
+            )
+
+    sd = sounddevice_module
+    version = _sounddevice_version(sd)
+    if version and not _version_at_least(version, MIN_SOUNDDEVICE_VERSION):
+        return AudioRuntimeReadiness(
+            ready=False,
+            publication_ready=False,
+            severity="error",
+            summary=f"Audio preflight: sounddevice {version} is too old for the validated ASIO route.",
+            details=(f"PPS requires sounddevice >= {MIN_SOUNDDEVICE_VERSION}; older builds may not expose the ASIO-enabled PortAudio path reliably.",),
+            actions=('Upgrade the PPS runtime dependencies with python -m pip install --upgrade -e ".[gui,web,lsl,validation]".',),
+            sounddevice_available=True,
+            sounddevice_version=version,
+            asio_hostapi_present=False,
+            preferred_devices=(),
+            fallback_devices=(),
+        )
+
+    try:
+        hostapis_raw = list(sd.query_hostapis())
+        devices_raw = list(sd.query_devices())
+    except Exception as exc:
+        return AudioRuntimeReadiness(
+            ready=False,
+            publication_ready=False,
+            severity="error",
+            summary="Audio preflight: sounddevice loaded, but audio devices could not be queried.",
+            details=(f"Device query error: {exc}",),
+            actions=("Reconnect the audio interface, restart Windows if the driver was just installed, then reopen PPSExperimentRunner.exe.",),
+            sounddevice_available=True,
+            sounddevice_version=version,
+            asio_hostapi_present=False,
+            preferred_devices=(),
+            fallback_devices=(),
+        )
+
+    def hostapi_name(device_info: Any) -> str:
+        try:
+            index = int(dict(device_info).get("hostapi", 0))
+            return str(dict(hostapis_raw[index]).get("name", ""))
+        except Exception:
+            return ""
+
+    query = device_query.lower().strip()
+    asio_hostapi_present = any("asio" in str(dict(api).get("name", "")).lower() for api in hostapis_raw)
+    preferred: list[str] = []
+    asio_fallbacks: list[str] = []
+    non_asio_multichannel: list[str] = []
+    stereo_komplete: list[str] = []
+
+    for index, raw in enumerate(devices_raw):
+        dev = dict(raw)
+        name = str(dev.get("name", ""))
+        hostapi = hostapi_name(dev)
+        outputs = int(dev.get("max_output_channels", 0) or 0)
+        label = f"[{index}] {name} ({hostapi}, {outputs} out)"
+        is_asio = "asio" in hostapi.lower()
+        is_target = bool(query and query in name.lower())
+        if outputs >= min_output_channels and is_asio and is_target:
+            preferred.append(label)
+        elif outputs >= min_output_channels and is_asio:
+            asio_fallbacks.append(label)
+        elif outputs >= min_output_channels:
+            non_asio_multichannel.append(label)
+        elif outputs >= LEGACY_STEREO_CHANNELS and is_target:
+            stereo_komplete.append(label)
+
+    if preferred:
+        return AudioRuntimeReadiness(
+            ready=True,
+            publication_ready=True,
+            severity="ok",
+            summary="Audio preflight: validated Komplete multichannel ASIO output is visible.",
+            details=(f"Using candidate: {preferred[0]}",),
+            actions=("Run pps-audio-stress --device-query Komplete --channels 3 before participant timing validation.",),
+            sounddevice_available=True,
+            sounddevice_version=version,
+            asio_hostapi_present=asio_hostapi_present,
+            preferred_devices=tuple(preferred),
+            fallback_devices=tuple(asio_fallbacks + non_asio_multichannel + stereo_komplete),
+        )
+
+    if asio_fallbacks:
+        return AudioRuntimeReadiness(
+            ready=True,
+            publication_ready=False,
+            severity="warning",
+            summary="Audio preflight: a multichannel ASIO output is visible, but the validated Komplete ASIO route is not.",
+            details=(f"Fallback ASIO candidate: {asio_fallbacks[0]}",),
+            actions=(
+                f"For the validated lab route, install/select the official Komplete Audio ASIO driver from {NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL}.",
+                "Do not use generic ASIO wrappers as publication timing evidence until the physical route is revalidated.",
+            ),
+            sounddevice_available=True,
+            sounddevice_version=version,
+            asio_hostapi_present=asio_hostapi_present,
+            preferred_devices=(),
+            fallback_devices=tuple(asio_fallbacks + non_asio_multichannel + stereo_komplete),
+        )
+
+    details: list[str] = []
+    if stereo_komplete:
+        details.append(f"Only a stereo Komplete endpoint is visible: {stereo_komplete[0]}")
+    elif non_asio_multichannel:
+        details.append(f"Non-ASIO multichannel output is visible, but not valid for PPS timing claims: {non_asio_multichannel[0]}")
+    elif not asio_hostapi_present:
+        details.append("No ASIO host API is visible to sounddevice.")
+    else:
+        details.append("ASIO is visible, but no output exposes at least three synchronized channels.")
+
+    return AudioRuntimeReadiness(
+        ready=False,
+        publication_ready=False,
+        severity="error",
+        summary="Audio preflight: Komplete Audio ASIO is missing or not exposing a 3+ channel output.",
+        details=tuple(details),
+        actions=(
+            f"Install the official Native Instruments Komplete Audio 6 MK2 Windows driver from {NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL}, then restart PPSExperimentRunner.exe.",
+            f"FlexASIO ({FLEXASIO_RELEASES_URL}) can be cached as an optional diagnostic fallback, but it does not replace the native Komplete ASIO timing route.",
+        ),
+        sounddevice_available=True,
+        sounddevice_version=version,
+        asio_hostapi_present=asio_hostapi_present,
+        preferred_devices=(),
+        fallback_devices=tuple(non_asio_multichannel + stereo_komplete),
+    )
+
+
+def audio_runtime_preflight_message() -> str:
+    """Return a concise experimenter-facing dependency message."""
+    return assess_audio_runtime_readiness().message()
 
 
 def ensure_2d_float32(data: np.ndarray) -> np.ndarray:
