@@ -34,6 +34,8 @@ from .session_runner import (
     load_run_package,
     next_segment_participant,
     prepare_segment_run_package,
+    prepared_session_asset_status,
+    prepared_session_asset_statuses,
     record_experiment_activity,
     record_prepared_session_queue,
     segment_run_setup_participants,
@@ -45,6 +47,8 @@ from .runtime_paths import repo_root
 DEFAULT_FOCUS_PROFILE_DESIGN_PATH = DEFAULT_DASHBOARD_STATE_ROOT / "focus_profile_runner_design.json"
 DEFAULT_FOCUS_LAYOUT_PROFILE = render_focus_layout_profile(1120, 720)
 FOCUS_STYLE_SHEET = render_focus_style_sheet(DEFAULT_FOCUS_LAYOUT_PROFILE)
+STUDY5_PROFILE_ID = "study5_box_breathing_pps"
+DATA_COLLECTED_MARK = "[collected]"
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -141,6 +145,120 @@ def _float_or_none(value: Any) -> float | None:
 
 def _package_duration(package: Any) -> float:
     return sum(float(block.duration_s) for block in package.blocks)
+
+
+def _block_metadata(block: Any) -> dict[str, Any]:
+    metadata = getattr(block, "metadata", {}) or {}
+    return metadata if isinstance(metadata, dict) else {}
+
+
+def _metadata_truthy(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value in (None, ""):
+        return False
+    return str(value).strip().lower() not in {"0", "false", "no", "none"}
+
+
+def _is_topup_block(block: Any) -> bool:
+    return _metadata_truthy(_block_metadata(block).get("is_topup_block"))
+
+
+def _block_part_key(block: Any) -> str:
+    metadata = _block_metadata(block)
+    value = metadata.get("part_number", metadata.get("topup_part_number", metadata.get("phase_index", "")))
+    text = str(value or "").strip()
+    if not text:
+        return "1"
+    try:
+        return str(int(float(text)))
+    except ValueError:
+        return text
+
+
+def _part_display_label(part_key: str) -> str:
+    text = str(part_key or "").strip()
+    try:
+        return f"Part {int(float(text)):02d}"
+    except ValueError:
+        return f"Part {text}" if text else "Part --"
+
+
+def _compact_run_block_label(block: Any) -> str:
+    text = str(getattr(block, "label", "") or f"Block {getattr(block, 'index', '')}").strip()
+    return text if len(text) <= 24 else f"{text[:21]}..."
+
+
+def _run_plan_items(package: Any, *, include_topup_slots: bool) -> list[dict[str, Any]]:
+    standard_blocks = [block for block in getattr(package, "blocks", []) if not _is_topup_block(block)]
+    items: list[dict[str, Any]] = []
+    display_index = 0
+    for index, block in enumerate(standard_blocks):
+        part_key = _block_part_key(block)
+        display_index += 1
+        items.append(
+            {
+                "kind": "standard",
+                "part_key": part_key,
+                "number": display_index,
+                "label": _compact_run_block_label(block),
+            }
+        )
+        next_block = standard_blocks[index + 1] if index + 1 < len(standard_blocks) else None
+        if include_topup_slots and (next_block is None or _block_part_key(next_block) != part_key):
+            display_index += 1
+            items.append(
+                {
+                    "kind": "topup",
+                    "part_key": part_key,
+                    "number": display_index,
+                    "label": "Top-up if needed",
+                }
+            )
+    return items
+
+
+def _run_plan_total(package: Any, *, include_topup_slots: bool) -> int:
+    return len(_run_plan_items(package, include_topup_slots=include_topup_slots))
+
+
+def _run_plan_text(package: Any, *, include_topup_slots: bool) -> str:
+    items = _run_plan_items(package, include_topup_slots=include_topup_slots)
+    if not items:
+        return "No blocks prepared"
+    lines: list[str] = []
+    part_order: list[str] = []
+    for item in items:
+        part_key = str(item["part_key"])
+        if part_key not in part_order:
+            part_order.append(part_key)
+    for part_key in part_order:
+        part_items = [item for item in items if item["part_key"] == part_key]
+        entries = ", ".join(f"{item['number']} {item['label']}" for item in part_items)
+        lines.append(f"{_part_display_label(part_key)}: {entries}")
+    return "\n".join(lines)
+
+
+def _payload_display_block_index(payload: dict[str, Any]) -> int:
+    for key in ("display_block_index", "play_order_index", "block_play_order_index", "block_index"):
+        try:
+            value = int(float(str(payload.get(key)).strip()))
+        except (TypeError, ValueError):
+            continue
+        if value > 0:
+            return value
+    return 0
+
+
+def _payload_display_block_count(payload: dict[str, Any], fallback: int) -> int:
+    for key in ("display_block_count", "block_count"):
+        try:
+            value = int(float(str(payload.get(key)).strip()))
+        except (TypeError, ValueError):
+            continue
+        if value >= 0:
+            return value
+    return max(0, int(fallback or 0))
 
 
 def _short_folder_label(path: Path) -> str:
@@ -475,8 +593,358 @@ def finished_profile_options() -> list[tuple[str, str]]:
             continue
         label = str(profile.get("variant_display") or profile.get("visible_variant_label") or template_id).strip()
         options.append((template_id, label or template_id))
-    options.sort(key=lambda item: (0 if item[0] == "study5_box_breathing_pps" else 1, item[1].lower()))
+    options.sort(key=lambda item: (0 if item[0] == STUDY5_PROFILE_ID else 1, item[1].lower()))
     return options
+
+
+def profile_participant_ids(profile_id: str) -> list[str]:
+    """Return the numbered participant IDs declared by a finished profile."""
+    profile = str(profile_id or "").strip()
+    if not profile:
+        return ["P001"]
+    count = 1
+    defaults_path = repo_root() / "assets" / "preloads" / profile / "05_run_setup" / "run_defaults.json"
+    try:
+        data = json.loads(defaults_path.read_text(encoding="utf-8"))
+        count = max(1, int(data.get("participants") or data.get("participant_count") or 1))
+    except Exception:
+        count = 1
+    return [f"P{index:03d}" for index in range(1, count + 1)]
+
+
+def parse_participant_range(text: str, *, max_participant: int | None = None) -> list[str]:
+    """Parse explicit participant ranges such as 1-10, P001-P010, or 1,3-5."""
+    raw = str(text or "").strip()
+    if not raw:
+        raise ValueError("Enter a participant number or range first.")
+    normalized = raw.replace(";", ",")
+    participant_numbers: list[int] = []
+    seen: set[int] = set()
+    for part in [item.strip() for item in normalized.split(",") if item.strip()]:
+        if "-" in part:
+            start_text, end_text = [item.strip() for item in part.split("-", 1)]
+            start = _parse_participant_number(start_text)
+            end = _parse_participant_number(end_text)
+            if start <= 0 or end <= 0:
+                raise ValueError("Participant numbers must be positive.")
+            if end < start:
+                raise ValueError("Participant ranges must run from low to high.")
+            numbers = range(start, end + 1)
+        else:
+            number = _parse_participant_number(part)
+            if number <= 0:
+                raise ValueError("Participant numbers must be positive.")
+            numbers = range(number, number + 1)
+        for number in numbers:
+            if max_participant is not None and number > max_participant:
+                raise ValueError(f"Participant P{number:03d} is outside the configured 1-{max_participant} range.")
+            if number not in seen:
+                participant_numbers.append(number)
+                seen.add(number)
+    if not participant_numbers:
+        raise ValueError("Enter at least one participant number.")
+    return [f"P{number:03d}" for number in participant_numbers]
+
+
+def profile_run_setup_manifest_path(profile_id: str) -> Path:
+    profile = str(profile_id or "").strip()
+    if not profile:
+        return Path()
+    return (
+        DEFAULT_PROJECT_REGISTRY_ROOT
+        / f"profile_{profile}"
+        / "6_experiment_run_setup"
+        / "experiment_run_setup_manifest.json"
+    )
+
+
+def profile_participant_asset_statuses(profile_id: str) -> dict[str, dict[str, Any]]:
+    participants = profile_participant_ids(profile_id)
+    run_setup = profile_run_setup_manifest_path(profile_id)
+    if not run_setup.is_file():
+        return {
+            participant: {
+                "participant_id": participant,
+                "generated": False,
+                "status": "not_generated",
+                "session_manifest_path": "",
+                "message": "Run setup has not been materialized yet.",
+                "source": "",
+                "data_collected": False,
+                "data_collection_status": "not_collected",
+                "data_session_manifest_path": "",
+                "data_session_dir": "",
+                "data_collection_message": "No completed participant data found.",
+            }
+            for participant in participants
+        }
+    return prepared_session_asset_statuses(run_setup, participants, state_root=DEFAULT_DASHBOARD_STATE_ROOT)
+
+
+def profile_participant_dropdown_label(participant: str, status: dict[str, Any]) -> str:
+    state = str(status.get("status") or "not_generated")
+    if state == "ready":
+        asset_suffix = "generated, ready"
+    elif bool(status.get("generated")):
+        asset_suffix = "generated"
+    elif state == "preparing":
+        asset_suffix = "generating"
+    elif state == "failed":
+        asset_suffix = "failed"
+    else:
+        asset_suffix = "not generated"
+    data_suffix = f"{DATA_COLLECTED_MARK} data collected" if status.get("data_collected") else "data not collected"
+    return f"{participant} - {asset_suffix} - {data_suffix}"
+
+
+def default_profile_participant(
+    participants: list[str],
+    statuses: dict[str, dict[str, Any]],
+    *,
+    preferred: str = "",
+) -> str:
+    available = [str(participant or "").strip() for participant in participants if str(participant or "").strip()]
+    if not available:
+        return ""
+    preferred = str(preferred or "").strip()
+    if preferred in available and _status_is_generated_without_data(statuses.get(preferred, {})):
+        return preferred
+    for participant in available:
+        if _status_is_generated_without_data(statuses.get(participant, {})):
+            return participant
+    return preferred if preferred in available else available[0]
+
+
+def _status_is_generated_without_data(status: dict[str, Any]) -> bool:
+    return bool(status.get("generated")) and not bool(status.get("data_collected"))
+
+
+def prepare_profile_audio_assets(
+    profile_id: str,
+    participant_ids: list[str],
+    *,
+    progress_callback: Callable[[dict[str, Any]], None] | None = None,
+) -> dict[str, Any]:
+    """Explicitly prepare local audio/session packages without opening Focus Mode."""
+    profile = str(profile_id or "").strip()
+    if not profile:
+        raise ValueError("Choose a study/profile preset before generating assets.")
+    participants = [participant for participant in participant_ids if participant]
+    if not participants:
+        raise ValueError("Choose at least one participant before generating assets.")
+
+    _emit_launcher_progress(
+        progress_callback,
+        "Loading profile inventory",
+        phase="profile_inventory",
+        detail=profile,
+        current=0,
+        total=len(participants),
+    )
+    controller, design, run_setup_manifest_path = _materialize_profile_run_setup(
+        profile,
+        progress_callback=progress_callback,
+    )
+    results: list[dict[str, Any]] = []
+    prepared_count = 0
+    reused_count = 0
+    for index, participant in enumerate(participants, start=1):
+        status = prepared_session_asset_status(
+            run_setup_manifest_path,
+            participant,
+            state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+            session_root=DEFAULT_SESSION_ROOT,
+        )
+        if status.get("status") == "preparing":
+            reused_count += 1
+            results.append({**status, "participant_id": participant, "status": "already_preparing"})
+            _emit_launcher_progress(
+                progress_callback,
+                f"{participant}: generation already running",
+                phase="asset_preparing",
+                detail=str(status.get("message") or ""),
+                current=index,
+                total=len(participants),
+            )
+            continue
+        if (
+            status.get("generated")
+            and status.get("status") == "ready"
+            and status.get("source") == "prepared_session_queue"
+            and status.get("session_manifest_path")
+        ):
+            record_prepared_session_queue(
+                participant_id=participant,
+                run_setup_manifest_path=run_setup_manifest_path,
+                session_manifest_path=Path(str(status["session_manifest_path"])),
+                status="ready",
+                message="Prepared package re-queued by Experiment Runner launcher.",
+                state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+            )
+            reused_count += 1
+            results.append({**status, "participant_id": participant, "status": "already_ready"})
+            _emit_launcher_progress(
+                progress_callback,
+                f"{participant}: assets already generated",
+                phase="asset_ready",
+                detail=str(status.get("session_manifest_path") or ""),
+                current=index,
+                total=len(participants),
+            )
+            continue
+
+        record_prepared_session_queue(
+            participant_id=participant,
+            run_setup_manifest_path=run_setup_manifest_path,
+            status="preparing",
+            message="Preparing from Experiment Runner launcher.",
+            state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+        )
+
+        def _participant_progress(payload: dict[str, Any], *, participant_id: str = participant, participant_index: int = index) -> None:
+            _emit_launcher_progress(
+                progress_callback,
+                str(payload.get("message") or f"Generating {participant_id}"),
+                phase=str(payload.get("phase") or "generating_assets"),
+                detail=f"{participant_id}: {payload.get('detail') or ''}".strip(),
+                current=participant_index - 1,
+                total=len(participants),
+            )
+
+        try:
+            package = prepare_segment_run_package(
+                run_setup_manifest_path,
+                participant,
+                design=design,
+                session_root=DEFAULT_SESSION_ROOT,
+                progress_callback=_participant_progress,
+            )
+        except Exception as exc:
+            record_prepared_session_queue(
+                participant_id=participant,
+                run_setup_manifest_path=run_setup_manifest_path,
+                status="failed",
+                message=str(exc),
+                state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+            )
+            raise
+
+        record_prepared_session_queue(
+            participant_id=participant,
+            run_setup_manifest_path=run_setup_manifest_path,
+            session_manifest_path=package.manifest_path,
+            status="ready",
+            message="Prepared by Experiment Runner launcher.",
+            state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+        )
+        record_experiment_activity(
+            "session_prepared",
+            template_id=profile,
+            run_setup_manifest_path=str(run_setup_manifest_path),
+            session_manifest_path=str(package.manifest_path),
+            session_dir=str(package.session_dir),
+            participant_id=participant,
+        )
+        prepared_count += 1
+        results.append(
+            {
+                "participant_id": participant,
+                "status": "generated",
+                "session_manifest_path": str(package.manifest_path),
+                "session_dir": str(package.session_dir),
+                "block_count": len(package.blocks),
+            }
+        )
+        _emit_launcher_progress(
+            progress_callback,
+            f"{participant}: assets generated",
+            phase="asset_generated",
+            detail=str(package.manifest_path),
+            current=index,
+            total=len(participants),
+        )
+
+    _emit_launcher_progress(
+        progress_callback,
+        "Audio assets ready",
+        phase="assets_ready",
+        detail=f"{prepared_count} generated, {reused_count} already available",
+        current=len(participants),
+        total=len(participants),
+    )
+    return {
+        "profile_id": profile,
+        "participant_count": len(participants),
+        "prepared_count": prepared_count,
+        "reused_count": reused_count,
+        "run_setup_manifest_path": str(run_setup_manifest_path),
+        "results": results,
+        "design_path": str(controller.design_path),
+    }
+
+
+def _materialize_profile_run_setup(
+    profile_id: str,
+    *,
+    progress_callback: Callable[[dict[str, Any]], None] | None = None,
+) -> tuple[Any, Any, Path]:
+    from . import dashboard_app
+
+    controller = _focus_dashboard_controller()
+    inventory_profiles = controller.preload_inventory_payload().get("profiles", [])
+    status = next((item for item in inventory_profiles if item.get("template_id") == profile_id), None)
+    if status is None:
+        raise ValueError(f"Unknown study/profile preset: {profile_id}")
+    if not (status.get("finished_profile") and status.get("segment_6_launchable")):
+        reason = str(status.get("profile_completion_status") or status.get("runner_readiness") or "unfinished_preload")
+        raise ValueError(
+            f"Study/profile preset '{profile_id}' is not a finished Segment 6 launchable profile yet ({reason})."
+        )
+
+    controller.load_template(profile_id, snapshot=False)
+    with controller._lock:
+        project = controller._ensure_project_context(controller.design)
+        design = dashboard_app._copy_design(controller.design)
+    controller._ensure_profile_run_artifacts(project, design, progress_callback=progress_callback)
+    with controller._lock:
+        project = controller._ensure_project_context(controller.design)
+        design = dashboard_app._copy_design(controller.design)
+    run_setup_manifest_path = dashboard_app._run_setup_manifest_path(project.project_dir)
+    if not run_setup_manifest_path.is_file():
+        raise RuntimeError(f"Study/profile preset '{profile_id}' did not produce a Segment 6 run setup.")
+    return controller, design, run_setup_manifest_path
+
+
+def _parse_participant_number(value: str) -> int:
+    text = str(value or "").strip()
+    if text.upper().startswith("P"):
+        text = text[1:]
+    if not text.isdigit():
+        raise ValueError(f"Invalid participant number: {value!r}")
+    return int(text)
+
+
+def _emit_launcher_progress(
+    progress_callback: Callable[[dict[str, Any]], None] | None,
+    message: str,
+    *,
+    phase: str,
+    detail: str = "",
+    current: int = 0,
+    total: int = 0,
+) -> None:
+    if progress_callback is None:
+        return
+    progress_callback(
+        {
+            "phase": phase,
+            "message": message,
+            "detail": detail,
+            "current": int(current or 0),
+            "total": int(total or 0),
+            "timestamp_unix": time.time(),
+        }
+    )
 
 
 def prepare_profile_focus_session(
@@ -1061,6 +1529,7 @@ class FocusModeWindow:
         self._timeline_perf_anchor: float | None = None
         self.timeline_state = TactileTimelineState()
         self.recenter_records: list[dict[str, Any]] = []
+        self._last_recenter_backend_warning = ""
         self.validation_topup_approval_records: list[dict[str, Any]] = []
         self.planned_tactile_cue_count = 0
         self.recenter_controller = TactileRecenterController(self.timeline_state, self._move_cursor_to_target)
@@ -1096,7 +1565,8 @@ class FocusModeWindow:
 
         self.run_state_chip = _chip(q, "Ready", tone="ok")
         self.part_chip = _chip(q, "Part -", tone="neutral")
-        self.block_chip = _chip(q, f"Block -/{len(self.package.blocks)}", tone="neutral")
+        initial_block_count = _run_plan_total(self.package, include_topup_slots=self.enable_missed_trial_topup)
+        self.block_chip = _chip(q, f"Block -/{initial_block_count}", tone="neutral")
         participant_label = (
             f"ID {self.package.participant_id}" if profile.compact else f"Participant {self.package.participant_id}"
         )
@@ -1134,10 +1604,12 @@ class FocusModeWindow:
         self.target_button = q["QPushButton"]("CLICK")
         self.target_button.setObjectName("targetButton")
         self.target_button.setMinimumHeight(profile.target_min_height)
-        self.target_button.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Expanding)
+        self.target_button.setMaximumHeight(profile.target_max_height)
+        self.target_button.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Fixed)
         self.target_button.setEnabled(False)
         self.target_button.clicked.connect(self._click)
         response_layout.addWidget(self.target_button, 1)
+        response_layout.addStretch(1)
         self.instruction_button = q["QPushButton"]("Continue")
         self.instruction_button.setObjectName("primaryButton")
         self.instruction_button.setVisible(False)
@@ -1272,7 +1744,7 @@ class FocusModeWindow:
             return val
 
         _add_session_metric(0, 0, "Participant", self.package.participant_id)
-        _add_session_metric(0, 2, "Blocks", str(len(self.package.blocks)))
+        self.session_blocks_value = _add_session_metric(0, 2, "Blocks", str(len(self.package.blocks)))
         instruction_summary = _instruction_profile_summary(self.package)
         if profile.compact:
             instruction_summary = instruction_summary.replace(" clip(s) preloaded", " clips")
@@ -1283,6 +1755,10 @@ class FocusModeWindow:
         if not profile.compact:
             folder_value = _add_session_metric(3, 0, "Folder", _short_folder_label(self.package.session_dir), column_span=3)
             folder_value.setToolTip(str(self.package.session_dir))
+            run_plan_row = 4
+        else:
+            run_plan_row = 3
+        self.run_plan_value = _add_session_metric(run_plan_row, 0, "Run plan", "", column_span=3)
         session_grid.setColumnStretch(1, 1)
         session_grid.setColumnStretch(3, 1)
         data_layout.addLayout(session_grid)
@@ -1323,6 +1799,7 @@ class FocusModeWindow:
         self.topup_checkbox = q["QCheckBox"]("Top up missed tactile trials at part end")
         self.topup_checkbox.setToolTip("Top up missed tactile trials at end of each part")
         self.topup_checkbox.setChecked(bool(self.enable_missed_trial_topup))
+        self.topup_checkbox.stateChanged.connect(lambda _state: self._refresh_run_plan())
         settings_layout.addWidget(self.backup_recording_checkbox)
         settings_layout.addWidget(self.topup_checkbox)
         settings_layout.addStretch(1)
@@ -1404,6 +1881,32 @@ class FocusModeWindow:
         self.timer.timeout.connect(self._drain)
         self.timer.start(100)
         self.dialog.finished.connect(lambda _code: self._stop())
+        self._refresh_run_plan()
+
+    def _topup_slots_enabled_for_plan(self) -> bool:
+        if hasattr(self, "topup_checkbox"):
+            try:
+                return bool(self.topup_checkbox.isChecked())
+            except Exception:
+                pass
+        return bool(self.enable_missed_trial_topup)
+
+    def _refresh_run_plan(self) -> None:
+        include_topup_slots = self._topup_slots_enabled_for_plan()
+        standard_count = sum(1 for block in self.package.blocks if not _is_topup_block(block))
+        topup_slots = sum(1 for item in _run_plan_items(self.package, include_topup_slots=include_topup_slots) if item["kind"] == "topup")
+        total_count = _run_plan_total(self.package, include_topup_slots=include_topup_slots)
+        plan_text = _run_plan_text(self.package, include_topup_slots=include_topup_slots)
+        if hasattr(self, "run_plan_value"):
+            self.run_plan_value.setText(plan_text)
+            self.run_plan_value.setToolTip(plan_text)
+        if hasattr(self, "session_blocks_value"):
+            if topup_slots:
+                self.session_blocks_value.setText(f"{total_count} ({standard_count} standard + {topup_slots} top-up)")
+            else:
+                self.session_blocks_value.setText(str(standard_count))
+        if hasattr(self, "block_chip") and not self._run_active:
+            self.block_chip.setText(f"Block -/{total_count}")
 
     def _runtime_capture_options(self) -> SessionCaptureOptions:
         return SessionCaptureOptions(
@@ -1518,6 +2021,7 @@ class FocusModeWindow:
             return
         self.capture_options = self._runtime_capture_options()
         self.enable_missed_trial_topup = bool(self.topup_checkbox.isChecked())
+        self._refresh_run_plan()
         runner_metadata = self._runner_metadata()
         if self.controller_factory is not None:
             self.controller = self.controller_factory(
@@ -1637,13 +2141,18 @@ class FocusModeWindow:
         anchor = _float_or_none(payload.get("block_schedule_perf_counter"))
         self._timeline_perf_anchor = anchor if anchor is not None else time.perf_counter()
         part_text = str(payload.get("part_number") or "").strip()
-        self.part_chip.setText(f"Part {part_text}" if part_text else "Part -")
-        block_index = str(payload.get("block_index") or "").strip()
-        block_count = int(payload.get("block_count") or len(self.package.blocks) or 0)
+        self.part_chip.setText(_part_display_label(part_text) if part_text else "Part -")
+        display_index = _payload_display_block_index(payload)
+        display_count = _payload_display_block_count(
+            payload,
+            _run_plan_total(self.package, include_topup_slots=self._topup_slots_enabled_for_plan()),
+        )
         if bool(payload.get("is_topup")):
-            self.block_chip.setText(f"Top-up {block_index}" if block_index else "Top-up")
+            self.block_chip.setText(
+                f"Block {display_index}/{display_count} (Top-up)" if display_index else f"Block -/{display_count} (Top-up)"
+            )
         else:
-            self.block_chip.setText(f"Block {block_index}/{block_count}" if block_index else f"Block -/{block_count}")
+            self.block_chip.setText(f"Block {display_index}/{display_count}" if display_index else f"Block -/{display_count}")
         self.recenter_status_label.setText("Cursor recenter: waiting for next tactile cue")
         self._update_tactile_timeline_display()
 
@@ -1691,20 +2200,43 @@ class FocusModeWindow:
     def _move_cursor_to_target(self, cue: TactileTimelineCue) -> None:
         center = self.target_button.mapToGlobal(self.target_button.rect().center())
         offscreen = self._offscreen_platform()
-        self.recenter_records.append(
-            {
-                "cue_id": cue.cue_id,
-                "trial_number": cue.trial_number,
-                "trial_uid": cue.trial_uid,
-                "time_s": cue.time_s,
-                "elapsed_s": self.timeline_state.elapsed_s,
-                "mode": "recorded_intent" if offscreen else "os_cursor",
-                "x": int(center.x()),
-                "y": int(center.y()),
-            }
-        )
-        if not offscreen:
-            self.q["QCursor"].setPos(center)
+        mode = "recorded_intent" if offscreen else self._move_os_cursor_to_global_center(int(center.x()), int(center.y()))
+        record = {
+            "cue_id": cue.cue_id,
+            "trial_number": cue.trial_number,
+            "trial_uid": cue.trial_uid,
+            "time_s": cue.time_s,
+            "elapsed_s": self.timeline_state.elapsed_s,
+            "mode": mode,
+            "x": int(center.x()),
+            "y": int(center.y()),
+        }
+        if self._last_recenter_backend_warning:
+            record["backend_warning"] = self._last_recenter_backend_warning
+        self.recenter_records.append(record)
+
+    def _move_os_cursor_to_global_center(self, x: int, y: int) -> str:
+        self._last_recenter_backend_warning = ""
+        try:
+            import pyautogui  # type: ignore
+
+            pyautogui.FAILSAFE = False
+            pyautogui.PAUSE = 0
+            pyautogui.moveTo(int(x), int(y), duration=0)
+            return "pyautogui"
+        except Exception as exc:
+            self._last_recenter_backend_warning = f"pyautogui unavailable: {exc}"
+        try:
+            self.q["QCursor"].setPos(int(x), int(y))
+            return "qt_cursor_fallback"
+        except Exception as exc:
+            detail = f"Qt cursor fallback failed: {exc}"
+            self._last_recenter_backend_warning = (
+                f"{self._last_recenter_backend_warning}; {detail}"
+                if self._last_recenter_backend_warning
+                else detail
+            )
+            return "cursor_move_failed"
 
     def _offscreen_platform(self) -> bool:
         env_platform = os.environ.get("QT_QPA_PLATFORM", "").strip().lower()
@@ -1738,18 +2270,25 @@ class FocusModeWindow:
                 elapsed = float(payload.get("elapsed_s") or 0.0)
                 value = int(max(0.0, min(1.0, elapsed / duration)) * 1000) if duration > 0 else 0
                 self.progress.setValue(value)
+                display_index = _payload_display_block_index(dict(payload))
+                display_count = _payload_display_block_count(
+                    dict(payload),
+                    _run_plan_total(self.package, include_topup_slots=self._topup_slots_enabled_for_plan()),
+                )
+                block_kind = "top-up block" if bool(payload.get("is_topup")) else "Block"
                 self.progress_label.setText(
-                    f"Block {payload.get('block_index')}: {payload.get('block_label')}  "
+                    f"{block_kind.title()} {display_index}: {payload.get('block_label')}  "
                     f"{elapsed:.1f}/{duration:.1f}s"
                 )
                 part_number = str(payload.get("part_number") or "").strip()
                 if part_number:
-                    self.part_chip.setText(f"Part {part_number}")
-                block_count = int(payload.get("block_count") or len(self.package.blocks) or 0)
+                    self.part_chip.setText(_part_display_label(part_number))
                 if bool(payload.get("is_topup")):
-                    self.block_chip.setText(f"Top-up {payload.get('block_index')}")
+                    self.block_chip.setText(
+                        f"Block {display_index}/{display_count} (Top-up)" if display_index else f"Block -/{display_count} (Top-up)"
+                    )
                 else:
-                    self.block_chip.setText(f"Block {payload.get('block_index')}/{block_count}")
+                    self.block_chip.setText(f"Block {display_index}/{display_count}" if display_index else f"Block -/{display_count}")
                 self._update_tactile_progress(elapsed)
             elif kind == "event":
                 self.event_label.setText(str(payload))
@@ -1996,9 +2535,27 @@ def run_launcher_window(
     heading.setObjectName("mutedLabel")
     heading.setWordWrap(True)
     panel_layout.addWidget(heading)
-    participant = q["QLineEdit"](participant_id or "P001")
-    participant.setPlaceholderText("Participant ID")
-    panel_layout.addWidget(participant)
+
+    profile_options = finished_profile_options()
+    profile_combo = _combo(q, profile_options, current=STUDY5_PROFILE_ID)
+    profile_combo.setEnabled(bool(profile_options))
+    panel_layout.addWidget(_field_row(q, "Study/profile preset", profile_combo))
+
+    participant_combo = q["QComboBox"]()
+    participant_combo.setObjectName("participantCombo")
+    panel_layout.addWidget(_field_row(q, "Participant", participant_combo))
+
+    asset_controls = q["QHBoxLayout"]()
+    generate_button = q["QPushButton"]("Generate Audio Assets")
+    range_input = q["QLineEdit"]()
+    range_input.setPlaceholderText("1-10")
+    range_button = q["QPushButton"]("Generate Range")
+    asset_controls.addWidget(generate_button)
+    asset_controls.addWidget(q["QLabel"]("Range"))
+    asset_controls.addWidget(range_input, 1)
+    asset_controls.addWidget(range_button)
+    panel_layout.addLayout(asset_controls)
+
     message = q["QLabel"](initial_message or "Ready")
     message.setObjectName("mutedLabel")
     message.setWordWrap(True)
@@ -2013,11 +2570,6 @@ def run_launcher_window(
     detail_message.setWordWrap(True)
     detail_message.setVisible(False)
     panel_layout.addWidget(detail_message)
-
-    profile_options = finished_profile_options()
-    profile_combo = _combo(q, profile_options, current="study5_box_breathing_pps")
-    profile_combo.setEnabled(bool(profile_options))
-    panel_layout.addWidget(_field_row(q, "Study/profile preset", profile_combo))
 
     buttons = q["QHBoxLayout"]()
     latest_button = q["QPushButton"]("Resume Last Experiment")
@@ -2040,14 +2592,62 @@ def run_launcher_window(
     preparation_messages: queue.Queue[tuple[str, Any]] = queue.Queue()
     preparation_cancel = threading.Event()
     preparation_thread: dict[str, threading.Thread | None] = {"thread": None}
+    participant_statuses: dict[str, dict[str, Any]] = {}
+
+    def _current_profile() -> str:
+        return str(profile_combo.currentData() or "")
+
+    def _refresh_participant_options(preferred: str = "") -> None:
+        nonlocal participant_statuses
+        profile = _current_profile()
+        participants = profile_participant_ids(profile)
+        statuses = profile_participant_asset_statuses(profile) if profile else {}
+        participant_statuses = statuses
+        current = default_profile_participant(
+            participants,
+            statuses,
+            preferred=preferred or str(participant_combo.currentData() or "") or participant_id or "P001",
+        )
+        participant_combo.blockSignals(True)
+        participant_combo.clear()
+        for participant in participants:
+            status = statuses.get(participant, {})
+            item_index = participant_combo.count()
+            participant_combo.addItem(profile_participant_dropdown_label(participant, status), participant)
+            if status.get("data_collected"):
+                participant_combo.setItemData(
+                    item_index,
+                    q["QBrush"](q["QColor"]("#15803d")),
+                    q["Qt"].ItemDataRole.ForegroundRole,
+                )
+                participant_combo.setItemData(
+                    item_index,
+                    str(status.get("data_collection_message") or "Participant data collected."),
+                    q["Qt"].ItemDataRole.ToolTipRole,
+                )
+        index = participant_combo.findData(current)
+        participant_combo.setCurrentIndex(index if index >= 0 else 0)
+        participant_combo.blockSignals(False)
+        enabled = bool(profile_options and participants)
+        participant_combo.setEnabled(enabled)
+        generate_button.setEnabled(enabled)
+        range_button.setEnabled(enabled)
+
+    def _selected_participant() -> str:
+        return str(participant_combo.currentData() or "").strip()
+
+    _refresh_participant_options(participant_id or "P001")
 
     def _set_busy(busy: bool) -> None:
         latest_button.setEnabled(not busy)
         profile_button.setEnabled((not busy) and bool(profile_options))
+        generate_button.setEnabled((not busy) and bool(profile_options))
+        range_button.setEnabled((not busy) and bool(profile_options))
         choose_button.setEnabled(not busy)
         close_button.setEnabled(not busy)
         profile_combo.setEnabled((not busy) and bool(profile_options))
-        participant.setEnabled(not busy)
+        participant_combo.setEnabled(not busy)
+        range_input.setEnabled(not busy)
         progress.setVisible(busy)
         detail_message.setVisible(busy)
         cancel_button.setVisible(busy)
@@ -2061,7 +2661,12 @@ def run_launcher_window(
             raise RuntimeError("Preparation cancelled.")
         preparation_messages.put(("progress", dict(payload)))
 
-    def _start_preparation(label: str, prepare: Callable[[Callable[[dict[str, Any]], None]], Path]) -> None:
+    def _start_preparation(
+        label: str,
+        prepare: Callable[[Callable[[dict[str, Any]], None]], Any],
+        *,
+        success_kind: str = "done",
+    ) -> None:
         active = preparation_thread.get("thread")
         if active is not None and active.is_alive():
             return
@@ -2073,11 +2678,11 @@ def run_launcher_window(
 
         def _worker() -> None:
             try:
-                manifest_path = prepare(_progress_callback)
+                result = prepare(_progress_callback)
             except Exception as exc:
                 preparation_messages.put(("error", str(exc)))
             else:
-                preparation_messages.put(("done", manifest_path))
+                preparation_messages.put((success_kind, result))
 
         worker = threading.Thread(target=_worker, name="pps-runner-launcher-prep", daemon=True)
         preparation_thread["thread"] = worker
@@ -2105,6 +2710,13 @@ def run_launcher_window(
                 selected_manifest["path"] = Path(payload)
                 message.setText("Opening Focus Mode")
                 dialog.accept()
+            elif kind == "generated":
+                _refresh_participant_options(_selected_participant())
+                prepared = int(payload.get("prepared_count") or 0) if isinstance(payload, dict) else 0
+                reused = int(payload.get("reused_count") or 0) if isinstance(payload, dict) else 0
+                message.setText(f"Audio assets ready: {prepared} generated, {reused} already available")
+                detail_message.setText("")
+                _set_busy(False)
             elif kind == "error":
                 message.setText(str(payload))
                 detail_message.setText("")
@@ -2118,7 +2730,7 @@ def run_launcher_window(
         _start_preparation(
             "Loading last experiment",
             lambda progress_callback: prepare_last_or_latest_focus_session(
-                participant.text().strip(),
+                _selected_participant(),
                 progress_callback=progress_callback,
             ),
         )
@@ -2128,9 +2740,48 @@ def run_launcher_window(
             "Loading selected profile",
             lambda progress_callback: prepare_profile_focus_session(
                 str(profile_combo.currentData() or ""),
-                participant.text().strip(),
+                _selected_participant(),
                 progress_callback=progress_callback,
             ),
+        )
+
+    def _generate_selected() -> None:
+        participant = _selected_participant()
+        if not participant:
+            message.setText("Choose a participant before generating assets.")
+            return
+        _start_preparation(
+            f"Generating audio assets for {participant}",
+            lambda progress_callback: prepare_profile_audio_assets(
+                _current_profile(),
+                [participant],
+                progress_callback=progress_callback,
+            ),
+            success_kind="generated",
+        )
+
+    def _generate_range() -> None:
+        try:
+            participants = parse_participant_range(
+                range_input.text().strip(),
+                max_participant=len(profile_participant_ids(_current_profile())),
+            )
+        except ValueError as exc:
+            message.setText(str(exc))
+            return
+        preferred = participants[0] if participants else _selected_participant()
+        if preferred:
+            index = participant_combo.findData(preferred)
+            if index >= 0:
+                participant_combo.setCurrentIndex(index)
+        _start_preparation(
+            f"Generating audio assets for {len(participants)} participant(s)",
+            lambda progress_callback: prepare_profile_audio_assets(
+                _current_profile(),
+                participants,
+                progress_callback=progress_callback,
+            ),
+            success_kind="generated",
         )
 
     def _choose_manifest() -> None:
@@ -2146,6 +2797,9 @@ def run_launcher_window(
 
     latest_button.clicked.connect(_open_latest)
     profile_button.clicked.connect(_open_profile)
+    generate_button.clicked.connect(_generate_selected)
+    range_button.clicked.connect(_generate_range)
+    profile_combo.currentIndexChanged.connect(lambda _index: _refresh_participant_options())
     choose_button.clicked.connect(_choose_manifest)
     cancel_button.clicked.connect(lambda: (preparation_cancel.set(), cancel_button.setEnabled(False), message.setText("Cancelling loading...")))
     close_button.clicked.connect(dialog.reject)
@@ -2154,7 +2808,7 @@ def run_launcher_window(
     def _validation_click_launcher_profile() -> None:
         from PySide6.QtTest import QTest
 
-        target = os.environ.get("PPS_FOCUS_VALIDATION_PROFILE", "study5_box_breathing_pps").strip()
+        target = os.environ.get("PPS_FOCUS_VALIDATION_PROFILE", STUDY5_PROFILE_ID).strip()
         if target:
             index = profile_combo.findData(target)
             if index >= 0:

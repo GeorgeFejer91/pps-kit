@@ -167,8 +167,8 @@ def test_dashboard_static_assets_are_packaged():
     app_js = dashboard_files.joinpath("app.js").read_text(encoding="utf-8")
     styles_css = dashboard_files.joinpath("styles.css").read_text(encoding="utf-8")
     viewer_js = viewer_files.joinpath("trajectory-viewer.js").read_text(encoding="utf-8")
-    assert 'href="styles.css?v=20260615-dashboard-tabs"' in html
-    assert 'src="app.js?v=20260615-dashboard-tabs"' in html
+    assert 'href="styles.css?v=20260615-dashboard-tabs-segment2-soundcheck"' in html
+    assert 'src="app.js?v=20260615-dashboard-tabs-segment2-soundcheck"' in html
     assert 'data-page-tab="toolkit"' in html
     assert 'data-page-tab="documentation"' in html
     assert 'data-page-tab="downloads"' in html
@@ -435,12 +435,20 @@ def test_dashboard_static_assets_are_packaged():
     assert "Instruction Snippet" not in app_js
     assert "/api/stimulus/bake" in app_js
     assert "/api/trials/preview-row" in app_js
+    assert "/api/audio/preview-source" in app_js
     assert "data-preview-strip" in app_js
     assert "filmstrip-preview-button" in app_js
     assert "trial-row-empty" in app_js
     assert ".trial-row-add.trial-row-empty" in styles_css
     assert "data-add-strip-row" in app_js
     assert "data-add-box-label" in app_js
+    assert "data-preview-source-label" in app_js
+    assert "sequence-label-preview" in app_js
+    assert "previewSourceLabel" in app_js
+    assert "getSourcePreviewAudioContext" in app_js
+    assert "decodeAudioData" in app_js
+    assert 'control.matches?.("[data-preview-source-label]")' in app_js
+    assert ".panel.profile-readonly [data-preview-source-label]" in styles_css
     assert "sequence-label-chip" in app_js
     assert "box-mode-toggle" in app_js
     assert "Audio box" in app_js
@@ -1853,6 +1861,58 @@ def test_dashboard_batch_bakes_trial_sequence_row_variant_folders(tmp_path: Path
     assert report.exists()
     report_data = json.loads(report.read_text(encoding="utf-8"))
     assert report_data["schema"] == "pps-segment-validation-report.v1"
+
+
+def test_dashboard_previews_each_segment2_source_label(tmp_path: Path):
+    client = _client(tmp_path)
+    custom = client.post("/api/templates/__custom__/load").json()
+    fixed_path = _register_segment1_wav(
+        client,
+        custom["design"],
+        "Inhale",
+        np.ones((64, 1), dtype=np.float32) * 0.05,
+        motion_mode="stationary",
+        source_kind="test_fixed_audio",
+    )
+    looming_path = _register_segment1_wav(
+        client,
+        custom["design"],
+        "Pink",
+        np.ones((96, 2), dtype=np.float32) * 0.04,
+        motion_mode="looming",
+        source_kind="test_looming_audio",
+    )
+    custom["design"]["prestimulus_files"] = [
+        {
+            "label": "Inhale",
+            "path": str(fixed_path),
+            "target_duration_s": 64 / 44100,
+            "render_mode": "preserve",
+            "motion_mode": "stationary",
+        }
+    ]
+    custom["design"]["noises"] = [
+        {"label": "Pink", "noise_type": "pink", "gain": 0.5, "prebaked_path": str(looming_path)}
+    ]
+    custom["design"]["protocol"]["trial_strips"] = [
+        {
+            "strip_id": "row-1",
+            "label": "Soundcheck row",
+            "elements": [
+                {"kind": "fixed_audio", "label": "Audio box", "source_labels": ["Inhale", "Pink"], "randomized": True},
+            ],
+        }
+    ]
+
+    for label in ("Inhale", "Pink"):
+        preview = client.post("/api/audio/preview-source", json={"design": custom["design"], "label": label}).json()
+
+        assert preview["label"] == label
+        assert preview["local_only"] is True
+        assert preview["auditory_preview_only"] is True
+        assert preview["url"].startswith("/api/trial-row-previews/source_")
+        assert Path(preview["path"]).exists()
+        assert client.get(preview["url"]).status_code == 200
 
 
 def test_dashboard_rejects_segment2_bake_when_segment1_sources_are_unregistered(tmp_path: Path):

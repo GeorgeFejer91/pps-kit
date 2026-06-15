@@ -1346,6 +1346,27 @@ class DashboardController:
             preview_dir=self.preview_dir,
         )
 
+    def preview_source_audio(self, payload: dict[str, Any]) -> dict[str, Any]:
+        label = str(payload.get("label") or "").strip()
+        if not label:
+            raise ValueError("Choose a source label to preview.")
+        if "design" in payload:
+            design = design_from_dict(dict(payload["design"]))
+        else:
+            with self._lock:
+                design = _copy_design(self.design)
+        if "trajectory_controls" in payload:
+            design = _apply_trajectory_controls(design, dict(payload["trajectory_controls"]))
+        with self._lock:
+            project = self._ensure_project_context(self.design)
+        artifact_root = self._lookup_root_for_design(design, project)
+        return _source_audio_preview(
+            design,
+            label,
+            render_dir=artifact_root,
+            preview_dir=self.preview_dir,
+        )
+
     def open_local_folder(self, payload: dict[str, Any]) -> dict[str, Any]:
         raw_path = str(payload.get("path") or "").strip()
         if not raw_path:
@@ -1618,6 +1639,13 @@ def create_app(
         except Exception as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
+    @app.post("/api/audio/preview-source")
+    def api_preview_source_audio(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
+        try:
+            return controller.preview_source_audio(payload)
+        except Exception as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
     @app.post("/api/local/open-folder")
     def api_open_local_folder(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
@@ -1860,6 +1888,54 @@ def _trial_strip_audio_preview(
         "local_only": True,
         "auditory_preview_only": True,
         "message": "Temporary browser-playable event-sequence preview assembled by the local companion backend.",
+    }
+
+
+def _source_audio_preview(
+    design: StimulusDesign,
+    label: str,
+    *,
+    render_dir: Path,
+    preview_dir: Path,
+) -> dict[str, Any]:
+    chunk = _preview_chunk_for_source_label(design, label, render_dir)
+    _ensure_dir(preview_dir)
+    preview_path = preview_dir / f"source_{_slug(label)}_{uuid.uuid4().hex[:8]}.wav"
+    duration_s = _write_trial_strip_preview_wav(preview_path, [chunk])
+    return {
+        "url": f"/api/trial-row-previews/{preview_path.name}",
+        "path": str(preview_path),
+        "label": label,
+        "duration_s": duration_s,
+        "local_only": True,
+        "auditory_preview_only": True,
+        "message": "Temporary browser-playable source preview served by the local companion backend.",
+    }
+
+
+def _preview_chunk_for_source_label(design: StimulusDesign, label: str, render_dir: Path) -> dict[str, Any]:
+    fixed = {asset.label: asset for asset in design.prestimulus_files if asset.label.strip()}
+    if label in fixed:
+        asset = fixed[label]
+        return {
+            "kind": "fixed_audio",
+            "label": asset.label,
+            "path": _resolve_dashboard_local_path(asset.path),
+            "gain": asset.gain,
+        }
+
+    source_key = _source_key(label)
+    source_assets = {asset.label: asset for asset in design.custom_looming_files if asset.label.strip()}
+    source_meta = {str(source.get("label", "")): source for source in protocol_sound_sources(design)}
+    source_wavs = _stimulus_wav_lookup(design, render_dir)
+    if source_key not in source_wavs:
+        raise ValueError(f"Bake or import Segment 1 audio before previewing this source: {label}")
+    asset = source_assets.get(label)
+    return {
+        "kind": "looming_stimulus",
+        "label": label,
+        "path": source_wavs[source_key],
+        "gain": asset.gain if asset is not None else float(source_meta.get(label, {}).get("gain") or 1.0),
     }
 
 

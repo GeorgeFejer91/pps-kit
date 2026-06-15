@@ -728,7 +728,8 @@ body.custom-mode .step-footer {
 }
 
 .panel.profile-readonly button[id^="open-"],
-.panel.profile-readonly #prepare-experiment {
+.panel.profile-readonly #prepare-experiment,
+.panel.profile-readonly [data-preview-source-label] {
   pointer-events: auto;
 }
 
@@ -1585,6 +1586,18 @@ select:focus {
   overflow-wrap: anywhere;
 }
 
+.sequence-label-chip-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.sequence-label-chip-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
 .sequence-label-empty {
   justify-content: flex-start;
   color: var(--muted);
@@ -1601,6 +1614,19 @@ select:focus {
   color: #8f2f2f;
   background: #fff7f7;
   line-height: 1;
+}
+
+.sequence-label-chip .sequence-label-preview {
+  border-color: #b9cdc4;
+  color: var(--primary);
+  background: #eef7f3;
+  font-size: 13px;
+}
+
+.sequence-label-chip .sequence-label-preview.playing {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #ffffff;
 }
 
 .box-add-label-row {

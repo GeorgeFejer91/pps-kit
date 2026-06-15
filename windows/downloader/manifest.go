@@ -24,14 +24,25 @@ type DownloadManifest struct {
 }
 
 type Payload struct {
-	Kind      string   `json:"kind"`
-	Label     string   `json:"label"`
-	Filename  string   `json:"filename"`
-	URL       string   `json:"url"`
-	SizeBytes int64    `json:"size_bytes"`
-	SHA256    string   `json:"sha256"`
-	Platform  string   `json:"platform"`
-	Contains  []string `json:"contains"`
+	Kind             string            `json:"kind"`
+	Label            string            `json:"label"`
+	Filename         string            `json:"filename"`
+	URL              string            `json:"url"`
+	SizeBytes        int64             `json:"size_bytes"`
+	SHA256           string            `json:"sha256"`
+	Platform         string            `json:"platform"`
+	PackageInventory *PackageInventory `json:"package_inventory,omitempty"`
+	Contains         []string          `json:"contains"`
+}
+
+type PackageInventory struct {
+	Schema               string `json:"schema"`
+	Filename             string `json:"filename"`
+	PathInPayload        string `json:"path_in_payload"`
+	SHA256               string `json:"sha256"`
+	ItemCount            int    `json:"item_count"`
+	RequiredItemCount    int    `json:"required_item_count"`
+	MissingRequiredCount int    `json:"missing_required_count"`
 }
 
 type Entrypoint struct {
@@ -77,6 +88,17 @@ func (m DownloadManifest) Validate() error {
 		}
 		if payload.SizeBytes < 0 {
 			return fmt.Errorf("payload %q has a negative size", payload.Kind)
+		}
+		if payload.PackageInventory != nil {
+			if strings.TrimSpace(payload.PackageInventory.Schema) == "" {
+				return fmt.Errorf("payload %q package inventory is missing schema", payload.Kind)
+			}
+			if len(payload.PackageInventory.SHA256) != 64 {
+				return fmt.Errorf("payload %q package inventory must include a 64-character SHA256", payload.Kind)
+			}
+			if payload.PackageInventory.MissingRequiredCount != 0 {
+				return fmt.Errorf("payload %q package inventory reports %d missing required item(s)", payload.Kind, payload.PackageInventory.MissingRequiredCount)
+			}
 		}
 	}
 	return nil

@@ -19,6 +19,7 @@ from peripersonal_space_toolkit.session_runner import (
     prepare_all_segment_run_packages,
     prepare_run_package,
     prepare_segment_run_package,
+    prepared_session_asset_status,
     preflight_run_package,
     record_experiment_activity,
     record_prepared_session_queue,
@@ -429,6 +430,112 @@ def test_prepared_session_queue_claims_only_matching_current_setup(tmp_path: Pat
     assert queue["entries"][-1]["status"] == "stale"
 
 
+def test_prepared_session_asset_status_reports_ready_and_generated_packages(tmp_path: Path):
+    run_manifest = _segment_run_setup_fixture(tmp_path)
+    session_root = tmp_path / "sessions"
+    state_root = tmp_path / "state"
+    package = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=session_root,
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+
+    scanned = prepared_session_asset_status(
+        run_manifest,
+        "P001",
+        state_root=state_root,
+        session_root=session_root,
+    )
+
+    assert scanned["generated"] is True
+    assert scanned["status"] == "generated"
+    assert scanned["session_manifest_path"] == str(package.manifest_path.resolve())
+
+    record_prepared_session_queue(
+        participant_id="P001",
+        run_setup_manifest_path=run_manifest,
+        session_manifest_path=package.manifest_path,
+        status="ready",
+        state_root=state_root,
+    )
+    queued = prepared_session_asset_status(
+        run_manifest,
+        "P001",
+        state_root=state_root,
+        session_root=session_root,
+    )
+
+    assert queued["generated"] is True
+    assert queued["status"] == "ready"
+    assert queued["source"] == "prepared_session_queue"
+    assert queued["data_collected"] is False
+
+    with (package.session_dir / "events.csv").open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=["event_id", "event_type", "unix_time", "monotonic_time", "payload_json"])
+        writer.writeheader()
+        writer.writerow(
+            {
+                "event_id": 1,
+                "event_type": "session_end",
+                "unix_time": "1.0",
+                "monotonic_time": "1.0",
+                "payload_json": json.dumps({"completed": True, "interrupted": False}),
+            }
+        )
+    collected = prepared_session_asset_status(
+        run_manifest,
+        "P001",
+        state_root=state_root,
+        session_root=session_root,
+    )
+
+    assert collected["generated"] is True
+    assert collected["data_collected"] is True
+    assert collected["data_collection_status"] == "collected"
+    assert collected["data_session_manifest_path"] == str(package.manifest_path.resolve())
+
+    package.blocks[0].wav_path.unlink()
+    missing = prepared_session_asset_status(
+        run_manifest,
+        "P001",
+        state_root=state_root,
+        session_root=session_root,
+    )
+
+    assert missing["generated"] is False
+    assert missing["status"] == "not_generated"
+    assert "missing" in missing["message"].lower()
+
+
+def test_run_playback_numbering_places_topups_in_play_order():
+    blocks = [
+        session_runner_module.RunBlock(
+            index=index,
+            label=f"Block {index:02d}",
+            manifest_path=Path(f"block_{index:02d}.csv"),
+            wav_path=Path(f"block_{index:02d}.wav"),
+            trial_count=1,
+            duration_s=1.0,
+            metadata={"part_number": 1 if index <= 6 else 2},
+        )
+        for index in range(1, 13)
+    ]
+
+    display_by_block, topup_by_part, total = session_runner_module._run_playback_numbering(
+        blocks,
+        include_topup_slots=True,
+    )
+
+    assert display_by_block[1] == 1
+    assert display_by_block[6] == 6
+    assert topup_by_part["1"] == 7
+    assert display_by_block[7] == 8
+    assert display_by_block[12] == 13
+    assert topup_by_part["2"] == 14
+    assert total == 14
+
+
 def test_non_launchable_activity_does_not_overwrite_last_experiment_pointer(tmp_path: Path):
     state_root = tmp_path / "state"
     record_experiment_activity(
@@ -777,6 +884,8 @@ def test_session_runner_emits_tactile_timeline_schedule_progress(tmp_path: Path)
     schedule = schedule_payloads[0]
     assert schedule["part_number"] == 1
     assert schedule["block_index"] == 1
+    assert schedule["display_block_index"] == 1
+    assert schedule["display_block_count"] == 1
     tactile_events = schedule["tactile_events"]
     assert len(tactile_events) == 1
     assert tactile_events[0]["trial_number"] == 1

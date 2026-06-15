@@ -53,6 +53,7 @@ class FocusLayoutProfile:
     input_padding_x: int
     progress_min_height: int
     target_min_height: int
+    target_max_height: int
     target_font_pt: float
     output_min_height: int
     output_max_height: int
@@ -118,8 +119,9 @@ def render_focus_layout_profile(
         input_padding_y=6 if compact else 7,
         input_padding_x=8 if compact else 9,
         progress_min_height=18 if constrained else 20,
-        target_min_height=138 if constrained else (160 if compact else 190),
-        target_font_pt=21.0 if constrained else (22.0 if compact else 24.0),
+        target_min_height=88 if constrained else (100 if compact else 112),
+        target_max_height=110 if constrained else (124 if compact else 140),
+        target_font_pt=18.0 if constrained else (19.0 if compact else 20.0),
         output_min_height=48 if constrained else (56 if compact else 60),
         output_max_height=72 if constrained else (84 if compact else 90),
         recording_chip_columns=3 if width >= 1080 else 2,

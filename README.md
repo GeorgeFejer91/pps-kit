@@ -60,7 +60,8 @@ This creates `dist\PPSExperimentRunner\PPSExperimentRunner.exe` with the PPS
 Toolkit icon embedded. `windows\Launch_Experiment_Runner.bat` only activates
 this packaged exe. `focus_app.py` is importable for the exe and validation
 harnesses, but direct Python/module runner invocation exits with retirement
-guidance instead of opening Focus Mode.
+guidance instead of opening Focus Mode. The build runs a Qt runtime preflight
+and fails if the Windows Qt platform plugin is not packaged.
 
 Optional: build the lightweight release downloader and offline-lab distribution
 manifest:
@@ -102,6 +103,14 @@ latest prepared dashboard experiment:
 ```bat
 windows\Launch_Experiment_Runner.bat
 ```
+
+The standalone runner launcher defaults to the Study 5 finished profile. Its
+participant control is a numbered dropdown, not a free-text field; each row
+shows whether that participant's local audio/session package is generated. Use
+`Generate Audio Assets` for the selected participant, or enter an explicit range
+such as `1-10` before pressing `Generate Range`. Range generation is deliberately
+manual so a lab PC does not fill with all 50 Study 5 participant packages unless
+the operator asks for them.
 
 The designer can preload bundled study profiles from `study_templates\`; the current catalog contains the unpublished Study 5 workflow plus 20 published-study profiles. Each profile has a matching local preload folder under `assets\preloads\<template_id>\` with segment metadata and prebaked auditory-only looming WAVs while the standardized FABIAN HRIR renderer resource stays under the hood. See [docs/PARADIGM_LIBRARY.md](docs/PARADIGM_LIBRARY.md) and [docs/PUBLISHED_PARADIGM_STRESS_TEST.md](docs/PUBLISHED_PARADIGM_STRESS_TEST.md).
 
@@ -183,6 +192,11 @@ lightweight `PPS-Toolkit-Downloader.exe`; Zenodo hosts the heavyweight
 extracts to `%LOCALAPPDATA%\PPS Toolkit\versions\vX.Y.Z`, creates shortcuts, and
 launches the dashboard only after verification. See
 [docs/PPS_DOWNLOADS.md](docs/PPS_DOWNLOADS.md).
+
+The repo contains the installer package source in `windows\downloader\` and the
+tracked offline-package inventory at `windows\installer_package_inventory.v1.json`;
+release binaries and ZIPs are generated into ignored `dist\` for GitHub
+Releases/Zenodo.
 
 ## Repository Layout
 

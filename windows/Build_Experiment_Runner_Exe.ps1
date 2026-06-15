@@ -11,9 +11,13 @@ if (-not (Test-Path $Python)) {
   powershell -ExecutionPolicy Bypass -File (Join-Path $Root "windows\Setup_Windows_App.ps1")
 }
 
-& $Python -m pip install -e ".[gui,package]"
+& $Python -m pip install -e ".[gui,lsl,xdf,package]"
 if ($LASTEXITCODE -ne 0) {
   throw "Editable package install failed with exit code $LASTEXITCODE"
+}
+& $Python (Join-Path $Root "tools\check_qt_runtime.py")
+if ($LASTEXITCODE -ne 0) {
+  throw "Qt runtime preflight failed. The packaged runner would be unable to initialize Qt."
 }
 & $Python -m PyInstaller --noconfirm --clean $Spec
 if ($LASTEXITCODE -ne 0) {
@@ -22,6 +26,11 @@ if ($LASTEXITCODE -ne 0) {
 
 if (-not (Test-Path $Exe)) {
   throw "Expected packaged runner was not created: $Exe"
+}
+
+& $Python (Join-Path $Root "tools\check_qt_runtime.py") --packaged-runner (Join-Path $Root "dist\PPSExperimentRunner")
+if ($LASTEXITCODE -ne 0) {
+  throw "Packaged runner Qt runtime validation failed."
 }
 
 & $Exe --help | Out-Host

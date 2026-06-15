@@ -57,6 +57,12 @@ native Focus Mode:
 windows\Launch_Experiment_Runner.bat --participant-id P001
 ```
 
+The standalone Experiment Runner uses a participant-number dropdown for finished
+profiles such as Study 5. The dropdown labels show whether each participant's
+local audio/session package is already generated. Use `Generate Audio Assets`
+for one participant or type an explicit range such as `1-10` and press
+`Generate Range` when you want to pre-generate packages intentionally.
+
 ## 5. Decode Recordings
 
 ```powershell

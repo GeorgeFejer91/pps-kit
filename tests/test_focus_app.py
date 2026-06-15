@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import sys
 import time
 from pathlib import Path
 from types import SimpleNamespace
@@ -51,6 +52,33 @@ def _collect_widget_texts(widget, widget_type) -> list[str]:
     return texts
 
 
+def test_focus_mode_run_plan_numbers_topup_slots_by_play_order():
+    from peripersonal_space_toolkit import focus_app
+
+    package = SimpleNamespace(
+        blocks=[
+            SimpleNamespace(
+                index=index,
+                label=f"Block {index:02d}",
+                duration_s=1.0,
+                metadata={"part_number": 1 if index <= 6 else 2},
+            )
+            for index in range(1, 13)
+        ]
+    )
+
+    plan = focus_app._run_plan_text(package, include_topup_slots=True)
+
+    assert "Part 01:" in plan
+    assert "6 Block 06" in plan
+    assert "7 Top-up if needed" in plan
+    assert "Part 02:" in plan
+    assert "8 Block 07" in plan
+    assert "13 Block 12" in plan
+    assert "14 Top-up if needed" in plan
+    assert focus_app._run_plan_total(package, include_topup_slots=True) == 14
+
+
 def _assert_widget_inside_dialog(widget, dialog) -> None:
     top_left = widget.mapTo(dialog, widget.rect().topLeft())
     bottom_right = widget.mapTo(dialog, widget.rect().bottomRight())
@@ -74,13 +102,15 @@ def test_focus_layout_renderer_preserves_legibility_baselines():
     assert constrained.window_height <= 600
     assert constrained.body_font_pt >= 10.5
     assert constrained.button_min_height >= 32
-    assert constrained.target_min_height >= 138
+    assert constrained.target_min_height >= 88
+    assert constrained.target_max_height <= 110
     assert constrained.right_stack_mode == "tabs"
     assert compact.right_stack_mode == "tabs"
     assert standard.right_stack_mode == "resizable"
     assert constrained.recording_chip_columns == 2
     assert standard.recording_chip_columns == 3
     assert standard.target_min_height > constrained.target_min_height
+    assert standard.target_max_height <= 140
 
     contrasts = focus_palette_contrast_report()
     assert contrasts["text_on_background"] >= 7.0
@@ -178,6 +208,7 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     assert window.dialog.width() <= available_width
     assert window.dialog.height() <= available_height
     assert window.target_button.minimumHeight() >= profile.target_min_height
+    assert window.target_button.maximumHeight() == profile.target_max_height
     assert window.output_summary.minimumHeight() == profile.output_min_height
 
     for widget in (
@@ -192,8 +223,47 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
         _assert_widget_inside_dialog(widget, window.dialog)
 
     assert window.target_button.geometry().height() >= profile.target_min_height
+    assert window.target_button.geometry().height() <= profile.target_max_height
     assert window.start_button.geometry().height() >= profile.button_min_height
     assert window.output_summary.geometry().height() >= profile.output_min_height
+    window.dialog.close()
+
+
+def test_focus_mode_recenter_uses_pyautogui_backend(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+        from peripersonal_space_toolkit.focus_timeline import TactileTimelineCue
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    moves: list[tuple[int, int, int]] = []
+
+    class FakePyAutoGUI:
+        FAILSAFE = True
+        PAUSE = 0.1
+
+        @staticmethod
+        def moveTo(x, y, duration=0):
+            moves.append((int(x), int(y), int(duration)))
+
+    monkeypatch.setitem(sys.modules, "pyautogui", FakePyAutoGUI)
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    window = focus_app.FocusModeWindow(q, package)
+    window.dialog.show()
+    app.processEvents()
+    monkeypatch.setattr(window, "_offscreen_platform", lambda: False)
+
+    cue = TactileTimelineCue(cue_id=1, trial_number=1, trial_uid="T001", time_s=4.0)
+    window._move_cursor_to_target(cue)
+
+    assert moves
+    assert window.recenter_records[-1]["mode"] == "pyautogui"
+    assert window.recenter_records[-1]["trial_uid"] == "T001"
     window.dialog.close()
 
 
@@ -212,6 +282,47 @@ def test_validation_realtime_audio_engine_waits_for_buffer_deadlines(tmp_path: P
 
     assert elapsed >= duration_s * 0.85
     assert engine.played_block_durations_s == pytest.approx([duration_s])
+
+
+def test_launcher_uses_participant_dropdown_instead_of_text_entry():
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    errors: list[BaseException] = []
+
+    def inspect_launcher() -> None:
+        try:
+            dialogs = [widget for widget in app.topLevelWidgets() if widget.windowTitle() == "PPS Experiment Runner"]
+            assert dialogs
+            dialog = dialogs[0]
+            participant_combo = dialog.findChild(q["QComboBox"], "participantCombo")
+            assert participant_combo is not None
+            assert participant_combo.count() >= 1
+            placeholders = [line.placeholderText() for line in dialog.findChildren(q["QLineEdit"])]
+            assert "Participant ID" not in placeholders
+            assert "1-10" in placeholders
+        except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
+            errors.append(exc)
+        finally:
+            for widget in app.topLevelWidgets():
+                if widget.windowTitle() == "PPS Experiment Runner":
+                    widget.reject()
+
+    q["QTimer"].singleShot(50, inspect_launcher)
+    exit_code = focus_app.run_launcher_window(
+        capture_options=SessionCaptureOptions(enable_lsl=False, write_internal_xdf=False, start_backup_recording=False),
+        participant_id="P001",
+        initial_message="inspection",
+    )
+
+    assert exit_code == 1
+    assert errors == []
 
 
 def test_prepare_profile_focus_session_uses_finished_profile_gate(tmp_path: Path, monkeypatch):
