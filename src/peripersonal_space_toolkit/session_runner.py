@@ -2691,7 +2691,7 @@ def _build_runner_session_metadata(
             **capture_options.as_dict(),
             "topup_missed_trials_by_part": bool(topup_enabled),
             "lsl_event_protocol_standard": True,
-            "local_audio_evidence_wav_label": "Belts and Suspenders full-audio backup WAV",
+            "local_audio_evidence_wav_label": "Fail-safe local audio evidence WAV",
         },
         "lsl_status_at_start": dict(lsl_status or {}),
         "session_paths": _session_metadata_paths(package),
@@ -3021,6 +3021,7 @@ def _timeline_trial_segments(schedule: BlockEventSchedule | None) -> list[dict[s
                 "start_sample_index": int(start.get("sample_index", 0)),
                 "clip_label": respiratory_label or clip_label or "Trial",
                 "trial_label": trial_type or "Trial",
+                "soa_ms": str(payload.get("soa_ms") or payload.get("SOA_ms") or "").strip(),
                 "family": str(payload.get("family") or payload.get("Family") or ""),
                 "trial_type": trial_type,
             }

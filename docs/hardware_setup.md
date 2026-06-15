@@ -10,7 +10,7 @@ This toolkit is Windows-first for experiment running because the validated lab r
 - Legacy Study 5 routing: audio output 1 is auditory; audio output 2 is tactile.
 - Rendered trajectory routing: outputs 1/2 are binaural left/right; output 3 is tactile.
 - A mouse, keyboard, button box, or other response device supported by the runner.
-- Optional local full-audio evidence WAV written by the runner from mixed output buffers.
+- Optional fail-safe local recording WAV written by the runner from mixed output buffers.
 - Optional WASAPI loopback diagnostics through `pyaudiowpatch`; this is not the core ASIO validation path.
 
 For the local Komplete Audio 6 setup, use the `Komplete Audio ASIO Driver` for

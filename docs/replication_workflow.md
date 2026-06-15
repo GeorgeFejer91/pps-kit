@@ -58,7 +58,7 @@ For designed experiments, use Segment 6 in the HTML dashboard:
 2. Set planned participants and experiment parts.
 3. Press `Save Design and Start Experiment Runner`.
 4. The local backend prepares the participant session package and starts native Focus Mode.
-5. In Focus Mode, enter participant metadata and choose runner-owned options: optional full-audio backup WAV and optional missed-trial top-up at the end of each experiment part. The LSL/event protocol, local marker mirror, trigger dictionary, `events.csv`, and analysis outputs are standard runner outputs.
+5. In Focus Mode, enter participant metadata and choose runner-owned options: optional fail-safe local recording and optional missed-trial top-up at the end of each experiment part. The LSL/event protocol, local marker mirror, trigger dictionary, `events.csv`, and analysis outputs are standard runner outputs.
 
 The integrated runner writes session outputs under `local_data\sessions\<participant_id>_<timestamp>\`.
 
