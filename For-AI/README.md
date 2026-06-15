@@ -36,10 +36,11 @@ Every future AI agent should:
 1. Read this folder before planning or editing.
 2. Check whether the current chat changed aims, scope, GUI behavior, data schemas, runner behavior, tests, publication boundaries, or repo structure.
 3. When changing the HTML dashboard, keep the packaged local dashboard and the online/static GitHub Pages dashboard synchronized in the same change set; update and verify both before finalizing.
-4. Treat `segment_registry_contract.md` as authoritative for Segments 0-3 unless the user explicitly asks to revise that contract.
-5. Preserve the tracked installer package definition in `windows/installer_package_inventory.v1.json` and the release boundary in `download_package_inventory.md` when changing packaging.
-6. Update the relevant `For-AI/` files before finalizing substantive work.
-7. State in the final response whether `For-AI/` was updated or why no update was needed.
+4. Preserve the public domain contract in `agent_update_protocol.md`: `https://ppskit.qzz.io/` is canonical, `https://georgefejer91.github.io/pps-kit/` is the GitHub Pages fallback, and the old `/peripersonal-space-toolkit/` Pages path should not be reintroduced.
+5. Treat `segment_registry_contract.md` as authoritative for Segments 0-3 unless the user explicitly asks to revise that contract.
+6. Preserve the tracked installer package definition in `windows/installer_package_inventory.v1.json` and the release boundary in `download_package_inventory.md` when changing packaging.
+7. Update the relevant `For-AI/` files before finalizing substantive work.
+8. State in the final response whether `For-AI/` was updated or why no update was needed.
 
 Do not put secrets, participant data, generated artifacts, local absolute paths, or private notes in this folder.
 
