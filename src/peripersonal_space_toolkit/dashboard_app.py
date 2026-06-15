@@ -6381,8 +6381,10 @@ def _materialize_segment1_ingredients_for_custom_project(
 
 
 def _should_replace_saved_design_with_default_profile(design: StimulusDesign) -> bool:
-    if design.study_profile_id:
+    if design.study_profile_id == DEFAULT_STUDY_TEMPLATE_ID:
         return False
+    if design.study_profile_id:
+        return True
     mode = str(design.study_profile_reference_parameters.get("dashboard_mode", "")).strip().lower()
     if mode == "custom":
         return True

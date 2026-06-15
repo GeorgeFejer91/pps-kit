@@ -75,6 +75,28 @@ def test_dashboard_preserves_deliberate_saved_profile(tmp_path: Path):
     assert state["design"]["name"] == "Edited Study 5 working copy"
 
 
+def test_dashboard_replaces_saved_non_default_profile_with_study5_for_startup(tmp_path: Path):
+    root = Path(__file__).resolve().parents[1]
+    saved_design = next(
+        template.design
+        for template in load_templates(root / "study_templates")
+        if template.template_id != DEFAULT_STUDY_TEMPLATE_ID
+    )
+    saved_path = tmp_path / "saved_other_profile.json"
+    save_design(saved_design, saved_path)
+
+    state = DashboardController(
+        design_path=saved_path,
+        render_dir=tmp_path / "render",
+        session_root=tmp_path / "sessions",
+        import_dir=tmp_path / "imports",
+    ).snapshot()
+
+    assert state["selected_template"] == DEFAULT_STUDY_TEMPLATE_ID
+    assert state["design"]["study_profile_id"] == DEFAULT_STUDY_TEMPLATE_ID
+    assert state["design"]["name"] == _study5_template().design.name
+
+
 def test_dashboard_migrates_legacy_study5_row_labels_on_saved_profile_load(tmp_path: Path):
     saved_design = _study5_template().design
     saved_design.protocol.trial_strips[0].label = "Inhale row"
