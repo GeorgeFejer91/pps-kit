@@ -22,6 +22,7 @@ def _write_minimal_session_manifest(
     *,
     participant_id: str = "P001",
     source_run_setup_manifest_path: Path | None = None,
+    blocks: list[dict[str, object]] | None = None,
 ) -> Path:
     session_dir = tmp_path / f"{participant_id}_20260613_120000"
     session_dir.mkdir()
@@ -35,7 +36,7 @@ def _write_minimal_session_manifest(
         "protocol_path": "protocol_schedule.csv",
         "render_manifest_path": "",
         "execution_mode": "participant_block_wavs",
-        "blocks": [],
+        "blocks": blocks or [],
     }
     if source_run_setup_manifest_path is not None:
         payload["source_run_setup_manifest_path"] = str(source_run_setup_manifest_path)
@@ -57,6 +58,48 @@ def _collect_widget_texts(widget, widget_type) -> list[str]:
             if text:
                 texts.append(str(text))
     return texts
+
+
+def _write_focus_preview_block_csv(path: Path, *, block_offset: int = 0) -> None:
+    path.write_text(
+        "\n".join(
+            [
+                "Trial_Number,Trial_UID,Trial_Type,Family,Row_Label,Fixed_Audio_Labels,SOA_ms,Trial_Start_S,Trial_End_S,Tactile_Onset_S,Sample_Rate_Hz",
+                f"1,T{block_offset + 1:03d},Audio-Tactile,audio_tactile,Inhale,Frontal looming,300,0.0,8.0,4.3,1000",
+                f"2,T{block_offset + 2:03d},Baseline,baseline,Exhale,Baseline,800,8.0,16.0,8.8,1000",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+def _write_focus_preview_session_manifest(tmp_path: Path) -> Path:
+    block_1_csv = tmp_path / "block_01.csv"
+    block_2_csv = tmp_path / "block_02.csv"
+    _write_focus_preview_block_csv(block_1_csv)
+    _write_focus_preview_block_csv(block_2_csv, block_offset=10)
+    blocks = [
+        {
+            "index": 1,
+            "label": "Block 01",
+            "manifest_path": str(block_1_csv),
+            "wav_path": str(tmp_path / "block_01.wav"),
+            "trial_count": 2,
+            "duration_s": 16.0,
+            "metadata": {"part_number": 1, "phase": "pre", "phase_label": "Condition 1", "sample_rate_hz": 1000},
+        },
+        {
+            "index": 2,
+            "label": "Block 02",
+            "manifest_path": str(block_2_csv),
+            "wav_path": str(tmp_path / "block_02.wav"),
+            "trial_count": 2,
+            "duration_s": 16.0,
+            "metadata": {"part_number": 1, "phase": "pre", "phase_label": "Condition 1", "sample_rate_hz": 1000},
+        },
+    ]
+    return _write_minimal_session_manifest(tmp_path, blocks=blocks)
 
 
 def test_focus_mode_run_plan_numbers_topup_slots_by_play_order():
@@ -283,6 +326,106 @@ def test_focus_mode_participant_dropdown_switches_loaded_package(tmp_path: Path,
     window.dialog.close()
 
 
+def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PIL import Image
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI smoke deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_focus_preview_session_manifest(tmp_path))
+    window = focus_app.FocusModeWindow(q, package, enable_missed_trial_topup=True)
+    window.dialog.resize(1180, 760)
+    window.dialog.show()
+    app.processEvents()
+
+    QTest.mouseClick(
+        window.block_plan_widget,
+        q["Qt"].MouseButton.LeftButton,
+        q["Qt"].KeyboardModifier.NoModifier,
+        window.block_plan_widget.item_center(1),
+    )
+    app.processEvents()
+
+    assert window.selected_display_block_index == 1
+    assert window.preview_display_block_index == 1
+    assert window._timeline_display_state() is window.timeline_preview_state
+    assert [segment.trial_label for segment in window.timeline_preview_state.trial_segments] == ["Inhale", "Exhale"]
+    assert [cue.soa_ms for cue in window.timeline_preview_state.cues] == ["300", "800"]
+    assert "Block preview: Block 1 | 2 trials | 2 tactile cues" in window.block_preview_label.text()
+
+    QTest.mouseClick(
+        window.block_plan_widget,
+        q["Qt"].MouseButton.LeftButton,
+        q["Qt"].KeyboardModifier.NoModifier,
+        window.block_plan_widget.item_center(3),
+    )
+    app.processEvents()
+
+    assert window.selected_display_block_index == 3
+    assert window.preview_display_block_index == 3
+    assert not window.timeline_preview_state.trial_segments
+    assert "top-up" in window.block_preview_label.text()
+
+    window._handle_block_schedule(
+        {
+            "part_number": 1,
+            "phase_label": "Condition 1",
+            "block_index": 1,
+            "display_block_index": 1,
+            "display_block_count": 3,
+            "block_label": "Block 01",
+            "duration_s": 16.0,
+            "tactile_events": [
+                {"trial_number": 1, "trial_uid": "T001", "time_s": 4.3, "soa_ms": "300", "row_label": "Inhale"},
+                {"trial_number": 2, "trial_uid": "T002", "time_s": 8.8, "soa_ms": "800", "row_label": "Exhale"},
+            ],
+            "trial_segments": [
+                {
+                    "trial_number": 1,
+                    "trial_uid": "T001",
+                    "start_s": 0.0,
+                    "end_s": 8.0,
+                    "clip_label": "Frontal looming",
+                    "trial_label": "Inhale",
+                },
+                {
+                    "trial_number": 2,
+                    "trial_uid": "T002",
+                    "start_s": 8.0,
+                    "end_s": 16.0,
+                    "clip_label": "Baseline",
+                    "trial_label": "Exhale",
+                },
+            ],
+        }
+    )
+    window._update_tactile_progress(5.0)
+    app.processEvents()
+
+    assert window.preview_display_block_index is None
+    assert window.selected_display_block_index == 1
+    assert window._timeline_display_state() is window.timeline_state
+
+    timeline_screenshot = tmp_path / "live_timeline_red_bar.png"
+    assert window.tactile_timeline_widget.grab().save(str(timeline_screenshot))
+    timeline_image = Image.open(timeline_screenshot).convert("RGB")
+    pixels = timeline_image.load()
+    red_pixels = sum(
+        1
+        for y in range(timeline_image.height)
+        for x in range(timeline_image.width)
+        if pixels[x, y][0] > 150 and pixels[x, y][1] < 70 and pixels[x, y][2] < 70
+    )
+    assert red_pixels > 60
+    window.dialog.close()
+
+
 @pytest.mark.parametrize("available_width,available_height", [(1024, 600), (1366, 768), (1920, 1080)])
 def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, available_width: int, available_height: int):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -342,6 +485,7 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
         window.processing_panel,
         window.output_panel,
         window.block_plan_widget,
+        window.block_preview_label,
         window.output_summary,
         window.tactile_timeline_widget,
     ):
