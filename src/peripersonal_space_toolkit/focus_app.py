@@ -332,11 +332,15 @@ def _field_row(q: dict[str, Any], label: str, widget: Any) -> Any:
     return row
 
 
-def _create_tactile_timeline_widget(q: dict[str, Any], state: TactileTimelineState) -> Any:
+def _create_tactile_timeline_widget(
+    q: dict[str, Any],
+    state: TactileTimelineState,
+    profile: FocusLayoutProfile | None = None,
+) -> Any:
     class TactileTimelineWidget(q["QWidget"]):
         def __init__(self) -> None:
             super().__init__()
-            self.setMinimumHeight(40)
+            self.setMinimumHeight(84 if profile is not None and profile.screen_class == "constrained" else 116)
 
         def paintEvent(self, _event: Any) -> None:  # noqa: N802 - Qt API
             painter = q["QPainter"](self)
@@ -344,20 +348,70 @@ def _create_tactile_timeline_widget(q: dict[str, Any], state: TactileTimelineSta
                 painter.setRenderHint(q["QPainter"].RenderHint.Antialiasing, True)
                 width = max(1, int(self.width()))
                 height = max(1, int(self.height()))
-                margin = 12
-                line_y = max(18, height // 2)
-                usable = max(1, width - (2 * margin))
+                label_width = 58
+                right_margin = 12
+                compact_rows = height < 108
+                top_margin = 6 if compact_rows else 10
+                usable = max(1, width - label_width - right_margin)
                 duration = max(0.001, float(state.duration_s or 0.0))
+                row_offsets = (3, 22, 41, 60) if compact_rows else (5, 31, 58, 86)
+                rows = [(label, top_margin + offset) for label, offset in zip(("Clip", "Trial", "Tactile", "Clicks"), row_offsets)]
 
-                base_pen = q["QPen"](q["QColor"]("#bcc7bd"))
-                base_pen.setWidth(2)
-                painter.setPen(base_pen)
-                painter.drawLine(margin, line_y, width - margin, line_y)
+                painter.fillRect(self.rect(), q["QColor"]("#f8f9f6"))
+                label_pen = q["QPen"](q["QColor"]("#647067"))
+                painter.setPen(label_pen)
+                for label, row_y in rows:
+                    painter.drawText(4, row_y - 8, label_width - 8, 18, int(q["Qt"].AlignmentFlag.AlignRight), label)
+                    guide_pen = q["QPen"](q["QColor"]("#d9dfd6"))
+                    guide_pen.setWidth(1)
+                    painter.setPen(guide_pen)
+                    painter.drawLine(label_width, row_y, width - right_margin, row_y)
+                    painter.setPen(label_pen)
 
-                if not state.cues:
+                if not state.cues and not state.trial_segments:
                     painter.setPen(q["QPen"](q["QColor"]("#647067")))
-                    painter.drawText(self.rect(), q["Qt"].AlignmentFlag.AlignCenter, "No tactile cues loaded")
+                    painter.drawText(self.rect(), q["Qt"].AlignmentFlag.AlignCenter, "No experiment schedule loaded")
                     return
+
+                def _x(time_s: float) -> int:
+                    return label_width + int(max(0.0, min(1.0, float(time_s) / duration)) * usable)
+
+                def _short(text: str, limit: int = 18) -> str:
+                    clean = " ".join(str(text or "").replace("|", " ").split())
+                    return clean if len(clean) <= limit else f"{clean[: max(1, limit - 3)]}..."
+
+                palette = ["#dcefeb", "#f4e2b8", "#e7dff0", "#dce7f4", "#f0dddd", "#e3ead8"]
+
+                def _color_for(label: str, fallback_index: int) -> str:
+                    text = str(label or "").strip().lower()
+                    if "inhale" in text:
+                        return "#dce7f4"
+                    if "exhale" in text:
+                        return "#e7dff0"
+                    if "baseline" in text:
+                        return "#e3ead8"
+                    if "catch" in text:
+                        return "#f4e2b8"
+                    return palette[fallback_index % len(palette)]
+
+                row_height = 16 if compact_rows else 18
+                for index, segment in enumerate(state.trial_segments):
+                    x1 = _x(segment.start_s)
+                    x2 = max(x1 + 2, _x(segment.end_s))
+                    clip_color = _color_for(segment.clip_label, index)
+                    trial_color = _color_for(segment.trial_label, index + 2)
+                    for row_index, (text, y, color) in enumerate(
+                        (
+                            (segment.clip_label or segment.family or "Clip", rows[0][1] - row_height // 2, clip_color),
+                            (segment.trial_label or segment.family or "Trial", rows[1][1] - row_height // 2, trial_color),
+                        )
+                    ):
+                        painter.setPen(q["QPen"](q["QColor"]("#bcc7bd")))
+                        painter.setBrush(q["QBrush"](q["QColor"](color)))
+                        painter.drawRoundedRect(x1, y, max(2, x2 - x1), row_height, 4, 4)
+                        if x2 - x1 >= 34:
+                            painter.setPen(q["QPen"](q["QColor"]("#202621")))
+                            painter.drawText(x1 + 3, y + 1, max(1, x2 - x1 - 6), row_height - 2, int(q["Qt"].AlignmentFlag.AlignVCenter), _short(text, 16 if row_index else 20))
 
                 for cue in state.cues:
                     status = state.cue_status(cue)
@@ -367,7 +421,8 @@ def _create_tactile_timeline_widget(q: dict[str, Any], state: TactileTimelineSta
                         "next": "#8c2f2f",
                         "upcoming": "#d9dfd6",
                     }.get(status, "#d9dfd6")
-                    x = margin + int(max(0.0, min(1.0, cue.time_s / duration)) * usable)
+                    x = _x(cue.time_s)
+                    line_y = rows[2][1]
                     radius = 5 if status == "next" else 4
                     marker_pen = q["QPen"](q["QColor"]("#202621" if status == "next" else "#bcc7bd"))
                     marker_pen.setWidth(1)
@@ -375,15 +430,100 @@ def _create_tactile_timeline_widget(q: dict[str, Any], state: TactileTimelineSta
                     painter.setBrush(q["QBrush"](q["QColor"](color)))
                     painter.drawEllipse(x - radius, line_y - radius, radius * 2, radius * 2)
 
-                cursor_x = margin + int(max(0.0, min(1.0, state.elapsed_s / duration)) * usable)
+                click_pen = q["QPen"](q["QColor"]("#1d5d99"))
+                click_pen.setWidth(2)
+                painter.setPen(click_pen)
+                painter.setBrush(q["QBrush"](q["QColor"]("#dce7f4")))
+                click_y = rows[3][1]
+                for marker in state.click_markers:
+                    x = _x(marker.time_s)
+                    painter.drawRect(x - 4, click_y - 4, 8, 8)
+
+                cursor_x = _x(state.elapsed_s)
                 cursor_pen = q["QPen"](q["QColor"]("#246b55"))
                 cursor_pen.setWidth(2)
                 painter.setPen(cursor_pen)
-                painter.drawLine(cursor_x, max(4, line_y - 18), cursor_x, min(height - 4, line_y + 18))
+                painter.drawLine(cursor_x, 4, cursor_x, min(height - 4, rows[-1][1] + 14))
             finally:
                 painter.end()
 
     return TactileTimelineWidget()
+
+
+def _create_block_plan_widget(q: dict[str, Any], owner: Any) -> Any:
+    class BlockPlanWidget(q["QWidget"]):
+        def __init__(self) -> None:
+            super().__init__()
+            profile = getattr(owner, "layout_profile", None)
+            self.setMinimumHeight(36 if profile is not None and profile.screen_class == "constrained" else 58)
+
+        def paintEvent(self, _event: Any) -> None:  # noqa: N802 - Qt API
+            painter = q["QPainter"](self)
+            try:
+                painter.setRenderHint(q["QPainter"].RenderHint.Antialiasing, True)
+                width = max(1, int(self.width()))
+                height = max(1, int(self.height()))
+                items = list(getattr(owner, "block_plan_items", []) or [])
+                painter.fillRect(self.rect(), q["QColor"]("#f8f9f6"))
+                if not items:
+                    painter.setPen(q["QPen"](q["QColor"]("#647067")))
+                    painter.drawText(self.rect(), q["Qt"].AlignmentFlag.AlignCenter, "No blocks prepared")
+                    return
+
+                margin = 8
+                gap = 5
+                box_count = max(1, len(items))
+                box_width = max(42, int((width - (2 * margin) - (gap * (box_count - 1))) / box_count))
+                box_height = max(34, height - (2 * margin))
+                active = getattr(owner, "active_display_block_index", None)
+                completed = set(getattr(owner, "completed_display_block_indices", set()) or set())
+                next_index = None
+                if active is None:
+                    for item in items:
+                        number = int(item.get("number") or 0)
+                        if number and number not in completed:
+                            next_index = number
+                            break
+
+                for index, item in enumerate(items):
+                    number = int(item.get("number") or 0)
+                    x = margin + index * (box_width + gap)
+                    y = margin
+                    if x + box_width > width - margin:
+                        break
+                    kind = str(item.get("kind") or "")
+                    if number == active:
+                        fill = "#246b55"
+                        border = "#1d5846"
+                        text = "#ffffff"
+                    elif number in completed:
+                        fill = "#dcefeb"
+                        border = "#9fd0bd"
+                        text = "#17634f"
+                    elif number == next_index:
+                        fill = "#f4e2b8"
+                        border = "#d6a94d"
+                        text = "#202621"
+                    elif kind == "topup":
+                        fill = "#f0dddd"
+                        border = "#e3aca7"
+                        text = "#8c2f2f"
+                    else:
+                        fill = "#ffffff"
+                        border = "#bcc7bd"
+                        text = "#202621"
+                    painter.setPen(q["QPen"](q["QColor"](border)))
+                    painter.setBrush(q["QBrush"](q["QColor"](fill)))
+                    painter.drawRoundedRect(x, y, box_width, box_height, 5, 5)
+                    painter.setPen(q["QPen"](q["QColor"](text)))
+                    label = "TU" if kind == "topup" else f"{number}"
+                    if box_width >= 68:
+                        label = f"{number} TU" if kind == "topup" else f"Block {number}"
+                    painter.drawText(x + 3, y + 2, box_width - 6, box_height - 4, q["Qt"].AlignmentFlag.AlignCenter, label)
+            finally:
+                painter.end()
+
+    return BlockPlanWidget()
 
 
 def _create_response_target_button(q: dict[str, Any], profile: FocusLayoutProfile) -> Any:
@@ -534,8 +674,8 @@ def _screen_fit_size(
 def _focus_layout_profile(
     q: dict[str, Any],
     *,
-    target_width: int = 1120,
-    target_height: int = 720,
+    target_width: int = 3840,
+    target_height: int = 900,
     min_width: int = 820,
     min_height: int = 520,
 ) -> FocusLayoutProfile:
@@ -1621,6 +1761,9 @@ class FocusModeWindow:
         self._last_recenter_backend_warning = ""
         self.validation_topup_approval_records: list[dict[str, Any]] = []
         self.planned_tactile_cue_count = 0
+        self.block_plan_items: list[dict[str, Any]] = []
+        self.active_display_block_index: int | None = None
+        self.completed_display_block_indices: set[int] = set()
         self.recenter_controller = TactileRecenterController(self.timeline_state, self._move_cursor_to_target)
 
         self.dialog = q["QDialog"]()
@@ -1922,12 +2065,17 @@ class FocusModeWindow:
         self.processing_splitter.setChildrenCollapsible(False)
         self.processing_splitter.setHandleWidth(max(7, profile.root_spacing))
 
-        processing_panel, progress_layout = _panel(q, "Data Processing", profile=profile)
+        processing_panel, progress_layout = _panel(q, "Experiment Control", profile=profile)
         self.processing_panel = processing_panel
         processing_panel.setMinimumHeight(170 if profile.screen_class == "constrained" else 190)
         processing_panel.setMinimumWidth(360 if profile.compact else 420)
         progress_layout.setSpacing(profile.panel_spacing)
-        progress_layout.addWidget(_subtitle(q, "Live Tactile Timeline"))
+        if profile.screen_class != "constrained":
+            progress_layout.addWidget(_subtitle(q, "Block Order"))
+        self.block_plan_widget = _create_block_plan_widget(q, self)
+        progress_layout.addWidget(self.block_plan_widget)
+        if profile.screen_class != "constrained":
+            progress_layout.addWidget(_subtitle(q, "Stimulus / Tactile / Click Timeline"))
         timeline_status = q["QWidget"]()
         timeline_status_layout = q["QHBoxLayout"](timeline_status)
         timeline_status_layout.setContentsMargins(0, 0, 0, 0)
@@ -1940,13 +2088,16 @@ class FocusModeWindow:
         timeline_status_layout.addWidget(self.next_tactile_label, 1)
         timeline_status_layout.addWidget(self.tactile_count_label)
         progress_layout.addWidget(timeline_status)
-        self.tactile_timeline_widget = _create_tactile_timeline_widget(q, self.timeline_state)
+        self.tactile_timeline_widget = _create_tactile_timeline_widget(q, self.timeline_state, profile)
         progress_layout.addWidget(self.tactile_timeline_widget)
         self.recenter_status_label = q["QLabel"]("Cursor recenter: waiting")
         self.recenter_status_label.setObjectName("mutedLabel")
         self.recenter_status_label.setWordWrap(True)
         progress_layout.addWidget(self.recenter_status_label)
-        progress_layout.addWidget(_subtitle(q, "Progress"))
+        if profile.screen_class == "constrained":
+            self.recenter_status_label.setVisible(False)
+        else:
+            progress_layout.addWidget(_subtitle(q, "Progress"))
         self.progress_label = q["QLabel"]("Waiting to start")
         self.progress_label.setObjectName("metricValue")
         self.progress_label.setWordWrap(True)
@@ -1963,6 +2114,11 @@ class FocusModeWindow:
         self.prewarm_label.setObjectName("mutedLabel")
         self.prewarm_label.setWordWrap(True)
         progress_layout.addWidget(self.prewarm_label)
+        if profile.screen_class == "constrained":
+            self.progress_label.setVisible(False)
+            self.progress.setVisible(False)
+            self.event_label.setVisible(False)
+            self.prewarm_label.setVisible(False)
         progress_layout.addStretch(1)
         self.processing_splitter.addWidget(processing_panel)
 
@@ -2031,6 +2187,9 @@ class FocusModeWindow:
         if hasattr(self, "run_plan_value"):
             self.run_plan_value.setText(plan_text)
             self.run_plan_value.setToolTip(plan_text)
+        self.block_plan_items = _run_plan_items(self.package, include_topup_slots=include_topup_slots)
+        if hasattr(self, "block_plan_widget"):
+            self.block_plan_widget.update()
         if hasattr(self, "session_blocks_value"):
             if topup_slots:
                 self.session_blocks_value.setText(f"{total_count} ({standard_count} standard + {topup_slots} top-up)")
@@ -2221,6 +2380,9 @@ class FocusModeWindow:
             self.event_label.setText("Start the run before logging responses.")
             return
         self.controller.log_click(in_target=True)
+        if self.timeline_state.active:
+            self.timeline_state.record_click(self.timeline_state.elapsed_s)
+            self._update_tactile_timeline_display()
         self.event_label.setText("Participant click logged")
 
     def _continue_instruction_button(self) -> None:
@@ -2267,6 +2429,7 @@ class FocusModeWindow:
             block_label=payload.get("block_label", ""),
             duration_s=payload.get("duration_s", 0.0),
             tactile_events=list(payload.get("tactile_events") or []),
+            trial_segments=list(payload.get("trial_segments") or []),
         )
         self.planned_tactile_cue_count += len(self.timeline_state.cues)
         anchor = _float_or_none(payload.get("block_schedule_perf_counter"))
@@ -2278,6 +2441,11 @@ class FocusModeWindow:
             payload,
             _run_plan_total(self.package, include_topup_slots=self._topup_slots_enabled_for_plan()),
         )
+        if self.active_display_block_index is not None and self.active_display_block_index != display_index:
+            self.completed_display_block_indices.add(int(self.active_display_block_index))
+        self.active_display_block_index = int(display_index) if display_index else None
+        if hasattr(self, "block_plan_widget"):
+            self.block_plan_widget.update()
         if bool(payload.get("is_topup")):
             self.block_chip.setText(
                 f"Block {display_index}/{display_count} (Top-up)" if display_index else f"Block -/{display_count} (Top-up)"
@@ -2306,7 +2474,7 @@ class FocusModeWindow:
         if total <= 0:
             text = "Next tactile: no cues in this block" if self.timeline_state.active else "Next tactile: no block schedule"
             self.next_tactile_label.setText(text)
-            self.tactile_count_label.setText("0 / 0 cues")
+            self.tactile_count_label.setText(f"0 / 0 cues | {self.timeline_state.click_count()} clicks")
             if not preserve_recenter_message:
                 self.recenter_status_label.setText("Cursor recenter: waiting")
             self.tactile_timeline_widget.update()
@@ -2321,7 +2489,9 @@ class FocusModeWindow:
             self.next_tactile_label.setText(
                 f"Next tactile: Trial {next_cue.trial_number} in {countdown:.1f}s{soa}{row}"
             )
-        self.tactile_count_label.setText(f"{self.timeline_state.passed_count()} / {total} cues")
+        self.tactile_count_label.setText(
+            f"{self.timeline_state.passed_count()} / {total} cues | {self.timeline_state.click_count()} clicks"
+        )
         if not preserve_recenter_message:
             self.recenter_status_label.setText(
                 f"Cursor recenter: {self.timeline_state.recentered_count()} / {total} cues"
@@ -2506,6 +2676,11 @@ class FocusModeWindow:
         self._run_active = False
         self._run_paused = False
         self.timeline_state.active = False
+        if self.active_display_block_index is not None:
+            self.completed_display_block_indices.add(int(self.active_display_block_index))
+        self.active_display_block_index = None
+        if hasattr(self, "block_plan_widget"):
+            self.block_plan_widget.update()
         self.target_button.setEnabled(False)
         self.pause_button.setEnabled(False)
         self.stop_button.setEnabled(False)

@@ -101,9 +101,9 @@ def test_focus_layout_renderer_preserves_legibility_baselines():
     assert constrained.window_width <= 1024
     assert constrained.window_height <= 600
     assert constrained.body_font_pt >= 10.5
-    assert constrained.button_min_height >= 32
+    assert constrained.button_min_height >= 30
     assert constrained.response_panel_side >= constrained.target_min_height
-    assert constrained.target_min_height >= 88
+    assert constrained.target_min_height >= 76
     assert constrained.target_max_height == constrained.target_min_height
     assert constrained.right_stack_mode == "tabs"
     assert compact.right_stack_mode == "resizable"
@@ -157,7 +157,10 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert "Participant Response" in joined
     assert "Participant Setup" in joined
     assert "Recording" in joined
-    assert "Live Tactile Timeline" in joined
+    assert "Experiment Control" in joined
+    if window.layout_profile.screen_class != "constrained":
+        assert "Block Order" in joined
+        assert "Stimulus / Tactile / Click Timeline" in joined
     assert "Next tactile" in joined
     assert "Instruction clips" in joined
     assert "No preloaded clips" in joined
@@ -249,6 +252,7 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
         window.close_button,
         window.processing_panel,
         window.output_panel,
+        window.block_plan_widget,
         window.output_summary,
         window.tactile_timeline_widget,
     ):

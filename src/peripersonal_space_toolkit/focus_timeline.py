@@ -20,7 +20,27 @@ class TactileTimelineCue:
     soa_ms: str = ""
     family: str = ""
     row_label: str = ""
+    clip_label: str = ""
+    trial_label: str = ""
     recentered: bool = False
+
+
+@dataclass
+class TimelineTrialSegment:
+    trial_number: int
+    trial_uid: str
+    start_s: float
+    end_s: float
+    clip_label: str = ""
+    trial_label: str = ""
+    family: str = ""
+
+
+@dataclass
+class TimelineClickMarker:
+    click_id: int
+    time_s: float
+    trial_uid: str = ""
 
 
 class TactileTimelineState:
@@ -36,6 +56,8 @@ class TactileTimelineState:
         self.elapsed_s = 0.0
         self.active = False
         self.cues: list[TactileTimelineCue] = []
+        self.trial_segments: list[TimelineTrialSegment] = []
+        self.click_markers: list[TimelineClickMarker] = []
 
     def load_block(
         self,
@@ -46,6 +68,7 @@ class TactileTimelineState:
         block_label: Any = "",
         duration_s: Any = 0.0,
         tactile_events: list[dict[str, Any]] | None = None,
+        trial_segments: list[dict[str, Any]] | None = None,
     ) -> None:
         self.part_number = str(part_number or "").strip()
         self.phase_label = str(phase_label or "").strip()
@@ -69,11 +92,34 @@ class TactileTimelineState:
                     soa_ms=str(event.get("soa_ms") or ""),
                     family=str(event.get("family") or ""),
                     row_label=str(event.get("row_label") or ""),
+                    clip_label=str(event.get("clip_label") or ""),
+                    trial_label=str(event.get("trial_label") or event.get("row_label") or ""),
                 )
             )
         self.cues = sorted(cues, key=lambda cue: (cue.time_s, cue.trial_number, cue.cue_id))
         for index, cue in enumerate(self.cues, start=1):
             cue.cue_id = index
+        segments: list[TimelineTrialSegment] = []
+        for index, segment in enumerate(trial_segments or [], start=1):
+            start_s = _float(segment.get("start_s"), default=math.nan)
+            end_s = _float(segment.get("end_s"), default=math.nan)
+            if not math.isfinite(start_s) or start_s < 0:
+                continue
+            if not math.isfinite(end_s) or end_s <= start_s:
+                end_s = start_s + 0.001
+            segments.append(
+                TimelineTrialSegment(
+                    trial_number=_int(segment.get("trial_number"), default=index),
+                    trial_uid=str(segment.get("trial_uid") or ""),
+                    start_s=start_s,
+                    end_s=end_s,
+                    clip_label=str(segment.get("clip_label") or ""),
+                    trial_label=str(segment.get("trial_label") or segment.get("row_label") or ""),
+                    family=str(segment.get("family") or ""),
+                )
+            )
+        self.trial_segments = sorted(segments, key=lambda item: (item.start_s, item.trial_number, item.trial_uid))
+        self.click_markers = []
 
     def clear(self) -> None:
         self.part_number = ""
@@ -84,6 +130,8 @@ class TactileTimelineState:
         self.elapsed_s = 0.0
         self.active = False
         self.cues = []
+        self.trial_segments = []
+        self.click_markers = []
 
     def update_elapsed(self, elapsed_s: Any) -> None:
         self.elapsed_s = max(0.0, _float(elapsed_s, default=0.0))
@@ -101,6 +149,28 @@ class TactileTimelineState:
 
     def recentered_count(self) -> int:
         return sum(1 for cue in self.cues if cue.recentered)
+
+    def click_count(self) -> int:
+        return len(self.click_markers)
+
+    def segment_at(self, time_s: Any) -> TimelineTrialSegment | None:
+        value = max(0.0, _float(time_s, default=0.0))
+        for segment in self.trial_segments:
+            if segment.start_s <= value <= segment.end_s:
+                return segment
+        return None
+
+    def record_click(self, elapsed_s: Any, *, trial_uid: str = "") -> TimelineClickMarker:
+        time_s = max(0.0, _float(elapsed_s, default=self.elapsed_s))
+        if self.duration_s > 0:
+            time_s = min(time_s, self.duration_s)
+        clean_uid = str(trial_uid or "").strip()
+        if not clean_uid:
+            segment = self.segment_at(time_s)
+            clean_uid = segment.trial_uid if segment is not None else ""
+        marker = TimelineClickMarker(click_id=len(self.click_markers) + 1, time_s=time_s, trial_uid=clean_uid)
+        self.click_markers.append(marker)
+        return marker
 
     def due_recenter_cues(self) -> list[TactileTimelineCue]:
         due: list[TactileTimelineCue] = []
