@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260615-hardware-doc-fit">
+  <link rel="stylesheet" href="styles.css?v=20260615-doc-lines">
 </head>
 <body>
   <div class="app-shell">
@@ -542,6 +542,8 @@
           <p class="info-lede">Peripersonal space is the multisensory region of space immediately surrounding the body within which stimuli are processed differently from those beyond arm's reach. First described as a distinct neural zone in primate neurophysiology by Rizzolatti and colleagues in the 1980s, it is defined by neurons in areas such as the ventral premotor cortex and the putamen that respond both to tactile stimulation of the body surface and to visual or auditory stimuli approaching from nearby space. This dual sensory tuning makes peripersonal space representation inherently multisensory and links it to functions ranging from defensive behavior and tool use to bodily self-awareness. A widely used behavioral paradigm for mapping the spatial boundary of peripersonal space is the audio-tactile interaction task, in which participants respond to tactile stimuli delivered to the body while auditory stimuli approach from varying distances; tactile response times are systematically faster when the approaching sound is near the body, and this facilitation profile is taken as a behavioral index of the spatial extent and weighting of an individual's peripersonal space representation. Despite being a well-studied phenomenon, the field lacks standardized norms for how such experiments should be implemented, and the scripts, timing parameters, and stimuli used to construct published tasks are rarely made available.</p>
         </section>
 
+        <hr class="doc-segment-rule" aria-hidden="true">
+
         <section id="docs-overview" class="info-segment" aria-labelledby="docs-overview-title">
           <div class="info-segment-heading">
             <span class="segment-kicker">Project</span>
@@ -549,6 +551,8 @@
           </div>
           <p class="info-lede">The Peripersonal Space Toolkit is a local-first research platform for designing and running audio-tactile peripersonal space experiments. Researchers can build a study from scratch by specifying trajectory, source material, timing, and tactile onset asynchronies through a graphical interface, or they can load published parameter sets to reproduce the design decisions reported in existing studies. The toolkit does not redistribute the stimuli from those studies, since these are rarely made available by authors, but it makes the decision parameters themselves explicit, version-controlled, and shareable across labs. All stimulus generation, experiment preparation, and data collection run locally on the lab PC through a local Python backend and a native experiment runner; the browser-based dashboard is a configuration interface only and communicates with the local backend at 127.0.0.1.</p>
         </section>
+
+        <hr class="doc-segment-rule" aria-hidden="true">
 
         <section id="docs-architecture" class="info-segment" aria-labelledby="docs-architecture-title">
           <div class="info-segment-heading">
@@ -667,6 +671,8 @@
           </div>
         </section>
 
+        <hr class="doc-segment-rule" aria-hidden="true">
+
         <section id="docs-hardware" class="info-segment" aria-labelledby="docs-hardware-title">
           <div class="info-segment-heading">
             <span class="segment-kicker">Lab Route</span>
@@ -724,6 +730,8 @@
           </div>
         </section>
 
+        <hr class="doc-segment-rule" aria-hidden="true">
+
         <section id="docs-spatialization" class="info-segment" aria-labelledby="docs-spatialization-title">
           <div class="info-segment-heading">
             <span class="segment-kicker">Stimulus Model</span>
@@ -748,6 +756,8 @@
             </article>
           </div>
         </section>
+
+        <hr class="doc-segment-rule" aria-hidden="true">
 
         <section id="docs-3dti" class="info-segment" aria-labelledby="docs-3dti-title">
           <div class="info-segment-heading">
@@ -794,6 +804,8 @@
           </div>
         </section>
 
+        <hr class="doc-segment-rule" aria-hidden="true">
+
         <section id="docs-designer" class="info-segment" aria-labelledby="docs-designer-title">
           <div class="info-segment-heading">
             <span class="segment-kicker">Design Workflow</span>
@@ -815,6 +827,8 @@
           </div>
         </section>
 
+        <hr class="doc-segment-rule" aria-hidden="true">
+
         <section id="docs-runner" class="info-segment" aria-labelledby="docs-runner-title">
           <div class="info-segment-heading">
             <span class="segment-kicker">Native Runtime</span>
@@ -826,6 +840,8 @@
             <a class="button-link" href="../../../docs/AUDIO_ROUTING_STRESS_TEST.md">Open Audio Stress Notes</a>
           </div>
         </section>
+
+        <hr class="doc-segment-rule" aria-hidden="true">
 
         <section id="docs-data-boundary" class="info-segment" aria-labelledby="docs-data-boundary-title">
           <div class="info-segment-heading">
@@ -900,4 +916,76 @@
         </section>
         <section id="downloads-companion" class="info-segment" aria-labelledby="downloads-companion-title">
           <div class="info-segment-heading">
-            <span class="segmen
+            <span class="segment-kicker">Local Companion</span>
+            <h2 id="downloads-companion-title">Local Companion</h2>
+          </div>
+          <div class="download-page-grid single">
+            <article class="info-card download-card">
+            <h2>Local Companion</h2>
+            <p>After installing, start the trusted local companion before using hosted dashboard actions.</p>
+            <code>windows\Start_Website_Companion.bat</code>
+          </article>
+          </div>
+        </section>
+      </section>
+
+    </main>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="segment-info-modal" class="modal-backdrop" hidden>
+    <div class="modal-card segment-info-card" role="dialog" aria-modal="true" aria-labelledby="segment-info-modal-title">
+      <div class="modal-heading">
+        <div>
+          <div id="segment-info-kicker" class="segment-kicker">Segment</div>
+          <h2 id="segment-info-modal-title">Segment Description</h2>
+        </div>
+        <button id="segment-info-modal-close" class="icon-action" type="button" aria-label="Close">X</button>
+      </div>
+      <div class="segment-info-grid">
+        <section>
+          <h3>Purpose</h3>
+          <p id="segment-info-purpose"></p>
+        </section>
+        <section>
+          <h3>Your Inputs</h3>
+          <p id="segment-info-inputs"></p>
+        </section>
+        <section>
+          <h3>Backend Work</h3>
+          <p id="segment-info-backend"></p>
+        </section>
+        <section>
+          <h3>Used Next</h3>
+          <p id="segment-info-next"></p>
+        </section>
+      </div>
+    </div>
+  </div>
+  <div id="customize-modal" class="modal-backdrop" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="customize-modal-title">
+      <form id="customize-form">
+        <div class="modal-heading">
+          <div>
+            <div class="segment-kicker">New Custom Study</div>
+            <h2 id="customize-modal-title">Name This Study</h2>
+          </div>
+          <button id="customize-modal-close" class="icon-action" type="button" aria-label="Close">X</button>
+        </div>
+        <div class="field-row">
+          <label for="customize-study-name">Study name</label>
+          <input id="customize-study-name" type="text" autocomplete="off" required>
+        </div>
+        <p id="customize-source-label" class="modal-source"></p>
+        <p id="customize-error" class="modal-error" role="alert" hidden></p>
+        <div class="modal-actions">
+          <button id="customize-cancel" type="button">Cancel</button>
+          <button id="customize-submit" class="primary" type="submit">Create Study</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="hardware_pixel_art.js?v=20260615-doc-lines"></script>
+  <script src="app.js?v=20260615-doc-lines"></script>
+</body>
+</html>

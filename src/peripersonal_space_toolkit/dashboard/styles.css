@@ -457,8 +457,15 @@ code {
 
 #documentation-page .info-segment {
   margin: 18px 0;
-  padding-top: 18px;
-  border-top: 1px solid #d7e2dc;
+  padding: 0;
+}
+
+.doc-segment-rule {
+  width: 100%;
+  height: 1px;
+  margin: 22px 0;
+  border: 0;
+  background: linear-gradient(90deg, rgba(81, 123, 101, 0.08), rgba(81, 123, 101, 0.58), rgba(81, 123, 101, 0.08));
 }
 
 .placeholder-copy {
@@ -3364,4 +3371,179 @@ body.modal-open {
     border-right: 5px solid transparent;
     border-bottom: 0;
     border-left: 5px solid transparent;
-    transform: trans
+    transform: translateX(50%);
+  }
+
+  .source-action-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .baseline-option-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .count-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .run-instruction-slot {
+    grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto auto;
+  }
+
+  .bake-panel {
+    grid-template-columns: minmax(180px, 1fr) 110px auto;
+  }
+
+  .bake-panel .status-label {
+    justify-self: start;
+  }
+
+  .source-card-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .audio-source-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stimulus-pool-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-splitter {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  :root {
+    --rail-width: 184px;
+  }
+
+  .rail {
+    inset: 8px auto 8px 8px;
+    padding: 12px 8px;
+    gap: 12px;
+  }
+
+  .rail nav a,
+  .rail-nav-group a {
+    padding: 7px 6px;
+    font-size: 12px;
+  }
+
+  .workspace {
+    margin-left: calc(var(--rail-width) + 18px);
+    padding: 10px;
+  }
+
+  .segment-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stimulus-pool-column .source-card-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .topbar {
+    height: auto;
+    align-items: flex-start;
+  }
+
+  .site-tab-list {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .site-tab {
+    min-width: 0;
+    flex: 1;
+    padding-inline: 7px;
+  }
+
+  .segment-zero-status-card {
+    grid-template-columns: 1fr;
+  }
+
+  .segment-zero-status-actions {
+    justify-content: flex-start;
+  }
+
+  .split-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .trial-decision-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .block-control-panel .trial-decision-fields,
+  .baseline-tactile-panel .tactile-decision-fields,
+  .baseline-tactile-panel .baseline-option-grid,
+  .count-strip,
+  .mixer-row,
+  .run-decision-grid,
+  .capture-option-grid,
+  .run-instruction-slot {
+    grid-template-columns: 1fr;
+  }
+
+  .capture-option-note {
+    justify-self: start;
+  }
+
+  .source-action-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .baseline-option-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bake-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .source-card-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .audio-source-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .filmstrip-row-header {
+    grid-template-columns: 1fr;
+  }
+
+  .filmstrip-row-body {
+    flex-direction: column;
+  }
+
+  .trial-condition-field {
+    flex-basis: auto;
+    width: 100%;
+  }
+
+  .filmstrip-sequence {
+    width: 100%;
+  }
+
+  .filmstrip-element {
+    min-width: 210px;
+  }
+
+}
+
+@media (max-width: 520px) {
+  .rail {
+    position: static;
+    width: auto;
+    max-height: none;
+    margin: 8px;
+  }
+
+  .workspace {
+    margin-left: 0;
+  }
+}
