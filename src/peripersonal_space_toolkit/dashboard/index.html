@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260615-doc-publication-links">
+  <link rel="stylesheet" href="styles.css?v=20260615-emulatable-studies-layout">
 </head>
 <body>
   <div class="app-shell">
@@ -28,6 +28,7 @@
         <div class="rail-nav-kicker">Documentation</div>
         <a href="#docs-pps" data-page-section-link="docs-pps" data-page-section-page="documentation"><span>Peripersonal Space</span></a>
         <a href="#docs-overview" data-page-section-link="docs-overview" data-page-section-page="documentation"><span>Toolkit</span></a>
+        <a href="#docs-emulatable-studies" data-page-section-link="docs-emulatable-studies" data-page-section-page="documentation"><span>Emulatable Studies</span></a>
         <a href="#docs-architecture" data-page-section-link="docs-architecture" data-page-section-page="documentation"><span>Architecture</span></a>
         <a href="#docs-hardware" data-page-section-link="docs-hardware" data-page-section-page="documentation"><span>Hardware</span></a>
         <a href="#docs-spatialization" data-page-section-link="docs-spatialization" data-page-section-page="documentation"><span>Spatialization</span></a>
@@ -554,6 +555,53 @@
 
         <hr class="doc-segment-rule" aria-hidden="true">
 
+        <section id="docs-emulatable-studies" class="info-segment" aria-labelledby="docs-emulatable-studies-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Published Profiles</span>
+            <h2 id="docs-emulatable-studies-title">Studies Currently Emulatable From Published Parameters</h2>
+          </div>
+          <p class="info-copy">The toolkit can currently recreate six published study profiles whose reported parameters pass the Segment 0-4 profile gate and can be materialized for native runner handoff. Those profiles come from the five publications below; the 2026 arm-movement publication contributes two emulatable experiment profiles. DOI URLs are shown in citation form, but each DOI link opens the resolved publisher page rather than a doi.org resolver URL.</p>
+          <div class="info-card-grid">
+            <article class="info-card">
+              <span class="card-kicker">Four-direction peri-trunk PPS</span>
+              <h2>Matsuda 2021</h2>
+              <p>Matsuda, Y., Sugimoto, M., Inami, M., &amp; Kitazaki, M. (2021). Peripersonal space in the front, rear, left and right directions for audio-tactile multisensory integration. <em>Scientific Reports, 11</em>, Article 11303.</p>
+              <p>Toolkit profile: <code>matsuda_2021_four_directions</code></p>
+              <a class="button-link publication-doi-link" href="https://www.nature.com/articles/s41598-021-90784-5">https://doi.org/10.1038/s41598-021-90784-5</a>
+            </article>
+            <article class="info-card">
+              <span class="card-kicker">Arm movement PPS</span>
+              <h2>Lamia 2026</h2>
+              <p>Lamia, P., Shabani, N., &amp; Candidi, M. (2026). Somatotopy-independent reduction of audio-tactile intersensory facilitation for looming sounds within the peripersonal space during arm movements execution. <em>Scientific Reports, 16</em>, Article 7133.</p>
+              <p>Toolkit profiles: <code>barumerli_2026_arm_movement_exp1</code> and <code>barumerli_2026_arm_movement_exp2</code></p>
+              <a class="button-link publication-doi-link" href="https://www.nature.com/articles/s41598-026-36796-5">https://doi.org/10.1038/s41598-026-36796-5</a>
+            </article>
+            <article class="info-card">
+              <span class="card-kicker">Bodily self PPS</span>
+              <h2>Noel 2015</h2>
+              <p>Noel, J.-P., Pfeiffer, C., Blanke, O., &amp; Serino, A. (2015). Peripersonal space as the space of the bodily self. <em>Cognition, 144</em>, 49-57.</p>
+              <p>Toolkit profile: <code>noel_2015_bodily_self</code></p>
+              <a class="button-link publication-doi-link" href="https://www.sciencedirect.com/science/article/pii/S001002771530038X">https://doi.org/10.1016/j.cognition.2015.07.012</a>
+            </article>
+            <article class="info-card">
+              <span class="card-kicker">Lateral peri-head PPS</span>
+              <h2>Pfeiffer 2018</h2>
+              <p>Pfeiffer, C., Noel, J. P., Serino, A., &amp; Blanke, O. (2018). Vestibular modulation of peripersonal space boundaries. <em>European Journal of Neuroscience, 47</em>(7), 800-811.</p>
+              <p>Toolkit profile: <code>pfeiffer_2018_lateral_perihead_left_to_right</code></p>
+              <a class="button-link publication-doi-link" href="https://onlinelibrary.wiley.com/doi/10.1111/ejn.13872">https://doi.org/10.1111/ejn.13872</a>
+            </article>
+            <article class="info-card">
+              <span class="card-kicker">Peri-trunk PPS</span>
+              <h2>Serino 2015</h2>
+              <p>Serino, A., Noel, J. P., Galli, G., Canzoneri, E., Marmaroli, P., Lissek, H., &amp; Blanke, O. (2015). Body part-centered and full body-centered peripersonal space representations. <em>Scientific Reports, 5</em>, Article 18603.</p>
+              <p>Toolkit profile: <code>serino_2015_peri_trunk_exp1</code></p>
+              <a class="button-link publication-doi-link" href="https://www.nature.com/articles/srep18603">https://doi.org/10.1038/srep18603</a>
+            </article>
+          </div>
+        </section>
+
+        <hr class="doc-segment-rule" aria-hidden="true">
+
         <section id="docs-architecture" class="info-segment" aria-labelledby="docs-architecture-title">
           <div class="info-segment-heading">
             <span class="segment-kicker">Software Flow</span>
@@ -1004,7 +1052,7 @@
       </form>
     </div>
   </div>
-  <script src="hardware_pixel_art.js?v=20260615-mit-license-disclaimer"></script>
-  <script src="app.js?v=20260615-mit-license-disclaimer"></script>
+  <script src="hardware_pixel_art.js?v=20260615-emulatable-studies-layout"></script>
+  <script src="app.js?v=20260615-emulatable-studies-layout"></script>
 </body>
 </html>
