@@ -130,6 +130,7 @@ The native rendering engine derives from the 3D Tune-In Toolkit (3DTI), an open-
 
 ### References
 
+- Gonzalez-Toledo, D., Molina-Tanco, L., Cuevas-Rodriguez, M., Majdak, P., & Reyes-Lecuona, A. (2023). The Binaural Rendering Toolbox. A Virtual Laboratory for Reproducible Research in Psychoacoustics. *Proceedings of the 10th Convention of the European Acoustics Association*. https://dael.euracoustics.org/confs/landing_pages/fa2023/001042.html
 - Cuevas-Rodriguez, M., Picinali, L., Gonzalez-Toledo, D., Garre, C., de la Rubia-Cuestas, E., Molina-Tanco, L., & Reyes-Lecuona, A. (2019). 3D Tune-In Toolkit: An open-source library for real-time binaural spatialisation. *PLOS ONE*, 14(3), e0211899. https://doi.org/10.1371/journal.pone.0211899
 - Audio Engineering Society. (2022). *AES69-2022: AES standard for file exchange — Spatial acoustic data file format* (SOFA).
 
