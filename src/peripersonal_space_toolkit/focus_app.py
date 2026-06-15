@@ -767,18 +767,14 @@ def prepare_profile_audio_assets(
                 total=len(participants),
             )
             continue
-        if (
-            status.get("generated")
-            and status.get("status") == "ready"
-            and status.get("source") == "prepared_session_queue"
-            and status.get("session_manifest_path")
-        ):
+        existing_session_manifest = str(status.get("session_manifest_path") or "").strip()
+        if status.get("generated") and existing_session_manifest:
             record_prepared_session_queue(
                 participant_id=participant,
                 run_setup_manifest_path=run_setup_manifest_path,
-                session_manifest_path=Path(str(status["session_manifest_path"])),
+                session_manifest_path=Path(existing_session_manifest),
                 status="ready",
-                message="Prepared package re-queued by Experiment Runner launcher.",
+                message="Prepared package reused by Experiment Runner launcher.",
                 state_root=DEFAULT_DASHBOARD_STATE_ROOT,
             )
             reused_count += 1

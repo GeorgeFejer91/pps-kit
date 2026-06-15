@@ -325,6 +325,91 @@ def test_launcher_uses_participant_dropdown_instead_of_text_entry():
     assert errors == []
 
 
+def test_launcher_generate_range_button_prepares_requested_range(monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    participants = ["P001", "P002", "P003"]
+    calls: list[tuple[str, list[str]]] = []
+    errors: list[BaseException] = []
+
+    monkeypatch.setattr(focus_app, "finished_profile_options", lambda: [(focus_app.STUDY5_PROFILE_ID, "Study 5")])
+    monkeypatch.setattr(focus_app, "profile_participant_ids", lambda _profile: participants)
+    monkeypatch.setattr(
+        focus_app,
+        "profile_participant_asset_statuses",
+        lambda _profile: {
+            participant: {
+                "participant_id": participant,
+                "generated": participant != "P003",
+                "status": "generated" if participant != "P003" else "not_generated",
+                "data_collected": False,
+            }
+            for participant in participants
+        },
+    )
+
+    def fake_prepare_profile_audio_assets(profile_id, participant_ids, *, progress_callback=None):
+        calls.append((profile_id, list(participant_ids)))
+        if progress_callback is not None:
+            progress_callback({"message": "Fake range generation", "current": len(participant_ids), "total": len(participant_ids)})
+        return {
+            "profile_id": profile_id,
+            "participant_count": len(participant_ids),
+            "prepared_count": 1,
+            "reused_count": 2,
+            "results": [],
+        }
+
+    monkeypatch.setattr(focus_app, "prepare_profile_audio_assets", fake_prepare_profile_audio_assets)
+
+    def inspect_launcher() -> None:
+        try:
+            dialogs = [widget for widget in app.topLevelWidgets() if widget.windowTitle() == "PPS Experiment Runner"]
+            assert dialogs
+            dialog = dialogs[0]
+            range_inputs = [line for line in dialog.findChildren(q["QLineEdit"]) if line.placeholderText() == "1-10"]
+            assert range_inputs
+            range_buttons = [button for button in dialog.findChildren(q["QPushButton"]) if button.text() == "Generate Range"]
+            assert range_buttons
+            range_inputs[0].setText("1-3")
+            QTest.mouseClick(range_buttons[0], q["Qt"].MouseButton.LeftButton)
+
+            def verify_and_close() -> None:
+                try:
+                    assert calls == [(focus_app.STUDY5_PROFILE_ID, participants)]
+                    labels = _collect_widget_texts(dialog, q["QLabel"])
+                    assert any("Audio assets ready: 1 generated, 2 already available" in label for label in labels)
+                except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
+                    errors.append(exc)
+                finally:
+                    dialog.reject()
+
+            q["QTimer"].singleShot(600, verify_and_close)
+        except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
+            errors.append(exc)
+            for widget in app.topLevelWidgets():
+                if widget.windowTitle() == "PPS Experiment Runner":
+                    widget.reject()
+
+    q["QTimer"].singleShot(50, inspect_launcher)
+    exit_code = focus_app.run_launcher_window(
+        capture_options=SessionCaptureOptions(enable_lsl=False, write_internal_xdf=False, start_backup_recording=False),
+        participant_id="P001",
+        initial_message="inspection",
+    )
+
+    assert exit_code == 1
+    assert errors == []
+
+
 def test_prepare_profile_focus_session_uses_finished_profile_gate(tmp_path: Path, monkeypatch):
     from peripersonal_space_toolkit import dashboard_app, focus_app
 
@@ -374,6 +459,85 @@ def test_prepare_profile_focus_session_uses_finished_profile_gate(tmp_path: Path
     assert calls["payload"] == {"participant_id": "P123"}
     assert calls["prepare_session_kwargs"] == {"progress_callback": None, "snapshot": False}
     assert calls["init_kwargs"]["design_path"] == tmp_path / "focus_design.json"
+
+
+def test_prepare_profile_audio_assets_reuses_scanned_generated_packages(tmp_path: Path, monkeypatch):
+    from peripersonal_space_toolkit import focus_app
+
+    run_setup_manifest = tmp_path / "6_experiment_run_setup" / "experiment_run_setup_manifest.json"
+    run_setup_manifest.parent.mkdir(parents=True)
+    run_setup_manifest.write_text("{}", encoding="utf-8")
+    existing_manifest = tmp_path / "sessions" / "P001_existing" / "session_manifest.json"
+    existing_manifest.parent.mkdir(parents=True)
+    existing_manifest.write_text("{}", encoding="utf-8")
+    generated_manifest = tmp_path / "sessions" / "P002_generated" / "session_manifest.json"
+    generated_manifest.parent.mkdir(parents=True)
+
+    prepared_participants: list[str] = []
+    queue_records: list[dict[str, object]] = []
+    activity_records: list[tuple[tuple[object, ...], dict[str, object]]] = []
+
+    monkeypatch.setattr(
+        focus_app,
+        "_materialize_profile_run_setup",
+        lambda profile, progress_callback=None: (
+            SimpleNamespace(design_path=tmp_path / "design.json"),
+            SimpleNamespace(),
+            run_setup_manifest,
+        ),
+    )
+
+    def fake_asset_status(run_setup_path, participant_id, **_kwargs):
+        assert run_setup_path == run_setup_manifest
+        if participant_id == "P001":
+            return {
+                "participant_id": "P001",
+                "generated": True,
+                "status": "generated",
+                "source": "session_scan",
+                "session_manifest_path": str(existing_manifest),
+                "message": "Prepared local audio package is available.",
+                "data_collected": False,
+            }
+        return {
+            "participant_id": participant_id,
+            "generated": False,
+            "status": "not_generated",
+            "source": "",
+            "session_manifest_path": "",
+            "message": "No prepared local audio package found.",
+            "data_collected": False,
+        }
+
+    def fake_prepare_segment_run_package(run_setup_path, participant_id, **_kwargs):
+        assert run_setup_path == run_setup_manifest
+        prepared_participants.append(participant_id)
+        return SimpleNamespace(
+            manifest_path=generated_manifest,
+            session_dir=generated_manifest.parent,
+            blocks=[object(), object()],
+        )
+
+    monkeypatch.setattr(focus_app, "prepared_session_asset_status", fake_asset_status)
+    monkeypatch.setattr(focus_app, "prepare_segment_run_package", fake_prepare_segment_run_package)
+    monkeypatch.setattr(focus_app, "record_prepared_session_queue", lambda **kwargs: queue_records.append(kwargs))
+    monkeypatch.setattr(
+        focus_app,
+        "record_experiment_activity",
+        lambda *args, **kwargs: activity_records.append((args, kwargs)),
+    )
+
+    result = focus_app.prepare_profile_audio_assets("study5_box_breathing_pps", ["P001", "P002"])
+
+    assert prepared_participants == ["P002"]
+    assert result["prepared_count"] == 1
+    assert result["reused_count"] == 1
+    assert [row["status"] for row in result["results"]] == ["already_ready", "generated"]
+    assert queue_records[0]["participant_id"] == "P001"
+    assert queue_records[0]["status"] == "ready"
+    assert queue_records[0]["session_manifest_path"] == existing_manifest
+    assert [record["status"] for record in queue_records if record["participant_id"] == "P002"] == ["preparing", "ready"]
+    assert activity_records
 
 
 def test_prepare_profile_focus_session_rejects_unfinished_profile(monkeypatch):
