@@ -195,6 +195,13 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
         ),
         enable_missed_trial_topup=True,
     )
+    window_type = q["Qt"].WindowType
+    flags = window.dialog.windowFlags()
+    assert flags & window_type.WindowSystemMenuHint == window_type.WindowSystemMenuHint
+    assert flags & window_type.WindowMinimizeButtonHint == window_type.WindowMinimizeButtonHint
+    assert flags & window_type.WindowMaximizeButtonHint == window_type.WindowMaximizeButtonHint
+    assert flags & window_type.WindowCloseButtonHint == window_type.WindowCloseButtonHint
+    assert window.dialog.isSizeGripEnabled()
     window.dialog.resize(1040, 720)
     window.dialog.show()
     app.processEvents()

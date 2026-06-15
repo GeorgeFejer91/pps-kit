@@ -134,6 +134,24 @@ def _require_qt() -> dict[str, Any]:
     }
 
 
+def _standard_window_flags(q: dict[str, Any]) -> Any:
+    window_type = q["Qt"].WindowType
+    return (
+        window_type.Window
+        | window_type.WindowTitleHint
+        | window_type.WindowSystemMenuHint
+        | window_type.WindowMinimizeButtonHint
+        | window_type.WindowMaximizeButtonHint
+        | window_type.WindowCloseButtonHint
+    )
+
+
+def _enable_standard_window_controls(q: dict[str, Any], dialog: Any) -> None:
+    dialog.setWindowFlags(_standard_window_flags(q))
+    if hasattr(dialog, "setSizeGripEnabled"):
+        dialog.setSizeGripEnabled(True)
+
+
 def _format_duration(seconds: float) -> str:
     total = max(0, int(round(float(seconds))))
     minutes, secs = divmod(total, 60)
@@ -1939,6 +1957,7 @@ class FocusModeWindow:
         self.recenter_controller = TactileRecenterController(self.timeline_state, self._move_cursor_to_target)
 
         self.dialog = q["QDialog"]()
+        _enable_standard_window_controls(q, self.dialog)
         self.dialog.setWindowTitle(f"PPS Experiment Runner - {package.participant_id}")
         self.dialog.setModal(True)
         self.layout_profile = layout_profile or _focus_layout_profile(q)
@@ -3313,6 +3332,7 @@ def run_launcher_window(
     app.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
 
     dialog = q["QDialog"]()
+    _enable_standard_window_controls(q, dialog)
     dialog.setWindowTitle("PPS Experiment Runner")
     dialog.resize(900, 620)
     dialog.setMinimumSize(760, 520)
