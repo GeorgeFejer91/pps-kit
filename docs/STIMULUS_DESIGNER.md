@@ -103,7 +103,7 @@ The designer currently covers:
 - an HTML-dashboard baseline strategy segment for baseline tactic, baseline timing anchors, baseline proportion, live trial-count feedback, and duration estimates
 - compact OpenSesame-style trial assembly controls that define condition factors, trial families, and which stimulus types are allowed in each block: audio-tactile, baseline, and catch
 - live trial-table and participant block-order previews before protocol CSV export
-- runner controls that prepare a participant run package from the current design, open the native Focus Mode app shell, collect participant/runtime metadata there, stress-test the preferred audio route, write standard event/LSL mirror/XDF/analysis outputs, and optionally save a local full-audio evidence WAV
+- runner controls that prepare a participant run package from the current design, open the native Focus Mode app shell, collect participant/runtime metadata there, stress-test the preferred audio route, write standard event/LSL mirror/XDF/analysis outputs, and optionally save a fail-safe local recording WAV
 - Segment 6 **Preload Instruction Audio Clips** controls for before-experiment, before-block, after-block, between-condition, and after-experiment messages with click, timed-delay, or runner-button continuation
 - seeded trial randomization with balanced shuffle, no-immediate-repeat, or ordered strategies
 - participant-level block order assignment using fixed order, seeded random permutation, or counterbalanced rotation
@@ -161,7 +161,7 @@ The Experiment Runner tab uses `artifacts\qt_runner_render\` as its default rend
 
 Reaction-time analysis now treats direct event timing as primary. Focus Mode logs mouse clicks immediately through the local event logger, the internal `PPSMarkersV2`/`PPSTriggerCodes` marker mirror, and optional external LSL streams. Planned tactile onsets are anchored to `audio_sample_zero`, which is emitted by the audio callback when the first block sample reaches the output buffer. A low-gain response marker pulse is also written to the tactile output channel for physical loopback QC; this marker is intended to be visible in validation recordings but below vibration threshold, and is not the primary RT source.
 
-The optional full-audio safety copy is a local digital output evidence WAV written from the already-mixed output buffers, after routing, gain, clipping limits, and tactile-channel mouse-click marker injection. It is not a physical latency measurement. Physical electrical loopback is retained as an internal validation reference for publication-quality timing checks, while WASAPI loopback remains diagnostic only for ASIO routes that may bypass Windows endpoint recording.
+The optional fail-safe local recording is a digital output evidence WAV written from the already-mixed output buffers, after routing, gain, clipping limits, and tactile-channel mouse-click marker injection. It is not a physical latency measurement. Physical electrical loopback is retained as an internal validation reference for publication-quality timing checks, while WASAPI loopback remains diagnostic only for ASIO routes that may bypass Windows endpoint recording.
 
 The local HTML dashboard is now the primary researcher workflow for pilot runs
 of the currently designed experiment, and its final runner action starts native
@@ -171,7 +171,7 @@ decisions to Focus Mode. `events.csv`, local
 `PPSMarkersV2`/`PPSTriggerCodes` mirrors, trigger dictionaries, and analysis
 CSVs are standard runner outputs; live LSL is always attempted. Focus Mode
 collects participant metadata, writes `session_metadata.json`, and lets the
-operator choose the optional local full-audio evidence WAV plus optional
+operator choose the optional fail-safe local recording plus optional
 missed-trial top-up at the end of each experiment part. When missed-trial
 top-up is enabled, Focus Mode keeps a live tactile miss ledger, prepares one
 shortened top-up block at the relevant part boundary, asks the operator for

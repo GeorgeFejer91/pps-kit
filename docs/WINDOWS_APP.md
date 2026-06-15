@@ -142,10 +142,10 @@ blocks, background audio, and click/tactile feedback into that stream. This is
 required because the Komplete ASIO driver is effectively single-client in this
 setup.
 
-Focus Mode can optionally write a local full-audio evidence WAV from the mixed output buffers. This is the normal data-heavy software safety copy for experiment runs; WASAPI loopback remains an optional diagnostic on Windows and may not capture ASIO multichannel playback.
+Focus Mode can optionally write a fail-safe local recording WAV from the mixed output buffers. This is the normal data-heavy software safety copy for experiment runs; WASAPI loopback remains an optional diagnostic on Windows and may not capture ASIO multichannel playback.
 
 ## Local Data
 
-The app writes runtime settings, demographics, session outputs, event logs, LSL marker mirrors, and optional audio evidence WAVs under `local_data\` by default. That folder is ignored by Git and should not be published.
+The app writes runtime settings, demographics, session outputs, event logs, LSL marker mirrors, and optional fail-safe local recording WAVs under `local_data\` by default. That folder is ignored by Git and should not be published.
 The resume ledger lives in `local_data\dashboard_state\` as append-only
 `experiment_activity_log.jsonl` plus the fast pointer `last_experiment.v1.json`.

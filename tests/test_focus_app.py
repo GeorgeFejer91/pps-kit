@@ -250,7 +250,11 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert "Part -" in joined
     assert "Participant Response" in joined
     assert "Participant Setup" in joined
-    assert "Recording" in joined
+    if window.operator_tabs is not None:
+        assert window.operator_tabs.tabText(0) == "Data Logging / Experiment Settings"
+    else:
+        assert "Data Logging / Experiment Settings" in joined
+    assert "Data Logging" in joined
     assert "Experiment Control" in joined
     assert "Part 1" in joined
     assert "Part 2" in joined
@@ -261,9 +265,10 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert "Instruction clips" in joined
     assert "No preloaded clips" in joined
     assert "Include name in LSL/session markers" in joined
-    assert "events.csv on" in joined
-    assert "LSL/event protocol off" in joined
-    assert "Backup WAV (Belts and Suspenders)" in joined
+    assert "events.csv on" not in joined
+    assert "LSL/event protocol" not in joined
+    assert "Save additional fail-safe local recording" in joined
+    assert "estimated extra file" in joined
     assert "Top up missed tactile trials at part end" in joined
     assert "CLICK" in joined
     assert window.participant_code_combo.objectName() == "runnerParticipantCombo"
@@ -277,6 +282,8 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert window.include_name_lsl_checkbox.objectName() == "nameSharingCheckbox"
     assert "(opt-in)" in window.include_name_lsl_checkbox.text()
     assert window.include_name_lsl_checkbox.minimumHeight() >= window.layout_profile.button_min_height + 8
+    assert window.backup_recording_checkbox.objectName() == "failSafeRecordingCheckbox"
+    assert "estimated extra file" in window.backup_recording_checkbox.text()
     assert window.response_panel.width() == window.response_panel.height()
     assert window.response_panel.width() == window.layout_profile.response_panel_side
     assert window.output_panel is not window.processing_panel
@@ -409,7 +416,25 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
     assert window.preview_display_block_index == 1
     assert [segment.clip_label for segment in window.timeline_preview_state.trial_segments] == ["Inhale", "Exhale"]
     assert [segment.trial_label for segment in window.timeline_preview_state.trial_segments] == ["Audio-tactile", "Baseline"]
+    assert [segment.soa_ms for segment in window.timeline_preview_state.trial_segments] == ["300", "800"]
     assert [segment.label for segment in window.timeline_preview_state.instruction_segments] == ["General", "Pre-block", "Post-block"]
+    block_strip_entries = window.block_plan_widget._layout_items()
+    instruction_entries = [entry for entry in block_strip_entries if entry.get("entry_kind") == "instruction"]
+    assert {entry.get("slot") for entry in instruction_entries} >= {
+        "before_experiment",
+        "before_each_block",
+        "after_each_block",
+        "between_conditions",
+    }
+    assert all(int(entry["width"]) <= 13 for entry in instruction_entries)
+    legend_entries = window.instruction_legend_widget._layout_items()
+    assert [entry.get("slot") for entry in legend_entries] == [
+        "before_experiment",
+        "before_each_block",
+        "after_each_block",
+        "between_conditions",
+        "after_experiment",
+    ]
 
     QTest.mouseClick(
         window.block_plan_widget,
@@ -424,6 +449,7 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
     assert window._timeline_display_state() is window.timeline_preview_state
     assert [segment.clip_label for segment in window.timeline_preview_state.trial_segments] == ["Inhale", "Exhale"]
     assert [segment.trial_label for segment in window.timeline_preview_state.trial_segments] == ["Audio-tactile", "Baseline"]
+    assert [segment.soa_ms for segment in window.timeline_preview_state.trial_segments] == ["300", "800"]
     assert [cue.soa_ms for cue in window.timeline_preview_state.cues] == ["300", "800"]
     assert "Block preview: Block 1 | 2 trials | 2 tactile cues" in window.block_preview_label.text()
 
@@ -465,6 +491,8 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
     app.processEvents()
     assert window.selected_part_key == "2"
     assert [item["part_block_number"] for item in window.block_plan_items] == [1, 2]
+    part2_instruction_entries = [entry for entry in window.block_plan_widget._layout_items() if entry.get("entry_kind") == "instruction"]
+    assert "after_experiment" in {entry.get("slot") for entry in part2_instruction_entries}
     assert window.preview_display_block_index == 4
     assert "Condition 2" in window.timeline_preview_state.phase_label
 
@@ -489,6 +517,7 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
                     "end_s": 8.0,
                     "clip_label": "Inhale",
                     "trial_label": "Audio-tactile",
+                    "soa_ms": "300",
                 },
                 {
                     "trial_number": 2,
@@ -497,6 +526,7 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
                     "end_s": 16.0,
                     "clip_label": "Exhale",
                     "trial_label": "Baseline",
+                    "soa_ms": "800",
                 },
             ],
         }
@@ -507,6 +537,7 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
     assert window.preview_display_block_index is None
     assert window.selected_display_block_index == 1
     assert window._timeline_display_state() is window.timeline_state
+    assert [segment.soa_ms for segment in window.timeline_state.trial_segments] == ["300", "800"]
 
     timeline_screenshot = tmp_path / "live_timeline_red_bar.png"
     assert window.tactile_timeline_widget.grab().save(str(timeline_screenshot))
@@ -566,8 +597,7 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     assert window.response_panel.geometry().width() == window.response_panel.geometry().height()
     assert window.output_panel is not window.processing_panel
     assert window.processing_splitter is None
-    expected_run_splitter_count = 2 if profile.right_stack_mode == "tabs" else 3
-    assert window.run_splitter.count() == expected_run_splitter_count
+    assert window.run_splitter.count() == 2
 
     visible_widgets = [
         window.target_button,
@@ -584,13 +614,12 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
         window.part_buttons["1"],
         window.part_buttons["2"],
         window.block_plan_widget,
+        window.instruction_legend_widget,
         window.output_summary,
         window.tactile_timeline_widget,
     ]
     if window.topup_draft_widget.isVisible():
         visible_widgets.append(window.topup_draft_widget)
-    if window.instruction_plan_widget.isVisible():
-        visible_widgets.append(window.instruction_plan_widget)
     if window.block_preview_label.isVisible():
         visible_widgets.append(window.block_preview_label)
     for widget in visible_widgets:

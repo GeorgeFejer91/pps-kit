@@ -24,8 +24,8 @@ experiment software runs locally on the research PC.
 - Segment 6 passes the prepared run setup to the local backend. Native Focus
   Mode owns participant metadata and runtime options; live LSL/event markers,
   local marker mirrors, trigger dictionaries, `events.csv`, and analysis CSVs
-  are standard runner outputs, while the full-audio evidence WAV remains an
-  optional runner checkbox.
+  are standard runner outputs, while the fail-safe local recording WAV remains
+  an optional runner checkbox.
 - File imports are local companion actions. Selected stimulus audio is copied
   into ignored local data on the research PC; it is not uploaded to GitHub
   Pages or any online service.

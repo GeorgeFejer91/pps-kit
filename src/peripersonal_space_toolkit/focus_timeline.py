@@ -33,6 +33,7 @@ class TimelineTrialSegment:
     end_s: float
     clip_label: str = ""
     trial_label: str = ""
+    soa_ms: str = ""
     family: str = ""
 
 
@@ -144,6 +145,7 @@ class TactileTimelineState:
                     end_s=end_s,
                     clip_label=str(segment.get("clip_label") or ""),
                     trial_label=str(segment.get("trial_label") or segment.get("row_label") or ""),
+                    soa_ms=str(segment.get("soa_ms") or segment.get("SOA_ms") or "").strip(),
                     family=str(segment.get("family") or ""),
                 )
             )
