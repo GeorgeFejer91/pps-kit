@@ -107,9 +107,12 @@ def _pair_tactile_responses(events: list[dict[str, Any]], *, min_rt_s: float, ma
     response_rows = []
     for tactile in tactile_events:
         onset = _as_float(tactile.get("unix_time"), 0.0)
-        limit = onset + max_rt_s
+        max_deadline = onset + max_rt_s
+        limit = max_deadline
+        next_trial_start = None
         for trial_start in trial_starts:
             if trial_start > onset + 0.01:
+                next_trial_start = trial_start
                 limit = min(limit, trial_start)
                 break
         click = None
@@ -118,6 +121,8 @@ def _pair_tactile_responses(events: list[dict[str, Any]], *, min_rt_s: float, ma
             if candidate.get("event_id") in used_click_ids:
                 continue
             if not _same_trial_context(tactile, candidate):
+                continue
+            if next_trial_start is not None and click_time >= next_trial_start:
                 continue
             if onset + min_rt_s <= click_time <= limit:
                 click = candidate

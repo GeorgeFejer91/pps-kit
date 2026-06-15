@@ -47,6 +47,17 @@ python .\validation_protocols\scripts\run_topup_missed_trial_stress.py `
   --output-dir artifacts\validation_runs\topup_missed_trial_stress_current
 ```
 
+Run the deterministic response-boundary matrix before the broader packaged or
+hardware-backed scenarios. It prepares a real Segment 5/6-style session package,
+runs `SessionRunnerController`, exercises instruction target double-clicks,
+catch and baseline rows, in-playback response markers, and exact response
+pairing boundaries, then automatically runs the offline artifact gate:
+
+```powershell
+python .\validation_protocols\scripts\run_protocol11_controlled_response_matrix.py `
+  --output-dir artifacts\validation_runs\protocol11_controlled_response_matrix_current
+```
+
 After each scenario writes a real runner session folder, run the offline
 Protocol 11 artifact gate with the scenario's controlled response plan:
 
@@ -59,7 +70,8 @@ python .\validation_protocols\scripts\validate_protocol11_emulated_runner_artifa
 
 The response plan may be JSON or CSV. The minimum plan is keyed by
 `trial_uid`; JSON plans may also declare expected capture options,
-instruction slots, top-up behavior, and operator failure-mode expectations.
+instruction slots, instruction-click actions, top-up behavior, and operator
+failure-mode expectations.
 
 When a checklist item has no dedicated harness yet, record it as a missing
 automation gap before changing runtime code. Add runner code only when the gap
@@ -219,7 +231,8 @@ for each scenario:
 - One-block actual-condition emulation with real audio hardware and OS-click
   responses.
 - Boundary-response synthetic run with deterministic early, late, double, and
-  out-of-target clicks.
+  out-of-target clicks. The canonical fast software gate is
+  `run_protocol11_controlled_response_matrix.py`.
 - Top-up adversarial run across two parts with approval accepted, denied, and
   failed.
 - Capture-options matrix with LSL, XDF, trigger, and analysis toggles.

@@ -1059,6 +1059,29 @@ def test_protocol11_artifact_auditor_accepts_one_block_runner_outputs(tmp_path: 
     assert (tmp_path / "protocol11_audit" / "protocol11_emulated_runner_artifact_audit.json").exists()
 
 
+def test_protocol11_controlled_response_matrix_exercises_boundary_pairing(tmp_path: Path):
+    matrix = _load_script("run_protocol11_controlled_response_matrix.py")
+
+    report = matrix.run_matrix(
+        output_dir=tmp_path,
+        participant_id="P011",
+        sample_rate=44100,
+        blocksize=512,
+        enable_lsl=False,
+        response_marker_delay_ms=8.0,
+    )
+
+    assert report["passed"]
+    assert report["checks"]["early_99ms_rejected"]
+    assert report["checks"]["boundary_100ms_accepted"]
+    assert report["checks"]["next_trial_start_click_rejected_previous"]
+    assert report["checks"]["max_3000ms_accepted"]
+    assert report["checks"]["late_3100ms_rejected"]
+    assert report["artifact_audit_passed"]
+    assert Path(report["response_plan_json"]).exists()
+    assert Path(report["artifact_audit_json"]).exists()
+
+
 def test_topup_missed_trial_stress_rescues_intentional_misses(tmp_path: Path):
     stress = _load_script("run_topup_missed_trial_stress.py")
 

@@ -278,6 +278,8 @@ class TopUpLedger:
 
     def _click_matches(self, entry: TopUpLedgerEntry, click: dict[str, Any]) -> bool:
         click_time = float(click["unix_time"])
+        if str(entry.miss_reason or "") == "next_trial_started" and click_time >= float(entry.response_deadline_unix_time):
+            return False
         return (float(entry.tactile_unix_time) + self.min_rt_s) <= click_time <= float(entry.response_deadline_unix_time)
 
     def _resolve_entry(self, entry: TopUpLedgerEntry, click: dict[str, Any]) -> None:

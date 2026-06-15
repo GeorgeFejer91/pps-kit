@@ -91,6 +91,52 @@ def test_topup_ledger_resolves_valid_click_that_arrives_after_trial_boundary(tmp
     assert ledger.entries[0].miss_reason == ""
 
 
+def test_response_pairing_rejects_click_at_next_trial_start(tmp_path: Path):
+    events = [
+        _event(1, "trial_start", 10.0, trial_uid="T001"),
+        _event(
+            2,
+            "tactile_onset",
+            10.5,
+            trial_uid="T001",
+            Trial_Type="Audio-Tactile",
+            Family="audio_tactile",
+            SOA_ms=0,
+        ),
+        _event(3, "trial_start", 11.0, trial_uid="T002"),
+        _event(4, "mouse_click", 11.0, in_target=True, during_playback=True),
+    ]
+
+    result = analyze_session_events(events)
+
+    assert result.response_rows[0]["trial_uid"] == "T001"
+    assert result.response_rows[0]["hit"] is False
+
+
+def test_topup_ledger_rejects_click_at_next_trial_start(tmp_path: Path):
+    ledger = TopUpLedger(tmp_path, participant_id="P001", session_id="S001", min_rt_s=0.1, max_rt_s=3.0)
+
+    ledger.observe_event(
+        _event(
+            1,
+            "tactile_onset",
+            10.5,
+            trial_uid="T001",
+            Trial_Type="Audio-Tactile",
+            Family="audio_tactile",
+            Row_Label="Inhale",
+            SOA_ms=0,
+            Trial_File_Path="trial.wav",
+        )
+    )
+    ledger.observe_event(_event(2, "trial_start", 11.0, trial_uid="T002"))
+    ledger.observe_event(_event(3, "mouse_click", 11.0, in_target=True, during_playback=True))
+
+    assert ledger.entries[0].status == MISSED_NEEDS_TOPUP
+    assert ledger.entries[0].click_event_id == ""
+    assert ledger.entries[0].miss_reason == "next_trial_started"
+
+
 def test_final_outcomes_use_topup_rescue_attempt():
     events = [
         {"event_id": 1, "event_type": "trial_start", "unix_time": 0.0, "monotonic_time": 0.0, "trial_uid": "ORIG"},

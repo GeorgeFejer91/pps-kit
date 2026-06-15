@@ -549,14 +549,22 @@ def _audit_response_plan(
         for row in events
         if row.get("event_type") == "mouse_click" and not _truthy(row.get("during_playback", True))
     ]
-    action_instruction_clicks = [item for item in plan_trials if _norm(item.get("action")) == "instruction_click"]
+    planned_instruction_clicks = [
+        item
+        for item in plan_trials
+        if _norm(item.get("action")) == "instruction_click"
+    ]
+    top_level_instruction_clicks = plan.get("instruction_clicks") or plan.get("instruction_actions") or []
+    if not isinstance(top_level_instruction_clicks, list):
+        top_level_instruction_clicks = []
+    planned_instruction_clicks.extend(item for item in top_level_instruction_clicks if isinstance(item, dict))
     _criterion(
         criteria,
         "emulated_response_model",
         "instruction_clicks_excluded_from_mouse_responses",
-        not action_instruction_clicks or not instruction_mouse_clicks,
+        not planned_instruction_clicks or not instruction_mouse_clicks,
         f"out-of-playback mouse_click rows={len(instruction_mouse_clicks)}",
-        required=bool(action_instruction_clicks),
+        required=bool(planned_instruction_clicks),
     )
     return {"planned_count": len(plan_trials), "missing": missing, "mismatches": mismatches, "rt_mismatches": rt_mismatches}
 
@@ -599,8 +607,15 @@ def _audit_response_markers(criteria: list[Criterion], *, events: list[dict[str,
     event_index = {str(row.get("event_id")): index for index, row in enumerate(events)}
     for marker in markers:
         mouse_id = str(_row_value(marker, "mouse_event_id", default="")).strip()
-        if mouse_id and event_index.get(mouse_id, -1) > event_index.get(str(marker.get("event_id")), -1):
-            event_order_failures.append(f"mouse {mouse_id} after marker {marker.get('event_id')}")
+        if not mouse_id:
+            continue
+        mouse_event_id = _as_int(mouse_id, default=None)
+        marker_event_id = _as_int(marker.get("event_id"), default=None)
+        if mouse_event_id is not None and marker_event_id is not None:
+            if mouse_event_id > marker_event_id:
+                event_order_failures.append(f"mouse {mouse_id} logged after marker {marker.get('event_id')}")
+        elif event_index.get(mouse_id, -1) > event_index.get(str(marker.get("event_id")), -1):
+            event_order_failures.append(f"mouse {mouse_id} sorted after marker {marker.get('event_id')}")
     _criterion(criteria, "response_marker_path", "mouse_logged_before_response_marker", not event_order_failures, "; ".join(event_order_failures[:8]))
 
 
