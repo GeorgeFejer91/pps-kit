@@ -207,23 +207,47 @@ def _part_display_label(part_key: str) -> str:
         return f"Part {text}" if text else "Part --"
 
 
+def _part_button_label(part_key: str) -> str:
+    text = str(part_key or "").strip()
+    try:
+        return f"Part {int(float(text))}"
+    except ValueError:
+        return f"Part {text}" if text else "Part"
+
+
 def _compact_run_block_label(block: Any) -> str:
     text = str(getattr(block, "label", "") or f"Block {getattr(block, 'index', '')}").strip()
     return text if len(text) <= 24 else f"{text[:21]}..."
+
+
+def _package_part_keys(package: Any) -> list[str]:
+    keys: list[str] = []
+    for block in getattr(package, "blocks", []) or []:
+        if _is_topup_block(block):
+            continue
+        part_key = _block_part_key(block)
+        if part_key not in keys:
+            keys.append(part_key)
+    return keys or ["1"]
 
 
 def _run_plan_items(package: Any, *, include_topup_slots: bool) -> list[dict[str, Any]]:
     standard_blocks = [block for block in getattr(package, "blocks", []) if not _is_topup_block(block)]
     items: list[dict[str, Any]] = []
     display_index = 0
+    part_block_counts: dict[str, int] = {}
     for index, block in enumerate(standard_blocks):
         part_key = _block_part_key(block)
         display_index += 1
+        part_block_counts[part_key] = int(part_block_counts.get(part_key, 0)) + 1
+        part_block_number = part_block_counts[part_key]
         items.append(
             {
                 "kind": "standard",
                 "part_key": part_key,
                 "number": display_index,
+                "part_block_number": part_block_number,
+                "display_label": f"Block {part_block_number}",
                 "label": _compact_run_block_label(block),
                 "block_index": int(getattr(block, "index", display_index) or display_index),
                 "trial_count": int(getattr(block, "trial_count", 0) or 0),
@@ -233,11 +257,15 @@ def _run_plan_items(package: Any, *, include_topup_slots: bool) -> list[dict[str
         next_block = standard_blocks[index + 1] if index + 1 < len(standard_blocks) else None
         if include_topup_slots and (next_block is None or _block_part_key(next_block) != part_key):
             display_index += 1
+            part_block_counts[part_key] = int(part_block_counts.get(part_key, 0)) + 1
+            part_block_number = part_block_counts[part_key]
             items.append(
                 {
                     "kind": "topup",
                     "part_key": part_key,
                     "number": display_index,
+                    "part_block_number": part_block_number,
+                    "display_label": f"Block {part_block_number} top-up",
                     "label": "Top-up if needed",
                 }
             )
@@ -260,7 +288,7 @@ def _run_plan_text(package: Any, *, include_topup_slots: bool) -> str:
             part_order.append(part_key)
     for part_key in part_order:
         part_items = [item for item in items if item["part_key"] == part_key]
-        entries = ", ".join(f"{item['number']} {item['label']}" for item in part_items)
+        entries = ", ".join(f"{item.get('part_block_number', item['number'])} {item['label']}" for item in part_items)
         lines.append(f"{_part_display_label(part_key)}: {entries}")
     return "\n".join(lines)
 
@@ -299,6 +327,103 @@ def _instruction_profile_summary(package: Any) -> str:
     slots = profile.get("slots", []) if isinstance(profile, dict) else []
     enabled = [slot for slot in slots if isinstance(slot, dict) and slot.get("enabled") and slot.get("path")]
     return f"{len(enabled)} clip(s) preloaded" if enabled else "No preloaded clips"
+
+
+INSTRUCTION_SLOT_ALIASES = {
+    "before_block": "before_each_block",
+    "pre_block": "before_each_block",
+    "after_block": "after_each_block",
+    "post_block": "after_each_block",
+    "interim": "between_conditions",
+}
+
+INSTRUCTION_SLOT_STYLES = {
+    "before_experiment": {"label": "General", "color": "#5b6ee1"},
+    "before_each_block": {"label": "Pre-block", "color": "#2f7d57"},
+    "after_each_block": {"label": "Post-block", "color": "#b7791f"},
+    "between_conditions": {"label": "Interim", "color": "#1f7a8c"},
+    "after_experiment": {"label": "Finish", "color": "#9f3a60"},
+}
+
+INSTRUCTION_SLOT_ORDER = (
+    "before_experiment",
+    "before_each_block",
+    "after_each_block",
+    "between_conditions",
+    "after_experiment",
+)
+
+
+def _canonical_instruction_slot(slot: Any) -> str:
+    text = str(slot or "").strip()
+    return INSTRUCTION_SLOT_ALIASES.get(text, text)
+
+
+def _instruction_slot_display(slot: str, fallback: str = "") -> str:
+    canonical = _canonical_instruction_slot(slot)
+    style = INSTRUCTION_SLOT_STYLES.get(canonical, {})
+    return str(style.get("label") or fallback or canonical.replace("_", " ").title())
+
+
+def _instruction_slot_color(slot: str) -> str:
+    canonical = _canonical_instruction_slot(slot)
+    style = INSTRUCTION_SLOT_STYLES.get(canonical, {})
+    return str(style.get("color") or "#647067")
+
+
+def _instruction_slots(package: Any) -> list[dict[str, Any]]:
+    profile = getattr(package, "instruction_profile", {}) or {}
+    raw_slots = profile.get("slots", []) if isinstance(profile, dict) else []
+    if isinstance(raw_slots, dict):
+        raw_slots = list(raw_slots.values())
+    slots: list[dict[str, Any]] = []
+    for item in raw_slots if isinstance(raw_slots, list) else []:
+        if not isinstance(item, dict):
+            continue
+        slot = _canonical_instruction_slot(item.get("slot"))
+        if not slot:
+            continue
+        payload = dict(item)
+        payload["slot"] = slot
+        payload["display_label"] = _instruction_slot_display(slot, str(item.get("label") or ""))
+        payload["color"] = _instruction_slot_color(slot)
+        slots.append(payload)
+    order = {slot: index for index, slot in enumerate(INSTRUCTION_SLOT_ORDER)}
+    return sorted(slots, key=lambda item: (order.get(str(item.get("slot") or ""), 99), str(item.get("display_label") or "")))
+
+
+def _enabled_instruction_slots(package: Any) -> list[dict[str, Any]]:
+    return [
+        slot
+        for slot in _instruction_slots(package)
+        if bool(slot.get("enabled")) and str(slot.get("path") or "").strip()
+    ]
+
+
+def _trial_type_color(label: Any, family: Any = "") -> str:
+    text = f"{label} {family}".strip().lower().replace("-", "_").replace(" ", "_")
+    if "audio_tactile" in text or "audiotactile" in text:
+        return "#dcefeb"
+    if "baseline" in text:
+        return "#f4e2b8"
+    if "catch" in text:
+        return "#e4e7eb"
+    if "top_up" in text or "topup" in text:
+        return "#f0dddd"
+    return "#e3ead8"
+
+
+def _topup_draft_item_label(item: dict[str, Any], *, compact: bool = False) -> str:
+    block = str(item.get("block_number") or "").strip()
+    trial = str(item.get("trial_number") or "").strip()
+    row = str(item.get("respiratory_phase") or item.get("row_label") or "").strip()
+    trial_type = str(item.get("trial_type") or item.get("family") or "Trial").strip()
+    soa = str(item.get("soa_ms") or "").strip()
+    prefix = " ".join(part for part in (f"B{block}" if block else "", f"T{trial}" if trial else "") if part)
+    if compact:
+        return " | ".join(part for part in (prefix, row, trial_type) if part)
+    soa_text = f"SOA {soa}" if soa else ""
+    return " | ".join(part for part in (prefix, row, trial_type, soa_text) if part)
 
 
 def _chip(q: dict[str, Any], text: str, *, tone: str = "neutral") -> Any:
@@ -369,9 +494,9 @@ def _create_tactile_timeline_widget(
         def __init__(self) -> None:
             super().__init__()
             if profile is not None and profile.screen_class == "constrained":
-                minimum_height = 52
+                minimum_height = 42
             elif profile is not None and profile.compact:
-                minimum_height = 96
+                minimum_height = 78
             else:
                 minimum_height = 116
             self.setMinimumHeight(minimum_height)
@@ -384,19 +509,21 @@ def _create_tactile_timeline_widget(
                 height = max(1, int(self.height()))
                 label_width = 58
                 right_margin = 12
-                compact_rows = height < 108
-                very_compact_rows = height < 78
-                top_margin = 4 if very_compact_rows else (6 if compact_rows else 10)
+                compact_rows = height < 96
+                very_compact_rows = height < 84
+                top_margin = 3 if very_compact_rows else (6 if compact_rows else 10)
                 usable = max(1, width - label_width - right_margin)
                 timeline_state = state_provider() if state_provider is not None else state
                 duration = max(0.001, float(timeline_state.duration_s or 0.0))
-                if very_compact_rows:
-                    row_offsets = (4, 18, 32, 46)
+                if height < 55:
+                    row_offsets = (2, 10, 18, 26, 34)
+                elif very_compact_rows:
+                    row_offsets = (3, 14, 25, 36, 47)
                 elif compact_rows:
-                    row_offsets = (3, 22, 41, 60)
+                    row_offsets = (3, 18, 33, 48, 63)
                 else:
-                    row_offsets = (5, 31, 58, 86)
-                rows = [(label, top_margin + offset) for label, offset in zip(("Clip", "Trial", "Tactile", "Clicks"), row_offsets)]
+                    row_offsets = (5, 26, 50, 74, 98)
+                rows = [(label, top_margin + offset) for label, offset in zip(("Instr", "Resp", "Type", "Tactile", "Clicks"), row_offsets)]
 
                 painter.fillRect(self.rect(), q["QColor"]("#f8f9f6"))
                 label_pen = q["QPen"](q["QColor"]("#647067"))
@@ -409,7 +536,7 @@ def _create_tactile_timeline_widget(
                     painter.drawLine(label_width, row_y, width - right_margin, row_y)
                     painter.setPen(label_pen)
 
-                if not timeline_state.cues and not timeline_state.trial_segments:
+                if not timeline_state.cues and not timeline_state.trial_segments and not timeline_state.instruction_segments:
                     painter.setPen(q["QPen"](q["QColor"]("#647067")))
                     painter.drawText(self.rect(), q["Qt"].AlignmentFlag.AlignCenter, "No experiment schedule loaded")
                     return
@@ -433,9 +560,24 @@ def _create_tactile_timeline_widget(
                         return "#e3ead8"
                     if "catch" in text:
                         return "#f4e2b8"
+                    if "audio" in text and "tactile" in text:
+                        return "#dcefeb"
                     return palette[fallback_index % len(palette)]
 
-                row_height = 12 if very_compact_rows else (16 if compact_rows else 18)
+                row_height = 8 if very_compact_rows else (12 if compact_rows else 16)
+
+                for segment in timeline_state.instruction_segments:
+                    x1 = _x(segment.start_s)
+                    x2 = max(x1 + 12, _x(segment.end_s))
+                    y = rows[0][1] - row_height // 2
+                    color = segment.color or _instruction_slot_color(segment.slot)
+                    painter.setPen(q["QPen"](q["QColor"]("#bcc7bd")))
+                    painter.setBrush(q["QBrush"](q["QColor"](color)))
+                    painter.drawRoundedRect(x1, y, max(10, x2 - x1), row_height, 4, 4)
+                    if x2 - x1 >= 42:
+                        painter.setPen(q["QPen"](q["QColor"]("#ffffff")))
+                        painter.drawText(x1 + 3, y + 1, max(1, x2 - x1 - 6), row_height - 2, int(q["Qt"].AlignmentFlag.AlignVCenter), _short(segment.label, 18))
+
                 for index, segment in enumerate(timeline_state.trial_segments):
                     x1 = _x(segment.start_s)
                     x2 = max(x1 + 2, _x(segment.end_s))
@@ -443,8 +585,8 @@ def _create_tactile_timeline_widget(
                     trial_color = _color_for(segment.trial_label, index + 2)
                     for row_index, (text, y, color) in enumerate(
                         (
-                            (segment.clip_label or segment.family or "Clip", rows[0][1] - row_height // 2, clip_color),
-                            (segment.trial_label or segment.family or "Trial", rows[1][1] - row_height // 2, trial_color),
+                            (segment.clip_label or "Resp", rows[1][1] - row_height // 2, clip_color),
+                            (segment.trial_label or segment.family or "Type", rows[2][1] - row_height // 2, trial_color),
                         )
                     ):
                         painter.setPen(q["QPen"](q["QColor"]("#bcc7bd")))
@@ -463,7 +605,7 @@ def _create_tactile_timeline_widget(
                         "upcoming": "#d9dfd6",
                     }.get(status, "#d9dfd6")
                     x = _x(cue.time_s)
-                    line_y = rows[2][1]
+                    line_y = rows[3][1]
                     radius = 5 if status == "next" else 4
                     marker_pen = q["QPen"](q["QColor"]("#202621" if status == "next" else "#bcc7bd"))
                     marker_pen.setWidth(1)
@@ -475,7 +617,7 @@ def _create_tactile_timeline_widget(
                 click_pen.setWidth(2)
                 painter.setPen(click_pen)
                 painter.setBrush(q["QBrush"](q["QColor"]("#dce7f4")))
-                click_y = rows[3][1]
+                click_y = rows[4][1]
                 for marker in timeline_state.click_markers:
                     x = _x(marker.time_s)
                     painter.drawRect(x - 4, click_y - 4, 8, 8)
@@ -584,7 +726,12 @@ def _create_block_plan_widget(q: dict[str, Any], owner: Any) -> Any:
             item = self._item_at(point)
             if item is not None:
                 label = str(item.get("label") or "")
-                self.setToolTip(f"Block {item.get('number')}: {label}" if label else f"Block {item.get('number')}")
+                display = str(item.get("display_label") or f"Block {item.get('part_block_number') or item.get('number')}")
+                part = _part_button_label(str(item.get("part_key") or ""))
+                detail = f"{part} {display}"
+                if label and label != display:
+                    detail = f"{detail}: {label}"
+                self.setToolTip(detail)
             super().mouseMoveEvent(event)
 
         def mousePressEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
@@ -633,6 +780,7 @@ def _create_block_plan_widget(q: dict[str, Any], owner: Any) -> Any:
                     box_width = int(item["width"])
                     box_height = int(item["height"])
                     kind = str(item.get("kind") or "")
+                    display_number = int(item.get("part_block_number") or number)
                     if number == active:
                         fill = "#246b55"
                         border = "#1d5846"
@@ -657,9 +805,9 @@ def _create_block_plan_widget(q: dict[str, Any], owner: Any) -> Any:
                     painter.setBrush(q["QBrush"](q["QColor"](fill)))
                     painter.drawRoundedRect(x, y, box_width, box_height, 5, 5)
                     painter.setPen(q["QPen"](q["QColor"](text)))
-                    label = "TU" if kind == "topup" else f"{number}"
+                    label = "TU" if kind == "topup" else f"{display_number}"
                     if box_width >= 68:
-                        label = f"{number} TU" if kind == "topup" else f"Block {number}"
+                        label = f"{display_number} TU" if kind == "topup" else f"Block {display_number}"
                     painter.drawText(x + 3, y + 2, box_width - 6, box_height - 4, q["Qt"].AlignmentFlag.AlignCenter, label)
                     if number == selected:
                         selected_pen = q["QPen"](q["QColor"]("#1d5d99"))
@@ -677,6 +825,155 @@ def _create_block_plan_widget(q: dict[str, Any], owner: Any) -> Any:
                 painter.end()
 
     return BlockPlanWidget()
+
+
+def _create_instruction_plan_widget(q: dict[str, Any], owner: Any) -> Any:
+    class InstructionPlanWidget(q["QWidget"]):
+        def __init__(self) -> None:
+            super().__init__()
+            profile = getattr(owner, "layout_profile", None)
+            self._compact = bool(profile is not None and profile.screen_class == "constrained")
+            self.setMinimumHeight(28 if self._compact else 32)
+            self.setMouseTracking(True)
+
+        def _layout_items(self) -> list[dict[str, Any]]:
+            items = [dict(item) for item in list(getattr(owner, "instruction_plan_items", []) or [])]
+            if not items:
+                return []
+            margin = 8
+            gap = 6
+            width = max(1, int(self.width()))
+            box_height = 18 if self._compact else 22
+            available = max(1, width - (2 * margin) - (gap * (len(items) - 1)))
+            box_width = max(62 if self._compact else 84, int(available / len(items)))
+            layout_items: list[dict[str, Any]] = []
+            for index, item in enumerate(items):
+                x = margin + index * (box_width + gap)
+                entry = dict(item)
+                entry.update({"x": x, "y": margin, "width": box_width, "height": box_height})
+                layout_items.append(entry)
+            return layout_items
+
+        def mouseMoveEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
+            try:
+                point = event.position().toPoint()
+            except AttributeError:
+                point = event.pos()
+            px = int(point.x())
+            py = int(point.y())
+            for item in self._layout_items():
+                if int(item["x"]) <= px <= int(item["x"]) + int(item["width"]) and int(item["y"]) <= py <= int(item["y"]) + int(item["height"]):
+                    label = str(item.get("label") or item.get("display_label") or "")
+                    mode = str(item.get("continue_mode") or "").replace("_", " ")
+                    duration = float(item.get("duration_s") or 0.0)
+                    self.setToolTip(f"{label} | {duration:.1f}s | {mode}".strip(" |"))
+                    break
+            super().mouseMoveEvent(event)
+
+        def paintEvent(self, _event: Any) -> None:  # noqa: N802 - Qt API
+            painter = q["QPainter"](self)
+            try:
+                painter.setRenderHint(q["QPainter"].RenderHint.Antialiasing, True)
+                painter.fillRect(self.rect(), q["QColor"]("#f8f9f6"))
+                items = self._layout_items()
+                if not items:
+                    painter.setPen(q["QPen"](q["QColor"]("#647067")))
+                    painter.drawText(self.rect(), q["Qt"].AlignmentFlag.AlignCenter, "No instruction clips")
+                    return
+                for item in items:
+                    x = int(item["x"])
+                    y = int(item["y"])
+                    width = int(item["width"])
+                    height = int(item["height"])
+                    color = str(item.get("color") or _instruction_slot_color(str(item.get("slot") or "")))
+                    painter.setPen(q["QPen"](q["QColor"]("#bcc7bd")))
+                    painter.setBrush(q["QBrush"](q["QColor"](color)))
+                    painter.drawRoundedRect(x, y, width, height, 5, 5)
+                    painter.setPen(q["QPen"](q["QColor"]("#ffffff")))
+                    text = str(item.get("display_label") or item.get("label") or "Instruction")
+                    painter.drawText(x + 4, y + 1, width - 8, height - 2, int(q["Qt"].AlignmentFlag.AlignCenter), text)
+            finally:
+                painter.end()
+
+    return InstructionPlanWidget()
+
+
+def _create_topup_draft_widget(q: dict[str, Any], owner: Any) -> Any:
+    class TopupDraftWidget(q["QWidget"]):
+        def __init__(self) -> None:
+            super().__init__()
+            profile = getattr(owner, "layout_profile", None)
+            self._compact = bool(profile is not None and profile.screen_class == "constrained")
+            self.setMinimumHeight(34 if self._compact else 42)
+            self.setCursor(q["Qt"].CursorShape.PointingHandCursor)
+
+        def refresh_layout_height(self) -> None:
+            items = list(getattr(owner, "_visible_topup_draft_items", lambda: [])() or [])
+            margin = 8
+            gap = 5
+            box_height = 18 if self._compact else 22
+            if not items:
+                target_height = 34 if self._compact else 42
+            else:
+                columns = max(1, min(len(items), int(max(1, self.width() - 16) / (132 if self._compact else 170))))
+                rows = int(math.ceil(len(items) / columns))
+                target_height = (2 * margin) + rows * box_height + max(0, rows - 1) * gap
+                target_height = max(34 if self._compact else 42, target_height)
+            if int(self.minimumHeight()) != int(target_height):
+                self.setMinimumHeight(int(target_height))
+                self.updateGeometry()
+
+        def resizeEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
+            super().resizeEvent(event)
+            self.refresh_layout_height()
+
+        def mousePressEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
+            if event.button() == q["Qt"].MouseButton.LeftButton:
+                handler = getattr(owner, "_select_current_part_topup_slot", None)
+                if callable(handler):
+                    handler()
+                    event.accept()
+                    return
+            super().mousePressEvent(event)
+
+        def paintEvent(self, _event: Any) -> None:  # noqa: N802 - Qt API
+            painter = q["QPainter"](self)
+            try:
+                painter.setRenderHint(q["QPainter"].RenderHint.Antialiasing, True)
+                painter.fillRect(self.rect(), q["QColor"]("#f8f9f6"))
+                items = list(getattr(owner, "_visible_topup_draft_items", lambda: [])() or [])
+                part_label = _part_button_label(str(getattr(owner, "selected_part_key", "") or "1"))
+                enabled = bool(getattr(owner, "_topup_slots_enabled_for_plan", lambda: False)())
+                if not enabled:
+                    painter.setPen(q["QPen"](q["QColor"]("#647067")))
+                    painter.drawText(self.rect(), q["Qt"].AlignmentFlag.AlignCenter, "Top-up block disabled")
+                    return
+                if not items:
+                    painter.setPen(q["QPen"](q["QColor"]("#647067")))
+                    painter.drawText(self.rect(), q["Qt"].AlignmentFlag.AlignCenter, f"{part_label} top-up draft: no missed tactile trials yet")
+                    return
+                margin = 8
+                gap = 5
+                box_height = 18 if self._compact else 22
+                columns = max(1, min(len(items), int(max(1, self.width() - 16) / (132 if self._compact else 170))))
+                available = max(1, int(self.width()) - (2 * margin) - gap * (columns - 1))
+                box_width = max(120 if self._compact else 150, int(available / columns))
+                for index, item in enumerate(items):
+                    row = int(index / columns)
+                    column = index % columns
+                    x = margin + column * (box_width + gap)
+                    y = margin + row * (box_height + gap)
+                    color = _trial_type_color(item.get("trial_type", ""), item.get("family", ""))
+                    painter.setPen(q["QPen"](q["QColor"]("#bcc7bd")))
+                    painter.setBrush(q["QBrush"](q["QColor"](color)))
+                    painter.drawRoundedRect(x, y, box_width, box_height, 5, 5)
+                    label = _topup_draft_item_label(item, compact=self._compact)
+                    painter.setPen(q["QPen"](q["QColor"]("#202621")))
+                    painter.drawText(x + 4, y + 1, box_width - 8, box_height - 2, int(q["Qt"].AlignmentFlag.AlignVCenter), label)
+            finally:
+                painter.end()
+
+    return TopupDraftWidget()
 
 
 def _create_response_target_button(q: dict[str, Any], profile: FocusLayoutProfile) -> Any:
@@ -1961,11 +2258,16 @@ class FocusModeWindow:
         self.timeline_preview_state = TactileTimelineState()
         self.selected_display_block_index: int | None = None
         self.preview_display_block_index: int | None = None
+        self.selected_part_key: str | None = None
         self.recenter_records: list[dict[str, Any]] = []
         self._last_recenter_backend_warning = ""
         self.validation_topup_approval_records: list[dict[str, Any]] = []
         self.planned_tactile_cue_count = 0
+        self.all_block_plan_items: list[dict[str, Any]] = []
         self.block_plan_items: list[dict[str, Any]] = []
+        self.instruction_plan_items: list[dict[str, Any]] = []
+        self.topup_draft_items: list[dict[str, Any]] = []
+        self.part_buttons: dict[str, Any] = {}
         self.active_display_block_index: int | None = None
         self.completed_display_block_indices: set[int] = set()
         self.recenter_controller = TactileRecenterController(self.timeline_state, self._move_cursor_to_target)
@@ -2282,7 +2584,7 @@ class FocusModeWindow:
         self.topup_checkbox = q["QCheckBox"]("Top up missed tactile trials at part end")
         self.topup_checkbox.setToolTip("Top up missed tactile trials at end of each part")
         self.topup_checkbox.setChecked(bool(self.enable_missed_trial_topup))
-        self.topup_checkbox.stateChanged.connect(lambda _state: self._refresh_run_plan())
+        self.topup_checkbox.stateChanged.connect(lambda _state: self._refresh_run_plan(select_default=True))
         settings_layout.addWidget(self.backup_recording_checkbox)
         settings_layout.addWidget(self.topup_checkbox)
         settings_layout.addStretch(1)
@@ -2299,6 +2601,23 @@ class FocusModeWindow:
         progress_layout.setSpacing(profile.panel_spacing)
         if profile.screen_class != "constrained":
             progress_layout.addWidget(_subtitle(q, "Block Order"))
+        self.part_selector_widget = q["QWidget"]()
+        part_selector_layout = q["QHBoxLayout"](self.part_selector_widget)
+        part_selector_layout.setContentsMargins(0, 0, 0, 0)
+        part_selector_layout.setSpacing(6)
+        part_selector_layout.addWidget(_subtitle(q, "Part"))
+        for part_key in ("1", "2"):
+            button = q["QPushButton"](_part_button_label(part_key))
+            button.setObjectName(f"part{part_key}Button")
+            button.setCheckable(True)
+            button.setMinimumHeight(profile.button_min_height)
+            button.clicked.connect(lambda _checked=False, key=part_key: self._select_part_key(key, preview_first=True))
+            self.part_buttons[part_key] = button
+            part_selector_layout.addWidget(button)
+        part_selector_layout.addStretch(1)
+        progress_layout.addWidget(self.part_selector_widget)
+        self.instruction_plan_widget = _create_instruction_plan_widget(q, self)
+        progress_layout.addWidget(self.instruction_plan_widget)
         self.block_plan_widget = _create_block_plan_widget(q, self)
         progress_layout.addWidget(self.block_plan_widget)
         self.block_preview_label = q["QLabel"]("Block preview: live schedule")
@@ -2307,6 +2626,8 @@ class FocusModeWindow:
         progress_layout.addWidget(self.block_preview_label)
         if profile.screen_class == "constrained":
             self.block_preview_label.setVisible(False)
+        self.topup_draft_widget = _create_topup_draft_widget(q, self)
+        progress_layout.addWidget(self.topup_draft_widget)
         if profile.screen_class != "constrained":
             progress_layout.addWidget(_subtitle(q, "Stimulus / Tactile / Click Timeline"))
         timeline_status = q["QWidget"]()
@@ -2344,6 +2665,9 @@ class FocusModeWindow:
         self.progress.setRange(0, 1000)
         self.progress.setValue(0)
         progress_layout.addWidget(self.progress)
+        if profile.screen_class == "constrained":
+            self.progress_label.setVisible(False)
+            self.progress.setVisible(False)
         self.event_label = q["QLabel"]("Event stream idle")
         self.event_label.setObjectName("mutedLabel")
         self.event_label.setWordWrap(True)
@@ -2389,19 +2713,189 @@ class FocusModeWindow:
         self.timer.timeout.connect(self._drain)
         self.timer.start(100)
         self.dialog.finished.connect(lambda _code: self._stop())
-        self._refresh_run_plan()
+        self._refresh_run_plan(select_default=True)
 
     def _timeline_display_state(self) -> TactileTimelineState:
         if self.preview_display_block_index is not None:
             return self.timeline_preview_state
         return self.timeline_state
 
+    def _available_part_keys(self) -> list[str]:
+        return _package_part_keys(self.package)
+
+    def _ensure_selected_part_key(self) -> str:
+        available = self._available_part_keys()
+        current = str(self.selected_part_key or "").strip()
+        if current in available:
+            return current
+        self.selected_part_key = available[0] if available else "1"
+        return str(self.selected_part_key)
+
+    def _select_part_key(self, part_key: str, *, preview_first: bool = False) -> None:
+        key = str(part_key or "").strip()
+        if key not in self._available_part_keys():
+            return
+        self.selected_part_key = key
+        self._refresh_run_plan(select_default=preview_first)
+
+    def _refresh_part_controls(self) -> None:
+        available = set(self._available_part_keys())
+        selected = self._ensure_selected_part_key()
+        for part_key, button in getattr(self, "part_buttons", {}).items():
+            enabled = part_key in available
+            button.setEnabled(enabled)
+            button.setChecked(enabled and part_key == selected)
+            if enabled:
+                button.setToolTip(f"Show {_part_button_label(part_key)} block order and top-up draft.")
+            else:
+                button.setToolTip(f"{_part_button_label(part_key)} is not present in this Segment 6 setup.")
+
+    def _visible_plan_items(self) -> list[dict[str, Any]]:
+        selected = self._ensure_selected_part_key()
+        return [dict(item) for item in self.all_block_plan_items if str(item.get("part_key") or "") == selected]
+
     def _run_plan_item_by_number(self, display_number: int) -> dict[str, Any] | None:
         target = int(display_number or 0)
-        for item in list(getattr(self, "block_plan_items", []) or []):
+        for item in list(getattr(self, "all_block_plan_items", []) or []) or list(getattr(self, "block_plan_items", []) or []):
             if int(item.get("number") or 0) == target:
                 return dict(item)
         return None
+
+    def _topup_item_for_part(self, part_key: str | None = None) -> dict[str, Any] | None:
+        key = str(part_key or self._ensure_selected_part_key() or "").strip()
+        for item in list(getattr(self, "all_block_plan_items", []) or []):
+            if str(item.get("part_key") or "") == key and str(item.get("kind") or "") == "topup":
+                return dict(item)
+        return None
+
+    def _select_current_part_topup_slot(self) -> None:
+        item = self._topup_item_for_part()
+        if item is not None:
+            self._select_block_plan_item(int(item.get("number") or 0))
+
+    def _visible_topup_draft_items(self) -> list[dict[str, Any]]:
+        selected = self._ensure_selected_part_key()
+        return [
+            dict(item)
+            for item in list(getattr(self, "topup_draft_items", []) or [])
+            if str(item.get("part_number") or "1").strip() == selected
+        ]
+
+    def _topup_draft_should_show(self) -> bool:
+        enabled = bool(self._topup_slots_enabled_for_plan())
+        if not enabled:
+            return False
+        selected_item = self._run_plan_item_by_number(self.selected_display_block_index or 0)
+        if selected_item is not None and str(selected_item.get("kind") or "") == "topup":
+            return True
+        return bool(self._visible_topup_draft_items())
+
+    def _refresh_topup_draft_widget(self) -> None:
+        if not hasattr(self, "topup_draft_widget"):
+            return
+        self.topup_draft_widget.setVisible(self._topup_draft_should_show())
+        refresh_height = getattr(self.topup_draft_widget, "refresh_layout_height", None)
+        if callable(refresh_height):
+            refresh_height()
+        self.topup_draft_widget.update()
+
+    def _refresh_timeline_min_height(self) -> None:
+        if not hasattr(self, "tactile_timeline_widget"):
+            return
+        profile = self.layout_profile
+        if profile.screen_class == "constrained" and not self.block_plan_items:
+            target = 42
+        elif profile.screen_class == "constrained":
+            target = 42
+        elif profile.compact:
+            target = 78
+        else:
+            target = 116
+        if int(self.tactile_timeline_widget.minimumHeight()) != int(target):
+            self.tactile_timeline_widget.setMinimumHeight(int(target))
+            self.tactile_timeline_widget.updateGeometry()
+
+    def _standard_plan_items(self) -> list[dict[str, Any]]:
+        return [dict(item) for item in list(getattr(self, "all_block_plan_items", []) or []) if str(item.get("kind") or "") == "standard"]
+
+    def _instruction_slots_for_item(self, item: dict[str, Any]) -> list[dict[str, Any]]:
+        if str(item.get("kind") or "") != "standard":
+            return []
+        enabled_slots = _enabled_instruction_slots(self.package)
+        by_slot = {str(slot.get("slot") or ""): dict(slot) for slot in enabled_slots}
+        standard_items = self._standard_plan_items()
+        numbers = [int(entry.get("number") or 0) for entry in standard_items]
+        item_number = int(item.get("number") or 0)
+        index = numbers.index(item_number) if item_number in numbers else -1
+        next_item = standard_items[index + 1] if 0 <= index < len(standard_items) - 1 else None
+        relevant: list[str] = []
+        if index == 0:
+            relevant.append("before_experiment")
+        relevant.append("before_each_block")
+        relevant.append("after_each_block")
+        if next_item is not None and str(next_item.get("part_key") or "") != str(item.get("part_key") or ""):
+            relevant.append("between_conditions")
+        if index == len(standard_items) - 1:
+            relevant.append("after_experiment")
+        return [by_slot[slot] for slot in relevant if slot in by_slot]
+
+    def _timeline_instruction_segments_for_item(self, item: dict[str, Any], *, duration_s: float) -> list[dict[str, Any]]:
+        slots = self._instruction_slots_for_item(item)
+        if not slots:
+            return []
+        duration = max(0.001, float(duration_s or 0.001))
+        leading_slots = [slot for slot in slots if str(slot.get("slot") or "") in {"before_experiment", "before_each_block"}]
+        trailing_slots = [slot for slot in slots if str(slot.get("slot") or "") not in {"before_experiment", "before_each_block"}]
+        width = min(duration * 0.08, max(0.4, duration / max(8.0, len(slots) * 3.0)))
+        gap = min(duration * 0.015, 0.25)
+        segments: list[dict[str, Any]] = []
+        cursor = 0.0
+        for slot in leading_slots:
+            start = cursor
+            end = min(duration, start + width)
+            segments.append(
+                {
+                    "slot": slot.get("slot", ""),
+                    "label": slot.get("display_label") or slot.get("label") or "Instruction",
+                    "start_s": start,
+                    "end_s": end,
+                    "color": slot.get("color") or _instruction_slot_color(str(slot.get("slot") or "")),
+                }
+            )
+            cursor = end + gap
+        cursor = max(0.0, duration - (len(trailing_slots) * width + max(0, len(trailing_slots) - 1) * gap))
+        for slot in trailing_slots:
+            start = cursor
+            end = min(duration, start + width)
+            segments.append(
+                {
+                    "slot": slot.get("slot", ""),
+                    "label": slot.get("display_label") or slot.get("label") or "Instruction",
+                    "start_s": start,
+                    "end_s": end,
+                    "color": slot.get("color") or _instruction_slot_color(str(slot.get("slot") or "")),
+                }
+            )
+            cursor = end + gap
+        return segments
+
+    def _set_instruction_plan_for_item(self, item: dict[str, Any] | None) -> None:
+        self.instruction_plan_items = self._instruction_slots_for_item(item or {}) if item else _enabled_instruction_slots(self.package)
+        if hasattr(self, "instruction_plan_widget"):
+            self.instruction_plan_widget.setVisible(
+                bool(self.instruction_plan_items) and self.layout_profile.screen_class != "constrained"
+            )
+            self.instruction_plan_widget.update()
+
+    def _select_default_block_preview(self) -> None:
+        if self._run_active:
+            return
+        for item in self.block_plan_items:
+            if str(item.get("kind") or "") == "standard":
+                self._select_block_plan_item(int(item.get("number") or 0))
+                return
+        if self.block_plan_items:
+            self._select_block_plan_item(int(self.block_plan_items[0].get("number") or 0))
 
     def _block_for_plan_item(self, item: dict[str, Any]) -> Any | None:
         block_index = item.get("block_index")
@@ -2442,15 +2936,19 @@ class FocusModeWindow:
         self.preview_display_block_index = None
         self.timeline_preview_state.clear()
         self.selected_display_block_index = selected
+        self._set_instruction_plan_for_item(self._run_plan_item_by_number(selected or 0) if selected else None)
         if hasattr(self, "block_preview_label"):
             if selected:
-                self.block_preview_label.setText(f"Block preview: live Block {selected}")
+                item = self._run_plan_item_by_number(selected)
+                display = item.get("display_label") if item else f"Block {selected}"
+                self.block_preview_label.setText(f"Block preview: live {display}")
             else:
                 self.block_preview_label.setText("Block preview: live schedule")
         if hasattr(self, "block_plan_widget"):
             self.block_plan_widget.update()
         if hasattr(self, "tactile_timeline_widget"):
             self.tactile_timeline_widget.update()
+        self._refresh_topup_draft_widget()
 
     def _select_block_plan_item(self, display_number: int) -> None:
         number = int(display_number or 0)
@@ -2459,20 +2957,27 @@ class FocusModeWindow:
         item = self._run_plan_item_by_number(number)
         if item is None:
             return
+        self.selected_part_key = str(item.get("part_key") or self._ensure_selected_part_key())
+        self._refresh_part_controls()
         self.selected_display_block_index = number
         if self.active_display_block_index == number:
             self._clear_block_preview(selected=number)
+            self._refresh_topup_draft_widget()
             return
 
         kind = str(item.get("kind") or "")
         if kind == "topup":
             self.preview_display_block_index = number
             self.timeline_preview_state.clear()
+            self._set_instruction_plan_for_item(item)
             part_label = _part_display_label(str(item.get("part_key") or ""))
+            draft_count = len(self._visible_topup_draft_items())
+            draft_text = f" | {draft_count} missed trial(s) in draft" if draft_count else " | waiting for missed trials"
             self.block_preview_label.setText(
-                f"Block preview: Block {number} top-up | {part_label} missed tactile trials"
+                f"Block preview: {item.get('display_label', 'Top-up')} | {part_label} missed tactile trials{draft_text}"
             )
             self.block_plan_widget.update()
+            self._refresh_topup_draft_widget()
             self.tactile_timeline_widget.update()
             return
 
@@ -2480,8 +2985,10 @@ class FocusModeWindow:
         if block is None:
             self.preview_display_block_index = number
             self.timeline_preview_state.clear()
+            self._set_instruction_plan_for_item(item)
             self.block_preview_label.setText(f"Block preview: Block {number} schedule unavailable")
             self.block_plan_widget.update()
+            self._refresh_topup_draft_widget()
             self.tactile_timeline_widget.update()
             return
 
@@ -2494,6 +3001,7 @@ class FocusModeWindow:
             self.timeline_preview_state.clear()
             self.block_preview_label.setText(f"Block preview: Block {number} unavailable ({exc})")
             self.block_plan_widget.update()
+            self._refresh_topup_draft_widget()
             self.tactile_timeline_widget.update()
             return
 
@@ -2506,14 +3014,17 @@ class FocusModeWindow:
             block_index=getattr(block, "index", ""),
             block_label=str(getattr(block, "label", "") or f"Block {number}"),
             duration_s=max(0.001, duration_s),
+            instruction_segments=self._timeline_instruction_segments_for_item(item, duration_s=max(0.001, duration_s)),
             tactile_events=tactile_events,
             trial_segments=trial_segments,
         )
         self.preview_display_block_index = number
+        self._set_instruction_plan_for_item(item)
         self.block_preview_label.setText(
-            f"Block preview: Block {number} | {len(trial_segments)} trials | {len(tactile_events)} tactile cues"
+            f"Block preview: {item.get('display_label', f'Block {number}')} | {len(trial_segments)} trials | {len(tactile_events)} tactile cues"
         )
         self.block_plan_widget.update()
+        self._refresh_topup_draft_widget()
         self.tactile_timeline_widget.update()
 
     def _populate_participant_code_combo(self, preferred: str = "") -> None:
@@ -2658,6 +3169,7 @@ class FocusModeWindow:
         self.timeline_state.clear()
         self._timeline_perf_anchor = None
         self.planned_tactile_cue_count = 0
+        self.topup_draft_items = []
         self.active_display_block_index = None
         self._clear_block_preview()
         self.completed_display_block_indices.clear()
@@ -2679,7 +3191,7 @@ class FocusModeWindow:
         if self.folder_value is not None:
             self.folder_value.setText(_short_folder_label(self.package.session_dir))
             self.folder_value.setToolTip(str(self.package.session_dir))
-        self._refresh_run_plan()
+        self._refresh_run_plan(select_default=True)
         self._update_tactile_timeline_display()
 
     def _topup_slots_enabled_for_plan(self) -> bool:
@@ -2690,7 +3202,7 @@ class FocusModeWindow:
                 pass
         return bool(self.enable_missed_trial_topup)
 
-    def _refresh_run_plan(self) -> None:
+    def _refresh_run_plan(self, *, select_default: bool = False) -> None:
         include_topup_slots = self._topup_slots_enabled_for_plan()
         standard_count = sum(1 for block in self.package.blocks if not _is_topup_block(block))
         topup_slots = sum(1 for item in _run_plan_items(self.package, include_topup_slots=include_topup_slots) if item["kind"] == "topup")
@@ -2699,23 +3211,33 @@ class FocusModeWindow:
         if hasattr(self, "run_plan_value"):
             self.run_plan_value.setText(plan_text)
             self.run_plan_value.setToolTip(plan_text)
-        self.block_plan_items = _run_plan_items(self.package, include_topup_slots=include_topup_slots)
+        self.all_block_plan_items = _run_plan_items(self.package, include_topup_slots=include_topup_slots)
+        self._refresh_part_controls()
+        self.block_plan_items = self._visible_plan_items()
         if hasattr(self, "block_plan_widget"):
             refresh_height = getattr(self.block_plan_widget, "refresh_layout_height", None)
             if callable(refresh_height):
                 refresh_height()
             self.block_plan_widget.update()
+        self._refresh_timeline_min_height()
+        if hasattr(self, "topup_draft_widget"):
+            self._refresh_topup_draft_widget()
         if hasattr(self, "session_blocks_value"):
             if topup_slots:
                 self.session_blocks_value.setText(f"{total_count} ({standard_count} standard + {topup_slots} top-up)")
             else:
                 self.session_blocks_value.setText(str(standard_count))
         if hasattr(self, "block_chip") and not self._run_active:
-            self.block_chip.setText(f"Block -/{total_count}")
+            self.block_chip.setText(f"Block -/{len(self.block_plan_items) or total_count}")
         if self.selected_display_block_index is not None:
             valid_numbers = {int(item.get("number") or 0) for item in self.block_plan_items}
             if self.selected_display_block_index not in valid_numbers:
                 self._clear_block_preview()
+                select_default = True
+        if select_default:
+            self._select_default_block_preview()
+        if not self.block_plan_items:
+            self._set_instruction_plan_for_item(None)
 
     def _runtime_capture_options(self) -> SessionCaptureOptions:
         return SessionCaptureOptions(
@@ -2832,6 +3354,8 @@ class FocusModeWindow:
         self.enable_missed_trial_topup = bool(self.topup_checkbox.isChecked())
         self._refresh_run_plan()
         self._clear_block_preview()
+        self.topup_draft_items = []
+        self._refresh_topup_draft_widget()
         runner_metadata = self._runner_metadata()
         if self.controller_factory is not None:
             self.controller = self.controller_factory(
@@ -2942,12 +3466,21 @@ class FocusModeWindow:
         self.dialog.accept()
 
     def _handle_block_schedule(self, payload: dict[str, Any]) -> None:
+        display_index = _payload_display_block_index(payload)
+        plan_item = self._run_plan_item_by_number(display_index)
+        if plan_item is not None:
+            self.selected_part_key = str(plan_item.get("part_key") or self.selected_part_key or "")
+            self._refresh_run_plan()
+        duration_s = payload.get("duration_s", 0.0)
+        duration_float = _float_or_none(duration_s)
+        duration_float = float(duration_float) if duration_float is not None else 0.0
         self.timeline_state.load_block(
             part_number=payload.get("part_number", ""),
             phase_label=payload.get("phase_label", payload.get("phase", "")),
             block_index=payload.get("block_index", ""),
             block_label=payload.get("block_label", ""),
-            duration_s=payload.get("duration_s", 0.0),
+            duration_s=duration_float,
+            instruction_segments=self._timeline_instruction_segments_for_item(plan_item or {}, duration_s=max(0.001, duration_float)),
             tactile_events=list(payload.get("tactile_events") or []),
             trial_segments=list(payload.get("trial_segments") or []),
         )
@@ -2956,7 +3489,6 @@ class FocusModeWindow:
         self._timeline_perf_anchor = anchor if anchor is not None else time.perf_counter()
         part_text = str(payload.get("part_number") or "").strip()
         self.part_chip.setText(_part_display_label(part_text) if part_text else "Part -")
-        display_index = _payload_display_block_index(payload)
         display_count = _payload_display_block_count(
             payload,
             _run_plan_total(self.package, include_topup_slots=self._topup_slots_enabled_for_plan()),
@@ -2966,14 +3498,20 @@ class FocusModeWindow:
         self.active_display_block_index = int(display_index) if display_index else None
         if self.active_display_block_index is not None:
             self._clear_block_preview(selected=self.active_display_block_index)
+            self._set_instruction_plan_for_item(plan_item)
         if hasattr(self, "block_plan_widget"):
             self.block_plan_widget.update()
+        if plan_item is not None:
+            display_index_label = int(plan_item.get("part_block_number") or display_index)
+            display_count = len([item for item in self.all_block_plan_items if str(item.get("part_key") or "") == str(plan_item.get("part_key") or "")]) or display_count
+        else:
+            display_index_label = display_index
         if bool(payload.get("is_topup")):
             self.block_chip.setText(
-                f"Block {display_index}/{display_count} (Top-up)" if display_index else f"Block -/{display_count} (Top-up)"
+                f"Block {display_index_label}/{display_count} (Top-up)" if display_index else f"Block -/{display_count} (Top-up)"
             )
         else:
-            self.block_chip.setText(f"Block {display_index}/{display_count}" if display_index else f"Block -/{display_count}")
+            self.block_chip.setText(f"Block {display_index_label}/{display_count}" if display_index else f"Block -/{display_count}")
         self.recenter_status_label.setText("Cursor recenter: waiting for next tactile cue")
         self._update_tactile_timeline_display()
 
@@ -3089,6 +3627,9 @@ class FocusModeWindow:
                 if dict(payload).get("ui_event") == "block_schedule":
                     self._handle_block_schedule(dict(payload))
                     continue
+                if dict(payload).get("ui_event") == "topup_draft":
+                    self._handle_topup_draft(dict(payload))
+                    continue
                 duration = float(payload.get("duration_s") or 0.0)
                 elapsed = float(payload.get("elapsed_s") or 0.0)
                 value = int(max(0.0, min(1.0, elapsed / duration)) * 1000) if duration > 0 else 0
@@ -3099,8 +3640,12 @@ class FocusModeWindow:
                     _run_plan_total(self.package, include_topup_slots=self._topup_slots_enabled_for_plan()),
                 )
                 block_kind = "top-up block" if bool(payload.get("is_topup")) else "Block"
+                plan_item = self._run_plan_item_by_number(display_index)
+                display_index_label = int(plan_item.get("part_block_number") or display_index) if plan_item is not None else display_index
+                if plan_item is not None:
+                    display_count = len([item for item in self.all_block_plan_items if str(item.get("part_key") or "") == str(plan_item.get("part_key") or "")]) or display_count
                 self.progress_label.setText(
-                    f"{block_kind.title()} {display_index}: {payload.get('block_label')}  "
+                    f"{block_kind.title()} {display_index_label}: {payload.get('block_label')}  "
                     f"{elapsed:.1f}/{duration:.1f}s"
                 )
                 part_number = str(payload.get("part_number") or "").strip()
@@ -3108,10 +3653,10 @@ class FocusModeWindow:
                     self.part_chip.setText(_part_display_label(part_number))
                 if bool(payload.get("is_topup")):
                     self.block_chip.setText(
-                        f"Block {display_index}/{display_count} (Top-up)" if display_index else f"Block -/{display_count} (Top-up)"
+                        f"Block {display_index_label}/{display_count} (Top-up)" if display_index else f"Block -/{display_count} (Top-up)"
                     )
                 else:
-                    self.block_chip.setText(f"Block {display_index}/{display_count}" if display_index else f"Block -/{display_count}")
+                    self.block_chip.setText(f"Block {display_index_label}/{display_count}" if display_index else f"Block -/{display_count}")
                 self._update_tactile_progress(elapsed)
             elif kind == "event":
                 self.event_label.setText(str(payload))
@@ -3133,6 +3678,19 @@ class FocusModeWindow:
             elif kind == "done":
                 self._handle_done(payload)
         self._tick_tactile_clock()
+
+    def _handle_topup_draft(self, payload: dict[str, Any]) -> None:
+        self.topup_draft_items = [dict(item) for item in list(payload.get("missed_trials") or []) if isinstance(item, dict)]
+        self._refresh_topup_draft_widget()
+        if self.selected_display_block_index is not None:
+            item = self._run_plan_item_by_number(self.selected_display_block_index)
+            if item is not None and str(item.get("kind") or "") == "topup":
+                draft_count = len(self._visible_topup_draft_items())
+                part_label = _part_display_label(str(item.get("part_key") or ""))
+                draft_text = f" | {draft_count} missed trial(s) in draft" if draft_count else " | waiting for missed trials"
+                self.block_preview_label.setText(
+                    f"Block preview: {item.get('display_label', 'Top-up')} | {part_label} missed tactile trials{draft_text}"
+                )
 
     def _handle_instruction_continue(self, payload: dict[str, Any]) -> None:
         context = dict(payload.get("context") or {})
