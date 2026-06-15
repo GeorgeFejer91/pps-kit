@@ -564,6 +564,106 @@ code {
   padding: 14px;
 }
 
+.architecture-flow {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.flow-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr) 34px minmax(0, 1fr);
+  gap: 8px;
+  align-items: stretch;
+}
+
+.flow-branch-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.flow-node {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  padding: 14px;
+}
+
+.flow-node span,
+.runner-route-grid span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.flow-node strong,
+.runner-route-grid strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.flow-node p {
+  margin: 0;
+  color: #37433b;
+  line-height: 1.45;
+}
+
+.flow-node > span {
+  margin-bottom: 7px;
+  color: var(--primary);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.resource-node {
+  border-color: #a6c1b5;
+  background: #f5faf7;
+}
+
+.flow-connector {
+  position: relative;
+  align-self: center;
+  height: 2px;
+  background: #86a897;
+}
+
+.flow-connector::after {
+  position: absolute;
+  top: 50%;
+  right: -1px;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 7px solid #86a897;
+  content: "";
+  transform: translateY(-50%);
+}
+
+.runner-interface-card {
+  border-color: #96c8b1;
+  background: #eff8f3;
+}
+
+.runner-route-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.runner-route-grid > div {
+  min-width: 0;
+  border: 1px solid #cadbd1;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 10px;
+}
+
 .info-card-link {
   display: block;
   color: inherit;
@@ -3062,8 +3162,28 @@ body.modal-open {
   .info-card-grid,
   .download-page-grid,
   .metric-grid,
+  .flow-row,
+  .flow-branch-grid,
+  .runner-route-grid,
   .workflow-summary-grid {
     grid-template-columns: 1fr;
+  }
+
+  .flow-connector {
+    justify-self: center;
+    width: 2px;
+    height: 28px;
+  }
+
+  .flow-connector::after {
+    top: auto;
+    right: 50%;
+    bottom: -1px;
+    border-top: 7px solid #86a897;
+    border-right: 5px solid transparent;
+    border-bottom: 0;
+    border-left: 5px solid transparent;
+    transform: translateX(50%);
   }
 
   .source-action-grid {

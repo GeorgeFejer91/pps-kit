@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260615-docs-3dti-brt">
+  <link rel="stylesheet" href="styles.css?v=20260615-docs-flow-runner">
 </head>
 <body>
   <div class="app-shell">
@@ -556,37 +556,81 @@
 
         <section id="docs-architecture" class="info-segment" aria-labelledby="docs-architecture-title">
           <div class="info-segment-heading">
-            <span class="segment-kicker">Software Layers</span>
-            <h2 id="docs-architecture-title">Architecture And Dependencies</h2>
+            <span class="segment-kicker">Software Flow</span>
+            <h2 id="docs-architecture-title">Architecture Flow</h2>
           </div>
-          <p class="info-copy">The project should be understood as a UI layer sitting on top of a Python experiment engine. The dashboard provides the visible workflow; the package code owns rendering, audio routing, validation, runner setup, and analysis outputs.</p>
-          <div class="info-card-grid">
-            <article class="info-card">
-              <h2>Science And Audio</h2>
-              <p><code>numpy</code>, <code>scipy</code>, <code>soundfile</code>, and <code>sounddevice</code> support numerical audio work, WAV I/O, and low-latency playback. <code>sofar</code> and <code>netCDF4</code> support SOFA/HRIR resources.</p>
-            </article>
-            <article class="info-card">
-              <h2>UI And Companion</h2>
-              <p>The browser dashboard talks to a local <code>FastAPI</code> and <code>Uvicorn</code> companion. The native desktop runner uses <code>PySide6</code> through the packaged <code>PPSExperimentRunner.exe</code>.</p>
-            </article>
-            <article class="info-card">
-              <h2>Timing And Recording</h2>
-              <p><code>pylsl</code> and <code>pyxdf</code> support marker streams and XDF reconstruction. Windows diagnostics may use <code>pyaudiowpatch</code>, but the validated multichannel experiment route uses ASIO.</p>
-            </article>
-            <article class="info-card">
-              <h2>Packaging</h2>
-              <p><code>PyInstaller</code> builds the native runner. The public release path uses a small Windows downloader plus a verified offline lab package.</p>
-            </article>
-            <article class="info-card">
-              <h2>Rendering Resources</h2>
-              <p>The current binaural workflow uses the bundled FABIAN/TU SOFA HRIR resource and can produce outputs through the native 3DTI route or the Python SOFA/FABIAN reference renderer.</p>
-            </article>
-            <article class="info-card">
-              <h2>Deep References</h2>
-              <p>Detailed setup and operating notes live in the repository documentation.</p>
-              <a class="button-link" href="../../../docs/WINDOWS_PC_SOFTWARE_REQUIREMENTS.md">Open Software Requirements</a>
-            </article>
+          <p class="info-copy">The website is a researcher-facing control surface. It collects choices, then asks the local companion and renderer stack to create files on the lab PC.</p>
+          <div class="architecture-flow" aria-label="PPS Toolkit rendering architecture flow">
+            <div class="flow-row">
+              <article class="flow-node">
+                <span>UI Layer</span>
+                <strong>Dashboard</strong>
+                <p>Study profile, trajectory, source, timing, SOA, and trial-structure choices.</p>
+              </article>
+              <span class="flow-connector" aria-hidden="true"></span>
+              <article class="flow-node">
+                <span>Local Orchestration</span>
+                <strong>Python Companion</strong>
+                <p>Validates choices, writes project folders, and calls render/session preparation code.</p>
+              </article>
+              <span class="flow-connector" aria-hidden="true"></span>
+              <article class="flow-node">
+                <span>Renderer Inputs</span>
+                <strong>Trajectory And HRIR Data</strong>
+                <p>Converts looming paths and timing into spatial render requests.</p>
+              </article>
+            </div>
+            <div class="flow-branch-grid">
+              <article class="flow-node resource-node">
+                <span>Reference Path</span>
+                <strong>SOFA/FABIAN Files</strong>
+                <p>SOFA HRIR measurements provide the binaural reference for the Python rendering path.</p>
+              </article>
+              <article class="flow-node resource-node">
+                <span>Native Path</span>
+                <strong>3DTI / BRT Renderer</strong>
+                <p>The native spatialization lineage renders moving binaural sources from the same UI decisions.</p>
+              </article>
+            </div>
+            <div class="flow-row compact-flow-row">
+              <article class="flow-node">
+                <span>Rendered Assets</span>
+                <strong>Binaural Looming WAVs</strong>
+                <p>Channels 1 and 2 carry left/right spatial audio, with manifests recording render provenance.</p>
+              </article>
+              <span class="flow-connector" aria-hidden="true"></span>
+              <article class="flow-node">
+                <span>Experiment Assembly</span>
+                <strong>Trial And SOA Files</strong>
+                <p>Trial rows, baseline/catch choices, and tactile timing add the channel-3 drive schedule.</p>
+              </article>
+              <span class="flow-connector" aria-hidden="true"></span>
+              <article class="flow-node">
+                <span>Prepared Run</span>
+                <strong>Session Package</strong>
+                <p>Accepted blocks, participant order, WAVs, CSVs, and manifests are handed to the runner.</p>
+              </article>
+            </div>
           </div>
+          <article class="info-card runner-interface-card">
+            <span class="card-kicker">Experiment Runner</span>
+            <h2>Hardware Interface</h2>
+            <p>The Experiment Runner is separate from the browser dashboard. It opens the prepared session package, owns participant timing, and sends the final three-channel playback stream to the lab hardware.</p>
+            <div class="runner-route-grid">
+              <div>
+                <strong>Komplete Audio 6 MK2</strong>
+                <span>Validated ASIO output route for synchronized headphone and tactile channels.</span>
+              </div>
+              <div>
+                <strong>Outputs 1 And 2</strong>
+                <span>Binaural left/right audio for the participant headphones.</span>
+              </div>
+              <div>
+                <strong>Output 3</strong>
+                <span>Analog tactile-drive channel routed to Woojer Strap 4.</span>
+              </div>
+            </div>
+          </article>
         </section>
 
         <section id="docs-spatialization" class="info-segment" aria-labelledby="docs-spatialization-title">
@@ -895,6 +939,6 @@
       </form>
     </div>
   </div>
-  <script src="app.js?v=20260615-docs-3dti-brt"></script>
+  <script src="app.js?v=20260615-docs-flow-runner"></script>
 </body>
 </html>
