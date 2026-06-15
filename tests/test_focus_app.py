@@ -538,6 +538,11 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
     assert window.selected_display_block_index == 1
     assert window._timeline_display_state() is window.timeline_state
     assert [segment.soa_ms for segment in window.timeline_state.trial_segments] == ["300", "800"]
+    assert window.progress.value() == int((5.0 / 16.0) * 1000)
+    response_click = window.timeline_state.record_click(4.6)
+    off_cue_click = window.timeline_state.record_click(8.1)
+    assert response_click.response_status == "tactile_response"
+    assert off_cue_click.response_status == "off_cue"
 
     timeline_screenshot = tmp_path / "live_timeline_red_bar.png"
     assert window.tactile_timeline_widget.grab().save(str(timeline_screenshot))
@@ -550,6 +555,20 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
         if pixels[x, y][0] > 150 and pixels[x, y][1] < 70 and pixels[x, y][2] < 70
     )
     assert red_pixels > 60
+    cue_linked_click_pixels = sum(
+        1
+        for y in range(timeline_image.height)
+        for x in range(timeline_image.width)
+        if pixels[x, y][0] < 60 and pixels[x, y][1] > 70 and pixels[x, y][2] < 110
+    )
+    off_cue_click_pixels = sum(
+        1
+        for y in range(timeline_image.height)
+        for x in range(timeline_image.width)
+        if 120 < pixels[x, y][0] < 180 and pixels[x, y][1] < 100 and pixels[x, y][2] < 70
+    )
+    assert cue_linked_click_pixels > 8
+    assert off_cue_click_pixels > 8
     window.dialog.close()
 
 

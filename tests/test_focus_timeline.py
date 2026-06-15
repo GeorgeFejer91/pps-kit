@@ -66,7 +66,13 @@ def test_tactile_timeline_state_loads_and_labels_cues():
     assert state.next_cue().trial_uid == "T001"
     click = state.record_click(4.6)
     assert click.trial_uid == "T001"
-    assert state.click_count() == 1
+    assert click.response_status == "tactile_response"
+    assert click.cue_id == 1
+    assert round(click.rt_s or 0.0, 3) == 0.3
+    early_click = state.record_click(8.1)
+    assert early_click.trial_uid == "T002"
+    assert early_click.response_status == "off_cue"
+    assert state.click_count() == 2
 
 
 def test_tactile_recenter_controller_fires_once_per_due_cue():
