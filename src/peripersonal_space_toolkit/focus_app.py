@@ -39,7 +39,10 @@ from .session_runner import (
     record_experiment_activity,
     record_prepared_session_queue,
     segment_run_setup_participants,
+    _timeline_tactile_events,
+    _timeline_trial_segments,
 )
+from .timing_schedule import BlockEventSchedule
 from .preload_inventory import load_preload_inventory
 from .runtime_paths import repo_root
 
@@ -72,7 +75,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 def _require_qt() -> dict[str, Any]:
     try:
-        from PySide6.QtCore import QTimer, Qt, Signal
+        from PySide6.QtCore import QPoint, QTimer, Qt, Signal
         from PySide6.QtGui import QBrush, QColor, QCursor, QFontDatabase, QIcon, QPainter, QPen
         from PySide6.QtWidgets import (
             QApplication,
@@ -116,6 +119,7 @@ def _require_qt() -> dict[str, Any]:
         "QMessageBox": QMessageBox,
         "QPainter": QPainter,
         "QPen": QPen,
+        "QPoint": QPoint,
         "QProgressBar": QProgressBar,
         "QPushButton": QPushButton,
         "Signal": Signal,
@@ -203,6 +207,9 @@ def _run_plan_items(package: Any, *, include_topup_slots: bool) -> list[dict[str
                 "part_key": part_key,
                 "number": display_index,
                 "label": _compact_run_block_label(block),
+                "block_index": int(getattr(block, "index", display_index) or display_index),
+                "trial_count": int(getattr(block, "trial_count", 0) or 0),
+                "duration_s": float(getattr(block, "duration_s", 0.0) or 0.0),
             }
         )
         next_block = standard_blocks[index + 1] if index + 1 < len(standard_blocks) else None
@@ -336,6 +343,7 @@ def _create_tactile_timeline_widget(
     q: dict[str, Any],
     state: TactileTimelineState,
     profile: FocusLayoutProfile | None = None,
+    state_provider: Callable[[], TactileTimelineState] | None = None,
 ) -> Any:
     class TactileTimelineWidget(q["QWidget"]):
         def __init__(self) -> None:
@@ -353,7 +361,8 @@ def _create_tactile_timeline_widget(
                 compact_rows = height < 108
                 top_margin = 6 if compact_rows else 10
                 usable = max(1, width - label_width - right_margin)
-                duration = max(0.001, float(state.duration_s or 0.0))
+                timeline_state = state_provider() if state_provider is not None else state
+                duration = max(0.001, float(timeline_state.duration_s or 0.0))
                 row_offsets = (3, 22, 41, 60) if compact_rows else (5, 31, 58, 86)
                 rows = [(label, top_margin + offset) for label, offset in zip(("Clip", "Trial", "Tactile", "Clicks"), row_offsets)]
 
@@ -368,7 +377,7 @@ def _create_tactile_timeline_widget(
                     painter.drawLine(label_width, row_y, width - right_margin, row_y)
                     painter.setPen(label_pen)
 
-                if not state.cues and not state.trial_segments:
+                if not timeline_state.cues and not timeline_state.trial_segments:
                     painter.setPen(q["QPen"](q["QColor"]("#647067")))
                     painter.drawText(self.rect(), q["Qt"].AlignmentFlag.AlignCenter, "No experiment schedule loaded")
                     return
@@ -395,7 +404,7 @@ def _create_tactile_timeline_widget(
                     return palette[fallback_index % len(palette)]
 
                 row_height = 16 if compact_rows else 18
-                for index, segment in enumerate(state.trial_segments):
+                for index, segment in enumerate(timeline_state.trial_segments):
                     x1 = _x(segment.start_s)
                     x2 = max(x1 + 2, _x(segment.end_s))
                     clip_color = _color_for(segment.clip_label, index)
@@ -413,8 +422,8 @@ def _create_tactile_timeline_widget(
                             painter.setPen(q["QPen"](q["QColor"]("#202621")))
                             painter.drawText(x1 + 3, y + 1, max(1, x2 - x1 - 6), row_height - 2, int(q["Qt"].AlignmentFlag.AlignVCenter), _short(text, 16 if row_index else 20))
 
-                for cue in state.cues:
-                    status = state.cue_status(cue)
+                for cue in timeline_state.cues:
+                    status = timeline_state.cue_status(cue)
                     color = {
                         "passed": "#647067",
                         "recentered": "#246b55",
@@ -435,13 +444,13 @@ def _create_tactile_timeline_widget(
                 painter.setPen(click_pen)
                 painter.setBrush(q["QBrush"](q["QColor"]("#dce7f4")))
                 click_y = rows[3][1]
-                for marker in state.click_markers:
+                for marker in timeline_state.click_markers:
                     x = _x(marker.time_s)
                     painter.drawRect(x - 4, click_y - 4, 8, 8)
 
-                cursor_x = _x(state.elapsed_s)
-                cursor_pen = q["QPen"](q["QColor"]("#246b55"))
-                cursor_pen.setWidth(2)
+                cursor_x = _x(timeline_state.elapsed_s)
+                cursor_pen = q["QPen"](q["QColor"]("#b91c1c"))
+                cursor_pen.setWidth(3)
                 painter.setPen(cursor_pen)
                 painter.drawLine(cursor_x, 4, cursor_x, min(height - 4, rows[-1][1] + 14))
             finally:
@@ -455,7 +464,111 @@ def _create_block_plan_widget(q: dict[str, Any], owner: Any) -> Any:
         def __init__(self) -> None:
             super().__init__()
             profile = getattr(owner, "layout_profile", None)
-            self.setMinimumHeight(36 if profile is not None and profile.screen_class == "constrained" else 58)
+            self._compact = bool(profile is not None and profile.screen_class == "constrained")
+            self.setMinimumHeight(36 if self._compact else 58)
+            self.setCursor(q["Qt"].CursorShape.PointingHandCursor)
+            self.setMouseTracking(True)
+
+        def _column_count(self, width: int, count: int) -> int:
+            margin = 8
+            gap = 5
+            min_width = 36 if self._compact else 42
+            available = max(min_width, int(width) - (2 * margin))
+            return max(1, min(max(1, count), int((available + gap) / (min_width + gap))))
+
+        def refresh_layout_height(self) -> None:
+            items = list(getattr(owner, "block_plan_items", []) or [])
+            if not items:
+                target_height = 36 if self._compact else 58
+            else:
+                margin = 8
+                gap = 5
+                box_height = 28 if self._compact else 32
+                columns = self._column_count(max(1, int(self.width())), len(items))
+                rows = max(1, int(math.ceil(len(items) / columns)))
+                target_height = (2 * margin) + (rows * box_height) + ((rows - 1) * gap)
+                target_height = max(36 if self._compact else 58, target_height)
+            if int(self.minimumHeight()) != int(target_height):
+                self.setMinimumHeight(int(target_height))
+                self.updateGeometry()
+
+        def resizeEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
+            super().resizeEvent(event)
+            self.refresh_layout_height()
+
+        def _layout_items(self) -> list[dict[str, Any]]:
+            items = list(getattr(owner, "block_plan_items", []) or [])
+            if not items:
+                return []
+            width = max(1, int(self.width()))
+            margin = 8
+            gap = 5
+            count = len(items)
+            columns = self._column_count(width, count)
+            rows = max(1, int(math.ceil(count / columns)))
+            box_height = 28 if self._compact else 32
+            available_width = max(1, width - (2 * margin) - (gap * (columns - 1)))
+            box_width = max(32 if self._compact else 38, int(available_width / columns))
+            layout_items: list[dict[str, Any]] = []
+            for index, item in enumerate(items):
+                row = int(index / columns)
+                column = index % columns
+                x = margin + column * (box_width + gap)
+                y = margin + row * (box_height + gap)
+                if y + box_height > max(self.height(), self.minimumHeight()) - 2:
+                    box_height = max(20, int((max(self.height(), self.minimumHeight()) - (2 * margin) - (gap * (rows - 1))) / rows))
+                    y = margin + row * (box_height + gap)
+                entry = dict(item)
+                entry.update({"x": x, "y": y, "width": box_width, "height": box_height})
+                layout_items.append(entry)
+            return layout_items
+
+        def item_center(self, number: int) -> Any:
+            for item in self._layout_items():
+                if int(item.get("number") or 0) == int(number):
+                    return q["QPoint"](
+                        int(item["x"]) + int(item["width"]) // 2,
+                        int(item["y"]) + int(item["height"]) // 2,
+                    )
+            return q["QPoint"](0, 0)
+
+        def _item_at(self, point: Any) -> dict[str, Any] | None:
+            px = int(point.x())
+            py = int(point.y())
+            for item in self._layout_items():
+                x = int(item["x"])
+                y = int(item["y"])
+                width = int(item["width"])
+                height = int(item["height"])
+                if x <= px <= x + width and y <= py <= y + height:
+                    return item
+            return None
+
+        def mouseMoveEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
+            try:
+                point = event.position().toPoint()
+            except AttributeError:
+                point = event.pos()
+            item = self._item_at(point)
+            if item is not None:
+                label = str(item.get("label") or "")
+                self.setToolTip(f"Block {item.get('number')}: {label}" if label else f"Block {item.get('number')}")
+            super().mouseMoveEvent(event)
+
+        def mousePressEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
+            if event.button() == q["Qt"].MouseButton.LeftButton:
+                try:
+                    point = event.position().toPoint()
+                except AttributeError:
+                    point = event.pos()
+                item = self._item_at(point)
+                if item is not None:
+                    handler = getattr(owner, "_select_block_plan_item", None)
+                    if callable(handler):
+                        handler(int(item.get("number") or 0))
+                    event.accept()
+                    return
+            super().mousePressEvent(event)
 
         def paintEvent(self, _event: Any) -> None:  # noqa: N802 - Qt API
             painter = q["QPainter"](self)
@@ -470,12 +583,8 @@ def _create_block_plan_widget(q: dict[str, Any], owner: Any) -> Any:
                     painter.drawText(self.rect(), q["Qt"].AlignmentFlag.AlignCenter, "No blocks prepared")
                     return
 
-                margin = 8
-                gap = 5
-                box_count = max(1, len(items))
-                box_width = max(42, int((width - (2 * margin) - (gap * (box_count - 1))) / box_count))
-                box_height = max(34, height - (2 * margin))
                 active = getattr(owner, "active_display_block_index", None)
+                selected = getattr(owner, "selected_display_block_index", None)
                 completed = set(getattr(owner, "completed_display_block_indices", set()) or set())
                 next_index = None
                 if active is None:
@@ -485,12 +594,12 @@ def _create_block_plan_widget(q: dict[str, Any], owner: Any) -> Any:
                             next_index = number
                             break
 
-                for index, item in enumerate(items):
+                for item in self._layout_items():
                     number = int(item.get("number") or 0)
-                    x = margin + index * (box_width + gap)
-                    y = margin
-                    if x + box_width > width - margin:
-                        break
+                    x = int(item["x"])
+                    y = int(item["y"])
+                    box_width = int(item["width"])
+                    box_height = int(item["height"])
                     kind = str(item.get("kind") or "")
                     if number == active:
                         fill = "#246b55"
@@ -520,6 +629,18 @@ def _create_block_plan_widget(q: dict[str, Any], owner: Any) -> Any:
                     if box_width >= 68:
                         label = f"{number} TU" if kind == "topup" else f"Block {number}"
                     painter.drawText(x + 3, y + 2, box_width - 6, box_height - 4, q["Qt"].AlignmentFlag.AlignCenter, label)
+                    if number == selected:
+                        selected_pen = q["QPen"](q["QColor"]("#1d5d99"))
+                        selected_pen.setWidth(3)
+                        painter.setPen(selected_pen)
+                        painter.setBrush(q["Qt"].BrushStyle.NoBrush)
+                        painter.drawRoundedRect(x + 2, y + 2, box_width - 4, box_height - 4, 5, 5)
+                    if number == active:
+                        bar_pen = q["QPen"](q["QColor"]("#b91c1c"))
+                        bar_pen.setWidth(4)
+                        painter.setPen(bar_pen)
+                        bar_x = x + max(4, box_width // 2)
+                        painter.drawLine(bar_x, y + 4, bar_x, y + box_height - 4)
             finally:
                 painter.end()
 
@@ -1805,6 +1926,9 @@ class FocusModeWindow:
         self._run_paused = False
         self._timeline_perf_anchor: float | None = None
         self.timeline_state = TactileTimelineState()
+        self.timeline_preview_state = TactileTimelineState()
+        self.selected_display_block_index: int | None = None
+        self.preview_display_block_index: int | None = None
         self.recenter_records: list[dict[str, Any]] = []
         self._last_recenter_backend_warning = ""
         self.validation_topup_approval_records: list[dict[str, Any]] = []
@@ -2127,6 +2251,10 @@ class FocusModeWindow:
             progress_layout.addWidget(_subtitle(q, "Block Order"))
         self.block_plan_widget = _create_block_plan_widget(q, self)
         progress_layout.addWidget(self.block_plan_widget)
+        self.block_preview_label = q["QLabel"]("Block preview: live schedule")
+        self.block_preview_label.setObjectName("mutedLabel")
+        self.block_preview_label.setWordWrap(True)
+        progress_layout.addWidget(self.block_preview_label)
         if profile.screen_class != "constrained":
             progress_layout.addWidget(_subtitle(q, "Stimulus / Tactile / Click Timeline"))
         timeline_status = q["QWidget"]()
@@ -2141,7 +2269,12 @@ class FocusModeWindow:
         timeline_status_layout.addWidget(self.next_tactile_label, 1)
         timeline_status_layout.addWidget(self.tactile_count_label)
         progress_layout.addWidget(timeline_status)
-        self.tactile_timeline_widget = _create_tactile_timeline_widget(q, self.timeline_state, profile)
+        self.tactile_timeline_widget = _create_tactile_timeline_widget(
+            q,
+            self.timeline_state,
+            profile,
+            state_provider=self._timeline_display_state,
+        )
         progress_layout.addWidget(self.tactile_timeline_widget)
         self.recenter_status_label = q["QLabel"]("Cursor recenter: waiting")
         self.recenter_status_label.setObjectName("mutedLabel")
@@ -2222,6 +2355,131 @@ class FocusModeWindow:
         self.timer.start(100)
         self.dialog.finished.connect(lambda _code: self._stop())
         self._refresh_run_plan()
+
+    def _timeline_display_state(self) -> TactileTimelineState:
+        if self.preview_display_block_index is not None:
+            return self.timeline_preview_state
+        return self.timeline_state
+
+    def _run_plan_item_by_number(self, display_number: int) -> dict[str, Any] | None:
+        target = int(display_number or 0)
+        for item in list(getattr(self, "block_plan_items", []) or []):
+            if int(item.get("number") or 0) == target:
+                return dict(item)
+        return None
+
+    def _block_for_plan_item(self, item: dict[str, Any]) -> Any | None:
+        block_index = item.get("block_index")
+        if block_index in (None, ""):
+            return None
+        try:
+            target_index = int(block_index)
+        except (TypeError, ValueError):
+            return None
+        for block in getattr(self.package, "blocks", []) or []:
+            try:
+                if int(getattr(block, "index", -1)) == target_index:
+                    return block
+            except (TypeError, ValueError):
+                continue
+        return None
+
+    def _block_preview_schedule(self, block: Any) -> BlockEventSchedule:
+        metadata = _block_metadata(block)
+        sample_rate_value = _float_or_none(metadata.get("sample_rate_hz"))
+        sample_rate = int(sample_rate_value) if sample_rate_value is not None and sample_rate_value > 0 else 0
+        trial_count = max(1, int(getattr(block, "trial_count", 0) or 0))
+        trial_duration_s = max(0.001, float(getattr(block, "duration_s", 0.0) or 0.0) / trial_count)
+        return BlockEventSchedule.from_block_manifest(
+            getattr(block, "manifest_path", ""),
+            block_index=int(getattr(block, "index", 0) or 0),
+            block_label=str(getattr(block, "label", "") or ""),
+            block_wav_path=getattr(block, "wav_path", ""),
+            participant_id=str(getattr(self.package, "participant_id", "") or ""),
+            session_id=str(getattr(self.package, "session_id", "") or ""),
+            part_number=_block_part_key(block),
+            sample_rate=sample_rate,
+            block_metadata=metadata,
+            trial_duration_s=trial_duration_s,
+        )
+
+    def _clear_block_preview(self, *, selected: int | None = None) -> None:
+        self.preview_display_block_index = None
+        self.timeline_preview_state.clear()
+        self.selected_display_block_index = selected
+        if hasattr(self, "block_preview_label"):
+            if selected:
+                self.block_preview_label.setText(f"Block preview: live Block {selected}")
+            else:
+                self.block_preview_label.setText("Block preview: live schedule")
+        if hasattr(self, "block_plan_widget"):
+            self.block_plan_widget.update()
+        if hasattr(self, "tactile_timeline_widget"):
+            self.tactile_timeline_widget.update()
+
+    def _select_block_plan_item(self, display_number: int) -> None:
+        number = int(display_number or 0)
+        if number <= 0:
+            return
+        item = self._run_plan_item_by_number(number)
+        if item is None:
+            return
+        self.selected_display_block_index = number
+        if self.active_display_block_index == number:
+            self._clear_block_preview(selected=number)
+            return
+
+        kind = str(item.get("kind") or "")
+        if kind == "topup":
+            self.preview_display_block_index = number
+            self.timeline_preview_state.clear()
+            part_label = _part_display_label(str(item.get("part_key") or ""))
+            self.block_preview_label.setText(
+                f"Block preview: Block {number} top-up | {part_label} missed tactile trials"
+            )
+            self.block_plan_widget.update()
+            self.tactile_timeline_widget.update()
+            return
+
+        block = self._block_for_plan_item(item)
+        if block is None:
+            self.preview_display_block_index = number
+            self.timeline_preview_state.clear()
+            self.block_preview_label.setText(f"Block preview: Block {number} schedule unavailable")
+            self.block_plan_widget.update()
+            self.tactile_timeline_widget.update()
+            return
+
+        try:
+            schedule = self._block_preview_schedule(block)
+            tactile_events = _timeline_tactile_events(schedule)
+            trial_segments = _timeline_trial_segments(schedule)
+        except Exception as exc:
+            self.preview_display_block_index = number
+            self.timeline_preview_state.clear()
+            self.block_preview_label.setText(f"Block preview: Block {number} unavailable ({exc})")
+            self.block_plan_widget.update()
+            self.tactile_timeline_widget.update()
+            return
+
+        duration_s = float(getattr(block, "duration_s", 0.0) or 0.0)
+        if duration_s <= 0 and trial_segments:
+            duration_s = max(float(segment.get("end_s") or 0.0) for segment in trial_segments)
+        self.timeline_preview_state.load_block(
+            part_number=_block_part_key(block),
+            phase_label=str(_block_metadata(block).get("phase_label") or _block_metadata(block).get("phase") or ""),
+            block_index=getattr(block, "index", ""),
+            block_label=str(getattr(block, "label", "") or f"Block {number}"),
+            duration_s=max(0.001, duration_s),
+            tactile_events=tactile_events,
+            trial_segments=trial_segments,
+        )
+        self.preview_display_block_index = number
+        self.block_preview_label.setText(
+            f"Block preview: Block {number} | {len(trial_segments)} trials | {len(tactile_events)} tactile cues"
+        )
+        self.block_plan_widget.update()
+        self.tactile_timeline_widget.update()
 
     def _populate_participant_code_combo(self, preferred: str = "") -> None:
         if not hasattr(self, "participant_code_combo"):
@@ -2366,6 +2624,7 @@ class FocusModeWindow:
         self._timeline_perf_anchor = None
         self.planned_tactile_cue_count = 0
         self.active_display_block_index = None
+        self._clear_block_preview()
         self.completed_display_block_indices.clear()
         self.recenter_records.clear()
         self.progress.setValue(0)
@@ -2407,6 +2666,9 @@ class FocusModeWindow:
             self.run_plan_value.setToolTip(plan_text)
         self.block_plan_items = _run_plan_items(self.package, include_topup_slots=include_topup_slots)
         if hasattr(self, "block_plan_widget"):
+            refresh_height = getattr(self.block_plan_widget, "refresh_layout_height", None)
+            if callable(refresh_height):
+                refresh_height()
             self.block_plan_widget.update()
         if hasattr(self, "session_blocks_value"):
             if topup_slots:
@@ -2415,6 +2677,10 @@ class FocusModeWindow:
                 self.session_blocks_value.setText(str(standard_count))
         if hasattr(self, "block_chip") and not self._run_active:
             self.block_chip.setText(f"Block -/{total_count}")
+        if self.selected_display_block_index is not None:
+            valid_numbers = {int(item.get("number") or 0) for item in self.block_plan_items}
+            if self.selected_display_block_index not in valid_numbers:
+                self._clear_block_preview()
 
     def _runtime_capture_options(self) -> SessionCaptureOptions:
         return SessionCaptureOptions(
@@ -2530,6 +2796,7 @@ class FocusModeWindow:
         self.capture_options = self._runtime_capture_options()
         self.enable_missed_trial_topup = bool(self.topup_checkbox.isChecked())
         self._refresh_run_plan()
+        self._clear_block_preview()
         runner_metadata = self._runner_metadata()
         if self.controller_factory is not None:
             self.controller = self.controller_factory(
@@ -2662,6 +2929,8 @@ class FocusModeWindow:
         if self.active_display_block_index is not None and self.active_display_block_index != display_index:
             self.completed_display_block_indices.add(int(self.active_display_block_index))
         self.active_display_block_index = int(display_index) if display_index else None
+        if self.active_display_block_index is not None:
+            self._clear_block_preview(selected=self.active_display_block_index)
         if hasattr(self, "block_plan_widget"):
             self.block_plan_widget.update()
         if bool(payload.get("is_topup")):
