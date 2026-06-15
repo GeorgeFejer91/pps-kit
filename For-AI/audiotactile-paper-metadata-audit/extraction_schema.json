@@ -1,0 +1,178 @@
+{
+  "schema": "pps-paper-metadata-extraction-schema.v1",
+  "parser_version": "0.1.0",
+  "pdf_statuses": [
+    "downloaded",
+    "open_access_unavailable",
+    "paywalled",
+    "needs_user_download",
+    "not_applicable",
+    "bad_pdf"
+  ],
+  "supplement_statuses": [
+    "downloaded",
+    "not_found",
+    "needs_user_download",
+    "paywalled",
+    "not_applicable",
+    "not_checked"
+  ],
+  "extraction_statuses": [
+    "parsed",
+    "parsed_with_warnings",
+    "failed",
+    "pending_pdf"
+  ],
+  "field_statuses": [
+    "reported",
+    "derived",
+    "inferred_low_confidence",
+    "not_reported_after_review",
+    "not_applicable",
+    "source_unavailable"
+  ],
+  "segment_fields": {
+    "segment_1_stimulus_reconstruction": [
+      {
+        "key": "stimulus_type",
+        "label": "Stimulus type",
+        "description": "Noise, tone, ecological sound, speech, or custom/baked stimulus class."
+      },
+      {
+        "key": "source_provenance",
+        "label": "Source/provenance",
+        "description": "Original asset, generated stimulus, licensed set, apparatus source, or supplement file."
+      },
+      {
+        "key": "trajectory_count",
+        "label": "Number of trajectories/tones",
+        "description": "Distinct looming/receding/static paths, tones, or auditory conditions."
+      },
+      {
+        "key": "trajectory_path",
+        "label": "Trajectory path",
+        "description": "Start/end distance, direction, body anchor, azimuth/elevation, and spatial coordinate frame."
+      },
+      {
+        "key": "stimulus_duration",
+        "label": "Duration",
+        "description": "Auditory stimulus duration and any pre/post padding."
+      },
+      {
+        "key": "stimulus_speed",
+        "label": "Speed/path length",
+        "description": "Motion speed, path length, propagation timing, or distance-at-time mapping."
+      },
+      {
+        "key": "auditory_conditions",
+        "label": "Auditory conditions",
+        "description": "Valence, direction, semantic, movement, or apparatus conditions affecting the auditory stimulus."
+      },
+      {
+        "key": "gain_envelope",
+        "label": "Gain/envelope",
+        "description": "SPL, intensity law, gain curve, cross-fade, or amplitude-field information."
+      },
+      {
+        "key": "renderer_or_apparatus",
+        "label": "Renderer/HRTF/speaker apparatus",
+        "description": "Headphones, HRTF, Unity/3D Tune-In, physical speakers, arrays, or other rendering provenance."
+      }
+    ],
+    "segment_2_sequence_and_intermixing": [
+      {
+        "key": "trial_rows_families",
+        "label": "Trial rows/families",
+        "description": "Within-trial audio sequence families and task rows."
+      },
+      {
+        "key": "condition_intermixing",
+        "label": "Condition intermixing",
+        "description": "Whether systematic manipulations are intermixed with task trials or separated."
+      },
+      {
+        "key": "blocked_or_random_order",
+        "label": "Blocked/random order",
+        "description": "Blocked condition structure, random intermixing, and task-critical order constraints."
+      },
+      {
+        "key": "iti_jitter_policy",
+        "label": "ITI/jitter policy",
+        "description": "Fixed ITI, jitter values, jitter range, distribution, or hazard-control policy."
+      },
+      {
+        "key": "response_window",
+        "label": "Response window",
+        "description": "Allowed response interval, timeout, or scoring window."
+      },
+      {
+        "key": "task_sequence_rules",
+        "label": "Task-critical sequence rules",
+        "description": "Special trial scheduling, target/no-target logic, or expectancy controls."
+      }
+    ],
+    "segment_3_tactile_soa_baseline": [
+      {
+        "key": "tactile_stimulus",
+        "label": "Tactile stimulus",
+        "description": "Tactile modality, body site, waveform, duration, frequency, amplitude, and calibration."
+      },
+      {
+        "key": "soa_table",
+        "label": "SOA/distance-at-touch table",
+        "description": "SOA values, tactile timing values, or distance-at-tactile values."
+      },
+      {
+        "key": "baseline_strategy",
+        "label": "Baseline strategy",
+        "description": "Tactile-only, far/static, fastest-baseline, SOA-matched, direction-coupled, or other baseline type."
+      },
+      {
+        "key": "baseline_timing",
+        "label": "Baseline SOAs/timing",
+        "description": "Baseline SOA values, baseline timing relative to omitted sound, or fixed baseline schedule."
+      },
+      {
+        "key": "catch_trial_type",
+        "label": "Catch-trial type",
+        "description": "Auditory-only, tactile-only, omitted target, no-go, target-absent, or other catch rule."
+      }
+    ],
+    "segment_4_counts": [
+      {
+        "key": "repetitions_per_tactile_soa_condition",
+        "label": "Repetitions per tactile SOA/condition",
+        "description": "Trial repetitions for each tactile SOA crossed with relevant conditions."
+      },
+      {
+        "key": "baseline_count",
+        "label": "Baseline count",
+        "description": "Baseline trial count or percentage."
+      },
+      {
+        "key": "catch_count",
+        "label": "Catch count",
+        "description": "Catch/no-go/auditory-only trial count or percentage."
+      },
+      {
+        "key": "block_count",
+        "label": "Block count",
+        "description": "Number of blocks, sessions, or phases when task-relevant."
+      },
+      {
+        "key": "total_trial_count",
+        "label": "Total trial count",
+        "description": "Total trials per participant, block, condition, or experiment."
+      }
+    ]
+  },
+  "review_rule": {
+    "missing_value_rule": "Only mark not_reported_after_review after main PDF extraction, targeted methods/table search, supplement search, and fallback extractor/source check have all been attempted.",
+    "copyright_boundary": "Do not commit PDFs, supplements, extracted full text, screenshots of pages, or long verbatim passages."
+  },
+  "local_artifact_conventions": {
+    "main_pdf_filename": "artifacts/paper_metadata_audit/publication_pdfs/<record_id>.pdf",
+    "supplement_folder": "artifacts/paper_metadata_audit/supplements/<record_id>/",
+    "extracted_output_folder": "artifacts/paper_metadata_audit/extracted/"
+  }
+}

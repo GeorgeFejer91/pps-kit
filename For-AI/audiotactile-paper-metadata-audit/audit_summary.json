@@ -1,0 +1,23 @@
+{
+  "schema": "pps-paper-metadata-audit-summary.v1",
+  "generated_on": "2026-06-16",
+  "parser_version": "0.1.0",
+  "record_count": 74,
+  "pdf_status_counts": {
+    "needs_user_download": 69,
+    "not_applicable": 5
+  },
+  "supplement_status_counts": {
+    "not_applicable": 5,
+    "not_checked": 69
+  },
+  "extraction_status_counts": {
+    "parsed_with_warnings": 5,
+    "pending_pdf": 69
+  },
+  "missing_download_request_count": 138,
+  "tracked_pdf_folder": "artifacts/paper_metadata_audit/publication_pdfs/",
+  "tracked_supplement_folder": "artifacts/paper_metadata_audit/supplements/",
+  "tracked_extraction_folder": "artifacts/paper_metadata_audit/extracted/",
+  "copyright_boundary": "PDFs, supplements, extracted text, and long quoted passages stay in ignored artifacts; tracked files store only metadata, statuses, and short evidence pointers."
+}

@@ -1,0 +1,39 @@
+{
+  "schema": "pps-paper-metadata-extraction-schema.v1",
+  "parser_version": "0.1.0",
+  "pdf_statuses": [
+    "downloaded",
+    "open_access_unavailable",
+    "paywalled",
+    "needs_user_download",
+    "not_applicable",
+    "bad_pdf"
+  ],
+  "supplement_statuses": [
+    "downloaded",
+    "not_found",
+    "needs_user_download",
+    "paywalled",
+    "not_applicable",
+    "not_checked"
+  ],
+  "extraction_statuses": [
+    "parsed",
+    "parsed_with_warnings",
+    "failed",
+    "pending_pdf"
+  ],
+  "field_statuses": [
+    "reported",
+    "derived",
+    "inferred_low_confidence",
+    "not_reported_after_review",
+    "not_applicable",
+    "source_unavailable"
+  ],
+  "local_artifact_conventions": {
+    "main_pdf_filename": "artifacts/paper_metadata_audit/publication_pdfs/<record_id>.pdf",
+    "supplement_folder": "artifacts/paper_metadata_audit/supplements/<record_id>/",
+    "extracted_output_folder": "artifacts/paper_metadata_audit/extracted/"
+  }
+}
