@@ -756,130 +756,139 @@ code {
 .arch-node-hw .arch-node-icon { color: #4a5c52; }
 .arch-node-hw .arch-node-kicker { color: #4a5c52; }
 
-/* Hardware tier stacked layout: interface on top, outputs below */
+/* Hardware tier: interface on top, branching down to outputs */
 .arch-hw-layout {
-  display: grid;
-  grid-template-rows: auto auto auto;
+  display: flex;
+  flex-direction: column;
   gap: 0;
 }
 
-.arch-hw-top {
-  margin-bottom: 0;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  border-bottom: none;
+/* Komplete node: text left, pixel art right */
+.arch-node-hw-main {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: start;
 }
 
-.arch-hw-arrows {
+.arch-node-hw-main .arch-node-copy {
+  min-width: 0;
+}
+
+.arch-node-hw-main .arch-hw-pixel {
+  flex-shrink: 0;
+  width: 120px;
+  min-height: 0;
+  padding: 6px;
+  margin-top: 0;
+}
+
+.arch-node-hw-main .arch-hw-pixel canvas {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* CSS-only connector showing signal routing from interface to outputs */
+.arch-hw-connector {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  height: 32px;
-  position: relative;
-  background: #f0f4f1;
-  border-left: 1px solid #c8d5cc;
-  border-right: 1px solid #c8d5cc;
-}
-
-.arch-hw-arrow-left,
-.arch-hw-arrow-right {
-  display: flex;
-  align-items: center;
-  font-size: 10px;
-  font-weight: 700;
-  color: #4a5c52;
-  letter-spacing: 0.04em;
+  height: 44px;
   position: relative;
 }
 
-.arch-hw-arrow-left {
-  justify-content: flex-start;
-  padding-left: 14px;
-  border-right: 1px solid #c8d5cc;
-}
-
-.arch-hw-arrow-right {
-  justify-content: flex-end;
-  padding-right: 14px;
-}
-
-/* Arrow stems and heads */
-.arch-hw-arrow-left::before {
+/* Vertical stem down from center of Komplete node */
+.arch-hw-connector::before {
   content: '';
   position: absolute;
+  top: 0;
   left: 50%;
-  top: 50%;
-  width: calc(50% - 8px);
+  width: 1px;
+  height: 16px;
+  background: #7a9c8a;
+  transform: translateX(-50%);
+}
+
+/* Horizontal crossbar splitting left and right */
+.arch-hw-connector::after {
+  content: '';
+  position: absolute;
+  top: 16px;
+  left: 25%;
+  width: 50%;
   height: 1px;
   background: #7a9c8a;
-  transform: translateX(-100%) translateY(-50%);
 }
 
-.arch-hw-arrow-left::after {
-  content: '';
-  position: absolute;
-  left: calc(50% - calc(50% - 8px) - 5px);
-  top: 50%;
-  border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
-  border-right: 5px solid #7a9c8a;
-  transform: translateY(-50%);
+.arch-hw-branch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  padding-top: 2px;
 }
 
-.arch-hw-arrow-right::before {
+/* Vertical drop from crossbar down toward each output node */
+.arch-hw-branch::before {
   content: '';
   position: absolute;
-  right: 50%;
-  top: 50%;
-  width: calc(50% - 8px);
-  height: 1px;
+  top: 16px;
+  bottom: 6px;
+  left: 50%;
+  width: 1px;
   background: #7a9c8a;
-  transform: translateX(100%) translateY(-50%);
+  transform: translateX(-50%);
 }
 
-.arch-hw-arrow-right::after {
+/* Arrowhead pointing into each output node */
+.arch-hw-branch::after {
   content: '';
   position: absolute;
-  right: calc(50% - calc(50% - 8px) - 5px);
-  top: 50%;
-  border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
-  border-left: 5px solid #7a9c8a;
-  transform: translateY(-50%);
+  bottom: 0;
+  left: 50%;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 6px solid #7a9c8a;
+  transform: translateX(-50%);
 }
 
+.arch-hw-label {
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #4a5c52;
+  padding-top: 2px;
+}
+
+/* Output nodes: text left, pixel art right */
 .arch-hw-outputs {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0;
+  gap: 8px;
 }
 
-.arch-hw-outputs .arch-node-hw:first-child {
-  border-top: none;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  border-right: none;
+.arch-node-hw-output {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: start;
 }
 
-.arch-hw-outputs .arch-node-hw:last-child {
-  border-top: none;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  border-bottom-left-radius: 0;
+.arch-node-hw-output .arch-node-copy {
+  min-width: 0;
 }
 
-/* Pixel art image embedded in arch node */
-.arch-node-hw .arch-hw-pixel {
-  margin-top: 10px;
-  min-height: 80px;
-  padding: 8px;
+.arch-node-hw-output .arch-hw-pixel {
+  flex-shrink: 0;
+  width: 90px;
+  min-height: 0;
+  padding: 5px;
+  margin-top: 0;
+}
+
+.arch-node-hw-output .arch-hw-pixel canvas {
   width: 100%;
-  box-sizing: border-box;
-}
-
-.arch-node-hw .arch-hw-pixel canvas {
-  width: min(100%, 160px);
-  max-width: 160px;
+  max-width: 100%;
 }
 
 .arch-vconnect {
@@ -3479,17 +3488,13 @@ body.modal-open {
     grid-template-columns: 1fr;
   }
 
-  .arch-hw-outputs .arch-node-hw:first-child {
-    border-bottom: none;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    border-right: 1px solid #c8d5cc;
+  .arch-node-hw-main,
+  .arch-node-hw-output {
+    grid-template-columns: 1fr;
   }
 
-  .arch-hw-outputs .arch-node-hw:last-child {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-left: 1px solid #c8d5cc;
+  .arch-hw-connector {
+    height: 36px;
   }
 
   .arch-tier {
