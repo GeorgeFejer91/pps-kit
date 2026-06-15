@@ -1146,10 +1146,8 @@ def test_protocol11_study5_readiness_auditor_checks_xdf_audio_and_scope(tmp_path
     session_dir = artifact_dir / "session_one_block"
     blocks_dir = session_dir / "blocks"
     analysis_dir = session_dir / "analysis"
-    marker_dir = artifact_dir / "response_marker_audio_evidence_validation_default_after_patch"
     blocks_dir.mkdir(parents=True)
     analysis_dir.mkdir()
-    marker_dir.mkdir()
 
     participant_id = "PVAL001"
     session_id = "PVAL001_study5_fixture"
@@ -1230,6 +1228,8 @@ def test_protocol11_study5_readiness_auditor_checks_xdf_audio_and_scope(tmp_path
 
     evidence_audio = np.zeros((3000, 4), dtype=np.float32)
     evidence_audio[:, :3] = block_audio
+    evidence_audio[570:590, 2] = 0.45
+    evidence_audio[1470:1490, 2] = 0.45
     evidence_wav = session_dir / "fixture_audio_evidence.wav"
     sf.write(evidence_wav, evidence_audio, sample_rate)
     evidence_sidecar = {
@@ -1478,43 +1478,6 @@ def test_protocol11_study5_readiness_auditor_checks_xdf_audio_and_scope(tmp_path
     image.save(artifact_dir / "focus_screenshot.png")
     image.save(artifact_dir / "live_desktop_after_first_cues.png")
 
-    (artifact_dir / "lsl_xdf_audio_reconciliation_report.json").write_text(
-        json.dumps(
-            {
-                "schema": "pps-lsl-xdf-audio-reconciliation.v1",
-                "passed": True,
-                "criteria": {
-                    "events_xdf_loadable": True,
-                    "lsl_markers_xdf_loadable": True,
-                    "events_and_lsl_marker_ids_match": True,
-                    "event_types_match_between_csv_layers": True,
-                    "event_codes_match_between_csv_layers": True,
-                    "trigger_keys_match_between_csv_layers": True,
-                    "xdf_and_audio_evidence_share_session_folder": True,
-                    "audio_evidence_is_komplete_asio": True,
-                    "audio_evidence_is_four_channel_runtime": True,
-                    "tactile_channel_is_output_3": True,
-                    "silent_output_4_confirmed": True,
-                    "no_audio_drops_or_interrupts": True,
-                },
-            }
-        ),
-        encoding="utf-8",
-    )
-    (marker_dir / "response_marker_loopback_report.json").write_text(
-        json.dumps(
-            {
-                "schema": "pps-response-marker-loopback.v1",
-                "passed": True,
-                "expected_marker_count": 2,
-                "detected_marker_count": 2,
-                "detection_rate": 1.0,
-                "abs_residual_ms": {"count": 2, "p95_ms": 0.0, "max_ms": 0.0},
-            }
-        ),
-        encoding="utf-8",
-    )
-
     report = auditor.audit_readiness(artifact_dir, output_dir=tmp_path / "readiness_audit")
 
     assert report["passed"]
@@ -1523,6 +1486,8 @@ def test_protocol11_study5_readiness_auditor_checks_xdf_audio_and_scope(tmp_path
     assert report["sections"]["local_recorder_audio_evidence"]["passed"]
     assert report["sections"]["analysis_outputs"]["passed"]
     assert report["scope"] == "one_block_study5_real_asio_rehearsal"
+    assert (tmp_path / "readiness_audit" / "lsl_xdf_audio_reconciliation_report.json").exists()
+    assert (tmp_path / "readiness_audit" / "response_marker_audio_evidence_validation" / "response_marker_loopback_report.json").exists()
 
     strict = auditor.audit_readiness(
         artifact_dir,
@@ -1535,6 +1500,44 @@ def test_protocol11_study5_readiness_auditor_checks_xdf_audio_and_scope(tmp_path
     assert strict["scope_summary"]["validation_audio_realtime"]
     assert any(item["name"] == "artifact_is_full_study5_when_required" and not item["passed"] for item in strict["criteria"])
     assert (tmp_path / "readiness_audit" / "protocol11_study5_readiness_audit.json").exists()
+
+
+def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_path: Path):
+    harness = _load_script("run_full_realtime_participant_emulation.py")
+    runner = tmp_path / "PPSExperimentRunner.exe"
+    screenshot = tmp_path / "focus_screenshot.png"
+
+    strict_args = harness.build_arg_parser().parse_args(
+        [
+            "--runner",
+            str(runner),
+            "--audio-mode",
+            "hardware",
+            "--strict-study5-readiness",
+            "--participant-id",
+            "P001",
+        ]
+    )
+    strict_command = harness._build_runner_command(strict_args, runner=runner, screenshot_path=screenshot)
+    strict_env = harness._configure_validation_env(strict_args, output_dir=tmp_path, focus_report_path=tmp_path / "focus_validation_report.json")
+
+    assert "--no-lsl" not in strict_command
+    assert "--no-internal-xdf" not in strict_command
+    assert "--no-backup-recording" not in strict_command
+    assert "--validation-screenshot" in strict_command
+    assert harness._standard_capture_requested(strict_args)
+    assert "PPS_FOCUS_VALIDATION_REALTIME_AUDIO" not in strict_env
+    assert strict_env["PPS_FOCUS_VALIDATION_PARTICIPANT_EMULATOR"] == "1"
+
+    legacy_args = harness.build_arg_parser().parse_args(["--runner", str(runner)])
+    legacy_command = harness._build_runner_command(legacy_args, runner=runner, screenshot_path=screenshot)
+
+    assert "--no-lsl" in legacy_command
+    assert "--no-internal-xdf" in legacy_command
+    assert "--no-backup-recording" in legacy_command
+
+    with pytest.raises(ValueError, match="requires --audio-mode hardware"):
+        harness.main(["--runner", str(runner), "--strict-study5-readiness"])
 
 
 def test_topup_missed_trial_stress_rescues_intentional_misses(tmp_path: Path):

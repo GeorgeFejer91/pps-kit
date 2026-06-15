@@ -28,8 +28,11 @@ from PIL import Image, ImageStat
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = REPO_ROOT / "src"
+SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
 
 
 SCHEMA = "pps-protocol11-study5-readiness-audit.v1"
@@ -453,6 +456,153 @@ def _best_response_marker_report(artifact_dir: Path) -> dict[str, Any]:
     return {"exists": True, "passed": bool(chosen.get("passed")), "chosen": chosen, "reports": reports}
 
 
+def _response_marker_report_from_audio(
+    *,
+    events_csv: Path,
+    recordings: list[Path],
+    output_dir: Path,
+) -> dict[str, Any]:
+    if not events_csv.is_file() or not recordings:
+        return {"exists": False, "passed": False, "generated": False, "error": "missing events.csv or audio evidence recordings"}
+    try:
+        from compare_response_marker_loopback import compare_loopback  # type: ignore
+
+        report = compare_loopback(
+            events_csv=events_csv,
+            recordings=recordings,
+            output_dir=output_dir,
+            tactile_channel_1based=3,
+        )
+    except Exception as exc:
+        return {"exists": False, "passed": False, "generated": False, "error": str(exc)}
+    report = dict(report)
+    report["exists"] = True
+    report["generated"] = True
+    report["_path"] = str(output_dir / "response_marker_loopback_report.json")
+    return {"exists": True, "passed": bool(report.get("passed")), "chosen": report, "reports": [report], "generated": True}
+
+
+def _audio_evidence_records(session_dir: Path) -> list[dict[str, Any]]:
+    sidecars = sorted(session_dir.glob("*audio_evidence.output_evidence.json"))
+    recordings_dir = session_dir / "recordings"
+    if not sidecars and recordings_dir.exists():
+        sidecars = sorted(recordings_dir.glob("*output_evidence.json"))
+    records: list[dict[str, Any]] = []
+    for sidecar_path in sidecars:
+        sidecar = _read_json(sidecar_path)
+        wav_path = _resolve_path(sidecar.get("path"), base=session_dir) if sidecar else Path()
+        if not _path_is_set(wav_path):
+            candidate = sidecar_path.with_suffix("")
+            if candidate.name.endswith(".output_evidence"):
+                candidate = candidate.with_name(candidate.name[: -len(".output_evidence")] + ".wav")
+            wav_path = candidate
+        records.append(
+            {
+                "sidecar_path": sidecar_path,
+                "wav_path": wav_path,
+                "sidecar": sidecar,
+                "scan": _wav_scan(wav_path),
+            }
+        )
+    if not records:
+        for wav_path in sorted(session_dir.glob("*audio_evidence.wav")):
+            records.append({"sidecar_path": Path(), "wav_path": wav_path, "sidecar": {}, "scan": _wav_scan(wav_path)})
+    return records
+
+
+def _audio_record_ok(record: dict[str, Any]) -> bool:
+    sidecar = record.get("sidecar") or {}
+    device_name = str(sidecar.get("device_name") or sidecar.get("device") or "")
+    return (
+        bool(sidecar)
+        and sidecar.get("schema") == "pps-digital-output-evidence.v1"
+        and "komplete" in device_name.lower()
+        and str(sidecar.get("hostapi", "")).upper() == "ASIO"
+        and int(sidecar.get("runtime_output_channels") or 0) >= 4
+        and int(sidecar.get("tactile_output_channel_1based") or 0) == 3
+        and int(sidecar.get("dropped_buffer_count") or 0) == 0
+        and not bool(sidecar.get("interrupted"))
+    )
+
+
+def _audio_wav_matches_sidecar(record: dict[str, Any]) -> bool:
+    sidecar = record.get("sidecar") or {}
+    scan = record.get("scan") or {}
+    return bool(
+        scan.get("readable")
+        and int(scan.get("frames") or -1) == int(sidecar.get("frames") or -2)
+        and int(scan.get("samplerate") or -1) == int(sidecar.get("sample_rate") or sidecar.get("sample_rate_hz") or -2)
+    )
+
+
+def _audio_signal_shape_ok(record: dict[str, Any]) -> bool:
+    peaks = [float(value) for value in (record.get("scan") or {}).get("max_abs_by_channel", [])]
+    return len(peaks) >= 4 and all(value > 0 for value in peaks[:3]) and peaks[3] <= 1e-6
+
+
+def _computed_reconciliation_report(
+    *,
+    session_dir: Path,
+    output_dir: Path,
+    event_counts: dict[str, int],
+    marker_counts: dict[str, int],
+    reconciliation: dict[str, Any],
+    xdf: dict[str, Any],
+    audio_records: list[dict[str, Any]],
+) -> dict[str, Any]:
+    audio_wavs = [Path(record["wav_path"]) for record in audio_records if _path_is_set(Path(record["wav_path"]))]
+    criteria = {
+        "events_xdf_loadable": bool(xdf.get("events_xdf", {}).get("loaded")),
+        "lsl_markers_xdf_loadable": bool(xdf.get("lsl_markers_xdf", {}).get("loaded")),
+        "events_and_lsl_marker_ids_match": not reconciliation.get("missing_from_lsl_markers_csv") and not reconciliation.get("extra_in_lsl_markers_csv"),
+        "event_types_match_between_csv_layers": not reconciliation.get("event_type_mismatches"),
+        "event_codes_match_between_csv_layers": not reconciliation.get("event_code_mismatches"),
+        "trigger_keys_match_between_csv_layers": not reconciliation.get("trigger_key_mismatches"),
+        "xdf_and_audio_evidence_share_session_folder": bool(audio_wavs)
+        and all(path.resolve().parent == session_dir.resolve() for path in audio_wavs),
+        "audio_evidence_is_komplete_asio": bool(audio_records) and all(_audio_record_ok(record) for record in audio_records),
+        "audio_evidence_is_four_channel_runtime": bool(audio_records)
+        and all(int((record.get("sidecar") or {}).get("runtime_output_channels") or 0) >= 4 for record in audio_records),
+        "tactile_channel_is_output_3": bool(audio_records)
+        and all(int((record.get("sidecar") or {}).get("tactile_output_channel_1based") or 0) == 3 for record in audio_records),
+        "silent_output_4_confirmed": bool(audio_records) and all(_audio_signal_shape_ok(record) for record in audio_records),
+        "no_audio_drops_or_interrupts": bool(audio_records)
+        and all(int((record.get("sidecar") or {}).get("dropped_buffer_count") or 0) == 0 and not bool((record.get("sidecar") or {}).get("interrupted")) for record in audio_records),
+    }
+    report = {
+        "schema": "pps-lsl-xdf-audio-reconciliation.v1",
+        "session_dir": str(session_dir),
+        "passed": all(criteria.values()),
+        "criteria": criteria,
+        "event_counts": event_counts,
+        "lsl_marker_counts": marker_counts,
+        "row_counts": {
+            "events_csv": reconciliation.get("events_csv_count", 0),
+            "lsl_markers_csv": reconciliation.get("lsl_markers_csv_count", 0),
+        },
+        "event_id_reconciliation": {
+            "missing_from_lsl_markers_csv": reconciliation.get("missing_from_lsl_markers_csv", []),
+            "extra_in_lsl_markers_csv": reconciliation.get("extra_in_lsl_markers_csv", []),
+            "event_type_mismatches": reconciliation.get("event_type_mismatches", []),
+            "event_code_mismatches": reconciliation.get("event_code_mismatches", []),
+            "trigger_key_mismatches": reconciliation.get("trigger_key_mismatches", []),
+        },
+        "xdf": xdf,
+        "audio_evidence": [
+            {
+                "sidecar_path": str(record.get("sidecar_path") or ""),
+                "wav_path": str(record.get("wav_path") or ""),
+                "sidecar": record.get("sidecar") or {},
+                "scan": record.get("scan") or {},
+            }
+            for record in audio_records
+        ],
+    }
+    output_dir.mkdir(parents=True, exist_ok=True)
+    _write_json(output_dir / "lsl_xdf_audio_reconciliation_report.json", report)
+    return report
+
+
 def _event_id_reconciliation(events: list[dict[str, Any]], markers: list[dict[str, str]]) -> dict[str, Any]:
     event_by_id = {str(row.get("event_id", "")).strip(): row for row in events if str(row.get("event_id", "")).strip()}
     marker_by_id = {str(row.get("event_id", "")).strip(): row for row in markers if str(row.get("event_id", "")).strip()}
@@ -586,7 +736,11 @@ def _scope_summary(session_dir: Path, manifest: dict[str, Any], focus_report: di
         expected_blocks = 12
     observed_block_count = len(blocks) if blocks else Counter(row.get("event_type", "") for row in events).get("block_start", 0)
     full_study5 = bool(is_study5 and expected_blocks and observed_block_count >= expected_blocks)
-    realtime = bool(focus_report.get("validation_audio_realtime"))
+    realtime = bool(
+        focus_report.get("validation_audio_realtime")
+        or focus_report.get("hardware_audio_realtime")
+        or str(focus_report.get("protocol11_audio_mode") or "").strip().lower() == "hardware"
+    )
     if full_study5 and realtime:
         scope = "full_study5_realtime"
     elif is_study5 and observed_block_count == 1:
@@ -681,19 +835,31 @@ def audit_readiness(
     sample_audit = _validate_manifest_samples(block_paths)
     xdf = {"events_xdf": _xdf_summary(paths["events_xdf"]), "lsl_markers_xdf": _xdf_summary(paths["lsl_markers_xdf"])}
     reconciliation = _event_id_reconciliation(events, markers)
-    reconciliation_report = _read_json(artifact_dir / "lsl_xdf_audio_reconciliation_report.json")
+    audio_records = _audio_evidence_records(session_dir)
+    audio_wav_paths = [Path(record["wav_path"]) for record in audio_records if _path_is_set(Path(record["wav_path"]))]
+    computed_reconciliation_report = _computed_reconciliation_report(
+        session_dir=session_dir,
+        output_dir=output_dir,
+        event_counts=event_counts,
+        marker_counts=marker_counts,
+        reconciliation=reconciliation,
+        xdf=xdf,
+        audio_records=audio_records,
+    )
+    existing_reconciliation_report = _read_json(artifact_dir / "lsl_xdf_audio_reconciliation_report.json")
+    reconciliation_report = existing_reconciliation_report if existing_reconciliation_report.get("passed") else computed_reconciliation_report
     response_marker_report = _best_response_marker_report(artifact_dir)
-
-    audio_sidecars = sorted(session_dir.glob("*audio_evidence.output_evidence.json"))
-    if not audio_sidecars:
-        audio_sidecars = sorted((session_dir / "recordings").glob("*output_evidence.json")) if (session_dir / "recordings").exists() else []
-    audio_sidecar_path = audio_sidecars[-1] if audio_sidecars else Path()
-    audio_sidecar = _read_json(audio_sidecar_path)
-    audio_wav_path = _resolve_path(audio_sidecar.get("path"), base=session_dir) if audio_sidecar else Path()
-    if not _path_is_set(audio_wav_path):
-        wavs = sorted(session_dir.glob("*audio_evidence.wav"))
-        audio_wav_path = wavs[-1] if wavs else Path()
-    audio_scan = _wav_scan(audio_wav_path)
+    expected_response_marker_count = event_counts.get("response_marker_start", 0)
+    chosen_marker_report = response_marker_report.get("chosen", {}) if response_marker_report.get("exists") else {}
+    if (
+        not response_marker_report.get("passed")
+        or int(chosen_marker_report.get("expected_marker_count") or -1) != expected_response_marker_count
+    ):
+        response_marker_report = _response_marker_report_from_audio(
+            events_csv=paths["events_csv"],
+            recordings=audio_wav_paths,
+            output_dir=output_dir / "response_marker_audio_evidence_validation",
+        )
     block_wav_scans = {path.name: _wav_scan(path) for path in block_wavs}
 
     analysis_paths = {suffix: _latest_analysis_csv(session_dir, suffix) for suffix in EXPECTED_ANALYSIS_SUFFIXES}
@@ -755,17 +921,33 @@ def audit_readiness(
     triggers = trigger_dictionary.get("triggers") or []
     add(Criterion("lsl_xdf_trigger_logging", "trigger_dictionary_has_reserved_and_trial_codes", bool(reserved) and any(str((item or {}).get("trigger_key", "")).startswith("trial:") for item in triggers), "Trigger dictionary includes reserved controls and deterministic trial keys.", evidence={"reserved_count": len(reserved), "trigger_count": len(triggers)}))
 
-    audio_device_name = str(audio_sidecar.get("device_name") or audio_sidecar.get("device") or "")
-    audio_sidecar_ok = bool(audio_sidecar) and audio_sidecar.get("schema") == "pps-digital-output-evidence.v1" and "komplete" in audio_device_name.lower() and str(audio_sidecar.get("hostapi", "")).upper() == "ASIO" and int(audio_sidecar.get("runtime_output_channels") or 0) >= 4 and int(audio_sidecar.get("tactile_output_channel_1based") or 0) == 3 and int(audio_sidecar.get("dropped_buffer_count") or 0) == 0 and not bool(audio_sidecar.get("interrupted"))
-    add(Criterion("local_recorder_audio_evidence", "audio_evidence_sidecar_is_komplete_asio_4ch_clean", audio_sidecar_ok, "Local audio-evidence sidecar records clean 4-channel ASIO output with tactile on output 3.", evidence={"path": audio_sidecar_path, "sidecar": audio_sidecar}))
-    sidecar_frames_match = audio_scan.get("readable") and int(audio_scan.get("frames") or -1) == int(audio_sidecar.get("frames") or -2) and int(audio_scan.get("samplerate") or -1) == int(audio_sidecar.get("sample_rate") or audio_sidecar.get("sample_rate_hz") or -2)
-    add(Criterion("local_recorder_audio_evidence", "audio_evidence_wav_matches_sidecar", bool(sidecar_frames_match), "Audio-evidence WAV is readable and agrees with sidecar sample rate/frame count.", evidence={"wav": audio_scan, "sidecar_path": audio_sidecar_path}))
-    peaks = [float(value) for value in audio_scan.get("max_abs_by_channel", [])]
-    output_4_silent = len(peaks) >= 4 and peaks[3] <= 1e-6
-    output_123_nonzero = len(peaks) >= 3 and all(value > 0 for value in peaks[:3])
-    add(Criterion("local_recorder_audio_evidence", "runtime_channels_have_expected_signal_shape", output_123_nonzero and output_4_silent, "Outputs 1-3 contain signal and output 4 remains silent.", evidence={"max_abs_by_channel": peaks}))
+    expected_audio_recordings = scheduled_expected.get("block_start", 0)
+    audio_inventory = [
+        {
+            "sidecar_path": str(record.get("sidecar_path") or ""),
+            "wav_path": str(record.get("wav_path") or ""),
+            "sidecar_ok": _audio_record_ok(record),
+            "wav_matches_sidecar": _audio_wav_matches_sidecar(record),
+            "signal_shape_ok": _audio_signal_shape_ok(record),
+            "sidecar": record.get("sidecar") or {},
+            "scan": record.get("scan") or {},
+        }
+        for record in audio_records
+    ]
+    add(
+        Criterion(
+            "local_recorder_audio_evidence",
+            "audio_evidence_files_cover_played_blocks",
+            bool(audio_records) and len(audio_records) >= expected_audio_recordings,
+            "There is one local audio-evidence WAV/sidecar set for every played block.",
+            evidence={"expected_recordings": expected_audio_recordings, "observed_recordings": len(audio_records), "records": audio_inventory},
+        )
+    )
+    add(Criterion("local_recorder_audio_evidence", "audio_evidence_sidecars_are_komplete_asio_4ch_clean", bool(audio_records) and all(_audio_record_ok(record) for record in audio_records), "Every local audio-evidence sidecar records clean 4-channel ASIO output with tactile on output 3.", evidence={"records": audio_inventory}))
+    add(Criterion("local_recorder_audio_evidence", "audio_evidence_wavs_match_sidecars", bool(audio_records) and all(_audio_wav_matches_sidecar(record) for record in audio_records), "Every audio-evidence WAV is readable and agrees with its sidecar sample rate/frame count.", evidence={"records": audio_inventory}))
+    add(Criterion("local_recorder_audio_evidence", "runtime_channels_have_expected_signal_shape", bool(audio_records) and all(_audio_signal_shape_ok(record) for record in audio_records), "For every audio-evidence WAV, outputs 1-3 contain signal and output 4 remains silent.", evidence={"records": audio_inventory}))
     recon_criteria = reconciliation_report.get("criteria") if isinstance(reconciliation_report.get("criteria"), dict) else {}
-    add(Criterion("local_recorder_audio_evidence", "reconciliation_report_passed", bool(reconciliation_report.get("passed")) and all(bool(value) for value in recon_criteria.values()), "Existing LSL/XDF/audio reconciliation report passes every criterion.", evidence={"path": artifact_dir / "lsl_xdf_audio_reconciliation_report.json", "criteria": recon_criteria}))
+    add(Criterion("local_recorder_audio_evidence", "lsl_xdf_audio_reconciliation_passed", bool(reconciliation_report.get("passed")) and all(bool(value) for value in recon_criteria.values()), "LSL/XDF/audio reconciliation passes every criterion.", evidence={"existing_report": artifact_dir / "lsl_xdf_audio_reconciliation_report.json", "computed_report": output_dir / "lsl_xdf_audio_reconciliation_report.json", "criteria": recon_criteria}))
 
     mouse_count = event_counts.get("mouse_click", 0)
     response_marker_count = event_counts.get("response_marker_start", 0)
@@ -817,8 +999,19 @@ def audit_readiness(
         "lsl_marker_counts": marker_counts,
         "expected_event_counts": scheduled_expected,
         "xdf": xdf,
-        "audio_evidence": {"sidecar_path": audio_sidecar_path, "wav_path": audio_wav_path, "scan": audio_scan},
+        "audio_evidence": {
+            "record_count": len(audio_records),
+            "records": [
+                {
+                    "sidecar_path": record.get("sidecar_path"),
+                    "wav_path": record.get("wav_path"),
+                    "scan": record.get("scan"),
+                }
+                for record in audio_records
+            ],
+        },
         "response_marker_loopback_report": response_marker_report,
+        "lsl_xdf_audio_reconciliation_report": reconciliation_report,
         "analysis_rt_audit": analysis_rt,
     }
     _write_json(output_dir / "protocol11_study5_readiness_audit.json", report)

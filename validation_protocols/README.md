@@ -80,6 +80,7 @@ python .\validation_protocols\scripts\run_one_block_trial_runner_realtime_stress
 python .\validation_protocols\scripts\run_topup_missed_trial_stress.py --output-dir artifacts\validation_runs\topup_missed_trial_stress_current
 python .\validation_protocols\scripts\run_study5_end_to_end_ui_mouse_validation.py --packaged-standalone-app
 python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py --participant-id P001 --mouse-backend pynput
+python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py --participant-id P001 --mouse-backend pynput --audio-mode hardware --strict-study5-readiness
 python .\validation_protocols\scripts\run_protocol11_controlled_response_matrix.py --output-dir artifacts\validation_runs\protocol11_controlled_response_matrix_current
 python .\validation_protocols\scripts\run_protocol11_capture_options_matrix.py --output-dir artifacts\validation_runs\protocol11_capture_options_matrix_current
 python .\validation_protocols\scripts\validate_protocol11_emulated_runner_artifacts.py --session-dir local_data\sessions\P001_YYYYMMDD_HHMMSS --response-plan artifacts\validation_runs\protocol11_response_plan.json
@@ -185,11 +186,16 @@ Separate these quantities in every report:
   aggregator for packaged realtime runs: it parses `events.xdf` and
   `lsl_markers.xdf`, reconciles event and marker CSV layers, verifies
   `trigger_dictionary.json`, checks nonblank Focus Mode screenshots, audits
-  block WAV geometry and manifest sample columns, checks the Komplete ASIO
-  4-channel local audio-evidence WAV/sidecar, consumes the response-marker
-  loopback report, verifies the analysis CSV family and RT tolerance against
-  the emulated click plan, and reports whether the artifact is a full Study 5
-  realtime run or only a scoped rehearsal. This is
+  block WAV geometry and manifest sample columns, checks every per-block
+  Komplete ASIO 4-channel local audio-evidence WAV/sidecar, generates the
+  LSL/XDF/audio reconciliation report when needed, generates local
+  audio-evidence response-marker recovery when needed, verifies the analysis
+  CSV family and RT tolerance against the emulated click plan, and reports
+  whether the artifact is a full Study 5 realtime run or only a scoped
+  rehearsal. The final Study 5 command is
+  `run_full_realtime_participant_emulation.py --audio-mode hardware --strict-study5-readiness`;
+  strict mode refuses fake audio and refuses disabling LSL, internal XDF, or
+  local audio-evidence recording. This is
   pre-participant operational evidence, not hardware latency, Woojer
   mechanical-onset, or scientific PPS evidence.
 - Actual-block direct loopback evidence: whether the same actual one-block

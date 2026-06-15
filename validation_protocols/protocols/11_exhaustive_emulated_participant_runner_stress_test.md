@@ -47,6 +47,18 @@ python .\validation_protocols\scripts\run_topup_missed_trial_stress.py `
   --output-dir artifacts\validation_runs\topup_missed_trial_stress_current
 ```
 
+The final Study 5 pre-participant gate must use the normal ASIO/audio-evidence
+path, not the validation fake-audio shortcut. Run it with hardware audio,
+standard capture, and the strict readiness audit enabled:
+
+```powershell
+python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py `
+  --participant-id P001 `
+  --mouse-backend pynput `
+  --audio-mode hardware `
+  --strict-study5-readiness
+```
+
 Run the deterministic response-boundary matrix before the broader packaged or
 hardware-backed scenarios. It prepares a real Segment 5/6-style session package,
 runs `SessionRunnerController`, exercises instruction target double-clicks,
@@ -80,7 +92,9 @@ python .\validation_protocols\scripts\validate_protocol11_emulated_runner_artifa
 For Study 5 participant-readiness claims, aggregate the packaged-runner
 evidence folder with the Study 5 readiness audit. Use the strict flags for the
 final gate; without them, the same script may pass a scoped one-block ASIO
-rehearsal while still reporting `full_study5_realtime_ready=false`.
+rehearsal while still reporting `full_study5_realtime_ready=false`. The full
+realtime harness writes the launch/preparation reports and invokes this audit
+automatically when `--strict-study5-readiness` is set.
 
 ```powershell
 python .\validation_protocols\scripts\audit_protocol11_study5_readiness.py `
@@ -250,8 +264,10 @@ for each scenario:
 
 - Full Study 5 packaged realtime emulation with randomized hits and misses.
   Finish this scenario by running
-  `audit_protocol11_study5_readiness.py --require-full-study5 --require-realtime`
-  over the generated validation folder.
+  `run_full_realtime_participant_emulation.py --audio-mode hardware --strict-study5-readiness`.
+  This keeps standard capture enabled, captures a Focus Mode screenshot, writes
+  compatibility launch/preparation reports, and invokes the strict Study 5
+  readiness audit over the generated validation folder.
 - One-block actual-condition emulation with real audio hardware and OS-click
   responses. This may pass `audit_protocol11_study5_readiness.py` as scoped
   local-recorder/XDF evidence, but it does not satisfy the final full-session

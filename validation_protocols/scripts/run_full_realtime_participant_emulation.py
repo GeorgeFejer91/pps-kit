@@ -21,6 +21,13 @@ from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from audit_protocol11_study5_readiness import audit_readiness  # noqa: E402
+
+
 STUDY5_TEMPLATE_ID = "study5_box_breathing_pps"
 SCHEMA = "pps-full-realtime-participant-emulation-evaluation.v1"
 
@@ -58,6 +65,115 @@ def _read_csv(path: Path) -> list[dict[str, str]]:
         return []
     with path.open(newline="", encoding="utf-8-sig") as handle:
         return list(csv.DictReader(handle))
+
+
+def _standard_capture_requested(args: argparse.Namespace) -> bool:
+    return bool(args.standard_capture or args.strict_study5_readiness)
+
+
+def _build_runner_command(args: argparse.Namespace, *, runner: Path, screenshot_path: Path) -> list[str]:
+    command = [
+        str(runner),
+        "--profile",
+        str(args.profile),
+        "--participant-id",
+        str(args.participant_id),
+        "--manual-start",
+        "--enable-missed-trial-topup",
+        "--validation-screenshot",
+        str(screenshot_path),
+    ]
+    if not _standard_capture_requested(args):
+        command.extend(["--no-lsl", "--no-internal-xdf", "--no-backup-recording"])
+    else:
+        if args.no_lsl:
+            command.append("--no-lsl")
+        if args.no_internal_xdf:
+            command.append("--no-internal-xdf")
+        if args.no_backup_recording:
+            command.append("--no-backup-recording")
+    return command
+
+
+def _configure_validation_env(args: argparse.Namespace, *, output_dir: Path, focus_report_path: Path) -> dict[str, str]:
+    env = os.environ.copy()
+    env.pop("QT_QPA_PLATFORM", None)
+    if args.audio_mode == "validation-realtime":
+        env["PPS_FOCUS_VALIDATION_REALTIME_AUDIO"] = "1"
+        env["PPS_FOCUS_VALIDATION_AUDIO_CHUNK_FRAMES"] = str(int(args.validation_audio_chunk_frames))
+    else:
+        env.pop("PPS_FOCUS_VALIDATION_REALTIME_AUDIO", None)
+        env.pop("PPS_FOCUS_VALIDATION_FAST_AUDIO", None)
+        env.pop("PPS_FOCUS_VALIDATION_AUDIO_CHUNK_FRAMES", None)
+    env["PPS_FOCUS_VALIDATION_PARTICIPANT_EMULATOR"] = "1"
+    env["PPS_FOCUS_VALIDATION_AUTO_APPROVE_TOPUP"] = "1"
+    env["PPS_FOCUS_VALIDATION_MOUSE_BACKEND"] = str(args.mouse_backend)
+    env["PPS_FOCUS_VALIDATION_PARTICIPANT_SEED"] = str(int(args.seed))
+    env["PPS_FOCUS_VALIDATION_PARTICIPANT_MISS_RATE"] = str(float(args.miss_rate))
+    env["PPS_FOCUS_VALIDATION_PARTICIPANT_MIN_MISSES"] = str(int(args.min_misses))
+    env["PPS_FOCUS_VALIDATION_REPORT"] = str(focus_report_path)
+    env["PPS_FOCUS_DISABLE_PREWARM"] = "1"
+    env["PPS_PROTOCOL11_OUTPUT_DIR"] = str(output_dir)
+    return env
+
+
+def _annotate_focus_report(path: Path, *, args: argparse.Namespace) -> dict[str, Any]:
+    focus = _read_json(path)
+    if not focus:
+        return {}
+    focus["protocol11_audio_mode"] = str(args.audio_mode)
+    focus["hardware_audio_realtime"] = bool(args.audio_mode == "hardware")
+    focus["standard_capture_requested"] = bool(_standard_capture_requested(args))
+    focus["strict_study5_readiness_requested"] = bool(args.strict_study5_readiness)
+    _write_json(path, focus)
+    return focus
+
+
+def _write_launch_and_preparation_reports(
+    output_dir: Path,
+    *,
+    args: argparse.Namespace,
+    runner: Path,
+    command: list[str],
+    pid: int | None,
+    exit_code: int | None,
+    focus_report_path: Path,
+    screenshot_path: Path,
+    evaluation: dict[str, Any],
+    started_at: str,
+) -> None:
+    _write_json(
+        output_dir / "packaged_runner_process_launch.json",
+        {
+            "schema": "pps-packaged-full-study5-process-launch.v1",
+            "pid": pid,
+            "exe": str(runner),
+            "command": command,
+            "profile_id": str(args.profile),
+            "participant_id": str(args.participant_id),
+            "audio_mode": str(args.audio_mode),
+            "standard_capture_requested": _standard_capture_requested(args),
+            "strict_study5_readiness_requested": bool(args.strict_study5_readiness),
+            "started_at": started_at,
+            "exit_code": exit_code,
+            "validation_report": str(focus_report_path),
+            "screenshot": str(screenshot_path),
+            "mouse_backend": str(args.mouse_backend),
+        },
+    )
+    _write_json(
+        output_dir / "preparation_report.json",
+        {
+            "schema": "pps-full-study5-realtime-validation-prep.v1",
+            "profile_id": str(args.profile),
+            "participant_id": str(args.participant_id),
+            "audio_mode": str(args.audio_mode),
+            "standard_capture_requested": _standard_capture_requested(args),
+            "session_dir": evaluation.get("session_dir", ""),
+            "session_manifest": evaluation.get("session_manifest", ""),
+            "events_csv": evaluation.get("events_csv", ""),
+        },
+    )
 
 
 def _events(path: Path) -> list[dict[str, Any]]:
@@ -98,12 +214,21 @@ def _latest_analysis_csv(session_dir: Path, suffix: str) -> Path | None:
 
 def _write_markdown(path: Path, report: dict[str, Any]) -> None:
     evaluation = dict(report.get("evaluation") or {})
+    audio_mode = str(report.get("audio_mode") or "")
+    audio_note = (
+        "It uses the packaged runner with hidden validation hooks and the normal hardware ASIO audio/local-recorder path."
+        if audio_mode == "hardware"
+        else "It uses the packaged runner with hidden validation hooks, wall-clock-paced software audio, and PC mouse-event emulation."
+    )
     lines = [
         "# Full Realtime Participant Emulation Evaluation",
         "",
         f"- Passed: `{report.get('passed')}`",
         f"- UI ready for data collection: `{report.get('ui_ready_for_data_collection')}`",
         f"- Runner exe: `{report.get('runner')}`",
+        f"- Audio mode: `{audio_mode}`",
+        f"- Standard capture requested: `{report.get('standard_capture_requested')}`",
+        f"- Strict Study 5 readiness requested: `{report.get('strict_study5_readiness_requested')}`",
         f"- Process exit code: `{report.get('process_exit_code')}`",
         f"- Wall-clock process duration: `{report.get('process_wall_s')}` s",
         f"- Session manifest: `{evaluation.get('session_manifest')}`",
@@ -114,7 +239,7 @@ def _write_markdown(path: Path, report: dict[str, Any]) -> None:
         f"- Top-up approvals: `{evaluation.get('topup_approval_count')}`",
         f"- Top-up rescue rows: `{evaluation.get('topup_rescue_row_count')}`",
         "",
-        "This is evaluation evidence only, not a public toolkit deliverable. It uses the packaged runner with hidden validation hooks, wall-clock-paced software audio, and PC mouse-event emulation. It does not replace hardware loopback or participant-data collection SOPs.",
+        f"This is evaluation evidence only, not a public toolkit deliverable. {audio_note} It does not replace hardware loopback or participant-data collection SOPs.",
     ]
     if report.get("failures"):
         lines.extend(["", "## Failures"])
@@ -264,46 +389,61 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--min-misses", type=int, default=8)
     parser.add_argument("--seed", type=int, default=20260615)
     parser.add_argument("--mouse-backend", default="pynput", choices=["pynput", "win32", "pyautogui", "qtest"])
+    parser.add_argument(
+        "--audio-mode",
+        default="validation-realtime",
+        choices=["validation-realtime", "hardware"],
+        help="validation-realtime uses wall-clock fake audio; hardware uses the normal ASIO runner engine.",
+    )
+    parser.add_argument(
+        "--validation-audio-chunk-frames",
+        type=int,
+        default=4096,
+        help="Callback chunk size for validation-realtime audio mode.",
+    )
+    parser.add_argument(
+        "--standard-capture",
+        action="store_true",
+        help="Leave standard LSL, local XDF, trigger dictionary, analysis CSV, and local audio-evidence recording enabled.",
+    )
+    parser.add_argument("--no-lsl", action="store_true", help="With --standard-capture, still disable live LSL outlets.")
+    parser.add_argument("--no-internal-xdf", action="store_true", help="With --standard-capture, still disable events.xdf.")
+    parser.add_argument("--no-backup-recording", action="store_true", help="With --standard-capture, still disable local audio-evidence WAVs.")
+    parser.add_argument(
+        "--readiness-audit",
+        action="store_true",
+        help="Run the Protocol 11 Study 5 readiness audit after the full run.",
+    )
+    parser.add_argument(
+        "--strict-study5-readiness",
+        action="store_true",
+        help="Run the strict final Study 5 readiness gate; implies --standard-capture and requires hardware audio mode.",
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_arg_parser().parse_args(argv)
+    if args.strict_study5_readiness and args.audio_mode != "hardware":
+        raise ValueError("Strict Study 5 readiness requires --audio-mode hardware so the normal ASIO/local-recorder path is exercised.")
+    if args.strict_study5_readiness and (args.no_lsl or args.no_internal_xdf or args.no_backup_recording):
+        raise ValueError("Strict Study 5 readiness cannot disable LSL, internal XDF, or local audio-evidence recording.")
     output_dir = (args.output_dir or _default_output_dir()).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     runner = args.runner.resolve()
     if not runner.is_file():
         raise FileNotFoundError(f"Packaged runner exe was not found: {runner}")
-    focus_report_path = output_dir / "full_realtime_focus_report.json"
+    focus_report_path = output_dir / "focus_validation_report.json"
+    screenshot_path = output_dir / "focus_screenshot.png"
     if focus_report_path.exists():
         focus_report_path.unlink()
+    if screenshot_path.exists():
+        screenshot_path.unlink()
 
-    env = os.environ.copy()
-    env.pop("QT_QPA_PLATFORM", None)
-    env["PPS_FOCUS_VALIDATION_REALTIME_AUDIO"] = "1"
-    env["PPS_FOCUS_VALIDATION_AUDIO_CHUNK_FRAMES"] = "4096"
-    env["PPS_FOCUS_VALIDATION_PARTICIPANT_EMULATOR"] = "1"
-    env["PPS_FOCUS_VALIDATION_AUTO_APPROVE_TOPUP"] = "1"
-    env["PPS_FOCUS_VALIDATION_MOUSE_BACKEND"] = str(args.mouse_backend)
-    env["PPS_FOCUS_VALIDATION_PARTICIPANT_SEED"] = str(int(args.seed))
-    env["PPS_FOCUS_VALIDATION_PARTICIPANT_MISS_RATE"] = str(float(args.miss_rate))
-    env["PPS_FOCUS_VALIDATION_PARTICIPANT_MIN_MISSES"] = str(int(args.min_misses))
-    env["PPS_FOCUS_VALIDATION_REPORT"] = str(focus_report_path)
-    env["PPS_FOCUS_DISABLE_PREWARM"] = "1"
-
-    command = [
-        str(runner),
-        "--profile",
-        str(args.profile),
-        "--participant-id",
-        str(args.participant_id),
-        "--manual-start",
-        "--enable-missed-trial-topup",
-        "--no-lsl",
-        "--no-internal-xdf",
-        "--no-backup-recording",
-    ]
+    env = _configure_validation_env(args, output_dir=output_dir, focus_report_path=focus_report_path)
+    command = _build_runner_command(args, runner=runner, screenshot_path=screenshot_path)
     started = time.perf_counter()
+    started_at = datetime.now().isoformat(timespec="seconds")
     process = subprocess.Popen(command, cwd=str(REPO_ROOT), env=env)
     failures: list[str] = []
     try:
@@ -323,22 +463,58 @@ def main(argv: list[str] | None = None) -> int:
         process_wall_s=process_wall_s,
         exit_code=exit_code,
     )
+    focus = _annotate_focus_report(focus_report_path, args=args)
+    if focus:
+        evaluation["protocol11_audio_mode"] = focus.get("protocol11_audio_mode")
+        evaluation["hardware_audio_realtime"] = focus.get("hardware_audio_realtime")
+    _write_launch_and_preparation_reports(
+        output_dir,
+        args=args,
+        runner=runner,
+        command=command,
+        pid=process.pid,
+        exit_code=exit_code,
+        focus_report_path=focus_report_path,
+        screenshot_path=screenshot_path,
+        evaluation=evaluation,
+        started_at=started_at,
+    )
     failures.extend(evaluation_failures)
+    readiness_audit: dict[str, Any] | None = None
+    if args.readiness_audit or args.strict_study5_readiness:
+        readiness_audit = audit_readiness(
+            output_dir,
+            output_dir=output_dir / "protocol11_study5_readiness_audit",
+            require_full_study5=bool(args.strict_study5_readiness),
+            require_realtime=bool(args.strict_study5_readiness),
+        )
+        if not readiness_audit.get("passed"):
+            failures.append("Protocol 11 Study 5 readiness audit failed.")
+        if args.strict_study5_readiness and not readiness_audit.get("full_study5_realtime_ready"):
+            failures.append("Strict Study 5 readiness was not proven by the audit.")
     report = {
         "schema": SCHEMA,
         "created_at": datetime.now().isoformat(timespec="seconds"),
         "runner": str(runner),
         "command": command,
+        "audio_mode": str(args.audio_mode),
+        "standard_capture_requested": _standard_capture_requested(args),
+        "strict_study5_readiness_requested": bool(args.strict_study5_readiness),
         "process_exit_code": exit_code,
         "process_wall_s": process_wall_s,
         "evaluation": evaluation,
+        "readiness_audit": readiness_audit or {},
         "passed": not failures,
         "ui_ready_for_data_collection": not failures,
         "failures": failures,
         "notes": [
             "Evaluation-only protocol, not a toolkit deliverable.",
             "The packaged runner remains the only active experiment runner.",
-            "Audio is wall-clock paced through a validation engine; this proves full-duration UI/software survival and top-up behavior, not hardware latency.",
+            (
+                "Hardware mode exercises the normal ASIO/local audio-evidence path; validation-realtime mode proves full-duration UI/software survival with fake audio only."
+                if args.audio_mode == "hardware"
+                else "Audio is wall-clock paced through a validation engine; this proves full-duration UI/software survival and top-up behavior, not hardware latency."
+            ),
         ],
     }
     _write_json(output_dir / "full_realtime_participant_emulation_report.json", report)
