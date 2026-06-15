@@ -779,6 +779,7 @@ def _write_packaged_standalone_markdown(path: Path, report: dict[str, Any]) -> N
     launcher = dict(report.get("launcher") or {})
     counts = dict(focus.get("event_counts") or {})
     click_mode = report.get("click_mode") or "unknown"
+    selected_profile = launcher.get("selected_profile") or report.get("selected_profile") or ""
     lines = [
         "# Packaged Standalone Runner Mouse Validation",
         "",
@@ -786,7 +787,7 @@ def _write_packaged_standalone_markdown(path: Path, report: dict[str, Any]) -> N
         f"- Click mode: `{click_mode}`",
         f"- Runner exe: `{report.get('packaged_runner')}`",
         f"- Process exit code: `{report.get('process_exit_code')}`",
-        f"- Selected profile: `{launcher.get('selected_profile', '')}`",
+        f"- Selected profile: `{selected_profile}`",
         f"- Session manifest: `{focus.get('session_manifest') or launcher.get('selected_manifest')}`",
         f"- Completed: `{focus.get('completed')}`",
         f"- Blocks completed: `{counts.get('block_end', 0)}`",
@@ -798,6 +799,27 @@ def _write_packaged_standalone_markdown(path: Path, report: dict[str, Any]) -> N
     ]
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _enable_process_dpi_awareness() -> None:
+    """Keep Win32 click/screenshot coordinates on the same pixel grid."""
+
+    if os.name != "nt":
+        return
+    try:
+        import ctypes
+
+        try:
+            ctypes.windll.shcore.SetProcessDpiAwareness(2)
+            return
+        except Exception:
+            pass
+        try:
+            ctypes.windll.user32.SetProcessDPIAware()
+        except Exception:
+            pass
+    except Exception:
+        pass
 
 
 def _run_packaged_standalone_app_background_validation(args: argparse.Namespace) -> int:
@@ -912,6 +934,7 @@ def _run_packaged_standalone_app_validation(args: argparse.Namespace) -> int:
     if not bool(getattr(args, "packaged_visible_os_clicks", False)):
         return _run_packaged_standalone_app_background_validation(args)
 
+    _enable_process_dpi_awareness()
     output_dir = args.output_dir.resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     runner = args.packaged_runner.resolve()
@@ -952,26 +975,36 @@ def _run_packaged_standalone_app_validation(args: argparse.Namespace) -> int:
         )
         _click_client_fraction(
             launcher_hwnd,
-            0.62,
-            0.64,
+            0.70,
+            0.16,
             "click Study/profile preset selector",
             launcher_clicks,
         )
         time.sleep(0.25)
+        screenshots["launcher_after_profile_click"] = _save_window_screenshot(
+            launcher_hwnd, output_dir / "packaged_launcher_after_profile_click.png"
+        )
         _click_client_fraction(
             launcher_hwnd,
-            0.62,
-            0.74,
+            0.70,
+            0.22,
             "click selected Study 5 profile option",
             launcher_clicks,
         )
         time.sleep(0.25)
+        screenshots["launcher_after_profile_option_click"] = _save_window_screenshot(
+            launcher_hwnd, output_dir / "packaged_launcher_after_profile_option_click.png"
+        )
         _click_client_fraction(
             launcher_hwnd,
-            0.45,
-            0.88,
+            0.32,
+            0.46,
             "click Run Selected Profile",
             launcher_clicks,
+        )
+        time.sleep(0.50)
+        screenshots["launcher_after_run_profile_click"] = _save_window_screenshot(
+            launcher_hwnd, output_dir / "packaged_launcher_after_run_profile_click.png"
         )
 
         deadline = time.time() + float(args.timeout_s)
@@ -1031,6 +1064,8 @@ def _run_packaged_standalone_app_validation(args: argparse.Namespace) -> int:
     report = {
         "schema": f"{SCHEMA}.packaged-standalone-app",
         "created_at": datetime.now().isoformat(timespec="seconds"),
+        "click_mode": "visible_win32_os_mouse_events",
+        "selected_profile": STUDY5_TEMPLATE_ID,
         "packaged_runner": str(runner),
         "process_exit_code": exit_code,
         "launcher_os_mouse_clicks": launcher_clicks,
