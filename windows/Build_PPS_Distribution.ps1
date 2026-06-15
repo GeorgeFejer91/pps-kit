@@ -99,11 +99,22 @@ foreach ($Item in $Items) {
 
 $RunnerDir = Join-Path $Root "dist\PPSExperimentRunner"
 if (Test-Path -LiteralPath $RunnerDir) {
-    New-Item -ItemType Directory -Force -Path (Join-Path $StageRoot "dist") | Out-Null
-    Copy-Item -LiteralPath $RunnerDir -Destination (Join-Path $StageRoot "dist\PPSExperimentRunner") -Recurse -Force
+    $RunnerDestination = Join-Path $StageRoot "dist\PPSExperimentRunner"
+    New-Item -ItemType Directory -Force -Path $RunnerDestination | Out-Null
+    & robocopy $RunnerDir $RunnerDestination /E /NFL /NDL /NJH /NJS /NP | Out-Null
+    if ($LASTEXITCODE -ge 8) {
+        throw "robocopy failed while copying packaged runner with exit code $LASTEXITCODE"
+    }
+    $global:LASTEXITCODE = 0
 }
 else {
     Write-Warning "Packaged Focus Mode runner was not found at dist\PPSExperimentRunner."
+}
+
+$PackageInventoryPath = Join-Path $StageRoot "pps_package_inventory.v1.json"
+& python (Join-Path $Root "tools\package_inventory.py") --stage-root $StageRoot --output $PackageInventoryPath --strict
+if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
 }
 
 if (Test-Path -LiteralPath $HeavyZip) {
@@ -130,7 +141,8 @@ $ManifestArgs = @(
     "--payload-url", $ZenodoPayloadUrl,
     "--output", $ManifestPath,
     "--version", $Version,
-    "--source-tag", "v$Version"
+    "--source-tag", "v$Version",
+    "--package-inventory", $PackageInventoryPath
 )
 if ($ZenodoDoi) {
     $ManifestArgs += @("--zenodo-doi", $ZenodoDoi)

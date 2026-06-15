@@ -49,3 +49,28 @@ func TestParseDownloadManifestRejectsMissingHash(t *testing.T) {
 		t.Fatal("ParseDownloadManifest accepted a payload without a valid SHA256")
 	}
 }
+
+func TestParseDownloadManifestRejectsIncompletePackageInventory(t *testing.T) {
+	_, err := ParseDownloadManifest([]byte(`{
+	  "schema": "pps-download-manifest.v1",
+	  "version": "0.1.0",
+	  "payloads": [{
+	    "kind": "offline_lab_windows_x64",
+	    "filename": "x.zip",
+	    "url": "https://example.test/x.zip",
+	    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+	    "package_inventory": {
+	      "schema": "pps-installer-package-inventory.v1",
+	      "filename": "pps_package_inventory.v1.json",
+	      "path_in_payload": "pps_package_inventory.v1.json",
+	      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+	      "item_count": 10,
+	      "required_item_count": 8,
+	      "missing_required_count": 1
+	    }
+	  }]
+	}`))
+	if err == nil {
+		t.Fatal("ParseDownloadManifest accepted an inventory with missing required items")
+	}
+}

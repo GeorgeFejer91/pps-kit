@@ -128,6 +128,7 @@ Segment 2 combines Segment 1 ingredients into named within-trial sequence design
 - Add ordered audio boxes left-to-right.
 - Put one or more existing Segment 1 source labels inside each audio box.
 - Use multiple labels inside a box as alternatives that multiply variants.
+- Use the speaker icon on each selected audio label to play that exact Segment 1 ingredient through the local companion backend for online or offline soundchecks.
 - Add jitter boxes when a timed silent interval is part of the sequence.
 
 ### Folder And File Operations
