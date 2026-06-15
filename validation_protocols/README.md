@@ -80,6 +80,7 @@ python .\validation_protocols\scripts\run_one_block_trial_runner_realtime_stress
 python .\validation_protocols\scripts\run_topup_missed_trial_stress.py --output-dir artifacts\validation_runs\topup_missed_trial_stress_current
 python .\validation_protocols\scripts\run_study5_end_to_end_ui_mouse_validation.py --packaged-standalone-app
 python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py --participant-id P001 --mouse-backend pynput
+python .\validation_protocols\scripts\validate_protocol11_emulated_runner_artifacts.py --session-dir local_data\sessions\P001_YYYYMMDD_HHMMSS --response-plan artifacts\validation_runs\protocol11_response_plan.json
 python .\validation_protocols\scripts\run_focus_mode_click_path_stress.py --output-dir artifacts\validation_runs\focus_mode_click_path_current --count 10 --offscreen
 python .\validation_protocols\scripts\run_visible_runner_os_click_stress.py --output-dir artifacts\validation_runs\visible_runner_os_click_stress_current --count 10 --interval-s 0.05 --armed
 python .\validation_protocols\scripts\run_one_block_actual_condition_validation.py --run-setup-manifest local_data\dashboard_projects\0_study_project_registry\profile_pfeiffer_2018_lateral_perihead_left_to_right\6_experiment_run_setup\experiment_run_setup_manifest.json --device 31 --audio-gain 0.005 --tactile-gain 0.05
@@ -164,8 +165,13 @@ Separate these quantities in every report:
   Mode / `SessionRunnerController` workflow survives controlled launch,
   cache/prewarm, stimulus, response-boundary, instruction, top-up, capture,
   analysis, LSL/trigger, and operator-failure scenarios with emulated response
-  plans. This is pre-participant operational evidence, not hardware latency,
-  Woojer mechanical-onset, or scientific PPS evidence.
+  plans. `validate_protocol11_emulated_runner_artifacts.py` is the offline
+  artifact gate for completed scenarios: it consumes a session folder and
+  response plan keyed by `trial_uid`, then verifies the written WAV/manifests,
+  events, timing QC, analysis CSVs, marker mirrors, trigger dictionary, top-up
+  files, and declared capture options. This is pre-participant operational
+  evidence, not hardware latency, Woojer mechanical-onset, or scientific PPS
+  evidence.
 - Actual-block direct loopback evidence: whether the same actual one-block
   session's source block WAV and direct electrical capture recover stable
   channel alignment and paired inter-channel skew without clipping. Absolute

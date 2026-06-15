@@ -1009,6 +1009,56 @@ def test_one_block_trial_runner_realtime_stress_writes_analysis_ready_outputs(tm
     assert (tmp_path / "analysis_ready_trials.csv").exists()
 
 
+def test_protocol11_artifact_auditor_accepts_one_block_runner_outputs(tmp_path: Path):
+    pytest.importorskip("pyxdf")
+    stress = _load_script("run_one_block_trial_runner_realtime_stress.py")
+    validator = _load_script("validate_protocol11_emulated_runner_artifacts.py")
+
+    stress_report = stress.run_stress(
+        output_dir=tmp_path / "runner",
+        participant_id="P001",
+        trial_count=2,
+        sample_rate=44100,
+        trial_duration_s=0.45,
+        blocksize=256,
+        enable_lsl=False,
+        response_marker_delay_ms=8.0,
+    )
+    analysis_rows = list(csv.DictReader(Path(stress_report["analysis_ready_trials_csv"]).open(encoding="utf-8")))
+    plan_path = tmp_path / "protocol11_response_plan.json"
+    plan_path.write_text(
+        json.dumps(
+            {
+                "schema": "pps-protocol11-response-plan.v1",
+                "expected_capture_options": stress_report["capture_options"],
+                "trials": [
+                    {
+                        "trial_uid": row["trial_uid"],
+                        "action": "hit",
+                        "planned_rt_ms": row["rt_ms"],
+                        "rt_tolerance_ms": 1.0,
+                    }
+                    for row in analysis_rows
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    audit = validator.validate_artifacts(
+        Path(stress_report["session_dir"]),
+        response_plan_path=plan_path,
+        output_dir=tmp_path / "protocol11_audit",
+    )
+
+    assert audit["passed"]
+    assert audit["sections"]["stimulus_assembly"]["passed"]
+    assert audit["sections"]["timing_event_schedule"]["passed"]
+    assert audit["sections"]["response_marker_path"]["passed"]
+    assert audit["response_plan_audit"]["planned_count"] == 2
+    assert (tmp_path / "protocol11_audit" / "protocol11_emulated_runner_artifact_audit.json").exists()
+
+
 def test_topup_missed_trial_stress_rescues_intentional_misses(tmp_path: Path):
     stress = _load_script("run_topup_missed_trial_stress.py")
 
