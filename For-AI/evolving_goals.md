@@ -5,6 +5,7 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 ## 2026-06-16
 
 - Formalized `validation_protocols/protocols/11_exhaustive_emulated_participant_runner_stress_test.md` as the next pre-participant operational validation checklist. Protocol 11 keeps the real packaged Focus Mode / `SessionRunnerController` workflow under test while using controlled emulated response plans to cover launch/session resolution, stimulus assembly, sample-exact event schedules, response-boundary pairing, instruction continuation, part-aware top-up, analysis outputs, LSL/trigger options, capture-off combinations, and operator failure modes. Use non-participant IDs and ignored validation output folders only; treat passing Protocol 11 as software/operations evidence, not hardware latency, Woojer mechanical-onset, participant-comprehension, or scientific PPS evidence.
+- The public Documentation tab now follows the intended reader path: Background, Project, Software Flow, Stimulus Model, Native Renderer, Lab Route, Design Workflow, Native Runtime, Published Profiles, and Public Release. Keep `Published Profiles` near the end, after the architecture, stimulus, renderer, hardware, designer, and runner sections, so readers can evaluate emulatable studies with the full toolkit context rather than encountering the study table immediately after the intro.
 
 ## 2026-06-14
 

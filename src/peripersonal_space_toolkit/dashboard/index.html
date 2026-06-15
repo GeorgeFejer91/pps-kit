@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260615-pps-intro-layout">
+  <link rel="stylesheet" href="styles.css?v=20260616-doc-section-order">
 </head>
 <body>
   <div class="app-shell">
@@ -28,13 +28,13 @@
         <div class="rail-nav-kicker">Documentation</div>
         <a href="#docs-pps" data-page-section-link="docs-pps" data-page-section-page="documentation"><span>Peripersonal Space</span></a>
         <a href="#docs-overview" data-page-section-link="docs-overview" data-page-section-page="documentation"><span>Toolkit</span></a>
-        <a href="#docs-emulatable-studies" data-page-section-link="docs-emulatable-studies" data-page-section-page="documentation"><span>Emulatable Studies</span></a>
         <a href="#docs-architecture" data-page-section-link="docs-architecture" data-page-section-page="documentation"><span>Architecture</span></a>
-        <a href="#docs-hardware" data-page-section-link="docs-hardware" data-page-section-page="documentation"><span>Hardware</span></a>
         <a href="#docs-spatialization" data-page-section-link="docs-spatialization" data-page-section-page="documentation"><span>Spatialization</span></a>
         <a href="#docs-3dti" data-page-section-link="docs-3dti" data-page-section-page="documentation"><span>3DTI</span></a>
+        <a href="#docs-hardware" data-page-section-link="docs-hardware" data-page-section-page="documentation"><span>Hardware</span></a>
         <a href="#docs-designer" data-page-section-link="docs-designer" data-page-section-page="documentation"><span>Designer</span></a>
         <a href="#docs-runner" data-page-section-link="docs-runner" data-page-section-page="documentation"><span>Runner</span></a>
+        <a href="#docs-emulatable-studies" data-page-section-link="docs-emulatable-studies" data-page-section-page="documentation"><span>Emulatable Studies</span></a>
         <a href="#docs-data-boundary" data-page-section-link="docs-data-boundary" data-page-section-page="documentation"><span>Data Boundary</span></a>
       </nav>
       <nav class="rail-nav-group" aria-label="Download sections" data-rail-page="downloads" hidden>
@@ -561,23 +561,6 @@
 
         <hr class="doc-segment-rule" aria-hidden="true">
 
-        <section id="docs-emulatable-studies" class="info-segment" aria-labelledby="docs-emulatable-studies-title">
-          <div class="info-segment-heading">
-            <span class="segment-kicker">Published Profiles</span>
-            <h2 id="docs-emulatable-studies-title">Studies Currently Emulatable From Published Parameters</h2>
-          </div>
-          <p class="info-copy">The toolkit can currently recreate six study profiles whose reported parameters pass the Segment 0–4 profile gate and can be materialized for native runner handoff, drawn from the five publications below.</p>
-          <ol class="pub-reference-list">
-            <li>Matsuda, Y., Sugimoto, M., Inami, M., &amp; Kitazaki, M. (2021). Peripersonal space in the front, rear, left and right directions for audio-tactile multisensory integration. <em>Scientific Reports, 11</em>, Article 11303. <a class="pub-doi-link" href="https://www.nature.com/articles/s41598-021-90784-5" target="_blank" rel="noopener">https://doi.org/10.1038/s41598-021-90784-5</a></li>
-            <li>Lamia, P., Shabani, N., &amp; Candidi, M. (2026). Somatotopy-independent reduction of audio-tactile intersensory facilitation for looming sounds within the peripersonal space during arm movements execution. <em>Scientific Reports, 16</em>, Article 7133. <a class="pub-doi-link" href="https://www.nature.com/articles/s41598-026-36796-5" target="_blank" rel="noopener">https://doi.org/10.1038/s41598-026-36796-5</a></li>
-            <li>Noel, J.-P., Pfeiffer, C., Blanke, O., &amp; Serino, A. (2015). Peripersonal space as the space of the bodily self. <em>Cognition, 144</em>, 49–57. <a class="pub-doi-link" href="https://www.sciencedirect.com/science/article/pii/S001002771530038X" target="_blank" rel="noopener">https://doi.org/10.1016/j.cognition.2015.07.012</a></li>
-            <li>Pfeiffer, C., Noel, J. P., Serino, A., &amp; Blanke, O. (2018). Vestibular modulation of peripersonal space boundaries. <em>European Journal of Neuroscience, 47</em>(7), 800–811. <a class="pub-doi-link" href="https://onlinelibrary.wiley.com/doi/10.1111/ejn.13872" target="_blank" rel="noopener">https://doi.org/10.1111/ejn.13872</a></li>
-            <li>Serino, A., Noel, J. P., Galli, G., Canzoneri, E., Marmaroli, P., Lissek, H., &amp; Blanke, O. (2015). Body part-centered and full body-centered peripersonal space representations. <em>Scientific Reports, 5</em>, Article 18603. <a class="pub-doi-link" href="https://www.nature.com/articles/srep18603" target="_blank" rel="noopener">https://doi.org/10.1038/srep18603</a></li>
-          </ol>
-        </section>
-
-        <hr class="doc-segment-rule" aria-hidden="true">
-
         <section id="docs-architecture" class="info-segment" aria-labelledby="docs-architecture-title">
           <div class="info-segment-heading">
             <span class="segment-kicker">Software Flow</span>
@@ -748,17 +731,6 @@
 
         <hr class="doc-segment-rule" aria-hidden="true">
 
-        <section id="docs-hardware" class="info-segment" aria-labelledby="docs-hardware-title">
-          <div class="info-segment-heading">
-            <span class="segment-kicker">Lab Route</span>
-            <h2 id="docs-hardware-title">Hardware Specifications and Latency Evidence</h2>
-          </div>
-          <p class="info-copy">The validated lab route runs on Windows and delivers auditory and tactile stimuli through a single synchronized multichannel ASIO output stream using the Native Instruments Komplete Audio 6 MK2 interface. Channels 1 and 2 route binaural left and right audio to participant headphones while channel 3 drives a Woojer Strap 4 connected as a wired analog load, removing the timing variability introduced by Bluetooth. The tactile signal is not a separate conversion path but a conventional audio waveform written to output 3 and routed into the Woojer's wired analog auxiliary input, whose transducer converts low-frequency signal energy into vibrotactile stimulation. Encoding the tactile cue as an audio channel keeps its onset timing under exactly the same software and hardware control as the auditory channels, making the stimulus onset asynchrony between sound and touch a direct function of the SOA schedule.</p>
-          <p class="info-copy">Latency was measured using a direct electrical loopback in which the three output channels were patched back into the Komplete Audio 6 MK2's own analog inputs via TRS cables, and a calibration pulse train was played while the return signal was simultaneously recorded. Comparing transmitted and received pulse timing gives the round-trip delay per channel. The physical-minus-digital latency is 33.462 &plusmn; 0.013 ms across 20 recovered pulses, representing the time between when the software schedules a sample and when that signal appears at the physical output. All 20 response marker pulses were recovered. The critical finding for audio-tactile research is the inter-channel skew: the left and right audio channels are synchronized to within 0.023 ms of each other, and the tactile drive channel deviates from the audio channels by only 0.011 ms. These sub-millisecond differences are possible because the Komplete Audio 6 MK2, operated through its ASIO driver as a single multichannel device, clocks all three outputs from the same sample clock and renders them within the same output buffer; this result cannot be replicated by routing stimuli through separate Windows stereo endpoints. The full loopback protocol is documented in <a href="../../../docs/EXPERIMENT_LATENCY_VALIDATION.md">the latency validation report</a>.</p>
-        </section>
-
-        <hr class="doc-segment-rule" aria-hidden="true">
-
         <section id="docs-spatialization" class="info-segment" aria-labelledby="docs-spatialization-title">
           <div class="info-segment-heading">
             <span class="segment-kicker">Stimulus Model</span>
@@ -833,6 +805,17 @@
 
         <hr class="doc-segment-rule" aria-hidden="true">
 
+        <section id="docs-hardware" class="info-segment" aria-labelledby="docs-hardware-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Lab Route</span>
+            <h2 id="docs-hardware-title">Hardware Specifications and Latency Evidence</h2>
+          </div>
+          <p class="info-copy">The validated lab route runs on Windows and delivers auditory and tactile stimuli through a single synchronized multichannel ASIO output stream using the Native Instruments Komplete Audio 6 MK2 interface. Channels 1 and 2 route binaural left and right audio to participant headphones while channel 3 drives a Woojer Strap 4 connected as a wired analog load, removing the timing variability introduced by Bluetooth. The tactile signal is not a separate conversion path but a conventional audio waveform written to output 3 and routed into the Woojer's wired analog auxiliary input, whose transducer converts low-frequency signal energy into vibrotactile stimulation. Encoding the tactile cue as an audio channel keeps its onset timing under exactly the same software and hardware control as the auditory channels, making the stimulus onset asynchrony between sound and touch a direct function of the SOA schedule.</p>
+          <p class="info-copy">Latency was measured using a direct electrical loopback in which the three output channels were patched back into the Komplete Audio 6 MK2's own analog inputs via TRS cables, and a calibration pulse train was played while the return signal was simultaneously recorded. Comparing transmitted and received pulse timing gives the round-trip delay per channel. The physical-minus-digital latency is 33.462 &plusmn; 0.013 ms across 20 recovered pulses, representing the time between when the software schedules a sample and when that signal appears at the physical output. All 20 response marker pulses were recovered. The critical finding for audio-tactile research is the inter-channel skew: the left and right audio channels are synchronized to within 0.023 ms of each other, and the tactile drive channel deviates from the audio channels by only 0.011 ms. These sub-millisecond differences are possible because the Komplete Audio 6 MK2, operated through its ASIO driver as a single multichannel device, clocks all three outputs from the same sample clock and renders them within the same output buffer; this result cannot be replicated by routing stimuli through separate Windows stereo endpoints. The full loopback protocol is documented in <a href="../../../docs/EXPERIMENT_LATENCY_VALIDATION.md">the latency validation report</a>.</p>
+        </section>
+
+        <hr class="doc-segment-rule" aria-hidden="true">
+
         <section id="docs-designer" class="info-segment" aria-labelledby="docs-designer-title">
           <div class="info-segment-heading">
             <span class="segment-kicker">Design Workflow</span>
@@ -866,6 +849,23 @@
             <a class="button-link" href="../../../docs/WINDOWS_APP.md">Open Windows App Guide</a>
             <a class="button-link" href="../../../docs/AUDIO_ROUTING_STRESS_TEST.md">Open Audio Stress Notes</a>
           </div>
+        </section>
+
+        <hr class="doc-segment-rule" aria-hidden="true">
+
+        <section id="docs-emulatable-studies" class="info-segment" aria-labelledby="docs-emulatable-studies-title">
+          <div class="info-segment-heading">
+            <span class="segment-kicker">Published Profiles</span>
+            <h2 id="docs-emulatable-studies-title">Studies Currently Emulatable</h2>
+          </div>
+          <p class="info-copy">The toolkit can currently recreate six study profiles whose reported parameters pass the Segment 0–4 profile gate and can be materialized for native runner handoff, drawn from the five publications below.</p>
+          <ol class="pub-reference-list">
+            <li>Matsuda, Y., Sugimoto, M., Inami, M., &amp; Kitazaki, M. (2021). Peripersonal space in the front, rear, left and right directions for audio-tactile multisensory integration. <em>Scientific Reports, 11</em>, Article 11303. <a class="pub-doi-link" href="https://www.nature.com/articles/s41598-021-90784-5" target="_blank" rel="noopener">https://doi.org/10.1038/s41598-021-90784-5</a></li>
+            <li>Lamia, P., Shabani, N., &amp; Candidi, M. (2026). Somatotopy-independent reduction of audio-tactile intersensory facilitation for looming sounds within the peripersonal space during arm movements execution. <em>Scientific Reports, 16</em>, Article 7133. <a class="pub-doi-link" href="https://www.nature.com/articles/s41598-026-36796-5" target="_blank" rel="noopener">https://doi.org/10.1038/s41598-026-36796-5</a></li>
+            <li>Noel, J.-P., Pfeiffer, C., Blanke, O., &amp; Serino, A. (2015). Peripersonal space as the space of the bodily self. <em>Cognition, 144</em>, 49–57. <a class="pub-doi-link" href="https://www.sciencedirect.com/science/article/pii/S001002771530038X" target="_blank" rel="noopener">https://doi.org/10.1016/j.cognition.2015.07.012</a></li>
+            <li>Pfeiffer, C., Noel, J. P., Serino, A., &amp; Blanke, O. (2018). Vestibular modulation of peripersonal space boundaries. <em>European Journal of Neuroscience, 47</em>(7), 800–811. <a class="pub-doi-link" href="https://onlinelibrary.wiley.com/doi/10.1111/ejn.13872" target="_blank" rel="noopener">https://doi.org/10.1111/ejn.13872</a></li>
+            <li>Serino, A., Noel, J. P., Galli, G., Canzoneri, E., Marmaroli, P., Lissek, H., &amp; Blanke, O. (2015). Body part-centered and full body-centered peripersonal space representations. <em>Scientific Reports, 5</em>, Article 18603. <a class="pub-doi-link" href="https://www.nature.com/articles/srep18603" target="_blank" rel="noopener">https://doi.org/10.1038/srep18603</a></li>
+          </ol>
         </section>
 
         <hr class="doc-segment-rule" aria-hidden="true">
@@ -1013,7 +1013,7 @@
       </form>
     </div>
   </div>
-  <script src="hardware_pixel_art.js?v=20260615-audiogram-emulatable-studies"></script>
-  <script src="app.js?v=20260615-audiogram-emulatable-studies"></script>
+  <script src="hardware_pixel_art.js?v=20260616-doc-section-order"></script>
+  <script src="app.js?v=20260616-doc-section-order"></script>
 </body>
 </html>
