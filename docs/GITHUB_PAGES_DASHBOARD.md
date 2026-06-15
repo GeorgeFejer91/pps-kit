@@ -22,15 +22,17 @@ experiment software runs locally on the research PC.
 
 ## Publish
 
-Enable GitHub Pages for the repository branch root. The root `index.html`
-redirects to:
+Enable GitHub Pages for the repository branch root. The public dashboard URL is:
 
 ```text
-src/peripersonal_space_toolkit/dashboard/index.html
+https://georgefejer91.github.io/peripersonal-space-toolkit/
 ```
 
-The dashboard uses relative static paths, so the same files work when served
-from GitHub Pages or from the local FastAPI app.
+The `github.com/GeorgeFejer91/peripersonal-space-toolkit` URL remains the GitHub
+repository/code view. The Pages root `index.html` displays the dashboard from the
+same packaged dashboard assets instead of redirecting visitors to a nested source
+path. The dashboard uses relative static paths, so the same files work when
+served from GitHub Pages or from the local FastAPI app.
 
 ## Use On A Research PC
 

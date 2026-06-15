@@ -81,7 +81,9 @@ In that mode, start the trusted local companion backend first:
 windows\Start_Website_Companion.bat
 ```
 
-Then open the Pages URL. The hosted page connects back to
+Then open the public dashboard at
+[https://georgefejer91.github.io/peripersonal-space-toolkit/](https://georgefejer91.github.io/peripersonal-space-toolkit/).
+The hosted page connects back to
 `http://127.0.0.1:8766` for local render/session/focus operations; the website
 itself cannot silently install packages or run experiments without the local
 companion. It also does not upload selected stimulus files, generated WAVs, or
