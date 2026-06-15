@@ -772,13 +772,16 @@ def _create_tactile_timeline_widget(
                     painter.setBrush(q["QBrush"](q["QColor"](color)))
                     painter.drawEllipse(x - radius, line_y - radius, radius * 2, radius * 2)
 
-                click_pen = q["QPen"](q["QColor"]("#1d5d99"))
-                click_pen.setWidth(2)
-                painter.setPen(click_pen)
-                painter.setBrush(q["QBrush"](q["QColor"]("#dce7f4")))
                 click_y = rows[5][1]
                 for marker in timeline_state.click_markers:
                     x = _x(marker.time_s)
+                    response_click = str(getattr(marker, "response_status", "") or "") == "tactile_response"
+                    pen_color = "#0f5f48" if response_click else "#9a3412"
+                    fill_color = "#b8ead7" if response_click else "#fed7aa"
+                    click_pen = q["QPen"](q["QColor"](pen_color))
+                    click_pen.setWidth(2)
+                    painter.setPen(click_pen)
+                    painter.setBrush(q["QBrush"](q["QColor"](fill_color)))
                     painter.drawRect(x - 4, click_y - 4, 8, 8)
 
                 cursor_x = _x(timeline_state.elapsed_s)
@@ -3720,8 +3723,7 @@ class FocusModeWindow:
             trial_segments=list(payload.get("trial_segments") or []),
         )
         self.planned_tactile_cue_count += len(self.timeline_state.cues)
-        anchor = _float_or_none(payload.get("block_schedule_perf_counter"))
-        self._timeline_perf_anchor = anchor if anchor is not None else time.perf_counter()
+        self._timeline_perf_anchor = None
         part_text = str(payload.get("part_number") or "").strip()
         self.part_chip.setText(_part_display_label(part_text) if part_text else "Part -")
         display_count = _payload_display_block_count(
@@ -3748,11 +3750,28 @@ class FocusModeWindow:
         else:
             self.block_chip.setText(f"Block {display_index_label}/{display_count}" if display_index else f"Block -/{display_count}")
         self.recenter_status_label.setText("Cursor recenter: waiting for next tactile cue")
+        self._sync_progress_bar_to_red_line()
         self._update_tactile_timeline_display()
 
-    def _update_tactile_progress(self, elapsed_s: float) -> None:
+    def _sync_progress_bar_to_red_line(self) -> None:
+        if not hasattr(self, "progress"):
+            return
+        duration = float(self.timeline_state.duration_s or 0.0)
+        if duration <= 0:
+            self.progress.setValue(0)
+            return
+        elapsed = max(0.0, min(duration, float(self.timeline_state.elapsed_s or 0.0)))
+        self.progress.setValue(int(max(0.0, min(1.0, elapsed / duration)) * 1000))
+
+    def _update_tactile_progress(self, elapsed_s: float, *, anchor_to_now: bool = False) -> None:
+        duration = float(self.timeline_state.duration_s or 0.0)
+        elapsed = max(0.0, float(elapsed_s or 0.0))
+        if duration > 0:
+            elapsed = min(elapsed, duration)
+        if anchor_to_now:
+            self._timeline_perf_anchor = time.perf_counter() - elapsed
         moved = self.recenter_controller.tick(
-            elapsed_s,
+            elapsed,
             active=self._run_active and self.timeline_state.active,
             paused=self._run_paused,
             instruction_waiting=self.pending_instruction_request is not None,
@@ -3762,6 +3781,7 @@ class FocusModeWindow:
             self.recenter_status_label.setText(
                 f"Cursor recenter: Trial {last.trial_number} at {last.time_s:.1f}s"
             )
+        self._sync_progress_bar_to_red_line()
         self._update_tactile_timeline_display(preserve_recenter_message=bool(moved))
 
     def _update_tactile_timeline_display(self, *, preserve_recenter_message: bool = False) -> None:
@@ -3846,7 +3866,7 @@ class FocusModeWindow:
         return platform in {"offscreen", "minimal"}
 
     def _tick_tactile_clock(self) -> None:
-        if self._timeline_perf_anchor is None or not self._run_active or not self.timeline_state.active:
+        if self._timeline_perf_anchor is None or not self._run_active or self._run_paused or not self.timeline_state.active:
             return
         elapsed = max(0.0, time.perf_counter() - self._timeline_perf_anchor)
         if self.timeline_state.duration_s > 0:
@@ -3867,8 +3887,6 @@ class FocusModeWindow:
                     continue
                 duration = float(payload.get("duration_s") or 0.0)
                 elapsed = float(payload.get("elapsed_s") or 0.0)
-                value = int(max(0.0, min(1.0, elapsed / duration)) * 1000) if duration > 0 else 0
-                self.progress.setValue(value)
                 display_index = _payload_display_block_index(dict(payload))
                 display_count = _payload_display_block_count(
                     dict(payload),
@@ -3892,7 +3910,7 @@ class FocusModeWindow:
                     )
                 else:
                     self.block_chip.setText(f"Block {display_index_label}/{display_count}" if display_index else f"Block -/{display_count}")
-                self._update_tactile_progress(elapsed)
+                self._update_tactile_progress(elapsed, anchor_to_now=True)
             elif kind == "event":
                 self.event_label.setText(str(payload))
             elif kind == "prewarm_progress":

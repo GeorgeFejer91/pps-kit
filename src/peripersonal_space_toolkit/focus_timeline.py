@@ -8,6 +8,9 @@ from typing import Any, Callable
 
 
 RECENTER_LEAD_S = 0.5
+CLICK_RESPONSE_MIN_RT_S = 0.1
+CLICK_RESPONSE_MAX_RT_S = 3.0
+CLICK_RESPONSE_EPSILON_S = 0.001
 
 
 @dataclass
@@ -51,6 +54,10 @@ class TimelineClickMarker:
     click_id: int
     time_s: float
     trial_uid: str = ""
+    response_status: str = "off_cue"
+    cue_id: int | None = None
+    cue_trial_uid: str = ""
+    rt_s: float | None = None
 
 
 class TactileTimelineState:
@@ -200,9 +207,42 @@ class TactileTimelineState:
         if not clean_uid:
             segment = self.segment_at(time_s)
             clean_uid = segment.trial_uid if segment is not None else ""
-        marker = TimelineClickMarker(click_id=len(self.click_markers) + 1, time_s=time_s, trial_uid=clean_uid)
+        status, cue, rt_s = self._classify_click_response(time_s, clean_uid)
+        marker = TimelineClickMarker(
+            click_id=len(self.click_markers) + 1,
+            time_s=time_s,
+            trial_uid=clean_uid,
+            response_status=status,
+            cue_id=cue.cue_id if cue is not None else None,
+            cue_trial_uid=cue.trial_uid if cue is not None else "",
+            rt_s=rt_s,
+        )
         self.click_markers.append(marker)
         return marker
+
+    def _classify_click_response(
+        self,
+        time_s: float,
+        trial_uid: str,
+    ) -> tuple[str, TactileTimelineCue | None, float | None]:
+        clean_uid = str(trial_uid or "").strip()
+        best: tuple[float, TactileTimelineCue] | None = None
+        for cue in self.cues:
+            if clean_uid and cue.trial_uid and clean_uid != cue.trial_uid:
+                continue
+            rt_s = float(time_s) - float(cue.time_s)
+            if rt_s < CLICK_RESPONSE_MIN_RT_S - CLICK_RESPONSE_EPSILON_S:
+                continue
+            if rt_s > CLICK_RESPONSE_MAX_RT_S + CLICK_RESPONSE_EPSILON_S:
+                continue
+            segment = self.segment_at(time_s)
+            if segment is not None and cue.trial_uid and segment.trial_uid and segment.trial_uid != cue.trial_uid:
+                continue
+            if best is None or rt_s < best[0]:
+                best = (rt_s, cue)
+        if best is None:
+            return "off_cue", None, None
+        return "tactile_response", best[1], best[0]
 
     def due_recenter_cues(self) -> list[TactileTimelineCue]:
         due: list[TactileTimelineCue] = []
