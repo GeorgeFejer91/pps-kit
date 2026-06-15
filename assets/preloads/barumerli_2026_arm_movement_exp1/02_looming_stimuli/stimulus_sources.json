@@ -5,7 +5,7 @@
     {
       "label": "Pink moving sound",
       "path": "assets/preloads/barumerli_2026_arm_movement_exp1/02_looming_stimuli/looming_Pink_moving_sound.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/barumerli_2026_arm_movement_exp1/02_looming_stimuli/looming_Pink_moving_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/barumerli_2026_arm_movement_exp1/02_looming_stimuli/looming_Pink_moving_sound.wav",
       "sha256": "7d8d5c6c71dc0491670e571ab7838c1058165c9e791a5be02fb99a79a3bcb39c",
       "duration_s": 3.0,
       "sample_rate": 44100,
@@ -47,7 +47,7 @@
     {
       "label": "Pink moving sound - receding",
       "path": "assets/preloads/barumerli_2026_arm_movement_exp1/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/barumerli_2026_arm_movement_exp1/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/barumerli_2026_arm_movement_exp1/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
       "sha256": "0c72667d446067c197b4b0fabbaf04eb5b0a80502179356e347616a23d6fb65e",
       "duration_s": 3.0,
       "sample_rate": 44100,

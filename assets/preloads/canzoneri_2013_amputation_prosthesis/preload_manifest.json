@@ -55,7 +55,7 @@
     {
       "label": "Pink moving sound",
       "path": "assets/preloads/canzoneri_2013_amputation_prosthesis/02_looming_stimuli/looming_Pink_moving_sound.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/canzoneri_2013_amputation_prosthesis/02_looming_stimuli/looming_Pink_moving_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/canzoneri_2013_amputation_prosthesis/02_looming_stimuli/looming_Pink_moving_sound.wav",
       "sha256": "2ab6ea11664e1dc1115f3cbe90d4a2081da7449b2e8b256faf49e8ba6471b7ea",
       "duration_s": 5.0,
       "sample_rate": 44100,
@@ -97,7 +97,7 @@
     {
       "label": "Pink moving sound - receding",
       "path": "assets/preloads/canzoneri_2013_amputation_prosthesis/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/canzoneri_2013_amputation_prosthesis/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/canzoneri_2013_amputation_prosthesis/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
       "sha256": "be8f9d223d53c43bbe2fd5c0295de71b984f82f6e4aa8f440f0d5ed737eea543",
       "duration_s": 5.0,
       "sample_rate": 44100,

@@ -55,7 +55,7 @@
     {
       "label": "Pink moving sound",
       "path": "assets/preloads/canzoneri_2012_dynamic_sounds/02_looming_stimuli/looming_Pink_moving_sound.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/canzoneri_2012_dynamic_sounds/02_looming_stimuli/looming_Pink_moving_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/canzoneri_2012_dynamic_sounds/02_looming_stimuli/looming_Pink_moving_sound.wav",
       "sha256": "d43c916d1d49ffd754a5ffbcd8571df69dd3dd4a0842d1da8682b252c91bde25",
       "duration_s": 3.0,
       "sample_rate": 44100,
@@ -97,7 +97,7 @@
     {
       "label": "Pink moving sound - receding",
       "path": "assets/preloads/canzoneri_2012_dynamic_sounds/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/canzoneri_2012_dynamic_sounds/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/canzoneri_2012_dynamic_sounds/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
       "sha256": "eaaa11c1c4e57ae1d94ef56650cbf01b88eda27b5776c3af5cff39f5cc016abc",
       "duration_s": 3.0,
       "sample_rate": 44100,

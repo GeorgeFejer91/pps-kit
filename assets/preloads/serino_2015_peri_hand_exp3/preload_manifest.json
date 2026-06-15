@@ -55,7 +55,7 @@
     {
       "label": "Hand moving sound",
       "path": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound.wav",
       "sha256": "8f825179f693f514146e7b985a36e73cd06f6aa6f27750b3940440c325a8a51a",
       "duration_s": 3.0,
       "sample_rate": 44100,
@@ -97,7 +97,7 @@
     {
       "label": "Hand moving sound - receding",
       "path": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound_-_receding.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound_-_receding.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound_-_receding.wav",
       "sha256": "4ba58b7cdd899afffe205d6db0d9f8fb9b892d6bbd262be679f9bd9dcd884ae0",
       "duration_s": 3.0,
       "sample_rate": 44100,

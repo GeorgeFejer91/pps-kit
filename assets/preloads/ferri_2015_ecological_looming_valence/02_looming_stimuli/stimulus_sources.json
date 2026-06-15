@@ -5,7 +5,7 @@
     {
       "label": "Negative ecological looming",
       "path": "assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Negative_ecological_looming.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Negative_ecological_looming.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Negative_ecological_looming.wav",
       "sha256": "ffa29042690ef4b01ee7f265dfb71c4d05d3458d28b20c174d8957e771efe9f4",
       "duration_s": 3.0,
       "sample_rate": 44100,
@@ -47,7 +47,7 @@
     {
       "label": "Neutral ecological looming",
       "path": "assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Neutral_ecological_looming.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Neutral_ecological_looming.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Neutral_ecological_looming.wav",
       "sha256": "67454c950ff97db5184a20551bdbf5786a4285264b67c9e7b250d6ff4391f823",
       "duration_s": 3.0,
       "sample_rate": 44100,
@@ -89,7 +89,7 @@
     {
       "label": "Positive ecological looming",
       "path": "assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Positive_ecological_looming.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Positive_ecological_looming.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Positive_ecological_looming.wav",
       "sha256": "78cc8a0aa039201fd18ed67f4ecf620000a352e8f128734807d36c020d21fb9f",
       "duration_s": 3.0,
       "sample_rate": 44100,

@@ -5,7 +5,7 @@
     {
       "label": "Pink moving sound",
       "path": "assets/preloads/serino_2015_toolless_sync_training/02_looming_stimuli/looming_Pink_moving_sound.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/serino_2015_toolless_sync_training/02_looming_stimuli/looming_Pink_moving_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_toolless_sync_training/02_looming_stimuli/looming_Pink_moving_sound.wav",
       "sha256": "59fd15637e285001e6a5b57ba8e39695cda9fe33a8c226d6838fc15ebebdd635",
       "duration_s": 3.0,
       "sample_rate": 44100,
@@ -47,7 +47,7 @@
     {
       "label": "Pink moving sound - receding",
       "path": "assets/preloads/serino_2015_toolless_sync_training/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/serino_2015_toolless_sync_training/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_toolless_sync_training/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
       "sha256": "dc050cfde74073dfb6c4776a125e0a6e1eed88019df88350a5ad802b2561cf69",
       "duration_s": 3.0,
       "sample_rate": 44100,

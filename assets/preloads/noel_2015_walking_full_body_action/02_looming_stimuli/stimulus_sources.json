@@ -5,7 +5,7 @@
     {
       "label": "Walking PPS looming sound",
       "path": "assets/preloads/noel_2015_walking_full_body_action/02_looming_stimuli/looming_Walking_PPS_looming_sound.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/noel_2015_walking_full_body_action/02_looming_stimuli/looming_Walking_PPS_looming_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/noel_2015_walking_full_body_action/02_looming_stimuli/looming_Walking_PPS_looming_sound.wav",
       "sha256": "a321287ae6a6bd289ed7c3d1a027f36208576b2ec64f07bf3d6247cae64a3bae",
       "duration_s": 3.0,
       "sample_rate": 44100,

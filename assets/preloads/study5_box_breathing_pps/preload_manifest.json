@@ -55,7 +55,7 @@
     {
       "label": "Pink frontal",
       "path": "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Pink_frontal.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Pink_frontal.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Pink_frontal.wav",
       "sha256": "2ff7c2286a5c04dfebab6e1ea33738849776bf3060e6acc2ee0ee66016e1e772",
       "duration_s": 4.0,
       "sample_rate": 44100,
@@ -97,7 +97,7 @@
     {
       "label": "Blue frontal",
       "path": "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Blue_frontal.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Blue_frontal.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Blue_frontal.wav",
       "sha256": "e0a330251805dcb37b092b4719707ba06f66a5b9bf45f98ef397fdfbcdfc8b65",
       "duration_s": 4.0,
       "sample_rate": 44100,
@@ -139,7 +139,7 @@
     {
       "label": "White frontal",
       "path": "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_White_frontal.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_White_frontal.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_White_frontal.wav",
       "sha256": "9efe872d368f1f1e1ac126ed315c6534cbbd9c29f5803310e9dbde347d05393a",
       "duration_s": 4.0,
       "sample_rate": 44100,
@@ -181,7 +181,7 @@
     {
       "label": "Brown frontal",
       "path": "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Brown_frontal.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Brown_frontal.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Brown_frontal.wav",
       "sha256": "9d7c04b7fbb2ac1b36ac86ed3947fb59ffccf7e81268c645726b467ade6e9a87",
       "duration_s": 4.0,
       "sample_rate": 44100,

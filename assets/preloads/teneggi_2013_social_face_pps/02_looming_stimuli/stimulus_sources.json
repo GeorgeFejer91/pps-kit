@@ -5,7 +5,7 @@
     {
       "label": "Face-centered moving sound",
       "path": "assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli/looming_Face-centered_moving_sound.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli/looming_Face-centered_moving_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli/looming_Face-centered_moving_sound.wav",
       "sha256": "1d3fbbe2a8457f7adfd7848d15b15ea653344cb28f2c480722050de7d334a3e6",
       "duration_s": 4.0,
       "sample_rate": 44100,
@@ -47,7 +47,7 @@
     {
       "label": "Face-centered moving sound - receding",
       "path": "assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli/looming_Face-centered_moving_sound_-_receding.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli/looming_Face-centered_moving_sound_-_receding.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli/looming_Face-centered_moving_sound_-_receding.wav",
       "sha256": "09574004bd9d70992cb6767b4e1d099006cc6c1ba4849f5e247a21488e552c19",
       "duration_s": 4.0,
       "sample_rate": 44100,

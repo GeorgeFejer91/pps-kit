@@ -1,4 +1,4 @@
-﻿# Peripersonal Space Toolkit
+# Peripersonal Space Toolkit
 
 A Windows-ready toolkit for running and reproducing the Study 5 audio-tactile peripersonal-space experiment. The repository packages the experiment runner, stimulus-generation pipeline, decoding helpers, small deidentified sample data, and bundled spoken instruction asset variants.
 
@@ -83,7 +83,8 @@ windows\Start_Website_Companion.bat
 ```
 
 Then open the public dashboard at
-[https://georgefejer91.github.io/peripersonal-space-toolkit/](https://georgefejer91.github.io/peripersonal-space-toolkit/).
+[https://ppskit.qzz.io/](https://ppskit.qzz.io/) or
+[https://georgefejer91.github.io/pps-kit/](https://georgefejer91.github.io/pps-kit/).
 The hosted page connects back to
 `http://127.0.0.1:8766` for local render/session/focus operations; the website
 itself cannot silently install packages or run experiments without the local

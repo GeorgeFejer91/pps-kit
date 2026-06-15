@@ -756,10 +756,11 @@ def test_dashboard_pages_companion_contract(tmp_path: Path):
     assert root.status_code in {302, 307}
     assert root.headers["location"] == "/dashboard/index.html"
 
-    health = client.get("/api/health", headers={"Origin": "https://georgefejer91.github.io"})
-    assert health.status_code == 200
-    assert health.json()["service"] == "pps-dashboard-companion"
-    assert health.headers["access-control-allow-origin"] == "https://georgefejer91.github.io"
+    for origin in ("https://georgefejer91.github.io", "https://ppskit.qzz.io"):
+        health = client.get("/api/health", headers={"Origin": origin})
+        assert health.status_code == 200
+        assert health.json()["service"] == "pps-dashboard-companion"
+        assert health.headers["access-control-allow-origin"] == origin
 
     preloads = client.get("/api/preloads").json()
     assert preloads["schema"] == "pps-preload-asset-inventory.v1"

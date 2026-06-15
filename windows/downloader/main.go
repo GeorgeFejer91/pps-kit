@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var defaultManifestURL = "https://github.com/GeorgeFejer91/peripersonal-space-toolkit/releases/latest/download/pps_download_manifest.v1.json"
+var defaultManifestURL = "https://github.com/GeorgeFejer91/pps-kit/releases/latest/download/pps_download_manifest.v1.json"
 var buildVersion = "dev"
 
 func main() {

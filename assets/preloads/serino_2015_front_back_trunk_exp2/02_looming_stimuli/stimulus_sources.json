@@ -5,7 +5,7 @@
     {
       "label": "Front-back moving sound",
       "path": "assets/preloads/serino_2015_front_back_trunk_exp2/02_looming_stimuli/looming_Front-back_moving_sound.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/serino_2015_front_back_trunk_exp2/02_looming_stimuli/looming_Front-back_moving_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_front_back_trunk_exp2/02_looming_stimuli/looming_Front-back_moving_sound.wav",
       "sha256": "f2079c462d02111c0bda61970a96b95652cf0f333282ef99ae9e7f5cf6893f22",
       "duration_s": 2.666667,
       "sample_rate": 44100,
@@ -47,7 +47,7 @@
     {
       "label": "Front-back moving sound - back to front",
       "path": "assets/preloads/serino_2015_front_back_trunk_exp2/02_looming_stimuli/looming_Front-back_moving_sound_-_back_to_front.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/serino_2015_front_back_trunk_exp2/02_looming_stimuli/looming_Front-back_moving_sound_-_back_to_front.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_front_back_trunk_exp2/02_looming_stimuli/looming_Front-back_moving_sound_-_back_to_front.wav",
       "sha256": "ae6d556d29268263f8a6480322f472c41789045ae8dbd8163bbac60602734b1e",
       "duration_s": 2.666667,
       "sample_rate": 44100,

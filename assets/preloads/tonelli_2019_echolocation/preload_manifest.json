@@ -55,7 +55,7 @@
     {
       "label": "Moving sound array",
       "path": "assets/preloads/tonelli_2019_echolocation/02_looming_stimuli/looming_Moving_sound_array.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/tonelli_2019_echolocation/02_looming_stimuli/looming_Moving_sound_array.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/tonelli_2019_echolocation/02_looming_stimuli/looming_Moving_sound_array.wav",
       "sha256": "fb4f9350f660c5b6e65d0d96a48db85d4d4f0fef6c245c9ea2985702a884c5dd",
       "duration_s": 3.0,
       "sample_rate": 44100,

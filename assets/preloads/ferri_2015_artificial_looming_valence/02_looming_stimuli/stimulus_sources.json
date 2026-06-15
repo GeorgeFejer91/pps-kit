@@ -5,7 +5,7 @@
     {
       "label": "Negative artificial 1/f2 looming",
       "path": "assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Negative_artificial_1_f2_looming.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Negative_artificial_1_f2_looming.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Negative_artificial_1_f2_looming.wav",
       "sha256": "a936d98e08b90f28737b469f17bcd613a63986be2464c77d3cade39eae22f440",
       "duration_s": 3.0,
       "sample_rate": 44100,
@@ -47,7 +47,7 @@
     {
       "label": "Neutral artificial 1/f looming",
       "path": "assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Neutral_artificial_1_f_looming.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Neutral_artificial_1_f_looming.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Neutral_artificial_1_f_looming.wav",
       "sha256": "64b4f08281efe5a8c0d720a2f0f5285a1b5abd6a7f7c0bc3f5fcccd44d98294b",
       "duration_s": 3.0,
       "sample_rate": 44100,

@@ -1,6 +1,6 @@
 param(
     [string]$Version = "",
-    [string]$ManifestUrl = "https://github.com/GeorgeFejer91/peripersonal-space-toolkit/releases/latest/download/pps_download_manifest.v1.json",
+    [string]$ManifestUrl = "https://github.com/GeorgeFejer91/pps-kit/releases/latest/download/pps_download_manifest.v1.json",
     [switch]$SkipIconResource
 )
 
@@ -83,4 +83,3 @@ Write-Host "Built PPS lightweight downloader:"
 Write-Host "  $VersionedExe"
 Write-Host "  $LatestExe"
 Write-Host "SHA256: $Hash"
-

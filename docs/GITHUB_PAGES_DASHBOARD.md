@@ -28,14 +28,20 @@ experiment software runs locally on the research PC.
 Enable GitHub Pages for the repository branch root. The public dashboard URL is:
 
 ```text
-https://georgefejer91.github.io/peripersonal-space-toolkit/
+https://ppskit.qzz.io/
 ```
 
-The `github.com/GeorgeFejer91/peripersonal-space-toolkit` URL remains the GitHub
-repository/code view. The Pages root `index.html` displays the dashboard from the
-same packaged dashboard assets instead of redirecting visitors to a nested source
-path. The dashboard uses relative static paths, so the same files work when
-served from GitHub Pages or from the local FastAPI app.
+The GitHub Pages fallback URL is:
+
+```text
+https://georgefejer91.github.io/pps-kit/
+```
+
+The `github.com/GeorgeFejer91/pps-kit` URL is the GitHub repository/code view.
+The Pages root `index.html` displays the dashboard from the same packaged
+dashboard assets instead of redirecting visitors to a nested source path. The
+dashboard uses relative static paths, so the same files work when served from
+GitHub Pages or from the local FastAPI app.
 
 ## Use On A Research PC
 
@@ -64,8 +70,9 @@ research PC, and the downloader verifies `pps_download_manifest.v1.json` hashes
 before extracting or launching software.
 
 The companion backend allows the default project GitHub Pages origin
-(`https://georgefejer91.github.io`). For forks or institutional Pages domains,
-start the companion with an explicit origin:
+(`https://georgefejer91.github.io`) and the custom domain
+(`https://ppskit.qzz.io`). For forks or institutional Pages domains, start the
+companion with an explicit origin:
 
 ```bat
 windows\Start_Website_Companion.bat --web-origin https://example.github.io

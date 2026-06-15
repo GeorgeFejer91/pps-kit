@@ -55,7 +55,7 @@
     {
       "label": "Wheelchair PPS broadband moving sound",
       "path": "assets/preloads/galli_2015_wheelchair_full_body/02_looming_stimuli/looming_Wheelchair_PPS_broadband_moving_sound.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/galli_2015_wheelchair_full_body/02_looming_stimuli/looming_Wheelchair_PPS_broadband_moving_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/galli_2015_wheelchair_full_body/02_looming_stimuli/looming_Wheelchair_PPS_broadband_moving_sound.wav",
       "sha256": "38beeaa2e76361e73b4ddd48d5a4b8784b7fe7b2c5bc83e0cdcb4d18932cce3c",
       "duration_s": 2.6,
       "sample_rate": 44100,
@@ -97,7 +97,7 @@
     {
       "label": "Wheelchair PPS broadband moving sound - back looming",
       "path": "assets/preloads/galli_2015_wheelchair_full_body/02_looming_stimuli/looming_Wheelchair_PPS_broadband_moving_sound_-_back_looming.wav",
-      "url": "https://georgefejer91.github.io/peripersonal-space-toolkit/assets/preloads/galli_2015_wheelchair_full_body/02_looming_stimuli/looming_Wheelchair_PPS_broadband_moving_sound_-_back_looming.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/galli_2015_wheelchair_full_body/02_looming_stimuli/looming_Wheelchair_PPS_broadband_moving_sound_-_back_looming.wav",
       "sha256": "dcd2281133b837c65315f3e41071b7718fd6caed8e0f5fb2be452d494b7c02b6",
       "duration_s": 2.6,
       "sample_rate": 44100,
