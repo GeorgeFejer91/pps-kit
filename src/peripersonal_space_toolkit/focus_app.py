@@ -61,6 +61,8 @@ DEFAULT_FOCUS_LAYOUT_PROFILE = render_focus_layout_profile(1120, 720)
 FOCUS_STYLE_SHEET = render_focus_style_sheet(DEFAULT_FOCUS_LAYOUT_PROFILE)
 STUDY5_PROFILE_ID = "study5_box_breathing_pps"
 DATA_COLLECTED_MARK = "[collected]"
+TIMELINE_LABEL_WIDTH = 58
+TIMELINE_RIGHT_MARGIN = 12
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -669,8 +671,8 @@ def _create_tactile_timeline_widget(
                 painter.setRenderHint(q["QPainter"].RenderHint.Antialiasing, True)
                 width = max(1, int(self.width()))
                 height = max(1, int(self.height()))
-                label_width = 58
-                right_margin = 12
+                label_width = TIMELINE_LABEL_WIDTH
+                right_margin = TIMELINE_RIGHT_MARGIN
                 compact_rows = height < 96
                 very_compact_rows = height < 84
                 top_margin = 3 if very_compact_rows else (6 if compact_rows else 10)
@@ -2974,10 +2976,15 @@ class FocusModeWindow:
         self.progress = q["QProgressBar"]()
         self.progress.setRange(0, 1000)
         self.progress.setValue(0)
-        progress_layout.addWidget(self.progress)
+        self.progress_track_widget = q["QWidget"]()
+        progress_track_layout = q["QHBoxLayout"](self.progress_track_widget)
+        progress_track_layout.setContentsMargins(TIMELINE_LABEL_WIDTH, 0, TIMELINE_RIGHT_MARGIN, 0)
+        progress_track_layout.setSpacing(0)
+        progress_track_layout.addWidget(self.progress)
+        progress_layout.addWidget(self.progress_track_widget)
         if profile.screen_class == "constrained":
             self.progress_label.setVisible(False)
-            self.progress.setVisible(False)
+            self.progress_track_widget.setVisible(False)
         self.event_label = q["QLabel"]("Event stream idle")
         self.event_label.setObjectName("mutedLabel")
         self.event_label.setWordWrap(True)
@@ -2988,7 +2995,7 @@ class FocusModeWindow:
         progress_layout.addWidget(self.prewarm_label)
         if profile.screen_class == "constrained":
             self.progress_label.setVisible(False)
-            self.progress.setVisible(False)
+            self.progress_track_widget.setVisible(False)
             self.event_label.setVisible(False)
             self.prewarm_label.setVisible(False)
         progress_layout.addStretch(1)

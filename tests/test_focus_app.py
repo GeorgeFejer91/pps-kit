@@ -540,6 +540,9 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
     assert window._timeline_display_state() is window.timeline_state
     assert [segment.soa_ms for segment in window.timeline_state.trial_segments] == ["300", "800"]
     assert window.progress.value() == int((5.0 / 16.0) * 1000)
+    progress_margins = window.progress_track_widget.layout().contentsMargins()
+    assert progress_margins.left() == focus_app.TIMELINE_LABEL_WIDTH
+    assert progress_margins.right() == focus_app.TIMELINE_RIGHT_MARGIN
     response_click = window.timeline_state.record_click(4.6)
     off_cue_click = window.timeline_state.record_click(8.1)
     assert response_click.response_status == "tactile_response"
