@@ -53,6 +53,8 @@ The root `CNAME` file is part of the Pages contract. It must be named exactly `C
 
 For hosted companion access, CORS origins are origins only: keep `https://ppskit.qzz.io` and `https://georgefejer91.github.io` allowed, but do not include paths such as `/pps-kit/`, `/documentation`, or `/download` in an origin. When changing public URLs or tab routes, update repository references, release-manifest URLs, dashboard links, preloaded asset URLs, human docs, CORS tests, static deep-link handling, and this `For-AI/` rule together.
 
+All external website links in the hosted/local HTML dashboard should open in a new browser tab with `rel="noopener noreferrer"`. Treat external HTTP(S) links as leaving the toolkit surface; internal route links, local companion calls, and repository-relative documentation links may remain in the same tab.
+
 ## Required GitHub Publishing
 
 Every completed repository change must be committed and pushed to GitHub immediately after verification. Do not leave completed edits as local-only work. Stage only the intended change set; do not bundle unrelated dirty files or pre-existing user changes into the commit. If pushing is blocked by missing credentials, network failure, branch protection, or a non-fast-forward remote, report that blocker explicitly in the final response and describe the exact local commit or staged state that still needs to be pushed.

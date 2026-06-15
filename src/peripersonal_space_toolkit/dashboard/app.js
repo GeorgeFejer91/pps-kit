@@ -4570,6 +4570,48 @@ function doiUrl(value) {
   return `https://doi.org/${doi.replace(/^doi:\s*/i, "")}`;
 }
 
+function enforceExternalLinkTargets(root = document) {
+  for (const link of root.querySelectorAll("a[href]")) {
+    let url;
+    try {
+      url = new URL(link.getAttribute("href"), window.location.href);
+    } catch (_err) {
+      continue;
+    }
+    if (!/^https?:$/i.test(url.protocol) || url.origin === window.location.origin) continue;
+    link.target = "_blank";
+    const relTokens = new Set((link.getAttribute("rel") || "").split(/\s+/).filter(Boolean));
+    relTokens.add("noopener");
+    relTokens.add("noreferrer");
+    link.setAttribute("rel", Array.from(relTokens).join(" "));
+  }
+}
+
+function renderHardwarePixelArt() {
+  const store = window.HARDWARE_PIXEL_ART || {};
+  for (const canvas of document.querySelectorAll("canvas[data-hardware-pixel]")) {
+    const key = canvas.dataset.hardwarePixel || "";
+    const art = store[key];
+    if (!art?.rgb || !art.width || !art.height || canvas.dataset.pixelRendered === "true") continue;
+    const width = Number(art.width);
+    const height = Number(art.height);
+    const binary = window.atob(art.rgb);
+    const rgba = new Uint8ClampedArray(width * height * 4);
+    for (let source = 0, target = 0; source < binary.length; source += 3, target += 4) {
+      rgba[target] = binary.charCodeAt(source);
+      rgba[target + 1] = binary.charCodeAt(source + 1);
+      rgba[target + 2] = binary.charCodeAt(source + 2);
+      rgba[target + 3] = 255;
+    }
+    canvas.width = width;
+    canvas.height = height;
+    canvas.dataset.pixelRendered = "true";
+    const context = canvas.getContext("2d");
+    context.imageSmoothingEnabled = false;
+    context.putImageData(new ImageData(rgba, width, height), 0, 0);
+  }
+}
+
 function wireEvents() {
   $("refresh-state").addEventListener("click", () => loadState().catch(reportError));
   $("apply-design").addEventListener("click", () => applyDesign().catch(reportError));
@@ -4946,6 +4988,8 @@ function reportError(error) {
 
 loadApiBase();
 loadResizableLayoutSettings();
+enforceExternalLinkTargets();
+renderHardwarePixelArt();
 wireEvents();
 initializePageTabs();
 loadState().catch(reportError);

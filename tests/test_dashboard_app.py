@@ -161,21 +161,24 @@ def test_dashboard_static_assets_are_packaged():
     assert dashboard_files.joinpath("index.html").is_file()
     assert dashboard_files.joinpath("styles.css").is_file()
     assert dashboard_files.joinpath("app.js").is_file()
+    assert dashboard_files.joinpath("hardware_pixel_art.js").is_file()
     assert viewer_files.joinpath("trajectory-viewer.js").is_file()
 
     html = dashboard_files.joinpath("index.html").read_text(encoding="utf-8")
     app_js = dashboard_files.joinpath("app.js").read_text(encoding="utf-8")
+    hardware_pixel_js = dashboard_files.joinpath("hardware_pixel_art.js").read_text(encoding="utf-8")
     styles_css = dashboard_files.joinpath("styles.css").read_text(encoding="utf-8")
     viewer_js = viewer_files.joinpath("trajectory-viewer.js").read_text(encoding="utf-8")
     public_root = Path(__file__).resolve().parents[1]
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    assert 'href="styles.css?v=20260615-route-pages"' in html
-    assert 'src="app.js?v=20260615-route-pages"' in html
-    assert "index.html?page=toolkit&v=20260615-route-pages" in public_index
-    assert "index.html?page=documentation&v=20260615-route-pages" in public_docs
-    assert "index.html?page=downloads&v=20260615-route-pages" in public_download
+    assert 'href="styles.css?v=20260615-hardware-pixels"' in html
+    assert 'src="hardware_pixel_art.js?v=20260615-hardware-pixels"' in html
+    assert 'src="app.js?v=20260615-hardware-pixels"' in html
+    assert "index.html?page=toolkit&v=20260615-hardware-pixels" in public_index
+    assert "index.html?page=documentation&v=20260615-hardware-pixels" in public_docs
+    assert "index.html?page=downloads&v=20260615-hardware-pixels" in public_download
     assert 'data-page-tab="toolkit"' in html
     assert 'data-page-tab="documentation"' in html
     assert 'data-page-tab="downloads"' in html
@@ -190,6 +193,14 @@ def test_dashboard_static_assets_are_packaged():
     assert 'downloads: "download"' in app_js
     assert "pageFromLocation" in app_js
     assert "replaceRouteForPage" in app_js
+    assert "enforceExternalLinkTargets" in app_js
+    assert "renderHardwarePixelArt" in app_js
+    assert 'data-hardware-pixel="komplete-audio6"' in html
+    assert 'data-hardware-pixel="woojer-strap-4"' in html
+    assert "window.HARDWARE_PIXEL_ART" in hardware_pixel_js
+    assert '"komplete-audio6"' in hardware_pixel_js
+    assert '"woojer-strap-4"' in hardware_pixel_js
+    assert ".hardware-pixel-frame" in styles_css
     assert 'id="audio-file-input"' in html
     assert 'id="zoom-in-camera"' in html
     assert 'id="zoom-out-camera"' in html

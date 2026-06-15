@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260615-route-pages">
+  <link rel="stylesheet" href="styles.css?v=20260615-hardware-pixels">
 </head>
 <body>
   <div class="app-shell">
@@ -715,22 +715,30 @@
             <h2 id="docs-hardware-title">Hardware Specifications And Latency Evidence</h2>
           </div>
           <p class="info-copy">The validated lab route is Windows-first and uses one synchronized multichannel ASIO output path. The current wiring convention is channel 1 to left auditory output, channel 2 to right auditory output, and channel 3 to the tactile drive path.</p>
-          <div class="info-card-grid">
-            <article class="info-card">
+          <div class="info-card-grid hardware-card-grid">
+            <a class="info-card info-card-link hardware-pixel-card" href="https://www.native-instruments.com/en/products/komplete/audio-interfaces/komplete-audio-6/specifications/" aria-label="Open Native Instruments Komplete Audio producer page">
+              <span class="card-kicker">Audio Interface</span>
+              <div class="hardware-pixel-frame" aria-hidden="true">
+                <canvas data-hardware-pixel="komplete-audio6"></canvas>
+              </div>
               <h2>Komplete Audio 6 MK2</h2>
               <p>The lab route uses Native Instruments Komplete Audio 6 MK2 as the synchronized multichannel interface.</p>
-              <a class="button-link" href="https://www.native-instruments.com/en/support/downloads/drivers-other-files/">Open NI Drivers Page</a>
-            </article>
+              <span class="card-link-label">Open Native Instruments page</span>
+            </a>
             <article class="info-card">
               <h2>Komplete ASIO Driver</h2>
               <p>Use the official Komplete Audio ASIO Driver on Windows. The stereo Windows endpoints are legacy/diagnostic paths, not the validated 3-channel route.</p>
               <a class="button-link" href="https://support.native-instruments.com/hc/en-us/articles/360001194217-Installing-the-ASIO-Driver-for-KOMPLETE-AUDIO-1-2-6-MK2-Windows">Open ASIO Install Guide</a>
             </article>
-            <article class="info-card">
+            <a class="info-card info-card-link hardware-pixel-card" href="https://www.woojer.com/products/strap-4" aria-label="Open Woojer Strap 4 producer page">
+              <span class="card-kicker">Tactile Endpoint</span>
+              <div class="hardware-pixel-frame" aria-hidden="true">
+                <canvas data-hardware-pixel="woojer-strap-4"></canvas>
+              </div>
               <h2>Woojer Strap</h2>
               <p>The tactile target is treated as a wired analog endpoint from Komplete output 3. Bluetooth should not be used for timing-sensitive tactile work.</p>
-              <a class="button-link" href="https://www.woojer.com/products/strap-4">Open Woojer Strap 4</a>
-            </article>
+              <span class="card-link-label">Open Woojer Strap 4</span>
+            </a>
           </div>
           <div class="metric-grid" aria-label="Current latency validation summary">
             <div class="metric-card">
@@ -939,6 +947,7 @@
       </form>
     </div>
   </div>
-  <script src="app.js?v=20260615-route-pages"></script>
+  <script src="hardware_pixel_art.js?v=20260615-hardware-pixels"></script>
+  <script src="app.js?v=20260615-hardware-pixels"></script>
 </body>
 </html>

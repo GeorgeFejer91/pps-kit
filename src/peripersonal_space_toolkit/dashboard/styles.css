@@ -719,6 +719,35 @@ code {
   line-height: 1.45;
 }
 
+.hardware-pixel-card {
+  display: grid;
+  grid-template-rows: auto auto auto 1fr auto;
+  gap: 8px;
+}
+
+.hardware-pixel-card p {
+  margin-bottom: 0;
+}
+
+.hardware-pixel-frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
+  border: 1px solid #d4ddd6;
+  border-radius: 6px;
+  background: #f6faf7;
+  overflow: hidden;
+}
+
+.hardware-pixel-frame canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 190px;
+  image-rendering: pixelated;
+}
+
 .info-card code {
   display: block;
   border: 1px solid var(--line);
