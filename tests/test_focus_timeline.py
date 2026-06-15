@@ -95,6 +95,20 @@ def test_tactile_recenter_controller_fires_once_per_due_cue():
     assert moved == [1, 2]
 
 
+def test_tactile_recenter_controller_never_pins_cursor_after_one_move():
+    state = TactileTimelineState(recenter_lead_s=0.5)
+    state.load_block(duration_s=6.0, tactile_events=[{"trial_number": 1, "trial_uid": "T001", "time_s": 4.0}])
+    moved: list[int] = []
+    controller = TactileRecenterController(state, lambda cue: moved.append(cue.trial_number))
+
+    assert [cue.trial_number for cue in controller.tick(3.5, active=True)] == [1]
+    assert controller.tick(3.55, active=True) == []
+    assert controller.tick(3.8, active=True) == []
+    assert controller.tick(4.0, active=True) == []
+    assert controller.tick(4.4, active=True) == []
+    assert moved == [1]
+
+
 def test_tactile_recenter_controller_respects_pause_and_instruction_wait():
     state = TactileTimelineState(recenter_lead_s=0.5)
     state.load_block(duration_s=6.0, tactile_events=[{"trial_number": 1, "time_s": 4.0}])

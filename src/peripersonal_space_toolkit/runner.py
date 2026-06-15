@@ -3219,9 +3219,8 @@ class PPSExperimentApp:
             self.click_target.set_active(True)
             self.info_label.config(text=f"Block {finished_block_num} complete. CLICK to start Block {self.current_block + 1}")
 
-            # Move mouse to click area and lock it there
+            # Move once for the next start click. Never pin or lock the cursor.
             self._do_recenter()
-            self._start_mouse_lock()
 
             # Keep controls disabled - click will start next block
             print(f"Awaiting click to start block {self.current_block + 1}")
@@ -3432,29 +3431,18 @@ class PPSExperimentApp:
             print(f"Recentering stopped for block {self.current_block + 1}")
 
     # -------------------------------------------------------------------------
-    # Mouse Lock (keeps mouse locked to click area between blocks)
+    # Deprecated Mouse Lock Guard
     # -------------------------------------------------------------------------
     def _start_mouse_lock(self):
-        """Start locking mouse to click target center (between blocks)."""
-        self.mouse_locked = True
-        self._do_mouse_lock()
+        """Deprecated no-op: never pin the cursor to the click target."""
+        self._stop_mouse_lock()
 
     def _do_mouse_lock(self):
-        """Continuously move mouse to click target center while locked."""
-        if not self.mouse_locked or not PYAUTOGUI_AVAILABLE:
-            return
-
-        try:
-            x, y = self.click_target.get_center_coords()
-            pyautogui.moveTo(x, y, duration=0)
-        except Exception:
-            pass
-
-        # Schedule next lock check (every 50ms for smooth locking)
-        self._mouse_lock_timer = self.root.after(50, self._do_mouse_lock)
+        """Deprecated no-op retained for old validation imports."""
+        self._stop_mouse_lock()
 
     def _stop_mouse_lock(self):
-        """Stop locking mouse to click target."""
+        """Clear any stale mouse-lock timer without moving the cursor."""
         self.mouse_locked = False
         if self._mouse_lock_timer:
             self.root.after_cancel(self._mouse_lock_timer)
