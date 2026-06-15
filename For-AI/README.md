@@ -37,3 +37,7 @@ Every future AI agent should:
 6. State in the final response whether `For-AI/` was updated or why no update was needed.
 
 Do not put secrets, participant data, generated artifacts, local absolute paths, or private notes in this folder.
+
+## Global Publishing Rule
+
+Every completed repository change must be committed and pushed to GitHub before finalizing. Keep commits scoped to the intended work and do not stage unrelated pre-existing worktree changes. HTML/dashboard GUI changes must keep the packaged local dashboard and the hosted/static GitHub Pages dashboard mutually synchronized: any change to one side requires the matching change to the other side in the same change set, followed by an immediate push so the website updates from the same source state.

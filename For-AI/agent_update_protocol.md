@@ -15,7 +15,8 @@ Every AI agent working in this repository must:
 7. Before finalizing, decide whether the work was substantive.
 8. If substantive, update the relevant `For-AI/` file.
 9. For any GUI or runner workflow claim, run or add an end-user mouse-click validation before finalizing. The accepted proof must emulate a user clicking visible controls through the workflow, not only call backend APIs or direct helper functions.
-10. In the final response, state whether `For-AI/` was updated.
+10. Commit the completed change set and push it to GitHub before finalizing. Keep the commit scoped to the intended work and do not stage unrelated pre-existing worktree changes. If authentication, network, branch protection, or conflicts block the push, report the exact blocker and leave the work ready to push.
+11. In the final response, state whether `For-AI/` was updated and whether the change was pushed.
 
 ## What Counts As Substantive
 
@@ -32,7 +33,11 @@ Update `For-AI/` after changes to:
 
 ## Web GUI Website Sync
 
-Every change to the new HTML/dashboard web GUI must be reflected on the online website version before the work is considered complete. Future agents should not stop after updating only the local dashboard files. They must also update the hosted/static GitHub Pages-facing files or deployment artifact used by the public website, then verify that the website version still uses relative dashboard/viewer assets and talks to the local companion backend rather than trying to run timing-sensitive experiments in browser JavaScript.
+Every change to the new HTML/dashboard web GUI must be reflected on the online website version before the work is considered complete. The local packaged dashboard and the hosted/static GitHub Pages dashboard are mutual mirrors: if either one changes, the other must be updated in the same change set so they stay in sync. Future agents should not stop after updating only the local dashboard files or only the website-facing files. They must update and verify both sides together, then commit and push the synchronized change immediately so the public website can update from the same source state. The website version must still use relative dashboard/viewer assets and talk to the local companion backend rather than trying to run timing-sensitive experiments in browser JavaScript.
+
+## Required GitHub Publishing
+
+Every completed repository change must be committed and pushed to GitHub immediately after verification. Do not leave completed edits as local-only work. Stage only the intended change set; do not bundle unrelated dirty files or pre-existing user changes into the commit. If pushing is blocked by missing credentials, network failure, branch protection, or a non-fast-forward remote, report that blocker explicitly in the final response and describe the exact local commit or staged state that still needs to be pushed.
 
 ## Local Browser Orchestration Boundary
 
