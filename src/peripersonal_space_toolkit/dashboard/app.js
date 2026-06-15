@@ -219,6 +219,8 @@ let pendingBakeRecipe = null;
 let activeTrialRowPreviewAudio = null;
 let activeSourcePreviewAudio = null;
 let activeSourcePreviewNode = null;
+let activeSourcePreviewButton = null;
+let activeSourcePreviewClearTimer = null;
 let sourcePreviewAudioContext = null;
 let customizeModalReturnFocus = null;
 let segmentInfoModalReturnFocus = null;
@@ -2659,7 +2661,13 @@ async function previewSourceLabel(button) {
       body: JSON.stringify(payload)
     });
     button.disabled = false;
-    await playSourcePreviewAudio(apiUrl(`${preview.url}?v=${Date.now()}`), button, audioContext, contextReady);
+    await playSourcePreviewAudio(
+      apiUrl(`${preview.url}?v=${Date.now()}`),
+      button,
+      audioContext,
+      contextReady,
+      Number(preview.duration_s) || 0
+    );
     started = true;
     showToast(`Soundcheck: ${preview.label || label}`);
   } catch (error) {
@@ -2681,6 +2689,7 @@ function getSourcePreviewAudioContext() {
 }
 
 function stopActiveSourcePreview() {
+  const previousButton = activeSourcePreviewButton;
   if (activeSourcePreviewNode) {
     try {
       activeSourcePreviewNode.stop();
@@ -2694,10 +2703,47 @@ function stopActiveSourcePreview() {
     activeSourcePreviewAudio.pause();
     activeSourcePreviewAudio = null;
   }
+  finishSourcePreview(previousButton);
 }
 
-async function playSourcePreviewAudio(url, button, audioContext, contextReady) {
+function finishSourcePreview(button = activeSourcePreviewButton) {
+  if (activeSourcePreviewClearTimer) {
+    clearTimeout(activeSourcePreviewClearTimer);
+    activeSourcePreviewClearTimer = null;
+  }
+  if (button) button.classList.remove("playing");
+  if (!button || activeSourcePreviewButton === button) {
+    activeSourcePreviewButton = null;
+  }
+}
+
+function armSourcePreviewCleanup(button, durationS) {
+  const durationMs = Number.isFinite(durationS) && durationS > 0
+    ? Math.min(Math.max(durationS * 1000 + 750, 1250), 60000)
+    : 15000;
+  activeSourcePreviewButton = button;
+  activeSourcePreviewClearTimer = window.setTimeout(() => {
+    if (activeSourcePreviewButton !== button) return;
+    if (activeSourcePreviewNode) {
+      try {
+        activeSourcePreviewNode.stop();
+      } catch (_error) {
+        // Already stopped.
+      }
+      activeSourcePreviewNode.disconnect();
+      activeSourcePreviewNode = null;
+    }
+    if (activeSourcePreviewAudio) {
+      activeSourcePreviewAudio.pause();
+      activeSourcePreviewAudio = null;
+    }
+    finishSourcePreview(button);
+  }, durationMs);
+}
+
+async function playSourcePreviewAudio(url, button, audioContext, contextReady, durationS = 0) {
   stopActiveSourcePreview();
+  armSourcePreviewCleanup(button, durationS);
   if (audioContext) {
     if (contextReady) await Promise.race([contextReady, delay(250)]);
     const response = await fetch(url);
@@ -2711,17 +2757,28 @@ async function playSourcePreviewAudio(url, button, audioContext, contextReady) {
       if (activeSourcePreviewNode === node) {
         activeSourcePreviewNode = null;
       }
-      button.classList.remove("playing");
+      node.disconnect();
+      finishSourcePreview(button);
     }, { once: true });
     node.start();
     return;
   }
   const audio = new Audio(url);
   activeSourcePreviewAudio = audio;
-  audio.addEventListener("ended", () => button.classList.remove("playing"), { once: true });
-  audio.addEventListener("pause", () => button.classList.remove("playing"), { once: true });
+  audio.addEventListener("ended", () => {
+    if (activeSourcePreviewAudio === audio) {
+      activeSourcePreviewAudio = null;
+    }
+    finishSourcePreview(button);
+  }, { once: true });
+  audio.addEventListener("pause", () => {
+    if (activeSourcePreviewAudio === audio) {
+      activeSourcePreviewAudio = null;
+    }
+    finishSourcePreview(button);
+  }, { once: true });
   audio.play().catch((error) => {
-    button.classList.remove("playing");
+    finishSourcePreview(button);
     showToast(error.message || String(error));
   });
 }

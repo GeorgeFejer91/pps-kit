@@ -167,8 +167,8 @@ def test_dashboard_static_assets_are_packaged():
     app_js = dashboard_files.joinpath("app.js").read_text(encoding="utf-8")
     styles_css = dashboard_files.joinpath("styles.css").read_text(encoding="utf-8")
     viewer_js = viewer_files.joinpath("trajectory-viewer.js").read_text(encoding="utf-8")
-    assert 'href="styles.css?v=20260615-dashboard-tabs-segment2-soundcheck"' in html
-    assert 'src="app.js?v=20260615-dashboard-tabs-segment2-soundcheck"' in html
+    assert 'href="styles.css?v=20260615-dashboard-tabs-segment2-soundcheck-cleanup"' in html
+    assert 'src="app.js?v=20260615-dashboard-tabs-segment2-soundcheck-cleanup"' in html
     assert 'data-page-tab="toolkit"' in html
     assert 'data-page-tab="documentation"' in html
     assert 'data-page-tab="downloads"' in html
@@ -447,6 +447,8 @@ def test_dashboard_static_assets_are_packaged():
     assert "previewSourceLabel" in app_js
     assert "getSourcePreviewAudioContext" in app_js
     assert "decodeAudioData" in app_js
+    assert "activeSourcePreviewClearTimer" in app_js
+    assert "duration_s" in app_js
     assert 'control.matches?.("[data-preview-source-label]")' in app_js
     assert ".panel.profile-readonly [data-preview-source-label]" in styles_css
     assert "sequence-label-chip" in app_js
