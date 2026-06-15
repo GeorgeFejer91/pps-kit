@@ -237,6 +237,20 @@ let trialPoolDraftInitialized = false;
 let runSequencePreviewTimer = null;
 let activePage = "toolkit";
 const PAGE_TABS = ["toolkit", "documentation", "downloads"];
+const PAGE_ROUTE_ALIASES = {
+  "": "toolkit",
+  toolkit: "toolkit",
+  app: "toolkit",
+  documentation: "documentation",
+  docs: "documentation",
+  download: "downloads",
+  downloads: "downloads"
+};
+const PAGE_ROUTE_SEGMENTS = {
+  toolkit: "",
+  documentation: "documentation",
+  downloads: "download"
+};
 
 async function api(path, options = {}) {
   let response;
@@ -450,13 +464,102 @@ function renderAll() {
   renderWorkflow();
 }
 
-function pageFromHash() {
-  const hash = String(window.location.hash || "").replace(/^#/, "");
-  if (PAGE_TABS.includes(hash)) return hash;
+function normalizePageRoute(value) {
+  const token = String(value || "")
+    .trim()
+    .replace(/^#/, "")
+    .replace(/^\/+|\/+$/g, "")
+    .toLowerCase();
+  return PAGE_ROUTE_ALIASES[token] || "";
+}
+
+function topLevelLocation() {
+  try {
+    if (window.parent && window.parent !== window && window.parent.location.origin === window.location.origin) {
+      return window.parent.location;
+    }
+  } catch (_err) {
+    // Cross-origin parents cannot be inspected; direct dashboard routing remains local.
+  }
+  return window.location;
+}
+
+function topLevelHistory() {
+  try {
+    if (window.parent && window.parent !== window && window.parent.location.origin === window.location.origin) {
+      return window.parent.history;
+    }
+  } catch (_err) {
+    // Keep using the iframe/window history when parent access is not available.
+  }
+  return window.history;
+}
+
+function topLevelHash() {
+  return topLevelLocation().hash || window.location.hash || "";
+}
+
+function pageFromPath(pathname) {
+  const parts = String(pathname || "").replace(/\/+$/g, "").split("/").filter(Boolean);
+  const last = parts[parts.length - 1] || "";
+  if (last.toLowerCase() === "index.html") {
+    return normalizePageRoute(parts[parts.length - 2] || "");
+  }
+  return normalizePageRoute(last);
+}
+
+function pageFromHash(hashValue = topLevelHash()) {
+  const hash = String(hashValue || "").replace(/^#/, "");
+  const pageHash = normalizePageRoute(hash);
+  if (pageHash) return pageHash;
   const target = hash ? $(hash) : null;
   const panel = target?.closest("[data-page-panel]");
   const page = panel?.dataset.pagePanel || "";
   return PAGE_TABS.includes(page) ? page : "";
+}
+
+function pageFromLocation() {
+  const queryPage = normalizePageRoute(new URLSearchParams(window.location.search).get("page"));
+  if (queryPage) return queryPage;
+  const routePage = pageFromPath(topLevelLocation().pathname);
+  if (routePage) return routePage;
+  return pageFromHash();
+}
+
+function publicRouteNavigationAvailable() {
+  const location = topLevelLocation();
+  if (!/^https?:$/i.test(location.protocol)) return false;
+  return window.parent && window.parent !== window && location.origin === window.location.origin;
+}
+
+function publicRouteBasePath() {
+  let path = String(topLevelLocation().pathname || "/")
+    .replace(/\/index\.html$/i, "/")
+    .replace(/\/(documentation|download|downloads)\/?$/i, "/");
+  if (!path.endsWith("/")) path += "/";
+  return path;
+}
+
+function pageRouteUrl(page, sectionId = "") {
+  const nextPage = PAGE_TABS.includes(page) ? page : "toolkit";
+  const cleanSection = String(sectionId || "").replace(/^#/, "");
+  if (!publicRouteNavigationAvailable()) {
+    const hash = cleanSection || (nextPage === "toolkit" ? "" : nextPage);
+    return `${window.location.pathname}${window.location.search}${hash ? `#${hash}` : ""}`;
+  }
+  const base = publicRouteBasePath();
+  const segment = PAGE_ROUTE_SEGMENTS[nextPage] || "";
+  const routePath = segment ? `${base}${segment}` : base;
+  return `${routePath}${cleanSection ? `#${cleanSection}` : ""}`;
+}
+
+function replaceRouteForPage(page, sectionId = "") {
+  const url = pageRouteUrl(page, sectionId);
+  try {
+    topLevelHistory().replaceState(null, "", url);
+  } catch (_err) {
+    window.history.replaceState(null, "", url);
+  }
 }
 
 function setActivePage(page, options = {}) {
@@ -475,10 +578,7 @@ function setActivePage(page, options = {}) {
   }
   syncRailForPage(nextPage);
   if (options.updateHash) {
-    const nextHash = nextPage === "toolkit" ? "" : `#${nextPage}`;
-    if (window.location.hash !== nextHash) {
-      history.replaceState(null, "", `${window.location.pathname}${window.location.search}${nextHash}`);
-    }
+    replaceRouteForPage(nextPage);
   }
   if (options.scrollTop) {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -509,7 +609,7 @@ function setActivePageSection(sectionId) {
 }
 
 function scrollToHashTarget() {
-  const hash = String(window.location.hash || "").replace(/^#/, "");
+  const hash = String(topLevelHash() || "").replace(/^#/, "");
   if (!hash || PAGE_TABS.includes(hash)) return;
   const target = $(hash);
   if (!target) return;
@@ -525,7 +625,7 @@ function renderPageTabs() {
 }
 
 function initializePageTabs() {
-  setActivePage(pageFromHash() || "toolkit");
+  setActivePage(pageFromLocation() || "toolkit");
   scrollToHashTarget();
 }
 
@@ -4075,7 +4175,7 @@ function updateActiveNav() {
         activeSection = link.dataset.pageSectionLink;
       }
     }
-    const hashSection = String(window.location.hash || "").replace(/^#/, "");
+    const hashSection = String(topLevelHash() || "").replace(/^#/, "");
     if (pageLinks.some((link) => link.dataset.pageSectionLink === hashSection)) {
       activeSection = hashSection;
     }
@@ -4488,7 +4588,7 @@ function wireEvents() {
       setActivePage(page, { updateHash: false, scrollTop: false });
       const target = $(targetId);
       if (target) {
-        history.replaceState(null, "", `${window.location.pathname}${window.location.search}#${targetId}`);
+        replaceRouteForPage(page, targetId);
         target.scrollIntoView({ behavior: "smooth", block: "start" });
         setActivePageSection(targetId);
         window.setTimeout(() => setActivePageSection(targetId), 350);
@@ -4496,7 +4596,7 @@ function wireEvents() {
     });
   }
   window.addEventListener("hashchange", () => {
-    const nextPage = pageFromHash();
+    const nextPage = pageFromLocation();
     if (nextPage) {
       setActivePage(nextPage, { scrollTop: false });
       scrollToHashTarget();

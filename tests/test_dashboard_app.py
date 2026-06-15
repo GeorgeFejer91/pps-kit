@@ -167,8 +167,15 @@ def test_dashboard_static_assets_are_packaged():
     app_js = dashboard_files.joinpath("app.js").read_text(encoding="utf-8")
     styles_css = dashboard_files.joinpath("styles.css").read_text(encoding="utf-8")
     viewer_js = viewer_files.joinpath("trajectory-viewer.js").read_text(encoding="utf-8")
-    assert 'href="styles.css?v=20260615-dashboard-tabs-segment2-soundcheck-cleanup"' in html
-    assert 'src="app.js?v=20260615-dashboard-tabs-segment2-soundcheck-cleanup"' in html
+    public_root = Path(__file__).resolve().parents[1]
+    public_index = (public_root / "index.html").read_text(encoding="utf-8")
+    public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
+    public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
+    assert 'href="styles.css?v=20260615-route-pages"' in html
+    assert 'src="app.js?v=20260615-route-pages"' in html
+    assert "index.html?page=toolkit&v=20260615-route-pages" in public_index
+    assert "index.html?page=documentation&v=20260615-route-pages" in public_docs
+    assert "index.html?page=downloads&v=20260615-route-pages" in public_download
     assert 'data-page-tab="toolkit"' in html
     assert 'data-page-tab="documentation"' in html
     assert 'data-page-tab="downloads"' in html
@@ -178,6 +185,11 @@ def test_dashboard_static_assets_are_packaged():
     assert 'id="downloads-page"' in html
     assert 'id="toolkit-page"' in html
     assert 'src="../viewer/index.html?v=source-trajectory-inventory"' in html
+    assert "PAGE_ROUTE_SEGMENTS" in app_js
+    assert 'documentation: "documentation"' in app_js
+    assert 'downloads: "download"' in app_js
+    assert "pageFromLocation" in app_js
+    assert "replaceRouteForPage" in app_js
     assert 'id="audio-file-input"' in html
     assert 'id="zoom-in-camera"' in html
     assert 'id="zoom-out-camera"' in html
@@ -197,7 +209,7 @@ def test_dashboard_static_assets_are_packaged():
     assert html.count('data-segment-info="') == 7
     assert "SEGMENT_INFO" in app_js
     assert "setActivePage" in app_js
-    assert "info-page-active" in styles_css
+    assert "info-page-active" in app_js
     assert "openSegmentInfoModal" in app_js
     assert "closeSegmentInfoModal" in app_js
     assert "Purpose" in html
