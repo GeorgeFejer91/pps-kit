@@ -3496,6 +3496,39 @@ select:focus {
   border-left: 1px solid var(--line-strong);
 }
 
+.view-preset-control {
+  display: inline-grid;
+  grid-template-columns: repeat(6, minmax(38px, 1fr));
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.view-preset-control[hidden] {
+  display: none;
+}
+
+.view-preset-control button {
+  min-height: 32px;
+  border: 0;
+  border-radius: 0;
+  padding: 5px 8px;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.view-preset-control button + button {
+  border-left: 1px solid var(--line-strong);
+}
+
+.view-preset-control button:hover,
+.view-preset-control button:focus-visible {
+  background: #e7eee9;
+}
+
 .segmented-control {
   display: inline-grid;
   grid-template-columns: repeat(2, minmax(42px, 1fr));

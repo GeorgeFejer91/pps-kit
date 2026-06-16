@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260616-avatar-center">
+  <link rel="stylesheet" href="styles.css?v=20260616-trajectory-nav">
 </head>
 <body>
   <div class="app-shell">
@@ -172,6 +172,14 @@
                   <button id="preview-mode-2d" type="button" class="mode-toggle active" data-preview-mode="2d" data-preview-view-control>2D</button>
                   <button id="preview-mode-3d" type="button" class="mode-toggle" data-preview-mode="3d" data-preview-view-control>3D</button>
                 </div>
+                <div id="view-preset-control" class="view-preset-control" aria-label="3D view angle presets" hidden>
+                  <button type="button" data-view-preset="front" data-preview-view-control title="Front view">Front</button>
+                  <button type="button" data-view-preset="back" data-preview-view-control title="Back view">Back</button>
+                  <button type="button" data-view-preset="left" data-preview-view-control title="Left view">Left</button>
+                  <button type="button" data-view-preset="right" data-preview-view-control title="Right view">Right</button>
+                  <button type="button" data-view-preset="top" data-preview-view-control title="Top view">Top</button>
+                  <button type="button" data-view-preset="iso" data-preview-view-control title="Isometric view">Iso</button>
+                </div>
                 <div class="zoom-control" aria-label="Trajectory preview zoom">
                   <button id="zoom-out-camera" type="button" title="Zoom out" aria-label="Zoom out" data-preview-view-control>-</button>
                   <button id="zoom-in-camera" type="button" title="Zoom in" aria-label="Zoom in" data-preview-view-control>+</button>
@@ -180,7 +188,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="../viewer/index.html?v=20260616-avatar-center"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="../viewer/index.html?v=20260616-trajectory-nav"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -1040,7 +1048,7 @@
       </form>
     </div>
   </div>
-  <script src="hardware_pixel_art.js?v=20260616-avatar-center"></script>
-  <script src="app.js?v=20260616-avatar-center"></script>
+  <script src="hardware_pixel_art.js?v=20260616-trajectory-nav"></script>
+  <script src="app.js?v=20260616-trajectory-nav"></script>
 </body>
 </html>

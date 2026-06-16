@@ -173,12 +173,12 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    assert 'href="styles.css?v=20260615-hardware-arch-side"' in html
-    assert 'src="hardware_pixel_art.js?v=20260615-hardware-arch-side"' in html
-    assert 'src="app.js?v=20260615-hardware-arch-side"' in html
-    assert "index.html?page=toolkit&v=20260615-hardware-arch-side" in public_index
-    assert "index.html?page=documentation&v=20260615-hardware-arch-side" in public_docs
-    assert "index.html?page=downloads&v=20260615-hardware-arch-side" in public_download
+    assert 'href="styles.css?v=20260616-trajectory-nav"' in html
+    assert 'src="hardware_pixel_art.js?v=20260616-trajectory-nav"' in html
+    assert 'src="app.js?v=20260616-trajectory-nav"' in html
+    assert "index.html?page=toolkit&v=20260616-trajectory-nav" in public_index
+    assert "index.html?page=documentation&v=20260616-trajectory-nav" in public_docs
+    assert "index.html?page=downloads&v=20260616-trajectory-nav" in public_download
     assert 'data-page-tab="toolkit"' in html
     assert 'data-page-tab="documentation"' in html
     assert 'data-page-tab="downloads"' in html
@@ -188,7 +188,7 @@ def test_dashboard_static_assets_are_packaged():
     assert html.count('class="doc-segment-rule"') == 8
     assert 'id="downloads-page"' in html
     assert 'id="toolkit-page"' in html
-    assert 'src="../viewer/index.html?v=source-trajectory-inventory"' in html
+    assert 'src="../viewer/index.html?v=20260616-trajectory-nav"' in html
     assert "PAGE_ROUTE_SEGMENTS" in app_js
     assert 'documentation: "documentation"' in app_js
     assert 'downloads: "download"' in app_js
@@ -538,6 +538,11 @@ def test_dashboard_static_assets_are_packaged():
     assert "callTrajectoryViewer" in app_js
     assert "fitTrajectoryRadius" in app_js
     assert "zoomTrajectoryCamera" in app_js
+    assert "snapTrajectoryView" in app_js
+    assert 'id="view-preset-control"' in html
+    for preset in ("front", "back", "left", "right", "top", "iso"):
+        assert f'data-view-preset="{preset}"' in html
+    assert ".view-preset-control" in styles_css
     assert "startBakeStimulus" in app_js
     assert "stageGeneratedNoise" in app_js
     assert "IMPORTED_AUDIO_HANDLING" in app_js
@@ -586,6 +591,13 @@ def test_dashboard_static_assets_are_packaged():
     assert "two_d_radius_centered" in viewer_js
     assert "two_d_pan_enabled" in viewer_js
     assert "two_d_zoom_enabled" in viewer_js
+    assert "three_d_pan_enabled" in viewer_js
+    assert "three_d_roll_locked" in viewer_js
+    assert "three_d_view_preset" in viewer_js
+    assert "snapTrajectoryView" in viewer_js
+    assert "VIEW_PRESETS" in viewer_js
+    assert "fit3DCameraToRadius" in viewer_js
+    assert "maxTargetRadius" in viewer_js
     assert "drawSourceTrajectoryInventory" in viewer_js
     assert "source_trajectory_count" in viewer_js
     assert "shared_tone_trajectory_group_count" in viewer_js
