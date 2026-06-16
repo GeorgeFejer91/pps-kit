@@ -25,6 +25,18 @@ from .audio_routing import (
     komplete_audio_asio_reconnect_steps,
     komplete_audio_asio_install_steps,
 )
+from .analysis_review import (
+    MODEL_BEST,
+    MODEL_LABELS,
+    MODEL_ORDER,
+    available_models_for_scope,
+    best_model_for_scope,
+    fit_row_for_scope,
+    load_analysis_review_data,
+    observed_points_for_scope,
+    prediction_points_for_scope,
+    scope_comparison_row,
+)
 from .focus_layout import (
     FocusLayoutProfile,
     render_focus_layout_profile,
@@ -106,6 +118,8 @@ def _require_qt() -> dict[str, Any]:
             QSizePolicy,
             QSplitter,
             QTabWidget,
+            QTableWidget,
+            QTableWidgetItem,
             QTextEdit,
             QVBoxLayout,
             QWidget,
@@ -141,6 +155,8 @@ def _require_qt() -> dict[str, Any]:
         "QSizePolicy": QSizePolicy,
         "QSplitter": QSplitter,
         "QTabWidget": QTabWidget,
+        "QTableWidget": QTableWidget,
+        "QTableWidgetItem": QTableWidgetItem,
         "QTextEdit": QTextEdit,
         "QTimer": QTimer,
         "QUrl": QUrl,
@@ -668,6 +684,379 @@ def _field_row(q: dict[str, Any], label: str, widget: Any) -> Any:
     layout.addWidget(key)
     layout.addWidget(widget, 1)
     return row
+
+
+def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
+    class AnalysisCurvePlotWidget(q["QWidget"]):
+        def __init__(self) -> None:
+            super().__init__()
+            self.observed: list[dict[str, float | str]] = []
+            self.predicted: list[dict[str, float]] = []
+            self.model_label = ""
+            self.metric_label = ""
+            self.empty_text = "No analysis curve selected"
+            self.setMinimumHeight(280)
+
+        def set_series(
+            self,
+            *,
+            observed: list[dict[str, float | str]],
+            predicted: list[dict[str, float]],
+            model_label: str,
+            metric_label: str,
+            empty_text: str,
+        ) -> None:
+            self.observed = list(observed)
+            self.predicted = list(predicted)
+            self.model_label = str(model_label or "")
+            self.metric_label = str(metric_label or "")
+            self.empty_text = str(empty_text or "No analysis curve selected")
+            self.update()
+
+        def paintEvent(self, _event: Any) -> None:  # noqa: N802 - Qt API
+            painter = q["QPainter"](self)
+            try:
+                painter.setRenderHint(q["QPainter"].RenderHint.Antialiasing, True)
+                painter.fillRect(self.rect(), q["QColor"]("#f8f9f6"))
+                width = max(1, int(self.width()))
+                height = max(1, int(self.height()))
+                left = 96
+                right = 18
+                top = 28
+                bottom = 42
+                plot_width = max(1, width - left - right)
+                plot_height = max(1, height - top - bottom)
+                all_points = [(float(item["x"]), float(item["y"])) for item in self.observed]
+                all_points.extend((float(item["x"]), float(item["y"])) for item in self.predicted)
+                if not all_points:
+                    painter.setPen(q["QPen"](q["QColor"]("#647067")))
+                    painter.drawText(self.rect(), q["Qt"].AlignmentFlag.AlignCenter, self.empty_text)
+                    return
+                x_values = [point[0] for point in all_points]
+                y_values = [point[1] for point in all_points]
+                x_min = min(x_values)
+                x_max = max(x_values)
+                y_min = min(y_values)
+                y_max = max(y_values)
+                if x_min == x_max:
+                    x_min -= 1.0
+                    x_max += 1.0
+                if y_min == y_max:
+                    y_min -= 1.0
+                    y_max += 1.0
+                y_pad = max(1.0, (y_max - y_min) * 0.12)
+                y_min -= y_pad
+                y_max += y_pad
+
+                def _x(value: float) -> int:
+                    return left + int((value - x_min) / (x_max - x_min) * plot_width)
+
+                def _y(value: float) -> int:
+                    return top + int((y_max - value) / (y_max - y_min) * plot_height)
+
+                grid_pen = q["QPen"](q["QColor"]("#d9dfd6"))
+                grid_pen.setWidth(1)
+                painter.setPen(grid_pen)
+                for index in range(5):
+                    y = top + int(plot_height * index / 4)
+                    painter.drawLine(left, y, width - right, y)
+                axis_pen = q["QPen"](q["QColor"]("#647067"))
+                axis_pen.setWidth(2)
+                painter.setPen(axis_pen)
+                painter.drawLine(left, top, left, top + plot_height)
+                painter.drawLine(left, top + plot_height, width - right, top + plot_height)
+
+                if self.predicted:
+                    line_pen = q["QPen"](q["QColor"]("#246b55"))
+                    line_pen.setWidth(3)
+                    painter.setPen(line_pen)
+                    previous: tuple[int, int] | None = None
+                    for point in self.predicted:
+                        current = (_x(float(point["x"])), _y(float(point["y"])))
+                        if previous is not None:
+                            painter.drawLine(previous[0], previous[1], current[0], current[1])
+                        previous = current
+
+                point_pen = q["QPen"](q["QColor"]("#8c2f2f"))
+                point_pen.setWidth(2)
+                painter.setPen(point_pen)
+                painter.setBrush(q["QBrush"](q["QColor"]("#f4e2b8")))
+                for point in self.observed:
+                    x = _x(float(point["x"]))
+                    y = _y(float(point["y"]))
+                    painter.drawEllipse(x - 5, y - 5, 10, 10)
+
+                painter.setPen(q["QPen"](q["QColor"]("#202621")))
+                painter.drawText(8, 6, width - 16, 18, int(q["Qt"].AlignmentFlag.AlignVCenter), self.model_label or "Model fit")
+                painter.setPen(q["QPen"](q["QColor"]("#647067")))
+                painter.drawText(left, height - 28, plot_width, 18, q["Qt"].AlignmentFlag.AlignCenter, "SOA (ms)")
+                painter.drawText(8, top + 18, left - 18, 18, int(q["Qt"].AlignmentFlag.AlignRight), self.metric_label or "RT")
+                painter.drawText(8, top + plot_height - 10, left - 18, 18, int(q["Qt"].AlignmentFlag.AlignRight), _fmt_analysis_value(y_min))
+                painter.drawText(8, top - 8, left - 18, 18, int(q["Qt"].AlignmentFlag.AlignRight), _fmt_analysis_value(y_max))
+                painter.drawText(left - 12, top + plot_height + 4, 70, 18, int(q["Qt"].AlignmentFlag.AlignLeft), _fmt_analysis_value(x_min))
+                painter.drawText(width - right - 70, top + plot_height + 4, 70, 18, int(q["Qt"].AlignmentFlag.AlignRight), _fmt_analysis_value(x_max))
+            finally:
+                painter.end()
+
+    return AnalysisCurvePlotWidget()
+
+
+class AnalysisReviewDialog:
+    """Read-only post-run model-fit review dialog."""
+
+    def __init__(self, q: dict[str, Any], parent: Any, data: Any) -> None:
+        self.q = q
+        self.data = data
+        self.dialog = q["QDialog"](parent)
+        _enable_standard_window_controls(q, self.dialog)
+        self.dialog.setWindowTitle("PPS Instant Analysis")
+        self.dialog.setModal(False)
+        self.dialog.resize(980, 700)
+        self.dialog.setMinimumSize(760, 520)
+        self.dialog.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
+        self._build()
+        self._refresh()
+
+    def show(self) -> None:
+        self.dialog.show()
+        self.dialog.raise_()
+        self.dialog.activateWindow()
+
+    def _build(self) -> None:
+        q = self.q
+        root = q["QVBoxLayout"](self.dialog)
+        root.setContentsMargins(14, 14, 14, 14)
+        root.setSpacing(10)
+
+        header = q["QLabel"]("Instant PPS Analysis")
+        header.setObjectName("appTitle")
+        root.addWidget(header)
+
+        subtitle = q["QLabel"]("Observed SOA curve points and automatic sigmoid, linear, and logarithmic-decay model fits.")
+        subtitle.setObjectName("mutedLabel")
+        subtitle.setWordWrap(True)
+        root.addWidget(subtitle)
+
+        controls = q["QHBoxLayout"]()
+        controls.setContentsMargins(0, 0, 0, 0)
+        controls.setSpacing(8)
+        self.scope_combo = q["QComboBox"]()
+        self.scope_combo.setObjectName("analysisScopeCombo")
+        for scope in self.data.scopes:
+            self.scope_combo.addItem(scope, scope)
+        self.model_combo = q["QComboBox"]()
+        self.model_combo.setObjectName("analysisModelCombo")
+        for model in MODEL_ORDER:
+            self.model_combo.addItem(MODEL_LABELS.get(model, model), model)
+        controls.addWidget(q["QLabel"]("Condition"))
+        controls.addWidget(self.scope_combo, 1)
+        controls.addWidget(q["QLabel"]("Model"))
+        controls.addWidget(self.model_combo)
+        root.addLayout(controls)
+
+        body = q["QSplitter"](q["Qt"].Orientation.Vertical)
+        body.setChildrenCollapsible(False)
+        body.setHandleWidth(8)
+        root.addWidget(body, 1)
+
+        overview_panel, overview_layout = _panel(q, "Best Model Overview")
+        self.overview_table = q["QTableWidget"](0, 7)
+        self.overview_table.setObjectName("analysisOverviewTable")
+        self.overview_table.setHorizontalHeaderLabels(["Scope", "Best", "AIC", "R2", "RMSE", "Metric", "N"])
+        self.overview_table.setEditTriggers(q["QTableWidget"].EditTrigger.NoEditTriggers)
+        self.overview_table.cellClicked.connect(self._select_scope_from_table)
+        try:
+            self.overview_table.horizontalHeader().setStretchLastSection(False)
+        except Exception:
+            pass
+        overview_layout.addWidget(self.overview_table)
+        body.addWidget(overview_panel)
+
+        plot_panel, plot_layout = _panel(q, "Model Visualization")
+        self.plot_widget = _create_analysis_curve_plot_widget(q)
+        plot_layout.addWidget(self.plot_widget)
+        body.addWidget(plot_panel)
+
+        detail_panel, detail_layout = _panel(q, "Selected Fit Details")
+        self.detail_text = q["QTextEdit"]()
+        self.detail_text.setObjectName("analysisDetailsText")
+        self.detail_text.setReadOnly(True)
+        self.detail_text.setMinimumHeight(110)
+        detail_layout.addWidget(self.detail_text)
+        body.addWidget(detail_panel)
+        body.setSizes([170, 330, 160])
+
+        buttons = q["QHBoxLayout"]()
+        buttons.addStretch(1)
+        self.open_folder_button = q["QPushButton"]("Open Analysis Folder")
+        self.open_folder_button.clicked.connect(self._open_analysis_folder)
+        close_button = q["QPushButton"]("Close")
+        close_button.clicked.connect(self.dialog.close)
+        buttons.addWidget(self.open_folder_button)
+        buttons.addWidget(close_button)
+        root.addLayout(buttons)
+
+        self.scope_combo.currentIndexChanged.connect(lambda _index: self._refresh())
+        self.model_combo.currentIndexChanged.connect(lambda _index: self._refresh())
+        self._populate_overview_table()
+
+    def _populate_overview_table(self) -> None:
+        q = self.q
+        scopes = self.data.scopes
+        self.overview_table.setRowCount(len(scopes))
+        for row_index, scope in enumerate(scopes):
+            row = scope_comparison_row(self.data, scope)
+            best_model = str(row.get("best_model") or "").strip()
+            best_fit = fit_row_for_scope(self.data, scope, best_model or MODEL_BEST) or {}
+            values = [
+                scope,
+                MODEL_LABELS.get(best_model, best_model),
+                _fmt_analysis_value(row.get("best_aic") or best_fit.get("aic")),
+                _fmt_analysis_value(row.get("best_r2") or best_fit.get("r2")),
+                _fmt_analysis_value(row.get("best_rmse") or best_fit.get("rmse")),
+                _metric_display(row.get("fit_metric") or best_fit.get("fit_metric")),
+                str(row.get("n_points") or best_fit.get("n_points") or ""),
+            ]
+            for column, value in enumerate(values):
+                self.overview_table.setItem(row_index, column, q["QTableWidgetItem"](str(value)))
+        self.overview_table.resizeColumnsToContents()
+        for column, width in enumerate((250, 95, 70, 70, 76, 150, 58)):
+            self.overview_table.setColumnWidth(column, width)
+
+    def _select_scope_from_table(self, row: int, _column: int) -> None:
+        item = self.overview_table.item(row, 0)
+        if item is None:
+            return
+        index = self.scope_combo.findText(item.text())
+        if index >= 0:
+            self.scope_combo.setCurrentIndex(index)
+
+    def _open_analysis_folder(self) -> None:
+        if self.data.session_dir is None:
+            return
+        analysis_dir = self.data.session_dir / "analysis"
+        target = analysis_dir if analysis_dir.is_dir() else self.data.session_dir
+        self.q["QDesktopServices"].openUrl(self.q["QUrl"].fromLocalFile(str(target)))
+
+    def _refresh(self) -> None:
+        if not self.data.scopes:
+            self.scope_combo.setEnabled(False)
+            self.model_combo.setEnabled(False)
+            self.plot_widget.set_series(
+                observed=[],
+                predicted=[],
+                model_label="No model fits",
+                metric_label="",
+                empty_text="No analyzable SOA curves were written for this session.",
+            )
+            self.detail_text.setPlainText(self._empty_detail_text())
+            return
+        scope = str(self.scope_combo.currentData() or self.scope_combo.currentText() or self.data.scopes[0])
+        requested_model = str(self.model_combo.currentData() or MODEL_BEST)
+        resolved_model = best_model_for_scope(self.data, scope) if requested_model == MODEL_BEST else requested_model
+        fit = fit_row_for_scope(self.data, scope, requested_model)
+        observed = observed_points_for_scope(self.data, scope)
+        predicted = prediction_points_for_scope(self.data, scope, requested_model)
+        metric = str(observed[0].get("metric") or "") if observed else str((fit or {}).get("fit_metric") or "")
+        available = available_models_for_scope(self.data, scope)
+        model_label = MODEL_LABELS.get(resolved_model, resolved_model or "Model")
+        if requested_model == MODEL_BEST and resolved_model:
+            model_label = f"Best model: {model_label}"
+        empty = f"{MODEL_LABELS.get(requested_model, requested_model)} was not fit for {scope}."
+        self.plot_widget.set_series(
+            observed=observed,
+            predicted=predicted,
+            model_label=f"{scope} | {model_label}",
+            metric_label=_metric_display(metric),
+            empty_text=empty if observed else "No curve points were available for this condition.",
+        )
+        self.detail_text.setPlainText(self._detail_text(scope, requested_model, resolved_model, fit, observed, available))
+
+    def _detail_text(
+        self,
+        scope: str,
+        requested_model: str,
+        resolved_model: str,
+        fit: dict[str, Any] | None,
+        observed: list[dict[str, float | str]],
+        available: list[str],
+    ) -> str:
+        lines = [f"Scope: {scope}"]
+        comparison = scope_comparison_row(self.data, scope)
+        best = str(comparison.get("best_model") or "").strip()
+        if best:
+            lines.append(f"Best model by AIC: {MODEL_LABELS.get(best, best)}")
+            lines.append(f"Best AIC: {_fmt_analysis_value(comparison.get('best_aic'))}")
+            lines.append(f"Best R2: {_fmt_analysis_value(comparison.get('best_r2'))}")
+        lines.append(f"Observed SOA point count: {len(observed)}")
+        if available:
+            lines.append("Available displays: " + ", ".join(MODEL_LABELS.get(model, model) for model in available))
+        if requested_model == MODEL_BEST and resolved_model:
+            lines.append(f"Displayed model: {MODEL_LABELS.get(resolved_model, resolved_model)}")
+        elif requested_model != MODEL_BEST:
+            lines.append(f"Displayed model: {MODEL_LABELS.get(requested_model, requested_model)}")
+        if fit is None:
+            lines.append("")
+            lines.append("This model was not fit for the selected condition, usually because there were too few usable SOA points.")
+        else:
+            lines.append("")
+            lines.append("Fit parameters")
+            for key in (
+                "lower",
+                "upper",
+                "pps_boundary_soa_ms",
+                "slope",
+                "intercept",
+                "log_slope",
+                "r2",
+                "rmse",
+                "rss",
+                "aic",
+                "n_points",
+                "fit_metric",
+            ):
+                if key in fit and fit.get(key) not in (None, ""):
+                    lines.append(f"- {key}: {_fmt_analysis_value(fit.get(key))}")
+        if self.data.summary_text:
+            lines.append("")
+            lines.append("Session summary")
+            lines.extend(str(self.data.summary_text).splitlines()[:8])
+        if self.data.warnings:
+            lines.append("")
+            lines.append("Warnings")
+            lines.extend(f"- {warning}" for warning in self.data.warnings[:6])
+        return "\n".join(lines)
+
+    def _empty_detail_text(self) -> str:
+        lines = ["No model-fit tables were available for review."]
+        if self.data.summary_text:
+            lines.append("")
+            lines.append(self.data.summary_text)
+        if self.data.warnings:
+            lines.append("")
+            lines.extend(f"- {warning}" for warning in self.data.warnings[:6])
+        return "\n".join(lines)
+
+
+def _fmt_analysis_value(value: Any) -> str:
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        return "" if value in (None, "") else str(value)
+    if not math.isfinite(parsed):
+        return "n/a"
+    if abs(parsed) >= 100:
+        return f"{parsed:.1f}"
+    if abs(parsed) >= 10:
+        return f"{parsed:.2f}"
+    return f"{parsed:.3f}"
+
+
+def _metric_display(value: Any) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    return text.replace("_", " ")
 
 
 def _create_tactile_timeline_widget(
@@ -2626,6 +3015,7 @@ class FocusModeWindow:
         self._last_recenter_backend_warning = ""
         self.validation_topup_approval_records: list[dict[str, Any]] = []
         self.planned_tactile_cue_count = 0
+        self.analysis_review_dialog: AnalysisReviewDialog | None = None
         self.primary_action_shortcuts: list[Any] = []
         self.operator_action_shortcuts: dict[str, list[Any]] = {}
         self.all_block_plan_items: list[dict[str, Any]] = []
@@ -4447,8 +4837,32 @@ class FocusModeWindow:
             lines.append("Warnings:")
             lines.extend(f"  {warning}" for warning in result.warnings)
         self.output_summary.setPlainText("\n".join(line for line in lines if line))
+        self._maybe_open_analysis_review(result)
         self._shutdown_owned_audio_engine()
         self.timer.stop()
+
+    def _maybe_open_analysis_review(self, result: Any) -> None:
+        if not bool(getattr(result, "completed", False)):
+            return
+        if _env_flag("PPS_FOCUS_DISABLE_ANALYSIS_POPUP"):
+            return
+        capture_options = dict(getattr(result, "capture_options", {}) or {})
+        if not bool(capture_options.get("write_analysis_csvs", True)):
+            return
+        try:
+            data = load_analysis_review_data(
+                getattr(result, "analysis_outputs", {}) or {},
+                session_dir=getattr(result, "session_dir", None),
+                summary_text=str(getattr(result, "summary_text", "") or ""),
+            )
+            if not data.has_analysis_tables:
+                return
+            self.analysis_review_dialog = AnalysisReviewDialog(self.q, self.dialog, data)
+            self.analysis_review_dialog.show()
+        except Exception as exc:  # noqa: BLE001 - analysis review must never break run completion.
+            current = self.output_summary.toPlainText().strip()
+            suffix = f"Analysis viewer unavailable: {exc}"
+            self.output_summary.setPlainText(f"{current}\n{suffix}" if current else suffix)
 
     def grab_screenshot(self, path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
