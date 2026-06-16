@@ -335,6 +335,12 @@ def _audit_window(
         "processing_panel": window.processing_panel,
         "output_panel": window.output_panel,
     }
+    if getattr(window, "data_columns_widget", None) is not None:
+        critical_widgets["data_settings_columns"] = window.data_columns_widget
+    if getattr(window, "data_logging_column", None) is not None:
+        critical_widgets["data_logging_column"] = window.data_logging_column
+    if getattr(window, "experiment_settings_column", None) is not None:
+        critical_widgets["experiment_settings_column"] = window.experiment_settings_column
     if profile.right_stack_mode == "tabs" and layout_variant == "settings_tab":
         critical_widgets["settings_panel"] = window.settings_panel
     elif profile.right_stack_mode == "tabs":
@@ -393,6 +399,25 @@ def _audit_window(
             failures.append(f"{segment_name} is too short to operate: {widget_metrics[segment_name]}")
         if widget_metrics[segment_name]["width"] < 220:
             failures.append(f"{segment_name} is too narrow to operate: {widget_metrics[segment_name]}")
+
+    data_column = widget_metrics.get("data_logging_column")
+    settings_column = widget_metrics.get("experiment_settings_column")
+    if data_column and settings_column:
+        column_mode = str((embedded_snapshot.get("adaptive_mechanisms") or {}).get("data_settings_columns") or "")
+        if column_mode == "stacked":
+            if settings_column["y"] < data_column["bottom"]:
+                failures.append("Experiment Settings column is not stacked below Data Logging in stacked mode.")
+        else:
+            same_row = abs(settings_column["y"] - data_column["y"]) <= 8
+            right_of_data = settings_column["x"] >= data_column["right"]
+            if not (same_row and right_of_data):
+                failures.append(
+                    "Data Logging and Experiment Settings columns are not side-by-side "
+                    f"for {profile.screen_class}: data={data_column}, settings={settings_column}."
+                )
+        for name, rect in (("data_logging_column", data_column), ("experiment_settings_column", settings_column)):
+            if rect["width"] < 220:
+                failures.append(f"{name} width {rect['width']}px is below the operator-control minimum.")
 
     splitter_metrics = {}
     splitter_names = ["workspace_splitter", "run_splitter"]

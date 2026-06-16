@@ -154,6 +154,25 @@ failure mode.
   invalidation, next-participant prewarm, and no auto-start.
 - [ ] Repeat after app restart and Windows reboot to catch resume/state bugs.
 
+### Runner UI Geometry And Controls
+
+- [ ] Verify the Focus Mode window renders inside the available desktop area at
+  constrained, compact, standard, and wide monitor sizes, including native
+  Windows DPI behavior and offscreen/headless validation.
+- [ ] Confirm the Experiment Control panel starts at the profile-defined height,
+  remains resizeable, spans the lower workspace, and never collapses the CLICK
+  target, response buttons, output summary, block plan, timeline, or progress
+  controls.
+- [ ] Confirm Data Logging and Experiment Settings use two columns on screens
+  with enough width, fall back to stacked layout only on genuinely narrow
+  screens, and keep full details available through tooltips when compact text
+  is used.
+- [ ] Capture and inspect screenshots for every visual/layout decision; numeric
+  geometry checks alone are not sufficient for readiness.
+- [ ] Exercise keyboard shortcuts for automation: Space/Return/Enter
+  start/continue, Ctrl+P pause/resume, Ctrl+Shift+S stop, Alt+1/Alt+2 part
+  selection, Ctrl+T top-up preview, and Ctrl+W close.
+
 ### Stimulus Assembly
 
 - [ ] For every assembled block, verify 3-channel geometry, sample rate,
@@ -188,7 +207,12 @@ failure mode.
 - [ ] Validate nominal hits at varied RTs across SOAs, blocks, parts, noise
   types, and respiratory phases.
 - [ ] Boundary-test RT pairing: tactile +99 ms rejects, +100 ms accepts,
-  +3.0 s accepts, and >3.0 s rejects.
+  +4.0 s accepts, and >4.0 s rejects.
+- [ ] Verify noisy participant clicking is logged without corrupting analysis:
+  all playback clicks remain in `events.csv`, but analysis and top-up use the
+  first in-target click between tactile onset +100 ms and
+  `min(tactile onset +4.0 s, next trial_start)`; double/random later clicks
+  cannot overwrite the selected response.
 - [ ] Verify a click at or after the next `trial_start` cannot bind to the
   previous trial.
 - [ ] Verify one click can bind to only one tactile onset.
@@ -236,6 +260,9 @@ failure mode.
   `Primary_Analysis_Included=false`.
 - [ ] Rescue rows preserve `Source_Trial_UID`, source hashes, row labels, SOA,
   trial type, and part metadata.
+- [ ] Top-up response clicks bind only to their top-up rescue/filler trial and
+  cannot retroactively convert an older original miss into a hit across block
+  or top-up context boundaries.
 - [ ] Denied approval logs `topup_block_skipped` and leaves original misses
   unresolved.
 - [ ] Top-up materialization failure logs `topup_block_materialize_failed` but

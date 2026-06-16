@@ -183,8 +183,8 @@ Separate these quantities in every report:
   plans. `run_protocol11_controlled_response_matrix.py` is the deterministic
   boundary-response scenario: it prepares a real Segment 5/6 session package,
   runs `SessionRunnerController`, exercises instruction target clicks, catch
-  and baseline rows, out-of-target and double clicks, +99 ms/+100 ms/+3.0 s/
-  >3.0 s response pairing, and a click exactly at the next `trial_start`, then
+  and baseline rows, out-of-target and double clicks, +99 ms/+100 ms/+4.0 s/
+  >4.0 s response pairing, and a click exactly at the next `trial_start`, then
   feeds the resulting session to the artifact gate. `run_protocol11_capture_options_matrix.py`
   is the local output-policy gate for capture variants: it verifies events-only,
   internal-XDF-only, analysis-without-XDF/LSL, marker-mirror-only, and standard

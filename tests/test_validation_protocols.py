@@ -1075,8 +1075,8 @@ def test_protocol11_controlled_response_matrix_exercises_boundary_pairing(tmp_pa
     assert report["checks"]["early_99ms_rejected"]
     assert report["checks"]["boundary_100ms_accepted"]
     assert report["checks"]["next_trial_start_click_rejected_previous"]
-    assert report["checks"]["max_3000ms_accepted"]
-    assert report["checks"]["late_3100ms_rejected"]
+    assert report["checks"]["max_4000ms_accepted"]
+    assert report["checks"]["late_4100ms_rejected"]
     assert report["artifact_audit_passed"]
     assert Path(report["response_plan_json"]).exists()
     assert Path(report["artifact_audit_json"]).exists()

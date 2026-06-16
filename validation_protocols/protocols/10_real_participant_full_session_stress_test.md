@@ -34,7 +34,7 @@ for scientific usability — not just file presence.
 Legend for thresholds referenced below (Study 5 timing contract):
 trial = 8.000 s; instruction segment = 4.000 s; looming segment = 4.000 s;
 tactile cue = 100 ms; SOAs = 0/300/800/1500/2200/2700 ms; response window
-min RT = 0.1 s, max RT = 3.0 s; channels = ch0 left / ch1 right / ch2 tactile;
+min RT = 0.1 s, max RT = 4.0 s; channels = ch0 left / ch1 right / ch2 tactile;
 ASIO 3-channel, requested latency 0.010, blocksize 256.
 
 ---
@@ -233,7 +233,7 @@ ASIO 3-channel, requested latency 0.010, blocksize 256.
   LSL. Marker-minus-mouse delay ≈ the intended 8 ms (mean ~8.1 ms, SD < 0.1 ms
   in prior stress).
 - [ ] **G3. RT window correctness.** A click is credited only when
-  onset + 0.1 s ≤ click ≤ min(onset + 3.0 s, next trial_start). Verify a too-fast
+  onset + 0.1 s ≤ click ≤ min(onset + 4.0 s, next trial_start). Verify a too-fast
   (<100 ms) click and a too-late (>3 s) click are **not** credited.
 - [ ] **G4. One click → one trial.** No click is credited to two tactile onsets;
   cross-block / cross-part clicks never bind to an earlier trial

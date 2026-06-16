@@ -458,6 +458,27 @@ def _run_plan_text(package: Any, *, include_topup_slots: bool) -> str:
     return "\n".join(lines)
 
 
+def _run_plan_compact_text(package: Any, *, include_topup_slots: bool) -> str:
+    items = _run_plan_items(package, include_topup_slots=include_topup_slots)
+    if not items:
+        return "No blocks prepared"
+    lines: list[str] = []
+    part_order: list[str] = []
+    for item in items:
+        part_key = str(item["part_key"])
+        if part_key not in part_order:
+            part_order.append(part_key)
+    for part_key in part_order:
+        part_items = [item for item in items if item["part_key"] == part_key]
+        standard_count = sum(1 for item in part_items if item.get("kind") == "standard")
+        topup_count = sum(1 for item in part_items if item.get("kind") == "topup")
+        parts = [f"{standard_count} block{'s' if standard_count != 1 else ''}"]
+        if topup_count:
+            parts.append("top-up if needed")
+        lines.append(f"{_part_display_label(part_key)}: {' + '.join(parts)}")
+    return "\n".join(lines)
+
+
 def _payload_display_block_index(payload: dict[str, Any]) -> int:
     for key in ("display_block_index", "play_order_index", "block_play_order_index", "block_index"):
         try:
@@ -694,7 +715,15 @@ def _create_tactile_timeline_widget(
                 label_pen = q["QPen"](q["QColor"]("#647067"))
                 painter.setPen(label_pen)
                 for label, row_y in rows:
-                    painter.drawText(4, max(0, row_y - 7), label_width - 8, 14 if height < 55 else 18, int(q["Qt"].AlignmentFlag.AlignRight), label)
+                    label_height = 8 if height < 55 else (10 if very_compact_rows else (14 if compact_rows else 18))
+                    painter.drawText(
+                        4,
+                        max(0, row_y - label_height // 2),
+                        label_width - 8,
+                        label_height,
+                        int(q["Qt"].AlignmentFlag.AlignRight | q["Qt"].AlignmentFlag.AlignVCenter),
+                        label,
+                    )
                     guide_pen = q["QPen"](q["QColor"]("#d9dfd6"))
                     guide_pen.setWidth(1)
                     painter.setPen(guide_pen)
@@ -2777,7 +2806,31 @@ class FocusModeWindow:
         data_panel.setMinimumWidth(380 if profile.compact else 460)
         data_panel_min_height = 248 if profile.screen_class == "constrained" else max(290, profile.response_panel_side)
         data_panel.setMinimumHeight(data_panel_min_height)
-        data_layout.addWidget(_subtitle(q, "Participant Setup"))
+        data_two_column = profile.screen_class != "constrained" or profile.available_width >= 1200
+        self.data_settings_columns_mode = "two_column" if data_two_column else "stacked"
+        self.data_columns_widget = q["QWidget"]()
+        self.data_columns_widget.setObjectName("dataSettingsColumns")
+        data_columns_layout = (q["QHBoxLayout"] if data_two_column else q["QVBoxLayout"])(self.data_columns_widget)
+        data_columns_layout.setContentsMargins(0, 0, 0, 0)
+        data_columns_layout.setSpacing(max(10, profile.grid_spacing + 4))
+        self.data_logging_column = q["QWidget"]()
+        self.data_logging_column.setObjectName("dataLoggingColumn")
+        self.experiment_settings_column = q["QWidget"]()
+        self.experiment_settings_column.setObjectName("experimentSettingsColumn")
+        data_logging_layout = q["QVBoxLayout"](self.data_logging_column)
+        data_logging_layout.setContentsMargins(0, 0, 0, 0)
+        data_logging_layout.setSpacing(profile.panel_spacing)
+        experiment_settings_layout = q["QVBoxLayout"](self.experiment_settings_column)
+        experiment_settings_layout.setContentsMargins(0, 0, 0, 0)
+        experiment_settings_layout.setSpacing(profile.panel_spacing)
+        if data_two_column:
+            self.data_logging_column.setMinimumWidth(280 if profile.compact else 330)
+            self.experiment_settings_column.setMinimumWidth(280 if profile.compact else 330)
+        data_columns_layout.addWidget(self.data_logging_column, 1)
+        data_columns_layout.addWidget(self.experiment_settings_column, 1)
+        data_layout.addWidget(self.data_columns_widget)
+
+        data_logging_layout.addWidget(_subtitle(q, "Participant Setup"))
         self.participant_code_combo = q["QComboBox"]()
         self.participant_code_combo.setObjectName("runnerParticipantCombo")
         self.participant_code_combo.setEditable(False)
@@ -2818,24 +2871,23 @@ class FocusModeWindow:
         setup_fields.setHorizontalSpacing(8)
         setup_fields.setVerticalSpacing(6)
 
-        def _add_setup_field(row: int, column: int, label: str, widget: Any, *, column_span: int = 1) -> None:
+        def _add_setup_field(row: int, label: str, widget: Any) -> None:
             key = q["QLabel"](label)
             key.setObjectName("metricLabel")
             key.setMinimumHeight(max(16, profile.input_min_height - 8))
             if hasattr(widget, "setMinimumHeight"):
                 widget.setMinimumHeight(profile.input_min_height)
-            setup_fields.addWidget(key, row, column)
-            setup_fields.addWidget(widget, row, column + 1, 1, column_span)
+            setup_fields.addWidget(key, row, 0)
+            setup_fields.addWidget(widget, row, 1)
 
-        _add_setup_field(0, 0, "Participant", self.participant_code_combo)
-        _add_setup_field(0, 2, "Age", self.age_input)
-        _add_setup_field(1, 0, "Name", self.participant_name_input, column_span=3)
-        _add_setup_field(2, 0, "Handedness", self.handedness_combo)
-        _add_setup_field(2, 2, "Gender", self.gender_combo)
+        _add_setup_field(0, "Participant", self.participant_code_combo)
+        _add_setup_field(1, "Name", self.participant_name_input)
+        _add_setup_field(2, "Age", self.age_input)
+        _add_setup_field(3, "Handedness", self.handedness_combo)
+        _add_setup_field(4, "Gender", self.gender_combo)
         setup_fields.setColumnStretch(1, 1)
-        setup_fields.setColumnStretch(3, 1)
-        data_layout.addLayout(setup_fields)
-        data_layout.addWidget(self.include_name_lsl_checkbox)
+        data_logging_layout.addLayout(setup_fields)
+        data_logging_layout.addWidget(self.include_name_lsl_checkbox)
         self._pre_run_controls.extend(
             [
                 self.participant_code_combo,
@@ -2847,48 +2899,7 @@ class FocusModeWindow:
             ]
         )
 
-        data_layout.addWidget(_subtitle(q, "Session"))
-        session_grid = q["QGridLayout"]()
-        session_grid.setContentsMargins(0, 0, 0, 0)
-        session_grid.setHorizontalSpacing(10)
-        session_grid.setVerticalSpacing(4)
-
-        def _add_session_metric(row: int, column: int, label: str, value: str, *, column_span: int = 1) -> Any:
-            key = q["QLabel"](label)
-            key.setObjectName("metricLabel")
-            key.setMinimumHeight(max(16, profile.input_min_height - 8))
-            val = q["QLabel"](value)
-            val.setObjectName("metricValue")
-            val.setWordWrap(True)
-            val.setMinimumHeight(max(16, profile.input_min_height - 8))
-            session_grid.addWidget(key, row, column)
-            session_grid.addWidget(val, row, column + 1, 1, column_span)
-            return val
-
-        self.session_participant_value = _add_session_metric(0, 0, "Participant", self.package.participant_id)
-        self.session_blocks_value = _add_session_metric(0, 2, "Blocks", str(len(self.package.blocks)))
-        instruction_summary = _instruction_profile_summary(self.package)
-        if profile.compact:
-            instruction_summary = instruction_summary.replace(" clip(s) preloaded", " clips")
-        self.session_duration_value = _add_session_metric(1, 0, "Duration", _format_duration(_package_duration(self.package)))
-        self.session_instruction_value = _add_session_metric(1, 2, "Instruction clips", instruction_summary)
-        self.session_value = _add_session_metric(2, 0, "Session", self.package.session_id, column_span=3)
-        self.session_value.setToolTip(f"Session: {self.package.session_id}\nFolder: {self.package.session_dir}")
-        self.folder_value = None
-        if not profile.compact:
-            self.folder_value = _add_session_metric(3, 0, "Folder", _short_folder_label(self.package.session_dir), column_span=3)
-            self.folder_value.setToolTip(str(self.package.session_dir))
-            run_plan_row = 4
-        else:
-            run_plan_row = 3
-        self.run_plan_value = _add_session_metric(run_plan_row, 0, "Run plan", "", column_span=3)
-        session_grid.setColumnStretch(1, 1)
-        session_grid.setColumnStretch(3, 1)
-        data_layout.addLayout(session_grid)
-        data_layout.addWidget(_subtitle(q, "Instruction Map"))
-        self.instruction_legend_widget = _create_instruction_legend_widget(q, self)
-        data_layout.addWidget(self.instruction_legend_widget)
-        data_layout.addWidget(_subtitle(q, "Data Logging"))
+        data_logging_layout.addWidget(_subtitle(q, "Data Logging"))
         self.backup_recording_checkbox = q["QCheckBox"](_backup_recording_checkbox_text(self.package))
         self.backup_recording_checkbox.setObjectName("failSafeRecordingCheckbox")
         self.backup_recording_checkbox.setToolTip(
@@ -2896,14 +2907,57 @@ class FocusModeWindow:
         )
         self.backup_recording_checkbox.setMinimumHeight(max(profile.button_min_height + 18, profile.input_min_height + 22))
         self.backup_recording_checkbox.setChecked(bool(self.capture_options.start_backup_recording))
-        data_layout.addWidget(self.backup_recording_checkbox)
-        data_layout.addWidget(_subtitle(q, "Experiment Settings"))
+        data_logging_layout.addWidget(self.backup_recording_checkbox)
+        data_logging_layout.addStretch(1)
+
+        experiment_settings_layout.addWidget(_subtitle(q, "Session"))
+        session_grid = q["QGridLayout"]()
+        session_grid.setContentsMargins(0, 0, 0, 0)
+        session_grid.setHorizontalSpacing(10)
+        session_grid.setVerticalSpacing(4)
+
+        def _add_session_metric(row: int, label: str, value: str) -> Any:
+            key = q["QLabel"](label)
+            key.setObjectName("metricLabel")
+            key.setMinimumHeight(max(16, profile.input_min_height - 8))
+            val = q["QLabel"](value)
+            val.setObjectName("metricValue")
+            val.setWordWrap(True)
+            val.setMinimumHeight(max(16, profile.input_min_height - 8))
+            session_grid.addWidget(key, row, 0)
+            session_grid.addWidget(val, row, 1)
+            return val
+
+        self.session_participant_value = _add_session_metric(0, "Participant", self.package.participant_id)
+        self.session_blocks_value = _add_session_metric(1, "Blocks", str(len(self.package.blocks)))
+        instruction_summary = _instruction_profile_summary(self.package)
+        if profile.compact:
+            instruction_summary = instruction_summary.replace(" clip(s) preloaded", " clips")
+        self.session_duration_value = _add_session_metric(2, "Duration", _format_duration(_package_duration(self.package)))
+        self.session_instruction_value = _add_session_metric(3, "Instruction clips", instruction_summary)
+        self.session_value = _add_session_metric(4, "Session", self.package.session_id)
+        self.session_value.setToolTip(f"Session: {self.package.session_id}\nFolder: {self.package.session_dir}")
+        self.folder_value = None
+        if not profile.compact:
+            self.folder_value = _add_session_metric(5, "Folder", _short_folder_label(self.package.session_dir))
+            self.folder_value.setToolTip(str(self.package.session_dir))
+            run_plan_row = 6
+        else:
+            run_plan_row = 5
+        self.run_plan_value = _add_session_metric(run_plan_row, "Run plan", "")
+        session_grid.setColumnStretch(1, 1)
+        experiment_settings_layout.addLayout(session_grid)
+        experiment_settings_layout.addWidget(_subtitle(q, "Experiment Settings"))
         self.topup_checkbox = q["QCheckBox"]("Top up missed tactile trials at part end")
         self.topup_checkbox.setToolTip("Top up missed tactile trials at end of each part")
         self.topup_checkbox.setMinimumHeight(profile.input_min_height)
         self.topup_checkbox.setChecked(bool(self.enable_missed_trial_topup))
         self.topup_checkbox.stateChanged.connect(lambda _state: self._refresh_run_plan(select_default=True))
-        data_layout.addWidget(self.topup_checkbox)
+        experiment_settings_layout.addWidget(self.topup_checkbox)
+        experiment_settings_layout.addWidget(_subtitle(q, "Instruction Map"))
+        self.instruction_legend_widget = _create_instruction_legend_widget(q, self)
+        experiment_settings_layout.addWidget(self.instruction_legend_widget)
+        experiment_settings_layout.addStretch(1)
         self._pre_run_controls.extend([self.backup_recording_checkbox, self.topup_checkbox])
         data_layout.addStretch(1)
         _add_operator_panel(settings_title, data_panel)
@@ -3529,7 +3583,8 @@ class FocusModeWindow:
         total_count = _run_plan_total(self.package, include_topup_slots=include_topup_slots)
         plan_text = _run_plan_text(self.package, include_topup_slots=include_topup_slots)
         if hasattr(self, "run_plan_value"):
-            self.run_plan_value.setText(plan_text)
+            display_plan = _run_plan_compact_text(self.package, include_topup_slots=include_topup_slots) if self.layout_profile.compact else plan_text
+            self.run_plan_value.setText(display_plan)
             self.run_plan_value.setToolTip(plan_text)
         self.all_block_plan_items = _run_plan_items(self.package, include_topup_slots=include_topup_slots)
         self._refresh_part_controls()
@@ -3768,6 +3823,12 @@ class FocusModeWindow:
             widgets["data_selection_panel"] = self.data_selection_panel
         if getattr(self, "settings_panel", None) is not None:
             widgets["settings_panel"] = self.settings_panel
+        if getattr(self, "data_columns_widget", None) is not None:
+            widgets["data_settings_columns"] = self.data_columns_widget
+        if getattr(self, "data_logging_column", None) is not None:
+            widgets["data_logging_column"] = self.data_logging_column
+        if getattr(self, "experiment_settings_column", None) is not None:
+            widgets["experiment_settings_column"] = self.experiment_settings_column
         splitter_metrics = {}
         for name in ("workspace_splitter", "run_splitter"):
             splitter = getattr(self, name, None)
@@ -3796,6 +3857,7 @@ class FocusModeWindow:
                 "operator_tabs": self.operator_tabs is not None,
                 "resizable_workspace_splitter": self.workspace_splitter is not None,
                 "resizable_run_splitter": self.run_splitter is not None,
+                "data_settings_columns": getattr(self, "data_settings_columns_mode", ""),
             },
         }
 
@@ -3830,6 +3892,23 @@ class FocusModeWindow:
         output = widgets.get("output_panel", {})
         if response and output and output.get("y", 0) < response.get("bottom", 0):
             failures.append("output_panel is not positioned under response_panel")
+        data_column = widgets.get("data_logging_column", {})
+        settings_column = widgets.get("experiment_settings_column", {})
+        if data_column and settings_column:
+            if getattr(self, "data_settings_columns_mode", "") == "stacked":
+                if settings_column.get("y", 0) < data_column.get("bottom", 0):
+                    failures.append("experiment_settings_column should stack below data_logging_column in stacked mode")
+            else:
+                same_row = abs(settings_column.get("y", 0) - data_column.get("y", 0)) <= 8
+                right_of_data = settings_column.get("x", 0) >= data_column.get("right", 0)
+                if not (same_row and right_of_data):
+                    failures.append(
+                        "Data Logging and Experiment Settings columns are not side-by-side "
+                        f"for {profile.screen_class} layout: data={data_column}, settings={settings_column}"
+                    )
+            for name, rect in (("data_logging_column", data_column), ("experiment_settings_column", settings_column)):
+                if rect.get("width", 0) < 220:
+                    failures.append(f"{name} is too narrow for operator controls: {rect}")
         required_shortcut_names = set(self.keyboard_shortcut_map())
         installed_shortcut_names = {"start_or_continue"} | {
             name for name, shortcuts in self.operator_action_shortcuts.items() if shortcuts

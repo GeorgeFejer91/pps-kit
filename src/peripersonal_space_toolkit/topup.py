@@ -16,6 +16,8 @@ from .session_events import SessionEvent
 PENDING = "pending"
 HIT = "hit"
 MISSED_NEEDS_TOPUP = "missed_needs_topup"
+DEFAULT_MIN_RESPONSE_RT_S = 0.1
+DEFAULT_MAX_RESPONSE_RT_S = 4.0
 
 
 @dataclass
@@ -76,8 +78,8 @@ class TopUpLedger:
         *,
         participant_id: str,
         session_id: str,
-        min_rt_s: float = 0.1,
-        max_rt_s: float = 3.0,
+        min_rt_s: float = DEFAULT_MIN_RESPONSE_RT_S,
+        max_rt_s: float = DEFAULT_MAX_RESPONSE_RT_S,
     ):
         self.session_dir = Path(session_dir)
         self.participant_id = participant_id
@@ -241,12 +243,16 @@ class TopUpLedger:
         self._try_resolve_from_unmatched(entry)
 
     def _record_click(self, event: SessionEvent, row: dict[str, Any]) -> None:
+        raw_is_topup = _field(row, "is_topup", "Is_Topup")
         click = {
             "event_id": event.event_id,
             "unix_time": float(event.unix_time),
             "monotonic_time": float(event.monotonic_time),
             "in_target": _truthy(row.get("in_target", True)),
             "during_playback": _truthy(row.get("during_playback", True)),
+            "block_number": _field(row, "block_number", "Block_Number"),
+            "part_number": _field(row, "part_number", "Part_Number"),
+            "is_topup": _truthy(raw_is_topup) if raw_is_topup not in (None, "") else None,
         }
         if not click["in_target"] or not click["during_playback"]:
             return
@@ -278,6 +284,8 @@ class TopUpLedger:
 
     def _click_matches(self, entry: TopUpLedgerEntry, click: dict[str, Any]) -> bool:
         click_time = float(click["unix_time"])
+        if not _same_click_context(entry, click):
+            return False
         if str(entry.miss_reason or "") == "next_trial_started" and click_time >= float(entry.response_deadline_unix_time):
             return False
         return (float(entry.tactile_unix_time) + self.min_rt_s) <= click_time <= float(entry.response_deadline_unix_time)
@@ -341,6 +349,21 @@ def _truthy(value: Any) -> bool:
     if value in (None, ""):
         return False
     return str(value).strip().lower() not in {"0", "false", "no", "none"}
+
+
+def _same_click_context(entry: TopUpLedgerEntry, click: dict[str, Any]) -> bool:
+    click_block = click.get("block_number")
+    if entry.block_number not in (None, "") and click_block not in (None, ""):
+        if _part_key(entry.block_number) != _part_key(click_block):
+            return False
+    click_part = click.get("part_number")
+    if entry.part_number not in (None, "") and click_part not in (None, ""):
+        if _part_key(entry.part_number) != _part_key(click_part):
+            return False
+    click_is_topup = click.get("is_topup")
+    if click_is_topup is not None and bool(entry.is_topup) != bool(click_is_topup):
+        return False
+    return True
 
 
 def _part_key(value: Any) -> str:
