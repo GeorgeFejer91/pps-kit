@@ -6,8 +6,8 @@
 - Coverage category: `covered_blocked_missing_publication_parameters`
 - Task family: face tactile detection with approaching/receding sound labels
 - PDF status: `needs_user_download`
-- Supplement status: `not_found`
-- Supplement acquisition attempts: `2` (`checked_no_supplement_candidates`)
+- Supplement status: `paywalled`
+- Supplement acquisition attempts: `2` (`supplement_routes_access_limited`)
 - Supplement extracted text files: `0`
 - Extraction status: `pending_pdf`
 - Metadata confidence: `0.0` (`pending_source`)
@@ -22,7 +22,7 @@
 
 - `main PDF OpenDataLoader extraction`: `pending` - Run parser after placing the publication PDF in artifacts/paper_metadata_audit/publication_pdfs.
 - `targeted methods/table search`: `pending_pdf` - Search methods, procedure, apparatus, stimuli, trial design, and tables for Segment 1-4 parameters.
-- `supplement search`: `checked_not_found` - Automated source routes found no supplement candidates; use publisher/source checks again before final missing-value decisions.
+- `supplement search`: `pending_manual_download` - Supplement-like sources were found or access was limited; manual download/check is still needed.
 - `fallback extractor/source check`: `pending_pdf` - Use pdfplumber/pypdf, rendered pages, publisher HTML, or supplement files before marking a field missing.
 
 ## Five Semantic Review Passes

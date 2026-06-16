@@ -4,45 +4,46 @@
   "parser_version": "0.5.1",
   "record_count": 74,
   "pdf_status_counts": {
-    "downloaded": 26,
-    "needs_user_download": 12,
+    "downloaded": 29,
+    "needs_user_download": 9,
     "not_applicable": 5,
     "open_access_unavailable": 13,
     "paywalled": 18
   },
   "supplement_status_counts": {
     "downloaded": 10,
-    "needs_user_download": 17,
+    "needs_user_download": 16,
     "not_applicable": 5,
     "not_checked": 6,
-    "not_found": 21,
-    "paywalled": 15
+    "not_found": 18,
+    "paywalled": 19
   },
   "extraction_status_counts": {
-    "parsed_with_warnings": 31,
-    "pending_pdf": 43
+    "parsed": 29,
+    "parsed_with_warnings": 5,
+    "pending_pdf": 40
   },
   "metadata_confidence_label_counts": {
     "not_applicable": 5,
-    "partial_extraction": 28,
-    "pending_source": 12,
+    "partial_extraction": 31,
+    "pending_source": 9,
     "source_unavailable": 29
   },
   "automated_evidence_status_counts": {
-    "no_extracted_source": 41,
+    "no_extracted_source": 38,
     "not_applicable": 5,
-    "source_mined": 28
+    "source_mined": 31
   },
-  "automated_evidence_field_total": 477,
+  "automated_evidence_field_total": 540,
   "supplement_extracted_record_count": 10,
   "supplement_extracted_file_total": 13,
   "semantic_review_strategy_count": 5,
   "semantic_review_pass_total": 370,
   "semantic_review_pass_status_counts": {
-    "completed": 136,
+    "completed": 151,
     "completed_no_hits": 4,
     "not_applicable": 25,
-    "source_unavailable": 205
+    "source_unavailable": 190
   },
   "missing_download_request_count": 81,
   "tracked_pdf_folder": "artifacts/paper_metadata_audit/publication_pdfs/",

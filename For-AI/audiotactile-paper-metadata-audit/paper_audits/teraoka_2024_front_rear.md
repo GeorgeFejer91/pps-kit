@@ -7,7 +7,7 @@
 - Task family: front/rear approaching auditory probe with vibrotactile detection and baseline
 - PDF status: `paywalled`
 - Supplement status: `downloaded`
-- Supplement acquisition attempts: `13` (`downloaded`)
+- Supplement acquisition attempts: `0` (`existing_files`)
 - Supplement extracted text files: `1`
 - Extraction status: `pending_pdf`
 - Metadata confidence: `0.25` (`partial_extraction`)

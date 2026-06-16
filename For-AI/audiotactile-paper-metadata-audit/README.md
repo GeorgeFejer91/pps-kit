@@ -15,23 +15,23 @@ Use `python -m tools.paper_metadata_parser.bundle --repo-root .` to refresh `loc
 ## Current Inventory
 
 - Literature records: 74
-- PDF status counts: `{"downloaded": 26, "needs_user_download": 12, "not_applicable": 5, "open_access_unavailable": 13, "paywalled": 18}`
-- Supplement status counts: `{"downloaded": 10, "needs_user_download": 17, "not_applicable": 5, "not_checked": 6, "not_found": 21, "paywalled": 15}`
-- Extraction status counts: `{"parsed_with_warnings": 31, "pending_pdf": 43}`
-- Metadata confidence counts: `{"not_applicable": 5, "partial_extraction": 28, "pending_source": 12, "source_unavailable": 29}`
-- Automated evidence status counts: `{"no_extracted_source": 41, "not_applicable": 5, "source_mined": 28}`
-- Automated evidence mined field total: 477
+- PDF status counts: `{"downloaded": 29, "needs_user_download": 9, "not_applicable": 5, "open_access_unavailable": 13, "paywalled": 18}`
+- Supplement status counts: `{"downloaded": 10, "needs_user_download": 16, "not_applicable": 5, "not_checked": 6, "not_found": 18, "paywalled": 19}`
+- Extraction status counts: `{"parsed": 29, "parsed_with_warnings": 5, "pending_pdf": 40}`
+- Metadata confidence counts: `{"not_applicable": 5, "partial_extraction": 31, "pending_source": 9, "source_unavailable": 29}`
+- Automated evidence status counts: `{"no_extracted_source": 38, "not_applicable": 5, "source_mined": 31}`
+- Automated evidence mined field total: 540
 - Supplement extracted records/files: 10 records / 13 files
 - Semantic review strategy count: 5
-- Semantic review pass status counts: `{"completed": 136, "completed_no_hits": 4, "not_applicable": 25, "source_unavailable": 205}`
+- Semantic review pass status counts: `{"completed": 151, "completed_no_hits": 4, "not_applicable": 25, "source_unavailable": 190}`
 - Missing download/check requests: 81
 
 ## Environment Readiness
 
-- Java available: `False`
-- `opendataloader_pdf` installed: `False`
-- OpenDataLoader ready: `False`
-- Fallback extractors: `{"pdfinfo_available": false, "pdfplumber_installed": true, "pdftoppm_available": false, "pypdf_installed": true}`
+- Java available: `True`
+- `opendataloader_pdf` installed: `True`
+- OpenDataLoader ready: `True`
+- Fallback extractors: `{"pdfinfo_available": true, "pdfplumber_installed": true, "pdftoppm_available": true, "pypdf_installed": true}`
 
 ## How To Use
 

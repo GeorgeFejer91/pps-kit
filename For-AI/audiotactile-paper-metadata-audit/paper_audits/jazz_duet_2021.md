@@ -7,7 +7,7 @@
 - Task family: audio-tactile PPS task after musical interaction context
 - PDF status: `paywalled`
 - Supplement status: `downloaded`
-- Supplement acquisition attempts: `8` (`downloaded`)
+- Supplement acquisition attempts: `0` (`existing_files`)
 - Supplement extracted text files: `1`
 - Extraction status: `pending_pdf`
 - Metadata confidence: `0.16` (`partial_extraction`)

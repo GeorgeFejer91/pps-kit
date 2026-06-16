@@ -2,15 +2,15 @@
   "schema": "pps-paper-metadata-environment.v1",
   "parser_version": "0.5.1",
   "checked_on": "2026-06-16",
-  "java_available": false,
-  "java_source": "",
-  "opendataloader_pdf_installed": false,
-  "opendataloader_ready": false,
+  "java_available": true,
+  "java_source": "local_artifact_jdk",
+  "opendataloader_pdf_installed": true,
+  "opendataloader_ready": true,
   "fallback_extractors": {
     "pdfplumber_installed": true,
     "pypdf_installed": true,
-    "pdftoppm_available": false,
-    "pdfinfo_available": false
+    "pdftoppm_available": true,
+    "pdfinfo_available": true
   },
   "notes": [
     "OpenDataLoader PDF is the primary extraction route when Java and opendataloader_pdf are available.",
