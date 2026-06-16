@@ -1,6 +1,6 @@
 {
   "schema": "pps-paper-metadata-extraction-schema.v1",
-  "parser_version": "0.3.0",
+  "parser_version": "0.5.0",
   "pdf_statuses": [
     "downloaded",
     "open_access_unavailable",
@@ -53,6 +53,16 @@
     ],
     "semantic_review_strategy_count": 5,
     "rule": "Store only short candidate values and page pointers; do not commit full text excerpts."
+  },
+  "supplement_extraction": {
+    "supported_local_formats": [
+      ".doc",
+      ".docx",
+      ".ods",
+      ".csv",
+      ".tsv"
+    ],
+    "rule": "Supplement text extraction writes only ignored local text artifacts; tracked audit files store counts, statuses, and short evidence pointers."
   },
   "local_artifact_conventions": {
     "main_pdf_filename": "artifacts/paper_metadata_audit/publication_pdfs/<record_id>.pdf",

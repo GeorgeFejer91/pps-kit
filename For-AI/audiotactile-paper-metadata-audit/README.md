@@ -13,15 +13,16 @@ The `artifacts/` tree is ignored by Git. Do not commit PDFs, supplements, extrac
 ## Current Inventory
 
 - Literature records: 74
-- PDF status counts: `{"downloaded": 27, "needs_user_download": 11, "not_applicable": 5, "open_access_unavailable": 13, "paywalled": 18}`
-- Supplement status counts: `{"downloaded": 1, "not_applicable": 5, "not_checked": 68}`
-- Extraction status counts: `{"parsed": 27, "parsed_with_warnings": 5, "pending_pdf": 42}`
-- Metadata confidence counts: `{"not_applicable": 5, "partial_extraction": 27, "pending_source": 11, "source_unavailable": 31}`
-- Automated evidence status counts: `{"no_extracted_source": 42, "not_applicable": 5, "source_mined": 27}`
-- Automated evidence mined field total: 480
+- PDF status counts: `{"downloaded": 28, "needs_user_download": 10, "not_applicable": 5, "open_access_unavailable": 13, "paywalled": 18}`
+- Supplement status counts: `{"downloaded": 10, "needs_user_download": 16, "not_applicable": 5, "not_checked": 6, "not_found": 18, "paywalled": 19}`
+- Extraction status counts: `{"parsed": 28, "parsed_with_warnings": 5, "pending_pdf": 41}`
+- Metadata confidence counts: `{"not_applicable": 5, "partial_extraction": 30, "pending_source": 10, "source_unavailable": 29}`
+- Automated evidence status counts: `{"no_extracted_source": 39, "not_applicable": 5, "source_mined": 30}`
+- Automated evidence mined field total: 518
+- Supplement extracted records/files: 10 records / 13 files
 - Semantic review strategy count: 5
-- Semantic review pass status counts: `{"completed": 133, "completed_no_hits": 2, "not_applicable": 25, "source_unavailable": 210}`
-- Missing download/check requests: 110
+- Semantic review pass status counts: `{"completed": 146, "completed_no_hits": 4, "not_applicable": 25, "source_unavailable": 195}`
+- Missing download/check requests: 82
 
 ## Environment Readiness
 

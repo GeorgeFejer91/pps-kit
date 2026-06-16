@@ -7,13 +7,15 @@ import json
 import os
 import re
 import shutil
+import zipfile
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 from typing import Any
+from xml.etree import ElementTree
 
 
-PARSER_VERSION = "0.3.0"
+PARSER_VERSION = "0.5.0"
 
 COVERAGE_PATH = Path("assets/preloads/audiotactile_literature_coverage.json")
 AUDIT_DIR = Path("For-AI/audiotactile-paper-metadata-audit")
@@ -630,6 +632,112 @@ def collect_content_nodes(value: Any) -> list[dict[str, Any]]:
     return nodes
 
 
+def safe_extracted_name(path: Path) -> str:
+    return re.sub(r"[^A-Za-z0-9._-]+", "_", path.stem).strip("._") or "supplement"
+
+
+def iter_xml_text(xml_bytes: bytes) -> str:
+    try:
+        root = ElementTree.fromstring(xml_bytes)
+    except ElementTree.ParseError:
+        return ""
+    parts: list[str] = []
+    for element in root.iter():
+        if element.text and element.text.strip():
+            parts.append(element.text.strip())
+        if element.tail and element.tail.strip():
+            parts.append(element.tail.strip())
+    return "\n".join(parts)
+
+
+def extract_docx_text(path: Path) -> str:
+    texts: list[str] = []
+    xml_names = ("word/document.xml", "word/footnotes.xml", "word/endnotes.xml", "word/comments.xml")
+    with zipfile.ZipFile(path) as archive:
+        names = set(archive.namelist())
+        for name in xml_names:
+            if name in names:
+                text = iter_xml_text(archive.read(name))
+                if text:
+                    texts.append(text)
+    return "\n\n".join(texts)
+
+
+def extract_ods_text(path: Path) -> str:
+    with zipfile.ZipFile(path) as archive:
+        if "content.xml" not in archive.namelist():
+            return ""
+        return iter_xml_text(archive.read("content.xml"))
+
+
+def extract_legacy_doc_text(path: Path) -> str:
+    data = path.read_bytes()
+    snippets: list[str] = []
+    for match in re.finditer(rb"(?:[\x20-\x7e]\x00){5,}", data):
+        text = match.group(0).decode("utf-16le", errors="ignore").strip()
+        if text:
+            snippets.append(text)
+    for match in re.finditer(rb"[\x20-\x7e]{8,}", data):
+        text = match.group(0).decode("latin-1", errors="ignore").strip()
+        if text:
+            snippets.append(text)
+    return "\n".join(dedupe_preserve_order(snippets))
+
+
+def extract_supplement_text(path: Path) -> tuple[str, str]:
+    suffix = path.suffix.lower()
+    try:
+        if suffix == ".docx":
+            text = extract_docx_text(path)
+        elif suffix == ".ods":
+            text = extract_ods_text(path)
+        elif suffix == ".doc":
+            text = extract_legacy_doc_text(path)
+        elif suffix in {".csv", ".tsv"}:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        else:
+            return "", "unsupported"
+    except (OSError, zipfile.BadZipFile, UnicodeError) as exc:
+        return "", f"failed:{exc.__class__.__name__}"
+    cleaned = clean_evidence_text(text)
+    if not cleaned:
+        return "", "empty"
+    return cleaned, "parsed"
+
+
+def extract_downloaded_supplements(records: list[dict[str, Any]], paths: AuditPaths) -> dict[str, dict[str, Any]]:
+    log: dict[str, dict[str, Any]] = {}
+    output_root = paths.extracted_dir / "supplements"
+    for record in records:
+        record_id = record["record_id"]
+        if record.get("coverage_category") == ADJACENT_CATEGORY:
+            continue
+        supplement_files, supplement_status = find_supplements(record_id, paths.supplement_dir)
+        if supplement_status != "downloaded":
+            continue
+        out_dir = output_root / record_id
+        out_dir.mkdir(parents=True, exist_ok=True)
+        parsed_files: list[str] = []
+        statuses: list[str] = []
+        for supplement in supplement_files:
+            text, status = extract_supplement_text(supplement)
+            statuses.append(status)
+            if status != "parsed":
+                continue
+            out_path = out_dir / f"{safe_extracted_name(supplement)}.txt"
+            out_path.write_text(text + "\n", encoding="utf-8")
+            parsed_files.append(artifact_rel(out_path, paths.repo_root))
+        if parsed_files or statuses:
+            log[record_id] = {
+                "parsed_files": parsed_files,
+                "status_counts": {
+                    status: statuses.count(status)
+                    for status in sorted(set(statuses))
+                },
+            }
+    return log
+
+
 def load_opendataloader_nodes(record_id: str, paths: AuditPaths) -> tuple[list[dict[str, Any]], str]:
     json_path = paths.extracted_dir / "opendataloader" / f"{record_id}.json"
     if not json_path.exists():
@@ -656,8 +764,40 @@ def load_opendataloader_nodes(record_id: str, paths: AuditPaths) -> tuple[list[d
         if len(content) < 25:
             continue
         node["section"] = current_section
+        node["source_file"] = artifact_rel(json_path, paths.repo_root)
         filtered.append(node)
     return filtered, artifact_rel(json_path, paths.repo_root)
+
+
+def load_supplement_text_nodes(record_id: str, paths: AuditPaths) -> tuple[list[dict[str, Any]], list[str]]:
+    folder = paths.extracted_dir / "supplements" / record_id
+    if not folder.exists():
+        return [], []
+    nodes: list[dict[str, Any]] = []
+    source_files: list[str] = []
+    for path in sorted(folder.glob("*.txt")):
+        content = clean_evidence_text(path.read_text(encoding="utf-8", errors="replace"))
+        if len(content) < 25:
+            continue
+        rel = artifact_rel(path, paths.repo_root)
+        source_files.append(rel)
+        nodes.append(
+            {
+                "type": "supplement_text",
+                "page": "supplement",
+                "content": content,
+                "section": "supplement",
+                "source_file": rel,
+            }
+        )
+    return nodes, source_files
+
+
+def load_mining_nodes(record_id: str, paths: AuditPaths) -> tuple[list[dict[str, Any]], list[str]]:
+    main_nodes, main_source = load_opendataloader_nodes(record_id, paths)
+    supplement_nodes, supplement_sources = load_supplement_text_nodes(record_id, paths)
+    source_files = [source for source in [main_source, *supplement_sources] if source]
+    return [*main_nodes, *supplement_nodes], source_files
 
 
 def score_node_for_field(node: dict[str, Any], field_key: str) -> int:
@@ -723,7 +863,7 @@ def semantic_review_passes(record: dict[str, Any], nodes: list[dict[str, Any]]) 
                 "status": "completed" if hit_count else "completed_no_hits",
                 "hit_count": hit_count,
                 "matched_terms": matched_terms[:12],
-                "page_or_section": "OpenDataLoader page(s) " + ", ".join(pages[:8]) if pages else "",
+                "page_or_section": "source page/section(s) " + ", ".join(pages[:8]) if pages else "",
                 "purpose": strategy["purpose"],
             }
         )
@@ -829,14 +969,14 @@ def mine_segment_field_audit(record: dict[str, Any], paths: AuditPaths) -> tuple
             "semantic_review_passes": semantic_review_passes(record, []),
         }
 
-    nodes, source_file = load_opendataloader_nodes(record["record_id"], paths)
+    nodes, source_files = load_mining_nodes(record["record_id"], paths)
     review_passes = semantic_review_passes(record, nodes)
     if not nodes:
         return field_audit, {
             "status": "no_extracted_source",
             "field_count": 0,
             "coverage_ratio": 0.0,
-            "source_files": [source_file] if source_file else [],
+            "source_files": source_files,
             "semantic_review_passes": review_passes,
         }
 
@@ -859,12 +999,15 @@ def mine_segment_field_audit(record: dict[str, Any], paths: AuditPaths) -> tuple
             if not value:
                 continue
             pages = dedupe_preserve_order([node["page"] for node in candidate_nodes if node.get("page")])
+            field_source_files = dedupe_preserve_order(
+                [node["source_file"] for node in candidate_nodes if node.get("source_file")]
+            )
             field.update(
                 {
                     "status": "inferred_low_confidence",
                     "value": ascii_safe(value[:320]),
-                    "source_file": source_file,
-                    "page_or_section": "OpenDataLoader page(s) " + ", ".join(pages[:4]) if pages else "OpenDataLoader extracted text",
+                    "source_file": field_source_files[0] if field_source_files else (source_files[0] if source_files else ""),
+                    "page_or_section": "source page/section(s) " + ", ".join(pages[:4]) if pages else "extracted source text",
                     "evidence_note": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
                 }
             )
@@ -874,7 +1017,7 @@ def mine_segment_field_audit(record: dict[str, Any], paths: AuditPaths) -> tuple
         "status": "source_mined",
         "field_count": mined_count,
         "coverage_ratio": round(mined_count / TOTAL_SEGMENT_FIELD_COUNT, 3),
-        "source_files": [source_file],
+        "source_files": source_files,
         "semantic_review_passes": review_passes,
     }
 
@@ -905,6 +1048,12 @@ def metadata_confidence(
             "source_acquired_unreviewed",
             "Publication PDF is locally available and parsed, but Segment 1-4 values still require critical manual review.",
         )
+    if mined_count:
+        return (
+            round(0.15 + min(0.25, mined_ratio * 0.30), 2),
+            "partial_extraction",
+            f"Supplement or other extracted source text yielded candidate values for {mined_count}/{TOTAL_SEGMENT_FIELD_COUNT} fields, but the main publication PDF is still missing or unavailable.",
+        )
     if pdf_status in {"open_access_unavailable", "paywalled"}:
         return (
             0.0,
@@ -919,6 +1068,18 @@ def metadata_confidence(
 
 
 def make_review_attempts(record: dict[str, Any], pdf_status: str, supplement_status: str) -> list[dict[str, str]]:
+    if supplement_status == "downloaded":
+        supplement_attempt_status = "available_for_review"
+        supplement_note = "Downloaded or locally provided supplement files are available for methods/table review."
+    elif supplement_status == "not_found":
+        supplement_attempt_status = "checked_not_found"
+        supplement_note = "Automated source routes found no supplement candidates; use publisher/source checks again before final missing-value decisions."
+    elif supplement_status in {"needs_user_download", "paywalled"}:
+        supplement_attempt_status = "pending_manual_download"
+        supplement_note = "Supplement-like sources were found or access was limited; manual download/check is still needed."
+    else:
+        supplement_attempt_status = "pending_download_or_check"
+        supplement_note = "Check supplementary PDFs, spreadsheets, methods appendices, and task scripts when main-paper fields are absent."
     if record["coverage_category"] == ADJACENT_CATEGORY:
         return [
             {
@@ -940,8 +1101,8 @@ def make_review_attempts(record: dict[str, Any], pdf_status: str, supplement_sta
         },
         {
             "attempt": "supplement search",
-            "status": "pending_download_or_check" if supplement_status == "not_checked" else "available_for_review",
-            "note": "Check supplementary PDFs, spreadsheets, methods appendices, and task scripts when main-paper fields are absent.",
+            "status": supplement_attempt_status,
+            "note": supplement_note,
         },
         {
             "attempt": "fallback extractor/source check",
@@ -1055,6 +1216,7 @@ def build_records(
     literature_records: list[dict[str, Any]],
     paths: AuditPaths,
     extraction_log: dict[str, dict[str, Any]],
+    supplement_extraction_log: dict[str, dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     audit_records: list[dict[str, Any]] = []
     missing_requests: list[dict[str, Any]] = []
@@ -1071,6 +1233,14 @@ def build_records(
         supplement_files, supplement_status = (
             ([], "not_applicable") if is_adjacent else find_supplements(record_id, paths.supplement_dir)
         )
+        supplement_acquisition = acquisition_status.get("supplement_acquisition", {})
+        supplement_extraction = supplement_extraction_log.get(record_id, {})
+        if (
+            not is_adjacent
+            and not supplement_files
+            and supplement_acquisition.get("supplement_status") in SUPPLEMENT_STATUSES
+        ):
+            supplement_status = supplement_acquisition["supplement_status"]
         if is_adjacent:
             extraction_status = "parsed_with_warnings"
         elif pdf_status == "bad_pdf":
@@ -1103,6 +1273,10 @@ def build_records(
             "pdf_acquisition_last_status": acquisition_status.get("last_status", ""),
             "supplement_status": supplement_status,
             "supplement_files": [artifact_rel(path, paths.repo_root) for path in supplement_files],
+            "supplement_acquisition_attempt_count": supplement_acquisition.get("attempt_count", 0),
+            "supplement_acquisition_last_status": supplement_acquisition.get("last_status", ""),
+            "supplement_extracted_text_files": supplement_extraction.get("parsed_files", []),
+            "supplement_extraction_status_counts": supplement_extraction.get("status_counts", {}),
             "extraction_status": extraction_status,
             "metadata_confidence_score": confidence_score,
             "metadata_confidence_label": confidence_label,
@@ -1134,7 +1308,7 @@ def build_records(
                     "note": "Download the main publication PDF here for exact Segment 1-4 inspection.",
                 }
             )
-        if not is_adjacent and supplement_status == "not_checked":
+        if not is_adjacent and supplement_status in {"not_checked", "needs_user_download", "paywalled"}:
             missing_requests.append(
                 {
                     "record_id": record_id,
@@ -1163,7 +1337,13 @@ def summary_from_records(audit_records: list[dict[str, Any]], missing_requests: 
     ]
     semantic_status_counts: dict[str, int] = {}
     semantic_pass_total = 0
+    supplement_extracted_file_total = 0
+    supplement_extracted_record_count = 0
     for record in audit_records:
+        supplement_extracted_files = record.get("supplement_extracted_text_files", [])
+        if supplement_extracted_files:
+            supplement_extracted_record_count += 1
+            supplement_extracted_file_total += len(supplement_extracted_files)
         for review_pass in record.get("automated_evidence_mining", {}).get("semantic_review_passes", []):
             semantic_pass_total += 1
             status = str(review_pass.get("status", ""))
@@ -1192,6 +1372,8 @@ def summary_from_records(audit_records: list[dict[str, Any]], missing_requests: 
             if status
         },
         "automated_evidence_field_total": sum(mined_field_counts),
+        "supplement_extracted_record_count": supplement_extracted_record_count,
+        "supplement_extracted_file_total": supplement_extracted_file_total,
         "semantic_review_strategy_count": len(SEMANTIC_REVIEW_STRATEGIES),
         "semantic_review_pass_total": semantic_pass_total,
         "semantic_review_pass_status_counts": dict(sorted(semantic_status_counts.items())),
@@ -1217,6 +1399,10 @@ def schema_payload() -> dict[str, Any]:
             "semantic_review_pass_status_values": ["completed", "completed_no_hits", "source_unavailable", "not_applicable"],
             "semantic_review_strategy_count": len(SEMANTIC_REVIEW_STRATEGIES),
             "rule": "Store only short candidate values and page pointers; do not commit full text excerpts.",
+        },
+        "supplement_extraction": {
+            "supported_local_formats": [".doc", ".docx", ".ods", ".csv", ".tsv"],
+            "rule": "Supplement text extraction writes only ignored local text artifacts; tracked audit files store counts, statuses, and short evidence pointers.",
         },
         "segment_fields": SEGMENT_FIELDS,
         "review_rule": {
@@ -1268,6 +1454,7 @@ The `artifacts/` tree is ignored by Git. Do not commit PDFs, supplements, extrac
 - Metadata confidence counts: `{json.dumps(summary["metadata_confidence_label_counts"], sort_keys=True)}`
 - Automated evidence status counts: `{json.dumps(summary["automated_evidence_status_counts"], sort_keys=True)}`
 - Automated evidence mined field total: {summary["automated_evidence_field_total"]}
+- Supplement extracted records/files: {summary["supplement_extracted_record_count"]} records / {summary["supplement_extracted_file_total"]} files
 - Semantic review strategy count: {summary["semantic_review_strategy_count"]}
 - Semantic review pass status counts: `{json.dumps(summary["semantic_review_pass_status_counts"], sort_keys=True)}`
 - Missing download/check requests: {summary["missing_download_request_count"]}
@@ -1338,6 +1525,8 @@ def paper_audit_text(record: dict[str, Any]) -> str:
         f"- Task family: {ascii_safe(record['audiotactile_task_family'])}",
         f"- PDF status: `{record['pdf_status']}`",
         f"- Supplement status: `{record['supplement_status']}`",
+        f"- Supplement acquisition attempts: `{record.get('supplement_acquisition_attempt_count', 0)}` (`{record.get('supplement_acquisition_last_status', '')}`)",
+        f"- Supplement extracted text files: `{len(record.get('supplement_extracted_text_files', []))}`",
         f"- Extraction status: `{record['extraction_status']}`",
         f"- Metadata confidence: `{record['metadata_confidence_score']}` (`{record['metadata_confidence_label']}`)",
         f"- Confidence basis: {ascii_safe(record['metadata_confidence_basis'])}",
@@ -1405,6 +1594,9 @@ def write_audit_files(
             "extraction_status": record["extraction_status"],
             "pdf_file": record["pdf_file"],
             "supplement_file_count": len(record["supplement_files"]),
+            "supplement_acquisition_attempt_count": record["supplement_acquisition_attempt_count"],
+            "supplement_acquisition_last_status": record["supplement_acquisition_last_status"],
+            "supplement_extracted_text_file_count": len(record["supplement_extracted_text_files"]),
             "known_prior_gap_count": len(record["known_missing_or_unresolved_from_prior_ledger"]),
             "metadata_confidence_score": record["metadata_confidence_score"],
             "metadata_confidence_label": record["metadata_confidence_label"],
@@ -1436,6 +1628,9 @@ def write_audit_files(
             "extraction_status",
             "pdf_file",
             "supplement_file_count",
+            "supplement_acquisition_attempt_count",
+            "supplement_acquisition_last_status",
+            "supplement_extracted_text_file_count",
             "known_prior_gap_count",
             "metadata_confidence_score",
             "metadata_confidence_label",
@@ -1483,7 +1678,8 @@ def run_audit(
     records = list(coverage["literature_records"])
     environment = detect_environment(paths.repo_root)
     extraction_log = extract_downloaded_pdfs(records, paths) if parse_downloaded else {}
-    audit_records, missing_requests = build_records(records, paths, extraction_log)
+    supplement_extraction_log = extract_downloaded_supplements(records, paths)
+    audit_records, missing_requests = build_records(records, paths, extraction_log, supplement_extraction_log)
     summary = summary_from_records(audit_records, missing_requests)
     write_audit_files(audit_records, missing_requests, summary, environment, paths)
     return summary

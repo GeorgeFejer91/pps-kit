@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import html
 import json
+import re
 import shutil
 import ssl
 import time
@@ -9,7 +11,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote, urlparse
+from urllib.parse import quote, unquote, urljoin, urlparse
 from urllib.request import Request, urlopen
 
 from .parser import ADJACENT_CATEGORY, ARTIFACT_DIR, COVERAGE_PATH, PDF_DIR, SUPPLEMENT_DIR, is_valid_pdf
@@ -17,6 +19,25 @@ from .parser import ADJACENT_CATEGORY, ARTIFACT_DIR, COVERAGE_PATH, PDF_DIR, SUP
 
 USER_AGENT = "PPSKitPaperMetadataAudit/0.1 (+https://github.com/GeorgeFejer91/pps-kit)"
 MAX_DOWNLOAD_BYTES = 80 * 1024 * 1024
+SUPPLEMENT_EXTENSIONS = (".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ods", ".csv", ".zip")
+SUPPLEMENT_LINK_TERMS = (
+    "supplement",
+    "supplemental",
+    "supplementary",
+    "supporting information",
+    "supporting material",
+    "additional file",
+    "appendix",
+    "extended data",
+    "moesm",
+    "esm",
+    "s1",
+)
+HTML_LINK_RE = re.compile(
+    r"<a\b[^>]*href=[\"']([^\"']+)[\"'][^>]*>(.*?)</a>",
+    re.IGNORECASE | re.DOTALL,
+)
+TAG_RE = re.compile(r"<[^>]+>")
 
 
 def normalize_doi(value: str) -> str:
@@ -116,7 +137,7 @@ def cached_openalex_candidates(repo_root: Path, doi: str) -> list[dict[str, str]
     return candidates
 
 
-def fetch_json(url: str, timeout: float = 25.0) -> dict[str, Any] | None:
+def fetch_json(url: str, timeout: float = 12.0) -> dict[str, Any] | None:
     request = Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
     try:
         with urlopen(request, timeout=timeout, context=ssl.create_default_context()) as response:
@@ -179,7 +200,7 @@ def looks_like_pdf(data: bytes) -> bool:
     return b"%PDF-" in data[:1024]
 
 
-def download_url(url: str, destination: Path, timeout: float = 45.0) -> tuple[bool, str]:
+def download_url(url: str, destination: Path, timeout: float = 30.0) -> tuple[bool, str]:
     request = Request(
         url,
         headers={
@@ -219,6 +240,258 @@ def download_url(url: str, destination: Path, timeout: float = 45.0) -> tuple[bo
         return False, "bad_pdf_after_write"
     tmp.replace(destination)
     return True, "downloaded"
+
+
+def fetch_text(url: str, timeout: float = 8.0) -> tuple[str, str]:
+    request = Request(
+        url,
+        headers={
+            "User-Agent": USER_AGENT,
+            "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+        },
+    )
+    try:
+        with urlopen(request, timeout=timeout, context=ssl.create_default_context()) as response:
+            status = getattr(response, "status", 200)
+            data = response.read(2 * 1024 * 1024)
+            charset = response.headers.get_content_charset() or "utf-8"
+            text = data.decode(charset, errors="replace")
+    except HTTPError as exc:
+        return "", f"http_{exc.code}"
+    except (URLError, TimeoutError, ssl.SSLError) as exc:
+        return "", f"network_error:{exc.__class__.__name__}"
+    if status >= 400:
+        return "", f"http_{status}"
+    return text, "fetched"
+
+
+def clean_link_text(value: str) -> str:
+    without_tags = TAG_RE.sub(" ", value)
+    return " ".join(html.unescape(without_tags).split())
+
+
+def looks_like_supplement_link(url: str, link_text: str = "") -> bool:
+    parsed = urlparse(url)
+    haystack = f"{unquote(parsed.path)} {unquote(parsed.query)} {link_text}".lower()
+    suffix = Path(parsed.path).suffix.lower()
+    if suffix in SUPPLEMENT_EXTENSIONS:
+        return any(term in haystack for term in SUPPLEMENT_LINK_TERMS) or suffix != ".pdf"
+    return any(term in haystack for term in SUPPLEMENT_LINK_TERMS)
+
+
+def html_supplement_candidates(page_url: str, html_text: str, source_label: str) -> list[dict[str, str]]:
+    candidates: list[dict[str, str]] = []
+    for match in HTML_LINK_RE.finditer(html_text):
+        href, label_html = match.groups()
+        absolute = urljoin(page_url, html.unescape(href).strip())
+        if not absolute.startswith(("http://", "https://")):
+            continue
+        label = clean_link_text(label_html)
+        if looks_like_supplement_link(absolute, label):
+            candidates.append(candidate(source_label, absolute))
+    return candidates
+
+
+def crossref_supplement_candidates(doi: str) -> list[dict[str, str]]:
+    if not doi:
+        return []
+    payload = fetch_json(f"https://api.crossref.org/works/{quote(doi, safe='')}")
+    if not payload:
+        return []
+    message = payload.get("message", {})
+    candidates: list[dict[str, str]] = []
+    for link in message.get("link", []) if isinstance(message, dict) else []:
+        if not isinstance(link, dict):
+            continue
+        url = link.get("URL")
+        content_type = str(link.get("content-type", "")).lower()
+        intended = str(link.get("intended-application", "")).lower()
+        descriptor = f"{content_type} {intended}"
+        if isinstance(url, str) and url.startswith(("http://", "https://")) and (
+            any(term in descriptor for term in ("supplement", "support", "component"))
+            or looks_like_supplement_link(url, descriptor)
+        ):
+            candidates.append(candidate("crossref:link", url))
+    return candidates
+
+
+def doi_landing_candidates(doi: str) -> list[dict[str, str]]:
+    if not doi:
+        return []
+    return [candidate("doi:landing", f"https://doi.org/{doi}")]
+
+
+def predictable_supplement_page_candidates(doi: str) -> list[dict[str, str]]:
+    if not doi:
+        return []
+    candidates: list[dict[str, str]] = []
+    if doi.startswith("10.1038/"):
+        article_id = doi.split("/", 1)[1]
+        candidates.append(candidate("publisher:nature-article", f"https://www.nature.com/articles/{article_id}"))
+    if doi.startswith("10.3389/"):
+        candidates.append(candidate("publisher:frontiers-article", f"https://www.frontiersin.org/articles/{doi}/full"))
+    if doi.startswith("10.1073/pnas."):
+        candidates.append(candidate("publisher:pnas-article", f"https://www.pnas.org/doi/full/{doi}"))
+    if doi.startswith("10.1098/"):
+        candidates.append(candidate("publisher:royal-society-article", f"https://royalsocietypublishing.org/doi/full/{doi}"))
+    if doi.startswith("10.1523/"):
+        candidates.append(candidate("publisher:jneurosci-article", f"https://www.jneurosci.org/content/lookup/doi/{doi}"))
+    if doi.startswith("10.3390/"):
+        candidates.append(candidate("publisher:mdpi-article", f"https://www.mdpi.com/{doi}"))
+    if doi.startswith("10.1371/journal.pone."):
+        candidates.append(candidate("publisher:plos-article", f"https://journals.plos.org/plosone/article?id={doi}"))
+    return candidates
+
+
+def supplement_page_candidates(repo_root: Path, record: dict[str, Any], doi: str) -> list[dict[str, str]]:
+    candidates: list[dict[str, str]] = []
+    candidates.extend(source_url_candidates(repo_root, record))
+    candidates.extend(doi_landing_candidates(doi))
+    candidates.extend(predictable_supplement_page_candidates(doi))
+    candidates.extend(crossref_supplement_candidates(doi))
+    return unique_candidates(candidates)
+
+
+def extension_from_content_type(content_type: str) -> str:
+    lower = content_type.lower()
+    if "pdf" in lower:
+        return ".pdf"
+    if "word" in lower or "officedocument.wordprocessingml" in lower:
+        return ".docx"
+    if "excel" in lower or "spreadsheetml" in lower:
+        return ".xlsx"
+    if "opendocument" in lower:
+        return ".ods"
+    if "zip" in lower:
+        return ".zip"
+    if "csv" in lower:
+        return ".csv"
+    return ""
+
+
+def safe_supplement_filename(url: str, content_type: str, index: int) -> str:
+    parsed = urlparse(url)
+    raw_name = unquote(Path(parsed.path).name)
+    name = re.sub(r"[^A-Za-z0-9._-]+", "_", raw_name).strip("._")
+    suffix = Path(name).suffix.lower()
+    if suffix not in SUPPLEMENT_EXTENSIONS:
+        suffix = extension_from_content_type(content_type)
+        stem = Path(name).stem if name else f"supplement_{index:02d}"
+        name = f"{stem or f'supplement_{index:02d}'}{suffix}"
+    if not suffix:
+        name = f"supplement_{index:02d}.bin"
+    return name[:120]
+
+
+def download_supplement_url(url: str, destination_dir: Path, index: int, timeout: float = 20.0) -> tuple[bool, str, str]:
+    request = Request(
+        url,
+        headers={
+            "User-Agent": USER_AGENT,
+            "Accept": "application/pdf,application/zip,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.*,application/msword,text/csv,*/*;q=0.8",
+        },
+    )
+    try:
+        with urlopen(request, timeout=timeout, context=ssl.create_default_context()) as response:
+            status = getattr(response, "status", 200)
+            content_type = response.headers.get("Content-Type", "")
+            chunks: list[bytes] = []
+            total = 0
+            while True:
+                chunk = response.read(1024 * 256)
+                if not chunk:
+                    break
+                total += len(chunk)
+                if total > MAX_DOWNLOAD_BYTES:
+                    return False, "download_too_large", ""
+                chunks.append(chunk)
+            data = b"".join(chunks)
+    except HTTPError as exc:
+        return False, f"http_{exc.code}", ""
+    except (URLError, TimeoutError, ssl.SSLError) as exc:
+        return False, f"network_error:{exc.__class__.__name__}", ""
+    if status >= 400:
+        return False, f"http_{status}", ""
+    if content_type.lower().startswith("text/html") or data.lstrip()[:20].lower().startswith(b"<!doctype html"):
+        return False, "not_file_html", ""
+    filename = safe_supplement_filename(url, content_type, index)
+    if filename.endswith(".bin"):
+        return False, "not_recognized_supplement_file", ""
+    destination_dir.mkdir(parents=True, exist_ok=True)
+    destination = destination_dir / filename
+    tmp = destination.with_suffix(destination.suffix + ".tmp")
+    tmp.write_bytes(data)
+    if destination.suffix.lower() == ".pdf" and not is_valid_pdf(tmp):
+        tmp.unlink(missing_ok=True)
+        return False, "bad_pdf_after_write", ""
+    tmp.replace(destination)
+    return True, "downloaded", destination.as_posix()
+
+
+def acquire_supplements_for_record(repo_root: Path, record: dict[str, Any]) -> dict[str, Any]:
+    record_id = record["record_id"]
+    doi = normalize_doi(record.get("doi", ""))
+    destination_dir = repo_root / SUPPLEMENT_DIR / record_id
+    existing_files = sorted(path for path in destination_dir.rglob("*") if path.is_file()) if destination_dir.exists() else []
+    if existing_files:
+        return {
+            "record_id": record_id,
+            "doi": doi,
+            "supplement_status": "downloaded",
+            "last_status": "existing_files",
+            "attempt_count": 0,
+            "downloaded_files": [path.relative_to(repo_root).as_posix() for path in existing_files],
+            "attempts": [],
+        }
+
+    page_candidates = supplement_page_candidates(repo_root, record, doi)
+    supplement_candidates: list[dict[str, str]] = []
+    attempts: list[dict[str, str]] = []
+    for page in page_candidates:
+        url = page["url"]
+        if looks_like_supplement_link(url):
+            supplement_candidates.append(page)
+            attempts.append({"source": page["source"], "url": url, "status": "direct_candidate"})
+            continue
+        html_text, status = fetch_text(url)
+        attempts.append({"source": page["source"], "url": url, "status": status})
+        if html_text:
+            supplement_candidates.extend(html_supplement_candidates(url, html_text, page["source"]))
+        time.sleep(0.1)
+
+    supplement_candidates = unique_candidates(supplement_candidates)
+    downloaded_files: list[str] = []
+    for index, item in enumerate(supplement_candidates, start=1):
+        ok, status, saved_path = download_supplement_url(item["url"], destination_dir, index)
+        attempts.append({"source": item["source"], "url": item["url"], "status": status})
+        if ok:
+            downloaded_files.append(Path(saved_path).relative_to(repo_root).as_posix())
+        time.sleep(0.1)
+
+    if downloaded_files:
+        supplement_status = "downloaded"
+        last_status = "downloaded"
+    elif supplement_candidates:
+        supplement_status = "needs_user_download"
+        last_status = attempts[-1]["status"] if attempts else "candidate_download_failed"
+    elif any(attempt["status"] in {"http_401", "http_403"} for attempt in attempts):
+        supplement_status = "paywalled"
+        last_status = "supplement_routes_access_limited"
+    elif not attempts:
+        supplement_status = "not_checked"
+        last_status = "no_supplement_search_routes"
+    else:
+        supplement_status = "not_found"
+        last_status = "checked_no_supplement_candidates"
+    return {
+        "record_id": record_id,
+        "doi": doi,
+        "supplement_status": supplement_status,
+        "last_status": last_status,
+        "attempt_count": len(attempts),
+        "downloaded_files": downloaded_files,
+        "attempts": attempts,
+    }
 
 
 def copy_existing_holmes_supplements(repo_root: Path, target_root: Path) -> int:
@@ -313,21 +586,19 @@ def run_acquisition(repo_root: Path, *, force: bool = False, limit: int | None =
     ]
     if limit is not None:
         records = records[:limit]
-    results = [acquire_for_record(repo_root, record, force=force) for record in records]
     copied_supplements = copy_existing_holmes_supplements(repo_root, repo_root / SUPPLEMENT_DIR)
-    holmes_supplement_dir = repo_root / SUPPLEMENT_DIR / "holmes_2020_four_experiments"
-    holmes_has_supplements = (
-        any(path.is_file() for path in holmes_supplement_dir.rglob("*"))
-        if holmes_supplement_dir.exists()
-        else False
-    )
+    results = []
+    for record in records:
+        result = acquire_for_record(repo_root, record, force=force)
+        result["supplement_acquisition"] = acquire_supplements_for_record(repo_root, record)
+        results.append(result)
+
     counts: dict[str, int] = {}
+    supplement_counts: dict[str, int] = {}
     for result in results:
         counts[result["pdf_status"]] = counts.get(result["pdf_status"], 0) + 1
-    supplement_counts = {
-        "downloaded": 1 if holmes_has_supplements else 0,
-        "not_checked": max(0, len(records) - (1 if holmes_has_supplements else 0)),
-    }
+        supplement_status = result.get("supplement_acquisition", {}).get("supplement_status", "not_checked")
+        supplement_counts[supplement_status] = supplement_counts.get(supplement_status, 0) + 1
     payload = {
         "schema": "pps-paper-metadata-acquisition-status.v1",
         "generated_on": date.today().isoformat(),
@@ -335,7 +606,7 @@ def run_acquisition(repo_root: Path, *, force: bool = False, limit: int | None =
         "completed_at": datetime.now(timezone.utc).isoformat(),
         "source_count": len(records),
         "pdf_status_counts": dict(sorted(counts.items())),
-        "supplement_status_counts": supplement_counts,
+        "supplement_status_counts": dict(sorted(supplement_counts.items())),
         "copied_existing_holmes_supplement_count": copied_supplements,
         "records": results,
     }

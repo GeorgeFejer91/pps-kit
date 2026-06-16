@@ -6,11 +6,13 @@
 - Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: audio-tactile PPS task after musical interaction context
 - PDF status: `paywalled`
-- Supplement status: `not_checked`
+- Supplement status: `downloaded`
+- Supplement acquisition attempts: `0` (`existing_files`)
+- Supplement extracted text files: `1`
 - Extraction status: `pending_pdf`
-- Metadata confidence: `0.0` (`source_unavailable`)
-- Confidence basis: Automated open-access acquisition did not produce a locally inspectable publication PDF.
-- Automated evidence mining: `no_extracted_source`; 0/25 fields with candidate values
+- Metadata confidence: `0.16` (`partial_extraction`)
+- Confidence basis: Supplement or other extracted source text yielded candidate values for 1/25 fields, but the main publication PDF is still missing or unavailable.
+- Automated evidence mining: `source_mined`; 1/25 fields with candidate values
 
 ## Known Prior Gaps
 
@@ -20,18 +22,18 @@
 
 - `main PDF OpenDataLoader extraction`: `available_for_run` - Run parser after placing the publication PDF in artifacts/paper_metadata_audit/publication_pdfs.
 - `targeted methods/table search`: `pending_review` - Search methods, procedure, apparatus, stimuli, trial design, and tables for Segment 1-4 parameters.
-- `supplement search`: `pending_download_or_check` - Check supplementary PDFs, spreadsheets, methods appendices, and task scripts when main-paper fields are absent.
+- `supplement search`: `available_for_review` - Downloaded or locally provided supplement files are available for methods/table review.
 - `fallback extractor/source check`: `pending_review` - Use pdfplumber/pypdf, rendered pages, publisher HTML, or supplement files before marking a field missing.
 
 ## Five Semantic Review Passes
 
 | Strategy | Status | Hits | Matched terms | Pages |
 |---|---|---:|---|---|
-| `stimulus_reconstruction` | `source_unavailable` | 0 |  |  |
-| `timing_soa` | `source_unavailable` | 0 |  |  |
-| `trial_structure_intermixing` | `source_unavailable` | 0 |  |  |
-| `baseline_catch_counts` | `source_unavailable` | 0 |  |  |
-| `tactile_response_apparatus` | `source_unavailable` | 0 |  |  |
+| `stimulus_reconstruction` | `completed` | 1 | near; far | source page/section(s) supplement |
+| `timing_soa` | `completed_no_hits` | 0 |  |  |
+| `trial_structure_intermixing` | `completed` | 1 | unimodal; condition | source page/section(s) supplement |
+| `baseline_catch_counts` | `completed` | 1 | baseline; for each | source page/section(s) supplement |
+| `tactile_response_apparatus` | `completed_no_hits` | 0 |  |  |
 
 ## Segment Field Status
 
@@ -46,7 +48,7 @@
 | `segment_1_stimulus_reconstruction` | `auditory_conditions` | `source_unavailable` |  |  |
 | `segment_1_stimulus_reconstruction` | `gain_envelope` | `source_unavailable` |  |  |
 | `segment_1_stimulus_reconstruction` | `renderer_or_apparatus` | `source_unavailable` |  |  |
-| `segment_2_sequence_and_intermixing` | `trial_rows_families` | `source_unavailable` |  |  |
+| `segment_2_sequence_and_intermixing` | `trial_rows_families` | `inferred_low_confidence` | Auto-mined candidates: baseline trials | artifacts/paper_metadata_audit/extracted/supplements/jazz_duet_2021/426_2020_1365_MOESM1_ESM.txt; source page/section(s) supplement |
 | `segment_2_sequence_and_intermixing` | `condition_intermixing` | `source_unavailable` |  |  |
 | `segment_2_sequence_and_intermixing` | `blocked_or_random_order` | `source_unavailable` |  |  |
 | `segment_2_sequence_and_intermixing` | `iti_jitter_policy` | `source_unavailable` |  |  |

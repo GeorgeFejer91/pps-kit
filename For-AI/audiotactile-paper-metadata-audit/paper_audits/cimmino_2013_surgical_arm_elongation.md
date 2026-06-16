@@ -7,6 +7,8 @@
 - Task family: static near/far audio-tactile PPS task
 - PDF status: `open_access_unavailable`
 - Supplement status: `not_checked`
+- Supplement acquisition attempts: `0` (`no_supplement_search_routes`)
+- Supplement extracted text files: `0`
 - Extraction status: `pending_pdf`
 - Metadata confidence: `0.0` (`source_unavailable`)
 - Confidence basis: Automated open-access acquisition did not produce a locally inspectable publication PDF.

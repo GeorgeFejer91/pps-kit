@@ -6,7 +6,9 @@
 - Coverage category: `not_yet_templated_missing_publication_parameters`
 - Task family: looming-sound chest-vibrotactile detection PPS readout with pseudo-walking foot-sole vibration context
 - PDF status: `paywalled`
-- Supplement status: `not_checked`
+- Supplement status: `not_found`
+- Supplement acquisition attempts: `1` (`checked_no_supplement_candidates`)
+- Supplement extracted text files: `0`
 - Extraction status: `pending_pdf`
 - Metadata confidence: `0.0` (`source_unavailable`)
 - Confidence basis: Automated open-access acquisition did not produce a locally inspectable publication PDF.
@@ -20,7 +22,7 @@
 
 - `main PDF OpenDataLoader extraction`: `available_for_run` - Run parser after placing the publication PDF in artifacts/paper_metadata_audit/publication_pdfs.
 - `targeted methods/table search`: `pending_review` - Search methods, procedure, apparatus, stimuli, trial design, and tables for Segment 1-4 parameters.
-- `supplement search`: `pending_download_or_check` - Check supplementary PDFs, spreadsheets, methods appendices, and task scripts when main-paper fields are absent.
+- `supplement search`: `checked_not_found` - Automated source routes found no supplement candidates; use publisher/source checks again before final missing-value decisions.
 - `fallback extractor/source check`: `pending_review` - Use pdfplumber/pypdf, rendered pages, publisher HTML, or supplement files before marking a field missing.
 
 ## Five Semantic Review Passes

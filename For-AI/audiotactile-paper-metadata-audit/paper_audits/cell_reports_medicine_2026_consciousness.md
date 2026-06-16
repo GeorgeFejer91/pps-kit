@@ -6,7 +6,9 @@
 - Coverage category: `not_yet_templated_requires_toolkit_structure`
 - Task family: audio-tactile PPS task in sleep/disorders-of-consciousness setting
 - PDF status: `needs_user_download`
-- Supplement status: `not_checked`
+- Supplement status: `not_found`
+- Supplement acquisition attempts: `2` (`checked_no_supplement_candidates`)
+- Supplement extracted text files: `0`
 - Extraction status: `pending_pdf`
 - Metadata confidence: `0.0` (`pending_source`)
 - Confidence basis: Main publication PDF is not yet locally available for Segment 1-4 inspection.
@@ -20,7 +22,7 @@
 
 - `main PDF OpenDataLoader extraction`: `pending` - Run parser after placing the publication PDF in artifacts/paper_metadata_audit/publication_pdfs.
 - `targeted methods/table search`: `pending_pdf` - Search methods, procedure, apparatus, stimuli, trial design, and tables for Segment 1-4 parameters.
-- `supplement search`: `pending_download_or_check` - Check supplementary PDFs, spreadsheets, methods appendices, and task scripts when main-paper fields are absent.
+- `supplement search`: `checked_not_found` - Automated source routes found no supplement candidates; use publisher/source checks again before final missing-value decisions.
 - `fallback extractor/source check`: `pending_pdf` - Use pdfplumber/pypdf, rendered pages, publisher HTML, or supplement files before marking a field missing.
 
 ## Five Semantic Review Passes

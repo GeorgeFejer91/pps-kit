@@ -7,6 +7,8 @@
 - Task family: methods/device paper rather than a distinct PPS profile
 - PDF status: `not_applicable`
 - Supplement status: `not_applicable`
+- Supplement acquisition attempts: `0` (``)
+- Supplement extracted text files: `0`
 - Extraction status: `parsed_with_warnings`
 - Metadata confidence: `0.0` (`not_applicable`)
 - Confidence basis: Record is adjacent/out of scope for audiotactile PPS Segment 1-4 extraction.

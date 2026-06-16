@@ -71,6 +71,7 @@ def test_paper_metadata_schema_and_status_values_are_valid():
     assert set(schema["field_statuses"]) == set(FIELD_STATUSES) == set(tool_schema["field_statuses"])
     assert set(schema["confidence_labels"]) == set(CONFIDENCE_LABELS) == set(tool_schema["confidence_labels"])
     assert schema["automated_evidence"] == tool_schema["automated_evidence"]
+    assert schema["supplement_extraction"] == tool_schema["supplement_extraction"]
     assert schema["local_artifact_conventions"]["main_pdf_filename"].startswith("artifacts/")
 
     for record in audit_records:
@@ -80,6 +81,10 @@ def test_paper_metadata_schema_and_status_values_are_valid():
         assert record["metadata_confidence_label"] in CONFIDENCE_LABELS, record["record_id"]
         assert 0.0 <= float(record["metadata_confidence_score"]) <= 1.0, record["record_id"]
         assert record["metadata_confidence_basis"], record["record_id"]
+        assert isinstance(record["supplement_extracted_text_files"], list), record["record_id"]
+        assert isinstance(record["supplement_extraction_status_counts"], dict), record["record_id"]
+        for extracted_file in record["supplement_extracted_text_files"]:
+            assert extracted_file.startswith("artifacts/paper_metadata_audit/extracted/supplements/"), record["record_id"]
         evidence = record["automated_evidence_mining"]
         assert evidence["status"] in schema["automated_evidence"]["status_values"], record["record_id"]
         assert 0 <= int(evidence["field_count"]) <= TOTAL_SEGMENT_FIELD_COUNT, record["record_id"]
