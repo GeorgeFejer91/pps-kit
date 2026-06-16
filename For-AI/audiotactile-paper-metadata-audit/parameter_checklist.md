@@ -42,6 +42,18 @@ Visual approximation decision ladder:
 6. Cross-check figure-derived geometry against supplement files and protocol-lineage citations when the methods text is incomplete or inconsistent.
 7. Run an arithmetic sanity check when possible: distance / duration, duration x speed, SOA-to-distance mapping, condition rows x repetitions, and baseline/catch percentages. Note mismatches instead of silently choosing one value.
 
+Visual approximation worksheet fields:
+
+| Worksheet field | What to write |
+|---|---|
+| Raw visual clue | Literal page clue before interpretation, such as `speaker drawn page-left of hand` or `near/far line shown in top view`. |
+| Participant-facing vector | Head/trunk/body facing direction relative to the page, room, or speakers; write `unclear` if the face/body-front cue is missing. |
+| Speaker/source vector | Physical or virtual source direction in room/apparatus coordinates, including whether the source, participant, or renderer moves. |
+| Face/source relation | Relation between participant-facing vector and source vector: front, rear, left, right, above/below, sagittal, coronal, or unclear. |
+| Body-relative translation | The body-relative trajectory label that is actually supported relative to the tactile anchor, or `body-relative mapping unclear`. |
+| Approximation grade | `reported` only for text/table/caption values; `derived` for scaled or arithmetically recoverable values; `inferred_low_confidence` for unscaled schematic/photo clues. |
+| Unsupported labels | Direction words that appeared in the paper but were not safe to assign to auditory trajectory, such as anatomical `frontal` or response-side labels. |
+
 Orientation ambiguity examples to preserve:
 
 | Figure clue | Safe audit wording |
@@ -112,6 +124,8 @@ Every manual review should include five different semantic searches, even when O
 5. Count/catch/protocol-lineage pass: search for repetition, total, catch, no-go, auditory-only, tactile-only, supplement, appendix, protocol, adapted, previous, based on, following, well-established, and cited-methods references.
 
 For the visual/spatial pass, the mandatory output is not just a trajectory label. Record the participant-facing direction, speaker/source direction in room coordinates, body-relative label used by the authors, stimulated body part, and whether movement is physical, speaker-switching, cross-fade/gain-based, or digitally rendered.
+
+For any value derived from a figure or photograph, explicitly separate `raw visual clue`, `participant-facing vector`, `speaker/source vector`, `face/source relation`, and `body-relative translation`. This prevents page-left/page-right, experimenter-view diagrams, and participant-rotated speaker setups from being mistaken for participant-left/participant-right trajectories.
 
 After those five passes, do a brief consistency pass before closing the review. This is not a replacement for source evidence; it catches extraction mistakes. Check whether speeds match path length/duration, whether SOAs map onto reported distances, whether trial totals equal rows x repetitions x blocks, whether baseline/catch percentages match counts, and whether any speed/direction you extracted actually belongs to a participant movement or control manipulation instead of the auditory stimulus.
 

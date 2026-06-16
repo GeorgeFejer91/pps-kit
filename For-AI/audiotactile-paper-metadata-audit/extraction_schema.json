@@ -217,6 +217,7 @@
   "review_rule": {
     "missing_value_rule": "Only mark not_reported_after_review after main PDF extraction, targeted methods/table search, supplement search, fallback extractor/source check, and cited prior-protocol lineage search have all been attempted.",
     "orientation_frame_rule": "Before accepting a trajectory/direction value, record participant-facing direction, speaker/source room coordinates, body-relative mapping, tactile anchor, movement implementation, and evidence class; figure-left/right is not participant-left/right unless orientation is explicit.",
+    "visual_approximation_rule": "For every visual/spatial clue, record the raw page or figure clue, participant-facing vector, speaker/source vector, face-to-source relation, body-relative translation, and approximation grade; unscaled schematic evidence stays qualitative.",
     "copyright_boundary": "Do not commit PDFs, supplements, extracted full text, screenshots of pages, or long verbatim passages.",
     "automated_evidence_rule": "Automated evidence mining stores only short candidate values and page pointers; it is not a substitute for final human/AI critical review against PDFs and supplements."
   },

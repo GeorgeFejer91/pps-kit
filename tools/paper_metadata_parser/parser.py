@@ -1487,6 +1487,7 @@ def schema_payload() -> dict[str, Any]:
         "review_rule": {
             "missing_value_rule": "Only mark not_reported_after_review after main PDF extraction, targeted methods/table search, supplement search, fallback extractor/source check, and cited prior-protocol lineage search have all been attempted.",
             "orientation_frame_rule": "Before accepting a trajectory/direction value, record participant-facing direction, speaker/source room coordinates, body-relative mapping, tactile anchor, movement implementation, and evidence class; figure-left/right is not participant-left/right unless orientation is explicit.",
+            "visual_approximation_rule": "For every visual/spatial clue, record the raw page or figure clue, participant-facing vector, speaker/source vector, face-to-source relation, body-relative translation, and approximation grade; unscaled schematic evidence stays qualitative.",
             "copyright_boundary": "Do not commit PDFs, supplements, extracted full text, screenshots of pages, or long verbatim passages.",
             "automated_evidence_rule": "Automated evidence mining stores only short candidate values and page pointers; it is not a substitute for final human/AI critical review against PDFs and supplements.",
         },
@@ -1554,11 +1555,15 @@ Never assume that figure-left/figure-right equals participant-left/participant-r
 
 Treat orientation as a relation, not a label. First record the participant face/head/trunk vector, then record the speaker/source vector in the apparatus or room frame, then translate only the supported part into body-relative terms such as front, rear, left, right, approaching, receding, ipsilateral, contralateral, proximal, or distal. When a top-view schematic, side-view drawing, photograph, or screenshot lacks a visible face/gaze/body-front cue, write `participant-facing direction unclear` and keep the trajectory qualitative until text, caption, supplement, or protocol-lineage evidence resolves it.
 
+For visual approximation, reviewers must preserve the intermediate reasoning rather than only the final label. Use this worksheet in the manual note or `evidence_note`: `raw visual clue <page/figure/panel>; participant-facing vector <reported/derived/unclear>; speaker/source vector <room/apparatus direction>; face-to-source relation <front/rear/left/right/near/far/unclear>; tactile anchor <body site/side>; body-relative translation <supported label or unclear>; approximation grade <reported/derived/inferred_low_confidence>`. This is especially important when the speaker is shown left/right on the page but the participant may be facing another direction.
+
 ## Information Extraction Strategy
 
 Use at least five semantic passes before finalizing a paper: stimulus reconstruction, visual/spatial geometry, trial sequence/intermixing, tactile timing/baseline, and counts/catch trials. The visual/spatial pass must explicitly answer three orientation questions: which direction the participant faced, where each speaker or virtual source sat in room coordinates, and which body-relative direction the authors intended. This prevents a lateral left-of-head array, a frontal speaker pair, and a participant-rotated four-direction block from being collapsed into the same "looming" label.
 
 Write the visual/spatial pass as a short coordinate audit, not just a keyword hit. Minimum acceptable form: `viewpoint <top/side/front/photo/unclear>; participant faces <direction/unclear>; sources at <room/apparatus coordinates>; tactile anchor <body part/side>; body-relative mapping <front/rear/left/right/near/far/etc.>; movement implementation <physical/digital/gain/switching/unclear>; evidence <text/caption/figure/supplement/lineage>`.
+
+When a visual clue is used, always record the face/source relation before assigning the final body-relative label. For example, `speaker at page-left` is only a raw clue; `speaker left of participant` requires evidence about the participant's facing direction; `frontal sagittal near/far line` requires evidence that the participant faced along that line. If the face/source relation is unresolved, keep `body-relative mapping unclear` even if the apparatus direction itself is visible.
 
 When methods text is thin, search figures, captions, timing diagrams, table footnotes, percentage formulas, supplement files, publisher HTML, and cited prior-protocol papers. Record whether each value is text-reported, caption-reported, derived from reported numbers, visually approximated, or inherited only as protocol lineage. Do not upgrade a visually approximated value to `reported` unless the caption or methods prose supplies the number or coordinate frame.
 
@@ -1591,6 +1596,7 @@ Use this decision ladder for every figure-derived spatial value:
 5. Extract numbers only from printed labels, axes, tables, captions, or a scaled diagram. If the drawing is unscaled, keep the value qualitative and mark it `inferred_low_confidence`.
 6. Cross-check figure-derived geometry against supplement files and protocol-lineage citations when the methods text is incomplete or inconsistent.
 7. Preserve ambiguity explicitly when orientation remains unresolved: record `body-relative mapping unclear` rather than replacing it with a generic trajectory label.
+8. Revisit any `frontal`, `lateral`, `ipsilateral`, or `contralateral` term in local context; it may describe anatomy, electrodes, analysis regions, or response mapping rather than auditory-source direction.
 
 Common orientation traps to guard against:
 
@@ -1697,6 +1703,18 @@ def checklist_text() -> str:
                     "6. Cross-check figure-derived geometry against supplement files and protocol-lineage citations when the methods text is incomplete or inconsistent.",
                     "7. Run an arithmetic sanity check when possible: distance / duration, duration x speed, SOA-to-distance mapping, condition rows x repetitions, and baseline/catch percentages. Note mismatches instead of silently choosing one value.",
                     "",
+                    "Visual approximation worksheet fields:",
+                    "",
+                    "| Worksheet field | What to write |",
+                    "|---|---|",
+                    "| Raw visual clue | Literal page clue before interpretation, such as `speaker drawn page-left of hand` or `near/far line shown in top view`. |",
+                    "| Participant-facing vector | Head/trunk/body facing direction relative to the page, room, or speakers; write `unclear` if the face/body-front cue is missing. |",
+                    "| Speaker/source vector | Physical or virtual source direction in room/apparatus coordinates, including whether the source, participant, or renderer moves. |",
+                    "| Face/source relation | Relation between participant-facing vector and source vector: front, rear, left, right, above/below, sagittal, coronal, or unclear. |",
+                    "| Body-relative translation | The body-relative trajectory label that is actually supported relative to the tactile anchor, or `body-relative mapping unclear`. |",
+                    "| Approximation grade | `reported` only for text/table/caption values; `derived` for scaled or arithmetically recoverable values; `inferred_low_confidence` for unscaled schematic/photo clues. |",
+                    "| Unsupported labels | Direction words that appeared in the paper but were not safe to assign to auditory trajectory, such as anatomical `frontal` or response-side labels. |",
+                    "",
                     "Orientation ambiguity examples to preserve:",
                     "",
                     "| Figure clue | Safe audit wording |",
@@ -1767,6 +1785,8 @@ def checklist_text() -> str:
                     "5. Count/catch/protocol-lineage pass: search for repetition, total, catch, no-go, auditory-only, tactile-only, supplement, appendix, protocol, adapted, previous, based on, following, well-established, and cited-methods references.",
                     "",
                     "For the visual/spatial pass, the mandatory output is not just a trajectory label. Record the participant-facing direction, speaker/source direction in room coordinates, body-relative label used by the authors, stimulated body part, and whether movement is physical, speaker-switching, cross-fade/gain-based, or digitally rendered.",
+                    "",
+                    "For any value derived from a figure or photograph, explicitly separate `raw visual clue`, `participant-facing vector`, `speaker/source vector`, `face/source relation`, and `body-relative translation`. This prevents page-left/page-right, experimenter-view diagrams, and participant-rotated speaker setups from being mistaken for participant-left/participant-right trajectories.",
                     "",
                     "After those five passes, do a brief consistency pass before closing the review. This is not a replacement for source evidence; it catches extraction mistakes. Check whether speeds match path length/duration, whether SOAs map onto reported distances, whether trial totals equal rows x repetitions x blocks, whether baseline/catch percentages match counts, and whether any speed/direction you extracted actually belongs to a participant movement or control manipulation instead of the auditory stimulus.",
                     "",
