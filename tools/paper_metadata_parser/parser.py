@@ -5,6 +5,7 @@ import csv
 import importlib.util
 import json
 import os
+import re
 import shutil
 from dataclasses import dataclass
 from datetime import date
@@ -12,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 
-PARSER_VERSION = "0.2.0"
+PARSER_VERSION = "0.3.0"
 
 COVERAGE_PATH = Path("assets/preloads/audiotactile_literature_coverage.json")
 AUDIT_DIR = Path("For-AI/audiotactile-paper-metadata-audit")
@@ -200,6 +201,226 @@ SEGMENT_FIELDS: dict[str, list[dict[str, str]]] = {
     ],
 }
 
+TOTAL_SEGMENT_FIELD_COUNT = sum(len(fields) for fields in SEGMENT_FIELDS.values())
+
+FIELD_KEYWORDS: dict[str, list[str]] = {
+    "stimulus_type": ["pink noise", "white noise", "tone", "tones", "sound", "audio stimuli", "auditory stimuli", "click", "speech"],
+    "source_provenance": ["samples", "generated", "created", "source", "stimuli were", "audio stimuli", "soundforge", "unity"],
+    "trajectory_count": ["types of sound", "directions", "approaching", "receding", "in and out", "front", "rear", "left", "right"],
+    "trajectory_path": ["distance", "near", "far", "towards", "away", "approaching", "receding", "moved", "loudspeaker", "cm"],
+    "stimulus_duration": ["duration", "presented for", "for 3000 ms", "for 3,000 ms", "ms", "seconds", "sound onset", "sound offset"],
+    "stimulus_speed": ["cm/s", "velocity", "linear uniform motion"],
+    "auditory_conditions": ["approaching", "receding", "in sound", "out sound", "front", "rear", "left", "right", "condition"],
+    "gain_envelope": ["db", "dba", "spl", "intensity", "exponential", "rising", "falling", "sound pressure"],
+    "renderer_or_apparatus": ["loudspeaker", "speaker", "headphone", "unity", "arduino", "hrtfs", "hrtf", "virtual", "3d"],
+    "trial_rows_families": ["types of trials", "audio-tactile", "unimodal", "catch", "trial", "conditions", "baseline"],
+    "condition_intermixing": ["randomly intermingled", "randomized", "random", "intermixed", "blocked", "block"],
+    "blocked_or_random_order": ["block", "blocked design", "randomized", "randomly", "pseudo-random", "order"],
+    "iti_jitter_policy": ["inter-trial", "inter trial", "iti", "silence", "jitter", "preceded", "followed"],
+    "response_window": ["respond", "response", "reaction time", "rt", "timeout", "voice", "microphone", "button"],
+    "task_sequence_rules": ["ignore", "catch", "no response", "no-go", "target", "trial", "sequence", "expectancy"],
+    "tactile_stimulus": ["tactile stimulus", "vibration", "vibro-tactile", "stimulator", "electrical", "actuator", "duration", "ms"],
+    "soa_table": ["temporal delays", "sound onset", "soa", "t1", "t2", "t3", "t4", "t5", "tbefore", "tafter"],
+    "baseline_strategy": ["unimodal tactile", "without any sound", "absence of auditory", "baseline", "silence", "tbefore", "tafter"],
+    "baseline_timing": ["before sound", "after sound", "before the sound", "after the sound", "tbefore", "tafter", "silence"],
+    "catch_trial_type": ["catch", "auditory stimulation only", "without tactile", "no tactile", "not to respond", "false alarm"],
+    "repetitions_per_tactile_soa_condition": ["repetitions", "for each", "trials for each", "combination", "target stimuli", "audio-tactile combination"],
+    "baseline_count": ["unimodal tactile", "baseline", "without any sound", "trials", "tbefore", "tafter"],
+    "catch_count": ["catch", "false alarm", "auditory only", "trials"],
+    "block_count": ["blocks", "sessions", "phases", "divided into", "block"],
+    "total_trial_count": ["total", "trials", "experiment consisted", "performed a total", "participants performed"],
+}
+
+FIELD_CANONICAL_TERMS: dict[str, list[tuple[str, str]]] = {
+    "stimulus_type": [
+        ("pink noise", "pink noise"),
+        ("white noise", "white noise"),
+        ("pure tone", "pure tone"),
+        ("500 hz tone", "500 Hz tone"),
+        ("click", "click"),
+        ("speech", "speech"),
+    ],
+    "source_provenance": [
+        ("soundforge", "SoundForge"),
+        ("sonic foundry", "Sonic Foundry"),
+        ("unity", "Unity"),
+        ("samples of pink-noise", "samples of pink noise"),
+        ("pink-noise", "pink-noise samples"),
+        ("pink noise", "pink-noise samples"),
+    ],
+    "trajectory_path": [
+        ("near loudspeaker", "near loudspeaker"),
+        ("far loudspeaker", "far loudspeaker"),
+        ("towards", "towards body"),
+        ("away", "away from body"),
+        ("approaching", "approaching trajectory"),
+        ("receding", "receding trajectory"),
+    ],
+    "stimulus_duration": [
+        ("sound onset", "duration relative to sound onset"),
+        ("sound offset", "duration relative to sound offset"),
+    ],
+    "stimulus_speed": [
+        ("linear uniform motion", "linear uniform motion"),
+    ],
+    "auditory_conditions": [
+        ("approaching", "approaching"),
+        ("receding", "receding"),
+        ("in sound", "IN sound"),
+        ("out sound", "OUT sound"),
+        ("front", "front"),
+        ("rear", "rear"),
+        ("left", "left"),
+        ("right", "right"),
+    ],
+    "renderer_or_apparatus": [
+        ("loudspeaker", "loudspeaker(s)"),
+        ("speaker", "speaker(s)"),
+        ("headphone", "headphones"),
+        ("unity", "Unity"),
+        ("arduino", "Arduino"),
+        ("hrtf", "HRTF"),
+        ("virtual", "virtual audio source"),
+    ],
+    "condition_intermixing": [
+        ("randomly intermingled", "randomly intermingled"),
+        ("random combination", "random combination of trials"),
+        ("randomized", "randomized"),
+        ("pseudo-random", "pseudo-randomized"),
+        ("blocked design", "blocked design"),
+        ("constant at", "condition held constant within block"),
+    ],
+    "blocked_or_random_order": [
+        ("blocked design", "blocked design"),
+        ("randomly", "randomized/random order"),
+        ("pseudo-random", "pseudo-randomized"),
+    ],
+    "iti_jitter_policy": [
+        ("inter-trial-interval was not fixed", "ITI not fixed"),
+        ("inter-trial interval was not fixed", "ITI not fixed"),
+        ("preceded and followed", "pre/post trial silence"),
+        ("silence", "silence interval"),
+        ("jitter", "jittered interval"),
+    ],
+    "response_window": [
+        ("respond vocally", "vocal response"),
+        ("microphone", "microphone response capture"),
+        ("voice-activated", "voice-key response capture"),
+        ("button", "button response"),
+        ("as quickly as possible", "speeded response"),
+    ],
+    "task_sequence_rules": [
+        ("ignore the auditory", "ignore auditory stimulus"),
+        ("ignore the sound", "ignore sound"),
+        ("not to respond", "withhold response on catch trials"),
+        ("catch", "catch/no-target trials"),
+        ("target", "tactile target trials"),
+    ],
+    "tactile_stimulus": [
+        ("electrical", "electrical tactile stimulation"),
+        ("vibration", "vibrotactile stimulation"),
+        ("vibro-tactile", "vibrotactile stimulation"),
+        ("actuator", "tactile actuator"),
+        ("stimulator", "tactile stimulator"),
+    ],
+    "catch_trial_type": [
+        ("auditory stimulation only", "auditory-only catch trials"),
+        ("only auditory", "auditory-only catch trials"),
+        ("without tactile", "no-tactile catch trials"),
+        ("not to respond", "withhold response on catch trials"),
+    ],
+    "baseline_strategy": [
+        ("unimodal tactile", "unimodal tactile baseline"),
+        ("without any sound", "tactile-only/no-sound baseline"),
+        ("absence of auditory", "tactile-only/no-sound baseline"),
+        ("silence", "silence baseline window"),
+    ],
+    "baseline_timing": [
+        ("before the sound", "pre-sound tactile baseline"),
+        ("after the sound", "post-sound tactile baseline"),
+        ("before sound onset", "pre-sound tactile baseline"),
+        ("after sound offset", "post-sound tactile baseline"),
+    ],
+    "trial_rows_families": [
+        ("audio-tactile", "audio-tactile trials"),
+        ("unimodal tactile", "unimodal tactile trials"),
+        ("catch", "catch trials"),
+        ("baseline", "baseline trials"),
+    ],
+}
+
+NUMERIC_PATTERN = re.compile(
+    r"\b\d+(?:[.,]\d+)?(?:\s*[-\u2010-\u2015]\s*\d+(?:[.,]\d+)?)?\s*"
+    r"(?:ms|msec|s|sec|cm/s|cm|m|dB|dBA|SPL|Hz|kHz|mA|%|trials?|blocks?|sessions?)\b",
+    re.IGNORECASE,
+)
+
+FIELD_NUMERIC_ALLOW: dict[str, tuple[str, ...]] = {
+    "stimulus_type": ("hz", "khz"),
+    "trajectory_path": ("cm", " m"),
+    "stimulus_duration": ("ms", "msec", " sec", " s"),
+    "stimulus_speed": ("cm/s", "m/s"),
+    "gain_envelope": ("db", "dba", "spl"),
+    "iti_jitter_policy": ("ms", "msec", " sec", " s"),
+    "tactile_stimulus": ("ms", "msec", "hz", "ma", "%"),
+    "soa_table": ("ms", "msec"),
+    "baseline_timing": ("ms", "msec", " sec", " s"),
+    "catch_trial_type": ("%", "trial"),
+    "repetitions_per_tactile_soa_condition": ("trial", "%"),
+    "baseline_count": ("trial", "%"),
+    "catch_count": ("trial", "%"),
+    "block_count": ("block", "session"),
+    "total_trial_count": ("trial", "block", "session"),
+}
+
+SEMANTIC_REVIEW_STRATEGIES: tuple[dict[str, Any], ...] = (
+    {
+        "strategy": "stimulus_reconstruction",
+        "purpose": "Find auditory stimulus type, source provenance, trajectory/path, speed, gain/envelope, and renderer/speaker details.",
+        "keywords": (
+            "pink noise", "tone", "sound", "audio stimuli", "auditory stimuli", "loudspeaker",
+            "speaker", "headphone", "approaching", "receding", "near", "far", "distance",
+            "cm/s", "dba", "db", "spl", "unity", "hrtf", "soundforge",
+        ),
+    },
+    {
+        "strategy": "timing_soa",
+        "purpose": "Find sound duration, tactile SOAs, temporal delays, silence windows, ITI, and jitter policies.",
+        "keywords": (
+            "temporal delay", "delays", "soa", "sound onset", "sound offset", "t1", "t2",
+            "t3", "t4", "t5", "tbefore", "tafter", "silence", "inter-trial",
+            "inter trial", "jitter", "duration",
+        ),
+    },
+    {
+        "strategy": "trial_structure_intermixing",
+        "purpose": "Find trial families, condition intermixing, randomization, blocking, and task-critical sequence rules.",
+        "keywords": (
+            "trial", "trials", "audio-tactile", "unimodal", "condition", "conditions",
+            "random", "randomized", "randomly", "intermingled", "intermixed", "block",
+            "blocked", "sequence", "order",
+        ),
+    },
+    {
+        "strategy": "baseline_catch_counts",
+        "purpose": "Find baseline strategy, catch/no-target trials, repetition counts, block counts, and total trial counts.",
+        "keywords": (
+            "baseline", "catch", "without any sound", "absence of auditory", "auditory only",
+            "unimodal tactile", "false alarm", "no tactile", "not to respond", "total",
+            "repetitions", "for each", "blocks",
+        ),
+    },
+    {
+        "strategy": "tactile_response_apparatus",
+        "purpose": "Find tactile stimulus modality/device/site, response capture, response window, and calibration details.",
+        "keywords": (
+            "tactile stimulus", "vibro-tactile", "vibration", "actuator", "stimulator",
+            "electrical", "electrodes", "arduino", "respond", "response", "reaction time",
+            "microphone", "voice", "button", "threshold", "calibration",
+        ),
+    },
+)
+
 @dataclass(frozen=True)
 class AuditPaths:
     repo_root: Path
@@ -383,16 +604,300 @@ def make_field_template(record: dict[str, Any]) -> dict[str, dict[str, Any]]:
     }
 
 
+def clean_evidence_text(value: str) -> str:
+    text = re.sub(r"<[^>]+>", " ", value)
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
+
+
+def collect_content_nodes(value: Any) -> list[dict[str, Any]]:
+    nodes: list[dict[str, Any]] = []
+    if isinstance(value, dict):
+        content = value.get("content")
+        if isinstance(content, str) and clean_evidence_text(content):
+            nodes.append(
+                {
+                    "type": str(value.get("type", "")),
+                    "page": str(value.get("page number", "")),
+                    "content": clean_evidence_text(content),
+                }
+            )
+        for child in value.get("kids", []) if isinstance(value.get("kids"), list) else []:
+            nodes.extend(collect_content_nodes(child))
+    elif isinstance(value, list):
+        for child in value:
+            nodes.extend(collect_content_nodes(child))
+    return nodes
+
+
+def load_opendataloader_nodes(record_id: str, paths: AuditPaths) -> tuple[list[dict[str, Any]], str]:
+    json_path = paths.extracted_dir / "opendataloader" / f"{record_id}.json"
+    if not json_path.exists():
+        return [], ""
+    try:
+        payload = load_json(json_path)
+    except json.JSONDecodeError:
+        return [], artifact_rel(json_path, paths.repo_root)
+
+    nodes = collect_content_nodes(payload.get("kids", []))
+    filtered: list[dict[str, Any]] = []
+    current_section = ""
+    references_started = False
+    for node in nodes:
+        content = node["content"]
+        lower = content.lower()
+        if lower.strip() in {"references", "reference"}:
+            references_started = True
+        if references_started:
+            continue
+        if node["type"] == "heading" or lower.strip() in {"methods", "materials and methods", "stimuli", "procedure"}:
+            current_section = content[:80]
+            continue
+        if len(content) < 25:
+            continue
+        node["section"] = current_section
+        filtered.append(node)
+    return filtered, artifact_rel(json_path, paths.repo_root)
+
+
+def score_node_for_field(node: dict[str, Any], field_key: str) -> int:
+    lower = node["content"].lower()
+    score = 0
+    for keyword in FIELD_KEYWORDS[field_key]:
+        if keyword in lower:
+            score += 3 if " " in keyword else 1
+    if NUMERIC_PATTERN.search(node["content"]):
+        score += 1
+    section = str(node.get("section", "")).lower()
+    if section and any(term in section for term in ("method", "stimuli", "procedure", "experiment")):
+        score += 1
+    return score
+
+
+def semantic_review_passes(record: dict[str, Any], nodes: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    if record["coverage_category"] == ADJACENT_CATEGORY:
+        return [
+            {
+                "strategy": strategy["strategy"],
+                "status": "not_applicable",
+                "hit_count": 0,
+                "matched_terms": [],
+                "page_or_section": "",
+                "purpose": strategy["purpose"],
+            }
+            for strategy in SEMANTIC_REVIEW_STRATEGIES
+        ]
+    if not nodes:
+        return [
+            {
+                "strategy": strategy["strategy"],
+                "status": "source_unavailable",
+                "hit_count": 0,
+                "matched_terms": [],
+                "page_or_section": "",
+                "purpose": strategy["purpose"],
+            }
+            for strategy in SEMANTIC_REVIEW_STRATEGIES
+        ]
+
+    passes: list[dict[str, Any]] = []
+    for strategy in SEMANTIC_REVIEW_STRATEGIES:
+        terms = list(strategy["keywords"])
+        matched_terms: list[str] = []
+        pages: list[str] = []
+        hit_count = 0
+        for node in nodes:
+            lower = node["content"].lower()
+            node_terms = [term for term in terms if term in lower]
+            if not node_terms:
+                continue
+            hit_count += 1
+            matched_terms.extend(node_terms)
+            if node.get("page"):
+                pages.append(str(node["page"]))
+        matched_terms = dedupe_preserve_order(matched_terms)
+        pages = dedupe_preserve_order(pages)
+        passes.append(
+            {
+                "strategy": strategy["strategy"],
+                "status": "completed" if hit_count else "completed_no_hits",
+                "hit_count": hit_count,
+                "matched_terms": matched_terms[:12],
+                "page_or_section": "OpenDataLoader page(s) " + ", ".join(pages[:8]) if pages else "",
+                "purpose": strategy["purpose"],
+            }
+        )
+    return passes
+
+
+def dedupe_preserve_order(values: list[str]) -> list[str]:
+    seen: set[str] = set()
+    unique: list[str] = []
+    for value in values:
+        normalized = value.strip()
+        key = normalized.lower()
+        if not normalized or key in seen:
+            continue
+        seen.add(key)
+        unique.append(normalized)
+    return unique
+
+
+def numeric_values_for_field(field_key: str, text: str) -> list[str]:
+    values: list[str] = []
+    for match in NUMERIC_PATTERN.finditer(text):
+        value = match.group(0).replace("\u2013", "-").replace("\u2014", "-")
+        lower = value.lower()
+        if field_key in {"stimulus_duration", "iti_jitter_policy", "soa_table", "baseline_timing"} and any(
+            unit in lower for unit in ("cm/s", "cm", "db", "dba", "spl", "hz", "khz", "ma", "trial", "block")
+        ):
+            continue
+        if field_key == "stimulus_type" and re.search(r"\b(?:hz|khz)\b", lower):
+            values.append(value)
+        elif field_key == "trajectory_path" and re.search(r"\bcm\b", lower) and "cm/s" not in lower:
+            values.append(value)
+        elif field_key == "stimulus_duration" and re.search(r"\b(?:ms|msec|sec|s)\b", lower):
+            values.append(value)
+        elif field_key == "stimulus_speed" and re.search(r"\b(?:cm/s|m/s)\b", lower):
+            values.append(value)
+        elif field_key == "gain_envelope" and re.search(r"\b(?:db|dba|spl)\b", lower):
+            values.append(value)
+        elif field_key == "iti_jitter_policy" and re.search(r"\b(?:ms|msec|sec|s)\b", lower):
+            values.append(value)
+        elif field_key == "tactile_stimulus" and re.search(r"\b(?:ms|msec|hz|ma|%)\b", lower):
+            values.append(value)
+        elif field_key == "soa_table" and re.search(r"\b(?:ms|msec)\b", lower):
+            values.append(value)
+        elif field_key == "baseline_timing" and re.search(r"\b(?:ms|msec|sec|s)\b", lower):
+            values.append(value)
+        elif field_key in {"catch_trial_type", "repetitions_per_tactile_soa_condition", "baseline_count", "catch_count", "total_trial_count"} and re.search(r"\b(?:trial|trials|%)\b", lower):
+            values.append(value)
+        elif field_key == "block_count" and re.search(r"\b(?:block|blocks|session|sessions)\b", lower):
+            values.append(value)
+    return values
+
+
+def field_candidate_value(field_key: str, nodes: list[dict[str, Any]]) -> str:
+    text = " ".join(node["content"] for node in nodes)
+    lower = text.lower()
+    values: list[str] = []
+    for needle, label in FIELD_CANONICAL_TERMS.get(field_key, []):
+        if needle in lower:
+            values.append(label)
+    values.extend(numeric_values_for_field(field_key, text))
+    if field_key == "trajectory_count":
+        if all(term in lower for term in ("front", "rear", "left", "right")):
+            values.append("four body-relative directions")
+        if "approaching" in lower and "receding" in lower:
+            values.append("approaching and receding motions")
+        if "in sound" in lower and "out sound" in lower:
+            values.append("IN and OUT sounds")
+    if field_key == "blocked_or_random_order":
+        if "random" in lower:
+            values.append("randomized/random order")
+        if "two blocks" in lower:
+            values.append("2 blocks")
+    if field_key == "block_count" and "two blocks" in lower:
+        values.append("2 blocks")
+    if field_key == "soa_table":
+        for pattern in (
+            r"T1[^.;]{0,90}T2[^.;]{0,90}T3[^.;]{0,90}T4[^.;]{0,90}T5[^.;]{0,90}",
+            r"300\s*,?\s*800\s*,?\s*1500\s*,?\s*2200\s*,?\s*2700\s*ms",
+        ):
+            match = re.search(pattern, text, flags=re.IGNORECASE)
+            if match:
+                values.append(clean_evidence_text(match.group(0))[:180])
+                break
+    if field_key == "baseline_timing":
+        for token in ("Tbefore", "Tafter", "T0", "T6"):
+            if token.lower() in lower:
+                values.append(token)
+    values = dedupe_preserve_order(values)
+    if not values:
+        return ""
+    return "Auto-mined candidates: " + "; ".join(values[:16])
+
+
+def mine_segment_field_audit(record: dict[str, Any], paths: AuditPaths) -> tuple[dict[str, dict[str, Any]], dict[str, Any]]:
+    field_audit = make_field_template(record)
+    if record["coverage_category"] == ADJACENT_CATEGORY:
+        return field_audit, {
+            "status": "not_applicable",
+            "field_count": 0,
+            "coverage_ratio": 0.0,
+            "source_files": [],
+            "semantic_review_passes": semantic_review_passes(record, []),
+        }
+
+    nodes, source_file = load_opendataloader_nodes(record["record_id"], paths)
+    review_passes = semantic_review_passes(record, nodes)
+    if not nodes:
+        return field_audit, {
+            "status": "no_extracted_source",
+            "field_count": 0,
+            "coverage_ratio": 0.0,
+            "source_files": [source_file] if source_file else [],
+            "semantic_review_passes": review_passes,
+        }
+
+    mined_count = 0
+    for segment, fields in field_audit.items():
+        for field_key, field in fields.items():
+            scored = [
+                (score_node_for_field(node, field_key), index, node)
+                for index, node in enumerate(nodes)
+            ]
+            ranked = [
+                (score, index, node)
+                for score, index, node in sorted(scored, key=lambda item: (-item[0], item[1]))
+                if score > 0
+            ][:3]
+            if not ranked:
+                continue
+            candidate_nodes = [node for _, _, node in ranked]
+            value = field_candidate_value(field_key, candidate_nodes)
+            if not value:
+                continue
+            pages = dedupe_preserve_order([node["page"] for node in candidate_nodes if node.get("page")])
+            field.update(
+                {
+                    "status": "inferred_low_confidence",
+                    "value": ascii_safe(value[:320]),
+                    "source_file": source_file,
+                    "page_or_section": "OpenDataLoader page(s) " + ", ".join(pages[:4]) if pages else "OpenDataLoader extracted text",
+                    "evidence_note": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+                }
+            )
+            mined_count += 1
+
+    return field_audit, {
+        "status": "source_mined",
+        "field_count": mined_count,
+        "coverage_ratio": round(mined_count / TOTAL_SEGMENT_FIELD_COUNT, 3),
+        "source_files": [source_file],
+        "semantic_review_passes": review_passes,
+    }
+
+
 def metadata_confidence(
     record: dict[str, Any],
     pdf_status: str,
     extraction_status: str,
+    automated_evidence: dict[str, Any] | None = None,
 ) -> tuple[float, str, str]:
     if record["coverage_category"] == ADJACENT_CATEGORY:
         return (
             0.0,
             "not_applicable",
             "Record is adjacent/out of scope for audiotactile PPS Segment 1-4 extraction.",
+        )
+    mined_ratio = float((automated_evidence or {}).get("coverage_ratio", 0.0) or 0.0)
+    mined_count = int((automated_evidence or {}).get("field_count", 0) or 0)
+    if pdf_status == "downloaded" and extraction_status in {"parsed", "parsed_with_warnings"} and mined_count:
+        return (
+            round(0.25 + min(0.35, mined_ratio * 0.35), 2),
+            "partial_extraction",
+            f"Publication PDF is parsed and the automated Segment 1-4 miner found candidate values for {mined_count}/{TOTAL_SEGMENT_FIELD_COUNT} fields; values still require critical PDF/supplement review.",
         )
     if pdf_status == "downloaded" and extraction_status in {"parsed", "parsed_with_warnings"}:
         return (
@@ -574,10 +1079,12 @@ def build_records(
             extraction_status = "pending_pdf"
         else:
             extraction_status = extraction_log.get(record_id, {}).get("status", "parsed_with_warnings")
+        segment_field_audit, automated_evidence = mine_segment_field_audit(record, paths)
         confidence_score, confidence_label, confidence_basis = metadata_confidence(
             record,
             pdf_status,
             extraction_status,
+            automated_evidence,
         )
 
         audit_record = {
@@ -600,6 +1107,7 @@ def build_records(
             "metadata_confidence_score": confidence_score,
             "metadata_confidence_label": confidence_label,
             "metadata_confidence_basis": confidence_basis,
+            "automated_evidence_mining": automated_evidence,
             "extraction_outputs": {
                 "primary": "artifacts/paper_metadata_audit/extracted/opendataloader/",
                 "fallback": f"artifacts/paper_metadata_audit/extracted/fallback/{record_id}/",
@@ -608,7 +1116,7 @@ def build_records(
                 ascii_safe(item) for item in record.get("missing_publication_parameters", [])
             ],
             "blocking_constraint_ids_from_prior_ledger": record.get("blocking_constraint_ids", []),
-            "segment_field_audit": make_field_template(record),
+            "segment_field_audit": segment_field_audit,
             "review_attempts": make_review_attempts(record, pdf_status, supplement_status),
         }
         audit_records.append(audit_record)
@@ -649,6 +1157,17 @@ def summary_from_records(audit_records: list[dict[str, Any]], missing_requests: 
             counts[record[key]] = counts.get(record[key], 0) + 1
         return dict(sorted(counts.items()))
 
+    mined_field_counts = [
+        int(record.get("automated_evidence_mining", {}).get("field_count", 0) or 0)
+        for record in audit_records
+    ]
+    semantic_status_counts: dict[str, int] = {}
+    semantic_pass_total = 0
+    for record in audit_records:
+        for review_pass in record.get("automated_evidence_mining", {}).get("semantic_review_passes", []):
+            semantic_pass_total += 1
+            status = str(review_pass.get("status", ""))
+            semantic_status_counts[status] = semantic_status_counts.get(status, 0) + 1
     return {
         "schema": "pps-paper-metadata-audit-summary.v1",
         "generated_on": date.today().isoformat(),
@@ -658,6 +1177,24 @@ def summary_from_records(audit_records: list[dict[str, Any]], missing_requests: 
         "supplement_status_counts": count_by("supplement_status"),
         "extraction_status_counts": count_by("extraction_status"),
         "metadata_confidence_label_counts": count_by("metadata_confidence_label"),
+        "automated_evidence_status_counts": {
+            status: sum(
+                1
+                for record in audit_records
+                if record.get("automated_evidence_mining", {}).get("status") == status
+            )
+            for status in sorted(
+                {
+                    str(record.get("automated_evidence_mining", {}).get("status", ""))
+                    for record in audit_records
+                }
+            )
+            if status
+        },
+        "automated_evidence_field_total": sum(mined_field_counts),
+        "semantic_review_strategy_count": len(SEMANTIC_REVIEW_STRATEGIES),
+        "semantic_review_pass_total": semantic_pass_total,
+        "semantic_review_pass_status_counts": dict(sorted(semantic_status_counts.items())),
         "missing_download_request_count": len(missing_requests),
         "tracked_pdf_folder": "artifacts/paper_metadata_audit/publication_pdfs/",
         "tracked_supplement_folder": "artifacts/paper_metadata_audit/supplements/",
@@ -675,10 +1212,17 @@ def schema_payload() -> dict[str, Any]:
         "extraction_statuses": list(EXTRACTION_STATUSES),
         "field_statuses": list(FIELD_STATUSES),
         "confidence_labels": list(CONFIDENCE_LABELS),
+        "automated_evidence": {
+            "status_values": ["not_applicable", "no_extracted_source", "source_mined"],
+            "semantic_review_pass_status_values": ["completed", "completed_no_hits", "source_unavailable", "not_applicable"],
+            "semantic_review_strategy_count": len(SEMANTIC_REVIEW_STRATEGIES),
+            "rule": "Store only short candidate values and page pointers; do not commit full text excerpts.",
+        },
         "segment_fields": SEGMENT_FIELDS,
         "review_rule": {
             "missing_value_rule": "Only mark not_reported_after_review after main PDF extraction, targeted methods/table search, supplement search, and fallback extractor/source check have all been attempted.",
             "copyright_boundary": "Do not commit PDFs, supplements, extracted full text, screenshots of pages, or long verbatim passages.",
+            "automated_evidence_rule": "Automated evidence mining stores only short candidate values and page pointers; it is not a substitute for final human/AI critical review against PDFs and supplements.",
         },
         "local_artifact_conventions": {
             "main_pdf_filename": "artifacts/paper_metadata_audit/publication_pdfs/<record_id>.pdf",
@@ -722,6 +1266,10 @@ The `artifacts/` tree is ignored by Git. Do not commit PDFs, supplements, extrac
 - Supplement status counts: `{json.dumps(summary["supplement_status_counts"], sort_keys=True)}`
 - Extraction status counts: `{json.dumps(summary["extraction_status_counts"], sort_keys=True)}`
 - Metadata confidence counts: `{json.dumps(summary["metadata_confidence_label_counts"], sort_keys=True)}`
+- Automated evidence status counts: `{json.dumps(summary["automated_evidence_status_counts"], sort_keys=True)}`
+- Automated evidence mined field total: {summary["automated_evidence_field_total"]}
+- Semantic review strategy count: {summary["semantic_review_strategy_count"]}
+- Semantic review pass status counts: `{json.dumps(summary["semantic_review_pass_status_counts"], sort_keys=True)}`
 - Missing download/check requests: {summary["missing_download_request_count"]}
 
 ## Environment Readiness
@@ -738,6 +1286,8 @@ The `artifacts/` tree is ignored by Git. Do not commit PDFs, supplements, extrac
 3. Run `python -m tools.paper_metadata_parser --refresh` from the repo root.
 4. Review `running_checklist.csv`, `missing_pdf_request_list.csv`, and `paper_audits/<record_id>.md`.
 5. Fill `metadata_audit.jsonl` or the per-paper summaries with extracted Segment 1-4 values using short evidence pointers only.
+
+Automated evidence-mined values are `inferred_low_confidence` candidates. Treat them as a triage map for critical review, not as final paper metadata.
 
 Before marking any value `not_reported_after_review`, inspect the main PDF, methods/tables, supplements, and at least one fallback/source route.
 """
@@ -791,6 +1341,7 @@ def paper_audit_text(record: dict[str, Any]) -> str:
         f"- Extraction status: `{record['extraction_status']}`",
         f"- Metadata confidence: `{record['metadata_confidence_score']}` (`{record['metadata_confidence_label']}`)",
         f"- Confidence basis: {ascii_safe(record['metadata_confidence_basis'])}",
+        f"- Automated evidence mining: `{record['automated_evidence_mining']['status']}`; {record['automated_evidence_mining']['field_count']}/{TOTAL_SEGMENT_FIELD_COUNT} fields with candidate values",
         "",
         "## Known Prior Gaps",
         "",
@@ -803,12 +1354,23 @@ def paper_audit_text(record: dict[str, Any]) -> str:
     lines.extend(["", "## Review Attempts", ""])
     for attempt in record["review_attempts"]:
         lines.append(f"- `{attempt['attempt']}`: `{attempt['status']}` - {ascii_safe(attempt['note'])}")
+    lines.extend(["", "## Five Semantic Review Passes", ""])
+    lines.append("| Strategy | Status | Hits | Matched terms | Pages |")
+    lines.append("|---|---|---:|---|---|")
+    for review_pass in record["automated_evidence_mining"]["semantic_review_passes"]:
+        lines.append(
+            f"| `{review_pass['strategy']}` | `{review_pass['status']}` | {review_pass['hit_count']} | {ascii_safe(review_pass.get('matched_terms', []))} | {ascii_safe(review_pass.get('page_or_section', ''))} |"
+        )
     lines.extend(["", "## Segment Field Status", ""])
     lines.append("| Segment | Field | Status | Value | Source pointer |")
     lines.append("|---|---|---|---|---|")
     for segment, fields in record["segment_field_audit"].items():
         for field_key, field in fields.items():
-            source = field.get("source_file") or field.get("page_or_section") or ""
+            source = "; ".join(
+                part
+                for part in (field.get("source_file", ""), field.get("page_or_section", ""))
+                if part
+            )
             lines.append(
                 f"| `{segment}` | `{field_key}` | `{field['status']}` | {ascii_safe(field.get('value', ''))} | {ascii_safe(source)} |"
             )
@@ -846,6 +1408,18 @@ def write_audit_files(
             "known_prior_gap_count": len(record["known_missing_or_unresolved_from_prior_ledger"]),
             "metadata_confidence_score": record["metadata_confidence_score"],
             "metadata_confidence_label": record["metadata_confidence_label"],
+            "automated_evidence_field_count": record["automated_evidence_mining"]["field_count"],
+            "automated_evidence_coverage_ratio": record["automated_evidence_mining"]["coverage_ratio"],
+            "semantic_review_completed_passes": sum(
+                1
+                for review_pass in record["automated_evidence_mining"]["semantic_review_passes"]
+                if review_pass["status"] in {"completed", "completed_no_hits"}
+            ),
+            "semantic_review_source_unavailable_passes": sum(
+                1
+                for review_pass in record["automated_evidence_mining"]["semantic_review_passes"]
+                if review_pass["status"] == "source_unavailable"
+            ),
         }
         for record in audit_records
     ]
@@ -865,6 +1439,10 @@ def write_audit_files(
             "known_prior_gap_count",
             "metadata_confidence_score",
             "metadata_confidence_label",
+            "automated_evidence_field_count",
+            "automated_evidence_coverage_ratio",
+            "semantic_review_completed_passes",
+            "semantic_review_source_unavailable_passes",
         ],
     )
     write_csv(

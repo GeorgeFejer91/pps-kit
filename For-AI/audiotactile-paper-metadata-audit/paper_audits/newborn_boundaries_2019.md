@@ -8,8 +8,9 @@
 - PDF status: `downloaded`
 - Supplement status: `not_checked`
 - Extraction status: `parsed`
-- Metadata confidence: `0.2` (`source_acquired_unreviewed`)
-- Confidence basis: Publication PDF is locally available and parsed, but Segment 1-4 values still require critical manual review.
+- Metadata confidence: `0.49` (`partial_extraction`)
+- Confidence basis: Publication PDF is parsed and the automated Segment 1-4 miner found candidate values for 17/25 fields; values still require critical PDF/supplement review.
+- Automated evidence mining: `source_mined`; 17/25 fields with candidate values
 
 ## Known Prior Gaps
 
@@ -22,34 +23,44 @@
 - `supplement search`: `pending_download_or_check` - Check supplementary PDFs, spreadsheets, methods appendices, and task scripts when main-paper fields are absent.
 - `fallback extractor/source check`: `pending_review` - Use pdfplumber/pypdf, rendered pages, publisher HTML, or supplement files before marking a field missing.
 
+## Five Semantic Review Passes
+
+| Strategy | Status | Hits | Matched terms | Pages |
+|---|---|---:|---|---|
+| `stimulus_reconstruction` | `completed` | 30 | sound; distance; near; pink noise; tone; auditory stimuli; approaching; receding; far; db; loudspeaker; speaker | OpenDataLoader page(s) 1, 2, 3, 4, 5, 6, 7, 8 |
+| `timing_soa` | `completed` | 6 | t1; delays; t3; sound onset; sound offset; t2; t4; t5 | OpenDataLoader page(s) 1, 2, 6, 7, 8 |
+| `trial_structure_intermixing` | `completed` | 27 | audio-tactile; order; condition; trial; trials; random; randomly; conditions; unimodal; sequence | OpenDataLoader page(s) 1, 2, 3, 4, 5, 6, 7, 8 |
+| `baseline_catch_counts` | `completed` | 3 | auditory only; total | OpenDataLoader page(s) 2, 8, 9 |
+| `tactile_response_apparatus` | `completed` | 22 | tactile stimulus; reaction time; respond; response | OpenDataLoader page(s) 1, 2, 3, 4, 5, 6, 7, 8 |
+
 ## Segment Field Status
 
 | Segment | Field | Status | Value | Source pointer |
 |---|---|---|---|---|
-| `segment_1_stimulus_reconstruction` | `stimulus_type` | `source_unavailable` |  |  |
+| `segment_1_stimulus_reconstruction` | `stimulus_type` | `inferred_low_confidence` | Auto-mined candidates: pink noise; pure tone | artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019.json; OpenDataLoader page(s) 2, 8 |
 | `segment_1_stimulus_reconstruction` | `source_provenance` | `source_unavailable` |  |  |
-| `segment_1_stimulus_reconstruction` | `trajectory_count` | `source_unavailable` |  |  |
-| `segment_1_stimulus_reconstruction` | `trajectory_path` | `source_unavailable` |  |  |
-| `segment_1_stimulus_reconstruction` | `stimulus_duration` | `source_unavailable` |  |  |
+| `segment_1_stimulus_reconstruction` | `trajectory_count` | `inferred_low_confidence` | Auto-mined candidates: approaching and receding motions | artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019.json; OpenDataLoader page(s) 8, 2, 3 |
+| `segment_1_stimulus_reconstruction` | `trajectory_path` | `inferred_low_confidence` | Auto-mined candidates: towards body; away from body; 35 cm; 1 cm | artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019.json; OpenDataLoader page(s) 8, 7, 9 |
+| `segment_1_stimulus_reconstruction` | `stimulus_duration` | `inferred_low_confidence` | Auto-mined candidates: duration relative to sound onset; duration relative to sound offset; 3000 ms; 2000 ms | artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019.json; OpenDataLoader page(s) 8, 9 |
 | `segment_1_stimulus_reconstruction` | `stimulus_speed` | `source_unavailable` |  |  |
-| `segment_1_stimulus_reconstruction` | `auditory_conditions` | `source_unavailable` |  |  |
-| `segment_1_stimulus_reconstruction` | `gain_envelope` | `source_unavailable` |  |  |
-| `segment_1_stimulus_reconstruction` | `renderer_or_apparatus` | `source_unavailable` |  |  |
-| `segment_2_sequence_and_intermixing` | `trial_rows_families` | `source_unavailable` |  |  |
+| `segment_1_stimulus_reconstruction` | `auditory_conditions` | `inferred_low_confidence` | Auto-mined candidates: IN sound; front; left; right | artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019.json; OpenDataLoader page(s) 8, 7 |
+| `segment_1_stimulus_reconstruction` | `gain_envelope` | `inferred_low_confidence` | Auto-mined candidates: 70 dB; 0.005 dB; 55 dB; 56.5 dB; 59 dB; 62.5 dB; 76 dB; 68.5 dB; 47 dB | artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019.json; OpenDataLoader page(s) 8, 7 |
+| `segment_1_stimulus_reconstruction` | `renderer_or_apparatus` | `inferred_low_confidence` | Auto-mined candidates: loudspeaker(s); speaker(s) | artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019.json; OpenDataLoader page(s) 8 |
+| `segment_2_sequence_and_intermixing` | `trial_rows_families` | `inferred_low_confidence` | Auto-mined candidates: audio-tactile trials | artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019.json; OpenDataLoader page(s) 9, 8 |
 | `segment_2_sequence_and_intermixing` | `condition_intermixing` | `source_unavailable` |  |  |
-| `segment_2_sequence_and_intermixing` | `blocked_or_random_order` | `source_unavailable` |  |  |
-| `segment_2_sequence_and_intermixing` | `iti_jitter_policy` | `source_unavailable` |  |  |
+| `segment_2_sequence_and_intermixing` | `blocked_or_random_order` | `inferred_low_confidence` | Auto-mined candidates: randomized/random order | artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019.json; OpenDataLoader page(s) 9, 3, 5 |
+| `segment_2_sequence_and_intermixing` | `iti_jitter_policy` | `inferred_low_confidence` | Auto-mined candidates: 3000 ms; 2000 ms | artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019.json; OpenDataLoader page(s) 8 |
 | `segment_2_sequence_and_intermixing` | `response_window` | `source_unavailable` |  |  |
-| `segment_2_sequence_and_intermixing` | `task_sequence_rules` | `source_unavailable` |  |  |
+| `segment_2_sequence_and_intermixing` | `task_sequence_rules` | `inferred_low_confidence` | Auto-mined candidates: ignore sound; tactile target trials | artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019.json; OpenDataLoader page(s) 9, 8 |
 | `segment_3_tactile_soa_baseline` | `tactile_stimulus` | `source_unavailable` |  |  |
-| `segment_3_tactile_soa_baseline` | `soa_table` | `source_unavailable` |  |  |
+| `segment_3_tactile_soa_baseline` | `soa_table` | `inferred_low_confidence` | Auto-mined candidates: 3000 ms; 2000 ms | artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019.json; OpenDataLoader page(s) 8 |
 | `segment_3_tactile_soa_baseline` | `baseline_strategy` | `source_unavailable` |  |  |
-| `segment_3_tactile_soa_baseline` | `baseline_timing` | `source_unavailable` |  |  |
+| `segment_3_tactile_soa_baseline` | `baseline_timing` | `inferred_low_confidence` | Auto-mined candidates: post-sound tactile baseline; 559.25 ms; 41.17 ms; 806.89 ms; 45.09 ms; 546.67 ms; 26.89 ms; 3000 ms | artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019.json; OpenDataLoader page(s) 3, 8 |
 | `segment_3_tactile_soa_baseline` | `catch_trial_type` | `source_unavailable` |  |  |
-| `segment_4_counts` | `repetitions_per_tactile_soa_condition` | `source_unavailable` |  |  |
-| `segment_4_counts` | `baseline_count` | `source_unavailable` |  |  |
-| `segment_4_counts` | `catch_count` | `source_unavailable` |  |  |
+| `segment_4_counts` | `repetitions_per_tactile_soa_condition` | `inferred_low_confidence` | Auto-mined candidates: 30 trials; 31 trials | artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019.json; OpenDataLoader page(s) 9, 8 |
+| `segment_4_counts` | `baseline_count` | `inferred_low_confidence` | Auto-mined candidates: 30 trials; 31 trials | artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019.json; OpenDataLoader page(s) 9, 8 |
+| `segment_4_counts` | `catch_count` | `inferred_low_confidence` | Auto-mined candidates: 30 trials; 31 trials | artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019.json; OpenDataLoader page(s) 8, 2, 9 |
 | `segment_4_counts` | `block_count` | `source_unavailable` |  |  |
-| `segment_4_counts` | `total_trial_count` | `source_unavailable` |  |  |
+| `segment_4_counts` | `total_trial_count` | `inferred_low_confidence` | Auto-mined candidates: 30 trials; 31 trials | artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019.json; OpenDataLoader page(s) 9, 8 |
 
 Do not paste long source text here; use short page/section pointers and concise paraphrases.

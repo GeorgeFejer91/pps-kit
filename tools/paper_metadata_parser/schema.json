@@ -1,6 +1,6 @@
 {
   "schema": "pps-paper-metadata-extraction-schema.v1",
-  "parser_version": "0.1.0",
+  "parser_version": "0.3.0",
   "pdf_statuses": [
     "downloaded",
     "open_access_unavailable",
@@ -39,6 +39,21 @@
     "partial_extraction",
     "high_confidence_extraction"
   ],
+  "automated_evidence": {
+    "status_values": [
+      "not_applicable",
+      "no_extracted_source",
+      "source_mined"
+    ],
+    "semantic_review_pass_status_values": [
+      "completed",
+      "completed_no_hits",
+      "source_unavailable",
+      "not_applicable"
+    ],
+    "semantic_review_strategy_count": 5,
+    "rule": "Store only short candidate values and page pointers; do not commit full text excerpts."
+  },
   "local_artifact_conventions": {
     "main_pdf_filename": "artifacts/paper_metadata_audit/publication_pdfs/<record_id>.pdf",
     "supplement_folder": "artifacts/paper_metadata_audit/supplements/<record_id>/",

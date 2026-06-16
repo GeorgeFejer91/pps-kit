@@ -16,7 +16,11 @@ The `artifacts/` tree is ignored by Git. Do not commit PDFs, supplements, extrac
 - PDF status counts: `{"downloaded": 27, "needs_user_download": 11, "not_applicable": 5, "open_access_unavailable": 13, "paywalled": 18}`
 - Supplement status counts: `{"downloaded": 1, "not_applicable": 5, "not_checked": 68}`
 - Extraction status counts: `{"parsed": 27, "parsed_with_warnings": 5, "pending_pdf": 42}`
-- Metadata confidence counts: `{"not_applicable": 5, "pending_source": 11, "source_acquired_unreviewed": 27, "source_unavailable": 31}`
+- Metadata confidence counts: `{"not_applicable": 5, "partial_extraction": 27, "pending_source": 11, "source_unavailable": 31}`
+- Automated evidence status counts: `{"no_extracted_source": 42, "not_applicable": 5, "source_mined": 27}`
+- Automated evidence mined field total: 480
+- Semantic review strategy count: 5
+- Semantic review pass status counts: `{"completed": 133, "completed_no_hits": 2, "not_applicable": 25, "source_unavailable": 210}`
 - Missing download/check requests: 110
 
 ## Environment Readiness
@@ -33,5 +37,7 @@ The `artifacts/` tree is ignored by Git. Do not commit PDFs, supplements, extrac
 3. Run `python -m tools.paper_metadata_parser --refresh` from the repo root.
 4. Review `running_checklist.csv`, `missing_pdf_request_list.csv`, and `paper_audits/<record_id>.md`.
 5. Fill `metadata_audit.jsonl` or the per-paper summaries with extracted Segment 1-4 values using short evidence pointers only.
+
+Automated evidence-mined values are `inferred_low_confidence` candidates. Treat them as a triage map for critical review, not as final paper metadata.
 
 Before marking any value `not_reported_after_review`, inspect the main PDF, methods/tables, supplements, and at least one fallback/source route.

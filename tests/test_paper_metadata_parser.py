@@ -12,6 +12,7 @@ from tools.paper_metadata_parser.parser import (
     FIELD_STATUSES,
     PDF_STATUSES,
     SUPPLEMENT_STATUSES,
+    TOTAL_SEGMENT_FIELD_COUNT,
 )
 
 
@@ -50,6 +51,13 @@ def test_paper_metadata_audit_covers_literature_database():
     assert sum(summary["extraction_status_counts"].values()) == 74
     assert summary["pdf_status_counts"].get("not_applicable") == 5
     assert summary["supplement_status_counts"].get("not_applicable") == 5
+    assert sum(summary["automated_evidence_status_counts"].values()) == 74
+    assert summary["automated_evidence_field_total"] == sum(
+        int(record["automated_evidence_mining"]["field_count"]) for record in audit_records
+    )
+    assert summary["semantic_review_strategy_count"] == 5
+    assert summary["semantic_review_pass_total"] == 5 * summary["record_count"]
+    assert sum(summary["semantic_review_pass_status_counts"].values()) == summary["semantic_review_pass_total"]
 
 
 def test_paper_metadata_schema_and_status_values_are_valid():
@@ -62,6 +70,7 @@ def test_paper_metadata_schema_and_status_values_are_valid():
     assert set(schema["extraction_statuses"]) == set(EXTRACTION_STATUSES) == set(tool_schema["extraction_statuses"])
     assert set(schema["field_statuses"]) == set(FIELD_STATUSES) == set(tool_schema["field_statuses"])
     assert set(schema["confidence_labels"]) == set(CONFIDENCE_LABELS) == set(tool_schema["confidence_labels"])
+    assert schema["automated_evidence"] == tool_schema["automated_evidence"]
     assert schema["local_artifact_conventions"]["main_pdf_filename"].startswith("artifacts/")
 
     for record in audit_records:
@@ -71,17 +80,34 @@ def test_paper_metadata_schema_and_status_values_are_valid():
         assert record["metadata_confidence_label"] in CONFIDENCE_LABELS, record["record_id"]
         assert 0.0 <= float(record["metadata_confidence_score"]) <= 1.0, record["record_id"]
         assert record["metadata_confidence_basis"], record["record_id"]
+        evidence = record["automated_evidence_mining"]
+        assert evidence["status"] in schema["automated_evidence"]["status_values"], record["record_id"]
+        assert 0 <= int(evidence["field_count"]) <= TOTAL_SEGMENT_FIELD_COUNT, record["record_id"]
+        assert 0.0 <= float(evidence["coverage_ratio"]) <= 1.0, record["record_id"]
+        review_passes = evidence["semantic_review_passes"]
+        assert len(review_passes) == schema["automated_evidence"]["semantic_review_strategy_count"], record["record_id"]
+        assert len({review_pass["strategy"] for review_pass in review_passes}) == len(review_passes), record["record_id"]
+        for review_pass in review_passes:
+            assert review_pass["status"] in schema["automated_evidence"]["semantic_review_pass_status_values"]
+            assert review_pass["purpose"], record["record_id"]
+            assert int(review_pass["hit_count"]) >= 0, record["record_id"]
         assert record["schema"] == "pps-paper-metadata-audit-record.v1"
         assert record["review_attempts"], record["record_id"]
         for segment_fields in record["segment_field_audit"].values():
             for field in segment_fields.values():
                 assert field["status"] in FIELD_STATUSES, record["record_id"]
                 assert {"value", "source_file", "page_or_section", "evidence_note"} <= set(field)
+                assert len(field["value"]) <= 320, record["record_id"]
+                if field["status"] == "inferred_low_confidence":
+                    assert field["value"].startswith("Auto-mined candidates:"), record["record_id"]
+                    assert field["source_file"].startswith("artifacts/paper_metadata_audit/extracted/"), record["record_id"]
+                    assert field["page_or_section"], record["record_id"]
 
         if record["coverage_category"] == "adjacent_out_of_scope":
             assert record["pdf_status"] == "not_applicable"
             assert record["supplement_status"] == "not_applicable"
             assert record["metadata_confidence_label"] == "not_applicable"
+            assert record["automated_evidence_mining"]["status"] == "not_applicable"
             for segment_fields in record["segment_field_audit"].values():
                 assert {field["status"] for field in segment_fields.values()} == {"not_applicable"}
         else:
@@ -93,6 +119,12 @@ def test_paper_metadata_schema_and_status_values_are_valid():
                     "partial_extraction",
                     "high_confidence_extraction",
                 }
+                assert record["automated_evidence_mining"]["status"] in {"source_mined", "no_extracted_source"}
+                if record["automated_evidence_mining"]["status"] == "source_mined":
+                    assert {
+                        review_pass["status"]
+                        for review_pass in record["automated_evidence_mining"]["semantic_review_passes"]
+                    } <= {"completed", "completed_no_hits"}
 
 
 def test_missing_pdf_request_list_tracks_main_pdfs_and_supplements():

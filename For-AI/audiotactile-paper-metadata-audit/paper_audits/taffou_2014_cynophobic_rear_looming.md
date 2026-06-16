@@ -10,6 +10,7 @@
 - Extraction status: `pending_pdf`
 - Metadata confidence: `0.0` (`pending_source`)
 - Confidence basis: Main publication PDF is not yet locally available for Segment 1-4 inspection.
+- Automated evidence mining: `no_extracted_source`; 0/25 fields with candidate values
 
 ## Known Prior Gaps
 
@@ -22,6 +23,16 @@
 - `targeted methods/table search`: `pending_pdf` - Search methods, procedure, apparatus, stimuli, trial design, and tables for Segment 1-4 parameters.
 - `supplement search`: `pending_download_or_check` - Check supplementary PDFs, spreadsheets, methods appendices, and task scripts when main-paper fields are absent.
 - `fallback extractor/source check`: `pending_pdf` - Use pdfplumber/pypdf, rendered pages, publisher HTML, or supplement files before marking a field missing.
+
+## Five Semantic Review Passes
+
+| Strategy | Status | Hits | Matched terms | Pages |
+|---|---|---:|---|---|
+| `stimulus_reconstruction` | `source_unavailable` | 0 |  |  |
+| `timing_soa` | `source_unavailable` | 0 |  |  |
+| `trial_structure_intermixing` | `source_unavailable` | 0 |  |  |
+| `baseline_catch_counts` | `source_unavailable` | 0 |  |  |
+| `tactile_response_apparatus` | `source_unavailable` | 0 |  |  |
 
 ## Segment Field Status
 
