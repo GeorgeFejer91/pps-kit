@@ -1,0 +1,287 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "taffou_2021_auditory_roughness",
+  "citation_short": "Taffou et al. (2021)",
+  "review_date": "2026-06-16",
+  "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
+  "confidence_score": 0.91,
+  "confidence_label": "high_confidence_extraction",
+  "confidence_basis": "Main PDF, OpenDataLoader output, fallback pypdf extraction, rendered methods/figure pages, Nature HTML, local DOCX supplement, extracted supplement text, and cited-protocol lineage were reviewed. The paper reports synthetic rough and non-rough sound synthesis, Max/MSP Spat rendering, LISTEN HRTFs, rear-left trajectory geometry, duration, speed, SOAs, baseline-like silent timings, randomization, response scoring window, repetitions, catch count, blocks, and total trials. Remaining uncertainty is mainly exact Max/MSP patch settings and catch sound-type split.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats_rear_left_binaural_roughness_looming_profile",
+    "reason": "The study is recreatable as a rear-left binaural looming PPS profile with two synthetic sound types crossed with seven tactile timings. It is a trunk-centered task even though the tactile actuator is on the left index finger, because hands were held on the trunk midline. Exact Spat room/render settings and author audio files are not supplied."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf",
+      "source": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+      "status": "reviewed",
+      "scope": "Reviewed methods, stimuli, apparatus, PPS experiment, Fig. 1, statistical analysis, and results for Segment 1-4 parameters."
+    },
+    {
+      "source_type": "opendataloader_json_md",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/taffou_2021_auditory_roughness.json",
+      "status": "reviewed",
+      "scope": "Used as primary extraction map for stimulus synthesis, HRTF rendering, timing, trial rows, counts, and analysis-window fields."
+    },
+    {
+      "source_type": "fallback_text_extraction",
+      "source": "pypdf local extraction",
+      "status": "reviewed",
+      "scope": "Searched all 11 PDF pages for stimulus, sound, rough, HRTF, Spat, trajectory, delay, catch, repetition, block, response, baseline, and supplement terms."
+    },
+    {
+      "source_type": "rendered_pdf_pages",
+      "source": "tmp/pdfs/taffou_2021_review/page-02.png through page-04.png",
+      "status": "reviewed_not_tracked",
+      "scope": "Temporary rendered pages were visually checked to verify sound synthesis text, rear-left 135-degree geometry, 5 m approach schematic, timing labels, and count continuation."
+    },
+    {
+      "source_type": "supplement_docx_and_text",
+      "source": "artifacts/paper_metadata_audit/supplements/taffou_2021_auditory_roughness/41598_2020_79767_MOESM1_ESM.docx",
+      "status": "reviewed",
+      "scope": "Supplement and extracted text were checked for hidden stimulus or count details; it adds RT tables and expectancy correction but no missing Spat patch or catch split."
+    },
+    {
+      "source_type": "publisher_html_and_protocol_lineage",
+      "source": "https://www.nature.com/articles/s41598-020-79767-0",
+      "status": "reviewed",
+      "scope": "Nature HTML was checked for open-access status, Methods text, supplement route, and cited prior-protocol papers."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "OpenDataLoader PDF extraction",
+      "status": "completed",
+      "result": "Mapped the methods sections containing synthetic sound formulae, Spat/HRTF rendering, trajectory geometry, tactile timing rows, and trial counts."
+    },
+    {
+      "strategy": "Fallback pypdf extraction",
+      "status": "completed",
+      "result": "Confirmed 20 repetitions for each of 14 delay-by-sound conditions, 280 tactile-target trials, 40 catch trials, and 10 blocks of 32 trials."
+    },
+    {
+      "strategy": "Rendered-page visual verification",
+      "status": "completed",
+      "result": "Verified from Fig. 1 that the virtual source approaches from rear-left space at 135 degrees toward the seated participant rather than from the front."
+    },
+    {
+      "strategy": "Supplement review",
+      "status": "completed",
+      "result": "Checked the DOCX supplement and extracted text; no additional stimulus-generation files or hidden count splits were present."
+    },
+    {
+      "strategy": "Stimulus reconstruction and trajectory pass",
+      "status": "completed",
+      "result": "Separated the two synthetic sound types from the single shared rear-left looming trajectory and recorded the renderer/HRTF provenance."
+    },
+    {
+      "strategy": "Timing, baseline, catch, and count pass",
+      "status": "completed",
+      "result": "Separated T1-T5 sound-period tactile timings from Tbefore/Tafter silent-period baseline-like timings and auditory-only catches."
+    },
+    {
+      "strategy": "Protocol-lineage pass",
+      "status": "completed",
+      "result": "Recorded the modified Canzoneri task and earlier Taffou/Hobeika rear/lateral PPS methods as lineage; the 2021 paper still reports its own roughness implementation."
+    }
+  ],
+  "field_status_counts": {
+    "derived": 2,
+    "reported": 23
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "reported",
+        "value": "Two synthetic 3000 ms sounds at 44.1 kHz: a harmonic non-rough sound with 500 Hz fundamental and seven harmonics, and the same sound amplitude-modulated at 70 Hz to create roughness.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF p.2, Stimuli",
+        "evidence_note": "Sound classes and roughness manipulation are directly reported."
+      },
+      "source_provenance": {
+        "status": "reported",
+        "value": "Synthetic sounds were generated from the reported harmonic formula; roughness used modulation depth m = 1 at 70 Hz. Exact audio files or Max/MSP patches are not supplied.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF p.2, Stimuli",
+        "evidence_note": "Formula-level provenance is reported, but not reusable source files."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "One shared rear-left looming trajectory crossed with two sound types: non-rough harmonic and rough amplitude-modulated harmonic.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF pp.2-4, Stimuli and Fig. 1",
+        "evidence_note": "Sound type varies, while spatial trajectory is the same for both sounds."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Virtual sound source approached from the rear-left hemifield at 135 degrees, from 520 cm to 20 cm from the center of the participant's head.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF pp.2-4, Stimuli and Fig. 1",
+        "evidence_note": "Text and rendered Fig. 1 confirm rear-left rather than frontal movement."
+      },
+      "stimulus_duration": {
+        "status": "reported",
+        "value": "Each auditory stimulus lasted 3000 ms, preceded by 1000 ms silence and followed by 2700-3300 ms of silence.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF p.3, Measure of PPS",
+        "evidence_note": "Sound duration and silence windows are directly reported."
+      },
+      "stimulus_speed": {
+        "status": "reported",
+        "value": "The simulated source moved at 166.67 cm/s over the 520 cm to 20 cm rear-left approach.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF p.2, Stimuli",
+        "evidence_note": "Velocity is explicitly reported."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "The main PPS task crossed two sound types, rough and non-rough, with the same rear-left looming trajectory; emotional and roughness rating tasks were separate.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF pp.2-4, Design and procedure",
+        "evidence_note": "Roughness is the systematic auditory manipulation in the PPS task."
+      },
+      "gain_envelope": {
+        "status": "reported",
+        "value": "The two sounds were loudness-equalized using Moore et al.'s model; a 0.8 dB rough/non-rough difference was found. Separate rating-task levels were 76.5 and 77.3 dBA.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF pp.2-3, Stimuli and emotional evaluation task",
+        "evidence_note": "Loudness equalization is reported, but exact Spat gain/path settings are not."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Max/MSP 6.1.8 with Spat rendered direct sound, reflections through order 3, late reverberation, LISTEN non-individual HRTFs, and nearfield correction; playback used DT770 headphones.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF pp.2-3, Stimuli/Apparatus",
+        "evidence_note": "Software, HRTF database, rendering components, and headphones are reported."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "The PPS task had tactile-target trials at seven delay levels crossed with two sound types plus auditory-only catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF pp.3-4, Measure of PPS",
+        "evidence_note": "The delay-by-sound design and catch family are reported."
+      },
+      "condition_intermixing": {
+        "status": "reported",
+        "value": "The 14 tactile-target conditions were presented in random order and randomly intermingled with catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF pp.3-4, Measure of PPS",
+        "evidence_note": "Condition intermixing is directly reported."
+      },
+      "blocked_or_random_order": {
+        "status": "reported",
+        "value": "Trials were divided into 10 blocks of 32 trials; within the experiment, trial conditions were randomized rather than blocked by sound type or delay.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF p.4, Measure of PPS",
+        "evidence_note": "Block count and random order are reported."
+      },
+      "iti_jitter_policy": {
+        "status": "reported",
+        "value": "Each trial had 1000 ms pre-sound silence and 2700-3300 ms post-sound silence; no separate inter-trial interval distribution is reported.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF p.3, Measure of PPS and Fig. 1",
+        "evidence_note": "The variable post-sound silence is the reported timing jitter."
+      },
+      "response_window": {
+        "status": "reported",
+        "value": "Participants responded as quickly as possible by keypress; RTs shorter than 100 ms or exceeding 1000 ms were removed from analyses.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF p.5, PPS measure analysis",
+        "evidence_note": "A scoring/exclusion window is reported, but no separate trial timeout is given."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Participants were blindfolded, ignored the auditory stimuli, pressed a keypad to detected tactile stimuli, and withheld responses during auditory-only catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF pp.3-4, Apparatus/Measure of PPS",
+        "evidence_note": "Instruction, response, and catch rules are reported."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "A 28 mm Veco miniature loudspeaker delivered a 20 ms 250 Hz sinusoidal vibration on the palmar surface of the participant's left index finger.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF pp.2-3, Stimuli/Apparatus",
+        "evidence_note": "Tactile device, site, waveform, duration, and frequency are reported."
+      },
+      "soa_table": {
+        "status": "derived",
+        "value": "Reported timings were Tbefore -650 ms, T1 0 ms, T2 750 ms, T3 1500 ms, T4 2250 ms, T5 3000 ms, and Tafter 3650 ms; T1-T5 imply 520, 395, 270, 145, and 20 cm.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF pp.3-4, Fig. 1 and Measure of PPS",
+        "evidence_note": "SOAs are reported; distance table is derived from reported speed/path."
+      },
+      "baseline_strategy": {
+        "status": "reported",
+        "value": "Tbefore and Tafter were silent-period tactile timings used as unimodal baseline-like conditions and for expectancy-effect correction.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf; artifacts/paper_metadata_audit/supplements/taffou_2021_auditory_roughness/41598_2020_79767_MOESM1_ESM.docx",
+        "page_or_section": "PDF p.3; Supplementary Data Analysis",
+        "evidence_note": "Main text and supplement describe silent-period baseline/expectancy logic."
+      },
+      "baseline_timing": {
+        "status": "reported",
+        "value": "Baseline-like tactile timings were -650 ms before sound onset and +650 ms after sound offset, i.e. 3650 ms from sound onset.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF p.3, Measure of PPS",
+        "evidence_note": "Tbefore and Tafter values are directly reported."
+      },
+      "catch_trial_type": {
+        "status": "reported",
+        "value": "Catch trials had auditory stimulation only and no tactile target; participants were to withhold responses.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF p.3, Measure of PPS",
+        "evidence_note": "Catch-trial type is directly reported."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "reported",
+        "value": "There were 20 repetitions for each of 14 tactile-target conditions: seven delays crossed with rough versus non-rough sound type.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF pp.3-4, Measure of PPS",
+        "evidence_note": "The repetition formula is directly reported."
+      },
+      "baseline_count": {
+        "status": "derived",
+        "value": "Baseline-like silent-period tactile count was 80 trials: 20 repetitions x 2 sound types x 2 timings, Tbefore and Tafter.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF pp.3-4, Measure of PPS",
+        "evidence_note": "Count is derived from the reported 14-condition repetition formula."
+      },
+      "catch_count": {
+        "status": "reported",
+        "value": "There were 40 auditory-only catch trials, randomly intermingled with tactile-target trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF p.4, Measure of PPS",
+        "evidence_note": "Total catch count is reported; rough/non-rough catch split is not."
+      },
+      "block_count": {
+        "status": "reported",
+        "value": "The test was divided into 10 blocks of 32 trials, each lasting about 4 min, after a small training block.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF p.4, Measure of PPS",
+        "evidence_note": "Block count and block size are directly reported."
+      },
+      "total_trial_count": {
+        "status": "reported",
+        "value": "The PPS test had 320 trials total: 280 tactile-target trials plus 40 auditory-only catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/taffou_2021_auditory_roughness.pdf",
+        "page_or_section": "PDF p.4, Measure of PPS",
+        "evidence_note": "Total is supported by reported target/catch counts and 10 x 32 blocks."
+      }
+    }
+  },
+  "critical_caveats": [
+    "Exact Max/MSP/Spat patch, room parameters, and gain automation files are not supplied.",
+    "Exact generated WAV files and random seed/source code are not supplied.",
+    "PPS playback SPL for the spatialized looming task is not separately reported; only relative loudness equalization and non-spatialized rating-task dBA values are given.",
+    "Catch trials are reported only as 40 auditory-only trials; their rough/non-rough split is not explicitly stated.",
+    "The trajectory is rear-left at 135 degrees in a binaural virtual-source frame, not a frontal speaker profile.",
+    "The task is trunk-centered by posture despite tactile stimulation being delivered to the left index finger."
+  ],
+  "next_manual_action": "Use this as a high-confidence rear-left binaural roughness PPS profile. Lab recreation should implement the synthetic sounds from the reported formula and approximate Spat/LISTEN/nearfield rendering with documented renderer defaults unless author patches become available."
+}
