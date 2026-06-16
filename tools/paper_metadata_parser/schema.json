@@ -1,6 +1,6 @@
 {
   "schema": "pps-paper-metadata-extraction-schema.v1",
-  "parser_version": "0.5.1",
+  "parser_version": "0.5.3",
   "pdf_statuses": [
     "downloaded",
     "open_access_unavailable",
@@ -58,6 +58,7 @@
     "supported_local_formats": [
       ".doc",
       ".docx",
+      ".pdf",
       ".ods",
       ".csv",
       ".tsv"

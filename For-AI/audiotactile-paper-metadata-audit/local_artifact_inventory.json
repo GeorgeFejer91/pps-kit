@@ -1,22 +1,22 @@
 {
   "schema": "pps-paper-metadata-local-artifact-inventory.v1",
-  "generated_at": "2026-06-16T13:46:01.229829+00:00",
+  "generated_at": "2026-06-16T14:50:28.652241+00:00",
   "artifact_root": "artifacts/paper_metadata_audit",
   "copyright_boundary": "This tracked inventory stores relative paths, sizes, and hashes only. The PDFs, supplements, extracted text, and local ZIP bundle remain ignored local artifacts and must not be committed to the public repository.",
   "restore_note": "To resume on the same machine, keep artifacts/paper_metadata_audit/ in place. To move work privately, transfer the ignored ZIP bundle named below outside the public Git repo, extract it into artifacts/paper_metadata_audit/, then run python -m tools.paper_metadata_parser --refresh.",
-  "artifact_file_count": 480,
-  "artifact_total_bytes": 103735565,
+  "artifact_file_count": 482,
+  "artifact_total_bytes": 107532938,
   "category_counts": {
     "acquisition_status.json": 1,
-    "extracted_text_or_parser_output": 430,
+    "extracted_text_or_parser_output": 431,
     "publication_pdf": 36,
-    "supplement": 13
+    "supplement": 14
   },
   "local_bundle": {
     "created": true,
     "relative_path": "artifacts/paper_metadata_audit/resume_bundles/paper_metadata_audit_artifacts_latest.zip",
-    "size_bytes": 80179124,
-    "sha256": "e6574b33337928437d3f6f923f636b0a3a9ae48ff727fb215dd9abf00f93cc7e"
+    "size_bytes": 83638853,
+    "sha256": "1bcc56489d023feb1b0e46127d63b0df21839633f320c54c500019c02da3fa11"
   },
   "files": [
     {
@@ -3364,6 +3364,14 @@
       "sha256": "351a85cfee500b0e97e1bc5c7d61e760d8f948df7006c74c40a0d005a1cf8996"
     },
     {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.txt",
+      "artifact_relative_path": "extracted/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.txt",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness",
+      "size_bytes": 14024,
+      "sha256": "3bc7d0935ce7149873b0d683914ed092219d91e15cd59f8d82762f24859ab4cc"
+    },
+    {
       "relative_path": "artifacts/paper_metadata_audit/extracted/supplements/holmes_2020_four_experiments/holmes_2020_MOESM1.txt",
       "artifact_relative_path": "extracted/supplements/holmes_2020_four_experiments/holmes_2020_MOESM1.txt",
       "category": "extracted_text_or_parser_output",
@@ -3754,6 +3762,14 @@
       "record_id": "tonelli_2019_echolocation",
       "size_bytes": 1430645,
       "sha256": "5ff5cf36374a5e01f03c21efd7b2cc757b2016a46fa2b77a817ff7db18b76179"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+      "artifact_relative_path": "supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+      "category": "supplement",
+      "record_id": "cell_reports_medicine_2026_consciousness",
+      "size_bytes": 3783349,
+      "sha256": "d1422999158381ae4a56c92b68cb2d6472716938ea24a17213c699070bdf8195"
     },
     {
       "relative_path": "artifacts/paper_metadata_audit/supplements/holmes_2020_four_experiments/holmes_2020_MOESM1.ods",

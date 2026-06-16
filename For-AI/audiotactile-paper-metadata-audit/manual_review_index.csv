@@ -1,6 +1,7 @@
 record_id,citation_short,manual_review_status,confidence_score,confidence_label,profile_recreation_assessment,critical_missing_or_caveat_count,source_check_count,review_date
 biggio_2017_racket_tool_use,Biggio et al. (2017),manual_review_completed_main_pdf_no_supplement_found,0.84,high_confidence_extraction,possible_with_caveats_static_near_far_racket_condition,6,5,2026-06-16
 canzoneri_2012_dynamic_sounds,Canzoneri et al. (2012),manual_review_completed_main_pdf,0.92,high_confidence_extraction,possible_with_caveats,4,5,2026-06-16
+cell_reports_medicine_2026_consciousness,Multisensory integration in PPS indexes consciousness states (2026),manual_review_completed_main_pdf_and_cell_press_source_pdf,0.91,high_confidence_extraction,possible_with_caveats_task_free_eeg_pps_two_variants,7,5,2026-06-16
 depersonalisation_2024,"Ferroni et al. (2024/2025), depersonalisation PPS",manual_review_completed_main_pdf_supplement_blocked,0.78,partial_extraction,possible_with_caveats,7,5,2026-06-16
 farne_ladavas_2002_auditory_pps_humans,Farne & Ladavas (2002),manual_review_completed_main_pdf,0.82,high_confidence_extraction,possible_with_caveats,6,5,2026-06-16
 finisguerra_2015_moving_sounds_motor,Finisguerra et al. (2015),manual_review_completed_main_pdf_no_supplement_found,0.86,high_confidence_extraction,possible_with_caveats_tms_specific,6,5,2026-06-16

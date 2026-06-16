@@ -1,0 +1,273 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "cell_reports_medicine_2026_consciousness",
+  "citation_short": "Multisensory integration in PPS indexes consciousness states (2026)",
+  "review_date": "2026-06-16",
+  "manual_review_status": "manual_review_completed_main_pdf_and_cell_press_source_pdf",
+  "confidence_score": 0.91,
+  "confidence_label": "high_confidence_extraction",
+  "confidence_basis": "Main PDF, OpenDataLoader output, fallback extraction, rendered STAR Methods pages, and the user-provided Cell Press article-export PDF were checked. The paper supplies enough Segment 1-4 metadata for static near/far PPS stimulation in healthy wake/sleep and DoC arm variants, but it reports no original code or scripts and no dynamic looming trajectory.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats_task_free_eeg_pps_two_variants",
+    "reason": "The study can be recreated as static near/far audio-tactile PPS stimulation for task-free EEG/clinical endpoints. It is not a behavioral RT profile and not a moving looming profile; exact white-noise assets, participant-specific gains, and some sleep-block totals would need protocol-level choices."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf",
+      "source": "artifacts/paper_metadata_audit/publication_pdfs/cell_reports_medicine_2026_consciousness.pdf",
+      "status": "reviewed",
+      "scope": "Checked article resource availability and STAR Methods around stimulus delivery, participant variants, EEG epochs, stimulation procedure, and counts."
+    },
+    {
+      "source_type": "cell_press_source_pdf",
+      "source": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+      "status": "reviewed",
+      "scope": "Extracted from the user-provided Cell Press ZIP; reviewed pages 11 and 16-18 for resource/code notes and STAR Methods."
+    },
+    {
+      "source_type": "opendataloader_json",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness.json",
+      "status": "reviewed",
+      "scope": "Used as the initial extracted text map, then corrected against the Cell Press PDF and rendered STAR Methods pages."
+    },
+    {
+      "source_type": "supplement_pdf_extracted_text",
+      "source": "artifacts/paper_metadata_audit/extracted/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.txt",
+      "status": "reviewed",
+      "scope": "Searched the extracted Cell Press source text for stimulus, apparatus, randomization, ITI, baseline, count, sleep, DoC, and code/script terms."
+    },
+    {
+      "source_type": "rendered_pdf_pages",
+      "source": "tmp/pdfs/cell_reports_2026_review/page-16.png through page-18.png",
+      "status": "reviewed_not_tracked",
+      "scope": "Temporary rendered STAR Methods pages were visually checked and not committed."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "OpenDataLoader PDF extraction",
+      "status": "completed",
+      "result": "Mapped noisy candidate Segment 1-4 values and identified the need to separate analysis frequencies from stimulus parameters."
+    },
+    {
+      "strategy": "Cell Press ZIP inspection",
+      "status": "completed",
+      "result": "Found a 43-PDF Cell Press export batch; extracted only the relevant article PDF for this record and found no scripts or code files."
+    },
+    {
+      "strategy": "STAR Methods stimulus reconstruction pass",
+      "status": "completed",
+      "result": "Separated the healthy chest and DoC arm task variants and captured white-noise duration, speaker geometry, gain, and tactile apparatus."
+    },
+    {
+      "strategy": "Timing, SOA, ITI, and jitter pass",
+      "status": "completed",
+      "result": "Confirmed synchronous audio-tactile onset, healthy awake ITI 2.5-3 s in five 100 ms steps, and DoC ITI uniformly 1.5-2 s."
+    },
+    {
+      "strategy": "Trial intermixing and block-structure pass",
+      "status": "completed",
+      "result": "Confirmed five randomized conditions per block, healthy awake 3 x 110-trial blocks, sleep stim/no-stim blocks, and DoC 250-trial blocks."
+    },
+    {
+      "strategy": "Baseline, response, catch, and count pass",
+      "status": "completed",
+      "result": "Captured EEG baseline windows, sleep no-stimulation blocks, no per-trial behavioral response, and no catch/no-go trial family."
+    },
+    {
+      "strategy": "Code/script availability pass",
+      "status": "completed",
+      "result": "Resource availability statements and the Cell Press ZIP show no original code or reusable stimulus-generation scripts."
+    }
+  ],
+  "field_status_counts": {
+    "derived": 1,
+    "not_applicable": 4,
+    "reported": 20
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "reported",
+        "value": "Healthy variant used 100 ms white-noise bursts; DoC variant used 50 ms white-noise bursts.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, STAR Methods, Experimental Design",
+        "evidence_note": "Both participant variants identify white-noise auditory stimulation and duration."
+      },
+      "source_provenance": {
+        "status": "reported",
+        "value": "Healthy sounds were generated with E-Prime 2; resource notes report no original code. Exact white-noise file, seed, or reusable script is not supplied.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.11, 16, Resource Availability and STAR Methods",
+        "evidence_note": "The source route gives software provenance but no code or asset bundle."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "Two static auditory distance conditions per variant: near and far, crossed with unisensory and audio-tactile condition families.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Experimental Design",
+        "evidence_note": "AN/AF and ANT/AFT rows encode near/far auditory distance rather than motion."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Healthy: speakers at 30 cm or 130 cm above the chest. DoC: speakers at 5 cm or 75 cm from the extended arm in depth.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Experimental Design",
+        "evidence_note": "Both variants specify body anchor and near/far speaker distances."
+      },
+      "stimulus_duration": {
+        "status": "reported",
+        "value": "Auditory duration was 100 ms in the healthy wake/sleep variant and 50 ms in the DoC patient variant.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Experimental Design",
+        "evidence_note": "Duration values are explicit for both auditory-stimulus variants."
+      },
+      "stimulus_speed": {
+        "status": "not_applicable",
+        "value": "No auditory movement speed is applicable; stimulation used static near/far loudspeaker positions, not looming or receding motion.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Experimental Design",
+        "evidence_note": "Near/far positions are reported, but no moving-source trajectory is described."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "Five conditions were used: tactile only, auditory near, auditory far, audio-tactile near, and audio-tactile far.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Experimental Design",
+        "evidence_note": "The same condition family appears in healthy and DoC procedures."
+      },
+      "gain_envelope": {
+        "status": "reported",
+        "value": "Healthy: individual auditory threshold plus 40%, mean 51 dB, equalized at the ear. DoC: 65.2 dB SPL near and 64.1 dB SPL far.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Experimental Design",
+        "evidence_note": "Intensity calibration is reported; no detailed waveform envelope is supplied."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Healthy: two commercial loudspeakers, E-Prime 2, Digitimer DS7AH. DoC: Logitech Z120 speakers and MEDEL Motionstim 8 FES setup.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Experimental Design",
+        "evidence_note": "Speaker and tactile-device apparatus are reported for both variants."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "Both variants use T, AN, AF, ANT, and AFT rows; sleep additionally alternates stimulation and no-stimulation block families.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Experimental Design",
+        "evidence_note": "Condition rows and sleep no-stimulation blocks are described in the procedure."
+      },
+      "condition_intermixing": {
+        "status": "reported",
+        "value": "Awake healthy and DoC trials were fully randomized within blocks; sleep stimulation/no-stimulation blocks were randomized independently of sleep stage.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Experimental Design and Procedure",
+        "evidence_note": "The randomization rule is explicit for trials and sleep blocks."
+      },
+      "blocked_or_random_order": {
+        "status": "reported",
+        "value": "Healthy awake: three randomized 110-trial blocks. Sleep: 5-min stimulation/no-stimulation blocks. DoC: 10-min randomized blocks.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Experimental Design and Procedure",
+        "evidence_note": "Block duration and trial randomization are reported by participant variant."
+      },
+      "iti_jitter_policy": {
+        "status": "reported",
+        "value": "Healthy awake ITI was 2.5-3 s in five random 100 ms steps. DoC ITI was uniformly distributed from 1.5-2 s.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Experimental Design",
+        "evidence_note": "ITI and jitter/distribution are explicitly reported for awake healthy and DoC protocols."
+      },
+      "response_window": {
+        "status": "not_applicable",
+        "value": "No per-trial behavioral response window is applicable; the PPS stimulation task was task-free EEG/clinical assessment.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Experimental Design and Procedure",
+        "evidence_note": "Participants were not required to respond during PPS stimulation trials."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Healthy sleep used stimulation and no-stimulation block alternation with awakenings/questionnaires; DoC blocks included brief clinical breaks.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Procedure",
+        "evidence_note": "Sequence constraints differ for sleep-state and clinical-patient procedures."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "Healthy: 5 ms electrical chest pulse below the manubrium via DS7AH. DoC: 50 ms, 35 Hz FES to arm extensors at 70% motor threshold.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Experimental Design",
+        "evidence_note": "Tactile site, duration, device, and calibration are reported for both variants."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "Audio-tactile near and far trials used synchronized auditory and tactile onset; no SOA ladder was manipulated.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Experimental Design",
+        "evidence_note": "The multisensory conditions specify simultaneous or onset-synchronized delivery."
+      },
+      "baseline_strategy": {
+        "status": "reported",
+        "value": "Controls include tactile-only and auditory-only rows, sleep no-stimulation blocks, and EEG baseline correction rather than a behavioral tactile SOA baseline.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Experimental Design and Quantification",
+        "evidence_note": "Baseline strategy combines control rows, sleep blocks, and EEG preprocessing."
+      },
+      "baseline_timing": {
+        "status": "reported",
+        "value": "Healthy EEG epochs used -1 to +2 s around stimulus onset. DoC epochs used -100 to +500 ms with a 100 ms pre-stimulus baseline.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.17-18, Quantification and Statistical Analysis",
+        "evidence_note": "EEG baseline windows are reported separately for healthy and DoC analyses."
+      },
+      "catch_trial_type": {
+        "status": "not_applicable",
+        "value": "No catch or no-go trial family is described; auditory-only rows are unisensory control conditions, not catches.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Experimental Design",
+        "evidence_note": "The task is response-free, with no target-absent catch requirement."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "reported",
+        "value": "Healthy awake: 22 trials per condition per block, three blocks. DoC: 50 trials per condition per 250-trial block.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Experimental Design",
+        "evidence_note": "Per-condition counts are reported for awake healthy and DoC blocks."
+      },
+      "baseline_count": {
+        "status": "reported",
+        "value": "Sleep baseline is specified as alternating 5-min no-stimulation blocks; EEG baseline windows are timing windows, not discrete trial counts.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Procedure and Quantification",
+        "evidence_note": "No-stimulation block duration is reported; no separate behavioral baseline count applies."
+      },
+      "catch_count": {
+        "status": "not_applicable",
+        "value": "No catch trials are described, so no catch count applies.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Experimental Design",
+        "evidence_note": "The trial rows are active unisensory or multisensory conditions."
+      },
+      "block_count": {
+        "status": "reported",
+        "value": "Healthy awake: three blocks. Sleep: repeated 5-min blocks overnight. DoC: mean 2.8 blocks per session, range 1-3.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Experimental Design and Procedure",
+        "evidence_note": "Block counts or block-duration rules are reported by participant variant."
+      },
+      "total_trial_count": {
+        "status": "derived",
+        "value": "Healthy awake totals 330 trials from 3 x 110. DoC totals 250-750 trials depending on 1-3 blocks, with 250 trials per block.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
+        "page_or_section": "PDF pp.16-18, Experimental Design",
+        "evidence_note": "Totals are derived from reported block and per-block counts."
+      }
+    }
+  }
+}

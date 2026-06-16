@@ -15,7 +15,7 @@ from typing import Any
 from xml.etree import ElementTree
 
 
-PARSER_VERSION = "0.5.2"
+PARSER_VERSION = "0.5.3"
 
 COVERAGE_PATH = Path("assets/preloads/audiotactile_literature_coverage.json")
 AUDIT_DIR = Path("For-AI/audiotactile-paper-metadata-audit")
@@ -670,6 +670,28 @@ def extract_ods_text(path: Path) -> str:
         return iter_xml_text(archive.read("content.xml"))
 
 
+def extract_pdf_text(path: Path) -> str:
+    if importlib.util.find_spec("pdfplumber") is not None:
+        import pdfplumber  # type: ignore
+
+        chunks: list[str] = []
+        with pdfplumber.open(str(path)) as pdf:
+            for index, page in enumerate(pdf.pages, start=1):
+                page_text = page.extract_text() or ""
+                chunks.append(f"\n\n[page {index}]\n{page_text}")
+        if any(chunk.strip() for chunk in chunks):
+            return "".join(chunks)
+    if importlib.util.find_spec("pypdf") is not None:
+        from pypdf import PdfReader  # type: ignore
+
+        reader = PdfReader(str(path))
+        return "".join(
+            f"\n\n[page {index}]\n{page.extract_text() or ''}"
+            for index, page in enumerate(reader.pages, start=1)
+        )
+    return ""
+
+
 def extract_legacy_doc_text(path: Path) -> str:
     data = path.read_bytes()
     snippets: list[str] = []
@@ -691,13 +713,15 @@ def extract_supplement_text(path: Path) -> tuple[str, str]:
             text = extract_docx_text(path)
         elif suffix == ".ods":
             text = extract_ods_text(path)
+        elif suffix == ".pdf":
+            text = extract_pdf_text(path)
         elif suffix == ".doc":
             text = extract_legacy_doc_text(path)
         elif suffix in {".csv", ".tsv"}:
             text = path.read_text(encoding="utf-8", errors="replace")
         else:
             return "", "unsupported"
-    except (OSError, zipfile.BadZipFile, UnicodeError) as exc:
+    except Exception as exc:
         return "", f"failed:{exc.__class__.__name__}"
     cleaned = clean_evidence_text(text)
     if not cleaned:
@@ -1433,7 +1457,7 @@ def schema_payload() -> dict[str, Any]:
             "rule": "Store only short candidate values and page pointers; do not commit full text excerpts.",
         },
         "supplement_extraction": {
-            "supported_local_formats": [".doc", ".docx", ".ods", ".csv", ".tsv"],
+            "supported_local_formats": [".doc", ".docx", ".pdf", ".ods", ".csv", ".tsv"],
             "rule": "Supplement text extraction writes only ignored local text artifacts; tracked audit files store counts, statuses, and short evidence pointers.",
         },
         "manual_reviews": {

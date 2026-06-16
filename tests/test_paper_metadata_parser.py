@@ -74,6 +74,7 @@ def test_paper_metadata_schema_and_status_values_are_valid():
     assert set(schema["confidence_labels"]) == set(CONFIDENCE_LABELS) == set(tool_schema["confidence_labels"])
     assert schema["automated_evidence"] == tool_schema["automated_evidence"]
     assert schema["supplement_extraction"] == tool_schema["supplement_extraction"]
+    assert ".pdf" in schema["supplement_extraction"]["supported_local_formats"]
     assert schema["manual_reviews"] == tool_schema["manual_reviews"]
     assert schema["local_artifact_conventions"]["main_pdf_filename"].startswith("artifacts/")
 

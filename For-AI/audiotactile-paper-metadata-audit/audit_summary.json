@@ -1,7 +1,7 @@
 {
   "schema": "pps-paper-metadata-audit-summary.v1",
   "generated_on": "2026-06-16",
-  "parser_version": "0.5.2",
+  "parser_version": "0.5.3",
   "record_count": 74,
   "doi_record_count": 67,
   "missing_doi_record_count": 7,
@@ -13,11 +13,11 @@
     "paywalled": 13
   },
   "supplement_status_counts": {
-    "downloaded": 10,
+    "downloaded": 11,
     "needs_user_download": 16,
     "not_applicable": 5,
     "not_checked": 6,
-    "not_found": 18,
+    "not_found": 17,
     "paywalled": 19
   },
   "extraction_status_counts": {
@@ -36,9 +36,9 @@
     "not_applicable": 5,
     "source_mined": 38
   },
-  "automated_evidence_field_total": 636,
-  "supplement_extracted_record_count": 10,
-  "supplement_extracted_file_total": 13,
+  "automated_evidence_field_total": 640,
+  "supplement_extracted_record_count": 11,
+  "supplement_extracted_file_total": 14,
   "semantic_review_strategy_count": 5,
   "semantic_review_pass_total": 370,
   "semantic_review_pass_status_counts": {
