@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260616-docs-flow-icons">
+  <link rel="stylesheet" href="styles.css?v=20260616-spatialization-docs">
 </head>
 <body>
   <div class="app-shell">
@@ -29,8 +29,7 @@
         <a href="#docs-pps" data-page-section-link="docs-pps" data-page-section-page="documentation"><span>Peripersonal Space</span></a>
         <a href="#docs-overview" data-page-section-link="docs-overview" data-page-section-page="documentation"><span>Toolkit</span></a>
         <a href="#docs-architecture" data-page-section-link="docs-architecture" data-page-section-page="documentation"><span>Architecture</span></a>
-        <a href="#docs-spatialization" data-page-section-link="docs-spatialization" data-page-section-page="documentation"><span>Spatialization</span></a>
-        <a href="#docs-3dti" data-page-section-link="docs-3dti" data-page-section-page="documentation"><span>3DTI</span></a>
+        <a href="#docs-spatialization" data-page-section-link="docs-spatialization" data-page-section-page="documentation"><span>Stimulus Generation</span></a>
         <a href="#docs-hardware" data-page-section-link="docs-hardware" data-page-section-page="documentation"><span>Hardware</span></a>
         <a href="#docs-designer" data-page-section-link="docs-designer" data-page-section-page="documentation"><span>Designer</span></a>
         <a href="#docs-runner" data-page-section-link="docs-runner" data-page-section-page="documentation"><span>Runner</span></a>
@@ -61,7 +60,7 @@
       <header class="topbar site-tabs" aria-label="Primary dashboard pages">
         <nav class="site-tab-list" aria-label="Dashboard tabs">
           <button class="site-tab active" type="button" data-page-tab="toolkit" aria-selected="true">PPS Toolkit</button>
-          <button class="site-tab" type="button" data-page-tab="documentation" aria-selected="false">Documentation</button>
+          <button class="site-tab" type="button" data-page-tab="documentation" aria-selected="false" aria-label="Documentation"><span class="tab-label-full">Documentation</span><span class="tab-label-short" aria-hidden="true">Docs</span></button>
           <button class="site-tab" type="button" data-page-tab="downloads" aria-selected="false">Downloads</button>
         </nav>
       </header>
@@ -730,84 +729,104 @@
 
         <section id="docs-spatialization" class="info-segment" aria-labelledby="docs-spatialization-title">
           <div class="info-segment-heading">
-            <span class="segment-kicker">Stimulus Model</span>
-            <h2 id="docs-spatialization-title">SOFA/FABIAN and Spatialized Looming Stimuli</h2>
+            <span class="segment-kicker">Stimulus Generation</span>
+            <h2 id="docs-spatialization-title">How are spatialized/binaural stimuli generated?</h2>
           </div>
-          <p class="info-copy">Binaural spatialization uses head-related transfer functions stored in the SOFA format, the Spatially Oriented Format for Acoustics, an AES-standardized container for spatial acoustic measurements. The bundled FABIAN/TU Berlin HRIR dataset serves as the binaural rendering reference. Researchers define source trajectory, looming duration, start and end distances, azimuth, and timing parameters through the interface, and the local backend converts these into binaural WAV files in which channels 1 and 2 carry the left and right auditory streams. Tactile timing is handled separately through a stimulus onset asynchrony schedule that drives the third analog output channel, and all rendering decisions are captured in manifests that record trajectory samples, tactile events, file hashes, and quality-control summaries for post-hoc auditability.</p>
-          <div class="info-card-grid">
+          <span id="docs-3dti" class="anchor-preserve" aria-hidden="true"></span>
+          <p class="info-copy">Spatialized sound is generated before a participant run. A researcher chooses a dry source, such as pink noise or a tone, and defines how that source should move through space: start distance, end distance, azimuth/elevation, duration, and whether the path is looming or receding. The local backend samples that path over time, looks up the matching left-ear and right-ear filters from a SOFA/FABIAN HRTF dataset, and asks the renderer to turn the moving source into a stereo binaural WAV. Channels 1 and 2 carry the headphone signal; tactile cues are added later as a separate channel-3 schedule, so the spatial audio bake stays auditory-only and auditable.</p>
+
+          <figure class="spatial-pipeline-figure" aria-label="Pictographic flow showing how a dry source becomes a binaural looming WAV">
+            <div class="spatial-pipeline">
+              <article class="spatial-pipeline-step">
+                <div class="spatial-step-icon" aria-hidden="true">
+                  <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20v-8l6-4v16l-6-4Z"/><path d="M17 12a5 5 0 010 8"/><path d="M21 9a9 9 0 010 14"/></svg>
+                </div>
+                <strong>Source sound</strong>
+                <span>Noise, tone, or imported clip</span>
+              </article>
+              <div class="spatial-pipeline-arrow" aria-hidden="true"></div>
+              <article class="spatial-pipeline-step">
+                <div class="spatial-step-icon" aria-hidden="true">
+                  <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 24c7-13 15-17 22-16"/><path d="M20 6h7v7"/><circle cx="8" cy="21" r="2"/><circle cx="24" cy="9" r="2"/></svg>
+                </div>
+                <strong>Trajectory</strong>
+                <span>Distance and direction over time</span>
+              </article>
+              <div class="spatial-pipeline-arrow" aria-hidden="true"></div>
+              <article class="spatial-pipeline-step">
+                <div class="spatial-step-icon spatial-step-image-icon" aria-hidden="true">
+                  <img src="sofa_logo.png" alt="">
+                </div>
+                <strong>SOFA / FABIAN</strong>
+                <span>Ear filters for each direction</span>
+              </article>
+              <div class="spatial-pipeline-arrow" aria-hidden="true"></div>
+              <article class="spatial-pipeline-step">
+                <div class="spatial-step-icon spatial-step-sonicom-icon" aria-hidden="true">
+                  <img src="sonicom_wave.png" alt="">
+                </div>
+                <strong>3DTI / BRT</strong>
+                <span>Renderer applies filters and motion</span>
+              </article>
+              <div class="spatial-pipeline-arrow" aria-hidden="true"></div>
+              <article class="spatial-pipeline-step">
+                <div class="spatial-step-icon" aria-hidden="true">
+                  <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 24V8"/><path d="M25 24V8"/><path d="M10 18c1.5-4 3-4 4.5 0s3 4 4.5 0 3-4 4.5 0"/><path d="M10 13c1.5-4 3-4 4.5 0s3 4 4.5 0 3-4 4.5 0"/></svg>
+                </div>
+                <strong>Binaural WAV</strong>
+                <span>Left/right channels plus manifests</span>
+              </article>
+            </div>
+            <figcaption class="spatial-pipeline-caption">The loom is not a volume trick alone: the renderer changes the left and right ear signals across time so the headphone audio carries direction, distance, and approach motion.</figcaption>
+          </figure>
+
+          <div class="spatial-explain-grid">
             <article class="info-card">
-              <h2>SOFA Standard</h2>
-              <p>SOFA is an AES-standardized format for spatial acoustic data, including HRTFs and binaural room impulse responses.</p>
+              <h2>What Is An HRTF?</h2>
+              <p>A head-related transfer function is a small acoustic fingerprint for one direction. It describes how the head, torso, and ears reshape a sound before it reaches the left and right eardrums. Applying different HRTFs over time makes a stationary source file behave like it is moving.</p>
+            </article>
+            <article class="info-card">
+              <h2>What Is SOFA?</h2>
+              <p>SOFA, the Spatially Oriented Format for Acoustics, is the standardized file container that stores spatial acoustic measurements such as HRTFs, HRIRs, and binaural room impulse responses with enough metadata for different tools to read them consistently.</p>
               <a class="button-link" href="https://www.sofaconventions.org/mediawiki/index.php/SOFA_%28Spatially_Oriented_Format_for_Acoustics%29" target="_blank" rel="noopener noreferrer">Open SOFA Conventions</a>
             </article>
             <article class="info-card">
-              <h2>FABIAN TU Berlin HRIR</h2>
-              <p>Bundled reference HRIR data are credited to Brinkmann, F. (2017). <em>The FABIAN head-related transfer function data base</em>.</p>
+              <h2>What Is FABIAN?</h2>
+              <p>FABIAN is TU Berlin's head-and-torso simulator dataset. PPS uses its HRIR/HRTF measurements as the reference listener model when creating binaural looming audio, and credits the source data to Brinkmann.</p>
               <a class="button-link" href="https://depositonce.tu-berlin.de/items/bff6568a-5735-4ebc-b3fa-ac10707b7beb" target="_blank" rel="noopener noreferrer">Open TU DepositOnce Record</a>
               <a class="button-link secondary-link" href="https://sofacoustics.org/data/database/tu-berlin/" target="_blank" rel="noopener noreferrer">Open TU Berlin SOFA Files</a>
             </article>
             <article class="info-card">
-              <h2>Stimulus Designer Notes</h2>
-              <p>Design outputs include render configs, trajectory CSVs, tactile-event CSVs, manifests, QC rows, and rendered looming WAVs.</p>
-              <a class="button-link" href="../../../docs/STIMULUS_DESIGNER.md">Open Stimulus Designer Docs</a>
-            </article>
-            <article class="info-card">
-              <h2>Replication Workflow</h2>
-              <p>Saved designs keep parameters explicit so published profiles and custom variants can be reviewed before data collection.</p>
-              <a class="button-link" href="../../../docs/REPLICATION.md">Open Replication Notes</a>
+              <h2>Where Do 3DTI And BRT Fit?</h2>
+              <p>3DTI and its newer BRT line provide the binaural-rendering toolbox layer: software that takes source audio, listener/source geometry, and HRIR data, then computes the left and right headphone signals. In PPS, this renderer layer is local infrastructure, not browser logic or participant data storage.</p>
+              <a class="button-link" href="https://github.com/GrupoDiana/BRTLibrary" target="_blank" rel="noopener noreferrer">Open BRT Library</a>
+              <a class="button-link secondary-link" href="https://www.3d-tune-in.eu/toolkit-developers" target="_blank" rel="noopener noreferrer">Open 3DTI Toolkit Page</a>
             </article>
           </div>
-        </section>
 
-        <hr class="doc-segment-rule" aria-hidden="true">
-
-        <section id="docs-3dti" class="info-segment" aria-labelledby="docs-3dti-title">
-          <div class="info-segment-heading">
-            <span class="segment-kicker">Native Renderer</span>
-            <h2 id="docs-3dti-title">3DTI Rendering Toolkit</h2>
+          <div class="spatial-output-band">
+            <div>
+              <span class="card-kicker">What gets written</span>
+              <p>Each bake writes the binaural WAV, trajectory samples, render configuration, quality-control rows, file hashes, and manifests. Those files make the exact spatialization decisions reviewable before data collection.</p>
+            </div>
+            <div>
+              <span class="card-kicker">What happens later</span>
+              <p>Segment 3 adds SOA-driven tactile cues as channel 3 for audio-tactile trial files. The native runner then plays channels 1, 2, and 3 together through one synchronized ASIO device.</p>
+            </div>
           </div>
-          <p class="info-copy">The native binaural rendering path traces to the 3D Tune-In Toolkit, referred to as 3DTI, an open-source C++ spatial audio library originally published by <a href="https://doi.org/10.1371/journal.pone.0211899" target="_blank" rel="noopener noreferrer">Cuevas-Rodriguez and colleagues in PLOS ONE in 2019</a>. The 3DTI authors have since migrated the core algorithms to the Binaural Rendering Toolbox, the BRT Library, which is now their recommended repository for ongoing development. PPS Toolkit adopts BRT as the primary forward-facing renderer while preserving 3DTI-compatible configurations and pinned source snapshots to support reproducibility of any work conducted under the earlier rendering path.</p>
-          <p class="info-copy"><strong>Citable renderer references:</strong></p>
+
+          <p class="info-copy"><strong>Citable sources and toolboxes:</strong></p>
           <ol class="pub-reference-list">
+            <li>Brinkmann, F. (2017). <em>The FABIAN head-related transfer function data base</em>. TU Berlin DepositOnce. <a class="pub-doi-link" href="https://doi.org/10.14279/depositonce-5718" target="_blank" rel="noopener noreferrer">https://doi.org/10.14279/depositonce-5718</a></li>
+            <li>SOFA Conventions. <em>SOFA (Spatially Oriented Format for Acoustics)</em>. <a class="pub-doi-link" href="https://www.sofaconventions.org/mediawiki/index.php/SOFA_%28Spatially_Oriented_Format_for_Acoustics%29" target="_blank" rel="noopener noreferrer">https://www.sofaconventions.org/mediawiki/index.php/SOFA_(Spatially_Oriented_Format_for_Acoustics)</a></li>
             <li>Gonz&aacute;lez-Toledo, D., Molina-Tanco, L., Cuevas-Rodr&iacute;guez, M., Majdak, P., &amp; Reyes-Lecuona, A. (2023). The Binaural Rendering Toolbox. A Virtual Laboratory for Reproducible Research in Psychoacoustics. <em>Proceedings of the 10th Convention of the European Acoustics Association</em>. <a class="pub-doi-link" href="https://dael.euracoustics.org/confs/landing_pages/fa2023/001042.html" target="_blank" rel="noopener noreferrer">https://dael.euracoustics.org/confs/landing_pages/fa2023/001042.html</a></li>
             <li>Cuevas-Rodr&iacute;guez, M., Picinali, L., Gonz&aacute;lez-Toledo, D., Garre, C., de la Rubia-Cuestas, E., Molina-Tanco, L., &amp; Reyes-Lecuona, A. (2019). 3D Tune-In Toolkit: An open-source library for real-time binaural spatialisation. <em>PLOS ONE, 14</em>(3), e0211899. <a class="pub-doi-link" href="https://doi.org/10.1371/journal.pone.0211899" target="_blank" rel="noopener noreferrer">https://doi.org/10.1371/journal.pone.0211899</a></li>
           </ol>
-          <div class="info-card-grid">
-            <a class="info-card info-card-link publication-card" href="https://doi.org/10.1371/journal.pone.0211899" target="_blank" rel="noopener noreferrer" aria-label="Open original 3DTI PLOS ONE publication">
-              <span class="card-kicker">Original Publication</span>
-              <h2>3D Tune-In Toolkit: An open-source library for real-time binaural spatialisation</h2>
-              <p>Maria Cuevas-Rodriguez, Lorenzo Picinali, Daniel Gonzalez-Toledo, Carlos Garre, Ernesto de la Rubia-Cuestas, Luis Molina-Tanco, Arcadio Reyes-Lecuona.</p>
-              <p>Published March 11, 2019. DOI: 10.1371/journal.pone.0211899</p>
-              <span class="card-link-label">Open PLOS ONE publication</span>
-            </a>
-            <a class="info-card info-card-link" href="https://github.com/3DTune-In/3dti_AudioToolkit" target="_blank" rel="noopener noreferrer" aria-label="Open original 3DTI AudioToolkit GitHub repository">
-              <span class="card-kicker">Original GitHub</span>
-              <h2>3DTI AudioToolkit</h2>
-              <p>The original 3D Tune-In AudioToolkit repository linked from the 2019 PLOS ONE publication and preserved here as renderer provenance.</p>
-              <span class="card-link-label">Open original AudioToolkit repository</span>
-            </a>
-            <a class="info-card info-card-link recommended-card" href="https://github.com/GrupoDiana/BRTLibrary" target="_blank" rel="noopener noreferrer" aria-label="Open newer author-recommended BRT Library GitHub repository">
-              <span class="card-kicker">Newer Recommended GitHub</span>
-              <h2>BRT Library</h2>
-              <p>The newer Binaural Rendering Toolbox repository. The 3DTI authors state the original algorithms have migrated to BRT and recommend transitioning to BRT for ongoing support.</p>
-              <span class="card-link-label">Open BRT Library repository</span>
-            </a>
-            <a class="info-card info-card-link" href="https://www.3d-tune-in.eu/toolkit-developers" target="_blank" rel="noopener noreferrer" aria-label="Open official 3DTI Toolkit project page">
-              <span class="card-kicker">Project Page</span>
-              <h2>3DTI Toolkit Page</h2>
-              <p>Official 3D Tune-In page describing the toolkit, binaural spatialisation features, test apps, wrappers, releases, and project background.</p>
-              <span class="card-link-label">Open 3DTI Toolkit page</span>
-            </a>
-            <a class="info-card info-card-link" href="https://github.com/3DTune-In" target="_blank" rel="noopener noreferrer" aria-label="Open 3D Tune-In GitHub organization">
-              <span class="card-kicker">Original GitHub Organization</span>
-              <h2>3D Tune-In GitHub</h2>
-              <p>Organization containing the original AudioToolkit, Unity wrapper, VST plugins, JavaScript wrapper, examples, releases, and supporting packages.</p>
-              <span class="card-link-label">Open 3D Tune-In organization</span>
-            </a>
-            <article class="info-card">
-              <h2>PPS Toolkit Boundary</h2>
-              <p>3DTI/BRT is a rendering dependency and provenance layer. It is not a browser dependency, participant timing engine, or place to store local experiment data.</p>
-            </article>
+
+          <div class="doc-link-row">
+            <a class="button-link" href="../../../docs/STIMULUS_DESIGNER.md">Open Stimulus Designer Docs</a>
+            <a class="button-link" href="../../../docs/REPLICATION.md">Open Replication Notes</a>
+            <a class="button-link" href="https://github.com/3DTune-In/3dti_AudioToolkit" target="_blank" rel="noopener noreferrer">Open Original 3DTI GitHub</a>
           </div>
         </section>
 
@@ -1021,7 +1040,7 @@
       </form>
     </div>
   </div>
-  <script src="hardware_pixel_art.js?v=20260616-docs-flow-icons"></script>
-  <script src="app.js?v=20260616-docs-flow-icons"></script>
+  <script src="hardware_pixel_art.js?v=20260616-spatialization-docs"></script>
+  <script src="app.js?v=20260616-spatialization-docs"></script>
 </body>
 </html>

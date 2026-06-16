@@ -375,6 +375,10 @@ code {
   border-color: var(--primary-hover);
 }
 
+.tab-label-short {
+  display: none;
+}
+
 .page-view[hidden] {
   display: none !important;
 }
@@ -474,6 +478,7 @@ code {
 #documentation-page .info-segment {
   margin: 18px 0;
   padding: 0;
+  scroll-margin-top: 92px;
 }
 
 .doc-segment-rule {
@@ -1306,6 +1311,139 @@ code {
   padding: 9px;
   white-space: normal;
   overflow-wrap: anywhere;
+}
+
+.anchor-preserve {
+  display: block;
+  height: 0;
+  scroll-margin-top: 18px;
+}
+
+.spatial-pipeline-figure {
+  margin: 18px 0 18px;
+}
+
+.spatial-pipeline {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  align-items: stretch;
+}
+
+.spatial-pipeline-step {
+  position: relative;
+  min-width: 0;
+  border: 1px solid #bfd3c7;
+  border-radius: 8px;
+  background: #f5faf7;
+  padding: 12px;
+}
+
+.spatial-pipeline-step::after {
+  position: absolute;
+  top: 26px;
+  right: -9px;
+  z-index: 1;
+  width: 10px;
+  height: 2px;
+  background: #8fb4a1;
+  content: "";
+}
+
+.spatial-pipeline-step:last-of-type::after {
+  display: none;
+}
+
+.spatial-pipeline-step strong,
+.spatial-pipeline-step span {
+  display: block;
+}
+
+.spatial-pipeline-step strong {
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.spatial-pipeline-step span {
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: #46564c;
+}
+
+.spatial-step-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin-bottom: 8px;
+  color: #2f775b;
+}
+
+.spatial-step-icon svg {
+  display: block;
+  width: 32px;
+  height: 32px;
+}
+
+.spatial-step-image-icon,
+.spatial-step-sonicom-icon {
+  border: 1px solid #9fbcae;
+  border-radius: 7px;
+  background: #ffffff;
+  padding: 2px;
+  box-shadow: 0 2px 6px rgba(27, 49, 38, 0.08);
+}
+
+.spatial-step-sonicom-icon {
+  border-color: #d36a9c;
+  background: #d94788;
+  padding: 5px;
+  box-shadow: 0 3px 8px rgba(139, 38, 82, 0.22);
+}
+
+.spatial-step-image-icon img,
+.spatial-step-sonicom-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.spatial-pipeline-arrow {
+  display: none;
+}
+
+.spatial-pipeline-caption {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.spatial-explain-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.spatial-output-band {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 18px 0;
+  border: 1px solid #cbdcd2;
+  border-radius: 8px;
+  background: #f3f8f5;
+  padding: 14px;
+}
+
+.spatial-output-band p {
+  margin: 0;
+  color: #37433b;
+  line-height: 1.45;
 }
 
 .button-link.primary-link {
@@ -3745,9 +3883,16 @@ body.modal-open {
   .flow-branch-grid,
   .runner-route-grid,
   .workflow-summary-grid,
+  .spatial-pipeline,
+  .spatial-explain-grid,
+  .spatial-output-band,
   .arch-tier-nodes-2,
   .arch-tier-nodes-3 {
     grid-template-columns: 1fr;
+  }
+
+  .spatial-pipeline-step::after {
+    display: none;
   }
 
   .arch-hw-outputs {
@@ -3867,16 +4012,27 @@ body.modal-open {
   .site-tab-list {
     width: 100%;
     justify-content: flex-start;
+    gap: 6px;
   }
 
   .site-tab {
     min-width: 0;
     flex: 1;
-    padding-inline: 7px;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    word-break: break-word;
+    min-height: 48px;
+    padding-inline: 4px;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
     line-height: 1.15;
+  }
+
+  .site-tab[data-page-tab="documentation"] .tab-label-full {
+    display: none;
+  }
+
+  .site-tab[data-page-tab="documentation"] .tab-label-short {
+    display: inline;
   }
 
   .info-page,
