@@ -127,6 +127,59 @@ def _write_focus_preview_session_manifest(tmp_path: Path) -> Path:
     return manifest
 
 
+def _write_analysis_review_outputs(session_dir: Path) -> dict[str, Path]:
+    analysis_dir = session_dir / "analysis"
+    analysis_dir.mkdir(parents=True, exist_ok=True)
+    session_id = session_dir.name
+    scope = "Part 1 / Inhale / pink"
+    curves = analysis_dir / f"{session_id}_pps_curve_points.csv"
+    curves.write_text(
+        "\n".join(
+            [
+                "scope,soa_ms,fit_metric,facilitation_ms,mean_rt_ms,n",
+                f"{scope},100,facilitation_ms,10,320,3",
+                f"{scope},200,facilitation_ms,20,300,3",
+                f"{scope},400,facilitation_ms,35,280,3",
+                f"{scope},800,facilitation_ms,44,260,3",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    fits = analysis_dir / f"{session_id}_model_fits.csv"
+    fits.write_text(
+        "\n".join(
+            [
+                "scope,model,fit_metric,n_points,intercept,slope,log_slope,lower,upper,pps_boundary_soa_ms,aic,r2,rmse",
+                f"{scope},linear,facilitation_ms,4,8,0.05,, ,,,14,0.91,2.0",
+                f"{scope},logarithmic_decay,facilitation_ms,4,-12,,8,,,,12,0.94,1.6",
+                f"{scope},sigmoid,facilitation_ms,4,,0.01,,5,50,300,10,0.97,1.1",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    comparison = analysis_dir / f"{session_id}_model_fit_comparison.csv"
+    comparison.write_text(
+        "scope,best_model,best_aic,best_r2,fit_metric,n_points\n"
+        f"{scope},sigmoid,10,0.97,facilitation_ms,4\n",
+        encoding="utf-8",
+    )
+    summary = analysis_dir / f"{session_id}_summary.csv"
+    summary.write_text(
+        "scope,n,hit_rate\n"
+        f"{scope},4,1.0\n",
+        encoding="utf-8",
+    )
+    (session_dir / "analysis_summary.txt").write_text("Tactile trials reconstructed: 4\n", encoding="utf-8")
+    return {
+        "curves": curves,
+        "model_fits": fits,
+        "model_fit_comparison": comparison,
+        "summary": summary,
+    }
+
+
 def test_focus_mode_run_plan_numbers_topup_slots_by_play_order():
     from peripersonal_space_toolkit import focus_app
 
@@ -923,6 +976,81 @@ def test_focus_mode_hardware_start_injects_ui_thread_audio_engine(tmp_path: Path
     assert window.result is not None
     assert window.result.completed is True
     assert fake_engine.shutdown_count == 1
+    window.dialog.close()
+
+
+def test_focus_mode_opens_post_run_analysis_review_dialog(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    monkeypatch.delenv("PPS_FOCUS_DISABLE_ANALYSIS_POPUP", raising=False)
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    window = focus_app.FocusModeWindow(q, package)
+    window.dialog.show()
+    app.processEvents()
+    outputs = _write_analysis_review_outputs(package.session_dir)
+
+    result = SimpleNamespace(
+        completed=True,
+        session_dir=package.session_dir,
+        summary_text="Tactile trials reconstructed: 4",
+        analysis_outputs=outputs,
+        capture_options={"write_analysis_csvs": True},
+    )
+
+    window._maybe_open_analysis_review(result)
+    app.processEvents()
+
+    assert window.analysis_review_dialog is not None
+    dialog = window.analysis_review_dialog.dialog
+    assert dialog.isVisible()
+    model_combo = dialog.findChild(q["QComboBox"], "analysisModelCombo")
+    scope_combo = dialog.findChild(q["QComboBox"], "analysisScopeCombo")
+    overview_table = dialog.findChild(q["QTableWidget"], "analysisOverviewTable")
+    details = dialog.findChild(q["QTextEdit"], "analysisDetailsText")
+    assert model_combo is not None and model_combo.count() == 4
+    assert scope_combo is not None and scope_combo.count() == 1
+    assert overview_table is not None and overview_table.rowCount() == 1
+    assert details is not None and "Best model by AIC" in details.toPlainText()
+    screenshot = tmp_path / "analysis_review_dialog.png"
+    assert dialog.grab().save(str(screenshot))
+    assert screenshot.stat().st_size > 0
+    dialog.close()
+    window.dialog.close()
+
+
+def test_focus_mode_skips_analysis_review_for_interrupted_or_disabled_analysis(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    monkeypatch.delenv("PPS_FOCUS_DISABLE_ANALYSIS_POPUP", raising=False)
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    outputs = _write_analysis_review_outputs(package.session_dir)
+    window = focus_app.FocusModeWindow(q, package)
+    window.dialog.show()
+    app.processEvents()
+
+    window._maybe_open_analysis_review(
+        SimpleNamespace(completed=False, session_dir=package.session_dir, analysis_outputs=outputs, capture_options={"write_analysis_csvs": True})
+    )
+    assert window.analysis_review_dialog is None
+
+    window._maybe_open_analysis_review(
+        SimpleNamespace(completed=True, session_dir=package.session_dir, analysis_outputs=outputs, capture_options={"write_analysis_csvs": False})
+    )
+    assert window.analysis_review_dialog is None
     window.dialog.close()
 
 
