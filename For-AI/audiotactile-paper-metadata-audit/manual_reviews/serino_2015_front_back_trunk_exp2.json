@@ -1,0 +1,304 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "serino_2015_front_back_trunk_exp2",
+  "citation_short": "Serino et al. (2015), Exp. 2",
+  "review_date": "2026-06-16",
+  "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
+  "confidence_score": 0.84,
+  "confidence_label": "high_confidence_extraction",
+  "confidence_basis": "Main PDF, OpenDataLoader output, pypdf fallback extraction, rendered figure/methods pages, and the downloaded supplement DOC/text extraction were checked. Exp. 2 trajectory geometry, apparatus, speed, tactile setup, trial families, ITI, repetitions, and total counts are extractable. Remaining uncertainty concerns the exact 16-speaker waveform/source asset, exact gain/SPL law, the 13-versus-14 distance wording discrepancy, exact baseline timings, block structure, and response timeout.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats",
+    "reason": "Experiment 2 can be recreated as a trunk-centered front/back 16-speaker or renderer-emulated moving-sound profile: dynamic sounds traverse 1 m in front to 1 m behind the standing participant, or the reverse, at 35 cm/s while tactile targets are delivered to sternum/back sites. Exact original acoustic waveform, intensity field, baseline timing schedule, and block/order rules would need approximation."
+  },
+  "orientation_ledger": {
+    "participant_frame": "Participants stood halfway down the 16-speaker array; explicit gaze/facing direction is not reported beyond author front/back body labels.",
+    "room_apparatus_frame": "Two arrays of eight speakers formed a 2 m longitudinal front-back layout, with each array 50 cm from participant midline in the horizontal plane.",
+    "body_relative_mapping": "Authors label the sampled space as participant front or back; sounds began 1 m in front or 1 m behind and terminated 1 m in the opposite space.",
+    "tactile_anchor": "Two vibrotactors on the trunk, one at sternum level and one at equivalent elevation on the back.",
+    "movement_implementation": "Physical 16-speaker array with speaker intensities modulated over time; full source movement is implemented by an intensity field rather than a moving loudspeaker.",
+    "evidence_class": "Text-reported in main PDF methods/results plus Figure 1/caption visual geometry; supplement extraction did not add reliable 16-speaker waveform details."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf",
+      "source": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
+      "status": "reviewed",
+      "scope": "PDF pages 2-4 for Experiment 2 and Figure 1; pages 11-13 for tactile apparatus, acoustic stimuli, procedure, design, counts, table, and ITI."
+    },
+    {
+      "source_type": "opendataloader_markdown",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_front_back_trunk_exp2.md",
+      "status": "reviewed",
+      "scope": "Used as primary extracted text map for targeted five-pass searches, then checked against rendered pages and fallback extraction."
+    },
+    {
+      "source_type": "opendataloader_figure_image",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_front_back_trunk_exp2_images/imageFile1.png",
+      "status": "reviewed",
+      "scope": "Visual inspection of Figure 1 lower-left/lower-right panels for the 16-speaker array, front/back axis, and 2 m layout."
+    },
+    {
+      "source_type": "supplement_doc",
+      "source": "artifacts/paper_metadata_audit/supplements/serino_2015_front_back_trunk_exp2/41598_2015_BFsrep18603_MOESM1_ESM.doc",
+      "status": "reviewed",
+      "scope": "Supplement was available locally; targeted searches found useful 2-speaker validation/provenance but no reliable 16-speaker waveform details in extracted text."
+    },
+    {
+      "source_type": "supplement_text_extraction",
+      "source": "artifacts/paper_metadata_audit/extracted/supplements/serino_2015_front_back_trunk_exp2/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+      "status": "reviewed",
+      "scope": "Searched for 16-speaker, array, front/back, validation, SoundForge, pink noise, SPL, and speaker-setup terms."
+    },
+    {
+      "source_type": "fallback_text_extraction",
+      "source": "pypdf local extraction",
+      "status": "reviewed",
+      "scope": "Printed targeted snippets from pages 2, 3, 11, 12, and 13 to verify Exp. 2 separation from other experiments."
+    },
+    {
+      "source_type": "rendered_pdf_pages",
+      "source": "tmp/pdfs/serino_2015_exp2_review/page-02.png; tmp/pdfs/serino_2015_exp2_methods/page-11.png through page-13.png",
+      "status": "reviewed_not_tracked",
+      "scope": "Temporary rendered pages checked for visual geometry, methods wording, and design/count paragraphs; page images were not committed."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "OpenDataLoader PDF extraction",
+      "status": "completed",
+      "result": "Mapped 20/25 auto-mined candidate fields and exposed mixed candidates from multiple experiments that required manual isolation."
+    },
+    {
+      "strategy": "Stimulus reconstruction pass",
+      "status": "completed",
+      "result": "Isolated Exp. 2 from the seven-experiment paper: 16-speaker front/back trunk setup, 35 cm/s movement, front-to-back/back-to-front trajectories, and trunk tactile anchors."
+    },
+    {
+      "strategy": "Visual/spatial geometry pass",
+      "status": "completed",
+      "result": "Rendered the Exp. 2/Figure 1 pages and inspected the extracted figure image; recorded the participant-array-body mapping in the orientation ledger."
+    },
+    {
+      "strategy": "Fallback extraction verification",
+      "status": "completed",
+      "result": "pypdf snippets from pages 2, 11, 12, and 13 confirmed the Exp. 2 distances, 16-speaker array, tactile apparatus, response rule, count formula, and ITI."
+    },
+    {
+      "strategy": "Supplement acoustic-provenance search",
+      "status": "completed",
+      "result": "Local supplement DOC/text was searched for 16-speaker, array, validation, pink-noise, SPL, and SoundForge terms; only 2-speaker provenance was reliably exposed."
+    },
+    {
+      "strategy": "Trial sequence, baseline, catch, and count pass",
+      "status": "completed",
+      "result": "Identified three trial families, 20% tactile-only baseline logic, auditory-only catches, 500-700 ms randomly shuffled ITI, 12 repetitions, 372 total trials, and derived 36 baseline/24 catch counts."
+    },
+    {
+      "strategy": "Ambiguity reconciliation pass",
+      "status": "completed",
+      "result": "Preserved the discrepancy between prose reporting 14 delays/front-back distances and the design formula using 13 multisensory distances rather than silently normalizing it."
+    }
+  ],
+  "field_status_counts": {
+    "derived": 4,
+    "inferred_low_confidence": 1,
+    "not_reported_after_review": 5,
+    "reported": 15
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "inferred_low_confidence",
+        "value": "Dynamic auditory stimuli; likely noise-based by paradigm/supplement context, but the exact 16-speaker Exp. 2 waveform is not directly reported.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf; artifacts/paper_metadata_audit/extracted/supplements/serino_2015_front_back_trunk_exp2/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+        "page_or_section": "PDF pp.11-12, Acoustic Stimuli; supplement 2-speaker setup",
+        "evidence_note": "Main text reports dynamic sounds and a 16-speaker setup; supplement exposes pink-noise provenance only for the 2-speaker setup."
+      },
+      "source_provenance": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf; artifacts/paper_metadata_audit/extracted/supplements/serino_2015_front_back_trunk_exp2/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+        "page_or_section": "PDF pp.11-13; supplement searched for 16-speaker provenance",
+        "evidence_note": "No exact Exp. 2 source WAV, noise seed, or generation script was found after PDF, supplement, fallback, and figure checks."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "Two dynamic traversal directions: front-to-back and back-to-front; analysis also separates body-relative looming versus receding halves.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
+        "page_or_section": "PDF pp.2, 11-12, Experiment 2 and Acoustic Stimuli",
+        "evidence_note": "Sounds started 1 m in front or back and terminated at the opposite far location."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Participants stood midway in a 2 m front-back 16-speaker array; sounds moved from 1 m front to 1 m back or the reverse, sampled at 5-95 cm in front/back space.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf; artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_front_back_trunk_exp2_images/imageFile1.png",
+        "page_or_section": "PDF pp.2, 11; Figure 1 caption/lower-left panel",
+        "evidence_note": "Figure/caption add the two 8-speaker arrays, 2 m longitudinal distance, and 50 cm lateral array spacing."
+      },
+      "stimulus_duration": {
+        "status": "derived",
+        "value": "Full front-back traversal duration is about 5.71 s from 2 m path length at 35 cm/s; each 1 m approach/recede half is about 2.86 s.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
+        "page_or_section": "PDF pp.2, 11, Experiment 2 and Acoustic Stimuli",
+        "evidence_note": "Derived from reported 2 m layout and 35 cm/s velocity; no standalone audio-file duration was reported."
+      },
+      "stimulus_speed": {
+        "status": "reported",
+        "value": "The 16-speaker setup produced Exp. 2 dynamic sounds moving at 35 cm/s.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
+        "page_or_section": "PDF p.11, Acoustic Stimuli",
+        "evidence_note": "This separates Exp. 2 from 22 cm/s two-speaker experiments and 25 cm/s Exp. 6."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "Front/back mapping space and looming/receding sound direction were analyzed; sounds could start in front or back and pass the body.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
+        "page_or_section": "PDF pp.2-3, Experiment 2 results",
+        "evidence_note": "ANOVA used Mapping Space Front vs Back and Sound Direction Looming vs Receding."
+      },
+      "gain_envelope": {
+        "status": "reported",
+        "value": "Speaker intensities in the 16-speaker array were modulated as a function of time; exact gain law and SPL endpoints for Exp. 2 are not reported.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf; artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_front_back_trunk_exp2_images/imageFile1.png",
+        "page_or_section": "PDF p.3 Figure 1 caption; p.11 Acoustic Stimuli",
+        "evidence_note": "Qualitative intensity-field implementation is reported, but not the numeric envelope."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Physical 16-speaker setup: two arrays of eight speakers, 2 m longitudinal front-back span, 50 cm from participant midline to each array.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf; artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_front_back_trunk_exp2_images/imageFile1.png",
+        "page_or_section": "PDF p.3 Figure 1 caption; p.11 Acoustic Stimuli",
+        "evidence_note": "Participant stood halfway down the array for Exp. 2."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "Three trial families: bimodal audio-tactile trials, tactile-only baseline trials, and auditory-only catch/no-go trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
+        "page_or_section": "PDF p.12, General Procedure and Design and Analysis",
+        "evidence_note": "All experiments used the same three broad trial types."
+      },
+      "condition_intermixing": {
+        "status": "derived",
+        "value": "Exp. 2 rows appear intermixed within a single 372-trial task formula; no separate blocked phases are described.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
+        "page_or_section": "PDF pp.12-13, Design and Analysis",
+        "evidence_note": "Derived from the combined formula; exact randomization/order algorithm is not specified."
+      },
+      "blocked_or_random_order": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf; artifacts/paper_metadata_audit/extracted/supplements/serino_2015_front_back_trunk_exp2/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+        "page_or_section": "PDF pp.11-13; supplement searched",
+        "evidence_note": "No explicit block count, trial-order algorithm, or randomization rule beyond ITI shuffling was found."
+      },
+      "iti_jitter_policy": {
+        "status": "reported",
+        "value": "Inter-trial intervals were randomly shuffled between 500 and 700 ms.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
+        "page_or_section": "PDF p.13, Design and Analysis",
+        "evidence_note": "Reported as a general rule after the experiment-specific trial-count formulas."
+      },
+      "response_window": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf; artifacts/paper_metadata_audit/extracted/supplements/serino_2015_front_back_trunk_exp2/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+        "page_or_section": "PDF pp.12-13; supplement searched",
+        "evidence_note": "XBOX button response is reported, but no explicit response timeout/window was found."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Participants responded rapidly to tactile vibration, treated sounds as task-irrelevant, and withheld responses on sound-only catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
+        "page_or_section": "PDF p.12, General Procedure and Design and Analysis",
+        "evidence_note": "The task rule is stated in the general procedure."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "Two Precision MicroDrives 312-101 150 Hz vibration motors on sternum and back; stimulation lasted 100 ms.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
+        "page_or_section": "PDF p.11, Tactile Stimuli",
+        "evidence_note": "Methods also report 3 V, 60 mA, 9000 rpm, 5 g, 113 mm2 surface area, and 50 ms spin-up."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "Distance-at-touch values are reported as 5, 20, 35, 50, 65, 80, and 95 cm in both front and back space; design formula uses 13 distances.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
+        "page_or_section": "PDF pp.2, 12, Experiment 2 and Design and Analysis",
+        "evidence_note": "Prose says one of 14 delays, while the formula says 13 multisensory distances; exact temporal SOA table is not printed."
+      },
+      "baseline_strategy": {
+        "status": "reported",
+        "value": "Tactile-only unimodal baseline trials without sound; fastest baseline condition was subtracted from audio-tactile RTs.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
+        "page_or_section": "PDF p.12, Design and Analysis",
+        "evidence_note": "Baseline correction strategy is explicitly described for all experiments."
+      },
+      "baseline_timing": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf; artifacts/paper_metadata_audit/extracted/supplements/serino_2015_front_back_trunk_exp2/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+        "page_or_section": "PDF p.12; supplement searched",
+        "evidence_note": "Exp. 2 formula reports 3 baselines, but exact timing/delay identities for those three baseline rows were not resolved."
+      },
+      "catch_trial_type": {
+        "status": "reported",
+        "value": "Auditory-only catch trials: sound presented without tactile stimulation, with response withholding required.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
+        "page_or_section": "PDF p.12, Design and Analysis; Table 1",
+        "evidence_note": "Exp. 2 Table 1 reports catch accuracy for looming and receding conditions."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "reported",
+        "value": "Exp. 2 formula: [13 multisensory distances x 2 sound directions + 3 baselines + 2 catch trials] x 12 repetitions.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
+        "page_or_section": "PDF p.12, Design and Analysis",
+        "evidence_note": "Thus each multisensory distance x direction cell has 12 repetitions."
+      },
+      "baseline_count": {
+        "status": "derived",
+        "value": "Three baseline rows x 12 repetitions = 36 tactile-only baseline trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
+        "page_or_section": "PDF p.12, Design and Analysis",
+        "evidence_note": "Count is derived directly from the reported Exp. 2 formula."
+      },
+      "catch_count": {
+        "status": "derived",
+        "value": "Two catch rows x 12 repetitions = 24 auditory-only catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
+        "page_or_section": "PDF p.12, Design and Analysis; Table 1",
+        "evidence_note": "Count is derived from the reported Exp. 2 formula; Table 1 separates looming/receding catch accuracy."
+      },
+      "block_count": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf; artifacts/paper_metadata_audit/extracted/supplements/serino_2015_front_back_trunk_exp2/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+        "page_or_section": "PDF pp.11-13; supplement searched",
+        "evidence_note": "The experiments never exceeded 60 minutes, but no Exp. 2 block/session count was found."
+      },
+      "total_trial_count": {
+        "status": "reported",
+        "value": "Experiment 2 consisted of 372 trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_front_back_trunk_exp2.pdf",
+        "page_or_section": "PDF p.12, Design and Analysis",
+        "evidence_note": "The total is explicitly reported with the Exp. 2 formula."
+      }
+    }
+  },
+  "critical_caveats": [
+    "Exact 16-speaker waveform/source asset, noise seed, or stimulus file is not reported.",
+    "Pink-noise provenance is exposed for the 2-speaker setup in the supplement but not directly for the Exp. 2 16-speaker setup.",
+    "Exact intensity/gain law and SPL calibration for the 16-speaker array are not reported beyond time-varying speaker-intensity modulation.",
+    "Main prose says 14 delays/distances in Exp. 2, whereas the design formula uses 13 multisensory distances.",
+    "Exact temporal SOA milliseconds and the identities of the three baseline timings are not printed.",
+    "Exact trial-order randomization, block count, and response timeout/window are not reported.",
+    "Participant-facing/gaze direction is not explicitly stated, so body-relative front/back mapping should follow the authors' front/back labels and Figure 1."
+  ],
+  "next_manual_action": "Strong candidate for a toolkit recreation as a renderer-emulated or multi-source 16-speaker front/back trunk profile, with the waveform, gain field, baseline timing, and 13/14 distance ambiguity documented as approximations unless author materials become available."
+}
