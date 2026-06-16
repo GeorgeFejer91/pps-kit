@@ -6,13 +6,14 @@
 - Coverage category: `covered_blocked_missing_publication_parameters`
 - Task family: walking/full-body PPS audio-tactile task
 - PDF status: `needs_user_download`
-- Supplement status: `paywalled`
-- Supplement acquisition attempts: `2` (`supplement_routes_access_limited`)
+- Supplement status: `not_found`
+- Supplement acquisition attempts: `2` (`checked_no_supplement_candidates`)
 - Supplement extracted text files: `0`
 - Extraction status: `pending_pdf`
 - Metadata confidence: `0.0` (`pending_source`)
 - Confidence basis: Main publication PDF is not yet locally available for Segment 1-4 inspection.
 - Automated evidence mining: `no_extracted_source`; 0/25 fields with candidate values
+- PPS visualization mining: `no_extracted_source`; 0/9 visualization-form candidates
 
 ## Known Prior Gaps
 
@@ -22,10 +23,10 @@
 
 - `main PDF OpenDataLoader extraction`: `pending` - Run parser after placing the publication PDF in artifacts/paper_metadata_audit/publication_pdfs.
 - `targeted methods/table search`: `pending_pdf` - Search methods, procedure, apparatus, stimuli, trial design, and tables for Segment 1-4 parameters.
-- `supplement search`: `pending_manual_download` - Supplement-like sources were found or access was limited; manual download/check is still needed.
+- `supplement search`: `checked_not_found` - Automated source routes found no supplement candidates; use publisher/source checks again before final missing-value decisions.
 - `fallback extractor/source check`: `pending_pdf` - Use pdfplumber/pypdf, rendered pages, publisher HTML, or supplement files before marking a field missing.
 
-## Five Semantic Review Passes
+## Six Semantic Review Passes
 
 | Strategy | Status | Hits | Matched terms | Pages |
 |---|---|---:|---|---|
@@ -34,6 +35,11 @@
 | `trial_structure_intermixing` | `source_unavailable` | 0 |  |  |
 | `baseline_catch_counts` | `source_unavailable` | 0 |  |  |
 | `tactile_response_apparatus` | `source_unavailable` | 0 |  |  |
+| `pps_visualization_reporting` | `source_unavailable` | 0 |  |  |
+
+## PPS Visualization Candidates
+
+- `no_extracted_source`: No extracted source text is available; inspect the publication PDF, figures, captions, and supplements manually before closing visualization review.
 
 ## Segment Field Status
 

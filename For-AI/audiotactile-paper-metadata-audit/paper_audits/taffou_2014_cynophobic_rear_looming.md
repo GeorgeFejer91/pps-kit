@@ -13,6 +13,7 @@
 - Metadata confidence: `0.0` (`pending_source`)
 - Confidence basis: Main publication PDF is not yet locally available for Segment 1-4 inspection.
 - Automated evidence mining: `no_extracted_source`; 0/25 fields with candidate values
+- PPS visualization mining: `no_extracted_source`; 0/9 visualization-form candidates
 
 ## Known Prior Gaps
 
@@ -26,7 +27,7 @@
 - `supplement search`: `pending_manual_download` - Supplement-like sources were found or access was limited; manual download/check is still needed.
 - `fallback extractor/source check`: `pending_pdf` - Use pdfplumber/pypdf, rendered pages, publisher HTML, or supplement files before marking a field missing.
 
-## Five Semantic Review Passes
+## Six Semantic Review Passes
 
 | Strategy | Status | Hits | Matched terms | Pages |
 |---|---|---:|---|---|
@@ -35,6 +36,11 @@
 | `trial_structure_intermixing` | `source_unavailable` | 0 |  |  |
 | `baseline_catch_counts` | `source_unavailable` | 0 |  |  |
 | `tactile_response_apparatus` | `source_unavailable` | 0 |  |  |
+| `pps_visualization_reporting` | `source_unavailable` | 0 |  |  |
+
+## PPS Visualization Candidates
+
+- `no_extracted_source`: No extracted source text is available; inspect the publication PDF, figures, captions, and supplements manually before closing visualization review.
 
 ## Segment Field Status
 

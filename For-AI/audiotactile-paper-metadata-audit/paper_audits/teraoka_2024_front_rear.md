@@ -7,12 +7,13 @@
 - Task family: front/rear approaching auditory probe with vibrotactile detection and baseline
 - PDF status: `paywalled`
 - Supplement status: `downloaded`
-- Supplement acquisition attempts: `0` (`existing_files`)
+- Supplement acquisition attempts: `13` (`downloaded`)
 - Supplement extracted text files: `1`
 - Extraction status: `pending_pdf`
 - Metadata confidence: `0.25` (`partial_extraction`)
 - Confidence basis: Supplement or other extracted source text yielded candidate values for 8/25 fields, but the main publication PDF is still missing or unavailable.
 - Automated evidence mining: `source_mined`; 8/25 fields with candidate values
+- PPS visualization mining: `source_mined`; 3/9 visualization-form candidates
 
 ## Known Prior Gaps
 
@@ -25,7 +26,7 @@
 - `supplement search`: `available_for_review` - Downloaded or locally provided supplement files are available for methods/table review.
 - `fallback extractor/source check`: `pending_review` - Use pdfplumber/pypdf, rendered pages, publisher HTML, or supplement files before marking a field missing.
 
-## Five Semantic Review Passes
+## Six Semantic Review Passes
 
 | Strategy | Status | Hits | Matched terms | Pages |
 |---|---|---:|---|---|
@@ -34,6 +35,15 @@
 | `trial_structure_intermixing` | `completed` | 1 | trial; trials; audio-tactile; condition; conditions | source page/section(s) supplement |
 | `baseline_catch_counts` | `completed` | 1 | baseline; for each | source page/section(s) supplement |
 | `tactile_response_apparatus` | `completed` | 1 | tactile stimulus; respond; reaction time | source page/section(s) supplement |
+| `pps_visualization_reporting` | `completed` | 1 | fig.; plot; reaction time; rt; facilitation; boxplot | source page/section(s) supplement |
+
+## PPS Visualization Candidates
+
+| Visualization type | Candidate status | Detected terms | Source pointer | Visual verification required | Plotted-parameter checklist | Manual review fields |
+|---|---|---|---|---|---|---|
+| `rt_by_soa_or_distance_curve` | `inferred_low_confidence` | reaction time; rt; facilitation; distance; t2; plot | artifacts/paper_metadata_audit/extracted/supplements/teraoka_2024_front_rear/221_2024_6782_MOESM1_ESM.txt; source page/section(s) supplement | `yes` | Render and inspect the source figure/table/page; record figure/table/panel pointer; verify x-axis values and units; verify y-axis metric and units; verify plotted SOA/distance/bin labels; verify model parameters/boundary/index values when shown; verify uncertainty display; cross-check plotted parameters against methods/results tables or text. | figure/table/panel pointer; visualization form; x and y encodings; PPS metric shown; model function if any; boundary/index definition; condition facets; uncertainty display; visual verification status for plotted parameters. |
+| `condition_group_bar_box_summary` | `inferred_low_confidence` | boxplot; mean; condition; pre; baseline; comparison | artifacts/paper_metadata_audit/extracted/supplements/teraoka_2024_front_rear/221_2024_6782_MOESM1_ESM.txt; source page/section(s) supplement | `yes` | Render and inspect the source figure/table/page; record figure/table/panel pointer; verify x-axis values and units; verify y-axis metric and units; verify plotted SOA/distance/bin labels; verify model parameters/boundary/index values when shown; verify uncertainty display; cross-check plotted parameters against methods/results tables or text. | figure/table/panel pointer; visualization form; x and y encodings; PPS metric shown; model function if any; boundary/index definition; condition facets; uncertainty display; visual verification status for plotted parameters. |
+| `apparatus_trajectory_schematic` | `inferred_low_confidence` | fig.; approaching; participant; tactile | artifacts/paper_metadata_audit/extracted/supplements/teraoka_2024_front_rear/221_2024_6782_MOESM1_ESM.txt; source page/section(s) supplement | `yes` | Render and inspect the source figure/table/page; record figure/table/panel pointer; verify x-axis values and units; verify y-axis metric and units; verify plotted SOA/distance/bin labels; verify model parameters/boundary/index values when shown; verify uncertainty display; cross-check plotted parameters against methods/results tables or text. | figure/table/panel pointer; visualization form; x and y encodings; PPS metric shown; model function if any; boundary/index definition; condition facets; uncertainty display; visual verification status for plotted parameters. |
 
 ## Segment Field Status
 

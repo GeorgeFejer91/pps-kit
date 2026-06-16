@@ -13,6 +13,7 @@
 - Metadata confidence: `0.0` (`not_applicable`)
 - Confidence basis: Record is adjacent/out of scope for audiotactile PPS Segment 1-4 extraction.
 - Automated evidence mining: `not_applicable`; 0/25 fields with candidate values
+- PPS visualization mining: `not_applicable`; 0/9 visualization-form candidates
 
 ## Known Prior Gaps
 
@@ -22,7 +23,7 @@
 
 - `scope check`: `complete_from_existing_ledger` - Existing literature ledger marks this record adjacent/out of scope for audiotactile PPS metadata extraction.
 
-## Five Semantic Review Passes
+## Six Semantic Review Passes
 
 | Strategy | Status | Hits | Matched terms | Pages |
 |---|---|---:|---|---|
@@ -31,6 +32,11 @@
 | `trial_structure_intermixing` | `not_applicable` | 0 |  |  |
 | `baseline_catch_counts` | `not_applicable` | 0 |  |  |
 | `tactile_response_apparatus` | `not_applicable` | 0 |  |  |
+| `pps_visualization_reporting` | `not_applicable` | 0 |  |  |
+
+## PPS Visualization Candidates
+
+- `not_applicable`: Adjacent/out-of-scope record; PPS visualization extraction is not required.
 
 ## Segment Field Status
 

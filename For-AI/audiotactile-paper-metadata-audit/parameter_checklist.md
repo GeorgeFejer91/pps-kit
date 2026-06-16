@@ -79,6 +79,34 @@ For every reviewed paper, add a short orientation ledger to the manual review no
 
 If a diagram is the only source, keep the status modest. A scaled figure with printed values can support `derived`; an unscaled schematic supports only qualitative direction unless the caption supplies the missing numbers. When the participant icon faces left/right/up/down on the page, explicitly translate page direction into body-relative direction only if the caption or surrounding text makes that mapping clear.
 
+## PPS Visualization Reporting Checklist
+
+In addition to apparatus geometry, extract every form used to visualize or summarize the PPS result itself. Use `pps_visualization_inventory.csv` as the running triage ledger, then confirm each candidate against the actual figure, caption, table, or supplement before promoting it into a manual review. Confirmation requires visual verification of plotted parameters, not just text extraction.
+
+| Visualization form | What to extract |
+|---|---|
+| RT/facilitation by SOA or distance curve | Figure/panel, x-axis encoding, y-axis metric, point/line style, baseline correction, uncertainty display, and visually checked SOA/distance values. |
+| Sigmoid/logistic/psychometric fit | Model family, fitted metric, boundary/midpoint definition, slope/shape parameter, fit statistic, and visually checked fitted/boundary values if plotted. |
+| PPS boundary or size/index summary | Boundary units, derivation rule, condition/group facets, whether it is shown as points/bars/boxes/table, and visually checked boundary/index values. |
+| Near/far or distance-bin plot | Bin labels, distance/SOA mapping, discrete comparisons, whether bins replace a continuous curve, and visually checked bin values. |
+| Spatial map, heatmap, or body boundary | Body-centered coordinate frame, map/contour/heat encoding, view direction, body anchor, color scale, and visually checked spatial scale/legend values. |
+| Apparatus or trajectory schematic | Participant, tactile site, source path, speaker/virtual-source positions, whether this is only a task schematic or also a claimed PPS map, and visually checked plotted labels. |
+| Neural trace, topography, or brain map | ERP/EEG/MEP/fMRI metric, time window, scalp/brain coordinates, relationship to behavioral PPS boundary, and visually checked scale/time-window values. |
+| Model-parameter or fit table | Parameter names, boundary/index fields, model comparison metrics, conditions/groups represented, and visual table-to-text consistency checks. |
+
+Plotted-parameter visual verification must answer:
+
+1. Which figure/table/panel was visually inspected?
+2. What x-axis values, bins, SOAs, distances, or coordinates are plotted, and what units are shown?
+3. What y-axis metric and units are plotted?
+4. What model parameters, boundary/index values, fit statistics, or color-scale values are shown?
+5. What uncertainty encoding is visible: SEM, SD, CI, range band, individual points, or none?
+6. Do plotted values match the methods/results text, tables, or supplement values? Record mismatches explicitly.
+
+Manual visualization note template:
+
+`PPS visualization <figure/table/panel>; form <curve/map/bar/box/table/topography/schematic>; x <encoding and visually checked values/units>; y <metric and visually checked units>; model <none/sigmoid/linear/log/etc.>; boundary/index <definition and visually checked value or none>; facets <condition/group/phase/body site>; uncertainty <SEM/SD/CI/range/none>; visual parameter check <matches text/table, mismatch noted, or no text/table comparator>; evidence <text/caption/figure/supplement>; status <reported/derived/inferred_low_confidence>.`
+
 Hidden-parameter search routes to check before declaring a value absent:
 
 1. Scan prose around Methods, Apparatus, Procedure, Stimuli, Design, EEG/TMS/task sections, and Results footnotes.
@@ -113,21 +141,24 @@ Segment-specific hiding places to inspect:
 | Segment 3 | Timing diagrams, trigger schematics, D/T labels, baseline analysis descriptions, tactile device specs. | Tactile stimulus, SOAs, baseline SOAs/timing, catch-trial type. |
 | Segment 4 | Design formulas, percentages, trial-table supplements, block summaries, results denominators after exclusions. | Repetition counts, baseline counts, catch counts, block counts, total trial count and derivation. |
 
-## Five-Pass Semantic Search Strategy
+## Six-Pass Semantic Search Strategy
 
-Every manual review should include five different semantic searches, even when OpenDataLoader finds many candidate fields:
+Every manual review should include six different semantic searches, even when OpenDataLoader finds many candidate fields:
 
 1. Stimulus reconstruction pass: search for sound/noise/tone, waveform, source, SPL, gain, envelope, speaker, headphone, renderer, HRTF, Matlab, Unity, SoundForge, Audacity, and apparatus terms.
 2. Visual/spatial geometry pass: search for figure, schematic, apparatus, frontal, front, rear, posterior, anterior, sagittal, coronal, left, right, ipsilateral, contralateral, lateral, near, far, proximal, distal, distance, elevation, height, body part, gaze, fixation, eyes closed, blindfolded, participant facing, rotation, and coordinate-frame clues; then inspect rendered pages.
 3. Trial sequence pass: search for randomized, blocked, intermingled, intermixed, pseudo-random, order, sequence, condition, family, percentage, row, block, trial type, ITI, jitter, and response-window terms.
 4. Tactile/SOA/baseline pass: search for tactile, vibrotactile, electrical, vibration, delay, SOA, temporal, onset, baseline, unimodal, pre, post, timing, target, non-target, and correction terms.
 5. Count/catch/protocol-lineage pass: search for repetition, total, catch, no-go, auditory-only, tactile-only, supplement, appendix, protocol, adapted, previous, based on, following, well-established, and cited-methods references.
+6. PPS visualization reporting pass: search for figure, plot, graph, curve, RT, facilitation, sigmoid, psychometric, boundary, threshold, PPS size, index, heatmap, map, bar graph, boxplot, model, topography, ERP, EEG, MEP, and table terms; then inspect actual figures/captions.
 
 For the visual/spatial pass, the mandatory output is not just a trajectory label. Record the participant-facing direction, speaker/source direction in room coordinates, body-relative label used by the authors, stimulated body part, and whether movement is physical, speaker-switching, cross-fade/gain-based, or digitally rendered.
 
+For the PPS visualization reporting pass, the mandatory output is not just `figure present`. Record what the graph encodes, what metric/model/boundary is shown, how conditions are separated, how uncertainty or individual data are displayed, and whether plotted parameter values were visually verified against text/tables.
+
 For any value derived from a figure or photograph, explicitly separate `raw visual clue`, `participant-facing vector`, `speaker/source vector`, `face/source relation`, and `body-relative translation`. This prevents page-left/page-right, experimenter-view diagrams, and participant-rotated speaker setups from being mistaken for participant-left/participant-right trajectories.
 
-After those five passes, do a brief consistency pass before closing the review. This is not a replacement for source evidence; it catches extraction mistakes. Check whether speeds match path length/duration, whether SOAs map onto reported distances, whether trial totals equal rows x repetitions x blocks, whether baseline/catch percentages match counts, and whether any speed/direction you extracted actually belongs to a participant movement or control manipulation instead of the auditory stimulus.
+After those six passes, do a brief consistency pass before closing the review. This is not a replacement for source evidence; it catches extraction mistakes. Check whether speeds match path length/duration, whether SOAs map onto reported distances, whether trial totals equal rows x repetitions x blocks, whether baseline/catch percentages match counts, whether any speed/direction you extracted actually belongs to a participant movement or control manipulation instead of the auditory stimulus, and whether visualization labels match the plotted axes/model.
 
 Suggested orientation note template for `orientation_ledger` or a field `evidence_note`:
 

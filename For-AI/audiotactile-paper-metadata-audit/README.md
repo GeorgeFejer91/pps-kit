@@ -41,9 +41,15 @@ Treat orientation as a relation, not a label. First record the participant face/
 
 For visual approximation, reviewers must preserve the intermediate reasoning rather than only the final label. Use this worksheet in the manual note or `evidence_note`: `raw visual clue <page/figure/panel>; participant-facing vector <reported/derived/unclear>; speaker/source vector <room/apparatus direction>; face-to-source relation <front/rear/left/right/near/far/unclear>; tactile anchor <body site/side>; body-relative translation <supported label or unclear>; approximation grade <reported/derived/inferred_low_confidence>`. This is especially important when the speaker is shown left/right on the page but the participant may be facing another direction.
 
+## PPS Visualization Reporting Rule
+
+Every reviewed paper must also record how PPS itself is visualized or summarized in the Results, figures, tables, and supplements. This is separate from apparatus geometry. Extract short pointers for every visualization form present: RT/facilitation by SOA or distance curves, sigmoid/logistic/psychometric fits, PPS boundary or size indices, condition/group bar/box summaries, near/far or distance-bin plots, spatial maps/heatmaps/body-boundary drawings, apparatus/trajectory schematics, neural traces/topographies/brain maps, and model-parameter or fit tables.
+
+For each confirmed visualization, preserve the figure/table/panel pointer, visual form, x-axis and y-axis encodings, PPS metric, model function if any, boundary/index definition, condition facets, and uncertainty display such as SEM, SD, confidence interval, shaded range, or no uncertainty shown. Each confirmed visualization also needs a plotted-parameter visual verification note: render or inspect the source page and check that SOA/distance/bin values, axis units, y-axis metric, fitted parameters, PPS boundary/index values, and uncertainty encodings match the caption, methods, results text, or tables. The generated `pps_visualization_inventory.csv` is a triage ledger only; final review still requires figure/caption inspection and must not commit figure screenshots or long source text.
+
 ## Information Extraction Strategy
 
-Use at least five semantic passes before finalizing a paper: stimulus reconstruction, visual/spatial geometry, trial sequence/intermixing, tactile timing/baseline, and counts/catch trials. The visual/spatial pass must explicitly answer three orientation questions: which direction the participant faced, where each speaker or virtual source sat in room coordinates, and which body-relative direction the authors intended. This prevents a lateral left-of-head array, a frontal speaker pair, and a participant-rotated four-direction block from being collapsed into the same "looming" label.
+Use at least six semantic passes before finalizing a paper: stimulus reconstruction, visual/spatial geometry, trial sequence/intermixing, tactile timing/baseline, counts/catch trials, and PPS visualization reporting. The visual/spatial pass must explicitly answer three orientation questions: which direction the participant faced, where each speaker or virtual source sat in room coordinates, and which body-relative direction the authors intended. This prevents a lateral left-of-head array, a frontal speaker pair, and a participant-rotated four-direction block from being collapsed into the same "looming" label.
 
 Write the visual/spatial pass as a short coordinate audit, not just a keyword hit. Minimum acceptable form: `viewpoint <top/side/front/photo/unclear>; participant faces <direction/unclear>; sources at <room/apparatus coordinates>; tactile anchor <body part/side>; body-relative mapping <front/rear/left/right/near/far/etc.>; movement implementation <physical/digital/gain/switching/unclear>; evidence <text/caption/figure/supplement/lineage>`.
 
@@ -97,30 +103,35 @@ The detailed tucked-away parameter triage matrix lives in `parameter_checklist.m
 - `pdf_retrieval_inventory.csv`: canonical running list of which main publication PDFs are already retrieved, which are missing, DOI/DOI URL for missing records, and the local target filename.
 - `protocol_lineage_candidates.csv`: cited prior-protocol papers that may contain missing stimulus, trajectory, timing, or count details for another audited paper.
 - `doi_inventory.csv`: DOI/DOI URL inventory plus current PDF and supplement status for every literature record.
+- `pps_visualization_inventory.csv`: one row per automated candidate for how each study visualizes PPS effects, models, boundaries, spatial maps, condition summaries, or neural traces.
 - `missing_pdf_request_list.csv`: actionable download queue for missing main PDFs and supplement/methods files.
 - `running_checklist.csv`: compact all-record metadata audit progress checklist.
 
 ## Current Inventory
 
 - Literature records: 74
-- PDF status counts: `{"downloaded": 36, "needs_user_download": 8, "not_applicable": 5, "open_access_unavailable": 12, "paywalled": 13}`
-- Main PDFs retrieved/missing/not applicable: 36 / 33 / 5
-- Supplement status counts: `{"downloaded": 13, "needs_user_download": 16, "not_applicable": 5, "not_checked": 6, "not_found": 16, "paywalled": 18}`
-- Extraction status counts: `{"parsed": 36, "parsed_with_warnings": 5, "pending_pdf": 33}`
-- Metadata confidence counts: `{"not_applicable": 5, "partial_extraction": 38, "pending_source": 8, "source_unavailable": 23}`
-- Automated evidence status counts: `{"no_extracted_source": 31, "not_applicable": 5, "source_mined": 38}`
-- Automated evidence mined field total: 653
-- Supplement extracted records/files: 13 records / 17 files
-- Semantic review strategy count: 5
-- Semantic review pass status counts: `{"completed": 185, "completed_no_hits": 5, "not_applicable": 25, "source_unavailable": 155}`
-- Missing download/check requests: 73
+- PDF status counts: `{"downloaded": 26, "needs_user_download": 12, "not_applicable": 5, "open_access_unavailable": 13, "paywalled": 18}`
+- Main PDFs retrieved/missing/not applicable: 26 / 43 / 5
+- Supplement status counts: `{"downloaded": 10, "needs_user_download": 17, "not_applicable": 5, "not_checked": 6, "not_found": 21, "paywalled": 15}`
+- Extraction status counts: `{"parsed_with_warnings": 31, "pending_pdf": 43}`
+- Metadata confidence counts: `{"not_applicable": 5, "partial_extraction": 28, "pending_source": 12, "source_unavailable": 29}`
+- Automated evidence status counts: `{"no_extracted_source": 41, "not_applicable": 5, "source_mined": 28}`
+- Automated evidence mined field total: 477
+- Supplement extracted records/files: 10 records / 13 files
+- Semantic review strategy count: 6
+- Semantic review pass status counts: `{"completed": 164, "completed_no_hits": 4, "not_applicable": 30, "source_unavailable": 246}`
+- PPS visualization taxonomy count: 9
+- PPS visualization candidate records/forms: 27 records / 173 candidates
+- PPS visualization status counts: `{"no_extracted_source": 41, "no_visualization_terms_found": 1, "not_applicable": 5, "source_mined": 27}`
+- PPS visualization type counts: `{"apparatus_trajectory_schematic": 27, "condition_group_bar_box_summary": 21, "model_parameter_or_fit_table": 13, "near_far_or_distance_bin_plot": 25, "neural_trace_topography_or_brain_map": 16, "pps_boundary_or_size_index": 20, "rt_by_soa_or_distance_curve": 26, "sigmoid_psychometric_fit": 14, "spatial_map_heatmap_or_body_boundary": 11}`
+- Missing download/check requests: 81
 
 ## Environment Readiness
 
-- Java available: `True`
-- `opendataloader_pdf` installed: `True`
-- OpenDataLoader ready: `True`
-- Fallback extractors: `{"pdfinfo_available": true, "pdfplumber_installed": true, "pdftoppm_available": true, "pypdf_installed": true}`
+- Java available: `False`
+- `opendataloader_pdf` installed: `False`
+- OpenDataLoader ready: `False`
+- Fallback extractors: `{"pdfinfo_available": false, "pdfplumber_installed": true, "pdftoppm_available": false, "pypdf_installed": true}`
 
 ## How To Use
 
@@ -129,13 +140,16 @@ The detailed tucked-away parameter triage matrix lives in `parameter_checklist.m
 3. Run `python -m tools.paper_metadata_parser --refresh` from the repo root.
 4. Review `pdf_retrieval_inventory.csv` first for the running list of retrieved/missing PDFs and missing-paper DOI URLs.
 5. Review `protocol_lineage_candidates.csv` when a paper cites an adapted or established prior protocol.
-6. Review `running_checklist.csv`, `missing_pdf_request_list.csv`, and `paper_audits/<record_id>.md`.
-7. Promote critically checked Segment 1-4 values into `manual_reviews/<record_id>.json` and update `manual_review_index.csv`.
+6. Review `pps_visualization_inventory.csv` to see every mined candidate for how PPS is plotted, modelled, mapped, or summarized across studies.
+7. Review `running_checklist.csv`, `missing_pdf_request_list.csv`, and `paper_audits/<record_id>.md`.
+8. Promote critically checked Segment 1-4 values and confirmed PPS visualization notes into `manual_reviews/<record_id>.json` and update `manual_review_index.csv`.
 
 Automated evidence-mined values are `inferred_low_confidence` candidates. Treat them as a triage map for critical review, not as final paper metadata.
 
 Before marking any value `not_reported_after_review`, inspect the main PDF, methods/tables, supplements, at least one fallback/source route, and any cited prior protocol paper that the article says it adapted, followed, or used as an established paradigm.
 
 Before marking trajectory/direction values as reported, inspect the rendered figure/caption evidence and verify the participant-facing direction relative to speakers, the body-relative direction being tested, and whether the trajectory is physical, digitally rendered, or inferred from gain/cross-fade timing.
+
+Before accepting a visualization style as confirmed, inspect the actual figure/caption/table and record what is plotted, what axes and model functions are used, whether a PPS boundary or index is derived, how uncertainty is displayed, and whether the plotted parameter values were visually checked against reported text/tables.
 
 Every manual review should preserve the orientation decision in short form, even when no final profile is created. A useful note format is: `participant faces <direction/unclear>; speakers/sources at <room/apparatus positions>; authors test <body-relative label>; tactile anchor <body site>; movement implemented by <physical source/digital renderer/speaker switching/gain envelope>; evidence <text/caption/figure/supplement/lineage>`.

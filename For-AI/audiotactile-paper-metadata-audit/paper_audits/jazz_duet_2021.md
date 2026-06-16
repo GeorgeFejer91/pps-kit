@@ -7,12 +7,13 @@
 - Task family: audio-tactile PPS task after musical interaction context
 - PDF status: `paywalled`
 - Supplement status: `downloaded`
-- Supplement acquisition attempts: `0` (`existing_files`)
+- Supplement acquisition attempts: `8` (`downloaded`)
 - Supplement extracted text files: `1`
 - Extraction status: `pending_pdf`
 - Metadata confidence: `0.16` (`partial_extraction`)
 - Confidence basis: Supplement or other extracted source text yielded candidate values for 1/25 fields, but the main publication PDF is still missing or unavailable.
 - Automated evidence mining: `source_mined`; 1/25 fields with candidate values
+- PPS visualization mining: `no_visualization_terms_found`; 0/9 visualization-form candidates
 
 ## Known Prior Gaps
 
@@ -25,7 +26,7 @@
 - `supplement search`: `available_for_review` - Downloaded or locally provided supplement files are available for methods/table review.
 - `fallback extractor/source check`: `pending_review` - Use pdfplumber/pypdf, rendered pages, publisher HTML, or supplement files before marking a field missing.
 
-## Five Semantic Review Passes
+## Six Semantic Review Passes
 
 | Strategy | Status | Hits | Matched terms | Pages |
 |---|---|---:|---|---|
@@ -34,6 +35,11 @@
 | `trial_structure_intermixing` | `completed` | 1 | unimodal; condition | source page/section(s) supplement |
 | `baseline_catch_counts` | `completed` | 1 | baseline; for each | source page/section(s) supplement |
 | `tactile_response_apparatus` | `completed_no_hits` | 0 |  |  |
+| `pps_visualization_reporting` | `completed` | 1 | figure; rt; facilitation | source page/section(s) supplement |
+
+## PPS Visualization Candidates
+
+- `no_visualization_terms_found`: Treat visualization candidates as a triage map. Confirm actual figure forms by inspecting rendered figures/captions and record only short pointers, not figure screenshots or long source text.
 
 ## Segment Field Status
 

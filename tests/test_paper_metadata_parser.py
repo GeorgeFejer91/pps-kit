@@ -12,6 +12,7 @@ from tools.paper_metadata_parser.parser import (
     EXTRACTION_STATUSES,
     FIELD_STATUSES,
     PDF_STATUSES,
+    PPS_VISUALIZATION_TYPES,
     SEGMENT_FIELDS,
     SUPPLEMENT_STATUSES,
     TOTAL_SEGMENT_FIELD_COUNT,
@@ -37,6 +38,7 @@ def test_paper_metadata_audit_covers_literature_database():
     summary = json.loads((AUDIT_DIR / "audit_summary.json").read_text(encoding="utf-8"))
     audit_records = load_jsonl(AUDIT_DIR / "metadata_audit.jsonl")
     checklist_rows = load_csv(AUDIT_DIR / "running_checklist.csv")
+    visualization_rows = load_csv(AUDIT_DIR / "pps_visualization_inventory.csv")
     paper_audits = sorted((AUDIT_DIR / "paper_audits").glob("*.md"))
 
     coverage_ids = {record["record_id"] for record in coverage["literature_records"]}
@@ -57,9 +59,15 @@ def test_paper_metadata_audit_covers_literature_database():
     assert summary["automated_evidence_field_total"] == sum(
         int(record["automated_evidence_mining"]["field_count"]) for record in audit_records
     )
-    assert summary["semantic_review_strategy_count"] == 5
-    assert summary["semantic_review_pass_total"] == 5 * summary["record_count"]
+    assert summary["semantic_review_strategy_count"] == 6
+    assert summary["semantic_review_pass_total"] == 6 * summary["record_count"]
     assert sum(summary["semantic_review_pass_status_counts"].values()) == summary["semantic_review_pass_total"]
+    assert summary["pps_visualization_type_count"] == len(PPS_VISUALIZATION_TYPES)
+    assert summary["pps_visualization_candidate_total"] == len(visualization_rows)
+    assert sum(summary["pps_visualization_status_counts"].values()) == 74
+    assert sum(summary["pps_visualization_type_counts"].values()) == len(visualization_rows)
+    assert all(row["visual_verification_required"] == "yes" for row in visualization_rows)
+    assert all(row["plotted_parameter_visual_checklist"] for row in visualization_rows)
 
 
 def test_paper_metadata_schema_and_status_values_are_valid():
@@ -78,6 +86,9 @@ def test_paper_metadata_schema_and_status_values_are_valid():
     assert schema["manual_reviews"] == tool_schema["manual_reviews"]
     assert schema["pdf_retrieval_inventory"] == tool_schema["pdf_retrieval_inventory"]
     assert schema["protocol_lineage_candidates"] == tool_schema["protocol_lineage_candidates"]
+    assert schema["pps_visualization_inventory"] == tool_schema["pps_visualization_inventory"]
+    assert len(schema["pps_visualization_inventory"]["visualization_types"]) == len(PPS_VISUALIZATION_TYPES)
+    assert "plotted_parameter_visual_verification_rule" in schema["review_rule"]
     assert schema["local_artifact_conventions"]["main_pdf_filename"].startswith("artifacts/")
 
     for record in audit_records:
@@ -102,6 +113,23 @@ def test_paper_metadata_schema_and_status_values_are_valid():
             assert review_pass["status"] in schema["automated_evidence"]["semantic_review_pass_status_values"]
             assert review_pass["purpose"], record["record_id"]
             assert int(review_pass["hit_count"]) >= 0, record["record_id"]
+        visualization = record["pps_visualization_audit"]
+        assert visualization["status"] in {
+            "not_applicable",
+            "no_extracted_source",
+            "no_visualization_terms_found",
+            "source_mined",
+        }, record["record_id"]
+        assert 0 <= int(visualization["candidate_count"]) <= len(PPS_VISUALIZATION_TYPES), record["record_id"]
+        assert 0.0 <= float(visualization["coverage_ratio"]) <= 1.0, record["record_id"]
+        for candidate in visualization["visualization_candidates"]:
+            assert candidate["visualization_type"] in {item["key"] for item in PPS_VISUALIZATION_TYPES}
+            assert candidate["candidate_status"] == "inferred_low_confidence"
+            assert candidate["visual_verification_required"] == "yes"
+            assert "verify x-axis values" in candidate["plotted_parameter_visual_checklist"]
+            assert "visual verification status" in candidate["manual_review_fields"]
+            assert candidate["source_file"].startswith("artifacts/paper_metadata_audit/extracted/")
+            assert candidate["page_or_section"]
         assert record["schema"] == "pps-paper-metadata-audit-record.v1"
         assert record["review_attempts"], record["record_id"]
         for segment_fields in record["segment_field_audit"].values():
@@ -119,6 +147,7 @@ def test_paper_metadata_schema_and_status_values_are_valid():
             assert record["supplement_status"] == "not_applicable"
             assert record["metadata_confidence_label"] == "not_applicable"
             assert record["automated_evidence_mining"]["status"] == "not_applicable"
+            assert record["pps_visualization_audit"]["status"] == "not_applicable"
             for segment_fields in record["segment_field_audit"].values():
                 assert {field["status"] for field in segment_fields.values()} == {"not_applicable"}
         else:
@@ -131,6 +160,11 @@ def test_paper_metadata_schema_and_status_values_are_valid():
                     "high_confidence_extraction",
                 }
                 assert record["automated_evidence_mining"]["status"] in {"source_mined", "no_extracted_source"}
+                assert record["pps_visualization_audit"]["status"] in {
+                    "source_mined",
+                    "no_extracted_source",
+                    "no_visualization_terms_found",
+                }
                 if record["automated_evidence_mining"]["status"] == "source_mined":
                     assert {
                         review_pass["status"]
@@ -452,7 +486,10 @@ def test_paper_metadata_parser_mines_fallback_pdf_text(tmp_path: Path):
         "\n\n[page 3]\n"
         "Methods described white noise approaching from 75 cm with a 300 ms stimulus duration. "
         "The audio-tactile trials used tactile stimulation for 100 ms and SOA values of 300 ms. "
-        "Catch trials and randomized blocks contained 250 trials in total.\n",
+        "Catch trials and randomized blocks contained 250 trials in total.\n"
+        "\n\n[page 4]\n"
+        "Figure 2 plotted reaction time facilitation by SOA with a sigmoid psychometric fit, slope, and R2. "
+        "The PPS boundary threshold and SEM band were shown in the model plot.\n",
         encoding="utf-8",
     )
 
@@ -474,6 +511,15 @@ def test_paper_metadata_parser_mines_fallback_pdf_text(tmp_path: Path):
     assert stimulus["status"] == "inferred_low_confidence"
     assert stimulus["source_file"].endswith("fallback_paper.fallback.txt")
     assert stimulus["page_or_section"] == "source page/section(s) 3"
+    visualization = record["pps_visualization_audit"]
+    assert visualization["status"] == "source_mined"
+    visualization_types = {candidate["visualization_type"] for candidate in visualization["visualization_candidates"]}
+    assert "rt_by_soa_or_distance_curve" in visualization_types
+    assert "sigmoid_psychometric_fit" in visualization_types
+    assert all(candidate["visual_verification_required"] == "yes" for candidate in visualization["visualization_candidates"])
+    visualization_rows = load_csv(repo_root / "For-AI" / "audit" / "pps_visualization_inventory.csv")
+    assert {row["visualization_type"] for row in visualization_rows} == visualization_types
+    assert all(row["plotted_parameter_visual_checklist"] for row in visualization_rows)
 
 
 def test_tracked_audit_files_do_not_include_pdfs_or_extracted_full_text():

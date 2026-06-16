@@ -1,6 +1,6 @@
 {
   "schema": "pps-paper-metadata-extraction-schema.v1",
-  "parser_version": "0.5.6",
+  "parser_version": "0.5.7",
   "pdf_statuses": [
     "downloaded",
     "open_access_unavailable",
@@ -51,7 +51,7 @@
       "source_unavailable",
       "not_applicable"
     ],
-    "semantic_review_strategy_count": 5,
+    "semantic_review_strategy_count": 6,
     "rule": "Store only short candidate values and page pointers; do not commit full text excerpts."
   },
   "supplement_extraction": {
@@ -78,6 +78,58 @@
   "protocol_lineage_candidates": {
     "path": "For-AI/audiotactile-paper-metadata-audit/protocol_lineage_candidates.csv",
     "rule": "Cited prior-protocol papers that may contain missing stimulus, trajectory, timing, apparatus, or count details for another audited paper; promote to the main literature database after screening when appropriate."
+  },
+  "pps_visualization_inventory": {
+    "path": "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv",
+    "schema": "pps-visualization-inventory.v1",
+    "visualization_types": [
+      {
+        "key": "rt_by_soa_or_distance_curve",
+        "label": "RT by SOA/distance curve",
+        "description": "Line, scatter, or point plot of tactile RT or facilitation across SOA, temporal delay, distance, or distance-at-touch."
+      },
+      {
+        "key": "sigmoid_psychometric_fit",
+        "label": "Sigmoid or psychometric fit",
+        "description": "Sigmoid, logistic, psychometric, cumulative-Gaussian, or similar fitted function used to estimate PPS shape or boundary."
+      },
+      {
+        "key": "pps_boundary_or_size_index",
+        "label": "PPS boundary or size index",
+        "description": "Single reported boundary, threshold, midpoint, index, area, width, or size estimate for PPS."
+      },
+      {
+        "key": "condition_group_bar_box_summary",
+        "label": "Condition/group bar or box summary",
+        "description": "Bar, box, violin, dot, or summary plot comparing PPS measures across conditions, groups, blocks, tools, posture, or phases."
+      },
+      {
+        "key": "spatial_map_heatmap_or_body_boundary",
+        "label": "Spatial map, heatmap, or body boundary",
+        "description": "Body-centered map, top-view boundary, heatmap, contour, spatial field, peri-hand/trunk/head map, or two-dimensional PPS representation."
+      },
+      {
+        "key": "near_far_or_distance_bin_plot",
+        "label": "Near/far or distance-bin plot",
+        "description": "Discrete near/far, proximal/distal, D1-Dn, or distance-bin visualization rather than a continuous fitted curve."
+      },
+      {
+        "key": "apparatus_trajectory_schematic",
+        "label": "Apparatus or trajectory schematic",
+        "description": "Figure, diagram, photograph, or schematic showing participant, tactile site, speakers, virtual source path, or looming/receding trajectory."
+      },
+      {
+        "key": "neural_trace_topography_or_brain_map",
+        "label": "Neural trace, topography, or brain map",
+        "description": "ERP, EEG, intracranial, TMS/MEP, fMRI, source-localization, scalp-topography, or brain-map visualization tied to PPS effects."
+      },
+      {
+        "key": "model_parameter_or_fit_table",
+        "label": "Model parameter or fit table",
+        "description": "Table or panel reporting fitted parameters, model comparison, slopes, boundaries, coefficients, or fit statistics."
+      }
+    ],
+    "rule": "One row per automated visualization-form candidate. Use it as a triage ledger for manual figure/caption review; every candidate requires visual verification of plotted parameters before confirmation. Do not commit figure screenshots or long source text."
   },
   "segment_fields": {
     "segment_1_stimulus_reconstruction": [
@@ -218,6 +270,8 @@
     "missing_value_rule": "Only mark not_reported_after_review after main PDF extraction, targeted methods/table search, supplement search, fallback extractor/source check, and cited prior-protocol lineage search have all been attempted.",
     "orientation_frame_rule": "Before accepting a trajectory/direction value, record participant-facing direction, speaker/source room coordinates, body-relative mapping, tactile anchor, movement implementation, and evidence class; figure-left/right is not participant-left/right unless orientation is explicit.",
     "visual_approximation_rule": "For every visual/spatial clue, record the raw page or figure clue, participant-facing vector, speaker/source vector, face-to-source relation, body-relative translation, and approximation grade; unscaled schematic evidence stays qualitative.",
+    "pps_visualization_rule": "For every reviewed study, record how PPS itself is visualized or summarized: axes, metric, model form, boundary/index definition, condition facets, uncertainty display, figure/table pointer, and visual verification status for plotted parameters.",
+    "plotted_parameter_visual_verification_rule": "Render or visually inspect each cited plot/table page and verify plotted SOA/distance/bin values, axis units, y-axis metric, model parameters, PPS boundary/index values, and uncertainty encodings against captions, methods, results text, or tables before marking a visualization form confirmed.",
     "copyright_boundary": "Do not commit PDFs, supplements, extracted full text, screenshots of pages, or long verbatim passages.",
     "automated_evidence_rule": "Automated evidence mining stores only short candidate values and page pointers; it is not a substitute for final human/AI critical review against PDFs and supplements."
   },

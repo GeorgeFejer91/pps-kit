@@ -15,7 +15,7 @@ from typing import Any
 from xml.etree import ElementTree
 
 
-PARSER_VERSION = "0.5.6"
+PARSER_VERSION = "0.5.7"
 
 COVERAGE_PATH = Path("assets/preloads/audiotactile_literature_coverage.json")
 AUDIT_DIR = Path("For-AI/audiotactile-paper-metadata-audit")
@@ -421,7 +421,142 @@ SEMANTIC_REVIEW_STRATEGIES: tuple[dict[str, Any], ...] = (
             "microphone", "voice", "button", "threshold", "calibration",
         ),
     },
+    {
+        "strategy": "pps_visualization_reporting",
+        "purpose": "Find how PPS effects are visualized or summarized: RT/SOA curves, fitted models, boundaries, maps, condition summaries, and neural plots.",
+        "keywords": (
+            "figure", "fig.", "plot", "graph", "curve", "reaction time", "rt",
+            "facilitation", "sigmoid", "psychometric", "boundary", "threshold",
+            "pps size", "peripersonal space size", "heatmap", "heat map", "map",
+            "bar graph", "boxplot", "topography", "erp", "eeg", "mep", "model",
+        ),
+    },
 )
+
+PPS_VISUALIZATION_TYPES: tuple[dict[str, Any], ...] = (
+    {
+        "key": "rt_by_soa_or_distance_curve",
+        "label": "RT by SOA/distance curve",
+        "description": "Line, scatter, or point plot of tactile RT or facilitation across SOA, temporal delay, distance, or distance-at-touch.",
+        "keywords": (
+            "reaction time", "response time", "rt", "facilitation", "soa", "temporal delay",
+            "distance", "distance at touch", "t1", "t2", "t3", "t4", "t5", "d1", "d2",
+            "curve", "plotted", "plot",
+        ),
+    },
+    {
+        "key": "sigmoid_psychometric_fit",
+        "label": "Sigmoid or psychometric fit",
+        "description": "Sigmoid, logistic, psychometric, cumulative-Gaussian, or similar fitted function used to estimate PPS shape or boundary.",
+        "keywords": (
+            "sigmoid", "logistic", "psychometric", "cumulative gaussian", "gaussian fit",
+            "curve fitting", "fit", "fitted", "slope", "inflection", "r2", "aic",
+        ),
+    },
+    {
+        "key": "pps_boundary_or_size_index",
+        "label": "PPS boundary or size index",
+        "description": "Single reported boundary, threshold, midpoint, index, area, width, or size estimate for PPS.",
+        "keywords": (
+            "pps boundary", "boundary", "border", "threshold", "midpoint", "inflection point",
+            "peripersonal space size", "pps size", "size of pps", "extension", "extent",
+            "area under", "auc", "index",
+        ),
+    },
+    {
+        "key": "condition_group_bar_box_summary",
+        "label": "Condition/group bar or box summary",
+        "description": "Bar, box, violin, dot, or summary plot comparing PPS measures across conditions, groups, blocks, tools, posture, or phases.",
+        "keywords": (
+            "bar graph", "bar plot", "boxplot", "box plot", "violin", "mean", "sem",
+            "standard error", "condition", "group", "pre", "post", "baseline", "comparison",
+        ),
+    },
+    {
+        "key": "spatial_map_heatmap_or_body_boundary",
+        "label": "Spatial map, heatmap, or body boundary",
+        "description": "Body-centered map, top-view boundary, heatmap, contour, spatial field, peri-hand/trunk/head map, or two-dimensional PPS representation.",
+        "keywords": (
+            "heat map", "heatmap", "map", "top view", "top-view", "contour", "boundary map",
+            "spatial map", "perihand", "peri-hand", "peritrunk", "peri-trunk", "perihead",
+            "near space", "body-centered", "body centred", "schema", "schematic",
+        ),
+    },
+    {
+        "key": "near_far_or_distance_bin_plot",
+        "label": "Near/far or distance-bin plot",
+        "description": "Discrete near/far, proximal/distal, D1-Dn, or distance-bin visualization rather than a continuous fitted curve.",
+        "keywords": (
+            "near", "far", "proximal", "distal", "close", "distant", "distance bins",
+            "distance levels", "d1", "d2", "d3", "d4", "d5", "d6", "d7",
+        ),
+    },
+    {
+        "key": "apparatus_trajectory_schematic",
+        "label": "Apparatus or trajectory schematic",
+        "description": "Figure, diagram, photograph, or schematic showing participant, tactile site, speakers, virtual source path, or looming/receding trajectory.",
+        "keywords": (
+            "figure", "fig.", "schematic", "diagram", "apparatus", "setup", "experimental setup",
+            "speaker", "loudspeaker", "trajectory", "approaching", "receding", "looming",
+            "participant", "tactile", "source",
+        ),
+    },
+    {
+        "key": "neural_trace_topography_or_brain_map",
+        "label": "Neural trace, topography, or brain map",
+        "description": "ERP, EEG, intracranial, TMS/MEP, fMRI, source-localization, scalp-topography, or brain-map visualization tied to PPS effects.",
+        "keywords": (
+            "erp", "eeg", "meg", "mep", "tms", "fmri", "bold", "topography", "topographic",
+            "scalp", "source localization", "source-localization", "brain", "cortex",
+            "electrode", "waveform", "amplitude",
+        ),
+    },
+    {
+        "key": "model_parameter_or_fit_table",
+        "label": "Model parameter or fit table",
+        "description": "Table or panel reporting fitted parameters, model comparison, slopes, boundaries, coefficients, or fit statistics.",
+        "keywords": (
+            "model", "parameter", "coefficient", "slope", "intercept", "fit statistics",
+            "model comparison", "table", "aic", "bic", "rmse", "confidence interval",
+        ),
+    },
+)
+
+PPS_VISUALIZATION_TYPE_BY_KEY = {item["key"]: item for item in PPS_VISUALIZATION_TYPES}
+
+PPS_VISUALIZATION_REQUIRED_TERMS: dict[str, tuple[str, ...]] = {
+    "rt_by_soa_or_distance_curve": (
+        "reaction time", "response time", "rt", "facilitation", "soa", "temporal delay", "distance at touch",
+    ),
+    "sigmoid_psychometric_fit": (
+        "sigmoid", "logistic", "psychometric", "cumulative gaussian", "gaussian fit", "curve fitting",
+    ),
+    "pps_boundary_or_size_index": (
+        "pps boundary", "boundary", "threshold", "midpoint", "inflection point",
+        "peripersonal space size", "pps size", "size of pps", "area under", "auc",
+    ),
+    "condition_group_bar_box_summary": (
+        "bar graph", "bar plot", "boxplot", "box plot", "violin", "standard error", "sem",
+    ),
+    "spatial_map_heatmap_or_body_boundary": (
+        "heat map", "heatmap", "contour", "boundary map", "spatial map", "body-centered",
+        "body centred", "perihand", "peri-hand", "peritrunk", "peri-trunk", "perihead",
+    ),
+    "near_far_or_distance_bin_plot": (
+        "near", "far", "proximal", "distal", "close", "distant", "distance bins", "distance levels",
+    ),
+    "apparatus_trajectory_schematic": (
+        "schematic", "diagram", "apparatus", "setup", "experimental setup", "speaker",
+        "loudspeaker", "trajectory", "approaching", "receding", "looming",
+    ),
+    "neural_trace_topography_or_brain_map": (
+        "erp", "eeg", "meg", "mep", "tms", "fmri", "bold", "topography", "topographic",
+        "scalp", "source localization", "source-localization", "brain", "cortex", "electrode", "waveform",
+    ),
+    "model_parameter_or_fit_table": (
+        "model comparison", "fit statistics", "aic", "bic", "rmse", "coefficient", "slope", "intercept",
+    ),
+}
 
 @dataclass(frozen=True)
 class AuditPaths:
@@ -924,6 +1059,114 @@ def semantic_review_passes(record: dict[str, Any], nodes: list[dict[str, Any]]) 
     return passes
 
 
+def score_node_for_visualization(node: dict[str, Any], visualization_type: dict[str, Any]) -> int:
+    lower = node["content"].lower()
+    required_terms = PPS_VISUALIZATION_REQUIRED_TERMS.get(str(visualization_type["key"]), ())
+    if required_terms and not any(term in lower for term in required_terms):
+        return 0
+    score = 0
+    for keyword in visualization_type["keywords"]:
+        if keyword in lower:
+            score += 3 if " " in keyword else 1
+    section = str(node.get("section", "")).lower()
+    if section and any(term in section for term in ("result", "figure", "table", "analysis", "discussion")):
+        score += 2
+    if any(term in lower for term in ("figure", "fig.", "table", "plot", "graph", "curve", "panel")):
+        score += 1
+    if score < 4:
+        return 0
+    return score
+
+
+def mine_pps_visualization_audit(
+    record: dict[str, Any],
+    nodes: list[dict[str, Any]],
+    source_files: list[str],
+) -> dict[str, Any]:
+    if record["coverage_category"] == ADJACENT_CATEGORY:
+        return {
+            "status": "not_applicable",
+            "candidate_count": 0,
+            "coverage_ratio": 0.0,
+            "source_files": [],
+            "visualization_candidates": [],
+            "manual_review_required": False,
+            "review_note": "Adjacent/out-of-scope record; PPS visualization extraction is not required.",
+        }
+    if not nodes:
+        return {
+            "status": "no_extracted_source",
+            "candidate_count": 0,
+            "coverage_ratio": 0.0,
+            "source_files": source_files,
+            "visualization_candidates": [],
+            "manual_review_required": True,
+            "review_note": "No extracted source text is available; inspect the publication PDF, figures, captions, and supplements manually before closing visualization review.",
+        }
+
+    candidates: list[dict[str, Any]] = []
+    for visualization_type in PPS_VISUALIZATION_TYPES:
+        scored = [
+            (score_node_for_visualization(node, visualization_type), index, node)
+            for index, node in enumerate(nodes)
+        ]
+        ranked = [
+            (score, index, node)
+            for score, index, node in sorted(scored, key=lambda item: (-item[0], item[1]))
+            if score > 0
+        ][:3]
+        if not ranked:
+            continue
+        candidate_nodes = [node for _, _, node in ranked]
+        matched_terms = dedupe_preserve_order(
+            [
+                keyword
+                for node in candidate_nodes
+                for keyword in visualization_type["keywords"]
+                if keyword in node["content"].lower()
+            ]
+        )
+        pages = dedupe_preserve_order([str(node["page"]) for node in candidate_nodes if node.get("page")])
+        candidate_sources = dedupe_preserve_order(
+            [node["source_file"] for node in candidate_nodes if node.get("source_file")]
+        )
+        candidates.append(
+            {
+                "visualization_type": visualization_type["key"],
+                "label": visualization_type["label"],
+                "candidate_status": "inferred_low_confidence",
+                "detected_terms": matched_terms[:12],
+                "source_file": candidate_sources[0] if candidate_sources else (source_files[0] if source_files else ""),
+                "page_or_section": "source page/section(s) " + ", ".join(pages[:5]) if pages else "extracted source text",
+                "evidence_note": "Automated PPS visualization miner found result/figure/model terms; verify against figures, captions, axes, legends, and results text before treating this visualization form as confirmed.",
+                "visual_verification_required": "yes",
+                "plotted_parameter_visual_checklist": (
+                    "Render and inspect the source figure/table/page; record figure/table/panel pointer; "
+                    "verify x-axis values and units; verify y-axis metric and units; verify plotted SOA/distance/bin labels; "
+                    "verify model parameters/boundary/index values when shown; verify uncertainty display; "
+                    "cross-check plotted parameters against methods/results tables or text."
+                ),
+                "manual_review_fields": (
+                    "figure/table/panel pointer; visualization form; x and y encodings; PPS metric shown; "
+                    "model function if any; boundary/index definition; condition facets; uncertainty display; "
+                    "visual verification status for plotted parameters."
+                ),
+            }
+        )
+
+    return {
+        "status": "source_mined" if candidates else "no_visualization_terms_found",
+        "candidate_count": len(candidates),
+        "coverage_ratio": round(len(candidates) / len(PPS_VISUALIZATION_TYPES), 3),
+        "source_files": source_files,
+        "visualization_candidates": candidates,
+        "manual_review_required": True,
+        "review_note": (
+            "Treat visualization candidates as a triage map. Confirm actual figure forms by inspecting rendered figures/captions and record only short pointers, not figure screenshots or long source text."
+        ),
+    }
+
+
 def dedupe_preserve_order(values: list[str]) -> list[str]:
     seen: set[str] = set()
     unique: list[str] = []
@@ -1304,6 +1547,8 @@ def build_records(
         else:
             extraction_status = extraction_log.get(record_id, {}).get("status", "parsed_with_warnings")
         segment_field_audit, automated_evidence = mine_segment_field_audit(record, paths)
+        visualization_nodes, visualization_sources = load_mining_nodes(record_id, paths)
+        pps_visualization_audit = mine_pps_visualization_audit(record, visualization_nodes, visualization_sources)
         confidence_score, confidence_label, confidence_basis = metadata_confidence(
             record,
             pdf_status,
@@ -1336,6 +1581,7 @@ def build_records(
             "metadata_confidence_label": confidence_label,
             "metadata_confidence_basis": confidence_basis,
             "automated_evidence_mining": automated_evidence,
+            "pps_visualization_audit": pps_visualization_audit,
             "extraction_outputs": {
                 "primary": "artifacts/paper_metadata_audit/extracted/opendataloader/",
                 "fallback": f"artifacts/paper_metadata_audit/extracted/fallback/{record_id}/",
@@ -1393,11 +1639,27 @@ def summary_from_records(audit_records: list[dict[str, Any]], missing_requests: 
     semantic_pass_total = 0
     supplement_extracted_file_total = 0
     supplement_extracted_record_count = 0
+    visualization_status_counts: dict[str, int] = {}
+    visualization_type_counts: dict[str, int] = {}
+    visualization_candidate_total = 0
+    visualization_candidate_record_count = 0
     for record in audit_records:
         supplement_extracted_files = record.get("supplement_extracted_text_files", [])
         if supplement_extracted_files:
             supplement_extracted_record_count += 1
             supplement_extracted_file_total += len(supplement_extracted_files)
+        visualization_audit = record.get("pps_visualization_audit", {})
+        visualization_status = str(visualization_audit.get("status", ""))
+        if visualization_status:
+            visualization_status_counts[visualization_status] = visualization_status_counts.get(visualization_status, 0) + 1
+        visualization_candidates = visualization_audit.get("visualization_candidates", [])
+        visualization_candidate_total += len(visualization_candidates)
+        if visualization_candidates:
+            visualization_candidate_record_count += 1
+        for candidate in visualization_candidates:
+            visualization_type = str(candidate.get("visualization_type", ""))
+            if visualization_type:
+                visualization_type_counts[visualization_type] = visualization_type_counts.get(visualization_type, 0) + 1
         for review_pass in record.get("automated_evidence_mining", {}).get("semantic_review_passes", []):
             semantic_pass_total += 1
             status = str(review_pass.get("status", ""))
@@ -1442,6 +1704,11 @@ def summary_from_records(audit_records: list[dict[str, Any]], missing_requests: 
         "semantic_review_strategy_count": len(SEMANTIC_REVIEW_STRATEGIES),
         "semantic_review_pass_total": semantic_pass_total,
         "semantic_review_pass_status_counts": dict(sorted(semantic_status_counts.items())),
+        "pps_visualization_type_count": len(PPS_VISUALIZATION_TYPES),
+        "pps_visualization_candidate_record_count": visualization_candidate_record_count,
+        "pps_visualization_candidate_total": visualization_candidate_total,
+        "pps_visualization_status_counts": dict(sorted(visualization_status_counts.items())),
+        "pps_visualization_type_counts": dict(sorted(visualization_type_counts.items())),
         "missing_download_request_count": len(missing_requests),
         "tracked_pdf_folder": "artifacts/paper_metadata_audit/publication_pdfs/",
         "tracked_supplement_folder": "artifacts/paper_metadata_audit/supplements/",
@@ -1483,11 +1750,26 @@ def schema_payload() -> dict[str, Any]:
             "path": "For-AI/audiotactile-paper-metadata-audit/protocol_lineage_candidates.csv",
             "rule": "Cited prior-protocol papers that may contain missing stimulus, trajectory, timing, apparatus, or count details for another audited paper; promote to the main literature database after screening when appropriate.",
         },
+        "pps_visualization_inventory": {
+            "path": "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv",
+            "schema": "pps-visualization-inventory.v1",
+            "visualization_types": [
+                {
+                    "key": item["key"],
+                    "label": item["label"],
+                    "description": item["description"],
+                }
+                for item in PPS_VISUALIZATION_TYPES
+            ],
+            "rule": "One row per automated visualization-form candidate. Use it as a triage ledger for manual figure/caption review; every candidate requires visual verification of plotted parameters before confirmation. Do not commit figure screenshots or long source text.",
+        },
         "segment_fields": SEGMENT_FIELDS,
         "review_rule": {
             "missing_value_rule": "Only mark not_reported_after_review after main PDF extraction, targeted methods/table search, supplement search, fallback extractor/source check, and cited prior-protocol lineage search have all been attempted.",
             "orientation_frame_rule": "Before accepting a trajectory/direction value, record participant-facing direction, speaker/source room coordinates, body-relative mapping, tactile anchor, movement implementation, and evidence class; figure-left/right is not participant-left/right unless orientation is explicit.",
             "visual_approximation_rule": "For every visual/spatial clue, record the raw page or figure clue, participant-facing vector, speaker/source vector, face-to-source relation, body-relative translation, and approximation grade; unscaled schematic evidence stays qualitative.",
+            "pps_visualization_rule": "For every reviewed study, record how PPS itself is visualized or summarized: axes, metric, model form, boundary/index definition, condition facets, uncertainty display, figure/table pointer, and visual verification status for plotted parameters.",
+            "plotted_parameter_visual_verification_rule": "Render or visually inspect each cited plot/table page and verify plotted SOA/distance/bin values, axis units, y-axis metric, model parameters, PPS boundary/index values, and uncertainty encodings against captions, methods, results text, or tables before marking a visualization form confirmed.",
             "copyright_boundary": "Do not commit PDFs, supplements, extracted full text, screenshots of pages, or long verbatim passages.",
             "automated_evidence_rule": "Automated evidence mining stores only short candidate values and page pointers; it is not a substitute for final human/AI critical review against PDFs and supplements.",
         },
@@ -1557,9 +1839,15 @@ Treat orientation as a relation, not a label. First record the participant face/
 
 For visual approximation, reviewers must preserve the intermediate reasoning rather than only the final label. Use this worksheet in the manual note or `evidence_note`: `raw visual clue <page/figure/panel>; participant-facing vector <reported/derived/unclear>; speaker/source vector <room/apparatus direction>; face-to-source relation <front/rear/left/right/near/far/unclear>; tactile anchor <body site/side>; body-relative translation <supported label or unclear>; approximation grade <reported/derived/inferred_low_confidence>`. This is especially important when the speaker is shown left/right on the page but the participant may be facing another direction.
 
+## PPS Visualization Reporting Rule
+
+Every reviewed paper must also record how PPS itself is visualized or summarized in the Results, figures, tables, and supplements. This is separate from apparatus geometry. Extract short pointers for every visualization form present: RT/facilitation by SOA or distance curves, sigmoid/logistic/psychometric fits, PPS boundary or size indices, condition/group bar/box summaries, near/far or distance-bin plots, spatial maps/heatmaps/body-boundary drawings, apparatus/trajectory schematics, neural traces/topographies/brain maps, and model-parameter or fit tables.
+
+For each confirmed visualization, preserve the figure/table/panel pointer, visual form, x-axis and y-axis encodings, PPS metric, model function if any, boundary/index definition, condition facets, and uncertainty display such as SEM, SD, confidence interval, shaded range, or no uncertainty shown. Each confirmed visualization also needs a plotted-parameter visual verification note: render or inspect the source page and check that SOA/distance/bin values, axis units, y-axis metric, fitted parameters, PPS boundary/index values, and uncertainty encodings match the caption, methods, results text, or tables. The generated `pps_visualization_inventory.csv` is a triage ledger only; final review still requires figure/caption inspection and must not commit figure screenshots or long source text.
+
 ## Information Extraction Strategy
 
-Use at least five semantic passes before finalizing a paper: stimulus reconstruction, visual/spatial geometry, trial sequence/intermixing, tactile timing/baseline, and counts/catch trials. The visual/spatial pass must explicitly answer three orientation questions: which direction the participant faced, where each speaker or virtual source sat in room coordinates, and which body-relative direction the authors intended. This prevents a lateral left-of-head array, a frontal speaker pair, and a participant-rotated four-direction block from being collapsed into the same "looming" label.
+Use at least six semantic passes before finalizing a paper: stimulus reconstruction, visual/spatial geometry, trial sequence/intermixing, tactile timing/baseline, counts/catch trials, and PPS visualization reporting. The visual/spatial pass must explicitly answer three orientation questions: which direction the participant faced, where each speaker or virtual source sat in room coordinates, and which body-relative direction the authors intended. This prevents a lateral left-of-head array, a frontal speaker pair, and a participant-rotated four-direction block from being collapsed into the same "looming" label.
 
 Write the visual/spatial pass as a short coordinate audit, not just a keyword hit. Minimum acceptable form: `viewpoint <top/side/front/photo/unclear>; participant faces <direction/unclear>; sources at <room/apparatus coordinates>; tactile anchor <body part/side>; body-relative mapping <front/rear/left/right/near/far/etc.>; movement implementation <physical/digital/gain/switching/unclear>; evidence <text/caption/figure/supplement/lineage>`.
 
@@ -1613,6 +1901,7 @@ The detailed tucked-away parameter triage matrix lives in `parameter_checklist.m
 - `pdf_retrieval_inventory.csv`: canonical running list of which main publication PDFs are already retrieved, which are missing, DOI/DOI URL for missing records, and the local target filename.
 - `protocol_lineage_candidates.csv`: cited prior-protocol papers that may contain missing stimulus, trajectory, timing, or count details for another audited paper.
 - `doi_inventory.csv`: DOI/DOI URL inventory plus current PDF and supplement status for every literature record.
+- `pps_visualization_inventory.csv`: one row per automated candidate for how each study visualizes PPS effects, models, boundaries, spatial maps, condition summaries, or neural traces.
 - `missing_pdf_request_list.csv`: actionable download queue for missing main PDFs and supplement/methods files.
 - `running_checklist.csv`: compact all-record metadata audit progress checklist.
 
@@ -1629,6 +1918,10 @@ The detailed tucked-away parameter triage matrix lives in `parameter_checklist.m
 - Supplement extracted records/files: {summary["supplement_extracted_record_count"]} records / {summary["supplement_extracted_file_total"]} files
 - Semantic review strategy count: {summary["semantic_review_strategy_count"]}
 - Semantic review pass status counts: `{json.dumps(summary["semantic_review_pass_status_counts"], sort_keys=True)}`
+- PPS visualization taxonomy count: {summary["pps_visualization_type_count"]}
+- PPS visualization candidate records/forms: {summary["pps_visualization_candidate_record_count"]} records / {summary["pps_visualization_candidate_total"]} candidates
+- PPS visualization status counts: `{json.dumps(summary["pps_visualization_status_counts"], sort_keys=True)}`
+- PPS visualization type counts: `{json.dumps(summary["pps_visualization_type_counts"], sort_keys=True)}`
 - Missing download/check requests: {summary["missing_download_request_count"]}
 
 ## Environment Readiness
@@ -1645,14 +1938,17 @@ The detailed tucked-away parameter triage matrix lives in `parameter_checklist.m
 3. Run `python -m tools.paper_metadata_parser --refresh` from the repo root.
 4. Review `pdf_retrieval_inventory.csv` first for the running list of retrieved/missing PDFs and missing-paper DOI URLs.
 5. Review `protocol_lineage_candidates.csv` when a paper cites an adapted or established prior protocol.
-6. Review `running_checklist.csv`, `missing_pdf_request_list.csv`, and `paper_audits/<record_id>.md`.
-7. Promote critically checked Segment 1-4 values into `manual_reviews/<record_id>.json` and update `manual_review_index.csv`.
+6. Review `pps_visualization_inventory.csv` to see every mined candidate for how PPS is plotted, modelled, mapped, or summarized across studies.
+7. Review `running_checklist.csv`, `missing_pdf_request_list.csv`, and `paper_audits/<record_id>.md`.
+8. Promote critically checked Segment 1-4 values and confirmed PPS visualization notes into `manual_reviews/<record_id>.json` and update `manual_review_index.csv`.
 
 Automated evidence-mined values are `inferred_low_confidence` candidates. Treat them as a triage map for critical review, not as final paper metadata.
 
 Before marking any value `not_reported_after_review`, inspect the main PDF, methods/tables, supplements, at least one fallback/source route, and any cited prior protocol paper that the article says it adapted, followed, or used as an established paradigm.
 
 Before marking trajectory/direction values as reported, inspect the rendered figure/caption evidence and verify the participant-facing direction relative to speakers, the body-relative direction being tested, and whether the trajectory is physical, digitally rendered, or inferred from gain/cross-fade timing.
+
+Before accepting a visualization style as confirmed, inspect the actual figure/caption/table and record what is plotted, what axes and model functions are used, whether a PPS boundary or index is derived, how uncertainty is displayed, and whether the plotted parameter values were visually checked against reported text/tables.
 
 Every manual review should preserve the orientation decision in short form, even when no final profile is created. A useful note format is: `participant faces <direction/unclear>; speakers/sources at <room/apparatus positions>; authors test <body-relative label>; tactile anchor <body site>; movement implemented by <physical source/digital renderer/speaker switching/gain envelope>; evidence <text/caption/figure/supplement/lineage>`.
 """
@@ -1740,6 +2036,34 @@ def checklist_text() -> str:
                     "",
                     "If a diagram is the only source, keep the status modest. A scaled figure with printed values can support `derived`; an unscaled schematic supports only qualitative direction unless the caption supplies the missing numbers. When the participant icon faces left/right/up/down on the page, explicitly translate page direction into body-relative direction only if the caption or surrounding text makes that mapping clear.",
                     "",
+                    "## PPS Visualization Reporting Checklist",
+                    "",
+                    "In addition to apparatus geometry, extract every form used to visualize or summarize the PPS result itself. Use `pps_visualization_inventory.csv` as the running triage ledger, then confirm each candidate against the actual figure, caption, table, or supplement before promoting it into a manual review. Confirmation requires visual verification of plotted parameters, not just text extraction.",
+                    "",
+                    "| Visualization form | What to extract |",
+                    "|---|---|",
+                    "| RT/facilitation by SOA or distance curve | Figure/panel, x-axis encoding, y-axis metric, point/line style, baseline correction, uncertainty display, and visually checked SOA/distance values. |",
+                    "| Sigmoid/logistic/psychometric fit | Model family, fitted metric, boundary/midpoint definition, slope/shape parameter, fit statistic, and visually checked fitted/boundary values if plotted. |",
+                    "| PPS boundary or size/index summary | Boundary units, derivation rule, condition/group facets, whether it is shown as points/bars/boxes/table, and visually checked boundary/index values. |",
+                    "| Near/far or distance-bin plot | Bin labels, distance/SOA mapping, discrete comparisons, whether bins replace a continuous curve, and visually checked bin values. |",
+                    "| Spatial map, heatmap, or body boundary | Body-centered coordinate frame, map/contour/heat encoding, view direction, body anchor, color scale, and visually checked spatial scale/legend values. |",
+                    "| Apparatus or trajectory schematic | Participant, tactile site, source path, speaker/virtual-source positions, whether this is only a task schematic or also a claimed PPS map, and visually checked plotted labels. |",
+                    "| Neural trace, topography, or brain map | ERP/EEG/MEP/fMRI metric, time window, scalp/brain coordinates, relationship to behavioral PPS boundary, and visually checked scale/time-window values. |",
+                    "| Model-parameter or fit table | Parameter names, boundary/index fields, model comparison metrics, conditions/groups represented, and visual table-to-text consistency checks. |",
+                    "",
+                    "Plotted-parameter visual verification must answer:",
+                    "",
+                    "1. Which figure/table/panel was visually inspected?",
+                    "2. What x-axis values, bins, SOAs, distances, or coordinates are plotted, and what units are shown?",
+                    "3. What y-axis metric and units are plotted?",
+                    "4. What model parameters, boundary/index values, fit statistics, or color-scale values are shown?",
+                    "5. What uncertainty encoding is visible: SEM, SD, CI, range band, individual points, or none?",
+                    "6. Do plotted values match the methods/results text, tables, or supplement values? Record mismatches explicitly.",
+                    "",
+                    "Manual visualization note template:",
+                    "",
+                    "`PPS visualization <figure/table/panel>; form <curve/map/bar/box/table/topography/schematic>; x <encoding and visually checked values/units>; y <metric and visually checked units>; model <none/sigmoid/linear/log/etc.>; boundary/index <definition and visually checked value or none>; facets <condition/group/phase/body site>; uncertainty <SEM/SD/CI/range/none>; visual parameter check <matches text/table, mismatch noted, or no text/table comparator>; evidence <text/caption/figure/supplement>; status <reported/derived/inferred_low_confidence>.`",
+                    "",
                     "Hidden-parameter search routes to check before declaring a value absent:",
                     "",
                     "1. Scan prose around Methods, Apparatus, Procedure, Stimuli, Design, EEG/TMS/task sections, and Results footnotes.",
@@ -1774,21 +2098,24 @@ def checklist_text() -> str:
                     "| Segment 3 | Timing diagrams, trigger schematics, D/T labels, baseline analysis descriptions, tactile device specs. | Tactile stimulus, SOAs, baseline SOAs/timing, catch-trial type. |",
                     "| Segment 4 | Design formulas, percentages, trial-table supplements, block summaries, results denominators after exclusions. | Repetition counts, baseline counts, catch counts, block counts, total trial count and derivation. |",
                     "",
-                    "## Five-Pass Semantic Search Strategy",
+                    "## Six-Pass Semantic Search Strategy",
                     "",
-                    "Every manual review should include five different semantic searches, even when OpenDataLoader finds many candidate fields:",
+                    "Every manual review should include six different semantic searches, even when OpenDataLoader finds many candidate fields:",
                     "",
                     "1. Stimulus reconstruction pass: search for sound/noise/tone, waveform, source, SPL, gain, envelope, speaker, headphone, renderer, HRTF, Matlab, Unity, SoundForge, Audacity, and apparatus terms.",
                     "2. Visual/spatial geometry pass: search for figure, schematic, apparatus, frontal, front, rear, posterior, anterior, sagittal, coronal, left, right, ipsilateral, contralateral, lateral, near, far, proximal, distal, distance, elevation, height, body part, gaze, fixation, eyes closed, blindfolded, participant facing, rotation, and coordinate-frame clues; then inspect rendered pages.",
                     "3. Trial sequence pass: search for randomized, blocked, intermingled, intermixed, pseudo-random, order, sequence, condition, family, percentage, row, block, trial type, ITI, jitter, and response-window terms.",
                     "4. Tactile/SOA/baseline pass: search for tactile, vibrotactile, electrical, vibration, delay, SOA, temporal, onset, baseline, unimodal, pre, post, timing, target, non-target, and correction terms.",
                     "5. Count/catch/protocol-lineage pass: search for repetition, total, catch, no-go, auditory-only, tactile-only, supplement, appendix, protocol, adapted, previous, based on, following, well-established, and cited-methods references.",
+                    "6. PPS visualization reporting pass: search for figure, plot, graph, curve, RT, facilitation, sigmoid, psychometric, boundary, threshold, PPS size, index, heatmap, map, bar graph, boxplot, model, topography, ERP, EEG, MEP, and table terms; then inspect actual figures/captions.",
                     "",
                     "For the visual/spatial pass, the mandatory output is not just a trajectory label. Record the participant-facing direction, speaker/source direction in room coordinates, body-relative label used by the authors, stimulated body part, and whether movement is physical, speaker-switching, cross-fade/gain-based, or digitally rendered.",
                     "",
+                    "For the PPS visualization reporting pass, the mandatory output is not just `figure present`. Record what the graph encodes, what metric/model/boundary is shown, how conditions are separated, how uncertainty or individual data are displayed, and whether plotted parameter values were visually verified against text/tables.",
+                    "",
                     "For any value derived from a figure or photograph, explicitly separate `raw visual clue`, `participant-facing vector`, `speaker/source vector`, `face/source relation`, and `body-relative translation`. This prevents page-left/page-right, experimenter-view diagrams, and participant-rotated speaker setups from being mistaken for participant-left/participant-right trajectories.",
                     "",
-                    "After those five passes, do a brief consistency pass before closing the review. This is not a replacement for source evidence; it catches extraction mistakes. Check whether speeds match path length/duration, whether SOAs map onto reported distances, whether trial totals equal rows x repetitions x blocks, whether baseline/catch percentages match counts, and whether any speed/direction you extracted actually belongs to a participant movement or control manipulation instead of the auditory stimulus.",
+                    "After those six passes, do a brief consistency pass before closing the review. This is not a replacement for source evidence; it catches extraction mistakes. Check whether speeds match path length/duration, whether SOAs map onto reported distances, whether trial totals equal rows x repetitions x blocks, whether baseline/catch percentages match counts, whether any speed/direction you extracted actually belongs to a participant movement or control manipulation instead of the auditory stimulus, and whether visualization labels match the plotted axes/model.",
                     "",
                     "Suggested orientation note template for `orientation_ledger` or a field `evidence_note`:",
                     "",
@@ -1838,6 +2165,7 @@ def paper_audit_text(record: dict[str, Any]) -> str:
         f"- Metadata confidence: `{record['metadata_confidence_score']}` (`{record['metadata_confidence_label']}`)",
         f"- Confidence basis: {ascii_safe(record['metadata_confidence_basis'])}",
         f"- Automated evidence mining: `{record['automated_evidence_mining']['status']}`; {record['automated_evidence_mining']['field_count']}/{TOTAL_SEGMENT_FIELD_COUNT} fields with candidate values",
+        f"- PPS visualization mining: `{record.get('pps_visualization_audit', {}).get('status', '')}`; {record.get('pps_visualization_audit', {}).get('candidate_count', 0)}/{len(PPS_VISUALIZATION_TYPES)} visualization-form candidates",
         "",
         "## Known Prior Gaps",
         "",
@@ -1850,13 +2178,30 @@ def paper_audit_text(record: dict[str, Any]) -> str:
     lines.extend(["", "## Review Attempts", ""])
     for attempt in record["review_attempts"]:
         lines.append(f"- `{attempt['attempt']}`: `{attempt['status']}` - {ascii_safe(attempt['note'])}")
-    lines.extend(["", "## Five Semantic Review Passes", ""])
+    lines.extend(["", "## Six Semantic Review Passes", ""])
     lines.append("| Strategy | Status | Hits | Matched terms | Pages |")
     lines.append("|---|---|---:|---|---|")
     for review_pass in record["automated_evidence_mining"]["semantic_review_passes"]:
         lines.append(
             f"| `{review_pass['strategy']}` | `{review_pass['status']}` | {review_pass['hit_count']} | {ascii_safe(review_pass.get('matched_terms', []))} | {ascii_safe(review_pass.get('page_or_section', ''))} |"
         )
+    lines.extend(["", "## PPS Visualization Candidates", ""])
+    visualization_audit = record.get("pps_visualization_audit", {})
+    visualization_candidates = visualization_audit.get("visualization_candidates", [])
+    if visualization_candidates:
+        lines.append("| Visualization type | Candidate status | Detected terms | Source pointer | Visual verification required | Plotted-parameter checklist | Manual review fields |")
+        lines.append("|---|---|---|---|---|---|---|")
+        for candidate in visualization_candidates:
+            source = "; ".join(
+                part
+                for part in (candidate.get("source_file", ""), candidate.get("page_or_section", ""))
+                if part
+            )
+            lines.append(
+                f"| `{candidate.get('visualization_type', '')}` | `{candidate.get('candidate_status', '')}` | {ascii_safe(candidate.get('detected_terms', []))} | {ascii_safe(source)} | `{candidate.get('visual_verification_required', 'yes')}` | {ascii_safe(candidate.get('plotted_parameter_visual_checklist', ''))} | {ascii_safe(candidate.get('manual_review_fields', ''))} |"
+            )
+    else:
+        lines.append(f"- `{visualization_audit.get('status', 'not_run')}`: {ascii_safe(visualization_audit.get('review_note', 'No PPS visualization candidates were mined.'))}")
     lines.extend(["", "## Segment Field Status", ""])
     lines.append("| Segment | Field | Status | Value | Source pointer |")
     lines.append("|---|---|---|---|---|")
@@ -1982,6 +2327,55 @@ def write_audit_files(
         ],
     )
 
+    visualization_rows = []
+    for record in audit_records:
+        visualization_audit = record.get("pps_visualization_audit", {})
+        for candidate in visualization_audit.get("visualization_candidates", []):
+            visualization_rows.append(
+                {
+                    "record_id": record["record_id"],
+                    "citation_short": record["citation_short"],
+                    "doi": record["doi"],
+                    "coverage_category": record["coverage_category"],
+                    "pdf_status": record["pdf_status"],
+                    "supplement_status": record["supplement_status"],
+                    "visualization_audit_status": visualization_audit.get("status", ""),
+                    "visualization_type": candidate.get("visualization_type", ""),
+                    "visualization_label": candidate.get("label", ""),
+                    "candidate_status": candidate.get("candidate_status", ""),
+                    "detected_terms": candidate.get("detected_terms", []),
+                    "source_file": candidate.get("source_file", ""),
+                    "page_or_section": candidate.get("page_or_section", ""),
+                    "visual_verification_required": candidate.get("visual_verification_required", "yes"),
+                    "plotted_parameter_visual_checklist": candidate.get("plotted_parameter_visual_checklist", ""),
+                    "manual_review_fields": candidate.get("manual_review_fields", ""),
+                    "evidence_note": candidate.get("evidence_note", ""),
+                }
+            )
+    write_csv(
+        paths.audit_dir / "pps_visualization_inventory.csv",
+        visualization_rows,
+        [
+            "record_id",
+            "citation_short",
+            "doi",
+            "coverage_category",
+            "pdf_status",
+            "supplement_status",
+            "visualization_audit_status",
+            "visualization_type",
+            "visualization_label",
+            "candidate_status",
+            "detected_terms",
+            "source_file",
+            "page_or_section",
+            "visual_verification_required",
+            "plotted_parameter_visual_checklist",
+            "manual_review_fields",
+            "evidence_note",
+        ],
+    )
+
     checklist_rows = [
         {
             "record_id": record["record_id"],
@@ -2011,6 +2405,13 @@ def write_audit_files(
                 for review_pass in record["automated_evidence_mining"]["semantic_review_passes"]
                 if review_pass["status"] == "source_unavailable"
             ),
+            "pps_visualization_audit_status": record.get("pps_visualization_audit", {}).get("status", ""),
+            "pps_visualization_candidate_count": record.get("pps_visualization_audit", {}).get("candidate_count", 0),
+            "pps_visualization_visual_verification_required": (
+                "yes"
+                if record.get("pps_visualization_audit", {}).get("visualization_candidates")
+                else "no"
+            ),
         }
         for record in audit_records
     ]
@@ -2037,6 +2438,9 @@ def write_audit_files(
             "automated_evidence_coverage_ratio",
             "semantic_review_completed_passes",
             "semantic_review_source_unavailable_passes",
+            "pps_visualization_audit_status",
+            "pps_visualization_candidate_count",
+            "pps_visualization_visual_verification_required",
         ],
     )
     write_csv(
