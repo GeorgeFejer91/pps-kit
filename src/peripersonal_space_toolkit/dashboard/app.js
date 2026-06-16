@@ -1,5 +1,6 @@
 let state = null;
 let viewerReady = false;
+let viewerInitialFitDone = false;
 const activePolls = new Set();
 let activeNavFrame = 0;
 const CUSTOM_TEMPLATE_ID = "__custom__";
@@ -361,6 +362,16 @@ function isCustomMode() {
 
 function isProfileReadonlyMode() {
   return Boolean(state && !isCustomMode());
+}
+
+// Editing the trajectory (typing distances/rotations OR dragging the preview
+// markers) is allowed only when the trajectory inputs are editable. This ties
+// drag-to-edit in the preview to the same gate as the input fields: if the
+// fields are locked (read-only profile or a not-yet-reached custom step), the
+// preview can still be viewed but the trajectory cannot be changed.
+function trajectoryEditingEnabled() {
+  const input = $("start-distance");
+  return Boolean(input && !input.disabled);
 }
 
 function ensureEditableProject() {
@@ -3946,7 +3957,12 @@ function renderWorkflow() {
       panel.title = "";
     }
     for (const control of panel.querySelectorAll("input, select, button")) {
-      const readonlyLocked = readonly && !profileReadonlyControlAllowed(control);
+      // Preview view-controls (2D/3D, zoom, Fit Radius, Reset Camera) only change
+      // the camera/view, never the trajectory data, so they stay usable even when
+      // the step is read-only or locked. People can always look at the preview;
+      // editing the trajectory itself remains gated to edit mode.
+      const previewViewControl = Boolean(control.matches?.("[data-preview-view-control]"));
+      const readonlyLocked = readonly && !previewViewControl && !profileReadonlyControlAllowed(control);
       if (readonlyLocked) {
         if (!control.title) {
           control.dataset.profileReadonlyTitle = "true";
@@ -3956,7 +3972,7 @@ function renderWorkflow() {
         control.title = "";
         delete control.dataset.profileReadonlyTitle;
       }
-      setWorkflowDisabled(control, locked || readonlyLocked);
+      setWorkflowDisabled(control, previewViewControl ? false : (locked || readonlyLocked));
     }
   }
 
@@ -4623,6 +4639,14 @@ function updateViewer() {
     return;
   }
   updateTrajectory(payload);
+  // Frame the opening view: once the viewer has rendered real data, center and
+  // fit the PPS radius square so it is correct for the actual radius (the
+  // default render uses a 1.1 m placeholder). Runs once per (re)load.
+  if (!viewerInitialFitDone) {
+    viewerInitialFitDone = true;
+    const fitRadius = frame.contentWindow?.fitTrajectoryRadius;
+    if (typeof fitRadius === "function") fitRadius();
+  }
 }
 
 function setPreviewMode(mode) {
@@ -4667,7 +4691,8 @@ function trajectoryPayloadFromControls() {
     start,
     end,
     controls,
-    source_trajectories: sourceTrajectories
+    source_trajectories: sourceTrajectories,
+    editable: trajectoryEditingEnabled()
   };
 }
 
@@ -5539,10 +5564,14 @@ function wireEvents() {
     if (event.source !== frame.contentWindow) return;
     const data = event.data || {};
     if (data.type !== "pps-trajectory-control-change") return;
+    // Ignore preview marker drags unless editing is enabled, so the preview is
+    // look-only in read-only/locked mode.
+    if (!trajectoryEditingEnabled()) return;
     applyTrajectoryControlUpdate(data.controls || {});
   });
   $("trajectory-frame").addEventListener("load", () => {
     viewerReady = true;
+    viewerInitialFitDone = false;
     updateViewer();
   });
   document.addEventListener("click", (event) => {

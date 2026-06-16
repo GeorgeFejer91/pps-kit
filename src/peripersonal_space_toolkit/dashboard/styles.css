@@ -1714,6 +1714,23 @@ body.custom-mode .step-footer {
   pointer-events: auto;
 }
 
+/* The trajectory preview stays viewable even when its step is read-only or
+   locked. The visualization is never dimmed and its camera/view controls
+   (2D/3D, zoom, Fit Radius, Reset Camera) plus the preview canvas remain
+   interactive so people can always inspect the trajectory. Editing the
+   trajectory itself stays gated to edit mode (handled in app.js). */
+.panel.stimulus-preview-panel.locked,
+.panel.stimulus-preview-panel.profile-readonly {
+  opacity: 1;
+}
+
+.panel.stimulus-preview-panel.locked iframe,
+.panel.stimulus-preview-panel.profile-readonly iframe,
+.panel.locked button[data-preview-view-control],
+.panel.profile-readonly button[data-preview-view-control] {
+  pointer-events: auto;
+}
+
 .field-row {
   display: grid;
   gap: 5px;

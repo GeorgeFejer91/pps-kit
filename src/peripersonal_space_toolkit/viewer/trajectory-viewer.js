@@ -39,7 +39,11 @@ let lastTwoDFitAspect = 1;
 const HEAD_CENTER_Y = 1.33;
 const DISTANCE_CM_MIN = 1;
 const DISTANCE_CM_MAX = 1000;
-const TWO_D_RADIUS_PADDING = 1.24;
+// Fraction of extra room around the PPS circle when it is fitted to the view.
+// ~1.08 makes the circle fill the centered square almost to the border (the
+// radius "reaches" the square edges) while leaving a small margin so the ring
+// stroke and endpoint markers are not clipped.
+const TWO_D_RADIUS_PADDING = 1.08;
 const TWO_D_MIN_WORLD_SPAN = 0.5;
 const TWO_D_MIN_ZOOM_FACTOR = 0.22;
 const TWO_D_MAX_ZOOM_OUT_FACTOR = 3.0;
@@ -57,6 +61,7 @@ const dragPoint = new THREE.Vector3();
 const dragHandles = new Map();
 let activeDragHandle = "";
 let activePan2D = false;
+let editingEnabled = true;
 let panStartClientX = 0;
 let panStartClientY = 0;
 const panStartTarget = new THREE.Vector3();
@@ -239,7 +244,7 @@ function setPointerFromEvent(event) {
 }
 
 function intersectDragHandle(event) {
-  if (currentViewMode !== "2d") return "";
+  if (currentViewMode !== "2d" || !editingEnabled) return "";
   const handles = [...dragHandles.values()].filter(Boolean);
   if (!handles.length) return "";
   setPointerFromEvent(event);
@@ -535,6 +540,9 @@ function drawScene(payload) {
   const modeChanged = currentViewMode !== mode;
   currentViewMode = mode;
   currentRadius = radius;
+  // Look-only unless the host marks the payload editable; disables marker drags
+  // while leaving pan/zoom/rotate available for inspection.
+  editingEnabled = payload.editable !== false;
   if (!is2D) {
     if (activeDragHandle || activePan2D) {
       activeDragHandle = "";
@@ -586,8 +594,12 @@ function drawScene(payload) {
   const labelLift = is2D ? 0.02 : 0.08;
   dynamicGroup.add(makeLabel("Start", startMarkerPosition.clone().add(new THREE.Vector3(0.08, labelLift, 0))));
   dynamicGroup.add(makeLabel("End", endMarkerPosition.clone().add(new THREE.Vector3(0.08, labelLift, 0))));
-  dynamicGroup.add(makeLabel("+X right", new THREE.Vector3(radius * 1.18, 0.05, 0)));
-  dynamicGroup.add(makeLabel("+Y front", new THREE.Vector3(0, 0.05, -radius * 1.18)));
+  // In 2D the circle now fills the centered square, so keep the orientation
+  // labels just inside the ring to stop them clipping at the view edge. In 3D
+  // there is room around the sphere, so keep them outside as before.
+  const axisLabelRadius = radius * (is2D ? 0.9 : 1.18);
+  dynamicGroup.add(makeLabel("+X right", new THREE.Vector3(axisLabelRadius, 0.05, 0)));
+  dynamicGroup.add(makeLabel("+Y front", new THREE.Vector3(0, 0.05, -axisLabelRadius)));
   if (!is2D) {
     dynamicGroup.add(makeLabel("+Z up", new THREE.Vector3(0, radius * 1.05, 0)));
   }

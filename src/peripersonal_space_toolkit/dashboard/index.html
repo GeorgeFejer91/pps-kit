@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260616-spatialization-docs">
+  <link rel="stylesheet" href="styles.css?v=20260616-trajectory-preview">
 </head>
 <body>
   <div class="app-shell">
@@ -169,18 +169,18 @@
               <div>Trajectory Preview</div>
               <div class="preview-actions">
                 <div class="segmented-control" aria-label="Trajectory preview mode">
-                  <button id="preview-mode-2d" type="button" class="mode-toggle active" data-preview-mode="2d">2D</button>
-                  <button id="preview-mode-3d" type="button" class="mode-toggle" data-preview-mode="3d">3D</button>
+                  <button id="preview-mode-2d" type="button" class="mode-toggle active" data-preview-mode="2d" data-preview-view-control>2D</button>
+                  <button id="preview-mode-3d" type="button" class="mode-toggle" data-preview-mode="3d" data-preview-view-control>3D</button>
                 </div>
                 <div class="zoom-control" aria-label="Trajectory preview zoom">
-                  <button id="zoom-out-camera" type="button" title="Zoom out" aria-label="Zoom out">-</button>
-                  <button id="zoom-in-camera" type="button" title="Zoom in" aria-label="Zoom in">+</button>
+                  <button id="zoom-out-camera" type="button" title="Zoom out" aria-label="Zoom out" data-preview-view-control>-</button>
+                  <button id="zoom-in-camera" type="button" title="Zoom in" aria-label="Zoom in" data-preview-view-control>+</button>
                 </div>
-                <button id="fit-radius-camera" type="button">Fit Radius</button>
-                <button id="reset-camera" type="button">Reset Camera</button>
+                <button id="fit-radius-camera" type="button" data-preview-view-control>Fit Radius</button>
+                <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="../viewer/index.html?v=source-trajectory-inventory"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="../viewer/index.html?v=20260616-trajectory-preview"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -1040,7 +1040,7 @@
       </form>
     </div>
   </div>
-  <script src="hardware_pixel_art.js?v=20260616-spatialization-docs"></script>
-  <script src="app.js?v=20260616-spatialization-docs"></script>
+  <script src="hardware_pixel_art.js?v=20260616-trajectory-preview"></script>
+  <script src="app.js?v=20260616-trajectory-preview"></script>
 </body>
 </html>

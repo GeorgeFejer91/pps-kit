@@ -4,6 +4,7 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 
 ## 2026-06-16
 
+- Dashboard read-only profile mode now keeps the trajectory preview visible and inspectable while disabling trajectory editing controls. The embedded trajectory viewer centers and fits the PPS radius circle into a square canvas on load/reset so preloads do not open with a clipped or off-center circle; keep this behavior synchronized between packaged dashboard assets and hosted/static pages.
 - The Documentation Software Flow architecture diagram now uses a bundled `sofa_logo.png` image as the SOFA/FABIAN HRIR reference-path icon. Keep this static image packaged under `src/peripersonal_space_toolkit/dashboard/`, framed with the `.arch-node-image-icon` CSS rule, and cache-bust root/documentation/download wrappers together when the architecture visuals change.
 - The Documentation Software Flow architecture diagram now uses a bundled `sonicom_wave.png` image on a pink `.arch-node-sonicom-icon` background for the 3DTI/BRT native-renderer node. Keep this renderer icon packaged with the dashboard assets and cache-bust the root/documentation/download wrappers together when documentation architecture icons change.
 - The Documentation Software Flow UI-layer node should not link back to GitHub Pages from inside the dashboard itself. Keep only the source-repository chip there, and describe the dashboard as the browser interface connected to the local backend.
