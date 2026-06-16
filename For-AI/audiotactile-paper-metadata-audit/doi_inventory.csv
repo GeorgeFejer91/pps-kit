@@ -1,21 +1,21 @@
 record_id,citation_short,doi,doi_url,coverage_category,pdf_status,supplement_status
 ladavas_2001_auditory_tactile_extinction,L\xc3\xa0davas et al. (2001),10.1093/neucas/7.2.97,https://doi.org/10.1093/neucas/7.2.97,not_yet_templated_requires_toolkit_structure,paywalled,paywalled
 farne_ladavas_2002_auditory_pps_humans,Farn\xc3\xa8 & L\xc3\xa0davas (2002),10.1162/089892902320474481,https://doi.org/10.1162/089892902320474481,not_yet_templated_requires_toolkit_structure,downloaded,paywalled
-kitagawa_2005_sound_complexity,Kitagawa et al. (2005),,,not_yet_templated_requires_toolkit_structure,open_access_unavailable,not_checked
+kitagawa_2005_sound_complexity,Kitagawa et al. (2005),10.1007/s00221-005-2393-8,https://doi.org/10.1007/s00221-005-2393-8,not_yet_templated_requires_toolkit_structure,open_access_unavailable,not_checked
 serino_2007_blind_cane_users,Serino et al. (2007),10.1111/j.1467-9280.2007.01952.x,https://doi.org/10.1111/j.1467-9280.2007.01952.x,not_yet_templated_requires_toolkit_structure,downloaded,paywalled
-serino_2009_tms,Serino et al. (2009),,,not_yet_templated_requires_toolkit_structure,open_access_unavailable,not_checked
+serino_2009_tms,Serino et al. (2009),10.1371/journal.pone.0006582,https://doi.org/10.1371/journal.pone.0006582,not_yet_templated_requires_toolkit_structure,open_access_unavailable,not_checked
 tajadura_jimenez_2009_visual_deprivation,Tajadura-Jimenez et al. (2009),10.1016/j.neuropsychologia.2009.07.025,https://doi.org/10.1016/j.neuropsychologia.2009.07.025,not_yet_templated_requires_toolkit_structure,downloaded,not_found
 bassolino_2010_mouse_use,Bassolino et al. (2010),10.1016/j.neuropsychologia.2009.11.009,https://doi.org/10.1016/j.neuropsychologia.2009.11.009,not_yet_templated_requires_toolkit_structure,paywalled,not_found
 serino_2011_rtms,Serino et al. (2011),10.1162/jocn_a_00006,https://doi.org/10.1162/jocn_a_00006,not_yet_templated_requires_toolkit_structure,paywalled,paywalled
-avenanti_2012_motor_cortex,Avenanti et al. (2012),,,not_yet_templated_requires_toolkit_structure,open_access_unavailable,not_checked
+avenanti_2012_motor_cortex,Avenanti et al. (2012),10.1016/j.neuroimage.2012.06.063,https://doi.org/10.1016/j.neuroimage.2012.06.063,not_yet_templated_requires_toolkit_structure,open_access_unavailable,not_checked
 serino_2011_professional_fencers,Serino et al. (2011 professional fencers),,,not_yet_templated_missing_publication_parameters,open_access_unavailable,not_checked
 canzoneri_2012_dynamic_sounds,Canzoneri et al. (2012),10.1371/journal.pone.0044306,https://doi.org/10.1371/journal.pone.0044306,covered_blocked_toolkit_structure,downloaded,needs_user_download
 canzoneri_2013_tool_use_reshaping,Canzoneri et al. (2013a),10.1007/s00221-013-3532-2,https://doi.org/10.1007/s00221-013-3532-2,covered_blocked_missing_publication_parameters,needs_user_download,needs_user_download
 canzoneri_2013_amputation_prosthesis,Canzoneri et al. (2013b),10.1038/srep02844,https://doi.org/10.1038/srep02844,covered_blocked_missing_publication_parameters,downloaded,needs_user_download
-cimmino_2013_surgical_arm_elongation,Cimmino et al. (2013),,,not_yet_templated_requires_toolkit_structure,open_access_unavailable,not_checked
+cimmino_2013_surgical_arm_elongation,Cimmino et al. (2013),10.3233/RNN-120286,https://doi.org/10.3233/RNN-120286,not_yet_templated_requires_toolkit_structure,open_access_unavailable,not_checked
 teramoto_2013_visual_deprivation,Teramoto et al. (2013),10.1037/a0028416,https://doi.org/10.1037/a0028416,not_yet_templated_requires_toolkit_structure,paywalled,not_found
 teneggi_2013_social_face,Teneggi et al. (2013),10.1016/j.cub.2013.01.043,https://doi.org/10.1016/j.cub.2013.01.043,covered_blocked_missing_publication_parameters,needs_user_download,paywalled
-taffou_2014_cynophobic_rear_looming,Taffou & Viaud-Delmon (2014),,,covered_blocked_toolkit_structure,needs_user_download,needs_user_download
+taffou_2014_cynophobic_rear_looming,Taffou & Viaud-Delmon (2014),10.3389/fpsyt.2014.00122,https://doi.org/10.3389/fpsyt.2014.00122,covered_blocked_toolkit_structure,needs_user_download,needs_user_download
 ferri_2015_artificial_valence,Ferri et al. (2015A),10.1016/j.neuropsychologia.2015.03.001,https://doi.org/10.1016/j.neuropsychologia.2015.03.001,covered_blocked_missing_publication_parameters,downloaded,paywalled
 ferri_2015_ecological_valence,Ferri et al. (2015B),10.1016/j.neuropsychologia.2015.03.001,https://doi.org/10.1016/j.neuropsychologia.2015.03.001,covered_blocked_missing_publication_parameters,downloaded,paywalled
 ferri_2015_jneurosci_itv,"Ferri et al. (2015), JNeurosci",10.1523/jneurosci.1696-15.2015,https://doi.org/10.1523/jneurosci.1696-15.2015,not_yet_templated_missing_publication_parameters,downloaded,paywalled

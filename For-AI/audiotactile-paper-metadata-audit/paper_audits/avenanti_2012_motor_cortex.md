@@ -1,8 +1,8 @@
 # Avenanti et al. (2012)
 
 - Record ID: `avenanti_2012_motor_cortex`
-- DOI: `not recorded`
-- DOI URL: not recorded
+- DOI: `10.1016/j.neuroimage.2012.06.063`
+- DOI URL: https://doi.org/10.1016/j.neuroimage.2012.06.063
 - Coverage category: `not_yet_templated_requires_toolkit_structure`
 - Task family: audio-tactile PPS stimulation with motor-evoked-potential endpoint
 - PDF status: `open_access_unavailable`

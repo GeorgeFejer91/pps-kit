@@ -1,8 +1,8 @@
 # Serino et al. (2009)
 
 - Record ID: `serino_2009_tms`
-- DOI: `not recorded`
-- DOI URL: not recorded
+- DOI: `10.1371/journal.pone.0006582`
+- DOI URL: https://doi.org/10.1371/journal.pone.0006582
 - Coverage category: `not_yet_templated_requires_toolkit_structure`
 - Task family: audio-tactile PPS stimulation with TMS/MEP endpoint
 - PDF status: `open_access_unavailable`

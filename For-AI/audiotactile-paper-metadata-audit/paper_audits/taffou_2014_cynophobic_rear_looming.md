@@ -1,8 +1,8 @@
 # Taffou & Viaud-Delmon (2014)
 
 - Record ID: `taffou_2014_cynophobic_rear_looming`
-- DOI: `not recorded`
-- DOI URL: not recorded
+- DOI: `10.3389/fpsyt.2014.00122`
+- DOI URL: https://doi.org/10.3389/fpsyt.2014.00122
 - Coverage category: `covered_blocked_toolkit_structure`
 - Task family: rear-field dog/sheep audio-tactile PPS task
 - PDF status: `needs_user_download`
