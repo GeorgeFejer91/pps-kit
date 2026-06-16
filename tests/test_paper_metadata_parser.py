@@ -6,6 +6,7 @@ import subprocess
 from pathlib import Path
 
 from tools.paper_metadata_parser import run_audit
+from tools.paper_metadata_parser.bundle import build_inventory
 from tools.paper_metadata_parser.parser import (
     CONFIDENCE_LABELS,
     EXTRACTION_STATUSES,
@@ -255,3 +256,37 @@ def test_tracked_audit_files_do_not_include_pdfs_or_extracted_full_text():
             text = path.read_text(encoding="utf-8")
             assert "C:\\" not in text
             assert "/Users/" not in text
+
+
+def test_local_artifact_inventory_is_github_safe():
+    inventory_path = AUDIT_DIR / "local_artifact_inventory.json"
+    inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
+
+    assert inventory["schema"] == "pps-paper-metadata-local-artifact-inventory.v1"
+    assert inventory["artifact_root"] == "artifacts/paper_metadata_audit"
+    assert inventory["artifact_file_count"] == len(inventory["files"])
+    assert inventory["local_bundle"]["relative_path"].startswith("artifacts/paper_metadata_audit/resume_bundles/")
+    assert "copyright_boundary" in inventory
+    for entry in inventory["files"]:
+        assert entry["relative_path"].startswith("artifacts/paper_metadata_audit/")
+        assert not entry["relative_path"].startswith(str(ROOT))
+        assert "C:\\" not in entry["relative_path"]
+        assert len(entry["sha256"]) == 64
+        assert entry["size_bytes"] >= 0
+
+
+def test_bundle_inventory_excludes_tooling_and_creates_local_zip(tmp_path: Path):
+    repo_root = tmp_path
+    artifact_root = repo_root / "artifacts" / "paper_metadata_audit"
+    (artifact_root / "publication_pdfs").mkdir(parents=True)
+    (artifact_root / "tooling" / "jdk").mkdir(parents=True)
+    (artifact_root / "publication_pdfs" / "example.pdf").write_bytes(b"%PDF-1.4\n%%EOF\n")
+    (artifact_root / "tooling" / "jdk" / "java.exe").write_bytes(b"local runtime")
+
+    inventory = build_inventory(repo_root)
+
+    assert inventory["artifact_file_count"] == 1
+    assert inventory["category_counts"] == {"publication_pdf": 1}
+    assert inventory["files"][0]["relative_path"] == "artifacts/paper_metadata_audit/publication_pdfs/example.pdf"
+    bundle_path = repo_root / inventory["local_bundle"]["relative_path"]
+    assert bundle_path.exists()

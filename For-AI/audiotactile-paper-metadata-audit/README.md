@@ -7,8 +7,10 @@ This folder is dedicated to metadata extraction from published audio-tactile PPS
 - `artifacts/paper_metadata_audit/publication_pdfs/`: place publication PDFs here as `<record_id>.pdf`.
 - `artifacts/paper_metadata_audit/supplements/<record_id>/`: place supplementary PDFs, DOCX, XLSX, ODS, ZIPs, scripts, or appendices here.
 - `artifacts/paper_metadata_audit/extracted/`: parser output from OpenDataLoader PDF and fallback extractors.
+- `artifacts/paper_metadata_audit/resume_bundles/`: ignored local ZIP backups for private transfer/resume only.
 
 The `artifacts/` tree is ignored by Git. Do not commit PDFs, supplements, extracted full text, page images, or long copied passages.
+Use `python -m tools.paper_metadata_parser.bundle --repo-root .` to refresh `local_artifact_inventory.json` and create/update the ignored local resume ZIP. The inventory is GitHub-safe because it stores only relative paths, sizes, hashes, and restore notes.
 
 ## Current Inventory
 
@@ -23,6 +25,9 @@ The `artifacts/` tree is ignored by Git. Do not commit PDFs, supplements, extrac
 - Semantic review strategy count: 5
 - Semantic review pass status counts: `{"completed": 146, "completed_no_hits": 4, "not_applicable": 25, "source_unavailable": 195}`
 - Missing download/check requests: 82
+- GitHub-safe local artifact inventory: `local_artifact_inventory.json`
+- Ignored local resume ZIP: `artifacts/paper_metadata_audit/resume_bundles/paper_metadata_audit_artifacts_latest.zip` (`67,948,001` bytes, SHA256 `49284d7b1f8def967059b3204c11c877cb8eb970cc505ee4a5a3c1cb06a29918`)
+- Resume inventory contents: 385 local files (`28` publication PDFs, `13` supplement files, `343` extracted parser/text outputs, `1` acquisition ledger)
 
 ## Environment Readiness
 
