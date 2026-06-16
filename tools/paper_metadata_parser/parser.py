@@ -15,7 +15,7 @@ from typing import Any
 from xml.etree import ElementTree
 
 
-PARSER_VERSION = "0.5.0"
+PARSER_VERSION = "0.5.1"
 
 COVERAGE_PATH = Path("assets/preloads/audiotactile_literature_coverage.json")
 AUDIT_DIR = Path("For-AI/audiotactile-paper-metadata-audit")
@@ -793,11 +793,41 @@ def load_supplement_text_nodes(record_id: str, paths: AuditPaths) -> tuple[list[
     return nodes, source_files
 
 
+def load_fallback_text_nodes(record_id: str, paths: AuditPaths) -> tuple[list[dict[str, Any]], list[str]]:
+    folder = paths.extracted_dir / "fallback" / record_id
+    if not folder.exists():
+        return [], []
+    nodes: list[dict[str, Any]] = []
+    source_files: list[str] = []
+    page_splitter = re.compile(r"(?:^|\n)\s*\[page\s+([^\]]+)\]\s*\n", flags=re.IGNORECASE)
+    for path in sorted(folder.glob("*.fallback.txt")):
+        raw = path.read_text(encoding="utf-8", errors="replace")
+        rel = artifact_rel(path, paths.repo_root)
+        source_files.append(rel)
+        parts = page_splitter.split(raw)
+        page_chunks = zip(parts[1::2], parts[2::2]) if len(parts) > 1 else [("fallback", raw)]
+        for page, content in page_chunks:
+            text = clean_evidence_text(content)
+            if len(text) < 25:
+                continue
+            nodes.append(
+                {
+                    "type": "fallback_pdf_text",
+                    "page": str(page).strip(),
+                    "content": text,
+                    "section": "fallback_pdf_text",
+                    "source_file": rel,
+                }
+            )
+    return nodes, source_files
+
+
 def load_mining_nodes(record_id: str, paths: AuditPaths) -> tuple[list[dict[str, Any]], list[str]]:
     main_nodes, main_source = load_opendataloader_nodes(record_id, paths)
+    fallback_nodes, fallback_sources = load_fallback_text_nodes(record_id, paths)
     supplement_nodes, supplement_sources = load_supplement_text_nodes(record_id, paths)
-    source_files = [source for source in [main_source, *supplement_sources] if source]
-    return [*main_nodes, *supplement_nodes], source_files
+    source_files = [source for source in [main_source, *fallback_sources, *supplement_sources] if source]
+    return [*main_nodes, *fallback_nodes, *supplement_nodes], source_files
 
 
 def score_node_for_field(node: dict[str, Any], field_key: str) -> int:
@@ -1442,8 +1472,10 @@ This folder is dedicated to metadata extraction from published audio-tactile PPS
 - `artifacts/paper_metadata_audit/publication_pdfs/`: place publication PDFs here as `<record_id>.pdf`.
 - `artifacts/paper_metadata_audit/supplements/<record_id>/`: place supplementary PDFs, DOCX, XLSX, ODS, ZIPs, scripts, or appendices here.
 - `artifacts/paper_metadata_audit/extracted/`: parser output from OpenDataLoader PDF and fallback extractors.
+- `artifacts/paper_metadata_audit/resume_bundles/`: ignored local ZIP backups for private transfer/resume only.
 
 The `artifacts/` tree is ignored by Git. Do not commit PDFs, supplements, extracted full text, page images, or long copied passages.
+Use `python -m tools.paper_metadata_parser.bundle --repo-root .` to refresh `local_artifact_inventory.json` and create/update the ignored local resume ZIP. The inventory is GitHub-safe because it stores only relative paths, sizes, hashes, and restore notes.
 
 ## Current Inventory
 

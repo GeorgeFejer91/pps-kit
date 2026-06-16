@@ -224,6 +224,65 @@ def test_paper_metadata_parser_can_inventory_downloaded_local_files(tmp_path: Pa
     assert by_id["adjacent_record"]["supplement_status"] == "not_applicable"
 
 
+def test_paper_metadata_parser_mines_fallback_pdf_text(tmp_path: Path):
+    repo_root = tmp_path
+    coverage_path = repo_root / "coverage.json"
+    coverage_path.write_text(
+        json.dumps(
+            {
+                "schema": "test",
+                "literature_records": [
+                    {
+                        "record_id": "fallback_paper",
+                        "citation_short": "Fallback Paper (2026)",
+                        "doi": "10.0000/fallback",
+                        "source_basis": ["fixture"],
+                        "current_template_ids": [],
+                        "coverage_category": "not_yet_templated_missing_publication_parameters",
+                        "audiotactile_task_family": "audio-tactile PPS fixture",
+                        "can_recreate_audiotactile_components_now": False,
+                        "blocking_constraint_ids": ["missing_core_soa_iti_baseline_repetition_parameters"],
+                        "missing_publication_parameters": [],
+                    }
+                ],
+            },
+            ensure_ascii=True,
+        ),
+        encoding="utf-8",
+    )
+    pdf_dir = repo_root / "artifacts" / "paper_metadata_audit" / "publication_pdfs"
+    fallback_dir = repo_root / "artifacts" / "paper_metadata_audit" / "extracted" / "fallback" / "fallback_paper"
+    pdf_dir.mkdir(parents=True)
+    fallback_dir.mkdir(parents=True)
+    (pdf_dir / "fallback_paper.pdf").write_bytes(b"%PDF-1.4\n%%EOF\n")
+    (fallback_dir / "fallback_paper.fallback.txt").write_text(
+        "\n\n[page 3]\n"
+        "Methods described white noise approaching from 75 cm with a 300 ms stimulus duration. "
+        "The audio-tactile trials used tactile stimulation for 100 ms and SOA values of 300 ms. "
+        "Catch trials and randomized blocks contained 250 trials in total.\n",
+        encoding="utf-8",
+    )
+
+    summary = run_audit(
+        repo_root,
+        coverage_path=Path("coverage.json"),
+        audit_dir=Path("For-AI/audit"),
+        artifact_dir=Path("artifacts/paper_metadata_audit"),
+        parse_downloaded=False,
+    )
+    record = load_jsonl(repo_root / "For-AI" / "audit" / "metadata_audit.jsonl")[0]
+
+    assert summary["automated_evidence_status_counts"] == {"source_mined": 1}
+    assert record["metadata_confidence_label"] == "partial_extraction"
+    assert record["automated_evidence_mining"]["source_files"] == [
+        "artifacts/paper_metadata_audit/extracted/fallback/fallback_paper/fallback_paper.fallback.txt"
+    ]
+    stimulus = record["segment_field_audit"]["segment_1_stimulus_reconstruction"]["stimulus_type"]
+    assert stimulus["status"] == "inferred_low_confidence"
+    assert stimulus["source_file"].endswith("fallback_paper.fallback.txt")
+    assert stimulus["page_or_section"] == "source page/section(s) 3"
+
+
 def test_tracked_audit_files_do_not_include_pdfs_or_extracted_full_text():
     result = subprocess.run(
         ["git", "ls-files"],

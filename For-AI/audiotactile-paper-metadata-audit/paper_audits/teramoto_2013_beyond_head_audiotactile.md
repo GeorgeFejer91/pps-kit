@@ -7,7 +7,7 @@
 - Task family: audiotactile interaction task manipulating cheek, hand, and knee tactile sites with spatially related sounds
 - PDF status: `paywalled`
 - Supplement status: `needs_user_download`
-- Supplement acquisition attempts: `3` (`http_404`)
+- Supplement acquisition attempts: `4` (`http_404`)
 - Supplement extracted text files: `0`
 - Extraction status: `pending_pdf`
 - Metadata confidence: `0.0` (`source_unavailable`)

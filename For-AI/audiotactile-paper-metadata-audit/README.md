@@ -15,26 +15,23 @@ Use `python -m tools.paper_metadata_parser.bundle --repo-root .` to refresh `loc
 ## Current Inventory
 
 - Literature records: 74
-- PDF status counts: `{"downloaded": 28, "needs_user_download": 10, "not_applicable": 5, "open_access_unavailable": 13, "paywalled": 18}`
-- Supplement status counts: `{"downloaded": 10, "needs_user_download": 16, "not_applicable": 5, "not_checked": 6, "not_found": 18, "paywalled": 19}`
-- Extraction status counts: `{"parsed": 28, "parsed_with_warnings": 5, "pending_pdf": 41}`
-- Metadata confidence counts: `{"not_applicable": 5, "partial_extraction": 30, "pending_source": 10, "source_unavailable": 29}`
-- Automated evidence status counts: `{"no_extracted_source": 39, "not_applicable": 5, "source_mined": 30}`
-- Automated evidence mined field total: 518
+- PDF status counts: `{"downloaded": 26, "needs_user_download": 12, "not_applicable": 5, "open_access_unavailable": 13, "paywalled": 18}`
+- Supplement status counts: `{"downloaded": 10, "needs_user_download": 17, "not_applicable": 5, "not_checked": 6, "not_found": 21, "paywalled": 15}`
+- Extraction status counts: `{"parsed_with_warnings": 31, "pending_pdf": 43}`
+- Metadata confidence counts: `{"not_applicable": 5, "partial_extraction": 28, "pending_source": 12, "source_unavailable": 29}`
+- Automated evidence status counts: `{"no_extracted_source": 41, "not_applicable": 5, "source_mined": 28}`
+- Automated evidence mined field total: 477
 - Supplement extracted records/files: 10 records / 13 files
 - Semantic review strategy count: 5
-- Semantic review pass status counts: `{"completed": 146, "completed_no_hits": 4, "not_applicable": 25, "source_unavailable": 195}`
-- Missing download/check requests: 82
-- GitHub-safe local artifact inventory: `local_artifact_inventory.json`
-- Ignored local resume ZIP: `artifacts/paper_metadata_audit/resume_bundles/paper_metadata_audit_artifacts_latest.zip` (`67,948,001` bytes, SHA256 `49284d7b1f8def967059b3204c11c877cb8eb970cc505ee4a5a3c1cb06a29918`)
-- Resume inventory contents: 385 local files (`28` publication PDFs, `13` supplement files, `343` extracted parser/text outputs, `1` acquisition ledger)
+- Semantic review pass status counts: `{"completed": 136, "completed_no_hits": 4, "not_applicable": 25, "source_unavailable": 205}`
+- Missing download/check requests: 81
 
 ## Environment Readiness
 
-- Java available: `True`
-- `opendataloader_pdf` installed: `True`
-- OpenDataLoader ready: `True`
-- Fallback extractors: `{"pdfinfo_available": true, "pdfplumber_installed": true, "pdftoppm_available": true, "pypdf_installed": true}`
+- Java available: `False`
+- `opendataloader_pdf` installed: `False`
+- OpenDataLoader ready: `False`
+- Fallback extractors: `{"pdfinfo_available": false, "pdfplumber_installed": true, "pdftoppm_available": false, "pypdf_installed": true}`
 
 ## How To Use
 

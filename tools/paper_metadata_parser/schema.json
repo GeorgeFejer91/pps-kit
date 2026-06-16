@@ -1,6 +1,6 @@
 {
   "schema": "pps-paper-metadata-extraction-schema.v1",
-  "parser_version": "0.5.0",
+  "parser_version": "0.5.1",
   "pdf_statuses": [
     "downloaded",
     "open_access_unavailable",

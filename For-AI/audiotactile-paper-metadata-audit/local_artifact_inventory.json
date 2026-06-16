@@ -1,22 +1,22 @@
 {
   "schema": "pps-paper-metadata-local-artifact-inventory.v1",
-  "generated_at": "2026-06-16T09:10:16.911802+00:00",
+  "generated_at": "2026-06-16T10:41:54.410517+00:00",
   "artifact_root": "artifacts/paper_metadata_audit",
   "copyright_boundary": "This tracked inventory stores relative paths, sizes, and hashes only. The PDFs, supplements, extracted text, and local ZIP bundle remain ignored local artifacts and must not be committed to the public repository.",
   "restore_note": "To resume on the same machine, keep artifacts/paper_metadata_audit/ in place. To move work privately, transfer the ignored ZIP bundle named below outside the public Git repo, extract it into artifacts/paper_metadata_audit/, then run python -m tools.paper_metadata_parser --refresh.",
-  "artifact_file_count": 385,
-  "artifact_total_bytes": 88305563,
+  "artifact_file_count": 79,
+  "artifact_total_bytes": 61693133,
   "category_counts": {
     "acquisition_status.json": 1,
-    "extracted_text_or_parser_output": 343,
-    "publication_pdf": 28,
+    "extracted_text_or_parser_output": 39,
+    "publication_pdf": 26,
     "supplement": 13
   },
   "local_bundle": {
     "created": true,
     "relative_path": "artifacts/paper_metadata_audit/resume_bundles/paper_metadata_audit_artifacts_latest.zip",
-    "size_bytes": 67948001,
-    "sha256": "49284d7b1f8def967059b3204c11c877cb8eb970cc505ee4a5a3c1cb06a29918"
+    "size_bytes": 45973872,
+    "sha256": "44903585979b18881b3864bd66f997be938c1de35d2e5f4215af8d42c6ddcd2f"
   },
   "files": [
     {
@@ -24,2676 +24,244 @@
       "artifact_relative_path": "acquisition_status.json",
       "category": "acquisition_status.json",
       "record_id": "",
-      "size_bytes": 79789,
-      "sha256": "aac895f017b8b08cde44c803ff91fe0ce881a5a7dbd4f29421f4df4f4ad6eb50"
+      "size_bytes": 116514,
+      "sha256": "3abf6bd68926cea7d4439c9acbe32289ace8c24fa4d622e58465d44d0dcb7cbf"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ageing_2021.json",
-      "artifact_relative_path": "extracted/opendataloader/ageing_2021.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/ageing_2021/ageing_2021.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/ageing_2021/ageing_2021.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "ageing_2021",
-      "size_bytes": 210200,
-      "sha256": "0e552de8253a419fe277ac448fcf7fedd4b058f3a01663fa516e30a2be20c1ba"
+      "size_bytes": 105771,
+      "sha256": "976879c559b42e8270ddb9cf8af5f8c47afd2eead813d700af44fc0414c4aaac"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ageing_2021.md",
-      "artifact_relative_path": "extracted/opendataloader/ageing_2021.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ageing_2021",
-      "size_bytes": 114717,
-      "sha256": "ff0b5f89d8a9deb0342a0bd77548cfd87e3696a7184375361592cdd8d3237cf5"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ageing_2021_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/ageing_2021_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ageing_2021_images",
-      "size_bytes": 45162,
-      "sha256": "f3e3b13eb30764f00565be8c1077234d6eb9730b841c077e770384e29924f5b0"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ageing_2021_images/imageFile10.png",
-      "artifact_relative_path": "extracted/opendataloader/ageing_2021_images/imageFile10.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ageing_2021_images",
-      "size_bytes": 59204,
-      "sha256": "bd53f9e1fcfbb9b69958249ae3acb0fb4365ec770f751ca3ad6813649387781f"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ageing_2021_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/ageing_2021_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ageing_2021_images",
-      "size_bytes": 834,
-      "sha256": "275064cfb49e0c1faf9bbec96f07d59a285ed2d8d453b0e327e4c4ade033bc97"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ageing_2021_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/ageing_2021_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ageing_2021_images",
-      "size_bytes": 84143,
-      "sha256": "a6801ca0d45c4c7079b29a2018be68a204ba9a59f3003e87686859b00a23df5e"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ageing_2021_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/ageing_2021_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ageing_2021_images",
-      "size_bytes": 112681,
-      "sha256": "2f0581d2ba360640bd118a7b9f29f545d7bab4de9c1537a2c63b9329d3cf1076"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ageing_2021_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/ageing_2021_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ageing_2021_images",
-      "size_bytes": 99397,
-      "sha256": "7a807914c8ce9d24dba85019603eb434c06762cd956f10993452291a96527bd7"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ageing_2021_images/imageFile6.png",
-      "artifact_relative_path": "extracted/opendataloader/ageing_2021_images/imageFile6.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ageing_2021_images",
-      "size_bytes": 121123,
-      "sha256": "701c49724b5c469be09f5d6a6ffd5af1b9f50e6947e30e9ab885c6b5d0e81805"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ageing_2021_images/imageFile7.png",
-      "artifact_relative_path": "extracted/opendataloader/ageing_2021_images/imageFile7.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ageing_2021_images",
-      "size_bytes": 103584,
-      "sha256": "2a73dc38a0c62d779524895cc29a768c776adb51e6d36d9233d5caa8bbce98e3"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ageing_2021_images/imageFile8.png",
-      "artifact_relative_path": "extracted/opendataloader/ageing_2021_images/imageFile8.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ageing_2021_images",
-      "size_bytes": 65711,
-      "sha256": "a363b030c4e70f3db4b098ccc5aa17185815c5e0c7fdc2373c3d679a5427b695"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ageing_2021_images/imageFile9.png",
-      "artifact_relative_path": "extracted/opendataloader/ageing_2021_images/imageFile9.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ageing_2021_images",
-      "size_bytes": 50537,
-      "sha256": "68797226b4c91d025a2921f05ddc46b5515b23b0dc8e3ee687cd0afba20edaa1"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2012_dynamic_sounds.json",
-      "artifact_relative_path": "extracted/opendataloader/canzoneri_2012_dynamic_sounds.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/canzoneri_2012_dynamic_sounds/canzoneri_2012_dynamic_sounds.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/canzoneri_2012_dynamic_sounds/canzoneri_2012_dynamic_sounds.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "canzoneri_2012_dynamic_sounds",
-      "size_bytes": 92238,
-      "sha256": "1e834ce2701242f1a86963de4ec4bda90ec06b3e141ba3f5d9941b0fcb365e13"
+      "size_bytes": 45789,
+      "sha256": "de03ddf465ca3b6e3f95adf28f21edefb6030882c226696e8d8754ea15d6a305"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2012_dynamic_sounds.md",
-      "artifact_relative_path": "extracted/opendataloader/canzoneri_2012_dynamic_sounds.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "canzoneri_2012_dynamic_sounds",
-      "size_bytes": 48307,
-      "sha256": "23025c362421cba2d868d8e37d8b5a6480b4c32b428284489701477bac123a06"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2012_dynamic_sounds_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/canzoneri_2012_dynamic_sounds_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "canzoneri_2012_dynamic_sounds_images",
-      "size_bytes": 126803,
-      "sha256": "2684a574bd6249cbb1b41bb7fe07979112b97007cc4687f1b910fa2aa1bb095a"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2012_dynamic_sounds_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/canzoneri_2012_dynamic_sounds_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "canzoneri_2012_dynamic_sounds_images",
-      "size_bytes": 59366,
-      "sha256": "7b211fafbaccf19884a855cd8399dced2bef512269f4793a2ab1d739af4ffe6f"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2012_dynamic_sounds_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/canzoneri_2012_dynamic_sounds_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "canzoneri_2012_dynamic_sounds_images",
-      "size_bytes": 42755,
-      "sha256": "fc12338b358883db03a5a4812ecedd4b23016bf10761b0ba4c9406aa8919976d"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2013_amputation_prosthesis.json",
-      "artifact_relative_path": "extracted/opendataloader/canzoneri_2013_amputation_prosthesis.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/canzoneri_2013_amputation_prosthesis/canzoneri_2013_amputation_prosthesis.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/canzoneri_2013_amputation_prosthesis/canzoneri_2013_amputation_prosthesis.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "canzoneri_2013_amputation_prosthesis",
-      "size_bytes": 103115,
-      "sha256": "9082cbc66e3fd57b40fdaf07457985010f6ec162cd6a923ba05df5f58cdb448a"
+      "size_bytes": 43227,
+      "sha256": "21ff4dcf26a68dfc181ab4ee59a983ce019700422d0de27a18b297b8ca1d3543"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2013_amputation_prosthesis.md",
-      "artifact_relative_path": "extracted/opendataloader/canzoneri_2013_amputation_prosthesis.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "canzoneri_2013_amputation_prosthesis",
-      "size_bytes": 48128,
-      "sha256": "449d2a8b998d81441a2c1fe0826aba020f363f57951ac9d99363d57687ebd675"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "canzoneri_2013_amputation_prosthesis_images",
-      "size_bytes": 146278,
-      "sha256": "3b517250699ccf69a7a22168f01677c6ddc1e361feae1f2dddb5403160881b54"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile10.png",
-      "artifact_relative_path": "extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile10.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "canzoneri_2013_amputation_prosthesis_images",
-      "size_bytes": 52289,
-      "sha256": "e711cf47790ae5647be6e5fde5bdf845c27f99e1004b48dc10dd936dd1fe7a6f"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile11.png",
-      "artifact_relative_path": "extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile11.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "canzoneri_2013_amputation_prosthesis_images",
-      "size_bytes": 3916,
-      "sha256": "a123bd71732722d74b8d7f9eb2c5e372c22a35a0a1ddb4611e794fce4a989756"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile12.png",
-      "artifact_relative_path": "extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile12.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "canzoneri_2013_amputation_prosthesis_images",
-      "size_bytes": 3916,
-      "sha256": "a123bd71732722d74b8d7f9eb2c5e372c22a35a0a1ddb4611e794fce4a989756"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "canzoneri_2013_amputation_prosthesis_images",
-      "size_bytes": 3916,
-      "sha256": "a123bd71732722d74b8d7f9eb2c5e372c22a35a0a1ddb4611e794fce4a989756"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "canzoneri_2013_amputation_prosthesis_images",
-      "size_bytes": 87096,
-      "sha256": "4e81ad3b7283d5b82a70b99d76b5ada8bf704ba71700caccc416c898a21fcc7c"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "canzoneri_2013_amputation_prosthesis_images",
-      "size_bytes": 3916,
-      "sha256": "a123bd71732722d74b8d7f9eb2c5e372c22a35a0a1ddb4611e794fce4a989756"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "canzoneri_2013_amputation_prosthesis_images",
-      "size_bytes": 153384,
-      "sha256": "3e3d9a5310105c6f719767166f82768085ef4db59c7124768b54d59b155a60f0"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile6.png",
-      "artifact_relative_path": "extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile6.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "canzoneri_2013_amputation_prosthesis_images",
-      "size_bytes": 3916,
-      "sha256": "a123bd71732722d74b8d7f9eb2c5e372c22a35a0a1ddb4611e794fce4a989756"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile7.png",
-      "artifact_relative_path": "extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile7.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "canzoneri_2013_amputation_prosthesis_images",
-      "size_bytes": 3916,
-      "sha256": "a123bd71732722d74b8d7f9eb2c5e372c22a35a0a1ddb4611e794fce4a989756"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile8.png",
-      "artifact_relative_path": "extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile8.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "canzoneri_2013_amputation_prosthesis_images",
-      "size_bytes": 67845,
-      "sha256": "146ce0f129d0078d5494aff6ccb2e9c53bbf487f289431f176998c92093d36b4"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile9.png",
-      "artifact_relative_path": "extracted/opendataloader/canzoneri_2013_amputation_prosthesis_images/imageFile9.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "canzoneri_2013_amputation_prosthesis_images",
-      "size_bytes": 3916,
-      "sha256": "a123bd71732722d74b8d7f9eb2c5e372c22a35a0a1ddb4611e794fce4a989756"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/disorders_consciousness_2019.json",
-      "artifact_relative_path": "extracted/opendataloader/disorders_consciousness_2019.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/disorders_consciousness_2019/disorders_consciousness_2019.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/disorders_consciousness_2019/disorders_consciousness_2019.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "disorders_consciousness_2019",
-      "size_bytes": 168174,
-      "sha256": "17c6ab32ad0103c3093446499df5b7895ba3bc1e16f2091c7982ca1d9b3636b0"
+      "size_bytes": 77546,
+      "sha256": "22857144e61df15ebffa9270c323536f935a31ce31715977590f1387ec7b3836"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/disorders_consciousness_2019.md",
-      "artifact_relative_path": "extracted/opendataloader/disorders_consciousness_2019.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "disorders_consciousness_2019",
-      "size_bytes": 84272,
-      "sha256": "5ca9b3d5e6b33d09040d625ca89740350c33fd4b72a349e54dd7f4a50751f779"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/disorders_consciousness_2019_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/disorders_consciousness_2019_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "disorders_consciousness_2019_images",
-      "size_bytes": 25650,
-      "sha256": "c98b5b53e0b2e4a63d09d993c0f785de5b032b162c6f1ac710bddca805aadf20"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/disorders_consciousness_2019_images/imageFile10.png",
-      "artifact_relative_path": "extracted/opendataloader/disorders_consciousness_2019_images/imageFile10.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "disorders_consciousness_2019_images",
-      "size_bytes": 158296,
-      "sha256": "ce47def327f9dabb050decf66518eb96574fde749101aef11cb330c9c9711c74"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/disorders_consciousness_2019_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/disorders_consciousness_2019_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "disorders_consciousness_2019_images",
-      "size_bytes": 18835,
-      "sha256": "477d6223cd4ca3d413b47394d94a8f680b428f68b19c26e6a25d4dadb6b7cd54"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/disorders_consciousness_2019_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/disorders_consciousness_2019_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "disorders_consciousness_2019_images",
-      "size_bytes": 922,
-      "sha256": "a0069624b17b784109ebff16f4d48b8450321ded3d2ed1e26de84c65cc37b4ec"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/disorders_consciousness_2019_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/disorders_consciousness_2019_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "disorders_consciousness_2019_images",
-      "size_bytes": 237305,
-      "sha256": "7858ac401f4c90a8eadfe225148eff6b2bc450988a9207176b551c0fdf882d7a"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/disorders_consciousness_2019_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/disorders_consciousness_2019_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "disorders_consciousness_2019_images",
-      "size_bytes": 141385,
-      "sha256": "450f600d0ffc6d227acd788d6c5e5ae4893a6b5a80de31d24e33f1d2e7c94e8d"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/disorders_consciousness_2019_images/imageFile6.png",
-      "artifact_relative_path": "extracted/opendataloader/disorders_consciousness_2019_images/imageFile6.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "disorders_consciousness_2019_images",
-      "size_bytes": 154071,
-      "sha256": "ff9295cb1a1492b7555da46a092c78fa998a6d3ff81a9490751d31d5680145d5"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/disorders_consciousness_2019_images/imageFile7.png",
-      "artifact_relative_path": "extracted/opendataloader/disorders_consciousness_2019_images/imageFile7.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "disorders_consciousness_2019_images",
-      "size_bytes": 169473,
-      "sha256": "d223f05efb42a8cd8ca4970c54618d7b1be9d1fb6bd64e6f4e5b0d681524f9a4"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/disorders_consciousness_2019_images/imageFile8.png",
-      "artifact_relative_path": "extracted/opendataloader/disorders_consciousness_2019_images/imageFile8.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "disorders_consciousness_2019_images",
-      "size_bytes": 170001,
-      "sha256": "5ee7aa44fe3a55310a9bbaf6c7a37439670d747b7265fc149b0c1fdcea42b1a9"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/disorders_consciousness_2019_images/imageFile9.png",
-      "artifact_relative_path": "extracted/opendataloader/disorders_consciousness_2019_images/imageFile9.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "disorders_consciousness_2019_images",
-      "size_bytes": 128877,
-      "sha256": "b68b160850ae185ba83014cc763b0cac46f140045a2a998bccc56ffef5e23837"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_artificial_valence.json",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_artificial_valence.json",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_artificial_valence",
-      "size_bytes": 204157,
-      "sha256": "62fc27edee294eda6c05dc3e314cd34625fe8e22939a7b864743da111b790504"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_artificial_valence.md",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_artificial_valence.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_artificial_valence",
-      "size_bytes": 61179,
-      "sha256": "a69c3b7ee28d79b359c6c47ede4e76bb1789567f6a11feb7dc2b2d61c830f1dd"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_artificial_valence_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_artificial_valence_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_artificial_valence_images",
-      "size_bytes": 95754,
-      "sha256": "7f4b70712f09fc5e8acf49960877b509083d11916c89dacefe1868572a2f5dd2"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_artificial_valence_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_artificial_valence_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_artificial_valence_images",
-      "size_bytes": 41937,
-      "sha256": "084e5fa2871493f68802b35de016dff2920d8df3d9cd5c30c1eb3a901a59dfef"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_artificial_valence_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_artificial_valence_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_artificial_valence_images",
-      "size_bytes": 78291,
-      "sha256": "da2475deeeed5a50218374bf2c51f20128ac55a9105b7e3754d948154777f12e"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_artificial_valence_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_artificial_valence_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_artificial_valence_images",
-      "size_bytes": 22031,
-      "sha256": "1183cd6c152a5fcd6bbc7b66874d68cb4e7726328fdddbfe896a504f34fa035b"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_artificial_valence_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_artificial_valence_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_artificial_valence_images",
-      "size_bytes": 90935,
-      "sha256": "5ce52caa44396c229acdec4bc0b489f4f475caac8e94089f15d8bf74bce2e7ee"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_ecological_valence.json",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_ecological_valence.json",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_ecological_valence",
-      "size_bytes": 204157,
-      "sha256": "9392470319213ebdc17cc2008669d4e40ff01c10356273ea41075c63bedea299"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_ecological_valence.md",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_ecological_valence.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_ecological_valence",
-      "size_bytes": 61179,
-      "sha256": "30a4aa8e15bd39878c51805f9387ec37d1b4126db7a75764f57721fe44865b6c"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_ecological_valence_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_ecological_valence_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_ecological_valence_images",
-      "size_bytes": 95754,
-      "sha256": "7f4b70712f09fc5e8acf49960877b509083d11916c89dacefe1868572a2f5dd2"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_ecological_valence_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_ecological_valence_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_ecological_valence_images",
-      "size_bytes": 41937,
-      "sha256": "084e5fa2871493f68802b35de016dff2920d8df3d9cd5c30c1eb3a901a59dfef"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_ecological_valence_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_ecological_valence_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_ecological_valence_images",
-      "size_bytes": 78291,
-      "sha256": "da2475deeeed5a50218374bf2c51f20128ac55a9105b7e3754d948154777f12e"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_ecological_valence_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_ecological_valence_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_ecological_valence_images",
-      "size_bytes": 22031,
-      "sha256": "1183cd6c152a5fcd6bbc7b66874d68cb4e7726328fdddbfe896a504f34fa035b"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_ecological_valence_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_ecological_valence_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_ecological_valence_images",
-      "size_bytes": 90935,
-      "sha256": "5ce52caa44396c229acdec4bc0b489f4f475caac8e94089f15d8bf74bce2e7ee"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_jneurosci_itv.json",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_jneurosci_itv.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/ferri_2015_jneurosci_itv/ferri_2015_jneurosci_itv.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/ferri_2015_jneurosci_itv/ferri_2015_jneurosci_itv.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "ferri_2015_jneurosci_itv",
-      "size_bytes": 155783,
-      "sha256": "b16cec67562c8bacbd887f057a2918f929cab40493e8f6f789a6f584fe0d307b"
+      "size_bytes": 75170,
+      "sha256": "f0af6edba7df5c58b4b7f293d14ff16b7c2fea921e1cd53246c8d93996f4f64c"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_jneurosci_itv.md",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_jneurosci_itv.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_jneurosci_itv",
-      "size_bytes": 78606,
-      "sha256": "b90f7f2e4bef80c629ffcf9bee28722988b09fe2fcd19a91e82ea21978f249ec"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_jneurosci_itv_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_jneurosci_itv_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_jneurosci_itv_images",
-      "size_bytes": 527,
-      "sha256": "d1fc66d593c9907a6e33bc3ee7632bb86f9ea1142b1991d0bf297f703e3454cb"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_jneurosci_itv_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_jneurosci_itv_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_jneurosci_itv_images",
-      "size_bytes": 252590,
-      "sha256": "fe1565f121972823afa5d179755f34c7859727d538115173efd3f25347d93e4c"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_jneurosci_itv_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_jneurosci_itv_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_jneurosci_itv_images",
-      "size_bytes": 57095,
-      "sha256": "485bd18f7fffd821fc15e372ccfe7c423d4cf79df7b9bf12e2ac76de06ded476"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_jneurosci_itv_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_jneurosci_itv_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_jneurosci_itv_images",
-      "size_bytes": 253373,
-      "sha256": "ec3d07743a28ac08f704f1473d6f03ad9670f2e33cfe19a60fc1d8f026fcbb30"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_jneurosci_itv_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_jneurosci_itv_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_jneurosci_itv_images",
-      "size_bytes": 123272,
-      "sha256": "df862c13b177884deeec8cea8269864b50ddb9c19e5ee5baad2fbf140fdc658d"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_jneurosci_itv_images/imageFile6.png",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_jneurosci_itv_images/imageFile6.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_jneurosci_itv_images",
-      "size_bytes": 193812,
-      "sha256": "4ae4df68a83cd8b986ebe4f64f1be2f125b975ec2acae65ed5fd3186a759334f"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_jneurosci_itv_images/imageFile7.png",
-      "artifact_relative_path": "extracted/opendataloader/ferri_2015_jneurosci_itv_images/imageFile7.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ferri_2015_jneurosci_itv_images",
-      "size_bytes": 94841,
-      "sha256": "b4268cff9dbab538ebcb77e5bbd318ab5a22e904d29dd1632ca52cc4dce2b0a5"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair.json",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/galli_2015_wheelchair/galli_2015_wheelchair.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/galli_2015_wheelchair/galli_2015_wheelchair.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "galli_2015_wheelchair",
-      "size_bytes": 140636,
-      "sha256": "b0bcd0552fa640759e905e60cdb8f8ff036130afa5cde3dadd73cd62dc3eaca0"
+      "size_bytes": 64844,
+      "sha256": "5b642b90116264fbafe3c22d335b6f779d5c21af2a894918af1ab128f217e1a1"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair.md",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair",
-      "size_bytes": 69860,
-      "sha256": "ef47892539148a05ff1a7f231c94197fbe5816c5983247a7cbf643acec8ffd7c"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 87,
-      "sha256": "38c5e2e485076e377263f7e8d8c3ad079a1c3775f96f1cd5b1d8940d327ad753"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile10.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile10.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 128,
-      "sha256": "4cbebe82515b4814dd7da142fc10047e9c11c28969df7e6ba80dbd63ef1ff8ea"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile11.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile11.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 114,
-      "sha256": "a9ead68a9cebfd022fb863f871128768d6d026e30cd85437153e96598f934801"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile12.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile12.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 80,
-      "sha256": "b1122ac89f215719f28685b9d26d85c18e571fe67d62c58faf18f242424605cf"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile13.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile13.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile14.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile14.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile15.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile15.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 82,
-      "sha256": "d7fb1448375e1db7eb4b92ffb2cdca514395de92a2d4cef56ec1b8fd2159abb4"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile16.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile16.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 82,
-      "sha256": "d7fb1448375e1db7eb4b92ffb2cdca514395de92a2d4cef56ec1b8fd2159abb4"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile17.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile17.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 82,
-      "sha256": "d7fb1448375e1db7eb4b92ffb2cdca514395de92a2d4cef56ec1b8fd2159abb4"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile18.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile18.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 82,
-      "sha256": "d7fb1448375e1db7eb4b92ffb2cdca514395de92a2d4cef56ec1b8fd2159abb4"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile19.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile19.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 82,
-      "sha256": "d7fb1448375e1db7eb4b92ffb2cdca514395de92a2d4cef56ec1b8fd2159abb4"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile20.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile20.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 77,
-      "sha256": "434cfe78ea6c18cb2fe2a0b98283b564bc137caefd042d8ae1cf5473a1c0f591"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile21.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile21.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile22.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile22.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile23.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile23.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile24.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile24.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile25.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile25.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 80,
-      "sha256": "b1122ac89f215719f28685b9d26d85c18e571fe67d62c58faf18f242424605cf"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile26.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile26.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 81,
-      "sha256": "e2f5f672564f5a5333b4ff2e1b6476d9e984ec945b8fd3597394a107bf310b4b"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile27.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile27.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 78,
-      "sha256": "1d55c190e99ff53d55e75ff598287c8a617aedf48a7d1399d1a8f62b1c116023"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile28.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile28.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 23338,
-      "sha256": "bc4bae26b27d9f4aa11b881fd18545e9857f7d833cbaab91f5722ca42c7d54b2"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile29.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile29.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 80,
-      "sha256": "635a44a30145a4746baddee10879249e534edb32294bb04343034223e0338629"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile30.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile30.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile31.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile31.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile32.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile32.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 77,
-      "sha256": "e979dcd7b6812181f5462d2edae672530dfff13d902c966c3da3b4696409e099"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile33.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile33.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 79,
-      "sha256": "a54ff403fd231a5ffe190337dc0ec7df0bf0ee77606d7cd7d7cdad7237369055"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile34.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile34.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 79,
-      "sha256": "a54ff403fd231a5ffe190337dc0ec7df0bf0ee77606d7cd7d7cdad7237369055"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile35.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile35.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 25874,
-      "sha256": "67da1fdac4a65f282e865c57abe558f17134f36b8db53eadfdf55b945c2a5193"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile36.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile36.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "c11e0eeeca9905d278d419bb9ecc9a772bf9f69af93ac2b3eadf8a97720b8224"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile37.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile37.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 77,
-      "sha256": "434cfe78ea6c18cb2fe2a0b98283b564bc137caefd042d8ae1cf5473a1c0f591"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile38.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile38.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 78,
-      "sha256": "ed44cd181649fd8d4f67637fdb71dd8f67f56822afdac17e10474734fd836f93"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile39.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile39.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 78,
-      "sha256": "ed44cd181649fd8d4f67637fdb71dd8f67f56822afdac17e10474734fd836f93"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile40.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile40.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 25497,
-      "sha256": "8432fe67de31180f7c7140e370acd8f22a0978e252ea43295d4ce6d7652b6e59"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile41.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile41.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "c11e0eeeca9905d278d419bb9ecc9a772bf9f69af93ac2b3eadf8a97720b8224"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile42.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile42.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile43.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile43.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile44.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile44.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 85,
-      "sha256": "ca271967e4d017c105bf094c28106fc71a6db90c967ae4c269dc9045594712ac"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile45.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile45.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 82,
-      "sha256": "3a6b601462668f8fe94840b4f1e094d0696224fcd938d02ab0de755a5ff8ef44"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile46.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile46.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "f10bfcf866334f5a09c74af2cc31af05f164abee253faccdac68d54c06f29027"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile47.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile47.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 22260,
-      "sha256": "57e4f6e6ce3a3756f0d698e5552a8b48dee68bfce7107800bcf068ae7e844be1"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile48.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile48.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile49.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile49.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile50.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile50.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile51.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile51.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile52.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile52.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile53.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile53.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile54.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile54.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile55.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile55.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 83,
-      "sha256": "49e654ee2f5f7483fe78f35e55eb75d90ea539e01ddd6cb2f98580372616cb04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile6.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile6.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 80,
-      "sha256": "b1122ac89f215719f28685b9d26d85c18e571fe67d62c58faf18f242424605cf"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile7.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile7.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 85,
-      "sha256": "ac5001f057d19c85d4e1963c9f6e2dbd85528b35aa976eb098ce2acdc7d661bc"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile8.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile8.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 86,
-      "sha256": "584bb156466b29769e7391e952e2c3d3a914abc11ce35e74ef404711703fb6ae"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair_images/imageFile9.png",
-      "artifact_relative_path": "extracted/opendataloader/galli_2015_wheelchair_images/imageFile9.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "galli_2015_wheelchair_images",
-      "size_bytes": 149898,
-      "sha256": "1df1587e4255d3e090309a0e63f35c4f854586a24d4411847af477ecc9e5513f"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/holmes_2020_four_experiments.json",
-      "artifact_relative_path": "extracted/opendataloader/holmes_2020_four_experiments.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/holmes_2020_four_experiments/holmes_2020_four_experiments.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/holmes_2020_four_experiments/holmes_2020_four_experiments.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "holmes_2020_four_experiments",
-      "size_bytes": 139575,
-      "sha256": "f92bafb818597e499a13f1a160dcd91ebd9566457d8498f6795fda6fa38040ed"
+      "size_bytes": 76363,
+      "sha256": "5042139296add89190c64bf50a3ebe388021ab3973d0ae4f01513a3de7313ad4"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/holmes_2020_four_experiments.md",
-      "artifact_relative_path": "extracted/opendataloader/holmes_2020_four_experiments.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "holmes_2020_four_experiments",
-      "size_bytes": 74800,
-      "sha256": "12038cc7731fc35467bfc4eaa869da58c82bb34a8893220f02ae1369fb6e93cf"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/holmes_2020_four_experiments_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/holmes_2020_four_experiments_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "holmes_2020_four_experiments_images",
-      "size_bytes": 68657,
-      "sha256": "b7dc92ae9dccb1af779a9d9b1055228dd54870b6f829b4840ac6bc7d77846062"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/holmes_2020_four_experiments_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/holmes_2020_four_experiments_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "holmes_2020_four_experiments_images",
-      "size_bytes": 107920,
-      "sha256": "f9baf4ed9ce333ed7348abc86f425e2e0315d24f4fdd2a10d290ff5b57caa5d5"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/holmes_2020_four_experiments_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/holmes_2020_four_experiments_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "holmes_2020_four_experiments_images",
-      "size_bytes": 141064,
-      "sha256": "3ecf823fd4636fbcbd2bb8359e4bc53a7fd90564d558a97bfa73e3958ba6ce5f"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ieeg_trunk_2018.json",
-      "artifact_relative_path": "extracted/opendataloader/ieeg_trunk_2018.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/ieeg_trunk_2018/ieeg_trunk_2018.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/ieeg_trunk_2018/ieeg_trunk_2018.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "ieeg_trunk_2018",
-      "size_bytes": 139124,
-      "sha256": "5cfa84b980b773b66f2ff619bd0d2060bf8236b197a877d410a3a3a6ef2c142d"
+      "size_bytes": 67849,
+      "sha256": "f8074e920e5ac025149cffcd2959b0ca60b4aebd736564049ae63b32409793ad"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ieeg_trunk_2018.md",
-      "artifact_relative_path": "extracted/opendataloader/ieeg_trunk_2018.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ieeg_trunk_2018",
-      "size_bytes": 71711,
-      "sha256": "b724299c19f90a050bb122ff244b4a01b20ff3179044a436b9c1a3c706d44153"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ieeg_trunk_2018_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/ieeg_trunk_2018_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ieeg_trunk_2018_images",
-      "size_bytes": 319892,
-      "sha256": "373ef0d70ec197df09a9f99376ee2818b821912e7357b18a9469e6774f900315"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ieeg_trunk_2018_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/ieeg_trunk_2018_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ieeg_trunk_2018_images",
-      "size_bytes": 245872,
-      "sha256": "4a463aab625014d1df72b46b2b4fcb662a22e5b983b5505d2c7cc77302327d94"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ieeg_trunk_2018_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/ieeg_trunk_2018_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ieeg_trunk_2018_images",
-      "size_bytes": 187903,
-      "sha256": "84cffcc948976da3334f4aed9b3a14e9caa160e36200e64ee23854319b874a2c"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ieeg_trunk_2018_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/ieeg_trunk_2018_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ieeg_trunk_2018_images",
-      "size_bytes": 240272,
-      "sha256": "a07803a5e3853bb93b17842abc3dff634a42e67ed135629522a40a3ae05a6f41"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/lamia_2026_arm_movement.json",
-      "artifact_relative_path": "extracted/opendataloader/lamia_2026_arm_movement.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/lamia_2026_arm_movement/lamia_2026_arm_movement.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/lamia_2026_arm_movement/lamia_2026_arm_movement.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "lamia_2026_arm_movement",
-      "size_bytes": 152929,
-      "sha256": "b1183a7452a1f7e97f65094ed3bc81f5203f655758b31f5b74a7ae714e3e5cf8"
+      "size_bytes": 74709,
+      "sha256": "69f60b8021eff02ba0aed1ec1785388b735c5b4d50c4696a8fa8e478a16787a4"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/lamia_2026_arm_movement.md",
-      "artifact_relative_path": "extracted/opendataloader/lamia_2026_arm_movement.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "lamia_2026_arm_movement",
-      "size_bytes": 72456,
-      "sha256": "5ef37d1157d27b65a5dc980e2080d4d8c347057cf2884b7c9d1e52c7a2181114"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/lamia_2026_arm_movement_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/lamia_2026_arm_movement_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "lamia_2026_arm_movement_images",
-      "size_bytes": 216560,
-      "sha256": "df60989f132575fc45fd9fd9fe256679bbbf815eb121b0a583950a09294410e3"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/lamia_2026_arm_movement_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/lamia_2026_arm_movement_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "lamia_2026_arm_movement_images",
-      "size_bytes": 44723,
-      "sha256": "13444e7dbeea840f44f689e4323824bdec3369e026e2d36b2c5be846209af2fa"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/lamia_2026_arm_movement_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/lamia_2026_arm_movement_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "lamia_2026_arm_movement_images",
-      "size_bytes": 74623,
-      "sha256": "0ef9cdd94851ae6e28a9eccee22884f69c9e743d27266c0a5751f68492f6d255"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/lamia_2026_arm_movement_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/lamia_2026_arm_movement_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "lamia_2026_arm_movement_images",
-      "size_bytes": 91523,
-      "sha256": "8195e77a0d13faf27f621a8623ea672f6d3f0154f31dfd911e8bb2f1070b9c1a"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/lamia_2026_arm_movement_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/lamia_2026_arm_movement_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "lamia_2026_arm_movement_images",
-      "size_bytes": 839,
-      "sha256": "f830a27a67ba7e9b29720ddcbd5419ec5d9e83c1e5949b53477d84f80cedc72f"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/lerner_2021_3d_boundary.json",
-      "artifact_relative_path": "extracted/opendataloader/lerner_2021_3d_boundary.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/lerner_2021_3d_boundary/lerner_2021_3d_boundary.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/lerner_2021_3d_boundary/lerner_2021_3d_boundary.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "lerner_2021_3d_boundary",
-      "size_bytes": 134994,
-      "sha256": "1d9152792fb730235bb205d8080a20e5b1656740c52613cacdaf8e7aa7e6a54f"
+      "size_bytes": 52784,
+      "sha256": "005b9b3c69ddaf03147d66a8a1a85e78a7e03058be2f566b575dc4ce2da10cac"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/lerner_2021_3d_boundary.md",
-      "artifact_relative_path": "extracted/opendataloader/lerner_2021_3d_boundary.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "lerner_2021_3d_boundary",
-      "size_bytes": 55045,
-      "sha256": "43c59a99847e4bfc7549ca7ccf6878afed69c397a99de4949517ce6ec81557d8"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "lerner_2021_3d_boundary_images",
-      "size_bytes": 201303,
-      "sha256": "a6f1143b034e60f2dcba2b2cb166b8bf50c030adf035d2c382dbad82e6333204"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile10.png",
-      "artifact_relative_path": "extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile10.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "lerner_2021_3d_boundary_images",
-      "size_bytes": 230143,
-      "sha256": "c420980f90b345f68a2b3d05b4d2f20eb959519283790dd8933fa1d16fd63fcb"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile11.png",
-      "artifact_relative_path": "extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile11.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "lerner_2021_3d_boundary_images",
-      "size_bytes": 238299,
-      "sha256": "86c164b95fcf00143669c615ec79043d4c814de1a74778be575b8060f31f8d5d"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "lerner_2021_3d_boundary_images",
-      "size_bytes": 94822,
-      "sha256": "3a9d181491af067fca85032e7761047b3868ba0a50315b3dee030a7392429135"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "lerner_2021_3d_boundary_images",
-      "size_bytes": 93490,
-      "sha256": "265d612e9d17f956a31d5ee24307df9fb6f5d666455f3ab4e6912c0df157df48"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "lerner_2021_3d_boundary_images",
-      "size_bytes": 224278,
-      "sha256": "e9e2816d6499cf2135b519bc52e1705ab92ca9946367e689ecacde04df717689"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "lerner_2021_3d_boundary_images",
-      "size_bytes": 229519,
-      "sha256": "3a99d26db1b2700274661a41f90ef944edb27d1cc9d2ba68f65ab3d67c0cfc87"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile6.png",
-      "artifact_relative_path": "extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile6.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "lerner_2021_3d_boundary_images",
-      "size_bytes": 217520,
-      "sha256": "c60e860fea4038a93d4ab1fda90a14b64292f0a3ac4a29aee7f8de8a7a40bf07"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile7.png",
-      "artifact_relative_path": "extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile7.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "lerner_2021_3d_boundary_images",
-      "size_bytes": 237495,
-      "sha256": "9260dfee2ac8901dc425520e6a171e64a5df17ff5fd567cc69d5155295094fda"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile8.png",
-      "artifact_relative_path": "extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile8.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "lerner_2021_3d_boundary_images",
-      "size_bytes": 211865,
-      "sha256": "c66e70aa086fa4b6a341b53869def0d07d938f359f0ca0271fad7eab34d55ab3"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile9.png",
-      "artifact_relative_path": "extracted/opendataloader/lerner_2021_3d_boundary_images/imageFile9.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "lerner_2021_3d_boundary_images",
-      "size_bytes": 216933,
-      "sha256": "1ed4b80f72c5427244f96ea487f1c855f7c22b4220682c87cc3758827833d699"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025.json",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/looming_duration_2025/looming_duration_2025.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/looming_duration_2025/looming_duration_2025.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "looming_duration_2025",
-      "size_bytes": 78610,
-      "sha256": "d5ae3543be81c220038fe28cbc604461208017e4dd9122dfaa4e66e818a5083d"
+      "size_bytes": 38277,
+      "sha256": "278d7412b149fade6b362c1f8e2a2be8363c5ab5c3f71938d35bd274b4f459dd"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025.md",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025",
-      "size_bytes": 37602,
-      "sha256": "60aad9d6d7b1f999bdb0e7079170f22d5bb1b0c0d66e3705d2c9f89e18a6c079"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 21601,
-      "sha256": "cccfd7059685abd6e5463a1ef458d9f588186a09175655a5e520c5963e4b8083"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile10.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile10.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 21601,
-      "sha256": "cccfd7059685abd6e5463a1ef458d9f588186a09175655a5e520c5963e4b8083"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile11.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile11.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 22362,
-      "sha256": "256db46465c07030011f6b7bcc70e5fe66938584ebfe96b5b1666ee643d262f9"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile12.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile12.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 21778,
-      "sha256": "60cc934b419938914c1ca6598bf505ff8c52573563c1ff69604a0da681ebc678"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile13.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile13.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 1714,
-      "sha256": "84c14161cfefcb6b5634c059a7f3ffe7da60c70c03d113d32d686dff073d6804"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile14.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile14.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 13721,
-      "sha256": "ba45097179a4e7525d08d44d22501f5629b7c101d86075e5c0d31b4158dda6a1"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile15.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile15.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 21601,
-      "sha256": "cccfd7059685abd6e5463a1ef458d9f588186a09175655a5e520c5963e4b8083"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile16.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile16.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 25378,
-      "sha256": "64e5960c06364fcde537ff90b3b479c8a2c7b953b3725bb914ee4496c3355c9e"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile17.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile17.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 16053,
-      "sha256": "1c9ceff06fb8c3d9b66c6dd05a5fb5674cac81317730924675045ae28cab7ade"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile18.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile18.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 1714,
-      "sha256": "84c14161cfefcb6b5634c059a7f3ffe7da60c70c03d113d32d686dff073d6804"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile19.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile19.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 13721,
-      "sha256": "ba45097179a4e7525d08d44d22501f5629b7c101d86075e5c0d31b4158dda6a1"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 13721,
-      "sha256": "ba45097179a4e7525d08d44d22501f5629b7c101d86075e5c0d31b4158dda6a1"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile20.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile20.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 21601,
-      "sha256": "cccfd7059685abd6e5463a1ef458d9f588186a09175655a5e520c5963e4b8083"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile21.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile21.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 1714,
-      "sha256": "84c14161cfefcb6b5634c059a7f3ffe7da60c70c03d113d32d686dff073d6804"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile22.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile22.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 13721,
-      "sha256": "ba45097179a4e7525d08d44d22501f5629b7c101d86075e5c0d31b4158dda6a1"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile23.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile23.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 21601,
-      "sha256": "cccfd7059685abd6e5463a1ef458d9f588186a09175655a5e520c5963e4b8083"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile24.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile24.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 1714,
-      "sha256": "84c14161cfefcb6b5634c059a7f3ffe7da60c70c03d113d32d686dff073d6804"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile25.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile25.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 13721,
-      "sha256": "ba45097179a4e7525d08d44d22501f5629b7c101d86075e5c0d31b4158dda6a1"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile26.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile26.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 21601,
-      "sha256": "cccfd7059685abd6e5463a1ef458d9f588186a09175655a5e520c5963e4b8083"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile27.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile27.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 1714,
-      "sha256": "84c14161cfefcb6b5634c059a7f3ffe7da60c70c03d113d32d686dff073d6804"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile28.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile28.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 13721,
-      "sha256": "ba45097179a4e7525d08d44d22501f5629b7c101d86075e5c0d31b4158dda6a1"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 1714,
-      "sha256": "84c14161cfefcb6b5634c059a7f3ffe7da60c70c03d113d32d686dff073d6804"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 21601,
-      "sha256": "cccfd7059685abd6e5463a1ef458d9f588186a09175655a5e520c5963e4b8083"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 1714,
-      "sha256": "84c14161cfefcb6b5634c059a7f3ffe7da60c70c03d113d32d686dff073d6804"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile6.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile6.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 13721,
-      "sha256": "ba45097179a4e7525d08d44d22501f5629b7c101d86075e5c0d31b4158dda6a1"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile7.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile7.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 21601,
-      "sha256": "cccfd7059685abd6e5463a1ef458d9f588186a09175655a5e520c5963e4b8083"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile8.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile8.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 1714,
-      "sha256": "84c14161cfefcb6b5634c059a7f3ffe7da60c70c03d113d32d686dff073d6804"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/looming_duration_2025_images/imageFile9.png",
-      "artifact_relative_path": "extracted/opendataloader/looming_duration_2025_images/imageFile9.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "looming_duration_2025_images",
-      "size_bytes": 13721,
-      "sha256": "ba45097179a4e7525d08d44d22501f5629b7c101d86075e5c0d31b4158dda6a1"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/matsuda_2021_four_directions.json",
-      "artifact_relative_path": "extracted/opendataloader/matsuda_2021_four_directions.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/matsuda_2021_four_directions/matsuda_2021_four_directions.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/matsuda_2021_four_directions/matsuda_2021_four_directions.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "matsuda_2021_four_directions",
-      "size_bytes": 99099,
-      "sha256": "053d9d8ce4e37e98cd3780c8accb4ef15b121130b732582d6c4747a8816da1e8"
+      "size_bytes": 49756,
+      "sha256": "dd970992043e4676721ce14da0e82c48afe6937f57804da13fccefdb71f054e6"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/matsuda_2021_four_directions.md",
-      "artifact_relative_path": "extracted/opendataloader/matsuda_2021_four_directions.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "matsuda_2021_four_directions",
-      "size_bytes": 47806,
-      "sha256": "f176748381698d8266ab96787e68019fdcb26ad218a00fc694210e7c3e5ea1c7"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/matsuda_2021_four_directions_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/matsuda_2021_four_directions_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "matsuda_2021_four_directions_images",
-      "size_bytes": 28648,
-      "sha256": "4382d482db8179395c4ee68f88eab5096ed98556f45d492beaff4d70b3605c0c"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/matsuda_2021_four_directions_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/matsuda_2021_four_directions_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "matsuda_2021_four_directions_images",
-      "size_bytes": 145285,
-      "sha256": "418bc00192708a33a5ecda8b876d9a58e186b29fbbd6964fd40ea8050dd021de"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/matsuda_2021_four_directions_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/matsuda_2021_four_directions_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "matsuda_2021_four_directions_images",
-      "size_bytes": 33879,
-      "sha256": "28d602999509c051795cb1aae3d607d773fea893603d70c124bd42e36b639fe3"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/matsuda_2021_four_directions_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/matsuda_2021_four_directions_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "matsuda_2021_four_directions_images",
-      "size_bytes": 13981,
-      "sha256": "7f97ad263bfcdc96a8b8fd92120407b3497ac627cbb57dd9308e1d4802b90d04"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/matsuda_2021_four_directions_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/matsuda_2021_four_directions_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "matsuda_2021_four_directions_images",
-      "size_bytes": 67927,
-      "sha256": "a6ea025a7aadf7ecdb1843e0167bac3afcf022c1ce94d9a8a9b9665278d7e843"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/matsuda_2021_four_directions_images/imageFile6.png",
-      "artifact_relative_path": "extracted/opendataloader/matsuda_2021_four_directions_images/imageFile6.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "matsuda_2021_four_directions_images",
-      "size_bytes": 777,
-      "sha256": "0ef820b5b4ef2afe9a6345b4bfea8d47902fb60e830b0e33f80145d32937294a"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019.json",
-      "artifact_relative_path": "extracted/opendataloader/newborn_boundaries_2019.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/newborn_boundaries_2019/newborn_boundaries_2019.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/newborn_boundaries_2019/newborn_boundaries_2019.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "newborn_boundaries_2019",
-      "size_bytes": 336125,
-      "sha256": "58045f7ab2424cd7289d4c8f9d3ac05974e625bdf812d1427bd8416030b26c29"
+      "size_bytes": 61660,
+      "sha256": "c19f48e0ac68f94eb9c6ea6c9fdc3a9acefd62e504e69acca65be440d2578a3d"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019.md",
-      "artifact_relative_path": "extracted/opendataloader/newborn_boundaries_2019.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "newborn_boundaries_2019",
-      "size_bytes": 60056,
-      "sha256": "54677fdd361fa14384568d98cbc96c54e3cac30c0bdb465565daebc73d52f056"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/newborn_boundaries_2019_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "newborn_boundaries_2019_images",
-      "size_bytes": 727,
-      "sha256": "4c104cac43ef988d115aa8ed85b1ea6f36daf89eb0e9e160a9079d8d7ecb463b"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/newborn_boundaries_2019_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "newborn_boundaries_2019_images",
-      "size_bytes": 12162,
-      "sha256": "5cb160352f7d7ca7256998ed5adad5a4520a0fade48262d8f98098322da6b332"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/newborn_boundaries_2019_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "newborn_boundaries_2019_images",
-      "size_bytes": 19070,
-      "sha256": "f95eab4b030ab46c7e98f9e91b68da588de0801e898e98a4ce7421fbece198a0"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/newborn_boundaries_2019_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/newborn_boundaries_2019_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "newborn_boundaries_2019_images",
-      "size_bytes": 26259,
-      "sha256": "9cb7e9b846504edbc18b1352970101ad73a92dd2f9bc5ff95ac961e9579b62f7"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2015_bodily_self.json",
-      "artifact_relative_path": "extracted/opendataloader/noel_2015_bodily_self.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/noel_2015_bodily_self/noel_2015_bodily_self.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/noel_2015_bodily_self/noel_2015_bodily_self.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "noel_2015_bodily_self",
-      "size_bytes": 94383,
-      "sha256": "0a7fc20fad05429652c123af8bc6847e76ace12198f47a2bdabc5534b1cc8c8c"
+      "size_bytes": 51025,
+      "sha256": "071d4586c51c15eca0a1a2be561afd6a279f85eb3e669921701a29b4911adbb2"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2015_bodily_self.md",
-      "artifact_relative_path": "extracted/opendataloader/noel_2015_bodily_self.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2015_bodily_self",
-      "size_bytes": 54740,
-      "sha256": "58d479439e8a9981c7cf0a18ac830e32620af00f7522b4b59d31bed4f7d2c50c"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2015_bodily_self_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2015_bodily_self_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2015_bodily_self_images",
-      "size_bytes": 20962,
-      "sha256": "08007594c9571531506a98427fd4446a0d2ff120d22cc8b83628e9e723f93b8d"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2015_bodily_self_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2015_bodily_self_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2015_bodily_self_images",
-      "size_bytes": 19333,
-      "sha256": "de973979d6b62ea01b807cf0cfbbd80193e61a9d47af7aa6e7e13d7c48f4b161"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2015_bodily_self_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2015_bodily_self_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2015_bodily_self_images",
-      "size_bytes": 3580,
-      "sha256": "cef4c4a548f9ebafae3baf1fbdc4816bb0bac89ababb9cacd384449a420f8a92"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2015_bodily_self_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2015_bodily_self_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2015_bodily_self_images",
-      "size_bytes": 198110,
-      "sha256": "87dbb81ead7b908cc0ccfc774d0fb191f5eb18ae0905599059cabef5423a1167"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2015_bodily_self_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2015_bodily_self_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2015_bodily_self_images",
-      "size_bytes": 139360,
-      "sha256": "0bd724a565c39a648a87b93ce92be10e01b6df1f72e0c887bf42aa582350f8aa"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2015_bodily_self_images/imageFile6.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2015_bodily_self_images/imageFile6.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2015_bodily_self_images",
-      "size_bytes": 67805,
-      "sha256": "01c370510b38965585ce4419f21b6b1feb17f7952a5aa48cc61d1f8161dfbc3d"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2015_bodily_self_images/imageFile7.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2015_bodily_self_images/imageFile7.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2015_bodily_self_images",
-      "size_bytes": 73482,
-      "sha256": "f64f6523e57b6f4cbe676179cdf6cd668f89815990978cd8c19c58d672f1e85b"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2015_bodily_self_images/imageFile8.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2015_bodily_self_images/imageFile8.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2015_bodily_self_images",
-      "size_bytes": 133092,
-      "sha256": "c5cca60352494823dcaa227b3ff8de54875ad23250ab8f114519df4755a89d81"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2018_neural_adaptation.json",
-      "artifact_relative_path": "extracted/opendataloader/noel_2018_neural_adaptation.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/noel_2018_neural_adaptation/noel_2018_neural_adaptation.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/noel_2018_neural_adaptation/noel_2018_neural_adaptation.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "noel_2018_neural_adaptation",
-      "size_bytes": 929478,
-      "sha256": "096d151b2ed7e691d10669bf22db8f8c30b2ff8e2edb34702a9ac746d875e78f"
+      "size_bytes": 147276,
+      "sha256": "1e7043a420574b82504ca83f2ae9eb772ca323507973fd76060250386ff83bcf"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2018_neural_adaptation.md",
-      "artifact_relative_path": "extracted/opendataloader/noel_2018_neural_adaptation.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2018_neural_adaptation",
-      "size_bytes": 151168,
-      "sha256": "c11e950933bbf59b6e0c33996a702c473c6b4bcea41ee68cc0109a2be6c266d6"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2018_neural_adaptation_images",
-      "size_bytes": 276,
-      "sha256": "c0eeb27297ead19e245bbbe733ace9279f4124f002fba6c3d85578b56f75b6fd"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile10.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile10.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2018_neural_adaptation_images",
-      "size_bytes": 561,
-      "sha256": "da5e23b2d4608af71a4545423ba0791b7e24a5b89732be265e28545ccb7d0f25"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile11.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile11.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2018_neural_adaptation_images",
-      "size_bytes": 561,
-      "sha256": "da5e23b2d4608af71a4545423ba0791b7e24a5b89732be265e28545ccb7d0f25"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile12.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile12.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2018_neural_adaptation_images",
-      "size_bytes": 2886,
-      "sha256": "0a21c5c614052883b0e9e5af5647a1ed278c45eeccb59270ef6c96e085581795"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile13.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile13.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2018_neural_adaptation_images",
-      "size_bytes": 105458,
-      "sha256": "f741da799b32f2e412beb8d08e2ec4e3766e79593c95a5def1868eeceb74f0c2"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile14.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile14.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2018_neural_adaptation_images",
-      "size_bytes": 66817,
-      "sha256": "009a475545f7afaf6ed4415a375a6e88486551d6e3a724b6117a8c16ed4fa8a9"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2018_neural_adaptation_images",
-      "size_bytes": 174032,
-      "sha256": "3f6fa1a67173651c48b660259aae621efdeabf81ceb86f773f367f9db344e9b8"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2018_neural_adaptation_images",
-      "size_bytes": 219561,
-      "sha256": "c91cedce1bc701342be793db23d3e12859834a3d33d4bcb859c84741a335bd02"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2018_neural_adaptation_images",
-      "size_bytes": 73578,
-      "sha256": "65f86ff568daa98f1e42267d6b20c78c7d19d610bd607f6f09aa57c95e33123f"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2018_neural_adaptation_images",
-      "size_bytes": 86076,
-      "sha256": "056a8ea390653d5b1a39b951f8cc08f35e20f1d5f7e1b4139c30c83bb66cf08c"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile6.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile6.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2018_neural_adaptation_images",
-      "size_bytes": 115779,
-      "sha256": "99105b5b296a8b0f9aaea3cbddc298a24ee715fc9fc76fec833abacda38ae31e"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile7.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile7.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2018_neural_adaptation_images",
-      "size_bytes": 562,
-      "sha256": "6e0e2d62083f5ec1cfe52e22d14733636349a000604ea1d0e134d17de4beb660"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile8.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile8.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2018_neural_adaptation_images",
-      "size_bytes": 562,
-      "sha256": "6e0e2d62083f5ec1cfe52e22d14733636349a000604ea1d0e134d17de4beb660"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile9.png",
-      "artifact_relative_path": "extracted/opendataloader/noel_2018_neural_adaptation_images/imageFile9.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "noel_2018_neural_adaptation_images",
-      "size_bytes": 2896,
-      "sha256": "7e59433611a910749c55ab4b5a47df416683a0cf5ecd8c803a379bef08c741fb"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/pregnancy_2019.json",
-      "artifact_relative_path": "extracted/opendataloader/pregnancy_2019.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/pregnancy_2019/pregnancy_2019.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/pregnancy_2019/pregnancy_2019.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "pregnancy_2019",
-      "size_bytes": 78819,
-      "sha256": "186975753c07e179ef937f334f4e095b3750079d035069be6f47c7b9c26fe230"
+      "size_bytes": 44125,
+      "sha256": "87bc7304c832a30e0a8df40efdbf5d179b8be9b7cde356744deaf71ddd3f8c6e"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/pregnancy_2019.md",
-      "artifact_relative_path": "extracted/opendataloader/pregnancy_2019.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "pregnancy_2019",
-      "size_bytes": 42774,
-      "sha256": "80f676819d29886f281dfcda512dd040c97751144ed1514c9c94d184ad3aa936"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/pregnancy_2019_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/pregnancy_2019_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "pregnancy_2019_images",
-      "size_bytes": 722,
-      "sha256": "a0f7d8eb3fdf6976358054c441fcb2e0fa295a1a6d658b7de50dcb1694e7666e"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/pregnancy_2019_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/pregnancy_2019_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "pregnancy_2019_images",
-      "size_bytes": 47148,
-      "sha256": "5b244dba406a7c5ee5d954c8cbb7a1ea12e2a928c871c9d880c671b17ea76476"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/pregnancy_2019_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/pregnancy_2019_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "pregnancy_2019_images",
-      "size_bytes": 25414,
-      "sha256": "b3c4dd8a33ea8ddfee62e4b50e1276b0eba937e8f23168f16c59cb298fdc45b3"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ronga_2021_newborn_erp.json",
-      "artifact_relative_path": "extracted/opendataloader/ronga_2021_newborn_erp.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/ronga_2021_newborn_erp/ronga_2021_newborn_erp.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/ronga_2021_newborn_erp/ronga_2021_newborn_erp.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "ronga_2021_newborn_erp",
-      "size_bytes": 33561,
-      "sha256": "61c4f7d6ea8630f32e2d2bc63215db2751bda7d7ac7ff3945740231ed2dfd92d"
+      "size_bytes": 17414,
+      "sha256": "e4a918662d578bfdf09224c304d7f10ccf48aaf800989ddc6b65e4f6187f57d8"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ronga_2021_newborn_erp.md",
-      "artifact_relative_path": "extracted/opendataloader/ronga_2021_newborn_erp.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ronga_2021_newborn_erp",
-      "size_bytes": 18476,
-      "sha256": "d8498dd06aa17b31b48af2201638bec86960d0de9f5b19e3323240fb324f17a7"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ronga_2021_newborn_erp_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/ronga_2021_newborn_erp_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "ronga_2021_newborn_erp_images",
-      "size_bytes": 388045,
-      "sha256": "20af8bdc9ba6090191f651765c985d3476f2b8ab62961f457a8e6716f95b7daa"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_exps_4_to_6.json",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_exps_4_to_6.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/serino_2015_exps_4_to_6/serino_2015_exps_4_to_6.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/serino_2015_exps_4_to_6/serino_2015_exps_4_to_6.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "serino_2015_exps_4_to_6",
-      "size_bytes": 186727,
-      "sha256": "0c51ae41bc68fb4f0bf657d367eeec9a556c423f63c07c1aa14f09f7ab3e0563"
+      "size_bytes": 78571,
+      "sha256": "4f1af6d13a38c657e25345cfc06f61125cfd1f4811c6020a574cef04be8e2212"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_exps_4_to_6.md",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_exps_4_to_6.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_exps_4_to_6",
-      "size_bytes": 76955,
-      "sha256": "514bbc186ffdc92004a98c8b2e21d724eeab29cc780e0b5a2bfa16498a705c45"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_exps_4_to_6_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_exps_4_to_6_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_exps_4_to_6_images",
-      "size_bytes": 126411,
-      "sha256": "f8e8e93cb61f89c35f7ef068477169d8b937e964667625a9dbd3e9db46188258"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_exps_4_to_6_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_exps_4_to_6_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_exps_4_to_6_images",
-      "size_bytes": 99595,
-      "sha256": "d4436756ed518e172c44399ca34bc2e909fbb26bc96e361b83bb489a57ac0d92"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_exps_4_to_6_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_exps_4_to_6_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_exps_4_to_6_images",
-      "size_bytes": 42491,
-      "sha256": "301670ad440b8397a3095ccd088522ef38fc3aee6eac01f2d8f099197f028e20"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_exps_4_to_6_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_exps_4_to_6_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_exps_4_to_6_images",
-      "size_bytes": 203256,
-      "sha256": "e29ba1fc1afda0204ed8a91fcac2930382098a6755f7f1b6596295cf88628058"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_exps_4_to_6_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_exps_4_to_6_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_exps_4_to_6_images",
-      "size_bytes": 199328,
-      "sha256": "784d8ba3d954b043dade9c5a1d9ea27cbac47b0d74eb39779009aee798a5b2c6"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_exps_4_to_6_images/imageFile6.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_exps_4_to_6_images/imageFile6.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_exps_4_to_6_images",
-      "size_bytes": 54047,
-      "sha256": "3474d22191c81f5e3dba221d02cd069d6aa9d1b17916f3b0afdcaa04bd7b2341"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_exps_4_to_6_images/imageFile7.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_exps_4_to_6_images/imageFile7.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_exps_4_to_6_images",
-      "size_bytes": 386046,
-      "sha256": "b8a9c0667db8fe910920d6d87f37df7caf4cb9abd59e800098ed089f43fbf703"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_front_back_trunk_exp2.json",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_front_back_trunk_exp2.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/serino_2015_front_back_trunk_exp2/serino_2015_front_back_trunk_exp2.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/serino_2015_front_back_trunk_exp2/serino_2015_front_back_trunk_exp2.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "serino_2015_front_back_trunk_exp2",
-      "size_bytes": 186807,
-      "sha256": "e5e3a35356560a5e7d7e5edd1699862fb8f5e8638a92f0c12ad8f4ee3780c962"
+      "size_bytes": 78571,
+      "sha256": "4f1af6d13a38c657e25345cfc06f61125cfd1f4811c6020a574cef04be8e2212"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_front_back_trunk_exp2.md",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_front_back_trunk_exp2.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_front_back_trunk_exp2",
-      "size_bytes": 77025,
-      "sha256": "e7c6357ad649842e289443bf79a85d020e78c3a7ce7ff57e84575efdf5d570d2"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_front_back_trunk_exp2_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_front_back_trunk_exp2_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_front_back_trunk_exp2_images",
-      "size_bytes": 126411,
-      "sha256": "f8e8e93cb61f89c35f7ef068477169d8b937e964667625a9dbd3e9db46188258"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_front_back_trunk_exp2_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_front_back_trunk_exp2_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_front_back_trunk_exp2_images",
-      "size_bytes": 99595,
-      "sha256": "d4436756ed518e172c44399ca34bc2e909fbb26bc96e361b83bb489a57ac0d92"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_front_back_trunk_exp2_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_front_back_trunk_exp2_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_front_back_trunk_exp2_images",
-      "size_bytes": 42491,
-      "sha256": "301670ad440b8397a3095ccd088522ef38fc3aee6eac01f2d8f099197f028e20"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_front_back_trunk_exp2_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_front_back_trunk_exp2_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_front_back_trunk_exp2_images",
-      "size_bytes": 203256,
-      "sha256": "e29ba1fc1afda0204ed8a91fcac2930382098a6755f7f1b6596295cf88628058"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_front_back_trunk_exp2_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_front_back_trunk_exp2_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_front_back_trunk_exp2_images",
-      "size_bytes": 199328,
-      "sha256": "784d8ba3d954b043dade9c5a1d9ea27cbac47b0d74eb39779009aee798a5b2c6"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_front_back_trunk_exp2_images/imageFile6.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_front_back_trunk_exp2_images/imageFile6.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_front_back_trunk_exp2_images",
-      "size_bytes": 54047,
-      "sha256": "3474d22191c81f5e3dba221d02cd069d6aa9d1b17916f3b0afdcaa04bd7b2341"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_front_back_trunk_exp2_images/imageFile7.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_front_back_trunk_exp2_images/imageFile7.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_front_back_trunk_exp2_images",
-      "size_bytes": 386046,
-      "sha256": "b8a9c0667db8fe910920d6d87f37df7caf4cb9abd59e800098ed089f43fbf703"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_hand_exp3.json",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_peri_hand_exp3.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/serino_2015_peri_hand_exp3/serino_2015_peri_hand_exp3.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/serino_2015_peri_hand_exp3/serino_2015_peri_hand_exp3.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "serino_2015_peri_hand_exp3",
-      "size_bytes": 186751,
-      "sha256": "05d42058795ce7112cbf1e243dec33e09e914b94a2a5feb9910ad99be388e7c2"
+      "size_bytes": 78571,
+      "sha256": "4f1af6d13a38c657e25345cfc06f61125cfd1f4811c6020a574cef04be8e2212"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_hand_exp3.md",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_peri_hand_exp3.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_peri_hand_exp3",
-      "size_bytes": 76976,
-      "sha256": "811d9a39417e20d0bb564300f95a16934206e565772ee32137a2b70b7c13b9cd"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_hand_exp3_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_peri_hand_exp3_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_peri_hand_exp3_images",
-      "size_bytes": 126411,
-      "sha256": "f8e8e93cb61f89c35f7ef068477169d8b937e964667625a9dbd3e9db46188258"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_hand_exp3_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_peri_hand_exp3_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_peri_hand_exp3_images",
-      "size_bytes": 99595,
-      "sha256": "d4436756ed518e172c44399ca34bc2e909fbb26bc96e361b83bb489a57ac0d92"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_hand_exp3_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_peri_hand_exp3_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_peri_hand_exp3_images",
-      "size_bytes": 42491,
-      "sha256": "301670ad440b8397a3095ccd088522ef38fc3aee6eac01f2d8f099197f028e20"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_hand_exp3_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_peri_hand_exp3_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_peri_hand_exp3_images",
-      "size_bytes": 203256,
-      "sha256": "e29ba1fc1afda0204ed8a91fcac2930382098a6755f7f1b6596295cf88628058"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_hand_exp3_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_peri_hand_exp3_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_peri_hand_exp3_images",
-      "size_bytes": 199328,
-      "sha256": "784d8ba3d954b043dade9c5a1d9ea27cbac47b0d74eb39779009aee798a5b2c6"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_hand_exp3_images/imageFile6.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_peri_hand_exp3_images/imageFile6.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_peri_hand_exp3_images",
-      "size_bytes": 54047,
-      "sha256": "3474d22191c81f5e3dba221d02cd069d6aa9d1b17916f3b0afdcaa04bd7b2341"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_hand_exp3_images/imageFile7.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_peri_hand_exp3_images/imageFile7.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_peri_hand_exp3_images",
-      "size_bytes": 386046,
-      "sha256": "b8a9c0667db8fe910920d6d87f37df7caf4cb9abd59e800098ed089f43fbf703"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_trunk_exp1.json",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_peri_trunk_exp1.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/serino_2015_peri_trunk_exp1/serino_2015_peri_trunk_exp1.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/serino_2015_peri_trunk_exp1/serino_2015_peri_trunk_exp1.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "serino_2015_peri_trunk_exp1",
-      "size_bytes": 186759,
-      "sha256": "926ed3534d294153ee13e501a910e5dfe2a46ef37ed03cffe3f7b007a00e0fb3"
+      "size_bytes": 78571,
+      "sha256": "4f1af6d13a38c657e25345cfc06f61125cfd1f4811c6020a574cef04be8e2212"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_trunk_exp1.md",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_peri_trunk_exp1.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_peri_trunk_exp1",
-      "size_bytes": 76983,
-      "sha256": "8354ce21cc0e4284d6f756824e61bb3d9bb43aa302c382876ad973231ed5f285"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_trunk_exp1_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_peri_trunk_exp1_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_peri_trunk_exp1_images",
-      "size_bytes": 126411,
-      "sha256": "f8e8e93cb61f89c35f7ef068477169d8b937e964667625a9dbd3e9db46188258"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_trunk_exp1_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_peri_trunk_exp1_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_peri_trunk_exp1_images",
-      "size_bytes": 99595,
-      "sha256": "d4436756ed518e172c44399ca34bc2e909fbb26bc96e361b83bb489a57ac0d92"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_trunk_exp1_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_peri_trunk_exp1_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_peri_trunk_exp1_images",
-      "size_bytes": 42491,
-      "sha256": "301670ad440b8397a3095ccd088522ef38fc3aee6eac01f2d8f099197f028e20"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_trunk_exp1_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_peri_trunk_exp1_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_peri_trunk_exp1_images",
-      "size_bytes": 203256,
-      "sha256": "e29ba1fc1afda0204ed8a91fcac2930382098a6755f7f1b6596295cf88628058"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_trunk_exp1_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_peri_trunk_exp1_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_peri_trunk_exp1_images",
-      "size_bytes": 199328,
-      "sha256": "784d8ba3d954b043dade9c5a1d9ea27cbac47b0d74eb39779009aee798a5b2c6"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_trunk_exp1_images/imageFile6.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_peri_trunk_exp1_images/imageFile6.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_peri_trunk_exp1_images",
-      "size_bytes": 54047,
-      "sha256": "3474d22191c81f5e3dba221d02cd069d6aa9d1b17916f3b0afdcaa04bd7b2341"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_trunk_exp1_images/imageFile7.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_peri_trunk_exp1_images/imageFile7.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_peri_trunk_exp1_images",
-      "size_bytes": 386046,
-      "sha256": "b8a9c0667db8fe910920d6d87f37df7caf4cb9abd59e800098ed089f43fbf703"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_toolless_sync_training.json",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_toolless_sync_training.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/serino_2015_toolless_sync_training/serino_2015_toolless_sync_training.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/serino_2015_toolless_sync_training/serino_2015_toolless_sync_training.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "serino_2015_toolless_sync_training",
-      "size_bytes": 117360,
-      "sha256": "b54a46bc33d8b4e07977eb369e6bfbe5fa6402af5472dbe48127915ebc2a0dcd"
+      "size_bytes": 64815,
+      "sha256": "928a53ea2690f057597d5cba81f320ca8d05a2d8fc73ce781b00a0d226680b34"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_toolless_sync_training.md",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_toolless_sync_training.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_toolless_sync_training",
-      "size_bytes": 68339,
-      "sha256": "18f13b379004fc552833f59768bd383800d1536cbb709c4944309c9bcd2b3921"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_toolless_sync_training_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_toolless_sync_training_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_toolless_sync_training_images",
-      "size_bytes": 97275,
-      "sha256": "2d82fa6598bec2ffdb328f5bf6144ce03ef1d5a1483411f81aa00f5a80566a6b"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_toolless_sync_training_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_toolless_sync_training_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_toolless_sync_training_images",
-      "size_bytes": 102656,
-      "sha256": "801f2ca03567a2012af57da88d9cf5f20bd4c3e7f68154187ebbd17bd7d0f1a4"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_toolless_sync_training_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_toolless_sync_training_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_toolless_sync_training_images",
-      "size_bytes": 33895,
-      "sha256": "2547b37507500bddcd4fff4c7d74e242a33ac8c74b2a172096d478e5f5e1796e"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_toolless_sync_training_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_toolless_sync_training_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_toolless_sync_training_images",
-      "size_bytes": 106190,
-      "sha256": "cdb32f8be7371daf99abe453bf11f57bf23dfaf9e7d4459b6ed784cf5fa6fd93"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_toolless_sync_training_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_toolless_sync_training_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_toolless_sync_training_images",
-      "size_bytes": 101885,
-      "sha256": "18df4b50633feabc43c7306b1880edd0f7881a85abf12475a8cfce0fc56b0bf1"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_toolless_sync_training_images/imageFile6.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_toolless_sync_training_images/imageFile6.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_toolless_sync_training_images",
-      "size_bytes": 43969,
-      "sha256": "0c1a98f858a8b1f373b9d647f5b2987aff897b0c21a279b2b8ea92db6bdd9f71"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_toolless_sync_training_images/imageFile7.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2015_toolless_sync_training_images/imageFile7.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2015_toolless_sync_training_images",
-      "size_bytes": 101531,
-      "sha256": "b741c5c6b7186ad5a11aeb6698ccdf8ede998facbf81b72792a9ca224a2b016f"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2018_mixed_reality_pps.json",
-      "artifact_relative_path": "extracted/opendataloader/serino_2018_mixed_reality_pps.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/serino_2018_mixed_reality_pps/serino_2018_mixed_reality_pps.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/serino_2018_mixed_reality_pps/serino_2018_mixed_reality_pps.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "serino_2018_mixed_reality_pps",
-      "size_bytes": 112801,
-      "sha256": "2e3f594b82e2c87159a4a4ddb6c0aa96c5ab48d90372a95556769a1103313460"
+      "size_bytes": 63160,
+      "sha256": "a8ad4da850a46875f63c1cc88efd3e81b3538fb8498121f83b7077d37b23ada5"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2018_mixed_reality_pps.md",
-      "artifact_relative_path": "extracted/opendataloader/serino_2018_mixed_reality_pps.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2018_mixed_reality_pps",
-      "size_bytes": 61478,
-      "sha256": "b8cc713f3e15e29d1f61654920f70f0844f4b20c1e680d93da15274be5a4437f"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2018_mixed_reality_pps_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2018_mixed_reality_pps_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2018_mixed_reality_pps_images",
-      "size_bytes": 156806,
-      "sha256": "0913277283bb2e609849b4dfc0a2c5145d7664ee742c0be749b29f84e004d647"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2018_mixed_reality_pps_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2018_mixed_reality_pps_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2018_mixed_reality_pps_images",
-      "size_bytes": 425296,
-      "sha256": "ac63ef92d11c98df2b660671e3c475dc02dc4628a08d4e6fec5f92b264697aa1"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2018_mixed_reality_pps_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2018_mixed_reality_pps_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2018_mixed_reality_pps_images",
-      "size_bytes": 100995,
-      "sha256": "8fbf4e38b4da3961d1c04bf9ccb1a2bc3adf33226fd2650242f31d2fe0740168"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2018_mixed_reality_pps_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2018_mixed_reality_pps_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2018_mixed_reality_pps_images",
-      "size_bytes": 161087,
-      "sha256": "1505f2263ee9f528873bd65427d575756fbbf3f8b6e125d63ef4ebdb2ef4d4f5"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2018_mixed_reality_pps_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/serino_2018_mixed_reality_pps_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "serino_2018_mixed_reality_pps_images",
-      "size_bytes": 252978,
-      "sha256": "26894a5186bccdeb9dfc051e1b28388fce12ff788b8be80c8e8eec0e0bfce63d"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/spadone_2021_connectivity.json",
-      "artifact_relative_path": "extracted/opendataloader/spadone_2021_connectivity.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/spadone_2021_connectivity/spadone_2021_connectivity.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/spadone_2021_connectivity/spadone_2021_connectivity.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "spadone_2021_connectivity",
-      "size_bytes": 129223,
-      "sha256": "208cf112e0d43a1a8f8d72a23e6aba3ecf0c3cdfb5068a3149cb2b9af5861825"
+      "size_bytes": 71377,
+      "sha256": "63738dd23476379a5e4628e9259589208eb3aecea8c8360fdc950015d5212e28"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/spadone_2021_connectivity.md",
-      "artifact_relative_path": "extracted/opendataloader/spadone_2021_connectivity.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "spadone_2021_connectivity",
-      "size_bytes": 69001,
-      "sha256": "9c7968404af504eb664d251d3833c5c1835fada8d93093b0a2d42c6436e2a6ec"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/spadone_2021_connectivity_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/spadone_2021_connectivity_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "spadone_2021_connectivity_images",
-      "size_bytes": 158498,
-      "sha256": "f8a7366717dfec25f0323dffb3fb665c46b7170e5eb73937ced83582af447b11"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/spadone_2021_connectivity_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/spadone_2021_connectivity_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "spadone_2021_connectivity_images",
-      "size_bytes": 268499,
-      "sha256": "fdd6d43663ff75340a09bad3e510d8f50f06770763b0df0ba44c060421f0f060"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/spadone_2021_connectivity_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/spadone_2021_connectivity_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "spadone_2021_connectivity_images",
-      "size_bytes": 323720,
-      "sha256": "e03dc5a6bf33701c5926ffd3d0e2b60503e193ad361ec312fa3eba461ef19bd7"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/spadone_2021_connectivity_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/spadone_2021_connectivity_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "spadone_2021_connectivity_images",
-      "size_bytes": 189113,
-      "sha256": "5c91faee7a5445b5e22d966fa75e91a37e712f95ebe8489ba4659254de2748b4"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/spadone_2021_connectivity_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/spadone_2021_connectivity_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "spadone_2021_connectivity_images",
-      "size_bytes": 270513,
-      "sha256": "d85f383661724fa4a2c342b96066bf72e9086c65542d9bbb2398704fb54c40ee"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/spadone_2021_connectivity_images/imageFile6.png",
-      "artifact_relative_path": "extracted/opendataloader/spadone_2021_connectivity_images/imageFile6.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "spadone_2021_connectivity_images",
-      "size_bytes": 16606,
-      "sha256": "1e9b71ace6e1b6bbc1721c2a35adfb1412ae33fa3bc4cf30d100e7f8327ce89b"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/spadone_2021_connectivity_images/imageFile7.png",
-      "artifact_relative_path": "extracted/opendataloader/spadone_2021_connectivity_images/imageFile7.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "spadone_2021_connectivity_images",
-      "size_bytes": 803,
-      "sha256": "bd5c02be7f1d1c7835b1013b0754a862e94c768a6c01f1bbd03b665f37befbda"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/taffou_2021_auditory_roughness.json",
-      "artifact_relative_path": "extracted/opendataloader/taffou_2021_auditory_roughness.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/taffou_2021_auditory_roughness/taffou_2021_auditory_roughness.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/taffou_2021_auditory_roughness/taffou_2021_auditory_roughness.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "taffou_2021_auditory_roughness",
-      "size_bytes": 109055,
-      "sha256": "f5f533af7f1a60ee509064ec2b148e2290265a528f0d61c85f9a8fcc794e02b4"
+      "size_bytes": 58794,
+      "sha256": "e91e2dd620c594ff2f8f167e1c8c11f70249358b5a1e82483ebb0211aea53046"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/taffou_2021_auditory_roughness.md",
-      "artifact_relative_path": "extracted/opendataloader/taffou_2021_auditory_roughness.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "taffou_2021_auditory_roughness",
-      "size_bytes": 57106,
-      "sha256": "f23e98df90c9a6d7db083f4f372cd7d3cae3409140fccd9416cb08362d2002d1"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/taffou_2021_auditory_roughness_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/taffou_2021_auditory_roughness_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "taffou_2021_auditory_roughness_images",
-      "size_bytes": 64812,
-      "sha256": "ac572a55408a69bf46a98c74ea1336505ba89312a9f93b04056e6dea95b42377"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/taffou_2021_auditory_roughness_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/taffou_2021_auditory_roughness_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "taffou_2021_auditory_roughness_images",
-      "size_bytes": 16218,
-      "sha256": "cee51f94a0cf60add39671d3ee81d40431b54752c23c706be44ed81dce03232a"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/taffou_2021_auditory_roughness_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/taffou_2021_auditory_roughness_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "taffou_2021_auditory_roughness_images",
-      "size_bytes": 11290,
-      "sha256": "5252a77adcb6a1aa7f4886a2ba54f905955dfcdcde9b0e658fafe9ab43bd4030"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/taffou_2021_auditory_roughness_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/taffou_2021_auditory_roughness_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "taffou_2021_auditory_roughness_images",
-      "size_bytes": 112677,
-      "sha256": "9a5aad4e9fdd4578faaae9d51125ccef03c74e8be7cc40030211c820f9d3067b"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/taffou_2021_auditory_roughness_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/taffou_2021_auditory_roughness_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "taffou_2021_auditory_roughness_images",
-      "size_bytes": 803,
-      "sha256": "36c5046c9a9e99b9a9876207780acc4c25c51c97517cbb99ffc6662a6a89e894"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation.json",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation.json",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/fallback/tonelli_2019_echolocation/tonelli_2019_echolocation.fallback.txt",
+      "artifact_relative_path": "extracted/fallback/tonelli_2019_echolocation/tonelli_2019_echolocation.fallback.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "tonelli_2019_echolocation",
-      "size_bytes": 99067,
-      "sha256": "b74d4bebac6c5fcf41c30e90db1e3ca78459633b3a3ca75b54d613665d13d805"
+      "size_bytes": 49056,
+      "sha256": "6610c43fe7ff630568f3fac155611ec4c28ea986d1c3bed217c3b6be17e8bcb1"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation.md",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation.md",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation",
-      "size_bytes": 49583,
-      "sha256": "eb3606f25f173b9ad32ec9d27cf41fd2a5511a2c500166ec78d09cabc7b4ee15"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile1.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile1.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 2545,
-      "sha256": "56f6774fa03f783aa67220d8482dd87ee599e0c5b8e42e0c528e87a396f485c6"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile10.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile10.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 69,
-      "sha256": "330d4a00fb2d81f2cba187d0279fa2b8be0b03fdfd126d022211ae7873b1861c"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile11.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile11.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 69,
-      "sha256": "330d4a00fb2d81f2cba187d0279fa2b8be0b03fdfd126d022211ae7873b1861c"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile12.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile12.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 69,
-      "sha256": "330d4a00fb2d81f2cba187d0279fa2b8be0b03fdfd126d022211ae7873b1861c"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile13.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile13.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 69,
-      "sha256": "3842cb9b46e35d3cdfcfb1b6aee31c5351a6dfd7065849ec13e68fd9dc452875"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile14.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile14.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 72,
-      "sha256": "37bfe96cf356b8a3ffb904f15d7340e9110295bed1b0be6e837c6f6563a56328"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile15.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile15.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 72,
-      "sha256": "37bfe96cf356b8a3ffb904f15d7340e9110295bed1b0be6e837c6f6563a56328"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile16.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile16.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 69,
-      "sha256": "330d4a00fb2d81f2cba187d0279fa2b8be0b03fdfd126d022211ae7873b1861c"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile17.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile17.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 69,
-      "sha256": "330d4a00fb2d81f2cba187d0279fa2b8be0b03fdfd126d022211ae7873b1861c"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile18.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile18.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 177,
-      "sha256": "f76e42d1f5fa974a1682a41a8ab0ed28b426cf0ba377ae82530f310af9073ca8"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile19.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile19.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 368,
-      "sha256": "23cf74df983c26fc603f010948007710a94d92817e8d469bff782db426cfbce5"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile2.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile2.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 853,
-      "sha256": "627c9e17746e3069c948524384ceeb9f61fc536a09c0c8f3352eb240e1b7b03d"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile20.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile20.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 419,
-      "sha256": "0ca0901f9581315fed08ab13a68fbe72581d2f6baa228a987897310f1c181503"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile21.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile21.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 592,
-      "sha256": "93f6d13e61330dbc5d62e2db80ed7c4c408faac4ee43d4777d7243d805f30c0c"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile22.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile22.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 273,
-      "sha256": "43870cb46b2408b397245bd0ee9447021fcd9c0358660dc6c6eeccac996ce42b"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile23.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile23.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 273,
-      "sha256": "43870cb46b2408b397245bd0ee9447021fcd9c0358660dc6c6eeccac996ce42b"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile24.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile24.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 127124,
-      "sha256": "fb17c31713834b1c4858f566cdb13df08404a309fef91d3abcf72cd813c28e77"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile25.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile25.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 70883,
-      "sha256": "6f2ab86a15887839cb197d2d402d8a881c8d5ee0a2d30abc3d32448637b5d475"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile26.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile26.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 25171,
-      "sha256": "f0c4d7f6e1c65e7c608530a223d534f1e7ab0ff319a9ebbc169f838861fe6723"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile27.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile27.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 174993,
-      "sha256": "1e1411e3d85b82d9d6ffee2bfa7ad36325eee10153bfc608e502e466bd190797"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile28.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile28.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 29353,
-      "sha256": "487636bf9660772802cc9dec7d1b7a9972f57b02184acca39a76b74dc4cd2063"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile3.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile3.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 117,
-      "sha256": "c439bf875be25ad19ee76f0051970ea0e0893ebebafa9c9dd07ffdd485a82eed"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile4.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile4.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 70,
-      "sha256": "351a85cfee500b0e97e1bc5c7d61e760d8f948df7006c74c40a0d005a1cf8996"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile5.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile5.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 69,
-      "sha256": "9669bc1608b0a53bdc6ab8a591e48e488c5306164dfda09b2e8bbe7324d4e3d6"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile6.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile6.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 70,
-      "sha256": "172bba3048946d2884b2b84d8578471ab6f753f691d9a4213219463d85373d1d"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile7.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile7.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 72,
-      "sha256": "d7af73ec5f8576804fad862fd6ad98ffe12160570a32c846bdf414ab9a656d8b"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile8.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile8.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 69,
-      "sha256": "9669bc1608b0a53bdc6ab8a591e48e488c5306164dfda09b2e8bbe7324d4e3d6"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation_images/imageFile9.png",
-      "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation_images/imageFile9.png",
-      "category": "extracted_text_or_parser_output",
-      "record_id": "tonelli_2019_echolocation_images",
-      "size_bytes": 70,
-      "sha256": "351a85cfee500b0e97e1bc5c7d61e760d8f948df7006c74c40a0d005a1cf8996"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/supplements/holmes_2020_four_experiments/holmes_2020_MOESM1.txt",
-      "artifact_relative_path": "extracted/supplements/holmes_2020_four_experiments/holmes_2020_MOESM1.txt",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/supplements/holmes_2020_four_experiments/221_2020_5771_MOESM1_ESM.txt",
+      "artifact_relative_path": "extracted/supplements/holmes_2020_four_experiments/221_2020_5771_MOESM1_ESM.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "holmes_2020_four_experiments",
       "size_bytes": 44012,
       "sha256": "0864caccd0a68ccca58fd42799391b31a33bfbdcaf0b330570daa1193c71100f"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/supplements/holmes_2020_four_experiments/holmes_2020_MOESM2.txt",
-      "artifact_relative_path": "extracted/supplements/holmes_2020_four_experiments/holmes_2020_MOESM2.txt",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/supplements/holmes_2020_four_experiments/221_2020_5771_MOESM2_ESM.txt",
+      "artifact_relative_path": "extracted/supplements/holmes_2020_four_experiments/221_2020_5771_MOESM2_ESM.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "holmes_2020_four_experiments",
       "size_bytes": 6397,
       "sha256": "53d9bdbbd4878e287731ff4b7a221df1e234a9a00301745c5179bd77f7eb0d9d"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/supplements/holmes_2020_four_experiments/holmes_2020_MOESM3.txt",
-      "artifact_relative_path": "extracted/supplements/holmes_2020_four_experiments/holmes_2020_MOESM3.txt",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/supplements/holmes_2020_four_experiments/221_2020_5771_MOESM3_ESM.txt",
+      "artifact_relative_path": "extracted/supplements/holmes_2020_four_experiments/221_2020_5771_MOESM3_ESM.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "holmes_2020_four_experiments",
       "size_bytes": 9881,
       "sha256": "5339bd32b5f6fdcb18d90fcb206e1b903051bfe63bcdb3e8268cab3c3cf84bef"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/extracted/supplements/holmes_2020_four_experiments/holmes_2020_MOESM4.txt",
-      "artifact_relative_path": "extracted/supplements/holmes_2020_four_experiments/holmes_2020_MOESM4.txt",
+      "relative_path": "artifacts/paper_metadata_audit/extracted/supplements/holmes_2020_four_experiments/221_2020_5771_MOESM4_ESM.txt",
+      "artifact_relative_path": "extracted/supplements/holmes_2020_four_experiments/221_2020_5771_MOESM4_ESM.txt",
       "category": "extracted_text_or_parser_output",
       "record_id": "holmes_2020_four_experiments",
       "size_bytes": 16716,
@@ -2802,22 +370,6 @@
       "record_id": "disorders_consciousness_2019",
       "size_bytes": 2663496,
       "sha256": "8f28fe9c98270f6147889b2fb674a8fce72d66ac6ccbdf9619c13baa1840ab5a"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/publication_pdfs/ferri_2015_artificial_valence.pdf",
-      "artifact_relative_path": "publication_pdfs/ferri_2015_artificial_valence.pdf",
-      "category": "publication_pdf",
-      "record_id": "ferri_2015_artificial_valence",
-      "size_bytes": 1231823,
-      "sha256": "70a4e9923edc349de3a9aa0e97d2193bef6ce31c7e2d7c7cf6ec2ce5699e7228"
-    },
-    {
-      "relative_path": "artifacts/paper_metadata_audit/publication_pdfs/ferri_2015_ecological_valence.pdf",
-      "artifact_relative_path": "publication_pdfs/ferri_2015_ecological_valence.pdf",
-      "category": "publication_pdf",
-      "record_id": "ferri_2015_ecological_valence",
-      "size_bytes": 1231823,
-      "sha256": "70a4e9923edc349de3a9aa0e97d2193bef6ce31c7e2d7c7cf6ec2ce5699e7228"
     },
     {
       "relative_path": "artifacts/paper_metadata_audit/publication_pdfs/ferri_2015_jneurosci_itv.pdf",
@@ -2996,32 +548,32 @@
       "sha256": "5ff5cf36374a5e01f03c21efd7b2cc757b2016a46fa2b77a817ff7db18b76179"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/supplements/holmes_2020_four_experiments/holmes_2020_MOESM1.ods",
-      "artifact_relative_path": "supplements/holmes_2020_four_experiments/holmes_2020_MOESM1.ods",
+      "relative_path": "artifacts/paper_metadata_audit/supplements/holmes_2020_four_experiments/221_2020_5771_MOESM1_ESM.ods",
+      "artifact_relative_path": "supplements/holmes_2020_four_experiments/221_2020_5771_MOESM1_ESM.ods",
       "category": "supplement",
       "record_id": "holmes_2020_four_experiments",
       "size_bytes": 166721,
       "sha256": "3184e423c6c8a72029fbaa005ad00a060717f8e77b0b663b7ccad129060f1a87"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/supplements/holmes_2020_four_experiments/holmes_2020_MOESM2.ods",
-      "artifact_relative_path": "supplements/holmes_2020_four_experiments/holmes_2020_MOESM2.ods",
+      "relative_path": "artifacts/paper_metadata_audit/supplements/holmes_2020_four_experiments/221_2020_5771_MOESM2_ESM.ods",
+      "artifact_relative_path": "supplements/holmes_2020_four_experiments/221_2020_5771_MOESM2_ESM.ods",
       "category": "supplement",
       "record_id": "holmes_2020_four_experiments",
       "size_bytes": 128389,
       "sha256": "cd247cc0f73d9e471d09725945d13ead751f26bbeddc2a8e257cf1f570289074"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/supplements/holmes_2020_four_experiments/holmes_2020_MOESM3.doc",
-      "artifact_relative_path": "supplements/holmes_2020_four_experiments/holmes_2020_MOESM3.doc",
+      "relative_path": "artifacts/paper_metadata_audit/supplements/holmes_2020_four_experiments/221_2020_5771_MOESM3_ESM.doc",
+      "artifact_relative_path": "supplements/holmes_2020_four_experiments/221_2020_5771_MOESM3_ESM.doc",
       "category": "supplement",
       "record_id": "holmes_2020_four_experiments",
       "size_bytes": 687616,
       "sha256": "64a988419cea07aa11dd0c4ee36c0681e19aeb89e445bc1ad24adde02adea0dd"
     },
     {
-      "relative_path": "artifacts/paper_metadata_audit/supplements/holmes_2020_four_experiments/holmes_2020_MOESM4.ods",
-      "artifact_relative_path": "supplements/holmes_2020_four_experiments/holmes_2020_MOESM4.ods",
+      "relative_path": "artifacts/paper_metadata_audit/supplements/holmes_2020_four_experiments/221_2020_5771_MOESM4_ESM.ods",
+      "artifact_relative_path": "supplements/holmes_2020_four_experiments/221_2020_5771_MOESM4_ESM.ods",
       "category": "supplement",
       "record_id": "holmes_2020_four_experiments",
       "size_bytes": 325625,
