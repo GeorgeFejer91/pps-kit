@@ -287,7 +287,19 @@ failure mode.
   `analysis_summary.txt`.
 - [ ] Analysis CSVs are written: responses, analysis-ready trials, final trial
   outcomes, summary, curve points, sigmoid fits, model fits, model comparison,
-  and timing QC.
+  data-behavior-by-scope, and timing QC.
+- [ ] `exploratory_quality_summary.json` is written when analysis CSVs are
+  enabled and uses only exploratory labels (`Expected pattern`,
+  `Mixed / ambiguous`, `Unusual pattern`, `Insufficient evidence`,
+  `Technical caveat`) rather than pass/fail recording verdicts.
+- [ ] The post-run `PPS Instant Analysis` dialog opens on `Data Behavior`,
+  exposes Model Fits, Responses, Timing Evidence, Top-Up, and Artifacts views,
+  and makes clear that the signals are operator feedback, not scientific
+  conclusions or participant-readiness certification.
+- [ ] Visual screenshot validation confirms plotted parameters are inspectable:
+  SOA/distance x positions, metric axis, observed means, uncertainty band,
+  sigmoid boundary marker, all-model overlay, raw/excluded/top-up point toggles,
+  and low-N markers.
 - [ ] Ground-truth planned hit/miss labels match `analysis_ready_trials.csv`.
 - [ ] Top-up final outcomes replace only originally missed trials and never
   replace original hits.

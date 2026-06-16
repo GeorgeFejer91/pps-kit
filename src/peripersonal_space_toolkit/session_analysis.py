@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import json
 import math
 import re
 import statistics
@@ -19,6 +20,23 @@ DEFAULT_MIN_RESPONSE_RT_S = 0.1
 DEFAULT_MAX_RESPONSE_RT_S = 4.0
 AGGREGATION_SEPARATE_PARTS = "separate_parts"
 AGGREGATION_POOL_PARTS = "pooled_parts"
+DATA_BEHAVIOR_SCHEMA = "pps-exploratory-data-behavior.v1"
+
+SIGNAL_EXPECTED = "Expected pattern"
+SIGNAL_MIXED = "Mixed / ambiguous"
+SIGNAL_UNUSUAL = "Unusual pattern"
+SIGNAL_INSUFFICIENT = "Insufficient evidence"
+SIGNAL_TECHNICAL = "Technical caveat"
+
+COMMON_PPS_VISUALIZATION_FEATURES = [
+    "RT or facilitation by SOA/distance",
+    "Near/far or distance-bin separation",
+    "Condition/group summaries",
+    "PPS boundary or size-index estimates",
+    "Sigmoid, linear, and logarithmic-decay model fits",
+    "Uncertainty/range around means",
+    "Model parameter or fit tables",
+]
 
 
 @dataclass
@@ -30,6 +48,8 @@ class SessionAnalysisResult:
     fit_rows: list[dict[str, Any]] = field(default_factory=list)
     model_fit_rows: list[dict[str, Any]] = field(default_factory=list)
     model_comparison_rows: list[dict[str, Any]] = field(default_factory=list)
+    data_behavior_rows: list[dict[str, Any]] = field(default_factory=list)
+    exploratory_quality_summary: dict[str, Any] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
 
 
@@ -49,6 +69,7 @@ def analyze_session_events(
     result.warnings.extend(curve_warnings)
     if not result.response_rows:
         result.warnings.append("No tactile response rows could be reconstructed from the event stream.")
+    result.data_behavior_rows, result.exploratory_quality_summary = _build_data_behavior_review(result, rows)
     return result
 
 
@@ -64,6 +85,8 @@ def write_analysis_csvs(result: SessionAnalysisResult, output_dir: str | Path, s
         "fits": output_dir / f"{stem}_sigmoid_fits.csv",
         "model_fits": output_dir / f"{stem}_model_fits.csv",
         "model_fit_comparison": output_dir / f"{stem}_model_fit_comparison.csv",
+        "data_behavior_by_scope": output_dir / "data_behavior_by_scope.csv",
+        "exploratory_quality_summary": output_dir / "exploratory_quality_summary.json",
     }
     _write_rows(outputs["responses"], result.response_rows)
     _write_rows(outputs["analysis_ready_trials"], result.final_outcome_rows or result.response_rows)
@@ -73,6 +96,8 @@ def write_analysis_csvs(result: SessionAnalysisResult, output_dir: str | Path, s
     _write_rows(outputs["fits"], result.fit_rows)
     _write_rows(outputs["model_fits"], result.model_fit_rows)
     _write_rows(outputs["model_fit_comparison"], result.model_comparison_rows)
+    _write_rows(outputs["data_behavior_by_scope"], result.data_behavior_rows)
+    _write_json(outputs["exploratory_quality_summary"], result.exploratory_quality_summary)
     return outputs
 
 
@@ -106,6 +131,477 @@ def format_analysis_summary(result: SessionAnalysisResult) -> str:
         lines.append("Warnings")
         lines.extend(f"- {warning}" for warning in result.warnings[:8])
     return "\n".join(lines)
+
+
+def _build_data_behavior_review(
+    result: SessionAnalysisResult,
+    event_rows: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Build exploratory, non-gating behavior signals from immediate outputs."""
+
+    rows: list[dict[str, Any]] = []
+    curves_by_scope: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for row in result.curve_rows:
+        scope = str(row.get("scope") or "").strip()
+        mode = str(row.get("aggregation_mode") or AGGREGATION_SEPARATE_PARTS).strip()
+        if scope:
+            curves_by_scope.setdefault((mode, scope), []).append(row)
+
+    fits_by_scope: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for row in result.model_fit_rows:
+        scope = str(row.get("scope") or "").strip()
+        mode = str(row.get("aggregation_mode") or AGGREGATION_SEPARATE_PARTS).strip()
+        if scope:
+            fits_by_scope.setdefault((mode, scope), []).append(row)
+
+    comparison_by_scope = {
+        (str(row.get("aggregation_mode") or AGGREGATION_SEPARATE_PARTS).strip(), str(row.get("scope") or "").strip()): row
+        for row in result.model_comparison_rows
+        if str(row.get("scope") or "").strip()
+    }
+
+    final_by_scope = _final_outcomes_by_scope(result.final_outcome_rows or result.response_rows)
+    for (mode, scope), curve_rows in sorted(curves_by_scope.items(), key=lambda item: item[0]):
+        _extend_scope_behavior_rows(
+            rows,
+            scope=scope,
+            aggregation_mode=mode,
+            curve_rows=curve_rows,
+            fit_rows=fits_by_scope.get((mode, scope), []),
+            comparison_row=comparison_by_scope.get((mode, scope), {}),
+            response_rows=final_by_scope.get((mode, scope), []),
+        )
+
+    if not curves_by_scope:
+        rows.append(
+            _behavior_row(
+                scope="Session",
+                aggregation_mode="",
+                signal=SIGNAL_INSUFFICIENT,
+                feature="RT or facilitation by SOA/distance",
+                message="No analyzable SOA/distance curve rows were written for this session.",
+                evidence="curve_points=0",
+            )
+        )
+
+    rows.extend(_session_level_behavior_rows(result, event_rows))
+    summary = _behavior_summary(rows, result, event_rows)
+    return rows, summary
+
+
+def _extend_scope_behavior_rows(
+    rows: list[dict[str, Any]],
+    *,
+    scope: str,
+    aggregation_mode: str,
+    curve_rows: list[dict[str, Any]],
+    fit_rows: list[dict[str, Any]],
+    comparison_row: dict[str, Any],
+    response_rows: list[dict[str, Any]],
+) -> None:
+    points = sorted(
+        (
+            (_as_float(row.get("soa_ms"), math.nan), _metric_value_for_row(row))
+            for row in curve_rows
+        ),
+        key=lambda item: item[0],
+    )
+    points = [(x, y) for x, y in points if math.isfinite(x) and math.isfinite(y)]
+    x_values = [x for x, _y in points]
+    y_values = [y for _x, y in points]
+    point_count = len(set(x_values))
+    n_values = [_as_float(row.get("n"), math.nan) for row in curve_rows]
+    low_n = [value for value in n_values if math.isfinite(value) and value < 3]
+
+    if point_count < 2:
+        rows.append(
+            _behavior_row(
+                scope=scope,
+                aggregation_mode=aggregation_mode,
+                signal=SIGNAL_INSUFFICIENT,
+                feature="RT or facilitation by SOA/distance",
+                message="Too few SOA/distance points were available to inspect a curve tendency.",
+                evidence=f"points={point_count}",
+            )
+        )
+    elif point_count < 4:
+        rows.append(
+            _behavior_row(
+                scope=scope,
+                aggregation_mode=aggregation_mode,
+                signal=SIGNAL_INSUFFICIENT,
+                feature="Model parameter or fit tables",
+                message="The curve can be plotted, but common PPS model comparisons are underpowered with fewer than four sampled points.",
+                evidence=f"points={point_count}",
+            )
+        )
+    elif y_values and max(y_values) - min(y_values) < 5.0:
+        rows.append(
+            _behavior_row(
+                scope=scope,
+                aggregation_mode=aggregation_mode,
+                signal=SIGNAL_UNUSUAL,
+                feature="RT or facilitation by SOA/distance",
+                message="The observed SOA/distance curve is nearly flat, which is unusual relative to common PPS facilitation displays.",
+                evidence=f"range_ms={max(y_values) - min(y_values):.3f}; points={point_count}",
+            )
+        )
+    else:
+        rows.append(
+            _behavior_row(
+                scope=scope,
+                aggregation_mode=aggregation_mode,
+                signal=SIGNAL_EXPECTED,
+                feature="RT or facilitation by SOA/distance",
+                message="The recording has enough SOA/distance points and a visible response-metric range for common PPS curve review.",
+                evidence=f"points={point_count}; range_ms={max(y_values) - min(y_values):.3f}" if y_values else f"points={point_count}",
+            )
+        )
+
+    if low_n:
+        rows.append(
+            _behavior_row(
+                scope=scope,
+                aggregation_mode=aggregation_mode,
+                signal=SIGNAL_MIXED,
+                feature="Condition/group summaries",
+                message="Some SOA/distance means are based on sparse observations, so visual trends should be treated as exploratory.",
+                evidence=f"low_n_points={len(low_n)}; min_n={min(low_n):.0f}",
+            )
+        )
+
+    spread_ratios = _spread_ratios(curve_rows)
+    if spread_ratios:
+        max_ratio = max(spread_ratios)
+        signal = SIGNAL_MIXED if max_ratio > 0.75 else SIGNAL_EXPECTED
+        message = (
+            "Uncertainty bands are wide relative to the observed curve range."
+            if signal == SIGNAL_MIXED
+            else "Uncertainty/range columns are available for visual inspection around the means."
+        )
+        rows.append(
+            _behavior_row(
+                scope=scope,
+                aggregation_mode=aggregation_mode,
+                signal=signal,
+                feature="Uncertainty/range around means",
+                message=message,
+                evidence=f"max_spread_to_curve_range={max_ratio:.3f}",
+            )
+        )
+
+    best_model = str(comparison_row.get("best_model") or "").strip()
+    if fit_rows:
+        rows.append(
+            _behavior_row(
+                scope=scope,
+                aggregation_mode=aggregation_mode,
+                signal=SIGNAL_EXPECTED,
+                feature="Sigmoid, linear, and logarithmic-decay model fits",
+                message="At least one common PPS model family was fit for this scope.",
+                evidence=f"models={';'.join(sorted({str(row.get('model') or '').strip() for row in fit_rows if str(row.get('model') or '').strip()}))}; best={best_model}",
+            )
+        )
+        _extend_model_stability_rows(rows, scope, aggregation_mode, fit_rows, comparison_row, x_values)
+    elif point_count >= 2:
+        rows.append(
+            _behavior_row(
+                scope=scope,
+                aggregation_mode=aggregation_mode,
+                signal=SIGNAL_INSUFFICIENT,
+                feature="Sigmoid, linear, and logarithmic-decay model fits",
+                message="No model-fit rows were available for this plotted scope.",
+                evidence=f"points={point_count}",
+            )
+        )
+
+    if response_rows:
+        hit_rate = sum(1 for row in response_rows if _truthy(row.get("hit"))) / len(response_rows)
+        if hit_rate < 0.6:
+            signal = SIGNAL_UNUSUAL
+            message = "The selected response distribution is unusually sparse for this scope."
+        elif hit_rate < 0.8:
+            signal = SIGNAL_MIXED
+            message = "The selected response distribution is uneven, so curve interpretation should stay cautious."
+        else:
+            signal = SIGNAL_EXPECTED
+            message = "The selected response yield is sufficient for exploratory plotting in this scope."
+        rows.append(
+            _behavior_row(
+                scope=scope,
+                aggregation_mode=aggregation_mode,
+                signal=signal,
+                feature="Condition/group summaries",
+                message=message,
+                evidence=f"hit_rate={hit_rate:.3f}; trials={len(response_rows)}",
+            )
+        )
+
+
+def _extend_model_stability_rows(
+    rows: list[dict[str, Any]],
+    scope: str,
+    aggregation_mode: str,
+    fit_rows: list[dict[str, Any]],
+    comparison_row: dict[str, Any],
+    x_values: list[float],
+) -> None:
+    finite_aic = sorted(
+        (_as_float(row.get("aic"), math.inf), str(row.get("model") or "").strip())
+        for row in fit_rows
+        if math.isfinite(_as_float(row.get("aic"), math.inf))
+    )
+    if len(finite_aic) >= 2 and finite_aic[1][0] - finite_aic[0][0] <= 2.0:
+        rows.append(
+            _behavior_row(
+                scope=scope,
+                aggregation_mode=aggregation_mode,
+                signal=SIGNAL_MIXED,
+                feature="Sigmoid, linear, and logarithmic-decay model fits",
+                message="Model fits are close by AIC, so the best model should be read as an exploratory tendency.",
+                evidence=f"best={finite_aic[0][1]}; delta_aic={finite_aic[1][0] - finite_aic[0][0]:.3f}",
+            )
+        )
+
+    sigmoid = next((row for row in fit_rows if str(row.get("model") or "").strip() == "sigmoid"), None)
+    if sigmoid is None:
+        return
+    boundary = _as_float(sigmoid.get("pps_boundary_soa_ms"), math.nan)
+    if not math.isfinite(boundary) or not x_values:
+        return
+    if min(x_values) <= boundary <= max(x_values):
+        rows.append(
+            _behavior_row(
+                scope=scope,
+                aggregation_mode=aggregation_mode,
+                signal=SIGNAL_EXPECTED,
+                feature="PPS boundary or size-index estimates",
+                message="The sigmoid boundary estimate falls inside the sampled SOA/distance range.",
+                evidence=f"boundary={boundary:.3f}; sampled_min={min(x_values):.3f}; sampled_max={max(x_values):.3f}",
+            )
+        )
+    else:
+        rows.append(
+            _behavior_row(
+                scope=scope,
+                aggregation_mode=aggregation_mode,
+                signal=SIGNAL_UNUSUAL,
+                feature="PPS boundary or size-index estimates",
+                message="The sigmoid boundary estimate falls outside the sampled SOA/distance range.",
+                evidence=f"boundary={boundary:.3f}; sampled_min={min(x_values):.3f}; sampled_max={max(x_values):.3f}",
+            )
+        )
+
+
+def _session_level_behavior_rows(
+    result: SessionAnalysisResult,
+    event_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    event_types = [str(row.get("event_type") or "").strip() for row in event_rows]
+    payload_qualities = [str(row.get("timestamp_quality") or "").strip() for row in event_rows if str(row.get("timestamp_quality") or "").strip()]
+    fallback_count = sum(1 for event_type in event_types if event_type == "timing_anchor_fallback")
+    fallback_count += sum(1 for quality in payload_qualities if "fallback" in quality.lower())
+    if fallback_count:
+        rows.append(
+            _behavior_row(
+                scope="Session",
+                aggregation_mode="",
+                signal=SIGNAL_TECHNICAL,
+                feature="Timing evidence",
+                message="Timing fallback evidence was logged, so plotted response timing should be reviewed with the timing artifacts.",
+                evidence=f"fallback_count={fallback_count}",
+            )
+        )
+    elif payload_qualities:
+        exact = sum(1 for quality in payload_qualities if quality == "dac_time_sample_exact")
+        rows.append(
+            _behavior_row(
+                scope="Session",
+                aggregation_mode="",
+                signal=SIGNAL_EXPECTED,
+                feature="Timing evidence",
+                message="Scheduled timing markers report sample-exact DAC timestamps where timing quality was recorded.",
+                evidence=f"dac_time_sample_exact={exact}; timestamp_quality_rows={len(payload_qualities)}",
+            )
+        )
+
+    mouse_events = [row for row in event_rows if str(row.get("event_type") or "").strip() == "mouse_click"]
+    selected_clicks = {
+        str(row.get("click_event_id") or "").strip()
+        for row in result.final_outcome_rows or result.response_rows
+        if str(row.get("click_event_id") or "").strip()
+    }
+    extra_clicks = [row for row in mouse_events if str(row.get("event_id") or "").strip() not in selected_clicks]
+    tactile_count = sum(1 for row in event_rows if str(row.get("event_type") or "").strip() == "tactile_onset")
+    if mouse_events and tactile_count:
+        ratio = len(extra_clicks) / max(1, tactile_count)
+        if ratio > 0.2:
+            signal = SIGNAL_UNUSUAL
+            message = "Extra logged clicks are frequent relative to tactile events; inspect excluded-event behavior before interpreting curves."
+        elif ratio > 0.05:
+            signal = SIGNAL_MIXED
+            message = "Extra logged clicks are present but selected analysis responses remain traceable."
+        else:
+            signal = SIGNAL_EXPECTED
+            message = "Logged click behavior is close to the selected response set."
+        rows.append(
+            _behavior_row(
+                scope="Session",
+                aggregation_mode="",
+                signal=signal,
+                feature="Rejected / extra clicks",
+                message=message,
+                evidence=f"mouse_clicks={len(mouse_events)}; selected_clicks={len(selected_clicks)}; extra_clicks={len(extra_clicks)}; tactile_events={tactile_count}",
+            )
+        )
+
+    final_rows = result.final_outcome_rows or result.response_rows
+    if final_rows:
+        final_hits = sum(1 for row in final_rows if _truthy(row.get("hit")))
+        hit_rate = final_hits / len(final_rows)
+        if hit_rate < 0.6:
+            signal = SIGNAL_UNUSUAL
+            message = "The final response yield is unusually sparse across the session."
+        elif hit_rate < 0.8:
+            signal = SIGNAL_MIXED
+            message = "The final response yield is mixed and should be interpreted condition-by-condition."
+        else:
+            signal = SIGNAL_EXPECTED
+            message = "The final response yield is sufficient for exploratory review."
+        rows.append(
+            _behavior_row(
+                scope="Session",
+                aggregation_mode="",
+                signal=signal,
+                feature="Response distribution",
+                message=message,
+                evidence=f"final_hits={final_hits}; final_trials={len(final_rows)}; hit_rate={hit_rate:.3f}",
+            )
+        )
+
+    rescued = [row for row in final_rows if _truthy(row.get("rescued_in_topup"))]
+    unresolved = [row for row in final_rows if not _truthy(row.get("hit"))]
+    if rescued:
+        rows.append(
+            _behavior_row(
+                scope="Session",
+                aggregation_mode="",
+                signal=SIGNAL_MIXED if unresolved else SIGNAL_EXPECTED,
+                feature="Top-up rescues",
+                message=(
+                    "Top-up rescued missed trials, with some misses still unresolved."
+                    if unresolved
+                    else "Top-up rescue rows are present and final outcomes reflect the recovered responses."
+                ),
+                evidence=f"rescued={len(rescued)}; unresolved_final_misses={len(unresolved)}",
+            )
+        )
+    elif unresolved:
+        rows.append(
+            _behavior_row(
+                scope="Session",
+                aggregation_mode="",
+                signal=SIGNAL_MIXED,
+                feature="Top-up rescues",
+                message="Some final tactile trials remain misses; this may be expected if top-up was disabled or declined.",
+                evidence=f"unresolved_final_misses={len(unresolved)}",
+            )
+        )
+    return rows
+
+
+def _behavior_summary(
+    rows: list[dict[str, Any]],
+    result: SessionAnalysisResult,
+    event_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    counts: dict[str, int] = {}
+    for row in rows:
+        signal = str(row.get("signal") or "").strip()
+        counts[signal] = counts.get(signal, 0) + 1
+    return {
+        "schema": DATA_BEHAVIOR_SCHEMA,
+        "interpretation_note": (
+            "Exploratory data-behavior signals describe tendencies in the recorded PPS outputs. "
+            "They are not scientific conclusions, participant-readiness certification, or a replacement for manual review."
+        ),
+        "common_pps_visualization_features": list(COMMON_PPS_VISUALIZATION_FEATURES),
+        "signal_labels": [SIGNAL_EXPECTED, SIGNAL_MIXED, SIGNAL_UNUSUAL, SIGNAL_INSUFFICIENT, SIGNAL_TECHNICAL],
+        "signal_counts": counts,
+        "scope_count": len({(row.get("aggregation_mode", ""), row.get("scope", "")) for row in rows if row.get("scope") not in ("", "Session")}),
+        "curve_scope_count": len({(row.get("aggregation_mode", ""), row.get("scope", "")) for row in result.curve_rows if row.get("scope")}),
+        "response_row_count": len(result.response_rows),
+        "final_outcome_row_count": len(result.final_outcome_rows),
+        "event_count": len(event_rows),
+    }
+
+
+def _behavior_row(
+    *,
+    scope: str,
+    aggregation_mode: str,
+    signal: str,
+    feature: str,
+    message: str,
+    evidence: str,
+) -> dict[str, Any]:
+    return {
+        "scope": scope,
+        "aggregation_mode": aggregation_mode,
+        "signal": signal,
+        "feature": feature,
+        "message": message,
+        "evidence": evidence,
+    }
+
+
+def _metric_value_for_row(row: dict[str, Any]) -> float:
+    metric = str(row.get("fit_metric") or "").strip()
+    candidates = [metric] if metric else []
+    candidates.extend(["facilitation_ms", "mean_rt_ms"])
+    for key in candidates:
+        value = _as_float(row.get(key), math.nan)
+        if math.isfinite(value):
+            return value
+    return math.nan
+
+
+def _spread_ratios(rows: list[dict[str, Any]]) -> list[float]:
+    y_values = [_metric_value_for_row(row) for row in rows]
+    y_values = [value for value in y_values if math.isfinite(value)]
+    if len(y_values) < 2:
+        return []
+    y_range = max(y_values) - min(y_values)
+    if y_range <= 0:
+        return []
+    ratios = []
+    for row in rows:
+        y = _metric_value_for_row(row)
+        if not math.isfinite(y):
+            continue
+        metric = str(row.get("fit_metric") or "").strip()
+        candidates = (
+            ["facilitation_sem_ms", "fit_metric_sem_ms", "facilitation_sd_ms", "fit_metric_sd_ms", "sem_rt_ms", "sd_rt_ms"]
+            if metric == "facilitation_ms"
+            else ["sem_rt_ms", "fit_metric_sem_ms", "sd_rt_ms", "fit_metric_sd_ms"]
+        )
+        for key in candidates:
+            spread = _as_float(row.get(key), math.nan)
+            if math.isfinite(spread) and spread > 0:
+                ratios.append((spread * 2.0) / y_range)
+                break
+    return ratios
+
+
+def _final_outcomes_by_scope(response_rows: list[dict[str, Any]]) -> dict[tuple[str, str], list[dict[str, Any]]]:
+    grouped: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for row in response_rows:
+        for mode in (AGGREGATION_SEPARATE_PARTS, AGGREGATION_POOL_PARTS):
+            part_label, condition, phase, noise = _analysis_context(row, aggregation_mode=mode)
+            scope = _scope(part_label, condition, phase, noise)
+            grouped.setdefault((mode, scope), []).append(row)
+    return grouped
 
 
 def _pair_tactile_responses(events: list[dict[str, Any]], *, min_rt_s: float, max_rt_s: float) -> list[dict[str, Any]]:
@@ -650,6 +1146,25 @@ def _write_rows(path: Path, rows: list[dict[str, Any]]) -> None:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
+
+
+def _write_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(_json_ready(payload), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _json_ready(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {str(key): _json_ready(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_json_ready(item) for item in value]
+    if isinstance(value, tuple):
+        return [_json_ready(item) for item in value]
+    if isinstance(value, (str, int, bool)) or value is None:
+        return value
+    if isinstance(value, float):
+        return value if math.isfinite(value) else None
+    return str(value)
 
 
 def _analysis_context(row: dict[str, Any], *, aggregation_mode: str) -> tuple[str, str, str, str]:

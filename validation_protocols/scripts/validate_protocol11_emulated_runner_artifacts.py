@@ -208,6 +208,11 @@ def _latest_analysis_csv(session_dir: Path, suffix: str) -> Path | None:
     return matches[-1] if matches else None
 
 
+def _analysis_file(session_dir: Path, filename: str) -> Path | None:
+    path = session_dir / "analysis" / filename
+    return path if path.is_file() else None
+
+
 def _trial_uid(row: dict[str, Any]) -> str:
     return str(_row_value(row, "trial_uid", "Trial_UID", default="")).strip()
 
@@ -270,6 +275,7 @@ def _analysis_paths(session_dir: Path) -> dict[str, Path | None]:
         "sigmoid_fits": _latest_analysis_csv(session_dir, "sigmoid_fits"),
         "model_fits": _latest_analysis_csv(session_dir, "model_fits"),
         "model_fit_comparison": _latest_analysis_csv(session_dir, "model_fit_comparison"),
+        "data_behavior_by_scope": _analysis_file(session_dir, "data_behavior_by_scope.csv"),
         "timing_qc": _latest_analysis_csv(session_dir, "timing_qc"),
     }
 
@@ -682,6 +688,7 @@ def _audit_outputs(
     lsl_xdf = session_dir / "lsl_markers.xdf"
     trigger_json = session_dir / "trigger_dictionary.json"
     summary_txt = session_dir / "analysis_summary.txt"
+    exploratory_summary = session_dir / "analysis" / "exploratory_quality_summary.json"
     if capture_options.get("write_events_csv", True):
         _criterion(criteria, "data_outputs_analysis", "events_csv_written", events_csv.is_file(), str(events_csv))
     else:
@@ -695,9 +702,36 @@ def _audit_outputs(
     missing_analysis = [name for name, path in analysis_paths.items() if path is None or not path.is_file()]
     if analysis_required:
         _criterion(criteria, "data_outputs_analysis", "analysis_csv_family_written", not missing_analysis, ",".join(missing_analysis))
+        exploratory_payload = _read_json(exploratory_summary) if exploratory_summary.is_file() else {}
+        signal_labels = set(exploratory_payload.get("signal_labels") or [])
+        signal_counts = exploratory_payload.get("signal_counts") or {}
+        observed_labels = set(signal_counts.keys()) if isinstance(signal_counts, dict) else set()
+        allowed_labels = {"Expected pattern", "Mixed / ambiguous", "Unusual pattern", "Insufficient evidence", "Technical caveat"}
+        _criterion(
+            criteria,
+            "data_outputs_analysis",
+            "exploratory_quality_summary_written",
+            exploratory_summary.is_file() and bool(exploratory_payload),
+            str(exploratory_summary),
+        )
+        _criterion(
+            criteria,
+            "data_outputs_analysis",
+            "exploratory_summary_uses_soft_labels",
+            bool((signal_labels or observed_labels).issubset(allowed_labels)) and not {"pass", "fail"}.intersection({label.lower() for label in signal_labels | observed_labels}),
+            f"labels={sorted(signal_labels | observed_labels)}",
+        )
     else:
         present_analysis = [name for name, path in analysis_paths.items() if path is not None and path.is_file()]
         _criterion(criteria, "data_outputs_analysis", "analysis_csv_family_absent_when_disabled", not present_analysis, ",".join(present_analysis), required=False)
+        _criterion(
+            criteria,
+            "data_outputs_analysis",
+            "exploratory_quality_summary_absent_when_disabled",
+            not exploratory_summary.exists(),
+            str(exploratory_summary),
+            required=False,
+        )
     if capture_options.get("write_lsl_marker_mirror", True):
         _criterion(criteria, "lsl_trigger_codes", "lsl_marker_mirrors_written_when_enabled", lsl_csv.is_file() and lsl_xdf.is_file(), f"{lsl_csv}; {lsl_xdf}")
     else:

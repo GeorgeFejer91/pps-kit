@@ -1423,6 +1423,39 @@ def test_protocol11_study5_readiness_auditor_checks_xdf_audio_and_scope(tmp_path
     _write_csv(analysis_dir / f"{session_id}_pps_curve_points.csv", [{"soa_ms": 200, "n": 1, "mean_rt_ms": 150.0}])
     _write_csv(analysis_dir / f"{session_id}_model_fits.csv", [{"model": "linear", "n_points": 1, "aic": 0.0}])
     _write_csv(analysis_dir / f"{session_id}_model_fit_comparison.csv", [{"best_model": "linear", "best_aic": 0.0}])
+    _write_csv(
+        analysis_dir / "data_behavior_by_scope.csv",
+        [
+            {
+                "scope": "Session",
+                "aggregation_mode": "",
+                "signal": "Expected pattern",
+                "feature": "Response distribution",
+                "message": "The final response yield is sufficient for exploratory review.",
+                "evidence": "hit_rate=1.000",
+            }
+        ],
+    )
+    (analysis_dir / "exploratory_quality_summary.json").write_text(
+        json.dumps(
+            {
+                "schema": "pps-exploratory-data-behavior.v1",
+                "interpretation_note": "Exploratory data-behavior signals are not scientific conclusions.",
+                "signal_labels": [
+                    "Expected pattern",
+                    "Mixed / ambiguous",
+                    "Unusual pattern",
+                    "Insufficient evidence",
+                    "Technical caveat",
+                ],
+                "signal_counts": {"Expected pattern": 1},
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     (analysis_dir / f"{session_id}_sigmoid_fits.csv").write_text("empty\n", encoding="utf-8")
     _write_csv(
         analysis_dir / f"{session_id}_timing_qc.csv",

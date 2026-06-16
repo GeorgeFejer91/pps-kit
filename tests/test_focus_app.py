@@ -181,12 +181,35 @@ def _write_analysis_review_outputs(session_dir: Path) -> dict[str, Path]:
         f"{pooled_scope},pooled_parts,8,1.0\n",
         encoding="utf-8",
     )
+    behavior = analysis_dir / "data_behavior_by_scope.csv"
+    behavior.write_text(
+        "scope,aggregation_mode,signal,feature,message,evidence\n"
+        f"{scope},separate_parts,Expected pattern,RT or facilitation by SOA/distance,The recording has enough SOA points for common PPS curve review,points=4\n"
+        "Session,,Technical caveat,Timing evidence,Timing evidence is available for review,timing_qc_rows=1\n",
+        encoding="utf-8",
+    )
+    behavior_summary = analysis_dir / "exploratory_quality_summary.json"
+    behavior_summary.write_text(
+        json.dumps(
+            {
+                "schema": "pps-exploratory-data-behavior.v1",
+                "interpretation_note": "Exploratory data-behavior signals are not scientific conclusions or participant-readiness certification.",
+                "signal_counts": {"Expected pattern": 1, "Technical caveat": 1},
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     (session_dir / "analysis_summary.txt").write_text("Tactile trials reconstructed: 4\n", encoding="utf-8")
     return {
         "curves": curves,
         "model_fits": fits,
         "model_fit_comparison": comparison,
         "summary": summary,
+        "data_behavior_by_scope": behavior,
+        "exploratory_quality_summary": behavior_summary,
     }
 
 
@@ -1022,16 +1045,28 @@ def test_focus_mode_opens_post_run_analysis_review_dialog(tmp_path: Path, monkey
     assert dialog.isVisible()
     model_combo = dialog.findChild(q["QComboBox"], "analysisModelCombo")
     scope_combo = dialog.findChild(q["QComboBox"], "analysisScopeCombo")
+    metric_combo = dialog.findChild(q["QComboBox"], "analysisMetricCombo")
+    source_combo = dialog.findChild(q["QComboBox"], "analysisSourceCombo")
+    grouping_combo = dialog.findChild(q["QComboBox"], "analysisGroupingCombo")
     overview_table = dialog.findChild(q["QTableWidget"], "analysisOverviewTable")
     details = dialog.findChild(q["QTextEdit"], "analysisDetailsText")
     assert model_combo is not None and model_combo.count() == 5
     assert "Compare all three" in [model_combo.itemText(index) for index in range(model_combo.count())]
+    assert metric_combo is not None and "Hit rate" in [metric_combo.itemText(index) for index in range(metric_combo.count())]
+    assert source_combo is not None and "Logged but excluded events" in [source_combo.itemText(index) for index in range(source_combo.count())]
+    assert grouping_combo is not None and "By SOA/distance bin" in [grouping_combo.itemText(index) for index in range(grouping_combo.count())]
     assert scope_combo is not None and scope_combo.count() == 1
     assert overview_table is not None and overview_table.rowCount() == 1
     part_buttons = [button for button in dialog.findChildren(q["QPushButton"], "analysisSegmentButton")]
-    assert len(part_buttons) == 2
-    assert {button.text() for button in part_buttons} == {"Separate parts", "Pool parts"}
-    assert details is not None and "Best model by AIC" in details.toPlainText()
+    assert {button.text() for button in part_buttons}.issuperset({"Data Behavior", "Model Fits", "Responses", "Timing Evidence", "Top-Up", "Artifacts", "Separate parts", "Pool parts"})
+    toggles = [box.text() for box in dialog.findChildren(q["QCheckBox"], "analysisPlotToggle")]
+    assert {"Observed means", "Uncertainty band", "Raw trial points", "Rejected / extra clicks", "Top-up rescues", "PPS boundary", "All model fits", "Low-N markers"}.issubset(set(toggles))
+    assert details is not None and "Exploratory data-behavior signals" in details.toPlainText()
+    assert "Expected pattern" in details.toPlainText()
+    assert "participant-readiness certification" in details.toPlainText()
+    assert "pass" not in details.toPlainText().lower()
+    assert "fail" not in details.toPlainText().lower()
+    assert "Best model by AIC" in details.toPlainText()
     assert "Displayed range: +/- SEM" in details.toPlainText()
     compare_index = model_combo.findText("Compare all three")
     assert compare_index >= 0

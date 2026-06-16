@@ -36,13 +36,30 @@ from .analysis_review import (
     PART_AGGREGATION_LABELS,
     PARTS_POOLED,
     PARTS_SEPARATE,
+    GROUPING_LABELS,
+    GROUPING_ORDER,
+    METRIC_FACILITATION,
+    METRIC_LABELS,
+    METRIC_MEAN_RT,
+    METRIC_ORDER,
+    SOURCE_FINAL,
+    SOURCE_LABELS,
+    SOURCE_ORDER,
+    VIEW_DATA_BEHAVIOR,
+    VIEW_LABELS,
+    VIEW_MODEL_FITS,
+    VIEW_ORDER,
     available_models_for_scope,
+    artifact_rows_for_review,
+    behavior_signal_counts,
+    behavior_signals_for_scope,
     best_model_for_scope,
     fit_row_for_scope,
     load_analysis_review_data,
     observed_points_for_scope,
     prediction_points_for_scope,
     prediction_series_for_scope,
+    raw_points_for_scope,
     scope_comparison_row,
     scopes_for_part_mode,
 )
@@ -707,11 +724,17 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
             self.observed: list[dict[str, float | str]] = []
             self.predicted: list[dict[str, float]] = []
             self.predicted_series: list[dict[str, Any]] = []
+            self.raw_points: list[dict[str, float | str]] = []
             self.model_label = ""
             self.metric_label = ""
             self.empty_text = "No analysis curve selected"
             self.boundary_x: float | None = None
             self.boundary_label = ""
+            self.show_observed = True
+            self.show_uncertainty = True
+            self.show_raw_points = False
+            self.show_boundary = True
+            self.show_low_n_markers = True
             self.setMinimumHeight(178)
             self.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Expanding)
 
@@ -726,6 +749,12 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
             predicted_series: list[dict[str, Any]] | None = None,
             boundary_x: float | None = None,
             boundary_label: str = "",
+            raw_points: list[dict[str, float | str]] | None = None,
+            show_observed: bool = True,
+            show_uncertainty: bool = True,
+            show_raw_points: bool = False,
+            show_boundary: bool = True,
+            show_low_n_markers: bool = True,
         ) -> None:
             self.observed = list(observed)
             self.predicted = list(predicted)
@@ -733,11 +762,17 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                 self.predicted_series = [{"model": "", "label": "Model fit", "points": list(predicted)}] if predicted else []
             else:
                 self.predicted_series = list(predicted_series)
+            self.raw_points = list(raw_points or [])
             self.model_label = str(model_label or "")
             self.metric_label = str(metric_label or "")
             self.empty_text = str(empty_text or "No analysis curve selected")
             self.boundary_x = boundary_x if boundary_x is not None and math.isfinite(float(boundary_x)) else None
             self.boundary_label = str(boundary_label or "")
+            self.show_observed = bool(show_observed)
+            self.show_uncertainty = bool(show_uncertainty)
+            self.show_raw_points = bool(show_raw_points)
+            self.show_boundary = bool(show_boundary)
+            self.show_low_n_markers = bool(show_low_n_markers)
             self.update()
 
         def paintEvent(self, _event: Any) -> None:  # noqa: N802 - Qt API
@@ -754,11 +789,14 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                 bottom = 42
                 plot_width = max(1, width - left - right)
                 plot_height = max(1, height - top - bottom)
-                all_points = [(float(item["x"]), float(item["y"])) for item in self.observed]
-                for item in self.observed:
+                visible_observed = self.observed if self.show_observed else []
+                all_points = [(float(item["x"]), float(item["y"])) for item in visible_observed]
+                if self.show_raw_points:
+                    all_points.extend((float(item["x"]), float(item["y"])) for item in self.raw_points)
+                for item in visible_observed:
                     low = _analysis_float(item.get("y_low"))
                     high = _analysis_float(item.get("y_high"))
-                    if low is not None and high is not None:
+                    if self.show_uncertainty and low is not None and high is not None:
                         all_points.append((float(item["x"]), low))
                         all_points.append((float(item["x"]), high))
                 for series in self.predicted_series:
@@ -769,7 +807,7 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                     return
                 x_values = [point[0] for point in all_points]
                 y_values = [point[1] for point in all_points]
-                if self.boundary_x is not None:
+                if self.show_boundary and self.boundary_x is not None:
                     x_values.append(float(self.boundary_x))
                 x_min = min(x_values)
                 x_max = max(x_values)
@@ -821,7 +859,7 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                 painter.drawLine(left, top, left, top + plot_height)
                 painter.drawLine(left, top + plot_height, width - right, top + plot_height)
 
-                if self.boundary_x is not None and x_min <= self.boundary_x <= x_max:
+                if self.show_boundary and self.boundary_x is not None and x_min <= self.boundary_x <= x_max:
                     boundary_pen = q["QPen"](q["QColor"]("#6a5d2f"))
                     boundary_pen.setWidth(2)
                     boundary_pen.setStyle(q["Qt"].PenStyle.DashLine)
@@ -847,10 +885,10 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
 
                 spread_points = [
                     (float(point["x"]), float(point["y_low"]), float(point["y_high"]))
-                    for point in self.observed
+                    for point in visible_observed
                     if _analysis_float(point.get("y_low")) is not None and _analysis_float(point.get("y_high")) is not None
                 ]
-                if spread_points:
+                if self.show_uncertainty and spread_points:
                     range_color = q["QColor"]("#d7b46a")
                     range_color.setAlpha(34)
                     range_pen_color = q["QColor"]("#9a7629")
@@ -872,7 +910,7 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                         y_bottom = int(round(_y(min(low, high))))
                         height_px = max(8, y_bottom - y_top)
                         painter.drawRoundedRect(int(round(_x(x_value))) - 8, y_top, 16, height_px, 7, 7)
-                    label = str(self.observed[0].get("spread_label") or "").strip()
+                    label = str(visible_observed[0].get("spread_label") or "").strip()
                     if label:
                         painter.setPen(q["QPen"](q["QColor"]("#647067")))
                         painter.drawText(
@@ -947,7 +985,7 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                                 label,
                             )
                             legend_x += 138
-                if self.observed:
+                if visible_observed:
                     if compact_legend and len(self.predicted_series) > 1:
                         legend_y = 50
                         legend_x = max(left + 190, width - right - 322) + 154
@@ -973,25 +1011,45 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                         "Observed mean",
                     )
 
-                if len(self.observed) >= 2:
+                if len(visible_observed) >= 2:
                     mean_pen = q["QPen"](q["QColor"]("#8c2f2f"))
                     mean_pen.setWidth(2)
                     painter.setPen(mean_pen)
                     mean_path = q["QPainterPath"]()
-                    first = self.observed[0]
+                    first = visible_observed[0]
                     mean_path.moveTo(_x(float(first["x"])), _y(float(first["y"])))
-                    for point in self.observed[1:]:
+                    for point in visible_observed[1:]:
                         mean_path.lineTo(_x(float(point["x"])), _y(float(point["y"])))
                     painter.drawPath(mean_path)
+
+                if self.show_raw_points and self.raw_points:
+                    raw_pen = q["QPen"](q["QColor"]("#4f5b52"))
+                    raw_pen.setWidth(1)
+                    raw_fill = q["QColor"]("#4f5b52")
+                    raw_fill.setAlpha(52)
+                    painter.setPen(raw_pen)
+                    painter.setBrush(q["QBrush"](raw_fill))
+                    for point in self.raw_points:
+                        x = int(round(_x(float(point["x"]))))
+                        y = int(round(_y(float(point["y"]))))
+                        painter.drawEllipse(x - 3, y - 3, 6, 6)
 
                 point_pen = q["QPen"](q["QColor"]("#8c2f2f"))
                 point_pen.setWidth(2)
                 painter.setPen(point_pen)
                 painter.setBrush(q["QBrush"](q["QColor"]("#f4e2b8")))
-                for point in self.observed:
+                for point in visible_observed:
                     x = int(round(_x(float(point["x"]))))
                     y = int(round(_y(float(point["y"]))))
                     painter.drawEllipse(x - 5, y - 5, 10, 10)
+                    if self.show_low_n_markers and str(point.get("low_n") or "").strip():
+                        low_n_pen = q["QPen"](q["QColor"]("#a4631b"))
+                        low_n_pen.setWidth(2)
+                        painter.setPen(low_n_pen)
+                        painter.setBrush(q["Qt"].BrushStyle.NoBrush)
+                        painter.drawEllipse(x - 8, y - 8, 16, 16)
+                        painter.setPen(point_pen)
+                        painter.setBrush(q["QBrush"](q["QColor"]("#f4e2b8")))
 
                 painter.setPen(q["QPen"](q["QColor"]("#202621")))
                 painter.drawText(8, 6, width - 16, 18, int(q["Qt"].AlignmentFlag.AlignVCenter), self.model_label or "Model fit")
@@ -1015,7 +1073,10 @@ class AnalysisReviewDialog:
         self.q = q
         self.data = data
         self.current_part_mode = data.default_part_mode
+        self.current_view = VIEW_DATA_BEHAVIOR
         self.part_mode_buttons: dict[str, Any] = {}
+        self.view_buttons: dict[str, Any] = {}
+        self.plot_toggles: dict[str, Any] = {}
         self.dialog = q["QDialog"](parent)
         _enable_standard_window_controls(q, self.dialog)
         self.dialog.setWindowTitle("PPS Instant Analysis")
@@ -1065,6 +1126,11 @@ QFrame#analysisSegmentedControl {
     border: 1px solid #bcc7bd;
     border-radius: 6px;
 }
+QFrame#analysisTogglePanel {
+    background: #ffffff;
+    border: 1px solid #d9dfd6;
+    border-radius: 6px;
+}
 QPushButton#analysisSegmentButton {
     border: 0;
     border-radius: 0;
@@ -1084,6 +1150,14 @@ QPushButton#analysisSegmentButton:checked {
 QPushButton#analysisSegmentButton:disabled {
     color: #9ba59d;
     background: #eef0eb;
+}
+QCheckBox#analysisPlotToggle {
+    color: #202621;
+    padding: 3px 6px;
+    font-weight: 650;
+}
+QCheckBox#analysisPlotToggle:disabled {
+    color: #9ba59d;
 }
 QTableWidget#analysisOverviewTable {
     background: #ffffff;
@@ -1133,12 +1207,34 @@ QTextEdit#analysisDetailsText {
         header.setObjectName("appTitle")
         root.addWidget(header)
 
-        subtitle = q["QLabel"]("Observed SOA curve points and automatic sigmoid, linear, and logarithmic-decay model fits.")
+        subtitle = q["QLabel"](
+            "Exploratory data-behavior signals compare this recording with common PPS visualization patterns; they are not scientific conclusions or participant-readiness certification."
+        )
         subtitle.setObjectName("mutedLabel")
         subtitle.setWordWrap(True)
         root.addWidget(subtitle)
 
-        controls = q["QHBoxLayout"]()
+        view_row = q["QHBoxLayout"]()
+        view_row.setContentsMargins(0, 0, 0, 0)
+        view_row.setSpacing(8)
+        view_row.addWidget(q["QLabel"]("View"))
+        self.view_frame = q["QFrame"]()
+        self.view_frame.setObjectName("analysisSegmentedControl")
+        view_layout = q["QGridLayout"](self.view_frame)
+        view_layout.setContentsMargins(0, 0, 0, 0)
+        view_layout.setSpacing(0)
+        for index, view in enumerate(VIEW_ORDER):
+            button = q["QPushButton"](VIEW_LABELS.get(view, view))
+            button.setObjectName("analysisSegmentButton")
+            button.setCheckable(True)
+            button.setChecked(view == self.current_view)
+            button.clicked.connect(lambda _checked=False, selected_view=view: self._set_view(selected_view))
+            self.view_buttons[view] = button
+            view_layout.addWidget(button, index // 3, index % 3)
+        view_row.addWidget(self.view_frame, 1)
+        root.addLayout(view_row)
+
+        controls = q["QGridLayout"]()
         controls.setContentsMargins(0, 0, 0, 0)
         controls.setSpacing(8)
         self.part_mode_frame = q["QFrame"]()
@@ -1162,13 +1258,55 @@ QTextEdit#analysisDetailsText {
         self.model_combo.setObjectName("analysisModelCombo")
         for model in MODEL_ORDER:
             self.model_combo.addItem(MODEL_LABELS.get(model, model), model)
-        controls.addWidget(q["QLabel"]("Parts"))
-        controls.addWidget(self.part_mode_frame)
-        controls.addWidget(q["QLabel"]("Condition"))
-        controls.addWidget(self.scope_combo, 1)
-        controls.addWidget(q["QLabel"]("Model"))
-        controls.addWidget(self.model_combo)
+        self.metric_combo = q["QComboBox"]()
+        self.metric_combo.setObjectName("analysisMetricCombo")
+        for metric in METRIC_ORDER:
+            self.metric_combo.addItem(METRIC_LABELS.get(metric, metric), metric)
+        self.source_combo = q["QComboBox"]()
+        self.source_combo.setObjectName("analysisSourceCombo")
+        for source in SOURCE_ORDER:
+            self.source_combo.addItem(SOURCE_LABELS.get(source, source), source)
+        self.grouping_combo = q["QComboBox"]()
+        self.grouping_combo.setObjectName("analysisGroupingCombo")
+        for grouping in GROUPING_ORDER:
+            self.grouping_combo.addItem(GROUPING_LABELS.get(grouping, grouping), grouping)
+        controls.addWidget(q["QLabel"]("Parts"), 0, 0)
+        controls.addWidget(self.part_mode_frame, 0, 1)
+        controls.addWidget(q["QLabel"]("Condition"), 0, 2)
+        controls.addWidget(self.scope_combo, 0, 3)
+        controls.addWidget(q["QLabel"]("Model"), 1, 0)
+        controls.addWidget(self.model_combo, 1, 1)
+        controls.addWidget(q["QLabel"]("Metric"), 1, 2)
+        controls.addWidget(self.metric_combo, 1, 3)
+        controls.addWidget(q["QLabel"]("Source"), 2, 0)
+        controls.addWidget(self.source_combo, 2, 1)
+        controls.addWidget(q["QLabel"]("Grouping"), 2, 2)
+        controls.addWidget(self.grouping_combo, 2, 3)
+        controls.setColumnStretch(3, 1)
         root.addLayout(controls)
+
+        toggle_panel = q["QFrame"]()
+        toggle_panel.setObjectName("analysisTogglePanel")
+        toggle_layout = q["QGridLayout"](toggle_panel)
+        toggle_layout.setContentsMargins(6, 4, 6, 4)
+        toggle_layout.setSpacing(3)
+        for index, (key, label, checked) in enumerate((
+            ("observed_means", "Observed means", True),
+            ("uncertainty_band", "Uncertainty band", True),
+            ("raw_trial_points", "Raw trial points", False),
+            ("rejected_extra_clicks", "Rejected / extra clicks", False),
+            ("topup_rescues", "Top-up rescues", False),
+            ("pps_boundary", "PPS boundary", True),
+            ("all_model_fits", "All model fits", False),
+            ("low_n_markers", "Low-N markers", True),
+        )):
+            box = q["QCheckBox"](label)
+            box.setObjectName("analysisPlotToggle")
+            box.setChecked(checked)
+            box.stateChanged.connect(lambda _state=0: self._refresh())
+            self.plot_toggles[key] = box
+            toggle_layout.addWidget(box, index // 4, index % 4)
+        root.addWidget(toggle_panel)
 
         body = q["QSplitter"](q["Qt"].Orientation.Vertical)
         body.setChildrenCollapsible(False)
@@ -1232,8 +1370,23 @@ QTextEdit#analysisDetailsText {
 
         self.scope_combo.currentIndexChanged.connect(lambda _index: self._refresh())
         self.model_combo.currentIndexChanged.connect(lambda _index: self._refresh())
+        self.metric_combo.currentIndexChanged.connect(lambda _index: self._refresh())
+        self.source_combo.currentIndexChanged.connect(lambda _index: self._refresh())
+        self.grouping_combo.currentIndexChanged.connect(lambda _index: self._refresh())
         self._reload_scopes_for_part_mode()
         self._populate_overview_table()
+
+    def _set_view(self, view: str) -> None:
+        if view == self.current_view or view not in VIEW_ORDER:
+            for button_view, button in self.view_buttons.items():
+                button.setChecked(button_view == self.current_view)
+            return
+        self.current_view = view
+        for button_view, button in self.view_buttons.items():
+            button.setChecked(button_view == view)
+        if view == VIEW_MODEL_FITS:
+            self.model_combo.setEnabled(True)
+        self._refresh()
 
     def _set_part_mode(self, mode: str) -> None:
         if mode == self.current_part_mode or mode not in self.data.part_modes:
@@ -1246,6 +1399,15 @@ QTextEdit#analysisDetailsText {
         self._reload_scopes_for_part_mode()
         self._populate_overview_table()
         self._refresh()
+
+    def _toggle_checked(self, key: str, default: bool = False) -> bool:
+        widget = self.plot_toggles.get(key)
+        if widget is None:
+            return default
+        try:
+            return bool(widget.isChecked())
+        except Exception:
+            return default
 
     def _reload_scopes_for_part_mode(self) -> None:
         current = str(self.scope_combo.currentData() or self.scope_combo.currentText() or "")
@@ -1323,12 +1485,21 @@ QTextEdit#analysisDetailsText {
         self.model_combo.setEnabled(True)
         scope = str(self.scope_combo.currentData() or self.scope_combo.currentText() or scopes[0])
         requested_model = str(self.model_combo.currentData() or MODEL_BEST)
+        metric = str(self.metric_combo.currentData() or METRIC_FACILITATION)
+        source_mode = str(self.source_combo.currentData() or SOURCE_FINAL)
+        grouping = str(self.grouping_combo.currentData() or "")
+        if self._toggle_checked("all_model_fits") and metric in {METRIC_FACILITATION, METRIC_MEAN_RT}:
+            requested_model = MODEL_COMPARE_ALL
         resolved_model = best_model_for_scope(self.data, scope, self.current_part_mode) if requested_model == MODEL_BEST else requested_model
         fit = None if requested_model == MODEL_COMPARE_ALL else fit_row_for_scope(self.data, scope, requested_model, self.current_part_mode)
-        observed = observed_points_for_scope(self.data, scope, self.current_part_mode)
-        predicted_series = prediction_series_for_scope(self.data, scope, requested_model, part_mode=self.current_part_mode)
+        observed = observed_points_for_scope(self.data, scope, self.current_part_mode, metric=metric, source_mode=source_mode)
+        model_metric_available = metric in {METRIC_FACILITATION, METRIC_MEAN_RT}
+        predicted_series = (
+            prediction_series_for_scope(self.data, scope, requested_model, part_mode=self.current_part_mode)
+            if model_metric_available
+            else []
+        )
         predicted = list(predicted_series[0].get("points") or []) if len(predicted_series) == 1 else []
-        metric = str(observed[0].get("metric") or "") if observed else str((fit or {}).get("fit_metric") or "")
         available = available_models_for_scope(self.data, scope, self.current_part_mode)
         model_label = MODEL_LABELS.get(resolved_model, resolved_model or "Model")
         if requested_model == MODEL_BEST and resolved_model:
@@ -1342,6 +1513,16 @@ QTextEdit#analysisDetailsText {
             boundary_x = _analysis_float(sigmoid_fit.get("pps_boundary_soa_ms"))
         elif resolved_model == MODEL_SIGMOID:
             boundary_x = _analysis_float((fit or {}).get("pps_boundary_soa_ms"))
+        if not model_metric_available:
+            boundary_x = None
+            model_label = METRIC_LABELS.get(metric, metric)
+        raw_points = (
+            raw_points_for_scope(self.data, scope, self.current_part_mode, source_mode=source_mode)
+            if self._toggle_checked("raw_trial_points") or self._toggle_checked("rejected_extra_clicks") or self._toggle_checked("topup_rescues")
+            else []
+        )
+        if self._toggle_checked("topup_rescues"):
+            raw_points.extend(raw_points_for_scope(self.data, scope, self.current_part_mode, source_mode="topup_rescues"))
         self.plot_widget.set_series(
             observed=observed,
             predicted=predicted,
@@ -1351,8 +1532,16 @@ QTextEdit#analysisDetailsText {
             empty_text=empty if observed else "No curve points were available for this condition.",
             boundary_x=boundary_x,
             boundary_label=f"PPS boundary {_fmt_analysis_value(boundary_x)} ms" if boundary_x is not None else "",
+            raw_points=raw_points,
+            show_observed=self._toggle_checked("observed_means", True),
+            show_uncertainty=self._toggle_checked("uncertainty_band", True),
+            show_raw_points=bool(raw_points),
+            show_boundary=self._toggle_checked("pps_boundary", True),
+            show_low_n_markers=self._toggle_checked("low_n_markers", True),
         )
-        self.detail_text.setPlainText(self._detail_text(scope, requested_model, resolved_model, fit, observed, available))
+        self.detail_text.setPlainText(
+            self._detail_text(scope, requested_model, resolved_model, fit, observed, available, metric, source_mode, grouping)
+        )
 
     def _detail_text(
         self,
@@ -1362,37 +1551,72 @@ QTextEdit#analysisDetailsText {
         fit: dict[str, Any] | None,
         observed: list[dict[str, float | str]],
         available: list[str],
+        metric: str,
+        source_mode: str,
+        grouping: str,
     ) -> str:
-        lines = [f"Scope: {scope}"]
+        lines = [f"View: {VIEW_LABELS.get(self.current_view, self.current_view)}"]
+        lines.append(f"Scope: {scope}")
         lines.append(f"Part summary: {PART_AGGREGATION_LABELS.get(self.current_part_mode, self.current_part_mode)}")
+        lines.append(f"Metric: {METRIC_LABELS.get(metric, _metric_display(metric))}")
+        lines.append(f"Source: {SOURCE_LABELS.get(source_mode, source_mode)}")
+        if grouping:
+            lines.append(f"Grouping lens: {GROUPING_LABELS.get(grouping, grouping)}")
+        if self.current_view == VIEW_DATA_BEHAVIOR:
+            lines.append("")
+            lines.append("Exploratory data-behavior signals")
+            signals = behavior_signals_for_scope(self.data, scope, self.current_part_mode)
+            if signals:
+                for row in signals[:10]:
+                    lines.append(
+                        f"- {row.get('signal', '')}: {row.get('feature', '')} - {row.get('message', '')} ({row.get('evidence', '')})"
+                    )
+            else:
+                lines.append("- Insufficient evidence: No behavior-signal artifact was available for this session.")
+            counts = behavior_signal_counts(self.data)
+            if counts:
+                ordered = [f"{label} {counts[label]}" for label in sorted(counts) if counts.get(label)]
+                lines.append("Signal mix: " + ", ".join(ordered))
+            note = str(self.data.exploratory_quality_summary.get("interpretation_note") or "").strip()
+            if note:
+                lines.append("")
+                lines.append(note)
+        elif self.current_view == "responses":
+            lines.extend(self._response_detail_lines(scope, source_mode))
+        elif self.current_view == "timing_evidence":
+            lines.extend(self._timing_detail_lines())
+        elif self.current_view == "topup":
+            lines.extend(self._topup_detail_lines())
+        elif self.current_view == "artifacts":
+            lines.extend(self._artifact_detail_lines())
         comparison = scope_comparison_row(self.data, scope, self.current_part_mode)
         best = str(comparison.get("best_model") or "").strip()
-        if best:
+        if best and self.current_view in {VIEW_DATA_BEHAVIOR, VIEW_MODEL_FITS}:
             lines.append(f"Best model by AIC: {MODEL_LABELS.get(best, best)}")
             lines.append(f"Best AIC: {_fmt_analysis_value(comparison.get('best_aic'))}")
             lines.append(f"Best R2: {_fmt_analysis_value(comparison.get('best_r2'))}")
-        lines.append(f"Observed SOA point count: {len(observed)}")
+        lines.append(f"Observed point count: {len(observed)}")
         spread_labels = sorted({str(point.get("spread_label") or "").strip() for point in observed if str(point.get("spread_label") or "").strip()})
         if spread_labels:
             lines.append(f"Displayed range: +/- {'/'.join(spread_labels)} around each SOA mean")
-        if available:
+        if available and self.current_view in {VIEW_DATA_BEHAVIOR, VIEW_MODEL_FITS}:
             lines.append("Available displays: " + ", ".join(MODEL_LABELS.get(model, model) for model in available))
-        if requested_model == MODEL_COMPARE_ALL:
+        if requested_model == MODEL_COMPARE_ALL and self.current_view in {VIEW_DATA_BEHAVIOR, VIEW_MODEL_FITS}:
             displayed = [model for model in (MODEL_SIGMOID, MODEL_LINEAR, MODEL_LOGARITHMIC_DECAY) if model in available]
             if displayed:
                 lines.append("Displayed models: " + ", ".join(MODEL_LABELS.get(model, model) for model in displayed))
-        elif requested_model == MODEL_BEST and resolved_model:
+        elif requested_model == MODEL_BEST and resolved_model and self.current_view in {VIEW_DATA_BEHAVIOR, VIEW_MODEL_FITS}:
             lines.append(f"Displayed model: {MODEL_LABELS.get(resolved_model, resolved_model)}")
-        elif requested_model != MODEL_BEST:
+        elif requested_model != MODEL_BEST and self.current_view in {VIEW_DATA_BEHAVIOR, VIEW_MODEL_FITS}:
             lines.append(f"Displayed model: {MODEL_LABELS.get(requested_model, requested_model)}")
-        if requested_model == MODEL_COMPARE_ALL:
+        if requested_model == MODEL_COMPARE_ALL and self.current_view in {VIEW_DATA_BEHAVIOR, VIEW_MODEL_FITS}:
             sigmoid_fit = fit_row_for_scope(self.data, scope, MODEL_SIGMOID, self.current_part_mode)
             if sigmoid_fit is not None and sigmoid_fit.get("pps_boundary_soa_ms") not in (None, ""):
                 lines.append(f"Sigmoid PPS boundary: {_fmt_analysis_value(sigmoid_fit.get('pps_boundary_soa_ms'))} ms")
-        elif fit is None:
+        elif fit is None and self.current_view == VIEW_MODEL_FITS:
             lines.append("")
             lines.append("This model was not fit for the selected condition, usually because there were too few usable SOA points.")
-        else:
+        elif fit is not None and self.current_view == VIEW_MODEL_FITS:
             lines.append("")
             lines.append("Fit parameters")
             for key in (
@@ -1420,6 +1644,68 @@ QTextEdit#analysisDetailsText {
             lines.append("Warnings")
             lines.extend(f"- {warning}" for warning in self.data.warnings[:6])
         return "\n".join(lines)
+
+    def _response_detail_lines(self, scope: str, source_mode: str) -> list[str]:
+        final_rows = self.data.final_outcome_rows or self.data.response_rows
+        scoped = []
+        for row in final_rows:
+            part = _analysis_int(row.get("part_number"))
+            part_label = "All parts" if self.current_part_mode == PARTS_POOLED and part is not None else (f"Part {part}" if part is not None else "")
+            condition = str(row.get("condition") or "").strip()
+            if condition.lower().startswith("part ") and condition[5:].strip().isdigit():
+                condition = ""
+            row_scope = " / ".join(part for part in (part_label, condition, str(row.get("respiratory_phase") or "").strip(), str(row.get("noise_type") or "").strip()) if part)
+            if row_scope == scope:
+                scoped.append(row)
+        hits = sum(1 for row in scoped if _analysis_truthy(row.get("hit")))
+        rescues = sum(1 for row in scoped if _analysis_truthy(row.get("rescued_in_topup")))
+        return [
+            "",
+            "Response behavior",
+            f"- Source lens: {SOURCE_LABELS.get(source_mode, source_mode)}",
+            f"- Scoped tactile rows: {len(scoped)}",
+            f"- Selected hits: {hits}",
+            f"- Top-up rescues in scope: {rescues}",
+        ]
+
+    def _timing_detail_lines(self) -> list[str]:
+        delays = [_analysis_float(row.get("marker_minus_mouse_ms")) for row in self.data.timing_qc_rows]
+        delays = [value for value in delays if value is not None]
+        qualities: dict[str, int] = {}
+        for row in self.data.event_rows:
+            quality = str(row.get("timestamp_quality") or "").strip()
+            if quality:
+                qualities[quality] = qualities.get(quality, 0) + 1
+        lines = ["", "Timing evidence"]
+        lines.append(f"- Timing QC rows: {len(self.data.timing_qc_rows)}")
+        if delays:
+            mean = sum(delays) / len(delays)
+            lines.append(f"- Marker-minus-mouse delay mean: {_fmt_analysis_value(mean)} ms")
+            lines.append(f"- Marker-minus-mouse delay range: {_fmt_analysis_value(min(delays))} to {_fmt_analysis_value(max(delays))} ms")
+        if qualities:
+            lines.append("- Timestamp qualities: " + ", ".join(f"{key} {value}" for key, value in sorted(qualities.items())))
+        return lines
+
+    def _topup_detail_lines(self) -> list[str]:
+        final_rows = self.data.final_outcome_rows or self.data.response_rows
+        rescues = [row for row in final_rows if _analysis_truthy(row.get("rescued_in_topup"))]
+        fillers = [row for row in self.data.response_rows if str(row.get("topup_role") or "").strip().lower() == "filler"]
+        unresolved = [row for row in final_rows if not _analysis_truthy(row.get("hit"))]
+        return [
+            "",
+            "Top-up behavior",
+            f"- Rescued final outcomes: {len(rescues)}",
+            f"- Filler rows excluded from primary analysis: {len(fillers)}",
+            f"- Final misses still present: {len(unresolved)}",
+        ]
+
+    def _artifact_detail_lines(self) -> list[str]:
+        rows = artifact_rows_for_review(self.data)
+        lines = ["", "Artifact evidence"]
+        if not rows:
+            return lines + ["- No artifact path inventory was available."]
+        lines.extend(f"- {row['artifact']}: {row['available']} ({row['path']})" for row in rows[:12])
+        return lines
 
     def _empty_detail_text(self) -> str:
         lines = ["No model-fit tables were available for review."]
@@ -1452,6 +1738,21 @@ def _analysis_float(value: Any) -> float | None:
     except (TypeError, ValueError):
         return None
     return parsed if math.isfinite(parsed) else None
+
+
+def _analysis_int(value: Any) -> int | None:
+    try:
+        return int(float(str(value).strip()))
+    except (TypeError, ValueError):
+        return None
+
+
+def _analysis_truthy(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value in (None, ""):
+        return False
+    return str(value).strip().lower() not in {"0", "false", "no", "none"}
 
 
 def _metric_display(value: Any) -> str:
@@ -5257,8 +5558,12 @@ class FocusModeWindow:
         if not bool(capture_options.get("write_analysis_csvs", True)):
             return
         try:
+            outputs = dict(getattr(result, "analysis_outputs", {}) or {})
+            events_csv = getattr(result, "events_csv", None)
+            if events_csv not in (None, ""):
+                outputs.setdefault("events_csv", events_csv)
             data = load_analysis_review_data(
-                getattr(result, "analysis_outputs", {}) or {},
+                outputs,
                 session_dir=getattr(result, "session_dir", None),
                 summary_text=str(getattr(result, "summary_text", "") or ""),
             )

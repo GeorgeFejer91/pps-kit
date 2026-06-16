@@ -1,25 +1,33 @@
 from __future__ import annotations
 
 import csv
+import json
 from pathlib import Path
 
 import pytest
 
 from peripersonal_space_toolkit.analysis_review import (
+    METRIC_HIT_RATE,
     MODEL_BEST,
     MODEL_COMPARE_ALL,
     PARTS_POOLED,
     PARTS_SEPARATE,
+    SIGNAL_EXPECTED,
     AnalysisReviewData,
+    artifact_rows_for_review,
     available_models_for_scope,
+    behavior_signal_counts,
+    behavior_signals_for_scope,
     best_model_for_scope,
     fit_row_for_scope,
     load_analysis_review_data,
     observed_points_for_scope,
     prediction_points_for_scope,
     prediction_series_for_scope,
+    raw_points_for_scope,
     scopes_for_part_mode,
 )
+from peripersonal_space_toolkit.session_analysis import analyze_session_events, write_analysis_csvs
 
 
 def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
@@ -37,6 +45,9 @@ def test_analysis_review_loads_existing_outputs_and_predicts_model_curves(tmp_pa
     fit_path = analysis_dir / "S001_model_fits.csv"
     comparison_path = analysis_dir / "S001_model_fit_comparison.csv"
     summary_path = analysis_dir / "S001_summary.csv"
+    final_path = analysis_dir / "S001_final_trial_outcomes.csv"
+    behavior_path = analysis_dir / "data_behavior_by_scope.csv"
+    behavior_summary_path = analysis_dir / "exploratory_quality_summary.json"
     scope = "Part 1 / Inhale / pink"
     _write_csv(
         curve_path,
@@ -65,6 +76,40 @@ def test_analysis_review_loads_existing_outputs_and_predicts_model_curves(tmp_pa
         ],
     )
     _write_csv(summary_path, [{"scope": scope, "n": 4, "hit_rate": 1.0}])
+    _write_csv(
+        final_path,
+        [
+            {"part_number": 1, "condition": "", "respiratory_phase": "Inhale", "noise_type": "pink", "soa_ms": 100, "rt_ms": 310, "hit": True},
+            {"part_number": 1, "condition": "", "respiratory_phase": "Inhale", "noise_type": "pink", "soa_ms": 100, "rt_ms": 330, "hit": True},
+            {"part_number": 1, "condition": "", "respiratory_phase": "Inhale", "noise_type": "pink", "soa_ms": 200, "rt_ms": 300, "hit": True},
+            {"part_number": 1, "condition": "", "respiratory_phase": "Inhale", "noise_type": "pink", "soa_ms": 200, "rt_ms": "", "hit": False},
+        ],
+    )
+    _write_csv(
+        behavior_path,
+        [
+            {
+                "scope": scope,
+                "aggregation_mode": PARTS_SEPARATE,
+                "signal": SIGNAL_EXPECTED,
+                "feature": "RT or facilitation by SOA/distance",
+                "message": "The recording has enough SOA/distance points for common PPS curve review.",
+                "evidence": "points=4",
+            }
+        ],
+    )
+    behavior_summary_path.write_text(
+        json.dumps(
+            {
+                "schema": "pps-exploratory-data-behavior.v1",
+                "interpretation_note": "Exploratory data-behavior signals are not scientific conclusions.",
+                "signal_counts": {SIGNAL_EXPECTED: 1},
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
     data = load_analysis_review_data(
         {
@@ -72,6 +117,9 @@ def test_analysis_review_loads_existing_outputs_and_predicts_model_curves(tmp_pa
             "model_fits": fit_path,
             "model_fit_comparison": comparison_path,
             "summary": summary_path,
+            "final_trial_outcomes": final_path,
+            "data_behavior_by_scope": behavior_path,
+            "exploratory_quality_summary": behavior_summary_path,
         },
         session_dir=tmp_path,
         summary_text="summary",
@@ -98,6 +146,15 @@ def test_analysis_review_loads_existing_outputs_and_predicts_model_curves(tmp_pa
     comparison_series = prediction_series_for_scope(data, scope, MODEL_COMPARE_ALL, sample_count=7)
     assert [series["model"] for series in comparison_series] == ["sigmoid", "linear", "logarithmic_decay"]
     assert all(len(series["points"]) == 7 for series in comparison_series)
+    assert behavior_signal_counts(data)[SIGNAL_EXPECTED] == 1
+    assert behavior_signals_for_scope(data, scope)[0]["signal"] == SIGNAL_EXPECTED
+    hit_rate_points = observed_points_for_scope(data, scope, metric=METRIC_HIT_RATE)
+    assert [point["y"] for point in hit_rate_points] == [1.0, 0.5]
+    raw_points = raw_points_for_scope(data, scope)
+    assert [point["y"] for point in raw_points] == [310.0, 330.0, 300.0]
+    artifacts = artifact_rows_for_review(data)
+    assert any(row["artifact"] == "data behavior" and row["available"] == "yes" for row in artifacts)
+    assert "not scientific conclusions" in data.exploratory_quality_summary["interpretation_note"]
 
 
 def test_analysis_review_handles_curve_points_without_model_fit():
@@ -109,3 +166,58 @@ def test_analysis_review_handles_curve_points_without_model_fit():
     assert best_model_for_scope(data, scope) == ""
     assert fit_row_for_scope(data, scope, "sigmoid") is None
     assert prediction_points_for_scope(data, scope, "sigmoid") == []
+
+
+def test_session_analysis_writes_exploratory_data_behavior_outputs(tmp_path: Path):
+    events = []
+    event_id = 1
+
+    def add_trial(index: int, trial_type: str, soa_ms: int, onset_s: float, rt_s: float) -> None:
+        nonlocal event_id
+        payload = {
+            "participant_id": "S001",
+            "part_number": 1,
+            "block_number": 1,
+            "trial_number": index,
+            "trial_uid": f"T{index:03d}",
+            "trial_type": trial_type,
+            "soa_ms": soa_ms,
+            "respiratory_phase": "Inhale",
+            "noise_type": "pink",
+            "timestamp_quality": "dac_time_sample_exact",
+        }
+        events.append({"event_id": event_id, "event_type": "trial_start", "unix_time": onset_s - 0.1, **payload})
+        event_id += 1
+        events.append({"event_id": event_id, "event_type": "tactile_onset", "unix_time": onset_s, **payload})
+        event_id += 1
+        events.append(
+            {
+                "event_id": event_id,
+                "event_type": "mouse_click",
+                "unix_time": onset_s + rt_s,
+                "in_target": True,
+                "during_playback": True,
+                "part_number": 1,
+                "block_number": 1,
+                "timestamp_quality": "dac_time_sample_exact",
+            }
+        )
+        event_id += 1
+
+    for index, soa in enumerate((100, 200, 400, 800), start=1):
+        add_trial(index, "Baseline", soa, index * 10.0, 0.42)
+        add_trial(index + 10, "Audio-Tactile", soa, index * 10.0 + 5.0, 0.36 - index * 0.025)
+
+    result = analyze_session_events(events)
+    outputs = write_analysis_csvs(result, tmp_path, "S001")
+
+    assert outputs["data_behavior_by_scope"].exists()
+    assert outputs["exploratory_quality_summary"].exists()
+    rows = list(csv.DictReader(outputs["data_behavior_by_scope"].open(encoding="utf-8")))
+    summary = json.loads(outputs["exploratory_quality_summary"].read_text(encoding="utf-8"))
+    assert rows
+    assert summary["schema"] == "pps-exploratory-data-behavior.v1"
+    assert "not scientific conclusions" in summary["interpretation_note"]
+    assert {row["signal"] for row in rows}.intersection({"Expected pattern", "Mixed / ambiguous", "Insufficient evidence"})
+    assert "pass" not in json.dumps(summary).lower()
+    assert "fail" not in json.dumps(summary).lower()
