@@ -84,6 +84,7 @@ python .\validation_protocols\scripts\compare_response_timing_strategies.py --ev
 python .\validation_protocols\scripts\run_session_runner_click_path_stress.py --count 25 --interval-s 0.02
 python .\validation_protocols\scripts\run_one_block_trial_runner_realtime_stress.py --output-dir artifacts\validation_runs\one_block_trial_runner_realtime_current
 python .\validation_protocols\scripts\run_topup_missed_trial_stress.py --output-dir artifacts\validation_runs\topup_missed_trial_stress_current
+python .\validation_protocols\scripts\run_trajectory_viewer_navigation_validation.py --output-dir artifacts\validation_runs\trajectory_viewer_navigation_current
 python .\validation_protocols\scripts\run_study5_end_to_end_ui_mouse_validation.py --packaged-standalone-app
 python .\validation_protocols\scripts\run_focus_runner_layout_validation.py --offscreen --output-dir artifacts\validation_runs\focus_runner_layout_current
 python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py --participant-id P001 --mouse-backend pynput

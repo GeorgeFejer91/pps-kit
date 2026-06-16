@@ -16,15 +16,19 @@ const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 container.appendChild(renderer.domElement);
+renderer.domElement.tabIndex = 0;
+renderer.domElement.setAttribute("aria-label", "Trajectory preview camera");
 
 const DEFAULT_3D_CAMERA_OFFSET = new THREE.Vector3(2.4, 1.6, 3.2);
 const avatarViewCenter = new THREE.Vector3(0, 0, 0);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 0, 0);
-controls.enablePan = false;
+controls.enablePan = true;
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
+controls.panSpeed = 0.85;
+controls.screenSpacePanning = true;
 controls.minPolarAngle = 0.08;
 controls.maxPolarAngle = Math.PI / 2;
 controls.minDistance = 0.6;
@@ -57,6 +61,16 @@ const ENDPOINT_2D_LIFT_M = 0.07;
 const SOURCE_TRAJECTORY_2D_LIFT_M = 0.045;
 const SOURCE_TRAJECTORY_3D_LIFT_M = 0.018;
 const SOURCE_TRAJECTORY_OFFSET_M = 0.032;
+const THREE_D_TARGET_PADDING_FACTOR = 1.8;
+const THREE_D_FIT_PADDING_FACTOR = 1.28;
+const VIEW_PRESETS = {
+  front: { theta: Math.PI, phi: Math.PI / 2 },
+  back: { theta: 0, phi: Math.PI / 2 },
+  left: { theta: -Math.PI / 2, phi: Math.PI / 2 },
+  right: { theta: Math.PI / 2, phi: Math.PI / 2 },
+  top: { theta: Math.PI, phi: 0.08 },
+  iso: { theta: 0.66, phi: 1.18 }
+};
 const pointer = new THREE.Vector2();
 const raycaster = new THREE.Raycaster();
 const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -68,6 +82,63 @@ let editingEnabled = true;
 let panStartClientX = 0;
 let panStartClientY = 0;
 const panStartTarget = new THREE.Vector3();
+let current3DViewPreset = "iso";
+const last3DCameraPosition = avatarViewCenter.clone().add(DEFAULT_3D_CAMERA_OFFSET);
+const last3DCameraTarget = avatarViewCenter.clone();
+
+function current3DCameraDistance() {
+  return Math.max(0.001, camera.position.distanceTo(controls.target));
+}
+
+function fit3DDistanceForRadius() {
+  const radius = Math.max(0.1, currentRadius);
+  const halfFov = THREE.MathUtils.degToRad(camera.fov) / 2;
+  const verticalDistance = (radius * THREE_D_FIT_PADDING_FACTOR) / Math.tan(halfFov);
+  const horizontalDistance = verticalDistance / Math.max(0.4, camera.aspect || 1);
+  return clamp(Math.max(verticalDistance, horizontalDistance, radius * 2.2), controls.minDistance, controls.maxDistance);
+}
+
+function store3DCameraState() {
+  if (currentViewMode !== "3d") return;
+  last3DCameraPosition.copy(camera.position);
+  last3DCameraTarget.copy(controls.target);
+}
+
+function sync3DViewState() {
+  if (!window.__trajectoryViewerState || currentViewMode !== "3d") return;
+  const distance = current3DCameraDistance();
+  const up = camera.up.clone().normalize();
+  const rollLocked = Math.abs(up.x) < 0.001 && Math.abs(up.y - 1) < 0.001 && Math.abs(up.z) < 0.001;
+  window.__trajectoryViewerState.three_d_pan_enabled = controls.enablePan;
+  window.__trajectoryViewerState.three_d_roll_locked = rollLocked;
+  window.__trajectoryViewerState.three_d_view_preset = current3DViewPreset;
+  window.__trajectoryViewerState.three_d_camera_distance_m = distance.toFixed(3);
+  window.__trajectoryViewerState.three_d_target_x_m = controls.target.x.toFixed(3);
+  window.__trajectoryViewerState.three_d_target_y_m = controls.target.y.toFixed(3);
+  window.__trajectoryViewerState.three_d_target_z_m = controls.target.z.toFixed(3);
+  window.__trajectoryViewerState.three_d_camera_x_m = camera.position.x.toFixed(3);
+  window.__trajectoryViewerState.three_d_camera_y_m = camera.position.y.toFixed(3);
+  window.__trajectoryViewerState.three_d_camera_z_m = camera.position.z.toFixed(3);
+  container.dataset.threeDPanEnabled = String(window.__trajectoryViewerState.three_d_pan_enabled);
+  container.dataset.threeDRollLocked = String(window.__trajectoryViewerState.three_d_roll_locked);
+  container.dataset.threeDViewPreset = window.__trajectoryViewerState.three_d_view_preset;
+  container.dataset.threeDCameraDistanceM = window.__trajectoryViewerState.three_d_camera_distance_m;
+  container.dataset.threeDTargetXM = window.__trajectoryViewerState.three_d_target_x_m;
+  container.dataset.threeDTargetYM = window.__trajectoryViewerState.three_d_target_y_m;
+  container.dataset.threeDTargetZM = window.__trajectoryViewerState.three_d_target_z_m;
+  container.dataset.threeDCameraXM = window.__trajectoryViewerState.three_d_camera_x_m;
+  container.dataset.threeDCameraYM = window.__trajectoryViewerState.three_d_camera_y_m;
+  container.dataset.threeDCameraZM = window.__trajectoryViewerState.three_d_camera_z_m;
+}
+
+function restore3DCameraState({ resetCamera = false } = {}) {
+  camera.up.set(0, 1, 0);
+  controls.target.copy(resetCamera ? avatarViewCenter : last3DCameraTarget);
+  camera.position.copy(resetCamera ? avatarViewCenter.clone().add(DEFAULT_3D_CAMERA_OFFSET) : last3DCameraPosition);
+  controls.update();
+  store3DCameraState();
+  sync3DViewState();
+}
 
 function fitted2DVerticalSpan() {
   const aspect = Math.max(0.1, camera.aspect || 1);
@@ -170,6 +241,8 @@ function zoom3DView(direction) {
   const nextDistance = clamp(offset.length() * factor, controls.minDistance, controls.maxDistance);
   camera.position.copy(controls.target).add(offset.setLength(nextDistance));
   controls.update();
+  store3DCameraState();
+  sync3DViewState();
 }
 
 function zoomTrajectoryCamera(direction) {
@@ -186,28 +259,60 @@ function applyCameraMode(mode, resetCamera = false) {
     controls.enableRotate = false;
     controls.enableZoom = false;
     controls.enablePan = false;
+    controls.maxTargetRadius = Infinity;
     controls.minPolarAngle = 0;
     controls.maxPolarAngle = 0;
     fit2DCameraToRadius({ resetCenter: resetCamera, resetZoom: resetCamera });
   } else {
     camera.up.set(0, 1, 0);
-    controls.target.copy(avatarViewCenter);
     controls.enabled = true;
     controls.enableRotate = true;
     controls.enableZoom = true;
-    controls.enablePan = false;
+    controls.enablePan = true;
+    controls.cursor.copy(avatarViewCenter);
+    controls.minTargetRadius = 0;
+    controls.maxTargetRadius = Math.max(0.8, currentRadius * THREE_D_TARGET_PADDING_FACTOR);
     controls.minDistance = 0.6;
     controls.maxDistance = 8.0;
     controls.minPolarAngle = 0.08;
     controls.maxPolarAngle = Math.PI / 2;
-    if (resetCamera) {
-      camera.position.copy(avatarViewCenter).add(DEFAULT_3D_CAMERA_OFFSET);
-    }
+    restore3DCameraState({ resetCamera });
   }
   camera.lookAt(controls.target);
   if (mode !== "2d") {
     controls.update();
+    store3DCameraState();
+    sync3DViewState();
   }
+}
+
+function snapTrajectoryView(presetName) {
+  if (currentViewMode !== "3d") return;
+  const preset = VIEW_PRESETS[presetName] || VIEW_PRESETS.iso;
+  const distance = clamp(current3DCameraDistance(), controls.minDistance, controls.maxDistance);
+  const offset = new THREE.Vector3().setFromSpherical(new THREE.Spherical(distance, preset.phi, preset.theta));
+  camera.up.set(0, 1, 0);
+  camera.position.copy(controls.target).add(offset);
+  current3DViewPreset = VIEW_PRESETS[presetName] ? presetName : "iso";
+  controls.update();
+  store3DCameraState();
+  sync3DViewState();
+}
+
+function fit3DCameraToRadius() {
+  if (currentViewMode !== "3d") return;
+  const offset = camera.position.clone().sub(controls.target);
+  if (offset.length() <= 0.0001) {
+    offset.copy(DEFAULT_3D_CAMERA_OFFSET);
+  }
+  const distance = fit3DDistanceForRadius();
+  controls.target.copy(avatarViewCenter);
+  camera.up.set(0, 1, 0);
+  camera.position.copy(controls.target).add(offset.normalize().multiplyScalar(distance));
+  current3DViewPreset = "fit";
+  controls.update();
+  store3DCameraState();
+  sync3DViewState();
 }
 
 scene.add(new THREE.HemisphereLight(0xf7ead8, 0x332820, 1.8));
@@ -598,7 +703,11 @@ function drawScene(payload) {
   const mode = payload.preview_mode === "2d" ? "2d" : "3d";
   const is2D = mode === "2d";
   const radius = Math.max(0.1, payload.radius_m || 1.1);
-  const modeChanged = currentViewMode !== mode;
+  const previousMode = currentViewMode;
+  const modeChanged = previousMode !== mode;
+  if (previousMode === "3d" && mode === "2d") {
+    store3DCameraState();
+  }
   currentViewMode = mode;
   currentRadius = radius;
   // Look-only unless the host marks the payload editable; disables marker drags
@@ -612,7 +721,7 @@ function drawScene(payload) {
     }
     renderer.domElement.style.cursor = "";
   }
-  applyCameraMode(mode, modeChanged);
+  applyCameraMode(mode, is2D ? modeChanged : false);
 
   if (is2D) {
     const disk = new THREE.Mesh(
@@ -711,6 +820,16 @@ function drawScene(payload) {
     radius_screen_height_px: radiusScreenBounds ? radiusScreenBounds.heightPx.toFixed(1) : "",
     two_d_view_center_x_m: is2D ? controls.target.x.toFixed(3) : "",
     two_d_view_center_z_m: is2D ? controls.target.z.toFixed(3) : "",
+    three_d_pan_enabled: !is2D && controls.enablePan,
+    three_d_roll_locked: !is2D,
+    three_d_view_preset: is2D ? "" : current3DViewPreset,
+    three_d_camera_distance_m: is2D ? "" : current3DCameraDistance().toFixed(3),
+    three_d_target_x_m: is2D ? "" : controls.target.x.toFixed(3),
+    three_d_target_y_m: is2D ? "" : controls.target.y.toFixed(3),
+    three_d_target_z_m: is2D ? "" : controls.target.z.toFixed(3),
+    three_d_camera_x_m: is2D ? "" : camera.position.x.toFixed(3),
+    three_d_camera_y_m: is2D ? "" : camera.position.y.toFixed(3),
+    three_d_camera_z_m: is2D ? "" : camera.position.z.toFixed(3),
     start_distance_cm: payload.controls?.start_distance_cm ?? "",
     end_distance_cm: payload.controls?.end_distance_cm ?? "",
     start_rotation_deg: payload.controls?.start_rotation_deg ?? "",
@@ -745,6 +864,16 @@ function drawScene(payload) {
   container.dataset.radiusScreenHeightPx = window.__trajectoryViewerState.radius_screen_height_px;
   container.dataset.twoDViewCenterXM = window.__trajectoryViewerState.two_d_view_center_x_m;
   container.dataset.twoDViewCenterZM = window.__trajectoryViewerState.two_d_view_center_z_m;
+  container.dataset.threeDPanEnabled = String(window.__trajectoryViewerState.three_d_pan_enabled);
+  container.dataset.threeDRollLocked = String(window.__trajectoryViewerState.three_d_roll_locked);
+  container.dataset.threeDViewPreset = window.__trajectoryViewerState.three_d_view_preset;
+  container.dataset.threeDCameraDistanceM = window.__trajectoryViewerState.three_d_camera_distance_m;
+  container.dataset.threeDTargetXM = window.__trajectoryViewerState.three_d_target_x_m;
+  container.dataset.threeDTargetYM = window.__trajectoryViewerState.three_d_target_y_m;
+  container.dataset.threeDTargetZM = window.__trajectoryViewerState.three_d_target_z_m;
+  container.dataset.threeDCameraXM = window.__trajectoryViewerState.three_d_camera_x_m;
+  container.dataset.threeDCameraYM = window.__trajectoryViewerState.three_d_camera_y_m;
+  container.dataset.threeDCameraZM = window.__trajectoryViewerState.three_d_camera_z_m;
   container.dataset.startDistanceCm = String(window.__trajectoryViewerState.start_distance_cm);
   container.dataset.endDistanceCm = String(window.__trajectoryViewerState.end_distance_cm);
   container.dataset.startRotationDeg = String(window.__trajectoryViewerState.start_rotation_deg);
@@ -755,6 +884,7 @@ function drawScene(payload) {
 }
 
 function handlePointerDown(event) {
+  renderer.domElement.focus({ preventScroll: true });
   const handle = intersectDragHandle(event);
   if (!handle && currentViewMode !== "2d") return;
   event.preventDefault();
@@ -803,6 +933,30 @@ function handlePointerUp(event) {
   }
 }
 
+function handleViewerKeyDown(event) {
+  const key = event.key.toLowerCase();
+  if (key === "home") {
+    event.preventDefault();
+    window.fitTrajectoryRadius();
+    return;
+  }
+  if (key === "r") {
+    event.preventDefault();
+    window.resetTrajectoryCamera();
+    return;
+  }
+  if (currentViewMode !== "3d") return;
+  const preset = {
+    "1": event.ctrlKey || event.metaKey ? "back" : "front",
+    "3": event.ctrlKey || event.metaKey ? "left" : "right",
+    "5": "iso",
+    "7": "top"
+  }[key];
+  if (!preset) return;
+  event.preventDefault();
+  snapTrajectoryView(preset);
+}
+
 function resize() {
   const width = Math.max(1, container.clientWidth);
   const height = Math.max(1, container.clientHeight);
@@ -843,12 +997,27 @@ renderer.domElement.addEventListener("pointerdown", handlePointerDown);
 renderer.domElement.addEventListener("pointermove", handlePointerMove);
 renderer.domElement.addEventListener("pointerup", handlePointerUp);
 renderer.domElement.addEventListener("pointercancel", handlePointerUp);
+renderer.domElement.addEventListener("keydown", handleViewerKeyDown);
+controls.addEventListener("start", () => {
+  if (currentViewMode === "3d") {
+    current3DViewPreset = "custom";
+  }
+});
+controls.addEventListener("change", () => {
+  if (currentViewMode === "3d") {
+    store3DCameraState();
+    sync3DViewState();
+  }
+});
 
 window.updateTrajectory = function updateTrajectory(payload) {
   drawScene(payload);
 };
 
 window.resetTrajectoryCamera = function resetTrajectoryCamera() {
+  if (currentViewMode === "3d") {
+    current3DViewPreset = "iso";
+  }
   applyCameraMode(currentViewMode, true);
 };
 
@@ -857,9 +1026,10 @@ window.fitTrajectoryRadius = function fitTrajectoryRadius() {
     fit2DCameraToRadius({ resetCenter: true, resetZoom: true });
     return;
   }
-  applyCameraMode(currentViewMode, true);
+  fit3DCameraToRadius();
 };
 
 window.zoomTrajectoryCamera = zoomTrajectoryCamera;
+window.snapTrajectoryView = snapTrajectoryView;
 
 container.dataset.viewerReady = "true";
