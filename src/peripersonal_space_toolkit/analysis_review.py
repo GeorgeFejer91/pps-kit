@@ -10,19 +10,22 @@ from typing import Any, Mapping
 
 
 MODEL_BEST = "best"
+MODEL_COMPARE_ALL = "compare_all"
 MODEL_SIGMOID = "sigmoid"
 MODEL_LINEAR = "linear"
 MODEL_LOGARITHMIC_DECAY = "logarithmic_decay"
 PARTS_SEPARATE = "separate_parts"
 PARTS_POOLED = "pooled_parts"
 
-MODEL_ORDER = (MODEL_BEST, MODEL_SIGMOID, MODEL_LINEAR, MODEL_LOGARITHMIC_DECAY)
+MODEL_ORDER = (MODEL_BEST, MODEL_COMPARE_ALL, MODEL_SIGMOID, MODEL_LINEAR, MODEL_LOGARITHMIC_DECAY)
 MODEL_LABELS = {
     MODEL_BEST: "Best model",
+    MODEL_COMPARE_ALL: "Compare all three",
     MODEL_SIGMOID: "Sigmoid",
     MODEL_LINEAR: "Linear",
     MODEL_LOGARITHMIC_DECAY: "Logarithmic decay",
 }
+MODEL_FIT_ORDER = (MODEL_SIGMOID, MODEL_LINEAR, MODEL_LOGARITHMIC_DECAY)
 PART_AGGREGATION_ORDER = (PARTS_SEPARATE, PARTS_POOLED)
 PART_AGGREGATION_LABELS = {
     PARTS_SEPARATE: "Separate parts",
@@ -153,7 +156,11 @@ def available_models_for_scope(data: AnalysisReviewData, scope: str, part_mode: 
         for row in data.model_fit_rows
         if _row_part_mode(row) == mode and str(row.get("scope") or "").strip() == scope and str(row.get("model") or "").strip()
     }
-    return [model for model in MODEL_ORDER if model == MODEL_BEST or model in models]
+    output = [MODEL_BEST]
+    if len(models.intersection(MODEL_FIT_ORDER)) >= 2:
+        output.append(MODEL_COMPARE_ALL)
+    output.extend(model for model in MODEL_FIT_ORDER if model in models)
+    return output
 
 
 def observed_points_for_scope(data: AnalysisReviewData, scope: str, part_mode: str | None = None) -> list[dict[str, float | str]]:
@@ -186,7 +193,7 @@ def prediction_points_for_scope(
     model: str,
     *,
     part_mode: str | None = None,
-    sample_count: int = 120,
+    sample_count: int = 480,
 ) -> list[dict[str, float]]:
     mode = _normalized_part_mode(part_mode or data.default_part_mode)
     fit = fit_row_for_scope(data, scope, model, mode)
@@ -208,6 +215,37 @@ def prediction_points_for_scope(
         if y is not None and math.isfinite(y):
             points.append({"x": float(x), "y": float(y)})
     return points
+
+
+def prediction_series_for_scope(
+    data: AnalysisReviewData,
+    scope: str,
+    model: str,
+    *,
+    part_mode: str | None = None,
+    sample_count: int = 480,
+) -> list[dict[str, Any]]:
+    mode = _normalized_part_mode(part_mode or data.default_part_mode)
+    requested = str(model or "").strip()
+    if requested == MODEL_COMPARE_ALL:
+        models = [candidate for candidate in MODEL_FIT_ORDER if fit_row_for_scope(data, scope, candidate, mode) is not None]
+    else:
+        models = [best_model_for_scope(data, scope, mode) if requested == MODEL_BEST else requested]
+    series: list[dict[str, Any]] = []
+    for candidate in models:
+        if not candidate:
+            continue
+        points = prediction_points_for_scope(data, scope, candidate, part_mode=mode, sample_count=sample_count)
+        if points:
+            series.append(
+                {
+                    "model": candidate,
+                    "label": MODEL_LABELS.get(candidate, candidate),
+                    "points": points,
+                    "fit": fit_row_for_scope(data, scope, candidate, mode) or {},
+                }
+            )
+    return series
 
 
 def scope_comparison_row(data: AnalysisReviewData, scope: str, part_mode: str | None = None) -> dict[str, Any]:

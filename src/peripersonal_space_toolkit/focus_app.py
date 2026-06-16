@@ -27,7 +27,10 @@ from .audio_routing import (
 )
 from .analysis_review import (
     MODEL_BEST,
+    MODEL_COMPARE_ALL,
     MODEL_LABELS,
+    MODEL_LINEAR,
+    MODEL_LOGARITHMIC_DECAY,
     MODEL_ORDER,
     MODEL_SIGMOID,
     PART_AGGREGATION_LABELS,
@@ -39,6 +42,7 @@ from .analysis_review import (
     load_analysis_review_data,
     observed_points_for_scope,
     prediction_points_for_scope,
+    prediction_series_for_scope,
     scope_comparison_row,
     scopes_for_part_mode,
 )
@@ -702,6 +706,7 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
             super().__init__()
             self.observed: list[dict[str, float | str]] = []
             self.predicted: list[dict[str, float]] = []
+            self.predicted_series: list[dict[str, Any]] = []
             self.model_label = ""
             self.metric_label = ""
             self.empty_text = "No analysis curve selected"
@@ -718,11 +723,16 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
             model_label: str,
             metric_label: str,
             empty_text: str,
+            predicted_series: list[dict[str, Any]] | None = None,
             boundary_x: float | None = None,
             boundary_label: str = "",
         ) -> None:
             self.observed = list(observed)
             self.predicted = list(predicted)
+            if predicted_series is None:
+                self.predicted_series = [{"model": "", "label": "Model fit", "points": list(predicted)}] if predicted else []
+            else:
+                self.predicted_series = list(predicted_series)
             self.model_label = str(model_label or "")
             self.metric_label = str(metric_label or "")
             self.empty_text = str(empty_text or "No analysis curve selected")
@@ -739,7 +749,8 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                 height = max(1, int(self.height()))
                 left = 128
                 right = 22
-                top = 28
+                compact_legend = len(self.predicted_series) > 1 and width < 840
+                top = 76 if compact_legend else 28
                 bottom = 42
                 plot_width = max(1, width - left - right)
                 plot_height = max(1, height - top - bottom)
@@ -750,7 +761,8 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                     if low is not None and high is not None:
                         all_points.append((float(item["x"]), low))
                         all_points.append((float(item["x"]), high))
-                all_points.extend((float(item["x"]), float(item["y"])) for item in self.predicted)
+                for series in self.predicted_series:
+                    all_points.extend((float(item["x"]), float(item["y"])) for item in list(series.get("points") or []))
                 if not all_points:
                     painter.setPen(q["QPen"](q["QColor"]("#647067")))
                     painter.drawText(self.rect(), q["Qt"].AlignmentFlag.AlignCenter, self.empty_text)
@@ -773,11 +785,29 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                 y_min -= y_pad
                 y_max += y_pad
 
-                def _x(value: float) -> int:
-                    return left + int((value - x_min) / (x_max - x_min) * plot_width)
+                def _x(value: float) -> float:
+                    return left + (value - x_min) / (x_max - x_min) * plot_width
 
-                def _y(value: float) -> int:
-                    return top + int((y_max - value) / (y_max - y_min) * plot_height)
+                def _y(value: float) -> float:
+                    return top + (y_max - value) / (y_max - y_min) * plot_height
+
+                def _model_color(model: str) -> Any:
+                    if model == MODEL_SIGMOID:
+                        return q["QColor"]("#246b55")
+                    if model == MODEL_LINEAR:
+                        return q["QColor"]("#4b5fa8")
+                    if model == MODEL_LOGARITHMIC_DECAY:
+                        return q["QColor"]("#a4631b")
+                    return q["QColor"]("#246b55")
+
+                def _model_pen(model: str, *, width_px: int = 3) -> Any:
+                    pen = q["QPen"](_model_color(model))
+                    pen.setWidth(width_px)
+                    if model == MODEL_LINEAR:
+                        pen.setStyle(q["Qt"].PenStyle.DashLine)
+                    elif model == MODEL_LOGARITHMIC_DECAY:
+                        pen.setStyle(q["Qt"].PenStyle.DotLine)
+                    return pen
 
                 grid_pen = q["QPen"](q["QColor"]("#d9dfd6"))
                 grid_pen.setWidth(1)
@@ -796,17 +826,24 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                     boundary_pen.setWidth(2)
                     boundary_pen.setStyle(q["Qt"].PenStyle.DashLine)
                     painter.setPen(boundary_pen)
-                    boundary_px = _x(float(self.boundary_x))
+                    boundary_px = int(round(_x(float(self.boundary_x))))
                     painter.drawLine(boundary_px, top, boundary_px, top + plot_height)
                     painter.setPen(q["QPen"](q["QColor"]("#6a5d2f")))
                     label = self.boundary_label or f"Boundary {_fmt_analysis_value(self.boundary_x)} ms"
-                    label_width = min(150, max(92, width - boundary_px - right - 4))
-                    if label_width < 100:
-                        label_width = 128
-                        label_x = max(left + 4, boundary_px - label_width - 6)
+                    if compact_legend:
+                        label = f"Boundary {_fmt_analysis_value(self.boundary_x)} ms"
+                        label_x = left
+                        label_y = 50
+                        label_width = 190
                     else:
-                        label_x = boundary_px + 6
-                    painter.drawText(label_x, top + 4, label_width, 18, int(q["Qt"].AlignmentFlag.AlignLeft), label)
+                        label_y = top + 4
+                        label_width = min(150, max(92, width - boundary_px - right - 4))
+                        if label_width < 100:
+                            label_width = 128
+                            label_x = int(max(left + 4, boundary_px - label_width - 6))
+                        else:
+                            label_x = int(boundary_px + 6)
+                    painter.drawText(label_x, label_y, label_width, 18, int(q["Qt"].AlignmentFlag.AlignLeft), label)
 
                 spread_points = [
                     (float(point["x"]), float(point["y_low"]), float(point["y_high"]))
@@ -814,9 +851,9 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                     if _analysis_float(point.get("y_low")) is not None and _analysis_float(point.get("y_high")) is not None
                 ]
                 if spread_points:
-                    range_color = q["QColor"]("#246b55")
+                    range_color = q["QColor"]("#d7b46a")
                     range_color.setAlpha(34)
-                    range_pen_color = q["QColor"]("#246b55")
+                    range_pen_color = q["QColor"]("#9a7629")
                     range_pen_color.setAlpha(82)
                     if len(spread_points) >= 2:
                         path = q["QPainterPath"]()
@@ -831,10 +868,10 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                     painter.setPen(q["QPen"](range_pen_color))
                     painter.setBrush(q["QBrush"](range_color))
                     for x_value, low, high in spread_points:
-                        y_top = _y(max(low, high))
-                        y_bottom = _y(min(low, high))
+                        y_top = int(round(_y(max(low, high))))
+                        y_bottom = int(round(_y(min(low, high))))
                         height_px = max(8, y_bottom - y_top)
-                        painter.drawRoundedRect(_x(x_value) - 8, y_top, 16, height_px, 7, 7)
+                        painter.drawRoundedRect(int(round(_x(x_value))) - 8, y_top, 16, height_px, 7, 7)
                     label = str(self.observed[0].get("spread_label") or "").strip()
                     if label:
                         painter.setPen(q["QPen"](q["QColor"]("#647067")))
@@ -844,27 +881,116 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                             plot_width,
                             16,
                             int(q["Qt"].AlignmentFlag.AlignRight),
-                            f"Range: +/- {label}",
+                            f"Observed mean range: +/- {label}",
                         )
 
-                if self.predicted:
-                    line_pen = q["QPen"](q["QColor"]("#246b55"))
-                    line_pen.setWidth(3)
-                    painter.setPen(line_pen)
-                    previous: tuple[int, int] | None = None
-                    for point in self.predicted:
-                        current = (_x(float(point["x"])), _y(float(point["y"])))
-                        if previous is not None:
-                            painter.drawLine(previous[0], previous[1], current[0], current[1])
-                        previous = current
+                for series in self.predicted_series:
+                    points = list(series.get("points") or [])
+                    if not points:
+                        continue
+                    model = str(series.get("model") or "")
+                    painter.setPen(_model_pen(model))
+                    path = q["QPainterPath"]()
+                    first = points[0]
+                    path.moveTo(_x(float(first["x"])), _y(float(first["y"])))
+                    for point in points[1:]:
+                        path.lineTo(_x(float(point["x"])), _y(float(point["y"])))
+                    painter.drawPath(path)
+
+                if len(self.predicted_series) > 1:
+                    if compact_legend:
+                        legend_x = max(left + 190, width - right - 322)
+                        legend_y = 32
+                        for index, series in enumerate(self.predicted_series):
+                            model = str(series.get("model") or "")
+                            label = str(series.get("label") or MODEL_LABELS.get(model, model))
+                            if model == MODEL_LOGARITHMIC_DECAY:
+                                label = "Log decay"
+                            item_x = legend_x + (index % 2) * 154
+                            item_y = legend_y + (index // 2) * 18
+                            painter.setPen(_model_pen(model, width_px=2))
+                            painter.drawLine(
+                                int(round(item_x)),
+                                int(round(item_y + 7)),
+                                int(round(item_x + 24)),
+                                int(round(item_y + 7)),
+                            )
+                            painter.setPen(q["QPen"](q["QColor"]("#202621")))
+                            painter.drawText(
+                                int(round(item_x + 30)),
+                                int(round(item_y)),
+                                142,
+                                16,
+                                int(q["Qt"].AlignmentFlag.AlignLeft),
+                                label,
+                            )
+                    else:
+                        legend_x = max(left + 12, width - right - 430)
+                        legend_y = top + 4
+                        for series in self.predicted_series:
+                            model = str(series.get("model") or "")
+                            label = str(series.get("label") or MODEL_LABELS.get(model, model))
+                            painter.setPen(_model_pen(model, width_px=2))
+                            painter.drawLine(
+                                int(round(legend_x)),
+                                int(round(legend_y + 7)),
+                                int(round(legend_x + 24)),
+                                int(round(legend_y + 7)),
+                            )
+                            painter.setPen(q["QPen"](q["QColor"]("#202621")))
+                            painter.drawText(
+                                int(round(legend_x + 30)),
+                                int(round(legend_y)),
+                                120,
+                                16,
+                                int(q["Qt"].AlignmentFlag.AlignLeft),
+                                label,
+                            )
+                            legend_x += 138
+                if self.observed:
+                    if compact_legend and len(self.predicted_series) > 1:
+                        legend_y = 50
+                        legend_x = max(left + 190, width - right - 322) + 154
+                    else:
+                        legend_y = top + 24 if len(self.predicted_series) > 1 else top + 4
+                        legend_x = max(left + 12, width - right - 182)
+                    mean_pen = q["QPen"](q["QColor"]("#8c2f2f"))
+                    mean_pen.setWidth(2)
+                    painter.setPen(mean_pen)
+                    painter.drawLine(
+                        int(round(legend_x)),
+                        int(round(legend_y + 7)),
+                        int(round(legend_x + 24)),
+                        int(round(legend_y + 7)),
+                    )
+                    painter.setPen(q["QPen"](q["QColor"]("#202621")))
+                    painter.drawText(
+                        int(round(legend_x + 30)),
+                        int(round(legend_y)),
+                        132,
+                        16,
+                        int(q["Qt"].AlignmentFlag.AlignLeft),
+                        "Observed mean",
+                    )
+
+                if len(self.observed) >= 2:
+                    mean_pen = q["QPen"](q["QColor"]("#8c2f2f"))
+                    mean_pen.setWidth(2)
+                    painter.setPen(mean_pen)
+                    mean_path = q["QPainterPath"]()
+                    first = self.observed[0]
+                    mean_path.moveTo(_x(float(first["x"])), _y(float(first["y"])))
+                    for point in self.observed[1:]:
+                        mean_path.lineTo(_x(float(point["x"])), _y(float(point["y"])))
+                    painter.drawPath(mean_path)
 
                 point_pen = q["QPen"](q["QColor"]("#8c2f2f"))
                 point_pen.setWidth(2)
                 painter.setPen(point_pen)
                 painter.setBrush(q["QBrush"](q["QColor"]("#f4e2b8")))
                 for point in self.observed:
-                    x = _x(float(point["x"]))
-                    y = _y(float(point["y"]))
+                    x = int(round(_x(float(point["x"]))))
+                    y = int(round(_y(float(point["y"]))))
                     painter.drawEllipse(x - 5, y - 5, 10, 10)
 
                 painter.setPen(q["QPen"](q["QColor"]("#202621")))
@@ -1079,6 +1205,7 @@ QTextEdit#analysisDetailsText {
 
         plot_panel, plot_layout = _panel(q, "Model Visualization")
         self.plot_widget = _create_analysis_curve_plot_widget(q)
+        self.plot_widget.setObjectName("analysisCurvePlot")
         plot_layout.addWidget(self.plot_widget)
         body.addWidget(plot_panel)
 
@@ -1197,19 +1324,28 @@ QTextEdit#analysisDetailsText {
         scope = str(self.scope_combo.currentData() or self.scope_combo.currentText() or scopes[0])
         requested_model = str(self.model_combo.currentData() or MODEL_BEST)
         resolved_model = best_model_for_scope(self.data, scope, self.current_part_mode) if requested_model == MODEL_BEST else requested_model
-        fit = fit_row_for_scope(self.data, scope, requested_model, self.current_part_mode)
+        fit = None if requested_model == MODEL_COMPARE_ALL else fit_row_for_scope(self.data, scope, requested_model, self.current_part_mode)
         observed = observed_points_for_scope(self.data, scope, self.current_part_mode)
-        predicted = prediction_points_for_scope(self.data, scope, requested_model, part_mode=self.current_part_mode)
+        predicted_series = prediction_series_for_scope(self.data, scope, requested_model, part_mode=self.current_part_mode)
+        predicted = list(predicted_series[0].get("points") or []) if len(predicted_series) == 1 else []
         metric = str(observed[0].get("metric") or "") if observed else str((fit or {}).get("fit_metric") or "")
         available = available_models_for_scope(self.data, scope, self.current_part_mode)
         model_label = MODEL_LABELS.get(resolved_model, resolved_model or "Model")
         if requested_model == MODEL_BEST and resolved_model:
             model_label = f"Best model: {model_label}"
+        elif requested_model == MODEL_COMPARE_ALL:
+            model_label = MODEL_LABELS.get(MODEL_COMPARE_ALL, "Compare all three")
         empty = f"{MODEL_LABELS.get(requested_model, requested_model)} was not fit for {scope}."
-        boundary_x = _analysis_float((fit or {}).get("pps_boundary_soa_ms")) if resolved_model == MODEL_SIGMOID else None
+        sigmoid_fit = fit_row_for_scope(self.data, scope, MODEL_SIGMOID, self.current_part_mode)
+        boundary_x = None
+        if requested_model == MODEL_COMPARE_ALL and sigmoid_fit is not None:
+            boundary_x = _analysis_float(sigmoid_fit.get("pps_boundary_soa_ms"))
+        elif resolved_model == MODEL_SIGMOID:
+            boundary_x = _analysis_float((fit or {}).get("pps_boundary_soa_ms"))
         self.plot_widget.set_series(
             observed=observed,
             predicted=predicted,
+            predicted_series=predicted_series,
             model_label=f"{scope} | {model_label}",
             metric_label=_metric_display(metric),
             empty_text=empty if observed else "No curve points were available for this condition.",
@@ -1241,11 +1377,19 @@ QTextEdit#analysisDetailsText {
             lines.append(f"Displayed range: +/- {'/'.join(spread_labels)} around each SOA mean")
         if available:
             lines.append("Available displays: " + ", ".join(MODEL_LABELS.get(model, model) for model in available))
-        if requested_model == MODEL_BEST and resolved_model:
+        if requested_model == MODEL_COMPARE_ALL:
+            displayed = [model for model in (MODEL_SIGMOID, MODEL_LINEAR, MODEL_LOGARITHMIC_DECAY) if model in available]
+            if displayed:
+                lines.append("Displayed models: " + ", ".join(MODEL_LABELS.get(model, model) for model in displayed))
+        elif requested_model == MODEL_BEST and resolved_model:
             lines.append(f"Displayed model: {MODEL_LABELS.get(resolved_model, resolved_model)}")
         elif requested_model != MODEL_BEST:
             lines.append(f"Displayed model: {MODEL_LABELS.get(requested_model, requested_model)}")
-        if fit is None:
+        if requested_model == MODEL_COMPARE_ALL:
+            sigmoid_fit = fit_row_for_scope(self.data, scope, MODEL_SIGMOID, self.current_part_mode)
+            if sigmoid_fit is not None and sigmoid_fit.get("pps_boundary_soa_ms") not in (None, ""):
+                lines.append(f"Sigmoid PPS boundary: {_fmt_analysis_value(sigmoid_fit.get('pps_boundary_soa_ms'))} ms")
+        elif fit is None:
             lines.append("")
             lines.append("This model was not fit for the selected condition, usually because there were too few usable SOA points.")
         else:

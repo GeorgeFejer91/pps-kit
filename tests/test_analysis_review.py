@@ -7,6 +7,7 @@ import pytest
 
 from peripersonal_space_toolkit.analysis_review import (
     MODEL_BEST,
+    MODEL_COMPARE_ALL,
     PARTS_POOLED,
     PARTS_SEPARATE,
     AnalysisReviewData,
@@ -16,6 +17,7 @@ from peripersonal_space_toolkit.analysis_review import (
     load_analysis_review_data,
     observed_points_for_scope,
     prediction_points_for_scope,
+    prediction_series_for_scope,
     scopes_for_part_mode,
 )
 
@@ -82,7 +84,7 @@ def test_analysis_review_loads_existing_outputs_and_predicts_model_curves(tmp_pa
     assert best_model_for_scope(data, scope) == "sigmoid"
     assert best_model_for_scope(data, "All parts / Inhale / pink", PARTS_POOLED) == "linear"
     assert fit_row_for_scope(data, scope, MODEL_BEST)["model"] == "sigmoid"
-    assert available_models_for_scope(data, scope) == ["best", "sigmoid", "linear", "logarithmic_decay"]
+    assert available_models_for_scope(data, scope) == ["best", "compare_all", "sigmoid", "linear", "logarithmic_decay"]
     observed = observed_points_for_scope(data, scope)
     assert [point["x"] for point in observed] == [100.0, 200.0, 400.0, 800.0]
     assert observed[0]["y_low"] == pytest.approx(8.0)
@@ -93,6 +95,9 @@ def test_analysis_review_loads_existing_outputs_and_predicts_model_curves(tmp_pa
     sigmoid = prediction_points_for_scope(data, scope, "sigmoid", sample_count=5)
     assert len(sigmoid) == 5
     assert sigmoid[0]["y"] < sigmoid[-1]["y"]
+    comparison_series = prediction_series_for_scope(data, scope, MODEL_COMPARE_ALL, sample_count=7)
+    assert [series["model"] for series in comparison_series] == ["sigmoid", "linear", "logarithmic_decay"]
+    assert all(len(series["points"]) == 7 for series in comparison_series)
 
 
 def test_analysis_review_handles_curve_points_without_model_fit():

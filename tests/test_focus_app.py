@@ -1024,7 +1024,8 @@ def test_focus_mode_opens_post_run_analysis_review_dialog(tmp_path: Path, monkey
     scope_combo = dialog.findChild(q["QComboBox"], "analysisScopeCombo")
     overview_table = dialog.findChild(q["QTableWidget"], "analysisOverviewTable")
     details = dialog.findChild(q["QTextEdit"], "analysisDetailsText")
-    assert model_combo is not None and model_combo.count() == 4
+    assert model_combo is not None and model_combo.count() == 5
+    assert "Compare all three" in [model_combo.itemText(index) for index in range(model_combo.count())]
     assert scope_combo is not None and scope_combo.count() == 1
     assert overview_table is not None and overview_table.rowCount() == 1
     part_buttons = [button for button in dialog.findChildren(q["QPushButton"], "analysisSegmentButton")]
@@ -1032,6 +1033,12 @@ def test_focus_mode_opens_post_run_analysis_review_dialog(tmp_path: Path, monkey
     assert {button.text() for button in part_buttons} == {"Separate parts", "Pool parts"}
     assert details is not None and "Best model by AIC" in details.toPlainText()
     assert "Displayed range: +/- SEM" in details.toPlainText()
+    compare_index = model_combo.findText("Compare all three")
+    assert compare_index >= 0
+    model_combo.setCurrentIndex(compare_index)
+    app.processEvents()
+    assert "Displayed models: Sigmoid, Linear, Logarithmic decay" in details.toPlainText()
+    assert "Sigmoid PPS boundary" in details.toPlainText()
     pooled = next(button for button in part_buttons if button.text() == "Pool parts")
     pooled.click()
     app.processEvents()
