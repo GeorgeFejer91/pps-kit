@@ -20,3 +20,14 @@ def test_packaged_runner_spec_includes_tactile_click_assets():
 
     assert '"assets" / "click"' in source
     assert '"assets/click"' in source
+
+
+def test_packaged_runner_build_has_iconless_retry_fallback():
+    spec = (REPO_ROOT / "windows" / "PPSExperimentRunner.spec").read_text(encoding="utf-8")
+    build_script = (REPO_ROOT / "windows" / "Build_Experiment_Runner_Exe.ps1").read_text(encoding="utf-8")
+
+    assert "PPS_EXPERIMENT_RUNNER_DISABLE_ICON" in spec
+    assert 'icon="NONE" if disable_icon else str(icon_path)' in spec
+    assert "$StandardBuildExitCode = $LASTEXITCODE" in build_script
+    assert 'PPS_EXPERIMENT_RUNNER_DISABLE_ICON = "1"' in build_script
+    assert "after iconless fallback retry" in build_script
