@@ -1,0 +1,302 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "serino_2015_peri_hand_exp3",
+  "citation_short": "Serino et al. (2015), Exp. 3",
+  "review_date": "2026-06-16",
+  "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
+  "confidence_score": 0.87,
+  "confidence_label": "high_confidence_extraction",
+  "confidence_basis": "Main PDF, OpenDataLoader output, pypdf fallback extraction, rendered figure/methods pages, and the downloaded supplement DOC/text extraction were checked. Exp. 3 is separable from the other Serino 2015 experiments: it uses the two-speaker hand-centered setup, five distances, 22 cm/s motion, hand dorsum vibration, reported trial families, D1/D5 baselines, 500-700 ms ITI jitter, 16 repetitions, and 208 total trials. Remaining uncertainty concerns exact original sound files, exact audio duration/SOA milliseconds, hand side, block/order rules, response timeout, and exact catch-direction composition.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats",
+    "reason": "Experiment 3 can be recreated as a lateralized peri-hand looming/receding pink-noise task using the reported two-speaker near/far geometry, 22 cm/s motion, D1-D5 distance table, hand-dorsum vibrotactile target, D1/D5 tactile-only baselines, sound-only catches, and 208-trial formula. Exact original WAV/envelope files and some order/response details remain approximations."
+  },
+  "orientation_ledger": {
+    "participant_frame": "Participant body/gaze direction is not explicitly specified; the hand was placed at shoulder width and therefore lateralized rather than on the midline.",
+    "room_apparatus_frame": "Two facing loudspeakers formed a 1 m near-far line, with the near speaker about 5 cm from the hand and the far speaker about 100 cm away.",
+    "body_relative_mapping": "Authors map sounds as moving toward or away from the participant's hand; D1-D5 are hand-relative distances from nearest to farthest.",
+    "tactile_anchor": "Single vibrotactor delivered 100 ms tactile stimulation to the hand dorsum; the exact hand side is not stated for Exp. 3.",
+    "movement_implementation": "Two physical loudspeakers were coactivated with differential intensity to create apparent continuous looming/receding motion.",
+    "evidence_class": "Text-reported in main PDF methods/results and supplement, with Figure 1/caption visually confirming the two-speaker near/far layout."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf",
+      "source": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
+      "status": "reviewed",
+      "scope": "PDF pages 3-4 for Experiment 3 and Figure 1; pages 11-13 for tactile apparatus, acoustic stimuli, procedure, design, counts, table, and ITI."
+    },
+    {
+      "source_type": "opendataloader_markdown",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_hand_exp3.md",
+      "status": "reviewed",
+      "scope": "Used as primary extracted text map for targeted five-pass searches, then checked against rendered pages and fallback extraction."
+    },
+    {
+      "source_type": "opendataloader_figure_image",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_hand_exp3_images/imageFile1.png",
+      "status": "reviewed",
+      "scope": "Visual inspection of Figure 1 upper-left panel for the 2-speaker near/far layout used in Experiments 1, 3, 4, and 5."
+    },
+    {
+      "source_type": "supplement_doc",
+      "source": "artifacts/paper_metadata_audit/supplements/serino_2015_peri_hand_exp3/41598_2015_BFsrep18603_MOESM1_ESM.doc",
+      "status": "reviewed",
+      "scope": "Checked the two-speaker setup, loudspeaker model, pink-noise provenance, SoundForge shaping, dB endpoints, and validation section."
+    },
+    {
+      "source_type": "supplement_text_extraction",
+      "source": "artifacts/paper_metadata_audit/extracted/supplements/serino_2015_peri_hand_exp3/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+      "status": "reviewed",
+      "scope": "Searched for hand, dorsum, two-speaker, M-Audio, pink-noise, SoundForge, SPL, looming, receding, and validation terms."
+    },
+    {
+      "source_type": "fallback_text_extraction",
+      "source": "pypdf local extraction",
+      "status": "reviewed",
+      "scope": "Printed targeted snippets from pages 3, 11, 12, and 13 to verify Exp. 3 separation from the other six experiments."
+    },
+    {
+      "source_type": "rendered_pdf_pages",
+      "source": "tmp/pdfs/serino_2015_exp3_review/page-03.png; tmp/pdfs/serino_2015_exp3_methods/page-11.png through page-13.png",
+      "status": "reviewed_not_tracked",
+      "scope": "Temporary rendered pages checked for visual geometry, methods wording, and design/count paragraphs; page images were not committed."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "OpenDataLoader PDF extraction",
+      "status": "completed",
+      "result": "Mapped 20/25 auto-mined candidate fields and exposed cross-experiment contamination from Exp. 1/2 speeds and counts."
+    },
+    {
+      "strategy": "Stimulus reconstruction pass",
+      "status": "completed",
+      "result": "Isolated Exp. 3 as the peri-hand task: two-speaker setup, lateralized hand at shoulder width, D1-D5 distances, and 22 cm/s apparent motion."
+    },
+    {
+      "strategy": "Visual/spatial geometry pass",
+      "status": "completed",
+      "result": "Rendered and inspected Figure 1/methods pages; recorded hand-centered near/far geometry and the missing hand-side/gaze details in the orientation ledger."
+    },
+    {
+      "strategy": "Fallback extraction verification",
+      "status": "completed",
+      "result": "pypdf snippets confirmed the Experiment 3 distances, shoulder-width hand posture, two-speaker apparatus, tactile-dorsum placement, count formula, and ITI."
+    },
+    {
+      "strategy": "Supplement acoustic-provenance pass",
+      "status": "completed",
+      "result": "Supplement supplied M-Audio speakers, 1 m separation, pink-noise 44.1 kHz samples, SoundForge 4.5, and 55-70 dB exponential envelopes for the shared two-speaker setup."
+    },
+    {
+      "strategy": "Trial sequence, baseline, catch, and count pass",
+      "status": "completed",
+      "result": "Identified three trial families, D1/D5 tactile-only baselines, sound-only catches, 16 repetitions, 208 total trials, and derived 32 baseline plus 16 catch trials."
+    },
+    {
+      "strategy": "Protocol-lineage and ambiguity pass",
+      "status": "completed",
+      "result": "Checked the paper's references to Canzoneri et al. 2012 and the supplement; kept exact WAV/envelope files, hand side, block/order rules, and response timeout as unresolved."
+    }
+  ],
+  "field_status_counts": {
+    "derived": 4,
+    "not_reported_after_review": 3,
+    "reported": 18
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "reported",
+        "value": "Pink-noise auditory samples at 44.1 kHz in the shared two-speaker setup.",
+        "source_file": "artifacts/paper_metadata_audit/extracted/supplements/serino_2015_peri_hand_exp3/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+        "page_or_section": "Supplement, 2-speakers setup",
+        "evidence_note": "The supplement describes the two-speaker setup used in Experiments 1, 3, 4, and 5."
+      },
+      "source_provenance": {
+        "status": "reported",
+        "value": "SoundForge 4.5 shaped pink-noise samples; exact source WAV/noise seed is not reported.",
+        "source_file": "artifacts/paper_metadata_audit/extracted/supplements/serino_2015_peri_hand_exp3/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+        "page_or_section": "Supplement, 2-speakers setup",
+        "evidence_note": "Software/source class is reported, but not the actual stimulus file."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "Two hand-centered auditory motion directions: looming toward the hand and receding away from the hand.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
+        "page_or_section": "PDF p.3, Experiment 3",
+        "evidence_note": "Experiment 3 ANOVA crossed Sound Direction Looming vs Receding with five distances."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Near-far line from about 5 to 100 cm relative to the lateralized hand; sampled D1-D5 values were 5, 27, 50, 71, and 93 cm.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf; artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_hand_exp3_images/imageFile1.png",
+        "page_or_section": "PDF p.3, Experiment 3 and Figure 1; p.11 Acoustic Stimuli",
+        "evidence_note": "The hand was at shoulder width and not on the midline; Figure 1 provides the shared 2-speaker near/far geometry."
+      },
+      "stimulus_duration": {
+        "status": "derived",
+        "value": "Full apparent-motion path duration is about 4.55 s for a 100 cm near-far distance at 22 cm/s.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
+        "page_or_section": "PDF p.11, Acoustic Stimuli",
+        "evidence_note": "Derived from reported path distance and speed; no separate Exp. 3 audio-file duration is printed."
+      },
+      "stimulus_speed": {
+        "status": "reported",
+        "value": "Experiment 3 sounds traveled at 22 cm/s.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
+        "page_or_section": "PDF p.11, Acoustic Stimuli",
+        "evidence_note": "This separates Exp. 3 from the faster 16-speaker Exp. 2 and slower Exp. 6 values."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "Looming and receding moving sounds were tested around the hand.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
+        "page_or_section": "PDF pp.3-4, Experiment 3",
+        "evidence_note": "Both directions affected tactile processing, with stronger looming effects."
+      },
+      "gain_envelope": {
+        "status": "reported",
+        "value": "Looming intensity rose exponentially from 55 to 70 dB SPL; receding decreased exponentially from 70 to 55 dB SPL.",
+        "source_file": "artifacts/paper_metadata_audit/extracted/supplements/serino_2015_peri_hand_exp3/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+        "page_or_section": "Supplement, 2-speakers setup",
+        "evidence_note": "The near/far speakers were coactivated with opposing intensity patterns."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Two M-Audio Studiophile AV 360 loudspeakers facing each other, one near and one far, coactivated with differential intensity.",
+        "source_file": "artifacts/paper_metadata_audit/extracted/supplements/serino_2015_peri_hand_exp3/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+        "page_or_section": "Supplement, 2-speakers setup",
+        "evidence_note": "The main PDF says the two-speaker setup was used in Exp. 3; the supplement gives speaker model and placement."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "Three trial families: bimodal audio-tactile trials, tactile-only baseline trials, and auditory-only catch/no-go trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
+        "page_or_section": "PDF p.12, General Procedure and Design and Analysis",
+        "evidence_note": "The design section lists the broad trial types used across experiments."
+      },
+      "condition_intermixing": {
+        "status": "derived",
+        "value": "Exp. 3 rows appear combined in a single 208-trial task formula with five distances and two sound directions; no separate blocked phases are described.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
+        "page_or_section": "PDF pp.12-13, Design and Analysis",
+        "evidence_note": "Derived from the combined formula; exact order/randomization algorithm is not reported."
+      },
+      "blocked_or_random_order": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf; artifacts/paper_metadata_audit/extracted/supplements/serino_2015_peri_hand_exp3/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+        "page_or_section": "PDF pp.11-13; supplement searched",
+        "evidence_note": "No explicit block count, block structure, or trial randomization algorithm was found."
+      },
+      "iti_jitter_policy": {
+        "status": "reported",
+        "value": "Inter-trial intervals were randomly shuffled between 500 and 700 ms.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
+        "page_or_section": "PDF p.13, Design and Analysis",
+        "evidence_note": "Reported as a general rule after the experiment-specific trial-count formulas."
+      },
+      "response_window": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf; artifacts/paper_metadata_audit/extracted/supplements/serino_2015_peri_hand_exp3/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+        "page_or_section": "PDF pp.12-13; supplement searched",
+        "evidence_note": "XBOX button response is reported, but no explicit response timeout/window was found."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Participants responded rapidly to tactile hand vibration, treated sounds as task-irrelevant, and withheld responses on sound-only catches.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
+        "page_or_section": "PDF p.12, General Procedure and Design and Analysis",
+        "evidence_note": "The general procedure states the response and catch rules."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "Single Precision MicroDrives 312-101 150 Hz vibration motor on hand dorsum; stimulation lasted 100 ms.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
+        "page_or_section": "PDF p.11, Tactile Stimuli",
+        "evidence_note": "Methods also report 3 V, 60 mA, 9000 rpm, 5 g, 113 mm2 surface area, and 50 ms spin-up."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "Five distance-at-touch values D1-D5: 5, 27, 50, 71, and 93 cm; temporal offsets follow 22 cm/s motion and reverse for looming/receding.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
+        "page_or_section": "PDF p.3, Experiment 3; p.11 Acoustic Stimuli",
+        "evidence_note": "Exact SOA milliseconds are not separately printed, but the distance table and speed are reported."
+      },
+      "baseline_strategy": {
+        "status": "reported",
+        "value": "Tactile-only unimodal baseline trials without sound; fastest baseline condition was subtracted from audio-tactile RTs.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
+        "page_or_section": "PDF p.12, Design and Analysis",
+        "evidence_note": "Baseline correction strategy is explicitly described for all experiments."
+      },
+      "baseline_timing": {
+        "status": "reported",
+        "value": "Baseline trials used two temporal delays corresponding to D1 and D5, the nearest and farthest Exp. 3 sampled distances.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
+        "page_or_section": "PDF pp.12-13, Design and Analysis",
+        "evidence_note": "The formula lists baselines D1 and D5; exact millisecond values are not tabulated."
+      },
+      "catch_trial_type": {
+        "status": "reported",
+        "value": "Auditory-only catch trials: sound presented without tactile stimulation, with response withholding required.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
+        "page_or_section": "PDF pp.12-13, Design and Analysis and Table 1",
+        "evidence_note": "Table 1 reports Exp. 3 catch accuracy; the formula includes catch trials."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "reported",
+        "value": "Exp. 3 formula: [D1-D5 multisensory x 2 directions + D1/D5 baselines + catch trials] x 16 repetitions.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
+        "page_or_section": "PDF p.13, Design and Analysis",
+        "evidence_note": "Thus each distance x sound-direction cell has 16 repetitions."
+      },
+      "baseline_count": {
+        "status": "derived",
+        "value": "Two baseline rows x 16 repetitions = 32 tactile-only baseline trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
+        "page_or_section": "PDF p.13, Design and Analysis",
+        "evidence_note": "Derived directly from the D1/D5 baseline rows and repetition factor."
+      },
+      "catch_count": {
+        "status": "derived",
+        "value": "Total 208 minus 160 multisensory minus 32 baseline trials leaves 16 auditory-only catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
+        "page_or_section": "PDF p.13, Design and Analysis; Table 1",
+        "evidence_note": "The formula includes catch trials but does not split catch trials by sound direction."
+      },
+      "block_count": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf; artifacts/paper_metadata_audit/extracted/supplements/serino_2015_peri_hand_exp3/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+        "page_or_section": "PDF pp.11-13; supplement searched",
+        "evidence_note": "The paper says experiments never exceeded 60 minutes, but no Exp. 3 block/session count was found."
+      },
+      "total_trial_count": {
+        "status": "reported",
+        "value": "Experiment 3 consisted of 208 trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
+        "page_or_section": "PDF p.13, Design and Analysis",
+        "evidence_note": "The total is explicitly reported with the Exp. 3 formula."
+      }
+    }
+  },
+  "critical_caveats": [
+    "Exact original pink-noise WAV/noise seed is not reported.",
+    "Exact SoundForge envelope files are not provided beyond exponential direction and dB endpoints.",
+    "Auditory file duration and SOA milliseconds are derived from reported path length/speed rather than printed as a table.",
+    "Exact hand side is not stated for Exp. 3, though the hand is reported as shoulder-width and lateralized.",
+    "Exact trial-order randomization, block count, and response timeout/window are not reported.",
+    "Catch count is derived from the formula residual and total; catch split by looming/receding direction is not explicitly reported."
+  ],
+  "next_manual_action": "Strong candidate for a runnable lateralized peri-hand two-speaker/digital two-source profile, with original WAV/envelope files, hand side, exact SOA milliseconds, catch-direction split, and block/order rules treated as approximations unless author materials become available."
+}
