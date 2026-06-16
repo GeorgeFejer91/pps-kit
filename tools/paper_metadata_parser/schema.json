@@ -1,6 +1,6 @@
 {
   "schema": "pps-paper-metadata-extraction-schema.v1",
-  "parser_version": "0.5.5",
+  "parser_version": "0.5.6",
   "pdf_statuses": [
     "downloaded",
     "open_access_unavailable",
@@ -69,7 +69,7 @@
     "folder": "For-AI/audiotactile-paper-metadata-audit/manual_reviews/",
     "index": "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv",
     "schema": "pps-paper-metadata-manual-review.v1",
-    "rule": "Manual reviews promote auto-mined candidates only after repeated critical passes; store normalized values, field statuses, confidence scores, and short source pointers, not full text."
+    "rule": "Manual reviews promote auto-mined candidates only after repeated critical passes; store normalized values, an orientation ledger, field statuses, confidence scores, and short source pointers, not full text."
   },
   "pdf_retrieval_inventory": {
     "path": "For-AI/audiotactile-paper-metadata-audit/pdf_retrieval_inventory.csv",

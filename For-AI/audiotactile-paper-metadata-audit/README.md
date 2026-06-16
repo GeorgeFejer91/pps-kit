@@ -37,9 +37,13 @@ Every manual review must include an orientation ledger before Segment 1 trajecto
 
 Never assume that figure-left/figure-right equals participant-left/participant-right. If the paper shows a person icon, first identify which way the person is facing relative to the speakers, then map the speaker direction into the participant/body frame. If that mapping is not explicit, keep the ambiguity in the review rather than collapsing it into a generic "looming" or "frontal" label.
 
+Treat orientation as a relation, not a label. First record the participant face/head/trunk vector, then record the speaker/source vector in the apparatus or room frame, then translate only the supported part into body-relative terms such as front, rear, left, right, approaching, receding, ipsilateral, contralateral, proximal, or distal. When a top-view schematic, side-view drawing, photograph, or screenshot lacks a visible face/gaze/body-front cue, write `participant-facing direction unclear` and keep the trajectory qualitative until text, caption, supplement, or protocol-lineage evidence resolves it.
+
 ## Information Extraction Strategy
 
 Use at least five semantic passes before finalizing a paper: stimulus reconstruction, visual/spatial geometry, trial sequence/intermixing, tactile timing/baseline, and counts/catch trials. The visual/spatial pass must explicitly answer three orientation questions: which direction the participant faced, where each speaker or virtual source sat in room coordinates, and which body-relative direction the authors intended. This prevents a lateral left-of-head array, a frontal speaker pair, and a participant-rotated four-direction block from being collapsed into the same "looming" label.
+
+Write the visual/spatial pass as a short coordinate audit, not just a keyword hit. Minimum acceptable form: `viewpoint <top/side/front/photo/unclear>; participant faces <direction/unclear>; sources at <room/apparatus coordinates>; tactile anchor <body part/side>; body-relative mapping <front/rear/left/right/near/far/etc.>; movement implementation <physical/digital/gain/switching/unclear>; evidence <text/caption/figure/supplement/lineage>`.
 
 When methods text is thin, search figures, captions, timing diagrams, table footnotes, percentage formulas, supplement files, publisher HTML, and cited prior-protocol papers. Record whether each value is text-reported, caption-reported, derived from reported numbers, visually approximated, or inherited only as protocol lineage. Do not upgrade a visually approximated value to `reported` unless the caption or methods prose supplies the number or coordinate frame.
 

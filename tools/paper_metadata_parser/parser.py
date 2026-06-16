@@ -15,7 +15,7 @@ from typing import Any
 from xml.etree import ElementTree
 
 
-PARSER_VERSION = "0.5.5"
+PARSER_VERSION = "0.5.6"
 
 COVERAGE_PATH = Path("assets/preloads/audiotactile_literature_coverage.json")
 AUDIT_DIR = Path("For-AI/audiotactile-paper-metadata-audit")
@@ -1473,7 +1473,7 @@ def schema_payload() -> dict[str, Any]:
             "folder": "For-AI/audiotactile-paper-metadata-audit/manual_reviews/",
             "index": "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv",
             "schema": "pps-paper-metadata-manual-review.v1",
-            "rule": "Manual reviews promote auto-mined candidates only after repeated critical passes; store normalized values, field statuses, confidence scores, and short source pointers, not full text.",
+            "rule": "Manual reviews promote auto-mined candidates only after repeated critical passes; store normalized values, an orientation ledger, field statuses, confidence scores, and short source pointers, not full text.",
         },
         "pdf_retrieval_inventory": {
             "path": "For-AI/audiotactile-paper-metadata-audit/pdf_retrieval_inventory.csv",
@@ -1486,6 +1486,7 @@ def schema_payload() -> dict[str, Any]:
         "segment_fields": SEGMENT_FIELDS,
         "review_rule": {
             "missing_value_rule": "Only mark not_reported_after_review after main PDF extraction, targeted methods/table search, supplement search, fallback extractor/source check, and cited prior-protocol lineage search have all been attempted.",
+            "orientation_frame_rule": "Before accepting a trajectory/direction value, record participant-facing direction, speaker/source room coordinates, body-relative mapping, tactile anchor, movement implementation, and evidence class; figure-left/right is not participant-left/right unless orientation is explicit.",
             "copyright_boundary": "Do not commit PDFs, supplements, extracted full text, screenshots of pages, or long verbatim passages.",
             "automated_evidence_rule": "Automated evidence mining stores only short candidate values and page pointers; it is not a substitute for final human/AI critical review against PDFs and supplements.",
         },
@@ -1551,9 +1552,13 @@ Every manual review must include an orientation ledger before Segment 1 trajecto
 
 Never assume that figure-left/figure-right equals participant-left/participant-right. If the paper shows a person icon, first identify which way the person is facing relative to the speakers, then map the speaker direction into the participant/body frame. If that mapping is not explicit, keep the ambiguity in the review rather than collapsing it into a generic "looming" or "frontal" label.
 
+Treat orientation as a relation, not a label. First record the participant face/head/trunk vector, then record the speaker/source vector in the apparatus or room frame, then translate only the supported part into body-relative terms such as front, rear, left, right, approaching, receding, ipsilateral, contralateral, proximal, or distal. When a top-view schematic, side-view drawing, photograph, or screenshot lacks a visible face/gaze/body-front cue, write `participant-facing direction unclear` and keep the trajectory qualitative until text, caption, supplement, or protocol-lineage evidence resolves it.
+
 ## Information Extraction Strategy
 
 Use at least five semantic passes before finalizing a paper: stimulus reconstruction, visual/spatial geometry, trial sequence/intermixing, tactile timing/baseline, and counts/catch trials. The visual/spatial pass must explicitly answer three orientation questions: which direction the participant faced, where each speaker or virtual source sat in room coordinates, and which body-relative direction the authors intended. This prevents a lateral left-of-head array, a frontal speaker pair, and a participant-rotated four-direction block from being collapsed into the same "looming" label.
+
+Write the visual/spatial pass as a short coordinate audit, not just a keyword hit. Minimum acceptable form: `viewpoint <top/side/front/photo/unclear>; participant faces <direction/unclear>; sources at <room/apparatus coordinates>; tactile anchor <body part/side>; body-relative mapping <front/rear/left/right/near/far/etc.>; movement implementation <physical/digital/gain/switching/unclear>; evidence <text/caption/figure/supplement/lineage>`.
 
 When methods text is thin, search figures, captions, timing diagrams, table footnotes, percentage formulas, supplement files, publisher HTML, and cited prior-protocol papers. Record whether each value is text-reported, caption-reported, derived from reported numbers, visually approximated, or inherited only as protocol lineage. Do not upgrade a visually approximated value to `reported` unless the caption or methods prose supplies the number or coordinate frame.
 
@@ -1672,14 +1677,15 @@ def checklist_text() -> str:
                     "",
                     "1. Render the methods, apparatus, timing, and design-figure pages to temporary PNGs and visually inspect them before finalizing Segment 1-4 values. Delete rendered pages before commit.",
                     "2. Record room/speaker coordinates separately from body-relative coordinates. Always note which direction the participant is facing relative to the speakers, whether the participant rotates between blocks, and whether the speakers or the participant define front, rear, left, and right.",
-                    "3. For four-direction or front/rear studies, do not infer body-relative direction from the page drawing alone. Confirm whether the same physical speaker pair is reused while the observer faces different directions, whether speaker arrays move, or whether the sound is digitally rendered.",
-                    "4. For two-speaker analog looming/receding sounds, identify the near/far speaker distances, body anchor, speaker height, gain/cross-fade law, and motion direction. Treat a trajectory as reported only when text/caption supplies enough geometry and timing; otherwise label figure-derived values as `derived` or `inferred_low_confidence`.",
-                    "5. Extract numeric values hidden in figure labels, captions, axes, legends, and table footnotes: distances, SOAs, sound onset/offset times, SPL ranges, block labels, row percentages, and catch/baseline counts.",
-                    "6. Track participant posture and stimulated body part as part of the spatial frame: sitting, supine, arm extended, chest/sternum, hand, back, shoulder, or trunk-centered setups can change the meaning of near/far or front/rear.",
-                    "7. If visual scale is used because text is incomplete, write the approximation basis in `evidence_note` and keep the value conservative. Do not mark a visually estimated value as fully `reported`.",
-                    "8. Always write the drawing viewpoint before the conclusion: top view, side view, front view, photograph, screenshot, or unclear. Only translate page-left/page-right into participant-left/participant-right when body orientation is explicit.",
-                    "9. If a paper includes both a participant movement and an auditory trajectory, assign speeds carefully. Hand, arm, head, or body speed belongs in the caveat/task context unless the text or timing table ties it to the auditory stimulus path.",
-                    "10. When the figure supplies a qualitative direction but no scale, preserve the useful geometry while leaving numeric fields missing: for example, `trajectory_path = derived qualitative`, `stimulus_speed = not_reported_after_review`.",
+                    "3. Treat orientation as a two-vector relation: participant face/head/trunk vector versus speaker/source vector. A valid note states both before assigning a body-relative label.",
+                    "4. For four-direction or front/rear studies, do not infer body-relative direction from the page drawing alone. Confirm whether the same physical speaker pair is reused while the observer faces different directions, whether speaker arrays move, or whether the sound is digitally rendered.",
+                    "5. For two-speaker analog looming/receding sounds, identify the near/far speaker distances, body anchor, speaker height, gain/cross-fade law, and motion direction. Treat a trajectory as reported only when text/caption supplies enough geometry and timing; otherwise label figure-derived values as `derived` or `inferred_low_confidence`.",
+                    "6. Extract numeric values hidden in figure labels, captions, axes, legends, and table footnotes: distances, SOAs, sound onset/offset times, SPL ranges, block labels, row percentages, and catch/baseline counts.",
+                    "7. Track participant posture and stimulated body part as part of the spatial frame: sitting, supine, arm extended, chest/sternum, hand, back, shoulder, or trunk-centered setups can change the meaning of near/far or front/rear.",
+                    "8. If visual scale is used because text is incomplete, write the approximation basis in `evidence_note` and keep the value conservative. Do not mark a visually estimated value as fully `reported`.",
+                    "9. Always write the drawing viewpoint before the conclusion: top view, side view, front view, photograph, screenshot, or unclear. Only translate page-left/page-right into participant-left/participant-right when body orientation is explicit.",
+                    "10. If a paper includes both a participant movement and an auditory trajectory, assign speeds carefully. Hand, arm, head, or body speed belongs in the caveat/task context unless the text or timing table ties it to the auditory stimulus path.",
+                    "11. When the figure supplies a qualitative direction but no scale, preserve the useful geometry while leaving numeric fields missing: for example, `trajectory_path = derived qualitative`, `stimulus_speed = not_reported_after_review`.",
                     "",
                     "Visual approximation decision ladder:",
                     "",
@@ -1698,6 +1704,7 @@ def checklist_text() -> str:
                     "| Speaker drawn on page-left, participant facing not visible | `speaker page-left in schematic; participant-facing direction unclear; body-relative left/right not assigned` |",
                     "| Participant icon faces the speaker line in a top view | `participant appears to face sagittal speaker line; body-relative near/far mapping derived from figure, exact azimuth not reported` |",
                     "| Same room speaker pair used while participant rotates | `physical speaker coordinates fixed; body-relative direction changes by participant rotation; record each block separately` |",
+                    "| Drawing shows arrows but no body-front cue | `apparatus movement direction visible; participant-facing vector unclear; do not assign front/rear/left/right body mapping` |",
                     "| Caption reports frontal stimulation but methods use frontal EEG/anatomy language elsewhere | `frontal auditory direction accepted only from caption/methods context, not from anatomical-analysis uses of frontal` |",
                     "| Source moves virtually through headphones | `room speaker frame not applicable; record renderer/HRTF coordinate frame, virtual azimuth/elevation, gain/motion law if reported` |",
                     "",
@@ -1707,6 +1714,7 @@ def checklist_text() -> str:
                     "|---|---|",
                     "| Participant-facing direction | Which way is the participant's head/trunk/body facing relative to the speakers or virtual source? |",
                     "| Speaker/source layout | Where are the physical speakers, virtual sources, or headphone-rendered sources in room/apparatus coordinates? |",
+                    "| Face/source relation | Does the source lie in front of, behind, left of, right of, above/below, or along the sagittal/coronal axis of the participant-facing vector? |",
                     "| Body-relative mapping | How does the paper map those sources onto front/rear/left/right/near/far/approaching/receding relative to the stimulated body site? |",
                     "| Tactile anchor | Which body part and side receive the tactile target, and does that anchor change between blocks? |",
                     "| Movement implementation | Is motion physical source movement, speaker switching, gain/cross-fade, amplitude field, HRTF/renderer motion, or only inferred from timing? |",
