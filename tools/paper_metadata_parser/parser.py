@@ -1434,6 +1434,12 @@ def schema_payload() -> dict[str, Any]:
             "supported_local_formats": [".doc", ".docx", ".ods", ".csv", ".tsv"],
             "rule": "Supplement text extraction writes only ignored local text artifacts; tracked audit files store counts, statuses, and short evidence pointers.",
         },
+        "manual_reviews": {
+            "folder": "For-AI/audiotactile-paper-metadata-audit/manual_reviews/",
+            "index": "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv",
+            "schema": "pps-paper-metadata-manual-review.v1",
+            "rule": "Manual reviews promote auto-mined candidates only after repeated critical passes; store normalized values, field statuses, confidence scores, and short source pointers, not full text.",
+        },
         "segment_fields": SEGMENT_FIELDS,
         "review_rule": {
             "missing_value_rule": "Only mark not_reported_after_review after main PDF extraction, targeted methods/table search, supplement search, and fallback extractor/source check have all been attempted.",
@@ -1477,6 +1483,13 @@ This folder is dedicated to metadata extraction from published audio-tactile PPS
 The `artifacts/` tree is ignored by Git. Do not commit PDFs, supplements, extracted full text, page images, or long copied passages.
 Use `python -m tools.paper_metadata_parser.bundle --repo-root .` to refresh `local_artifact_inventory.json` and create/update the ignored local resume ZIP. The inventory is GitHub-safe because it stores only relative paths, sizes, hashes, and restore notes.
 
+## Tracked Manual Reviews
+
+- `manual_reviews/<record_id>.json`: durable critical reviews with normalized Segment 1-4 values, field statuses, confidence scores, and short source pointers.
+- `manual_review_index.csv`: compact progress index for hand-reviewed records.
+
+Manual reviews are the layer where auto-mined candidates become checked metadata. Keep them short and source-pointer-only; do not paste full methods text or copyrighted passages.
+
 ## Current Inventory
 
 - Literature records: {summary["record_count"]}
@@ -1504,7 +1517,7 @@ Use `python -m tools.paper_metadata_parser.bundle --repo-root .` to refresh `loc
 2. Download supplements into `artifacts/paper_metadata_audit/supplements/<record_id>/`.
 3. Run `python -m tools.paper_metadata_parser --refresh` from the repo root.
 4. Review `running_checklist.csv`, `missing_pdf_request_list.csv`, and `paper_audits/<record_id>.md`.
-5. Fill `metadata_audit.jsonl` or the per-paper summaries with extracted Segment 1-4 values using short evidence pointers only.
+5. Promote critically checked Segment 1-4 values into `manual_reviews/<record_id>.json` and update `manual_review_index.csv`.
 
 Automated evidence-mined values are `inferred_low_confidence` candidates. Treat them as a triage map for critical review, not as final paper metadata.
 

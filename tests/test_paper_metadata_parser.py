@@ -12,6 +12,7 @@ from tools.paper_metadata_parser.parser import (
     EXTRACTION_STATUSES,
     FIELD_STATUSES,
     PDF_STATUSES,
+    SEGMENT_FIELDS,
     SUPPLEMENT_STATUSES,
     TOTAL_SEGMENT_FIELD_COUNT,
 )
@@ -73,6 +74,7 @@ def test_paper_metadata_schema_and_status_values_are_valid():
     assert set(schema["confidence_labels"]) == set(CONFIDENCE_LABELS) == set(tool_schema["confidence_labels"])
     assert schema["automated_evidence"] == tool_schema["automated_evidence"]
     assert schema["supplement_extraction"] == tool_schema["supplement_extraction"]
+    assert schema["manual_reviews"] == tool_schema["manual_reviews"]
     assert schema["local_artifact_conventions"]["main_pdf_filename"].startswith("artifacts/")
 
     for record in audit_records:
@@ -131,6 +133,65 @@ def test_paper_metadata_schema_and_status_values_are_valid():
                         review_pass["status"]
                         for review_pass in record["automated_evidence_mining"]["semantic_review_passes"]
                     } <= {"completed", "completed_no_hits"}
+
+
+def test_manual_reviews_are_schema_valid_and_source_pointer_only():
+    manual_dir = AUDIT_DIR / "manual_reviews"
+    review_paths = sorted(manual_dir.glob("*.json"))
+    assert review_paths
+
+    coverage = json.loads(COVERAGE_PATH.read_text(encoding="utf-8"))
+    coverage_ids = {record["record_id"] for record in coverage["literature_records"]}
+    index_rows = load_csv(AUDIT_DIR / "manual_review_index.csv")
+    indexed_ids = {row["record_id"] for row in index_rows}
+    review_ids = {path.stem for path in review_paths}
+    expected_segments = set(SEGMENT_FIELDS)
+    expected_field_count = sum(len(fields) for fields in SEGMENT_FIELDS.values())
+
+    assert indexed_ids == review_ids
+    assert expected_field_count == TOTAL_SEGMENT_FIELD_COUNT
+
+    for path in review_paths:
+        review = json.loads(path.read_text(encoding="utf-8"))
+        assert review["schema"] == "pps-paper-metadata-manual-review.v1"
+        assert review["record_id"] == path.stem
+        assert review["record_id"] in coverage_ids
+        assert review["confidence_label"] in CONFIDENCE_LABELS
+        assert 0.0 <= float(review["confidence_score"]) <= 1.0
+        assert len(review["review_attempts"]) >= 5
+        assert len(review["source_checks"]) >= 3
+        assert not json.dumps(review).count("\n\n")
+
+        for source_check in review["source_checks"]:
+            source = source_check["source"]
+            assert "C:\\" not in source
+            assert "/Users/" not in source
+            if source.startswith("artifacts/"):
+                assert source.startswith("artifacts/paper_metadata_audit/")
+
+        segment_audit = review["segment_field_audit"]
+        assert set(segment_audit) == expected_segments
+        status_counts: dict[str, int] = {}
+        field_count = 0
+        for segment, fields in SEGMENT_FIELDS.items():
+            expected_fields = {field["key"] for field in fields}
+            assert set(segment_audit[segment]) == expected_fields
+            for field_key, field in segment_audit[segment].items():
+                field_count += 1
+                status = field["status"]
+                status_counts[status] = status_counts.get(status, 0) + 1
+                assert status in FIELD_STATUSES, f"{path.name}:{field_key}"
+                assert len(field["value"]) <= 500
+                assert len(field["evidence_note"]) <= 260
+                assert "C:\\" not in field["source_file"]
+                assert "/Users/" not in field["source_file"]
+                assert not field["value"].startswith("Auto-mined candidates:")
+                if status in {"reported", "derived", "not_reported_after_review"}:
+                    assert field["source_file"], f"{path.name}:{field_key}"
+                    assert field["page_or_section"], f"{path.name}:{field_key}"
+
+        assert field_count == TOTAL_SEGMENT_FIELD_COUNT
+        assert review["field_status_counts"] == dict(sorted(status_counts.items()))
 
 
 def test_missing_pdf_request_list_tracks_main_pdfs_and_supplements():

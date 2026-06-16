@@ -64,6 +64,12 @@
     ],
     "rule": "Supplement text extraction writes only ignored local text artifacts; tracked audit files store counts, statuses, and short evidence pointers."
   },
+  "manual_reviews": {
+    "folder": "For-AI/audiotactile-paper-metadata-audit/manual_reviews/",
+    "index": "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv",
+    "schema": "pps-paper-metadata-manual-review.v1",
+    "rule": "Manual reviews promote auto-mined candidates only after repeated critical passes; store normalized values, field statuses, confidence scores, and short source pointers, not full text."
+  },
   "segment_fields": {
     "segment_1_stimulus_reconstruction": [
       {
