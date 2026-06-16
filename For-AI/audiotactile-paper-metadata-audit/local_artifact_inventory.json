@@ -1,22 +1,22 @@
 {
   "schema": "pps-paper-metadata-local-artifact-inventory.v1",
-  "generated_at": "2026-06-16T12:46:26.114115+00:00",
+  "generated_at": "2026-06-16T13:42:44.321705+00:00",
   "artifact_root": "artifacts/paper_metadata_audit",
   "copyright_boundary": "This tracked inventory stores relative paths, sizes, and hashes only. The PDFs, supplements, extracted text, and local ZIP bundle remain ignored local artifacts and must not be committed to the public repository.",
   "restore_note": "To resume on the same machine, keep artifacts/paper_metadata_audit/ in place. To move work privately, transfer the ignored ZIP bundle named below outside the public Git repo, extract it into artifacts/paper_metadata_audit/, then run python -m tools.paper_metadata_parser --refresh.",
-  "artifact_file_count": 397,
-  "artifact_total_bytes": 89694230,
+  "artifact_file_count": 467,
+  "artifact_total_bytes": 102787459,
   "category_counts": {
     "acquisition_status.json": 1,
-    "extracted_text_or_parser_output": 354,
-    "publication_pdf": 29,
+    "extracted_text_or_parser_output": 418,
+    "publication_pdf": 35,
     "supplement": 13
   },
   "local_bundle": {
     "created": true,
     "relative_path": "artifacts/paper_metadata_audit/resume_bundles/paper_metadata_audit_artifacts_latest.zip",
-    "size_bytes": 68977281,
-    "sha256": "b586f4813601d70b15bb1c734cab3c117f8a71732b235daeec5ec9d1ff4b8423"
+    "size_bytes": 79351061,
+    "sha256": "352d54a316831f56d9963060d5bfba4faddfc236684a4cbef2bd537c23c0b4a5"
   },
   "files": [
     {
@@ -122,6 +122,70 @@
       "record_id": "ageing_2021_images",
       "size_bytes": 50537,
       "sha256": "68797226b4c91d025a2921f05ddc46b5515b23b0dc8e3ee687cd0afba20edaa1"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/biggio_2017_racket_tool_use.json",
+      "artifact_relative_path": "extracted/opendataloader/biggio_2017_racket_tool_use.json",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "biggio_2017_racket_tool_use",
+      "size_bytes": 65965,
+      "sha256": "699494c1a20734976d37848346f2d19e488e4dcedc66a19a6f707aeb87e43d32"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/biggio_2017_racket_tool_use.md",
+      "artifact_relative_path": "extracted/opendataloader/biggio_2017_racket_tool_use.md",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "biggio_2017_racket_tool_use",
+      "size_bytes": 30850,
+      "sha256": "1051faa61fbb06646c0243b3493bbfcff2ad16e00a078e4339056e0f341e213d"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/biggio_2017_racket_tool_use_images/imageFile1.png",
+      "artifact_relative_path": "extracted/opendataloader/biggio_2017_racket_tool_use_images/imageFile1.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "biggio_2017_racket_tool_use_images",
+      "size_bytes": 26565,
+      "sha256": "98446be51d89bfd5ce7e65d27766b73018a436d73f86238f2bfb860128e72062"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/biggio_2017_racket_tool_use_images/imageFile2.png",
+      "artifact_relative_path": "extracted/opendataloader/biggio_2017_racket_tool_use_images/imageFile2.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "biggio_2017_racket_tool_use_images",
+      "size_bytes": 21046,
+      "sha256": "dc6a60879722e96f6cbbe0f3ee9c1f424504a7bf7d23eb16e58ae08e48e7f6ff"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/biggio_2017_racket_tool_use_images/imageFile3.png",
+      "artifact_relative_path": "extracted/opendataloader/biggio_2017_racket_tool_use_images/imageFile3.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "biggio_2017_racket_tool_use_images",
+      "size_bytes": 4304,
+      "sha256": "cbfc814b209f60accacd5be37e2cdefbc9651d0308026588b8bfc4c7ca16f98f"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/biggio_2017_racket_tool_use_images/imageFile4.png",
+      "artifact_relative_path": "extracted/opendataloader/biggio_2017_racket_tool_use_images/imageFile4.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "biggio_2017_racket_tool_use_images",
+      "size_bytes": 81027,
+      "sha256": "2f6f059758182a10b2f4cb93ccecc2636041b6f61f9125bf2f2772f0f512fbe4"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/biggio_2017_racket_tool_use_images/imageFile5.png",
+      "artifact_relative_path": "extracted/opendataloader/biggio_2017_racket_tool_use_images/imageFile5.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "biggio_2017_racket_tool_use_images",
+      "size_bytes": 9536,
+      "sha256": "ecd4482b1d15fd41444c94bd201d43142903c89fcede36058cc2c676f05cc6fd"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/biggio_2017_racket_tool_use_images/imageFile6.png",
+      "artifact_relative_path": "extracted/opendataloader/biggio_2017_racket_tool_use_images/imageFile6.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "biggio_2017_racket_tool_use_images",
+      "size_bytes": 11944,
+      "sha256": "225ad2f9b45c41f2cc1b734672934d63b66b770a3a9e8dcbdb90c128c9f7ec81"
     },
     {
       "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2012_dynamic_sounds.json",
@@ -276,6 +340,326 @@
       "sha256": "a123bd71732722d74b8d7f9eb2c5e372c22a35a0a1ddb4611e794fce4a989756"
     },
     {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness.json",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness.json",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness",
+      "size_bytes": 369604,
+      "sha256": "cee5b73d52ddd4a11629429e792d959c317bca33cc88f315b342d0d34a62579c"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness.md",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness.md",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness",
+      "size_bytes": 110025,
+      "sha256": "cd128eae8b016f318276d706d32e3583f256d65e97065ec9247ac66a1cdce7d6"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile1.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile1.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 68113,
+      "sha256": "5f41a91b9965b3f4c53b4912907ae0e3f1c90f8edaf580b923a1eedc3fa2e99c"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile10.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile10.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 8906,
+      "sha256": "11de261cfaef26f147b8977337973c414dba25c23a8421a595acf015adc7d6b1"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile11.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile11.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 608,
+      "sha256": "c17f02b71d560de6d7a5871ea61ac0cde25267b59670d1ccdd8eb122202f5e9d"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile12.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile12.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 6417,
+      "sha256": "f9868d6f20bb748f7ef4db5730f0aeb6d88cade71571050fb94c3ef93585b00b"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile13.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile13.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 560,
+      "sha256": "970df4635e78bf12e6a5634984a533ca1f456ad4e32a1865601da7c886d7bd37"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile14.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile14.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 5103,
+      "sha256": "204c378923a749bfaa934c8bba4884400ef87986151b9bdeb5636750afb2a379"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile15.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile15.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 577,
+      "sha256": "bd75172efddd5165246cbab5fa4c22c5efabfa0450bc3552845425ecd4dbf53c"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile16.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile16.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 4109,
+      "sha256": "f269ee9a3e87fbe16d22ee0db172ee659bc9b73ee9fb0f761ae856087571ef91"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile17.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile17.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 606,
+      "sha256": "7fe12cfbf1260635be10dcb1faf939f1c0596d0b3214fedaf1d9910bc30af886"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile18.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile18.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 621,
+      "sha256": "882a6f6cba1ca4e87ec5eb9e982d30212a20c07cca9c3bc9ea07dd5c6014ddad"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile19.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile19.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 6767,
+      "sha256": "33e7e65a97fa3583e3a5ec1177d4309c19373e1baec8b34180f49616a756d84c"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile2.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile2.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 492,
+      "sha256": "62513f5f66875c46226d17e3e4328b6a4e530dbb29164956bdc633500968ce0f"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile20.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile20.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 6383,
+      "sha256": "b02836efc6b7e97456533cefde77528435f7fa1c153ec832e890c39ee1c420d8"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile21.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile21.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 1181,
+      "sha256": "295cbf844dcdab3d1ea5dc265db06dc7416a5c2c0a679bb55f63ef964d7efa6d"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile22.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile22.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 208188,
+      "sha256": "9fe4534157304b9eae5528fcb3be79cbe03465401bc2e11f2e6229a57bce8f96"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile23.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile23.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 13637,
+      "sha256": "24f85ab4d9185329835d115b64777b387aac2c7a06194f1a6bdf9121e1b1039f"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile24.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile24.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 27541,
+      "sha256": "a93d68fdeb65a60069beac83862204cee23639964b45696af6257e09c51b7e8e"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile25.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile25.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 21746,
+      "sha256": "8e34a36194125e16911ad25a5168ff494235f9ef3de87b97aae73e597cb79624"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile26.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile26.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 31305,
+      "sha256": "d21c4c382ccbad1c1a767e3a91011d5525b33d375d54a0162f7781b67e5648ce"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile27.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile27.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 69473,
+      "sha256": "e97d8272f9b2b5661af43c064d76e571916a66a78c27d468803db955a6277b7c"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile28.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile28.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 215119,
+      "sha256": "692639951a9f66dab183c1d7ba78bf5534ffc89e4e7704bd50ae325d5674072b"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile29.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile29.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 29217,
+      "sha256": "02f68432f2a932ca9a584aad3d52ddc81ec250b6becc534a5636b91b13a9148b"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile3.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile3.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 492,
+      "sha256": "62513f5f66875c46226d17e3e4328b6a4e530dbb29164956bdc633500968ce0f"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile30.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile30.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 47322,
+      "sha256": "294777f0043e729e6de38911d42e9b7a4510d6f3b9c92232e4dd00c4cd23c7c1"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile31.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile31.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 227033,
+      "sha256": "5db07c977e171e7bb4156cf8d521f1e5bab21fc16291474d8330f4c3b4eb3564"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile4.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile4.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 918,
+      "sha256": "1d10c4db1f75cb1a6b402582106a01d974e290a5275d02a29125d97fd7bf242f"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile5.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile5.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 9844,
+      "sha256": "dc6725f8df7716c815156cc3a36d7c3319adcdfa9ba08cde0596b8b2af3054ee"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile6.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile6.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 56909,
+      "sha256": "b504273d2a4f456a9b734af8e834d5b6a4b2ba579b4ad9a356e1393592960aa9"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile7.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile7.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 912,
+      "sha256": "efbe308f5e40ba0917359c43934070721947e828e075cf8147296d5b1ac3590e"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile8.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile8.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 921,
+      "sha256": "09bab0121ccfaa31085eecc58a4effd3d396cd45bdbd64334659da9eaa41392d"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile9.png",
+      "artifact_relative_path": "extracted/opendataloader/cell_reports_medicine_2026_consciousness_images/imageFile9.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "cell_reports_medicine_2026_consciousness_images",
+      "size_bytes": 10120,
+      "sha256": "a9c177fe04bc8cf1226408e8bdf15ddf4d0283fd2bc0674fe3443c598617278e"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/depersonalisation_2024.json",
+      "artifact_relative_path": "extracted/opendataloader/depersonalisation_2024.json",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "depersonalisation_2024",
+      "size_bytes": 227311,
+      "sha256": "27a18dce1bdb15271a12802b89ccc9816074d1f59883c2bfd9cbed9f38d0ec11"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/depersonalisation_2024.md",
+      "artifact_relative_path": "extracted/opendataloader/depersonalisation_2024.md",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "depersonalisation_2024",
+      "size_bytes": 90916,
+      "sha256": "6ebf899f1338d836cccb77e7be18abe21c99de689df0fd8b6116da0131296642"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/depersonalisation_2024_images/imageFile1.png",
+      "artifact_relative_path": "extracted/opendataloader/depersonalisation_2024_images/imageFile1.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "depersonalisation_2024_images",
+      "size_bytes": 1740,
+      "sha256": "ef9bb1a4a3a9d4b96a6e08781e47b2f47e471a1b25f352843fdfbb63ad600581"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/depersonalisation_2024_images/imageFile2.png",
+      "artifact_relative_path": "extracted/opendataloader/depersonalisation_2024_images/imageFile2.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "depersonalisation_2024_images",
+      "size_bytes": 3557,
+      "sha256": "ebbf7818d166e09ba1be605425ba442b22441c9a7a9e6c446c5307c52b8222b8"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/depersonalisation_2024_images/imageFile3.png",
+      "artifact_relative_path": "extracted/opendataloader/depersonalisation_2024_images/imageFile3.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "depersonalisation_2024_images",
+      "size_bytes": 133244,
+      "sha256": "945e13efe6e6a289d2d4c1c7c98527e16bc1535c52d945ca9ba5f8b3b1a0a981"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/depersonalisation_2024_images/imageFile4.png",
+      "artifact_relative_path": "extracted/opendataloader/depersonalisation_2024_images/imageFile4.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "depersonalisation_2024_images",
+      "size_bytes": 170176,
+      "sha256": "458347479e037d3a2bba24641bbed5112da5e759efa2234ec0c5adbef942f76b"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/depersonalisation_2024_images/imageFile5.png",
+      "artifact_relative_path": "extracted/opendataloader/depersonalisation_2024_images/imageFile5.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "depersonalisation_2024_images",
+      "size_bytes": 114231,
+      "sha256": "c4c0326f1df2febafdacd6bfb6efdf487e7974a30a83c9fb8eb9ba198f56882a"
+    },
+    {
       "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/disorders_consciousness_2019.json",
       "artifact_relative_path": "extracted/opendataloader/disorders_consciousness_2019.json",
       "category": "extracted_text_or_parser_output",
@@ -370,6 +754,22 @@
       "record_id": "disorders_consciousness_2019_images",
       "size_bytes": 128877,
       "sha256": "b68b160850ae185ba83014cc763b0cac46f140045a2a998bccc56ffef5e23837"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/farne_ladavas_2002_auditory_pps_humans.json",
+      "artifact_relative_path": "extracted/opendataloader/farne_ladavas_2002_auditory_pps_humans.json",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "farne_ladavas_2002_auditory_pps_humans",
+      "size_bytes": 164355,
+      "sha256": "5621457f22b9e35097dda9e5780d228168db6c510d7d453758b221a22a17c81d"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/farne_ladavas_2002_auditory_pps_humans.md",
+      "artifact_relative_path": "extracted/opendataloader/farne_ladavas_2002_auditory_pps_humans.md",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "farne_ladavas_2002_auditory_pps_humans",
+      "size_bytes": 68450,
+      "sha256": "0c6ad1531189610e88b6a03b95f81726eddbbf261d75957a28b6426966ee391b"
     },
     {
       "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/ferri_2015_artificial_valence.json",
@@ -554,6 +954,62 @@
       "record_id": "ferri_2015_jneurosci_itv_images",
       "size_bytes": 94841,
       "sha256": "b4268cff9dbab538ebcb77e5bbd318ab5a22e904d29dd1632ca52cc4dce2b0a5"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/finisguerra_2015_moving_sounds_motor.json",
+      "artifact_relative_path": "extracted/opendataloader/finisguerra_2015_moving_sounds_motor.json",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "finisguerra_2015_moving_sounds_motor",
+      "size_bytes": 98520,
+      "sha256": "2a3cebbfe75b2a5d9e9deeb0c6c2e8e187e5e777e40404ff32dcdb2a0e9b28c1"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/finisguerra_2015_moving_sounds_motor.md",
+      "artifact_relative_path": "extracted/opendataloader/finisguerra_2015_moving_sounds_motor.md",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "finisguerra_2015_moving_sounds_motor",
+      "size_bytes": 54192,
+      "sha256": "3b89c00e372afd9ff4b682919ca4c826fba765bbf08e3f1676845cc3ad7f1236"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/finisguerra_2015_moving_sounds_motor_images/imageFile1.png",
+      "artifact_relative_path": "extracted/opendataloader/finisguerra_2015_moving_sounds_motor_images/imageFile1.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "finisguerra_2015_moving_sounds_motor_images",
+      "size_bytes": 18803,
+      "sha256": "fccd42f9f925d2b84eca03ae9e94de48445c57c869eab9115674315e4e1747ab"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/finisguerra_2015_moving_sounds_motor_images/imageFile2.png",
+      "artifact_relative_path": "extracted/opendataloader/finisguerra_2015_moving_sounds_motor_images/imageFile2.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "finisguerra_2015_moving_sounds_motor_images",
+      "size_bytes": 26487,
+      "sha256": "702c0c9a5089bc74b079a3c07e7bfa3da463f7dd56ec59ddfd4b1a7475a95d1b"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/finisguerra_2015_moving_sounds_motor_images/imageFile3.png",
+      "artifact_relative_path": "extracted/opendataloader/finisguerra_2015_moving_sounds_motor_images/imageFile3.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "finisguerra_2015_moving_sounds_motor_images",
+      "size_bytes": 4580,
+      "sha256": "2c5efe9781d24435d86a0b56e14a5432479756d3b9ae0c7311bb88d57831a7e0"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/finisguerra_2015_moving_sounds_motor_images/imageFile4.png",
+      "artifact_relative_path": "extracted/opendataloader/finisguerra_2015_moving_sounds_motor_images/imageFile4.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "finisguerra_2015_moving_sounds_motor_images",
+      "size_bytes": 250403,
+      "sha256": "a4764f49f1ddc036bbd782080f4019a8ccfd7257eb37a28a1297691f5c278e15"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/finisguerra_2015_moving_sounds_motor_images/imageFile5.png",
+      "artifact_relative_path": "extracted/opendataloader/finisguerra_2015_moving_sounds_motor_images/imageFile5.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "finisguerra_2015_moving_sounds_motor_images",
+      "size_bytes": 20627,
+      "sha256": "c5fd5d6a609f2d1bd3acdb725eb08790357a88f44d8d8e75517ba1e9364980c8"
     },
     {
       "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/galli_2015_wheelchair.json",
@@ -2516,6 +2972,62 @@
       "sha256": "36c5046c9a9e99b9a9876207780acc4c25c51c97517cbb99ffc6662a6a89e894"
     },
     {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tajadura_jimenez_2009_visual_deprivation.json",
+      "artifact_relative_path": "extracted/opendataloader/tajadura_jimenez_2009_visual_deprivation.json",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "tajadura_jimenez_2009_visual_deprivation",
+      "size_bytes": 100471,
+      "sha256": "9ee76ebfd0d0363f4c05f9b35a4895612d5712e8caa26fc9a89f8c5a9d5799d1"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tajadura_jimenez_2009_visual_deprivation.md",
+      "artifact_relative_path": "extracted/opendataloader/tajadura_jimenez_2009_visual_deprivation.md",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "tajadura_jimenez_2009_visual_deprivation",
+      "size_bytes": 54357,
+      "sha256": "f4197cc92fb401d076a0f2f8c2dcef2484397122eb04454655dee78b393bdb48"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tajadura_jimenez_2009_visual_deprivation_images/imageFile1.png",
+      "artifact_relative_path": "extracted/opendataloader/tajadura_jimenez_2009_visual_deprivation_images/imageFile1.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "tajadura_jimenez_2009_visual_deprivation_images",
+      "size_bytes": 21199,
+      "sha256": "c24e001204ee7ece45833a40ea71b4eace4f4c80963c06db0ed97cc9f2cff7b5"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tajadura_jimenez_2009_visual_deprivation_images/imageFile2.png",
+      "artifact_relative_path": "extracted/opendataloader/tajadura_jimenez_2009_visual_deprivation_images/imageFile2.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "tajadura_jimenez_2009_visual_deprivation_images",
+      "size_bytes": 27267,
+      "sha256": "d856e00e803a702fc5f50612bc08b4f163487ad33589b6ce4d419338d1ad30ee"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tajadura_jimenez_2009_visual_deprivation_images/imageFile3.png",
+      "artifact_relative_path": "extracted/opendataloader/tajadura_jimenez_2009_visual_deprivation_images/imageFile3.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "tajadura_jimenez_2009_visual_deprivation_images",
+      "size_bytes": 80637,
+      "sha256": "0a34b1306ac1ed9712c9effe857ec0c65cf8a49e38231f5cf882e77b1ec51c06"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tajadura_jimenez_2009_visual_deprivation_images/imageFile4.png",
+      "artifact_relative_path": "extracted/opendataloader/tajadura_jimenez_2009_visual_deprivation_images/imageFile4.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "tajadura_jimenez_2009_visual_deprivation_images",
+      "size_bytes": 88012,
+      "sha256": "030b39cdc79e66a72dcf9dd5553ebeecd5a6d1020859f50f5f1c50ec693224c8"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tajadura_jimenez_2009_visual_deprivation_images/imageFile5.png",
+      "artifact_relative_path": "extracted/opendataloader/tajadura_jimenez_2009_visual_deprivation_images/imageFile5.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "tajadura_jimenez_2009_visual_deprivation_images",
+      "size_bytes": 226506,
+      "sha256": "e0985c921841f169e7c721663bae5aabf51b0c2e04f1155ca6cf9e95c92281ba"
+    },
+    {
       "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation.json",
       "artifact_relative_path": "extracted/opendataloader/tonelli_2019_echolocation.json",
       "category": "extracted_text_or_parser_output",
@@ -2868,6 +3380,14 @@
       "sha256": "05996a24c72b639c498a0cdf4f879030064361d739e79137f13a41570ac39ec7"
     },
     {
+      "relative_path": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+      "artifact_relative_path": "publication_pdfs/biggio_2017_racket_tool_use.pdf",
+      "category": "publication_pdf",
+      "record_id": "biggio_2017_racket_tool_use",
+      "size_bytes": 399762,
+      "sha256": "7cb88c55ea1a87b2a1e6178fd3171e8ec4e37efd5930870fcb4c1ae9dd91b3c4"
+    },
+    {
       "relative_path": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
       "artifact_relative_path": "publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
       "category": "publication_pdf",
@@ -2884,12 +3404,36 @@
       "sha256": "98ad22e22ec5b4fbb5008e0c7c865f7460b3f8cf03b4a6a051cdfdf09fc21daa"
     },
     {
+      "relative_path": "artifacts/paper_metadata_audit/publication_pdfs/cell_reports_medicine_2026_consciousness.pdf",
+      "artifact_relative_path": "publication_pdfs/cell_reports_medicine_2026_consciousness.pdf",
+      "category": "publication_pdf",
+      "record_id": "cell_reports_medicine_2026_consciousness",
+      "size_bytes": 5043039,
+      "sha256": "4921d1ec214adf258b1ca327c892e3f6c3a629ecf5f9b4b58dc9b5f6e5e5fbde"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf",
+      "artifact_relative_path": "publication_pdfs/depersonalisation_2024.pdf",
+      "category": "publication_pdf",
+      "record_id": "depersonalisation_2024",
+      "size_bytes": 1643826,
+      "sha256": "c34311d32637b4df653b933d86b7fdbf51733032e2e21e86782c3a2dfa7b0344"
+    },
+    {
       "relative_path": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
       "artifact_relative_path": "publication_pdfs/disorders_consciousness_2019.pdf",
       "category": "publication_pdf",
       "record_id": "disorders_consciousness_2019",
       "size_bytes": 2663496,
       "sha256": "8f28fe9c98270f6147889b2fb674a8fce72d66ac6ccbdf9619c13baa1840ab5a"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/publication_pdfs/farne_ladavas_2002_auditory_pps_humans.pdf",
+      "artifact_relative_path": "publication_pdfs/farne_ladavas_2002_auditory_pps_humans.pdf",
+      "category": "publication_pdf",
+      "record_id": "farne_ladavas_2002_auditory_pps_humans",
+      "size_bytes": 153828,
+      "sha256": "d56b27c1f0ffef20311ec9c653fa26e552aa24b45c4b4c48569e3db70c1abd90"
     },
     {
       "relative_path": "artifacts/paper_metadata_audit/publication_pdfs/ferri_2015_artificial_valence.pdf",
@@ -2914,6 +3458,14 @@
       "record_id": "ferri_2015_jneurosci_itv",
       "size_bytes": 1601572,
       "sha256": "1e38b60be027819d905a4f53777d2c819cf92b407194d93ac958a57518835054"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+      "artifact_relative_path": "publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+      "category": "publication_pdf",
+      "record_id": "finisguerra_2015_moving_sounds_motor",
+      "size_bytes": 1281611,
+      "sha256": "625879121693b757dd7c3e2f28c185f534a147f63c75cdc553fd1a1de9107320"
     },
     {
       "relative_path": "artifacts/paper_metadata_audit/publication_pdfs/galli_2015_wheelchair.pdf",
@@ -3082,6 +3634,14 @@
       "record_id": "taffou_2021_auditory_roughness",
       "size_bytes": 1332250,
       "sha256": "ac87a3899a5508bfb6f37d1564ee9bf147d8c6a72f512ecfea1f73e60e5ad386"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+      "artifact_relative_path": "publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+      "category": "publication_pdf",
+      "record_id": "tajadura_jimenez_2009_visual_deprivation",
+      "size_bytes": 713116,
+      "sha256": "6460a7848157e6bbca67e142621d002c6e2ef041af414f43d9e59441764304fd"
     },
     {
       "relative_path": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",

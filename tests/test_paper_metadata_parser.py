@@ -135,6 +135,25 @@ def test_paper_metadata_schema_and_status_values_are_valid():
                     } <= {"completed", "completed_no_hits"}
 
 
+def test_doi_inventory_tracks_every_literature_record():
+    coverage = json.loads(COVERAGE_PATH.read_text(encoding="utf-8"))
+    summary = json.loads((AUDIT_DIR / "audit_summary.json").read_text(encoding="utf-8"))
+    doi_rows = load_csv(AUDIT_DIR / "doi_inventory.csv")
+    coverage_ids = {record["record_id"] for record in coverage["literature_records"]}
+    doi_ids = {row["record_id"] for row in doi_rows}
+
+    assert doi_ids == coverage_ids
+    assert len(doi_rows) == summary["record_count"] == 74
+    assert summary["doi_record_count"] == sum(1 for row in doi_rows if row["doi"])
+    assert summary["missing_doi_record_count"] == sum(1 for row in doi_rows if not row["doi"])
+    for row in doi_rows:
+        assert row["coverage_category"]
+        if row["doi"]:
+            assert row["doi_url"] == f"https://doi.org/{row['doi']}"
+        else:
+            assert row["doi_url"] == ""
+
+
 def test_manual_reviews_are_schema_valid_and_source_pointer_only():
     manual_dir = AUDIT_DIR / "manual_reviews"
     review_paths = sorted(manual_dir.glob("*.json"))

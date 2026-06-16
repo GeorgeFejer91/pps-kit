@@ -1,6 +1,6 @@
 {
   "schema": "pps-paper-metadata-environment.v1",
-  "parser_version": "0.5.1",
+  "parser_version": "0.5.2",
   "checked_on": "2026-06-16",
   "java_available": true,
   "java_source": "local_artifact_jdk",

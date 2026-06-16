@@ -22,16 +22,16 @@ Manual reviews are the layer where auto-mined candidates become checked metadata
 ## Current Inventory
 
 - Literature records: 74
-- PDF status counts: `{"downloaded": 29, "needs_user_download": 9, "not_applicable": 5, "open_access_unavailable": 13, "paywalled": 18}`
+- PDF status counts: `{"downloaded": 35, "needs_user_download": 8, "not_applicable": 5, "open_access_unavailable": 12, "paywalled": 14}`
 - Supplement status counts: `{"downloaded": 10, "needs_user_download": 16, "not_applicable": 5, "not_checked": 6, "not_found": 18, "paywalled": 19}`
-- Extraction status counts: `{"parsed": 29, "parsed_with_warnings": 5, "pending_pdf": 40}`
-- Metadata confidence counts: `{"not_applicable": 5, "partial_extraction": 31, "pending_source": 9, "source_unavailable": 29}`
-- Automated evidence status counts: `{"no_extracted_source": 38, "not_applicable": 5, "source_mined": 31}`
-- Automated evidence mined field total: 540
+- Extraction status counts: `{"parsed": 35, "parsed_with_warnings": 5, "pending_pdf": 34}`
+- Metadata confidence counts: `{"not_applicable": 5, "partial_extraction": 37, "pending_source": 8, "source_unavailable": 24}`
+- Automated evidence status counts: `{"no_extracted_source": 32, "not_applicable": 5, "source_mined": 37}`
+- Automated evidence mined field total: 623
 - Supplement extracted records/files: 10 records / 13 files
 - Semantic review strategy count: 5
-- Semantic review pass status counts: `{"completed": 151, "completed_no_hits": 4, "not_applicable": 25, "source_unavailable": 190}`
-- Missing download/check requests: 81
+- Semantic review pass status counts: `{"completed": 179, "completed_no_hits": 6, "not_applicable": 25, "source_unavailable": 160}`
+- Missing download/check requests: 75
 
 ## Environment Readiness
 

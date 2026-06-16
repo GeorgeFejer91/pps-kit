@@ -15,7 +15,7 @@ from typing import Any
 from xml.etree import ElementTree
 
 
-PARSER_VERSION = "0.5.1"
+PARSER_VERSION = "0.5.2"
 
 COVERAGE_PATH = Path("assets/preloads/audiotactile_literature_coverage.json")
 AUDIT_DIR = Path("For-AI/audiotactile-paper-metadata-audit")
@@ -1383,6 +1383,8 @@ def summary_from_records(audit_records: list[dict[str, Any]], missing_requests: 
         "generated_on": date.today().isoformat(),
         "parser_version": PARSER_VERSION,
         "record_count": len(audit_records),
+        "doi_record_count": sum(1 for record in audit_records if record.get("doi")),
+        "missing_doi_record_count": sum(1 for record in audit_records if not record.get("doi")),
         "pdf_status_counts": count_by("pdf_status"),
         "supplement_status_counts": count_by("supplement_status"),
         "extraction_status_counts": count_by("extraction_status"),
@@ -1627,6 +1629,32 @@ def write_audit_files(
     (paths.audit_dir / "README.md").write_text(readme_text(summary, environment), encoding="utf-8")
     (paths.audit_dir / "parameter_checklist.md").write_text(checklist_text(), encoding="utf-8")
     write_jsonl(paths.audit_dir / "metadata_audit.jsonl", audit_records)
+
+    doi_rows = [
+        {
+            "record_id": record["record_id"],
+            "citation_short": record["citation_short"],
+            "doi": record["doi"],
+            "doi_url": doi_url(record["doi"]),
+            "coverage_category": record["coverage_category"],
+            "pdf_status": record["pdf_status"],
+            "supplement_status": record["supplement_status"],
+        }
+        for record in audit_records
+    ]
+    write_csv(
+        paths.audit_dir / "doi_inventory.csv",
+        doi_rows,
+        [
+            "record_id",
+            "citation_short",
+            "doi",
+            "doi_url",
+            "coverage_category",
+            "pdf_status",
+            "supplement_status",
+        ],
+    )
 
     checklist_rows = [
         {
