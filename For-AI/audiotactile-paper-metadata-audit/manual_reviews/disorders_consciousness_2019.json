@@ -1,0 +1,275 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "disorders_consciousness_2019",
+  "citation_short": "Noel et al. (2019), DoC PPS encoding",
+  "review_date": "2026-06-16",
+  "manual_review_status": "manual_review_completed_main_pdf_no_supplement_found",
+  "confidence_score": 0.91,
+  "confidence_label": "high_confidence_extraction",
+  "confidence_basis": "Main PDF, OpenDataLoader output, fallback pypdf extraction, targeted methods searches, rendered methods pages, and PMC/Europe PMC supplement checks were reviewed. The paper reports enough static near/far auditory, tactile, condition, ITI, baseline, block, and count information to recreate the DoC and healthy-control EEG PPS profile; exact white-noise source asset/seed and original scripts are not supplied.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats_static_near_far_doc_arm_erp_profile",
+    "reason": "The study can be recreated as a passive arm-centered near/far audio-tactile EEG profile with white-noise bursts, electrical tactile stimulation, five randomized condition rows, fixed per-block counts, and reported EEG baseline. It is static near/far stimulation, not a looming or front-approach trajectory."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf",
+      "source": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+      "status": "reviewed",
+      "scope": "Reviewed apparatus, Experiment 1 procedure, Experiment 2 patient procedure, EEG preprocessing, figure methods panel, and analyses for Segment 1-4 values."
+    },
+    {
+      "source_type": "opendataloader_json_md",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/disorders_consciousness_2019.json",
+      "status": "reviewed",
+      "scope": "Used as primary extraction map for pages 3-4 and checked against fallback extraction and rendered page images."
+    },
+    {
+      "source_type": "fallback_text_extraction",
+      "source": "pypdf local extraction",
+      "status": "reviewed",
+      "scope": "Searched all pages for white noise, tactile, speaker, near, far, randomized, inter-trial, baseline, block, trial, and supplement terms."
+    },
+    {
+      "source_type": "rendered_pdf_pages",
+      "source": "tmp/pdfs/disorders_consciousness_2019_review/page-03.png through page-04.png",
+      "status": "reviewed_not_tracked",
+      "scope": "Temporary rendered methods pages were visually checked to verify distances, apparatus, condition rows, ITI, and block/session counts."
+    },
+    {
+      "source_type": "full_text_xml_and_supplement_route",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6664240/",
+      "status": "checked_no_supplement",
+      "scope": "PMC/Europe PMC route was checked; the full-text metadata reports no supplementary material for this article."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "OpenDataLoader PDF extraction",
+      "status": "completed",
+      "result": "Located methods pages with white-noise auditory bursts, FES tactile stimulation, near/far distances, randomized blocks, ITI, and per-condition counts."
+    },
+    {
+      "strategy": "Targeted methods and figure search",
+      "status": "completed",
+      "result": "Confirmed the figure caption and apparatus/procedure paragraphs use 5 cm and 75 cm speaker positions with five total conditions."
+    },
+    {
+      "strategy": "Fallback extraction verification",
+      "status": "completed",
+      "result": "pypdf confirmed the Segment 1-4 values and clarified that automated low-confidence SOA/catch hits were analysis timings, not task catch trials."
+    },
+    {
+      "strategy": "Rendered-page visual pass",
+      "status": "completed",
+      "result": "Visually verified the methods figure, randomized-within-block statement, 1.5-2 s uniform ITI, variable patient block counts, and EEG baseline window."
+    },
+    {
+      "strategy": "Supplement/source route check",
+      "status": "completed_no_supplement_found",
+      "result": "PMC/Europe PMC metadata did not expose supplementary files, so the main PDF is the complete available source for this audit."
+    },
+    {
+      "strategy": "Stimulus, baseline, and count reconciliation",
+      "status": "completed",
+      "result": "Mapped T, ANear, AFar, ATNear, and ATFar rows; synchronous audio-tactile timing; unisensory controls; no catch task; and 50 trials per condition per block."
+    }
+  ],
+  "field_status_counts": {
+    "not_applicable": 4,
+    "reported": 21
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "reported",
+        "value": "Auditory stimulation used 50 ms white-noise bursts.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF p.3, Material and apparatus",
+        "evidence_note": "The apparatus section identifies white noise and its duration."
+      },
+      "source_provenance": {
+        "status": "reported",
+        "value": "White noise was delivered through Logitech Z120 portable speakers; exact source file, random seed, or script is not supplied.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF p.3, Material and apparatus",
+        "evidence_note": "Speaker model and stimulus class are reported, but not reusable audio assets."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "Two static auditory distance positions: near and far.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF pp.3-4, Material and apparatus/Fig. 1",
+        "evidence_note": "The task uses near and far speaker positions rather than motion."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Speakers were placed about 5 cm and 75 cm from the participant's extended stimulated arm in the depth dimension.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF pp.3-4, Material and apparatus/Fig. 1",
+        "evidence_note": "The methods and figure caption report near/far distances anchored to the stimulated arm."
+      },
+      "stimulus_duration": {
+        "status": "reported",
+        "value": "Auditory bursts lasted 50 ms; tactile FES stimulation also lasted 50 ms.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF p.3, Material and apparatus",
+        "evidence_note": "Both auditory and tactile stimulus durations are reported."
+      },
+      "stimulus_speed": {
+        "status": "not_applicable",
+        "value": "No auditory motion speed applies; this profile used static near/far speakers.",
+        "source_file": "",
+        "page_or_section": "",
+        "evidence_note": "No looming/receding trajectory is described."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "Auditory near alone, auditory far alone, audio-tactile near, audio-tactile far, plus tactile alone.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF pp.3-4, Procedure/Fig. 1",
+        "evidence_note": "The procedure and figure caption enumerate the five condition families."
+      },
+      "gain_envelope": {
+        "status": "reported",
+        "value": "Reported levels were 65.2 dB SPL at near and 64.1 dB SPL at far; no detailed amplitude envelope beyond a 50 ms burst is provided.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF p.3, Material and apparatus",
+        "evidence_note": "The two distance-specific SPL values are explicitly reported."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Auditory apparatus was Logitech Z120 portable speakers; tactile stimulation used a MEDEL MOTIONSTIM 8 FES device.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF p.3, Material and apparatus",
+        "evidence_note": "The main stimulation hardware is reported."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "Five trial rows per block: tactile alone, auditory near, auditory far, audio-tactile near, and audio-tactile far.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF pp.3-4, Procedure/Fig. 1",
+        "evidence_note": "The block is defined as five 50-trial condition rows."
+      },
+      "condition_intermixing": {
+        "status": "reported",
+        "value": "All trials were fully randomized within each block.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF p.4, Procedure",
+        "evidence_note": "The procedure reports randomization within blocks."
+      },
+      "blocked_or_random_order": {
+        "status": "reported",
+        "value": "Healthy participants completed three randomized 250-trial blocks; patients completed variable randomized blocks by clinical availability.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF p.4, Procedures for Experiments 1-2",
+        "evidence_note": "Healthy and patient block structures are reported separately."
+      },
+      "iti_jitter_policy": {
+        "status": "reported",
+        "value": "Inter-trial interval was 1.5-2 s with a uniform distribution.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF p.4, Procedure",
+        "evidence_note": "ITI range and distribution are explicitly reported."
+      },
+      "response_window": {
+        "status": "not_applicable",
+        "value": "No per-trial behavioral response window applies; participants were instructed to relax with eyes closed during passive EEG stimulation.",
+        "source_file": "",
+        "page_or_section": "",
+        "evidence_note": "The task is passive and has no response-window rule."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Participants kept eyes closed; healthy participants had short breaks between blocks, and patients lay supine at about 130 degrees.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF pp.3-4, Procedure",
+        "evidence_note": "Experiment-specific posture and rest rules are described."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "50 ms FES pulses at 35 Hz over extensor digitorum communis, 70 percent motor threshold, 5-11 mA, via Flextrode electrodes.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF p.3, Material and apparatus",
+        "evidence_note": "Site, duration, frequency, calibration rule, current range, and electrodes are reported."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "Audio-tactile trials were synchronous; the study did not manipulate a tactile SOA ladder.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF p.3, Material and apparatus",
+        "evidence_note": "The methods state that auditory and tactile stimuli were administered synchronously."
+      },
+      "baseline_strategy": {
+        "status": "reported",
+        "value": "Tactile-only and auditory-only rows served as unisensory control/baseline rows for multisensory comparisons; EEG used prestimulus baseline correction.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF pp.3-5, Procedure/EEG preprocessing/Analyses",
+        "evidence_note": "The condition design and analyses compare multisensory responses with unisensory controls."
+      },
+      "baseline_timing": {
+        "status": "reported",
+        "value": "EEG epochs spanned -100 to +500 ms around stimulus onset and were baseline-corrected to the 100 ms prestimulus interval.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF p.4, EEG acquisition and preprocessing",
+        "evidence_note": "Epoch and baseline-correction windows are explicitly reported."
+      },
+      "catch_trial_type": {
+        "status": "not_applicable",
+        "value": "No catch or no-go trials are described; auditory-only rows are unisensory controls rather than behavioral catches.",
+        "source_file": "",
+        "page_or_section": "",
+        "evidence_note": "The five rows are passive stimulus conditions."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "reported",
+        "value": "Each 250-trial block contained 50 trials in each of the five condition rows.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF pp.3-4, Procedure/Fig. 1",
+        "evidence_note": "The per-condition repetition count is stated for each block."
+      },
+      "baseline_count": {
+        "status": "reported",
+        "value": "Per block, unisensory controls were 50 tactile-only, 50 auditory-near, and 50 auditory-far trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF pp.3-4, Procedure/Fig. 1",
+        "evidence_note": "Unisensory row counts are part of the five 50-trial block rows."
+      },
+      "catch_count": {
+        "status": "not_applicable",
+        "value": "No catch/no-go count applies because no catch family is reported.",
+        "source_file": "",
+        "page_or_section": "",
+        "evidence_note": "No behavioral catch trials are part of the design."
+      },
+      "block_count": {
+        "status": "reported",
+        "value": "Healthy participants completed three blocks; patients averaged 3.2 blocks per session, ranging from 1 to 7, with 96 total blocks across 30 sessions.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF pp.2 and 4, Participants/Experiment 2 procedure",
+        "evidence_note": "Patient session/block variability and healthy block count are reported."
+      },
+      "total_trial_count": {
+        "status": "reported",
+        "value": "Each block had 250 trials; healthy participants therefore completed three 250-trial blocks, and patient data comprised 96 such blocks.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/disorders_consciousness_2019.pdf",
+        "page_or_section": "PDF pp.2-4, Participants/Procedure",
+        "evidence_note": "The paper reports per-block trials, healthy block count, and patient total blocks."
+      }
+    }
+  },
+  "critical_caveats": [
+    "The exact white-noise source file, seed, and any stimulus-generation script are not supplied.",
+    "The profile is static near/far around the arm, not a looming, receding, or frontal auditory trajectory.",
+    "Only distance-specific SPL values are reported; no detailed amplitude envelope is provided beyond the 50 ms burst.",
+    "Patient recordings had variable block counts by clinical availability.",
+    "This is a passive EEG profile with no behavioral response window or catch task."
+  ],
+  "next_manual_action": "Use this as the high-confidence DoC/static near-far arm protocol source for the Cell Reports Medicine lineage. For missing exact sound assets or scripts, inspect cited lineage papers, but do not infer a looming/frontal trajectory from this paper."
+}

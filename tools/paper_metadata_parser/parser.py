@@ -1533,6 +1533,10 @@ Use `python -m tools.paper_metadata_parser.bundle --repo-root .` to refresh `loc
 
 Manual reviews are the layer where auto-mined candidates become checked metadata. Keep them short and source-pointer-only; do not paste full methods text or copyrighted passages.
 
+## Protocol Lineage Rule
+
+Some papers omit low-level stimulus, trajectory, timing, or count details because they say the task was adapted from, based on, or used as an established paradigm from earlier work. In those cases, inspect the cited prior-protocol paper before marking the field `not_reported_after_review`, and record the linked source in `protocol_lineage_candidates.csv`.
+
 ## Tracked Generated Ledgers
 
 - `pdf_retrieval_inventory.csv`: canonical running list of which main publication PDFs are already retrieved, which are missing, DOI/DOI URL for missing records, and the local target filename.
