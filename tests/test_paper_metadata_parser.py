@@ -7,6 +7,7 @@ from pathlib import Path
 
 from tools.paper_metadata_parser import run_audit
 from tools.paper_metadata_parser.parser import (
+    CONFIDENCE_LABELS,
     EXTRACTION_STATUSES,
     FIELD_STATUSES,
     PDF_STATUSES,
@@ -44,18 +45,11 @@ def test_paper_metadata_audit_covers_literature_database():
     assert audit_ids == coverage_ids
     assert checklist_ids == coverage_ids
     assert len(paper_audits) == 74
-    assert summary["pdf_status_counts"] == {
-        "needs_user_download": 69,
-        "not_applicable": 5,
-    }
-    assert summary["supplement_status_counts"] == {
-        "not_applicable": 5,
-        "not_checked": 69,
-    }
-    assert summary["extraction_status_counts"] == {
-        "parsed_with_warnings": 5,
-        "pending_pdf": 69,
-    }
+    assert sum(summary["pdf_status_counts"].values()) == 74
+    assert sum(summary["supplement_status_counts"].values()) == 74
+    assert sum(summary["extraction_status_counts"].values()) == 74
+    assert summary["pdf_status_counts"].get("not_applicable") == 5
+    assert summary["supplement_status_counts"].get("not_applicable") == 5
 
 
 def test_paper_metadata_schema_and_status_values_are_valid():
@@ -67,12 +61,16 @@ def test_paper_metadata_schema_and_status_values_are_valid():
     assert set(schema["supplement_statuses"]) == set(SUPPLEMENT_STATUSES) == set(tool_schema["supplement_statuses"])
     assert set(schema["extraction_statuses"]) == set(EXTRACTION_STATUSES) == set(tool_schema["extraction_statuses"])
     assert set(schema["field_statuses"]) == set(FIELD_STATUSES) == set(tool_schema["field_statuses"])
+    assert set(schema["confidence_labels"]) == set(CONFIDENCE_LABELS) == set(tool_schema["confidence_labels"])
     assert schema["local_artifact_conventions"]["main_pdf_filename"].startswith("artifacts/")
 
     for record in audit_records:
         assert record["pdf_status"] in PDF_STATUSES, record["record_id"]
         assert record["supplement_status"] in SUPPLEMENT_STATUSES, record["record_id"]
         assert record["extraction_status"] in EXTRACTION_STATUSES, record["record_id"]
+        assert record["metadata_confidence_label"] in CONFIDENCE_LABELS, record["record_id"]
+        assert 0.0 <= float(record["metadata_confidence_score"]) <= 1.0, record["record_id"]
+        assert record["metadata_confidence_basis"], record["record_id"]
         assert record["schema"] == "pps-paper-metadata-audit-record.v1"
         assert record["review_attempts"], record["record_id"]
         for segment_fields in record["segment_field_audit"].values():
@@ -83,11 +81,18 @@ def test_paper_metadata_schema_and_status_values_are_valid():
         if record["coverage_category"] == "adjacent_out_of_scope":
             assert record["pdf_status"] == "not_applicable"
             assert record["supplement_status"] == "not_applicable"
+            assert record["metadata_confidence_label"] == "not_applicable"
             for segment_fields in record["segment_field_audit"].values():
                 assert {field["status"] for field in segment_fields.values()} == {"not_applicable"}
         else:
-            assert record["pdf_status"] == "needs_user_download"
-            assert record["supplement_status"] == "not_checked"
+            assert record["pdf_status"] in set(PDF_STATUSES) - {"not_applicable"}
+            assert record["supplement_status"] in set(SUPPLEMENT_STATUSES) - {"not_applicable"}
+            if record["pdf_status"] == "downloaded":
+                assert record["metadata_confidence_label"] in {
+                    "source_acquired_unreviewed",
+                    "partial_extraction",
+                    "high_confidence_extraction",
+                }
 
 
 def test_missing_pdf_request_list_tracks_main_pdfs_and_supplements():
@@ -100,16 +105,21 @@ def test_missing_pdf_request_list_tracks_main_pdfs_and_supplements():
     }
 
     assert len(in_scope_ids) == 69
-    assert len(requests) == 2 * len(in_scope_ids)
     by_record: dict[str, set[str]] = {}
     for request in requests:
         by_record.setdefault(request["record_id"], set()).add(request["requested_item"])
         assert request["target_location"].startswith("artifacts/paper_metadata_audit/")
         assert not request["target_location"].startswith(str(ROOT))
 
-    assert set(by_record) == in_scope_ids
-    for requested_items in by_record.values():
-        assert requested_items == {"publication_pdf", "supplement_or_methods_files"}
+    assert set(by_record) <= in_scope_ids
+    records = {record["record_id"]: record for record in load_jsonl(AUDIT_DIR / "metadata_audit.jsonl")}
+    for record_id in in_scope_ids:
+        requested_items = by_record.get(record_id, set())
+        record = records[record_id]
+        if record["pdf_status"] != "downloaded":
+            assert "publication_pdf" in requested_items
+        if record["supplement_status"] not in {"downloaded", "not_found"}:
+            assert "supplement_or_methods_files" in requested_items
 
 
 def test_paper_metadata_parser_can_inventory_downloaded_local_files(tmp_path: Path):
@@ -170,6 +180,7 @@ def test_paper_metadata_parser_can_inventory_downloaded_local_files(tmp_path: Pa
     assert summary["record_count"] == 2
     assert by_id["paper_with_pdf"]["pdf_status"] == "downloaded"
     assert by_id["paper_with_pdf"]["supplement_status"] == "downloaded"
+    assert by_id["paper_with_pdf"]["metadata_confidence_label"] == "source_acquired_unreviewed"
     assert by_id["paper_with_pdf"]["pdf_file"] == "artifacts/paper_metadata_audit/publication_pdfs/paper_with_pdf.pdf"
     assert by_id["adjacent_record"]["pdf_status"] == "not_applicable"
     assert by_id["adjacent_record"]["supplement_status"] == "not_applicable"

@@ -1,21 +1,32 @@
 {
   "schema": "pps-paper-metadata-audit-summary.v1",
   "generated_on": "2026-06-16",
-  "parser_version": "0.1.0",
+  "parser_version": "0.2.0",
   "record_count": 74,
   "pdf_status_counts": {
-    "needs_user_download": 69,
-    "not_applicable": 5
+    "downloaded": 27,
+    "needs_user_download": 11,
+    "not_applicable": 5,
+    "open_access_unavailable": 13,
+    "paywalled": 18
   },
   "supplement_status_counts": {
+    "downloaded": 1,
     "not_applicable": 5,
-    "not_checked": 69
+    "not_checked": 68
   },
   "extraction_status_counts": {
+    "parsed": 27,
     "parsed_with_warnings": 5,
-    "pending_pdf": 69
+    "pending_pdf": 42
   },
-  "missing_download_request_count": 138,
+  "metadata_confidence_label_counts": {
+    "not_applicable": 5,
+    "pending_source": 11,
+    "source_acquired_unreviewed": 27,
+    "source_unavailable": 31
+  },
+  "missing_download_request_count": 110,
   "tracked_pdf_folder": "artifacts/paper_metadata_audit/publication_pdfs/",
   "tracked_supplement_folder": "artifacts/paper_metadata_audit/supplements/",
   "tracked_extraction_folder": "artifacts/paper_metadata_audit/extracted/",

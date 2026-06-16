@@ -8,6 +8,8 @@
 - PDF status: `not_applicable`
 - Supplement status: `not_applicable`
 - Extraction status: `parsed_with_warnings`
+- Metadata confidence: `0.0` (`not_applicable`)
+- Confidence basis: Record is adjacent/out of scope for audiotactile PPS Segment 1-4 extraction.
 
 ## Known Prior Gaps
 

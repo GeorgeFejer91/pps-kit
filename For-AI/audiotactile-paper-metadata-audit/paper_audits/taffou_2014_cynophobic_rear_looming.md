@@ -8,6 +8,8 @@
 - PDF status: `needs_user_download`
 - Supplement status: `not_checked`
 - Extraction status: `pending_pdf`
+- Metadata confidence: `0.0` (`pending_source`)
+- Confidence basis: Main publication PDF is not yet locally available for Segment 1-4 inspection.
 
 ## Known Prior Gaps
 

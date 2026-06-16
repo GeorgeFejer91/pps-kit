@@ -1,12 +1,13 @@
 {
   "schema": "pps-paper-metadata-environment.v1",
-  "parser_version": "0.1.0",
+  "parser_version": "0.2.0",
   "checked_on": "2026-06-16",
-  "java_available": false,
-  "opendataloader_pdf_installed": false,
-  "opendataloader_ready": false,
+  "java_available": true,
+  "java_source": "local_artifact_jdk",
+  "opendataloader_pdf_installed": true,
+  "opendataloader_ready": true,
   "fallback_extractors": {
-    "pdfplumber_installed": false,
+    "pdfplumber_installed": true,
     "pypdf_installed": true,
     "pdftoppm_available": true,
     "pdfinfo_available": true

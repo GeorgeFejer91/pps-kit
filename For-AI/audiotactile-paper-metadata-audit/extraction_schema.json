@@ -1,6 +1,6 @@
 {
   "schema": "pps-paper-metadata-extraction-schema.v1",
-  "parser_version": "0.1.0",
+  "parser_version": "0.2.0",
   "pdf_statuses": [
     "downloaded",
     "open_access_unavailable",
@@ -30,6 +30,14 @@
     "not_reported_after_review",
     "not_applicable",
     "source_unavailable"
+  ],
+  "confidence_labels": [
+    "not_applicable",
+    "pending_source",
+    "source_unavailable",
+    "source_acquired_unreviewed",
+    "partial_extraction",
+    "high_confidence_extraction"
   ],
   "segment_fields": {
     "segment_1_stimulus_reconstruction": [

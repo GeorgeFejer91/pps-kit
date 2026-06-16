@@ -4,6 +4,7 @@ import argparse
 import csv
 import importlib.util
 import json
+import os
 import shutil
 from dataclasses import dataclass
 from datetime import date
@@ -11,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 
-PARSER_VERSION = "0.1.0"
+PARSER_VERSION = "0.2.0"
 
 COVERAGE_PATH = Path("assets/preloads/audiotactile_literature_coverage.json")
 AUDIT_DIR = Path("For-AI/audiotactile-paper-metadata-audit")
@@ -19,6 +20,8 @@ ARTIFACT_DIR = Path("artifacts/paper_metadata_audit")
 PDF_DIR = ARTIFACT_DIR / "publication_pdfs"
 SUPPLEMENT_DIR = ARTIFACT_DIR / "supplements"
 EXTRACTED_DIR = ARTIFACT_DIR / "extracted"
+ACQUISITION_STATUS_PATH = ARTIFACT_DIR / "acquisition_status.json"
+LOCAL_JAVA_ROOT = ARTIFACT_DIR / "tooling" / "jdk"
 
 PDF_STATUSES = (
     "downloaded",
@@ -49,6 +52,14 @@ FIELD_STATUSES = (
     "not_reported_after_review",
     "not_applicable",
     "source_unavailable",
+)
+CONFIDENCE_LABELS = (
+    "not_applicable",
+    "pending_source",
+    "source_unavailable",
+    "source_acquired_unreviewed",
+    "partial_extraction",
+    "high_confidence_extraction",
 )
 
 ADJACENT_CATEGORY = "adjacent_out_of_scope"
@@ -245,8 +256,37 @@ def ensure_directories(paths: AuditPaths) -> None:
         folder.mkdir(parents=True, exist_ok=True)
 
 
-def detect_environment() -> dict[str, Any]:
-    java_available = shutil.which("java") is not None
+def local_java_executable(repo_root: Path) -> Path | None:
+    java_root = repo_root / LOCAL_JAVA_ROOT
+    if not java_root.exists():
+        return None
+    candidates = sorted(java_root.rglob("bin/java.exe")) + sorted(java_root.rglob("bin/java"))
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def ensure_java_on_path(repo_root: Path) -> Path | None:
+    existing = shutil.which("java")
+    if existing:
+        return Path(existing)
+    local_java = local_java_executable(repo_root)
+    if local_java is None:
+        return None
+    java_bin = str(local_java.parent)
+    path_parts = os.environ.get("PATH", "").split(os.pathsep)
+    if java_bin not in path_parts:
+        os.environ["PATH"] = java_bin + os.pathsep + os.environ.get("PATH", "")
+    os.environ.setdefault("JAVA_HOME", str(local_java.parent.parent))
+    return local_java
+
+
+def detect_environment(repo_root: Path | None = None) -> dict[str, Any]:
+    repo_root = (repo_root or Path(".")).resolve()
+    path_java = shutil.which("java")
+    local_java = local_java_executable(repo_root)
+    java_available = path_java is not None or local_java is not None
     opendataloader_installed = importlib.util.find_spec("opendataloader_pdf") is not None
     pdfplumber_installed = importlib.util.find_spec("pdfplumber") is not None
     pypdf_installed = importlib.util.find_spec("pypdf") is not None
@@ -257,6 +297,7 @@ def detect_environment() -> dict[str, Any]:
         "parser_version": PARSER_VERSION,
         "checked_on": date.today().isoformat(),
         "java_available": java_available,
+        "java_source": "PATH" if path_java else ("local_artifact_jdk" if local_java else ""),
         "opendataloader_pdf_installed": opendataloader_installed,
         "opendataloader_ready": java_available and opendataloader_installed,
         "fallback_extractors": {
@@ -274,7 +315,7 @@ def detect_environment() -> dict[str, Any]:
 
 
 def is_valid_pdf(path: Path) -> bool:
-    if not path.is_file() or path.suffix.lower() != ".pdf" or path.stat().st_size == 0:
+    if not path.is_file() or path.stat().st_size == 0:
         return False
     with path.open("rb") as handle:
         prefix = handle.read(1024)
@@ -289,6 +330,18 @@ def find_pdf(record_id: str, pdf_dir: Path) -> tuple[Path | None, str]:
     if valid:
         return valid[0], "downloaded"
     return candidates[0], "bad_pdf"
+
+
+def load_acquisition_status(path: Path) -> dict[str, dict[str, Any]]:
+    if not path.exists():
+        return {}
+    payload = load_json(path)
+    records = payload.get("records", [])
+    return {
+        str(record.get("record_id")): record
+        for record in records
+        if record.get("record_id")
+    }
 
 
 def find_supplements(record_id: str, supplement_dir: Path) -> tuple[list[Path], str]:
@@ -328,6 +381,36 @@ def make_field_template(record: dict[str, Any]) -> dict[str, dict[str, Any]]:
         segment: {field["key"]: initial_field_audit(status) for field in fields}
         for segment, fields in SEGMENT_FIELDS.items()
     }
+
+
+def metadata_confidence(
+    record: dict[str, Any],
+    pdf_status: str,
+    extraction_status: str,
+) -> tuple[float, str, str]:
+    if record["coverage_category"] == ADJACENT_CATEGORY:
+        return (
+            0.0,
+            "not_applicable",
+            "Record is adjacent/out of scope for audiotactile PPS Segment 1-4 extraction.",
+        )
+    if pdf_status == "downloaded" and extraction_status in {"parsed", "parsed_with_warnings"}:
+        return (
+            0.2,
+            "source_acquired_unreviewed",
+            "Publication PDF is locally available and parsed, but Segment 1-4 values still require critical manual review.",
+        )
+    if pdf_status in {"open_access_unavailable", "paywalled"}:
+        return (
+            0.0,
+            "source_unavailable",
+            "Automated open-access acquisition did not produce a locally inspectable publication PDF.",
+        )
+    return (
+        0.0,
+        "pending_source",
+        "Main publication PDF is not yet locally available for Segment 1-4 inspection.",
+    )
 
 
 def make_review_attempts(record: dict[str, Any], pdf_status: str, supplement_status: str) -> list[dict[str, str]]:
@@ -398,10 +481,11 @@ def fallback_extract_pdf(pdf_path: Path, output_dir: Path) -> tuple[str, list[st
     return out_path.name, warnings
 
 
-def run_opendataloader(pdf_paths: list[Path], output_dir: Path) -> tuple[bool, str]:
+def run_opendataloader(pdf_paths: list[Path], output_dir: Path, repo_root: Path) -> tuple[bool, str]:
     if not pdf_paths:
         return True, "no PDFs to parse"
-    if not (shutil.which("java") and importlib.util.find_spec("opendataloader_pdf")):
+    java_path = ensure_java_on_path(repo_root)
+    if not (java_path and importlib.util.find_spec("opendataloader_pdf")):
         return False, "Java and/or opendataloader_pdf unavailable"
     try:
         import opendataloader_pdf  # type: ignore
@@ -429,7 +513,7 @@ def extract_downloaded_pdfs(records: list[dict[str, Any]], paths: AuditPaths) ->
             pdf_by_record[record["record_id"]] = pdf_path
 
     extraction_log: dict[str, dict[str, Any]] = {}
-    success, message = run_opendataloader(downloaded, paths.extracted_dir / "opendataloader")
+    success, message = run_opendataloader(downloaded, paths.extracted_dir / "opendataloader", paths.repo_root)
     for record_id, pdf_path in pdf_by_record.items():
         extraction_log[record_id] = {
             "primary_extractor": "opendataloader_pdf",
@@ -469,10 +553,16 @@ def build_records(
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     audit_records: list[dict[str, Any]] = []
     missing_requests: list[dict[str, Any]] = []
+    acquisition_by_record = load_acquisition_status(paths.repo_root / ACQUISITION_STATUS_PATH)
     for record in literature_records:
         record_id = record["record_id"]
         is_adjacent = record["coverage_category"] == ADJACENT_CATEGORY
+        acquisition_status = acquisition_by_record.get(record_id, {})
         pdf_path, pdf_status = (None, "not_applicable") if is_adjacent else find_pdf(record_id, paths.pdf_dir)
+        if not is_adjacent and pdf_path is None:
+            acquired_status = acquisition_status.get("pdf_status")
+            if acquired_status in PDF_STATUSES and acquired_status != "downloaded":
+                pdf_status = acquired_status
         supplement_files, supplement_status = (
             ([], "not_applicable") if is_adjacent else find_supplements(record_id, paths.supplement_dir)
         )
@@ -484,6 +574,11 @@ def build_records(
             extraction_status = "pending_pdf"
         else:
             extraction_status = extraction_log.get(record_id, {}).get("status", "parsed_with_warnings")
+        confidence_score, confidence_label, confidence_basis = metadata_confidence(
+            record,
+            pdf_status,
+            extraction_status,
+        )
 
         audit_record = {
             "schema": "pps-paper-metadata-audit-record.v1",
@@ -497,9 +592,14 @@ def build_records(
             "current_template_ids": record.get("current_template_ids", []),
             "pdf_status": pdf_status,
             "pdf_file": artifact_rel(pdf_path, paths.repo_root) if pdf_path else "",
+            "pdf_acquisition_attempt_count": acquisition_status.get("attempt_count", 0),
+            "pdf_acquisition_last_status": acquisition_status.get("last_status", ""),
             "supplement_status": supplement_status,
             "supplement_files": [artifact_rel(path, paths.repo_root) for path in supplement_files],
             "extraction_status": extraction_status,
+            "metadata_confidence_score": confidence_score,
+            "metadata_confidence_label": confidence_label,
+            "metadata_confidence_basis": confidence_basis,
             "extraction_outputs": {
                 "primary": "artifacts/paper_metadata_audit/extracted/opendataloader/",
                 "fallback": f"artifacts/paper_metadata_audit/extracted/fallback/{record_id}/",
@@ -513,7 +613,7 @@ def build_records(
         }
         audit_records.append(audit_record)
 
-        if not is_adjacent and pdf_status in {"needs_user_download", "bad_pdf"}:
+        if not is_adjacent and pdf_status in {"needs_user_download", "bad_pdf", "open_access_unavailable", "paywalled"}:
             missing_requests.append(
                 {
                     "record_id": record_id,
@@ -557,6 +657,7 @@ def summary_from_records(audit_records: list[dict[str, Any]], missing_requests: 
         "pdf_status_counts": count_by("pdf_status"),
         "supplement_status_counts": count_by("supplement_status"),
         "extraction_status_counts": count_by("extraction_status"),
+        "metadata_confidence_label_counts": count_by("metadata_confidence_label"),
         "missing_download_request_count": len(missing_requests),
         "tracked_pdf_folder": "artifacts/paper_metadata_audit/publication_pdfs/",
         "tracked_supplement_folder": "artifacts/paper_metadata_audit/supplements/",
@@ -573,6 +674,7 @@ def schema_payload() -> dict[str, Any]:
         "supplement_statuses": list(SUPPLEMENT_STATUSES),
         "extraction_statuses": list(EXTRACTION_STATUSES),
         "field_statuses": list(FIELD_STATUSES),
+        "confidence_labels": list(CONFIDENCE_LABELS),
         "segment_fields": SEGMENT_FIELDS,
         "review_rule": {
             "missing_value_rule": "Only mark not_reported_after_review after main PDF extraction, targeted methods/table search, supplement search, and fallback extractor/source check have all been attempted.",
@@ -619,6 +721,7 @@ The `artifacts/` tree is ignored by Git. Do not commit PDFs, supplements, extrac
 - PDF status counts: `{json.dumps(summary["pdf_status_counts"], sort_keys=True)}`
 - Supplement status counts: `{json.dumps(summary["supplement_status_counts"], sort_keys=True)}`
 - Extraction status counts: `{json.dumps(summary["extraction_status_counts"], sort_keys=True)}`
+- Metadata confidence counts: `{json.dumps(summary["metadata_confidence_label_counts"], sort_keys=True)}`
 - Missing download/check requests: {summary["missing_download_request_count"]}
 
 ## Environment Readiness
@@ -686,6 +789,8 @@ def paper_audit_text(record: dict[str, Any]) -> str:
         f"- PDF status: `{record['pdf_status']}`",
         f"- Supplement status: `{record['supplement_status']}`",
         f"- Extraction status: `{record['extraction_status']}`",
+        f"- Metadata confidence: `{record['metadata_confidence_score']}` (`{record['metadata_confidence_label']}`)",
+        f"- Confidence basis: {ascii_safe(record['metadata_confidence_basis'])}",
         "",
         "## Known Prior Gaps",
         "",
@@ -739,6 +844,8 @@ def write_audit_files(
             "pdf_file": record["pdf_file"],
             "supplement_file_count": len(record["supplement_files"]),
             "known_prior_gap_count": len(record["known_missing_or_unresolved_from_prior_ledger"]),
+            "metadata_confidence_score": record["metadata_confidence_score"],
+            "metadata_confidence_label": record["metadata_confidence_label"],
         }
         for record in audit_records
     ]
@@ -756,6 +863,8 @@ def write_audit_files(
             "pdf_file",
             "supplement_file_count",
             "known_prior_gap_count",
+            "metadata_confidence_score",
+            "metadata_confidence_label",
         ],
     )
     write_csv(
@@ -794,7 +903,7 @@ def run_audit(
     ensure_directories(paths)
     coverage = load_json(paths.coverage_path)
     records = list(coverage["literature_records"])
-    environment = detect_environment()
+    environment = detect_environment(paths.repo_root)
     extraction_log = extract_downloaded_pdfs(records, paths) if parse_downloaded else {}
     audit_records, missing_requests = build_records(records, paths, extraction_log)
     summary = summary_from_records(audit_records, missing_requests)

@@ -13,17 +13,18 @@ The `artifacts/` tree is ignored by Git. Do not commit PDFs, supplements, extrac
 ## Current Inventory
 
 - Literature records: 74
-- PDF status counts: `{"needs_user_download": 69, "not_applicable": 5}`
-- Supplement status counts: `{"not_applicable": 5, "not_checked": 69}`
-- Extraction status counts: `{"parsed_with_warnings": 5, "pending_pdf": 69}`
-- Missing download/check requests: 138
+- PDF status counts: `{"downloaded": 27, "needs_user_download": 11, "not_applicable": 5, "open_access_unavailable": 13, "paywalled": 18}`
+- Supplement status counts: `{"downloaded": 1, "not_applicable": 5, "not_checked": 68}`
+- Extraction status counts: `{"parsed": 27, "parsed_with_warnings": 5, "pending_pdf": 42}`
+- Metadata confidence counts: `{"not_applicable": 5, "pending_source": 11, "source_acquired_unreviewed": 27, "source_unavailable": 31}`
+- Missing download/check requests: 110
 
 ## Environment Readiness
 
-- Java available: `False`
-- `opendataloader_pdf` installed: `False`
-- OpenDataLoader ready: `False`
-- Fallback extractors: `{"pdfinfo_available": true, "pdfplumber_installed": false, "pdftoppm_available": true, "pypdf_installed": true}`
+- Java available: `True`
+- `opendataloader_pdf` installed: `True`
+- OpenDataLoader ready: `True`
+- Fallback extractors: `{"pdfinfo_available": true, "pdfplumber_installed": true, "pdftoppm_available": true, "pypdf_installed": true}`
 
 ## How To Use
 

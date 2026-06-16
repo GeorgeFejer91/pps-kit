@@ -5,9 +5,11 @@
 - DOI URL: https://doi.org/10.1111/j.1467-9280.2007.01952.x
 - Coverage category: `not_yet_templated_requires_toolkit_structure`
 - Task family: static near/far weak-target Go/NoGo tactile detection
-- PDF status: `needs_user_download`
+- PDF status: `paywalled`
 - Supplement status: `not_checked`
 - Extraction status: `pending_pdf`
+- Metadata confidence: `0.0` (`source_unavailable`)
+- Confidence basis: Automated open-access acquisition did not produce a locally inspectable publication PDF.
 
 ## Known Prior Gaps
 
@@ -15,10 +17,10 @@
 
 ## Review Attempts
 
-- `main PDF OpenDataLoader extraction`: `pending` - Run parser after placing the publication PDF in artifacts/paper_metadata_audit/publication_pdfs.
-- `targeted methods/table search`: `pending_pdf` - Search methods, procedure, apparatus, stimuli, trial design, and tables for Segment 1-4 parameters.
+- `main PDF OpenDataLoader extraction`: `available_for_run` - Run parser after placing the publication PDF in artifacts/paper_metadata_audit/publication_pdfs.
+- `targeted methods/table search`: `pending_review` - Search methods, procedure, apparatus, stimuli, trial design, and tables for Segment 1-4 parameters.
 - `supplement search`: `pending_download_or_check` - Check supplementary PDFs, spreadsheets, methods appendices, and task scripts when main-paper fields are absent.
-- `fallback extractor/source check`: `pending_pdf` - Use pdfplumber/pypdf, rendered pages, publisher HTML, or supplement files before marking a field missing.
+- `fallback extractor/source check`: `pending_review` - Use pdfplumber/pypdf, rendered pages, publisher HTML, or supplement files before marking a field missing.
 
 ## Segment Field Status
 
