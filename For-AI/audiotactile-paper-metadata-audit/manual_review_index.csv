@@ -1,3 +1,4 @@
 record_id,citation_short,manual_review_status,confidence_score,confidence_label,profile_recreation_assessment,critical_missing_or_caveat_count,source_check_count,review_date
 canzoneri_2012_dynamic_sounds,Canzoneri et al. (2012),manual_review_completed_main_pdf,0.92,high_confidence_extraction,possible_with_caveats,4,5,2026-06-16
 mindfulness_pps_2024,Mindfulness and PPS boundaries (2024),manual_review_completed_main_pdf,0.86,high_confidence_extraction,possible_with_caveats,4,4,2026-06-16
+serino_2015_peri_trunk_exp1,"Serino et al. (2015), Exp. 1",manual_review_completed_main_pdf_and_supplement,0.86,high_confidence_extraction,possible_with_caveats,6,7,2026-06-16
