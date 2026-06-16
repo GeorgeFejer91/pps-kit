@@ -9,12 +9,12 @@ Use this checklist for every in-scope publication. Each field must carry one of 
 | `stimulus_type` | Noise, tone, ecological sound, speech, or custom/baked stimulus class. |
 | `source_provenance` | Original asset, generated stimulus, licensed set, apparatus source, or supplement file. |
 | `trajectory_count` | Distinct looming/receding/static paths, tones, or auditory conditions. |
-| `trajectory_path` | Start/end distance, direction, body anchor, azimuth/elevation, and spatial coordinate frame. |
+| `trajectory_path` | Start/end distance, direction, participant-facing direction, speaker/source position, body anchor, azimuth/elevation, and spatial coordinate frame. |
 | `stimulus_duration` | Auditory stimulus duration and any pre/post padding. |
 | `stimulus_speed` | Motion speed, path length, propagation timing, or distance-at-time mapping. |
 | `auditory_conditions` | Valence, direction, semantic, movement, or apparatus conditions affecting the auditory stimulus. |
 | `gain_envelope` | SPL, intensity law, gain curve, cross-fade, or amplitude-field information. |
-| `renderer_or_apparatus` | Headphones, HRTF, Unity/3D Tune-In, physical speakers, arrays, or other rendering provenance. |
+| `renderer_or_apparatus` | Headphones, HRTF, Unity/3D Tune-In, physical speakers, arrays, room/speaker layout, or other rendering provenance. |
 
 ## Visual And Layout Approximation Strategies
 
@@ -28,12 +28,33 @@ Use visual inspection whenever the methods text is ambiguous or when speaker/par
 6. Track participant posture and stimulated body part as part of the spatial frame: sitting, supine, arm extended, chest/sternum, hand, back, shoulder, or trunk-centered setups can change the meaning of near/far or front/rear.
 7. If visual scale is used because text is incomplete, write the approximation basis in `evidence_note` and keep the value conservative. Do not mark a visually estimated value as fully `reported`.
 
+For every reviewed paper, add a short orientation ledger to the manual review notes before closing Segment 1:
+
+| Orientation item | Required question |
+|---|---|
+| Participant-facing direction | Which way is the participant's head/trunk/body facing relative to the speakers or virtual source? |
+| Speaker/source layout | Where are the physical speakers, virtual sources, or headphone-rendered sources in room/apparatus coordinates? |
+| Body-relative mapping | How does the paper map those sources onto front/rear/left/right/near/far/approaching/receding relative to the stimulated body site? |
+| Tactile anchor | Which body part and side receive the tactile target, and does that anchor change between blocks? |
+| Movement implementation | Is motion physical source movement, speaker switching, gain/cross-fade, amplitude field, HRTF/renderer motion, or only inferred from timing? |
+| Evidence class | Is the geometry text-reported, caption-reported, figure-derived, supplement-reported, protocol-lineage-reported, or low-confidence inferred? |
+
+If a diagram is the only source, keep the status modest. A scaled figure with printed values can support `derived`; an unscaled schematic supports only qualitative direction unless the caption supplies the missing numbers. When the participant icon faces left/right/up/down on the page, explicitly translate page direction into body-relative direction only if the caption or surrounding text makes that mapping clear.
+
+Hidden-parameter search routes to check before declaring a value absent:
+
+1. Scan prose around Methods, Apparatus, Procedure, Stimuli, Design, EEG/TMS/task sections, and Results footnotes.
+2. Search abbreviations and synonyms: D1-Dn, T1-Tn, SOA, ISI, ITI, jitter, delay, near/far, close/distant, proximal/distal, IN/OUT, looming/receding, front/frontal/anterior, back/rear/posterior, lateral, ipsilateral, contralateral, sagittal, coronal, azimuth, elevation, height, fixation, gaze, facing, rotation, seated, supine, eyes closed, blindfolded.
+3. Inspect figures/captions/tables for labels that do not appear in extracted text, especially small speaker-distance labels, row formulas, block diagrams, timing axes, and supplement-only tables.
+4. Search supplements and source bundles for scripts, spreadsheets, appendix methods, trial lists, figure source data, or exported article PDFs.
+5. Follow protocol-lineage citations when the paper says the task was adapted, based on a previous paradigm, or performed as described elsewhere.
+
 ## Five-Pass Semantic Search Strategy
 
 Every manual review should include five different semantic searches, even when OpenDataLoader finds many candidate fields:
 
 1. Stimulus reconstruction pass: search for sound/noise/tone, waveform, source, SPL, gain, envelope, speaker, headphone, renderer, HRTF, Matlab, Unity, SoundForge, Audacity, and apparatus terms.
-2. Visual/spatial geometry pass: search for figure, schematic, apparatus, frontal, front, rear, left, right, lateral, near, far, distance, elevation, height, body part, participant facing, rotation, and coordinate-frame clues; then inspect rendered pages.
+2. Visual/spatial geometry pass: search for figure, schematic, apparatus, frontal, front, rear, posterior, anterior, sagittal, coronal, left, right, ipsilateral, contralateral, lateral, near, far, proximal, distal, distance, elevation, height, body part, gaze, fixation, eyes closed, blindfolded, participant facing, rotation, and coordinate-frame clues; then inspect rendered pages.
 3. Trial sequence pass: search for randomized, blocked, intermingled, intermixed, pseudo-random, order, sequence, condition, family, percentage, row, block, trial type, ITI, jitter, and response-window terms.
 4. Tactile/SOA/baseline pass: search for tactile, vibrotactile, electrical, vibration, delay, SOA, temporal, onset, baseline, unimodal, pre, post, timing, target, non-target, and correction terms.
 5. Count/catch/protocol-lineage pass: search for repetition, total, catch, no-go, auditory-only, tactile-only, supplement, appendix, protocol, adapted, previous, based on, following, well-established, and cited-methods references.

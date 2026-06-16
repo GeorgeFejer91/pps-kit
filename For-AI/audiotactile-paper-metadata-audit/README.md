@@ -27,11 +27,31 @@ Some papers omit low-level stimulus, trajectory, timing, or count details becaus
 
 Many PPS papers tuck essential parameters into apparatus figures, captions, timing schematics, or row-percentage formulas rather than methods prose. Render and inspect those pages when reviewing a paper. For every trajectory or direction field, separate the physical speaker layout from the body-relative frame: record which way the participant faced, whether the participant rotated between blocks, whether the speakers moved, and which body part anchored the tactile stimulus. If a value is estimated from a figure rather than text/caption, mark it `derived` or `inferred_low_confidence` and explain the visual approximation basis.
 
+Every manual review must include an orientation ledger before Segment 1 trajectory fields are finalized:
+
+- Participant frame: seated/supine/standing posture, gaze or body-facing direction when reported, whether eyes were closed/blindfolded, and whether the participant rotated between blocks.
+- Room/apparatus frame: physical speaker/source positions in room or page coordinates, speaker height, near/far distances, azimuth/elevation, and whether the speaker array or participant moved.
+- Body-relative mapping: how the authors label the same source as front, rear, left, right, ipsilateral, contralateral, proximal, distal, approaching, or receding relative to the stimulated body part.
+- Tactile anchor: body site and side being stimulated, because hand-, trunk-, face-, neck-, and back-centered setups can invert the practical meaning of "near", "front", or "left".
+- Evidence class: text-reported, caption-reported, table-reported, supplement-reported, protocol-lineage-reported, visually derived from a scaled figure, or inferred with low confidence.
+
+Never assume that figure-left/figure-right equals participant-left/participant-right. If the paper shows a person icon, first identify which way the person is facing relative to the speakers, then map the speaker direction into the participant/body frame. If that mapping is not explicit, keep the ambiguity in the review rather than collapsing it into a generic "looming" or "frontal" label.
+
 ## Information Extraction Strategy
 
 Use at least five semantic passes before finalizing a paper: stimulus reconstruction, visual/spatial geometry, trial sequence/intermixing, tactile timing/baseline, and counts/catch trials. The visual/spatial pass must explicitly answer three orientation questions: which direction the participant faced, where each speaker or virtual source sat in room coordinates, and which body-relative direction the authors intended. This prevents a lateral left-of-head array, a frontal speaker pair, and a participant-rotated four-direction block from being collapsed into the same "looming" label.
 
 When methods text is thin, search figures, captions, timing diagrams, table footnotes, percentage formulas, supplement files, publisher HTML, and cited prior-protocol papers. Record whether each value is text-reported, caption-reported, derived from reported numbers, visually approximated, or inherited only as protocol lineage. Do not upgrade a visually approximated value to `reported` unless the caption or methods prose supplies the number or coordinate frame.
+
+Use a hidden-parameter retrieval ladder before marking a field missing:
+
+1. Main text methods/procedure/apparatus/results tables, including abbreviations such as D1-Dn, T1-Tn, AT, A-only, T-only, near/far, IN/OUT, and pre/post.
+2. Figures and captions, especially apparatus photos, timing diagrams, distance-axis labels, block-design panels, and row-percentage formulas.
+3. Supplement files, data dictionaries, trial tables, scripts, appendix methods, publisher "source data", and article-export ZIPs.
+4. Publisher HTML and reference/citation context, including phrases such as adapted from, following, based on, well-established, as previously described, protocol, frontal, front, sagittal, lateral, and near space.
+5. Cited prior-protocol papers when the current paper delegates low-level stimulus, trajectory, timing, or repetition details to earlier work.
+
+For visual approximation, render pages at readable resolution and keep values conservative. Use scaled figure labels or axis ticks when available; otherwise record only qualitative geometry such as "speaker appears lateral to the left hand" or "participant-facing direction unclear". If a diagram supplies direction but not exact distance/speed/timing, the direction can be `derived` while the missing numeric field remains `not_reported_after_review` only after the supplement and protocol-lineage checks are complete.
 
 ## Tracked Generated Ledgers
 
@@ -78,3 +98,5 @@ Automated evidence-mined values are `inferred_low_confidence` candidates. Treat 
 Before marking any value `not_reported_after_review`, inspect the main PDF, methods/tables, supplements, at least one fallback/source route, and any cited prior protocol paper that the article says it adapted, followed, or used as an established paradigm.
 
 Before marking trajectory/direction values as reported, inspect the rendered figure/caption evidence and verify the participant-facing direction relative to speakers, the body-relative direction being tested, and whether the trajectory is physical, digitally rendered, or inferred from gain/cross-fade timing.
+
+Every manual review should preserve the orientation decision in short form, even when no final profile is created. A useful note format is: `participant faces <direction/unclear>; speakers/sources at <room/apparatus positions>; authors test <body-relative label>; tactile anchor <body site>; movement implemented by <physical source/digital renderer/speaker switching/gain envelope>; evidence <text/caption/figure/supplement/lineage>`.
