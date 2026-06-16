@@ -811,6 +811,7 @@ def test_dashboard_pages_companion_contract(tmp_path: Path):
         health = client.get("/api/health", headers={"Origin": origin})
         assert health.status_code == 200
         assert health.json()["service"] == "pps-dashboard-companion"
+        assert health.json()["security"]["mutation_token_required"] is False
         assert health.headers["access-control-allow-origin"] == origin
 
     preloads = client.get("/api/preloads").json()
@@ -847,6 +848,55 @@ def test_dashboard_pages_companion_contract(tmp_path: Path):
     synced = client.post("/api/preloads/study5_box_breathing_pps/sync").json()
     assert synced["status"] == "ready"
     assert synced["ready_asset_count"] == 4
+
+
+def test_dashboard_companion_token_can_gate_mutating_routes(tmp_path: Path):
+    design_path = tmp_path / "design.json"
+    save_design(_compact_design(), design_path)
+    controller = DashboardController(
+        design_path=design_path,
+        render_dir=_render_dir(tmp_path),
+        session_root=tmp_path / "sessions",
+        import_dir=tmp_path / "imports",
+        preview_dir=tmp_path / "previews",
+        project_registry_root=tmp_path / "dashboard_projects" / "0_study_project_registry",
+    )
+    client = TestClient(
+        create_app(
+            controller,
+            web_origins=[],
+            companion_token="test-token",
+            require_mutation_token=True,
+        )
+    )
+
+    health = client.get("/api/health").json()
+    assert health["security"]["mutation_token_required"] is True
+    assert health["security"]["token_header"] == "X-PPS-Companion-Token"
+
+    missing = client.post("/api/design", json={})
+    assert missing.status_code == 403
+    assert missing.json()["reason"] == "missing_token"
+
+    stale = client.post("/api/design", json={}, headers={"X-PPS-Companion-Token": "old-token"})
+    assert stale.status_code == 403
+    assert stale.json()["reason"] == "stale_or_invalid_token"
+
+    accepted = client.post("/api/design", json={}, headers={"X-PPS-Companion-Token": "test-token"})
+    assert accepted.status_code == 200
+    security = client.get("/api/health").json()["security"]
+    assert security["accepted_mutating_requests"] == 1
+    assert security["rejected_mutating_requests"] == 2
+
+
+def test_dashboard_static_assets_include_companion_token_header_control():
+    dashboard_dir = files("peripersonal_space_toolkit.dashboard")
+    html = (dashboard_dir / "index.html").read_text(encoding="utf-8")
+    app_js = (dashboard_dir / "app.js").read_text(encoding="utf-8")
+
+    assert 'id="companion-token"' in html
+    assert "X-PPS-Companion-Token" in app_js
+    assert "ppsDashboard.companionToken" in app_js
 
 
 def test_dashboard_loads_unpublished_study5_preload_with_instruction_events(tmp_path: Path):

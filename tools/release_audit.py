@@ -8,6 +8,7 @@ import csv
 import hashlib
 import json
 import re
+import subprocess
 import sys
 import wave
 from pathlib import Path
@@ -86,11 +87,28 @@ def sha256_file(path: Path) -> str:
 
 
 def iter_public_files(root: Path):
-    for path in root.rglob("*"):
-        if not path.is_file():
+    try:
+        completed = subprocess.run(
+            ["git", "ls-files", "-z"],
+            cwd=root,
+            check=True,
+            capture_output=True,
+        )
+        rel_paths = [Path(item.decode("utf-8")) for item in completed.stdout.split(b"\0") if item]
+    except Exception:
+        rel_paths = []
+        for path in root.rglob("*"):
+            try:
+                if not path.is_file():
+                    continue
+                rel_paths.append(path.relative_to(root))
+            except OSError:
+                continue
+    for rel_path in rel_paths:
+        if set(rel_path.parts) & IGNORED_DIRS:
             continue
-        parts = set(path.relative_to(root).parts)
-        if parts & IGNORED_DIRS:
+        path = root / rel_path
+        if not path.is_file():
             continue
         yield path
 

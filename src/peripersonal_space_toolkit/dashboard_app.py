@@ -79,6 +79,7 @@ from .templates import (
 )
 from .preload_inventory import ensure_preload_assets, load_preload_inventory, preload_inventory_payload, profile_asset_status
 from .runtime_paths import repo_root, writable_root
+from .dashboard_backend.security import CompanionSecurity, TOKEN_HEADER
 
 
 REPO_ROOT = repo_root()
@@ -1459,17 +1460,25 @@ def create_app(
     controller: DashboardController | None = None,
     *,
     web_origins: list[str] | tuple[str, ...] | None = None,
+    companion_token: str | None = None,
+    require_mutation_token: bool | None = None,
 ) -> Any:
     try:
-        from fastapi import Body, FastAPI, HTTPException
+        from fastapi import Body, FastAPI, HTTPException, Request
         from fastapi.middleware.cors import CORSMiddleware
+        from fastapi.responses import JSONResponse
         from fastapi.responses import RedirectResponse
         from fastapi.staticfiles import StaticFiles
     except ImportError as exc:
         raise RuntimeError("Install the web extra to run the dashboard: pip install -e .[web]") from exc
 
     controller = controller or DashboardController()
+    security = CompanionSecurity.from_environment(
+        token=companion_token,
+        require_mutation_token=require_mutation_token,
+    )
     app = FastAPI(title="PPS Local Dashboard", docs_url=None, redoc_url=None)
+    app.state.companion_security = security
     configured_origins = DEFAULT_WEB_ORIGINS if web_origins is None else web_origins
     origins = [origin.rstrip("/") for origin in configured_origins if origin]
     if origins:
@@ -1477,7 +1486,7 @@ def create_app(
             CORSMiddleware,
             allow_origins=origins,
             allow_methods=["GET", "POST"],
-            allow_headers=["Content-Type"],
+            allow_headers=["Content-Type", TOKEN_HEADER],
             allow_credentials=False,
         )
     dashboard_dir = files("peripersonal_space_toolkit.dashboard")
@@ -1492,6 +1501,26 @@ def create_app(
     _ensure_dir(controller.preview_dir)
     app.mount("/api/trial-row-previews", StaticFiles(directory=str(controller.preview_dir)), name="trial_row_previews")
 
+    @app.middleware("http")
+    async def companion_security_middleware(request: Request, call_next: Any) -> Any:
+        if request.method.upper() in {"POST", "PUT", "PATCH", "DELETE"}:
+            accepted, reason = security.authorize_mutation(
+                path=request.url.path,
+                method=request.method.upper(),
+                origin=request.headers.get("origin", ""),
+                supplied_token=request.headers.get(TOKEN_HEADER, ""),
+            )
+            if not accepted:
+                return JSONResponse(
+                    status_code=403,
+                    content={
+                        "detail": "Local companion mutation token is missing or invalid.",
+                        "reason": reason,
+                        "token_header": TOKEN_HEADER,
+                    },
+                )
+        return await call_next(request)
+
     @app.get("/api/state")
     def api_state() -> dict[str, Any]:
         return controller.snapshot()
@@ -1505,6 +1534,7 @@ def create_app(
             "render_dir": str(controller.render_dir),
             "session_root": str(controller.session_root),
             "project_registry_root": str(controller.project_registry_root),
+            "security": security.public_status(),
         }
 
     @app.get("/api/templates")
@@ -7165,6 +7195,16 @@ def build_arg_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Do not allow the default project GitHub Pages origin.",
     )
+    parser.add_argument(
+        "--companion-token",
+        default="",
+        help="Token required in X-PPS-Companion-Token for mutating local companion API calls.",
+    )
+    parser.add_argument(
+        "--require-companion-token",
+        action="store_true",
+        help="Require a per-launch token for mutating local companion API calls. Generates one if --companion-token is omitted.",
+    )
     return parser
 
 
@@ -7197,7 +7237,13 @@ def main(argv: list[str] | None = None) -> int:
             project_registry_root=args.project_registry_root,
         ),
         web_origins=[] if args.no_default_web_origin else [*DEFAULT_WEB_ORIGINS, *args.web_origin],
+        companion_token=args.companion_token or None,
+        require_mutation_token=args.require_companion_token or None,
     )
+    security = getattr(app.state, "companion_security", None)
+    if getattr(security, "enabled", False):
+        print(f"Local companion mutation token: {security.token}")
+        print("Hosted/static dashboards must send it as X-PPS-Companion-Token for mutating actions.")
     if not args.no_browser:
         threading.Timer(0.8, lambda: webbrowser.open(url)).start()
     try:

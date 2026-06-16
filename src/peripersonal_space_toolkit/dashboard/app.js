@@ -5,7 +5,7 @@ const activePolls = new Set();
 let activeNavFrame = 0;
 const CUSTOM_TEMPLATE_ID = "__custom__";
 const DEFAULT_STUDY_TEMPLATE_ID = "study5_box_breathing_pps";
-const STATIC_RESOURCE_VERSION = "20260616-trajectory-nav";
+const STATIC_RESOURCE_VERSION = "20260617-security-core";
 const STATIC_REPO_ROOT = new URL("../../../", document.currentScript?.src || window.location.href).href;
 const STATIC_PRELOAD_INVENTORY_PATH = "assets/preloads/preload_inventory.json";
 const STATIC_TEMPLATE_DIR = "study_templates/";
@@ -107,6 +107,7 @@ const DOWNSTREAM_STEPS = {
   run: []
 };
 const LOCAL_BACKEND_DEFAULT = "http://127.0.0.1:8766";
+const COMPANION_TOKEN_STORAGE_KEY = "ppsDashboard.companionToken";
 const PANEL_RESIZE_SNAP_PX = 8;
 const PANEL_HEIGHT_MIN = 150;
 const PANEL_HEIGHT_MAX = 1000;
@@ -221,6 +222,7 @@ const TRIAL_PREVIEW_LIMIT = 240;
 const $ = (id) => document.getElementById(id);
 const cssEscape = (value) => (window.CSS && window.CSS.escape ? window.CSS.escape(String(value)) : String(value).replace(/["\\]/g, "\\$&"));
 let apiBase = "";
+let companionToken = "";
 let templateLoadInFlight = false;
 let pendingAudioImportMode = "preserve";
 let pendingInstructionSlot = "";
@@ -272,9 +274,11 @@ async function api(path, options = {}) {
   }
   let response;
   try {
+    const headers = { "Content-Type": "application/json", ...(fetchOptions.headers || {}) };
+    if (companionToken) headers["X-PPS-Companion-Token"] = companionToken;
     response = await fetch(apiUrl(path), {
-      headers: { "Content-Type": "application/json" },
-      ...fetchOptions
+      ...fetchOptions,
+      headers
     });
   } catch (error) {
     setConnectionStatus(false);
@@ -343,6 +347,24 @@ function saveApiBase(value) {
     localStorage.removeItem("ppsDashboard.apiBase");
   }
   $("backend-url").value = apiBase || (companionOrigin ? window.location.origin : LOCAL_BACKEND_DEFAULT);
+}
+
+function loadCompanionToken() {
+  const params = new URLSearchParams(window.location.search || "");
+  companionToken = String(params.get("ppsToken") || localStorage.getItem(COMPANION_TOKEN_STORAGE_KEY) || "").trim();
+  const field = $("companion-token");
+  if (field) field.value = companionToken;
+}
+
+function saveCompanionToken(value) {
+  companionToken = String(value || "").trim();
+  if (companionToken) {
+    localStorage.setItem(COMPANION_TOKEN_STORAGE_KEY, companionToken);
+  } else {
+    localStorage.removeItem(COMPANION_TOKEN_STORAGE_KEY);
+  }
+  const field = $("companion-token");
+  if (field) field.value = companionToken;
 }
 
 function setConnectionStatus(connected, label = "") {
@@ -5303,8 +5325,10 @@ function wireEvents() {
   $("apply-design").addEventListener("click", () => applyDesign().catch(reportError));
   $("connect-backend").addEventListener("click", () => {
     saveApiBase($("backend-url").value);
+    saveCompanionToken($("companion-token")?.value || "");
     loadState().catch(reportError);
   });
+  $("companion-token")?.addEventListener("change", () => saveCompanionToken($("companion-token").value));
   for (const button of document.querySelectorAll("[data-page-tab]")) {
     button.addEventListener("click", () => setActivePage(button.dataset.pageTab, { updateHash: true, scrollTop: true }));
   }
@@ -5680,6 +5704,7 @@ function reportError(error) {
 }
 
 loadApiBase();
+loadCompanionToken();
 loadResizableLayoutSettings();
 enforceExternalLinkTargets();
 renderHardwarePixelArt();

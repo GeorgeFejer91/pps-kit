@@ -8,6 +8,7 @@ Read this file before modifying the repository. Then read:
 - [evolving_goals.md](evolving_goals.md) for active decisions and dated project direction.
 - [segment_registry_contract.md](segment_registry_contract.md) for the locked Segments 0-3 project/folder/manifest contract.
 - [download_package_inventory.md](download_package_inventory.md) for the installer/offline-package inventory and release packaging boundary.
+- [module_map.md](module_map.md) for the current source ownership map and refactor direction.
 - [audiotactile-paper-metadata-audit/README.md](audiotactile-paper-metadata-audit/README.md) for the standalone paper/PDF/supplement metadata extraction audit that is independent from GUI profile recreation.
 - [agent_update_protocol.md](agent_update_protocol.md) for how to keep this folder current.
 - [skills/html-dashboard-orchestrator/SKILL.md](skills/html-dashboard-orchestrator/SKILL.md) before making HTML dashboard or hosted-GitHub-Pages GUI changes.

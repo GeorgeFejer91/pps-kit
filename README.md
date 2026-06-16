@@ -225,14 +225,24 @@ windows\                 Ready-to-use Windows setup and launch scripts
 
 Future AI agents and maintainers should start with [AGENTS.md](AGENTS.md) and [For-AI/README.md](For-AI/README.md). The `For-AI\` folder records current project aims, scope, evolving goals, and update rules for keeping that context current.
 
+## Validation Tiers
+
+Use the repo-local check entrypoint for routine validation:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\check_all.ps1 -Tier Quick
+```
+
+`Quick` is the fresh-clone-safe path for ordinary changes. `Standard` adds the full tracked pytest suite, and `Deep` is reserved for generated paper-audit artifacts, packaged-runner checks, or lab hardware evidence when the required local state is present. See [docs/VALIDATION.md](docs/VALIDATION.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
 ## Privacy And Release Boundaries
 
 Do not commit participant recordings, demographics, raw exports, or generated local experiment output. The ignored folders `local_data\`, `artifacts\`, and `models\` are intended for local use only. See [docs/hardware_setup.md](docs/hardware_setup.md), [docs/AUDIO_ROUTING_STRESS_TEST.md](docs/AUDIO_ROUTING_STRESS_TEST.md), [docs/replication_workflow.md](docs/replication_workflow.md), and [docs/privacy_boundary.md](docs/privacy_boundary.md). Run this before publishing a release:
 
 ```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\check_all.ps1 -Tier Standard
 python tools\release_audit.py
 python tools\make_release_bundle.py
-pytest
 ```
 
 ## License

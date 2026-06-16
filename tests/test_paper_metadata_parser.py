@@ -17,6 +17,12 @@ from tools.paper_metadata_parser.parser import (
     SUPPLEMENT_STATUSES,
     TOTAL_SEGMENT_FIELD_COUNT,
 )
+from peripersonal_space_toolkit.paper_audit import (
+    blocker_counts,
+    load_metadata_records,
+    profile_candidate_summary,
+    source_pointer_only_issues,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,6 +37,29 @@ def load_jsonl(path: Path) -> list[dict]:
 def load_csv(path: Path) -> list[dict[str, str]]:
     with path.open(newline="", encoding="utf-8") as handle:
         return list(csv.DictReader(handle))
+
+
+def test_paper_audit_package_summarizes_core_pipeline_without_source_artifacts():
+    records = load_metadata_records(ROOT)
+    summary = profile_candidate_summary(records)
+    blockers = blocker_counts(records)
+
+    assert summary["schema"] == "pps-paper-audit-profile-candidate-summary.v1"
+    assert summary["record_count"] == 74
+    assert summary["category_counts"]["covered_runnable_profile"] == 5
+    assert len(summary["runnable_profile_records"]) == 5
+    assert len(summary["missing_parameter_records"]) == 28
+    assert len(summary["toolkit_structure_gap_records"]) == 36
+    assert len(summary["adjacent_out_of_scope_records"]) == 5
+    assert blockers
+    assert summary["blocker_counts"] == blockers
+    assert "raw PDFs" in summary["copyright_boundary"]
+    assert "artifacts/paper_metadata_audit/" in summary["copyright_boundary"]
+    assert source_pointer_only_issues(records) == []
+    assert all(
+        {"record_id", "citation_short", "coverage_category", "blocker_ids"} <= set(record)
+        for record in summary["toolkit_structure_gap_records"]
+    )
 
 
 def test_paper_metadata_audit_covers_literature_database():
