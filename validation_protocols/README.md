@@ -38,6 +38,7 @@ Run the protocols in this order when doing a full timing audit:
 8. `protocols/08_missed_trial_topup_stress.md`
 9. `protocols/09_recording_layer_alignment_validation.md`
 11. `protocols/11_exhaustive_emulated_participant_runner_stress_test.md`
+12. `protocols/12_published_profile_recreation_interface_validation.md`
 
 For a first hardware/data-collection confidence check, run protocol 0 before
 using real experiment stimuli. For next-phase runner, latency, LSL, and
@@ -53,6 +54,11 @@ packaged Focus Mode / `SessionRunnerController` workflow under test while using
 controlled emulated response plans to audit launch paths, session resolution,
 stimulus assembly, response pairing, top-up behavior, capture options, output
 analysis, and operator failure modes.
+
+Protocol 12 is the published-profile recreation interface matrix. It verifies
+that ready published preloads pass the Segment 0-4 profile gate, remain
+read-only in the interface, materialize through local Segments 0-6, and produce
+runner-handoff artifacts before a profile is treated as runnable evidence.
 
 ## Scripts
 
@@ -87,6 +93,7 @@ python .\validation_protocols\scripts\run_protocol11_controlled_response_matrix.
 python .\validation_protocols\scripts\run_protocol11_capture_options_matrix.py --output-dir artifacts\validation_runs\protocol11_capture_options_matrix_current
 python .\validation_protocols\scripts\validate_protocol11_emulated_runner_artifacts.py --session-dir local_data\sessions\P001_YYYYMMDD_HHMMSS --response-plan artifacts\validation_runs\protocol11_response_plan.json
 python .\validation_protocols\scripts\audit_protocol11_study5_readiness.py --artifact-dir artifacts\validation_runs\full_study5_realtime_current --require-full-study5 --require-realtime
+python .\validation_protocols\scripts\run_profile_recreation_interface_matrix.py --output-dir artifacts\validation_runs\profile_recreation_interface_matrix_current
 python .\validation_protocols\scripts\run_focus_mode_click_path_stress.py --output-dir artifacts\validation_runs\focus_mode_click_path_current --count 10 --offscreen
 python .\validation_protocols\scripts\run_visible_runner_os_click_stress.py --output-dir artifacts\validation_runs\visible_runner_os_click_stress_current --count 10 --interval-s 0.05 --armed
 python .\validation_protocols\scripts\run_one_block_actual_condition_validation.py --run-setup-manifest local_data\dashboard_projects\0_study_project_registry\profile_pfeiffer_2018_lateral_perihead_left_to_right\6_experiment_run_setup\experiment_run_setup_manifest.json --device 31 --audio-gain 0.005 --tactile-gain 0.05
@@ -223,6 +230,13 @@ Separate these quantities in every report:
   forwards it as `PPS_AUDIO_DEVICE_INDEX`. This is
   pre-participant operational evidence, not hardware latency, Woojer
   mechanical-onset, or scientific PPS evidence.
+- Published-profile recreation interface matrix: whether ready published
+  profiles can be selected through the preload/profile path, validated against
+  `profile_recreation_status.json`, kept read-only, materialized through
+  local Segments 0-6, and converted into runner-handoff artifacts without
+  writing generated outputs under `assets/preloads/`. This is a parameter and
+  interface recreation gate; it is not a claim to use original author stimuli
+  or to prove hardware timing.
 - Actual-block direct loopback evidence: whether the same actual one-block
   session's source block WAV and direct electrical capture recover stable
   channel alignment and paired inter-channel skew without clipping. Absolute
