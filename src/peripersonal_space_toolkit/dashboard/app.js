@@ -5,7 +5,7 @@ const activePolls = new Set();
 let activeNavFrame = 0;
 const CUSTOM_TEMPLATE_ID = "__custom__";
 const DEFAULT_STUDY_TEMPLATE_ID = "study5_box_breathing_pps";
-const STATIC_RESOURCE_VERSION = "20260616-3dti-citations";
+const STATIC_RESOURCE_VERSION = "20260616-trajectory-nav";
 const STATIC_REPO_ROOT = new URL("../../../", document.currentScript?.src || window.location.href).href;
 const STATIC_PRELOAD_INVENTORY_PATH = "assets/preloads/preload_inventory.json";
 const STATIC_TEMPLATE_DIR = "study_templates/";
@@ -4816,6 +4816,10 @@ function syncPreviewModeControls(mode) {
     button.classList.toggle("active", button.dataset.previewMode === current);
     button.setAttribute("aria-pressed", String(button.dataset.previewMode === current));
   }
+  const presetControl = $("view-preset-control");
+  if (presetControl) {
+    presetControl.hidden = current !== "3d";
+  }
 }
 
 function getWorkflowStep(stepId) {
@@ -5533,6 +5537,9 @@ function wireEvents() {
   $("fit-radius-camera").addEventListener("click", () => callTrajectoryViewer("fitTrajectoryRadius"));
   $("zoom-in-camera").addEventListener("click", () => callTrajectoryViewer("zoomTrajectoryCamera", "in"));
   $("zoom-out-camera").addEventListener("click", () => callTrajectoryViewer("zoomTrajectoryCamera", "out"));
+  for (const button of document.querySelectorAll("[data-view-preset]")) {
+    button.addEventListener("click", () => callTrajectoryViewer("snapTrajectoryView", button.dataset.viewPreset));
+  }
   $("preview-mode").addEventListener("change", () => setPreviewMode($("preview-mode").value));
   for (const id of TRAJECTORY_FIELD_IDS) {
     $(id).addEventListener("input", updateViewer);
