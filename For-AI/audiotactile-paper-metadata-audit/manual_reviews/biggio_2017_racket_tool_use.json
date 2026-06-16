@@ -1,0 +1,282 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "biggio_2017_racket_tool_use",
+  "citation_short": "Biggio et al. (2017)",
+  "review_date": "2026-06-16",
+  "manual_review_status": "manual_review_completed_main_pdf_no_supplement_found",
+  "confidence_score": 0.84,
+  "confidence_label": "high_confidence_extraction",
+  "confidence_basis": "Main PDF, OpenDataLoader output, fallback text search, rendered methods/results pages, and a DOI/source-route check were reviewed. The static near/far speaker geometry, 150 ms pink-noise stimulus, 70 dB ear-level equalization, electrical tactile target, microphone response capture, no-racket/common-racket/personal-racket sessions, random 90-trial session structure, catch counts, and group-specific session counts are reported. Remaining gaps are exact far-sound lead time, ITI/jitter, numeric response window, exact tactile pulse/current, and the pink-noise source file/seed.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats_static_near_far_racket_condition",
+    "reason": "The core audio-tactile PPS task can be recreated as a static near/far speaker design with no-racket, common-racket, and personal-racket blocked sessions. Exact replication would require assumptions for the unreported far-sound lead, ITI, response timeout, tactile pulse parameters, and pink-noise source."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf",
+      "source": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+      "status": "reviewed",
+      "scope": "PDF pages 2-4 for Experimental procedure, Figure 1, session structure, apparatus, trial counts, RT scoring, and results sanity checks."
+    },
+    {
+      "source_type": "opendataloader_json",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/biggio_2017_racket_tool_use.json",
+      "status": "reviewed",
+      "scope": "Used as primary extracted text map and checked against rendered PDF pages and targeted text searches."
+    },
+    {
+      "source_type": "fallback_text_extraction",
+      "source": "pdftotext/pdfplumber-style local text search",
+      "status": "reviewed",
+      "scope": "Targeted searches for pink noise, loudspeaker, near/far, 68.5 cm, 30 cm, 70 dB, trial, catch, random, baseline, SOA, ITI, tactile, Digitimer, microphone, and response terms."
+    },
+    {
+      "source_type": "rendered_pdf_pages",
+      "source": "tmp/pdfs/biggio_2017_review/page-2.png through page-4.png",
+      "status": "reviewed_not_tracked",
+      "scope": "Visual methods and figure check; temporary rendered page images were not committed."
+    },
+    {
+      "source_type": "supplement_route_check",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2017.07.018",
+      "status": "checked_no_supplement_found",
+      "scope": "Tracked ledger plus web/source route did not identify a supplement for this article."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "OpenDataLoader PDF extraction",
+      "status": "completed",
+      "result": "Mapped automated candidate Segment 1-4 values across 16 of 25 fields."
+    },
+    {
+      "strategy": "Stimulus reconstruction pass",
+      "status": "completed",
+      "result": "Confirmed static near/far pink-noise speaker conditions, 150 ms duration, 70 dB ear-level equalization, 68.5 cm near-far spacing, and racket geometry."
+    },
+    {
+      "strategy": "Timing and SOA pass",
+      "status": "completed_with_gap",
+      "result": "Confirmed near sound/touch simultaneity and qualitative far-sound lead; no exact far lead, ITI, or jitter values were found."
+    },
+    {
+      "strategy": "Sequence and intermixing pass",
+      "status": "completed",
+      "result": "Confirmed random within-session ordering of near, far, and catch rows, with no-racket/common-racket/personal-racket sessions counterbalanced as blocked conditions."
+    },
+    {
+      "strategy": "Baseline, catch, and counts pass",
+      "status": "completed",
+      "result": "Confirmed 90 trials per session, 30 near audio-tactile, 30 far audio-tactile, 30 catch trials split 15 near and 15 far, and no separate tactile-only baseline."
+    },
+    {
+      "strategy": "Tactile and response apparatus pass",
+      "status": "completed",
+      "result": "Confirmed right-wrist electrical stimulation via DS7AH HV Digitimer, microphone voice response capture, and Matlab analysis of audio traces."
+    },
+    {
+      "strategy": "Rendered-page and source route pass",
+      "status": "completed_no_supplement",
+      "result": "Rendered pages 2-4 were inspected and no supplement was found through the tracked DOI/source route."
+    }
+  ],
+  "field_status_counts": {
+    "not_applicable": 3,
+    "not_reported_after_review": 2,
+    "reported": 20
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "reported",
+        "value": "Auditory stimuli were 150 ms bursts of pink noise.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+        "page_or_section": "PDF p.2, Experimental procedure",
+        "evidence_note": "The auditory sound class and duration are stated in the multisensory paradigm description."
+      },
+      "source_provenance": {
+        "status": "reported",
+        "value": "Custom Matlab software synchronized electrical and audio stimuli and controlled trial order; exact pink-noise source file or seed is not supplied.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+        "page_or_section": "PDF p.2, Experimental procedure",
+        "evidence_note": "Software control is reported; reproducible audio asset provenance is incomplete."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "Two static auditory positions: Near and Far.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+        "page_or_section": "PDF pp.2-3, Experimental procedure and Figure 1",
+        "evidence_note": "Near/Far is the spatial auditory factor."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Near loudspeaker was close to the right hand, with the hand about 30 cm from the body; far loudspeaker was about 68.5 cm from the near loudspeaker, corresponding to racket tip placement in racket sessions.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+        "page_or_section": "PDF pp.2-3, Experimental design and Figure 1",
+        "evidence_note": "The text and figure specify the static near/far geometry and racket length."
+      },
+      "stimulus_duration": {
+        "status": "reported",
+        "value": "Pink-noise bursts lasted 150 ms.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+        "page_or_section": "PDF p.2, Experimental procedure",
+        "evidence_note": "Duration is explicitly reported."
+      },
+      "stimulus_speed": {
+        "status": "not_applicable",
+        "value": "No moving or looming sound trajectory was used; sounds were emitted from static near or far loudspeakers.",
+        "source_file": "",
+        "page_or_section": "",
+        "evidence_note": "The auditory manipulation is a static location factor."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "Auditory location conditions were Near and Far, crossed with session/object conditions: no tennis racket, common tennis racket, and personal tennis racket for tennis players.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+        "page_or_section": "PDF pp.2-3, Experimental procedure/design",
+        "evidence_note": "Location and object/session factors are reported."
+      },
+      "gain_envelope": {
+        "status": "reported",
+        "value": "Near and far speaker volumes were individually adjusted so sound intensity was 70 dB at the participant's right ear.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+        "page_or_section": "PDF p.2, Experimental procedure",
+        "evidence_note": "SPL equalization is reported; no dynamic gain envelope is needed for static bursts."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Two identical loudspeakers, a personal computer/custom Matlab synchronization, a DS7AH HV Digitimer stimulator, and microphone voice-response capture.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+        "page_or_section": "PDF pp.2-3, Experimental procedure and Figure 1",
+        "evidence_note": "The apparatus is described in text and shown in Figure 1."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "Each session had near audio-tactile target trials, far audio-tactile target trials, and sound-only catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+        "page_or_section": "PDF p.3, Experimental design",
+        "evidence_note": "The 90-trial session composition lists the three row families."
+      },
+      "condition_intermixing": {
+        "status": "reported",
+        "value": "Within each session, near, far, and catch trials were randomly ordered. Object/session conditions were separate sessions whose order was counterbalanced.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+        "page_or_section": "PDF pp.2-3, Experimental design",
+        "evidence_note": "The paper reports random trial order within sessions and counterbalanced session order."
+      },
+      "blocked_or_random_order": {
+        "status": "reported",
+        "value": "No-racket, common-racket, and personal-racket conditions were blocked by session; session order was counterbalanced among subjects, while trials inside each session were random.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+        "page_or_section": "PDF pp.2-3, Experimental procedure/design",
+        "evidence_note": "Session blocking and trial randomization are explicitly reported."
+      },
+      "iti_jitter_policy": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf; https://doi.org/10.1016/j.neuropsychologia.2017.07.018",
+        "page_or_section": "PDF pp.2-4; source route checked 2026-06-16",
+        "evidence_note": "No ITI, inter-trial jitter, or distribution/range was found in the main PDF or source route."
+      },
+      "response_window": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf; https://doi.org/10.1016/j.neuropsychologia.2017.07.018",
+        "page_or_section": "PDF pp.2-4; source route checked 2026-06-16",
+        "evidence_note": "Participants responded as soon as possible, but no numeric response deadline or scoring window was reported."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Participants were blindfolded, responded verbally to the electrical tactile target, ignored the auditory stimulus, and withheld responses on sound-only catch trials; a familiarization phase preceded the experiment.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+        "page_or_section": "PDF pp.2-3, Experimental procedure/design",
+        "evidence_note": "Target, ignore-sound, catch/no-go, and familiarization rules are reported."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "Electrical tactile stimulation was delivered at the right wrist through a surface bipolar electrode attached with Velcro and connected to a DS7AH HV Digitimer constant-current stimulator.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+        "page_or_section": "PDF p.2, Experimental procedure",
+        "evidence_note": "Modality, site, electrode, and stimulator are reported; pulse duration/current are not."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "Near acoustic and tactile stimuli were simultaneous; far sound began slightly before tactile onset to compensate for distance, but the exact lead time is not reported.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+        "page_or_section": "PDF p.2, Experimental procedure",
+        "evidence_note": "The timing relation is reported qualitatively; exact far SOA is a caveat."
+      },
+      "baseline_strategy": {
+        "status": "reported",
+        "value": "No separate tactile-only baseline is reported; PPS effects are estimated from near-versus-far audio-tactile reaction times within each object/session condition.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+        "page_or_section": "PDF pp.2-3, Experimental design and Data processing",
+        "evidence_note": "The design uses near/far comparison rather than a distinct baseline row."
+      },
+      "baseline_timing": {
+        "status": "not_applicable",
+        "value": "No tactile-only baseline SOA schedule was used or reported.",
+        "source_file": "",
+        "page_or_section": "",
+        "evidence_note": "There is no baseline timing ladder in this design."
+      },
+      "catch_trial_type": {
+        "status": "reported",
+        "value": "Catch trials were sound-only no-response trials split across near and far sound locations.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+        "page_or_section": "PDF p.3, Experimental design",
+        "evidence_note": "Catch type and near/far split are explicitly reported."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "reported",
+        "value": "Per session: 30 near audio-tactile target trials and 30 far audio-tactile target trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+        "page_or_section": "PDF p.3, Experimental design",
+        "evidence_note": "Repetitions per near/far tactile condition are explicitly listed."
+      },
+      "baseline_count": {
+        "status": "not_applicable",
+        "value": "No separate baseline trials are reported.",
+        "source_file": "",
+        "page_or_section": "",
+        "evidence_note": "There is no baseline row to count."
+      },
+      "catch_count": {
+        "status": "reported",
+        "value": "Per session: 30 catch trials, with 15 near-sound-only and 15 far-sound-only trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+        "page_or_section": "PDF p.3, Experimental design",
+        "evidence_note": "The catch count and near/far split are explicit."
+      },
+      "block_count": {
+        "status": "reported",
+        "value": "Novices and tennis players completed no-racket and common-racket sessions; tennis players additionally completed a personal-racket session. Session order was counterbalanced.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+        "page_or_section": "PDF pp.2-3, Experimental procedure/design",
+        "evidence_note": "Session counts differ by group because pTR applied only to tennis players."
+      },
+      "total_trial_count": {
+        "status": "reported",
+        "value": "Each session contained 90 trials. Thus the reported structure gives 180 task trials for novices and 270 task trials for tennis players across their respective sessions.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/biggio_2017_racket_tool_use.pdf",
+        "page_or_section": "PDF p.3, Experimental design",
+        "evidence_note": "Per-session total is explicit; group totals follow directly from the reported sessions."
+      }
+    }
+  },
+  "critical_caveats": [
+    "This is a static near/far auditory task, not a dynamic looming/receding trajectory profile.",
+    "The exact pink-noise source file, random seed, and spectrum recipe are not supplied.",
+    "The exact far-sound lead time is not reported, only a qualitative compensation statement.",
+    "The exact electrical tactile pulse duration, current, and calibration rule are not reported.",
+    "ITI or jitter policy is not reported.",
+    "No numeric response deadline/window is reported for the voice/microphone response."
+  ],
+  "next_manual_action": "Use this as a high-confidence static near/far racket/tool-condition template candidate. Exact recreation should label far-SOA lead, ITI, response window, tactile pulse parameters, and source pink-noise file as lab-default approximations unless a hidden protocol source becomes available."
+}
