@@ -29,6 +29,10 @@ from .analysis_review import (
     MODEL_BEST,
     MODEL_LABELS,
     MODEL_ORDER,
+    MODEL_SIGMOID,
+    PART_AGGREGATION_LABELS,
+    PARTS_POOLED,
+    PARTS_SEPARATE,
     available_models_for_scope,
     best_model_for_scope,
     fit_row_for_scope,
@@ -36,6 +40,7 @@ from .analysis_review import (
     observed_points_for_scope,
     prediction_points_for_scope,
     scope_comparison_row,
+    scopes_for_part_mode,
 )
 from .focus_layout import (
     FocusLayoutProfile,
@@ -100,7 +105,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
 def _require_qt() -> dict[str, Any]:
     try:
         from PySide6.QtCore import QPoint, QTimer, Qt, QUrl, Signal
-        from PySide6.QtGui import QBrush, QColor, QCursor, QDesktopServices, QFontDatabase, QIcon, QKeySequence, QPainter, QPen, QShortcut
+        from PySide6.QtGui import QBrush, QColor, QCursor, QDesktopServices, QFontDatabase, QIcon, QKeySequence, QPainter, QPainterPath, QPen, QShortcut
         from PySide6.QtWidgets import (
             QApplication,
             QCheckBox,
@@ -111,10 +116,12 @@ def _require_qt() -> dict[str, Any]:
             QGridLayout,
             QHBoxLayout,
             QLabel,
+            QHeaderView,
             QLineEdit,
             QMessageBox,
             QProgressBar,
             QPushButton,
+            QScrollArea,
             QSizePolicy,
             QSplitter,
             QTabWidget,
@@ -139,6 +146,7 @@ def _require_qt() -> dict[str, Any]:
         "QFrame": QFrame,
         "QGridLayout": QGridLayout,
         "QHBoxLayout": QHBoxLayout,
+        "QHeaderView": QHeaderView,
         "QFontDatabase": QFontDatabase,
         "QIcon": QIcon,
         "QKeySequence": QKeySequence,
@@ -146,10 +154,12 @@ def _require_qt() -> dict[str, Any]:
         "QLineEdit": QLineEdit,
         "QMessageBox": QMessageBox,
         "QPainter": QPainter,
+        "QPainterPath": QPainterPath,
         "QPen": QPen,
         "QPoint": QPoint,
         "QProgressBar": QProgressBar,
         "QPushButton": QPushButton,
+        "QScrollArea": QScrollArea,
         "QShortcut": QShortcut,
         "Signal": Signal,
         "QSizePolicy": QSizePolicy,
@@ -695,7 +705,10 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
             self.model_label = ""
             self.metric_label = ""
             self.empty_text = "No analysis curve selected"
-            self.setMinimumHeight(280)
+            self.boundary_x: float | None = None
+            self.boundary_label = ""
+            self.setMinimumHeight(178)
+            self.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Expanding)
 
         def set_series(
             self,
@@ -705,12 +718,16 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
             model_label: str,
             metric_label: str,
             empty_text: str,
+            boundary_x: float | None = None,
+            boundary_label: str = "",
         ) -> None:
             self.observed = list(observed)
             self.predicted = list(predicted)
             self.model_label = str(model_label or "")
             self.metric_label = str(metric_label or "")
             self.empty_text = str(empty_text or "No analysis curve selected")
+            self.boundary_x = boundary_x if boundary_x is not None and math.isfinite(float(boundary_x)) else None
+            self.boundary_label = str(boundary_label or "")
             self.update()
 
         def paintEvent(self, _event: Any) -> None:  # noqa: N802 - Qt API
@@ -720,13 +737,19 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                 painter.fillRect(self.rect(), q["QColor"]("#f8f9f6"))
                 width = max(1, int(self.width()))
                 height = max(1, int(self.height()))
-                left = 96
-                right = 18
+                left = 128
+                right = 22
                 top = 28
                 bottom = 42
                 plot_width = max(1, width - left - right)
                 plot_height = max(1, height - top - bottom)
                 all_points = [(float(item["x"]), float(item["y"])) for item in self.observed]
+                for item in self.observed:
+                    low = _analysis_float(item.get("y_low"))
+                    high = _analysis_float(item.get("y_high"))
+                    if low is not None and high is not None:
+                        all_points.append((float(item["x"]), low))
+                        all_points.append((float(item["x"]), high))
                 all_points.extend((float(item["x"]), float(item["y"])) for item in self.predicted)
                 if not all_points:
                     painter.setPen(q["QPen"](q["QColor"]("#647067")))
@@ -734,6 +757,8 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                     return
                 x_values = [point[0] for point in all_points]
                 y_values = [point[1] for point in all_points]
+                if self.boundary_x is not None:
+                    x_values.append(float(self.boundary_x))
                 x_min = min(x_values)
                 x_max = max(x_values)
                 y_min = min(y_values)
@@ -765,6 +790,62 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                 painter.setPen(axis_pen)
                 painter.drawLine(left, top, left, top + plot_height)
                 painter.drawLine(left, top + plot_height, width - right, top + plot_height)
+
+                if self.boundary_x is not None and x_min <= self.boundary_x <= x_max:
+                    boundary_pen = q["QPen"](q["QColor"]("#6a5d2f"))
+                    boundary_pen.setWidth(2)
+                    boundary_pen.setStyle(q["Qt"].PenStyle.DashLine)
+                    painter.setPen(boundary_pen)
+                    boundary_px = _x(float(self.boundary_x))
+                    painter.drawLine(boundary_px, top, boundary_px, top + plot_height)
+                    painter.setPen(q["QPen"](q["QColor"]("#6a5d2f")))
+                    label = self.boundary_label or f"Boundary {_fmt_analysis_value(self.boundary_x)} ms"
+                    label_width = min(150, max(92, width - boundary_px - right - 4))
+                    if label_width < 100:
+                        label_width = 128
+                        label_x = max(left + 4, boundary_px - label_width - 6)
+                    else:
+                        label_x = boundary_px + 6
+                    painter.drawText(label_x, top + 4, label_width, 18, int(q["Qt"].AlignmentFlag.AlignLeft), label)
+
+                spread_points = [
+                    (float(point["x"]), float(point["y_low"]), float(point["y_high"]))
+                    for point in self.observed
+                    if _analysis_float(point.get("y_low")) is not None and _analysis_float(point.get("y_high")) is not None
+                ]
+                if spread_points:
+                    range_color = q["QColor"]("#246b55")
+                    range_color.setAlpha(34)
+                    range_pen_color = q["QColor"]("#246b55")
+                    range_pen_color.setAlpha(82)
+                    if len(spread_points) >= 2:
+                        path = q["QPainterPath"]()
+                        first = spread_points[0]
+                        path.moveTo(_x(first[0]), _y(max(first[1], first[2])))
+                        for x_value, low, high in spread_points[1:]:
+                            path.lineTo(_x(x_value), _y(max(low, high)))
+                        for x_value, low, high in reversed(spread_points):
+                            path.lineTo(_x(x_value), _y(min(low, high)))
+                        path.closeSubpath()
+                        painter.fillPath(path, q["QBrush"](range_color))
+                    painter.setPen(q["QPen"](range_pen_color))
+                    painter.setBrush(q["QBrush"](range_color))
+                    for x_value, low, high in spread_points:
+                        y_top = _y(max(low, high))
+                        y_bottom = _y(min(low, high))
+                        height_px = max(8, y_bottom - y_top)
+                        painter.drawRoundedRect(_x(x_value) - 8, y_top, 16, height_px, 7, 7)
+                    label = str(self.observed[0].get("spread_label") or "").strip()
+                    if label:
+                        painter.setPen(q["QPen"](q["QColor"]("#647067")))
+                        painter.drawText(
+                            left,
+                            top + plot_height + 22,
+                            plot_width,
+                            16,
+                            int(q["Qt"].AlignmentFlag.AlignRight),
+                            f"Range: +/- {label}",
+                        )
 
                 if self.predicted:
                     line_pen = q["QPen"](q["QColor"]("#246b55"))
@@ -807,13 +888,16 @@ class AnalysisReviewDialog:
     def __init__(self, q: dict[str, Any], parent: Any, data: Any) -> None:
         self.q = q
         self.data = data
+        self.current_part_mode = data.default_part_mode
+        self.part_mode_buttons: dict[str, Any] = {}
         self.dialog = q["QDialog"](parent)
         _enable_standard_window_controls(q, self.dialog)
         self.dialog.setWindowTitle("PPS Instant Analysis")
         self.dialog.setModal(False)
-        self.dialog.resize(980, 700)
-        self.dialog.setMinimumSize(760, 520)
-        self.dialog.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
+        minimum_width, minimum_height, initial_width, initial_height = self._screen_sized_bounds()
+        self.dialog.setMinimumSize(minimum_width, minimum_height)
+        self.dialog.resize(initial_width, initial_height)
+        self.dialog.setStyleSheet(self._analysis_style_sheet())
         self._build()
         self._refresh()
 
@@ -822,11 +906,102 @@ class AnalysisReviewDialog:
         self.dialog.raise_()
         self.dialog.activateWindow()
 
+    def _screen_sized_bounds(self) -> tuple[int, int, int, int]:
+        width = 1280
+        height = 900
+        try:
+            screen = self.q["QApplication"].primaryScreen()
+            geometry = screen.availableGeometry() if screen is not None else None
+            if geometry is not None:
+                width = int(geometry.width())
+                height = int(geometry.height())
+        except Exception:
+            pass
+        minimum_width = min(720, max(620, width - 80))
+        minimum_height = min(500, max(460, height - 120))
+        initial_width = min(980, max(minimum_width, width - 120))
+        initial_height = min(700, max(minimum_height, height - 120))
+        return minimum_width, minimum_height, initial_width, initial_height
+
+    def _analysis_style_sheet(self) -> str:
+        return (
+            _focus_style_sheet(self.q, DEFAULT_FOCUS_LAYOUT_PROFILE)
+            + """
+QDialog {
+    background: #f4f5f1;
+}
+QScrollArea#analysisScrollArea,
+QWidget#analysisContent {
+    background: #f4f5f1;
+}
+QFrame#analysisSegmentedControl {
+    background: #ffffff;
+    border: 1px solid #bcc7bd;
+    border-radius: 6px;
+}
+QPushButton#analysisSegmentButton {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 6px 10px;
+    min-height: 30px;
+    font-weight: 700;
+}
+QPushButton#analysisSegmentButton:hover {
+    background: #f3f6f2;
+}
+QPushButton#analysisSegmentButton:checked {
+    background: #246b55;
+    color: #ffffff;
+    font-weight: 800;
+}
+QPushButton#analysisSegmentButton:disabled {
+    color: #9ba59d;
+    background: #eef0eb;
+}
+QTableWidget#analysisOverviewTable {
+    background: #ffffff;
+    border: 1px solid #d9dfd6;
+    border-radius: 6px;
+    gridline-color: #d9dfd6;
+    selection-background-color: #e9f4ef;
+    selection-color: #202621;
+}
+QHeaderView::section {
+    background: #f8f9f6;
+    color: #37433b;
+    border: 0;
+    border-right: 1px solid #d9dfd6;
+    border-bottom: 1px solid #d9dfd6;
+    padding: 5px 6px;
+    font-weight: 800;
+}
+QTextEdit#analysisDetailsText {
+    background: #ffffff;
+    border-radius: 6px;
+}
+"""
+        )
+
     def _build(self) -> None:
         q = self.q
-        root = q["QVBoxLayout"](self.dialog)
-        root.setContentsMargins(14, 14, 14, 14)
-        root.setSpacing(10)
+        outer = q["QVBoxLayout"](self.dialog)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setSpacing(0)
+        self.scroll_area = q["QScrollArea"]()
+        self.scroll_area.setObjectName("analysisScrollArea")
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setHorizontalScrollBarPolicy(q["Qt"].ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.scroll_area.setFrameShape(q["QFrame"].Shape.NoFrame)
+        self.scroll_area.setMinimumHeight(0)
+        self.scroll_area.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Expanding)
+        content = q["QWidget"]()
+        content.setObjectName("analysisContent")
+        root = q["QVBoxLayout"](content)
+        root.setContentsMargins(12, 12, 12, 8)
+        root.setSpacing(8)
+        self.scroll_area.setWidget(content)
+        outer.addWidget(self.scroll_area, 1)
 
         header = q["QLabel"]("Instant PPS Analysis")
         header.setObjectName("appTitle")
@@ -840,14 +1015,29 @@ class AnalysisReviewDialog:
         controls = q["QHBoxLayout"]()
         controls.setContentsMargins(0, 0, 0, 0)
         controls.setSpacing(8)
+        self.part_mode_frame = q["QFrame"]()
+        self.part_mode_frame.setObjectName("analysisSegmentedControl")
+        part_mode_layout = q["QHBoxLayout"](self.part_mode_frame)
+        part_mode_layout.setContentsMargins(0, 0, 0, 0)
+        part_mode_layout.setSpacing(0)
+        available_part_modes = set(self.data.part_modes)
+        for mode in (PARTS_SEPARATE, PARTS_POOLED):
+            button = q["QPushButton"](PART_AGGREGATION_LABELS.get(mode, mode))
+            button.setObjectName("analysisSegmentButton")
+            button.setCheckable(True)
+            button.setEnabled(mode in available_part_modes)
+            button.setChecked(mode == self.current_part_mode)
+            button.clicked.connect(lambda _checked=False, selected_mode=mode: self._set_part_mode(selected_mode))
+            self.part_mode_buttons[mode] = button
+            part_mode_layout.addWidget(button)
         self.scope_combo = q["QComboBox"]()
         self.scope_combo.setObjectName("analysisScopeCombo")
-        for scope in self.data.scopes:
-            self.scope_combo.addItem(scope, scope)
         self.model_combo = q["QComboBox"]()
         self.model_combo.setObjectName("analysisModelCombo")
         for model in MODEL_ORDER:
             self.model_combo.addItem(MODEL_LABELS.get(model, model), model)
+        controls.addWidget(q["QLabel"]("Parts"))
+        controls.addWidget(self.part_mode_frame)
         controls.addWidget(q["QLabel"]("Condition"))
         controls.addWidget(self.scope_combo, 1)
         controls.addWidget(q["QLabel"]("Model"))
@@ -857,6 +1047,8 @@ class AnalysisReviewDialog:
         body = q["QSplitter"](q["Qt"].Orientation.Vertical)
         body.setChildrenCollapsible(False)
         body.setHandleWidth(8)
+        body.setMinimumHeight(0)
+        body.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Expanding)
         root.addWidget(body, 1)
 
         overview_panel, overview_layout = _panel(q, "Best Model Overview")
@@ -864,9 +1056,22 @@ class AnalysisReviewDialog:
         self.overview_table.setObjectName("analysisOverviewTable")
         self.overview_table.setHorizontalHeaderLabels(["Scope", "Best", "AIC", "R2", "RMSE", "Metric", "N"])
         self.overview_table.setEditTriggers(q["QTableWidget"].EditTrigger.NoEditTriggers)
+        self.overview_table.setWordWrap(False)
+        self.overview_table.setMinimumHeight(82)
+        self.overview_table.setMaximumHeight(112)
+        self.overview_table.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Minimum)
+        self.overview_table.setHorizontalScrollBarPolicy(q["Qt"].ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.overview_table.setVerticalScrollBarPolicy(q["Qt"].ScrollBarPolicy.ScrollBarAsNeeded)
         self.overview_table.cellClicked.connect(self._select_scope_from_table)
         try:
-            self.overview_table.horizontalHeader().setStretchLastSection(False)
+            header = self.overview_table.horizontalHeader()
+            header.setStretchLastSection(False)
+            header.setSectionResizeMode(0, q["QHeaderView"].ResizeMode.Stretch)
+            for column in range(1, 7):
+                header.setSectionResizeMode(column, q["QHeaderView"].ResizeMode.Fixed)
+            vertical_header = self.overview_table.verticalHeader()
+            vertical_header.setVisible(False)
+            vertical_header.setDefaultSectionSize(30)
         except Exception:
             pass
         overview_layout.addWidget(self.overview_table)
@@ -881,12 +1086,14 @@ class AnalysisReviewDialog:
         self.detail_text = q["QTextEdit"]()
         self.detail_text.setObjectName("analysisDetailsText")
         self.detail_text.setReadOnly(True)
-        self.detail_text.setMinimumHeight(110)
+        self.detail_text.setMinimumHeight(64)
+        self.detail_text.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Expanding)
         detail_layout.addWidget(self.detail_text)
         body.addWidget(detail_panel)
-        body.setSizes([170, 330, 160])
+        body.setSizes([104, 252, 88])
 
         buttons = q["QHBoxLayout"]()
+        buttons.setContentsMargins(12, 8, 12, 12)
         buttons.addStretch(1)
         self.open_folder_button = q["QPushButton"]("Open Analysis Folder")
         self.open_folder_button.clicked.connect(self._open_analysis_folder)
@@ -894,20 +1101,52 @@ class AnalysisReviewDialog:
         close_button.clicked.connect(self.dialog.close)
         buttons.addWidget(self.open_folder_button)
         buttons.addWidget(close_button)
-        root.addLayout(buttons)
+        outer.addLayout(buttons)
 
         self.scope_combo.currentIndexChanged.connect(lambda _index: self._refresh())
         self.model_combo.currentIndexChanged.connect(lambda _index: self._refresh())
+        self._reload_scopes_for_part_mode()
         self._populate_overview_table()
+
+    def _set_part_mode(self, mode: str) -> None:
+        if mode == self.current_part_mode or mode not in self.data.part_modes:
+            for button_mode, button in self.part_mode_buttons.items():
+                button.setChecked(button_mode == self.current_part_mode)
+            return
+        self.current_part_mode = mode
+        for button_mode, button in self.part_mode_buttons.items():
+            button.setChecked(button_mode == mode)
+        self._reload_scopes_for_part_mode()
+        self._populate_overview_table()
+        self._refresh()
+
+    def _reload_scopes_for_part_mode(self) -> None:
+        current = str(self.scope_combo.currentData() or self.scope_combo.currentText() or "")
+        scopes = scopes_for_part_mode(self.data, self.current_part_mode)
+        try:
+            self.scope_combo.blockSignals(True)
+        except Exception:
+            pass
+        self.scope_combo.clear()
+        for scope in scopes:
+            self.scope_combo.addItem(scope, scope)
+        if current:
+            index = self.scope_combo.findText(current)
+            if index >= 0:
+                self.scope_combo.setCurrentIndex(index)
+        try:
+            self.scope_combo.blockSignals(False)
+        except Exception:
+            pass
 
     def _populate_overview_table(self) -> None:
         q = self.q
-        scopes = self.data.scopes
+        scopes = scopes_for_part_mode(self.data, self.current_part_mode)
         self.overview_table.setRowCount(len(scopes))
         for row_index, scope in enumerate(scopes):
-            row = scope_comparison_row(self.data, scope)
+            row = scope_comparison_row(self.data, scope, self.current_part_mode)
             best_model = str(row.get("best_model") or "").strip()
-            best_fit = fit_row_for_scope(self.data, scope, best_model or MODEL_BEST) or {}
+            best_fit = fit_row_for_scope(self.data, scope, best_model or MODEL_BEST, self.current_part_mode) or {}
             values = [
                 scope,
                 MODEL_LABELS.get(best_model, best_model),
@@ -918,9 +1157,10 @@ class AnalysisReviewDialog:
                 str(row.get("n_points") or best_fit.get("n_points") or ""),
             ]
             for column, value in enumerate(values):
-                self.overview_table.setItem(row_index, column, q["QTableWidgetItem"](str(value)))
-        self.overview_table.resizeColumnsToContents()
-        for column, width in enumerate((250, 95, 70, 70, 76, 150, 58)):
+                item = q["QTableWidgetItem"](str(value))
+                item.setToolTip(str(value))
+                self.overview_table.setItem(row_index, column, item)
+        for column, width in enumerate((220, 112, 62, 62, 70, 118, 34)):
             self.overview_table.setColumnWidth(column, width)
 
     def _select_scope_from_table(self, row: int, _column: int) -> None:
@@ -939,7 +1179,8 @@ class AnalysisReviewDialog:
         self.q["QDesktopServices"].openUrl(self.q["QUrl"].fromLocalFile(str(target)))
 
     def _refresh(self) -> None:
-        if not self.data.scopes:
+        scopes = scopes_for_part_mode(self.data, self.current_part_mode)
+        if not scopes:
             self.scope_combo.setEnabled(False)
             self.model_combo.setEnabled(False)
             self.plot_widget.set_series(
@@ -951,24 +1192,29 @@ class AnalysisReviewDialog:
             )
             self.detail_text.setPlainText(self._empty_detail_text())
             return
-        scope = str(self.scope_combo.currentData() or self.scope_combo.currentText() or self.data.scopes[0])
+        self.scope_combo.setEnabled(True)
+        self.model_combo.setEnabled(True)
+        scope = str(self.scope_combo.currentData() or self.scope_combo.currentText() or scopes[0])
         requested_model = str(self.model_combo.currentData() or MODEL_BEST)
-        resolved_model = best_model_for_scope(self.data, scope) if requested_model == MODEL_BEST else requested_model
-        fit = fit_row_for_scope(self.data, scope, requested_model)
-        observed = observed_points_for_scope(self.data, scope)
-        predicted = prediction_points_for_scope(self.data, scope, requested_model)
+        resolved_model = best_model_for_scope(self.data, scope, self.current_part_mode) if requested_model == MODEL_BEST else requested_model
+        fit = fit_row_for_scope(self.data, scope, requested_model, self.current_part_mode)
+        observed = observed_points_for_scope(self.data, scope, self.current_part_mode)
+        predicted = prediction_points_for_scope(self.data, scope, requested_model, part_mode=self.current_part_mode)
         metric = str(observed[0].get("metric") or "") if observed else str((fit or {}).get("fit_metric") or "")
-        available = available_models_for_scope(self.data, scope)
+        available = available_models_for_scope(self.data, scope, self.current_part_mode)
         model_label = MODEL_LABELS.get(resolved_model, resolved_model or "Model")
         if requested_model == MODEL_BEST and resolved_model:
             model_label = f"Best model: {model_label}"
         empty = f"{MODEL_LABELS.get(requested_model, requested_model)} was not fit for {scope}."
+        boundary_x = _analysis_float((fit or {}).get("pps_boundary_soa_ms")) if resolved_model == MODEL_SIGMOID else None
         self.plot_widget.set_series(
             observed=observed,
             predicted=predicted,
             model_label=f"{scope} | {model_label}",
             metric_label=_metric_display(metric),
             empty_text=empty if observed else "No curve points were available for this condition.",
+            boundary_x=boundary_x,
+            boundary_label=f"PPS boundary {_fmt_analysis_value(boundary_x)} ms" if boundary_x is not None else "",
         )
         self.detail_text.setPlainText(self._detail_text(scope, requested_model, resolved_model, fit, observed, available))
 
@@ -982,13 +1228,17 @@ class AnalysisReviewDialog:
         available: list[str],
     ) -> str:
         lines = [f"Scope: {scope}"]
-        comparison = scope_comparison_row(self.data, scope)
+        lines.append(f"Part summary: {PART_AGGREGATION_LABELS.get(self.current_part_mode, self.current_part_mode)}")
+        comparison = scope_comparison_row(self.data, scope, self.current_part_mode)
         best = str(comparison.get("best_model") or "").strip()
         if best:
             lines.append(f"Best model by AIC: {MODEL_LABELS.get(best, best)}")
             lines.append(f"Best AIC: {_fmt_analysis_value(comparison.get('best_aic'))}")
             lines.append(f"Best R2: {_fmt_analysis_value(comparison.get('best_r2'))}")
         lines.append(f"Observed SOA point count: {len(observed)}")
+        spread_labels = sorted({str(point.get("spread_label") or "").strip() for point in observed if str(point.get("spread_label") or "").strip()})
+        if spread_labels:
+            lines.append(f"Displayed range: +/- {'/'.join(spread_labels)} around each SOA mean")
         if available:
             lines.append("Available displays: " + ", ".join(MODEL_LABELS.get(model, model) for model in available))
         if requested_model == MODEL_BEST and resolved_model:
@@ -1052,10 +1302,23 @@ def _fmt_analysis_value(value: Any) -> str:
     return f"{parsed:.3f}"
 
 
+def _analysis_float(value: Any) -> float | None:
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        return None
+    return parsed if math.isfinite(parsed) else None
+
+
 def _metric_display(value: Any) -> str:
     text = str(value or "").strip()
     if not text:
         return ""
+    lowered = text.lower()
+    if lowered == "facilitation_ms":
+        return "Facilitation (ms)"
+    if lowered == "mean_rt_ms":
+        return "Mean RT (ms)"
     return text.replace("_", " ")
 
 

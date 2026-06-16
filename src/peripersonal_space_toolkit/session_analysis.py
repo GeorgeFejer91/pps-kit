@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import math
+import re
 import statistics
 import warnings as py_warnings
 from dataclasses import dataclass, field
@@ -16,6 +17,8 @@ from scipy.optimize import OptimizeWarning, curve_fit
 
 DEFAULT_MIN_RESPONSE_RT_S = 0.1
 DEFAULT_MAX_RESPONSE_RT_S = 4.0
+AGGREGATION_SEPARATE_PARTS = "separate_parts"
+AGGREGATION_POOL_PARTS = "pooled_parts"
 
 
 @dataclass
@@ -262,6 +265,7 @@ def _summarize_responses(response_rows: list[dict[str, Any]]) -> list[dict[str, 
     for row in response_rows:
         key = (
             row.get("participant_id", ""),
+            row.get("part_number", ""),
             row.get("condition", ""),
             row.get("trial_type", ""),
             row.get("respiratory_phase", ""),
@@ -278,11 +282,13 @@ def _summarize_responses(response_rows: list[dict[str, Any]]) -> list[dict[str, 
         summary.append(
             {
                 "participant_id": key[0],
-                "condition": key[1],
-                "trial_type": key[2],
-                "respiratory_phase": key[3],
-                "noise_type": key[4],
-                "soa_ms": key[5],
+                "part_number": key[1],
+                "condition": key[2],
+                "trial_type": key[3],
+                "respiratory_phase": key[4],
+                "noise_type": key[5],
+                "soa_ms": key[6],
+                "aggregation_mode": AGGREGATION_SEPARATE_PARTS,
                 "n": len(rows),
                 "hits": hits,
                 "hit_rate": hits / len(rows) if rows else "",
@@ -296,11 +302,34 @@ def _summarize_responses(response_rows: list[dict[str, Any]]) -> list[dict[str, 
 def _build_pps_curves(
     response_rows: list[dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[str]]:
-    baseline = _baseline_means(response_rows)
+    curve_rows: list[dict[str, Any]] = []
+    fit_rows: list[dict[str, Any]] = []
+    model_fit_rows: list[dict[str, Any]] = []
+    model_comparison_rows: list[dict[str, Any]] = []
+    warnings: list[str] = []
+    for aggregation_mode in (AGGREGATION_SEPARATE_PARTS, AGGREGATION_POOL_PARTS):
+        mode_curves, mode_fits, mode_model_fits, mode_comparisons, mode_warnings = _build_pps_curves_for_mode(
+            response_rows,
+            aggregation_mode=aggregation_mode,
+        )
+        curve_rows.extend(mode_curves)
+        fit_rows.extend(mode_fits)
+        model_fit_rows.extend(mode_model_fits)
+        model_comparison_rows.extend(mode_comparisons)
+        warnings.extend(mode_warnings)
+    return curve_rows, fit_rows, model_fit_rows, model_comparison_rows, warnings
+
+
+def _build_pps_curves_for_mode(
+    response_rows: list[dict[str, Any]],
+    *,
+    aggregation_mode: str,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[str]]:
+    baseline = _baseline_means(response_rows, aggregation_mode=aggregation_mode)
     audio_rows = [row for row in response_rows if row.get("trial_type") == "Audio-Tactile" and row.get("rt_ms") not in (None, "")]
     groups: dict[tuple[Any, ...], list[dict[str, Any]]] = {}
     for row in audio_rows:
-        key = (row.get("condition", ""), row.get("respiratory_phase", ""), row.get("noise_type", ""))
+        key = _analysis_context(row, aggregation_mode=aggregation_mode)
         groups.setdefault(key, []).append(row)
 
     curve_rows: list[dict[str, Any]] = []
@@ -309,7 +338,8 @@ def _build_pps_curves(
     model_comparison_rows: list[dict[str, Any]] = []
     warnings: list[str] = []
     for key, rows in sorted(groups.items(), key=lambda item: tuple(str(part) for part in item[0])):
-        condition, phase, noise = key
+        part_label, condition, phase, noise = key
+        part_number = _part_number_from_label(part_label)
         by_soa: dict[int, list[float]] = {}
         for row in rows:
             soa = _as_int(row.get("soa_ms"), None)
@@ -322,35 +352,66 @@ def _build_pps_curves(
         metric = "facilitation_ms"
         for soa, values in sorted(by_soa.items()):
             mean_rt = statistics.mean(values)
-            base_rt = _lookup_baseline(baseline, condition, phase, soa)
+            rt_sd = statistics.stdev(values) if len(values) > 1 else 0.0
+            rt_sem = rt_sd / math.sqrt(len(values)) if len(values) > 1 else 0.0
+            base_stats = _lookup_baseline(baseline, part_label, condition, phase, noise, soa)
+            base_rt = base_stats.get("mean") if base_stats is not None else None
             facilitation = base_rt - mean_rt if base_rt is not None else None
+            baseline_sem = _as_float((base_stats or {}).get("sem"), math.nan)
+            facilitation_sem = math.sqrt(rt_sem**2 + baseline_sem**2) if facilitation is not None and math.isfinite(baseline_sem) else math.nan
+            baseline_sd = _as_float((base_stats or {}).get("sd"), math.nan)
+            facilitation_sd = math.sqrt(rt_sd**2 + baseline_sd**2) if facilitation is not None and math.isfinite(baseline_sd) else math.nan
             y = facilitation if facilitation is not None else mean_rt
             if facilitation is None:
                 metric = "mean_rt_ms"
             curve_rows.append(
                 {
-                    "scope": _scope(condition, phase, noise),
+                    "scope": _scope(part_label, condition, phase, noise),
+                    "aggregation_mode": aggregation_mode,
+                    "aggregation_label": _aggregation_label(aggregation_mode),
+                    "part_number": "" if part_number is None else part_number,
                     "condition": condition,
                     "respiratory_phase": phase,
                     "noise_type": noise,
                     "soa_ms": soa,
                     "n": len(values),
                     "mean_rt_ms": mean_rt,
+                    "sd_rt_ms": rt_sd if len(values) > 1 else "",
+                    "sem_rt_ms": rt_sem if len(values) > 1 else "",
                     "baseline_mean_rt_ms": "" if base_rt is None else base_rt,
+                    "baseline_sd_rt_ms": "" if not math.isfinite(baseline_sd) or base_rt is None else baseline_sd,
+                    "baseline_sem_rt_ms": "" if not math.isfinite(baseline_sem) or base_rt is None else baseline_sem,
                     "facilitation_ms": "" if facilitation is None else facilitation,
+                    "facilitation_sd_ms": "" if not math.isfinite(facilitation_sd) else facilitation_sd,
+                    "facilitation_sem_ms": "" if not math.isfinite(facilitation_sem) else facilitation_sem,
                     "fit_metric": metric,
+                    "fit_metric_sd_ms": rt_sd if metric == "mean_rt_ms" and len(values) > 1 else ("" if not math.isfinite(facilitation_sd) else facilitation_sd),
+                    "fit_metric_sem_ms": rt_sem if metric == "mean_rt_ms" and len(values) > 1 else ("" if not math.isfinite(facilitation_sem) else facilitation_sem),
                 }
             )
             xs.append(float(soa))
             ys.append(float(y))
-        scope = _scope(condition, phase, noise)
-        model_rows = _fit_model_family(np.asarray(xs), np.asarray(ys), scope=scope, condition=condition, phase=phase, noise=noise, metric=metric)
+        scope = _scope(part_label, condition, phase, noise)
+        model_rows = _fit_model_family(
+            np.asarray(xs),
+            np.asarray(ys),
+            scope=scope,
+            part_label=part_label,
+            condition=condition,
+            phase=phase,
+            noise=noise,
+            metric=metric,
+            aggregation_mode=aggregation_mode,
+        )
         model_fit_rows.extend(model_rows)
         if model_rows:
             best = sorted(model_rows, key=lambda row: _as_float(row.get("aic"), math.inf))[0]
             model_comparison_rows.append(
                 {
                     "scope": scope,
+                    "aggregation_mode": aggregation_mode,
+                    "aggregation_label": _aggregation_label(aggregation_mode),
+                    "part_number": "" if part_number is None else part_number,
                     "condition": condition,
                     "respiratory_phase": phase,
                     "noise_type": noise,
@@ -365,7 +426,19 @@ def _build_pps_curves(
         if len(xs) >= 4:
             fit = _fit_sigmoid(np.asarray(xs), np.asarray(ys))
             if fit:
-                fit_rows.append({"scope": scope, "condition": condition, "respiratory_phase": phase, "noise_type": noise, "fit_metric": metric, **fit})
+                fit_rows.append(
+                    {
+                        "scope": scope,
+                        "aggregation_mode": aggregation_mode,
+                        "aggregation_label": _aggregation_label(aggregation_mode),
+                        "part_number": "" if part_number is None else part_number,
+                        "condition": condition,
+                        "respiratory_phase": phase,
+                        "noise_type": noise,
+                        "fit_metric": metric,
+                        **fit,
+                    }
+                )
             else:
                 warnings.append(f"Sigmoid fit did not converge for {scope}.")
         elif xs:
@@ -373,7 +446,7 @@ def _build_pps_curves(
     return curve_rows, fit_rows, model_fit_rows, model_comparison_rows, warnings
 
 
-def _baseline_means(response_rows: list[dict[str, Any]]) -> dict[tuple[Any, ...], float]:
+def _baseline_means(response_rows: list[dict[str, Any]], *, aggregation_mode: str) -> dict[tuple[Any, ...], dict[str, float]]:
     groups: dict[tuple[Any, ...], list[float]] = {}
     for row in response_rows:
         if row.get("trial_type") != "Baseline" or row.get("rt_ms") in (None, ""):
@@ -382,19 +455,31 @@ def _baseline_means(response_rows: list[dict[str, Any]]) -> dict[tuple[Any, ...]
         soa = _as_int(row.get("soa_ms"), None)
         if soa is None or not math.isfinite(rt):
             continue
-        condition = row.get("condition", "")
-        phase = row.get("respiratory_phase", "")
-        groups.setdefault((condition, phase, soa), []).append(rt)
-        groups.setdefault(("", phase, soa), []).append(rt)
-        groups.setdefault(("", "", soa), []).append(rt)
-    return {key: statistics.mean(values) for key, values in groups.items() if values}
+        part_label, condition, phase, noise = _analysis_context(row, aggregation_mode=aggregation_mode)
+        for key in _baseline_lookup_keys(part_label, condition, phase, noise, soa):
+            groups.setdefault(key, []).append(rt)
+    return {key: _mean_sd_sem(values) for key, values in groups.items() if values}
 
 
-def _lookup_baseline(baseline: dict[tuple[Any, ...], float], condition: Any, phase: Any, soa: int) -> float | None:
-    for key in ((condition, phase, soa), ("", phase, soa), ("", "", soa)):
+def _lookup_baseline(
+    baseline: dict[tuple[Any, ...], dict[str, float]],
+    part_label: Any,
+    condition: Any,
+    phase: Any,
+    noise: Any,
+    soa: int,
+) -> dict[str, float] | None:
+    for key in _baseline_lookup_keys(part_label, condition, phase, noise, soa):
         if key in baseline:
             return baseline[key]
     return None
+
+
+def _mean_sd_sem(values: list[float]) -> dict[str, float]:
+    mean = statistics.mean(values)
+    sd = statistics.stdev(values) if len(values) > 1 else 0.0
+    sem = sd / math.sqrt(len(values)) if len(values) > 1 else 0.0
+    return {"mean": mean, "sd": sd, "sem": sem, "n": float(len(values))}
 
 
 def _fit_sigmoid(x: np.ndarray, y: np.ndarray) -> dict[str, float] | None:
@@ -428,24 +513,68 @@ def _fit_model_family(
     y: np.ndarray,
     *,
     scope: str,
+    part_label: Any,
     condition: Any,
     phase: Any,
     noise: Any,
     metric: str,
+    aggregation_mode: str,
 ) -> list[dict[str, Any]]:
     if len(x) < 2 or len(set(x.tolist())) < 2:
         return []
     rows: list[dict[str, Any]] = []
     linear = _fit_linear_model(x, y)
     if linear is not None:
-        rows.append(_model_row("linear", linear, scope, condition, phase, noise, metric, len(x), parameter_count=2))
+        rows.append(
+            _model_row(
+                "linear",
+                linear,
+                scope,
+                part_label,
+                condition,
+                phase,
+                noise,
+                metric,
+                len(x),
+                aggregation_mode=aggregation_mode,
+                parameter_count=2,
+            )
+        )
     if np.all(x > 0):
         logarithmic = _fit_log_model(x, y)
         if logarithmic is not None:
-            rows.append(_model_row("logarithmic_decay", logarithmic, scope, condition, phase, noise, metric, len(x), parameter_count=2))
+            rows.append(
+                _model_row(
+                    "logarithmic_decay",
+                    logarithmic,
+                    scope,
+                    part_label,
+                    condition,
+                    phase,
+                    noise,
+                    metric,
+                    len(x),
+                    aggregation_mode=aggregation_mode,
+                    parameter_count=2,
+                )
+            )
     sigmoid = _fit_sigmoid(x, y)
     if sigmoid is not None:
-        rows.append(_model_row("sigmoid", sigmoid, scope, condition, phase, noise, metric, len(x), parameter_count=4))
+        rows.append(
+            _model_row(
+                "sigmoid",
+                sigmoid,
+                scope,
+                part_label,
+                condition,
+                phase,
+                noise,
+                metric,
+                len(x),
+                aggregation_mode=aggregation_mode,
+                parameter_count=4,
+            )
+        )
     return rows
 
 
@@ -484,16 +613,22 @@ def _model_row(
     model: str,
     fit: dict[str, Any],
     scope: str,
+    part_label: Any,
     condition: Any,
     phase: Any,
     noise: Any,
     metric: str,
     n_points: int,
     *,
+    aggregation_mode: str,
     parameter_count: int,
 ) -> dict[str, Any]:
+    part_number = _part_number_from_label(part_label)
     return {
         "scope": scope,
+        "aggregation_mode": aggregation_mode,
+        "aggregation_label": _aggregation_label(aggregation_mode),
+        "part_number": "" if part_number is None else part_number,
         "condition": condition,
         "respiratory_phase": phase,
         "noise_type": noise,
@@ -517,8 +652,57 @@ def _write_rows(path: Path, rows: list[dict[str, Any]]) -> None:
         writer.writerows(rows)
 
 
-def _scope(condition: Any, phase: Any, noise: Any) -> str:
-    parts = [str(part) for part in (condition, phase, noise) if str(part).strip()]
+def _analysis_context(row: dict[str, Any], *, aggregation_mode: str) -> tuple[str, str, str, str]:
+    part_number = _as_int(row.get("part_number"), None)
+    raw_condition = row.get("condition", "")
+    condition = _condition_without_part_label(raw_condition)
+    phase = str(row.get("respiratory_phase", "") or "").strip()
+    noise = str(row.get("noise_type", "") or "").strip()
+    if aggregation_mode == AGGREGATION_POOL_PARTS:
+        part_label = "All parts" if part_number is not None else ""
+    else:
+        part_label = f"Part {part_number}" if part_number is not None else ""
+    return part_label, condition, phase, noise
+
+
+def _condition_without_part_label(value: Any) -> str:
+    text = str(value or "").strip()
+    return "" if re.fullmatch(r"part\s+\d+", text, flags=re.IGNORECASE) else text
+
+
+def _part_number_from_label(value: Any) -> int | None:
+    match = re.fullmatch(r"part\s+(\d+)", str(value or "").strip(), flags=re.IGNORECASE)
+    if not match:
+        return None
+    return int(match.group(1))
+
+
+def _aggregation_label(value: str) -> str:
+    if value == AGGREGATION_POOL_PARTS:
+        return "Pool parts"
+    return "Separate parts"
+
+
+def _baseline_lookup_keys(part_label: Any, condition: Any, phase: Any, noise: Any, soa: int) -> list[tuple[Any, ...]]:
+    part = str(part_label or "").strip()
+    cond = str(condition or "").strip()
+    ph = str(phase or "").strip()
+    ns = str(noise or "").strip()
+    keys = [
+        (part, cond, ph, ns, soa),
+        (part, cond, ph, "", soa),
+        (part, "", ph, "", soa),
+        (part, "", "", "", soa),
+        ("", cond, ph, ns, soa),
+        ("", cond, ph, "", soa),
+        ("", "", ph, "", soa),
+        ("", "", "", "", soa),
+    ]
+    return list(dict.fromkeys(keys))
+
+
+def _scope(part_label: Any, condition: Any, phase: Any, noise: Any) -> str:
+    parts = [str(part) for part in (part_label, condition, phase, noise) if str(part).strip()]
     return " / ".join(parts) or "All audio-tactile"
 
 

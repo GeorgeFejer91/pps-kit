@@ -132,15 +132,20 @@ def _write_analysis_review_outputs(session_dir: Path) -> dict[str, Path]:
     analysis_dir.mkdir(parents=True, exist_ok=True)
     session_id = session_dir.name
     scope = "Part 1 / Inhale / pink"
+    pooled_scope = "All parts / Inhale / pink"
     curves = analysis_dir / f"{session_id}_pps_curve_points.csv"
     curves.write_text(
         "\n".join(
             [
-                "scope,soa_ms,fit_metric,facilitation_ms,mean_rt_ms,n",
-                f"{scope},100,facilitation_ms,10,320,3",
-                f"{scope},200,facilitation_ms,20,300,3",
-                f"{scope},400,facilitation_ms,35,280,3",
-                f"{scope},800,facilitation_ms,44,260,3",
+                "scope,aggregation_mode,aggregation_label,soa_ms,fit_metric,facilitation_ms,facilitation_sem_ms,mean_rt_ms,n",
+                f"{scope},separate_parts,Separate parts,100,facilitation_ms,10,2,320,3",
+                f"{scope},separate_parts,Separate parts,200,facilitation_ms,20,3,300,3",
+                f"{scope},separate_parts,Separate parts,400,facilitation_ms,35,4,280,3",
+                f"{scope},separate_parts,Separate parts,800,facilitation_ms,44,3,260,3",
+                f"{pooled_scope},pooled_parts,Pool parts,100,facilitation_ms,12,2,318,6",
+                f"{pooled_scope},pooled_parts,Pool parts,200,facilitation_ms,22,3,298,6",
+                f"{pooled_scope},pooled_parts,Pool parts,400,facilitation_ms,34,4,282,6",
+                f"{pooled_scope},pooled_parts,Pool parts,800,facilitation_ms,43,3,262,6",
             ]
         )
         + "\n",
@@ -150,10 +155,13 @@ def _write_analysis_review_outputs(session_dir: Path) -> dict[str, Path]:
     fits.write_text(
         "\n".join(
             [
-                "scope,model,fit_metric,n_points,intercept,slope,log_slope,lower,upper,pps_boundary_soa_ms,aic,r2,rmse",
-                f"{scope},linear,facilitation_ms,4,8,0.05,, ,,,14,0.91,2.0",
-                f"{scope},logarithmic_decay,facilitation_ms,4,-12,,8,,,,12,0.94,1.6",
-                f"{scope},sigmoid,facilitation_ms,4,,0.01,,5,50,300,10,0.97,1.1",
+                "scope,aggregation_mode,aggregation_label,model,fit_metric,n_points,intercept,slope,log_slope,lower,upper,pps_boundary_soa_ms,aic,r2,rmse",
+                f"{scope},separate_parts,Separate parts,linear,facilitation_ms,4,8,0.05,, ,,,14,0.91,2.0",
+                f"{scope},separate_parts,Separate parts,logarithmic_decay,facilitation_ms,4,-12,,8,,,,12,0.94,1.6",
+                f"{scope},separate_parts,Separate parts,sigmoid,facilitation_ms,4,,0.01,,5,50,300,10,0.97,1.1",
+                f"{pooled_scope},pooled_parts,Pool parts,linear,facilitation_ms,4,9,0.047,,,,,13,0.92,1.9",
+                f"{pooled_scope},pooled_parts,Pool parts,logarithmic_decay,facilitation_ms,4,-10,,7,,,,11,0.94,1.5",
+                f"{pooled_scope},pooled_parts,Pool parts,sigmoid,facilitation_ms,4,,0.009,,4,48,320,9,0.98,1.0",
             ]
         )
         + "\n",
@@ -161,14 +169,16 @@ def _write_analysis_review_outputs(session_dir: Path) -> dict[str, Path]:
     )
     comparison = analysis_dir / f"{session_id}_model_fit_comparison.csv"
     comparison.write_text(
-        "scope,best_model,best_aic,best_r2,fit_metric,n_points\n"
-        f"{scope},sigmoid,10,0.97,facilitation_ms,4\n",
+        "scope,aggregation_mode,aggregation_label,best_model,best_aic,best_r2,fit_metric,n_points\n"
+        f"{scope},separate_parts,Separate parts,sigmoid,10,0.97,facilitation_ms,4\n"
+        f"{pooled_scope},pooled_parts,Pool parts,sigmoid,9,0.98,facilitation_ms,4\n",
         encoding="utf-8",
     )
     summary = analysis_dir / f"{session_id}_summary.csv"
     summary.write_text(
-        "scope,n,hit_rate\n"
-        f"{scope},4,1.0\n",
+        "scope,aggregation_mode,n,hit_rate\n"
+        f"{scope},separate_parts,4,1.0\n"
+        f"{pooled_scope},pooled_parts,8,1.0\n",
         encoding="utf-8",
     )
     (session_dir / "analysis_summary.txt").write_text("Tactile trials reconstructed: 4\n", encoding="utf-8")
@@ -1017,7 +1027,16 @@ def test_focus_mode_opens_post_run_analysis_review_dialog(tmp_path: Path, monkey
     assert model_combo is not None and model_combo.count() == 4
     assert scope_combo is not None and scope_combo.count() == 1
     assert overview_table is not None and overview_table.rowCount() == 1
+    part_buttons = [button for button in dialog.findChildren(q["QPushButton"], "analysisSegmentButton")]
+    assert len(part_buttons) == 2
+    assert {button.text() for button in part_buttons} == {"Separate parts", "Pool parts"}
     assert details is not None and "Best model by AIC" in details.toPlainText()
+    assert "Displayed range: +/- SEM" in details.toPlainText()
+    pooled = next(button for button in part_buttons if button.text() == "Pool parts")
+    pooled.click()
+    app.processEvents()
+    assert scope_combo.currentText() == "All parts / Inhale / pink"
+    assert "Part summary: Pool parts" in details.toPlainText()
     screenshot = tmp_path / "analysis_review_dialog.png"
     assert dialog.grab().save(str(screenshot))
     assert screenshot.stat().st_size > 0

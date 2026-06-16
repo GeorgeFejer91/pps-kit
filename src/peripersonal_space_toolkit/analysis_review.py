@@ -13,6 +13,8 @@ MODEL_BEST = "best"
 MODEL_SIGMOID = "sigmoid"
 MODEL_LINEAR = "linear"
 MODEL_LOGARITHMIC_DECAY = "logarithmic_decay"
+PARTS_SEPARATE = "separate_parts"
+PARTS_POOLED = "pooled_parts"
 
 MODEL_ORDER = (MODEL_BEST, MODEL_SIGMOID, MODEL_LINEAR, MODEL_LOGARITHMIC_DECAY)
 MODEL_LABELS = {
@@ -20,6 +22,11 @@ MODEL_LABELS = {
     MODEL_SIGMOID: "Sigmoid",
     MODEL_LINEAR: "Linear",
     MODEL_LOGARITHMIC_DECAY: "Logarithmic decay",
+}
+PART_AGGREGATION_ORDER = (PARTS_SEPARATE, PARTS_POOLED)
+PART_AGGREGATION_LABELS = {
+    PARTS_SEPARATE: "Separate parts",
+    PARTS_POOLED: "Pool parts",
 }
 
 
@@ -41,12 +48,18 @@ class AnalysisReviewData:
 
     @property
     def scopes(self) -> list[str]:
-        scopes = {
-            str(row.get("scope") or "").strip()
-            for row in [*self.curve_rows, *self.model_fit_rows, *self.model_comparison_rows]
-            if str(row.get("scope") or "").strip()
-        }
-        return sorted(scopes)
+        return scopes_for_part_mode(self, self.default_part_mode)
+
+    @property
+    def part_modes(self) -> list[str]:
+        modes = {_row_part_mode(row) for row in [*self.curve_rows, *self.model_fit_rows, *self.model_comparison_rows]}
+        ordered = [mode for mode in PART_AGGREGATION_ORDER if mode in modes]
+        extras = sorted(mode for mode in modes if mode not in PART_AGGREGATION_ORDER)
+        return ordered + extras or [PARTS_SEPARATE]
+
+    @property
+    def default_part_mode(self) -> str:
+        return PARTS_SEPARATE if PARTS_SEPARATE in self.part_modes else self.part_modes[0]
 
 
 def load_analysis_review_data(
@@ -78,50 +91,77 @@ def load_analysis_review_data(
     return data
 
 
-def best_model_for_scope(data: AnalysisReviewData, scope: str) -> str:
+def scopes_for_part_mode(data: AnalysisReviewData, part_mode: str | None = None) -> list[str]:
+    mode = _normalized_part_mode(part_mode or data.default_part_mode)
+    scopes = {
+        str(row.get("scope") or "").strip()
+        for row in [*data.curve_rows, *data.model_fit_rows, *data.model_comparison_rows]
+        if _row_part_mode(row) == mode and str(row.get("scope") or "").strip()
+    }
+    return sorted(scopes)
+
+
+def best_model_for_scope(data: AnalysisReviewData, scope: str, part_mode: str | None = None) -> str:
     scope = str(scope or "").strip()
-    comparison = next((row for row in data.model_comparison_rows if str(row.get("scope") or "").strip() == scope), None)
+    mode = _normalized_part_mode(part_mode or data.default_part_mode)
+    comparison = next(
+        (
+            row
+            for row in data.model_comparison_rows
+            if _row_part_mode(row) == mode and str(row.get("scope") or "").strip() == scope
+        ),
+        None,
+    )
     if comparison is not None:
         model = str(comparison.get("best_model") or "").strip()
         if model:
             return model
-    rows = [row for row in data.model_fit_rows if str(row.get("scope") or "").strip() == scope]
+    rows = [
+        row
+        for row in data.model_fit_rows
+        if _row_part_mode(row) == mode and str(row.get("scope") or "").strip() == scope
+    ]
     if not rows:
         return ""
     best = min(rows, key=lambda row: _as_float(row.get("aic"), math.inf))
     return str(best.get("model") or "").strip()
 
 
-def fit_row_for_scope(data: AnalysisReviewData, scope: str, model: str) -> dict[str, Any] | None:
+def fit_row_for_scope(data: AnalysisReviewData, scope: str, model: str, part_mode: str | None = None) -> dict[str, Any] | None:
     scope = str(scope or "").strip()
     model = str(model or "").strip()
+    mode = _normalized_part_mode(part_mode or data.default_part_mode)
     if model == MODEL_BEST:
-        model = best_model_for_scope(data, scope)
+        model = best_model_for_scope(data, scope, mode)
     matches = [
         row
         for row in data.model_fit_rows
-        if str(row.get("scope") or "").strip() == scope and str(row.get("model") or "").strip() == model
+        if _row_part_mode(row) == mode
+        and str(row.get("scope") or "").strip() == scope
+        and str(row.get("model") or "").strip() == model
     ]
     if not matches:
         return None
     return min(matches, key=lambda row: _as_float(row.get("aic"), math.inf))
 
 
-def available_models_for_scope(data: AnalysisReviewData, scope: str) -> list[str]:
+def available_models_for_scope(data: AnalysisReviewData, scope: str, part_mode: str | None = None) -> list[str]:
     scope = str(scope or "").strip()
+    mode = _normalized_part_mode(part_mode or data.default_part_mode)
     models = {
         str(row.get("model") or "").strip()
         for row in data.model_fit_rows
-        if str(row.get("scope") or "").strip() == scope and str(row.get("model") or "").strip()
+        if _row_part_mode(row) == mode and str(row.get("scope") or "").strip() == scope and str(row.get("model") or "").strip()
     }
     return [model for model in MODEL_ORDER if model == MODEL_BEST or model in models]
 
 
-def observed_points_for_scope(data: AnalysisReviewData, scope: str) -> list[dict[str, float | str]]:
+def observed_points_for_scope(data: AnalysisReviewData, scope: str, part_mode: str | None = None) -> list[dict[str, float | str]]:
     scope = str(scope or "").strip()
+    mode = _normalized_part_mode(part_mode or data.default_part_mode)
     points: list[dict[str, float | str]] = []
     for row in data.curve_rows:
-        if str(row.get("scope") or "").strip() != scope:
+        if _row_part_mode(row) != mode or str(row.get("scope") or "").strip() != scope:
             continue
         x = _as_float(row.get("soa_ms"), math.nan)
         if not math.isfinite(x):
@@ -130,7 +170,13 @@ def observed_points_for_scope(data: AnalysisReviewData, scope: str) -> list[dict
         y = _metric_value(row, metric)
         if y is None:
             continue
-        points.append({"x": x, "y": y, "metric": metric or _metric_name(row)})
+        low, high, spread_label = _spread_bounds(row, metric, y)
+        point: dict[str, float | str] = {"x": x, "y": y, "metric": metric or _metric_name(row)}
+        if low is not None and high is not None:
+            point["y_low"] = low
+            point["y_high"] = high
+            point["spread_label"] = spread_label
+        points.append(point)
     return sorted(points, key=lambda item: float(item["x"]))
 
 
@@ -139,10 +185,12 @@ def prediction_points_for_scope(
     scope: str,
     model: str,
     *,
+    part_mode: str | None = None,
     sample_count: int = 120,
 ) -> list[dict[str, float]]:
-    fit = fit_row_for_scope(data, scope, model)
-    observed = observed_points_for_scope(data, scope)
+    mode = _normalized_part_mode(part_mode or data.default_part_mode)
+    fit = fit_row_for_scope(data, scope, model, mode)
+    observed = observed_points_for_scope(data, scope, mode)
     if fit is None or not observed:
         return []
     xs = [float(point["x"]) for point in observed]
@@ -162,10 +210,18 @@ def prediction_points_for_scope(
     return points
 
 
-def scope_comparison_row(data: AnalysisReviewData, scope: str) -> dict[str, Any]:
+def scope_comparison_row(data: AnalysisReviewData, scope: str, part_mode: str | None = None) -> dict[str, Any]:
     scope = str(scope or "").strip()
-    row = next((item for item in data.model_comparison_rows if str(item.get("scope") or "").strip() == scope), None)
-    return dict(row or {"scope": scope, "best_model": best_model_for_scope(data, scope)})
+    mode = _normalized_part_mode(part_mode or data.default_part_mode)
+    row = next(
+        (
+            item
+            for item in data.model_comparison_rows
+            if _row_part_mode(item) == mode and str(item.get("scope") or "").strip() == scope
+        ),
+        None,
+    )
+    return dict(row or {"scope": scope, "aggregation_mode": mode, "best_model": best_model_for_scope(data, scope, mode)})
 
 
 def _output_path(outputs: dict[str, Any], key: str, session_dir: Path | None, pattern: str) -> Path | None:
@@ -199,6 +255,19 @@ def _metric_name(row: dict[str, Any]) -> str:
     return "mean_rt_ms"
 
 
+def _row_part_mode(row: dict[str, Any]) -> str:
+    return _normalized_part_mode(row.get("aggregation_mode") or PARTS_SEPARATE)
+
+
+def _normalized_part_mode(value: Any) -> str:
+    text = str(value or "").strip()
+    if text in {PARTS_SEPARATE, PARTS_POOLED}:
+        return text
+    if text.lower() in {"pool", "pooled", "pooled_parts", "all_parts"}:
+        return PARTS_POOLED
+    return PARTS_SEPARATE
+
+
 def _metric_value(row: dict[str, Any], metric: str) -> float | None:
     candidates = [metric] if metric else []
     candidates.extend(["facilitation_ms", "mean_rt_ms"])
@@ -207,6 +276,35 @@ def _metric_value(row: dict[str, Any], metric: str) -> float | None:
         if math.isfinite(value):
             return value
     return None
+
+
+def _spread_bounds(row: dict[str, Any], metric: str, y: float) -> tuple[float | None, float | None, str]:
+    metric_key = metric or _metric_name(row)
+    if metric_key == "facilitation_ms":
+        candidates = [
+            ("facilitation_sem_ms", "SEM"),
+            ("fit_metric_sem_ms", "SEM"),
+            ("facilitation_sd_ms", "SD"),
+            ("fit_metric_sd_ms", "SD"),
+            ("sem_rt_ms", "SEM"),
+            ("sd_rt_ms", "SD"),
+        ]
+    else:
+        candidates = [
+            ("sem_rt_ms", "SEM"),
+            ("fit_metric_sem_ms", "SEM"),
+            ("sd_rt_ms", "SD"),
+            ("fit_metric_sd_ms", "SD"),
+        ]
+    for key, label in candidates:
+        spread = _as_float(row.get(key), math.nan)
+        if math.isfinite(spread) and spread > 0:
+            return y - spread, y + spread, label
+    explicit_low = _as_float(row.get("fit_metric_low_ms"), math.nan)
+    explicit_high = _as_float(row.get("fit_metric_high_ms"), math.nan)
+    if math.isfinite(explicit_low) and math.isfinite(explicit_high):
+        return min(explicit_low, explicit_high), max(explicit_low, explicit_high), "range"
+    return None, None, ""
 
 
 def _predict_y(fit: dict[str, Any], model: str, x: float) -> float | None:

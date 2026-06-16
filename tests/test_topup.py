@@ -360,6 +360,63 @@ def test_immediate_analysis_writes_sigmoid_logarithmic_and_linear_fit_outputs(tm
     assert outputs["final_trial_outcomes"].exists()
 
 
+def test_immediate_analysis_summarizes_across_blocks_with_optional_part_pooling():
+    events = []
+    event_id = 1
+    trials = [
+        (1, 1, 100, 0.34),
+        (1, 2, 100, 0.32),
+        (1, 1, 200, 0.30),
+        (1, 2, 200, 0.28),
+        (2, 3, 100, 0.40),
+        (2, 4, 100, 0.38),
+        (2, 3, 200, 0.36),
+        (2, 4, 200, 0.34),
+    ]
+    for index, (part, block, soa, rt_s) in enumerate(trials, start=1):
+        onset = index * 5.0
+        context = {
+            "part_number": part,
+            "block_number": block,
+            "trial_uid": f"T{index:03d}",
+            "Trial_Type": "Audio-Tactile",
+            "SOA_ms": soa,
+            "Respiratory_Phase": "Inhale",
+            "Noise_Type": "pink",
+        }
+        events.append({"event_id": event_id, "event_type": "trial_start", "unix_time": onset - 1.0, "monotonic_time": onset - 1.0, **context})
+        event_id += 1
+        events.append({"event_id": event_id, "event_type": "tactile_onset", "unix_time": onset, "monotonic_time": onset, **context})
+        event_id += 1
+        events.append(
+            {
+                "event_id": event_id,
+                "event_type": "mouse_click",
+                "unix_time": onset + rt_s,
+                "monotonic_time": onset + rt_s,
+                "in_target": True,
+                "during_playback": True,
+                "part_number": part,
+                "block_number": block,
+            }
+        )
+        event_id += 1
+
+    result = analyze_session_events(events)
+    curve_rows = result.curve_rows
+    separate = [row for row in curve_rows if row["aggregation_mode"] == "separate_parts"]
+    pooled = [row for row in curve_rows if row["aggregation_mode"] == "pooled_parts"]
+
+    assert {row["scope"] for row in separate} == {"Part 1 / Inhale / pink", "Part 2 / Inhale / pink"}
+    assert {row["scope"] for row in pooled} == {"All parts / Inhale / pink"}
+    assert all("block" not in str(row["scope"]).lower() for row in curve_rows)
+    part1_100 = next(row for row in separate if row["scope"] == "Part 1 / Inhale / pink" and row["soa_ms"] == 100)
+    pooled_100 = next(row for row in pooled if row["soa_ms"] == 100)
+    assert part1_100["n"] == 2
+    assert pooled_100["n"] == 4
+    assert part1_100["sem_rt_ms"] != ""
+
+
 class _TopupAwareMockAudioEngine:
     def __init__(self):
         self.played: list[str] = []
