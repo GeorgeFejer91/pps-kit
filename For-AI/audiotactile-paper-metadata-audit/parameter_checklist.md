@@ -9,7 +9,7 @@ Use this checklist for every in-scope publication. Each field must carry one of 
 | `stimulus_type` | Noise, tone, ecological sound, speech, or custom/baked stimulus class. |
 | `source_provenance` | Original asset, generated stimulus, licensed set, apparatus source, or supplement file. |
 | `trajectory_count` | Distinct looming/receding/static paths, tones, or auditory conditions. |
-| `trajectory_path` | Start/end distance, direction, participant-facing direction, speaker/source position, body anchor, azimuth/elevation, and spatial coordinate frame. |
+| `trajectory_path` | Start/end distance, movement direction, participant-facing direction, speaker/source position, body anchor, azimuth/elevation, and spatial coordinate frame. |
 | `stimulus_duration` | Auditory stimulus duration and any pre/post padding. |
 | `stimulus_speed` | Motion speed, path length, propagation timing, or distance-at-time mapping. |
 | `auditory_conditions` | Valence, direction, semantic, movement, or apparatus conditions affecting the auditory stimulus. |
@@ -40,6 +40,15 @@ For every reviewed paper, add a short orientation ledger to the manual review no
 | Evidence class | Is the geometry text-reported, caption-reported, figure-derived, supplement-reported, protocol-lineage-reported, or low-confidence inferred? |
 
 If a diagram is the only source, keep the status modest. A scaled figure with printed values can support `derived`; an unscaled schematic supports only qualitative direction unless the caption supplies the missing numbers. When the participant icon faces left/right/up/down on the page, explicitly translate page direction into body-relative direction only if the caption or surrounding text makes that mapping clear.
+
+Visual approximation decision ladder:
+
+1. Record the page, figure, caption, and panel that produced the clue.
+2. Identify the participant posture, head/trunk facing direction, gaze/fixation instruction, blindfold/eyes-closed state, and any block-wise participant rotation.
+3. Identify the room/apparatus frame: speaker/source positions, near/far labels, height, azimuth/elevation, source movement, and whether the speaker array, participant, or digital renderer changes across conditions.
+4. Translate the page/apparatus frame into the participant/body frame: front, rear, left, right, ipsilateral, contralateral, approaching, receding, proximal, or distal relative to the tactile anchor.
+5. Extract numbers only from printed labels, axes, tables, captions, or a scaled diagram. If the drawing is unscaled, keep the value qualitative and mark it `inferred_low_confidence`.
+6. Cross-check figure-derived geometry against supplement files and protocol-lineage citations when the methods text is incomplete or inconsistent.
 
 Hidden-parameter search routes to check before declaring a value absent:
 

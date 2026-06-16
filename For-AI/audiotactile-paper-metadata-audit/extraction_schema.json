@@ -99,7 +99,7 @@
       {
         "key": "trajectory_path",
         "label": "Trajectory path",
-        "description": "Start/end distance, direction, body anchor, azimuth/elevation, and spatial coordinate frame."
+        "description": "Start/end distance, movement direction, participant-facing direction, speaker/source position, body anchor, azimuth/elevation, and spatial coordinate frame."
       },
       {
         "key": "stimulus_duration",
