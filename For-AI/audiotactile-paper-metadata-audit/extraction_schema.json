@@ -1,6 +1,6 @@
 {
   "schema": "pps-paper-metadata-extraction-schema.v1",
-  "parser_version": "0.5.3",
+  "parser_version": "0.5.4",
   "pdf_statuses": [
     "downloaded",
     "open_access_unavailable",
@@ -70,6 +70,10 @@
     "index": "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv",
     "schema": "pps-paper-metadata-manual-review.v1",
     "rule": "Manual reviews promote auto-mined candidates only after repeated critical passes; store normalized values, field statuses, confidence scores, and short source pointers, not full text."
+  },
+  "pdf_retrieval_inventory": {
+    "path": "For-AI/audiotactile-paper-metadata-audit/pdf_retrieval_inventory.csv",
+    "rule": "One row per literature record; records whether the main publication PDF has been retrieved locally, gives the DOI/DOI URL for missing PDFs, and names the target local PDF path."
   },
   "segment_fields": {
     "segment_1_stimulus_reconstruction": [
@@ -207,7 +211,7 @@
     ]
   },
   "review_rule": {
-    "missing_value_rule": "Only mark not_reported_after_review after main PDF extraction, targeted methods/table search, supplement search, and fallback extractor/source check have all been attempted.",
+    "missing_value_rule": "Only mark not_reported_after_review after main PDF extraction, targeted methods/table search, supplement search, fallback extractor/source check, and cited prior-protocol lineage search have all been attempted.",
     "copyright_boundary": "Do not commit PDFs, supplements, extracted full text, screenshots of pages, or long verbatim passages.",
     "automated_evidence_rule": "Automated evidence mining stores only short candidate values and page pointers; it is not a substitute for final human/AI critical review against PDFs and supplements."
   },

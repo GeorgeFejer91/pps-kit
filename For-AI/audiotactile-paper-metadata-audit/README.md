@@ -19,10 +19,18 @@ Use `python -m tools.paper_metadata_parser.bundle --repo-root .` to refresh `loc
 
 Manual reviews are the layer where auto-mined candidates become checked metadata. Keep them short and source-pointer-only; do not paste full methods text or copyrighted passages.
 
+## Tracked Generated Ledgers
+
+- `pdf_retrieval_inventory.csv`: canonical running list of which main publication PDFs are already retrieved, which are missing, DOI/DOI URL for missing records, and the local target filename.
+- `doi_inventory.csv`: DOI/DOI URL inventory plus current PDF and supplement status for every literature record.
+- `missing_pdf_request_list.csv`: actionable download queue for missing main PDFs and supplement/methods files.
+- `running_checklist.csv`: compact all-record metadata audit progress checklist.
+
 ## Current Inventory
 
 - Literature records: 74
 - PDF status counts: `{"downloaded": 36, "needs_user_download": 8, "not_applicable": 5, "open_access_unavailable": 12, "paywalled": 13}`
+- Main PDFs retrieved/missing/not applicable: 36 / 33 / 5
 - Supplement status counts: `{"downloaded": 11, "needs_user_download": 16, "not_applicable": 5, "not_checked": 6, "not_found": 17, "paywalled": 19}`
 - Extraction status counts: `{"parsed": 36, "parsed_with_warnings": 5, "pending_pdf": 33}`
 - Metadata confidence counts: `{"not_applicable": 5, "partial_extraction": 38, "pending_source": 8, "source_unavailable": 23}`
@@ -45,9 +53,10 @@ Manual reviews are the layer where auto-mined candidates become checked metadata
 1. Download each available publication PDF into `artifacts/paper_metadata_audit/publication_pdfs/<record_id>.pdf`.
 2. Download supplements into `artifacts/paper_metadata_audit/supplements/<record_id>/`.
 3. Run `python -m tools.paper_metadata_parser --refresh` from the repo root.
-4. Review `running_checklist.csv`, `missing_pdf_request_list.csv`, and `paper_audits/<record_id>.md`.
-5. Promote critically checked Segment 1-4 values into `manual_reviews/<record_id>.json` and update `manual_review_index.csv`.
+4. Review `pdf_retrieval_inventory.csv` first for the running list of retrieved/missing PDFs and missing-paper DOI URLs.
+5. Review `running_checklist.csv`, `missing_pdf_request_list.csv`, and `paper_audits/<record_id>.md`.
+6. Promote critically checked Segment 1-4 values into `manual_reviews/<record_id>.json` and update `manual_review_index.csv`.
 
 Automated evidence-mined values are `inferred_low_confidence` candidates. Treat them as a triage map for critical review, not as final paper metadata.
 
-Before marking any value `not_reported_after_review`, inspect the main PDF, methods/tables, supplements, and at least one fallback/source route.
+Before marking any value `not_reported_after_review`, inspect the main PDF, methods/tables, supplements, at least one fallback/source route, and any cited prior protocol paper that the article says it adapted, followed, or used as an established paradigm.

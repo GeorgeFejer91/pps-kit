@@ -1,10 +1,13 @@
 {
   "schema": "pps-paper-metadata-audit-summary.v1",
   "generated_on": "2026-06-16",
-  "parser_version": "0.5.3",
+  "parser_version": "0.5.4",
   "record_count": 74,
   "doi_record_count": 67,
   "missing_doi_record_count": 7,
+  "pdf_retrieved_record_count": 36,
+  "pdf_missing_or_unavailable_record_count": 33,
+  "pdf_not_applicable_record_count": 5,
   "pdf_status_counts": {
     "downloaded": 36,
     "needs_user_download": 8,

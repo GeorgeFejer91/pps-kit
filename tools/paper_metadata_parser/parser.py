@@ -15,7 +15,7 @@ from typing import Any
 from xml.etree import ElementTree
 
 
-PARSER_VERSION = "0.5.3"
+PARSER_VERSION = "0.5.4"
 
 COVERAGE_PATH = Path("assets/preloads/audiotactile_literature_coverage.json")
 AUDIT_DIR = Path("For-AI/audiotactile-paper-metadata-audit")
@@ -1409,6 +1409,15 @@ def summary_from_records(audit_records: list[dict[str, Any]], missing_requests: 
         "record_count": len(audit_records),
         "doi_record_count": sum(1 for record in audit_records if record.get("doi")),
         "missing_doi_record_count": sum(1 for record in audit_records if not record.get("doi")),
+        "pdf_retrieved_record_count": sum(1 for record in audit_records if record.get("pdf_status") == "downloaded"),
+        "pdf_missing_or_unavailable_record_count": sum(
+            1
+            for record in audit_records
+            if record.get("pdf_status") in {"needs_user_download", "bad_pdf", "open_access_unavailable", "paywalled"}
+        ),
+        "pdf_not_applicable_record_count": sum(
+            1 for record in audit_records if record.get("pdf_status") == "not_applicable"
+        ),
         "pdf_status_counts": count_by("pdf_status"),
         "supplement_status_counts": count_by("supplement_status"),
         "extraction_status_counts": count_by("extraction_status"),
@@ -1466,9 +1475,13 @@ def schema_payload() -> dict[str, Any]:
             "schema": "pps-paper-metadata-manual-review.v1",
             "rule": "Manual reviews promote auto-mined candidates only after repeated critical passes; store normalized values, field statuses, confidence scores, and short source pointers, not full text.",
         },
+        "pdf_retrieval_inventory": {
+            "path": "For-AI/audiotactile-paper-metadata-audit/pdf_retrieval_inventory.csv",
+            "rule": "One row per literature record; records whether the main publication PDF has been retrieved locally, gives the DOI/DOI URL for missing PDFs, and names the target local PDF path.",
+        },
         "segment_fields": SEGMENT_FIELDS,
         "review_rule": {
-            "missing_value_rule": "Only mark not_reported_after_review after main PDF extraction, targeted methods/table search, supplement search, and fallback extractor/source check have all been attempted.",
+            "missing_value_rule": "Only mark not_reported_after_review after main PDF extraction, targeted methods/table search, supplement search, fallback extractor/source check, and cited prior-protocol lineage search have all been attempted.",
             "copyright_boundary": "Do not commit PDFs, supplements, extracted full text, screenshots of pages, or long verbatim passages.",
             "automated_evidence_rule": "Automated evidence mining stores only short candidate values and page pointers; it is not a substitute for final human/AI critical review against PDFs and supplements.",
         },
@@ -1516,10 +1529,18 @@ Use `python -m tools.paper_metadata_parser.bundle --repo-root .` to refresh `loc
 
 Manual reviews are the layer where auto-mined candidates become checked metadata. Keep them short and source-pointer-only; do not paste full methods text or copyrighted passages.
 
+## Tracked Generated Ledgers
+
+- `pdf_retrieval_inventory.csv`: canonical running list of which main publication PDFs are already retrieved, which are missing, DOI/DOI URL for missing records, and the local target filename.
+- `doi_inventory.csv`: DOI/DOI URL inventory plus current PDF and supplement status for every literature record.
+- `missing_pdf_request_list.csv`: actionable download queue for missing main PDFs and supplement/methods files.
+- `running_checklist.csv`: compact all-record metadata audit progress checklist.
+
 ## Current Inventory
 
 - Literature records: {summary["record_count"]}
 - PDF status counts: `{json.dumps(summary["pdf_status_counts"], sort_keys=True)}`
+- Main PDFs retrieved/missing/not applicable: {summary["pdf_retrieved_record_count"]} / {summary["pdf_missing_or_unavailable_record_count"]} / {summary["pdf_not_applicable_record_count"]}
 - Supplement status counts: `{json.dumps(summary["supplement_status_counts"], sort_keys=True)}`
 - Extraction status counts: `{json.dumps(summary["extraction_status_counts"], sort_keys=True)}`
 - Metadata confidence counts: `{json.dumps(summary["metadata_confidence_label_counts"], sort_keys=True)}`
@@ -1542,12 +1563,13 @@ Manual reviews are the layer where auto-mined candidates become checked metadata
 1. Download each available publication PDF into `artifacts/paper_metadata_audit/publication_pdfs/<record_id>.pdf`.
 2. Download supplements into `artifacts/paper_metadata_audit/supplements/<record_id>/`.
 3. Run `python -m tools.paper_metadata_parser --refresh` from the repo root.
-4. Review `running_checklist.csv`, `missing_pdf_request_list.csv`, and `paper_audits/<record_id>.md`.
-5. Promote critically checked Segment 1-4 values into `manual_reviews/<record_id>.json` and update `manual_review_index.csv`.
+4. Review `pdf_retrieval_inventory.csv` first for the running list of retrieved/missing PDFs and missing-paper DOI URLs.
+5. Review `running_checklist.csv`, `missing_pdf_request_list.csv`, and `paper_audits/<record_id>.md`.
+6. Promote critically checked Segment 1-4 values into `manual_reviews/<record_id>.json` and update `manual_review_index.csv`.
 
 Automated evidence-mined values are `inferred_low_confidence` candidates. Treat them as a triage map for critical review, not as final paper metadata.
 
-Before marking any value `not_reported_after_review`, inspect the main PDF, methods/tables, supplements, and at least one fallback/source route.
+Before marking any value `not_reported_after_review`, inspect the main PDF, methods/tables, supplements, at least one fallback/source route, and any cited prior protocol paper that the article says it adapted, followed, or used as an established paradigm.
 """
 
 
@@ -1577,6 +1599,9 @@ def checklist_text() -> str:
             "2. Targeted review of methods, apparatus, procedure, trial-design tables, and figures.",
             "3. Supplement search, including PDFs, spreadsheets, appendices, scripts, and project pages.",
             "4. Fallback extraction or source check using pdfplumber/pypdf, publisher HTML, rendered pages, or a second source route.",
+            "5. Protocol-lineage search for terms such as adapted, previous, protocol, as described, based on, following, well-established, paradigm, front/frontal, and cited-methods references.",
+            "",
+            "When a paper says it adapted or used an established paradigm, record the cited source study and inspect that source before deciding that low-level stimulus, trajectory, timing, or count details are unavailable.",
             "",
             "Keep tracked evidence short. Store raw PDF/text artifacts only under ignored `artifacts/paper_metadata_audit/`.",
             "",
@@ -1677,6 +1702,72 @@ def write_audit_files(
             "coverage_category",
             "pdf_status",
             "supplement_status",
+        ],
+    )
+
+    pdf_retrieval_rows = []
+    for record in audit_records:
+        pdf_status = record["pdf_status"]
+        if pdf_status == "downloaded":
+            pdf_retrieved = "yes"
+        elif pdf_status == "not_applicable":
+            pdf_retrieved = "not_applicable"
+        else:
+            pdf_retrieved = "no"
+        doi = record["doi"]
+        manual_download_target = ""
+        if pdf_status not in {"downloaded", "not_applicable"}:
+            manual_download_target = f"artifacts/paper_metadata_audit/publication_pdfs/{record['record_id']}.pdf"
+        pdf_retrieval_rows.append(
+            {
+                "record_id": record["record_id"],
+                "citation_short": record["citation_short"],
+                "coverage_category": record["coverage_category"],
+                "pdf_retrieved": pdf_retrieved,
+                "pdf_status": pdf_status,
+                "pdf_file": record["pdf_file"],
+                "doi": doi,
+                "doi_url": doi_url(doi),
+                "doi_missing": "yes" if not doi else "no",
+                "manual_download_target": manual_download_target,
+                "manual_download_priority": (
+                    "already_retrieved"
+                    if pdf_status == "downloaded"
+                    else "not_applicable"
+                    if pdf_status == "not_applicable"
+                    else "doi_lookup_needed"
+                    if not doi
+                    else "download_by_doi"
+                ),
+                "pdf_acquisition_attempt_count": record["pdf_acquisition_attempt_count"],
+                "pdf_acquisition_last_status": record["pdf_acquisition_last_status"],
+                "note": (
+                    "Main publication PDF is available locally."
+                    if pdf_status == "downloaded"
+                    else "Adjacent/out-of-scope record; no PDF retrieval required."
+                    if pdf_status == "not_applicable"
+                    else "Main publication PDF still missing locally; use DOI/DOI URL when available."
+                ),
+            }
+        )
+    write_csv(
+        paths.audit_dir / "pdf_retrieval_inventory.csv",
+        pdf_retrieval_rows,
+        [
+            "record_id",
+            "citation_short",
+            "coverage_category",
+            "pdf_retrieved",
+            "pdf_status",
+            "pdf_file",
+            "doi",
+            "doi_url",
+            "doi_missing",
+            "manual_download_target",
+            "manual_download_priority",
+            "pdf_acquisition_attempt_count",
+            "pdf_acquisition_last_status",
+            "note",
         ],
     )
 

@@ -76,6 +76,7 @@ def test_paper_metadata_schema_and_status_values_are_valid():
     assert schema["supplement_extraction"] == tool_schema["supplement_extraction"]
     assert ".pdf" in schema["supplement_extraction"]["supported_local_formats"]
     assert schema["manual_reviews"] == tool_schema["manual_reviews"]
+    assert schema["pdf_retrieval_inventory"] == tool_schema["pdf_retrieval_inventory"]
     assert schema["local_artifact_conventions"]["main_pdf_filename"].startswith("artifacts/")
 
     for record in audit_records:
@@ -153,6 +154,55 @@ def test_doi_inventory_tracks_every_literature_record():
             assert row["doi_url"] == f"https://doi.org/{row['doi']}"
         else:
             assert row["doi_url"] == ""
+
+
+def test_pdf_retrieval_inventory_tracks_every_publication_pdf():
+    summary = json.loads((AUDIT_DIR / "audit_summary.json").read_text(encoding="utf-8"))
+    records = {record["record_id"]: record for record in load_jsonl(AUDIT_DIR / "metadata_audit.jsonl")}
+    retrieval_rows = load_csv(AUDIT_DIR / "pdf_retrieval_inventory.csv")
+    retrieval_ids = {row["record_id"] for row in retrieval_rows}
+
+    assert retrieval_ids == set(records)
+    assert len(retrieval_rows) == summary["record_count"] == 74
+    assert sum(1 for row in retrieval_rows if row["pdf_retrieved"] == "yes") == summary[
+        "pdf_retrieved_record_count"
+    ]
+    assert sum(1 for row in retrieval_rows if row["pdf_retrieved"] == "no") == summary[
+        "pdf_missing_or_unavailable_record_count"
+    ]
+    assert sum(1 for row in retrieval_rows if row["pdf_retrieved"] == "not_applicable") == summary[
+        "pdf_not_applicable_record_count"
+    ]
+
+    for row in retrieval_rows:
+        record = records[row["record_id"]]
+        assert row["pdf_status"] == record["pdf_status"]
+        assert row["doi"] == record["doi"]
+        assert row["doi_url"] == record["doi_url"]
+        assert "C:\\" not in row["pdf_file"]
+        assert "C:\\" not in row["manual_download_target"]
+        assert "/Users/" not in row["pdf_file"]
+        assert "/Users/" not in row["manual_download_target"]
+        if row["pdf_retrieved"] == "yes":
+            assert row["pdf_status"] == "downloaded"
+            assert row["pdf_file"].startswith("artifacts/paper_metadata_audit/publication_pdfs/")
+            assert row["manual_download_target"] == ""
+            assert row["manual_download_priority"] == "already_retrieved"
+        elif row["pdf_retrieved"] == "not_applicable":
+            assert row["pdf_status"] == "not_applicable"
+            assert row["manual_download_target"] == ""
+            assert row["manual_download_priority"] == "not_applicable"
+        else:
+            assert row["pdf_retrieved"] == "no"
+            assert row["pdf_status"] in {"needs_user_download", "bad_pdf", "open_access_unavailable", "paywalled"}
+            assert row["manual_download_target"] == (
+                f"artifacts/paper_metadata_audit/publication_pdfs/{row['record_id']}.pdf"
+            )
+            if row["doi"]:
+                assert row["manual_download_priority"] == "download_by_doi"
+            else:
+                assert row["doi_missing"] == "yes"
+                assert row["manual_download_priority"] == "doi_lookup_needed"
 
 
 def test_manual_reviews_are_schema_valid_and_source_pointer_only():

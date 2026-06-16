@@ -55,5 +55,8 @@ A field can be marked `not_reported_after_review` only after all of these attemp
 2. Targeted review of methods, apparatus, procedure, trial-design tables, and figures.
 3. Supplement search, including PDFs, spreadsheets, appendices, scripts, and project pages.
 4. Fallback extraction or source check using pdfplumber/pypdf, publisher HTML, rendered pages, or a second source route.
+5. Protocol-lineage search for terms such as adapted, previous, protocol, as described, based on, following, well-established, paradigm, front/frontal, and cited-methods references.
+
+When a paper says it adapted or used an established paradigm, record the cited source study and inspect that source before deciding that low-level stimulus, trajectory, timing, or count details are unavailable.
 
 Keep tracked evidence short. Store raw PDF/text artifacts only under ignored `artifacts/paper_metadata_audit/`.

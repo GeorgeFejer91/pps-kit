@@ -6,10 +6,22 @@
   "manual_review_status": "manual_review_completed_main_pdf_and_cell_press_source_pdf",
   "confidence_score": 0.91,
   "confidence_label": "high_confidence_extraction",
-  "confidence_basis": "Main PDF, OpenDataLoader output, fallback extraction, rendered STAR Methods pages, and the user-provided Cell Press article-export PDF were checked. The paper supplies enough Segment 1-4 metadata for static near/far PPS stimulation in healthy wake/sleep and DoC arm variants, but it reports no original code or scripts and no dynamic looming trajectory.",
+  "confidence_basis": "Main PDF, OpenDataLoader output, fallback extraction, rendered STAR Methods pages, user-provided Cell Press article-export PDF, and cited-protocol lineage terms were checked. The paper directly reports white-noise bursts and enough Segment 1-4 metadata for static near/far PPS stimulation in healthy wake/sleep and DoC arm variants, but it reports no original code/scripts and no dynamic looming trajectory.",
   "profile_recreation_assessment": {
     "assessment": "possible_with_caveats_task_free_eeg_pps_two_variants",
     "reason": "The study can be recreated as static near/far audio-tactile PPS stimulation for task-free EEG/clinical endpoints. It is not a behavioral RT profile and not a moving looming profile; exact white-noise assets, participant-specific gains, and some sleep-block totals would need protocol-level choices."
+  },
+  "protocol_lineage": {
+    "status": "reported_but_prior_protocols_should_be_checked_for_missing_low_level_details",
+    "cell_paper_directly_reports": "Auditory stimuli were white-noise bursts: 100 ms for healthy wake/sleep and 50 ms for DoC patients.",
+    "semantic_search_result": "Searches for frontal/front did not identify a frontal speaker trajectory; hits referred to brain/anatomy or analysis terms. The experimental geometry is near/far above chest for healthy participants and near/far along the extended arm depth axis for DoC patients.",
+    "cited_protocol_sources": [
+      "Noel et al. (2020) Rapid Recalibration of Peri-Personal Space, cited as part of the well-established audiotactile stimulation paradigm.",
+      "Noel et al. (2019) Peripersonal space encoding in patients with disorders of consciousness, cited directly for the PPS index/procedure context.",
+      "Bernasconi/Noel et al. (2018) audio-tactile trunk iEEG study, cited in the paradigm lineage.",
+      "Ronga et al. (2021) newborn ERP spatial tuning study, cited directly for the PPS index/procedure context."
+    ],
+    "audit_instruction": "If exact white-noise generation, speaker orientation, or DoC bedside setup details remain insufficient in this paper, inspect these cited protocol papers before marking the value not_reported_after_review."
   },
   "source_checks": [
     {
@@ -78,6 +90,11 @@
       "strategy": "Code/script availability pass",
       "status": "completed",
       "result": "Resource availability statements and the Cell Press ZIP show no original code or reusable stimulus-generation scripts."
+    },
+    {
+      "strategy": "Prior-protocol semantic lineage pass",
+      "status": "completed",
+      "result": "Searched frontal/front, adapted, previous, protocol, well-established, and cited PPS paradigm references; no frontal trajectory was found, but cited Noel/Ronga/Bernasconi lineage papers were identified as fallback protocol sources."
     }
   ],
   "field_status_counts": {
@@ -96,10 +113,10 @@
       },
       "source_provenance": {
         "status": "reported",
-        "value": "Healthy sounds were generated with E-Prime 2; resource notes report no original code. Exact white-noise file, seed, or reusable script is not supplied.",
+        "value": "Healthy sounds were generated with E-Prime 2; no original code is reported. For missing low-level details, check cited Noel/Ronga/Bernasconi PPS protocols.",
         "source_file": "artifacts/paper_metadata_audit/supplements/cell_reports_medicine_2026_consciousness/cell_press_article_export_20260616.pdf",
-        "page_or_section": "PDF pp.11, 16, Resource Availability and STAR Methods",
-        "evidence_note": "The source route gives software provenance but no code or asset bundle."
+        "page_or_section": "PDF pp.3, 11, 16 and references 27-31",
+        "evidence_note": "The paper reports E-Prime/white noise and a well-established paradigm lineage, but no asset or code bundle."
       },
       "trajectory_count": {
         "status": "reported",
