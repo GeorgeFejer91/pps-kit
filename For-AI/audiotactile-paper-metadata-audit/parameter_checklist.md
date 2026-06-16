@@ -28,6 +28,18 @@ Use visual inspection whenever the methods text is ambiguous or when speaker/par
 6. Track participant posture and stimulated body part as part of the spatial frame: sitting, supine, arm extended, chest/sternum, hand, back, shoulder, or trunk-centered setups can change the meaning of near/far or front/rear.
 7. If visual scale is used because text is incomplete, write the approximation basis in `evidence_note` and keep the value conservative. Do not mark a visually estimated value as fully `reported`.
 
+## Five-Pass Semantic Search Strategy
+
+Every manual review should include five different semantic searches, even when OpenDataLoader finds many candidate fields:
+
+1. Stimulus reconstruction pass: search for sound/noise/tone, waveform, source, SPL, gain, envelope, speaker, headphone, renderer, HRTF, Matlab, Unity, SoundForge, Audacity, and apparatus terms.
+2. Visual/spatial geometry pass: search for figure, schematic, apparatus, frontal, front, rear, left, right, lateral, near, far, distance, elevation, height, body part, participant facing, rotation, and coordinate-frame clues; then inspect rendered pages.
+3. Trial sequence pass: search for randomized, blocked, intermingled, intermixed, pseudo-random, order, sequence, condition, family, percentage, row, block, trial type, ITI, jitter, and response-window terms.
+4. Tactile/SOA/baseline pass: search for tactile, vibrotactile, electrical, vibration, delay, SOA, temporal, onset, baseline, unimodal, pre, post, timing, target, non-target, and correction terms.
+5. Count/catch/protocol-lineage pass: search for repetition, total, catch, no-go, auditory-only, tactile-only, supplement, appendix, protocol, adapted, previous, based on, following, well-established, and cited-methods references.
+
+For the visual/spatial pass, the mandatory output is not just a trajectory label. Record the participant-facing direction, speaker/source direction in room coordinates, body-relative label used by the authors, stimulated body part, and whether movement is physical, speaker-switching, cross-fade/gain-based, or digitally rendered.
+
 ## Segment 2 Sequence And Intermixing
 
 | Field | What to extract |
