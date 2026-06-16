@@ -17,6 +17,9 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 container.appendChild(renderer.domElement);
 
+const DEFAULT_3D_CAMERA_OFFSET = new THREE.Vector3(2.4, 1.6, 3.2);
+const avatarViewCenter = new THREE.Vector3(0, 0, 0);
+
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 0, 0);
 controls.enablePan = false;
@@ -130,14 +133,28 @@ function set2DViewCenter(center) {
 
 function sync2DViewState() {
   if (!window.__trajectoryViewerState || currentViewMode !== "2d") return;
+  const avatarScreenCenter = currentAvatarScreenCenter();
+  const radiusScreenBounds = twoDRadiusScreenBounds(currentRadius);
   window.__trajectoryViewerState.two_d_fit_vertical_span_m = lastTwoDFitVerticalSpan.toFixed(3);
   window.__trajectoryViewerState.two_d_view_vertical_span_m = lastTwoDVerticalSpan.toFixed(3);
   window.__trajectoryViewerState.two_d_camera_distance_m = lastTwoDCameraDistance.toFixed(3);
+  window.__trajectoryViewerState.avatar_screen_center_x_fraction = avatarScreenCenter.x.toFixed(3);
+  window.__trajectoryViewerState.avatar_screen_center_y_fraction = avatarScreenCenter.y.toFixed(3);
+  window.__trajectoryViewerState.radius_screen_center_x_fraction = radiusScreenBounds.centerX.toFixed(3);
+  window.__trajectoryViewerState.radius_screen_center_y_fraction = radiusScreenBounds.centerY.toFixed(3);
+  window.__trajectoryViewerState.radius_screen_width_px = radiusScreenBounds.widthPx.toFixed(1);
+  window.__trajectoryViewerState.radius_screen_height_px = radiusScreenBounds.heightPx.toFixed(1);
   window.__trajectoryViewerState.two_d_view_center_x_m = controls.target.x.toFixed(3);
   window.__trajectoryViewerState.two_d_view_center_z_m = controls.target.z.toFixed(3);
   container.dataset.twoDFitVerticalSpanM = window.__trajectoryViewerState.two_d_fit_vertical_span_m;
   container.dataset.twoDViewVerticalSpanM = window.__trajectoryViewerState.two_d_view_vertical_span_m;
   container.dataset.twoDCameraDistanceM = window.__trajectoryViewerState.two_d_camera_distance_m;
+  container.dataset.avatarScreenCenterXFraction = window.__trajectoryViewerState.avatar_screen_center_x_fraction;
+  container.dataset.avatarScreenCenterYFraction = window.__trajectoryViewerState.avatar_screen_center_y_fraction;
+  container.dataset.radiusScreenCenterXFraction = window.__trajectoryViewerState.radius_screen_center_x_fraction;
+  container.dataset.radiusScreenCenterYFraction = window.__trajectoryViewerState.radius_screen_center_y_fraction;
+  container.dataset.radiusScreenWidthPx = window.__trajectoryViewerState.radius_screen_width_px;
+  container.dataset.radiusScreenHeightPx = window.__trajectoryViewerState.radius_screen_height_px;
   container.dataset.twoDViewCenterXM = window.__trajectoryViewerState.two_d_view_center_x_m;
   container.dataset.twoDViewCenterZM = window.__trajectoryViewerState.two_d_view_center_z_m;
 }
@@ -174,7 +191,7 @@ function applyCameraMode(mode, resetCamera = false) {
     fit2DCameraToRadius({ resetCenter: resetCamera, resetZoom: resetCamera });
   } else {
     camera.up.set(0, 1, 0);
-    controls.target.set(0, 0, 0);
+    controls.target.copy(avatarViewCenter);
     controls.enabled = true;
     controls.enableRotate = true;
     controls.enableZoom = true;
@@ -184,7 +201,7 @@ function applyCameraMode(mode, resetCamera = false) {
     controls.minPolarAngle = 0.08;
     controls.maxPolarAngle = Math.PI / 2;
     if (resetCamera) {
-      camera.position.set(2.4, 1.6, 3.2);
+      camera.position.copy(avatarViewCenter).add(DEFAULT_3D_CAMERA_OFFSET);
     }
   }
   camera.lookAt(controls.target);
@@ -302,6 +319,50 @@ function addAvatar() {
   }
 
   avatarGroup.position.y = -HEAD_CENTER_Y;
+  new THREE.Box3().setFromObject(avatarGroup).getCenter(avatarViewCenter);
+  avatarViewCenter.x = 0;
+  avatarViewCenter.z = 0;
+}
+
+function viewportPercentForWorld(point) {
+  camera.updateMatrixWorld(true);
+  camera.updateProjectionMatrix();
+  const projected = point.clone().project(camera);
+  return {
+    x: (projected.x + 1) / 2,
+    y: (1 - projected.y) / 2
+  };
+}
+
+function currentAvatarScreenCenter() {
+  return viewportPercentForWorld(currentViewMode === "2d" ? new THREE.Vector3(0, 0, 0) : avatarViewCenter);
+}
+
+function twoDRadiusScreenBounds(radius) {
+  const points = [
+    new THREE.Vector3(-radius, 0, 0),
+    new THREE.Vector3(radius, 0, 0),
+    new THREE.Vector3(0, 0, -radius),
+    new THREE.Vector3(0, 0, radius)
+  ].map(viewportPercentForWorld);
+  const xs = points.map((point) => point.x);
+  const ys = points.map((point) => point.y);
+  const minX = Math.min(...xs);
+  const maxX = Math.max(...xs);
+  const minY = Math.min(...ys);
+  const maxY = Math.max(...ys);
+  const widthPx = (maxX - minX) * Math.max(1, container.clientWidth);
+  const heightPx = (maxY - minY) * Math.max(1, container.clientHeight);
+  return {
+    minX,
+    maxX,
+    minY,
+    maxY,
+    centerX: (minX + maxX) / 2,
+    centerY: (minY + maxY) / 2,
+    widthPx,
+    heightPx
+  };
 }
 
 function makeLabel(text, position) {
@@ -621,6 +682,8 @@ function drawScene(payload) {
   }
   const sourceStatus = inventorySummary.sourceCount ? `, ${inventorySummary.sourceCount} source trajector${inventorySummary.sourceCount === 1 ? "y" : "ies"}` : "";
   statusEl.textContent = `${payload.path_length_m.toFixed(2)} m path, ${payload.movement_duration_s.toFixed(2)} s movement${sourceStatus}`;
+  const avatarScreenCenter = currentAvatarScreenCenter();
+  const radiusScreenBounds = is2D ? twoDRadiusScreenBounds(radius) : null;
   window.__trajectoryViewerState = {
     ready: true,
     view_mode: mode,
@@ -639,6 +702,13 @@ function drawScene(payload) {
     two_d_fit_aspect: is2D ? lastTwoDFitAspect.toFixed(3) : "",
     two_d_pan_enabled: is2D,
     two_d_zoom_enabled: is2D,
+    avatar_view_center_y_m: avatarViewCenter.y.toFixed(3),
+    avatar_screen_center_x_fraction: avatarScreenCenter.x.toFixed(3),
+    avatar_screen_center_y_fraction: avatarScreenCenter.y.toFixed(3),
+    radius_screen_center_x_fraction: radiusScreenBounds ? radiusScreenBounds.centerX.toFixed(3) : "",
+    radius_screen_center_y_fraction: radiusScreenBounds ? radiusScreenBounds.centerY.toFixed(3) : "",
+    radius_screen_width_px: radiusScreenBounds ? radiusScreenBounds.widthPx.toFixed(1) : "",
+    radius_screen_height_px: radiusScreenBounds ? radiusScreenBounds.heightPx.toFixed(1) : "",
     two_d_view_center_x_m: is2D ? controls.target.x.toFixed(3) : "",
     two_d_view_center_z_m: is2D ? controls.target.z.toFixed(3) : "",
     start_distance_cm: payload.controls?.start_distance_cm ?? "",
@@ -666,6 +736,13 @@ function drawScene(payload) {
   container.dataset.twoDFitAspect = window.__trajectoryViewerState.two_d_fit_aspect;
   container.dataset.twoDPanEnabled = String(window.__trajectoryViewerState.two_d_pan_enabled);
   container.dataset.twoDZoomEnabled = String(window.__trajectoryViewerState.two_d_zoom_enabled);
+  container.dataset.avatarViewCenterYM = window.__trajectoryViewerState.avatar_view_center_y_m;
+  container.dataset.avatarScreenCenterXFraction = window.__trajectoryViewerState.avatar_screen_center_x_fraction;
+  container.dataset.avatarScreenCenterYFraction = window.__trajectoryViewerState.avatar_screen_center_y_fraction;
+  container.dataset.radiusScreenCenterXFraction = window.__trajectoryViewerState.radius_screen_center_x_fraction;
+  container.dataset.radiusScreenCenterYFraction = window.__trajectoryViewerState.radius_screen_center_y_fraction;
+  container.dataset.radiusScreenWidthPx = window.__trajectoryViewerState.radius_screen_width_px;
+  container.dataset.radiusScreenHeightPx = window.__trajectoryViewerState.radius_screen_height_px;
   container.dataset.twoDViewCenterXM = window.__trajectoryViewerState.two_d_view_center_x_m;
   container.dataset.twoDViewCenterZM = window.__trajectoryViewerState.two_d_view_center_z_m;
   container.dataset.startDistanceCm = String(window.__trajectoryViewerState.start_distance_cm);
