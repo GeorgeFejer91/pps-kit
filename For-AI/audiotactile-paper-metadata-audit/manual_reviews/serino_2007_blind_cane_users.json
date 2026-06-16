@@ -1,0 +1,284 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "serino_2007_blind_cane_users",
+  "citation_short": "Serino et al. (2007)",
+  "review_date": "2026-06-16",
+  "manual_review_status": "manual_review_completed_main_pdf_supplement_limited",
+  "confidence_score": 0.88,
+  "confidence_label": "high_confidence_extraction",
+  "confidence_basis": "Main PDF, OpenDataLoader output, fallback text search, rendered methods/results pages, and publisher/source-route checks were reviewed. The static near/far auditory layout, 150 ms white-noise bursts, 70 dB equalization, 5 ms far-sound lead, electrical tactile target/nontarget structure, catch rows, 150-trial task composition, and cane/handle/training blocks are reported. Remaining gaps are ITI/jitter, numeric response window, exact tactile pulse duration/current, and detailed randomization.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats_static_near_far_tool_condition",
+    "reason": "The audio-tactile task can be recreated as a static near/far speaker PPS design with cane and handle/tool-use conditions. It is not a dynamic looming profile, and exact electrical pulse/current plus ITI/response timeout would need reasonable lab defaults."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf",
+      "source": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+      "status": "reviewed",
+      "scope": "PDF pages 2-4 for rationale, Procedure and Materials, Figure 1, auditory/tactile apparatus, trial counts, blocked conditions, and catch-trial sanity checks."
+    },
+    {
+      "source_type": "opendataloader_json",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2007_blind_cane_users.json",
+      "status": "reviewed",
+      "scope": "Used as primary extracted text map and checked against rendered PDF pages and targeted text searches."
+    },
+    {
+      "source_type": "fallback_text_extraction",
+      "source": "pdftotext/pdfplumber-style local text search",
+      "status": "reviewed",
+      "scope": "Targeted searches for white noise, 150 ms, 70 dB, near/far, 125 cm, 5 ms, target/nontarget/catch, blocked, counterbalanced, XGen, DS7A, response, ITI, and timeout terms."
+    },
+    {
+      "source_type": "rendered_pdf_pages",
+      "source": "tmp/pdfs/serino_2007_review/page-2.png through page-4.png",
+      "status": "reviewed_not_tracked",
+      "scope": "Visual layout check of methods, Figure 1, and results pages; temporary rendered page images were not committed."
+    },
+    {
+      "source_type": "supplement_route_check",
+      "source": "https://doi.org/10.1111/j.1467-9280.2007.01952.x",
+      "status": "checked_access_limited_or_no_supplement",
+      "scope": "Tracked ledger and publisher/source route did not provide a usable supplement; missing ITI and tactile pulse details remain main-PDF gaps."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "OpenDataLoader PDF extraction",
+      "status": "completed",
+      "result": "Mapped automated candidate Segment 1-4 values and located methods pages for manual checking."
+    },
+    {
+      "strategy": "Stimulus reconstruction pass",
+      "status": "completed",
+      "result": "Confirmed static near/far white-noise bursts, two loudspeaker locations, 125 cm far distance, 150 ms duration, 70 dB ear-level equalization, and the 5 ms far-sound timing correction."
+    },
+    {
+      "strategy": "Tactile and SOA pass",
+      "status": "completed",
+      "result": "Confirmed weak target and strong nontarget electrical stimulation on the right index finger, simultaneous near sound/touch, and far sound onset 5 ms before touch."
+    },
+    {
+      "strategy": "Sequence and intermixing pass",
+      "status": "completed",
+      "result": "Separated target, nontarget, and sound-only catch rows from blocked cane, handle, and sighted training conditions."
+    },
+    {
+      "strategy": "Counts and baseline pass",
+      "status": "completed",
+      "result": "Confirmed 150 trials per described task with 30 trials in each target/nontarget near/far row plus 30 catch trials; no tactile-only baseline was found."
+    },
+    {
+      "strategy": "Rendered-page layout pass",
+      "status": "completed",
+      "result": "Rendered pages 2-4 were inspected to verify methods text, Figure 1 geometry, and catch/results statements."
+    },
+    {
+      "strategy": "Supplement/source route pass",
+      "status": "completed_no_hits",
+      "result": "No usable supplement was available in the tracked/publisher route; ITI, response deadline, and exact tactile pulse parameters remain unreported after review."
+    }
+  ],
+  "field_status_counts": {
+    "derived": 1,
+    "not_applicable": 3,
+    "not_reported_after_review": 2,
+    "reported": 19
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "reported",
+        "value": "Auditory stimuli were 150 ms bursts of white noise.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+        "page_or_section": "PDF p.3, Procedure and Materials",
+        "evidence_note": "The sound class and duration are stated in the methods text."
+      },
+      "source_provenance": {
+        "status": "reported",
+        "value": "Sounds were generated by two identical loudspeakers; phono-spectral waves were recorded by computer to verify equal sounds at the origin.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+        "page_or_section": "PDF p.3, Procedure and Materials",
+        "evidence_note": "The paper describes speaker generation and verification, but not the source file/noise seed."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "Two static auditory positions/conditions: near the stimulated hand and far on the floor near the cane tip.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+        "page_or_section": "PDF pp.2-3, Procedure and Figure 1",
+        "evidence_note": "Near and far sound locations are the task's auditory spatial factor."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Near sound was close to the stimulated right hand; far sound was on the floor about 125 cm from the hand, corresponding to average cane length and the fixed cane-tip location.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+        "page_or_section": "PDF pp.2-3, Procedure and Figure 1",
+        "evidence_note": "The method and figure give the static spatial layout."
+      },
+      "stimulus_duration": {
+        "status": "reported",
+        "value": "Auditory white-noise bursts lasted 150 ms.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+        "page_or_section": "PDF p.3, Procedure and Materials",
+        "evidence_note": "Duration is explicitly reported."
+      },
+      "stimulus_speed": {
+        "status": "not_applicable",
+        "value": "No looming or moving auditory stimulus was used; near and far sounds were static speaker locations.",
+        "source_file": "",
+        "page_or_section": "",
+        "evidence_note": "The task uses static near/far locations rather than a moving trajectory."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "Near versus far sound location was crossed with weak target, strong nontarget, and sound-only catch rows; tool state was manipulated in separate cane/handle/training blocks.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+        "page_or_section": "PDF pp.2-4, Procedure, Figure 1, and Results",
+        "evidence_note": "Sound location and tool/training conditions are reported as design factors."
+      },
+      "gain_envelope": {
+        "status": "reported",
+        "value": "Near and far sounds were equalized to 70 dB at the participant's ear; sounds were also checked for equality at origin.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+        "page_or_section": "PDF p.3, Procedure and Materials",
+        "evidence_note": "SPL equalization is reported; no detailed gain curve is needed for static bursts."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Two identical loudspeakers placed near and far from the stimulated hand; XGen software controlled stimulus presentation and response recording.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+        "page_or_section": "PDF pp.2-3, Figure 1 and Procedure",
+        "evidence_note": "The apparatus and control software are described in the methods section."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "Rows/families were weak tactile target plus near/far sound, strong tactile nontarget plus near/far sound, and sound-only catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+        "page_or_section": "PDF p.2, Procedure and Materials",
+        "evidence_note": "The 150-trial composition lists the trial rows explicitly."
+      },
+      "condition_intermixing": {
+        "status": "reported",
+        "value": "Near/far sound trials and target/nontarget/catch rows occurred within the task; cane, handle, and sighted training conditions were separate blocked conditions.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+        "page_or_section": "PDF pp.2-3, Procedure and Materials",
+        "evidence_note": "The paper separates within-task trial rows from blocked tool conditions."
+      },
+      "blocked_or_random_order": {
+        "status": "reported",
+        "value": "Participants performed cane and handle tasks in two blocked conditions with counterbalanced order; sighted subjects had two additional cane-training blocks immediately after and 1 day after training.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+        "page_or_section": "PDF p.3, Procedure and Materials",
+        "evidence_note": "Blocked condition structure and order counterbalancing are reported."
+      },
+      "iti_jitter_policy": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf; https://doi.org/10.1111/j.1467-9280.2007.01952.x",
+        "page_or_section": "PDF pp.2-4; supplement route checked 2026-06-16",
+        "evidence_note": "No ITI, jitter range, or inter-trial distribution was found in the main PDF or available source route."
+      },
+      "response_window": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf; https://doi.org/10.1111/j.1467-9280.2007.01952.x",
+        "page_or_section": "PDF pp.2-4; supplement route checked 2026-06-16",
+        "evidence_note": "Participants responded as rapidly as possible, but no numeric deadline or scoring window was found."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Subjects verbally responded only to weak tactile targets, ignored sounds, received 30 familiarization trials before the experiment, and should not respond on strong nontarget or sound-only catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+        "page_or_section": "PDF pp.2-3, Procedure and Materials",
+        "evidence_note": "Response rules and familiarization are reported."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "Two DS7A Digitimer constant-current stimulators delivered weak target and strong nontarget electrical stimuli through Neuroline electrodes on the upper side of the right index finger; intensities were calibrated to about 90% and 100% perception.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+        "page_or_section": "PDF p.3, Procedure and Materials",
+        "evidence_note": "Device, site, target/nontarget role, and perceptual calibration are reported; pulse duration/current are not."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "Near sound and tactile stimuli were simultaneous; far sound onset preceded tactile onset by 5 ms to compensate for the extra sound-travel distance.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+        "page_or_section": "PDF p.3, Procedure and Materials",
+        "evidence_note": "The SOA/timing correction is explicitly reported."
+      },
+      "baseline_strategy": {
+        "status": "reported",
+        "value": "No separate tactile-only baseline is reported; the task estimates PPS effects from near-versus-far sound comparisons across handle/cane/training conditions.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+        "page_or_section": "PDF pp.2-4, Procedure and Results",
+        "evidence_note": "Baseline is a within-design comparison rather than a distinct tactile-only trial family."
+      },
+      "baseline_timing": {
+        "status": "not_applicable",
+        "value": "No tactile-only baseline SOA schedule was used or reported.",
+        "source_file": "",
+        "page_or_section": "",
+        "evidence_note": "The study uses near/far and tool-condition comparisons instead of a baseline timing ladder."
+      },
+      "catch_trial_type": {
+        "status": "reported",
+        "value": "Catch trials were sound-only no-response trials; results report responses on fewer than 1% of catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+        "page_or_section": "PDF pp.2 and 4, Procedure and Results",
+        "evidence_note": "Catch type and a false-response sanity check are reported."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "reported",
+        "value": "Per described task: 30 weak-target trials with near sound, 30 weak-target trials with far sound, 30 strong-nontarget trials with near sound, and 30 strong-nontarget trials with far sound.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+        "page_or_section": "PDF p.2, Procedure and Materials",
+        "evidence_note": "The trial counts are explicitly listed in the task-composition paragraph."
+      },
+      "baseline_count": {
+        "status": "not_applicable",
+        "value": "No separate tactile-only baseline trials are reported.",
+        "source_file": "",
+        "page_or_section": "",
+        "evidence_note": "There is no baseline row to count."
+      },
+      "catch_count": {
+        "status": "reported",
+        "value": "Per described task: 30 sound-only catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+        "page_or_section": "PDF p.2, Procedure and Materials",
+        "evidence_note": "The catch count is explicitly listed."
+      },
+      "block_count": {
+        "status": "reported",
+        "value": "All participants completed cane and handle blocked conditions; sighted participants also completed cane blocks immediately after 10 min training and 1 day after training.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+        "page_or_section": "PDF p.3, Procedure and Materials",
+        "evidence_note": "Blocked condition count differs by group because sighted subjects had extra training phases."
+      },
+      "total_trial_count": {
+        "status": "derived",
+        "value": "The described task contains 150 trials per administered condition; this implies 300 trials for blind participants across cane/handle and 600 for sighted participants if each listed sighted condition used the same task.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+        "page_or_section": "PDF pp.2-3, Procedure and Materials",
+        "evidence_note": "Per-task total is reported; group totals are derived because the paper does not explicitly multiply across conditions."
+      }
+    }
+  },
+  "critical_caveats": [
+    "This is a static near/far auditory task, not a looming or receding trajectory profile.",
+    "The exact white-noise source file, random seed, and spectral recipe are not supplied.",
+    "The exact electrical tactile pulse duration, current, and waveform are not reported.",
+    "ITI or jitter policy is not reported.",
+    "No numeric response deadline/window is reported for the voice-key response.",
+    "Detailed trial randomization within the 150-trial task is not reported.",
+    "The paper strongly implies the 150-trial task repeats in each blocked condition, but group totals are derived rather than directly stated."
+  ],
+  "next_manual_action": "Use this as a high-confidence static near/far tool-condition template candidate. Exact toolkit recreation should label missing tactile pulse parameters, ITI, response window, and randomization details as lab-default approximations unless a supplement or protocol source becomes available."
+}
