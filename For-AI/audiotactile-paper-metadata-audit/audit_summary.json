@@ -1,7 +1,7 @@
 {
   "schema": "pps-paper-metadata-audit-summary.v1",
   "generated_on": "2026-06-16",
-  "parser_version": "0.5.4",
+  "parser_version": "0.5.5",
   "record_count": 74,
   "doi_record_count": 67,
   "missing_doi_record_count": 7,

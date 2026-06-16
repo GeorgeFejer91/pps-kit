@@ -1,6 +1,6 @@
 {
   "schema": "pps-paper-metadata-extraction-schema.v1",
-  "parser_version": "0.5.4",
+  "parser_version": "0.5.5",
   "pdf_statuses": [
     "downloaded",
     "open_access_unavailable",
@@ -74,6 +74,10 @@
   "pdf_retrieval_inventory": {
     "path": "For-AI/audiotactile-paper-metadata-audit/pdf_retrieval_inventory.csv",
     "rule": "One row per literature record; records whether the main publication PDF has been retrieved locally, gives the DOI/DOI URL for missing PDFs, and names the target local PDF path."
+  },
+  "protocol_lineage_candidates": {
+    "path": "For-AI/audiotactile-paper-metadata-audit/protocol_lineage_candidates.csv",
+    "rule": "Cited prior-protocol papers that may contain missing stimulus, trajectory, timing, apparatus, or count details for another audited paper; promote to the main literature database after screening when appropriate."
   },
   "segment_fields": {
     "segment_1_stimulus_reconstruction": [

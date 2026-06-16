@@ -22,6 +22,7 @@ Manual reviews are the layer where auto-mined candidates become checked metadata
 ## Tracked Generated Ledgers
 
 - `pdf_retrieval_inventory.csv`: canonical running list of which main publication PDFs are already retrieved, which are missing, DOI/DOI URL for missing records, and the local target filename.
+- `protocol_lineage_candidates.csv`: cited prior-protocol papers that may contain missing stimulus, trajectory, timing, or count details for another audited paper.
 - `doi_inventory.csv`: DOI/DOI URL inventory plus current PDF and supplement status for every literature record.
 - `missing_pdf_request_list.csv`: actionable download queue for missing main PDFs and supplement/methods files.
 - `running_checklist.csv`: compact all-record metadata audit progress checklist.
@@ -54,8 +55,9 @@ Manual reviews are the layer where auto-mined candidates become checked metadata
 2. Download supplements into `artifacts/paper_metadata_audit/supplements/<record_id>/`.
 3. Run `python -m tools.paper_metadata_parser --refresh` from the repo root.
 4. Review `pdf_retrieval_inventory.csv` first for the running list of retrieved/missing PDFs and missing-paper DOI URLs.
-5. Review `running_checklist.csv`, `missing_pdf_request_list.csv`, and `paper_audits/<record_id>.md`.
-6. Promote critically checked Segment 1-4 values into `manual_reviews/<record_id>.json` and update `manual_review_index.csv`.
+5. Review `protocol_lineage_candidates.csv` when a paper cites an adapted or established prior protocol.
+6. Review `running_checklist.csv`, `missing_pdf_request_list.csv`, and `paper_audits/<record_id>.md`.
+7. Promote critically checked Segment 1-4 values into `manual_reviews/<record_id>.json` and update `manual_review_index.csv`.
 
 Automated evidence-mined values are `inferred_low_confidence` candidates. Treat them as a triage map for critical review, not as final paper metadata.
 

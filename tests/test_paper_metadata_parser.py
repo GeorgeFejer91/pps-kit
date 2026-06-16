@@ -77,6 +77,7 @@ def test_paper_metadata_schema_and_status_values_are_valid():
     assert ".pdf" in schema["supplement_extraction"]["supported_local_formats"]
     assert schema["manual_reviews"] == tool_schema["manual_reviews"]
     assert schema["pdf_retrieval_inventory"] == tool_schema["pdf_retrieval_inventory"]
+    assert schema["protocol_lineage_candidates"] == tool_schema["protocol_lineage_candidates"]
     assert schema["local_artifact_conventions"]["main_pdf_filename"].startswith("artifacts/")
 
     for record in audit_records:
@@ -203,6 +204,61 @@ def test_pdf_retrieval_inventory_tracks_every_publication_pdf():
             else:
                 assert row["doi_missing"] == "yes"
                 assert row["manual_download_priority"] == "doi_lookup_needed"
+
+
+def test_protocol_lineage_candidates_are_trackable_to_records_or_promotion_queue():
+    coverage = json.loads(COVERAGE_PATH.read_text(encoding="utf-8"))
+    coverage_ids = {record["record_id"] for record in coverage["literature_records"]}
+    retrieval_rows = {row["record_id"]: row for row in load_csv(AUDIT_DIR / "pdf_retrieval_inventory.csv")}
+    lineage_rows = load_csv(AUDIT_DIR / "protocol_lineage_candidates.csv")
+
+    required_fields = {
+        "source_record_id",
+        "source_citation_short",
+        "source_context",
+        "cited_reference_number",
+        "cited_protocol_citation",
+        "cited_protocol_title",
+        "cited_protocol_doi",
+        "cited_protocol_doi_url",
+        "current_literature_record_id",
+        "current_pdf_status",
+        "current_audit_status",
+        "coverage_action",
+        "next_step",
+    }
+    allowed_actions = {
+        "screen_for_promotion_to_literature_database",
+        "download_and_manual_review",
+        "manual_review_needed",
+    }
+    allowed_audit_statuses = {
+        "not_in_audit",
+        "record_present_pdf_missing",
+        "record_present_pdf_retrieved",
+    }
+
+    assert lineage_rows
+    assert {row["source_record_id"] for row in lineage_rows} <= coverage_ids
+    assert {"10.1093/cercor/bhaa103", "10.1016/j.nicl.2019.101940"} <= {
+        row["cited_protocol_doi"] for row in lineage_rows
+    }
+    for row in lineage_rows:
+        assert required_fields <= set(row)
+        assert row["coverage_action"] in allowed_actions
+        assert row["current_audit_status"] in allowed_audit_statuses
+        assert row["cited_protocol_doi_url"] == f"https://doi.org/{row['cited_protocol_doi']}"
+        assert "C:\\" not in json.dumps(row)
+        assert "/Users/" not in json.dumps(row)
+        linked_record_id = row["current_literature_record_id"]
+        if linked_record_id:
+            assert linked_record_id in coverage_ids
+            assert row["current_pdf_status"] == retrieval_rows[linked_record_id]["pdf_status"]
+            assert row["coverage_action"] in {"download_and_manual_review", "manual_review_needed"}
+        else:
+            assert row["current_pdf_status"] == "not_in_inventory"
+            assert row["current_audit_status"] == "not_in_audit"
+            assert row["coverage_action"] == "screen_for_promotion_to_literature_database"
 
 
 def test_manual_reviews_are_schema_valid_and_source_pointer_only():
