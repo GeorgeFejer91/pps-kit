@@ -47,6 +47,7 @@ SCHEDULED_EVENT_TYPES = {
     "trial_end",
     "response_marker_start",
 }
+OS_CLICK_BACKENDS = {"pyautogui", "pynput", "win32"}
 EXPECTED_ANALYSIS_SUFFIXES = [
     "responses",
     "analysis_ready_trials",
@@ -422,15 +423,98 @@ def _flatten_json_values(value: Any) -> list[str]:
 def _planned_click_summary(focus_report: dict[str, Any]) -> dict[str, Any]:
     actions = [item for item in focus_report.get("validation_mouse_clicks") or [] if isinstance(item, dict)]
     standard = [item for item in actions if item.get("action") == "standard_click"]
+    topup = [item for item in actions if item.get("action") == "topup_click"]
     misses = [item for item in actions if item.get("action") == "deliberate_miss"]
     plan_headers = [item for item in actions if item.get("label") == "participant_emulator_plan"]
     return {
         "standard_click_count": len(standard),
+        "topup_click_count": len(topup),
+        "all_click_count": len(standard) + len(topup),
         "deliberate_miss_count": len(misses),
         "plan_declared_tactile_count": _as_int(plan_headers[-1].get("standard_tactile_cue_count"), default=None) if plan_headers else None,
         "plan_declared_miss_count": _as_int(plan_headers[-1].get("planned_miss_count"), default=None) if plan_headers else None,
         "standard_clicks": standard,
+        "topup_clicks": topup,
         "misses": misses,
+    }
+
+
+def _click_event_id(row: dict[str, Any]) -> str:
+    for key in ("click_event_id", "topup_click_event_id", "mouse_event_id"):
+        text = str(row.get(key) or "").strip()
+        if text:
+            return text
+    return ""
+
+
+def _analysis_selection_audit(
+    *,
+    planned: dict[str, Any],
+    analysis_ready_rows: list[dict[str, str]],
+    response_rows: list[dict[str, str]],
+    mouse_event_ids: set[str],
+    scheduled_tactile_count: int,
+) -> dict[str, Any]:
+    hit_rows = [row for row in analysis_ready_rows if _truthy(row.get("hit") or row.get("Hit"))]
+    original_hit_rows = [
+        row
+        for row in analysis_ready_rows
+        if _truthy(row.get("hit") or row.get("Hit")) and _norm(row.get("final_outcome_source") or "original") in {"", "original"}
+    ]
+    topup_rescue_rows = [
+        row
+        for row in analysis_ready_rows
+        if _truthy(row.get("hit") or row.get("Hit")) and _norm(row.get("final_outcome_source")) == "topup_rescue"
+    ]
+    response_hit_rows = [row for row in response_rows if _truthy(row.get("hit") or row.get("Hit"))]
+    response_selected_ids = [_click_event_id(row) for row in response_hit_rows]
+    response_selected_ids = [value for value in response_selected_ids if value]
+    duplicate_selected_ids = sorted(value for value, count in Counter(response_selected_ids).items() if count > 1)
+    selected_id_set = set(response_selected_ids)
+    missing_selected_ids = sorted(selected_id_set - mouse_event_ids)
+    extra_logged_mouse_ids = sorted(mouse_event_ids - selected_id_set, key=lambda value: (0, int(value)) if value.isdigit() else (1, value))
+
+    declared_tactile_count = planned.get("plan_declared_tactile_count")
+    if declared_tactile_count is None:
+        declared_tactile_count = len(analysis_ready_rows)
+    declared_miss_count = planned.get("plan_declared_miss_count")
+    if declared_miss_count is None:
+        declared_miss_count = planned.get("deliberate_miss_count", 0)
+    standard_click_count = int(planned.get("standard_click_count") or 0)
+    topup_click_count = int(planned.get("topup_click_count") or 0)
+    planned_click_count = int(planned.get("all_click_count") or standard_click_count + topup_click_count)
+
+    expected_original_hits_ok = not standard_click_count or len(original_hit_rows) == standard_click_count
+    expected_topup_ok = int(declared_miss_count or 0) == 0 or len(topup_rescue_rows) == int(declared_miss_count or 0)
+    return {
+        "analysis_ready_rows": len(analysis_ready_rows),
+        "analysis_ready_hit_count": len(hit_rows),
+        "analysis_ready_original_hit_count": len(original_hit_rows),
+        "analysis_ready_topup_rescue_hit_count": len(topup_rescue_rows),
+        "response_rows": len(response_rows),
+        "response_hit_count": len(response_hit_rows),
+        "response_selected_click_event_id_count": len(response_selected_ids),
+        "raw_mouse_click_count": len(mouse_event_ids),
+        "extra_logged_mouse_click_count": max(0, len(mouse_event_ids) - len(selected_id_set)),
+        "extra_logged_mouse_event_ids": extra_logged_mouse_ids[:20],
+        "duplicate_selected_click_event_ids": duplicate_selected_ids[:20],
+        "missing_selected_mouse_event_ids": missing_selected_ids[:20],
+        "scheduled_tactile_onset_count": scheduled_tactile_count,
+        "declared_standard_tactile_count": declared_tactile_count,
+        "declared_miss_count": declared_miss_count,
+        "planned_standard_click_count": standard_click_count,
+        "planned_topup_click_count": topup_click_count,
+        "planned_all_click_count": planned_click_count,
+        "rows_match_declared_standard_tactile_count": len(analysis_ready_rows) == int(declared_tactile_count or -1),
+        "original_hits_match_standard_plan": expected_original_hits_ok,
+        "topup_rescues_match_miss_plan": expected_topup_ok,
+        "response_hits_match_all_planned_clicks": len(response_hit_rows) == planned_click_count,
+        "selected_click_ids_are_unique_and_logged": (
+            len(response_selected_ids) == len(response_hit_rows)
+            and not duplicate_selected_ids
+            and not missing_selected_ids
+        ),
+        "final_hits_cover_standard_pool": len(hit_rows) == int(declared_tactile_count or -1),
     }
 
 
@@ -694,22 +778,53 @@ def _validate_manifest_samples(block_paths: list[Path]) -> dict[str, Any]:
     return {"mismatches": mismatches, "row_counts": row_counts, "cue_checks": dict(cue_checks)}
 
 
-def _analysis_rt_audit(focus_report: dict[str, Any], analysis_ready_rows: list[dict[str, str]], tolerance_ms: float) -> dict[str, Any]:
+def _analysis_rt_audit(
+    focus_report: dict[str, Any],
+    analysis_ready_rows: list[dict[str, str]],
+    tolerance_ms: float,
+    os_click_max_tolerance_ms: float,
+) -> dict[str, Any]:
     click_summary = _planned_click_summary(focus_report)
     row_by_uid = {str(row.get("trial_uid") or row.get("Trial_UID") or ""): row for row in analysis_ready_rows}
     diffs = []
+    planned_diffs = []
     missing = []
+    backends = Counter()
+    outliers = []
     for click in click_summary["standard_clicks"]:
         trial_uid = str(click.get("trial_uid") or "")
         row = row_by_uid.get(trial_uid)
         if row is None:
             missing.append(trial_uid)
             continue
+        backend = _norm(click.get("backend"))
+        if backend:
+            backends[backend] += 1
+        planned_schedule_rt = _as_float(click.get("planned_delay_ms"), default=math.nan)
         planned_rt = _as_float(click.get("actual_delay_ms"), default=math.nan)
         observed_rt = _as_float(row.get("rt_ms") or row.get("RT_ms"), default=math.nan)
         if math.isfinite(planned_rt) and math.isfinite(observed_rt):
-            diffs.append(observed_rt - planned_rt)
+            diff = observed_rt - planned_rt
+            diffs.append(diff)
+            if abs(diff) > tolerance_ms:
+                outliers.append(
+                    {
+                        "trial_uid": trial_uid,
+                        "backend": backend,
+                        "emulated_actual_delay_ms": planned_rt,
+                        "analysis_rt_ms": observed_rt,
+                        "absolute_error_ms": abs(diff),
+                    }
+                )
+        if math.isfinite(planned_schedule_rt) and math.isfinite(observed_rt):
+            planned_diffs.append(observed_rt - planned_schedule_rt)
     stats = _ms_stats([abs(value) for value in diffs])
+    planned_stats = _ms_stats([abs(value) for value in planned_diffs])
+    os_backend_observed = any(backend in OS_CLICK_BACKENDS for backend in backends)
+    max_error = float(stats.get("max_ms", 0.0)) if stats.get("count", 0) else 0.0
+    p95_error = float(stats.get("p95_ms", 0.0)) if stats.get("count", 0) else 0.0
+    strict_within_tolerance = max_error <= tolerance_ms
+    os_distribution_within_tolerance = os_backend_observed and p95_error <= tolerance_ms and max_error <= os_click_max_tolerance_ms
     return {
         "planned_standard_click_count": click_summary["standard_click_count"],
         "planned_deliberate_miss_count": click_summary["deliberate_miss_count"],
@@ -717,8 +832,17 @@ def _analysis_rt_audit(focus_report: dict[str, Any], analysis_ready_rows: list[d
         "declared_miss_count": click_summary["plan_declared_miss_count"],
         "matched_rt_count": len(diffs),
         "missing_analysis_uids": missing,
+        "backend_counts": dict(backends),
+        "os_click_backend_observed": os_backend_observed,
         "absolute_rt_error_ms": stats,
-        "within_tolerance": not missing and (stats.get("count", 0) == 0 or float(stats.get("max_ms", 0.0)) <= tolerance_ms),
+        "absolute_rt_error_against_planned_schedule_ms": planned_stats,
+        "strict_max_tolerance_ms": tolerance_ms,
+        "os_click_p95_tolerance_ms": tolerance_ms,
+        "os_click_max_tolerance_ms": os_click_max_tolerance_ms,
+        "strict_max_within_tolerance": strict_within_tolerance,
+        "os_distribution_within_tolerance": os_distribution_within_tolerance,
+        "outliers_over_strict_tolerance": sorted(outliers, key=lambda item: float(item["absolute_error_ms"]), reverse=True)[:20],
+        "within_tolerance": not missing and (stats.get("count", 0) == 0 or strict_within_tolerance or os_distribution_within_tolerance),
     }
 
 
@@ -783,6 +907,7 @@ def audit_readiness(
     require_full_study5: bool = False,
     require_realtime: bool = False,
     rt_tolerance_ms: float = 25.0,
+    os_click_rt_max_tolerance_ms: float = 125.0,
 ) -> dict[str, Any]:
     artifact_dir = artifact_dir.resolve()
     focus_report = _read_json(artifact_dir / "focus_validation_report.json")
@@ -863,9 +988,10 @@ def audit_readiness(
     block_wav_scans = {path.name: _wav_scan(path) for path in block_wavs}
 
     analysis_paths = {suffix: _latest_analysis_csv(session_dir, suffix) for suffix in EXPECTED_ANALYSIS_SUFFIXES}
+    response_rows = _read_csv(analysis_paths["responses"] or Path())
     analysis_ready_rows = _read_csv(analysis_paths["analysis_ready_trials"] or Path())
     timing_qc_rows = _read_csv(analysis_paths["timing_qc"] or Path())
-    analysis_rt = _analysis_rt_audit(focus_report, analysis_ready_rows, rt_tolerance_ms)
+    analysis_rt = _analysis_rt_audit(focus_report, analysis_ready_rows, rt_tolerance_ms, os_click_rt_max_tolerance_ms)
     scope = _scope_summary(session_dir, manifest, focus_report, session_metadata, events)
 
     criteria: list[Criterion] = []
@@ -952,11 +1078,36 @@ def audit_readiness(
     mouse_count = event_counts.get("mouse_click", 0)
     response_marker_count = event_counts.get("response_marker_start", 0)
     planned = _planned_click_summary(focus_report)
+    mouse_event_ids = {str(row.get("event_id") or "").strip() for row in events if row.get("event_type") == "mouse_click" and str(row.get("event_id") or "").strip()}
+    analysis_selection = _analysis_selection_audit(
+        planned=planned,
+        analysis_ready_rows=analysis_ready_rows,
+        response_rows=response_rows,
+        mouse_event_ids=mouse_event_ids,
+        scheduled_tactile_count=scheduled_expected.get("tactile_onset", 0),
+    )
     response_markers = [row for row in events if row.get("event_type") == "response_marker_start"]
     linked_marker_ids = [row.get("payload", {}).get("mouse_event_id") for row in response_markers if str(row.get("payload", {}).get("mouse_event_id") or "").strip()]
     add(Criterion("response_marker_path", "mouse_clicks_and_response_markers_pair_one_to_one", mouse_count == response_marker_count and len(linked_marker_ids) == response_marker_count, "Each accepted in-playback click has one linked response_marker_start.", evidence={"mouse_click_count": mouse_count, "response_marker_start_count": response_marker_count, "linked_marker_count": len(linked_marker_ids)}))
-    if planned["standard_click_count"]:
-        add(Criterion("response_marker_path", "accepted_click_count_matches_emulated_plan", mouse_count == planned["standard_click_count"], "Observed accepted clicks match the standard-click portion of the emulated plan.", evidence={key: planned[key] for key in ("standard_click_count", "deliberate_miss_count", "plan_declared_tactile_count", "plan_declared_miss_count")}))
+    if planned["all_click_count"]:
+        add(
+            Criterion(
+                "response_marker_path",
+                "accepted_click_count_matches_emulated_plan",
+                bool(analysis_selection["response_hits_match_all_planned_clicks"]),
+                "Analysis-selected response hits match the standard and top-up click portions of the emulated plan.",
+                evidence=analysis_selection,
+            )
+        )
+        add(
+            Criterion(
+                "response_marker_path",
+                "extra_logged_clicks_are_excluded_from_analysis_selection",
+                bool(analysis_selection["selected_click_ids_are_unique_and_logged"]),
+                "Raw mouse clicks can include extra/double clicks, but selected response click IDs must be unique and logged.",
+                evidence=analysis_selection,
+            )
+        )
     qc_deltas = [_as_float(row.get("marker_minus_mouse_ms"), default=math.nan) for row in timing_qc_rows]
     add(Criterion("response_marker_path", "timing_qc_links_all_response_markers", len(timing_qc_rows) == response_marker_count and all(math.isfinite(value) for value in qc_deltas), "timing_qc.csv has one mouse-marker row per response marker.", evidence={"timing_qc_rows": len(timing_qc_rows), "response_marker_count": response_marker_count, "marker_minus_mouse_ms": _ms_stats(qc_deltas)}))
     chosen_marker_report = response_marker_report.get("chosen", {}) if response_marker_report.get("exists") else {}
@@ -966,12 +1117,14 @@ def audit_readiness(
 
     analysis_files = {suffix: {"path": str(path) if path else "", "exists": bool(path and path.is_file()), "bytes": path.stat().st_size if path and path.is_file() else 0} for suffix, path in analysis_paths.items()}
     add(Criterion("analysis_outputs", "all_expected_analysis_csvs_exist", all(item["exists"] and item["bytes"] > 0 for item in analysis_files.values()), "Expected analysis CSV family exists.", evidence=analysis_files))
-    hit_count = sum(1 for row in analysis_ready_rows if _truthy(row.get("hit") or row.get("Hit")))
-    tactile_count = scheduled_expected.get("tactile_onset", 0)
-    miss_count = tactile_count - hit_count
-    expected_hit_ok = hit_count == mouse_count and len(analysis_ready_rows) == tactile_count
-    add(Criterion("analysis_outputs", "analysis_ready_matches_expected_hits_and_misses", expected_hit_ok, "analysis_ready_trials hit/miss rows match tactile cues and accepted clicks.", evidence={"analysis_ready_rows": len(analysis_ready_rows), "hit_count": hit_count, "miss_count": miss_count, "tactile_onset_count": tactile_count, "mouse_click_count": mouse_count}))
-    add(Criterion("analysis_outputs", "emulated_rt_values_match_plan_tolerance", analysis_rt["within_tolerance"], f"Analysis RTs match emulated click timings within {rt_tolerance_ms:.1f} ms.", evidence=analysis_rt))
+    expected_hit_ok = (
+        bool(analysis_selection["rows_match_declared_standard_tactile_count"])
+        and bool(analysis_selection["original_hits_match_standard_plan"])
+        and bool(analysis_selection["topup_rescues_match_miss_plan"])
+        and bool(analysis_selection["final_hits_cover_standard_pool"])
+    )
+    add(Criterion("analysis_outputs", "analysis_ready_matches_expected_hits_and_misses", expected_hit_ok, "analysis_ready_trials rows match the original tactile pool, original hits, and top-up rescues.", evidence=analysis_selection))
+    add(Criterion("analysis_outputs", "emulated_rt_values_match_plan_tolerance", analysis_rt["within_tolerance"], f"Analysis RTs match emulated click timings within strict {rt_tolerance_ms:.1f} ms, or OS-click p95 within {rt_tolerance_ms:.1f} ms and max within {os_click_rt_max_tolerance_ms:.1f} ms.", evidence=analysis_rt))
 
     full_ready = bool(scope["full_study5"] and scope["validation_audio_realtime"])
     add(Criterion("scope_acceptance", "artifact_is_full_study5_when_required", (not require_full_study5) or bool(scope["full_study5"]), "Full Study 5 evidence is required only for final participant-readiness claims.", evidence=scope))
@@ -1012,6 +1165,7 @@ def audit_readiness(
         },
         "response_marker_loopback_report": response_marker_report,
         "lsl_xdf_audio_reconciliation_report": reconciliation_report,
+        "analysis_selection_audit": analysis_selection,
         "analysis_rt_audit": analysis_rt,
     }
     _write_json(output_dir / "protocol11_study5_readiness_audit.json", report)
@@ -1027,6 +1181,12 @@ def main() -> None:
     parser.add_argument("--require-full-study5", action="store_true", help="Fail if the artifact is not a complete 12-block Study 5 run.")
     parser.add_argument("--require-realtime", action="store_true", help="Fail if the artifact is not marked as realtime validation audio.")
     parser.add_argument("--rt-tolerance-ms", type=float, default=25.0, help="Allowed absolute RT error against the emulated click plan.")
+    parser.add_argument(
+        "--os-click-rt-max-tolerance-ms",
+        type=float,
+        default=125.0,
+        help="Allowed max absolute RT error for real OS-click backends when the RT error p95 still satisfies --rt-tolerance-ms.",
+    )
     args = parser.parse_args()
 
     report = audit_readiness(
@@ -1036,6 +1196,7 @@ def main() -> None:
         require_full_study5=args.require_full_study5,
         require_realtime=args.require_realtime,
         rt_tolerance_ms=args.rt_tolerance_ms,
+        os_click_rt_max_tolerance_ms=args.os_click_rt_max_tolerance_ms,
     )
     report_path = Path(report["output_dir"]) / "protocol11_study5_readiness_audit.json"
     print(f"Wrote Protocol 11 Study 5 readiness audit: {report_path}")

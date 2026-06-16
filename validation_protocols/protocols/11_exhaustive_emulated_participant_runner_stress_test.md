@@ -129,6 +129,17 @@ python .\validation_protocols\scripts\audit_protocol11_study5_readiness.py `
   --require-realtime
 ```
 
+The Study 5 readiness audit separates raw click logging from analysis-selected
+responses. All in-playback clicks should remain locally logged and paired to
+response markers, including extra double/random clicks, but analysis/top-up
+selection must use unique logged `click_event_id` values and must match the
+planned standard clicks plus approved top-up attempts. For controller and
+QTest-style deterministic backends, RT errors must satisfy the strict maximum
+tolerance. For visible OS-click backends (`pyautogui`, `pynput`, `win32`), RT
+matching is distribution-aware: p95 must remain within the strict tolerance,
+and the maximum outlier must remain within the audit's bounded OS-click
+tolerance.
+
 The response plan may be JSON or CSV. The minimum plan is keyed by
 `trial_uid`; JSON plans may also declare expected capture options,
 instruction slots, instruction-click actions, top-up behavior, and operator
@@ -283,7 +294,9 @@ failure mode.
 - [ ] `primary_analysis_included=false` rows are excluded from final primary
   analysis.
 - [ ] RT distributions in analysis match planned emulated delays within the
-  expected UI/backend tolerance.
+  expected UI/backend tolerance: strict maximum tolerance for deterministic
+  controller/QTest backends, and strict p95 plus bounded maximum tolerance for
+  visible OS-click backends.
 
 ### LSL And Trigger Codes
 
