@@ -1537,6 +1537,10 @@ Manual reviews are the layer where auto-mined candidates become checked metadata
 
 Some papers omit low-level stimulus, trajectory, timing, or count details because they say the task was adapted from, based on, or used as an established paradigm from earlier work. In those cases, inspect the cited prior-protocol paper before marking the field `not_reported_after_review`, and record the linked source in `protocol_lineage_candidates.csv`.
 
+## Visual Geometry Rule
+
+Many PPS papers tuck essential parameters into apparatus figures, captions, timing schematics, or row-percentage formulas rather than methods prose. Render and inspect those pages when reviewing a paper. For every trajectory or direction field, separate the physical speaker layout from the body-relative frame: record which way the participant faced, whether the participant rotated between blocks, whether the speakers moved, and which body part anchored the tactile stimulus. If a value is estimated from a figure rather than text/caption, mark it `derived` or `inferred_low_confidence` and explain the visual approximation basis.
+
 ## Tracked Generated Ledgers
 
 - `pdf_retrieval_inventory.csv`: canonical running list of which main publication PDFs are already retrieved, which are missing, DOI/DOI URL for missing records, and the local target filename.
@@ -1580,6 +1584,8 @@ Some papers omit low-level stimulus, trajectory, timing, or count details becaus
 Automated evidence-mined values are `inferred_low_confidence` candidates. Treat them as a triage map for critical review, not as final paper metadata.
 
 Before marking any value `not_reported_after_review`, inspect the main PDF, methods/tables, supplements, at least one fallback/source route, and any cited prior protocol paper that the article says it adapted, followed, or used as an established paradigm.
+
+Before marking trajectory/direction values as reported, inspect the rendered figure/caption evidence and verify the participant-facing direction relative to speakers, the body-relative direction being tested, and whether the trajectory is physical, digitally rendered, or inferred from gain/cross-fade timing.
 """
 
 
@@ -1599,6 +1605,23 @@ def checklist_text() -> str:
         for field in fields:
             lines.append(f"| `{field['key']}` | {field['description']} |")
         lines.append("")
+        if segment == "segment_1_stimulus_reconstruction":
+            lines.extend(
+                [
+                    "## Visual And Layout Approximation Strategies",
+                    "",
+                    "Use visual inspection whenever the methods text is ambiguous or when speaker/participant geometry is shown mainly in a figure.",
+                    "",
+                    "1. Render the methods, apparatus, timing, and design-figure pages to temporary PNGs and visually inspect them before finalizing Segment 1-4 values. Delete rendered pages before commit.",
+                    "2. Record room/speaker coordinates separately from body-relative coordinates. Always note which direction the participant is facing relative to the speakers, whether the participant rotates between blocks, and whether the speakers or the participant define front, rear, left, and right.",
+                    "3. For four-direction or front/rear studies, do not infer body-relative direction from the page drawing alone. Confirm whether the same physical speaker pair is reused while the observer faces different directions, whether speaker arrays move, or whether the sound is digitally rendered.",
+                    "4. For two-speaker analog looming/receding sounds, identify the near/far speaker distances, body anchor, speaker height, gain/cross-fade law, and motion direction. Treat a trajectory as reported only when text/caption supplies enough geometry and timing; otherwise label figure-derived values as `derived` or `inferred_low_confidence`.",
+                    "5. Extract numeric values hidden in figure labels, captions, axes, legends, and table footnotes: distances, SOAs, sound onset/offset times, SPL ranges, block labels, row percentages, and catch/baseline counts.",
+                    "6. Track participant posture and stimulated body part as part of the spatial frame: sitting, supine, arm extended, chest/sternum, hand, back, shoulder, or trunk-centered setups can change the meaning of near/far or front/rear.",
+                    "7. If visual scale is used because text is incomplete, write the approximation basis in `evidence_note` and keep the value conservative. Do not mark a visually estimated value as fully `reported`.",
+                    "",
+                ]
+            )
     lines.extend(
         [
             "## Missing-Value Rule",
@@ -1612,6 +1635,8 @@ def checklist_text() -> str:
             "5. Protocol-lineage search for terms such as adapted, previous, protocol, as described, based on, following, well-established, paradigm, front/frontal, and cited-methods references.",
             "",
             "When a paper says it adapted or used an established paradigm, record the cited source study and inspect that source before deciding that low-level stimulus, trajectory, timing, or count details are unavailable.",
+            "",
+            "When a parameter depends on a diagram, inspect the rendered page and explicitly record the coordinate frame: physical speaker layout, participant facing direction, body-relative direction, stimulated body part, and whether values are text-reported or visually approximated.",
             "",
             "Keep tracked evidence short. Store raw PDF/text artifacts only under ignored `artifacts/paper_metadata_audit/`.",
             "",

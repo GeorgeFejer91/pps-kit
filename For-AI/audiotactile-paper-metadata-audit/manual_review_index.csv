@@ -8,6 +8,7 @@ finisguerra_2015_moving_sounds_motor,Finisguerra et al. (2015),manual_review_com
 ieeg_trunk_2018,Bernasconi/Noel et al. (2018),manual_review_completed_main_pdf_supplement_blocked,0.90,high_confidence_extraction,possible_with_caveats_passive_ieeg_trunk_looming_profile,6,5,2026-06-16
 disorders_consciousness_2019,"Noel et al. (2019), DoC PPS encoding",manual_review_completed_main_pdf_no_supplement_found,0.91,high_confidence_extraction,possible_with_caveats_static_near_far_doc_arm_erp_profile,5,5,2026-06-16
 mindfulness_pps_2024,Mindfulness and PPS boundaries (2024),manual_review_completed_main_pdf,0.86,high_confidence_extraction,possible_with_caveats,4,4,2026-06-16
+matsuda_2021_four_directions,Matsuda et al. (2021),manual_review_completed_main_pdf_and_publisher_html_no_supplement_found,0.93,high_confidence_extraction,possible_with_caveats_four_direction_dynamic_trunk_pps_profile,5,6,2026-06-16
 ronga_2021_newborn_erp,"Ronga et al. (2021), newborn ERP",manual_review_completed_main_pdf_and_pnas_supplements,0.90,high_confidence_extraction,possible_with_caveats_static_near_far_passive_erp_profile,5,6,2026-06-16
 serino_2007_blind_cane_users,Serino et al. (2007),manual_review_completed_main_pdf_supplement_limited,0.88,high_confidence_extraction,possible_with_caveats_static_near_far_tool_condition,7,5,2026-06-16
 serino_2015_peri_trunk_exp1,"Serino et al. (2015), Exp. 1",manual_review_completed_main_pdf_and_supplement,0.86,high_confidence_extraction,possible_with_caveats,6,7,2026-06-16
