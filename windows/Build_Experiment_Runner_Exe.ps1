@@ -19,9 +19,17 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) {
   throw "Qt runtime preflight failed. The packaged runner would be unable to initialize Qt."
 }
+$env:PPS_EXPERIMENT_RUNNER_DISABLE_ICON = $null
 & $Python -m PyInstaller --noconfirm --clean $Spec
 if ($LASTEXITCODE -ne 0) {
-  throw "PyInstaller build failed with exit code $LASTEXITCODE"
+  $StandardBuildExitCode = $LASTEXITCODE
+  Write-Warning "Standard branded PyInstaller build failed with exit code $StandardBuildExitCode. Retrying once without embedding the .ico resource; this avoids Windows Defender false positives during BeginUpdateResource while preserving the runner code path."
+  $env:PPS_EXPERIMENT_RUNNER_DISABLE_ICON = "1"
+  & $Python -m PyInstaller --noconfirm --clean $Spec
+  $env:PPS_EXPERIMENT_RUNNER_DISABLE_ICON = $null
+  if ($LASTEXITCODE -ne 0) {
+    throw "PyInstaller build failed with exit code $LASTEXITCODE after iconless fallback retry. Standard build exit code was $StandardBuildExitCode."
+  }
 }
 
 if (-not (Test-Path $Exe)) {
