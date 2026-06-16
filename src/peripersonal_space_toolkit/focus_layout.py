@@ -82,7 +82,7 @@ def render_focus_layout_profile(
     width = max(640, int(available_width or target_width))
     height = max(440, int(available_height or target_height))
     compact = width <= 1180 or height <= 860
-    constrained = width <= 980 or height <= 640
+    constrained = width <= 980 or height <= 740
     spacious = width >= 1700 and height >= 960
 
     window_width = min(target_width, max(720, int(width * 0.96)))
@@ -99,8 +99,21 @@ def render_focus_layout_profile(
 
     target_square_size = 76 if constrained else (96 if compact else 104)
     response_panel_side = 236 if constrained else (304 if compact else (328 if spacious else 316))
-    experiment_control_min_height = 152 if constrained else (196 if compact else 252)
-    experiment_control_initial_height = 168 if constrained else (214 if compact else 300)
+    if constrained:
+        experiment_control_min_height = 160
+        experiment_control_initial_height = 184
+    elif compact and height <= 740:
+        experiment_control_min_height = 196
+        experiment_control_initial_height = 224
+    elif compact:
+        experiment_control_min_height = 212
+        experiment_control_initial_height = 252
+    elif spacious:
+        experiment_control_min_height = 280
+        experiment_control_initial_height = 372
+    else:
+        experiment_control_min_height = 264
+        experiment_control_initial_height = 336
 
     return FocusLayoutProfile(
         screen_class=screen_class,

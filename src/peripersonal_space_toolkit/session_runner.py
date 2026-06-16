@@ -2170,7 +2170,7 @@ class SessionRunnerController:
             "part_number": _block_part_number(active_block) if active_block else "",
             "phase": active_block.metadata.get("phase", "") if active_block else "",
             "phase_label": active_block.metadata.get("phase_label", "") if active_block else "",
-            "is_topup": bool(active_block.metadata.get("is_topup")) if active_block else False,
+            "is_topup": bool(active_block.metadata.get("is_topup") or active_block.metadata.get("is_topup_block")) if active_block else False,
         }
         event = self.events.log(
             "mouse_click",

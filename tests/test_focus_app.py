@@ -194,6 +194,8 @@ def test_focus_layout_renderer_preserves_legibility_baselines():
     assert constrained.target_min_height >= 76
     assert constrained.target_max_height == constrained.target_min_height
     assert constrained.experiment_control_min_height >= 152
+    assert compact.experiment_control_min_height >= 212
+    assert standard.experiment_control_min_height >= 280
     assert constrained.experiment_control_initial_height >= constrained.experiment_control_min_height
     assert compact.experiment_control_initial_height > constrained.experiment_control_initial_height
     assert standard.experiment_control_initial_height > compact.experiment_control_initial_height
@@ -288,6 +290,9 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert "(opt-in)" in window.include_name_lsl_checkbox.text()
     assert window.include_name_lsl_checkbox.minimumHeight() >= window.layout_profile.button_min_height + 8
     assert window.backup_recording_checkbox.objectName() == "failSafeRecordingCheckbox"
+    assert window.data_columns_widget.objectName() == "dataSettingsColumns"
+    assert window.data_logging_column.objectName() == "dataLoggingColumn"
+    assert window.experiment_settings_column.objectName() == "experimentSettingsColumn"
     assert "estimated extra file" in window.backup_recording_checkbox.text()
     assert window.response_panel.width() == window.response_panel.height()
     assert window.response_panel.width() == window.layout_profile.response_panel_side
@@ -637,6 +642,7 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     assert window.include_name_lsl_checkbox.minimumHeight() >= profile.button_min_height + 8
     assert window.output_summary.minimumHeight() == profile.output_min_height
     assert window.processing_panel.minimumHeight() == profile.experiment_control_min_height
+    assert window.workspace_splitter.sizes()[1] >= min(profile.experiment_control_initial_height, window.processing_panel.height())
     assert window.response_panel.minimumWidth() == profile.response_panel_side
     assert window.response_panel.minimumHeight() == profile.response_panel_side
     assert window.response_panel.maximumWidth() == profile.response_panel_side
@@ -645,6 +651,13 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     assert window.output_panel is not window.processing_panel
     assert window.processing_splitter is None
     assert window.run_splitter.count() == 2
+    data_rect = _widget_rect(window.data_logging_column, window.dialog)
+    settings_rect = _widget_rect(window.experiment_settings_column, window.dialog)
+    if window.data_settings_columns_mode == "stacked":
+        assert settings_rect["y"] >= data_rect["bottom"]
+    else:
+        assert abs(settings_rect["y"] - data_rect["y"]) <= 8
+        assert settings_rect["x"] >= data_rect["right"]
 
     visible_widgets = [
         window.target_button,
@@ -949,6 +962,25 @@ def test_focus_mode_recenter_uses_pyautogui_backend(tmp_path: Path, monkeypatch)
     assert window.recenter_records[-1]["mode"] == "pyautogui"
     assert window.recenter_records[-1]["trial_uid"] == "T001"
     window.dialog.close()
+
+
+def test_tactile_timeline_uses_four_second_response_window():
+    from peripersonal_space_toolkit.focus_timeline import TactileTimelineState
+
+    state = TactileTimelineState()
+    state.load_block(
+        duration_s=10.0,
+        tactile_events=[
+            {"trial_number": 1, "trial_uid": "T001", "time_s": 1.0},
+        ],
+    )
+
+    accepted = state.record_click(5.0, trial_uid="T001")
+    rejected = state.record_click(5.002, trial_uid="T001")
+
+    assert accepted.response_status == "tactile_response"
+    assert accepted.rt_s == pytest.approx(4.0)
+    assert rejected.response_status == "off_cue"
 
 
 def test_validation_realtime_audio_engine_waits_for_buffer_deadlines(tmp_path: Path):

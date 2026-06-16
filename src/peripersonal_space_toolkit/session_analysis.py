@@ -14,6 +14,10 @@ import numpy as np
 from scipy.optimize import OptimizeWarning, curve_fit
 
 
+DEFAULT_MIN_RESPONSE_RT_S = 0.1
+DEFAULT_MAX_RESPONSE_RT_S = 4.0
+
+
 @dataclass
 class SessionAnalysisResult:
     response_rows: list[dict[str, Any]] = field(default_factory=list)
@@ -26,7 +30,12 @@ class SessionAnalysisResult:
     warnings: list[str] = field(default_factory=list)
 
 
-def analyze_session_events(events: Iterable[Any], *, min_rt_s: float = 0.1, max_rt_s: float = 3.0) -> SessionAnalysisResult:
+def analyze_session_events(
+    events: Iterable[Any],
+    *,
+    min_rt_s: float = DEFAULT_MIN_RESPONSE_RT_S,
+    max_rt_s: float = DEFAULT_MAX_RESPONSE_RT_S,
+) -> SessionAnalysisResult:
     rows = sorted((_as_row(event) for event in events), key=lambda row: (_as_float(row.get("unix_time"), 0.0), row.get("event_id", 0)))
     result = SessionAnalysisResult()
     result.response_rows = _pair_tactile_responses(rows, min_rt_s=min_rt_s, max_rt_s=max_rt_s)
