@@ -786,6 +786,18 @@ code {
   object-fit: cover;
 }
 
+.arch-node-sonicom-icon {
+  padding: 5px;
+  border-color: #d36a9c;
+  background: #d94788;
+  box-shadow: 0 3px 8px rgba(139, 38, 82, 0.22);
+}
+
+.arch-node-sonicom-icon img {
+  border-radius: 0;
+  object-fit: contain;
+}
+
 .arch-node-kicker {
   display: block;
   font-size: 10px;
