@@ -1,22 +1,22 @@
 {
   "schema": "pps-paper-metadata-local-artifact-inventory.v1",
-  "generated_at": "2026-06-16T14:50:28.652241+00:00",
+  "generated_at": "2026-06-16T15:27:37.881346+00:00",
   "artifact_root": "artifacts/paper_metadata_audit",
   "copyright_boundary": "This tracked inventory stores relative paths, sizes, and hashes only. The PDFs, supplements, extracted text, and local ZIP bundle remain ignored local artifacts and must not be committed to the public repository.",
   "restore_note": "To resume on the same machine, keep artifacts/paper_metadata_audit/ in place. To move work privately, transfer the ignored ZIP bundle named below outside the public Git repo, extract it into artifacts/paper_metadata_audit/, then run python -m tools.paper_metadata_parser --refresh.",
-  "artifact_file_count": 482,
-  "artifact_total_bytes": 107532938,
+  "artifact_file_count": 486,
+  "artifact_total_bytes": 107842861,
   "category_counts": {
     "acquisition_status.json": 1,
-    "extracted_text_or_parser_output": 431,
+    "extracted_text_or_parser_output": 433,
     "publication_pdf": 36,
-    "supplement": 14
+    "supplement": 16
   },
   "local_bundle": {
     "created": true,
     "relative_path": "artifacts/paper_metadata_audit/resume_bundles/paper_metadata_audit_artifacts_latest.zip",
-    "size_bytes": 83638853,
-    "sha256": "1bcc56489d023feb1b0e46127d63b0df21839633f320c54c500019c02da3fa11"
+    "size_bytes": 83903500,
+    "sha256": "a8ebc571672350154099e488cf8cb8b42c2479f42c5012f7938bf55f03b78cab"
   },
   "files": [
     {
@@ -3420,6 +3420,22 @@
       "sha256": "655da06fa19c3fe47291495fe41a79420c2a9df3df6392b1d0ed55e3d7e3f7c2"
     },
     {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.txt",
+      "artifact_relative_path": "extracted/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.txt",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "ronga_2021_newborn_erp",
+      "size_bytes": 19941,
+      "sha256": "4a5daea131ee2b75b2216662a8e21c71f974a3cbc58784a2de32afc056bfed49"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/supplements/ronga_2021_newborn_erp/pnas.2024548118.sd01.txt",
+      "artifact_relative_path": "extracted/supplements/ronga_2021_newborn_erp/pnas.2024548118.sd01.txt",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "ronga_2021_newborn_erp",
+      "size_bytes": 1970,
+      "sha256": "eff0291b93be39450c1d56a75acbae10093b96cdd939632a67b63284090ab0c4"
+    },
+    {
       "relative_path": "artifacts/paper_metadata_audit/extracted/supplements/serino_2015_exps_4_to_6/41598_2015_BFsrep18603_MOESM1_ESM.txt",
       "artifact_relative_path": "extracted/supplements/serino_2015_exps_4_to_6/41598_2015_BFsrep18603_MOESM1_ESM.txt",
       "category": "extracted_text_or_parser_output",
@@ -3818,6 +3834,22 @@
       "record_id": "lamia_2026_arm_movement",
       "size_bytes": 3936792,
       "sha256": "1ba1ff66a09f18a9efb1cf1e6e01c7c0fa36009b19f784dd36ceb254edd02874"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+      "artifact_relative_path": "supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+      "category": "supplement",
+      "record_id": "ronga_2021_newborn_erp",
+      "size_bytes": 198836,
+      "sha256": "d41155c035f590d67d912cafee1947275b88a3fc0242b35b7186aa3923a88114"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sd01.pdf",
+      "artifact_relative_path": "supplements/ronga_2021_newborn_erp/pnas.2024548118.sd01.pdf",
+      "category": "supplement",
+      "record_id": "ronga_2021_newborn_erp",
+      "size_bytes": 89176,
+      "sha256": "614f488aa505e63e8787e670dda9b46356cbf7677e7b428ceed7c5ce04e29eb3"
     },
     {
       "relative_path": "artifacts/paper_metadata_audit/supplements/serino_2015_exps_4_to_6/41598_2015_BFsrep18603_MOESM1_ESM.doc",

@@ -231,11 +231,13 @@ def test_protocol_lineage_candidates_are_trackable_to_records_or_promotion_queue
         "screen_for_promotion_to_literature_database",
         "download_and_manual_review",
         "manual_review_needed",
+        "lineage_review_completed",
     }
     allowed_audit_statuses = {
         "not_in_audit",
         "record_present_pdf_missing",
         "record_present_pdf_retrieved",
+        "manual_review_completed",
     }
 
     assert lineage_rows
@@ -254,7 +256,11 @@ def test_protocol_lineage_candidates_are_trackable_to_records_or_promotion_queue
         if linked_record_id:
             assert linked_record_id in coverage_ids
             assert row["current_pdf_status"] == retrieval_rows[linked_record_id]["pdf_status"]
-            assert row["coverage_action"] in {"download_and_manual_review", "manual_review_needed"}
+            assert row["coverage_action"] in {
+                "download_and_manual_review",
+                "manual_review_needed",
+                "lineage_review_completed",
+            }
         else:
             assert row["current_pdf_status"] == "not_in_inventory"
             assert row["current_audit_status"] == "not_in_audit"

@@ -16,12 +16,12 @@
     "paywalled": 13
   },
   "supplement_status_counts": {
-    "downloaded": 11,
+    "downloaded": 12,
     "needs_user_download": 16,
     "not_applicable": 5,
     "not_checked": 6,
     "not_found": 17,
-    "paywalled": 19
+    "paywalled": 18
   },
   "extraction_status_counts": {
     "parsed": 36,
@@ -39,18 +39,18 @@
     "not_applicable": 5,
     "source_mined": 38
   },
-  "automated_evidence_field_total": 640,
-  "supplement_extracted_record_count": 11,
-  "supplement_extracted_file_total": 14,
+  "automated_evidence_field_total": 652,
+  "supplement_extracted_record_count": 12,
+  "supplement_extracted_file_total": 16,
   "semantic_review_strategy_count": 5,
   "semantic_review_pass_total": 370,
   "semantic_review_pass_status_counts": {
-    "completed": 183,
-    "completed_no_hits": 7,
+    "completed": 185,
+    "completed_no_hits": 5,
     "not_applicable": 25,
     "source_unavailable": 155
   },
-  "missing_download_request_count": 74,
+  "missing_download_request_count": 73,
   "tracked_pdf_folder": "artifacts/paper_metadata_audit/publication_pdfs/",
   "tracked_supplement_folder": "artifacts/paper_metadata_audit/supplements/",
   "tracked_extraction_folder": "artifacts/paper_metadata_audit/extracted/",
