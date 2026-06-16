@@ -124,7 +124,7 @@
       {
         "key": "renderer_or_apparatus",
         "label": "Renderer/HRTF/speaker apparatus",
-        "description": "Headphones, HRTF, Unity/3D Tune-In, physical speakers, arrays, or other rendering provenance."
+        "description": "Headphones, HRTF, Unity/3D Tune-In, physical speakers, arrays, room/speaker layout, or other rendering provenance."
       }
     ],
     "segment_2_sequence_and_intermixing": [

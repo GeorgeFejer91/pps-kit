@@ -31,19 +31,6 @@ Use visual inspection whenever the methods text is ambiguous or when speaker/par
 9. If a paper includes both a participant movement and an auditory trajectory, assign speeds carefully. Hand, arm, head, or body speed belongs in the caveat/task context unless the text or timing table ties it to the auditory stimulus path.
 10. When the figure supplies a qualitative direction but no scale, preserve the useful geometry while leaving numeric fields missing: for example, `trajectory_path = derived qualitative`, `stimulus_speed = not_reported_after_review`.
 
-For every reviewed paper, add a short orientation ledger to the manual review notes before closing Segment 1:
-
-| Orientation item | Required question |
-|---|---|
-| Participant-facing direction | Which way is the participant's head/trunk/body facing relative to the speakers or virtual source? |
-| Speaker/source layout | Where are the physical speakers, virtual sources, or headphone-rendered sources in room/apparatus coordinates? |
-| Body-relative mapping | How does the paper map those sources onto front/rear/left/right/near/far/approaching/receding relative to the stimulated body site? |
-| Tactile anchor | Which body part and side receive the tactile target, and does that anchor change between blocks? |
-| Movement implementation | Is motion physical source movement, speaker switching, gain/cross-fade, amplitude field, HRTF/renderer motion, or only inferred from timing? |
-| Evidence class | Is the geometry text-reported, caption-reported, figure-derived, supplement-reported, protocol-lineage-reported, or low-confidence inferred? |
-
-If a diagram is the only source, keep the status modest. A scaled figure with printed values can support `derived`; an unscaled schematic supports only qualitative direction unless the caption supplies the missing numbers. When the participant icon faces left/right/up/down on the page, explicitly translate page direction into body-relative direction only if the caption or surrounding text makes that mapping clear.
-
 Visual approximation decision ladder:
 
 1. Record the page, figure, caption, and panel that produced the clue.
@@ -63,6 +50,19 @@ Orientation ambiguity examples to preserve:
 | Same room speaker pair used while participant rotates | `physical speaker coordinates fixed; body-relative direction changes by participant rotation; record each block separately` |
 | Caption reports frontal stimulation but methods use frontal EEG/anatomy language elsewhere | `frontal auditory direction accepted only from caption/methods context, not from anatomical-analysis uses of frontal` |
 | Source moves virtually through headphones | `room speaker frame not applicable; record renderer/HRTF coordinate frame, virtual azimuth/elevation, gain/motion law if reported` |
+
+For every reviewed paper, add a short orientation ledger to the manual review notes before closing Segment 1:
+
+| Orientation item | Required question |
+|---|---|
+| Participant-facing direction | Which way is the participant's head/trunk/body facing relative to the speakers or virtual source? |
+| Speaker/source layout | Where are the physical speakers, virtual sources, or headphone-rendered sources in room/apparatus coordinates? |
+| Body-relative mapping | How does the paper map those sources onto front/rear/left/right/near/far/approaching/receding relative to the stimulated body site? |
+| Tactile anchor | Which body part and side receive the tactile target, and does that anchor change between blocks? |
+| Movement implementation | Is motion physical source movement, speaker switching, gain/cross-fade, amplitude field, HRTF/renderer motion, or only inferred from timing? |
+| Evidence class | Is the geometry text-reported, caption-reported, figure-derived, supplement-reported, protocol-lineage-reported, or low-confidence inferred? |
+
+If a diagram is the only source, keep the status modest. A scaled figure with printed values can support `derived`; an unscaled schematic supports only qualitative direction unless the caption supplies the missing numbers. When the participant icon faces left/right/up/down on the page, explicitly translate page direction into body-relative direction only if the caption or surrounding text makes that mapping clear.
 
 Hidden-parameter search routes to check before declaring a value absent:
 

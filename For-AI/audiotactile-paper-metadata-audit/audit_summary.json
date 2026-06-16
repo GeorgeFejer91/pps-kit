@@ -16,11 +16,11 @@
     "paywalled": 13
   },
   "supplement_status_counts": {
-    "downloaded": 12,
+    "downloaded": 13,
     "needs_user_download": 16,
     "not_applicable": 5,
     "not_checked": 6,
-    "not_found": 17,
+    "not_found": 16,
     "paywalled": 18
   },
   "extraction_status_counts": {
@@ -39,9 +39,9 @@
     "not_applicable": 5,
     "source_mined": 38
   },
-  "automated_evidence_field_total": 652,
-  "supplement_extracted_record_count": 12,
-  "supplement_extracted_file_total": 16,
+  "automated_evidence_field_total": 653,
+  "supplement_extracted_record_count": 13,
+  "supplement_extracted_file_total": 17,
   "semantic_review_strategy_count": 5,
   "semantic_review_pass_total": 370,
   "semantic_review_pass_status_counts": {

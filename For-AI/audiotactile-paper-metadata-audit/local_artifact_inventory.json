@@ -1,22 +1,22 @@
 {
   "schema": "pps-paper-metadata-local-artifact-inventory.v1",
-  "generated_at": "2026-06-16T15:27:37.881346+00:00",
+  "generated_at": "2026-06-16T17:42:50.458575+00:00",
   "artifact_root": "artifacts/paper_metadata_audit",
   "copyright_boundary": "This tracked inventory stores relative paths, sizes, and hashes only. The PDFs, supplements, extracted text, and local ZIP bundle remain ignored local artifacts and must not be committed to the public repository.",
   "restore_note": "To resume on the same machine, keep artifacts/paper_metadata_audit/ in place. To move work privately, transfer the ignored ZIP bundle named below outside the public Git repo, extract it into artifacts/paper_metadata_audit/, then run python -m tools.paper_metadata_parser --refresh.",
-  "artifact_file_count": 486,
-  "artifact_total_bytes": 107842861,
+  "artifact_file_count": 488,
+  "artifact_total_bytes": 107879981,
   "category_counts": {
     "acquisition_status.json": 1,
-    "extracted_text_or_parser_output": 433,
+    "extracted_text_or_parser_output": 434,
     "publication_pdf": 36,
-    "supplement": 16
+    "supplement": 17
   },
   "local_bundle": {
     "created": true,
     "relative_path": "artifacts/paper_metadata_audit/resume_bundles/paper_metadata_audit_artifacts_latest.zip",
-    "size_bytes": 83903500,
-    "sha256": "a8ebc571672350154099e488cf8cb8b42c2479f42c5012f7938bf55f03b78cab"
+    "size_bytes": 83932423,
+    "sha256": "a8d91e913fcaa5cb5e6494e6d830dba32483ed8d450dccfcace52a28e25ef061"
   },
   "files": [
     {
@@ -3420,6 +3420,14 @@
       "sha256": "655da06fa19c3fe47291495fe41a79420c2a9df3df6392b1d0ed55e3d7e3f7c2"
     },
     {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+      "artifact_relative_path": "extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "noel_2015_bodily_self",
+      "size_bytes": 9331,
+      "sha256": "9af5b25d910d115d7b2ed4e5231a15b7abe1cca7215509cefdbd8c94e2506f23"
+    },
+    {
       "relative_path": "artifacts/paper_metadata_audit/extracted/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.txt",
       "artifact_relative_path": "extracted/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.txt",
       "category": "extracted_text_or_parser_output",
@@ -3834,6 +3842,14 @@
       "record_id": "lamia_2026_arm_movement",
       "size_bytes": 3936792,
       "sha256": "1ba1ff66a09f18a9efb1cf1e6e01c7c0fa36009b19f784dd36ceb254edd02874"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.docx",
+      "artifact_relative_path": "supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.docx",
+      "category": "supplement",
+      "record_id": "noel_2015_bodily_self",
+      "size_bytes": 27789,
+      "sha256": "6ffcacce4e90e4aba58cb09ba7bf748f1426dc33a937c42440895e91c4c2867b"
     },
     {
       "relative_path": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",

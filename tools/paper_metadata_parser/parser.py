@@ -112,7 +112,7 @@ SEGMENT_FIELDS: dict[str, list[dict[str, str]]] = {
         {
             "key": "renderer_or_apparatus",
             "label": "Renderer/HRTF/speaker apparatus",
-            "description": "Headphones, HRTF, Unity/3D Tune-In, physical speakers, arrays, or other rendering provenance.",
+            "description": "Headphones, HRTF, Unity/3D Tune-In, physical speakers, arrays, room/speaker layout, or other rendering provenance.",
         },
     ],
     "segment_2_sequence_and_intermixing": [
@@ -1557,6 +1557,15 @@ Use at least five semantic passes before finalizing a paper: stimulus reconstruc
 
 When methods text is thin, search figures, captions, timing diagrams, table footnotes, percentage formulas, supplement files, publisher HTML, and cited prior-protocol papers. Record whether each value is text-reported, caption-reported, derived from reported numbers, visually approximated, or inherited only as protocol lineage. Do not upgrade a visually approximated value to `reported` unless the caption or methods prose supplies the number or coordinate frame.
 
+Treat each paper like a parameter-recovery problem, not a text-mining problem. Search for the function a value plays in recreation even when the exact Segment field name is absent:
+
+- Segment 1 values may be hidden in apparatus photographs, sound-generation software notes, figure legends, SPL/equalization clauses, source-code bundles, or distance-at-touch tables.
+- Segment 2 values may be hidden in randomization constraints, block diagrams, "no more than N consecutive" rules, ITI/ISI clauses, and task instructions rather than stimulus paragraphs.
+- Segment 3 values may be hidden in timing diagrams, trigger descriptions, D/T labels, analysis-baseline definitions, and control-condition prose.
+- Segment 4 values may be hidden in design formulas, row percentages, block x condition multiplications, supplement trial tables, and exclusions/results denominators.
+
+For every visually inferred spatial value, the audit note must state the viewpoint before the interpretation: top view, side view, front view, photograph, screenshot, or unclear. Then record the participant-facing direction relative to the source, not just a page direction. A valid visual note distinguishes `page-left speaker near hand` from `participant-left speaker near hand`; the latter is allowed only when the participant's body/facing direction is reported or unambiguous from caption/context.
+
 Use a hidden-parameter retrieval ladder before marking a field missing:
 
 1. Main text methods/procedure/apparatus/results tables, including abbreviations such as D1-Dn, T1-Tn, AT, A-only, T-only, near/far, IN/OUT, and pre/post.
@@ -1564,6 +1573,7 @@ Use a hidden-parameter retrieval ladder before marking a field missing:
 3. Supplement files, data dictionaries, trial tables, scripts, appendix methods, publisher "source data", and article-export ZIPs.
 4. Publisher HTML and reference/citation context, including phrases such as adapted from, following, based on, well-established, as previously described, protocol, frontal, front, sagittal, lateral, and near space.
 5. Cited prior-protocol papers when the current paper delegates low-level stimulus, trajectory, timing, or repetition details to earlier work.
+6. A consistency pass comparing extracted values against the task's arithmetic: path length divided by duration, SOA-to-distance mapping, repetitions x rows x blocks, baseline/catch percentages, and whether a reported speed belongs to the auditory object, a hand/body movement, or another manipulation.
 
 For visual approximation, render pages at readable resolution and keep values conservative. Use scaled figure labels or axis ticks when available; otherwise record only qualitative geometry such as "speaker appears lateral to the left hand" or "participant-facing direction unclear". If a diagram supplies direction but not exact distance/speed/timing, the direction can be `derived` while the missing numeric field remains `not_reported_after_review` only after the supplement and protocol-lineage checks are complete.
 
@@ -1575,6 +1585,17 @@ Use this decision ladder for every figure-derived spatial value:
 4. Translate the page/apparatus frame into the participant/body frame: front, rear, left, right, ipsilateral, contralateral, approaching, receding, proximal, or distal relative to the tactile anchor.
 5. Extract numbers only from printed labels, axes, tables, captions, or a scaled diagram. If the drawing is unscaled, keep the value qualitative and mark it `inferred_low_confidence`.
 6. Cross-check figure-derived geometry against supplement files and protocol-lineage citations when the methods text is incomplete or inconsistent.
+7. Preserve ambiguity explicitly when orientation remains unresolved: record `body-relative mapping unclear` rather than replacing it with a generic trajectory label.
+
+Common orientation traps to guard against:
+
+- A participant may rotate across direction blocks while the room speakers stay fixed; in that case, the same physical speaker can become front, rear, left, or right in the body frame.
+- A figure may draw the apparatus from the experimenter's viewpoint, not the participant's viewpoint.
+- "Frontal" may refer to an anatomical/EEG region rather than an auditory source direction; check the local sentence context before using it as trajectory evidence.
+- A reported movement speed may describe the participant's hand/arm/body, not the auditory stimulus; only assign it to `stimulus_speed` when the source trajectory or sound timing supports that mapping.
+- Virtual or headphone-rendered sources need renderer-frame coordinates and HRTF/gain provenance; a speaker-style diagram alone is not enough to infer physical speaker placement.
+
+The detailed tucked-away parameter triage matrix lives in `parameter_checklist.md`. Use it when a field is missing from obvious Methods prose: search by the role a value plays in recreation, not only by the Segment field name. For example, a sound speed may be recoverable from a distance-at-touch table plus a duration label, count totals may be hidden in a design formula, and participant-facing direction may appear only in a schematic/caption. Preserve those clues as `derived` or `inferred_low_confidence` with short evidence notes unless the text, table, caption, supplement, or cited protocol reports the value directly.
 
 ## Tracked Generated Ledgers
 
@@ -1656,6 +1677,9 @@ def checklist_text() -> str:
                     "5. Extract numeric values hidden in figure labels, captions, axes, legends, and table footnotes: distances, SOAs, sound onset/offset times, SPL ranges, block labels, row percentages, and catch/baseline counts.",
                     "6. Track participant posture and stimulated body part as part of the spatial frame: sitting, supine, arm extended, chest/sternum, hand, back, shoulder, or trunk-centered setups can change the meaning of near/far or front/rear.",
                     "7. If visual scale is used because text is incomplete, write the approximation basis in `evidence_note` and keep the value conservative. Do not mark a visually estimated value as fully `reported`.",
+                    "8. Always write the drawing viewpoint before the conclusion: top view, side view, front view, photograph, screenshot, or unclear. Only translate page-left/page-right into participant-left/participant-right when body orientation is explicit.",
+                    "9. If a paper includes both a participant movement and an auditory trajectory, assign speeds carefully. Hand, arm, head, or body speed belongs in the caveat/task context unless the text or timing table ties it to the auditory stimulus path.",
+                    "10. When the figure supplies a qualitative direction but no scale, preserve the useful geometry while leaving numeric fields missing: for example, `trajectory_path = derived qualitative`, `stimulus_speed = not_reported_after_review`.",
                     "",
                     "Visual approximation decision ladder:",
                     "",
@@ -1665,6 +1689,17 @@ def checklist_text() -> str:
                     "4. Translate the page/apparatus frame into the participant/body frame: front, rear, left, right, ipsilateral, contralateral, approaching, receding, proximal, or distal relative to the tactile anchor.",
                     "5. Extract numbers only from printed labels, axes, tables, captions, or a scaled diagram. If the drawing is unscaled, keep the value qualitative and mark it `inferred_low_confidence`.",
                     "6. Cross-check figure-derived geometry against supplement files and protocol-lineage citations when the methods text is incomplete or inconsistent.",
+                    "7. Run an arithmetic sanity check when possible: distance / duration, duration x speed, SOA-to-distance mapping, condition rows x repetitions, and baseline/catch percentages. Note mismatches instead of silently choosing one value.",
+                    "",
+                    "Orientation ambiguity examples to preserve:",
+                    "",
+                    "| Figure clue | Safe audit wording |",
+                    "|---|---|",
+                    "| Speaker drawn on page-left, participant facing not visible | `speaker page-left in schematic; participant-facing direction unclear; body-relative left/right not assigned` |",
+                    "| Participant icon faces the speaker line in a top view | `participant appears to face sagittal speaker line; body-relative near/far mapping derived from figure, exact azimuth not reported` |",
+                    "| Same room speaker pair used while participant rotates | `physical speaker coordinates fixed; body-relative direction changes by participant rotation; record each block separately` |",
+                    "| Caption reports frontal stimulation but methods use frontal EEG/anatomy language elsewhere | `frontal auditory direction accepted only from caption/methods context, not from anatomical-analysis uses of frontal` |",
+                    "| Source moves virtually through headphones | `room speaker frame not applicable; record renderer/HRTF coordinate frame, virtual azimuth/elevation, gain/motion law if reported` |",
                     "",
                     "For every reviewed paper, add a short orientation ledger to the manual review notes before closing Segment 1:",
                     "",
@@ -1687,6 +1722,32 @@ def checklist_text() -> str:
                     "4. Search supplements and source bundles for scripts, spreadsheets, appendix methods, trial lists, figure source data, or exported article PDFs.",
                     "5. Follow protocol-lineage citations when the paper says the task was adapted, based on a previous paradigm, or performed as described elsewhere.",
                     "",
+                    "## Tucked-Away Parameter Triage Matrix",
+                    "",
+                    "When a Segment 1-4 value is not obvious in Methods prose, search for the same value by function rather than by the exact field name. Papers often report the information needed for recreation in scattered, indirect forms.",
+                    "",
+                    "| Parameter need | Where it is often hidden | Semantic clues to search | How to record it |",
+                    "|---|---|---|---|",
+                    "| Sound identity/source | Stimulus paragraphs, equipment lists, supplement scripts, figure captions, software/version notes. | noise, pink, white, pure tone, harmonic, rough, Audacity, SoundForge, Matlab, Max/MSP, WAV, sample, generated. | `stimulus_type` and `source_provenance`; use `source_unavailable` only when no paper/supplement/lineage source identifies the sound class. |",
+                    "| Trajectory path | Apparatus figures, speaker photos, distance-axis labels, timing diagrams, captions, participant-position diagrams. | approaching, receding, looming, far-to-near, near-to-far, front, rear, lateral, sagittal, coronal, left, right, azimuth, elevation, source position. | `trajectory_path`; separate room coordinates from body-relative direction and cite the figure/panel if visual. |",
+                    "| Participant orientation | Apparatus diagrams, participant cartoons, instruction text, blindfold/fixation notes, block descriptions. | seated, standing, supine, facing, fixation, gaze, eyes closed, blindfolded, rotated, head, trunk, body midline. | `orientation_ledger`; never infer participant-left/right from figure-left/right without a body-facing cue. |",
+                    "| Movement implementation | Apparatus methods, audio-generation notes, speaker-array diagrams, HRTF/renderer descriptions, intensity/gain formulas. | speaker switching, cross-fade, fade in/out, intensity, SPL, gain, attenuation, HRTF, binaural, virtual, renderer, array, source moved. | `renderer_or_apparatus`, `gain_envelope`, and `trajectory_path`; mark visual-only movement mechanisms as `inferred_low_confidence`. |",
+                    "| Speed and duration | Figure axes, tactile-delay tables, distance-at-touch labels, captions, audio filenames, reported distance/speed formulas. | ms, s, cm/s, m/s, distance at touch, D1-Dn, T1-Tn, onset, offset, duration, propagation, constant velocity. | `stimulus_duration` and `stimulus_speed`; derive speed only when distance and time are both reported or a scaled figure explicitly supports it. |",
+                    "| SOAs and baseline timing | Timing diagrams, ERP/TMS trigger diagrams, delay labels, response-correction formulas, supplement tables. | SOA, ISI, delay, D0, D1-Dn, Tbefore, Tafter, tactile onset, sound onset, baseline, unimodal, no sound. | `soa_table`, `baseline_strategy`, and `baseline_timing`; preserve sign conventions relative to sound/tactile onset. |",
+                    "| Intermixing and jitter | Trial-design paragraphs, block diagrams, randomization constraints, task scripts, table notes. | randomized, pseudo-random, intermixed, intermingled, blocked, order, sequence, ITI, jitter, shuffled, no more than, consecutive. | `condition_intermixing`, `blocked_or_random_order`, `iti_jitter_policy`, and `task_sequence_rules`. |",
+                    "| Counts and catch trials | Design formulas, percentage descriptions, table footnotes, block summaries, supplement trial lists. | repetitions, trials per condition, catch, no-go, auditory-only, tactile-only, baseline, block, session, percentage, total. | `repetitions_per_tactile_soa_condition`, `baseline_count`, `catch_count`, `block_count`, and `total_trial_count`; show derivation in `evidence_note` when multiplying factors. |",
+                    "",
+                    "Use this triage matrix alongside keyword search. A useful manual review is allowed to say \"the exact value is not reported\", but it should be clear which alternate hiding places were checked.",
+                    "",
+                    "Segment-specific hiding places to inspect:",
+                    "",
+                    "| Segment | Hidden evidence route | What to recover |",
+                    "|---|---|---|",
+                    "| Segment 1 | Apparatus photos, source bundle scripts, audio software/version notes, SPL calibration notes, distance labels, captions. | Sound class/provenance, trajectory count/path, duration, speed, gain/envelope, renderer/speaker apparatus. |",
+                    "| Segment 2 | Randomization sentences, block schematics, pseudo-random constraints, ITI/ISI clauses, task instructions, sequence scripts. | Intermixing, blocked/random order, jitter/range/distribution, response window, task row families. |",
+                    "| Segment 3 | Timing diagrams, trigger schematics, D/T labels, baseline analysis descriptions, tactile device specs. | Tactile stimulus, SOAs, baseline SOAs/timing, catch-trial type. |",
+                    "| Segment 4 | Design formulas, percentages, trial-table supplements, block summaries, results denominators after exclusions. | Repetition counts, baseline counts, catch counts, block counts, total trial count and derivation. |",
+                    "",
                     "## Five-Pass Semantic Search Strategy",
                     "",
                     "Every manual review should include five different semantic searches, even when OpenDataLoader finds many candidate fields:",
@@ -1698,6 +1759,14 @@ def checklist_text() -> str:
                     "5. Count/catch/protocol-lineage pass: search for repetition, total, catch, no-go, auditory-only, tactile-only, supplement, appendix, protocol, adapted, previous, based on, following, well-established, and cited-methods references.",
                     "",
                     "For the visual/spatial pass, the mandatory output is not just a trajectory label. Record the participant-facing direction, speaker/source direction in room coordinates, body-relative label used by the authors, stimulated body part, and whether movement is physical, speaker-switching, cross-fade/gain-based, or digitally rendered.",
+                    "",
+                    "After those five passes, do a brief consistency pass before closing the review. This is not a replacement for source evidence; it catches extraction mistakes. Check whether speeds match path length/duration, whether SOAs map onto reported distances, whether trial totals equal rows x repetitions x blocks, whether baseline/catch percentages match counts, and whether any speed/direction you extracted actually belongs to a participant movement or control manipulation instead of the auditory stimulus.",
+                    "",
+                    "Suggested orientation note template for `orientation_ledger` or a field `evidence_note`:",
+                    "",
+                    "`Participant <posture> facing <reported/unclear direction>; speakers/sources <room/apparatus locations>; tactile anchor <body site/side>; authors label direction as <front/rear/left/right/near/far/approaching/receding>; movement implemented by <physical movement/speaker switching/gain envelope/HRTF renderer/unclear>; evidence <text/caption/figure/supplement/lineage>, page/figure <pointer>.`",
+                    "",
+                    "If the figure shows a participant from above or side view, first describe the diagram literally, then translate only the supported part into body coordinates. Example: \"diagram shows near/far speaker pair on page-left of the hand; participant-facing direction is not specified, so lateral body mapping remains ambiguous.\" This preserves useful visual evidence without pretending the paper reported more than it did.",
                     "",
                 ]
             )
