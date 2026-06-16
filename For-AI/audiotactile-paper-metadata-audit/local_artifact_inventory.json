@@ -1,22 +1,22 @@
 {
   "schema": "pps-paper-metadata-local-artifact-inventory.v1",
-  "generated_at": "2026-06-16T13:42:44.321705+00:00",
+  "generated_at": "2026-06-16T13:46:01.229829+00:00",
   "artifact_root": "artifacts/paper_metadata_audit",
   "copyright_boundary": "This tracked inventory stores relative paths, sizes, and hashes only. The PDFs, supplements, extracted text, and local ZIP bundle remain ignored local artifacts and must not be committed to the public repository.",
   "restore_note": "To resume on the same machine, keep artifacts/paper_metadata_audit/ in place. To move work privately, transfer the ignored ZIP bundle named below outside the public Git repo, extract it into artifacts/paper_metadata_audit/, then run python -m tools.paper_metadata_parser --refresh.",
-  "artifact_file_count": 467,
-  "artifact_total_bytes": 102787459,
+  "artifact_file_count": 480,
+  "artifact_total_bytes": 103735565,
   "category_counts": {
     "acquisition_status.json": 1,
-    "extracted_text_or_parser_output": 418,
-    "publication_pdf": 35,
+    "extracted_text_or_parser_output": 430,
+    "publication_pdf": 36,
     "supplement": 13
   },
   "local_bundle": {
     "created": true,
     "relative_path": "artifacts/paper_metadata_audit/resume_bundles/paper_metadata_audit_artifacts_latest.zip",
-    "size_bytes": 79351061,
-    "sha256": "352d54a316831f56d9963060d5bfba4faddfc236684a4cbef2bd537c23c0b4a5"
+    "size_bytes": 80179124,
+    "sha256": "e6574b33337928437d3f6f923f636b0a3a9ae48ff727fb215dd9abf00f93cc7e"
   },
   "files": [
     {
@@ -2428,6 +2428,102 @@
       "sha256": "20af8bdc9ba6090191f651765c985d3476f2b8ab62961f457a8e6716f95b7daa"
     },
     {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2007_blind_cane_users.json",
+      "artifact_relative_path": "extracted/opendataloader/serino_2007_blind_cane_users.json",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "serino_2007_blind_cane_users",
+      "size_bytes": 86997,
+      "sha256": "20efa9a9e137dcdedd3fb9dcd4feb0fbb95c1ace4317df6a024f18f38a2d28a0"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2007_blind_cane_users.md",
+      "artifact_relative_path": "extracted/opendataloader/serino_2007_blind_cane_users.md",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "serino_2007_blind_cane_users",
+      "size_bytes": 36516,
+      "sha256": "6cc60c1661468fd9b796731245a5aabc01b5989deb04f1914ddcf0bac8ae8a81"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2007_blind_cane_users_images/imageFile1.png",
+      "artifact_relative_path": "extracted/opendataloader/serino_2007_blind_cane_users_images/imageFile1.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "serino_2007_blind_cane_users_images",
+      "size_bytes": 94631,
+      "sha256": "0a5c82f51cff3da0f56ee5827163d1ebea432b5d2b5032de443d68e42dc0b093"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2007_blind_cane_users_images/imageFile10.png",
+      "artifact_relative_path": "extracted/opendataloader/serino_2007_blind_cane_users_images/imageFile10.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "serino_2007_blind_cane_users_images",
+      "size_bytes": 46238,
+      "sha256": "cca3140737a530fae6c49c10e6d2ae98ec12db2a636082824810200c0cca4371"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2007_blind_cane_users_images/imageFile2.png",
+      "artifact_relative_path": "extracted/opendataloader/serino_2007_blind_cane_users_images/imageFile2.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "serino_2007_blind_cane_users_images",
+      "size_bytes": 97443,
+      "sha256": "365fe59a794659f324f21c15909e5c6cbac06ca5426d12044e73bc7f9080e10f"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2007_blind_cane_users_images/imageFile3.png",
+      "artifact_relative_path": "extracted/opendataloader/serino_2007_blind_cane_users_images/imageFile3.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "serino_2007_blind_cane_users_images",
+      "size_bytes": 29707,
+      "sha256": "4dd88e833e70736897370795aa1cbbddc8a7f175234d59fbf7b7375bf9e509f9"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2007_blind_cane_users_images/imageFile4.png",
+      "artifact_relative_path": "extracted/opendataloader/serino_2007_blind_cane_users_images/imageFile4.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "serino_2007_blind_cane_users_images",
+      "size_bytes": 93803,
+      "sha256": "6e3067c612b3a469962f34fb49b11b7ce0feb5ffaf0b725c804487b3f59181e2"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2007_blind_cane_users_images/imageFile5.png",
+      "artifact_relative_path": "extracted/opendataloader/serino_2007_blind_cane_users_images/imageFile5.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "serino_2007_blind_cane_users_images",
+      "size_bytes": 10885,
+      "sha256": "67a33178866c3934e889c13dfe52b8b50c185968401f65ae5f12316dcaaa7d77"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2007_blind_cane_users_images/imageFile6.png",
+      "artifact_relative_path": "extracted/opendataloader/serino_2007_blind_cane_users_images/imageFile6.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "serino_2007_blind_cane_users_images",
+      "size_bytes": 11411,
+      "sha256": "c74bd83a870ac9b8984aba3dc3dccd780a1705dbcb0ff96d6895656079805326"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2007_blind_cane_users_images/imageFile7.png",
+      "artifact_relative_path": "extracted/opendataloader/serino_2007_blind_cane_users_images/imageFile7.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "serino_2007_blind_cane_users_images",
+      "size_bytes": 97043,
+      "sha256": "22be360601e9ada5782bef393e1118e05c7f56e1f2cfa998bf7ed94e8728b775"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2007_blind_cane_users_images/imageFile8.png",
+      "artifact_relative_path": "extracted/opendataloader/serino_2007_blind_cane_users_images/imageFile8.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "serino_2007_blind_cane_users_images",
+      "size_bytes": 99807,
+      "sha256": "afecc93932f3628b27ad696fe20ecbe6abc0b2e4db986d7b533420a3bc24f27c"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2007_blind_cane_users_images/imageFile9.png",
+      "artifact_relative_path": "extracted/opendataloader/serino_2007_blind_cane_users_images/imageFile9.png",
+      "category": "extracted_text_or_parser_output",
+      "record_id": "serino_2007_blind_cane_users_images",
+      "size_bytes": 98008,
+      "sha256": "597a04b14f3ea6aa775af23b85c07f440d097eeb31a636e8f8bfe0eff0a719b4"
+    },
+    {
       "relative_path": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_exps_4_to_6.json",
       "artifact_relative_path": "extracted/opendataloader/serino_2015_exps_4_to_6.json",
       "category": "extracted_text_or_parser_output",
@@ -3570,6 +3666,14 @@
       "record_id": "ronga_2021_newborn_erp",
       "size_bytes": 820181,
       "sha256": "219010e74164e7843bb2b7633a9ea34b71613a3b21e04e46d5373ba326179ee2"
+    },
+    {
+      "relative_path": "artifacts/paper_metadata_audit/publication_pdfs/serino_2007_blind_cane_users.pdf",
+      "artifact_relative_path": "publication_pdfs/serino_2007_blind_cane_users.pdf",
+      "category": "publication_pdf",
+      "record_id": "serino_2007_blind_cane_users",
+      "size_bytes": 145617,
+      "sha256": "2d157b4eefd398daa516f7aad13d8bb77d428985438144c912313983cacad084"
     },
     {
       "relative_path": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_exps_4_to_6.pdf",
