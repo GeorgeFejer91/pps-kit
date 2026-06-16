@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from importlib.util import find_spec
+import os
 
 from PyInstaller.utils.hooks import collect_data_files
 
@@ -9,6 +10,12 @@ from PyInstaller.utils.hooks import collect_data_files
 root = Path.cwd().resolve()
 src_root = root / "src"
 icon_path = src_root / "peripersonal_space_toolkit" / "assets" / "pps_toolkit_icon.ico"
+disable_icon = os.environ.get("PPS_EXPERIMENT_RUNNER_DISABLE_ICON", "").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
 
 datas = collect_data_files(
     "peripersonal_space_toolkit",
@@ -69,7 +76,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=str(icon_path),
+    icon="NONE" if disable_icon else str(icon_path),
 )
 coll = COLLECT(
     exe,

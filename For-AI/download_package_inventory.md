@@ -90,6 +90,12 @@ Current ASIO policy:
   `sounddevice`. Without this import-order guard, python-sounddevice can lock
   the frozen app into a non-ASIO PortAudio backend even though source validation
   tools can see the Komplete ASIO route.
+- `windows\Build_Experiment_Runner_Exe.ps1` may retry PyInstaller once with
+  `PPS_EXPERIMENT_RUNNER_DISABLE_ICON=1` if the normal branded build fails while
+  embedding the `.ico` resource, such as a Windows Defender
+  `BeginUpdateResource` false-positive path. Treat this as a packaging
+  continuity fallback only: the runner code path, Qt runtime checks, packaged
+  `qwindows.dll`, and packaged-exe audio validation still have to pass.
 - The Komplete ASIO route may need an even stream width. The runner should use
   a 4-channel ASIO stream when the native driver exposes 4+ outputs, while still
   routing auditory left/right to outputs 1/2, tactile stimuli and response
