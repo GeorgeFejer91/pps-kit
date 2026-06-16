@@ -27,6 +27,9 @@ Use visual inspection whenever the methods text is ambiguous or when speaker/par
 5. Extract numeric values hidden in figure labels, captions, axes, legends, and table footnotes: distances, SOAs, sound onset/offset times, SPL ranges, block labels, row percentages, and catch/baseline counts.
 6. Track participant posture and stimulated body part as part of the spatial frame: sitting, supine, arm extended, chest/sternum, hand, back, shoulder, or trunk-centered setups can change the meaning of near/far or front/rear.
 7. If visual scale is used because text is incomplete, write the approximation basis in `evidence_note` and keep the value conservative. Do not mark a visually estimated value as fully `reported`.
+8. Always write the drawing viewpoint before the conclusion: top view, side view, front view, photograph, screenshot, or unclear. Only translate page-left/page-right into participant-left/participant-right when body orientation is explicit.
+9. If a paper includes both a participant movement and an auditory trajectory, assign speeds carefully. Hand, arm, head, or body speed belongs in the caveat/task context unless the text or timing table ties it to the auditory stimulus path.
+10. When the figure supplies a qualitative direction but no scale, preserve the useful geometry while leaving numeric fields missing: for example, `trajectory_path = derived qualitative`, `stimulus_speed = not_reported_after_review`.
 
 For every reviewed paper, add a short orientation ledger to the manual review notes before closing Segment 1:
 
@@ -49,6 +52,17 @@ Visual approximation decision ladder:
 4. Translate the page/apparatus frame into the participant/body frame: front, rear, left, right, ipsilateral, contralateral, approaching, receding, proximal, or distal relative to the tactile anchor.
 5. Extract numbers only from printed labels, axes, tables, captions, or a scaled diagram. If the drawing is unscaled, keep the value qualitative and mark it `inferred_low_confidence`.
 6. Cross-check figure-derived geometry against supplement files and protocol-lineage citations when the methods text is incomplete or inconsistent.
+7. Run an arithmetic sanity check when possible: distance / duration, duration x speed, SOA-to-distance mapping, condition rows x repetitions, and baseline/catch percentages. Note mismatches instead of silently choosing one value.
+
+Orientation ambiguity examples to preserve:
+
+| Figure clue | Safe audit wording |
+|---|---|
+| Speaker drawn on page-left, participant facing not visible | `speaker page-left in schematic; participant-facing direction unclear; body-relative left/right not assigned` |
+| Participant icon faces the speaker line in a top view | `participant appears to face sagittal speaker line; body-relative near/far mapping derived from figure, exact azimuth not reported` |
+| Same room speaker pair used while participant rotates | `physical speaker coordinates fixed; body-relative direction changes by participant rotation; record each block separately` |
+| Caption reports frontal stimulation but methods use frontal EEG/anatomy language elsewhere | `frontal auditory direction accepted only from caption/methods context, not from anatomical-analysis uses of frontal` |
+| Source moves virtually through headphones | `room speaker frame not applicable; record renderer/HRTF coordinate frame, virtual azimuth/elevation, gain/motion law if reported` |
 
 Hidden-parameter search routes to check before declaring a value absent:
 
@@ -75,6 +89,15 @@ When a Segment 1-4 value is not obvious in Methods prose, search for the same va
 
 Use this triage matrix alongside keyword search. A useful manual review is allowed to say "the exact value is not reported", but it should be clear which alternate hiding places were checked.
 
+Segment-specific hiding places to inspect:
+
+| Segment | Hidden evidence route | What to recover |
+|---|---|---|
+| Segment 1 | Apparatus photos, source bundle scripts, audio software/version notes, SPL calibration notes, distance labels, captions. | Sound class/provenance, trajectory count/path, duration, speed, gain/envelope, renderer/speaker apparatus. |
+| Segment 2 | Randomization sentences, block schematics, pseudo-random constraints, ITI/ISI clauses, task instructions, sequence scripts. | Intermixing, blocked/random order, jitter/range/distribution, response window, task row families. |
+| Segment 3 | Timing diagrams, trigger schematics, D/T labels, baseline analysis descriptions, tactile device specs. | Tactile stimulus, SOAs, baseline SOAs/timing, catch-trial type. |
+| Segment 4 | Design formulas, percentages, trial-table supplements, block summaries, results denominators after exclusions. | Repetition counts, baseline counts, catch counts, block counts, total trial count and derivation. |
+
 ## Five-Pass Semantic Search Strategy
 
 Every manual review should include five different semantic searches, even when OpenDataLoader finds many candidate fields:
@@ -86,6 +109,8 @@ Every manual review should include five different semantic searches, even when O
 5. Count/catch/protocol-lineage pass: search for repetition, total, catch, no-go, auditory-only, tactile-only, supplement, appendix, protocol, adapted, previous, based on, following, well-established, and cited-methods references.
 
 For the visual/spatial pass, the mandatory output is not just a trajectory label. Record the participant-facing direction, speaker/source direction in room coordinates, body-relative label used by the authors, stimulated body part, and whether movement is physical, speaker-switching, cross-fade/gain-based, or digitally rendered.
+
+After those five passes, do a brief consistency pass before closing the review. This is not a replacement for source evidence; it catches extraction mistakes. Check whether speeds match path length/duration, whether SOAs map onto reported distances, whether trial totals equal rows x repetitions x blocks, whether baseline/catch percentages match counts, and whether any speed/direction you extracted actually belongs to a participant movement or control manipulation instead of the auditory stimulus.
 
 Suggested orientation note template for `orientation_ledger` or a field `evidence_note`:
 

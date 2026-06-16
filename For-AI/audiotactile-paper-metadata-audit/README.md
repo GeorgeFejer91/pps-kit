@@ -43,6 +43,15 @@ Use at least five semantic passes before finalizing a paper: stimulus reconstruc
 
 When methods text is thin, search figures, captions, timing diagrams, table footnotes, percentage formulas, supplement files, publisher HTML, and cited prior-protocol papers. Record whether each value is text-reported, caption-reported, derived from reported numbers, visually approximated, or inherited only as protocol lineage. Do not upgrade a visually approximated value to `reported` unless the caption or methods prose supplies the number or coordinate frame.
 
+Treat each paper like a parameter-recovery problem, not a text-mining problem. Search for the function a value plays in recreation even when the exact Segment field name is absent:
+
+- Segment 1 values may be hidden in apparatus photographs, sound-generation software notes, figure legends, SPL/equalization clauses, source-code bundles, or distance-at-touch tables.
+- Segment 2 values may be hidden in randomization constraints, block diagrams, "no more than N consecutive" rules, ITI/ISI clauses, and task instructions rather than stimulus paragraphs.
+- Segment 3 values may be hidden in timing diagrams, trigger descriptions, D/T labels, analysis-baseline definitions, and control-condition prose.
+- Segment 4 values may be hidden in design formulas, row percentages, block x condition multiplications, supplement trial tables, and exclusions/results denominators.
+
+For every visually inferred spatial value, the audit note must state the viewpoint before the interpretation: top view, side view, front view, photograph, screenshot, or unclear. Then record the participant-facing direction relative to the source, not just a page direction. A valid visual note distinguishes `page-left speaker near hand` from `participant-left speaker near hand`; the latter is allowed only when the participant's body/facing direction is reported or unambiguous from caption/context.
+
 Use a hidden-parameter retrieval ladder before marking a field missing:
 
 1. Main text methods/procedure/apparatus/results tables, including abbreviations such as D1-Dn, T1-Tn, AT, A-only, T-only, near/far, IN/OUT, and pre/post.
@@ -50,6 +59,7 @@ Use a hidden-parameter retrieval ladder before marking a field missing:
 3. Supplement files, data dictionaries, trial tables, scripts, appendix methods, publisher "source data", and article-export ZIPs.
 4. Publisher HTML and reference/citation context, including phrases such as adapted from, following, based on, well-established, as previously described, protocol, frontal, front, sagittal, lateral, and near space.
 5. Cited prior-protocol papers when the current paper delegates low-level stimulus, trajectory, timing, or repetition details to earlier work.
+6. A consistency pass comparing extracted values against the task's arithmetic: path length divided by duration, SOA-to-distance mapping, repetitions x rows x blocks, baseline/catch percentages, and whether a reported speed belongs to the auditory object, a hand/body movement, or another manipulation.
 
 For visual approximation, render pages at readable resolution and keep values conservative. Use scaled figure labels or axis ticks when available; otherwise record only qualitative geometry such as "speaker appears lateral to the left hand" or "participant-facing direction unclear". If a diagram supplies direction but not exact distance/speed/timing, the direction can be `derived` while the missing numeric field remains `not_reported_after_review` only after the supplement and protocol-lineage checks are complete.
 
@@ -61,6 +71,15 @@ Use this decision ladder for every figure-derived spatial value:
 4. Translate the page/apparatus frame into the participant/body frame: front, rear, left, right, ipsilateral, contralateral, approaching, receding, proximal, or distal relative to the tactile anchor.
 5. Extract numbers only from printed labels, axes, tables, captions, or a scaled diagram. If the drawing is unscaled, keep the value qualitative and mark it `inferred_low_confidence`.
 6. Cross-check figure-derived geometry against supplement files and protocol-lineage citations when the methods text is incomplete or inconsistent.
+7. Preserve ambiguity explicitly when orientation remains unresolved: record `body-relative mapping unclear` rather than replacing it with a generic trajectory label.
+
+Common orientation traps to guard against:
+
+- A participant may rotate across direction blocks while the room speakers stay fixed; in that case, the same physical speaker can become front, rear, left, or right in the body frame.
+- A figure may draw the apparatus from the experimenter's viewpoint, not the participant's viewpoint.
+- "Frontal" may refer to an anatomical/EEG region rather than an auditory source direction; check the local sentence context before using it as trajectory evidence.
+- A reported movement speed may describe the participant's hand/arm/body, not the auditory stimulus; only assign it to `stimulus_speed` when the source trajectory or sound timing supports that mapping.
+- Virtual or headphone-rendered sources need renderer-frame coordinates and HRTF/gain provenance; a speaker-style diagram alone is not enough to infer physical speaker placement.
 
 The detailed tucked-away parameter triage matrix lives in `parameter_checklist.md`. Use it when a field is missing from obvious Methods prose: search by the role a value plays in recreation, not only by the Segment field name. For example, a sound speed may be recoverable from a distance-at-touch table plus a duration label, count totals may be hidden in a design formula, and participant-facing direction may appear only in a schematic/caption. Preserve those clues as `derived` or `inferred_low_confidence` with short evidence notes unless the text, table, caption, supplement, or cited protocol reports the value directly.
 
