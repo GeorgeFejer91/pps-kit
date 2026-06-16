@@ -58,6 +58,23 @@ Hidden-parameter search routes to check before declaring a value absent:
 4. Search supplements and source bundles for scripts, spreadsheets, appendix methods, trial lists, figure source data, or exported article PDFs.
 5. Follow protocol-lineage citations when the paper says the task was adapted, based on a previous paradigm, or performed as described elsewhere.
 
+## Tucked-Away Parameter Triage Matrix
+
+When a Segment 1-4 value is not obvious in Methods prose, search for the same value by function rather than by the exact field name. Papers often report the information needed for recreation in scattered, indirect forms.
+
+| Parameter need | Where it is often hidden | Semantic clues to search | How to record it |
+|---|---|---|---|
+| Sound identity/source | Stimulus paragraphs, equipment lists, supplement scripts, figure captions, software/version notes. | noise, pink, white, pure tone, harmonic, rough, Audacity, SoundForge, Matlab, Max/MSP, WAV, sample, generated. | `stimulus_type` and `source_provenance`; use `source_unavailable` only when no paper/supplement/lineage source identifies the sound class. |
+| Trajectory path | Apparatus figures, speaker photos, distance-axis labels, timing diagrams, captions, participant-position diagrams. | approaching, receding, looming, far-to-near, near-to-far, front, rear, lateral, sagittal, coronal, left, right, azimuth, elevation, source position. | `trajectory_path`; separate room coordinates from body-relative direction and cite the figure/panel if visual. |
+| Participant orientation | Apparatus diagrams, participant cartoons, instruction text, blindfold/fixation notes, block descriptions. | seated, standing, supine, facing, fixation, gaze, eyes closed, blindfolded, rotated, head, trunk, body midline. | `orientation_ledger`; never infer participant-left/right from figure-left/right without a body-facing cue. |
+| Movement implementation | Apparatus methods, audio-generation notes, speaker-array diagrams, HRTF/renderer descriptions, intensity/gain formulas. | speaker switching, cross-fade, fade in/out, intensity, SPL, gain, attenuation, HRTF, binaural, virtual, renderer, array, source moved. | `renderer_or_apparatus`, `gain_envelope`, and `trajectory_path`; mark visual-only movement mechanisms as `inferred_low_confidence`. |
+| Speed and duration | Figure axes, tactile-delay tables, distance-at-touch labels, captions, audio filenames, reported distance/speed formulas. | ms, s, cm/s, m/s, distance at touch, D1-Dn, T1-Tn, onset, offset, duration, propagation, constant velocity. | `stimulus_duration` and `stimulus_speed`; derive speed only when distance and time are both reported or a scaled figure explicitly supports it. |
+| SOAs and baseline timing | Timing diagrams, ERP/TMS trigger diagrams, delay labels, response-correction formulas, supplement tables. | SOA, ISI, delay, D0, D1-Dn, Tbefore, Tafter, tactile onset, sound onset, baseline, unimodal, no sound. | `soa_table`, `baseline_strategy`, and `baseline_timing`; preserve sign conventions relative to sound/tactile onset. |
+| Intermixing and jitter | Trial-design paragraphs, block diagrams, randomization constraints, task scripts, table notes. | randomized, pseudo-random, intermixed, intermingled, blocked, order, sequence, ITI, jitter, shuffled, no more than, consecutive. | `condition_intermixing`, `blocked_or_random_order`, `iti_jitter_policy`, and `task_sequence_rules`. |
+| Counts and catch trials | Design formulas, percentage descriptions, table footnotes, block summaries, supplement trial lists. | repetitions, trials per condition, catch, no-go, auditory-only, tactile-only, baseline, block, session, percentage, total. | `repetitions_per_tactile_soa_condition`, `baseline_count`, `catch_count`, `block_count`, and `total_trial_count`; show derivation in `evidence_note` when multiplying factors. |
+
+Use this triage matrix alongside keyword search. A useful manual review is allowed to say "the exact value is not reported", but it should be clear which alternate hiding places were checked.
+
 ## Five-Pass Semantic Search Strategy
 
 Every manual review should include five different semantic searches, even when OpenDataLoader finds many candidate fields:
@@ -69,6 +86,12 @@ Every manual review should include five different semantic searches, even when O
 5. Count/catch/protocol-lineage pass: search for repetition, total, catch, no-go, auditory-only, tactile-only, supplement, appendix, protocol, adapted, previous, based on, following, well-established, and cited-methods references.
 
 For the visual/spatial pass, the mandatory output is not just a trajectory label. Record the participant-facing direction, speaker/source direction in room coordinates, body-relative label used by the authors, stimulated body part, and whether movement is physical, speaker-switching, cross-fade/gain-based, or digitally rendered.
+
+Suggested orientation note template for `orientation_ledger` or a field `evidence_note`:
+
+`Participant <posture> facing <reported/unclear direction>; speakers/sources <room/apparatus locations>; tactile anchor <body site/side>; authors label direction as <front/rear/left/right/near/far/approaching/receding>; movement implemented by <physical movement/speaker switching/gain envelope/HRTF renderer/unclear>; evidence <text/caption/figure/supplement/lineage>, page/figure <pointer>.`
+
+If the figure shows a participant from above or side view, first describe the diagram literally, then translate only the supported part into body coordinates. Example: "diagram shows near/far speaker pair on page-left of the hand; participant-facing direction is not specified, so lateral body mapping remains ambiguous." This preserves useful visual evidence without pretending the paper reported more than it did.
 
 ## Segment 2 Sequence And Intermixing
 

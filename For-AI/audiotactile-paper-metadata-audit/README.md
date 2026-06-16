@@ -62,6 +62,8 @@ Use this decision ladder for every figure-derived spatial value:
 5. Extract numbers only from printed labels, axes, tables, captions, or a scaled diagram. If the drawing is unscaled, keep the value qualitative and mark it `inferred_low_confidence`.
 6. Cross-check figure-derived geometry against supplement files and protocol-lineage citations when the methods text is incomplete or inconsistent.
 
+The detailed tucked-away parameter triage matrix lives in `parameter_checklist.md`. Use it when a field is missing from obvious Methods prose: search by the role a value plays in recreation, not only by the Segment field name. For example, a sound speed may be recoverable from a distance-at-touch table plus a duration label, count totals may be hidden in a design formula, and participant-facing direction may appear only in a schematic/caption. Preserve those clues as `derived` or `inferred_low_confidence` with short evidence notes unless the text, table, caption, supplement, or cited protocol reports the value directly.
+
 ## Tracked Generated Ledgers
 
 - `pdf_retrieval_inventory.csv`: canonical running list of which main publication PDFs are already retrieved, which are missing, DOI/DOI URL for missing records, and the local target filename.
