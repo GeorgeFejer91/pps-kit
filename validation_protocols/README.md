@@ -201,9 +201,16 @@ Separate these quantities in every report:
   Komplete ASIO 4-channel local audio-evidence WAV/sidecar, generates the
   LSL/XDF/audio reconciliation report when needed, generates local
   audio-evidence response-marker recovery when needed, verifies the analysis
-  CSV family and RT tolerance against the emulated click plan, and reports
-  whether the artifact is a full Study 5 realtime run or only a scoped
-  rehearsal. The final Study 5 command is
+  CSV family, checks that selected response IDs are unique logged mouse events
+  even when raw playback clicks include double/random extras, audits top-up
+  rescues against the original missed-trial plan, and reports RT tolerance
+  against the emulated click plan. For visible OS-click backends
+  (`pyautogui`, `pynput`, `win32`), RT tolerance is distribution-aware:
+  controller/QTest paths must satisfy the strict max tolerance, while OS-click
+  paths must keep p95 within the strict tolerance and max within the bounded
+  OS-click tolerance reported by the audit. The audit reports whether the
+  artifact is a full Study 5 realtime run or only a scoped rehearsal. The
+  final Study 5 command is
   `run_full_realtime_participant_emulation.py --audio-mode hardware --strict-study5-readiness`;
   strict mode refuses fake audio and refuses disabling LSL, internal XDF, or
   local audio-evidence recording. If the local packaged exe is blocked by

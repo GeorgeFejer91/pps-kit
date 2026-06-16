@@ -1407,8 +1407,15 @@ def test_protocol11_study5_readiness_auditor_checks_xdf_audio_and_scope(tmp_path
     hub.write_trigger_dictionary(session_dir / "trigger_dictionary.json")
 
     analysis_rows = [
-        {"trial_uid": trial_uid, "hit": "True", "rt_ms": "150.0", "primary_analysis_included": "True", "trial_type": "Audio-Tactile"}
-        for _mouse_id, _marker_id, trial_uid in mouse_marker_pairs
+        {
+            "trial_uid": trial_uid,
+            "hit": "True",
+            "rt_ms": "150.0",
+            "primary_analysis_included": "True",
+            "trial_type": "Audio-Tactile",
+            "click_event_id": str(mouse_id),
+        }
+        for mouse_id, _marker_id, trial_uid in mouse_marker_pairs
     ]
     for suffix in ("responses", "analysis_ready_trials", "final_trial_outcomes"):
         _write_csv(analysis_dir / f"{session_id}_{suffix}.csv", analysis_rows)
@@ -1500,6 +1507,97 @@ def test_protocol11_study5_readiness_auditor_checks_xdf_audio_and_scope(tmp_path
     assert strict["scope_summary"]["validation_audio_realtime"]
     assert any(item["name"] == "artifact_is_full_study5_when_required" and not item["passed"] for item in strict["criteria"])
     assert (tmp_path / "readiness_audit" / "protocol11_study5_readiness_audit.json").exists()
+
+
+def test_study5_readiness_auditor_selection_audit_is_topup_and_extra_click_aware():
+    auditor = _load_script("audit_protocol11_study5_readiness.py")
+
+    planned = {
+        "standard_click_count": 2,
+        "topup_click_count": 2,
+        "all_click_count": 4,
+        "deliberate_miss_count": 1,
+        "plan_declared_tactile_count": 3,
+        "plan_declared_miss_count": 1,
+    }
+    analysis_ready_rows = [
+        {"trial_uid": "T001", "hit": "True", "final_outcome_source": "original", "click_event_id": "101"},
+        {"trial_uid": "T002", "hit": "True", "final_outcome_source": "original", "click_event_id": "102"},
+        {
+            "trial_uid": "T003",
+            "hit": "True",
+            "final_outcome_source": "topup_rescue",
+            "click_event_id": "201",
+            "topup_click_event_id": "201",
+        },
+    ]
+    response_rows = [
+        {"trial_uid": "T001", "hit": "True", "is_topup": "false", "click_event_id": "101"},
+        {"trial_uid": "T002", "hit": "True", "is_topup": "false", "click_event_id": "102"},
+        {"trial_uid": "T003", "hit": "False", "is_topup": "false", "click_event_id": ""},
+        {"trial_uid": "TU001", "hit": "True", "is_topup": "true", "topup_role": "rescue", "click_event_id": "201"},
+        {"trial_uid": "TU002", "hit": "True", "is_topup": "true", "topup_role": "filler", "click_event_id": "202"},
+    ]
+
+    audit = auditor._analysis_selection_audit(
+        planned=planned,
+        analysis_ready_rows=analysis_ready_rows,
+        response_rows=response_rows,
+        mouse_event_ids={"101", "102", "201", "202", "301"},
+        scheduled_tactile_count=5,
+    )
+
+    assert audit["response_hits_match_all_planned_clicks"]
+    assert audit["rows_match_declared_standard_tactile_count"]
+    assert audit["original_hits_match_standard_plan"]
+    assert audit["topup_rescues_match_miss_plan"]
+    assert audit["final_hits_cover_standard_pool"]
+    assert audit["selected_click_ids_are_unique_and_logged"]
+    assert audit["extra_logged_mouse_click_count"] == 1
+    assert audit["extra_logged_mouse_event_ids"] == ["301"]
+
+
+def test_study5_readiness_auditor_rt_tolerance_is_backend_aware():
+    auditor = _load_script("audit_protocol11_study5_readiness.py")
+
+    focus_report = {
+        "validation_mouse_clicks": [
+            {"label": "participant_emulator_plan", "standard_tactile_cue_count": 20, "planned_miss_count": 0},
+            *[
+                {
+                    "label": "tactile_response_click",
+                    "action": "standard_click",
+                    "trial_uid": f"T{i:03d}",
+                    "planned_delay_ms": 250.0,
+                    "actual_delay_ms": 250.0,
+                    "backend": "pyautogui",
+                }
+                for i in range(19)
+            ],
+            {
+                "label": "tactile_response_click",
+                "action": "standard_click",
+                "trial_uid": "T019",
+                "planned_delay_ms": 250.0,
+                "actual_delay_ms": 250.0,
+                "backend": "pyautogui",
+            },
+        ],
+    }
+    rows = [{"trial_uid": f"T{i:03d}", "hit": "True", "rt_ms": "250.0"} for i in range(19)]
+    rows.append({"trial_uid": "T019", "hit": "True", "rt_ms": "355.0"})
+
+    os_audit = auditor._analysis_rt_audit(focus_report, rows, 25.0, 125.0)
+    assert os_audit["within_tolerance"]
+    assert os_audit["os_distribution_within_tolerance"]
+    assert not os_audit["strict_max_within_tolerance"]
+
+    qtest_report = json.loads(json.dumps(focus_report))
+    for record in qtest_report["validation_mouse_clicks"]:
+        if record.get("action") == "standard_click":
+            record["backend"] = "qtest"
+    qtest_audit = auditor._analysis_rt_audit(qtest_report, rows, 25.0, 125.0)
+    assert not qtest_audit["within_tolerance"]
 
 
 def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_path: Path):
