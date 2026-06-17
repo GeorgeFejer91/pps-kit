@@ -583,6 +583,7 @@ def _run_standalone_launcher_validation(args: argparse.Namespace) -> int:
     app = q["QApplication"].instance() or q["QApplication"](sys.argv[:1])
     focus_app.DEFAULT_FOCUS_PROFILE_DESIGN_PATH = output_dir / "focus_profile_runner_design.json"
     focus_app.DEFAULT_PROJECT_REGISTRY_ROOT = output_dir / "projects"
+    focus_app.DEFAULT_DASHBOARD_STATE_ROOT = output_dir / "dashboard_state"
     focus_app.DEFAULT_SESSION_ROOT = output_dir / "sessions"
     focus_app.DEFAULT_RENDER_DIR = output_dir / "rendered"
 
@@ -631,6 +632,8 @@ def _run_standalone_launcher_validation(args: argparse.Namespace) -> int:
 
     try:
         focus_app.run_focus_window = _validation_focus_window
+        previous_auto_click = os.environ.get("PPS_FOCUS_VALIDATION_LAUNCHER_AUTO_CLICK")
+        os.environ["PPS_FOCUS_VALIDATION_LAUNCHER_AUTO_CLICK"] = "1"
         q["QTimer"].singleShot(300, _click_launcher)
         exit_code = focus_app.run_launcher_window(
             capture_options=SessionCaptureOptions(
@@ -644,6 +647,10 @@ def _run_standalone_launcher_validation(args: argparse.Namespace) -> int:
         )
     finally:
         focus_app.run_focus_window = original_run_focus_window
+        if previous_auto_click is None:
+            os.environ.pop("PPS_FOCUS_VALIDATION_LAUNCHER_AUTO_CLICK", None)
+        else:
+            os.environ["PPS_FOCUS_VALIDATION_LAUNCHER_AUTO_CLICK"] = previous_auto_click
 
     focus_result = dict(focus_holder.get("focus_mode") or {})
     report = {

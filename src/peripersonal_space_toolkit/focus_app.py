@@ -78,6 +78,7 @@ from .runner_diary import (
     load_runner_settings as _load_runner_settings,
     resolve_or_create_output_project,
     runner_settings_path as _runner_settings_path,
+    slugify_identifier,
     update_runner_settings as _update_runner_settings,
 )
 from .session_runner import (
@@ -104,10 +105,12 @@ from .session_runner import (
 from .timing_schedule import BlockEventSchedule
 from .preload_inventory import load_preload_inventory
 from .profile_memory import (
+    BRIDGE_MANIFEST_FILENAME,
     append_output_diary_event,
     active_output_folder,
     build_profile_catalog,
     load_runner_settings as load_profile_runner_settings,
+    prepare_acquisition_folder,
     profile_participant_ids_from_entry,
     resolve_profile_entry,
     update_runner_settings as update_profile_runner_settings,
@@ -233,6 +236,179 @@ def create_runner_output_project(
         capture_options=capture_options,
     )
     return resolution.root
+
+
+def create_timestamped_output_environment(parent_dir: Path, session_name: str) -> tuple[Path, Path, str]:
+    parent = Path(parent_dir).expanduser().resolve()
+    if not parent.is_dir():
+        raise ValueError("Choose an existing output folder before initiating a new data collection environment.")
+    slug = slugify_identifier(session_name, fallback="")
+    if not slug:
+        raise ValueError("Enter a session name before initiating a new data collection environment.")
+    stamp = time.strftime("%Y%m%d_%H%M%S")
+    root = parent / f"{slug}_{stamp}"
+    suffix = 2
+    while root.exists():
+        root = parent / f"{slug}_{stamp}_{suffix}"
+        suffix += 1
+    root.mkdir(parents=True, exist_ok=False)
+    diary = ensure_output_diary(root, session_name)
+    return root, diary, slug
+
+
+def _capture_options_payload(capture_options: SessionCaptureOptions | dict[str, Any] | None) -> dict[str, Any]:
+    if capture_options is None:
+        return SessionCaptureOptions().as_dict()
+    if isinstance(capture_options, SessionCaptureOptions):
+        return capture_options.as_dict()
+    return dict(capture_options)
+
+
+def initiate_data_collection_environment(
+    *,
+    parent_folder: Path,
+    profile_id: str,
+    session_name: str,
+    participant_id: str = "P001",
+    capture_options: SessionCaptureOptions | dict[str, Any] | None = None,
+    progress_callback: Callable[[dict[str, Any]], None] | None = None,
+) -> dict[str, Any]:
+    """Create a folder-local data collection environment and preload one participant."""
+    parent = Path(parent_folder).expanduser()
+    if not parent.is_dir():
+        raise ValueError("Choose an existing output folder before initiating a new data collection environment.")
+    profile = str(profile_id or "").strip()
+    if not profile:
+        raise ValueError("Choose an experiment profile before initiating a new data collection environment.")
+    label = str(session_name or "").strip()
+    session_slug = slugify_identifier(label, fallback="")
+    if not session_slug:
+        raise ValueError("Enter a session name before initiating a new data collection environment.")
+    participant = str(participant_id or "").strip() or "P001"
+    capture_payload = _capture_options_payload(capture_options)
+
+    _emit_launcher_progress(
+        progress_callback,
+        "Loading selected profile",
+        phase="profile_inventory",
+        detail=profile,
+        current=0,
+        total=4,
+    )
+    _controller, _design, run_setup_manifest_path = _materialize_profile_run_setup(
+        profile,
+        progress_callback=progress_callback,
+    )
+    entry = resolve_profile_entry(
+        profile,
+        registry_root=DEFAULT_PROJECT_REGISTRY_ROOT,
+        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+        session_root=active_output_folder(state_root=DEFAULT_DASHBOARD_STATE_ROOT, fallback=DEFAULT_SESSION_ROOT),
+        inventory=load_preload_inventory(repo_root()),
+    )
+    source_project_dir = Path(str(entry.get("project_dir") or "")).expanduser()
+    if not source_project_dir.is_dir():
+        source_project_dir = Path(run_setup_manifest_path).resolve().parents[1]
+
+    _emit_launcher_progress(
+        progress_callback,
+        "Creating output environment",
+        phase="environment_folder",
+        detail=str(parent),
+        current=1,
+        total=4,
+    )
+    environment_root, diary_path, session_slug = create_timestamped_output_environment(parent, label)
+    set_runner_session_root(
+        environment_root,
+        diary_path=diary_path,
+        experiment_name=label,
+        profile_id=profile,
+        participant_id=participant,
+        capture_options=capture_payload,
+    )
+    update_runner_settings(
+        DEFAULT_DASHBOARD_STATE_ROOT,
+        active_session_name=label,
+        active_output_parent_folder=str(parent.resolve()),
+        active_environment_created_at=time.strftime("%Y-%m-%dT%H:%M:%S"),
+    )
+
+    _emit_launcher_progress(
+        progress_callback,
+        "Copying profile snapshot",
+        phase="profile_snapshot",
+        detail=str(source_project_dir),
+        current=2,
+        total=4,
+    )
+    bridge = prepare_acquisition_folder(
+        profile_entry=entry,
+        source_project_dir=source_project_dir,
+        output_folder=environment_root,
+        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+        participant_id=participant,
+        capture_options=capture_payload,
+    )
+    append_diary_entry(
+        diary_path,
+        "data_collection_environment_initiated",
+        participant_id=participant,
+        experiment_name=label,
+        profile_id=profile,
+        run_setup_manifest_path=str(bridge.get("run_setup_manifest_path") or ""),
+        capture_options=capture_payload,
+        payload={
+            "parent_folder": str(parent.resolve()),
+            "environment_root": str(environment_root),
+            "bridge_manifest_path": str(bridge.get("bridge_manifest_path") or ""),
+            "session_name": label,
+            "session_slug": session_slug,
+        },
+    )
+    append_output_diary_event(
+        "data_collection_environment_initiated",
+        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+        output_folder=environment_root,
+        profile_id=profile,
+        profile_kind=str(entry.get("kind") or ""),
+        dashboard_project_id=str(entry.get("dashboard_project_id") or ""),
+        participant_id=participant,
+        bridge_manifest_path=str(bridge.get("bridge_manifest_path") or ""),
+        session_name=label,
+    )
+
+    _emit_launcher_progress(
+        progress_callback,
+        "Preparing first participant",
+        phase="participant_package",
+        detail=participant,
+        current=3,
+        total=4,
+    )
+    prepared = prepare_profile_audio_assets(
+        profile,
+        [participant],
+        session_root=environment_root,
+        progress_callback=progress_callback,
+    )
+    _emit_launcher_progress(
+        progress_callback,
+        "Data collection environment ready",
+        phase="environment_ready",
+        detail=str(environment_root),
+        current=4,
+        total=4,
+    )
+    return {
+        "environment_root": str(environment_root),
+        "diary_path": str(diary_path),
+        "bridge": bridge,
+        "prepared_participants": prepared,
+        "profile_id": profile,
+        "session_name": label,
+        "participant_id": participant,
+    }
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -2872,11 +3048,66 @@ def finished_profile_options() -> list[tuple[str, str]]:
     return options
 
 
+def _environment_bridge_manifest(output_root: Path | None = None) -> dict[str, Any]:
+    root = Path(output_root) if output_root is not None else active_output_folder(
+        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+        fallback=DEFAULT_SESSION_ROOT,
+    )
+    return _read_json_dict(root / BRIDGE_MANIFEST_FILENAME)
+
+
+def _bridge_matches_profile(bridge: dict[str, Any], profile_id: str) -> bool:
+    profile = str(profile_id or "").strip()
+    bridge_profile = str(bridge.get("profile_id") or "").strip()
+    return bool(bridge and (not profile or not bridge_profile or bridge_profile == profile))
+
+
+def _environment_run_setup_manifest_path(profile_id: str, output_root: Path | None = None) -> Path:
+    bridge = _environment_bridge_manifest(output_root)
+    if not _bridge_matches_profile(bridge, profile_id):
+        return Path()
+    path = Path(str(bridge.get("run_setup_manifest_path") or ""))
+    return path if path.is_file() else Path()
+
+
+def _environment_participant_ids(profile_id: str, output_root: Path | None = None) -> list[str]:
+    bridge = _environment_bridge_manifest(output_root)
+    if not _bridge_matches_profile(bridge, profile_id):
+        return []
+    participants = [str(item or "").strip() for item in bridge.get("participant_ids", []) if str(item or "").strip()]
+    if participants:
+        return participants
+    count = int(bridge.get("participant_count") or 0)
+    return [f"P{index:03d}" for index in range(1, count + 1)] if count > 0 else []
+
+
+def _environment_design_and_run_setup(profile_id: str, output_root: Path | None = None) -> tuple[Any, Path] | None:
+    root = Path(output_root) if output_root is not None else active_output_folder(
+        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+        fallback=DEFAULT_SESSION_ROOT,
+    )
+    run_setup = _environment_run_setup_manifest_path(profile_id, root)
+    if not run_setup.is_file():
+        return None
+    bridge = _environment_bridge_manifest(root)
+    snapshot_dir = Path(str(bridge.get("acquisition_profile_snapshot_dir") or ""))
+    design_path = snapshot_dir / "0_profile" / "active_design.json"
+    if not design_path.is_file():
+        return None
+    from . import dashboard_app
+
+    design = dashboard_app._normalize_dashboard_design(dashboard_app.load_design(design_path))
+    return design, run_setup
+
+
 def profile_participant_ids(profile_id: str) -> list[str]:
     """Return participant IDs declared by a bundled or custom profile."""
     profile = str(profile_id or "").strip()
     if not profile:
         return ["P001"]
+    bridged = _environment_participant_ids(profile)
+    if bridged:
+        return bridged
     try:
         entry = resolve_profile_entry(
             profile,
@@ -2935,6 +3166,9 @@ def profile_run_setup_manifest_path(profile_id: str) -> Path:
     profile = str(profile_id or "").strip()
     if not profile:
         return Path()
+    bridged = _environment_run_setup_manifest_path(profile)
+    if bridged.is_file():
+        return bridged
     try:
         entry = resolve_profile_entry(
             profile,
@@ -2957,9 +3191,11 @@ def profile_run_setup_manifest_path(profile_id: str) -> Path:
 
 
 def profile_participant_asset_statuses(profile_id: str, *, session_root: Path | None = None) -> dict[str, dict[str, Any]]:
-    participants = profile_participant_ids(profile_id)
-    run_setup = profile_run_setup_manifest_path(profile_id)
     output_root = Path(session_root) if session_root is not None else current_runner_session_root()
+    participants = _environment_participant_ids(profile_id, output_root) or profile_participant_ids(profile_id)
+    run_setup = _environment_run_setup_manifest_path(profile_id, output_root)
+    if not run_setup.is_file():
+        run_setup = profile_run_setup_manifest_path(profile_id)
     if not run_setup.is_file():
         return {
             participant: {
@@ -3172,14 +3408,19 @@ def prepare_profile_audio_assets(
         current=0,
         total=len(participants),
     )
-    controller, design, run_setup_manifest_path = _materialize_profile_run_setup(
-        profile,
-        progress_callback=progress_callback,
-    )
     output_root = Path(session_root) if session_root is not None else active_output_folder(
         state_root=DEFAULT_DASHBOARD_STATE_ROOT,
         fallback=DEFAULT_SESSION_ROOT,
     )
+    environment = _environment_design_and_run_setup(profile, output_root)
+    if environment is not None:
+        design, run_setup_manifest_path = environment
+        controller = SimpleNamespace(design_path=Path(run_setup_manifest_path).resolve().parents[1] / "0_profile" / "active_design.json")
+    else:
+        controller, design, run_setup_manifest_path = _materialize_profile_run_setup(
+            profile,
+            progress_callback=progress_callback,
+        )
     results: list[dict[str, Any]] = []
     prepared_count = 0
     reused_count = 0
@@ -3427,14 +3668,18 @@ def prepare_profile_focus_session(
                 "timestamp_unix": time.time(),
             }
         )
-    _controller, design, run_setup_manifest_path = _materialize_profile_run_setup(
-        profile,
-        progress_callback=progress_callback,
-    )
     output_root = Path(session_root) if session_root is not None else active_output_folder(
         state_root=DEFAULT_DASHBOARD_STATE_ROOT,
         fallback=DEFAULT_SESSION_ROOT,
     )
+    environment = _environment_design_and_run_setup(profile, output_root)
+    if environment is not None:
+        design, run_setup_manifest_path = environment
+    else:
+        _controller, design, run_setup_manifest_path = _materialize_profile_run_setup(
+            profile,
+            progress_callback=progress_callback,
+        )
     claimed = claim_prepared_session(
         run_setup_manifest_path,
         participant,
@@ -6181,6 +6426,338 @@ def run_launcher_window(
     app = q["QApplication"].instance() or q["QApplication"](sys.argv[:1])
     app.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
 
+    runner_settings = load_profile_runner_settings(state_root=DEFAULT_DASHBOARD_STATE_ROOT, default_output_folder=DEFAULT_SESSION_ROOT)
+    diary_settings = load_runner_settings()
+    initial_diary = current_runner_diary_path()
+    diary_context = latest_diary_context(initial_diary) if initial_diary is not None else {}
+    initial_profile = str(
+        runner_settings.get("active_profile_id")
+        or diary_settings.get("last_profile_id")
+        or diary_context.get("profile_id")
+        or STUDY5_PROFILE_ID
+    ).strip()
+    initial_participant = str(
+        participant_id
+        or runner_settings.get("participant_id")
+        or diary_settings.get("last_participant_id")
+        or diary_context.get("participant_id")
+        or "P001"
+    ).strip()
+    initial_output_root = Path(str(runner_settings.get("active_output_folder") or current_runner_session_root())).expanduser()
+    initial_session_name = str(
+        diary_settings.get("active_session_name")
+        or diary_settings.get("last_experiment_name")
+        or diary_context.get("experiment_name")
+        or initial_output_root.name
+        or "PPS experiment"
+    ).strip()
+
+    profile_options = finished_profile_options()
+    profile_values = {profile_id for profile_id, _label in profile_options}
+    if initial_profile and initial_profile not in profile_values:
+        profile_options.insert(0, (initial_profile, initial_profile))
+        profile_values.add(initial_profile)
+    editable_profile_options = [("", "Choose experiment profile..."), *profile_options]
+
+    dialog = q["QDialog"]()
+    _enable_standard_window_controls(q, dialog)
+    dialog.setWindowTitle("PPS Experiment Runner")
+    dialog.resize(880, 520)
+    dialog.setMinimumSize(760, 480)
+    dialog.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
+    apply_qt_app_icon(q, app=app, window=dialog)
+
+    selected_action: dict[str, Any] = {"open_environment": False}
+    setup_mode: dict[str, bool] = {"enabled": False}
+    initializing: dict[str, bool] = {"busy": False}
+    messages: queue.Queue[tuple[str, Any]] = queue.Queue()
+
+    layout = q["QVBoxLayout"](dialog)
+    layout.setContentsMargins(16, 16, 16, 16)
+    layout.setSpacing(14)
+    panel, panel_layout = _panel(q, "Experiment Environment")
+    heading = q["QLabel"](
+        "Resume the remembered data collection environment, or choose a new output parent folder and initiate a fresh environment."
+    )
+    heading.setObjectName("mutedLabel")
+    heading.setWordWrap(True)
+    panel_layout.addWidget(heading)
+
+    output_folder_input = q["QLineEdit"](str(initial_output_root))
+    output_folder_input.setObjectName("outputFolderField")
+    output_folder_input.setReadOnly(True)
+    output_folder_input.setToolTip(str(initial_output_root))
+    copy_button = q["QPushButton"]("Copy Path")
+    copy_button.setObjectName("copyOutputFolderButton")
+    output_widget = q["QWidget"]()
+    output_layout = q["QHBoxLayout"](output_widget)
+    output_layout.setContentsMargins(0, 0, 0, 0)
+    output_layout.setSpacing(8)
+    output_layout.addWidget(output_folder_input, 1)
+    output_layout.addWidget(copy_button)
+    panel_layout.addWidget(_field_row(q, "Output Folder", output_widget))
+
+    profile_combo = _combo(q, editable_profile_options, current=initial_profile)
+    profile_combo.setObjectName("environmentProfileCombo")
+    profile_combo.setEnabled(False)
+    panel_layout.addWidget(_field_row(q, "Experiment Profile", profile_combo))
+
+    session_name_input = q["QLineEdit"](initial_session_name)
+    session_name_input.setObjectName("sessionNameField")
+    session_name_input.setReadOnly(True)
+    session_name_input.setPlaceholderText("My Experiment")
+    panel_layout.addWidget(_field_row(q, "Session Name", session_name_input))
+
+    message = q["QLabel"](initial_message or "Ready to resume the remembered experiment environment.")
+    message.setObjectName("mutedLabel")
+    message.setWordWrap(True)
+    panel_layout.addWidget(message)
+    progress = q["QProgressBar"]()
+    progress.setRange(0, 1000)
+    progress.setValue(0)
+    progress.setVisible(False)
+    panel_layout.addWidget(progress)
+
+    buttons = q["QHBoxLayout"]()
+    resume_button = q["QPushButton"]("Resume Experiment")
+    resume_button.setObjectName("resumeExperimentButton")
+    resume_button.setProperty("class", "primary")
+    choose_folder_button = q["QPushButton"]("Choose a new output folder")
+    choose_folder_button.setObjectName("chooseOutputFolderButton")
+    initiate_button = q["QPushButton"]("Initiate New Data Collection Environment")
+    initiate_button.setObjectName("initiateEnvironmentButton")
+    initiate_button.setEnabled(False)
+    close_button = q["QPushButton"]("Close")
+    buttons.addWidget(resume_button)
+    buttons.addWidget(choose_folder_button)
+    buttons.addWidget(initiate_button)
+    buttons.addStretch(1)
+    buttons.addWidget(close_button)
+    panel_layout.addLayout(buttons)
+    layout.addWidget(panel)
+    layout.addStretch(1)
+
+    def _capture_options_for_launcher() -> dict[str, Any]:
+        return _capture_options_payload(capture_options)
+
+    def _selected_parent() -> Path:
+        return Path(output_folder_input.text().strip()).expanduser()
+
+    def _selected_profile() -> str:
+        return str(profile_combo.currentData() or "").strip()
+
+    def _session_name() -> str:
+        return str(session_name_input.text() or "").strip()
+
+    def _session_slug() -> str:
+        return slugify_identifier(_session_name(), fallback="")
+
+    def _resume_ready() -> bool:
+        return initial_output_root.is_dir() and bool(initial_profile)
+
+    def _set_environment_busy(busy: bool) -> None:
+        initializing["busy"] = busy
+        resume_button.setEnabled((not busy) and _resume_ready())
+        choose_folder_button.setEnabled(not busy)
+        initiate_button.setEnabled((not busy) and _can_initiate())
+        close_button.setEnabled(not busy)
+        output_folder_input.setEnabled(not busy)
+        profile_combo.setEnabled((not busy) and setup_mode["enabled"])
+        session_name_input.setEnabled(not busy)
+        copy_button.setEnabled(not busy)
+        progress.setVisible(busy)
+        if busy:
+            progress.setRange(0, 0)
+        else:
+            progress.setRange(0, 1000)
+            progress.setValue(0)
+
+    def _validation_errors() -> list[str]:
+        if not setup_mode["enabled"]:
+            return []
+        parent = _selected_parent()
+        if not output_folder_input.text().strip():
+            return ["Choose an output parent folder."]
+        if not parent.is_dir():
+            return ["Output folder must be an existing folder."]
+        if not _selected_profile():
+            return ["Choose an experiment profile."]
+        if not _session_slug():
+            return ["Enter a Windows-safe session name."]
+        return []
+
+    def _can_initiate() -> bool:
+        return setup_mode["enabled"] and not _validation_errors()
+
+    def _refresh_initiate_state() -> None:
+        errors = _validation_errors()
+        initiate_button.setEnabled((not initializing["busy"]) and setup_mode["enabled"] and not errors)
+        if setup_mode["enabled"]:
+            if errors:
+                message.setText(errors[0])
+            else:
+                preview = _selected_parent() / f"{_session_slug()}_<timestamp>"
+                message.setText(f"Ready to create {preview}.")
+        output_folder_input.setToolTip(output_folder_input.text().strip())
+
+    def _unlock_for_new_environment(parent: Path) -> None:
+        setup_mode["enabled"] = True
+        output_folder_input.setReadOnly(False)
+        output_folder_input.setText(str(parent))
+        profile_combo.setEnabled(True)
+        profile_combo.setCurrentIndex(0)
+        session_name_input.setReadOnly(False)
+        session_name_input.setText("")
+        resume_button.setEnabled(False)
+        _refresh_initiate_state()
+
+    def _copy_output_path() -> None:
+        try:
+            app.clipboard().setText(output_folder_input.text())
+            message.setText("Output folder path copied.")
+        except Exception as exc:
+            message.setText(f"Could not copy path: {exc}")
+
+    def _choose_parent_folder() -> None:
+        parent = q["QFileDialog"].getExistingDirectory(
+            dialog,
+            "Choose Output Parent Folder",
+            str(initial_output_root.parent if initial_output_root else DEFAULT_SESSION_ROOT.parent),
+        )
+        if parent:
+            _unlock_for_new_environment(Path(parent))
+
+    def _resume_environment() -> None:
+        if not _resume_ready():
+            message.setText("No remembered experiment environment is ready. Choose a new output folder first.")
+            return
+        output_root = initial_output_root.expanduser().resolve()
+        remember_runner_context(
+            session_root=output_root,
+            diary_path=find_output_diary(output_root),
+            experiment_name=initial_session_name,
+            profile_id=initial_profile,
+            participant_id=initial_participant,
+            capture_options=_capture_options_for_launcher(),
+        )
+        update_profile_runner_settings(
+            state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+            output_folder=output_root,
+            profile_id=initial_profile,
+            participant_id=initial_participant,
+            capture_options=_capture_options_for_launcher(),
+        )
+        _append_output_diary_event(
+            "resume_experiment_clicked",
+            session_root=output_root,
+            experiment_name=initial_session_name,
+            profile_id=initial_profile,
+            participant_id=initial_participant,
+            capture_options=_capture_options_for_launcher(),
+            create=True,
+        )
+        selected_action["open_environment"] = True
+        dialog.accept()
+
+    def _start_environment_initialization() -> None:
+        errors = _validation_errors()
+        if errors:
+            message.setText(errors[0])
+            return
+        _set_environment_busy(True)
+        message.setText("Creating data collection environment...")
+
+        def _progress_callback(payload: dict[str, Any]) -> None:
+            messages.put(("progress", dict(payload)))
+
+        def _worker() -> None:
+            try:
+                result = initiate_data_collection_environment(
+                    parent_folder=_selected_parent(),
+                    profile_id=_selected_profile(),
+                    session_name=_session_name(),
+                    participant_id="P001",
+                    capture_options=capture_options,
+                    progress_callback=_progress_callback,
+                )
+            except Exception as exc:
+                messages.put(("error", str(exc)))
+            else:
+                messages.put(("done", result))
+
+        threading.Thread(target=_worker, name="pps-environment-init", daemon=True).start()
+
+    def _drain_environment_messages() -> None:
+        while not messages.empty():
+            kind, payload = messages.get_nowait()
+            if kind == "progress":
+                total = int(payload.get("total") or 0)
+                current = int(payload.get("current") or 0)
+                if total > 0:
+                    progress.setRange(0, 1000)
+                    progress.setValue(int(max(0.0, min(1.0, current / total)) * 1000))
+                else:
+                    progress.setRange(0, 0)
+                message.setText(str(payload.get("message") or "Preparing environment"))
+            elif kind == "error":
+                message.setText(str(payload))
+                _set_environment_busy(False)
+                _refresh_initiate_state()
+            elif kind == "done":
+                selected_action["open_environment"] = True
+                message.setText("Environment ready.")
+                dialog.accept()
+
+    timer = q["QTimer"](dialog)
+    timer.timeout.connect(_drain_environment_messages)
+    timer.start(100)
+
+    output_folder_input.textChanged.connect(lambda _text: _refresh_initiate_state())
+    profile_combo.currentIndexChanged.connect(lambda _index: _refresh_initiate_state())
+    session_name_input.textChanged.connect(lambda _text: _refresh_initiate_state())
+    copy_button.clicked.connect(_copy_output_path)
+    choose_folder_button.clicked.connect(_choose_parent_folder)
+    resume_button.clicked.connect(_resume_environment)
+    initiate_button.clicked.connect(_start_environment_initialization)
+    close_button.clicked.connect(dialog.reject)
+    resume_button.setEnabled(_resume_ready())
+
+    def _validation_auto_environment() -> None:
+        target_profile = os.environ.get("PPS_FOCUS_VALIDATION_PROFILE", STUDY5_PROFILE_ID).strip() or STUDY5_PROFILE_ID
+        parent = DEFAULT_SESSION_ROOT
+        parent.mkdir(parents=True, exist_ok=True)
+        _unlock_for_new_environment(parent)
+        index = profile_combo.findData(target_profile)
+        if index >= 0:
+            profile_combo.setCurrentIndex(index)
+        session_name_input.setText("Study 5 validation")
+        q["QTimer"].singleShot(250, lambda: initiate_button.click() if initiate_button.isEnabled() else None)
+
+    if _env_flag("PPS_FOCUS_VALIDATION_LAUNCHER_AUTO_CLICK"):
+        q["QTimer"].singleShot(200, _validation_auto_environment)
+
+    accepted = dialog.exec() == q["QDialog"].DialogCode.Accepted
+    if not accepted or not selected_action.get("open_environment"):
+        return 1
+    return _run_environment_operations_window(
+        capture_options=capture_options,
+        enable_missed_trial_topup=enable_missed_trial_topup,
+        participant_id=initial_participant or "P001",
+    )
+
+
+def _run_environment_operations_window(
+    *,
+    capture_options: SessionCaptureOptions | None = None,
+    enable_missed_trial_topup: bool = False,
+    participant_id: str = "",
+    initial_message: str = "",
+) -> int:
+    q = _require_qt()
+    set_windows_app_user_model_id("PPS.Toolkit.FocusMode")
+    app = q["QApplication"].instance() or q["QApplication"](sys.argv[:1])
+    app.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
+
     dialog = q["QDialog"]()
     _enable_standard_window_controls(q, dialog)
     dialog.setWindowTitle("PPS Experiment Runner")
@@ -6211,8 +6788,8 @@ def run_launcher_window(
     layout = q["QVBoxLayout"](dialog)
     layout.setContentsMargins(16, 16, 16, 16)
     layout.setSpacing(14)
-    panel, panel_layout = _panel(q, "Open Experiment Runner")
-    heading = q["QLabel"]("Resume the last dashboard experiment, choose a prepared participant session, or run a finished study/profile preset.")
+    panel, panel_layout = _panel(q, "Prepare Participants And Run")
+    heading = q["QLabel"]("Generate participant files for the active data collection environment, then open Focus Mode for the selected participant.")
     heading.setObjectName("mutedLabel")
     heading.setWordWrap(True)
     panel_layout.addWidget(heading)
@@ -6223,6 +6800,7 @@ def run_launcher_window(
     output_folder_input.setToolTip("Participant session folders, bridge manifest, and output diary are written here.")
     choose_output_button = q["QPushButton"]("Choose Output Folder")
     choose_output_button.setObjectName("chooseOutputFolderButton")
+    choose_output_button.setVisible(False)
     output_folder_widget = q["QWidget"]()
     output_folder_layout = q["QHBoxLayout"](output_folder_widget)
     output_folder_layout.setContentsMargins(0, 0, 0, 0)
@@ -6236,8 +6814,8 @@ def run_launcher_window(
     profile_combo = _combo(q, profile_options, current=initial_profile if initial_profile in available_profiles else STUDY5_PROFILE_ID)
     if profile_combo.currentIndex() < 0 and profile_options:
         profile_combo.setCurrentIndex(0)
-    profile_combo.setEnabled(bool(profile_options))
-    panel_layout.addWidget(_field_row(q, "Study/profile", profile_combo))
+    profile_combo.setEnabled(False)
+    panel_layout.addWidget(_field_row(q, "Experiment Profile", profile_combo))
 
     participant_combo = q["QComboBox"]()
     participant_combo.setObjectName("participantCombo")
@@ -6443,7 +7021,7 @@ def run_launcher_window(
         choose_button.setEnabled(not busy)
         choose_output_button.setEnabled(not busy)
         close_button.setEnabled(not busy)
-        profile_combo.setEnabled((not busy) and bool(profile_options))
+        profile_combo.setEnabled(False)
         participant_combo.setEnabled(not busy)
         range_input.setEnabled(not busy)
         progress.setVisible(busy)
@@ -6727,6 +7305,15 @@ def run_launcher_window(
                     "selected_profile": str(profile_combo.currentData() or ""),
                 }
             )
+        else:
+            validation_launcher_clicks.append(
+                {
+                    "label": "click Study/profile selector",
+                    "timestamp_unix": time.time(),
+                    "selected_profile": str(profile_combo.currentData() or ""),
+                    "mode": "locked_environment_profile",
+                }
+            )
         q["QTimer"].singleShot(150, _validation_click_launcher_run_button)
 
     def _validation_click_launcher_run_button() -> None:
@@ -6832,22 +7419,10 @@ def main(argv: list[str] | None = None) -> int:
             auto_close_ms=args.validation_auto_close_ms,
             screenshot_path=args.validation_screenshot,
         )
-    try:
-        manifest = prepare_last_or_latest_focus_session(args.participant_id)
-    except Exception as exc:
-        return run_launcher_window(
-            capture_options=options,
-            enable_missed_trial_topup=args.enable_missed_trial_topup,
-            participant_id=args.participant_id,
-            initial_message=str(exc),
-        )
-    return run_focus_window(
-        manifest,
+    return run_launcher_window(
         capture_options=options,
         enable_missed_trial_topup=args.enable_missed_trial_topup,
-        manual_start=True,
-        auto_close_ms=args.validation_auto_close_ms,
-        screenshot_path=args.validation_screenshot,
+        participant_id=args.participant_id,
     )
 
 

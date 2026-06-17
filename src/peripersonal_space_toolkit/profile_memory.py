@@ -165,7 +165,7 @@ def update_runner_settings(
         current_diary_text = str(current.get("diary_path") or "").strip()
         current_diary = Path(current_diary_text).expanduser() if current_diary_text else None
         if current_diary is None or current_diary.name == OUTPUT_DIARY_FILENAME or current_diary.parent != output:
-            updates["diary_path"] = str(output / OUTPUT_DIARY_FILENAME)
+            updates["diary_path"] = str(_find_runner_log_diary(output) or output / OUTPUT_DIARY_FILENAME)
         updates["bridge_manifest_path"] = str(output / BRIDGE_MANIFEST_FILENAME)
     if profile_id is not None:
         updates["active_profile_id"] = str(profile_id)
@@ -413,25 +413,24 @@ def rebase_project_copy_paths(project_dir: Path, *, old_root: Path, new_root: Pa
     root = Path(project_dir)
     old_path = Path(old_root).resolve()
     new_path = Path(new_root).resolve()
-    for json_path in root.rglob("*.json"):
+    for json_path in _walk_project_files(root, ".json"):
         data = _read_json(json_path)
         if not data:
             continue
-        json_path.write_text(
-            json.dumps(_json_ready(_replace_path_strings(data, old_path=old_path, new_path=new_path)), indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
-        )
+        _write_json_file(json_path, _replace_path_strings(data, old_path=old_path, new_path=new_path))
     replacements = _path_replacements(old_path, new_path)
-    for csv_path in root.rglob("*.csv"):
+    for csv_path in _walk_project_files(root, ".csv"):
         try:
-            text = csv_path.read_text(encoding="utf-8")
+            with open(_filesystem_path(csv_path), "r", encoding="utf-8") as handle:
+                text = handle.read()
         except Exception:
             continue
         updated = text
         for old_text, new_text in replacements:
             updated = updated.replace(old_text, new_text)
         if updated != text:
-            csv_path.write_text(updated, encoding="utf-8")
+            with open(_filesystem_path(csv_path), "w", encoding="utf-8") as handle:
+                handle.write(updated)
 
 
 def write_bridge_manifest(
@@ -450,7 +449,7 @@ def write_bridge_manifest(
     run_setup_text = str(segment_manifests.get("6_experiment_run_setup") or "")
     run_setup_path = Path(run_setup_text) if run_setup_text else None
     run_setup = _read_json(run_setup_path) if run_setup_path is not None else {}
-    participants = _participants_from_run_setup(run_setup_path) if run_setup_path is not None and run_setup_path.is_file() else []
+    participants = _participants_from_run_setup(run_setup_path) if run_setup_path is not None and _path_exists(run_setup_path) else []
     manifest = {
         "schema": DASHBOARD_RUNNER_BRIDGE_SCHEMA,
         "created_at": now_iso(),
@@ -465,7 +464,7 @@ def write_bridge_manifest(
         "participant_id": str(participant_id or ""),
         "participant_ids": participants,
         "participant_count": len(participants) or int(profile_entry.get("participant_count") or 0),
-        "segment_6_ready": bool(run_setup.get("prepared")) and bool(run_setup_path is not None and run_setup_path.is_file()),
+        "segment_6_ready": bool(run_setup.get("prepared")) and bool(run_setup_path is not None and _path_exists(run_setup_path)),
         "asset_roots": list(profile_entry.get("asset_roots") or []),
         "stored_project_dir": str(profile_entry.get("project_dir") or ""),
         "acquisition_profile_snapshot_dir": str(project_dir),
@@ -473,12 +472,12 @@ def write_bridge_manifest(
             segment: {
                 "path": str(path),
                 "sha256": _sha256_file(Path(path)) if path else "",
-                "exists": bool(path and Path(path).is_file()),
+                "exists": bool(path and _path_exists(Path(path))),
             }
             for segment, path in segment_manifests.items()
         },
         "run_setup_manifest_path": str(run_setup_path) if run_setup_path is not None else "",
-        "run_setup_manifest_sha256": _sha256_file(run_setup_path) if run_setup_path is not None and run_setup_path.is_file() else "",
+        "run_setup_manifest_sha256": _sha256_file(run_setup_path) if run_setup_path is not None and _path_exists(run_setup_path) else "",
         "capture_options": dict(capture_options or {}),
         "runner_settings_path": str(runner_settings_path(state_root)),
     }
@@ -523,7 +522,7 @@ def _bundled_profile_entries(
             continue
         project_dir = registry_root / f"profile_{project_slug(profile_id, 'profile')}"
         run_setup_path = project_dir / "6_experiment_run_setup" / "experiment_run_setup_manifest.json"
-        participant_ids = _participants_from_run_setup(run_setup_path) if run_setup_path.is_file() else _participants_from_preload_defaults(profile_id)
+        participant_ids = _participants_from_run_setup(run_setup_path) if _path_exists(run_setup_path) else _participants_from_preload_defaults(profile_id)
         statuses = _participant_statuses(run_setup_path, participant_ids, session_root=session_root, state_root=state_root)
         asset_roots = [str(repo_root() / "assets" / "preloads" / profile_id)]
         if project_dir.exists():
@@ -531,7 +530,7 @@ def _bundled_profile_entries(
         missing_reasons = []
         if not launchable:
             missing_reasons.append(str(profile.get("profile_completion_status") or profile.get("runner_readiness") or "unfinished_preload"))
-        if run_setup_path.is_file() and not _run_setup_ready(run_setup_path):
+        if _path_exists(run_setup_path) and not _run_setup_ready(run_setup_path):
             missing_reasons.append("Segment 6 run setup manifest is missing, stale, or incomplete.")
         entries.append(
             {
@@ -542,8 +541,8 @@ def _bundled_profile_entries(
                 "project_dir": str(project_dir) if project_dir.exists() else "",
                 "asset_roots": asset_roots,
                 "segment_manifests": _segment_manifest_paths(project_dir),
-                "run_setup_manifest_path": str(run_setup_path) if run_setup_path.is_file() else "",
-                "segment_6_ready": bool(launchable and (not run_setup_path.is_file() or _run_setup_ready(run_setup_path))),
+                "run_setup_manifest_path": str(run_setup_path) if _path_exists(run_setup_path) else "",
+                "segment_6_ready": bool(launchable and (not _path_exists(run_setup_path) or _run_setup_ready(run_setup_path))),
                 "participant_count": len(participant_ids),
                 "participant_ids": participant_ids,
                 "participants": [_participant_entry(participant, statuses.get(participant, {})) for participant in participant_ids],
@@ -566,7 +565,7 @@ def _custom_profile_entries(registry_root: Path, *, session_root: Path, state_ro
         if not child.is_dir() or not child.name.startswith("custom_"):
             continue
         active_design_path = child / "0_profile" / "active_design.json"
-        if not active_design_path.is_file():
+        if not _path_exists(active_design_path):
             continue
         design = _read_json(active_design_path)
         reference = design.get("study_profile_reference_parameters")
@@ -583,7 +582,7 @@ def _custom_profile_entries(registry_root: Path, *, session_root: Path, state_ro
             or child.name
         )
         run_setup_path = child / "6_experiment_run_setup" / "experiment_run_setup_manifest.json"
-        participant_ids = _participants_from_run_setup(run_setup_path) if run_setup_path.is_file() else []
+        participant_ids = _participants_from_run_setup(run_setup_path) if _path_exists(run_setup_path) else []
         statuses = _participant_statuses(run_setup_path, participant_ids, session_root=session_root, state_root=state_root)
         ready = _run_setup_ready(run_setup_path)
         missing = []
@@ -598,7 +597,7 @@ def _custom_profile_entries(registry_root: Path, *, session_root: Path, state_ro
                 "project_dir": str(child),
                 "asset_roots": [str(child)],
                 "segment_manifests": _segment_manifest_paths(child),
-                "run_setup_manifest_path": str(run_setup_path) if run_setup_path.is_file() else "",
+                "run_setup_manifest_path": str(run_setup_path) if _path_exists(run_setup_path) else "",
                 "segment_6_ready": ready,
                 "participant_count": len(participant_ids),
                 "participant_ids": participant_ids,
@@ -620,7 +619,7 @@ def _participant_statuses(
     state_root: Path,
 ) -> dict[str, dict[str, Any]]:
     participants = [str(participant or "").strip() for participant in participant_ids if str(participant or "").strip()]
-    if not participants or not Path(run_setup_path).is_file():
+    if not participants or not _path_exists(run_setup_path):
         return {}
     try:
         from .session_runner import prepared_session_asset_statuses
@@ -670,6 +669,31 @@ def _matches_ignore(name: str, patterns: Iterable[str]) -> bool:
     return any(fnmatch.fnmatch(name, pattern) for pattern in patterns)
 
 
+def _walk_project_files(root: Path, suffix: str) -> Iterable[Path]:
+    root_text = _filesystem_path(root)
+    target_suffix = str(suffix or "").lower()
+    for current_root, _dir_names, file_names in os.walk(root_text):
+        for file_name in file_names:
+            if target_suffix and not file_name.lower().endswith(target_suffix):
+                continue
+            yield Path(os.path.join(current_root, file_name))
+
+
+def _find_runner_log_diary(folder: Path) -> Path | None:
+    root = Path(folder)
+    try:
+        matches = [
+            path
+            for path in _walk_project_files(root, "LOG-DIARY_DO_NOT_DELETE.txt")
+            if os.path.isfile(_filesystem_path(path))
+        ]
+    except Exception:
+        return None
+    if not matches:
+        return None
+    return max(matches, key=lambda path: os.path.getmtime(_filesystem_path(path)))
+
+
 def _replace_path_strings(value: Any, *, old_path: Path, new_path: Path) -> Any:
     if isinstance(value, dict):
         return {str(key): _replace_path_strings(item, old_path=old_path, new_path=new_path) for key, item in value.items()}
@@ -711,7 +735,7 @@ def _segment_manifest_paths(project_dir: Path) -> dict[str, str]:
         "5_block_csv_preview": root / "5_block_csv_preview" / "block_csv_preview_manifest.json",
         "6_experiment_run_setup": root / "6_experiment_run_setup" / "experiment_run_setup_manifest.json",
     }
-    return {segment: str(path) for segment, path in paths.items() if path.is_file()}
+    return {segment: str(path) for segment, path in paths.items() if _path_exists(path)}
 
 
 def _run_setup_ready(run_setup_path: Path) -> bool:
@@ -720,7 +744,7 @@ def _run_setup_ready(run_setup_path: Path) -> bool:
     if manifest.get("schema") != RUN_SETUP_MANIFEST_SCHEMA or not bool(manifest.get("prepared")):
         return False
     csv_path = _resolve_manifest_path(manifest.get("csv_path", ""), path.parent)
-    return bool(csv_path and csv_path.is_file())
+    return bool(csv_path and _path_exists(csv_path))
 
 
 def _participants_from_run_setup(run_setup_path: Path) -> list[str]:
@@ -728,9 +752,9 @@ def _participants_from_run_setup(run_setup_path: Path) -> list[str]:
     manifest = _read_json(path)
     csv_path = _resolve_manifest_path(manifest.get("csv_path", ""), path.parent)
     participants: set[str] = set()
-    if csv_path and csv_path.is_file():
+    if csv_path and _path_exists(csv_path):
         try:
-            with csv_path.open(newline="", encoding="utf-8-sig") as handle:
+            with open(_filesystem_path(csv_path), newline="", encoding="utf-8-sig") as handle:
                 for row in csv.DictReader(handle):
                     participant = str(row.get("participant_id") or "").strip()
                     if participant:

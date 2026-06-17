@@ -1189,7 +1189,7 @@ def test_validation_realtime_audio_engine_waits_for_buffer_deadlines(tmp_path: P
     assert engine.played_block_durations_s == pytest.approx([duration_s])
 
 
-def test_launcher_uses_participant_dropdown_instead_of_text_entry():
+def test_launcher_first_screen_is_environment_gate():
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
         from PIL import Image, ImageStat
@@ -1207,19 +1207,32 @@ def test_launcher_uses_participant_dropdown_instead_of_text_entry():
             dialogs = [widget for widget in app.topLevelWidgets() if widget.windowTitle() == "PPS Experiment Runner"]
             assert dialogs
             dialog = dialogs[0]
-            participant_combo = dialog.findChild(q["QComboBox"], "participantCombo")
-            assert participant_combo is not None
-            assert participant_combo.count() >= 1
+            assert dialog.findChild(q["QComboBox"], "participantCombo") is None
             output_field = dialog.findChild(q["QLineEdit"], "outputFolderField")
             assert output_field is not None
             assert output_field.isReadOnly()
+            profile_combo = dialog.findChild(q["QComboBox"], "environmentProfileCombo")
+            assert profile_combo is not None
+            assert not profile_combo.isEnabled()
+            session_field = dialog.findChild(q["QLineEdit"], "sessionNameField")
+            assert session_field is not None
+            assert session_field.isReadOnly()
             assert dialog.findChild(q["QPushButton"], "chooseOutputFolderButton") is not None
+            initiate_button = dialog.findChild(q["QPushButton"], "initiateEnvironmentButton")
+            assert initiate_button is not None
+            assert not initiate_button.isEnabled()
+            assert dialog.findChild(q["QPushButton"], "resumeExperimentButton") is not None
             labels = _collect_widget_texts(dialog, q["QLabel"])
-            assert labels.index("Output Folder") < labels.index("Study/profile")
+            assert labels.index("Output Folder") < labels.index("Experiment Profile")
+            assert labels.index("Experiment Profile") < labels.index("Session Name")
             placeholders = [line.placeholderText() for line in dialog.findChildren(q["QLineEdit"])]
             assert "Participant ID" not in placeholders
-            assert "1-10" in placeholders
-            screenshot = Path.cwd() / ".pytest_cache" / "launcher_output_folder.png"
+            assert "1-10" not in placeholders
+            button_labels = [button.text() for button in dialog.findChildren(q["QPushButton"])]
+            assert "Generate Audio Assets" not in button_labels
+            assert "Generate Range" not in button_labels
+            assert "Run Selected Profile" not in button_labels
+            screenshot = Path.cwd() / ".pytest_cache" / "launcher_environment_gate.png"
             screenshot.parent.mkdir(parents=True, exist_ok=True)
             assert dialog.grab().save(str(screenshot))
             image = Image.open(screenshot).convert("RGB")
@@ -1355,7 +1368,11 @@ def test_launcher_generate_range_button_prepares_requested_range(monkeypatch):
 
     def inspect_launcher() -> None:
         try:
-            dialogs = [widget for widget in app.topLevelWidgets() if widget.windowTitle() == "PPS Experiment Runner"]
+            dialogs = [
+                widget
+                for widget in app.topLevelWidgets()
+                if widget.windowTitle() == "PPS Experiment Runner" and widget.findChild(q["QComboBox"], "participantCombo") is not None
+            ]
             assert dialogs
             dialog = dialogs[0]
             range_inputs = [line for line in dialog.findChildren(q["QLineEdit"]) if line.placeholderText() == "1-10"]
@@ -1383,7 +1400,7 @@ def test_launcher_generate_range_button_prepares_requested_range(monkeypatch):
                     widget.reject()
 
     q["QTimer"].singleShot(50, inspect_launcher)
-    exit_code = focus_app.run_launcher_window(
+    exit_code = focus_app._run_environment_operations_window(
         capture_options=SessionCaptureOptions(enable_lsl=False, write_internal_xdf=False, start_backup_recording=False),
         participant_id="P001",
         initial_message="inspection",
@@ -1470,6 +1487,24 @@ def test_runner_output_project_setting_creates_timestamped_folder(tmp_path: Path
     assert settings["last_profile_id"] == "study5_box_breathing_pps"
     assert settings["last_participant_id"] == "P001"
     assert settings["last_capture_options"]["enable_lsl"] is True
+
+
+def test_timestamped_output_environment_uses_parent_and_collision_suffix(tmp_path: Path, monkeypatch):
+    from peripersonal_space_toolkit import focus_app
+
+    parent = tmp_path / "operator_outputs"
+    parent.mkdir()
+    monkeypatch.setattr(focus_app.time, "strftime", lambda _fmt: "20260618_091011")
+    first = parent / "my_lab_pilot_20260618_091011"
+    first.mkdir()
+
+    root, diary, slug = focus_app.create_timestamped_output_environment(parent, "My Lab Pilot ä/ß")
+
+    assert slug == "my_lab_pilot"
+    assert root == parent / "my_lab_pilot_20260618_091011_2"
+    assert root.is_dir()
+    assert diary.parent == root
+    assert diary.name.endswith("_LOG-DIARY_DO_NOT_DELETE.txt")
 
 
 def test_prepare_profile_audio_assets_reuses_scanned_generated_packages(tmp_path: Path, monkeypatch):
