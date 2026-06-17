@@ -436,6 +436,25 @@ code {
   gap: 8px;
 }
 
+.data-acquisition-bridge {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+  border: 1px solid #c7d8ce;
+  border-radius: 7px;
+  background: #f1f7f4;
+  padding: 10px;
+}
+
+.data-acquisition-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .info-page {
   margin-top: 14px;
 }
@@ -4106,7 +4125,15 @@ body.modal-open {
     grid-template-columns: 1fr;
   }
 
+  .data-acquisition-bridge {
+    grid-template-columns: 1fr;
+  }
+
   .segment-zero-status-actions {
+    justify-content: flex-start;
+  }
+
+  .data-acquisition-actions {
     justify-content: flex-start;
   }
 

@@ -69,6 +69,17 @@ from .focus_layout import (
     render_focus_style_sheet,
 )
 from .focus_timeline import TactileRecenterController, TactileTimelineCue, TactileTimelineState
+from .runner_diary import (
+    RUNNER_SETTINGS_SCHEMA,
+    append_diary_entry,
+    ensure_output_diary,
+    find_output_diary,
+    latest_diary_context,
+    load_runner_settings as _load_runner_settings,
+    resolve_or_create_output_project,
+    runner_settings_path as _runner_settings_path,
+    update_runner_settings,
+)
 from .session_runner import (
     DEFAULT_DASHBOARD_STATE_ROOT,
     DEFAULT_PROJECT_REGISTRY_ROOT,
@@ -100,54 +111,115 @@ DEFAULT_FOCUS_LAYOUT_PROFILE = render_focus_layout_profile(1120, 720)
 FOCUS_STYLE_SHEET = render_focus_style_sheet(DEFAULT_FOCUS_LAYOUT_PROFILE)
 STUDY5_PROFILE_ID = "study5_box_breathing_pps"
 DATA_COLLECTED_MARK = "[collected]"
-RUNNER_SETTINGS_SCHEMA = "pps-focus-runner-settings.v1"
-RUNNER_OUTPUT_PROJECT_PREFIX = "pps_runner_outputs"
 TIMELINE_LABEL_WIDTH = 58
 TIMELINE_RIGHT_MARGIN = 12
 
 
 def runner_settings_path(state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT) -> Path:
-    return Path(state_root) / "focus_runner_settings.v1.json"
+    return _runner_settings_path(state_root)
 
 
 def load_runner_settings(state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT) -> dict[str, Any]:
-    path = runner_settings_path(state_root)
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
-        return {"schema": RUNNER_SETTINGS_SCHEMA}
-    return data if data.get("schema") == RUNNER_SETTINGS_SCHEMA else {"schema": RUNNER_SETTINGS_SCHEMA}
+    return _load_runner_settings(state_root)
 
 
 def current_runner_session_root(state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT) -> Path:
-    raw = str(load_runner_settings(state_root).get("session_root") or "").strip()
-    return Path(raw).expanduser() if raw else DEFAULT_SESSION_ROOT
+    settings = load_runner_settings(state_root)
+    raw = str(settings.get("current_output_project_root") or settings.get("session_root") or "").strip()
+    if raw:
+        return Path(raw).expanduser()
+    diary_raw = str(settings.get("diary_path") or "").strip()
+    if diary_raw:
+        diary_path = Path(diary_raw).expanduser()
+        if diary_path.is_file():
+            return diary_path.parent
+    return DEFAULT_SESSION_ROOT
 
 
-def set_runner_session_root(session_root: Path, state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT) -> Path:
+def current_runner_diary_path(state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT) -> Path | None:
+    settings = load_runner_settings(state_root)
+    raw = str(settings.get("diary_path") or "").strip()
+    if raw:
+        path = Path(raw).expanduser()
+        if path.is_file():
+            return path
+    return find_output_diary(current_runner_session_root(state_root))
+
+
+def set_runner_session_root(
+    session_root: Path,
+    state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT,
+    *,
+    diary_path: Path | None = None,
+    experiment_name: str = "",
+    profile_id: str = "",
+    participant_id: str = "",
+    capture_options: dict[str, Any] | None = None,
+) -> Path:
     root = Path(session_root).expanduser().resolve()
     root.mkdir(parents=True, exist_ok=True)
-    payload = {
-        "schema": RUNNER_SETTINGS_SCHEMA,
-        "session_root": str(root),
-        "updated_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
-    }
-    path = runner_settings_path(state_root)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    diary = diary_path or find_output_diary(root)
+    update_runner_settings(
+        state_root,
+        session_root=str(root),
+        current_output_project_root=str(root),
+        diary_path="" if diary is None else str(Path(diary).resolve()),
+        last_experiment_name=experiment_name,
+        last_profile_id=profile_id,
+        last_participant_id=participant_id,
+        last_capture_options=capture_options or {},
+    )
     return root
 
 
-def create_runner_output_project(parent_dir: Path, state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT) -> Path:
-    parent = Path(parent_dir).expanduser().resolve()
-    parent.mkdir(parents=True, exist_ok=True)
-    stamp = time.strftime("%Y%m%d_%H%M%S")
-    candidate = parent / f"{RUNNER_OUTPUT_PROJECT_PREFIX}_{stamp}"
-    suffix = 2
-    while candidate.exists():
-        candidate = parent / f"{RUNNER_OUTPUT_PROJECT_PREFIX}_{stamp}_{suffix}"
-        suffix += 1
-    return set_runner_session_root(candidate, state_root=state_root)
+def remember_runner_context(
+    *,
+    session_root: Path | None = None,
+    diary_path: Path | None = None,
+    experiment_name: str = "",
+    profile_id: str = "",
+    participant_id: str = "",
+    capture_options: dict[str, Any] | None = None,
+    state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT,
+) -> dict[str, Any]:
+    root = Path(session_root).expanduser().resolve() if session_root is not None else current_runner_session_root(state_root).resolve()
+    diary = diary_path or find_output_diary(root)
+    return update_runner_settings(
+        state_root,
+        session_root=str(root),
+        current_output_project_root=str(root),
+        diary_path="" if diary is None else str(Path(diary).resolve()),
+        last_experiment_name=experiment_name,
+        last_profile_id=profile_id,
+        last_participant_id=participant_id,
+        last_capture_options=capture_options or {},
+    )
+
+
+def create_runner_output_project(
+    parent_dir: Path,
+    state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT,
+    *,
+    experiment_identifier: str = "PPS experiment",
+    profile_id: str = "",
+    participant_id: str = "",
+    capture_options: dict[str, Any] | None = None,
+) -> Path:
+    resolution = resolve_or_create_output_project(
+        parent_dir,
+        experiment_identifier=experiment_identifier,
+        timestamp=time.strftime("%Y%m%d_%H%M%S"),
+    )
+    set_runner_session_root(
+        resolution.root,
+        state_root=state_root,
+        diary_path=resolution.diary_path,
+        experiment_name=experiment_identifier,
+        profile_id=profile_id,
+        participant_id=participant_id,
+        capture_options=capture_options,
+    )
+    return resolution.root
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -2916,6 +2988,75 @@ def _package_output_root(package: Any) -> Path:
     return session_dir.parent
 
 
+def _package_experiment_context(package: Any) -> dict[str, str]:
+    design_data = _read_json_dict(getattr(package, "design_path", None))
+    run_setup_data = _read_json_dict(getattr(package, "source_run_setup_manifest_path", None))
+    experiment_name = (
+        str(run_setup_data.get("experiment_name") or "").strip()
+        or str(design_data.get("study_profile_title") or "").strip()
+        or str(design_data.get("name") or "").strip()
+        or str(design_data.get("study_profile_id") or "").strip()
+        or "PPS experiment"
+    )
+    return {
+        "experiment_name": experiment_name,
+        "profile_id": str(design_data.get("study_profile_id") or "").strip(),
+    }
+
+
+def _read_json_dict(path: Any) -> dict[str, Any]:
+    if path in (None, ""):
+        return {}
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _append_output_diary_event(
+    event_type: str,
+    *,
+    package: Any | None = None,
+    session_root: Path | None = None,
+    experiment_name: str = "",
+    profile_id: str = "",
+    participant_id: str = "",
+    capture_options: dict[str, Any] | None = None,
+    payload: dict[str, Any] | None = None,
+    create: bool = False,
+) -> Path | None:
+    root = _package_output_root(package) if package is not None else Path(session_root or current_runner_session_root()).expanduser().resolve()
+    context = _package_experiment_context(package) if package is not None else {}
+    experiment = experiment_name or context.get("experiment_name", "") or profile_id or "PPS experiment"
+    profile = profile_id or context.get("profile_id", "")
+    participant = participant_id or str(getattr(package, "participant_id", "") or "").strip()
+    diary = ensure_output_diary(root, experiment) if create else find_output_diary(root)
+    if diary is None:
+        return None
+    path = append_diary_entry(
+        diary,
+        event_type,
+        session_id=str(getattr(package, "session_id", "") or ""),
+        participant_id=participant,
+        experiment_name=experiment,
+        profile_id=profile,
+        run_setup_manifest_path=str(getattr(package, "source_run_setup_manifest_path", "") or ""),
+        session_manifest_path=str(getattr(package, "manifest_path", "") or ""),
+        capture_options=capture_options,
+        payload=payload,
+    )
+    remember_runner_context(
+        session_root=root,
+        diary_path=path,
+        experiment_name=experiment,
+        profile_id=profile,
+        participant_id=participant,
+        capture_options=capture_options,
+    )
+    return path
+
+
 def _package_participant_statuses(package: Any, participants: list[str]) -> dict[str, dict[str, Any]]:
     statuses: dict[str, dict[str, Any]] = {}
     run_setup = getattr(package, "source_run_setup_manifest_path", None)
@@ -3838,6 +3979,13 @@ class FocusModeWindow:
         self.dialog.resize(self.layout_profile.window_width, self.layout_profile.window_height)
         self.dialog.setMinimumSize(self.layout_profile.min_width, self.layout_profile.min_height)
         self.dialog.setStyleSheet(_focus_style_sheet(q, self.layout_profile))
+        _append_output_diary_event(
+            "focus_window_opened",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            payload={"topup_enabled": self.enable_missed_trial_topup},
+            create=True,
+        )
         self._build()
 
     def _build(self) -> None:
@@ -4709,6 +4857,13 @@ class FocusModeWindow:
         self._refresh_loaded_package_display()
         self._populate_participant_code_combo(self.package.participant_id)
         self.event_label.setText(f"Participant {self.package.participant_id} ready")
+        _append_output_diary_event(
+            "participant_switched",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            payload={"previous_participant_id": current, "selected_participant_id": self.package.participant_id},
+            create=True,
+        )
 
     def _clear_participant_details(self) -> None:
         if hasattr(self, "participant_name_input"):
@@ -4885,6 +5040,14 @@ class FocusModeWindow:
                     message=str(exc),
                     state_root=DEFAULT_DASHBOARD_STATE_ROOT,
                 )
+                _append_output_diary_event(
+                    "next_participant_prewarm_failed",
+                    package=self.package,
+                    participant_id=next_participant,
+                    capture_options=self.capture_options.as_dict(),
+                    payload={"message": str(exc), "run_setup_manifest_path": str(run_setup_path)},
+                    create=True,
+                )
                 self.messages.put(("prewarm", {"participant_id": next_participant, "status": "failed", "message": str(exc)}))
             else:
                 record_prepared_session_queue(
@@ -4894,6 +5057,13 @@ class FocusModeWindow:
                     status="ready",
                     message="Prepared by Focus Mode one-step-ahead queue.",
                     state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+                )
+                _append_output_diary_event(
+                    "next_participant_prewarmed",
+                    package=package,
+                    capture_options=self.capture_options.as_dict(),
+                    payload={"source": "focus_mode_background_worker"},
+                    create=True,
                 )
                 self.messages.put(
                     (
@@ -5134,6 +5304,7 @@ class FocusModeWindow:
     def _approve_pending_instruction_continue(self, *, source: str) -> bool:
         if self.pending_instruction_request is None:
             return False
+        context = dict(self.pending_instruction_request.get("context") or {})
         self.pending_instruction_request["approved"] = True
         self.pending_instruction_request["event"].set()
         self.pending_instruction_request = None
@@ -5141,6 +5312,13 @@ class FocusModeWindow:
         self.target_button.setEnabled(True)
         self.event_label.setText(f"Instruction continuation logged ({source})")
         self._set_primary_action_shortcuts_enabled(False)
+        _append_output_diary_event(
+            "instruction_continue",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            payload={"source": source, "context": context},
+            create=True,
+        )
         return True
 
     def _create_real_audio_engine_on_ui_thread(self) -> Any:
@@ -5173,6 +5351,13 @@ class FocusModeWindow:
                 pass
 
     def _handle_startup_failure(self, message: str) -> None:
+        _append_output_diary_event(
+            "audio_initialization_failed",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            payload={"message": message},
+            create=True,
+        )
         result = SimpleNamespace(
             completed=False,
             interrupted=True,
@@ -5201,6 +5386,14 @@ class FocusModeWindow:
         self.topup_draft_items = []
         self._refresh_topup_draft_widget()
         runner_metadata = self._runner_metadata()
+        _append_output_diary_event(
+            "start_run_clicked",
+            package=self.package,
+            participant_id=str(runner_metadata.get("participant_code") or self.package.participant_id),
+            capture_options=self.capture_options.as_dict(),
+            payload={"topup_enabled": self.enable_missed_trial_topup},
+            create=True,
+        )
         if self.controller_factory is not None:
             self.controller = self.controller_factory(
                 self.package,
@@ -5273,6 +5466,16 @@ class FocusModeWindow:
             self.timeline_state.record_click(self.timeline_state.elapsed_s)
             self._update_tactile_timeline_display()
         self.event_label.setText("Participant click logged")
+        _append_output_diary_event(
+            "target_clicked",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            payload={
+                "during_playback": self._run_active,
+                "elapsed_s": self.timeline_state.elapsed_s if self.timeline_state.active else "",
+            },
+            create=True,
+        )
 
     def _continue_instruction_button(self) -> None:
         self._approve_pending_instruction_continue(source="button")
@@ -5286,13 +5489,28 @@ class FocusModeWindow:
             self._run_paused = True
             self.run_state_chip.setText("Paused")
             self.progress_label.setText("Paused")
+            event_type = "pause_clicked"
         else:
             self.controller.resume()
             self.pause_button.setText("Pause")
             self._run_paused = False
             self.run_state_chip.setText("Running")
+            event_type = "resume_clicked"
+        _append_output_diary_event(
+            event_type,
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            create=True,
+        )
 
     def _stop(self) -> None:
+        _append_output_diary_event(
+            "stop_clicked",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            payload={"thread_alive": bool(self.thread and self.thread.is_alive())},
+            create=True,
+        )
         self._run_active = False
         stop = getattr(self.controller, "stop", None)
         if callable(stop):
@@ -5301,6 +5519,12 @@ class FocusModeWindow:
             self.progress_label.setText("Stopping" if self.thread and self.thread.is_alive() else self.progress_label.text())
 
     def _close(self) -> None:
+        _append_output_diary_event(
+            "close_clicked",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            create=True,
+        )
         self._stop()
         self.dialog.accept()
 
@@ -5565,6 +5789,13 @@ class FocusModeWindow:
     def _handle_topup_approval(self, payload: dict[str, Any]) -> None:
         q = self.q
         summary = dict(payload.get("summary") or {})
+        _append_output_diary_event(
+            "topup_approval_requested",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            payload={"summary": summary},
+            create=True,
+        )
         missed = int(summary.get("missed_trial_count") or 0)
         topup_trials = int(summary.get("topup_trial_count") or 0)
         fillers = int(summary.get("filler_trial_count") or 0)
@@ -5585,6 +5816,13 @@ class FocusModeWindow:
                 }
             )
             payload["approved"] = True
+            _append_output_diary_event(
+                "topup_approval_resolved",
+                package=self.package,
+                capture_options=self.capture_options.as_dict(),
+                payload={"summary": summary, "approved": True, "mode": "validation_auto_approve"},
+                create=True,
+            )
             payload["event"].set()
             return
         answer = q["QMessageBox"].question(
@@ -5602,6 +5840,13 @@ class FocusModeWindow:
                 "mode": "operator_dialog",
                 "timestamp_unix": time.time(),
             }
+        )
+        _append_output_diary_event(
+            "topup_approval_resolved",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            payload={"summary": summary, "approved": bool(payload["approved"]), "mode": "operator_dialog"},
+            create=True,
         )
         payload["event"].set()
 
@@ -5642,6 +5887,25 @@ class FocusModeWindow:
             lines.append("Warnings:")
             lines.extend(f"  {warning}" for warning in result.warnings)
         self.output_summary.setPlainText("\n".join(line for line in lines if line))
+        _append_output_diary_event(
+            "output_summary_written",
+            package=self.package,
+            capture_options=dict(getattr(result, "capture_options", {}) or {}),
+            payload={
+                "completed": bool(getattr(result, "completed", False)),
+                "interrupted": bool(getattr(result, "interrupted", False)),
+                "session_dir": str(getattr(result, "session_dir", "")),
+                "events_csv": str(getattr(result, "events_csv", "")),
+                "events_xdf": str(getattr(result, "events_xdf", "")),
+                "lsl_markers_csv": str(getattr(result, "lsl_markers_csv", "") or ""),
+                "lsl_markers_xdf": str(getattr(result, "lsl_markers_xdf", "") or ""),
+                "trigger_dictionary_path": str(getattr(result, "trigger_dictionary_path", "") or ""),
+                "session_metadata_path": str(getattr(result, "session_metadata_path", "") or ""),
+                "recording_paths": [str(path) for path in list(getattr(result, "recording_paths", []) or [])],
+                "warnings": list(getattr(result, "warnings", []) or []),
+            },
+            create=True,
+        )
         self._maybe_open_analysis_review(result)
         self._shutdown_owned_audio_engine()
         self.timer.stop()
@@ -5813,8 +6077,19 @@ def run_launcher_window(
     heading.setWordWrap(True)
     panel_layout.addWidget(heading)
 
+    initial_settings = load_runner_settings()
+    initial_diary = current_runner_diary_path()
+    initial_diary_context = latest_diary_context(initial_diary) if initial_diary is not None else {}
+    initial_profile = str(initial_settings.get("last_profile_id") or initial_diary_context.get("profile_id") or STUDY5_PROFILE_ID).strip()
+    initial_participant = str(
+        participant_id
+        or initial_settings.get("last_participant_id")
+        or initial_diary_context.get("participant_id")
+        or "P001"
+    ).strip()
     profile_options = finished_profile_options()
-    profile_combo = _combo(q, profile_options, current=STUDY5_PROFILE_ID)
+    available_profiles = {profile_id for profile_id, _label in profile_options}
+    profile_combo = _combo(q, profile_options, current=initial_profile if initial_profile in available_profiles else STUDY5_PROFILE_ID)
     profile_combo.setEnabled(bool(profile_options))
     panel_layout.addWidget(_field_row(q, "Study/profile preset", profile_combo))
 
@@ -5829,7 +6104,7 @@ def run_launcher_window(
     output_value.setToolTip(str(output_root_state["path"]))
     output_button = q["QPushButton"]("Change Output Folder")
     output_button.setToolTip(
-        "Choose a parent folder. The runner creates a timestamped PPS output project there and uses it for future sessions."
+        "Choose a folder. Existing diary folders are reused; otherwise the runner creates an experiment-named output project there."
     )
     output_row = q["QWidget"]()
     output_row_layout = q["QHBoxLayout"](output_row)
@@ -5838,6 +6113,15 @@ def run_launcher_window(
     output_row_layout.addWidget(output_value, 1)
     output_row_layout.addWidget(output_button)
     panel_layout.addWidget(_field_row(q, "Output project", output_row))
+    if initial_diary is not None:
+        remember_runner_context(
+            session_root=output_root_state["path"],
+            diary_path=initial_diary,
+            experiment_name=str(initial_diary_context.get("experiment_name") or ""),
+            profile_id=str(initial_diary_context.get("profile_id") or initial_profile),
+            participant_id=str(initial_diary_context.get("participant_id") or initial_participant),
+            capture_options=dict(initial_diary_context.get("capture_options") or {}),
+        )
 
     asset_controls = q["QHBoxLayout"]()
     generate_button = q["QPushButton"]("Generate Audio Assets")
@@ -5948,7 +6232,7 @@ def run_launcher_window(
         current = default_profile_participant(
             participants,
             statuses,
-            preferred=preferred or str(participant_combo.currentData() or "") or participant_id or "P001",
+            preferred=preferred or str(participant_combo.currentData() or "") or initial_participant or "P001",
         )
         participant_combo.blockSignals(True)
         participant_combo.clear()
@@ -5978,7 +6262,35 @@ def run_launcher_window(
     def _selected_participant() -> str:
         return str(participant_combo.currentData() or "").strip()
 
-    _refresh_participant_options(participant_id or "P001")
+    _refresh_participant_options(initial_participant or "P001")
+
+    def _current_profile_label() -> str:
+        try:
+            label = str(profile_combo.currentText() or "").strip()
+        except Exception:
+            label = ""
+        return label or _current_profile() or "PPS experiment"
+
+    def _launcher_capture_options() -> dict[str, Any]:
+        return capture_options.as_dict() if capture_options is not None else SessionCaptureOptions().as_dict()
+
+    def _log_launcher_event(event_type: str, *, payload: dict[str, Any] | None = None, create: bool = False) -> None:
+        _append_output_diary_event(
+            event_type,
+            session_root=_current_output_root(),
+            experiment_name=_current_profile_label(),
+            profile_id=_current_profile(),
+            participant_id=_selected_participant(),
+            capture_options=_launcher_capture_options(),
+            payload=payload,
+            create=create,
+        )
+
+    _log_launcher_event(
+        "launcher_opened",
+        payload={"restored_diary_path": "" if initial_diary is None else str(initial_diary)},
+        create=False,
+    )
 
     def _set_busy(busy: bool) -> None:
         latest_button.setEnabled(not busy)
@@ -6052,16 +6364,31 @@ def run_launcher_window(
                     continue
                 selected_manifest["path"] = Path(payload)
                 message.setText("Opening Focus Mode")
+                _log_launcher_event(
+                    "launcher_opening_focus_mode",
+                    payload={"session_manifest_path": str(selected_manifest["path"])},
+                    create=True,
+                )
                 dialog.accept()
             elif kind == "generated":
                 _refresh_participant_options(_selected_participant())
                 prepared = int(payload.get("prepared_count") or 0) if isinstance(payload, dict) else 0
                 reused = int(payload.get("reused_count") or 0) if isinstance(payload, dict) else 0
                 message.setText(f"Audio assets ready: {prepared} generated, {reused} already available")
+                _log_launcher_event(
+                    "audio_assets_generation_finished",
+                    payload=dict(payload) if isinstance(payload, dict) else {},
+                    create=True,
+                )
                 detail_message.setText("")
                 _set_busy(False)
             elif kind == "error":
                 message.setText(str(payload))
+                _log_launcher_event(
+                    "launcher_preparation_failed",
+                    payload={"message": str(payload)},
+                    create=True,
+                )
                 detail_message.setText("")
                 _set_busy(False)
 
@@ -6070,6 +6397,7 @@ def run_launcher_window(
     preparation_timer.start(100)
 
     def _open_latest() -> None:
+        _log_launcher_event("resume_last_clicked", create=True)
         _start_preparation(
             "Loading last experiment",
             lambda progress_callback: prepare_last_or_latest_focus_session(
@@ -6080,6 +6408,7 @@ def run_launcher_window(
         )
 
     def _open_profile() -> None:
+        _log_launcher_event("run_selected_profile_clicked", create=True)
         _start_preparation(
             "Loading selected profile",
             lambda progress_callback: prepare_profile_focus_session(
@@ -6095,6 +6424,11 @@ def run_launcher_window(
         if not participant:
             message.setText("Choose a participant before generating assets.")
             return
+        _log_launcher_event(
+            "generate_audio_assets_clicked",
+            payload={"participant_ids": [participant]},
+            create=True,
+        )
         _start_preparation(
             f"Generating audio assets for {participant}",
             lambda progress_callback: prepare_profile_audio_assets(
@@ -6120,6 +6454,11 @@ def run_launcher_window(
             index = participant_combo.findData(preferred)
             if index >= 0:
                 participant_combo.setCurrentIndex(index)
+        _log_launcher_event(
+            "generate_audio_asset_range_clicked",
+            payload={"participant_ids": participants, "range_text": range_input.text().strip()},
+            create=True,
+        )
         _start_preparation(
             f"Generating audio assets for {len(participants)} participant(s)",
             lambda progress_callback: prepare_profile_audio_assets(
@@ -6140,13 +6479,24 @@ def run_launcher_window(
         if not parent:
             return
         try:
-            project_root = create_runner_output_project(Path(parent))
+            project_root = create_runner_output_project(
+                Path(parent),
+                experiment_identifier=_current_profile_label(),
+                profile_id=_current_profile(),
+                participant_id=_selected_participant(),
+                capture_options=_launcher_capture_options(),
+            )
         except Exception as exc:
             message.setText(f"Could not create output project: {exc}")
             return
         _set_output_root(project_root)
         message.setText(f"Runner output project set to {project_root}")
         _refresh_participant_options(_selected_participant())
+        _log_launcher_event(
+            "output_folder_selected",
+            payload={"selected_folder": str(parent), "output_project_root": str(project_root)},
+            create=False,
+        )
 
     def _choose_manifest() -> None:
         filename, _selected_filter = q["QFileDialog"].getOpenFileName(
@@ -6156,6 +6506,11 @@ def run_launcher_window(
             "PPS session_manifest.json (session_manifest.json);;JSON files (*.json);;All files (*)",
         )
         if filename:
+            _log_launcher_event(
+                "choose_session_manifest_clicked",
+                payload={"session_manifest_path": filename},
+                create=False,
+            )
             selected_manifest["path"] = Path(filename)
             dialog.accept()
 
@@ -6167,7 +6522,7 @@ def run_launcher_window(
     output_button.clicked.connect(_choose_output_folder)
     choose_button.clicked.connect(_choose_manifest)
     cancel_button.clicked.connect(lambda: (preparation_cancel.set(), cancel_button.setEnabled(False), message.setText("Cancelling loading...")))
-    close_button.clicked.connect(dialog.reject)
+    close_button.clicked.connect(lambda: (_log_launcher_event("launcher_close_clicked", create=False), dialog.reject()))
     validation_launcher_clicks: list[dict[str, Any]] = []
 
     def _validation_click_launcher_profile() -> None:

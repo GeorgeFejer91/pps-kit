@@ -5,7 +5,7 @@ const activePolls = new Set();
 let activeNavFrame = 0;
 const CUSTOM_TEMPLATE_ID = "__custom__";
 const DEFAULT_STUDY_TEMPLATE_ID = "study5_box_breathing_pps";
-const STATIC_RESOURCE_VERSION = "20260617-security-core";
+const STATIC_RESOURCE_VERSION = "20260617-runner-diary-bridge";
 const STATIC_REPO_ROOT = new URL("../../../", document.currentScript?.src || window.location.href).href;
 const STATIC_PRELOAD_INVENTORY_PATH = "assets/preloads/preload_inventory.json";
 const STATIC_TEMPLATE_DIR = "study_templates/";
@@ -423,7 +423,7 @@ function profileReadonlyControlAllowed(control) {
   if (control.matches?.("[data-preview-source-label]")) return true;
   return Boolean(
     control.id
-    && (control.id.startsWith("open-") || control.id === "prepare-experiment")
+    && (control.id.startsWith("open-") || control.id === "prepare-experiment" || control.id === "export-data-acquisition-folder")
   );
 }
 
@@ -1083,6 +1083,7 @@ function renderAll() {
   renderPreviewTables();
   renderSegmentRegistryOutputs();
   renderWorkflow();
+  renderDataAcquisitionBridge();
 }
 
 function normalizePageRoute(value) {
@@ -1302,6 +1303,7 @@ function renderStudy() {
   renderExistingCustomProjects();
   renderProfileSummary();
   renderPreloadAssetStatus();
+  renderDataAcquisitionBridge();
 }
 
 function renderExistingCustomProjects() {
@@ -1370,6 +1372,26 @@ function renderPreloadAssetStatus() {
       : value.replace(/_/g, " ");
   badge.className = `status-label ${ready ? "ready" : value === "recipe_only" ? "" : "required"}`;
   badge.title = status.message || "";
+}
+
+function renderDataAcquisitionBridge() {
+  const context = state?.data_acquisition || {};
+  const active = Boolean(context.active && context.root && context.diary_path);
+  const status = $("data-acquisition-status");
+  const exportButton = $("export-data-acquisition-folder");
+  const openButton = $("open-data-acquisition-folder");
+  if (status) {
+    status.textContent = active ? "linked" : "not linked";
+    status.className = `status-label ${active ? "ready" : "required"}`;
+  }
+  if (exportButton) {
+    exportButton.disabled = staticModeActive;
+    exportButton.textContent = active ? "Update Data Acquisition Folder" : "Export Settings to Data Acquisition Folder";
+  }
+  if (openButton) {
+    openButton.disabled = !active;
+    openButton.dataset.folderPath = active ? context.root : "";
+  }
 }
 
 function renderStimulus() {
@@ -4300,6 +4322,17 @@ async function loadCustomProject() {
   scrollToStep(state.custom_workflow?.current_step || "study");
 }
 
+async function exportDataAcquisitionFolder() {
+  const payload = isProfileReadonlyMode() ? collectProfileRunPayload() : collectPayload();
+  state = await api("/api/data-acquisition/export", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+  renderAll();
+  updateViewer();
+  showToast("Data acquisition folder linked");
+}
+
 function openSegmentInfoModal(stepId, trigger = null) {
   const info = SEGMENT_INFO[stepId];
   if (!info) return;
@@ -5396,6 +5429,7 @@ function wireEvents() {
   });
   $("load-custom-project")?.addEventListener("click", () => loadCustomProject().catch(reportError));
   $("apply-profile-project")?.addEventListener("click", () => continueWorkflowStep("study").catch(reportError));
+  $("export-data-acquisition-folder")?.addEventListener("click", () => exportDataAcquisitionFolder().catch(reportError));
   $("bake-stimulus").addEventListener("click", () => startBakeStimulus().catch(reportError));
   $("bake-trial-sequences")?.addEventListener("click", () => startBakeTrialSequences().catch(reportError));
   $("bake-trial-files")?.addEventListener("click", () => startBakeTrialFiles().catch(reportError));
@@ -5404,6 +5438,10 @@ function wireEvents() {
   $("accept-block-csvs")?.addEventListener("click", () => acceptBlockCsvs().catch(reportError));
   $("open-profile-folder")?.addEventListener("click", () => {
     const path = $("open-profile-folder")?.dataset.folderPath || projectSegment("0_profile").folder_path || "";
+    openLocalFolder(path).catch(reportError);
+  });
+  $("open-data-acquisition-folder")?.addEventListener("click", () => {
+    const path = $("open-data-acquisition-folder")?.dataset.folderPath || state?.data_acquisition?.root || "";
     openLocalFolder(path).catch(reportError);
   });
   $("open-ingredient-folder")?.addEventListener("click", () => {

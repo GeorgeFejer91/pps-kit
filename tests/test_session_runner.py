@@ -25,6 +25,7 @@ from peripersonal_space_toolkit.session_runner import (
     record_prepared_session_queue,
     segment_run_setup_participants,
 )
+from peripersonal_space_toolkit.runner_diary import find_output_diary, read_diary_entries
 
 
 def _compact_design():
@@ -883,6 +884,15 @@ def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
     assert result.recording_paths
     assert result.recording_paths[0].parent == package.session_dir
     assert result.recording_paths[0].name.endswith("_audio_evidence.wav")
+    diary = find_output_diary(package.session_dir.parent)
+    assert diary is not None
+    diary_entries = read_diary_entries(diary)
+    diary_types = [entry["event_type"] for entry in diary_entries]
+    assert "session_package_prepared" in diary_types
+    assert "session_start" in diary_types
+    assert "mouse_click" in diary_types
+    assert "session_completed" in diary_types
+    assert "Alice Example" not in diary.read_text(encoding="utf-8")
 
 
 def test_session_runner_emits_tactile_timeline_schedule_progress(tmp_path: Path):
@@ -921,6 +931,31 @@ def test_session_runner_emits_tactile_timeline_schedule_progress(tmp_path: Path)
     assert trial_segments[0]["clip_label"] == "Inhale"
     assert trial_segments[0]["trial_label"] == "Audio-tactile"
     assert trial_segments[0]["start_s"] < trial_segments[0]["end_s"]
+
+
+def test_session_runner_diary_records_interrupted_session(tmp_path: Path):
+    design = _compact_design()
+    package = prepare_run_package(
+        design,
+        "P001",
+        render_dir=_render_dir(tmp_path),
+        session_root=tmp_path / "sessions",
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+    engine = _MockAudioEngine()
+    engine.stopped = True
+    controller = SessionRunnerController(package, audio_engine=engine)
+
+    result = controller.run()
+
+    assert result.completed is False
+    assert result.interrupted is True
+    diary = find_output_diary(package.session_dir.parent)
+    assert diary is not None
+    entries = read_diary_entries(diary)
+    assert entries[-1]["event_type"] == "session_interrupted"
+    assert entries[-1]["payload"]["completed"] is False
+    assert entries[-1]["payload"]["interrupted"] is True
 
 
 def test_session_runner_emits_live_topup_draft_after_response_window(tmp_path: Path):

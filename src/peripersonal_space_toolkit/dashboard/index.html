@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260617-security-core">
+  <link rel="stylesheet" href="styles.css?v=20260617-runner-diary-bridge">
 </head>
 <body>
   <div class="app-shell">
@@ -112,6 +112,16 @@
               <button id="apply-profile-project" type="button" class="primary">Apply Profile / Create Project Folder</button>
               <button id="open-profile-folder" type="button" disabled>Open Folder</button>
             </div>
+            <div class="data-acquisition-bridge" aria-label="Data acquisition folder bridge">
+              <div>
+                <div class="product-label">Data acquisition folder</div>
+                <span id="data-acquisition-status" class="status-label required">not linked</span>
+              </div>
+              <div class="data-acquisition-actions">
+                <button id="export-data-acquisition-folder" type="button" class="primary">Export Settings to Data Acquisition Folder</button>
+                <button id="open-data-acquisition-folder" type="button" disabled>Open Folder</button>
+              </div>
+            </div>
           </section>
         </div>
       </section>
@@ -190,7 +200,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="../viewer/index.html?v=20260617-security-core"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="../viewer/index.html?v=20260617-runner-diary-bridge"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -1050,7 +1060,7 @@
       </form>
     </div>
   </div>
-  <script src="hardware_pixel_art.js?v=20260617-security-core"></script>
-  <script src="app.js?v=20260617-security-core"></script>
+  <script src="hardware_pixel_art.js?v=20260617-runner-diary-bridge"></script>
+  <script src="app.js?v=20260617-runner-diary-bridge"></script>
 </body>
 </html>

@@ -38,6 +38,7 @@ from peripersonal_space_toolkit.render_backend import (
     render_design_with_3dti,
     sha256_file,
 )
+from peripersonal_space_toolkit.runner_diary import read_diary_entries
 
 
 def _compact_design():
@@ -173,7 +174,7 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260617-security-core"
+    static_version = "20260617-runner-diary-bridge"
     assert f'href="styles.css?v={static_version}"' in html
     assert f'src="hardware_pixel_art.js?v={static_version}"' in html
     assert f'src="app.js?v={static_version}"' in html
@@ -280,6 +281,10 @@ def test_dashboard_static_assets_are_packaged():
     assert 'id="bake-trial-sequences"' in html
     assert "Bake Trial Sequences" in html
     assert 'id="open-profile-folder"' in html
+    assert 'id="export-data-acquisition-folder"' in html
+    assert 'id="open-data-acquisition-folder"' in html
+    assert "/api/data-acquisition/export" in app_js
+    assert "renderDataAcquisitionBridge" in app_js
     assert 'id="open-ingredient-folder"' in html
     assert 'id="open-trial-sequence-folder"' in html
     assert 'id="segment0-output-summary"' not in html
@@ -674,6 +679,48 @@ def test_dashboard_creates_profile_and_custom_project_folders(tmp_path: Path):
     assert (project_dir / "3_tactile_and_baseline_trials").is_dir()
     assert (project_dir / "4_trial_repetition_pool").is_dir()
     assert (project_dir / "5_block_csv_preview").is_dir()
+
+
+def test_dashboard_exports_data_acquisition_folder_bridge(tmp_path: Path):
+    client = _client(tmp_path)
+    parent = tmp_path / "operator_selected_output"
+
+    response = client.post("/api/data-acquisition/export", json={"selected_folder": str(parent)})
+
+    assert response.status_code == 200
+    state = response.json()
+    result = state["data_acquisition_export_result"]
+    acquisition_root = Path(result["data_acquisition_root"])
+    diary_path = Path(result["diary_path"])
+    bridge_manifest_path = Path(result["bridge_manifest_path"])
+    design_export_dir = Path(result["dashboard_project_export_dir"])
+    design_snapshot_path = Path(result["dashboard_design_snapshot_path"])
+    runner_settings_path = Path(result["runner_settings_path"])
+    assert acquisition_root.parent == parent
+    assert acquisition_root.is_dir()
+    assert diary_path.is_file()
+    assert diary_path.name.endswith("_LOG-DIARY_DO_NOT_DELETE.txt")
+    assert bridge_manifest_path.is_file()
+    assert design_export_dir.is_dir()
+    assert dashboard_app._path_exists(design_export_dir / "0_profile" / "project_manifest.json")
+    assert dashboard_app._path_exists(design_export_dir / "0_profile" / "active_design.json")
+    assert design_snapshot_path.is_file()
+    bridge_manifest = json.loads(bridge_manifest_path.read_text(encoding="utf-8"))
+    assert bridge_manifest["schema"] == "pps-dashboard-runner-bridge.v1"
+    assert bridge_manifest["data_acquisition_root"] == str(acquisition_root)
+    assert bridge_manifest["diary_path"] == str(diary_path)
+    settings = json.loads(runner_settings_path.read_text(encoding="utf-8"))
+    assert settings["schema"] == "pps-focus-runner-settings.v1"
+    assert settings["current_output_project_root"] == str(acquisition_root)
+    assert settings["session_root"] == str(acquisition_root)
+    assert settings["diary_path"] == str(diary_path)
+    assert state["data_acquisition"]["active"] is True
+    assert state["data_acquisition"]["root"] == str(acquisition_root)
+    entries = read_diary_entries(diary_path)
+    assert [entry["event_type"] for entry in entries] == [
+        "output_project_created",
+        "dashboard_data_acquisition_folder_exported",
+    ]
 
 
 def test_dashboard_rejects_profile_mutation_and_blank_custom_names(tmp_path: Path):

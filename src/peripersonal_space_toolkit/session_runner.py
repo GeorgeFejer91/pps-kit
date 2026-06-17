@@ -25,6 +25,7 @@ from typing import Any, Callable, Iterable
 from .design import StimulusDesign, experiment_schedule_rows, export_protocol_csv, save_design, validate_design
 from .session_analysis import analyze_session_events, format_analysis_summary, write_analysis_csvs
 from .session_events import SessionEventLogger
+from .runner_diary import append_diary_entry, ensure_output_diary, find_output_diary
 from .timing_events import TimingEventHub, TriggerDictionary
 from .timing_schedule import BlockEventSchedule
 from .topup import TopUpLedger, write_topup_draft_manifest
@@ -384,6 +385,15 @@ def prepare_run_package(
         ),
     )
     _write_session_manifest(package, wavs)
+    _append_package_diary_event(
+        package,
+        "session_package_prepared",
+        payload={
+            "execution_mode": package.execution_mode,
+            "block_count": len(package.blocks),
+            "session_dir": str(package.session_dir),
+        },
+    )
     return package
 
 
@@ -461,6 +471,7 @@ def record_experiment_activity(
     log_path = root / "experiment_activity_log.jsonl"
     with log_path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(event, sort_keys=True) + "\n")
+    _append_activity_diary_event(event)
 
     pointer_path = root / "last_experiment.v1.json"
     if event["event_type"] not in LAUNCHABLE_ACTIVITY_EVENTS:
@@ -1370,6 +1381,16 @@ def prepare_segment_run_package(
         detail=str(manifest_path),
     )
     _write_session_manifest(package, source_wavs)
+    _append_package_diary_event(
+        package,
+        "session_package_prepared",
+        payload={
+            "execution_mode": package.execution_mode,
+            "block_count": len(package.blocks),
+            "session_dir": str(package.session_dir),
+            "source_run_setup_manifest_path": str(run_setup_manifest_path),
+        },
+    )
     _emit_prepare_progress(
         progress_callback,
         "Opening Focus Mode",
@@ -1490,6 +1511,18 @@ class SessionRunnerController:
             lsl_message=self.events.lsl_status.message,
             capture_options=self.capture_options.as_dict(),
             topup_enabled=self.topup_ledger is not None,
+        )
+        _append_package_diary_event(
+            self.package,
+            "session_start",
+            capture_options=self.capture_options,
+            payload={
+                "session_dir": str(self.package.session_dir),
+                "session_metadata_path": str(session_metadata_path),
+                "lsl_enabled": self.events.lsl_status.enabled,
+                "lsl_message": self.events.lsl_status.message,
+                "topup_enabled": self.topup_ledger is not None,
+            },
         )
         try:
             if engine is None:
@@ -1695,6 +1728,12 @@ class SessionRunnerController:
         except Exception as exc:
             interrupted = True
             self.events.log("session_error", message=str(exc))
+            _append_package_diary_event(
+                self.package,
+                "session_error",
+                capture_options=self.capture_options,
+                payload={"message": str(exc)},
+            )
             self._emit(event_callback, f"Run error: {exc}")
         finally:
             self._progress_callback = None
@@ -1702,7 +1741,7 @@ class SessionRunnerController:
             if owns_engine and self.audio_engine is not None and hasattr(self.audio_engine, "shutdown"):
                 self.audio_engine.shutdown()
 
-        return SessionRunResult(
+        result = SessionRunResult(
             completed=completed,
             interrupted=interrupted,
             session_dir=self.package.session_dir,
@@ -1719,6 +1758,25 @@ class SessionRunnerController:
             session_metadata_path=self._session_metadata_path,
             capture_options=self.capture_options.as_dict(),
         )
+        _append_package_diary_event(
+            self.package,
+            "session_completed" if completed else "session_interrupted",
+            capture_options=self.capture_options,
+            payload={
+                "completed": completed,
+                "interrupted": interrupted,
+                "events_csv": str(result.events_csv),
+                "events_xdf": str(result.events_xdf),
+                "lsl_markers_csv": str(result.lsl_markers_csv or ""),
+                "lsl_markers_xdf": str(result.lsl_markers_xdf or ""),
+                "trigger_dictionary_path": str(result.trigger_dictionary_path or ""),
+                "session_metadata_path": str(result.session_metadata_path or ""),
+                "recording_paths": [str(path) for path in result.recording_paths],
+                "analysis_outputs": {key: str(value) for key, value in result.analysis_outputs.items()},
+                "warnings": list(result.warnings),
+            },
+        )
+        return result
 
     def _write_session_metadata(self) -> Path:
         self._session_metadata = _build_runner_session_metadata(
@@ -2022,21 +2080,45 @@ class SessionRunnerController:
             "wav_path": str(block.wav_path),
         }
         self.events.log("topup_block_ready", **summary)
+        _append_package_diary_event(
+            self.package,
+            "topup_block_ready",
+            capture_options=self.capture_options,
+            payload=summary,
+        )
         approved = False
         if self._topup_approval_callback is not None:
             try:
                 approved = bool(self._topup_approval_callback(dict(summary)))
             except Exception as exc:
                 self.events.log("topup_block_approval_failed", message=str(exc), **summary)
+                _append_package_diary_event(
+                    self.package,
+                    "topup_block_approval_failed",
+                    capture_options=self.capture_options,
+                    payload={"message": str(exc), **summary},
+                )
                 self._run_warnings.append(f"Top-up approval failed: {exc}")
         else:
             self._run_warnings.append("Top-up block was prepared but not played because operator approval was not configured.")
         if not approved:
             self.events.log("topup_block_skipped", reason="operator_not_approved", **summary)
+            _append_package_diary_event(
+                self.package,
+                "topup_block_skipped",
+                capture_options=self.capture_options,
+                payload={"reason": "operator_not_approved", **summary},
+            )
             self._persist_topup_state(part_number=part_number)
             return True
 
         self.events.log("topup_block_approved", **summary)
+        _append_package_diary_event(
+            self.package,
+            "topup_block_approved",
+            capture_options=self.capture_options,
+            payload=summary,
+        )
         self._emit(event_callback, f"Top-up block: {block.label}")
         block_start_unix = time.time()
         block_start_monotonic = time.perf_counter()
@@ -2154,16 +2236,19 @@ class SessionRunnerController:
         if self.audio_engine is not None and hasattr(self.audio_engine, "stop"):
             self.audio_engine.stop()
         self.events.log("operator_stop")
+        _append_package_diary_event(self.package, "operator_stop", capture_options=self.capture_options)
 
     def pause(self) -> None:
         if self.audio_engine is not None and hasattr(self.audio_engine, "pause"):
             self.audio_engine.pause()
         self.events.log("operator_pause")
+        _append_package_diary_event(self.package, "operator_pause", capture_options=self.capture_options)
 
     def resume(self) -> None:
         if self.audio_engine is not None and hasattr(self.audio_engine, "resume"):
             self.audio_engine.resume()
         self.events.log("operator_resume")
+        _append_package_diary_event(self.package, "operator_resume", capture_options=self.capture_options)
 
     def awaiting_instruction_continue(self) -> dict[str, Any]:
         return dict(self._instruction_wait_context)
@@ -2173,6 +2258,12 @@ class SessionRunnerController:
             return
         self._instruction_continue_source = str(source or "operator")
         self._instruction_continue_event.set()
+        _append_package_diary_event(
+            self.package,
+            "instruction_continue",
+            capture_options=self.capture_options,
+            payload={"source": self._instruction_continue_source, "context": dict(self._instruction_wait_context)},
+        )
 
     def log_click(self, *, x: int | None = None, y: int | None = None, in_target: bool = True) -> None:
         if self._instruction_continue_event is not None:
@@ -2213,6 +2304,17 @@ class SessionRunnerController:
                 marker_gain=RESPONSE_MARKER_GAIN,
             )
         self.events.push_deferred_event_marker(event)
+        _append_package_diary_event(
+            self.package,
+            "mouse_click",
+            capture_options=self.capture_options,
+            payload={
+                "event_id": event.event_id,
+                "in_target": in_target,
+                "during_playback": during_playback,
+                **block_payload,
+            },
+        )
 
     def _materialize_topup_block(
         self,
@@ -2805,6 +2907,66 @@ def _session_metadata_paths(package: RunPackage) -> dict[str, Any]:
         }
         for key, path in paths.items()
     }
+
+
+def _append_package_diary_event(
+    package: RunPackage,
+    event_type: str,
+    *,
+    capture_options: dict[str, Any] | SessionCaptureOptions | None = None,
+    payload: dict[str, Any] | None = None,
+) -> Path | None:
+    try:
+        experiment = _experiment_metadata_from_package(package)
+        experiment_name = str(experiment.get("experiment_name") or experiment.get("project_label") or "PPS experiment")
+        profile_id = str(experiment.get("template_id") or "")
+        diary_path = ensure_output_diary(Path(package.session_dir).parent, experiment_name)
+        options = capture_options.as_dict() if isinstance(capture_options, SessionCaptureOptions) else dict(capture_options or {})
+        return append_diary_entry(
+            diary_path,
+            event_type,
+            session_id=package.session_id,
+            participant_id=package.participant_id,
+            experiment_name=experiment_name,
+            profile_id=profile_id,
+            run_setup_manifest_path="" if package.source_run_setup_manifest_path is None else str(package.source_run_setup_manifest_path),
+            session_manifest_path=str(package.manifest_path),
+            capture_options=options,
+            payload=payload or {},
+        )
+    except Exception:
+        return None
+
+
+def _append_activity_diary_event(event: dict[str, Any]) -> Path | None:
+    session_manifest_text = str(event.get("session_manifest_path") or event.get("session_manifest") or "").strip()
+    session_dir_text = str(event.get("session_dir") or "").strip()
+    package: RunPackage | None = None
+    if session_manifest_text:
+        try:
+            package = load_run_package(Path(session_manifest_text))
+        except Exception:
+            package = None
+    if package is not None:
+        return _append_package_diary_event(package, str(event.get("event_type") or "activity"), payload=event)
+    if not session_dir_text:
+        return None
+    try:
+        session_dir = Path(session_dir_text).expanduser().resolve()
+        root = session_dir.parent
+        diary_path = find_output_diary(root) or ensure_output_diary(root, str(event.get("experiment_name") or "PPS experiment"))
+        return append_diary_entry(
+            diary_path,
+            str(event.get("event_type") or "activity"),
+            participant_id=str(event.get("participant_id") or ""),
+            experiment_name=str(event.get("experiment_name") or ""),
+            profile_id=str(event.get("template_id") or event.get("profile_id") or ""),
+            run_setup_manifest_path=str(event.get("run_setup_manifest_path") or ""),
+            session_manifest_path=session_manifest_text,
+            payload=event,
+        )
+    except Exception:
+        return None
 
 
 def _load_json_if_exists(path: Path | None) -> dict[str, Any]:

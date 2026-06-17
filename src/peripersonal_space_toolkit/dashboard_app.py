@@ -80,6 +80,14 @@ from .templates import (
 from .preload_inventory import ensure_preload_assets, load_preload_inventory, preload_inventory_payload, profile_asset_status
 from .runtime_paths import repo_root, writable_root
 from .dashboard_backend.security import CompanionSecurity, TOKEN_HEADER
+from .runner_diary import (
+    append_diary_entry,
+    find_output_diary,
+    load_runner_settings,
+    resolve_or_create_output_project,
+    runner_settings_path,
+    update_runner_settings,
+)
 
 
 REPO_ROOT = repo_root()
@@ -99,6 +107,8 @@ INGREDIENT_MANIFEST_SCHEMA = "pps-core-audio-ingredients.v1"
 TRIAL_REPETITION_POOL_MANIFEST_SCHEMA = "pps-trial-repetition-pool.v1"
 BLOCK_CSV_PREVIEW_MANIFEST_SCHEMA = "pps-block-csv-preview.v1"
 RUN_SETUP_MANIFEST_SCHEMA = "pps-experiment-run-setup.v1"
+DATA_ACQUISITION_BRIDGE_SCHEMA = "pps-dashboard-runner-bridge.v1"
+DASHBOARD_DESIGN_EXPORT_DIRNAME = "dashboard_design_export"
 PROJECT_METADATA_KEY = "dashboard_project"
 RUN_SETUP_METADATA_KEY = "dashboard_run_setup"
 CUSTOM_PROJECT_ID_SLUG_MAX_LENGTH = 21
@@ -330,6 +340,13 @@ class DashboardController:
             self.state_root = Path(project_registry_root).parent / "dashboard_state"
         else:
             self.state_root = Path(state_root)
+        remembered = load_runner_settings(self.state_root)
+        remembered_root = str(remembered.get("current_output_project_root") or remembered.get("session_root") or "").strip()
+        if remembered_root:
+            remembered_path = Path(remembered_root).expanduser()
+            remembered_diary = str(remembered.get("diary_path") or "").strip()
+            if remembered_path.is_dir() and (not remembered_diary or Path(remembered_diary).expanduser().is_file() or find_output_diary(remembered_path)):
+                self.session_root = remembered_path
         self.templates = load_templates(self.template_dir)
         self.preload_inventory = load_preload_inventory(REPO_ROOT)
         self.design = self._load_initial_design()
@@ -391,6 +408,7 @@ class DashboardController:
             "trial_pool_bake": _trial_pool_bake_status(project.project_dir, design),
             "block_csv_preview": _block_csv_preview_status(project.project_dir, design),
             "run_sequence_setup": _run_setup_preview(project.project_dir, design),
+            "data_acquisition": self._data_acquisition_context(),
             "preload_inventory": profile_asset_status(
                 design.study_profile_id,
                 inventory=self.preload_inventory,
@@ -437,6 +455,58 @@ class DashboardController:
             repo_root=REPO_ROOT,
         )
 
+    def _data_acquisition_context(self) -> dict[str, Any]:
+        settings = load_runner_settings(self.state_root)
+        root_text = str(settings.get("current_output_project_root") or settings.get("session_root") or "").strip()
+        root = Path(root_text).expanduser() if root_text else None
+        diary_text = str(settings.get("diary_path") or "").strip()
+        diary = Path(diary_text).expanduser() if diary_text else None
+        if (diary is None or not diary.is_file()) and root is not None:
+            diary = find_output_diary(root)
+        active = bool(root and root.is_dir() and diary and diary.is_file())
+        return {
+            "active": active,
+            "root": "" if root is None else str(root),
+            "diary_path": "" if diary is None else str(diary),
+            "runner_settings_path": str(runner_settings_path(self.state_root)),
+            "last_experiment_name": str(settings.get("last_experiment_name") or ""),
+            "last_profile_id": str(settings.get("last_profile_id") or ""),
+            "last_participant_id": str(settings.get("last_participant_id") or ""),
+            "updated_at": str(settings.get("updated_at") or ""),
+        }
+
+    def _append_dashboard_diary_event(
+        self,
+        event_type: str,
+        *,
+        design: StimulusDesign | None = None,
+        project: DashboardProjectContext | None = None,
+        payload: dict[str, Any] | None = None,
+    ) -> Path | None:
+        context = self._data_acquisition_context()
+        diary_text = str(context.get("diary_path") or "").strip()
+        if not diary_text:
+            return None
+        active_design = design or self.design
+        active_project = project or _project_context_from_design(active_design, self.project_registry_root)
+        experiment_name = _experiment_identifier_for_diary(active_design, active_project)
+        try:
+            return append_diary_entry(
+                Path(diary_text),
+                event_type,
+                participant_id=self.participant_id,
+                experiment_name=experiment_name,
+                profile_id=str(active_design.study_profile_id or ""),
+                capture_options={},
+                payload={
+                    "project_dir": "" if active_project is None else str(active_project.project_dir),
+                    "design_path": str(self.design_path),
+                    **(payload or {}),
+                },
+            )
+        except Exception:
+            return None
+
     def custom_projects_payload(self) -> list[dict[str, Any]]:
         return _custom_project_records(self.project_registry_root)
 
@@ -462,6 +532,11 @@ class DashboardController:
                 _write_project_context_files(project, self.design)
                 save_design(self.design, self.design_path)
             self.current_run_package = None
+            self._append_dashboard_diary_event(
+                "dashboard_profile_loaded",
+                project=project,
+                payload={"template_id": template_id},
+            )
         return self.snapshot() if snapshot else {"selected_template": template_id}
 
     def load_custom_design(self) -> dict[str, Any]:
@@ -491,6 +566,11 @@ class DashboardController:
             _write_segment_validation_report(project, self.design)
             self.participant_id = ""
             self.current_run_package = None
+            self._append_dashboard_diary_event(
+                "dashboard_custom_design_started",
+                project=project,
+                payload={"project_dir": str(project.project_dir)},
+            )
         return self.snapshot()
 
     def customize_as_new_project(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -517,6 +597,11 @@ class DashboardController:
             self.participant_id = ""
             self.current_run_package = None
             save_design(self.design, self.design_path)
+            self._append_dashboard_diary_event(
+                "dashboard_custom_project_created",
+                project=project,
+                payload={"project_name": project_name, "project_id": project.project_id},
+            )
         snapshot = self.snapshot()
         snapshot["customized_project_created"] = {
             "project_id": snapshot["project"]["project_id"],
@@ -556,7 +641,99 @@ class DashboardController:
             _write_project_context_files(context, self.design)
             _write_segment_validation_report(context, self.design)
             save_design(self.design, self.design_path)
+            self._append_dashboard_diary_event(
+                "dashboard_custom_project_loaded",
+                project=context,
+                payload={"project_id": project_id},
+            )
         return self.snapshot()
+
+    def export_data_acquisition_folder(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        payload = payload or {}
+        save_payload = {
+            key: value
+            for key, value in payload.items()
+            if key not in {"selected_folder", "data_acquisition_folder", "experiment_identifier"}
+        }
+        if save_payload:
+            with self._lock:
+                profile_run_mode = _is_readonly_profile_design(self.design)
+            if profile_run_mode:
+                self._apply_profile_runner_payload(save_payload)
+            else:
+                self.update_design(save_payload)
+        selected_text = str(payload.get("selected_folder") or payload.get("data_acquisition_folder") or "").strip()
+        selected_folder = Path(selected_text).expanduser() if selected_text else _choose_local_directory("Select PPS data acquisition folder")
+        if selected_folder is None:
+            raise ValueError("No data acquisition folder was selected.")
+        with self._lock:
+            project = self._ensure_project_context(self.design)
+            design = _copy_design(self.design)
+            participant_id = self.participant_id
+        experiment_name = str(payload.get("experiment_identifier") or "").strip() or _experiment_identifier_for_diary(design, project)
+        resolution = resolve_or_create_output_project(
+            selected_folder,
+            experiment_identifier=experiment_name,
+        )
+        design_export_dir = _export_dashboard_project_to_acquisition_folder(project.project_dir, resolution.root, project.project_id)
+        design_snapshot_path = resolution.root / "dashboard_design_snapshot.json"
+        _write_text_file(design_snapshot_path, json.dumps(_json_ready(design_to_dict(design)), indent=2) + "\n", encoding="utf-8")
+        bridge_manifest_path = resolution.root / "dashboard_runner_bridge_manifest.v1.json"
+        bridge_manifest = {
+            "schema": DATA_ACQUISITION_BRIDGE_SCHEMA,
+            "created_at": datetime.now().isoformat(timespec="seconds"),
+            "local_only": True,
+            "data_acquisition_root": str(resolution.root),
+            "diary_path": str(resolution.diary_path),
+            "experiment_name": experiment_name,
+            "profile_id": str(design.study_profile_id or ""),
+            "participant_id": participant_id,
+            "dashboard_project": project.to_dict(),
+            "dashboard_project_export_dir": str(design_export_dir),
+            "dashboard_design_snapshot_path": str(design_snapshot_path),
+            "runner_settings_path": str(runner_settings_path(self.state_root)),
+            "reused_existing_diary": resolution.reused_existing_diary,
+            "created_output_project": resolution.created,
+        }
+        _write_json(bridge_manifest_path, bridge_manifest)
+        append_diary_entry(
+            resolution.diary_path,
+            "dashboard_data_acquisition_folder_exported",
+            participant_id=participant_id,
+            experiment_name=experiment_name,
+            profile_id=str(design.study_profile_id or ""),
+            payload={
+                "selected_folder": str(selected_folder),
+                "data_acquisition_root": str(resolution.root),
+                "dashboard_project_dir": str(project.project_dir),
+                "dashboard_project_export_dir": str(design_export_dir),
+                "bridge_manifest_path": str(bridge_manifest_path),
+                "design_snapshot_path": str(design_snapshot_path),
+                "reused_existing_diary": resolution.reused_existing_diary,
+                "created_output_project": resolution.created,
+            },
+        )
+        update_runner_settings(
+            self.state_root,
+            session_root=str(resolution.root),
+            current_output_project_root=str(resolution.root),
+            diary_path=str(resolution.diary_path),
+            last_experiment_name=experiment_name,
+            last_profile_id=str(design.study_profile_id or ""),
+            last_participant_id=participant_id,
+            last_capture_options={},
+            bridge_manifest_path=str(bridge_manifest_path),
+            dashboard_project_export_dir=str(design_export_dir),
+        )
+        with self._lock:
+            self.session_root = resolution.root
+            self.current_run_package = None
+        snapshot = self.snapshot()
+        snapshot["data_acquisition_export_result"] = {
+            **bridge_manifest,
+            "bridge_manifest_path": str(bridge_manifest_path),
+        }
+        return snapshot
 
     def update_design(self, payload: dict[str, Any]) -> dict[str, Any]:
         with self._lock:
@@ -587,6 +764,14 @@ class DashboardController:
                 project_dir=str(_project_context_from_design(self.design, self.project_registry_root).project_dir if _project_context_from_design(self.design, self.project_registry_root) else ""),
                 design_path=str(self.design_path),
                 participant_id=self.participant_id,
+            )
+            self._append_dashboard_diary_event(
+                "dashboard_design_saved",
+                project=_project_context_from_design(self.design, self.project_registry_root),
+                payload={
+                    "payload_keys": sorted(str(key) for key in payload.keys()),
+                    "design_name": self.design.name,
+                },
             )
         return self.snapshot()
 
@@ -630,6 +815,12 @@ class DashboardController:
             project = self._ensure_project_context(self.design)
             design = _copy_design(self.design)
         recipe_kind = str(recipe.get("kind") or "").strip().lower()
+        self._append_dashboard_diary_event(
+            "dashboard_bake_requested",
+            design=design,
+            project=project,
+            payload={"recipe_kind": recipe_kind, "recipe_label": str(recipe.get("label") or "")},
+        )
         if recipe_kind != "block_csv_preview":
             _raise_if_current_block_csvs_accepted(project.project_dir, design)
         if recipe_kind == "trial_sequence_batch":
@@ -872,6 +1063,16 @@ class DashboardController:
             )
         with self._lock:
             self.current_run_package = package
+        self._append_dashboard_diary_event(
+            "dashboard_session_prepared",
+            design=design,
+            project=project,
+            payload={
+                "session_manifest_path": str(package.manifest_path),
+                "session_dir": str(package.session_dir),
+                "run_setup_manifest_path": str(run_setup_manifest_path),
+            },
+        )
         return self.snapshot() if snapshot else {"session_manifest": str(package.manifest_path), "session_dir": str(package.session_dir)}
 
     def accept_block_csv_preview(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -894,6 +1095,12 @@ class DashboardController:
         if errors:
             raise ValueError(f"Cannot accept Segment 5 block CSVs: {errors[0]}")
         _write_json(manifest_path, manifest)
+        self._append_dashboard_diary_event(
+            "dashboard_block_csvs_accepted",
+            design=design,
+            project=project,
+            payload={"manifest_path": str(manifest_path)},
+        )
         return self.snapshot()
 
     def edit_block_csv_preview(self) -> dict[str, Any]:
@@ -916,6 +1123,12 @@ class DashboardController:
             raise ValueError(f"Cannot reopen Segment 5 block CSVs: {errors[0]}")
         _write_json(manifest_path, manifest)
         _clear_downstream_segment_outputs(project, from_segment=5)
+        self._append_dashboard_diary_event(
+            "dashboard_block_csvs_reopened",
+            design=design,
+            project=project,
+            payload={"manifest_path": str(manifest_path)},
+        )
         return self.snapshot()
 
     def preview_run_sequence(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -937,6 +1150,11 @@ class DashboardController:
             _set_run_setup_settings(self.design, settings)
             self.current_run_package = None
             save_design(self.design, self.design_path)
+            self._append_dashboard_diary_event(
+                "dashboard_run_sequence_regenerated",
+                project=project,
+                payload={"seed": settings["seed"]},
+            )
         return self.snapshot()
 
     def prepare_experiment_run_setup(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -966,6 +1184,14 @@ class DashboardController:
                 run_setup_manifest_path=result.get("manifest_path", ""),
                 participant_id=self.participant_id,
                 experiment_structure=result.get("experiment_structure", _run_setup_settings(self.design).get("experiment_structure", "")),
+            )
+            self._append_dashboard_diary_event(
+                "dashboard_run_setup_prepared",
+                project=project,
+                payload={
+                    "run_setup_manifest_path": result.get("manifest_path", ""),
+                    "experiment_structure": result.get("experiment_structure", _run_setup_settings(self.design).get("experiment_structure", "")),
+                },
             )
         snapshot = self.snapshot()
         snapshot["run_sequence_prepare_result"] = result
@@ -1178,6 +1404,18 @@ class DashboardController:
             participant_id=participant_id,
             runner_binary=launch_command.runner_binary,
             packaged_runner=launch_command.packaged_runner,
+        )
+        self._append_dashboard_diary_event(
+            "dashboard_runner_opened",
+            design=design,
+            project=project,
+            payload={
+                "session_manifest_path": str(package.manifest_path),
+                "session_dir": str(package.session_dir),
+                "run_setup_manifest_path": str(run_setup_manifest_path),
+                "runner_binary": launch_command.runner_binary,
+                "packaged_runner": launch_command.packaged_runner,
+            },
         )
         result = {
             "status": "launched",
@@ -1562,6 +1800,13 @@ def create_app(
     def api_customize_project(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
             return controller.customize_as_new_project(payload)
+        except Exception as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/api/data-acquisition/export")
+    def api_export_data_acquisition_folder(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
+        try:
+            return controller.export_data_acquisition_folder(payload)
         except Exception as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -2043,6 +2288,59 @@ def _stimulus_wav_lookup(design: StimulusDesign, render_dir: Path) -> dict[str, 
 
 def _source_key(value: str) -> str:
     return str(value or "").replace("_", " ").replace("-", " ").strip().lower()
+
+
+def _choose_local_directory(title: str) -> Path | None:
+    try:
+        import tkinter as tk
+        from tkinter import filedialog
+    except Exception as exc:
+        raise RuntimeError("The local companion could not open a folder picker in this environment.") from exc
+    root = tk.Tk()
+    root.withdraw()
+    root.attributes("-topmost", True)
+    try:
+        selected = filedialog.askdirectory(parent=root, title=title, mustexist=False)
+    finally:
+        root.destroy()
+    return Path(selected).expanduser() if selected else None
+
+
+def _experiment_identifier_for_diary(
+    design: StimulusDesign,
+    project: DashboardProjectContext | None = None,
+) -> str:
+    candidates = [
+        "" if project is None else project.project_label,
+        design.study_profile_title,
+        design.name,
+        design.study_profile_id,
+    ]
+    for candidate in candidates:
+        text = str(candidate or "").strip()
+        if text:
+            return text
+    return "PPS experiment"
+
+
+def _export_dashboard_project_to_acquisition_folder(project_dir: Path, acquisition_root: Path, project_id: str) -> Path:
+    source = Path(project_dir).expanduser().resolve()
+    root = Path(acquisition_root).expanduser().resolve()
+    _ensure_dir(root)
+    target = root / DASHBOARD_DESIGN_EXPORT_DIRNAME / _safe_filename(project_id or source.name)
+    resolved_target = target.resolve()
+    if source == resolved_target or source in resolved_target.parents:
+        raise ValueError("Cannot export a dashboard project into one of its own subfolders.")
+    if resolved_target in source.parents:
+        raise ValueError("Cannot overwrite a parent folder of the active dashboard project.")
+    if _path_exists(target):
+        _remove_tree(target)
+    shutil.copytree(
+        _filesystem_path(source),
+        _filesystem_path(target),
+        ignore=shutil.ignore_patterns("__pycache__", ".pytest_cache"),
+    )
+    return target
 
 
 def _resolve_dashboard_local_path(value: str | Path) -> Path:

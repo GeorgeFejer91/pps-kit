@@ -1449,14 +1449,26 @@ def test_runner_output_project_setting_creates_timestamped_folder(tmp_path: Path
     parent = tmp_path / "operator_outputs"
     monkeypatch.setattr(focus_app.time, "strftime", lambda _fmt: "20260617_151500")
 
-    project = focus_app.create_runner_output_project(parent, state_root=state_root)
+    project = focus_app.create_runner_output_project(
+        parent,
+        state_root=state_root,
+        experiment_identifier="Study 5 PPS box-breathing profile",
+        profile_id="study5_box_breathing_pps",
+        participant_id="P001",
+        capture_options={"enable_lsl": True},
+    )
 
-    assert project == parent / "pps_runner_outputs_20260617_151500"
+    assert project == parent / "study_5_pps_box_breathing_profile_20260617_151500"
     assert project.is_dir()
     assert focus_app.current_runner_session_root(state_root) == project
     settings = focus_app.load_runner_settings(state_root)
     assert settings["schema"] == "pps-focus-runner-settings.v1"
     assert settings["session_root"] == str(project)
+    assert settings["current_output_project_root"] == str(project)
+    assert settings["diary_path"].endswith("_LOG-DIARY_DO_NOT_DELETE.txt")
+    assert settings["last_profile_id"] == "study5_box_breathing_pps"
+    assert settings["last_participant_id"] == "P001"
+    assert settings["last_capture_options"]["enable_lsl"] is True
 
 
 def test_prepare_profile_audio_assets_reuses_scanned_generated_packages(tmp_path: Path, monkeypatch):
