@@ -1210,13 +1210,15 @@ def test_launcher_uses_participant_dropdown_instead_of_text_entry():
             participant_combo = dialog.findChild(q["QComboBox"], "participantCombo")
             assert participant_combo is not None
             assert participant_combo.count() >= 1
+            output_field = dialog.findChild(q["QLineEdit"], "outputFolderField")
+            assert output_field is not None
+            assert output_field.isReadOnly()
+            assert dialog.findChild(q["QPushButton"], "chooseOutputFolderButton") is not None
+            labels = _collect_widget_texts(dialog, q["QLabel"])
+            assert labels.index("Output Folder") < labels.index("Study/profile")
             placeholders = [line.placeholderText() for line in dialog.findChildren(q["QLineEdit"])]
             assert "Participant ID" not in placeholders
             assert "1-10" in placeholders
-            labels = _collect_widget_texts(dialog, q["QLabel"])
-            buttons = _collect_widget_texts(dialog, q["QPushButton"])
-            assert any("Output project" in label for label in labels)
-            assert "Change Output Folder" in buttons
             screenshot = Path.cwd() / ".pytest_cache" / "launcher_output_folder.png"
             screenshot.parent.mkdir(parents=True, exist_ok=True)
             assert dialog.grab().save(str(screenshot))
@@ -1392,54 +1394,53 @@ def test_launcher_generate_range_button_prepares_requested_range(monkeypatch):
 
 
 def test_prepare_profile_focus_session_uses_finished_profile_gate(tmp_path: Path, monkeypatch):
-    from peripersonal_space_toolkit import dashboard_app, focus_app
+    from peripersonal_space_toolkit import focus_app
 
     manifest = tmp_path / "sessions" / "P123_run" / "session_manifest.json"
     manifest.parent.mkdir(parents=True)
     manifest.write_text("{}", encoding="utf-8")
+    run_setup = tmp_path / "profile" / "6_experiment_run_setup" / "experiment_run_setup_manifest.json"
+    run_setup.parent.mkdir(parents=True)
+    run_setup.write_text("{}", encoding="utf-8")
     calls: dict[str, object] = {}
 
-    class FakeController:
-        current_run_package = None
+    monkeypatch.setattr(
+        focus_app,
+        "_materialize_profile_run_setup",
+        lambda profile_id, progress_callback=None: (
+            SimpleNamespace(design_path=tmp_path / "design.json"),
+            SimpleNamespace(),
+            run_setup,
+        ),
+    )
+    monkeypatch.setattr(focus_app, "claim_prepared_session", lambda *_args, **_kwargs: None)
 
-        def __init__(self, **kwargs):
-            calls["init_kwargs"] = kwargs
+    def fake_prepare_segment_run_package(run_setup_path, participant_id, **kwargs):
+        calls["run_setup_path"] = run_setup_path
+        calls["participant_id"] = participant_id
+        calls["prepare_kwargs"] = dict(kwargs)
+        return SimpleNamespace(
+            manifest_path=manifest,
+            source_run_setup_manifest_path=run_setup,
+            session_dir=manifest.parent,
+            blocks=[object()],
+        )
 
-        def preload_inventory_payload(self):
-            return {
-                "profiles": [
-                    {
-                        "template_id": "study5_box_breathing_pps",
-                        "variant_display": "Study 5",
-                        "finished_profile": True,
-                        "segment_6_launchable": True,
-                    }
-                ]
-            }
-
-        def load_template(self, profile_id, **kwargs):
-            calls["profile_id"] = profile_id
-            calls["load_template_kwargs"] = dict(kwargs)
-
-        def prepare_session(self, payload, **kwargs):
-            calls["payload"] = dict(payload)
-            calls["prepare_session_kwargs"] = dict(kwargs)
-            self.current_run_package = SimpleNamespace(
-                manifest_path=manifest,
-                source_run_setup_manifest_path=tmp_path / "run_setup.json",
-                session_dir=manifest.parent,
-            )
-            return {}
-
-    monkeypatch.setattr(dashboard_app, "DashboardController", FakeController)
-    monkeypatch.setattr(focus_app, "DEFAULT_FOCUS_PROFILE_DESIGN_PATH", tmp_path / "focus_design.json")
+    monkeypatch.setattr(focus_app, "prepare_segment_run_package", fake_prepare_segment_run_package)
+    monkeypatch.setattr(focus_app, "record_prepared_session_queue", lambda **kwargs: calls.setdefault("queue", kwargs))
+    monkeypatch.setattr(focus_app, "record_experiment_activity", lambda *args, **kwargs: calls.setdefault("activity", (args, kwargs)))
+    monkeypatch.setattr(
+        focus_app,
+        "resolve_profile_entry",
+        lambda *_args, **_kwargs: {"kind": "bundled", "dashboard_project_id": "profile_study5_box_breathing_pps"},
+    )
+    monkeypatch.setattr(focus_app, "update_profile_runner_settings", lambda **kwargs: calls.setdefault("settings", kwargs))
 
     assert focus_app.prepare_profile_focus_session("study5_box_breathing_pps", "P123") == manifest
-    assert calls["profile_id"] == "study5_box_breathing_pps"
-    assert calls["load_template_kwargs"] == {"snapshot": False}
-    assert calls["payload"] == {"participant_id": "P123"}
-    assert calls["prepare_session_kwargs"] == {"progress_callback": None, "snapshot": False}
-    assert calls["init_kwargs"]["design_path"] == tmp_path / "focus_design.json"
+    assert calls["run_setup_path"] == run_setup
+    assert calls["participant_id"] == "P123"
+    assert calls["queue"]["participant_id"] == "P123"
+    assert calls["settings"]["profile_id"] == "study5_box_breathing_pps"
 
 
 def test_runner_output_project_setting_creates_timestamped_folder(tmp_path: Path, monkeypatch):
@@ -1534,6 +1535,7 @@ def test_prepare_profile_audio_assets_reuses_scanned_generated_packages(tmp_path
     monkeypatch.setattr(focus_app, "prepared_session_asset_status", fake_asset_status)
     monkeypatch.setattr(focus_app, "prepare_segment_run_package", fake_prepare_segment_run_package)
     monkeypatch.setattr(focus_app, "record_prepared_session_queue", lambda **kwargs: queue_records.append(kwargs))
+    monkeypatch.setattr(focus_app, "update_profile_runner_settings", lambda **_kwargs: {})
     monkeypatch.setattr(
         focus_app,
         "record_experiment_activity",

@@ -5,7 +5,7 @@ const activePolls = new Set();
 let activeNavFrame = 0;
 const CUSTOM_TEMPLATE_ID = "__custom__";
 const DEFAULT_STUDY_TEMPLATE_ID = "study5_box_breathing_pps";
-const STATIC_RESOURCE_VERSION = "20260617-runner-diary-bridge";
+const STATIC_RESOURCE_VERSION = "20260617-profile-memory2";
 const STATIC_REPO_ROOT = new URL("../../../", document.currentScript?.src || window.location.href).href;
 const STATIC_PRELOAD_INVENTORY_PATH = "assets/preloads/preload_inventory.json";
 const STATIC_TEMPLATE_DIR = "study_templates/";
@@ -234,6 +234,7 @@ let activeSourcePreviewButton = null;
 let activeSourcePreviewClearTimer = null;
 let sourcePreviewAudioContext = null;
 let customizeModalReturnFocus = null;
+let saveProfileModalReturnFocus = null;
 let segmentInfoModalReturnFocus = null;
 let trialPoolRepetitionDraft = {
   defaultRepetitions: 1,
@@ -332,9 +333,10 @@ function isCompanionDashboardOrigin() {
 }
 
 function loadApiBase() {
+  const companionOrigin = isCompanionDashboardOrigin();
   const stored = localStorage.getItem("ppsDashboard.apiBase");
-  apiBase = stored || (isCompanionDashboardOrigin() ? "" : LOCAL_BACKEND_DEFAULT);
-  $("backend-url").value = apiBase || (isCompanionDashboardOrigin() ? window.location.origin : LOCAL_BACKEND_DEFAULT);
+  apiBase = companionOrigin ? "" : (stored || LOCAL_BACKEND_DEFAULT);
+  $("backend-url").value = apiBase || (companionOrigin ? window.location.origin : LOCAL_BACKEND_DEFAULT);
 }
 
 function saveApiBase(value) {
@@ -423,7 +425,13 @@ function profileReadonlyControlAllowed(control) {
   if (control.matches?.("[data-preview-source-label]")) return true;
   return Boolean(
     control.id
-    && (control.id.startsWith("open-") || control.id === "prepare-experiment" || control.id === "export-data-acquisition-folder")
+    && (
+      control.id.startsWith("open-")
+      || control.id === "prepare-experiment"
+      || control.id === "export-data-acquisition-folder"
+      || control.id === "save-study-profile"
+      || control.id === "export-output-folder"
+    )
   );
 }
 
@@ -1281,17 +1289,35 @@ function renderProfileMode() {
 function renderStudy() {
   const select = $("template-select");
   select.innerHTML = "";
+  const activeProjectId = state.project?.project_kind === "custom" ? state.project.project_id : "";
   const customOption = document.createElement("option");
   customOption.value = CUSTOM_TEMPLATE_ID;
   customOption.textContent = "Custom design (define manually)";
-  customOption.selected = !state.selected_template;
+  customOption.selected = !state.selected_template && !activeProjectId;
   select.appendChild(customOption);
+  const bundledGroup = document.createElement("optgroup");
+  bundledGroup.label = "Bundled profiles";
   for (const template of state.templates) {
     const option = document.createElement("option");
     option.value = template.template_id;
     option.textContent = template.citation_label;
-    option.selected = template.template_id === state.selected_template;
-    select.appendChild(option);
+    option.selected = !activeProjectId && template.template_id === state.selected_template;
+    bundledGroup.appendChild(option);
+  }
+  select.appendChild(bundledGroup);
+  const customEntries = profileCatalogEntries().filter((entry) => entry.kind === "custom");
+  if (customEntries.length) {
+    const customGroup = document.createElement("optgroup");
+    customGroup.label = "Stored local profiles";
+    for (const entry of customEntries) {
+      const option = document.createElement("option");
+      option.value = customProfileSelectValue(entry.profile_id);
+      const created = entry.created_at ? ` (${entry.created_at})` : "";
+      option.textContent = `${entry.display_name || entry.profile_id}${created}`;
+      option.selected = entry.profile_id === activeProjectId;
+      customGroup.appendChild(option);
+    }
+    select.appendChild(customGroup);
   }
   $("design-name").value = state.design.name || "";
   const readonly = isProfileReadonlyMode();
@@ -1304,6 +1330,22 @@ function renderStudy() {
   renderProfileSummary();
   renderPreloadAssetStatus();
   renderDataAcquisitionBridge();
+}
+
+function profileCatalogEntries() {
+  return Array.isArray(state.profile_catalog?.entries) ? state.profile_catalog.entries : [];
+}
+
+function customProfileSelectValue(profileId) {
+  return `custom-profile:${profileId}`;
+}
+
+function selectedProfileChoice(value = $("template-select")?.value || "") {
+  const raw = String(value || "");
+  if (raw.startsWith("custom-profile:")) {
+    return { kind: "custom", id: raw.slice("custom-profile:".length) };
+  }
+  return { kind: raw === CUSTOM_TEMPLATE_ID ? "manual" : "bundled", id: raw };
 }
 
 function renderExistingCustomProjects() {
@@ -1336,7 +1378,8 @@ function renderExistingCustomProjects() {
 }
 
 function renderProfileSummary() {
-  const selectedId = $("template-select").value;
+  const choice = selectedProfileChoice();
+  const selectedId = choice.kind === "bundled" ? choice.id : "";
   const current = state.templates.find((item) => item.template_id === selectedId);
   const href = current?.doi ? doiUrl(current.doi) : "";
   const summary = $("profile-summary");
@@ -1346,7 +1389,7 @@ function renderProfileSummary() {
     : "";
   const notice = $("profile-recreation-notice");
   if (notice) {
-    const showNotice = Boolean(href && selectedId && selectedId !== CUSTOM_TEMPLATE_ID);
+    const showNotice = Boolean(href && selectedId);
     notice.hidden = !showNotice;
     notice.textContent = showNotice ? PROFILE_RECREATION_NOTICE : "";
   }
@@ -1355,8 +1398,9 @@ function renderProfileSummary() {
 function renderPreloadAssetStatus() {
   const badge = $("preload-asset-status");
   if (!badge) return;
-  const selectedId = $("template-select").value;
-  if (!selectedId || selectedId === CUSTOM_TEMPLATE_ID) {
+  const choice = selectedProfileChoice();
+  const selectedId = choice.kind === "bundled" ? choice.id : "";
+  if (!selectedId) {
     badge.hidden = true;
     return;
   }
@@ -3811,6 +3855,7 @@ function renderRun() {
   const setup = state.run_sequence_setup || {};
   const segment6 = projectSegment("6_experiment_run_setup");
   const prepared = Boolean(setup.prepared || segment6.status === "ready");
+  const localProfileActionsAvailable = prepared && !staticModeActive;
   if ($("participants") && document.activeElement !== $("participants")) {
     $("participants").value = state.design.protocol?.participants ?? setup.participant_count ?? 1;
   }
@@ -3831,6 +3876,27 @@ function renderRun() {
     prepareButton.disabled = !setup.ready && !isProfileReadonlyMode();
     prepareButton.textContent = prepared ? "Open Experiment Runner" : "Save Design and Start Experiment Runner";
   }
+  const saveProfileButton = $("save-study-profile");
+  if (saveProfileButton) {
+    saveProfileButton.disabled = !localProfileActionsAvailable;
+    saveProfileButton.title = localProfileActionsAvailable
+      ? "Save this prepared experiment as a reusable local study profile."
+      : (prepared ? STATIC_COMPANION_REQUIRED_MESSAGE : "Prepare Segment 6 before saving a reusable profile.");
+  }
+  const exportButton = $("export-output-folder");
+  if (exportButton) {
+    exportButton.disabled = !localProfileActionsAvailable;
+    exportButton.title = localProfileActionsAvailable
+      ? "Copy the active profile snapshot into the runner output folder for data collection."
+      : (prepared ? STATIC_COMPANION_REQUIRED_MESSAGE : "Prepare Segment 6 before preparing the output folder.");
+  }
+  const outputSummary = $("output-folder-summary");
+  if (outputSummary) {
+    const folder = state.runner_settings?.active_output_folder || "";
+    outputSummary.textContent = folder ? folderDisplayName(folder) : "runner default";
+    outputSummary.title = folder || "Output folder is selected in PPSExperimentRunner.exe.";
+    outputSummary.className = `status-label ${folder ? "ready" : "optional"}`;
+  }
   const summary = $("run-sequence-summary");
   if (summary) {
     const participantCount = Number(setup.participant_count || state.design.protocol?.participants || 0);
@@ -3844,6 +3910,14 @@ function renderRun() {
   renderRunInstructions(setup.instruction_profile || state.design?.study_profile_reference_parameters?.dashboard_run_setup?.instruction_profile || {});
   renderRunSequenceTable(setup.rows || []);
   renderProtocolSummary();
+}
+
+function folderDisplayName(path) {
+  const text = String(path || "").replace(/[\\/]+$/, "");
+  if (!text) return "runner default";
+  const parts = text.split(/[\\/]/).filter(Boolean);
+  const tail = parts.slice(-2).join(" / ");
+  return tail || text;
 }
 
 function normalizedRunInstructionSlots(profile = {}) {
@@ -4279,10 +4353,15 @@ async function continueWorkflowStep(stepId) {
 async function loadTemplate() {
   if (templateLoadInFlight) return;
   const select = $("template-select");
-  const id = select.value;
+  const choice = selectedProfileChoice(select.value);
+  const id = choice.id;
   if (!id) return;
+  if (choice.kind === "custom") {
+    await loadCustomProject(id);
+    return;
+  }
   if (staticModeActive) {
-    if (id === CUSTOM_TEMPLATE_ID) {
+    if (choice.kind === "manual") {
       renderStudy();
       showToast("Start the local companion backend before creating custom studies.");
       return;
@@ -4301,16 +4380,16 @@ async function loadTemplate() {
     state = await api(`/api/templates/${encodeURIComponent(id)}/load`, { method: "POST" });
     renderAll();
     updateViewer();
-    showToast(id === CUSTOM_TEMPLATE_ID ? "Custom design started" : "Profile loaded");
+    showToast(choice.kind === "manual" ? "Custom design started" : "Profile loaded");
   } finally {
     templateLoadInFlight = false;
     $("template-select").disabled = false;
   }
 }
 
-async function loadCustomProject() {
+async function loadCustomProject(projectIdOverride = "") {
   const select = $("existing-custom-project");
-  const projectId = select?.value || "";
+  const projectId = projectIdOverride || select?.value || "";
   if (!projectId) {
     showToast("Choose a custom study to open");
     return;
@@ -4625,6 +4704,103 @@ async function regenerateRunSequence() {
   });
   renderAll();
   showToast("Block sequence regenerated");
+}
+
+async function ensureLocalBackendState() {
+  if (!state) {
+    await loadState();
+  }
+  if (!state || staticModeActive) {
+    showToast(STATIC_COMPANION_REQUIRED_MESSAGE);
+    return false;
+  }
+  return true;
+}
+
+async function savePreparedStudyProfile() {
+  if (!(await ensureLocalBackendState())) return;
+  const prepared = Boolean(state.run_sequence_setup?.prepared || projectSegment("6_experiment_run_setup").status === "ready");
+  if (!prepared) {
+    showToast("Prepare Segment 6 before saving a study profile.");
+    return;
+  }
+  openSaveProfileModal();
+}
+
+function openSaveProfileModal() {
+  const modal = $("save-profile-modal");
+  const input = $("save-profile-name");
+  const error = $("save-profile-error");
+  if (!modal || !input || !error) return;
+  saveProfileModalReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  input.value = state.design?.name || state.design?.study_profile_title || "New study profile";
+  error.hidden = true;
+  error.textContent = "";
+  modal.hidden = false;
+  document.body.classList.add("modal-open");
+  window.setTimeout(() => {
+    input.focus();
+    input.select();
+  }, 0);
+}
+
+function closeSaveProfileModal() {
+  const modal = $("save-profile-modal");
+  if (!modal || modal.hidden) return;
+  modal.hidden = true;
+  document.body.classList.remove("modal-open");
+  if (saveProfileModalReturnFocus && document.contains(saveProfileModalReturnFocus)) {
+    saveProfileModalReturnFocus.focus();
+  }
+  saveProfileModalReturnFocus = null;
+}
+
+function showSaveProfileError(message) {
+  const error = $("save-profile-error");
+  if (!error) return;
+  error.textContent = message;
+  error.hidden = false;
+}
+
+async function submitSaveProfileModal() {
+  const input = $("save-profile-name");
+  const cleanName = String(input?.value || "").trim();
+  if (!cleanName) {
+    showSaveProfileError("Enter a profile name.");
+    input?.focus();
+    return;
+  }
+  $("save-profile-submit").disabled = true;
+  try {
+    state = await api("/api/profiles/save-prepared", {
+      method: "POST",
+      body: JSON.stringify({ name: cleanName })
+    });
+    closeSaveProfileModal();
+    renderAll();
+    updateViewer();
+    showToast("Study profile saved");
+  } catch (error) {
+    showSaveProfileError(error.message || String(error));
+  } finally {
+    $("save-profile-submit").disabled = false;
+  }
+}
+
+async function exportOutputFolder() {
+  if (!(await ensureLocalBackendState())) return;
+  const prepared = Boolean(state.run_sequence_setup?.prepared || projectSegment("6_experiment_run_setup").status === "ready");
+  if (!prepared) {
+    showToast("Prepare Segment 6 before preparing the output folder.");
+    return;
+  }
+  const payload = isProfileReadonlyMode() ? collectProfileRunPayload() : collectPayload();
+  state = await api("/api/run-sequence/export-bridge", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+  renderAll();
+  showToast("Output folder prepared for data collection");
 }
 
 async function prepareExperiment() {
@@ -5405,12 +5581,23 @@ function wireEvents() {
   $("customize-modal")?.addEventListener("click", (event) => {
     if (event.target === $("customize-modal")) closeCustomizeModal();
   });
+  $("save-profile-form")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    submitSaveProfileModal().catch(reportError);
+  });
+  $("save-profile-cancel")?.addEventListener("click", closeSaveProfileModal);
+  $("save-profile-modal-close")?.addEventListener("click", closeSaveProfileModal);
+  $("save-profile-modal")?.addEventListener("click", (event) => {
+    if (event.target === $("save-profile-modal")) closeSaveProfileModal();
+  });
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
     if (!$("segment-info-modal")?.hidden) {
       closeSegmentInfoModal();
     } else if (!$("customize-modal")?.hidden) {
       closeCustomizeModal();
+    } else if (!$("save-profile-modal")?.hidden) {
+      closeSaveProfileModal();
     }
   });
   $("backend-url").addEventListener("keydown", (event) => {
@@ -5461,6 +5648,8 @@ function wireEvents() {
     openLocalFolder(path).catch(reportError);
   });
   $("regenerate-run-sequence")?.addEventListener("click", () => regenerateRunSequence().catch(reportError));
+  $("save-study-profile")?.addEventListener("click", () => savePreparedStudyProfile().catch(reportError));
+  $("export-output-folder")?.addEventListener("click", () => exportOutputFolder().catch(reportError));
   $("prepare-experiment")?.addEventListener("click", () => prepareExperiment().catch(reportError));
   $("generated-noise-select").addEventListener("change", () => {
     const selectedNoise = $("generated-noise-select").value;

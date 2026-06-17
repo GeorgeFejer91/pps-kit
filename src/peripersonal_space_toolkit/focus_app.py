@@ -78,7 +78,7 @@ from .runner_diary import (
     load_runner_settings as _load_runner_settings,
     resolve_or_create_output_project,
     runner_settings_path as _runner_settings_path,
-    update_runner_settings,
+    update_runner_settings as _update_runner_settings,
 )
 from .session_runner import (
     DEFAULT_DASHBOARD_STATE_ROOT,
@@ -103,6 +103,15 @@ from .session_runner import (
 )
 from .timing_schedule import BlockEventSchedule
 from .preload_inventory import load_preload_inventory
+from .profile_memory import (
+    append_output_diary_event,
+    active_output_folder,
+    build_profile_catalog,
+    load_runner_settings as load_profile_runner_settings,
+    profile_participant_ids_from_entry,
+    resolve_profile_entry,
+    update_runner_settings as update_profile_runner_settings,
+)
 from .runtime_paths import repo_root
 
 
@@ -121,6 +130,10 @@ def runner_settings_path(state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT) -> Pat
 
 def load_runner_settings(state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT) -> dict[str, Any]:
     return _load_runner_settings(state_root)
+
+
+def update_runner_settings(state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT, **updates: Any) -> dict[str, Any]:
+    return _update_runner_settings(state_root, **updates)
 
 
 def current_runner_session_root(state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT) -> Path:
@@ -2714,7 +2727,10 @@ def prepare_latest_focus_session(
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> Path:
     """Materialize a session package from the newest prepared Segment 6 setup."""
-    output_root = Path(session_root) if session_root is not None else current_runner_session_root()
+    output_root = Path(session_root) if session_root is not None else active_output_folder(
+        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+        fallback=DEFAULT_SESSION_ROOT,
+    )
     run_setup = find_latest_dashboard_run_setup()
     if run_setup is None:
         raise FileNotFoundError("No prepared Segment 6 dashboard setup was found.")
@@ -2745,6 +2761,13 @@ def prepare_latest_focus_session(
         session_dir=str(package.session_dir),
         participant_id=participant,
     )
+    update_profile_runner_settings(
+        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+        output_folder=output_root,
+        participant_id=participant,
+        run_setup_manifest_path=run_setup,
+        session_manifest_path=package.manifest_path,
+    )
     return package.manifest_path
 
 
@@ -2755,7 +2778,10 @@ def prepare_last_or_latest_focus_session(
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> Path:
     """Open the last launchable session, falling back to the newest prepared setup."""
-    output_root = Path(session_root) if session_root is not None else current_runner_session_root()
+    output_root = Path(session_root) if session_root is not None else active_output_folder(
+        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+        fallback=DEFAULT_SESSION_ROOT,
+    )
     pointer = load_last_experiment_pointer()
     session_text = str(pointer.get("session_manifest_path") or "").strip()
     session_manifest = Path(session_text) if session_text else Path()
@@ -2794,6 +2820,13 @@ def prepare_last_or_latest_focus_session(
                 session_dir=str(package.session_dir),
                 participant_id=participant,
             )
+            update_profile_runner_settings(
+                state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+                output_folder=output_root,
+                participant_id=participant,
+                run_setup_manifest_path=run_setup,
+                session_manifest_path=package.manifest_path,
+            )
             return package.manifest_path
     return prepare_latest_focus_session(
         participant_id or str(pointer.get("participant_id") or ""),
@@ -2805,10 +2838,11 @@ def prepare_last_or_latest_focus_session(
 def _focus_dashboard_controller() -> Any:
     from . import dashboard_app
 
+    output_root = active_output_folder(state_root=DEFAULT_DASHBOARD_STATE_ROOT, fallback=DEFAULT_SESSION_ROOT)
     return dashboard_app.DashboardController(
         design_path=DEFAULT_FOCUS_PROFILE_DESIGN_PATH,
         render_dir=DEFAULT_RENDER_DIR,
-        session_root=current_runner_session_root(),
+        session_root=output_root,
         import_dir=dashboard_app.DEFAULT_IMPORT_DIR,
         preview_dir=dashboard_app.DEFAULT_PREVIEW_DIR,
         project_registry_root=DEFAULT_PROJECT_REGISTRY_ROOT,
@@ -2816,41 +2850,51 @@ def _focus_dashboard_controller() -> Any:
 
 
 def finished_profile_options() -> list[tuple[str, str]]:
-    """Return Segment 6-launchable study/profile presets for the runner launcher."""
-    inventory = load_preload_inventory(repo_root())
-    profiles = inventory.get("profiles", [])
+    """Return Segment 6-launchable bundled and local profiles for the launcher."""
+    catalog = build_profile_catalog(
+        registry_root=DEFAULT_PROJECT_REGISTRY_ROOT,
+        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+        session_root=active_output_folder(state_root=DEFAULT_DASHBOARD_STATE_ROOT, fallback=DEFAULT_SESSION_ROOT),
+        inventory=load_preload_inventory(repo_root()),
+        include_unlaunchable_bundled=False,
+    )
     options: list[tuple[str, str]] = []
-    for profile in profiles:
-        finished = bool(profile.get("finished_profile")) or (
-            str(profile.get("runner_readiness") or "") == "ready"
-            and bool(profile.get("profile_checks_passed"))
-            and bool(profile.get("segment_0_to_4_profile_checks_passed"))
-        )
-        launchable = bool(profile.get("segment_6_launchable")) or finished
-        if not (finished and launchable):
+    for profile in catalog.get("entries", []):
+        if not bool(profile.get("segment_6_ready")):
             continue
-        template_id = str(profile.get("template_id") or "").strip()
-        if not template_id:
+        profile_id = str(profile.get("profile_id") or "").strip()
+        if not profile_id:
             continue
-        label = str(profile.get("variant_display") or profile.get("visible_variant_label") or template_id).strip()
-        options.append((template_id, label or template_id))
+        label = str(profile.get("display_name") or profile_id).strip()
+        kind_label = "local" if profile.get("kind") == "custom" else "bundled"
+        options.append((profile_id, f"{label} ({kind_label})"))
     options.sort(key=lambda item: (0 if item[0] == STUDY5_PROFILE_ID else 1, item[1].lower()))
     return options
 
 
 def profile_participant_ids(profile_id: str) -> list[str]:
-    """Return the numbered participant IDs declared by a finished profile."""
+    """Return participant IDs declared by a bundled or custom profile."""
     profile = str(profile_id or "").strip()
     if not profile:
         return ["P001"]
-    count = 1
-    defaults_path = repo_root() / "assets" / "preloads" / profile / "05_run_setup" / "run_defaults.json"
     try:
-        data = json.loads(defaults_path.read_text(encoding="utf-8"))
-        count = max(1, int(data.get("participants") or data.get("participant_count") or 1))
+        entry = resolve_profile_entry(
+            profile,
+            registry_root=DEFAULT_PROJECT_REGISTRY_ROOT,
+            state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+            session_root=active_output_folder(state_root=DEFAULT_DASHBOARD_STATE_ROOT, fallback=DEFAULT_SESSION_ROOT),
+            inventory=load_preload_inventory(repo_root()),
+        )
+        return profile_participant_ids_from_entry(entry)
     except Exception:
         count = 1
-    return [f"P{index:03d}" for index in range(1, count + 1)]
+        defaults_path = repo_root() / "assets" / "preloads" / profile / "05_run_setup" / "run_defaults.json"
+        try:
+            data = json.loads(defaults_path.read_text(encoding="utf-8"))
+            count = max(1, int(data.get("participants") or data.get("participant_count") or 1))
+        except Exception:
+            count = 1
+        return [f"P{index:03d}" for index in range(1, count + 1)]
 
 
 def parse_participant_range(text: str, *, max_participant: int | None = None) -> list[str]:
@@ -2891,6 +2935,19 @@ def profile_run_setup_manifest_path(profile_id: str) -> Path:
     profile = str(profile_id or "").strip()
     if not profile:
         return Path()
+    try:
+        entry = resolve_profile_entry(
+            profile,
+            registry_root=DEFAULT_PROJECT_REGISTRY_ROOT,
+            state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+            session_root=active_output_folder(state_root=DEFAULT_DASHBOARD_STATE_ROOT, fallback=DEFAULT_SESSION_ROOT),
+            inventory=load_preload_inventory(repo_root()),
+        )
+        run_setup = str(entry.get("run_setup_manifest_path") or "").strip()
+        if run_setup:
+            return Path(run_setup)
+    except Exception:
+        pass
     return (
         DEFAULT_PROJECT_REGISTRY_ROOT
         / f"profile_{profile}"
@@ -3119,7 +3176,10 @@ def prepare_profile_audio_assets(
         profile,
         progress_callback=progress_callback,
     )
-    output_root = Path(session_root) if session_root is not None else current_runner_session_root()
+    output_root = Path(session_root) if session_root is not None else active_output_folder(
+        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+        fallback=DEFAULT_SESSION_ROOT,
+    )
     results: list[dict[str, Any]] = []
     prepared_count = 0
     reused_count = 0
@@ -3216,6 +3276,14 @@ def prepare_profile_audio_assets(
             session_dir=str(package.session_dir),
             participant_id=participant,
         )
+        update_profile_runner_settings(
+            state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+            output_folder=output_root,
+            profile_id=profile,
+            participant_id=participant,
+            run_setup_manifest_path=run_setup_manifest_path,
+            session_manifest_path=package.manifest_path,
+        )
         prepared_count += 1
         results.append(
             {
@@ -3260,6 +3328,24 @@ def _materialize_profile_run_setup(
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> tuple[Any, Any, Path]:
     from . import dashboard_app
+
+    entry = resolve_profile_entry(
+        profile_id,
+        registry_root=DEFAULT_PROJECT_REGISTRY_ROOT,
+        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+        session_root=active_output_folder(state_root=DEFAULT_DASHBOARD_STATE_ROOT, fallback=DEFAULT_SESSION_ROOT),
+        inventory=load_preload_inventory(repo_root()),
+    )
+    if entry.get("kind") == "custom":
+        run_setup_manifest_path = Path(str(entry.get("run_setup_manifest_path") or ""))
+        if not run_setup_manifest_path.is_file() or not bool(entry.get("segment_6_ready")):
+            reasons = entry.get("missing_or_stale_asset_reasons") or ["Segment 6 is not ready."]
+            raise ValueError(f"Local study profile '{profile_id}' cannot be launched: {str(reasons[0])}")
+        design_path = Path(str(entry.get("project_dir") or "")) / "0_profile" / "active_design.json"
+        if not design_path.is_file():
+            raise FileNotFoundError(f"Stored profile design is missing: {design_path}")
+        design = dashboard_app._normalize_dashboard_design(dashboard_app.load_design(design_path))
+        return SimpleNamespace(design_path=design_path), design, run_setup_manifest_path
 
     controller = _focus_dashboard_controller()
     inventory_profiles = controller.preload_inventory_payload().get("profiles", [])
@@ -3325,7 +3411,7 @@ def prepare_profile_focus_session(
     session_root: Path | None = None,
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> Path:
-    """Materialize a participant session directly from a finished preload profile."""
+    """Materialize a participant session directly from a bundled or custom profile."""
     profile = str(profile_id or "").strip()
     if not profile:
         raise ValueError("Choose a study/profile preset before opening Focus Mode.")
@@ -3341,35 +3427,62 @@ def prepare_profile_focus_session(
                 "timestamp_unix": time.time(),
             }
         )
-    controller = _focus_dashboard_controller()
-    inventory_profiles = controller.preload_inventory_payload().get("profiles", [])
-    status = next((item for item in inventory_profiles if item.get("template_id") == profile), None)
-    if status is None:
-        raise ValueError(f"Unknown study/profile preset: {profile}")
-    if not (status.get("finished_profile") and status.get("segment_6_launchable")):
-        reason = str(status.get("profile_completion_status") or status.get("runner_readiness") or "unfinished_preload")
-        raise ValueError(
-            f"Study/profile preset '{profile}' is not a finished Segment 6 launchable profile yet ({reason})."
-        )
-
-    output_root = Path(session_root) if session_root is not None else current_runner_session_root()
-    controller.load_template(profile, snapshot=False)
-    controller.session_root = output_root
-    controller.prepare_session(
-        {"participant_id": participant},
+    _controller, design, run_setup_manifest_path = _materialize_profile_run_setup(
+        profile,
         progress_callback=progress_callback,
-        snapshot=False,
     )
-    package = controller.current_run_package
-    if package is None or not Path(package.manifest_path).is_file():
-        raise RuntimeError(f"Study/profile preset '{profile}' did not produce a session manifest.")
+    output_root = Path(session_root) if session_root is not None else active_output_folder(
+        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+        fallback=DEFAULT_SESSION_ROOT,
+    )
+    claimed = claim_prepared_session(
+        run_setup_manifest_path,
+        participant,
+        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+        session_root=output_root,
+    )
+    if claimed is not None:
+        package = load_run_package(claimed)
+    else:
+        package = prepare_segment_run_package(
+            run_setup_manifest_path,
+            participant,
+            design=design,
+            session_root=output_root,
+            progress_callback=progress_callback,
+        )
+        record_prepared_session_queue(
+            participant_id=participant,
+            run_setup_manifest_path=run_setup_manifest_path,
+            session_manifest_path=package.manifest_path,
+            status="ready",
+            message="Prepared by Experiment Runner launcher.",
+            state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+        )
     record_experiment_activity(
         "session_prepared",
         template_id=profile,
-        run_setup_manifest_path=str(package.source_run_setup_manifest_path or ""),
+        run_setup_manifest_path=str(run_setup_manifest_path),
         session_manifest_path=str(package.manifest_path),
         session_dir=str(package.session_dir),
         participant_id=participant,
+    )
+    entry = resolve_profile_entry(
+        profile,
+        registry_root=DEFAULT_PROJECT_REGISTRY_ROOT,
+        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+        session_root=output_root,
+        inventory=load_preload_inventory(repo_root()),
+    )
+    update_profile_runner_settings(
+        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+        output_folder=output_root,
+        profile_id=profile,
+        profile_kind=str(entry.get("kind") or ""),
+        dashboard_project_id=str(entry.get("dashboard_project_id") or ""),
+        participant_id=participant,
+        run_setup_manifest_path=run_setup_manifest_path,
+        session_manifest_path=package.manifest_path,
     )
     return Path(package.manifest_path)
 
@@ -3386,6 +3499,15 @@ def _env_int(name: str) -> int | None:
         return int(value)
     except ValueError:
         return None
+
+
+def _path_is_within(path: str | Path, root: str | Path) -> bool:
+    try:
+        target = Path(path).resolve()
+        base = Path(root).resolve()
+    except Exception:
+        return False
+    return target == base or base in target.parents
 
 
 def _env_float(name: str, default: float) -> float:
@@ -6068,6 +6190,24 @@ def run_launcher_window(
     apply_qt_app_icon(q, app=app, window=dialog)
 
     selected_manifest: dict[str, Path | None] = {"path": None}
+    runner_settings = load_profile_runner_settings(state_root=DEFAULT_DASHBOARD_STATE_ROOT, default_output_folder=DEFAULT_SESSION_ROOT)
+    initial_settings = load_runner_settings()
+    initial_diary = current_runner_diary_path()
+    initial_diary_context = latest_diary_context(initial_diary) if initial_diary is not None else {}
+    initial_profile = str(
+        runner_settings.get("active_profile_id")
+        or initial_settings.get("last_profile_id")
+        or initial_diary_context.get("profile_id")
+        or STUDY5_PROFILE_ID
+    ).strip()
+    initial_participant = str(
+        participant_id
+        or runner_settings.get("participant_id")
+        or initial_settings.get("last_participant_id")
+        or initial_diary_context.get("participant_id")
+        or "P001"
+    ).strip()
+    output_root_state: dict[str, Path] = {"path": Path(runner_settings.get("active_output_folder") or DEFAULT_SESSION_ROOT)}
     layout = q["QVBoxLayout"](dialog)
     layout.setContentsMargins(16, 16, 16, 16)
     layout.setSpacing(14)
@@ -6077,42 +6217,32 @@ def run_launcher_window(
     heading.setWordWrap(True)
     panel_layout.addWidget(heading)
 
-    initial_settings = load_runner_settings()
-    initial_diary = current_runner_diary_path()
-    initial_diary_context = latest_diary_context(initial_diary) if initial_diary is not None else {}
-    initial_profile = str(initial_settings.get("last_profile_id") or initial_diary_context.get("profile_id") or STUDY5_PROFILE_ID).strip()
-    initial_participant = str(
-        participant_id
-        or initial_settings.get("last_participant_id")
-        or initial_diary_context.get("participant_id")
-        or "P001"
-    ).strip()
+    output_folder_input = q["QLineEdit"](str(output_root_state["path"]))
+    output_folder_input.setReadOnly(True)
+    output_folder_input.setObjectName("outputFolderField")
+    output_folder_input.setToolTip("Participant session folders, bridge manifest, and output diary are written here.")
+    choose_output_button = q["QPushButton"]("Choose Output Folder")
+    choose_output_button.setObjectName("chooseOutputFolderButton")
+    output_folder_widget = q["QWidget"]()
+    output_folder_layout = q["QHBoxLayout"](output_folder_widget)
+    output_folder_layout.setContentsMargins(0, 0, 0, 0)
+    output_folder_layout.setSpacing(8)
+    output_folder_layout.addWidget(output_folder_input, 1)
+    output_folder_layout.addWidget(choose_output_button)
+    panel_layout.addWidget(_field_row(q, "Output Folder", output_folder_widget))
+
     profile_options = finished_profile_options()
     available_profiles = {profile_id for profile_id, _label in profile_options}
     profile_combo = _combo(q, profile_options, current=initial_profile if initial_profile in available_profiles else STUDY5_PROFILE_ID)
+    if profile_combo.currentIndex() < 0 and profile_options:
+        profile_combo.setCurrentIndex(0)
     profile_combo.setEnabled(bool(profile_options))
-    panel_layout.addWidget(_field_row(q, "Study/profile preset", profile_combo))
+    panel_layout.addWidget(_field_row(q, "Study/profile", profile_combo))
 
     participant_combo = q["QComboBox"]()
     participant_combo.setObjectName("participantCombo")
     panel_layout.addWidget(_field_row(q, "Participant", participant_combo))
 
-    output_root_state: dict[str, Path] = {"path": current_runner_session_root()}
-    output_value = q["QLabel"](_short_folder_label(output_root_state["path"]))
-    output_value.setObjectName("metricValue")
-    output_value.setWordWrap(True)
-    output_value.setToolTip(str(output_root_state["path"]))
-    output_button = q["QPushButton"]("Change Output Folder")
-    output_button.setToolTip(
-        "Choose a folder. Existing diary folders are reused; otherwise the runner creates an experiment-named output project there."
-    )
-    output_row = q["QWidget"]()
-    output_row_layout = q["QHBoxLayout"](output_row)
-    output_row_layout.setContentsMargins(0, 0, 0, 0)
-    output_row_layout.setSpacing(8)
-    output_row_layout.addWidget(output_value, 1)
-    output_row_layout.addWidget(output_button)
-    panel_layout.addWidget(_field_row(q, "Output project", output_row))
     if initial_diary is not None:
         remember_runner_context(
             session_root=output_root_state["path"],
@@ -6220,8 +6350,21 @@ def run_launcher_window(
 
     def _set_output_root(path: Path) -> None:
         output_root_state["path"] = Path(path)
-        output_value.setText(_short_folder_label(output_root_state["path"]))
-        output_value.setToolTip(str(output_root_state["path"]))
+        output_folder_input.setText(str(output_root_state["path"]))
+        output_folder_input.setToolTip(str(output_root_state["path"]))
+
+    def _current_profile_kind() -> str:
+        try:
+            entry = resolve_profile_entry(
+                _current_profile(),
+                registry_root=DEFAULT_PROJECT_REGISTRY_ROOT,
+                state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+                session_root=active_output_folder(state_root=DEFAULT_DASHBOARD_STATE_ROOT, fallback=DEFAULT_SESSION_ROOT),
+                inventory=load_preload_inventory(repo_root()),
+            )
+            return str(entry.get("kind") or "")
+        except Exception:
+            return ""
 
     def _refresh_participant_options(preferred: str = "") -> None:
         nonlocal participant_statuses
@@ -6298,7 +6441,7 @@ def run_launcher_window(
         generate_button.setEnabled((not busy) and bool(profile_options))
         range_button.setEnabled((not busy) and bool(profile_options))
         choose_button.setEnabled(not busy)
-        output_button.setEnabled(not busy)
+        choose_output_button.setEnabled(not busy)
         close_button.setEnabled(not busy)
         profile_combo.setEnabled((not busy) and bool(profile_options))
         participant_combo.setEnabled(not busy)
@@ -6489,6 +6632,21 @@ def run_launcher_window(
         except Exception as exc:
             message.setText(f"Could not create output project: {exc}")
             return
+        update_profile_runner_settings(
+            state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+            output_folder=project_root,
+            profile_id=_current_profile(),
+            profile_kind=_current_profile_kind(),
+            participant_id=_selected_participant(),
+        )
+        append_output_diary_event(
+            "output_folder_selected",
+            state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+            output_folder=project_root,
+            profile_id=_current_profile(),
+            profile_kind=_current_profile_kind(),
+            participant_id=_selected_participant(),
+        )
         _set_output_root(project_root)
         message.setText(f"Runner output project set to {project_root}")
         _refresh_participant_options(_selected_participant())
@@ -6518,8 +6676,35 @@ def run_launcher_window(
     profile_button.clicked.connect(_open_profile)
     generate_button.clicked.connect(_generate_selected)
     range_button.clicked.connect(_generate_range)
-    profile_combo.currentIndexChanged.connect(lambda _index: _refresh_participant_options())
-    output_button.clicked.connect(_choose_output_folder)
+
+    def _profile_changed(_index: int) -> None:
+        update_profile_runner_settings(
+            state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+            output_folder=_current_output_root(),
+            profile_id=_current_profile(),
+            profile_kind=_current_profile_kind(),
+            participant_id=_selected_participant(),
+        )
+        append_output_diary_event(
+            "profile_selected",
+            state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+            profile_id=_current_profile(),
+            profile_kind=_current_profile_kind(),
+            participant_id=_selected_participant(),
+        )
+        _refresh_participant_options()
+
+    profile_combo.currentIndexChanged.connect(_profile_changed)
+    participant_combo.currentIndexChanged.connect(
+        lambda _index: update_profile_runner_settings(
+            state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+            output_folder=_current_output_root(),
+            profile_id=_current_profile(),
+            profile_kind=_current_profile_kind(),
+            participant_id=_selected_participant(),
+        )
+    )
+    choose_output_button.clicked.connect(_choose_output_folder)
     choose_button.clicked.connect(_choose_manifest)
     cancel_button.clicked.connect(lambda: (preparation_cancel.set(), cancel_button.setEnabled(False), message.setText("Cancelling loading...")))
     close_button.clicked.connect(lambda: (_log_launcher_event("launcher_close_clicked", create=False), dialog.reject()))
@@ -6537,7 +6722,7 @@ def run_launcher_window(
             QTest.mouseClick(profile_combo, q["Qt"].MouseButton.LeftButton)
             validation_launcher_clicks.append(
                 {
-                    "label": "click Study/profile preset selector",
+                    "label": "click Study/profile selector",
                     "timestamp_unix": time.time(),
                     "selected_profile": str(profile_combo.currentData() or ""),
                 }

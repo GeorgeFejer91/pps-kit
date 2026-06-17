@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260617-runner-diary-bridge">
+  <link rel="stylesheet" href="styles.css?v=20260617-profile-memory2">
 </head>
 <body>
   <div class="app-shell">
@@ -94,7 +94,7 @@
               </div>
             </div>
             <div class="field-row">
-              <label for="template-select">Study/profile preload</label>
+              <label for="template-select">Study/profile</label>
               <select id="template-select"></select>
             </div>
             <div id="profile-summary" class="summary-text"></div>
@@ -200,7 +200,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="../viewer/index.html?v=20260617-runner-diary-bridge"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="../viewer/index.html?v=20260617-profile-memory2"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -539,8 +539,14 @@
                 <tbody></tbody>
               </table>
             </div>
+            <div class="run-output-summary" aria-label="Acquisition output folder">
+              <span>Output folder</span>
+              <span id="output-folder-summary" class="status-label">runner default</span>
+            </div>
             <div class="step-footer run-sequence-actions">
               <button id="regenerate-run-sequence" type="button">Regenerate Sequence</button>
+              <button id="save-study-profile" type="button">Save as New Study Profile</button>
+              <button id="export-output-folder" type="button">Prepare Output Folder for Data Collection</button>
               <button id="prepare-experiment" type="button" class="primary">Save Design and Start Experiment Runner</button>
             </div>
           </section>
@@ -1060,7 +1066,29 @@
       </form>
     </div>
   </div>
-  <script src="hardware_pixel_art.js?v=20260617-runner-diary-bridge"></script>
-  <script src="app.js?v=20260617-runner-diary-bridge"></script>
+  <div id="save-profile-modal" class="modal-backdrop" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="save-profile-modal-title">
+      <form id="save-profile-form">
+        <div class="modal-heading">
+          <div>
+            <div class="segment-kicker">Segment 6</div>
+            <h2 id="save-profile-modal-title">Save Study Profile</h2>
+          </div>
+          <button id="save-profile-modal-close" class="icon-action" type="button" aria-label="Close">X</button>
+        </div>
+        <div class="field-row">
+          <label for="save-profile-name">Profile name</label>
+          <input id="save-profile-name" type="text" autocomplete="off" required>
+        </div>
+        <p id="save-profile-error" class="modal-error" role="alert" hidden></p>
+        <div class="modal-actions">
+          <button id="save-profile-cancel" type="button">Cancel</button>
+          <button id="save-profile-submit" class="primary" type="submit">Save Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="hardware_pixel_art.js?v=20260617-profile-memory2"></script>
+  <script src="app.js?v=20260617-profile-memory2"></script>
 </body>
 </html>

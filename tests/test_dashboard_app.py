@@ -17,7 +17,7 @@ pytest.importorskip("httpx")
 
 from fastapi.testclient import TestClient
 
-from peripersonal_space_toolkit import dashboard_app, focus_launch
+from peripersonal_space_toolkit import dashboard_app, focus_launch, profile_memory
 from peripersonal_space_toolkit.dashboard_app import DashboardController, create_app
 from peripersonal_space_toolkit.design import (
     AudioFileSpec,
@@ -156,6 +156,21 @@ def _assert_dashboard_path_exists(root: Path, value: str) -> None:
     assert dashboard_app._path_exists(target)
 
 
+def test_custom_profile_id_timestamp_collision_never_overwrites(tmp_path: Path):
+    registry = tmp_path / "registry"
+    registry.mkdir()
+    created_at = dashboard_app.datetime(2026, 6, 17, 17, 42, 30)
+
+    first = profile_memory.generate_custom_profile_id("My Lab Pilot", registry, created_at=created_at)
+    assert first == "custom_my_lab_pilot_20260617_174230"
+    (registry / first).mkdir()
+    second = profile_memory.generate_custom_profile_id("My Lab Pilot", registry, created_at=created_at)
+    assert second == "custom_my_lab_pilot_20260617_174230_2"
+    (registry / second).mkdir()
+    third = profile_memory.generate_custom_profile_id("My Lab Pilot", registry, created_at=created_at)
+    assert third == "custom_my_lab_pilot_20260617_174230_3"
+
+
 def test_dashboard_static_assets_are_packaged():
     dashboard_files = files("peripersonal_space_toolkit.dashboard")
     viewer_files = files("peripersonal_space_toolkit.viewer")
@@ -174,7 +189,7 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260617-runner-diary-bridge"
+    static_version = "20260617-profile-memory2"
     assert f'href="styles.css?v={static_version}"' in html
     assert f'src="hardware_pixel_art.js?v={static_version}"' in html
     assert f'src="app.js?v={static_version}"' in html
@@ -217,7 +232,11 @@ def test_dashboard_static_assets_are_packaged():
     assert 'id="fit-radius-camera"' in html
     assert 'id="preload-asset-status"' in html
     assert 'id="profile-recreation-notice"' in html
-    assert "Study/profile preload" in html
+    assert "Study/profile" in html
+    assert "Save as New Study Profile" in html
+    assert "Prepare Output Folder for Data Collection" in html
+    assert "/api/profiles/save-prepared" in app_js
+    assert "/api/run-sequence/export-bridge" in app_js
     assert 'id="edit-profile-rail"' in html
     assert "Edit As New Study" in html
     assert 'id="customize-modal"' in html
@@ -2581,7 +2600,53 @@ def test_dashboard_bakes_baseline_tactile_trial_files_with_three_channels(tmp_pa
     assert {row["phase_label"] for row in run_rows} == {"Condition 1", "Condition 2"}
     assert all(row["block_csv_file"].endswith("_final.csv") for row in run_rows)
 
-    prepared_design = run_prepared["design"]
+    saved_response = client.post("/api/profiles/save-prepared", json={"name": "My Lab Pilot"})
+    assert saved_response.status_code == 200, saved_response.text
+    saved = saved_response.json()
+    saved_result = saved["saved_profile_result"]
+    assert saved_result["profile_id"].startswith("custom_my_lab_pilot_")
+    assert saved_result["source_profile_id"]
+    saved_project_dir = Path(saved_result["project_dir"])
+    assert saved_project_dir.is_dir()
+    saved_manifest = json.loads((saved_project_dir / "0_profile" / "project_manifest.json").read_text(encoding="utf-8"))
+    assert saved_manifest["project_label"] == "My Lab Pilot"
+    assert saved_manifest["source_profile_id"] == saved_result["source_profile_id"]
+    saved_run_manifest = saved_project_dir / "6_experiment_run_setup" / "experiment_run_setup_manifest.json"
+    assert saved_run_manifest.is_file()
+    saved_run_payload = json.loads(saved_run_manifest.read_text(encoding="utf-8"))
+    assert str(saved_project_dir) in saved_run_payload["csv_path"]
+    assert str(run_manifest.parent.parent) not in saved_run_payload["csv_path"]
+    catalog = client.get("/api/profile-catalog").json()
+    catalog_entry = next(item for item in catalog["entries"] if item["profile_id"] == saved_result["profile_id"])
+    assert catalog_entry["kind"] == "custom"
+    assert catalog_entry["display_name"] == "My Lab Pilot"
+    assert catalog_entry["segment_6_ready"] is True
+
+    export_response = client.post("/api/run-sequence/export-bridge", json={"participant_id": "P001"})
+    assert export_response.status_code == 200, export_response.text
+    exported = export_response.json()["output_folder_export_result"]
+    bridge_path = Path(exported["bridge_manifest_path"])
+    assert bridge_path.parent == tmp_path / "sessions"
+    assert bridge_path.name == "dashboard_runner_bridge_manifest.v1.json"
+    assert bridge_path.is_file()
+    bridge_payload = json.loads(bridge_path.read_text(encoding="utf-8"))
+    assert bridge_payload["profile_id"] == saved_result["profile_id"]
+    assert bridge_payload["kind"] == "custom"
+    assert bridge_payload["participant_id"] == "P001"
+    snapshot_dir = Path(bridge_payload["acquisition_profile_snapshot_dir"])
+    assert snapshot_dir.is_dir()
+    assert snapshot_dir.parent.name == "study_profile_snapshot"
+    assert (snapshot_dir / "6_experiment_run_setup" / "experiment_run_setup_manifest.json").is_file()
+    settings_path = tmp_path / "dashboard_projects" / "dashboard_state" / "focus_runner_settings.v1.json"
+    settings = json.loads(settings_path.read_text(encoding="utf-8"))
+    assert settings["active_output_folder"] == str(tmp_path / "sessions")
+    assert settings["active_profile_id"] == saved_result["profile_id"]
+    diary = tmp_path / "sessions" / "output_diary.v1.jsonl"
+    diary_events = [json.loads(line) for line in diary.read_text(encoding="utf-8").splitlines()]
+    assert {event["event_type"] for event in diary_events} >= {"profile_saved", "acquisition_folder_exported"}
+    assert all("participant_name" not in event for event in diary_events)
+
+    prepared_design = saved["design"]
     prepared_response = client.post("/api/session/prepare", json={"participant_id": "P001", "design": prepared_design})
     assert prepared_response.status_code == 200, prepared_response.text
     prepared = prepared_response.json()

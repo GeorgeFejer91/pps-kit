@@ -1729,6 +1729,8 @@ body.custom-mode .step-footer {
 
 .panel.profile-readonly button[id^="open-"],
 .panel.profile-readonly #prepare-experiment,
+.panel.profile-readonly #save-study-profile,
+.panel.profile-readonly #export-output-folder,
 .panel.profile-readonly [data-preview-source-label] {
   pointer-events: auto;
 }
@@ -3615,6 +3617,18 @@ select:focus {
   gap: 8px;
   justify-content: flex-end;
   margin-top: 12px;
+}
+
+.run-output-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .run-sequence-table-wrap {

@@ -69,6 +69,16 @@ from .session_runner import (
     rendered_wavs,
 )
 from .focus_launch import build_focus_runner_command
+from .profile_memory import (
+    append_output_diary_event,
+    active_output_folder,
+    build_profile_catalog,
+    generate_custom_profile_id,
+    load_runner_settings as load_profile_runner_settings,
+    prepare_acquisition_folder,
+    rebase_project_copy_paths,
+    update_runner_settings as update_profile_runner_settings,
+)
 from .templates import (
     DEFAULT_STUDY_TEMPLATE_ID,
     StudyTemplate,
@@ -83,10 +93,10 @@ from .dashboard_backend.security import CompanionSecurity, TOKEN_HEADER
 from .runner_diary import (
     append_diary_entry,
     find_output_diary,
-    load_runner_settings,
+    load_runner_settings as load_diary_runner_settings,
     resolve_or_create_output_project,
-    runner_settings_path,
-    update_runner_settings,
+    runner_settings_path as diary_runner_settings_path,
+    update_runner_settings as update_diary_runner_settings,
 )
 
 
@@ -232,6 +242,7 @@ class DashboardProjectContext:
     segment5_dir: Path
     segment6_dir: Path
     shared_tactile_path: Path
+    source_profile_id: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -240,6 +251,7 @@ class DashboardProjectContext:
             "project_kind": self.project_kind,
             "project_label": self.project_label,
             "source_template_id": self.source_template_id,
+            "source_profile_id": self.source_profile_id,
             "created_at": self.created_at,
             "registry_root": str(self.registry_root),
             "project_dir": str(self.project_dir),
@@ -340,7 +352,7 @@ class DashboardController:
             self.state_root = Path(project_registry_root).parent / "dashboard_state"
         else:
             self.state_root = Path(state_root)
-        remembered = load_runner_settings(self.state_root)
+        remembered = load_diary_runner_settings(self.state_root)
         remembered_root = str(remembered.get("current_output_project_root") or remembered.get("session_root") or "").strip()
         if remembered_root:
             remembered_path = Path(remembered_root).expanduser()
@@ -386,11 +398,20 @@ class DashboardController:
         preflight = _preflight_to_dict(
             preflight_run_package(design, participant_id, render_dir=artifact_root, require_audio=False)
         )
+        runner_settings = load_profile_runner_settings(state_root=self.state_root, default_output_folder=self.session_root)
+        profile_catalog = build_profile_catalog(
+            registry_root=self.project_registry_root,
+            state_root=self.state_root,
+            session_root=Path(runner_settings["active_output_folder"]),
+            inventory=self.preload_inventory,
+        )
         return {
             "design": design_to_dict(design),
             "design_path": str(self.design_path),
             "project": project.to_dict(),
             "custom_projects": self.custom_projects_payload(),
+            "profile_catalog": profile_catalog,
+            "runner_settings": runner_settings,
             "participant_id": participant_id,
             "templates": self.templates_payload(),
             "selected_template": design.study_profile_id,
@@ -456,7 +477,7 @@ class DashboardController:
         )
 
     def _data_acquisition_context(self) -> dict[str, Any]:
-        settings = load_runner_settings(self.state_root)
+        settings = load_diary_runner_settings(self.state_root)
         root_text = str(settings.get("current_output_project_root") or settings.get("session_root") or "").strip()
         root = Path(root_text).expanduser() if root_text else None
         diary_text = str(settings.get("diary_path") or "").strip()
@@ -468,7 +489,7 @@ class DashboardController:
             "active": active,
             "root": "" if root is None else str(root),
             "diary_path": "" if diary is None else str(diary),
-            "runner_settings_path": str(runner_settings_path(self.state_root)),
+            "runner_settings_path": str(diary_runner_settings_path(self.state_root)),
             "last_experiment_name": str(settings.get("last_experiment_name") or ""),
             "last_profile_id": str(settings.get("last_profile_id") or ""),
             "last_participant_id": str(settings.get("last_participant_id") or ""),
@@ -507,6 +528,15 @@ class DashboardController:
         except Exception:
             return None
 
+    def profile_catalog_payload(self) -> dict[str, Any]:
+        settings = load_profile_runner_settings(state_root=self.state_root, default_output_folder=self.session_root)
+        return build_profile_catalog(
+            registry_root=self.project_registry_root,
+            state_root=self.state_root,
+            session_root=Path(settings["active_output_folder"]),
+            inventory=self.preload_inventory,
+        )
+
     def custom_projects_payload(self) -> list[dict[str, Any]]:
         return _custom_project_records(self.project_registry_root)
 
@@ -537,6 +567,22 @@ class DashboardController:
                 project=project,
                 payload={"template_id": template_id},
             )
+            participant_id = self.participant_id
+        update_profile_runner_settings(
+            state_root=self.state_root,
+            profile_id=template_id,
+            profile_kind="bundled",
+            dashboard_project_id=project.project_id,
+            participant_id=participant_id,
+        )
+        append_output_diary_event(
+            "profile_selected",
+            state_root=self.state_root,
+            profile_id=template_id,
+            profile_kind="bundled",
+            dashboard_project_id=project.project_id,
+            participant_id=participant_id,
+        )
         return self.snapshot() if snapshot else {"selected_template": template_id}
 
     def load_custom_design(self) -> dict[str, Any]:
@@ -623,6 +669,7 @@ class DashboardController:
             project_kind="custom",
             project_label=record["project_label"],
             source_template_id=record.get("source_template_id", ""),
+            source_profile_id=record.get("source_profile_id", ""),
             created_at=record.get("created_at", ""),
         )
         design.study_profile_reference_parameters[PROJECT_METADATA_KEY] = {
@@ -631,6 +678,7 @@ class DashboardController:
             "project_kind": context.project_kind,
             "project_label": context.project_label,
             "source_template_id": context.source_template_id,
+            "source_profile_id": context.source_profile_id,
             "created_at": context.created_at,
             "placeholder_name": False,
         }
@@ -646,6 +694,21 @@ class DashboardController:
                 project=context,
                 payload={"project_id": project_id},
             )
+        update_profile_runner_settings(
+            state_root=self.state_root,
+            profile_id=context.project_id,
+            profile_kind="custom",
+            dashboard_project_id=context.project_id,
+            participant_id="",
+        )
+        append_output_diary_event(
+            "profile_selected",
+            state_root=self.state_root,
+            profile_id=context.project_id,
+            profile_kind="custom",
+            dashboard_project_id=context.project_id,
+            participant_id="",
+        )
         return self.snapshot()
 
     def export_data_acquisition_folder(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -691,7 +754,7 @@ class DashboardController:
             "dashboard_project": project.to_dict(),
             "dashboard_project_export_dir": str(design_export_dir),
             "dashboard_design_snapshot_path": str(design_snapshot_path),
-            "runner_settings_path": str(runner_settings_path(self.state_root)),
+            "runner_settings_path": str(diary_runner_settings_path(self.state_root)),
             "reused_existing_diary": resolution.reused_existing_diary,
             "created_output_project": resolution.created,
         }
@@ -713,7 +776,7 @@ class DashboardController:
                 "created_output_project": resolution.created,
             },
         )
-        update_runner_settings(
+        update_diary_runner_settings(
             self.state_root,
             session_root=str(resolution.root),
             current_output_project_root=str(resolution.root),
@@ -725,6 +788,15 @@ class DashboardController:
             bridge_manifest_path=str(bridge_manifest_path),
             dashboard_project_export_dir=str(design_export_dir),
         )
+        profile_id = project.project_id if project.project_kind == "custom" else str(design.study_profile_id or project.project_id)
+        update_profile_runner_settings(
+            state_root=self.state_root,
+            output_folder=resolution.root,
+            profile_id=profile_id,
+            profile_kind="custom" if project.project_kind == "custom" else "bundled",
+            dashboard_project_id=project.project_id,
+            participant_id=participant_id,
+        )
         with self._lock:
             self.session_root = resolution.root
             self.current_run_package = None
@@ -733,6 +805,175 @@ class DashboardController:
             **bridge_manifest,
             "bridge_manifest_path": str(bridge_manifest_path),
         }
+        return snapshot
+
+    def save_prepared_study_profile(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        payload = payload or {}
+        profile_name = str(payload.get("name") or "").strip()
+        if not profile_name:
+            raise ValueError("Enter a profile name before saving.")
+        created_at = datetime.now()
+        with self._lock:
+            source_project = self._ensure_project_context(self.design)
+            source_design = _copy_design(self.design)
+            run_setup_manifest_path = _run_setup_manifest_path(source_project.project_dir)
+            manifest = _load_json(run_setup_manifest_path)
+            errors = _validate_run_setup_manifest(manifest, project_dir=source_project.project_dir, design=source_design)
+            if errors:
+                raise ValueError(f"Prepare Segment 6 before saving a study profile: {errors[0]}")
+            source_metadata = _project_metadata(source_design)
+            source_profile_id = str(
+                source_metadata.get("project_id")
+                or source_design.study_profile_id
+                or source_project.project_id
+            ).strip()
+            source_template_id = str(
+                source_metadata.get("source_template_id")
+                or source_design.study_profile_id
+                or source_profile_id
+            ).strip()
+            project_id = generate_custom_profile_id(
+                profile_name,
+                self.project_registry_root,
+                created_at=created_at,
+                max_slug_length=CUSTOM_PROJECT_ID_SLUG_MAX_LENGTH,
+            )
+            new_context = _project_context_from_parts(
+                registry_root=self.project_registry_root,
+                project_id=project_id,
+                project_kind="custom",
+                project_label=profile_name,
+                source_template_id=source_template_id,
+                source_profile_id=source_profile_id,
+                created_at=created_at.isoformat(timespec="seconds"),
+            )
+            if new_context.project_dir.exists():
+                raise FileExistsError(f"Custom profile folder already exists: {new_context.project_dir}")
+            shutil.copytree(source_project.project_dir, new_context.project_dir)
+            rebase_project_copy_paths(new_context.project_dir, old_root=source_project.project_dir, new_root=new_context.project_dir)
+            saved_design = _copy_design(source_design)
+            saved_design.name = profile_name
+            saved_design.study_profile_id = ""
+            saved_design.study_profile_title = ""
+            params = dict(saved_design.study_profile_reference_parameters or {})
+            params["dashboard_mode"] = "custom"
+            params["source_profile_id"] = source_profile_id
+            params["source_template_id"] = source_template_id
+            params[PROJECT_METADATA_KEY] = {
+                "schema": PROJECT_MANIFEST_SCHEMA,
+                "project_id": new_context.project_id,
+                "project_kind": new_context.project_kind,
+                "project_label": new_context.project_label,
+                "source_template_id": new_context.source_template_id,
+                "source_profile_id": new_context.source_profile_id,
+                "created_at": new_context.created_at,
+                "placeholder_name": False,
+            }
+            saved_design.study_profile_reference_parameters = params
+            self.design = saved_design
+            self.participant_id = self.participant_id or "P001"
+            self.current_run_package = None
+            _write_project_context_files(new_context, self.design)
+            _write_segment_validation_report(new_context, self.design)
+            save_design(self.design, self.design_path)
+            participant_id = self.participant_id
+        update_profile_runner_settings(
+            state_root=self.state_root,
+            profile_id=new_context.project_id,
+            profile_kind="custom",
+            dashboard_project_id=new_context.project_id,
+            participant_id=participant_id,
+            run_setup_manifest_path=_run_setup_manifest_path(new_context.project_dir),
+        )
+        record_experiment_activity(
+            "profile_saved",
+            state_root=self.state_root,
+            template_id=new_context.project_id,
+            project_dir=str(new_context.project_dir),
+            design_path=str(self.design_path),
+            run_setup_manifest_path=str(_run_setup_manifest_path(new_context.project_dir)),
+            participant_id=participant_id,
+            source_profile_id=source_profile_id,
+        )
+        append_output_diary_event(
+            "profile_saved",
+            state_root=self.state_root,
+            profile_id=new_context.project_id,
+            profile_kind="custom",
+            dashboard_project_id=new_context.project_id,
+            participant_id=participant_id,
+            source_profile_id=source_profile_id,
+            display_name=profile_name,
+        )
+        snapshot = self.snapshot()
+        snapshot["saved_profile_result"] = {
+            "profile_id": new_context.project_id,
+            "display_name": profile_name,
+            "project_dir": str(new_context.project_dir),
+            "source_profile_id": source_profile_id,
+        }
+        return snapshot
+
+    def export_active_output_folder(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        if payload:
+            with self._lock:
+                profile_run_mode = _is_readonly_profile_design(self.design)
+            if profile_run_mode:
+                self._apply_profile_runner_payload(payload)
+            else:
+                self.update_design(payload)
+        with self._lock:
+            project = self._ensure_project_context(self.design)
+            design = _copy_design(self.design)
+            participant_id = self.participant_id
+        manifest_path = _run_setup_manifest_path(project.project_dir)
+        manifest = _load_json(manifest_path)
+        errors = _validate_run_setup_manifest(manifest, project_dir=project.project_dir, design=design)
+        if errors:
+            raise ValueError(f"Prepare Segment 6 before preparing the output folder: {errors[0]}")
+        settings = load_profile_runner_settings(state_root=self.state_root, default_output_folder=self.session_root)
+        output_folder = Path(settings["active_output_folder"])
+        profile_id = project.project_id if project.project_kind == "custom" else str(design.study_profile_id or project.project_id)
+        catalog = build_profile_catalog(
+            registry_root=self.project_registry_root,
+            state_root=self.state_root,
+            session_root=output_folder,
+            inventory=self.preload_inventory,
+        )
+        profile_entry = next((entry for entry in catalog["entries"] if entry.get("profile_id") == profile_id), None)
+        if profile_entry is None:
+            profile_entry = {
+                "profile_id": profile_id,
+                "display_name": project.project_label,
+                "kind": "custom" if project.project_kind == "custom" else "bundled",
+                "dashboard_project_id": project.project_id,
+                "project_dir": str(project.project_dir),
+                "asset_roots": [str(project.project_dir)],
+                "source_template_id": project.source_template_id,
+                "source_profile_id": project.source_profile_id,
+                "participant_count": int(manifest.get("participant_count") or 0),
+                "participant_ids": [],
+            }
+        bridge = prepare_acquisition_folder(
+            profile_entry=profile_entry,
+            source_project_dir=project.project_dir,
+            output_folder=output_folder,
+            state_root=self.state_root,
+            participant_id=participant_id,
+        )
+        record_experiment_activity(
+            "acquisition_folder_exported",
+            state_root=self.state_root,
+            template_id=profile_id,
+            project_dir=str(project.project_dir),
+            design_path=str(self.design_path),
+            run_setup_manifest_path=str(manifest_path),
+            participant_id=participant_id,
+            output_folder=str(output_folder),
+            bridge_manifest_path=bridge.get("bridge_manifest_path", ""),
+        )
+        snapshot = self.snapshot()
+        snapshot["output_folder_export_result"] = bridge
         return snapshot
 
     def update_design(self, payload: dict[str, Any]) -> dict[str, Any]:
@@ -1001,6 +1242,7 @@ class DashboardController:
             project = self._ensure_project_context(self.design)
             design = _copy_design(self.design)
             participant_id = self.participant_id
+        session_root = active_output_folder(state_root=self.state_root, fallback=self.session_root)
         gate_errors = _profile_runner_readiness_errors(design)
         if gate_errors:
             raise ValueError(gate_errors[0])
@@ -1029,6 +1271,8 @@ class DashboardController:
                 state_root=self.state_root,
                 session_root=self.session_root,
             )
+            if claimed_manifest is not None and not _path_is_within(claimed_manifest, session_root):
+                claimed_manifest = None
             if claimed_manifest is not None:
                 package = load_run_package(claimed_manifest)
                 if progress_callback is not None:
@@ -1047,7 +1291,7 @@ class DashboardController:
                     run_setup_manifest_path,
                     participant_id,
                     design=design,
-                    session_root=self.session_root,
+                    session_root=session_root,
                     progress_callback=progress_callback,
                 )
         else:
@@ -1059,7 +1303,7 @@ class DashboardController:
                 design,
                 participant_id,
                 render_dir=artifact_root,
-                session_root=self.session_root,
+                session_root=session_root,
             )
         with self._lock:
             self.current_run_package = package
@@ -1332,6 +1576,7 @@ class DashboardController:
             design = _copy_design(self.design)
             participant_id = self.participant_id
             existing_package = self.current_run_package
+        session_root = active_output_folder(state_root=self.state_root, fallback=self.session_root)
         gate_errors = _profile_runner_readiness_errors(design)
         if gate_errors:
             raise ValueError(gate_errors[0])
@@ -1363,6 +1608,8 @@ class DashboardController:
                 state_root=self.state_root,
                 session_root=self.session_root,
             )
+            if claimed_manifest is not None and not _path_is_within(claimed_manifest, session_root):
+                claimed_manifest = None
             if claimed_manifest is not None:
                 package = load_run_package(claimed_manifest)
             else:
@@ -1370,7 +1617,7 @@ class DashboardController:
                     run_setup_manifest_path,
                     participant_id,
                     design=design,
-                    session_root=self.session_root,
+                    session_root=session_root,
                 )
             with self._lock:
                 self.current_run_package = package
@@ -1386,6 +1633,20 @@ class DashboardController:
                 participant_id=participant_id,
                 experiment_structure=str(manifest.get("experiment_structure") or ""),
             )
+        profile_id = project.project_id if project.project_kind == "custom" else str(design.study_profile_id or project.project_id)
+        profile_kind = "custom" if project.project_kind == "custom" else "bundled"
+        update_profile_runner_settings(
+            state_root=self.state_root,
+            output_folder=session_root,
+            profile_id=profile_id,
+            profile_kind=profile_kind,
+            dashboard_project_id=project.project_id,
+            participant_id=participant_id,
+            run_setup_manifest_path=run_setup_manifest_path,
+            session_manifest_path=package.manifest_path,
+        )
+        export_snapshot = self.export_active_output_folder()
+        bridge_result = export_snapshot.get("output_folder_export_result", {}) if isinstance(export_snapshot, dict) else {}
         launch_command = build_focus_runner_command(
             package.manifest_path,
             manual_start=True,
@@ -1417,6 +1678,18 @@ class DashboardController:
                 "packaged_runner": launch_command.packaged_runner,
             },
         )
+        append_output_diary_event(
+            "runner_launched",
+            state_root=self.state_root,
+            profile_id=profile_id,
+            profile_kind=profile_kind,
+            dashboard_project_id=project.project_id,
+            participant_id=participant_id,
+            run_setup_manifest_path=str(run_setup_manifest_path),
+            session_manifest_path=str(package.manifest_path),
+            session_dir=str(package.session_dir),
+            runner_binary=launch_command.runner_binary,
+        )
         result = {
             "status": "launched",
             "pid": process.pid,
@@ -1430,6 +1703,7 @@ class DashboardController:
             "run_setup_manifest": str(run_setup_manifest_path),
             "session_manifest": str(package.manifest_path),
             "session_dir": str(package.session_dir),
+            "bridge_manifest": str(bridge_result.get("bridge_manifest_path") or ""),
             "runner_options": "collected by PPSExperimentRunner.exe",
             "local_only": True,
         }
@@ -1785,6 +2059,10 @@ def create_app(
     def api_preloads() -> dict[str, Any]:
         return controller.preload_inventory_payload()
 
+    @app.get("/api/profile-catalog")
+    def api_profile_catalog() -> dict[str, Any]:
+        return controller.profile_catalog_payload()
+
     @app.post("/api/preloads/{template_id}/sync")
     def api_sync_preload(template_id: str) -> dict[str, Any]:
         return controller.sync_preload_assets(template_id)
@@ -1807,6 +2085,13 @@ def create_app(
     def api_export_data_acquisition_folder(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
             return controller.export_data_acquisition_folder(payload)
+        except Exception as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/api/profiles/save-prepared")
+    def api_save_prepared_profile(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
+        try:
+            return controller.save_prepared_study_profile(payload)
         except Exception as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -1874,6 +2159,13 @@ def create_app(
     def api_prepare_run_sequence(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
         try:
             return controller.prepare_experiment_run_setup(payload)
+        except Exception as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/api/run-sequence/export-bridge")
+    def api_export_run_sequence_bridge(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
+        try:
+            return controller.export_active_output_folder(payload)
         except Exception as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -2373,6 +2665,15 @@ def _path_exists(path: str | Path) -> bool:
         return os.path.exists(_filesystem_path(path))
     except OSError:
         return False
+
+
+def _path_is_within(path: str | Path, root: str | Path) -> bool:
+    try:
+        target = Path(path).resolve()
+        base = Path(root).resolve()
+    except Exception:
+        return False
+    return target == base or base in target.parents
 
 
 def _ensure_dir(path: str | Path) -> None:
@@ -6788,10 +7089,12 @@ def _placeholder_custom_project_name(value: str) -> bool:
     return str(value or "").strip().lower() in {"", "custom pps design", "untitled pps design"}
 
 
-def _custom_project_id(name: str) -> str:
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    slug = _project_slug(name, "custom_project", max_length=CUSTOM_PROJECT_ID_SLUG_MAX_LENGTH)
-    return f"custom_{slug}_{timestamp}"
+def _custom_project_id(name: str, registry_root: Path = DEFAULT_PROJECT_REGISTRY_ROOT) -> str:
+    return generate_custom_profile_id(
+        name,
+        registry_root,
+        max_slug_length=CUSTOM_PROJECT_ID_SLUG_MAX_LENGTH,
+    )
 
 
 def _profile_project_id(design: StimulusDesign) -> str:
@@ -6807,6 +7110,7 @@ def _project_context_from_parts(
     project_label: str,
     source_template_id: str = "",
     created_at: str = "",
+    source_profile_id: str = "",
 ) -> DashboardProjectContext:
     registry_root = Path(registry_root)
     project_dir = registry_root / project_id
@@ -6817,6 +7121,7 @@ def _project_context_from_parts(
         project_label=project_label,
         source_template_id=source_template_id,
         created_at=created_at or datetime.now().isoformat(timespec="seconds"),
+        source_profile_id=source_profile_id,
         registry_root=registry_root,
         project_dir=project_dir,
         profile_dir=project_dir / "0_profile",
@@ -6868,6 +7173,7 @@ def _custom_project_record(registry_root: Path, project_id: str) -> dict[str, An
         "project_id": project_dir.name,
         "project_label": project_label,
         "source_template_id": str(manifest.get("source_template_id") or metadata.get("source_template_id") or ""),
+        "source_profile_id": str(manifest.get("source_profile_id") or metadata.get("source_profile_id") or ""),
         "created_at": str(manifest.get("created_at") or metadata.get("created_at") or ""),
         "project_dir": str(project_dir),
         "active_design_path": str(active_design_path),
@@ -6903,6 +7209,7 @@ def _project_context_from_design(design: StimulusDesign, registry_root: Path) ->
         project_label=str(metadata.get("project_label") or design.name or project_id),
         source_template_id=str(metadata.get("source_template_id") or design.study_profile_id or ""),
         created_at=str(metadata.get("created_at") or ""),
+        source_profile_id=str(metadata.get("source_profile_id") or ""),
     )
 
 
@@ -6919,14 +7226,16 @@ def _ensure_dashboard_project_context(
             return existing
 
     if _is_custom_design(design):
-        project_id = _custom_project_id(design.name)
+        project_id = _custom_project_id(design.name, registry_root)
         source_template_id = str(design.study_profile_reference_parameters.get("customized_from_profile_id") or "").strip()
+        source_profile_id = str(design.study_profile_reference_parameters.get("source_profile_id") or source_template_id).strip()
         context = _project_context_from_parts(
             registry_root=registry_root,
             project_id=project_id,
             project_kind="custom",
             project_label=design.name.strip() or "Custom PPS design",
             source_template_id=source_template_id,
+            source_profile_id=source_profile_id,
             created_at=datetime.now().isoformat(timespec="seconds"),
         )
     else:
@@ -6946,6 +7255,7 @@ def _ensure_dashboard_project_context(
         "project_kind": context.project_kind,
         "project_label": context.project_label,
         "source_template_id": context.source_template_id,
+        "source_profile_id": context.source_profile_id,
         "created_at": context.created_at,
         "placeholder_name": _is_custom_design(design) and _placeholder_custom_project_name(design.name),
     }
