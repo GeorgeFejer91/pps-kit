@@ -471,6 +471,16 @@ def test_prepared_session_asset_status_reports_ready_and_generated_packages(tmp_
     assert queued["source"] == "prepared_session_queue"
     assert queued["data_collected"] is False
 
+    wrong_folder = prepared_session_asset_status(
+        run_manifest,
+        "P001",
+        state_root=state_root,
+        session_root=tmp_path / "other_sessions",
+    )
+    assert wrong_folder["generated"] is False
+    assert wrong_folder["status"] == "not_generated"
+    assert "different output folder" in wrong_folder["message"]
+
     with (package.session_dir / "events.csv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=["event_id", "event_type", "unix_time", "monotonic_time", "payload_json"])
         writer.writeheader()

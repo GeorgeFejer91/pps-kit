@@ -692,6 +692,9 @@ def prepared_session_asset_status(
             continue
         if status in {"ready", "claimed"}:
             valid, message = _prepared_session_manifest_ready_for_run_setup(manifest_path, run_setup, participant)
+            if valid and not _path_is_within(manifest_path, Path(session_root)):
+                valid = False
+                message = "Prepared session belongs to a different output folder."
             if valid:
                 return {
                     "participant_id": participant,
@@ -795,6 +798,15 @@ def _scan_prepared_session_manifest(
         if valid:
             return manifest_path, message
     return None
+
+
+def _path_is_within(path: Path, root: Path) -> bool:
+    try:
+        target = Path(path).resolve()
+        base = Path(root).resolve()
+    except Exception:
+        return False
+    return target == base or base in target.parents
 
 
 def _participant_data_collection_status(
@@ -1686,7 +1698,7 @@ class SessionRunnerController:
             if owns_engine and self.audio_engine is not None and hasattr(self.audio_engine, "shutdown"):
                 self.audio_engine.shutdown()
 
-        return SessionRunResult(
+        result = SessionRunResult(
             completed=completed,
             interrupted=interrupted,
             session_dir=self.package.session_dir,
@@ -1703,6 +1715,40 @@ class SessionRunnerController:
             session_metadata_path=self._session_metadata_path,
             capture_options=self.capture_options.as_dict(),
         )
+        try:
+            from .profile_memory import append_output_diary_event, update_runner_settings
+
+            event_type = "run_completed" if result.completed and not result.interrupted else "run_interrupted"
+            append_output_diary_event(
+                event_type,
+                state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+                participant_id=self.package.participant_id,
+                session_id=self.package.session_id,
+                session_dir=str(self.package.session_dir),
+                session_manifest_path=str(self.package.manifest_path),
+                run_setup_manifest_path=str(self.package.source_run_setup_manifest_path or ""),
+                completed=result.completed,
+                interrupted=result.interrupted,
+                capture_options=result.capture_options,
+            )
+            append_output_diary_event(
+                "participant_collection_summary",
+                state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+                participant_id=self.package.participant_id,
+                session_id=self.package.session_id,
+                data_collected=bool(result.completed and not result.interrupted),
+                session_dir=str(self.package.session_dir),
+            )
+            update_runner_settings(
+                state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+                participant_id=self.package.participant_id,
+                capture_options=result.capture_options,
+                run_setup_manifest_path=str(self.package.source_run_setup_manifest_path or ""),
+                session_manifest_path=self.package.manifest_path,
+            )
+        except Exception:
+            pass
+        return result
 
     def _write_session_metadata(self) -> Path:
         self._session_metadata = _build_runner_session_metadata(

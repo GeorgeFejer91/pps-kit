@@ -611,7 +611,7 @@ def _run_standalone_launcher_validation(args: argparse.Namespace) -> int:
                 if index >= 0:
                     combo.setCurrentIndex(index)
                 QTest.mouseClick(combo, q["Qt"].MouseButton.LeftButton)
-                _record_click("click Study/profile preset selector")
+                _record_click("click Study/profile selector")
             if button is not None and button.isEnabled():
                 QTest.mouseClick(button, q["Qt"].MouseButton.LeftButton)
                 _record_click("click Run Selected Profile")
@@ -656,7 +656,7 @@ def _run_standalone_launcher_validation(args: argparse.Namespace) -> int:
         "focus_mode": focus_result,
     }
     failures: list[str] = []
-    if not any(click.get("label") == "click Study/profile preset selector" for click in launcher_clicks):
+    if not any(click.get("label") == "click Study/profile selector" for click in launcher_clicks):
         failures.append("Standalone runner profile selector was not clicked.")
     if not any(click.get("label") == "click Run Selected Profile" for click in launcher_clicks):
         failures.append("Standalone runner Run Selected Profile button was not clicked.")
@@ -890,7 +890,7 @@ def _run_packaged_standalone_app_background_validation(args: argparse.Namespace)
         failures.append("Packaged standalone launcher did not expose any finished profiles.")
     if launcher_result.get("selected_profile") != STUDY5_TEMPLATE_ID:
         failures.append("Packaged standalone launcher did not select the Study 5 profile.")
-    if not any(click.get("label") == "click Study/profile preset selector" for click in launcher_clicks):
+    if not any(click.get("label") == "click Study/profile selector" for click in launcher_clicks):
         failures.append("Packaged standalone launcher profile selector was not clicked by a validation mouse event.")
     if not any(click.get("label") == "click Run Selected Profile" for click in launcher_clicks):
         failures.append("Packaged standalone launcher Run Selected Profile was not clicked by a validation mouse event.")
@@ -977,7 +977,7 @@ def _run_packaged_standalone_app_validation(args: argparse.Namespace) -> int:
             launcher_hwnd,
             0.70,
             0.16,
-            "click Study/profile preset selector",
+            "click Study/profile selector",
             launcher_clicks,
         )
         time.sleep(0.25)
@@ -1040,7 +1040,7 @@ def _run_packaged_standalone_app_validation(args: argparse.Namespace) -> int:
     counts = dict(focus_result.get("event_counts") or {})
     if exit_code != 0:
         failures.append(f"Packaged runner exited with code {exit_code}.")
-    if not any(click.get("label") == "click Study/profile preset selector" for click in launcher_clicks):
+    if not any(click.get("label") == "click Study/profile selector" for click in launcher_clicks):
         failures.append("Standalone launcher profile selector was not clicked with an OS mouse event.")
     if not any(click.get("label") == "click Run Selected Profile" for click in launcher_clicks):
         failures.append("Standalone launcher Run Selected Profile was not clicked with an OS mouse event.")

@@ -7,6 +7,7 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
 - Dashboard backend and Segment 0-6 materialization: `src/peripersonal_space_toolkit/dashboard_app.py`.
 - Dashboard backend helper seams: `src/peripersonal_space_toolkit/dashboard_backend/`.
 - Browser dashboard/static GitHub Pages surface: `src/peripersonal_space_toolkit/dashboard/`, root `index.html`, `.nojekyll`, `CNAME`.
+- Shared stored-profile catalogue, runner memory, acquisition bridge, and output diary helpers: `profile_memory.py`.
 - Runtime package preparation and participant playback: `session_runner.py`, `focus_app.py`, `focus_launch.py`.
 - Event, timing, and output evidence contracts: `timing_events.py`, `session_events.py`, `output_evidence.py`, `topup.py`.
 - Published-study preload recreation gate: `profile_recreation.py`, `assets/preloads/`, `study_templates/`.
