@@ -413,7 +413,12 @@ def test_prepared_session_queue_claims_only_matching_current_setup(tmp_path: Pat
         state_root=state_root,
     )
 
-    assert claim_prepared_session(run_manifest, "P002", state_root=state_root) == package.manifest_path.resolve()
+    other_root = tmp_path / "other_sessions"
+    assert claim_prepared_session(run_manifest, "P002", state_root=state_root, session_root=other_root) is None
+    assert (
+        claim_prepared_session(run_manifest, "P002", state_root=state_root, session_root=tmp_path / "sessions")
+        == package.manifest_path.resolve()
+    )
     record_prepared_session_queue(
         participant_id="P002",
         run_setup_manifest_path=run_manifest,
@@ -470,6 +475,19 @@ def test_prepared_session_asset_status_reports_ready_and_generated_packages(tmp_
     assert queued["status"] == "ready"
     assert queued["source"] == "prepared_session_queue"
     assert queued["data_collected"] is False
+
+    other_root = tmp_path / "other_sessions"
+    other_root.mkdir()
+    different_output = prepared_session_asset_status(
+        run_manifest,
+        "P001",
+        state_root=state_root,
+        session_root=other_root,
+    )
+
+    assert different_output["generated"] is False
+    assert different_output["status"] == "not_generated"
+    assert "different output folder" in different_output["message"]
 
     with (package.session_dir / "events.csv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=["event_id", "event_type", "unix_time", "monotonic_time", "payload_json"])

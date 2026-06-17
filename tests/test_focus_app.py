@@ -1192,6 +1192,7 @@ def test_validation_realtime_audio_engine_waits_for_buffer_deadlines(tmp_path: P
 def test_launcher_uses_participant_dropdown_instead_of_text_entry():
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
+        from PIL import Image, ImageStat
         from PySide6.QtWidgets import QApplication
         from peripersonal_space_toolkit import focus_app
     except Exception as exc:  # pragma: no cover - depends on optional GUI deps
@@ -1212,6 +1213,17 @@ def test_launcher_uses_participant_dropdown_instead_of_text_entry():
             placeholders = [line.placeholderText() for line in dialog.findChildren(q["QLineEdit"])]
             assert "Participant ID" not in placeholders
             assert "1-10" in placeholders
+            labels = _collect_widget_texts(dialog, q["QLabel"])
+            buttons = _collect_widget_texts(dialog, q["QPushButton"])
+            assert any("Output project" in label for label in labels)
+            assert "Change Output Folder" in buttons
+            screenshot = Path.cwd() / ".pytest_cache" / "launcher_output_folder.png"
+            screenshot.parent.mkdir(parents=True, exist_ok=True)
+            assert dialog.grab().save(str(screenshot))
+            image = Image.open(screenshot).convert("RGB")
+            assert image.width >= 760
+            assert image.height >= 520
+            assert max(ImageStat.Stat(image).stddev) > 0.0
         except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
             errors.append(exc)
         finally:
@@ -1314,7 +1326,7 @@ def test_launcher_generate_range_button_prepares_requested_range(monkeypatch):
     monkeypatch.setattr(
         focus_app,
         "profile_participant_asset_statuses",
-        lambda _profile: {
+        lambda _profile, **_kwargs: {
             participant: {
                 "participant_id": participant,
                 "generated": participant != "P003",
@@ -1325,7 +1337,7 @@ def test_launcher_generate_range_button_prepares_requested_range(monkeypatch):
         },
     )
 
-    def fake_prepare_profile_audio_assets(profile_id, participant_ids, *, progress_callback=None):
+    def fake_prepare_profile_audio_assets(profile_id, participant_ids, *, session_root=None, progress_callback=None):
         calls.append((profile_id, list(participant_ids)))
         if progress_callback is not None:
             progress_callback({"message": "Fake range generation", "current": len(participant_ids), "total": len(participant_ids)})
@@ -1430,6 +1442,23 @@ def test_prepare_profile_focus_session_uses_finished_profile_gate(tmp_path: Path
     assert calls["init_kwargs"]["design_path"] == tmp_path / "focus_design.json"
 
 
+def test_runner_output_project_setting_creates_timestamped_folder(tmp_path: Path, monkeypatch):
+    from peripersonal_space_toolkit import focus_app
+
+    state_root = tmp_path / "state"
+    parent = tmp_path / "operator_outputs"
+    monkeypatch.setattr(focus_app.time, "strftime", lambda _fmt: "20260617_151500")
+
+    project = focus_app.create_runner_output_project(parent, state_root=state_root)
+
+    assert project == parent / "pps_runner_outputs_20260617_151500"
+    assert project.is_dir()
+    assert focus_app.current_runner_session_root(state_root) == project
+    settings = focus_app.load_runner_settings(state_root)
+    assert settings["schema"] == "pps-focus-runner-settings.v1"
+    assert settings["session_root"] == str(project)
+
+
 def test_prepare_profile_audio_assets_reuses_scanned_generated_packages(tmp_path: Path, monkeypatch):
     from peripersonal_space_toolkit import focus_app
 
@@ -1445,6 +1474,7 @@ def test_prepare_profile_audio_assets_reuses_scanned_generated_packages(tmp_path
     prepared_participants: list[str] = []
     queue_records: list[dict[str, object]] = []
     activity_records: list[tuple[tuple[object, ...], dict[str, object]]] = []
+    output_root = tmp_path / "operator_selected_output"
 
     monkeypatch.setattr(
         focus_app,
@@ -1458,6 +1488,7 @@ def test_prepare_profile_audio_assets_reuses_scanned_generated_packages(tmp_path
 
     def fake_asset_status(run_setup_path, participant_id, **_kwargs):
         assert run_setup_path == run_setup_manifest
+        assert Path(_kwargs["session_root"]) == output_root
         if participant_id == "P001":
             return {
                 "participant_id": "P001",
@@ -1480,6 +1511,7 @@ def test_prepare_profile_audio_assets_reuses_scanned_generated_packages(tmp_path
 
     def fake_prepare_segment_run_package(run_setup_path, participant_id, **_kwargs):
         assert run_setup_path == run_setup_manifest
+        assert Path(_kwargs["session_root"]) == output_root
         prepared_participants.append(participant_id)
         return SimpleNamespace(
             manifest_path=generated_manifest,
@@ -1496,7 +1528,11 @@ def test_prepare_profile_audio_assets_reuses_scanned_generated_packages(tmp_path
         lambda *args, **kwargs: activity_records.append((args, kwargs)),
     )
 
-    result = focus_app.prepare_profile_audio_assets("study5_box_breathing_pps", ["P001", "P002"])
+    result = focus_app.prepare_profile_audio_assets(
+        "study5_box_breathing_pps",
+        ["P001", "P002"],
+        session_root=output_root,
+    )
 
     assert prepared_participants == ["P002"]
     assert result["prepared_count"] == 1
@@ -1549,7 +1585,36 @@ def test_prepare_last_or_latest_focus_session_skips_non_launchable_pointer(tmp_p
     monkeypatch.setattr(
         focus_app,
         "prepare_latest_focus_session",
-        lambda participant_id=None, progress_callback=None: fallback_manifest,
+        lambda participant_id=None, session_root=None, progress_callback=None: fallback_manifest,
     )
 
     assert focus_app.prepare_last_or_latest_focus_session("P001") == fallback_manifest
+
+
+def test_prepare_last_or_latest_focus_session_skips_pointer_outside_output_root(tmp_path: Path, monkeypatch):
+    from peripersonal_space_toolkit import focus_app
+
+    old_root = tmp_path / "old_output"
+    old_root.mkdir()
+    old_manifest = _write_focus_preview_session_manifest(old_root)
+    new_root = tmp_path / "new_output"
+    fallback_manifest = new_root / "P001_fallback" / "session_manifest.json"
+    fallback_manifest.parent.mkdir(parents=True)
+    calls: dict[str, object] = {}
+
+    monkeypatch.setattr(
+        focus_app,
+        "load_last_experiment_pointer",
+        lambda: {"session_manifest_path": str(old_manifest), "participant_id": "P001"},
+    )
+
+    def fake_prepare_latest(participant_id=None, session_root=None, progress_callback=None):
+        calls["participant_id"] = participant_id
+        calls["session_root"] = session_root
+        return fallback_manifest
+
+    monkeypatch.setattr(focus_app, "prepare_latest_focus_session", fake_prepare_latest)
+
+    assert focus_app.prepare_last_or_latest_focus_session("P001", session_root=new_root) == fallback_manifest
+    assert calls["participant_id"] == "P001"
+    assert calls["session_root"] == new_root

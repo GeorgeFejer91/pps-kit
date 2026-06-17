@@ -836,6 +836,7 @@ class DashboardController:
                 run_setup_manifest_path,
                 participant_id,
                 state_root=self.state_root,
+                session_root=self.session_root,
             )
             if claimed_manifest is not None:
                 package = load_run_package(claimed_manifest)
@@ -1134,6 +1135,7 @@ class DashboardController:
                 run_setup_manifest_path,
                 participant_id,
                 state_root=self.state_root,
+                session_root=self.session_root,
             )
             if claimed_manifest is not None:
                 package = load_run_package(claimed_manifest)

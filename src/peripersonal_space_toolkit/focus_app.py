@@ -100,8 +100,54 @@ DEFAULT_FOCUS_LAYOUT_PROFILE = render_focus_layout_profile(1120, 720)
 FOCUS_STYLE_SHEET = render_focus_style_sheet(DEFAULT_FOCUS_LAYOUT_PROFILE)
 STUDY5_PROFILE_ID = "study5_box_breathing_pps"
 DATA_COLLECTED_MARK = "[collected]"
+RUNNER_SETTINGS_SCHEMA = "pps-focus-runner-settings.v1"
+RUNNER_OUTPUT_PROJECT_PREFIX = "pps_runner_outputs"
 TIMELINE_LABEL_WIDTH = 58
 TIMELINE_RIGHT_MARGIN = 12
+
+
+def runner_settings_path(state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT) -> Path:
+    return Path(state_root) / "focus_runner_settings.v1.json"
+
+
+def load_runner_settings(state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT) -> dict[str, Any]:
+    path = runner_settings_path(state_root)
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {"schema": RUNNER_SETTINGS_SCHEMA}
+    return data if data.get("schema") == RUNNER_SETTINGS_SCHEMA else {"schema": RUNNER_SETTINGS_SCHEMA}
+
+
+def current_runner_session_root(state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT) -> Path:
+    raw = str(load_runner_settings(state_root).get("session_root") or "").strip()
+    return Path(raw).expanduser() if raw else DEFAULT_SESSION_ROOT
+
+
+def set_runner_session_root(session_root: Path, state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT) -> Path:
+    root = Path(session_root).expanduser().resolve()
+    root.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "schema": RUNNER_SETTINGS_SCHEMA,
+        "session_root": str(root),
+        "updated_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+    }
+    path = runner_settings_path(state_root)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    return root
+
+
+def create_runner_output_project(parent_dir: Path, state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT) -> Path:
+    parent = Path(parent_dir).expanduser().resolve()
+    parent.mkdir(parents=True, exist_ok=True)
+    stamp = time.strftime("%Y%m%d_%H%M%S")
+    candidate = parent / f"{RUNNER_OUTPUT_PROJECT_PREFIX}_{stamp}"
+    suffix = 2
+    while candidate.exists():
+        candidate = parent / f"{RUNNER_OUTPUT_PROJECT_PREFIX}_{stamp}_{suffix}"
+        suffix += 1
+    return set_runner_session_root(candidate, state_root=state_root)
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -2581,12 +2627,22 @@ def _is_launchable_session_manifest(path: Path) -> bool:
     return bool(package.blocks)
 
 
+def _path_is_inside_root(path: Path, root: Path) -> bool:
+    try:
+        Path(path).resolve().relative_to(Path(root).resolve())
+        return True
+    except (OSError, ValueError):
+        return False
+
+
 def prepare_latest_focus_session(
     participant_id: str | None = None,
     *,
+    session_root: Path | None = None,
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> Path:
     """Materialize a session package from the newest prepared Segment 6 setup."""
+    output_root = Path(session_root) if session_root is not None else current_runner_session_root()
     run_setup = find_latest_dashboard_run_setup()
     if run_setup is None:
         raise FileNotFoundError("No prepared Segment 6 dashboard setup was found.")
@@ -2596,13 +2652,18 @@ def prepare_latest_focus_session(
         if not participants:
             raise ValueError(f"Prepared setup has no participants: {run_setup}")
         participant = participants[0]
-    claimed = claim_prepared_session(run_setup, participant, state_root=DEFAULT_DASHBOARD_STATE_ROOT)
+    claimed = claim_prepared_session(
+        run_setup,
+        participant,
+        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+        session_root=output_root,
+    )
     if claimed is not None:
         return claimed
     package = prepare_segment_run_package(
         run_setup,
         participant,
-        session_root=DEFAULT_SESSION_ROOT,
+        session_root=output_root,
         progress_callback=progress_callback,
     )
     record_experiment_activity(
@@ -2618,13 +2679,19 @@ def prepare_latest_focus_session(
 def prepare_last_or_latest_focus_session(
     participant_id: str | None = None,
     *,
+    session_root: Path | None = None,
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> Path:
     """Open the last launchable session, falling back to the newest prepared setup."""
+    output_root = Path(session_root) if session_root is not None else current_runner_session_root()
     pointer = load_last_experiment_pointer()
     session_text = str(pointer.get("session_manifest_path") or "").strip()
     session_manifest = Path(session_text) if session_text else Path()
-    if session_text and _is_launchable_session_manifest(session_manifest):
+    if (
+        session_text
+        and _path_is_inside_root(session_manifest, output_root)
+        and _is_launchable_session_manifest(session_manifest)
+    ):
         return session_manifest
     run_setup_text = str(pointer.get("run_setup_manifest_path") or "").strip()
     run_setup = Path(run_setup_text) if run_setup_text else Path()
@@ -2634,13 +2701,18 @@ def prepare_last_or_latest_focus_session(
             participants = segment_run_setup_participants(run_setup)
             participant = participants[0] if participants else ""
         if participant:
-            claimed = claim_prepared_session(run_setup, participant, state_root=DEFAULT_DASHBOARD_STATE_ROOT)
+            claimed = claim_prepared_session(
+                run_setup,
+                participant,
+                state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+                session_root=output_root,
+            )
             if claimed is not None:
                 return claimed
             package = prepare_segment_run_package(
                 run_setup,
                 participant,
-                session_root=DEFAULT_SESSION_ROOT,
+                session_root=output_root,
                 progress_callback=progress_callback,
             )
             record_experiment_activity(
@@ -2653,6 +2725,7 @@ def prepare_last_or_latest_focus_session(
             return package.manifest_path
     return prepare_latest_focus_session(
         participant_id or str(pointer.get("participant_id") or ""),
+        session_root=output_root,
         progress_callback=progress_callback,
     )
 
@@ -2663,7 +2736,7 @@ def _focus_dashboard_controller() -> Any:
     return dashboard_app.DashboardController(
         design_path=DEFAULT_FOCUS_PROFILE_DESIGN_PATH,
         render_dir=DEFAULT_RENDER_DIR,
-        session_root=DEFAULT_SESSION_ROOT,
+        session_root=current_runner_session_root(),
         import_dir=dashboard_app.DEFAULT_IMPORT_DIR,
         preview_dir=dashboard_app.DEFAULT_PREVIEW_DIR,
         project_registry_root=DEFAULT_PROJECT_REGISTRY_ROOT,
@@ -2754,9 +2827,10 @@ def profile_run_setup_manifest_path(profile_id: str) -> Path:
     )
 
 
-def profile_participant_asset_statuses(profile_id: str) -> dict[str, dict[str, Any]]:
+def profile_participant_asset_statuses(profile_id: str, *, session_root: Path | None = None) -> dict[str, dict[str, Any]]:
     participants = profile_participant_ids(profile_id)
     run_setup = profile_run_setup_manifest_path(profile_id)
+    output_root = Path(session_root) if session_root is not None else current_runner_session_root()
     if not run_setup.is_file():
         return {
             participant: {
@@ -2774,7 +2848,12 @@ def profile_participant_asset_statuses(profile_id: str) -> dict[str, dict[str, A
             }
             for participant in participants
         }
-    return prepared_session_asset_statuses(run_setup, participants, state_root=DEFAULT_DASHBOARD_STATE_ROOT)
+    return prepared_session_asset_statuses(
+        run_setup,
+        participants,
+        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+        session_root=output_root,
+    )
 
 
 def profile_participant_dropdown_label(participant: str, status: dict[str, Any]) -> str:
@@ -2829,9 +2908,18 @@ def _package_participant_ids(package: Any) -> list[str]:
     return [participant for participant in participants if str(participant or "").strip()]
 
 
+def _package_output_root(package: Any) -> Path:
+    try:
+        session_dir = Path(getattr(package, "session_dir")).resolve()
+    except Exception:
+        return current_runner_session_root()
+    return session_dir.parent
+
+
 def _package_participant_statuses(package: Any, participants: list[str]) -> dict[str, dict[str, Any]]:
     statuses: dict[str, dict[str, Any]] = {}
     run_setup = getattr(package, "source_run_setup_manifest_path", None)
+    output_root = _package_output_root(package)
     if run_setup and participants:
         run_setup_path = Path(run_setup)
         if run_setup_path.is_file():
@@ -2840,6 +2928,7 @@ def _package_participant_statuses(package: Any, participants: list[str]) -> dict
                     run_setup_path,
                     participants,
                     state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+                    session_root=output_root,
                 )
             except Exception:
                 statuses = {}
@@ -2866,6 +2955,7 @@ def prepare_profile_audio_assets(
     profile_id: str,
     participant_ids: list[str],
     *,
+    session_root: Path | None = None,
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     """Explicitly prepare local audio/session packages without opening Focus Mode."""
@@ -2888,6 +2978,7 @@ def prepare_profile_audio_assets(
         profile,
         progress_callback=progress_callback,
     )
+    output_root = Path(session_root) if session_root is not None else current_runner_session_root()
     results: list[dict[str, Any]] = []
     prepared_count = 0
     reused_count = 0
@@ -2896,7 +2987,7 @@ def prepare_profile_audio_assets(
             run_setup_manifest_path,
             participant,
             state_root=DEFAULT_DASHBOARD_STATE_ROOT,
-            session_root=DEFAULT_SESSION_ROOT,
+            session_root=output_root,
         )
         if status.get("status") == "preparing":
             reused_count += 1
@@ -2955,7 +3046,7 @@ def prepare_profile_audio_assets(
                 run_setup_manifest_path,
                 participant,
                 design=design,
-                session_root=DEFAULT_SESSION_ROOT,
+                session_root=output_root,
                 progress_callback=_participant_progress,
             )
         except Exception as exc:
@@ -3090,6 +3181,7 @@ def prepare_profile_focus_session(
     profile_id: str,
     participant_id: str | None = None,
     *,
+    session_root: Path | None = None,
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> Path:
     """Materialize a participant session directly from a finished preload profile."""
@@ -3119,7 +3211,9 @@ def prepare_profile_focus_session(
             f"Study/profile preset '{profile}' is not a finished Segment 6 launchable profile yet ({reason})."
         )
 
+    output_root = Path(session_root) if session_root is not None else current_runner_session_root()
     controller.load_template(profile, snapshot=False)
+    controller.session_root = output_root
     controller.prepare_session(
         {"participant_id": participant},
         progress_callback=progress_callback,
@@ -3697,6 +3791,7 @@ class FocusModeWindow:
     ) -> None:
         self.q = q
         self.package = package
+        self.output_root = _package_output_root(package)
         self.capture_options = capture_options or SessionCaptureOptions()
         self.enable_missed_trial_topup = bool(enable_missed_trial_topup)
         self.controller_factory = controller_factory
@@ -4595,7 +4690,7 @@ class FocusModeWindow:
             package = prepare_segment_run_package(
                 run_setup_path,
                 selected,
-                session_root=DEFAULT_SESSION_ROOT,
+                session_root=self.output_root,
                 progress_callback=_progress,
             )
         except Exception as exc:
@@ -4609,6 +4704,7 @@ class FocusModeWindow:
                 pass
 
         self.package = package
+        self.output_root = _package_output_root(package)
         self._clear_participant_details()
         self._refresh_loaded_package_display()
         self._populate_participant_code_combo(self.package.participant_id)
@@ -4778,7 +4874,7 @@ class FocusModeWindow:
                 package = prepare_segment_run_package(
                     run_setup_path,
                     next_participant,
-                    session_root=DEFAULT_SESSION_ROOT,
+                    session_root=self.output_root,
                     progress_callback=_progress,
                 )
             except Exception as exc:
@@ -5198,8 +5294,9 @@ class FocusModeWindow:
 
     def _stop(self) -> None:
         self._run_active = False
-        if self.controller is not None:
-            self.controller.stop()
+        stop = getattr(self.controller, "stop", None)
+        if callable(stop):
+            stop()
         if hasattr(self, "progress_label"):
             self.progress_label.setText("Stopping" if self.thread and self.thread.is_alive() else self.progress_label.text())
 
@@ -5725,6 +5822,23 @@ def run_launcher_window(
     participant_combo.setObjectName("participantCombo")
     panel_layout.addWidget(_field_row(q, "Participant", participant_combo))
 
+    output_root_state: dict[str, Path] = {"path": current_runner_session_root()}
+    output_value = q["QLabel"](_short_folder_label(output_root_state["path"]))
+    output_value.setObjectName("metricValue")
+    output_value.setWordWrap(True)
+    output_value.setToolTip(str(output_root_state["path"]))
+    output_button = q["QPushButton"]("Change Output Folder")
+    output_button.setToolTip(
+        "Choose a parent folder. The runner creates a timestamped PPS output project there and uses it for future sessions."
+    )
+    output_row = q["QWidget"]()
+    output_row_layout = q["QHBoxLayout"](output_row)
+    output_row_layout.setContentsMargins(0, 0, 0, 0)
+    output_row_layout.setSpacing(8)
+    output_row_layout.addWidget(output_value, 1)
+    output_row_layout.addWidget(output_button)
+    panel_layout.addWidget(_field_row(q, "Output project", output_row))
+
     asset_controls = q["QHBoxLayout"]()
     generate_button = q["QPushButton"]("Generate Audio Assets")
     range_input = q["QLineEdit"]()
@@ -5817,11 +5931,19 @@ def run_launcher_window(
     def _current_profile() -> str:
         return str(profile_combo.currentData() or "")
 
+    def _current_output_root() -> Path:
+        return Path(output_root_state["path"])
+
+    def _set_output_root(path: Path) -> None:
+        output_root_state["path"] = Path(path)
+        output_value.setText(_short_folder_label(output_root_state["path"]))
+        output_value.setToolTip(str(output_root_state["path"]))
+
     def _refresh_participant_options(preferred: str = "") -> None:
         nonlocal participant_statuses
         profile = _current_profile()
         participants = profile_participant_ids(profile)
-        statuses = profile_participant_asset_statuses(profile) if profile else {}
+        statuses = profile_participant_asset_statuses(profile, session_root=_current_output_root()) if profile else {}
         participant_statuses = statuses
         current = default_profile_participant(
             participants,
@@ -5864,6 +5986,7 @@ def run_launcher_window(
         generate_button.setEnabled((not busy) and bool(profile_options))
         range_button.setEnabled((not busy) and bool(profile_options))
         choose_button.setEnabled(not busy)
+        output_button.setEnabled(not busy)
         close_button.setEnabled(not busy)
         profile_combo.setEnabled((not busy) and bool(profile_options))
         participant_combo.setEnabled(not busy)
@@ -5951,6 +6074,7 @@ def run_launcher_window(
             "Loading last experiment",
             lambda progress_callback: prepare_last_or_latest_focus_session(
                 _selected_participant(),
+                session_root=_current_output_root(),
                 progress_callback=progress_callback,
             ),
         )
@@ -5961,6 +6085,7 @@ def run_launcher_window(
             lambda progress_callback: prepare_profile_focus_session(
                 str(profile_combo.currentData() or ""),
                 _selected_participant(),
+                session_root=_current_output_root(),
                 progress_callback=progress_callback,
             ),
         )
@@ -5975,6 +6100,7 @@ def run_launcher_window(
             lambda progress_callback: prepare_profile_audio_assets(
                 _current_profile(),
                 [participant],
+                session_root=_current_output_root(),
                 progress_callback=progress_callback,
             ),
             success_kind="generated",
@@ -5999,16 +6125,34 @@ def run_launcher_window(
             lambda progress_callback: prepare_profile_audio_assets(
                 _current_profile(),
                 participants,
+                session_root=_current_output_root(),
                 progress_callback=progress_callback,
             ),
             success_kind="generated",
         )
 
+    def _choose_output_folder() -> None:
+        parent = q["QFileDialog"].getExistingDirectory(
+            dialog,
+            "Choose Runner Output Folder",
+            str(_current_output_root().parent if _current_output_root() else DEFAULT_SESSION_ROOT.parent),
+        )
+        if not parent:
+            return
+        try:
+            project_root = create_runner_output_project(Path(parent))
+        except Exception as exc:
+            message.setText(f"Could not create output project: {exc}")
+            return
+        _set_output_root(project_root)
+        message.setText(f"Runner output project set to {project_root}")
+        _refresh_participant_options(_selected_participant())
+
     def _choose_manifest() -> None:
         filename, _selected_filter = q["QFileDialog"].getOpenFileName(
             dialog,
             "Choose Session Manifest",
-            str(DEFAULT_SESSION_ROOT),
+            str(_current_output_root()),
             "PPS session_manifest.json (session_manifest.json);;JSON files (*.json);;All files (*)",
         )
         if filename:
@@ -6020,6 +6164,7 @@ def run_launcher_window(
     generate_button.clicked.connect(_generate_selected)
     range_button.clicked.connect(_generate_range)
     profile_combo.currentIndexChanged.connect(lambda _index: _refresh_participant_options())
+    output_button.clicked.connect(_choose_output_folder)
     choose_button.clicked.connect(_choose_manifest)
     cancel_button.clicked.connect(lambda: (preparation_cancel.set(), cancel_button.setEnabled(False), message.setText("Cancelling loading...")))
     close_button.clicked.connect(dialog.reject)

@@ -592,11 +592,13 @@ def claim_prepared_session(
     participant_id: str,
     *,
     state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT,
+    session_root: Path | None = None,
 ) -> Path | None:
     queue_data = _load_prepared_session_queue(state_root)
     run_setup = Path(run_setup_manifest_path).resolve()
     participant = sanitize_participant_id(participant_id)
     run_setup_hash = _run_setup_queue_hash(run_setup)
+    session_root_path = Path(session_root).resolve() if session_root is not None else None
     changed = False
     for entry in queue_data.get("entries", []):
         if str(entry.get("status") or "") != "ready":
@@ -617,6 +619,8 @@ def claim_prepared_session(
             entry["message"] = "Prepared session manifest is missing."
             entry["updated_at"] = datetime.now().isoformat(timespec="seconds")
             changed = True
+            continue
+        if session_root_path is not None and not _path_is_within(manifest_path, session_root_path):
             continue
         try:
             package = load_run_package(manifest_path)
@@ -665,6 +669,7 @@ def prepared_session_asset_status(
 
     run_setup_hash = _run_setup_queue_hash(run_setup)
     fallback_message = ""
+    session_root_path = Path(session_root).resolve()
     data_status = _participant_data_collection_status(run_setup, participant, session_root=session_root)
     queue_data = _load_prepared_session_queue(state_root)
     for entry in reversed(list(queue_data.get("entries", []))):
@@ -691,6 +696,9 @@ def prepared_session_asset_status(
             fallback_message = str(entry.get("message") or "Previous generation failed.")
             continue
         if status in {"ready", "claimed"}:
+            if manifest_path and not _path_is_within(manifest_path, session_root_path):
+                fallback_message = "Prepared queue entry belongs to a different output folder."
+                continue
             valid, message = _prepared_session_manifest_ready_for_run_setup(manifest_path, run_setup, participant)
             if valid:
                 return {
@@ -726,6 +734,14 @@ def prepared_session_asset_status(
         "source": "",
         **data_status,
     }
+
+
+def _path_is_within(path: Path, root: Path) -> bool:
+    try:
+        Path(path).resolve().relative_to(Path(root).resolve())
+        return True
+    except (OSError, ValueError):
+        return False
 
 
 def prepared_session_asset_statuses(
