@@ -73,10 +73,12 @@ from .profile_memory import (
     append_output_diary_event,
     active_output_folder,
     build_profile_catalog,
+    copy_project_tree,
     generate_custom_profile_id,
     load_runner_settings as load_profile_runner_settings,
     prepare_acquisition_folder,
     rebase_project_copy_paths,
+    refresh_project_dependency_hashes,
     update_runner_settings as update_profile_runner_settings,
 )
 from .templates import (
@@ -570,6 +572,7 @@ class DashboardController:
             participant_id = self.participant_id
         update_profile_runner_settings(
             state_root=self.state_root,
+            output_folder=self.session_root,
             profile_id=template_id,
             profile_kind="bundled",
             dashboard_project_id=project.project_id,
@@ -696,6 +699,7 @@ class DashboardController:
             )
         update_profile_runner_settings(
             state_root=self.state_root,
+            output_folder=self.session_root,
             profile_id=context.project_id,
             profile_kind="custom",
             dashboard_project_id=context.project_id,
@@ -849,8 +853,9 @@ class DashboardController:
             )
             if new_context.project_dir.exists():
                 raise FileExistsError(f"Custom profile folder already exists: {new_context.project_dir}")
-            shutil.copytree(source_project.project_dir, new_context.project_dir)
+            copy_project_tree(source_project.project_dir, new_context.project_dir)
             rebase_project_copy_paths(new_context.project_dir, old_root=source_project.project_dir, new_root=new_context.project_dir)
+            refresh_project_dependency_hashes(new_context.project_dir)
             saved_design = _copy_design(source_design)
             saved_design.name = profile_name
             saved_design.study_profile_id = ""
@@ -879,6 +884,7 @@ class DashboardController:
             participant_id = self.participant_id
         update_profile_runner_settings(
             state_root=self.state_root,
+            output_folder=self.session_root,
             profile_id=new_context.project_id,
             profile_kind="custom",
             dashboard_project_id=new_context.project_id,
@@ -2627,11 +2633,8 @@ def _export_dashboard_project_to_acquisition_folder(project_dir: Path, acquisiti
         raise ValueError("Cannot overwrite a parent folder of the active dashboard project.")
     if _path_exists(target):
         _remove_tree(target)
-    shutil.copytree(
-        _filesystem_path(source),
-        _filesystem_path(target),
-        ignore=shutil.ignore_patterns("__pycache__", ".pytest_cache"),
-    )
+    copy_project_tree(source, target, ignore_patterns=("__pycache__", ".pytest_cache"))
+    refresh_project_dependency_hashes(target)
     return target
 
 

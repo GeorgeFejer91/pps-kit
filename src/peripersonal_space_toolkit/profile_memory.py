@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import csv
+import fnmatch
 import hashlib
 import json
+import os
 import re
 import shutil
 from datetime import datetime
@@ -306,10 +308,11 @@ def prepare_acquisition_folder(
     if output != snapshot_dir and output not in snapshot_dir.parents:
         raise ValueError("Acquisition profile snapshot path escapes the output folder.")
     if snapshot_dir.exists():
-        shutil.rmtree(snapshot_dir)
+        remove_project_tree(snapshot_dir)
     snapshot_root.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(source, snapshot_dir)
+    copy_project_tree(source, snapshot_dir)
     rebase_project_copy_paths(snapshot_dir, old_root=source, new_root=snapshot_dir)
+    refresh_project_dependency_hashes(snapshot_dir)
     bridge = write_bridge_manifest(
         output_folder=output,
         profile_entry={**profile_entry, "acquisition_profile_snapshot_dir": str(snapshot_dir)},
@@ -340,6 +343,69 @@ def prepare_acquisition_folder(
         acquisition_profile_snapshot_dir=str(snapshot_dir),
     )
     return bridge
+
+
+def copy_project_tree(
+    source: Path,
+    target: Path,
+    *,
+    ignore_patterns: Iterable[str] = (),
+) -> None:
+    """Copy a stored profile project tree without tripping Windows path limits."""
+    source_root = Path(source).expanduser().resolve()
+    target_root = Path(target).expanduser().resolve()
+    if not os.path.isdir(_filesystem_path(source_root)):
+        raise FileNotFoundError(f"Stored profile project folder is missing: {source_root}")
+    if _path_exists(target_root):
+        raise FileExistsError(f"Profile project folder already exists: {target_root}")
+
+    patterns = tuple(str(pattern) for pattern in ignore_patterns if str(pattern))
+    source_text = _filesystem_path(source_root)
+    for root_text, dir_names, file_names in os.walk(source_text):
+        dir_names[:] = [name for name in dir_names if not _matches_ignore(name, patterns)]
+        rel_text = os.path.relpath(root_text, source_text)
+        destination_dir = target_root if rel_text == "." else target_root / rel_text
+        os.makedirs(_filesystem_path(destination_dir), exist_ok=True)
+        for file_name in file_names:
+            if _matches_ignore(file_name, patterns):
+                continue
+            source_file = os.path.join(root_text, file_name)
+            target_file = destination_dir / file_name
+            os.makedirs(_filesystem_path(target_file.parent), exist_ok=True)
+            shutil.copy2(source_file, _filesystem_path(target_file))
+
+
+def remove_project_tree(path: Path) -> None:
+    target = Path(path).expanduser().resolve()
+    if _path_exists(target):
+        shutil.rmtree(_filesystem_path(target))
+
+
+def refresh_project_dependency_hashes(project_dir: Path) -> None:
+    """Refresh manifest-to-manifest hashes after copying and rebasing a profile."""
+    root = Path(project_dir)
+    segment2_manifest = root / "2_trial_sequence_designs" / "trial_sequence_variants_manifest.json"
+    segment3_manifest = root / "3_tactile_and_baseline_trials" / "baseline_tactile_trial_files_manifest.json"
+    segment4_manifest = root / "4_trial_repetition_pool" / "trial_repetition_pool_manifest.json"
+    segment5_manifest = root / "5_block_csv_preview" / "block_csv_preview_manifest.json"
+    segment6_manifest = root / "6_experiment_run_setup" / "experiment_run_setup_manifest.json"
+    updates = (
+        (segment3_manifest, "trial_sequence_manifest_sha256", segment2_manifest),
+        (segment4_manifest, "source_segment3_manifest_sha256", segment3_manifest),
+        (segment5_manifest, "source_segment4_manifest_sha256", segment4_manifest),
+        (segment6_manifest, "source_segment5_manifest_sha256", segment5_manifest),
+    )
+    for manifest_path, field_name, source_path in updates:
+        if not _path_exists(manifest_path) or not _path_exists(source_path):
+            continue
+        payload = _read_json(manifest_path)
+        if not payload:
+            continue
+        digest = _sha256_file(source_path)
+        if not digest or payload.get(field_name) == digest:
+            continue
+        payload[field_name] = digest
+        _write_json_file(manifest_path, payload)
 
 
 def rebase_project_copy_paths(project_dir: Path, *, old_root: Path, new_root: Path) -> None:
@@ -583,6 +649,27 @@ def _participant_entry(participant_id: str, status: dict[str, Any]) -> dict[str,
     }
 
 
+def _filesystem_path(path: str | Path) -> str:
+    resolved = Path(path).expanduser().resolve()
+    text = str(resolved)
+    if os.name == "nt" and not text.startswith("\\\\?\\"):
+        if text.startswith("\\\\"):
+            return "\\\\?\\UNC\\" + text.lstrip("\\")
+        return "\\\\?\\" + text
+    return text
+
+
+def _path_exists(path: str | Path) -> bool:
+    try:
+        return os.path.exists(_filesystem_path(path))
+    except OSError:
+        return False
+
+
+def _matches_ignore(name: str, patterns: Iterable[str]) -> bool:
+    return any(fnmatch.fnmatch(name, pattern) for pattern in patterns)
+
+
 def _replace_path_strings(value: Any, *, old_path: Path, new_path: Path) -> Any:
     if isinstance(value, dict):
         return {str(key): _replace_path_strings(item, old_path=old_path, new_path=new_path) for key, item in value.items()}
@@ -685,15 +772,23 @@ def _resolve_manifest_path(value: Any, base_dir: Path) -> Path | None:
 
 def _read_json(path: Path) -> dict[str, Any]:
     try:
-        return json.loads(Path(path).read_text(encoding="utf-8"))
+        with open(_filesystem_path(path), "r", encoding="utf-8") as handle:
+            return json.load(handle)
     except Exception:
         return {}
+
+
+def _write_json_file(path: Path, payload: dict[str, Any]) -> None:
+    target = Path(path)
+    os.makedirs(_filesystem_path(target.parent), exist_ok=True)
+    with open(_filesystem_path(target), "w", encoding="utf-8") as handle:
+        handle.write(json.dumps(_json_ready(payload), indent=2, sort_keys=True) + "\n")
 
 
 def _sha256_file(path: Path) -> str:
     try:
         digest = hashlib.sha256()
-        with Path(path).open("rb") as handle:
+        with open(_filesystem_path(path), "rb") as handle:
             for chunk in iter(lambda: handle.read(1024 * 1024), b""):
                 digest.update(chunk)
         return digest.hexdigest()
