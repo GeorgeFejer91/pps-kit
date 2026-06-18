@@ -414,9 +414,9 @@ def initiate_data_collection_environment(
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run native PPS Focus Mode from a prepared session manifest.")
     parser.add_argument("--session-manifest", type=Path, help="Path to local_data/sessions/.../session_manifest.json.")
-    parser.add_argument("--last-experiment", action="store_true", help="Open the last launchable dashboard experiment.")
-    parser.add_argument("--latest-dashboard-setup", action="store_true", help="Prepare and open the newest prepared dashboard Segment 6 setup.")
-    parser.add_argument("--launcher", action="store_true", help="Open the profile/session launcher instead of auto-resuming.")
+    parser.add_argument("--last-experiment", action="store_true", help="Bypass the gate and open the last launchable dashboard experiment.")
+    parser.add_argument("--latest-dashboard-setup", action="store_true", help="Bypass the gate, prepare, and open the newest prepared dashboard Segment 6 setup.")
+    parser.add_argument("--launcher", action="store_true", help="Open the resume/data-collection environment gate explicitly. This is also the no-argument default.")
     parser.add_argument("--profile", default="", help="Load a finished study/profile preload directly in the runner, for example study5_box_breathing_pps.")
     parser.add_argument("--participant-id", default="", help="Participant ID to materialize when using --latest-dashboard-setup.")
     parser.add_argument("--manual-start", action="store_true", help="Open the runner window but wait for Start Run before playback.")

@@ -44,11 +44,14 @@ embedded. This exe is the only active operator experiment runner. The
 `windows\Launch_Experiment_Runner.bat` wrapper only activates that exe and
 fails with build instructions if it is missing; it does not fall back to a
 Python module runner, and direct module launch exits with retirement guidance.
-With no batch arguments, the wrapper opens the standalone
-Experiment Runner picker (`--launcher`). Running `PPSExperimentRunner.exe`
-directly with no arguments auto-opens the last valid launchable session/run
-setup ready for the researcher to click `Start Run`; `--launcher` forces the
-picker.
+With no batch arguments, the wrapper opens the standalone Experiment Runner
+resume decision gate. Running `PPSExperimentRunner.exe` directly with no
+arguments must show the same first window, where the researcher chooses whether
+to resume the remembered experiment environment or initiate a fresh data
+collection environment. Explicit flags such as `--session-manifest`,
+`--last-experiment`, `--latest-dashboard-setup`, and `--profile` are reserved
+for dashboard handoff, validation, and scripted workflows that intentionally
+bypass that gate.
 
 For finished public releases, build the lightweight downloader separately:
 

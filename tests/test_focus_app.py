@@ -1252,9 +1252,146 @@ def test_launcher_first_screen_is_environment_gate():
         participant_id="P001",
         initial_message="inspection",
     )
+    for widget in app.topLevelWidgets():
+        widget.close()
+        widget.deleteLater()
+    app.processEvents()
 
     assert exit_code == 1
     assert errors == []
+
+
+def test_launcher_resume_button_click_opens_environment_operations(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    errors: list[BaseException] = []
+    calls: list[dict[str, object]] = []
+
+    monkeypatch.setattr(
+        focus_app,
+        "load_profile_runner_settings",
+        lambda **_kwargs: {
+            "active_profile_id": focus_app.STUDY5_PROFILE_ID,
+            "active_output_folder": str(tmp_path),
+            "participant_id": "P001",
+        },
+    )
+    monkeypatch.setattr(
+        focus_app,
+        "load_runner_settings",
+        lambda *args, **kwargs: {
+            "last_experiment_name": "Study 5 gate test",
+            "last_profile_id": focus_app.STUDY5_PROFILE_ID,
+            "last_participant_id": "P001",
+        },
+    )
+    monkeypatch.setattr(focus_app, "finished_profile_options", lambda: [(focus_app.STUDY5_PROFILE_ID, "Study 5")])
+    monkeypatch.setattr(focus_app, "current_runner_diary_path", lambda: None)
+    monkeypatch.setattr(focus_app, "find_output_diary", lambda _root: None)
+    monkeypatch.setattr(focus_app, "remember_runner_context", lambda **_kwargs: {})
+    monkeypatch.setattr(focus_app, "update_profile_runner_settings", lambda **_kwargs: {})
+    monkeypatch.setattr(focus_app, "_append_output_diary_event", lambda *args, **kwargs: None)
+
+    def fake_environment_operations_window(**kwargs):
+        calls.append(kwargs)
+        return 58
+
+    monkeypatch.setattr(focus_app, "_run_environment_operations_window", fake_environment_operations_window)
+
+    def click_resume() -> None:
+        try:
+            dialogs = [widget for widget in app.topLevelWidgets() if widget.windowTitle() == "PPS Experiment Runner"]
+            assert dialogs
+            dialog = dialogs[0]
+            assert dialog.findChild(q["QComboBox"], "participantCombo") is None
+            resume = dialog.findChild(q["QPushButton"], "resumeExperimentButton")
+            assert resume is not None
+            assert resume.isEnabled()
+            QTest.mouseClick(resume, q["Qt"].MouseButton.LeftButton)
+        except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
+            errors.append(exc)
+            for widget in app.topLevelWidgets():
+                if widget.windowTitle() == "PPS Experiment Runner":
+                    widget.reject()
+
+    q["QTimer"].singleShot(50, click_resume)
+    exit_code = focus_app.run_launcher_window(
+        capture_options=SessionCaptureOptions(enable_lsl=False, write_internal_xdf=False, start_backup_recording=False),
+        participant_id="P001",
+    )
+    for widget in app.topLevelWidgets():
+        widget.close()
+        widget.deleteLater()
+    app.processEvents()
+
+    assert exit_code == 58
+    assert errors == []
+    assert len(calls) == 1
+    assert calls[0]["participant_id"] == "P001"
+
+
+def test_main_no_args_opens_resume_environment_gate(monkeypatch):
+    from peripersonal_space_toolkit import focus_app
+
+    calls: list[dict[str, object]] = []
+
+    def fake_launcher(**kwargs):
+        calls.append(kwargs)
+        return 37
+
+    monkeypatch.setattr(focus_app, "run_launcher_window", fake_launcher)
+    monkeypatch.setattr(
+        focus_app,
+        "prepare_last_or_latest_focus_session",
+        lambda *_args, **_kwargs: pytest.fail("no-argument launch must not auto-resume"),
+    )
+    monkeypatch.setattr(
+        focus_app,
+        "run_focus_window",
+        lambda *_args, **_kwargs: pytest.fail("no-argument launch must not open Focus Mode directly"),
+    )
+
+    assert focus_app.main([]) == 37
+    assert len(calls) == 1
+    assert calls[0]["participant_id"] == ""
+
+
+def test_main_last_experiment_flag_keeps_explicit_direct_resume(tmp_path: Path, monkeypatch):
+    from peripersonal_space_toolkit import focus_app
+
+    manifest = tmp_path / "session_manifest.json"
+    calls: dict[str, object] = {}
+
+    def fake_prepare(participant_id=None, **kwargs):
+        calls["participant_id"] = participant_id
+        calls["prepare_kwargs"] = kwargs
+        return manifest
+
+    def fake_focus_window(path, **kwargs):
+        calls["focus_path"] = path
+        calls["focus_kwargs"] = kwargs
+        return 41
+
+    monkeypatch.setattr(focus_app, "prepare_last_or_latest_focus_session", fake_prepare)
+    monkeypatch.setattr(focus_app, "run_focus_window", fake_focus_window)
+    monkeypatch.setattr(
+        focus_app,
+        "run_launcher_window",
+        lambda **_kwargs: pytest.fail("--last-experiment should remain an explicit gate bypass"),
+    )
+
+    assert focus_app.main(["--last-experiment", "--participant-id", "P007", "--manual-start"]) == 41
+    assert calls["participant_id"] == "P007"
+    assert calls["focus_path"] == manifest
+    assert calls["focus_kwargs"]["manual_start"] is True
 
 
 def test_audio_dependency_dialog_retry_accepts_after_asio_detected(monkeypatch):

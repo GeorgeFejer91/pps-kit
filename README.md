@@ -159,10 +159,12 @@ pps-analyze --sample
 
 `pps-dashboard` starts a local-only browser dashboard at `127.0.0.1` for researcher-facing design, render, prepare, and review decisions. The dashboard uses a fixed one-page navigation rail, adjustable preview/panel sizing controls, and a sequential custom-design workflow that blocks run actions until the minimum runnable experiment profile is filled in. The existing Qt designer remains available as `pps-design`; the only active operator experiment runner is the packaged native `dist\PPSExperimentRunner\PPSExperimentRunner.exe`.
 
-`PPSExperimentRunner.exe` can reopen the last launchable dashboard experiment
-from the ignored local resume ledger in `local_data\dashboard_state\`. Explicit
-`--session-manifest` still wins, followed by the last launchable experiment, the
-latest prepared Segment 6 setup, and then manual file selection.
+`PPSExperimentRunner.exe` opens the resume experiment decision gate by default,
+using the ignored local resume ledger in `local_data\dashboard_state\` to show
+the remembered data-collection environment. Explicit `--session-manifest`,
+`--last-experiment`, `--latest-dashboard-setup`, and `--profile` launches are
+reserved for dashboard handoff, validation, and scripted workflows that
+intentionally bypass that first gate.
 
 Verify the bundled Pfeiffer-style profile and render handoff:
 

@@ -58,5 +58,5 @@ Write-Host "Run windows\Launch_Experiment_Runner.bat to open the standalone Expe
 Write-Host "Run windows\Build_Experiment_Runner_Exe.ps1 to package Focus Mode as dist\PPSExperimentRunner\PPSExperimentRunner.exe."
 Write-Host "Run windows\Start_Website_Companion.bat when using the GitHub Pages dashboard."
 Write-Host "Run windows\Launch_Stimulus_Designer.bat to compare the Qt designer."
-Write-Host "Run dist\PPSExperimentRunner\PPSExperimentRunner.exe with no arguments to auto-open the last launchable experiment."
+Write-Host "Run dist\PPSExperimentRunner\PPSExperimentRunner.exe with no arguments to open the resume experiment decision gate."
 Write-Host "The standardized under-the-hood FABIAN HRIR resource is bundled; use windows\Fetch_FABIAN_HRTF.ps1 only to refresh its manifest."
