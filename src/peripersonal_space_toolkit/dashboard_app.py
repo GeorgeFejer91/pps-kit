@@ -72,6 +72,7 @@ from .focus_launch import build_focus_runner_command
 from .profile_memory import (
     append_output_diary_event,
     active_output_folder,
+    bridge_manifest_path as acquisition_bridge_manifest_path,
     build_profile_catalog,
     copy_project_tree,
     generate_custom_profile_id,
@@ -746,7 +747,8 @@ class DashboardController:
         design_export_dir = _export_dashboard_project_to_acquisition_folder(project.project_dir, resolution.root, project.project_id)
         design_snapshot_path = resolution.root / "dashboard_design_snapshot.json"
         _write_text_file(design_snapshot_path, json.dumps(_json_ready(design_to_dict(design)), indent=2) + "\n", encoding="utf-8")
-        bridge_manifest_path = resolution.root / "dashboard_runner_bridge_manifest.v1.json"
+        bridge_manifest_path = acquisition_bridge_manifest_path(resolution.root)
+        _ensure_dir(bridge_manifest_path.parent)
         bridge_manifest = {
             "schema": DATA_ACQUISITION_BRIDGE_SCHEMA,
             "created_at": datetime.now().isoformat(timespec="seconds"),

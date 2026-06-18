@@ -105,12 +105,17 @@ from .session_runner import (
 from .timing_schedule import BlockEventSchedule
 from .preload_inventory import load_preload_inventory
 from .profile_memory import (
+    ACQUISITION_PROFILE_SNAPSHOT_DIRNAME,
     BRIDGE_MANIFEST_FILENAME,
     OUTPUT_DIARY_FILENAME,
     append_output_diary_event,
     active_output_folder,
+    bridge_manifest_path,
     build_profile_catalog,
+    existing_bridge_manifest_path,
+    existing_output_diary_path,
     load_runner_settings as load_profile_runner_settings,
+    output_diary_path,
     prepare_acquisition_folder,
     profile_participant_ids_from_entry,
     resolve_profile_entry,
@@ -247,6 +252,8 @@ def current_runner_session_root(state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT)
     if diary_raw:
         diary_path = Path(diary_raw).expanduser()
         if diary_path.is_file():
+            if diary_path.parent.name == ACQUISITION_PROFILE_SNAPSHOT_DIRNAME:
+                return diary_path.parent.parent
             return diary_path.parent
     return DEFAULT_SESSION_ROOT
 
@@ -3609,7 +3616,8 @@ def _environment_bridge_manifest(output_root: Path | None = None) -> dict[str, A
         state_root=DEFAULT_DASHBOARD_STATE_ROOT,
         fallback=DEFAULT_SESSION_ROOT,
     )
-    return _read_json_dict(root / BRIDGE_MANIFEST_FILENAME)
+    path = existing_bridge_manifest_path(root) or bridge_manifest_path(root)
+    return _read_json_dict(path)
 
 
 def _bridge_matches_profile(bridge: dict[str, Any], profile_id: str) -> bool:
@@ -3853,11 +3861,29 @@ def _package_experiment_context(package: Any) -> dict[str, str]:
     }
 
 
+def _focus_filesystem_path(path: Any) -> str:
+    resolved = Path(path).expanduser().resolve()
+    text = str(resolved)
+    if os.name == "nt" and not text.startswith("\\\\?\\"):
+        if text.startswith("\\\\"):
+            return "\\\\?\\UNC\\" + text.lstrip("\\")
+        return "\\\\?\\" + text
+    return text
+
+
+def _focus_path_is_file(path: Any) -> bool:
+    try:
+        return os.path.isfile(_focus_filesystem_path(path))
+    except Exception:
+        return False
+
+
 def _read_json_dict(path: Any) -> dict[str, Any]:
     if path in (None, ""):
         return {}
     try:
-        data = json.loads(Path(path).read_text(encoding="utf-8"))
+        with open(_focus_filesystem_path(path), "r", encoding="utf-8") as handle:
+            data = json.load(handle)
     except Exception:
         return {}
     return data if isinstance(data, dict) else {}
@@ -3867,10 +3893,11 @@ def _read_latest_output_diary_context(path: Any) -> dict[str, Any]:
     if path in (None, ""):
         return {}
     diary_path = Path(path)
-    if not diary_path.is_file():
+    if not _focus_path_is_file(diary_path):
         return {}
     try:
-        lines = diary_path.read_text(encoding="utf-8").splitlines()
+        with open(_focus_filesystem_path(diary_path), "r", encoding="utf-8") as handle:
+            lines = handle.read().splitlines()
     except Exception:
         return {}
     context: dict[str, Any] = {}
@@ -3915,20 +3942,24 @@ def _classify_launcher_output_folder(
     except Exception:
         resolved_root = root
     runner_diary_path = find_output_diary(resolved_root) if resolved_root.is_dir() else None
-    output_diary_path = resolved_root / OUTPUT_DIARY_FILENAME
-    bridge_path = resolved_root / BRIDGE_MANIFEST_FILENAME
-    output_diary_context = _read_latest_output_diary_context(output_diary_path)
-    if not bridge_path.is_file():
+    existing_output_diary = existing_output_diary_path(resolved_root) if resolved_root.is_dir() else None
+    output_diary_file = existing_output_diary or output_diary_path(resolved_root)
+    existing_bridge = existing_bridge_manifest_path(resolved_root) if resolved_root.is_dir() else None
+    bridge_path = existing_bridge or bridge_manifest_path(resolved_root)
+    output_diary_context = _read_latest_output_diary_context(existing_output_diary)
+    bridge_exists = existing_bridge is not None or _focus_path_is_file(bridge_path)
+    if not bridge_exists:
         bridged_text = str(output_diary_context.get("bridge_manifest_path") or "").strip()
         bridged_path = Path(bridged_text).expanduser() if bridged_text else None
-        if bridged_path is not None and bridged_path.is_file():
+        if bridged_path is not None and _focus_path_is_file(bridged_path):
             bridge_path = bridged_path
+            bridge_exists = True
     bridge = _read_json_dict(bridge_path)
     diary_context = latest_diary_context(runner_diary_path) if runner_diary_path is not None else {}
     has_environment_marker = bool(
-        (runner_diary_path is not None and runner_diary_path.is_file())
-        or output_diary_path.is_file()
-        or bridge_path.is_file()
+        runner_diary_path is not None
+        or existing_output_diary is not None
+        or bridge_exists
     )
     if not has_environment_marker:
         return {
@@ -3938,7 +3969,7 @@ def _classify_launcher_output_folder(
             "session_name": "",
             "participant_id": fallback_participant_id or "P001",
             "runner_diary_path": None,
-            "output_diary_path": output_diary_path if output_diary_path.exists() else None,
+            "output_diary_path": output_diary_file if _focus_path_is_file(output_diary_file) else None,
             "bridge_manifest_path": None,
             "bridge": {},
             "markers": [],
@@ -3967,11 +3998,11 @@ def _classify_launcher_output_folder(
         or "P001"
     ).strip()
     markers: list[str] = []
-    if runner_diary_path is not None and runner_diary_path.is_file():
+    if runner_diary_path is not None:
         markers.append("runner diary")
-    if output_diary_path.is_file():
+    if existing_output_diary is not None:
         markers.append("output diary")
-    if bridge_path.is_file():
+    if bridge_exists:
         markers.append("dashboard bridge")
     return {
         "kind": "existing_environment",
@@ -3980,8 +4011,8 @@ def _classify_launcher_output_folder(
         "session_name": session_name,
         "participant_id": participant or "P001",
         "runner_diary_path": runner_diary_path,
-        "output_diary_path": output_diary_path if output_diary_path.is_file() else None,
-        "bridge_manifest_path": bridge_path if bridge_path.is_file() else None,
+        "output_diary_path": existing_output_diary,
+        "bridge_manifest_path": bridge_path if bridge_exists else None,
         "bridge": bridge,
         "markers": markers,
     }

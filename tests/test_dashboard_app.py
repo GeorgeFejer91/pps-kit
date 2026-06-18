@@ -728,14 +728,16 @@ def test_dashboard_exports_data_acquisition_folder_bridge(tmp_path: Path):
     runner_settings_path = Path(result["runner_settings_path"])
     assert acquisition_root.parent == parent
     assert acquisition_root.is_dir()
-    assert diary_path.is_file()
+    assert dashboard_app._path_exists(diary_path)
     assert diary_path.name.endswith("_LOG-DIARY_DO_NOT_DELETE.txt")
-    assert bridge_manifest_path.is_file()
+    assert diary_path.parent == acquisition_root / "study_profile_snapshot_DO_NOT_DELETE"
+    assert dashboard_app._path_exists(bridge_manifest_path)
+    assert bridge_manifest_path.parent == acquisition_root / "study_profile_snapshot_DO_NOT_DELETE"
     assert design_export_dir.is_dir()
     assert dashboard_app._path_exists(design_export_dir / "0_profile" / "project_manifest.json")
     assert dashboard_app._path_exists(design_export_dir / "0_profile" / "active_design.json")
-    assert design_snapshot_path.is_file()
-    bridge_manifest = json.loads(bridge_manifest_path.read_text(encoding="utf-8"))
+    assert dashboard_app._path_exists(design_snapshot_path)
+    bridge_manifest = dashboard_app._load_json(bridge_manifest_path)
     assert bridge_manifest["schema"] == "pps-dashboard-runner-bridge.v1"
     assert bridge_manifest["data_acquisition_root"] == str(acquisition_root)
     assert bridge_manifest["diary_path"] == str(diary_path)
@@ -743,7 +745,7 @@ def test_dashboard_exports_data_acquisition_folder_bridge(tmp_path: Path):
     assert settings["schema"] == "pps-focus-runner-settings.v1"
     assert settings["current_output_project_root"] == str(acquisition_root)
     assert settings["session_root"] == str(acquisition_root)
-    assert settings["diary_path"] == str(diary_path)
+    assert str(settings["diary_path"]).replace("\\\\?\\", "") == str(diary_path)
     assert state["data_acquisition"]["active"] is True
     assert state["data_acquisition"]["root"] == str(acquisition_root)
     entries = read_diary_entries(diary_path)
@@ -2639,25 +2641,29 @@ def test_dashboard_bakes_baseline_tactile_trial_files_with_three_channels(tmp_pa
     assert export_response.status_code == 200, export_response.text
     exported = export_response.json()["output_folder_export_result"]
     bridge_path = Path(exported["bridge_manifest_path"])
-    assert bridge_path.parent == tmp_path / "sessions"
+    metadata_dir = tmp_path / "sessions" / "study_profile_snapshot_DO_NOT_DELETE"
+    assert bridge_path.parent == metadata_dir
     assert bridge_path.name == "dashboard_runner_bridge_manifest.v1.json"
     assert bridge_path.is_file()
-    bridge_payload = json.loads(bridge_path.read_text(encoding="utf-8"))
+    bridge_payload = dashboard_app._load_json(bridge_path)
     assert bridge_payload["profile_id"] == saved_result["profile_id"]
     assert bridge_payload["kind"] == "custom"
     assert bridge_payload["participant_id"] == "P001"
     snapshot_dir = Path(bridge_payload["acquisition_profile_snapshot_dir"])
     assert snapshot_dir.is_dir()
-    assert snapshot_dir.parent.name == "study_profile_snapshot"
+    assert snapshot_dir.parent == metadata_dir
     assert (snapshot_dir / "6_experiment_run_setup" / "experiment_run_setup_manifest.json").is_file()
     settings_path = tmp_path / "dashboard_projects" / "dashboard_state" / "focus_runner_settings.v1.json"
     settings = json.loads(settings_path.read_text(encoding="utf-8"))
     assert settings["active_output_folder"] == str(tmp_path / "sessions")
     assert settings["active_profile_id"] == saved_result["profile_id"]
-    diary = tmp_path / "sessions" / "output_diary.v1.jsonl"
+    diary = metadata_dir / "output_diary.v1.jsonl"
     diary_events = [json.loads(line) for line in diary.read_text(encoding="utf-8").splitlines()]
     assert {event["event_type"] for event in diary_events} >= {"profile_saved", "acquisition_folder_exported"}
     assert all("participant_name" not in event for event in diary_events)
+    assert not (tmp_path / "sessions" / "output_diary.v1.jsonl").exists()
+    assert not (tmp_path / "sessions" / "dashboard_runner_bridge_manifest.v1.json").exists()
+    assert not (tmp_path / "sessions" / "study_profile_snapshot").exists()
 
     prepared_design = saved["design"]
     prepared_response = client.post("/api/session/prepare", json={"participant_id": "P001", "design": prepared_design})

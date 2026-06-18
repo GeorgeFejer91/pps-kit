@@ -2128,8 +2128,91 @@ def test_timestamped_output_environment_uses_parent_and_collision_suffix(tmp_pat
     assert slug == "my_lab_pilot"
     assert root == parent / "my_lab_pilot_20260618_091011_2"
     assert root.is_dir()
-    assert diary.parent == root
+    assert diary.parent == root / "study_profile_snapshot_DO_NOT_DELETE"
     assert diary.name.endswith("_LOG-DIARY_DO_NOT_DELETE.txt")
+    assert not (root / diary.name).exists()
+
+
+def test_initiate_data_collection_environment_groups_snapshot_metadata(tmp_path: Path, monkeypatch):
+    from peripersonal_space_toolkit import focus_app
+    from peripersonal_space_toolkit.profile_memory import _path_exists
+
+    state_root = tmp_path / "state"
+    parent = tmp_path / "operator_outputs"
+    parent.mkdir()
+    source_project = tmp_path / "source_profile"
+    run_setup = source_project / "6_experiment_run_setup" / "experiment_run_setup_manifest.json"
+    run_setup.parent.mkdir(parents=True)
+    run_csv = run_setup.parent / "experiment_block_order.csv"
+    run_csv.write_text("participant_id\nP001\n", encoding="utf-8")
+    run_setup.write_text(
+        json.dumps(
+            {
+                "schema": "pps-experiment-run-setup.v1",
+                "prepared": True,
+                "csv_path": str(run_csv),
+                "participant_count": 1,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (source_project / "0_profile").mkdir(parents=True)
+    (source_project / "0_profile" / "active_design.json").write_text("{}\n", encoding="utf-8")
+
+    monkeypatch.setattr(focus_app, "DEFAULT_DASHBOARD_STATE_ROOT", state_root)
+    monkeypatch.setattr(focus_app.time, "strftime", lambda fmt: "20260618_205901" if "%Y%m%d" in fmt else "2026-06-18T20:59:01")
+    monkeypatch.setattr(
+        focus_app,
+        "_materialize_profile_run_setup",
+        lambda profile, progress_callback=None: (SimpleNamespace(), SimpleNamespace(), run_setup),
+    )
+    monkeypatch.setattr(
+        focus_app,
+        "resolve_profile_entry",
+        lambda *_args, **_kwargs: {
+            "profile_id": focus_app.STUDY5_PROFILE_ID,
+            "display_name": "Study 5",
+            "kind": "bundled",
+            "dashboard_project_id": "profile_study5_box_breathing_pps",
+            "project_dir": str(source_project),
+            "participant_count": 1,
+            "participant_ids": ["P001"],
+        },
+    )
+    monkeypatch.setattr(
+        focus_app,
+        "prepare_profile_audio_assets",
+        lambda *_args, **_kwargs: {"prepared_count": 0, "reused_count": 1, "results": []},
+    )
+
+    result = focus_app.initiate_data_collection_environment(
+        parent_folder=parent,
+        profile_id=focus_app.STUDY5_PROFILE_ID,
+        session_name="Study5",
+        participant_id="P001",
+        capture_options={"enable_lsl": False},
+    )
+
+    environment_root = Path(result["environment_root"])
+    metadata_dir = environment_root / "study_profile_snapshot_DO_NOT_DELETE"
+    assert environment_root == parent / "study5_20260618_205901"
+    assert metadata_dir.is_dir()
+    assert Path(result["diary_path"]).parent == metadata_dir
+    assert (metadata_dir / "output_diary.v1.jsonl").is_file()
+    assert (metadata_dir / "dashboard_runner_bridge_manifest.v1.json").is_file()
+    copied_run_setup = metadata_dir / focus_app.STUDY5_PROFILE_ID / "6_experiment_run_setup" / "experiment_run_setup_manifest.json"
+    assert _path_exists(copied_run_setup)
+    assert not (environment_root / "output_diary.v1.jsonl").exists()
+    assert not (environment_root / "dashboard_runner_bridge_manifest.v1.json").exists()
+    assert not (environment_root / "study_profile_snapshot").exists()
+
+    bridge = json.loads((metadata_dir / "dashboard_runner_bridge_manifest.v1.json").read_text(encoding="utf-8"))
+    assert bridge["environment_metadata_dir"] == str(metadata_dir)
+    assert bridge["acquisition_profile_snapshot_dir"] == str(metadata_dir / focus_app.STUDY5_PROFILE_ID)
+    settings = focus_app.load_runner_settings(state_root)
+    assert settings["current_output_project_root"] == str(environment_root)
+    assert str(settings["diary_path"]).replace("\\\\?\\", "") == result["diary_path"]
 
 
 def test_prepare_profile_audio_assets_reuses_scanned_generated_packages(tmp_path: Path, monkeypatch):

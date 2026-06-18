@@ -13,6 +13,15 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterable
 
+from .output_layout import (
+    ACQUISITION_PROFILE_SNAPSHOT_DIRNAME,
+    BRIDGE_MANIFEST_FILENAME,
+    OUTPUT_DIARY_FILENAME,
+    bridge_manifest_path,
+    find_existing_metadata_file,
+    output_diary_path,
+    output_metadata_dir,
+)
 from .preload_inventory import load_preload_inventory
 from .runtime_paths import repo_root, writable_root
 
@@ -26,9 +35,6 @@ PROFILE_CATALOG_SCHEMA = "pps-shared-profile-catalog.v1"
 DASHBOARD_RUNNER_BRIDGE_SCHEMA = "pps-dashboard-runner-bridge-manifest.v1"
 OUTPUT_DIARY_EVENT_SCHEMA = "pps-output-diary-event.v1"
 FOCUS_RUNNER_SETTINGS_FILENAME = "focus_runner_settings.v1.json"
-BRIDGE_MANIFEST_FILENAME = "dashboard_runner_bridge_manifest.v1.json"
-OUTPUT_DIARY_FILENAME = "output_diary.v1.jsonl"
-ACQUISITION_PROFILE_SNAPSHOT_DIRNAME = "study_profile_snapshot"
 RUN_SETUP_MANIFEST_SCHEMA = "pps-experiment-run-setup.v1"
 PROJECT_MANIFEST_SCHEMA = "pps-dashboard-project.v1"
 CUSTOM_PROJECT_ID_SLUG_MAX_LENGTH = 21
@@ -37,6 +43,14 @@ _REDACTED_KEYS = {"participant_name", "real_name", "given_name", "family_name", 
 
 def now_iso() -> str:
     return datetime.now().isoformat(timespec="seconds")
+
+
+def existing_output_diary_path(output_folder: Path | str) -> Path | None:
+    return find_existing_metadata_file(output_folder, OUTPUT_DIARY_FILENAME)
+
+
+def existing_bridge_manifest_path(output_folder: Path | str) -> Path | None:
+    return find_existing_metadata_file(output_folder, BRIDGE_MANIFEST_FILENAME)
 
 
 def generate_custom_profile_id(
@@ -93,9 +107,9 @@ def load_runner_settings(
             or default_output_folder
         )
     ).expanduser()
-    output_diary_path = Path(str(data.get("output_diary_path") or output_folder / OUTPUT_DIARY_FILENAME))
-    diary_path = Path(str(data.get("diary_path") or output_diary_path))
-    bridge_path = Path(str(data.get("bridge_manifest_path") or output_folder / BRIDGE_MANIFEST_FILENAME))
+    output_diary = Path(str(data.get("output_diary_path") or output_diary_path(output_folder)))
+    diary_path = Path(str(data.get("diary_path") or output_diary))
+    bridge_path = Path(str(data.get("bridge_manifest_path") or bridge_manifest_path(output_folder)))
     normalized = dict(data)
     normalized.update(
         {
@@ -104,7 +118,7 @@ def load_runner_settings(
         "current_output_project_root": str(data.get("current_output_project_root") or output_folder),
         "session_root": str(data.get("session_root") or output_folder),
         "diary_path": str(diary_path),
-        "output_diary_path": str(output_diary_path),
+        "output_diary_path": str(output_diary),
         "bridge_manifest_path": str(bridge_path),
         "active_profile_id": str(data.get("active_profile_id") or data.get("template_id") or ""),
         "active_profile_kind": str(data.get("active_profile_kind") or ""),
@@ -133,12 +147,12 @@ def save_runner_settings(
     data["active_output_folder"] = str(output_folder)
     data["current_output_project_root"] = str(data.get("current_output_project_root") or output_folder)
     data["session_root"] = str(data.get("session_root") or output_folder)
-    data["output_diary_path"] = str(data.get("output_diary_path") or output_folder / OUTPUT_DIARY_FILENAME)
+    data["output_diary_path"] = str(data.get("output_diary_path") or output_diary_path(output_folder))
     data["diary_path"] = str(data.get("diary_path") or data["output_diary_path"])
-    data["bridge_manifest_path"] = str(data.get("bridge_manifest_path") or output_folder / BRIDGE_MANIFEST_FILENAME)
+    data["bridge_manifest_path"] = str(data.get("bridge_manifest_path") or bridge_manifest_path(output_folder))
     data["updated_at"] = now_iso()
     path = runner_settings_path(state_root)
-    path.write_text(json.dumps(_json_ready(data), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    _write_json_file(path, data)
     return path
 
 
@@ -161,12 +175,12 @@ def update_runner_settings(
         updates["active_output_folder"] = str(output)
         updates["current_output_project_root"] = str(output)
         updates["session_root"] = str(output)
-        updates["output_diary_path"] = str(output / OUTPUT_DIARY_FILENAME)
+        updates["output_diary_path"] = str(output_diary_path(output))
         current_diary_text = str(current.get("diary_path") or "").strip()
         current_diary = Path(current_diary_text).expanduser() if current_diary_text else None
         if current_diary is None or current_diary.name == OUTPUT_DIARY_FILENAME or current_diary.parent != output:
-            updates["diary_path"] = str(_find_runner_log_diary(output) or output / OUTPUT_DIARY_FILENAME)
-        updates["bridge_manifest_path"] = str(output / BRIDGE_MANIFEST_FILENAME)
+            updates["diary_path"] = str(_find_runner_log_diary(output) or output_diary_path(output))
+        updates["bridge_manifest_path"] = str(bridge_manifest_path(output))
     if profile_id is not None:
         updates["active_profile_id"] = str(profile_id)
     if profile_kind is not None:
@@ -204,17 +218,17 @@ def append_output_diary_event(
     settings = load_runner_settings(state_root=state_root)
     root = Path(output_folder or settings["active_output_folder"]).expanduser()
     root.mkdir(parents=True, exist_ok=True)
-    diary_path = Path(settings.get("output_diary_path") or root / OUTPUT_DIARY_FILENAME)
+    diary_path = Path(settings.get("output_diary_path") or output_diary_path(root))
     if output_folder is not None:
-        diary_path = root / OUTPUT_DIARY_FILENAME
-    diary_path.parent.mkdir(parents=True, exist_ok=True)
+        diary_path = output_diary_path(root)
+    os.makedirs(_filesystem_path(diary_path.parent), exist_ok=True)
     event = {
         "schema": OUTPUT_DIARY_EVENT_SCHEMA,
         "event_type": str(event_type or "activity"),
         "created_at": now_iso(),
         **_redact_participant_names(_json_ready(payload)),
     }
-    with diary_path.open("a", encoding="utf-8") as handle:
+    with open(_filesystem_path(diary_path), "a", encoding="utf-8") as handle:
         handle.write(json.dumps(event, sort_keys=True) + "\n")
     return diary_path
 
@@ -303,7 +317,7 @@ def prepare_acquisition_folder(
     source = Path(source_project_dir).resolve()
     if not source.exists() or not source.is_dir():
         raise FileNotFoundError(f"Stored profile project folder is missing: {source}")
-    snapshot_root = output / ACQUISITION_PROFILE_SNAPSHOT_DIRNAME
+    snapshot_root = output_metadata_dir(output)
     snapshot_dir = (snapshot_root / profile_id).resolve()
     if output != snapshot_dir and output not in snapshot_dir.parents:
         raise ValueError("Acquisition profile snapshot path escapes the output folder.")
@@ -455,6 +469,8 @@ def write_bridge_manifest(
         "created_at": now_iso(),
         "local_only": True,
         "active_output_folder": str(output),
+        "environment_metadata_dir": str(output_metadata_dir(output)),
+        "output_diary_path": str(output_diary_path(output)),
         "profile_id": str(profile_entry.get("profile_id") or ""),
         "display_name": str(profile_entry.get("display_name") or ""),
         "kind": str(profile_entry.get("kind") or ""),
@@ -481,8 +497,10 @@ def write_bridge_manifest(
         "capture_options": dict(capture_options or {}),
         "runner_settings_path": str(runner_settings_path(state_root)),
     }
-    bridge_path = output / BRIDGE_MANIFEST_FILENAME
-    bridge_path.write_text(json.dumps(_json_ready(manifest), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    bridge_path = bridge_manifest_path(output)
+    os.makedirs(_filesystem_path(bridge_path.parent), exist_ok=True)
+    with open(_filesystem_path(bridge_path), "w", encoding="utf-8") as handle:
+        handle.write(json.dumps(_json_ready(manifest), indent=2, sort_keys=True) + "\n")
     manifest["bridge_manifest_path"] = str(bridge_path)
     return manifest
 

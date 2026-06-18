@@ -3,12 +3,19 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import time
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterable
+
+from .output_layout import (
+    ACQUISITION_PROFILE_SNAPSHOT_DIRNAME,
+    LEGACY_ACQUISITION_PROFILE_SNAPSHOT_DIRNAME,
+    output_metadata_dir,
+)
 
 
 RUNNER_DIARY_SCHEMA = "pps-runner-output-diary.v1"
@@ -41,17 +48,45 @@ def diary_filename(identifier: str | None) -> str:
 
 def is_diary_file(path: Path) -> bool:
     path = Path(path)
-    return path.is_file() and path.name.endswith(DIARY_SUFFIX)
+    return os.path.isfile(_filesystem_path(path)) and path.name.endswith(DIARY_SUFFIX)
+
+
+def _diary_search_dirs(root: Path) -> list[Path]:
+    candidates = [
+        output_metadata_dir(root),
+        root / LEGACY_ACQUISITION_PROFILE_SNAPSHOT_DIRNAME,
+        root / ACQUISITION_PROFILE_SNAPSHOT_DIRNAME,
+        root,
+    ]
+    unique: list[Path] = []
+    seen: set[str] = set()
+    for candidate in candidates:
+        key = str(candidate)
+        if key not in seen:
+            unique.append(candidate)
+            seen.add(key)
+    return unique
 
 
 def find_output_diary(folder: Path) -> Path | None:
     root = Path(folder).expanduser()
-    if not root.is_dir():
+    if not os.path.isdir(_filesystem_path(root)):
         return None
-    candidates = [path for path in root.glob(f"*{DIARY_SUFFIX}") if path.is_file()]
+    candidates: list[Path] = []
+    for search_dir in _diary_search_dirs(root):
+        try:
+            names = os.listdir(_filesystem_path(search_dir))
+        except OSError:
+            continue
+        for name in names:
+            if not name.endswith(DIARY_SUFFIX):
+                continue
+            path = search_dir / name
+            if os.path.isfile(_filesystem_path(path)):
+                candidates.append(path)
     if not candidates:
         return None
-    return max(candidates, key=lambda path: path.stat().st_mtime)
+    return max(candidates, key=lambda path: os.path.getmtime(_filesystem_path(path)))
 
 
 def ensure_output_diary(project_root: Path, experiment_identifier: str | None = None) -> Path:
@@ -60,7 +95,7 @@ def ensure_output_diary(project_root: Path, experiment_identifier: str | None = 
     existing = find_output_diary(root)
     if existing is not None:
         return existing
-    diary_path = root / diary_filename(experiment_identifier)
+    diary_path = output_metadata_dir(root) / diary_filename(experiment_identifier)
     append_diary_entry(
         diary_path,
         "diary_created",
@@ -96,7 +131,7 @@ def resolve_or_create_output_project(
         project_root = selected / f"{slug}_{stamp}_{suffix}"
         suffix += 1
     project_root.mkdir(parents=True, exist_ok=True)
-    diary_path = project_root / diary_filename(slug)
+    diary_path = output_metadata_dir(project_root) / diary_filename(slug)
     append_diary_entry(
         diary_path,
         "output_project_created",
@@ -120,7 +155,7 @@ def append_diary_entry(
     payload: dict[str, Any] | None = None,
 ) -> Path:
     path = Path(diary_path).expanduser().resolve()
-    path.parent.mkdir(parents=True, exist_ok=True)
+    os.makedirs(_filesystem_path(path.parent), exist_ok=True)
     now = time.time()
     entry = {
         "schema": RUNNER_DIARY_SCHEMA,
@@ -136,18 +171,19 @@ def append_diary_entry(
         "capture_options": _json_ready(capture_options or {}),
         "payload": _json_ready(payload or {}),
     }
-    with path.open("a", encoding="utf-8") as handle:
+    with open(_filesystem_path(path), "a", encoding="utf-8") as handle:
         handle.write(json.dumps(entry, sort_keys=True, ensure_ascii=False) + "\n")
     return path
 
 
 def read_diary_entries(diary_path: Path, *, limit: int | None = None) -> list[dict[str, Any]]:
     path = Path(diary_path)
-    if not path.is_file():
+    if not os.path.isfile(_filesystem_path(path)):
         return []
     entries: list[dict[str, Any]] = []
     try:
-        lines: Iterable[str] = path.read_text(encoding="utf-8").splitlines()
+        with open(_filesystem_path(path), "r", encoding="utf-8") as handle:
+            lines: Iterable[str] = handle.read().splitlines()
     except Exception:
         return []
     for line in lines:
@@ -190,7 +226,8 @@ def runner_settings_path(state_root: Path) -> Path:
 def load_runner_settings(state_root: Path) -> dict[str, Any]:
     path = runner_settings_path(state_root)
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
+        with open(_filesystem_path(path), "r", encoding="utf-8") as handle:
+            data = json.load(handle)
     except Exception:
         return {"schema": RUNNER_SETTINGS_SCHEMA}
     if not isinstance(data, dict) or data.get("schema") != RUNNER_SETTINGS_SCHEMA:
@@ -204,8 +241,9 @@ def update_runner_settings(state_root: Path, **updates: Any) -> dict[str, Any]:
     data["schema"] = RUNNER_SETTINGS_SCHEMA
     data["updated_at"] = datetime.now().isoformat(timespec="seconds")
     path = runner_settings_path(state_root)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8")
+    os.makedirs(_filesystem_path(path.parent), exist_ok=True)
+    with open(_filesystem_path(path), "w", encoding="utf-8") as handle:
+        handle.write(json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False) + "\n")
     return data
 
 
@@ -219,3 +257,13 @@ def _json_ready(value: Any) -> Any:
     if isinstance(value, (str, int, float, bool)) or value is None:
         return value
     return str(value)
+
+
+def _filesystem_path(path: str | Path) -> str:
+    resolved = Path(path).expanduser().resolve()
+    text = str(resolved)
+    if os.name == "nt" and not text.startswith("\\\\?\\"):
+        if text.startswith("\\\\"):
+            return "\\\\?\\UNC\\" + text.lstrip("\\")
+        return "\\\\?\\" + text
+    return text
