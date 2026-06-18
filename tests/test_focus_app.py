@@ -1227,6 +1227,7 @@ def test_launcher_first_screen_is_environment_gate():
             choose_button = dialog.findChild(q["QPushButton"], "chooseOutputFolderButton")
             assert choose_button is not None
             assert choose_button.text().startswith("2 ")
+            assert choose_button.property("decisionTone") == "folder"
             initiate_button = dialog.findChild(q["QPushButton"], "initiateEnvironmentButton")
             assert initiate_button is not None
             assert not initiate_button.isEnabled()
@@ -1234,6 +1235,7 @@ def test_launcher_first_screen_is_environment_gate():
             resume_button = dialog.findChild(q["QPushButton"], "resumeExperimentButton")
             assert resume_button is not None
             assert resume_button.text().startswith("1 ")
+            assert resume_button.property("decisionTone") == "resume"
             labels = _collect_widget_texts(dialog, q["QLabel"])
             assert labels.index("Output Folder") < labels.index("Experiment Profile")
             assert labels.index("Experiment Profile") < labels.index("Session Name")
