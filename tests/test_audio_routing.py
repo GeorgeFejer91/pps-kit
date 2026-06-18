@@ -10,6 +10,7 @@ from peripersonal_space_toolkit.audio_routing import (
     center_audio_for_output,
     komplete_audio_asio_install_message,
     komplete_audio_asio_install_steps,
+    output_channel_map_from_env,
     prepare_block_audio_for_output,
     preferred_runtime_output_channels,
     tactile_output_channel_for_channels,
@@ -180,6 +181,45 @@ def test_binaural_tactile_render_can_pad_silent_fourth_channel():
     assert prepared.channels == 4
     assert prepared.tactile_channel == 2
     np.testing.assert_array_equal(prepared.data, np.array([[0.1, 0.2, 0.3, 0.0]], dtype=np.float32))
+
+
+def test_manual_output_channel_map_routes_left_right_tactile_to_selected_outputs():
+    source = np.array([[0.1, 0.2, 0.3]], dtype=np.float32)
+
+    prepared = prepare_block_audio_for_output(source, output_channels=6, output_channel_map=(3, 4, 5))
+    instruction = center_audio_for_output(np.array([[0.5]], dtype=np.float32), 6, audio_channels=prepared.audio_channels)
+    probe = tactile_probe_for_output(np.array([1.0], dtype=np.float32), 6, tactile_channel=prepared.tactile_channel)
+
+    assert prepared.audio_channels == (3, 4)
+    assert prepared.tactile_channel == 5
+    np.testing.assert_array_equal(prepared.data, np.array([[0.0, 0.0, 0.0, 0.1, 0.2, 0.3]], dtype=np.float32))
+    np.testing.assert_array_equal(instruction, np.array([[0.0, 0.0, 0.0, 0.5, 0.5, 0.0]], dtype=np.float32))
+    np.testing.assert_array_equal(probe, np.array([[0.0, 0.0, 0.0, 0.0, 0.0, 1.0]], dtype=np.float32))
+
+
+def test_manual_output_channel_map_allows_duplicate_mixed_outputs():
+    source = np.array([[0.1, 0.2, 0.3]], dtype=np.float32)
+
+    prepared = prepare_block_audio_for_output(source, output_channels=3, output_channel_map=(0, 0, 0))
+    scaled = apply_output_volumes(
+        prepared.data,
+        audio_volume=0.5,
+        tactile_volume=0.25,
+        audio_channels=prepared.audio_channels,
+        tactile_channel=prepared.tactile_channel,
+    )
+
+    assert prepared.audio_channels == (0, 0)
+    assert prepared.tactile_channel == 0
+    np.testing.assert_allclose(prepared.data, np.array([[0.6, 0.0, 0.0]], dtype=np.float32))
+    np.testing.assert_allclose(scaled, np.array([[0.3, 0.0, 0.0]], dtype=np.float32))
+
+
+def test_manual_output_channel_env_uses_one_based_channels_and_allows_duplicates():
+    assert output_channel_map_from_env(8, value="4,4,6") == (3, 3, 5)
+
+    with pytest.raises(ValueError, match="between 1 and 8"):
+        output_channel_map_from_env(8, value="1,2,9")
 
 
 def test_komplete_asio_prefers_silent_fourth_channel_padding():

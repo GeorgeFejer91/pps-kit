@@ -1757,6 +1757,7 @@ def test_unvalidated_audio_route_confirmation_window_accepts_continue(monkeypatc
             assert confirms
             confirm = confirms[0]
             assert "not calibrated" in confirm.informativeText()
+            assert "left=Output 4, right=Output 4, tactile=Output 6" in confirm.informativeText()
             buttons = confirm.findChildren(q["QPushButton"])
             continue_button = next(button for button in buttons if button.text() == "Continue Pretest")
             QTest.mouseClick(continue_button, q["Qt"].MouseButton.LeftButton)
@@ -1769,7 +1770,7 @@ def test_unvalidated_audio_route_confirmation_window_accepts_continue(monkeypatc
     parent = q["QDialog"]()
     parent.setObjectName("unvalidatedConfirmParent")
     q["QTimer"].singleShot(50, click_confirmation)
-    assert focus_app._confirm_unvalidated_audio_route(q, parent=parent, label=fallback) is True
+    assert focus_app._confirm_unvalidated_audio_route(q, parent=parent, label=fallback, channels=(4, 4, 6)) is True
     parent.close()
     parent.deleteLater()
     app.processEvents()
@@ -1779,6 +1780,7 @@ def test_unvalidated_audio_route_confirmation_window_accepts_continue(monkeypatc
 def test_audio_dependency_dialog_unvalidated_route_sets_override_after_confirmation(monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     monkeypatch.delenv("PPS_AUDIO_DEVICE_INDEX", raising=False)
+    monkeypatch.delenv("PPS_AUDIO_OUTPUT_CHANNELS", raising=False)
     monkeypatch.delenv("PPS_AUDIO_UNVALIDATED_ROUTE_FROM_DIALOG", raising=False)
     try:
         from PySide6.QtTest import QTest
@@ -1824,10 +1826,10 @@ def test_audio_dependency_dialog_unvalidated_route_sets_override_after_confirmat
         unvalidated_output_devices=(fallback,),
     )
 
-    def fake_confirm(q_arg, *, parent, label):
+    def fake_confirm(q_arg, *, parent, label, channels):
         assert q_arg is q
         assert parent.objectName() == "audioDependencyDialog"
-        confirm_calls.append(label)
+        confirm_calls.append(f"{label}|{channels}")
         return True
 
     monkeypatch.setattr(focus_app, "_confirm_unvalidated_audio_route", fake_confirm)
@@ -1844,6 +1846,16 @@ def test_audio_dependency_dialog_unvalidated_route_sets_override_after_confirmat
             assert combo is not None
             assert combo.count() == 1
             assert int(combo.itemData(0)) == 44
+            left = dialog.findChild(q["QComboBox"], "unvalidatedLeftChannelCombo")
+            right = dialog.findChild(q["QComboBox"], "unvalidatedRightChannelCombo")
+            tactile = dialog.findChild(q["QComboBox"], "unvalidatedTactileChannelCombo")
+            assert left is not None and right is not None and tactile is not None
+            assert left.count() == 8
+            assert right.count() == 8
+            assert tactile.count() == 8
+            left.setCurrentIndex(left.findData(4))
+            right.setCurrentIndex(right.findData(4))
+            tactile.setCurrentIndex(tactile.findData(6))
             button = dialog.findChild(q["QPushButton"], "useUnvalidatedAudioRouteButton")
             assert button is not None
             QTest.mouseClick(button, q["Qt"].MouseButton.LeftButton)
@@ -1855,8 +1867,9 @@ def test_audio_dependency_dialog_unvalidated_route_sets_override_after_confirmat
 
     q["QTimer"].singleShot(50, click_unvalidated_route)
     assert focus_app._show_audio_dependency_dialog(q, readiness=missing_with_fallback) is True
-    assert confirm_calls == [fallback]
+    assert confirm_calls == [f"{fallback}|{(4, 4, 6)}"]
     assert os.environ["PPS_AUDIO_DEVICE_INDEX"] == "44"
+    assert os.environ["PPS_AUDIO_OUTPUT_CHANNELS"] == "4,4,6"
     assert os.environ["PPS_AUDIO_UNVALIDATED_ROUTE_FROM_DIALOG"] == "1"
     assert errors == []
 

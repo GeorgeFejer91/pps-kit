@@ -394,7 +394,52 @@ def preferred_runtime_output_channels(max_output_channels: int, hostapi_name: st
     return BINAURAL_TACTILE_CHANNELS if max_output_channels >= BINAURAL_TACTILE_CHANNELS else LEGACY_STEREO_CHANNELS
 
 
-def prepare_block_audio_for_output(data: np.ndarray, *, output_channels: int | None = None) -> PreparedBlockAudio:
+def output_channel_map_from_env(
+    max_output_channels: int,
+    *,
+    value: str | None = None,
+) -> tuple[int, int, int] | None:
+    """Return a zero-based manual left/right/tactile map from PPS_AUDIO_OUTPUT_CHANNELS.
+
+    The environment value is intentionally one-based and user-facing: "1,2,3"
+    means left=Output 1, right=Output 2, tactile=Output 3.
+    """
+    text = str(os.environ.get("PPS_AUDIO_OUTPUT_CHANNELS", "") if value is None else value).strip()
+    if not text:
+        return None
+    parts = [part for part in re.split(r"[\s,;]+", text) if part]
+    if len(parts) != BINAURAL_TACTILE_CHANNELS:
+        raise ValueError("PPS_AUDIO_OUTPUT_CHANNELS must contain exactly three one-based output numbers.")
+    try:
+        one_based = tuple(int(part) for part in parts)
+    except ValueError as exc:
+        raise ValueError("PPS_AUDIO_OUTPUT_CHANNELS must contain output numbers such as 1,2,3.") from exc
+    if any(channel < 1 or channel > max_output_channels for channel in one_based):
+        raise ValueError(
+            f"PPS_AUDIO_OUTPUT_CHANNELS must be between 1 and {max_output_channels} for the selected device."
+        )
+    return tuple(channel - 1 for channel in one_based)  # type: ignore[return-value]
+
+
+def _validate_output_channel_map(
+    output_channel_map: tuple[int, int, int] | None,
+    output_channels: int,
+) -> tuple[int, int, int] | None:
+    if output_channel_map is None:
+        return None
+    if len(output_channel_map) != BINAURAL_TACTILE_CHANNELS:
+        raise ValueError("Manual output channel map must contain left, right, and tactile channels.")
+    if any(channel < 0 or channel >= output_channels for channel in output_channel_map):
+        raise ValueError("Manual output channel map contains a channel outside the output stream.")
+    return tuple(int(channel) for channel in output_channel_map)  # type: ignore[return-value]
+
+
+def prepare_block_audio_for_output(
+    data: np.ndarray,
+    *,
+    output_channels: int | None = None,
+    output_channel_map: tuple[int, int, int] | None = None,
+) -> PreparedBlockAudio:
     """Map a rendered/legacy block WAV into physical output-channel order.
 
     For 3+ channel rendered files, the first three source channels are already
@@ -413,17 +458,24 @@ def prepare_block_audio_for_output(data: np.ndarray, *, output_channels: int | N
 
     if source_channels >= BINAURAL_TACTILE_CHANNELS:
         requested_channels = output_channels or BINAURAL_TACTILE_CHANNELS
+        if output_channel_map is not None:
+            requested_channels = max(requested_channels, max(output_channel_map) + 1)
         if requested_channels < BINAURAL_TACTILE_CHANNELS:
             raise ValueError("Binaural+tactile blocks require at least 3 output channels.")
+        manual_map = _validate_output_channel_map(output_channel_map, requested_channels)
+        audio_channels = SPATIAL_AUDIO_CHANNELS if manual_map is None else manual_map[:2]
+        tactile_channel = SPATIAL_TACTILE_CHANNEL if manual_map is None else manual_map[2]
         routed = np.zeros((array.shape[0], requested_channels), dtype=np.float32)
-        routed[:, :BINAURAL_TACTILE_CHANNELS] = array[:, :BINAURAL_TACTILE_CHANNELS]
+        routed[:, audio_channels[0]] += array[:, 0]
+        routed[:, audio_channels[1]] += array[:, 1]
+        routed[:, tactile_channel] += array[:, 2]
         return PreparedBlockAudio(
             data=np.ascontiguousarray(routed),
             layout="binaural_left_right_plus_tactile",
             channels=requested_channels,
             source_channels=source_channels,
-            audio_channels=SPATIAL_AUDIO_CHANNELS,
-            tactile_channel=SPATIAL_TACTILE_CHANNEL,
+            audio_channels=audio_channels,
+            tactile_channel=tactile_channel,
         )
 
     if output_channels is not None and output_channels != LEGACY_STEREO_CHANNELS:
@@ -453,15 +505,23 @@ def apply_output_volumes(
     audio_targets = audio_channels or audio_output_channels_for_channels(channels)
     tactile_target = tactile_output_channel_for_channels(channels) if tactile_channel is None else tactile_channel
 
+    gain_by_channel: dict[int, float] = {}
     for channel in audio_targets:
         if 0 <= channel < channels:
-            routed[:, channel] *= float(audio_volume)
+            gain_by_channel[channel] = max(gain_by_channel.get(channel, 0.0), float(audio_volume))
     if 0 <= tactile_target < channels:
-        routed[:, tactile_target] *= float(tactile_volume)
+        gain_by_channel[tactile_target] = max(gain_by_channel.get(tactile_target, 0.0), float(tactile_volume))
+    for channel, gain in gain_by_channel.items():
+        routed[:, channel] *= gain
     return np.ascontiguousarray(routed)
 
 
-def center_audio_for_output(data: np.ndarray, output_channels: int) -> np.ndarray:
+def center_audio_for_output(
+    data: np.ndarray,
+    output_channels: int,
+    *,
+    audio_channels: tuple[int, ...] | None = None,
+) -> np.ndarray:
     """Route mono/stereo instruction audio to auditory channels only."""
     array = ensure_2d_float32(data)
     if array.shape[1] == 1:
@@ -470,18 +530,23 @@ def center_audio_for_output(data: np.ndarray, output_channels: int) -> np.ndarra
         mono = np.mean(array[:, :2], axis=1)
 
     routed = np.zeros((array.shape[0], output_channels), dtype=np.float32)
-    if output_channels >= BINAURAL_TACTILE_CHANNELS:
-        routed[:, 0] = mono
-        routed[:, 1] = mono
-    else:
-        routed[:, 0] = mono
+    for channel in audio_channels or audio_output_channels_for_channels(output_channels):
+        if 0 <= channel < output_channels:
+            routed[:, channel] = mono
     return np.ascontiguousarray(routed)
 
 
-def tactile_probe_for_output(data: np.ndarray, output_channels: int, tactile_volume: float = 1.0) -> np.ndarray:
+def tactile_probe_for_output(
+    data: np.ndarray,
+    output_channels: int,
+    tactile_volume: float = 1.0,
+    *,
+    tactile_channel: int | None = None,
+) -> np.ndarray:
     """Route a mono tactile probe to the active tactile output channel only."""
     array = ensure_2d_float32(data)
     tactile = array[:, 0]
     routed = np.zeros((array.shape[0], output_channels), dtype=np.float32)
-    routed[:, tactile_output_channel_for_channels(output_channels)] = tactile * float(tactile_volume)
+    target = tactile_output_channel_for_channels(output_channels) if tactile_channel is None else tactile_channel
+    routed[:, target] = tactile * float(tactile_volume)
     return np.ascontiguousarray(routed)

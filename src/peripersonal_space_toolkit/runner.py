@@ -46,9 +46,11 @@ from pathlib import Path
 
 from .audio_routing import (
     BINAURAL_TACTILE_CHANNELS,
+    audio_output_channels_for_channels,
     audio_runtime_preflight_message,
     apply_output_volumes,
     center_audio_for_output,
+    output_channel_map_from_env,
     prepare_block_audio_for_output,
     preferred_runtime_output_channels,
     tactile_output_channel_for_channels,
@@ -448,8 +450,19 @@ class AudioEngine:
         self.device_info = sd.query_devices(device_idx) if device_idx is not None else {}
         self.device_hostapi = _hostapi_name_for_device(self.device_info) if self.device_info else ""
         self.max_output_channels = int(self.device_info.get("max_output_channels", 0)) if self.device_info else 0
-        self.runtime_output_channels = preferred_runtime_output_channels(self.max_output_channels, self.device_hostapi)
-        self.tactile_output_channel = tactile_output_channel_for_channels(self.runtime_output_channels)
+        try:
+            self.output_channel_map = output_channel_map_from_env(self.max_output_channels)
+        except ValueError as exc:
+            print(f"Warning: Ignoring invalid PPS_AUDIO_OUTPUT_CHANNELS: {exc}")
+            self.output_channel_map = None
+        if self.output_channel_map is not None:
+            self.runtime_output_channels = max(BINAURAL_TACTILE_CHANNELS, max(self.output_channel_map) + 1)
+            self.audio_output_channels = self.output_channel_map[:2]
+            self.tactile_output_channel = self.output_channel_map[2]
+        else:
+            self.runtime_output_channels = preferred_runtime_output_channels(self.max_output_channels, self.device_hostapi)
+            self.audio_output_channels = audio_output_channels_for_channels(self.runtime_output_channels)
+            self.tactile_output_channel = tactile_output_channel_for_channels(self.runtime_output_channels)
         self.stop_flag = False
         self.paused = False
         self.pause_lock = threading.Lock()
@@ -521,6 +534,7 @@ class AudioEngine:
             f"device=[{self.device_idx}] {self.device_info.get('name', 'default')} "
             f"hostapi={self.device_hostapi or 'unknown'} max_out={self.max_output_channels} "
             f"runtime_channels={self.runtime_output_channels} tactile_out={self.tactile_output_channel + 1} "
+            f"audio_out={tuple(channel + 1 for channel in self.audio_output_channels)} "
             f"latency block={BLOCK_STREAM_LATENCY}s click={CLICK_LATENCY}"
         )
 
@@ -571,7 +585,9 @@ class AudioEngine:
         """Use a silent fourth channel when a driver rejects 3-channel ASIO streams."""
         if self.runtime_output_channels == 3 and self.max_output_channels >= 4:
             self.runtime_output_channels = 4
-            self.tactile_output_channel = tactile_output_channel_for_channels(self.runtime_output_channels)
+            if self.output_channel_map is None:
+                self.audio_output_channels = audio_output_channels_for_channels(self.runtime_output_channels)
+                self.tactile_output_channel = tactile_output_channel_for_channels(self.runtime_output_channels)
             print("Audio routing: 3-channel stream failed; retrying with 4 channels (Output 4 silent).")
             return True
         return False
@@ -845,6 +861,8 @@ class AudioEngine:
                         self._instr_data[self._instr_pos:self._instr_pos + n],
                         self.audio_volume,
                         0.0,
+                        audio_channels=self.audio_output_channels,
+                        tactile_channel=self.tactile_output_channel,
                     )
                     self._instr_pos += n
                     if self._instr_pos >= len(self._instr_data):
@@ -870,6 +888,8 @@ class AudioEngine:
                             self._block_data[self._block_pos:self._block_pos + n],
                             self.audio_volume,
                             self.tactile_volume,
+                            audio_channels=self.audio_output_channels,
+                            tactile_channel=self.tactile_output_channel,
                         )
                         self._block_pos += n
                         self.elapsed_time = self._block_pos / self._block_sr
@@ -886,7 +906,7 @@ class AudioEngine:
             n = min(frames, remaining)
             if n > 0:
                 click_samples = self._click_data[self._click_pos:self._click_pos + n, 0]
-                tactile_channel = min(tactile_output_channel_for_channels(outdata.shape[1]), outdata.shape[1] - 1)
+                tactile_channel = min(self.tactile_output_channel, outdata.shape[1] - 1)
                 if self._click_pos == 0:
                     metadata = dict(self._click_metadata or {})
                     marker_sample_rate = self._block_sr if block_buffer_start_sample is not None else self._click_sr
@@ -1007,6 +1027,8 @@ class AudioEngine:
                 self._block_data[self._block_pos:self._block_pos + n],
                 self.audio_volume,
                 self.tactile_volume,
+                audio_channels=self.audio_output_channels,
+                tactile_channel=self.tactile_output_channel,
             )
             if n < frames:
                 outdata[n:].fill(0)
@@ -1048,7 +1070,11 @@ class AudioEngine:
 
             requested_channels = self.runtime_output_channels if source_channels >= BINAURAL_TACTILE_CHANNELS else 2
             try:
-                prepared = prepare_block_audio_for_output(data, output_channels=requested_channels)
+                prepared = prepare_block_audio_for_output(
+                    data,
+                    output_channels=requested_channels,
+                    output_channel_map=self.output_channel_map,
+                )
             except ValueError as exc:
                 print(f"ERROR: Unsupported block WAV layout for {path}: {exc}")
                 return False
@@ -1116,7 +1142,11 @@ class AudioEngine:
                 )
             except Exception:
                 if prepared.channels == 3 and self._promote_runtime_to_four_channels():
-                    prepared = prepare_block_audio_for_output(data, output_channels=4)
+                    prepared = prepare_block_audio_for_output(
+                        data,
+                        output_channels=4,
+                        output_channel_map=self.output_channel_map,
+                    )
                     with self._block_lock:
                         self._block_data = prepared.data
                         self._block_pos = 0
@@ -1278,6 +1308,8 @@ class AudioEngine:
                 self._instr_data[self._instr_pos:self._instr_pos + n],
                 self.audio_volume,
                 0.0,
+                audio_channels=self.audio_output_channels,
+                tactile_channel=self.tactile_output_channel,
             )
             if n < frames:
                 outdata[n:].fill(0)
@@ -1308,7 +1340,11 @@ class AudioEngine:
                 else:
                     data, sr = sf.read(path, dtype='float32')
 
-                data = center_audio_for_output(data, self.runtime_output_channels)
+                data = center_audio_for_output(
+                    data,
+                    self.runtime_output_channels,
+                    audio_channels=self.audio_output_channels,
+                )
 
                 self.stop_flag = False
                 self._instr_finished.clear()
@@ -1347,7 +1383,11 @@ class AudioEngine:
                     )
                 except Exception:
                     if data.shape[1] == 3 and self._promote_runtime_to_four_channels():
-                        data = center_audio_for_output(data[:, :2], self.runtime_output_channels)
+                        data = center_audio_for_output(
+                            data[:, :2],
+                            self.runtime_output_channels,
+                            audio_channels=self.audio_output_channels,
+                        )
                         with self._instr_lock:
                             self._instr_data = data
                             self._instr_pos = 0
@@ -1400,8 +1440,18 @@ class AudioEngine:
 
         try:
             data, sr = sf.read(path, dtype='float32')
-            base_data = center_audio_for_output(data, self.runtime_output_channels)
-            data = apply_output_volumes(base_data, volume, 0.0)
+            base_data = center_audio_for_output(
+                data,
+                self.runtime_output_channels,
+                audio_channels=self.audio_output_channels,
+            )
+            data = apply_output_volumes(
+                base_data,
+                volume,
+                0.0,
+                audio_channels=self.audio_output_channels,
+                tactile_channel=self.tactile_output_channel,
+            )
 
             # Create looping playback
             self.bg_music_base_data = base_data
@@ -1441,8 +1491,18 @@ class AudioEngine:
                 )
             except Exception:
                 if data.shape[1] == 3 and self._promote_runtime_to_four_channels():
-                    base_data = center_audio_for_output(base_data[:, :2], self.runtime_output_channels)
-                    data = apply_output_volumes(base_data, volume, 0.0)
+                    base_data = center_audio_for_output(
+                        base_data[:, :2],
+                        self.runtime_output_channels,
+                        audio_channels=self.audio_output_channels,
+                    )
+                    data = apply_output_volumes(
+                        base_data,
+                        volume,
+                        0.0,
+                        audio_channels=self.audio_output_channels,
+                        tactile_channel=self.tactile_output_channel,
+                    )
                     self.bg_music_base_data = base_data
                     self.bg_music_data = data
                     stream = self._make_output_stream(
@@ -1468,7 +1528,13 @@ class AudioEngine:
     def set_background_volume(self, volume):
         """Update the volume of background music (0.0 to 1.0)."""
         if hasattr(self, 'bg_music_base_data') and hasattr(self, 'bg_music_volume'):
-            self.bg_music_data = apply_output_volumes(self.bg_music_base_data, volume, 0.0)
+            self.bg_music_data = apply_output_volumes(
+                self.bg_music_base_data,
+                volume,
+                0.0,
+                audio_channels=self.audio_output_channels,
+                tactile_channel=self.tactile_output_channel,
+            )
             self.bg_music_volume = volume
 
     def set_main_volume(self, volume):
@@ -2635,7 +2701,8 @@ class PPSExperimentApp:
             try:
                 data, sr = sf.read(TACTILE_TEST_STIMULUS, dtype='float32')
                 output_channels = self.audio.runtime_output_channels if self.audio else 2
-                probe = tactile_probe_for_output(data, output_channels, 1.0)
+                tactile_channel = self.audio.tactile_output_channel if self.audio else None
+                probe = tactile_probe_for_output(data, output_channels, 1.0, tactile_channel=tactile_channel)
                 device_idx = self.audio.device_idx if self.audio else None
 
                 if self.audio and self.audio._persistent_output_available(samplerate=sr, channels=probe.shape[1]):
@@ -2650,7 +2717,8 @@ class PPSExperimentApp:
                         time.sleep(0.01)
                     with self.audio._block_lock:
                         self.audio._block_data = None
-                    print(f"DEBUG: Playing tactile test stimulus on Output {tactile_output_channel_for_channels(probe.shape[1]) + 1}")
+                    output_label = (tactile_channel if tactile_channel is not None else tactile_output_channel_for_channels(probe.shape[1])) + 1
+                    print(f"DEBUG: Playing tactile test stimulus on Output {output_label}")
                     return
 
                 if self.audio:
@@ -2668,7 +2736,13 @@ class PPSExperimentApp:
                     )
                 except Exception:
                     if self.audio and probe.shape[1] == 3 and self.audio._promote_runtime_to_four_channels():
-                        probe = tactile_probe_for_output(data, self.audio.runtime_output_channels, self.audio.tactile_volume)
+                        tactile_channel = self.audio.tactile_output_channel
+                        probe = tactile_probe_for_output(
+                            data,
+                            self.audio.runtime_output_channels,
+                            self.audio.tactile_volume,
+                            tactile_channel=tactile_channel,
+                        )
                         stream = sd.OutputStream(
                             samplerate=sr,
                             channels=probe.shape[1],
@@ -2682,8 +2756,16 @@ class PPSExperimentApp:
                         raise
 
                 with stream:
-                    stream.write(apply_output_volumes(probe, 1.0, self.audio.tactile_volume if self.audio else 1.0))
-                print(f"DEBUG: Playing tactile test stimulus on Output {tactile_output_channel_for_channels(probe.shape[1]) + 1}")
+                    stream.write(
+                        apply_output_volumes(
+                            probe,
+                            1.0,
+                            self.audio.tactile_volume if self.audio else 1.0,
+                            tactile_channel=tactile_channel,
+                        )
+                    )
+                output_label = (tactile_channel if tactile_channel is not None else tactile_output_channel_for_channels(probe.shape[1])) + 1
+                print(f"DEBUG: Playing tactile test stimulus on Output {output_label}")
             except Exception as e:
                 print(f"ERROR: Could not play tactile test: {e}")
             finally:

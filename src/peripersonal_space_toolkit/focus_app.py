@@ -649,10 +649,42 @@ def _audio_device_index_from_label(label: str) -> int | None:
         return None
 
 
-def _unvalidated_audio_override_message(label: str) -> str:
+def _audio_output_count_from_label(label: str) -> int:
+    text = str(label or "")
+    marker = "outputs 1-"
+    if marker in text:
+        tail = text.split(marker, 1)[1].lstrip()
+        digits = ""
+        for char in tail:
+            if char.isdigit():
+                digits += char
+            elif digits:
+                break
+        if digits:
+            return int(digits)
+    out_marker = " out"
+    if out_marker in text:
+        prefix = text.split(out_marker, 1)[0].rstrip()
+        trailing_digits: list[str] = []
+        for char in reversed(prefix):
+            if char.isdigit():
+                trailing_digits.append(char)
+            elif trailing_digits:
+                break
+        digits = "".join(reversed(trailing_digits))
+        if digits:
+            return int(digits)
+    return 0
+
+
+def _manual_channel_summary(channels: tuple[int, int, int]) -> str:
+    return f"left=Output {channels[0]}, right=Output {channels[1]}, tactile=Output {channels[2]}"
+
+
+def _unvalidated_audio_override_message(label: str, channels: tuple[int, int, int]) -> str:
     return (
         "Unvalidated pretest audio route selected: "
-        f"{label}. PPS will use outputs 1=L, 2=R, 3=tactile. "
+        f"{label}. PPS will use {_manual_channel_summary(channels)}. "
         "This setup is not calibrated for PPS timing; run independent channel and latency tests before using it for "
         "time-sensitive data collection."
     )
@@ -661,10 +693,17 @@ def _unvalidated_audio_override_message(label: str) -> str:
 def _clear_dialog_audio_override_if_validated_route_ready(readiness: AudioRuntimeReadiness) -> None:
     if readiness.publication_ready and os.environ.get("PPS_AUDIO_UNVALIDATED_ROUTE_FROM_DIALOG") == "1":
         os.environ.pop("PPS_AUDIO_DEVICE_INDEX", None)
+        os.environ.pop("PPS_AUDIO_OUTPUT_CHANNELS", None)
         os.environ.pop("PPS_AUDIO_UNVALIDATED_ROUTE_FROM_DIALOG", None)
 
 
-def _confirm_unvalidated_audio_route(q: dict[str, Any], *, parent: Any, label: str) -> bool:
+def _confirm_unvalidated_audio_route(
+    q: dict[str, Any],
+    *,
+    parent: Any,
+    label: str,
+    channels: tuple[int, int, int],
+) -> bool:
     message_box = q["QMessageBox"](parent)
     message_box.setObjectName("unvalidatedAudioRouteConfirmDialog")
     _enable_standard_window_controls(q, message_box)
@@ -672,7 +711,7 @@ def _confirm_unvalidated_audio_route(q: dict[str, Any], *, parent: Any, label: s
     message_box.setIcon(q["QMessageBox"].Icon.Warning)
     message_box.setText("Use this unvalidated route for pretesting?")
     message_box.setInformativeText(
-        _unvalidated_audio_override_message(label)
+        _unvalidated_audio_override_message(label, channels)
         + " Do not treat this route as calibrated participant timing evidence until channel identity and latency "
         "have been tested independently."
     )
@@ -724,8 +763,9 @@ def _show_audio_dependency_dialog(
 
     unvalidated_label = q["QLabel"](
         "<b>Unvalidated pretest route</b><br>"
-        "For pretesting only, you may choose a detected 3+ output device and continue. "
-        "PPS will map Output 1 to left audio, Output 2 to right audio, and Output 3 to tactile. "
+        "For pretesting only, choose a detected 3+ output device and manually assign left, right, and tactile "
+        "to any available physical output channels. You may pick the same output more than once; overlapping "
+        "signals will be mixed onto that output. "
         "These settings are not calibrated for this toolkit's timing claims; verify channel identity and latency "
         "independently before any time-sensitive use."
     )
@@ -736,12 +776,32 @@ def _show_audio_dependency_dialog(
     unvalidated_controls = q["QHBoxLayout"]()
     unvalidated_combo = q["QComboBox"]()
     unvalidated_combo.setObjectName("unvalidatedAudioDeviceCombo")
+    unvalidated_controls.addWidget(unvalidated_combo, 1)
+    layout.addLayout(unvalidated_controls)
+
+    channel_controls = q["QHBoxLayout"]()
+    left_channel_combo = q["QComboBox"]()
+    left_channel_combo.setObjectName("unvalidatedLeftChannelCombo")
+    right_channel_combo = q["QComboBox"]()
+    right_channel_combo.setObjectName("unvalidatedRightChannelCombo")
+    tactile_channel_combo = q["QComboBox"]()
+    tactile_channel_combo.setObjectName("unvalidatedTactileChannelCombo")
+    manual_channel_widgets: list[Any] = []
+    for label, combo in (
+        ("Left", left_channel_combo),
+        ("Right", right_channel_combo),
+        ("Tactile", tactile_channel_combo),
+    ):
+        label_widget = q["QLabel"](label)
+        manual_channel_widgets.append(label_widget)
+        manual_channel_widgets.append(combo)
+        channel_controls.addWidget(label_widget)
+        channel_controls.addWidget(combo)
     use_unvalidated = q["QPushButton"]("Use Selected Unvalidated Route")
     use_unvalidated.setObjectName("useUnvalidatedAudioRouteButton")
     use_unvalidated.setToolTip("Continue for pretesting only; this route is not calibrated PPS timing hardware.")
-    unvalidated_controls.addWidget(unvalidated_combo, 1)
-    unvalidated_controls.addWidget(use_unvalidated)
-    layout.addLayout(unvalidated_controls)
+    channel_controls.addWidget(use_unvalidated)
+    layout.addLayout(channel_controls)
 
     buttons = q["QHBoxLayout"]()
     open_driver = q["QPushButton"]("Open Native Instruments Driver Page")
@@ -771,12 +831,38 @@ def _show_audio_dependency_dialog(
         show_unvalidated = bool(unvalidated_combo.count()) and not ready.publication_ready
         unvalidated_label.setVisible(show_unvalidated)
         unvalidated_combo.setVisible(show_unvalidated)
+        for widget in manual_channel_widgets:
+            widget.setVisible(show_unvalidated)
         use_unvalidated.setVisible(show_unvalidated)
         use_unvalidated.setEnabled(show_unvalidated)
+        _refresh_manual_channel_dropdowns()
         if ready.publication_ready:
             status.setText("Komplete Audio ASIO Driver detected. PPS will use it automatically.")
         else:
             status.setText("Waiting for Komplete Audio ASIO Driver. Install/reconnect the interface, then retry detection.")
+
+    def _refresh_manual_channel_dropdowns() -> None:
+        label = str(unvalidated_combo.currentText() or "")
+        output_count = _audio_output_count_from_label(label)
+        previous = [
+            left_channel_combo.currentData() or 1,
+            right_channel_combo.currentData() or 2,
+            tactile_channel_combo.currentData() or 3,
+        ]
+        for combo_index, combo in enumerate((left_channel_combo, right_channel_combo, tactile_channel_combo)):
+            combo.blockSignals(True)
+            combo.clear()
+            for output_index in range(1, output_count + 1):
+                combo.addItem(f"Output {output_index}", output_index)
+            preferred = min(max(int(previous[combo_index]), 1), max(output_count, 1))
+            default = min(combo_index + 1, output_count) if output_count else 0
+            target = preferred if output_count and 1 <= preferred <= output_count else default
+            if target:
+                item_index = combo.findData(target)
+                combo.setCurrentIndex(item_index if item_index >= 0 else 0)
+            combo.blockSignals(False)
+
+    unvalidated_combo.currentIndexChanged.connect(_refresh_manual_channel_dropdowns)
 
     def _retry() -> None:
         current["readiness"] = assess_audio_runtime_readiness()
@@ -790,14 +876,20 @@ def _show_audio_dependency_dialog(
         if device_index is None or not label:
             status.setText("Choose a detected 3+ output route before continuing.")
             return
-        if not _confirm_unvalidated_audio_route(q, parent=dialog, label=label):
+        channels = (
+            int(left_channel_combo.currentData() or 1),
+            int(right_channel_combo.currentData() or 2),
+            int(tactile_channel_combo.currentData() or 3),
+        )
+        if not _confirm_unvalidated_audio_route(q, parent=dialog, label=label, channels=channels):
             status.setText("Unvalidated pretest route was not selected.")
             return
         os.environ["PPS_AUDIO_DEVICE_INDEX"] = str(int(device_index))
+        os.environ["PPS_AUDIO_OUTPUT_CHANNELS"] = ",".join(str(channel) for channel in channels)
         os.environ["PPS_AUDIO_UNVALIDATED_ROUTE_FROM_DIALOG"] = "1"
         current["accepted_unvalidated"] = True
         current["unvalidated_label"] = label
-        status.setText(_unvalidated_audio_override_message(label))
+        status.setText(_unvalidated_audio_override_message(label, channels))
         dialog.accept()
 
     open_driver.clicked.connect(lambda: q["QDesktopServices"].openUrl(q["QUrl"](NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL)))
@@ -7370,9 +7462,11 @@ def _run_environment_operations_window(
             readiness_state["readiness"] = refreshed
             override = os.environ.get("PPS_AUDIO_DEVICE_INDEX", "").strip()
             if os.environ.get("PPS_AUDIO_UNVALIDATED_ROUTE_FROM_DIALOG") == "1" and override:
+                channel_text = os.environ.get("PPS_AUDIO_OUTPUT_CHANNELS", "1,2,3")
                 message.setText(
                     "Unvalidated pretest audio route selected. PPS will use the selected 3+ output device with "
-                    "outputs 1=L, 2=R, 3=tactile; run independent channel and latency tests before time-sensitive use."
+                    f"left/right/tactile outputs {channel_text}; run independent channel and latency tests before "
+                    "time-sensitive use."
                 )
                 driver_button.setVisible(True)
             else:
