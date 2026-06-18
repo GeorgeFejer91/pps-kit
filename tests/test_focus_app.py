@@ -1792,10 +1792,7 @@ def test_unvalidated_audio_route_confirmation_window_accepts_continue(monkeypatc
     q = focus_app._require_qt()
     app = QApplication.instance() or QApplication([])
     errors: list[BaseException] = []
-    fallback = (
-        "[44] Speakers (Nahimic Easy Surround) "
-        "(Windows WDM-KS, 8 out; outputs 1-8 available; PPS uses 1=L, 2=R, 3=tactile)"
-    )
+    display_device = "Speakers (Nahimic Easy Surround)"
 
     def click_confirmation() -> None:
         try:
@@ -1803,9 +1800,11 @@ def test_unvalidated_audio_route_confirmation_window_accepts_continue(monkeypatc
             assert confirms
             confirm = confirms[0]
             assert "not calibrated" in confirm.informativeText()
+            assert display_device in confirm.informativeText()
+            assert "[44]" not in confirm.informativeText()
             assert "left=Output 4, right=Output 4, tactile=Output 6" in confirm.informativeText()
             buttons = confirm.findChildren(q["QPushButton"])
-            continue_button = next(button for button in buttons if button.text() == "Continue Pretest")
+            continue_button = next(button for button in buttons if button.text() == "Continue Without Komplete Interface")
             QTest.mouseClick(continue_button, q["Qt"].MouseButton.LeftButton)
         except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
             errors.append(exc)
@@ -1816,14 +1815,14 @@ def test_unvalidated_audio_route_confirmation_window_accepts_continue(monkeypatc
     parent = q["QDialog"]()
     parent.setObjectName("unvalidatedConfirmParent")
     q["QTimer"].singleShot(50, click_confirmation)
-    assert focus_app._confirm_unvalidated_audio_route(q, parent=parent, label=fallback, channels=(4, 4, 6)) is True
+    assert focus_app._confirm_unvalidated_audio_route(q, parent=parent, label=display_device, channels=(4, 4, 6)) is True
     parent.close()
     parent.deleteLater()
     app.processEvents()
     assert errors == []
 
 
-def test_audio_dependency_dialog_unvalidated_route_sets_override_after_confirmation(monkeypatch):
+def test_audio_dependency_dialog_user_selected_system_route_sets_audio_env_after_confirmation(monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     monkeypatch.delenv("PPS_AUDIO_DEVICE_INDEX", raising=False)
     monkeypatch.delenv("PPS_AUDIO_OUTPUT_CHANNELS", raising=False)
@@ -1888,10 +1887,10 @@ def test_audio_dependency_dialog_unvalidated_route_sets_override_after_confirmat
             labels = _collect_widget_texts(dialog, q["QLabel"])
             assert any("Komplete Audio 6 MK2 interface not detected" in label for label in labels)
             assert any("Unvalidated pretest route" in label for label in labels)
-            combo = dialog.findChild(q["QComboBox"], "unvalidatedAudioDeviceCombo")
-            assert combo is not None
-            assert combo.count() == 1
-            assert int(combo.itemData(0)) == 44
+            assert any("Left (default 1)" in label for label in labels)
+            assert any("Right (default 2)" in label for label in labels)
+            assert any("Tactile (default 3)" in label for label in labels)
+            assert dialog.findChild(q["QComboBox"], "unvalidatedAudioDeviceCombo") is None
             left = dialog.findChild(q["QComboBox"], "unvalidatedLeftChannelCombo")
             right = dialog.findChild(q["QComboBox"], "unvalidatedRightChannelCombo")
             tactile = dialog.findChild(q["QComboBox"], "unvalidatedTactileChannelCombo")
@@ -1899,11 +1898,18 @@ def test_audio_dependency_dialog_unvalidated_route_sets_override_after_confirmat
             assert left.count() == 8
             assert right.count() == 8
             assert tactile.count() == 8
-            left.setCurrentIndex(left.findData(4))
-            right.setCurrentIndex(right.findData(4))
-            tactile.setCurrentIndex(tactile.findData(6))
+            assert left.itemText(0) == "Speakers (Nahimic Easy Surround) - Output 1"
+            assert right.itemText(1) == "Speakers (Nahimic Easy Surround) - Output 2"
+            assert tactile.itemText(2) == "Speakers (Nahimic Easy Surround) - Output 3"
+            assert left.itemData(0)[:2] == (44, 1)
+            assert right.itemData(1)[:2] == (44, 2)
+            assert tactile.itemData(2)[:2] == (44, 3)
+            left.setCurrentIndex(next(index for index in range(left.count()) if left.itemData(index)[:2] == (44, 4)))
+            right.setCurrentIndex(next(index for index in range(right.count()) if right.itemData(index)[:2] == (44, 4)))
+            tactile.setCurrentIndex(next(index for index in range(tactile.count()) if tactile.itemData(index)[:2] == (44, 6)))
             button = dialog.findChild(q["QPushButton"], "useUnvalidatedAudioRouteButton")
             assert button is not None
+            assert button.text() == "Accept Pretest Settings"
             QTest.mouseClick(button, q["Qt"].MouseButton.LeftButton)
         except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
             errors.append(exc)
@@ -1913,7 +1919,7 @@ def test_audio_dependency_dialog_unvalidated_route_sets_override_after_confirmat
 
     q["QTimer"].singleShot(50, click_unvalidated_route)
     assert focus_app._show_audio_dependency_dialog(q, readiness=missing_with_fallback) is True
-    assert confirm_calls == [f"{fallback}|{(4, 4, 6)}"]
+    assert confirm_calls == [f"Speakers (Nahimic Easy Surround)|{(4, 4, 6)}"]
     assert os.environ["PPS_AUDIO_DEVICE_INDEX"] == "44"
     assert os.environ["PPS_AUDIO_OUTPUT_CHANNELS"] == "4,4,6"
     assert os.environ["PPS_AUDIO_UNVALIDATED_ROUTE_FROM_DIALOG"] == "1"
