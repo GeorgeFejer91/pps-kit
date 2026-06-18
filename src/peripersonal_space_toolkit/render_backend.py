@@ -33,6 +33,7 @@ from .design import (
     trajectory_point_at_time,
     trajectory_points_with_holds,
 )
+from .subprocess_utils import windows_no_console_kwargs
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -1181,7 +1182,14 @@ def render_design_with_3dti(
         "--qc",
         str(qc_path),
     ]
-    completed = subprocess.run(command, cwd=REPO_ROOT, text=True, capture_output=True, check=False)
+    completed = subprocess.run(
+        command,
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+        **windows_no_console_kwargs(),
+    )
     if completed.returncode != 0:
         message = (completed.stderr or completed.stdout or "3DTI renderer failed.").strip()
         write_manifest(

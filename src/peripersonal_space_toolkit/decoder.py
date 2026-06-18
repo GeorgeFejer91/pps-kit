@@ -805,6 +805,8 @@ def _decode_mp3_to_mono_float(path: Path, target_sample_rate: int) -> np.ndarray
     ffmpeg is already on PATH on the lab machine. Returns samples in [-1, 1].
     """
     import subprocess, io
+    from .subprocess_utils import windows_no_console_kwargs
+
     r = subprocess.run(
         [
             "ffmpeg", "-v", "error", "-i", str(path),
@@ -812,6 +814,7 @@ def _decode_mp3_to_mono_float(path: Path, target_sample_rate: int) -> np.ndarray
         ],
         capture_output=True,
         check=False,
+        **windows_no_console_kwargs(),
     )
     if r.returncode != 0 or not r.stdout:
         raise RuntimeError(

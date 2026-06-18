@@ -6989,7 +6989,9 @@ def run_launcher_window(
                     progress.setValue(int(max(0.0, min(1.0, current / total)) * 1000))
                 else:
                     progress.setRange(0, 0)
-                message.setText(str(payload.get("message") or "Preparing environment"))
+                progress_message = str(payload.get("message") or "Preparing environment")
+                detail = str(payload.get("detail") or "").strip()
+                message.setText(f"{progress_message}: {detail}" if detail else progress_message)
             elif kind == "error":
                 message.setText(str(payload))
                 _set_environment_busy(False)

@@ -14,6 +14,7 @@ from typing import Any
 from . import render_backend
 from .app_assets import apply_qt_app_icon, set_windows_app_user_model_id
 from .focus_launch import build_focus_runner_command, resolve_packaged_focus_runner
+from .subprocess_utils import windows_no_console_kwargs
 from .design import (
     DEFAULT_SOFA_FILE,
     DEFAULT_TRAJECTORY_PLANE_HEIGHT_M,
@@ -1688,6 +1689,7 @@ class QtStimulusDesigner:
                 capture_output=True,
                 timeout=45,
                 check=False,
+                **windows_no_console_kwargs(),
             )
             output = (completed.stdout + "\n" + completed.stderr).strip()
             self._append_runner_review(output or "Audio stress command returned no output.")
@@ -1717,7 +1719,7 @@ class QtStimulusDesigner:
             return
         try:
             launch_command = build_focus_runner_command(self.current_run_package.manifest_path, manual_start=True)
-            subprocess.Popen(launch_command.command, cwd=REPO_ROOT)
+            subprocess.Popen(launch_command.command, cwd=REPO_ROOT, **windows_no_console_kwargs())
             self._append_runner_review(f"Opened active experiment runner: {launch_command.runner_binary}")
         except Exception as exc:
             self.qt["QMessageBox"].warning(self.window, "Start Focus Mode", str(exc))

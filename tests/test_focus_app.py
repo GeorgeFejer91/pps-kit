@@ -1399,9 +1399,9 @@ def test_launcher_pick_empty_folder_unlocks_required_fields_and_initiate(tmp_pat
             dialogs = [widget for widget in app.topLevelWidgets() if widget.windowTitle() == "PPS Experiment Runner"]
             assert dialogs
             dialog = dialogs[0]
-            dialog.activateWindow()
-            dialog.setFocus(q["Qt"].FocusReason.ShortcutFocusReason)
-            QTest.keyClick(dialog, q["Qt"].Key.Key_2)
+            initial_choose_button = dialog.findChild(q["QPushButton"], "chooseOutputFolderButton")
+            assert initial_choose_button is not None
+            QTest.mouseClick(initial_choose_button, q["Qt"].MouseButton.LeftButton)
             app.processEvents()
 
             output_field = dialog.findChild(q["QLineEdit"], "outputFolderField")

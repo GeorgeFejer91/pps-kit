@@ -4,6 +4,8 @@ import base64
 import csv
 import json
 import math
+import os
+import subprocess
 import time
 from importlib.resources import files
 from pathlib import Path
@@ -38,6 +40,15 @@ from peripersonal_space_toolkit.render_backend import (
     render_design_with_3dti,
     sha256_file,
 )
+from peripersonal_space_toolkit.subprocess_utils import windows_no_console_kwargs
+
+
+def test_windows_no_console_kwargs_requests_hidden_console_on_windows():
+    kwargs = windows_no_console_kwargs()
+    if os.name == "nt":
+        assert int(kwargs.get("creationflags") or 0) & subprocess.CREATE_NO_WINDOW
+    else:
+        assert kwargs == {}
 from peripersonal_space_toolkit.runner_diary import read_diary_entries
 
 
@@ -1241,6 +1252,8 @@ def test_dashboard_launches_every_finished_profile_from_segment6(tmp_path: Path,
         assert state["profile_run_materialization_result"]["profile_id"] == profile_id
 
     assert len(runner_calls) == len(finished_profiles)
+    if os.name == "nt":
+        assert all(int(kwargs.get("creationflags") or 0) & subprocess.CREATE_NO_WINDOW for _args, kwargs in runner_calls)
 
 
 def test_dashboard_validates_full_study5_segment0_to_3_pipeline(tmp_path: Path):

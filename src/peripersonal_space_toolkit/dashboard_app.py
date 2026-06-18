@@ -91,6 +91,7 @@ from .templates import (
 )
 from .preload_inventory import ensure_preload_assets, load_preload_inventory, preload_inventory_payload, profile_asset_status
 from .runtime_paths import repo_root, writable_root
+from .subprocess_utils import windows_no_console_kwargs
 from .dashboard_backend.security import CompanionSecurity, TOKEN_HEADER
 from .runner_diary import (
     append_diary_entry,
@@ -1658,7 +1659,7 @@ class DashboardController:
             manual_start=True,
         )
         command = launch_command.command
-        process = subprocess.Popen(command, cwd=WRITABLE_ROOT)
+        process = subprocess.Popen(command, cwd=WRITABLE_ROOT, **windows_no_console_kwargs())
         record_experiment_activity(
             "runner_launched",
             state_root=self.state_root,
@@ -1945,7 +1946,15 @@ class DashboardController:
         ]
 
         def _stress() -> dict[str, Any]:
-            completed = subprocess.run(command, cwd=WRITABLE_ROOT, text=True, capture_output=True, timeout=45, check=False)
+            completed = subprocess.run(
+                command,
+                cwd=WRITABLE_ROOT,
+                text=True,
+                capture_output=True,
+                timeout=45,
+                check=False,
+                **windows_no_console_kwargs(),
+            )
             return {
                 "exit_code": completed.returncode,
                 "stdout": completed.stdout,
@@ -1964,7 +1973,7 @@ class DashboardController:
         command = launch_command.command
 
         def _focus() -> dict[str, Any]:
-            process = subprocess.Popen(command, cwd=WRITABLE_ROOT)
+            process = subprocess.Popen(command, cwd=WRITABLE_ROOT, **windows_no_console_kwargs())
             return {
                 "pid": process.pid,
                 "command": command,
@@ -3261,6 +3270,7 @@ def _ffmpeg_concat_lossless(segment_paths: list[Path], output_path: Path) -> boo
         capture_output=True,
         text=True,
         check=False,
+        **windows_no_console_kwargs(),
     )
     try:
         os.unlink(_filesystem_path(list_path))
@@ -4980,6 +4990,7 @@ def _ffmpeg_merge_three_channel(source_stereo_path: Path, tactile_mono_path: Pat
         capture_output=True,
         text=True,
         check=False,
+        **windows_no_console_kwargs(),
     )
     return completed.returncode == 0 and _path_exists(output_path)
 
