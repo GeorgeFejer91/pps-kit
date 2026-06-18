@@ -68,6 +68,7 @@ class FocusLayoutProfile:
     output_min_height: int
     output_max_height: int
     experiment_control_min_height: int
+    experiment_control_content_min_height: int
     experiment_control_initial_height: int
     recording_chip_columns: int
     right_stack_mode: str
@@ -90,7 +91,7 @@ def render_focus_layout_profile(
 
     width = max(640, int(available_width or target_width))
     height = max(440, int(available_height or target_height))
-    compact = width <= 1180 or height <= 860
+    compact = width <= 1180 or height <= 880
     constrained = width <= 980 or height <= 740
     spacious = width >= 1700 and height >= 960
 
@@ -109,18 +110,23 @@ def render_focus_layout_profile(
     target_square_size = 76 if constrained else (96 if compact else 104)
     response_panel_side = 236 if constrained else (304 if compact else (328 if spacious else 316))
     if constrained:
-        experiment_control_min_height = 160
+        experiment_control_content_min_height = 160
+        experiment_control_min_height = experiment_control_content_min_height
         experiment_control_initial_height = 184
     elif compact and height <= 740:
-        experiment_control_min_height = 196
-        experiment_control_initial_height = 224
+        experiment_control_content_min_height = 216
+        experiment_control_min_height = experiment_control_content_min_height
+        experiment_control_initial_height = 244
     elif compact:
-        experiment_control_min_height = 212
-        experiment_control_initial_height = 252
+        experiment_control_content_min_height = 224
+        experiment_control_min_height = experiment_control_content_min_height
+        experiment_control_initial_height = 260
     elif spacious:
+        experiment_control_content_min_height = 282
         experiment_control_min_height = 280
         experiment_control_initial_height = 372
     else:
+        experiment_control_content_min_height = 264
         experiment_control_min_height = 264
         experiment_control_initial_height = 336
 
@@ -155,8 +161,13 @@ def render_focus_layout_profile(
         target_font_pt=18.0 if constrained else (19.0 if compact else 20.0),
         output_min_height=48 if constrained else (56 if compact else 60),
         output_max_height=72 if constrained else (84 if compact else 90),
-        experiment_control_min_height=experiment_control_min_height,
-        experiment_control_initial_height=max(experiment_control_min_height, experiment_control_initial_height),
+        experiment_control_min_height=max(experiment_control_min_height, experiment_control_content_min_height),
+        experiment_control_content_min_height=experiment_control_content_min_height,
+        experiment_control_initial_height=max(
+            experiment_control_min_height,
+            experiment_control_content_min_height,
+            experiment_control_initial_height,
+        ),
         recording_chip_columns=3 if width >= 1080 else 2,
         right_stack_mode="tabs" if constrained else "resizable",
         compact=compact,

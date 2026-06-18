@@ -126,8 +126,19 @@ STUDY5_PROFILE_ID = "study5_box_breathing_pps"
 DATA_COLLECTED_MARK = "[collected]"
 TIMELINE_LABEL_WIDTH = 58
 TIMELINE_RIGHT_MARGIN = 12
+TIMELINE_ROW_NAMES = ("Resp", "Type", "SOA", "Tactile", "Clicks")
+TIMELINE_SEGMENT_LABEL_SKIP_WIDTH = 22
+TIMELINE_REPEATED_LABEL_SKIP_WIDTH = 58
 SINGLE_INSTANCE_MUTEX_NAME = "Local\\PPSExperimentRunnerSingleInstance"
 SINGLE_INSTANCE_EXIT_CODE = 4
+
+
+def _timeline_widget_minimum_height(profile: FocusLayoutProfile | None) -> int:
+    if profile is not None and profile.screen_class == "constrained":
+        return 42
+    if profile is not None and profile.compact:
+        return 78
+    return 112
 SINGLE_INSTANCE_MESSAGE = (
     "PPS Experiment Runner is already open.\n\n"
     "Close the existing Experiment Runner window before starting another one."
@@ -521,7 +532,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
 def _require_qt() -> dict[str, Any]:
     try:
         from PySide6.QtCore import QPoint, QTimer, Qt, QUrl, Signal
-        from PySide6.QtGui import QBrush, QColor, QCursor, QDesktopServices, QFontDatabase, QIcon, QKeySequence, QPainter, QPainterPath, QPen, QShortcut
+        from PySide6.QtGui import QBrush, QColor, QCursor, QDesktopServices, QFont, QFontDatabase, QFontMetrics, QIcon, QKeySequence, QPainter, QPainterPath, QPen, QShortcut
         from PySide6.QtWidgets import (
             QApplication,
             QCheckBox,
@@ -560,10 +571,12 @@ def _require_qt() -> dict[str, Any]:
         "QDialog": QDialog,
         "QFileDialog": QFileDialog,
         "QFrame": QFrame,
+        "QFont": QFont,
         "QGridLayout": QGridLayout,
         "QHBoxLayout": QHBoxLayout,
         "QHeaderView": QHeaderView,
         "QFontDatabase": QFontDatabase,
+        "QFontMetrics": QFontMetrics,
         "QIcon": QIcon,
         "QKeySequence": QKeySequence,
         "QLabel": QLabel,
@@ -2521,16 +2534,35 @@ def _create_tactile_timeline_widget(
     class TactileTimelineWidget(q["QWidget"]):
         def __init__(self) -> None:
             super().__init__()
-            if profile is not None and profile.screen_class == "constrained":
-                minimum_height = 42
-            elif profile is not None and profile.compact:
-                minimum_height = 90
-            else:
-                minimum_height = 132
-            self.setMinimumHeight(minimum_height)
+            self._row_names = tuple(TIMELINE_ROW_NAMES)
+            self._label_fit_stats = {
+                "drawn": 0,
+                "shrunk": 0,
+                "elided": 0,
+                "skipped": 0,
+                "skipped_repeated": 0,
+                "overlap_count": 0,
+            }
+            self.setMinimumHeight(_timeline_widget_minimum_height(profile))
+
+        def timeline_debug_snapshot(self) -> dict[str, Any]:
+            return {
+                "row_count": len(self._row_names),
+                "row_names": list(self._row_names),
+                "label_fit": dict(self._label_fit_stats),
+                "minimum_height": int(self.minimumHeight()),
+            }
 
         def paintEvent(self, _event: Any) -> None:  # noqa: N802 - Qt API
             painter = q["QPainter"](self)
+            fit_stats = {
+                "drawn": 0,
+                "shrunk": 0,
+                "elided": 0,
+                "skipped": 0,
+                "skipped_repeated": 0,
+                "overlap_count": 0,
+            }
             try:
                 painter.setRenderHint(q["QPainter"].RenderHint.Antialiasing, True)
                 width = max(1, int(self.width()))
@@ -2539,19 +2571,18 @@ def _create_tactile_timeline_widget(
                 right_margin = TIMELINE_RIGHT_MARGIN
                 compact_rows = height < 96
                 very_compact_rows = height < 84
-                top_margin = 3 if very_compact_rows else (6 if compact_rows else 10)
                 usable = max(1, width - label_width - right_margin)
                 timeline_state = state_provider() if state_provider is not None else state
                 duration = max(0.001, float(timeline_state.duration_s or 0.0))
-                if height < 55:
-                    row_offsets = (1, 8, 15, 22, 29, 36)
-                elif very_compact_rows:
-                    row_offsets = (3, 14, 25, 36, 47, 58)
-                elif compact_rows:
-                    row_offsets = (3, 17, 31, 45, 59, 73)
+                top_y = 5 if very_compact_rows else (8 if compact_rows else 14)
+                bottom_y = max(top_y + 1, height - (5 if very_compact_rows else (8 if compact_rows else 12)))
+                if len(self._row_names) == 1:
+                    row_y_values = [int((top_y + bottom_y) / 2)]
                 else:
-                    row_offsets = (5, 25, 47, 69, 91, 113)
-                rows = [(label, top_margin + offset) for label, offset in zip(("Instr", "Resp", "Type", "SOA", "Tactile", "Clicks"), row_offsets)]
+                    row_gap = (bottom_y - top_y) / max(1, len(self._row_names) - 1)
+                    row_y_values = [int(round(top_y + index * row_gap)) for index in range(len(self._row_names))]
+                rows = list(zip(self._row_names, row_y_values))
+                row_y_by_name = {label: row_y for label, row_y in rows}
 
                 painter.fillRect(self.rect(), q["QColor"]("#f8f9f6"))
                 label_pen = q["QPen"](q["QColor"]("#647067"))
@@ -2572,7 +2603,7 @@ def _create_tactile_timeline_widget(
                     painter.drawLine(label_width, row_y, width - right_margin, row_y)
                     painter.setPen(label_pen)
 
-                if not timeline_state.cues and not timeline_state.trial_segments and not timeline_state.instruction_segments:
+                if not timeline_state.cues and not timeline_state.trial_segments and not timeline_state.click_markers:
                     painter.setPen(q["QPen"](q["QColor"]("#647067")))
                     painter.drawText(self.rect(), q["Qt"].AlignmentFlag.AlignCenter, "No experiment schedule loaded")
                     return
@@ -2580,9 +2611,9 @@ def _create_tactile_timeline_widget(
                 def _x(time_s: float) -> int:
                     return label_width + int(max(0.0, min(1.0, float(time_s) / duration)) * usable)
 
-                def _short(text: str, limit: int = 18) -> str:
+                def _clean_label(text: str) -> str:
                     clean = " ".join(str(text or "").replace("|", " ").split())
-                    return clean if len(clean) <= limit else f"{clean[: max(1, limit - 3)]}..."
+                    return clean
 
                 palette = ["#dcefeb", "#f4e2b8", "#e7dff0", "#dce7f4", "#f0dddd", "#e3ead8"]
 
@@ -2618,39 +2649,122 @@ def _create_tactile_timeline_widget(
                     return "#f0dddd"
 
                 row_height = 6 if height < 55 else (8 if very_compact_rows else (12 if compact_rows else 16))
+                last_text_by_row: dict[str, str] = {}
+                drawn_rects_by_row: dict[str, tuple[int, int, int, int]] = {}
+                text_alignment = int(q["Qt"].AlignmentFlag.AlignLeft | q["Qt"].AlignmentFlag.AlignVCenter)
+                text_elide_enum = getattr(q["Qt"], "TextElideMode", None)
+                text_elide_mode = getattr(text_elide_enum, "ElideRight", None) if text_elide_enum is not None else None
+                if text_elide_mode is None:
+                    text_elide_mode = q["Qt"].ElideRight
 
-                for segment in timeline_state.instruction_segments:
-                    x1 = _x(segment.start_s)
-                    x2 = max(x1 + 12, _x(segment.end_s))
-                    y = rows[0][1] - row_height // 2
-                    color = segment.color or _instruction_slot_color(segment.slot)
-                    painter.setPen(q["QPen"](q["QColor"]("#bcc7bd")))
-                    painter.setBrush(q["QBrush"](q["QColor"](color)))
-                    painter.drawRoundedRect(x1, y, max(10, x2 - x1), row_height, 4, 4)
-                    if x2 - x1 >= 42:
-                        painter.setPen(q["QPen"](q["QColor"]("#ffffff")))
-                        painter.drawText(x1 + 3, y + 1, max(1, x2 - x1 - 6), row_height - 2, int(q["Qt"].AlignmentFlag.AlignVCenter), _short(segment.label, 18))
+                def _advance(metrics: Any, text: str) -> int:
+                    try:
+                        return int(metrics.horizontalAdvance(text))
+                    except AttributeError:
+                        return int(metrics.width(text))
+
+                def _draw_fitted_text(
+                    row_name: str,
+                    x: int,
+                    y: int,
+                    box_width: int,
+                    box_height: int,
+                    text: str,
+                    color: str,
+                    *,
+                    optional: bool = True,
+                ) -> None:
+                    clean = _clean_label(text)
+                    text_width = max(0, int(box_width) - 6)
+                    if not clean or text_width <= 0:
+                        fit_stats["skipped"] += 1
+                        return
+                    if optional and box_width < TIMELINE_SEGMENT_LABEL_SKIP_WIDTH:
+                        fit_stats["skipped"] += 1
+                        return
+                    if optional and clean == last_text_by_row.get(row_name) and box_width < TIMELINE_REPEATED_LABEL_SKIP_WIDTH:
+                        fit_stats["skipped"] += 1
+                        fit_stats["skipped_repeated"] += 1
+                        return
+
+                    original_font = q["QFont"](painter.font())
+                    base_font = q["QFont"](original_font)
+                    base_point = float(base_font.pointSizeF())
+                    if base_point <= 0:
+                        base_point = float(profile.chip_font_pt if profile is not None else 9.0)
+                        base_font.setPointSizeF(base_point)
+                    min_point = max(5.8 if very_compact_rows else 6.4, base_point - (2.2 if compact_rows else 1.8))
+                    fitted_font = q["QFont"](base_font)
+                    metrics = q["QFontMetrics"](fitted_font)
+                    fitted_text = clean
+                    fit_kind = "drawn"
+                    if _advance(metrics, clean) > text_width:
+                        point = base_point - 0.4
+                        while point >= min_point:
+                            trial_font = q["QFont"](base_font)
+                            trial_font.setPointSizeF(point)
+                            trial_metrics = q["QFontMetrics"](trial_font)
+                            if _advance(trial_metrics, clean) <= text_width:
+                                fitted_font = trial_font
+                                metrics = trial_metrics
+                                fit_kind = "shrunk"
+                                break
+                            point -= 0.4
+                        else:
+                            fitted_font = q["QFont"](base_font)
+                            fitted_font.setPointSizeF(min_point)
+                            metrics = q["QFontMetrics"](fitted_font)
+                            fitted_text = str(metrics.elidedText(clean, text_elide_mode, text_width))
+                            if not fitted_text.strip():
+                                fit_stats["skipped"] += 1
+                                return
+                            fit_kind = "elided"
+
+                    previous = drawn_rects_by_row.get(row_name)
+                    if previous is not None and x < previous[2]:
+                        fit_stats["overlap_count"] += 1
+                    drawn_rects_by_row[row_name] = (x, y, x + max(1, box_width), y + max(1, box_height))
+                    last_text_by_row[row_name] = clean
+                    painter.setFont(fitted_font)
+                    painter.setPen(q["QPen"](q["QColor"](color)))
+                    painter.drawText(x + 3, y + 1, max(1, text_width), max(1, box_height - 2), text_alignment, fitted_text)
+                    painter.setFont(original_font)
+                    fit_stats["drawn"] += 1
+                    if fit_kind in ("shrunk", "elided"):
+                        fit_stats[fit_kind] += 1
 
                 for index, segment in enumerate(timeline_state.trial_segments):
                     x1 = _x(segment.start_s)
                     x2 = max(x1 + 2, _x(segment.end_s))
                     clip_color = _color_for(segment.clip_label, index)
                     trial_color = _color_for(segment.trial_label, index + 2)
-                    for row_index, (text, y, color) in enumerate(
+                    for row_name, text, y, color in (
                         (
-                            (segment.clip_label or "Resp", rows[1][1] - row_height // 2, clip_color),
-                            (segment.trial_label or segment.family or "Type", rows[2][1] - row_height // 2, trial_color),
-                            (f"{segment.soa_ms} ms" if segment.soa_ms else "SOA", rows[3][1] - row_height // 2, _soa_color(segment.soa_ms)),
+                            "Resp",
+                            segment.clip_label or "Resp",
+                            row_y_by_name["Resp"] - row_height // 2,
+                            clip_color,
+                        ),
+                        (
+                            "Type",
+                            segment.trial_label or segment.family or "Type",
+                            row_y_by_name["Type"] - row_height // 2,
+                            trial_color,
+                        ),
+                        (
+                            "SOA",
+                            f"{segment.soa_ms} ms" if segment.soa_ms else "SOA",
+                            row_y_by_name["SOA"] - row_height // 2,
+                            _soa_color(segment.soa_ms),
                         )
                     ):
+                        segment_width = max(2, x2 - x1)
                         painter.setPen(q["QPen"](q["QColor"]("#bcc7bd")))
                         painter.setBrush(q["QBrush"](q["QColor"](color)))
-                        painter.drawRoundedRect(x1, y, max(2, x2 - x1), row_height, 4, 4)
-                        if x2 - x1 >= 34:
-                            painter.setPen(q["QPen"](q["QColor"]("#202621")))
-                            painter.drawText(x1 + 3, y + 1, max(1, x2 - x1 - 6), row_height - 2, int(q["Qt"].AlignmentFlag.AlignVCenter), _short(text, 12 if row_index == 2 else (16 if row_index else 20)))
+                        painter.drawRoundedRect(x1, y, segment_width, row_height, 4, 4)
+                        _draw_fitted_text(row_name, x1, y, segment_width, row_height, text, "#202621", optional=True)
 
-                tactile_y = rows[4][1]
+                tactile_y = row_y_by_name["Tactile"]
                 for cue in timeline_state.cues:
                     status = timeline_state.cue_status(cue)
                     color = {
@@ -2667,7 +2781,7 @@ def _create_tactile_timeline_widget(
                     painter.setBrush(q["QBrush"](q["QColor"](color)))
                     painter.drawEllipse(x - radius, tactile_y - radius, radius * 2, radius * 2)
 
-                click_y = rows[5][1]
+                click_y = row_y_by_name["Clicks"]
                 for marker in timeline_state.click_markers:
                     x = _x(marker.time_s)
                     response_click = str(getattr(marker, "response_status", "") or "") == "tactile_response"
@@ -2688,6 +2802,7 @@ def _create_tactile_timeline_widget(
                 painter.setPen(cursor_pen)
                 painter.drawLine(cursor_x, 4, cursor_x, min(height - 4, rows[-1][1] + (10 if very_compact_rows else 14)))
             finally:
+                self._label_fit_stats = fit_stats
                 painter.end()
 
     return TactileTimelineWidget()
@@ -2793,6 +2908,9 @@ def _create_block_plan_widget(q: dict[str, Any], owner: Any) -> Any:
             if int(self.minimumHeight()) != int(target_height):
                 self.setMinimumHeight(int(target_height))
                 self.updateGeometry()
+            owner_refresh = getattr(owner, "_refresh_experiment_control_minimum_height", None)
+            if callable(owner_refresh):
+                owner_refresh()
 
         def resizeEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
             super().resizeEvent(event)
@@ -5252,7 +5370,10 @@ class FocusModeWindow:
 
         processing_panel, progress_layout = _panel(q, "Experiment Control", profile=profile)
         self.processing_panel = processing_panel
-        processing_panel_min_height = profile.experiment_control_min_height
+        processing_panel_min_height = max(
+            profile.experiment_control_min_height,
+            profile.experiment_control_content_min_height,
+        )
         processing_panel.setMinimumHeight(processing_panel_min_height)
         processing_panel.setMinimumWidth(360 if profile.compact else 420)
         progress_layout.setSpacing(profile.panel_spacing)
@@ -5286,6 +5407,7 @@ class FocusModeWindow:
         if profile.screen_class != "constrained":
             progress_layout.addWidget(_subtitle(q, "Stimulus / Tactile / Click Timeline"))
         timeline_status = q["QWidget"]()
+        self.timeline_status_widget = timeline_status
         timeline_status_layout = q["QHBoxLayout"](timeline_status)
         timeline_status_layout.setContentsMargins(0, 0, 0, 0)
         timeline_status_layout.setSpacing(8)
@@ -5359,6 +5481,7 @@ class FocusModeWindow:
             remaining_width = max(620, profile.window_width - response_column_width)
             self.run_splitter.setSizes([response_column_width, remaining_width])
         top_height = response_stack_height
+        self._refresh_experiment_control_minimum_height()
         self.workspace_splitter.setSizes([top_height, profile.experiment_control_initial_height])
 
         self.timer = q["QTimer"](self.dialog)
@@ -5451,22 +5574,67 @@ class FocusModeWindow:
         if callable(refresh_height):
             refresh_height()
         self.topup_draft_widget.update()
+        self._refresh_experiment_control_minimum_height()
+
+    def _experiment_control_content_minimum_height(self) -> int:
+        profile_min = int(getattr(self.layout_profile, "experiment_control_content_min_height", 0) or 0)
+        if not hasattr(self, "processing_panel"):
+            return profile_min
+        if self.layout_profile.compact:
+            return profile_min
+        layout = self.processing_panel.layout()
+        margin_total = 0
+        spacing = max(0, int(getattr(layout, "spacing", lambda: 0)())) if layout is not None else 0
+        if layout is not None:
+            margins = layout.contentsMargins()
+            margin_total = int(margins.top()) + int(margins.bottom())
+        essential_widgets = [
+            getattr(self, "part_selector_widget", None),
+            getattr(self, "block_plan_widget", None),
+            getattr(self, "block_preview_label", None),
+            getattr(self, "topup_draft_widget", None),
+            getattr(self, "timeline_status_widget", None),
+            getattr(self, "tactile_timeline_widget", None),
+            getattr(self, "progress_track_widget", None),
+        ]
+        visible_heights: list[int] = []
+        for widget in essential_widgets:
+            if widget is None or widget.isHidden():
+                continue
+            hint_height = 0
+            try:
+                hint_height = int(widget.minimumSizeHint().height())
+            except Exception:
+                hint_height = 0
+            visible_heights.append(max(0, int(widget.minimumHeight()), hint_height))
+        if not visible_heights:
+            return profile_min
+        core_total = margin_total + sum(visible_heights) + spacing * max(0, len(visible_heights) - 1)
+        bounded_core = min(int(core_total), int(getattr(self.layout_profile, "experiment_control_initial_height", 0) or core_total))
+        return max(profile_min, bounded_core)
+
+    def _refresh_experiment_control_minimum_height(self) -> None:
+        if not hasattr(self, "processing_panel"):
+            return
+        content_min = self._experiment_control_content_minimum_height()
+        target = max(
+            int(getattr(self.layout_profile, "experiment_control_min_height", 0) or 0),
+            int(getattr(self.layout_profile, "experiment_control_content_min_height", 0) or 0),
+            content_min,
+        )
+        self.experiment_control_content_min_height = content_min
+        if int(self.processing_panel.minimumHeight()) != int(target):
+            self.processing_panel.setMinimumHeight(int(target))
+            self.processing_panel.updateGeometry()
 
     def _refresh_timeline_min_height(self) -> None:
         if not hasattr(self, "tactile_timeline_widget"):
             return
-        profile = self.layout_profile
-        if profile.screen_class == "constrained" and not self.block_plan_items:
-            target = 42
-        elif profile.screen_class == "constrained":
-            target = 42
-        elif profile.compact:
-            target = 90
-        else:
-            target = 132
+        target = _timeline_widget_minimum_height(self.layout_profile)
         if int(self.tactile_timeline_widget.minimumHeight()) != int(target):
             self.tactile_timeline_widget.setMinimumHeight(int(target))
             self.tactile_timeline_widget.updateGeometry()
+        self._refresh_experiment_control_minimum_height()
 
     def _standard_plan_items(self) -> list[dict[str, Any]]:
         return [dict(item) for item in list(getattr(self, "all_block_plan_items", []) or []) if str(item.get("kind") or "") == "standard"]
@@ -5907,6 +6075,7 @@ class FocusModeWindow:
             self._select_default_block_preview()
         if not self.block_plan_items:
             self._set_instruction_plan_for_item(None)
+        self._refresh_experiment_control_minimum_height()
 
     def _runtime_capture_options(self) -> SessionCaptureOptions:
         return SessionCaptureOptions(
@@ -6155,11 +6324,23 @@ class FocusModeWindow:
                 "count": int(self.operator_tabs.count()),
                 "current_index": int(self.operator_tabs.currentIndex()),
             }
+        timeline_debug = {}
+        timeline_snapshot = getattr(self.tactile_timeline_widget, "timeline_debug_snapshot", None)
+        if callable(timeline_snapshot):
+            timeline_debug = dict(timeline_snapshot())
+        experiment_control_content_min = self._experiment_control_content_minimum_height()
         return {
             "dialog": {"width": int(self.dialog.width()), "height": int(self.dialog.height())},
             "layout_profile": self.layout_profile.as_dict(),
             "widgets": {name: self._dialog_relative_rect(widget) for name, widget in widgets.items() if widget is not None},
             "splitters": splitter_metrics,
+            "timeline_debug": timeline_debug,
+            "experiment_control_debug": {
+                "content_min_height": int(experiment_control_content_min),
+                "profile_content_min_height": int(self.layout_profile.experiment_control_content_min_height),
+                "profile_min_height": int(self.layout_profile.experiment_control_min_height),
+                "panel_minimum_height": int(self.processing_panel.minimumHeight()),
+            },
             "keyboard_shortcuts": self.keyboard_shortcut_map(),
             "adaptive_mechanisms": {
                 "right_stack_mode": self.layout_profile.right_stack_mode,
@@ -6193,10 +6374,24 @@ class FocusModeWindow:
                 "processing_panel is shorter than the profile minimum "
                 f"{profile.experiment_control_min_height}px: {processing}"
             )
+        experiment_control_debug = snapshot.get("experiment_control_debug") or {}
+        content_min_height = int(experiment_control_debug.get("content_min_height") or 0)
+        if processing and content_min_height and processing.get("height", 0) < content_min_height:
+            failures.append(
+                "processing_panel is shorter than the content-safe minimum "
+                f"{content_min_height}px: {processing}"
+            )
         if processing:
             workspace_width = int(getattr(self.workspace_splitter, "width", lambda: 0)())
             if workspace_width and processing.get("width", 0) < workspace_width - 8:
                 failures.append(f"processing_panel does not span the lower workspace width: {processing}")
+        timeline_debug = snapshot.get("timeline_debug") or {}
+        row_names = list(timeline_debug.get("row_names") or [])
+        if row_names != list(TIMELINE_ROW_NAMES):
+            failures.append(f"timeline rows are {row_names}, expected {list(TIMELINE_ROW_NAMES)}")
+        label_fit = dict(timeline_debug.get("label_fit") or {})
+        if int(label_fit.get("overlap_count") or 0) > 0:
+            failures.append(f"timeline labels overlap in {label_fit.get('overlap_count')} measured rect(s)")
         response = widgets.get("response_panel", {})
         output = widgets.get("output_panel", {})
         if response and output and output.get("y", 0) < response.get("bottom", 0):

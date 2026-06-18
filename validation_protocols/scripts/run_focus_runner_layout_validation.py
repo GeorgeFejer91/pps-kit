@@ -33,6 +33,9 @@ DEFAULT_SCENARIOS = [
     ("compact_1024x600", 1024, 600, "window"),
     ("taskbar_1280x720", 1280, 720, "window"),
     ("laptop_1366x768", 1366, 768, "window"),
+    ("laptop_1536x864", 1536, 864, "window"),
+    ("laptop_1600x900", 1600, 900, "window"),
+    ("laptop_1920x1000", 1920, 1000, "window"),
     ("desktop_1920x1080", 1920, 1080, "window"),
     ("wide_2560x1440", 2560, 1440, "window"),
 ]
@@ -58,6 +61,40 @@ REQUIRED_TEXT_INSTRUCTIONS_COMPACT = "5 clips"
 REQUIRED_TEXT_OPERATOR_PANEL = "Data Logging / Experiment Settings"
 
 
+def _write_block_csv(path: Path, *, block_index: int) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    soas = ("300", "800", "1500", "2200")
+    rows = [
+        "Trial_Number,Trial_UID,Trial_Type,Family,Row_Label,Fixed_Audio_Labels,SOA_ms,Trial_Start_S,Trial_End_S,Tactile_Onset_S,Sample_Rate_Hz"
+    ]
+    for trial_number in range(1, 35):
+        start_s = float((trial_number - 1) * 8)
+        end_s = start_s + 8.0
+        soa = soas[(trial_number - 1) % len(soas)]
+        row_label = "Inhale" if trial_number % 2 else "Exhale"
+        trial_type = "Baseline" if trial_number % 7 == 0 else "Audio-Tactile"
+        family = "baseline" if trial_type == "Baseline" else "audio_tactile"
+        fixed_label = f"{row_label} instruction with frontal looming source"
+        rows.append(
+            ",".join(
+                [
+                    str(trial_number),
+                    f"B{block_index:02d}T{trial_number:03d}",
+                    trial_type,
+                    family,
+                    row_label,
+                    fixed_label,
+                    soa,
+                    f"{start_s:.3f}",
+                    f"{end_s:.3f}",
+                    f"{start_s + 4.3:.3f}",
+                    "1000",
+                ]
+            )
+        )
+    path.write_text("\n".join(rows) + "\n", encoding="utf-8")
+
+
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Validate the Focus Mode runner layout across common screen sizes.")
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
@@ -74,13 +111,16 @@ def build_arg_parser() -> argparse.ArgumentParser:
 def _write_manifest(output_dir: Path) -> Path:
     session_dir = output_dir / "P001_focus_runner_layout"
     session_dir.mkdir(parents=True, exist_ok=True)
+    blocks_dir = session_dir / "blocks"
     manifest_path = session_dir / "session_manifest.json"
+    for index in range(1, 13):
+        _write_block_csv(blocks_dir / f"block_{index:02d}.csv", block_index=index)
     blocks = [
         {
             "index": index,
             "label": f"Condition {1 if index <= 6 else 2} Block {((index - 1) % 6) + 1:02d}",
-            "manifest_path": str(session_dir / "blocks" / f"block_{index:02d}.csv"),
-            "wav_path": str(session_dir / "blocks" / f"block_{index:02d}.wav"),
+            "manifest_path": str(blocks_dir / f"block_{index:02d}.csv"),
+            "wav_path": str(blocks_dir / f"block_{index:02d}.wav"),
             "trial_count": 34,
             "duration_s": 272.0,
             "metadata": {
@@ -390,6 +430,34 @@ def _audit_window(
             f"{widget_metrics['processing_panel']['height']} is below profile minimum "
             f"{profile.experiment_control_min_height}."
         )
+    experiment_control_debug = dict(embedded_snapshot.get("experiment_control_debug") or {})
+    content_min_height = int(experiment_control_debug.get("content_min_height") or 0)
+    if content_min_height and widget_metrics["processing_panel"]["height"] < content_min_height:
+        failures.append(
+            "Experiment Control height "
+            f"{widget_metrics['processing_panel']['height']} is below content-safe minimum {content_min_height}."
+        )
+    timeline_debug = dict(embedded_snapshot.get("timeline_debug") or {})
+    if list(timeline_debug.get("row_names") or []) != list(focus_app.TIMELINE_ROW_NAMES):
+        failures.append(
+            "Timeline row list is "
+            f"{list(timeline_debug.get('row_names') or [])}, expected {list(focus_app.TIMELINE_ROW_NAMES)}."
+        )
+    label_fit = dict(timeline_debug.get("label_fit") or {})
+    if int(label_fit.get("overlap_count") or 0):
+        failures.append(f"Timeline labels overlap according to measured label rects: {label_fit}.")
+    block_layout_items = []
+    try:
+        block_layout_items = list(window.block_plan_widget._layout_items())
+    except Exception:
+        block_layout_items = []
+    if block_layout_items:
+        max_block_bottom = max(int(item.get("y", 0)) + int(item.get("height", 0)) for item in block_layout_items)
+        if max_block_bottom > int(window.block_plan_widget.height()):
+            failures.append(
+                "Block strip layout exceeds its visible widget height: "
+                f"bottom {max_block_bottom}px > widget {window.block_plan_widget.height()}px."
+            )
 
     for segment_name in ("response_panel", "data_selection_panel", "settings_panel", "processing_panel", "output_panel"):
         if segment_name not in widget_metrics:

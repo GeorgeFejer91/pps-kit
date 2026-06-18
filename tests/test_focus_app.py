@@ -282,9 +282,16 @@ def test_focus_layout_renderer_preserves_legibility_baselines():
     assert constrained.experiment_control_min_height >= 152
     assert compact.experiment_control_min_height >= 212
     assert standard.experiment_control_min_height >= 280
+    assert constrained.experiment_control_min_height >= constrained.experiment_control_content_min_height
+    assert compact.experiment_control_min_height >= compact.experiment_control_content_min_height
+    assert standard.experiment_control_min_height >= standard.experiment_control_content_min_height
     assert constrained.experiment_control_initial_height >= constrained.experiment_control_min_height
     assert compact.experiment_control_initial_height > constrained.experiment_control_initial_height
     assert standard.experiment_control_initial_height > compact.experiment_control_initial_height
+    for width, height in ((1920, 1000), (1600, 900), (1536, 864), (1366, 768)):
+        laptop = render_focus_layout_profile(width, height)
+        assert laptop.experiment_control_initial_height >= laptop.experiment_control_content_min_height
+        assert laptop.experiment_control_min_height >= laptop.experiment_control_content_min_height
     assert constrained.right_stack_mode == "tabs"
     assert compact.right_stack_mode == "resizable"
     assert standard.right_stack_mode == "resizable"
@@ -514,6 +521,10 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
     assert [segment.trial_label for segment in window.timeline_preview_state.trial_segments] == ["Audio-tactile", "Baseline"]
     assert [segment.soa_ms for segment in window.timeline_preview_state.trial_segments] == ["300", "800"]
     assert [segment.label for segment in window.timeline_preview_state.instruction_segments] == ["General", "Pre-block", "Post-block"]
+    timeline_debug = window.layout_validation_snapshot()["timeline_debug"]
+    assert timeline_debug["row_names"] == ["Resp", "Type", "SOA", "Tactile", "Clicks"]
+    assert timeline_debug["row_count"] == 5
+    assert "Instr" not in timeline_debug["row_names"]
     block_strip_entries = window.block_plan_widget._layout_items()
     instruction_entries = [entry for entry in block_strip_entries if entry.get("entry_kind") == "instruction"]
     assert {entry.get("slot") for entry in instruction_entries} >= {
@@ -654,6 +665,10 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
         if pixels[x, y][0] > 150 and pixels[x, y][1] < 70 and pixels[x, y][2] < 70
     )
     assert red_pixels > 60
+    timeline_debug = window.tactile_timeline_widget.timeline_debug_snapshot()
+    assert timeline_debug["row_names"] == list(focus_app.TIMELINE_ROW_NAMES)
+    assert timeline_debug["label_fit"]["drawn"] > 0
+    assert timeline_debug["label_fit"]["overlap_count"] == 0
     cue_linked_click_pixels = sum(
         1
         for y in range(timeline_image.height)
@@ -727,7 +742,12 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     assert window.target_button.maximumHeight() == profile.target_min_height
     assert window.include_name_lsl_checkbox.minimumHeight() >= profile.button_min_height + 8
     assert window.output_summary.minimumHeight() == profile.output_min_height
-    assert window.processing_panel.minimumHeight() == profile.experiment_control_min_height
+    snapshot = window.layout_validation_snapshot()
+    content_min = snapshot["experiment_control_debug"]["content_min_height"]
+    assert window.processing_panel.minimumHeight() >= profile.experiment_control_min_height
+    assert window.processing_panel.minimumHeight() >= content_min
+    assert snapshot["timeline_debug"]["row_names"] == ["Resp", "Type", "SOA", "Tactile", "Clicks"]
+    assert snapshot["timeline_debug"]["row_count"] == 5
     assert window.workspace_splitter.sizes()[1] >= min(profile.experiment_control_initial_height, window.processing_panel.height())
     assert window.response_panel.minimumWidth() == profile.response_panel_side
     assert window.response_panel.minimumHeight() == profile.response_panel_side
