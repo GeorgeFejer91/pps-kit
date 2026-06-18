@@ -77,6 +77,7 @@ class AudioRuntimeReadiness:
     preferred_devices: tuple[str, ...]
     fallback_devices: tuple[str, ...]
     komplete_asio_driver_registered: bool = False
+    unvalidated_output_devices: tuple[str, ...] = ()
 
     def message(self) -> str:
         lines = [self.summary]
@@ -162,6 +163,13 @@ def komplete_audio_asio_install_message() -> str:
             *[f"{index}. {step}" for index, step in enumerate(komplete_audio_asio_install_steps(), start=1)],
         )
     )
+
+
+def _output_device_label(index: int, name: str, hostapi: str, outputs: int) -> str:
+    channel_note = ""
+    if outputs >= BINAURAL_TACTILE_CHANNELS:
+        channel_note = "; outputs 1-{0} available; PPS uses 1=L, 2=R, 3=tactile".format(outputs)
+    return f"[{index}] {name} ({hostapi}, {outputs} out{channel_note})"
 
 
 def assess_audio_runtime_readiness(
@@ -262,7 +270,7 @@ def assess_audio_runtime_readiness(
         name = str(dev.get("name", ""))
         hostapi = hostapi_name(dev)
         outputs = int(dev.get("max_output_channels", 0) or 0)
-        label = f"[{index}] {name} ({hostapi}, {outputs} out)"
+        label = _output_device_label(index, name, hostapi, outputs)
         is_asio = "asio" in hostapi.lower()
         is_target = bool(query and query in name.lower())
         if outputs >= min_output_channels and is_asio and is_target:
@@ -288,6 +296,7 @@ def assess_audio_runtime_readiness(
             preferred_devices=tuple(preferred),
             fallback_devices=tuple(asio_fallbacks + non_asio_multichannel + stereo_komplete),
             komplete_asio_driver_registered=registry_present,
+            unvalidated_output_devices=tuple(asio_fallbacks + non_asio_multichannel),
         )
 
     if asio_fallbacks:
@@ -307,28 +316,36 @@ def assess_audio_runtime_readiness(
             preferred_devices=(),
             fallback_devices=tuple(asio_fallbacks + non_asio_multichannel + stereo_komplete),
             komplete_asio_driver_registered=registry_present,
+            unvalidated_output_devices=tuple(asio_fallbacks + non_asio_multichannel),
         )
 
     details: list[str] = []
+    if registry_present:
+        details.append(
+            "Komplete Audio ASIO Driver is installed/registered in Windows, but the Komplete Audio 6 MK2 interface "
+            "is not connected or not ready as a usable 3+ channel ASIO device."
+        )
     if stereo_komplete:
         details.append(f"Only a stereo Komplete endpoint is visible: {stereo_komplete[0]}")
-    elif non_asio_multichannel:
+    if non_asio_multichannel:
         details.append(f"Non-ASIO multichannel output is visible, but not valid for PPS timing claims: {non_asio_multichannel[0]}")
-    elif registry_present:
-        details.append(
-            "Komplete Audio ASIO Driver is registered in Windows, but the interface is not exposing a usable 3+ channel ASIO device yet."
-        )
-    elif not asio_hostapi_present:
+    if not details and not asio_hostapi_present:
         details.append("No ASIO host API is visible to sounddevice.")
-    else:
+    elif not details:
         details.append("ASIO is visible, but no output exposes at least three synchronized channels.")
     actions = komplete_audio_asio_reconnect_steps() if registry_present else komplete_audio_asio_install_steps()
+    summary = (
+        "Audio preflight: Komplete Audio ASIO driver is installed, but the Komplete Audio 6 MK2 interface is not "
+        "exposing a 3+ channel ASIO output."
+        if registry_present
+        else "Audio preflight: Komplete Audio ASIO driver is missing or not exposing a 3+ channel output."
+    )
 
     return AudioRuntimeReadiness(
         ready=False,
         publication_ready=False,
         severity="error",
-        summary="Audio preflight: Komplete Audio ASIO is missing or not exposing a 3+ channel output.",
+        summary=summary,
         details=tuple(details),
         actions=actions,
         sounddevice_available=True,
@@ -337,6 +354,7 @@ def assess_audio_runtime_readiness(
         preferred_devices=(),
         fallback_devices=tuple(non_asio_multichannel + stereo_komplete),
         komplete_asio_driver_registered=registry_present,
+        unvalidated_output_devices=tuple(non_asio_multichannel),
     )
 
 

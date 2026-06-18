@@ -1734,6 +1734,133 @@ def test_audio_dependency_dialog_retry_accepts_after_asio_detected(monkeypatch):
     assert errors == []
 
 
+def test_unvalidated_audio_route_confirmation_window_accepts_continue(monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    errors: list[BaseException] = []
+    fallback = (
+        "[44] Speakers (Nahimic Easy Surround) "
+        "(Windows WDM-KS, 8 out; outputs 1-8 available; PPS uses 1=L, 2=R, 3=tactile)"
+    )
+
+    def click_confirmation() -> None:
+        try:
+            confirms = [widget for widget in app.topLevelWidgets() if widget.objectName() == "unvalidatedAudioRouteConfirmDialog"]
+            assert confirms
+            confirm = confirms[0]
+            assert "not calibrated" in confirm.informativeText()
+            buttons = confirm.findChildren(q["QPushButton"])
+            continue_button = next(button for button in buttons if button.text() == "Continue Pretest")
+            QTest.mouseClick(continue_button, q["Qt"].MouseButton.LeftButton)
+        except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
+            errors.append(exc)
+            for widget in app.topLevelWidgets():
+                if widget.objectName() == "unvalidatedAudioRouteConfirmDialog":
+                    widget.reject()
+
+    parent = q["QDialog"]()
+    parent.setObjectName("unvalidatedConfirmParent")
+    q["QTimer"].singleShot(50, click_confirmation)
+    assert focus_app._confirm_unvalidated_audio_route(q, parent=parent, label=fallback) is True
+    parent.close()
+    parent.deleteLater()
+    app.processEvents()
+    assert errors == []
+
+
+def test_audio_dependency_dialog_unvalidated_route_sets_override_after_confirmation(monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    monkeypatch.delenv("PPS_AUDIO_DEVICE_INDEX", raising=False)
+    monkeypatch.delenv("PPS_AUDIO_UNVALIDATED_ROUTE_FROM_DIALOG", raising=False)
+    try:
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+        from peripersonal_space_toolkit.audio_routing import AudioRuntimeReadiness
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    for widget in app.topLevelWidgets():
+        if widget.objectName() in {"audioDependencyDialog", "unvalidatedAudioRouteConfirmDialog", "unvalidatedConfirmParent"}:
+            widget.close()
+            widget.deleteLater()
+    app.processEvents()
+    errors: list[BaseException] = []
+    fallback = (
+        "[44] Speakers (Nahimic Easy Surround) "
+        "(Windows WDM-KS, 8 out; outputs 1-8 available; PPS uses 1=L, 2=R, 3=tactile)"
+    )
+    confirm_calls: list[str] = []
+    missing_with_fallback = AudioRuntimeReadiness(
+        ready=False,
+        publication_ready=False,
+        severity="error",
+        summary=(
+            "Audio preflight: Komplete Audio ASIO driver is installed, but the Komplete Audio 6 MK2 interface "
+            "is not exposing a 3+ channel ASIO output."
+        ),
+        details=(
+            "Komplete Audio ASIO Driver is installed/registered in Windows, but the Komplete Audio 6 MK2 interface "
+            "is not connected or not ready as a usable 3+ channel ASIO device.",
+            f"Non-ASIO multichannel output is visible, but not valid for PPS timing claims: {fallback}",
+        ),
+        actions=(),
+        sounddevice_available=True,
+        sounddevice_version="0.5.5",
+        asio_hostapi_present=True,
+        preferred_devices=(),
+        fallback_devices=(fallback,),
+        komplete_asio_driver_registered=True,
+        unvalidated_output_devices=(fallback,),
+    )
+
+    def fake_confirm(q_arg, *, parent, label):
+        assert q_arg is q
+        assert parent.objectName() == "audioDependencyDialog"
+        confirm_calls.append(label)
+        return True
+
+    monkeypatch.setattr(focus_app, "_confirm_unvalidated_audio_route", fake_confirm)
+
+    def click_unvalidated_route() -> None:
+        try:
+            dialogs = [widget for widget in app.topLevelWidgets() if widget.objectName() == "audioDependencyDialog"]
+            assert dialogs
+            dialog = dialogs[0]
+            labels = _collect_widget_texts(dialog, q["QLabel"])
+            assert any("Komplete Audio 6 MK2 interface not detected" in label for label in labels)
+            assert any("Unvalidated pretest route" in label for label in labels)
+            combo = dialog.findChild(q["QComboBox"], "unvalidatedAudioDeviceCombo")
+            assert combo is not None
+            assert combo.count() == 1
+            assert int(combo.itemData(0)) == 44
+            button = dialog.findChild(q["QPushButton"], "useUnvalidatedAudioRouteButton")
+            assert button is not None
+            QTest.mouseClick(button, q["Qt"].MouseButton.LeftButton)
+        except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
+            errors.append(exc)
+            for widget in app.topLevelWidgets():
+                if widget.objectName() == "audioDependencyDialog":
+                    widget.reject()
+
+    q["QTimer"].singleShot(50, click_unvalidated_route)
+    assert focus_app._show_audio_dependency_dialog(q, readiness=missing_with_fallback) is True
+    assert confirm_calls == [fallback]
+    assert os.environ["PPS_AUDIO_DEVICE_INDEX"] == "44"
+    assert os.environ["PPS_AUDIO_UNVALIDATED_ROUTE_FROM_DIALOG"] == "1"
+    assert errors == []
+
+
 def test_launcher_generate_range_button_prepares_requested_range(monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:

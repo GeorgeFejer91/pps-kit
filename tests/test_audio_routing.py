@@ -83,9 +83,30 @@ def test_audio_preflight_distinguishes_registered_driver_without_visible_interfa
 
     assert readiness.ready is False
     assert readiness.komplete_asio_driver_registered is True
-    assert "registered in Windows" in readiness.message()
+    assert "driver is installed" in readiness.summary
+    assert "installed/registered in Windows" in readiness.message()
     assert "Reconnect or power-cycle" in readiness.message()
     assert "automatically selects" in readiness.message()
+
+
+def test_audio_preflight_lists_unvalidated_multichannel_outputs_with_channel_map():
+    sd = FakeSoundDevice(
+        [{"name": "ASIO"}, {"name": "Windows WDM-KS"}],
+        [
+            _device("ASIO4ALL v2", 0, 2),
+            _device("Speakers (Nahimic Easy Surround)", 1, 8),
+        ],
+    )
+
+    readiness = assess_audio_runtime_readiness(sounddevice_module=sd, komplete_asio_registered=True)
+
+    assert readiness.ready is False
+    assert "driver is installed" in readiness.summary
+    assert "not connected or not ready" in readiness.message()
+    assert readiness.unvalidated_output_devices == (
+        "[1] Speakers (Nahimic Easy Surround) (Windows WDM-KS, 8 out; outputs 1-8 available; PPS uses 1=L, 2=R, 3=tactile)",
+    )
+    assert "Non-ASIO multichannel output is visible" in readiness.message()
 
 
 def test_audio_preflight_allows_generic_asio_only_as_unvalidated_fallback():
@@ -100,6 +121,9 @@ def test_audio_preflight_allows_generic_asio_only_as_unvalidated_fallback():
     assert readiness.publication_ready is False
     assert "fallback" in readiness.message().lower()
     assert "publication timing evidence" in readiness.message()
+    assert readiness.unvalidated_output_devices == (
+        "[0] FlexASIO (ASIO, 4 out; outputs 1-4 available; PPS uses 1=L, 2=R, 3=tactile)",
+    )
 
 
 def test_audio_preflight_rejects_old_sounddevice_version():

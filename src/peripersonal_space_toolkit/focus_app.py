@@ -594,17 +594,39 @@ def _backup_recording_checkbox_text(package: Any) -> str:
 
 def _audio_dependency_dialog_html(readiness: AudioRuntimeReadiness) -> str:
     detail_items = "".join(f"<li>{escape(item)}</li>" for item in readiness.details)
+    unvalidated_items = "".join(f"<li>{escape(item)}</li>" for item in readiness.unvalidated_output_devices)
     steps = komplete_audio_asio_reconnect_steps() if readiness.komplete_asio_driver_registered else komplete_audio_asio_install_steps()
     step_items = "".join(f"<li>{escape(step)}</li>" for step in steps)
     sounddevice = escape(readiness.sounddevice_version or "not detected")
     hostapi_state = "visible" if readiness.asio_hostapi_present else "not visible"
+    if readiness.komplete_asio_driver_registered:
+        heading = "Komplete Audio 6 MK2 interface not detected"
+        intro = (
+            "PPS found the installed native <b>Komplete Audio ASIO Driver</b>, but Windows is not exposing "
+            "the connected multichannel Komplete interface yet."
+        )
+        driver_state = "installed/registered"
+    else:
+        heading = "Komplete Audio ASIO driver required"
+        intro = (
+            "PPS needs the native <b>Komplete Audio ASIO Driver</b> so left, right, "
+            "and tactile output share one synchronized multichannel device."
+        )
+        driver_state = "not registered"
+    unvalidated_html = (
+        "<p><b>Detected 3+ output alternatives for pretesting only:</b></p>"
+        f"<ul>{unvalidated_items}</ul>"
+        if unvalidated_items
+        else ""
+    )
     return (
-        "<h2>Komplete Audio ASIO driver required</h2>"
-        "<p>PPS needs the native <b>Komplete Audio ASIO Driver</b> so left, right, "
-        "and tactile output share one synchronized multichannel device.</p>"
+        f"<h2>{heading}</h2>"
+        f"<p>{intro}</p>"
         f"<p><b>Status:</b> {escape(readiness.summary)}</p>"
-        f"<p><b>sounddevice:</b> {sounddevice}<br><b>ASIO host API:</b> {hostapi_state}</p>"
+        f"<p><b>Komplete ASIO driver:</b> {driver_state}<br>"
+        f"<b>sounddevice:</b> {sounddevice}<br><b>ASIO host API:</b> {hostapi_state}</p>"
         f"<ul>{detail_items}</ul>"
+        f"{unvalidated_html}"
         "<p><b>What to do next:</b></p>"
         f"<ol>{step_items}</ol>"
         "<p>"
@@ -617,6 +639,50 @@ def _audio_dependency_dialog_html(readiness: AudioRuntimeReadiness) -> str:
     )
 
 
+def _audio_device_index_from_label(label: str) -> int | None:
+    text = str(label or "").strip()
+    if not text.startswith("[") or "]" not in text:
+        return None
+    try:
+        return int(text[1 : text.index("]")])
+    except Exception:
+        return None
+
+
+def _unvalidated_audio_override_message(label: str) -> str:
+    return (
+        "Unvalidated pretest audio route selected: "
+        f"{label}. PPS will use outputs 1=L, 2=R, 3=tactile. "
+        "This setup is not calibrated for PPS timing; run independent channel and latency tests before using it for "
+        "time-sensitive data collection."
+    )
+
+
+def _clear_dialog_audio_override_if_validated_route_ready(readiness: AudioRuntimeReadiness) -> None:
+    if readiness.publication_ready and os.environ.get("PPS_AUDIO_UNVALIDATED_ROUTE_FROM_DIALOG") == "1":
+        os.environ.pop("PPS_AUDIO_DEVICE_INDEX", None)
+        os.environ.pop("PPS_AUDIO_UNVALIDATED_ROUTE_FROM_DIALOG", None)
+
+
+def _confirm_unvalidated_audio_route(q: dict[str, Any], *, parent: Any, label: str) -> bool:
+    message_box = q["QMessageBox"](parent)
+    message_box.setObjectName("unvalidatedAudioRouteConfirmDialog")
+    _enable_standard_window_controls(q, message_box)
+    message_box.setWindowTitle("Unvalidated Audio Route")
+    message_box.setIcon(q["QMessageBox"].Icon.Warning)
+    message_box.setText("Use this unvalidated route for pretesting?")
+    message_box.setInformativeText(
+        _unvalidated_audio_override_message(label)
+        + " Do not treat this route as calibrated participant timing evidence until channel identity and latency "
+        "have been tested independently."
+    )
+    continue_button = message_box.addButton("Continue Pretest", q["QMessageBox"].ButtonRole.AcceptRole)
+    cancel_button = message_box.addButton("Cancel", q["QMessageBox"].ButtonRole.RejectRole)
+    message_box.setDefaultButton(cancel_button)
+    message_box.exec()
+    return message_box.clickedButton() == continue_button
+
+
 def _show_audio_dependency_dialog(
     q: dict[str, Any],
     *,
@@ -624,7 +690,11 @@ def _show_audio_dependency_dialog(
     readiness: AudioRuntimeReadiness | None = None,
 ) -> bool:
     """Show a repair dialog and return True once native Komplete ASIO is ready."""
-    current: dict[str, AudioRuntimeReadiness] = {"readiness": readiness or assess_audio_runtime_readiness()}
+    current: dict[str, Any] = {
+        "readiness": readiness or assess_audio_runtime_readiness(),
+        "accepted_unvalidated": False,
+        "unvalidated_label": "",
+    }
     if current["readiness"].publication_ready:
         return True
 
@@ -652,6 +722,27 @@ def _show_audio_dependency_dialog(
     status.setWordWrap(True)
     layout.addWidget(status)
 
+    unvalidated_label = q["QLabel"](
+        "<b>Unvalidated pretest route</b><br>"
+        "For pretesting only, you may choose a detected 3+ output device and continue. "
+        "PPS will map Output 1 to left audio, Output 2 to right audio, and Output 3 to tactile. "
+        "These settings are not calibrated for this toolkit's timing claims; verify channel identity and latency "
+        "independently before any time-sensitive use."
+    )
+    unvalidated_label.setObjectName("unvalidatedAudioRouteWarning")
+    unvalidated_label.setWordWrap(True)
+    layout.addWidget(unvalidated_label)
+
+    unvalidated_controls = q["QHBoxLayout"]()
+    unvalidated_combo = q["QComboBox"]()
+    unvalidated_combo.setObjectName("unvalidatedAudioDeviceCombo")
+    use_unvalidated = q["QPushButton"]("Use Selected Unvalidated Route")
+    use_unvalidated.setObjectName("useUnvalidatedAudioRouteButton")
+    use_unvalidated.setToolTip("Continue for pretesting only; this route is not calibrated PPS timing hardware.")
+    unvalidated_controls.addWidget(unvalidated_combo, 1)
+    unvalidated_controls.addWidget(use_unvalidated)
+    layout.addLayout(unvalidated_controls)
+
     buttons = q["QHBoxLayout"]()
     open_driver = q["QPushButton"]("Open Native Instruments Driver Page")
     open_driver.setObjectName("openKompleteDriverPageButton")
@@ -670,7 +761,18 @@ def _show_audio_dependency_dialog(
 
     def _render() -> None:
         ready = current["readiness"]
+        _clear_dialog_audio_override_if_validated_route_ready(ready)
         instructions.setText(_audio_dependency_dialog_html(ready))
+        unvalidated_combo.clear()
+        for label in ready.unvalidated_output_devices:
+            device_index = _audio_device_index_from_label(label)
+            if device_index is not None:
+                unvalidated_combo.addItem(label, device_index)
+        show_unvalidated = bool(unvalidated_combo.count()) and not ready.publication_ready
+        unvalidated_label.setVisible(show_unvalidated)
+        unvalidated_combo.setVisible(show_unvalidated)
+        use_unvalidated.setVisible(show_unvalidated)
+        use_unvalidated.setEnabled(show_unvalidated)
         if ready.publication_ready:
             status.setText("Komplete Audio ASIO Driver detected. PPS will use it automatically.")
         else:
@@ -682,12 +784,30 @@ def _show_audio_dependency_dialog(
         if current["readiness"].publication_ready:
             dialog.accept()
 
+    def _use_unvalidated() -> None:
+        device_index = unvalidated_combo.currentData()
+        label = str(unvalidated_combo.currentText() or "").strip()
+        if device_index is None or not label:
+            status.setText("Choose a detected 3+ output route before continuing.")
+            return
+        if not _confirm_unvalidated_audio_route(q, parent=dialog, label=label):
+            status.setText("Unvalidated pretest route was not selected.")
+            return
+        os.environ["PPS_AUDIO_DEVICE_INDEX"] = str(int(device_index))
+        os.environ["PPS_AUDIO_UNVALIDATED_ROUTE_FROM_DIALOG"] = "1"
+        current["accepted_unvalidated"] = True
+        current["unvalidated_label"] = label
+        status.setText(_unvalidated_audio_override_message(label))
+        dialog.accept()
+
     open_driver.clicked.connect(lambda: q["QDesktopServices"].openUrl(q["QUrl"](NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL)))
     open_guide.clicked.connect(lambda: q["QDesktopServices"].openUrl(q["QUrl"](NI_KOMPLETE_AUDIO_DRIVER_INSTALL_GUIDE_URL)))
     retry.clicked.connect(_retry)
+    use_unvalidated.clicked.connect(_use_unvalidated)
     close.clicked.connect(dialog.reject)
     _render()
-    return dialog.exec() == q["QDialog"].DialogCode.Accepted and current["readiness"].publication_ready
+    accepted = dialog.exec() == q["QDialog"].DialogCode.Accepted
+    return accepted and (current["readiness"].publication_ready or bool(current["accepted_unvalidated"]))
 
 
 def _block_metadata(block: Any) -> dict[str, Any]:
@@ -6495,6 +6615,7 @@ def run_focus_window(
     validation_audio_requested = _env_flag("PPS_FOCUS_VALIDATION_REALTIME_AUDIO") or _env_flag("PPS_FOCUS_VALIDATION_FAST_AUDIO")
     if not validation_audio_requested:
         readiness = assess_audio_runtime_readiness()
+        _clear_dialog_audio_override_if_validated_route_ready(readiness)
         if not readiness.publication_ready and not _show_audio_dependency_dialog(q, readiness=readiness):
             return 2
     if _env_flag("PPS_FOCUS_VALIDATION_REALTIME_AUDIO"):
@@ -7178,6 +7299,8 @@ def _run_environment_operations_window(
     try:
         readiness_state["readiness"] = None if initial_message else assess_audio_runtime_readiness()
         readiness = readiness_state["readiness"]
+        if readiness is not None:
+            _clear_dialog_audio_override_if_validated_route_ready(readiness)
         launcher_message = initial_message or (readiness.message() if readiness is not None else "")
         show_driver_button = bool(readiness is not None and not readiness.publication_ready)
     except Exception as exc:
@@ -7230,6 +7353,7 @@ def _run_environment_operations_window(
         try:
             readiness_state["readiness"] = assess_audio_runtime_readiness()
             readiness = readiness_state["readiness"]
+            _clear_dialog_audio_override_if_validated_route_ready(readiness)
             message.setText(readiness.message())
             driver_button.setVisible(not readiness.publication_ready)
             return readiness
@@ -7242,8 +7366,18 @@ def _run_environment_operations_window(
     def _open_audio_dependency_dialog() -> None:
         readiness = readiness_state["readiness"] or assess_audio_runtime_readiness()
         if _show_audio_dependency_dialog(q, parent=dialog, readiness=readiness):
-            message.setText(assess_audio_runtime_readiness().message())
-            driver_button.setVisible(False)
+            refreshed = assess_audio_runtime_readiness()
+            readiness_state["readiness"] = refreshed
+            override = os.environ.get("PPS_AUDIO_DEVICE_INDEX", "").strip()
+            if os.environ.get("PPS_AUDIO_UNVALIDATED_ROUTE_FROM_DIALOG") == "1" and override:
+                message.setText(
+                    "Unvalidated pretest audio route selected. PPS will use the selected 3+ output device with "
+                    "outputs 1=L, 2=R, 3=tactile; run independent channel and latency tests before time-sensitive use."
+                )
+                driver_button.setVisible(True)
+            else:
+                message.setText(refreshed.message())
+                driver_button.setVisible(not refreshed.publication_ready)
         else:
             _refresh_launcher_audio_preflight()
 
