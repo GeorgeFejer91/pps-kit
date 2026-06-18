@@ -15,6 +15,12 @@ FOCUS_COLORS = {
     "primary": "#246b55",
     "primary_hover": "#1d5846",
     "primary_soft": "#e9f4ef",
+    "attention": "#9a6500",
+    "attention_soft": "#fff6dc",
+    "attention_border": "#d28b00",
+    "complete": "#1f745b",
+    "complete_soft": "#edf7f2",
+    "complete_border": "#8abda8",
     "danger": "#8c2f2f",
     "danger_soft": "#f8e1df",
     "danger_border": "#e3aca7",
@@ -187,6 +193,33 @@ QLabel#mutedLabel {{
     font-size: {profile.muted_font_pt:g}pt;
     min-height: {max(16, profile.input_min_height - 10)}px;
 }}
+QLabel#gateStepLabel {{
+    background: {colors["attention_soft"]};
+    border: 2px solid {colors["attention_border"]};
+    border-radius: 6px;
+    color: #5b430d;
+    font-weight: 900;
+    padding: 6px 9px;
+    min-height: {max(18, profile.input_min_height - 6)}px;
+}}
+QLabel#gateStepLabel[attention="complete"] {{
+    background: {colors["complete_soft"]};
+    border-color: {colors["complete_border"]};
+    color: {colors["complete"]};
+}}
+QLabel#gateStatusLabel {{
+    color: {colors["muted"]};
+    font-size: {profile.muted_font_pt:g}pt;
+    min-height: {max(16, profile.input_min_height - 10)}px;
+}}
+QLabel#gateStatusLabel[attention="current"] {{
+    color: {colors["text"]};
+    font-weight: 700;
+}}
+QLabel#gateStatusLabel[attention="complete"] {{
+    color: {colors["complete"]};
+    font-weight: 700;
+}}
 QLabel#metricLabel {{
     color: {colors["muted"]};
     font-size: {profile.muted_font_pt:g}pt;
@@ -290,6 +323,44 @@ QPushButton:disabled {{
     background: {colors["disabled"]};
     border-color: #d7ded5;
 }}
+QPushButton[attention="current"] {{
+    background: {colors["attention_soft"]};
+    border: 2px solid {colors["attention_border"]};
+    color: {colors["text"]};
+}}
+QPushButton[attention="current"]:hover {{
+    background: #fff1c2;
+    border-color: {colors["attention"]};
+}}
+QPushButton[attention="available"] {{
+    background: {colors["primary_soft"]};
+    border: 2px solid {colors["primary"]};
+    color: {colors["text"]};
+}}
+QPushButton[attention="available"]:hover {{
+    background: #f4fbf8;
+    border-color: {colors["primary_hover"]};
+}}
+QPushButton[attention="complete"] {{
+    background: {colors["complete_soft"]};
+    border-color: {colors["complete_border"]};
+    color: {colors["complete"]};
+}}
+QPushButton[attention="go"] {{
+    background: {colors["primary"]};
+    border: 2px solid {colors["primary"]};
+    color: {colors["surface"]};
+}}
+QPushButton[attention="go"]:hover {{
+    background: {colors["primary_hover"]};
+    border-color: {colors["primary_hover"]};
+}}
+QPushButton[attention="locked"],
+QPushButton[attention="locked"]:disabled {{
+    color: {colors["disabled_text"]};
+    background: {colors["disabled"]};
+    border: 1px dashed #cbd4ca;
+}}
 QPushButton#primaryButton {{
     background: {colors["primary"]};
     border-color: {colors["primary"]};
@@ -333,12 +404,43 @@ QLineEdit {{
     border-radius: 6px;
     padding: {profile.input_padding_y}px {profile.input_padding_x}px;
 }}
+QLineEdit[gateState="locked"] {{
+    background: {colors["disabled"]};
+    border: 1px dashed #cbd4ca;
+    color: {colors["disabled_text"]};
+}}
+QLineEdit[gateState="needed"] {{
+    background: {colors["attention_soft"]};
+    border: 2px solid {colors["attention_border"]};
+    color: {colors["text"]};
+}}
+QLineEdit[gateState="complete"] {{
+    background: {colors["complete_soft"]};
+    border: 2px solid {colors["complete_border"]};
+    color: {colors["text"]};
+}}
 QComboBox {{
     background: {colors["surface"]};
     border: 1px solid {colors["border_strong"]};
     border-radius: 6px;
     padding: 6px {profile.input_padding_x}px;
     min-height: {profile.input_min_height}px;
+}}
+QComboBox[gateState="locked"],
+QComboBox[gateState="locked"]:disabled {{
+    background: {colors["disabled"]};
+    border: 1px dashed #cbd4ca;
+    color: {colors["disabled_text"]};
+}}
+QComboBox[gateState="needed"] {{
+    background: {colors["attention_soft"]};
+    border: 2px solid {colors["attention_border"]};
+    color: {colors["text"]};
+}}
+QComboBox[gateState="complete"] {{
+    background: {colors["complete_soft"]};
+    border: 2px solid {colors["complete_border"]};
+    color: {colors["text"]};
 }}
 QCheckBox {{
     background: transparent;
