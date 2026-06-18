@@ -126,6 +126,93 @@ STUDY5_PROFILE_ID = "study5_box_breathing_pps"
 DATA_COLLECTED_MARK = "[collected]"
 TIMELINE_LABEL_WIDTH = 58
 TIMELINE_RIGHT_MARGIN = 12
+SINGLE_INSTANCE_MUTEX_NAME = "Local\\PPSExperimentRunnerSingleInstance"
+SINGLE_INSTANCE_EXIT_CODE = 4
+SINGLE_INSTANCE_MESSAGE = (
+    "PPS Experiment Runner is already open.\n\n"
+    "Close the existing Experiment Runner window before starting another one."
+)
+
+
+class _RunnerSingleInstance:
+    def __init__(
+        self,
+        *,
+        acquired: bool,
+        handle: Any | None = None,
+        kernel32: Any | None = None,
+        message: str = SINGLE_INSTANCE_MESSAGE,
+    ) -> None:
+        self.acquired = bool(acquired)
+        self._handle = handle
+        self._kernel32 = kernel32
+        self.message = message
+
+    def release(self) -> None:
+        if self._handle is None or self._kernel32 is None:
+            return
+        try:
+            self._kernel32.ReleaseMutex(self._handle)
+        except Exception:
+            pass
+        try:
+            self._kernel32.CloseHandle(self._handle)
+        except Exception:
+            pass
+        self._handle = None
+
+
+def _acquire_runner_single_instance() -> _RunnerSingleInstance:
+    """Acquire the process-wide runner guard for the current Windows session."""
+    if sys.platform != "win32":
+        return _RunnerSingleInstance(acquired=True)
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel32.CreateMutexW.argtypes = (wintypes.LPVOID, wintypes.BOOL, wintypes.LPCWSTR)
+        kernel32.CreateMutexW.restype = wintypes.HANDLE
+        kernel32.ReleaseMutex.argtypes = (wintypes.HANDLE,)
+        kernel32.ReleaseMutex.restype = wintypes.BOOL
+        kernel32.CloseHandle.argtypes = (wintypes.HANDLE,)
+        kernel32.CloseHandle.restype = wintypes.BOOL
+        ctypes.set_last_error(0)
+        handle = kernel32.CreateMutexW(None, True, SINGLE_INSTANCE_MUTEX_NAME)
+        error_code = ctypes.get_last_error()
+        if not handle:
+            return _RunnerSingleInstance(
+                acquired=False,
+                message=(
+                    "PPS Experiment Runner could not verify that no other runner is open.\n\n"
+                    f"Windows error {error_code}. Close any existing runner and try again."
+                ),
+            )
+        if error_code == 183:
+            kernel32.CloseHandle(handle)
+            return _RunnerSingleInstance(acquired=False)
+        return _RunnerSingleInstance(acquired=True, handle=handle, kernel32=kernel32)
+    except Exception as exc:
+        return _RunnerSingleInstance(
+            acquired=False,
+            message=(
+                "PPS Experiment Runner could not verify that no other runner is open.\n\n"
+                f"{exc}"
+            ),
+        )
+
+
+def _show_runner_single_instance_notice(message: str = SINGLE_INSTANCE_MESSAGE) -> None:
+    if sys.platform == "win32":
+        try:
+            import ctypes
+
+            flags = 0x00000040 | 0x00010000 | 0x00040000
+            ctypes.windll.user32.MessageBoxW(None, message, "PPS Experiment Runner", flags)
+            return
+        except Exception:
+            pass
+    print(message, file=sys.stderr)
 
 
 def runner_settings_path(state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT) -> Path:
@@ -7927,62 +8014,69 @@ def _run_environment_operations_window(
 def main(argv: list[str] | None = None) -> int:
     args = build_arg_parser().parse_args(argv)
     options = _capture_options_from_args(args)
-    if args.launcher:
+    single_instance = _acquire_runner_single_instance()
+    if not single_instance.acquired:
+        _show_runner_single_instance_notice(single_instance.message)
+        return SINGLE_INSTANCE_EXIT_CODE
+    try:
+        if args.launcher:
+            return run_launcher_window(
+                capture_options=options,
+                enable_missed_trial_topup=args.enable_missed_trial_topup,
+                participant_id=args.participant_id,
+            )
+        if args.session_manifest is not None:
+            return run_focus_window(
+                args.session_manifest,
+                capture_options=options,
+                enable_missed_trial_topup=args.enable_missed_trial_topup,
+                manual_start=args.manual_start,
+                auto_close_ms=args.validation_auto_close_ms,
+                screenshot_path=args.validation_screenshot,
+            )
+        if args.profile:
+            try:
+                manifest = prepare_profile_focus_session(args.profile, args.participant_id)
+            except Exception as exc:
+                return run_launcher_window(
+                    capture_options=options,
+                    enable_missed_trial_topup=args.enable_missed_trial_topup,
+                    participant_id=args.participant_id,
+                    initial_message=str(exc),
+                )
+            return run_focus_window(
+                manifest,
+                capture_options=options,
+                enable_missed_trial_topup=args.enable_missed_trial_topup,
+                manual_start=args.manual_start,
+                auto_close_ms=args.validation_auto_close_ms,
+                screenshot_path=args.validation_screenshot,
+            )
+        if args.latest_dashboard_setup or args.last_experiment:
+            try:
+                manifest = prepare_last_or_latest_focus_session(args.participant_id)
+            except Exception as exc:
+                return run_launcher_window(
+                    capture_options=options,
+                    enable_missed_trial_topup=args.enable_missed_trial_topup,
+                    participant_id=args.participant_id,
+                    initial_message=str(exc),
+                )
+            return run_focus_window(
+                manifest,
+                capture_options=options,
+                enable_missed_trial_topup=args.enable_missed_trial_topup,
+                manual_start=args.manual_start,
+                auto_close_ms=args.validation_auto_close_ms,
+                screenshot_path=args.validation_screenshot,
+            )
         return run_launcher_window(
             capture_options=options,
             enable_missed_trial_topup=args.enable_missed_trial_topup,
             participant_id=args.participant_id,
         )
-    if args.session_manifest is not None:
-        return run_focus_window(
-            args.session_manifest,
-            capture_options=options,
-            enable_missed_trial_topup=args.enable_missed_trial_topup,
-            manual_start=args.manual_start,
-            auto_close_ms=args.validation_auto_close_ms,
-            screenshot_path=args.validation_screenshot,
-        )
-    if args.profile:
-        try:
-            manifest = prepare_profile_focus_session(args.profile, args.participant_id)
-        except Exception as exc:
-            return run_launcher_window(
-                capture_options=options,
-                enable_missed_trial_topup=args.enable_missed_trial_topup,
-                participant_id=args.participant_id,
-                initial_message=str(exc),
-            )
-        return run_focus_window(
-            manifest,
-            capture_options=options,
-            enable_missed_trial_topup=args.enable_missed_trial_topup,
-            manual_start=args.manual_start,
-            auto_close_ms=args.validation_auto_close_ms,
-            screenshot_path=args.validation_screenshot,
-        )
-    if args.latest_dashboard_setup or args.last_experiment:
-        try:
-            manifest = prepare_last_or_latest_focus_session(args.participant_id)
-        except Exception as exc:
-            return run_launcher_window(
-                capture_options=options,
-                enable_missed_trial_topup=args.enable_missed_trial_topup,
-                participant_id=args.participant_id,
-                initial_message=str(exc),
-            )
-        return run_focus_window(
-            manifest,
-            capture_options=options,
-            enable_missed_trial_topup=args.enable_missed_trial_topup,
-            manual_start=args.manual_start,
-            auto_close_ms=args.validation_auto_close_ms,
-            screenshot_path=args.validation_screenshot,
-        )
-    return run_launcher_window(
-        capture_options=options,
-        enable_missed_trial_topup=args.enable_missed_trial_topup,
-        participant_id=args.participant_id,
-    )
+    finally:
+        single_instance.release()
 
 
 def direct_module_launch_retirement_message() -> str:

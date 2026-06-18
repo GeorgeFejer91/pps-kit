@@ -1618,11 +1618,20 @@ def test_main_no_args_opens_resume_environment_gate(monkeypatch):
     from peripersonal_space_toolkit import focus_app
 
     calls: list[dict[str, object]] = []
+    released: list[bool] = []
 
     def fake_launcher(**kwargs):
         calls.append(kwargs)
         return 37
 
+    class FakeSingleInstance:
+        acquired = True
+        message = ""
+
+        def release(self):
+            released.append(True)
+
+    monkeypatch.setattr(focus_app, "_acquire_runner_single_instance", lambda: FakeSingleInstance())
     monkeypatch.setattr(focus_app, "run_launcher_window", fake_launcher)
     monkeypatch.setattr(
         focus_app,
@@ -1638,6 +1647,33 @@ def test_main_no_args_opens_resume_environment_gate(monkeypatch):
     assert focus_app.main([]) == 37
     assert len(calls) == 1
     assert calls[0]["participant_id"] == ""
+    assert released == [True]
+
+
+def test_main_blocks_when_experiment_runner_already_open(monkeypatch):
+    from peripersonal_space_toolkit import focus_app
+
+    notices: list[str] = []
+
+    monkeypatch.setattr(
+        focus_app,
+        "_acquire_runner_single_instance",
+        lambda: focus_app._RunnerSingleInstance(acquired=False, message="runner already open"),
+    )
+    monkeypatch.setattr(focus_app, "_show_runner_single_instance_notice", notices.append)
+    monkeypatch.setattr(
+        focus_app,
+        "run_launcher_window",
+        lambda **_kwargs: pytest.fail("second runner launch must not open the launcher"),
+    )
+    monkeypatch.setattr(
+        focus_app,
+        "run_focus_window",
+        lambda *_args, **_kwargs: pytest.fail("second runner launch must not open Focus Mode"),
+    )
+
+    assert focus_app.main([]) == focus_app.SINGLE_INSTANCE_EXIT_CODE
+    assert notices == ["runner already open"]
 
 
 def test_main_last_experiment_flag_keeps_explicit_direct_resume(tmp_path: Path, monkeypatch):
@@ -1645,6 +1681,14 @@ def test_main_last_experiment_flag_keeps_explicit_direct_resume(tmp_path: Path, 
 
     manifest = tmp_path / "session_manifest.json"
     calls: dict[str, object] = {}
+    released: list[bool] = []
+
+    class FakeSingleInstance:
+        acquired = True
+        message = ""
+
+        def release(self):
+            released.append(True)
 
     def fake_prepare(participant_id=None, **kwargs):
         calls["participant_id"] = participant_id
@@ -1658,6 +1702,7 @@ def test_main_last_experiment_flag_keeps_explicit_direct_resume(tmp_path: Path, 
 
     monkeypatch.setattr(focus_app, "prepare_last_or_latest_focus_session", fake_prepare)
     monkeypatch.setattr(focus_app, "run_focus_window", fake_focus_window)
+    monkeypatch.setattr(focus_app, "_acquire_runner_single_instance", lambda: FakeSingleInstance())
     monkeypatch.setattr(
         focus_app,
         "run_launcher_window",
@@ -1668,6 +1713,7 @@ def test_main_last_experiment_flag_keeps_explicit_direct_resume(tmp_path: Path, 
     assert calls["participant_id"] == "P007"
     assert calls["focus_path"] == manifest
     assert calls["focus_kwargs"]["manual_start"] is True
+    assert released == [True]
 
 
 def test_audio_dependency_dialog_retry_accepts_after_asio_detected(monkeypatch):
