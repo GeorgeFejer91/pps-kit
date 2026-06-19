@@ -33,6 +33,11 @@ from peripersonal_space_toolkit.session_runner import (  # noqa: E402
     SessionRunnerController,
     prepare_segment_run_package,
 )
+from peripersonal_space_toolkit.output_layout import (  # noqa: E402
+    output_data_analytics_dir,
+    output_runner_logs_dir,
+    output_verbose_events_dir,
+)
 from run_one_block_trial_runner_realtime_stress import (  # noqa: E402
     _build_segment_fixture,
     _write_csv,
@@ -63,11 +68,42 @@ def _path_status(path: Path) -> dict[str, Any]:
     }
 
 
-def _analysis_csv_paths(session_dir: Path) -> list[Path]:
-    analysis_dir = session_dir / "analysis"
-    if not analysis_dir.exists():
-        return []
-    return sorted(path for path in analysis_dir.glob("*.csv") if path.is_file())
+def _read_json(path: Path) -> dict[str, Any]:
+    if not path.is_file():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _resolve_path(value: Any, *, base: Path, fallback: Path) -> Path:
+    text = str(value or "").strip()
+    if not text:
+        return fallback
+    path = Path(text)
+    return path if path.is_absolute() else base / path
+
+
+def _session_manifest_path(session_dir: Path) -> Path:
+    return (
+        session_dir / "session_manifest.json"
+        if (session_dir / "session_manifest.json").is_file()
+        else output_runner_logs_dir(session_dir.parent) / session_dir.name / "session_manifest.json"
+    )
+
+
+def _analysis_csv_paths(session_dir: Path, *, analysis_dir: Path | None = None) -> list[Path]:
+    candidates = [analysis_dir or Path(), session_dir / "analysis", output_data_analytics_dir(session_dir.parent) / session_dir.name]
+    seen: set[str] = set()
+    paths: list[Path] = []
+    for candidate in candidates:
+        key = str(candidate)
+        if key in seen or str(candidate) in {"", "."} or not candidate.exists():
+            continue
+        seen.add(key)
+        paths.extend(sorted(path for path in candidate.glob("*.csv") if path.is_file()))
+    return paths
 
 
 def _capture_variants() -> list[dict[str, Any]]:
@@ -219,15 +255,25 @@ class FastScheduleAudioEngine:
 
 
 def _file_inventory(session_dir: Path) -> dict[str, Any]:
-    analysis_csvs = _analysis_csv_paths(session_dir)
+    manifest_path = _session_manifest_path(session_dir)
+    manifest = _read_json(manifest_path)
+    outputs = manifest.get("outputs") if isinstance(manifest.get("outputs"), dict) else {}
+    manifest_base = manifest_path.parent if manifest_path.parent != Path() else session_dir
+    verbose_dir = output_verbose_events_dir(session_dir.parent) / session_dir.name
+    analysis_dir = _resolve_path(
+        outputs.get("analysis_dir"),
+        base=manifest_base,
+        fallback=output_data_analytics_dir(session_dir.parent) / session_dir.name,
+    )
+    analysis_csvs = _analysis_csv_paths(session_dir, analysis_dir=analysis_dir)
     return {
-        "events_csv": _path_status(session_dir / "events.csv"),
-        "events_xdf": _path_status(session_dir / "events.xdf"),
-        "lsl_markers_csv": _path_status(session_dir / "lsl_markers.csv"),
-        "lsl_markers_xdf": _path_status(session_dir / "lsl_markers.xdf"),
-        "trigger_dictionary_json": _path_status(session_dir / "trigger_dictionary.json"),
-        "analysis_summary_txt": _path_status(session_dir / "analysis_summary.txt"),
-        "session_metadata_json": _path_status(session_dir / "session_metadata.json"),
+        "events_csv": _path_status(_resolve_path(outputs.get("verbose_events_csv") or outputs.get("events_csv"), base=manifest_base, fallback=verbose_dir / "events.csv")),
+        "events_xdf": _path_status(_resolve_path(outputs.get("verbose_events_xdf") or outputs.get("events_xdf"), base=manifest_base, fallback=verbose_dir / "events.xdf")),
+        "lsl_markers_csv": _path_status(_resolve_path(outputs.get("lsl_markers_csv"), base=manifest_base, fallback=verbose_dir / "lsl_markers.csv")),
+        "lsl_markers_xdf": _path_status(_resolve_path(outputs.get("lsl_markers_xdf"), base=manifest_base, fallback=verbose_dir / "lsl_markers.xdf")),
+        "trigger_dictionary_json": _path_status(_resolve_path(outputs.get("trigger_dictionary_json"), base=manifest_base, fallback=verbose_dir / "trigger_dictionary.json")),
+        "analysis_summary_txt": _path_status(_resolve_path(outputs.get("analysis_summary_txt"), base=manifest_base, fallback=analysis_dir / "analysis_summary.txt")),
+        "session_metadata_json": _path_status(_resolve_path(outputs.get("session_metadata_json"), base=manifest_base, fallback=output_runner_logs_dir(session_dir.parent) / session_dir.name / "session_metadata.json")),
         "analysis_csvs": [str(path) for path in analysis_csvs],
         "analysis_csv_count": len(analysis_csvs),
     }

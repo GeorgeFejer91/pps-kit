@@ -35,6 +35,8 @@ VALIDATION_LANE_AUTO = "auto"
 VALIDATION_LANE_SOFTWARE_ONLY = "software-only"
 VALIDATION_LANE_FULL_STACK = "full-stack"
 OS_MOUSE_BACKENDS = {"pynput", "win32", "pyautogui"}
+WIRED_LOOPBACK_OFF = "off"
+WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY = "output4-tactile-proxy"
 
 
 def _default_output_dir() -> Path:
@@ -129,6 +131,9 @@ def _build_runner_command(args: argparse.Namespace, *, runner: Path, screenshot_
         str(screenshot_path),
         ]
     )
+    wired_loopback = str(getattr(args, "wired_loopback", WIRED_LOOPBACK_OFF) or WIRED_LOOPBACK_OFF)
+    if wired_loopback != WIRED_LOOPBACK_OFF:
+        command.extend(["--wired-loopback", wired_loopback])
     if not _standard_capture_requested(args):
         command.extend(["--no-lsl", "--no-internal-xdf", "--no-backup-recording"])
     else:
@@ -168,6 +173,7 @@ def _configure_validation_env(args: argparse.Namespace, *, output_dir: Path, foc
     env["PPS_FOCUS_DISABLE_PREWARM"] = "1"
     env["PPS_PROTOCOL11_OUTPUT_DIR"] = str(output_dir)
     env["PPS_PROTOCOL11_VALIDATION_LANE"] = _resolved_validation_lane(args)
+    env["PPS_PROTOCOL11_WIRED_LOOPBACK"] = str(getattr(args, "wired_loopback", WIRED_LOOPBACK_OFF) or WIRED_LOOPBACK_OFF)
     if args.audio_device_index is not None:
         env["PPS_AUDIO_DEVICE_INDEX"] = str(int(args.audio_device_index))
     return env
@@ -183,6 +189,7 @@ def _annotate_focus_report(path: Path, *, args: argparse.Namespace) -> dict[str,
     focus["standard_capture_requested"] = bool(_standard_capture_requested(args))
     focus["strict_study5_readiness_requested"] = bool(args.strict_study5_readiness)
     focus["final_condition_candidate"] = bool(_resolved_validation_lane(args) == VALIDATION_LANE_FULL_STACK)
+    focus["wired_loopback_mode"] = str(getattr(args, "wired_loopback", WIRED_LOOPBACK_OFF) or WIRED_LOOPBACK_OFF)
     _write_json(path, focus)
     return focus
 
@@ -213,6 +220,7 @@ def _write_launch_and_preparation_reports(
             "audio_mode": str(args.audio_mode),
             "validation_lane": _resolved_validation_lane(args),
             "audio_device_index": args.audio_device_index,
+            "wired_loopback_mode": str(getattr(args, "wired_loopback", WIRED_LOOPBACK_OFF) or WIRED_LOOPBACK_OFF),
             "standard_capture_requested": _standard_capture_requested(args),
             "strict_study5_readiness_requested": bool(args.strict_study5_readiness),
             "started_at": started_at,
@@ -230,6 +238,7 @@ def _write_launch_and_preparation_reports(
             "participant_id": str(args.participant_id),
             "audio_mode": str(args.audio_mode),
             "validation_lane": _resolved_validation_lane(args),
+            "wired_loopback_mode": str(getattr(args, "wired_loopback", WIRED_LOOPBACK_OFF) or WIRED_LOOPBACK_OFF),
             "standard_capture_requested": _standard_capture_requested(args),
             "session_dir": evaluation.get("session_dir", ""),
             "session_manifest": evaluation.get("session_manifest", ""),
@@ -524,6 +533,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default=None,
         help="Validation override passed as PPS_AUDIO_DEVICE_INDEX to force a specific sounddevice output index.",
     )
+    parser.add_argument(
+        "--wired-loopback",
+        default=WIRED_LOOPBACK_OFF,
+        choices=[WIRED_LOOPBACK_OFF, WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY],
+        help="Pass through the optional Focus Mode wired loopback capture mode.",
+    )
     parser.add_argument("--no-lsl", action="store_true", help="With --standard-capture, still disable live LSL outlets.")
     parser.add_argument("--no-internal-xdf", action="store_true", help="With --standard-capture, still disable events.xdf.")
     parser.add_argument("--no-backup-recording", action="store_true", help="With --standard-capture, still disable local audio-evidence WAVs.")
@@ -620,6 +635,7 @@ def main(argv: list[str] | None = None) -> int:
         "validation_lane": validation_lane,
         "command": command,
         "audio_mode": str(args.audio_mode),
+        "wired_loopback_mode": str(getattr(args, "wired_loopback", WIRED_LOOPBACK_OFF) or WIRED_LOOPBACK_OFF),
         "standard_capture_requested": _standard_capture_requested(args),
         "audio_device_index": args.audio_device_index,
         "strict_study5_readiness_requested": bool(args.strict_study5_readiness),

@@ -4526,6 +4526,51 @@ def _env_float(name: str, default: float) -> float:
     return parsed if math.isfinite(parsed) else default
 
 
+def _validation_start_gate_ready(records: list[dict[str, Any]], state: dict[str, Any], *, source: str) -> bool:
+    ready_file = os.environ.get("PPS_FOCUS_VALIDATION_START_READY_FILE", "").strip()
+    if not ready_file or bool(state.get("released")):
+        return True
+    now = time.perf_counter()
+    if not state.get("started_monotonic"):
+        state["started_monotonic"] = now
+        records.append(
+            {
+                "label": "start_gate_waiting",
+                "source": source,
+                "ready_file": ready_file,
+                "timestamp_unix": time.time(),
+            }
+        )
+    if Path(ready_file).expanduser().is_file():
+        state["released"] = True
+        records.append(
+            {
+                "label": "start_gate_released",
+                "source": source,
+                "ready_file": ready_file,
+                "wait_s": max(0.0, now - float(state.get("started_monotonic") or now)),
+                "timestamp_unix": time.time(),
+            }
+        )
+        return True
+    timeout_s = max(0.0, _env_float("PPS_FOCUS_VALIDATION_START_READY_TIMEOUT_S", 60.0))
+    elapsed_s = now - float(state.get("started_monotonic") or now)
+    if elapsed_s >= timeout_s:
+        state["released"] = True
+        records.append(
+            {
+                "label": "start_gate_timeout_released",
+                "source": source,
+                "ready_file": ready_file,
+                "wait_s": elapsed_s,
+                "timeout_s": timeout_s,
+                "timestamp_unix": time.time(),
+            }
+        )
+        return True
+    return False
+
+
 class _ValidationFastAudioEngine:
     """Validation-only fake engine that emits normal scheduled audio callbacks."""
 
@@ -4676,12 +4721,21 @@ def _install_validation_auto_clicker(q: dict[str, Any], window: "FocusModeWindow
     from PySide6.QtTest import QTest
 
     clicks: list[dict[str, Any]] = []
+    start_gate_state: dict[str, Any] = {}
 
     def _click(widget: Any, label: str) -> None:
         if widget is None or not widget.isEnabled():
             return
         QTest.mouseClick(widget, q["Qt"].MouseButton.LeftButton)
         clicks.append({"label": label, "timestamp_unix": time.time()})
+
+    def _click_start_when_ready() -> None:
+        if window.result is not None:
+            return
+        if window.start_button.isEnabled() and _validation_start_gate_ready(clicks, start_gate_state, source="auto_clicker"):
+            _click(window.start_button, "Start Run")
+            return
+        q["QTimer"].singleShot(100, _click_start_when_ready)
 
     def _poll() -> None:
         if window.result is not None:
@@ -4698,7 +4752,7 @@ def _install_validation_auto_clicker(q: dict[str, Any], window: "FocusModeWindow
                 _click(window.target_button, f"instruction target: {label}")
         q["QTimer"].singleShot(50, _poll)
 
-    q["QTimer"].singleShot(500, lambda: _click(window.start_button, "Start Run"))
+    q["QTimer"].singleShot(500, _click_start_when_ready)
     q["QTimer"].singleShot(650, _poll)
     return clicks
 
@@ -4719,6 +4773,7 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
     completed_events: set[int] = set()
     pending: list[dict[str, Any]] = []
     start_clicked = {"value": False}
+    start_gate_state: dict[str, Any] = {}
     miss_keys: set[str] | None = None
     instruction_attempts: dict[int, tuple[int, float]] = {}
 
@@ -4952,7 +5007,11 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
         if window.result is not None:
             q["QTimer"].singleShot(1000, window.dialog.accept)
             return
-        if not start_clicked["value"] and window.start_button.isEnabled():
+        if (
+            not start_clicked["value"]
+            and window.start_button.isEnabled()
+            and _validation_start_gate_ready(records, start_gate_state, source="participant_emulator")
+        ):
             backend = _press_primary_key("Start Run")
             start_clicked["value"] = True
             records.append({"label": "Start Run", "backend": backend, "timestamp_unix": time.time()})
@@ -4998,7 +5057,14 @@ def _write_validation_focus_report(
     validation_clicks: list[dict[str, Any]],
     engine: _ValidationFastAudioEngine | None,
 ) -> None:
-    events_csv = package.session_dir / "events.csv"
+    manifest_outputs: dict[str, Any] = {}
+    try:
+        manifest_payload = json.loads(Path(session_manifest).read_text(encoding="utf-8"))
+        if isinstance(manifest_payload.get("outputs"), dict):
+            manifest_outputs = dict(manifest_payload.get("outputs") or {})
+    except Exception:
+        manifest_outputs = {}
+    events_csv = Path(str(manifest_outputs.get("verbose_events_csv") or manifest_outputs.get("events_csv") or package.session_dir / "events.csv"))
     payload = {
         "schema": "pps-focus-mode-packaged-validation.v1",
         "session_manifest": str(session_manifest),

@@ -88,6 +88,33 @@ python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py
   --strict-study5-readiness
 ```
 
+For a full operator rehearsal that creates a fresh Desktop acquisition folder,
+preloads Study 5 participant `P050`, turns on the output-4/Input-4 tactile proxy,
+runs the packaged runner under full-stack conditions, and optionally records one
+continuous external LabRecorder XDF, use:
+
+```powershell
+python .\validation_protocols\scripts\run_desktop_full_mock_rehearsal.py `
+  --desktop-output-parent "$env:USERPROFILE\Desktop" `
+  --session-name study_5_full_mock_rehearsal `
+  --profile study5_box_breathing_pps `
+  --participant-id P050 `
+  --runner-mode packaged `
+  --validation-lane full-stack `
+  --audio-mode hardware `
+  --mouse-backend pynput `
+  --wired-loopback output4-tactile-proxy `
+  --external-labrecorder `
+  --strict-study5-readiness `
+  --timeout-s 7200
+```
+
+This rehearsal script writes its reports under
+`Experiment_context_folder_DO_NOT_DELETE/validation_reports/mock_rehearsal_*`
+inside the Desktop acquisition root. LabRecorder is intentionally continuous
+for the whole session; block identity is reconstructed from `PPSMarkersV2`
+fields rather than by restarting external recording per block.
+
 If the local packaged executable is quarantined or blocked by endpoint
 protection, use source mode only as an interim hardware/capture diagnostic:
 

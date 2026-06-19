@@ -54,6 +54,23 @@ def _write_minimal_session_manifest(
     return manifest_path
 
 
+def test_validation_start_gate_waits_for_ready_file(tmp_path: Path, monkeypatch):
+    from peripersonal_space_toolkit import focus_app
+
+    ready_file = tmp_path / "external_labrecorder.ready"
+    records: list[dict[str, object]] = []
+    state: dict[str, object] = {}
+    monkeypatch.setenv("PPS_FOCUS_VALIDATION_START_READY_FILE", str(ready_file))
+    monkeypatch.setenv("PPS_FOCUS_VALIDATION_START_READY_TIMEOUT_S", "10")
+
+    assert not focus_app._validation_start_gate_ready(records, state, source="test")
+    ready_file.write_text("ready\n", encoding="utf-8")
+    assert focus_app._validation_start_gate_ready(records, state, source="test")
+
+    labels = [str(record["label"]) for record in records]
+    assert labels == ["start_gate_waiting", "start_gate_released"]
+
+
 def _collect_widget_texts(widget, widget_type) -> list[str]:
     texts: list[str] = []
     for child in widget.findChildren(widget_type):

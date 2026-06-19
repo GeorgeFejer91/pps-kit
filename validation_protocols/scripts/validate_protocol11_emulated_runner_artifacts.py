@@ -26,6 +26,12 @@ SRC_ROOT = REPO_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
+from peripersonal_space_toolkit.output_layout import (  # noqa: E402
+    output_data_analytics_dir,
+    output_runner_logs_dir,
+    output_verbose_events_dir,
+)
+
 
 SCHEMA = "pps-protocol11-emulated-runner-artifact-audit.v1"
 PLAN_SCHEMA = "pps-protocol11-response-plan.v1"
@@ -179,6 +185,34 @@ def _resolve_path(value: Any, *, base: Path) -> Path:
     return path
 
 
+def _path_is_set(path: Path | None) -> bool:
+    return path is not None and str(path) not in {"", "."}
+
+
+def _first_existing(paths: list[Path]) -> Path | None:
+    for path in paths:
+        if _path_is_set(path) and path.exists():
+            return path
+    return None
+
+
+def _manifest_output_path(outputs: dict[str, Any], *keys: str, base: Path, fallback: Path) -> Path:
+    for key in keys:
+        value = outputs.get(key)
+        if value not in (None, ""):
+            return _resolve_path(value, base=base)
+    return fallback
+
+
+def _session_manifest_path(session_dir: Path) -> Path:
+    return _first_existing(
+        [
+            session_dir / "session_manifest.json",
+            output_runner_logs_dir(session_dir.parent) / session_dir.name / "session_manifest.json",
+        ]
+    ) or (session_dir / "session_manifest.json")
+
+
 def _event_rows(path: Path) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for row in _read_csv(path):
@@ -203,12 +237,30 @@ def _count_by(rows: list[dict[str, Any]], key: str) -> dict[str, int]:
     return counts
 
 
-def _latest_analysis_csv(session_dir: Path, suffix: str) -> Path | None:
-    matches = sorted((session_dir / "analysis").glob(f"*_{suffix}.csv"))
+def _latest_analysis_csv(session_dir: Path, suffix: str, *, analysis_dir: Path | None = None) -> Path | None:
+    candidates = [
+        analysis_dir or Path(),
+        session_dir / "analysis",
+        output_data_analytics_dir(session_dir.parent) / session_dir.name,
+    ]
+    matches: list[Path] = []
+    seen: set[str] = set()
+    for candidate in candidates:
+        key = str(candidate)
+        if not _path_is_set(candidate) or key in seen or not candidate.is_dir():
+            continue
+        seen.add(key)
+        matches.extend(sorted(candidate.glob(f"*_{suffix}.csv")))
     return matches[-1] if matches else None
 
 
-def _analysis_file(session_dir: Path, filename: str) -> Path | None:
+def _analysis_file(session_dir: Path, filename: str, *, analysis_dir: Path | None = None) -> Path | None:
+    for candidate_dir in (analysis_dir, session_dir / "analysis", output_data_analytics_dir(session_dir.parent) / session_dir.name):
+        if candidate_dir is None or not _path_is_set(candidate_dir):
+            continue
+        path = candidate_dir / filename
+        if path.is_file():
+            return path
     path = session_dir / "analysis" / filename
     return path if path.is_file() else None
 
@@ -265,18 +317,18 @@ def _expected_capture_options(plan: dict[str, Any], session_metadata: dict[str, 
     return {str(key): bool(value) for key, value in options.items()}
 
 
-def _analysis_paths(session_dir: Path) -> dict[str, Path | None]:
+def _analysis_paths(session_dir: Path, *, analysis_dir: Path | None = None) -> dict[str, Path | None]:
     return {
-        "responses": _latest_analysis_csv(session_dir, "responses"),
-        "analysis_ready_trials": _latest_analysis_csv(session_dir, "analysis_ready_trials"),
-        "final_trial_outcomes": _latest_analysis_csv(session_dir, "final_trial_outcomes"),
-        "summary": _latest_analysis_csv(session_dir, "summary"),
-        "curve_points": _latest_analysis_csv(session_dir, "pps_curve_points"),
-        "sigmoid_fits": _latest_analysis_csv(session_dir, "sigmoid_fits"),
-        "model_fits": _latest_analysis_csv(session_dir, "model_fits"),
-        "model_fit_comparison": _latest_analysis_csv(session_dir, "model_fit_comparison"),
-        "data_behavior_by_scope": _analysis_file(session_dir, "data_behavior_by_scope.csv"),
-        "timing_qc": _latest_analysis_csv(session_dir, "timing_qc"),
+        "responses": _latest_analysis_csv(session_dir, "responses", analysis_dir=analysis_dir),
+        "analysis_ready_trials": _latest_analysis_csv(session_dir, "analysis_ready_trials", analysis_dir=analysis_dir),
+        "final_trial_outcomes": _latest_analysis_csv(session_dir, "final_trial_outcomes", analysis_dir=analysis_dir),
+        "summary": _latest_analysis_csv(session_dir, "summary", analysis_dir=analysis_dir),
+        "curve_points": _latest_analysis_csv(session_dir, "pps_curve_points", analysis_dir=analysis_dir),
+        "sigmoid_fits": _latest_analysis_csv(session_dir, "sigmoid_fits", analysis_dir=analysis_dir),
+        "model_fits": _latest_analysis_csv(session_dir, "model_fits", analysis_dir=analysis_dir),
+        "model_fit_comparison": _latest_analysis_csv(session_dir, "model_fit_comparison", analysis_dir=analysis_dir),
+        "data_behavior_by_scope": _analysis_file(session_dir, "data_behavior_by_scope.csv", analysis_dir=analysis_dir),
+        "timing_qc": _latest_analysis_csv(session_dir, "timing_qc", analysis_dir=analysis_dir),
     }
 
 
@@ -681,14 +733,15 @@ def _audit_outputs(
     session_dir: Path,
     capture_options: dict[str, bool],
     analysis_paths: dict[str, Path | None],
+    output_paths: dict[str, Path],
 ) -> None:
-    events_csv = session_dir / "events.csv"
-    events_xdf = session_dir / "events.xdf"
-    lsl_csv = session_dir / "lsl_markers.csv"
-    lsl_xdf = session_dir / "lsl_markers.xdf"
-    trigger_json = session_dir / "trigger_dictionary.json"
-    summary_txt = session_dir / "analysis_summary.txt"
-    exploratory_summary = session_dir / "analysis" / "exploratory_quality_summary.json"
+    events_csv = output_paths["events_csv"]
+    events_xdf = output_paths["events_xdf"]
+    lsl_csv = output_paths["lsl_markers_csv"]
+    lsl_xdf = output_paths["lsl_markers_xdf"]
+    trigger_json = output_paths["trigger_dictionary_json"]
+    summary_txt = output_paths["analysis_summary_txt"]
+    exploratory_summary = output_paths["exploratory_quality_summary"]
     if capture_options.get("write_events_csv", True):
         _criterion(criteria, "data_outputs_analysis", "events_csv_written", events_csv.is_file(), str(events_csv))
     else:
@@ -742,9 +795,17 @@ def _audit_outputs(
         _criterion(criteria, "lsl_trigger_codes", "trigger_dictionary_absent_when_disabled", not trigger_json.exists(), str(trigger_json), required=False)
 
 
-def _audit_lsl_and_triggers(criteria: list[Criterion], *, session_dir: Path, events: list[dict[str, Any]], capture_options: dict[str, bool]) -> None:
-    lsl_csv = session_dir / "lsl_markers.csv"
-    trigger_json = session_dir / "trigger_dictionary.json"
+def _audit_lsl_and_triggers(
+    criteria: list[Criterion],
+    *,
+    session_dir: Path,
+    events: list[dict[str, Any]],
+    capture_options: dict[str, bool],
+    output_paths: dict[str, Path],
+) -> None:
+    _unused_session_dir = session_dir
+    lsl_csv = output_paths["lsl_markers_csv"]
+    trigger_json = output_paths["trigger_dictionary_json"]
     if not capture_options.get("write_lsl_marker_mirror", True):
         _criterion(criteria, "lsl_trigger_codes", "lsl_marker_event_ids_match_events", not lsl_csv.exists(), "LSL marker mirror disabled", required=False)
     elif lsl_csv.is_file():
@@ -798,18 +859,112 @@ def validate_artifacts(
     session_dir = session_dir.resolve()
     output_dir = (output_dir or (session_dir / "analysis" / "protocol11_audit")).resolve()
     criteria: list[Criterion] = []
-    manifest_path = session_dir / "session_manifest.json"
+    manifest_path = _session_manifest_path(session_dir)
     manifest = _read_json(manifest_path)
-    metadata_path = session_dir / "session_metadata.json"
+    outputs = manifest.get("outputs") if isinstance(manifest.get("outputs"), dict) else {}
+    manifest_base = manifest_path.parent if manifest_path.parent != Path() else session_dir
+    metadata_path = _first_existing(
+        [
+            _manifest_output_path(outputs, "session_metadata_json", base=manifest_base, fallback=Path()),
+            session_dir / "session_metadata.json",
+            output_runner_logs_dir(session_dir.parent) / session_dir.name / "session_metadata.json",
+        ]
+    ) or (session_dir / "session_metadata.json")
     metadata = _read_json(metadata_path)
     blocks = _block_entries(manifest, session_dir)
     rows = _manifest_rows(blocks)
-    events_path = session_dir / "events.csv"
+    events_path = _first_existing(
+        [
+            _manifest_output_path(
+                outputs,
+                "verbose_events_csv",
+                "events_csv",
+                base=manifest_base,
+                fallback=output_verbose_events_dir(session_dir.parent) / session_dir.name / "events.csv",
+            ),
+            session_dir / "events.csv",
+        ]
+    ) or (session_dir / "events.csv")
+    output_paths = {
+        "events_csv": events_path,
+        "events_xdf": _first_existing(
+            [
+                _manifest_output_path(
+                    outputs,
+                    "verbose_events_xdf",
+                    "events_xdf",
+                    base=manifest_base,
+                    fallback=output_verbose_events_dir(session_dir.parent) / session_dir.name / "events.xdf",
+                ),
+                session_dir / "events.xdf",
+            ]
+        )
+        or (session_dir / "events.xdf"),
+        "lsl_markers_csv": _first_existing(
+            [
+                _manifest_output_path(
+                    outputs,
+                    "lsl_markers_csv",
+                    base=manifest_base,
+                    fallback=output_verbose_events_dir(session_dir.parent) / session_dir.name / "lsl_markers.csv",
+                ),
+                session_dir / "lsl_markers.csv",
+            ]
+        )
+        or (session_dir / "lsl_markers.csv"),
+        "lsl_markers_xdf": _first_existing(
+            [
+                _manifest_output_path(
+                    outputs,
+                    "lsl_markers_xdf",
+                    base=manifest_base,
+                    fallback=output_verbose_events_dir(session_dir.parent) / session_dir.name / "lsl_markers.xdf",
+                ),
+                session_dir / "lsl_markers.xdf",
+            ]
+        )
+        or (session_dir / "lsl_markers.xdf"),
+        "trigger_dictionary_json": _first_existing(
+            [
+                _manifest_output_path(
+                    outputs,
+                    "trigger_dictionary_json",
+                    base=manifest_base,
+                    fallback=output_verbose_events_dir(session_dir.parent) / session_dir.name / "trigger_dictionary.json",
+                ),
+                session_dir / "trigger_dictionary.json",
+            ]
+        )
+        or (session_dir / "trigger_dictionary.json"),
+    }
+    analysis_dir = _first_existing(
+        [
+            _manifest_output_path(
+                outputs,
+                "analysis_dir",
+                base=manifest_base,
+                fallback=output_data_analytics_dir(session_dir.parent) / session_dir.name,
+            ),
+            session_dir / "analysis",
+        ]
+    ) or (session_dir / "analysis")
+    output_paths["analysis_summary_txt"] = _first_existing(
+        [
+            _manifest_output_path(outputs, "analysis_summary_txt", base=manifest_base, fallback=analysis_dir / "analysis_summary.txt"),
+            session_dir / "analysis_summary.txt",
+        ]
+    ) or (analysis_dir / "analysis_summary.txt")
+    output_paths["exploratory_quality_summary"] = _first_existing(
+        [
+            analysis_dir / "exploratory_quality_summary.json",
+            session_dir / "analysis" / "exploratory_quality_summary.json",
+        ]
+    ) or (analysis_dir / "exploratory_quality_summary.json")
     events = _event_rows(events_path)
     session_start = next((row for row in events if row.get("event_type") == "session_start"), {})
     plan = _load_response_plan(response_plan_path)
     capture_options = _expected_capture_options(plan, metadata, session_start)
-    analysis_paths = _analysis_paths(session_dir)
+    analysis_paths = _analysis_paths(session_dir, analysis_dir=analysis_dir)
     analysis_rows = _read_csv(analysis_paths["analysis_ready_trials"]) if analysis_paths["analysis_ready_trials"] else []
     final_rows = _read_csv(analysis_paths["final_trial_outcomes"]) if analysis_paths["final_trial_outcomes"] else []
     timing_qc_rows = _read_csv(analysis_paths["timing_qc"]) if analysis_paths["timing_qc"] else []
@@ -846,8 +1001,8 @@ def validate_artifacts(
     _audit_response_markers(criteria, events=events, timing_qc_rows=timing_qc_rows)
     _audit_instruction_flow(criteria, plan=plan, events=events)
     _audit_topup(criteria, plan=plan, session_dir=session_dir, rows=rows, final_rows=final_rows, events=events)
-    _audit_outputs(criteria, session_dir=session_dir, capture_options=capture_options, analysis_paths=analysis_paths)
-    _audit_lsl_and_triggers(criteria, session_dir=session_dir, events=events, capture_options=capture_options)
+    _audit_outputs(criteria, session_dir=session_dir, capture_options=capture_options, analysis_paths=analysis_paths, output_paths=output_paths)
+    _audit_lsl_and_triggers(criteria, session_dir=session_dir, events=events, capture_options=capture_options, output_paths=output_paths)
     _audit_operator_modes(criteria, plan=plan, events=events)
 
     criteria_payload = [criterion.as_dict() for criterion in criteria]

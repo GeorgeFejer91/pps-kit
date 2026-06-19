@@ -225,8 +225,20 @@ def _first_existing(paths: Iterable[Path]) -> Path | None:
     return None
 
 
-def _latest_analysis_csv(session_dir: Path, suffix: str) -> Path | None:
-    matches = sorted((session_dir / "analysis").glob(f"*_{suffix}.csv"))
+def _latest_analysis_csv(session_dir: Path, suffix: str, *, analysis_dir: Path | None = None) -> Path | None:
+    candidates: list[Path] = []
+    if analysis_dir is not None and _path_is_set(analysis_dir):
+        candidates.append(analysis_dir)
+    candidates.append(session_dir / "analysis")
+    candidates.append(session_dir.parent / "Data_Analytics" / session_dir.name)
+    seen: set[str] = set()
+    matches: list[Path] = []
+    for candidate in candidates:
+        key = str(candidate)
+        if key in seen or not candidate.is_dir():
+            continue
+        seen.add(key)
+        matches.extend(sorted(candidate.glob(f"*_{suffix}.csv")))
     return matches[-1] if matches else None
 
 
@@ -621,7 +633,12 @@ def _audio_wav_matches_sidecar(record: dict[str, Any]) -> bool:
 
 def _audio_signal_shape_ok(record: dict[str, Any]) -> bool:
     peaks = [float(value) for value in (record.get("scan") or {}).get("max_abs_by_channel", [])]
-    return len(peaks) >= 4 and all(value > 0 for value in peaks[:3]) and peaks[3] <= 1e-6
+    sidecar = record.get("sidecar") or {}
+    duplicate_channel = _as_int(sidecar.get("duplicate_tactile_output_channel_1based"), default=0)
+    output4_ok = peaks[3] <= 1e-6
+    if duplicate_channel == 4:
+        output4_ok = peaks[3] > 0
+    return len(peaks) >= 4 and all(value > 0 for value in peaks[:3]) and output4_ok
 
 
 def _computed_reconciliation_report(
@@ -930,9 +947,23 @@ def audit_readiness(
             session_dir / "session_manifest.json",
         ]
     ) or (session_dir / "session_manifest.json")
-    metadata_path = session_dir / "session_metadata.json"
     manifest = _read_json(manifest_path)
+    outputs = manifest.get("outputs") if isinstance(manifest.get("outputs"), dict) else {}
+    manifest_base = manifest_path.parent if manifest_path.parent != Path() else session_dir
+    metadata_path = _first_existing(
+        [
+            _resolve_path(outputs.get("session_metadata_json"), base=manifest_base),
+            session_dir / "session_metadata.json",
+        ]
+    ) or (session_dir / "session_metadata.json")
     session_metadata = _read_json(metadata_path)
+    analysis_dir = _first_existing(
+        [
+            _resolve_path(outputs.get("analysis_dir"), base=manifest_base),
+            session_dir / "analysis",
+            session_dir.parent / "Data_Analytics" / session_dir.name,
+        ]
+    ) or (session_dir / "analysis")
 
     paths = {
         "focus_validation_report": artifact_dir / "focus_validation_report.json",
@@ -940,12 +971,43 @@ def audit_readiness(
         "preparation_report": artifact_dir / "preparation_report.json",
         "session_manifest": manifest_path,
         "session_metadata": metadata_path,
-        "events_csv": session_dir / "events.csv",
-        "events_xdf": session_dir / "events.xdf",
-        "lsl_markers_csv": session_dir / "lsl_markers.csv",
-        "lsl_markers_xdf": session_dir / "lsl_markers.xdf",
-        "trigger_dictionary": session_dir / "trigger_dictionary.json",
-        "analysis_summary": session_dir / "analysis_summary.txt",
+        "events_csv": _first_existing(
+            [
+                _resolve_path(outputs.get("verbose_events_csv") or outputs.get("events_csv"), base=manifest_base),
+                session_dir / "events.csv",
+            ]
+        )
+        or (session_dir / "events.csv"),
+        "events_xdf": _first_existing(
+            [
+                _resolve_path(outputs.get("verbose_events_xdf") or outputs.get("events_xdf"), base=manifest_base),
+                session_dir / "events.xdf",
+            ]
+        )
+        or (session_dir / "events.xdf"),
+        "lsl_markers_csv": _first_existing(
+            [
+                _resolve_path(outputs.get("lsl_markers_csv"), base=manifest_base),
+                session_dir / "lsl_markers.csv",
+            ]
+        )
+        or (session_dir / "lsl_markers.csv"),
+        "lsl_markers_xdf": _first_existing(
+            [
+                _resolve_path(outputs.get("lsl_markers_xdf"), base=manifest_base),
+                session_dir / "lsl_markers.xdf",
+            ]
+        )
+        or (session_dir / "lsl_markers.xdf"),
+        "trigger_dictionary": _first_existing(
+            [
+                _resolve_path(outputs.get("trigger_dictionary_json"), base=manifest_base),
+                session_dir / "trigger_dictionary.json",
+            ]
+        )
+        or (session_dir / "trigger_dictionary.json"),
+        "analysis_summary": _first_existing([analysis_dir / "analysis_summary.txt", session_dir / "analysis_summary.txt"])
+        or (analysis_dir / "analysis_summary.txt"),
     }
     screenshot_candidates = [artifact_dir / "focus_screenshot.png", artifact_dir / "live_desktop_after_first_cues.png"]
     screenshot_summaries = {path.name: _screenshot_summary(path) for path in screenshot_candidates}
@@ -987,7 +1049,7 @@ def audit_readiness(
         )
     block_wav_scans = {path.name: _wav_scan(path) for path in block_wavs}
 
-    analysis_paths = {suffix: _latest_analysis_csv(session_dir, suffix) for suffix in EXPECTED_ANALYSIS_SUFFIXES}
+    analysis_paths = {suffix: _latest_analysis_csv(session_dir, suffix, analysis_dir=analysis_dir) for suffix in EXPECTED_ANALYSIS_SUFFIXES}
     response_rows = _read_csv(analysis_paths["responses"] or Path())
     analysis_ready_rows = _read_csv(analysis_paths["analysis_ready_trials"] or Path())
     timing_qc_rows = _read_csv(analysis_paths["timing_qc"] or Path())
@@ -1071,7 +1133,7 @@ def audit_readiness(
     )
     add(Criterion("local_recorder_audio_evidence", "audio_evidence_sidecars_are_komplete_asio_4ch_clean", bool(audio_records) and all(_audio_record_ok(record) for record in audio_records), "Every local audio-evidence sidecar records clean 4-channel ASIO output with tactile on output 3.", evidence={"records": audio_inventory}))
     add(Criterion("local_recorder_audio_evidence", "audio_evidence_wavs_match_sidecars", bool(audio_records) and all(_audio_wav_matches_sidecar(record) for record in audio_records), "Every audio-evidence WAV is readable and agrees with its sidecar sample rate/frame count.", evidence={"records": audio_inventory}))
-    add(Criterion("local_recorder_audio_evidence", "runtime_channels_have_expected_signal_shape", bool(audio_records) and all(_audio_signal_shape_ok(record) for record in audio_records), "For every audio-evidence WAV, outputs 1-3 contain signal and output 4 remains silent.", evidence={"records": audio_inventory}))
+    add(Criterion("local_recorder_audio_evidence", "runtime_channels_have_expected_signal_shape", bool(audio_records) and all(_audio_signal_shape_ok(record) for record in audio_records), "Every audio-evidence WAV has signal on outputs 1-3; output 4 is silent unless the sidecar declares a tactile mirror on output 4.", evidence={"records": audio_inventory}))
     recon_criteria = reconciliation_report.get("criteria") if isinstance(reconciliation_report.get("criteria"), dict) else {}
     add(Criterion("local_recorder_audio_evidence", "lsl_xdf_audio_reconciliation_passed", bool(reconciliation_report.get("passed")) and all(bool(value) for value in recon_criteria.values()), "LSL/XDF/audio reconciliation passes every criterion.", evidence={"existing_report": artifact_dir / "lsl_xdf_audio_reconciliation_report.json", "computed_report": output_dir / "lsl_xdf_audio_reconciliation_report.json", "criteria": recon_criteria}))
 

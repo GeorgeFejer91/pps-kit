@@ -1649,6 +1649,8 @@ def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_pa
             "--strict-study5-readiness",
             "--participant-id",
             "P001",
+            "--wired-loopback",
+            "output4-tactile-proxy",
         ]
     )
     strict_command = harness._build_runner_command(strict_args, runner=runner, screenshot_path=screenshot)
@@ -1658,11 +1660,14 @@ def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_pa
     assert "--no-internal-xdf" not in strict_command
     assert "--no-backup-recording" not in strict_command
     assert "--validation-screenshot" in strict_command
+    assert "--wired-loopback" in strict_command
+    assert "output4-tactile-proxy" in strict_command
     assert harness._standard_capture_requested(strict_args)
     assert "PPS_FOCUS_VALIDATION_REALTIME_AUDIO" not in strict_env
     assert strict_env["PPS_FOCUS_VALIDATION_PARTICIPANT_EMULATOR"] == "1"
     assert strict_env["PPS_AUDIO_DEVICE_INDEX"] == "28"
     assert strict_env["PPS_PROTOCOL11_VALIDATION_LANE"] == "full-stack"
+    assert strict_env["PPS_PROTOCOL11_WIRED_LOOPBACK"] == "output4-tactile-proxy"
 
     legacy_args = harness.build_arg_parser().parse_args(["--runner", str(runner)])
     legacy_command = harness._build_runner_command(legacy_args, runner=runner, screenshot_path=screenshot)
@@ -1671,6 +1676,7 @@ def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_pa
     assert "--no-lsl" in legacy_command
     assert "--no-internal-xdf" in legacy_command
     assert "--no-backup-recording" in legacy_command
+    assert "--wired-loopback" not in legacy_command
     assert legacy_env["PPS_PROTOCOL11_VALIDATION_LANE"] == "software-only"
 
     source_args = harness.build_arg_parser().parse_args(
@@ -1702,6 +1708,163 @@ def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_pa
         harness.main(["--runner", str(runner), "--validation-lane", "full-stack", "--audio-mode", "hardware", "--no-backup-recording"])
     with pytest.raises(ValueError, match="Software-only validation requires --audio-mode validation-realtime"):
         harness.main(["--runner", str(runner), "--validation-lane", "software-only", "--audio-mode", "hardware"])
+
+
+def test_desktop_full_mock_rehearsal_delegates_to_full_stack_harness(tmp_path: Path, monkeypatch):
+    rehearsal = _load_script("run_desktop_full_mock_rehearsal.py")
+    parent = tmp_path / "Desktop"
+    parent.mkdir()
+    runner = tmp_path / "PPSExperimentRunner.exe"
+    runner.write_text("exe", encoding="utf-8")
+    environment_root = parent / "mock_20260620"
+    captured: dict[str, object] = {}
+
+    def fake_create_environment(args):
+        environment_root.mkdir(parents=True)
+        return {"environment_root": str(environment_root), "participant_id": args.participant_id}
+
+    def fake_emulator_main(argv):
+        captured["argv"] = list(argv)
+        output_dir = Path(argv[argv.index("--output-dir") + 1])
+        session_dir = environment_root / "P050_20260620_121400"
+        session_dir.mkdir(parents=True)
+        manifest = session_dir / "session_manifest.json"
+        manifest.write_text(json.dumps({"outputs": {}}), encoding="utf-8")
+        (output_dir / "focus_validation_report.json").write_text(
+            json.dumps(
+                {
+                    "session_dir": str(session_dir),
+                    "session_manifest": str(manifest),
+                    "events_csv": str(output_dir / "events.csv"),
+                    "completed": True,
+                }
+            ),
+            encoding="utf-8",
+        )
+        (output_dir / "full_realtime_participant_emulation_report.json").write_text(
+            json.dumps({"passed": True}),
+            encoding="utf-8",
+        )
+        return 0
+
+    monkeypatch.setattr(rehearsal, "_create_rehearsal_environment", fake_create_environment)
+    monkeypatch.setattr(rehearsal.emulator, "main", fake_emulator_main)
+    monkeypatch.setattr(rehearsal, "output_validation_reports_dir", lambda root: Path(root) / "v")
+    args = rehearsal.build_arg_parser().parse_args(
+        [
+            "--desktop-output-parent",
+            str(parent),
+            "--runner",
+            str(runner),
+            "--skip-audio-preflight",
+        ]
+    )
+
+    report = rehearsal.run_rehearsal(args)
+
+    argv = captured["argv"]
+    assert report["passed"]
+    assert report["environment_root"] == str(environment_root.resolve())
+    assert "--wired-loopback" in argv
+    assert argv[argv.index("--wired-loopback") + 1] == "output4-tactile-proxy"
+    assert "--strict-study5-readiness" in argv
+    assert argv[argv.index("--participant-id") + 1] == "P050"
+    assert Path(report["validation_dir"]).parent.name == "v"
+
+
+def test_desktop_full_mock_rehearsal_reconciles_external_labrecorder_xdf(tmp_path: Path, monkeypatch):
+    rehearsal = _load_script("run_desktop_full_mock_rehearsal.py")
+    validation_dir = tmp_path / "validation"
+    validation_dir.mkdir()
+    session_dir = tmp_path / "session"
+    session_dir.mkdir()
+    lsl_markers_csv = tmp_path / "lsl_markers.csv"
+    marker_rows = [
+        {
+            "event_id": "1",
+            "event_type": "session_start",
+            "event_code": "1",
+            "trigger_key": "control:session_start",
+            "session_id": "S",
+            "participant_id": "P050",
+            "block_index": "",
+            "trial_uid": "",
+            "sample_index": "",
+            "timestamp_quality": "software_log",
+            "payload_json": "{}",
+            "lsl_timestamp": "10.000000000",
+            "pushed_to_lsl": "True",
+        },
+        {
+            "event_id": "2",
+            "event_type": "block_start",
+            "event_code": "10",
+            "trigger_key": "control:block_start",
+            "session_id": "S",
+            "participant_id": "P050",
+            "block_index": "1",
+            "trial_uid": "",
+            "sample_index": "",
+            "timestamp_quality": "software_log",
+            "payload_json": "{}",
+            "lsl_timestamp": "10.100000000",
+            "pushed_to_lsl": "True",
+        },
+    ]
+    _write_csv(lsl_markers_csv, marker_rows)
+    manifest = session_dir / "session_manifest.json"
+    manifest.write_text(json.dumps({"outputs": {"lsl_markers_csv": str(lsl_markers_csv)}}), encoding="utf-8")
+    (validation_dir / "focus_validation_report.json").write_text(
+        json.dumps({"session_dir": str(session_dir), "session_manifest": str(manifest), "events_csv": str(tmp_path / "events.csv")}),
+        encoding="utf-8",
+    )
+    rich_rows = [
+        {**marker_rows[0], "sample_lsl_timestamp": "10.000000000"},
+        {**marker_rows[1], "sample_lsl_timestamp": "10.100000000"},
+    ]
+    numeric_rows = [
+        {"event_code": "1", "sample_lsl_timestamp": "10.000000000"},
+        {"event_code": "10", "sample_lsl_timestamp": "10.100000000"},
+    ]
+    xdf_path = validation_dir / "session_external_labrecorder.xdf"
+    xdf_path.write_bytes(b"xdf")
+    monkeypatch.setattr(rehearsal, "_load_xdf_streams", lambda _path: (rich_rows, numeric_rows, {}))
+
+    report = rehearsal.reconcile_external_labrecorder_xdf(
+        validation_dir=validation_dir,
+        xdf_path=xdf_path,
+        labrecorder_cli=tmp_path / "LabRecorderCLI.exe",
+        labrecorder_command=["LabRecorderCLI.exe", str(xdf_path)],
+        labrecorder_returncode=0,
+        stdout_path=tmp_path / "stdout.txt",
+        stderr_path=tmp_path / "stderr.txt",
+    )
+
+    assert report["passed"]
+    assert report["comparison"]["rich_xdf_sample_count"] == 2
+    assert report["block_indices_observed"] == ["1"]
+    assert (validation_dir / "external_labrecorder_reconciliation" / "external_labrecorder_rich_xdf_samples.csv").is_file()
+
+
+def test_readiness_audit_accepts_declared_output4_tactile_mirror():
+    auditor = _load_script("audit_protocol11_study5_readiness.py")
+
+    silent_output4 = {
+        "scan": {"max_abs_by_channel": [0.2, 0.1, 0.3, 0.0]},
+        "sidecar": {"duplicate_tactile_output_channel_1based": ""},
+    }
+    mirrored_output4 = {
+        "scan": {"max_abs_by_channel": [0.2, 0.1, 0.3, 0.3]},
+        "sidecar": {"duplicate_tactile_output_channel_1based": 4},
+    }
+    unexpected_output4_signal = {
+        "scan": {"max_abs_by_channel": [0.2, 0.1, 0.3, 0.3]},
+        "sidecar": {"duplicate_tactile_output_channel_1based": ""},
+    }
+
+    assert auditor._audio_signal_shape_ok(silent_output4)
+    assert auditor._audio_signal_shape_ok(mirrored_output4)
+    assert not auditor._audio_signal_shape_ok(unexpected_output4_signal)
 
 
 def test_one_block_actual_condition_progress_csv_accepts_variable_payloads(tmp_path: Path):
