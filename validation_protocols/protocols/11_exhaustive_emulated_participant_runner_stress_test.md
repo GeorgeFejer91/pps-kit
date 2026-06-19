@@ -24,6 +24,27 @@ Passing this protocol does not prove perception, fatigue, Woojer mechanical
 onset, participant comprehension, or scientific PPS interpretability. Hardware
 timing claims still require the actual-condition and loopback protocols.
 
+## Validation Lanes
+
+Protocol 11 now has two named lanes so software-only evidence cannot be
+mistaken for final-condition evidence:
+
+- `software-only`: runs the packaged Focus Mode workflow with
+  `validation-realtime` audio. It is useful for UI survival, top-up logic,
+  event/analysis pairing, and output-shape checks on machines without the
+  lab audio route. It cannot prove Study 5 final readiness.
+- `full-stack`: runs packaged Focus Mode with the normal hardware ASIO audio
+  path, standard capture enabled, local audio-evidence WAVs, XDF/LSL outputs,
+  trigger dictionary, visible OS mouse-click backend, and the strict Study 5
+  readiness audit. This is the lane for final-condition pre-participant
+  validation.
+
+The response-marker invariant belongs to the full-stack lane: every in-playback
+mouse click must be logged as `mouse_click`, paired to one `response_marker_start`,
+and recoverable as a short tactile-channel pulse in the runtime
+`*_audio_evidence.wav`. The precomputed `blocks/Block_*.wav` files are
+stimulus-only WAVs and are not expected to contain response-click markers.
+
 ## Existing Harnesses
 
 Use the existing scripts where they already cover part of the matrix:
@@ -32,7 +53,10 @@ replace `P001` with an unused planned validation ID from the selected run setup.
 ```powershell
 python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py `
   --participant-id P001 `
-  --mouse-backend pynput
+  --mouse-backend pynput `
+  --validation-lane software-only `
+  --audio-mode validation-realtime `
+  --standard-capture
 
 python .\validation_protocols\scripts\run_study5_end_to_end_ui_mouse_validation.py `
   --packaged-standalone-app
@@ -59,6 +83,7 @@ standard capture, and the strict readiness audit enabled:
 python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py `
   --participant-id P001 `
   --mouse-backend pynput `
+  --validation-lane full-stack `
   --audio-mode hardware `
   --strict-study5-readiness
 ```
@@ -71,6 +96,7 @@ python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py
   --runner-mode source `
   --participant-id P001 `
   --mouse-backend pynput `
+  --validation-lane full-stack `
   --audio-mode hardware `
   --strict-study5-readiness
 ```
@@ -117,10 +143,10 @@ python .\validation_protocols\scripts\validate_protocol11_emulated_runner_artifa
 
 For Study 5 participant-readiness claims, aggregate the packaged-runner
 evidence folder with the Study 5 readiness audit. Use the strict flags for the
-final gate; without them, the same script may pass a scoped one-block ASIO
-rehearsal while still reporting `full_study5_realtime_ready=false`. The full
-realtime harness writes the launch/preparation reports and invokes this audit
-automatically when `--strict-study5-readiness` is set.
+final gate; software-only artifacts can pass their own lane while still
+reporting `final_condition_ready=false`. The full realtime harness writes the
+launch/preparation reports and invokes this audit automatically when
+`--validation-lane full-stack` or `--strict-study5-readiness` is set.
 
 ```powershell
 python .\validation_protocols\scripts\audit_protocol11_study5_readiness.py `

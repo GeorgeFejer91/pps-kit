@@ -31,6 +31,10 @@ from audit_protocol11_study5_readiness import audit_readiness  # noqa: E402
 
 STUDY5_TEMPLATE_ID = "study5_box_breathing_pps"
 SCHEMA = "pps-full-realtime-participant-emulation-evaluation.v1"
+VALIDATION_LANE_AUTO = "auto"
+VALIDATION_LANE_SOFTWARE_ONLY = "software-only"
+VALIDATION_LANE_FULL_STACK = "full-stack"
+OS_MOUSE_BACKENDS = {"pynput", "win32", "pyautogui"}
 
 
 def _default_output_dir() -> Path:
@@ -68,8 +72,44 @@ def _read_csv(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
+def _resolved_validation_lane(args: argparse.Namespace) -> str:
+    lane = str(getattr(args, "validation_lane", VALIDATION_LANE_AUTO) or VALIDATION_LANE_AUTO).strip().lower()
+    if lane != VALIDATION_LANE_AUTO:
+        return lane
+    if bool(getattr(args, "strict_study5_readiness", False)) or str(getattr(args, "audio_mode", "")) == "hardware":
+        return VALIDATION_LANE_FULL_STACK
+    return VALIDATION_LANE_SOFTWARE_ONLY
+
+
+def _apply_validation_lane_policy(args: argparse.Namespace) -> str:
+    lane = _resolved_validation_lane(args)
+    if lane == VALIDATION_LANE_SOFTWARE_ONLY:
+        if bool(args.strict_study5_readiness):
+            raise ValueError("Software-only validation cannot request strict Study 5 readiness; use --validation-lane full-stack --audio-mode hardware.")
+        if str(args.audio_mode) != "validation-realtime":
+            raise ValueError("Software-only validation requires --audio-mode validation-realtime; use --validation-lane full-stack for hardware audio.")
+    elif lane == VALIDATION_LANE_FULL_STACK:
+        if str(args.audio_mode) != "hardware":
+            raise ValueError("Full-stack validation requires --audio-mode hardware so the normal ASIO/local-recorder path is exercised.")
+        if str(args.mouse_backend) not in OS_MOUSE_BACKENDS:
+            allowed = ", ".join(sorted(OS_MOUSE_BACKENDS))
+            raise ValueError(f"Full-stack validation requires an OS mouse backend ({allowed}); qtest is software-only.")
+        if args.no_lsl or args.no_internal_xdf or args.no_backup_recording:
+            raise ValueError("Full-stack validation cannot disable LSL, internal XDF, or local audio-evidence recording.")
+        args.standard_capture = True
+        args.strict_study5_readiness = True
+    else:
+        raise ValueError(f"Unknown validation lane: {lane}")
+    args.validation_lane = lane
+    return lane
+
+
 def _standard_capture_requested(args: argparse.Namespace) -> bool:
-    return bool(args.standard_capture or args.strict_study5_readiness)
+    return bool(
+        args.standard_capture
+        or args.strict_study5_readiness
+        or _resolved_validation_lane(args) == VALIDATION_LANE_FULL_STACK
+    )
 
 
 def _build_runner_command(args: argparse.Namespace, *, runner: Path, screenshot_path: Path) -> list[str]:
@@ -127,6 +167,7 @@ def _configure_validation_env(args: argparse.Namespace, *, output_dir: Path, foc
     env["PPS_FOCUS_VALIDATION_REPORT"] = str(focus_report_path)
     env["PPS_FOCUS_DISABLE_PREWARM"] = "1"
     env["PPS_PROTOCOL11_OUTPUT_DIR"] = str(output_dir)
+    env["PPS_PROTOCOL11_VALIDATION_LANE"] = _resolved_validation_lane(args)
     if args.audio_device_index is not None:
         env["PPS_AUDIO_DEVICE_INDEX"] = str(int(args.audio_device_index))
     return env
@@ -137,9 +178,11 @@ def _annotate_focus_report(path: Path, *, args: argparse.Namespace) -> dict[str,
     if not focus:
         return {}
     focus["protocol11_audio_mode"] = str(args.audio_mode)
+    focus["protocol11_validation_lane"] = _resolved_validation_lane(args)
     focus["hardware_audio_realtime"] = bool(args.audio_mode == "hardware")
     focus["standard_capture_requested"] = bool(_standard_capture_requested(args))
     focus["strict_study5_readiness_requested"] = bool(args.strict_study5_readiness)
+    focus["final_condition_candidate"] = bool(_resolved_validation_lane(args) == VALIDATION_LANE_FULL_STACK)
     _write_json(path, focus)
     return focus
 
@@ -168,6 +211,7 @@ def _write_launch_and_preparation_reports(
             "participant_id": str(args.participant_id),
             "runner_mode": str(args.runner_mode),
             "audio_mode": str(args.audio_mode),
+            "validation_lane": _resolved_validation_lane(args),
             "audio_device_index": args.audio_device_index,
             "standard_capture_requested": _standard_capture_requested(args),
             "strict_study5_readiness_requested": bool(args.strict_study5_readiness),
@@ -185,6 +229,7 @@ def _write_launch_and_preparation_reports(
             "profile_id": str(args.profile),
             "participant_id": str(args.participant_id),
             "audio_mode": str(args.audio_mode),
+            "validation_lane": _resolved_validation_lane(args),
             "standard_capture_requested": _standard_capture_requested(args),
             "session_dir": evaluation.get("session_dir", ""),
             "session_manifest": evaluation.get("session_manifest", ""),
@@ -232,10 +277,11 @@ def _latest_analysis_csv(session_dir: Path, suffix: str) -> Path | None:
 def _write_markdown(path: Path, report: dict[str, Any]) -> None:
     evaluation = dict(report.get("evaluation") or {})
     audio_mode = str(report.get("audio_mode") or "")
+    validation_lane = str(report.get("validation_lane") or "")
     audio_note = (
-        "It uses the packaged runner with hidden validation hooks and the normal hardware ASIO audio/local-recorder path."
-        if audio_mode == "hardware"
-        else "It uses the packaged runner with hidden validation hooks, wall-clock-paced software audio, and PC mouse-event emulation."
+        "It is the full-stack lane: packaged Focus Mode, OS mouse clicks, hardware ASIO audio, and local audio-evidence capture."
+        if validation_lane == VALIDATION_LANE_FULL_STACK
+        else "It is the software-only lane: packaged Focus Mode with wall-clock-paced validation audio and PC mouse-event emulation."
     )
     lines = [
         "# Full Realtime Participant Emulation Evaluation",
@@ -244,7 +290,9 @@ def _write_markdown(path: Path, report: dict[str, Any]) -> None:
         f"- UI ready for data collection: `{report.get('ui_ready_for_data_collection')}`",
         f"- Runner exe: `{report.get('runner')}`",
         f"- Runner mode: `{report.get('runner_mode')}`",
+        f"- Validation lane: `{validation_lane}`",
         f"- Audio mode: `{audio_mode}`",
+        f"- Final-condition ready: `{report.get('final_condition_ready')}`",
         f"- Standard capture requested: `{report.get('standard_capture_requested')}`",
         f"- Strict Study 5 readiness requested: `{report.get('strict_study5_readiness_requested')}`",
         f"- Process exit code: `{report.get('process_exit_code')}`",
@@ -273,6 +321,7 @@ def _evaluate_focus_report(
     exit_code: int | None,
     audio_mode: str = "validation-realtime",
     runner_mode: str = "packaged",
+    validation_lane: str = VALIDATION_LANE_SOFTWARE_ONLY,
 ) -> tuple[dict[str, Any], list[str]]:
     failures: list[str] = []
     focus = _read_json(focus_report_path)
@@ -346,8 +395,24 @@ def _evaluate_focus_report(
     if not focus.get("completed"):
         failures.append("Focus Mode did not report completed=True.")
     hardware_realtime = str(audio_mode) == "hardware"
+    full_stack = str(validation_lane) == VALIDATION_LANE_FULL_STACK
     if not hardware_realtime and not focus.get("validation_audio_realtime"):
         failures.append("The run did not use the realtime validation audio engine.")
+    if full_stack:
+        if not hardware_realtime:
+            failures.append("Full-stack validation did not use hardware audio mode.")
+        if counts.get("recording_unavailable", 0):
+            failures.append(f"Full-stack validation logged recording_unavailable {counts.get('recording_unavailable')} time(s).")
+        audio_evidence_wavs = sorted(session_dir.glob("*audio_evidence.wav"))
+        audio_evidence_sidecars = sorted(session_dir.glob("*audio_evidence.output_evidence.json"))
+        if not audio_evidence_wavs or len(audio_evidence_wavs) != len(audio_evidence_sidecars):
+            failures.append(
+                f"Full-stack validation requires per-block audio-evidence WAV/sidecar sets; found wavs={len(audio_evidence_wavs)} sidecars={len(audio_evidence_sidecars)}."
+            )
+        if counts.get("mouse_click", 0) <= 0 or counts.get("response_marker_start", 0) != counts.get("mouse_click", 0):
+            failures.append(
+                f"Full-stack validation requires one response_marker_start per mouse_click; mouse_click={counts.get('mouse_click', 0)} response_marker_start={counts.get('response_marker_start', 0)}."
+            )
     if expected_duration_s > 0 and process_wall_s < expected_duration_s * 0.90:
         failures.append(
             f"Process wall time {process_wall_s:.1f}s was shorter than 90% of expected realtime duration {expected_duration_s:.1f}s."
@@ -380,8 +445,10 @@ def _evaluate_focus_report(
     evaluation = {
         "focus_report": str(focus_report_path),
         "runner_mode": runner_mode,
+        "validation_lane": validation_lane,
         "audio_mode": audio_mode,
         "hardware_audio_realtime": hardware_realtime,
+        "final_condition_candidate": full_stack,
         "session_manifest": str(session_manifest),
         "session_dir": str(session_dir),
         "events_csv": str(events_csv),
@@ -426,6 +493,15 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--seed", type=int, default=20260615)
     parser.add_argument("--mouse-backend", default="pynput", choices=["pynput", "win32", "pyautogui", "qtest"])
     parser.add_argument(
+        "--validation-lane",
+        default=VALIDATION_LANE_AUTO,
+        choices=[VALIDATION_LANE_AUTO, VALIDATION_LANE_SOFTWARE_ONLY, VALIDATION_LANE_FULL_STACK],
+        help=(
+            "auto labels validation-realtime runs as software-only and hardware/strict runs as full-stack; "
+            "software-only is development evidence, full-stack is final-condition readiness evidence."
+        ),
+    )
+    parser.add_argument(
         "--audio-mode",
         default="validation-realtime",
         choices=["validation-realtime", "hardware"],
@@ -466,10 +542,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_arg_parser().parse_args(argv)
-    if args.strict_study5_readiness and args.audio_mode != "hardware":
-        raise ValueError("Strict Study 5 readiness requires --audio-mode hardware so the normal ASIO/local-recorder path is exercised.")
-    if args.strict_study5_readiness and (args.no_lsl or args.no_internal_xdf or args.no_backup_recording):
-        raise ValueError("Strict Study 5 readiness cannot disable LSL, internal XDF, or local audio-evidence recording.")
+    validation_lane = _apply_validation_lane_policy(args)
     output_dir = (args.output_dir or _default_output_dir()).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     runner = args.runner.resolve()
@@ -506,11 +579,14 @@ def main(argv: list[str] | None = None) -> int:
         exit_code=exit_code,
         audio_mode=str(args.audio_mode),
         runner_mode=str(args.runner_mode),
+        validation_lane=validation_lane,
     )
     focus = _annotate_focus_report(focus_report_path, args=args)
     if focus:
         evaluation["protocol11_audio_mode"] = focus.get("protocol11_audio_mode")
+        evaluation["protocol11_validation_lane"] = focus.get("protocol11_validation_lane")
         evaluation["hardware_audio_realtime"] = focus.get("hardware_audio_realtime")
+        evaluation["final_condition_candidate"] = focus.get("final_condition_candidate")
     _write_launch_and_preparation_reports(
         output_dir,
         args=args,
@@ -525,12 +601,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     failures.extend(evaluation_failures)
     readiness_audit: dict[str, Any] | None = None
-    if args.readiness_audit or args.strict_study5_readiness:
+    if args.readiness_audit or args.strict_study5_readiness or validation_lane == VALIDATION_LANE_FULL_STACK:
         readiness_audit = audit_readiness(
             output_dir,
             output_dir=output_dir / "protocol11_study5_readiness_audit",
-            require_full_study5=bool(args.strict_study5_readiness),
-            require_realtime=bool(args.strict_study5_readiness),
+            require_full_study5=bool(args.strict_study5_readiness or validation_lane == VALIDATION_LANE_FULL_STACK),
+            require_realtime=bool(args.strict_study5_readiness or validation_lane == VALIDATION_LANE_FULL_STACK),
         )
         if not readiness_audit.get("passed"):
             failures.append("Protocol 11 Study 5 readiness audit failed.")
@@ -541,6 +617,7 @@ def main(argv: list[str] | None = None) -> int:
         "created_at": datetime.now().isoformat(timespec="seconds"),
         "runner": str(runner),
         "runner_mode": str(args.runner_mode),
+        "validation_lane": validation_lane,
         "command": command,
         "audio_mode": str(args.audio_mode),
         "standard_capture_requested": _standard_capture_requested(args),
@@ -552,14 +629,15 @@ def main(argv: list[str] | None = None) -> int:
         "readiness_audit": readiness_audit or {},
         "passed": not failures,
         "ui_ready_for_data_collection": not failures,
+        "final_condition_ready": bool(validation_lane == VALIDATION_LANE_FULL_STACK and not failures),
         "failures": failures,
         "notes": [
             "Evaluation-only protocol, not a toolkit deliverable.",
             "The packaged runner remains the only active experiment runner.",
             (
-                "Hardware mode exercises the normal ASIO/local audio-evidence path; validation-realtime mode proves full-duration UI/software survival with fake audio only."
-                if args.audio_mode == "hardware"
-                else "Audio is wall-clock paced through a validation engine; this proves full-duration UI/software survival and top-up behavior, not hardware latency."
+                "Full-stack lane exercises the normal ASIO/local audio-evidence path and is eligible for final-condition readiness when the strict audit passes."
+                if validation_lane == VALIDATION_LANE_FULL_STACK
+                else "Software-only lane is wall-clock paced through a validation engine; it proves full-duration UI/software survival and top-up behavior, not hardware readiness."
             ),
         ],
     }

@@ -1662,13 +1662,16 @@ def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_pa
     assert "PPS_FOCUS_VALIDATION_REALTIME_AUDIO" not in strict_env
     assert strict_env["PPS_FOCUS_VALIDATION_PARTICIPANT_EMULATOR"] == "1"
     assert strict_env["PPS_AUDIO_DEVICE_INDEX"] == "28"
+    assert strict_env["PPS_PROTOCOL11_VALIDATION_LANE"] == "full-stack"
 
     legacy_args = harness.build_arg_parser().parse_args(["--runner", str(runner)])
     legacy_command = harness._build_runner_command(legacy_args, runner=runner, screenshot_path=screenshot)
+    legacy_env = harness._configure_validation_env(legacy_args, output_dir=tmp_path, focus_report_path=tmp_path / "focus_validation_report.json")
 
     assert "--no-lsl" in legacy_command
     assert "--no-internal-xdf" in legacy_command
     assert "--no-backup-recording" in legacy_command
+    assert legacy_env["PPS_PROTOCOL11_VALIDATION_LANE"] == "software-only"
 
     source_args = harness.build_arg_parser().parse_args(
         [
@@ -1687,9 +1690,18 @@ def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_pa
     assert "--no-lsl" not in source_command
     assert source_env["SD_ENABLE_ASIO"] == "1"
     assert str(REPO_ROOT / "src") in source_env["PYTHONPATH"]
+    assert source_env["PPS_PROTOCOL11_VALIDATION_LANE"] == "full-stack"
 
     with pytest.raises(ValueError, match="requires --audio-mode hardware"):
         harness.main(["--runner", str(runner), "--strict-study5-readiness"])
+    with pytest.raises(ValueError, match="Full-stack validation requires --audio-mode hardware"):
+        harness.main(["--runner", str(runner), "--validation-lane", "full-stack"])
+    with pytest.raises(ValueError, match="requires an OS mouse backend"):
+        harness.main(["--runner", str(runner), "--validation-lane", "full-stack", "--audio-mode", "hardware", "--mouse-backend", "qtest"])
+    with pytest.raises(ValueError, match="cannot disable LSL, internal XDF, or local audio-evidence"):
+        harness.main(["--runner", str(runner), "--validation-lane", "full-stack", "--audio-mode", "hardware", "--no-backup-recording"])
+    with pytest.raises(ValueError, match="Software-only validation requires --audio-mode validation-realtime"):
+        harness.main(["--runner", str(runner), "--validation-lane", "software-only", "--audio-mode", "hardware"])
 
 
 def test_topup_missed_trial_stress_rescues_intentional_misses(tmp_path: Path):
