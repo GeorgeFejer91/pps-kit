@@ -324,8 +324,11 @@ def _audit_window(
         failures.append(f"Selected Qt font {font_family!r} is not available to this platform.")
     texts = _collect_texts(window.dialog)
     required_text = set(REQUIRED_TEXT_COMMON)
-    if profile.screen_class != "constrained":
-        required_text.update({"Block Order", "Stimulus / Tactile / Click Timeline", "Progress"})
+    adaptive = dict(embedded_snapshot.get("adaptive_mechanisms") or {})
+    if bool(adaptive.get("lower_headings")):
+        required_text.update({"Block Order", "Stimulus / Tactile / Click Timeline"})
+    if bool(adaptive.get("lower_detail_text")):
+        required_text.add("Progress")
     if profile.right_stack_mode == "tabs":
         required_text.update(REQUIRED_TEXT_DATA)
         required_text.add(REQUIRED_TEXT_INSTRUCTIONS_COMPACT if profile.compact else REQUIRED_TEXT_INSTRUCTIONS_FULL)
@@ -437,6 +440,15 @@ def _audit_window(
             "Experiment Control height "
             f"{widget_metrics['processing_panel']['height']} is below content-safe minimum {content_min_height}."
         )
+    for key, label_text in (
+        ("clipped_widgets", "clipped"),
+        ("too_short_widgets", "shorter than measured content"),
+        ("hidden_required_widgets", "hidden but required"),
+        ("overlap_pairs", "overlapping"),
+    ):
+        values = list(experiment_control_debug.get(key) or [])
+        if values:
+            failures.append(f"Experiment Control lower timeline widgets are {label_text}: {values}.")
     timeline_debug = dict(embedded_snapshot.get("timeline_debug") or {})
     if list(timeline_debug.get("row_names") or []) != list(focus_app.TIMELINE_ROW_NAMES):
         failures.append(
@@ -465,13 +477,14 @@ def _audit_window(
         min_segment_height = 60 if segment_name == "output_panel" and profile.screen_class == "constrained" else 80
         if widget_metrics[segment_name]["height"] < min_segment_height:
             failures.append(f"{segment_name} is too short to operate: {widget_metrics[segment_name]}")
-        if widget_metrics[segment_name]["width"] < 220:
+        min_segment_width = 160 if segment_name in {"response_panel", "output_panel"} and profile.screen_class == "constrained" else 220
+        if widget_metrics[segment_name]["width"] < min_segment_width:
             failures.append(f"{segment_name} is too narrow to operate: {widget_metrics[segment_name]}")
 
     data_column = widget_metrics.get("data_logging_column")
     settings_column = widget_metrics.get("experiment_settings_column")
     if data_column and settings_column:
-        column_mode = str((embedded_snapshot.get("adaptive_mechanisms") or {}).get("data_settings_columns") or "")
+        column_mode = str(adaptive.get("data_settings_columns") or "")
         if column_mode == "stacked":
             if settings_column["y"] < data_column["bottom"]:
                 failures.append("Experiment Settings column is not stacked below Data Logging in stacked mode.")
