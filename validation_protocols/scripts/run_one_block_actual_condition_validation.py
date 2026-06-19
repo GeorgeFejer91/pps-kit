@@ -367,6 +367,23 @@ def _run_click_worker(controller: SessionRunnerController, engine: DirectInputCa
         item["actual_click_perf_counter"] = time.perf_counter()
 
 
+def _write_progress_csv(path: Path, rows: list[dict[str, Any]]) -> None:
+    if not rows:
+        return
+    fieldnames: list[str] = []
+    for preferred in ("monotonic_time", "ui_event", "block_index", "block_label", "elapsed_s", "duration_s", "session_id"):
+        if any(preferred in row for row in rows):
+            fieldnames.append(preferred)
+    for row in rows:
+        for key in row:
+            if key not in fieldnames:
+                fieldnames.append(key)
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(rows)
+
+
 def run_validation(args: argparse.Namespace) -> dict[str, Any]:
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -473,10 +490,7 @@ def run_validation(args: argparse.Namespace) -> dict[str, Any]:
 
     progress_csv = output_dir / "runner_progress_samples.csv"
     if progress_rows:
-        with progress_csv.open("w", newline="", encoding="utf-8") as handle:
-            writer = csv.DictWriter(handle, fieldnames=list(progress_rows[0]))
-            writer.writeheader()
-            writer.writerows(progress_rows)
+        _write_progress_csv(progress_csv, progress_rows)
 
     capture_clipped = bool(engine.direct_capture_metadata.get("clipped_channels_1based"))
     capture_started_ok = args.no_direct_capture or bool(engine.direct_capture_metadata.get("started"))

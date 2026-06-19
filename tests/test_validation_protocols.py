@@ -1704,6 +1704,24 @@ def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_pa
         harness.main(["--runner", str(runner), "--validation-lane", "software-only", "--audio-mode", "hardware"])
 
 
+def test_one_block_actual_condition_progress_csv_accepts_variable_payloads(tmp_path: Path):
+    harness = _load_script("run_one_block_actual_condition_validation.py")
+    progress_csv = tmp_path / "runner_progress_samples.csv"
+
+    harness._write_progress_csv(
+        progress_csv,
+        [
+            {"monotonic_time": 1.0, "block_index": 1, "block_label": "Block 01"},
+            {"monotonic_time": 2.0, "elapsed_s": 0.25, "duration_s": 1.0, "session_id": "P001_test"},
+        ],
+    )
+
+    rows = list(csv.DictReader(progress_csv.open(newline="", encoding="utf-8")))
+    assert len(rows) == 2
+    assert "elapsed_s" in rows[0]
+    assert rows[1]["session_id"] == "P001_test"
+
+
 def test_topup_missed_trial_stress_rescues_intentional_misses(tmp_path: Path):
     stress = _load_script("run_topup_missed_trial_stress.py")
 
