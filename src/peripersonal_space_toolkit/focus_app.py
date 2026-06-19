@@ -89,6 +89,9 @@ from .session_runner import (
     DEFAULT_SESSION_ROOT,
     SessionCaptureOptions,
     SessionRunnerController,
+    WIRED_LOOPBACK_CLI_OUTPUT4_TACTILE_PROXY,
+    WIRED_LOOPBACK_OFF,
+    WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY,
     claim_prepared_session,
     find_latest_dashboard_run_setup,
     load_last_experiment_pointer,
@@ -100,6 +103,7 @@ from .session_runner import (
     record_experiment_activity,
     record_prepared_session_queue,
     segment_run_setup_participants,
+    normalize_wired_loopback_mode,
     _timeline_tactile_events,
     _timeline_trial_segments,
 )
@@ -529,6 +533,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--no-internal-xdf", action="store_true", help="Do not write the local events.xdf mirror.")
     parser.add_argument("--no-analysis-csv", action="store_true", help="Do not write immediate analysis CSV outputs.")
     parser.add_argument("--no-backup-recording", action="store_true", help="Do not write the optional fail-safe local recording WAV.")
+    parser.add_argument(
+        "--wired-loopback",
+        choices=[WIRED_LOOPBACK_OFF, WIRED_LOOPBACK_CLI_OUTPUT4_TACTILE_PROXY],
+        default=WIRED_LOOPBACK_OFF,
+        help="Enable an optional wired analog loopback route, for example output4-tactile-proxy.",
+    )
     parser.add_argument("--enable-missed-trial-topup", action="store_true", help="Prepare and request approval for one final missed-trial top-up block.")
     parser.add_argument("--validation-screenshot", type=Path, help=argparse.SUPPRESS)
     parser.add_argument("--validation-auto-close-ms", type=int, default=None, help=argparse.SUPPRESS)
@@ -729,6 +739,13 @@ def _backup_recording_checkbox_text(package: Any) -> str:
     return (
         "Save additional fail-safe local recording\n"
         f"(LSL logging remains standard; estimated extra file: ~{_estimated_backup_recording_size(package)})"
+    )
+
+
+def _wired_loopback_checkbox_text() -> str:
+    return (
+        "Wired loopback: mirror tactile to Output 4\n"
+        "(patch Output 4 to Input 4; proxy only, not Woojer mechanical onset)"
     )
 
 
@@ -3455,6 +3472,7 @@ def _capture_options_from_args(args: argparse.Namespace) -> SessionCaptureOption
         write_internal_xdf=not args.no_internal_xdf,
         write_analysis_csvs=not args.no_analysis_csv,
         start_backup_recording=not args.no_backup_recording,
+        wired_loopback_mode=normalize_wired_loopback_mode(args.wired_loopback),
     )
 
 
@@ -5369,6 +5387,18 @@ class FocusModeWindow:
         self.backup_recording_checkbox.setMinimumHeight(max(profile.button_min_height + 18, profile.input_min_height + 22))
         self.backup_recording_checkbox.setChecked(bool(self.capture_options.start_backup_recording))
         data_logging_layout.addWidget(self.backup_recording_checkbox)
+        self.wired_loopback_checkbox = q["QCheckBox"](_wired_loopback_checkbox_text())
+        self.wired_loopback_checkbox.setObjectName("wiredLoopbackCheckbox")
+        self.wired_loopback_checkbox.setToolTip(
+            "Duplicates tactile output 3 to output 4 and records input 4 as an analog proxy. "
+            "This does not measure Woojer mechanical vibration onset."
+        )
+        self.wired_loopback_checkbox.setMinimumHeight(max(profile.button_min_height + 18, profile.input_min_height + 22))
+        self.wired_loopback_checkbox.setChecked(
+            normalize_wired_loopback_mode(self.capture_options.wired_loopback_mode)
+            == WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY
+        )
+        data_logging_layout.addWidget(self.wired_loopback_checkbox)
         data_logging_layout.addStretch(1)
 
         experiment_settings_layout.addWidget(_subtitle(q, "Session"))
@@ -5419,7 +5449,7 @@ class FocusModeWindow:
         self.instruction_legend_widget = _create_instruction_legend_widget(q, self)
         experiment_settings_layout.addWidget(self.instruction_legend_widget)
         experiment_settings_layout.addStretch(1)
-        self._pre_run_controls.extend([self.backup_recording_checkbox, self.topup_checkbox])
+        self._pre_run_controls.extend([self.backup_recording_checkbox, self.wired_loopback_checkbox, self.topup_checkbox])
         data_layout.addStretch(1)
         _add_operator_panel(settings_title, data_panel)
 
@@ -6276,6 +6306,8 @@ class FocusModeWindow:
             self.folder_value.setToolTip(str(self.package.session_dir))
         if hasattr(self, "backup_recording_checkbox"):
             self.backup_recording_checkbox.setText(_backup_recording_checkbox_text(self.package))
+        if hasattr(self, "wired_loopback_checkbox"):
+            self.wired_loopback_checkbox.setText(_wired_loopback_checkbox_text())
         self._refresh_run_plan(select_default=True)
         self._update_tactile_timeline_display()
 
@@ -6335,6 +6367,11 @@ class FocusModeWindow:
             write_lsl_marker_mirror=True,
             write_trigger_dictionary=True,
             start_backup_recording=bool(self.backup_recording_checkbox.isChecked()),
+            wired_loopback_mode=(
+                WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY
+                if bool(self.wired_loopback_checkbox.isChecked())
+                else WIRED_LOOPBACK_OFF
+            ),
         )
 
     def _runner_metadata(self) -> dict[str, Any]:
@@ -6729,6 +6766,8 @@ class FocusModeWindow:
         if device_idx is None:
             raise RuntimeError("No usable audio output device was found.\n" + audio_runtime_preflight_message())
         engine = AudioEngine(device_idx)
+        if hasattr(engine, "set_wired_loopback_mode"):
+            engine.set_wired_loopback_mode(self.capture_options.wired_loopback_mode)
         try:
             if CLICK_SOUND and not engine.load_click_sound(CLICK_SOUND):
                 raise RuntimeError(

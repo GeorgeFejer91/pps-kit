@@ -498,6 +498,7 @@ def apply_output_volumes(
     *,
     audio_channels: tuple[int, ...] | None = None,
     tactile_channel: int | None = None,
+    duplicate_tactile_channel: int | None = None,
 ) -> np.ndarray:
     """Apply auditory and tactile gains to already-routed output data."""
     routed = ensure_2d_float32(data).copy()
@@ -513,6 +514,12 @@ def apply_output_volumes(
         gain_by_channel[tactile_target] = max(gain_by_channel.get(tactile_target, 0.0), float(tactile_volume))
     for channel, gain in gain_by_channel.items():
         routed[:, channel] *= gain
+    if (
+        duplicate_tactile_channel is not None
+        and 0 <= duplicate_tactile_channel < channels
+        and 0 <= tactile_target < channels
+    ):
+        routed[:, duplicate_tactile_channel] = routed[:, tactile_target]
     return np.ascontiguousarray(routed)
 
 
@@ -542,6 +549,7 @@ def tactile_probe_for_output(
     tactile_volume: float = 1.0,
     *,
     tactile_channel: int | None = None,
+    duplicate_tactile_channel: int | None = None,
 ) -> np.ndarray:
     """Route a mono tactile probe to the active tactile output channel only."""
     array = ensure_2d_float32(data)
@@ -549,4 +557,6 @@ def tactile_probe_for_output(
     routed = np.zeros((array.shape[0], output_channels), dtype=np.float32)
     target = tactile_output_channel_for_channels(output_channels) if tactile_channel is None else tactile_channel
     routed[:, target] = tactile * float(tactile_volume)
+    if duplicate_tactile_channel is not None and 0 <= duplicate_tactile_channel < output_channels:
+        routed[:, duplicate_tactile_channel] = routed[:, target]
     return np.ascontiguousarray(routed)

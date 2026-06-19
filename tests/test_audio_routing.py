@@ -236,6 +236,28 @@ def test_komplete_asio_prefers_silent_fourth_channel_padding():
     np.testing.assert_array_equal(tactile_probe, np.array([[0.0, 0.0, 1.0, 0.0]], dtype=np.float32))
 
 
+def test_output4_tactile_proxy_duplicates_scaled_tactile_channel_only_when_requested():
+    routed = np.array([[0.1, 0.2, 0.4, 0.0]], dtype=np.float32)
+
+    default = apply_output_volumes(routed, audio_volume=1.0, tactile_volume=0.5)
+    mirrored = apply_output_volumes(
+        routed,
+        audio_volume=1.0,
+        tactile_volume=0.5,
+        duplicate_tactile_channel=3,
+    )
+    probe = tactile_probe_for_output(
+        np.array([1.0], dtype=np.float32),
+        output_channels=4,
+        tactile_volume=0.25,
+        duplicate_tactile_channel=3,
+    )
+
+    np.testing.assert_array_equal(default, np.array([[0.1, 0.2, 0.2, 0.0]], dtype=np.float32))
+    np.testing.assert_array_equal(mirrored, np.array([[0.1, 0.2, 0.2, 0.2]], dtype=np.float32))
+    np.testing.assert_array_equal(probe, np.array([[0.0, 0.0, 0.25, 0.25]], dtype=np.float32))
+
+
 def test_volume_scaling_uses_binaural_audio_pair_and_tactile_channel():
     routed = np.array([[1.0, 2.0, 3.0, 4.0]], dtype=np.float32)
 

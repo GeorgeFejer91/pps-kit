@@ -7,6 +7,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
+from .session_runner import (
+    WIRED_LOOPBACK_CLI_OUTPUT4_TACTILE_PROXY,
+    WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY,
+    normalize_wired_loopback_mode,
+)
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_PACKAGED_FOCUS_RUNNER = REPO_ROOT / "dist" / "PPSExperimentRunner" / "PPSExperimentRunner.exe"
@@ -64,6 +70,8 @@ def build_focus_runner_command(
         command.append("--no-analysis-csv")
     if not bool(options.get("start_backup_recording", True)):
         command.append("--no-backup-recording")
+    if normalize_wired_loopback_mode(options.get("wired_loopback_mode")) == WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY:
+        command.extend(["--wired-loopback", WIRED_LOOPBACK_CLI_OUTPUT4_TACTILE_PROXY])
     if enable_missed_trial_topup or bool(options.get("enable_missed_trial_topup", False)):
         command.append("--enable-missed-trial-topup")
     if manual_start:

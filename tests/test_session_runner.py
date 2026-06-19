@@ -857,6 +857,8 @@ class _MockAudioEngine:
         self.click_metadata: dict[str, object] = {}
         self.marker_gain = None
         self.recordings: list[str] = []
+        self.wired_loopback_mode = "off"
+        self.wired_loopback_recordings: list[str] = []
         self.on_audio_started = None
         self.progress_values = [0.0, 0.01]
 
@@ -936,6 +938,9 @@ class _MockAudioEngine:
         self.click_metadata = dict(metadata or {})
         self.marker_gain = marker_gain
 
+    def set_wired_loopback_mode(self, mode) -> None:
+        self.wired_loopback_mode = str(mode)
+
     def start_recording(self, output_path=None) -> bool:
         self.recordings.append(str(output_path))
         return True
@@ -945,6 +950,18 @@ class _MockAudioEngine:
         if output_path:
             sf.write(output_path, data, 44100)
         return data
+
+    def start_wired_loopback_recording(self, output_path=None, mode=None, sample_rate=None) -> bool:
+        self.wired_loopback_recordings.append(str(output_path))
+        if mode is not None:
+            self.wired_loopback_mode = str(mode)
+        return True
+
+    def stop_wired_loopback_recording(self, output_path=None, interrupted=False):
+        data = np.zeros((10, 4), dtype=np.float32)
+        if output_path:
+            sf.write(output_path, data, 44100)
+        return {"path": str(output_path or ""), "interrupted": bool(interrupted)}
 
 
 def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
@@ -1036,6 +1053,37 @@ def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
     assert "mouse_click" in diary_types
     assert "session_completed" in diary_types
     assert "Alice Example" not in diary.read_text(encoding="utf-8")
+
+
+def test_session_runner_wired_loopback_proxy_records_per_block_artifact(tmp_path: Path):
+    package = prepare_run_package(
+        _compact_design(),
+        "P001",
+        render_dir=_render_dir(tmp_path),
+        session_root=tmp_path / "sessions",
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+    engine = _MockAudioEngine()
+    controller = SessionRunnerController(
+        package,
+        audio_engine=engine,
+        capture_options={"wired_loopback_mode": "output4_tactile_proxy"},
+    )
+
+    result = controller.run()
+
+    assert result.completed
+    assert engine.wired_loopback_mode == "output4_tactile_proxy"
+    assert engine.wired_loopback_recordings == [str(package.session_dir / "block_01_wired_loopback_input4.wav")]
+    assert sorted(path.name for path in result.recording_paths) == [
+        "block_01_audio_evidence.wav",
+        "block_01_wired_loopback_input4.wav",
+    ]
+    assert (package.session_dir / "block_01_wired_loopback_input4.wav").exists()
+    events_text = result.events_csv.read_text(encoding="utf-8")
+    assert "wired_loopback_start" in events_text
+    assert "wired_loopback_end" in events_text
+    assert result.capture_options["wired_loopback_mode"] == "output4_tactile_proxy"
 
 
 def test_session_runner_emits_tactile_timeline_schedule_progress(tmp_path: Path):

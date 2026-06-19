@@ -121,6 +121,23 @@ def _audio_evidence_path(package: "RunPackage", block: "RunBlock") -> Path:
     return Path(package.session_dir) / f"block_{int(block.index):02d}_audio_evidence.wav"
 
 
+def _wired_loopback_path(package: "RunPackage", block: "RunBlock") -> Path:
+    return Path(package.session_dir) / f"block_{int(block.index):02d}_wired_loopback_input4.wav"
+
+
+WIRED_LOOPBACK_OFF = "off"
+WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY = "output4_tactile_proxy"
+WIRED_LOOPBACK_CLI_OUTPUT4_TACTILE_PROXY = "output4-tactile-proxy"
+WIRED_LOOPBACK_MODES = frozenset({WIRED_LOOPBACK_OFF, WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY})
+
+
+def normalize_wired_loopback_mode(value: Any) -> str:
+    text = str(value or WIRED_LOOPBACK_OFF).strip().lower().replace("-", "_")
+    if text == WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY:
+        return WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY
+    return WIRED_LOOPBACK_OFF
+
+
 @dataclass(frozen=True)
 class RenderedWav:
     path: Path
@@ -211,8 +228,9 @@ class SessionCaptureOptions:
     write_lsl_marker_mirror: bool = True
     write_trigger_dictionary: bool = True
     start_backup_recording: bool = True
+    wired_loopback_mode: str = WIRED_LOOPBACK_OFF
 
-    def as_dict(self) -> dict[str, bool]:
+    def as_dict(self) -> dict[str, Any]:
         return {
             "enable_lsl": bool(self.enable_lsl),
             "write_events_csv": bool(self.write_events_csv),
@@ -221,6 +239,7 @@ class SessionCaptureOptions:
             "write_lsl_marker_mirror": bool(self.write_lsl_marker_mirror),
             "write_trigger_dictionary": bool(self.write_trigger_dictionary),
             "start_backup_recording": bool(self.start_backup_recording),
+            "wired_loopback_mode": normalize_wired_loopback_mode(self.wired_loopback_mode),
         }
 
 
@@ -1839,6 +1858,7 @@ class SessionRunnerController:
         self._instruction_wait_context: dict[str, Any] = {}
         self._progress_callback: ProgressCallback | None = None
         self._topup_draft_signature = ""
+        self._configure_audio_engine_capture_options(self.audio_engine)
 
     def run(
         self,
@@ -1939,6 +1959,8 @@ class SessionRunnerController:
                     )
                 recording_path = _audio_evidence_path(self.package, block)
                 recording_started = self._start_backup_recording(engine, recording_path, block)
+                wired_loopback_path = _wired_loopback_path(self.package, block)
+                wired_loopback_started = self._start_wired_loopback_recording(engine, wired_loopback_path, block)
 
                 def _progress(elapsed_s: float, current_block: RunBlock = block) -> None:
                     self._emit_topup_draft(progress_callback, expire=True, now_unix=block_start_unix + float(elapsed_s or 0.0))
@@ -2009,7 +2031,15 @@ class SessionRunnerController:
                     )
                     for fallback_event in self.logger.events[before_count:]:
                         self._handle_logged_event(fallback_event)
-                self._stop_backup_recording(engine, recording_path, block, interrupted=(not ok or self._stop_requested), started=recording_started)
+                interrupted_block = not ok or self._stop_requested
+                self._stop_backup_recording(engine, recording_path, block, interrupted=interrupted_block, started=recording_started)
+                self._stop_wired_loopback_recording(
+                    engine,
+                    wired_loopback_path,
+                    block,
+                    interrupted=interrupted_block,
+                    started=wired_loopback_started,
+                )
                 self._accepting_responses = False
                 self.events.log("block_end", block_number=block.index, block_label=block.label, completed=ok)
                 self._persist_topup_state()
@@ -2532,6 +2562,8 @@ class SessionRunnerController:
             )
         recording_path = _audio_evidence_path(self.package, block)
         recording_started = self._start_backup_recording(engine, recording_path, block)
+        wired_loopback_path = _wired_loopback_path(self.package, block)
+        wired_loopback_started = self._start_wired_loopback_recording(engine, wired_loopback_path, block)
 
         def _progress(elapsed_s: float, current_block: RunBlock = block) -> None:
             if progress_callback:
@@ -2608,7 +2640,15 @@ class SessionRunnerController:
             )
             for fallback_event in self.logger.events[before_count:]:
                 self._handle_logged_event(fallback_event)
-        self._stop_backup_recording(engine, recording_path, block, interrupted=(not ok or self._stop_requested), started=recording_started)
+        interrupted_block = not ok or self._stop_requested
+        self._stop_backup_recording(engine, recording_path, block, interrupted=interrupted_block, started=recording_started)
+        self._stop_wired_loopback_recording(
+            engine,
+            wired_loopback_path,
+            block,
+            interrupted=interrupted_block,
+            started=wired_loopback_started,
+        )
         self._accepting_responses = False
         self.events.log("block_end", block_number=block.index, block_label=block.label, completed=ok, is_topup=True)
         self.topup_ledger.finalize_open_trials(part_number=part_number)
@@ -2932,12 +2972,21 @@ class SessionRunnerController:
         if device_idx is None:
             raise RuntimeError("No usable audio output device was found.\n" + audio_runtime_preflight_message())
         engine = AudioEngine(device_idx)
+        self._configure_audio_engine_capture_options(engine)
         if CLICK_SOUND and not engine.load_click_sound(CLICK_SOUND):
             raise RuntimeError(
                 "Audio output stream could not be opened for the tactile response-marker path. "
                 "Check the selected ASIO device and restart the runner."
             )
         return engine
+
+    def _configure_audio_engine_capture_options(self, engine: Any | None) -> None:
+        if engine is None or not hasattr(engine, "set_wired_loopback_mode"):
+            return
+        try:
+            engine.set_wired_loopback_mode(self.capture_options.wired_loopback_mode)
+        except Exception as exc:
+            self._run_warnings.append(f"Wired loopback mode could not be applied: {exc}")
 
     def _write_outputs(self) -> None:
         self.events.flush_callback_events()
@@ -3077,6 +3126,85 @@ class SessionRunnerController:
             self.events.log("recording_end", block_number=block.index, block_label=block.label, path=str(path), interrupted=interrupted)
         except Exception as exc:
             self.events.log("recording_stop_failed", block_number=block.index, block_label=block.label, path=str(path), message=str(exc))
+
+    def _start_wired_loopback_recording(self, engine: Any, path: Path, block: RunBlock) -> bool:
+        if self.capture_options.wired_loopback_mode != WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY:
+            return False
+        if not hasattr(engine, "start_wired_loopback_recording"):
+            self.events.log(
+                "wired_loopback_unavailable",
+                block_number=block.index,
+                block_label=block.label,
+                mode=self.capture_options.wired_loopback_mode,
+                reason="audio engine has no wired loopback recording API",
+            )
+            return False
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            sample_rate = _as_int(
+                block.metadata.get("sample_rate_hz", block.metadata.get("sample_rate")),
+                default=0,
+            )
+            if sample_rate <= 0:
+                try:
+                    import soundfile as sf
+
+                    sample_rate = int(sf.info(_soundfile_path(block.wav_path)).samplerate)
+                except Exception:
+                    sample_rate = 0
+            started = bool(
+                engine.start_wired_loopback_recording(
+                    str(path),
+                    mode=self.capture_options.wired_loopback_mode,
+                    sample_rate=sample_rate or None,
+                )
+            )
+        except Exception as exc:
+            self.events.log(
+                "wired_loopback_start_failed",
+                block_number=block.index,
+                block_label=block.label,
+                path=str(path),
+                mode=self.capture_options.wired_loopback_mode,
+                message=str(exc),
+            )
+            return False
+        self.events.log(
+            "wired_loopback_start",
+            block_number=block.index,
+            block_label=block.label,
+            path=str(path),
+            started=started,
+            mode=self.capture_options.wired_loopback_mode,
+            source_output_channel_1based=4,
+            input_channel_1based=4,
+            scope="duplicate_tactile_proxy_not_woojer_mechanical_onset",
+        )
+        if started:
+            self._recording_paths.append(path)
+        return started
+
+    def _stop_wired_loopback_recording(self, engine: Any, path: Path, block: RunBlock, *, interrupted: bool, started: bool) -> None:
+        if not started or not hasattr(engine, "stop_wired_loopback_recording"):
+            return
+        try:
+            engine.stop_wired_loopback_recording(str(path), interrupted=interrupted)
+            self.events.log(
+                "wired_loopback_end",
+                block_number=block.index,
+                block_label=block.label,
+                path=str(path),
+                interrupted=interrupted,
+                mode=self.capture_options.wired_loopback_mode,
+            )
+        except Exception as exc:
+            self.events.log(
+                "wired_loopback_stop_failed",
+                block_number=block.index,
+                block_label=block.label,
+                path=str(path),
+                message=str(exc),
+            )
 
     @staticmethod
     def _emit(callback: EventCallback | None, message: str) -> None:
@@ -3229,11 +3357,23 @@ def _coerce_capture_options(
         options = value
     elif isinstance(value, dict):
         allowed = SessionCaptureOptions().__dataclass_fields__.keys()
-        options = SessionCaptureOptions(**{key: bool(value[key]) for key in allowed if key in value})
+        kwargs: dict[str, Any] = {}
+        for key in allowed:
+            if key not in value:
+                continue
+            if key == "wired_loopback_mode":
+                kwargs[key] = normalize_wired_loopback_mode(value[key])
+            else:
+                kwargs[key] = bool(value[key])
+        options = SessionCaptureOptions(**kwargs)
     else:
         raise TypeError(f"Unsupported capture options type: {type(value)!r}")
     if enable_lsl is not None:
         options = SessionCaptureOptions(**{**options.as_dict(), "enable_lsl": bool(enable_lsl)})
+    else:
+        normalized_mode = normalize_wired_loopback_mode(options.wired_loopback_mode)
+        if normalized_mode != options.wired_loopback_mode:
+            options = SessionCaptureOptions(**{**options.as_dict(), "wired_loopback_mode": normalized_mode})
     if not (options.write_events_csv or options.write_internal_xdf or options.write_analysis_csvs or options.write_lsl_marker_mirror):
         raise ValueError("At least one durable runner output must be enabled.")
     return options
@@ -4594,7 +4734,7 @@ def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> Non
         "timing": {
             "primary_response_source": "mouse_click event log plus optional LSL marker stream",
             "stimulus_anchor": "audio_sample_zero emitted by audio callback",
-            "backup_trace": "optional local digital output evidence WAV; physical loopback is validation-only",
+            "backup_trace": "optional local digital output evidence WAV; output-4 wired loopback is an opt-in tactile proxy, not Woojer mechanical onset",
             "response_marker": {
                 "channel": "tactile output",
                 "gain": RESPONSE_MARKER_GAIN,
@@ -4616,6 +4756,7 @@ def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> Non
         "outputs": {
             "participant_trials_csv": str(_participant_trials_csv_path(package)),
             "participant_audio_evidence_wav_pattern": str(package.session_dir / "block_XX_audio_evidence.wav"),
+            "participant_wired_loopback_input4_wav_pattern": str(package.session_dir / "block_XX_wired_loopback_input4.wav"),
             "labrecorder_xdf_pattern": str(package.session_dir / "block_XX.xdf"),
             "verbose_events_csv": str(_verbose_events_csv_path(package)),
             "verbose_events_xdf": str(_verbose_events_xdf_path(package)),

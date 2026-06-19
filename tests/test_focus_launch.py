@@ -23,6 +23,7 @@ def test_focus_runner_command_prefers_packaged_exe(tmp_path: Path, monkeypatch):
             "write_internal_xdf": False,
             "write_analysis_csvs": True,
             "start_backup_recording": False,
+            "wired_loopback_mode": "output4_tactile_proxy",
             "enable_missed_trial_topup": True,
         },
         manual_start=True,
@@ -38,6 +39,8 @@ def test_focus_runner_command_prefers_packaged_exe(tmp_path: Path, monkeypatch):
     assert "--no-internal-xdf" in result.command
     assert "--no-analysis-csv" not in result.command
     assert "--no-backup-recording" in result.command
+    assert "--wired-loopback" in result.command
+    assert "output4-tactile-proxy" in result.command
     assert "--enable-missed-trial-topup" in result.command
     assert "--manual-start" in result.command
 

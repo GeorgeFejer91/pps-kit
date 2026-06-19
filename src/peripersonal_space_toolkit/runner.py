@@ -60,6 +60,9 @@ from .session_runner import (
     DEFAULT_SESSION_ROOT,
     RESPONSE_MARKER_GAIN,
     SessionCaptureOptions,
+    WIRED_LOOPBACK_OFF,
+    WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY,
+    normalize_wired_loopback_mode,
     _block_event_schedules,
     _write_timing_qc_csv,
     find_latest_dashboard_run_setup,
@@ -345,6 +348,19 @@ def output_extra_settings_for_device(device_idx, channels):
     return None
 
 
+def input_extra_settings_for_device(device_idx, channels):
+    """Return host-API-specific input settings for a stream, if needed."""
+    if device_idx is None:
+        return None
+    try:
+        device_info = sd.query_devices(device_idx)
+        if _hostapi_name_for_device(device_info).lower() == "asio" and hasattr(sd, "AsioSettings"):
+            return sd.AsioSettings(channel_selectors=list(range(int(channels))))
+    except Exception as exc:
+        print(f"Warning: Could not prepare host-specific input settings: {exc}")
+    return None
+
+
 def find_output_device():
     """Find the best output device.
 
@@ -450,6 +466,7 @@ class AudioEngine:
         self.device_info = sd.query_devices(device_idx) if device_idx is not None else {}
         self.device_hostapi = _hostapi_name_for_device(self.device_info) if self.device_info else ""
         self.max_output_channels = int(self.device_info.get("max_output_channels", 0)) if self.device_info else 0
+        self.max_input_channels = int(self.device_info.get("max_input_channels", 0)) if self.device_info else 0
         try:
             self.output_channel_map = output_channel_map_from_env(self.max_output_channels)
         except ValueError as exc:
@@ -516,6 +533,15 @@ class AudioEngine:
         self._output_evidence = OutputEvidenceRecorder()
         self._output_evidence_summary = {}
 
+        # Optional physical analog proxy recording. When enabled, output 4 is a
+        # duplicate tactile drive and input 4 is captured as a wired loopback.
+        self.wired_loopback_mode = WIRED_LOOPBACK_OFF
+        self._wired_loopback = OutputEvidenceRecorder()
+        self._wired_loopback_stream = None
+        self._wired_loopback_summary = {}
+        self._wired_loopback_output_path = None
+        self._wired_loopback_start_time = None
+
         # Legacy WASAPI diagnostic state. Kept for operator diagnostics only;
         # not used as the core ASIO multichannel recording path.
         self._recording_pyaudio = None     # PyAudio instance for recording
@@ -555,6 +581,33 @@ class AudioEngine:
             extra_settings=output_extra_settings_for_device(self.device_idx, channels),
             callback=callback,
         )
+
+    def set_wired_loopback_mode(self, mode):
+        """Configure optional output-4 tactile proxy loopback behavior."""
+        normalized = normalize_wired_loopback_mode(mode)
+        self.wired_loopback_mode = normalized
+        if (
+            normalized == WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY
+            and self.runtime_output_channels < 4
+            and self.max_output_channels >= 4
+        ):
+            self.runtime_output_channels = 4
+            if self.output_channel_map is None:
+                self.audio_output_channels = audio_output_channels_for_channels(self.runtime_output_channels)
+                self.tactile_output_channel = tactile_output_channel_for_channels(self.runtime_output_channels)
+        if normalized == WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY and self.runtime_output_channels < 4:
+            print(
+                "Warning: Wired loopback requested but the selected output route has fewer than "
+                "4 output channels; output 4 tactile proxy is unavailable."
+            )
+
+    def _duplicate_tactile_channel(self):
+        if (
+            self.wired_loopback_mode == WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY
+            and self.runtime_output_channels >= 4
+        ):
+            return 3
+        return None
 
     def _persistent_output_available(self, *, samplerate, channels) -> bool:
         return (
@@ -679,6 +732,10 @@ class AudioEngine:
             "hostapi": self.device_hostapi,
             "runtime_output_channels": self.runtime_output_channels,
             "tactile_output_channel_1based": self.tactile_output_channel + 1,
+            "wired_loopback_mode": self.wired_loopback_mode,
+            "duplicate_tactile_output_channel_1based": (
+                self._duplicate_tactile_channel() + 1 if self._duplicate_tactile_channel() is not None else ""
+            ),
             "audio_volume": float(self.audio_volume),
             "tactile_volume": float(self.tactile_volume),
             "sample_rate_hz": int(self._block_sr or self._click_sr or 44100),
@@ -726,14 +783,112 @@ class AudioEngine:
             traceback.print_exc()
             return None
 
+    def start_wired_loopback_recording(self, output_path=None, mode=None, sample_rate=None):
+        """Start physical input recording for output-4 tactile proxy loopback."""
+        if mode is not None:
+            self.set_wired_loopback_mode(mode)
+        if self.wired_loopback_mode != WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY:
+            return False
+        if output_path is None:
+            print("ERROR: Wired loopback recording requires an output path")
+            return False
+        if self.runtime_output_channels < 4:
+            print("ERROR: Wired loopback requires a 4+ channel output route with output 4 available")
+            return False
+        if self.max_input_channels < 4:
+            print("ERROR: Wired loopback requires input 4 on the selected audio interface")
+            return False
+        sample_rate = int(sample_rate or self._block_sr or self._click_sr or 44100)
+        input_channels = 4
+        metadata = {
+            "schema": "pps-wired-loopback-evidence.v1",
+            "mode": "wired_loopback_output4_tactile_proxy",
+            "device_index": self.device_idx,
+            "device_name": str(self.device_info.get("name", "")),
+            "hostapi": self.device_hostapi,
+            "runtime_output_channels": self.runtime_output_channels,
+            "source_output_channel_1based": 4,
+            "input_channel_1based": 4,
+            "tactile_output_channel_1based": self.tactile_output_channel + 1,
+            "sample_rate_hz": sample_rate,
+            "scope": "analog_duplicate_tactile_proxy_not_woojer_mechanical_onset",
+            "wiring": "Komplete Output 4 patched to Komplete Input 4",
+        }
+
+        def _input_callback(indata, frames, time_info, status):
+            if status:
+                print(f"Wired loopback input stream status: {status}")
+            self._wired_loopback.write_buffer(indata, sample_rate=sample_rate)
+
+        try:
+            started = self._wired_loopback.start(output_path, metadata=metadata)
+            self._wired_loopback_stream = sd.InputStream(
+                samplerate=sample_rate,
+                channels=input_channels,
+                dtype="float32",
+                device=self.device_idx,
+                latency=BLOCK_STREAM_LATENCY,
+                blocksize=RECORDING_BUFFER_SIZE,
+                extra_settings=input_extra_settings_for_device(self.device_idx, input_channels),
+                callback=_input_callback,
+            )
+            self._wired_loopback_stream.start()
+            self._wired_loopback_output_path = output_path
+            self._wired_loopback_start_time = time.time()
+            print(f"Wired output-4 loopback recording started: {output_path}")
+            return bool(started)
+        except Exception as e:
+            print(f"ERROR starting wired loopback recording: {e}")
+            try:
+                if self._wired_loopback_stream is not None:
+                    self._wired_loopback_stream.close()
+            except Exception:
+                pass
+            self._wired_loopback_stream = None
+            self._wired_loopback.stop(interrupted=True)
+            import traceback
+            traceback.print_exc()
+            return False
+
+    def stop_wired_loopback_recording(self, output_path=None, interrupted=False):
+        """Stop physical input recording for output-4 tactile proxy loopback."""
+        if self._wired_loopback_stream is not None:
+            try:
+                self._wired_loopback_stream.stop()
+                self._wired_loopback_stream.close()
+            except Exception:
+                pass
+            self._wired_loopback_stream = None
+        if not self._wired_loopback.active:
+            print("Wired loopback recording not active")
+            return None
+        try:
+            summary = self._wired_loopback.stop(interrupted=interrupted)
+            self._wired_loopback_summary = dict(summary)
+            self._wired_loopback_output_path = None
+            self._wired_loopback_start_time = None
+            print(
+                "Wired output-4 loopback evidence saved: "
+                f"{summary.get('path')} ({summary.get('duration_s', 0):.1f}s, "
+                f"dropped_buffers={summary.get('dropped_buffer_count')})"
+            )
+            return summary
+        except Exception as e:
+            print(f"ERROR stopping wired loopback recording: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+
     def is_recording(self):
         """Check if recording is currently active."""
-        return bool(self._output_evidence.active or self._recording_active)
+        return bool(self._output_evidence.active or self._recording_active or self._wired_loopback.active)
 
     def get_recording_duration(self):
         """Get current recording duration in seconds."""
         if self._output_evidence.active:
             return self._output_evidence.elapsed_s
+        if self._wired_loopback.active:
+            return self._wired_loopback.elapsed_s
         if self._recording_start_time is None:
             return 0.0
         return time.time() - self._recording_start_time
@@ -863,6 +1018,7 @@ class AudioEngine:
                         0.0,
                         audio_channels=self.audio_output_channels,
                         tactile_channel=self.tactile_output_channel,
+                        duplicate_tactile_channel=self._duplicate_tactile_channel(),
                     )
                     self._instr_pos += n
                     if self._instr_pos >= len(self._instr_data):
@@ -890,6 +1046,7 @@ class AudioEngine:
                             self.tactile_volume,
                             audio_channels=self.audio_output_channels,
                             tactile_channel=self.tactile_output_channel,
+                            duplicate_tactile_channel=self._duplicate_tactile_channel(),
                         )
                         self._block_pos += n
                         self.elapsed_time = self._block_pos / self._block_sr
@@ -907,6 +1064,9 @@ class AudioEngine:
             if n > 0:
                 click_samples = self._click_data[self._click_pos:self._click_pos + n, 0]
                 tactile_channel = min(self.tactile_output_channel, outdata.shape[1] - 1)
+                duplicate_tactile_channel = self._duplicate_tactile_channel()
+                if duplicate_tactile_channel is not None and duplicate_tactile_channel >= outdata.shape[1]:
+                    duplicate_tactile_channel = None
                 if self._click_pos == 0:
                     metadata = dict(self._click_metadata or {})
                     marker_sample_rate = self._block_sr if block_buffer_start_sample is not None else self._click_sr
@@ -918,10 +1078,14 @@ class AudioEngine:
                         sample_offset_in_buffer=0,
                         sample_rate=marker_sample_rate,
                         marker_channel=tactile_channel,
+                        marker_duplicate_channel=duplicate_tactile_channel if duplicate_tactile_channel is not None else "",
+                        marker_duplicate_channel_1based=(duplicate_tactile_channel + 1) if duplicate_tactile_channel is not None else "",
                         marker_gain=self._click_gain if self._click_gain is not None else self.tactile_volume,
                         **metadata,
                     )
                 outdata[:n, tactile_channel] = click_samples * (self._click_gain if self._click_gain is not None else self.tactile_volume)
+                if duplicate_tactile_channel is not None and duplicate_tactile_channel != tactile_channel:
+                    outdata[:n, duplicate_tactile_channel] = outdata[:n, tactile_channel]
                 self._click_pos += n
             if self._click_pos >= len(self._click_data):
                 self._click_active = False
@@ -1029,6 +1193,7 @@ class AudioEngine:
                 self.tactile_volume,
                 audio_channels=self.audio_output_channels,
                 tactile_channel=self.tactile_output_channel,
+                duplicate_tactile_channel=self._duplicate_tactile_channel(),
             )
             if n < frames:
                 outdata[n:].fill(0)
@@ -1245,6 +1410,10 @@ class AudioEngine:
             print("Saving interrupted digital output evidence recording...")
             self.stop_recording(interrupted=True)
 
+        if self._wired_loopback.active or self._wired_loopback_stream is not None:
+            print("Saving interrupted wired loopback recording...")
+            self.stop_wired_loopback_recording(interrupted=True)
+
         # Stop any legacy diagnostic recording and SAVE it with interrupted marker
         if self._recording_stream is not None:
             print("Saving interrupted recording...")
@@ -1257,6 +1426,9 @@ class AudioEngine:
         # Stop any active output evidence recording.
         if self._output_evidence.active:
             self.stop_recording(interrupted=True)
+
+        if self._wired_loopback.active or self._wired_loopback_stream is not None:
+            self.stop_wired_loopback_recording(interrupted=True)
 
         # Stop any active legacy diagnostic recording
         if self._recording_stream is not None:
@@ -1310,6 +1482,7 @@ class AudioEngine:
                 0.0,
                 audio_channels=self.audio_output_channels,
                 tactile_channel=self.tactile_output_channel,
+                duplicate_tactile_channel=self._duplicate_tactile_channel(),
             )
             if n < frames:
                 outdata[n:].fill(0)
@@ -1451,6 +1624,7 @@ class AudioEngine:
                 0.0,
                 audio_channels=self.audio_output_channels,
                 tactile_channel=self.tactile_output_channel,
+                duplicate_tactile_channel=self._duplicate_tactile_channel(),
             )
 
             # Create looping playback
@@ -1502,6 +1676,7 @@ class AudioEngine:
                         0.0,
                         audio_channels=self.audio_output_channels,
                         tactile_channel=self.tactile_output_channel,
+                        duplicate_tactile_channel=self._duplicate_tactile_channel(),
                     )
                     self.bg_music_base_data = base_data
                     self.bg_music_data = data
@@ -1534,6 +1709,7 @@ class AudioEngine:
                 0.0,
                 audio_channels=self.audio_output_channels,
                 tactile_channel=self.tactile_output_channel,
+                duplicate_tactile_channel=self._duplicate_tactile_channel(),
             )
             self.bg_music_volume = volume
 
@@ -2702,7 +2878,13 @@ class PPSExperimentApp:
                 data, sr = sf.read(TACTILE_TEST_STIMULUS, dtype='float32')
                 output_channels = self.audio.runtime_output_channels if self.audio else 2
                 tactile_channel = self.audio.tactile_output_channel if self.audio else None
-                probe = tactile_probe_for_output(data, output_channels, 1.0, tactile_channel=tactile_channel)
+                probe = tactile_probe_for_output(
+                    data,
+                    output_channels,
+                    1.0,
+                    tactile_channel=tactile_channel,
+                    duplicate_tactile_channel=self.audio._duplicate_tactile_channel() if self.audio else None,
+                )
                 device_idx = self.audio.device_idx if self.audio else None
 
                 if self.audio and self.audio._persistent_output_available(samplerate=sr, channels=probe.shape[1]):
@@ -2742,6 +2924,7 @@ class PPSExperimentApp:
                             self.audio.runtime_output_channels,
                             self.audio.tactile_volume,
                             tactile_channel=tactile_channel,
+                            duplicate_tactile_channel=self.audio._duplicate_tactile_channel(),
                         )
                         stream = sd.OutputStream(
                             samplerate=sr,
@@ -2762,6 +2945,7 @@ class PPSExperimentApp:
                             1.0,
                             self.audio.tactile_volume if self.audio else 1.0,
                             tactile_channel=tactile_channel,
+                            duplicate_tactile_channel=self.audio._duplicate_tactile_channel() if self.audio else None,
                         )
                     )
                 output_label = (tactile_channel if tactile_channel is not None else tactile_output_channel_for_channels(probe.shape[1])) + 1
