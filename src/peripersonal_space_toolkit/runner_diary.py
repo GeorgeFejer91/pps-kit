@@ -14,7 +14,10 @@ from typing import Any, Iterable
 from .output_layout import (
     ACQUISITION_PROFILE_SNAPSHOT_DIRNAME,
     LEGACY_ACQUISITION_PROFILE_SNAPSHOT_DIRNAME,
+    LEGACY_PROTECTED_PROFILE_SNAPSHOT_DIRNAME,
     output_metadata_dir,
+    output_project_state_dir,
+    output_runner_logs_dir,
 )
 
 
@@ -53,7 +56,10 @@ def is_diary_file(path: Path) -> bool:
 
 def _diary_search_dirs(root: Path) -> list[Path]:
     candidates = [
+        output_runner_logs_dir(root),
+        output_project_state_dir(root),
         output_metadata_dir(root),
+        root / LEGACY_PROTECTED_PROFILE_SNAPSHOT_DIRNAME,
         root / LEGACY_ACQUISITION_PROFILE_SNAPSHOT_DIRNAME,
         root / ACQUISITION_PROFILE_SNAPSHOT_DIRNAME,
         root,
@@ -95,7 +101,7 @@ def ensure_output_diary(project_root: Path, experiment_identifier: str | None = 
     existing = find_output_diary(root)
     if existing is not None:
         return existing
-    diary_path = output_metadata_dir(root) / diary_filename(experiment_identifier)
+    diary_path = output_runner_logs_dir(root) / diary_filename(experiment_identifier)
     append_diary_entry(
         diary_path,
         "diary_created",
@@ -131,7 +137,7 @@ def resolve_or_create_output_project(
         project_root = selected / f"{slug}_{stamp}_{suffix}"
         suffix += 1
     project_root.mkdir(parents=True, exist_ok=True)
-    diary_path = output_metadata_dir(project_root) / diary_filename(slug)
+    diary_path = output_runner_logs_dir(project_root) / diary_filename(slug)
     append_diary_entry(
         diary_path,
         "output_project_created",

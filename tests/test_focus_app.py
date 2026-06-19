@@ -15,6 +15,12 @@ from peripersonal_space_toolkit.focus_layout import (
     focus_palette_contrast_report,
     render_focus_layout_profile,
 )
+from peripersonal_space_toolkit.output_layout import (
+    output_metadata_dir,
+    output_profile_snapshot_dir,
+    output_project_state_dir,
+    output_runner_logs_dir,
+)
 from peripersonal_space_toolkit.session_runner import RUN_PACKAGE_SCHEMA, SessionCaptureOptions, load_run_package
 
 
@@ -2256,7 +2262,7 @@ def test_timestamped_output_environment_uses_parent_and_collision_suffix(tmp_pat
     assert slug == "my_lab_pilot"
     assert root == parent / "my_lab_pilot_20260618_091011_2"
     assert root.is_dir()
-    assert diary.parent == root / "study_profile_snapshot_DO_NOT_DELETE"
+    assert diary.parent == output_runner_logs_dir(root)
     assert diary.name.endswith("_LOG-DIARY_DO_NOT_DELETE.txt")
     assert not (root / diary.name).exists()
 
@@ -2323,21 +2329,23 @@ def test_initiate_data_collection_environment_groups_snapshot_metadata(tmp_path:
     )
 
     environment_root = Path(result["environment_root"])
-    metadata_dir = environment_root / "study_profile_snapshot_DO_NOT_DELETE"
+    metadata_dir = output_metadata_dir(environment_root)
+    project_state_dir = output_project_state_dir(environment_root)
+    profile_snapshot_dir = output_profile_snapshot_dir(environment_root)
     assert environment_root == parent / "study5_20260618_205901"
     assert metadata_dir.is_dir()
-    assert Path(result["diary_path"]).parent == metadata_dir
-    assert (metadata_dir / "output_diary.v1.jsonl").is_file()
-    assert (metadata_dir / "dashboard_runner_bridge_manifest.v1.json").is_file()
-    copied_run_setup = metadata_dir / focus_app.STUDY5_PROFILE_ID / "6_experiment_run_setup" / "experiment_run_setup_manifest.json"
+    assert Path(result["diary_path"]).parent == output_runner_logs_dir(environment_root)
+    assert (project_state_dir / "output_diary.v1.jsonl").is_file()
+    assert (project_state_dir / "dashboard_runner_bridge_manifest.v1.json").is_file()
+    copied_run_setup = profile_snapshot_dir / focus_app.STUDY5_PROFILE_ID / "6_experiment_run_setup" / "experiment_run_setup_manifest.json"
     assert _path_exists(copied_run_setup)
     assert not (environment_root / "output_diary.v1.jsonl").exists()
     assert not (environment_root / "dashboard_runner_bridge_manifest.v1.json").exists()
     assert not (environment_root / "study_profile_snapshot").exists()
 
-    bridge = json.loads((metadata_dir / "dashboard_runner_bridge_manifest.v1.json").read_text(encoding="utf-8"))
+    bridge = json.loads((project_state_dir / "dashboard_runner_bridge_manifest.v1.json").read_text(encoding="utf-8"))
     assert bridge["environment_metadata_dir"] == str(metadata_dir)
-    assert bridge["acquisition_profile_snapshot_dir"] == str(metadata_dir / focus_app.STUDY5_PROFILE_ID)
+    assert bridge["acquisition_profile_snapshot_dir"] == str(profile_snapshot_dir / focus_app.STUDY5_PROFILE_ID)
     settings = focus_app.load_runner_settings(state_root)
     assert settings["current_output_project_root"] == str(environment_root)
     assert str(settings["diary_path"]).replace("\\\\?\\", "") == result["diary_path"]

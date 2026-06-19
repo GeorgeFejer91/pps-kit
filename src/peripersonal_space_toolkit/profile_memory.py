@@ -21,6 +21,8 @@ from .output_layout import (
     find_existing_metadata_file,
     output_diary_path,
     output_metadata_dir,
+    output_profile_snapshot_dir,
+    output_runner_logs_dir,
 )
 from .preload_inventory import load_preload_inventory
 from .runtime_paths import repo_root, writable_root
@@ -317,7 +319,7 @@ def prepare_acquisition_folder(
     source = Path(source_project_dir).resolve()
     if not source.exists() or not source.is_dir():
         raise FileNotFoundError(f"Stored profile project folder is missing: {source}")
-    snapshot_root = output_metadata_dir(output)
+    snapshot_root = output_profile_snapshot_dir(output)
     snapshot_dir = (snapshot_root / profile_id).resolve()
     if output != snapshot_dir and output not in snapshot_dir.parents:
         raise ValueError("Acquisition profile snapshot path escapes the output folder.")
@@ -470,6 +472,9 @@ def write_bridge_manifest(
         "local_only": True,
         "active_output_folder": str(output),
         "environment_metadata_dir": str(output_metadata_dir(output)),
+        "project_state_dir": str(output_diary_path(output).parent),
+        "profile_snapshot_dir": str(output_profile_snapshot_dir(output)),
+        "runner_logs_dir": str(output_runner_logs_dir(output)),
         "output_diary_path": str(output_diary_path(output)),
         "profile_id": str(profile_entry.get("profile_id") or ""),
         "display_name": str(profile_entry.get("display_name") or ""),

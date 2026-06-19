@@ -68,6 +68,7 @@ from .focus_layout import (
     render_focus_layout_profile,
     render_focus_style_sheet,
 )
+from .output_layout import output_root_for_metadata_path
 from .focus_timeline import TactileRecenterController, TactileTimelineCue, TactileTimelineState
 from .runner_diary import (
     RUNNER_SETTINGS_SCHEMA,
@@ -105,7 +106,6 @@ from .session_runner import (
 from .timing_schedule import BlockEventSchedule
 from .preload_inventory import load_preload_inventory
 from .profile_memory import (
-    ACQUISITION_PROFILE_SNAPSHOT_DIRNAME,
     BRIDGE_MANIFEST_FILENAME,
     OUTPUT_DIARY_FILENAME,
     append_output_diary_event,
@@ -253,9 +253,7 @@ def current_runner_session_root(state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT)
     if diary_raw:
         diary_path = Path(diary_raw).expanduser()
         if diary_path.is_file():
-            if diary_path.parent.name == ACQUISITION_PROFILE_SNAPSHOT_DIRNAME:
-                return diary_path.parent.parent
-            return diary_path.parent
+            return output_root_for_metadata_path(diary_path)
     return DEFAULT_SESSION_ROOT
 
 

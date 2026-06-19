@@ -29,6 +29,7 @@ LSL_MARKER_CHANNELS = [
     "event_type",
     "event_code",
     "trigger_key",
+    "marker_name",
     "session_id",
     "participant_id",
     "block_index",
@@ -236,6 +237,7 @@ class LSLMarkerOutlet:
             event.event_type,
             str(marker.get("event_code", "")),
             str(marker.get("trigger_key", "")),
+            str(marker.get("marker_name", "")),
             str(marker.get("session_id", "")),
             str(marker.get("participant_id", "")),
             str(marker.get("block_index", "")),
@@ -315,6 +317,7 @@ class TimingEventHub:
         payload.setdefault("trigger_key", trigger_key)
         payload.setdefault("event_code", event_code)
         payload.setdefault("marker_version", MARKER_VERSION)
+        payload.setdefault("marker_name", _self_describing_marker_name(event_type, payload))
         event = self.logger.log(event_type, unix_time=unix_time, monotonic_time=monotonic_time, **payload)
         marker = self._marker_from_event(
             event,
@@ -361,6 +364,7 @@ class TimingEventHub:
             "event_type",
             "event_code",
             "trigger_key",
+            "marker_name",
             "lsl_timestamp",
             "timestamp_quality",
             "sample_index",
@@ -537,6 +541,7 @@ class TimingEventHub:
             "event_type": event.event_type,
             "event_code": int(event_code),
             "trigger_key": trigger_key,
+            "marker_name": payload.get("marker_name", ""),
             "session_id": self.session_id,
             "participant_id": self.participant_id,
             "block_index": block_index,
@@ -582,6 +587,82 @@ def _push_sample(outlet: Any, sample: list[Any], timestamp: float) -> None:
             outlet.push_sample(sample, timestamp)
         except TypeError:
             outlet.push_sample(sample)
+
+
+def _self_describing_marker_name(event_type: str, payload: dict[str, Any]) -> str:
+    participant = _marker_token(payload.get("participant_id", "PXX"))
+    block = _as_int(payload.get("block_index", payload.get("block_number")), default=0)
+    block_label = f"block{block:02d}" if block > 0 else "blockXX"
+    phase = _marker_token(
+        _row_value(payload, "respiratory_phase", "Respiratory_Phase", "row_label", "Row_Label", "Row", default="")
+    )
+    trial_type = str(_row_value(payload, "trial_type", "Trial_Type", default="")).strip()
+    family = str(_row_value(payload, "family", "Family", default="")).strip()
+    modality = _marker_modality(trial_type, family)
+    catch = _marker_is_catch(trial_type, family)
+    noise = _marker_token(_row_value(payload, "noise_type", "Noise_Type", "noise_label", "Noise_Label", default=""))
+    soa = str(_row_value(payload, "soa_ms", "SOA_ms", default="")).strip()
+    suffix = {
+        "trial_start": "trial_start",
+        "looming_onset": "audio_start",
+        "tactile_onset": "tactile_start",
+        "response_window_onset": "response_window",
+        "stimulus_window_onset": "start",
+        "mouse_click": "response",
+        "trial_end": "trial_end",
+    }.get(str(event_type or ""), str(event_type or "event"))
+    parts = [participant, block_label]
+    if phase:
+        parts.append(phase)
+    if modality:
+        parts.append(modality)
+    if catch and "catch" not in modality:
+        parts.append("catch")
+    if noise:
+        parts.append(noise)
+    if soa and soa.lower() not in {"nan", "none"} and modality != "audio":
+        parts.append(f"SOA{_marker_token(soa)}")
+    parts.append(_marker_token(suffix))
+    return "_".join(part for part in parts if part)
+
+
+def _marker_modality(trial_type: str, family: str) -> str:
+    text = f"{trial_type} {family}".strip().lower()
+    if "audio" in text and "tactile" in text:
+        return "audiotactile"
+    if "baseline" in text or ("tactile" in text and "audio" not in text):
+        return "tactile"
+    if "audio" in text or "catch" in text:
+        return "audio"
+    return ""
+
+
+def _marker_is_catch(trial_type: str, family: str) -> bool:
+    text = f"{trial_type} {family}".strip().lower()
+    return "catch" in text or "audio_only" in text or "audio-only" in text
+
+
+def _row_value(row: dict[str, Any], *keys: str, default: Any = "") -> Any:
+    for key in keys:
+        value = row.get(key)
+        if value not in (None, ""):
+            return value
+    return default
+
+
+def _marker_token(value: Any) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    text = text.replace("+", "plus")
+    return "".join(ch if ch.isalnum() else "_" for ch in text).strip("_")
+
+
+def _as_int(value: Any, *, default: int) -> int:
+    try:
+        return int(float(str(value).strip()))
+    except (TypeError, ValueError):
+        return default
 
 
 def write_lsl_marker_xdf(
@@ -710,6 +791,7 @@ def _rich_marker_samples_chunk(stream_id: int, markers: list[dict[str, Any]]) ->
             str(marker.get("event_type", "")),
             str(marker.get("event_code", "")),
             str(marker.get("trigger_key", "")),
+            str(marker.get("marker_name", "")),
             str(marker.get("session_id", "")),
             str(marker.get("participant_id", "")),
             str(marker.get("block_index", "")),

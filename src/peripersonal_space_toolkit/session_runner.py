@@ -23,6 +23,14 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 from .design import StimulusDesign, experiment_schedule_rows, export_protocol_csv, save_design, validate_design
+from .output_layout import (
+    output_data_analytics_dir,
+    output_metadata_dir,
+    output_prepared_blocks_dir,
+    output_runner_logs_dir,
+    output_shared_instructions_dir,
+    output_verbose_events_dir,
+)
 from .session_analysis import analyze_session_events, format_analysis_summary, write_analysis_csvs
 from .session_events import SessionEventLogger
 from .runner_diary import append_diary_entry, ensure_output_diary, find_output_diary
@@ -58,6 +66,59 @@ BLOCK_WAV_CACHE_SCHEMA = "pps-session-block-cache.v1"
 BLOCK_WAV_CACHE_VERSION = "2026-06-14.v1"
 RESPONSE_MARKER_GAIN = 0.05
 LAUNCHABLE_ACTIVITY_EVENTS = {"run_setup_prepared", "session_prepared", "runner_launched"}
+PARTICIPANT_TRIAL_CSV_SUFFIX = "_trials.csv"
+
+
+def _package_output_root(package: "RunPackage") -> Path:
+    return Path(package.session_dir).parent
+
+
+def _package_runner_log_dir(package: "RunPackage") -> Path:
+    return output_runner_logs_dir(_package_output_root(package)) / package.session_id
+
+
+def _package_prepared_blocks_dir(package: "RunPackage") -> Path:
+    return output_prepared_blocks_dir(_package_output_root(package)) / package.session_id / "blocks"
+
+
+def _package_verbose_events_dir(package: "RunPackage") -> Path:
+    return output_verbose_events_dir(_package_output_root(package)) / package.session_id
+
+
+def _package_analytics_dir(package: "RunPackage") -> Path:
+    return output_data_analytics_dir(_package_output_root(package)) / package.session_id
+
+
+def _participant_trials_csv_path(package: "RunPackage") -> Path:
+    return Path(package.session_dir) / f"{package.session_id}{PARTICIPANT_TRIAL_CSV_SUFFIX}"
+
+
+def _verbose_events_csv_path(package: "RunPackage") -> Path:
+    return _package_verbose_events_dir(package) / "events.csv"
+
+
+def _verbose_events_xdf_path(package: "RunPackage") -> Path:
+    return _package_verbose_events_dir(package) / "events.xdf"
+
+
+def _lsl_markers_csv_path(package: "RunPackage") -> Path:
+    return _package_verbose_events_dir(package) / "lsl_markers.csv"
+
+
+def _lsl_markers_xdf_path(package: "RunPackage") -> Path:
+    return _package_verbose_events_dir(package) / "lsl_markers.xdf"
+
+
+def _trigger_dictionary_path(package: "RunPackage") -> Path:
+    return _package_verbose_events_dir(package) / "trigger_dictionary.json"
+
+
+def _session_metadata_path(package: "RunPackage") -> Path:
+    return _package_runner_log_dir(package) / "session_metadata.json"
+
+
+def _audio_evidence_path(package: "RunPackage", block: "RunBlock") -> Path:
+    return Path(package.session_dir) / f"block_{int(block.index):02d}_audio_evidence.wav"
 
 
 @dataclass(frozen=True)
@@ -161,6 +222,255 @@ class SessionCaptureOptions:
             "write_trigger_dictionary": bool(self.write_trigger_dictionary),
             "start_backup_recording": bool(self.start_backup_recording),
         }
+
+
+PARTICIPANT_TRIAL_FIELDNAMES = [
+    "recording_date",
+    "recording_time",
+    "recording_unix_time",
+    "participant_id",
+    "participant_age_years",
+    "participant_gender",
+    "participant_handedness",
+    "session_id",
+    "part_number",
+    "condition",
+    "block_number",
+    "block_label",
+    "trial_number",
+    "trial_uid",
+    "trial_type",
+    "family",
+    "respiratory_phase",
+    "row_label",
+    "stimulus_modality",
+    "noise_type",
+    "soa_ms",
+    "tactile_present",
+    "catch_trial",
+    "audio_present",
+    "stimulus_start_unix_time",
+    "tactile_unix_time",
+    "response_window_onset_unix_time",
+    "response_unix_time",
+    "rt_ms",
+    "response_event_id",
+    "response_given",
+    "outcome",
+    "correctness_rule",
+    "is_topup",
+    "topup_role",
+    "source_trial_uid",
+    "primary_analysis_included",
+]
+
+
+class ParticipantTrialCsvWriter:
+    """Append one analysis-friendly row when each trial reaches its end marker."""
+
+    def __init__(
+        self,
+        path: Path,
+        *,
+        package: RunPackage,
+        participant_metadata: dict[str, Any] | None = None,
+        min_rt_s: float = 0.1,
+        max_rt_s: float = 4.0,
+    ):
+        self.path = Path(path)
+        self.package = package
+        self.participant_metadata = dict(participant_metadata or {})
+        self.min_rt_s = max(0.0, float(min_rt_s))
+        self.max_rt_s = max(self.min_rt_s, float(max_rt_s))
+        self._trial_states: dict[tuple[str, str], dict[str, Any]] = {}
+        self._clicks: list[dict[str, Any]] = []
+        self._written_keys: set[tuple[str, str]] = set()
+        self._lock = threading.RLock()
+        self._write_header()
+
+    def observe_event(self, event: Any) -> None:
+        row = _flat_event_row(event)
+        event_type = str(row.get("event_type") or "")
+        if not event_type:
+            return
+        with self._lock:
+            if event_type == "mouse_click":
+                self._clicks.append(row)
+                return
+            if event_type in {"trial_start", "looming_onset", "tactile_onset", "response_window_onset", "stimulus_window_onset", "trial_end"}:
+                key = self._trial_key(row)
+                state = self._trial_states.setdefault(key, {"events": {}, "base": dict(row)})
+                state["events"][event_type] = dict(row)
+                state["base"].update({key: value for key, value in row.items() if value not in (None, "")})
+                if event_type == "trial_end":
+                    self._append_resolved_trial(key, state)
+
+    def rewrite_from_events(self, events: Iterable[Any]) -> Path:
+        with self._lock:
+            self._trial_states = {}
+            self._clicks = []
+            self._written_keys = set()
+            self._write_header()
+            for event in sorted(
+                (_flat_event_row(item) for item in events),
+                key=lambda row: (_as_float(row.get("unix_time"), default=0.0), _as_int(row.get("event_id"), default=0)),
+            ):
+                event_type = str(event.get("event_type") or "")
+                if event_type == "mouse_click":
+                    self._clicks.append(event)
+                    continue
+                if event_type in {"trial_start", "looming_onset", "tactile_onset", "response_window_onset", "stimulus_window_onset", "trial_end"}:
+                    key = self._trial_key(event)
+                    state = self._trial_states.setdefault(key, {"events": {}, "base": dict(event)})
+                    state["events"][event_type] = dict(event)
+                    state["base"].update({name: value for name, value in event.items() if value not in (None, "")})
+                    if event_type == "trial_end":
+                        self._append_resolved_trial(key, state)
+            return self.path
+
+    def _write_header(self) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        with self.path.open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=PARTICIPANT_TRIAL_FIELDNAMES)
+            writer.writeheader()
+
+    def _trial_key(self, row: dict[str, Any]) -> tuple[str, str]:
+        block = str(_row_value(row, "block_number", "block_index", "Block_Number", default="")).strip()
+        trial_uid = str(_row_value(row, "trial_uid", "Trial_UID", default="")).strip()
+        if not trial_uid:
+            trial_uid = str(_row_value(row, "trial_number", "trial_index", "Trial_Number", default="")).strip()
+        return (block, trial_uid)
+
+    def _append_resolved_trial(self, key: tuple[str, str], state: dict[str, Any]) -> None:
+        if key in self._written_keys:
+            return
+        row = self._resolved_trial_row(state)
+        with self.path.open("a", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=PARTICIPANT_TRIAL_FIELDNAMES)
+            writer.writerow(row)
+        self._written_keys.add(key)
+
+    def _resolved_trial_row(self, state: dict[str, Any]) -> dict[str, Any]:
+        events = dict(state.get("events", {}) or {})
+        base = dict(state.get("base", {}) or {})
+        trial_start = events.get("trial_start", {})
+        looming_onset = events.get("looming_onset", {})
+        tactile_onset = events.get("tactile_onset", {})
+        response_onset = events.get("response_window_onset", {})
+        trial_end = events.get("trial_end", base)
+        trial_type = str(_row_value(base, "trial_type", "Trial_Type", default="")).strip()
+        family = str(_row_value(base, "family", "Family", default="")).strip()
+        modality = _trial_stimulus_modality(trial_type, family, bool(tactile_onset))
+        tactile_present = _trial_has_tactile(trial_type, family, bool(tactile_onset))
+        catch_trial = _trial_is_catch(trial_type, family)
+        audio_present = _trial_has_audio(trial_type, family, bool(looming_onset))
+        trial_start_unix = _as_float(trial_start.get("unix_time", base.get("unix_time")), default=0.0)
+        stimulus_start_unix = _as_float(
+            looming_onset.get("unix_time", tactile_onset.get("unix_time", response_onset.get("unix_time", trial_start_unix))),
+            default=trial_start_unix,
+        )
+        tactile_unix = _as_float(tactile_onset.get("unix_time"), default=0.0)
+        response_window_unix = _as_float(response_onset.get("unix_time"), default=stimulus_start_unix)
+        trial_end_unix = _as_float(trial_end.get("unix_time"), default=response_window_unix)
+        click, valid_response, response_given = self._select_response(
+            block_number=str(_row_value(base, "block_number", "block_index", "Block_Number", default="")).strip(),
+            trial_start_unix=trial_start_unix,
+            response_window_unix=response_window_unix,
+            tactile_unix=tactile_unix,
+            trial_end_unix=trial_end_unix,
+            tactile_present=tactile_present,
+            catch_trial=catch_trial,
+        )
+        click_unix = _as_float(click.get("unix_time"), default=0.0) if click else 0.0
+        rt_ms = ""
+        if valid_response and tactile_present and tactile_unix > 0.0 and click_unix > 0.0:
+            rt_ms = f"{(click_unix - tactile_unix) * 1000.0:.3f}"
+        if tactile_present:
+            outcome = "Hit" if valid_response else "Miss"
+            correctness_rule = "response within 4 s tactile response window"
+        elif catch_trial:
+            outcome = "Miss" if response_given else "Hit"
+            correctness_rule = "withhold response during catch/audio-only trial"
+        else:
+            outcome = "Hit" if not response_given else "Miss"
+            correctness_rule = "withhold response when no tactile target is present"
+        recorded_at = datetime.fromtimestamp(_as_float(trial_end.get("unix_time"), default=time.time()))
+        return {
+            "recording_date": recorded_at.strftime("%Y-%m-%d"),
+            "recording_time": recorded_at.strftime("%H:%M:%S.%f")[:-3],
+            "recording_unix_time": f"{_as_float(trial_end.get('unix_time'), default=time.time()):.9f}",
+            "participant_id": self.package.participant_id,
+            "participant_age_years": self.participant_metadata.get("age_years", ""),
+            "participant_gender": self.participant_metadata.get("gender", ""),
+            "participant_handedness": self.participant_metadata.get("handedness", ""),
+            "session_id": self.package.session_id,
+            "part_number": _row_value(base, "part_number", "Part_Number", default=""),
+            "condition": _row_value(base, "condition", "Condition", default=""),
+            "block_number": _row_value(base, "block_number", "block_index", "Block_Number", default=""),
+            "block_label": _row_value(base, "block_label", "Block_Label", default=""),
+            "trial_number": _row_value(base, "trial_number", "trial_index", "Trial_Number", default=""),
+            "trial_uid": _row_value(base, "trial_uid", "Trial_UID", default=""),
+            "trial_type": trial_type,
+            "family": family,
+            "respiratory_phase": _row_value(base, "respiratory_phase", "Respiratory_Phase", "row_label", "Row_Label", "Row", default=""),
+            "row_label": _row_value(base, "row_label", "Row_Label", "Row", default=""),
+            "stimulus_modality": modality,
+            "noise_type": _row_value(base, "noise_type", "Noise_Type", "noise_label", "Noise_Label", default=""),
+            "soa_ms": _row_value(base, "soa_ms", "SOA_ms", default=""),
+            "tactile_present": str(tactile_present).lower(),
+            "catch_trial": str(catch_trial).lower(),
+            "audio_present": str(audio_present).lower(),
+            "stimulus_start_unix_time": "" if stimulus_start_unix <= 0.0 else f"{stimulus_start_unix:.9f}",
+            "tactile_unix_time": "" if tactile_unix <= 0.0 else f"{tactile_unix:.9f}",
+            "response_window_onset_unix_time": "" if response_window_unix <= 0.0 else f"{response_window_unix:.9f}",
+            "response_unix_time": "" if click_unix <= 0.0 else f"{click_unix:.9f}",
+            "rt_ms": rt_ms,
+            "response_event_id": "" if not click else click.get("event_id", ""),
+            "response_given": str(response_given).lower(),
+            "outcome": outcome,
+            "correctness_rule": correctness_rule,
+            "is_topup": str(_truthy(_row_value(base, "is_topup", "Is_Topup", "block_is_topup_block", default=False))).lower(),
+            "topup_role": _row_value(base, "topup_role", "Topup_Role", default=""),
+            "source_trial_uid": _row_value(base, "source_trial_uid", "Source_Trial_UID", "Original_Trial_UID", default=""),
+            "primary_analysis_included": str(_truthy(_row_value(base, "primary_analysis_included", "Primary_Analysis_Included", default=True))).lower(),
+        }
+
+    def _select_response(
+        self,
+        *,
+        block_number: str,
+        trial_start_unix: float,
+        response_window_unix: float,
+        tactile_unix: float,
+        trial_end_unix: float,
+        tactile_present: bool,
+        catch_trial: bool,
+    ) -> tuple[dict[str, Any], bool, bool]:
+        start = response_window_unix if response_window_unix > 0.0 else trial_start_unix
+        end = trial_end_unix if trial_end_unix > start else start + self.max_rt_s
+        candidates = [
+            click
+            for click in self._clicks
+            if _truthy(click.get("in_target", True))
+            and _truthy(click.get("during_playback", True))
+            and str(_row_value(click, "block_number", "block_index", default="")).strip() == block_number
+            and start <= _as_float(click.get("unix_time"), default=0.0) <= end
+        ]
+        candidates.sort(key=lambda item: (_as_float(item.get("unix_time"), default=0.0), _as_int(item.get("event_id"), default=0)))
+        if not candidates:
+            return {}, False, False
+        if tactile_present:
+            tactile_start = tactile_unix if tactile_unix > 0.0 else start
+            valid_start = tactile_start + self.min_rt_s
+            valid_end = min(end, tactile_start + self.max_rt_s)
+            for click in candidates:
+                click_time = _as_float(click.get("unix_time"), default=0.0)
+                if valid_start <= click_time <= valid_end:
+                    return click, True, True
+            return candidates[0], False, True
+        if catch_trial:
+            return candidates[0], False, True
+        return candidates[0], False, True
 
 
 ProgressCallback = Callable[[dict[str, Any]], None]
@@ -324,14 +634,16 @@ def prepare_run_package(
     created_at = created_at or datetime.now()
     timestamp = created_at.strftime("%Y%m%d_%H%M%S")
     session_id = f"{clean_participant}_{timestamp}"
-    session_dir = Path(session_root) / session_id
-    block_dir = session_dir / "blocks"
-    analysis_dir = session_dir / "analysis"
+    session_root = Path(session_root)
+    session_dir = session_root / session_id
+    run_package_dir = output_runner_logs_dir(session_root) / session_id
+    block_dir = output_prepared_blocks_dir(session_root) / session_id / "blocks"
     block_dir.mkdir(parents=True, exist_ok=True)
-    analysis_dir.mkdir(parents=True, exist_ok=True)
+    run_package_dir.mkdir(parents=True, exist_ok=True)
+    session_dir.mkdir(parents=True, exist_ok=True)
 
-    design_path = session_dir / "design.json"
-    protocol_path = session_dir / "protocol_schedule.csv"
+    design_path = run_package_dir / "design.json"
+    protocol_path = run_package_dir / "protocol_schedule.csv"
     rows = _participant_rows(design, clean_participant)
     variant_lookup = _trial_sequence_variant_lookup(render_dir)
     _attach_sequence_variant_paths(rows, variant_lookup)
@@ -363,7 +675,7 @@ def prepare_run_package(
             )
         )
 
-    manifest_path = session_dir / "session_manifest.json"
+    manifest_path = run_package_dir / "session_manifest.json"
     render_manifest = render_manifest_path(render_dir)
     package = RunPackage(
         participant_id=clean_participant,
@@ -403,7 +715,7 @@ def load_run_package(manifest_path: Path) -> RunPackage:
     data = _load_json(manifest_path)
     if data.get("schema") != RUN_PACKAGE_SCHEMA:
         raise ValueError(f"Unsupported run package manifest: {manifest_path}")
-    session_dir = manifest_path.parent
+    session_dir = Path(str(data.get("session_dir") or manifest_path.parent))
     blocks = [
         RunBlock(
             index=int(item["index"]),
@@ -815,8 +1127,12 @@ def _scan_prepared_session_manifest(
     root = Path(session_root)
     if not _path_exists(root):
         return None
+    candidates = [
+        *output_runner_logs_dir(root).glob(f"{participant_id}_*/session_manifest.json"),
+        *root.glob(f"{participant_id}_*/session_manifest.json"),
+    ]
     candidates = sorted(
-        root.glob(f"{participant_id}_*/session_manifest.json"),
+        {path.resolve() for path in candidates},
         key=lambda path: path.stat().st_mtime if _path_exists(path) else 0.0,
         reverse=True,
     )
@@ -856,8 +1172,12 @@ def _participant_data_collection_status(
     root = Path(session_root)
     if not _path_exists(root):
         return base
+    candidates = [
+        *output_runner_logs_dir(root).glob(f"{participant}_*/session_manifest.json"),
+        *root.glob(f"{participant}_*/session_manifest.json"),
+    ]
     candidates = sorted(
-        root.glob(f"{participant}_*/session_manifest.json"),
+        {path.resolve() for path in candidates},
         key=lambda path: path.stat().st_mtime if _path_exists(path) else 0.0,
         reverse=True,
     )
@@ -904,7 +1224,10 @@ def _load_matching_session_package(
 
 
 def _session_package_has_completed_data(package: RunPackage) -> tuple[bool, str]:
-    events_csv = Path(package.session_dir) / "events.csv"
+    events_csv = _verbose_events_csv_path(package)
+    if not _path_exists(events_csv):
+        legacy_events_csv = Path(package.session_dir) / "events.csv"
+        events_csv = legacy_events_csv if _path_exists(legacy_events_csv) else events_csv
     if not _path_exists(events_csv):
         return False, ""
     try:
@@ -1188,11 +1511,13 @@ def prepare_segment_run_package(
     created_at = created_at or datetime.now()
     timestamp = created_at.strftime("%Y%m%d_%H%M%S")
     session_id = f"{clean_participant}_{timestamp}"
-    session_dir = Path(session_root) / session_id
-    block_dir = session_dir / "blocks"
-    analysis_dir = session_dir / "analysis"
+    session_root = Path(session_root)
+    session_dir = session_root / session_id
+    run_package_dir = output_runner_logs_dir(session_root) / session_id
+    block_dir = output_prepared_blocks_dir(session_root) / session_id / "blocks"
     block_dir.mkdir(parents=True, exist_ok=True)
-    analysis_dir.mkdir(parents=True, exist_ok=True)
+    run_package_dir.mkdir(parents=True, exist_ok=True)
+    session_dir.mkdir(parents=True, exist_ok=True)
     _emit_prepare_progress(
         progress_callback,
         "Preparing Segment 6 setup",
@@ -1207,13 +1532,13 @@ def prepare_segment_run_package(
         source_base_dir=run_setup_manifest_path.parent,
     )
 
-    design_path = session_dir / "design.json"
+    design_path = run_package_dir / "design.json"
     if design is None:
         design_path.write_text("{}\n", encoding="utf-8")
     else:
         save_design(design, design_path)
 
-    protocol_path = session_dir / "protocol_schedule.csv"
+    protocol_path = run_package_dir / "protocol_schedule.csv"
     _write_segment_protocol_schedule(protocol_path, participant_rows, clean_participant, order_csv_path)
 
     blocks: list[RunBlock] = []
@@ -1369,7 +1694,7 @@ def prepare_segment_run_package(
             )
         )
 
-    manifest_path = session_dir / "session_manifest.json"
+    manifest_path = run_package_dir / "session_manifest.json"
     package = RunPackage(
         participant_id=clean_participant,
         session_id=session_id,
@@ -1458,9 +1783,13 @@ class SessionRunnerController:
         self.block_schedules = _block_event_schedules(package)
         self.trigger_dictionary = TriggerDictionary.from_schedules(self.block_schedules.values())
         self.logger = SessionEventLogger(package.participant_id)
+        self._runner_log_dir = _package_runner_log_dir(package)
+        self._verbose_events_dir = _package_verbose_events_dir(package)
+        self._analytics_dir = _package_analytics_dir(package)
+        self._topup_dir = self._runner_log_dir / "topup"
         self.topup_ledger = (
             TopUpLedger(
-                package.session_dir,
+                self._topup_dir,
                 participant_id=package.participant_id,
                 session_id=package.session_id,
             )
@@ -1468,12 +1797,18 @@ class SessionRunnerController:
             else None
         )
         self._runner_metadata_input = dict(runner_metadata or {})
-        self._session_metadata_path = package.session_dir / "session_metadata.json"
+        self._session_metadata_path = _session_metadata_path(package)
         self._session_metadata = _build_runner_session_metadata(
             package,
             runner_metadata=self._runner_metadata_input,
             capture_options=self.capture_options,
             topup_enabled=enable_topup,
+        )
+        self._participant_trials_csv_path = _participant_trials_csv_path(package)
+        self._participant_trial_writer = ParticipantTrialCsvWriter(
+            self._participant_trials_csv_path,
+            package=package,
+            participant_metadata=dict(self._session_metadata.get("participant") or {}),
         )
         self._lsl_session_metadata = _redact_session_metadata_for_lsl(self._session_metadata)
         self._topup_approval_callback = topup_approval_callback
@@ -1491,6 +1826,11 @@ class SessionRunnerController:
         self._analysis_outputs: dict[str, Path] = {}
         self._summary_text = ""
         self._recording_paths: list[Path] = []
+        self._events_csv_path = _verbose_events_csv_path(package)
+        self._events_xdf_path = _verbose_events_xdf_path(package)
+        self._lsl_markers_csv_path = _lsl_markers_csv_path(package)
+        self._lsl_markers_xdf_path = _lsl_markers_xdf_path(package)
+        self._trigger_dictionary_path = _trigger_dictionary_path(package)
         self._accepting_responses = False
         self._active_block: RunBlock | None = None
         self._run_warnings: list[str] = []
@@ -1597,7 +1937,7 @@ class SessionRunnerController:
                         manifest_path=str(block.manifest_path),
                         scheduled_event_count=len(schedule),
                     )
-                recording_path = self.package.session_dir / f"Block_{block.index:02d}_{_slug(block.label)}_audio_evidence.wav"
+                recording_path = _audio_evidence_path(self.package, block)
                 recording_started = self._start_backup_recording(engine, recording_path, block)
 
                 def _progress(elapsed_s: float, current_block: RunBlock = block) -> None:
@@ -1757,16 +2097,16 @@ class SessionRunnerController:
             completed=completed,
             interrupted=interrupted,
             session_dir=self.package.session_dir,
-            events_csv=self.package.session_dir / "events.csv",
-            events_xdf=self.package.session_dir / "events.xdf",
+            events_csv=self._events_csv_path,
+            events_xdf=self._events_xdf_path,
             analysis_outputs=self._analysis_outputs,
             summary_text=self._summary_text,
             warnings=list(self._run_warnings) if completed else ["Session was interrupted before all blocks completed.", *self._run_warnings],
             lsl_status=dict(self.events.lsl_status.__dict__),
             recording_paths=list(self._recording_paths),
-            lsl_markers_csv=self.package.session_dir / "lsl_markers.csv",
-            lsl_markers_xdf=self.package.session_dir / "lsl_markers.xdf",
-            trigger_dictionary_path=self.package.session_dir / "trigger_dictionary.json",
+            lsl_markers_csv=self._lsl_markers_csv_path,
+            lsl_markers_xdf=self._lsl_markers_xdf_path,
+            trigger_dictionary_path=self._trigger_dictionary_path,
             session_metadata_path=self._session_metadata_path,
             capture_options=self.capture_options.as_dict(),
         )
@@ -1833,10 +2173,12 @@ class SessionRunnerController:
             lsl_status=dict(self.events.lsl_status.__dict__),
         )
         self.package.session_dir.mkdir(parents=True, exist_ok=True)
+        self._session_metadata_path.parent.mkdir(parents=True, exist_ok=True)
         self._session_metadata_path.write_text(json.dumps(_json_ready(self._session_metadata), indent=2, sort_keys=True) + "\n", encoding="utf-8")
         return self._session_metadata_path
 
     def _handle_logged_event(self, event: Any) -> None:
+        self._participant_trial_writer.observe_event(event)
         if self.topup_ledger is None:
             return
         self.topup_ledger.observe_event(event)
@@ -1846,7 +2188,7 @@ class SessionRunnerController:
         if self.topup_ledger is None:
             return
         outputs = self.topup_ledger.write_outputs()
-        draft_path = write_topup_draft_manifest(self.package.session_dir, self.topup_ledger, part_number=part_number)
+        draft_path = write_topup_draft_manifest(self._topup_dir, self.topup_ledger, part_number=part_number)
         self._analysis_outputs.update(outputs)
         key = "topup_block_manifest_draft" if part_number is None else f"topup_block_manifest_part{_part_suffix(part_number)}_draft"
         self._analysis_outputs[key] = draft_path
@@ -2188,7 +2530,7 @@ class SessionRunnerController:
                 manifest_path=str(block.manifest_path),
                 scheduled_event_count=len(schedule),
             )
-        recording_path = self.package.session_dir / f"Block_{block.index:02d}_{_slug(block.label)}_audio_evidence.wav"
+        recording_path = _audio_evidence_path(self.package, block)
         recording_started = self._start_backup_recording(engine, recording_path, block)
 
         def _progress(elapsed_s: float, current_block: RunBlock = block) -> None:
@@ -2433,10 +2775,10 @@ class SessionRunnerController:
         multi_part = len(_package_part_numbers(self.package)) > 1
         block_label = f"Part {part_label} top-up missed tactile trials" if multi_part and part_label else "Top-up missed tactile trials"
         block_stem = f"Block_{block_index:02d}_{'part' + part_label + '_' if multi_part and part_label else ''}topup_missed_trials"
-        wav_path = self.package.session_dir / "blocks" / f"{block_stem}.wav"
+        wav_path = _package_prepared_blocks_dir(self.package) / f"{block_stem}.wav"
         manifest_stem = f"topup_block_part{part_label}_manifest" if multi_part and part_label else "topup_block_manifest"
-        csv_path = self.package.session_dir / f"{manifest_stem}.csv"
-        json_path = self.package.session_dir / f"{manifest_stem}.json"
+        csv_path = self._topup_dir / f"{manifest_stem}.csv"
+        json_path = self._topup_dir / f"{manifest_stem}.json"
 
         clips: list[Any] = []
         sample_rate = 0
@@ -2522,6 +2864,7 @@ class SessionRunnerController:
         wav_path.parent.mkdir(parents=True, exist_ok=True)
         sf.write(_soundfile_path(wav_path), block_audio, sample_rate, subtype="PCM_16")
         _write_csv_rows(csv_path, trial_rows)
+        json_path.parent.mkdir(parents=True, exist_ok=True)
         json_path.write_text(
             json.dumps(
                 {
@@ -2602,22 +2945,22 @@ class SessionRunnerController:
         if self.topup_ledger is not None:
             self.topup_ledger.finalize_open_trials()
             topup_outputs = self.topup_ledger.write_outputs()
-            topup_outputs["topup_block_manifest_draft"] = write_topup_draft_manifest(self.package.session_dir, self.topup_ledger)
-            topup_manifest_csv = self.package.session_dir / "topup_block_manifest.csv"
-            topup_manifest_json = self.package.session_dir / "topup_block_manifest.json"
+            topup_outputs["topup_block_manifest_draft"] = write_topup_draft_manifest(self._topup_dir, self.topup_ledger)
+            topup_manifest_csv = self._topup_dir / "topup_block_manifest.csv"
+            topup_manifest_json = self._topup_dir / "topup_block_manifest.json"
             if topup_manifest_csv.exists():
                 topup_outputs["topup_block_manifest"] = topup_manifest_csv
             if topup_manifest_json.exists():
                 topup_outputs["topup_block_manifest_json"] = topup_manifest_json
-            for part_csv in sorted(self.package.session_dir.glob("topup_block_part*_manifest.csv")):
+            for part_csv in sorted(self._topup_dir.glob("topup_block_part*_manifest.csv")):
                 match = re.search(r"part([^_]+)_manifest", part_csv.stem)
                 key = f"topup_block_manifest_part{match.group(1)}" if match else part_csv.stem
                 topup_outputs[key] = part_csv
-            for part_json in sorted(self.package.session_dir.glob("topup_block_part*_manifest.json")):
+            for part_json in sorted(self._topup_dir.glob("topup_block_part*_manifest.json")):
                 match = re.search(r"part([^_]+)_manifest", part_json.stem)
                 key = f"topup_block_manifest_json_part{match.group(1)}" if match else part_json.stem
                 topup_outputs[key] = part_json
-            topup_block_dir = self.package.session_dir / "blocks"
+            topup_block_dir = _package_prepared_blocks_dir(self.package)
             for topup_wav in sorted(topup_block_dir.glob("*topup_missed_trials.wav")):
                 match = re.search(r"_part([^_]+)_topup", topup_wav.stem)
                 if match:
@@ -2626,11 +2969,12 @@ class SessionRunnerController:
                     topup_outputs["topup_block_wav"] = topup_wav
                 else:
                     topup_outputs[topup_wav.stem] = topup_wav
-        events_csv = self.package.session_dir / "events.csv"
-        events_xdf = self.package.session_dir / "events.xdf"
-        lsl_markers_csv = self.package.session_dir / "lsl_markers.csv"
-        lsl_markers_xdf = self.package.session_dir / "lsl_markers.xdf"
-        trigger_dictionary_path = self.package.session_dir / "trigger_dictionary.json"
+        self._participant_trial_writer.rewrite_from_events(self.logger.events)
+        events_csv = self._events_csv_path
+        events_xdf = self._events_xdf_path
+        lsl_markers_csv = self._lsl_markers_csv_path
+        lsl_markers_xdf = self._lsl_markers_xdf_path
+        trigger_dictionary_path = self._trigger_dictionary_path
         if self.capture_options.write_events_csv:
             self.logger.write_csv(events_csv)
         if self.capture_options.write_internal_xdf:
@@ -2652,9 +2996,10 @@ class SessionRunnerController:
             self.events.write_trigger_dictionary(trigger_dictionary_path)
         analysis = analyze_session_events(self.logger.events)
         self._analysis_outputs = {}
+        self._analysis_outputs["participant_trials"] = self._participant_trials_csv_path
         if self.capture_options.write_analysis_csvs:
-            self._analysis_outputs = write_analysis_csvs(analysis, self.package.session_dir / "analysis", self.package.session_id)
-            self._analysis_outputs["timing_qc"] = _write_timing_qc_csv(self.logger.events, self.package.session_dir / "analysis" / f"{self.package.session_id}_timing_qc.csv")
+            self._analysis_outputs.update(write_analysis_csvs(analysis, self._analytics_dir, self.package.session_id))
+            self._analysis_outputs["timing_qc"] = _write_timing_qc_csv(self.logger.events, self._analytics_dir / f"{self.package.session_id}_timing_qc.csv")
         self._analysis_outputs.update(topup_outputs)
         if self.capture_options.write_lsl_marker_mirror:
             self._analysis_outputs["lsl_markers"] = lsl_markers_csv
@@ -2664,7 +3009,8 @@ class SessionRunnerController:
         if _path_exists(self._session_metadata_path):
             self._analysis_outputs["session_metadata"] = self._session_metadata_path
         self._summary_text = format_analysis_summary(analysis)
-        (self.package.session_dir / "analysis_summary.txt").write_text(self._summary_text + "\n", encoding="utf-8")
+        self._analytics_dir.mkdir(parents=True, exist_ok=True)
+        (self._analytics_dir / "analysis_summary.txt").write_text(self._summary_text + "\n", encoding="utf-8")
 
     def _play_block_with_schedule(
         self,
@@ -2760,6 +3106,68 @@ def _event_metadata(metadata: dict[str, Any] | None) -> dict[str, Any]:
         for key, value in metadata.items()
         if isinstance(key, str) and key and isinstance(value, (str, int, float, bool))
     }
+
+
+def _flat_event_row(event: Any) -> dict[str, Any]:
+    if isinstance(event, dict):
+        row = dict(event)
+    elif hasattr(event, "as_flat_dict"):
+        row = dict(event.as_flat_dict())
+    else:
+        row = {
+            "event_id": getattr(event, "event_id", ""),
+            "event_type": getattr(event, "event_type", ""),
+            "unix_time": getattr(event, "unix_time", ""),
+            "monotonic_time": getattr(event, "monotonic_time", ""),
+        }
+        payload = getattr(event, "payload", {}) or {}
+        if isinstance(payload, dict):
+            row.update(payload)
+    payload_json = row.get("payload_json")
+    if payload_json and isinstance(payload_json, str):
+        try:
+            payload = json.loads(payload_json)
+        except Exception:
+            payload = {}
+        if isinstance(payload, dict):
+            for key, value in payload.items():
+                row.setdefault(key, value)
+    return row
+
+
+def _trial_is_catch(trial_type: str, family: str) -> bool:
+    text = f"{trial_type} {family}".strip().lower()
+    return "catch" in text or "audio_only" in text or "audio-only" in text
+
+
+def _trial_has_tactile(trial_type: str, family: str, tactile_event_seen: bool) -> bool:
+    if tactile_event_seen:
+        return True
+    text = f"{trial_type} {family}".strip().lower()
+    if _trial_is_catch(trial_type, family):
+        return False
+    return "tactile" in text or "baseline" in text
+
+
+def _trial_has_audio(trial_type: str, family: str, looming_event_seen: bool) -> bool:
+    if looming_event_seen:
+        return True
+    text = f"{trial_type} {family}".strip().lower()
+    if "baseline" in text and "audio" not in text:
+        return False
+    return "audio" in text or "catch" in text
+
+
+def _trial_stimulus_modality(trial_type: str, family: str, tactile_event_seen: bool) -> str:
+    tactile = _trial_has_tactile(trial_type, family, tactile_event_seen)
+    audio = _trial_has_audio(trial_type, family, False)
+    if tactile and audio:
+        return "audiotactile"
+    if tactile:
+        return "tactile"
+    if audio:
+        return "audio"
+    return ""
 
 
 def _block_condition_key(block: RunBlock) -> tuple[int, str]:
@@ -2944,14 +3352,29 @@ def _session_metadata_paths(package: RunPackage) -> dict[str, Any]:
         "protocol": package.protocol_path,
         "source_run_setup_manifest": package.source_run_setup_manifest_path,
         "render_manifest": package.render_manifest_path,
+        "participant_trials_csv": _participant_trials_csv_path(package),
+        "verbose_events_csv": _verbose_events_csv_path(package),
+        "verbose_events_xdf": _verbose_events_xdf_path(package),
+        "lsl_markers_csv": _lsl_markers_csv_path(package),
+        "lsl_markers_xdf": _lsl_markers_xdf_path(package),
+        "trigger_dictionary_json": _trigger_dictionary_path(package),
     }
-    return {
+    result = {
         key: {
             "path": "" if path is None else str(path),
             "sha256": "" if path is None or not _path_exists(path) else _sha256_file(Path(path)),
         }
         for key, path in paths.items()
     }
+    result["directories"] = {
+        "participant_data_dir": str(package.session_dir),
+        "experiment_context_dir": str(output_metadata_dir(_package_output_root(package))),
+        "runner_logs_dir": str(_package_runner_log_dir(package)),
+        "verbose_events_dir": str(_package_verbose_events_dir(package)),
+        "data_analytics_dir": str(_package_analytics_dir(package)),
+        "prepared_blocks_dir": str(_package_prepared_blocks_dir(package)),
+    }
+    return result
 
 
 def _append_package_diary_event(
@@ -3454,7 +3877,7 @@ def _normalize_instruction_profile(value: Any) -> dict[str, Any]:
 def _materialize_session_instruction_profile(value: Any, *, session_dir: Path, source_base_dir: Path) -> dict[str, Any]:
     profile = _normalize_instruction_profile(value)
     slots: list[dict[str, Any]] = []
-    instruction_dir = Path(session_dir) / "instructions"
+    instruction_dir = output_shared_instructions_dir(Path(session_dir).parent)
     for item in profile.get("slots", []):
         slot = dict(item)
         if not bool(slot.get("enabled")):
@@ -4157,6 +4580,9 @@ def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> Non
         "participant_id": package.participant_id,
         "session_id": package.session_id,
         "created_at": package.created_at,
+        "session_dir": str(package.session_dir),
+        "context_dir": str(output_metadata_dir(_package_output_root(package))),
+        "data_analytics_dir": str(_package_analytics_dir(package)),
         "execution_mode": package.execution_mode,
         "source_run_setup_manifest_path": str(package.source_run_setup_manifest_path) if package.source_run_setup_manifest_path else "",
         "audio_route": {
@@ -4178,7 +4604,7 @@ def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> Non
                 "name": "PPSMarkersV2",
                 "type": "Markers",
                 "required": True,
-                "policy": "standard runner event/metadata protocol; live outlet is always attempted and local mirrors are always written",
+                "policy": "create once before the first instruction/block, keep online until participant session end, and never destroy/recreate per block",
             },
         },
         "design_path": str(package.design_path),
@@ -4188,13 +4614,17 @@ def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> Non
         "source_wavs": [_json_ready(asdict(wav)) for wav in wavs],
         "blocks": [_json_ready(asdict(block)) for block in package.blocks],
         "outputs": {
-            "events_csv": str(package.session_dir / "events.csv"),
-            "events_xdf": str(package.session_dir / "events.xdf"),
-            "lsl_markers_csv": str(package.session_dir / "lsl_markers.csv"),
-            "lsl_markers_xdf": str(package.session_dir / "lsl_markers.xdf"),
-            "trigger_dictionary_json": str(package.session_dir / "trigger_dictionary.json"),
-            "session_metadata_json": str(package.session_dir / "session_metadata.json"),
-            "analysis_dir": str(package.session_dir / "analysis"),
+            "participant_trials_csv": str(_participant_trials_csv_path(package)),
+            "participant_audio_evidence_wav_pattern": str(package.session_dir / "block_XX_audio_evidence.wav"),
+            "labrecorder_xdf_pattern": str(package.session_dir / "block_XX.xdf"),
+            "verbose_events_csv": str(_verbose_events_csv_path(package)),
+            "verbose_events_xdf": str(_verbose_events_xdf_path(package)),
+            "lsl_markers_csv": str(_lsl_markers_csv_path(package)),
+            "lsl_markers_xdf": str(_lsl_markers_xdf_path(package)),
+            "trigger_dictionary_json": str(_trigger_dictionary_path(package)),
+            "session_metadata_json": str(_session_metadata_path(package)),
+            "analysis_dir": str(_package_analytics_dir(package)),
+            "prepared_blocks_dir": str(_package_prepared_blocks_dir(package)),
         },
     }
     package.manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")

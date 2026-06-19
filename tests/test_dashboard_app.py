@@ -40,6 +40,12 @@ from peripersonal_space_toolkit.render_backend import (
     render_design_with_3dti,
     sha256_file,
 )
+from peripersonal_space_toolkit.output_layout import (
+    output_metadata_dir,
+    output_profile_snapshot_dir,
+    output_project_state_dir,
+    output_runner_logs_dir,
+)
 from peripersonal_space_toolkit.subprocess_utils import windows_no_console_kwargs
 
 
@@ -730,10 +736,11 @@ def test_dashboard_exports_data_acquisition_folder_bridge(tmp_path: Path):
     assert acquisition_root.is_dir()
     assert dashboard_app._path_exists(diary_path)
     assert diary_path.name.endswith("_LOG-DIARY_DO_NOT_DELETE.txt")
-    assert diary_path.parent == acquisition_root / "study_profile_snapshot_DO_NOT_DELETE"
+    assert diary_path.parent == output_runner_logs_dir(acquisition_root)
     assert dashboard_app._path_exists(bridge_manifest_path)
-    assert bridge_manifest_path.parent == acquisition_root / "study_profile_snapshot_DO_NOT_DELETE"
+    assert bridge_manifest_path.parent == output_project_state_dir(acquisition_root)
     assert design_export_dir.is_dir()
+    assert design_export_dir.parent == output_profile_snapshot_dir(acquisition_root) / "dashboard_design_export"
     assert dashboard_app._path_exists(design_export_dir / "0_profile" / "project_manifest.json")
     assert dashboard_app._path_exists(design_export_dir / "0_profile" / "active_design.json")
     assert dashboard_app._path_exists(design_snapshot_path)
@@ -2641,8 +2648,10 @@ def test_dashboard_bakes_baseline_tactile_trial_files_with_three_channels(tmp_pa
     assert export_response.status_code == 200, export_response.text
     exported = export_response.json()["output_folder_export_result"]
     bridge_path = Path(exported["bridge_manifest_path"])
-    metadata_dir = tmp_path / "sessions" / "study_profile_snapshot_DO_NOT_DELETE"
-    assert bridge_path.parent == metadata_dir
+    metadata_dir = output_metadata_dir(tmp_path / "sessions")
+    project_state_dir = output_project_state_dir(tmp_path / "sessions")
+    profile_snapshot_dir = output_profile_snapshot_dir(tmp_path / "sessions")
+    assert bridge_path.parent == project_state_dir
     assert bridge_path.name == "dashboard_runner_bridge_manifest.v1.json"
     assert bridge_path.is_file()
     bridge_payload = dashboard_app._load_json(bridge_path)
@@ -2651,13 +2660,13 @@ def test_dashboard_bakes_baseline_tactile_trial_files_with_three_channels(tmp_pa
     assert bridge_payload["participant_id"] == "P001"
     snapshot_dir = Path(bridge_payload["acquisition_profile_snapshot_dir"])
     assert snapshot_dir.is_dir()
-    assert snapshot_dir.parent == metadata_dir
+    assert snapshot_dir.parent == profile_snapshot_dir
     assert (snapshot_dir / "6_experiment_run_setup" / "experiment_run_setup_manifest.json").is_file()
     settings_path = tmp_path / "dashboard_projects" / "dashboard_state" / "focus_runner_settings.v1.json"
     settings = json.loads(settings_path.read_text(encoding="utf-8"))
     assert settings["active_output_folder"] == str(tmp_path / "sessions")
     assert settings["active_profile_id"] == saved_result["profile_id"]
-    diary = metadata_dir / "output_diary.v1.jsonl"
+    diary = project_state_dir / "output_diary.v1.jsonl"
     diary_events = [json.loads(line) for line in diary.read_text(encoding="utf-8").splitlines()]
     assert {event["event_type"] for event in diary_events} >= {"profile_saved", "acquisition_folder_exported"}
     assert all("participant_name" not in event for event in diary_events)

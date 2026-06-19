@@ -5,6 +5,7 @@ import json
 from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -13,6 +14,7 @@ import soundfile as sf
 from peripersonal_space_toolkit import session_runner as session_runner_module
 from peripersonal_space_toolkit.design import ProtocolSpec, default_design
 from peripersonal_space_toolkit.session_runner import (
+    ParticipantTrialCsvWriter,
     SessionRunnerController,
     claim_prepared_session,
     load_last_experiment_pointer,
@@ -26,6 +28,13 @@ from peripersonal_space_toolkit.session_runner import (
     segment_run_setup_participants,
 )
 from peripersonal_space_toolkit.runner_diary import find_output_diary, read_diary_entries
+from peripersonal_space_toolkit.output_layout import (
+    output_data_analytics_dir,
+    output_prepared_blocks_dir,
+    output_runner_logs_dir,
+    output_shared_instructions_dir,
+    output_verbose_events_dir,
+)
 
 
 def _compact_design():
@@ -262,9 +271,13 @@ def test_prepare_run_package_writes_manifest_protocol_and_blocks(tmp_path: Path)
     assert package.design_path.exists()
     assert package.protocol_path.exists()
     assert package.manifest_path.exists()
+    assert package.manifest_path.parent == output_runner_logs_dir(tmp_path / "sessions") / package.session_id
+    assert package.design_path.parent == package.manifest_path.parent
     assert len(package.blocks) == 1
     assert package.blocks[0].manifest_path.exists()
     assert package.blocks[0].wav_path.exists()
+    assert package.blocks[0].manifest_path.parent == output_prepared_blocks_dir(tmp_path / "sessions") / package.session_id / "blocks"
+    assert not (package.session_dir / "blocks").exists()
 
     manifest = json.loads(package.manifest_path.read_text(encoding="utf-8"))
     assert manifest["schema"] == "pps-run-session.v1"
@@ -292,8 +305,10 @@ def test_prepare_segment_run_package_uses_segment5_and_segment6_csvs(tmp_path: P
     assert package.execution_mode == "participant_block_wavs"
     assert package.participant_id == "P001"
     assert package.manifest_path.exists()
+    assert package.manifest_path.parent == output_runner_logs_dir(tmp_path / "sessions") / package.session_id
     assert len(package.blocks) == 1
     assert package.blocks[0].metadata["source_block_index"] == 1
+    assert package.blocks[0].manifest_path.parent == output_prepared_blocks_dir(tmp_path / "sessions") / package.session_id / "blocks"
 
     block_audio, sample_rate = sf.read(package.blocks[0].wav_path, always_2d=True)
     assert sample_rate == 44100
@@ -686,9 +701,10 @@ def test_prepare_segment_run_package_copies_instruction_audio(tmp_path: Path):
 
     slot = package.instruction_profile["slots"][0]
     copied = Path(slot["path"])
-    assert copied.parent == package.session_dir / "instructions"
+    assert copied.parent == output_shared_instructions_dir(tmp_path / "sessions")
     assert copied.exists()
     assert copied.name == "before_experiment.wav"
+    assert not (package.session_dir / "instructions").exists()
     session_manifest = json.loads(package.manifest_path.read_text(encoding="utf-8"))
     assert session_manifest["instruction_profile"]["slots"][0]["path"] == str(copied)
     assert session_manifest["instruction_profile"]["slots"][0]["sha256"]
@@ -726,6 +742,111 @@ def test_prepare_segment_run_package_keeps_missing_instruction_optional(tmp_path
     assert slot["required"] is False
     assert slot["path"] == str(missing_instruction)
     assert not (package.session_dir / "instructions").exists()
+
+
+def test_participant_trial_csv_writer_classifies_hit_miss_for_tactile_and_catch(tmp_path: Path):
+    package = SimpleNamespace(participant_id="P001", session_id="P001_20260102_030405", session_dir=tmp_path / "P001_20260102_030405")
+    writer = ParticipantTrialCsvWriter(
+        package.session_dir / f"{package.session_id}_trials.csv",
+        package=package,
+        participant_metadata={"age_years": "29", "gender": "female", "handedness": "right"},
+    )
+
+    def emit_trial(
+        *,
+        event_id: int,
+        block_number: int,
+        trial_number: int,
+        trial_type: str,
+        family: str,
+        start_unix: float,
+        tactile_unix: float | None = None,
+        click_unix: float | None = None,
+    ) -> int:
+        uid = f"T{trial_number:03d}"
+        base = {
+            "participant_id": "P001",
+            "session_id": package.session_id,
+            "block_number": block_number,
+            "block_label": "Block 01",
+            "trial_number": trial_number,
+            "trial_uid": uid,
+            "trial_type": trial_type,
+            "family": family,
+            "row_label": "Inhale",
+            "respiratory_phase": "Inhale",
+            "soa_ms": "300",
+            "noise_type": "pink",
+        }
+        writer.observe_event({"event_id": event_id, "event_type": "trial_start", "unix_time": start_unix, **base})
+        event_id += 1
+        if trial_type in {"Audio-Tactile", "Catch"}:
+            writer.observe_event({"event_id": event_id, "event_type": "looming_onset", "unix_time": start_unix + 1.0, **base})
+            event_id += 1
+        if tactile_unix is not None:
+            writer.observe_event({"event_id": event_id, "event_type": "tactile_onset", "unix_time": tactile_unix, **base})
+            event_id += 1
+        writer.observe_event({"event_id": event_id, "event_type": "response_window_onset", "unix_time": start_unix + 1.0, **base})
+        event_id += 1
+        if click_unix is not None:
+            writer.observe_event(
+                {
+                    "event_id": event_id,
+                    "event_type": "mouse_click",
+                    "unix_time": click_unix,
+                    "block_number": block_number,
+                    "in_target": True,
+                    "during_playback": True,
+                }
+            )
+            event_id += 1
+        writer.observe_event({"event_id": event_id, "event_type": "trial_end", "unix_time": start_unix + 6.0, **base})
+        return event_id + 1
+
+    next_event = emit_trial(
+        event_id=1,
+        block_number=1,
+        trial_number=1,
+        trial_type="Audio-Tactile",
+        family="audio_tactile",
+        start_unix=100.0,
+        tactile_unix=103.0,
+        click_unix=103.25,
+    )
+    next_event = emit_trial(
+        event_id=next_event,
+        block_number=1,
+        trial_number=2,
+        trial_type="Catch",
+        family="catch",
+        start_unix=200.0,
+    )
+    next_event = emit_trial(
+        event_id=next_event,
+        block_number=1,
+        trial_number=3,
+        trial_type="Catch",
+        family="catch",
+        start_unix=300.0,
+        click_unix=302.0,
+    )
+    emit_trial(
+        event_id=next_event,
+        block_number=1,
+        trial_number=4,
+        trial_type="Baseline",
+        family="baseline",
+        start_unix=400.0,
+        tactile_unix=403.0,
+    )
+
+    rows = list(csv.DictReader(writer.path.open(encoding="utf-8")))
+    assert [row["outcome"] for row in rows] == ["Hit", "Hit", "Miss", "Miss"]
+    assert rows[0]["rt_ms"] == "250.000"
+    assert rows[0]["tactile_present"] == "true"
+    assert rows[1]["catch_trial"] == "true"
+    assert rows[2]["response_given"] == "true"
+    assert rows[3]["stimulus_modality"] == "tactile"
 
 
 class _MockAudioEngine:
@@ -820,7 +941,10 @@ class _MockAudioEngine:
         return True
 
     def stop_recording(self, output_path=None, interrupted=False):
-        return np.zeros((10, 3), dtype=np.float32)
+        data = np.zeros((10, 3), dtype=np.float32)
+        if output_path:
+            sf.write(output_path, data, 44100)
+        return data
 
 
 def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
@@ -859,6 +983,7 @@ def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
     assert result.session_metadata_path and result.session_metadata_path.exists()
     assert result.analysis_outputs["responses"].exists()
     assert result.analysis_outputs["analysis_ready_trials"].exists()
+    assert result.analysis_outputs["participant_trials"].exists()
     assert result.analysis_outputs["timing_qc"].exists()
     assert result.analysis_outputs["lsl_markers"].exists()
     assert result.analysis_outputs["lsl_markers_xdf"].exists()
@@ -883,7 +1008,25 @@ def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
     assert "0.05" in events_text
     assert result.recording_paths
     assert result.recording_paths[0].parent == package.session_dir
-    assert result.recording_paths[0].name.endswith("_audio_evidence.wav")
+    assert result.recording_paths[0].name == "block_01_audio_evidence.wav"
+    assert result.events_csv.parent == output_verbose_events_dir(package.session_dir.parent) / package.session_id
+    assert result.lsl_markers_csv and result.lsl_markers_csv.parent == result.events_csv.parent
+    assert result.trigger_dictionary_path and result.trigger_dictionary_path.parent == result.events_csv.parent
+    assert result.session_metadata_path.parent == output_runner_logs_dir(package.session_dir.parent) / package.session_id
+    assert result.analysis_outputs["analysis_ready_trials"].parent == output_data_analytics_dir(package.session_dir.parent) / package.session_id
+    participant_trial_rows = list(csv.DictReader(result.analysis_outputs["participant_trials"].open(encoding="utf-8")))
+    assert participant_trial_rows
+    assert participant_trial_rows[0]["participant_age_years"] == "29"
+    assert participant_trial_rows[0]["outcome"] in {"Hit", "Miss"}
+    assert not (package.session_dir / "events.csv").exists()
+    assert not (package.session_dir / "lsl_markers.csv").exists()
+    assert not (package.session_dir / "trigger_dictionary.json").exists()
+    assert not (package.session_dir / "session_metadata.json").exists()
+    assert not (package.session_dir / "analysis").exists()
+    assert sorted(path.name for path in package.session_dir.iterdir()) == [
+        f"{package.session_id}_trials.csv",
+        "block_01_audio_evidence.wav",
+    ]
     diary = find_output_diary(package.session_dir.parent)
     assert diary is not None
     diary_entries = read_diary_entries(diary)

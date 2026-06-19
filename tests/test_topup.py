@@ -12,6 +12,7 @@ import pytest
 from peripersonal_space_toolkit.session_analysis import analyze_session_events, write_analysis_csvs
 from peripersonal_space_toolkit.session_events import SessionEvent
 from peripersonal_space_toolkit.session_runner import SessionRunnerController, prepare_segment_run_package
+from peripersonal_space_toolkit.output_layout import output_prepared_blocks_dir
 from peripersonal_space_toolkit.topup import HIT, MISSED_NEEDS_TOPUP, TopUpLedger
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -484,7 +485,7 @@ def test_session_runner_plays_approved_topup_block_and_writes_final_outcomes(tmp
     assert result.analysis_outputs["topup_ledger_csv"].exists()
     assert result.analysis_outputs["topup_block_manifest"].exists()
     assert result.analysis_outputs["topup_block_wav"].exists()
-    assert result.analysis_outputs["topup_block_wav"].parent == package.session_dir / "blocks"
+    assert result.analysis_outputs["topup_block_wav"].parent == output_prepared_blocks_dir(package.session_dir.parent) / package.session_id / "blocks"
     final_outcomes = result.analysis_outputs["final_trial_outcomes"]
     assert final_outcomes.exists()
     with final_outcomes.open(newline="", encoding="utf-8") as handle:
@@ -551,8 +552,8 @@ def test_session_runner_plays_one_topup_at_end_of_each_part(tmp_path: Path):
     assert result.analysis_outputs["topup_block_manifest_part2"].exists()
     assert result.analysis_outputs["topup_block_wav_part1"].exists()
     assert result.analysis_outputs["topup_block_wav_part2"].exists()
-    assert result.analysis_outputs["topup_block_wav_part1"].parent == package.session_dir / "blocks"
-    assert result.analysis_outputs["topup_block_wav_part2"].parent == package.session_dir / "blocks"
+    assert result.analysis_outputs["topup_block_wav_part1"].parent == output_prepared_blocks_dir(package.session_dir.parent) / package.session_id / "blocks"
+    assert result.analysis_outputs["topup_block_wav_part2"].parent == output_prepared_blocks_dir(package.session_dir.parent) / package.session_id / "blocks"
     part1_rows = list(csv.DictReader(result.analysis_outputs["topup_block_manifest_part1"].open(encoding="utf-8")))
     part2_rows = list(csv.DictReader(result.analysis_outputs["topup_block_manifest_part2"].open(encoding="utf-8")))
     assert {row["Part_Number"] for row in part1_rows} == {"1"}

@@ -12,7 +12,7 @@ from peripersonal_space_toolkit.runner_diary import (
     resolve_or_create_output_project,
     slugify_identifier,
 )
-from peripersonal_space_toolkit.output_layout import output_metadata_dir
+from peripersonal_space_toolkit.output_layout import output_metadata_dir, output_runner_logs_dir
 
 
 def test_diary_filename_uses_experiment_identifier():
@@ -55,8 +55,8 @@ def test_resolve_output_project_creates_experiment_named_child(tmp_path: Path):
     assert result.created is True
     assert result.reused_existing_diary is False
     assert result.root == tmp_path / "study_5_pps_box_breathing_profile_20260617_151500"
-    assert result.diary_path == output_metadata_dir(result.root) / diary_filename("study_5_pps_box_breathing_profile")
-    assert result.diary_path.parent.name == "study_profile_snapshot_DO_NOT_DELETE"
+    assert result.diary_path == output_runner_logs_dir(result.root) / diary_filename("study_5_pps_box_breathing_profile")
+    assert result.diary_path.parent == output_metadata_dir(result.root) / "runner_logs"
     assert not (result.root / diary_filename("study_5_pps_box_breathing_profile")).exists()
     entries = read_diary_entries(result.diary_path)
     assert entries[0]["event_type"] == "output_project_created"
