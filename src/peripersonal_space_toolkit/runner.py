@@ -50,6 +50,7 @@ from .audio_routing import (
     audio_runtime_preflight_message,
     apply_output_volumes,
     center_audio_for_output,
+    default_tactile_duplicate_channel,
     output_channel_map_from_env,
     prepare_block_audio_for_output,
     preferred_runtime_output_channels,
@@ -583,7 +584,7 @@ class AudioEngine:
         )
 
     def set_wired_loopback_mode(self, mode):
-        """Configure optional output-4 tactile proxy loopback behavior."""
+        """Configure optional input-4 recording of the output-4 tactile proxy."""
         normalized = normalize_wired_loopback_mode(mode)
         self.wired_loopback_mode = normalized
         if (
@@ -602,12 +603,11 @@ class AudioEngine:
             )
 
     def _duplicate_tactile_channel(self):
-        if (
-            self.wired_loopback_mode == WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY
-            and self.runtime_output_channels >= 4
-        ):
-            return 3
-        return None
+        return default_tactile_duplicate_channel(
+            self.runtime_output_channels,
+            tactile_channel=self.tactile_output_channel,
+            audio_channels=self.audio_output_channels,
+        )
 
     def _persistent_output_available(self, *, samplerate, channels) -> bool:
         return (
@@ -635,13 +635,13 @@ class AudioEngine:
             self._init_click_stream()
 
     def _promote_runtime_to_four_channels(self) -> bool:
-        """Use a silent fourth channel when a driver rejects 3-channel ASIO streams."""
+        """Use a tactile-mirror fourth channel when a driver rejects 3-channel ASIO streams."""
         if self.runtime_output_channels == 3 and self.max_output_channels >= 4:
             self.runtime_output_channels = 4
             if self.output_channel_map is None:
                 self.audio_output_channels = audio_output_channels_for_channels(self.runtime_output_channels)
                 self.tactile_output_channel = tactile_output_channel_for_channels(self.runtime_output_channels)
-            print("Audio routing: 3-channel stream failed; retrying with 4 channels (Output 4 silent).")
+            print("Audio routing: 3-channel stream failed; retrying with 4 channels (Output 4 tactile mirror).")
             return True
         return False
         

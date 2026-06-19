@@ -99,7 +99,7 @@ Current ASIO policy:
 - The Komplete ASIO route may need an even stream width. The runner should use
   a 4-channel ASIO stream when the native driver exposes 4+ outputs, while still
   routing auditory left/right to outputs 1/2, tactile stimuli and response
-  marker click tone to output 3, and keeping output 4 silent.
+  marker click tone to output 3, and a duplicate tactile mirror to output 4.
 
 The downloader must materialize a complete program repository into the chosen
 install folder. At minimum the installed folder must include:

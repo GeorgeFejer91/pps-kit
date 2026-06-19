@@ -319,6 +319,7 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
         from PIL import Image, ImageStat
+        from PySide6.QtTest import QTest
         from PySide6.QtWidgets import QApplication
         from peripersonal_space_toolkit import focus_app
     except Exception as exc:  # pragma: no cover - depends on optional GUI deps
@@ -375,7 +376,7 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert "LSL/event protocol" not in joined
     assert "Save additional fail-safe local recording" in joined
     assert "estimated extra file" in joined
-    assert "Wired loopback: mirror tactile to Output 4" in joined
+    assert "Record wired loopback from Input 4" in joined
     assert "Top up missed tactile trials at part end" in joined
     assert "CLICK" in joined
     assert window.participant_code_combo.objectName() == "runnerParticipantCombo"
@@ -392,9 +393,12 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert window.backup_recording_checkbox.objectName() == "failSafeRecordingCheckbox"
     assert window.wired_loopback_checkbox.objectName() == "wiredLoopbackCheckbox"
     assert not window.wired_loopback_checkbox.isChecked()
-    window.wired_loopback_checkbox.setChecked(True)
+    QTest.mouseClick(window.wired_loopback_checkbox, q["Qt"].MouseButton.LeftButton)
+    app.processEvents()
     assert window._runtime_capture_options().wired_loopback_mode == "output4_tactile_proxy"
-    window.wired_loopback_checkbox.setChecked(False)
+    QTest.mouseClick(window.wired_loopback_checkbox, q["Qt"].MouseButton.LeftButton)
+    app.processEvents()
+    assert window._runtime_capture_options().wired_loopback_mode == "off"
     assert window.data_columns_widget.objectName() == "dataSettingsColumns"
     assert window.data_logging_column.objectName() == "dataLoggingColumn"
     assert window.experiment_settings_column.objectName() == "experimentSettingsColumn"

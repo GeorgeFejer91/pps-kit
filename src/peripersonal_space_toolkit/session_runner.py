@@ -4734,7 +4734,7 @@ def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> Non
         "timing": {
             "primary_response_source": "mouse_click event log plus optional LSL marker stream",
             "stimulus_anchor": "audio_sample_zero emitted by audio callback",
-            "backup_trace": "optional local digital output evidence WAV; output-4 wired loopback is an opt-in tactile proxy, not Woojer mechanical onset",
+            "backup_trace": "optional local digital output evidence WAV; output 4 mirrors tactile on canonical 4-channel routes; input-4 wired loopback recording is opt-in and not Woojer mechanical onset",
             "response_marker": {
                 "channel": "tactile output",
                 "gain": RESPONSE_MARKER_GAIN,

@@ -383,11 +383,28 @@ def audio_output_channels_for_channels(channels: int) -> tuple[int, ...]:
     return SPATIAL_AUDIO_CHANNELS if channels >= BINAURAL_TACTILE_CHANNELS else LEGACY_AUDIO_CHANNELS
 
 
+def default_tactile_duplicate_channel(
+    channels: int,
+    *,
+    tactile_channel: int | None = None,
+    audio_channels: tuple[int, ...] | None = None,
+) -> int | None:
+    """Return the automatic tactile mirror channel for canonical 4+ channel output."""
+    tactile_target = tactile_output_channel_for_channels(channels) if tactile_channel is None else int(tactile_channel)
+    duplicate_channel = BINAURAL_TACTILE_PADDED_CHANNELS - 1
+    if channels < BINAURAL_TACTILE_PADDED_CHANNELS or tactile_target != SPATIAL_TACTILE_CHANNEL:
+        return None
+    if duplicate_channel in (audio_channels or audio_output_channels_for_channels(channels)):
+        return None
+    return duplicate_channel
+
+
 def preferred_runtime_output_channels(max_output_channels: int, hostapi_name: str = "") -> int:
     """Return the synchronized stream width to request from the output device.
 
     ASIO drivers are often happier with even channel counts. The validated PPS
-    route still uses outputs 1/2/3; output 4 is silent padding when available.
+    route uses outputs 1/2 for audio, output 3 for tactile, and output 4 as a
+    duplicate tactile mirror when available.
     """
     if max_output_channels >= 4 and str(hostapi_name or "").strip().lower() == "asio":
         return 4
@@ -447,9 +464,10 @@ def prepare_block_audio_for_output(
     original Study 5 mapping is preserved by swapping source right to output 0
     and source left to output 1.
 
-    If ``output_channels`` is 4 or greater for rendered files, channel 3+ is
-    padded with silence. This supports ASIO drivers that prefer even channel
-    counts while keeping tactile on physical output channel 3.
+    If ``output_channels`` is 4 or greater for rendered files, output 4 mirrors
+    the tactile cue whenever tactile remains on the canonical physical output 3.
+    This supports ASIO drivers that prefer even channel counts while keeping
+    output 4 available as a wired analog duplicate proxy.
     """
     array = ensure_2d_float32(data)
     source_channels = int(array.shape[1])
@@ -469,6 +487,13 @@ def prepare_block_audio_for_output(
         routed[:, audio_channels[0]] += array[:, 0]
         routed[:, audio_channels[1]] += array[:, 1]
         routed[:, tactile_channel] += array[:, 2]
+        duplicate_tactile_channel = default_tactile_duplicate_channel(
+            requested_channels,
+            tactile_channel=tactile_channel,
+            audio_channels=audio_channels,
+        )
+        if duplicate_tactile_channel is not None:
+            routed[:, duplicate_tactile_channel] += array[:, 2]
         return PreparedBlockAudio(
             data=np.ascontiguousarray(routed),
             layout="binaural_left_right_plus_tactile",
@@ -514,6 +539,12 @@ def apply_output_volumes(
         gain_by_channel[tactile_target] = max(gain_by_channel.get(tactile_target, 0.0), float(tactile_volume))
     for channel, gain in gain_by_channel.items():
         routed[:, channel] *= gain
+    if duplicate_tactile_channel is None:
+        duplicate_tactile_channel = default_tactile_duplicate_channel(
+            channels,
+            tactile_channel=tactile_target,
+            audio_channels=audio_targets,
+        )
     if (
         duplicate_tactile_channel is not None
         and 0 <= duplicate_tactile_channel < channels
@@ -551,12 +582,14 @@ def tactile_probe_for_output(
     tactile_channel: int | None = None,
     duplicate_tactile_channel: int | None = None,
 ) -> np.ndarray:
-    """Route a mono tactile probe to the active tactile output channel only."""
+    """Route a mono tactile probe to the active tactile output channel."""
     array = ensure_2d_float32(data)
     tactile = array[:, 0]
     routed = np.zeros((array.shape[0], output_channels), dtype=np.float32)
     target = tactile_output_channel_for_channels(output_channels) if tactile_channel is None else tactile_channel
     routed[:, target] = tactile * float(tactile_volume)
+    if duplicate_tactile_channel is None:
+        duplicate_tactile_channel = default_tactile_duplicate_channel(output_channels, tactile_channel=target)
     if duplicate_tactile_channel is not None and 0 <= duplicate_tactile_channel < output_channels:
         routed[:, duplicate_tactile_channel] = routed[:, target]
     return np.ascontiguousarray(routed)

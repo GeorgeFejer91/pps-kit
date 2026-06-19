@@ -137,13 +137,13 @@ Komplete output 3. No Woojer USB/Bluetooth driver is required for the electrical
 latency validation. Bluetooth must not be used for timing-sensitive tactile
 validation.
 
-Focus Mode includes an optional wired loopback selection for lab validation:
-`Output 4 tactile proxy`. When selected, the runner mirrors the tactile drive
-and response-marker pulse from Komplete output 3 onto output 4, records the
-first four Komplete inputs during each block, and labels input 4 as a duplicate
-tactile proxy. Use the wiring `Output 4 -> Input 4` with phantom power off and
-low input gain. This records an analog duplicate output, not the actual Woojer
-input node or mechanical vibration onset.
+On the standard 4-channel Komplete route, Focus Mode always mirrors the tactile
+drive and response-marker pulse from Komplete output 3 onto output 4. The
+optional `Record wired loopback from Input 4` selection records the first four
+Komplete inputs during each block and labels input 4 as a duplicate tactile
+proxy. Use the wiring `Output 4 -> Input 4` with phantom power off and low input
+gain. This records an analog duplicate output, not the actual Woojer input node
+or mechanical vibration onset.
 
 Woojer firmware/app tooling can be maintained from the vendor support page:
 

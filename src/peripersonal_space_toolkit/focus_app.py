@@ -537,7 +537,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--wired-loopback",
         choices=[WIRED_LOOPBACK_OFF, WIRED_LOOPBACK_CLI_OUTPUT4_TACTILE_PROXY],
         default=WIRED_LOOPBACK_OFF,
-        help="Enable an optional wired analog loopback route, for example output4-tactile-proxy.",
+        help="Record an optional wired analog loopback route, for example output4-tactile-proxy.",
     )
     parser.add_argument("--enable-missed-trial-topup", action="store_true", help="Prepare and request approval for one final missed-trial top-up block.")
     parser.add_argument("--validation-screenshot", type=Path, help=argparse.SUPPRESS)
@@ -744,8 +744,8 @@ def _backup_recording_checkbox_text(package: Any) -> str:
 
 def _wired_loopback_checkbox_text() -> str:
     return (
-        "Wired loopback: mirror tactile to Output 4\n"
-        "(patch Output 4 to Input 4; proxy only, not Woojer mechanical onset)"
+        "Record wired loopback from Input 4\n"
+        "(Output 4 always mirrors tactile; patch Output 4 to Input 4)"
     )
 
 
@@ -5390,8 +5390,8 @@ class FocusModeWindow:
         self.wired_loopback_checkbox = q["QCheckBox"](_wired_loopback_checkbox_text())
         self.wired_loopback_checkbox.setObjectName("wiredLoopbackCheckbox")
         self.wired_loopback_checkbox.setToolTip(
-            "Duplicates tactile output 3 to output 4 and records input 4 as an analog proxy. "
-            "This does not measure Woojer mechanical vibration onset."
+            "Output 4 already mirrors tactile output 3 on 4-channel routes. "
+            "This records input 4 as an analog duplicate proxy, not Woojer mechanical vibration onset."
         )
         self.wired_loopback_checkbox.setMinimumHeight(max(profile.button_min_height + 18, profile.input_min_height + 22))
         self.wired_loopback_checkbox.setChecked(

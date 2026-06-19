@@ -21,10 +21,11 @@ Use the calibration loopback state:
 - Physical output 1 to input 1.
 - Physical output 2 to input 2.
 - Physical output 3 to input 3.
-- Optional participant-run proxy: if Focus Mode `Wired loopback: mirror tactile
-  to Output 4` is enabled, patch physical output 4 to input 4. This records a
-  duplicate tactile-drive proxy while output 3 still drives the Woojer; it does
-  not measure the exact Woojer input node or mechanical vibration onset.
+- Optional participant-run proxy: on the standard 4-channel route, Focus Mode
+  already mirrors tactile output 3 to output 4. Enable `Record wired loopback
+  from Input 4` and patch physical output 4 to input 4 to save a duplicate
+  tactile-drive proxy while output 3 still drives the Woojer. This does not
+  measure the exact Woojer input node or mechanical vibration onset.
 
 Physical jack labels are 1-based. Software selectors are 0-based.
 

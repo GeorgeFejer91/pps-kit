@@ -48,7 +48,7 @@ The `Render Looming WAVs` action and `pps-render-design` create one WAV per nois
 
 For the current designed experiment, use the HTML dashboard Segment 6 handoff to native Focus Mode. It prepares `local_data\sessions\<participant_id>_<timestamp>\`, writes the design, protocol schedule, session manifest, per-block manifests/WAVs, event CSV/XDF, internal LSL marker mirrors, and immediate analysis outputs.
 
-The primary reaction-time source is the callback-derived event/LSL timing stream. The optional local audio evidence WAV records the runner's mixed output buffers, including the low-gain tactile-channel response marker. Focus Mode also offers an opt-in wired loopback mode that mirrors the tactile drive from Komplete output 3 onto output 4 and records input 4 as a per-block analog proxy when output 4 is patched to input 4. That proxy is useful for route checks, but it is not the exact Woojer input node and does not measure Woojer mechanical vibration onset.
+The primary reaction-time source is the callback-derived event/LSL timing stream. The optional local audio evidence WAV records the runner's mixed output buffers, including the low-gain tactile-channel response marker. On the standard 4-channel Komplete route, output 4 always mirrors the tactile drive from output 3. Focus Mode's opt-in wired loopback mode records input 4 as a per-block analog proxy when output 4 is patched to input 4. That proxy is useful for route checks, but it is not the exact Woojer input node and does not measure Woojer mechanical vibration onset.
 
 The locked Study 5 flow now runs through the dashboard Segment 6 handoff and
 native Focus Mode:
