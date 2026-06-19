@@ -96,7 +96,10 @@ def render_focus_layout_profile(
     spacious = width >= 1700 and height >= 960
 
     window_width = min(target_width, max(720, int(width * 0.96)))
-    window_height = min(target_height, max(500, int(height * 0.94)))
+    if height <= target_height:
+        window_height = max(500, height)
+    else:
+        window_height = min(max(target_height, int(height * 0.94)), int(height * 0.98))
 
     if constrained:
         screen_class = "constrained"
@@ -108,7 +111,7 @@ def render_focus_layout_profile(
         screen_class = "standard"
 
     target_square_size = 76 if constrained else (96 if compact else 104)
-    response_panel_side = 236 if constrained else (304 if compact else (328 if spacious else 316))
+    response_panel_side = 168 if constrained else (220 if compact else (328 if spacious else 316))
     if constrained:
         experiment_control_content_min_height = 160
         experiment_control_min_height = experiment_control_content_min_height
@@ -140,8 +143,8 @@ def render_focus_layout_profile(
         min_height=min(min_height, window_height),
         root_margin=8 if compact else 10,
         root_spacing=8 if compact else 10,
-        panel_margin=10 if compact else 12,
-        panel_spacing=6 if compact else 8,
+        panel_margin=8 if constrained else (10 if compact else 12),
+        panel_spacing=4 if constrained else (6 if compact else 8),
         grid_spacing=8 if compact else 10,
         body_font_pt=10.5 if constrained else 11.0,
         muted_font_pt=9.2 if constrained else 9.5,
@@ -159,8 +162,8 @@ def render_focus_layout_profile(
         target_min_height=target_square_size,
         target_max_height=target_square_size,
         target_font_pt=18.0 if constrained else (19.0 if compact else 20.0),
-        output_min_height=48 if constrained else (56 if compact else 60),
-        output_max_height=72 if constrained else (84 if compact else 90),
+        output_min_height=36 if constrained else (44 if compact else 60),
+        output_max_height=58 if constrained else (70 if compact else 90),
         experiment_control_min_height=max(experiment_control_min_height, experiment_control_content_min_height),
         experiment_control_content_min_height=experiment_control_content_min_height,
         experiment_control_initial_height=max(

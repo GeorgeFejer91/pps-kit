@@ -132,6 +132,7 @@ DATA_COLLECTED_MARK = "[collected]"
 TIMELINE_LABEL_WIDTH = 58
 TIMELINE_RIGHT_MARGIN = 12
 TIMELINE_ROW_NAMES = ("Resp", "Type", "SOA", "Tactile", "Clicks")
+TIMELINE_MINIMUM_VISIBLE_HEIGHT = 84
 TIMELINE_SEGMENT_LABEL_SKIP_WIDTH = 22
 TIMELINE_REPEATED_LABEL_SKIP_WIDTH = 58
 SINGLE_INSTANCE_MUTEX_NAME = "Local\\PPSExperimentRunnerSingleInstance"
@@ -140,10 +141,10 @@ SINGLE_INSTANCE_EXIT_CODE = 4
 
 def _timeline_widget_minimum_height(profile: FocusLayoutProfile | None) -> int:
     if profile is not None and profile.screen_class == "constrained":
-        return 42
+        return TIMELINE_MINIMUM_VISIBLE_HEIGHT
     if profile is not None and profile.compact:
-        return 78
-    return 112
+        return TIMELINE_MINIMUM_VISIBLE_HEIGHT
+    return max(TIMELINE_MINIMUM_VISIBLE_HEIGHT, 96)
 SINGLE_INSTANCE_MESSAGE = (
     "PPS Experiment Runner is already open.\n\n"
     "Close the existing Experiment Runner window before starting another one."
@@ -1447,6 +1448,17 @@ def _panel(q: dict[str, Any], title: str, *, profile: FocusLayoutProfile | None 
         heading.setMinimumHeight(max(16, input_min_height - 8))
         layout.addWidget(heading)
     return frame, layout
+
+
+def _create_focus_mode_dialog(q: dict[str, Any], owner: Any) -> Any:
+    class FocusModeDialog(q["QDialog"]):
+        def resizeEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
+            super().resizeEvent(event)
+            schedule_clamp = getattr(owner, "_schedule_experiment_control_splitter_clamp", None)
+            if callable(schedule_clamp):
+                schedule_clamp()
+
+    return FocusModeDialog()
 
 
 def _subtitle(q: dict[str, Any], text: str) -> Any:
@@ -3251,6 +3263,11 @@ def _create_topup_draft_widget(q: dict[str, Any], owner: Any) -> Any:
                     painter.setBrush(q["QBrush"](q["QColor"](color)))
                     painter.drawRoundedRect(x, y, box_width, box_height, 5, 5)
                     label = _topup_draft_item_label(item, compact=self._compact)
+                    try:
+                        elide_mode = q["Qt"].TextElideMode.ElideRight
+                    except AttributeError:
+                        elide_mode = q["Qt"].ElideRight
+                    label = str(painter.fontMetrics().elidedText(label, elide_mode, max(1, box_width - 8)))
                     painter.setPen(q["QPen"](q["QColor"]("#202621")))
                     painter.drawText(x + 4, y + 1, box_width - 8, box_height - 2, int(q["Qt"].AlignmentFlag.AlignVCenter), label)
             finally:
@@ -5065,7 +5082,9 @@ class FocusModeWindow:
         self.completed_display_block_indices: set[int] = set()
         self.recenter_controller = TactileRecenterController(self.timeline_state, self._move_cursor_to_target)
 
-        self.dialog = q["QDialog"]()
+        self._workspace_splitter_clamping = False
+        self._workspace_splitter_clamp_pending = False
+        self.dialog = _create_focus_mode_dialog(q, self)
         _enable_standard_window_controls(q, self.dialog)
         self.dialog.setWindowTitle(f"PPS Experiment Runner - {package.participant_id}")
         self.dialog.setModal(True)
@@ -5129,6 +5148,9 @@ class FocusModeWindow:
         self.workspace_splitter = q["QSplitter"](q["Qt"].Orientation.Vertical)
         self.workspace_splitter.setChildrenCollapsible(False)
         self.workspace_splitter.setHandleWidth(max(7, profile.root_spacing))
+        self.workspace_splitter.splitterMoved.connect(
+            lambda _pos, _index: self._clamp_workspace_splitter_for_experiment_control()
+        )
         root.addWidget(self.workspace_splitter, 1)
 
         self.run_splitter = q["QSplitter"](q["Qt"].Orientation.Horizontal)
@@ -5197,8 +5219,14 @@ class FocusModeWindow:
 
         output_panel, output_layout = _panel(q, "Output Summary", profile=profile)
         self.output_panel = output_panel
-        output_panel_min_height = 64 if profile.screen_class == "constrained" else (116 if profile.compact else 126)
-        output_panel_max_height = 100 if profile.screen_class == "constrained" else (160 if profile.compact else 180)
+        output_title_min_height = max(16, profile.input_min_height - 8)
+        output_panel_min_height = (
+            profile.output_min_height
+            + output_title_min_height
+            + profile.panel_spacing
+            + (profile.panel_margin * 2)
+        )
+        output_panel_max_height = max(profile.output_max_height + (profile.panel_margin * 2), output_panel_min_height)
         output_panel.setMinimumHeight(output_panel_min_height)
         output_panel.setMaximumHeight(output_panel_max_height)
         output_panel.setMinimumWidth(profile.response_panel_side)
@@ -5241,7 +5269,7 @@ class FocusModeWindow:
         data_panel.setMinimumWidth(380 if profile.compact else 460)
         data_panel_min_height = 248 if profile.screen_class == "constrained" else max(290, profile.response_panel_side)
         data_panel.setMinimumHeight(data_panel_min_height)
-        data_two_column = profile.screen_class != "constrained" or profile.available_width >= 1200
+        data_two_column = profile.screen_class != "constrained" or profile.available_width >= 1000
         self.data_settings_columns_mode = "two_column" if data_two_column else "stacked"
         self.data_columns_widget = q["QWidget"]()
         self.data_columns_widget.setObjectName("dataSettingsColumns")
@@ -5407,8 +5435,11 @@ class FocusModeWindow:
         )
         processing_panel.setMinimumHeight(processing_panel_min_height)
         processing_panel.setMinimumWidth(360 if profile.compact else 420)
+        processing_panel.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Minimum)
         progress_layout.setSpacing(profile.panel_spacing)
-        if profile.screen_class != "constrained":
+        show_lower_detail_text = profile.screen_class == "spacious" and profile.available_height >= 1300
+        show_lower_headings = (not profile.compact) and profile.available_height >= 1100
+        if show_lower_headings:
             progress_layout.addWidget(_subtitle(q, "Block Order"))
         self.part_selector_widget = q["QWidget"]()
         part_selector_layout = q["QHBoxLayout"](self.part_selector_widget)
@@ -5429,24 +5460,26 @@ class FocusModeWindow:
         progress_layout.addWidget(self.block_plan_widget)
         self.block_preview_label = q["QLabel"]("Block preview: live schedule")
         self.block_preview_label.setObjectName("mutedLabel")
-        self.block_preview_label.setWordWrap(True)
+        self.block_preview_label.setWordWrap(False)
         progress_layout.addWidget(self.block_preview_label)
-        if profile.screen_class == "constrained":
+        if not show_lower_detail_text:
             self.block_preview_label.setVisible(False)
         self.topup_draft_widget = _create_topup_draft_widget(q, self)
         progress_layout.addWidget(self.topup_draft_widget)
-        if profile.screen_class != "constrained":
+        if show_lower_headings:
             progress_layout.addWidget(_subtitle(q, "Stimulus / Tactile / Click Timeline"))
         timeline_status = q["QWidget"]()
         self.timeline_status_widget = timeline_status
+        timeline_status.setMinimumHeight(max(profile.button_min_height, profile.input_min_height + 4))
         timeline_status_layout = q["QHBoxLayout"](timeline_status)
         timeline_status_layout.setContentsMargins(0, 0, 0, 0)
         timeline_status_layout.setSpacing(8)
         self.next_tactile_label = q["QLabel"]("Next tactile: no block schedule")
         self.next_tactile_label.setObjectName("metricValue")
-        self.next_tactile_label.setWordWrap(True)
+        self.next_tactile_label.setWordWrap(False)
         self.tactile_count_label = q["QLabel"]("0 / 0 cues")
         self.tactile_count_label.setObjectName("mutedLabel")
+        self.tactile_count_label.setWordWrap(False)
         timeline_status_layout.addWidget(self.next_tactile_label, 1)
         timeline_status_layout.addWidget(self.tactile_count_label)
         progress_layout.addWidget(timeline_status)
@@ -5459,20 +5492,23 @@ class FocusModeWindow:
         progress_layout.addWidget(self.tactile_timeline_widget)
         self.recenter_status_label = q["QLabel"]("Cursor recenter: waiting")
         self.recenter_status_label.setObjectName("mutedLabel")
-        self.recenter_status_label.setWordWrap(True)
+        self.recenter_status_label.setWordWrap(False)
         progress_layout.addWidget(self.recenter_status_label)
-        if profile.screen_class == "constrained":
+        if not show_lower_detail_text:
             self.recenter_status_label.setVisible(False)
-        else:
+        if show_lower_detail_text:
             progress_layout.addWidget(_subtitle(q, "Progress"))
         self.progress_label = q["QLabel"]("Waiting to start")
         self.progress_label.setObjectName("metricValue")
-        self.progress_label.setWordWrap(True)
+        self.progress_label.setWordWrap(False)
         progress_layout.addWidget(self.progress_label)
+        if not show_lower_detail_text:
+            self.progress_label.setVisible(False)
         self.progress = q["QProgressBar"]()
         self.progress.setRange(0, 1000)
         self.progress.setValue(0)
         self.progress_track_widget = q["QWidget"]()
+        self.progress_track_widget.setMinimumHeight(profile.progress_min_height + 5)
         progress_track_layout = q["QHBoxLayout"](self.progress_track_widget)
         progress_track_layout.setContentsMargins(TIMELINE_LABEL_WIDTH, 0, TIMELINE_RIGHT_MARGIN, 0)
         progress_track_layout.setSpacing(0)
@@ -5483,17 +5519,17 @@ class FocusModeWindow:
             self.progress_track_widget.setVisible(False)
         self.event_label = q["QLabel"]("Event stream idle")
         self.event_label.setObjectName("mutedLabel")
-        self.event_label.setWordWrap(True)
+        self.event_label.setWordWrap(False)
         progress_layout.addWidget(self.event_label)
         self.prewarm_label = q["QLabel"]("Next participant: idle")
         self.prewarm_label.setObjectName("mutedLabel")
-        self.prewarm_label.setWordWrap(True)
+        self.prewarm_label.setWordWrap(False)
         progress_layout.addWidget(self.prewarm_label)
-        if profile.screen_class == "constrained":
-            self.progress_label.setVisible(False)
-            self.progress_track_widget.setVisible(False)
+        if not show_lower_detail_text:
             self.event_label.setVisible(False)
             self.prewarm_label.setVisible(False)
+        if profile.screen_class == "constrained":
+            self.progress_track_widget.setVisible(False)
         progress_layout.addStretch(1)
         self.workspace_splitter.addWidget(processing_panel)
 
@@ -5514,6 +5550,7 @@ class FocusModeWindow:
         top_height = response_stack_height
         self._refresh_experiment_control_minimum_height()
         self.workspace_splitter.setSizes([top_height, profile.experiment_control_initial_height])
+        self._clamp_workspace_splitter_for_experiment_control()
 
         self.timer = q["QTimer"](self.dialog)
         self.timer.timeout.connect(self._drain)
@@ -5592,6 +5629,8 @@ class FocusModeWindow:
         enabled = bool(self._topup_slots_enabled_for_plan())
         if not enabled:
             return False
+        if self.layout_profile.compact or self.layout_profile.available_height <= 900:
+            return False
         selected_item = self._run_plan_item_by_number(self.selected_display_block_index or 0)
         if selected_item is not None and str(selected_item.get("kind") or "") == "topup":
             return True
@@ -5607,42 +5646,222 @@ class FocusModeWindow:
         self.topup_draft_widget.update()
         self._refresh_experiment_control_minimum_height()
 
-    def _experiment_control_content_minimum_height(self) -> int:
-        profile_min = int(getattr(self.layout_profile, "experiment_control_content_min_height", 0) or 0)
-        if not hasattr(self, "processing_panel"):
-            return profile_min
-        if self.layout_profile.compact:
-            return profile_min
-        layout = self.processing_panel.layout()
+    def _experiment_control_visible_widgets(self) -> list[tuple[str, Any]]:
+        candidates = [
+            ("part_selector_widget", getattr(self, "part_selector_widget", None)),
+            ("block_plan_widget", getattr(self, "block_plan_widget", None)),
+            ("block_preview_label", getattr(self, "block_preview_label", None)),
+            ("topup_draft_widget", getattr(self, "topup_draft_widget", None)),
+            ("timeline_status_widget", getattr(self, "timeline_status_widget", None)),
+            ("tactile_timeline_widget", getattr(self, "tactile_timeline_widget", None)),
+            ("recenter_status_label", getattr(self, "recenter_status_label", None)),
+            ("progress_label", getattr(self, "progress_label", None)),
+            ("progress_track_widget", getattr(self, "progress_track_widget", None)),
+            ("event_label", getattr(self, "event_label", None)),
+            ("prewarm_label", getattr(self, "prewarm_label", None)),
+        ]
+        visible: list[tuple[str, Any]] = []
+        for name, widget in candidates:
+            if widget is None:
+                continue
+            try:
+                if widget.isHidden():
+                    continue
+            except Exception:
+                continue
+            visible.append((name, widget))
+        return visible
+
+    def _experiment_control_visible_layout_widgets(self) -> list[Any]:
+        layout = self.processing_panel.layout() if hasattr(self, "processing_panel") else None
+        if layout is None:
+            return []
+        widgets: list[Any] = []
+        for index in range(int(layout.count())):
+            item = layout.itemAt(index)
+            widget = item.widget() if item is not None else None
+            if widget is None:
+                continue
+            try:
+                if widget.isHidden():
+                    continue
+            except Exception:
+                continue
+            widgets.append(widget)
+        return widgets
+
+    def _widget_required_height(self, widget: Any, available_width: int) -> int:
+        heights = [0]
+        for getter_name in ("minimumHeight",):
+            try:
+                heights.append(max(0, int(getattr(widget, getter_name)())))
+            except Exception:
+                pass
+        for getter_name in ("minimumSizeHint", "sizeHint"):
+            try:
+                hint = getattr(widget, getter_name)()
+                heights.append(max(0, int(hint.height())))
+            except Exception:
+                pass
+        width = max(1, int(available_width or 1))
+        try:
+            current_width = int(widget.width())
+            if current_width > 1:
+                width = min(width, current_width)
+        except Exception:
+            pass
+        try:
+            if bool(widget.hasHeightForWidth()):
+                heights.append(max(0, int(widget.heightForWidth(width))))
+        except Exception:
+            pass
+        return max(heights)
+
+    def _experiment_control_layout_margins_and_spacing(self) -> tuple[int, int, int]:
+        layout = self.processing_panel.layout() if hasattr(self, "processing_panel") else None
         margin_total = 0
+        horizontal_margins = 0
         spacing = max(0, int(getattr(layout, "spacing", lambda: 0)())) if layout is not None else 0
         if layout is not None:
             margins = layout.contentsMargins()
             margin_total = int(margins.top()) + int(margins.bottom())
-        essential_widgets = [
-            getattr(self, "part_selector_widget", None),
-            getattr(self, "block_plan_widget", None),
-            getattr(self, "block_preview_label", None),
-            getattr(self, "topup_draft_widget", None),
-            getattr(self, "timeline_status_widget", None),
-            getattr(self, "tactile_timeline_widget", None),
-            getattr(self, "progress_track_widget", None),
-        ]
-        visible_heights: list[int] = []
-        for widget in essential_widgets:
-            if widget is None or widget.isHidden():
-                continue
-            hint_height = 0
-            try:
-                hint_height = int(widget.minimumSizeHint().height())
-            except Exception:
-                hint_height = 0
-            visible_heights.append(max(0, int(widget.minimumHeight()), hint_height))
+            horizontal_margins = int(margins.left()) + int(margins.right())
+        return margin_total, horizontal_margins, spacing
+
+    def _experiment_control_content_minimum_height(self) -> int:
+        profile_min = int(getattr(self.layout_profile, "experiment_control_content_min_height", 0) or 0)
+        if not hasattr(self, "processing_panel"):
+            return profile_min
+        margin_total, horizontal_margins, spacing = self._experiment_control_layout_margins_and_spacing()
+        panel_width = int(getattr(self.processing_panel, "width", lambda: 0)() or 0)
+        fallback_width = max(360, int(getattr(self.layout_profile, "window_width", 0) or 0))
+        available_width = max(1, (panel_width or fallback_width) - horizontal_margins)
+        visible_heights = [self._widget_required_height(widget, available_width) for widget in self._experiment_control_visible_layout_widgets()]
         if not visible_heights:
             return profile_min
         core_total = margin_total + sum(visible_heights) + spacing * max(0, len(visible_heights) - 1)
-        bounded_core = min(int(core_total), int(getattr(self.layout_profile, "experiment_control_initial_height", 0) or core_total))
-        return max(profile_min, bounded_core)
+        return max(profile_min, int(core_total))
+
+    def _clamp_workspace_splitter_for_experiment_control(self) -> None:
+        if self._workspace_splitter_clamping:
+            return
+        if not hasattr(self, "workspace_splitter") or not hasattr(self, "processing_panel"):
+            return
+        target = max(
+            int(getattr(self.processing_panel, "minimumHeight", lambda: 0)() or 0),
+            int(getattr(self, "experiment_control_content_min_height", 0) or 0),
+            self._experiment_control_content_minimum_height(),
+        )
+        sizes = list(self.workspace_splitter.sizes())
+        if len(sizes) < 2:
+            return
+        total = int(getattr(self.workspace_splitter, "height", lambda: 0)() or 0)
+        if total <= 0:
+            total = sum(int(size) for size in sizes)
+        if total <= 0:
+            return
+        bottom = int(sizes[-1])
+        if bottom >= target:
+            return
+        self._workspace_splitter_clamping = True
+        try:
+            top = max(0, total - target)
+            self.workspace_splitter.setSizes([top, target])
+        finally:
+            self._workspace_splitter_clamping = False
+
+    def _schedule_experiment_control_splitter_clamp(self) -> None:
+        if self._workspace_splitter_clamp_pending:
+            return
+        if not hasattr(self, "dialog"):
+            return
+        self._workspace_splitter_clamp_pending = True
+
+        def _run() -> None:
+            self._workspace_splitter_clamp_pending = False
+            self._refresh_experiment_control_minimum_height()
+            self._clamp_workspace_splitter_for_experiment_control()
+
+        self.q["QTimer"].singleShot(0, _run)
+
+    def _experiment_control_layout_debug(self) -> dict[str, Any]:
+        content_min = self._experiment_control_content_minimum_height()
+        panel_height = int(getattr(self.processing_panel, "height", lambda: 0)() or 0) if hasattr(self, "processing_panel") else 0
+        visible_widgets = self._experiment_control_visible_widgets()
+        visible_names = {name for name, _widget in visible_widgets}
+        required_names = self._required_experiment_control_widget_names()
+        panel_rect = {
+            "width": int(getattr(self.processing_panel, "width", lambda: 0)() or 0) if hasattr(self, "processing_panel") else 0,
+            "height": panel_height,
+        }
+        widgets: dict[str, dict[str, int]] = {}
+        clipped: list[str] = []
+        too_short: list[str] = []
+        overlap_pairs: list[str] = []
+        for name, widget in visible_widgets:
+            try:
+                top_left = widget.mapTo(self.processing_panel, widget.rect().topLeft())
+                width = int(widget.width())
+                height = int(widget.height())
+                x = int(top_left.x())
+                y = int(top_left.y())
+                rect = {
+                    "x": x,
+                    "y": y,
+                    "right": x + width,
+                    "bottom": y + height,
+                    "width": width,
+                    "height": height,
+                }
+            except Exception:
+                continue
+            required_height = self._widget_required_height(widget, max(1, rect["width"]))
+            rect["required_height"] = int(required_height)
+            widgets[name] = rect
+            if rect["x"] < 0 or rect["y"] < 0 or rect["right"] > panel_rect["width"] or rect["bottom"] > panel_height:
+                clipped.append(name)
+            if rect["height"] < required_height:
+                too_short.append(name)
+        names = list(widgets)
+        for left_index, left_name in enumerate(names):
+            left = widgets[left_name]
+            for right_name in names[left_index + 1 :]:
+                right = widgets[right_name]
+                horizontal_overlap = left["x"] < right["right"] and right["x"] < left["right"]
+                vertical_overlap = left["y"] < right["bottom"] and right["y"] < left["bottom"]
+                if horizontal_overlap and vertical_overlap:
+                    overlap_pairs.append(f"{left_name}:{right_name}")
+        timeline_debug = {}
+        if hasattr(self, "tactile_timeline_widget"):
+            timeline_snapshot = getattr(self.tactile_timeline_widget, "timeline_debug_snapshot", None)
+            if callable(timeline_snapshot):
+                timeline_debug = dict(timeline_snapshot())
+        return {
+            "content_min_height": int(content_min),
+            "profile_content_min_height": int(self.layout_profile.experiment_control_content_min_height),
+            "profile_min_height": int(self.layout_profile.experiment_control_min_height),
+            "panel_minimum_height": int(self.processing_panel.minimumHeight()) if hasattr(self, "processing_panel") else 0,
+            "actual_height": int(panel_height),
+            "visible_child_count": len(visible_widgets),
+            "widgets": widgets,
+            "clipped_widgets": clipped,
+            "too_short_widgets": too_short,
+            "overlap_pairs": overlap_pairs,
+            "overlap_count": len(overlap_pairs),
+            "hidden_required_widgets": sorted(required_names - visible_names),
+            "timeline_label_fit": dict(timeline_debug.get("label_fit") or {}),
+        }
+
+    def _required_experiment_control_widget_names(self) -> set[str]:
+        names = {
+            "part_selector_widget",
+            "block_plan_widget",
+            "timeline_status_widget",
+            "tactile_timeline_widget",
+        }
+        if hasattr(self, "topup_draft_widget") and self._topup_draft_should_show():
+            names.add("topup_draft_widget")
+        return names
 
     def _refresh_experiment_control_minimum_height(self) -> None:
         if not hasattr(self, "processing_panel"):
@@ -5657,6 +5876,7 @@ class FocusModeWindow:
         if int(self.processing_panel.minimumHeight()) != int(target):
             self.processing_panel.setMinimumHeight(int(target))
             self.processing_panel.updateGeometry()
+        self._clamp_workspace_splitter_for_experiment_control()
 
     def _refresh_timeline_min_height(self) -> None:
         if not hasattr(self, "tactile_timeline_widget"):
@@ -6359,19 +6579,14 @@ class FocusModeWindow:
         timeline_snapshot = getattr(self.tactile_timeline_widget, "timeline_debug_snapshot", None)
         if callable(timeline_snapshot):
             timeline_debug = dict(timeline_snapshot())
-        experiment_control_content_min = self._experiment_control_content_minimum_height()
+        experiment_control_debug = self._experiment_control_layout_debug()
         return {
             "dialog": {"width": int(self.dialog.width()), "height": int(self.dialog.height())},
             "layout_profile": self.layout_profile.as_dict(),
             "widgets": {name: self._dialog_relative_rect(widget) for name, widget in widgets.items() if widget is not None},
             "splitters": splitter_metrics,
             "timeline_debug": timeline_debug,
-            "experiment_control_debug": {
-                "content_min_height": int(experiment_control_content_min),
-                "profile_content_min_height": int(self.layout_profile.experiment_control_content_min_height),
-                "profile_min_height": int(self.layout_profile.experiment_control_min_height),
-                "panel_minimum_height": int(self.processing_panel.minimumHeight()),
-            },
+            "experiment_control_debug": experiment_control_debug,
             "keyboard_shortcuts": self.keyboard_shortcut_map(),
             "adaptive_mechanisms": {
                 "right_stack_mode": self.layout_profile.right_stack_mode,
@@ -6379,6 +6594,10 @@ class FocusModeWindow:
                 "resizable_workspace_splitter": self.workspace_splitter is not None,
                 "resizable_run_splitter": self.run_splitter is not None,
                 "data_settings_columns": getattr(self, "data_settings_columns_mode", ""),
+                "lower_detail_text": bool(
+                    self.layout_profile.screen_class == "spacious" and self.layout_profile.available_height >= 1300
+                ),
+                "lower_headings": bool((not self.layout_profile.compact) and self.layout_profile.available_height >= 1100),
             },
         }
 
@@ -6412,6 +6631,18 @@ class FocusModeWindow:
                 "processing_panel is shorter than the content-safe minimum "
                 f"{content_min_height}px: {processing}"
             )
+        clipped_lower = list(experiment_control_debug.get("clipped_widgets") or [])
+        if clipped_lower:
+            failures.append(f"lower Experiment Control widgets are clipped: {clipped_lower}")
+        too_short_lower = list(experiment_control_debug.get("too_short_widgets") or [])
+        if too_short_lower:
+            failures.append(f"lower Experiment Control widgets are shorter than measured content: {too_short_lower}")
+        overlap_pairs = list(experiment_control_debug.get("overlap_pairs") or [])
+        if overlap_pairs:
+            failures.append(f"lower Experiment Control widgets overlap: {overlap_pairs}")
+        hidden_required = list(experiment_control_debug.get("hidden_required_widgets") or [])
+        if hidden_required:
+            failures.append(f"required lower Experiment Control widgets are hidden: {hidden_required}")
         if processing:
             workspace_width = int(getattr(self.workspace_splitter, "width", lambda: 0)())
             if workspace_width and processing.get("width", 0) < workspace_width - 8:
@@ -6785,7 +7016,9 @@ class FocusModeWindow:
         if total <= 0:
             text = "Next tactile: no cues in this block" if self.timeline_state.active else "Next tactile: no block schedule"
             self.next_tactile_label.setText(text)
+            self.next_tactile_label.setToolTip(text)
             self.tactile_count_label.setText(f"0 / 0 cues | {self.timeline_state.click_count()} clicks")
+            self.tactile_count_label.setToolTip(self.tactile_count_label.text())
             if not preserve_recenter_message:
                 self.recenter_status_label.setText("Cursor recenter: waiting")
             self.tactile_timeline_widget.update()
@@ -6800,9 +7033,11 @@ class FocusModeWindow:
             self.next_tactile_label.setText(
                 f"Next tactile: Trial {next_cue.trial_number} in {countdown:.1f}s{soa}{row}"
             )
+        self.next_tactile_label.setToolTip(self.next_tactile_label.text())
         self.tactile_count_label.setText(
             f"{self.timeline_state.passed_count()} / {total} cues | {self.timeline_state.click_count()} clicks"
         )
+        self.tactile_count_label.setToolTip(self.tactile_count_label.text())
         if not preserve_recenter_message:
             self.recenter_status_label.setText(
                 f"Cursor recenter: {self.timeline_state.recentered_count()} / {total} cues"
@@ -6928,6 +7163,7 @@ class FocusModeWindow:
             elif kind == "done":
                 self._handle_done(payload)
         self._tick_tactile_clock()
+        self._refresh_experiment_control_minimum_height()
 
     def _handle_topup_draft(self, payload: dict[str, Any]) -> None:
         self.topup_draft_items = [dict(item) for item in list(payload.get("missed_trials") or []) if isinstance(item, dict)]
@@ -6941,6 +7177,7 @@ class FocusModeWindow:
                 self.block_preview_label.setText(
                     f"Block preview: {item.get('display_label', 'Top-up')} | {part_label} missed tactile trials{draft_text}"
                 )
+                self._refresh_experiment_control_minimum_height()
 
     def _handle_instruction_continue(self, payload: dict[str, Any]) -> None:
         context = dict(payload.get("context") or {})

@@ -811,6 +811,98 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     window.dialog.close()
 
 
+@pytest.mark.parametrize("available_width,available_height", [(1024, 600), (1366, 768), (1536, 864), (1600, 900), (1920, 1000)])
+def test_focus_mode_lower_control_panel_resists_splitter_compression(
+    tmp_path: Path,
+    available_width: int,
+    available_height: int,
+):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_focus_preview_session_manifest(tmp_path))
+    profile = render_focus_layout_profile(available_width, available_height)
+    window = focus_app.FocusModeWindow(q, package, enable_missed_trial_topup=True, layout_profile=profile)
+    window.dialog.resize(profile.window_width, profile.window_height)
+    window.dialog.show()
+    app.processEvents()
+
+    total = max(1, int(window.workspace_splitter.height()))
+    window.workspace_splitter.setSizes([max(1, total - 24), 24])
+    app.processEvents()
+    window._clamp_workspace_splitter_for_experiment_control()
+    app.processEvents()
+
+    snapshot = window.layout_validation_snapshot()
+    debug = snapshot["experiment_control_debug"]
+    assert window.processing_panel.height() >= debug["content_min_height"]
+    assert window.tactile_timeline_widget.height() >= focus_app.TIMELINE_MINIMUM_VISIBLE_HEIGHT
+    assert debug["clipped_widgets"] == []
+    assert debug["overlap_pairs"] == []
+    assert debug["hidden_required_widgets"] == []
+    assert not window.layout_validation_failures()
+    window.dialog.close()
+
+
+@pytest.mark.parametrize("available_width,available_height", [(1366, 768), (1600, 900), (1920, 1000)])
+def test_focus_mode_lower_control_panel_handles_long_timeline_labels(
+    tmp_path: Path,
+    available_width: int,
+    available_height: int,
+):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_focus_preview_session_manifest(tmp_path))
+    profile = render_focus_layout_profile(available_width, available_height)
+    window = focus_app.FocusModeWindow(q, package, enable_missed_trial_topup=True, layout_profile=profile)
+    window.dialog.resize(profile.window_width, profile.window_height)
+    window.dialog.show()
+    app.processEvents()
+
+    long_label = "Very long respiratory condition and tactile cue detail " * 6
+    window.next_tactile_label.setText(f"Next tactile: {long_label}")
+    window.next_tactile_label.setToolTip(window.next_tactile_label.text())
+    window.tactile_count_label.setText("999 / 999 cues | 999 clicks")
+    window.topup_draft_items = [
+        {
+            "part_number": "1",
+            "block_number": "1",
+            "trial_number": str(index),
+            "respiratory_phase": long_label,
+            "trial_type": "Audio-Tactile",
+            "family": "audio_tactile",
+            "soa_ms": "2200",
+        }
+        for index in range(1, 7)
+    ]
+    window._refresh_topup_draft_widget()
+    window._refresh_experiment_control_minimum_height()
+    app.processEvents()
+
+    debug = window.layout_validation_snapshot()["experiment_control_debug"]
+    if profile.compact or profile.available_height <= 900:
+        assert not window.topup_draft_widget.isVisible()
+    else:
+        assert window.topup_draft_widget.isVisible()
+    assert debug["clipped_widgets"] == []
+    assert debug["overlap_pairs"] == []
+    assert not window.layout_validation_failures()
+    window.dialog.close()
+
+
 def test_focus_mode_instruction_continue_accepts_target_click_and_keyboard(tmp_path: Path):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
@@ -1298,7 +1390,6 @@ def test_launcher_first_screen_is_environment_gate():
 def test_launcher_resume_shortcut_opens_environment_operations(tmp_path: Path, monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
-        from PySide6.QtTest import QTest
         from PySide6.QtWidgets import QApplication
         from peripersonal_space_toolkit import focus_app
     except Exception as exc:  # pragma: no cover - depends on optional GUI deps
@@ -1306,6 +1397,10 @@ def test_launcher_resume_shortcut_opens_environment_operations(tmp_path: Path, m
 
     q = focus_app._require_qt()
     app = QApplication.instance() or QApplication([])
+    for widget in app.topLevelWidgets():
+        widget.close()
+        widget.deleteLater()
+    app.processEvents()
     errors: list[BaseException] = []
     calls: list[dict[str, object]] = []
 
@@ -1340,18 +1435,43 @@ def test_launcher_resume_shortcut_opens_environment_operations(tmp_path: Path, m
 
     monkeypatch.setattr(focus_app, "_run_environment_operations_window", fake_environment_operations_window)
 
+    resume_attempts = {"count": 0}
+
+    def reject_if_still_open() -> None:
+        if calls or errors:
+            return
+        errors.append(AssertionError("Launcher resume shortcut test timed out before the dialog closed."))
+        for widget in app.topLevelWidgets():
+            if widget.windowTitle() == "PPS Experiment Runner":
+                widget.reject()
+
     def click_resume() -> None:
         try:
-            dialogs = [widget for widget in app.topLevelWidgets() if widget.windowTitle() == "PPS Experiment Runner"]
+            dialogs = [
+                widget
+                for widget in app.topLevelWidgets()
+                if widget.windowTitle() == "PPS Experiment Runner"
+                and widget.isVisible()
+                and widget.findChild(q["QPushButton"], "resumeExperimentButton") is not None
+            ]
+            if not dialogs and resume_attempts["count"] < 20:
+                resume_attempts["count"] += 1
+                q["QTimer"].singleShot(50, click_resume)
+                return
             assert dialogs
             dialog = dialogs[0]
             assert dialog.findChild(q["QComboBox"], "participantCombo") is None
             resume = dialog.findChild(q["QPushButton"], "resumeExperimentButton")
             assert resume is not None
             assert resume.isEnabled()
-            dialog.activateWindow()
-            dialog.setFocus(q["Qt"].FocusReason.ShortcutFocusReason)
-            QTest.keyClick(dialog, q["Qt"].Key.Key_1)
+            resume_shortcuts = [
+                shortcut
+                for shortcut in dialog.findChildren(q["QShortcut"])
+                if shortcut.key().toString() == "1"
+            ]
+            assert resume_shortcuts
+            assert resume_shortcuts[0].isEnabled()
+            resume_shortcuts[0].activated.emit()
         except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
             errors.append(exc)
             for widget in app.topLevelWidgets():
@@ -1359,6 +1479,7 @@ def test_launcher_resume_shortcut_opens_environment_operations(tmp_path: Path, m
                     widget.reject()
 
     q["QTimer"].singleShot(50, click_resume)
+    q["QTimer"].singleShot(3000, reject_if_still_open)
     exit_code = focus_app.run_launcher_window(
         capture_options=SessionCaptureOptions(enable_lsl=False, write_internal_xdf=False, start_backup_recording=False),
         participant_id="P001",
@@ -2078,7 +2199,14 @@ def test_prepare_profile_focus_session_uses_finished_profile_gate(tmp_path: Path
     )
     monkeypatch.setattr(focus_app, "update_profile_runner_settings", lambda **kwargs: calls.setdefault("settings", kwargs))
 
-    assert focus_app.prepare_profile_focus_session("study5_box_breathing_pps", "P123") == manifest
+    assert (
+        focus_app.prepare_profile_focus_session(
+            "study5_box_breathing_pps",
+            "P123",
+            session_root=tmp_path / "isolated_output",
+        )
+        == manifest
+    )
     assert calls["run_setup_path"] == run_setup
     assert calls["participant_id"] == "P123"
     assert calls["queue"]["participant_id"] == "P123"
