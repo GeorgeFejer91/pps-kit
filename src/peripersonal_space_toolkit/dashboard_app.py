@@ -72,6 +72,7 @@ from .focus_launch import build_focus_runner_command
 from .loudness import (
     LOUDNESS_POLICY_KEY,
     db_to_linear,
+    loudness_manifest_payload,
     loudness_policy_for_design,
     normalize_loudness_policy,
 )
@@ -3586,6 +3587,10 @@ def _run_setup_manifest_path(render_dir: Path) -> Path:
     return _run_setup_root(render_dir) / "experiment_run_setup_manifest.json"
 
 
+def _run_setup_loudness_manifest_path(render_dir: Path) -> Path:
+    return _run_setup_root(render_dir) / "loudness_manifest.json"
+
+
 def _run_setup_csv_path(render_dir: Path) -> Path:
     return _run_setup_root(render_dir) / "experiment_block_order.csv"
 
@@ -3983,6 +3988,7 @@ def _run_setup_preview(project_dir: Path, design: StimulusDesign) -> dict[str, A
         "csv_rows": csv_rows,
         "csv_path": str(_run_setup_csv_path(project_dir)),
         "manifest_path": str(_run_setup_manifest_path(project_dir)),
+        "loudness_manifest_path": str(_run_setup_loudness_manifest_path(project_dir)),
         "validation_errors": manifest_errors,
     }
 
@@ -4671,6 +4677,7 @@ def _write_run_setup_outputs(project_dir: Path, design: StimulusDesign) -> dict[
         writer.writeheader()
         writer.writerows(preview["csv_rows"])
     manifest_path = _run_setup_manifest_path(project_dir)
+    loudness_manifest_path = _run_setup_loudness_manifest_path(project_dir)
     manifest = {
         "schema": RUN_SETUP_MANIFEST_SCHEMA,
         "status": "prepared",
@@ -4688,6 +4695,7 @@ def _write_run_setup_outputs(project_dir: Path, design: StimulusDesign) -> dict[
         "instruction_profile_signature": preview["instruction_profile_signature"],
         "instruction_profile_warnings": preview["instruction_profile_warnings"],
         "loudness_policy": preview["loudness_policy"],
+        "loudness_manifest_path": str(loudness_manifest_path),
         "source_segment5_manifest": preview["source_segment5_manifest"],
         "source_segment5_manifest_sha256": preview["source_segment5_manifest_sha256"],
         "summary_rows": preview["rows"],
@@ -4697,12 +4705,27 @@ def _write_run_setup_outputs(project_dir: Path, design: StimulusDesign) -> dict[
         if _path_exists(csv_path):
             Path(_filesystem_path(csv_path)).unlink()
         raise ValueError(f"Segment 6 prepare validation failed before manifest publish: {errors[0]}")
+    loudness_manifest = loudness_manifest_payload(
+        preview["loudness_policy"],
+        created_at=manifest["prepared_at"],
+        source_context="dashboard_segment_6_run_setup",
+        run_setup_manifest_path=str(manifest_path),
+        stimulus_audit_summary={
+            "participant_count": preview["participant_count"],
+            "parts_per_participant": preview["parts_per_participant"],
+            "total_block_runs": preview["total_block_runs"],
+            "source_segment5_manifest": preview["source_segment5_manifest"],
+            "source_segment5_manifest_sha256": preview["source_segment5_manifest_sha256"],
+        },
+    )
+    _write_json(loudness_manifest_path, loudness_manifest)
     _write_json(manifest_path, manifest)
     return {
         "status": "prepared",
         "root": str(root),
         "csv_path": str(csv_path),
         "manifest_path": str(manifest_path),
+        "loudness_manifest_path": str(loudness_manifest_path),
         "participant_count": preview["participant_count"],
         "parts_per_participant": preview["parts_per_participant"],
         "total_block_runs": preview["total_block_runs"],
@@ -7664,7 +7687,7 @@ def _study_settings_manifest(context: DashboardProjectContext, design: StimulusD
                 segment="1_core_audio_ingredients",
                 label="Looming endpoint SPL",
                 control="Endpoint dB SPL input",
-                note="Final active movement window and 0.5 s post-hold use this endpoint level.",
+                note="The final 500 ms active movement window is the calibration window; the 0.5 s post-hold stays at endpoint level but is excluded from calibration.",
             ),
             _gui_setting_record(
                 key="instruction_offset_db",

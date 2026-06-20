@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import math
+from datetime import datetime
 from typing import Any, Mapping
 
 
 LOUDNESS_POLICY_KEY = "loudness_policy"
 LOUDNESS_POLICY_SCHEMA = "pps-loudness-policy.v1"
+LOUDNESS_MANIFEST_SCHEMA = "pps-loudness-manifest.v1"
 DEFAULT_START_SPL_DB = 55.0
 DEFAULT_END_SPL_DB = 75.0
 DEFAULT_INSTRUCTION_OFFSET_DB = -6.0
@@ -26,7 +28,7 @@ DEFAULT_LOUDNESS_POLICY: dict[str, Any] = {
     "instruction_offset_db": DEFAULT_INSTRUCTION_OFFSET_DB,
     "movement_ramp_shape": "linear_db",
     "hold_level_policy": "constant_start_and_endpoint",
-    "calibration_window": "endpoint_500ms_hold_or_final_active_movement",
+    "calibration_window": "final_500ms_active_movement_excluding_padding",
     "calibration_window_s": DEFAULT_CALIBRATION_WINDOW_S,
     "estimated_full_scale_spl_db": DEFAULT_ESTIMATED_FULL_SCALE_SPL_DB,
     "audio_peak_ceiling_dbfs": DEFAULT_AUDIO_PEAK_CEILING_DBFS,
@@ -106,6 +108,7 @@ def normalize_loudness_policy(
         {"constant_start_and_endpoint"},
         "constant_start_and_endpoint",
     )
+    policy["calibration_window"] = "final_500ms_active_movement_excluding_padding"
     policy["calibration_window_s"] = max(0.05, _float(policy.get("calibration_window_s"), DEFAULT_CALIBRATION_WINDOW_S))
     policy["estimated_full_scale_spl_db"] = _float(
         policy.get("estimated_full_scale_spl_db"),
@@ -171,22 +174,39 @@ def relative_loudness_envelope(policy: Mapping[str, Any], samples: int, sample_r
 
 
 def calibration_window_samples(policy: Mapping[str, Any], sample_rate: int, total_samples: int) -> tuple[int, int]:
-    """Return the endpoint-level calibration window, preferring the post-hold."""
+    """Return the final active-movement calibration window, excluding holds."""
 
     pre = max(0.0, _float(policy.get("pre_hold_s"), 0.5))
     movement = max(0.0, _float(policy.get("movement_duration_s"), 3.0))
-    post = max(0.0, _float(policy.get("post_hold_s"), 0.5))
     window_s = max(0.05, _float(policy.get("calibration_window_s"), DEFAULT_CALIBRATION_WINDOW_S))
     active_end = pre + movement
-    if post > 0:
-        start_s = active_end
-        stop_s = min(active_end + post, active_end + window_s)
-    else:
-        start_s = max(pre, active_end - window_s)
-        stop_s = active_end
+    start_s = max(pre, active_end - window_s)
+    stop_s = active_end
     start = max(0, min(total_samples, int(round(start_s * sample_rate))))
     stop = max(start + 1, min(total_samples, int(round(stop_s * sample_rate))))
     return start, stop
+
+
+def calibration_window_target_rms_dbfs(policy: Mapping[str, Any], sample_rate: int, total_samples: int) -> float:
+    """Return the intended RMS dBFS for the active calibration window.
+
+    The endpoint target remains the final sample/post-hold level. Because the
+    final active 500 ms is still ramping, its intended RMS is slightly below the
+    endpoint hold RMS. Using the ramp-window target preserves the 55->75 dB
+    endpoint relationship while matching the actual calibration window across
+    noise types.
+    """
+
+    start, stop = calibration_window_samples(policy, sample_rate, total_samples)
+    if stop <= start or sample_rate <= 0:
+        return spl_to_rms_dbfs(policy, _float(policy.get("end_spl_db"), DEFAULT_END_SPL_DB))
+    powers = [
+        db_to_linear(spl_to_rms_dbfs(policy, envelope_db_for_time(policy, index / float(sample_rate)))) ** 2
+        for index in range(start, stop)
+    ]
+    if not powers:
+        return spl_to_rms_dbfs(policy, _float(policy.get("end_spl_db"), DEFAULT_END_SPL_DB))
+    return linear_to_db(math.sqrt(sum(powers) / len(powers)))
 
 
 def hold_window_samples(
@@ -208,6 +228,122 @@ def hold_window_samples(
     start = max(0, min(total_samples, int(round(start_s * sample_rate))))
     stop = max(start, min(total_samples, int(round(stop_s * sample_rate))))
     return start, stop
+
+
+def loudness_protocol_warnings(policy: Mapping[str, Any] | None) -> list[str]:
+    """Return participant-run warnings implied by the loudness policy."""
+
+    normalized = normalize_loudness_policy(policy)
+    hardware = normalized.get("hardware", {}) if isinstance(normalized.get("hardware"), Mapping) else {}
+    warnings: list[str] = []
+    calibration_status = str(normalized.get("calibration_status") or "").strip().lower()
+    if calibration_status != "measured":
+        warnings.append("SPL is estimated, not measured; verify with a headphone coupler/artificial ear before publication-grade SPL claims.")
+    route = str(hardware.get("route") or "").strip()
+    route_lower = route.lower()
+    if "asio" not in route_lower or "komplete" not in route_lower:
+        warnings.append(f"Loudness protocol expects ASIO / Komplete output; policy route is '{route or 'unspecified'}'.")
+    interface = str(hardware.get("audio_interface") or "").strip()
+    if "komplete audio 6" not in interface.lower():
+        warnings.append(f"Loudness protocol expects Komplete Audio 6 MK2; policy interface is '{interface or 'unspecified'}'.")
+    headphones = str(hardware.get("headphones") or "").strip()
+    if "hd 560s" not in headphones.lower():
+        warnings.append(f"Loudness protocol expects Sennheiser HD 560S; policy headphones are '{headphones or 'unspecified'}'.")
+    knob = str(hardware.get("headphone_knob") or "").strip().lower()
+    if "max" not in knob and "clockwise" not in knob:
+        warnings.append("Komplete headphone volume knob should be fully clockwise for this loudness profile.")
+    try:
+        runner_volume = float(hardware.get("runner_audio_volume_percent"))
+    except (TypeError, ValueError):
+        runner_volume = float("nan")
+    if not math.isfinite(runner_volume) or abs(runner_volume - 100.0) > 0.01:
+        warnings.append(
+            "Runner audio volume should be 100% for this loudness profile; "
+            f"policy records {hardware.get('runner_audio_volume_percent', 'unspecified')}%."
+        )
+    windows_policy = str(hardware.get("windows_volume_policy") or "").strip().lower()
+    if "not_part_of_asio_calibration" not in windows_policy:
+        warnings.append("Windows/system volume should not be treated as part of the ASIO calibration path.")
+    return warnings
+
+
+def loudness_manifest_payload(
+    policy: Mapping[str, Any] | None,
+    *,
+    created_at: str | None = None,
+    participant_id: str = "",
+    session_id: str = "",
+    source_context: str = "",
+    renderer_manifest_path: str = "",
+    run_setup_manifest_path: str = "",
+    source_wavs: list[Any] | None = None,
+    stimulus_audit_summary: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Build the standalone loudness manifest shared by Segment 6 and sessions."""
+
+    normalized = normalize_loudness_policy(policy)
+    hardware = normalized.get("hardware", {}) if isinstance(normalized.get("hardware"), Mapping) else {}
+    active_end = float(normalized.get("pre_hold_s", 0.5)) + float(normalized.get("movement_duration_s", 3.0))
+    active_start = max(
+        float(normalized.get("pre_hold_s", 0.5)),
+        active_end - float(normalized.get("calibration_window_s", DEFAULT_CALIBRATION_WINDOW_S)),
+    )
+    return _json_ready(
+        {
+            "schema": LOUDNESS_MANIFEST_SCHEMA,
+            "created_at": created_at or datetime.now().isoformat(timespec="seconds"),
+            "source_context": source_context,
+            "participant_id": participant_id,
+            "session_id": session_id,
+            "policy": normalized,
+            "targets": {
+                "start_spl_db": normalized.get("start_spl_db"),
+                "endpoint_spl_db": normalized.get("end_spl_db"),
+                "instruction_spl_db": normalized.get("instruction_target_spl_db"),
+                "instruction_offset_db": normalized.get("instruction_offset_db"),
+                "start_target_rms_dbfs": normalized.get("start_target_rms_dbfs"),
+                "endpoint_target_rms_dbfs": normalized.get("end_target_rms_dbfs"),
+                "instruction_target_rms_dbfs": normalized.get("instruction_target_rms_dbfs"),
+            },
+            "calibration": {
+                "mode": normalized.get("calibration_mode"),
+                "status": normalized.get("calibration_status"),
+                "window": normalized.get("calibration_window"),
+                "window_s": normalized.get("calibration_window_s"),
+                "active_movement_window_s": [active_start, active_end],
+                "excluded_padding_s": {
+                    "pre_hold_s": normalized.get("pre_hold_s"),
+                    "post_hold_s": normalized.get("post_hold_s"),
+                },
+                "estimated_full_scale_spl_db": normalized.get("estimated_full_scale_spl_db"),
+                "estimate_basis": normalized.get("estimate_basis", {}),
+            },
+            "hardware_protocol": {
+                "audio_interface": hardware.get("audio_interface", ""),
+                "headphones": hardware.get("headphones", ""),
+                "headphone_knob": hardware.get("headphone_knob", ""),
+                "audio_route": hardware.get("route", ""),
+                "runner_audio_volume_percent": hardware.get("runner_audio_volume_percent", ""),
+                "windows_volume_policy": hardware.get("windows_volume_policy", ""),
+            },
+            "renderer": {
+                "ramp_shape": normalized.get("movement_ramp_shape"),
+                "hold_level_policy": normalized.get("hold_level_policy"),
+                "normalization_status": "hidden_peak_normalization_disabled_in_loudness_control_mode",
+                "peak_ceiling_dbfs": normalized.get("audio_peak_ceiling_dbfs"),
+                "spatialization": normalized.get("renderer_role"),
+                "distance_attenuation_policy": normalized.get("distance_gain_policy"),
+                "threedti_authority": "3DTI supplies binaural/spatial cues; toolkit loudness policy controls final headphone SPL estimate.",
+            },
+            "inputs": {
+                "renderer_manifest_path": renderer_manifest_path,
+                "run_setup_manifest_path": run_setup_manifest_path,
+                "source_wavs": source_wavs or [],
+            },
+            "stimulus_audit_summary": dict(stimulus_audit_summary or {}),
+            "warnings": loudness_protocol_warnings(normalized),
+        }
+    )
 
 
 def _deep_merge(defaults: Mapping[str, Any], incoming: Mapping[str, Any]) -> dict[str, Any]:
@@ -238,3 +374,13 @@ def _float(value: Any, default: float) -> float:
 def _choice(value: Any, allowed: set[str], default: str) -> str:
     text = str(value or "").strip().lower()
     return text if text in allowed else default
+
+
+def _json_ready(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return {str(key): _json_ready(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_ready(item) for item in value]
+    if hasattr(value, "__fspath__"):
+        return str(value)
+    return value

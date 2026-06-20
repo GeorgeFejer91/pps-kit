@@ -30,10 +30,12 @@ Policy direction:
   software gain caps, a measured calibration profile, and startup fail-safes.
 - ASIO playback should be treated as the standard route; Windows endpoint volume
   is only part of the policy for non-ASIO diagnostics.
-- Looming stimuli should be matched by calibrated endpoint-window RMS across
-  noise types, preferring the constant post-hold when present. Instruction audio
-  should remain below looming audio by a fixed offset, initially documented as
-  -6 dB pending pilot comfort measurement.
+- Looming stimuli should be matched by the final 500 ms of the active movement
+  window across noise types. The 0.5 s pre/post trajectory holds stay constant
+  at the start/endpoint levels but are excluded from SPL calibration unless the
+  active sound actually occupies them. Instruction audio should remain below
+  looming audio by a fixed offset, initially documented as -6 dB pending pilot
+  comfort measurement.
 
 Implemented software policy:
 
@@ -51,20 +53,23 @@ Implemented software policy:
   Python SOFA/FABIAN renderer applies a linear-dB looming envelope, keeps
   pre/post trajectory holds constant at the start/endpoint SPL, disables hidden
   output peak normalization, disables direct-path distance gain, and scales the
-  endpoint calibration window to the target RMS dBFS. If a 0.5 s post-hold is
-  present, that post-hold is the preferred endpoint calibration window; otherwise
-  the renderer falls back to the final active movement window.
+  final active-movement calibration window to the intended ramp-window RMS
+  target. The endpoint/post-hold remains the endpoint target; it does not define
+  the calibration window.
 - Segment 1 render manifests, Segment 2-6 dashboard manifests, study-settings
-  manifests, and runner session manifests now carry the loudness policy. Segment
-  6 is stale if the policy changes, and Segment 2 refuses to bake from referenced
+  manifests, Segment 6 `loudness_manifest.json`, and runner session
+  `loudness_manifest.json` files now carry the loudness policy. Segment 6 is
+  stale if the policy changes, and Segment 2 refuses to bake from referenced
   Segment 1 ingredients whose recorded loudness-policy provenance differs from
   the current design.
 - Segment 2 fixed instruction clips are attenuated by the loudness policy
   instruction offset at sequence-assembly time. Source assets are not modified.
 
-Future implementation should add participant-run preflight checks for a measured
-`loudness_profile.json`, stimulus-level audit tolerance, physical SPL measurement
-entry, and post-routing digital level evidence in run manifests.
+Future implementation should add a measured `loudness_profile.json`, physical
+SPL measurement entry, and post-routing digital level evidence in run manifests.
+Current participant preflight warnings already flag estimated-not-measured SPL
+and policy deviations from ASIO/Komplete/HD 560S/max-knob/100% runner-volume
+assumptions.
 
 Local source update:
 

@@ -23,7 +23,12 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 from .design import StimulusDesign, experiment_schedule_rows, export_protocol_csv, save_design, validate_design
-from .loudness import normalize_loudness_policy
+from .loudness import (
+    loudness_manifest_payload,
+    loudness_policy_for_design,
+    loudness_protocol_warnings,
+    normalize_loudness_policy,
+)
 from .output_layout import (
     output_data_analytics_dir,
     output_metadata_dir,
@@ -118,6 +123,10 @@ def _trigger_dictionary_path(package: "RunPackage") -> Path:
 
 def _session_metadata_path(package: "RunPackage") -> Path:
     return _package_runner_log_dir(package) / "session_metadata.json"
+
+
+def _loudness_manifest_path(package: "RunPackage") -> Path:
+    return package.manifest_path.with_name("loudness_manifest.json")
 
 
 def _audio_evidence_path(package: "RunPackage", block: "RunBlock") -> Path:
@@ -634,6 +643,8 @@ def preflight_run_package(
         audio_ready = _preferred_audio_route_available()
         if not audio_ready:
             messages.append(f"Preferred audio route not detected: {PREFERRED_AUDIO_ROUTE}.")
+    loudness_warnings = loudness_protocol_warnings(loudness_policy_for_design(design))
+    messages.extend(f"Loudness: {warning}" for warning in loudness_warnings)
 
     return RunPreflight(
         participant_id=clean_participant,
@@ -4891,6 +4902,23 @@ def _wav_info(path: Path, *, sha256: str = "", label: str = "") -> RenderedWav:
 
 def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> None:
     loudness_policy = normalize_loudness_policy(package.loudness_policy)
+    loudness_manifest_path = _loudness_manifest_path(package)
+    source_wavs = [_json_ready(asdict(wav)) for wav in wavs]
+    loudness_manifest = loudness_manifest_payload(
+        loudness_policy,
+        created_at=package.created_at,
+        participant_id=package.participant_id,
+        session_id=package.session_id,
+        source_context="runner_session_package",
+        renderer_manifest_path=str(package.render_manifest_path) if package.render_manifest_path else "",
+        run_setup_manifest_path=str(package.source_run_setup_manifest_path) if package.source_run_setup_manifest_path else "",
+        source_wavs=source_wavs,
+        stimulus_audit_summary={
+            "source_wav_count": len(source_wavs),
+            "prepared_block_count": len(package.blocks),
+            "execution_mode": package.execution_mode,
+        },
+    )
     manifest = {
         "schema": RUN_PACKAGE_SCHEMA,
         "participant_id": package.participant_id,
@@ -4914,6 +4942,7 @@ def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> Non
                 "end_spl_db": loudness_policy.get("end_spl_db", ""),
                 "instruction_offset_db": loudness_policy.get("instruction_offset_db", ""),
                 "estimated_full_scale_spl_db": loudness_policy.get("estimated_full_scale_spl_db", ""),
+                "loudness_manifest_path": str(loudness_manifest_path),
                 "warning": "Estimated SPL until verified with a headphone coupler/artificial ear.",
             },
         },
@@ -4938,7 +4967,7 @@ def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> Non
         "render_manifest_path": str(package.render_manifest_path) if package.render_manifest_path else "",
         "instruction_profile": _json_ready(package.instruction_profile),
         "loudness_policy": _json_ready(loudness_policy),
-        "source_wavs": [_json_ready(asdict(wav)) for wav in wavs],
+        "source_wavs": source_wavs,
         "blocks": [_json_ready(asdict(block)) for block in package.blocks],
         "outputs": {
             "participant_trials_csv": str(_participant_trials_csv_path(package)),
@@ -4952,10 +4981,12 @@ def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> Non
             "lsl_markers_xdf": str(_lsl_markers_xdf_path(package)),
             "trigger_dictionary_json": str(_trigger_dictionary_path(package)),
             "session_metadata_json": str(_session_metadata_path(package)),
+            "loudness_manifest_json": str(loudness_manifest_path),
             "analysis_dir": str(_package_analytics_dir(package)),
             "prepared_blocks_dir": str(_package_prepared_blocks_dir(package)),
         },
     }
+    loudness_manifest_path.write_text(json.dumps(loudness_manifest, indent=2), encoding="utf-8")
     package.manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
 

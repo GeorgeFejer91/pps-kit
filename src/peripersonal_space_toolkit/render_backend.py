@@ -35,6 +35,7 @@ from .design import (
 )
 from .loudness import (
     LOUDNESS_POLICY_KEY,
+    calibration_window_target_rms_dbfs,
     calibration_window_samples,
     db_to_linear,
     linear_to_db,
@@ -350,9 +351,10 @@ def _apply_calibrated_loudness_target(
     start, stop = calibration_window_samples(policy, sample_rate, total_samples)
     final_window = stereo[start:stop, :]
     measured_rms = float(np.sqrt(np.mean(final_window * final_window))) if len(final_window) else 0.0
-    target_rms = db_to_linear(float(policy["end_target_rms_dbfs"]))
+    target_rms_dbfs = calibration_window_target_rms_dbfs(policy, sample_rate, total_samples)
+    target_rms = db_to_linear(target_rms_dbfs)
     if measured_rms <= 0:
-        raise RuntimeError("Cannot apply calibrated loudness target: endpoint calibration window is silent.")
+        raise RuntimeError("Cannot apply calibrated loudness target: active calibration window is silent.")
     gain = target_rms / measured_rms
     scaled = stereo * gain
     audio_peak = float(np.max(np.abs(scaled))) if scaled.size else 0.0
@@ -375,6 +377,8 @@ def _apply_calibrated_loudness_target(
         "loudness_end_spl_db": f"{float(policy['end_spl_db']):.3f}",
         "loudness_target_start_rms_dbfs": f"{float(policy['start_target_rms_dbfs']):.3f}",
         "loudness_target_end_rms_dbfs": f"{float(policy['end_target_rms_dbfs']):.3f}",
+        "loudness_calibration_window_role": "final_active_movement_excluding_trajectory_padding",
+        "loudness_calibration_window_target_rms_dbfs": f"{target_rms_dbfs:.3f}",
         "loudness_final_window_start_s": f"{start / sample_rate:.6f}",
         "loudness_final_window_stop_s": f"{stop / sample_rate:.6f}",
         "loudness_pre_hold_rms_dbfs": f"{_stereo_rms_dbfs(scaled, pre_start, pre_stop):.3f}",
@@ -709,8 +713,9 @@ def build_render_config(
                 "output_limiter_peak_dbfs": 20.0 * math.log10(OUTPUT_LIMITER_PEAK),
                 "note": (
                     "In loudness-control mode, the toolkit applies a constant-hold linear-dB envelope and "
-                    "matches the endpoint calibration window RMS to the manifest target; hidden audio peak "
-                    "normalization is disabled. Legacy designs without a loudness policy retain peak normalization."
+                    "matches the final active-movement calibration window RMS to the intended ramp-window target; "
+                    "hidden audio peak normalization is disabled. Legacy designs without a loudness policy retain "
+                    "peak normalization."
                 ),
             },
         },
@@ -852,6 +857,8 @@ def write_render_qc(path: Path, rows: list[dict[str, Any]]) -> None:
         "loudness_end_spl_db",
         "loudness_target_start_rms_dbfs",
         "loudness_target_end_rms_dbfs",
+        "loudness_calibration_window_role",
+        "loudness_calibration_window_target_rms_dbfs",
         "loudness_final_window_start_s",
         "loudness_final_window_stop_s",
         "loudness_pre_hold_rms_dbfs",

@@ -6,7 +6,7 @@ let activeNavFrame = 0;
 const CUSTOM_TEMPLATE_ID = "__custom__";
 const DEFAULT_STUDY_TEMPLATE_ID = "study5_box_breathing_pps";
 const STUDY5_PINK_WHITE_TEMPLATE_ID = "study5_box_breathing_pps_pink_white";
-const STATIC_RESOURCE_VERSION = "20260620-loudness-policy";
+const STATIC_RESOURCE_VERSION = "20260620-loudness-active-window";
 const DEFAULT_LOUDNESS_POLICY = {
   schema: "pps-loudness-policy.v1",
   mode: "estimated_spl",
@@ -17,6 +17,7 @@ const DEFAULT_LOUDNESS_POLICY = {
   instruction_offset_db: -6,
   movement_ramp_shape: "linear_db",
   hold_level_policy: "constant_start_and_endpoint",
+  calibration_window: "final_500ms_active_movement_excluding_padding",
   calibration_window_s: 0.5,
   estimated_full_scale_spl_db: 109.2,
   audio_peak_ceiling_dbfs: -1,
@@ -2338,6 +2339,7 @@ function normalizeLoudnessPolicy(policy = {}, controls = null) {
   merged.audio_peak_ceiling_dbfs = clampNumber(Number(merged.audio_peak_ceiling_dbfs), -12, 0, DEFAULT_LOUDNESS_POLICY.audio_peak_ceiling_dbfs);
   merged.movement_ramp_shape = "linear_db";
   merged.hold_level_policy = "constant_start_and_endpoint";
+  merged.calibration_window = "final_500ms_active_movement_excluding_padding";
   merged.calibration_window_s = clampNumber(Number(merged.calibration_window_s), 0.05, 2, DEFAULT_LOUDNESS_POLICY.calibration_window_s);
   merged.pre_hold_s = Math.max(0, Number(resolvedControls.start_hold_s || 0));
   merged.movement_duration_s = Math.max(0.1, Number(resolvedControls.movement_duration_s || 3));
@@ -2391,6 +2393,7 @@ function updateLoudnessDerived() {
   const instructionGain = dbToLinear(policy.instruction_offset_db);
   summary.innerHTML = `
     <span>${policy.start_spl_db.toFixed(0)}-&gt;${policy.end_spl_db.toFixed(0)} dB SPL linear-dB active ramp</span>
+    <span>final ${policy.calibration_window_s.toFixed(1)} s active window calibrated</span>
     <span>RMS targets ${policy.start_target_rms_dbfs.toFixed(1)}-&gt;${policy.end_target_rms_dbfs.toFixed(1)} dBFS</span>
     <span>Instructions ${policy.instruction_offset_db.toFixed(1)} dB (${instructionGain.toFixed(3)}x)</span>
     <span>${policy.calibration_status === "measured" ? "measured" : "estimated, not measured"}</span>
