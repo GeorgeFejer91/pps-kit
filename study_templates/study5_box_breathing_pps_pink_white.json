@@ -5,7 +5,7 @@
   "source_url": "docs/STUDY5_PROTOCOL.md",
   "doi": "",
   "verification_status": "verified",
-  "notes": "Local unpublished Study 5 pink/white preload. This profile was created from the Study 5 dashboard Edit-mode workflow by removing the Blue frontal and Brown frontal looming sources and allowing the Segment 2 source-label decisions to propagate downward. All other Study 5 timing, SOA, baseline, catch, instruction, trajectory, block, participant, and repetition defaults are retained; with two looming sources the prepared Segment 4 pool contains 102 rows instead of the four-source profile's 204 rows.",
+  "notes": "Local unpublished Study 5 pink/white preload. This profile was created from the Study 5 dashboard Edit-mode workflow by removing the Blue frontal and Brown frontal looming sources and allowing the Segment 2 source-label decisions to propagate downward. All other Study 5 timing, SOA, baseline, catch, instruction, trajectory, block, and participant defaults are retained. Segment 4 family repetitions are scaled for the two-source pool so the prepared trial pool preserves the original four-source Study 5 total of 204 rows and six 34-trial blocks.",
   "reference_parameters": {
     "profile_type": "local_unpublished_study5_box_breathing_pps_pink_white",
     "publication_status": "unpublished_lab_profile",
@@ -147,7 +147,7 @@
     "local_only_assets": true,
     "variant_source_profile_id": "study5_box_breathing_pps",
     "variant_source_profile_title": "Study 5 PPS box-breathing profile",
-    "noise_source_policy": "Pink frontal and White frontal only; Blue frontal and Brown frontal removed through dashboard Edit mode."
+    "noise_source_policy": "Pink frontal and White frontal only; Blue frontal and Brown frontal removed through dashboard Edit mode. Segment 4 family repetitions are doubled for the two-source pool so the original 204 planned rows are retained."
   },
   "design": {
     "name": "Study 5 PPS box-breathing pink/white design",
@@ -216,10 +216,10 @@
     "protocol": {
       "repetitions_per_condition": 1,
       "trial_pool_repetition_defaults": {
-        "default": 3.0,
-        "audio_tactile": 3.0,
-        "baseline": 1.5,
-        "catch": 3.0
+        "default": 6.0,
+        "audio_tactile": 6.0,
+        "baseline": 3.0,
+        "catch": 6.0
       },
       "soa_values_ms": [
         300,
@@ -384,6 +384,11 @@
       "source": "Dashboard GUI Edit-mode workflow, 2026-06-20",
       "parameter": "source_pool_variant",
       "value": "Blue frontal and Brown frontal source cards removed; Segment 2 looming-stimulus source labels propagated to Pink frontal and White frontal."
+    },
+    {
+      "source": "Dashboard GUI Edit-mode workflow, 2026-06-20",
+      "parameter": "trial_pool_repetition_policy",
+      "value": "Pink/white variant scales Segment 4 family repetitions to audio-tactile 6.0, baseline 3.0, and catch 6.0 so source-pool pruning does not reduce the original Study 5 204-row trial budget."
     }
   ]
 }

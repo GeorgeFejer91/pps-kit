@@ -7,6 +7,7 @@ import math
 import os
 import subprocess
 import time
+from collections import Counter
 from importlib.resources import files
 from pathlib import Path
 
@@ -206,7 +207,7 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260620-study5-protocol"
+    static_version = "20260620-study5-counts"
     assert f'href="styles.css?v={static_version}"' in html
     assert f'src="hardware_pixel_art.js?v={static_version}"' in html
     assert f'src="app.js?v={static_version}"' in html
@@ -1485,6 +1486,117 @@ def test_dashboard_validates_full_study5_segment0_to_3_pipeline(tmp_path: Path):
     state = client.get("/api/state").json()
     assert state["project_segments"]["4_trial_repetition_pool"]["status"] == "ready"
     assert state["project_segments"]["4_trial_repetition_pool"]["total_count"] == 528
+
+
+def test_dashboard_pink_white_profile_preserves_study5_trial_budget_after_source_prune(tmp_path: Path):
+    client = _client(tmp_path)
+    client.post("/api/templates/study5_box_breathing_pps_pink_white/load").json()
+    loaded = client.post("/api/project/customize", json={"name": "Study 5 pink white invariant"}).json()
+
+    assert loaded["custom_workflow"]["is_custom"] is True
+    assert [item["label"] for item in loaded["design"]["noises"]] == ["Pink frontal", "White frontal"]
+    assert loaded["design"]["protocol"]["trial_pool_repetition_defaults"] == {
+        "default": 6.0,
+        "audio_tactile": 6.0,
+        "baseline": 3.0,
+        "catch": 6.0,
+    }
+
+    sequence_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "P001",
+            "design": loaded["design"],
+            "bake_recipe": {"kind": "trial_sequence_batch", "label": "2_trial_sequence_designs"},
+        },
+    ).json()
+    sequence_done = _wait_job(client, sequence_job["job_id"])
+    assert sequence_done["status"] == "succeeded"
+    assert sequence_done["result"]["variant_count"] == 4
+
+    tactile_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "P001",
+            "design": loaded["design"],
+            "bake_recipe": {"kind": "audiotactile_trial_batch", "label": "3_tactile_and_baseline_trials"},
+        },
+    ).json()
+    tactile_done = _wait_job(client, tactile_job["job_id"])
+    assert tactile_done["status"] == "succeeded"
+    assert tactile_done["result"]["audio_tactile_count"] == 20
+    assert tactile_done["result"]["baseline_count"] == 20
+    assert tactile_done["result"]["catch_count"] == 4
+
+    pool_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "P001",
+            "design": loaded["design"],
+            "bake_recipe": {"kind": "trial_repetition_pool", "label": "4_trial_repetition_pool"},
+        },
+    ).json()
+    pool_done = _wait_job(client, pool_job["job_id"])
+    assert pool_done["status"] == "succeeded"
+    assert pool_done["result"]["unique_file_count"] == 44
+    assert pool_done["result"]["total_count"] == 204
+    assert pool_done["result"]["audio_tactile_count"] == 120
+    assert pool_done["result"]["baseline_count"] == 60
+    assert pool_done["result"]["catch_count"] == 24
+
+    pool_manifest = _read_json_file(pool_done["result"]["manifest_path"])
+    assert pool_manifest["settings"]["family_repetitions"] == {
+        "audio_tactile": 6,
+        "baseline": 3,
+        "catch": 6,
+    }
+    assert pool_manifest["balance_warnings"] == []
+    pool_rows = _read_csv_rows(pool_done["result"]["csv_path"])
+    assert len(pool_rows) == 204
+    assert dict(Counter(dashboard_app._block_csv_noise_type(row) for row in pool_rows)) == {"pink": 102, "white": 102}
+    assert dict(Counter((row["family"], dashboard_app._block_csv_noise_type(row)) for row in pool_rows)) == {
+        ("audio_tactile", "pink"): 60,
+        ("audio_tactile", "white"): 60,
+        ("baseline", "pink"): 30,
+        ("baseline", "white"): 30,
+        ("catch", "pink"): 12,
+        ("catch", "white"): 12,
+    }
+
+    block_job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "P001",
+            "design": loaded["design"],
+            "bake_recipe": {"kind": "block_csv_preview", "label": "5_block_csv_preview"},
+        },
+    ).json()
+    block_done = _wait_job(client, block_job["job_id"])
+    assert block_done["status"] == "succeeded"
+    assert block_done["result"]["block_count"] == 6
+    assert block_done["result"]["csv_count"] == 6
+    assert block_done["result"]["total_count"] == 204
+
+    block_manifest = _read_json_file(block_done["result"]["manifest_path"])
+    assert [block["trial_count"] for block in block_manifest["blocks"]] == [34, 34, 34, 34, 34, 34]
+    assert block_manifest["row_sequence_strategy"] == "cycle_preserved_segment_row_order_within_each_block"
+    for block in block_manifest["blocks"]:
+        block_rows = _read_csv_rows(block["csv_path"])
+        assert dict(Counter(row["family"] for row in block_rows)) == {
+            "audio_tactile": 20,
+            "baseline": 10,
+            "catch": 4,
+        }
+        assert dict(Counter(row["noise_type"] for row in block_rows)) == {"pink": 17, "white": 17}
+        assert dict(Counter((row["family"], row["noise_type"]) for row in block_rows)) == {
+            ("audio_tactile", "pink"): 10,
+            ("audio_tactile", "white"): 10,
+            ("baseline", "pink"): 5,
+            ("baseline", "white"): 5,
+            ("catch", "pink"): 2,
+            ("catch", "white"): 2,
+        }
+        assert [row["row_label"] for row in block_rows] == ["Inhale trial type", "Exhale trial type"] * 17
 
 
 def test_dashboard_loads_all_preloads_with_trajectory_inventory(tmp_path: Path):

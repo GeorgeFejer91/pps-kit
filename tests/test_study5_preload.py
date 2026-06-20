@@ -274,7 +274,7 @@ def test_unpublished_study5_template_preloads_breathing_assets_and_filmstrip():
     assert all("instruction | " in row["sequence_labels"] for row in rows)
 
 
-def test_study5_pink_white_profile_keeps_study5_defaults_with_two_sources():
+def test_study5_pink_white_profile_keeps_study5_trial_budget_with_two_sources():
     root = Path(__file__).resolve().parents[1]
     template = _study5_pink_white_template()
     design = template.design
@@ -289,10 +289,10 @@ def test_study5_pink_white_profile_keeps_study5_defaults_with_two_sources():
     assert [asset.noise_type for asset in design.noises] == ["pink", "white"]
     assert all(PINK_WHITE_STUDY5_TEMPLATE_ID in asset.prebaked_path for asset in design.noises)
     assert design.protocol.trial_pool_repetition_defaults == {
-        "default": 3.0,
-        "audio_tactile": 3.0,
-        "baseline": 1.5,
-        "catch": 3.0,
+        "default": 6.0,
+        "audio_tactile": 6.0,
+        "baseline": 3.0,
+        "catch": 6.0,
     }
     assert dashboard_app._run_setup_settings(design)["experiment_structure"] == "pre_post"
 

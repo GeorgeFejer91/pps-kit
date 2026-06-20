@@ -95,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 32,
+      "value": 33,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -194,10 +194,10 @@
       "parameter": "trial_pool_repetitions",
       "status": "reported",
       "value": {
-        "default": 3.0,
-        "audio_tactile": 3.0,
-        "baseline": 1.5,
-        "catch": 3.0
+        "default": 6.0,
+        "audio_tactile": 6.0,
+        "baseline": 3.0,
+        "catch": 6.0
       },
       "note": "Segment 4 repetition defaults are encoded."
     },
@@ -289,6 +289,11 @@
       "source": "Dashboard GUI Edit-mode workflow, 2026-06-20",
       "parameter": "source_pool_variant",
       "value": "Blue frontal and Brown frontal source cards removed; Segment 2 looming-stimulus source labels propagated to Pink frontal and White frontal."
+    },
+    {
+      "source": "Dashboard GUI Edit-mode workflow, 2026-06-20",
+      "parameter": "trial_pool_repetition_policy",
+      "value": "Pink/white variant scales Segment 4 family repetitions to audio-tactile 6.0, baseline 3.0, and catch 6.0 so source-pool pruning does not reduce the original Study 5 204-row trial budget."
     }
   ],
   "notes": "This manifest audits recreation inside the PPS Toolkit GUI. It distinguishes toolkit-generated recreations of reported parameters from the original authors' exact stimulus set."
