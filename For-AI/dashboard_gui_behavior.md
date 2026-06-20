@@ -27,3 +27,9 @@ In the HTML dashboard study selector, the pink/white variant is presented as a b
 ## Static Profile Segment 3-5 Previews
 
 Hosted/static mode cannot write WAVs or CSVs, but finished bundled profiles must still show the same downstream decisions that the local companion would materialize. `staticStateForTemplate()` therefore derives read-only virtual Segment 3 trial files, Segment 4 repetition-pool rows, and Segment 5 block previews from the committed profile parameters. The Study 5 pink/white variant should show 44 virtual Segment 3 WAVs, 204 planned Segment 4 pool rows, and 6 accepted static block previews of 34 trials each. These are inspection previews only; the local companion still performs the actual file/CSV materialization when launching or preparing a run.
+
+## Static Preview Parity Audit
+
+Hosted/static no-companion mode must keep every profile visible in the static selector aligned with committed offline/local profile truth. Ready launchable profiles must match local dashboard preview counts and read-only Segment 3-6 summaries; blocked profiles must remain inspectable only as metadata/source/trajectory/blocker previews and must not appear launchable. Editing, baking, file import, saving, output-folder export, local-folder opening, and runner launch remain disabled until the hosted page connects to the local companion.
+
+`validation_protocols/scripts/run_static_dashboard_preview_parity_audit.py` is the static-preview parity harness. It can force the dashboard into no-companion static mode with `forceStaticPreview=1`, read the query-gated sanitized browser snapshot exposed by `auditStaticPreview=1`, and compare all static-selectable profiles against preload/profile ledgers plus local Protocol 12 materialization for ready profiles. The audit surface must stay validation-only and must not expose local paths, participant data, generated outputs, or secrets.

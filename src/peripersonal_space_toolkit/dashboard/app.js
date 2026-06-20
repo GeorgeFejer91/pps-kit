@@ -6,10 +6,13 @@ let activeNavFrame = 0;
 const CUSTOM_TEMPLATE_ID = "__custom__";
 const DEFAULT_STUDY_TEMPLATE_ID = "study5_box_breathing_pps";
 const STUDY5_PINK_WHITE_TEMPLATE_ID = "study5_box_breathing_pps_pink_white";
-const STATIC_RESOURCE_VERSION = "20260620-trajectory-ready";
+const STATIC_RESOURCE_VERSION = "20260620-static-preview-parity";
 const STATIC_REPO_ROOT = new URL("../../../", document.currentScript?.src || window.location.href).href;
 const STATIC_PRELOAD_INVENTORY_PATH = "assets/preloads/preload_inventory.json";
 const STATIC_TEMPLATE_DIR = "study_templates/";
+const STATIC_AUDIT_SNAPSHOT_SCHEMA = "pps-static-dashboard-preview-audit-snapshot.v1";
+const STATIC_AUDIT_QUERY_PARAM = "auditStaticPreview";
+const STATIC_FORCE_QUERY_PARAM = "forceStaticPreview";
 const STATIC_COMPANION_REQUIRED_MESSAGE =
   "Start the local companion backend to create, bake, save, prepare, or open local experiment files.";
 const PROFILE_RECREATION_NOTICE =
@@ -109,6 +112,27 @@ const DOWNSTREAM_STEPS = {
 };
 const LOCAL_BACKEND_DEFAULT = "http://127.0.0.1:8766";
 const COMPANION_TOKEN_STORAGE_KEY = "ppsDashboard.companionToken";
+const STATIC_AUDIT_CONTROL_IDS = [
+  "edit-mode-button",
+  "edit-profile-rail",
+  "apply-design",
+  "load-custom-project",
+  "apply-profile-project",
+  "export-data-acquisition-folder",
+  "import-audio-spatialize",
+  "import-audio-preserve",
+  "bake-stimulus",
+  "bake-trial-sequences",
+  "bake-trial-files",
+  "apply-trial-pool-repetitions",
+  "bake-trial-pool",
+  "regenerate-block-csvs",
+  "accept-block-csvs",
+  "regenerate-run-sequence",
+  "save-study-profile",
+  "export-output-folder",
+  "prepare-experiment"
+];
 const PANEL_RESIZE_SNAP_PX = 8;
 const PANEL_HEIGHT_MIN = 150;
 const PANEL_HEIGHT_MAX = 1000;
@@ -1580,6 +1604,254 @@ function staticParticipantOrders(design) {
   }));
 }
 
+function queryFlagEnabled(name) {
+  const params = new URLSearchParams(window.location.search || "");
+  if (!params.has(name)) return false;
+  const value = String(params.get(name) || "1").trim().toLowerCase();
+  return !["0", "false", "no", "off"].includes(value);
+}
+
+function staticPreviewAuditEnabled() {
+  return queryFlagEnabled(STATIC_AUDIT_QUERY_PARAM);
+}
+
+function forceStaticPreviewEnabled() {
+  return queryFlagEnabled(STATIC_FORCE_QUERY_PARAM);
+}
+
+function auditControlSnapshot(id) {
+  const control = $(id);
+  return {
+    exists: Boolean(control),
+    disabled: control ? Boolean(control.disabled) : null,
+    text: control ? String(control.textContent || control.value || "").trim() : "",
+    title: control ? String(control.title || "") : ""
+  };
+}
+
+function auditSourceSnapshot() {
+  const source = [];
+  for (const item of state?.design?.noises || []) {
+    source.push({
+      kind: "noise",
+      label: item.label || "",
+      noise_type: item.noise_type || item.tone_type || "",
+      motion_mode: item.motion_mode || "",
+      path: item.prebaked_path || "",
+      has_trajectory_snapshot: Boolean(item.trajectory_snapshot && Object.keys(item.trajectory_snapshot).length)
+    });
+  }
+  for (const item of state?.design?.custom_looming_files || []) {
+    source.push({
+      kind: "custom_looming",
+      label: item.label || "",
+      noise_type: item.tone_type || item.noise_type || "",
+      motion_mode: item.motion_mode || "",
+      path: item.path || "",
+      has_trajectory_snapshot: Boolean(item.trajectory_snapshot && Object.keys(item.trajectory_snapshot).length)
+    });
+  }
+  for (const item of state?.design?.prestimulus_files || []) {
+    source.push({
+      kind: "prestimulus",
+      label: item.label || "",
+      noise_type: item.tone_type || item.noise_type || "prestimulus",
+      motion_mode: item.motion_mode || "stationary",
+      path: item.path || "",
+      has_trajectory_snapshot: false
+    });
+  }
+  return source;
+}
+
+function auditTrialStripSnapshot(strip, index) {
+  const variants = stripPreviewVariants(strip);
+  return {
+    index: index + 1,
+    label: strip?.label || `Trial type ${index + 1}`,
+    variant_count: variants.length,
+    variants: variants.map((variant) => variant.map((choice) => ({
+      kind: choice.kind || "",
+      label: choice.label || "",
+      value: choice.value ?? ""
+    })))
+  };
+}
+
+function auditPoolRows(rows = []) {
+  return rows.map((row) => ({
+    trial_pool_index: row.trial_pool_index || "",
+    family: row.family || "",
+    row_label: row.row_label || "",
+    folder_name: row.folder_name || "",
+    source_file_name: row.source_file_name || "",
+    duration_ms: row.duration_ms || 0,
+    repetition_index: row.repetition_index || "",
+    configured_repetitions: row.configured_repetitions || "",
+    fractional_extra: row.fractional_extra || 0,
+    soa_ms: row.soa_ms || "",
+    baseline_mode: row.baseline_mode || "",
+    sequence_variant_key: row.sequence_variant_key || "",
+    sequence_labels: row.sequence_labels || "",
+    noise_type: row.noise_type || "",
+    channels: row.channels || "",
+    tactile_channel: row.tactile_channel || ""
+  }));
+}
+
+function auditBlockRows(rows = []) {
+  return rows.map((row) => ({
+    block_index: row.block_index || "",
+    block_trial_index: row.block_trial_index || "",
+    trial_pool_index: row.trial_pool_index || "",
+    family: row.family || "",
+    row_label: row.row_label || "",
+    folder_name: row.folder_name || "",
+    source_file_name: row.source_file_name || "",
+    duration_ms: row.duration_ms || 0,
+    repetition_index: row.repetition_index || "",
+    configured_repetitions: row.configured_repetitions || "",
+    fractional_extra: row.fractional_extra || 0,
+    soa_ms: row.soa_ms || "",
+    baseline_mode: row.baseline_mode || "",
+    sequence_variant_key: row.sequence_variant_key || "",
+    sequence_labels: row.sequence_labels || "",
+    noise_type: row.noise_type || "",
+    channels: row.channels || "",
+    tactile_channel: row.tactile_channel || ""
+  }));
+}
+
+function auditBlockSnapshot(block) {
+  return {
+    block_index: block.block_index || "",
+    block_label: block.block_label || "",
+    trial_count: block.trial_count || 0,
+    duration_ms: block.duration_ms || 0,
+    family_counts: clone(block.family_counts || {}),
+    row_label_counts: clone(block.row_label_counts || {}),
+    soa_counts: clone(block.soa_counts || {}),
+    noise_type_counts: clone(block.noise_type_counts || {}),
+    preview_rows: auditBlockRows(block.preview_rows || [])
+  };
+}
+
+function dashboardAuditSnapshot() {
+  const setup = state?.run_sequence_setup || {};
+  const protocol = state?.design?.protocol || {};
+  const segments = {};
+  for (const folder of Object.values(STEP_SEGMENT_FOLDERS)) {
+    const segment = state?.project_segments?.[folder] || {};
+    segments[folder] = {
+      status: segment.status || "",
+      accepted: Boolean(segment.accepted),
+      manifest_exists: Boolean(segment.manifest_exists),
+      message: segment.message || segment.last_validation_message || "",
+      audio_tactile_count: segment.audio_tactile_count || 0,
+      baseline_count: segment.baseline_count || 0,
+      catch_count: segment.catch_count || 0,
+      total_count: segment.total_count || segment.trial_count || 0,
+      block_count: segment.block_count || 0,
+      csv_count: segment.csv_count || 0
+    };
+  }
+  return {
+    schema: STATIC_AUDIT_SNAPSHOT_SCHEMA,
+    loaded: Boolean(state),
+    static_mode: Boolean(staticModeActive),
+    edit_mode_active: Boolean(editModeActive),
+    selected_template: state?.selected_template || "",
+    template_count: state?.templates?.length || 0,
+    templates: (state?.templates || []).map((template) => ({
+      template_id: template.template_id || "",
+      citation_label: template.citation_label || "",
+      title: template.title || "",
+      doi: template.doi || "",
+      preload_asset_status: clone(template.preload_asset_status || {})
+    })),
+    profile: {
+      name: state?.design?.name || "",
+      study_profile_id: state?.design?.study_profile_id || "",
+      title: state?.design?.study_profile_title || "",
+      doi: selectedProfileChoice().kind === "bundled"
+        ? (state?.templates || []).find((template) => template.template_id === state.selected_template)?.doi || ""
+        : "",
+      preload_inventory: clone(state?.preload_inventory || {}),
+      custom_missing: clone(state?.custom_workflow?.missing || [])
+    },
+    controls: Object.fromEntries(STATIC_AUDIT_CONTROL_IDS.map((id) => [id, auditControlSnapshot(id)])),
+    segments,
+    sources: auditSourceSnapshot(),
+    trajectory_controls: clone(state?.trajectory_controls || {}),
+    viewer_payload: clone(state?.viewer_payload || {}),
+    protocol: {
+      participants: protocol.participants || 0,
+      blocks: protocol.blocks || 0,
+      soa_values_ms: clone(protocol.soa_values_ms || []),
+      include_baseline_trials: Boolean(protocol.include_baseline_trials),
+      baseline_strategy: protocol.baseline_strategy || "",
+      baseline_soa_values_ms: clone(protocol.baseline_soa_values_ms || []),
+      baseline_custom_trial_mode: protocol.baseline_custom_trial_mode || "",
+      include_catch_trials: Boolean(protocol.include_catch_trials),
+      trial_pool_repetition_defaults: clone(protocol.trial_pool_repetition_defaults || {}),
+      trial_strips: (protocol.trial_strips || []).map(auditTrialStripSnapshot)
+    },
+    trial_file_bake: {
+      status: state?.trial_file_bake?.status || "",
+      audio_tactile_count: state?.trial_file_bake?.audio_tactile_count || 0,
+      baseline_count: state?.trial_file_bake?.baseline_count || 0,
+      catch_count: state?.trial_file_bake?.catch_count || 0,
+      total_count: state?.trial_file_bake?.total_count || 0
+    },
+    trial_pool_bake: {
+      status: state?.trial_pool_bake?.status || "",
+      unique_file_count: state?.trial_pool_bake?.unique_file_count || 0,
+      total_count: state?.trial_pool_bake?.total_count || state?.trial_pool_bake?.total_trials || 0,
+      audio_tactile_count: state?.trial_pool_bake?.audio_tactile_count || 0,
+      baseline_count: state?.trial_pool_bake?.baseline_count || 0,
+      catch_count: state?.trial_pool_bake?.catch_count || 0,
+      estimated_total_duration_ms: state?.trial_pool_bake?.estimated_total_duration_ms || 0,
+      family_counts: clone(state?.trial_pool_bake?.family_counts || {}),
+      preview_rows: auditPoolRows(state?.trial_pool_bake?.preview_rows || [])
+    },
+    block_csv_preview: {
+      status: state?.block_csv_preview?.status || "",
+      accepted: Boolean(state?.block_csv_preview?.accepted),
+      block_count: state?.block_csv_preview?.block_count || 0,
+      csv_count: state?.block_csv_preview?.csv_count || 0,
+      total_count: state?.block_csv_preview?.total_count || 0,
+      estimated_total_duration_ms: state?.block_csv_preview?.estimated_total_duration_ms || 0,
+      blocks: (state?.block_csv_preview?.blocks || []).map(auditBlockSnapshot)
+    },
+    run_sequence_setup: {
+      ready: Boolean(setup.ready),
+      prepared: Boolean(setup.prepared),
+      participant_count: setup.participant_count || 0,
+      experiment_structure: setup.experiment_structure || "",
+      parts_per_participant: setup.parts_per_participant || 0,
+      total_block_runs: setup.total_block_runs || 0,
+      rows: clone(setup.rows || []),
+      message: setup.message || ""
+    },
+    disabled_summary: {
+      edit_disabled: Boolean($("edit-mode-button")?.disabled),
+      mutating_enabled: STATIC_AUDIT_CONTROL_IDS
+        .filter((id) => id !== "edit-mode-button")
+        .filter((id) => {
+          const control = $(id);
+          return control && !control.disabled;
+        })
+    }
+  };
+}
+
+function exposeDashboardAuditHook() {
+  if (!staticPreviewAuditEnabled()) return;
+  window.PPSDashboardAudit = Object.freeze({
+    snapshot: dashboardAuditSnapshot
+  });
+}
+
 async function loadStaticState(fallbackError = null) {
   staticModeReason = fallbackError?.message || "";
   const selected = state?.selected_template && state.selected_template !== CUSTOM_TEMPLATE_ID
@@ -1590,12 +1862,17 @@ async function loadStaticState(fallbackError = null) {
   setConnectionStatus(false, "static profile");
   renderAll();
   updateViewer();
-  showToast("Loaded Study 5 and committed preload assets from GitHub. Start the local companion for local generation or runner launch.");
+  showToast("Loaded committed preload assets from GitHub. Start the local companion for local generation or runner launch.");
   return true;
 }
 
 async function loadState(options = {}) {
   const resetMode = options.resetEditMode === true;
+  if (forceStaticPreviewEnabled()) {
+    if (resetMode) resetEditMode();
+    await loadStaticState(new Error("Forced static preview audit mode."));
+    return;
+  }
   try {
     state = await api("/api/state", { skipStaticGuard: true });
     staticModeActive = false;
@@ -1828,8 +2105,10 @@ function renderProfileMode() {
       : editModeActive ? "custom edit mode" : "custom view mode";
   status.className = `status-label ${readonly || customViewModeLocked() ? "required" : "ready"}`;
   button.textContent = readonly ? "Edit As New Study" : "Editing Custom Study";
-  button.disabled = !readonly;
-  button.title = readonly
+  button.disabled = !readonly || staticModeActive;
+  button.title = staticModeActive
+    ? STATIC_COMPANION_REQUIRED_MESSAGE
+    : readonly
     ? "Create a named custom copy before changing this loaded profile."
     : "This project is already editable.";
 }
@@ -4490,8 +4769,11 @@ function renderRun() {
   if (regenerateButton) regenerateButton.disabled = prepared || !setup.ready;
   const prepareButton = $("prepare-experiment");
   if (prepareButton) {
-    prepareButton.disabled = !setup.ready && !isProfileReadonlyMode();
+    prepareButton.disabled = staticModeActive || (!setup.ready && !isProfileReadonlyMode());
     prepareButton.textContent = prepared ? "Open Experiment Runner" : "Save Design and Start Experiment Runner";
+    prepareButton.title = staticModeActive
+      ? STATIC_COMPANION_REQUIRED_MESSAGE
+      : "";
   }
   const saveProfileButton = $("save-study-profile");
   if (saveProfileButton) {
@@ -6598,6 +6880,7 @@ loadCompanionToken();
 loadResizableLayoutSettings();
 enforceExternalLinkTargets();
 renderHardwarePixelArt();
+exposeDashboardAuditHook();
 wireEvents();
 initializePageTabs();
 loadState({ resetEditMode: true }).catch(reportError);
