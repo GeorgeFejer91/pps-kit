@@ -29,6 +29,16 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--offscreen", action="store_true", help="Use Qt offscreen mode for CI/headless smoke runs.")
     parser.add_argument("--fullscreen", action="store_true", help="Show the validation window full-screen.")
     parser.add_argument("--mouse-backend", choices=["qtest", "pynput", "win32", "pyautogui"], default="qtest")
+    parser.add_argument(
+        "--external-click-process",
+        action="store_true",
+        help="For OS backends, send clicks from a helper Python process instead of this Qt process.",
+    )
+    parser.add_argument(
+        "--qtest-controls",
+        action="store_true",
+        help="Use Qt clicks for setup/start controls and reserve the requested backend for response-target clicks.",
+    )
     return parser
 
 
@@ -131,7 +141,8 @@ def main(argv: list[str] | None = None) -> int:
     mouse_clicks: list[dict[str, Any]] = []
 
     def _factory(package_obj: Any, *, capture_options: SessionCaptureOptions, **kwargs: Any) -> FakeFocusController:
-        controller = FakeFocusController(package_obj, capture_options=capture_options, **kwargs)
+        run_duration_s = max(1.5, 1.2 + (max(0, args.count) * max(1, args.interval_ms) / 1000.0) + 1.5)
+        controller = FakeFocusController(package_obj, capture_options=capture_options, run_duration_s=run_duration_s, **kwargs)
         controller_holder["controller"] = controller
         return controller
 
@@ -147,7 +158,7 @@ def main(argv: list[str] | None = None) -> int:
         if widget is None or not widget.isEnabled():
             return
         backend = args.mouse_backend
-        if backend == "qtest" or args.offscreen:
+        if backend == "qtest" or args.offscreen or (args.qtest_controls and label in {"Submit setup", "Start Run"}):
             QTest.mouseClick(widget, q["Qt"].MouseButton.LeftButton)
             mouse_clicks.append({"label": label, "backend": "qtest", "timestamp_unix": time.time()})
             return
@@ -159,6 +170,36 @@ def main(argv: list[str] | None = None) -> int:
             app.processEvents()
             time.sleep(0.05)
             x, y, source = focus_app._widget_screen_center(widget)
+            hwnd, client_x, client_y = focus_app._widget_win32_client_center(widget)
+            if args.external_click_process:
+                result = focus_app._send_validation_external_mouse_click(
+                    x=int(x),
+                    y=int(y),
+                    backend=backend,
+                    python_path=os.environ.get("PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON") or sys.executable,
+                    hwnd=hwnd,
+                    client_x=client_x,
+                    client_y=client_y,
+                )
+                app.processEvents()
+                time.sleep(0.03)
+                app.processEvents()
+                mouse_clicks.append(
+                    {
+                        "label": label,
+                        "backend": backend,
+                        "coordinate_source": source,
+                        "x": x,
+                        "y": y,
+                        "hwnd": hwnd or "",
+                        "client_x": client_x,
+                        "client_y": client_y,
+                        "external_click_process": True,
+                        "external_click_result": result,
+                        "timestamp_unix": time.time(),
+                    }
+                )
+                return
             if backend == "pynput":
                 from pynput.mouse import Button, Controller
 
@@ -208,7 +249,7 @@ def main(argv: list[str] | None = None) -> int:
             700 + index * max(1, args.interval_ms),
             lambda index=index: _mouse_click(window.target_button, f"CLICK target {index + 1}"),
         )
-    close_after_ms = 2400 + max(0, args.count) * max(1, args.interval_ms)
+    close_after_ms = 3600 + max(0, args.count) * max(1, args.interval_ms)
     exit_code = window.exec(
         fullscreen=bool(args.fullscreen),
         auto_start=False,
@@ -225,6 +266,9 @@ def main(argv: list[str] | None = None) -> int:
         "logged_click_count": click_count,
         "click_mode": "qt_mouse_clicks" if args.mouse_backend == "qtest" else "visible_os_mouse_clicks",
         "mouse_backend": args.mouse_backend,
+        "external_click_process": bool(args.external_click_process),
+        "qtest_controls": bool(args.qtest_controls),
+        "external_click_python": os.environ.get("PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON") or (sys.executable if args.external_click_process else ""),
         "mouse_clicks": mouse_clicks,
         "screenshot_path": str(screenshot_path),
         "session_manifest": str(manifest_path),

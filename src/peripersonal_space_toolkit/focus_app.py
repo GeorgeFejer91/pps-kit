@@ -684,6 +684,14 @@ def _widget_screen_center(widget: Any) -> tuple[int, int, str]:
         x = int(center.x())
         y = int(center.y())
         if x or y:
+            ratio = 1.0
+            try:
+                screen = widget.screen()
+                ratio = float(screen.devicePixelRatio()) if screen is not None else 1.0
+            except Exception:
+                ratio = 1.0
+            if ratio > 1.01:
+                return int(round(x * ratio)), int(round(y * ratio)), f"qt_map_to_global_dpr_{ratio:g}"
             return x, y, "qt_map_to_global"
     except Exception:
         pass
@@ -702,6 +710,222 @@ def _widget_screen_center(widget: Any) -> tuple[int, int, str]:
         except Exception:
             pass
     return 0, 0, "unresolved"
+
+
+def _widget_win32_client_center(widget: Any) -> tuple[int, int, int]:
+    if sys.platform != "win32":
+        return 0, 0, 0
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        hwnd = int(widget.winId())
+        rect = wintypes.RECT()
+        if hwnd and ctypes.windll.user32.GetClientRect(hwnd, ctypes.byref(rect)):
+            width = max(0, int(rect.right - rect.left))
+            height = max(0, int(rect.bottom - rect.top))
+            return hwnd, int(width / 2), int(height / 2)
+    except Exception:
+        pass
+    return 0, 0, 0
+
+
+def _send_validation_external_mouse_click(
+    *,
+    x: int,
+    y: int,
+    backend: str,
+    python_path: str | None = None,
+    hwnd: int | None = None,
+    client_x: int | None = None,
+    client_y: int | None = None,
+    window_message_only: bool = False,
+    timeout_s: float = 2.0,
+) -> dict[str, Any]:
+    """Send a validation click from a helper Python process."""
+    import subprocess
+
+    resolved_backend = str(backend or "").strip().lower()
+    helper_python = str(python_path or os.environ.get("PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON") or "").strip()
+    if not helper_python:
+        return {"ok": False, "backend": resolved_backend, "error": "external_click_python_not_configured"}
+    if resolved_backend not in {"pynput", "win32", "pyautogui"}:
+        return {"ok": False, "backend": resolved_backend, "error": f"unsupported_backend:{resolved_backend}"}
+    helper_code = r'''
+import ctypes
+import json
+import sys
+import time
+
+
+def _set_dpi_aware():
+    try:
+        ctypes.windll.shcore.SetProcessDpiAwareness(2)
+    except Exception:
+        try:
+            ctypes.windll.user32.SetProcessDPIAware()
+        except Exception:
+            pass
+
+
+def _send_win32_click(x, y):
+    user32 = ctypes.windll.user32
+    user32.SetCursorPos(int(x), int(y))
+    time.sleep(0.05)
+
+    class MOUSEINPUT(ctypes.Structure):
+        _fields_ = [
+            ("dx", ctypes.c_long),
+            ("dy", ctypes.c_long),
+            ("mouseData", ctypes.c_ulong),
+            ("dwFlags", ctypes.c_ulong),
+            ("time", ctypes.c_ulong),
+            ("dwExtraInfo", ctypes.POINTER(ctypes.c_ulong)),
+        ]
+
+    class INPUTUNION(ctypes.Union):
+        _fields_ = [("mi", MOUSEINPUT)]
+
+    class INPUT(ctypes.Structure):
+        _fields_ = [("type", ctypes.c_ulong), ("union", INPUTUNION)]
+
+    extra = ctypes.c_ulong(0)
+
+    def _send(flags):
+        item = INPUT(0, INPUTUNION(mi=MOUSEINPUT(0, 0, 0, flags, 0, ctypes.pointer(extra))))
+        sent = user32.SendInput(1, ctypes.byref(item), ctypes.sizeof(item))
+        if int(sent) != 1:
+            raise OSError("SendInput failed")
+
+    _send(0x0002)
+    time.sleep(0.03)
+    _send(0x0004)
+
+
+def _send_win32_message_click(hwnd, client_x, client_y):
+    user32 = ctypes.windll.user32
+    lparam = (int(client_y) << 16) | (int(client_x) & 0xFFFF)
+    user32.PostMessageW(int(hwnd), 0x0200, 0, lparam)
+    time.sleep(0.02)
+    user32.PostMessageW(int(hwnd), 0x0201, 0x0001, lparam)
+    time.sleep(0.03)
+    user32.PostMessageW(int(hwnd), 0x0202, 0, lparam)
+
+
+backend = sys.argv[1].strip().lower()
+x = int(round(float(sys.argv[2])))
+y = int(round(float(sys.argv[3])))
+hwnd = int(sys.argv[4]) if len(sys.argv) > 4 and sys.argv[4].strip() else 0
+client_x = int(round(float(sys.argv[5]))) if len(sys.argv) > 5 and sys.argv[5].strip() else 0
+client_y = int(round(float(sys.argv[6]))) if len(sys.argv) > 6 and sys.argv[6].strip() else 0
+message_only = sys.argv[7].strip().lower() in {"1", "true", "yes"} if len(sys.argv) > 7 else False
+result = {"ok": False, "backend": backend, "x": x, "y": y, "hwnd": hwnd or ""}
+try:
+    _set_dpi_aware()
+    raw_ok = False
+    raw_error = ""
+    if message_only:
+        raw_error = "raw_input_skipped_for_window_message_only"
+    elif backend == "pynput":
+        try:
+            from pynput.mouse import Button, Controller
+
+            mouse = Controller()
+            mouse.position = (x, y)
+            time.sleep(0.05)
+            mouse.press(Button.left)
+            time.sleep(0.03)
+            mouse.release(Button.left)
+            raw_ok = True
+        except Exception as exc:
+            raw_error = str(exc)
+    elif backend == "win32":
+        try:
+            _send_win32_click(x, y)
+            raw_ok = True
+        except Exception as exc:
+            raw_error = str(exc)
+    elif backend == "pyautogui":
+        try:
+            import pyautogui
+
+            pyautogui.FAILSAFE = False
+            pyautogui.PAUSE = 0
+            pyautogui.click(x, y)
+            raw_ok = True
+        except Exception as exc:
+            raw_error = str(exc)
+    else:
+        raise ValueError(f"unsupported backend: {backend}")
+    message_ok = False
+    message_error = ""
+    if message_only and hwnd and client_x >= 0 and client_y >= 0:
+        try:
+            _send_win32_message_click(hwnd, client_x, client_y)
+            message_ok = True
+        except Exception as exc:
+            message_error = str(exc)
+    result["raw_input_sent"] = raw_ok
+    result["window_message_sent"] = message_ok
+    if raw_error:
+        result["raw_input_error"] = raw_error
+    if message_error:
+        result["window_message_error"] = message_error
+    result["ok"] = bool(raw_ok or message_ok)
+except Exception as exc:
+    result["error"] = str(exc)
+print(json.dumps(result, sort_keys=True))
+raise SystemExit(0 if result["ok"] else 2)
+'''
+    startupinfo = None
+    creationflags = 0
+    if sys.platform == "win32":
+        try:
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            startupinfo.wShowWindow = 0
+            creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+        except Exception:
+            startupinfo = None
+            creationflags = 0
+    try:
+        completed = subprocess.run(
+            [
+                helper_python,
+                "-c",
+                helper_code,
+                resolved_backend,
+                str(int(x)),
+                str(int(y)),
+                str(int(hwnd or 0)),
+                str(int(client_x or 0)),
+                str(int(client_y or 0)),
+                "1" if window_message_only else "0",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=max(0.5, float(timeout_s)),
+            startupinfo=startupinfo,
+            creationflags=creationflags,
+        )
+    except Exception as exc:
+        return {"ok": False, "backend": resolved_backend, "python": helper_python, "x": int(x), "y": int(y), "error": str(exc)}
+    stdout = (completed.stdout or "").strip()
+    payload: dict[str, Any] = {}
+    if stdout:
+        try:
+            payload = json.loads(stdout.splitlines()[-1])
+        except Exception:
+            payload = {"stdout": stdout}
+    payload.setdefault("backend", resolved_backend)
+    payload.setdefault("x", int(x))
+    payload.setdefault("y", int(y))
+    payload["python"] = helper_python
+    payload["returncode"] = int(completed.returncode)
+    if completed.stderr:
+        payload["stderr"] = completed.stderr.strip()
+    payload["ok"] = bool(payload.get("ok")) and completed.returncode == 0
+    return payload
 
 
 def _force_foreground_window(widget: Any) -> None:
@@ -4817,6 +5041,7 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
     delay_max_ms = max(delay_min_ms, _env_float("PPS_FOCUS_VALIDATION_PARTICIPANT_DELAY_MAX_MS", 850.0))
     topup_delay_min_ms = max(100.0, _env_float("PPS_FOCUS_VALIDATION_TOPUP_DELAY_MIN_MS", 140.0))
     topup_delay_max_ms = max(topup_delay_min_ms, _env_float("PPS_FOCUS_VALIDATION_TOPUP_DELAY_MAX_MS", 500.0))
+    trial_end_margin_ms = max(0.0, _env_float("PPS_FOCUS_VALIDATION_TRIAL_END_MARGIN_MS", 650.0))
     backend_requested = os.environ.get("PPS_FOCUS_VALIDATION_MOUSE_BACKEND", "win32").strip().lower() or "win32"
     records: list[dict[str, Any]] = []
     scheduled_events: set[str] = set()
@@ -4874,6 +5099,7 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
                 "miss_rate": miss_rate,
                 "delay_min_ms": delay_min_ms,
                 "delay_max_ms": delay_max_ms,
+                "trial_end_margin_ms": trial_end_margin_ms,
                 "timestamp_unix": time.time(),
             }
         )
@@ -4952,10 +5178,47 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
         return "qtest_space"
 
     def _logged_mouse_click_count() -> int:
+        return len(_mouse_click_events())
+
+    def _mouse_click_events() -> list[Any]:
         controller = window.controller
         logger = getattr(controller, "logger", None) if controller is not None else None
         events = getattr(logger, "events", []) if logger is not None else []
-        return sum(1 for event in events if getattr(event, "event_type", "") == "mouse_click")
+        return [event for event in events if getattr(event, "event_type", "") == "mouse_click"]
+
+    def _latest_mouse_click_event() -> Any | None:
+        events = _mouse_click_events()
+        return events[-1] if events else None
+
+    def _matched_tactile_event(item: dict[str, Any]) -> Any | None:
+        controller = window.controller
+        logger = getattr(controller, "logger", None) if controller is not None else None
+        events = getattr(logger, "events", []) if logger is not None else []
+        trial_uid = str(item.get("trial_uid") or "").strip()
+        block_index = _validation_int(item.get("block_index"), default=0)
+        for event in reversed(events):
+            if getattr(event, "event_type", "") != "tactile_onset":
+                continue
+            payload = dict(getattr(event, "payload", {}) or {})
+            event_trial_uid = str(payload.get("trial_uid") or payload.get("Trial_UID") or "").strip()
+            event_block_index = _validation_int(payload.get("block_index") or payload.get("block_number"), default=0)
+            if trial_uid and event_trial_uid != trial_uid:
+                continue
+            if block_index > 0 and event_block_index > 0 and event_block_index != block_index:
+                continue
+            return event
+        return None
+
+    def _bounded_validation_delay_ms(delay_ms: float, *, tactile_relative_s: Any = None, trial_end_relative_s: Any = None) -> tuple[float, float | None]:
+        try:
+            tactile_s = float(tactile_relative_s)
+            trial_end_s = float(trial_end_relative_s)
+        except (TypeError, ValueError):
+            return float(delay_ms), None
+        if not (math.isfinite(tactile_s) and math.isfinite(trial_end_s) and trial_end_s > tactile_s):
+            return float(delay_ms), None
+        max_delay_ms = max(100.0, (trial_end_s - tactile_s) * 1000.0 - trial_end_margin_ms)
+        return min(float(delay_ms), max_delay_ms), max_delay_ms
 
     def _pump_click_events() -> None:
         try:
@@ -4979,6 +5242,66 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
         _pump_click_events()
         return "win32"
 
+    def _try_external_click_process(
+        widget: Any,
+        label: str,
+        preferred_backend: str,
+        *,
+        verify_target_click: bool,
+        before_click_count: int,
+    ) -> tuple[bool, str]:
+        external_python = str(os.environ.get("PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON") or "").strip()
+        if not external_python or preferred_backend not in {"pynput", "win32", "pyautogui"} or window._offscreen_platform():
+            return False, preferred_backend
+        x, y, coordinate_source = _widget_screen_center(widget)
+        hwnd, client_x, client_y = _widget_win32_client_center(widget)
+
+        def _attempt(*, window_message_only: bool) -> dict[str, Any]:
+            result = _send_validation_external_mouse_click(
+                x=int(x),
+                y=int(y),
+                backend=preferred_backend,
+                python_path=external_python,
+                hwnd=hwnd,
+                client_x=client_x,
+                client_y=client_y,
+                window_message_only=window_message_only,
+            )
+            records.append(
+                {
+                    "label": "external_mouse_click_process",
+                    "source_label": label,
+                    "backend": preferred_backend,
+                    "backend_transport": "external_python_process",
+                    "coordinate_source": coordinate_source,
+                    "x": int(x),
+                    "y": int(y),
+                    "hwnd": hwnd or "",
+                    "client_x": client_x,
+                    "client_y": client_y,
+                    "window_message_only": bool(window_message_only),
+                    "ok": bool(result.get("ok")),
+                    "returncode": result.get("returncode"),
+                    "raw_input_sent": bool(result.get("raw_input_sent")),
+                    "window_message_sent": bool(result.get("window_message_sent")),
+                    "error": str(result.get("error") or result.get("stderr") or result.get("raw_input_error") or ""),
+                    "timestamp_unix": time.time(),
+                }
+            )
+            _pump_click_events()
+            return result
+
+        result = _attempt(window_message_only=False)
+        _pump_click_events()
+        if not verify_target_click or _logged_mouse_click_count() > before_click_count:
+            return bool(result.get("ok")), preferred_backend
+        if hwnd:
+            fallback = _attempt(window_message_only=True)
+            _pump_click_events()
+            if _logged_mouse_click_count() > before_click_count:
+                return bool(fallback.get("ok")), f"{preferred_backend}+win32_message_fallback"
+        return bool(result.get("ok")), preferred_backend
+
     def _click_widget(widget: Any, label: str, *, preferred_backend: str = "qtest") -> str:
         if widget is None or not widget.isEnabled():
             return "skipped_disabled"
@@ -4994,6 +5317,26 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
             _pump_click_events()
             return "qtest_control"
         _activate_widget_for_os_click(widget)
+        external_attempted, external_backend = _try_external_click_process(
+            widget,
+            label,
+            preferred_backend,
+            verify_target_click=verify_target_click,
+            before_click_count=before_clicks,
+        )
+        if external_attempted:
+            if not verify_target_click or _logged_mouse_click_count() > before_clicks:
+                return external_backend
+            records.append(
+                {
+                    "label": "external_mouse_click_not_observed",
+                    "source_label": label,
+                    "backend": external_backend,
+                    "before_mouse_click_count": before_clicks,
+                    "after_mouse_click_count": _logged_mouse_click_count(),
+                    "timestamp_unix": time.time(),
+                }
+            )
         if preferred_backend == "pyautogui":
             try:
                 import pyautogui  # type: ignore
@@ -5097,6 +5440,14 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
             else:
                 delay_ms = rng.uniform(delay_min_ms, delay_max_ms)
                 action = "standard_click"
+            uncapped_delay_ms = float(delay_ms)
+            delay_cap_ms = None
+            if not should_miss:
+                delay_ms, delay_cap_ms = _bounded_validation_delay_ms(
+                    delay_ms,
+                    tactile_relative_s=payload.get("relative_time_s") or payload.get("tactile_onset_s") or payload.get("Tactile_Onset_S"),
+                    trial_end_relative_s=payload.get("trial_end_s") or payload.get("Trial_End_S"),
+                )
             scheduled_events.add(event_key)
             scheduled_response_keys.add(key)
             item = {
@@ -5111,6 +5462,8 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
                 "tactile_monotonic_time": float(event.monotonic_time),
                 "due_monotonic_time": float(event.monotonic_time) + delay_ms / 1000.0,
                 "planned_delay_ms": delay_ms,
+                "uncapped_delay_ms": uncapped_delay_ms,
+                "delay_cap_ms": delay_cap_ms,
             }
             if should_miss:
                 completed_events.add(event_key)
@@ -5163,6 +5516,16 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
             else:
                 delay_ms = rng.uniform(delay_min_ms, delay_max_ms)
                 action = "standard_click"
+            uncapped_delay_ms = float(delay_ms)
+            delay_cap_ms = None
+            if not should_miss:
+                segment = timeline.segment_at(float(getattr(cue, "time_s", 0.0) or 0.0))
+                trial_end_s = getattr(segment, "end_s", None) if segment is not None else getattr(timeline, "duration_s", None)
+                delay_ms, delay_cap_ms = _bounded_validation_delay_ms(
+                    delay_ms,
+                    tactile_relative_s=getattr(cue, "time_s", None),
+                    trial_end_relative_s=trial_end_s,
+                )
             scheduled_events.add(event_key)
             scheduled_response_keys.add(key)
             tactile_monotonic = float(anchor) + float(getattr(cue, "time_s", 0.0) or 0.0)
@@ -5178,6 +5541,8 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
                 "tactile_monotonic_time": tactile_monotonic,
                 "due_monotonic_time": tactile_monotonic + delay_ms / 1000.0,
                 "planned_delay_ms": delay_ms,
+                "uncapped_delay_ms": uncapped_delay_ms,
+                "delay_cap_ms": delay_cap_ms,
                 "schedule_source": "timeline",
             }
             if should_miss:
@@ -5192,7 +5557,16 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
             schedule_key = str(item.get("schedule_key") or item.get("event_id"))
             if schedule_key in completed_events or now < float(item["due_monotonic_time"]):
                 continue
+            before_click_count = _logged_mouse_click_count()
             backend = _click_widget(window.target_button, f"tactile response {item['trial_uid']}", preferred_backend=backend_requested)
+            mouse_event = _latest_mouse_click_event() if _logged_mouse_click_count() > before_click_count else None
+            mouse_monotonic = getattr(mouse_event, "monotonic_time", None) if mouse_event is not None else None
+            tactile_event = _matched_tactile_event(item)
+            tactile_monotonic = getattr(tactile_event, "monotonic_time", None) if tactile_event is not None else item["tactile_monotonic_time"]
+            try:
+                actual_delay_ms = (float(mouse_monotonic) - float(tactile_monotonic)) * 1000.0
+            except (TypeError, ValueError):
+                actual_delay_ms = (time.perf_counter() - float(item["tactile_monotonic_time"])) * 1000.0
             completed_events.add(schedule_key)
             pending.remove(item)
             records.append(
@@ -5200,7 +5574,10 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
                     **item,
                     "label": "tactile_response_click",
                     "backend": backend,
-                    "actual_delay_ms": (time.perf_counter() - float(item["tactile_monotonic_time"])) * 1000.0,
+                    "actual_delay_ms": actual_delay_ms,
+                    "mouse_event_id": getattr(mouse_event, "event_id", "") if mouse_event is not None else "",
+                    "tactile_event_id": getattr(tactile_event, "event_id", "") if tactile_event is not None else "",
+                    "actual_tactile_monotonic_time": float(tactile_monotonic) if tactile_monotonic is not None else "",
                     "timestamp_unix": time.time(),
                 }
             )

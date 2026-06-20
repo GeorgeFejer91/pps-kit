@@ -334,8 +334,98 @@ def _section_passed(readiness: dict[str, Any], section: str, *, default: bool | 
     return default
 
 
+def _payload(row: dict[str, str]) -> dict[str, Any]:
+    try:
+        payload = row.get("payload_json") or "{}"
+        parsed = json.loads(payload)
+        return parsed if isinstance(parsed, dict) else {}
+    except Exception:
+        return {}
+
+
+def _wired_loopback_event_summary(events_csv: Path) -> dict[str, Any]:
+    rows = _read_csv(events_csv)
+    starts: list[dict[str, Any]] = []
+    failures: list[dict[str, Any]] = []
+    for row in rows:
+        if str(row.get("event_type") or "") != "wired_loopback_start":
+            continue
+        payload = _payload(row)
+        item = {
+            "block_number": payload.get("block_number"),
+            "started": bool(payload.get("started")),
+            "path": str(payload.get("path") or ""),
+            "message": str(payload.get("message") or ""),
+        }
+        starts.append(item)
+        if not item["started"]:
+            failures.append(item)
+    return {
+        "start_count": len(starts),
+        "started_count": sum(1 for item in starts if item.get("started")),
+        "failed_count": len(failures),
+        "failures": failures,
+    }
+
+
+def _wired_sidecar_summary(session_dir: Path) -> dict[str, Any]:
+    sidecars = sorted(session_dir.glob("*wired_loopback_input4.output_evidence.json")) if session_dir.is_dir() else []
+    records: list[dict[str, Any]] = []
+    healthy_count = 0
+    signaled_count = 0
+    for sidecar in sidecars:
+        payload = _read_json(sidecar)
+        wav_path = _resolve_path(payload.get("path"), base=sidecar.parent)
+        frames = int(payload.get("frames") or payload.get("frames_seen") or 0)
+        dropped = int(payload.get("dropped_buffer_count") or 0)
+        interrupted = bool(payload.get("interrupted"))
+        peaks = payload.get("peak_by_channel") if isinstance(payload.get("peak_by_channel"), list) else []
+        input_channel = int(payload.get("input_channel_1based") or 0)
+        if input_channel > 0 and len(peaks) >= input_channel:
+            signal_peak = float(peaks[input_channel - 1] or 0.0)
+        elif len(peaks) == 1:
+            signal_peak = float(peaks[0] or 0.0)
+        else:
+            signal_peak = max((float(value or 0.0) for value in peaks), default=0.0)
+        healthy = (
+            bool(payload.get("started"))
+            and wav_path.is_file()
+            and wav_path.stat().st_size > 80
+            and frames > 0
+            and not interrupted
+            and dropped == 0
+        )
+        signaled = healthy and signal_peak > 1e-7
+        healthy_count += 1 if healthy else 0
+        signaled_count += 1 if signaled else 0
+        records.append(
+            {
+                "sidecar": str(sidecar),
+                "wav": str(wav_path),
+                "started": bool(payload.get("started")),
+                "frames": frames,
+                "duration_s": float(payload.get("duration_s") or 0.0),
+                "channels": int(payload.get("channels") or 0),
+                "input_channel_1based": input_channel,
+                "signal_peak": signal_peak,
+                "dropped_buffer_count": dropped,
+                "interrupted": interrupted,
+                "healthy": healthy,
+                "signal_present": signaled,
+            }
+        )
+    return {
+        "sidecar_count": len(sidecars),
+        "healthy_count": healthy_count,
+        "signaled_count": signaled_count,
+        "records": records,
+    }
+
+
 def _write_cross_stream_markdown(path: Path, report: dict[str, Any]) -> None:
     criteria = report.get("criteria") if isinstance(report.get("criteria"), dict) else {}
+    wired_events = report.get("wired_loopback_events") if isinstance(report.get("wired_loopback_events"), dict) else {}
+    wired_sidecars = report.get("wired_loopback_sidecars") if isinstance(report.get("wired_loopback_sidecars"), dict) else {}
     lines = [
         "# Cross-Stream Reconciliation",
         "",
@@ -345,6 +435,9 @@ def _write_cross_stream_markdown(path: Path, report: dict[str, Any]) -> None:
         f"- Expected played blocks: `{report.get('expected_played_blocks')}`",
         f"- Audio-evidence WAVs: `{report.get('audio_evidence_wav_count')}`",
         f"- Wired loopback WAVs: `{report.get('wired_loopback_wav_count')}`",
+        f"- Wired loopback started blocks: `{wired_events.get('started_count', '')}`",
+        f"- Healthy wired sidecars: `{wired_sidecars.get('healthy_count', '')}`",
+        f"- Wired sidecars with input signal: `{wired_sidecars.get('signaled_count', '')}`",
         "",
         "## Criteria",
     ]
@@ -382,6 +475,8 @@ def cross_stream_reconciliation_report(
     if audio_evidence_wav_count <= 0 and session_dir.is_dir():
         audio_evidence_wav_count = len(sorted(session_dir.glob("*audio_evidence.wav")))
     wired_loopback_wav_count = len(sorted(session_dir.glob("*wired_loopback_input4.wav"))) if session_dir.is_dir() else 0
+    wired_events = _wired_loopback_event_summary(paths["events_csv"])
+    wired_sidecars = _wired_sidecar_summary(session_dir)
     external_checked = bool(external_report.get("checked"))
     external_file_ok = bool(external_report.get("passed")) and Path(str(external_report.get("xdf_path") or "")).is_file()
     external_returncode = external_report.get("labrecorder_returncode")
@@ -436,6 +531,21 @@ def cross_stream_reconciliation_report(
             or not readiness_checked
             or (expected_played_blocks > 0 and wired_loopback_wav_count >= expected_played_blocks)
         ),
+        "wired_loopback_started_for_played_blocks": (
+            not wired_loopback_requested
+            or not readiness_checked
+            or (expected_played_blocks > 0 and int(wired_events.get("started_count") or 0) >= expected_played_blocks)
+        ),
+        "wired_loopback_sidecars_nonempty_clean": (
+            not wired_loopback_requested
+            or not readiness_checked
+            or (expected_played_blocks > 0 and int(wired_sidecars.get("healthy_count") or 0) >= expected_played_blocks)
+        ),
+        "wired_loopback_input_signal_present": (
+            not wired_loopback_requested
+            or not readiness_checked
+            or (expected_played_blocks > 0 and int(wired_sidecars.get("signaled_count") or 0) >= expected_played_blocks)
+        ),
     }
     checked = readiness_checked or external_checked or wired_loopback_requested
     report = {
@@ -451,6 +561,8 @@ def cross_stream_reconciliation_report(
         "audio_evidence_wav_count": audio_evidence_wav_count,
         "wired_loopback_requested": bool(wired_loopback_requested),
         "wired_loopback_wav_count": wired_loopback_wav_count,
+        "wired_loopback_events": wired_events,
+        "wired_loopback_sidecars": wired_sidecars,
         "event_counts": event_counts,
         "criteria": criteria,
         "reports": {

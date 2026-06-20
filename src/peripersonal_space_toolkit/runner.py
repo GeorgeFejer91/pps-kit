@@ -542,6 +542,8 @@ class AudioEngine:
         self._wired_loopback_summary = {}
         self._wired_loopback_output_path = None
         self._wired_loopback_start_time = None
+        self._wired_loopback_last_error = ""
+        self._click_stream_is_duplex = False
 
         # Legacy WASAPI diagnostic state. Kept for operator diagnostics only;
         # not used as the core ASIO multichannel recording path.
@@ -581,6 +583,38 @@ class AudioEngine:
             blocksize=blocksize,
             extra_settings=output_extra_settings_for_device(self.device_idx, channels),
             callback=callback,
+        )
+
+    def _wired_loopback_duplex_available(self) -> bool:
+        return (
+            self.wired_loopback_mode == WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY
+            and self.runtime_output_channels >= 4
+            and self.max_input_channels >= 4
+            and self.device_hostapi.lower() == "asio"
+        )
+
+    def _make_duplex_click_stream(self, *, samplerate, output_channels, latency, blocksize):
+        """Create one ASIO stream that owns output playback and input-4 capture."""
+
+        input_channels = 4
+
+        def _duplex_callback(indata, outdata, frames, time_info, status):
+            if getattr(self, "_wired_loopback", None) is not None and self._wired_loopback.active:
+                self._wired_loopback.write_buffer(indata, sample_rate=samplerate)
+            self._click_callback(outdata, frames, time_info, status)
+
+        return sd.Stream(
+            samplerate=samplerate,
+            device=(self.device_idx, self.device_idx),
+            channels=(input_channels, output_channels),
+            dtype="float32",
+            latency=(BLOCK_STREAM_LATENCY, latency),
+            blocksize=blocksize,
+            extra_settings=(
+                input_extra_settings_for_device(self.device_idx, input_channels),
+                output_extra_settings_for_device(self.device_idx, output_channels),
+            ),
+            callback=_duplex_callback,
         )
 
     def set_wired_loopback_mode(self, mode):
@@ -629,6 +663,7 @@ class AudioEngine:
             except Exception:
                 pass
             self._click_stream = None
+            self._click_stream_is_duplex = False
 
     def _restart_persistent_output(self):
         if self._click_data is not None and self._click_stream is None:
@@ -785,6 +820,7 @@ class AudioEngine:
 
     def start_wired_loopback_recording(self, output_path=None, mode=None, sample_rate=None):
         """Start physical input recording for output-4 tactile proxy loopback."""
+        self._wired_loopback_last_error = ""
         if mode is not None:
             self.set_wired_loopback_mode(mode)
         if self.wired_loopback_mode != WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY:
@@ -815,13 +851,57 @@ class AudioEngine:
             "wiring": "Komplete Output 4 patched to Komplete Input 4",
         }
 
+        def _start_recorder() -> bool:
+            started = self._wired_loopback.start(output_path, metadata=metadata)
+            if started:
+                self._wired_loopback_output_path = output_path
+                self._wired_loopback_start_time = time.time()
+            return bool(started)
+
+        if self._click_data is not None:
+            try:
+                if self.persistent_output_ready() and not self._click_stream_is_duplex:
+                    self._close_persistent_output()
+                started = _start_recorder()
+                if not started:
+                    self._wired_loopback_last_error = "wired_loopback_recorder_start_failed"
+                    self._restart_persistent_output()
+                    return False
+                if not self.persistent_output_ready():
+                    self._init_click_stream()
+                if self.persistent_output_ready() and self._click_stream_is_duplex:
+                    print(f"Wired output-4 loopback recording started on duplex stream: {output_path}")
+                    return True
+                self._wired_loopback_last_error = "persistent_output_stream_not_duplex_for_wired_loopback"
+                self._wired_loopback.stop(interrupted=True)
+                self._wired_loopback_output_path = None
+                self._wired_loopback_start_time = None
+                if not self.persistent_output_ready():
+                    self._restart_persistent_output()
+                return False
+            except Exception as e:
+                self._wired_loopback_last_error = str(e)
+                print(f"ERROR starting duplex wired loopback recording: {e}")
+                try:
+                    if self._wired_loopback.active:
+                        self._wired_loopback.stop(interrupted=True)
+                except Exception:
+                    pass
+                self._wired_loopback_output_path = None
+                self._wired_loopback_start_time = None
+                if not self.persistent_output_ready():
+                    self._restart_persistent_output()
+                import traceback
+                traceback.print_exc()
+                return False
+
         def _input_callback(indata, frames, time_info, status):
             if status:
                 print(f"Wired loopback input stream status: {status}")
             self._wired_loopback.write_buffer(indata, sample_rate=sample_rate)
 
         try:
-            started = self._wired_loopback.start(output_path, metadata=metadata)
+            started = _start_recorder()
             self._wired_loopback_stream = sd.InputStream(
                 samplerate=sample_rate,
                 channels=input_channels,
@@ -833,11 +913,10 @@ class AudioEngine:
                 callback=_input_callback,
             )
             self._wired_loopback_stream.start()
-            self._wired_loopback_output_path = output_path
-            self._wired_loopback_start_time = time.time()
             print(f"Wired output-4 loopback recording started: {output_path}")
             return bool(started)
         except Exception as e:
+            self._wired_loopback_last_error = str(e)
             print(f"ERROR starting wired loopback recording: {e}")
             try:
                 if self._wired_loopback_stream is not None:
@@ -1102,16 +1181,17 @@ class AudioEngine:
             return False
         try:
             print(f"DEBUG: Initializing click stream on device {self.device_idx}, sr={self._click_sr}, latency={CLICK_LATENCY}")
+            self._click_stream_is_duplex = False
             try:
-                self._click_stream = self._make_output_stream(
-                    samplerate=self._click_sr,
-                    channels=self.runtime_output_channels,
-                    latency=CLICK_LATENCY,
-                    blocksize=CLICK_BLOCKSIZE,
-                    callback=self._click_callback
-                )
-            except Exception:
-                if self._promote_runtime_to_four_channels():
+                if self._wired_loopback_duplex_available():
+                    self._click_stream = self._make_duplex_click_stream(
+                        samplerate=self._click_sr,
+                        output_channels=self.runtime_output_channels,
+                        latency=CLICK_LATENCY,
+                        blocksize=CLICK_BLOCKSIZE,
+                    )
+                    self._click_stream_is_duplex = True
+                else:
                     self._click_stream = self._make_output_stream(
                         samplerate=self._click_sr,
                         channels=self.runtime_output_channels,
@@ -1119,16 +1199,55 @@ class AudioEngine:
                         blocksize=CLICK_BLOCKSIZE,
                         callback=self._click_callback
                     )
+            except Exception:
+                if self._promote_runtime_to_four_channels():
+                    if self._wired_loopback_duplex_available():
+                        self._click_stream = self._make_duplex_click_stream(
+                            samplerate=self._click_sr,
+                            output_channels=self.runtime_output_channels,
+                            latency=CLICK_LATENCY,
+                            blocksize=CLICK_BLOCKSIZE,
+                        )
+                        self._click_stream_is_duplex = True
+                    else:
+                        self._click_stream = self._make_output_stream(
+                            samplerate=self._click_sr,
+                            channels=self.runtime_output_channels,
+                            latency=CLICK_LATENCY,
+                            blocksize=CLICK_BLOCKSIZE,
+                            callback=self._click_callback
+                        )
                 else:
                     raise
             self._click_stream.start()
-            print(f"DEBUG: Click stream started successfully, active={self._click_stream.active}")
+            print(
+                "DEBUG: Click stream started successfully, "
+                f"active={self._click_stream.active}, duplex={self._click_stream_is_duplex}"
+            )
             return self.persistent_output_ready()
         except Exception as e:
             print(f"ERROR: Click stream init failed: {e}")
             import traceback
             traceback.print_exc()
             self._click_stream = None
+            self._click_stream_is_duplex = False
+            if self._wired_loopback_duplex_available():
+                self._wired_loopback_last_error = str(e)
+                try:
+                    print("Warning: Falling back to output-only click stream after duplex init failed.")
+                    self._click_stream = self._make_output_stream(
+                        samplerate=self._click_sr,
+                        channels=self.runtime_output_channels,
+                        latency=CLICK_LATENCY,
+                        blocksize=CLICK_BLOCKSIZE,
+                        callback=self._click_callback,
+                    )
+                    self._click_stream.start()
+                    return self.persistent_output_ready()
+                except Exception as fallback_exc:
+                    print(f"ERROR: Output-only click stream fallback failed: {fallback_exc}")
+                    traceback.print_exc()
+                    self._click_stream = None
             return False
     
     def trigger_click(self, metadata=None, marker_gain=None):

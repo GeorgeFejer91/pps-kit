@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import sys
 import threading
 import time
@@ -69,6 +70,39 @@ def test_validation_start_gate_waits_for_ready_file(tmp_path: Path, monkeypatch)
 
     labels = [str(record["label"]) for record in records]
     assert labels == ["start_gate_waiting", "start_gate_released"]
+
+
+def test_validation_external_mouse_click_uses_helper_python(monkeypatch):
+    from peripersonal_space_toolkit import focus_app
+
+    calls: list[dict[str, object]] = []
+
+    class FakeCompleted:
+        returncode = 0
+        stdout = json.dumps({"ok": True, "backend": "pynput", "x": 101, "y": 202})
+        stderr = ""
+
+    def fake_run(command, **kwargs):
+        calls.append({"command": list(command), **kwargs})
+        return FakeCompleted()
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    result = focus_app._send_validation_external_mouse_click(
+        x=101,
+        y=202,
+        backend="pynput",
+        python_path=sys.executable,
+    )
+
+    assert result["ok"] is True
+    assert result["backend"] == "pynput"
+    assert result["python"] == sys.executable
+    assert calls[0]["command"][0] == sys.executable
+    assert calls[0]["command"][1] == "-c"
+    assert calls[0]["command"][3:] == ["pynput", "101", "202", "0", "0", "0", "0"]
+    assert calls[0]["capture_output"] is True
+    assert calls[0]["text"] is True
 
 
 def _collect_widget_texts(widget, widget_type) -> list[str]:

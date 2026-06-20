@@ -66,6 +66,7 @@ PREPARED_SESSION_QUEUE_SCHEMA = "pps-prepared-session-queue.v1"
 BLOCK_WAV_CACHE_SCHEMA = "pps-session-block-cache.v1"
 BLOCK_WAV_CACHE_VERSION = "2026-06-14.v1"
 RESPONSE_MARKER_GAIN = 0.05
+EXTERNAL_LABRECORDER_FINAL_MARKER_SETTLE_S = 1.0
 LAUNCHABLE_ACTIVITY_EVENTS = {"run_setup_prepared", "session_prepared", "runner_launched"}
 PARTICIPANT_TRIAL_CSV_SUFFIX = "_trials.csv"
 
@@ -2292,7 +2293,15 @@ class SessionRunnerController:
             )
         except Exception:
             pass
+        final_marker_settle_s = max(0.0, float(EXTERNAL_LABRECORDER_FINAL_MARKER_SETTLE_S))
+        if final_marker_settle_s:
+            try:
+                self.events.flush_callback_events(timeout_s=min(0.5, final_marker_settle_s))
+            except Exception:
+                pass
+            time.sleep(final_marker_settle_s)
         stopped = capture.stop(timeout_s=self.capture_options.external_labrecorder_stop_timeout_s)
+        stopped["final_marker_settle_s"] = final_marker_settle_s
         if _path_exists(self._external_labrecorder_xdf_path):
             self._recording_paths.append(self._external_labrecorder_xdf_path)
             self._external_labrecorder_outputs["external_labrecorder_xdf"] = self._external_labrecorder_xdf_path
@@ -3308,6 +3317,7 @@ class SessionRunnerController:
             source_output_channel_1based=4,
             input_channel_1based=4,
             scope="duplicate_tactile_proxy_not_woojer_mechanical_onset",
+            message=str(getattr(engine, "_wired_loopback_last_error", "") or ""),
         )
         if started:
             self._recording_paths.append(path)

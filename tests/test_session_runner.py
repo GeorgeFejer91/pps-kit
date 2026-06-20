@@ -1140,6 +1140,7 @@ def test_session_runner_owned_labrecorder_starts_after_lsl_before_audio(tmp_path
 
     monkeypatch.setattr(session_runner_module, "find_labrecorder_cli", lambda _explicit=None: cli)
     monkeypatch.setattr(session_runner_module, "LabRecorderCapture", FakeLabRecorderCapture)
+    monkeypatch.setattr(session_runner_module, "EXTERNAL_LABRECORDER_FINAL_MARKER_SETTLE_S", 0.0)
     engine = _MockAudioEngine()
     engine.on_audio_started = lambda: order.append("audio_playback")
     ui_events: list[str] = []
@@ -1168,6 +1169,7 @@ def test_session_runner_owned_labrecorder_starts_after_lsl_before_audio(tmp_path
     capture_report = json.loads(result.analysis_outputs["external_labrecorder_report"].read_text(encoding="utf-8"))
     assert capture_report["start"]["started"] is True
     assert capture_report["stop"]["returncode"] == 0
+    assert capture_report["stop"]["final_marker_settle_s"] == 0.0
 
 
 def test_labrecorder_capture_uses_rcs_remote_control(tmp_path: Path, monkeypatch):

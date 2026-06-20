@@ -232,6 +232,10 @@ def _configure_validation_env(args: argparse.Namespace, *, output_dir: Path, foc
     env["PPS_FOCUS_VALIDATION_PARTICIPANT_EMULATOR"] = "1"
     env["PPS_FOCUS_VALIDATION_AUTO_APPROVE_TOPUP"] = "1"
     env["PPS_FOCUS_VALIDATION_MOUSE_BACKEND"] = str(args.mouse_backend)
+    if str(args.mouse_backend) in OS_MOUSE_BACKENDS:
+        env.setdefault("PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON", sys.executable)
+    else:
+        env.pop("PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON", None)
     env["PPS_FOCUS_VALIDATION_PARTICIPANT_SEED"] = str(int(args.seed))
     env["PPS_FOCUS_VALIDATION_PARTICIPANT_MISS_RATE"] = str(float(args.miss_rate))
     env["PPS_FOCUS_VALIDATION_PARTICIPANT_MIN_MISSES"] = str(int(args.min_misses))
@@ -272,6 +276,7 @@ def _write_launch_and_preparation_reports(
     screenshot_path: Path,
     evaluation: dict[str, Any],
     started_at: str,
+    external_click_python: str = "",
 ) -> None:
     _write_json(
         output_dir / "packaged_runner_process_launch.json",
@@ -296,6 +301,7 @@ def _write_launch_and_preparation_reports(
             "validation_report": str(focus_report_path),
             "screenshot": str(screenshot_path),
             "mouse_backend": str(args.mouse_backend),
+            "external_click_python": str(external_click_python or ""),
         },
     )
     _write_json(
@@ -712,6 +718,7 @@ def main(argv: list[str] | None = None) -> int:
         screenshot_path=screenshot_path,
         evaluation=evaluation,
         started_at=started_at,
+        external_click_python=env.get("PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON", ""),
     )
     failures.extend(evaluation_failures)
     readiness_audit: dict[str, Any] | None = None
@@ -738,6 +745,7 @@ def main(argv: list[str] | None = None) -> int:
         "standard_capture_requested": _standard_capture_requested(args),
         "audio_device_index": args.audio_device_index,
         "strict_study5_readiness_requested": bool(args.strict_study5_readiness),
+        "external_click_python": env.get("PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON", ""),
         "process_exit_code": exit_code,
         "process_wall_s": process_wall_s,
         "evaluation": evaluation,

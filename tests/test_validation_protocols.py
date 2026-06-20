@@ -35,6 +35,30 @@ def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
             writer.writerow(row)
 
 
+def _write_wired_loopback_evidence(path: Path, *, healthy: bool = True) -> None:
+    frames = 128 if healthy else 0
+    data = np.zeros((frames, 4), dtype=np.float32)
+    if healthy:
+        data[:, 3] = 0.01
+    sf.write(path, data, 44100, subtype="FLOAT")
+    payload = {
+        "schema": "pps-wired-loopback-evidence.v1",
+        "mode": "wired_loopback_output4_tactile_proxy",
+        "started": True,
+        "path": str(path),
+        "sample_rate": 44100,
+        "channels": 4,
+        "frames": frames,
+        "frames_seen": frames,
+        "duration_s": frames / 44100,
+        "input_channel_1based": 4,
+        "peak_by_channel": [0.0, 0.0, 0.0, 0.01 if healthy else 0.0],
+        "dropped_buffer_count": 0,
+        "interrupted": not healthy,
+    }
+    path.with_name(path.stem + ".output_evidence.json").write_text(json.dumps(payload), encoding="utf-8")
+
+
 def test_dummy_pulse_stimulus_has_coded_three_channel_shape(tmp_path: Path):
     make = _load_script("make_dummy_pulse_stimulus.py")
 
@@ -1655,8 +1679,9 @@ def test_response_marker_loopback_pairs_against_dominant_offset_when_first_candi
     assert [row["raw_offset_ms"] for row in pairs] == [314.0, 314.0, 314.0]
 
 
-def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_path: Path):
+def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_path: Path, monkeypatch):
     harness = _load_script("run_full_realtime_participant_emulation.py")
+    monkeypatch.delenv("PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON", raising=False)
     runner = tmp_path / "PPSExperimentRunner.exe"
     labrecorder_cli = tmp_path / "LabRecorderCLI.exe"
     labrecorder_cli.write_text("cli", encoding="utf-8")
@@ -1707,6 +1732,7 @@ def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_pa
     assert strict_env["PPS_AUDIO_DEVICE_INDEX"] == "28"
     assert strict_env["PPS_PROTOCOL11_VALIDATION_LANE"] == "full-stack"
     assert strict_env["PPS_PROTOCOL11_WIRED_LOOPBACK"] == "output4-tactile-proxy"
+    assert strict_env["PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON"] == sys.executable
 
     legacy_args = harness.build_arg_parser().parse_args(["--runner", str(runner)])
     legacy_command = harness._build_runner_command(legacy_args, runner=runner, screenshot_path=screenshot)
@@ -1717,6 +1743,14 @@ def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_pa
     assert "--no-backup-recording" in legacy_command
     assert "--wired-loopback" not in legacy_command
     assert legacy_env["PPS_PROTOCOL11_VALIDATION_LANE"] == "software-only"
+    assert legacy_env["PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON"] == sys.executable
+
+    qtest_env = harness._configure_validation_env(
+        harness.build_arg_parser().parse_args(["--runner", str(runner), "--mouse-backend", "qtest"]),
+        output_dir=tmp_path,
+        focus_report_path=tmp_path / "focus_validation_report.json",
+    )
+    assert "PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON" not in qtest_env
 
     source_args = harness.build_arg_parser().parse_args(
         [
@@ -1907,12 +1941,34 @@ def test_desktop_full_mock_rehearsal_uses_runner_owned_labrecorder(tmp_path: Pat
         output_dir = Path(argv[argv.index("--output-dir") + 1])
         session_dir = environment_root / "P050_20260620_121400"
         session_dir.mkdir(parents=True)
-        (session_dir / "block_01_wired_loopback_input4.wav").write_bytes(b"wav")
+        _write_wired_loopback_evidence(session_dir / "block_01_wired_loopback_input4.wav", healthy=True)
         context_dir = environment_root / "Experiment_context_folder_DO_NOT_DELETE"
         verbose_dir = context_dir / "verbose_events" / session_dir.name
         runner_log_dir = context_dir / "runner_logs" / session_dir.name
         verbose_dir.mkdir(parents=True)
         runner_log_dir.mkdir(parents=True)
+        _write_csv(
+            verbose_dir / "events.csv",
+            [
+                {
+                    "event_id": "1",
+                    "event_type": "block_start",
+                    "payload_json": json.dumps({"block_number": 1}),
+                },
+                {
+                    "event_id": "2",
+                    "event_type": "wired_loopback_start",
+                    "payload_json": json.dumps(
+                        {
+                            "block_number": 1,
+                            "started": True,
+                            "path": str(session_dir / "block_01_wired_loopback_input4.wav"),
+                            "message": "",
+                        }
+                    ),
+                },
+            ],
+        )
         lsl_markers_csv = verbose_dir / "lsl_markers.csv"
         marker_rows = [
             {
@@ -2085,6 +2141,81 @@ def test_desktop_full_mock_rehearsal_uses_runner_owned_labrecorder(tmp_path: Pat
     validation_dir = Path(report["validation_dir"])
     assert (validation_dir / "external_labrecorder_reconciliation" / "external_labrecorder_reconciliation_report.json").is_file()
     assert (validation_dir / "cross_stream_reconciliation" / "cross_stream_reconciliation_report.json").is_file()
+
+
+def test_desktop_full_mock_rehearsal_rejects_empty_wired_loopback_sidecars(tmp_path: Path):
+    rehearsal = _load_script("run_desktop_full_mock_rehearsal.py")
+    validation_dir = tmp_path / "validation"
+    validation_dir.mkdir()
+    session_dir = tmp_path / "session"
+    session_dir.mkdir()
+    wired_wav = session_dir / "block_01_wired_loopback_input4.wav"
+    _write_wired_loopback_evidence(wired_wav, healthy=False)
+    events_csv = tmp_path / "events.csv"
+    _write_csv(
+        events_csv,
+        [
+            {
+                "event_id": "1",
+                "event_type": "block_start",
+                "payload_json": json.dumps({"block_number": 1}),
+            },
+            {
+                "event_id": "2",
+                "event_type": "wired_loopback_start",
+                "payload_json": json.dumps(
+                    {
+                        "block_number": 1,
+                        "started": False,
+                        "path": str(wired_wav),
+                        "message": "persistent_output_stream_not_duplex_for_wired_loopback",
+                    }
+                ),
+            },
+        ],
+    )
+    lsl_markers_csv = tmp_path / "lsl_markers.csv"
+    _write_csv(lsl_markers_csv, [{"event_id": "1", "event_type": "block_start", "payload_json": "{}"}])
+    manifest = session_dir / "session_manifest.json"
+    manifest.write_text(json.dumps({"outputs": {"lsl_markers_csv": str(lsl_markers_csv)}}), encoding="utf-8")
+    (validation_dir / "focus_validation_report.json").write_text(
+        json.dumps({"session_dir": str(session_dir), "session_manifest": str(manifest), "events_csv": str(events_csv)}),
+        encoding="utf-8",
+    )
+    readiness = {
+        "passed": True,
+        "expected_event_counts": {"block_start": 1},
+        "event_counts": {"block_start": 1},
+        "audio_evidence": {"record_count": 1},
+        "sections": {"response_marker_path": {"passed": True}},
+        "criteria": [
+            {"section": "lsl_xdf_trigger_logging", "name": "events_xdf_loadable_and_complete", "passed": True},
+            {"section": "lsl_xdf_trigger_logging", "name": "lsl_marker_xdf_dual_streams_complete", "passed": True},
+            {"section": "lsl_xdf_trigger_logging", "name": "events_and_lsl_marker_csvs_match", "passed": True},
+            {"section": "local_recorder_audio_evidence", "name": "audio_evidence_files_cover_played_blocks", "passed": True},
+            {"section": "local_recorder_audio_evidence", "name": "lsl_xdf_audio_reconciliation_passed", "passed": True},
+            {"section": "analysis_outputs", "name": "emulated_rt_values_match_plan_tolerance", "passed": True},
+        ],
+    }
+
+    report = rehearsal.cross_stream_reconciliation_report(
+        validation_dir=validation_dir,
+        harness_report={
+            "passed": True,
+            "validation_lane": "full-stack",
+            "strict_study5_readiness_requested": True,
+            "readiness_audit": readiness,
+        },
+        focus_report={},
+        external_report={"checked": False, "passed": True},
+        wired_loopback_requested=True,
+    )
+
+    assert not report["passed"]
+    assert not report["criteria"]["wired_loopback_started_for_played_blocks"]
+    assert not report["criteria"]["wired_loopback_sidecars_nonempty_clean"]
+    assert not report["criteria"]["wired_loopback_input_signal_present"]
+    assert report["wired_loopback_events"]["failures"][0]["message"] == "persistent_output_stream_not_duplex_for_wired_loopback"
 
 
 def test_desktop_full_mock_rehearsal_preflight_enables_asio(monkeypatch):
