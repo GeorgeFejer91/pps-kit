@@ -6,7 +6,29 @@ let activeNavFrame = 0;
 const CUSTOM_TEMPLATE_ID = "__custom__";
 const DEFAULT_STUDY_TEMPLATE_ID = "study5_box_breathing_pps";
 const STUDY5_PINK_WHITE_TEMPLATE_ID = "study5_box_breathing_pps_pink_white";
-const STATIC_RESOURCE_VERSION = "20260620-static-preview-parity";
+const STATIC_RESOURCE_VERSION = "20260620-loudness-policy";
+const DEFAULT_LOUDNESS_POLICY = {
+  schema: "pps-loudness-policy.v1",
+  mode: "estimated_spl",
+  calibration_mode: "estimate_allowed",
+  calibration_status: "estimated_not_measured",
+  start_spl_db: 55,
+  end_spl_db: 75,
+  instruction_offset_db: -6,
+  movement_ramp_shape: "linear_db",
+  hold_level_policy: "constant_start_and_endpoint",
+  calibration_window_s: 0.5,
+  estimated_full_scale_spl_db: 109.2,
+  audio_peak_ceiling_dbfs: -1,
+  hardware: {
+    audio_interface: "Native Instruments Komplete Audio 6 MK2",
+    headphones: "Sennheiser HD 560S",
+    headphone_knob: "maximum_clockwise",
+    route: "ASIO / Komplete Audio ASIO Driver",
+    runner_audio_volume_percent: 100,
+    windows_volume_policy: "not_part_of_asio_calibration"
+  }
+};
 const STATIC_REPO_ROOT = new URL("../../../", document.currentScript?.src || window.location.href).href;
 const STATIC_PRELOAD_INVENTORY_PATH = "assets/preloads/preload_inventory.json";
 const STATIC_TEMPLATE_DIR = "study_templates/";
@@ -57,7 +79,7 @@ const SEGMENT_INFO = {
     kicker: "Segment 1",
     title: "Build Looming Stimuli",
     purpose: "Define the auditory ingredients available to the experiment.",
-    inputs: "Trajectory values, generated noise type, custom tones, custom clips, bake label, gain.",
+    inputs: "Trajectory values, generated noise type, custom tones, custom clips, bake label, and loudness policy.",
     backend: "Copies, imports, or bakes 1_core_audio_ingredients audio ingredients and records source metadata.",
     next: "Supplies stimulus ingredients for Trial Sequence Design."
   },
@@ -2275,12 +2297,104 @@ function renderStimulus() {
   $("start-hold").value = controls.start_hold_s ?? 0.5;
   $("end-hold").value = controls.end_hold_s ?? 0.5;
   syncPreviewModeControls($("preview-mode").value || "2d");
+  renderLoudnessControls();
   renderGeneratedNoiseSelect();
   renderBakePanel();
   renderNoiseTable();
   renderAudioTable();
   refreshAssemblyTargetOptions();
   renderSourceCounts();
+}
+
+function dbToLinear(db) {
+  return Math.pow(10, Number(db || 0) / 20);
+}
+
+function normalizeLoudnessPolicy(policy = {}, controls = null) {
+  const resolvedControls = controls || {
+    start_hold_s: Number(state?.trajectory_controls?.start_hold_s ?? 0.5),
+    movement_duration_s: Number(state?.trajectory_controls?.movement_duration_s ?? 3),
+    end_hold_s: Number(state?.trajectory_controls?.end_hold_s ?? 0.5)
+  };
+  const merged = {
+    ...clone(DEFAULT_LOUDNESS_POLICY),
+    ...(policy && typeof policy === "object" ? clone(policy) : {})
+  };
+  merged.hardware = {
+    ...clone(DEFAULT_LOUDNESS_POLICY.hardware),
+    ...(policy?.hardware && typeof policy.hardware === "object" ? clone(policy.hardware) : {})
+  };
+  merged.schema = "pps-loudness-policy.v1";
+  merged.mode = ["estimated_spl", "measured_spl", "digital_dbfs"].includes(String(merged.mode || "")) ? merged.mode : "estimated_spl";
+  merged.calibration_mode = ["estimate_allowed", "measured_required", "digital_only"].includes(String(merged.calibration_mode || "")) ? merged.calibration_mode : "estimate_allowed";
+  merged.calibration_status = ["estimated_not_measured", "measured", "digital_only"].includes(String(merged.calibration_status || "")) ? merged.calibration_status : "estimated_not_measured";
+  merged.start_spl_db = clampNumber(Number(merged.start_spl_db), 30, 95, DEFAULT_LOUDNESS_POLICY.start_spl_db);
+  merged.end_spl_db = clampNumber(Number(merged.end_spl_db), 30, 95, DEFAULT_LOUDNESS_POLICY.end_spl_db);
+  if (merged.end_spl_db < merged.start_spl_db) {
+    [merged.start_spl_db, merged.end_spl_db] = [merged.end_spl_db, merged.start_spl_db];
+  }
+  merged.instruction_offset_db = clampNumber(Number(merged.instruction_offset_db), -30, 0, DEFAULT_LOUDNESS_POLICY.instruction_offset_db);
+  merged.estimated_full_scale_spl_db = clampNumber(Number(merged.estimated_full_scale_spl_db), 80, 130, DEFAULT_LOUDNESS_POLICY.estimated_full_scale_spl_db);
+  merged.audio_peak_ceiling_dbfs = clampNumber(Number(merged.audio_peak_ceiling_dbfs), -12, 0, DEFAULT_LOUDNESS_POLICY.audio_peak_ceiling_dbfs);
+  merged.movement_ramp_shape = "linear_db";
+  merged.hold_level_policy = "constant_start_and_endpoint";
+  merged.calibration_window_s = clampNumber(Number(merged.calibration_window_s), 0.05, 2, DEFAULT_LOUDNESS_POLICY.calibration_window_s);
+  merged.pre_hold_s = Math.max(0, Number(resolvedControls.start_hold_s || 0));
+  merged.movement_duration_s = Math.max(0.1, Number(resolvedControls.movement_duration_s || 3));
+  merged.post_hold_s = Math.max(0, Number(resolvedControls.end_hold_s || 0));
+  merged.total_duration_s = merged.pre_hold_s + merged.movement_duration_s + merged.post_hold_s;
+  merged.start_target_rms_dbfs = merged.start_spl_db - merged.estimated_full_scale_spl_db;
+  merged.end_target_rms_dbfs = merged.end_spl_db - merged.estimated_full_scale_spl_db;
+  merged.instruction_target_spl_db = merged.end_spl_db + merged.instruction_offset_db;
+  merged.instruction_target_rms_dbfs = merged.instruction_target_spl_db - merged.estimated_full_scale_spl_db;
+  return merged;
+}
+
+function savedLoudnessPolicy() {
+  const params = state?.design?.study_profile_reference_parameters || {};
+  return normalizeLoudnessPolicy(params.loudness_policy || {});
+}
+
+function collectLoudnessPolicy() {
+  const saved = savedLoudnessPolicy();
+  const policy = normalizeLoudnessPolicy({
+    ...saved,
+    start_spl_db: Number($("loudness-start-spl")?.value || saved.start_spl_db),
+    end_spl_db: Number($("loudness-end-spl")?.value || saved.end_spl_db),
+    instruction_offset_db: Number($("instruction-offset-db")?.value || saved.instruction_offset_db),
+    estimated_full_scale_spl_db: Number($("estimated-full-scale-spl")?.value || saved.estimated_full_scale_spl_db),
+    audio_peak_ceiling_dbfs: Number($("audio-peak-ceiling-dbfs")?.value || saved.audio_peak_ceiling_dbfs)
+  }, currentTrajectoryControls());
+  return policy;
+}
+
+function renderLoudnessControls() {
+  const policy = savedLoudnessPolicy();
+  const fields = {
+    "loudness-start-spl": policy.start_spl_db,
+    "loudness-end-spl": policy.end_spl_db,
+    "instruction-offset-db": policy.instruction_offset_db,
+    "estimated-full-scale-spl": policy.estimated_full_scale_spl_db,
+    "audio-peak-ceiling-dbfs": policy.audio_peak_ceiling_dbfs
+  };
+  for (const [id, value] of Object.entries(fields)) {
+    const input = $(id);
+    if (input && document.activeElement !== input) input.value = Number(value).toFixed(id.includes("offset") || id.includes("ceiling") ? 1 : 0);
+  }
+  updateLoudnessDerived();
+}
+
+function updateLoudnessDerived() {
+  const policy = collectLoudnessPolicy();
+  const summary = $("loudness-derived");
+  if (!summary) return;
+  const instructionGain = dbToLinear(policy.instruction_offset_db);
+  summary.innerHTML = `
+    <span>${policy.start_spl_db.toFixed(0)}-&gt;${policy.end_spl_db.toFixed(0)} dB SPL linear-dB active ramp</span>
+    <span>RMS targets ${policy.start_target_rms_dbfs.toFixed(1)}-&gt;${policy.end_target_rms_dbfs.toFixed(1)} dBFS</span>
+    <span>Instructions ${policy.instruction_offset_db.toFixed(1)} dB (${instructionGain.toFixed(3)}x)</span>
+    <span>${policy.calibration_status === "measured" ? "measured" : "estimated, not measured"}</span>
+  `;
 }
 
 function renderGeneratedNoiseSelect() {
@@ -2308,7 +2422,8 @@ function renderBakePanel() {
   }
   const label = pendingBakeRecipe.label || pendingBakeRecipe.audio?.label || noiseTypeLabel(pendingBakeRecipe.noise_type);
   $("bake-label").value = label || "";
-  $("bake-gain").value = Number(pendingBakeRecipe.gain || pendingBakeRecipe.audio?.gain || 1);
+  if ($("bake-gain")) $("bake-gain").value = 1;
+  pendingBakeRecipe.loudness_policy = collectLoudnessPolicy();
   const kind = pendingBakeRecipe.kind === "imported_audio" ? audioRoleTitle(pendingBakeRecipe.render_mode) : `${noiseTypeLabel(pendingBakeRecipe.noise_type)} noise`;
   status.textContent = `Staged: ${kind}`;
   status.className = "status-label ready";
@@ -2336,6 +2451,7 @@ function renderNoiseTable() {
       </div>
       ${stimulusTrajectoryHiddenFields(noise, selectedNoise, "generated_noise")}
       <input data-field="prebaked_path" type="hidden" value="${escapeAttr(localPath)}">
+      <input data-field="gain" type="hidden" value="${Number(noise.gain || 1)}">
       <div class="source-card-fields">
         <div class="field-row">
           <label>Label</label>
@@ -2354,10 +2470,6 @@ function renderNoiseTable() {
         <div class="field-row">
           <label>Elevation</label>
           <input data-field="elevation_deg" type="number" step="1" value="${Number(noise.elevation_deg || 0)}">
-        </div>
-        <div class="field-row">
-          <label>Gain</label>
-          <input data-field="gain" type="number" step="0.05" min="0.01" value="${Number(noise.gain || 1)}">
         </div>
       </div>
     `;
@@ -2411,6 +2523,7 @@ function renderAudioTable() {
       <input data-field="target_source_label" type="hidden" value="">
       <input data-field="phase" type="hidden" value="${escapeAttr(phase)}">
       <input data-field="gap_s" type="hidden" value="0">
+      <input data-field="gain" type="hidden" value="${Number(audio.gain || 1)}">
       <div class="source-card-fields audio-source-fields">
         ${role === "prestimulus" ? "" : `
         <div class="field-row">
@@ -2435,10 +2548,6 @@ function renderAudioTable() {
         <div class="field-row">
           <label>Target s</label>
           <input data-field="target_duration_s" type="number" min="0.1" step="0.1" value="${Number(audio.target_duration_s || 4)}">
-        </div>
-        <div class="field-row">
-          <label>Gain</label>
-          <input data-field="gain" type="number" min="0.01" step="0.05" value="${Number(audio.gain || 1)}">
         </div>
       </div>
     `;
@@ -5140,6 +5249,10 @@ function collectPayload() {
   const audio = collectAudioFiles();
   design.custom_looming_files = audio.looming;
   design.prestimulus_files = audio.prestimulus;
+  design.study_profile_reference_parameters = {
+    ...(design.study_profile_reference_parameters || {}),
+    loudness_policy: collectLoudnessPolicy()
+  };
   const trialStrips = collectTrialStrips();
   const legacySpatial = design.protocol?.spatial_values_cm?.length
     ? design.protocol.spatial_values_cm
@@ -6226,7 +6339,8 @@ function stageGeneratedNoise(noiseType = "pink") {
     kind: "generated_noise",
     noise_type: type,
     label,
-    gain: Number($("bake-gain")?.value || 1)
+    gain: 1,
+    loudness_policy: collectLoudnessPolicy()
   };
   $("bake-label").value = label;
   renderBakePanel();
@@ -6240,7 +6354,8 @@ function stageImportedAudioForBake(audio, renderMode) {
     render_mode: mode,
     label: audio.label || audioRoleTitle(mode),
     audio,
-    gain: Number(audio.gain || 1)
+    gain: 1,
+    loudness_policy: collectLoudnessPolicy()
   };
   $("bake-label").value = pendingBakeRecipe.label;
   renderBakePanel();
@@ -6250,12 +6365,13 @@ function collectBakeRecipe() {
   if (!pendingBakeRecipe) return null;
   const recipe = clone(pendingBakeRecipe);
   recipe.label = $("bake-label").value.trim() || recipe.label || "Baked stimulus";
-  recipe.gain = Math.max(0.01, Number($("bake-gain").value || recipe.gain || 1));
+  recipe.gain = 1;
+  recipe.loudness_policy = collectLoudnessPolicy();
   if (recipe.audio) {
     recipe.audio = {
       ...recipe.audio,
       label: recipe.label,
-      gain: recipe.gain
+      gain: 1
     };
   }
   return recipe;
@@ -6597,9 +6713,12 @@ function wireEvents() {
   $("bake-label").addEventListener("input", () => {
     if (pendingBakeRecipe) pendingBakeRecipe.label = $("bake-label").value.trim();
   });
-  $("bake-gain").addEventListener("input", () => {
-    if (pendingBakeRecipe) pendingBakeRecipe.gain = Math.max(0.01, Number($("bake-gain").value || 1));
-  });
+  for (const id of ["loudness-start-spl", "loudness-end-spl", "instruction-offset-db", "estimated-full-scale-spl", "audio-peak-ceiling-dbfs"]) {
+    $(id)?.addEventListener("input", () => {
+      updateLoudnessDerived();
+      if (pendingBakeRecipe) pendingBakeRecipe.loudness_policy = collectLoudnessPolicy();
+    });
+  }
   $("import-audio-spatialize").addEventListener("click", () => openAudioPicker("spatialize"));
   $("import-audio-preserve").addEventListener("click", () => openAudioPicker("preserve"));
   $("import-audio-prestimulus")?.addEventListener("click", () => openAudioPicker("prestimulus"));
@@ -6731,7 +6850,11 @@ function wireEvents() {
   }
   $("preview-mode").addEventListener("change", () => setPreviewMode($("preview-mode").value));
   for (const id of TRAJECTORY_FIELD_IDS) {
-    $(id).addEventListener("input", updateViewer);
+    $(id).addEventListener("input", () => {
+      updateViewer();
+      updateLoudnessDerived();
+      if (pendingBakeRecipe) pendingBakeRecipe.loudness_policy = collectLoudnessPolicy();
+    });
   }
   wireSplitters();
   for (const button of document.querySelectorAll("[data-preview-mode]")) {

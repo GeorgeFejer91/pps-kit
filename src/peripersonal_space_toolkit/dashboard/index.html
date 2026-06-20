@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260620-static-preview-parity">
+  <link rel="stylesheet" href="styles.css?v=20260620-loudness-policy">
 </head>
 <body>
   <div class="app-shell">
@@ -208,7 +208,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="../viewer/index.html?v=20260620-static-preview-parity"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="../viewer/index.html?v=20260620-loudness-policy"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -238,9 +238,25 @@
                   <label for="bake-label">Bake label</label>
                   <input id="bake-label" type="text" autocomplete="off">
                 </div>
-                <div class="field-row">
-                  <label for="bake-gain">Gain</label>
-                  <input id="bake-gain" type="number" min="0.01" step="0.05" value="1">
+                <input id="bake-gain" type="hidden" value="1">
+                <div class="loudness-panel" aria-label="Loudness policy">
+                  <div class="loudness-panel-heading">
+                    <span>Loudness Contract</span>
+                    <span class="status-label optional">estimated SPL</span>
+                  </div>
+                  <div class="loudness-grid">
+                    <label for="loudness-start-spl">Start dB SPL</label>
+                    <input id="loudness-start-spl" type="number" min="30" max="95" step="1" value="55">
+                    <label for="loudness-end-spl">Endpoint dB SPL</label>
+                    <input id="loudness-end-spl" type="number" min="30" max="95" step="1" value="75">
+                    <label for="instruction-offset-db">Instruction offset</label>
+                    <input id="instruction-offset-db" type="number" min="-30" max="0" step="1" value="-6">
+                    <label for="estimated-full-scale-spl">0 dBFS estimate</label>
+                    <input id="estimated-full-scale-spl" type="number" min="80" max="130" step="0.1" value="109.2">
+                    <label for="audio-peak-ceiling-dbfs">Peak ceiling</label>
+                    <input id="audio-peak-ceiling-dbfs" type="number" min="-12" max="0" step="0.1" value="-1">
+                  </div>
+                  <div id="loudness-derived" class="loudness-derived"></div>
                 </div>
                 <button id="bake-stimulus" type="button" class="primary">Bake Ingredient</button>
                 <span id="bake-status" class="status-label required">No source staged</span>
@@ -1096,7 +1112,7 @@
       </form>
     </div>
   </div>
-  <script src="hardware_pixel_art.js?v=20260620-static-preview-parity"></script>
-  <script src="app.js?v=20260620-static-preview-parity"></script>
+  <script src="hardware_pixel_art.js?v=20260620-loudness-policy"></script>
+  <script src="app.js?v=20260620-loudness-policy"></script>
 </body>
 </html>

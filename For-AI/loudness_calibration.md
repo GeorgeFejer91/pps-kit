@@ -30,13 +30,41 @@ Policy direction:
   software gain caps, a measured calibration profile, and startup fail-safes.
 - ASIO playback should be treated as the standard route; Windows endpoint volume
   is only part of the policy for non-ASIO diagnostics.
-- Looming stimuli should be matched by calibrated RMS/final-window RMS across
-  noise types. Instruction audio should remain below looming audio by a fixed
-  offset, initially documented as -6 dB pending pilot comfort measurement.
+- Looming stimuli should be matched by calibrated endpoint-window RMS across
+  noise types, preferring the constant post-hold when present. Instruction audio
+  should remain below looming audio by a fixed offset, initially documented as
+  -6 dB pending pilot comfort measurement.
 
-Future implementation should add participant-run preflight checks for a
-`loudness_profile.json`, stimulus-level audit tolerance, clipping rejection, and
-post-routing digital level evidence in run manifests.
+Implemented software policy:
+
+- `src/peripersonal_space_toolkit/loudness.py` defines the shared
+  `loudness_policy` schema and defaults: 55 dB SPL start, 75 dB SPL endpoint,
+  -6 dB instruction offset, estimated 0 dBFS = 109.2 dB SPL for Komplete Audio
+  6 MK2 at maximum headphone output into HD 560S, and -1 dBFS audio peak
+  ceiling.
+- The HTML dashboard now exposes a Segment 1 `Loudness Contract` panel instead
+  of visible per-source gain controls. The old `gain` fields remain hidden for
+  backward-compatible design loading; the intended calibration surface is the
+  top-level loudness policy.
+- Renderer loudness-control mode is active whenever a design declares
+  `study_profile_reference_parameters.loudness_policy`. In that mode the
+  Python SOFA/FABIAN renderer applies a linear-dB looming envelope, keeps
+  pre/post trajectory holds constant at the start/endpoint SPL, disables hidden
+  output peak normalization, disables direct-path distance gain, and scales the
+  endpoint calibration window to the target RMS dBFS. If a 0.5 s post-hold is
+  present, that post-hold is the preferred endpoint calibration window; otherwise
+  the renderer falls back to the final active movement window.
+- Segment 1 render manifests, Segment 2-6 dashboard manifests, study-settings
+  manifests, and runner session manifests now carry the loudness policy. Segment
+  6 is stale if the policy changes, and Segment 2 refuses to bake from referenced
+  Segment 1 ingredients whose recorded loudness-policy provenance differs from
+  the current design.
+- Segment 2 fixed instruction clips are attenuated by the loudness policy
+  instruction offset at sequence-assembly time. Source assets are not modified.
+
+Future implementation should add participant-run preflight checks for a measured
+`loudness_profile.json`, stimulus-level audit tolerance, physical SPL measurement
+entry, and post-routing digital level evidence in run manifests.
 
 Local source update:
 

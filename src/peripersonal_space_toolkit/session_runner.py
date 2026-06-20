@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 from .design import StimulusDesign, experiment_schedule_rows, export_protocol_csv, save_design, validate_design
+from .loudness import normalize_loudness_policy
 from .output_layout import (
     output_data_analytics_dir,
     output_metadata_dir,
@@ -175,6 +176,7 @@ class RunPackage:
     execution_mode: str = "design_schedule_blocks"
     source_run_setup_manifest_path: Path | None = None
     instruction_profile: dict[str, Any] = field(default_factory=dict)
+    loudness_policy: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -726,6 +728,11 @@ def prepare_run_package(
             session_dir=session_dir,
             source_base_dir=REPO_ROOT,
         ),
+        loudness_policy=normalize_loudness_policy(
+            design.study_profile_reference_parameters.get("loudness_policy")
+            if isinstance(design.study_profile_reference_parameters, dict)
+            else None
+        ),
     )
     _write_session_manifest(package, wavs)
     _append_package_diary_event(
@@ -772,6 +779,7 @@ def load_run_package(manifest_path: Path) -> RunPackage:
         execution_mode=str(data.get("execution_mode") or "design_schedule_blocks"),
         source_run_setup_manifest_path=Path(str(data["source_run_setup_manifest_path"])) if data.get("source_run_setup_manifest_path") else None,
         instruction_profile=_normalize_instruction_profile(data.get("instruction_profile", {})),
+        loudness_policy=normalize_loudness_policy(data.get("loudness_policy")),
     )
 
 
@@ -1562,6 +1570,7 @@ def prepare_segment_run_package(
         session_dir=session_dir,
         source_base_dir=run_setup_manifest_path.parent,
     )
+    loudness_policy = normalize_loudness_policy(run_setup.get("loudness_policy"))
 
     design_path = run_package_dir / "design.json"
     if design is None:
@@ -1739,6 +1748,7 @@ def prepare_segment_run_package(
         execution_mode="participant_block_wavs",
         source_run_setup_manifest_path=run_setup_manifest_path,
         instruction_profile=instruction_profile,
+        loudness_policy=loudness_policy,
     )
     _emit_prepare_progress(
         progress_callback,
@@ -4880,6 +4890,7 @@ def _wav_info(path: Path, *, sha256: str = "", label: str = "") -> RenderedWav:
 
 
 def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> None:
+    loudness_policy = normalize_loudness_policy(package.loudness_policy)
     manifest = {
         "schema": RUN_PACKAGE_SCHEMA,
         "participant_id": package.participant_id,
@@ -4895,6 +4906,16 @@ def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> Non
             "channels": 3,
             "latency_s": REQUESTED_LATENCY_S,
             "blocksize": REQUESTED_BLOCKSIZE,
+            "loudness_control": {
+                "policy_schema": loudness_policy.get("schema", ""),
+                "calibration_status": loudness_policy.get("calibration_status", ""),
+                "hardware": loudness_policy.get("hardware", {}),
+                "start_spl_db": loudness_policy.get("start_spl_db", ""),
+                "end_spl_db": loudness_policy.get("end_spl_db", ""),
+                "instruction_offset_db": loudness_policy.get("instruction_offset_db", ""),
+                "estimated_full_scale_spl_db": loudness_policy.get("estimated_full_scale_spl_db", ""),
+                "warning": "Estimated SPL until verified with a headphone coupler/artificial ear.",
+            },
         },
         "timing": {
             "primary_response_source": "mouse_click event log plus optional LSL marker stream",
@@ -4916,6 +4937,7 @@ def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> Non
         "protocol_path": str(package.protocol_path),
         "render_manifest_path": str(package.render_manifest_path) if package.render_manifest_path else "",
         "instruction_profile": _json_ready(package.instruction_profile),
+        "loudness_policy": _json_ready(loudness_policy),
         "source_wavs": [_json_ready(asdict(wav)) for wav in wavs],
         "blocks": [_json_ready(asdict(block)) for block in package.blocks],
         "outputs": {

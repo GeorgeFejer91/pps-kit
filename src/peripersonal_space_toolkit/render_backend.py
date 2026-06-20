@@ -33,6 +33,16 @@ from .design import (
     trajectory_point_at_time,
     trajectory_points_with_holds,
 )
+from .loudness import (
+    LOUDNESS_POLICY_KEY,
+    calibration_window_samples,
+    db_to_linear,
+    linear_to_db,
+    loudness_policy_for_design,
+    normalize_loudness_policy,
+    relative_loudness_envelope,
+    rms_dbfs_to_estimated_spl,
+)
 from .subprocess_utils import windows_no_console_kwargs
 
 
@@ -300,6 +310,85 @@ def _generate_noise(noise_type: str, samples: int, sample_rate: int, seed: int) 
     return result / peak if peak > 0 else result
 
 
+def _loudness_control_enabled(config: dict[str, Any]) -> bool:
+    return bool(config.get("renderer", {}).get("level_model", {}).get("toolkit_loudness_control_enabled"))
+
+
+def _rms_dbfs(data: "Any") -> float:
+    import numpy as np
+
+    if data is None or not len(data):
+        return float("-inf")
+    rms = float(np.sqrt(np.mean(np.asarray(data, dtype=float) ** 2)))
+    return linear_to_db(rms)
+
+
+def _apply_loudness_envelope(data: "Any", policy: dict[str, Any], sample_rate: int) -> "Any":
+    import numpy as np
+
+    envelope = np.asarray(relative_loudness_envelope(policy, len(data), sample_rate), dtype=float)
+    if data.ndim == 1:
+        return data * envelope
+    return data * envelope[:, None]
+
+
+def _stereo_rms_dbfs(stereo: "Any", start: int, stop: int) -> float:
+    window = stereo[start:stop, :]
+    if not len(window):
+        return float("-inf")
+    return _rms_dbfs(window)
+
+
+def _apply_calibrated_loudness_target(
+    stereo: "Any",
+    policy: dict[str, Any],
+    sample_rate: int,
+    total_samples: int,
+) -> tuple["Any", dict[str, Any]]:
+    import numpy as np
+
+    start, stop = calibration_window_samples(policy, sample_rate, total_samples)
+    final_window = stereo[start:stop, :]
+    measured_rms = float(np.sqrt(np.mean(final_window * final_window))) if len(final_window) else 0.0
+    target_rms = db_to_linear(float(policy["end_target_rms_dbfs"]))
+    if measured_rms <= 0:
+        raise RuntimeError("Cannot apply calibrated loudness target: endpoint calibration window is silent.")
+    gain = target_rms / measured_rms
+    scaled = stereo * gain
+    audio_peak = float(np.max(np.abs(scaled))) if scaled.size else 0.0
+    audio_peak_dbfs = linear_to_db(audio_peak)
+    ceiling_dbfs = float(policy.get("audio_peak_ceiling_dbfs", -1.0))
+    if audio_peak_dbfs > ceiling_dbfs:
+        raise RuntimeError(
+            "Calibrated loudness render would exceed the audio peak ceiling "
+            f"({audio_peak_dbfs:.3f} dBFS > {ceiling_dbfs:.3f} dBFS)."
+        )
+    pre_start = 0
+    pre_stop = max(0, min(total_samples, int(round(float(policy.get("pre_hold_s", 0.5)) * sample_rate))))
+    post_start = max(0, min(total_samples, int(round((float(policy.get("pre_hold_s", 0.5)) + float(policy.get("movement_duration_s", 3.0))) * sample_rate))))
+    post_stop = max(post_start, min(total_samples, int(round(float(policy.get("total_duration_s", total_samples / sample_rate)) * sample_rate))))
+    final_rms_dbfs = _stereo_rms_dbfs(scaled, start, stop)
+    metadata = {
+        "loudness_control": "toolkit_estimated_spl",
+        "loudness_ramp_shape": str(policy.get("movement_ramp_shape", "linear_db")),
+        "loudness_start_spl_db": f"{float(policy['start_spl_db']):.3f}",
+        "loudness_end_spl_db": f"{float(policy['end_spl_db']):.3f}",
+        "loudness_target_start_rms_dbfs": f"{float(policy['start_target_rms_dbfs']):.3f}",
+        "loudness_target_end_rms_dbfs": f"{float(policy['end_target_rms_dbfs']):.3f}",
+        "loudness_final_window_start_s": f"{start / sample_rate:.6f}",
+        "loudness_final_window_stop_s": f"{stop / sample_rate:.6f}",
+        "loudness_pre_hold_rms_dbfs": f"{_stereo_rms_dbfs(scaled, pre_start, pre_stop):.3f}",
+        "loudness_final_window_rms_dbfs": f"{final_rms_dbfs:.3f}",
+        "loudness_post_hold_rms_dbfs": f"{_stereo_rms_dbfs(scaled, post_start, post_stop):.3f}",
+        "loudness_final_window_estimated_spl_db": f"{rms_dbfs_to_estimated_spl(policy, final_rms_dbfs):.3f}",
+        "loudness_applied_gain_db": f"{linear_to_db(gain):.3f}",
+        "loudness_audio_peak_dbfs": f"{audio_peak_dbfs:.3f}",
+        "loudness_peak_ceiling_dbfs": f"{ceiling_dbfs:.3f}",
+        "loudness_peak_status": "within_ceiling",
+    }
+    return scaled, metadata
+
+
 def _has_imported_audio_sources(config: dict[str, Any]) -> bool:
     return any(source.get("source_kind") == "imported_audio" for source in config["source"]["noises"])
 
@@ -343,6 +432,12 @@ def _render_imported_audio_source(
     else:
         stereo = data[:, :2]
     gain = float(source.get("gain", 1.0) or 1.0)
+    loudness_metadata: dict[str, Any] = {}
+    if _loudness_control_enabled(config):
+        policy = config["loudness_policy"]
+        stereo = _apply_loudness_envelope(stereo * gain, policy, sample_rate)
+        stereo, loudness_metadata = _apply_calibrated_loudness_target(stereo, policy, sample_rate, total_samples)
+        gain = 1.0
     include_tactile = bool(config["tactile"].get("enabled", True))
     if include_tactile:
         tactile_channel = data[:, 2] if data.shape[1] > 2 else tactile
@@ -352,12 +447,14 @@ def _render_imported_audio_source(
     else:
         rendered = stereo * gain
     peak = float(np.max(np.abs(rendered))) if rendered.size else 0.0
-    if peak > OUTPUT_LIMITER_PEAK:
+    if peak > OUTPUT_LIMITER_PEAK and not _loudness_control_enabled(config):
         rendered = rendered / peak * OUTPUT_LIMITER_PEAK
         peak = float(np.max(np.abs(rendered)))
+    audio_peak = float(np.max(np.abs(stereo))) if stereo.size else 0.0
     wav_path = output_dir / f"looming_{_slug(source['label'])}.wav"
     sf.write(wav_path, rendered, sample_rate, subtype="PCM_16")
-    peak_dbfs = "-inf" if peak <= 0 else f"{20.0 * math.log10(peak):.3f}"
+    peak_for_qc = audio_peak if _loudness_control_enabled(config) else peak
+    peak_dbfs = "-inf" if peak_for_qc <= 0 else f"{20.0 * math.log10(peak_for_qc):.3f}"
     return wav_path, {
         "status": "rendered_imported_audio",
         "noise_label": source["label"],
@@ -373,12 +470,13 @@ def _render_imported_audio_source(
         "tactile_events": len(config["tactile"]["events"]),
         "tactile_channel": 2 if include_tactile else "",
         "peak_dbfs": peak_dbfs,
-        "clipping": str(peak >= 1.0).lower(),
+        "clipping": str(peak_for_qc >= 1.0).lower(),
         "hrir_positions_used": "",
         "first_half_left_rms": "",
         "first_half_right_rms": "",
         "second_half_left_rms": "",
         "second_half_right_rms": "",
+        **loudness_metadata,
         "wav_sha256": sha256_file(wav_path) or "",
         "message": (
             "Imported local audio source rendered as binaural left/right"
@@ -538,7 +636,7 @@ def _spatialize_moving_source(
 
     stereo = stereo[:total_samples, :]
     audio_peak = float(np.max(np.abs(stereo))) if stereo.size else 0.0
-    if audio_peak > 0:
+    if audio_peak > 0 and not _loudness_control_enabled(config):
         stereo = stereo / audio_peak * OUTPUT_AUDIO_PEAK_NORMALIZATION
     return stereo, used_hrir_indices
 
@@ -560,8 +658,14 @@ def build_render_config(
     sources = _noise_rows(design)
     imported_source_count = sum(1 for source in sources if source.get("source_kind") == "imported_audio")
     tactile_events = _tactile_events(design) if include_tactile else []
+    reference_parameters = design.study_profile_reference_parameters if isinstance(design.study_profile_reference_parameters, dict) else {}
+    raw_loudness_policy = reference_parameters.get(LOUDNESS_POLICY_KEY)
+    loudness_control_enabled = isinstance(raw_loudness_policy, dict)
+    loudness_policy = loudness_policy_for_design(design)
+    output_peak_normalization = None if loudness_control_enabled else OUTPUT_AUDIO_PEAK_NORMALIZATION
     return {
         "schema": "pps-3dti-render-config.v1",
+        "loudness_policy": loudness_policy,
         "renderer": {
             "backend": "3DTI AudioToolkit",
             "repository": THREEDTI_REPOSITORY,
@@ -585,16 +689,28 @@ def build_render_config(
                 "reverb_enabled": False,
             },
             "level_model": {
-                "noise_gain_unit": "linear_amplitude_multiplier",
+                "toolkit_loudness_control_enabled": loudness_control_enabled,
+                "noise_gain_unit": (
+                    "linear_source_precalibration_multiplier"
+                    if loudness_control_enabled
+                    else "linear_amplitude_multiplier"
+                ),
                 "noise_gain_default": 1.0,
-                "absolute_spl_calibrated": False,
-                "output_audio_peak_normalization": OUTPUT_AUDIO_PEAK_NORMALIZATION,
-                "output_audio_peak_normalization_dbfs": 20.0 * math.log10(OUTPUT_AUDIO_PEAK_NORMALIZATION),
+                "absolute_spl_estimated": loudness_control_enabled
+                and loudness_policy.get("mode") == "estimated_spl",
+                "absolute_spl_calibrated": loudness_control_enabled
+                and loudness_policy.get("calibration_status") == "measured",
+                "loudness_policy": loudness_policy,
+                "output_audio_peak_normalization": output_peak_normalization,
+                "output_audio_peak_normalization_dbfs": (
+                    None if output_peak_normalization is None else 20.0 * math.log10(output_peak_normalization)
+                ),
                 "output_limiter_peak": OUTPUT_LIMITER_PEAK,
                 "output_limiter_peak_dbfs": 20.0 * math.log10(OUTPUT_LIMITER_PEAK),
                 "note": (
-                    "Pfeiffer's reference script uses dB parameters before final WAV normalization; "
-                    "this renderer keeps 3DTI relative distance/ILD gains and peak-normalizes the generated WAV."
+                    "In loudness-control mode, the toolkit applies a constant-hold linear-dB envelope and "
+                    "matches the endpoint calibration window RMS to the manifest target; hidden audio peak "
+                    "normalization is disabled. Legacy designs without a loudness policy retain peak normalization."
                 ),
             },
         },
@@ -628,7 +744,12 @@ def build_render_config(
                 "snippets": _stimulus_snippet_rows(design),
                 "integration": "recorded_for_session_assembly",
             },
-            "gain_law": "3DTI_free_field_direct_path",
+            "gain_law": False if loudness_control_enabled else "3DTI_free_field_direct_path",
+            "distance_gain_policy": (
+                loudness_policy.get("distance_gain_policy")
+                if loudness_control_enabled
+                else "3DTI_free_field_direct_path"
+            ),
             "sofa_file": sofa_file,
             "sofa_file_sha256": sha256_file(sofa_path),
             "hrtf_resource": {
@@ -725,6 +846,22 @@ def write_render_qc(path: Path, rows: list[dict[str, Any]]) -> None:
         "first_half_right_rms",
         "second_half_left_rms",
         "second_half_right_rms",
+        "loudness_control",
+        "loudness_ramp_shape",
+        "loudness_start_spl_db",
+        "loudness_end_spl_db",
+        "loudness_target_start_rms_dbfs",
+        "loudness_target_end_rms_dbfs",
+        "loudness_final_window_start_s",
+        "loudness_final_window_stop_s",
+        "loudness_pre_hold_rms_dbfs",
+        "loudness_final_window_rms_dbfs",
+        "loudness_post_hold_rms_dbfs",
+        "loudness_final_window_estimated_spl_db",
+        "loudness_applied_gain_db",
+        "loudness_audio_peak_dbfs",
+        "loudness_peak_ceiling_dbfs",
+        "loudness_peak_status",
         "wav_sha256",
         "message",
     ]
@@ -842,6 +979,9 @@ def render_with_python_sofa_reference(config: dict[str, Any], output_dir: Path, 
         else:
             dry_seed = int(config["source"]["seed"]) + noise_index * 1009
             dry = _generate_noise(noise["noise_type"], total_samples, sample_rate, dry_seed)
+        loudness_metadata: dict[str, Any] = {}
+        if _loudness_control_enabled(config):
+            dry = _apply_loudness_envelope(dry, config["loudness_policy"], sample_rate)
         stereo, used_hrir_indices = _spatialize_moving_source(
             dry,
             noise,
@@ -853,19 +993,27 @@ def render_with_python_sofa_reference(config: dict[str, Any], output_dir: Path, 
             hop_samples=hop_samples,
             window=window,
         )
+        if _loudness_control_enabled(config):
+            stereo, loudness_metadata = _apply_calibrated_loudness_target(
+                stereo,
+                config["loudness_policy"],
+                sample_rate,
+                total_samples,
+            )
         rendered = np.column_stack([stereo, tactile]) if include_tactile and tactile is not None else stereo
         first_half = stereo[: total_samples // 2, :]
         second_half = stereo[total_samples // 2 :, :]
         first_rms = np.sqrt(np.mean(first_half * first_half, axis=0)) if len(first_half) else np.zeros(2)
         second_rms = np.sqrt(np.mean(second_half * second_half, axis=0)) if len(second_half) else np.zeros(2)
         peak = float(np.max(np.abs(rendered))) if rendered.size else 0.0
-        if peak > OUTPUT_LIMITER_PEAK:
+        if peak > OUTPUT_LIMITER_PEAK and not _loudness_control_enabled(config):
             rendered = rendered / peak * OUTPUT_LIMITER_PEAK
             peak = float(np.max(np.abs(rendered)))
+        peak_for_qc = float(np.max(np.abs(stereo))) if _loudness_control_enabled(config) and stereo.size else peak
         wav_path = output_dir / f"looming_{_slug(noise['label'])}.wav"
         sf.write(wav_path, rendered, sample_rate, subtype="PCM_16")
         wav_paths.append(wav_path)
-        peak_dbfs = "-inf" if peak <= 0 else f"{20.0 * math.log10(peak):.3f}"
+        peak_dbfs = "-inf" if peak_for_qc <= 0 else f"{20.0 * math.log10(peak_for_qc):.3f}"
         rows.append(
             {
                 "status": "rendered_reference",
@@ -879,12 +1027,13 @@ def render_with_python_sofa_reference(config: dict[str, Any], output_dir: Path, 
                 "tactile_events": len(config["tactile"]["events"]),
                 "tactile_channel": 2 if include_tactile else "",
                 "peak_dbfs": peak_dbfs,
-                "clipping": str(peak >= 1.0).lower(),
+                "clipping": str(peak_for_qc >= 1.0).lower(),
                 "hrir_positions_used": len(used_hrir_indices),
                 "first_half_left_rms": f"{float(first_rms[0]):.9f}",
                 "first_half_right_rms": f"{float(first_rms[1]):.9f}",
                 "second_half_left_rms": f"{float(second_rms[0]):.9f}",
                 "second_half_right_rms": f"{float(second_rms[1]):.9f}",
+                **loudness_metadata,
                 "wav_sha256": sha256_file(wav_path) or "",
                 "message": (
                     "Rendered with the Python SOFA/FABIAN reference engine from the same "
@@ -922,6 +1071,7 @@ def write_manifest(
         "duration_s": config["trajectory"]["total_duration_s"],
         "trajectory_samples": len(config["trajectory"]["samples"]),
         "source": config["source"],
+        "loudness_policy": config.get("loudness_policy", normalize_loudness_policy(None)),
         "tactile_events": {
             "enabled": bool(config["tactile"].get("enabled", True)),
             "stage": config["tactile"].get("stage", ""),
@@ -965,6 +1115,7 @@ def postprocess_native_manifest(
             "backend_executable": str(backend_executable),
             "backend_executable_sha256": sha256_file(backend_executable),
             "renderer": config["renderer"],
+            "loudness_policy": config.get("loudness_policy", normalize_loudness_policy(None)),
             "source": {
                 "sample_rate": config["source"]["sample_rate"],
                 "sofa_file": config["source"]["sofa_file"],

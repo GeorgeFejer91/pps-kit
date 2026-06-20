@@ -2248,7 +2248,7 @@ select:focus {
 
 .bake-panel {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) 110px auto auto;
+  grid-template-columns: minmax(170px, 0.55fr) minmax(360px, 1.45fr) auto auto;
   gap: 8px;
   align-items: end;
   margin-top: 10px;
@@ -2263,6 +2263,60 @@ select:focus {
 .bake-panel .status-label {
   align-self: center;
   justify-self: end;
+}
+
+.loudness-panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f9fbf7;
+  padding: 8px;
+  min-width: 0;
+}
+
+.loudness-panel-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  color: #27322c;
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 7px;
+}
+
+.loudness-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(72px, 1fr));
+  gap: 6px;
+  align-items: end;
+}
+
+.loudness-grid label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.loudness-grid input {
+  width: 100%;
+  min-height: 30px;
+}
+
+.loudness-derived {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  color: #526058;
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.loudness-derived span {
+  border: 1px solid #d2ded5;
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 3px 6px;
 }
 
 .source-card-list {
@@ -4192,6 +4246,10 @@ body.modal-open {
 
   .bake-panel {
     grid-template-columns: 1fr;
+  }
+
+  .loudness-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .arch-tier,

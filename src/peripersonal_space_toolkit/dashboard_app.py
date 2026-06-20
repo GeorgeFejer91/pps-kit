@@ -69,6 +69,12 @@ from .session_runner import (
     rendered_wavs,
 )
 from .focus_launch import build_focus_runner_command
+from .loudness import (
+    LOUDNESS_POLICY_KEY,
+    db_to_linear,
+    loudness_policy_for_design,
+    normalize_loudness_policy,
+)
 from .output_layout import output_profile_snapshot_dir
 from .profile_memory import (
     append_output_diary_event,
@@ -612,6 +618,7 @@ class DashboardController:
         design.protocol.baseline_custom_trial_mode = "tactile_only"
         design.protocol.blocks = 1
         design.protocol.participants = 1
+        design = _normalize_dashboard_design(design)
         with self._lock:
             self.design = design
             project = self._ensure_project_context(self.design)
@@ -1195,7 +1202,15 @@ class DashboardController:
 
             with self._lock:
                 active_project = self._ensure_project_context(self.design)
-                _record_ingredient_file(active_project, wav_path, label=label, source_kind=source_kind, trajectory_snapshot=trajectory_snapshot, motion_mode="looming")
+                _record_ingredient_file(
+                    active_project,
+                    wav_path,
+                    label=label,
+                    source_kind=source_kind,
+                    trajectory_snapshot=trajectory_snapshot,
+                    motion_mode="looming",
+                    provenance={"loudness_policy": loudness_policy_for_design(bake_design)},
+                )
                 if source_kind == "generated_noise":
                     source_payload["prebaked_path"] = str(wav_path)
                     source = NoiseDefinition(**source_payload)
@@ -1782,7 +1797,15 @@ class DashboardController:
             sequence_order=max(0, int(_float(payload.get("sequence_order"), 0.0))),
             motion_mode=motion_mode,
         )
-        _record_ingredient_file(project, path, label=label, source_kind="imported_audio", trajectory_snapshot={}, motion_mode=motion_mode)
+        _record_ingredient_file(
+            project,
+            path,
+            label=label,
+            source_kind="imported_audio",
+            trajectory_snapshot={},
+            motion_mode=motion_mode,
+            provenance={"loudness_policy": loudness_policy_for_design(self.design)},
+        )
         _clear_downstream_segment_outputs(project, from_segment=1)
         _write_segment_validation_report(project, self.design)
         return {
@@ -2509,7 +2532,8 @@ def _preview_chunk_for_source_label(design: StimulusDesign, label: str, render_d
             "kind": "fixed_audio",
             "label": asset.label,
             "path": _resolve_dashboard_local_path(asset.path),
-            "gain": asset.gain,
+            "gain": asset.gain * _instruction_loudness_gain(design),
+            "loudness_role": "instruction_clip",
         }
 
     source_key = _source_key(label)
@@ -2542,7 +2566,8 @@ def _trial_strip_preview_chunks(design: StimulusDesign, strip: Any, render_dir: 
                     "kind": "fixed_audio",
                     "label": asset.label,
                     "path": _resolve_dashboard_local_path(asset.path),
-                    "gain": asset.gain,
+                    "gain": asset.gain * _instruction_loudness_gain(design),
+                    "loudness_role": "instruction_clip",
                 }
             )
         elif element.kind == "looming_stimulus":
@@ -2807,7 +2832,15 @@ def _ingredient_lookup(render_dir: Path) -> dict[str, dict[str, Any]]:
     return lookup
 
 
-def _metadata_for_audio_choice(label: str, path: Path, *, kind: str, gain: float, ingredient: dict[str, Any] | None = None) -> dict[str, Any]:
+def _metadata_for_audio_choice(
+    label: str,
+    path: Path,
+    *,
+    kind: str,
+    gain: float,
+    ingredient: dict[str, Any] | None = None,
+    loudness_role: str = "",
+) -> dict[str, Any]:
     path = Path(path)
     if not _path_exists(path):
         raise FileNotFoundError(f"Audio source file was not found: {path}")
@@ -2829,6 +2862,7 @@ def _metadata_for_audio_choice(label: str, path: Path, *, kind: str, gain: float
         "label": label,
         "path": path,
         "gain": gain,
+        "loudness_role": loudness_role,
         "descriptor": descriptor,
         "duration_ms": int(info["duration_ms"]),
         "sample_rate": int(info["sample_rate"]),
@@ -2881,8 +2915,9 @@ def _trial_variant_factors(design: StimulusDesign, strip: Any, render_dir: Path)
                     asset.label,
                     _resolve_dashboard_local_path(asset.path),
                     kind="fixed_audio",
-                    gain=asset.gain,
+                    gain=asset.gain * _instruction_loudness_gain(design),
                     ingredient=ingredient,
+                    loudness_role="instruction_clip",
                 ))
             else:
                 key = _source_key(label)
@@ -2896,6 +2931,7 @@ def _trial_variant_factors(design: StimulusDesign, strip: Any, render_dir: Path)
                     kind="looming_stimulus",
                     gain=asset.gain if asset is not None else float(source_meta.get(label, {}).get("gain") or 1.0),
                     ingredient=ingredient,
+                    loudness_role="looming_stimulus",
                 ))
         if not choices:
             return []
@@ -2925,9 +2961,25 @@ def _validate_segment1_references_for_trial_sequences(design: StimulusDesign, re
     ingredient_errors = _validate_ingredient_rows(list(ingredients.values()))
     if ingredient_errors:
         raise ValueError(f"Segment 1 ingredient registry is not ready: {ingredient_errors[0]}")
+    required_labels = _required_segment1_labels_for_trial_sequences(design)
+    current_loudness_signature = json.dumps(_json_ready(loudness_policy_for_design(design)), sort_keys=True)
+    stale_loudness = [
+        label
+        for label in required_labels
+        for row in [ingredients.get(label)]
+        if row is not None
+        if json.dumps(_json_ready((row.get("provenance") or {}).get("loudness_policy")), sort_keys=True)
+        != current_loudness_signature
+    ]
+    if stale_loudness:
+        raise ValueError(
+            "Segment 1 ingredients were baked/imported under a different loudness policy: "
+            + ", ".join(stale_loudness[:6])
+            + ("." if len(stale_loudness) <= 6 else ", ...")
+        )
     missing = [
         label
-        for label in _required_segment1_labels_for_trial_sequences(design)
+        for label in required_labels
         if _source_key(label) not in keyed
     ]
     if missing:
@@ -3206,6 +3258,7 @@ def _variant_chunks_from_choices(variant: tuple[dict[str, Any], ...], silence_di
                 "label": str(choice.get("label") or "Audio"),
                 "path": Path(choice["path"]),
                 "gain": float(choice.get("gain") or 1.0),
+                "loudness_role": str(choice.get("loudness_role") or ""),
                 "descriptor": str(choice.get("descriptor") or ""),
                 "sha256": str(choice.get("sha256") or ""),
                 "duration_ms": int(choice.get("duration_ms") or 0),
@@ -3235,6 +3288,8 @@ def _variant_segment_metadata(chunks: list[dict[str, Any]]) -> tuple[list[dict[s
             "label": str(chunk.get("label") or ("Jitter" if kind == "jitter" else "Audio")),
             "descriptor": str(chunk.get("descriptor") or ""),
             "path": str(chunk.get("path") or ""),
+            "gain": round(max(0.0, float(chunk.get("gain", 1.0))), 9),
+            "loudness_role": str(chunk.get("loudness_role") or ""),
             "start_s": round(cursor_s, 6),
             "start_ms": _duration_ms_from_seconds(cursor_s),
             "duration_s": round(duration_s, 6),
@@ -3433,6 +3488,7 @@ def _bake_trial_sequence_variants(design: StimulusDesign, render_dir: Path) -> d
             "status": "baked",
             "root": str(root),
             "design_signature": _segment2_design_signature(design),
+            "loudness_policy": loudness_policy_for_design(design),
             "variant_count": len(manifest_rows),
             "rows": row_summaries,
             "variants": manifest_rows,
@@ -3893,6 +3949,7 @@ def _run_setup_preview(project_dir: Path, design: StimulusDesign) -> dict[str, A
     structure = str(settings["experiment_structure"])
     seed = int(settings["seed"])
     instruction_profile = _normalize_run_instruction_profile(settings.get("instruction_profile"), design=design)
+    loudness_policy = loudness_policy_for_design(design)
     participants = max(1, int(design.protocol.participants or 1))
     blocks = [dict(block) for block in block_manifest.get("blocks", [])]
     summary_rows, csv_rows = _run_setup_preview_rows(
@@ -3919,6 +3976,7 @@ def _run_setup_preview(project_dir: Path, design: StimulusDesign) -> dict[str, A
         "instruction_profile": instruction_profile,
         "instruction_profile_signature": _instruction_profile_signature(instruction_profile),
         "instruction_profile_warnings": _instruction_profile_warnings(instruction_profile),
+        "loudness_policy": loudness_policy,
         "source_segment5_manifest": str(block_manifest_path),
         "source_segment5_manifest_sha256": _local_file_sha256(block_manifest_path),
         "rows": summary_rows[:240],
@@ -4571,6 +4629,11 @@ def _validate_run_setup_manifest(
     expected_participants = max(1, int(getattr(design.protocol, "participants", 1) or 1)) if design is not None else int(manifest.get("participant_count") or 0)
     if int(manifest.get("participant_count") or 0) != expected_participants:
         return ["Segment 6 manifest is stale because the participant count changed."]
+    if design is not None:
+        expected_loudness = loudness_policy_for_design(design)
+        recorded_loudness = manifest.get("loudness_policy")
+        if json.dumps(_json_ready(recorded_loudness), sort_keys=True) != json.dumps(_json_ready(expected_loudness), sort_keys=True):
+            return ["Segment 6 manifest is stale because the loudness policy changed."]
     csv_path = Path(str(manifest.get("csv_path") or _run_setup_csv_path(project_dir)))
     if not _path_exists(csv_path):
         return ["Segment 6 block-order CSV is missing."]
@@ -4624,6 +4687,7 @@ def _write_run_setup_outputs(project_dir: Path, design: StimulusDesign) -> dict[
         "instruction_profile": preview["instruction_profile"],
         "instruction_profile_signature": preview["instruction_profile_signature"],
         "instruction_profile_warnings": preview["instruction_profile_warnings"],
+        "loudness_policy": preview["loudness_policy"],
         "source_segment5_manifest": preview["source_segment5_manifest"],
         "source_segment5_manifest_sha256": preview["source_segment5_manifest_sha256"],
         "summary_rows": preview["rows"],
@@ -4643,6 +4707,7 @@ def _write_run_setup_outputs(project_dir: Path, design: StimulusDesign) -> dict[
         "parts_per_participant": preview["parts_per_participant"],
         "total_block_runs": preview["total_block_runs"],
         "instruction_profile": preview["instruction_profile"],
+        "loudness_policy": preview["loudness_policy"],
         "rows": preview["rows"],
     }
 
@@ -5056,7 +5121,7 @@ def _write_audio_from_segments(path: Path, segments: list[dict[str, Any]], *, si
             data, rate = _read_stereo_audio(source_path, target_sample_rate=sample_rate)
             if not sample_rate:
                 sample_rate = rate
-            chunks.append(data)
+            chunks.append(data * max(0.0, float(segment.get("gain", 1.0))))
         else:
             if not sample_rate:
                 sample_rate = 44100
@@ -5315,6 +5380,7 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
             "trial_sequence_manifest": str(trial_sequence_manifest_path),
             "trial_sequence_manifest_sha256": _local_file_sha256(trial_sequence_manifest_path),
             "tactile_cue_path": str(DEFAULT_TACTILE_CUE_PATH),
+            "loudness_policy": loudness_policy_for_design(design),
             "soa_values_ms": soa_values,
             "include_catch_trials": include_catch,
             "baseline_strategy": design.protocol.baseline_strategy,
@@ -5810,6 +5876,7 @@ def _bake_trial_repetition_pool(design: StimulusDesign, render_dir: Path, recipe
         "csv_path": str(csv_path),
         "source_segment3_manifest": str(source_manifest_path),
         "source_segment3_manifest_sha256": _local_file_sha256(source_manifest_path),
+        "loudness_policy": loudness_policy_for_design(design),
         "settings": settings,
         "balancing_seed": balancing_seed,
         "balancing_signature": balancing_signature,
@@ -6207,6 +6274,7 @@ def _bake_block_csv_preview(
         "source_segment4_manifest": str(source_manifest_path),
         "source_segment4_manifest_sha256": _local_file_sha256(source_manifest_path),
         "source_segment4_csv": str(pool_csv_path),
+        "loudness_policy": loudness_policy_for_design(design),
         "block_count": block_count,
         "randomization_seed": seed,
         "total_trials": len(pool_rows),
@@ -6278,6 +6346,14 @@ def _design_for_bake_recipe(design: StimulusDesign, recipe: dict[str, Any], labe
     bake_design.noises = []
     bake_design.custom_looming_files = []
     bake_design.prestimulus_files = []
+    params = dict(bake_design.study_profile_reference_parameters or {})
+    params[LOUDNESS_POLICY_KEY] = normalize_loudness_policy(
+        recipe.get(LOUDNESS_POLICY_KEY) or recipe.get("loudness_policy") or params.get(LOUDNESS_POLICY_KEY),
+        pre_hold_s=bake_design.trajectory.padding_pre_s,
+        movement_duration_s=bake_design.trajectory.movement_duration_s,
+        post_hold_s=bake_design.trajectory.padding_post_s,
+    )
+    bake_design.study_profile_reference_parameters = params
     kind = str(recipe.get("kind") or "generated_noise").strip().lower()
     if kind == "generated_noise":
         noise_type = str(recipe.get("noise_type") or "").strip().lower()
@@ -6674,8 +6750,26 @@ def _copy_design(design: StimulusDesign) -> StimulusDesign:
     return design_from_dict(design_to_dict(design))
 
 
+def _sync_loudness_policy_with_trajectory(design: StimulusDesign) -> StimulusDesign:
+    params = dict(design.study_profile_reference_parameters or {})
+    params[LOUDNESS_POLICY_KEY] = normalize_loudness_policy(
+        params.get(LOUDNESS_POLICY_KEY),
+        pre_hold_s=design.trajectory.padding_pre_s,
+        movement_duration_s=design.trajectory.movement_duration_s,
+        post_hold_s=design.trajectory.padding_post_s,
+    )
+    design.study_profile_reference_parameters = params
+    return design
+
+
+def _instruction_loudness_gain(design: StimulusDesign) -> float:
+    policy = loudness_policy_for_design(design)
+    return db_to_linear(float(policy.get("instruction_offset_db", -6.0)))
+
+
 def _normalize_dashboard_design(design: StimulusDesign) -> StimulusDesign:
     updated = _normalize_study5_event_sequence_labels(_copy_design(design))
+    updated = _sync_loudness_policy_with_trajectory(updated)
     updated = _normalize_study5_full_soa_baseline_defaults(updated)
     updated = _normalize_study5_trial_pool_repetition_defaults(updated)
     updated = _normalize_study5_original_instruction_assets(updated)
@@ -7414,6 +7508,7 @@ def _materialize_study_profile_segment1_ingredients(project: DashboardProjectCon
                 "source_catalog_path": str(source_path),
                 "source_catalog_sha256": str(asset.get("sha256") or ""),
                 "read_only_catalog": True,
+                "loudness_policy": loudness_policy_for_design(design),
             },
         )
     for audio in design.custom_looming_files:
@@ -7471,6 +7566,7 @@ def _materialize_study_profile_segment1_ingredients(project: DashboardProjectCon
             provenance={
                 "source_catalog_path": str(source_path),
                 "read_only_catalog": True,
+                "loudness_policy": loudness_policy_for_design(design),
             },
         )
 
@@ -7529,6 +7625,7 @@ def _study_settings_manifest(context: DashboardProjectContext, design: StimulusD
         else ""
     )
     trial_pool_defaults = _protocol_trial_pool_repetition_defaults(design)
+    loudness_policy = loudness_policy_for_design(design)
     gui_settings_inventory = {
         record["key"]: record
         for record in [
@@ -7552,6 +7649,46 @@ def _study_settings_manifest(context: DashboardProjectContext, design: StimulusD
                 segment="1_core_audio_ingredients",
                 label="Core audio ingredients",
                 control="Bake Ingredient",
+            ),
+            _gui_setting_record(
+                key="loudness_start_spl_db",
+                value=loudness_policy["start_spl_db"],
+                segment="1_core_audio_ingredients",
+                label="Looming start SPL",
+                control="Start dB SPL input",
+                note="0.5 s pre-hold stays at this level before active movement.",
+            ),
+            _gui_setting_record(
+                key="loudness_end_spl_db",
+                value=loudness_policy["end_spl_db"],
+                segment="1_core_audio_ingredients",
+                label="Looming endpoint SPL",
+                control="Endpoint dB SPL input",
+                note="Final active movement window and 0.5 s post-hold use this endpoint level.",
+            ),
+            _gui_setting_record(
+                key="instruction_offset_db",
+                value=loudness_policy["instruction_offset_db"],
+                segment="1_core_audio_ingredients",
+                label="Instruction loudness offset",
+                control="Instruction offset dB input",
+                note="Fixed instruction clips are attenuated by this dB offset relative to the looming endpoint target.",
+            ),
+            _gui_setting_record(
+                key="estimated_full_scale_spl_db",
+                value=loudness_policy["estimated_full_scale_spl_db"],
+                segment="1_core_audio_ingredients",
+                label="Estimated full-scale SPL",
+                control="loudness policy metadata",
+                note="Estimated hardware correspondence for Komplete Audio 6 MK2 at max headphone output and Sennheiser HD 560S; replace with measured value after coupler calibration.",
+            ),
+            _gui_setting_record(
+                key="loudness_calibration_status",
+                value=loudness_policy["calibration_status"],
+                segment="1_core_audio_ingredients",
+                label="Loudness calibration status",
+                control="loudness policy metadata",
+                note="Estimated values are not a substitute for physical SPL measurement.",
             ),
             _gui_setting_record(
                 key="trial_sequence_rows",
@@ -7653,6 +7790,7 @@ def _study_settings_manifest(context: DashboardProjectContext, design: StimulusD
             "design_name": design.name,
             "notes": design.study_profile_notes,
             "reference_parameters": design.study_profile_reference_parameters,
+            "loudness_policy": loudness_policy,
             "profile_parameters_manifest": profile_recreation.get("profile_parameters_manifest", ""),
             "recreation_status": dict(profile_recreation.get("recreation_status") or {}),
             "runner_readiness": profile_recreation.get("runner_readiness", ""),
@@ -7714,6 +7852,7 @@ def _study_settings_manifest(context: DashboardProjectContext, design: StimulusD
                 "duplicates_wavs": False,
                 "blocks_defined_here": False,
             },
+            "loudness_policy": loudness_policy,
             "trial_rows": trial_rows,
         },
         "gui_settings_inventory": gui_settings_inventory,
@@ -7795,6 +7934,7 @@ def _segment2_design_signature(design: StimulusDesign) -> str:
         {
             "trial_strips": [asdict(strip) for strip in design.protocol.trial_strips],
             "required_segment1_labels": _required_segment1_labels_for_trial_sequences(design),
+            "loudness_policy": loudness_policy_for_design(design),
         }
     )
 
@@ -7809,6 +7949,7 @@ def _segment3_design_signature(design: StimulusDesign) -> str:
             "baseline_strategy": str(protocol.baseline_strategy or ""),
             "baseline_soa_values_ms": list(protocol.baseline_soa_values_ms),
             "baseline_custom_trial_mode": str(protocol.baseline_custom_trial_mode or ""),
+            "loudness_policy": loudness_policy_for_design(design),
         }
     )
 
