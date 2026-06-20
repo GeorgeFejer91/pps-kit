@@ -206,13 +206,16 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260620-static-profile-pool2"
+    static_version = "20260620-study5-protocol"
     assert f'href="styles.css?v={static_version}"' in html
     assert f'src="hardware_pixel_art.js?v={static_version}"' in html
     assert f'src="app.js?v={static_version}"' in html
     assert f"index.html?page=toolkit&v={static_version}" in public_index
     assert f"index.html?page=documentation&v={static_version}" in public_docs
     assert f"index.html?page=downloads&v={static_version}" in public_download
+    assert "STUDY5_PINK_WHITE_TEMPLATE_ID" in app_js
+    assert "Bundled study protocols" in app_js
+    assert "PPS Toolkit Study 5 pink/white protocol variant" in app_js
     assert 'data-page-tab="toolkit"' in html
     assert 'data-page-tab="documentation"' in html
     assert 'data-page-tab="downloads"' in html

@@ -10,7 +10,7 @@ from peripersonal_space_toolkit import dashboard_app
 from peripersonal_space_toolkit.dashboard_app import DashboardController
 from peripersonal_space_toolkit.design import block_trial_rows, default_design, save_design, validate_design
 from peripersonal_space_toolkit.preload_inventory import load_preload_inventory, profile_asset_status
-from peripersonal_space_toolkit.templates import DEFAULT_STUDY_TEMPLATE_ID, load_templates
+from peripersonal_space_toolkit.templates import DEFAULT_STUDY_TEMPLATE_ID, load_templates, study_template_citation_label
 
 PINK_WHITE_STUDY5_TEMPLATE_ID = "study5_box_breathing_pps_pink_white"
 
@@ -32,6 +32,19 @@ def test_study5_is_first_default_preload():
     templates = load_templates(root / "study_templates")
 
     assert templates[0].template_id == DEFAULT_STUDY_TEMPLATE_ID
+
+
+def test_study5_pink_white_protocol_is_adjacent_to_base_protocol():
+    root = Path(__file__).resolve().parents[1]
+    templates = load_templates(root / "study_templates")
+
+    assert [template.template_id for template in templates[:2]] == [
+        DEFAULT_STUDY_TEMPLATE_ID,
+        PINK_WHITE_STUDY5_TEMPLATE_ID,
+    ]
+    label = study_template_citation_label(templates[1])
+    assert "Study 5 pink/white protocol variant" in label
+    assert "Pink and white looming sources" in label
 
 
 def test_dashboard_starts_from_study5_when_no_deliberate_profile_is_saved(tmp_path: Path):

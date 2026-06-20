@@ -5,7 +5,8 @@ const activePolls = new Set();
 let activeNavFrame = 0;
 const CUSTOM_TEMPLATE_ID = "__custom__";
 const DEFAULT_STUDY_TEMPLATE_ID = "study5_box_breathing_pps";
-const STATIC_RESOURCE_VERSION = "20260620-static-profile-pool2";
+const STUDY5_PINK_WHITE_TEMPLATE_ID = "study5_box_breathing_pps_pink_white";
+const STATIC_RESOURCE_VERSION = "20260620-study5-protocol";
 const STATIC_REPO_ROOT = new URL("../../../", document.currentScript?.src || window.location.href).href;
 const STATIC_PRELOAD_INVENTORY_PATH = "assets/preloads/preload_inventory.json";
 const STATIC_TEMPLATE_DIR = "study_templates/";
@@ -626,15 +627,21 @@ async function loadStaticTemplates() {
     })
   );
   staticTemplatesCache = loaded.sort((left, right) => {
-    const leftDefault = left.template_id !== DEFAULT_STUDY_TEMPLATE_ID ? 1 : 0;
-    const rightDefault = right.template_id !== DEFAULT_STUDY_TEMPLATE_ID ? 1 : 0;
-    if (leftDefault !== rightDefault) return leftDefault - rightDefault;
+    const leftPriority = studyProtocolPriority(left.template_id);
+    const rightPriority = studyProtocolPriority(right.template_id);
+    if (leftPriority !== rightPriority) return leftPriority - rightPriority;
     const leftVerified = left.verification_status !== "verified" ? 1 : 0;
     const rightVerified = right.verification_status !== "verified" ? 1 : 0;
     if (leftVerified !== rightVerified) return leftVerified - rightVerified;
     return String(left.title || "").localeCompare(String(right.title || ""));
   });
   return staticTemplatesCache;
+}
+
+function studyProtocolPriority(templateId) {
+  if (templateId === DEFAULT_STUDY_TEMPLATE_ID) return 0;
+  if (templateId === STUDY5_PINK_WHITE_TEMPLATE_ID) return 1;
+  return 100;
 }
 
 function staticProfileAssetStatus(templateId, inventory = staticPreloadInventory) {
@@ -776,6 +783,9 @@ function attachStaticProfileStatus(payload, status) {
 }
 
 function staticCitationLabel(data) {
+  if (data.template_id === STUDY5_PINK_WHITE_TEMPLATE_ID) {
+    return `PPS Toolkit Study 5 pink/white protocol variant (2026) - Pink and white looming sources [${data.verification_status || "verified"}]`;
+  }
   const citation = String(data.citation || "").replace(/\s+/g, " ").trim();
   const match = citation.match(/^(.+?)\s*\((\d{4})\)[.,]?\s*(.*)$/);
   if (!match) return `${data.title || data.template_id} [${data.verification_status || "unverified"}]`;
@@ -1834,7 +1844,7 @@ function renderStudy() {
   customOption.selected = !state.selected_template && !activeProjectId;
   select.appendChild(customOption);
   const bundledGroup = document.createElement("optgroup");
-  bundledGroup.label = "Bundled profiles";
+  bundledGroup.label = "Bundled study protocols";
   for (const template of state.templates) {
     const option = document.createElement("option");
     option.value = template.template_id;
