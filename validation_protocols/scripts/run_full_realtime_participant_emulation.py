@@ -74,6 +74,52 @@ def _read_csv(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
+def _resolve_path(value: Any, *, base: Path) -> Path:
+    text = str(value or "").strip()
+    if not text:
+        return Path()
+    path = Path(text)
+    if path.is_absolute():
+        return path
+    base_candidate = base / path
+    if base_candidate.exists():
+        return base_candidate
+    return REPO_ROOT / path
+
+
+def _session_manifest(focus: dict[str, Any]) -> tuple[Path, dict[str, Any], Path]:
+    manifest_path = Path(str(focus.get("session_manifest") or ""))
+    manifest = _read_json(manifest_path)
+    manifest_base = manifest_path.parent if manifest_path.parent != Path() else REPO_ROOT
+    return manifest_path, manifest, manifest_base
+
+
+def _analysis_dir_from_manifest(session_dir: Path, manifest: dict[str, Any], manifest_base: Path) -> Path | None:
+    outputs = manifest.get("outputs") if isinstance(manifest.get("outputs"), dict) else {}
+    path = _resolve_path(outputs.get("analysis_dir"), base=manifest_base)
+    if path and path.is_dir():
+        return path
+    for candidate in (session_dir / "analysis", session_dir.parent / "Data_Analytics" / session_dir.name):
+        if candidate.is_dir():
+            return candidate
+    return None
+
+
+def _topup_dir_from_manifest(session_dir: Path, manifest: dict[str, Any], manifest_base: Path) -> Path | None:
+    outputs = manifest.get("outputs") if isinstance(manifest.get("outputs"), dict) else {}
+    for key in ("topup_ledger_json", "topup_ledger_csv", "topup_block_manifest_csv", "topup_block_manifest_json"):
+        path = _resolve_path(outputs.get(key), base=manifest_base)
+        if path and path.parent.is_dir():
+            return path.parent
+    for candidate in (
+        session_dir / "topup",
+        session_dir.parent / "Experiment_context_folder_DO_NOT_DELETE" / "runner_logs" / session_dir.name / "topup",
+    ):
+        if candidate.is_dir():
+            return candidate
+    return None
+
+
 def _resolved_validation_lane(args: argparse.Namespace) -> str:
     lane = str(getattr(args, "validation_lane", VALIDATION_LANE_AUTO) or VALIDATION_LANE_AUTO).strip().lower()
     if lane != VALIDATION_LANE_AUTO:
@@ -85,6 +131,10 @@ def _resolved_validation_lane(args: argparse.Namespace) -> str:
 
 def _apply_validation_lane_policy(args: argparse.Namespace) -> str:
     lane = _resolved_validation_lane(args)
+    if bool(getattr(args, "external_labrecorder", False)):
+        if args.no_lsl:
+            raise ValueError("External LabRecorder validation requires live LSL outlets.")
+        args.standard_capture = True
     if lane == VALIDATION_LANE_SOFTWARE_ONLY:
         if bool(args.strict_study5_readiness):
             raise ValueError("Software-only validation cannot request strict Study 5 readiness; use --validation-lane full-stack --audio-mode hardware.")
@@ -110,6 +160,7 @@ def _standard_capture_requested(args: argparse.Namespace) -> bool:
     return bool(
         args.standard_capture
         or args.strict_study5_readiness
+        or bool(getattr(args, "external_labrecorder", False))
         or _resolved_validation_lane(args) == VALIDATION_LANE_FULL_STACK
     )
 
@@ -134,6 +185,21 @@ def _build_runner_command(args: argparse.Namespace, *, runner: Path, screenshot_
     wired_loopback = str(getattr(args, "wired_loopback", WIRED_LOOPBACK_OFF) or WIRED_LOOPBACK_OFF)
     if wired_loopback != WIRED_LOOPBACK_OFF:
         command.extend(["--wired-loopback", wired_loopback])
+    if bool(getattr(args, "external_labrecorder", False)):
+        command.append("--external-labrecorder")
+        labrecorder_cli = str(getattr(args, "labrecorder_cli", "") or "").strip()
+        if labrecorder_cli:
+            command.extend(["--labrecorder-cli", labrecorder_cli])
+        command.extend(
+            [
+                "--labrecorder-stream-timeout-s",
+                str(float(getattr(args, "labrecorder_stream_timeout_s", 10.0))),
+                "--labrecorder-startup-s",
+                str(float(getattr(args, "labrecorder_startup_s", 1.0))),
+                "--labrecorder-stop-timeout-s",
+                str(float(getattr(args, "labrecorder_stop_timeout_s", 8.0))),
+            ]
+        )
     if not _standard_capture_requested(args):
         command.extend(["--no-lsl", "--no-internal-xdf", "--no-backup-recording"])
     else:
@@ -221,6 +287,8 @@ def _write_launch_and_preparation_reports(
             "validation_lane": _resolved_validation_lane(args),
             "audio_device_index": args.audio_device_index,
             "wired_loopback_mode": str(getattr(args, "wired_loopback", WIRED_LOOPBACK_OFF) or WIRED_LOOPBACK_OFF),
+            "external_labrecorder_requested": bool(getattr(args, "external_labrecorder", False)),
+            "labrecorder_cli": str(getattr(args, "labrecorder_cli", "") or ""),
             "standard_capture_requested": _standard_capture_requested(args),
             "strict_study5_readiness_requested": bool(args.strict_study5_readiness),
             "started_at": started_at,
@@ -239,6 +307,8 @@ def _write_launch_and_preparation_reports(
             "audio_mode": str(args.audio_mode),
             "validation_lane": _resolved_validation_lane(args),
             "wired_loopback_mode": str(getattr(args, "wired_loopback", WIRED_LOOPBACK_OFF) or WIRED_LOOPBACK_OFF),
+            "external_labrecorder_requested": bool(getattr(args, "external_labrecorder", False)),
+            "labrecorder_cli": str(getattr(args, "labrecorder_cli", "") or ""),
             "standard_capture_requested": _standard_capture_requested(args),
             "session_dir": evaluation.get("session_dir", ""),
             "session_manifest": evaluation.get("session_manifest", ""),
@@ -278,8 +348,19 @@ def _session_manifest_duration_s(path: Path) -> float:
     return total
 
 
-def _latest_analysis_csv(session_dir: Path, suffix: str) -> Path | None:
-    matches = sorted((session_dir / "analysis").glob(f"*_{suffix}.csv"))
+def _latest_analysis_csv(session_dir: Path, suffix: str, *, analysis_dir: Path | None = None) -> Path | None:
+    candidates: list[Path] = []
+    if analysis_dir is not None:
+        candidates.append(analysis_dir)
+    candidates.extend([session_dir / "analysis", session_dir.parent / "Data_Analytics" / session_dir.name])
+    seen: set[str] = set()
+    matches: list[Path] = []
+    for candidate in candidates:
+        key = str(candidate)
+        if key in seen or not candidate.is_dir():
+            continue
+        seen.add(key)
+        matches.extend(sorted(candidate.glob(f"*_{suffix}.csv")))
     return matches[-1] if matches else None
 
 
@@ -336,8 +417,10 @@ def _evaluate_focus_report(
     focus = _read_json(focus_report_path)
     if not focus:
         return {}, ["Packaged Focus Mode did not write its validation focus report."]
-    session_manifest = Path(str(focus.get("session_manifest") or ""))
+    session_manifest, manifest, manifest_base = _session_manifest(focus)
     session_dir = Path(str(focus.get("session_dir") or ""))
+    analysis_dir = _analysis_dir_from_manifest(session_dir, manifest, manifest_base)
+    topup_dir = _topup_dir_from_manifest(session_dir, manifest, manifest_base)
     events_csv = Path(str(focus.get("events_csv") or ""))
     events = _events(events_csv)
     counts = _event_counts(events)
@@ -364,10 +447,10 @@ def _evaluate_focus_report(
         if str(record.get("actual_delay_ms") or "").strip()
     ]
     approvals = list(focus.get("validation_topup_approvals") or [])
-    ledger = _read_json(session_dir / "topup_ledger.json")
+    ledger = _read_json(topup_dir / "topup_ledger.json") if topup_dir else {}
     topup_manifest_paths = [
         path
-        for path in sorted(session_dir.glob("topup_block*manifest.csv"))
+        for path in sorted((topup_dir or session_dir).glob("topup_block*manifest.csv"))
         if "draft" not in path.name.lower()
     ]
     topup_manifest_rows = [row for path in topup_manifest_paths for row in _read_csv(path)]
@@ -376,7 +459,7 @@ def _evaluate_focus_report(
         for row in topup_manifest_rows
         if str(row.get("Topup_Role") or row.get("topup_role") or "").lower() == "rescue"
     ]
-    final_outcomes = _latest_analysis_csv(session_dir, "final_trial_outcomes")
+    final_outcomes = _latest_analysis_csv(session_dir, "final_trial_outcomes", analysis_dir=analysis_dir)
     final_rows = _read_csv(final_outcomes) if final_outcomes else []
     rescued_final_rows = [
         row
@@ -460,6 +543,8 @@ def _evaluate_focus_report(
         "final_condition_candidate": full_stack,
         "session_manifest": str(session_manifest),
         "session_dir": str(session_dir),
+        "analysis_dir": str(analysis_dir or ""),
+        "topup_dir": str(topup_dir or ""),
         "events_csv": str(events_csv),
         "event_counts": counts,
         "expected_realtime_duration_s": expected_duration_s,
@@ -539,6 +624,20 @@ def build_arg_parser() -> argparse.ArgumentParser:
         choices=[WIRED_LOOPBACK_OFF, WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY],
         help="Pass through the optional Focus Mode wired loopback capture mode.",
     )
+    parser.add_argument(
+        "--external-labrecorder",
+        action="store_true",
+        help="Ask the runner to own one full-session LabRecorder RCS XDF capture.",
+    )
+    parser.add_argument(
+        "--labrecorder-cli",
+        type=Path,
+        default=None,
+        help="Optional explicit LabRecorderCLI.exe path passed to the runner so it can locate the LabRecorder bundle.",
+    )
+    parser.add_argument("--labrecorder-stream-timeout-s", type=float, default=10.0)
+    parser.add_argument("--labrecorder-startup-s", type=float, default=1.0)
+    parser.add_argument("--labrecorder-stop-timeout-s", type=float, default=8.0)
     parser.add_argument("--no-lsl", action="store_true", help="With --standard-capture, still disable live LSL outlets.")
     parser.add_argument("--no-internal-xdf", action="store_true", help="With --standard-capture, still disable events.xdf.")
     parser.add_argument("--no-backup-recording", action="store_true", help="With --standard-capture, still disable local audio-evidence WAVs.")

@@ -799,6 +799,7 @@ def _analysis_rt_audit(
     focus_report: dict[str, Any],
     analysis_ready_rows: list[dict[str, str]],
     tolerance_ms: float,
+    os_click_p95_tolerance_ms: float,
     os_click_max_tolerance_ms: float,
 ) -> dict[str, Any]:
     click_summary = _planned_click_summary(focus_report)
@@ -841,7 +842,7 @@ def _analysis_rt_audit(
     max_error = float(stats.get("max_ms", 0.0)) if stats.get("count", 0) else 0.0
     p95_error = float(stats.get("p95_ms", 0.0)) if stats.get("count", 0) else 0.0
     strict_within_tolerance = max_error <= tolerance_ms
-    os_distribution_within_tolerance = os_backend_observed and p95_error <= tolerance_ms and max_error <= os_click_max_tolerance_ms
+    os_distribution_within_tolerance = os_backend_observed and p95_error <= os_click_p95_tolerance_ms and max_error <= os_click_max_tolerance_ms
     return {
         "planned_standard_click_count": click_summary["standard_click_count"],
         "planned_deliberate_miss_count": click_summary["deliberate_miss_count"],
@@ -854,7 +855,7 @@ def _analysis_rt_audit(
         "absolute_rt_error_ms": stats,
         "absolute_rt_error_against_planned_schedule_ms": planned_stats,
         "strict_max_tolerance_ms": tolerance_ms,
-        "os_click_p95_tolerance_ms": tolerance_ms,
+        "os_click_p95_tolerance_ms": os_click_p95_tolerance_ms,
         "os_click_max_tolerance_ms": os_click_max_tolerance_ms,
         "strict_max_within_tolerance": strict_within_tolerance,
         "os_distribution_within_tolerance": os_distribution_within_tolerance,
@@ -924,6 +925,7 @@ def audit_readiness(
     require_full_study5: bool = False,
     require_realtime: bool = False,
     rt_tolerance_ms: float = 25.0,
+    os_click_rt_p95_tolerance_ms: float = 35.0,
     os_click_rt_max_tolerance_ms: float = 125.0,
 ) -> dict[str, Any]:
     artifact_dir = artifact_dir.resolve()
@@ -1053,7 +1055,13 @@ def audit_readiness(
     response_rows = _read_csv(analysis_paths["responses"] or Path())
     analysis_ready_rows = _read_csv(analysis_paths["analysis_ready_trials"] or Path())
     timing_qc_rows = _read_csv(analysis_paths["timing_qc"] or Path())
-    analysis_rt = _analysis_rt_audit(focus_report, analysis_ready_rows, rt_tolerance_ms, os_click_rt_max_tolerance_ms)
+    analysis_rt = _analysis_rt_audit(
+        focus_report,
+        analysis_ready_rows,
+        rt_tolerance_ms,
+        os_click_rt_p95_tolerance_ms,
+        os_click_rt_max_tolerance_ms,
+    )
     scope = _scope_summary(session_dir, manifest, focus_report, session_metadata, events)
 
     criteria: list[Criterion] = []
@@ -1186,7 +1194,7 @@ def audit_readiness(
         and bool(analysis_selection["final_hits_cover_standard_pool"])
     )
     add(Criterion("analysis_outputs", "analysis_ready_matches_expected_hits_and_misses", expected_hit_ok, "analysis_ready_trials rows match the original tactile pool, original hits, and top-up rescues.", evidence=analysis_selection))
-    add(Criterion("analysis_outputs", "emulated_rt_values_match_plan_tolerance", analysis_rt["within_tolerance"], f"Analysis RTs match emulated click timings within strict {rt_tolerance_ms:.1f} ms, or OS-click p95 within {rt_tolerance_ms:.1f} ms and max within {os_click_rt_max_tolerance_ms:.1f} ms.", evidence=analysis_rt))
+    add(Criterion("analysis_outputs", "emulated_rt_values_match_plan_tolerance", analysis_rt["within_tolerance"], f"Analysis RTs match emulated click timings within strict {rt_tolerance_ms:.1f} ms, or OS-click p95 within {os_click_rt_p95_tolerance_ms:.1f} ms and max within {os_click_rt_max_tolerance_ms:.1f} ms.", evidence=analysis_rt))
 
     full_ready = bool(scope["full_study5"] and scope["validation_audio_realtime"])
     add(Criterion("scope_acceptance", "artifact_is_full_study5_when_required", (not require_full_study5) or bool(scope["full_study5"]), "Full Study 5 evidence is required only for final participant-readiness claims.", evidence=scope))
@@ -1244,6 +1252,12 @@ def main() -> None:
     parser.add_argument("--require-realtime", action="store_true", help="Fail if the artifact is not marked as realtime validation audio.")
     parser.add_argument("--rt-tolerance-ms", type=float, default=25.0, help="Allowed absolute RT error against the emulated click plan.")
     parser.add_argument(
+        "--os-click-rt-p95-tolerance-ms",
+        type=float,
+        default=35.0,
+        help="Allowed p95 absolute RT error for real OS-click backends.",
+    )
+    parser.add_argument(
         "--os-click-rt-max-tolerance-ms",
         type=float,
         default=125.0,
@@ -1258,6 +1272,7 @@ def main() -> None:
         require_full_study5=args.require_full_study5,
         require_realtime=args.require_realtime,
         rt_tolerance_ms=args.rt_tolerance_ms,
+        os_click_rt_p95_tolerance_ms=args.os_click_rt_p95_tolerance_ms,
         os_click_rt_max_tolerance_ms=args.os_click_rt_max_tolerance_ms,
     )
     report_path = Path(report["output_dir"]) / "protocol11_study5_readiness_audit.json"

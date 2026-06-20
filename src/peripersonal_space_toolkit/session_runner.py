@@ -34,6 +34,7 @@ from .output_layout import (
 from .session_analysis import analyze_session_events, format_analysis_summary, write_analysis_csvs
 from .session_events import SessionEventLogger
 from .runner_diary import append_diary_entry, ensure_output_diary, find_output_diary
+from .labrecorder_capture import LabRecorderCapture, LabRecorderCaptureError, find_labrecorder_cli
 from .timing_events import TimingEventHub, TriggerDictionary
 from .timing_schedule import BlockEventSchedule
 from .topup import TopUpLedger, write_topup_draft_manifest
@@ -229,6 +230,11 @@ class SessionCaptureOptions:
     write_trigger_dictionary: bool = True
     start_backup_recording: bool = True
     wired_loopback_mode: str = WIRED_LOOPBACK_OFF
+    start_external_labrecorder: bool = False
+    external_labrecorder_cli: str = ""
+    external_labrecorder_stream_timeout_s: float = 10.0
+    external_labrecorder_startup_s: float = 1.0
+    external_labrecorder_stop_timeout_s: float = 8.0
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -240,6 +246,11 @@ class SessionCaptureOptions:
             "write_trigger_dictionary": bool(self.write_trigger_dictionary),
             "start_backup_recording": bool(self.start_backup_recording),
             "wired_loopback_mode": normalize_wired_loopback_mode(self.wired_loopback_mode),
+            "start_external_labrecorder": bool(self.start_external_labrecorder),
+            "external_labrecorder_cli": str(self.external_labrecorder_cli or ""),
+            "external_labrecorder_stream_timeout_s": float(self.external_labrecorder_stream_timeout_s),
+            "external_labrecorder_startup_s": float(self.external_labrecorder_startup_s),
+            "external_labrecorder_stop_timeout_s": float(self.external_labrecorder_stop_timeout_s),
         }
 
 
@@ -1850,6 +1861,13 @@ class SessionRunnerController:
         self._lsl_markers_csv_path = _lsl_markers_csv_path(package)
         self._lsl_markers_xdf_path = _lsl_markers_xdf_path(package)
         self._trigger_dictionary_path = _trigger_dictionary_path(package)
+        self._external_labrecorder_xdf_path = self._verbose_events_dir / "session_external_labrecorder.xdf"
+        self._external_labrecorder_stdout_path = self._runner_log_dir / "external_labrecorder_stdout.txt"
+        self._external_labrecorder_stderr_path = self._runner_log_dir / "external_labrecorder_stderr.txt"
+        self._external_labrecorder_report_path = self._runner_log_dir / "external_labrecorder_capture_report.json"
+        self._external_labrecorder_capture: LabRecorderCapture | None = None
+        self._external_labrecorder_outputs: dict[str, Path] = {}
+        self._external_labrecorder_status: dict[str, Any] = {"enabled": bool(self.capture_options.start_external_labrecorder)}
         self._accepting_responses = False
         self._active_block: RunBlock | None = None
         self._run_warnings: list[str] = []
@@ -1873,30 +1891,45 @@ class SessionRunnerController:
         self._progress_callback = progress_callback
         session_metadata_path = self._write_session_metadata()
         self._lsl_session_metadata = _redact_session_metadata_for_lsl(self._session_metadata)
-        self.events.log(
-            "session_start",
-            session_dir=str(self.package.session_dir),
-            session_metadata_path=str(session_metadata_path),
-            session_metadata_sha256=_sha256_file(session_metadata_path) if _path_exists(session_metadata_path) else "",
-            session_metadata=self._lsl_session_metadata,
-            lsl_enabled=self.events.lsl_status.enabled,
-            lsl_message=self.events.lsl_status.message,
-            capture_options=self.capture_options.as_dict(),
-            topup_enabled=self.topup_ledger is not None,
-        )
-        _append_package_diary_event(
-            self.package,
-            "session_start",
-            capture_options=self.capture_options,
-            payload={
-                "session_dir": str(self.package.session_dir),
-                "session_metadata_path": str(session_metadata_path),
-                "lsl_enabled": self.events.lsl_status.enabled,
-                "lsl_message": self.events.lsl_status.message,
-                "topup_enabled": self.topup_ledger is not None,
-            },
-        )
         try:
+            external_labrecorder_start = self._start_external_labrecorder_capture()
+            self.events.log(
+                "session_start",
+                session_dir=str(self.package.session_dir),
+                session_metadata_path=str(session_metadata_path),
+                session_metadata_sha256=_sha256_file(session_metadata_path) if _path_exists(session_metadata_path) else "",
+                session_metadata=self._lsl_session_metadata,
+                lsl_enabled=self.events.lsl_status.enabled,
+                lsl_message=self.events.lsl_status.message,
+                capture_options=self.capture_options.as_dict(),
+                topup_enabled=self.topup_ledger is not None,
+                external_labrecorder=external_labrecorder_start,
+            )
+            if bool(external_labrecorder_start.get("started")):
+                self.events.log(
+                    "external_labrecorder_start",
+                    xdf_path=str(self._external_labrecorder_xdf_path),
+                    labrecorder_cli=str(external_labrecorder_start.get("labrecorder_cli") or ""),
+                    pid=external_labrecorder_start.get("pid"),
+                    command=external_labrecorder_start.get("command") or [],
+                )
+                if event_callback is not None:
+                    event_callback("external_labrecorder_started")
+            if event_callback is not None:
+                event_callback("session_start")
+            _append_package_diary_event(
+                self.package,
+                "session_start",
+                capture_options=self.capture_options,
+                payload={
+                    "session_dir": str(self.package.session_dir),
+                    "session_metadata_path": str(session_metadata_path),
+                    "lsl_enabled": self.events.lsl_status.enabled,
+                    "lsl_message": self.events.lsl_status.message,
+                    "topup_enabled": self.topup_ledger is not None,
+                    "external_labrecorder": external_labrecorder_start,
+                },
+            )
             if engine is None:
                 engine = self._create_audio_engine()
                 self.audio_engine = engine
@@ -2119,6 +2152,7 @@ class SessionRunnerController:
             self._emit(event_callback, f"Run error: {exc}")
         finally:
             self._progress_callback = None
+            self._stop_external_labrecorder_capture()
             self._write_outputs()
             if owns_engine and self.audio_engine is not None and hasattr(self.audio_engine, "shutdown"):
                 self.audio_engine.shutdown()
@@ -2192,6 +2226,100 @@ class SessionRunnerController:
         except Exception:
             pass
         return result
+
+    def _write_external_labrecorder_report(self, payload: dict[str, Any]) -> None:
+        self._external_labrecorder_report_path.parent.mkdir(parents=True, exist_ok=True)
+        self._external_labrecorder_report_path.write_text(
+            json.dumps(_json_ready(payload), indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        self._external_labrecorder_outputs["external_labrecorder_report"] = self._external_labrecorder_report_path
+
+    def _start_external_labrecorder_capture(self) -> dict[str, Any]:
+        if not self.capture_options.start_external_labrecorder:
+            self._external_labrecorder_status = {"enabled": False, "started": False}
+            return dict(self._external_labrecorder_status)
+        if not self.capture_options.enable_lsl or not self.events.lsl_status.enabled:
+            raise RuntimeError(f"External LabRecorder capture requires active LSL outlets: {self.events.lsl_status.message}")
+        try:
+            cli = find_labrecorder_cli(self.capture_options.external_labrecorder_cli or None)
+            capture = LabRecorderCapture(
+                labrecorder_cli=cli,
+                xdf_path=self._external_labrecorder_xdf_path,
+                session_id=self.package.session_id,
+                stdout_path=self._external_labrecorder_stdout_path,
+                stderr_path=self._external_labrecorder_stderr_path,
+            )
+            started = capture.start(
+                stream_timeout_s=self.capture_options.external_labrecorder_stream_timeout_s,
+                startup_s=self.capture_options.external_labrecorder_startup_s,
+            )
+        except (FileNotFoundError, LabRecorderCaptureError) as exc:
+            raise RuntimeError(f"External LabRecorder capture could not start: {exc}") from exc
+        self._external_labrecorder_capture = capture
+        self._external_labrecorder_status = dict(started)
+        self._external_labrecorder_outputs["external_labrecorder_xdf"] = self._external_labrecorder_xdf_path
+        self._external_labrecorder_outputs["external_labrecorder_stdout"] = self._external_labrecorder_stdout_path
+        self._external_labrecorder_outputs["external_labrecorder_stderr"] = self._external_labrecorder_stderr_path
+        self._write_external_labrecorder_report(
+            {
+                "schema": "pps-runner-owned-labrecorder-capture.v1",
+                "session_id": self.package.session_id,
+                "participant_id": self.package.participant_id,
+                "start": started,
+                "stop": {},
+            }
+        )
+        _append_package_diary_event(
+            self.package,
+            "external_labrecorder_started",
+            capture_options=self.capture_options,
+            payload=started,
+        )
+        return dict(started)
+
+    def _stop_external_labrecorder_capture(self) -> None:
+        capture = self._external_labrecorder_capture
+        if capture is None:
+            return
+        if self._external_labrecorder_status.get("stop"):
+            return
+        try:
+            self.events.log(
+                "external_labrecorder_stop_requested",
+                xdf_path=str(self._external_labrecorder_xdf_path),
+                pid=self._external_labrecorder_status.get("pid"),
+            )
+        except Exception:
+            pass
+        stopped = capture.stop(timeout_s=self.capture_options.external_labrecorder_stop_timeout_s)
+        if _path_exists(self._external_labrecorder_xdf_path):
+            self._recording_paths.append(self._external_labrecorder_xdf_path)
+            self._external_labrecorder_outputs["external_labrecorder_xdf"] = self._external_labrecorder_xdf_path
+        for key, path in (
+            ("external_labrecorder_stdout", self._external_labrecorder_stdout_path),
+            ("external_labrecorder_stderr", self._external_labrecorder_stderr_path),
+        ):
+            if _path_exists(path):
+                self._external_labrecorder_outputs[key] = path
+        self._external_labrecorder_status["stop"] = stopped
+        self._write_external_labrecorder_report(
+            {
+                "schema": "pps-runner-owned-labrecorder-capture.v1",
+                "session_id": self.package.session_id,
+                "participant_id": self.package.participant_id,
+                "start": {key: value for key, value in self._external_labrecorder_status.items() if key != "stop"},
+                "stop": stopped,
+            }
+        )
+        if int(stopped.get("returncode") or 0) != 0:
+            self._run_warnings.append(f"External LabRecorder exited with code {stopped.get('returncode')}.")
+        _append_package_diary_event(
+            self.package,
+            "external_labrecorder_stopped",
+            capture_options=self.capture_options,
+            payload=stopped,
+        )
 
     def _write_session_metadata(self) -> Path:
         self._session_metadata = _build_runner_session_metadata(
@@ -3057,6 +3185,7 @@ class SessionRunnerController:
             self._analysis_outputs["trigger_dictionary"] = trigger_dictionary_path
         if _path_exists(self._session_metadata_path):
             self._analysis_outputs["session_metadata"] = self._session_metadata_path
+        self._analysis_outputs.update(self._external_labrecorder_outputs)
         self._summary_text = format_analysis_summary(analysis)
         self._analytics_dir.mkdir(parents=True, exist_ok=True)
         (self._analytics_dir / "analysis_summary.txt").write_text(self._summary_text + "\n", encoding="utf-8")
@@ -3358,13 +3487,37 @@ def _coerce_capture_options(
     elif isinstance(value, dict):
         allowed = SessionCaptureOptions().__dataclass_fields__.keys()
         kwargs: dict[str, Any] = {}
+        bool_fields = {
+            "enable_lsl",
+            "write_events_csv",
+            "write_internal_xdf",
+            "write_analysis_csvs",
+            "write_lsl_marker_mirror",
+            "write_trigger_dictionary",
+            "start_backup_recording",
+            "start_external_labrecorder",
+        }
+        float_fields = {
+            "external_labrecorder_stream_timeout_s",
+            "external_labrecorder_startup_s",
+            "external_labrecorder_stop_timeout_s",
+        }
         for key in allowed:
             if key not in value:
                 continue
             if key == "wired_loopback_mode":
                 kwargs[key] = normalize_wired_loopback_mode(value[key])
-            else:
+            elif key == "external_labrecorder_cli":
+                kwargs[key] = str(value[key] or "")
+            elif key in float_fields:
+                try:
+                    kwargs[key] = max(0.0, float(value[key]))
+                except (TypeError, ValueError):
+                    kwargs[key] = getattr(SessionCaptureOptions(), key)
+            elif key in bool_fields:
                 kwargs[key] = bool(value[key])
+            else:
+                kwargs[key] = value[key]
         options = SessionCaptureOptions(**kwargs)
     else:
         raise TypeError(f"Unsupported capture options type: {type(value)!r}")
@@ -3376,6 +3529,8 @@ def _coerce_capture_options(
             options = SessionCaptureOptions(**{**options.as_dict(), "wired_loopback_mode": normalized_mode})
     if not (options.write_events_csv or options.write_internal_xdf or options.write_analysis_csvs or options.write_lsl_marker_mirror):
         raise ValueError("At least one durable runner output must be enabled.")
+    if options.start_external_labrecorder and not options.enable_lsl:
+        raise ValueError("Runner-owned LabRecorder capture requires live LSL outlets.")
     return options
 
 
@@ -4757,7 +4912,8 @@ def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> Non
             "participant_trials_csv": str(_participant_trials_csv_path(package)),
             "participant_audio_evidence_wav_pattern": str(package.session_dir / "block_XX_audio_evidence.wav"),
             "participant_wired_loopback_input4_wav_pattern": str(package.session_dir / "block_XX_wired_loopback_input4.wav"),
-            "labrecorder_xdf_pattern": str(package.session_dir / "block_XX.xdf"),
+            "external_labrecorder_xdf": str(_package_verbose_events_dir(package) / "session_external_labrecorder.xdf"),
+            "external_labrecorder_report": str(_package_runner_log_dir(package) / "external_labrecorder_capture_report.json"),
             "verbose_events_csv": str(_verbose_events_csv_path(package)),
             "verbose_events_xdf": str(_verbose_events_xdf_path(package)),
             "lsl_markers_csv": str(_lsl_markers_csv_path(package)),

@@ -695,16 +695,42 @@ def _audit_instruction_flow(criteria: list[Criterion], *, plan: dict[str, Any], 
     _criterion(criteria, "instruction_module", "missing_optional_instruction_logged_or_clean", True, f"instruction_missing_or_error={len(errors)}", required=False)
 
 
-def _audit_topup(criteria: list[Criterion], *, plan: dict[str, Any], session_dir: Path, rows: list[dict[str, Any]], final_rows: list[dict[str, str]], events: list[dict[str, Any]]) -> None:
+def _audit_topup(
+    criteria: list[Criterion],
+    *,
+    plan: dict[str, Any],
+    session_dir: Path,
+    outputs: dict[str, Any],
+    manifest_base: Path,
+    rows: list[dict[str, Any]],
+    final_rows: list[dict[str, str]],
+    events: list[dict[str, Any]],
+) -> None:
     expectation = plan.get("expected_topup") or plan.get("topup") or {}
     if not isinstance(expectation, dict):
         expectation = {}
     required = bool(expectation)
     expect_enabled = _truthy(expectation.get("enabled", expectation.get("expected", required)))
-    ledger_csv = session_dir / "topup_ledger.csv"
-    ledger_json = session_dir / "topup_ledger.json"
-    manifest_csvs = sorted(path for path in session_dir.glob("topup_block*manifest.csv") if "draft" not in path.name.lower())
-    manifest_jsons = sorted(path for path in session_dir.glob("topup_block*manifest.json") if "draft" not in path.name.lower())
+    output_ledger_csv = _manifest_output_path(outputs, "topup_ledger_csv", base=manifest_base, fallback=Path())
+    output_ledger_json = _manifest_output_path(outputs, "topup_ledger_json", base=manifest_base, fallback=Path())
+    ledger_csv = _first_existing([output_ledger_csv, session_dir / "topup_ledger.csv"]) or (session_dir / "topup_ledger.csv")
+    ledger_json = _first_existing([output_ledger_json, session_dir / "topup_ledger.json"]) or (session_dir / "topup_ledger.json")
+    search_dirs = [session_dir, session_dir / "topup"]
+    for path in (output_ledger_csv, output_ledger_json):
+        if _path_is_set(path):
+            search_dirs.append(path.parent)
+    seen_dirs: set[str] = set()
+    manifest_csvs: list[Path] = []
+    manifest_jsons: list[Path] = []
+    for directory in search_dirs:
+        key = str(directory)
+        if key in seen_dirs or not directory.is_dir():
+            continue
+        seen_dirs.add(key)
+        manifest_csvs.extend(path for path in sorted(directory.glob("topup_block*manifest.csv")) if "draft" not in path.name.lower())
+        manifest_jsons.extend(path for path in sorted(directory.glob("topup_block*manifest.json")) if "draft" not in path.name.lower())
+    manifest_csvs = list(dict.fromkeys(manifest_csvs))
+    manifest_jsons = list(dict.fromkeys(manifest_jsons))
     rescue_rows = []
     filler_rows = []
     for path in manifest_csvs:
@@ -1000,7 +1026,16 @@ def validate_artifacts(
     )
     _audit_response_markers(criteria, events=events, timing_qc_rows=timing_qc_rows)
     _audit_instruction_flow(criteria, plan=plan, events=events)
-    _audit_topup(criteria, plan=plan, session_dir=session_dir, rows=rows, final_rows=final_rows, events=events)
+    _audit_topup(
+        criteria,
+        plan=plan,
+        session_dir=session_dir,
+        outputs=outputs,
+        manifest_base=manifest_base,
+        rows=rows,
+        final_rows=final_rows,
+        events=events,
+    )
     _audit_outputs(criteria, session_dir=session_dir, capture_options=capture_options, analysis_paths=analysis_paths, output_paths=output_paths)
     _audit_lsl_and_triggers(criteria, session_dir=session_dir, events=events, capture_options=capture_options, output_paths=output_paths)
     _audit_operator_modes(criteria, plan=plan, events=events)

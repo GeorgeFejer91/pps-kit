@@ -84,6 +84,16 @@ def _collect_widget_texts(widget, widget_type) -> list[str]:
     return texts
 
 
+def _fill_required_setup(window) -> None:
+    window.participant_name_input.setText("Mock Participant")
+    window.age_input.setText("30")
+    for combo_name, value in (("handedness_combo", "right"), ("gender_combo", "prefer_not_to_say")):
+        combo = getattr(window, combo_name)
+        index = combo.findData(value)
+        assert index >= 0
+        combo.setCurrentIndex(index)
+
+
 def _write_focus_preview_block_csv(path: Path, *, block_offset: int = 0) -> None:
     path.write_text(
         "\n".join(
@@ -374,6 +384,7 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert "Part -" in joined
     assert "Participant Response" in joined
     assert "Participant Setup" in joined
+    assert "Submit setup" in joined
     if window.operator_tabs is not None:
         assert window.operator_tabs.tabText(0) == "Data Logging / Experiment Settings"
     else:
@@ -394,6 +405,7 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert "Save additional fail-safe local recording" in joined
     assert "estimated extra file" in joined
     assert "Record wired loopback from Input 4" in joined
+    assert "Record full-session LabRecorder XDF" in joined
     assert "Top up missed tactile trials at part end" in joined
     assert "CLICK" in joined
     assert window.participant_code_combo.objectName() == "runnerParticipantCombo"
@@ -407,8 +419,14 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert window.include_name_lsl_checkbox.objectName() == "nameSharingCheckbox"
     assert "(opt-in)" in window.include_name_lsl_checkbox.text()
     assert window.include_name_lsl_checkbox.minimumHeight() >= window.layout_profile.button_min_height + 8
+    assert window.setup_submit_button.objectName() == "participantSetupSubmitButton"
+    assert window.setup_submit_button.isEnabled()
+    assert not window.start_button.isEnabled()
     assert window.backup_recording_checkbox.objectName() == "failSafeRecordingCheckbox"
     assert window.wired_loopback_checkbox.objectName() == "wiredLoopbackCheckbox"
+    assert window.external_labrecorder_checkbox.objectName() == "externalLabRecorderCheckbox"
+    assert not window.external_labrecorder_checkbox.isChecked()
+    assert not window.external_labrecorder_checkbox.isEnabled()
     assert not window.wired_loopback_checkbox.isChecked()
     QTest.mouseClick(window.wired_loopback_checkbox, q["Qt"].MouseButton.LeftButton)
     app.processEvents()
@@ -449,6 +467,53 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert target_image.width == target_image.height == window.target_button.width()
     assert len(target_colors) >= 4
     assert target_image.getpixel((target_image.width // 2, target_image.height // 2)) != target_image.getpixel((4, 4))
+    window.dialog.close()
+
+
+def test_focus_mode_setup_submit_prepares_controller_before_start(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    created: list[dict[str, object]] = []
+
+    class FakeController:
+        def __init__(self, package_obj, *, capture_options=None, runner_metadata=None, enable_topup=False, **_kwargs):
+            self.package = package_obj
+            self.capture_options = capture_options
+            self.runner_metadata = dict(runner_metadata or {})
+            self.enable_topup = enable_topup
+            self.audio_engine = None
+            created.append(self.runner_metadata)
+
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+        controller_factory=FakeController,
+    )
+    window.dialog.show()
+    app.processEvents()
+
+    assert not window.start_button.isEnabled()
+    assert window.start() is None
+    assert not created
+
+    _fill_required_setup(window)
+    assert window._submit_participant_setup()
+
+    assert created and created[0]["participant_name"] == "Mock Participant"
+    assert window.demographics_submitted
+    assert window.controller is not None
+    assert window.start_button.isEnabled()
+    assert not window.participant_name_input.isEnabled()
+    assert not window.setup_submit_button.isEnabled()
     window.dialog.close()
 
 
@@ -983,7 +1048,7 @@ def test_focus_mode_instruction_continue_accepts_target_click_and_keyboard(tmp_p
     window.dialog.close()
 
 
-def test_focus_mode_primary_shortcut_starts_when_not_editing(tmp_path: Path):
+def test_focus_mode_primary_shortcut_starts_only_after_setup(tmp_path: Path):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
         from PySide6.QtWidgets import QApplication
@@ -994,7 +1059,19 @@ def test_focus_mode_primary_shortcut_starts_when_not_editing(tmp_path: Path):
     q = focus_app._require_qt()
     app = QApplication.instance() or QApplication([])
     package = load_run_package(_write_minimal_session_manifest(tmp_path))
-    window = focus_app.FocusModeWindow(q, package)
+
+    class FakeController:
+        def __init__(self, package_obj, *, capture_options=None, **_kwargs):
+            self.package = package_obj
+            self.capture_options = capture_options
+            self.audio_engine = None
+
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+        controller_factory=FakeController,
+    )
     window.dialog.show()
     app.processEvents()
 
@@ -1006,6 +1083,13 @@ def test_focus_mode_primary_shortcut_starts_when_not_editing(tmp_path: Path):
     window._handle_primary_action_shortcut()
     assert starts == []
 
+    window.start_button.setFocus()
+    app.processEvents()
+    window._handle_primary_action_shortcut()
+    assert starts == []
+
+    _fill_required_setup(window)
+    assert window._submit_participant_setup()
     window.start_button.setFocus()
     app.processEvents()
     window._handle_primary_action_shortcut()
@@ -1143,9 +1227,15 @@ def test_focus_mode_hardware_start_injects_ui_thread_audio_engine(tmp_path: Path
     monkeypatch.setattr(window, "_create_real_audio_engine_on_ui_thread", fake_create_engine)
     monkeypatch.setattr(focus_app, "SessionRunnerController", FakeController)
 
+    _fill_required_setup(window)
+    assert window._submit_participant_setup()
+    assert window.demographics_submitted
+    assert window.start_button.isEnabled()
     window.start()
     assert created_on_threads == [threading.current_thread().name]
-    assert injected_engines == [fake_engine]
+    assert injected_engines == [None]
+    assert window.controller is not None
+    assert window.controller.audio_engine is fake_engine
     assert window.thread is not None
     window.thread.join(timeout=2)
     assert not window.thread.is_alive()

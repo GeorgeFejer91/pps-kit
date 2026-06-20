@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import json
+import os
 from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
@@ -12,6 +13,7 @@ import pytest
 import soundfile as sf
 
 from peripersonal_space_toolkit import session_runner as session_runner_module
+from peripersonal_space_toolkit import labrecorder_capture as labrecorder_capture_module
 from peripersonal_space_toolkit.design import ProtocolSpec, default_design
 from peripersonal_space_toolkit.session_runner import (
     ParticipantTrialCsvWriter,
@@ -1084,6 +1086,200 @@ def test_session_runner_wired_loopback_proxy_records_per_block_artifact(tmp_path
     assert "wired_loopback_start" in events_text
     assert "wired_loopback_end" in events_text
     assert result.capture_options["wired_loopback_mode"] == "output4_tactile_proxy"
+
+
+def test_session_runner_owned_labrecorder_starts_after_lsl_before_audio(tmp_path: Path, monkeypatch):
+    package = prepare_run_package(
+        _compact_design(),
+        "P001",
+        render_dir=_render_dir(tmp_path),
+        session_root=tmp_path / "sessions",
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+    cli = tmp_path / "LabRecorderCLI.exe"
+    cli.write_text("fake", encoding="utf-8")
+    order: list[str] = []
+
+    class FakeLabRecorderCapture:
+        def __init__(self, *, labrecorder_cli, xdf_path, session_id, stdout_path, stderr_path):
+            self.labrecorder_cli = Path(labrecorder_cli)
+            self.xdf_path = Path(xdf_path)
+            self.session_id = session_id
+            self.stdout_path = Path(stdout_path)
+            self.stderr_path = Path(stderr_path)
+            self.command = [str(self.labrecorder_cli), str(self.xdf_path), f"source_id='pps-markers-v2-{session_id}'"]
+
+        def start(self, *, stream_timeout_s=10.0, startup_s=1.0):
+            order.append("labrecorder_start")
+            return {
+                "enabled": True,
+                "started": True,
+                "pid": 123,
+                "xdf_path": str(self.xdf_path),
+                "labrecorder_cli": str(self.labrecorder_cli),
+                "command": list(self.command),
+                "lsl": {"ready": True, "found_source_ids": [f"pps-markers-v2-{self.session_id}"]},
+            }
+
+        def stop(self, *, timeout_s=8.0):
+            order.append("labrecorder_stop")
+            self.xdf_path.parent.mkdir(parents=True, exist_ok=True)
+            self.xdf_path.write_bytes(b"fake xdf")
+            self.stdout_path.parent.mkdir(parents=True, exist_ok=True)
+            self.stdout_path.write_text("stopped\n", encoding="utf-8")
+            self.stderr_path.write_text("", encoding="utf-8")
+            return {
+                "enabled": True,
+                "stopped": True,
+                "returncode": 0,
+                "stdout_path": str(self.stdout_path),
+                "stderr_path": str(self.stderr_path),
+                "xdf_path": str(self.xdf_path),
+                "command": list(self.command),
+            }
+
+    monkeypatch.setattr(session_runner_module, "find_labrecorder_cli", lambda _explicit=None: cli)
+    monkeypatch.setattr(session_runner_module, "LabRecorderCapture", FakeLabRecorderCapture)
+    engine = _MockAudioEngine()
+    engine.on_audio_started = lambda: order.append("audio_playback")
+    ui_events: list[str] = []
+    controller = SessionRunnerController(
+        package,
+        audio_engine=engine,
+        capture_options={"start_external_labrecorder": True, "external_labrecorder_cli": str(cli)},
+    )
+    controller.events.lsl = SimpleNamespace(
+        status=SimpleNamespace(available=True, enabled=True, message="fake LSL active"),
+        local_clock=lambda: 10.0,
+        push=lambda event, marker, timestamp: None,
+    )
+
+    result = controller.run(event_callback=lambda message: ui_events.append(str(message)))
+
+    assert result.completed
+    assert order.index("labrecorder_start") < order.index("audio_playback") < order.index("labrecorder_stop")
+    assert ui_events[:2] == ["external_labrecorder_started", "session_start"]
+    assert result.analysis_outputs["external_labrecorder_xdf"].name == "session_external_labrecorder.xdf"
+    assert result.analysis_outputs["external_labrecorder_report"].name == "external_labrecorder_capture_report.json"
+    assert "session_external_labrecorder.xdf" in {path.name for path in result.recording_paths}
+    events_text = result.events_csv.read_text(encoding="utf-8")
+    assert "external_labrecorder_start" in events_text
+    assert "external_labrecorder_stop_requested" in events_text
+    capture_report = json.loads(result.analysis_outputs["external_labrecorder_report"].read_text(encoding="utf-8"))
+    assert capture_report["start"]["started"] is True
+    assert capture_report["stop"]["returncode"] == 0
+
+
+def test_labrecorder_capture_uses_rcs_remote_control(tmp_path: Path, monkeypatch):
+    cli = tmp_path / "LabRecorderCLI.exe"
+    cli.write_text("fake", encoding="utf-8")
+    gui = tmp_path / "LabRecorder.exe"
+    gui.write_text("fake", encoding="utf-8")
+    (tmp_path / "LabRecorder.cfg").write_text("RCSEnabled=1\nRCSPort=22345\n", encoding="utf-8")
+    popen_calls: list[dict[str, object]] = []
+    rcs_batches: list[list[str]] = []
+    monkeypatch.setenv("QT_PLUGIN_PATH", "C:/wrong/qt/plugins")
+
+    class FakeProcess:
+        pid = 456
+        returncode = None
+
+        def poll(self):
+            return self.returncode
+
+        def terminate(self):
+            self.returncode = 1
+
+        def wait(self, timeout=None):
+            if self.returncode is None:
+                self.returncode = 0
+            return self.returncode
+
+        def kill(self):
+            self.returncode = -9
+
+    def fake_popen(args, **kwargs):
+        popen_calls.append({"args": args, **kwargs})
+        stdout = kwargs.get("stdout")
+        if hasattr(stdout, "write"):
+            stdout.write("labrecorder stdout")
+            stdout.flush()
+        return FakeProcess()
+
+    monkeypatch.setattr(
+        labrecorder_capture_module,
+        "wait_for_runner_lsl_streams",
+        lambda _session_id, timeout_s=10.0: {"ready": True, "found_source_ids": ["pps-markers-v2-P001_session"]},
+    )
+    monkeypatch.setattr(labrecorder_capture_module.subprocess, "Popen", fake_popen)
+    monkeypatch.setattr(
+        labrecorder_capture_module.LabRecorderCapture,
+        "_wait_for_rcs",
+        lambda self, timeout_s=10.0: {"ready": True, "port": 22345, "error": ""},
+    )
+    monkeypatch.setattr(
+        labrecorder_capture_module.LabRecorderCapture,
+        "_send_rcs_commands",
+        lambda self, commands: rcs_batches.append(list(commands)),
+    )
+    monkeypatch.setattr(labrecorder_capture_module, "_wait_for_labrecorder_collection_started", lambda path, timeout_s=8.0: True)
+    monkeypatch.setattr(
+        labrecorder_capture_module,
+        "_wait_for_file_quiet",
+        lambda path, timeout_s=8.0: path.write_bytes(b"fake xdf") or True,
+    )
+    monkeypatch.setattr(labrecorder_capture_module, "_wait_for_labrecorder_footer", lambda path, timeout_s=8.0: True)
+    monkeypatch.setattr(labrecorder_capture_module, "_close_labrecorder_windows", lambda pid: True)
+
+    capture = labrecorder_capture_module.LabRecorderCapture(
+        labrecorder_cli=cli,
+        xdf_path=tmp_path / "session_external_labrecorder.xdf",
+        session_id="P001_session",
+        stdout_path=tmp_path / "external_labrecorder_stdout.txt",
+        stderr_path=tmp_path / "external_labrecorder_stderr.txt",
+    )
+
+    started = capture.start(startup_s=0.0)
+    stopped = capture.stop(timeout_s=1.0)
+
+    assert started["started"] is True
+    assert started["collection_started"] is True
+    assert rcs_batches[0] == [
+        "update",
+        "select all",
+        f"filename {{root:{str(tmp_path.resolve()).replace(chr(92), '/')}/}} {{template:session_external_labrecorder.xdf}}",
+        "start",
+    ]
+    assert rcs_batches[1] == ["stop"]
+    assert stopped["returncode"] == 0
+    assert stopped["footer_observed"] is True
+    assert stopped["graceful_close_sent"] is True
+    assert capture.stdout_path.read_text(encoding="utf-8") == "labrecorder stdout"
+    assert popen_calls[0]["args"][0] == str(gui.resolve())
+    assert popen_calls[0]["cwd"] == str(cli.parent)
+    assert popen_calls[0]["stdout"] is not labrecorder_capture_module.subprocess.PIPE
+    assert "startupinfo" in popen_calls[0]
+    child_env = popen_calls[0]["env"]
+    assert isinstance(child_env, dict)
+    assert child_env["PATH"].split(os.pathsep)[0] == str(tmp_path.resolve())
+    assert "QT_PLUGIN_PATH" not in child_env
+
+
+def test_session_runner_owned_labrecorder_requires_lsl(tmp_path: Path):
+    package = prepare_run_package(
+        _compact_design(),
+        "P001",
+        render_dir=_render_dir(tmp_path),
+        session_root=tmp_path / "sessions",
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+
+    with pytest.raises(ValueError, match="requires live LSL outlets"):
+        SessionRunnerController(
+            package,
+            audio_engine=_MockAudioEngine(),
+            capture_options={"enable_lsl": False, "start_external_labrecorder": True},
+        )
 
 
 def test_session_runner_emits_tactile_timeline_schedule_progress(tmp_path: Path):

@@ -90,8 +90,8 @@ python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py
 
 For a full operator rehearsal that creates a fresh Desktop acquisition folder,
 preloads Study 5 participant `P050`, turns on the output-4/Input-4 tactile proxy,
-runs the packaged runner under full-stack conditions, and optionally records one
-continuous external LabRecorder XDF, use:
+runs the packaged runner under full-stack conditions, and asks the runner to own
+one continuous external LabRecorder XDF subprocess, use:
 
 ```powershell
 python .\validation_protocols\scripts\run_desktop_full_mock_rehearsal.py `
@@ -112,8 +112,20 @@ python .\validation_protocols\scripts\run_desktop_full_mock_rehearsal.py `
 This rehearsal script writes its reports under
 `Experiment_context_folder_DO_NOT_DELETE/validation_reports/mock_rehearsal_*`
 inside the Desktop acquisition root. LabRecorder is intentionally continuous
-for the whole session; block identity is reconstructed from `PPSMarkersV2`
-fields rather than by restarting external recording per block.
+for the whole session and is started by `SessionRunnerController` only after the
+session `PPSMarkersV2` and `PPSTriggerCodes` LSL source IDs resolve. The Focus
+Mode setup gate submits mock participant metadata first, which prepares the
+session/controller layer and creates the LSL outlets before `Start Run` can be
+clicked. Playback is held until the LabRecorder RCS child process is running;
+block identity is reconstructed from marker fields rather than by restarting
+external recording per block. The
+rehearsal report also writes `cross_stream_reconciliation_report.json/md`,
+which summarizes strict readiness CSV/internal-XDF/audio-evidence/RT checks,
+the continuous external XDF comparison, and wired-loopback inventory.
+If the focus validation report shows a backend such as `pynput+qtest_recovery`
+or `win32+qtest_recovery`, treat the artifact as data-shape/capture evidence
+only. Final full-stack OS-click readiness requires the requested visible OS
+mouse backend to be observed without Qt recovery.
 
 If the local packaged executable is quarantined or blocked by endpoint
 protection, use source mode only as an interim hardware/capture diagnostic:

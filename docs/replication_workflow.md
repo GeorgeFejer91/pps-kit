@@ -58,11 +58,11 @@ For designed experiments, use Segment 6 in the HTML dashboard:
 2. Set planned participants and experiment parts.
 3. Press `Save Design and Start Experiment Runner`.
 4. The local backend prepares the participant session package and starts native Focus Mode.
-5. In Focus Mode, enter participant metadata and choose runner-owned options: optional fail-safe local recording and optional missed-trial top-up at the end of each experiment part. The LSL/event protocol, local marker mirror, trigger dictionary, `events.csv`, and analysis outputs are standard runner outputs.
+5. In Focus Mode, enter participant metadata and choose runner-owned options: optional fail-safe local recording, optional wired-loopback capture, optional full-session LabRecorder XDF capture, and optional missed-trial top-up at the end of each experiment part. Press `Submit setup` before starting the run; this prepares the session/controller metadata and creates the session-lifetime LSL outlets before playback is enabled. The LSL/event protocol, local marker mirror, trigger dictionary, `events.csv`, and analysis outputs are standard runner outputs.
 
 The integrated runner writes session outputs under `local_data\sessions\<participant_id>_<timestamp>\`.
 
-For designed experiments, use `events.csv` / `events.xdf`, the internal `PPSMarkersV2`/`PPSTriggerCodes` marker mirror, and optional external LSL streams as the primary reconstruction record. The optional local audio evidence WAV is a data-heavy safety copy of the runner's mixed output buffers, including tactile-channel response marker clicks. Physical electrical loopback WAVs are validation-only traces used to quantify how well those software records match the physical outputs.
+For designed experiments, use `events.csv` / `events.xdf`, the internal `PPSMarkersV2`/`PPSTriggerCodes` marker mirror, and optional runner-owned LabRecorder `session_external_labrecorder.xdf` as reconstruction records. The runner keeps the LSL outlets alive for the participant session after setup submission. When requested, it waits for the session LSL streams and starts LabRecorder through RCS before playback. The optional local audio evidence WAV is a data-heavy safety copy of the runner's mixed output buffers, including tactile-channel response marker clicks. Physical electrical loopback WAVs are validation-only traces used to quantify how well those software records match the physical outputs.
 
 The legacy Tk runner is no longer a public launch path. Use Focus Mode through
 the dashboard handoff or `windows\Launch_Experiment_Runner.bat`.

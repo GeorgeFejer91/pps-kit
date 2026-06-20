@@ -89,6 +89,8 @@ python .\validation_protocols\scripts\run_study5_end_to_end_ui_mouse_validation.
 python .\validation_protocols\scripts\run_focus_runner_layout_validation.py --offscreen --output-dir artifacts\validation_runs\focus_runner_layout_current
 python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py --participant-id P001 --mouse-backend pynput
 python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py --participant-id P001 --mouse-backend pynput --audio-mode hardware --strict-study5-readiness
+python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py --participant-id P001 --mouse-backend pynput --audio-mode hardware --validation-lane full-stack --external-labrecorder --strict-study5-readiness
+python .\validation_protocols\scripts\run_desktop_full_mock_rehearsal.py --desktop-output-parent "$env:USERPROFILE\Desktop" --session-name study_5_full_mock_rehearsal --participant-id P050 --runner-mode packaged --validation-lane full-stack --audio-mode hardware --mouse-backend pynput --wired-loopback output4-tactile-proxy --external-labrecorder --strict-study5-readiness --timeout-s 7200
 python .\validation_protocols\scripts\run_full_realtime_participant_emulation.py --runner-mode source --participant-id P001 --mouse-backend pynput --audio-mode hardware --strict-study5-readiness
 python .\validation_protocols\scripts\run_protocol11_controlled_response_matrix.py --output-dir artifacts\validation_runs\protocol11_controlled_response_matrix_current
 python .\validation_protocols\scripts\run_protocol11_capture_options_matrix.py --output-dir artifacts\validation_runs\protocol11_capture_options_matrix_current
@@ -137,8 +139,18 @@ Separate these quantities in every report:
 - LSL reliability: whether LSL received all actual markers with stable arrival
   behavior, and whether rich LSL event metadata reconciles exactly with local
   `events.csv`/`lsl_markers.csv`.
-- External XDF preservation: whether LabRecorder records both `PPSMarkersV2`
-  and `PPSTriggerCodes` without missing, duplicate, or mismatched markers.
+- External XDF preservation: whether runner-owned LabRecorder records both
+  `PPSMarkersV2` and `PPSTriggerCodes` without missing, duplicate, or
+  mismatched markers, after the runner has verified the session LSL source IDs
+  and before playback begins.
+- Focus Mode setup gate: whether `Submit setup` validates participant metadata,
+  freezes pre-run capture choices, prepares the session/controller layer, and
+  creates the session-lifetime LSL outlets before `Start Run` can enable
+  playback.
+- Visible OS mouse delivery: full-stack rehearsals should report the requested
+  mouse backend and any recovery backend. A run that relies on Qt/qtest recovery
+  can prove data-shape and capture completeness, but it is not final visible
+  OS-click evidence.
 - Electrical latency: output-to-input timing from direct loopback calibration.
 - Single-file channel routing: whether one 3-channel WAV independently reaches
   left Sennheiser, right Sennheiser, and Woojer/tactile output paths.

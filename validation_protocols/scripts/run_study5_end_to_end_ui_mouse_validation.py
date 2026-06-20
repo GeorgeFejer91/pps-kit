@@ -444,6 +444,18 @@ def _run_focus_mode_by_mouse(
         QTest.mouseClick(widget, q["Qt"].MouseButton.LeftButton)
         mouse_clicks.append({"label": label, "timestamp": datetime.now().isoformat(timespec="milliseconds")})
 
+    def _select_combo_data(combo: Any, value: str) -> None:
+        index = combo.findData(value)
+        if index >= 0:
+            combo.setCurrentIndex(index)
+
+    def _submit_setup() -> None:
+        window.participant_name_input.setText("Mock Participant")
+        window.age_input.setText("30")
+        _select_combo_data(window.handedness_combo, "right")
+        _select_combo_data(window.gender_combo, "prefer_not_to_say")
+        _click(window.setup_submit_button, "Submit setup")
+
     def _poll_instruction_requests() -> None:
         if window.result is not None:
             window.grab_screenshot(output_dir / "focus_mode_complete.png")
@@ -459,7 +471,8 @@ def _run_focus_mode_by_mouse(
                 _click(window.target_button, f"instruction target: {context.get('instruction_label', '')}")
         q["QTimer"].singleShot(50, _poll_instruction_requests)
 
-    q["QTimer"].singleShot(300, lambda: _click(window.start_button, "Start Run"))
+    q["QTimer"].singleShot(250, _submit_setup)
+    q["QTimer"].singleShot(450, lambda: _click(window.start_button, "Start Run"))
     q["QTimer"].singleShot(450, _poll_instruction_requests)
     exit_code = window.exec(
         fullscreen=bool(qt_headed),

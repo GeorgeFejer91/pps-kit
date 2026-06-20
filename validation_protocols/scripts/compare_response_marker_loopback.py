@@ -14,6 +14,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import re
 import statistics
 import sys
@@ -29,7 +30,7 @@ SCHEMA = "pps-response-marker-loopback-comparison.v1"
 MIN_DETECTION_RATE = 0.95
 MAX_P95_RESIDUAL_MS = 2.0
 MAX_ABS_RESIDUAL_MS = 5.0
-DIGITAL_EVIDENCE_MIN_SEARCH_POST_MS = 300.0
+DIGITAL_EVIDENCE_MIN_SEARCH_POST_MS = 600.0
 
 
 def _default_output_dir() -> Path:
@@ -37,9 +38,28 @@ def _default_output_dir() -> Path:
     return Path("artifacts") / "validation_runs" / f"response_marker_loopback_comparison_{stamp}"
 
 
+def _filesystem_path(path: Path) -> str:
+    text = str(Path(path).resolve())
+    if os.name == "nt" and not text.startswith("\\\\?\\"):
+        if text.startswith("\\\\"):
+            return "\\\\?\\UNC\\" + text.lstrip("\\")
+        return "\\\\?\\" + text
+    return text
+
+
+def _write_text(path: Path, text: str) -> None:
+    _mkdir(path.parent)
+    with open(_filesystem_path(path), "w", encoding="utf-8", newline="") as handle:
+        handle.write(text)
+
+
+def _mkdir(path: Path) -> None:
+    os.makedirs(_filesystem_path(path), exist_ok=True)
+
+
 def _read_events(path: Path) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
-    with path.open(newline="", encoding="utf-8-sig") as handle:
+    with open(_filesystem_path(path), newline="", encoding="utf-8-sig") as handle:
         for row in csv.DictReader(handle):
             payload = {}
             try:
@@ -130,6 +150,45 @@ def _detect_starts(signal: np.ndarray, *, sample_rate: int, min_peak: float, min
     return starts, {"threshold": threshold, "peak": peak, "low_signal": False}
 
 
+def _estimate_common_offset(
+    markers: list[dict[str, Any]],
+    starts: list[int],
+    *,
+    sample_rate: int,
+    search_pre_ms: float,
+    search_post_ms: float,
+) -> float | None:
+    """Estimate the dominant recording offset before one-by-one pairing.
+
+    Digital audio-evidence WAVs can contain both tactile/looming pulses and the
+    response-marker pulse train. A nearest-candidate first match can lock onto
+    the wrong pulse for an early marker, so we pick the densest offset cluster
+    across the whole block before pairing.
+    """
+
+    if not markers or not starts:
+        return None
+    pre = int(round((search_pre_ms / 1000.0) * sample_rate))
+    post = int(round((search_post_ms / 1000.0) * sample_rate))
+    bin_width = max(1, int(round(0.005 * sample_rate)))
+    bins: dict[int, list[int]] = {}
+    for marker in markers:
+        expected = int(marker["sample_index"])
+        for start in starts:
+            if expected - pre <= start <= expected + post:
+                offset = int(start) - expected
+                bins.setdefault(int(round(offset / bin_width)), []).append(offset)
+    if not bins:
+        return None
+    _bin, offsets = max(
+        bins.items(),
+        key=lambda item: (len(item[1]), statistics.median(item[1])),
+    )
+    if len(offsets) < max(2, int(round(len(markers) * 0.25))):
+        return None
+    return float(statistics.median(offsets))
+
+
 def _pair_markers(
     markers: list[dict[str, Any]],
     starts: list[int],
@@ -143,6 +202,13 @@ def _pair_markers(
     rows: list[dict[str, Any]] = []
     pre = int(round((search_pre_ms / 1000.0) * sample_rate))
     post = int(round((search_post_ms / 1000.0) * sample_rate))
+    offset_estimate = _estimate_common_offset(
+        markers,
+        starts,
+        sample_rate=sample_rate,
+        search_pre_ms=search_pre_ms,
+        search_post_ms=search_post_ms,
+    )
     for marker in markers:
         expected = int(marker["sample_index"])
         candidates = [start for start in starts if start not in used and expected - pre <= start <= expected + post]
@@ -280,7 +346,8 @@ def _write_pairs_csv(path: Path, blocks: list[dict[str, Any]]) -> None:
         "timestamp_quality",
         "marker_gain",
     ]
-    with path.open("w", newline="", encoding="utf-8") as handle:
+    _mkdir(path.parent)
+    with open(_filesystem_path(path), "w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         for block in blocks:
@@ -302,7 +369,7 @@ def _write_markdown(path: Path, report: dict[str, Any]) -> None:
         "",
         "The fitted offset estimates recording/hardware latency. Residuals estimate how reliably response markers can be recovered after accounting for that latency.",
     ]
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    _write_text(path, "\n".join(lines) + "\n")
 
 
 def compare_loopback(
@@ -316,7 +383,7 @@ def compare_loopback(
     min_peak: float = 0.005,
     min_gap_ms: float = 5.0,
 ) -> dict[str, Any]:
-    output_dir.mkdir(parents=True, exist_ok=True)
+    _mkdir(output_dir)
     events = _read_events(events_csv)
     markers = _response_markers(events)
     blocks: list[dict[str, Any]] = []
@@ -380,7 +447,7 @@ def compare_loopback(
             "Digital audio-evidence WAVs can include recorder pre-roll, so their pairing window is widened automatically.",
         ],
     }
-    (output_dir / "response_marker_loopback_report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+    _write_text(output_dir / "response_marker_loopback_report.json", json.dumps(report, indent=2) + "\n")
     _write_pairs_csv(output_dir / "response_marker_loopback_pairs.csv", blocks)
     _write_markdown(output_dir / "response_marker_loopback_report.md", report)
     return report

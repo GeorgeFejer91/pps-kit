@@ -23,6 +23,11 @@ def test_focus_runner_command_prefers_packaged_exe(tmp_path: Path, monkeypatch):
             "write_internal_xdf": False,
             "write_analysis_csvs": True,
             "start_backup_recording": False,
+            "start_external_labrecorder": True,
+            "external_labrecorder_cli": str(tmp_path / "LabRecorderCLI.exe"),
+            "external_labrecorder_stream_timeout_s": 12.5,
+            "external_labrecorder_startup_s": 1.25,
+            "external_labrecorder_stop_timeout_s": 9.0,
             "wired_loopback_mode": "output4_tactile_proxy",
             "enable_missed_trial_topup": True,
         },
@@ -39,6 +44,12 @@ def test_focus_runner_command_prefers_packaged_exe(tmp_path: Path, monkeypatch):
     assert "--no-internal-xdf" in result.command
     assert "--no-analysis-csv" not in result.command
     assert "--no-backup-recording" in result.command
+    assert "--external-labrecorder" in result.command
+    assert "--labrecorder-cli" in result.command
+    assert str(tmp_path / "LabRecorderCLI.exe") in result.command
+    assert result.command[result.command.index("--labrecorder-stream-timeout-s") + 1] == "12.5"
+    assert result.command[result.command.index("--labrecorder-startup-s") + 1] == "1.25"
+    assert result.command[result.command.index("--labrecorder-stop-timeout-s") + 1] == "9.0"
     assert "--wired-loopback" in result.command
     assert "output4-tactile-proxy" in result.command
     assert "--enable-missed-trial-topup" in result.command

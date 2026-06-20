@@ -28,6 +28,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--interval-ms", type=int, default=60)
     parser.add_argument("--offscreen", action="store_true", help="Use Qt offscreen mode for CI/headless smoke runs.")
     parser.add_argument("--fullscreen", action="store_true", help="Show the validation window full-screen.")
+    parser.add_argument("--mouse-backend", choices=["qtest", "pynput", "win32", "pyautogui"], default="qtest")
     return parser
 
 
@@ -145,10 +146,63 @@ def main(argv: list[str] | None = None) -> int:
     def _mouse_click(widget: Any, label: str) -> None:
         if widget is None or not widget.isEnabled():
             return
-        QTest.mouseClick(widget, q["Qt"].MouseButton.LeftButton)
-        mouse_clicks.append({"label": label, "timestamp_unix": time.time()})
+        backend = args.mouse_backend
+        if backend == "qtest" or args.offscreen:
+            QTest.mouseClick(widget, q["Qt"].MouseButton.LeftButton)
+            mouse_clicks.append({"label": label, "backend": "qtest", "timestamp_unix": time.time()})
+            return
+        try:
+            window.dialog.raise_()
+            window.dialog.activateWindow()
+            focus_app._force_foreground_window(window.dialog)
+            widget.setFocus(q["Qt"].FocusReason.MouseFocusReason)
+            app.processEvents()
+            time.sleep(0.05)
+            x, y, source = focus_app._widget_screen_center(widget)
+            if backend == "pynput":
+                from pynput.mouse import Button, Controller
 
-    q["QTimer"].singleShot(300, lambda: _mouse_click(window.start_button, "Start Run"))
+                mouse = Controller()
+                mouse.position = (int(x), int(y))
+                time.sleep(0.05)
+                mouse.press(Button.left)
+                time.sleep(0.03)
+                mouse.release(Button.left)
+            elif backend == "win32":
+                import ctypes
+
+                ctypes.windll.user32.SetCursorPos(int(x), int(y))
+                time.sleep(0.05)
+                ctypes.windll.user32.mouse_event(0x0002, 0, 0, 0, 0)
+                time.sleep(0.03)
+                ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
+            elif backend == "pyautogui":
+                import pyautogui  # type: ignore
+
+                pyautogui.FAILSAFE = False
+                pyautogui.PAUSE = 0
+                pyautogui.click(int(x), int(y))
+            app.processEvents()
+            time.sleep(0.03)
+            app.processEvents()
+            mouse_clicks.append({"label": label, "backend": backend, "coordinate_source": source, "x": x, "y": y, "timestamp_unix": time.time()})
+        except Exception as exc:
+            mouse_clicks.append({"label": label, "backend": backend, "error": str(exc), "timestamp_unix": time.time()})
+
+    def _select_combo_data(combo: Any, value: str) -> None:
+        index = combo.findData(value)
+        if index >= 0:
+            combo.setCurrentIndex(index)
+
+    def _submit_setup() -> None:
+        window.participant_name_input.setText("Mock Participant")
+        window.age_input.setText("30")
+        _select_combo_data(window.handedness_combo, "right")
+        _select_combo_data(window.gender_combo, "prefer_not_to_say")
+        _mouse_click(window.setup_submit_button, "Submit setup")
+
+    q["QTimer"].singleShot(250, _submit_setup)
+    q["QTimer"].singleShot(450, lambda: _mouse_click(window.start_button, "Start Run"))
     for index in range(max(0, args.count)):
         q["QTimer"].singleShot(
             700 + index * max(1, args.interval_ms),
@@ -169,7 +223,8 @@ def main(argv: list[str] | None = None) -> int:
         "exit_code": exit_code,
         "requested_click_count": args.count,
         "logged_click_count": click_count,
-        "click_mode": "qt_mouse_clicks",
+        "click_mode": "qt_mouse_clicks" if args.mouse_backend == "qtest" else "visible_os_mouse_clicks",
+        "mouse_backend": args.mouse_backend,
         "mouse_clicks": mouse_clicks,
         "screenshot_path": str(screenshot_path),
         "session_manifest": str(manifest_path),

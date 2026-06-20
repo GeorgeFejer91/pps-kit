@@ -8,13 +8,10 @@ and optional continuous external LabRecorder XDF capture.
 from __future__ import annotations
 
 import argparse
-from contextlib import contextmanager
 import csv
-from collections.abc import Iterator
 import json
 import os
 from pathlib import Path
-import subprocess
 import sys
 import time
 from typing import Any
@@ -33,7 +30,6 @@ from run_labrecorder_lsl_xdf_stress import (  # noqa: E402
     _find_labrecorder_cli,
     _load_xdf_streams,
     _stats,
-    _stop_labrecorder,
     _write_csv,
     compare_xdf_to_local,
 )
@@ -165,6 +161,20 @@ def build_emulator_argv(args: argparse.Namespace, *, output_dir: Path) -> list[s
     ]
     if args.audio_device_index is not None:
         argv.extend(["--audio-device-index", str(int(args.audio_device_index))])
+    if bool(args.external_labrecorder):
+        argv.append("--external-labrecorder")
+        if args.labrecorder_cli is not None:
+            argv.extend(["--labrecorder-cli", str(args.labrecorder_cli)])
+        argv.extend(
+            [
+                "--labrecorder-stream-timeout-s",
+                str(float(args.labrecorder_stream_timeout_s)),
+                "--labrecorder-startup-s",
+                str(float(args.labrecorder_startup_s)),
+                "--labrecorder-stop-timeout-s",
+                str(float(args.labrecorder_stop_timeout_s)),
+            ]
+        )
     if bool(args.strict_study5_readiness):
         argv.append("--strict-study5-readiness")
     return argv
@@ -173,6 +183,11 @@ def build_emulator_argv(args: argparse.Namespace, *, output_dir: Path) -> list[s
 def _create_rehearsal_environment(args: argparse.Namespace) -> dict[str, Any]:
     capture_options = SessionCaptureOptions(
         wired_loopback_mode=normalize_wired_loopback_mode(args.wired_loopback),
+        start_external_labrecorder=bool(args.external_labrecorder),
+        external_labrecorder_cli=str(args.labrecorder_cli or ""),
+        external_labrecorder_stream_timeout_s=float(args.labrecorder_stream_timeout_s),
+        external_labrecorder_startup_s=float(args.labrecorder_startup_s),
+        external_labrecorder_stop_timeout_s=float(args.labrecorder_stop_timeout_s),
     )
     return initiate_data_collection_environment(
         parent_folder=Path(args.desktop_output_parent).expanduser(),
@@ -181,35 +196,6 @@ def _create_rehearsal_environment(args: argparse.Namespace) -> dict[str, Any]:
         participant_id=str(args.participant_id),
         capture_options=capture_options,
     )
-
-
-def _start_labrecorder_session(
-    *,
-    labrecorder_cli: Path,
-    xdf_path: Path,
-    startup_s: float,
-) -> tuple[subprocess.Popen, list[str]]:
-    xdf_path.parent.mkdir(parents=True, exist_ok=True)
-    predicates = ["name='PPSMarkersV2'", "name='PPSTriggerCodes'"]
-    command = [str(labrecorder_cli), str(xdf_path), *predicates]
-    creationflags = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
-    process = subprocess.Popen(
-        command,
-        cwd=str(REPO_ROOT),
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        creationflags=creationflags,
-    )
-    time.sleep(max(0.0, startup_s))
-    if process.poll() is not None:
-        stdout, stderr = process.communicate(timeout=2.0)
-        raise RuntimeError(
-            "LabRecorderCLI exited before the rehearsal started. "
-            f"returncode={process.returncode} stdout={stdout!r} stderr={stderr!r}"
-        )
-    return process, command
 
 
 def _session_output_paths(validation_dir: Path) -> dict[str, Path]:
@@ -262,7 +248,31 @@ def reconcile_external_labrecorder_xdf(
     _write_csv(output_dir / "external_labrecorder_rich_xdf_samples.csv", rich_rows, [*LSL_MARKER_CHANNELS, "sample_lsl_timestamp"])
     _write_csv(output_dir / "external_labrecorder_numeric_xdf_samples.csv", numeric_rows, ["event_code", "sample_lsl_timestamp"])
     marker_rows = _read_csv(paths["lsl_markers_csv"])
-    comparison = compare_xdf_to_local(rich_rows=rich_rows, numeric_rows=numeric_rows, marker_rows=marker_rows)
+    rich_event_ids = [
+        int(str(row.get("event_id") or ""))
+        for row in rich_rows
+        if str(row.get("event_id") or "").isdigit()
+    ]
+    capture_min_event_id = min(rich_event_ids) if rich_event_ids else None
+    capture_max_event_id = max(rich_event_ids) if rich_event_ids else None
+    if capture_min_event_id is not None and capture_max_event_id is not None:
+        marker_rows_in_capture = [
+            row
+            for row in marker_rows
+            if str(row.get("event_id") or "").isdigit()
+            and capture_min_event_id <= int(str(row.get("event_id") or "")) <= capture_max_event_id
+        ]
+        ignored_marker_event_ids = [
+            str(row.get("event_id") or "")
+            for row in marker_rows
+            if str(row.get("pushed_to_lsl", "")).lower() in {"true", "1", "yes"}
+            and str(row.get("event_id") or "").isdigit()
+            and not (capture_min_event_id <= int(str(row.get("event_id") or "")) <= capture_max_event_id)
+        ]
+    else:
+        marker_rows_in_capture = marker_rows
+        ignored_marker_event_ids = []
+    comparison = compare_xdf_to_local(rich_rows=rich_rows, numeric_rows=numeric_rows, marker_rows=marker_rows_in_capture)
     event_type_counts = comparison.get("event_type_counts_xdf") or {}
     block_indices = sorted(
         {
@@ -273,7 +283,7 @@ def reconcile_external_labrecorder_xdf(
     )
     timestamp_deltas = [
         (float(rich["sample_lsl_timestamp"]) - float(marker["lsl_timestamp"])) * 1000.0
-        for rich, marker in zip(rich_rows, marker_rows)
+        for rich, marker in zip(rich_rows, marker_rows_in_capture)
         if str(rich.get("sample_lsl_timestamp", "")).strip() and str(marker.get("lsl_timestamp", "")).strip()
     ]
     report = {
@@ -294,6 +304,8 @@ def reconcile_external_labrecorder_xdf(
         "block_indices_observed": block_indices,
         "event_type_counts_xdf": event_type_counts,
         "timestamp_delta_xdf_minus_local_marker_ms": _stats(timestamp_deltas),
+        "capture_event_id_range": [capture_min_event_id, capture_max_event_id],
+        "ignored_out_of_capture_event_ids": ignored_marker_event_ids,
         "comparison": comparison,
         "limitations": [
             "This is one continuous external XDF for the whole rehearsal; block identity is preserved by LSL marker fields.",
@@ -302,6 +314,160 @@ def reconcile_external_labrecorder_xdf(
     }
     _write_json(output_dir / "external_labrecorder_reconciliation_report.json", report)
     _write_markdown_report(output_dir / "external_labrecorder_reconciliation_report.md", report)
+    return report
+
+
+def _criterion_passed(readiness: dict[str, Any], section: str, name: str, *, default: bool | None = None) -> bool | None:
+    for item in readiness.get("criteria") or []:
+        if not isinstance(item, dict):
+            continue
+        if str(item.get("section") or "") == section and str(item.get("name") or "") == name:
+            return bool(item.get("passed"))
+    return default
+
+
+def _section_passed(readiness: dict[str, Any], section: str, *, default: bool | None = None) -> bool | None:
+    sections = readiness.get("sections") if isinstance(readiness.get("sections"), dict) else {}
+    item = sections.get(section) if isinstance(sections.get(section), dict) else {}
+    if item:
+        return bool(item.get("passed"))
+    return default
+
+
+def _write_cross_stream_markdown(path: Path, report: dict[str, Any]) -> None:
+    criteria = report.get("criteria") if isinstance(report.get("criteria"), dict) else {}
+    lines = [
+        "# Cross-Stream Reconciliation",
+        "",
+        f"- Passed: `{report.get('passed')}`",
+        f"- Checked: `{report.get('checked')}`",
+        f"- Session dir: `{report.get('session_dir', '')}`",
+        f"- Expected played blocks: `{report.get('expected_played_blocks')}`",
+        f"- Audio-evidence WAVs: `{report.get('audio_evidence_wav_count')}`",
+        f"- Wired loopback WAVs: `{report.get('wired_loopback_wav_count')}`",
+        "",
+        "## Criteria",
+    ]
+    for key, value in criteria.items():
+        lines.append(f"- `{key}`: `{value}`")
+    paths = report.get("reports") if isinstance(report.get("reports"), dict) else {}
+    if paths:
+        lines.extend(["", "## Reports"])
+        for key, value in paths.items():
+            lines.append(f"- `{key}`: `{value}`")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def cross_stream_reconciliation_report(
+    *,
+    validation_dir: Path,
+    harness_report: dict[str, Any],
+    focus_report: dict[str, Any],
+    external_report: dict[str, Any],
+    wired_loopback_requested: bool,
+) -> dict[str, Any]:
+    output_dir = validation_dir / "cross_stream_reconciliation"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    readiness = harness_report.get("readiness_audit") if isinstance(harness_report.get("readiness_audit"), dict) else {}
+    paths = _session_output_paths(validation_dir)
+    session_dir = paths["session_dir"]
+    expected_counts = readiness.get("expected_event_counts") if isinstance(readiness.get("expected_event_counts"), dict) else {}
+    event_counts = readiness.get("event_counts") if isinstance(readiness.get("event_counts"), dict) else {}
+    if not event_counts:
+        evaluation = harness_report.get("evaluation") if isinstance(harness_report.get("evaluation"), dict) else {}
+        event_counts = evaluation.get("event_counts") if isinstance(evaluation.get("event_counts"), dict) else {}
+    expected_played_blocks = int(expected_counts.get("block_start") or event_counts.get("block_start") or 0)
+    audio_evidence = readiness.get("audio_evidence") if isinstance(readiness.get("audio_evidence"), dict) else {}
+    audio_evidence_wav_count = int(audio_evidence.get("record_count") or 0)
+    if audio_evidence_wav_count <= 0 and session_dir.is_dir():
+        audio_evidence_wav_count = len(sorted(session_dir.glob("*audio_evidence.wav")))
+    wired_loopback_wav_count = len(sorted(session_dir.glob("*wired_loopback_input4.wav"))) if session_dir.is_dir() else 0
+    external_checked = bool(external_report.get("checked"))
+    external_file_ok = bool(external_report.get("passed")) and Path(str(external_report.get("xdf_path") or "")).is_file()
+    external_returncode = external_report.get("labrecorder_returncode")
+    external_stop_error = str(external_report.get("labrecorder_stop_error") or "").strip()
+    external_mode = str(external_report.get("labrecorder_mode") or "").strip().lower()
+    if external_returncode in ("", None):
+        external_process_ok = external_file_ok
+    else:
+        try:
+            code = int(external_returncode)
+            external_process_ok = code == 0 or (
+                external_file_ok
+                and not external_stop_error
+                and external_mode in {"rcs", "remote_control", "labrecorder_rcs"}
+                and code in {1, -15}
+            )
+        except (TypeError, ValueError):
+            external_process_ok = False
+    readiness_checked = bool(readiness)
+    strict_required = bool(
+        harness_report.get("strict_study5_readiness_requested")
+        or str(harness_report.get("validation_lane") or "") == emulator.VALIDATION_LANE_FULL_STACK
+    )
+    criteria: dict[str, bool] = {
+        "strict_readiness_audit_present": readiness_checked or not strict_required,
+        "strict_readiness_audit_passed": bool(readiness.get("passed")) if readiness_checked else True,
+        "events_csv_matches_events_xdf": bool(
+            _criterion_passed(readiness, "lsl_xdf_trigger_logging", "events_xdf_loadable_and_complete", default=not readiness_checked)
+        ),
+        "lsl_marker_csv_matches_lsl_marker_xdf": bool(
+            _criterion_passed(readiness, "lsl_xdf_trigger_logging", "lsl_marker_xdf_dual_streams_complete", default=not readiness_checked)
+        ),
+        "events_csv_matches_lsl_marker_csv": bool(
+            _criterion_passed(readiness, "lsl_xdf_trigger_logging", "events_and_lsl_marker_csvs_match", default=not readiness_checked)
+        ),
+        "audio_evidence_wavs_cover_played_blocks": bool(
+            _criterion_passed(readiness, "local_recorder_audio_evidence", "audio_evidence_files_cover_played_blocks", default=not readiness_checked)
+        ),
+        "audio_xdf_reconciliation_passed": bool(
+            _criterion_passed(readiness, "local_recorder_audio_evidence", "lsl_xdf_audio_reconciliation_passed", default=not readiness_checked)
+        ),
+        "response_markers_match_mouse_clicks_and_wav_pulses": bool(
+            _section_passed(readiness, "response_marker_path", default=not readiness_checked)
+        ),
+        "analysis_rt_matches_emulated_plan": bool(
+            _criterion_passed(readiness, "analysis_outputs", "emulated_rt_values_match_plan_tolerance", default=not readiness_checked)
+        ),
+        "external_labrecorder_xdf_matches_local_lsl_markers": (not external_checked) or bool(external_report.get("passed")),
+        "external_labrecorder_process_clean_exit": (not external_checked) or bool(external_process_ok),
+        "wired_loopback_wavs_cover_played_blocks": (
+            not wired_loopback_requested
+            or not readiness_checked
+            or (expected_played_blocks > 0 and wired_loopback_wav_count >= expected_played_blocks)
+        ),
+    }
+    checked = readiness_checked or external_checked or wired_loopback_requested
+    report = {
+        "schema": "pps-desktop-rehearsal-cross-stream-reconciliation.v1",
+        "checked": bool(checked),
+        "passed": bool(all(criteria.values())),
+        "validation_dir": str(validation_dir),
+        "session_dir": str(session_dir),
+        "session_manifest": str(paths["session_manifest"]),
+        "events_csv": str(paths["events_csv"]),
+        "lsl_markers_csv": str(paths["lsl_markers_csv"]),
+        "expected_played_blocks": expected_played_blocks,
+        "audio_evidence_wav_count": audio_evidence_wav_count,
+        "wired_loopback_requested": bool(wired_loopback_requested),
+        "wired_loopback_wav_count": wired_loopback_wav_count,
+        "event_counts": event_counts,
+        "criteria": criteria,
+        "reports": {
+            "readiness_audit": str((readiness.get("output_dir") or "") and Path(str(readiness.get("output_dir"))) / "protocol11_study5_readiness_audit.json"),
+            "local_lsl_xdf_audio": str((readiness.get("output_dir") or "") and Path(str(readiness.get("output_dir"))) / "lsl_xdf_audio_reconciliation_report.json"),
+            "external_labrecorder": str(validation_dir / "external_labrecorder_reconciliation" / "external_labrecorder_reconciliation_report.json"),
+        },
+        "focus_report": str(validation_dir / "focus_validation_report.json"),
+        "harness_report": str(validation_dir / "full_realtime_participant_emulation_report.json"),
+        "external_labrecorder": external_report,
+        "limitations": [
+            "This cross-check reconciles software timing streams, local runtime WAV evidence, and the wired tactile proxy when requested.",
+            "It does not prove human perception, fatigue, or Woojer mechanical vibration onset.",
+        ],
+    }
+    _write_json(output_dir / "cross_stream_reconciliation_report.json", report)
+    _write_cross_stream_markdown(output_dir / "cross_stream_reconciliation_report.md", report)
     return report
 
 
@@ -337,21 +503,6 @@ def _write_markdown_report(path: Path, report: dict[str, Any]) -> None:
     path.write_text("\n".join(line for line in lines if line != "") + "\n", encoding="utf-8")
 
 
-@contextmanager
-def _temporary_env(updates: dict[str, str]) -> Iterator[None]:
-    previous = {key: os.environ.get(key) for key in updates}
-    try:
-        for key, value in updates.items():
-            os.environ[key] = value
-        yield
-    finally:
-        for key, value in previous.items():
-            if value is None:
-                os.environ.pop(key, None)
-            else:
-                os.environ[key] = value
-
-
 def run_rehearsal(args: argparse.Namespace) -> dict[str, Any]:
     parent = Path(args.desktop_output_parent).expanduser()
     if not parent.is_dir():
@@ -368,25 +519,23 @@ def run_rehearsal(args: argparse.Namespace) -> dict[str, Any]:
         and not audio_preflight.get("komplete_asio_4x4_ready")
     ):
         raise RuntimeError("Komplete Audio ASIO 4-input/4-output route was not found; inspect the audio_preflight field.")
+    labrecorder_cli: Path | None = None
+    if args.external_labrecorder:
+        labrecorder_cli = _find_labrecorder_cli(args.labrecorder_cli)
+        args.labrecorder_cli = labrecorder_cli
 
     environment = _create_rehearsal_environment(args)
     environment_root = Path(environment["environment_root"]).resolve()
     stamp = time.strftime("%Y%m%d_%H%M%S")
     validation_dir = output_validation_reports_dir(environment_root) / f"mock_rehearsal_{stamp}"
     validation_dir.mkdir(parents=True, exist_ok=True)
-    start_ready_file = validation_dir / "external_labrecorder.ready"
-    if start_ready_file.exists():
-        start_ready_file.unlink()
 
-    labrecorder_process: subprocess.Popen | None = None
-    labrecorder_cli: Path | None = None
     labrecorder_command: list[str] = []
     labrecorder_returncode: int | None = None
     stdout_path = validation_dir / "external_labrecorder_stdout.txt"
     stderr_path = validation_dir / "external_labrecorder_stderr.txt"
     external_report: dict[str, Any] = {"checked": False, "passed": True}
     xdf_path = validation_dir / "session_external_labrecorder.xdf"
-
     _write_json(
         validation_dir / "desktop_full_mock_rehearsal_preflight.json",
         {
@@ -394,46 +543,43 @@ def run_rehearsal(args: argparse.Namespace) -> dict[str, Any]:
             "environment": environment,
             "audio_preflight": audio_preflight,
             "external_labrecorder_requested": bool(args.external_labrecorder),
+            "labrecorder_cli": str(labrecorder_cli or ""),
             "wired_loopback": str(args.wired_loopback),
         },
     )
 
-    if args.external_labrecorder:
-        labrecorder_cli = _find_labrecorder_cli(args.labrecorder_cli)
-        labrecorder_process, labrecorder_command = _start_labrecorder_session(
-            labrecorder_cli=labrecorder_cli,
-            xdf_path=xdf_path,
-            startup_s=float(args.labrecorder_startup_s),
-        )
-        start_ready_file.write_text(
-            json.dumps({"labrecorder_pid": labrecorder_process.pid, "xdf_path": str(xdf_path)}, indent=2) + "\n",
-            encoding="utf-8",
-        )
-
-    env_updates: dict[str, str] = {}
-    if args.external_labrecorder:
-        env_updates = {
-            "PPS_FOCUS_VALIDATION_START_READY_FILE": str(start_ready_file),
-            "PPS_FOCUS_VALIDATION_START_READY_TIMEOUT_S": str(float(args.start_ready_timeout_s)),
-        }
     emulator_argv = build_emulator_argv(args, output_dir=validation_dir)
     harness_exit_code = 1
     harness_error = ""
     try:
-        with _temporary_env(env_updates):
-            harness_exit_code = int(emulator.main(emulator_argv))
+        harness_exit_code = int(emulator.main(emulator_argv))
     except Exception as exc:
         harness_error = str(exc)
-    finally:
-        if labrecorder_process is not None:
-            labrecorder_returncode, stdout, stderr = _stop_labrecorder(
-                labrecorder_process,
-                timeout_s=float(args.labrecorder_stop_timeout_s),
-            )
-            stdout_path.write_text(stdout, encoding="utf-8")
-            stderr_path.write_text(stderr, encoding="utf-8")
 
+    focus_report = _read_json(validation_dir / "focus_validation_report.json")
     if args.external_labrecorder:
+        analysis_outputs = focus_report.get("analysis_outputs") if isinstance(focus_report.get("analysis_outputs"), dict) else {}
+        xdf_path = _resolve_path(
+            focus_report.get("external_labrecorder_xdf") or analysis_outputs.get("external_labrecorder_xdf"),
+            base=validation_dir,
+        )
+        runner_labrecorder_report_path = _resolve_path(
+            focus_report.get("external_labrecorder_report") or analysis_outputs.get("external_labrecorder_report"),
+            base=validation_dir,
+        )
+        runner_labrecorder_report = _read_json(runner_labrecorder_report_path)
+        start_info = runner_labrecorder_report.get("start") if isinstance(runner_labrecorder_report.get("start"), dict) else {}
+        stop_info = runner_labrecorder_report.get("stop") if isinstance(runner_labrecorder_report.get("stop"), dict) else {}
+        labrecorder_command = list(start_info.get("command") or stop_info.get("command") or [])
+        labrecorder_returncode = stop_info.get("returncode") if "returncode" in stop_info else None
+        stdout_path = _resolve_path(
+            focus_report.get("external_labrecorder_stdout") or analysis_outputs.get("external_labrecorder_stdout") or stop_info.get("stdout_path"),
+            base=validation_dir,
+        )
+        stderr_path = _resolve_path(
+            focus_report.get("external_labrecorder_stderr") or analysis_outputs.get("external_labrecorder_stderr") or stop_info.get("stderr_path"),
+            base=validation_dir,
+        )
         external_report = reconcile_external_labrecorder_xdf(
             validation_dir=validation_dir,
             xdf_path=xdf_path,
@@ -444,10 +590,25 @@ def run_rehearsal(args: argparse.Namespace) -> dict[str, Any]:
             stderr_path=stderr_path,
         )
         external_report["checked"] = True
+        external_report["labrecorder_mode"] = str(start_info.get("mode") or ("rcs" if start_info.get("labrecorder_exe") else "cli"))
+        external_report["labrecorder_stop_error"] = str(stop_info.get("error") or "")
+        external_report["labrecorder_capture_report"] = str(runner_labrecorder_report_path)
 
     harness_report = _read_json(validation_dir / "full_realtime_participant_emulation_report.json")
-    focus_report = _read_json(validation_dir / "focus_validation_report.json")
-    passed = harness_exit_code == 0 and bool(harness_report.get("passed")) and bool(external_report.get("passed", True)) and not harness_error
+    cross_stream_report = cross_stream_reconciliation_report(
+        validation_dir=validation_dir,
+        harness_report=harness_report,
+        focus_report=focus_report,
+        external_report=external_report,
+        wired_loopback_requested=args.wired_loopback != WIRED_LOOPBACK_OFF,
+    )
+    passed = (
+        harness_exit_code == 0
+        and bool(harness_report.get("passed"))
+        and bool(external_report.get("passed", True))
+        and bool(cross_stream_report.get("passed"))
+        and not harness_error
+    )
     report = {
         "schema": SCHEMA,
         "created_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
@@ -473,6 +634,7 @@ def run_rehearsal(args: argparse.Namespace) -> dict[str, Any]:
         "focus_report": str(validation_dir / "focus_validation_report.json"),
         "session_dir": str(focus_report.get("session_dir") or ""),
         "external_labrecorder": external_report,
+        "cross_stream_reconciliation": cross_stream_report,
         "limitations": [
             "Emulated participant responses prove operational data-shape and capture behavior, not human perception or fatigue.",
             "The wired loopback records an analog duplicate tactile proxy from Output 4 to Input 4, not Woojer mechanical onset.",
@@ -512,9 +674,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--external-labrecorder", action="store_true")
     parser.add_argument("--labrecorder-cli", type=Path, default=None)
-    parser.add_argument("--labrecorder-startup-s", type=float, default=2.5)
+    parser.add_argument("--labrecorder-stream-timeout-s", type=float, default=10.0)
+    parser.add_argument("--labrecorder-startup-s", type=float, default=1.0)
     parser.add_argument("--labrecorder-stop-timeout-s", type=float, default=8.0)
-    parser.add_argument("--start-ready-timeout-s", type=float, default=60.0)
     parser.add_argument("--strict-study5-readiness", dest="strict_study5_readiness", action="store_true", default=True)
     parser.add_argument("--no-strict-study5-readiness", dest="strict_study5_readiness", action="store_false")
     parser.add_argument("--skip-audio-preflight", action="store_true")

@@ -174,8 +174,16 @@ and Segment 6 and before relying on LSL markers for EEG alignment.
    folder contains participant block CSVs with `Trial_Start_Sample`,
    `Looming_Onset_Sample`, `Tactile_Onset_Sample`,
    `Response_Window_Onset_Sample`, and `Trial_End_Sample`.
-2. Start LabRecorder or the lab EEG recorder before block playback and confirm
-   both LSL streams are visible:
+2. In Focus Mode, complete participant metadata and press `Submit setup` before
+   starting the run. That setup submission creates the session-lifetime LSL
+   outlets and keeps `Start Run` locked until the runner can prepare them.
+   If using the runner-owned LabRecorder path, enable `Record full-session
+   LabRecorder XDF` before setup/start; the runner will confirm both LSL
+   streams by session `source_id`, start LabRecorder through RCS, wait until
+   LabRecorder reports data collection started for both streams, and hold
+   playback until that gate passes. If using a separate lab EEG recorder, start
+   it after setup submission but before block playback and confirm both LSL
+   streams are visible:
    - `PPSMarkersV2` for rich reconstructable string markers.
    - `PPSTriggerCodes` for numeric trigger codes.
 3. Play a short block or use a prepared dry-run participant. Do not use

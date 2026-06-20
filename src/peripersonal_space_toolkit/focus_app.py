@@ -533,6 +533,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--no-internal-xdf", action="store_true", help="Do not write the local events.xdf mirror.")
     parser.add_argument("--no-analysis-csv", action="store_true", help="Do not write immediate analysis CSV outputs.")
     parser.add_argument("--no-backup-recording", action="store_true", help="Do not write the optional fail-safe local recording WAV.")
+    parser.add_argument("--external-labrecorder", action="store_true", help="Start runner-owned LabRecorder RCS capture after LSL outlets are online and before playback.")
+    parser.add_argument("--labrecorder-cli", type=Path, default=None, help="Optional explicit path to LabRecorderCLI.exe used to find the LabRecorder bundle.")
+    parser.add_argument("--labrecorder-stream-timeout-s", type=float, default=10.0, help="Seconds to wait for runner LSL streams before starting LabRecorder.")
+    parser.add_argument("--labrecorder-startup-s", type=float, default=1.0, help="Seconds to wait after LabRecorder starts before playback may continue.")
+    parser.add_argument("--labrecorder-stop-timeout-s", type=float, default=8.0, help="Seconds to wait for LabRecorder to close the XDF at session end.")
     parser.add_argument(
         "--wired-loopback",
         choices=[WIRED_LOOPBACK_OFF, WIRED_LOOPBACK_CLI_OUTPUT4_TACTILE_PROXY],
@@ -674,6 +679,14 @@ def _center_dialog_on_primary_screen(q: dict[str, Any], dialog: Any) -> None:
 
 
 def _widget_screen_center(widget: Any) -> tuple[int, int, str]:
+    try:
+        center = widget.mapToGlobal(widget.rect().center())
+        x = int(center.x())
+        y = int(center.y())
+        if x or y:
+            return x, y, "qt_map_to_global"
+    except Exception:
+        pass
     if sys.platform == "win32":
         try:
             import ctypes
@@ -688,8 +701,33 @@ def _widget_screen_center(widget: Any) -> tuple[int, int, str]:
                     return int(rect.left + width / 2), int(rect.top + height / 2), "win32_get_window_rect"
         except Exception:
             pass
-    center = widget.mapToGlobal(widget.rect().center())
-    return int(center.x()), int(center.y()), "qt_map_to_global"
+    return 0, 0, "unresolved"
+
+
+def _force_foreground_window(widget: Any) -> None:
+    if sys.platform != "win32":
+        return
+    try:
+        import ctypes
+
+        hwnd = int(widget.winId())
+        if not hwnd:
+            return
+        user32 = ctypes.windll.user32
+        if user32.IsIconic(hwnd):
+            user32.ShowWindow(hwnd, 9)  # SW_RESTORE
+        swp_flags = 0x0001 | 0x0002 | 0x0040  # SWP_NOSIZE | SWP_NOMOVE | SWP_SHOWWINDOW
+        user32.SetWindowPos(hwnd, -1, 0, 0, 0, 0, swp_flags)  # HWND_TOPMOST
+        user32.BringWindowToTop(hwnd)
+        user32.SetActiveWindow(hwnd)
+        user32.SetForegroundWindow(hwnd)
+        try:
+            user32.SwitchToThisWindow(hwnd, True)
+        except Exception:
+            pass
+        user32.SetWindowPos(hwnd, -2, 0, 0, 0, 0, swp_flags)  # HWND_NOTOPMOST
+    except Exception:
+        pass
 
 
 def _format_duration(seconds: float) -> str:
@@ -746,6 +784,13 @@ def _wired_loopback_checkbox_text() -> str:
     return (
         "Record wired loopback from Input 4\n"
         "(Output 4 always mirrors tactile; patch Output 4 to Input 4)"
+    )
+
+
+def _external_labrecorder_checkbox_text() -> str:
+    return (
+        "Record full-session LabRecorder XDF\n"
+        "(Runner starts LabRecorder after LSL appears and before playback)"
     )
 
 
@@ -3473,6 +3518,11 @@ def _capture_options_from_args(args: argparse.Namespace) -> SessionCaptureOption
         write_analysis_csvs=not args.no_analysis_csv,
         start_backup_recording=not args.no_backup_recording,
         wired_loopback_mode=normalize_wired_loopback_mode(args.wired_loopback),
+        start_external_labrecorder=bool(args.external_labrecorder),
+        external_labrecorder_cli=str(args.labrecorder_cli or ""),
+        external_labrecorder_stream_timeout_s=float(args.labrecorder_stream_timeout_s),
+        external_labrecorder_startup_s=float(args.labrecorder_startup_s),
+        external_labrecorder_stop_timeout_s=float(args.labrecorder_stop_timeout_s),
     )
 
 
@@ -4769,8 +4819,9 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
     topup_delay_max_ms = max(topup_delay_min_ms, _env_float("PPS_FOCUS_VALIDATION_TOPUP_DELAY_MAX_MS", 500.0))
     backend_requested = os.environ.get("PPS_FOCUS_VALIDATION_MOUSE_BACKEND", "win32").strip().lower() or "win32"
     records: list[dict[str, Any]] = []
-    scheduled_events: set[int] = set()
-    completed_events: set[int] = set()
+    scheduled_events: set[str] = set()
+    scheduled_response_keys: set[str] = set()
+    completed_events: set[str] = set()
     pending: list[dict[str, Any]] = []
     start_clicked = {"value": False}
     start_gate_state: dict[str, Any] = {}
@@ -4832,10 +4883,36 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
         x, y, _source = _widget_screen_center(window.target_button)
         return x, y
 
+    def _select_combo_data(combo: Any, value: str) -> None:
+        try:
+            index = combo.findData(value)
+            if int(index) >= 0:
+                combo.setCurrentIndex(index)
+        except Exception:
+            pass
+
+    def _submit_mock_setup_if_needed() -> None:
+        if bool(getattr(window, "demographics_submitted", False)):
+            return
+        try:
+            if not str(window.participant_name_input.text() or "").strip():
+                window.participant_name_input.setText("Mock Participant")
+            if not str(window.age_input.text() or "").strip():
+                window.age_input.setText("30")
+            _select_combo_data(window.handedness_combo, "right")
+            _select_combo_data(window.gender_combo, "prefer_not_to_say")
+            submit = getattr(window, "setup_submit_button", None)
+            if submit is not None and submit.isEnabled():
+                backend = _click_widget(submit, "Submit setup", preferred_backend="qtest")
+                records.append({"label": "Submit setup", "backend": backend, "timestamp_unix": time.time()})
+        except Exception as exc:
+            records.append({"label": "participant_setup_submit_failed", "message": str(exc), "timestamp_unix": time.time()})
+
     def _activate_widget_for_os_click(widget: Any) -> None:
         try:
             window.dialog.raise_()
             window.dialog.activateWindow()
+            _force_foreground_window(window.dialog)
             widget.setFocus(q["Qt"].FocusReason.MouseFocusReason)
             q["QApplication"].processEvents()
             time.sleep(0.02)
@@ -4846,6 +4923,7 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
         try:
             window.dialog.raise_()
             window.dialog.activateWindow()
+            _force_foreground_window(window.dialog)
             window.dialog.setFocus(q["Qt"].FocusReason.ShortcutFocusReason)
             q["QApplication"].processEvents()
             time.sleep(0.02)
@@ -4873,12 +4951,47 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
         QTest.keyClick(window.dialog, q["Qt"].Key.Key_Space)
         return "qtest_space"
 
+    def _logged_mouse_click_count() -> int:
+        controller = window.controller
+        logger = getattr(controller, "logger", None) if controller is not None else None
+        events = getattr(logger, "events", []) if logger is not None else []
+        return sum(1 for event in events if getattr(event, "event_type", "") == "mouse_click")
+
+    def _pump_click_events() -> None:
+        try:
+            q["QApplication"].processEvents()
+            time.sleep(0.035)
+            q["QApplication"].processEvents()
+        except Exception:
+            pass
+
+    def _send_win32_click(widget: Any) -> str:
+        if window._offscreen_platform():
+            return "win32_skipped_offscreen"
+        import ctypes
+
+        x, y = _target_center() if widget is window.target_button else _widget_screen_center(widget)[:2]
+        ctypes.windll.user32.SetCursorPos(int(x), int(y))
+        time.sleep(0.035)
+        ctypes.windll.user32.mouse_event(0x0002, 0, 0, 0, 0)
+        time.sleep(0.025)
+        ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
+        _pump_click_events()
+        return "win32"
+
     def _click_widget(widget: Any, label: str, *, preferred_backend: str = "qtest") -> str:
         if widget is None or not widget.isEnabled():
             return "skipped_disabled"
+        verify_target_click = (
+            widget is window.target_button
+            and window.controller is not None
+            and window.pending_instruction_request is None
+        )
+        before_clicks = _logged_mouse_click_count() if verify_target_click else -1
         backend_used = preferred_backend
         if preferred_backend == "qtest" or window._offscreen_platform():
             QTest.mouseClick(widget, q["Qt"].MouseButton.LeftButton)
+            _pump_click_events()
             return "qtest_control"
         _activate_widget_for_os_click(widget)
         if preferred_backend == "pyautogui":
@@ -4889,6 +5002,7 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
                 pyautogui.PAUSE = 0
                 x, y, _source = _widget_screen_center(widget)
                 pyautogui.click(int(x), int(y))
+                _pump_click_events()
                 return "pyautogui"
             except Exception as exc:
                 records.append({"label": "pyautogui_backend_unavailable", "message": str(exc), "timestamp_unix": time.time()})
@@ -4900,24 +5014,37 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
                 mouse = Controller()
                 x, y, _source = _widget_screen_center(widget)
                 mouse.position = (int(x), int(y))
+                time.sleep(0.035)
                 mouse.press(Button.left)
+                time.sleep(0.025)
                 mouse.release(Button.left)
+                _pump_click_events()
+                if verify_target_click and _logged_mouse_click_count() <= before_clicks:
+                    try:
+                        fallback = _send_win32_click(widget)
+                        if _logged_mouse_click_count() > before_clicks:
+                            return f"pynput+{fallback}_recovery"
+                    except Exception as fallback_exc:
+                        records.append({"label": "win32_recovery_unavailable", "message": str(fallback_exc), "timestamp_unix": time.time()})
+                    QTest.mouseClick(widget, q["Qt"].MouseButton.LeftButton)
+                    _pump_click_events()
+                    return "pynput+qtest_recovery"
                 return "pynput"
             except Exception as exc:
                 records.append({"label": "pynput_backend_unavailable", "message": str(exc), "timestamp_unix": time.time()})
                 backend_used = "win32"
         if backend_used == "win32" and not window._offscreen_platform():
             try:
-                import ctypes
-
-                x, y = _target_center() if widget is window.target_button else _widget_screen_center(widget)[:2]
-                ctypes.windll.user32.SetCursorPos(int(x), int(y))
-                ctypes.windll.user32.mouse_event(0x0002, 0, 0, 0, 0)
-                ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
-                return "win32"
+                backend = _send_win32_click(widget)
+                if verify_target_click and _logged_mouse_click_count() <= before_clicks:
+                    QTest.mouseClick(widget, q["Qt"].MouseButton.LeftButton)
+                    _pump_click_events()
+                    return f"{backend}+qtest_recovery"
+                return backend
             except Exception as exc:
                 records.append({"label": "win32_backend_unavailable", "message": str(exc), "timestamp_unix": time.time()})
         QTest.mouseClick(widget, q["Qt"].MouseButton.LeftButton)
+        _pump_click_events()
         return "qtest"
 
     def _continue_instruction_if_needed() -> None:
@@ -4949,13 +5076,17 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
             return
         active_miss_keys = _ensure_miss_plan()
         for event in controller.logger.events:
-            if event.event_type != "tactile_onset" or event.event_id in scheduled_events:
+            event_key = f"event:{event.event_id}"
+            if event.event_type != "tactile_onset" or event_key in scheduled_events:
                 continue
             payload = dict(event.payload or {})
             is_topup = _truthy(payload.get("is_topup") or payload.get("Is_Topup") or payload.get("block_is_topup_block"))
             block_index = _validation_int(payload.get("block_index") or payload.get("block_number"), default=0)
             sample_index = _validation_int(payload.get("sample_index") or payload.get("planned_sample_index"), default=0)
             key = _validation_event_key(block_index, payload, sample_index)
+            if key in scheduled_response_keys:
+                scheduled_events.add(event_key)
+                continue
             should_miss = (not is_topup) and key in active_miss_keys
             if is_topup:
                 delay_ms = rng.uniform(topup_delay_min_ms, topup_delay_max_ms)
@@ -4966,9 +5097,11 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
             else:
                 delay_ms = rng.uniform(delay_min_ms, delay_max_ms)
                 action = "standard_click"
-            scheduled_events.add(event.event_id)
+            scheduled_events.add(event_key)
+            scheduled_response_keys.add(key)
             item = {
                 "event_id": event.event_id,
+                "schedule_key": event_key,
                 "trial_uid": str(payload.get("trial_uid") or payload.get("Trial_UID") or ""),
                 "source_trial_uid": str(payload.get("source_trial_uid") or payload.get("Source_Trial_UID") or ""),
                 "block_index": block_index,
@@ -4980,7 +5113,75 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
                 "planned_delay_ms": delay_ms,
             }
             if should_miss:
-                completed_events.add(event.event_id)
+                completed_events.add(event_key)
+                records.append({**item, "label": "tactile_response_plan", "timestamp_unix": time.time()})
+            else:
+                pending.append(item)
+
+    def _timeline_block_is_topup(block_index: int) -> bool:
+        controller = window.controller
+        active_block = getattr(controller, "_active_block", None) if controller is not None else None
+        metadata = dict(getattr(active_block, "metadata", {}) or {}) if active_block is not None else {}
+        active_index = _validation_int(getattr(active_block, "index", ""), default=-1) if active_block is not None else -1
+        if active_index == int(block_index):
+            return _truthy(metadata.get("is_topup") or metadata.get("is_topup_block"))
+        item = window._run_plan_item_by_number(getattr(window, "active_display_block_index", None) or 0)
+        return bool(item is not None and str(item.get("kind") or "") == "topup")
+
+    def _schedule_timeline_cues() -> None:
+        controller = window.controller
+        timeline = getattr(window, "timeline_state", None)
+        anchor = getattr(window, "_timeline_perf_anchor", None)
+        if controller is None or timeline is None or not bool(getattr(timeline, "active", False)):
+            return
+        if anchor is None:
+            return
+        block_index = _validation_int(getattr(timeline, "block_index", ""), default=0)
+        if block_index <= 0:
+            return
+        active_miss_keys = _ensure_miss_plan()
+        is_topup = _timeline_block_is_topup(block_index)
+        for cue in list(getattr(timeline, "cues", []) or []):
+            sample_index = getattr(cue, "sample_index", None)
+            payload = {"trial_uid": getattr(cue, "trial_uid", ""), "trial_number": getattr(cue, "trial_number", "")}
+            key = _validation_event_key(
+                block_index,
+                payload,
+                _validation_int(sample_index, default=int(getattr(cue, "cue_id", 0) or 0)),
+            )
+            event_key = f"timeline:{block_index}:{getattr(cue, 'cue_id', '')}:{getattr(cue, 'trial_uid', '')}"
+            if event_key in scheduled_events or key in scheduled_response_keys:
+                scheduled_events.add(event_key)
+                continue
+            should_miss = (not is_topup) and key in active_miss_keys
+            if is_topup:
+                delay_ms = rng.uniform(topup_delay_min_ms, topup_delay_max_ms)
+                action = "topup_click"
+            elif should_miss:
+                delay_ms = 0.0
+                action = "deliberate_miss"
+            else:
+                delay_ms = rng.uniform(delay_min_ms, delay_max_ms)
+                action = "standard_click"
+            scheduled_events.add(event_key)
+            scheduled_response_keys.add(key)
+            tactile_monotonic = float(anchor) + float(getattr(cue, "time_s", 0.0) or 0.0)
+            item = {
+                "event_id": event_key,
+                "schedule_key": event_key,
+                "trial_uid": str(getattr(cue, "trial_uid", "") or ""),
+                "source_trial_uid": "",
+                "block_index": block_index,
+                "is_topup": is_topup,
+                "topup_role": "timeline",
+                "action": action,
+                "tactile_monotonic_time": tactile_monotonic,
+                "due_monotonic_time": tactile_monotonic + delay_ms / 1000.0,
+                "planned_delay_ms": delay_ms,
+                "schedule_source": "timeline",
+            }
+            if should_miss:
+                completed_events.add(event_key)
                 records.append({**item, "label": "tactile_response_plan", "timestamp_unix": time.time()})
             else:
                 pending.append(item)
@@ -4988,10 +5189,11 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
     def _fire_due_responses() -> None:
         now = time.perf_counter()
         for item in list(pending):
-            if item["event_id"] in completed_events or now < float(item["due_monotonic_time"]):
+            schedule_key = str(item.get("schedule_key") or item.get("event_id"))
+            if schedule_key in completed_events or now < float(item["due_monotonic_time"]):
                 continue
             backend = _click_widget(window.target_button, f"tactile response {item['trial_uid']}", preferred_backend=backend_requested)
-            completed_events.add(int(item["event_id"]))
+            completed_events.add(schedule_key)
             pending.remove(item)
             records.append(
                 {
@@ -5007,6 +5209,7 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
         if window.result is not None:
             q["QTimer"].singleShot(1000, window.dialog.accept)
             return
+        _submit_mock_setup_if_needed()
         if (
             not start_clicked["value"]
             and window.start_button.isEnabled()
@@ -5016,6 +5219,7 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
             start_clicked["value"] = True
             records.append({"label": "Start Run", "backend": backend, "timestamp_unix": time.time()})
         _continue_instruction_if_needed()
+        _schedule_timeline_cues()
         _schedule_tactile_events()
         _fire_due_responses()
         q["QTimer"].singleShot(20, _poll)
@@ -5085,6 +5289,13 @@ def _write_validation_focus_report(
         "played_instruction_duration_s": sum(getattr(engine, "played_instruction_durations_s", [])) if engine is not None else None,
         "validation_audio_realtime": bool(getattr(engine, "realtime", False)) if engine is not None else False,
     }
+    if window.result is not None:
+        analysis_outputs = dict(getattr(window.result, "analysis_outputs", {}) or {})
+        payload["analysis_outputs"] = {str(key): str(value) for key, value in analysis_outputs.items()}
+        payload["external_labrecorder_xdf"] = str(analysis_outputs.get("external_labrecorder_xdf") or "")
+        payload["external_labrecorder_report"] = str(analysis_outputs.get("external_labrecorder_report") or "")
+        payload["external_labrecorder_stdout"] = str(analysis_outputs.get("external_labrecorder_stdout") or "")
+        payload["external_labrecorder_stderr"] = str(analysis_outputs.get("external_labrecorder_stderr") or "")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
@@ -5135,6 +5346,7 @@ class FocusModeWindow:
         self.thread: threading.Thread | None = None
         self.result: Any | None = None
         self.exit_code = 1
+        self.demographics_submitted = False
         self.pending_instruction_request: dict[str, Any] | None = None
         self._pre_run_controls: list[Any] = []
         self._prewarm_thread: threading.Thread | None = None
@@ -5275,6 +5487,7 @@ class FocusModeWindow:
 
         self.start_button = q["QPushButton"]("Start Run")
         self.start_button.setObjectName("primaryButton")
+        self.start_button.setEnabled(False)
         self.pause_button = q["QPushButton"]("Pause")
         self.stop_button = q["QPushButton"]("Stop")
         self.stop_button.setObjectName("dangerButton")
@@ -5433,6 +5646,12 @@ class FocusModeWindow:
         setup_fields.setColumnStretch(1, 1)
         data_logging_layout.addLayout(setup_fields)
         data_logging_layout.addWidget(self.include_name_lsl_checkbox)
+        self.setup_submit_button = q["QPushButton"]("Submit setup")
+        self.setup_submit_button.setObjectName("participantSetupSubmitButton")
+        self.setup_submit_button.setToolTip("Submit participant setup and create the session LSL marker streams.")
+        self.setup_submit_button.setMinimumHeight(profile.button_min_height)
+        self.setup_submit_button.clicked.connect(self._submit_participant_setup)
+        data_logging_layout.addWidget(self.setup_submit_button)
         self._pre_run_controls.extend(
             [
                 self.participant_code_combo,
@@ -5441,6 +5660,7 @@ class FocusModeWindow:
                 self.age_input,
                 self.handedness_combo,
                 self.gender_combo,
+                self.setup_submit_button,
             ]
         )
 
@@ -5465,6 +5685,17 @@ class FocusModeWindow:
             == WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY
         )
         data_logging_layout.addWidget(self.wired_loopback_checkbox)
+        self.external_labrecorder_checkbox = q["QCheckBox"](_external_labrecorder_checkbox_text())
+        self.external_labrecorder_checkbox.setObjectName("externalLabRecorderCheckbox")
+        self.external_labrecorder_checkbox.setToolTip(
+            "Starts LabRecorder through its remote-control socket as a child process owned by the runner. "
+            "Playback waits until PPSMarkersV2 and PPSTriggerCodes are discoverable and LabRecorder is running."
+        )
+        self.external_labrecorder_checkbox.setMinimumHeight(max(profile.button_min_height + 18, profile.input_min_height + 22))
+        self.external_labrecorder_checkbox.setChecked(bool(self.capture_options.start_external_labrecorder))
+        self.external_labrecorder_checkbox.setEnabled(bool(self.capture_options.enable_lsl))
+        data_logging_layout.addWidget(self.external_labrecorder_checkbox)
+        self._pre_run_controls.append(self.external_labrecorder_checkbox)
         data_logging_layout.addStretch(1)
 
         experiment_settings_layout.addWidget(_subtitle(q, "Session"))
@@ -5649,7 +5880,7 @@ class FocusModeWindow:
         self.timer = q["QTimer"](self.dialog)
         self.timer.timeout.connect(self._drain)
         self.timer.start(100)
-        self.dialog.finished.connect(lambda _code: self._stop())
+        self.dialog.finished.connect(self._handle_dialog_finished)
         self._refresh_run_plan(select_default=True)
         self._install_operator_action_shortcuts()
 
@@ -6324,6 +6555,9 @@ class FocusModeWindow:
         )
 
     def _clear_participant_details(self) -> None:
+        self.demographics_submitted = False
+        self.start_button.setEnabled(False)
+        self._release_prepared_controller()
         if hasattr(self, "participant_name_input"):
             self.participant_name_input.clear()
         if hasattr(self, "age_input"):
@@ -6334,6 +6568,8 @@ class FocusModeWindow:
             combo = getattr(self, combo_name, None)
             if combo is not None:
                 combo.setCurrentIndex(0)
+        if hasattr(self, "setup_submit_button"):
+            self.setup_submit_button.setEnabled(True)
 
     def _refresh_loaded_package_display(self) -> None:
         profile = self.layout_profile
@@ -6438,6 +6674,11 @@ class FocusModeWindow:
                 if bool(self.wired_loopback_checkbox.isChecked())
                 else WIRED_LOOPBACK_OFF
             ),
+            start_external_labrecorder=bool(self.external_labrecorder_checkbox.isChecked()),
+            external_labrecorder_cli=str(self.capture_options.external_labrecorder_cli or ""),
+            external_labrecorder_stream_timeout_s=float(self.capture_options.external_labrecorder_stream_timeout_s),
+            external_labrecorder_startup_s=float(self.capture_options.external_labrecorder_startup_s),
+            external_labrecorder_stop_timeout_s=float(self.capture_options.external_labrecorder_stop_timeout_s),
         )
 
     def _runner_metadata(self) -> dict[str, Any]:
@@ -6551,6 +6792,115 @@ class FocusModeWindow:
                 control.setEnabled(False)
             except Exception:
                 pass
+
+    def _participant_setup_failures(self) -> list[str]:
+        failures: list[str] = []
+        if not str(self.participant_name_input.text() or "").strip():
+            failures.append("name")
+        age_text = str(self.age_input.text() or "").strip()
+        if not age_text:
+            failures.append("age")
+        else:
+            try:
+                age_value = float(age_text)
+            except ValueError:
+                failures.append("valid age")
+            else:
+                if age_value <= 0 or age_value > 120:
+                    failures.append("valid age")
+        if not str(self.handedness_combo.currentData() or "").strip():
+            failures.append("handedness")
+        if not str(self.gender_combo.currentData() or "").strip():
+            failures.append("gender")
+        return failures
+
+    def _controller_lsl_status(self) -> Any:
+        events = getattr(self.controller, "events", None)
+        return getattr(events, "lsl_status", None)
+
+    def _release_prepared_controller(self) -> None:
+        controller = self.controller
+        if controller is None:
+            return
+        events = getattr(controller, "events", None)
+        close = getattr(events, "close", None)
+        if callable(close):
+            try:
+                close()
+            except Exception:
+                pass
+        self.controller = None
+
+    def _handle_dialog_finished(self, _code: int) -> None:
+        self._stop()
+        if not (self.thread is not None and self.thread.is_alive()):
+            self._release_prepared_controller()
+
+    def _submit_participant_setup(self) -> bool:
+        if self.demographics_submitted and self.controller is not None:
+            return True
+        failures = self._participant_setup_failures()
+        if failures:
+            self.event_label.setText(f"Complete participant setup: {', '.join(failures)}.")
+            return False
+        self.capture_options = self._runtime_capture_options()
+        self.enable_missed_trial_topup = bool(self.topup_checkbox.isChecked())
+        self._refresh_run_plan()
+        runner_metadata = self._runner_metadata()
+        try:
+            if self.controller_factory is not None:
+                self.controller = self.controller_factory(
+                    self.package,
+                    capture_options=self.capture_options,
+                    enable_topup=self.enable_missed_trial_topup,
+                    runner_metadata=runner_metadata,
+                    topup_approval_callback=self._request_topup_approval if self.enable_missed_trial_topup else None,
+                    instruction_continue_callback=self._request_instruction_continue,
+                )
+            else:
+                self.controller = SessionRunnerController(
+                    self.package,
+                    audio_engine=None,
+                    capture_options=self.capture_options,
+                    enable_topup=self.enable_missed_trial_topup,
+                    runner_metadata=runner_metadata,
+                    topup_approval_callback=self._request_topup_approval if self.enable_missed_trial_topup else None,
+                    instruction_continue_callback=self._request_instruction_continue,
+                )
+        except Exception as exc:
+            self.controller = None
+            self.event_label.setText(f"Participant setup could not prepare LSL: {exc}")
+            return False
+        lsl_status = self._controller_lsl_status()
+        if (
+            bool(self.capture_options.enable_lsl)
+            and hasattr(lsl_status, "enabled")
+            and not bool(getattr(lsl_status, "enabled", False))
+        ):
+            message = str(getattr(lsl_status, "message", "LSL streams were not created.") or "LSL streams were not created.")
+            self._release_prepared_controller()
+            self.event_label.setText(f"Participant setup could not prepare LSL: {message}")
+            return False
+        self.demographics_submitted = True
+        self._freeze_pre_run_controls()
+        self.start_button.setEnabled(True)
+        self.run_state_chip.setText("LSL Ready" if bool(self.capture_options.enable_lsl) else "Ready")
+        lsl_message = str(getattr(lsl_status, "message", "") or "")
+        self.event_label.setText(lsl_message or "Participant setup submitted")
+        _append_output_diary_event(
+            "participant_setup_submitted",
+            package=self.package,
+            participant_id=str(runner_metadata.get("participant_code") or self.package.participant_id),
+            capture_options=self.capture_options.as_dict(),
+            payload={
+                "lsl_enabled": bool(getattr(lsl_status, "enabled", False)) if lsl_status is not None else bool(self.capture_options.enable_lsl),
+                "lsl_message": lsl_message,
+                "topup_enabled": self.enable_missed_trial_topup,
+                "participant_metadata_fields": sorted(key for key, value in runner_metadata.items() if str(value or "").strip()),
+            },
+            create=True,
+        )
+        return True
 
     def _install_primary_action_shortcuts(self) -> None:
         q = self.q
@@ -6884,49 +7234,34 @@ class FocusModeWindow:
     def start(self) -> None:
         if self.thread is not None and self.thread.is_alive():
             return
-        self.capture_options = self._runtime_capture_options()
-        self.enable_missed_trial_topup = bool(self.topup_checkbox.isChecked())
+        if not self.demographics_submitted or self.controller is None:
+            self.start_button.setEnabled(False)
+            self.event_label.setText("Submit participant setup before starting playback.")
+            return
+        self.capture_options = self.controller.capture_options
+        self.enable_missed_trial_topup = bool(self.enable_missed_trial_topup)
         self._refresh_run_plan()
         self._clear_block_preview()
         self.topup_draft_items = []
         self._refresh_topup_draft_widget()
-        runner_metadata = self._runner_metadata()
         _append_output_diary_event(
             "start_run_clicked",
             package=self.package,
-            participant_id=str(runner_metadata.get("participant_code") or self.package.participant_id),
+            participant_id=self.package.participant_id,
             capture_options=self.capture_options.as_dict(),
             payload={"topup_enabled": self.enable_missed_trial_topup},
             create=True,
         )
-        if self.controller_factory is not None:
-            self.controller = self.controller_factory(
-                self.package,
-                capture_options=self.capture_options,
-                enable_topup=self.enable_missed_trial_topup,
-                runner_metadata=runner_metadata,
-                topup_approval_callback=self._request_topup_approval if self.enable_missed_trial_topup else None,
-                instruction_continue_callback=self._request_instruction_continue,
-            )
-        else:
+        if self.controller_factory is None and getattr(self.controller, "audio_engine", None) is None:
             try:
                 self._shutdown_owned_audio_engine()
                 self._owned_audio_engine = self._create_real_audio_engine_on_ui_thread()
+                self.controller.audio_engine = self._owned_audio_engine
             except Exception as exc:
                 self._handle_startup_failure(f"Audio initialization failed: {exc}")
                 return
-            self.controller = SessionRunnerController(
-                self.package,
-                audio_engine=self._owned_audio_engine,
-                capture_options=self.capture_options,
-                enable_topup=self.enable_missed_trial_topup,
-                runner_metadata=runner_metadata,
-                topup_approval_callback=self._request_topup_approval if self.enable_missed_trial_topup else None,
-                instruction_continue_callback=self._request_instruction_continue,
-            )
         self.start_button.setEnabled(False)
         self._set_primary_action_shortcuts_enabled(False)
-        self._freeze_pre_run_controls()
         self.pause_button.setEnabled(True)
         self.stop_button.setEnabled(True)
         self.target_button.setEnabled(True)
@@ -7210,6 +7545,18 @@ class FocusModeWindow:
             elapsed = self.timeline_state.elapsed_s
         self._update_tactile_progress(elapsed)
 
+    def _activate_response_target_window(self) -> None:
+        if self._offscreen_platform():
+            return
+        try:
+            self.dialog.raise_()
+            self.dialog.activateWindow()
+            _force_foreground_window(self.dialog)
+            self.target_button.setFocus(self.q["Qt"].FocusReason.MouseFocusReason)
+            self.q["QApplication"].processEvents()
+        except Exception:
+            pass
+
     def _drain(self) -> None:
         while not self.messages.empty():
             kind, payload = self.messages.get_nowait()
@@ -7248,6 +7595,8 @@ class FocusModeWindow:
                 self._update_tactile_progress(elapsed, anchor_to_now=True)
             elif kind == "event":
                 self.event_label.setText(str(payload))
+                if str(payload) in {"external_labrecorder_started", "session_start"}:
+                    self._activate_response_target_window()
             elif kind == "prewarm_progress":
                 self.prewarm_label.setText(f"Next {payload.get('participant_id')}: {payload.get('message')}")
             elif kind == "prewarm":

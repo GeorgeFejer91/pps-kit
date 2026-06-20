@@ -70,6 +70,18 @@ def build_focus_runner_command(
         command.append("--no-analysis-csv")
     if not bool(options.get("start_backup_recording", True)):
         command.append("--no-backup-recording")
+    if bool(options.get("start_external_labrecorder", False)):
+        command.append("--external-labrecorder")
+        labrecorder_cli = str(options.get("external_labrecorder_cli") or "").strip()
+        if labrecorder_cli:
+            command.extend(["--labrecorder-cli", labrecorder_cli])
+        for option_key, flag in (
+            ("external_labrecorder_stream_timeout_s", "--labrecorder-stream-timeout-s"),
+            ("external_labrecorder_startup_s", "--labrecorder-startup-s"),
+            ("external_labrecorder_stop_timeout_s", "--labrecorder-stop-timeout-s"),
+        ):
+            if option_key in options:
+                command.extend([flag, str(options[option_key])])
     if normalize_wired_loopback_mode(options.get("wired_loopback_mode")) == WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY:
         command.extend(["--wired-loopback", WIRED_LOOPBACK_CLI_OUTPUT4_TACTILE_PROXY])
     if enable_missed_trial_topup or bool(options.get("enable_missed_trial_topup", False)):
