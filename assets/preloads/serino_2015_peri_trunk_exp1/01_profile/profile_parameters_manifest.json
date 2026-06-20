@@ -6,6 +6,8 @@
   "doi": "10.1038/srep18603",
   "source_url": "https://www.nature.com/articles/srep18603",
   "verification_status": "partial",
+  "publication_status": "published",
+  "profile_type": "",
   "paper_group_key": "doi:10.1038/srep18603",
   "visible_variant_label": "C",
   "variant_display": "Serino 2015 peri-trunk PPS Experiment 1 - Variant C",
@@ -17,6 +19,9 @@
     "gui_recreatable": true,
     "segment_0_to_4_profile_checks_passed": true,
     "segment_1_to_6_materializable": true,
+    "finished_profile": true,
+    "segment_6_launchable": true,
+    "profile_completion_status": "finished_segment_6_launchable",
     "missing_parameter_count": 0,
     "unsupported_structure_count": 0
   },

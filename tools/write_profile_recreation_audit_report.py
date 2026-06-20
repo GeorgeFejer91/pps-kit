@@ -44,7 +44,7 @@ def render_audit_report(status: dict[str, Any], materialization: dict[str, Any])
         if item.get("template_id")
     }
     gui_ready = [profile for profile in profiles if profile.get("profile_checks_passed") is True]
-    published_ready = [profile for profile in gui_ready if profile.get("template_id") != "study5_box_breathing_pps"]
+    published_ready = [profile for profile in gui_ready if _is_published_profile(profile)]
     missing_profiles = [
         profile for profile in profiles if int(profile.get("missing_parameter_count") or 0) > 0
     ]
@@ -183,13 +183,15 @@ def _summary_table(rows: list[tuple[str, str]]) -> str:
 def _overall_result_text(gui_ready: list[dict[str, Any]], published_ready: list[dict[str, Any]]) -> str:
     ready_ids = [str(profile.get("template_id") or "") for profile in gui_ready]
     published_ids = [str(profile.get("template_id") or "") for profile in published_ready]
+    unpublished_ids = [str(profile.get("template_id") or "") for profile in gui_ready if not _is_published_profile(profile)]
     if published_ids:
         return (
             "The current audit found "
             + _tex(str(len(ready_ids)))
             + " profile(s) that can be materialized end-to-end. "
-            + r"\texttt{study5\_\allowbreak{}box\_\allowbreak{}breathing\_\allowbreak{}pps}"
-            + " is an unpublished lab profile; the published-paper profile(s) passing current checks are "
+            + "The unpublished lab profile(s) passing current checks are "
+            + ", ".join(_texttt(template_id) for template_id in unpublished_ids)
+            + "; the published-paper profile(s) passing current checks are "
             + ", ".join(_texttt(template_id) for template_id in published_ids)
             + "."
         )
@@ -201,6 +203,10 @@ def _overall_result_text(gui_ready: list[dict[str, Any]], published_ready: list[
             "catalogued published paper yet passes all exact-recreation profile checks."
         )
     return "No profile currently passes all exact-recreation profile checks."
+
+
+def _is_published_profile(profile: dict[str, Any]) -> bool:
+    return str(profile.get("publication_status") or "published") != "unpublished_lab_profile"
 
 
 def _ready_table(profiles: list[dict[str, Any]], materialized: dict[str, dict[str, Any]]) -> str:

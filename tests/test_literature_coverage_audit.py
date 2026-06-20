@@ -40,8 +40,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 5,
     }
-    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 21
-    assert coverage["coverage_summary"]["current_profile_check_pass_count"] == 7
+    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 22
+    assert coverage["coverage_summary"]["current_profile_check_pass_count"] == 8
     assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 6
     assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 7
     assert coverage["coverage_summary"]["pubmed_screened_records"] == 48

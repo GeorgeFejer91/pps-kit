@@ -12,11 +12,19 @@ from peripersonal_space_toolkit.design import block_trial_rows, default_design, 
 from peripersonal_space_toolkit.preload_inventory import load_preload_inventory, profile_asset_status
 from peripersonal_space_toolkit.templates import DEFAULT_STUDY_TEMPLATE_ID, load_templates
 
+PINK_WHITE_STUDY5_TEMPLATE_ID = "study5_box_breathing_pps_pink_white"
+
 
 def _study5_template():
     root = Path(__file__).resolve().parents[1]
     templates = load_templates(root / "study_templates")
     return next(template for template in templates if template.template_id == DEFAULT_STUDY_TEMPLATE_ID)
+
+
+def _study5_pink_white_template():
+    root = Path(__file__).resolve().parents[1]
+    templates = load_templates(root / "study_templates")
+    return next(template for template in templates if template.template_id == PINK_WHITE_STUDY5_TEMPLATE_ID)
 
 
 def test_study5_is_first_default_preload():
@@ -251,3 +259,54 @@ def test_unpublished_study5_template_preloads_breathing_assets_and_filmstrip():
     assert {row["trial_type_label"] for row in rows} == {"Inhale trial type", "Exhale trial type"}
     assert {row["trial_strip_label"] for row in rows} == {"Inhale trial type", "Exhale trial type"}
     assert all("instruction | " in row["sequence_labels"] for row in rows)
+
+
+def test_study5_pink_white_profile_keeps_study5_defaults_with_two_sources():
+    root = Path(__file__).resolve().parents[1]
+    template = _study5_pink_white_template()
+    design = template.design
+
+    assert template.title == "Study 5 PPS box-breathing pink/white profile"
+    assert template.verification_status == "verified"
+    assert design.study_profile_reference_parameters["publication_status"] == "unpublished_lab_profile"
+    assert design.study_profile_reference_parameters["variant_source_profile_id"] == DEFAULT_STUDY_TEMPLATE_ID
+    assert design.study_profile_reference_parameters["noise_source_policy"].startswith("Pink frontal and White frontal only")
+    assert design.name == "Study 5 PPS box-breathing pink/white design"
+    assert [asset.label for asset in design.noises] == ["Pink frontal", "White frontal"]
+    assert [asset.noise_type for asset in design.noises] == ["pink", "white"]
+    assert all(PINK_WHITE_STUDY5_TEMPLATE_ID in asset.prebaked_path for asset in design.noises)
+    assert design.protocol.trial_pool_repetition_defaults == {
+        "default": 3.0,
+        "audio_tactile": 3.0,
+        "baseline": 1.5,
+        "catch": 3.0,
+    }
+    assert dashboard_app._run_setup_settings(design)["experiment_structure"] == "pre_post"
+
+    strips = design.protocol.trial_strips
+    assert [strip.label for strip in strips] == ["Inhale trial type", "Exhale trial type"]
+    for strip in strips:
+        looming = next(element for element in strip.elements if element.kind == "looming_stimulus")
+        assert looming.source_labels == ["Pink frontal", "White frontal"]
+
+    inventory = load_preload_inventory(root)
+    asset_status = profile_asset_status(PINK_WHITE_STUDY5_TEMPLATE_ID, inventory=inventory, repo_root=root)
+    assert asset_status["status"] == "ready"
+    assert asset_status["asset_count"] == 2
+    assert all(asset["sha256_ok"] is True for asset in asset_status["assets"])
+
+    trial_design = json.loads(
+        (
+            root
+            / "assets"
+            / "preloads"
+            / PINK_WHITE_STUDY5_TEMPLATE_ID
+            / "04_trial_designer"
+            / "trial_design.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert trial_design["preview_trial_count"] == 120
+    assert validate_design(design) == []
+    rows = block_trial_rows(design)
+    noncatch = [row for row in rows if row["trial_type"] == "Audio-Tactile"]
+    assert len(noncatch) == design.protocol.blocks * 2 * len(design.noises) * len(design.protocol.soa_values_ms)

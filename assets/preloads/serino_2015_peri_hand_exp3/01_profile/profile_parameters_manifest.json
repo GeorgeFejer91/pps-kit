@@ -6,6 +6,8 @@
   "doi": "10.1038/srep18603",
   "source_url": "https://www.nature.com/articles/srep18603",
   "verification_status": "partial",
+  "publication_status": "published",
+  "profile_type": "",
   "paper_group_key": "doi:10.1038/srep18603",
   "visible_variant_label": "B",
   "variant_display": "Serino 2015 peri-hand PPS Experiment 3 - Variant B",
@@ -17,6 +19,9 @@
     "gui_recreatable": false,
     "segment_0_to_4_profile_checks_passed": false,
     "segment_1_to_6_materializable": false,
+    "finished_profile": false,
+    "segment_6_launchable": false,
+    "profile_completion_status": "unfinished_preload",
     "missing_parameter_count": 0,
     "unsupported_structure_count": 1
   },

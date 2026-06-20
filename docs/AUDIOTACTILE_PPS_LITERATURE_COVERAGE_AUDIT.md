@@ -15,7 +15,7 @@ The Holmes consensus-corpus screening trail is `assets/preloads/audiotactile_hol
 The PubMed screening audit trail is `assets/preloads/audiotactile_pubmed_screening.json`, with the supplemental PubMed query-variant trail in `assets/preloads/audiotactile_pubmed_query_variant_screening.json`.
 The OpenAlex broad-screen trail is `assets/preloads/audiotactile_openalex_broad_screening.json`, with per-hit screening decisions in `assets/preloads/audiotactile_openalex_candidate_screening.json`. The additional query-variant exhaustiveness screen is `assets/preloads/audiotactile_openalex_query_variant_screening.json`. The live web sanity trail is `assets/preloads/audiotactile_web_sanity_screening.json`.
 
-Current ledger size: 74 literature records. Across the separate preload gate, 7 profile variants currently pass runnable checks. In the broader literature ledger, 29 not-yet-templated records expose toolkit-structure gaps, 21 not-yet-templated records are structurally close but lack extracted/published PPS-task parameters, and 5 records are adjacent/out of scope. The previous generic candidate bucket is now cleared: tracked records are classified by whether the PPS task is runnable, missing exact task details, blocked by an unsupported task structure, or not actually an audiotactile PPS target.
+Current ledger size: 74 literature records. Across the separate preload gate, 8 profile variants currently pass runnable checks. In the broader literature ledger, 29 not-yet-templated records expose toolkit-structure gaps, 21 not-yet-templated records are structurally close but lack extracted/published PPS-task parameters, and 5 records are adjacent/out of scope. The previous generic candidate bucket is now cleared: tracked records are classified by whether the PPS task is runnable, missing exact task details, blocked by an unsupported task structure, or not actually an audiotactile PPS target.
 
 ## Evidence Base
 
@@ -70,11 +70,11 @@ A live web sanity pass checked eight currently visible search hits and full-text
 
 ## Current Toolkit Verdict
 
-The current profile gate covers 21 templates:
+The current profile gate covers 22 templates:
 
 | Outcome | Count | Meaning |
 |---|---:|---|
-| GUI-recreatable | 7 | Current Segment 0-4 profile parameters are complete; Segment 5-6 are native toolkit generation/handoff. Six are published profiles; Study 5 is an unpublished lab profile. |
+| GUI-recreatable | 8 | Current Segment 0-4 profile parameters are complete; Segment 5-6 are native toolkit generation/handoff. Six are published profiles; the original Study 5 profile and the Study 5 pink/white variant are unpublished lab profiles. |
 | Missing publication parameters | 12 | The task looks structurally expressible, but published or encoded details are insufficient. |
 | Toolkit structural gap | 7 | The task uses a trial, audio, tactile, response, timing, coordinate, or apparatus feature that the toolkit schema does not yet model. |
 

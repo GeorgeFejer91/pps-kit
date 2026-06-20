@@ -6,6 +6,8 @@
   "doi": "10.1016/j.cognition.2015.07.012",
   "source_url": "https://noel-lab.org/wp-content/uploads/2024/05/noet-et-al-cognition-2015.pdf",
   "verification_status": "verified",
+  "publication_status": "published",
+  "profile_type": "",
   "paper_group_key": "doi:10.1016/j.cognition.2015.07.012",
   "visible_variant_label": "",
   "variant_display": "PPS as the space of the bodily self",
@@ -17,6 +19,9 @@
     "gui_recreatable": true,
     "segment_0_to_4_profile_checks_passed": true,
     "segment_1_to_6_materializable": true,
+    "finished_profile": true,
+    "segment_6_launchable": true,
+    "profile_completion_status": "finished_segment_6_launchable",
     "missing_parameter_count": 0,
     "unsupported_structure_count": 0
   },

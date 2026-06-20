@@ -34,7 +34,7 @@ from peripersonal_space_toolkit.profile_recreation import (  # noqa: E402
     READY_RUNNER,
     load_profile_recreation_status,
 )
-from peripersonal_space_toolkit.templates import DEFAULT_STUDY_TEMPLATE_ID, load_templates  # noqa: E402
+from peripersonal_space_toolkit.templates import load_templates  # noqa: E402
 
 
 SCHEMA = "pps-protocol12-profile-recreation-interface-matrix.v1"
@@ -226,7 +226,19 @@ def _target_template_ids(status: dict[str, Any], *, profile_set: str) -> list[st
     ]
     if profile_set == "ready-all":
         return ready
-    return [template_id for template_id in ready if template_id != DEFAULT_STUDY_TEMPLATE_ID]
+    return [
+        template_id
+        for template_id in ready
+        if _is_published_profile(status, template_id=template_id)
+    ]
+
+
+def _is_published_profile(status: dict[str, Any], *, template_id: str) -> bool:
+    profile = next(
+        (item for item in status.get("profiles", []) if str(item.get("template_id") or "") == template_id),
+        {},
+    )
+    return str(profile.get("publication_status") or "published") != "unpublished_lab_profile"
 
 
 def _default_blocked_samples(status: dict[str, Any], *, exclude: set[str]) -> list[str]:
@@ -273,7 +285,7 @@ def _validate_ready_profile_gate(template_id: str, profile: dict[str, Any], crit
             },
         )
     )
-    published_profile = template_id != DEFAULT_STUDY_TEMPLATE_ID
+    published_profile = str(profile.get("publication_status") or manifest.get("publication_status") or "published") != "unpublished_lab_profile"
     caveat_text = str(manifest.get("notes") or "")
     caveat_ok = bool(caveat_text) and ((not published_profile) or "original authors" in caveat_text)
     criteria.append(

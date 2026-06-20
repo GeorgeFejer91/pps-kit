@@ -20,6 +20,7 @@ from peripersonal_space_toolkit.templates import DEFAULT_STUDY_TEMPLATE_ID, load
 
 ROOT = Path(__file__).resolve().parents[1]
 VALIDATION_SCRIPT_DIR = ROOT / "validation_protocols" / "scripts"
+PINK_WHITE_STUDY5_TEMPLATE_ID = "study5_box_breathing_pps_pink_white"
 
 
 def _load_validation_script(name: str):
@@ -38,7 +39,7 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     template_ids = {template.template_id for template in templates}
     status = json.loads((root / "assets" / "preloads" / "profile_recreation_status.json").read_text(encoding="utf-8"))
 
-    assert len(templates) == 21
+    assert len(templates) == 22
     assert status["schema"] == PROFILE_RECREATION_STATUS_SCHEMA
     assert status["profile_count"] == len(templates)
     assert {profile["template_id"] for profile in status["profiles"]} == template_ids
@@ -101,12 +102,21 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
 
     study5 = profiles[DEFAULT_STUDY_TEMPLATE_ID]
     assert study5["primary_category"] == "gui_recreatable"
+    assert study5["publication_status"] == "unpublished_lab_profile"
     assert study5["runner_readiness"] == "ready"
     assert study5["profile_checks_passed"] is True
     assert study5["segment_0_to_4_profile_checks_passed"] is True
     assert study5["missing_parameter_count"] == 0
     assert study5["unsupported_structure_count"] == 0
-    assert len(status["categories"]["gui_recreatable"]) == 7
+    pink_white = profiles[PINK_WHITE_STUDY5_TEMPLATE_ID]
+    assert pink_white["primary_category"] == "gui_recreatable"
+    assert pink_white["publication_status"] == "unpublished_lab_profile"
+    assert pink_white["runner_readiness"] == "ready"
+    assert pink_white["profile_checks_passed"] is True
+    assert pink_white["segment_0_to_4_profile_checks_passed"] is True
+    assert pink_white["missing_parameter_count"] == 0
+    assert pink_white["unsupported_structure_count"] == 0
+    assert len(status["categories"]["gui_recreatable"]) == 8
 
     pfeiffer = profiles["pfeiffer_2018_lateral_perihead_left_to_right"]
     assert pfeiffer["primary_category"] == "gui_recreatable"
@@ -209,7 +219,9 @@ def test_protocol12_matrix_targets_ready_published_profiles_and_blocked_samples(
     blocked_samples = matrix._default_blocked_samples(status, exclude=set(ready_published))
 
     assert DEFAULT_STUDY_TEMPLATE_ID not in ready_published
+    assert PINK_WHITE_STUDY5_TEMPLATE_ID not in ready_published
     assert DEFAULT_STUDY_TEMPLATE_ID in ready_all
+    assert PINK_WHITE_STUDY5_TEMPLATE_ID in ready_all
     assert len(ready_published) == 6
     assert set(ready_published) < set(ready_all)
     assert len(blocked_samples) == 2

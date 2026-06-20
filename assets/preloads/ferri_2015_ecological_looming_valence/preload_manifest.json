@@ -3,6 +3,8 @@
   "template_id": "ferri_2015_ecological_looming_valence",
   "title": "Ferri 2015 ecological emotional looming sounds",
   "visible_variant_label": "B",
+  "publication_status": "published",
+  "profile_type": "audio_tactile_ecological_valence",
   "asset_mode": "bundled_local",
   "retrieval_strategy": "bundled_or_download_from_github_pages",
   "local_only": true,
@@ -42,6 +44,9 @@
     "gui_recreatable": false,
     "segment_0_to_4_profile_checks_passed": false,
     "segment_1_to_6_materializable": false,
+    "finished_profile": false,
+    "segment_6_launchable": false,
+    "profile_completion_status": "unfinished_preload",
     "missing_parameter_count": 2,
     "unsupported_structure_count": 0
   },

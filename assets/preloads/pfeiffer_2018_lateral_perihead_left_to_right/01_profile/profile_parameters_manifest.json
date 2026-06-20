@@ -6,6 +6,8 @@
   "doi": "10.1111/ejn.13872",
   "source_url": "https://doi.org/10.1111/ejn.13872",
   "verification_status": "verified",
+  "publication_status": "published",
+  "profile_type": "",
   "paper_group_key": "doi:10.1111/ejn.13872",
   "visible_variant_label": "",
   "variant_display": "Pfeiffer EJN2018 bilateral lateral trajectory profile",
@@ -17,6 +19,9 @@
     "gui_recreatable": true,
     "segment_0_to_4_profile_checks_passed": true,
     "segment_1_to_6_materializable": true,
+    "finished_profile": true,
+    "segment_6_launchable": true,
+    "profile_completion_status": "finished_segment_6_launchable",
     "missing_parameter_count": 0,
     "unsupported_structure_count": 0
   },

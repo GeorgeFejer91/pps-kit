@@ -6,6 +6,8 @@
   "doi": "10.3389/fnbeh.2015.00004",
   "source_url": "https://www.frontiersin.org/journals/behavioral-neuroscience/articles/10.3389/fnbeh.2015.00004/full",
   "verification_status": "partial",
+  "publication_status": "published",
+  "profile_type": "audio_tactile_training_plasticity",
   "paper_group_key": "doi:10.3389/fnbeh.2015.00004",
   "visible_variant_label": "",
   "variant_display": "Serino 2015 synchronous far audio-tactile PPS training",
@@ -17,6 +19,9 @@
     "gui_recreatable": false,
     "segment_0_to_4_profile_checks_passed": false,
     "segment_1_to_6_materializable": false,
+    "finished_profile": false,
+    "segment_6_launchable": false,
+    "profile_completion_status": "unfinished_preload",
     "missing_parameter_count": 2,
     "unsupported_structure_count": 0
   },

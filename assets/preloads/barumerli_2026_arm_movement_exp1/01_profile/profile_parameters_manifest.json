@@ -6,6 +6,8 @@
   "doi": "10.1038/s41598-026-36796-5",
   "source_url": "https://www.nature.com/articles/s41598-026-36796-5",
   "verification_status": "verified",
+  "publication_status": "published",
+  "profile_type": "",
   "paper_group_key": "doi:10.1038/s41598-026-36796-5",
   "visible_variant_label": "A",
   "variant_display": "Looming/receding PPS during arm movement, Experiment 1 - Variant A",
@@ -17,6 +19,9 @@
     "gui_recreatable": true,
     "segment_0_to_4_profile_checks_passed": true,
     "segment_1_to_6_materializable": true,
+    "finished_profile": true,
+    "segment_6_launchable": true,
+    "profile_completion_status": "finished_segment_6_launchable",
     "missing_parameter_count": 0,
     "unsupported_structure_count": 0
   },

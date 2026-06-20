@@ -3,6 +3,8 @@
   "template_id": "study5_box_breathing_pps",
   "title": "Study 5 PPS box-breathing profile",
   "visible_variant_label": "",
+  "publication_status": "unpublished_lab_profile",
+  "profile_type": "local_unpublished_study5_box_breathing_pps",
   "asset_mode": "bundled_local",
   "retrieval_strategy": "bundled_or_download_from_github_pages",
   "local_only": true,
@@ -42,6 +44,9 @@
     "gui_recreatable": true,
     "segment_0_to_4_profile_checks_passed": true,
     "segment_1_to_6_materializable": true,
+    "finished_profile": true,
+    "segment_6_launchable": true,
+    "profile_completion_status": "finished_segment_6_launchable",
     "missing_parameter_count": 0,
     "unsupported_structure_count": 0
   },

@@ -11,3 +11,7 @@ Entering `Edit` on a bundled/read-only profile opens the existing custom-study n
 Top-level source-card labels are parent decisions for Segment 2 trial-sequence audio boxes. When a source card is removed in Edit mode, that label is pruned immediately from every downstream sequence box before save. When a source-card label changes, existing downstream labels are renamed to the new label. Future label pickers are rebuilt from the current source pool.
 
 The backend also prunes stale custom-design `trial_strips[*].elements[*].source_labels` during save, so direct/API payloads cannot persist labels for deleted sources. Bundled profile preloads remain unchanged and read-only until copied.
+
+## Study 5 Pink/White Variant
+
+The tracked preload `study5_box_breathing_pps_pink_white` is a Study 5 lab-profile variant created through the dashboard Edit-mode workflow on 2026-06-20. The GUI-created working copy removed the `Blue frontal` and `Brown frontal` source cards, and the downward propagation mechanism pruned those labels from both Segment 2 looming-stimulus boxes. The committed bundled profile keeps only `Pink frontal` and `White frontal`, reuses the original Study 5 Pink/White WAVs, and retains the original Study 5 SOAs, trajectory, instruction audio, baseline/catch settings, block/run defaults, and Segment 4 repetition defaults. With two looming sources and unchanged repetitions, Segment 4 materializes 102 planned rows rather than the original four-source profile's 204 rows.

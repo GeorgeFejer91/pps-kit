@@ -6,6 +6,8 @@
   "doi": "10.1016/j.cub.2013.01.043",
   "source_url": "https://pubmed.ncbi.nlm.nih.gov/23394831/",
   "verification_status": "partial",
+  "publication_status": "published",
+  "profile_type": "face_audio_tactile_social_context",
   "paper_group_key": "doi:10.1016/j.cub.2013.01.043",
   "visible_variant_label": "",
   "variant_display": "Teneggi 2013 social modulation face PPS",
@@ -17,6 +19,9 @@
     "gui_recreatable": false,
     "segment_0_to_4_profile_checks_passed": false,
     "segment_1_to_6_materializable": false,
+    "finished_profile": false,
+    "segment_6_launchable": false,
+    "profile_completion_status": "unfinished_preload",
     "missing_parameter_count": 1,
     "unsupported_structure_count": 0
   },

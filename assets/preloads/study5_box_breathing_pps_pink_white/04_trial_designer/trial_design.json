@@ -1,0 +1,136 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "study5_box_breathing_pps_pink_white",
+  "repetitions_per_condition": 1,
+  "soa_values_ms": [
+    300,
+    800,
+    1500,
+    2200,
+    2700
+  ],
+  "spatial_values_cm": [
+    100.0,
+    83.3,
+    60.0,
+    36.7,
+    20.0
+  ],
+  "custom_clip_assets": [
+    {
+      "label": "Inhale instruction",
+      "phase": "Inhale",
+      "variant": "original_study5",
+      "path": "assets/breathing/original_study5/Inhale-2-3-4-hold_FIXED.wav",
+      "duration_s": 4.0,
+      "default": true
+    },
+    {
+      "label": "Exhale instruction",
+      "phase": "Exhale",
+      "variant": "original_study5",
+      "path": "assets/breathing/original_study5/Exhale-2-3-4-hold_FIXED.wav",
+      "duration_s": 4.0,
+      "default": true
+    }
+  ],
+  "trial_strips": [
+    {
+      "strip_id": "study5-inhale-row",
+      "label": "Inhale trial type",
+      "audio_tactile_percentage": 100.0,
+      "catch_percentage": 0.0,
+      "baseline_percentage": 0.0,
+      "elements": [
+        {
+          "element_id": "study5-inhale-instruction",
+          "kind": "fixed_audio",
+          "label": "Inhale instruction",
+          "source_label": "Inhale instruction",
+          "source_labels": [
+            "Inhale instruction"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        },
+        {
+          "element_id": "study5-inhale-looming",
+          "kind": "looming_stimulus",
+          "label": "Looming Stimulus",
+          "source_label": "Pink frontal",
+          "source_labels": [
+            "Pink frontal",
+            "White frontal"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    },
+    {
+      "strip_id": "study5-exhale-row",
+      "label": "Exhale trial type",
+      "audio_tactile_percentage": 100.0,
+      "catch_percentage": 0.0,
+      "baseline_percentage": 0.0,
+      "elements": [
+        {
+          "element_id": "study5-exhale-instruction",
+          "kind": "fixed_audio",
+          "label": "Exhale instruction",
+          "source_label": "Exhale instruction",
+          "source_labels": [
+            "Exhale instruction"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        },
+        {
+          "element_id": "study5-exhale-looming",
+          "kind": "looming_stimulus",
+          "label": "Looming Stimulus",
+          "source_label": "Pink frontal",
+          "source_labels": [
+            "Pink frontal",
+            "White frontal"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [
+    {
+      "label": "Inhale instruction",
+      "path": "assets/breathing/original_study5/Inhale-2-3-4-hold_FIXED.wav",
+      "target_duration_s": 4.0,
+      "render_mode": "preserve",
+      "tone_type": "",
+      "gain": 1.0,
+      "placement": "before",
+      "target_source_label": "",
+      "phase": "Inhale",
+      "gap_s": 0.0,
+      "sequence_order": 1,
+      "motion_mode": "stationary",
+      "trajectory_snapshot": {}
+    },
+    {
+      "label": "Exhale instruction",
+      "path": "assets/breathing/original_study5/Exhale-2-3-4-hold_FIXED.wav",
+      "target_duration_s": 4.0,
+      "render_mode": "preserve",
+      "tone_type": "",
+      "gain": 1.0,
+      "placement": "before",
+      "target_source_label": "",
+      "phase": "Exhale",
+      "gap_s": 0.0,
+      "sequence_order": 1,
+      "motion_mode": "stationary",
+      "trajectory_snapshot": {}
+    }
+  ],
+  "preview_trial_count": 120
+}

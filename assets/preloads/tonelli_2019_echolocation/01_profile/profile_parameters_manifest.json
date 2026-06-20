@@ -6,6 +6,8 @@
   "doi": "10.1007/s00221-019-05469-3",
   "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6394550/",
   "verification_status": "partial",
+  "publication_status": "published",
+  "profile_type": "",
   "paper_group_key": "doi:10.1007/s00221-019-05469-3",
   "visible_variant_label": "",
   "variant_display": "Enhanced audio-tactile PPS after echolocation training",
@@ -17,6 +19,9 @@
     "gui_recreatable": false,
     "segment_0_to_4_profile_checks_passed": false,
     "segment_1_to_6_materializable": false,
+    "finished_profile": false,
+    "segment_6_launchable": false,
+    "profile_completion_status": "unfinished_preload",
     "missing_parameter_count": 1,
     "unsupported_structure_count": 1
   },

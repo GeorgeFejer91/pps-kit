@@ -6,6 +6,8 @@
   "doi": "",
   "source_url": "docs/STUDY5_PROTOCOL.md",
   "verification_status": "verified",
+  "publication_status": "unpublished_lab_profile",
+  "profile_type": "local_unpublished_study5_box_breathing_pps",
   "paper_group_key": "citation:pps toolkit study 5 protocol (2026). box-breathing audio-tactile pps profile. unpublished lab profile.",
   "visible_variant_label": "",
   "variant_display": "Study 5 PPS box-breathing profile",
@@ -17,6 +19,9 @@
     "gui_recreatable": true,
     "segment_0_to_4_profile_checks_passed": true,
     "segment_1_to_6_materializable": true,
+    "finished_profile": true,
+    "segment_6_launchable": true,
+    "profile_completion_status": "finished_segment_6_launchable",
     "missing_parameter_count": 0,
     "unsupported_structure_count": 0
   },
@@ -90,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 27,
+      "value": 28,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {

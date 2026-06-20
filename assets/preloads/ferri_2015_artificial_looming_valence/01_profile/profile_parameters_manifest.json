@@ -6,6 +6,8 @@
   "doi": "10.1016/j.neuropsychologia.2015.03.001",
   "source_url": "https://discovery.ucl.ac.uk/id/eprint/1464805/",
   "verification_status": "partial",
+  "publication_status": "published",
+  "profile_type": "audio_tactile_looming_valence",
   "paper_group_key": "doi:10.1016/j.neuropsychologia.2015.03.001",
   "visible_variant_label": "A",
   "variant_display": "Ferri 2015 artificial emotional looming sounds - Variant A",
@@ -17,6 +19,9 @@
     "gui_recreatable": false,
     "segment_0_to_4_profile_checks_passed": false,
     "segment_1_to_6_materializable": false,
+    "finished_profile": false,
+    "segment_6_launchable": false,
+    "profile_completion_status": "unfinished_preload",
     "missing_parameter_count": 2,
     "unsupported_structure_count": 0
   },

@@ -43,6 +43,8 @@ click used only to continue an instruction is not counted as a trial response.
 
 Study 5 also includes owned 4-second auditory-only looming WAVs for the pink, blue, white, and brown frontal sources under `assets/preloads/study5_box_breathing_pps/02_looming_stimuli/`. These files are binaural/source stimuli only; tactile events are still introduced later from the SOA schedule during session preparation.
 
+The additional bundled profile `study5_box_breathing_pps_pink_white` is a Study 5 lab variant created through the dashboard Edit-mode source-removal workflow. It keeps only the original pink and white frontal looming WAVs, prunes blue and brown from the Segment 2 decision pool, and leaves the remaining Study 5 timing, SOA, baseline/catch, instruction, trajectory, block, participant, and repetition defaults unchanged.
+
 The preload asset inventory lives at `assets/preloads/preload_inventory.json`, with a Study 5 profile manifest at `assets/preloads/study5_box_breathing_pps/preload_manifest.json`. Each preload profile uses the same local file-cabinet structure as the HTML dashboard: `01_profile`, `02_looming_stimuli`, `03_baseline_strategy`, `04_trial_designer`, and `05_run_setup`. The dashboard/backend use this inventory to verify local assets and read source, trajectory, baseline, trial, and run-default metadata.
 
 ## Dashboard Preload
