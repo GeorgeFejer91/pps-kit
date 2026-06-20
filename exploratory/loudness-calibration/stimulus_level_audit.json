@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-20T01:33:00.151120+00:00",
+  "generated_at": "2026-06-20T18:35:35.097521+00:00",
   "root": ".",
   "patterns": [
     "assets/preloads/study5_box_breathing_pps/*.wav",
@@ -19,15 +19,15 @@
       "last_500ms_rms_dbfs_max": -14.264753259425476
     },
     "study5_looming": {
-      "count": 8,
+      "count": 2,
       "peak_dbfs_min": -0.9152087163722664,
       "peak_dbfs_max": -0.9149141945731412,
-      "rms_dbfs_min": -20.862346250917994,
-      "rms_dbfs_max": -13.697276730193868,
-      "first_500ms_rms_dbfs_min": -38.370494580136786,
+      "rms_dbfs_min": -20.410169597488363,
+      "rms_dbfs_max": -20.303701840657315,
+      "first_500ms_rms_dbfs_min": -34.241835336504046,
       "first_500ms_rms_dbfs_max": -33.99925111393844,
-      "last_500ms_rms_dbfs_min": -13.74286181080235,
-      "last_500ms_rms_dbfs_max": -5.166748925540132
+      "last_500ms_rms_dbfs_min": -13.285175918512937,
+      "last_500ms_rms_dbfs_max": -13.229143428724992
     }
   },
   "records": [
@@ -347,36 +347,6 @@
       "notes": ""
     },
     {
-      "path": "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Blue_frontal.wav",
-      "category": "study5_looming",
-      "sample_rate_hz": 44100,
-      "channels": 2,
-      "duration_s": 4.0,
-      "peak": 0.900024414,
-      "peak_dbfs": -0.9149141945731412,
-      "rms": 0.090548798,
-      "rms_dbfs": -20.862346250917994,
-      "first_500ms_rms_dbfs": -34.636013663672,
-      "last_500ms_rms_dbfs": -13.74286181080235,
-      "per_channel_rms_dbfs": "-20.196;-21.650",
-      "notes": ""
-    },
-    {
-      "path": "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Brown_frontal.wav",
-      "category": "study5_looming",
-      "sample_rate_hz": 44100,
-      "channels": 2,
-      "duration_s": 4.0,
-      "peak": 0.900024414,
-      "peak_dbfs": -0.9149141945731412,
-      "rms": 0.206602781,
-      "rms_dbfs": -13.697276730193868,
-      "first_500ms_rms_dbfs": -38.370494580136786,
-      "last_500ms_rms_dbfs": -5.166748925540132,
-      "per_channel_rms_dbfs": "-13.718;-13.677",
-      "notes": ""
-    },
-    {
       "path": "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Pink_frontal.wav",
       "category": "study5_looming",
       "sample_rate_hz": 44100,
@@ -393,66 +363,6 @@
     },
     {
       "path": "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_White_frontal.wav",
-      "category": "study5_looming",
-      "sample_rate_hz": 44100,
-      "channels": 2,
-      "duration_s": 4.0,
-      "peak": 0.899993896,
-      "peak_dbfs": -0.9152087163722664,
-      "rms": 0.095387512,
-      "rms_dbfs": -20.410169597488363,
-      "first_500ms_rms_dbfs": -34.241835336504046,
-      "last_500ms_rms_dbfs": -13.285175918512937,
-      "per_channel_rms_dbfs": "-20.290;-20.534",
-      "notes": ""
-    },
-    {
-      "path": "assets/preloads/study5_box_breathing_pps/looming_Blue_frontal.wav",
-      "category": "study5_looming",
-      "sample_rate_hz": 44100,
-      "channels": 2,
-      "duration_s": 4.0,
-      "peak": 0.900024414,
-      "peak_dbfs": -0.9149141945731412,
-      "rms": 0.090548798,
-      "rms_dbfs": -20.862346250917994,
-      "first_500ms_rms_dbfs": -34.636013663672,
-      "last_500ms_rms_dbfs": -13.74286181080235,
-      "per_channel_rms_dbfs": "-20.196;-21.650",
-      "notes": ""
-    },
-    {
-      "path": "assets/preloads/study5_box_breathing_pps/looming_Brown_frontal.wav",
-      "category": "study5_looming",
-      "sample_rate_hz": 44100,
-      "channels": 2,
-      "duration_s": 4.0,
-      "peak": 0.900024414,
-      "peak_dbfs": -0.9149141945731412,
-      "rms": 0.206602781,
-      "rms_dbfs": -13.697276730193868,
-      "first_500ms_rms_dbfs": -38.370494580136786,
-      "last_500ms_rms_dbfs": -5.166748925540132,
-      "per_channel_rms_dbfs": "-13.718;-13.677",
-      "notes": ""
-    },
-    {
-      "path": "assets/preloads/study5_box_breathing_pps/looming_Pink_frontal.wav",
-      "category": "study5_looming",
-      "sample_rate_hz": 44100,
-      "channels": 2,
-      "duration_s": 4.0,
-      "peak": 0.900024414,
-      "peak_dbfs": -0.9149141945731412,
-      "rms": 0.096563925,
-      "rms_dbfs": -20.303701840657315,
-      "first_500ms_rms_dbfs": -33.99925111393844,
-      "last_500ms_rms_dbfs": -13.229143428724992,
-      "per_channel_rms_dbfs": "-20.547;-20.074",
-      "notes": ""
-    },
-    {
-      "path": "assets/preloads/study5_box_breathing_pps/looming_White_frontal.wav",
       "category": "study5_looming",
       "sample_rate_hz": 44100,
       "channels": 2,

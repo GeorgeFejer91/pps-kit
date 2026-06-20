@@ -1,10 +1,9 @@
 {
   "schema": "pps-profile-recreation-status.v1",
-  "profile_count": 22,
+  "profile_count": 21,
   "categories": {
     "gui_recreatable": [
       "study5_box_breathing_pps",
-      "study5_box_breathing_pps_pink_white",
       "matsuda_2021_four_directions",
       "barumerli_2026_arm_movement_exp1",
       "barumerli_2026_arm_movement_exp2",
@@ -44,14 +43,14 @@
   "profiles": [
     {
       "template_id": "study5_box_breathing_pps",
-      "title": "Study 5 PPS box-breathing profile",
-      "citation": "PPS Toolkit Study 5 protocol (2026). Box-breathing audio-tactile PPS profile. Unpublished lab profile.",
+      "title": "Study 5 PPS box-breathing white/pink profile",
+      "citation": "PPS Toolkit Study 5 white/pink protocol (2026). Box-breathing audio-tactile PPS profile with white and pink looming sources. Unpublished lab profile.",
       "doi": "",
       "verification_status": "verified",
       "publication_status": "unpublished_lab_profile",
-      "profile_type": "local_unpublished_study5_box_breathing_pps",
+      "profile_type": "local_unpublished_study5_box_breathing_pps_white_pink",
       "visible_variant_label": "",
-      "variant_display": "Study 5 PPS box-breathing profile",
+      "variant_display": "Study 5 PPS box-breathing white/pink profile",
       "primary_category": "gui_recreatable",
       "category_label": "GUI-recreatable",
       "runner_readiness": "ready",
@@ -108,73 +107,6 @@
       "missing_publication_parameters": [],
       "unsupported_toolkit_structures": [],
       "profile_parameters_manifest": "assets/preloads/study5_box_breathing_pps/01_profile/profile_parameters_manifest.json"
-    },
-    {
-      "template_id": "study5_box_breathing_pps_pink_white",
-      "title": "Study 5 PPS box-breathing pink/white profile",
-      "citation": "PPS Toolkit Study 5 pink/white protocol variant (2026). Box-breathing audio-tactile PPS profile with pink and white looming sources. Unpublished lab profile.",
-      "doi": "",
-      "verification_status": "verified",
-      "publication_status": "unpublished_lab_profile",
-      "profile_type": "local_unpublished_study5_box_breathing_pps_pink_white",
-      "visible_variant_label": "",
-      "variant_display": "Study 5 PPS box-breathing pink/white profile",
-      "primary_category": "gui_recreatable",
-      "category_label": "GUI-recreatable",
-      "runner_readiness": "ready",
-      "profile_checks_passed": true,
-      "gui_recreatable": true,
-      "segment_0_to_4_profile_checks_passed": true,
-      "segment_1_to_6_materializable": true,
-      "finished_profile": true,
-      "segment_6_launchable": true,
-      "profile_completion_status": "finished_segment_6_launchable",
-      "missing_parameter_count": 0,
-      "unsupported_structure_count": 0,
-      "segment_0_to_4_profile_checks": {
-        "gate": "segments_0_to_4",
-        "passed": true,
-        "segments": [
-          {
-            "segment": "0",
-            "segment_label": "Segment 0 profile manifest and provenance",
-            "passed": true,
-            "field_count": 3,
-            "blocking_reasons": []
-          },
-          {
-            "segment": "1",
-            "segment_label": "Segment 1 source/stimulus assets",
-            "passed": true,
-            "field_count": 3,
-            "blocking_reasons": []
-          },
-          {
-            "segment": "2",
-            "segment_label": "Segment 2 trial rows and sequences",
-            "passed": true,
-            "field_count": 3,
-            "blocking_reasons": []
-          },
-          {
-            "segment": "3",
-            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-            "passed": true,
-            "field_count": 4,
-            "blocking_reasons": []
-          },
-          {
-            "segment": "4",
-            "segment_label": "Segment 4 repetition pool settings",
-            "passed": true,
-            "field_count": 1,
-            "blocking_reasons": []
-          }
-        ]
-      },
-      "missing_publication_parameters": [],
-      "unsupported_toolkit_structures": [],
-      "profile_parameters_manifest": "assets/preloads/study5_box_breathing_pps_pink_white/01_profile/profile_parameters_manifest.json"
     },
     {
       "template_id": "matsuda_2021_four_directions",

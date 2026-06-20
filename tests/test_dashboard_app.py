@@ -207,20 +207,19 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260620-seeded-block-randomization"
+    static_version = "20260620-study5-white-pink-canonical"
     assert f'href="styles.css?v={static_version}"' in html
     assert f'src="hardware_pixel_art.js?v={static_version}"' in html
     assert f'src="app.js?v={static_version}"' in html
     assert f"index.html?page=toolkit&v={static_version}" in public_index
     assert f"index.html?page=documentation&v={static_version}" in public_docs
     assert f"index.html?page=downloads&v={static_version}" in public_download
-    assert "STUDY5_PINK_WHITE_TEMPLATE_ID" in app_js
     assert "seededGellermannBlockRows" in app_js
     assert "downloadBlockRandomization" in app_js
     assert 'control.id === "download-block-randomization"' in app_js
     assert "index % blockCount" not in app_js
     assert "Bundled study protocols" in app_js
-    assert "PPS Toolkit Study 5 pink/white protocol variant" in app_js
+    assert "PPS Toolkit Study 5 white/pink protocol" in app_js
     assert 'data-page-tab="toolkit"' in html
     assert 'data-page-tab="documentation"' in html
     assert 'data-page-tab="downloads"' in html
@@ -568,6 +567,7 @@ def test_dashboard_static_assets_are_packaged():
     assert "min_max" in app_js
     assert "isCompanionDashboardOrigin" in app_js
     assert "http://127.0.0.1:8766" in app_js
+    assert 'new URL("../../../../", document.currentScript?.src || window.location.href).href' in app_js
     assert "STATIC_PRELOAD_INVENTORY_PATH" in app_js
     assert "study_templates/" in app_js
     assert "staticStateForTemplate" in app_js
@@ -994,7 +994,7 @@ def test_dashboard_pages_companion_contract(tmp_path: Path):
 
     synced = client.post("/api/preloads/study5_box_breathing_pps/sync").json()
     assert synced["status"] == "ready"
-    assert synced["ready_asset_count"] == 4
+    assert synced["ready_asset_count"] == 2
 
 
 def test_dashboard_companion_token_can_gate_mutating_routes(tmp_path: Path):
@@ -1053,7 +1053,7 @@ def test_dashboard_loads_unpublished_study5_preload_with_instruction_events(tmp_
     design = loaded["design"]
 
     assert loaded["selected_template"] == "study5_box_breathing_pps"
-    assert design["study_profile_title"] == "Study 5 PPS box-breathing profile"
+    assert design["study_profile_title"] == "Study 5 PPS box-breathing white/pink profile"
     assert design["study_profile_reference_parameters"]["publication_status"] == "unpublished_lab_profile"
     assert design["study_profile_reference_parameters"]["looming_assets_bundled"] is True
     assert design["study_profile_reference_parameters"]["custom_clips_preloaded"] is True
@@ -1099,35 +1099,28 @@ def test_dashboard_loads_unpublished_study5_preload_with_instruction_events(tmp_
     )
     assert run_defaults["instruction_profile"]["slots"] == run_setup["instruction_profile"]["slots"]
     assert len(design["prestimulus_files"]) == 2
-    assert [asset["label"] for asset in design["noises"]] == [
-        "Pink frontal",
-        "Blue frontal",
-        "White frontal",
-        "Brown frontal",
-    ]
+    assert [asset["label"] for asset in design["noises"]] == ["Pink frontal", "White frontal"]
     assert design["custom_looming_files"] == []
     assert all("/1_core_audio_ingredients/" in asset["prebaked_path"].replace("\\", "/") for asset in design["noises"])
-    assert [asset["noise_type"] for asset in design["noises"]] == ["pink", "blue", "white", "brown"]
-    assert len(loaded["viewer_payload"]["source_trajectories"]) == 4
-    assert {item["tone_type"] for item in loaded["viewer_payload"]["source_trajectories"]} == {"pink", "blue", "white", "brown"}
+    assert [asset["noise_type"] for asset in design["noises"]] == ["pink", "white"]
+    assert len(loaded["viewer_payload"]["source_trajectories"]) == 2
+    assert {item["tone_type"] for item in loaded["viewer_payload"]["source_trajectories"]} == {"pink", "white"}
     assert all("/1_core_audio_ingredients/" in item["local_path"].replace("\\", "/") for item in loaded["viewer_payload"]["source_trajectories"])
     assert loaded["preload_inventory"]["status"] == "ready"
     assert loaded["preflight"]["render_ready"] is True
     project = loaded["project"]
     segment1_dir = Path(project["segment_folders"]["1_core_audio_ingredients"])
     ingredient_manifest = json.loads((segment1_dir / "stimulus_ingredients_manifest.json").read_text(encoding="utf-8"))
-    assert ingredient_manifest["ingredient_count"] == 6
+    assert ingredient_manifest["ingredient_count"] == 4
     assert {item["label"] for item in ingredient_manifest["ingredients"]} == {
         "Pink frontal",
-        "Blue frontal",
         "White frontal",
-        "Brown frontal",
         "Inhale instruction",
         "Exhale instruction",
     }
     assert all(item["provenance"].get("read_only_catalog") is True for item in ingredient_manifest["ingredients"])
     assert loaded["project_segments"]["1_core_audio_ingredients"]["status"] == "ready"
-    assert loaded["project_segments"]["1_core_audio_ingredients"]["wav_count"] == 6
+    assert loaded["project_segments"]["1_core_audio_ingredients"]["wav_count"] == 4
 
     protocol = design["protocol"]
     assert protocol["include_catch_trials"] is True
@@ -1137,10 +1130,10 @@ def test_dashboard_loads_unpublished_study5_preload_with_instruction_events(tmp_
     assert protocol["baseline_custom_trial_mode"] == "tactile_only"
     assert protocol["baseline_soa_values_ms"] == []
     assert protocol["trial_pool_repetition_defaults"] == {
-        "default": 3.0,
-        "audio_tactile": 3.0,
-        "baseline": 1.5,
-        "catch": 3.0,
+        "default": 6.0,
+        "audio_tactile": 6.0,
+        "baseline": 3.0,
+        "catch": 6.0,
     }
 
     assert all(strip["catch_percentage"] == 0.0 for strip in protocol["trial_strips"])
@@ -1162,13 +1155,13 @@ def test_dashboard_loads_unpublished_study5_preload_with_instruction_events(tmp_
     assert study_manifest["default_settings"]["baseline_generation"]["effective_soa_values_ms"] == [300, 800, 1500, 2200, 2700]
     assert study_manifest["default_settings"]["catch_generation"]["enabled"] is True
     assert study_manifest["default_settings"]["trial_pool_generation"]["family_repetitions"] == {
-        "audio_tactile": 3,
-        "baseline": 1.5,
-        "catch": 3,
+        "audio_tactile": 6,
+        "baseline": 3,
+        "catch": 6,
     }
     assert study_manifest["gui_settings_inventory"]["include_catch_trials"]["value"] is True
     assert study_manifest["gui_settings_inventory"]["baseline_strategy"]["value"] == "tactile_only"
-    assert study_manifest["gui_settings_inventory"]["trial_pool_family_repetitions"]["value"]["baseline"] == 1.5
+    assert study_manifest["gui_settings_inventory"]["trial_pool_family_repetitions"]["value"]["baseline"] == 3
 
     strips = design["protocol"]["trial_strips"]
     assert [strip["label"] for strip in strips] == ["Inhale trial type", "Exhale trial type"]
@@ -1331,7 +1324,7 @@ def test_dashboard_validates_full_study5_segment0_to_3_pipeline(tmp_path: Path):
 
     assert loaded["project_segments"]["0_profile"]["status"] == "ready"
     assert loaded["project_segments"]["1_core_audio_ingredients"]["status"] == "ready"
-    assert loaded["project_segments"]["1_core_audio_ingredients"]["wav_count"] == 6
+    assert loaded["project_segments"]["1_core_audio_ingredients"]["wav_count"] == 4
     loaded = client.post("/api/project/customize", json={"name": "Study 5 segment pipeline custom"}).json()
     assert loaded["custom_workflow"]["is_custom"] is True
     assert loaded["project_segments"]["1_core_audio_ingredients"]["status"] == "ready"
@@ -1346,7 +1339,7 @@ def test_dashboard_validates_full_study5_segment0_to_3_pipeline(tmp_path: Path):
     ).json()
     sequence_done = _wait_job(client, sequence_job["job_id"])
     assert sequence_done["status"] == "succeeded"
-    assert sequence_done["result"]["variant_count"] == 8
+    assert sequence_done["result"]["variant_count"] == 4
     sequence_manifest = _read_json_file(sequence_done["result"]["manifest_path"])
     assert sequence_manifest["schema"] == "pps-trial-sequence-variants.v1"
     assert len(sequence_manifest["rows"]) == 2
@@ -1370,18 +1363,18 @@ def test_dashboard_validates_full_study5_segment0_to_3_pipeline(tmp_path: Path):
     ).json()
     tactile_done = _wait_job(client, tactile_job["job_id"])
     assert tactile_done["status"] == "succeeded"
-    assert tactile_done["result"]["audio_tactile_count"] == 40
-    assert tactile_done["result"]["baseline_count"] == 40
-    assert tactile_done["result"]["catch_count"] == 8
+    assert tactile_done["result"]["audio_tactile_count"] == 20
+    assert tactile_done["result"]["baseline_count"] == 20
+    assert tactile_done["result"]["catch_count"] == 4
 
     state = client.get("/api/state").json()
     assert state["project_segments"]["2_trial_sequence_designs"]["status"] == "ready"
-    assert state["project_segments"]["2_trial_sequence_designs"]["variant_count"] == 8
+    assert state["project_segments"]["2_trial_sequence_designs"]["variant_count"] == 4
     assert state["project_segments"]["3_tactile_and_baseline_trials"]["status"] == "ready"
-    assert state["project_segments"]["3_tactile_and_baseline_trials"]["audio_tactile_count"] == 40
-    assert state["project_segments"]["3_tactile_and_baseline_trials"]["baseline_count"] == 40
-    assert state["project_segments"]["3_tactile_and_baseline_trials"]["catch_count"] == 8
-    assert state["project_segments"]["3_tactile_and_baseline_trials"]["total_count"] == 88
+    assert state["project_segments"]["3_tactile_and_baseline_trials"]["audio_tactile_count"] == 20
+    assert state["project_segments"]["3_tactile_and_baseline_trials"]["baseline_count"] == 20
+    assert state["project_segments"]["3_tactile_and_baseline_trials"]["catch_count"] == 4
+    assert state["project_segments"]["3_tactile_and_baseline_trials"]["total_count"] == 44
     segment3_root = Path(tactile_done["result"]["root"])
     expected_row_folders = {"row_01__inhale_trial_type", "row_02__exhale_trial_type"}
     assert {path.name for path in segment3_root.iterdir() if path.is_dir() and not path.name.startswith("_")} == expected_row_folders
@@ -1415,10 +1408,10 @@ def test_dashboard_validates_full_study5_segment0_to_3_pipeline(tmp_path: Path):
     assert "catch_trials" in catch_row["file_path"]
     report = _read_json_file(Path(state["project"]["profile_dir"]) / "segment_validation_report.json")
     assert report["schema"] == "pps-segment-validation-report.v1"
-    assert report["expected"]["3_tactile_and_baseline_trials"]["audio_tactile_count"] == 40
-    assert report["expected"]["3_tactile_and_baseline_trials"]["baseline_count"] == 40
-    assert report["expected"]["3_tactile_and_baseline_trials"]["catch_count"] == 8
-    assert report["observed"]["3_tactile_and_baseline_trials"]["total_count"] == 88
+    assert report["expected"]["3_tactile_and_baseline_trials"]["audio_tactile_count"] == 20
+    assert report["expected"]["3_tactile_and_baseline_trials"]["baseline_count"] == 20
+    assert report["expected"]["3_tactile_and_baseline_trials"]["catch_count"] == 4
+    assert report["observed"]["3_tactile_and_baseline_trials"]["total_count"] == 44
 
     default_pool_job = client.post(
         "/api/stimulus/bake",
@@ -1433,23 +1426,23 @@ def test_dashboard_validates_full_study5_segment0_to_3_pipeline(tmp_path: Path):
     ).json()
     default_pool_done = _wait_job(client, default_pool_job["job_id"])
     assert default_pool_done["status"] == "succeeded"
-    assert default_pool_done["result"]["unique_file_count"] == 88
+    assert default_pool_done["result"]["unique_file_count"] == 44
     assert default_pool_done["result"]["total_count"] == 204
     assert default_pool_done["result"]["audio_tactile_count"] == 120
     assert default_pool_done["result"]["baseline_count"] == 60
     assert default_pool_done["result"]["catch_count"] == 24
     default_pool_manifest = _read_json_file(default_pool_done["result"]["manifest_path"])
     assert default_pool_manifest["settings"]["family_repetitions"] == {
-        "audio_tactile": 3,
-        "baseline": 1.5,
-        "catch": 3,
+        "audio_tactile": 6,
+        "baseline": 3,
+        "catch": 6,
     }
     assert default_pool_manifest["balance_warnings"] == []
     default_rows = _read_csv_rows(default_pool_done["result"]["csv_path"])
     assert len(default_rows) == 204
     assert {"base_repetitions", "fractional_remainder", "fractional_extra", "balancing_signature", "source_lineage"} <= set(default_rows[0])
     baseline_rows = [row for row in default_rows if row["family"] == "baseline"]
-    assert sum(int(row["fractional_extra"]) for row in baseline_rows) == 20
+    assert sum(int(row["fractional_extra"]) for row in baseline_rows) == 0
     by_row_soa: dict[tuple[str, str], int] = {}
     for row in baseline_rows:
         key = (row["row_label"], row["soa_ms"])
@@ -1528,27 +1521,27 @@ def test_dashboard_validates_full_study5_segment0_to_3_pipeline(tmp_path: Path):
     ).json()
     pool_done = _wait_job(client, pool_job["job_id"])
     assert pool_done["status"] == "succeeded"
-    assert pool_done["result"]["unique_file_count"] == 88
-    assert pool_done["result"]["total_count"] == 528
-    assert pool_done["result"]["audio_tactile_count"] == 240
-    assert pool_done["result"]["baseline_count"] == 240
-    assert pool_done["result"]["catch_count"] == 48
+    assert pool_done["result"]["unique_file_count"] == 44
+    assert pool_done["result"]["total_count"] == 264
+    assert pool_done["result"]["audio_tactile_count"] == 120
+    assert pool_done["result"]["baseline_count"] == 120
+    assert pool_done["result"]["catch_count"] == 24
     pool_root = Path(pool_done["result"]["root"])
     assert not list(pool_root.rglob("*.wav"))
     pool_manifest = _read_json_file(pool_done["result"]["manifest_path"])
     assert pool_manifest["source_segment3_manifest_sha256"] == dashboard_app._local_file_sha256(Path(tactile_done["result"]["manifest_path"]))
     pool_rows = _read_csv_rows(pool_done["result"]["csv_path"])
-    assert len(pool_rows) == 528
+    assert len(pool_rows) == 264
     assert pool_rows[0]["trial_file_path"].endswith(".wav")
     assert {"audio_tactile", "baseline", "catch"} <= {row["family"] for row in pool_rows}
     state = client.get("/api/state").json()
     assert state["project_segments"]["4_trial_repetition_pool"]["status"] == "ready"
-    assert state["project_segments"]["4_trial_repetition_pool"]["total_count"] == 528
+    assert state["project_segments"]["4_trial_repetition_pool"]["total_count"] == 264
 
 
-def test_dashboard_pink_white_profile_preserves_study5_trial_budget_after_source_prune(tmp_path: Path):
+def test_dashboard_study5_profile_preserves_trial_budget_with_two_sources(tmp_path: Path):
     client = _client(tmp_path)
-    client.post("/api/templates/study5_box_breathing_pps_pink_white/load").json()
+    client.post("/api/templates/study5_box_breathing_pps/load").json()
     loaded = client.post("/api/project/customize", json={"name": "Study 5 pink white invariant"}).json()
 
     assert loaded["custom_workflow"]["is_custom"] is True
@@ -3078,7 +3071,14 @@ def test_dashboard_open_folder_is_local_backend_action(tmp_path: Path, monkeypat
     assert opened["folder"] == str(wav_path.parent.resolve())
     assert calls
 
-    preload_path = dashboard_app.REPO_ROOT / "assets" / "preloads" / "study5_box_breathing_pps" / "looming_Pink_frontal.wav"
+    preload_path = (
+        dashboard_app.REPO_ROOT
+        / "assets"
+        / "preloads"
+        / "study5_box_breathing_pps"
+        / "02_looming_stimuli"
+        / "looming_Pink_frontal.wav"
+    )
     opened_preload = client.post("/api/local/open-folder", json={"path": str(preload_path)}).json()
     assert opened_preload["local_only"] is True
     assert opened_preload["folder"] == str(preload_path.parent.resolve())

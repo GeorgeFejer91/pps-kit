@@ -16,9 +16,9 @@ from peripersonal_space_toolkit.output_layout import output_metadata_dir, output
 
 
 def test_diary_filename_uses_experiment_identifier():
-    filename = diary_filename("Study 5 PPS box-breathing profile")
+    filename = diary_filename("Study 5 PPS box-breathing white/pink profile")
 
-    assert filename == f"study_5_pps_box_breathing_profile_{DIARY_FILENAME_MARKER}.txt"
+    assert filename == f"study_5_pps_box_breathing_white_pink_profile_{DIARY_FILENAME_MARKER}.txt"
     assert slugify_identifier("  Bad / Name ++  ") == "bad_name"
 
 
@@ -48,14 +48,16 @@ def test_diary_append_and_read_skips_corrupted_lines(tmp_path: Path):
 def test_resolve_output_project_creates_experiment_named_child(tmp_path: Path):
     result = resolve_or_create_output_project(
         tmp_path,
-        experiment_identifier="Study 5 PPS box-breathing profile",
+        experiment_identifier="Study 5 PPS box-breathing white/pink profile",
         timestamp="20260617_151500",
     )
 
     assert result.created is True
     assert result.reused_existing_diary is False
-    assert result.root == tmp_path / "study_5_pps_box_breathing_profile_20260617_151500"
-    assert result.diary_path == output_runner_logs_dir(result.root) / diary_filename("study_5_pps_box_breathing_profile")
+    assert result.root == tmp_path / "study_5_pps_box_breathing_white_pink_profile_20260617_151500"
+    assert result.diary_path == output_runner_logs_dir(result.root) / diary_filename(
+        "study_5_pps_box_breathing_white_pink_profile"
+    )
     assert result.diary_path.parent == output_metadata_dir(result.root) / "runner_logs"
     assert not (result.root / diary_filename("study_5_pps_box_breathing_profile")).exists()
     entries = read_diary_entries(result.diary_path)

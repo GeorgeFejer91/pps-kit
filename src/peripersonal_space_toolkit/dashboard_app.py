@@ -194,10 +194,10 @@ TRIAL_FAMILY_COLORS = {
     "catch": "#a4631b",
 }
 STUDY5_TRIAL_POOL_REPETITION_DEFAULTS = {
-    "default": 3.0,
-    "audio_tactile": 3.0,
-    "baseline": 1.5,
-    "catch": 3.0,
+    "default": 6.0,
+    "audio_tactile": 6.0,
+    "baseline": 3.0,
+    "catch": 6.0,
 }
 STUDY5_ORIGINAL_INSTRUCTION_ASSETS = {
     "Inhale instruction": {
@@ -7262,6 +7262,7 @@ def _materialize_segment1_ingredients_for_custom_project(
         "customized_from_profile_id": source_design.study_profile_id or source_metadata.get("source_template_id", ""),
         "customized_from_project_id": source_metadata.get("project_id", ""),
         "customized_at": datetime.now().isoformat(timespec="seconds"),
+        "loudness_policy": loudness_policy_for_design(design),
     }
     for noise in design.noises:
         if not str(noise.prebaked_path or "").strip():
@@ -7674,6 +7675,7 @@ def _materialize_study_profile_segment1_ingredients(project: DashboardProjectCon
                 "source_catalog_path": str(source_path),
                 "source_catalog_sha256": str(asset.get("sha256") or ""),
                 "read_only_catalog": True,
+                "loudness_policy": loudness_policy_for_design(design),
             },
         )
     for audio in design.prestimulus_files:

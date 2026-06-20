@@ -31,21 +31,15 @@
       },
       "source_labels": [
         "Pink frontal",
-        "Blue frontal",
-        "White frontal",
-        "Brown frontal"
+        "White frontal"
       ],
       "tone_types": [
         "pink",
-        "blue",
-        "white",
-        "brown"
+        "white"
       ],
       "asset_paths": [
         "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Pink_frontal.wav",
-        "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Blue_frontal.wav",
-        "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_White_frontal.wav",
-        "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Brown_frontal.wav"
+        "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_White_frontal.wav"
       ]
     }
   ]

@@ -38,10 +38,9 @@ def test_static_dashboard_preview_parity_audit_targets_all_previewable_profiles(
     all_ids = module._target_template_ids(inventory, status, profile_set="all")
     ready_ids = module._target_template_ids(inventory, status, profile_set="ready-all")
 
-    assert len(all_ids) == 22
+    assert len(all_ids) == 21
     assert ready_ids == [
         "study5_box_breathing_pps",
-        "study5_box_breathing_pps_pink_white",
         "matsuda_2021_four_directions",
         "barumerli_2026_arm_movement_exp1",
         "barumerli_2026_arm_movement_exp2",

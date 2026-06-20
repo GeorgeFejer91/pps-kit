@@ -74,7 +74,7 @@ The current profile gate covers 22 templates:
 
 | Outcome | Count | Meaning |
 |---|---:|---|
-| GUI-recreatable | 8 | Current Segment 0-4 profile parameters are complete; Segment 5-6 are native toolkit generation/handoff. Six are published profiles; the original Study 5 profile and the Study 5 pink/white variant are unpublished lab profiles. |
+| GUI-recreatable | 7 | Current Segment 0-4 profile parameters are complete; Segment 5-6 are native toolkit generation/handoff. Six are published profiles; the canonical Study 5 white/pink profile is the unpublished lab profile. |
 | Missing publication parameters | 12 | The task looks structurally expressible, but published or encoded details are insufficient. |
 | Toolkit structural gap | 7 | The task uses a trial, audio, tactile, response, timing, coordinate, or apparatus feature that the toolkit schema does not yet model. |
 

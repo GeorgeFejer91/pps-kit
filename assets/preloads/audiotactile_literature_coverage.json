@@ -119,8 +119,8 @@
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 5
     },
-    "current_template_count": 22,
-    "current_profile_check_pass_count": 8,
+    "current_template_count": 21,
+    "current_profile_check_pass_count": 7,
     "published_profile_check_pass_count": 6,
     "current_templates_with_missing_publication_parameters": 12,
     "current_templates_with_toolkit_structural_gaps": 7,
@@ -461,12 +461,6 @@
   "current_template_coverage": [
     {
       "template_id": "study5_box_breathing_pps",
-      "published": false,
-      "current_recreation_category": "gui_recreatable",
-      "primary_constraint_ids": []
-    },
-    {
-      "template_id": "study5_box_breathing_pps_pink_white",
       "published": false,
       "current_recreation_category": "gui_recreatable",
       "primary_constraint_ids": []

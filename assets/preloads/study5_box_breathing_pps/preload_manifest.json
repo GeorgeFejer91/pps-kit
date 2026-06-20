@@ -1,10 +1,10 @@
 {
   "schema": "pps-preload-profile-assets.v1",
   "template_id": "study5_box_breathing_pps",
-  "title": "Study 5 PPS box-breathing profile",
+  "title": "Study 5 PPS box-breathing white/pink profile",
   "visible_variant_label": "",
   "publication_status": "unpublished_lab_profile",
-  "profile_type": "local_unpublished_study5_box_breathing_pps",
+  "profile_type": "local_unpublished_study5_box_breathing_pps_white_pink",
   "asset_mode": "bundled_local",
   "retrieval_strategy": "bundled_or_download_from_github_pages",
   "local_only": true,
@@ -100,48 +100,6 @@
       }
     },
     {
-      "label": "Blue frontal",
-      "path": "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Blue_frontal.wav",
-      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Blue_frontal.wav",
-      "sha256": "e0a330251805dcb37b092b4719707ba06f66a5b9bf45f98ef397fdfbcdfc8b65",
-      "duration_s": 4.0,
-      "sample_rate": 44100,
-      "channels": 2,
-      "source_kind": "generated_noise",
-      "noise_type": "blue",
-      "tone_type": "blue",
-      "motion_mode": "looming",
-      "direction_label": "looming",
-      "render_mode": "preserve",
-      "include_tactile": false,
-      "trajectory_snapshot": {
-        "schema": "pps-stimulus-trajectory.v1",
-        "label": "Blue frontal",
-        "source_kind": "generated_noise",
-        "noise_type": "blue",
-        "start_distance_cm": 110.0,
-        "end_distance_cm": 10.0,
-        "start_rotation_deg": 0.0,
-        "end_rotation_deg": 0.0,
-        "movement_duration_s": 3.0,
-        "start_hold_s": 0.5,
-        "end_hold_s": 0.5,
-        "path_length_m": 1.0,
-        "coordinate_mode": "polar",
-        "path_direction": "approach",
-        "start": {
-          "x_m": 0.0,
-          "y_m": 1.1,
-          "z_m": 0.0
-        },
-        "end": {
-          "x_m": 0.0,
-          "y_m": 0.1,
-          "z_m": 0.0
-        }
-      }
-    },
-    {
       "label": "White frontal",
       "path": "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_White_frontal.wav",
       "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_White_frontal.wav",
@@ -161,48 +119,6 @@
         "label": "White frontal",
         "source_kind": "generated_noise",
         "noise_type": "white",
-        "start_distance_cm": 110.0,
-        "end_distance_cm": 10.0,
-        "start_rotation_deg": 0.0,
-        "end_rotation_deg": 0.0,
-        "movement_duration_s": 3.0,
-        "start_hold_s": 0.5,
-        "end_hold_s": 0.5,
-        "path_length_m": 1.0,
-        "coordinate_mode": "polar",
-        "path_direction": "approach",
-        "start": {
-          "x_m": 0.0,
-          "y_m": 1.1,
-          "z_m": 0.0
-        },
-        "end": {
-          "x_m": 0.0,
-          "y_m": 0.1,
-          "z_m": 0.0
-        }
-      }
-    },
-    {
-      "label": "Brown frontal",
-      "path": "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Brown_frontal.wav",
-      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Brown_frontal.wav",
-      "sha256": "9d7c04b7fbb2ac1b36ac86ed3947fb59ffccf7e81268c645726b467ade6e9a87",
-      "duration_s": 4.0,
-      "sample_rate": 44100,
-      "channels": 2,
-      "source_kind": "generated_noise",
-      "noise_type": "brown",
-      "tone_type": "brown",
-      "motion_mode": "looming",
-      "direction_label": "looming",
-      "render_mode": "preserve",
-      "include_tactile": false,
-      "trajectory_snapshot": {
-        "schema": "pps-stimulus-trajectory.v1",
-        "label": "Brown frontal",
-        "source_kind": "generated_noise",
-        "noise_type": "brown",
         "start_distance_cm": 110.0,
         "end_distance_cm": 10.0,
         "start_rotation_deg": 0.0,

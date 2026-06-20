@@ -2380,13 +2380,13 @@ def test_runner_output_project_setting_creates_timestamped_folder(tmp_path: Path
     project = focus_app.create_runner_output_project(
         parent,
         state_root=state_root,
-        experiment_identifier="Study 5 PPS box-breathing profile",
+        experiment_identifier="Study 5 PPS box-breathing white/pink profile",
         profile_id="study5_box_breathing_pps",
         participant_id="P001",
         capture_options={"enable_lsl": True},
     )
 
-    assert project == parent / "study_5_pps_box_breathing_profile_20260617_151500"
+    assert project == parent / "study_5_pps_box_breathing_white_pink_profile_20260617_151500"
     assert project.is_dir()
     assert focus_app.current_runner_session_root(state_root) == project
     settings = focus_app.load_runner_settings(state_root)

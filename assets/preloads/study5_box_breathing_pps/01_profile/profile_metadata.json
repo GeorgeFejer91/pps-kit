@@ -1,14 +1,14 @@
 {
   "schema": "pps-preload-profile-segment.v1",
   "template_id": "study5_box_breathing_pps",
-  "title": "Study 5 PPS box-breathing profile",
-  "citation": "PPS Toolkit Study 5 protocol (2026). Box-breathing audio-tactile PPS profile. Unpublished lab profile.",
+  "title": "Study 5 PPS box-breathing white/pink profile",
+  "citation": "PPS Toolkit Study 5 white/pink protocol (2026). Box-breathing audio-tactile PPS profile with white and pink looming sources. Unpublished lab profile.",
   "doi": "",
   "source_url": "docs/STUDY5_PROTOCOL.md",
   "verification_status": "verified",
-  "notes": "Local unpublished Study 5 preload. This profile is not a published-study citation; it preloads the lab's box-breathing PPS workflow with bundled 4-second inhale/exhale instruction assets, Study 5 trajectory defaults, SOAs, catch trials, and within-block trial type rows.",
+  "notes": "Local unpublished Study 5 preload using white and pink frontal looming sources. This is the canonical Study 5 profile in this repository. It retains the Study 5 timing, SOA, baseline, catch, instruction, trajectory, block, and participant defaults, and scales Segment 4 family repetitions for the two-source pool so the prepared trial pool preserves 204 rows and six 34-trial blocks.",
   "reference_parameters": {
-    "profile_type": "local_unpublished_study5_box_breathing_pps",
+    "profile_type": "local_unpublished_study5_box_breathing_pps_white_pink",
     "publication_status": "unpublished_lab_profile",
     "instruction_assets_bundled": true,
     "custom_clips_preloaded": true,
@@ -145,7 +145,12 @@
     "start_hold_s": 0.5,
     "end_hold_s": 0.5,
     "tactile_pulse_duration_ms": 100,
-    "local_only_assets": true
+    "local_only_assets": true,
+    "noise_source_policy": "Canonical Study 5 source pool: Pink frontal and White frontal only. Segment 4 family repetitions are scaled to audio-tactile 6.0, baseline 3.0, and catch 6.0 so the prepared trial pool preserves 204 rows and six 34-trial blocks.",
+    "canonical_study5_profile": true,
+    "source_pool_profile": "white_pink",
+    "source_pool_profile_note": "The repository retains only the white/pink Study 5 source pool as the canonical Study 5 profile.",
+    "notes": "Local unpublished Study 5 preload using white and pink frontal looming sources. This is the canonical Study 5 profile in this repository. It retains the Study 5 timing, SOA, baseline, catch, instruction, trajectory, block, and participant defaults, and scales Segment 4 family repetitions for the two-source pool so the prepared trial pool preserves 204 rows and six 34-trial blocks."
   },
   "provenance": [
     {
@@ -154,7 +159,7 @@
     },
     {
       "field": "prebaked looming assets",
-      "source": "Bundled owned Study 5 auditory-only looming WAVs under assets/preloads/study5_box_breathing_pps/02_looming_stimuli; the preload inventory records the original generated-noise recipe, trajectory metadata, segment catalog paths, and SHA-256 hashes."
+      "source": "Bundled owned Study 5 auditory-only looming WAVs under assets/preloads/study5_box_breathing_pps/02_looming_stimuli; the preload inventory records the white/pink generated-noise recipe, trajectory metadata, segment catalog paths, and SHA-256 hashes."
     },
     {
       "field": "visible trial assembly",
@@ -163,6 +168,16 @@
     {
       "field": "trajectory and SOAs",
       "source": "Study 5 toolkit defaults: 110 cm to 10 cm approach, 3 s movement inside a 4 s stimulus window, SOAs 300/800/1500/2200/2700 ms."
+    },
+    {
+      "source": "Repository canonical Study 5 profile metadata.",
+      "parameter": "source_pool_profile",
+      "value": "White/pink canonical Study 5 source pool with Segment 4 repetitions scaled to audio-tactile 6.0, baseline 3.0, and catch 6.0."
+    },
+    {
+      "source": "Repository canonical Study 5 profile metadata.",
+      "parameter": "trial_pool_repetition_policy",
+      "value": "The white/pink canonical Study 5 profile scales Segment 4 family repetitions to audio-tactile 6.0, baseline 3.0, and catch 6.0 so the 204-row Study 5 trial budget is retained."
     }
   ]
 }

@@ -1,13 +1,13 @@
 {
   "template_id": "study5_box_breathing_pps",
-  "title": "Study 5 PPS box-breathing profile",
-  "citation": "PPS Toolkit Study 5 protocol (2026). Box-breathing audio-tactile PPS profile. Unpublished lab profile.",
+  "title": "Study 5 PPS box-breathing white/pink profile",
+  "citation": "PPS Toolkit Study 5 white/pink protocol (2026). Box-breathing audio-tactile PPS profile with white and pink looming sources. Unpublished lab profile.",
   "source_url": "docs/STUDY5_PROTOCOL.md",
   "doi": "",
   "verification_status": "verified",
-    "notes": "Local unpublished Study 5 preload. This profile is not a published-study citation; it preloads the lab's box-breathing PPS workflow with bundled 4-second inhale/exhale instruction assets, Study 5 trajectory defaults, SOAs, catch trials, and within-block trial type rows.",
+  "notes": "Local unpublished Study 5 preload using white and pink frontal looming sources. This is the canonical Study 5 profile in this repository. It retains the Study 5 timing, SOA, baseline, catch, instruction, trajectory, block, and participant defaults, and scales Segment 4 family repetitions for the two-source pool so the prepared trial pool preserves 204 rows and six 34-trial blocks.",
   "reference_parameters": {
-    "profile_type": "local_unpublished_study5_box_breathing_pps",
+    "profile_type": "local_unpublished_study5_box_breathing_pps_white_pink",
     "publication_status": "unpublished_lab_profile",
     "instruction_assets_bundled": true,
     "custom_clips_preloaded": true,
@@ -144,10 +144,15 @@
     "start_hold_s": 0.5,
     "end_hold_s": 0.5,
     "tactile_pulse_duration_ms": 100,
-    "local_only_assets": true
+    "local_only_assets": true,
+    "noise_source_policy": "Canonical Study 5 source pool: Pink frontal and White frontal only. Segment 4 family repetitions are scaled to audio-tactile 6.0, baseline 3.0, and catch 6.0 so the prepared trial pool preserves 204 rows and six 34-trial blocks.",
+    "canonical_study5_profile": true,
+    "source_pool_profile": "white_pink",
+    "source_pool_profile_note": "The repository retains only the white/pink Study 5 source pool as the canonical Study 5 profile.",
+    "notes": "Local unpublished Study 5 preload using white and pink frontal looming sources. This is the canonical Study 5 profile in this repository. It retains the Study 5 timing, SOA, baseline, catch, instruction, trajectory, block, and participant defaults, and scales Segment 4 family repetitions for the two-source pool so the prepared trial pool preserves 204 rows and six 34-trial blocks."
   },
   "design": {
-    "name": "Study 5 PPS box-breathing design",
+    "name": "Study 5 PPS box-breathing white/pink design",
     "sofa_file": "assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa",
     "noises": [
       {
@@ -159,26 +164,10 @@
         "motion_mode": "looming"
       },
       {
-        "label": "Blue frontal",
-        "noise_type": "blue",
-        "gain": 1.0,
-        "prebaked_path": "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Blue_frontal.wav",
-        "sequence_order": 2,
-        "motion_mode": "looming"
-      },
-      {
         "label": "White frontal",
         "noise_type": "white",
         "gain": 1.0,
         "prebaked_path": "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_White_frontal.wav",
-        "sequence_order": 2,
-        "motion_mode": "looming"
-      },
-      {
-        "label": "Brown frontal",
-        "noise_type": "brown",
-        "gain": 1.0,
-        "prebaked_path": "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Brown_frontal.wav",
         "sequence_order": 2,
         "motion_mode": "looming"
       }
@@ -229,16 +218,32 @@
     "protocol": {
       "repetitions_per_condition": 1,
       "trial_pool_repetition_defaults": {
-        "default": 3.0,
-        "audio_tactile": 3.0,
-        "baseline": 1.5,
-        "catch": 3.0
+        "default": 6.0,
+        "audio_tactile": 6.0,
+        "baseline": 3.0,
+        "catch": 6.0
       },
-      "soa_values_ms": [300, 800, 1500, 2200, 2700],
-      "spatial_values_cm": [100.0, 83.3, 60.0, 36.7, 20.0],
+      "soa_values_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "spatial_values_cm": [
+        100.0,
+        83.3,
+        60.0,
+        36.7,
+        20.0
+      ],
       "pair_spatial_values_with_soas": true,
-      "auditory_motion_directions": ["looming"],
-      "tactile_sites": ["hand"],
+      "auditory_motion_directions": [
+        "looming"
+      ],
+      "tactile_sites": [
+        "hand"
+      ],
       "include_catch_trials": true,
       "catch_trial_percentage": 0.0,
       "catch_trials_exact": null,
@@ -246,32 +251,53 @@
       "baseline_strategy": "tactile_only",
       "baseline_soa_values_ms": [],
       "baseline_custom_trial_mode": "tactile_only",
-      "respiratory_phases": ["Inhale", "Exhale"],
+      "respiratory_phases": [
+        "Inhale",
+        "Exhale"
+      ],
       "blocks": 6,
       "block_specs": [
         {
           "label": "Block 1",
-          "stimulus_types": ["Audio-Tactile", "Catch"]
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
         },
         {
           "label": "Block 2",
-          "stimulus_types": ["Audio-Tactile", "Catch"]
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
         },
         {
           "label": "Block 3",
-          "stimulus_types": ["Audio-Tactile", "Catch"]
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
         },
         {
           "label": "Block 4",
-          "stimulus_types": ["Audio-Tactile", "Catch"]
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
         },
         {
           "label": "Block 5",
-          "stimulus_types": ["Audio-Tactile", "Catch"]
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
         },
         {
           "label": "Block 6",
-          "stimulus_types": ["Audio-Tactile", "Catch"]
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
         }
       ],
       "trial_strips": [
@@ -295,7 +321,10 @@
               "kind": "looming_stimulus",
               "label": "Looming Stimulus",
               "source_label": "",
-              "source_labels": ["Pink frontal", "Blue frontal", "White frontal", "Brown frontal"],
+              "source_labels": [
+                "Pink frontal",
+                "White frontal"
+              ],
               "randomized": true
             }
           ]
@@ -320,7 +349,10 @@
               "kind": "looming_stimulus",
               "label": "Looming Stimulus",
               "source_label": "",
-              "source_labels": ["Pink frontal", "Blue frontal", "White frontal", "Brown frontal"],
+              "source_labels": [
+                "Pink frontal",
+                "White frontal"
+              ],
               "randomized": true
             }
           ]
@@ -331,6 +363,153 @@
       "max_consecutive_same_trial_type": 2,
       "participants": 50,
       "random_seed": 20250604
+    },
+    "study_profile_title": "Study 5 PPS box-breathing white/pink profile",
+    "study_profile_notes": "Local unpublished Study 5 preload using white and pink frontal looming sources. This is the canonical Study 5 profile in this repository. It retains the Study 5 timing, SOA, baseline, catch, instruction, trajectory, block, and participant defaults, and scales Segment 4 family repetitions for the two-source pool so the prepared trial pool preserves 204 rows and six 34-trial blocks.",
+    "study_profile_reference_parameters": {
+      "profile_type": "local_unpublished_study5_box_breathing_pps_white_pink",
+      "publication_status": "unpublished_lab_profile",
+      "instruction_assets_bundled": true,
+      "custom_clips_preloaded": true,
+      "instruction_duration_s": 4.0,
+      "default_instruction_asset_variant": "original_study5",
+      "inhale_instruction_asset": "assets/breathing/original_study5/Inhale-2-3-4-hold_FIXED.wav",
+      "exhale_instruction_asset": "assets/breathing/original_study5/Exhale-2-3-4-hold_FIXED.wav",
+      "instruction_asset_variants": {
+        "british_kokoro": {
+          "label": "British Kokoro voice",
+          "manifest": "assets/breathing/british_kokoro/spoken_assets_manifest.json",
+          "inhale_instruction_asset": "assets/breathing/british_kokoro/Inhale-2-3-4-hold_FIXED.wav",
+          "exhale_instruction_asset": "assets/breathing/british_kokoro/Exhale-2-3-4-hold_FIXED.wav"
+        },
+        "original_study5": {
+          "label": "Original Study 5 instruction audio",
+          "manifest": "assets/breathing/original_study5/spoken_assets_manifest.json",
+          "inhale_instruction_asset": "assets/breathing/original_study5/Inhale-2-3-4-hold_FIXED.wav",
+          "exhale_instruction_asset": "assets/breathing/original_study5/Exhale-2-3-4-hold_FIXED.wav"
+        }
+      },
+      "custom_clip_assets": [
+        {
+          "label": "Inhale instruction",
+          "phase": "Inhale",
+          "variant": "original_study5",
+          "path": "assets/breathing/original_study5/Inhale-2-3-4-hold_FIXED.wav",
+          "duration_s": 4.0,
+          "default": true
+        },
+        {
+          "label": "Exhale instruction",
+          "phase": "Exhale",
+          "variant": "original_study5",
+          "path": "assets/breathing/original_study5/Exhale-2-3-4-hold_FIXED.wav",
+          "duration_s": 4.0,
+          "default": true
+        }
+      ],
+      "dashboard_run_setup": {
+        "experiment_structure": "pre_post",
+        "seed": 20256604,
+        "instruction_profile": {
+          "schema": "pps-run-instructions.v1",
+          "slots": [
+            {
+              "slot": "before_experiment",
+              "label": "General instructions",
+              "enabled": true,
+              "required": false,
+              "path": "assets/breathing/original_study5/General_Instructions.wav",
+              "duration_s": 85.707755,
+              "sample_rate": 44100,
+              "channels": 1,
+              "continue_mode": "click",
+              "delay_s": 0.0,
+              "button_label": "Start experiment",
+              "source": "original_study5"
+            },
+            {
+              "slot": "before_each_block",
+              "label": "Pre-block instruction",
+              "enabled": true,
+              "required": false,
+              "path": "assets/breathing/original_study5/Pre-Block_Instruction.wav",
+              "duration_s": 8.418073,
+              "sample_rate": 44100,
+              "channels": 1,
+              "continue_mode": "delay",
+              "delay_s": 0.0,
+              "button_label": "Start block",
+              "source": "original_study5"
+            },
+            {
+              "slot": "after_each_block",
+              "label": "Post-block instruction",
+              "enabled": true,
+              "required": false,
+              "path": "assets/breathing/original_study5/Post-Block_Instruction.wav",
+              "duration_s": 8.829388,
+              "sample_rate": 44100,
+              "channels": 1,
+              "continue_mode": "click",
+              "delay_s": 0.0,
+              "button_label": "Next block",
+              "source": "original_study5"
+            },
+            {
+              "slot": "between_conditions",
+              "label": "Condition transition",
+              "enabled": true,
+              "required": false,
+              "path": "assets/breathing/original_study5/InterimMessage.wav",
+              "duration_s": 10.109388,
+              "sample_rate": 44100,
+              "channels": 1,
+              "continue_mode": "button",
+              "delay_s": 0.0,
+              "button_label": "Start next condition",
+              "source": "original_study5"
+            },
+            {
+              "slot": "after_experiment",
+              "label": "Finish message",
+              "enabled": true,
+              "required": false,
+              "path": "assets/breathing/original_study5/FinishMessage.wav",
+              "duration_s": 7.000816,
+              "sample_rate": 44100,
+              "channels": 1,
+              "continue_mode": "delay",
+              "delay_s": 0.0,
+              "button_label": "Finish",
+              "source": "original_study5"
+            }
+          ]
+        }
+      },
+      "trial_unit_duration_s": 8.0,
+      "looming_stimulus_window_s": 4.0,
+      "looming_assets_bundled": true,
+      "preload_inventory": "assets/preloads/preload_inventory.json",
+      "preload_asset_manifest": "assets/preloads/study5_box_breathing_pps/preload_manifest.json",
+      "preload_catalog_segments": [
+        "assets/preloads/study5_box_breathing_pps/01_profile",
+        "assets/preloads/study5_box_breathing_pps/02_looming_stimuli",
+        "assets/preloads/study5_box_breathing_pps/03_baseline_strategy",
+        "assets/preloads/study5_box_breathing_pps/04_trial_designer",
+        "assets/preloads/study5_box_breathing_pps/05_run_setup"
+      ],
+      "movement_duration_s": 3.0,
+      "movement_start_distance_cm": 110.0,
+      "movement_end_distance_cm": 10.0,
+      "start_hold_s": 0.5,
+      "end_hold_s": 0.5,
+      "tactile_pulse_duration_ms": 100,
+      "local_only_assets": true,
+      "noise_source_policy": "Canonical Study 5 source pool: Pink frontal and White frontal only. Segment 4 family repetitions are scaled to audio-tactile 6.0, baseline 3.0, and catch 6.0 so the prepared trial pool preserves 204 rows and six 34-trial blocks.",
+      "canonical_study5_profile": true,
+      "source_pool_profile": "white_pink",
+      "source_pool_profile_note": "The repository retains only the white/pink Study 5 source pool as the canonical Study 5 profile.",
+      "notes": "Local unpublished Study 5 preload using white and pink frontal looming sources. This is the canonical Study 5 profile in this repository. It retains the Study 5 timing, SOA, baseline, catch, instruction, trajectory, block, and participant defaults, and scales Segment 4 family repetitions for the two-source pool so the prepared trial pool preserves 204 rows and six 34-trial blocks."
     }
   },
   "provenance": [
@@ -340,7 +519,7 @@
     },
     {
       "field": "prebaked looming assets",
-      "source": "Bundled owned Study 5 auditory-only looming WAVs under assets/preloads/study5_box_breathing_pps/02_looming_stimuli; the preload inventory records the original generated-noise recipe, trajectory metadata, segment catalog paths, and SHA-256 hashes."
+      "source": "Bundled owned Study 5 auditory-only looming WAVs under assets/preloads/study5_box_breathing_pps/02_looming_stimuli; the preload inventory records the white/pink generated-noise recipe, trajectory metadata, segment catalog paths, and SHA-256 hashes."
     },
     {
       "field": "visible trial assembly",
@@ -349,6 +528,16 @@
     {
       "field": "trajectory and SOAs",
       "source": "Study 5 toolkit defaults: 110 cm to 10 cm approach, 3 s movement inside a 4 s stimulus window, SOAs 300/800/1500/2200/2700 ms."
+    },
+    {
+      "source": "Repository canonical Study 5 profile metadata.",
+      "parameter": "source_pool_profile",
+      "value": "White/pink canonical Study 5 source pool with Segment 4 repetitions scaled to audio-tactile 6.0, baseline 3.0, and catch 6.0."
+    },
+    {
+      "source": "Repository canonical Study 5 profile metadata.",
+      "parameter": "trial_pool_repetition_policy",
+      "value": "The white/pink canonical Study 5 profile scales Segment 4 family repetitions to audio-tactile 6.0, baseline 3.0, and catch 6.0 so the 204-row Study 5 trial budget is retained."
     }
   ]
 }

@@ -1,16 +1,16 @@
 {
   "schema": "pps-study-profile-parameters.v1",
   "template_id": "study5_box_breathing_pps",
-  "title": "Study 5 PPS box-breathing profile",
-  "citation": "PPS Toolkit Study 5 protocol (2026). Box-breathing audio-tactile PPS profile. Unpublished lab profile.",
+  "title": "Study 5 PPS box-breathing white/pink profile",
+  "citation": "PPS Toolkit Study 5 white/pink protocol (2026). Box-breathing audio-tactile PPS profile with white and pink looming sources. Unpublished lab profile.",
   "doi": "",
   "source_url": "docs/STUDY5_PROTOCOL.md",
   "verification_status": "verified",
   "publication_status": "unpublished_lab_profile",
-  "profile_type": "local_unpublished_study5_box_breathing_pps",
-  "paper_group_key": "citation:pps toolkit study 5 protocol (2026). box-breathing audio-tactile pps profile. unpublished lab profile.",
+  "profile_type": "local_unpublished_study5_box_breathing_pps_white_pink",
+  "paper_group_key": "citation:pps toolkit study 5 white/pink protocol (2026). box-breathing audio-tactile pps profile with white and pink looming sources. unpublished lab profile.",
   "visible_variant_label": "",
-  "variant_display": "Study 5 PPS box-breathing profile",
+  "variant_display": "Study 5 PPS box-breathing white/pink profile",
   "recreation_status": {
     "primary_category": "gui_recreatable",
     "category_label": "GUI-recreatable",
@@ -74,7 +74,7 @@
       "status": "reported",
       "value": {
         "template_id": "study5_box_breathing_pps",
-        "title": "Study 5 PPS box-breathing profile"
+        "title": "Study 5 PPS box-breathing white/pink profile"
       },
       "note": "Profile ID and title are encoded."
     },
@@ -84,7 +84,7 @@
       "parameter": "publication_reference",
       "status": "reported",
       "value": {
-        "citation": "PPS Toolkit Study 5 protocol (2026). Box-breathing audio-tactile PPS profile. Unpublished lab profile.",
+        "citation": "PPS Toolkit Study 5 white/pink protocol (2026). Box-breathing audio-tactile PPS profile with white and pink looming sources. Unpublished lab profile.",
         "doi": "",
         "source_url": "docs/STUDY5_PROTOCOL.md"
       },
@@ -95,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 28,
+      "value": 35,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -103,7 +103,7 @@
       "segment_label": "Segment 1 source/stimulus assets",
       "parameter": "source_stimulus_inventory",
       "status": "reported",
-      "value": 4,
+      "value": 2,
       "note": "Prebaked/profile source assets available."
     },
     {
@@ -111,7 +111,7 @@
       "segment_label": "Segment 1 source/stimulus assets",
       "parameter": "trajectory_snapshots",
       "status": "reported",
-      "value": 4,
+      "value": 2,
       "note": "Source-level trajectory snapshots are available."
     },
     {
@@ -194,10 +194,10 @@
       "parameter": "trial_pool_repetitions",
       "status": "reported",
       "value": {
-        "default": 3.0,
-        "audio_tactile": 3.0,
-        "baseline": 1.5,
-        "catch": 3.0
+        "default": 6.0,
+        "audio_tactile": 6.0,
+        "baseline": 3.0,
+        "catch": 6.0
       },
       "note": "Segment 4 repetition defaults are encoded."
     },
@@ -244,7 +244,7 @@
     "02_looming_stimuli": {
       "stimulus_sources": "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/stimulus_sources.json",
       "trajectory_inventory": "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/trajectory_inventory.json",
-      "asset_count": 4
+      "asset_count": 2
     },
     "03_baseline_strategy": {
       "baseline_strategy": "assets/preloads/study5_box_breathing_pps/03_baseline_strategy/baseline_strategy.json"
@@ -275,7 +275,7 @@
     },
     {
       "field": "prebaked looming assets",
-      "source": "Bundled owned Study 5 auditory-only looming WAVs under assets/preloads/study5_box_breathing_pps/02_looming_stimuli; the preload inventory records the original generated-noise recipe, trajectory metadata, segment catalog paths, and SHA-256 hashes."
+      "source": "Bundled owned Study 5 auditory-only looming WAVs under assets/preloads/study5_box_breathing_pps/02_looming_stimuli; the preload inventory records the white/pink generated-noise recipe, trajectory metadata, segment catalog paths, and SHA-256 hashes."
     },
     {
       "field": "visible trial assembly",
@@ -284,6 +284,16 @@
     {
       "field": "trajectory and SOAs",
       "source": "Study 5 toolkit defaults: 110 cm to 10 cm approach, 3 s movement inside a 4 s stimulus window, SOAs 300/800/1500/2200/2700 ms."
+    },
+    {
+      "source": "Repository canonical Study 5 profile metadata.",
+      "parameter": "source_pool_profile",
+      "value": "White/pink canonical Study 5 source pool with Segment 4 repetitions scaled to audio-tactile 6.0, baseline 3.0, and catch 6.0."
+    },
+    {
+      "source": "Repository canonical Study 5 profile metadata.",
+      "parameter": "trial_pool_repetition_policy",
+      "value": "The white/pink canonical Study 5 profile scales Segment 4 family repetitions to audio-tactile 6.0, baseline 3.0, and catch 6.0 so the 204-row Study 5 trial budget is retained."
     }
   ],
   "notes": "This manifest audits recreation inside the PPS Toolkit GUI. It distinguishes toolkit-generated recreations of reported parameters from the original authors' exact stimulus set."

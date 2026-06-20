@@ -12,7 +12,6 @@ from .design import StimulusDesign, design_from_dict
 
 
 DEFAULT_STUDY_TEMPLATE_ID = "study5_box_breathing_pps"
-STUDY5_PINK_WHITE_TEMPLATE_ID = "study5_box_breathing_pps_pink_white"
 
 
 @dataclass
@@ -79,10 +78,10 @@ def _authors_to_bibtex(authors: str) -> str:
 
 
 def study_template_citation_label(template: StudyTemplate) -> str:
-    if template.template_id == STUDY5_PINK_WHITE_TEMPLATE_ID:
+    if template.template_id == DEFAULT_STUDY_TEMPLATE_ID:
         return (
-            "PPS Toolkit Study 5 pink/white protocol variant (2026) - "
-            f"Pink and white looming sources [{template.verification_status}]"
+            "PPS Toolkit Study 5 white/pink protocol (2026) - "
+            f"White and pink looming sources [{template.verification_status}]"
         )
     parsed = _parse_citation(template.citation)
     lead = f"{parsed['authors']} ({parsed['year']})" if parsed["authors"] and parsed["year"] else template.title
@@ -93,8 +92,6 @@ def study_template_citation_label(template: StudyTemplate) -> str:
 def study_template_priority(template_id: str) -> int:
     if template_id == DEFAULT_STUDY_TEMPLATE_ID:
         return 0
-    if template_id == STUDY5_PINK_WHITE_TEMPLATE_ID:
-        return 1
     return 100
 
 

@@ -12,19 +12,10 @@ from peripersonal_space_toolkit.design import block_trial_rows, default_design, 
 from peripersonal_space_toolkit.preload_inventory import load_preload_inventory, profile_asset_status
 from peripersonal_space_toolkit.templates import DEFAULT_STUDY_TEMPLATE_ID, load_templates, study_template_citation_label
 
-PINK_WHITE_STUDY5_TEMPLATE_ID = "study5_box_breathing_pps_pink_white"
-
-
 def _study5_template():
     root = Path(__file__).resolve().parents[1]
     templates = load_templates(root / "study_templates")
     return next(template for template in templates if template.template_id == DEFAULT_STUDY_TEMPLATE_ID)
-
-
-def _study5_pink_white_template():
-    root = Path(__file__).resolve().parents[1]
-    templates = load_templates(root / "study_templates")
-    return next(template for template in templates if template.template_id == PINK_WHITE_STUDY5_TEMPLATE_ID)
 
 
 def test_study5_is_first_default_preload():
@@ -34,17 +25,15 @@ def test_study5_is_first_default_preload():
     assert templates[0].template_id == DEFAULT_STUDY_TEMPLATE_ID
 
 
-def test_study5_pink_white_protocol_is_adjacent_to_base_protocol():
+def test_white_pink_profile_is_the_only_study5_protocol():
     root = Path(__file__).resolve().parents[1]
     templates = load_templates(root / "study_templates")
 
-    assert [template.template_id for template in templates[:2]] == [
-        DEFAULT_STUDY_TEMPLATE_ID,
-        PINK_WHITE_STUDY5_TEMPLATE_ID,
-    ]
-    label = study_template_citation_label(templates[1])
-    assert "Study 5 pink/white protocol variant" in label
-    assert "Pink and white looming sources" in label
+    study5_templates = [template for template in templates if "study5" in template.template_id]
+    assert [template.template_id for template in study5_templates] == [DEFAULT_STUDY_TEMPLATE_ID]
+    label = study_template_citation_label(study5_templates[0])
+    assert "Study 5 white/pink protocol" in label
+    assert "White and pink looming sources" in label
 
 
 def test_dashboard_starts_from_study5_when_no_deliberate_profile_is_saved(tmp_path: Path):
@@ -149,10 +138,10 @@ def test_dashboard_migrates_legacy_study5_row_labels_on_saved_profile_load(tmp_p
     assert state["design"]["protocol"]["baseline_custom_trial_mode"] == "tactile_only"
     assert state["design"]["protocol"]["baseline_soa_values_ms"] == []
     assert state["design"]["protocol"]["trial_pool_repetition_defaults"] == {
-        "default": 3.0,
-        "audio_tactile": 3.0,
-        "baseline": 1.5,
-        "catch": 3.0,
+        "default": 6.0,
+        "audio_tactile": 6.0,
+        "baseline": 3.0,
+        "catch": 6.0,
     }
 
 
@@ -163,8 +152,8 @@ def test_unpublished_study5_template_preloads_breathing_assets_and_filmstrip():
 
     assert study5.doi == ""
     assert study5.verification_status == "verified"
-    assert design.study_profile_title == "Study 5 PPS box-breathing profile"
-    assert design.name == "Study 5 PPS box-breathing design"
+    assert design.study_profile_title == "Study 5 PPS box-breathing white/pink profile"
+    assert design.name == "Study 5 PPS box-breathing white/pink design"
     assert design.study_profile_reference_parameters["custom_clips_preloaded"] is True
     assert dashboard_app._run_setup_settings(design)["experiment_structure"] == "pre_post"
     assert design.protocol.include_catch_trials is True
@@ -174,10 +163,10 @@ def test_unpublished_study5_template_preloads_breathing_assets_and_filmstrip():
     assert design.protocol.baseline_custom_trial_mode == "tactile_only"
     assert design.protocol.baseline_soa_values_ms == []
     assert design.protocol.trial_pool_repetition_defaults == {
-        "default": 3.0,
-        "audio_tactile": 3.0,
-        "baseline": 1.5,
-        "catch": 3.0,
+        "default": 6.0,
+        "audio_tactile": 6.0,
+        "baseline": 3.0,
+        "catch": 6.0,
     }
     custom_clip_assets = design.study_profile_reference_parameters["custom_clip_assets"]
     assert [clip["label"] for clip in custom_clip_assets[:2]] == ["Inhale instruction", "Exhale instruction"]
@@ -220,12 +209,7 @@ def test_unpublished_study5_template_preloads_breathing_assets_and_filmstrip():
         assert slot["sha256"]
         assert slot["continue_mode"] == continue_mode
         assert slot["source"] == "original_study5"
-    assert [asset.label for asset in design.noises] == [
-        "Pink frontal",
-        "Blue frontal",
-        "White frontal",
-        "Brown frontal",
-    ]
+    assert [asset.label for asset in design.noises] == ["Pink frontal", "White frontal"]
     assert design.custom_looming_files == []
 
     for clip in design.prestimulus_files:
@@ -249,7 +233,7 @@ def test_unpublished_study5_template_preloads_breathing_assets_and_filmstrip():
     inventory = load_preload_inventory(root)
     asset_status = profile_asset_status(DEFAULT_STUDY_TEMPLATE_ID, inventory=inventory, repo_root=root)
     assert asset_status["status"] == "ready"
-    assert asset_status["asset_count"] == 4
+    assert asset_status["asset_count"] == 2
     assert all(asset["sha256_ok"] is True for asset in asset_status["assets"])
 
     strips = design.protocol.trial_strips
@@ -274,20 +258,22 @@ def test_unpublished_study5_template_preloads_breathing_assets_and_filmstrip():
     assert all("instruction | " in row["sequence_labels"] for row in rows)
 
 
-def test_study5_pink_white_profile_keeps_study5_trial_budget_with_two_sources():
+def test_study5_profile_keeps_trial_budget_with_two_sources():
     root = Path(__file__).resolve().parents[1]
-    template = _study5_pink_white_template()
+    template = _study5_template()
     design = template.design
 
-    assert template.title == "Study 5 PPS box-breathing pink/white profile"
+    assert template.title == "Study 5 PPS box-breathing white/pink profile"
     assert template.verification_status == "verified"
     assert design.study_profile_reference_parameters["publication_status"] == "unpublished_lab_profile"
-    assert design.study_profile_reference_parameters["variant_source_profile_id"] == DEFAULT_STUDY_TEMPLATE_ID
-    assert design.study_profile_reference_parameters["noise_source_policy"].startswith("Pink frontal and White frontal only")
-    assert design.name == "Study 5 PPS box-breathing pink/white design"
+    noise_policy = design.study_profile_reference_parameters["noise_source_policy"]
+    assert "Pink frontal and White frontal only" in noise_policy
+    assert "204 rows" in noise_policy
+    assert design.study_profile_reference_parameters["canonical_study5_profile"] is True
+    assert design.name == "Study 5 PPS box-breathing white/pink design"
     assert [asset.label for asset in design.noises] == ["Pink frontal", "White frontal"]
     assert [asset.noise_type for asset in design.noises] == ["pink", "white"]
-    assert all(PINK_WHITE_STUDY5_TEMPLATE_ID in asset.prebaked_path for asset in design.noises)
+    assert all(DEFAULT_STUDY_TEMPLATE_ID in asset.prebaked_path for asset in design.noises)
     assert design.protocol.trial_pool_repetition_defaults == {
         "default": 6.0,
         "audio_tactile": 6.0,
@@ -303,7 +289,7 @@ def test_study5_pink_white_profile_keeps_study5_trial_budget_with_two_sources():
         assert looming.source_labels == ["Pink frontal", "White frontal"]
 
     inventory = load_preload_inventory(root)
-    asset_status = profile_asset_status(PINK_WHITE_STUDY5_TEMPLATE_ID, inventory=inventory, repo_root=root)
+    asset_status = profile_asset_status(DEFAULT_STUDY_TEMPLATE_ID, inventory=inventory, repo_root=root)
     assert asset_status["status"] == "ready"
     assert asset_status["asset_count"] == 2
     assert all(asset["sha256_ok"] is True for asset in asset_status["assets"])
@@ -313,7 +299,7 @@ def test_study5_pink_white_profile_keeps_study5_trial_budget_with_two_sources():
             root
             / "assets"
             / "preloads"
-            / PINK_WHITE_STUDY5_TEMPLATE_ID
+            / DEFAULT_STUDY_TEMPLATE_ID
             / "04_trial_designer"
             / "trial_design.json"
         ).read_text(encoding="utf-8")
