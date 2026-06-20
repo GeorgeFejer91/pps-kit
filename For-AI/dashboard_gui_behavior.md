@@ -6,6 +6,12 @@ The HTML dashboard has a left-rail `View / Edit` mode switch. `View` is the safe
 
 Entering `Edit` on a bundled/read-only profile opens the existing custom-study naming modal first. After the custom copy is created, Edit mode unlocks source, trajectory, trial-sequence, baseline, repetition, block, and run-setup decisions for that custom working copy. Static hosted mode without a local companion cannot enter Edit mode.
 
+## Trajectory Preview
+
+The Segment 1 trajectory preview is an embedded Three.js viewer. The right-side preview controls (`2D`, `3D`, view presets, zoom, fit radius, reset) are view-only camera controls and must stay usable in read-only, locked, and hosted/static modes. The left trajectory/source controls remain mutation controls and are gated by View/Edit mode.
+
+The dashboard must not depend solely on catching the iframe `load` event before it sends preview payloads. If the viewer iframe loads before listeners are attached, `updateViewer()` should detect the viewer API when it becomes available, mark it ready, and push the current payload so online/static previews do not remain stuck on the viewer's initial placeholder 2D scene.
+
 ## Downward Source Propagation
 
 Top-level source-card labels are parent decisions for Segment 2 trial-sequence audio boxes. When a source card is removed in Edit mode, that label is pruned immediately from every downstream sequence box before save. When a source-card label changes, existing downstream labels are renamed to the new label. Future label pickers are rebuilt from the current source pool.

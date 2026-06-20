@@ -6,7 +6,7 @@ let activeNavFrame = 0;
 const CUSTOM_TEMPLATE_ID = "__custom__";
 const DEFAULT_STUDY_TEMPLATE_ID = "study5_box_breathing_pps";
 const STUDY5_PINK_WHITE_TEMPLATE_ID = "study5_box_breathing_pps_pink_white";
-const STATIC_RESOURCE_VERSION = "20260620-study5-counts";
+const STATIC_RESOURCE_VERSION = "20260620-trajectory-ready";
 const STATIC_REPO_ROOT = new URL("../../../", document.currentScript?.src || window.location.href).href;
 const STATIC_PRELOAD_INVENTORY_PATH = "assets/preloads/preload_inventory.json";
 const STATIC_TEMPLATE_DIR = "study_templates/";
@@ -5498,23 +5498,34 @@ async function pollJob(jobId) {
   }
 }
 
-function updateViewer() {
-  if (!state || !viewerReady) return;
+function trajectoryViewerWindow() {
   const frame = $("trajectory-frame");
+  try {
+    return frame?.contentWindow || null;
+  } catch {
+    return null;
+  }
+}
+
+function updateViewer() {
+  if (!state) return;
   const payload = trajectoryPayloadFromControls();
   syncPreviewModeControls(payload.preview_mode);
-  const updateTrajectory = frame.contentWindow?.updateTrajectory;
+  const viewerWindow = trajectoryViewerWindow();
+  const updateTrajectory = viewerWindow?.updateTrajectory;
   if (typeof updateTrajectory !== "function") {
+    viewerReady = false;
     window.setTimeout(updateViewer, 150);
     return;
   }
+  viewerReady = true;
   updateTrajectory(payload);
   // Frame the opening view: once the viewer has rendered real data, center and
   // fit the PPS radius square so it is correct for the actual radius (the
   // default render uses a 1.1 m placeholder). Runs once per (re)load.
   if (!viewerInitialFitDone) {
     viewerInitialFitDone = true;
-    const fitRadius = frame.contentWindow?.fitTrajectoryRadius;
+    const fitRadius = viewerWindow?.fitTrajectoryRadius;
     if (typeof fitRadius === "function") fitRadius();
   }
 }
@@ -5527,8 +5538,8 @@ function setPreviewMode(mode) {
 }
 
 function callTrajectoryViewer(method, ...args) {
-  const frame = $("trajectory-frame");
-  const fn = frame.contentWindow?.[method];
+  const viewerWindow = trajectoryViewerWindow();
+  const fn = viewerWindow?.[method];
   if (typeof fn === "function") fn(...args);
 }
 
