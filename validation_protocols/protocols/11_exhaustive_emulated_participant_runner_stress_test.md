@@ -127,6 +127,25 @@ or `win32+qtest_recovery`, treat the artifact as data-shape/capture evidence
 only. Final full-stack OS-click readiness requires the requested visible OS
 mouse backend to be observed without Qt recovery.
 
+After the rehearsal completes, run the reusable final drift gate on the Desktop
+acquisition root:
+
+```powershell
+python .\validation_protocols\scripts\audit_full_session_wired_lsl_xdf_drift.py `
+  --rehearsal-root "$env:USERPROFILE\Desktop\study_5_full_mock_rehearsal_YYYYMMDD_HHMMSS"
+```
+
+The final Study 5 automated readiness rule treats the Output-4-to-Input-4
+tactile proxy as the hardwired timing reference. The gate must detect every
+`tactile_onset` pulse, keep external XDF vs local LSL timestamps within
+0.1 ms, keep per-block tactile peak residual p95 <= 1 ms and max <= 2 ms, and
+show no adjacent tactile step > 2 ms. Response-marker recovery is decided from
+runtime digital audio evidence (`response_marker_loopback_report.json`) rather
+than from the weak hardwired response-marker peak metric; hardwired
+response-marker peak variation is informational only when digital recovery
+detects all response-marker pulses. This gate still does not measure Woojer
+mechanical vibration onset or human behavioral validity.
+
 If the local packaged executable is quarantined or blocked by endpoint
 protection, use source mode only as an interim hardware/capture diagnostic:
 
