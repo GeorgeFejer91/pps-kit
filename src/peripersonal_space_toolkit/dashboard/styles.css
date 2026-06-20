@@ -269,6 +269,14 @@ code {
   width: fit-content;
 }
 
+.rail-mode-switch {
+  width: 100%;
+}
+
+.rail-mode-switch button {
+  font-size: 12px;
+}
+
 .button-link {
   min-height: 34px;
   display: inline-flex;

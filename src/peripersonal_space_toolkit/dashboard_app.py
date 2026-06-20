@@ -6680,7 +6680,35 @@ def _normalize_dashboard_design(design: StimulusDesign) -> StimulusDesign:
     updated = _normalize_study5_trial_pool_repetition_defaults(updated)
     updated = _normalize_study5_original_instruction_assets(updated)
     updated = _ensure_source_trajectory_snapshots(updated)
-    return _ensure_preload_source_assets(updated)
+    updated = _ensure_preload_source_assets(updated)
+    return _prune_custom_trial_strip_source_labels(updated)
+
+
+def _available_sequence_source_labels(design: StimulusDesign) -> set[str]:
+    labels: set[str] = set()
+    for source in [*design.noises, *design.custom_looming_files, *design.prestimulus_files]:
+        label = str(getattr(source, "label", "") or "").strip()
+        if label:
+            labels.add(label)
+    return labels
+
+
+def _prune_custom_trial_strip_source_labels(design: StimulusDesign) -> StimulusDesign:
+    if not _is_custom_design(design):
+        return design
+    available = _available_sequence_source_labels(design)
+    for strip in design.protocol.trial_strips:
+        for element in strip.elements:
+            if element.kind not in {"fixed_audio", "looming_stimulus"}:
+                continue
+            labels = [str(label or "").strip() for label in element.source_labels if str(label or "").strip()]
+            fallback = str(element.source_label or "").strip()
+            if not labels and fallback:
+                labels = [fallback]
+            filtered = [label for label in dict.fromkeys(labels) if label in available]
+            element.source_labels = filtered
+            element.source_label = filtered[0] if filtered else ""
+    return design
 
 
 def _normalize_study5_full_soa_baseline_defaults(design: StimulusDesign) -> StimulusDesign:

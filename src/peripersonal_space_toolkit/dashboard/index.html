@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260617-profile-memory2">
+  <link rel="stylesheet" href="styles.css?v=20260620-edit-mode-propagation">
 </head>
 <body>
   <div class="app-shell">
@@ -14,6 +14,14 @@
       <div class="brand">
         <div class="brand-name">PPS Toolkit</div>
         <div class="brand-subtitle">Local researcher dashboard</div>
+      </div>
+      <div class="profile-mode-panel" aria-label="Dashboard mode">
+        <div class="layout-title">Mode</div>
+        <div class="segmented-control rail-mode-switch" role="group" aria-label="View or edit mode">
+          <button id="view-mode-button" type="button" data-dashboard-mode="view" class="active" aria-pressed="true">View</button>
+          <button id="edit-mode-button" type="button" data-dashboard-mode="edit" aria-pressed="false">Edit</button>
+        </div>
+        <span id="edit-mode-status" class="status-label optional">view mode</span>
       </div>
       <nav class="rail-nav-group active" aria-label="Toolkit workflow sections" data-rail-page="toolkit">
         <a href="#study" data-step-link="study"><span>0 Preload</span><strong class="decision-state not-ready" data-step-state="study" aria-label="Preload not ready" title="Preload not ready">X</strong></a>
@@ -1088,7 +1096,7 @@
       </form>
     </div>
   </div>
-  <script src="hardware_pixel_art.js?v=20260617-profile-memory2"></script>
-  <script src="app.js?v=20260617-profile-memory2"></script>
+  <script src="hardware_pixel_art.js?v=20260620-edit-mode-propagation"></script>
+  <script src="app.js?v=20260620-edit-mode-propagation"></script>
 </body>
 </html>

@@ -1752,6 +1752,33 @@ def test_dashboard_state_templates_and_design_update(tmp_path: Path):
     assert updated["viewer_payload"]["path_length_m"] > 0
 
 
+def test_custom_study_source_removal_prunes_stale_trial_sequence_labels(tmp_path: Path):
+    client = _client(tmp_path)
+
+    client.post("/api/templates/study5_box_breathing_pps/load").json()
+    custom = client.post("/api/project/customize", json={"name": "Study 5 pink white source test"}).json()
+    design = custom["design"]
+    design["noises"] = [
+        source
+        for source in design["noises"]
+        if source["label"] in {"Pink frontal", "White frontal"}
+    ]
+
+    updated = client.post("/api/design", json={"participant_id": "", "design": design}).json()
+
+    assert [source["label"] for source in updated["design"]["noises"]] == ["Pink frontal", "White frontal"]
+    looming_label_rows = [
+        element["source_labels"]
+        for strip in updated["design"]["protocol"]["trial_strips"]
+        for element in strip["elements"]
+        if element["kind"] == "looming_stimulus"
+    ]
+    assert looming_label_rows == [
+        ["Pink frontal", "White frontal"],
+        ["Pink frontal", "White frontal"],
+    ]
+
+
 def test_dashboard_saves_baseline_strategy_and_updates_summary(tmp_path: Path):
     client = _client(tmp_path)
     design = _compact_design()

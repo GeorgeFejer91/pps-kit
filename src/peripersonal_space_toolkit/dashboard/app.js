@@ -5,7 +5,7 @@ const activePolls = new Set();
 let activeNavFrame = 0;
 const CUSTOM_TEMPLATE_ID = "__custom__";
 const DEFAULT_STUDY_TEMPLATE_ID = "study5_box_breathing_pps";
-const STATIC_RESOURCE_VERSION = "20260617-profile-memory2";
+const STATIC_RESOURCE_VERSION = "20260620-edit-mode-propagation";
 const STATIC_REPO_ROOT = new URL("../../../", document.currentScript?.src || window.location.href).href;
 const STATIC_PRELOAD_INVENTORY_PATH = "assets/preloads/preload_inventory.json";
 const STATIC_TEMPLATE_DIR = "study_templates/";
@@ -247,6 +247,7 @@ let trialPoolDraftSourceHash = "";
 let trialPoolDraftInitialized = false;
 let runSequencePreviewTimer = null;
 let activePage = "toolkit";
+let editModeActive = false;
 let staticModeActive = false;
 let staticModeReason = "";
 let staticPreloadInventory = null;
@@ -388,6 +389,64 @@ function isProfileReadonlyMode() {
   return Boolean(state && !isCustomMode());
 }
 
+function customViewModeLocked() {
+  return Boolean(isCustomMode() && !editModeActive);
+}
+
+function setEditMode(active) {
+  if (active) {
+    if (!state) {
+      showToast("Wait for the dashboard state to load before editing.");
+      editModeActive = false;
+      renderEditModePanel();
+      return false;
+    }
+    if (staticModeActive) {
+      showToast(STATIC_COMPANION_REQUIRED_MESSAGE);
+      editModeActive = false;
+      renderEditModePanel();
+      return false;
+    }
+    if (isProfileReadonlyMode()) {
+      editModeActive = false;
+      renderEditModePanel();
+      openCustomizeModal();
+      showToast("Name a new custom study before editing this profile.");
+      return false;
+    }
+    editModeActive = true;
+  } else {
+    editModeActive = false;
+  }
+  renderAll();
+  updateViewer();
+  return editModeActive;
+}
+
+function resetEditMode() {
+  editModeActive = false;
+}
+
+function renderEditModePanel() {
+  const viewButton = $("view-mode-button");
+  const editButton = $("edit-mode-button");
+  const status = $("edit-mode-status");
+  if (!viewButton || !editButton || !status) return;
+  const canEnterEdit = Boolean(state && !staticModeActive);
+  viewButton.classList.toggle("active", !editModeActive);
+  editButton.classList.toggle("active", editModeActive);
+  viewButton.setAttribute("aria-pressed", String(!editModeActive));
+  editButton.setAttribute("aria-pressed", String(editModeActive));
+  editButton.disabled = !canEnterEdit;
+  editButton.title = staticModeActive
+    ? STATIC_COMPANION_REQUIRED_MESSAGE
+    : isProfileReadonlyMode()
+      ? "Create a named custom copy before editing this loaded profile."
+      : "Unlock editable custom-study decisions.";
+  status.textContent = editModeActive ? "edit mode" : "view mode";
+  status.className = `status-label ${editModeActive ? "ready" : "optional"}`;
+}
+
 // Editing the trajectory (typing distances/rotations OR dragging the preview
 // markers) is allowed only when the trajectory inputs are editable. This ties
 // drag-to-edit in the preview to the same gate as the input fields: if the
@@ -399,7 +458,11 @@ function trajectoryEditingEnabled() {
 }
 
 function ensureEditableProject() {
-  if (!isProfileReadonlyMode()) return true;
+  if (!isProfileReadonlyMode() && editModeActive) return true;
+  if (!isProfileReadonlyMode()) {
+    showToast("Switch to Edit mode before changing this study.");
+    return false;
+  }
   openCustomizeModal();
   showToast("Name a new custom study before editing this profile.");
   return false;
@@ -432,6 +495,17 @@ function profileReadonlyControlAllowed(control) {
       || control.id === "save-study-profile"
       || control.id === "export-output-folder"
     )
+  );
+}
+
+function viewModeControlAllowed(control) {
+  if (!control) return false;
+  if (control.matches?.("[data-preview-source-label]")) return true;
+  if (control.id?.startsWith("open-")) return true;
+  const prepared = Boolean(state?.run_sequence_setup?.prepared || projectSegment("6_experiment_run_setup").status === "ready");
+  return Boolean(
+    prepared
+    && ["prepare-experiment", "save-study-profile", "export-output-folder"].includes(control.id || "")
   );
 }
 
@@ -1059,15 +1133,18 @@ async function loadStaticState(fallbackError = null) {
   return true;
 }
 
-async function loadState() {
+async function loadState(options = {}) {
+  const resetMode = options.resetEditMode === true;
   try {
     state = await api("/api/state", { skipStaticGuard: true });
     staticModeActive = false;
     staticModeReason = "";
+    if (resetMode) resetEditMode();
     renderAll();
     updateViewer();
   } catch (error) {
     try {
+      if (resetMode) resetEditMode();
       await loadStaticState(error);
     } catch (staticError) {
       console.error(staticError);
@@ -1079,6 +1156,9 @@ async function loadState() {
 function renderAll() {
   if (!state) return;
   document.body.classList.toggle("static-dashboard-mode", staticModeActive);
+  document.body.classList.toggle("dashboard-edit-mode", editModeActive);
+  document.body.classList.toggle("dashboard-view-mode", !editModeActive);
+  renderEditModePanel();
   renderHeader();
   renderPageTabs();
   renderProfileMode();
@@ -1264,11 +1344,14 @@ function renderHeader() {
   const applyButton = $("apply-design");
   if (applyButton) {
     const readonly = isProfileReadonlyMode();
+    const viewLocked = customViewModeLocked();
     applyButton.textContent = readonly ? "Profile Read-Only" : "Save Custom Design";
     applyButton.title = readonly
       ? "Create a custom project before editing this loaded profile."
+      : viewLocked
+        ? "Switch to Edit mode before saving custom design changes."
       : "Save the current custom project decisions.";
-    applyButton.disabled = readonly;
+    applyButton.disabled = readonly || viewLocked;
   }
 }
 
@@ -1277,8 +1360,12 @@ function renderProfileMode() {
   const button = $("edit-profile-rail");
   if (!status || !button) return;
   const readonly = isProfileReadonlyMode();
-  status.textContent = staticModeActive && readonly ? "static profile" : readonly ? "profile run mode" : "custom edit mode";
-  status.className = `status-label ${readonly ? "required" : "ready"}`;
+  status.textContent = staticModeActive && readonly
+    ? "static profile"
+    : readonly
+      ? "profile run mode"
+      : editModeActive ? "custom edit mode" : "custom view mode";
+  status.className = `status-label ${readonly || customViewModeLocked() ? "required" : "ready"}`;
   button.textContent = readonly ? "Edit As New Study" : "Editing Custom Study";
   button.disabled = !readonly;
   button.title = readonly
@@ -1497,6 +1584,7 @@ function renderNoiseTable() {
     const localPath = noise.prebaked_path || wav?.path || "";
     const card = document.createElement("div");
     card.className = "source-card noise-source-card";
+    card.dataset.sourceLabel = sourceCardLabelFromSpec(noise, "Generated noise");
     applySourceCardColor(card, selectedNoise);
     card.innerHTML = `
       <div class="source-card-heading">
@@ -1564,6 +1652,7 @@ function renderAudioTable() {
     const card = document.createElement("div");
     card.className = "source-card audio-source-card";
     card.dataset.audioRole = role;
+    card.dataset.sourceLabel = sourceCardLabelFromSpec(audio, audioRoleTitle(role));
     applySourceCardColor(card, colorKey);
     card.innerHTML = `
       <div class="source-card-heading">
@@ -3349,6 +3438,73 @@ function sourcePoolOptions(selected = []) {
     .join("");
 }
 
+function sourceCardLabelFromSpec(spec = {}, fallback = "Audio source") {
+  return String(spec.label || fallback || "Audio source").trim();
+}
+
+function sourceCardCurrentLabel(card) {
+  if (!card) return "";
+  const fallback = card.classList.contains("audio-source-card")
+    ? audioRoleTitle(card.dataset.audioRole || "preserve")
+    : "Generated noise";
+  return String(card.querySelector('[data-field="label"]')?.value || fallback).trim();
+}
+
+function sequenceLabelSetFromDom() {
+  const labels = new Set();
+  for (const item of fixedAudioSourceOptions()) {
+    if (item.value) labels.add(item.value);
+  }
+  for (const source of stimulusSourceDetailsFromDom()) {
+    if (source.label) labels.add(source.label);
+  }
+  return labels;
+}
+
+function reconcileTrialStripLabelsWithSourcePool(labelMap = {}) {
+  const validLabels = sequenceLabelSetFromDom();
+  const strips = collectTrialStrips();
+  let changed = false;
+  for (const strip of strips) {
+    for (const element of strip.elements || []) {
+      if (!["fixed_audio", "looming_stimulus"].includes(element.kind)) continue;
+      const originalLabels = audioBoxLabels(element);
+      const nextLabels = [];
+      for (const label of originalLabels) {
+        const mapped = labelMap[label] || label;
+        if (mapped && validLabels.has(mapped) && !nextLabels.includes(mapped)) {
+          nextLabels.push(mapped);
+        }
+      }
+      if (nextLabels.length !== originalLabels.length || nextLabels.some((label, index) => label !== originalLabels[index])) {
+        changed = true;
+        element.source_labels = nextLabels;
+        element.source_label = nextLabels[0] || "";
+        if (element.kind === "fixed_audio") {
+          element.label = nextLabels.length > 1 ? "Audio pool" : (nextLabels[0] || "Audio box");
+        }
+      }
+    }
+  }
+  if (changed) {
+    setTrialStrips(strips);
+  } else {
+    syncFilmstripSourceOptions();
+  }
+  return changed;
+}
+
+function reconcileSourceCardLabel(card) {
+  const previous = String(card?.dataset.sourceLabel || "").trim();
+  const next = sourceCardCurrentLabel(card);
+  if (card) card.dataset.sourceLabel = next;
+  if (previous && next && previous !== next) {
+    reconcileTrialStripLabelsWithSourcePool({ [previous]: next });
+  } else {
+    syncFilmstripSourceOptions();
+  }
+}
+
 function fixedAudioSourceOptions() {
   const options = [];
   for (const card of [
@@ -3845,7 +4001,7 @@ function syncFilmstripSourceOptions() {
     select.value = [...select.options].some((option) => option.value === selected) ? selected : "";
   }
   for (const select of document.querySelectorAll('[data-element-field="source_labels"]')) {
-    const selected = [...select.selectedOptions].map((option) => option.value);
+    const selected = Array.from(select.selectedOptions || []).map((option) => option.value);
     select.innerHTML = sourcePoolOptions(selected);
   }
   updateFilmstripCounts();
@@ -4014,6 +4170,7 @@ function renderWorkflow() {
   const workflow = state.custom_workflow || { is_custom: false, steps: [] };
   const customMode = Boolean(workflow.is_custom);
   const profileReadonly = isProfileReadonlyMode();
+  const viewLocked = customViewModeLocked();
   document.body.classList.toggle("custom-mode", customMode);
   document.body.classList.toggle("profile-readonly-mode", profileReadonly);
   const pill = $("workflow-pill");
@@ -4067,11 +4224,18 @@ function renderWorkflow() {
     const stepId = panel.dataset.stepPanel;
     const locked = Boolean(customMode && WORKFLOW_STEPS.indexOf(stepId) > unlockedIndex);
     const readonly = Boolean(profileReadonly && stepId !== "study");
+    const viewReadonly = Boolean(viewLocked && stepId !== "study");
     panel.classList.toggle("locked", locked);
     panel.classList.toggle("profile-readonly", readonly);
-    if (readonly) {
-      panel.title = "Create a custom study before editing this loaded profile.";
-    } else if (panel.title === "Create a custom study before editing this loaded profile.") {
+    panel.classList.toggle("view-readonly", viewReadonly);
+    if (readonly || viewReadonly) {
+      panel.title = readonly
+        ? "Create a custom study before editing this loaded profile."
+        : "Switch to Edit mode before changing this custom study.";
+    } else if (
+      panel.title === "Create a custom study before editing this loaded profile."
+      || panel.title === "Switch to Edit mode before changing this custom study."
+    ) {
       panel.title = "";
     }
     for (const control of panel.querySelectorAll("input, select, button")) {
@@ -4081,6 +4245,7 @@ function renderWorkflow() {
       // editing the trajectory itself remains gated to edit mode.
       const previewViewControl = Boolean(control.matches?.("[data-preview-view-control]"));
       const readonlyLocked = readonly && !previewViewControl && !profileReadonlyControlAllowed(control);
+      const viewModeLocked = viewReadonly && !previewViewControl && !viewModeControlAllowed(control);
       if (readonlyLocked) {
         if (!control.title) {
           control.dataset.profileReadonlyTitle = "true";
@@ -4090,13 +4255,22 @@ function renderWorkflow() {
         control.title = "";
         delete control.dataset.profileReadonlyTitle;
       }
-      setWorkflowDisabled(control, previewViewControl ? false : (locked || readonlyLocked));
+      if (viewModeLocked) {
+        if (!control.title) {
+          control.dataset.viewReadonlyTitle = "true";
+          control.title = "Switch to Edit mode before changing this custom study.";
+        }
+      } else if (control.dataset.viewReadonlyTitle === "true") {
+        control.title = "";
+        delete control.dataset.viewReadonlyTitle;
+      }
+      setWorkflowDisabled(control, previewViewControl ? false : (locked || readonlyLocked || viewModeLocked));
     }
   }
 
-  setWorkflowDisabled($("design-name"), profileReadonly);
-  setWorkflowDisabled($("apply-profile-project"), profileReadonly);
-  setWorkflowDisabled($("apply-design"), profileReadonly);
+  setWorkflowDisabled($("design-name"), profileReadonly || viewLocked);
+  setWorkflowDisabled($("apply-profile-project"), profileReadonly || viewLocked);
+  setWorkflowDisabled($("apply-design"), profileReadonly || viewLocked);
   updateActiveNav();
 }
 
@@ -4368,6 +4542,7 @@ async function loadTemplate() {
     }
     state = await staticStateForTemplate(id);
     staticModeActive = true;
+    resetEditMode();
     setConnectionStatus(false, "static profile");
     renderAll();
     updateViewer();
@@ -4378,6 +4553,7 @@ async function loadTemplate() {
   select.disabled = true;
   try {
     state = await api(`/api/templates/${encodeURIComponent(id)}/load`, { method: "POST" });
+    resetEditMode();
     renderAll();
     updateViewer();
     showToast(choice.kind === "manual" ? "Custom design started" : "Profile loaded");
@@ -4395,6 +4571,7 @@ async function loadCustomProject(projectIdOverride = "") {
     return;
   }
   state = await api(`/api/projects/${encodeURIComponent(projectId)}/load`, { method: "POST" });
+  resetEditMode();
   renderAll();
   updateViewer();
   showToast("Custom study opened");
@@ -4513,6 +4690,7 @@ async function customizeAsNewProject(name) {
     method: "POST",
     body: JSON.stringify({ name: cleanName })
   });
+  editModeActive = true;
   renderAll();
   updateViewer();
   showToast("Custom project created");
@@ -5450,7 +5628,11 @@ function fileToBase64(file) {
 
 function removeSourceCard(button) {
   const card = button.closest(".source-card");
+  const removedLabel = sourceCardCurrentLabel(card);
   if (card) card.remove();
+  if (removedLabel) {
+    reconcileTrialStripLabelsWithSourcePool({ [removedLabel]: "" });
+  }
   refreshAssemblyTargetOptions();
   syncFilmstripSourceOptions();
   renderSourceCounts();
@@ -5530,12 +5712,14 @@ function renderHardwarePixelArt() {
 }
 
 function wireEvents() {
-  $("refresh-state").addEventListener("click", () => loadState().catch(reportError));
+  $("refresh-state").addEventListener("click", () => loadState({ resetEditMode: true }).catch(reportError));
   $("apply-design").addEventListener("click", () => applyDesign().catch(reportError));
+  $("view-mode-button")?.addEventListener("click", () => setEditMode(false));
+  $("edit-mode-button")?.addEventListener("click", () => setEditMode(true));
   $("connect-backend").addEventListener("click", () => {
     saveApiBase($("backend-url").value);
     saveCompanionToken($("companion-token")?.value || "");
-    loadState().catch(reportError);
+    loadState({ resetEditMode: true }).catch(reportError);
   });
   $("companion-token")?.addEventListener("change", () => saveCompanionToken($("companion-token").value));
   for (const button of document.querySelectorAll("[data-page-tab]")) {
@@ -5603,7 +5787,7 @@ function wireEvents() {
   $("backend-url").addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       saveApiBase($("backend-url").value);
-      loadState().catch(reportError);
+      loadState({ resetEditMode: true }).catch(reportError);
     }
   });
   $("template-select").addEventListener("change", () => {
@@ -5885,6 +6069,13 @@ function wireEvents() {
     }
   });
   document.addEventListener("change", (event) => {
+    const sourceLabelCard = event.target.closest?.(".source-card");
+    if (sourceLabelCard && event.target.matches('[data-field="label"]')) {
+      reconcileSourceCardLabel(sourceLabelCard);
+      refreshAssemblyTargetOptions();
+      renderSourceCounts();
+      updateViewer();
+    }
     if (event.target.matches('[data-field="audio_role"]')) {
       const card = event.target.closest(".audio-source-card");
       const title = card?.querySelector(".source-card-heading strong");
@@ -5937,4 +6128,4 @@ enforceExternalLinkTargets();
 renderHardwarePixelArt();
 wireEvents();
 initializePageTabs();
-loadState().catch(reportError);
+loadState({ resetEditMode: true }).catch(reportError);
