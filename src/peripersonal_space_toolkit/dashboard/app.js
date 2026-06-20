@@ -6,7 +6,41 @@ let activeNavFrame = 0;
 const CUSTOM_TEMPLATE_ID = "__custom__";
 const DEFAULT_STUDY_TEMPLATE_ID = "study5_box_breathing_pps";
 const STUDY5_PINK_WHITE_TEMPLATE_ID = "study5_box_breathing_pps_pink_white";
-const STATIC_RESOURCE_VERSION = "20260620-loudness-active-window";
+const STATIC_RESOURCE_VERSION = "20260620-seeded-block-randomization";
+const BLOCK_RANDOMIZATION_STRATEGY = "seeded_gellermann_row_order_preserving";
+const BLOCK_RANDOMIZATION_MAX_CONSECUTIVE_FEATURE = 2;
+const BLOCK_CSV_DOWNLOAD_COLUMNS = [
+  "block_index",
+  "block_label",
+  "block_trial_index",
+  "trial_pool_index",
+  "family",
+  "family_label",
+  "family_color_hex",
+  "row_label",
+  "row_color_hex",
+  "folder_key",
+  "folder_name",
+  "noise_type",
+  "noise_color_hex",
+  "soa_ms",
+  "soa_color_hex",
+  "baseline_mode",
+  "sequence_variant_key",
+  "sequence_labels",
+  "source_file_name",
+  "trial_file_path",
+  "source_sha256",
+  "duration_ms",
+  "duration_s",
+  "looming_segment_onset_s",
+  "tactile_onset_s",
+  "repetition_index",
+  "configured_repetitions",
+  "fractional_extra",
+  "channels",
+  "tactile_channel",
+];
 const DEFAULT_LOUDNESS_POLICY = {
   schema: "pps-loudness-policy.v1",
   mode: "estimated_spl",
@@ -538,6 +572,7 @@ function profileReadonlyControlAllowed(control) {
     control.id
     && (
       control.id.startsWith("open-")
+      || control.id === "download-block-randomization"
       || control.id === "prepare-experiment"
       || control.id === "export-data-acquisition-folder"
       || control.id === "save-study-profile"
@@ -550,6 +585,7 @@ function viewModeControlAllowed(control) {
   if (!control) return false;
   if (control.matches?.("[data-preview-source-label]")) return true;
   if (control.id?.startsWith("open-")) return true;
+  if (control.id === "download-block-randomization") return true;
   const prepared = Boolean(state?.run_sequence_setup?.prepared || projectSegment("6_experiment_run_setup").status === "ready");
   return Boolean(
     prepared
@@ -1230,29 +1266,209 @@ function staticCountBy(rows, key) {
   return counts;
 }
 
-function staticBlockRows(poolRows, blockCount) {
-  const rowKeys = Array.from(new Set(poolRows.map((row) => row.row_label || row.folder_key || "row")));
-  const rowsByKey = new Map(rowKeys.map((key) => [key, []]));
-  for (const row of poolRows) rowsByKey.get(row.row_label || row.folder_key || "row")?.push(row);
-  const distributed = new Map();
-  for (const key of rowKeys) {
-    const buckets = Array.from({ length: blockCount }, () => []);
-    for (const [index, row] of (rowsByKey.get(key) || []).entries()) {
-      buckets[index % blockCount].push(row);
+function blockCsvAssignmentKey(row) {
+  return ["family", "row_label", "soa_ms", "source_lineage", "sequence_variant_key", "baseline_mode"]
+    .map((key) => String(row?.[key] ?? ""))
+    .join("|");
+}
+
+function blockCsvFeatureKeys(row) {
+  return [
+    `family:${row?.family || ""}`,
+    `row:${row?.row_label || ""}`,
+    `soa:${row?.soa_ms || ""}`,
+    `source:${row?.source_lineage || ""}`,
+    `variant:${row?.sequence_variant_key || ""}`,
+  ];
+}
+
+function blockCsvSortableTrialIndex(row) {
+  const index = Number(row?.trial_pool_index || 0);
+  return Number.isFinite(index) ? index : 0;
+}
+
+function blockCsvRowKey(row) {
+  const folderKey = String(row?.folder_key || "");
+  const parts = folderKey.split("__");
+  if (parts.length >= 2 && /^row_\d+$/i.test(parts[0])) return parts.slice(0, 2).join("__").toLowerCase();
+  const label = String(row?.row_label || row?.row_folder_name || "").trim();
+  return slugify(label).toLowerCase() || "row_01";
+}
+
+function blockCsvRowSortTuple(rowKey, firstSeen) {
+  const match = String(rowKey || "").match(/row[_-]?(\d+)/i);
+  const rowNumber = match ? Number(match[1]) : firstSeen + 1;
+  return [rowNumber, firstSeen, String(rowKey || "")];
+}
+
+function compareTuples(left, right) {
+  for (let index = 0; index < Math.max(left.length, right.length); index += 1) {
+    if (left[index] < right[index]) return -1;
+    if (left[index] > right[index]) return 1;
+  }
+  return 0;
+}
+
+function blockCsvRowOrder(poolRows) {
+  const seen = new Map();
+  for (const row of poolRows || []) {
+    const rowKey = blockCsvRowKey(row);
+    if (!seen.has(rowKey)) {
+      seen.set(rowKey, {
+        row_key: rowKey,
+        row_label: String(row.row_label || rowKey),
+        first_seen: seen.size,
+      });
     }
-    distributed.set(key, buckets);
+  }
+  return Array.from(seen.values())
+    .sort((left, right) => compareTuples(
+      blockCsvRowSortTuple(left.row_key, left.first_seen),
+      blockCsvRowSortTuple(right.row_key, right.first_seen)
+    ))
+    .map(({ first_seen: _firstSeen, ...rowInfo }) => rowInfo);
+}
+
+function blockCsvRunFeatures(row) {
+  return {
+    condition: blockCsvAssignmentKey(row),
+    family: trialPoolFamilyKey(row?.family || ""),
+    soa: String(row?.soa_ms || ""),
+    source: String(row?.source_lineage || row?.noise_type || ""),
+    variant: String(row?.sequence_variant_key || row?.source_file_name || ""),
+    baseline: String(row?.baseline_mode || ""),
+  };
+}
+
+function blockCsvImmediateExactRepeat(row, orderedRows) {
+  const previous = orderedRows[orderedRows.length - 1];
+  return Boolean(previous && blockCsvRunFeatures(previous).condition === blockCsvRunFeatures(row).condition);
+}
+
+function blockCsvFeatureRunExceeded(row, orderedRows, maxRun) {
+  const safeMaxRun = Math.max(1, Number(maxRun || BLOCK_RANDOMIZATION_MAX_CONSECUTIVE_FEATURE));
+  if (orderedRows.length < safeMaxRun) return false;
+  const candidate = blockCsvRunFeatures(row);
+  const recent = orderedRows.slice(-safeMaxRun);
+  for (const key of ["family", "soa", "source", "variant", "baseline"]) {
+    const value = candidate[key];
+    if (!value) continue;
+    if (recent.every((previous) => blockCsvRunFeatures(previous)[key] === value)) return true;
+  }
+  return false;
+}
+
+function blockCsvViolatesGellermann(row, orderedRows, maxRun) {
+  return blockCsvImmediateExactRepeat(row, orderedRows) || blockCsvFeatureRunExceeded(row, orderedRows, maxRun);
+}
+
+function seededGellermannOrderRows(rows, seedText, maxRun = BLOCK_RANDOMIZATION_MAX_CONSECUTIVE_FEATURE) {
+  const remaining = [...(rows || [])].sort((left, right) => {
+    const leftHash = stableHashInt(`${seedText}|${left.trial_pool_index || ""}|${blockCsvAssignmentKey(left)}`);
+    const rightHash = stableHashInt(`${seedText}|${right.trial_pool_index || ""}|${blockCsvAssignmentKey(right)}`);
+    return leftHash - rightHash || blockCsvSortableTrialIndex(left) - blockCsvSortableTrialIndex(right);
+  });
+  const ordered = [];
+  while (remaining.length) {
+    let selectedIndex = remaining.findIndex((row) => !blockCsvViolatesGellermann(row, ordered, maxRun));
+    if (selectedIndex < 0) {
+      selectedIndex = remaining.findIndex((row) => !blockCsvImmediateExactRepeat(row, ordered));
+    }
+    if (selectedIndex < 0) {
+      selectedIndex = remaining.findIndex((row) => !blockCsvFeatureRunExceeded(row, ordered, maxRun));
+    }
+    if (selectedIndex < 0) selectedIndex = 0;
+    ordered.push(remaining.splice(selectedIndex, 1)[0]);
+  }
+  return ordered;
+}
+
+function distributeBlockCsvRowFamily(rowsForRowFamily, blockCount, seed, rowKey, maxRun) {
+  const groups = new Map();
+  for (const row of rowsForRowFamily || []) {
+    const groupKey = blockCsvAssignmentKey(row);
+    if (!groups.has(groupKey)) groups.set(groupKey, []);
+    groups.get(groupKey).push(row);
+  }
+  const rowBlocks = Array.from({ length: blockCount }, () => []);
+  const featureCounts = Array.from({ length: blockCount }, () => ({}));
+  for (const groupKey of Array.from(groups.keys()).sort()) {
+    const rows = [...(groups.get(groupKey) || [])].sort(
+      (left, right) => blockCsvSortableTrialIndex(left) - blockCsvSortableTrialIndex(right)
+    );
+    const offset = stableHashInt(`${seed}|${rowKey}|${groupKey}`) % blockCount;
+    const rotation = Array.from({ length: blockCount }, (_unused, index) => (offset + index) % blockCount);
+    const rotationRank = new Map(rotation.map((blockIndex, rank) => [blockIndex, rank]));
+    for (const row of rows) {
+      const featureKeys = blockCsvFeatureKeys(row);
+      let bestBlock = rotation[0];
+      let bestScore = null;
+      for (const candidate of rotation) {
+        const featureLoad = featureKeys.reduce(
+          (total, key) => total + Number(featureCounts[candidate][key] || 0),
+          0
+        );
+        const score = [
+          rowBlocks[candidate].length,
+          featureLoad,
+          rotationRank.get(candidate) || 0,
+        ];
+        if (!bestScore || compareTuples(score, bestScore) < 0) {
+          bestScore = score;
+          bestBlock = candidate;
+        }
+      }
+      rowBlocks[bestBlock].push(row);
+      for (const key of featureKeys) {
+        featureCounts[bestBlock][key] = Number(featureCounts[bestBlock][key] || 0) + 1;
+      }
+    }
+  }
+  return rowBlocks.map((rows, index) => seededGellermannOrderRows(
+    rows,
+    `${seed}|${rowKey}|block:${index + 1}`,
+    maxRun
+  ));
+}
+
+function seededGellermannBlockRows(poolRows, blockCount, seed, maxRun = BLOCK_RANDOMIZATION_MAX_CONSECUTIVE_FEATURE) {
+  const rowOrder = blockCsvRowOrder(poolRows || []);
+  if (!rowOrder.length) {
+    return {
+      blocks: Array.from({ length: blockCount }, () => []),
+      rowOrder,
+    };
+  }
+  const rowsByRowKey = new Map(rowOrder.map((rowInfo) => [rowInfo.row_key, []]));
+  for (const row of poolRows || []) {
+    const rowKey = blockCsvRowKey(row);
+    if (!rowsByRowKey.has(rowKey)) rowsByRowKey.set(rowKey, []);
+    rowsByRowKey.get(rowKey).push(row);
+  }
+  const distributedByRow = new Map();
+  for (const rowInfo of rowOrder) {
+    distributedByRow.set(rowInfo.row_key, distributeBlockCsvRowFamily(
+      rowsByRowKey.get(rowInfo.row_key) || [],
+      blockCount,
+      seed,
+      rowInfo.row_key,
+      maxRun
+    ));
   }
   const blocks = Array.from({ length: blockCount }, () => []);
   for (let blockIndex = 0; blockIndex < blockCount; blockIndex += 1) {
-    const queues = new Map(rowKeys.map((key) => [key, [...(distributed.get(key)?.[blockIndex] || [])]]));
-    while ([...queues.values()].some((queue) => queue.length)) {
-      for (const key of rowKeys) {
-        const queue = queues.get(key) || [];
+    const rowQueues = new Map(rowOrder.map((rowInfo) => [
+      rowInfo.row_key,
+      [...(distributedByRow.get(rowInfo.row_key)?.[blockIndex] || [])],
+    ]));
+    while (Array.from(rowQueues.values()).some((queue) => queue.length)) {
+      for (const rowInfo of rowOrder) {
+        const queue = rowQueues.get(rowInfo.row_key) || [];
         if (queue.length) blocks[blockIndex].push(queue.shift());
       }
     }
   }
-  return blocks;
+  return { blocks, rowOrder };
 }
 
 function staticBlockPreviewRow(row, blockIndex, blockTrialIndex, soaMin, soaMax) {
@@ -1306,10 +1522,18 @@ function staticBlockCsvPreviewPayload(design, trialPoolBake, status) {
   const poolRows = trialPoolBake.preview_rows || [];
   if (!status.finished_profile || !poolRows.length) return {};
   const blockCount = Math.max(1, Math.round(Number(design.protocol?.blocks || 1)));
+  const rawSeed = Number(design.protocol?.random_seed || 20250604);
+  const seed = Number.isFinite(rawSeed) ? Math.round(rawSeed) : 20250604;
   const soaValues = poolRows.map((row) => Number(row.soa_ms || 0)).filter((value) => value > 0);
   const soaMin = soaValues.length ? Math.min(...soaValues) : 0;
   const soaMax = soaValues.length ? Math.max(...soaValues) : 0;
-  const blocks = staticBlockRows(poolRows, blockCount).map((rows, index) => {
+  const scheduled = seededGellermannBlockRows(
+    poolRows,
+    blockCount,
+    seed,
+    BLOCK_RANDOMIZATION_MAX_CONSECUTIVE_FEATURE
+  );
+  const blocks = scheduled.blocks.map((rows, index) => {
     const blockIndex = index + 1;
     const previewRows = rows.map((row, rowIndex) => staticBlockPreviewRow(row, blockIndex, rowIndex + 1, soaMin, soaMax));
     const durationMs = previewRows.reduce((total, row) => total + Number(row.duration_ms || 0), 0);
@@ -1334,6 +1558,14 @@ function staticBlockCsvPreviewPayload(design, trialPoolBake, status) {
     block_count: blockCount,
     csv_count: blocks.length,
     total_count: poolRows.length,
+    total_trials: poolRows.length,
+    randomization_seed: seed,
+    randomization_strategy: BLOCK_RANDOMIZATION_STRATEGY,
+    max_consecutive_same_feature: BLOCK_RANDOMIZATION_MAX_CONSECUTIVE_FEATURE,
+    balancing_strategy: "row_order_preserving_minimum_divergence_by_family_soa_source_lineage_with_gellermann_constraints",
+    row_sequence_strategy: "cycle_preserved_segment_row_order_within_each_block",
+    row_order: scheduled.rowOrder,
+    csv_columns: BLOCK_CSV_DOWNLOAD_COLUMNS,
     estimated_total_duration_ms: blocks.reduce((total, block) => total + Number(block.duration_ms || 0), 0),
     blocks,
   };
@@ -2830,6 +3062,7 @@ function renderSegmentRegistryOutputs() {
   const segment5 = projectSegment("5_block_csv_preview");
   const blockButton = $("regenerate-block-csvs");
   const acceptButton = $("accept-block-csvs");
+  const downloadButton = $("download-block-randomization");
   const segment4Ready = segment4.status === "ready";
   const blockAccepted = Boolean(segment5.accepted || state.block_csv_preview?.accepted);
   if (blockButton) blockButton.disabled = !segment4Ready || blockAccepted;
@@ -2837,6 +3070,7 @@ function renderSegmentRegistryOutputs() {
     acceptButton.disabled = !(segment5.status === "ready");
     acceptButton.textContent = blockAccepted ? "Edit Blocks" : "Accept Blocks";
   }
+  if (downloadButton) downloadButton.disabled = !(state.block_csv_preview?.blocks || []).length;
   const blockStatus = $("block-csv-bake-status");
   if (blockStatus) {
     blockStatus.textContent = segment5.status === "ready"
@@ -2886,6 +3120,7 @@ function renderBlockCsvPreview() {
   const preview = state.block_csv_preview || {};
   const blockAccepted = Boolean(segment5.accepted || preview.accepted);
   if (blockInput) blockInput.disabled = blockAccepted;
+  if ($("download-block-randomization")) $("download-block-randomization").disabled = !(preview.blocks || []).length;
   if ($("blocks")) $("blocks").value = blockInput?.value || protocolBlocks;
   const job = latestBlockCsvJob();
   if (job?.status === "running" || job?.status === "queued") {
@@ -5716,6 +5951,110 @@ async function acceptBlockCsvs() {
   }
 }
 
+function csvEscape(value) {
+  const text = String(value ?? "");
+  return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+function rowsToCsv(rows, columns) {
+  return [
+    columns.map(csvEscape).join(","),
+    ...rows.map((row) => columns.map((column) => csvEscape(row[column] ?? "")).join(",")),
+  ].join("\r\n") + "\r\n";
+}
+
+function downloadTextFile(fileName, text, mimeType) {
+  const blob = new Blob([text], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  link.rel = "noopener";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+function blockRandomizationDownloadStem(preview) {
+  const profile = slugify(state?.design?.study_profile_id || state?.design?.name || "pps_profile") || "pps_profile";
+  const seed = String(preview?.randomization_seed || state?.design?.protocol?.random_seed || "seed");
+  return `${profile}_segment5_seed${seed}`;
+}
+
+function blockRandomizationRows(preview) {
+  return (preview?.blocks || []).flatMap((block) => block.preview_rows || []);
+}
+
+function blockRandomizationManifestForDownload(preview, columns) {
+  return {
+    schema: preview.schema || "pps-block-csv-preview.v1",
+    download_kind: "segment5_block_randomization",
+    downloaded_at: new Date().toISOString(),
+    profile_id: state?.design?.study_profile_id || "",
+    profile_title: state?.design?.study_profile_title || state?.design?.name || "",
+    status: preview.status || projectSegment("5_block_csv_preview").status || "",
+    accepted: Boolean(preview.accepted || projectSegment("5_block_csv_preview").accepted),
+    block_count: preview.block_count || (preview.blocks || []).length,
+    csv_count: preview.csv_count || (preview.blocks || []).length,
+    total_trials: preview.total_trials || preview.total_count || blockRandomizationRows(preview).length,
+    randomization_seed: preview.randomization_seed || state?.design?.protocol?.random_seed || "",
+    randomization_strategy: preview.randomization_strategy || BLOCK_RANDOMIZATION_STRATEGY,
+    max_consecutive_same_feature: preview.max_consecutive_same_feature || BLOCK_RANDOMIZATION_MAX_CONSECUTIVE_FEATURE,
+    balancing_strategy: preview.balancing_strategy || "",
+    row_sequence_strategy: preview.row_sequence_strategy || "cycle_preserved_segment_row_order_within_each_block",
+    row_order: preview.row_order || [],
+    csv_columns: columns,
+    blocks: (preview.blocks || []).map((block) => ({
+      block_index: block.block_index,
+      block_label: block.block_label,
+      csv_file_name: block.csv_file_name,
+      trial_count: block.trial_count,
+      duration_ms: block.duration_ms,
+      family_counts: block.family_counts || {},
+      row_label_counts: block.row_label_counts || {},
+      soa_counts: block.soa_counts || {},
+      noise_type_counts: block.noise_type_counts || {},
+    })),
+  };
+}
+
+async function downloadBlockRandomization() {
+  const preview = state?.block_csv_preview || {};
+  const blocks = preview.blocks || [];
+  if (!blocks.length) {
+    showToast("Generate blocks first");
+    return;
+  }
+  const truncatedBlock = blocks.find((block) => {
+    const previewCount = (block.preview_rows || []).length;
+    const trialCount = Number(block.trial_count || previewCount);
+    return previewCount < trialCount;
+  });
+  if (truncatedBlock) {
+    showToast("This preview is truncated; use the local Segment 5 CSV files for the full randomization");
+    return;
+  }
+  const sourceColumns = Array.isArray(preview.csv_columns) && preview.csv_columns.length
+    ? preview.csv_columns
+    : BLOCK_CSV_DOWNLOAD_COLUMNS;
+  const filteredColumns = sourceColumns
+    .filter((column) => BLOCK_CSV_DOWNLOAD_COLUMNS.includes(column));
+  const columns = filteredColumns.length ? filteredColumns : BLOCK_CSV_DOWNLOAD_COLUMNS;
+  const rows = blockRandomizationRows(preview);
+  if (!rows.length) {
+    showToast("Generate blocks first");
+    return;
+  }
+  const stem = blockRandomizationDownloadStem(preview);
+  downloadTextFile(`${stem}.csv`, rowsToCsv(rows, columns), "text/csv;charset=utf-8");
+  window.setTimeout(() => {
+    const manifest = blockRandomizationManifestForDownload(preview, columns);
+    downloadTextFile(`${stem}_manifest.json`, JSON.stringify(manifest, null, 2) + "\n", "application/json;charset=utf-8");
+  }, 120);
+  showToast("Segment 5 randomization downloaded");
+}
+
 function scheduleRunSequencePreview() {
   window.clearTimeout(runSequencePreviewTimer);
   renderRun();
@@ -6680,6 +7019,7 @@ function wireEvents() {
   $("bake-trial-pool")?.addEventListener("click", () => startBakeTrialPool().catch(reportError));
   $("regenerate-block-csvs")?.addEventListener("click", () => startBakeBlockCsvs().catch(reportError));
   $("accept-block-csvs")?.addEventListener("click", () => acceptBlockCsvs().catch(reportError));
+  $("download-block-randomization")?.addEventListener("click", () => downloadBlockRandomization().catch(reportError));
   $("open-profile-folder")?.addEventListener("click", () => {
     const path = $("open-profile-folder")?.dataset.folderPath || projectSegment("0_profile").folder_path || "";
     openLocalFolder(path).catch(reportError);

@@ -1736,6 +1736,7 @@ body.custom-mode .step-footer {
 }
 
 .panel.profile-readonly button[id^="open-"],
+.panel.profile-readonly #download-block-randomization,
 .panel.profile-readonly #prepare-experiment,
 .panel.profile-readonly #save-study-profile,
 .panel.profile-readonly #export-output-folder,
@@ -3274,6 +3275,16 @@ select:focus {
 
 .block-csv-controls .field-row {
   max-width: 360px;
+}
+
+.block-csv-download-row .field-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.block-csv-download-row button {
+  width: 100%;
 }
 
 .block-csv-decision-actions {

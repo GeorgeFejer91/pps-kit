@@ -207,7 +207,7 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260620-loudness-active-window"
+    static_version = "20260620-seeded-block-randomization"
     assert f'href="styles.css?v={static_version}"' in html
     assert f'src="hardware_pixel_art.js?v={static_version}"' in html
     assert f'src="app.js?v={static_version}"' in html
@@ -215,6 +215,10 @@ def test_dashboard_static_assets_are_packaged():
     assert f"index.html?page=documentation&v={static_version}" in public_docs
     assert f"index.html?page=downloads&v={static_version}" in public_download
     assert "STUDY5_PINK_WHITE_TEMPLATE_ID" in app_js
+    assert "seededGellermannBlockRows" in app_js
+    assert "downloadBlockRandomization" in app_js
+    assert 'control.id === "download-block-randomization"' in app_js
+    assert "index % blockCount" not in app_js
     assert "Bundled study protocols" in app_js
     assert "PPS Toolkit Study 5 pink/white protocol variant" in app_js
     assert 'data-page-tab="toolkit"' in html
@@ -226,6 +230,8 @@ def test_dashboard_static_assets_are_packaged():
     assert html.count('class="doc-segment-rule"') == 8
     assert 'id="downloads-page"' in html
     assert 'id="toolkit-page"' in html
+    assert 'id="download-block-randomization"' in html
+    assert ".panel.profile-readonly #download-block-randomization" in styles_css
     assert f'src="../viewer/index.html?v={static_version}"' in html
     assert "PAGE_ROUTE_SEGMENTS" in app_js
     assert 'documentation: "documentation"' in app_js
@@ -413,6 +419,7 @@ def test_dashboard_static_assets_are_packaged():
     assert "Bake Trial Pool CSV" in html
     assert "Regenerate Blocks" in html
     assert "Accept Blocks" in html
+    assert "Download Randomization" in html
     assert "Edit Blocks" in app_js
     assert "Bake Block CSVs" not in html
     assert 'id="block-count"' in html
@@ -565,7 +572,7 @@ def test_dashboard_static_assets_are_packaged():
     assert "study_templates/" in app_js
     assert "staticStateForTemplate" in app_js
     assert "DEFAULT_STUDY_TEMPLATE_ID = \"study5_box_breathing_pps\"" in app_js
-    assert "Loaded Study 5 and committed preload assets from GitHub" in app_js
+    assert "Loaded committed preload assets from GitHub" in app_js
     assert "Start the local companion backend to create, bake, save, prepare, or open local experiment files." in app_js
     assert "Open Asset" in app_js
     assert "staticPreviewAssetForLabel" in app_js
@@ -652,6 +659,55 @@ def test_dashboard_static_assets_are_packaged():
     assert "radiusChanged" not in viewer_js
     assert "trajectory-viewer.js?v=" in viewer_files.joinpath("index.html").read_text(encoding="utf-8")
     assert "/api/" not in html
+
+
+def test_segment5_block_scheduler_is_seeded_gellermann_and_row_order_preserving():
+    rows = []
+    trial_pool_index = 1
+    for row_label, folder_key in (
+        ("Inhale trial type", "row_01__inhale_trial_type"),
+        ("Exhale trial type", "row_02__exhale_trial_type"),
+    ):
+        for family in ("audio_tactile", "baseline", "catch"):
+            for source_lineage in ("pink", "white", "blue"):
+                for soa_ms in (300, 900, 1500):
+                    rows.append(
+                        {
+                            "trial_pool_index": trial_pool_index,
+                            "family": family,
+                            "row_label": row_label,
+                            "folder_key": f"{folder_key}__{family}",
+                            "soa_ms": str(soa_ms),
+                            "source_lineage": source_lineage,
+                            "sequence_variant_key": f"{source_lineage}_{soa_ms}",
+                            "baseline_mode": "silent" if family == "baseline" else "",
+                            "source_file_name": f"{source_lineage}_{soa_ms}.wav",
+                        }
+                    )
+                    trial_pool_index += 1
+
+    first = dashboard_app._assign_trial_pool_rows_to_blocks(rows, 3, seed=111)
+    second = dashboard_app._assign_trial_pool_rows_to_blocks(rows, 3, seed=111)
+    third = dashboard_app._assign_trial_pool_rows_to_blocks(rows, 3, seed=222)
+
+    def signature(blocks):
+        return [[row["trial_pool_index"] for row in block] for block in blocks]
+
+    assert signature(first) == signature(second)
+    assert signature(first) != signature(third)
+    for block in first:
+        labels = [row["row_label"] for row in block]
+        assert labels == ["Inhale trial type", "Exhale trial type"] * (len(labels) // 2)
+
+    for row_label in ("Inhale trial type", "Exhale trial type"):
+        row_queue = [row for row in first[0] if row["row_label"] == row_label]
+        for previous, current in zip(row_queue, row_queue[1:]):
+            assert dashboard_app._block_csv_assignment_key(previous) != dashboard_app._block_csv_assignment_key(current)
+        for index in range(2, len(row_queue)):
+            recent = row_queue[index - 2:index + 1]
+            for key in ("family", "soa", "source", "variant", "baseline"):
+                values = [dashboard_app._block_csv_run_features(row)[key] for row in recent]
+                assert not values[0] or len(set(values)) > 1
 
 
 def test_dashboard_creates_profile_and_custom_project_folders(tmp_path: Path):
@@ -1428,6 +1484,8 @@ def test_dashboard_validates_full_study5_segment0_to_3_pipeline(tmp_path: Path):
     assert default_block_done["result"]["total_count"] == 204
     default_block_manifest = _read_json_file(default_block_done["result"]["manifest_path"])
     assert [block["trial_count"] for block in default_block_manifest["blocks"]] == [34, 34, 34, 34, 34, 34]
+    assert default_block_manifest["randomization_strategy"] == "seeded_gellermann_row_order_preserving"
+    assert default_block_manifest["max_consecutive_same_feature"] == 2
     assert default_block_manifest["row_sequence_strategy"] == "cycle_preserved_segment_row_order_within_each_block"
     assert [row["row_label"] for row in default_block_manifest["row_order"]] == ["Inhale trial type", "Exhale trial type"]
     assert default_block_manifest["soa_color_gradient"]["minimum_soa_ms"] == 300
@@ -1579,6 +1637,8 @@ def test_dashboard_pink_white_profile_preserves_study5_trial_budget_after_source
 
     block_manifest = _read_json_file(block_done["result"]["manifest_path"])
     assert [block["trial_count"] for block in block_manifest["blocks"]] == [34, 34, 34, 34, 34, 34]
+    assert block_manifest["randomization_strategy"] == "seeded_gellermann_row_order_preserving"
+    assert block_manifest["max_consecutive_same_feature"] == 2
     assert block_manifest["row_sequence_strategy"] == "cycle_preserved_segment_row_order_within_each_block"
     for block in block_manifest["blocks"]:
         block_rows = _read_csv_rows(block["csv_path"])
@@ -2639,6 +2699,8 @@ def test_dashboard_bakes_baseline_tactile_trial_files_with_three_channels(tmp_pa
     assert block_root.name.startswith("5_")
     block_manifest = json.loads(Path(block_done["result"]["manifest_path"]).read_text(encoding="utf-8"))
     assert block_manifest["schema"] == "pps-block-csv-preview.v1"
+    assert block_manifest["randomization_strategy"] == "seeded_gellermann_row_order_preserving"
+    assert block_manifest["max_consecutive_same_feature"] == 2
     assert block_manifest["source_segment4_manifest_sha256"] == dashboard_app._local_file_sha256(Path(pool_done["result"]["manifest_path"]))
     assert len(block_manifest["blocks"]) == 2
     block_counts = [block["trial_count"] for block in block_manifest["blocks"]]

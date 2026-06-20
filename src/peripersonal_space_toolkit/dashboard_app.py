@@ -128,6 +128,8 @@ STUDY_SETTINGS_MANIFEST_SCHEMA = "pps-dashboard-study-settings-manifest.v1"
 INGREDIENT_MANIFEST_SCHEMA = "pps-core-audio-ingredients.v1"
 TRIAL_REPETITION_POOL_MANIFEST_SCHEMA = "pps-trial-repetition-pool.v1"
 BLOCK_CSV_PREVIEW_MANIFEST_SCHEMA = "pps-block-csv-preview.v1"
+BLOCK_RANDOMIZATION_STRATEGY = "seeded_gellermann_row_order_preserving"
+BLOCK_RANDOMIZATION_MAX_CONSECUTIVE_FEATURE = 2
 RUN_SETUP_MANIFEST_SCHEMA = "pps-experiment-run-setup.v1"
 DATA_ACQUISITION_BRIDGE_SCHEMA = "pps-dashboard-runner-bridge.v1"
 DASHBOARD_DESIGN_EXPORT_DIRNAME = "dashboard_design_export"
@@ -6002,6 +6004,108 @@ def _block_csv_feature_keys(row: dict[str, Any]) -> list[str]:
     ]
 
 
+def _block_csv_sortable_trial_index(row: dict[str, Any]) -> int:
+    try:
+        return int(float(str(row.get("trial_pool_index") or "0")))
+    except ValueError:
+        return 0
+
+
+def _block_csv_run_features(row: dict[str, Any]) -> dict[str, str]:
+    return {
+        "condition": _block_csv_assignment_key(row),
+        "family": _trial_pool_family_key(row.get("family")),
+        "soa": str(row.get("soa_ms") or ""),
+        "source": str(row.get("source_lineage") or _block_csv_noise_type(row) or ""),
+        "variant": str(row.get("sequence_variant_key") or row.get("source_file_name") or ""),
+        "baseline": str(row.get("baseline_mode") or ""),
+    }
+
+
+def _block_csv_immediate_exact_repeat(row: dict[str, Any], ordered_rows: list[dict[str, Any]]) -> bool:
+    if not ordered_rows:
+        return False
+    return _block_csv_run_features(ordered_rows[-1])["condition"] == _block_csv_run_features(row)["condition"]
+
+
+def _block_csv_feature_run_exceeded(
+    row: dict[str, Any],
+    ordered_rows: list[dict[str, Any]],
+    max_run: int,
+) -> bool:
+    safe_max_run = max(1, int(max_run or BLOCK_RANDOMIZATION_MAX_CONSECUTIVE_FEATURE))
+    if len(ordered_rows) < safe_max_run:
+        return False
+    candidate = _block_csv_run_features(row)
+    recent_rows = ordered_rows[-safe_max_run:]
+    for key in ("family", "soa", "source", "variant", "baseline"):
+        value = candidate.get(key) or ""
+        if not value:
+            continue
+        if all(_block_csv_run_features(previous).get(key) == value for previous in recent_rows):
+            return True
+    return False
+
+
+def _block_csv_violates_gellermann(
+    row: dict[str, Any],
+    ordered_rows: list[dict[str, Any]],
+    max_run: int,
+) -> bool:
+    return _block_csv_immediate_exact_repeat(row, ordered_rows) or _block_csv_feature_run_exceeded(
+        row,
+        ordered_rows,
+        max_run,
+    )
+
+
+def _gellermann_order_block_csv_rows(
+    rows: list[dict[str, Any]],
+    *,
+    seed_text: str,
+    max_run: int = BLOCK_RANDOMIZATION_MAX_CONSECUTIVE_FEATURE,
+) -> list[dict[str, Any]]:
+    remaining = sorted(
+        rows,
+        key=lambda item: (
+            _stable_int(f"{seed_text}|{item.get('trial_pool_index') or ''}|{_block_csv_assignment_key(item)}"),
+            _block_csv_sortable_trial_index(item),
+        ),
+    )
+    ordered: list[dict[str, Any]] = []
+    while remaining:
+        selected_index: int | None = next(
+            (
+                index
+                for index, row in enumerate(remaining)
+                if not _block_csv_violates_gellermann(row, ordered, max_run)
+            ),
+            None,
+        )
+        if selected_index is None:
+            selected_index = next(
+                (
+                    index
+                    for index, row in enumerate(remaining)
+                    if not _block_csv_immediate_exact_repeat(row, ordered)
+                ),
+                None,
+            )
+        if selected_index is None:
+            selected_index = next(
+                (
+                    index
+                    for index, row in enumerate(remaining)
+                    if not _block_csv_feature_run_exceeded(row, ordered, max_run)
+                ),
+                None,
+            )
+        if selected_index is None:
+            selected_index = 0
+        ordered.append(remaining.pop(selected_index))
+    return ordered
+
+
 def _block_csv_row_key(row: dict[str, Any]) -> str:
     folder_key = str(row.get("folder_key") or "")
     parts = folder_key.split("__")
@@ -6067,7 +6171,11 @@ def _distribute_block_csv_row_family(
             for key in feature_keys:
                 feature_counts[block_index][key] = feature_counts[block_index].get(key, 0) + 1
     for index, rows in enumerate(row_blocks, start=1):
-        rows.sort(key=lambda item: _stable_int(f"{seed}|{row_key}|block:{index}|trial:{item.get('trial_pool_index')}"))
+        row_blocks[index - 1] = _gellermann_order_block_csv_rows(
+            rows,
+            seed_text=f"{seed}|{row_key}|block:{index}",
+            max_run=BLOCK_RANDOMIZATION_MAX_CONSECUTIVE_FEATURE,
+        )
     return row_blocks
 
 
@@ -6300,10 +6408,12 @@ def _bake_block_csv_preview(
         "loudness_policy": loudness_policy_for_design(design),
         "block_count": block_count,
         "randomization_seed": seed,
+        "randomization_strategy": BLOCK_RANDOMIZATION_STRATEGY,
+        "max_consecutive_same_feature": BLOCK_RANDOMIZATION_MAX_CONSECUTIVE_FEATURE,
         "total_trials": len(pool_rows),
         "estimated_total_duration_ms": total_duration_ms,
         "estimated_total_duration_s": round(total_duration_ms / 1000.0, 3),
-        "balancing_strategy": "row_order_preserving_minimum_divergence_by_family_soa_source_lineage",
+        "balancing_strategy": "row_order_preserving_minimum_divergence_by_family_soa_source_lineage_with_gellermann_constraints",
         "row_sequence_strategy": "cycle_preserved_segment_row_order_within_each_block",
         "row_order": row_order,
         "soa_color_gradient": {
