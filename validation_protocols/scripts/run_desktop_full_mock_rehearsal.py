@@ -99,6 +99,7 @@ def _resolve_path(value: Any, *, base: Path) -> Path:
 
 
 def _audio_route_preflight() -> dict[str, Any]:
+    os.environ.setdefault("SD_ENABLE_ASIO", "1")
     try:
         import sounddevice as sd  # type: ignore
     except Exception as exc:

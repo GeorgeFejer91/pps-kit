@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import importlib.util
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -1770,6 +1771,35 @@ def test_desktop_full_mock_rehearsal_delegates_to_full_stack_harness(tmp_path: P
     assert "--strict-study5-readiness" in argv
     assert argv[argv.index("--participant-id") + 1] == "P050"
     assert Path(report["validation_dir"]).parent.name == "v"
+
+
+def test_desktop_full_mock_rehearsal_preflight_enables_asio(monkeypatch):
+    rehearsal = _load_script("run_desktop_full_mock_rehearsal.py")
+
+    class FakeSoundDevice:
+        @staticmethod
+        def query_hostapis():
+            return [{"name": "ASIO"}]
+
+        @staticmethod
+        def query_devices():
+            return [
+                {
+                    "name": "Komplete Audio ASIO Driver",
+                    "hostapi": 0,
+                    "max_input_channels": 6,
+                    "max_output_channels": 6,
+                }
+            ]
+
+    monkeypatch.delenv("SD_ENABLE_ASIO", raising=False)
+    monkeypatch.setitem(sys.modules, "sounddevice", FakeSoundDevice)
+
+    report = rehearsal._audio_route_preflight()
+
+    assert report["komplete_asio_4x4_ready"]
+    assert report["candidates"][0]["hostapi"] == "ASIO"
+    assert os.environ["SD_ENABLE_ASIO"] == "1"
 
 
 def test_desktop_full_mock_rehearsal_reconciles_external_labrecorder_xdf(tmp_path: Path, monkeypatch):
