@@ -809,6 +809,9 @@ async function staticStateForTemplate(templateId) {
   const status = staticProfileAssetStatus(cleanId, inventory);
   const design = normalizeStaticTemplateDesign(data, status);
   const project = staticProjectPayload(design, status);
+  const trialFileBake = staticTrialFileBakePayload(design, status);
+  const trialPoolBake = staticTrialPoolBakePayload(design, trialFileBake);
+  const blockCsvPreview = staticBlockCsvPreviewPayload(design, trialPoolBake, status);
   return {
     static_mode: true,
     static_mode_reason: staticModeReason,
@@ -833,11 +836,11 @@ async function staticStateForTemplate(templateId) {
     participant_orders: staticParticipantOrders(design),
     validation: [],
     render: staticRenderStatus(status),
-    project_segments: staticProjectSegments(status),
+    project_segments: staticProjectSegments(status, trialFileBake, trialPoolBake, blockCsvPreview),
     trial_sequence_bake: {},
-    trial_file_bake: {},
-    trial_pool_bake: {},
-    block_csv_preview: status.finished_profile ? { accepted: true, blocks: [], block_count: Number(design.protocol?.blocks || 0) } : {},
+    trial_file_bake: trialFileBake,
+    trial_pool_bake: trialPoolBake,
+    block_csv_preview: blockCsvPreview,
     run_sequence_setup: staticRunSetupPreview(design, status),
     preload_inventory: status,
     preflight: {
@@ -847,6 +850,435 @@ async function staticStateForTemplate(templateId) {
     },
     session: null,
     jobs: []
+  };
+}
+
+function staticSourceInventory(design) {
+  const inventory = new Map();
+  const addSource = (source, defaults = {}) => {
+    const label = String(source?.label || "").trim();
+    if (!label) return;
+    const noiseType = String(source.noise_type || source.tone_type || defaults.noise_type || defaults.tone_type || "").toLowerCase();
+    inventory.set(label, {
+      label,
+      kind: defaults.kind || source.source_kind || source.render_mode || "",
+      noise_type: noiseType,
+      duration_ms: Math.max(0, Math.round(Number(source.duration_s ?? source.target_duration_s ?? source.duration ?? defaults.duration_s ?? 4) * 1000)),
+    });
+  };
+  for (const noise of design.noises || []) addSource(noise, { kind: "generated_noise", duration_s: 4 });
+  for (const audio of design.custom_looming_files || []) addSource(audio, { kind: "custom_looming", duration_s: 4 });
+  for (const clip of design.prestimulus_files || []) addSource(clip, { kind: "prestimulus", tone_type: "prestimulus", duration_s: 4 });
+  return inventory;
+}
+
+function staticVariantDurationMs(variant, sourceInventory) {
+  return variant.reduce((total, choice) => {
+    if (choice.kind === "jitter") return total + Math.max(0, Number(choice.value || 0));
+    return total + Math.max(0, Number(sourceInventory.get(choice.label)?.duration_ms || 0));
+  }, 0);
+}
+
+function staticVariantNoiseType(variant, sourceInventory) {
+  for (const choice of [...variant].reverse()) {
+    if (choice.kind !== "audio") continue;
+    const source = sourceInventory.get(choice.label);
+    if (source?.noise_type && source.noise_type !== "prestimulus") return source.noise_type;
+  }
+  return "";
+}
+
+function staticTrialFileRow({
+  templateId,
+  rowIndex,
+  rowLabel,
+  family,
+  folderName,
+  variant,
+  variantIndex,
+  durationMs,
+  soaMs = "",
+  baselineMode = "",
+  noiseType = "",
+}) {
+  const rowFolderName = `row_${String(rowIndex + 1).padStart(2, "0")}__${slugify(rowLabel)}`;
+  const sequenceLabels = variant.map((choice) => choice.label).join(" | ");
+  const variantKey = previewVariantKey(variant);
+  const folderKey = slugify(`${rowFolderName}__${folderName}`);
+  const familySuffix = family === "audio_tactile" ? `soa${soaMs}ms_tac120ms_ch3` : (family === "baseline" ? `baseline_${baselineMode}_soa${soaMs}ms_tac120ms_ch3` : "catch_audio");
+  const sourceFileName = `${slugify(variantKey)}_${familySuffix}_total${durationMs}ms.wav`;
+  const filePath = `static://${templateId}/${rowFolderName}/${folderName}/${sourceFileName}`;
+  const fileKey = `${family}|${rowFolderName}|${variantIndex}|${soaMs}|${baselineMode}`;
+  return {
+    family,
+    folder_key: folderKey,
+    folder_name: folderName,
+    row_folder_name: rowFolderName,
+    row_label: rowLabel,
+    file_key: fileKey,
+    source_file_name: sourceFileName,
+    file_path: filePath,
+    sha256: "",
+    duration_ms: durationMs,
+    duration_s: Math.round((durationMs / 1000) * 1000) / 1000,
+    looming_segment_onset_s: "",
+    tactile_onset_s: Number.isFinite(Number(soaMs)) ? Math.round((Number(soaMs) / 1000) * 1000) / 1000 : "",
+    soa_ms: soaMs,
+    baseline_mode: baselineMode,
+    sequence_variant_key: variantKey,
+    sequence_labels: sequenceLabels,
+    source_labels: sequenceLabels,
+    noise_type: noiseType,
+    channels: family === "catch" ? 2 : 3,
+    tactile_channel: family === "catch" ? "" : 3,
+  };
+}
+
+function staticTrialFileBakePayload(design, status) {
+  const protocol = design.protocol || {};
+  const sourceInventory = staticSourceInventory(design);
+  const soaValues = (protocol.soa_values_ms || []).filter((value) => Number.isFinite(Number(value))).map((value) => Number(value));
+  const baselineSoas = staticBaselineSoaValues(protocol, soaValues);
+  const includeCatch = Boolean(protocol.include_catch_trials);
+  const files = [];
+  let variantCounter = 1;
+  for (const [rowIndex, strip] of (protocol.trial_strips || []).entries()) {
+    const variants = stripPreviewVariants(strip);
+    const rowLabel = strip.label || `Trial type ${rowIndex + 1}`;
+    for (const variant of variants) {
+      const durationMs = staticVariantDurationMs(variant, sourceInventory);
+      const noiseType = staticVariantNoiseType(variant, sourceInventory);
+      const variantIndex = variantCounter;
+      variantCounter += 1;
+      for (const soaMs of soaValues) {
+        files.push(staticTrialFileRow({
+          templateId: design.study_profile_id || DEFAULT_STUDY_TEMPLATE_ID,
+          rowIndex,
+          rowLabel,
+          family: "audio_tactile",
+          folderName: "target_audio_tactile",
+          variant,
+          variantIndex,
+          durationMs,
+          soaMs,
+          noiseType,
+        }));
+      }
+      for (const soaMs of baselineSoas) {
+        files.push(staticTrialFileRow({
+          templateId: design.study_profile_id || DEFAULT_STUDY_TEMPLATE_ID,
+          rowIndex,
+          rowLabel,
+          family: "baseline",
+          folderName: "baseline",
+          variant,
+          variantIndex,
+          durationMs,
+          soaMs,
+          baselineMode: protocol.baseline_custom_trial_mode || protocol.baseline_strategy || "tactile_only",
+          noiseType,
+        }));
+      }
+      if (includeCatch) {
+        files.push(staticTrialFileRow({
+          templateId: design.study_profile_id || DEFAULT_STUDY_TEMPLATE_ID,
+          rowIndex,
+          rowLabel,
+          family: "catch",
+          folderName: "catch_trials",
+          variant,
+          variantIndex,
+          durationMs,
+          noiseType,
+        }));
+      }
+    }
+  }
+  const counts = {
+    audio_tactile: files.filter((file) => file.family === "audio_tactile").length,
+    baseline: files.filter((file) => file.family === "baseline").length,
+    catch: files.filter((file) => file.family === "catch").length,
+  };
+  return {
+    root: "",
+    manifest_path: status.profile_parameters_manifest || "",
+    manifest_exists: Boolean(status.profile_checks_passed),
+    schema: "pps-static-trial-files-preview.v1",
+    status: status.profile_checks_passed ? "static_preload" : "missing",
+    audio_tactile_count: counts.audio_tactile,
+    baseline_count: counts.baseline,
+    catch_count: counts.catch,
+    total_count: files.length,
+    rows: [],
+    files,
+    manifest_sha256: `static-${design.study_profile_id || DEFAULT_STUDY_TEMPLATE_ID}-${files.length}`,
+  };
+}
+
+function staticBaselineSoaValues(protocol, soaValues) {
+  if (!protocol.include_baseline_trials) return [];
+  const strategy = protocol.baseline_strategy || "none";
+  if (!strategy || strategy === "none") return [];
+  const custom = (protocol.baseline_soa_values_ms || []).filter((value) => Number.isFinite(Number(value))).map((value) => Number(value));
+  if (strategy === "custom") return custom;
+  if (strategy === "min_anchor") return soaValues.length ? [soaValues[0]] : [];
+  if (strategy === "max_anchor") return soaValues.length ? [soaValues[soaValues.length - 1]] : [];
+  if (strategy === "min_max") return Array.from(new Set([soaValues[0], soaValues[soaValues.length - 1]].filter((value) => Number.isFinite(Number(value)))));
+  if (strategy === "soa_zero") return [0];
+  return custom.length ? custom : soaValues;
+}
+
+function staticTrialPoolSettings(protocol) {
+  const defaults = protocol.trial_pool_repetition_defaults || {};
+  const defaultRepetitions = normalizeRepetitionValue(defaults.default ?? protocol.repetitions_per_condition ?? 1, 1);
+  const familyRepetitions = {};
+  for (const [key, value] of Object.entries(defaults)) {
+    const family = trialPoolFamilyKey(key);
+    if (["audio_tactile", "baseline", "catch"].includes(family)) {
+      familyRepetitions[family] = normalizeRepetitionValue(value, defaultRepetitions);
+    }
+  }
+  return {
+    default_repetitions: defaultRepetitions,
+    family_repetitions: familyRepetitions,
+    folder_repetitions: {},
+    file_repetition_overrides: {},
+    fractional_seed: Number(protocol.random_seed || 20250604) || 20250604,
+  };
+}
+
+function staticConfiguredRepetitions(file, settings) {
+  const family = trialPoolFamilyKey(file.family);
+  return normalizeRepetitionValue(settings.family_repetitions?.[family] ?? settings.default_repetitions ?? 1, 1);
+}
+
+function staticTrialPoolRows(files, settings) {
+  const records = files.map((file, index) => {
+    const configured = staticConfiguredRepetitions(file, settings);
+    const baseRepetitions = Math.floor(configured);
+    const fractionalRemainder = normalizeRepetitionValue(configured - baseRepetitions, 0);
+    return {
+      file,
+      index,
+      configured,
+      baseRepetitions,
+      fractionalRemainder,
+      fractionalExtra: false,
+      balancingStratum: fractionalRemainder ? trialPoolFractionalStratum(file, fractionalRemainder) : "",
+      balancingParentStratum: fractionalRemainder ? trialPoolFractionalParentStratum(file, fractionalRemainder) : "",
+      sourceLineage: trialPoolSourceLineage(file),
+    };
+  });
+  const fractionalGroups = new Map();
+  for (const record of records) {
+    if (!record.fractionalRemainder) continue;
+    if (!fractionalGroups.has(record.balancingStratum)) fractionalGroups.set(record.balancingStratum, []);
+    fractionalGroups.get(record.balancingStratum).push(record);
+  }
+  const seed = Number(settings.fractional_seed || 20250604) || 20250604;
+  for (const [stratum, group] of fractionalGroups.entries()) {
+    const extraCount = Math.max(0, Math.min(group.length, Math.floor(group.length * group[0].fractionalRemainder + 0.5)));
+    if (!extraCount) continue;
+    const ordered = [...group].sort((a, b) => {
+      const left = `${a.sourceLineage}|${a.file.sequence_variant_key || ""}|${a.file.source_file_name || ""}`;
+      const right = `${b.sourceLineage}|${b.file.sequence_variant_key || ""}|${b.file.source_file_name || ""}`;
+      return left.localeCompare(right);
+    });
+    const offset = stableHashInt(`${seed}|${stratum}`) % ordered.length;
+    const rotated = ordered.slice(offset).concat(ordered.slice(0, offset));
+    for (const record of rotated.slice(0, extraCount)) record.fractionalExtra = true;
+  }
+  const rows = [];
+  let trialPoolIndex = 1;
+  for (const record of records) {
+    const occurrenceCount = record.baseRepetitions + (record.fractionalExtra ? 1 : 0);
+    for (let repetitionIndex = 1; repetitionIndex <= occurrenceCount; repetitionIndex += 1) {
+      rows.push({
+        trial_pool_index: trialPoolIndex,
+        family: trialPoolFamilyKey(record.file.family),
+        folder_key: record.file.folder_key || "",
+        folder_name: record.file.folder_name || "",
+        row_label: record.file.row_label || "",
+        source_file_name: record.file.source_file_name || "",
+        trial_file_path: record.file.file_path || "",
+        source_sha256: record.file.sha256 || "",
+        duration_ms: record.file.duration_ms || 0,
+        duration_s: record.file.duration_s || "",
+        looming_segment_onset_s: record.file.looming_segment_onset_s || "",
+        tactile_onset_s: record.file.tactile_onset_s || "",
+        repetition_index: repetitionIndex,
+        configured_repetitions: record.configured,
+        base_repetitions: record.baseRepetitions,
+        fractional_remainder: record.fractionalRemainder,
+        fractional_extra: repetitionIndex > record.baseRepetitions ? 1 : 0,
+        balancing_seed: seed,
+        balancing_stratum: record.balancingStratum,
+        balancing_signature: `static-${seed}`,
+        source_lineage: record.sourceLineage,
+        soa_ms: record.file.soa_ms || "",
+        baseline_mode: record.file.baseline_mode || "",
+        sequence_variant_key: record.file.sequence_variant_key || "",
+        sequence_labels: record.file.sequence_labels || "",
+        noise_type: record.file.noise_type || "",
+        channels: record.file.channels || "",
+        tactile_channel: record.file.tactile_channel || "",
+      });
+      trialPoolIndex += 1;
+    }
+  }
+  return rows;
+}
+
+function staticTrialPoolBakePayload(design, trialFileBake) {
+  const protocol = design.protocol || {};
+  const settings = staticTrialPoolSettings(protocol);
+  const poolRows = staticTrialPoolRows(trialFileBake.files || [], settings);
+  const familyCounts = { audio_tactile: 0, baseline: 0, catch: 0 };
+  for (const row of poolRows) {
+    if (Object.prototype.hasOwnProperty.call(familyCounts, row.family)) familyCounts[row.family] += 1;
+  }
+  const totalDurationMs = poolRows.reduce((total, row) => total + Number(row.duration_ms || 0), 0);
+  return {
+    root: "",
+    manifest_path: "",
+    csv_path: "",
+    manifest_exists: Boolean(poolRows.length),
+    schema: "pps-static-trial-repetition-pool-preview.v1",
+    status: poolRows.length ? "static_preload" : "missing",
+    settings,
+    unique_file_count: trialFileBake.files?.length || 0,
+    total_count: poolRows.length,
+    total_trials: poolRows.length,
+    audio_tactile_count: familyCounts.audio_tactile,
+    baseline_count: familyCounts.baseline,
+    catch_count: familyCounts.catch,
+    estimated_total_duration_ms: totalDurationMs,
+    family_counts: familyCounts,
+    preview_rows: poolRows,
+  };
+}
+
+function staticRowColor(value) {
+  const hue = stableHashInt(value || "row") % 360;
+  return `hsl(${hue} 45% 48%)`;
+}
+
+function staticCountBy(rows, key) {
+  const counts = {};
+  for (const row of rows || []) {
+    const value = String(row[key] ?? "");
+    if (!value) continue;
+    counts[value] = (counts[value] || 0) + 1;
+  }
+  return counts;
+}
+
+function staticBlockRows(poolRows, blockCount) {
+  const rowKeys = Array.from(new Set(poolRows.map((row) => row.row_label || row.folder_key || "row")));
+  const rowsByKey = new Map(rowKeys.map((key) => [key, []]));
+  for (const row of poolRows) rowsByKey.get(row.row_label || row.folder_key || "row")?.push(row);
+  const distributed = new Map();
+  for (const key of rowKeys) {
+    const buckets = Array.from({ length: blockCount }, () => []);
+    for (const [index, row] of (rowsByKey.get(key) || []).entries()) {
+      buckets[index % blockCount].push(row);
+    }
+    distributed.set(key, buckets);
+  }
+  const blocks = Array.from({ length: blockCount }, () => []);
+  for (let blockIndex = 0; blockIndex < blockCount; blockIndex += 1) {
+    const queues = new Map(rowKeys.map((key) => [key, [...(distributed.get(key)?.[blockIndex] || [])]]));
+    while ([...queues.values()].some((queue) => queue.length)) {
+      for (const key of rowKeys) {
+        const queue = queues.get(key) || [];
+        if (queue.length) blocks[blockIndex].push(queue.shift());
+      }
+    }
+  }
+  return blocks;
+}
+
+function staticBlockPreviewRow(row, blockIndex, blockTrialIndex, soaMin, soaMax) {
+  const family = trialPoolFamilyKey(row.family);
+  const soaValue = Number(row.soa_ms || 0);
+  return {
+    block_index: blockIndex,
+    block_label: `Block ${String(blockIndex).padStart(2, "0")}`,
+    block_trial_index: blockTrialIndex,
+    trial_pool_index: row.trial_pool_index,
+    family,
+    family_label: familyDisplayName(family),
+    family_color_hex: TRIAL_FAMILY_COLORS[family] || "#68746c",
+    row_label: row.row_label || "",
+    row_color_hex: staticRowColor(row.row_label || row.folder_key || ""),
+    folder_key: row.folder_key || "",
+    folder_name: row.folder_name || "",
+    noise_type: row.noise_type || "",
+    noise_color_hex: row.noise_type ? sourceColor(row.noise_type) : "#d8dde2",
+    soa_ms: row.soa_ms || "",
+    soa_color_hex: soaValue > 0 ? staticSoaColor(soaValue, soaMin, soaMax) : "#d8dde2",
+    baseline_mode: row.baseline_mode || "",
+    sequence_variant_key: row.sequence_variant_key || "",
+    sequence_labels: row.sequence_labels || "",
+    source_file_name: row.source_file_name || "",
+    trial_file_path: row.trial_file_path || "",
+    source_sha256: row.source_sha256 || "",
+    duration_ms: row.duration_ms || 0,
+    duration_s: row.duration_s || "",
+    looming_segment_onset_s: row.looming_segment_onset_s || "",
+    tactile_onset_s: row.tactile_onset_s || "",
+    repetition_index: row.repetition_index || "",
+    configured_repetitions: row.configured_repetitions || "",
+    fractional_extra: row.fractional_extra || "",
+    channels: row.channels || "",
+    tactile_channel: row.tactile_channel || "",
+  };
+}
+
+function staticSoaColor(value, minimum, maximum) {
+  const min = Number(minimum || 0);
+  const max = Number(maximum || 0);
+  const t = max > min ? Math.max(0, Math.min(1, (Number(value || 0) - min) / (max - min))) : 0.5;
+  const start = [226, 237, 255];
+  const end = [37, 86, 151];
+  const rgb = start.map((component, index) => Math.round(component + (end[index] - component) * t));
+  return `#${rgb.map((component) => component.toString(16).padStart(2, "0")).join("")}`;
+}
+
+function staticBlockCsvPreviewPayload(design, trialPoolBake, status) {
+  const poolRows = trialPoolBake.preview_rows || [];
+  if (!status.finished_profile || !poolRows.length) return {};
+  const blockCount = Math.max(1, Math.round(Number(design.protocol?.blocks || 1)));
+  const soaValues = poolRows.map((row) => Number(row.soa_ms || 0)).filter((value) => value > 0);
+  const soaMin = soaValues.length ? Math.min(...soaValues) : 0;
+  const soaMax = soaValues.length ? Math.max(...soaValues) : 0;
+  const blocks = staticBlockRows(poolRows, blockCount).map((rows, index) => {
+    const blockIndex = index + 1;
+    const previewRows = rows.map((row, rowIndex) => staticBlockPreviewRow(row, blockIndex, rowIndex + 1, soaMin, soaMax));
+    const durationMs = previewRows.reduce((total, row) => total + Number(row.duration_ms || 0), 0);
+    return {
+      block_index: blockIndex,
+      block_label: `Block ${String(blockIndex).padStart(2, "0")}`,
+      csv_path: "",
+      csv_file_name: `static_block_${String(blockIndex).padStart(2, "0")}.csv`,
+      trial_count: previewRows.length,
+      duration_ms: durationMs,
+      family_counts: staticCountBy(previewRows, "family"),
+      row_label_counts: staticCountBy(previewRows, "row_label"),
+      soa_counts: staticCountBy(previewRows, "soa_ms"),
+      noise_type_counts: staticCountBy(previewRows, "noise_type"),
+      preview_rows: previewRows,
+      preview_row_count: previewRows.length,
+    };
+  });
+  return {
+    status: "static_preload",
+    accepted: true,
+    block_count: blockCount,
+    csv_count: blocks.length,
+    total_count: poolRows.length,
+    estimated_total_duration_ms: blocks.reduce((total, block) => total + Number(block.duration_ms || 0), 0),
+    blocks,
   };
 }
 
@@ -934,7 +1366,7 @@ function staticProjectPayload(design, status) {
   };
 }
 
-function staticProjectSegments(status) {
+function staticProjectSegments(status, trialFileBake = {}, trialPoolBake = {}, blockCsvPreview = {}) {
   const profileGate = Boolean(status.profile_checks_passed && status.segment_0_to_4_profile_checks_passed);
   const launchable = Boolean(status.finished_profile && status.segment_6_launchable);
   const segment = (folderName, ready, message, extra = {}) => ({
@@ -961,18 +1393,37 @@ function staticProjectSegments(status) {
     "3_tactile_and_baseline_trials": segment(
       "3_tactile_and_baseline_trials",
       profileGate,
-      profileGate ? "Baseline and tactile parameters loaded from the static profile." : "This profile has not passed the Segment 0-4 gate."
+      profileGate ? "Baseline and tactile parameters loaded from the static profile." : "This profile has not passed the Segment 0-4 gate.",
+      {
+        audio_tactile_count: trialFileBake.audio_tactile_count || 0,
+        baseline_count: trialFileBake.baseline_count || 0,
+        catch_count: trialFileBake.catch_count || 0,
+        total_count: trialFileBake.total_count || 0,
+      }
     ),
     "4_trial_repetition_pool": segment(
       "4_trial_repetition_pool",
       profileGate,
-      profileGate ? "Trial-pool parameters loaded from the static profile." : "This profile has not passed the Segment 0-4 gate."
+      profileGate ? "Trial-pool parameters loaded from the static profile." : "This profile has not passed the Segment 0-4 gate.",
+      {
+        source_file_count: trialPoolBake.unique_file_count || trialFileBake.total_count || 0,
+        trial_count: trialPoolBake.total_count || 0,
+        total_count: trialPoolBake.total_count || 0,
+        audio_tactile_count: trialPoolBake.audio_tactile_count || 0,
+        baseline_count: trialPoolBake.baseline_count || 0,
+        catch_count: trialPoolBake.catch_count || 0,
+      }
     ),
     "5_block_csv_preview": segment(
       "5_block_csv_preview",
       launchable,
       launchable ? "Block CSVs are materialized by the local companion when the profile is launched." : "This profile is not Segment 6 launchable yet.",
-      { accepted: launchable }
+      {
+        accepted: launchable,
+        block_count: blockCsvPreview.block_count || 0,
+        csv_count: blockCsvPreview.csv_count || blockCsvPreview.blocks?.length || 0,
+        total_count: blockCsvPreview.total_count || trialPoolBake.total_count || 0,
+      }
     ),
     "6_experiment_run_setup": segment(
       "6_experiment_run_setup",
