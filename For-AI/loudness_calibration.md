@@ -37,3 +37,12 @@ Policy direction:
 Future implementation should add participant-run preflight checks for a
 `loudness_profile.json`, stimulus-level audit tolerance, clipping rejection, and
 post-routing digital level evidence in run manifests.
+
+Local source update:
+
+- `exploratory/loudness-calibration/sources/` is the local-only publication
+  review folder for this loudness work. PDFs there are ignored by Git.
+- The Ferri et al. PPS paper is locally downloaded as
+  `ferri_2015_emotion_inducing_approaching_sounds_pps.pdf` from UCL Discovery;
+  tracked metadata, hash, page count, and short facts live in
+  `exploratory/loudness-calibration/source_manifest.json`.

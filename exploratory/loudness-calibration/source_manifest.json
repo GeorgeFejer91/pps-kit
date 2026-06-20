@@ -6,7 +6,47 @@
     "tracked_in_git": false,
     "reason": "Vendor and reseller pages are cached locally for lab review, but artifacts/ is ignored and third-party pages are not redistributed in the repository."
   },
+  "local_publication_sources": {
+    "directory": "exploratory/loudness-calibration/sources",
+    "tracked_in_git": false,
+    "reason": "Full publication PDFs are local review copies only. Track source metadata, hashes, and short facts instead of redistributing the PDFs."
+  },
   "sources": [
+    {
+      "id": "ferri_2015_emotion_inducing_approaching_sounds_pps",
+      "kind": "open_access_author_accepted_manuscript",
+      "title": "Emotion-inducing approaching sounds shape the boundaries of multisensory peripersonal space",
+      "authors": [
+        "Francesca Ferri",
+        "Ana Tajadura-Jimenez",
+        "Aleksander Valjamae",
+        "Roberta Vastano",
+        "Marcello Costantini"
+      ],
+      "publication": "Neuropsychologia 70, 468-475",
+      "year": 2015,
+      "doi": "10.1016/j.neuropsychologia.2015.03.001",
+      "repository_page": "https://discovery.ucl.ac.uk/id/eprint/1464805/",
+      "download_url": "https://discovery.ucl.ac.uk/id/eprint/1464805/1/Ferri%2CEmotion-inducing_approaching.._Neuropsychologia_Authors_copy-1.pdf",
+      "alternate_pdf_url": "https://ricerca.unich.it/retrieve/e4233f19-6a94-2860-e053-6605fe0a460a/NSY-D-14-00358R2-2-8-42.pdf",
+      "local_path": "exploratory/loudness-calibration/sources/ferri_2015_emotion_inducing_approaching_sounds_pps.pdf",
+      "tracked_in_git": false,
+      "retrieved_on": "2026-06-20",
+      "size_bytes": 1231823,
+      "sha256": "70A4E9923EDC349DE3A9AA0E97D2193BEF6CE31C7E2D7C7CF6EC2CE5699E7228",
+      "page_count": 38,
+      "verification": [
+        "pypdf reported 38 pages",
+        "first-page text extraction contains the expected title",
+        "first page was rendered locally with pypdfium2 and visually inspected"
+      ],
+      "facts_used": [
+        "direct PPS precedent for emotion-inducing approaching sounds",
+        "Experiment 1 validation included Pink, Brown, White, Violet, and Blue noise",
+        "Experiment 1 selected Brown as the negative-valence artificial sound and White as the neutral artificial sound",
+        "reported artificial looming stimuli used a 55 to 70 dB intensity increase"
+      ]
+    },
     {
       "id": "sennheiser_hd560s_product",
       "kind": "manufacturer_product_page",

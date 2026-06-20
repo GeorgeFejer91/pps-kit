@@ -99,12 +99,26 @@ For the HD 560S and Komplete Audio 6 MK2 chain:
 - `hardware_sources.md`: confirmed hardware facts and source links.
 - `calculation_model.md`: equations for converting WAV dBFS and measured or
   estimated output voltage into predicted SPL.
+- `sources/`: local-only publication review folder. Full PDFs in this folder
+  are ignored by Git; tracked files store only metadata, hashes, and short facts.
 - `analyze_stimulus_levels.py`: local audit script for Study 5 looming and
   breathing WAV levels.
 - `stimulus_level_audit_notes.md`: current audit interpretation; Brown looming
   is RMS-hotter than the other Study 5 looming variants despite matching peaks.
 - `source_manifest.json`: source list and local cache hashes for downloaded
-  pages stored under ignored `artifacts/loudness_calibration_sources/`.
+  pages stored under ignored `artifacts/loudness_calibration_sources/` and
+  local-only publication PDFs under `sources/`.
+
+## Local Publication Source Notes
+
+The Ferri et al. paper used to justify Brown and White artificial looming noise
+as PPS stimuli is available locally, but intentionally untracked, at
+`sources/ferri_2015_emotion_inducing_approaching_sounds_pps.pdf`. It was
+downloaded from UCL Discovery's open-access author accepted manuscript route on
+2026-06-20 after the initially identified university-hosted PDF URL blocked
+command-line retrieval. The tracked manifest records the DOI, repository URL,
+download URL, local filename, byte size, SHA256, page count, and verification
+notes.
 
 ## Consensus Literature Notes
 

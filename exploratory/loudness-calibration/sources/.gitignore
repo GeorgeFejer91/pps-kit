@@ -1,0 +1,4 @@
+# Publication PDFs are local-only review sources and must not be redistributed
+# from this public repository.
+*.pdf
+*.PDF
