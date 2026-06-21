@@ -2483,27 +2483,37 @@ class SessionRunnerController:
         context: dict[str, Any] | None = None,
     ) -> bool:
         slot = self._instruction_slot(slot_name)
-        if not slot or not bool(slot.get("enabled")):
+        force_part_transition_wait = bool(needs_continue and str((context or {}).get("next_action") or "").strip() == "next_condition")
+        if (not slot or not bool(slot.get("enabled"))) and not force_part_transition_wait:
             return not self._stop_requested
         context = dict(context or {})
-        label = str(slot.get("label") or slot_name.replace("_", " ").title())
-        path = Path(str(slot.get("path") or ""))
+        slot_payload = dict(slot or {})
+        if force_part_transition_wait:
+            slot_payload["continue_mode"] = "button"
+            slot_payload["button_label"] = _part_transition_button_label(context) or "Start Part 2"
+        label = str(slot_payload.get("label") or slot_name.replace("_", " ").title())
+        path_text = str(slot_payload.get("path") or "").strip()
+        path = Path(path_text) if path_text else Path()
         payload = {
             "instruction_slot": slot_name,
             "instruction_label": label,
             "instruction_path": str(path),
-            "instruction_continue_mode": str(slot.get("continue_mode") or "click"),
+            "instruction_continue_mode": str(slot_payload.get("continue_mode") or "click"),
+            "button_label": str(slot_payload.get("button_label") or "Continue"),
             **context,
         }
-        if not _path_exists(path):
+        if not path_text or not _path_exists(path):
             self.events.log("instruction_missing", **payload)
-            self._run_warnings.append(f"Instruction audio is missing for {label}: {path}")
+            if str(path).strip():
+                self._run_warnings.append(f"Instruction audio is missing for {label}: {path}")
+            if force_part_transition_wait:
+                return self._await_instruction_continuation(slot_payload, payload, event_callback=event_callback)
             return not self._stop_requested
         self._emit(event_callback, f"Instruction: {label}")
         self.events.log(
             "instruction_start",
-            duration_s=float(slot.get("duration_s") or 0.0),
-            sha256=str(slot.get("sha256") or ""),
+            duration_s=float(slot_payload.get("duration_s") or 0.0),
+            sha256=str(slot_payload.get("sha256") or ""),
             **payload,
         )
         ok = self._play_instruction_audio(engine, path)
@@ -2573,14 +2583,15 @@ class SessionRunnerController:
 
         self._instruction_continue_event = threading.Event()
         self._instruction_continue_source = ""
-        self._instruction_wait_context = {**payload, "mode": mode, "button_label": str(slot.get("button_label") or "Continue")}
+        button_label = str(payload.get("button_label") or slot.get("button_label") or "Continue")
+        self._instruction_wait_context = {**payload, "mode": mode, "button_label": button_label}
         self.events.log("instruction_continue_wait", **self._instruction_wait_context)
         self._emit(
             event_callback,
             (
                 f"Click the response target to continue after {payload.get('instruction_label')}"
                 if mode == "click"
-                else str(slot.get("button_label") or "Continue")
+                else button_label
             ),
         )
         try:
@@ -3877,6 +3888,22 @@ def _timeline_trial_type_label(payload: dict[str, Any]) -> str:
     return labels.get(key, trial_type or family or "Trial")
 
 
+def _timeline_noise_type_label(payload: dict[str, Any]) -> str:
+    return _timeline_payload_label(payload, "Noise_Type", "noise_type")
+
+
+def _part_transition_button_label(payload: dict[str, Any]) -> str:
+    if str(payload.get("next_action") or "").strip() != "next_condition":
+        return ""
+    part = _timeline_payload_label(payload, "next_part_number", "part_number", "block_part_number", "Part_Number")
+    if not part:
+        return "Start Part 2"
+    try:
+        return f"Start Part {int(float(part))}"
+    except ValueError:
+        return f"Start Part {part}"
+
+
 def _timeline_tactile_events(schedule: BlockEventSchedule | None) -> list[dict[str, Any]]:
     if schedule is None:
         return []
@@ -3912,6 +3939,7 @@ def _timeline_tactile_events(schedule: BlockEventSchedule | None) -> list[dict[s
                 "family": family,
                 "row_label": row_label,
                 "trial_label": trial_type_label,
+                "noise_type": _timeline_noise_type_label(payload),
                 "clip_label": _timeline_payload_label(
                     payload,
                     "Fixed_Audio_Labels",
@@ -4011,6 +4039,7 @@ def _timeline_trial_segments(schedule: BlockEventSchedule | None) -> list[dict[s
                 "start_sample_index": int(start.get("sample_index", 0)),
                 "clip_label": respiratory_label or clip_label or "Trial",
                 "trial_label": trial_type or "Trial",
+                "noise_type": _timeline_noise_type_label(payload),
                 "soa_ms": str(payload.get("soa_ms") or payload.get("SOA_ms") or "").strip(),
                 "family": str(payload.get("family") or payload.get("Family") or ""),
                 "trial_type": trial_type,

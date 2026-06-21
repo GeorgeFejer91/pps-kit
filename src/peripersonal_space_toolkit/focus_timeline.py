@@ -25,6 +25,7 @@ class TactileTimelineCue:
     row_label: str = ""
     clip_label: str = ""
     trial_label: str = ""
+    noise_type: str = ""
     recentered: bool = False
 
 
@@ -36,6 +37,7 @@ class TimelineTrialSegment:
     end_s: float
     clip_label: str = ""
     trial_label: str = ""
+    noise_type: str = ""
     soa_ms: str = ""
     family: str = ""
 
@@ -131,6 +133,7 @@ class TactileTimelineState:
                     row_label=str(event.get("row_label") or ""),
                     clip_label=str(event.get("clip_label") or ""),
                     trial_label=str(event.get("trial_label") or event.get("row_label") or ""),
+                    noise_type=str(event.get("noise_type") or event.get("Noise_Type") or "").strip(),
                 )
             )
         self.cues = sorted(cues, key=lambda cue: (cue.time_s, cue.trial_number, cue.cue_id))
@@ -152,6 +155,7 @@ class TactileTimelineState:
                     end_s=end_s,
                     clip_label=str(segment.get("clip_label") or ""),
                     trial_label=str(segment.get("trial_label") or segment.get("row_label") or ""),
+                    noise_type=str(segment.get("noise_type") or segment.get("Noise_Type") or "").strip(),
                     soa_ms=str(segment.get("soa_ms") or segment.get("SOA_ms") or "").strip(),
                     family=str(segment.get("family") or ""),
                 )

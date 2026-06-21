@@ -132,9 +132,9 @@ def _write_focus_preview_block_csv(path: Path, *, block_offset: int = 0) -> None
     path.write_text(
         "\n".join(
             [
-                "Trial_Number,Trial_UID,Trial_Type,Family,Row_Label,Fixed_Audio_Labels,SOA_ms,Trial_Start_S,Trial_End_S,Tactile_Onset_S,Sample_Rate_Hz",
-                f"1,T{block_offset + 1:03d},Audio-Tactile,audio_tactile,Inhale,Frontal looming,300,0.0,8.0,4.3,1000",
-                f"2,T{block_offset + 2:03d},Baseline,baseline,Exhale,Baseline,800,8.0,16.0,8.8,1000",
+                "Trial_Number,Trial_UID,Trial_Type,Family,Row_Label,Fixed_Audio_Labels,Noise_Type,SOA_ms,Trial_Start_S,Trial_End_S,Tactile_Onset_S,Sample_Rate_Hz",
+                f"1,T{block_offset + 1:03d},Audio-Tactile,audio_tactile,Inhale,Frontal looming,pink,300,0.0,8.0,4.3,1000",
+                f"2,T{block_offset + 2:03d},Baseline,baseline,Exhale,Baseline,white,800,8.0,16.0,8.8,1000",
             ]
         )
         + "\n",
@@ -648,14 +648,17 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
     assert window.selected_part_key == "1"
     assert window.part_buttons["1"].isEnabled()
     assert window.part_buttons["2"].isEnabled()
+    assert window.start_part2_button is not None
+    assert not window.start_part2_button.isEnabled()
     assert window.preview_display_block_index == 1
     assert [segment.clip_label for segment in window.timeline_preview_state.trial_segments] == ["Inhale", "Exhale"]
     assert [segment.trial_label for segment in window.timeline_preview_state.trial_segments] == ["Audio-tactile", "Baseline"]
+    assert [segment.noise_type for segment in window.timeline_preview_state.trial_segments] == ["pink", "white"]
     assert [segment.soa_ms for segment in window.timeline_preview_state.trial_segments] == ["300", "800"]
     assert [segment.label for segment in window.timeline_preview_state.instruction_segments] == ["General", "Pre-block", "Post-block"]
     timeline_debug = window.layout_validation_snapshot()["timeline_debug"]
-    assert timeline_debug["row_names"] == ["Resp", "Type", "SOA", "Tactile", "Clicks"]
-    assert timeline_debug["row_count"] == 5
+    assert timeline_debug["row_names"] == list(focus_app.TIMELINE_ROW_NAMES)
+    assert timeline_debug["row_count"] == len(focus_app.TIMELINE_ROW_NAMES)
     assert "Instr" not in timeline_debug["row_names"]
     block_strip_entries = window.block_plan_widget._layout_items()
     instruction_entries = [entry for entry in block_strip_entries if entry.get("entry_kind") == "instruction"]
@@ -688,7 +691,9 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
     assert window._timeline_display_state() is window.timeline_preview_state
     assert [segment.clip_label for segment in window.timeline_preview_state.trial_segments] == ["Inhale", "Exhale"]
     assert [segment.trial_label for segment in window.timeline_preview_state.trial_segments] == ["Audio-tactile", "Baseline"]
+    assert [segment.noise_type for segment in window.timeline_preview_state.trial_segments] == ["pink", "white"]
     assert [segment.soa_ms for segment in window.timeline_preview_state.trial_segments] == ["300", "800"]
+    assert [cue.noise_type for cue in window.timeline_preview_state.cues] == ["pink", "white"]
     assert [cue.soa_ms for cue in window.timeline_preview_state.cues] == ["300", "800"]
     assert "Block preview: Block 1 | 2 trials | 2 tactile cues" in window.block_preview_label.text()
 
@@ -745,8 +750,8 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
             "block_label": "Block 01",
             "duration_s": 16.0,
             "tactile_events": [
-                {"trial_number": 1, "trial_uid": "T001", "time_s": 4.3, "soa_ms": "300", "row_label": "Inhale"},
-                {"trial_number": 2, "trial_uid": "T002", "time_s": 8.8, "soa_ms": "800", "row_label": "Exhale"},
+                {"trial_number": 1, "trial_uid": "T001", "time_s": 4.3, "soa_ms": "300", "row_label": "Inhale", "noise_type": "pink"},
+                {"trial_number": 2, "trial_uid": "T002", "time_s": 8.8, "soa_ms": "800", "row_label": "Exhale", "noise_type": "white"},
             ],
             "trial_segments": [
                 {
@@ -756,6 +761,7 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
                     "end_s": 8.0,
                     "clip_label": "Inhale",
                     "trial_label": "Audio-tactile",
+                    "noise_type": "pink",
                     "soa_ms": "300",
                 },
                 {
@@ -765,6 +771,7 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
                     "end_s": 16.0,
                     "clip_label": "Exhale",
                     "trial_label": "Baseline",
+                    "noise_type": "white",
                     "soa_ms": "800",
                 },
             ],
@@ -776,6 +783,7 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
     assert window.preview_display_block_index is None
     assert window.selected_display_block_index == 1
     assert window._timeline_display_state() is window.timeline_state
+    assert [segment.noise_type for segment in window.timeline_state.trial_segments] == ["pink", "white"]
     assert [segment.soa_ms for segment in window.timeline_state.trial_segments] == ["300", "800"]
     assert window.progress.value() == int((5.0 / 16.0) * 1000)
     progress_margins = window.progress_track_widget.layout().contentsMargins()
@@ -814,14 +822,13 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
         if pixels[x, y][0] > 180 and 70 < pixels[x, y][1] < 150 and pixels[x, y][2] < 90
     )
     height = timeline_image.height
-    if height < 55:
-        tactile_y = 3 + 29
-    elif height < 84:
-        tactile_y = 3 + 47
-    elif height < 96:
-        tactile_y = 6 + 59
-    else:
-        tactile_y = 10 + 91
+    compact_rows = height < 96
+    very_compact_rows = height < 84
+    top_y = 5 if very_compact_rows else (8 if compact_rows else 14)
+    bottom_y = max(top_y + 1, height - (5 if very_compact_rows else (8 if compact_rows else 12)))
+    row_index = list(focus_app.TIMELINE_ROW_NAMES).index("Tactile")
+    row_gap = (bottom_y - top_y) / max(1, len(focus_app.TIMELINE_ROW_NAMES) - 1)
+    tactile_y = int(round(top_y + row_index * row_gap))
     cue_band_click_pixels = sum(
         1
         for y in range(max(0, tactile_y - 5), min(timeline_image.height, tactile_y + 6))
@@ -878,8 +885,8 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     content_min = snapshot["experiment_control_debug"]["content_min_height"]
     assert window.processing_panel.minimumHeight() >= profile.experiment_control_min_height
     assert window.processing_panel.minimumHeight() >= content_min
-    assert snapshot["timeline_debug"]["row_names"] == ["Resp", "Type", "SOA", "Tactile", "Clicks"]
-    assert snapshot["timeline_debug"]["row_count"] == 5
+    assert snapshot["timeline_debug"]["row_names"] == list(focus_app.TIMELINE_ROW_NAMES)
+    assert snapshot["timeline_debug"]["row_count"] == len(focus_app.TIMELINE_ROW_NAMES)
     assert window.workspace_splitter.sizes()[1] >= min(profile.experiment_control_initial_height, window.processing_panel.height())
     assert window.response_panel.minimumWidth() == profile.response_panel_side
     assert window.response_panel.minimumHeight() == profile.response_panel_side
@@ -1079,6 +1086,62 @@ def test_focus_mode_instruction_continue_accepts_target_click_and_keyboard(tmp_p
     assert keyboard_payload["approved"] is True
     assert keyboard_event.is_set()
     assert window.pending_instruction_request is None
+    window.dialog.close()
+
+
+def test_focus_mode_start_part2_button_controls_part_transition(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_focus_preview_session_manifest(tmp_path))
+    window = focus_app.FocusModeWindow(q, package)
+    window.dialog.show()
+    app.processEvents()
+
+    assert window.start_part2_button is not None
+    assert window.start_part2_button.isVisible()
+    assert not window.start_part2_button.isEnabled()
+
+    transition_event = threading.Event()
+    transition_payload = {
+        "context": {
+            "mode": "button",
+            "instruction_label": "Interim",
+            "button_label": "Start Part 2",
+            "next_action": "next_condition",
+            "block_part_number": 2,
+        },
+        "approved": False,
+        "event": transition_event,
+    }
+    window._handle_instruction_continue(transition_payload)
+    app.processEvents()
+
+    assert window.start_part2_button.isEnabled()
+    assert not window.target_button.isEnabled()
+    assert not window.instruction_button.isVisible()
+
+    window._click()
+    window._handle_primary_action_shortcut()
+    app.processEvents()
+    assert transition_payload["approved"] is False
+    assert not transition_event.is_set()
+
+    QTest.mouseClick(window.start_part2_button, q["Qt"].MouseButton.LeftButton)
+    app.processEvents()
+
+    assert transition_payload["approved"] is True
+    assert transition_event.is_set()
+    assert window.pending_instruction_request is None
+    assert window.selected_part_key == "2"
+    assert not window.start_part2_button.isEnabled()
     window.dialog.close()
 
 

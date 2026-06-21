@@ -1315,13 +1315,83 @@ def test_session_runner_emits_tactile_timeline_schedule_progress(tmp_path: Path)
     assert tactile_events[0]["soa_ms"] == "10"
     assert tactile_events[0]["row_label"] == "Inhale"
     assert tactile_events[0]["trial_label"] == "Audio-tactile"
+    assert tactile_events[0]["noise_type"] == "pink"
     assert tactile_events[0]["clip_label"]
     trial_segments = schedule["trial_segments"]
     assert len(trial_segments) >= 1
     assert trial_segments[0]["trial_number"] == 1
     assert trial_segments[0]["clip_label"] == "Inhale"
     assert trial_segments[0]["trial_label"] == "Audio-tactile"
+    assert trial_segments[0]["noise_type"] == "pink"
     assert trial_segments[0]["start_s"] < trial_segments[0]["end_s"]
+
+
+def test_session_runner_part2_transition_waits_for_button_without_instruction_slot(tmp_path: Path):
+    session_dir = tmp_path / "P001_20260621_120000"
+    session_dir.mkdir()
+    block_paths: list[Path] = []
+    blocks: list[session_runner_module.RunBlock] = []
+    for part in (1, 2):
+        wav_path = tmp_path / f"block_{part:02d}.wav"
+        sf.write(wav_path, np.zeros((441, 3), dtype=np.float32), 44100)
+        csv_path = tmp_path / f"block_{part:02d}.csv"
+        csv_path.write_text(
+            "\n".join(
+                [
+                    "Trial_Number,Trial_UID,Trial_Type,Family,Row_Label,Noise_Type,SOA_ms,Trial_Start_S,Trial_End_S,Tactile_Onset_S,Sample_Rate_Hz",
+                    f"1,P{part}_T001,Audio-Tactile,audio_tactile,Inhale,pink,10,0.0,0.01,0.004,44100",
+                ]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        block_paths.append(wav_path)
+        blocks.append(
+            session_runner_module.RunBlock(
+                index=part,
+                label=f"Block {part:02d}",
+                manifest_path=csv_path,
+                wav_path=wav_path,
+                trial_count=1,
+                duration_s=0.01,
+                metadata={"part_number": part, "phase": f"part{part}", "phase_label": f"Part {part}", "sample_rate_hz": 44100},
+            )
+        )
+
+    package = session_runner_module.RunPackage(
+        participant_id="P001",
+        session_id=session_dir.name,
+        created_at="2026-06-21T12:00:00",
+        session_dir=session_dir,
+        design_path=tmp_path / "design.json",
+        protocol_path=tmp_path / "protocol.csv",
+        manifest_path=session_dir / "session_manifest.json",
+        render_manifest_path=None,
+        blocks=blocks,
+        instruction_profile={"schema": "pps-run-instructions.v1", "slots": []},
+    )
+    package.manifest_path.write_text(json.dumps({"schema": "test"}, indent=2), encoding="utf-8")
+    contexts: list[dict[str, object]] = []
+
+    def _continue(context: dict[str, object]) -> bool:
+        contexts.append(dict(context))
+        return True
+
+    engine = _MockAudioEngine()
+    controller = SessionRunnerController(
+        package,
+        audio_engine=engine,
+        capture_options={"enable_lsl": False, "write_analysis_csvs": False},
+        instruction_continue_callback=_continue,
+    )
+
+    result = controller.run()
+
+    assert result.completed
+    assert engine.played == [str(path) for path in block_paths]
+    assert [context["next_action"] for context in contexts] == ["next_condition"]
+    assert contexts[0]["button_label"] == "Start Part 2"
+    assert contexts[0]["mode"] == "button"
 
 
 def test_session_runner_diary_records_interrupted_session(tmp_path: Path):

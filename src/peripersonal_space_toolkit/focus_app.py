@@ -135,7 +135,7 @@ STUDY5_PROFILE_ID = "study5_box_breathing_pps"
 DATA_COLLECTED_MARK = "[collected]"
 TIMELINE_LABEL_WIDTH = 58
 TIMELINE_RIGHT_MARGIN = 12
-TIMELINE_ROW_NAMES = ("Resp", "Type", "SOA", "Tactile", "Clicks")
+TIMELINE_ROW_NAMES = ("Resp", "Type", "Noise", "SOA", "Tactile", "Clicks")
 TIMELINE_MINIMUM_VISIBLE_HEIGHT = 84
 TIMELINE_SEGMENT_LABEL_SKIP_WIDTH = 22
 TIMELINE_REPEATED_LABEL_SKIP_WIDTH = 58
@@ -1475,6 +1475,16 @@ def _part_button_label(part_key: str) -> str:
         return f"Part {int(float(text))}"
     except ValueError:
         return f"Part {text}" if text else "Part"
+
+
+def _part_key_text(value: Any) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    try:
+        return str(int(float(text)))
+    except ValueError:
+        return text
 
 
 def _compact_run_block_label(block: Any) -> str:
@@ -2951,6 +2961,24 @@ def _create_tactile_timeline_widget(
                         return "#eadcf0"
                     return "#f0dddd"
 
+                def _noise_label(value: str) -> str:
+                    text = str(value or "").strip()
+                    if not text:
+                        return "Noise"
+                    return text.replace("_", " ").title()
+
+                def _noise_color(value: str, fallback_index: int) -> str:
+                    text = str(value or "").strip().lower()
+                    colors = {
+                        "pink": "#f5d5e0",
+                        "white": "#e5e7eb",
+                        "blue": "#dbeafe",
+                        "brown": "#e8dcc9",
+                        "violet": "#e9d5ff",
+                        "custom_audio": "#dbe8dc",
+                    }
+                    return colors.get(text, palette[(fallback_index + 3) % len(palette)])
+
                 row_height = 6 if height < 55 else (8 if very_compact_rows else (12 if compact_rows else 16))
                 last_text_by_row: dict[str, str] = {}
                 drawn_rects_by_row: dict[str, tuple[int, int, int, int]] = {}
@@ -3053,6 +3081,12 @@ def _create_tactile_timeline_widget(
                             segment.trial_label or segment.family or "Type",
                             row_y_by_name["Type"] - row_height // 2,
                             trial_color,
+                        ),
+                        (
+                            "Noise",
+                            _noise_label(segment.noise_type),
+                            row_y_by_name["Noise"] - row_height // 2,
+                            _noise_color(segment.noise_type, index),
                         ),
                         (
                             "SOA",
@@ -5749,6 +5783,7 @@ class FocusModeWindow:
         self.instruction_plan_items: list[dict[str, Any]] = []
         self.topup_draft_items: list[dict[str, Any]] = []
         self.part_buttons: dict[str, Any] = {}
+        self.start_part2_button: Any | None = None
         self.active_display_block_index: int | None = None
         self.completed_display_block_indices: set[int] = set()
         self.recenter_controller = TactileRecenterController(self.timeline_state, self._move_cursor_to_target)
@@ -6156,6 +6191,13 @@ class FocusModeWindow:
             button.clicked.connect(lambda _checked=False, key=part_key: self._select_part_key(key, preview_first=True))
             self.part_buttons[part_key] = button
             part_selector_layout.addWidget(button)
+        self.start_part2_button = q["QPushButton"]("Start Part 2")
+        self.start_part2_button.setObjectName("startPart2Button")
+        self.start_part2_button.setMinimumHeight(profile.button_min_height)
+        self.start_part2_button.setEnabled(False)
+        self.start_part2_button.setToolTip("Part 2 can be started only after Part 1 has finished and the runner is waiting at the part boundary.")
+        self.start_part2_button.clicked.connect(self._start_part2_button_clicked)
+        part_selector_layout.addWidget(self.start_part2_button)
         part_selector_layout.addStretch(1)
         progress_layout.addWidget(self.part_selector_widget)
         self.block_plan_widget = _create_block_plan_widget(q, self)
@@ -6295,6 +6337,51 @@ class FocusModeWindow:
                 button.setToolTip(f"Show {_part_button_label(part_key)} block order and top-up draft.")
             else:
                 button.setToolTip(f"{_part_button_label(part_key)} is not present in this Segment 6 setup.")
+        self._refresh_start_part2_button()
+
+    def _pending_start_part_key(self) -> str:
+        request = self.pending_instruction_request
+        if request is None:
+            return ""
+        context = dict(request.get("context") or {})
+        if str(context.get("next_action") or "").strip() != "next_condition":
+            return ""
+        for key in ("next_part_number", "part_number", "block_part_number", "Part_Number"):
+            value = context.get(key)
+            if value not in (None, ""):
+                return _part_key_text(value)
+        return "2" if "2" in self._available_part_keys() else ""
+
+    def _refresh_start_part2_button(self) -> None:
+        button = getattr(self, "start_part2_button", None)
+        if button is None:
+            return
+        has_part2 = "2" in self._available_part_keys()
+        button.setVisible(has_part2)
+        pending_part = self._pending_start_part_key()
+        enabled = bool(has_part2 and pending_part == "2")
+        button.setEnabled(enabled)
+        button.setText("Start Part 2")
+        if enabled:
+            button.setToolTip("Part 1 is complete. Click to continue acquisition into Part 2.")
+        elif has_part2:
+            button.setToolTip("Part 2 can be started only after Part 1 has finished and the runner is waiting at the part boundary.")
+        else:
+            button.setToolTip("This run setup has no Part 2.")
+
+    def _part2_start_gate_pending(self) -> bool:
+        return self._pending_start_part_key() == "2"
+
+    def _start_part2_button_clicked(self) -> None:
+        if not self._part2_start_gate_pending():
+            if hasattr(self, "event_label"):
+                self.event_label.setText("Start Part 2 becomes available after Part 1 is complete.")
+            self._refresh_start_part2_button()
+            return
+        self.selected_part_key = "2"
+        self._refresh_run_plan()
+        self._approve_pending_instruction_continue(source="start part 2 button")
+        self._refresh_start_part2_button()
 
     def _visible_plan_items(self) -> list[dict[str, Any]]:
         selected = self._ensure_selected_part_key()
@@ -7526,6 +7613,9 @@ class FocusModeWindow:
 
     def _handle_primary_action_shortcut(self) -> None:
         if self.pending_instruction_request is not None:
+            if self._part2_start_gate_pending():
+                self.event_label.setText("Use Start Part 2 to continue to Part 2.")
+                return
             self._approve_pending_instruction_continue(source="keyboard")
             return
         if self.start_button.isEnabled() and not self._keyboard_focus_is_pre_run_input():
@@ -7539,9 +7629,11 @@ class FocusModeWindow:
         self.pending_instruction_request["event"].set()
         self.pending_instruction_request = None
         self.instruction_button.setVisible(False)
+        self.instruction_button.setText("Continue")
         self.target_button.setEnabled(True)
         self.event_label.setText(f"Instruction continuation logged ({source})")
         self._set_primary_action_shortcuts_enabled(False)
+        self._refresh_start_part2_button()
         _append_output_diary_event(
             "instruction_continue",
             package=self.package,
@@ -7638,6 +7730,7 @@ class FocusModeWindow:
                 self._handle_startup_failure(f"Audio initialization failed: {exc}")
                 return
         self.start_button.setEnabled(False)
+        self._refresh_start_part2_button()
         self._set_primary_action_shortcuts_enabled(False)
         self.pause_button.setEnabled(True)
         self.stop_button.setEnabled(True)
@@ -7673,6 +7766,9 @@ class FocusModeWindow:
 
     def _click(self) -> None:
         if self.pending_instruction_request is not None:
+            if self._part2_start_gate_pending():
+                self.event_label.setText("Use Start Part 2 to continue to Part 2.")
+                return
             self._approve_pending_instruction_continue(source="click target")
             return
         if self.controller is None:
@@ -7695,6 +7791,9 @@ class FocusModeWindow:
         )
 
     def _continue_instruction_button(self) -> None:
+        if self._part2_start_gate_pending():
+            self.event_label.setText("Use Start Part 2 to continue to Part 2.")
+            return
         self._approve_pending_instruction_continue(source="button")
 
     def _toggle_pause(self) -> None:
@@ -7845,8 +7944,9 @@ class FocusModeWindow:
             countdown = max(0.0, next_cue.time_s - self.timeline_state.elapsed_s)
             soa = f" | SOA {next_cue.soa_ms} ms" if str(next_cue.soa_ms).strip() else ""
             row = f" | {next_cue.row_label}" if str(next_cue.row_label).strip() else ""
+            noise = f" | {next_cue.noise_type}" if str(next_cue.noise_type).strip() else ""
             self.next_tactile_label.setText(
-                f"Next tactile: Trial {next_cue.trial_number} in {countdown:.1f}s{soa}{row}"
+                f"Next tactile: Trial {next_cue.trial_number} in {countdown:.1f}s{soa}{row}{noise}"
             )
         self.next_tactile_label.setToolTip(self.next_tactile_label.text())
         self.tactile_count_label.setText(
@@ -8013,6 +8113,14 @@ class FocusModeWindow:
         self.pending_instruction_request = payload
         mode = str(context.get("mode") or "click")
         label = str(context.get("instruction_label") or "instruction")
+        if self._part2_start_gate_pending():
+            self.target_button.setEnabled(False)
+            self.instruction_button.setVisible(False)
+            self.instruction_button.setText("Continue")
+            self.event_label.setText("Part 1 complete. Click Start Part 2 when ready.")
+            self._set_primary_action_shortcuts_enabled(False)
+            self._refresh_start_part2_button()
+            return
         self.target_button.setEnabled(True)
         if mode == "button":
             self.instruction_button.setText(str(context.get("button_label") or "Continue"))
@@ -8022,6 +8130,7 @@ class FocusModeWindow:
             self.instruction_button.setVisible(False)
             self.event_label.setText(f"Click the target or press Space/Enter to continue after {label}.")
         self._set_primary_action_shortcuts_enabled(True)
+        self._refresh_start_part2_button()
 
     def _handle_topup_approval(self, payload: dict[str, Any]) -> None:
         q = self.q
@@ -8102,6 +8211,7 @@ class FocusModeWindow:
         self.pause_button.setEnabled(False)
         self.stop_button.setEnabled(False)
         self.start_button.setEnabled(False)
+        self._refresh_start_part2_button()
         self._set_primary_action_shortcuts_enabled(False)
         self.progress.setValue(1000 if result.completed else self.progress.value())
         self.run_state_chip.setText("Complete" if result.completed else "Interrupted")

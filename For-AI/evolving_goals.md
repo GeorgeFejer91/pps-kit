@@ -5,6 +5,7 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 ## 2026-06-21
 
 - Updated the runner-owned external LabRecorder output contract: when enabled, `SessionRunnerController` now gives `LabRecorder.exe` the participant session folder as the native XDF target and names the recording `<session_id>_external_labrecorder.xdf`, matching the `<session_id>_trials.csv` convention. LabRecorder stdout/stderr and `external_labrecorder_capture_report.json` remain under context `runner_logs/<session_id>/`; local event/LSL mirrors remain under context `verbose_events/<session_id>/`. Validation fallback still reads older rehearsals that used context `session_external_labrecorder.xdf`.
+- Refined Focus Mode operator flow: the live/preview tactile timeline now carries a `Noise` lane between trial type and SOA using `Noise_Type` from block schedules, while compact constrained layouts keep the six-row timeline visible without clipping at 1024x600. Two-part runs now stop at the between-condition handoff until the explicit `Start Part 2` button is clicked; response-target clicks and primary keyboard shortcuts do not continue past that boundary.
 
 ## 2026-06-20
 

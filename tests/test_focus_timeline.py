@@ -20,6 +20,7 @@ def test_tactile_timeline_state_loads_and_labels_cues():
                 "end_s": 8.0,
                 "clip_label": "White noise",
                 "trial_label": "Inhale",
+                "noise_type": "white",
                 "soa_ms": "300",
                 "family": "audio_tactile",
             },
@@ -30,6 +31,7 @@ def test_tactile_timeline_state_loads_and_labels_cues():
                 "end_s": 16.0,
                 "clip_label": "Baseline",
                 "trial_label": "Exhale",
+                "noise_type": "pink",
                 "soa_ms": "800",
                 "family": "baseline",
             },
@@ -41,6 +43,7 @@ def test_tactile_timeline_state_loads_and_labels_cues():
                 "time_s": 8.8,
                 "sample_index": 388080,
                 "soa_ms": "800",
+                "noise_type": "pink",
                 "family": "baseline",
                 "row_label": "Exhale",
             },
@@ -50,6 +53,7 @@ def test_tactile_timeline_state_loads_and_labels_cues():
                 "time_s": 4.3,
                 "sample_index": 189630,
                 "soa_ms": "300",
+                "noise_type": "white",
                 "family": "audio_tactile",
                 "row_label": "Inhale",
             },
@@ -62,6 +66,8 @@ def test_tactile_timeline_state_loads_and_labels_cues():
     assert [cue.trial_number for cue in state.cues] == [1, 2]
     assert [cue.family for cue in state.cues] == ["audio_tactile", "baseline"]
     assert [segment.trial_label for segment in state.trial_segments] == ["Inhale", "Exhale"]
+    assert [segment.noise_type for segment in state.trial_segments] == ["white", "pink"]
+    assert [cue.noise_type for cue in state.cues] == ["white", "pink"]
     assert [segment.soa_ms for segment in state.trial_segments] == ["300", "800"]
     assert state.next_cue().trial_uid == "T001"
     click = state.record_click(4.6)
