@@ -181,8 +181,10 @@ and Segment 6 and before relying on LSL markers for EEG alignment.
    LabRecorder XDF` before setup/start; the runner will confirm both LSL
    streams by session `source_id`, start LabRecorder through RCS, wait until
    LabRecorder reports data collection started for both streams, and hold
-   playback until that gate passes. If using a separate lab EEG recorder, start
-   it after setup submission but before block playback and confirm both LSL
+   playback until that gate passes. The native XDF is written directly to the
+   participant session folder as `<session_id>_external_labrecorder.xdf`. If
+   using a separate lab EEG recorder, start it after setup submission but
+   before block playback and confirm both LSL
    streams are visible:
    - `PPSMarkersV2` for rich reconstructable string markers.
    - `PPSTriggerCodes` for numeric trigger codes.

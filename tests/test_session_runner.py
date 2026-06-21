@@ -1033,6 +1033,8 @@ def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
     assert result.trigger_dictionary_path and result.trigger_dictionary_path.parent == result.events_csv.parent
     assert result.session_metadata_path.parent == output_runner_logs_dir(package.session_dir.parent) / package.session_id
     assert result.analysis_outputs["analysis_ready_trials"].parent == output_data_analytics_dir(package.session_dir.parent) / package.session_id
+    manifest_outputs = json.loads(package.manifest_path.read_text(encoding="utf-8"))["outputs"]
+    assert Path(manifest_outputs["external_labrecorder_xdf"]) == package.session_dir / f"{package.session_id}_external_labrecorder.xdf"
     participant_trial_rows = list(csv.DictReader(result.analysis_outputs["participant_trials"].open(encoding="utf-8")))
     assert participant_trial_rows
     assert participant_trial_rows[0]["participant_age_years"] == "29"
@@ -1160,9 +1162,9 @@ def test_session_runner_owned_labrecorder_starts_after_lsl_before_audio(tmp_path
     assert result.completed
     assert order.index("labrecorder_start") < order.index("audio_playback") < order.index("labrecorder_stop")
     assert ui_events[:2] == ["external_labrecorder_started", "session_start"]
-    assert result.analysis_outputs["external_labrecorder_xdf"].name == "session_external_labrecorder.xdf"
+    assert result.analysis_outputs["external_labrecorder_xdf"] == package.session_dir / f"{package.session_id}_external_labrecorder.xdf"
     assert result.analysis_outputs["external_labrecorder_report"].name == "external_labrecorder_capture_report.json"
-    assert "session_external_labrecorder.xdf" in {path.name for path in result.recording_paths}
+    assert f"{package.session_id}_external_labrecorder.xdf" in {path.name for path in result.recording_paths}
     events_text = result.events_csv.read_text(encoding="utf-8")
     assert "external_labrecorder_start" in events_text
     assert "external_labrecorder_stop_requested" in events_text

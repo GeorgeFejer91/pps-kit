@@ -273,6 +273,10 @@ def _discover_context(
         )
     else:
         external_xdf = external_xdf.resolve()
+    if (not external_xdf or not _is_file(external_xdf)) and session_dir:
+        candidate = session_dir / f"{session_dir.name}_external_labrecorder.xdf"
+        if _is_file(candidate):
+            external_xdf = candidate
     if (not external_xdf or not _is_file(external_xdf)) and events_csv:
         candidate = events_csv.with_name("session_external_labrecorder.xdf")
         if _is_file(candidate):

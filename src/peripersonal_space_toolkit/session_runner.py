@@ -101,6 +101,10 @@ def _participant_trials_csv_path(package: "RunPackage") -> Path:
     return Path(package.session_dir) / f"{package.session_id}{PARTICIPANT_TRIAL_CSV_SUFFIX}"
 
 
+def _external_labrecorder_xdf_path(package: "RunPackage") -> Path:
+    return Path(package.session_dir) / f"{package.session_id}_external_labrecorder.xdf"
+
+
 def _verbose_events_csv_path(package: "RunPackage") -> Path:
     return _package_verbose_events_dir(package) / "events.csv"
 
@@ -1883,7 +1887,7 @@ class SessionRunnerController:
         self._lsl_markers_csv_path = _lsl_markers_csv_path(package)
         self._lsl_markers_xdf_path = _lsl_markers_xdf_path(package)
         self._trigger_dictionary_path = _trigger_dictionary_path(package)
-        self._external_labrecorder_xdf_path = self._verbose_events_dir / "session_external_labrecorder.xdf"
+        self._external_labrecorder_xdf_path = _external_labrecorder_xdf_path(package)
         self._external_labrecorder_stdout_path = self._runner_log_dir / "external_labrecorder_stdout.txt"
         self._external_labrecorder_stderr_path = self._runner_log_dir / "external_labrecorder_stderr.txt"
         self._external_labrecorder_report_path = self._runner_log_dir / "external_labrecorder_capture_report.json"
@@ -4973,7 +4977,7 @@ def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> Non
             "participant_trials_csv": str(_participant_trials_csv_path(package)),
             "participant_audio_evidence_wav_pattern": str(package.session_dir / "block_XX_audio_evidence.wav"),
             "participant_wired_loopback_input4_wav_pattern": str(package.session_dir / "block_XX_wired_loopback_input4.wav"),
-            "external_labrecorder_xdf": str(_package_verbose_events_dir(package) / "session_external_labrecorder.xdf"),
+            "external_labrecorder_xdf": str(_external_labrecorder_xdf_path(package)),
             "external_labrecorder_report": str(_package_runner_log_dir(package) / "external_labrecorder_capture_report.json"),
             "verbose_events_csv": str(_verbose_events_csv_path(package)),
             "verbose_events_xdf": str(_verbose_events_xdf_path(package)),

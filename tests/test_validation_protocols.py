@@ -2005,7 +2005,7 @@ def test_desktop_full_mock_rehearsal_uses_runner_owned_labrecorder(tmp_path: Pat
         _write_csv(lsl_markers_csv, marker_rows)
         manifest = session_dir / "session_manifest.json"
         manifest.write_text(json.dumps({"outputs": {"lsl_markers_csv": str(lsl_markers_csv)}}), encoding="utf-8")
-        xdf_path = verbose_dir / "session_external_labrecorder.xdf"
+        xdf_path = session_dir / f"{session_dir.name}_external_labrecorder.xdf"
         xdf_path.write_bytes(b"xdf")
         stdout_path = runner_log_dir / "external_labrecorder_stdout.txt"
         stderr_path = runner_log_dir / "external_labrecorder_stderr.txt"
