@@ -2497,7 +2497,7 @@ class SessionRunnerController:
         payload = {
             "instruction_slot": slot_name,
             "instruction_label": label,
-            "instruction_path": str(path),
+            "instruction_path": path_text,
             "instruction_continue_mode": str(slot_payload.get("continue_mode") or "click"),
             "button_label": str(slot_payload.get("button_label") or "Continue"),
             **context,
