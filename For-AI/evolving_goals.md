@@ -2,6 +2,10 @@
 
 This file is the dated project memory. Add a new dated entry when a chat or implementation changes project direction, product behavior, or release constraints.
 
+## 2026-06-23
+
+- Added the isolated `Woojer-latency-testing/` workflow for Woojer audio pass-through latency stress testing. The folder is intentionally outside `validation_protocols/` and outside toolkit runtime functionality. Its script generates safe Output-3 pulse trains, records the selected Komplete input over the native ASIO full-duplex route, writes JSON/CSV/Markdown reports under ignored local `runs/`, optionally appends the tracked LaTeX stress log, and reports Woojer-added audio latency when a direct baseline run is supplied. This is explicitly an audio pass-through measurement only, not Woojer mechanical vibration onset or participant perception evidence.
+
 ## 2026-06-21
 
 - Updated the runner-owned external LabRecorder output contract: when enabled, `SessionRunnerController` now gives `LabRecorder.exe` the participant session folder as the native XDF target and names the recording `<session_id>_external_labrecorder.xdf`, matching the `<session_id>_trials.csv` convention. LabRecorder stdout/stderr and `external_labrecorder_capture_report.json` remain under context `runner_logs/<session_id>/`; local event/LSL mirrors remain under context `verbose_events/<session_id>/`. Validation fallback still reads older rehearsals that used context `session_external_labrecorder.xdf`.
