@@ -107,7 +107,7 @@ def test_dashboard_replaces_saved_non_default_profile_with_study5_for_startup(tm
     assert state["design"]["name"] == _study5_template().design.name
 
 
-def test_dashboard_migrates_legacy_study5_row_labels_on_saved_profile_load(tmp_path: Path):
+def test_dashboard_replaces_noncanonical_study5_saved_profile_on_load(tmp_path: Path):
     saved_design = _study5_template().design
     saved_design.protocol.trial_strips[0].label = "Inhale row"
     saved_design.protocol.trial_strips[1].label = "Exhale row"
@@ -115,8 +115,8 @@ def test_dashboard_migrates_legacy_study5_row_labels_on_saved_profile_load(tmp_p
     saved_design.protocol.baseline_strategy = "none"
     saved_design.protocol.baseline_custom_trial_mode = "audio_tactile"
     saved_design.protocol.baseline_soa_values_ms = [0]
-    saved_design.study_profile_notes = "Legacy Study 5 config with filmstrip trial rows."
-    saved_path = tmp_path / "legacy_study5.json"
+    saved_design.study_profile_notes = "Noncanonical Study 5 config with outdated trial rows."
+    saved_path = tmp_path / "noncanonical_study5.json"
     save_design(saved_design, saved_path)
 
     state = DashboardController(
@@ -130,8 +130,8 @@ def test_dashboard_migrates_legacy_study5_row_labels_on_saved_profile_load(tmp_p
         "Inhale trial type",
         "Exhale trial type",
     ]
-    assert "within-block trial type rows" in state["design"]["study_profile_notes"]
-    assert "filmstrip trial rows" not in state["design"]["study_profile_notes"]
+    assert "canonical Study 5 profile" in state["design"]["study_profile_notes"]
+    assert "outdated trial rows" not in state["design"]["study_profile_notes"]
     assert state["design"]["protocol"]["include_catch_trials"] is True
     assert state["design"]["protocol"]["include_baseline_trials"] is True
     assert state["design"]["protocol"]["baseline_strategy"] == "tactile_only"

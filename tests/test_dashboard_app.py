@@ -24,6 +24,7 @@ from peripersonal_space_toolkit import dashboard_app, focus_launch, profile_memo
 from peripersonal_space_toolkit.dashboard_app import DashboardController, create_app
 from peripersonal_space_toolkit.design import (
     AudioFileSpec,
+    NoiseDefinition,
     ProtocolSpec,
     default_design,
     design_from_dict,
@@ -157,7 +158,10 @@ def _register_segment1_wav(
         source_kind=source_kind,
         trajectory_snapshot={},
         motion_mode=motion_mode,
-        provenance={"test_fixture": True},
+        provenance={
+            "test_fixture": True,
+            "loudness_policy": dashboard_app.loudness_policy_for_design(design_from_dict(state["design"])),
+        },
     )
     return path
 
@@ -207,7 +211,7 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260620-study5-white-pink-canonical"
+    static_version = "20260624-study5-profile-refresh"
     assert f'href="styles.css?v={static_version}"' in html
     assert f'src="hardware_pixel_art.js?v={static_version}"' in html
     assert f'src="app.js?v={static_version}"' in html
@@ -799,7 +803,7 @@ def test_dashboard_exports_data_acquisition_folder_bridge(tmp_path: Path):
     assert diary_path.parent == output_runner_logs_dir(acquisition_root)
     assert dashboard_app._path_exists(bridge_manifest_path)
     assert bridge_manifest_path.parent == output_project_state_dir(acquisition_root)
-    assert design_export_dir.is_dir()
+    assert dashboard_app._path_exists(design_export_dir)
     assert design_export_dir.parent == output_profile_snapshot_dir(acquisition_root) / "dashboard_design_export"
     assert dashboard_app._path_exists(design_export_dir / "0_profile" / "project_manifest.json")
     assert dashboard_app._path_exists(design_export_dir / "0_profile" / "active_design.json")
@@ -1173,6 +1177,80 @@ def test_dashboard_loads_unpublished_study5_preload_with_instruction_events(tmp_
     assert loaded["trial_preview"][0]["type"] in {"Audio-Tactile", "Catch", "Baseline"}
     assert any("Inhale instruction | " in row["sequence"] for row in loaded["trial_preview"])
     assert any("Exhale instruction | " in row["sequence"] for row in loaded["trial_preview"])
+
+
+def test_dashboard_startup_replaces_stale_study5_working_copy(tmp_path: Path):
+    template = next(
+        item
+        for item in dashboard_app.load_templates(dashboard_app.TEMPLATE_DIR)
+        if item.template_id == dashboard_app.DEFAULT_STUDY_TEMPLATE_ID
+    )
+    stale_design = dashboard_app._normalize_dashboard_design(template.design)
+    stale_design.noises.append(
+        NoiseDefinition(
+            label="Noncanonical extra source A",
+            noise_type="pink",
+            prebaked_path="assets/preloads/study5_box_breathing_pps/02_looming_stimuli/noncanonical_extra_source_a.wav",
+        )
+    )
+    stale_design.noises.append(
+        NoiseDefinition(
+            label="Noncanonical extra source B",
+            noise_type="white",
+            prebaked_path="assets/preloads/study5_box_breathing_pps/02_looming_stimuli/noncanonical_extra_source_b.wav",
+        )
+    )
+    for strip in stale_design.protocol.trial_strips:
+        for element in strip.elements:
+            if element.kind == "looming_stimulus":
+                element.source_labels = [
+                    "Pink frontal",
+                    "Noncanonical extra source A",
+                    "White frontal",
+                    "Noncanonical extra source B",
+                ]
+                element.source_label = "Pink frontal"
+    stale_design.protocol.trial_pool_repetition_defaults = {
+        "default": 2.0,
+        "audio_tactile": 2.0,
+        "baseline": 2.0,
+        "catch": 2.0,
+    }
+
+    design_path = tmp_path / "design.json"
+    save_design(stale_design, design_path)
+    registry_root = tmp_path / "dashboard_projects" / "0_study_project_registry"
+    stale_project = registry_root / "profile_study5_box_breathing_pps"
+    stale_profile_dir = stale_project / "0_profile"
+    stale_segment5_dir = stale_project / "5_block_csv_preview"
+    stale_profile_dir.mkdir(parents=True)
+    stale_segment5_dir.mkdir(parents=True)
+    save_design(stale_design, stale_profile_dir / "active_design.json")
+    (stale_segment5_dir / "stale_block_preview_marker.txt").write_text("noncanonical preview", encoding="utf-8")
+
+    controller = DashboardController(
+        design_path=design_path,
+        render_dir=_render_dir(tmp_path),
+        session_root=tmp_path / "sessions",
+        import_dir=tmp_path / "imports",
+        preview_dir=tmp_path / "previews",
+        project_registry_root=registry_root,
+    )
+    state = controller.snapshot()
+    design = state["design"]
+
+    assert [noise["label"] for noise in design["noises"]] == ["Pink frontal", "White frontal"]
+    assert design["custom_looming_files"] == []
+    assert design["protocol"]["trial_pool_repetition_defaults"] == {
+        "default": 6.0,
+        "audio_tactile": 6.0,
+        "baseline": 3.0,
+        "catch": 6.0,
+    }
+    for strip in design["protocol"]["trial_strips"]:
+        looming = next(element for element in strip["elements"] if element["kind"] == "looming_stimulus")
+        assert looming["source_labels"] == ["Pink frontal", "White frontal"]
+    assert not (stale_segment5_dir / "stale_block_preview_marker.txt").exists()
 
 
 def test_dashboard_blocks_runner_launch_for_incomplete_published_profile(tmp_path: Path):
@@ -1815,7 +1893,7 @@ def test_dashboard_state_templates_and_design_update(tmp_path: Path):
     assert state["design"]["name"]
     assert state["templates"]
     assert state["preload_inventory"]["status"] == "ready"
-    assert state["render"]["wav_count"] >= 4
+    assert state["render"]["wav_count"] >= 2
 
     template_id = state["templates"][0]["template_id"]
     loaded = client.post(f"/api/templates/{template_id}/load").json()
@@ -2333,8 +2411,9 @@ def test_dashboard_sequence_bake_preserves_stereo_looming_after_mono_instruction
 
     assert sequence_sr == sample_rate
     assert sequence_audio.shape == (fixed_frames + looming_frames, 2)
-    assert np.max(np.abs(sequence_audio[:fixed_frames, 0] - instruction_source[:, 0])) <= 1 / 32768
-    assert np.max(np.abs(sequence_audio[:fixed_frames, 1] - instruction_source[:, 0])) <= 1 / 32768
+    instruction_gain = dashboard_app._instruction_loudness_gain(design_from_dict(custom["design"]))
+    assert np.max(np.abs(sequence_audio[:fixed_frames, 0] - instruction_source[:, 0] * instruction_gain)) <= 1 / 32768
+    assert np.max(np.abs(sequence_audio[:fixed_frames, 1] - instruction_source[:, 0] * instruction_gain)) <= 1 / 32768
     assert np.max(np.abs(sequence_audio[fixed_frames:, 0] - looming_source[:, 0])) <= 1 / 32768
     assert np.max(np.abs(sequence_audio[fixed_frames:, 1] - looming_source[:, 1])) <= 1 / 32768
     assert np.max(np.abs(sequence_audio[fixed_frames:, 0] - sequence_audio[fixed_frames:, 1])) > 0.05
@@ -2858,7 +2937,7 @@ def test_dashboard_bakes_baseline_tactile_trial_files_with_three_channels(tmp_pa
     snapshot_dir = Path(bridge_payload["acquisition_profile_snapshot_dir"])
     assert snapshot_dir.is_dir()
     assert snapshot_dir.parent == profile_snapshot_dir
-    assert (snapshot_dir / "6_experiment_run_setup" / "experiment_run_setup_manifest.json").is_file()
+    assert dashboard_app._path_exists(snapshot_dir / "6_experiment_run_setup" / "experiment_run_setup_manifest.json")
     settings_path = tmp_path / "dashboard_projects" / "dashboard_state" / "focus_runner_settings.v1.json"
     settings = json.loads(settings_path.read_text(encoding="utf-8"))
     assert settings["active_output_folder"] == str(tmp_path / "sessions")

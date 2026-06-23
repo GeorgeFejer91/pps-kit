@@ -745,12 +745,12 @@ def test_protocol_summary_and_export_use_repetitions_soas_spatial_values_and_cat
     design.protocol.participants = 4
 
     summary = protocol_summary(design)
-    assert summary["audio_tactile_trials"] == 16
+    assert summary["audio_tactile_trials"] == 8
     assert summary["baseline_trials"] == 4
-    assert summary["catch_trials"] == 5
-    assert summary["total_trials"] == 25
-    assert summary["trials_per_block"] == 9
-    assert summary["total_participant_trials"] == 100
+    assert summary["catch_trials"] == 3
+    assert summary["total_trials"] == 15
+    assert summary["trials_per_block"] == 5
+    assert summary["total_participant_trials"] == 60
 
     protocol_path = tmp_path / "protocol.csv"
     export_protocol_csv(design, protocol_path)

@@ -168,7 +168,7 @@ class ProtocolSpec:
 
 @dataclass
 class StimulusDesign:
-    name: str = "Study 5 PPS design"
+    name: str = "Study 5 PPS white/pink design"
     study_profile_id: str = ""
     study_profile_title: str = ""
     study_profile_notes: str = ""
@@ -186,9 +186,7 @@ def default_design() -> StimulusDesign:
         sofa_file=DEFAULT_SOFA_FILE,
         noises=[
             NoiseDefinition("Pink frontal", "pink", 0.0),
-            NoiseDefinition("Blue frontal", "blue", 0.0),
             NoiseDefinition("White frontal", "white", 0.0),
-            NoiseDefinition("Brown frontal", "brown", 0.0),
         ]
     )
 
@@ -303,7 +301,7 @@ def design_from_dict(data: dict[str, Any]) -> StimulusDesign:
         )
     protocol = ProtocolSpec(**protocol_data)
     return StimulusDesign(
-        name=data.get("name", "Study 5 PPS design"),
+        name=data.get("name", "Study 5 PPS white/pink design"),
         study_profile_id=data.get("study_profile_id", ""),
         study_profile_title=data.get("study_profile_title", ""),
         study_profile_notes=data.get("study_profile_notes", ""),

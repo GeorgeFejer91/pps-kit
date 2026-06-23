@@ -5,7 +5,7 @@ const activePolls = new Set();
 let activeNavFrame = 0;
 const CUSTOM_TEMPLATE_ID = "__custom__";
 const DEFAULT_STUDY_TEMPLATE_ID = "study5_box_breathing_pps";
-const STATIC_RESOURCE_VERSION = "20260620-study5-white-pink-canonical";
+const STATIC_RESOURCE_VERSION = "20260624-study5-profile-refresh";
 const BLOCK_RANDOMIZATION_STRATEGY = "seeded_gellermann_row_order_preserving";
 const BLOCK_RANDOMIZATION_MAX_CONSECUTIVE_FEATURE = 2;
 const BLOCK_CSV_DOWNLOAD_COLUMNS = [
@@ -2119,6 +2119,42 @@ async function loadStaticState(fallbackError = null) {
   return true;
 }
 
+function mergeStaticProfileSegment(localSegment = {}, staticSegment = {}) {
+  return {
+    ...staticSegment,
+    folder_path: localSegment.folder_path || staticSegment.folder_path || "",
+    manifest_path: localSegment.manifest_path || staticSegment.manifest_path || "",
+    folder_exists: localSegment.folder_exists ?? staticSegment.folder_exists,
+    manifest_exists: localSegment.manifest_exists || staticSegment.manifest_exists,
+    static_profile_preview: true,
+    last_validation_message: "Committed profile preview; local companion will materialize files for runner launch."
+  };
+}
+
+async function applyStaticProfileInspectionPreview() {
+  if (staticModeActive || !state || !isProfileReadonlyMode()) return;
+  const profileId = state.selected_template || state.design?.study_profile_id || "";
+  if (!profileId || profileId === CUSTOM_TEMPLATE_ID || !state.preload_inventory?.finished_profile) return;
+  const staticPreview = await staticStateForTemplate(profileId);
+  const localSegments = state.project_segments || {};
+  const staticSegments = staticPreview.project_segments || {};
+  state = {
+    ...state,
+    static_profile_preview: true,
+    trial_sequence_bake: staticPreview.trial_sequence_bake || state.trial_sequence_bake,
+    trial_file_bake: staticPreview.trial_file_bake,
+    trial_pool_bake: staticPreview.trial_pool_bake,
+    block_csv_preview: staticPreview.block_csv_preview,
+    project_segments: {
+      ...localSegments,
+      "2_trial_sequence_designs": mergeStaticProfileSegment(localSegments["2_trial_sequence_designs"], staticSegments["2_trial_sequence_designs"]),
+      "3_tactile_and_baseline_trials": mergeStaticProfileSegment(localSegments["3_tactile_and_baseline_trials"], staticSegments["3_tactile_and_baseline_trials"]),
+      "4_trial_repetition_pool": mergeStaticProfileSegment(localSegments["4_trial_repetition_pool"], staticSegments["4_trial_repetition_pool"]),
+      "5_block_csv_preview": mergeStaticProfileSegment(localSegments["5_block_csv_preview"], staticSegments["5_block_csv_preview"]),
+    }
+  };
+}
+
 async function loadState(options = {}) {
   const resetMode = options.resetEditMode === true;
   if (forceStaticPreviewEnabled()) {
@@ -2130,6 +2166,7 @@ async function loadState(options = {}) {
     state = await api("/api/state", { skipStaticGuard: true });
     staticModeActive = false;
     staticModeReason = "";
+    await applyStaticProfileInspectionPreview();
     if (resetMode) resetEditMode();
     renderAll();
     updateViewer();
@@ -5645,6 +5682,7 @@ async function loadTemplate() {
   select.disabled = true;
   try {
     state = await api(`/api/templates/${encodeURIComponent(id)}/load`, { method: "POST" });
+    await applyStaticProfileInspectionPreview();
     resetEditMode();
     renderAll();
     updateViewer();

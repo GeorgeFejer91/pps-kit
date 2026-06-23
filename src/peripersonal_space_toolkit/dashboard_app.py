@@ -376,7 +376,7 @@ class DashboardController:
         self.templates = load_templates(self.template_dir)
         self.preload_inventory = load_preload_inventory(REPO_ROOT)
         self.design = self._load_initial_design()
-        project = self._ensure_project_context(self.design)
+        project = self._ensure_project_context(self.design, clear_stale_profile_outputs=True)
         if self.design.study_profile_id == DEFAULT_STUDY_TEMPLATE_ID:
             _materialize_study_profile_segment1_ingredients(project, self.design)
             _write_project_context_files(project, self.design)
@@ -454,12 +454,20 @@ class DashboardController:
             "jobs": [_job_to_dict(job) for job in self.jobs.recent()],
         }
 
-    def _ensure_project_context(self, design: StimulusDesign, *, force_new_custom: bool = False) -> DashboardProjectContext:
+    def _ensure_project_context(
+        self,
+        design: StimulusDesign,
+        *,
+        force_new_custom: bool = False,
+        clear_stale_profile_outputs: bool = False,
+    ) -> DashboardProjectContext:
         context = _ensure_dashboard_project_context(
             design,
             self.project_registry_root,
             force_new_custom=force_new_custom,
         )
+        if clear_stale_profile_outputs and _profile_project_contract_stale(context, design):
+            _clear_profile_project_materialized_outputs(context)
         _write_project_context_files(context, design)
         return context
 
@@ -570,7 +578,7 @@ class DashboardController:
         self.sync_preload_assets(template_id)
         with self._lock:
             self.design = _normalize_dashboard_design(template.design)
-            project = self._ensure_project_context(self.design)
+            project = self._ensure_project_context(self.design, clear_stale_profile_outputs=True)
             if self.design.study_profile_id:
                 _materialize_study_profile_segment1_ingredients(project, self.design)
                 _write_project_context_files(project, self.design)
@@ -6906,6 +6914,7 @@ def _normalize_dashboard_design(design: StimulusDesign) -> StimulusDesign:
     updated = _normalize_study5_full_soa_baseline_defaults(updated)
     updated = _normalize_study5_trial_pool_repetition_defaults(updated)
     updated = _normalize_study5_original_instruction_assets(updated)
+    updated = _normalize_study5_canonical_source_pool(updated)
     updated = _ensure_source_trajectory_snapshots(updated)
     updated = _ensure_preload_source_assets(updated)
     return _prune_custom_trial_strip_source_labels(updated)
@@ -7029,6 +7038,55 @@ def _normalize_study5_original_instruction_assets(design: StimulusDesign) -> Sti
         if asset.label not in STUDY5_ORIGINAL_INSTRUCTION_ASSETS
     )
     design.prestimulus_files = normalized
+    return design
+
+
+def _normalize_study5_canonical_source_pool(design: StimulusDesign) -> StimulusDesign:
+    if design.study_profile_id != DEFAULT_STUDY_TEMPLATE_ID:
+        return design
+    assets = _preload_assets_by_label(DEFAULT_STUDY_TEMPLATE_ID)
+    if not assets:
+        return design
+    ordered_assets = list(assets.values())
+    expected_keys = {_source_key(str(asset.get("label") or "")) for asset in ordered_assets}
+    existing_noises = {_source_key(noise.label): noise for noise in design.noises if _source_key(noise.label) in expected_keys}
+    canonical_noises: list[NoiseDefinition] = []
+    for asset in ordered_assets:
+        label = str(asset.get("label") or "").strip()
+        if not label:
+            continue
+        key = _source_key(label)
+        noise = existing_noises.get(key)
+        if noise is None:
+            noise = NoiseDefinition(
+                label=label,
+                noise_type=str(asset.get("noise_type") or asset.get("tone_type") or "pink"),
+                azimuth_deg=0.0,
+                elevation_deg=0.0,
+                gain=1.0,
+                prebaked_path=str(asset.get("path") or ""),
+                sequence_order=2,
+                motion_mode=str(asset.get("motion_mode") or "looming"),
+                trajectory_snapshot=dict(asset.get("trajectory_snapshot") or {}),
+            )
+        noise.label = label
+        noise.noise_type = str(asset.get("noise_type") or asset.get("tone_type") or noise.noise_type or "pink")
+        noise.prebaked_path = str(asset.get("path") or noise.prebaked_path or "")
+        noise.sequence_order = 2
+        noise.motion_mode = str(asset.get("motion_mode") or noise.motion_mode or "looming")
+        if isinstance(asset.get("trajectory_snapshot"), dict):
+            noise.trajectory_snapshot = dict(asset.get("trajectory_snapshot") or {})
+        canonical_noises.append(noise)
+    design.noises = canonical_noises
+    design.custom_looming_files = []
+    expected_labels = [noise.label for noise in canonical_noises]
+    for strip in design.protocol.trial_strips:
+        for element in strip.elements:
+            if element.kind != "looming_stimulus":
+                continue
+            element.source_labels = list(expected_labels)
+            element.source_label = expected_labels[0] if expected_labels else ""
+            element.randomized = True
     return design
 
 
@@ -7307,13 +7365,72 @@ def _materialize_segment1_ingredients_for_custom_project(
 
 def _should_replace_saved_design_with_default_profile(design: StimulusDesign) -> bool:
     if design.study_profile_id == DEFAULT_STUDY_TEMPLATE_ID:
-        return False
+        return _study5_profile_contract_signature(design) != _study5_profile_contract_signature(_normalize_dashboard_design(design))
     if design.study_profile_id:
         return True
     mode = str(design.study_profile_reference_parameters.get("dashboard_mode", "")).strip().lower()
     if mode == "custom":
         return True
-    return design.name.strip() in {"", "Study 5 PPS design", "Custom PPS design"}
+    name = design.name.strip()
+    if name in {"", "Study 5 PPS white/pink design", "Custom PPS design"}:
+        return True
+    normalized_name = " ".join(name.lower().split())
+    return normalized_name.startswith("study 5 pps") and "white/pink" not in normalized_name
+
+
+def _study5_profile_contract_signature(design: StimulusDesign) -> dict[str, Any]:
+    if design.study_profile_id != DEFAULT_STUDY_TEMPLATE_ID:
+        return {"profile_id": str(design.study_profile_id or "")}
+    reps = getattr(design.protocol, "trial_pool_repetition_defaults", {}) or {}
+    return {
+        "profile_id": DEFAULT_STUDY_TEMPLATE_ID,
+        "noise_labels": [str(noise.label or "") for noise in design.noises],
+        "noise_types": [str(noise.noise_type or "") for noise in design.noises],
+        "custom_looming_labels": [str(audio.label or "") for audio in design.custom_looming_files],
+        "looming_strip_sources": [
+            [str(label or "") for label in element.source_labels]
+            for strip in design.protocol.trial_strips
+            for element in strip.elements
+            if element.kind == "looming_stimulus"
+        ],
+        "trial_pool_repetition_defaults": {
+            key: _json_repetition_value(reps.get(key))
+            for key in ("default", "audio_tactile", "baseline", "catch")
+        },
+        "include_baseline_trials": bool(design.protocol.include_baseline_trials),
+        "baseline_strategy": str(design.protocol.baseline_strategy or ""),
+        "baseline_soa_values_ms": [int(value) for value in design.protocol.baseline_soa_values_ms],
+        "include_catch_trials": bool(design.protocol.include_catch_trials),
+        "soa_values_ms": [int(value) for value in design.protocol.soa_values_ms],
+        "blocks": int(design.protocol.blocks or 0),
+    }
+
+
+def _profile_project_contract_stale(context: DashboardProjectContext, design: StimulusDesign) -> bool:
+    if _is_custom_design(design) or not str(design.study_profile_id or "").strip():
+        return False
+    active_design_path = context.profile_dir / "active_design.json"
+    if not _path_exists(active_design_path):
+        return any(
+            _path_exists(path)
+            for path in [
+                _ingredient_manifest_path(context),
+                _trial_sequence_bake_root(context.project_dir) / "trial_sequence_variants_manifest.json",
+                _baseline_tactile_bake_root(context.project_dir) / "baseline_tactile_trial_files_manifest.json",
+                _trial_pool_manifest_path(context.project_dir),
+                _block_csv_preview_manifest_path(context.project_dir),
+                _run_setup_manifest_path(context.project_dir),
+            ]
+        )
+    try:
+        previous = load_design(active_design_path)
+    except Exception:
+        return True
+    if previous.study_profile_id != design.study_profile_id:
+        return True
+    if design.study_profile_id == DEFAULT_STUDY_TEMPLATE_ID:
+        return _study5_profile_contract_signature(previous) != _study5_profile_contract_signature(design)
+    return False
 
 
 def _project_metadata(design: StimulusDesign) -> dict[str, Any]:
@@ -7575,6 +7692,16 @@ def _clear_downstream_segment_outputs(context: DashboardProjectContext, *, from_
         else:
             _remove_tree(target)
             _ensure_dir(target)
+
+
+def _clear_profile_project_materialized_outputs(context: DashboardProjectContext) -> None:
+    resolved = context.segment1_dir.resolve()
+    project_resolved = context.project_dir.resolve()
+    if project_resolved not in resolved.parents and resolved != project_resolved:
+        raise RuntimeError(f"Refusing to clear a folder outside the active dashboard project: {context.segment1_dir}")
+    _remove_tree(context.segment1_dir)
+    _ensure_dir(context.segment1_dir)
+    _clear_downstream_segment_outputs(context, from_segment=1)
 
 
 def _clear_segment6_generated_outputs(segment6_dir: Path) -> None:
