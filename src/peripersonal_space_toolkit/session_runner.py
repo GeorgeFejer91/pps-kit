@@ -41,6 +41,7 @@ from .session_analysis import analyze_session_events, format_analysis_summary, w
 from .session_events import SessionEventLogger
 from .runner_diary import append_diary_entry, ensure_output_diary, find_output_diary
 from .labrecorder_capture import LabRecorderCapture, LabRecorderCaptureError, find_labrecorder_cli
+from .tactile_latency import tactile_drive_onset_s, woojer_tactile_latency_policy
 from .timing_events import TimingEventHub, TriggerDictionary
 from .timing_schedule import BlockEventSchedule
 from .topup import TopUpLedger, write_topup_draft_manifest
@@ -70,7 +71,7 @@ SEGMENT_BLOCK_PREVIEW_SCHEMA = "pps-block-csv-preview.v1"
 LAST_EXPERIMENT_SCHEMA = "pps-last-experiment.v1"
 PREPARED_SESSION_QUEUE_SCHEMA = "pps-prepared-session-queue.v1"
 BLOCK_WAV_CACHE_SCHEMA = "pps-session-block-cache.v1"
-BLOCK_WAV_CACHE_VERSION = "2026-06-14.v1"
+BLOCK_WAV_CACHE_VERSION = "2026-06-23.woojer-compensation.v1"
 RESPONSE_MARKER_GAIN = 0.05
 EXTERNAL_LABRECORDER_FINAL_MARKER_SETTLE_S = 1.0
 LAUNCHABLE_ACTIVITY_EVENTS = {"run_setup_prepared", "session_prepared", "runner_launched"}
@@ -1350,6 +1351,7 @@ def _segment_block_cache_key(
     payload = {
         "schema": BLOCK_WAV_CACHE_SCHEMA,
         "version": BLOCK_WAV_CACHE_VERSION,
+        "tactile_latency_compensation": woojer_tactile_latency_policy(),
         "source_csv_path": str(Path(source_csv).resolve()),
         "source_csv_sha256": _sha256_file(source_csv),
         "source_run_setup_sha256": _sha256_file(source_run_setup_manifest_path)
@@ -1389,6 +1391,12 @@ def _cache_manifest_trial_payload(trial_rows: list[dict[str, Any]]) -> list[dict
                 "sample_rate": _as_int(row.get("Sample_Rate_Hz"), default=0),
                 "channels": _as_int(row.get("Channels"), default=0),
                 "duration_frames": max(0, end_sample - start_sample),
+                "tactile_drive_onset_s": row.get("Tactile_Drive_Onset_S", ""),
+                "tactile_latency_compensation_requested_ms": row.get("Tactile_Latency_Compensation_Requested_ms", ""),
+                "tactile_latency_compensation_applied_ms": row.get("Tactile_Latency_Compensation_Applied_ms", ""),
+                "tactile_latency_compensation_status": row.get("Tactile_Latency_Compensation_Status", ""),
+                "tactile_latency_compensation_applied": row.get("Tactile_Latency_Compensation_Applied", ""),
+                "tactile_latency_compensation_note": row.get("Tactile_Latency_Compensation_Note", ""),
             }
         )
     return trials
@@ -1411,6 +1419,7 @@ def _write_block_cache_manifest(
         "schema": BLOCK_WAV_CACHE_SCHEMA,
         "version": BLOCK_WAV_CACHE_VERSION,
         "cache_key": cache_key,
+        "tactile_latency_compensation": woojer_tactile_latency_policy(),
         "source_csv_path": str(Path(source_csv).resolve()),
         "source_csv_sha256": _sha256_file(source_csv),
         "source_run_setup_manifest_path": str(Path(source_run_setup_manifest_path).resolve()),
@@ -1490,6 +1499,14 @@ def _segment_trial_rows_from_cache(
         looming_onset_s = _segment_looming_onset_s(row)
         tactile_onset_s = _segment_tactile_onset_s(row, looming_onset_s)
         family = _segment_family(row)
+        tactile_compensation = {
+            "requested_compensation_ms": _as_float(cached.get("tactile_latency_compensation_requested_ms"), default=0.0),
+            "applied_compensation_ms": _as_float(cached.get("tactile_latency_compensation_applied_ms"), default=0.0),
+            "drive_onset_s": _as_float(cached.get("tactile_drive_onset_s"), default=tactile_onset_s),
+            "status": str(cached.get("tactile_latency_compensation_status") or ""),
+            "applied": _truthy(cached.get("tactile_latency_compensation_applied")),
+            "note": str(cached.get("tactile_latency_compensation_note") or ""),
+        }
         trial_rows.append(
             _segment_session_trial_row(
                 row,
@@ -1515,6 +1532,8 @@ def _segment_trial_rows_from_cache(
                 duration_s=duration_s,
                 looming_onset_s=looming_onset_s,
                 tactile_onset_s=tactile_onset_s,
+                tactile_drive_onset_s=float(tactile_compensation.get("drive_onset_s") or tactile_onset_s),
+                tactile_compensation=tactile_compensation,
             )
         )
         wav_infos.append(_wav_info(trial_path, sha256=trial_hash, label=trial_path.stem))
@@ -3010,15 +3029,21 @@ class SessionRunnerController:
             if sample_rate and int(rate) != sample_rate:
                 raise ValueError("Top-up block source rows contain mixed sample rates.")
             sample_rate = int(rate)
+            looming_onset_s = _segment_looming_onset_s(source_row)
+            tactile_onset_s = _segment_tactile_onset_s(source_row, looming_onset_s)
+            family = _segment_family(source_row)
+            data, tactile_compensation = _apply_tactile_drive_compensation(
+                data,
+                sample_rate=sample_rate,
+                family=family,
+                tactile_onset_s=tactile_onset_s,
+            )
             target_channels = max(target_channels, int(data.shape[1]))
             clips.append(data)
             duration_frames = int(data.shape[0])
             trial_start_sample = frame_cursor
             trial_end_sample = frame_cursor + duration_frames
             duration_s = float(duration_frames / sample_rate) if sample_rate else 0.0
-            looming_onset_s = _segment_looming_onset_s(source_row)
-            tactile_onset_s = _segment_tactile_onset_s(source_row, looming_onset_s)
-            family = _segment_family(source_row)
             source_uid = str(_row_value(source_row, "Trial_UID", "trial_uid", default=getattr(entry, "trial_uid", ""))).strip()
             source_block_csv = _resolve_relative_path(
                 _row_value(source_row, "Source_Block_CSV_Path", "source_block_csv_path", default=str(source_block.manifest_path)),
@@ -3051,6 +3076,8 @@ class SessionRunnerController:
                 duration_s=duration_s,
                 looming_onset_s=looming_onset_s,
                 tactile_onset_s=tactile_onset_s,
+                tactile_drive_onset_s=float(tactile_compensation.get("drive_onset_s") or tactile_onset_s),
+                tactile_compensation=tactile_compensation,
             )
             row["Trial_UID"] = f"{self.package.participant_id}_topup_B{block_index:02d}_T{trial_index:03d}_{role}"
             row["Block_Label"] = block_label
@@ -4354,6 +4381,81 @@ def _segment_tactile_onset_s(row: dict[str, Any], looming_onset_s: float) -> flo
     return round(max(0.0, looming_onset_s + soa_ms / 1000.0), 6)
 
 
+def _tactile_drive_onset_for_trial(family: str, tactile_onset_s: float) -> tuple[float, float]:
+    policy = woojer_tactile_latency_policy()
+    requested_ms = float(policy.get("compensation_ms") or 0.0)
+    if family not in {"audio_tactile", "baseline"} or requested_ms <= 0.0:
+        return max(0.0, float(tactile_onset_s)), 0.0
+    drive_onset_s = tactile_drive_onset_s(float(tactile_onset_s), requested_ms)
+    requested_samples_ms = max(0.0, (float(tactile_onset_s) - drive_onset_s) * 1000.0)
+    return round(drive_onset_s, 9), requested_samples_ms
+
+
+def _apply_tactile_drive_compensation(
+    data: Any,
+    *,
+    sample_rate: int,
+    family: str,
+    tactile_onset_s: float,
+) -> tuple[Any, dict[str, Any]]:
+    import numpy as np
+
+    drive_onset_s, requested_ms = _tactile_drive_onset_for_trial(family, tactile_onset_s)
+    policy = woojer_tactile_latency_policy()
+    result = {
+        "requested_compensation_ms": requested_ms,
+        "applied_compensation_ms": 0.0,
+        "drive_onset_s": max(0.0, float(tactile_onset_s)),
+        "status": policy.get("status", ""),
+        "applied": False,
+        "note": "",
+    }
+    if family not in {"audio_tactile", "baseline"}:
+        result["note"] = "no_tactile_trial"
+        return data, result
+    if requested_ms <= 0.0:
+        result["note"] = "compensation_disabled"
+        return data, result
+    if sample_rate <= 0 or getattr(data, "ndim", 0) != 2 or int(data.shape[1]) < 3:
+        result["note"] = "no_tactile_channel_available"
+        return data, result
+
+    nominal_sample = max(0, int(round(float(tactile_onset_s) * sample_rate)))
+    drive_sample = max(0, int(round(drive_onset_s * sample_rate)))
+    if drive_sample >= nominal_sample:
+        result["note"] = "no_advance_after_clamp"
+        return data, result
+    if nominal_sample >= int(data.shape[0]):
+        result["note"] = "nominal_onset_outside_trial_audio"
+        return data, result
+
+    source = np.asarray(data)
+    adjusted = np.array(source, copy=True)
+    tactile = np.array(source[:, 2], copy=True)
+    active = np.flatnonzero(np.abs(tactile) > 1.0e-7)
+    if active.size == 0:
+        result["note"] = "empty_tactile_channel"
+        return data, result
+    if int(active[-1]) < nominal_sample:
+        result["note"] = "tactile_signal_before_nominal_onset"
+        return data, result
+
+    shift = nominal_sample - drive_sample
+    shifted = np.zeros_like(tactile)
+    shifted[: max(0, len(tactile) - shift)] = tactile[shift:]
+    adjusted[:, 2] = shifted
+    applied_ms = shift / float(sample_rate) * 1000.0
+    result.update(
+        {
+            "applied_compensation_ms": applied_ms,
+            "drive_onset_s": drive_sample / float(sample_rate),
+            "applied": True,
+            "note": "tactile_channel_shifted_earlier",
+        }
+    )
+    return adjusted, result
+
+
 def _write_segment_protocol_schedule(path: Path, rows: list[dict[str, str]], participant_id: str, source_csv_path: Path) -> None:
     fieldnames = [
         "participant_id",
@@ -4433,6 +4535,15 @@ def _materialize_segment_block_wav(
         if sample_rate and int(rate) != sample_rate:
             raise ValueError(f"Segment 5 block contains mixed sample rates: {source_block_csv_path.name}")
         sample_rate = int(rate)
+        looming_onset_s = _segment_looming_onset_s(row)
+        tactile_onset_s = _segment_tactile_onset_s(row, looming_onset_s)
+        family = _segment_family(row)
+        data, tactile_compensation = _apply_tactile_drive_compensation(
+            data,
+            sample_rate=sample_rate,
+            family=family,
+            tactile_onset_s=tactile_onset_s,
+        )
         target_channels = max(target_channels, int(data.shape[1]))
         clips.append(data)
         wav_infos.append(_wav_info(trial_path, sha256=actual_hash, label=trial_path.stem))
@@ -4440,9 +4551,6 @@ def _materialize_segment_block_wav(
         trial_start_sample = frame_cursor
         trial_end_sample = frame_cursor + duration_frames
         duration_s = float(duration_frames / sample_rate) if sample_rate else 0.0
-        looming_onset_s = _segment_looming_onset_s(row)
-        tactile_onset_s = _segment_tactile_onset_s(row, looming_onset_s)
-        family = _segment_family(row)
         trial_rows.append(
             _segment_session_trial_row(
                 row,
@@ -4468,6 +4576,8 @@ def _materialize_segment_block_wav(
                 duration_s=duration_s,
                 looming_onset_s=looming_onset_s,
                 tactile_onset_s=tactile_onset_s,
+                tactile_drive_onset_s=float(tactile_compensation.get("drive_onset_s") or tactile_onset_s),
+                tactile_compensation=tactile_compensation,
             )
         )
         frame_cursor = trial_end_sample
@@ -4511,10 +4621,15 @@ def _segment_session_trial_row(
     duration_s: float,
     looming_onset_s: float,
     tactile_onset_s: float,
+    tactile_drive_onset_s: float,
+    tactile_compensation: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     trial_start_s = trial_start_sample / float(sample_rate)
     trial_end_s = trial_end_sample / float(sample_rate)
     response_window_onset_s = looming_onset_s if family in {"audio_tactile", "catch"} else tactile_onset_s
+    tactile_compensation = dict(tactile_compensation or {})
+    has_tactile = family in {"audio_tactile", "baseline"}
+    drive_onset_s = max(0.0, float(tactile_drive_onset_s))
     soa_ms = _row_value(source, "soa_ms", "SOA_ms", default="")
     row_label = str(_row_value(source, "row_label", "Row_Label", "Row", default="")).strip()
     trial_uid = f"{participant_id}_{phase}_B{output_block_index:02d}_T{trial_index:03d}_{_row_value(source, 'trial_pool_index', default=trial_index)}"
@@ -4557,6 +4672,17 @@ def _segment_session_trial_row(
         "Looming_Onset_Sample": int(round((trial_start_s + looming_onset_s) * sample_rate)) if family in {"audio_tactile", "catch"} else "",
         "Tactile_Onset_S": f"{tactile_onset_s:.9f}" if family in {"audio_tactile", "baseline"} else "",
         "Tactile_Onset_Sample": int(round((trial_start_s + tactile_onset_s) * sample_rate)) if family in {"audio_tactile", "baseline"} else "",
+        "Tactile_Drive_Onset_S": f"{drive_onset_s:.9f}" if has_tactile else "",
+        "Tactile_Drive_Onset_Sample": int(round((trial_start_s + drive_onset_s) * sample_rate)) if has_tactile else "",
+        "Tactile_Latency_Compensation_Requested_ms": (
+            f"{float(tactile_compensation.get('requested_compensation_ms') or 0.0):.3f}" if has_tactile else ""
+        ),
+        "Tactile_Latency_Compensation_Applied_ms": (
+            f"{float(tactile_compensation.get('applied_compensation_ms') or 0.0):.3f}" if has_tactile else ""
+        ),
+        "Tactile_Latency_Compensation_Status": str(tactile_compensation.get("status") or "") if has_tactile else "",
+        "Tactile_Latency_Compensation_Applied": bool(tactile_compensation.get("applied")) if has_tactile else "",
+        "Tactile_Latency_Compensation_Note": str(tactile_compensation.get("note") or "") if has_tactile else "",
         "Response_Window_Onset_S": f"{response_window_onset_s:.9f}",
         "Response_Window_Onset_Sample": int(round((trial_start_s + response_window_onset_s) * sample_rate)),
         "Trial_End_S": f"{trial_end_s:.9f}",
@@ -4609,6 +4735,13 @@ def _write_segment_block_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         "Looming_Onset_Sample",
         "Tactile_Onset_S",
         "Tactile_Onset_Sample",
+        "Tactile_Drive_Onset_S",
+        "Tactile_Drive_Onset_Sample",
+        "Tactile_Latency_Compensation_Requested_ms",
+        "Tactile_Latency_Compensation_Applied_ms",
+        "Tactile_Latency_Compensation_Status",
+        "Tactile_Latency_Compensation_Applied",
+        "Tactile_Latency_Compensation_Note",
         "Response_Window_Onset_S",
         "Response_Window_Onset_Sample",
         "Trial_End_S",
@@ -4935,6 +5068,7 @@ def _wav_info(path: Path, *, sha256: str = "", label: str = "") -> RenderedWav:
 
 def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> None:
     loudness_policy = normalize_loudness_policy(package.loudness_policy)
+    tactile_latency_policy = woojer_tactile_latency_policy()
     loudness_manifest_path = _loudness_manifest_path(package)
     source_wavs = [_json_ready(asdict(wav)) for wav in wavs]
     loudness_manifest = loudness_manifest_payload(
@@ -4983,6 +5117,7 @@ def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> Non
             "primary_response_source": "mouse_click event log plus optional LSL marker stream",
             "stimulus_anchor": "audio_sample_zero emitted by audio callback",
             "backup_trace": "optional local digital output evidence WAV; output 4 mirrors tactile on canonical 4-channel routes; input-4 wired loopback recording is opt-in and not Woojer mechanical onset",
+            "tactile_latency_compensation": _json_ready(tactile_latency_policy),
             "response_marker": {
                 "channel": "tactile output",
                 "gain": RESPONSE_MARKER_GAIN,

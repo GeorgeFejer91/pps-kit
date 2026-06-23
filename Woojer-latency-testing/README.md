@@ -95,3 +95,14 @@ woojer_loop_latency - direct_baseline_latency
 
 If the return signal is low, clipped, unstable, or missing pulses, fix wiring,
 levels, or device selection before interpreting latency numbers.
+
+## Current Runner Compensation
+
+The toolkit runner currently treats the measured Woojer-added audio-path delay
+as a provisional 23 ms compensation. During participant block preparation, the
+generated block WAV advances the tactile drive by 23 ms while leaving the
+nominal tactile onset fields unchanged for SOA and RT interpretation. With the
+baseline 100 ms nominal tactile reference, the prepared Woojer drive starts at
+77 ms. Override this only for local calibration work with
+`PPS_WOOJER_TACTILE_COMPENSATION_MS`; this remains an audio-path estimate, not a
+mechanical vibration-onset measurement.

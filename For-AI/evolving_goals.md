@@ -5,6 +5,7 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 ## 2026-06-23
 
 - Added the isolated `Woojer-latency-testing/` workflow for Woojer audio pass-through latency stress testing. The folder is intentionally outside `validation_protocols/` and outside toolkit runtime functionality. Its script generates safe Output-3 pulse trains, records the selected Komplete input over the native ASIO full-duplex route, writes JSON/CSV/Markdown reports under ignored local `runs/`, optionally appends the tracked LaTeX stress log, and reports Woojer-added audio latency when a direct baseline run is supplied. This is explicitly an audio pass-through measurement only, not Woojer mechanical vibration onset or participant perception evidence.
+- Added a provisional Woojer tactile-drive compensation to participant block preparation. The current default advances the prepared tactile drive by 23 ms, based on the Woojer audio-path loopback estimate, while preserving nominal `Tactile_Onset_*` timing for SOA/RT semantics. Generated Segment 6 participant block CSVs and top-up block CSVs now include `Tactile_Drive_Onset_*` plus requested/applied compensation metadata; a 100 ms nominal tactile reference becomes a 77 ms drive onset by default. The value can be overridden with `PPS_WOOJER_TACTILE_COMPENSATION_MS` for local calibration, and remains provisional because Woojer mechanical vibration onset was not measured.
 
 ## 2026-06-21
 

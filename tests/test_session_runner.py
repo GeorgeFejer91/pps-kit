@@ -330,6 +330,73 @@ def test_prepare_segment_run_package_uses_segment5_and_segment6_csvs(tmp_path: P
     assert manifest["source_run_setup_manifest_path"] == str(run_manifest)
 
 
+def test_prepare_segment_run_package_advances_woojer_tactile_drive_in_block_wav(tmp_path: Path):
+    run_manifest = _segment_run_setup_fixture(tmp_path)
+    block_csv = run_manifest.parent.parent / "5_block_csv_preview" / "block_01_final.csv"
+    sample_rate = 44100
+    nominal_onset_s = 0.100
+    cue_duration_s = 0.100
+    target = tmp_path / "target_100ms_tactile.wav"
+    target_audio = np.zeros((int(round(0.250 * sample_rate)), 3), dtype=np.float32)
+    target_audio[:, 0] = 0.05
+    target_audio[:, 1] = 0.02
+    cue_start = int(round(nominal_onset_s * sample_rate))
+    cue_end = cue_start + int(round(cue_duration_s * sample_rate))
+    target_audio[cue_start:cue_end, 2] = 0.25
+    sf.write(target, target_audio, sample_rate)
+
+    with block_csv.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        rows = list(reader)
+        fieldnames = list(reader.fieldnames or [])
+    rows[0].update(
+        {
+            "soa_ms": "100",
+            "source_file_name": target.name,
+            "trial_file_path": str(target),
+            "source_sha256": _sha256(target),
+            "duration_ms": "250",
+            "duration_s": "0.25",
+            "looming_segment_onset_s": "0.000",
+            "tactile_onset_s": f"{nominal_onset_s:.3f}",
+        }
+    )
+    with block_csv.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    package = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=tmp_path / "sessions",
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+        use_block_cache=False,
+    )
+
+    block_audio, rate = sf.read(package.blocks[0].wav_path, always_2d=True)
+    assert rate == sample_rate
+    tactile_active = np.flatnonzero(np.abs(block_audio[:, 2]) > 0.05)
+    assert tactile_active.size > 0
+    assert tactile_active[0] == pytest.approx(int(round(0.077 * sample_rate)), abs=1)
+
+    with package.blocks[0].manifest_path.open(newline="", encoding="utf-8") as handle:
+        prepared_rows = list(csv.DictReader(handle))
+    prepared = prepared_rows[0]
+    assert float(prepared["Tactile_Onset_S"]) == pytest.approx(0.100)
+    assert int(prepared["Tactile_Onset_Sample"]) == int(round(0.100 * sample_rate))
+    assert float(prepared["Tactile_Drive_Onset_S"]) == pytest.approx(0.077, abs=1 / sample_rate)
+    assert int(prepared["Tactile_Drive_Onset_Sample"]) == pytest.approx(int(round(0.077 * sample_rate)), abs=1)
+    assert float(prepared["Tactile_Latency_Compensation_Requested_ms"]) == pytest.approx(23.0)
+    assert float(prepared["Tactile_Latency_Compensation_Applied_ms"]) == pytest.approx(23.0, abs=0.03)
+    assert prepared["Tactile_Latency_Compensation_Status"] == "provisional_woojer_audio_path_not_mechanical_onset"
+
+    manifest = json.loads(package.manifest_path.read_text(encoding="utf-8"))
+    policy = manifest["timing"]["tactile_latency_compensation"]
+    assert policy["compensation_ms"] == pytest.approx(23.0)
+    assert policy["example_compensated_drive_onset_ms"] == pytest.approx(77.0)
+
+
 def test_prepare_segment_run_package_reports_progress_and_reuses_block_cache(tmp_path: Path):
     run_manifest = _segment_run_setup_fixture(tmp_path)
     cache_root = tmp_path / "block_cache"

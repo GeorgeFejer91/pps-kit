@@ -11,6 +11,15 @@ This toolkit packages the audio-tactile peripersonal-space task used for Study 5
 - tactile SOAs: 0, 300, 800, 1500, 2200, 2700 ms
 - looming approach: 110 cm to 10 cm over 3 s, embedded in a 4 s stimulus window
 
+Prepared participant block WAVs apply a provisional Woojer audio-path
+compensation: the tactile drive on channel 3 is emitted 23 ms before the
+nominal tactile onset. For the common 100 ms nominal reference point, the
+prepared drive begins at 77 ms. Block CSVs keep `Tactile_Onset_*` as the
+intended/estimated tactile event for SOA and RT semantics, and add
+`Tactile_Drive_Onset_*` plus compensation metadata for the earlier audio
+command. This is based on Woojer audio pass-through loopback only, not measured
+mechanical vibration onset.
+
 ## Trial Families
 
 - audio-tactile trials: looming noise plus tactile cue

@@ -53,8 +53,16 @@ Initial scaffold & planned & no hardware run yet & -- & -- & -- & pending \\
 
 \section{Open Notes}
 
-No hardware Woojer audio pass-through run has been recorded yet in this
-tracked log. Generated WAVs, captures, JSON reports, and run folders are local
-artifacts and should remain ignored.
+The current successful wired Woojer-loop observations used Komplete Output 4
+as the working drive route and Komplete Input 3 as the return route, with
+roughly 56.86 ms combined loop latency. Subtracting the earlier Komplete
+electrical baseline gives a provisional Woojer-added audio-path estimate of
+about 23 ms. This estimate is now used by the runner as a provisional prepared
+block-WAV compensation: nominal tactile timing remains unchanged in
+\texttt{Tactile\_Onset\_*}, while the tactile drive is emitted 23 ms earlier
+and documented in \texttt{Tactile\_Drive\_Onset\_*}. This remains an audio-path
+proxy and not a mechanical vibration-onset measurement. Generated WAVs,
+captures, JSON reports, and run folders are local artifacts and should remain
+ignored.
 
 \end{document}

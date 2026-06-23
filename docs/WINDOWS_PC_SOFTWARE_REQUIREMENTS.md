@@ -153,6 +153,15 @@ Electrical channel-3 timing is not mechanical vibration onset. Mechanical
 Woojer onset requires an external vibration sensor, accelerometer, or contact
 microphone and the corresponding sensor driver/software.
 
+Participant block preparation currently applies a provisional 23 ms Woojer
+audio-path compensation. The prepared block WAV advances the tactile drive
+relative to the nominal tactile event, so a 100 ms nominal tactile reference is
+written as a 77 ms drive onset. Session block CSVs preserve the nominal
+`Tactile_Onset_*` fields and add `Tactile_Drive_Onset_*` plus compensation
+metadata. Override the provisional value only for a local calibration run with
+`PPS_WOOJER_TACTILE_COMPENSATION_MS`; do not describe this value as mechanical
+vibration onset without a sensor measurement.
+
 ## Verification Commands
 
 Run the machine-readable PC audit:
