@@ -328,6 +328,7 @@ def test_prepare_segment_run_package_uses_segment5_and_segment6_csvs(tmp_path: P
     manifest = json.loads(package.manifest_path.read_text(encoding="utf-8"))
     assert manifest["execution_mode"] == "participant_block_wavs"
     assert manifest["source_run_setup_manifest_path"] == str(run_manifest)
+    assert manifest["source_run_setup_sha256"] == _sha256(run_manifest)
 
 
 def test_prepare_segment_run_package_advances_woojer_tactile_drive_in_block_wav(tmp_path: Path):
@@ -609,6 +610,51 @@ def test_prepared_session_asset_status_reports_ready_and_generated_packages(tmp_
     assert missing["generated"] is False
     assert missing["status"] == "not_generated"
     assert "missing" in missing["message"].lower()
+
+
+def test_prepared_session_status_rejects_stale_source_block_csv(tmp_path: Path):
+    run_manifest = _segment_run_setup_fixture(tmp_path)
+    session_root = tmp_path / "sessions"
+    state_root = tmp_path / "state"
+    package = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=session_root,
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+    record_prepared_session_queue(
+        participant_id="P001",
+        run_setup_manifest_path=run_manifest,
+        session_manifest_path=package.manifest_path,
+        status="ready",
+        state_root=state_root,
+    )
+
+    block_csv = run_manifest.parent.parent / "5_block_csv_preview" / "block_01_final.csv"
+    with block_csv.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        rows = list(reader)
+        fieldnames = list(reader.fieldnames or [])
+    rows[0]["noise_type"] = "white"
+    with block_csv.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    stale_status = prepared_session_asset_status(
+        run_manifest,
+        "P001",
+        state_root=state_root,
+        session_root=session_root,
+    )
+
+    assert stale_status["generated"] is False
+    assert stale_status["status"] == "not_generated"
+    assert "source CSV changed" in stale_status["message"]
+    assert claim_prepared_session(run_manifest, "P001", state_root=state_root, session_root=session_root) is None
+    queue = json.loads((state_root / "prepared_session_queue.v1.json").read_text(encoding="utf-8"))
+    assert queue["entries"][-1]["status"] == "stale"
+    assert "source CSV changed" in queue["entries"][-1]["message"]
 
 
 def test_run_playback_numbering_places_topups_in_play_order():

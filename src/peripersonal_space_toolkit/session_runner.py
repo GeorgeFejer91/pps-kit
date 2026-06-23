@@ -1014,6 +1014,17 @@ def claim_prepared_session(
             entry["updated_at"] = datetime.now().isoformat(timespec="seconds")
             changed = True
             continue
+        current, message = prepared_session_manifest_current_status(
+            manifest_path,
+            run_setup_manifest_path=run_setup,
+            participant_id=participant,
+        )
+        if not current:
+            entry["status"] = "stale"
+            entry["message"] = message
+            entry["updated_at"] = datetime.now().isoformat(timespec="seconds")
+            changed = True
+            continue
         entry["status"] = "claimed"
         entry["claimed_at"] = datetime.now().isoformat(timespec="seconds")
         entry["updated_at"] = entry["claimed_at"]
@@ -1093,7 +1104,7 @@ def prepared_session_asset_status(
                 }
             fallback_message = message
 
-    scanned = _scan_prepared_session_manifest(run_setup, participant, session_root=session_root)
+    scanned, scanned_message = _scan_prepared_session_manifest(run_setup, participant, session_root=session_root)
     if scanned is not None:
         manifest_path, message = scanned
         return {
@@ -1105,6 +1116,8 @@ def prepared_session_asset_status(
             "source": "session_scan",
             **data_status,
         }
+    if scanned_message:
+        fallback_message = fallback_message or scanned_message
 
     return {
         "participant_id": participant,
@@ -1150,17 +1163,32 @@ def _prepared_session_manifest_ready_for_run_setup(
     run_setup_manifest_path: Path,
     participant_id: str,
 ) -> tuple[bool, str]:
+    return prepared_session_manifest_current_status(
+        manifest_path,
+        run_setup_manifest_path=run_setup_manifest_path,
+        participant_id=participant_id,
+    )
+
+
+def prepared_session_manifest_current_status(
+    manifest_path: Path,
+    *,
+    run_setup_manifest_path: Path | None = None,
+    participant_id: str | None = None,
+) -> tuple[bool, str]:
     if not manifest_path or not _path_exists(manifest_path):
         return False, "Prepared session manifest is missing."
     try:
         package = load_run_package(manifest_path)
     except Exception as exc:
         return False, str(exc)
-    if package.participant_id != participant_id:
+    if participant_id is not None and package.participant_id != participant_id:
         return False, "Prepared session participant does not match."
     source_path = package.source_run_setup_manifest_path
-    if source_path is None or Path(source_path).resolve() != Path(run_setup_manifest_path).resolve():
-        return False, "Prepared session belongs to a different run setup."
+    requested_run_setup = Path(run_setup_manifest_path) if run_setup_manifest_path is not None else source_path
+    if run_setup_manifest_path is not None:
+        if source_path is None or Path(source_path).resolve() != Path(run_setup_manifest_path).resolve():
+            return False, "Prepared session belongs to a different run setup."
     if not package.blocks:
         return False, "Prepared session has no blocks."
     for block in package.blocks:
@@ -1170,6 +1198,45 @@ def _prepared_session_manifest_ready_for_run_setup(
             return False, f"Prepared block WAV is missing: {wav_path}"
         if not _path_exists(manifest):
             return False, f"Prepared block manifest is missing: {manifest}"
+    return _prepared_session_sources_current(package, requested_run_setup)
+
+
+def _prepared_session_sources_current(package: RunPackage, run_setup_manifest_path: Path | None) -> tuple[bool, str]:
+    if package.execution_mode != "participant_block_wavs":
+        return True, "Prepared local audio package is available."
+    if run_setup_manifest_path is None or not _path_exists(run_setup_manifest_path):
+        return False, "Prepared session source run setup is missing."
+
+    manifest = _load_json(package.manifest_path)
+    recorded_run_hash = str(manifest.get("source_run_setup_sha256") or "").strip()
+    current_run_hash = _sha256_file(run_setup_manifest_path)
+    if not recorded_run_hash:
+        return False, "Prepared session was created before source-hash tracking; regenerate audio assets."
+    if recorded_run_hash != current_run_hash:
+        return False, "Prepared session is stale because the Segment 6 run setup changed."
+
+    for block in package.blocks:
+        metadata = dict(block.metadata or {})
+        if bool(metadata.get("is_topup_block")):
+            continue
+        source_text = str(metadata.get("source_block_csv_path") or "").strip()
+        recorded_source_hash = str(metadata.get("source_block_csv_sha256") or "").strip()
+        if not source_text or not recorded_source_hash:
+            return False, f"Prepared block {block.index} lacks source CSV provenance; regenerate audio assets."
+        source_csv = _resolve_relative_path(source_text, Path(run_setup_manifest_path).parent)
+        if not _path_exists(source_csv):
+            return False, f"Prepared block source CSV is missing: {source_csv}"
+        if _sha256_file(source_csv) != recorded_source_hash:
+            return False, f"Prepared block {block.index} is stale because the source CSV changed: {source_csv}"
+        try:
+            source_rows = _read_csv_rows(source_csv)
+        except Exception as exc:
+            return False, f"Prepared block source CSV cannot be read: {exc}"
+        if len(source_rows) != int(block.trial_count):
+            return False, (
+                f"Prepared block {block.index} trial count is stale: "
+                f"{block.trial_count} prepared vs {len(source_rows)} source rows."
+            )
     return True, "Prepared local audio package is available."
 
 
@@ -1178,10 +1245,10 @@ def _scan_prepared_session_manifest(
     participant_id: str,
     *,
     session_root: Path = DEFAULT_SESSION_ROOT,
-) -> tuple[Path, str] | None:
+) -> tuple[tuple[Path, str] | None, str]:
     root = Path(session_root)
     if not _path_exists(root):
-        return None
+        return None, ""
     candidates = [
         *output_runner_logs_dir(root).glob(f"{participant_id}_*/session_manifest.json"),
         *root.glob(f"{participant_id}_*/session_manifest.json"),
@@ -1191,11 +1258,14 @@ def _scan_prepared_session_manifest(
         key=lambda path: path.stat().st_mtime if _path_exists(path) else 0.0,
         reverse=True,
     )
+    last_message = ""
     for manifest_path in candidates:
         valid, message = _prepared_session_manifest_ready_for_run_setup(manifest_path, run_setup_manifest_path, participant_id)
         if valid:
-            return manifest_path, message
-    return None
+            return (manifest_path, message), ""
+        if message:
+            last_message = message
+    return None, last_message
 
 
 def _path_is_within(path: Path, root: Path) -> bool:
@@ -5096,6 +5166,11 @@ def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> Non
         "data_analytics_dir": str(_package_analytics_dir(package)),
         "execution_mode": package.execution_mode,
         "source_run_setup_manifest_path": str(package.source_run_setup_manifest_path) if package.source_run_setup_manifest_path else "",
+        "source_run_setup_sha256": (
+            _sha256_file(package.source_run_setup_manifest_path)
+            if package.source_run_setup_manifest_path and _path_exists(package.source_run_setup_manifest_path)
+            else ""
+        ),
         "audio_route": {
             "preferred_device": PREFERRED_AUDIO_ROUTE,
             "channels": 3,

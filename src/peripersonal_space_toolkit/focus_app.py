@@ -98,6 +98,7 @@ from .session_runner import (
     load_run_package,
     next_segment_participant,
     prepare_segment_run_package,
+    prepared_session_manifest_current_status,
     prepared_session_asset_status,
     prepared_session_asset_statuses,
     record_experiment_activity,
@@ -3789,7 +3790,12 @@ def _is_launchable_session_manifest(path: Path) -> bool:
         package = load_run_package(path)
     except Exception:
         return False
-    return bool(package.blocks)
+    if not package.blocks:
+        return False
+    if package.source_run_setup_manifest_path is None:
+        return True
+    current, _message = prepared_session_manifest_current_status(path)
+    return current
 
 
 def _path_is_inside_root(path: Path, root: Path) -> bool:
