@@ -258,6 +258,59 @@ def test_unpublished_study5_template_preloads_breathing_assets_and_filmstrip():
     assert all("instruction | " in row["sequence_labels"] for row in rows)
 
 
+def test_study5_instruction_transcript_library_covers_original_instruction_assets():
+    root = Path(__file__).resolve().parents[1]
+    library_path = (
+        root
+        / "assets"
+        / "preloads"
+        / DEFAULT_STUDY_TEMPLATE_ID
+        / "05_run_setup"
+        / "instruction_transcript_library.json"
+    )
+    library = json.loads(library_path.read_text(encoding="utf-8"))
+
+    assert library["schema"] == "pps-study5-instruction-transcript-library.v1"
+    assert library["template_id"] == DEFAULT_STUDY_TEMPLATE_ID
+    assert library["source_variant"] == "original_study5"
+
+    entries = library["entries"]
+    assert len(entries) == 7
+    run_level_slots = {
+        entry["slot"]
+        for entry in entries
+        if entry["category"] == "run_level_instruction"
+    }
+    assert run_level_slots == {
+        "before_experiment",
+        "before_each_block",
+        "after_each_block",
+        "between_conditions",
+        "after_experiment",
+    }
+    trial_phases = {
+        entry["trial_phase"]
+        for entry in entries
+        if entry["category"] == "within_trial_instruction"
+    }
+    assert trial_phases == {"Inhale", "Exhale"}
+
+    general = next(entry for entry in entries if entry["slot"] == "before_experiment")
+    assert "During this experiment" in general["transcript_text"]
+    assert "press the mouse button" in general["transcript_text"]
+    assert len(general["segments"]) >= 10
+
+    manifest = json.loads(
+        (root / library["source_manifest"]).read_text(encoding="utf-8")
+    )
+    manifest_files = manifest["files"]
+    for entry in entries:
+        audio_name = Path(entry["source_audio"]).name
+        assert audio_name in manifest_files
+        assert entry["sha256"] == manifest_files[audio_name]["sha256"]
+        assert entry["transcript_text"].strip()
+
+
 def test_study5_profile_keeps_trial_budget_with_two_sources():
     root = Path(__file__).resolve().parents[1]
     template = _study5_template()
