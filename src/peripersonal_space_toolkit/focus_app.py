@@ -1886,11 +1886,23 @@ def _create_focus_mode_dialog(q: dict[str, Any], owner: Any) -> Any:
                     handler(watched, event)
             return False
 
+        def _restore_locked_geometry(self) -> None:
+            if not bool(getattr(owner, "_experiment_window_locked", False)):
+                return
+            restore = getattr(owner, "_restore_locked_experiment_window_geometry", None)
+            if callable(restore):
+                restore()
+
+        def moveEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
+            super().moveEvent(event)
+            self._restore_locked_geometry()
+
         def resizeEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
             super().resizeEvent(event)
             schedule_clamp = getattr(owner, "_schedule_experiment_control_splitter_clamp", None)
             if callable(schedule_clamp):
                 schedule_clamp()
+            self._restore_locked_geometry()
 
     return FocusModeDialog()
 
@@ -6187,6 +6199,12 @@ class FocusModeWindow:
         self.analysis_review_dialog: AnalysisReviewDialog | None = None
         self.primary_action_shortcuts: list[Any] = []
         self.operator_action_shortcuts: dict[str, list[Any]] = {}
+        self._experiment_window_locked = False
+        self._experiment_window_lock_restoring = False
+        self._experiment_window_locked_geometry: Any | None = None
+        self._experiment_window_locked_window_state: Any | None = None
+        self._experiment_window_previous_minimum_size: Any | None = None
+        self._experiment_window_previous_maximum_size: Any | None = None
         self.all_block_plan_items: list[dict[str, Any]] = []
         self.block_plan_items: list[dict[str, Any]] = []
         self.instruction_plan_items: list[dict[str, Any]] = []
@@ -8194,6 +8212,82 @@ class FocusModeWindow:
             if button is not None:
                 button.setEnabled(enabled)
 
+    def _window_geometry_payload(self, geometry: Any | None = None) -> dict[str, int]:
+        rect = geometry if geometry is not None else self.dialog.geometry()
+        return {
+            "x": int(rect.x()),
+            "y": int(rect.y()),
+            "width": int(rect.width()),
+            "height": int(rect.height()),
+        }
+
+    def _experiment_window_lock_snapshot(self) -> dict[str, Any]:
+        locked_geometry = self._experiment_window_locked_geometry
+        payload: dict[str, Any] = {
+            "active": bool(self._experiment_window_locked),
+            "current_geometry": self._window_geometry_payload(),
+        }
+        if locked_geometry is not None:
+            payload["locked_geometry"] = self._window_geometry_payload(locked_geometry)
+        if self._experiment_window_locked_window_state is not None:
+            payload["locked_window_state"] = str(self._experiment_window_locked_window_state)
+        return payload
+
+    def _lock_experiment_window_geometry(self) -> None:
+        if self._experiment_window_locked:
+            self._restore_locked_experiment_window_geometry()
+            return
+        self._experiment_window_locked_geometry = self.dialog.geometry()
+        self._experiment_window_locked_window_state = self.dialog.windowState()
+        self._experiment_window_previous_minimum_size = self.dialog.minimumSize()
+        self._experiment_window_previous_maximum_size = self.dialog.maximumSize()
+        self._experiment_window_locked = True
+        if hasattr(self.dialog, "setSizeGripEnabled"):
+            self.dialog.setSizeGripEnabled(False)
+        self.dialog.setFixedSize(self._experiment_window_locked_geometry.size())
+        self._restore_locked_experiment_window_geometry()
+        _append_output_diary_event(
+            "focus_window_geometry_locked",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            payload=self._experiment_window_lock_snapshot(),
+            create=True,
+        )
+
+    def _restore_locked_experiment_window_geometry(self) -> None:
+        if not self._experiment_window_locked or self._experiment_window_lock_restoring:
+            return
+        locked_geometry = self._experiment_window_locked_geometry
+        if locked_geometry is None:
+            return
+        self._experiment_window_lock_restoring = True
+        try:
+            locked_state = self._experiment_window_locked_window_state
+            if locked_state is not None and self.dialog.windowState() != locked_state:
+                self.dialog.setWindowState(locked_state)
+            if self.dialog.geometry() != locked_geometry:
+                self.dialog.setGeometry(locked_geometry)
+        finally:
+            self._experiment_window_lock_restoring = False
+
+    def _unlock_experiment_window_geometry(self) -> None:
+        if not self._experiment_window_locked and self._experiment_window_previous_minimum_size is None:
+            return
+        self._experiment_window_locked = False
+        self._experiment_window_lock_restoring = False
+        previous_maximum = self._experiment_window_previous_maximum_size
+        previous_minimum = self._experiment_window_previous_minimum_size
+        if previous_maximum is not None:
+            self.dialog.setMaximumSize(previous_maximum)
+        if previous_minimum is not None:
+            self.dialog.setMinimumSize(previous_minimum)
+        if hasattr(self.dialog, "setSizeGripEnabled"):
+            self.dialog.setSizeGripEnabled(True)
+        self._experiment_window_locked_geometry = None
+        self._experiment_window_locked_window_state = None
+        self._experiment_window_previous_minimum_size = None
+        self._experiment_window_previous_maximum_size = None
+
     def _output_test_engine(self) -> Any | None:
         controller_engine = getattr(self.controller, "audio_engine", None) if self.controller is not None else None
         engine = controller_engine or self._owned_audio_engine
@@ -8715,6 +8809,7 @@ class FocusModeWindow:
             "splitters": splitter_metrics,
             "timeline_debug": timeline_debug,
             "experiment_control_debug": experiment_control_debug,
+            "experiment_window_lock": self._experiment_window_lock_snapshot(),
             "keyboard_shortcuts": self.keyboard_shortcut_map(),
             "adaptive_mechanisms": {
                 "right_stack_mode": self.layout_profile.right_stack_mode,
@@ -8997,9 +9092,10 @@ class FocusModeWindow:
         self.stop_button.setEnabled(True)
         self.target_button.setEnabled(True)
         self._last_response_click_signature = None
-        self._refresh_target_global_bounds()
         self._run_active = True
         self._run_paused = False
+        self._lock_experiment_window_geometry()
+        self._refresh_target_global_bounds()
         self._start_global_response_click_listener()
         self.run_state_chip.setText("Running")
         self.progress_label.setText("Starting playback")
@@ -9547,6 +9643,7 @@ class FocusModeWindow:
         self._run_active = False
         self._run_paused = False
         self._stop_global_response_click_listener()
+        self._unlock_experiment_window_geometry()
         self.timeline_state.active = False
         if self.active_display_block_index is not None:
             self.completed_display_block_indices.add(int(self.active_display_block_index))

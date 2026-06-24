@@ -1936,6 +1936,104 @@ def test_focus_mode_hardware_start_injects_ui_thread_audio_engine(tmp_path: Path
     window.dialog.close()
 
 
+def test_focus_mode_start_click_locks_window_geometry_until_done(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    started = threading.Event()
+    release = threading.Event()
+
+    class FakeController:
+        def __init__(self, package_obj, *, capture_options=None, **_kwargs):
+            self.package = package_obj
+            self.capture_options = capture_options
+            self.audio_engine = SimpleNamespace()
+
+        def run(self, *, progress_callback=None, event_callback=None):
+            started.set()
+            assert release.wait(timeout=2)
+            return SimpleNamespace(
+                completed=True,
+                interrupted=False,
+                summary_text="done",
+                session_dir=self.package.session_dir,
+                events_csv=self.package.session_dir / "events.csv",
+                events_xdf=self.package.session_dir / "events.xdf",
+                lsl_markers_csv=None,
+                lsl_markers_xdf=None,
+                trigger_dictionary_path=None,
+                session_metadata_path=None,
+                recording_paths=[],
+                warnings=[],
+                capture_options={"write_analysis_csvs": False},
+            )
+
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+        controller_factory=FakeController,
+    )
+    window.dialog.show()
+    window.dialog.resize(900, 700)
+    app.processEvents()
+
+    _fill_required_setup(window)
+    assert window._submit_participant_setup()
+    assert window.start_button.isEnabled()
+    QTest.mouseClick(window.start_button, q["Qt"].MouseButton.LeftButton)
+    assert started.wait(timeout=2)
+    app.processEvents()
+
+    locked_geometry = window.dialog.geometry()
+    locked_size = locked_geometry.size()
+    lock_snapshot = window.layout_validation_snapshot()["experiment_window_lock"]
+    assert lock_snapshot["active"] is True
+    assert lock_snapshot["locked_geometry"] == {
+        "x": locked_geometry.x(),
+        "y": locked_geometry.y(),
+        "width": locked_geometry.width(),
+        "height": locked_geometry.height(),
+    }
+    assert window.dialog.minimumSize() == locked_size
+    assert window.dialog.maximumSize() == locked_size
+
+    window.dialog.setGeometry(
+        locked_geometry.x() + 40,
+        locked_geometry.y() + 25,
+        locked_geometry.width() + 30,
+        locked_geometry.height() + 30,
+    )
+    app.processEvents()
+    window._restore_locked_experiment_window_geometry()
+    app.processEvents()
+
+    assert window.dialog.geometry() == locked_geometry
+    assert window.layout_validation_snapshot()["experiment_window_lock"]["active"] is True
+
+    release.set()
+    assert window.thread is not None
+    window.thread.join(timeout=2)
+    assert not window.thread.is_alive()
+    window._drain()
+    app.processEvents()
+
+    assert window.result is not None
+    assert window.result.completed is True
+    assert window.layout_validation_snapshot()["experiment_window_lock"]["active"] is False
+    assert window.dialog.minimumSize().width() <= locked_size.width()
+    assert window.dialog.maximumSize().width() >= locked_size.width()
+    window.dialog.close()
+
+
 def test_focus_mode_opens_post_run_analysis_review_dialog(tmp_path: Path, monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     monkeypatch.delenv("PPS_FOCUS_DISABLE_ANALYSIS_POPUP", raising=False)
