@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import glob
 import json
 import os
 from pathlib import Path
@@ -34,7 +35,10 @@ from run_labrecorder_lsl_xdf_stress import (  # noqa: E402
     compare_xdf_to_local,
 )
 from peripersonal_space_toolkit.focus_app import initiate_data_collection_environment  # noqa: E402
-from peripersonal_space_toolkit.output_layout import output_validation_reports_dir  # noqa: E402
+from peripersonal_space_toolkit.output_layout import (  # noqa: E402
+    _filesystem_path,
+    output_validation_reports_dir,
+)
 from peripersonal_space_toolkit.session_runner import (  # noqa: E402
     SessionCaptureOptions,
     WIRED_LOOPBACK_CLI_OUTPUT4_TACTILE_PROXY,
@@ -53,9 +57,44 @@ def _default_desktop_output_parent() -> Path:
     return desktop if desktop.exists() else home
 
 
+def _mkdir(path: Path | str) -> None:
+    os.makedirs(_filesystem_path(Path(path)), exist_ok=True)
+
+
+def _path_is_file(path: Path | str) -> bool:
+    return os.path.isfile(_filesystem_path(Path(path)))
+
+
+def _path_is_dir(path: Path | str) -> bool:
+    return os.path.isdir(_filesystem_path(Path(path)))
+
+
+def _path_size(path: Path | str) -> int:
+    try:
+        return os.path.getsize(_filesystem_path(Path(path)))
+    except OSError:
+        return 0
+
+
+def _glob_files(directory: Path, pattern: str) -> list[Path]:
+    if not _path_is_dir(directory):
+        return []
+    return sorted(Path(item) for item in glob.glob(os.path.join(_filesystem_path(directory), pattern)))
+
+
+def _write_text(path: Path, text: str) -> None:
+    _mkdir(path.parent)
+    with open(_filesystem_path(path), "w", encoding="utf-8") as handle:
+        handle.write(text)
+
+
+def _read_text(path: Path) -> str:
+    with open(_filesystem_path(path), "r", encoding="utf-8") as handle:
+        return handle.read()
+
+
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(_json_ready(payload), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    _write_text(path, json.dumps(_json_ready(payload), indent=2, sort_keys=True) + "\n")
 
 
 def _json_ready(value: Any) -> Any:
@@ -69,18 +108,18 @@ def _json_ready(value: Any) -> Any:
 
 
 def _read_json(path: Path) -> dict[str, Any]:
-    if not path.is_file():
+    if not _path_is_file(path):
         return {}
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        return json.loads(_read_text(path))
     except Exception:
         return {}
 
 
 def _read_csv(path: Path) -> list[dict[str, str]]:
-    if not path.is_file():
+    if not _path_is_file(path):
         return []
-    with path.open(newline="", encoding="utf-8-sig") as handle:
+    with open(_filesystem_path(path), newline="", encoding="utf-8-sig") as handle:
         return list(csv.DictReader(handle))
 
 
@@ -226,9 +265,9 @@ def reconcile_external_labrecorder_xdf(
     stderr_path: Path,
 ) -> dict[str, Any]:
     output_dir = validation_dir / "external_labrecorder_reconciliation"
-    output_dir.mkdir(parents=True, exist_ok=True)
+    _mkdir(output_dir)
     paths = _session_output_paths(validation_dir)
-    if not xdf_path.is_file() or xdf_path.stat().st_size == 0:
+    if not _path_is_file(xdf_path) or _path_size(xdf_path) == 0:
         report = {
             "schema": "pps-desktop-rehearsal-external-labrecorder.v1",
             "passed": False,
@@ -369,7 +408,7 @@ def _wired_loopback_event_summary(events_csv: Path) -> dict[str, Any]:
 
 
 def _wired_sidecar_summary(session_dir: Path) -> dict[str, Any]:
-    sidecars = sorted(session_dir.glob("*wired_loopback_input4.output_evidence.json")) if session_dir.is_dir() else []
+    sidecars = _glob_files(session_dir, "*wired_loopback_input4.output_evidence.json")
     records: list[dict[str, Any]] = []
     healthy_count = 0
     signaled_count = 0
@@ -389,8 +428,8 @@ def _wired_sidecar_summary(session_dir: Path) -> dict[str, Any]:
             signal_peak = max((float(value or 0.0) for value in peaks), default=0.0)
         healthy = (
             bool(payload.get("started"))
-            and wav_path.is_file()
-            and wav_path.stat().st_size > 80
+            and _path_is_file(wav_path)
+            and _path_size(wav_path) > 80
             and frames > 0
             and not interrupted
             and dropped == 0
@@ -448,7 +487,7 @@ def _write_cross_stream_markdown(path: Path, report: dict[str, Any]) -> None:
         lines.extend(["", "## Reports"])
         for key, value in paths.items():
             lines.append(f"- `{key}`: `{value}`")
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    _write_text(path, "\n".join(lines) + "\n")
 
 
 def cross_stream_reconciliation_report(
@@ -460,7 +499,7 @@ def cross_stream_reconciliation_report(
     wired_loopback_requested: bool,
 ) -> dict[str, Any]:
     output_dir = validation_dir / "cross_stream_reconciliation"
-    output_dir.mkdir(parents=True, exist_ok=True)
+    _mkdir(output_dir)
     readiness = harness_report.get("readiness_audit") if isinstance(harness_report.get("readiness_audit"), dict) else {}
     paths = _session_output_paths(validation_dir)
     session_dir = paths["session_dir"]
@@ -472,13 +511,15 @@ def cross_stream_reconciliation_report(
     expected_played_blocks = int(expected_counts.get("block_start") or event_counts.get("block_start") or 0)
     audio_evidence = readiness.get("audio_evidence") if isinstance(readiness.get("audio_evidence"), dict) else {}
     audio_evidence_wav_count = int(audio_evidence.get("record_count") or 0)
-    if audio_evidence_wav_count <= 0 and session_dir.is_dir():
-        audio_evidence_wav_count = len(sorted(session_dir.glob("*audio_evidence.wav")))
-    wired_loopback_wav_count = len(sorted(session_dir.glob("*wired_loopback_input4.wav"))) if session_dir.is_dir() else 0
+    if audio_evidence_wav_count <= 0 and _path_is_dir(session_dir):
+        audio_evidence_wav_count = len(_glob_files(session_dir, "*audio_evidence.wav"))
+    wired_loopback_wav_count = len(_glob_files(session_dir, "*wired_loopback_input4.wav"))
     wired_events = _wired_loopback_event_summary(paths["events_csv"])
     wired_sidecars = _wired_sidecar_summary(session_dir)
     external_checked = bool(external_report.get("checked"))
-    external_file_ok = bool(external_report.get("passed")) and Path(str(external_report.get("xdf_path") or "")).is_file()
+    external_file_ok = bool(external_report.get("passed")) and _path_is_file(
+        Path(str(external_report.get("xdf_path") or ""))
+    )
     external_returncode = external_report.get("labrecorder_returncode")
     external_stop_error = str(external_report.get("labrecorder_stop_error") or "").strip()
     external_mode = str(external_report.get("labrecorder_mode") or "").strip().lower()
@@ -612,15 +653,15 @@ def _write_markdown_report(path: Path, report: dict[str, Any]) -> None:
         lines.extend(["", "## Limitations", ""])
         for limitation in limitations:
             lines.append(f"- {limitation}")
-    path.write_text("\n".join(line for line in lines if line != "") + "\n", encoding="utf-8")
+    _write_text(path, "\n".join(line for line in lines if line != "") + "\n")
 
 
 def run_rehearsal(args: argparse.Namespace) -> dict[str, Any]:
     parent = Path(args.desktop_output_parent).expanduser()
-    if not parent.is_dir():
+    if not _path_is_dir(parent):
         raise ValueError(f"Desktop output parent does not exist: {parent}")
     runner = Path(args.runner).expanduser()
-    if args.runner_mode == "packaged" and not runner.is_file():
+    if args.runner_mode == "packaged" and not _path_is_file(runner):
         raise FileNotFoundError(f"Packaged runner exe was not found: {runner}")
     if args.wired_loopback != WIRED_LOOPBACK_OFF and args.audio_mode != "hardware":
         raise ValueError("Wired loopback rehearsal requires --audio-mode hardware.")
@@ -640,7 +681,7 @@ def run_rehearsal(args: argparse.Namespace) -> dict[str, Any]:
     environment_root = Path(environment["environment_root"]).resolve()
     stamp = time.strftime("%Y%m%d_%H%M%S")
     validation_dir = output_validation_reports_dir(environment_root) / f"mock_rehearsal_{stamp}"
-    validation_dir.mkdir(parents=True, exist_ok=True)
+    _mkdir(validation_dir)
 
     labrecorder_command: list[str] = []
     labrecorder_returncode: int | None = None
