@@ -18,6 +18,12 @@ from types import SimpleNamespace
 from typing import Any, Callable
 
 from .app_assets import apply_qt_app_icon, set_windows_app_user_model_id
+from .analysis_catalog import (
+    DATASET_KIND_POOL,
+    load_analysis_dataset,
+    refresh_analysis_catalog,
+    selected_dataset_id_for_participant,
+)
 from .audio_routing import (
     NI_KOMPLETE_AUDIO_DRIVER_INSTALL_GUIDE_URL,
     NI_KOMPLETE_AUDIO_DRIVER_PAGE_URL,
@@ -2457,9 +2463,20 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
 class AnalysisReviewDialog:
     """Read-only post-run model-fit review dialog."""
 
-    def __init__(self, q: dict[str, Any], parent: Any, data: Any) -> None:
+    def __init__(
+        self,
+        q: dict[str, Any],
+        parent: Any,
+        data: Any,
+        *,
+        dataset_entries: list[dict[str, Any]] | None = None,
+        selected_dataset_id: str = "",
+    ) -> None:
         self.q = q
         self.data = data
+        self.dataset_entries = list(dataset_entries or [])
+        self.current_dataset_id = str(selected_dataset_id or getattr(data, "dataset_id", "") or "")
+        self._dataset_combo_updating = False
         self.current_part_mode = data.default_part_mode
         self.current_view = VIEW_DATA_BEHAVIOR
         self.current_condition_lens = default_condition_lens(data)
@@ -2636,6 +2653,18 @@ QTextEdit#analysisDetailsText {
         subtitle.setObjectName("mutedLabel")
         subtitle.setWordWrap(True)
         root.addWidget(subtitle)
+
+        dataset_row = q["QHBoxLayout"]()
+        dataset_row.setContentsMargins(0, 0, 0, 0)
+        dataset_row.setSpacing(8)
+        dataset_row.addWidget(q["QLabel"]("Dataset"))
+        self.dataset_combo = q["QComboBox"]()
+        self.dataset_combo.setObjectName("analysisDatasetCombo")
+        self.dataset_combo.setMinimumWidth(260)
+        self._populate_dataset_combo()
+        self.dataset_combo.currentIndexChanged.connect(self._dataset_selection_changed)
+        dataset_row.addWidget(self.dataset_combo, 1)
+        root.addLayout(dataset_row)
 
         quality_row = q["QHBoxLayout"]()
         quality_row.setContentsMargins(0, 0, 0, 0)
@@ -2866,6 +2895,65 @@ QTextEdit#analysisDetailsText {
         self._populate_overview_table()
         self._refresh_quick_button_styles()
 
+    def _populate_dataset_combo(self) -> None:
+        if not hasattr(self, "dataset_combo"):
+            return
+        entries = self.dataset_entries or [
+            {
+                "dataset_id": self.current_dataset_id or getattr(self.data, "dataset_id", "") or "current",
+                "dataset_label": getattr(self.data, "dataset_label", "") or "Current participant",
+                "dataset_kind": getattr(self.data, "dataset_kind", "") or "participant",
+            }
+        ]
+        self._dataset_combo_updating = True
+        try:
+            self.dataset_combo.blockSignals(True)
+            self.dataset_combo.clear()
+            for entry in entries:
+                dataset_id = str(entry.get("dataset_id") or "")
+                self.dataset_combo.addItem(self._dataset_entry_label(entry), dataset_id)
+            current = self.current_dataset_id or str(getattr(self.data, "dataset_id", "") or "")
+            index = self.dataset_combo.findData(current)
+            self.dataset_combo.setCurrentIndex(index if index >= 0 else 0)
+        finally:
+            self.dataset_combo.blockSignals(False)
+            self._dataset_combo_updating = False
+
+    def _dataset_entry_label(self, entry: dict[str, Any]) -> str:
+        label = str(entry.get("dataset_label") or "").strip() or "Dataset"
+        quality = str(entry.get("quality_status") or "").strip().upper()
+        if str(entry.get("dataset_kind") or "") == DATASET_KIND_POOL:
+            return label
+        return f"{label} ({quality})" if quality else label
+
+    def _dataset_selection_changed(self, _index: int) -> None:
+        if self._dataset_combo_updating:
+            return
+        dataset_id = str(self.dataset_combo.currentData() or "").strip()
+        if not dataset_id or dataset_id == self.current_dataset_id:
+            return
+        entry = next((item for item in self.dataset_entries if str(item.get("dataset_id") or "") == dataset_id), None)
+        if entry is None:
+            return
+        try:
+            data = load_analysis_dataset(entry)
+        except Exception as exc:  # noqa: BLE001 - keep the existing dataset visible on load failure.
+            self.triage_hint.setText(f"Could not load selected analysis dataset: {exc}")
+            return
+        if not data.has_analysis_tables:
+            self.triage_hint.setText("Selected analysis dataset has no plotted analysis tables.")
+            return
+        self.data = data
+        self.current_dataset_id = dataset_id
+        self.current_part_mode = data.default_part_mode
+        self.current_condition_lens = default_condition_lens(data)
+        self.current_quick_model = default_condition_model(data)
+        self.quick_mode = True
+        self._reload_scopes_for_part_mode()
+        self._populate_overview_table()
+        self._refresh_quick_button_styles()
+        self._refresh()
+
     def _condition_button_tooltip(self, payload: dict[str, Any]) -> str:
         cues = []
         if payload.get("curve_separation_winner"):
@@ -2906,6 +2994,10 @@ QTextEdit#analysisDetailsText {
         condition_payloads = {str(row.get("lens") or ""): row for row in condition_lens_button_rows(self.data)}
         for lens, button in self.condition_lens_buttons.items():
             payload = condition_payloads.get(lens, {})
+            label = str(payload.get("label") or lens)
+            if button.text() != label:
+                button.setText(label)
+            button.setToolTip(self._condition_button_tooltip(payload))
             if button.isChecked() != (lens == self.current_condition_lens):
                 button.setChecked(lens == self.current_condition_lens)
             stripe = "#246b55" if payload.get("curve_separation_winner") else "#4b5fa8" if payload.get("boundary_shift_winner") else "#bcc7bd"
@@ -2913,6 +3005,10 @@ QTextEdit#analysisDetailsText {
         model_payloads = {str(row.get("model") or ""): row for row in model_button_rows(self.data)}
         for model, button in self.quick_model_buttons.items():
             payload = model_payloads.get(model, {})
+            label = str(payload.get("label") or MODEL_LABELS.get(model, model))
+            if button.text() != label:
+                button.setText(label)
+            button.setToolTip(self._model_button_tooltip(payload))
             if button.isChecked() != (model == self.current_quick_model):
                 button.setChecked(model == self.current_quick_model)
             self._style_triage_button(button, selected=model == self.current_quick_model, stripe=self._evidence_color(str(payload.get("evidence_tier") or "")))
@@ -2932,7 +3028,8 @@ QTextEdit#analysisDetailsText {
 
     def _refresh_quality_badge(self) -> None:
         status, reason = recording_quality_status(self.data)
-        self.quality_badge.setText(f"Participant Run Quality: {status}")
+        label = str(getattr(self.data, "quality_label", "") or "Participant Run Quality")
+        self.quality_badge.setText(f"{label}: {status}")
         if status == "PASS":
             self.quality_badge.setStyleSheet("background: #dceee5; color: #174f3e; border: 1px solid #8dc3aa;")
         elif status == "FAIL":
@@ -2977,7 +3074,13 @@ QTextEdit#analysisDetailsText {
 
     def _quick_detail_text(self) -> str:
         status, reason = recording_quality_status(self.data)
-        lines = [f"Participant Run Quality: {status}", reason]
+        quality_label = str(getattr(self.data, "quality_label", "") or "Participant Run Quality")
+        lines = [f"{quality_label}: {status}", reason]
+        if str(getattr(self.data, "dataset_kind", "") or "") == DATASET_KIND_POOL:
+            lines.append(
+                f"Pool inclusion: {getattr(self.data, 'pool_included_count', 0)} PASS participant(s), "
+                f"{getattr(self.data, 'pool_excluded_count', 0)} excluded."
+            )
         lines.append(f"Condition lens: {self.current_condition_lens}")
         lines.append(f"Model display: {MODEL_LABELS.get(self.current_quick_model, self.current_quick_model)}")
         summary = self.data.condition_lens_triage_summary
@@ -10204,6 +10307,28 @@ class FocusModeWindow:
         if not bool(capture_options.get("write_analysis_csvs", True)):
             return
         try:
+            catalog = refresh_analysis_catalog(self.output_root)
+            entries = catalog.selectable_entries
+            selected_dataset_id = selected_dataset_id_for_participant(
+                catalog,
+                str(getattr(self.package, "participant_id", "") or getattr(result, "participant_id", "") or ""),
+            )
+            if entries and selected_dataset_id:
+                selected_entry = next((entry for entry in entries if str(entry.get("dataset_id") or "") == selected_dataset_id), entries[0])
+                data = load_analysis_dataset(selected_entry)
+                if not data.has_analysis_tables:
+                    return
+                self.analysis_review_dialog = AnalysisReviewDialog(
+                    self.q,
+                    self.dialog,
+                    data,
+                    dataset_entries=entries,
+                    selected_dataset_id=selected_dataset_id,
+                )
+                self.analysis_review_dialog.show()
+                return
+            if _package_is_split_part(self.package):
+                return
             outputs = dict(getattr(result, "analysis_outputs", {}) or {})
             events_csv = getattr(result, "events_csv", None)
             if events_csv not in (None, ""):

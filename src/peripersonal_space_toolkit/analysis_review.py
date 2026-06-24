@@ -106,6 +106,13 @@ class AnalysisReviewData:
     """Loaded analysis-review data for one completed runner session."""
 
     session_dir: Path | None = None
+    dataset_id: str = ""
+    dataset_label: str = ""
+    dataset_kind: str = ""
+    participant_id: str = ""
+    quality_label: str = "Participant Run Quality"
+    pool_included_count: int = 0
+    pool_excluded_count: int = 0
     curve_rows: list[dict[str, Any]] = field(default_factory=list)
     model_fit_rows: list[dict[str, Any]] = field(default_factory=list)
     model_comparison_rows: list[dict[str, Any]] = field(default_factory=list)
@@ -158,12 +165,28 @@ def load_analysis_review_data(
     *,
     session_dir: str | Path | None = None,
     summary_text: str = "",
+    dataset_metadata: Mapping[str, Any] | None = None,
 ) -> AnalysisReviewData:
     """Load existing immediate-analysis outputs for read-only review."""
 
     root = Path(session_dir) if session_dir not in (None, "") else None
     outputs = dict(analysis_outputs or {})
-    data = AnalysisReviewData(session_dir=root, summary_text=str(summary_text or "").strip())
+    metadata = dict(dataset_metadata or {})
+    data = AnalysisReviewData(
+        session_dir=root,
+        dataset_id=str(metadata.get("dataset_id") or ""),
+        dataset_label=str(metadata.get("dataset_label") or ""),
+        dataset_kind=str(metadata.get("dataset_kind") or ""),
+        participant_id=str(metadata.get("participant_id") or ""),
+        quality_label=(
+            "Participant Pool Quality"
+            if str(metadata.get("dataset_kind") or "") == "participant_pool"
+            else "Participant Run Quality"
+        ),
+        pool_included_count=_as_int(metadata.get("pool_included_count"), 0),
+        pool_excluded_count=_as_int(metadata.get("pool_excluded_count"), 0),
+        summary_text=str(summary_text or "").strip(),
+    )
 
     curves_path = _output_path(outputs, "curves", root, "*_pps_curve_points.csv")
     fits_path = _output_path(outputs, "model_fits", root, "*_model_fits.csv")

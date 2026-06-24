@@ -12,7 +12,7 @@ import sys
 import warnings as py_warnings
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, Mapping
 
 import numpy as np
 from scipy.optimize import OptimizeWarning, curve_fit
@@ -94,9 +94,46 @@ def analyze_session_events(
     max_rt_s: float = DEFAULT_MAX_RESPONSE_RT_S,
 ) -> SessionAnalysisResult:
     rows = sorted((_as_row(event) for event in events), key=lambda row: (_as_float(row.get("unix_time"), 0.0), row.get("event_id", 0)))
+    result = _analyze_response_rows(
+        _pair_tactile_responses(rows, min_rt_s=min_rt_s, max_rt_s=max_rt_s),
+        event_rows=rows,
+        rows_are_final=False,
+    )
+    if not result.response_rows:
+        result.warnings.append("No tactile response rows could be reconstructed from the event stream.")
+    return result
+
+
+def analyze_analysis_ready_trials(
+    rows: Iterable[Mapping[str, Any]],
+    *,
+    event_rows: Iterable[Mapping[str, Any]] | None = None,
+    recording_quality_gate: dict[str, Any] | None = None,
+) -> SessionAnalysisResult:
+    """Analyze saved analysis-ready trial rows without reconstructing raw events."""
+
+    trial_rows = [_coerce_analysis_ready_row(dict(row)) for row in rows]
+    result = _analyze_response_rows(
+        trial_rows,
+        event_rows=[dict(row) for row in event_rows or []],
+        rows_are_final=True,
+    )
+    if recording_quality_gate is not None:
+        result.recording_quality_gate = dict(recording_quality_gate)
+    if not result.response_rows:
+        result.warnings.append("No analysis-ready trial rows were available.")
+    return result
+
+
+def _analyze_response_rows(
+    response_rows: list[dict[str, Any]],
+    *,
+    event_rows: list[dict[str, Any]],
+    rows_are_final: bool,
+) -> SessionAnalysisResult:
     result = SessionAnalysisResult()
-    result.response_rows = _pair_tactile_responses(rows, min_rt_s=min_rt_s, max_rt_s=max_rt_s)
-    result.final_outcome_rows = _build_final_outcomes(result.response_rows)
+    result.response_rows = response_rows
+    result.final_outcome_rows = list(response_rows) if rows_are_final else _build_final_outcomes(result.response_rows)
     analysis_rows = result.final_outcome_rows or result.response_rows
     result.summary_rows = _summarize_responses(analysis_rows)
     result.curve_rows, result.fit_rows, result.model_fit_rows, result.model_comparison_rows, curve_warnings = _build_pps_curves(analysis_rows)
@@ -107,10 +144,8 @@ def analyze_session_events(
         result.condition_lens_model_comparison_rows,
         result.condition_lens_triage_summary,
     ) = _build_condition_lens_outputs(analysis_rows)
-    result.recording_quality_gate = _build_recording_quality_gate(result, rows)
-    if not result.response_rows:
-        result.warnings.append("No tactile response rows could be reconstructed from the event stream.")
-    result.data_behavior_rows, result.exploratory_quality_summary = _build_data_behavior_review(result, rows)
+    result.recording_quality_gate = _build_recording_quality_gate(result, event_rows)
+    result.data_behavior_rows, result.exploratory_quality_summary = _build_data_behavior_review(result, event_rows)
     return result
 
 
@@ -1879,6 +1914,43 @@ def _truthy(value: Any) -> bool:
     if value in (None, ""):
         return False
     return str(value).strip().lower() not in {"0", "false", "no", "none"}
+
+
+def _coerce_analysis_ready_row(row: dict[str, Any]) -> dict[str, Any]:
+    boolean_fields = {
+        "hit",
+        "original_hit",
+        "rescued_in_topup",
+        "topup_hit",
+        "is_topup",
+        "primary_analysis_included",
+        "in_target",
+        "during_playback",
+        "catch_trial",
+        "baseline_trial",
+    }
+    for field in boolean_fields:
+        if field in row and row[field] not in (None, ""):
+            row[field] = _truthy(row[field])
+    if "hit" not in row or row.get("hit") in (None, ""):
+        outcome = str(row.get("outcome") or row.get("Outcome") or "").strip().lower()
+        if outcome:
+            row["hit"] = outcome == "hit"
+    if "trial_type" not in row and "Trial_Type" in row:
+        row["trial_type"] = row.get("Trial_Type")
+    if "respiratory_phase" not in row and "Respiratory_Phase" in row:
+        row["respiratory_phase"] = row.get("Respiratory_Phase")
+    if "noise_type" not in row and "Noise_Type" in row:
+        row["noise_type"] = row.get("Noise_Type")
+    if "soa_ms" not in row and "SOA_ms" in row:
+        row["soa_ms"] = row.get("SOA_ms")
+    if "rt_ms" not in row and "RT_ms" in row:
+        row["rt_ms"] = row.get("RT_ms")
+    if "participant_id" not in row and "Participant_ID" in row:
+        row["participant_id"] = row.get("Participant_ID")
+    if "part_number" not in row and "Part_Number" in row:
+        row["part_number"] = row.get("Part_Number")
+    return row
 
 
 def _primary_analysis_included(row: dict[str, Any]) -> bool:

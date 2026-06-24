@@ -15,6 +15,7 @@ import soundfile as sf
 from peripersonal_space_toolkit import session_runner as session_runner_module
 from peripersonal_space_toolkit import labrecorder_capture as labrecorder_capture_module
 from peripersonal_space_toolkit.design import ProtocolSpec, default_design
+from peripersonal_space_toolkit.analysis_catalog import PARTICIPANT_COMBINED_DIRNAME
 from peripersonal_space_toolkit.session_runner import (
     ParticipantTrialCsvWriter,
     SessionRunnerController,
@@ -1249,6 +1250,7 @@ def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
     assert result.session_metadata_path and result.session_metadata_path.exists()
     assert result.analysis_outputs["responses"].exists()
     assert result.analysis_outputs["analysis_ready_trials"].exists()
+    assert result.analysis_outputs["analysis_catalog"].exists()
     assert result.analysis_outputs["participant_trials"].exists()
     assert result.analysis_outputs["timing_qc"].exists()
     assert result.analysis_outputs["lsl_markers"].exists()
@@ -1282,6 +1284,7 @@ def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
     assert result.trigger_dictionary_path and result.trigger_dictionary_path.parent == result.events_csv.parent
     assert result.session_metadata_path.parent == output_runner_logs_dir(package.session_dir.parent) / package.session_id
     assert result.analysis_outputs["analysis_ready_trials"].parent == output_data_analytics_dir(package.session_dir.parent) / package.session_id
+    assert result.analysis_outputs["analysis_catalog"].parent == output_data_analytics_dir(package.session_dir.parent)
     manifest_outputs = json.loads(package.manifest_path.read_text(encoding="utf-8"))["outputs"]
     assert Path(manifest_outputs["external_labrecorder_xdf"]) == package.session_dir / f"{package.session_id}_external_labrecorder.xdf"
     participant_trial_rows = list(csv.DictReader(result.analysis_outputs["participant_trials"].open(encoding="utf-8")))
@@ -1338,6 +1341,7 @@ def test_split_part_controller_writes_part_identity_and_status_handoff(tmp_path:
     assert result1.session_metadata_path.parent == output_runner_logs_dir(session_root) / part1.session_group_id / "part_01"
     assert result1.analysis_outputs["participant_trials"].parent == part1.session_dir
     assert result1.analysis_outputs["analysis_ready_trials"].parent == output_data_analytics_dir(session_root) / part1.session_group_id / "part_01"
+    assert result1.analysis_outputs["analysis_catalog"].parent == output_data_analytics_dir(session_root)
     assert result1.recording_paths[0].parent == part1.session_dir
     status_path = output_runner_logs_dir(session_root) / part1.session_group_id / "part_01" / "part_completion_status.json"
     completion_status = json.loads(status_path.read_text(encoding="utf-8"))
@@ -1399,6 +1403,14 @@ def test_split_part_controller_writes_part_identity_and_status_handoff(tmp_path:
     controller2 = SessionRunnerController(part2, audio_engine=_MockAudioEngine())
     result2 = controller2.run()
     assert result2.completed
+    assert result2.analysis_outputs["analysis_catalog"].exists()
+    combined_analysis = (
+        output_data_analytics_dir(session_root)
+        / part1.session_group_id
+        / PARTICIPANT_COMBINED_DIRNAME
+        / f"{part1.session_group_id}_participant_combined_analysis_ready_trials.csv"
+    )
+    assert combined_analysis.exists()
 
     collected = prepared_session_asset_status(
         run_manifest,

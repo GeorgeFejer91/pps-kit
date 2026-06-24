@@ -2294,6 +2294,7 @@ def test_focus_mode_opens_post_run_analysis_review_dialog(tmp_path: Path, monkey
     dialog = window.analysis_review_dialog.dialog
     assert dialog.isVisible()
     model_combo = dialog.findChild(q["QComboBox"], "analysisModelCombo")
+    dataset_combo = dialog.findChild(q["QComboBox"], "analysisDatasetCombo")
     scope_combo = dialog.findChild(q["QComboBox"], "analysisScopeCombo")
     metric_combo = dialog.findChild(q["QComboBox"], "analysisMetricCombo")
     source_combo = dialog.findChild(q["QComboBox"], "analysisSourceCombo")
@@ -2306,6 +2307,7 @@ def test_focus_mode_opens_post_run_analysis_review_dialog(tmp_path: Path, monkey
     more_button = dialog.findChild(q["QPushButton"], "analysisMoreButton")
     condition_buttons = [button for button in dialog.findChildren(q["QPushButton"], "analysisConditionLensButton")]
     quick_model_buttons = [button for button in dialog.findChildren(q["QPushButton"], "analysisModelButton")]
+    assert dataset_combo is not None and dataset_combo.count() == 1
     assert quality_badge is not None and "Participant Run Quality: PASS" in quality_badge.text()
     assert triage_hint is not None and "AICc support" in triage_hint.text()
     assert "Baseline: pooled across SOAs within condition" in triage_hint.text()
@@ -2356,6 +2358,80 @@ def test_focus_mode_opens_post_run_analysis_review_dialog(tmp_path: Path, monkey
     assert screenshot.stat().st_size > 0
     dialog.close()
     window.dialog.close()
+
+
+def test_analysis_review_dialog_switches_saved_datasets(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+        from peripersonal_space_toolkit.analysis_catalog import load_analysis_dataset
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    p001_dir = tmp_path / "P001"
+    p002_dir = tmp_path / "P002"
+    outputs_1 = _write_analysis_review_outputs(p001_dir)
+    outputs_2 = _write_analysis_review_outputs(p002_dir)
+    outputs_2["recording_quality_gate"].write_text(
+        json.dumps(
+            {
+                "schema": "pps-recording-quality-gate.v1",
+                "status": "FAIL",
+                "primary_reason": "Injected test exclusion.",
+                "failures": [{"code": "test_fail", "message": "Injected test exclusion.", "evidence": "test"}],
+                "warnings": [],
+                "metrics": {"overall_hit_rate": 0.2},
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    entries = [
+        {
+            "dataset_id": "participant:P001",
+            "dataset_kind": "participant",
+            "dataset_label": "P001",
+            "participant_id": "P001",
+            "quality_status": "PASS",
+            "analysis_dir": str(p001_dir / "analysis"),
+            "outputs": {key: str(value) for key, value in outputs_1.items()},
+        },
+        {
+            "dataset_id": "participant:P002",
+            "dataset_kind": "participant",
+            "dataset_label": "P002",
+            "participant_id": "P002",
+            "quality_status": "FAIL",
+            "analysis_dir": str(p002_dir / "analysis"),
+            "outputs": {key: str(value) for key, value in outputs_2.items()},
+        },
+    ]
+    dialog_controller = focus_app.AnalysisReviewDialog(
+        q,
+        None,
+        load_analysis_dataset(entries[0]),
+        dataset_entries=entries,
+        selected_dataset_id="participant:P001",
+    )
+    dialog = dialog_controller.dialog
+    dialog.show()
+    app.processEvents()
+    dataset_combo = dialog.findChild(q["QComboBox"], "analysisDatasetCombo")
+    quality_badge = dialog.findChild(q["QLabel"], "analysisQualityBadge")
+    assert dataset_combo is not None and dataset_combo.count() == 2
+    assert quality_badge is not None and "PASS" in quality_badge.text()
+
+    dataset_combo.setCurrentIndex(dataset_combo.findData("participant:P002"))
+    app.processEvents()
+
+    assert dialog_controller.current_dataset_id == "participant:P002"
+    assert "FAIL" in quality_badge.text()
+    dialog.close()
 
 
 def test_focus_mode_skips_analysis_review_for_interrupted_or_disabled_analysis(tmp_path: Path, monkeypatch):

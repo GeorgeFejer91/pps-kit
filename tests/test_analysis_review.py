@@ -6,6 +6,13 @@ from pathlib import Path
 
 import pytest
 
+from peripersonal_space_toolkit.analysis_catalog import (
+    PARTICIPANT_COMBINED_DIRNAME,
+    PARTICIPANT_POOL_DIRNAME,
+    analysis_catalog_path,
+    load_analysis_dataset,
+    refresh_analysis_browser_outputs,
+)
 from peripersonal_space_toolkit.analysis_review import (
     CONDITION_LENS_TWO_BY_TWO,
     METRIC_HIT_RATE,
@@ -36,7 +43,8 @@ from peripersonal_space_toolkit.analysis_review import (
     recording_quality_status,
     scopes_for_part_mode,
 )
-from peripersonal_space_toolkit.session_analysis import analyze_session_events, write_analysis_csvs
+from peripersonal_space_toolkit.output_layout import output_data_analytics_dir, output_runner_logs_dir
+from peripersonal_space_toolkit.session_analysis import analyze_analysis_ready_trials, analyze_session_events, write_analysis_csvs
 
 
 def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
@@ -420,3 +428,168 @@ def test_condition_lens_metric_label_reports_baseline_corrected_status() -> None
 
     assert condition_lens_metric_label(data, CONDITION_LENS_TWO_BY_TWO) == "Baseline-corrected facilitation (ms)"
     assert condition_lens_baseline_status(data, CONDITION_LENS_TWO_BY_TWO) == "Baseline: pooled across SOAs within condition"
+
+
+def _write_saved_trial_analysis(
+    output_root: Path,
+    leaf: Path,
+    stem: str,
+    participant_id: str,
+    *,
+    baseline_rt: float,
+    audio_rt_by_soa: dict[int, float],
+    audio_repeats: int = 1,
+    quality_status: str = "PASS",
+) -> dict[str, Path]:
+    rows: list[dict[str, object]] = []
+    trial = 1
+    for soa in sorted(audio_rt_by_soa):
+        for repeat in range(audio_repeats):
+            rows.append(
+                {
+                    "participant_id": participant_id,
+                    "trial_uid": f"{participant_id}_A{trial:03d}_{repeat}",
+                    "trial_type": "Audio-Tactile",
+                    "part_number": 1,
+                    "respiratory_phase": "Inhale",
+                    "noise_type": "pink",
+                    "soa_ms": soa,
+                    "rt_ms": audio_rt_by_soa[soa],
+                    "hit": True,
+                    "primary_analysis_included": True,
+                }
+            )
+        trial += 1
+    for soa in sorted(audio_rt_by_soa):
+        rows.append(
+            {
+                "participant_id": participant_id,
+                "trial_uid": f"{participant_id}_B{trial:03d}",
+                "trial_type": "Baseline",
+                "part_number": 1,
+                "respiratory_phase": "Inhale",
+                "noise_type": "pink",
+                "soa_ms": soa,
+                "rt_ms": baseline_rt,
+                "hit": True,
+                "primary_analysis_included": True,
+            }
+        )
+        trial += 1
+    result = analyze_analysis_ready_trials(rows)
+    analysis_dir = output_data_analytics_dir(output_root) / leaf
+    outputs = write_analysis_csvs(result, analysis_dir, stem)
+    quality = {
+        "schema": "pps-recording-quality-gate.v1",
+        "status": quality_status,
+        "primary_reason": "No serious exclusion criteria were triggered." if quality_status == "PASS" else "Injected test exclusion.",
+        "failures": [] if quality_status == "PASS" else [{"code": "test_fail", "message": "Injected test exclusion.", "evidence": "test"}],
+        "warnings": [],
+        "metrics": {"overall_hit_rate": 1.0},
+    }
+    outputs["recording_quality_gate"].write_text(json.dumps(quality, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    (analysis_dir / "analysis_summary.txt").write_text("Saved participant analysis\n", encoding="utf-8")
+    return outputs
+
+
+def test_analysis_catalog_builds_pass_only_participant_balanced_pool(tmp_path: Path) -> None:
+    soas = {100: 400.0, 200: 390.0, 400: 380.0, 800: 370.0}
+    _write_saved_trial_analysis(
+        tmp_path,
+        Path("P001_session"),
+        "P001_session",
+        "P001",
+        baseline_rt=500.0,
+        audio_rt_by_soa=soas,
+        audio_repeats=1,
+        quality_status="PASS",
+    )
+    _write_saved_trial_analysis(
+        tmp_path,
+        Path("P002_session"),
+        "P002_session",
+        "P002",
+        baseline_rt=600.0,
+        audio_rt_by_soa={100: 590.0, 200: 580.0, 400: 570.0, 800: 560.0},
+        audio_repeats=10,
+        quality_status="PASS",
+    )
+    _write_saved_trial_analysis(
+        tmp_path,
+        Path("P003_session"),
+        "P003_session",
+        "P003",
+        baseline_rt=700.0,
+        audio_rt_by_soa={100: 100.0, 200: 100.0, 400: 100.0, 800: 100.0},
+        audio_repeats=10,
+        quality_status="FAIL",
+    )
+
+    catalog = refresh_analysis_browser_outputs(tmp_path)
+
+    assert analysis_catalog_path(tmp_path).exists()
+    pool_entry = next(entry for entry in catalog.selectable_entries if entry["dataset_kind"] == "participant_pool")
+    assert pool_entry["pool_included_count"] == 2
+    assert pool_entry["pool_excluded_count"] == 1
+    assert Path(pool_entry["analysis_dir"]).parent == output_data_analytics_dir(tmp_path)
+    data = load_analysis_dataset(pool_entry)
+    pool_row = next(
+        row
+        for row in data.condition_lens_curve_rows
+        if row.get("analysis_lens") == CONDITION_LENS_TWO_BY_TWO
+        and row.get("display_scope") == "Part 1 / Inhale"
+        and int(float(row.get("soa_ms"))) == 100
+    )
+    assert float(pool_row["facilitation_ms"]) == pytest.approx(55.0)
+    assert int(float(pool_row["n"])) == 2
+    assert data.quality_label == "Participant Pool Quality"
+    assert recording_quality_status(data)[0] == "PASS"
+
+
+def test_analysis_catalog_waits_for_complete_split_participant_before_combining(tmp_path: Path) -> None:
+    group = "P001_20260613_120000"
+    _write_saved_trial_analysis(
+        tmp_path,
+        Path(group) / "part_01",
+        f"{group}_part01",
+        "P001",
+        baseline_rt=500.0,
+        audio_rt_by_soa={100: 410.0, 200: 400.0, 400: 390.0, 800: 380.0},
+        quality_status="PASS",
+    )
+    _write_saved_trial_analysis(
+        tmp_path,
+        Path(group) / "part_02",
+        f"{group}_part02",
+        "P001",
+        baseline_rt=510.0,
+        audio_rt_by_soa={100: 420.0, 200: 410.0, 400: 400.0, 800: 390.0},
+        quality_status="PASS",
+    )
+    manifest = output_runner_logs_dir(tmp_path) / group / "session_group_manifest.json"
+    manifest.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "schema": "pps-session-group-manifest.v1",
+        "session_group_id": group,
+        "participant_id": "P001",
+        "parts": [
+            {"part_number": 1, "part_folder_name": "part_01", "completed": True},
+            {"part_number": 2, "part_folder_name": "part_02", "completed": False},
+        ],
+    }
+    manifest.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    incomplete = refresh_analysis_browser_outputs(tmp_path)
+    assert not any(entry["dataset_kind"] == "participant" for entry in incomplete.selectable_entries)
+    assert not (output_data_analytics_dir(tmp_path) / group / PARTICIPANT_COMBINED_DIRNAME).exists()
+
+    payload["parts"][1]["completed"] = True
+    manifest.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    complete = refresh_analysis_browser_outputs(tmp_path)
+
+    combined_dir = output_data_analytics_dir(tmp_path) / group / PARTICIPANT_COMBINED_DIRNAME
+    pool_dir = output_data_analytics_dir(tmp_path) / PARTICIPANT_POOL_DIRNAME
+    assert combined_dir.exists()
+    assert pool_dir.exists()
+    participant_entries = [entry for entry in complete.selectable_entries if entry["dataset_kind"] == "participant"]
+    assert [entry["participant_id"] for entry in participant_entries] == ["P001"]

@@ -37,6 +37,7 @@ from .output_layout import (
     output_shared_instructions_dir,
     output_verbose_events_dir,
 )
+from .analysis_catalog import refresh_analysis_browser_outputs
 from .session_analysis import analyze_session_events, format_analysis_summary, write_analysis_csvs
 from .session_events import SessionEventLogger
 from .runner_diary import append_diary_entry, ensure_output_diary, find_output_diary
@@ -2960,6 +2961,7 @@ class SessionRunnerController:
             self._stop_external_labrecorder_capture()
             self._write_outputs()
             self._write_part_completion_status(completed=completed, interrupted=interrupted)
+            self._refresh_analysis_browser_outputs(completed=completed, interrupted=interrupted)
             if owns_engine and self.audio_engine is not None and hasattr(self.audio_engine, "shutdown"):
                 self.audio_engine.shutdown()
 
@@ -4052,6 +4054,21 @@ class SessionRunnerController:
         self._summary_text = format_analysis_summary(analysis)
         _mkdir(self._analytics_dir)
         _write_text_file(self._analytics_dir / "analysis_summary.txt", self._summary_text + "\n", encoding="utf-8")
+
+    def _refresh_analysis_browser_outputs(self, *, completed: bool, interrupted: bool) -> None:
+        if interrupted or not completed or not self.capture_options.write_analysis_csvs:
+            return
+        try:
+            catalog = refresh_analysis_browser_outputs(
+                _package_output_root(self.package),
+                preferred_participant_id=self.package.participant_id,
+            )
+        except Exception as exc:  # noqa: BLE001 - derived analysis must not block run completion.
+            self._run_warnings.append(f"Analysis browser catalog refresh failed: {exc}")
+            return
+        self._analysis_outputs["analysis_catalog"] = catalog.path
+        for warning in catalog.warnings:
+            self._run_warnings.append(warning)
 
     def _write_part_completion_status(self, *, completed: bool, interrupted: bool) -> None:
         if not _package_is_split_part(self.package):
