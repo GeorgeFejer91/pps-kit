@@ -368,10 +368,17 @@ def create_timestamped_output_environment(parent_dir: Path, session_name: str) -
 
 def _capture_options_payload(capture_options: SessionCaptureOptions | dict[str, Any] | None) -> dict[str, Any]:
     if capture_options is None:
-        return SessionCaptureOptions().as_dict()
+        return _default_focus_capture_options().as_dict()
     if isinstance(capture_options, SessionCaptureOptions):
         return capture_options.as_dict()
     return dict(capture_options)
+
+
+def _default_focus_capture_options() -> SessionCaptureOptions:
+    return SessionCaptureOptions(
+        wired_loopback_mode=WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY,
+        start_external_labrecorder=True,
+    )
 
 
 def initiate_data_collection_environment(
@@ -534,7 +541,20 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--no-internal-xdf", action="store_true", help="Do not write the local events.xdf mirror.")
     parser.add_argument("--no-analysis-csv", action="store_true", help="Do not write immediate analysis CSV outputs.")
     parser.add_argument("--no-backup-recording", action="store_true", help="Do not write the optional fail-safe local recording WAV.")
-    parser.add_argument("--external-labrecorder", action="store_true", help="Start runner-owned LabRecorder RCS capture after LSL outlets are online and before playback.")
+    labrecorder_group = parser.add_mutually_exclusive_group()
+    labrecorder_group.add_argument(
+        "--external-labrecorder",
+        dest="external_labrecorder",
+        action="store_true",
+        default=True,
+        help="Start runner-owned LabRecorder RCS capture after LSL outlets are online and before playback.",
+    )
+    labrecorder_group.add_argument(
+        "--no-external-labrecorder",
+        dest="external_labrecorder",
+        action="store_false",
+        help="Open Focus Mode with full-session LabRecorder XDF unchecked.",
+    )
     parser.add_argument("--labrecorder-cli", type=Path, default=None, help="Optional explicit path to LabRecorderCLI.exe used to find the LabRecorder bundle.")
     parser.add_argument("--labrecorder-stream-timeout-s", type=float, default=10.0, help="Seconds to wait for runner LSL streams before starting LabRecorder.")
     parser.add_argument("--labrecorder-startup-s", type=float, default=1.0, help="Seconds to wait after LabRecorder starts before playback may continue.")
@@ -542,10 +562,23 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--wired-loopback",
         choices=[WIRED_LOOPBACK_OFF, WIRED_LOOPBACK_CLI_OUTPUT4_TACTILE_PROXY],
-        default=WIRED_LOOPBACK_OFF,
-        help="Record an optional wired analog loopback route, for example output4-tactile-proxy.",
+        default=WIRED_LOOPBACK_CLI_OUTPUT4_TACTILE_PROXY,
+        help="Record a wired analog loopback route, or pass off to open the checkbox unchecked.",
     )
-    parser.add_argument("--enable-missed-trial-topup", action="store_true", help="Prepare and request approval for one final missed-trial top-up block.")
+    topup_group = parser.add_mutually_exclusive_group()
+    topup_group.add_argument(
+        "--enable-missed-trial-topup",
+        dest="enable_missed_trial_topup",
+        action="store_true",
+        default=True,
+        help="Prepare and request approval for one final missed-trial top-up block.",
+    )
+    topup_group.add_argument(
+        "--no-missed-trial-topup",
+        dest="enable_missed_trial_topup",
+        action="store_false",
+        help="Open Focus Mode with missed-trial top-up unchecked.",
+    )
     parser.add_argument("--validation-screenshot", type=Path, help=argparse.SUPPRESS)
     parser.add_argument("--validation-auto-close-ms", type=int, default=None, help=argparse.SUPPRESS)
     return parser
@@ -3777,7 +3810,7 @@ def _capture_options_from_args(args: argparse.Namespace) -> SessionCaptureOption
         write_analysis_csvs=not args.no_analysis_csv,
         start_backup_recording=not args.no_backup_recording,
         wired_loopback_mode=normalize_wired_loopback_mode(args.wired_loopback),
-        start_external_labrecorder=bool(args.external_labrecorder),
+        start_external_labrecorder=bool(args.external_labrecorder and not args.no_lsl),
         external_labrecorder_cli=str(args.labrecorder_cli or ""),
         external_labrecorder_stream_timeout_s=float(args.labrecorder_stream_timeout_s),
         external_labrecorder_startup_s=float(args.labrecorder_startup_s),
@@ -5747,14 +5780,14 @@ class FocusModeWindow:
         package: Any,
         *,
         capture_options: SessionCaptureOptions | None = None,
-        enable_missed_trial_topup: bool = False,
+        enable_missed_trial_topup: bool = True,
         controller_factory: Callable[..., Any] | None = None,
         layout_profile: FocusLayoutProfile | None = None,
     ) -> None:
         self.q = q
         self.package = package
         self.output_root = _package_output_root(package)
-        self.capture_options = capture_options or SessionCaptureOptions()
+        self.capture_options = capture_options or _default_focus_capture_options()
         self.enable_missed_trial_topup = bool(enable_missed_trial_topup)
         self.controller_factory = controller_factory
         self.messages: queue.Queue[tuple[str, Any]] = queue.Queue()
@@ -6110,7 +6143,9 @@ class FocusModeWindow:
             "Playback waits until PPSMarkersV2 and PPSTriggerCodes are discoverable and LabRecorder is running."
         )
         self.external_labrecorder_checkbox.setMinimumHeight(max(profile.button_min_height + 18, profile.input_min_height + 22))
-        self.external_labrecorder_checkbox.setChecked(bool(self.capture_options.start_external_labrecorder))
+        self.external_labrecorder_checkbox.setChecked(
+            bool(self.capture_options.enable_lsl and self.capture_options.start_external_labrecorder)
+        )
         self.external_labrecorder_checkbox.setEnabled(bool(self.capture_options.enable_lsl))
         data_logging_layout.addWidget(self.external_labrecorder_checkbox)
         self._pre_run_controls.append(self.external_labrecorder_checkbox)
@@ -7144,7 +7179,9 @@ class FocusModeWindow:
                 if bool(self.wired_loopback_checkbox.isChecked())
                 else WIRED_LOOPBACK_OFF
             ),
-            start_external_labrecorder=bool(self.external_labrecorder_checkbox.isChecked()),
+            start_external_labrecorder=bool(
+                self.capture_options.enable_lsl and self.external_labrecorder_checkbox.isChecked()
+            ),
             external_labrecorder_cli=str(self.capture_options.external_labrecorder_cli or ""),
             external_labrecorder_stream_timeout_s=float(self.capture_options.external_labrecorder_stream_timeout_s),
             external_labrecorder_startup_s=float(self.capture_options.external_labrecorder_startup_s),
@@ -8324,7 +8361,7 @@ def run_focus_window(
     session_manifest: Path,
     *,
     capture_options: SessionCaptureOptions | None = None,
-    enable_missed_trial_topup: bool = False,
+    enable_missed_trial_topup: bool = True,
     manual_start: bool = False,
     fullscreen: bool = True,
     auto_close_ms: int | None = None,
@@ -8404,7 +8441,7 @@ def run_focus_window(
 def run_launcher_window(
     *,
     capture_options: SessionCaptureOptions | None = None,
-    enable_missed_trial_topup: bool = False,
+    enable_missed_trial_topup: bool = True,
     participant_id: str = "",
     initial_message: str = "",
 ) -> int:
@@ -8926,7 +8963,7 @@ def run_launcher_window(
 def _run_environment_operations_window(
     *,
     capture_options: SessionCaptureOptions | None = None,
-    enable_missed_trial_topup: bool = False,
+    enable_missed_trial_topup: bool = True,
     participant_id: str = "",
     initial_message: str = "",
 ) -> int:
@@ -9185,7 +9222,7 @@ def _run_environment_operations_window(
         return label or _current_profile() or "PPS experiment"
 
     def _launcher_capture_options() -> dict[str, Any]:
-        return capture_options.as_dict() if capture_options is not None else SessionCaptureOptions().as_dict()
+        return capture_options.as_dict() if capture_options is not None else _default_focus_capture_options().as_dict()
 
     def _log_launcher_event(event_type: str, *, payload: dict[str, Any] | None = None, create: bool = False) -> None:
         _append_output_diary_event(

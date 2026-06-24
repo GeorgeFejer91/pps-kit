@@ -70,7 +70,10 @@ def build_focus_runner_command(
         command.append("--no-analysis-csv")
     if not bool(options.get("start_backup_recording", True)):
         command.append("--no-backup-recording")
-    if bool(options.get("start_external_labrecorder", False)):
+    external_labrecorder = options.get("start_external_labrecorder")
+    if external_labrecorder is False:
+        command.append("--no-external-labrecorder")
+    elif external_labrecorder is True:
         command.append("--external-labrecorder")
         labrecorder_cli = str(options.get("external_labrecorder_cli") or "").strip()
         if labrecorder_cli:
@@ -82,10 +85,20 @@ def build_focus_runner_command(
         ):
             if option_key in options:
                 command.extend([flag, str(options[option_key])])
-    if normalize_wired_loopback_mode(options.get("wired_loopback_mode")) == WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY:
+    if "wired_loopback_mode" in options:
+        wired_mode = normalize_wired_loopback_mode(options.get("wired_loopback_mode"))
+        command.extend(
+            [
+                "--wired-loopback",
+                WIRED_LOOPBACK_CLI_OUTPUT4_TACTILE_PROXY if wired_mode == WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY else "off",
+            ]
+        )
+    elif normalize_wired_loopback_mode(options.get("wired_loopback_mode")) == WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY:
         command.extend(["--wired-loopback", WIRED_LOOPBACK_CLI_OUTPUT4_TACTILE_PROXY])
-    if enable_missed_trial_topup or bool(options.get("enable_missed_trial_topup", False)):
+    if enable_missed_trial_topup or options.get("enable_missed_trial_topup") is True:
         command.append("--enable-missed-trial-topup")
+    elif options.get("enable_missed_trial_topup") is False:
+        command.append("--no-missed-trial-topup")
     if manual_start:
         command.append("--manual-start")
     return FocusRunnerCommand(command=command, packaged_runner=packaged, runner_binary=runner_binary)

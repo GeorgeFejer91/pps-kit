@@ -56,6 +56,48 @@ def test_focus_runner_command_prefers_packaged_exe(tmp_path: Path, monkeypatch):
     assert "--manual-start" in result.command
 
 
+def test_focus_runner_command_can_open_default_checked_options_unchecked(tmp_path: Path, monkeypatch):
+    exe = tmp_path / "PPSExperimentRunner.exe"
+    exe.write_bytes(b"runner")
+    manifest = tmp_path / "session_manifest.json"
+    manifest.write_text("{}", encoding="utf-8")
+    monkeypatch.setenv(focus_launch.FOCUS_RUNNER_ENV_VAR, str(exe))
+
+    result = focus_launch.build_focus_runner_command(
+        manifest,
+        capture_options={
+            "start_external_labrecorder": False,
+            "wired_loopback_mode": "off",
+            "enable_missed_trial_topup": False,
+        },
+        manual_start=True,
+    )
+
+    assert "--no-external-labrecorder" in result.command
+    assert result.command[result.command.index("--wired-loopback") + 1] == "off"
+    assert "--no-missed-trial-topup" in result.command
+    assert "--external-labrecorder" not in result.command
+    assert "--enable-missed-trial-topup" not in result.command
+
+
+def test_focus_app_cli_defaults_enable_labrecorder_wired_loopback_and_topup():
+    args = focus_app.build_arg_parser().parse_args([])
+    options = focus_app._capture_options_from_args(args)
+
+    assert options.wired_loopback_mode == "output4_tactile_proxy"
+    assert options.start_external_labrecorder is True
+    assert args.enable_missed_trial_topup is True
+
+    unchecked_args = focus_app.build_arg_parser().parse_args(
+        ["--wired-loopback", "off", "--no-external-labrecorder", "--no-missed-trial-topup"]
+    )
+    unchecked_options = focus_app._capture_options_from_args(unchecked_args)
+
+    assert unchecked_options.wired_loopback_mode == "off"
+    assert unchecked_options.start_external_labrecorder is False
+    assert unchecked_args.enable_missed_trial_topup is False
+
+
 def test_focus_runner_command_requires_packaged_exe(tmp_path: Path, monkeypatch):
     manifest = tmp_path / "session_manifest.json"
     manifest.write_text("{}", encoding="utf-8")

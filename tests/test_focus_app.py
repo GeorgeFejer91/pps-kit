@@ -504,6 +504,41 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     window.dialog.close()
 
 
+def test_focus_mode_default_capture_checkboxes_are_operator_opt_out(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    window = focus_app.FocusModeWindow(q, package)
+    window.dialog.show()
+    app.processEvents()
+
+    assert window.wired_loopback_checkbox.isChecked()
+    assert window.external_labrecorder_checkbox.isEnabled()
+    assert window.external_labrecorder_checkbox.isChecked()
+    assert window.topup_checkbox.isChecked()
+    assert window._runtime_capture_options().wired_loopback_mode == "output4_tactile_proxy"
+    assert window._runtime_capture_options().start_external_labrecorder is True
+    assert window._topup_slots_enabled_for_plan() is True
+
+    QTest.mouseClick(window.wired_loopback_checkbox, q["Qt"].MouseButton.LeftButton)
+    QTest.mouseClick(window.external_labrecorder_checkbox, q["Qt"].MouseButton.LeftButton)
+    QTest.mouseClick(window.topup_checkbox, q["Qt"].MouseButton.LeftButton)
+    app.processEvents()
+
+    assert window._runtime_capture_options().wired_loopback_mode == "off"
+    assert window._runtime_capture_options().start_external_labrecorder is False
+    assert window._topup_slots_enabled_for_plan() is False
+    window.dialog.close()
+
+
 def test_focus_mode_setup_submit_prepares_controller_before_start(tmp_path: Path):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
