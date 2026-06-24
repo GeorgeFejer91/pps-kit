@@ -6164,6 +6164,9 @@ class FocusModeWindow:
         self.pending_instruction_request: dict[str, Any] | None = None
         self.pending_topup_approval_request: dict[str, Any] | None = None
         self._pre_run_controls: list[Any] = []
+        self.mode_tabs: Any | None = None
+        self.data_logging_tab_index = 0
+        self.experiment_control_tab_index = 1
         self._prewarm_thread: threading.Thread | None = None
         self._prewarm_started = False
         self._participant_combo_updating = False
@@ -6263,13 +6266,24 @@ class FocusModeWindow:
         topbar_layout.addLayout(brand, 1)
         root.addWidget(topbar)
 
+        self.mode_tabs = q["QTabWidget"]()
+        self.mode_tabs.setObjectName("focusModeTabs")
+        self.mode_tabs.setDocumentMode(True)
+        root.addWidget(self.mode_tabs, 1)
+
+        self.experiment_control_tab = q["QWidget"]()
+        self.experiment_control_tab.setObjectName("experimentControlTab")
+        experiment_control_tab_layout = q["QVBoxLayout"](self.experiment_control_tab)
+        experiment_control_tab_layout.setContentsMargins(0, 0, 0, 0)
+        experiment_control_tab_layout.setSpacing(0)
+
         self.workspace_splitter = q["QSplitter"](q["Qt"].Orientation.Vertical)
         self.workspace_splitter.setChildrenCollapsible(False)
         self.workspace_splitter.setHandleWidth(max(7, profile.root_spacing))
         self.workspace_splitter.splitterMoved.connect(
             lambda _pos, _index: self._clamp_workspace_splitter_for_experiment_control()
         )
-        root.addWidget(self.workspace_splitter, 1)
+        experiment_control_tab_layout.addWidget(self.workspace_splitter, 1)
 
         self.run_splitter = q["QSplitter"](q["Qt"].Orientation.Horizontal)
         self.run_splitter.setChildrenCollapsible(False)
@@ -6307,7 +6321,6 @@ class FocusModeWindow:
         self.instruction_button.setObjectName("primaryButton")
         self.instruction_button.setVisible(False)
         self.instruction_button.clicked.connect(self._continue_instruction_button)
-        response_layout.addWidget(self.instruction_button)
 
         self.start_button = q["QPushButton"]("Start Run")
         self.start_button.setObjectName("primaryButton")
@@ -6315,7 +6328,8 @@ class FocusModeWindow:
         self.pause_button = q["QPushButton"]("Pause")
         self.stop_button = q["QPushButton"]("Stop")
         self.stop_button.setObjectName("dangerButton")
-        self.close_button = q["QPushButton"]("Close")
+        self.close_button = q["QPushButton"]("Close", self.dialog)
+        self.close_button.setVisible(False)
         self.pause_button.setEnabled(False)
         self.stop_button.setEnabled(False)
         for button in (self.start_button, self.pause_button, self.stop_button, self.close_button):
@@ -6325,17 +6339,6 @@ class FocusModeWindow:
         self.pause_button.clicked.connect(self._toggle_pause)
         self.stop_button.clicked.connect(self._stop)
         self.close_button.clicked.connect(self._close)
-        controls = q["QGridLayout"]()
-        controls.setContentsMargins(0, 0, 0, 0)
-        controls.setHorizontalSpacing(6)
-        controls.setVerticalSpacing(6)
-        controls.addWidget(self.start_button, 0, 0)
-        controls.addWidget(self.pause_button, 0, 1)
-        controls.addWidget(self.stop_button, 1, 0)
-        controls.addWidget(self.close_button, 1, 1)
-        controls.setColumnStretch(0, 1)
-        controls.setColumnStretch(1, 1)
-        response_layout.addLayout(controls)
         self._install_primary_action_shortcuts()
         response_cell_layout.addWidget(response_panel, 0, q["Qt"].AlignmentFlag.AlignTop | q["Qt"].AlignmentFlag.AlignHCenter)
 
@@ -6386,7 +6389,6 @@ class FocusModeWindow:
         output_test_controls.addWidget(self.test_audio_button)
         output_test_controls.addWidget(self.test_tactile_button)
         output_levels_layout.addLayout(output_test_controls)
-        response_cell_layout.addWidget(output_levels_panel)
 
         output_panel, output_layout = _panel(q, "Output Summary", profile=profile)
         self.output_panel = output_panel
@@ -6410,40 +6412,36 @@ class FocusModeWindow:
         output_layout.addWidget(self.output_summary)
         show_output_summary_panel = profile.screen_class != "constrained"
         output_panel.setVisible(show_output_summary_panel)
-        response_cell_layout.addWidget(output_panel)
-        response_stack_parts = [profile.response_panel_side, output_levels_panel_min_height]
+        output_stack_cell = q["QWidget"]()
+        output_stack_cell.setObjectName("outputStackCell")
+        output_stack_layout = q["QVBoxLayout"](output_stack_cell)
+        output_stack_layout.setContentsMargins(0, 0, 0, 0)
+        output_stack_layout.setSpacing(max(6, profile.root_spacing))
+        output_stack_cell.setMinimumWidth(300 if profile.compact else 360)
+        output_stack_cell.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Expanding)
+        output_stack_layout.addWidget(output_levels_panel)
+        output_stack_layout.addWidget(output_panel)
+        output_stack_layout.addStretch(1)
+        self.output_stack_cell = output_stack_cell
+        output_stack_parts = [output_levels_panel_min_height]
         if show_output_summary_panel:
-            response_stack_parts.append(output_panel_min_height)
-        response_stack_height = sum(response_stack_parts) + (max(6, profile.root_spacing) * max(0, len(response_stack_parts) - 1))
+            output_stack_parts.append(output_panel_min_height)
+        output_stack_height = sum(output_stack_parts) + (max(6, profile.root_spacing) * max(0, len(output_stack_parts) - 1))
+        response_stack_height = max(profile.response_panel_side, output_stack_height)
         self.response_stack_height = response_stack_height
-        response_cell.setMinimumHeight(response_stack_height)
+        response_cell.setMinimumHeight(profile.response_panel_side)
         response_cell_layout.addStretch(1)
         self.run_splitter.addWidget(response_cell)
+        self.run_splitter.addWidget(output_stack_cell)
 
         self.operator_splitter = None
         self.operator_tabs = None
-        if profile.right_stack_mode == "tabs":
-            self.operator_tabs = q["QTabWidget"]()
-            self.operator_tabs.setDocumentMode(True)
-            self.operator_tabs.setMinimumWidth(300)
-            try:
-                self.operator_tabs.tabBar().setMovable(True)
-            except Exception:
-                pass
-            self.run_splitter.addWidget(self.operator_tabs)
-
-        def _add_operator_panel(title_text: str, panel: Any) -> None:
-            if self.operator_tabs is not None:
-                self.operator_tabs.addTab(panel, title_text)
-            else:
-                self.run_splitter.addWidget(panel)
-
         settings_title = "Data Logging / Experiment Settings"
-        data_panel_title = "" if profile.right_stack_mode == "tabs" else settings_title
-        data_panel, data_layout = _panel(q, data_panel_title, profile=profile)
+        data_panel, data_layout = _panel(q, settings_title, profile=profile)
         self.data_selection_panel = data_panel
         self.settings_panel = data_panel
         data_panel.setMinimumWidth(380 if profile.compact else 460)
+        data_panel.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Expanding)
         data_panel_min_height = 248 if profile.screen_class == "constrained" else max(290, profile.response_panel_side)
         data_panel.setMinimumHeight(data_panel_min_height)
         data_two_column = profile.screen_class != "constrained" or profile.available_width >= 1000
@@ -6566,6 +6564,10 @@ class FocusModeWindow:
         self.setup_submit_button.setMinimumHeight(profile.button_min_height)
         self.setup_submit_button.clicked.connect(self._submit_participant_setup)
         data_logging_layout.addWidget(self.setup_submit_button)
+        self.setup_status_label = q["QLabel"]("Submit setup to unlock Experiment Control.")
+        self.setup_status_label.setObjectName("mutedLabel")
+        self.setup_status_label.setWordWrap(True)
+        data_logging_layout.addWidget(self.setup_status_label)
         self._pre_run_controls.extend(
             [
                 self.participant_code_combo,
@@ -6667,7 +6669,7 @@ class FocusModeWindow:
         experiment_settings_layout.addStretch(1)
         self._pre_run_controls.extend([self.backup_recording_checkbox, self.wired_loopback_checkbox, self.topup_checkbox])
         data_layout.addStretch(1)
-        _add_operator_panel(settings_title, data_panel)
+        self.data_logging_tab_index = self.mode_tabs.addTab(data_panel, "Data Logging")
 
         self.processing_splitter = None
 
@@ -6683,6 +6685,17 @@ class FocusModeWindow:
         progress_layout.setSpacing(profile.panel_spacing)
         show_lower_detail_text = profile.screen_class == "spacious" and profile.available_height >= 1300
         show_lower_headings = (not profile.compact) and profile.available_height >= 1100
+        self.run_controls_widget = q["QWidget"]()
+        self.run_controls_widget.setObjectName("experimentRunControls")
+        run_controls_layout = q["QHBoxLayout"](self.run_controls_widget)
+        run_controls_layout.setContentsMargins(0, 0, 0, 0)
+        run_controls_layout.setSpacing(6)
+        run_controls_layout.addWidget(self.start_button)
+        run_controls_layout.addWidget(self.pause_button)
+        run_controls_layout.addWidget(self.stop_button)
+        run_controls_layout.addWidget(self.instruction_button)
+        run_controls_layout.addStretch(1)
+        progress_layout.addWidget(self.run_controls_widget)
         if show_lower_headings:
             progress_layout.addWidget(_subtitle(q, "Block Order"))
         self.part_selector_widget = q["QWidget"]()
@@ -6783,21 +6796,22 @@ class FocusModeWindow:
             self.progress_track_widget.setVisible(False)
         progress_layout.addStretch(1)
         self.workspace_splitter.addWidget(processing_panel)
+        self.experiment_control_tab_index = self.mode_tabs.addTab(self.experiment_control_tab, "Experiment Control")
+        self.mode_tabs.setTabEnabled(self.experiment_control_tab_index, False)
+        self.mode_tabs.setCurrentIndex(self.data_logging_tab_index)
 
         self.workspace_splitter.setStretchFactor(0, 1)
         self.workspace_splitter.setStretchFactor(1, 1)
         self.run_splitter.setStretchFactor(0, 0)
-        if profile.right_stack_mode == "tabs":
+        if self.run_splitter.count() > 1:
             self.run_splitter.setStretchFactor(1, 1)
-        else:
-            self.run_splitter.setStretchFactor(1, 2)
 
         response_column_width = profile.response_panel_side + max(12, profile.root_spacing)
-        if profile.right_stack_mode == "tabs":
-            self.run_splitter.setSizes([response_column_width, max(420, profile.window_width - response_column_width)])
-        else:
-            remaining_width = max(620, profile.window_width - response_column_width)
+        if self.run_splitter.count() > 1:
+            remaining_width = max(360, profile.window_width - response_column_width)
             self.run_splitter.setSizes([response_column_width, remaining_width])
+        else:
+            self.run_splitter.setSizes([max(response_column_width, profile.window_width - (profile.root_margin * 2))])
         top_height = response_stack_height
         self._refresh_experiment_control_minimum_height()
         self.workspace_splitter.setSizes([top_height, profile.experiment_control_initial_height])
@@ -6811,6 +6825,25 @@ class FocusModeWindow:
         self._install_operator_action_shortcuts()
         self._apply_participant_ledger_to_fields(self.package.participant_id)
         self._refresh_participant_ledger_summary()
+
+    def _set_experiment_control_tab_ready(self, ready: bool, *, switch: bool = False) -> None:
+        tabs = getattr(self, "mode_tabs", None)
+        if tabs is None:
+            return
+        index = int(getattr(self, "experiment_control_tab_index", 1))
+        if 0 <= index < tabs.count():
+            tabs.setTabEnabled(index, bool(ready))
+            if ready and switch:
+                tabs.setCurrentIndex(index)
+            elif not ready and tabs.currentIndex() == index:
+                data_index = int(getattr(self, "data_logging_tab_index", 0))
+                if 0 <= data_index < tabs.count():
+                    tabs.setCurrentIndex(data_index)
+
+    def _set_setup_status_message(self, message: str) -> None:
+        label = getattr(self, "setup_status_label", None)
+        if label is not None:
+            label.setText(str(message or ""))
 
     def _install_response_click_filter(self) -> None:
         app = self.q["QApplication"].instance()
@@ -7067,6 +7100,7 @@ class FocusModeWindow:
 
     def _experiment_control_visible_widgets(self) -> list[tuple[str, Any]]:
         candidates = [
+            ("run_controls_widget", getattr(self, "run_controls_widget", None)),
             ("part_selector_widget", getattr(self, "part_selector_widget", None)),
             ("block_plan_widget", getattr(self, "block_plan_widget", None)),
             ("block_preview_label", getattr(self, "block_preview_label", None)),
@@ -7768,6 +7802,7 @@ class FocusModeWindow:
 
     def _clear_participant_details(self) -> None:
         self.demographics_submitted = False
+        self._set_experiment_control_tab_ready(False)
         self.start_button.setEnabled(False)
         self._release_prepared_controller()
         if hasattr(self, "participant_name_input"):
@@ -7782,6 +7817,7 @@ class FocusModeWindow:
                 combo.setCurrentIndex(0)
         if hasattr(self, "setup_submit_button"):
             self.setup_submit_button.setEnabled(True)
+        self._set_setup_status_message("Submit setup to unlock Experiment Control.")
 
     def _refresh_loaded_package_display(self) -> None:
         profile = self.layout_profile
@@ -8236,10 +8272,13 @@ class FocusModeWindow:
 
     def _submit_participant_setup(self) -> bool:
         if self.demographics_submitted and self.controller is not None:
+            self._set_setup_status_message("Setup submitted. Experiment Control is ready.")
+            self._set_experiment_control_tab_ready(True, switch=True)
             return True
         failures = self._participant_setup_failures()
         if failures:
             self.event_label.setText(f"Complete participant setup: {', '.join(failures)}.")
+            self._set_setup_status_message(f"Complete participant setup: {', '.join(failures)}.")
             return False
         self.capture_options = self._runtime_capture_options()
         self.enable_missed_trial_topup = bool(self.topup_checkbox.isChecked())
@@ -8268,6 +8307,7 @@ class FocusModeWindow:
         except Exception as exc:
             self.controller = None
             self.event_label.setText(f"Participant setup could not prepare LSL: {exc}")
+            self._set_setup_status_message(f"Participant setup could not prepare LSL: {exc}")
             return False
         lsl_status = self._controller_lsl_status()
         if (
@@ -8278,6 +8318,7 @@ class FocusModeWindow:
             message = str(getattr(lsl_status, "message", "LSL streams were not created.") or "LSL streams were not created.")
             self._release_prepared_controller()
             self.event_label.setText(f"Participant setup could not prepare LSL: {message}")
+            self._set_setup_status_message(f"Participant setup could not prepare LSL: {message}")
             return False
         self.demographics_submitted = True
         self._apply_output_volumes_to_engine(getattr(self.controller, "audio_engine", None))
@@ -8291,12 +8332,14 @@ class FocusModeWindow:
         self._refresh_participant_step_buttons()
         self._refresh_participant_ledger_summary()
         self.start_button.setEnabled(True)
+        self._set_experiment_control_tab_ready(True, switch=True)
         self.run_state_chip.setText("LSL Ready" if bool(self.capture_options.enable_lsl) else "Ready")
         lsl_message = str(getattr(lsl_status, "message", "") or "")
         event_message = lsl_message or "Participant setup submitted"
         if ledger_error:
             event_message = f"{event_message}; participant ledger not saved: {ledger_error}"
         self.event_label.setText(event_message)
+        self._set_setup_status_message("Setup submitted. Experiment Control is ready.")
         _append_output_diary_event(
             "participant_setup_submitted",
             package=self.package,
@@ -8374,8 +8417,7 @@ class FocusModeWindow:
             self._stop()
 
     def _handle_close_shortcut(self) -> None:
-        if self.close_button.isEnabled():
-            self._close()
+        self._close()
 
     def _handle_part_shortcut(self, part_key: str) -> None:
         button = getattr(self, "part_buttons", {}).get(str(part_key))
@@ -8402,6 +8444,7 @@ class FocusModeWindow:
         widgets = {
             "target_button": self.target_button,
             "response_panel": self.response_panel,
+            "output_stack_cell": self.output_stack_cell,
             "output_levels_panel": self.output_levels_panel,
             "output_panel": self.output_panel,
             "output_summary": self.output_summary,
@@ -8409,10 +8452,10 @@ class FocusModeWindow:
             "part_selector_widget": self.part_selector_widget,
             "block_plan_widget": self.block_plan_widget,
             "tactile_timeline_widget": self.tactile_timeline_widget,
+            "run_controls_widget": self.run_controls_widget,
             "start_button": self.start_button,
             "pause_button": self.pause_button,
             "stop_button": self.stop_button,
-            "close_button": self.close_button,
         }
         if getattr(self, "data_selection_panel", None) is not None:
             widgets["data_selection_panel"] = self.data_selection_panel
@@ -8441,15 +8484,31 @@ class FocusModeWindow:
                 "count": int(self.operator_tabs.count()),
                 "current_index": int(self.operator_tabs.currentIndex()),
             }
+        if self.mode_tabs is not None:
+            splitter_metrics["mode_tabs"] = {
+                "width": int(self.mode_tabs.width()),
+                "height": int(self.mode_tabs.height()),
+                "count": int(self.mode_tabs.count()),
+                "current_index": int(self.mode_tabs.currentIndex()),
+                "data_logging_index": int(self.data_logging_tab_index),
+                "experiment_control_index": int(self.experiment_control_tab_index),
+                "experiment_control_enabled": bool(self.mode_tabs.isTabEnabled(self.experiment_control_tab_index)),
+            }
         timeline_debug = {}
         timeline_snapshot = getattr(self.tactile_timeline_widget, "timeline_debug_snapshot", None)
         if callable(timeline_snapshot):
             timeline_debug = dict(timeline_snapshot())
         experiment_control_debug = self._experiment_control_layout_debug()
+        visible_widgets = {
+            name: bool(getattr(widget, "isVisibleTo", lambda _parent: True)(self.dialog))
+            for name, widget in widgets.items()
+            if widget is not None
+        }
         return {
             "dialog": {"width": int(self.dialog.width()), "height": int(self.dialog.height())},
             "layout_profile": self.layout_profile.as_dict(),
             "widgets": {name: self._dialog_relative_rect(widget) for name, widget in widgets.items() if widget is not None},
+            "widget_visibility": visible_widgets,
             "splitters": splitter_metrics,
             "timeline_debug": timeline_debug,
             "experiment_control_debug": experiment_control_debug,
@@ -8457,6 +8516,7 @@ class FocusModeWindow:
             "adaptive_mechanisms": {
                 "right_stack_mode": self.layout_profile.right_stack_mode,
                 "operator_tabs": self.operator_tabs is not None,
+                "mode_tabs": self.mode_tabs is not None,
                 "resizable_workspace_splitter": self.workspace_splitter is not None,
                 "resizable_run_splitter": self.run_splitter is not None,
                 "data_settings_columns": getattr(self, "data_settings_columns_mode", ""),
@@ -8472,6 +8532,7 @@ class FocusModeWindow:
         profile = self.layout_profile
         dialog = snapshot["dialog"]
         widgets = snapshot["widgets"]
+        widget_visibility = dict(snapshot.get("widget_visibility") or {})
         failures: list[str] = []
         if dialog["width"] > profile.available_width or dialog["height"] > profile.available_height:
             failures.append(
@@ -8479,58 +8540,70 @@ class FocusModeWindow:
                 f"{profile.available_width}x{profile.available_height}"
             )
         for name, rect in widgets.items():
+            if not bool(widget_visibility.get(name, True)):
+                continue
             if rect["x"] < 0 or rect["y"] < 0 or rect["right"] > dialog["width"] or rect["bottom"] > dialog["height"]:
                 failures.append(f"{name} is clipped outside the dialog: {rect}")
         target = widgets.get("target_button", {})
-        if target and (target.get("width") != profile.target_min_height or target.get("height") != profile.target_min_height):
+        target_visible = bool(widget_visibility.get("target_button", True))
+        if target and target_visible and (target.get("width") != profile.target_min_height or target.get("height") != profile.target_min_height):
             failures.append(f"target_button does not match fixed {profile.target_min_height}px square: {target}")
         processing = widgets.get("processing_panel", {})
-        if processing and processing.get("height", 0) < profile.experiment_control_min_height:
+        processing_visible = bool(widget_visibility.get("processing_panel", True))
+        if processing and processing_visible and processing.get("height", 0) < profile.experiment_control_min_height:
             failures.append(
                 "processing_panel is shorter than the profile minimum "
                 f"{profile.experiment_control_min_height}px: {processing}"
             )
         experiment_control_debug = snapshot.get("experiment_control_debug") or {}
         content_min_height = int(experiment_control_debug.get("content_min_height") or 0)
-        if processing and content_min_height and processing.get("height", 0) < content_min_height:
+        if processing and processing_visible and content_min_height and processing.get("height", 0) < content_min_height:
             failures.append(
                 "processing_panel is shorter than the content-safe minimum "
                 f"{content_min_height}px: {processing}"
             )
         clipped_lower = list(experiment_control_debug.get("clipped_widgets") or [])
-        if clipped_lower:
+        if processing_visible and clipped_lower:
             failures.append(f"lower Experiment Control widgets are clipped: {clipped_lower}")
         too_short_lower = list(experiment_control_debug.get("too_short_widgets") or [])
-        if too_short_lower:
+        if processing_visible and too_short_lower:
             failures.append(f"lower Experiment Control widgets are shorter than measured content: {too_short_lower}")
         overlap_pairs = list(experiment_control_debug.get("overlap_pairs") or [])
-        if overlap_pairs:
+        if processing_visible and overlap_pairs:
             failures.append(f"lower Experiment Control widgets overlap: {overlap_pairs}")
         hidden_required = list(experiment_control_debug.get("hidden_required_widgets") or [])
-        if hidden_required:
+        if processing_visible and hidden_required:
             failures.append(f"required lower Experiment Control widgets are hidden: {hidden_required}")
-        if processing:
+        if processing and processing_visible:
             workspace_width = int(getattr(self.workspace_splitter, "width", lambda: 0)())
             if workspace_width and processing.get("width", 0) < workspace_width - 8:
                 failures.append(f"processing_panel does not span the lower workspace width: {processing}")
         timeline_debug = snapshot.get("timeline_debug") or {}
         row_names = list(timeline_debug.get("row_names") or [])
-        if row_names != list(TIMELINE_ROW_NAMES):
+        timeline_visible = bool(widget_visibility.get("tactile_timeline_widget", True))
+        if timeline_visible and row_names != list(TIMELINE_ROW_NAMES):
             failures.append(f"timeline rows are {row_names}, expected {list(TIMELINE_ROW_NAMES)}")
         label_fit = dict(timeline_debug.get("label_fit") or {})
-        if int(label_fit.get("overlap_count") or 0) > 0:
+        if timeline_visible and int(label_fit.get("overlap_count") or 0) > 0:
             failures.append(f"timeline labels overlap in {label_fit.get('overlap_count')} measured rect(s)")
         response = widgets.get("response_panel", {})
         output_levels = widgets.get("output_levels_panel", {})
         output = widgets.get("output_panel", {})
-        if response and output_levels and output_levels.get("y", 0) < response.get("bottom", 0):
-            failures.append("output_levels_panel is not positioned under response_panel")
+        response_visible = bool(widget_visibility.get("response_panel", True))
+        if response_visible and response and output_levels:
+            output_separated = (
+                output_levels.get("y", 0) >= response.get("bottom", 0)
+                or output_levels.get("x", 0) >= response.get("right", 0)
+            )
+            if not output_separated:
+                failures.append("output_levels_panel is not separated from response_panel")
         output_panel_visible = bool(getattr(getattr(self, "output_panel", None), "isVisible", lambda: False)())
-        if output_panel_visible and output_levels and output and output.get("y", 0) < output_levels.get("bottom", 0):
+        if response_visible and output_panel_visible and output_levels and output and output.get("y", 0) < output_levels.get("bottom", 0):
             failures.append("output_panel is not positioned under output_levels_panel")
         data_column = widgets.get("data_logging_column", {})
         settings_column = widgets.get("experiment_settings_column", {})
-        if data_column and settings_column:
+        data_visible = bool(widget_visibility.get("data_logging_column", True))
+        if data_visible and data_column and settings_column:
             if getattr(self, "data_settings_columns_mode", "") == "stacked":
                 if settings_column.get("y", 0) < data_column.get("bottom", 0):
                     failures.append("experiment_settings_column should stack below data_logging_column in stacked mode")

@@ -426,10 +426,12 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert "Participant Response" in joined
     assert "Participant Setup" in joined
     assert "Submit setup" in joined
-    if window.operator_tabs is not None:
-        assert window.operator_tabs.tabText(0) == "Data Logging / Experiment Settings"
-    else:
-        assert "Data Logging / Experiment Settings" in joined
+    assert window.mode_tabs is not None
+    assert window.mode_tabs.tabText(window.data_logging_tab_index) == "Data Logging"
+    assert window.mode_tabs.tabText(window.experiment_control_tab_index) == "Experiment Control"
+    assert window.mode_tabs.currentIndex() == window.data_logging_tab_index
+    assert not window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
+    assert "Data Logging / Experiment Settings" in joined
     assert "Data Logging" in joined
     assert "Experiment Control" in joined
     assert "Output Levels" in joined
@@ -464,7 +466,8 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert not window.participant_decrement_button.isEnabled()
     assert window.participant_status_summary_label.objectName() == "participantLedgerSummary"
     assert "P001: setup not saved; data not collected" in window.participant_status_summary_label.text()
-    assert window.part_buttons["1"].isEnabled()
+    assert "unlock Experiment Control" in window.setup_status_label.text()
+    assert not window.part_buttons["1"].isEnabled()
     assert not window.part_buttons["2"].isEnabled()
     assert window.preview_display_block_index is None
     placeholders = [line.placeholderText() for line in window.dialog.findChildren(q["QLineEdit"])]
@@ -487,8 +490,10 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert window.output_34_volume_percent_box.singleStep() == pytest.approx(0.001)
     assert window.test_audio_button.objectName() == "testAudioOutputButton"
     assert window.test_tactile_button.objectName() == "testTactileOutputButton"
-    assert window.test_audio_button.isEnabled()
-    assert window.test_tactile_button.isEnabled()
+    assert not window.output_12_volume_slider.isEnabled()
+    assert not window.output_34_volume_slider.isEnabled()
+    assert not window.test_audio_button.isEnabled()
+    assert not window.test_tactile_button.isEnabled()
     assert window.backup_recording_checkbox.objectName() == "failSafeRecordingCheckbox"
     assert window.wired_loopback_checkbox.objectName() == "wiredLoopbackCheckbox"
     assert window.external_labrecorder_checkbox.objectName() == "externalLabRecorderCheckbox"
@@ -501,6 +506,21 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     QTest.mouseClick(window.wired_loopback_checkbox, q["Qt"].MouseButton.LeftButton)
     app.processEvents()
     assert window._runtime_capture_options().wired_loopback_mode == "off"
+
+    _fill_required_setup(window)
+    QTest.mouseClick(window.setup_submit_button, q["Qt"].MouseButton.LeftButton)
+    app.processEvents()
+    assert window.demographics_submitted
+    assert window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
+    assert window.mode_tabs.currentIndex() == window.experiment_control_tab_index
+    assert window.part_buttons["1"].isEnabled()
+    assert not window.part_buttons["2"].isEnabled()
+    assert window.start_button.isEnabled()
+    assert "Experiment Control is ready" in window.setup_status_label.text()
+    assert window.output_12_volume_slider.isEnabled()
+    assert window.output_34_volume_slider.isEnabled()
+    assert window.test_audio_button.isEnabled()
+    assert window.test_tactile_button.isEnabled()
     assert window.data_columns_widget.objectName() == "dataSettingsColumns"
     assert window.data_logging_column.objectName() == "dataLoggingColumn"
     assert window.experiment_settings_column.objectName() == "experimentSettingsColumn"
@@ -510,19 +530,25 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert window.output_panel is not window.processing_panel
     assert window.processing_splitter is None
     response_rect = _widget_rect(window.response_panel, window.dialog)
+    output_stack_rect = _widget_rect(window.output_stack_cell, window.dialog)
     output_levels_rect = _widget_rect(window.output_levels_panel, window.dialog)
     output_rect = _widget_rect(window.output_panel, window.dialog)
     response_cell_rect = _widget_rect(window.response_cell, window.dialog)
     processing_rect = _widget_rect(window.processing_panel, window.dialog)
+    run_controls_rect = _widget_rect(window.run_controls_widget, window.dialog)
+    start_rect = _widget_rect(window.start_button, window.dialog)
     workspace_rect = _widget_rect(window.workspace_splitter, window.dialog)
-    assert output_levels_rect["y"] >= response_rect["bottom"]
-    assert output_levels_rect["x"] >= response_cell_rect["x"]
-    assert output_levels_rect["right"] <= response_cell_rect["right"]
+    assert window.run_controls_widget.objectName() == "experimentRunControls"
+    assert run_controls_rect["y"] >= processing_rect["y"]
+    assert start_rect["y"] >= processing_rect["y"]
+    assert start_rect["y"] > response_rect["bottom"]
+    assert output_stack_rect["x"] >= response_rect["right"]
+    assert output_levels_rect["x"] >= output_stack_rect["x"]
+    assert output_levels_rect["right"] <= output_stack_rect["right"]
     if window.output_panel.isVisible():
         assert output_rect["y"] >= output_levels_rect["bottom"]
-        assert output_rect["y"] >= response_rect["bottom"]
-        assert output_rect["x"] >= response_cell_rect["x"]
-        assert output_rect["right"] <= response_cell_rect["right"]
+        assert output_rect["x"] >= output_stack_rect["x"]
+        assert output_rect["right"] <= output_stack_rect["right"]
     else:
         assert window.layout_profile.screen_class == "constrained"
     assert processing_rect["width"] >= workspace_rect["width"] - 8
@@ -612,6 +638,8 @@ def test_focus_mode_setup_submit_prepares_controller_before_start(tmp_path: Path
     app.processEvents()
 
     assert not window.start_button.isEnabled()
+    assert window.mode_tabs.currentIndex() == window.data_logging_tab_index
+    assert not window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
     assert window.start() is None
     assert not created
 
@@ -622,6 +650,8 @@ def test_focus_mode_setup_submit_prepares_controller_before_start(tmp_path: Path
     assert window.demographics_submitted
     assert window.controller is not None
     assert window.start_button.isEnabled()
+    assert window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
+    assert window.mode_tabs.currentIndex() == window.experiment_control_tab_index
     assert not window.participant_name_input.isEnabled()
     assert not window.setup_submit_button.isEnabled()
     window.dialog.close()
@@ -810,6 +840,13 @@ def test_focus_mode_output_test_buttons_use_standard_assets_and_current_gains(tm
     window.dialog.show()
     app.processEvents()
 
+    assert not window.test_audio_button.isEnabled()
+    assert not window.test_tactile_button.isEnabled()
+    _fill_required_setup(window)
+    assert window._submit_participant_setup()
+    assert window.test_audio_button.isEnabled()
+    assert window.test_tactile_button.isEnabled()
+
     window.output_12_volume_percent_box.setValue(41)
     window.output_34_volume_percent_box.setValue(23)
     QTest.mouseClick(window.test_audio_button, q["Qt"].MouseButton.LeftButton)
@@ -906,8 +943,10 @@ def test_focus_mode_close_click_releases_waits_and_closes_labrecorder(tmp_path: 
     window.pending_topup_approval_request = {"approved": True, "event": topup_event}
     window.dialog.show()
     app.processEvents()
+    window._set_experiment_control_tab_ready(True, switch=True)
+    app.processEvents()
 
-    QTest.mouseClick(window.close_button, q["Qt"].MouseButton.LeftButton)
+    QTest.keyClick(window.dialog, q["Qt"].Key.Key_W, q["Qt"].KeyboardModifier.ControlModifier)
     app.processEvents()
 
     assert controller.stop_called is True
@@ -1016,6 +1055,8 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
     window = focus_app.FocusModeWindow(q, package, enable_missed_trial_topup=True)
     window.dialog.resize(1180, 760)
     window.dialog.show()
+    app.processEvents()
+    window._set_experiment_control_tab_ready(True, switch=True)
     app.processEvents()
 
     assert window.selected_part_key == "1"
@@ -1254,8 +1295,33 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     assert window.target_button.maximumHeight() == profile.target_min_height
     assert window.include_name_lsl_checkbox.minimumHeight() >= profile.button_min_height + 8
     assert window.output_summary.minimumHeight() == profile.output_min_height
+    assert window.mode_tabs.count() == 2
+    assert window.mode_tabs.currentIndex() == window.data_logging_tab_index
+    assert not window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
+    data_rect = _widget_rect(window.data_logging_column, window.dialog)
+    settings_rect = _widget_rect(window.experiment_settings_column, window.dialog)
+    if window.data_settings_columns_mode == "stacked":
+        assert settings_rect["y"] >= data_rect["bottom"]
+    else:
+        assert abs(settings_rect["y"] - data_rect["y"]) <= 8
+        assert settings_rect["x"] >= data_rect["right"]
+    for widget in (
+        window.participant_code_combo,
+        window.include_name_lsl_checkbox,
+        window.setup_submit_button,
+        window.data_columns_widget,
+        window.instruction_legend_widget,
+    ):
+        _assert_widget_inside_dialog(widget, window.dialog)
+
+    _fill_required_setup(window)
+    assert window._submit_participant_setup()
+    app.processEvents()
+    assert window.mode_tabs.currentIndex() == window.experiment_control_tab_index
     snapshot = window.layout_validation_snapshot()
     content_min = snapshot["experiment_control_debug"]["content_min_height"]
+    assert snapshot["splitters"]["mode_tabs"]["count"] == 2
+    assert snapshot["splitters"]["mode_tabs"]["experiment_control_enabled"] is True
     assert window.processing_panel.minimumHeight() >= profile.experiment_control_min_height
     assert window.processing_panel.minimumHeight() >= content_min
     assert snapshot["timeline_debug"]["row_names"] == list(focus_app.TIMELINE_ROW_NAMES)
@@ -1269,30 +1335,21 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     assert window.output_panel is not window.processing_panel
     assert window.processing_splitter is None
     assert window.run_splitter.count() == 2
-    data_rect = _widget_rect(window.data_logging_column, window.dialog)
-    settings_rect = _widget_rect(window.experiment_settings_column, window.dialog)
-    if window.data_settings_columns_mode == "stacked":
-        assert settings_rect["y"] >= data_rect["bottom"]
-    else:
-        assert abs(settings_rect["y"] - data_rect["y"]) <= 8
-        assert settings_rect["x"] >= data_rect["right"]
 
     visible_widgets = [
         window.target_button,
         window.response_panel,
-        window.participant_code_combo,
-        window.include_name_lsl_checkbox,
+        window.output_stack_cell,
+        window.run_controls_widget,
         window.start_button,
         window.pause_button,
         window.stop_button,
-        window.close_button,
         window.processing_panel,
         window.output_levels_panel,
         window.part_selector_widget,
         window.part_buttons["1"],
         window.part_buttons["2"],
         window.block_plan_widget,
-        window.instruction_legend_widget,
         window.tactile_timeline_widget,
     ]
     if window.topup_draft_widget.isVisible():
@@ -1308,15 +1365,19 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     assert window.output_summary.geometry().height() >= profile.output_min_height
     assert window.processing_panel.geometry().height() >= profile.experiment_control_min_height
     response_rect = _widget_rect(window.response_panel, window.dialog)
+    output_stack_rect = _widget_rect(window.output_stack_cell, window.dialog)
     output_rect = _widget_rect(window.output_panel, window.dialog)
-    response_cell_rect = _widget_rect(window.response_cell, window.dialog)
+    run_controls_rect = _widget_rect(window.run_controls_widget, window.dialog)
+    start_rect = _widget_rect(window.start_button, window.dialog)
     run_rect = _widget_rect(window.run_splitter, window.dialog)
     processing_rect = _widget_rect(window.processing_panel, window.dialog)
     workspace_rect = _widget_rect(window.workspace_splitter, window.dialog)
+    assert run_controls_rect["y"] >= processing_rect["y"]
+    assert start_rect["y"] > response_rect["bottom"]
+    assert output_stack_rect["x"] >= response_rect["right"]
     if window.output_panel.isVisible():
-        assert output_rect["y"] >= response_rect["bottom"]
-        assert output_rect["x"] >= response_cell_rect["x"]
-        assert output_rect["right"] <= response_cell_rect["right"]
+        assert output_rect["x"] >= output_stack_rect["x"]
+        assert output_rect["right"] <= output_stack_rect["right"]
     else:
         assert window.layout_profile.screen_class == "constrained"
     assert processing_rect["y"] >= run_rect["bottom"]
@@ -1345,6 +1406,8 @@ def test_focus_mode_lower_control_panel_resists_splitter_compression(
     window = focus_app.FocusModeWindow(q, package, enable_missed_trial_topup=True, layout_profile=profile)
     window.dialog.resize(profile.window_width, profile.window_height)
     window.dialog.show()
+    app.processEvents()
+    window._set_experiment_control_tab_ready(True, switch=True)
     app.processEvents()
 
     total = max(1, int(window.workspace_splitter.height()))
@@ -1384,6 +1447,8 @@ def test_focus_mode_lower_control_panel_handles_long_timeline_labels(
     window = focus_app.FocusModeWindow(q, package, enable_missed_trial_topup=True, layout_profile=profile)
     window.dialog.resize(profile.window_width, profile.window_height)
     window.dialog.show()
+    app.processEvents()
+    window._set_experiment_control_tab_ready(True, switch=True)
     app.processEvents()
 
     long_label = "Very long respiratory condition and tactile cue detail " * 6
@@ -1430,6 +1495,8 @@ def test_focus_mode_instruction_continue_accepts_target_click_and_keyboard(tmp_p
     package = load_run_package(_write_minimal_session_manifest(tmp_path))
     window = focus_app.FocusModeWindow(q, package)
     window.dialog.show()
+    app.processEvents()
+    window._set_experiment_control_tab_ready(True, switch=True)
     app.processEvents()
 
     click_event = threading.Event()
@@ -1540,6 +1607,8 @@ def test_focus_mode_start_part2_button_controls_part_transition(tmp_path: Path):
     window = focus_app.FocusModeWindow(q, package)
     window.dialog.show()
     app.processEvents()
+    window._set_experiment_control_tab_ready(True, switch=True)
+    app.processEvents()
 
     assert window.start_part2_button is not None
     assert window.start_part2_button.isVisible()
@@ -1642,11 +1711,18 @@ def test_focus_mode_operator_keyboard_shortcuts_control_ui(tmp_path: Path):
     q = focus_app._require_qt()
     app = QApplication.instance() or QApplication([])
     package = load_run_package(_write_focus_preview_session_manifest(tmp_path))
-    window = focus_app.FocusModeWindow(q, package, enable_missed_trial_topup=True)
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+        enable_missed_trial_topup=True,
+    )
     window.dialog.show()
     window.dialog.activateWindow()
     window.dialog.setFocus(q["Qt"].FocusReason.ShortcutFocusReason)
     app.processEvents()
+    _fill_required_setup(window)
+    assert window._submit_participant_setup()
 
     shortcut_map = window.keyboard_shortcut_map()
     assert shortcut_map["pause_resume"] == ["Ctrl+P"]

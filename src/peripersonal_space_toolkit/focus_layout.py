@@ -311,6 +311,11 @@ QTabBar::tab:selected {{
     border-bottom-color: {colors["surface"]};
     color: {colors["text"]};
 }}
+QTabBar::tab:disabled {{
+    background: {colors["disabled"]};
+    color: {colors["disabled_text"]};
+    border-color: {colors["border"]};
+}}
 QProgressBar {{
     border: 1px solid {colors["border_strong"]};
     border-radius: 6px;
