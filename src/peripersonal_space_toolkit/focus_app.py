@@ -60,6 +60,8 @@ from .analysis_review import (
     behavior_signals_for_scope,
     best_model_for_scope,
     condition_lens_button_rows,
+    condition_lens_baseline_status,
+    condition_lens_metric_label,
     condition_lens_observed_series,
     condition_lens_prediction_series,
     fit_row_for_scope,
@@ -2944,9 +2946,10 @@ QTextEdit#analysisDetailsText {
         lens_label = str(lens_payload.get("label") or self.current_condition_lens)
         model_label = str(model_payload.get("label") or MODEL_LABELS.get(self.current_quick_model, self.current_quick_model))
         tier = str(model_payload.get("evidence_tier") or MODEL_EVIDENCE_INSUFFICIENT)
+        baseline_status = condition_lens_baseline_status(self.data, self.current_condition_lens)
         self.triage_hint.setText(
             f"{lens_label}: {len(observed_series)} curve(s). {model_label} AICc support: {tier}. "
-            "Button colors point to promising visual separation or model support, not confirmatory statistics."
+            f"{baseline_status}. Button colors point to promising visual separation or model support, not confirmatory statistics."
         )
         self.plot_widget.set_series(
             observed=[],
@@ -2954,7 +2957,7 @@ QTextEdit#analysisDetailsText {
             predicted=[],
             predicted_series=predicted_series,
             model_label=f"{lens_label} | {model_label}",
-            metric_label="Facilitation / RT (ms)",
+            metric_label=condition_lens_metric_label(self.data, self.current_condition_lens),
             empty_text="No condition-lens curve points were available for this participant.",
             show_observed=True,
             show_uncertainty=True,

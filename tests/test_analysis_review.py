@@ -20,7 +20,9 @@ from peripersonal_space_toolkit.analysis_review import (
     behavior_signal_counts,
     behavior_signals_for_scope,
     best_model_for_scope,
+    condition_lens_baseline_status,
     condition_lens_button_rows,
+    condition_lens_metric_label,
     condition_lens_observed_series,
     condition_lens_prediction_series,
     default_condition_model,
@@ -317,3 +319,104 @@ def test_session_analysis_writes_exploratory_data_behavior_outputs(tmp_path: Pat
     assert {row["signal"] for row in rows}.intersection({"Expected pattern", "Mixed / ambiguous", "Insufficient evidence"})
     assert "pass" not in json.dumps(summary).lower()
     assert "fail" not in json.dumps(summary).lower()
+
+
+def test_session_analysis_pools_baseline_across_soas_within_condition_scope() -> None:
+    events = []
+    event_id = 1
+
+    def add_trial(
+        *,
+        index: int,
+        trial_type: str,
+        soa_ms: int,
+        onset_s: float,
+        rt_s: float,
+        part_number: int,
+        phase: str,
+        noise: str = "pink",
+    ) -> None:
+        nonlocal event_id
+        payload = {
+            "participant_id": "S001",
+            "part_number": part_number,
+            "block_number": 1,
+            "trial_number": index,
+            "trial_uid": f"T{index:03d}",
+            "trial_type": trial_type,
+            "soa_ms": soa_ms,
+            "respiratory_phase": phase,
+            "noise_type": noise,
+            "timestamp_quality": "dac_time_sample_exact",
+        }
+        events.append({"event_id": event_id, "event_type": "trial_start", "unix_time": onset_s - 0.1, **payload})
+        event_id += 1
+        events.append({"event_id": event_id, "event_type": "tactile_onset", "unix_time": onset_s, **payload})
+        event_id += 1
+        events.append(
+            {
+                "event_id": event_id,
+                "event_type": "mouse_click",
+                "unix_time": onset_s + rt_s,
+                "in_target": True,
+                "during_playback": True,
+                "part_number": part_number,
+                "block_number": 1,
+                "timestamp_quality": "dac_time_sample_exact",
+            }
+        )
+        event_id += 1
+
+    add_trial(index=1, trial_type="Baseline", soa_ms=100, onset_s=1.0, rt_s=0.400, part_number=1, phase="Inhale")
+    add_trial(index=2, trial_type="Baseline", soa_ms=800, onset_s=2.0, rt_s=0.500, part_number=1, phase="Inhale")
+    add_trial(index=3, trial_type="Audio-Tactile", soa_ms=100, onset_s=3.0, rt_s=0.350, part_number=1, phase="Inhale")
+    add_trial(index=4, trial_type="Audio-Tactile", soa_ms=800, onset_s=4.0, rt_s=0.300, part_number=1, phase="Inhale")
+    add_trial(index=5, trial_type="Baseline", soa_ms=100, onset_s=5.0, rt_s=0.610, part_number=1, phase="Exhale")
+    add_trial(index=6, trial_type="Audio-Tactile", soa_ms=100, onset_s=6.0, rt_s=0.500, part_number=1, phase="Exhale")
+
+    result = analyze_session_events(events)
+
+    inhale_rows = [
+        row
+        for row in result.condition_lens_curve_rows
+        if row.get("analysis_lens") == CONDITION_LENS_TWO_BY_TWO and row.get("display_scope") == "Part 1 / Inhale"
+    ]
+    assert {int(row["soa_ms"]) for row in inhale_rows} == {100, 800}
+    assert [float(row["baseline_mean_rt_ms"]) for row in inhale_rows] == pytest.approx([450.0, 450.0])
+    assert {row["baseline_source_soas_ms"] for row in inhale_rows} == {"100;800"}
+    assert {row["baseline_n"] for row in inhale_rows} == {2}
+    assert {row["baseline_correction_method"] for row in inhale_rows} == {"condition_mean_pooled_soa"}
+    assert {int(row["soa_ms"]): float(row["facilitation_ms"]) for row in inhale_rows} == pytest.approx({100: 100.0, 800: 150.0})
+
+    exhale_row = next(
+        row
+        for row in result.condition_lens_curve_rows
+        if row.get("analysis_lens") == CONDITION_LENS_TWO_BY_TWO and row.get("display_scope") == "Part 1 / Exhale"
+    )
+    assert float(exhale_row["baseline_mean_rt_ms"]) == 610.0
+    assert float(exhale_row["facilitation_ms"]) == 110.0
+
+    legacy_inhale = [
+        row
+        for row in result.curve_rows
+        if row.get("aggregation_mode") == PARTS_SEPARATE and row.get("scope") == "Part 1 / Inhale / pink"
+    ]
+    assert [float(row["baseline_mean_rt_ms"]) for row in legacy_inhale] == pytest.approx([450.0, 450.0])
+    assert {row["baseline_source_soas_ms"] for row in legacy_inhale} == {"100;800"}
+
+
+def test_condition_lens_metric_label_reports_baseline_corrected_status() -> None:
+    data = AnalysisReviewData(
+        condition_lens_curve_rows=[
+            {
+                "analysis_lens": CONDITION_LENS_TWO_BY_TWO,
+                "display_scope": "Part 1 / Inhale",
+                "fit_metric": "facilitation_ms",
+                "facilitation_ms": 25,
+                "baseline_correction_method": "condition_mean_pooled_soa",
+            }
+        ]
+    )
+
+    assert condition_lens_metric_label(data, CONDITION_LENS_TWO_BY_TWO) == "Baseline-corrected facilitation (ms)"
+    assert condition_lens_baseline_status(data, CONDITION_LENS_TWO_BY_TWO) == "Baseline: pooled across SOAs within condition"

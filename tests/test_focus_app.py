@@ -267,29 +267,30 @@ def _write_analysis_review_outputs(session_dir: Path) -> dict[str, Path]:
     )
     condition_curves = analysis_dir / f"{session_id}_condition_lens_curve_points.csv"
     condition_curve_lines = [
-        "analysis_lens,analysis_lens_label,display_scope,scope,aggregation_mode,aggregation_label,part_label,state_label,pooled_factors,soa_ms,fit_metric,facilitation_ms,facilitation_sem_ms,mean_rt_ms,n",
+        "analysis_lens,analysis_lens_label,display_scope,scope,aggregation_mode,aggregation_label,part_label,state_label,pooled_factors,soa_ms,fit_metric,facilitation_ms,facilitation_sem_ms,mean_rt_ms,n,baseline_mean_rt_ms,baseline_n,baseline_source_soas_ms,baseline_correction_method",
     ]
+    baseline_suffix = "330,32,100;200;400;800,condition_mean_pooled_soa"
     for part in (1, 2):
         for state, offset in (("Inhale", 0), ("Exhale", 5)):
             display = f"Part {part} / {state}"
             for soa, facilitation in ((100, 10 + offset + part), (200, 20 + offset + part), (400, 34 + offset + part), (800, 43 + offset + part)):
                 condition_curve_lines.append(
-                    f"two_by_two,2 x 2,{display},{display},two_by_two,2 x 2,Part {part},{state},noise/source,{soa},facilitation_ms,{facilitation},2,{330 - facilitation},8"
+                    f"two_by_two,2 x 2,{display},{display},two_by_two,2 x 2,Part {part},{state},noise/source,{soa},facilitation_ms,{facilitation},2,{330 - facilitation},8,{baseline_suffix}"
                 )
     for part in (1, 2):
         display = f"Part {part}"
         for soa, facilitation in ((100, 12 + part), (200, 23 + part), (400, 35 + part), (800, 44 + part)):
             condition_curve_lines.append(
-                f"part,Parts,{display},{display},part,Part lens,Part {part},All states,state;noise/source,{soa},facilitation_ms,{facilitation},2,{330 - facilitation},16"
+                f"part,Parts,{display},{display},part,Part lens,Part {part},All states,state;noise/source,{soa},facilitation_ms,{facilitation},2,{330 - facilitation},16,{baseline_suffix}"
             )
     for state, offset in (("Inhale", 0), ("Exhale", 5)):
         for soa, facilitation in ((100, 12 + offset), (200, 23 + offset), (400, 35 + offset), (800, 44 + offset)):
             condition_curve_lines.append(
-                f"state,States,{state},{state},state,State lens,All parts,{state},part;noise/source,{soa},facilitation_ms,{facilitation},2,{330 - facilitation},16"
+                f"state,States,{state},{state},state,State lens,All parts,{state},part;noise/source,{soa},facilitation_ms,{facilitation},2,{330 - facilitation},16,{baseline_suffix}"
             )
     for soa, facilitation in ((100, 14), (200, 24), (400, 36), (800, 45)):
         condition_curve_lines.append(
-            f"overall,Overall,All conditions,All conditions,overall,Overall lens,All parts,All states,part;state;noise/source,{soa},facilitation_ms,{facilitation},2,{330 - facilitation},32"
+            f"overall,Overall,All conditions,All conditions,overall,Overall lens,All parts,All states,part;state;noise/source,{soa},facilitation_ms,{facilitation},2,{330 - facilitation},32,{baseline_suffix}"
         )
     condition_curves.write_text("\n".join(condition_curve_lines) + "\n", encoding="utf-8")
     condition_fits = analysis_dir / f"{session_id}_condition_lens_model_fits.csv"
@@ -2196,11 +2197,14 @@ def test_focus_mode_opens_post_run_analysis_review_dialog(tmp_path: Path, monkey
     details = dialog.findChild(q["QTextEdit"], "analysisDetailsText")
     quality_badge = dialog.findChild(q["QLabel"], "analysisQualityBadge")
     triage_hint = dialog.findChild(q["QLabel"], "analysisTriageHint")
+    analysis_plot = dialog.findChild(q["QWidget"], "analysisCurvePlot")
     more_button = dialog.findChild(q["QPushButton"], "analysisMoreButton")
     condition_buttons = [button for button in dialog.findChildren(q["QPushButton"], "analysisConditionLensButton")]
     quick_model_buttons = [button for button in dialog.findChildren(q["QPushButton"], "analysisModelButton")]
     assert quality_badge is not None and "Participant Run Quality: PASS" in quality_badge.text()
     assert triage_hint is not None and "AICc support" in triage_hint.text()
+    assert "Baseline: pooled across SOAs within condition" in triage_hint.text()
+    assert analysis_plot is not None and getattr(analysis_plot, "metric_label", "") == "Baseline-corrected facilitation (ms)"
     assert {button.text() for button in condition_buttons} == {"2 x 2", "Part 1 | Part 2", "Inhale | Exhale"}
     assert {button.text() for button in quick_model_buttons} == {"Sigmoid", "Log decay", "Linear"}
     assert details is not None and "Participant Run Quality: PASS" in details.toPlainText()

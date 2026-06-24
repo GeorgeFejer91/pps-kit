@@ -37,6 +37,7 @@ METRIC_FACILITATION = "facilitation_ms"
 METRIC_MEAN_RT = "mean_rt_ms"
 METRIC_HIT_RATE = "hit_rate"
 METRIC_RESPONSE_COUNT = "response_count"
+BASELINE_CORRECTION_METHOD_CONDITION_MEAN_POOLED_SOA = "condition_mean_pooled_soa"
 SOURCE_FINAL = "final_analysis"
 SOURCE_ORIGINAL = "original_trials"
 SOURCE_TOPUP = "topup_rescues"
@@ -540,15 +541,35 @@ def recording_quality_status(data: AnalysisReviewData) -> tuple[str, str]:
     return status, reason or ("No serious exclusion criteria were triggered." if status == QUALITY_PASS else "A serious exclusion criterion was triggered.")
 
 
+def condition_lens_metric_label(data: AnalysisReviewData, lens: str) -> str:
+    rows = _condition_lens_rows(data, lens)
+    if any(_metric_name(row) == METRIC_FACILITATION for row in rows):
+        return "Baseline-corrected facilitation (ms)"
+    return "Mean RT (ms)"
+
+
+def condition_lens_baseline_status(data: AnalysisReviewData, lens: str) -> str:
+    rows = _condition_lens_rows(data, lens)
+    corrected = [
+        row
+        for row in rows
+        if _metric_name(row) == METRIC_FACILITATION
+        and str(row.get("baseline_correction_method") or "").strip() == BASELINE_CORRECTION_METHOD_CONDITION_MEAN_POOLED_SOA
+    ]
+    if corrected:
+        return "Baseline: pooled across SOAs within condition"
+    if any(_metric_name(row) == METRIC_FACILITATION for row in rows):
+        return "Baseline: corrected"
+    return "Baseline: unavailable; plotting mean RT"
+
+
 def condition_lens_observed_series(
     data: AnalysisReviewData,
     lens: str,
     *,
     metric: str = METRIC_FACILITATION,
 ) -> list[dict[str, Any]]:
-    rows = [row for row in data.condition_lens_curve_rows if str(row.get("analysis_lens") or "") == lens]
-    if not rows and lens == CONDITION_LENS_TWO_BY_TWO:
-        rows = [dict(row, analysis_lens=lens, display_scope=row.get("scope", "")) for row in data.curve_rows if _row_part_mode(row) == data.default_part_mode]
+    rows = _condition_lens_rows(data, lens)
     grouped: dict[str, list[dict[str, float | str]]] = {}
     for row in rows:
         scope = _condition_row_scope(row)
@@ -651,6 +672,13 @@ def condition_lens_fit_row(data: AnalysisReviewData, lens: str, scope: str, mode
     if not matches:
         return None
     return min(matches, key=lambda row: _as_float(row.get("aicc"), _as_float(row.get("aic"), math.inf)))
+
+
+def _condition_lens_rows(data: AnalysisReviewData, lens: str) -> list[dict[str, Any]]:
+    rows = [row for row in data.condition_lens_curve_rows if str(row.get("analysis_lens") or "") == lens]
+    if not rows and lens == CONDITION_LENS_TWO_BY_TWO:
+        rows = [dict(row, analysis_lens=lens, display_scope=row.get("scope", "")) for row in data.curve_rows if _row_part_mode(row) == data.default_part_mode]
+    return rows
 
 
 def _fallback_lens_label(data: AnalysisReviewData, lens: str) -> str:

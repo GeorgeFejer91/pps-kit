@@ -35,6 +35,7 @@ MODEL_EVIDENCE_MIXED = "mixed"
 MODEL_EVIDENCE_INSUFFICIENT = "insufficient"
 QUALITY_PASS = "PASS"
 QUALITY_FAIL = "FAIL"
+BASELINE_CORRECTION_METHOD_CONDITION_MEAN_POOLED_SOA = "condition_mean_pooled_soa"
 
 SIGNAL_EXPECTED = "Expected pattern"
 SIGNAL_MIXED = "Mixed / ambiguous"
@@ -880,7 +881,7 @@ def _build_condition_lens_curves_for_lens(
             mean_rt = statistics.mean(values)
             rt_sd = statistics.stdev(values) if len(values) > 1 else 0.0
             rt_sem = rt_sd / math.sqrt(len(values)) if len(values) > 1 else 0.0
-            base_stats = baseline.get((scope, soa))
+            base_stats = baseline.get(scope)
             base_rt = base_stats.get("mean") if base_stats is not None else None
             facilitation = base_rt - mean_rt if base_rt is not None else None
             baseline_sem = _as_float((base_stats or {}).get("sem"), math.nan)
@@ -913,6 +914,9 @@ def _build_condition_lens_curves_for_lens(
                     "baseline_mean_rt_ms": "" if base_rt is None else base_rt,
                     "baseline_sd_rt_ms": "" if not math.isfinite(baseline_sd) or base_rt is None else baseline_sd,
                     "baseline_sem_rt_ms": "" if not math.isfinite(baseline_sem) or base_rt is None else baseline_sem,
+                    "baseline_n": "" if base_rt is None else base_stats.get("n", ""),
+                    "baseline_source_soas_ms": "" if base_rt is None else base_stats.get("source_soas_ms", ""),
+                    "baseline_correction_method": "" if base_rt is None else BASELINE_CORRECTION_METHOD_CONDITION_MEAN_POOLED_SOA,
                     "facilitation_ms": "" if facilitation is None else facilitation,
                     "facilitation_sd_ms": "" if not math.isfinite(facilitation_sd) else facilitation_sd,
                     "facilitation_sem_ms": "" if not math.isfinite(facilitation_sem) else facilitation_sem,
@@ -955,8 +959,8 @@ def _build_condition_lens_curves_for_lens(
     return curve_rows, model_fit_rows, model_comparison_rows
 
 
-def _condition_lens_baseline_means(response_rows: list[dict[str, Any]], *, analysis_lens: str) -> dict[tuple[str, int], dict[str, float]]:
-    groups: dict[tuple[str, int], list[float]] = {}
+def _condition_lens_baseline_means(response_rows: list[dict[str, Any]], *, analysis_lens: str) -> dict[str, dict[str, Any]]:
+    groups: dict[str, list[tuple[float, int]]] = {}
     for row in response_rows:
         if row.get("trial_type") != "Baseline" or row.get("rt_ms") in (None, ""):
             continue
@@ -965,8 +969,8 @@ def _condition_lens_baseline_means(response_rows: list[dict[str, Any]], *, analy
         if soa is None or not math.isfinite(rt):
             continue
         scope, _part_label, _state_label = _condition_lens_context(row, analysis_lens=analysis_lens)
-        groups.setdefault((scope, soa), []).append(rt)
-    return {key: _mean_sd_sem(values) for key, values in groups.items() if values}
+        groups.setdefault(scope, []).append((rt, soa))
+    return {key: _baseline_mean_sd_sem(values) for key, values in groups.items() if values}
 
 
 def _condition_lens_context(row: dict[str, Any], *, analysis_lens: str) -> tuple[str, str, str]:
@@ -1398,7 +1402,7 @@ def _build_pps_curves_for_mode(
             mean_rt = statistics.mean(values)
             rt_sd = statistics.stdev(values) if len(values) > 1 else 0.0
             rt_sem = rt_sd / math.sqrt(len(values)) if len(values) > 1 else 0.0
-            base_stats = _lookup_baseline(baseline, part_label, condition, phase, noise, soa)
+            base_stats = _lookup_baseline(baseline, part_label, condition, phase, noise)
             base_rt = base_stats.get("mean") if base_stats is not None else None
             facilitation = base_rt - mean_rt if base_rt is not None else None
             baseline_sem = _as_float((base_stats or {}).get("sem"), math.nan)
@@ -1425,6 +1429,9 @@ def _build_pps_curves_for_mode(
                     "baseline_mean_rt_ms": "" if base_rt is None else base_rt,
                     "baseline_sd_rt_ms": "" if not math.isfinite(baseline_sd) or base_rt is None else baseline_sd,
                     "baseline_sem_rt_ms": "" if not math.isfinite(baseline_sem) or base_rt is None else baseline_sem,
+                    "baseline_n": "" if base_rt is None else base_stats.get("n", ""),
+                    "baseline_source_soas_ms": "" if base_rt is None else base_stats.get("source_soas_ms", ""),
+                    "baseline_correction_method": "" if base_rt is None else BASELINE_CORRECTION_METHOD_CONDITION_MEAN_POOLED_SOA,
                     "facilitation_ms": "" if facilitation is None else facilitation,
                     "facilitation_sd_ms": "" if not math.isfinite(facilitation_sd) else facilitation_sd,
                     "facilitation_sem_ms": "" if not math.isfinite(facilitation_sem) else facilitation_sem,
@@ -1491,8 +1498,8 @@ def _build_pps_curves_for_mode(
     return curve_rows, fit_rows, model_fit_rows, model_comparison_rows, warnings
 
 
-def _baseline_means(response_rows: list[dict[str, Any]], *, aggregation_mode: str) -> dict[tuple[Any, ...], dict[str, float]]:
-    groups: dict[tuple[Any, ...], list[float]] = {}
+def _baseline_means(response_rows: list[dict[str, Any]], *, aggregation_mode: str) -> dict[tuple[Any, ...], dict[str, Any]]:
+    groups: dict[tuple[Any, ...], list[tuple[float, int]]] = {}
     for row in response_rows:
         if row.get("trial_type") != "Baseline" or row.get("rt_ms") in (None, ""):
             continue
@@ -1501,20 +1508,19 @@ def _baseline_means(response_rows: list[dict[str, Any]], *, aggregation_mode: st
         if soa is None or not math.isfinite(rt):
             continue
         part_label, condition, phase, noise = _analysis_context(row, aggregation_mode=aggregation_mode)
-        for key in _baseline_lookup_keys(part_label, condition, phase, noise, soa):
-            groups.setdefault(key, []).append(rt)
-    return {key: _mean_sd_sem(values) for key, values in groups.items() if values}
+        for key in _baseline_lookup_keys(part_label, condition, phase, noise):
+            groups.setdefault(key, []).append((rt, soa))
+    return {key: _baseline_mean_sd_sem(values) for key, values in groups.items() if values}
 
 
 def _lookup_baseline(
-    baseline: dict[tuple[Any, ...], dict[str, float]],
+    baseline: dict[tuple[Any, ...], dict[str, Any]],
     part_label: Any,
     condition: Any,
     phase: Any,
     noise: Any,
-    soa: int,
-) -> dict[str, float] | None:
-    for key in _baseline_lookup_keys(part_label, condition, phase, noise, soa):
+) -> dict[str, Any] | None:
+    for key in _baseline_lookup_keys(part_label, condition, phase, noise):
         if key in baseline:
             return baseline[key]
     return None
@@ -1525,6 +1531,17 @@ def _mean_sd_sem(values: list[float]) -> dict[str, float]:
     sd = statistics.stdev(values) if len(values) > 1 else 0.0
     sem = sd / math.sqrt(len(values)) if len(values) > 1 else 0.0
     return {"mean": mean, "sd": sd, "sem": sem, "n": float(len(values))}
+
+
+def _baseline_mean_sd_sem(samples: list[tuple[float, int]]) -> dict[str, Any]:
+    values = [float(value) for value, _soa in samples]
+    stats = _mean_sd_sem(values)
+    source_soas = sorted({int(soa) for _value, soa in samples})
+    return {
+        **stats,
+        "n": len(values),
+        "source_soas_ms": ";".join(str(soa) for soa in source_soas),
+    }
 
 
 def _fit_sigmoid(x: np.ndarray, y: np.ndarray) -> dict[str, float] | None:
@@ -1776,20 +1793,20 @@ def _aggregation_label(value: str) -> str:
     return "Separate parts"
 
 
-def _baseline_lookup_keys(part_label: Any, condition: Any, phase: Any, noise: Any, soa: int) -> list[tuple[Any, ...]]:
+def _baseline_lookup_keys(part_label: Any, condition: Any, phase: Any, noise: Any) -> list[tuple[Any, ...]]:
     part = str(part_label or "").strip()
     cond = str(condition or "").strip()
     ph = str(phase or "").strip()
     ns = str(noise or "").strip()
     keys = [
-        (part, cond, ph, ns, soa),
-        (part, cond, ph, "", soa),
-        (part, "", ph, "", soa),
-        (part, "", "", "", soa),
-        ("", cond, ph, ns, soa),
-        ("", cond, ph, "", soa),
-        ("", "", ph, "", soa),
-        ("", "", "", "", soa),
+        (part, cond, ph, ns),
+        (part, cond, ph, ""),
+        (part, "", ph, ""),
+        (part, "", "", ""),
+        ("", cond, ph, ns),
+        ("", cond, ph, ""),
+        ("", "", ph, ""),
+        ("", "", "", ""),
     ]
     return list(dict.fromkeys(keys))
 
