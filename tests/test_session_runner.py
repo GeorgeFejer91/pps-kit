@@ -20,6 +20,7 @@ from peripersonal_space_toolkit.session_runner import (
     SessionRunnerController,
     claim_prepared_session,
     load_last_experiment_pointer,
+    load_run_package,
     prepare_all_segment_run_packages,
     prepare_run_package,
     prepare_segment_run_package,
@@ -243,6 +244,65 @@ def _segment_run_setup_fixture(tmp_path: Path) -> Path:
     return run_manifest
 
 
+def _two_part_segment_run_setup_fixture(tmp_path: Path) -> Path:
+    run_manifest = _segment_run_setup_fixture(tmp_path)
+    manifest = json.loads(run_manifest.read_text(encoding="utf-8"))
+    order_csv = Path(manifest["csv_path"])
+    block_csv = run_manifest.parent.parent / "5_block_csv_preview" / "block_01_final.csv"
+    fieldnames = [
+        "participant_id",
+        "participant_index",
+        "experiment_structure",
+        "phase",
+        "phase_label",
+        "phase_index",
+        "participant_block_position",
+        "source_block_index",
+        "block_label",
+        "block_csv_file",
+        "block_csv_path",
+        "trial_count",
+        "duration_ms",
+        "sequence_seed",
+    ]
+    with order_csv.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        for participant in ("P001", "P002"):
+            for position, phase, phase_label in (
+                (1, "pre", "Part 1"),
+                (2, "post", "Part 2"),
+            ):
+                writer.writerow(
+                    {
+                        "participant_id": participant,
+                        "participant_index": participant[-1],
+                        "experiment_structure": "pre_post",
+                        "phase": phase,
+                        "phase_label": phase_label,
+                        "phase_index": position,
+                        "participant_block_position": position,
+                        "source_block_index": 1,
+                        "block_label": f"Block {position:02d}",
+                        "block_csv_file": block_csv.name,
+                        "block_csv_path": str(block_csv),
+                        "trial_count": 2,
+                        "duration_ms": 15,
+                        "sequence_seed": 123 + position,
+                    }
+                )
+    manifest.update(
+        {
+            "experiment_structure": "pre_post",
+            "parts_per_participant": 2,
+            "blocks_per_part": 1,
+            "total_block_runs": 4,
+        }
+    )
+    run_manifest.write_text(json.dumps(manifest), encoding="utf-8")
+    return run_manifest
+
+
 def test_preflight_reports_missing_render_and_ready_state(tmp_path: Path):
     design = _compact_design()
 
@@ -329,6 +389,55 @@ def test_prepare_segment_run_package_uses_segment5_and_segment6_csvs(tmp_path: P
     assert manifest["execution_mode"] == "participant_block_wavs"
     assert manifest["source_run_setup_manifest_path"] == str(run_manifest)
     assert manifest["source_run_setup_sha256"] == _sha256(run_manifest)
+
+
+def test_prepare_segment_run_package_creates_split_part_packages(tmp_path: Path):
+    run_manifest = _two_part_segment_run_setup_fixture(tmp_path)
+    session_root = tmp_path / "sessions"
+
+    part1 = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=session_root,
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+    part2 = load_run_package(part1.sibling_part_manifest_paths[0])
+
+    assert part1.session_group_id == "P001_20260102_030405"
+    assert part1.part_number == 1
+    assert part2.part_number == 2
+    assert part1.session_dir == session_root / "P001_20260102_030405" / "part_01"
+    assert part2.session_dir == session_root / "P001_20260102_030405" / "part_02"
+    assert part1.manifest_path.parent == output_runner_logs_dir(session_root) / part1.session_group_id / "part_01"
+    assert part2.manifest_path.parent == output_runner_logs_dir(session_root) / part1.session_group_id / "part_02"
+    assert (output_runner_logs_dir(session_root) / part1.session_group_id / "session_group_manifest.json").exists()
+    assert part1.blocks[0].index == 1
+    assert part2.blocks[0].index == 1
+    assert part1.blocks[0].metadata["global_block_index"] == 1
+    assert part2.blocks[0].metadata["global_block_index"] == 2
+    assert part1.blocks[0].metadata["participant_block_position"] == 1
+    assert part2.blocks[0].metadata["participant_block_position"] == 2
+    assert part1.blocks[0].metadata["part_block_number"] == 1
+    assert part2.blocks[0].metadata["part_block_number"] == 1
+    assert part1.blocks[0].metadata["part_number"] == 1
+    assert part2.blocks[0].metadata["part_number"] == 2
+    assert part1.blocks[0].manifest_path.parent == output_prepared_blocks_dir(session_root) / part1.session_group_id / "part_01" / "blocks"
+    assert part2.blocks[0].manifest_path.parent == output_prepared_blocks_dir(session_root) / part1.session_group_id / "part_02" / "blocks"
+
+    with part2.blocks[0].manifest_path.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    assert rows[0]["Session_Group_ID"] == part1.session_group_id
+    assert rows[0]["Part_Session_ID"] == part2.part_session_id
+    assert rows[0]["Global_Block_Index"] == "2"
+    assert rows[0]["Part_Block_Number"] == "1"
+
+    group_manifest = json.loads((output_runner_logs_dir(session_root) / part1.session_group_id / "session_group_manifest.json").read_text(encoding="utf-8"))
+    assert group_manifest["schema"] == "pps-run-session-group.v1"
+    assert [entry["part_number"] for entry in group_manifest["parts"]] == [1, 2]
+    assert {Path(entry["session_manifest_path"]) for entry in group_manifest["parts"]} == {
+        part1.manifest_path,
+        part2.manifest_path,
+    }
 
 
 def test_prepare_segment_run_package_creates_prepared_blocks_under_deep_output_root(tmp_path: Path):
@@ -1197,6 +1306,109 @@ def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
     assert "mouse_click" in diary_types
     assert "session_completed" in diary_types
     assert "Alice Example" not in diary.read_text(encoding="utf-8")
+
+
+def test_split_part_controller_writes_part_identity_and_status_handoff(tmp_path: Path):
+    run_manifest = _two_part_segment_run_setup_fixture(tmp_path)
+    session_root = tmp_path / "sessions"
+    state_root = tmp_path / "state"
+    part1 = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=session_root,
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+    part2 = load_run_package(part1.sibling_part_manifest_paths[0])
+
+    initial_status = prepared_session_asset_status(
+        run_manifest,
+        "P001",
+        state_root=state_root,
+        session_root=session_root,
+    )
+    assert initial_status["session_manifest_path"] == str(part1.manifest_path.resolve())
+    assert initial_status["next_part_number"] == 1
+    assert "Part 1 ready" in initial_status["part_inventory"]
+
+    controller1 = SessionRunnerController(part1, audio_engine=_MockAudioEngine())
+    result1 = controller1.run()
+
+    assert result1.completed
+    assert result1.events_csv.parent == output_verbose_events_dir(session_root) / part1.session_group_id / "part_01"
+    assert result1.session_metadata_path.parent == output_runner_logs_dir(session_root) / part1.session_group_id / "part_01"
+    assert result1.analysis_outputs["participant_trials"].parent == part1.session_dir
+    assert result1.analysis_outputs["analysis_ready_trials"].parent == output_data_analytics_dir(session_root) / part1.session_group_id / "part_01"
+    assert result1.recording_paths[0].parent == part1.session_dir
+    status_path = output_runner_logs_dir(session_root) / part1.session_group_id / "part_01" / "part_completion_status.json"
+    completion_status = json.loads(status_path.read_text(encoding="utf-8"))
+    assert completion_status["completed"] is True
+    assert completion_status["session_group_id"] == part1.session_group_id
+    assert completion_status["part_session_id"] == part1.part_session_id
+    assert completion_status["part_number"] == 1
+
+    with result1.events_csv.open(newline="", encoding="utf-8") as handle:
+        event_rows = list(csv.DictReader(handle))
+    event_types = [row["event_type"] for row in event_rows]
+    assert "part_session_start" in event_types
+    assert "part_session_end" in event_types
+    part_start = json.loads(next(row for row in event_rows if row["event_type"] == "part_session_start")["payload_json"])
+    assert part_start["session_group_id"] == part1.session_group_id
+    assert part_start["part_session_id"] == part1.part_session_id
+    assert part_start["part_number"] == 1
+
+    with result1.lsl_markers_csv.open(newline="", encoding="utf-8") as handle:
+        marker_rows = list(csv.DictReader(handle))
+    assert marker_rows
+    assert marker_rows[0]["session_group_id"] == part1.session_group_id
+    assert marker_rows[0]["part_session_id"] == part1.part_session_id
+    assert marker_rows[0]["part_number"] == "1"
+
+    trigger_dictionary = json.loads(result1.trigger_dictionary_path.read_text(encoding="utf-8"))
+    assert trigger_dictionary["session_group_id"] == part1.session_group_id
+    assert trigger_dictionary["part_session_id"] == part1.part_session_id
+    assert trigger_dictionary["part_number"] == 1
+    session_metadata = json.loads(result1.session_metadata_path.read_text(encoding="utf-8"))
+    assert session_metadata["session_group_id"] == part1.session_group_id
+    assert session_metadata["part_session_id"] == part1.part_session_id
+    assert session_metadata["part_number"] == 1
+    participant_rows = list(csv.DictReader(result1.analysis_outputs["participant_trials"].open(encoding="utf-8")))
+    assert participant_rows[0]["session_group_id"] == part1.session_group_id
+    assert participant_rows[0]["part_session_id"] == part1.part_session_id
+
+    after_part1 = prepared_session_asset_status(
+        run_manifest,
+        "P001",
+        state_root=state_root,
+        session_root=session_root,
+    )
+    assert after_part1["data_collected"] is False
+    assert after_part1["data_collection_status"] == "part_2_ready"
+    assert after_part1["session_manifest_path"] == str(part2.manifest_path.resolve())
+    assert after_part1["next_part_manifest_path"] == str(part2.manifest_path.resolve())
+    assert after_part1["part_inventory"] == "Part 1 complete, Part 2 ready"
+
+    record_prepared_session_queue(
+        participant_id="P001",
+        run_setup_manifest_path=run_manifest,
+        session_manifest_path=part1.manifest_path,
+        status="ready",
+        state_root=state_root,
+    )
+    assert claim_prepared_session(run_manifest, "P001", state_root=state_root, session_root=session_root) == part2.manifest_path.resolve()
+
+    controller2 = SessionRunnerController(part2, audio_engine=_MockAudioEngine())
+    result2 = controller2.run()
+    assert result2.completed
+
+    collected = prepared_session_asset_status(
+        run_manifest,
+        "P001",
+        state_root=state_root,
+        session_root=session_root,
+    )
+    assert collected["data_collected"] is True
+    assert collected["data_collection_status"] == "collected"
+    assert collected["part_inventory"] == "Part 1 complete, Part 2 collected"
 
 
 def test_session_runner_controller_handles_deep_output_root(tmp_path: Path):

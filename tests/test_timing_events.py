@@ -68,7 +68,10 @@ def test_timing_event_hub_fans_out_to_logger_and_dual_lsl(monkeypatch):
     assert rich.samples[0][0][2] == "mouse_click"
     assert rich.samples[0][0][3] == "30"
     assert rich.samples[0][0][5] == "P001_blockXX_response"
-    assert rich.samples[0][0][11] == "software_log"
+    assert rich.samples[0][0][11] == ""
+    assert rich.samples[0][0][12] == ""
+    assert rich.samples[0][0][13] == ""
+    assert rich.samples[0][0][14] == "software_log"
     assert numeric.samples[0][0] == [30]
     assert rich.samples[0][1] == pytest.approx(1000.0)
 

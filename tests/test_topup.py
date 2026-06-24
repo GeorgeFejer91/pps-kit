@@ -472,6 +472,7 @@ def test_session_runner_plays_enabled_topup_block_without_approval_callback_and_
         "P001",
         session_root=tmp_path / "sessions",
         created_at=datetime(2026, 1, 2, 3, 4, 5),
+        split_parts=False,
     )
     engine = _TopupAwareMockAudioEngine()
     controller = SessionRunnerController(package, audio_engine=engine, enable_topup=True)
@@ -535,6 +536,7 @@ def test_session_runner_plays_one_topup_at_end_of_each_part(tmp_path: Path):
         "P001",
         session_root=tmp_path / "sessions",
         created_at=datetime(2026, 1, 2, 3, 4, 5),
+        split_parts=False,
     )
     engine = _TopupAwareMockAudioEngine()
     controller = SessionRunnerController(

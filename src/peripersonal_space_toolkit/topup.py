@@ -112,7 +112,9 @@ class TopUpLedger:
                 self._record_click(event, row)
             elif event_type == "trial_start":
                 self.expire_due(float(event.unix_time))
-            elif event_type in {"trial_end", "block_end", "session_end"}:
+            elif event_type == "trial_end":
+                self._expire_trial_at_end(row, float(event.unix_time), float(event.monotonic_time))
+            elif event_type in {"block_end", "session_end"}:
                 self.expire_due(float(event.unix_time))
 
     def finalize_open_trials(self, *, part_number: int | str | None = None) -> None:
@@ -144,6 +146,18 @@ class TopUpLedger:
                 entry.status = MISSED_NEEDS_TOPUP
                 entry.miss_reason = entry.miss_reason or "next_trial_started"
             self._prune_unmatched_clicks(unix_time)
+
+    def _expire_trial_at_end(self, row: dict[str, Any], unix_time: float, monotonic_time: float) -> None:
+        for entry in self.entries:
+            if entry.status != PENDING:
+                continue
+            if not _same_trial_entry(entry, row):
+                continue
+            entry.response_deadline_unix_time = min(float(entry.response_deadline_unix_time), unix_time)
+            entry.response_deadline_monotonic_time = min(float(entry.response_deadline_monotonic_time), monotonic_time)
+            entry.status = MISSED_NEEDS_TOPUP
+            entry.miss_reason = entry.miss_reason or "trial_ended"
+        self._prune_unmatched_clicks(unix_time)
 
     def missed_entries(self, *, include_topup: bool = False, part_number: int | str | None = None) -> list[TopUpLedgerEntry]:
         with self._lock:
@@ -288,7 +302,7 @@ class TopUpLedger:
         click_time = float(click["unix_time"])
         if not _same_click_context(entry, click):
             return False
-        if str(entry.miss_reason or "") == "next_trial_started" and click_time >= float(entry.response_deadline_unix_time):
+        if str(entry.miss_reason or "") in {"next_trial_started", "trial_ended"} and click_time >= float(entry.response_deadline_unix_time):
             return False
         return (float(entry.tactile_unix_time) + self.min_rt_s) <= click_time <= float(entry.response_deadline_unix_time)
 
@@ -353,6 +367,30 @@ def _truthy(value: Any) -> bool:
     if value in (None, ""):
         return False
     return str(value).strip().lower() not in {"0", "false", "no", "none"}
+
+
+def _same_trial_entry(entry: TopUpLedgerEntry, row: dict[str, Any]) -> bool:
+    row_trial_uid = str(_field(row, "trial_uid", "Trial_UID") or "").strip()
+    if entry.trial_uid and row_trial_uid:
+        if entry.trial_uid != row_trial_uid:
+            return False
+    else:
+        row_trial_number = _field(row, "trial_number", "Trial_Number")
+        if entry.trial_number not in (None, "") and row_trial_number not in (None, ""):
+            if _part_key(entry.trial_number) != _part_key(row_trial_number):
+                return False
+
+    row_block = _field(row, "block_number", "Block_Number")
+    if entry.block_number not in (None, "") and row_block not in (None, ""):
+        if _part_key(entry.block_number) != _part_key(row_block):
+            return False
+
+    row_part = _field(row, "part_number", "Part_Number")
+    if entry.part_number not in (None, "") and row_part not in (None, ""):
+        if _part_key(entry.part_number) != _part_key(row_part):
+            return False
+
+    return True
 
 
 def _same_click_context(entry: TopUpLedgerEntry, click: dict[str, Any]) -> bool:

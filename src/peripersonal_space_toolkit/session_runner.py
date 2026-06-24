@@ -66,6 +66,9 @@ REQUESTED_LATENCY_S = 0.010
 REQUESTED_BLOCKSIZE = 256
 SESSION_METADATA_SCHEMA = "pps-runner-session-metadata.v1"
 RUN_PACKAGE_SCHEMA = "pps-run-session.v1"
+SESSION_GROUP_MANIFEST_SCHEMA = "pps-run-session-group.v1"
+PART_SPLIT_SCHEMA = "pps-runner-part-split.v1"
+PART_COMPLETION_STATUS_SCHEMA = "pps-runner-part-completion.v1"
 SEGMENT_RUN_SETUP_SCHEMA = "pps-experiment-run-setup.v1"
 SEGMENT_BLOCK_PREVIEW_SCHEMA = "pps-block-csv-preview.v1"
 LAST_EXPERIMENT_SCHEMA = "pps-last-experiment.v1"
@@ -79,23 +82,32 @@ PARTICIPANT_TRIAL_CSV_SUFFIX = "_trials.csv"
 
 
 def _package_output_root(package: "RunPackage") -> Path:
-    return Path(package.session_dir).parent
+    session_dir = Path(package.session_dir)
+    if _package_is_split_part(package):
+        return session_dir.parent.parent
+    return session_dir.parent
+
+
+def _package_context_leaf(package: "RunPackage") -> Path:
+    if _package_is_split_part(package):
+        return Path(package.session_group_id) / package.part_folder_name
+    return Path(package.session_id)
 
 
 def _package_runner_log_dir(package: "RunPackage") -> Path:
-    return output_runner_logs_dir(_package_output_root(package)) / package.session_id
+    return output_runner_logs_dir(_package_output_root(package)) / _package_context_leaf(package)
 
 
 def _package_prepared_blocks_dir(package: "RunPackage") -> Path:
-    return output_prepared_blocks_dir(_package_output_root(package)) / package.session_id / "blocks"
+    return output_prepared_blocks_dir(_package_output_root(package)) / _package_context_leaf(package) / "blocks"
 
 
 def _package_verbose_events_dir(package: "RunPackage") -> Path:
-    return output_verbose_events_dir(_package_output_root(package)) / package.session_id
+    return output_verbose_events_dir(_package_output_root(package)) / _package_context_leaf(package)
 
 
 def _package_analytics_dir(package: "RunPackage") -> Path:
-    return output_data_analytics_dir(_package_output_root(package)) / package.session_id
+    return output_data_analytics_dir(_package_output_root(package)) / _package_context_leaf(package)
 
 
 def _participant_trials_csv_path(package: "RunPackage") -> Path:
@@ -132,6 +144,47 @@ def _session_metadata_path(package: "RunPackage") -> Path:
 
 def _loudness_manifest_path(package: "RunPackage") -> Path:
     return package.manifest_path.with_name("loudness_manifest.json")
+
+
+def _package_is_split_part(package: "RunPackage") -> bool:
+    return bool(
+        str(getattr(package, "part_split_schema", "") or "").strip()
+        and str(getattr(package, "session_group_id", "") or "").strip()
+        and str(getattr(package, "part_folder_name", "") or "").strip()
+    )
+
+
+def _package_part_session_id(package: "RunPackage") -> str:
+    return str(getattr(package, "part_session_id", "") or getattr(package, "session_id", ""))
+
+
+def _package_part_number_value(package: "RunPackage") -> str:
+    part_number = getattr(package, "part_number", None)
+    if part_number in (None, ""):
+        return ""
+    return str(part_number)
+
+
+def _package_part_identity(package: "RunPackage") -> dict[str, Any]:
+    return {
+        "session_group_id": str(package.session_group_id or ""),
+        "part_session_id": _package_part_session_id(package) if _package_is_split_part(package) else "",
+        "part_number": getattr(package, "part_number", None) if _package_is_split_part(package) else "",
+    }
+
+
+def _package_split_part_count(package: "RunPackage") -> int:
+    if not _package_is_split_part(package):
+        return 1
+    return 1 + len([path for path in package.sibling_part_manifest_paths if str(path or "").strip()])
+
+
+def _session_group_manifest_path(package: "RunPackage") -> Path:
+    return output_runner_logs_dir(_package_output_root(package)) / package.session_group_id / "session_group_manifest.json"
+
+
+def _part_completion_status_path(package: "RunPackage") -> Path:
+    return _package_runner_log_dir(package) / "part_completion_status.json"
 
 
 def _audio_evidence_path(package: "RunPackage", block: "RunBlock") -> Path:
@@ -191,6 +244,12 @@ class RunPackage:
     source_run_setup_manifest_path: Path | None = None
     instruction_profile: dict[str, Any] = field(default_factory=dict)
     loudness_policy: dict[str, Any] = field(default_factory=dict)
+    session_group_id: str = ""
+    part_number: int | None = None
+    part_session_id: str = ""
+    part_folder_name: str = ""
+    sibling_part_manifest_paths: list[Path] = field(default_factory=list)
+    part_split_schema: str = ""
 
 
 @dataclass(frozen=True)
@@ -280,6 +339,8 @@ PARTICIPANT_TRIAL_FIELDNAMES = [
     "participant_gender",
     "participant_handedness",
     "session_id",
+    "session_group_id",
+    "part_session_id",
     "part_number",
     "condition",
     "block_number",
@@ -451,6 +512,8 @@ class ParticipantTrialCsvWriter:
             "participant_gender": self.participant_metadata.get("gender", ""),
             "participant_handedness": self.participant_metadata.get("handedness", ""),
             "session_id": self.package.session_id,
+            "session_group_id": str(getattr(self.package, "session_group_id", "") or ""),
+            "part_session_id": _package_part_session_id(self.package) if _package_is_split_part(self.package) else "",
             "part_number": _row_value(base, "part_number", "Part_Number", default=""),
             "condition": _row_value(base, "condition", "Condition", default=""),
             "block_number": _row_value(base, "block_number", "block_index", "Block_Number", default=""),
@@ -549,6 +612,13 @@ def _filesystem_path(path: str | Path) -> str:
 def _path_exists(path: str | Path) -> bool:
     try:
         return os.path.exists(_filesystem_path(path))
+    except OSError:
+        return False
+
+
+def _path_is_file(path: str | Path) -> bool:
+    try:
+        return os.path.isfile(_filesystem_path(path))
     except OSError:
         return False
 
@@ -811,6 +881,12 @@ def load_run_package(manifest_path: Path) -> RunPackage:
         source_run_setup_manifest_path=Path(str(data["source_run_setup_manifest_path"])) if data.get("source_run_setup_manifest_path") else None,
         instruction_profile=_normalize_instruction_profile(data.get("instruction_profile", {})),
         loudness_policy=normalize_loudness_policy(data.get("loudness_policy")),
+        session_group_id=str(data.get("session_group_id") or ""),
+        part_number=_as_int(data.get("part_number"), default=0) or None,
+        part_session_id=str(data.get("part_session_id") or data.get("session_id") or ""),
+        part_folder_name=str(data.get("part_folder_name") or ""),
+        sibling_part_manifest_paths=[Path(str(item)) for item in data.get("sibling_part_manifest_paths", []) if str(item or "").strip()],
+        part_split_schema=str(data.get("part_split_schema") or ""),
     )
 
 
@@ -993,7 +1069,7 @@ def claim_prepared_session(
     session_root_path = Path(session_root).resolve() if session_root is not None else None
     changed = False
     for entry in queue_data.get("entries", []):
-        if str(entry.get("status") or "") != "ready":
+        if str(entry.get("status") or "") not in {"ready", "claimed"}:
             continue
         if str(entry.get("participant_id") or "") != participant:
             continue
@@ -1039,11 +1115,25 @@ def claim_prepared_session(
             entry["updated_at"] = datetime.now().isoformat(timespec="seconds")
             changed = True
             continue
+        selected_manifest_path = _next_runnable_manifest_for_package(package)
+        if selected_manifest_path != manifest_path:
+            valid, message = _prepared_session_manifest_ready_for_run_setup(
+                selected_manifest_path,
+                run_setup,
+                participant,
+            )
+            if not valid:
+                entry["status"] = "invalid"
+                entry["message"] = message
+                entry["updated_at"] = datetime.now().isoformat(timespec="seconds")
+                changed = True
+                continue
         entry["status"] = "claimed"
+        entry["claimed_manifest_path"] = str(selected_manifest_path.resolve())
         entry["claimed_at"] = datetime.now().isoformat(timespec="seconds")
         entry["updated_at"] = entry["claimed_at"]
         _write_prepared_session_queue(state_root, queue_data)
-        return manifest_path
+        return selected_manifest_path.resolve()
     if changed:
         _write_prepared_session_queue(state_root, queue_data)
     return None
@@ -1107,11 +1197,16 @@ def prepared_session_asset_status(
                 valid = False
                 message = "Prepared session belongs to a different output folder."
             if valid:
+                selected_manifest_path = manifest_path
+                try:
+                    selected_manifest_path = _next_runnable_manifest_for_package(load_run_package(manifest_path))
+                except Exception:
+                    selected_manifest_path = manifest_path
                 return {
                     "participant_id": participant,
                     "generated": True,
                     "status": "ready" if status == "ready" else "generated",
-                    "session_manifest_path": str(manifest_path.resolve()),
+                    "session_manifest_path": str(selected_manifest_path.resolve()),
                     "message": message,
                     "source": "prepared_session_queue",
                     **data_status,
@@ -1254,32 +1349,93 @@ def _prepared_session_sources_current(package: RunPackage, run_setup_manifest_pa
     return True, "Prepared local audio package is available."
 
 
+def _iter_prepared_session_manifest_candidates(
+    run_setup_manifest_path: Path,
+    participant_id: str,
+    *,
+    session_root: Path = DEFAULT_SESSION_ROOT,
+) -> list[Path]:
+    root = Path(session_root)
+    if not _path_exists(root):
+        return []
+    participant = sanitize_participant_id(participant_id)
+    patterns = [
+        output_runner_logs_dir(root).glob(f"{participant}_*/session_manifest.json"),
+        output_runner_logs_dir(root).glob(f"{participant}_*/part_*/session_manifest.json"),
+        root.glob(f"{participant}_*/session_manifest.json"),
+        root.glob(f"{participant}_*/part_*/session_manifest.json"),
+    ]
+    candidates: set[Path] = set()
+    for pattern in patterns:
+        candidates.update(path.resolve() for path in pattern if _path_exists(path))
+    return sorted(
+        candidates,
+        key=lambda path: path.stat().st_mtime if _path_exists(path) else 0.0,
+        reverse=True,
+    )
+
+
 def _scan_prepared_session_manifest(
     run_setup_manifest_path: Path,
     participant_id: str,
     *,
     session_root: Path = DEFAULT_SESSION_ROOT,
 ) -> tuple[tuple[Path, str] | None, str]:
-    root = Path(session_root)
-    if not _path_exists(root):
-        return None, ""
-    candidates = [
-        *output_runner_logs_dir(root).glob(f"{participant_id}_*/session_manifest.json"),
-        *root.glob(f"{participant_id}_*/session_manifest.json"),
-    ]
-    candidates = sorted(
-        {path.resolve() for path in candidates},
-        key=lambda path: path.stat().st_mtime if _path_exists(path) else 0.0,
-        reverse=True,
+    candidates = _iter_prepared_session_manifest_candidates(
+        run_setup_manifest_path,
+        participant_id,
+        session_root=session_root,
     )
     last_message = ""
     for manifest_path in candidates:
         valid, message = _prepared_session_manifest_ready_for_run_setup(manifest_path, run_setup_manifest_path, participant_id)
         if valid:
-            return (manifest_path, message), ""
+            try:
+                package = load_run_package(manifest_path)
+                selected = _next_runnable_manifest_for_package(package)
+                return (selected, message), ""
+            except Exception:
+                return (manifest_path, message), ""
         if message:
             last_message = message
     return None, last_message
+
+
+def _split_group_packages(package: RunPackage) -> list[RunPackage]:
+    if not _package_is_split_part(package):
+        return [package]
+    packages: dict[Path, RunPackage] = {package.manifest_path.resolve(): package}
+    for manifest_path in package.sibling_part_manifest_paths:
+        if not manifest_path or not _path_exists(manifest_path):
+            continue
+        try:
+            sibling = load_run_package(manifest_path)
+        except Exception:
+            continue
+        if sibling.participant_id != package.participant_id:
+            continue
+        if sibling.session_group_id and package.session_group_id and sibling.session_group_id != package.session_group_id:
+            continue
+        packages[sibling.manifest_path.resolve()] = sibling
+    return sorted(packages.values(), key=lambda item: int(item.part_number or 0))
+
+
+def _next_runnable_package_for_group(packages: list[RunPackage]) -> RunPackage | None:
+    ordered = sorted(packages, key=lambda item: int(item.part_number or 0))
+    if not ordered:
+        return None
+    for package in ordered:
+        completed, _message = _session_package_has_completed_data(package)
+        if not completed:
+            return package
+    return ordered[-1]
+
+
+def _next_runnable_manifest_for_package(package: RunPackage) -> Path:
+    if not _package_is_split_part(package):
+        return package.manifest_path
+    selected = _next_runnable_package_for_group(_split_group_packages(package))
+    return selected.manifest_path if selected is not None else package.manifest_path
 
 
 def _path_is_within(path: Path, root: Path) -> bool:
@@ -1289,6 +1445,91 @@ def _path_is_within(path: Path, root: Path) -> bool:
     except Exception:
         return False
     return target == base or base in target.parents
+
+
+def _split_part_status_label(part_number: int, *, completed: bool, message: str) -> str:
+    if completed:
+        suffix = "complete" if int(part_number or 0) == 1 else "collected"
+    elif str(message or "").strip():
+        suffix = "incomplete"
+    else:
+        suffix = "ready"
+    return f"Part {int(part_number or 0) or '?'} {suffix}"
+
+
+def _split_group_data_collection_status(packages: list[RunPackage], base: dict[str, Any]) -> dict[str, Any]:
+    ordered = sorted(packages, key=lambda item: int(item.part_number or 0))
+    if not ordered:
+        return base
+    part_statuses: list[dict[str, Any]] = []
+    first_unfinished: RunPackage | None = None
+    first_unfinished_message = ""
+    for package in ordered:
+        completed, message = _session_package_has_completed_data(package)
+        part_number = int(package.part_number or 0)
+        if first_unfinished is None and not completed:
+            first_unfinished = package
+            first_unfinished_message = message
+        part_statuses.append(
+            {
+                "part_number": part_number,
+                "part_session_id": package.part_session_id,
+                "part_folder_name": package.part_folder_name,
+                "session_manifest_path": str(package.manifest_path.resolve()),
+                "session_dir": str(package.session_dir.resolve()),
+                "completed": bool(completed),
+                "status": "complete" if completed else ("incomplete" if message else "ready"),
+                "message": message,
+                "label": _split_part_status_label(part_number, completed=completed, message=message),
+            }
+        )
+    inventory = ", ".join(str(item.get("label") or "") for item in part_statuses if item.get("label"))
+    all_completed = all(bool(item.get("completed")) for item in part_statuses)
+    selected = ordered[-1] if all_completed else (first_unfinished or ordered[0])
+    selected_part = int(selected.part_number or 0)
+    payload = {
+        **base,
+        "data_session_manifest_path": str(selected.manifest_path.resolve()),
+        "data_session_dir": str(selected.session_dir.resolve()),
+        "session_group_id": selected.session_group_id,
+        "session_group_manifest_path": str(_session_group_manifest_path(selected)),
+        "next_part_number": selected_part if not all_completed else "",
+        "next_part_manifest_path": "" if all_completed else str(selected.manifest_path.resolve()),
+        "next_part_session_dir": "" if all_completed else str(selected.session_dir.resolve()),
+        "part_statuses": part_statuses,
+        "part_inventory": inventory,
+        "data_collection_message": inventory or base["data_collection_message"],
+    }
+    if all_completed:
+        payload.update(
+            {
+                "data_collected": True,
+                "data_collection_status": "collected",
+                "data_collection_message": inventory or "Completed participant data found.",
+            }
+        )
+    elif first_unfinished_message:
+        payload.update(
+            {
+                "data_collection_status": "incomplete",
+                "data_collection_message": inventory or first_unfinished_message,
+            }
+        )
+    elif selected_part <= 1:
+        payload.update(
+            {
+                "data_collection_status": "not_collected",
+                "data_collection_message": inventory or "No completed participant data found.",
+            }
+        )
+    else:
+        payload.update(
+            {
+                "data_collection_status": f"part_{selected_part}_ready",
+                "data_collection_message": inventory or f"Part {selected_part} is ready.",
+            }
+        )
+    return payload
 
 
 def _participant_data_collection_status(
@@ -1303,30 +1544,43 @@ def _participant_data_collection_status(
         "data_session_manifest_path": "",
         "data_session_dir": "",
         "data_collection_message": "No completed participant data found.",
+        "session_group_id": "",
+        "session_group_manifest_path": "",
+        "next_part_number": "",
+        "next_part_manifest_path": "",
+        "next_part_session_dir": "",
+        "part_statuses": [],
+        "part_inventory": "",
     }
     participant = sanitize_participant_id(participant_id)
     if not participant:
         base["data_collection_message"] = "Participant ID is required."
         return base
-    root = Path(session_root)
-    if not _path_exists(root):
-        return base
-    candidates = [
-        *output_runner_logs_dir(root).glob(f"{participant}_*/session_manifest.json"),
-        *root.glob(f"{participant}_*/session_manifest.json"),
-    ]
-    candidates = sorted(
-        {path.resolve() for path in candidates},
-        key=lambda path: path.stat().st_mtime if _path_exists(path) else 0.0,
-        reverse=True,
+    candidates = _iter_prepared_session_manifest_candidates(
+        run_setup_manifest_path,
+        participant,
+        session_root=session_root,
     )
+    seen_split_groups: set[str] = set()
     for manifest_path in candidates:
         package = _load_matching_session_package(manifest_path, run_setup_manifest_path, participant)
         if package is None:
             continue
+        if _package_is_split_part(package):
+            group_key = package.session_group_id or str(package.session_dir.parent.resolve())
+            if group_key in seen_split_groups:
+                continue
+            seen_split_groups.add(group_key)
+            group_packages = [
+                item
+                for item in _split_group_packages(package)
+                if _load_matching_session_package(item.manifest_path, run_setup_manifest_path, participant) is not None
+            ]
+            return _split_group_data_collection_status(group_packages, base)
         collected, message = _session_package_has_completed_data(package)
         if collected:
             return {
+                **base,
                 "data_collected": True,
                 "data_collection_status": "collected",
                 "data_session_manifest_path": str(package.manifest_path.resolve()),
@@ -1363,6 +1617,14 @@ def _load_matching_session_package(
 
 
 def _session_package_has_completed_data(package: RunPackage) -> tuple[bool, str]:
+    if _package_is_split_part(package):
+        status = _load_json_if_exists(_part_completion_status_path(package))
+        if status.get("schema") == PART_COMPLETION_STATUS_SCHEMA:
+            completed = _truthy(status.get("completed"))
+            interrupted = _truthy(status.get("interrupted"))
+            if completed and not interrupted:
+                return True, "Completed participant data found."
+            return False, "Participant data exists, but the part did not complete."
     events_csv = _verbose_events_csv_path(package)
     if not _path_exists(events_csv):
         legacy_events_csv = Path(package.session_dir) / "events.csv"
@@ -1636,6 +1898,7 @@ def prepare_segment_run_package(
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
     block_cache_root: Path = DEFAULT_SESSION_BLOCK_CACHE_ROOT,
     use_block_cache: bool = True,
+    split_parts: bool | None = None,
 ) -> RunPackage:
     """Prepare one participant session from Segment 5 master blocks and Segment 6 order CSV.
 
@@ -1665,6 +1928,23 @@ def prepare_segment_run_package(
             _as_int(row.get("participant_block_position"), default=1),
         )
     )
+    if split_parts is None:
+        split_parts = _as_int(run_setup.get("parts_per_participant"), default=1) > 1
+    if split_parts:
+        packages = _prepare_split_segment_run_packages(
+            run_setup_manifest_path,
+            run_setup,
+            order_csv_path,
+            participant_rows,
+            clean_participant,
+            design=design,
+            session_root=session_root,
+            created_at=created_at,
+            progress_callback=progress_callback,
+            block_cache_root=block_cache_root,
+            use_block_cache=use_block_cache,
+        )
+        return _select_next_runnable_part_package(packages)
     created_at = created_at or datetime.now()
     timestamp = created_at.strftime("%Y%m%d_%H%M%S")
     session_id = f"{clean_participant}_{timestamp}"
@@ -1898,6 +2178,355 @@ def prepare_segment_run_package(
     return package
 
 
+def _prepare_split_segment_run_packages(
+    run_setup_manifest_path: Path,
+    run_setup: dict[str, Any],
+    order_csv_path: Path,
+    participant_rows: list[dict[str, str]],
+    clean_participant: str,
+    *,
+    design: StimulusDesign | None,
+    session_root: Path,
+    created_at: datetime | None,
+    progress_callback: Callable[[dict[str, Any]], None] | None,
+    block_cache_root: Path,
+    use_block_cache: bool,
+) -> list[RunPackage]:
+    created_at = created_at or datetime.now()
+    timestamp = created_at.strftime("%Y%m%d_%H%M%S")
+    session_group_id = f"{clean_participant}_{timestamp}"
+    session_root = Path(session_root)
+    group_session_dir = session_root / session_group_id
+    group_runner_log_dir = output_runner_logs_dir(session_root) / session_group_id
+    _mkdir(group_session_dir)
+    _mkdir(group_runner_log_dir)
+
+    rows_with_global: list[tuple[int, dict[str, str]]] = list(enumerate(participant_rows, start=1))
+    part_numbers = sorted(
+        {
+            _segment_part_number(str(row.get("phase") or "single").strip().lower() or "single")
+            for _global_index, row in rows_with_global
+        }
+    )
+    if len(part_numbers) < 2:
+        raise ValueError("Split session preparation requires at least two Segment 6 parts.")
+    part_count = len(part_numbers)
+    total_blocks = len(participant_rows)
+    packages: list[RunPackage] = []
+    package_wavs: dict[str, list[RenderedWav]] = {}
+
+    _emit_prepare_progress(
+        progress_callback,
+        "Preparing split Segment 6 setup",
+        phase="segment6_split",
+        current=0,
+        total=total_blocks,
+        detail=f"{session_group_id}: {part_count} parts",
+    )
+
+    for part_number in part_numbers:
+        part_label = f"part_{part_number:02d}"
+        part_rows = [
+            (global_index, row)
+            for global_index, row in rows_with_global
+            if _segment_part_number(str(row.get("phase") or "single").strip().lower() or "single") == part_number
+        ]
+        if not part_rows:
+            continue
+        part_session_id = f"{session_group_id}_{part_label}"
+        session_dir = group_session_dir / part_label
+        run_package_dir = group_runner_log_dir / part_label
+        block_dir = output_prepared_blocks_dir(session_root) / session_group_id / part_label / "blocks"
+        _mkdir(block_dir)
+        _mkdir(run_package_dir)
+        _mkdir(session_dir)
+
+        instruction_profile = _materialize_session_instruction_profile(
+            run_setup.get("instruction_profile", {}),
+            session_dir=session_dir,
+            source_base_dir=run_setup_manifest_path.parent,
+            output_root=session_root,
+        )
+        loudness_policy = normalize_loudness_policy(run_setup.get("loudness_policy"))
+
+        design_path = run_package_dir / "design.json"
+        if design is None:
+            _write_text_file(design_path, "{}\n")
+        else:
+            _write_json_file(design_path, design_to_dict(design))
+
+        protocol_path = run_package_dir / "protocol_schedule.csv"
+        _write_segment_protocol_schedule(protocol_path, [row for _global_index, row in part_rows], clean_participant, order_csv_path)
+
+        blocks: list[RunBlock] = []
+        source_wavs: list[RenderedWav] = []
+        seen_wavs: set[Path] = set()
+        for part_block_number, (global_block_index, order_row) in enumerate(part_rows, start=1):
+            source_csv = _resolve_relative_path(order_row.get("block_csv_path", ""), order_csv_path.parent)
+            if not _path_exists(source_csv):
+                raise FileNotFoundError(f"Segment 6 references a missing Segment 5 block CSV: {source_csv}")
+            master_rows = _read_csv_rows(source_csv)
+            if not master_rows:
+                raise ValueError(f"Segment 5 block CSV has no trial rows: {source_csv}")
+
+            phase = str(order_row.get("phase") or "single").strip().lower() or "single"
+            participant_position = _as_int(order_row.get("participant_block_position"), default=global_block_index)
+            source_block_index = _as_int(order_row.get("source_block_index"), default=participant_position)
+            label = str(order_row.get("block_label") or f"Block {part_block_number:02d}").strip()
+            base_stem = f"Block_{part_block_number:02d}_from_{Path(source_csv).stem}"
+            block_csv_path = block_dir / f"{base_stem}.csv"
+            block_wav_path = block_dir / f"{base_stem}.wav"
+
+            _emit_prepare_progress(
+                progress_callback,
+                f"Loading WAV files for Part {part_number} block {part_block_number}/{len(part_rows)}",
+                phase="loading_wavs",
+                current=global_block_index - 1,
+                total=total_blocks,
+                detail=str(source_csv),
+            )
+            cache_key = ""
+            cache_status = "disabled"
+            cache_link_mode = ""
+            cached: tuple[Path, dict[str, Any]] | None = None
+            if use_block_cache:
+                cache_key = _segment_block_cache_key(
+                    source_csv=source_csv,
+                    source_rows=master_rows,
+                    source_run_setup_manifest_path=run_setup_manifest_path,
+                )
+                cached = _read_valid_block_cache(
+                    cache_key=cache_key,
+                    source_csv=source_csv,
+                    source_rows=master_rows,
+                    source_run_setup_manifest_path=run_setup_manifest_path,
+                    block_cache_root=block_cache_root,
+                )
+            if cached is not None:
+                cached_wav_path, cache_manifest = cached
+                cache_link_mode = _link_or_copy_cached_block(cached_wav_path, block_wav_path)
+                cache_status = "hit"
+                duration_s, sample_rate, channels, trial_rows, wav_infos = _segment_trial_rows_from_cache(
+                    master_rows,
+                    cache_manifest,
+                    participant_id=clean_participant,
+                    session_id=part_session_id,
+                    part_number=part_number,
+                    phase=phase,
+                    phase_label=str(order_row.get("phase_label") or phase.title()),
+                    output_block_index=part_block_number,
+                    participant_block_position=participant_position,
+                    source_block_index=source_block_index,
+                    source_block_label=label,
+                    source_block_csv_path=source_csv,
+                )
+            else:
+                _emit_prepare_progress(
+                    progress_callback,
+                    f"Assembling Part {part_number} block {part_block_number}/{len(part_rows)}",
+                    phase="assembling_block",
+                    current=global_block_index,
+                    total=total_blocks,
+                    detail=str(block_wav_path),
+                )
+                materialize_target = block_wav_path
+                cache_wav_path = Path()
+                cache_manifest_path = Path()
+                if use_block_cache and cache_key:
+                    cache_wav_path, cache_manifest_path = _segment_block_cache_paths(cache_key, block_cache_root)
+                    _mkdir(cache_wav_path.parent)
+                    if _path_exists(cache_wav_path):
+                        Path(_filesystem_path(cache_wav_path)).unlink()
+                    materialize_target = cache_wav_path
+                duration_s, sample_rate, channels, trial_rows, wav_infos = _materialize_segment_block_wav(
+                    materialize_target,
+                    master_rows,
+                    participant_id=clean_participant,
+                    session_id=part_session_id,
+                    part_number=part_number,
+                    phase=phase,
+                    phase_label=str(order_row.get("phase_label") or phase.title()),
+                    output_block_index=part_block_number,
+                    participant_block_position=participant_position,
+                    source_block_index=source_block_index,
+                    source_block_label=label,
+                    source_block_csv_path=source_csv,
+                )
+                if use_block_cache and cache_key and cache_wav_path:
+                    _write_block_cache_manifest(
+                        cache_manifest_path,
+                        cache_key=cache_key,
+                        source_csv=source_csv,
+                        source_run_setup_manifest_path=run_setup_manifest_path,
+                        block_wav_path=cache_wav_path,
+                        duration_s=duration_s,
+                        sample_rate=sample_rate,
+                        channels=channels,
+                        trial_rows=trial_rows,
+                    )
+                    cache_link_mode = _link_or_copy_cached_block(cache_wav_path, block_wav_path)
+                    cache_status = "miss_stored"
+                else:
+                    cache_status = "disabled"
+            for row in trial_rows:
+                row["Session_Group_ID"] = session_group_id
+                row["Part_Session_ID"] = part_session_id
+                row["Global_Block_Index"] = global_block_index
+                row["Part_Block_Number"] = part_block_number
+                row["Block_Number"] = part_block_number
+                row["Block_Label"] = f"Block {part_block_number:02d}"
+            _write_segment_block_csv(block_csv_path, trial_rows)
+            for wav in wav_infos:
+                resolved = wav.path.resolve()
+                if resolved not in seen_wavs:
+                    source_wavs.append(wav)
+                    seen_wavs.add(resolved)
+            blocks.append(
+                RunBlock(
+                    index=part_block_number,
+                    label=label,
+                    manifest_path=block_csv_path,
+                    wav_path=block_wav_path,
+                    trial_count=len(trial_rows),
+                    duration_s=duration_s,
+                    metadata={
+                        "execution_mode": "participant_block_wavs",
+                        "phase": phase,
+                        "phase_label": str(order_row.get("phase_label") or phase.title()),
+                        "session_group_id": session_group_id,
+                        "part_session_id": part_session_id,
+                        "part_number": part_number,
+                        "part_block_number": part_block_number,
+                        "global_block_index": global_block_index,
+                        "participant_block_position": participant_position,
+                        "source_block_index": source_block_index,
+                        "source_block_label": label,
+                        "source_block_csv_path": str(source_csv),
+                        "source_block_csv_sha256": _sha256_file(source_csv),
+                        "sample_rate_hz": sample_rate,
+                        "channels": channels,
+                        "block_cache_key": cache_key,
+                        "block_cache_status": cache_status,
+                        "block_cache_link_mode": cache_link_mode,
+                    },
+                )
+            )
+
+        package = RunPackage(
+            participant_id=clean_participant,
+            session_id=part_session_id,
+            created_at=created_at.isoformat(timespec="seconds"),
+            session_dir=session_dir,
+            design_path=design_path,
+            protocol_path=protocol_path,
+            manifest_path=run_package_dir / "session_manifest.json",
+            render_manifest_path=None,
+            blocks=blocks,
+            execution_mode="participant_block_wavs",
+            source_run_setup_manifest_path=run_setup_manifest_path,
+            instruction_profile=instruction_profile,
+            loudness_policy=loudness_policy,
+            session_group_id=session_group_id,
+            part_number=part_number,
+            part_session_id=part_session_id,
+            part_folder_name=part_label,
+            sibling_part_manifest_paths=[],
+            part_split_schema=PART_SPLIT_SCHEMA,
+        )
+        packages.append(package)
+        package_wavs[part_session_id] = source_wavs
+
+    if len(packages) < 2:
+        raise ValueError("Split session preparation did not produce both part packages.")
+
+    for package in packages:
+        siblings = [other.manifest_path for other in packages if other.part_number != package.part_number]
+        package = RunPackage(
+            **{
+                **package.__dict__,
+                "sibling_part_manifest_paths": siblings,
+            }
+        )
+        package_index = next(index for index, item in enumerate(packages) if item.part_number == package.part_number)
+        packages[package_index] = package
+        _write_session_manifest(package, package_wavs.get(package.part_session_id, []))
+        _append_package_diary_event(
+            package,
+            "session_part_package_prepared",
+            payload={
+                "execution_mode": package.execution_mode,
+                "block_count": len(package.blocks),
+                "session_dir": str(package.session_dir),
+                "source_run_setup_manifest_path": str(run_setup_manifest_path),
+                "session_group_id": session_group_id,
+                "part_number": package.part_number,
+                "part_session_id": package.part_session_id,
+            },
+        )
+
+    _write_session_group_manifest(packages, run_setup=run_setup, run_setup_manifest_path=run_setup_manifest_path)
+    _emit_prepare_progress(
+        progress_callback,
+        "Opening Focus Mode",
+        phase="opening_focus_mode",
+        current=total_blocks,
+        total=total_blocks,
+        detail=str(_select_next_runnable_part_package(packages).manifest_path),
+    )
+    return packages
+
+
+def _select_next_runnable_part_package(packages: list[RunPackage]) -> RunPackage:
+    ordered = sorted(packages, key=lambda package: int(package.part_number or 0))
+    for package in ordered:
+        completed, _message = _session_package_has_completed_data(package)
+        if not completed:
+            return package
+    return ordered[-1]
+
+
+def _write_session_group_manifest(
+    packages: list[RunPackage],
+    *,
+    run_setup: dict[str, Any],
+    run_setup_manifest_path: Path,
+) -> Path:
+    if not packages:
+        raise ValueError("Cannot write a session group manifest without packages.")
+    first = packages[0]
+    group_path = _session_group_manifest_path(first)
+    part_entries = []
+    for package in sorted(packages, key=lambda item: int(item.part_number or 0)):
+        completed, message = _session_package_has_completed_data(package)
+        part_entries.append(
+            {
+                "part_number": package.part_number,
+                "part_session_id": package.part_session_id,
+                "part_folder_name": package.part_folder_name,
+                "session_manifest_path": str(package.manifest_path),
+                "session_dir": str(package.session_dir),
+                "block_count": len(package.blocks),
+                "completed": completed,
+                "completion_message": message,
+                "part_completion_status_path": str(_part_completion_status_path(package)),
+            }
+        )
+    payload = {
+        "schema": SESSION_GROUP_MANIFEST_SCHEMA,
+        "part_split_schema": PART_SPLIT_SCHEMA,
+        "session_group_id": first.session_group_id,
+        "participant_id": first.participant_id,
+        "created_at": first.created_at,
+        "source_run_setup_manifest_path": str(run_setup_manifest_path),
+        "source_run_setup_sha256": _sha256_file(run_setup_manifest_path) if _path_is_file(run_setup_manifest_path) else "",
+        "experiment_structure": str(run_setup.get("experiment_structure") or ""),
+        "parts_per_participant": len(packages),
+        "parts": part_entries,
+    }
+    _write_json_file(group_path, payload)
+    return group_path
+
+
 def prepare_all_segment_run_packages(
     run_setup_manifest_path: Path,
     *,
@@ -1956,6 +2585,11 @@ class SessionRunnerController:
             else None
         )
         self._runner_metadata_input = dict(runner_metadata or {})
+        self._part_identity = {
+            key: value
+            for key, value in _package_part_identity(package).items()
+            if value not in (None, "")
+        }
         self._session_metadata_path = _session_metadata_path(package)
         self._session_metadata = _build_runner_session_metadata(
             package,
@@ -1980,6 +2614,7 @@ class SessionRunnerController:
             trigger_dictionary=self.trigger_dictionary,
             event_callback=self._handle_logged_event,
             stream_metadata=self._lsl_session_metadata,
+            default_payload=self._part_identity,
         )
         self._stop_requested = False
         self._analysis_outputs: dict[str, Path] = {}
@@ -2035,6 +2670,15 @@ class SessionRunnerController:
                 topup_enabled=self.topup_ledger is not None,
                 external_labrecorder=external_labrecorder_start,
             )
+            if _package_is_split_part(self.package):
+                self.events.log(
+                    "part_session_start",
+                    session_dir=str(self.package.session_dir),
+                    session_group_manifest_path=str(_session_group_manifest_path(self.package)),
+                    part_completion_status_path=str(_part_completion_status_path(self.package)),
+                    part_folder_name=self.package.part_folder_name,
+                    sibling_part_manifest_paths=[str(path) for path in self.package.sibling_part_manifest_paths],
+                )
             if bool(external_labrecorder_start.get("started")):
                 self.events.log(
                     "external_labrecorder_start",
@@ -2068,14 +2712,19 @@ class SessionRunnerController:
                 standard_blocks,
                 include_topup_slots=self.topup_ledger is not None,
             )
-            if not self._play_instruction_slot(
-                engine,
-                "before_experiment",
-                event_callback=event_callback,
-                needs_continue=bool(standard_blocks),
-                context={"next_action": "start_experiment"},
-            ):
-                interrupted = True
+            play_start_instruction = not (
+                _package_is_split_part(self.package)
+                and _as_int(self.package.part_number, default=1) > 1
+            )
+            if play_start_instruction:
+                if not self._play_instruction_slot(
+                    engine,
+                    "before_experiment",
+                    event_callback=event_callback,
+                    needs_continue=bool(standard_blocks),
+                    context={"next_action": "start_experiment", "part_folder_name": self.package.part_folder_name},
+                ):
+                    interrupted = True
             for block_index, block in enumerate(standard_blocks):
                 if self._stop_requested:
                     interrupted = True
@@ -2260,19 +2909,45 @@ class SessionRunnerController:
                         interrupted = True
                         break
             if not interrupted and not self._stop_requested:
+                final_instruction_slot = (
+                    "between_conditions"
+                    if _package_is_split_part(self.package)
+                    and _as_int(self.package.part_number, default=1) < _package_split_part_count(self.package)
+                    else "after_experiment"
+                )
                 if not self._play_instruction_slot(
                     engine,
-                    "after_experiment",
+                    final_instruction_slot,
                     event_callback=event_callback,
                     needs_continue=False,
-                    context={"next_action": "finish_experiment"},
+                    context={
+                        "next_action": "finish_part" if final_instruction_slot == "between_conditions" else "finish_experiment",
+                        "part_folder_name": self.package.part_folder_name,
+                        "sibling_part_manifest_paths": [str(path) for path in self.package.sibling_part_manifest_paths],
+                    },
                 ):
                     interrupted = True
             completed = not interrupted
+            if _package_is_split_part(self.package):
+                self.events.log(
+                    "part_session_end",
+                    completed=completed,
+                    interrupted=interrupted,
+                    part_completion_status_path=str(_part_completion_status_path(self.package)),
+                    next_part_manifest_path=str(self.package.sibling_part_manifest_paths[0]) if self.package.sibling_part_manifest_paths else "",
+                )
             self.events.log("session_end", completed=completed, interrupted=interrupted)
         except Exception as exc:
             interrupted = True
             self.events.log("session_error", message=str(exc))
+            if _package_is_split_part(self.package):
+                self.events.log(
+                    "part_session_end",
+                    completed=False,
+                    interrupted=True,
+                    error=str(exc),
+                    part_completion_status_path=str(_part_completion_status_path(self.package)),
+                )
             _append_package_diary_event(
                 self.package,
                 "session_error",
@@ -2284,6 +2959,7 @@ class SessionRunnerController:
             self._progress_callback = None
             self._stop_external_labrecorder_capture()
             self._write_outputs()
+            self._write_part_completion_status(completed=completed, interrupted=interrupted)
             if owns_engine and self.audio_engine is not None and hasattr(self.audio_engine, "shutdown"):
                 self.audio_engine.shutdown()
 
@@ -3184,6 +3860,10 @@ class SessionRunnerController:
                 tactile_drive_onset_s=float(tactile_compensation.get("drive_onset_s") or tactile_onset_s),
                 tactile_compensation=tactile_compensation,
             )
+            row["Session_Group_ID"] = self.package.session_group_id
+            row["Part_Session_ID"] = _package_part_session_id(self.package) if _package_is_split_part(self.package) else ""
+            row["Global_Block_Index"] = _row_value(source_row, "Global_Block_Index", default=block_index)
+            row["Part_Block_Number"] = block_index
             row["Trial_UID"] = f"{self.package.participant_id}_topup_B{block_index:02d}_T{trial_index:03d}_{role}"
             row["Block_Label"] = block_label
             row["Is_Topup"] = "true"
@@ -3216,6 +3896,8 @@ class SessionRunnerController:
                     "schema": "pps-topup-block-manifest.v1",
                     "participant_id": self.package.participant_id,
                     "session_id": self.package.session_id,
+                    "session_group_id": self.package.session_group_id,
+                    "part_session_id": _package_part_session_id(self.package) if _package_is_split_part(self.package) else "",
                     "part_number": "" if part_number is None else part_label,
                     "phase_label": phase_label,
                     "block_index": block_index,
@@ -3244,6 +3926,8 @@ class SessionRunnerController:
             metadata={
                 "execution_mode": "topup_block_wavs",
                 "is_topup_block": True,
+                "session_group_id": self.package.session_group_id,
+                "part_session_id": _package_part_session_id(self.package) if _package_is_split_part(self.package) else "",
                 "display_block_index": display_index,
                 "play_order_index": display_index,
                 "display_block_count": display_count,
@@ -3336,6 +4020,9 @@ class SessionRunnerController:
                 metadata={
                     "participant_id": self.package.participant_id,
                     "session_id": self.package.session_id,
+                    "session_group_id": self.package.session_group_id,
+                    "part_session_id": self.package.part_session_id,
+                    "part_number": self.package.part_number,
                     "session_manifest": str(self.package.manifest_path),
                     "session_metadata": str(self._session_metadata_path),
                     "lsl_status": dict(self.events.lsl_status.__dict__),
@@ -3365,6 +4052,47 @@ class SessionRunnerController:
         self._summary_text = format_analysis_summary(analysis)
         _mkdir(self._analytics_dir)
         _write_text_file(self._analytics_dir / "analysis_summary.txt", self._summary_text + "\n", encoding="utf-8")
+
+    def _write_part_completion_status(self, *, completed: bool, interrupted: bool) -> None:
+        if not _package_is_split_part(self.package):
+            return
+        status_path = _part_completion_status_path(self.package)
+        payload = {
+            "schema": PART_COMPLETION_STATUS_SCHEMA,
+            "session_group_id": self.package.session_group_id,
+            "part_session_id": self.package.part_session_id,
+            "session_id": self.package.session_id,
+            "participant_id": self.package.participant_id,
+            "part_number": self.package.part_number,
+            "part_folder_name": self.package.part_folder_name,
+            "completed": bool(completed),
+            "interrupted": bool(interrupted),
+            "updated_at": datetime.now().isoformat(timespec="seconds"),
+            "session_manifest_path": str(self.package.manifest_path),
+            "session_dir": str(self.package.session_dir),
+            "events_csv": str(self._events_csv_path),
+            "lsl_markers_csv": str(self._lsl_markers_csv_path),
+            "trigger_dictionary_json": str(self._trigger_dictionary_path),
+            "session_metadata_json": str(self._session_metadata_path),
+            "participant_trials_csv": str(self._participant_trials_csv_path),
+            "analysis_outputs": {key: str(value) for key, value in self._analysis_outputs.items()},
+        }
+        _write_json_file(status_path, payload)
+        packages = [self.package]
+        for sibling in self.package.sibling_part_manifest_paths:
+            try:
+                packages.append(load_run_package(Path(sibling)))
+            except Exception:
+                continue
+        try:
+            run_setup = _load_json(self.package.source_run_setup_manifest_path) if self.package.source_run_setup_manifest_path else {}
+            _write_session_group_manifest(
+                packages,
+                run_setup=run_setup,
+                run_setup_manifest_path=self.package.source_run_setup_manifest_path or Path(),
+            )
+        except Exception:
+            return
 
     def _play_block_with_schedule(
         self,
@@ -3741,6 +4469,12 @@ def _build_runner_session_metadata(
     return {
         "schema": SESSION_METADATA_SCHEMA,
         "session_id": package.session_id,
+        "session_group_id": package.session_group_id,
+        "part_session_id": _package_part_session_id(package),
+        "part_number": package.part_number,
+        "part_folder_name": package.part_folder_name,
+        "part_split_schema": package.part_split_schema,
+        "sibling_part_manifest_paths": [str(path) for path in package.sibling_part_manifest_paths],
         "created_at": package.created_at,
         "run_started_at": run_started_at,
         "participant": participant,
@@ -3810,6 +4544,10 @@ def _experiment_metadata_from_package(package: RunPackage) -> dict[str, Any]:
         "project_label": str(project_data.get("project_label") or "").strip(),
         "template_id": str(design_data.get("study_profile_id") or project_data.get("source_template_id") or "").strip(),
         "execution_mode": package.execution_mode,
+        "session_group_id": package.session_group_id,
+        "part_session_id": _package_part_session_id(package),
+        "part_number": package.part_number,
+        "part_split_schema": package.part_split_schema,
         "experiment_structure": str(run_setup_data.get("experiment_structure") or "").strip(),
         "participant_count": run_setup_data.get("participant_count", ""),
         "parts_per_participant": run_setup_data.get("parts_per_participant", ""),
@@ -3826,6 +4564,8 @@ def _session_metadata_paths(package: RunPackage) -> dict[str, Any]:
         "protocol": package.protocol_path,
         "source_run_setup_manifest": package.source_run_setup_manifest_path,
         "render_manifest": package.render_manifest_path,
+        "session_group_manifest": _session_group_manifest_path(package) if _package_is_split_part(package) else None,
+        "part_completion_status": _part_completion_status_path(package) if _package_is_split_part(package) else None,
         "participant_trials_csv": _participant_trials_csv_path(package),
         "verbose_events_csv": _verbose_events_csv_path(package),
         "verbose_events_xdf": _verbose_events_xdf_path(package),
@@ -4366,10 +5106,16 @@ def _normalize_instruction_profile(value: Any) -> dict[str, Any]:
     }
 
 
-def _materialize_session_instruction_profile(value: Any, *, session_dir: Path, source_base_dir: Path) -> dict[str, Any]:
+def _materialize_session_instruction_profile(
+    value: Any,
+    *,
+    session_dir: Path,
+    source_base_dir: Path,
+    output_root: Path | None = None,
+) -> dict[str, Any]:
     profile = _normalize_instruction_profile(value)
     slots: list[dict[str, Any]] = []
-    instruction_dir = output_shared_instructions_dir(Path(session_dir).parent)
+    instruction_dir = output_shared_instructions_dir(Path(output_root) if output_root is not None else Path(session_dir).parent)
     for item in profile.get("slots", []):
         slot = dict(item)
         if not bool(slot.get("enabled")):
@@ -4805,11 +5551,15 @@ def _write_segment_block_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     fieldnames = [
         "Participant_ID",
         "Session_ID",
+        "Session_Group_ID",
+        "Part_Session_ID",
         "Part_Number",
         "Phase",
         "Phase_Label",
         "Block_Number",
         "Block_Label",
+        "Global_Block_Index",
+        "Part_Block_Number",
         "Participant_Block_Position",
         "Source_Block_Index",
         "Source_Block_Label",
@@ -5196,9 +5946,17 @@ def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> Non
         "schema": RUN_PACKAGE_SCHEMA,
         "participant_id": package.participant_id,
         "session_id": package.session_id,
+        "session_group_id": package.session_group_id,
+        "part_number": "" if package.part_number is None else package.part_number,
+        "part_session_id": _package_part_session_id(package),
+        "part_folder_name": package.part_folder_name,
+        "sibling_part_manifest_paths": [str(path) for path in package.sibling_part_manifest_paths],
+        "part_split_schema": package.part_split_schema,
         "created_at": package.created_at,
         "session_dir": str(package.session_dir),
         "context_dir": str(output_metadata_dir(_package_output_root(package))),
+        "session_group_manifest_path": str(_session_group_manifest_path(package)) if _package_is_split_part(package) else "",
+        "part_completion_status_path": str(_part_completion_status_path(package)) if _package_is_split_part(package) else "",
         "data_analytics_dir": str(_package_analytics_dir(package)),
         "execution_mode": package.execution_mode,
         "source_run_setup_manifest_path": str(package.source_run_setup_manifest_path) if package.source_run_setup_manifest_path else "",
@@ -5263,6 +6021,8 @@ def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> Non
             "loudness_manifest_json": str(loudness_manifest_path),
             "analysis_dir": str(_package_analytics_dir(package)),
             "prepared_blocks_dir": str(_package_prepared_blocks_dir(package)),
+            "part_completion_status_json": str(_part_completion_status_path(package)) if _package_is_split_part(package) else "",
+            "session_group_manifest_json": str(_session_group_manifest_path(package)) if _package_is_split_part(package) else "",
         },
     }
     _write_json_file(loudness_manifest_path, loudness_manifest)

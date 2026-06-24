@@ -34,6 +34,9 @@ LSL_MARKER_CHANNELS = [
     "marker_name",
     "session_id",
     "participant_id",
+    "session_group_id",
+    "part_session_id",
+    "part_number",
     "block_index",
     "trial_uid",
     "sample_index",
@@ -111,6 +114,9 @@ class TriggerDictionary:
                 payload = dict(getattr(event, "payload", {}) or {})
                 trial_records[trigger_key] = {
                     "event_type": getattr(event, "event_type", ""),
+                    "session_group_id": payload.get("session_group_id", ""),
+                    "part_session_id": payload.get("part_session_id", ""),
+                    "part_number": payload.get("part_number", ""),
                     "block_index": payload.get("block_index", payload.get("block_number", "")),
                     "trial_index": payload.get("trial_index", payload.get("trial_number", "")),
                     "trial_uid": payload.get("trial_uid", payload.get("Trial_UID", "")),
@@ -144,6 +150,9 @@ class TriggerDictionary:
             self.codes[key] = code
             self.metadata[key] = {
                 "event_type": event_type,
+                "session_group_id": payload.get("session_group_id", ""),
+                "part_session_id": payload.get("part_session_id", ""),
+                "part_number": payload.get("part_number", ""),
                 "block_index": payload.get("block_index", payload.get("block_number", "")),
                 "trial_index": payload.get("trial_index", payload.get("trial_number", "")),
                 "trial_uid": payload.get("trial_uid", payload.get("Trial_UID", "")),
@@ -152,13 +161,25 @@ class TriggerDictionary:
             }
             return key, code
 
-    def write_json(self, path: str | Path, *, session_id: str = "", participant_id: str = "") -> Path:
+    def write_json(
+        self,
+        path: str | Path,
+        *,
+        session_id: str = "",
+        participant_id: str = "",
+        session_group_id: str = "",
+        part_session_id: str = "",
+        part_number: str | int = "",
+    ) -> Path:
         path = Path(path)
         payload = {
             "schema": "pps-trigger-dictionary.v1",
             "marker_version": MARKER_VERSION,
             "session_id": session_id,
             "participant_id": participant_id,
+            "session_group_id": session_group_id,
+            "part_session_id": part_session_id,
+            "part_number": part_number,
             "reserved_codes": dict(sorted(RESERVED_TRIGGER_CODES.items(), key=lambda item: item[1])),
             "triggers": [
                 {
@@ -257,6 +278,9 @@ class LSLMarkerOutlet:
             str(marker.get("marker_name", "")),
             str(marker.get("session_id", "")),
             str(marker.get("participant_id", "")),
+            str(marker.get("session_group_id", "")),
+            str(marker.get("part_session_id", "")),
+            str(marker.get("part_number", "")),
             str(marker.get("block_index", "")),
             str(marker.get("trial_uid", "")),
             str(marker.get("sample_index", "")),
@@ -281,6 +305,7 @@ class TimingEventHub:
         trigger_dictionary: TriggerDictionary | None = None,
         event_callback: Callable[[SessionEvent], None] | None = None,
         stream_metadata: dict[str, Any] | None = None,
+        default_payload: dict[str, Any] | None = None,
     ):
         self.logger = logger
         self.session_id = session_id
@@ -288,6 +313,7 @@ class TimingEventHub:
         self.trigger_dictionary = trigger_dictionary or TriggerDictionary.from_schedules([])
         self._event_callback = event_callback
         self.stream_metadata = dict(stream_metadata or {})
+        self.default_payload = dict(default_payload or {})
         self.lsl: LSLMarkerOutlet | None = (
             LSLMarkerOutlet(session_id=session_id, participant_id=participant_id, stream_metadata=self.stream_metadata)
             if enable_lsl
@@ -326,6 +352,8 @@ class TimingEventHub:
             unix_time = time.time()
         if monotonic_time is None:
             monotonic_time = time.perf_counter()
+        for key, value in self.default_payload.items():
+            payload.setdefault(key, value)
         payload.setdefault("session_id", self.session_id)
         payload.setdefault("participant_id", self.participant_id)
         lsl_timestamp = _as_float(payload.get("lsl_timestamp"), default=None)
@@ -382,6 +410,11 @@ class TimingEventHub:
             "event_code",
             "trigger_key",
             "marker_name",
+            "session_id",
+            "participant_id",
+            "session_group_id",
+            "part_session_id",
+            "part_number",
             "lsl_timestamp",
             "timestamp_quality",
             "sample_index",
@@ -408,7 +441,14 @@ class TimingEventHub:
         )
 
     def write_trigger_dictionary(self, path: str | Path) -> Path:
-        return self.trigger_dictionary.write_json(path, session_id=self.session_id, participant_id=self.participant_id)
+        return self.trigger_dictionary.write_json(
+            path,
+            session_id=self.session_id,
+            participant_id=self.participant_id,
+            session_group_id=str(self.default_payload.get("session_group_id") or ""),
+            part_session_id=str(self.default_payload.get("part_session_id") or ""),
+            part_number=self.default_payload.get("part_number", ""),
+        )
 
     def push_deferred_event_marker(self, event: SessionEvent) -> None:
         """Push an already logged event marker after latency-sensitive work.
@@ -561,6 +601,9 @@ class TimingEventHub:
             "marker_name": payload.get("marker_name", ""),
             "session_id": self.session_id,
             "participant_id": self.participant_id,
+            "session_group_id": payload.get("session_group_id", ""),
+            "part_session_id": payload.get("part_session_id", ""),
+            "part_number": payload.get("part_number", ""),
             "block_index": block_index,
             "trial_uid": payload.get("trial_uid", payload.get("Trial_UID", "")),
             "sample_index": payload.get("sample_index", payload.get("planned_sample_index", "")),
@@ -811,6 +854,9 @@ def _rich_marker_samples_chunk(stream_id: int, markers: list[dict[str, Any]]) ->
             str(marker.get("marker_name", "")),
             str(marker.get("session_id", "")),
             str(marker.get("participant_id", "")),
+            str(marker.get("session_group_id", "")),
+            str(marker.get("part_session_id", "")),
+            str(marker.get("part_number", "")),
             str(marker.get("block_index", "")),
             str(marker.get("trial_uid", "")),
             str(marker.get("sample_index", "")),

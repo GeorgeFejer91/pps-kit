@@ -4711,7 +4711,11 @@ def profile_participant_dropdown_label(participant: str, status: dict[str, Any])
         asset_suffix = "failed"
     else:
         asset_suffix = "not generated"
-    data_suffix = f"{DATA_COLLECTED_MARK} data collected" if status.get("data_collected") else "data not collected"
+    inventory = str(status.get("part_inventory") or "").strip()
+    if inventory:
+        data_suffix = inventory
+    else:
+        data_suffix = f"{DATA_COLLECTED_MARK} data collected" if status.get("data_collected") else "data not collected"
     return f"{participant} - {asset_suffix} - {data_suffix}"
 
 
@@ -4751,11 +4755,19 @@ def _package_participant_ids(package: Any) -> list[str]:
     return [participant for participant in participants if str(participant or "").strip()]
 
 
+def _package_is_split_part(package: Any) -> bool:
+    return bool(str(getattr(package, "part_split_schema", "") or "").strip()) and bool(
+        str(getattr(package, "session_group_id", "") or "").strip()
+    )
+
+
 def _package_output_root(package: Any) -> Path:
     try:
         session_dir = Path(getattr(package, "session_dir")).resolve()
     except Exception:
         return current_runner_session_root()
+    if _package_is_split_part(package):
+        return session_dir.parent.parent
     return session_dir.parent
 
 
@@ -5376,21 +5388,31 @@ def prepare_profile_focus_session(
     if claimed is not None:
         package = load_run_package(claimed)
     else:
-        package = prepare_segment_run_package(
+        status = prepared_session_asset_status(
             run_setup_manifest_path,
             participant,
-            design=design,
-            session_root=output_root,
-            progress_callback=progress_callback,
-        )
-        record_prepared_session_queue(
-            participant_id=participant,
-            run_setup_manifest_path=run_setup_manifest_path,
-            session_manifest_path=package.manifest_path,
-            status="ready",
-            message="Prepared by Experiment Runner launcher.",
             state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+            session_root=output_root,
         )
+        existing_manifest = str(status.get("session_manifest_path") or "").strip()
+        if bool(status.get("generated")) and existing_manifest:
+            package = load_run_package(Path(existing_manifest))
+        else:
+            package = prepare_segment_run_package(
+                run_setup_manifest_path,
+                participant,
+                design=design,
+                session_root=output_root,
+                progress_callback=progress_callback,
+            )
+            record_prepared_session_queue(
+                participant_id=participant,
+                run_setup_manifest_path=run_setup_manifest_path,
+                session_manifest_path=package.manifest_path,
+                status="ready",
+                message="Prepared by Experiment Runner launcher.",
+                state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+            )
     record_experiment_activity(
         "session_prepared",
         template_id=profile,
@@ -6519,6 +6541,7 @@ class FocusModeWindow:
         self.topup_draft_items: list[dict[str, Any]] = []
         self.part_buttons: dict[str, Any] = {}
         self.start_part2_button: Any | None = None
+        self.load_next_part_button: Any | None = None
         self.active_display_block_index: int | None = None
         self.completed_display_block_indices: set[int] = set()
         self.recenter_controller = TactileRecenterController(self.timeline_state, self._move_cursor_to_target)
@@ -7050,6 +7073,14 @@ class FocusModeWindow:
         self.start_part2_button.setToolTip("Part 2 can be started only after Part 1 has finished and the runner is waiting at the part boundary.")
         self.start_part2_button.clicked.connect(self._start_part2_button_clicked)
         part_selector_layout.addWidget(self.start_part2_button)
+        self.load_next_part_button = q["QPushButton"]("Load Part 2")
+        self.load_next_part_button.setObjectName("loadNextPartButton")
+        self.load_next_part_button.setMinimumHeight(profile.button_min_height)
+        self.load_next_part_button.setVisible(False)
+        self.load_next_part_button.setEnabled(False)
+        self.load_next_part_button.setToolTip("Load the next prepared part package and return to Data Logging.")
+        self.load_next_part_button.clicked.connect(self._load_next_part_button_clicked)
+        part_selector_layout.addWidget(self.load_next_part_button)
         part_selector_layout.addStretch(1)
         progress_layout.addWidget(self.part_selector_widget)
         self.block_plan_widget = _create_block_plan_widget(q, self)
@@ -7547,6 +7578,10 @@ class FocusModeWindow:
         button = getattr(self, "start_part2_button", None)
         if button is None:
             return
+        if _package_is_split_part(self.package):
+            button.setVisible(False)
+            button.setEnabled(False)
+            return
         has_part2 = "2" in self._available_part_keys()
         button.setVisible(has_part2)
         pending_part = self._pending_start_part_key()
@@ -7573,6 +7608,61 @@ class FocusModeWindow:
         self._refresh_run_plan()
         self._approve_pending_instruction_continue(source="start part 2 button")
         self._refresh_start_part2_button()
+
+    def _next_split_part_manifest(self) -> Path | None:
+        if not _package_is_split_part(self.package):
+            return None
+        current_part = _part_key_text(getattr(self.package, "part_number", ""))
+        try:
+            current_number = int(current_part or "0")
+        except ValueError:
+            current_number = 0
+        candidates: list[tuple[int, Path]] = []
+        for manifest_path in list(getattr(self.package, "sibling_part_manifest_paths", []) or []):
+            path = Path(manifest_path)
+            if not path.exists():
+                continue
+            try:
+                package = load_run_package(path)
+            except Exception:
+                continue
+            try:
+                part_number = int(_part_key_text(getattr(package, "part_number", "")) or "0")
+            except ValueError:
+                part_number = 0
+            if part_number > current_number:
+                candidates.append((part_number, package.manifest_path))
+        if not candidates:
+            return None
+        return sorted(candidates, key=lambda item: item[0])[0][1]
+
+    def _refresh_load_next_part_button(self, *, completed: bool = False) -> None:
+        button = getattr(self, "load_next_part_button", None)
+        if button is None:
+            return
+        next_manifest = self._next_split_part_manifest()
+        visible = bool(completed and next_manifest is not None)
+        button.setVisible(visible)
+        button.setEnabled(visible)
+        if visible:
+            button.setToolTip(f"Load the next prepared part package: {next_manifest}")
+        else:
+            button.setToolTip("The next split part appears here after the current part completes.")
+
+    def _load_next_part_button_clicked(self) -> None:
+        manifest_path = self._next_split_part_manifest()
+        if manifest_path is None:
+            if hasattr(self, "event_label"):
+                self.event_label.setText("No later prepared part package was found.")
+            self._refresh_load_next_part_button(completed=False)
+            return
+        try:
+            package = load_run_package(manifest_path)
+        except Exception as exc:
+            if hasattr(self, "event_label"):
+                self.event_label.setText(f"Could not load next part: {exc}")
+            return
+        self._replace_loaded_package(package, message=f"Part {getattr(package, 'part_number', '')} ready. Submit setup to start.")
 
     def _visible_plan_items(self) -> list[dict[str, Any]]:
         selected = self._ensure_selected_part_key()
@@ -8168,6 +8258,9 @@ class FocusModeWindow:
         return save_participant_ledger(self.output_root, ledger)
 
     def _participant_data_summary(self, status: dict[str, Any]) -> str:
+        inventory = str(status.get("part_inventory") or "").strip()
+        if inventory:
+            return inventory
         collection_state = str(status.get("data_collection_status") or "").strip()
         if bool(status.get("data_collected")) or collection_state == "collected":
             return "data collected"
@@ -8298,12 +8391,39 @@ class FocusModeWindow:
         _set_progress(f"Loading participant {selected}")
         try:
             self.q["QApplication"].setOverrideCursor(self.q["QCursor"](self.q["Qt"].CursorShape.WaitCursor))
-            package = prepare_segment_run_package(
+            manifest_path = claim_prepared_session(
                 run_setup_path,
                 selected,
+                state_root=DEFAULT_DASHBOARD_STATE_ROOT,
                 session_root=self.output_root,
-                progress_callback=_progress,
             )
+            if manifest_path is None:
+                status = prepared_session_asset_status(
+                    run_setup_path,
+                    selected,
+                    state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+                    session_root=self.output_root,
+                )
+                existing_manifest = str(status.get("session_manifest_path") or "").strip()
+                if bool(status.get("generated")) and existing_manifest:
+                    manifest_path = Path(existing_manifest)
+            if manifest_path is not None:
+                package = load_run_package(manifest_path)
+            else:
+                package = prepare_segment_run_package(
+                    run_setup_path,
+                    selected,
+                    session_root=self.output_root,
+                    progress_callback=_progress,
+                )
+                record_prepared_session_queue(
+                    participant_id=selected,
+                    run_setup_manifest_path=run_setup_path,
+                    session_manifest_path=package.manifest_path,
+                    status="ready",
+                    message="Prepared by Experiment Runner participant switch.",
+                    state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+                )
         except Exception as exc:
             self.event_label.setText(f"Could not load participant {selected}: {exc}")
             self._populate_participant_code_combo(current)
@@ -8314,17 +8434,42 @@ class FocusModeWindow:
             except Exception:
                 pass
 
-        self.package = package
-        self.output_root = _package_output_root(package)
-        self._clear_participant_details()
-        self._refresh_loaded_package_display()
-        self._populate_participant_code_combo(self.package.participant_id)
-        self.event_label.setText(f"Participant {self.package.participant_id} ready")
+        self._replace_loaded_package(package, message=f"Participant {package.participant_id} ready")
         _append_output_diary_event(
             "participant_switched",
             package=self.package,
             capture_options=self.capture_options.as_dict(),
             payload={"previous_participant_id": current, "selected_participant_id": self.package.participant_id},
+            create=True,
+        )
+
+    def _replace_loaded_package(self, package: Any, *, message: str = "") -> None:
+        self.package = package
+        self.output_root = _package_output_root(package)
+        self.result = None
+        self.exit_code = 1
+        self.pending_instruction_request = None
+        self.pending_topup_approval_request = None
+        self.thread = None
+        self.messages = queue.Queue()
+        if hasattr(self, "load_next_part_button"):
+            self.load_next_part_button.setVisible(False)
+            self.load_next_part_button.setEnabled(False)
+        self._clear_participant_details()
+        self._refresh_loaded_package_display()
+        self._populate_participant_code_combo(self.package.participant_id)
+        if hasattr(self, "mode_tabs"):
+            self._set_experiment_control_tab_ready(False)
+            self.mode_tabs.setCurrentIndex(self.data_logging_tab_index)
+        if hasattr(self, "timer") and not self.timer.isActive():
+            self.timer.start(100)
+        if message and hasattr(self, "event_label"):
+            self.event_label.setText(message)
+        _append_output_diary_event(
+            "runner_part_package_loaded",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            payload={"message": message},
             create=True,
         )
 
@@ -8387,6 +8532,7 @@ class FocusModeWindow:
         if hasattr(self, "wired_loopback_checkbox"):
             self.wired_loopback_checkbox.setText(_wired_loopback_checkbox_text())
         self._refresh_run_plan(select_default=True)
+        self._refresh_load_next_part_button(completed=False)
         self._update_tactile_timeline_display()
         self._apply_participant_ledger_to_fields(self.package.participant_id)
         self._refresh_participant_ledger_summary()
@@ -9898,10 +10044,16 @@ class FocusModeWindow:
         self.start_button.setEnabled(False)
         self._set_output_test_buttons_enabled(True)
         self._refresh_start_part2_button()
+        self._refresh_load_next_part_button(completed=bool(result.completed))
         self._set_primary_action_shortcuts_enabled(False)
         self.progress.setValue(1000 if result.completed else self.progress.value())
         self.run_state_chip.setText("Complete" if result.completed else "Interrupted")
         self.progress_label.setText("Complete" if result.completed else "Interrupted")
+        if _package_is_split_part(self.package) and bool(result.completed):
+            next_manifest = self._next_split_part_manifest()
+            if next_manifest is not None:
+                current_part = _part_key_text(getattr(self.package, "part_number", "")) or "?"
+                self.event_label.setText(f"Part {current_part} complete; Part 2 ready.")
         lines = [str(result.summary_text or "").strip()]
         lines.append(f"Session folder: {result.session_dir}")
         lines.append(f"Events CSV: {result.events_csv}")

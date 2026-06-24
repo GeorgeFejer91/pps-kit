@@ -890,7 +890,8 @@ def _analysis_rt_audit(
         if str(row.get("final_outcome_source") or "original").strip().lower() != "original":
             skipped_topup_rescued.append(trial_uid)
             continue
-        if str(row.get("click_event_id") or "") != str(click.get("mouse_event_id") or ""):
+        planned_mouse_event_id = str(click.get("mouse_event_id") or "")
+        if planned_mouse_event_id and str(row.get("click_event_id") or "") != planned_mouse_event_id:
             skipped_unselected.append(trial_uid)
             continue
         backend = _norm(click.get("backend"))
