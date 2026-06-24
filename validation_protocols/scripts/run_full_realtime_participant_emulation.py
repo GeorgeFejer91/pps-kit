@@ -23,10 +23,13 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = REPO_ROOT / "src"
 SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from audit_protocol11_study5_readiness import audit_readiness  # noqa: E402
+from peripersonal_space_toolkit.output_layout import _filesystem_path  # noqa: E402
 
 
 STUDY5_TEMPLATE_ID = "study5_box_breathing_pps"
@@ -43,9 +46,47 @@ def _default_output_dir() -> Path:
     return REPO_ROOT / "artifacts" / "validation_runs" / f"full_realtime_participant_emulation_{time.strftime('%Y%m%d_%H%M%S')}"
 
 
+def _mkdir(path: Path | str) -> None:
+    os.makedirs(_filesystem_path(Path(path)), exist_ok=True)
+
+
+def _path_is_file(path: Path | str) -> bool:
+    return os.path.isfile(_filesystem_path(Path(path)))
+
+
+def _path_exists(path: Path | str) -> bool:
+    return os.path.exists(_filesystem_path(Path(path)))
+
+
+def _path_is_dir(path: Path | str) -> bool:
+    return os.path.isdir(_filesystem_path(Path(path)))
+
+
+def _glob_files(directory: Path, pattern: str) -> list[Path]:
+    if not _path_is_dir(directory):
+        return []
+    return sorted(Path(item) for item in Path(_filesystem_path(directory)).glob(pattern))
+
+
+def _unlink_if_exists(path: Path | str) -> None:
+    target = Path(path)
+    if _path_exists(target):
+        os.unlink(_filesystem_path(target))
+
+
+def _write_text(path: Path, text: str) -> None:
+    _mkdir(path.parent)
+    with open(_filesystem_path(path), "w", encoding="utf-8") as handle:
+        handle.write(text)
+
+
+def _read_text(path: Path) -> str:
+    with open(_filesystem_path(path), "r", encoding="utf-8") as handle:
+        return handle.read()
+
+
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(_json_ready(payload), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    _write_text(path, json.dumps(_json_ready(payload), indent=2, sort_keys=True) + "\n")
 
 
 def _json_ready(value: Any) -> Any:
@@ -59,18 +100,18 @@ def _json_ready(value: Any) -> Any:
 
 
 def _read_json(path: Path) -> dict[str, Any]:
-    if not path.is_file():
+    if not _path_is_file(path):
         return {}
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        return json.loads(_read_text(path))
     except Exception:
         return {}
 
 
 def _read_csv(path: Path) -> list[dict[str, str]]:
-    if not path.is_file():
+    if not _path_is_file(path):
         return []
-    with path.open(newline="", encoding="utf-8-sig") as handle:
+    with open(_filesystem_path(path), newline="", encoding="utf-8-sig") as handle:
         return list(csv.DictReader(handle))
 
 
@@ -82,7 +123,7 @@ def _resolve_path(value: Any, *, base: Path) -> Path:
     if path.is_absolute():
         return path
     base_candidate = base / path
-    if base_candidate.exists():
+    if _path_exists(base_candidate):
         return base_candidate
     return REPO_ROOT / path
 
@@ -97,10 +138,10 @@ def _session_manifest(focus: dict[str, Any]) -> tuple[Path, dict[str, Any], Path
 def _analysis_dir_from_manifest(session_dir: Path, manifest: dict[str, Any], manifest_base: Path) -> Path | None:
     outputs = manifest.get("outputs") if isinstance(manifest.get("outputs"), dict) else {}
     path = _resolve_path(outputs.get("analysis_dir"), base=manifest_base)
-    if path and path.is_dir():
+    if path and _path_is_dir(path):
         return path
     for candidate in (session_dir / "analysis", session_dir.parent / "Data_Analytics" / session_dir.name):
-        if candidate.is_dir():
+        if _path_is_dir(candidate):
             return candidate
     return None
 
@@ -109,13 +150,13 @@ def _topup_dir_from_manifest(session_dir: Path, manifest: dict[str, Any], manife
     outputs = manifest.get("outputs") if isinstance(manifest.get("outputs"), dict) else {}
     for key in ("topup_ledger_json", "topup_ledger_csv", "topup_block_manifest_csv", "topup_block_manifest_json"):
         path = _resolve_path(outputs.get(key), base=manifest_base)
-        if path and path.parent.is_dir():
+        if path and _path_is_dir(path.parent):
             return path.parent
     for candidate in (
         session_dir / "topup",
         session_dir.parent / "Experiment_context_folder_DO_NOT_DELETE" / "runner_logs" / session_dir.name / "topup",
     ):
-        if candidate.is_dir():
+        if _path_is_dir(candidate):
             return candidate
     return None
 
@@ -363,10 +404,10 @@ def _latest_analysis_csv(session_dir: Path, suffix: str, *, analysis_dir: Path |
     matches: list[Path] = []
     for candidate in candidates:
         key = str(candidate)
-        if key in seen or not candidate.is_dir():
+        if key in seen or not _path_is_dir(candidate):
             continue
         seen.add(key)
-        matches.extend(sorted(candidate.glob(f"*_{suffix}.csv")))
+        matches.extend(_glob_files(candidate, f"*_{suffix}.csv"))
     return matches[-1] if matches else None
 
 
@@ -406,8 +447,7 @@ def _write_markdown(path: Path, report: dict[str, Any]) -> None:
     if report.get("failures"):
         lines.extend(["", "## Failures"])
         lines.extend(f"- {failure}" for failure in report["failures"])
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    _write_text(path, "\n".join(lines) + "\n")
 
 
 def _evaluate_focus_report(
@@ -456,7 +496,7 @@ def _evaluate_focus_report(
     ledger = _read_json(topup_dir / "topup_ledger.json") if topup_dir else {}
     topup_manifest_paths = [
         path
-        for path in sorted((topup_dir or session_dir).glob("topup_block*manifest.csv"))
+        for path in _glob_files(topup_dir or session_dir, "topup_block*manifest.csv")
         if "draft" not in path.name.lower()
     ]
     topup_manifest_rows = [row for path in topup_manifest_paths for row in _read_csv(path)]
@@ -501,8 +541,8 @@ def _evaluate_focus_report(
             failures.append("Full-stack validation did not use hardware audio mode.")
         if counts.get("recording_unavailable", 0):
             failures.append(f"Full-stack validation logged recording_unavailable {counts.get('recording_unavailable')} time(s).")
-        audio_evidence_wavs = sorted(session_dir.glob("*audio_evidence.wav"))
-        audio_evidence_sidecars = sorted(session_dir.glob("*audio_evidence.output_evidence.json"))
+        audio_evidence_wavs = _glob_files(session_dir, "*audio_evidence.wav")
+        audio_evidence_sidecars = _glob_files(session_dir, "*audio_evidence.output_evidence.json")
         if not audio_evidence_wavs or len(audio_evidence_wavs) != len(audio_evidence_sidecars):
             failures.append(
                 f"Full-stack validation requires per-block audio-evidence WAV/sidecar sets; found wavs={len(audio_evidence_wavs)} sidecars={len(audio_evidence_sidecars)}."
@@ -664,16 +704,14 @@ def main(argv: list[str] | None = None) -> int:
     args = build_arg_parser().parse_args(argv)
     validation_lane = _apply_validation_lane_policy(args)
     output_dir = (args.output_dir or _default_output_dir()).resolve()
-    output_dir.mkdir(parents=True, exist_ok=True)
+    _mkdir(output_dir)
     runner = args.runner.resolve()
-    if args.runner_mode == "packaged" and not runner.is_file():
+    if args.runner_mode == "packaged" and not _path_is_file(runner):
         raise FileNotFoundError(f"Packaged runner exe was not found: {runner}")
     focus_report_path = output_dir / "focus_validation_report.json"
     screenshot_path = output_dir / "focus_screenshot.png"
-    if focus_report_path.exists():
-        focus_report_path.unlink()
-    if screenshot_path.exists():
-        screenshot_path.unlink()
+    _unlink_if_exists(focus_report_path)
+    _unlink_if_exists(screenshot_path)
 
     env = _configure_validation_env(args, output_dir=output_dir, focus_report_path=focus_report_path)
     command = _build_runner_command(args, runner=runner, screenshot_path=screenshot_path)
