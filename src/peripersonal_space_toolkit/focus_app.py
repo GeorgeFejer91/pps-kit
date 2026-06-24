@@ -150,6 +150,8 @@ OUTPUT_12_VOLUME_PERCENT_KEY = "output_1_2_volume_percent"
 OUTPUT_34_VOLUME_PERCENT_KEY = "output_3_4_volume_percent"
 OUTPUT_CHANNEL_VOLUME_SETTINGS_KEY = "output_channel_volumes"
 OUTPUT_CHANNEL_VOLUME_SCHEMA = "pps-output-channel-volumes.v1"
+OUTPUT_TEST_AUDIO_PATH = repo_root() / "assets" / "breathing" / "runner_output_test_audio.wav"
+OUTPUT_TEST_TACTILE_PATH = repo_root() / "assets" / "tactile" / "runner_output_test_tactile.wav"
 
 
 def _timeline_widget_minimum_height(profile: FocusLayoutProfile | None) -> int:
@@ -6062,6 +6064,7 @@ class FocusModeWindow:
         self.exit_code = 1
         self.demographics_submitted = False
         self.pending_instruction_request: dict[str, Any] | None = None
+        self.pending_topup_approval_request: dict[str, Any] | None = None
         self._pre_run_controls: list[Any] = []
         self._prewarm_thread: threading.Thread | None = None
         self._prewarm_started = False
@@ -6069,6 +6072,7 @@ class FocusModeWindow:
         self.participant_statuses: dict[str, dict[str, Any]] = {}
         self._run_active = False
         self._run_paused = False
+        self._output_test_active = False
         self._timeline_perf_anchor: float | None = None
         self.timeline_state = TactileTimelineState()
         self.timeline_preview_state = TactileTimelineState()
@@ -6232,9 +6236,9 @@ class FocusModeWindow:
         self.output_levels_panel = output_levels_panel
         output_levels_panel.setMinimumWidth(profile.response_panel_side)
         output_levels_panel.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Fixed)
-        output_levels_panel_min_height = max(88, (profile.input_min_height * 3) + (profile.panel_margin * 2))
+        output_levels_panel_min_height = max(124, (profile.input_min_height * 4) + (profile.panel_margin * 2) + profile.panel_spacing)
         output_levels_panel.setMinimumHeight(output_levels_panel_min_height)
-        output_levels_panel.setMaximumHeight(max(output_levels_panel_min_height, 116))
+        output_levels_panel.setMaximumHeight(max(output_levels_panel_min_height, 156))
         (
             output_12_row,
             self.output_12_volume_slider,
@@ -6261,6 +6265,20 @@ class FocusModeWindow:
         )
         output_levels_layout.addWidget(output_12_row)
         output_levels_layout.addWidget(output_34_row)
+        output_test_controls = q["QHBoxLayout"]()
+        output_test_controls.setContentsMargins(0, 0, 0, 0)
+        output_test_controls.setSpacing(6)
+        self.test_audio_button = q["QPushButton"]("Test Audio")
+        self.test_audio_button.setObjectName("testAudioOutputButton")
+        self.test_audio_button.setToolTip("Play the standardized spoken test through Komplete outputs 1/2 using the current Output 1/2 level.")
+        self.test_audio_button.clicked.connect(lambda _checked=False: self._run_output_test("audio"))
+        self.test_tactile_button = q["QPushButton"]("Test Tactile")
+        self.test_tactile_button.setObjectName("testTactileOutputButton")
+        self.test_tactile_button.setToolTip("Play four standardized tactile pulses one second apart through output 3, mirrored to output 4, using the current Output 3/4 level.")
+        self.test_tactile_button.clicked.connect(lambda _checked=False: self._run_output_test("tactile"))
+        output_test_controls.addWidget(self.test_audio_button)
+        output_test_controls.addWidget(self.test_tactile_button)
+        output_levels_layout.addLayout(output_test_controls)
         response_cell_layout.addWidget(output_levels_panel)
 
         output_panel, output_layout = _panel(q, "Output Summary", profile=profile)
@@ -7690,6 +7708,132 @@ class FocusModeWindow:
             self.output_34_volume_percent,
         )
 
+    def _set_output_test_buttons_enabled(self, enabled: bool) -> None:
+        enabled = bool(enabled) and not self._run_active and not self._output_test_active
+        for button_name in ("test_audio_button", "test_tactile_button"):
+            button = getattr(self, button_name, None)
+            if button is not None:
+                button.setEnabled(enabled)
+
+    def _output_test_engine(self) -> Any | None:
+        controller_engine = getattr(self.controller, "audio_engine", None) if self.controller is not None else None
+        engine = controller_engine or self._owned_audio_engine
+        if engine is None:
+            engine = self._create_real_audio_engine_on_ui_thread()
+            self._owned_audio_engine = engine
+        self._apply_output_volumes_to_engine(engine)
+        return engine
+
+    def _run_output_test(self, target: str) -> bool:
+        target = str(target or "").strip().lower()
+        if self._run_active or (self.thread is not None and self.thread.is_alive()):
+            self.event_label.setText("Output tests are available before playback starts or after it ends.")
+            return False
+        if self._output_test_active:
+            self.event_label.setText("Output test already playing.")
+            return False
+        if target == "audio":
+            path = OUTPUT_TEST_AUDIO_PATH
+            label = "Test Audio"
+        elif target == "tactile":
+            path = OUTPUT_TEST_TACTILE_PATH
+            label = "Test Tactile"
+        else:
+            return False
+        if not path.exists():
+            self.event_label.setText(f"{label} asset missing: {path}")
+            return False
+        try:
+            engine = self._output_test_engine()
+        except Exception as exc:
+            self.event_label.setText(f"{label} could not initialize audio: {exc}")
+            return False
+        if engine is None:
+            self.event_label.setText(f"{label} could not initialize audio.")
+            return False
+
+        self._output_test_active = True
+        self._set_output_test_buttons_enabled(False)
+        self.event_label.setText(f"{label} playing")
+        _append_output_diary_event(
+            "output_test_started",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            payload={
+                "target": target,
+                "asset_path": str(path),
+                "playback_output_levels": self._output_channel_volume_payload(),
+            },
+            create=True,
+        )
+
+        def _finish(success: bool, message: str = "") -> None:
+            self.messages.put(
+                (
+                    "output_test_done",
+                    {
+                        "target": target,
+                        "label": label,
+                        "success": bool(success),
+                        "message": message,
+                        "asset_path": str(path),
+                    },
+                )
+            )
+
+        if target == "audio":
+            play_instruction = getattr(engine, "play_instruction", None)
+            if not callable(play_instruction):
+                _finish(False, "audio engine has no instruction playback API")
+                return False
+            try:
+                returned = play_instruction(str(path), lambda success=True: _finish(bool(success)))
+                if returned is False:
+                    _finish(False, "audio engine rejected instruction playback")
+                    return False
+            except Exception as exc:
+                _finish(False, str(exc))
+                return False
+            return True
+
+        play_block = getattr(engine, "play_block", None)
+        if not callable(play_block):
+            _finish(False, "audio engine has no block playback API")
+            return False
+
+        def _play_tactile() -> None:
+            try:
+                _finish(bool(play_block(str(path))))
+            except Exception as exc:
+                _finish(False, str(exc))
+
+        threading.Thread(target=_play_tactile, name="pps-output-tactile-test", daemon=True).start()
+        return True
+
+    def _handle_output_test_done(self, payload: dict[str, Any]) -> None:
+        self._output_test_active = False
+        self._set_output_test_buttons_enabled(True)
+        label = str(payload.get("label") or "Output test")
+        success = bool(payload.get("success"))
+        message = str(payload.get("message") or "").strip()
+        if success:
+            self.event_label.setText(f"{label} complete")
+        else:
+            self.event_label.setText(f"{label} failed: {message or 'playback did not complete'}")
+        _append_output_diary_event(
+            "output_test_finished",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            payload={
+                "target": str(payload.get("target") or ""),
+                "asset_path": str(payload.get("asset_path") or ""),
+                "success": success,
+                "message": message,
+                "playback_output_levels": self._output_channel_volume_payload(),
+            },
+            create=True,
+        )
+
     def _runner_metadata(self) -> dict[str, Any]:
         return {
             "participant_code": self._selected_participant_code() or self.package.participant_id,
@@ -7843,6 +7987,8 @@ class FocusModeWindow:
 
     def _handle_dialog_finished(self, _code: int) -> None:
         self._stop()
+        self._release_pending_operator_requests(source="runner_window_closed")
+        self._close_external_labrecorder_for_runner_exit()
         if not (self.thread is not None and self.thread.is_alive()):
             self._release_prepared_controller()
 
@@ -8301,6 +8447,7 @@ class FocusModeWindow:
                 self._handle_startup_failure(f"Audio initialization failed: {exc}")
                 return
         self.start_button.setEnabled(False)
+        self._set_output_test_buttons_enabled(False)
         self._refresh_start_part2_button()
         self._set_primary_action_shortcuts_enabled(False)
         self.pause_button.setEnabled(True)
@@ -8325,15 +8472,74 @@ class FocusModeWindow:
 
     def _request_topup_approval(self, summary: dict[str, Any]) -> bool:
         request = {"summary": dict(summary), "approved": False, "event": threading.Event()}
+        self.pending_topup_approval_request = request
         self.messages.put(("topup_approval", request))
         request["event"].wait()
+        if self.pending_topup_approval_request is request:
+            self.pending_topup_approval_request = None
         return bool(request["approved"])
 
     def _request_instruction_continue(self, context: dict[str, Any]) -> bool:
         request = {"context": dict(context), "approved": False, "event": threading.Event()}
+        self.pending_instruction_request = request
         self.messages.put(("instruction_continue", request))
         request["event"].wait()
+        if self.pending_instruction_request is request:
+            self.pending_instruction_request = None
         return bool(request["approved"])
+
+    def _release_pending_operator_requests(self, *, source: str) -> None:
+        released: list[str] = []
+        for name, attr in (
+            ("instruction_continue", "pending_instruction_request"),
+            ("topup_approval", "pending_topup_approval_request"),
+        ):
+            request = getattr(self, attr, None)
+            if not request:
+                continue
+            request["approved"] = False
+            event = request.get("event")
+            if hasattr(event, "set"):
+                event.set()
+            setattr(self, attr, None)
+            released.append(name)
+        if not released:
+            return
+        target_button = getattr(self, "target_button", None)
+        if target_button is not None:
+            target_button.setEnabled(False)
+        instruction_button = getattr(self, "instruction_button", None)
+        if instruction_button is not None:
+            instruction_button.setVisible(False)
+        self._set_primary_action_shortcuts_enabled(False)
+        self._refresh_start_part2_button()
+        _append_output_diary_event(
+            "pending_operator_request_released",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            payload={"source": source, "released": released},
+            create=True,
+        )
+
+    def _close_external_labrecorder_for_runner_exit(self) -> None:
+        controller = self.controller
+        close = getattr(controller, "close_external_labrecorder_for_runner_exit", None)
+        if not callable(close):
+            return
+        try:
+            timeout_s = min(2.0, max(0.25, float(self.capture_options.external_labrecorder_stop_timeout_s)))
+        except Exception:
+            timeout_s = 2.0
+        try:
+            close(timeout_s=timeout_s)
+        except Exception as exc:
+            _append_output_diary_event(
+                "external_labrecorder_runner_exit_close_failed",
+                package=self.package,
+                capture_options=self.capture_options.as_dict(),
+                payload={"error": str(exc)},
+                create=True,
+            )
 
     def _click(self) -> None:
         if self.pending_instruction_request is not None:
@@ -8660,6 +8866,8 @@ class FocusModeWindow:
                 self._handle_topup_approval(payload)
             elif kind == "instruction_continue":
                 self._handle_instruction_continue(payload)
+            elif kind == "output_test_done":
+                self._handle_output_test_done(payload)
             elif kind == "done":
                 self._handle_done(payload)
         self._tick_tactile_clock()
@@ -8680,6 +8888,9 @@ class FocusModeWindow:
                 self._refresh_experiment_control_minimum_height()
 
     def _handle_instruction_continue(self, payload: dict[str, Any]) -> None:
+        event = payload.get("event")
+        if hasattr(event, "is_set") and event.is_set():
+            return
         context = dict(payload.get("context") or {})
         self.pending_instruction_request = payload
         mode = str(context.get("mode") or "click")
@@ -8704,6 +8915,10 @@ class FocusModeWindow:
         self._refresh_start_part2_button()
 
     def _handle_topup_approval(self, payload: dict[str, Any]) -> None:
+        event = payload.get("event")
+        if hasattr(event, "is_set") and event.is_set():
+            return
+        self.pending_topup_approval_request = payload
         q = self.q
         summary = dict(payload.get("summary") or {})
         _append_output_diary_event(
@@ -8741,6 +8956,8 @@ class FocusModeWindow:
                 create=True,
             )
             payload["event"].set()
+            if self.pending_topup_approval_request is payload:
+                self.pending_topup_approval_request = None
             return
         answer = q["QMessageBox"].question(
             self.dialog,
@@ -8766,6 +8983,8 @@ class FocusModeWindow:
             create=True,
         )
         payload["event"].set()
+        if self.pending_topup_approval_request is payload:
+            self.pending_topup_approval_request = None
 
     def _handle_done(self, result: Any) -> None:
         self.result = result
@@ -8782,6 +9001,7 @@ class FocusModeWindow:
         self.pause_button.setEnabled(False)
         self.stop_button.setEnabled(False)
         self.start_button.setEnabled(False)
+        self._set_output_test_buttons_enabled(True)
         self._refresh_start_part2_button()
         self._set_primary_action_shortcuts_enabled(False)
         self.progress.setValue(1000 if result.completed else self.progress.value())

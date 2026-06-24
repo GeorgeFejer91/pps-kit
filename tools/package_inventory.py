@@ -200,6 +200,20 @@ INVENTORY_ITEMS: list[dict[str, Any]] = [
         "source": "tracked",
     },
     {
+        "path": "assets/breathing/runner_output_test_audio.wav",
+        "kind": "audio_asset",
+        "role": "standardized spoken Output 1/2 runner test asset",
+        "required": True,
+        "source": "tracked",
+    },
+    {
+        "path": "assets/tactile/runner_output_test_tactile.wav",
+        "kind": "audio_asset",
+        "role": "standardized Output 3/4 tactile pulse runner test asset",
+        "required": True,
+        "source": "tracked",
+    },
+    {
         "path": "assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa",
         "kind": "hrir_asset",
         "role": "redistributable FABIAN/TU SOFA resource",

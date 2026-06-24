@@ -9,6 +9,7 @@ import time
 from pathlib import Path
 from types import SimpleNamespace
 
+import numpy as np
 import pytest
 import soundfile as sf
 
@@ -434,6 +435,8 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert "Output Levels" in joined
     assert "Output 1/2" in joined
     assert "Output 3/4" in joined
+    assert "Test Audio" in joined
+    assert "Test Tactile" in joined
     assert "Part 1" in joined
     assert "Part 2" in joined
     if window.layout_profile.screen_class != "constrained":
@@ -478,6 +481,10 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert window.output_12_volume_slider.maximum() == 100
     assert window.output_34_volume_slider.minimum() == 0
     assert window.output_34_volume_slider.maximum() == 100
+    assert window.test_audio_button.objectName() == "testAudioOutputButton"
+    assert window.test_tactile_button.objectName() == "testTactileOutputButton"
+    assert window.test_audio_button.isEnabled()
+    assert window.test_tactile_button.isEnabled()
     assert window.backup_recording_checkbox.objectName() == "failSafeRecordingCheckbox"
     assert window.wired_loopback_checkbox.objectName() == "wiredLoopbackCheckbox"
     assert window.external_labrecorder_checkbox.objectName() == "externalLabRecorderCheckbox"
@@ -743,6 +750,156 @@ def test_focus_mode_output_volume_sliders_persist_and_apply_to_engine(tmp_path: 
     assert settings["output_channel_volumes"]["output_1_2_linear_gain"] == pytest.approx(0.35)
     assert settings["output_channel_volumes"]["output_3_4_linear_gain"] == pytest.approx(0.20)
     window.dialog.close()
+
+
+def test_focus_mode_output_test_buttons_use_standard_assets_and_current_gains(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    class FakeEngine:
+        def __init__(self) -> None:
+            self.audio_volume = 1.0
+            self.tactile_volume = 1.0
+            self.instruction_paths: list[str] = []
+            self.block_paths: list[str] = []
+
+        def set_main_volume(self, value: float) -> None:
+            self.audio_volume = float(value)
+
+        def play_instruction(self, path: str, done=None) -> bool:
+            self.instruction_paths.append(path)
+            if done is not None:
+                done(True)
+            return True
+
+        def play_block(self, path: str) -> bool:
+            self.block_paths.append(path)
+            return True
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+    )
+    engine = FakeEngine()
+    window._create_real_audio_engine_on_ui_thread = lambda: engine
+    window.dialog.show()
+    app.processEvents()
+
+    window.output_12_volume_slider.setValue(41)
+    window.output_34_volume_slider.setValue(23)
+    QTest.mouseClick(window.test_audio_button, q["Qt"].MouseButton.LeftButton)
+    app.processEvents()
+    window._drain()
+
+    assert engine.instruction_paths == [str(focus_app.OUTPUT_TEST_AUDIO_PATH)]
+    assert engine.audio_volume == pytest.approx(0.41)
+    assert engine.tactile_volume == pytest.approx(0.23)
+    assert window.test_audio_button.isEnabled()
+    assert "Test Audio complete" in window.event_label.text()
+
+    QTest.mouseClick(window.test_tactile_button, q["Qt"].MouseButton.LeftButton)
+    for _ in range(25):
+        app.processEvents()
+        window._drain()
+        if engine.block_paths:
+            break
+        time.sleep(0.01)
+    window._drain()
+
+    assert engine.block_paths == [str(focus_app.OUTPUT_TEST_TACTILE_PATH)]
+    assert window.test_tactile_button.isEnabled()
+    assert "Test Tactile complete" in window.event_label.text()
+    window._run_active = True
+    assert not window._run_output_test("audio")
+    assert "before playback starts" in window.event_label.text()
+    window.dialog.close()
+
+
+def test_runner_output_test_assets_match_expected_routes_and_levels():
+    from peripersonal_space_toolkit import focus_app
+
+    audio, audio_sr = sf.read(focus_app.OUTPUT_TEST_AUDIO_PATH, dtype="float32")
+    audio_arr = audio if audio.ndim > 1 else audio[:, None]
+    tactile, tactile_sr = sf.read(focus_app.OUTPUT_TEST_TACTILE_PATH, dtype="float32")
+
+    assert audio_sr == 22050
+    assert 1.5 <= audio_arr.shape[0] / audio_sr <= 3.0
+    assert 0.15 <= float(np.sqrt(np.mean(np.square(audio_arr)))) <= 0.22
+    assert float(np.max(np.abs(audio_arr))) <= 0.90
+
+    assert tactile_sr == 44100
+    assert tactile.ndim == 2
+    assert tactile.shape[1] == 3
+    assert float(np.max(np.abs(tactile[:, :2]))) == pytest.approx(0.0)
+    tactile_channel = tactile[:, 2]
+    assert float(np.max(np.abs(tactile_channel))) > 0.90
+    active = np.flatnonzero(np.abs(tactile_channel) > 0.1)
+    assert active.size
+    starts = [int(active[0])]
+    for sample in active[1:]:
+        if int(sample) - starts[-1] > int(0.5 * tactile_sr):
+            starts.append(int(sample))
+    assert len(starts) == 4
+    intervals = np.diff(starts) / tactile_sr
+    assert intervals == pytest.approx([1.0, 1.0, 1.0], abs=0.005)
+
+
+def test_focus_mode_close_click_releases_waits_and_closes_labrecorder(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    class FakeController:
+        def __init__(self) -> None:
+            self.stop_called = False
+            self.close_calls: list[float] = []
+            self.events = SimpleNamespace(close=lambda: None)
+
+        def stop(self) -> None:
+            self.stop_called = True
+
+        def close_external_labrecorder_for_runner_exit(self, *, timeout_s: float = 2.0) -> None:
+            self.close_calls.append(float(timeout_s))
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+    )
+    controller = FakeController()
+    window.controller = controller
+    instruction_event = threading.Event()
+    topup_event = threading.Event()
+    window.pending_instruction_request = {"approved": True, "event": instruction_event}
+    window.pending_topup_approval_request = {"approved": True, "event": topup_event}
+    window.dialog.show()
+    app.processEvents()
+
+    QTest.mouseClick(window.close_button, q["Qt"].MouseButton.LeftButton)
+    app.processEvents()
+
+    assert controller.stop_called is True
+    assert controller.close_calls == [2.0]
+    assert instruction_event.is_set()
+    assert topup_event.is_set()
+    assert window.pending_instruction_request is None
+    assert window.pending_topup_approval_request is None
 
 
 def test_focus_mode_participant_dropdown_switches_loaded_package(tmp_path: Path, monkeypatch):

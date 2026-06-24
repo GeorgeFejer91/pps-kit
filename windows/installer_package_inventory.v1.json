@@ -184,6 +184,20 @@
       "source": "tracked"
     },
     {
+      "kind": "audio_asset",
+      "path": "assets/breathing/runner_output_test_audio.wav",
+      "required": true,
+      "role": "standardized spoken Output 1/2 runner test asset",
+      "source": "tracked"
+    },
+    {
+      "kind": "audio_asset",
+      "path": "assets/tactile/runner_output_test_tactile.wav",
+      "required": true,
+      "role": "standardized Output 3/4 tactile pulse runner test asset",
+      "source": "tracked"
+    },
+    {
       "kind": "hrir_asset",
       "path": "assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa",
       "required": true,
@@ -268,10 +282,10 @@
   "schema": "pps-installer-package-inventory.v1",
   "stage_root": "",
   "summary": {
-    "item_count": 37,
+    "item_count": 39,
     "missing_required_count": 0,
     "optional_absent_count": 0,
     "optional_item_count": 2,
-    "required_item_count": 35
+    "required_item_count": 37
   }
 }
