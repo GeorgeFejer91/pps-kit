@@ -1997,6 +1997,7 @@ class SessionRunnerController:
         self._external_labrecorder_capture: LabRecorderCapture | None = None
         self._external_labrecorder_outputs: dict[str, Path] = {}
         self._external_labrecorder_status: dict[str, Any] = {"enabled": bool(self.capture_options.start_external_labrecorder)}
+        self._external_labrecorder_stop_lock = threading.Lock()
         self._accepting_responses = False
         self._active_block: RunBlock | None = None
         self._run_warnings: list[str] = []
@@ -2403,56 +2404,82 @@ class SessionRunnerController:
         )
         return dict(started)
 
-    def _stop_external_labrecorder_capture(self) -> None:
-        capture = self._external_labrecorder_capture
-        if capture is None:
-            return
-        if self._external_labrecorder_status.get("stop"):
-            return
-        try:
-            self.events.log(
-                "external_labrecorder_stop_requested",
-                xdf_path=str(self._external_labrecorder_xdf_path),
-                pid=self._external_labrecorder_status.get("pid"),
-            )
-        except Exception:
-            pass
-        final_marker_settle_s = max(0.0, float(EXTERNAL_LABRECORDER_FINAL_MARKER_SETTLE_S))
-        if final_marker_settle_s:
+    def _stop_external_labrecorder_capture(self, *, runner_exit: bool = False, timeout_s: float | None = None) -> None:
+        with self._external_labrecorder_stop_lock:
+            capture = self._external_labrecorder_capture
+            if capture is None:
+                return
+            if self._external_labrecorder_status.get("stop"):
+                return
             try:
-                self.events.flush_callback_events(timeout_s=min(0.5, final_marker_settle_s))
+                self.events.log(
+                    "external_labrecorder_stop_requested",
+                    xdf_path=str(self._external_labrecorder_xdf_path),
+                    pid=self._external_labrecorder_status.get("pid"),
+                    runner_exit=bool(runner_exit),
+                )
             except Exception:
                 pass
-            time.sleep(final_marker_settle_s)
-        stopped = capture.stop(timeout_s=self.capture_options.external_labrecorder_stop_timeout_s)
-        stopped["final_marker_settle_s"] = final_marker_settle_s
-        if _path_exists(self._external_labrecorder_xdf_path):
-            self._recording_paths.append(self._external_labrecorder_xdf_path)
-            self._external_labrecorder_outputs["external_labrecorder_xdf"] = self._external_labrecorder_xdf_path
-        for key, path in (
-            ("external_labrecorder_stdout", self._external_labrecorder_stdout_path),
-            ("external_labrecorder_stderr", self._external_labrecorder_stderr_path),
-        ):
-            if _path_exists(path):
-                self._external_labrecorder_outputs[key] = path
-        self._external_labrecorder_status["stop"] = stopped
-        self._write_external_labrecorder_report(
-            {
-                "schema": "pps-runner-owned-labrecorder-capture.v1",
-                "session_id": self.package.session_id,
-                "participant_id": self.package.participant_id,
-                "start": {key: value for key, value in self._external_labrecorder_status.items() if key != "stop"},
-                "stop": stopped,
-            }
-        )
-        if int(stopped.get("returncode") or 0) != 0:
-            self._run_warnings.append(f"External LabRecorder exited with code {stopped.get('returncode')}.")
-        _append_package_diary_event(
-            self.package,
-            "external_labrecorder_stopped",
-            capture_options=self.capture_options,
-            payload=stopped,
-        )
+            final_marker_settle_s = 0.0 if runner_exit else max(0.0, float(EXTERNAL_LABRECORDER_FINAL_MARKER_SETTLE_S))
+            if final_marker_settle_s:
+                try:
+                    self.events.flush_callback_events(timeout_s=min(0.5, final_marker_settle_s))
+                except Exception:
+                    pass
+                time.sleep(final_marker_settle_s)
+            stop_timeout_s = (
+                max(0.25, float(timeout_s))
+                if timeout_s is not None
+                else self.capture_options.external_labrecorder_stop_timeout_s
+            )
+            if runner_exit and hasattr(capture, "close_for_runner_exit"):
+                stopped = capture.close_for_runner_exit(timeout_s=stop_timeout_s)
+            else:
+                stopped = capture.stop(timeout_s=stop_timeout_s)
+            stopped["final_marker_settle_s"] = final_marker_settle_s
+            stopped["runner_exit"] = bool(runner_exit)
+            if _path_exists(self._external_labrecorder_xdf_path):
+                if self._external_labrecorder_xdf_path not in self._recording_paths:
+                    self._recording_paths.append(self._external_labrecorder_xdf_path)
+                self._external_labrecorder_outputs["external_labrecorder_xdf"] = self._external_labrecorder_xdf_path
+            for key, path in (
+                ("external_labrecorder_stdout", self._external_labrecorder_stdout_path),
+                ("external_labrecorder_stderr", self._external_labrecorder_stderr_path),
+            ):
+                if _path_exists(path):
+                    self._external_labrecorder_outputs[key] = path
+            self._external_labrecorder_status["stop"] = stopped
+            self._write_external_labrecorder_report(
+                {
+                    "schema": "pps-runner-owned-labrecorder-capture.v1",
+                    "session_id": self.package.session_id,
+                    "participant_id": self.package.participant_id,
+                    "start": {key: value for key, value in self._external_labrecorder_status.items() if key != "stop"},
+                    "stop": stopped,
+                }
+            )
+            if int(stopped.get("returncode") or 0) != 0:
+                self._run_warnings.append(f"External LabRecorder exited with code {stopped.get('returncode')}.")
+            _append_package_diary_event(
+                self.package,
+                "external_labrecorder_stopped",
+                capture_options=self.capture_options,
+                payload=stopped,
+            )
+
+    def close_external_labrecorder_for_runner_exit(self, *, timeout_s: float = 2.0) -> None:
+        self._stop_requested = True
+        if self._instruction_continue_event is not None:
+            self.continue_instruction(source="runner_exit")
+        engine = self.audio_engine
+        if engine is not None:
+            stop = getattr(engine, "stop", None)
+            if callable(stop):
+                try:
+                    stop()
+                except Exception:
+                    pass
+        self._stop_external_labrecorder_capture(runner_exit=True, timeout_s=timeout_s)
 
     def _write_session_metadata(self) -> Path:
         self._session_metadata = _build_runner_session_metadata(

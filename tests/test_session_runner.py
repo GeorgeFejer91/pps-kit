@@ -1403,7 +1403,7 @@ def test_labrecorder_capture_uses_rcs_remote_control(tmp_path: Path, monkeypatch
         "_wait_for_file_quiet",
         lambda path, timeout_s=8.0: path.write_bytes(b"fake xdf") or True,
     )
-    monkeypatch.setattr(labrecorder_capture_module, "_wait_for_labrecorder_footer", lambda path, timeout_s=8.0: True)
+    monkeypatch.setattr(labrecorder_capture_module, "_wait_for_labrecorder_footer", lambda path, timeout_s=8.0, expected_streams=2: True)
     monkeypatch.setattr(labrecorder_capture_module, "_close_labrecorder_windows", lambda pid: True)
 
     capture = labrecorder_capture_module.LabRecorderCapture(
@@ -1419,16 +1419,24 @@ def test_labrecorder_capture_uses_rcs_remote_control(tmp_path: Path, monkeypatch
 
     assert started["started"] is True
     assert started["collection_started"] is True
+    assert started["stream_selection"] == "select_all_visible_network_streams"
+    assert started["stream_selection_refreshes"] == 1
+    assert started["started_stream_count"] == 2
     assert rcs_batches[0] == [
         "update",
+    ]
+    assert rcs_batches[1] == [
         "select all",
+    ]
+    assert rcs_batches[2] == [
         f"filename {{root:{str(tmp_path.resolve()).replace(chr(92), '/')}/}} {{template:session_external_labrecorder.xdf}}",
         "start",
     ]
-    assert rcs_batches[1] == ["stop"]
+    assert rcs_batches[3] == ["stop"]
     assert stopped["returncode"] == 0
     assert stopped["footer_observed"] is True
     assert stopped["graceful_close_sent"] is True
+    assert stopped["expected_footer_stream_count"] == 2
     assert capture.stdout_path.read_text(encoding="utf-8") == "labrecorder stdout"
     assert popen_calls[0]["args"][0] == str(gui.resolve())
     assert popen_calls[0]["cwd"] == str(cli.parent)
@@ -1438,6 +1446,81 @@ def test_labrecorder_capture_uses_rcs_remote_control(tmp_path: Path, monkeypatch
     assert isinstance(child_env, dict)
     assert child_env["PATH"].split(os.pathsep)[0] == str(tmp_path.resolve())
     assert "QT_PLUGIN_PATH" not in child_env
+
+
+def test_session_runner_closes_owned_labrecorder_when_runner_exits(tmp_path: Path, monkeypatch):
+    package = prepare_run_package(
+        _compact_design(),
+        "P001",
+        render_dir=_render_dir(tmp_path),
+        session_root=tmp_path / "sessions",
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+    cli = tmp_path / "LabRecorderCLI.exe"
+    cli.write_text("fake", encoding="utf-8")
+    close_calls: list[float] = []
+
+    class FakeLabRecorderCapture:
+        def __init__(self, *, labrecorder_cli, xdf_path, session_id, stdout_path, stderr_path):
+            self.labrecorder_cli = Path(labrecorder_cli)
+            self.xdf_path = Path(xdf_path)
+            self.session_id = session_id
+            self.stdout_path = Path(stdout_path)
+            self.stderr_path = Path(stderr_path)
+            self.command = [str(self.labrecorder_cli), str(self.xdf_path), "select_all_visible_network_streams"]
+
+        def start(self, *, stream_timeout_s=10.0, startup_s=1.0):
+            return {
+                "enabled": True,
+                "started": True,
+                "pid": 789,
+                "xdf_path": str(self.xdf_path),
+                "labrecorder_cli": str(self.labrecorder_cli),
+                "command": list(self.command),
+                "stream_selection": "select_all_visible_network_streams",
+                "lsl": {"ready": True},
+            }
+
+        def close_for_runner_exit(self, *, timeout_s=2.0):
+            close_calls.append(float(timeout_s))
+            self.xdf_path.parent.mkdir(parents=True, exist_ok=True)
+            self.xdf_path.write_bytes(b"fake xdf")
+            self.stdout_path.parent.mkdir(parents=True, exist_ok=True)
+            self.stdout_path.write_text("closed by runner exit\n", encoding="utf-8")
+            self.stderr_path.write_text("", encoding="utf-8")
+            return {
+                "enabled": True,
+                "stopped": True,
+                "returncode": 0,
+                "stdout_path": str(self.stdout_path),
+                "stderr_path": str(self.stderr_path),
+                "xdf_path": str(self.xdf_path),
+                "command": list(self.command),
+            }
+
+    monkeypatch.setattr(session_runner_module, "find_labrecorder_cli", lambda _explicit=None: cli)
+    monkeypatch.setattr(session_runner_module, "LabRecorderCapture", FakeLabRecorderCapture)
+    controller = SessionRunnerController(
+        package,
+        audio_engine=_MockAudioEngine(),
+        capture_options={"start_external_labrecorder": True, "external_labrecorder_cli": str(cli)},
+    )
+    controller.events.lsl = SimpleNamespace(
+        status=SimpleNamespace(available=True, enabled=True, message="fake LSL active"),
+        local_clock=lambda: 10.0,
+        push=lambda event, marker, timestamp: None,
+    )
+
+    controller._start_external_labrecorder_capture()
+    controller.close_external_labrecorder_for_runner_exit(timeout_s=0.5)
+
+    assert close_calls == [0.5]
+    report = json.loads(controller._external_labrecorder_report_path.read_text(encoding="utf-8"))
+    assert report["start"]["stream_selection"] == "select_all_visible_network_streams"
+    assert report["stop"]["runner_exit"] is True
+    assert report["stop"]["final_marker_settle_s"] == 0.0
+    assert report["stop"]["returncode"] == 0
+    assert package.session_dir / f"{package.session_id}_external_labrecorder.xdf" in controller._recording_paths
 
 
 def test_session_runner_owned_labrecorder_requires_lsl(tmp_path: Path):

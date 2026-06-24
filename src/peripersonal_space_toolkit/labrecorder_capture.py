@@ -166,6 +166,8 @@ class LabRecorderCapture:
     started_at_unix: float = 0.0
     labrecorder_exe: Path = field(default=Path(), init=False)
     rcs_port: int = 22345
+    started_stream_count: int = 0
+    stream_selection_refreshes: int = 0
     _stdout_handle: TextIO | None = field(default=None, init=False, repr=False)
     _stderr_handle: TextIO | None = field(default=None, init=False, repr=False)
 
@@ -216,10 +218,10 @@ class LabRecorderCapture:
                 "LabRecorder exited before playback could start. "
                 f"returncode={self.process.returncode} stdout={stdout_text!r} stderr={stderr_text!r}"
             )
+        self.started_stream_count = 0
+        self.stream_selection_refreshes = self._select_all_visible_network_streams(refresh_s=max(0.0, float(startup_s)))
         self._send_rcs_commands(
             [
-                "update",
-                "select all",
                 f"filename {{root:{_rcs_path(self.xdf_path.parent)}}} {{template:{self.xdf_path.name}}}",
                 "start",
             ]
@@ -230,6 +232,9 @@ class LabRecorderCapture:
         )
         if not collection_started:
             time.sleep(max(0.0, float(startup_s)))
+        self.started_stream_count = _labrecorder_started_stream_count(self.stdout_path)
+        if collection_started:
+            self.started_stream_count = max(2, self.started_stream_count)
         if self.process.poll() is not None:
             self.process.wait(timeout=2.0)
             self._close_output_handles()
@@ -251,6 +256,10 @@ class LabRecorderCapture:
             "lsl": lsl,
             "rcs": rcs,
             "collection_started": bool(collection_started),
+            "stream_selection": "select_all_visible_network_streams",
+            "stream_selection_refreshes": int(self.stream_selection_refreshes),
+            "minimum_required_stream_count": 2,
+            "started_stream_count": int(self.started_stream_count),
             "window_show_state": "show_min_no_activate",
             "started_at_unix": self.started_at_unix,
         }
@@ -263,10 +272,15 @@ class LabRecorderCapture:
         recording_stopped = False
         footer_observed = False
         graceful_close_sent = False
+        expected_streams = max(2, int(self.started_stream_count or 0))
         try:
             if process.poll() is None:
                 self._send_rcs_commands(["stop"])
-                footer_observed = _wait_for_labrecorder_footer(self.stdout_path, timeout_s=max(0.5, float(timeout_s)))
+                footer_observed = _wait_for_labrecorder_footer(
+                    self.stdout_path,
+                    timeout_s=max(0.5, float(timeout_s)),
+                    expected_streams=expected_streams,
+                )
                 recording_stopped = _wait_for_file_quiet(self.xdf_path, timeout_s=max(0.5, float(timeout_s)))
                 graceful_close_sent = _close_labrecorder_windows(process.pid)
                 try:
@@ -301,6 +315,7 @@ class LabRecorderCapture:
             "mode": "rcs",
             "recording_stopped": bool(recording_stopped),
             "footer_observed": bool(footer_observed),
+            "expected_footer_stream_count": expected_streams,
             "graceful_close_sent": bool(graceful_close_sent),
             "returncode": process.returncode,
             "stdout_path": str(self.stdout_path),
@@ -312,6 +327,9 @@ class LabRecorderCapture:
             "stdout_tail": stdout_text[-2000:],
             "stderr_tail": stderr_text[-2000:],
         }
+
+    def close_for_runner_exit(self, *, timeout_s: float = 2.0) -> dict[str, Any]:
+        return self.stop(timeout_s=max(0.25, float(timeout_s)))
 
     def _wait_for_rcs(self, *, timeout_s: float) -> dict[str, Any]:
         deadline = time.perf_counter() + max(0.1, float(timeout_s))
@@ -332,6 +350,18 @@ class LabRecorderCapture:
             for command in commands:
                 sock.sendall((command.rstrip() + "\n").encode("utf-8"))
                 time.sleep(0.15)
+
+    def _select_all_visible_network_streams(self, *, refresh_s: float) -> int:
+        deadline = time.perf_counter() + max(0.0, float(refresh_s))
+        refreshes = 0
+        while True:
+            self._send_rcs_commands(["update"])
+            refreshes += 1
+            time.sleep(min(0.35, max(0.0, deadline - time.perf_counter())))
+            self._send_rcs_commands(["select all"])
+            if time.perf_counter() >= deadline:
+                return refreshes
+            time.sleep(min(0.15, max(0.0, deadline - time.perf_counter())))
 
     def _close_output_handles(self) -> None:
         for handle in (self._stdout_handle, self._stderr_handle):
@@ -460,12 +490,22 @@ def _wait_for_labrecorder_footer(stdout_path: Path, *, timeout_s: float, expecte
 def _wait_for_labrecorder_collection_started(stdout_path: Path, *, timeout_s: float, expected_streams: int = 2) -> bool:
     deadline = time.perf_counter() + max(0.1, float(timeout_s))
     expected = max(1, int(expected_streams))
+    last_count = -1
+    last_change = time.perf_counter()
     while time.perf_counter() <= deadline:
-        text = _read_text(stdout_path)
-        if text.count("Started data collection for stream") >= expected:
+        count = _labrecorder_started_stream_count(stdout_path)
+        now = time.perf_counter()
+        if count != last_count:
+            last_count = count
+            last_change = now
+        if count >= expected and (now - last_change) >= 0.5:
             return True
         time.sleep(0.25)
-    return _read_text(stdout_path).count("Started data collection for stream") >= expected
+    return _labrecorder_started_stream_count(stdout_path) >= expected
+
+
+def _labrecorder_started_stream_count(stdout_path: Path) -> int:
+    return _read_text(stdout_path).count("Started data collection for stream")
 
 
 def _close_labrecorder_windows(pid: int | None) -> bool:
