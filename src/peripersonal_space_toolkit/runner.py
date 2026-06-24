@@ -643,6 +643,62 @@ class AudioEngine:
             audio_channels=self.audio_output_channels,
         )
 
+    def _apply_output_channel_volumes(
+        self,
+        data,
+        *,
+        audio_scale: float = 1.0,
+        tactile_scale: float = 1.0,
+        include_audio: bool = True,
+        include_tactile: bool = True,
+    ):
+        """Apply the live Komplete output master gains to a routed buffer."""
+        audio_gain = float(self.audio_volume) * float(audio_scale) if include_audio else 0.0
+        tactile_gain = float(self.tactile_volume) * float(tactile_scale) if include_tactile else 0.0
+        return apply_output_volumes(
+            data,
+            audio_gain,
+            tactile_gain,
+            audio_channels=self.audio_output_channels,
+            tactile_channel=self.tactile_output_channel,
+            duplicate_tactile_channel=self._duplicate_tactile_channel(),
+        )
+
+    def _refresh_background_music_data(self):
+        """Refresh compatibility buffer using the current Output 1/2 master."""
+        if not hasattr(self, "bg_music_base_data"):
+            return
+        self.bg_music_data = self._apply_output_channel_volumes(
+            self.bg_music_base_data,
+            audio_scale=getattr(self, "bg_music_volume", 1.0),
+            include_tactile=False,
+        )
+
+    def _next_background_music_chunk(self, frames):
+        """Return the next looped background chunk with live Output 1/2 gain."""
+        base_data = getattr(self, "bg_music_base_data", None)
+        if base_data is None or len(base_data) == 0:
+            return np.zeros((frames, self.runtime_output_channels), dtype=np.float32)
+        chunks = []
+        remaining_frames = int(frames)
+        while remaining_frames > 0:
+            remaining = len(base_data) - self.bg_music_idx
+            take = min(remaining_frames, remaining)
+            if take <= 0:
+                self.bg_music_idx = 0
+                continue
+            chunks.append(base_data[self.bg_music_idx:self.bg_music_idx + take])
+            self.bg_music_idx += take
+            remaining_frames -= take
+            if self.bg_music_idx >= len(base_data):
+                self.bg_music_idx = 0
+        raw = chunks[0] if len(chunks) == 1 else np.concatenate(chunks, axis=0)
+        return self._apply_output_channel_volumes(
+            raw,
+            audio_scale=getattr(self, "bg_music_volume", 1.0),
+            include_tactile=False,
+        )
+
     def _persistent_output_available(self, *, samplerate, channels) -> bool:
         return (
             self._click_stream is not None
@@ -1072,14 +1128,7 @@ class AudioEngine:
 
         if hasattr(self, "bg_music_data") and not getattr(self, "bg_music_stop", True):
             try:
-                remaining = len(self.bg_music_data) - self.bg_music_idx
-                if remaining >= frames:
-                    outdata[:] += self.bg_music_data[self.bg_music_idx:self.bg_music_idx + frames]
-                    self.bg_music_idx += frames
-                else:
-                    outdata[:remaining] += self.bg_music_data[self.bg_music_idx:]
-                    outdata[remaining:] += self.bg_music_data[:frames - remaining]
-                    self.bg_music_idx = frames - remaining
+                outdata[:] += self._next_background_music_chunk(frames)
             except Exception as exc:
                 print(f"Background mix error: {exc}")
                 self.bg_music_stop = True
@@ -1091,13 +1140,9 @@ class AudioEngine:
                     self._instr_finished.set()
                 else:
                     n = min(frames, remaining)
-                    outdata[:n] += apply_output_volumes(
+                    outdata[:n] += self._apply_output_channel_volumes(
                         self._instr_data[self._instr_pos:self._instr_pos + n],
-                        self.audio_volume,
-                        0.0,
-                        audio_channels=self.audio_output_channels,
-                        tactile_channel=self.tactile_output_channel,
-                        duplicate_tactile_channel=self._duplicate_tactile_channel(),
+                        include_tactile=False,
                     )
                     self._instr_pos += n
                     if self._instr_pos >= len(self._instr_data):
@@ -1119,13 +1164,8 @@ class AudioEngine:
                             self._emit_scheduled_block_events(block_buffer_start_sample, event_frames, time_info)
                         elif n > 0 and self._block_pos == 0:
                             self._emit_audio_sample_zero_once(time_info)
-                        outdata[:n] += apply_output_volumes(
+                        outdata[:n] += self._apply_output_channel_volumes(
                             self._block_data[self._block_pos:self._block_pos + n],
-                            self.audio_volume,
-                            self.tactile_volume,
-                            audio_channels=self.audio_output_channels,
-                            tactile_channel=self.tactile_output_channel,
-                            duplicate_tactile_channel=self._duplicate_tactile_channel(),
                         )
                         self._block_pos += n
                         self.elapsed_time = self._block_pos / self._block_sr
@@ -1307,13 +1347,8 @@ class AudioEngine:
             elif n > 0 and self._block_pos == 0:
                 self._emit_audio_sample_zero_once(time_info)
             # Apply volume in real time for instant slider response.
-            outdata[:n] = apply_output_volumes(
+            outdata[:n] = self._apply_output_channel_volumes(
                 self._block_data[self._block_pos:self._block_pos + n],
-                self.audio_volume,
-                self.tactile_volume,
-                audio_channels=self.audio_output_channels,
-                tactile_channel=self.tactile_output_channel,
-                duplicate_tactile_channel=self._duplicate_tactile_channel(),
             )
             if n < frames:
                 outdata[n:].fill(0)
@@ -1596,13 +1631,9 @@ class AudioEngine:
                 return
 
             n = min(frames, remaining)
-            outdata[:n] = apply_output_volumes(
+            outdata[:n] = self._apply_output_channel_volumes(
                 self._instr_data[self._instr_pos:self._instr_pos + n],
-                self.audio_volume,
-                0.0,
-                audio_channels=self.audio_output_channels,
-                tactile_channel=self.tactile_output_channel,
-                duplicate_tactile_channel=self._duplicate_tactile_channel(),
+                include_tactile=False,
             )
             if n < frames:
                 outdata[n:].fill(0)
@@ -1738,71 +1769,47 @@ class AudioEngine:
                 self.runtime_output_channels,
                 audio_channels=self.audio_output_channels,
             )
-            data = apply_output_volumes(
-                base_data,
-                volume,
-                0.0,
-                audio_channels=self.audio_output_channels,
-                tactile_channel=self.tactile_output_channel,
-                duplicate_tactile_channel=self._duplicate_tactile_channel(),
-            )
 
             # Create looping playback
             self.bg_music_base_data = base_data
-            self.bg_music_data = data
             self.bg_music_sr = sr
             self.bg_music_idx = 0
-            self.bg_music_volume = volume
+            self.bg_music_volume = float(volume)
             self.bg_music_stop = False
+            self._refresh_background_music_data()
 
-            if self._persistent_output_available(samplerate=sr, channels=data.shape[1]):
+            if self._persistent_output_available(samplerate=sr, channels=base_data.shape[1]):
                 print(
                     f"Background music started on persistent ASIO stream "
-                    f"(channels={data.shape[1]}, volume: {volume*100:.0f}%)"
+                    f"(channels={base_data.shape[1]}, volume: {volume*100:.0f}%)"
                 )
                 return _PersistentPlaybackHandle(lambda: setattr(self, "bg_music_stop", True))
 
             def callback(outdata, frames, time_info, status):
-                remaining = len(self.bg_music_data) - self.bg_music_idx
-                if remaining >= frames:
-                    outdata[:] = self.bg_music_data[self.bg_music_idx:self.bg_music_idx + frames]
-                    self.bg_music_idx += frames
-                else:
-                    # Loop: fill with remaining, then restart from beginning
-                    outdata[:remaining] = self.bg_music_data[self.bg_music_idx:]
-                    outdata[remaining:] = self.bg_music_data[:frames - remaining]
-                    self.bg_music_idx = frames - remaining
+                outdata[:] = self._next_background_music_chunk(frames)
 
             self._close_persistent_output()
 
             try:
                 stream = self._make_output_stream(
                     samplerate=sr,
-                    channels=data.shape[1],
+                    channels=base_data.shape[1],
                     latency=STREAM_LATENCY,
                     blocksize=AUDIO_BLOCKSIZE,
                     callback=callback,
                 )
             except Exception:
-                if data.shape[1] == 3 and self._promote_runtime_to_four_channels():
+                if base_data.shape[1] == 3 and self._promote_runtime_to_four_channels():
                     base_data = center_audio_for_output(
                         base_data[:, :2],
                         self.runtime_output_channels,
                         audio_channels=self.audio_output_channels,
                     )
-                    data = apply_output_volumes(
-                        base_data,
-                        volume,
-                        0.0,
-                        audio_channels=self.audio_output_channels,
-                        tactile_channel=self.tactile_output_channel,
-                        duplicate_tactile_channel=self._duplicate_tactile_channel(),
-                    )
                     self.bg_music_base_data = base_data
-                    self.bg_music_data = data
+                    self._refresh_background_music_data()
                     stream = self._make_output_stream(
                         samplerate=sr,
-                        channels=data.shape[1],
+                        channels=base_data.shape[1],
                         latency=STREAM_LATENCY,
                         blocksize=AUDIO_BLOCKSIZE,
                         callback=callback,
@@ -1811,7 +1818,7 @@ class AudioEngine:
                     raise
             stream.start()
             print(
-                f"Background music started (channels={data.shape[1]}, "
+                f"Background music started (channels={base_data.shape[1]}, "
                 f"volume: {volume*100:.0f}%, latency={STREAM_LATENCY}s)"
             )
             return stream
@@ -1823,19 +1830,13 @@ class AudioEngine:
     def set_background_volume(self, volume):
         """Update the volume of background music (0.0 to 1.0)."""
         if hasattr(self, 'bg_music_base_data') and hasattr(self, 'bg_music_volume'):
-            self.bg_music_data = apply_output_volumes(
-                self.bg_music_base_data,
-                volume,
-                0.0,
-                audio_channels=self.audio_output_channels,
-                tactile_channel=self.tactile_output_channel,
-                duplicate_tactile_channel=self._duplicate_tactile_channel(),
-            )
-            self.bg_music_volume = volume
+            self.bg_music_volume = float(volume)
+            self._refresh_background_music_data()
 
     def set_main_volume(self, volume):
         """Set the main audio volume for instructions and blocks (0.0 to 1.0)."""
         self.audio_volume = volume
+        self._refresh_background_music_data()
         print(f"Main audio volume set to {volume*100:.0f}%")
 
 
