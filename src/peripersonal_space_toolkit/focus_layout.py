@@ -401,6 +401,20 @@ QPushButton#primaryButton:hover {{
     background: {colors["primary_hover"]};
     border-color: {colors["primary_hover"]};
 }}
+QPushButton#startButton {{
+    background: {colors["danger"]};
+    border: 1px solid {colors["danger"]};
+    color: {colors["surface"]};
+}}
+QPushButton#startButton:hover {{
+    background: #762828;
+    border-color: #762828;
+}}
+QPushButton#startButton:disabled {{
+    color: {colors["disabled_text"]};
+    background: {colors["disabled"]};
+    border: 1px solid #d7ded5;
+}}
 QPushButton#dangerButton {{
     color: {colors["danger"]};
 }}

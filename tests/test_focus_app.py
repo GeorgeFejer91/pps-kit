@@ -218,6 +218,61 @@ def _write_focus_preview_session_manifest(tmp_path: Path) -> Path:
     return manifest
 
 
+def _write_split_focus_session_manifests(tmp_path: Path) -> tuple[Path, Path]:
+    group_id = "P001_20260613_120000"
+    group_dir = tmp_path / group_id
+    part_manifests: list[Path] = []
+    for part_number in (1, 2):
+        part_dir = group_dir / f"part_{part_number:02d}"
+        part_dir.mkdir(parents=True, exist_ok=True)
+        block_csv = part_dir / f"part_{part_number:02d}_block_01.csv"
+        _write_focus_preview_block_csv(block_csv, block_offset=part_number * 10)
+        block_wav = part_dir / f"part_{part_number:02d}_block_01.wav"
+        block_wav.write_bytes(b"")
+        manifest_path = part_dir / "session_manifest.json"
+        payload = {
+            "schema": RUN_PACKAGE_SCHEMA,
+            "participant_id": "P001",
+            "session_id": f"{group_id}_part{part_number:02d}",
+            "session_group_id": group_id,
+            "part_number": part_number,
+            "part_session_id": f"{group_id}_part{part_number:02d}",
+            "part_folder_name": f"part_{part_number:02d}",
+            "part_split_schema": "pps-runner-part-split.v1",
+            "created_at": "2026-06-13T12:00:00",
+            "session_dir": str(part_dir),
+            "design_path": "design.json",
+            "protocol_path": "protocol_schedule.csv",
+            "render_manifest_path": "",
+            "execution_mode": "participant_block_wavs",
+            "sibling_part_manifest_paths": [],
+            "blocks": [
+                {
+                    "index": 1,
+                    "label": f"Part {part_number} Block 01",
+                    "manifest_path": str(block_csv),
+                    "wav_path": str(block_wav),
+                    "trial_count": 2,
+                    "duration_s": 16.0,
+                    "metadata": {
+                        "part_number": part_number,
+                        "part_block_number": 1,
+                        "phase": f"part_{part_number}",
+                        "phase_label": f"Part {part_number}",
+                        "sample_rate_hz": 1000,
+                    },
+                }
+            ],
+        }
+        manifest_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        part_manifests.append(manifest_path)
+    for manifest_path in part_manifests:
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        payload["sibling_part_manifest_paths"] = [str(path) for path in part_manifests if path != manifest_path]
+        manifest_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return part_manifests[0], part_manifests[1]
+
+
 def _write_analysis_review_outputs(session_dir: Path) -> dict[str, Path]:
     analysis_dir = session_dir / "analysis"
     analysis_dir.mkdir(parents=True, exist_ok=True)
@@ -726,6 +781,56 @@ def test_focus_mode_default_capture_checkboxes_are_operator_opt_out(tmp_path: Pa
     assert window._runtime_capture_options().wired_loopback_mode == "off"
     assert window._runtime_capture_options().start_external_labrecorder is False
     assert window._topup_slots_enabled_for_plan() is False
+    window.dialog.close()
+
+
+def test_focus_mode_start_button_is_red_and_tracks_selected_split_part(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    part1_manifest, part2_manifest = _write_split_focus_session_manifests(tmp_path)
+    package = load_run_package(part1_manifest)
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+    )
+    window.dialog.show()
+    app.processEvents()
+
+    assert window.start_button.objectName() == "startButton"
+    assert "QPushButton#startButton" in window.dialog.styleSheet()
+    assert "#8c2f2f" in window.dialog.styleSheet()
+    assert window.start_button.text() == "Start Part 1"
+    assert not window.part_buttons["1"].isEnabled()
+    assert not window.part_buttons["2"].isEnabled()
+
+    _fill_required_setup(window)
+    QTest.mouseClick(window.setup_submit_button, q["Qt"].MouseButton.LeftButton)
+    app.processEvents()
+
+    assert window.start_button.isEnabled()
+    assert window.start_button.text() == "Start Part 1"
+    assert window.part_buttons["1"].isEnabled()
+    assert window.part_buttons["2"].isEnabled()
+
+    QTest.mouseClick(window.part_buttons["2"], q["Qt"].MouseButton.LeftButton)
+    app.processEvents()
+
+    assert Path(window.package.manifest_path) == part2_manifest
+    assert window.package.part_number == 2
+    assert window.selected_part_key == "2"
+    assert window.start_button.text() == "Start Part 2"
+    assert [item["part_key"] for item in window.block_plan_items] == ["2", "2"]
+    assert window.demographics_submitted
+    assert window.start_button.isEnabled()
     window.dialog.close()
 
 
@@ -1833,18 +1938,18 @@ def test_focus_mode_start_part2_button_controls_part_transition(tmp_path: Path):
     app.processEvents()
 
     assert window.start_part2_button.isEnabled()
+    assert window.start_button.isEnabled()
+    assert window.start_button.text() == "Start Part 2"
     assert not window.target_button.isEnabled()
     assert not window.instruction_button.isVisible()
 
     window._click()
-    window._handle_primary_action_shortcut()
     app.processEvents()
     assert transition_payload["approved"] is False
     assert not transition_event.is_set()
 
-    QTest.mouseClick(window.start_part2_button, q["Qt"].MouseButton.LeftButton)
+    window._handle_primary_action_shortcut()
     app.processEvents()
-
     assert transition_payload["approved"] is True
     assert transition_event.is_set()
     assert window.pending_instruction_request is None
