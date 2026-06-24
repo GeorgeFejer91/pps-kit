@@ -154,6 +154,40 @@ OUTPUT_TEST_AUDIO_PATH = repo_root() / "assets" / "breathing" / "runner_output_t
 OUTPUT_TEST_TACTILE_PATH = repo_root() / "assets" / "tactile" / "runner_output_test_tactile.wav"
 
 
+def _timeline_segment_value(segment: Any, key: str) -> Any:
+    if isinstance(segment, dict):
+        return segment.get(key, "")
+    return getattr(segment, key, "")
+
+
+def _timeline_segment_is_catch(segment: Any) -> bool:
+    labels = (
+        _timeline_segment_value(segment, "family"),
+        _timeline_segment_value(segment, "trial_label"),
+        _timeline_segment_value(segment, "trial_type"),
+    )
+    for label in labels:
+        text = str(label or "").strip().lower().replace("-", "_").replace(" ", "_")
+        if text in {"catch", "catch_trial", "audio_only"}:
+            return True
+    return False
+
+
+def _timeline_soa_display_label(segment: Any) -> str:
+    if _timeline_segment_is_catch(segment):
+        return "N/A"
+    value = str(_timeline_segment_value(segment, "soa_ms") or _timeline_segment_value(segment, "SOA_ms") or "").strip()
+    if not value:
+        return "SOA"
+    if value.lower().replace(".", "").replace("/", "") in {"na", "none"}:
+        return "N/A"
+    return f"{value} ms"
+
+
+def _timeline_row_label_optional(row_name: str) -> bool:
+    return str(row_name or "").strip() not in {"Type", "Noise"}
+
+
 def _timeline_widget_minimum_height(profile: FocusLayoutProfile | None) -> int:
     if profile is not None and profile.screen_class == "constrained":
         return TIMELINE_MINIMUM_VISIBLE_HEIGHT
@@ -3336,7 +3370,7 @@ def _create_tactile_timeline_widget(
                         ),
                         (
                             "SOA",
-                            f"{segment.soa_ms} ms" if segment.soa_ms else "SOA",
+                            _timeline_soa_display_label(segment),
                             row_y_by_name["SOA"] - row_height // 2,
                             _soa_color(segment.soa_ms),
                         )
@@ -3345,7 +3379,16 @@ def _create_tactile_timeline_widget(
                         painter.setPen(q["QPen"](q["QColor"]("#bcc7bd")))
                         painter.setBrush(q["QBrush"](q["QColor"](color)))
                         painter.drawRoundedRect(x1, y, segment_width, row_height, 4, 4)
-                        _draw_fitted_text(row_name, x1, y, segment_width, row_height, text, "#202621", optional=True)
+                        _draw_fitted_text(
+                            row_name,
+                            x1,
+                            y,
+                            segment_width,
+                            row_height,
+                            text,
+                            "#202621",
+                            optional=_timeline_row_label_optional(row_name),
+                        )
 
                 tactile_y = row_y_by_name["Tactile"]
                 for cue in timeline_state.cues:
