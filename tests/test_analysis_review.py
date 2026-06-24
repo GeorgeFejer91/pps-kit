@@ -7,7 +7,6 @@ from pathlib import Path
 import pytest
 
 from peripersonal_space_toolkit.analysis_catalog import (
-    PARTICIPANT_COMBINED_DIRNAME,
     PARTICIPANT_POOL_DIRNAME,
     analysis_catalog_path,
     load_analysis_dataset,
@@ -528,10 +527,16 @@ def test_analysis_catalog_builds_pass_only_participant_balanced_pool(tmp_path: P
     catalog = refresh_analysis_browser_outputs(tmp_path)
 
     assert analysis_catalog_path(tmp_path).exists()
+    assert (output_data_analytics_dir(tmp_path) / "P001").exists()
+    assert (output_data_analytics_dir(tmp_path) / "P002").exists()
+    assert (output_data_analytics_dir(tmp_path) / "P003").exists()
+    participant_entries = [entry for entry in catalog.selectable_entries if entry["dataset_kind"] == "participant"]
+    assert [entry["participant_id"] for entry in participant_entries] == ["P001", "P002", "P003"]
     pool_entry = next(entry for entry in catalog.selectable_entries if entry["dataset_kind"] == "participant_pool")
     assert pool_entry["pool_included_count"] == 2
     assert pool_entry["pool_excluded_count"] == 1
     assert Path(pool_entry["analysis_dir"]).parent == output_data_analytics_dir(tmp_path)
+    assert Path(pool_entry["analysis_dir"]).name == PARTICIPANT_POOL_DIRNAME
     data = load_analysis_dataset(pool_entry)
     pool_row = next(
         row
@@ -581,15 +586,16 @@ def test_analysis_catalog_waits_for_complete_split_participant_before_combining(
 
     incomplete = refresh_analysis_browser_outputs(tmp_path)
     assert not any(entry["dataset_kind"] == "participant" for entry in incomplete.selectable_entries)
-    assert not (output_data_analytics_dir(tmp_path) / group / PARTICIPANT_COMBINED_DIRNAME).exists()
+    assert not (output_data_analytics_dir(tmp_path) / "P001").exists()
 
     payload["parts"][1]["completed"] = True
     manifest.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     complete = refresh_analysis_browser_outputs(tmp_path)
 
-    combined_dir = output_data_analytics_dir(tmp_path) / group / PARTICIPANT_COMBINED_DIRNAME
+    combined_dir = output_data_analytics_dir(tmp_path) / "P001"
     pool_dir = output_data_analytics_dir(tmp_path) / PARTICIPANT_POOL_DIRNAME
     assert combined_dir.exists()
+    assert (combined_dir / "P001_analysis_ready_trials.csv").exists()
     assert pool_dir.exists()
     participant_entries = [entry for entry in complete.selectable_entries if entry["dataset_kind"] == "participant"]
     assert [entry["participant_id"] for entry in participant_entries] == ["P001"]

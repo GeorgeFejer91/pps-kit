@@ -25,11 +25,14 @@ from .session_analysis import (
 
 ANALYSIS_CATALOG_SCHEMA = "pps-analysis-catalog.v1"
 ANALYSIS_CATALOG_FILENAME = "analysis_catalog.v1.json"
+ANALYSIS_DERIVED_METADATA_FILENAME = "analysis_dataset_source.v1.json"
 PARTICIPANT_COMBINED_DIRNAME = "participant_combined"
-PARTICIPANT_POOL_DIRNAME = "_participant_pool"
+PARTICIPANT_POOL_DIRNAME = "participant_pool"
+LEGACY_PARTICIPANT_POOL_DIRNAME = "_participant_pool"
 DATASET_KIND_PARTICIPANT = "participant"
 DATASET_KIND_PART = "part"
 DATASET_KIND_POOL = "participant_pool"
+DATASET_KIND_SOURCE_RUN = "source_run"
 
 
 @dataclass
@@ -65,16 +68,16 @@ def refresh_analysis_catalog(output_root: Path | str) -> AnalysisCatalog:
 
 
 def refresh_analysis_browser_outputs(output_root: Path | str, *, preferred_participant_id: str = "") -> AnalysisCatalog:
-    """Refresh derived participant-combined and PASS-only pool artifacts."""
+    """Refresh derived participant-level and PASS-only pool artifacts."""
 
     root = Path(output_root).expanduser()
     analytics_root = output_data_analytics_dir(root)
     _mkdir(analytics_root)
     warnings: list[str] = []
     try:
-        _refresh_split_participant_outputs(root)
+        _refresh_participant_outputs(root)
     except Exception as exc:  # noqa: BLE001 - catalog refresh must not block run completion.
-        warnings.append(f"Could not refresh split-participant analysis outputs: {exc}")
+        warnings.append(f"Could not refresh participant-level analysis outputs: {exc}")
     try:
         participant_entries = _participant_entries_for_pool(root)
         _build_participant_pool_outputs(root, participant_entries)
@@ -103,38 +106,126 @@ def selected_dataset_id_for_participant(catalog: AnalysisCatalog, participant_id
     return ""
 
 
-def _refresh_split_participant_outputs(output_root: Path) -> None:
-    part_entries = [entry for entry in _discover_analysis_entries(output_root, include_derived=False) if entry.get("dataset_kind") == DATASET_KIND_PART]
+def _refresh_participant_outputs(output_root: Path) -> None:
+    source_entries = _discover_analysis_entries(output_root, include_derived=False)
+    by_participant: dict[str, list[dict[str, Any]]] = {}
+    for component in [*_unsplit_participant_components(source_entries), *_completed_split_participant_components(output_root, source_entries)]:
+        participant = str(component.get("participant_id") or "").strip()
+        if not participant:
+            continue
+        by_participant.setdefault(participant, []).append(component)
+
+    for participant, components in sorted(by_participant.items()):
+        rows: list[dict[str, Any]] = []
+        component_quality: list[dict[str, Any]] = []
+        source_components: list[dict[str, Any]] = []
+        for component in sorted(components, key=lambda item: str(item.get("sort_key") or "")):
+            analysis_ready_paths = [Path(str(path)) for path in component.get("analysis_ready_paths", [])]
+            for analysis_ready in analysis_ready_paths:
+                rows.extend(_read_csv_rows(analysis_ready))
+            component_quality.extend(dict(quality) for quality in component.get("quality_gates", []))
+            source_components.append(
+                {
+                    "component_kind": component.get("component_kind", ""),
+                    "source_id": component.get("source_id", ""),
+                    "analysis_dirs": component.get("analysis_dirs", []),
+                    "analysis_ready_trials": [str(path) for path in analysis_ready_paths],
+                }
+            )
+        if not rows:
+            continue
+        result = analyze_analysis_ready_trials(rows)
+        result.recording_quality_gate = _merged_participant_quality_gate(result.recording_quality_gate, component_quality)
+        analysis_dir = _participant_analysis_dir(output_root, participant)
+        stem = _participant_output_stem(participant)
+        outputs = write_analysis_csvs(result, analysis_dir, stem)
+        _write_text(analysis_dir / "analysis_summary.txt", format_analysis_summary(result) + "\n")
+        outputs["analysis_summary"] = analysis_dir / "analysis_summary.txt"
+        _write_derived_metadata(
+            analysis_dir,
+            {
+                "schema": "pps-analysis-derived-source.v1",
+                "dataset_kind": DATASET_KIND_PARTICIPANT,
+                "participant_id": participant,
+                "source_policy": "participant_folder_combines_all_complete_source_components_for_this_participant",
+                "source_components": source_components,
+            },
+        )
+
+
+def _unsplit_participant_components(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    components: list[dict[str, Any]] = []
+    for entry in entries:
+        kind = str(entry.get("dataset_kind") or "")
+        if kind not in {DATASET_KIND_SOURCE_RUN, DATASET_KIND_PARTICIPANT}:
+            continue
+        participant = str(entry.get("participant_id") or "").strip()
+        if not participant:
+            continue
+        analysis_ready = str((entry.get("outputs") or {}).get("analysis_ready_trials") or "").strip()
+        if not analysis_ready:
+            continue
+        quality = dict(entry.get("recording_quality_gate") or {})
+        quality.setdefault("component_label", str(entry.get("dataset_label") or entry.get("session_id") or "source run"))
+        components.append(
+            {
+                "component_kind": "source_run",
+                "participant_id": participant,
+                "source_id": str(entry.get("session_id") or Path(str(entry.get("analysis_dir") or "")).name),
+                "sort_key": f"source:{entry.get('session_id') or entry.get('analysis_dir')}",
+                "analysis_dirs": [str(entry.get("analysis_dir") or "")],
+                "analysis_ready_paths": [analysis_ready],
+                "quality_gates": [quality],
+            }
+        )
+    return components
+
+
+def _completed_split_participant_components(output_root: Path, entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    part_entries = [entry for entry in entries if entry.get("dataset_kind") == DATASET_KIND_PART]
     by_group: dict[str, list[dict[str, Any]]] = {}
     for entry in part_entries:
         group = str(entry.get("session_group_id") or "").strip()
         if group:
             by_group.setdefault(group, []).append(entry)
-    for group, entries in by_group.items():
+
+    components: list[dict[str, Any]] = []
+    for group, group_entries in by_group.items():
         manifest = output_runner_logs_dir(output_root) / group / "session_group_manifest.json"
         payload = _read_json(manifest)
         parts = payload.get("parts", []) if isinstance(payload, dict) else []
         if not parts or not all(bool(part.get("completed")) for part in parts if isinstance(part, dict)):
             continue
         expected_names = {str(part.get("part_folder_name") or "").strip() for part in parts if isinstance(part, dict)}
+        entries_for_group = group_entries
         if expected_names:
-            entries = [entry for entry in entries if Path(str(entry.get("analysis_dir") or "")).name in expected_names]
-            if {Path(str(entry.get("analysis_dir") or "")).name for entry in entries} != expected_names:
+            entries_for_group = [entry for entry in group_entries if Path(str(entry.get("analysis_dir") or "")).name in expected_names]
+            if {Path(str(entry.get("analysis_dir") or "")).name for entry in entries_for_group} != expected_names:
                 continue
-        rows: list[dict[str, Any]] = []
-        part_quality = []
-        for entry in sorted(entries, key=lambda item: int(item.get("part_number") or 0)):
-            rows.extend(_read_csv_rows(Path(str((entry.get("outputs") or {}).get("analysis_ready_trials") or ""))))
-            part_quality.append(dict(entry.get("recording_quality_gate") or {}))
-        if not rows:
+        entries_for_group = sorted(entries_for_group, key=lambda item: int(item.get("part_number") or 0))
+        participant = str(payload.get("participant_id") or "").strip() if isinstance(payload, dict) else ""
+        participant = participant or str(_first_value_from_entries(entries_for_group, "participant_id") or "").strip()
+        analysis_ready_paths = [str((entry.get("outputs") or {}).get("analysis_ready_trials") or "") for entry in entries_for_group]
+        analysis_ready_paths = [path for path in analysis_ready_paths if path]
+        if not participant or not analysis_ready_paths:
             continue
-        result = analyze_analysis_ready_trials(rows)
-        result.recording_quality_gate = _merged_participant_quality_gate(result.recording_quality_gate, part_quality)
-        analysis_dir = output_data_analytics_dir(output_root) / group / PARTICIPANT_COMBINED_DIRNAME
-        stem = f"{group}_participant_combined"
-        outputs = write_analysis_csvs(result, analysis_dir, stem)
-        _write_text(analysis_dir / "analysis_summary.txt", format_analysis_summary(result) + "\n")
-        outputs["analysis_summary"] = analysis_dir / "analysis_summary.txt"
+        quality_gates = []
+        for entry in entries_for_group:
+            quality = dict(entry.get("recording_quality_gate") or {})
+            quality.setdefault("component_label", f"Part {entry.get('part_number') or ''}".strip())
+            quality_gates.append(quality)
+        components.append(
+            {
+                "component_kind": "split_session_group",
+                "participant_id": participant,
+                "source_id": group,
+                "sort_key": f"split:{group}",
+                "analysis_dirs": [str(entry.get("analysis_dir") or "") for entry in entries_for_group],
+                "analysis_ready_paths": analysis_ready_paths,
+                "quality_gates": quality_gates,
+            }
+        )
+    return components
 
 
 def _participant_entries_for_pool(output_root: Path) -> list[dict[str, Any]]:
@@ -142,6 +233,7 @@ def _participant_entries_for_pool(output_root: Path) -> list[dict[str, Any]]:
         entry
         for entry in _discover_analysis_entries(output_root)
         if entry.get("dataset_kind") == DATASET_KIND_PARTICIPANT
+        and bool(entry.get("selectable", True))
         and str(entry.get("quality_status") or "").upper() == QUALITY_PASS
     ]
     return sorted(entries, key=lambda entry: str(entry.get("participant_id") or ""))
@@ -152,20 +244,40 @@ def _build_participant_pool_outputs(output_root: Path, participant_entries: list
         entry
         for entry in _discover_analysis_entries(output_root)
         if entry.get("dataset_kind") == DATASET_KIND_PARTICIPANT
+        and bool(entry.get("selectable", True))
     ]
     excluded_count = max(0, len(completed_participants) - len(participant_entries))
-    if not participant_entries:
-        return {}
-    rows = _participant_balanced_rows(participant_entries)
-    if not rows:
-        return {}
+    rows = _participant_balanced_rows(participant_entries) if participant_entries else []
     result = analyze_analysis_ready_trials(rows)
-    _apply_group_model_support(result, participant_entries)
+    if rows:
+        _apply_group_model_support(result, participant_entries)
+    pool_status = QUALITY_PASS if participant_entries and rows else QUALITY_FAIL
+    pool_failures = []
+    if not participant_entries:
+        pool_failures.append(
+            {
+                "code": "no_pass_participants",
+                "message": "No PASS participant datasets were available for the participant pool.",
+                "evidence": f"completed_participants={len(completed_participants)}",
+            }
+        )
+    elif not rows:
+        pool_failures.append(
+            {
+                "code": "no_pool_rows",
+                "message": "PASS participants were found, but no rows could be aggregated for the participant pool.",
+                "evidence": f"included_participants={len(participant_entries)}",
+            }
+        )
     result.recording_quality_gate = {
         "schema": RECORDING_QUALITY_GATE_SCHEMA,
-        "status": QUALITY_PASS,
-        "primary_reason": f"Participant pool includes {len(participant_entries)} PASS participant dataset(s); {excluded_count} failed dataset(s) excluded.",
-        "failures": [],
+        "status": pool_status,
+        "primary_reason": (
+            f"Participant pool includes {len(participant_entries)} PASS participant dataset(s); {excluded_count} failed dataset(s) excluded."
+            if pool_status == QUALITY_PASS
+            else pool_failures[0]["message"]
+        ),
+        "failures": pool_failures,
         "warnings": [],
         "metrics": {
             "included_participants": len(participant_entries),
@@ -177,6 +289,16 @@ def _build_participant_pool_outputs(output_root: Path, participant_entries: list
     outputs = write_analysis_csvs(result, analysis_dir, "participant_pool")
     _write_text(analysis_dir / "analysis_summary.txt", format_analysis_summary(result) + "\n")
     outputs["analysis_summary"] = analysis_dir / "analysis_summary.txt"
+    _write_derived_metadata(
+        analysis_dir,
+        {
+            "schema": "pps-analysis-derived-source.v1",
+            "dataset_kind": DATASET_KIND_POOL,
+            "source_policy": "participant_balanced_pass_only_pool",
+            "included_participants": [str(entry.get("participant_id") or "") for entry in participant_entries],
+            "excluded_participant_count": excluded_count,
+        },
+    )
     return outputs
 
 
@@ -281,31 +403,42 @@ def _apply_group_model_support(result: Any, participant_entries: list[dict[str, 
     result.condition_lens_triage_summary = summary
 
 
-def _merged_participant_quality_gate(computed: dict[str, Any], part_quality: list[dict[str, Any]]) -> dict[str, Any]:
-    failures = list(computed.get("failures") or [])
-    part_failures = []
-    for index, quality in enumerate(part_quality, start=1):
+def _merged_participant_quality_gate(computed: dict[str, Any], component_quality: list[dict[str, Any]]) -> dict[str, Any]:
+    failures = [] if component_quality else list(computed.get("failures") or [])
+    component_failures = []
+    for index, quality in enumerate(component_quality, start=1):
         status = str(quality.get("status") or "").strip().upper()
         if status != QUALITY_PASS:
-            part_failures.append(
+            label = str(quality.get("component_label") or f"component {index}").strip()
+            component_failures.append(
                 {
-                    "code": "split_part_quality_failed",
-                    "message": f"Part {index} failed serious exclusion criteria.",
+                    "code": "source_component_quality_failed",
+                    "message": f"{label} failed serious exclusion criteria.",
                     "evidence": str(quality.get("primary_reason") or status or "UNKNOWN"),
                 }
             )
-    failures.extend(part_failures)
-    status = QUALITY_FAIL if failures else str(computed.get("status") or QUALITY_PASS).upper()
+    failures.extend(component_failures)
+    if component_failures:
+        status = QUALITY_FAIL
+    elif component_quality:
+        status = QUALITY_PASS
+    else:
+        status = QUALITY_FAIL if failures else str(computed.get("status") or QUALITY_PASS).upper()
     return {
         **computed,
         "status": status,
         "primary_reason": (
-            "At least one required split part failed serious exclusion criteria."
-            if part_failures
-            else computed.get("primary_reason", "No serious exclusion criteria were triggered across the complete participant dataset.")
+            "At least one source component failed serious exclusion criteria."
+            if component_failures
+            else (
+                "No serious exclusion criteria were triggered across the saved source components."
+                if component_quality
+                else computed.get("primary_reason", "No serious exclusion criteria were triggered across the complete participant dataset.")
+            )
         ),
         "failures": failures,
-        "component_part_quality": part_quality,
+        "component_quality": component_quality,
+        "computed_participant_quality_gate": computed,
     }
 
 
@@ -315,12 +448,15 @@ def _discover_analysis_entries(output_root: Path, *, include_derived: bool = Tru
         return []
     entries: list[dict[str, Any]] = []
     seen_dirs: set[Path] = set()
+    new_pool_exists = bool(_outputs_for_analysis_dir(analytics_root / PARTICIPANT_POOL_DIRNAME).get("analysis_ready_trials"))
     for analysis_ready in sorted(analytics_root.rglob("*_analysis_ready_trials.csv")):
         analysis_dir = analysis_ready.parent
         if analysis_dir in seen_dirs:
             continue
         seen_dirs.add(analysis_dir)
-        if not include_derived and analysis_dir.name in {PARTICIPANT_COMBINED_DIRNAME, PARTICIPANT_POOL_DIRNAME}:
+        if new_pool_exists and analysis_dir.name == LEGACY_PARTICIPANT_POOL_DIRNAME:
+            continue
+        if not include_derived and _is_derived_analysis_dir(output_root, analysis_dir):
             continue
         entry = _entry_for_analysis_dir(output_root, analysis_dir)
         if entry is not None:
@@ -342,7 +478,7 @@ def _entry_for_analysis_dir(output_root: Path, analysis_dir: Path) -> dict[str, 
     selectable = True
     session_group_id = ""
     part_number: int | str = ""
-    if analysis_dir.name == PARTICIPANT_POOL_DIRNAME:
+    if analysis_dir.name in {PARTICIPANT_POOL_DIRNAME, LEGACY_PARTICIPANT_POOL_DIRNAME}:
         dataset_kind = DATASET_KIND_POOL
         participant_id = ""
         dataset_id = "participant_pool"
@@ -351,6 +487,7 @@ def _entry_for_analysis_dir(output_root: Path, analysis_dir: Path) -> dict[str, 
         session_group_id = rel_parts[0] if rel_parts else ""
         dataset_id = f"participant:{participant_id or session_group_id}"
         label = participant_id or session_group_id
+        selectable = not _participant_analysis_exists(output_root, participant_id or session_group_id)
     elif analysis_dir.name.startswith("part_") and len(rel_parts) >= 2:
         dataset_kind = DATASET_KIND_PART
         selectable = False
@@ -358,9 +495,14 @@ def _entry_for_analysis_dir(output_root: Path, analysis_dir: Path) -> dict[str, 
         part_number = _part_number_from_name(analysis_dir.name)
         dataset_id = f"part:{session_id}"
         label = f"{participant_id or session_group_id} Part {part_number}"
+    elif _is_top_level_participant_analysis_dir(output_root, analysis_dir, participant_id):
+        dataset_id = f"participant:{participant_id or analysis_dir.name}"
+        label = participant_id or analysis_dir.name
     else:
-        dataset_id = f"participant:{participant_id or session_id}"
-        label = participant_id or session_id
+        dataset_kind = DATASET_KIND_SOURCE_RUN
+        selectable = False
+        dataset_id = f"source_run:{session_id or analysis_dir.name}"
+        label = f"{participant_id or session_id or analysis_dir.name} source run"
     if dataset_kind == DATASET_KIND_POOL:
         included = int((quality.get("metrics") or {}).get("included_participants") or 0)
         excluded = int((quality.get("metrics") or {}).get("excluded_participants") or 0)
@@ -388,6 +530,58 @@ def _entry_for_analysis_dir(output_root: Path, analysis_dir: Path) -> dict[str, 
         "outputs": {key: str(path) for key, path in outputs.items()},
         "recording_quality_gate": quality,
     }
+
+
+def _is_derived_analysis_dir(output_root: Path, analysis_dir: Path) -> bool:
+    if (analysis_dir / ANALYSIS_DERIVED_METADATA_FILENAME).is_file():
+        return True
+    if analysis_dir.name in {PARTICIPANT_COMBINED_DIRNAME, PARTICIPANT_POOL_DIRNAME, LEGACY_PARTICIPANT_POOL_DIRNAME}:
+        return True
+    return False
+
+
+def _is_top_level_participant_analysis_dir(output_root: Path, analysis_dir: Path, participant_id: str) -> bool:
+    try:
+        rel_parts = analysis_dir.relative_to(output_data_analytics_dir(output_root)).parts
+    except ValueError:
+        return False
+    if len(rel_parts) != 1:
+        return False
+    metadata = _read_json(analysis_dir / ANALYSIS_DERIVED_METADATA_FILENAME)
+    if str(metadata.get("dataset_kind") or "") == DATASET_KIND_PARTICIPANT:
+        return True
+    participant = str(participant_id or "").strip()
+    return bool(participant and analysis_dir.name == _safe_path_name(participant))
+
+
+def _participant_analysis_exists(output_root: Path, participant_id: str) -> bool:
+    participant = str(participant_id or "").strip()
+    if not participant:
+        return False
+    return bool(_outputs_for_analysis_dir(_participant_analysis_dir(output_root, participant)).get("analysis_ready_trials"))
+
+
+def _participant_analysis_dir(output_root: Path, participant_id: str) -> Path:
+    return output_data_analytics_dir(output_root) / _safe_path_name(participant_id)
+
+
+def _participant_output_stem(participant_id: str) -> str:
+    return _safe_path_name(participant_id)
+
+
+def _safe_path_name(value: Any) -> str:
+    text = str(value or "").strip() or "unknown_participant"
+    invalid = '<>:"/\\|?*'
+    cleaned = "".join("_" if char in invalid or ord(char) < 32 else char for char in text).strip(". ")
+    return cleaned or "unknown_participant"
+
+
+def _first_value_from_entries(entries: list[dict[str, Any]], key: str) -> str:
+    for entry in entries:
+        value = str(entry.get(key) or "").strip()
+        if value:
+            return value
+    return ""
 
 
 def _outputs_for_analysis_dir(analysis_dir: Path) -> dict[str, Path]:
@@ -463,6 +657,10 @@ def _write_text(path: Path, text: str) -> None:
     _mkdir(path.parent)
     with open(_filesystem_path(path), "w", encoding="utf-8") as handle:
         handle.write(text)
+
+
+def _write_derived_metadata(analysis_dir: Path, payload: dict[str, Any]) -> None:
+    _write_text(analysis_dir / ANALYSIS_DERIVED_METADATA_FILENAME, json.dumps(_json_ready(payload), indent=2, sort_keys=True) + "\n")
 
 
 def _mkdir(path: Path) -> None:

@@ -15,7 +15,6 @@ import soundfile as sf
 from peripersonal_space_toolkit import session_runner as session_runner_module
 from peripersonal_space_toolkit import labrecorder_capture as labrecorder_capture_module
 from peripersonal_space_toolkit.design import ProtocolSpec, default_design
-from peripersonal_space_toolkit.analysis_catalog import PARTICIPANT_COMBINED_DIRNAME
 from peripersonal_space_toolkit.session_runner import (
     ParticipantTrialCsvWriter,
     SessionRunnerController,
@@ -1404,12 +1403,7 @@ def test_split_part_controller_writes_part_identity_and_status_handoff(tmp_path:
     result2 = controller2.run()
     assert result2.completed
     assert result2.analysis_outputs["analysis_catalog"].exists()
-    combined_analysis = (
-        output_data_analytics_dir(session_root)
-        / part1.session_group_id
-        / PARTICIPANT_COMBINED_DIRNAME
-        / f"{part1.session_group_id}_participant_combined_analysis_ready_trials.csv"
-    )
+    combined_analysis = output_data_analytics_dir(session_root) / "P001" / "P001_analysis_ready_trials.csv"
     assert combined_analysis.exists()
 
     collected = prepared_session_asset_status(
