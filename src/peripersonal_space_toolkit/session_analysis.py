@@ -622,7 +622,6 @@ def _final_outcomes_by_scope(response_rows: list[dict[str, Any]]) -> dict[tuple[
 
 def _pair_tactile_responses(events: list[dict[str, Any]], *, min_rt_s: float, max_rt_s: float) -> list[dict[str, Any]]:
     tactile_events = [row for row in events if row.get("event_type") == "tactile_onset"]
-    trial_starts = sorted(_as_float(row.get("unix_time"), 0.0) for row in events if row.get("event_type") == "trial_start")
     clicks = [row for row in events if row.get("event_type") == "mouse_click" and _truthy(row.get("in_target", True))]
     clicks = [row for row in clicks if _truthy(row.get("during_playback", True))]
     clicks = sorted(clicks, key=lambda row: (_as_float(row.get("unix_time"), 0.0), row.get("event_id", 0)))
@@ -631,14 +630,7 @@ def _pair_tactile_responses(events: list[dict[str, Any]], *, min_rt_s: float, ma
     response_rows = []
     for tactile in tactile_events:
         onset = _as_float(tactile.get("unix_time"), 0.0)
-        max_deadline = onset + max_rt_s
-        limit = max_deadline
-        next_trial_start = None
-        for trial_start in trial_starts:
-            if trial_start > onset + 0.01:
-                next_trial_start = trial_start
-                limit = min(limit, trial_start)
-                break
+        response_deadline = onset + max_rt_s
         click = None
         for candidate in clicks:
             click_time = _as_float(candidate.get("unix_time"), 0.0)
@@ -646,9 +638,7 @@ def _pair_tactile_responses(events: list[dict[str, Any]], *, min_rt_s: float, ma
                 continue
             if not _same_trial_context(tactile, candidate):
                 continue
-            if next_trial_start is not None and click_time >= next_trial_start:
-                continue
-            if onset + min_rt_s <= click_time <= limit:
+            if onset + min_rt_s <= click_time <= response_deadline:
                 click = candidate
                 used_click_ids.add(candidate.get("event_id"))
                 break

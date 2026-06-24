@@ -8432,8 +8432,8 @@ class FocusModeWindow:
             self.output_summary.setPlainText(f"{current}\n{suffix}" if current else suffix)
 
     def grab_screenshot(self, path: Path) -> None:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        self.dialog.grab().save(str(path))
+        os.makedirs(_output_filesystem_path(path.parent), exist_ok=True)
+        self.dialog.grab().save(_output_filesystem_path(path))
 
     def exec(
         self,

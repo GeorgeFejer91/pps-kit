@@ -111,7 +111,7 @@ class TopUpLedger:
             elif event_type == "mouse_click":
                 self._record_click(event, row)
             elif event_type == "trial_start":
-                self.expire_at_trial_boundary(float(event.unix_time), float(event.monotonic_time))
+                self.expire_due(float(event.unix_time))
             elif event_type in {"trial_end", "block_end", "session_end"}:
                 self.expire_due(float(event.unix_time))
 

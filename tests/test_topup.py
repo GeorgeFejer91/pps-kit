@@ -13,7 +13,7 @@ from peripersonal_space_toolkit.session_analysis import analyze_session_events, 
 from peripersonal_space_toolkit.session_events import SessionEvent
 from peripersonal_space_toolkit.session_runner import SessionRunnerController, prepare_segment_run_package
 from peripersonal_space_toolkit.output_layout import output_prepared_blocks_dir
-from peripersonal_space_toolkit.topup import HIT, MISSED_NEEDS_TOPUP, TopUpLedger
+from peripersonal_space_toolkit.topup import HIT, MISSED_NEEDS_TOPUP, PENDING, TopUpLedger
 
 sys.path.insert(0, str(Path(__file__).parent))
 from test_session_runner import _segment_run_setup_fixture
@@ -83,18 +83,17 @@ def test_topup_ledger_resolves_valid_click_that_arrives_after_trial_boundary(tmp
         )
     )
     ledger.observe_event(_event(2, "trial_start", 11.5, trial_uid="T002"))
-    assert ledger.entries[0].status == MISSED_NEEDS_TOPUP
-    assert ledger.entries[0].miss_reason == "next_trial_started"
+    assert ledger.entries[0].status == PENDING
 
-    ledger.observe_event(_event(3, "mouse_click", 10.42, in_target=True, during_playback=True))
+    ledger.observe_event(_event(3, "mouse_click", 12.42, in_target=True, during_playback=True))
 
     assert ledger.entries[0].status == HIT
     assert ledger.entries[0].click_event_id == 3
-    assert round(float(ledger.entries[0].rt_ms), 3) == 420.0
+    assert round(float(ledger.entries[0].rt_ms), 3) == 2420.0
     assert ledger.entries[0].miss_reason == ""
 
 
-def test_response_pairing_rejects_click_at_next_trial_start(tmp_path: Path):
+def test_response_pairing_accepts_click_after_next_trial_start_within_response_window(tmp_path: Path):
     events = [
         _event(1, "trial_start", 10.0, trial_uid="T001"),
         _event(
@@ -113,7 +112,8 @@ def test_response_pairing_rejects_click_at_next_trial_start(tmp_path: Path):
     result = analyze_session_events(events)
 
     assert result.response_rows[0]["trial_uid"] == "T001"
-    assert result.response_rows[0]["hit"] is False
+    assert result.response_rows[0]["hit"] is True
+    assert result.response_rows[0]["click_event_id"] == 4
 
 
 def test_response_pairing_uses_four_second_window_and_first_valid_click(tmp_path: Path):
@@ -166,7 +166,7 @@ def test_response_pairing_uses_four_second_window_and_first_valid_click(tmp_path
     assert by_uid["T003"]["hit"] is False
 
 
-def test_topup_ledger_rejects_click_at_next_trial_start(tmp_path: Path):
+def test_topup_ledger_accepts_click_after_next_trial_start_within_response_window(tmp_path: Path):
     ledger = TopUpLedger(tmp_path, participant_id="P001", session_id="S001", min_rt_s=0.1, max_rt_s=3.0)
 
     ledger.observe_event(
@@ -185,9 +185,9 @@ def test_topup_ledger_rejects_click_at_next_trial_start(tmp_path: Path):
     ledger.observe_event(_event(2, "trial_start", 11.0, trial_uid="T002"))
     ledger.observe_event(_event(3, "mouse_click", 11.0, in_target=True, during_playback=True))
 
-    assert ledger.entries[0].status == MISSED_NEEDS_TOPUP
-    assert ledger.entries[0].click_event_id == ""
-    assert ledger.entries[0].miss_reason == "next_trial_started"
+    assert ledger.entries[0].status == HIT
+    assert ledger.entries[0].click_event_id == 3
+    assert ledger.entries[0].miss_reason == ""
 
 
 def test_topup_ledger_does_not_bind_topup_click_to_original_miss(tmp_path: Path):
