@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import csv
 import math
+import os
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable
@@ -167,10 +169,19 @@ class BlockEventSchedule:
 
 
 def _read_rows(path: Path) -> list[dict[str, str]]:
-    if not path.exists():
+    if not os.path.exists(_filesystem_path(path)):
         return []
-    with path.open(newline="", encoding="utf-8-sig") as handle:
+    with open(_filesystem_path(path), newline="", encoding="utf-8-sig") as handle:
         return list(csv.DictReader(handle))
+
+
+def _filesystem_path(path: str | Path) -> str:
+    text = str(Path(path).resolve())
+    if sys.platform == "win32" and not text.startswith("\\\\?\\"):
+        if text.startswith("\\\\"):
+            return "\\\\?\\UNC\\" + text.lstrip("\\")
+        return "\\\\?\\" + text
+    return text
 
 
 def _event_priority(event_type: str) -> int:

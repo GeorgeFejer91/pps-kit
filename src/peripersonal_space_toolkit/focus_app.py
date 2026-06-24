@@ -5055,9 +5055,9 @@ class _ValidationFastAudioEngine:
 
 def _validation_event_counts(events_csv: Path) -> dict[str, int]:
     counts: dict[str, int] = {}
-    if not events_csv.is_file():
+    if not os.path.isfile(_output_filesystem_path(events_csv)):
         return counts
-    with events_csv.open(newline="", encoding="utf-8-sig") as handle:
+    with open(_output_filesystem_path(events_csv), newline="", encoding="utf-8-sig") as handle:
         for row in csv.DictReader(handle):
             event_type = str(row.get("event_type") or "")
             if event_type:
@@ -5065,11 +5065,47 @@ def _validation_event_counts(events_csv: Path) -> dict[str, int]:
     return counts
 
 
+def _validation_scoped_event_counts(events_csv: Path) -> dict[str, Any]:
+    scopes: dict[str, Any] = {
+        "standard": {},
+        "topup": {},
+        "standard_trial_families": {},
+        "topup_trial_families": {},
+    }
+    if not os.path.isfile(_output_filesystem_path(events_csv)):
+        return scopes
+    with open(_output_filesystem_path(events_csv), newline="", encoding="utf-8-sig") as handle:
+        for row in csv.DictReader(handle):
+            event_type = str(row.get("event_type") or "")
+            if not event_type:
+                continue
+            try:
+                payload = json.loads(str(row.get("payload_json") or "{}"))
+            except Exception:
+                payload = {}
+            is_topup = _truthy(
+                payload.get("is_topup")
+                or payload.get("Is_Topup")
+                or payload.get("block_is_topup_block")
+                or payload.get("block_is_topup")
+            )
+            scope_key = "topup" if is_topup else "standard"
+            scope_counts = scopes[scope_key]
+            scope_counts[event_type] = int(scope_counts.get(event_type, 0)) + 1
+            if event_type == "trial_start":
+                family = str(payload.get("family") or payload.get("Family") or "").strip() or "unknown"
+                family_key = "topup_trial_families" if is_topup else "standard_trial_families"
+                family_counts = scopes[family_key]
+                family_counts[family] = int(family_counts.get(family, 0)) + 1
+    return scopes
+
+
 def _install_validation_auto_clicker(q: dict[str, Any], window: "FocusModeWindow") -> list[dict[str, Any]]:
     from PySide6.QtTest import QTest
 
     clicks: list[dict[str, Any]] = []
     start_gate_state: dict[str, Any] = {}
+    instruction_attempts: dict[int, tuple[int, float]] = {}
 
     def _click(widget: Any, label: str) -> None:
         if widget is None or not widget.isEnabled():
@@ -5077,13 +5113,53 @@ def _install_validation_auto_clicker(q: dict[str, Any], window: "FocusModeWindow
         QTest.mouseClick(widget, q["Qt"].MouseButton.LeftButton)
         clicks.append({"label": label, "timestamp_unix": time.time()})
 
+    def _select_combo_data(combo: Any, value: str) -> None:
+        try:
+            index = combo.findData(value)
+            if int(index) >= 0:
+                combo.setCurrentIndex(index)
+        except Exception:
+            pass
+
+    def _submit_mock_setup_if_needed() -> None:
+        if bool(getattr(window, "demographics_submitted", False)):
+            return
+        try:
+            if not str(window.participant_name_input.text() or "").strip():
+                window.participant_name_input.setText("Mock Participant")
+            if not str(window.age_input.text() or "").strip():
+                window.age_input.setText("30")
+            _select_combo_data(window.handedness_combo, "right")
+            _select_combo_data(window.gender_combo, "prefer_not_to_say")
+            _click(getattr(window, "setup_submit_button", None), "Submit setup")
+        except Exception as exc:
+            clicks.append({"label": "participant_setup_submit_failed", "message": str(exc), "timestamp_unix": time.time()})
+
     def _click_start_when_ready() -> None:
         if window.result is not None:
             return
+        _submit_mock_setup_if_needed()
         if window.start_button.isEnabled() and _validation_start_gate_ready(clicks, start_gate_state, source="auto_clicker"):
             _click(window.start_button, "Start Run")
             return
         q["QTimer"].singleShot(100, _click_start_when_ready)
+
+    def _part2_start_gate_pending() -> bool:
+        check = getattr(window, "_part2_start_gate_pending", None)
+        if callable(check):
+            try:
+                return bool(check())
+            except Exception:
+                return False
+        return False
+
+    def _click_instruction_once(widget: Any, label: str, request_id: int) -> None:
+        attempt_count, last_attempt = instruction_attempts.get(request_id, (0, 0.0))
+        now = time.perf_counter()
+        if attempt_count >= 5 or (attempt_count > 0 and now - last_attempt < 0.25):
+            return
+        instruction_attempts[request_id] = (attempt_count + 1, now)
+        _click(widget, label)
 
     def _poll() -> None:
         if window.result is not None:
@@ -5091,13 +5167,16 @@ def _install_validation_auto_clicker(q: dict[str, Any], window: "FocusModeWindow
             return
         request = window.pending_instruction_request
         if request is not None:
+            request_id = id(request)
             context = dict(request.get("context") or {})
             mode = str(context.get("mode") or "click")
             label = str(context.get("instruction_label") or "instruction")
-            if mode == "button":
-                _click(window.instruction_button, f"instruction button: {label}")
+            if _part2_start_gate_pending():
+                _click_instruction_once(getattr(window, "start_part2_button", None), "Start Part 2", request_id)
+            elif mode == "button":
+                _click_instruction_once(window.instruction_button, f"instruction button: {label}", request_id)
             else:
-                _click(window.target_button, f"instruction target: {label}")
+                _click_instruction_once(window.target_button, f"instruction target: {label}", request_id)
         q["QTimer"].singleShot(50, _poll)
 
     q["QTimer"].singleShot(500, _click_start_when_ready)
@@ -5477,6 +5556,26 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
         context = dict(request.get("context") or {})
         mode = str(context.get("mode") or "click")
         label = str(context.get("instruction_label") or "instruction")
+        part2_pending = False
+        check_part2 = getattr(window, "_part2_start_gate_pending", None)
+        if callable(check_part2):
+            try:
+                part2_pending = bool(check_part2())
+            except Exception:
+                part2_pending = False
+        if part2_pending:
+            button = getattr(window, "start_part2_button", None)
+            if button is not None and button.isEnabled():
+                backend = _click_widget(button, "Start Part 2", preferred_backend="qtest")
+                records.append(
+                    {
+                        "label": "Start Part 2",
+                        "mode": "part_transition",
+                        "backend": backend,
+                        "timestamp_unix": time.time(),
+                    }
+                )
+            return
         backend = _press_primary_key(f"instruction: {label}")
         records.append(
             {
@@ -5729,6 +5828,7 @@ def _write_validation_focus_report(
         "exit_code": int(exit_code),
         "completed": bool(window.result is not None and getattr(window.result, "completed", False)),
         "event_counts": _validation_event_counts(events_csv),
+        "scoped_event_counts": _validation_scoped_event_counts(events_csv),
         "validation_mouse_clicks": validation_clicks,
         "validation_topup_approvals": list(getattr(window, "validation_topup_approval_records", [])),
         "planned_tactile_cue_count": int(getattr(window, "planned_tactile_cue_count", 0)),

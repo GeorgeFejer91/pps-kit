@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import csv
+import os
 import sys
 import types
 from pathlib import Path
 
 import pytest
 
+from peripersonal_space_toolkit import timing_schedule as timing_schedule_module
 from peripersonal_space_toolkit.session_events import SessionEventLogger
 from peripersonal_space_toolkit.timing_events import LSL_STREAM_NAME, LSL_NUMERIC_STREAM_NAME, TimingEventHub
 from peripersonal_space_toolkit.timing_schedule import BlockEventSchedule, ScheduledBlockEvent
@@ -302,3 +304,63 @@ def test_block_event_schedule_can_flush_final_boundary_event():
 
     assert len(due) == 1
     assert due[0].event_type == "trial_end"
+
+
+def test_block_event_schedule_reads_deep_manifest_path(tmp_path: Path):
+    deep_dir = tmp_path
+    for index in range(16):
+        deep_dir = deep_dir / f"study5_deep_packaged_schedule_manifest_segment_{index:02d}"
+    os.makedirs(timing_schedule_module._filesystem_path(deep_dir), exist_ok=True)
+    manifest = deep_dir / "block_01_final.csv"
+    with open(timing_schedule_module._filesystem_path(manifest), "w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=[
+                "Trial_Number",
+                "Trial_UID",
+                "Trial_Type",
+                "Family",
+                "SOA_ms",
+                "Sample_Rate_Hz",
+                "Trial_Start_Sample",
+                "Looming_Onset_Sample",
+                "Tactile_Onset_Sample",
+                "Response_Window_Onset_Sample",
+                "Trial_End_Sample",
+            ],
+        )
+        writer.writeheader()
+        writer.writerow(
+            {
+                "Trial_Number": 1,
+                "Trial_UID": "P001_deep_B01_T001",
+                "Trial_Type": "Audio-Tactile",
+                "Family": "audio_tactile",
+                "SOA_ms": 10,
+                "Sample_Rate_Hz": 100,
+                "Trial_Start_Sample": 0,
+                "Looming_Onset_Sample": 400,
+                "Tactile_Onset_Sample": 410,
+                "Response_Window_Onset_Sample": 400,
+                "Trial_End_Sample": 800,
+            }
+        )
+
+    schedule = BlockEventSchedule.from_block_manifest(
+        manifest,
+        block_index=1,
+        block_label="Block 01",
+        participant_id="P001",
+        session_id="S001",
+        sample_rate=100,
+    )
+
+    event_types = [event.event_type for event in schedule.events]
+    assert event_types == [
+        "audio_sample_zero",
+        "trial_start",
+        "looming_onset",
+        "response_window_onset",
+        "tactile_onset",
+        "trial_end",
+    ]

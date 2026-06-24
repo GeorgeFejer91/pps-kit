@@ -966,6 +966,8 @@ def _run_packaged_standalone_app_background_validation(args: argparse.Namespace)
         failures.append("Packaged Focus Mode did not write a validation report.")
 
     counts = dict(focus_result.get("event_counts") or {})
+    scoped_counts = dict(focus_result.get("scoped_event_counts") or {})
+    standard_counts = dict(scoped_counts.get("standard") or counts)
     launcher_clicks = list(launcher_result.get("validation_mouse_clicks") or [])
     focus_clicks = list(focus_result.get("validation_mouse_clicks") or [])
     if exit_code != 0:
@@ -980,9 +982,9 @@ def _run_packaged_standalone_app_background_validation(args: argparse.Namespace)
         failures.append("Packaged standalone launcher Run Selected Profile was not clicked by a validation mouse event.")
     if not focus_result.get("completed"):
         failures.append("Packaged Focus Mode did not complete Study 5.")
-    if int(counts.get("block_end") or 0) != 12:
+    if int(standard_counts.get("block_end") or 0) != 12:
         failures.append("Packaged Focus Mode did not complete all 12 Study 5 blocks.")
-    if int(counts.get("trial_start") or 0) != 408 or int(counts.get("trial_end") or 0) != 408:
+    if int(standard_counts.get("trial_start") or 0) != 408 or int(standard_counts.get("trial_end") or 0) != 408:
         failures.append("Packaged Focus Mode did not emit all 408 Study 5 trial starts/ends.")
     if int(focus_result.get("played_instruction_count") or 0) < 5:
         failures.append("Packaged Focus Mode did not attempt all five original Study 5 instruction clips.")
@@ -1122,6 +1124,8 @@ def _run_packaged_standalone_app_validation(args: argparse.Namespace) -> int:
         failures.append("Packaged Focus Mode did not write a validation report.")
 
     counts = dict(focus_result.get("event_counts") or {})
+    scoped_counts = dict(focus_result.get("scoped_event_counts") or {})
+    standard_counts = dict(scoped_counts.get("standard") or counts)
     if exit_code != 0:
         failures.append(f"Packaged runner exited with code {exit_code}.")
     if not any(click.get("label") == "click Study/profile selector" for click in launcher_clicks):
@@ -1130,9 +1134,9 @@ def _run_packaged_standalone_app_validation(args: argparse.Namespace) -> int:
         failures.append("Standalone launcher Run Selected Profile was not clicked with an OS mouse event.")
     if not focus_result.get("completed"):
         failures.append("Packaged Focus Mode did not complete Study 5.")
-    if int(counts.get("block_end") or 0) != 12:
+    if int(standard_counts.get("block_end") or 0) != 12:
         failures.append("Packaged Focus Mode did not complete all 12 Study 5 blocks.")
-    if int(counts.get("trial_start") or 0) != 408 or int(counts.get("trial_end") or 0) != 408:
+    if int(standard_counts.get("trial_start") or 0) != 408 or int(standard_counts.get("trial_end") or 0) != 408:
         failures.append("Packaged Focus Mode did not emit all 408 Study 5 trial starts/ends.")
     if int(focus_result.get("played_instruction_count") or 0) < 5:
         failures.append("Packaged Focus Mode did not attempt all five original Study 5 instruction clips.")

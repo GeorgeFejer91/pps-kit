@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import csv
 import json
+import os
 import threading
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Iterable
 
+from .output_layout import _filesystem_path as _output_filesystem_path
 from .session_events import SessionEvent
 
 
@@ -181,17 +183,17 @@ class TopUpLedger:
 
     def write_outputs(self) -> dict[str, Path]:
         with self._lock:
-            self.session_dir.mkdir(parents=True, exist_ok=True)
+            os.makedirs(_output_filesystem_path(self.session_dir), exist_ok=True)
             rows = [entry.as_row() for entry in self.entries]
             fieldnames = _fieldnames(rows)
-            with self.csv_path.open("w", newline="", encoding="utf-8") as handle:
+            with open(_output_filesystem_path(self.csv_path), "w", newline="", encoding="utf-8") as handle:
                 writer = csv.DictWriter(handle, fieldnames=fieldnames)
                 writer.writeheader()
                 writer.writerows(rows)
-            self.json_path.write_text(
-                json.dumps({"schema": "pps-topup-ledger.v1", "summary": self.summary(), "entries": rows}, indent=2),
-                encoding="utf-8",
-            )
+            with open(_output_filesystem_path(self.json_path), "w", encoding="utf-8") as handle:
+                handle.write(
+                    json.dumps({"schema": "pps-topup-ledger.v1", "summary": self.summary(), "entries": rows}, indent=2)
+                )
         return {"topup_ledger_csv": self.csv_path, "topup_ledger_json": self.json_path}
 
     def _add_tactile(self, event: SessionEvent, row: dict[str, Any]) -> None:
@@ -312,7 +314,9 @@ def write_topup_draft_manifest(session_dir: str | Path, ledger: TopUpLedger, *, 
         "summary": ledger.summary(),
         "missed_trials": [entry.as_row() for entry in ledger.missed_entries(include_topup=False, part_number=part_number)],
     }
-    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    os.makedirs(_output_filesystem_path(path.parent), exist_ok=True)
+    with open(_output_filesystem_path(path), "w", encoding="utf-8") as handle:
+        handle.write(json.dumps(payload, indent=2))
     return path
 
 
