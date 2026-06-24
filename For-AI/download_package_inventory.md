@@ -131,11 +131,23 @@ Optional but preferred when available:
 - Approved native 3DTI renderer binaries under `third_party/3dti_renderer/bin/`.
 - Pinned 3DTI source/attribution material under `third_party/3dti_AudioToolkit/`.
 
+## Runner Executable Sync Rule
+
+Any completed change to experiment-runner functionality must carry through to
+the local packaged runner executable path. This includes Focus Mode behavior,
+standalone launcher behavior, audio routing/preflight behavior, participant or
+session state handling, generated-session playback behavior, and
+validation-visible runner workflows. Do not treat a runner change as complete if
+only the Python source entrypoint was updated; rebuild or refresh the
+`PPSExperimentRunner.exe` packaging path, update the package inventory or
+release payload metadata if needed, and verify the packaged/local exe exercises
+the changed behavior.
+
 ## Build And Verification Order
 
 1. Install dependencies into `.venv` with the Windows setup path or `python -m pip install -e ".[tts,gui,web,lsl,xdf,validation,dev,package]"`. The GUI extra is pinned to PySide6 6.7.x because newer PySide6 releases have broken Qt imports in the current Anaconda-based lab venv.
 2. Run tests and release audit before packaging.
-3. Build the packaged runner with `windows/Build_Experiment_Runner_Exe.ps1`. This must run `tools/check_qt_runtime.py` before and after PyInstaller so broken PySide6 imports or missing `qwindows.dll` fail the build. After building, verify the packaged exe, not just source Python, can open `Komplete Audio ASIO Driver` through the real runner path because ASIO depends on the frozen entrypoint setting `SD_ENABLE_ASIO=1` before any sounddevice import.
+3. Build the packaged runner with `windows/Build_Experiment_Runner_Exe.ps1`. This must run `tools/check_qt_runtime.py` before and after PyInstaller so broken PySide6 imports or missing `qwindows.dll` fail the build. After any runner-functionality change, this packaged/local exe path must be refreshed and verified so the installable runner carries the new source behavior. After building, verify the packaged exe, not just source Python, can open `Komplete Audio ASIO Driver` through the real runner path because ASIO depends on the frozen entrypoint setting `SD_ENABLE_ASIO=1` before any sounddevice import.
 4. Build or stage the offline/local HTML GUI exe entrypoint that starts the companion and opens the dashboard.
 5. Stage the repo-shaped program directory and all dependency/runtime payloads that the downloader will install.
 6. Let `tools/package_inventory.py --strict` validate the staged repository-shaped package and write `pps_package_inventory.v1.json`.
