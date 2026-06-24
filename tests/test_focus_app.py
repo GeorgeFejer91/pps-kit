@@ -123,9 +123,15 @@ def _fill_required_setup(window) -> None:
     window.age_input.setText("30")
     for combo_name, value in (("handedness_combo", "right"), ("gender_combo", "prefer_not_to_say")):
         combo = getattr(window, combo_name)
-        index = combo.findData(value)
-        assert index >= 0
-        combo.setCurrentIndex(index)
+        assert _set_combo_for_test(combo, value)
+
+
+def _set_combo_for_test(combo, value: str) -> bool:
+    index = combo.findData(value)
+    if index < 0:
+        return False
+    combo.setCurrentIndex(index)
+    return True
 
 
 def _write_focus_preview_block_csv(path: Path, *, block_offset: int = 0) -> None:
@@ -448,6 +454,13 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert window.participant_code_combo.objectName() == "runnerParticipantCombo"
     assert not window.participant_code_combo.isEditable()
     assert window.participant_code_combo.currentData() == "P001"
+    assert window.participant_selector_widget.objectName() == "runnerParticipantStepper"
+    assert window.participant_increment_button.objectName() == "participantIncrementButton"
+    assert window.participant_decrement_button.objectName() == "participantDecrementButton"
+    assert not window.participant_increment_button.isEnabled()
+    assert not window.participant_decrement_button.isEnabled()
+    assert window.participant_status_summary_label.objectName() == "participantLedgerSummary"
+    assert "P001: setup not saved; data not collected" in window.participant_status_summary_label.text()
     assert window.part_buttons["1"].isEnabled()
     assert not window.part_buttons["2"].isEnabled()
     assert window.preview_display_block_index is None
@@ -600,6 +613,72 @@ def test_focus_mode_setup_submit_prepares_controller_before_start(tmp_path: Path
     window.dialog.close()
 
 
+def test_focus_mode_participant_setup_ledger_restores_submitted_fields(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+
+    class FakeController:
+        def __init__(self, package_obj, *, capture_options=None, runner_metadata=None, **_kwargs):
+            self.package = package_obj
+            self.capture_options = capture_options
+            self.runner_metadata = dict(runner_metadata or {})
+            self.audio_engine = None
+
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+        controller_factory=FakeController,
+    )
+    window.dialog.show()
+    app.processEvents()
+
+    assert "setup not saved" in window.participant_status_summary_label.text()
+    window.participant_name_input.setText("Ledger Participant")
+    window.age_input.setText("34")
+    assert _set_combo_for_test(window.handedness_combo, "right")
+    assert _set_combo_for_test(window.gender_combo, "male")
+    window.include_name_lsl_checkbox.setChecked(True)
+
+    assert window._submit_participant_setup()
+
+    ledger_path = focus_app.participant_ledger_path(tmp_path)
+    ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+    entry = ledger["participants"]["P001"]
+    assert entry["participant_name"] == "Ledger Participant"
+    assert entry["age_years"] == "34"
+    assert entry["handedness"] == "right"
+    assert entry["gender"] == "male"
+    assert entry["include_name_in_lsl"] is True
+    assert "setup saved" in window.participant_status_summary_label.text()
+    window.dialog.close()
+
+    restored = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+        controller_factory=FakeController,
+    )
+    restored.dialog.show()
+    app.processEvents()
+
+    assert restored.participant_name_input.text() == "Ledger Participant"
+    assert restored.age_input.text() == "34"
+    assert restored.handedness_combo.currentData() == "right"
+    assert restored.gender_combo.currentData() == "male"
+    assert restored.include_name_lsl_checkbox.isChecked()
+    assert "P001: setup saved; data not collected" in restored.participant_status_summary_label.text()
+    restored.dialog.close()
+
+
 def test_focus_mode_output_volume_sliders_persist_and_apply_to_engine(tmp_path: Path, monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
@@ -669,6 +748,7 @@ def test_focus_mode_output_volume_sliders_persist_and_apply_to_engine(tmp_path: 
 def test_focus_mode_participant_dropdown_switches_loaded_package(tmp_path: Path, monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
+        from PySide6.QtTest import QTest
         from PySide6.QtWidgets import QApplication
         from peripersonal_space_toolkit import focus_app
     except Exception as exc:  # pragma: no cover - depends on optional GUI deps
@@ -727,8 +807,10 @@ def test_focus_mode_participant_dropdown_switches_loaded_package(tmp_path: Path,
     assert p002_index >= 0
     assert focus_app.DATA_COLLECTED_MARK in combo.itemText(p002_index)
     assert combo.itemData(p002_index, q["Qt"].ItemDataRole.ForegroundRole) is not None
+    assert not window.participant_decrement_button.isEnabled()
+    assert window.participant_increment_button.isEnabled()
 
-    combo.setCurrentIndex(p002_index)
+    QTest.mouseClick(window.participant_increment_button, q["Qt"].MouseButton.LeftButton)
     app.processEvents()
 
     assert prepared == ["P002"]
@@ -738,6 +820,9 @@ def test_focus_mode_participant_dropdown_switches_loaded_package(tmp_path: Path,
     assert "P002" in window.dialog.windowTitle()
     assert window.participant_name_input.text() == ""
     assert not window.include_name_lsl_checkbox.isChecked()
+    assert window.participant_decrement_button.isEnabled()
+    assert not window.participant_increment_button.isEnabled()
+    assert "P002: setup not saved; data collected" in window.participant_status_summary_label.text()
     assert window.progress_label.text() == "Waiting to start"
     window.dialog.close()
 

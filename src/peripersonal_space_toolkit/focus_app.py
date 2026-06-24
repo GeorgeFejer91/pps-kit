@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+from datetime import datetime
 from html import escape
 import json
 import math
@@ -69,7 +70,7 @@ from .focus_layout import (
     render_focus_style_sheet,
 )
 from .output_layout import _filesystem_path as _output_filesystem_path
-from .output_layout import output_root_for_metadata_path
+from .output_layout import output_project_state_dir, output_root_for_metadata_path
 from .focus_timeline import TactileRecenterController, TactileTimelineCue, TactileTimelineState
 from .runner_diary import (
     RUNNER_SETTINGS_SCHEMA,
@@ -135,6 +136,8 @@ DEFAULT_FOCUS_LAYOUT_PROFILE = render_focus_layout_profile(1120, 720)
 FOCUS_STYLE_SHEET = render_focus_style_sheet(DEFAULT_FOCUS_LAYOUT_PROFILE)
 STUDY5_PROFILE_ID = "study5_box_breathing_pps"
 DATA_COLLECTED_MARK = "[collected]"
+PARTICIPANT_LEDGER_FILENAME = "participant_ledger.v1.json"
+PARTICIPANT_LEDGER_SCHEMA = "pps-focus-participant-ledger.v1"
 TIMELINE_LABEL_WIDTH = 58
 TIMELINE_RIGHT_MARGIN = 12
 TIMELINE_ROW_NAMES = ("Resp", "Type", "Noise", "SOA", "Tactile", "Clicks")
@@ -675,6 +678,7 @@ def _require_qt() -> dict[str, Any]:
             QTableWidget,
             QTableWidgetItem,
             QTextEdit,
+            QToolButton,
             QVBoxLayout,
             QWidget,
         )
@@ -719,6 +723,7 @@ def _require_qt() -> dict[str, Any]:
         "QTableWidgetItem": QTableWidgetItem,
         "QTextEdit": QTextEdit,
         "QTimer": QTimer,
+        "QToolButton": QToolButton,
         "QUrl": QUrl,
         "QVBoxLayout": QVBoxLayout,
         "QWidget": QWidget,
@@ -3832,6 +3837,14 @@ def _combo(q: dict[str, Any], values: list[tuple[str, str]], *, current: str = "
     return combo
 
 
+def _set_combo_data(combo: Any, value: str) -> bool:
+    index = combo.findData(str(value or ""))
+    if index < 0:
+        return False
+    combo.setCurrentIndex(index)
+    return True
+
+
 def _qt_font_family(q: dict[str, Any]) -> str:
     try:
         families = set(q["QFontDatabase"].families())
@@ -4368,6 +4381,52 @@ def _read_json_dict(path: Any) -> dict[str, Any]:
     except Exception:
         return {}
     return data if isinstance(data, dict) else {}
+
+
+def participant_ledger_path(output_root: Path | str) -> Path:
+    return output_project_state_dir(output_root) / PARTICIPANT_LEDGER_FILENAME
+
+
+def load_participant_ledger(output_root: Path | str) -> dict[str, Any]:
+    path = participant_ledger_path(output_root)
+    try:
+        with open(_output_filesystem_path(path), "r", encoding="utf-8") as handle:
+            data = json.load(handle)
+    except Exception:
+        return {"schema": PARTICIPANT_LEDGER_SCHEMA, "participants": {}}
+    if not isinstance(data, dict):
+        return {"schema": PARTICIPANT_LEDGER_SCHEMA, "participants": {}}
+    participants = data.get("participants")
+    if not isinstance(participants, dict):
+        participants = {}
+    return {
+        **data,
+        "schema": PARTICIPANT_LEDGER_SCHEMA,
+        "participants": participants,
+    }
+
+
+def save_participant_ledger(output_root: Path | str, ledger: dict[str, Any]) -> Path:
+    path = participant_ledger_path(output_root)
+    data = dict(ledger or {})
+    participants = data.get("participants")
+    if not isinstance(participants, dict):
+        participants = {}
+    data["schema"] = PARTICIPANT_LEDGER_SCHEMA
+    data["participants"] = participants
+    data["updated_at"] = datetime.now().isoformat(timespec="seconds")
+    os.makedirs(_output_filesystem_path(path.parent), exist_ok=True)
+    with open(_output_filesystem_path(path), "w", encoding="utf-8") as handle:
+        handle.write(json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False) + "\n")
+    return path
+
+
+def participant_ledger_entry(output_root: Path | str, participant_id: str) -> dict[str, Any]:
+    participant = str(participant_id or "").strip()
+    if not participant:
+        return {}
+    entry = load_participant_ledger(output_root).get("participants", {}).get(participant)
+    return dict(entry) if isinstance(entry, dict) else {}
 
 
 def _read_latest_output_diary_context(path: Any) -> dict[str, Any]:
@@ -6007,6 +6066,7 @@ class FocusModeWindow:
         self._prewarm_thread: threading.Thread | None = None
         self._prewarm_started = False
         self._participant_combo_updating = False
+        self.participant_statuses: dict[str, dict[str, Any]] = {}
         self._run_active = False
         self._run_paused = False
         self._timeline_perf_anchor: float | None = None
@@ -6285,12 +6345,39 @@ class FocusModeWindow:
         data_layout.addWidget(self.data_columns_widget)
 
         data_logging_layout.addWidget(_subtitle(q, "Participant Setup"))
+        self.participant_selector_widget = q["QWidget"]()
+        self.participant_selector_widget.setObjectName("runnerParticipantStepper")
+        participant_selector_layout = q["QHBoxLayout"](self.participant_selector_widget)
+        participant_selector_layout.setContentsMargins(0, 0, 0, 0)
+        participant_selector_layout.setSpacing(6)
         self.participant_code_combo = q["QComboBox"]()
         self.participant_code_combo.setObjectName("runnerParticipantCombo")
         self.participant_code_combo.setEditable(False)
         self.participant_code_combo.setToolTip("Select a prepared participant profile from the run setup.")
+        participant_selector_layout.addWidget(self.participant_code_combo, 1)
+        participant_arrow_column = q["QWidget"]()
+        participant_arrow_layout = q["QVBoxLayout"](participant_arrow_column)
+        participant_arrow_layout.setContentsMargins(0, 0, 0, 0)
+        participant_arrow_layout.setSpacing(2)
+        self.participant_increment_button = q["QToolButton"]()
+        self.participant_increment_button.setObjectName("participantIncrementButton")
+        self.participant_increment_button.setArrowType(q["Qt"].ArrowType.UpArrow)
+        self.participant_increment_button.setToolTip("Next participant")
+        self.participant_decrement_button = q["QToolButton"]()
+        self.participant_decrement_button.setObjectName("participantDecrementButton")
+        self.participant_decrement_button.setArrowType(q["Qt"].ArrowType.DownArrow)
+        self.participant_decrement_button.setToolTip("Previous participant")
+        for button in (self.participant_increment_button, self.participant_decrement_button):
+            button.setAutoRaise(True)
+            button.setMinimumWidth(max(24, profile.input_min_height - 6))
+            button.setMinimumHeight(max(14, profile.input_min_height // 2 - 2))
+        participant_arrow_layout.addWidget(self.participant_increment_button)
+        participant_arrow_layout.addWidget(self.participant_decrement_button)
+        participant_selector_layout.addWidget(participant_arrow_column)
         self._populate_participant_code_combo(self.package.participant_id)
         self.participant_code_combo.currentIndexChanged.connect(self._participant_selection_changed)
+        self.participant_increment_button.clicked.connect(lambda _checked=False: self._step_participant_selection(1))
+        self.participant_decrement_button.clicked.connect(lambda _checked=False: self._step_participant_selection(-1))
         self.participant_name_input = q["QLineEdit"]("")
         self.participant_name_input.setPlaceholderText("Participant name")
         self.include_name_lsl_checkbox = q["QCheckBox"]("Include name in LSL/session markers (opt-in)")
@@ -6334,13 +6421,18 @@ class FocusModeWindow:
             setup_fields.addWidget(key, row, 0)
             setup_fields.addWidget(widget, row, 1)
 
-        _add_setup_field(0, "Participant", self.participant_code_combo)
+        _add_setup_field(0, "Participant", self.participant_selector_widget)
         _add_setup_field(1, "Name", self.participant_name_input)
         _add_setup_field(2, "Age", self.age_input)
         _add_setup_field(3, "Handedness", self.handedness_combo)
         _add_setup_field(4, "Gender", self.gender_combo)
         setup_fields.setColumnStretch(1, 1)
         data_logging_layout.addLayout(setup_fields)
+        self.participant_status_summary_label = q["QLabel"]("")
+        self.participant_status_summary_label.setObjectName("participantLedgerSummary")
+        self.participant_status_summary_label.setWordWrap(True)
+        self.participant_status_summary_label.setMinimumHeight(max(18, profile.input_min_height - 4))
+        data_logging_layout.addWidget(self.participant_status_summary_label)
         data_logging_layout.addWidget(self.include_name_lsl_checkbox)
         self.setup_submit_button = q["QPushButton"]("Submit setup")
         self.setup_submit_button.setObjectName("participantSetupSubmitButton")
@@ -6351,6 +6443,9 @@ class FocusModeWindow:
         self._pre_run_controls.extend(
             [
                 self.participant_code_combo,
+                self.participant_selector_widget,
+                self.participant_increment_button,
+                self.participant_decrement_button,
                 self.participant_name_input,
                 self.include_name_lsl_checkbox,
                 self.age_input,
@@ -6588,6 +6683,8 @@ class FocusModeWindow:
         self.dialog.finished.connect(self._handle_dialog_finished)
         self._refresh_run_plan(select_default=True)
         self._install_operator_action_shortcuts()
+        self._apply_participant_ledger_to_fields(self.package.participant_id)
+        self._refresh_participant_ledger_summary()
 
     def _timeline_display_state(self) -> TactileTimelineState:
         if self.preview_display_block_index is not None:
@@ -7179,11 +7276,125 @@ class FocusModeWindow:
         self._refresh_topup_draft_widget()
         self.tactile_timeline_widget.update()
 
+    def _step_participant_selection(self, delta: int) -> None:
+        if not hasattr(self, "participant_code_combo"):
+            return
+        combo = self.participant_code_combo
+        count = combo.count()
+        if count <= 0:
+            return
+        current_index = combo.currentIndex()
+        next_index = max(0, min(count - 1, current_index + int(delta or 0)))
+        if next_index != current_index:
+            combo.setCurrentIndex(next_index)
+        self._refresh_participant_step_buttons()
+
+    def _refresh_participant_step_buttons(self) -> None:
+        if not hasattr(self, "participant_code_combo"):
+            return
+        count = self.participant_code_combo.count()
+        index = self.participant_code_combo.currentIndex()
+        can_change = (
+            count > 1
+            and not self.demographics_submitted
+            and not self._run_active
+            and self.controller is None
+            and not (self.thread is not None and self.thread.is_alive())
+        )
+        if hasattr(self, "participant_decrement_button"):
+            self.participant_decrement_button.setEnabled(can_change and index > 0)
+        if hasattr(self, "participant_increment_button"):
+            self.participant_increment_button.setEnabled(can_change and 0 <= index < count - 1)
+
+    def _participant_ledger_entry_for(self, participant_id: str) -> dict[str, Any]:
+        entry = participant_ledger_entry(self.output_root, participant_id)
+        if not entry:
+            return {}
+        current_run_setup = str(getattr(self.package, "source_run_setup_manifest_path", "") or "")
+        entry_run_setup = str(entry.get("run_setup_manifest_path") or "")
+        if current_run_setup and entry_run_setup:
+            try:
+                if Path(current_run_setup).resolve() != Path(entry_run_setup).resolve():
+                    return {}
+            except Exception:
+                if current_run_setup != entry_run_setup:
+                    return {}
+        return entry
+
+    def _apply_participant_ledger_to_fields(self, participant_id: str | None = None) -> bool:
+        if not hasattr(self, "participant_name_input"):
+            return False
+        participant = str(participant_id or self._selected_participant_code() or self.package.participant_id or "").strip()
+        entry = self._participant_ledger_entry_for(participant)
+        if not entry:
+            return False
+        self.participant_name_input.setText(str(entry.get("participant_name") or ""))
+        self.age_input.setText(str(entry.get("age_years") or ""))
+        _set_combo_data(self.handedness_combo, str(entry.get("handedness") or ""))
+        _set_combo_data(self.gender_combo, str(entry.get("gender") or ""))
+        self.include_name_lsl_checkbox.setChecked(bool(entry.get("include_name_in_lsl", False)))
+        return True
+
+    def _save_participant_ledger_entry(self, runner_metadata: dict[str, Any]) -> Path:
+        participant = str(runner_metadata.get("participant_code") or self.package.participant_id or "").strip()
+        if not participant:
+            raise ValueError("Participant code is required for the setup ledger.")
+        ledger = load_participant_ledger(self.output_root)
+        participants = dict(ledger.get("participants") or {})
+        now = datetime.now().isoformat(timespec="seconds")
+        participants[participant] = {
+            "participant_id": participant,
+            "participant_name": str(runner_metadata.get("participant_name") or ""),
+            "age_years": str(runner_metadata.get("age_years") or ""),
+            "handedness": str(runner_metadata.get("handedness") or ""),
+            "gender": str(runner_metadata.get("gender") or ""),
+            "include_name_in_lsl": bool(runner_metadata.get("include_name_in_lsl")),
+            "submitted_at": now,
+            "updated_at": now,
+            "session_id": str(getattr(self.package, "session_id", "") or ""),
+            "session_manifest_path": str(getattr(self.package, "manifest_path", "") or ""),
+            "run_setup_manifest_path": str(getattr(self.package, "source_run_setup_manifest_path", "") or ""),
+        }
+        ledger["participants"] = participants
+        return save_participant_ledger(self.output_root, ledger)
+
+    def _participant_data_summary(self, status: dict[str, Any]) -> str:
+        collection_state = str(status.get("data_collection_status") or "").strip()
+        if bool(status.get("data_collected")) or collection_state == "collected":
+            return "data collected"
+        if collection_state == "incomplete":
+            return "incomplete data exists"
+        return "data not collected"
+
+    def _refresh_participant_ledger_summary(self) -> None:
+        if not hasattr(self, "participant_status_summary_label"):
+            return
+        participants = _package_participant_ids(self.package)
+        statuses = self.participant_statuses or _package_participant_statuses(self.package, participants)
+        selected = self._selected_participant_code() or str(getattr(self.package, "participant_id", "") or "").strip()
+        status = statuses.get(selected, {})
+        setup_text = "setup saved" if self._participant_ledger_entry_for(selected) else "setup not saved"
+        data_text = self._participant_data_summary(status)
+        collected_others = [
+            participant
+            for participant in participants
+            if participant != selected and bool(statuses.get(participant, {}).get("data_collected"))
+        ]
+        if collected_others:
+            preview = ", ".join(collected_others[:4])
+            if len(collected_others) > 4:
+                preview = f"{preview}, +{len(collected_others) - 4}"
+            other_text = f"Other completed: {preview}."
+        else:
+            other_text = "No other completed data."
+        self.participant_status_summary_label.setText(f"{selected}: {setup_text}; {data_text}. {other_text}")
+
     def _populate_participant_code_combo(self, preferred: str = "") -> None:
         if not hasattr(self, "participant_code_combo"):
             return
         participants = _package_participant_ids(self.package)
         statuses = _package_participant_statuses(self.package, participants)
+        self.participant_statuses = statuses
         current = str(preferred or getattr(self.package, "participant_id", "") or "").strip()
         self._participant_combo_updating = True
         try:
@@ -7220,6 +7431,8 @@ class FocusModeWindow:
         finally:
             self.participant_code_combo.blockSignals(False)
             self._participant_combo_updating = False
+        self._refresh_participant_step_buttons()
+        self._refresh_participant_ledger_summary()
 
     def _selected_participant_code(self) -> str:
         if hasattr(self, "participant_code_combo"):
@@ -7234,6 +7447,8 @@ class FocusModeWindow:
         selected = self._selected_participant_code()
         current = str(getattr(self.package, "participant_id", "") or "").strip()
         if not selected or selected == current:
+            self._refresh_participant_step_buttons()
+            self._refresh_participant_ledger_summary()
             return
         if self._run_active or self.controller is not None or (self.thread is not None and self.thread.is_alive()):
             if hasattr(self, "event_label"):
@@ -7362,6 +7577,8 @@ class FocusModeWindow:
             self.wired_loopback_checkbox.setText(_wired_loopback_checkbox_text())
         self._refresh_run_plan(select_default=True)
         self._update_tactile_timeline_display()
+        self._apply_participant_ledger_to_fields(self.package.participant_id)
+        self._refresh_participant_ledger_summary()
 
     def _topup_slots_enabled_for_plan(self) -> bool:
         if hasattr(self, "topup_checkbox"):
@@ -7677,10 +7894,21 @@ class FocusModeWindow:
         self.demographics_submitted = True
         self._apply_output_volumes_to_engine(getattr(self.controller, "audio_engine", None))
         self._freeze_pre_run_controls()
+        ledger_path_text = ""
+        ledger_error = ""
+        try:
+            ledger_path_text = str(self._save_participant_ledger_entry(runner_metadata))
+        except Exception as exc:
+            ledger_error = str(exc)
+        self._refresh_participant_step_buttons()
+        self._refresh_participant_ledger_summary()
         self.start_button.setEnabled(True)
         self.run_state_chip.setText("LSL Ready" if bool(self.capture_options.enable_lsl) else "Ready")
         lsl_message = str(getattr(lsl_status, "message", "") or "")
-        self.event_label.setText(lsl_message or "Participant setup submitted")
+        event_message = lsl_message or "Participant setup submitted"
+        if ledger_error:
+            event_message = f"{event_message}; participant ledger not saved: {ledger_error}"
+        self.event_label.setText(event_message)
         _append_output_diary_event(
             "participant_setup_submitted",
             package=self.package,
@@ -7691,6 +7919,9 @@ class FocusModeWindow:
                 "lsl_message": lsl_message,
                 "topup_enabled": self.enable_missed_trial_topup,
                 "playback_output_levels": self._output_channel_volume_payload(),
+                "participant_ledger_path": ledger_path_text,
+                "participant_ledger_saved": bool(ledger_path_text) and not ledger_error,
+                "participant_ledger_error": ledger_error,
                 "participant_metadata_fields": sorted(key for key, value in runner_metadata.items() if str(value or "").strip()),
             },
             create=True,
