@@ -478,9 +478,13 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert window.output_12_volume_slider.objectName() == "output12VolumeSlider"
     assert window.output_34_volume_slider.objectName() == "output34VolumeSlider"
     assert window.output_12_volume_slider.minimum() == 0
-    assert window.output_12_volume_slider.maximum() == 100
+    assert window.output_12_volume_slider.maximum() == 100_000
     assert window.output_34_volume_slider.minimum() == 0
-    assert window.output_34_volume_slider.maximum() == 100
+    assert window.output_34_volume_slider.maximum() == 100_000
+    assert window.output_12_volume_percent_box.objectName() == "output12VolumePercentBox"
+    assert window.output_34_volume_percent_box.objectName() == "output34VolumePercentBox"
+    assert window.output_34_volume_percent_box.decimals() == 3
+    assert window.output_34_volume_percent_box.singleStep() == pytest.approx(0.001)
     assert window.test_audio_button.objectName() == "testAudioOutputButton"
     assert window.test_tactile_button.objectName() == "testTactileOutputButton"
     assert window.test_audio_button.isEnabled()
@@ -514,10 +518,13 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert output_levels_rect["y"] >= response_rect["bottom"]
     assert output_levels_rect["x"] >= response_cell_rect["x"]
     assert output_levels_rect["right"] <= response_cell_rect["right"]
-    assert output_rect["y"] >= output_levels_rect["bottom"]
-    assert output_rect["y"] >= response_rect["bottom"]
-    assert output_rect["x"] >= response_cell_rect["x"]
-    assert output_rect["right"] <= response_cell_rect["right"]
+    if window.output_panel.isVisible():
+        assert output_rect["y"] >= output_levels_rect["bottom"]
+        assert output_rect["y"] >= response_rect["bottom"]
+        assert output_rect["x"] >= response_cell_rect["x"]
+        assert output_rect["right"] <= response_cell_rect["right"]
+    else:
+        assert window.layout_profile.screen_class == "constrained"
     assert processing_rect["width"] >= workspace_rect["width"] - 8
 
     screenshot = tmp_path / "focus_mode_shell.png"
@@ -689,6 +696,7 @@ def test_focus_mode_participant_setup_ledger_restores_submitted_fields(tmp_path:
 def test_focus_mode_output_volume_sliders_persist_and_apply_to_engine(tmp_path: Path, monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
+        from PySide6.QtTest import QTest
         from PySide6.QtWidgets import QApplication
         from peripersonal_space_toolkit import focus_app
     except Exception as exc:  # pragma: no cover - depends on optional GUI deps
@@ -696,7 +704,7 @@ def test_focus_mode_output_volume_sliders_persist_and_apply_to_engine(tmp_path: 
 
     state_root = tmp_path / "dashboard_state"
     monkeypatch.setattr(focus_app, "DEFAULT_DASHBOARD_STATE_ROOT", state_root)
-    focus_app._persist_output_channel_volumes(72, 44, state_root=state_root)
+    focus_app._persist_output_channel_volumes(72, 0.125, state_root=state_root)
 
     class FakeEngine:
         def __init__(self) -> None:
@@ -725,30 +733,38 @@ def test_focus_mode_output_volume_sliders_persist_and_apply_to_engine(tmp_path: 
     window.dialog.show()
     app.processEvents()
 
-    assert window.output_12_volume_slider.value() == 72
-    assert window.output_34_volume_slider.value() == 44
+    assert window.output_12_volume_slider.value() == 72_000
+    assert window.output_34_volume_slider.value() == 125
+    assert window.output_12_volume_percent_box.value() == pytest.approx(72)
+    assert window.output_34_volume_percent_box.value() == pytest.approx(0.125)
     _fill_required_setup(window)
     assert window._submit_participant_setup()
     assert window.controller is not None
     engine = window.controller.audio_engine
     assert engine.audio_volume == pytest.approx(0.72)
-    assert engine.tactile_volume == pytest.approx(0.44)
+    assert engine.tactile_volume == pytest.approx(0.00125)
     assert window.output_12_volume_slider.isEnabled()
     assert window.output_34_volume_slider.isEnabled()
     assert window.controller.runner_metadata["playback_output_levels"]["output_1_2_percent"] == 72
-    assert window.controller.runner_metadata["playback_output_levels"]["output_3_4_percent"] == 44
+    assert window.controller.runner_metadata["playback_output_levels"]["output_3_4_percent"] == pytest.approx(0.125)
 
-    window.output_12_volume_slider.setValue(35)
-    window.output_34_volume_slider.setValue(20)
+    window.output_12_volume_slider.setValue(35_000)
+    window.output_34_volume_percent_box.setFocus()
+    tactile_volume_edit = window.output_34_volume_percent_box.lineEdit()
+    tactile_volume_edit.selectAll()
+    QTest.keyClicks(tactile_volume_edit, "0.005")
+    QTest.keyClick(tactile_volume_edit, q["Qt"].Key.Key_Enter)
     app.processEvents()
 
     assert engine.audio_volume == pytest.approx(0.35)
-    assert engine.tactile_volume == pytest.approx(0.20)
+    assert engine.tactile_volume == pytest.approx(0.00005)
+    assert window.thread is None
+    assert window.output_34_volume_slider.value() == 5
     settings = json.loads((state_root / "focus_runner_settings.v1.json").read_text(encoding="utf-8"))
     assert settings["output_1_2_volume_percent"] == 35
-    assert settings["output_3_4_volume_percent"] == 20
+    assert settings["output_3_4_volume_percent"] == pytest.approx(0.005)
     assert settings["output_channel_volumes"]["output_1_2_linear_gain"] == pytest.approx(0.35)
-    assert settings["output_channel_volumes"]["output_3_4_linear_gain"] == pytest.approx(0.20)
+    assert settings["output_channel_volumes"]["output_3_4_linear_gain"] == pytest.approx(0.00005)
     window.dialog.close()
 
 
@@ -794,8 +810,8 @@ def test_focus_mode_output_test_buttons_use_standard_assets_and_current_gains(tm
     window.dialog.show()
     app.processEvents()
 
-    window.output_12_volume_slider.setValue(41)
-    window.output_34_volume_slider.setValue(23)
+    window.output_12_volume_percent_box.setValue(41)
+    window.output_34_volume_percent_box.setValue(23)
     QTest.mouseClick(window.test_audio_button, q["Qt"].MouseButton.LeftButton)
     app.processEvents()
     window._drain()
@@ -1271,13 +1287,12 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
         window.stop_button,
         window.close_button,
         window.processing_panel,
-        window.output_panel,
+        window.output_levels_panel,
         window.part_selector_widget,
         window.part_buttons["1"],
         window.part_buttons["2"],
         window.block_plan_widget,
         window.instruction_legend_widget,
-        window.output_summary,
         window.tactile_timeline_widget,
     ]
     if window.topup_draft_widget.isVisible():
@@ -1298,9 +1313,12 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     run_rect = _widget_rect(window.run_splitter, window.dialog)
     processing_rect = _widget_rect(window.processing_panel, window.dialog)
     workspace_rect = _widget_rect(window.workspace_splitter, window.dialog)
-    assert output_rect["y"] >= response_rect["bottom"]
-    assert output_rect["x"] >= response_cell_rect["x"]
-    assert output_rect["right"] <= response_cell_rect["right"]
+    if window.output_panel.isVisible():
+        assert output_rect["y"] >= response_rect["bottom"]
+        assert output_rect["x"] >= response_cell_rect["x"]
+        assert output_rect["right"] <= response_cell_rect["right"]
+    else:
+        assert window.layout_profile.screen_class == "constrained"
     assert processing_rect["y"] >= run_rect["bottom"]
     assert processing_rect["width"] >= workspace_rect["width"] - 8
     assert not window.layout_validation_failures()

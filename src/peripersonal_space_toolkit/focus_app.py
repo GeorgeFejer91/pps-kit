@@ -391,14 +391,33 @@ def _default_focus_capture_options() -> SessionCaptureOptions:
     )
 
 
-def _coerce_volume_percent(value: Any, *, default: int = 100) -> int:
+OUTPUT_VOLUME_SLIDER_SCALE = 1000
+OUTPUT_VOLUME_PERCENT_DECIMALS = 3
+OUTPUT_VOLUME_PERCENT_STEP = 0.001
+
+
+def _coerce_volume_percent(value: Any, *, default: float = 100.0) -> float:
     try:
         number = float(value)
     except (TypeError, ValueError):
         number = float(default)
     if not math.isfinite(number):
         number = float(default)
-    return int(max(0, min(100, round(number))))
+    return round(max(0.0, min(100.0, number)), OUTPUT_VOLUME_PERCENT_DECIMALS)
+
+
+def _volume_percent_to_slider_value(value: Any) -> int:
+    return int(round(_coerce_volume_percent(value) * OUTPUT_VOLUME_SLIDER_SCALE))
+
+
+def _slider_value_to_volume_percent(value: Any) -> float:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        number = 100.0 * OUTPUT_VOLUME_SLIDER_SCALE
+    if not math.isfinite(number):
+        number = 100.0 * OUTPUT_VOLUME_SLIDER_SCALE
+    return _coerce_volume_percent(number / OUTPUT_VOLUME_SLIDER_SCALE)
 
 
 def _output_volume_gain(percent: Any) -> float:
@@ -417,7 +436,7 @@ def _output_channel_volume_payload(output_12_percent: Any, output_34_percent: An
     }
 
 
-def _load_output_channel_volume_percentages(state_root: Path | None = None) -> tuple[int, int]:
+def _load_output_channel_volume_percentages(state_root: Path | None = None) -> tuple[float, float]:
     settings = load_runner_settings(DEFAULT_DASHBOARD_STATE_ROOT if state_root is None else state_root)
     grouped = settings.get(OUTPUT_CHANNEL_VOLUME_SETTINGS_KEY)
     grouped = grouped if isinstance(grouped, dict) else {}
@@ -655,13 +674,14 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 def _require_qt() -> dict[str, Any]:
     try:
-        from PySide6.QtCore import QPoint, QTimer, Qt, QUrl, Signal
+        from PySide6.QtCore import QEvent, QPoint, QTimer, Qt, QUrl, Signal
         from PySide6.QtGui import QBrush, QColor, QCursor, QDesktopServices, QFont, QFontDatabase, QFontMetrics, QIcon, QKeySequence, QPainter, QPainterPath, QPen, QShortcut
         from PySide6.QtWidgets import (
             QApplication,
             QCheckBox,
             QComboBox,
             QDialog,
+            QDoubleSpinBox,
             QFileDialog,
             QFrame,
             QGridLayout,
@@ -695,6 +715,8 @@ def _require_qt() -> dict[str, Any]:
         "QCursor": QCursor,
         "QDesktopServices": QDesktopServices,
         "QDialog": QDialog,
+        "QDoubleSpinBox": QDoubleSpinBox,
+        "QEvent": QEvent,
         "QFileDialog": QFileDialog,
         "QFrame": QFrame,
         "QFont": QFont,
@@ -1899,11 +1921,46 @@ def _output_volume_slider_row(
     q: dict[str, Any],
     *,
     label: str,
-    value: int,
+    value: float,
     object_name: str,
     tooltip: str,
-    on_change: Callable[[int], None],
+    on_change: Callable[[float], None],
 ) -> tuple[Any, Any, Any]:
+    class VolumePercentSpinBox(q["QDoubleSpinBox"]):
+        def __init__(self) -> None:
+            super().__init__()
+            self.lineEdit().installEventFilter(self)
+
+        def _commit_text_value(self) -> None:
+            text = self.lineEdit().text().replace("%", "").strip().replace(",", ".")
+            try:
+                value = float(text)
+            except ValueError:
+                self.interpretText()
+                return
+            if math.isfinite(value):
+                self.setValue(_coerce_volume_percent(value))
+            else:
+                self.interpretText()
+
+        def eventFilter(self, watched: Any, event: Any) -> bool:  # noqa: N802 - Qt override
+            if (
+                watched is self.lineEdit()
+                and event.type() == q["QEvent"].Type.KeyPress
+                and event.key() in (q["Qt"].Key.Key_Return, q["Qt"].Key.Key_Enter)
+            ):
+                self._commit_text_value()
+                event.accept()
+                return True
+            return super().eventFilter(watched, event)
+
+        def keyPressEvent(self, event: Any) -> None:  # noqa: N802 - Qt override
+            if event.key() in (q["Qt"].Key.Key_Return, q["Qt"].Key.Key_Enter):
+                self._commit_text_value()
+                event.accept()
+                return
+            super().keyPressEvent(event)
+
     row = q["QWidget"]()
     layout = q["QHBoxLayout"](row)
     layout.setContentsMargins(0, 0, 0, 0)
@@ -1912,21 +1969,45 @@ def _output_volume_slider_row(
     key.setObjectName("metricLabel")
     slider = q["QSlider"](q["Qt"].Orientation.Horizontal)
     slider.setObjectName(object_name)
-    slider.setRange(0, 100)
+    slider.setRange(0, 100 * OUTPUT_VOLUME_SLIDER_SCALE)
     slider.setSingleStep(1)
-    slider.setPageStep(5)
-    slider.setTickInterval(10)
+    slider.setPageStep(10)
+    slider.setTickInterval(100)
     slider.setToolTip(tooltip)
-    slider.setValue(_coerce_volume_percent(value))
+    slider.setValue(_volume_percent_to_slider_value(value))
     slider.setMinimumWidth(120)
-    percent = q["QLabel"](f"{_coerce_volume_percent(value)}%")
-    percent.setObjectName("metricValue")
-    percent.setMinimumWidth(42)
+    percent = VolumePercentSpinBox()
+    percent.setObjectName(object_name.replace("Slider", "PercentBox"))
+    percent.setRange(0.0, 100.0)
+    percent.setDecimals(OUTPUT_VOLUME_PERCENT_DECIMALS)
+    percent.setSingleStep(OUTPUT_VOLUME_PERCENT_STEP)
+    percent.setSuffix("%")
+    percent.setKeyboardTracking(False)
+    percent.setValue(_coerce_volume_percent(value))
+    percent.setMinimumWidth(78)
+    percent.setMaximumWidth(96)
     percent.setToolTip(tooltip)
     layout.addWidget(key)
     layout.addWidget(slider, 1)
     layout.addWidget(percent)
-    slider.valueChanged.connect(lambda changed: on_change(int(changed)))
+
+    def _slider_changed(changed: int) -> None:
+        percent_value = _slider_value_to_volume_percent(changed)
+        previous = percent.blockSignals(True)
+        percent.setValue(percent_value)
+        percent.blockSignals(previous)
+        on_change(percent_value)
+
+    def _percent_changed(changed: float) -> None:
+        percent_value = _coerce_volume_percent(changed)
+        slider_value = _volume_percent_to_slider_value(percent_value)
+        previous = slider.blockSignals(True)
+        slider.setValue(slider_value)
+        slider.blockSignals(previous)
+        on_change(percent_value)
+
+    slider.valueChanged.connect(_slider_changed)
+    percent.valueChanged.connect(_percent_changed)
     return row, slider, percent
 
 
@@ -6214,6 +6295,9 @@ class FocusModeWindow:
         self.close_button = q["QPushButton"]("Close")
         self.pause_button.setEnabled(False)
         self.stop_button.setEnabled(False)
+        for button in (self.start_button, self.pause_button, self.stop_button, self.close_button):
+            button.setAutoDefault(False)
+            button.setDefault(False)
         self.start_button.clicked.connect(self.start)
         self.pause_button.clicked.connect(self._toggle_pause)
         self.stop_button.clicked.connect(self._stop)
@@ -6242,7 +6326,7 @@ class FocusModeWindow:
         (
             output_12_row,
             self.output_12_volume_slider,
-            self.output_12_volume_label,
+            self.output_12_volume_percent_box,
         ) = _output_volume_slider_row(
             q,
             label="Output 1/2",
@@ -6254,7 +6338,7 @@ class FocusModeWindow:
         (
             output_34_row,
             self.output_34_volume_slider,
-            self.output_34_volume_label,
+            self.output_34_volume_percent_box,
         ) = _output_volume_slider_row(
             q,
             label="Output 3/4",
@@ -6301,13 +6385,14 @@ class FocusModeWindow:
         self.output_summary.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Expanding)
         self.output_summary.setPlainText("Session outputs will appear here after the run.")
         output_layout.addWidget(self.output_summary)
+        show_output_summary_panel = profile.screen_class != "constrained"
+        output_panel.setVisible(show_output_summary_panel)
         response_cell_layout.addWidget(output_panel)
-        response_stack_height = (
-            profile.response_panel_side
-            + output_levels_panel_min_height
-            + output_panel_min_height
-            + (max(6, profile.root_spacing) * 2)
-        )
+        response_stack_parts = [profile.response_panel_side, output_levels_panel_min_height]
+        if show_output_summary_panel:
+            response_stack_parts.append(output_panel_min_height)
+        response_stack_height = sum(response_stack_parts) + (max(6, profile.root_spacing) * max(0, len(response_stack_parts) - 1))
+        self.response_stack_height = response_stack_height
         response_cell.setMinimumHeight(response_stack_height)
         response_cell_layout.addStretch(1)
         self.run_splitter.addWidget(response_cell)
@@ -7689,16 +7774,28 @@ class FocusModeWindow:
             setattr(engine, "audio_volume", audio_gain)
         setattr(engine, "tactile_volume", tactile_gain)
 
-    def _set_output_volume(self, target: str, value: int) -> None:
+    def _set_output_volume(self, target: str, value: float) -> None:
         percent = _coerce_volume_percent(value)
         if target == "output_1_2":
             self.output_12_volume_percent = percent
-            if hasattr(self, "output_12_volume_label"):
-                self.output_12_volume_label.setText(f"{percent}%")
+            if hasattr(self, "output_12_volume_slider"):
+                previous = self.output_12_volume_slider.blockSignals(True)
+                self.output_12_volume_slider.setValue(_volume_percent_to_slider_value(percent))
+                self.output_12_volume_slider.blockSignals(previous)
+            if hasattr(self, "output_12_volume_percent_box"):
+                previous = self.output_12_volume_percent_box.blockSignals(True)
+                self.output_12_volume_percent_box.setValue(percent)
+                self.output_12_volume_percent_box.blockSignals(previous)
         elif target == "output_3_4":
             self.output_34_volume_percent = percent
-            if hasattr(self, "output_34_volume_label"):
-                self.output_34_volume_label.setText(f"{percent}%")
+            if hasattr(self, "output_34_volume_slider"):
+                previous = self.output_34_volume_slider.blockSignals(True)
+                self.output_34_volume_slider.setValue(_volume_percent_to_slider_value(percent))
+                self.output_34_volume_slider.blockSignals(previous)
+            if hasattr(self, "output_34_volume_percent_box"):
+                previous = self.output_34_volume_percent_box.blockSignals(True)
+                self.output_34_volume_percent_box.setValue(percent)
+                self.output_34_volume_percent_box.blockSignals(previous)
         self._apply_output_volumes_to_engine(self._owned_audio_engine)
         controller_engine = getattr(self.controller, "audio_engine", None) if self.controller is not None else None
         if controller_engine is not self._owned_audio_engine:
@@ -8283,7 +8380,8 @@ class FocusModeWindow:
         output = widgets.get("output_panel", {})
         if response and output_levels and output_levels.get("y", 0) < response.get("bottom", 0):
             failures.append("output_levels_panel is not positioned under response_panel")
-        if output_levels and output and output.get("y", 0) < output_levels.get("bottom", 0):
+        output_panel_visible = bool(getattr(getattr(self, "output_panel", None), "isVisible", lambda: False)())
+        if output_panel_visible and output_levels and output and output.get("y", 0) < output_levels.get("bottom", 0):
             failures.append("output_panel is not positioned under output_levels_panel")
         data_column = widgets.get("data_logging_column", {})
         settings_column = widgets.get("experiment_settings_column", {})
@@ -8311,6 +8409,27 @@ class FocusModeWindow:
             failures.append(f"missing installed keyboard shortcuts: {missing_shortcuts}")
         return failures
 
+    def _focused_output_volume_percent_box(self) -> Any | None:
+        focus = self.q["QApplication"].focusWidget()
+        if focus is None:
+            return None
+        for name in ("output_12_volume_percent_box", "output_34_volume_percent_box"):
+            box = getattr(self, name, None)
+            if box is not None and (focus is box or box.isAncestorOf(focus)):
+                return box
+        return None
+
+    def _commit_focused_output_volume_percent_box(self) -> bool:
+        box = self._focused_output_volume_percent_box()
+        if box is None:
+            return False
+        commit = getattr(box, "_commit_text_value", None)
+        if callable(commit):
+            commit()
+        else:
+            box.interpretText()
+        return True
+
     def _keyboard_focus_is_pre_run_input(self) -> bool:
         focus = self.q["QApplication"].focusWidget()
         if focus is None:
@@ -8320,11 +8439,14 @@ class FocusModeWindow:
             self.q["QTextEdit"],
             self.q["QComboBox"],
             self.q["QCheckBox"],
+            self.q["QDoubleSpinBox"],
             self.q["QSlider"],
         )
         return isinstance(focus, input_types)
 
     def _handle_primary_action_shortcut(self) -> None:
+        if self._commit_focused_output_volume_percent_box():
+            return
         if self.pending_instruction_request is not None:
             if self._part2_start_gate_pending():
                 self.event_label.setText("Use Start Part 2 to continue to Part 2.")
