@@ -425,6 +425,9 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
         assert "Data Logging / Experiment Settings" in joined
     assert "Data Logging" in joined
     assert "Experiment Control" in joined
+    assert "Output Levels" in joined
+    assert "Output 1/2" in joined
+    assert "Output 3/4" in joined
     assert "Part 1" in joined
     assert "Part 2" in joined
     if window.layout_profile.screen_class != "constrained":
@@ -456,6 +459,12 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert window.setup_submit_button.objectName() == "participantSetupSubmitButton"
     assert window.setup_submit_button.isEnabled()
     assert not window.start_button.isEnabled()
+    assert window.output_12_volume_slider.objectName() == "output12VolumeSlider"
+    assert window.output_34_volume_slider.objectName() == "output34VolumeSlider"
+    assert window.output_12_volume_slider.minimum() == 0
+    assert window.output_12_volume_slider.maximum() == 100
+    assert window.output_34_volume_slider.minimum() == 0
+    assert window.output_34_volume_slider.maximum() == 100
     assert window.backup_recording_checkbox.objectName() == "failSafeRecordingCheckbox"
     assert window.wired_loopback_checkbox.objectName() == "wiredLoopbackCheckbox"
     assert window.external_labrecorder_checkbox.objectName() == "externalLabRecorderCheckbox"
@@ -477,10 +486,15 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert window.output_panel is not window.processing_panel
     assert window.processing_splitter is None
     response_rect = _widget_rect(window.response_panel, window.dialog)
+    output_levels_rect = _widget_rect(window.output_levels_panel, window.dialog)
     output_rect = _widget_rect(window.output_panel, window.dialog)
     response_cell_rect = _widget_rect(window.response_cell, window.dialog)
     processing_rect = _widget_rect(window.processing_panel, window.dialog)
     workspace_rect = _widget_rect(window.workspace_splitter, window.dialog)
+    assert output_levels_rect["y"] >= response_rect["bottom"]
+    assert output_levels_rect["x"] >= response_cell_rect["x"]
+    assert output_levels_rect["right"] <= response_cell_rect["right"]
+    assert output_rect["y"] >= output_levels_rect["bottom"]
     assert output_rect["y"] >= response_rect["bottom"]
     assert output_rect["x"] >= response_cell_rect["x"]
     assert output_rect["right"] <= response_cell_rect["right"]
@@ -583,6 +597,72 @@ def test_focus_mode_setup_submit_prepares_controller_before_start(tmp_path: Path
     assert window.start_button.isEnabled()
     assert not window.participant_name_input.isEnabled()
     assert not window.setup_submit_button.isEnabled()
+    window.dialog.close()
+
+
+def test_focus_mode_output_volume_sliders_persist_and_apply_to_engine(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    state_root = tmp_path / "dashboard_state"
+    monkeypatch.setattr(focus_app, "DEFAULT_DASHBOARD_STATE_ROOT", state_root)
+    focus_app._persist_output_channel_volumes(72, 44, state_root=state_root)
+
+    class FakeEngine:
+        def __init__(self) -> None:
+            self.audio_volume = 1.0
+            self.tactile_volume = 1.0
+
+        def set_main_volume(self, value: float) -> None:
+            self.audio_volume = float(value)
+
+    class FakeController:
+        def __init__(self, package_obj, *, capture_options=None, runner_metadata=None, **_kwargs):
+            self.package = package_obj
+            self.capture_options = capture_options
+            self.runner_metadata = dict(runner_metadata or {})
+            self.audio_engine = FakeEngine()
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+        controller_factory=FakeController,
+    )
+    window.dialog.show()
+    app.processEvents()
+
+    assert window.output_12_volume_slider.value() == 72
+    assert window.output_34_volume_slider.value() == 44
+    _fill_required_setup(window)
+    assert window._submit_participant_setup()
+    assert window.controller is not None
+    engine = window.controller.audio_engine
+    assert engine.audio_volume == pytest.approx(0.72)
+    assert engine.tactile_volume == pytest.approx(0.44)
+    assert window.output_12_volume_slider.isEnabled()
+    assert window.output_34_volume_slider.isEnabled()
+    assert window.controller.runner_metadata["playback_output_levels"]["output_1_2_percent"] == 72
+    assert window.controller.runner_metadata["playback_output_levels"]["output_3_4_percent"] == 44
+
+    window.output_12_volume_slider.setValue(35)
+    window.output_34_volume_slider.setValue(20)
+    app.processEvents()
+
+    assert engine.audio_volume == pytest.approx(0.35)
+    assert engine.tactile_volume == pytest.approx(0.20)
+    settings = json.loads((state_root / "focus_runner_settings.v1.json").read_text(encoding="utf-8"))
+    assert settings["output_1_2_volume_percent"] == 35
+    assert settings["output_3_4_volume_percent"] == 20
+    assert settings["output_channel_volumes"]["output_1_2_linear_gain"] == pytest.approx(0.35)
+    assert settings["output_channel_volumes"]["output_3_4_linear_gain"] == pytest.approx(0.20)
     window.dialog.close()
 
 

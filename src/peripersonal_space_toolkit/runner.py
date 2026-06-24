@@ -1146,6 +1146,7 @@ class AudioEngine:
                 duplicate_tactile_channel = self._duplicate_tactile_channel()
                 if duplicate_tactile_channel is not None and duplicate_tactile_channel >= outdata.shape[1]:
                     duplicate_tactile_channel = None
+                effective_click_gain = (self._click_gain if self._click_gain is not None else 1.0) * self.tactile_volume
                 if self._click_pos == 0:
                     metadata = dict(self._click_metadata or {})
                     marker_sample_rate = self._block_sr if block_buffer_start_sample is not None else self._click_sr
@@ -1159,10 +1160,10 @@ class AudioEngine:
                         marker_channel=tactile_channel,
                         marker_duplicate_channel=duplicate_tactile_channel if duplicate_tactile_channel is not None else "",
                         marker_duplicate_channel_1based=(duplicate_tactile_channel + 1) if duplicate_tactile_channel is not None else "",
-                        marker_gain=self._click_gain if self._click_gain is not None else self.tactile_volume,
+                        marker_gain=effective_click_gain,
                         **metadata,
                     )
-                outdata[:n, tactile_channel] = click_samples * (self._click_gain if self._click_gain is not None else self.tactile_volume)
+                outdata[:n, tactile_channel] = click_samples * effective_click_gain
                 if duplicate_tactile_channel is not None and duplicate_tactile_channel != tactile_channel:
                     outdata[:n, duplicate_tactile_channel] = outdata[:n, tactile_channel]
                 self._click_pos += n

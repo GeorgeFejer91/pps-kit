@@ -143,6 +143,10 @@ TIMELINE_SEGMENT_LABEL_SKIP_WIDTH = 22
 TIMELINE_REPEATED_LABEL_SKIP_WIDTH = 58
 SINGLE_INSTANCE_MUTEX_NAME = "Local\\PPSExperimentRunnerSingleInstance"
 SINGLE_INSTANCE_EXIT_CODE = 4
+OUTPUT_12_VOLUME_PERCENT_KEY = "output_1_2_volume_percent"
+OUTPUT_34_VOLUME_PERCENT_KEY = "output_3_4_volume_percent"
+OUTPUT_CHANNEL_VOLUME_SETTINGS_KEY = "output_channel_volumes"
+OUTPUT_CHANNEL_VOLUME_SCHEMA = "pps-output-channel-volumes.v1"
 
 
 def _timeline_widget_minimum_height(profile: FocusLayoutProfile | None) -> int:
@@ -382,6 +386,65 @@ def _default_focus_capture_options() -> SessionCaptureOptions:
     )
 
 
+def _coerce_volume_percent(value: Any, *, default: int = 100) -> int:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        number = float(default)
+    if not math.isfinite(number):
+        number = float(default)
+    return int(max(0, min(100, round(number))))
+
+
+def _output_volume_gain(percent: Any) -> float:
+    return _coerce_volume_percent(percent) / 100.0
+
+
+def _output_channel_volume_payload(output_12_percent: Any, output_34_percent: Any) -> dict[str, Any]:
+    output_12 = _coerce_volume_percent(output_12_percent)
+    output_34 = _coerce_volume_percent(output_34_percent)
+    return {
+        "schema": OUTPUT_CHANNEL_VOLUME_SCHEMA,
+        "output_1_2_percent": output_12,
+        "output_3_4_percent": output_34,
+        "output_1_2_linear_gain": _output_volume_gain(output_12),
+        "output_3_4_linear_gain": _output_volume_gain(output_34),
+    }
+
+
+def _load_output_channel_volume_percentages(state_root: Path | None = None) -> tuple[int, int]:
+    settings = load_runner_settings(DEFAULT_DASHBOARD_STATE_ROOT if state_root is None else state_root)
+    grouped = settings.get(OUTPUT_CHANNEL_VOLUME_SETTINGS_KEY)
+    grouped = grouped if isinstance(grouped, dict) else {}
+    output_12 = grouped.get(
+        "output_1_2_percent",
+        settings.get(OUTPUT_12_VOLUME_PERCENT_KEY, settings.get("audio_volume_percent", 100)),
+    )
+    output_34 = grouped.get(
+        "output_3_4_percent",
+        settings.get(OUTPUT_34_VOLUME_PERCENT_KEY, settings.get("tactile_volume_percent", 100)),
+    )
+    return _coerce_volume_percent(output_12), _coerce_volume_percent(output_34)
+
+
+def _persist_output_channel_volumes(
+    output_12_percent: Any,
+    output_34_percent: Any,
+    *,
+    state_root: Path | None = None,
+) -> dict[str, Any]:
+    output_12 = _coerce_volume_percent(output_12_percent)
+    output_34 = _coerce_volume_percent(output_34_percent)
+    return update_runner_settings(
+        DEFAULT_DASHBOARD_STATE_ROOT if state_root is None else state_root,
+        **{
+            OUTPUT_12_VOLUME_PERCENT_KEY: output_12,
+            OUTPUT_34_VOLUME_PERCENT_KEY: output_34,
+            OUTPUT_CHANNEL_VOLUME_SETTINGS_KEY: _output_channel_volume_payload(output_12, output_34),
+        },
+    )
+
+
 def initiate_data_collection_environment(
     *,
     parent_folder: Path,
@@ -606,6 +669,7 @@ def _require_qt() -> dict[str, Any]:
             QPushButton,
             QScrollArea,
             QSizePolicy,
+            QSlider,
             QSplitter,
             QTabWidget,
             QTableWidget,
@@ -648,6 +712,7 @@ def _require_qt() -> dict[str, Any]:
         "QShortcut": QShortcut,
         "Signal": Signal,
         "QSizePolicy": QSizePolicy,
+        "QSlider": QSlider,
         "QSplitter": QSplitter,
         "QTabWidget": QTabWidget,
         "QTableWidget": QTableWidget,
@@ -1821,6 +1886,41 @@ def _field_row(q: dict[str, Any], label: str, widget: Any) -> Any:
     layout.addWidget(key)
     layout.addWidget(widget, 1)
     return row
+
+
+def _output_volume_slider_row(
+    q: dict[str, Any],
+    *,
+    label: str,
+    value: int,
+    object_name: str,
+    tooltip: str,
+    on_change: Callable[[int], None],
+) -> tuple[Any, Any, Any]:
+    row = q["QWidget"]()
+    layout = q["QHBoxLayout"](row)
+    layout.setContentsMargins(0, 0, 0, 0)
+    layout.setSpacing(8)
+    key = q["QLabel"](label)
+    key.setObjectName("metricLabel")
+    slider = q["QSlider"](q["Qt"].Orientation.Horizontal)
+    slider.setObjectName(object_name)
+    slider.setRange(0, 100)
+    slider.setSingleStep(1)
+    slider.setPageStep(5)
+    slider.setTickInterval(10)
+    slider.setToolTip(tooltip)
+    slider.setValue(_coerce_volume_percent(value))
+    slider.setMinimumWidth(120)
+    percent = q["QLabel"](f"{_coerce_volume_percent(value)}%")
+    percent.setObjectName("metricValue")
+    percent.setMinimumWidth(42)
+    percent.setToolTip(tooltip)
+    layout.addWidget(key)
+    layout.addWidget(slider, 1)
+    layout.addWidget(percent)
+    slider.valueChanged.connect(lambda changed: on_change(int(changed)))
+    return row, slider, percent
 
 
 def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
@@ -5893,6 +5993,7 @@ class FocusModeWindow:
         self.output_root = _package_output_root(package)
         self.capture_options = capture_options or _default_focus_capture_options()
         self.enable_missed_trial_topup = bool(enable_missed_trial_topup)
+        self.output_12_volume_percent, self.output_34_volume_percent = _load_output_channel_volume_percentages()
         self.controller_factory = controller_factory
         self.messages: queue.Queue[tuple[str, Any]] = queue.Queue()
         self.controller: SessionRunnerController | None = None
@@ -6067,6 +6168,41 @@ class FocusModeWindow:
         self._install_primary_action_shortcuts()
         response_cell_layout.addWidget(response_panel, 0, q["Qt"].AlignmentFlag.AlignTop | q["Qt"].AlignmentFlag.AlignHCenter)
 
+        output_levels_panel, output_levels_layout = _panel(q, "Output Levels", profile=profile)
+        self.output_levels_panel = output_levels_panel
+        output_levels_panel.setMinimumWidth(profile.response_panel_side)
+        output_levels_panel.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Fixed)
+        output_levels_panel_min_height = max(88, (profile.input_min_height * 3) + (profile.panel_margin * 2))
+        output_levels_panel.setMinimumHeight(output_levels_panel_min_height)
+        output_levels_panel.setMaximumHeight(max(output_levels_panel_min_height, 116))
+        (
+            output_12_row,
+            self.output_12_volume_slider,
+            self.output_12_volume_label,
+        ) = _output_volume_slider_row(
+            q,
+            label="Output 1/2",
+            value=self.output_12_volume_percent,
+            object_name="output12VolumeSlider",
+            tooltip="Linear gain for the Komplete output 1/2 auditory headphone pair.",
+            on_change=lambda value: self._set_output_volume("output_1_2", value),
+        )
+        (
+            output_34_row,
+            self.output_34_volume_slider,
+            self.output_34_volume_label,
+        ) = _output_volume_slider_row(
+            q,
+            label="Output 3/4",
+            value=self.output_34_volume_percent,
+            object_name="output34VolumeSlider",
+            tooltip="Linear gain for tactile output 3 and its output 4 mirror.",
+            on_change=lambda value: self._set_output_volume("output_3_4", value),
+        )
+        output_levels_layout.addWidget(output_12_row)
+        output_levels_layout.addWidget(output_34_row)
+        response_cell_layout.addWidget(output_levels_panel)
+
         output_panel, output_layout = _panel(q, "Output Summary", profile=profile)
         self.output_panel = output_panel
         output_title_min_height = max(16, profile.input_min_height - 8)
@@ -6088,7 +6224,12 @@ class FocusModeWindow:
         self.output_summary.setPlainText("Session outputs will appear here after the run.")
         output_layout.addWidget(self.output_summary)
         response_cell_layout.addWidget(output_panel)
-        response_stack_height = profile.response_panel_side + output_panel_min_height + max(6, profile.root_spacing)
+        response_stack_height = (
+            profile.response_panel_side
+            + output_levels_panel_min_height
+            + output_panel_min_height
+            + (max(6, profile.root_spacing) * 2)
+        )
         response_cell.setMinimumHeight(response_stack_height)
         response_cell_layout.addStretch(1)
         self.run_splitter.addWidget(response_cell)
@@ -7292,6 +7433,46 @@ class FocusModeWindow:
             external_labrecorder_stop_timeout_s=float(self.capture_options.external_labrecorder_stop_timeout_s),
         )
 
+    def _output_channel_volume_payload(self) -> dict[str, Any]:
+        return _output_channel_volume_payload(
+            self.output_12_volume_percent,
+            self.output_34_volume_percent,
+        )
+
+    def _apply_output_volumes_to_engine(self, engine: Any | None) -> None:
+        if engine is None:
+            return
+        audio_gain = _output_volume_gain(self.output_12_volume_percent)
+        tactile_gain = _output_volume_gain(self.output_34_volume_percent)
+        setter = getattr(engine, "set_main_volume", None)
+        if callable(setter):
+            try:
+                setter(audio_gain)
+            except Exception:
+                setattr(engine, "audio_volume", audio_gain)
+        else:
+            setattr(engine, "audio_volume", audio_gain)
+        setattr(engine, "tactile_volume", tactile_gain)
+
+    def _set_output_volume(self, target: str, value: int) -> None:
+        percent = _coerce_volume_percent(value)
+        if target == "output_1_2":
+            self.output_12_volume_percent = percent
+            if hasattr(self, "output_12_volume_label"):
+                self.output_12_volume_label.setText(f"{percent}%")
+        elif target == "output_3_4":
+            self.output_34_volume_percent = percent
+            if hasattr(self, "output_34_volume_label"):
+                self.output_34_volume_label.setText(f"{percent}%")
+        self._apply_output_volumes_to_engine(self._owned_audio_engine)
+        controller_engine = getattr(self.controller, "audio_engine", None) if self.controller is not None else None
+        if controller_engine is not self._owned_audio_engine:
+            self._apply_output_volumes_to_engine(controller_engine)
+        _persist_output_channel_volumes(
+            self.output_12_volume_percent,
+            self.output_34_volume_percent,
+        )
+
     def _runner_metadata(self) -> dict[str, Any]:
         return {
             "participant_code": self._selected_participant_code() or self.package.participant_id,
@@ -7300,6 +7481,7 @@ class FocusModeWindow:
             "age_years": self.age_input.text().strip(),
             "handedness": self.handedness_combo.currentData() or "",
             "gender": self.gender_combo.currentData() or "",
+            "playback_output_levels": self._output_channel_volume_payload(),
         }
 
     def start_next_participant_prewarm(self) -> None:
@@ -7493,6 +7675,7 @@ class FocusModeWindow:
             self.event_label.setText(f"Participant setup could not prepare LSL: {message}")
             return False
         self.demographics_submitted = True
+        self._apply_output_volumes_to_engine(getattr(self.controller, "audio_engine", None))
         self._freeze_pre_run_controls()
         self.start_button.setEnabled(True)
         self.run_state_chip.setText("LSL Ready" if bool(self.capture_options.enable_lsl) else "Ready")
@@ -7507,6 +7690,7 @@ class FocusModeWindow:
                 "lsl_enabled": bool(getattr(lsl_status, "enabled", False)) if lsl_status is not None else bool(self.capture_options.enable_lsl),
                 "lsl_message": lsl_message,
                 "topup_enabled": self.enable_missed_trial_topup,
+                "playback_output_levels": self._output_channel_volume_payload(),
                 "participant_metadata_fields": sorted(key for key, value in runner_metadata.items() if str(value or "").strip()),
             },
             create=True,
@@ -7599,6 +7783,7 @@ class FocusModeWindow:
         widgets = {
             "target_button": self.target_button,
             "response_panel": self.response_panel,
+            "output_levels_panel": self.output_levels_panel,
             "output_panel": self.output_panel,
             "output_summary": self.output_summary,
             "processing_panel": self.processing_panel,
@@ -7717,9 +7902,12 @@ class FocusModeWindow:
         if int(label_fit.get("overlap_count") or 0) > 0:
             failures.append(f"timeline labels overlap in {label_fit.get('overlap_count')} measured rect(s)")
         response = widgets.get("response_panel", {})
+        output_levels = widgets.get("output_levels_panel", {})
         output = widgets.get("output_panel", {})
-        if response and output and output.get("y", 0) < response.get("bottom", 0):
-            failures.append("output_panel is not positioned under response_panel")
+        if response and output_levels and output_levels.get("y", 0) < response.get("bottom", 0):
+            failures.append("output_levels_panel is not positioned under response_panel")
+        if output_levels and output and output.get("y", 0) < output_levels.get("bottom", 0):
+            failures.append("output_panel is not positioned under output_levels_panel")
         data_column = widgets.get("data_logging_column", {})
         settings_column = widgets.get("experiment_settings_column", {})
         if data_column and settings_column:
@@ -7755,6 +7943,7 @@ class FocusModeWindow:
             self.q["QTextEdit"],
             self.q["QComboBox"],
             self.q["QCheckBox"],
+            self.q["QSlider"],
         )
         return isinstance(focus, input_types)
 
@@ -7800,6 +7989,7 @@ class FocusModeWindow:
         engine = AudioEngine(device_idx)
         if hasattr(engine, "set_wired_loopback_mode"):
             engine.set_wired_loopback_mode(self.capture_options.wired_loopback_mode)
+        self._apply_output_volumes_to_engine(engine)
         try:
             if CLICK_SOUND and not engine.load_click_sound(CLICK_SOUND):
                 raise RuntimeError(
@@ -7826,7 +8016,7 @@ class FocusModeWindow:
             "audio_initialization_failed",
             package=self.package,
             capture_options=self.capture_options.as_dict(),
-            payload={"message": message},
+            payload={"message": message, "playback_output_levels": self._output_channel_volume_payload()},
             create=True,
         )
         result = SimpleNamespace(
@@ -7865,7 +8055,10 @@ class FocusModeWindow:
             package=self.package,
             participant_id=self.package.participant_id,
             capture_options=self.capture_options.as_dict(),
-            payload={"topup_enabled": self.enable_missed_trial_topup},
+            payload={
+                "topup_enabled": self.enable_missed_trial_topup,
+                "playback_output_levels": self._output_channel_volume_payload(),
+            },
             create=True,
         )
         if self.controller_factory is None and getattr(self.controller, "audio_engine", None) is None:

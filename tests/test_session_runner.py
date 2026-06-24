@@ -1117,6 +1117,13 @@ def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
             "age_years": "29",
             "handedness": "right",
             "gender": "female",
+            "playback_output_levels": {
+                "schema": "pps-output-channel-volumes.v1",
+                "output_1_2_percent": 72,
+                "output_3_4_percent": 44,
+                "output_1_2_gain": 0.72,
+                "output_3_4_gain": 0.44,
+            },
         },
     )
     engine.on_audio_started = lambda: controller.log_click(x=10, y=12)
@@ -1146,6 +1153,8 @@ def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
     local_metadata = json.loads(result.session_metadata_path.read_text(encoding="utf-8"))
     assert local_metadata["participant"]["name"] == "Alice Example"
     assert local_metadata["participant"]["participant_pseudonym"].startswith("PPS-")
+    assert local_metadata["capture_policy"]["playback_output_levels"]["output_1_2_percent"] == 72
+    assert local_metadata["capture_policy"]["playback_output_levels"]["output_3_4_percent"] == 44
     with result.lsl_markers_csv.open(newline="", encoding="utf-8") as handle:
         marker_rows = list(csv.DictReader(handle))
     session_start_payload = json.loads(next(row for row in marker_rows if row["event_type"] == "session_start")["payload_json"])
