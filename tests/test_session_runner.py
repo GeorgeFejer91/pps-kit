@@ -1569,6 +1569,241 @@ def test_session_runner_owned_labrecorder_starts_after_lsl_before_audio(tmp_path
     assert capture_report["stop"]["final_marker_settle_s"] == 0.0
 
 
+def test_split_parts_can_share_one_same_window_labrecorder_xdf(tmp_path: Path, monkeypatch):
+    run_manifest = _two_part_segment_run_setup_fixture(tmp_path)
+    session_root = tmp_path / "sessions"
+    part1 = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=session_root,
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+    part2 = load_run_package(part1.sibling_part_manifest_paths[0])
+    cli = tmp_path / "LabRecorderCLI.exe"
+    cli.write_text("fake", encoding="utf-8")
+    starts: list[dict[str, object]] = []
+    stops: list[dict[str, object]] = []
+
+    class FakeLabRecorderCapture:
+        def __init__(self, *, labrecorder_cli, xdf_path, session_id, stdout_path, stderr_path):
+            self.labrecorder_cli = Path(labrecorder_cli)
+            self.xdf_path = Path(xdf_path)
+            self.session_id = session_id
+            self.stdout_path = Path(stdout_path)
+            self.stderr_path = Path(stderr_path)
+            self.command = [str(self.labrecorder_cli), str(self.xdf_path), f"source_id={session_id}"]
+
+        def start(self, *, stream_timeout_s=10.0, startup_s=1.0):
+            payload = {
+                "enabled": True,
+                "started": True,
+                "pid": 321,
+                "xdf_path": str(self.xdf_path),
+                "labrecorder_cli": str(self.labrecorder_cli),
+                "command": list(self.command),
+                "lsl": {"ready": True, "found_source_ids": [f"pps-markers-v2-{self.session_id}"]},
+            }
+            starts.append(payload)
+            return payload
+
+        def stop(self, *, timeout_s=8.0):
+            self.xdf_path.parent.mkdir(parents=True, exist_ok=True)
+            self.xdf_path.write_bytes(b"continuous xdf")
+            self.stdout_path.parent.mkdir(parents=True, exist_ok=True)
+            self.stdout_path.write_text("stopped\n", encoding="utf-8")
+            self.stderr_path.write_text("", encoding="utf-8")
+            payload = {
+                "enabled": True,
+                "stopped": True,
+                "returncode": 0,
+                "stdout_path": str(self.stdout_path),
+                "stderr_path": str(self.stderr_path),
+                "xdf_path": str(self.xdf_path),
+                "command": list(self.command),
+            }
+            stops.append(payload)
+            return payload
+
+    monkeypatch.setattr(session_runner_module, "find_labrecorder_cli", lambda _explicit=None: cli)
+    monkeypatch.setattr(session_runner_module, "LabRecorderCapture", FakeLabRecorderCapture)
+    monkeypatch.setattr(session_runner_module, "EXTERNAL_LABRECORDER_FINAL_MARKER_SETTLE_S", 0.0)
+    fake_lsl = SimpleNamespace(
+        status=SimpleNamespace(available=True, enabled=True, message="fake shared LSL active"),
+        local_clock=lambda: 10.0,
+        push=lambda event, marker, timestamp: None,
+    )
+    controller1 = SessionRunnerController(
+        part1,
+        audio_engine=_MockAudioEngine(),
+        capture_options={
+            "start_external_labrecorder": True,
+            "external_labrecorder_cli": str(cli),
+            "external_labrecorder_scope": "session_group_same_window",
+        },
+        lsl_stream_session_id=part1.session_group_id,
+        external_labrecorder_stop_on_run_end=False,
+    )
+    controller1.events.lsl = fake_lsl
+
+    result1 = controller1.run()
+
+    assert result1.completed
+    assert len(starts) == 1
+    assert not stops
+    assert starts[0]["lsl"]["found_source_ids"] == [f"pps-markers-v2-{part1.session_group_id}"]
+    state = controller1.handoff_external_labrecorder_to_next_part()
+    assert state is not None
+    assert state["lsl_stream_session_id"] == part1.session_group_id
+    controller1.events.close()
+
+    controller2 = SessionRunnerController(
+        part2,
+        audio_engine=_MockAudioEngine(),
+        capture_options={
+            "start_external_labrecorder": True,
+            "external_labrecorder_cli": str(cli),
+            "external_labrecorder_scope": "session_group_same_window",
+        },
+        lsl_stream_session_id=state["lsl_stream_session_id"],
+        shared_lsl_outlet=state["lsl_outlet"],
+        external_labrecorder_state=state,
+        external_labrecorder_finalize_path=state["finalize_path"],
+    )
+    result2 = controller2.run()
+
+    group_xdf = session_root / part1.session_group_id / f"{part1.session_group_id}_external_labrecorder.xdf"
+    report_path = output_runner_logs_dir(session_root) / part1.session_group_id / "external_labrecorder_capture_report.json"
+    assert result2.completed
+    assert len(starts) == 1
+    assert len(stops) == 1
+    assert group_xdf.exists()
+    assert not (part1.session_dir / f"{part1.session_id}_external_labrecorder.xdf").exists()
+    assert result2.analysis_outputs["external_labrecorder_xdf"] == group_xdf
+    assert group_xdf in result2.recording_paths
+    assert report_path.exists()
+    capture_report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert capture_report["external_labrecorder_scope"] == "session_group_same_window"
+    assert capture_report["lsl_stream_session_id"] == part1.session_group_id
+    assert capture_report["stop"]["finalized_xdf_path"] == str(group_xdf)
+    assert capture_report["stop"]["source_xdf_path_before_finalize"].endswith(f"{part1.session_id}_external_labrecorder.xdf")
+    with result2.events_csv.open(newline="", encoding="utf-8") as handle:
+        events = list(csv.DictReader(handle))
+    continued = next(row for row in events if row["event_type"] == "external_labrecorder_start")
+    continued_payload = json.loads(continued["payload_json"])
+    assert continued_payload["continued_from_previous_part"] is True
+    with result2.lsl_markers_csv.open(newline="", encoding="utf-8") as handle:
+        marker_rows = list(csv.DictReader(handle))
+    assert marker_rows[0]["session_group_id"] == part1.session_group_id
+    assert marker_rows[0]["part_session_id"] == part2.part_session_id
+    assert marker_rows[0]["part_number"] == "2"
+
+
+def test_split_parts_close_and_relaunch_write_separate_labrecorder_xdfs(tmp_path: Path, monkeypatch):
+    run_manifest = _two_part_segment_run_setup_fixture(tmp_path)
+    session_root = tmp_path / "sessions"
+    part1 = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=session_root,
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+    part2 = load_run_package(part1.sibling_part_manifest_paths[0])
+    cli = tmp_path / "LabRecorderCLI.exe"
+    cli.write_text("fake", encoding="utf-8")
+    start_session_ids: list[str] = []
+
+    class FakeLabRecorderCapture:
+        def __init__(self, *, labrecorder_cli, xdf_path, session_id, stdout_path, stderr_path):
+            self.labrecorder_cli = Path(labrecorder_cli)
+            self.xdf_path = Path(xdf_path)
+            self.session_id = session_id
+            self.stdout_path = Path(stdout_path)
+            self.stderr_path = Path(stderr_path)
+            self.command = [str(self.labrecorder_cli), str(self.xdf_path), f"source_id={session_id}"]
+
+        def start(self, *, stream_timeout_s=10.0, startup_s=1.0):
+            start_session_ids.append(self.session_id)
+            return {
+                "enabled": True,
+                "started": True,
+                "pid": 654,
+                "xdf_path": str(self.xdf_path),
+                "labrecorder_cli": str(self.labrecorder_cli),
+                "command": list(self.command),
+                "lsl": {"ready": True, "found_source_ids": [f"pps-markers-v2-{self.session_id}"]},
+            }
+
+        def stop(self, *, timeout_s=8.0):
+            self.xdf_path.parent.mkdir(parents=True, exist_ok=True)
+            self.xdf_path.write_bytes(f"xdf {self.session_id}".encode("utf-8"))
+            self.stdout_path.parent.mkdir(parents=True, exist_ok=True)
+            self.stdout_path.write_text("stopped\n", encoding="utf-8")
+            self.stderr_path.write_text("", encoding="utf-8")
+            return {
+                "enabled": True,
+                "stopped": True,
+                "returncode": 0,
+                "stdout_path": str(self.stdout_path),
+                "stderr_path": str(self.stderr_path),
+                "xdf_path": str(self.xdf_path),
+                "command": list(self.command),
+            }
+
+        def close_for_runner_exit(self, *, timeout_s=2.0):
+            return self.stop(timeout_s=timeout_s)
+
+    monkeypatch.setattr(session_runner_module, "find_labrecorder_cli", lambda _explicit=None: cli)
+    monkeypatch.setattr(session_runner_module, "LabRecorderCapture", FakeLabRecorderCapture)
+    monkeypatch.setattr(session_runner_module, "EXTERNAL_LABRECORDER_FINAL_MARKER_SETTLE_S", 0.0)
+    fake_lsl1 = SimpleNamespace(
+        status=SimpleNamespace(available=True, enabled=True, message="fake Part 1 LSL active"),
+        local_clock=lambda: 10.0,
+        push=lambda event, marker, timestamp: None,
+    )
+    controller1 = SessionRunnerController(
+        part1,
+        audio_engine=_MockAudioEngine(),
+        capture_options={
+            "start_external_labrecorder": True,
+            "external_labrecorder_cli": str(cli),
+            "external_labrecorder_scope": "session_group_same_window",
+        },
+        lsl_stream_session_id=part1.session_group_id,
+        external_labrecorder_stop_on_run_end=False,
+    )
+    controller1.events.lsl = fake_lsl1
+    result1 = controller1.run()
+    controller1.close_external_labrecorder_for_runner_exit(timeout_s=0.5)
+
+    fake_lsl2 = SimpleNamespace(
+        status=SimpleNamespace(available=True, enabled=True, message="fake Part 2 LSL active"),
+        local_clock=lambda: 11.0,
+        push=lambda event, marker, timestamp: None,
+    )
+    controller2 = SessionRunnerController(
+        part2,
+        audio_engine=_MockAudioEngine(),
+        capture_options={"start_external_labrecorder": True, "external_labrecorder_cli": str(cli)},
+    )
+    controller2.events.lsl = fake_lsl2
+    result2 = controller2.run()
+
+    group_xdf = session_root / part1.session_group_id / f"{part1.session_group_id}_external_labrecorder.xdf"
+    part1_xdf = part1.session_dir / f"{part1.session_id}_external_labrecorder.xdf"
+    part2_xdf = part2.session_dir / f"{part2.session_id}_external_labrecorder.xdf"
+    assert result1.completed
+    assert result2.completed
+    assert start_session_ids == [part1.session_group_id, part2.session_id]
+    assert part1_xdf.exists()
+    assert part2_xdf.exists()
+    assert not group_xdf.exists()
+    status1 = json.loads((output_runner_logs_dir(session_root) / part1.session_group_id / "part_01" / "part_completion_status.json").read_text(encoding="utf-8"))
+    status2 = json.loads((output_runner_logs_dir(session_root) / part1.session_group_id / "part_02" / "part_completion_status.json").read_text(encoding="utf-8"))
+    assert status1["external_labrecorder_xdf"] == str(part1_xdf)
+    assert status2["external_labrecorder_xdf"] == str(part2_xdf)
+    assert result2.analysis_outputs["external_labrecorder_xdf"] == part2_xdf
+
+
 def test_labrecorder_capture_uses_rcs_remote_control(tmp_path: Path, monkeypatch):
     cli = tmp_path / "LabRecorderCLI.exe"
     cli.write_text("fake", encoding="utf-8")

@@ -834,6 +834,135 @@ def test_focus_mode_start_button_is_red_and_tracks_selected_split_part(tmp_path:
     window.dialog.close()
 
 
+def test_focus_mode_clicking_part2_adopts_same_window_labrecorder_handoff(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    os.environ.setdefault("PPS_FOCUS_DISABLE_ANALYSIS_POPUP", "1")
+    try:
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    part1_manifest, _part2_manifest = _write_split_focus_session_manifests(tmp_path)
+    package = load_run_package(part1_manifest)
+    shared_lsl = object()
+    created: list[object] = []
+
+    class FakeController:
+        def __init__(
+            self,
+            package_obj,
+            *,
+            audio_engine=None,
+            capture_options=None,
+            lsl_stream_session_id=None,
+            shared_lsl_outlet=None,
+            external_labrecorder_state=None,
+            external_labrecorder_stop_on_run_end=True,
+            external_labrecorder_finalize_path=None,
+            **_kwargs,
+        ):
+            self.package = package_obj
+            self.audio_engine = audio_engine or SimpleNamespace()
+            self.capture_options = capture_options
+            self.kwargs = {
+                "lsl_stream_session_id": lsl_stream_session_id,
+                "shared_lsl_outlet": shared_lsl_outlet,
+                "external_labrecorder_state": external_labrecorder_state,
+                "external_labrecorder_stop_on_run_end": external_labrecorder_stop_on_run_end,
+                "external_labrecorder_finalize_path": external_labrecorder_finalize_path,
+            }
+            self.events = SimpleNamespace(
+                lsl_status=SimpleNamespace(available=True, enabled=True, message="fake LSL active"),
+                close=lambda: None,
+            )
+            self.run_called = False
+            created.append(self)
+
+        def handoff_external_labrecorder_to_next_part(self):
+            return {
+                "schema": "pps-runner-continuous-labrecorder-handoff.v1",
+                "capture": object(),
+                "status": {"enabled": True, "started": True, "xdf_path": str(self.package.session_dir / "part1_external.xdf")},
+                "xdf_path": self.package.session_dir / f"{self.package.session_id}_external_labrecorder.xdf",
+                "stdout_path": self.package.manifest_path.parent / "external_labrecorder_stdout.txt",
+                "stderr_path": self.package.manifest_path.parent / "external_labrecorder_stderr.txt",
+                "report_path": self.package.manifest_path.parent.parent / "external_labrecorder_capture_report.json",
+                "lsl_outlet": shared_lsl,
+                "lsl_stream_session_id": self.package.session_group_id,
+                "session_group_id": self.package.session_group_id,
+                "source_part_session_id": self.package.part_session_id,
+                "finalize_path": self.package.session_dir.parent / f"{self.package.session_group_id}_external_labrecorder.xdf",
+            }
+
+        def run(self, *, progress_callback=None, event_callback=None):
+            self.run_called = True
+            if event_callback:
+                event_callback("session_start")
+            return SimpleNamespace(
+                completed=True,
+                interrupted=False,
+                summary_text="done",
+                session_dir=self.package.session_dir,
+                events_csv=self.package.session_dir / "events.csv",
+                events_xdf=self.package.session_dir / "events.xdf",
+                lsl_markers_csv=None,
+                lsl_markers_xdf=None,
+                trigger_dictionary_path=None,
+                session_metadata_path=None,
+                recording_paths=[],
+                warnings=[],
+                capture_options={"write_analysis_csvs": False},
+            )
+
+    monkeypatch.setattr(focus_app, "SessionRunnerController", FakeController)
+    window = focus_app.FocusModeWindow(q, package)
+    window.dialog.show()
+    app.processEvents()
+
+    _fill_required_setup(window)
+    QTest.mouseClick(window.setup_submit_button, q["Qt"].MouseButton.LeftButton)
+    app.processEvents()
+
+    assert len(created) == 1
+    assert created[0].capture_options.external_labrecorder_scope == "session_group_same_window"
+    assert created[0].kwargs["lsl_stream_session_id"] == package.session_group_id
+    assert created[0].kwargs["external_labrecorder_stop_on_run_end"] is False
+    assert window.start_button.text() == "Start Part 1"
+
+    QTest.mouseClick(window.start_button, q["Qt"].MouseButton.LeftButton)
+    window.thread.join(timeout=2)
+    window._drain()
+    app.processEvents()
+
+    assert created[0].run_called is True
+    assert "Part 1 complete" in window.event_label.text()
+    QTest.mouseClick(window.part_buttons["2"], q["Qt"].MouseButton.LeftButton)
+    app.processEvents()
+
+    assert len(created) == 2
+    assert window.start_button.text() == "Start Part 2"
+    assert window.start_button.isEnabled()
+    assert created[1].capture_options.external_labrecorder_scope == "session_group_same_window"
+    assert created[1].kwargs["shared_lsl_outlet"] is shared_lsl
+    assert created[1].kwargs["external_labrecorder_state"]["lsl_outlet"] is shared_lsl
+    assert created[1].kwargs["external_labrecorder_stop_on_run_end"] is True
+    assert str(created[1].kwargs["external_labrecorder_finalize_path"]).endswith(
+        f"{package.session_group_id}_external_labrecorder.xdf"
+    )
+
+    QTest.mouseClick(window.start_button, q["Qt"].MouseButton.LeftButton)
+    window.thread.join(timeout=2)
+    window._drain()
+    app.processEvents()
+
+    assert created[1].run_called is True
+    window.dialog.close()
+
+
 def test_focus_mode_setup_submit_prepares_controller_before_start(tmp_path: Path):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:

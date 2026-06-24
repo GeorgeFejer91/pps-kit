@@ -302,6 +302,8 @@ class TimingEventHub:
         enable_lsl: bool,
         session_id: str,
         participant_id: str,
+        lsl_stream_session_id: str | None = None,
+        lsl_outlet: LSLMarkerOutlet | None = None,
         trigger_dictionary: TriggerDictionary | None = None,
         event_callback: Callable[[SessionEvent], None] | None = None,
         stream_metadata: dict[str, Any] | None = None,
@@ -310,15 +312,21 @@ class TimingEventHub:
         self.logger = logger
         self.session_id = session_id
         self.participant_id = participant_id
+        self.lsl_stream_session_id = str(lsl_stream_session_id or session_id)
         self.trigger_dictionary = trigger_dictionary or TriggerDictionary.from_schedules([])
         self._event_callback = event_callback
         self.stream_metadata = dict(stream_metadata or {})
         self.default_payload = dict(default_payload or {})
-        self.lsl: LSLMarkerOutlet | None = (
-            LSLMarkerOutlet(session_id=session_id, participant_id=participant_id, stream_metadata=self.stream_metadata)
-            if enable_lsl
-            else None
-        )
+        if lsl_outlet is not None:
+            self.lsl = lsl_outlet
+        elif enable_lsl:
+            self.lsl = LSLMarkerOutlet(
+                session_id=self.lsl_stream_session_id,
+                participant_id=participant_id,
+                stream_metadata=self.stream_metadata,
+            )
+        else:
+            self.lsl = None
         self._marker_records: list[dict[str, Any]] = []
         self._marker_lock = threading.Lock()
         self._callback_queue: queue.Queue[dict[str, Any] | None] = queue.Queue(maxsize=4096)

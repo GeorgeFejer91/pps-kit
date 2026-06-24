@@ -108,6 +108,8 @@ from .session_runner import (
     DEFAULT_PROJECT_REGISTRY_ROOT,
     DEFAULT_RENDER_DIR,
     DEFAULT_SESSION_ROOT,
+    EXTERNAL_LABRECORDER_SCOPE_PART,
+    EXTERNAL_LABRECORDER_SCOPE_SESSION_GROUP,
     SessionCaptureOptions,
     SessionRunnerController,
     WIRED_LOOPBACK_CLI_OUTPUT4_TACTILE_PROXY,
@@ -6609,6 +6611,7 @@ class FocusModeWindow:
         self.controller_factory = controller_factory
         self.messages: queue.Queue[tuple[str, Any]] = queue.Queue()
         self.controller: SessionRunnerController | None = None
+        self._continuous_external_labrecorder_state: dict[str, Any] | None = None
         self._owned_audio_engine: Any | None = None
         self.thread: threading.Thread | None = None
         self.result: Any | None = None
@@ -7723,11 +7726,41 @@ class FocusModeWindow:
                 self.event_label.setText(f"Could not load {_part_button_label(part_key)}: {exc}")
             return
         restore_submitted_setup = bool(self.demographics_submitted and self.controller is not None)
+        self._prepare_continuous_external_labrecorder_handoff(package)
         self.selected_part_key = str(part_key)
         self._replace_loaded_package(package, message=f"{_part_button_label(part_key)} ready. Submit setup, then start.")
         if restore_submitted_setup:
             if self._submit_participant_setup():
                 self.event_label.setText(f"{_part_button_label(part_key)} ready. Press {self.start_button.text()} when ready.")
+
+    def _prepare_continuous_external_labrecorder_handoff(self, next_package: Any) -> None:
+        controller = self.controller
+        if controller is None:
+            return
+        if not (_package_is_split_part(self.package) and _package_is_split_part(next_package)):
+            return
+        if str(getattr(self.package, "session_group_id", "")) != str(getattr(next_package, "session_group_id", "")):
+            return
+        handoff = getattr(controller, "handoff_external_labrecorder_to_next_part", None)
+        if not callable(handoff):
+            return
+        state = handoff()
+        if not state:
+            return
+        self._continuous_external_labrecorder_state = dict(state)
+        _append_output_diary_event(
+            "external_labrecorder_handoff_prepared",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            payload={
+                "next_part_session_id": str(getattr(next_package, "part_session_id", "") or getattr(next_package, "session_id", "")),
+                "session_group_id": str(getattr(next_package, "session_group_id", "")),
+                "xdf_path": str(state.get("xdf_path") or ""),
+                "finalize_path": str(state.get("finalize_path") or ""),
+                "lsl_stream_session_id": str(state.get("lsl_stream_session_id") or ""),
+            },
+            create=True,
+        )
 
     def _start_button_part_key(self) -> str:
         if self._part2_start_gate_pending():
@@ -7853,6 +7886,7 @@ class FocusModeWindow:
             if hasattr(self, "event_label"):
                 self.event_label.setText(f"Could not load next part: {exc}")
             return
+        self._prepare_continuous_external_labrecorder_handoff(package)
         self._replace_loaded_package(package, message=f"Part {getattr(package, 'part_number', '')} ready. Submit setup to start.")
 
     def _visible_plan_items(self) -> list[dict[str, Any]]:
@@ -8776,6 +8810,15 @@ class FocusModeWindow:
         self._refresh_experiment_control_minimum_height()
 
     def _runtime_capture_options(self) -> SessionCaptureOptions:
+        start_external_labrecorder = bool(
+            self.capture_options.enable_lsl and self.external_labrecorder_checkbox.isChecked()
+        )
+        external_scope = EXTERNAL_LABRECORDER_SCOPE_PART
+        if start_external_labrecorder and (
+            self._continuous_external_labrecorder_state is not None
+            or (_package_is_split_part(self.package) and self._next_split_part_manifest() is not None)
+        ):
+            external_scope = EXTERNAL_LABRECORDER_SCOPE_SESSION_GROUP
         return SessionCaptureOptions(
             enable_lsl=bool(self.capture_options.enable_lsl),
             write_events_csv=True,
@@ -8789,9 +8832,8 @@ class FocusModeWindow:
                 if bool(self.wired_loopback_checkbox.isChecked())
                 else WIRED_LOOPBACK_OFF
             ),
-            start_external_labrecorder=bool(
-                self.capture_options.enable_lsl and self.external_labrecorder_checkbox.isChecked()
-            ),
+            start_external_labrecorder=start_external_labrecorder,
+            external_labrecorder_scope=external_scope,
             external_labrecorder_cli=str(self.capture_options.external_labrecorder_cli or ""),
             external_labrecorder_stream_timeout_s=float(self.capture_options.external_labrecorder_stream_timeout_s),
             external_labrecorder_startup_s=float(self.capture_options.external_labrecorder_startup_s),
@@ -9226,6 +9268,19 @@ class FocusModeWindow:
         self.enable_missed_trial_topup = bool(self.topup_checkbox.isChecked())
         self._refresh_run_plan()
         runner_metadata = self._runner_metadata()
+        continuous_state = dict(self._continuous_external_labrecorder_state or {})
+        lsl_stream_session_id = str(continuous_state.get("lsl_stream_session_id") or "")
+        if not lsl_stream_session_id and self.capture_options.external_labrecorder_scope == EXTERNAL_LABRECORDER_SCOPE_SESSION_GROUP:
+            lsl_stream_session_id = str(getattr(self.package, "session_group_id", "") or getattr(self.package, "session_id", ""))
+        stop_external_labrecorder_on_run_end = True
+        if (
+            self.capture_options.external_labrecorder_scope == EXTERNAL_LABRECORDER_SCOPE_SESSION_GROUP
+            and _package_is_split_part(self.package)
+            and self._next_split_part_manifest() is not None
+            and not continuous_state
+        ):
+            stop_external_labrecorder_on_run_end = False
+        external_finalize_path = continuous_state.get("finalize_path") if continuous_state else None
         try:
             if self.controller_factory is not None:
                 self.controller = self.controller_factory(
@@ -9245,7 +9300,14 @@ class FocusModeWindow:
                     runner_metadata=runner_metadata,
                     topup_approval_callback=self._auto_approve_topup_playback if self.enable_missed_trial_topup else None,
                     instruction_continue_callback=self._request_instruction_continue,
+                    lsl_stream_session_id=lsl_stream_session_id or None,
+                    shared_lsl_outlet=continuous_state.get("lsl_outlet") if continuous_state else None,
+                    external_labrecorder_state=continuous_state or None,
+                    external_labrecorder_stop_on_run_end=stop_external_labrecorder_on_run_end,
+                    external_labrecorder_finalize_path=external_finalize_path,
                 )
+                if continuous_state:
+                    self._continuous_external_labrecorder_state = None
         except Exception as exc:
             self.controller = None
             self.event_label.setText(f"Participant setup could not prepare LSL: {exc}")
@@ -9831,22 +9893,83 @@ class FocusModeWindow:
     def _close_external_labrecorder_for_runner_exit(self) -> None:
         controller = self.controller
         close = getattr(controller, "close_external_labrecorder_for_runner_exit", None)
-        if not callable(close):
-            return
         try:
             timeout_s = min(2.0, max(0.25, float(self.capture_options.external_labrecorder_stop_timeout_s)))
         except Exception:
             timeout_s = 2.0
+        if callable(close):
+            try:
+                close(timeout_s=timeout_s)
+            except Exception as exc:
+                _append_output_diary_event(
+                    "external_labrecorder_runner_exit_close_failed",
+                    package=self.package,
+                    capture_options=self.capture_options.as_dict(),
+                    payload={"error": str(exc)},
+                    create=True,
+                )
+        self._close_pending_continuous_external_labrecorder_state(timeout_s=timeout_s)
+
+    def _close_pending_continuous_external_labrecorder_state(self, *, timeout_s: float) -> None:
+        state = self._continuous_external_labrecorder_state
+        if not state:
+            return
+        capture = state.get("capture")
+        if capture is None:
+            self._continuous_external_labrecorder_state = None
+            return
         try:
-            close(timeout_s=timeout_s)
+            close_for_exit = getattr(capture, "close_for_runner_exit", None)
+            if callable(close_for_exit):
+                stopped = close_for_exit(timeout_s=timeout_s)
+            else:
+                stopped = capture.stop(timeout_s=timeout_s)
         except Exception as exc:
             _append_output_diary_event(
-                "external_labrecorder_runner_exit_close_failed",
+                "external_labrecorder_pending_handoff_close_failed",
                 package=self.package,
                 capture_options=self.capture_options.as_dict(),
-                payload={"error": str(exc)},
+                payload={"error": str(exc), "xdf_path": str(state.get("xdf_path") or "")},
                 create=True,
             )
+            return
+        stopped = dict(stopped or {})
+        stopped["runner_exit"] = True
+        stopped["pending_handoff_cancelled"] = True
+        report_path = Path(state.get("report_path") or "")
+        if str(report_path):
+            try:
+                os.makedirs(_output_filesystem_path(report_path.parent), exist_ok=True)
+                with open(_output_filesystem_path(report_path), "w", encoding="utf-8") as handle:
+                    handle.write(
+                        json.dumps(
+                            {
+                                "schema": "pps-runner-owned-labrecorder-capture.v1",
+                                "session_group_id": str(state.get("session_group_id") or ""),
+                                "source_part_session_id": str(state.get("source_part_session_id") or ""),
+                                "lsl_stream_session_id": str(state.get("lsl_stream_session_id") or ""),
+                                "start": {key: value for key, value in dict(state.get("status") or {}).items() if key != "stop"},
+                                "stop": stopped,
+                            },
+                            indent=2,
+                            sort_keys=True,
+                        )
+                        + "\n"
+                    )
+            except Exception:
+                pass
+        _append_output_diary_event(
+            "external_labrecorder_pending_handoff_closed",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            payload={
+                "xdf_path": str(state.get("xdf_path") or stopped.get("xdf_path") or ""),
+                "finalize_path": str(state.get("finalize_path") or ""),
+                "returncode": stopped.get("returncode"),
+            },
+            create=True,
+        )
+        self._continuous_external_labrecorder_state = None
 
     def _click(self) -> None:
         if self.pending_instruction_request is not None:
