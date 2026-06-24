@@ -331,6 +331,24 @@ def test_prepare_segment_run_package_uses_segment5_and_segment6_csvs(tmp_path: P
     assert manifest["source_run_setup_sha256"] == _sha256(run_manifest)
 
 
+def test_prepare_segment_run_package_creates_prepared_blocks_under_deep_output_root(tmp_path: Path):
+    run_manifest = _segment_run_setup_fixture(tmp_path)
+    session_root = tmp_path / ("deep_validation_output_" + "x" * 40) / ("materialized_profile_" + "y" * 40) / ("sessions_" + "z" * 40)
+    session_runner_module._mkdir(session_root)
+
+    package = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=session_root,
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+
+    assert session_runner_module._path_exists(package.manifest_path)
+    assert session_runner_module._path_exists(package.blocks[0].manifest_path)
+    assert session_runner_module._path_exists(package.blocks[0].wav_path)
+    assert package.blocks[0].manifest_path.parent == output_prepared_blocks_dir(session_root) / package.session_id / "blocks"
+
+
 def test_prepare_segment_run_package_advances_woojer_tactile_drive_in_block_wav(tmp_path: Path):
     run_manifest = _segment_run_setup_fixture(tmp_path)
     block_csv = run_manifest.parent.parent / "5_block_csv_preview" / "block_01_final.csv"

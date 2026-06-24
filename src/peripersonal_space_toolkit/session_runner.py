@@ -22,7 +22,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
-from .design import StimulusDesign, experiment_schedule_rows, export_protocol_csv, save_design, validate_design
+from .design import StimulusDesign, design_to_dict, experiment_schedule_rows, export_protocol_csv, validate_design
 from .loudness import (
     loudness_manifest_payload,
     loudness_policy_for_design,
@@ -553,9 +553,24 @@ def _path_exists(path: str | Path) -> bool:
         return False
 
 
+def _mkdir(path: str | Path) -> None:
+    os.makedirs(_filesystem_path(path), exist_ok=True)
+
+
 def _read_text_file(path: str | Path, *, encoding: str = "utf-8") -> str:
     with open(_filesystem_path(path), "r", encoding=encoding) as handle:
         return handle.read()
+
+
+def _write_text_file(path: str | Path, text: str, *, encoding: str = "utf-8") -> None:
+    target = Path(path)
+    _mkdir(target.parent)
+    with open(_filesystem_path(target), "w", encoding=encoding) as handle:
+        handle.write(text)
+
+
+def _write_json_file(path: str | Path, payload: Any) -> None:
+    _write_text_file(path, json.dumps(_json_ready(payload), indent=2, sort_keys=True) + "\n")
 
 
 def _soundfile_path(path: str | Path) -> str:
@@ -687,9 +702,9 @@ def prepare_run_package(
     session_dir = session_root / session_id
     run_package_dir = output_runner_logs_dir(session_root) / session_id
     block_dir = output_prepared_blocks_dir(session_root) / session_id / "blocks"
-    block_dir.mkdir(parents=True, exist_ok=True)
-    run_package_dir.mkdir(parents=True, exist_ok=True)
-    session_dir.mkdir(parents=True, exist_ok=True)
+    _mkdir(block_dir)
+    _mkdir(run_package_dir)
+    _mkdir(session_dir)
 
     design_path = run_package_dir / "design.json"
     protocol_path = run_package_dir / "protocol_schedule.csv"
@@ -701,7 +716,7 @@ def prepare_run_package(
     if not rows:
         raise ValueError("The current design produced no participant schedule rows.")
 
-    save_design(design, design_path)
+    _write_json_file(design_path, design_to_dict(design))
     export_protocol_csv(design, protocol_path)
 
     wav_by_label = _wav_lookup(wavs)
@@ -1438,7 +1453,7 @@ def _segment_block_cache_paths(cache_key: str, block_cache_root: Path = DEFAULT_
 
 
 def _link_or_copy_cached_block(source: Path, target: Path) -> str:
-    target.parent.mkdir(parents=True, exist_ok=True)
+    _mkdir(target.parent)
     if _path_exists(target):
         Path(_filesystem_path(target)).unlink()
     try:
@@ -1484,7 +1499,7 @@ def _write_block_cache_manifest(
     channels: int,
     trial_rows: list[dict[str, Any]],
 ) -> None:
-    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    _mkdir(manifest_path.parent)
     payload = {
         "schema": BLOCK_WAV_CACHE_SCHEMA,
         "version": BLOCK_WAV_CACHE_VERSION,
@@ -1503,7 +1518,7 @@ def _write_block_cache_manifest(
         "trials": _cache_manifest_trial_payload(trial_rows),
         "created_at": datetime.now().isoformat(timespec="seconds"),
     }
-    manifest_path.write_text(json.dumps(_json_ready(payload), indent=2, sort_keys=True), encoding="utf-8")
+    _write_json_file(manifest_path, payload)
 
 
 def _read_valid_block_cache(
@@ -1658,9 +1673,9 @@ def prepare_segment_run_package(
     session_dir = session_root / session_id
     run_package_dir = output_runner_logs_dir(session_root) / session_id
     block_dir = output_prepared_blocks_dir(session_root) / session_id / "blocks"
-    block_dir.mkdir(parents=True, exist_ok=True)
-    run_package_dir.mkdir(parents=True, exist_ok=True)
-    session_dir.mkdir(parents=True, exist_ok=True)
+    _mkdir(block_dir)
+    _mkdir(run_package_dir)
+    _mkdir(session_dir)
     _emit_prepare_progress(
         progress_callback,
         "Preparing Segment 6 setup",
@@ -1678,9 +1693,9 @@ def prepare_segment_run_package(
 
     design_path = run_package_dir / "design.json"
     if design is None:
-        design_path.write_text("{}\n", encoding="utf-8")
+        _write_text_file(design_path, "{}\n")
     else:
-        save_design(design, design_path)
+        _write_json_file(design_path, design_to_dict(design))
 
     protocol_path = run_package_dir / "protocol_schedule.csv"
     _write_segment_protocol_schedule(protocol_path, participant_rows, clean_participant, order_csv_path)
@@ -1771,7 +1786,7 @@ def prepare_segment_run_package(
             cache_manifest_path = Path()
             if use_block_cache and cache_key:
                 cache_wav_path, cache_manifest_path = _segment_block_cache_paths(cache_key, block_cache_root)
-                cache_wav_path.parent.mkdir(parents=True, exist_ok=True)
+                _mkdir(cache_wav_path.parent)
                 if _path_exists(cache_wav_path):
                     Path(_filesystem_path(cache_wav_path)).unlink()
                 materialize_target = cache_wav_path
@@ -4228,8 +4243,8 @@ def _empty_topup_source_block() -> RunBlock:
 
 def _write_csv_rows(path: Path, rows: list[dict[str, Any]]) -> None:
     fieldnames = sorted({key for row in rows for key in row.keys()}) if rows else ["empty"]
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", newline="", encoding="utf-8") as handle:
+    _mkdir(path.parent)
+    with open(_filesystem_path(path), "w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
@@ -4249,7 +4264,7 @@ def _append_topup_block_to_session_manifest(manifest_path: Path, block: RunBlock
     outputs["topup_block_manifest_csv"] = str(block.manifest_path)
     outputs["topup_block_manifest_json"] = str(block.metadata.get("topup_manifest_json", ""))
     manifest["outputs"] = outputs
-    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    _write_json_file(manifest_path, manifest)
 
 
 def _load_segment_run_setup(run_setup_manifest_path: Path) -> tuple[dict[str, Any], list[dict[str, str]], Path]:
@@ -4352,7 +4367,7 @@ def _materialize_session_instruction_profile(value: Any, *, session_dir: Path, s
         if not _path_exists(source) or Path(source).is_dir():
             slots.append(slot)
             continue
-        instruction_dir.mkdir(parents=True, exist_ok=True)
+        _mkdir(instruction_dir)
         suffix = source.suffix or ".wav"
         target = instruction_dir / f"{_slug(str(slot.get('slot') or source.stem))}{suffix}"
         if _path_exists(target) and _sha256_file(target) != _sha256_file(source):
@@ -4541,8 +4556,8 @@ def _write_segment_protocol_schedule(path: Path, rows: list[dict[str, str]], par
         "duration_ms",
         "source_segment6_csv_path",
     ]
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", newline="", encoding="utf-8") as handle:
+    _mkdir(path.parent)
+    with open(_filesystem_path(path), "w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         for row in rows:
@@ -4822,8 +4837,8 @@ def _write_segment_block_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         "Repetition_Index",
         "Fractional_Extra",
     ]
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", newline="", encoding="utf-8") as handle:
+    _mkdir(path.parent)
+    with open(_filesystem_path(path), "w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
@@ -5229,8 +5244,8 @@ def _write_session_manifest(package: RunPackage, wavs: list[RenderedWav]) -> Non
             "prepared_blocks_dir": str(_package_prepared_blocks_dir(package)),
         },
     }
-    loudness_manifest_path.write_text(json.dumps(loudness_manifest, indent=2), encoding="utf-8")
-    package.manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    _write_json_file(loudness_manifest_path, loudness_manifest)
+    _write_json_file(package.manifest_path, manifest)
 
 
 def _write_timing_qc_csv(events: Iterable[Any], path: Path) -> Path:

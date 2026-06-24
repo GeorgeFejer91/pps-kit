@@ -2768,3 +2768,61 @@ def test_recording_layer_alignment_compares_digital_physical_and_lsl(tmp_path: P
     assert report["audio"]["interchannel_skew"]["right_minus_left_ms"] == pytest.approx(0.0)
     assert report["internal_lsl"]["missing_marker_event_ids"] == []
     assert report["internal_lsl"]["lsl_timestamp_error_ms"]["p95_ms"] == pytest.approx(0.0)
+
+
+def test_study5_baseline_no_looming_metrics_require_instruction_audio():
+    audit = _load_script("audit_study5_baseline_propagation.py")
+    sample_rate = 1000
+    data = np.zeros((8000, 3), dtype=np.float32)
+    tone = np.sin(np.linspace(0, np.pi * 16, 4000, endpoint=False)).astype(np.float32) * 0.02
+    data[:4000, 0] = tone
+    data[:4000, 1] = tone
+    data[4800:4900, 2] = 0.05
+
+    ok = audit.baseline_no_looming_metrics(data, sample_rate, looming_offset_s=4.0)
+    assert ok["passed"]
+    assert ok["pre_instruction_audio_peak"] > 0.01
+    assert ok["looming_interval_audio_peak"] == pytest.approx(0.0)
+    assert ok["tactile_peak"] == pytest.approx(0.05)
+
+    missing_instruction = data.copy()
+    missing_instruction[:4000, :2] = 0.0
+    assert not audit.baseline_no_looming_metrics(missing_instruction, sample_rate, looming_offset_s=4.0)["passed"]
+
+    leaking_looming = data.copy()
+    leaking_looming[4200:4300, 0] = 0.02
+    assert not audit.baseline_no_looming_metrics(leaking_looming, sample_rate, looming_offset_s=4.0)["passed"]
+
+
+def test_study5_prepared_block_audit_flags_baseline_silent():
+    audit = _load_script("audit_study5_baseline_propagation.py")
+    families = ["baseline"] * 10 + ["audio_tactile"] * 20 + ["catch"] * 4
+    rows = []
+    for index, family in enumerate(families, start=1):
+        phase = "Inhale" if index % 2 else "Exhale"
+        if family == "baseline":
+            stem = "baseline_no_looming_inhale4000ms_white_soa300ms_ch3.wav"
+        elif family == "audio_tactile":
+            stem = "inhale4000ms_whitefrontal4000ms_soa300ms_ch3.wav"
+        else:
+            stem = "catch_inhale4000ms_whitefrontal4000ms_audio.wav"
+        if index == 1:
+            stem = "baseline_silent_inhale4000ms_white_soa300ms_ch3.wav"
+        rows.append(
+            {
+                "Trial_Number": index,
+                "Family": family,
+                "Respiratory_Phase": phase,
+                "Row_Label": f"{phase} trial type",
+                "Source_File_Name": stem,
+                "Trial_File_Path": f"C:/tmp/{stem}",
+            }
+        )
+
+    report = audit._audit_block_rows(rows, label="Block_01", expect_block_counts=True)
+
+    assert not report["passed"]
+    assert report["checks"]["trial_count"]
+    assert report["checks"]["family_counts"]
+    assert report["checks"]["phase_alternation"]
+    assert not report["checks"]["no_stale_baseline_silent"]
