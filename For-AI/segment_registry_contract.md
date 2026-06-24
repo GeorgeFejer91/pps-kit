@@ -187,7 +187,7 @@ Segment 3 turns Segment 2 sequence designs into final trial WAV assets: 3-channe
   - Channel 2: right auditory/binaural channel.
   - Channel 3: tactile cue channel.
 - The tactile cue must always be placed in channel 3 for tactile-bearing trial files.
-- Baseline trials still contain the tactile cue in channel 3. If the baseline strategy calls for silent audio, channels 1 and 2 are silent while channel 3 carries the tactile cue.
+- Baseline trials still contain the tactile cue in channel 3. If the baseline strategy calls for absent looming/stimulus audio, only the looming/stimulus component is removed from channels 1 and 2; fixed instruction components such as inhale/exhale cues remain audible. Fully silent auditory channels are reserved for designs that deliberately have no non-looming audio components to preserve.
 - Catch trial files are the exception: they are stereo/binaural audio-only copies of Segment 2 sequence WAVs and do not carry a tactile cue.
 
 ### Folder And File Operations
@@ -219,8 +219,8 @@ Example:
       inhale4000ms_pinklooming4000ms_soa300ms_tac120ms_total8000ms_ch3.wav
       inhale4000ms_pinklooming4000ms_soa800ms_tac120ms_total8000ms_ch3.wav
     baseline/
-      baseline_silent_inhale4000ms_pinklooming4000ms_soa300ms_tac120ms_total8000ms_ch3.wav
-      baseline_silent_inhale4000ms_pinklooming4000ms_soa800ms_tac120ms_total8000ms_ch3.wav
+      baseline_no_looming_inhale4000ms_pinklooming4000ms_soa300ms_tac120ms_total8000ms_ch3.wav
+      baseline_no_looming_inhale4000ms_pinklooming4000ms_soa800ms_tac120ms_total8000ms_ch3.wav
     catch_trials/
       catch_inhale4000ms_pinklooming4000ms_total8000ms_audio.wav
 ```

@@ -1475,7 +1475,11 @@ def test_dashboard_validates_full_study5_segment0_to_3_pipeline(tmp_path: Path):
     assert baseline_wav.shape[1] == 3
     assert baseline_row["baseline_mode"] == "tactile_only"
     assert baseline_row["channel_role_map"]["3"] == "tactile cue"
-    assert np.max(np.abs(baseline_wav[:, :2])) == pytest.approx(0.0)
+    assert "baseline_no_looming" in Path(baseline_row["file_path"]).name
+    looming_onset_frame = int(round(float(baseline_row["looming_segment_onset_s"]) * baseline_sr))
+    assert looming_onset_frame > 0
+    assert np.max(np.abs(baseline_wav[:looming_onset_frame, :2])) > 0.01
+    assert np.max(np.abs(baseline_wav[looming_onset_frame:, :2])) == pytest.approx(0.0)
     assert np.max(np.abs(baseline_wav[:, 2])) > 0.01
     assert catch_sr == catch_row["sample_rate_hz"]
     assert catch_wav.shape[1] == 2
@@ -2692,7 +2696,7 @@ def test_dashboard_bakes_baseline_tactile_trial_files_with_three_channels(tmp_pa
     assert "row_" not in Path(baseline_row["file_path"]).name.lower()
     assert "soa10ms" in Path(audio_row["file_path"]).name
     assert "tac" in Path(audio_row["file_path"]).name
-    assert "baseline_silent" in Path(baseline_row["file_path"]).name
+    assert "baseline_no_looming" in Path(baseline_row["file_path"]).name
     assert audio_row["looming_segment_onset_s"] == pytest.approx(fixed_frames / sample_rate)
     assert audio_row["tactile_onset_s"] == pytest.approx(fixed_frames / sample_rate + 0.010)
     audio, sr = sf.read(dashboard_app._soundfile_path(audio_row["file_path"]), dtype="float32", always_2d=True)
@@ -2707,7 +2711,8 @@ def test_dashboard_bakes_baseline_tactile_trial_files_with_three_channels(tmp_pa
     assert baseline.shape[1] == 3
     assert baseline_row["baseline_mode"] == "tactile_only"
     assert baseline_row["channel_role_map"]["3"] == "tactile cue"
-    assert np.max(np.abs(baseline[:, :2])) == pytest.approx(0.0)
+    assert np.max(np.abs(baseline[:fixed_frames, :2])) > 0.01
+    assert np.max(np.abs(baseline[fixed_frames:, :2])) == pytest.approx(0.0)
     assert np.max(np.abs(baseline[:, 2])) > 0.01
     state = client.get("/api/state").json()
     assert state["project_segments"]["2_trial_sequence_designs"]["status"] == "ready"

@@ -4974,7 +4974,7 @@ def _trial_bake_file_stem(
     baseline_mode: str = "",
 ) -> str:
     if family == "baseline":
-        mode = "silent" if baseline_mode == "tactile_only" else "audio"
+        mode = "no_looming" if baseline_mode == "tactile_only" else "audio"
         descriptor = _compact_trial_content_descriptor(variant, max_length=28)
         stem = f"baseline_{mode}_{descriptor}_soa{_duration_token(soa_ms)}_tac{_duration_token(tactile_duration_ms)}_total{_duration_token(total_duration_ms)}_ch3"
     elif family == "catch":
@@ -5138,7 +5138,28 @@ def _write_three_channel_trial_wav(output_path: Path, source_audio_path: Path, t
     return float(combined.shape[0] / sample_rate) if sample_rate else 0.0, "python_soundfile"
 
 
-def _write_audio_from_segments(path: Path, segments: list[dict[str, Any]], *, silence_all_audio: bool) -> float:
+def _silence_segment_for_baseline(
+    segment: dict[str, Any],
+    *,
+    silence_all_audio: bool,
+    silence_looming_audio: bool,
+) -> bool:
+    if silence_all_audio:
+        return True
+    if not silence_looming_audio:
+        return False
+    kind = str(segment.get("kind") or segment.get("source_kind") or "").strip().lower()
+    role = str(segment.get("loudness_role") or "").strip().lower()
+    return bool(segment.get("is_looming_stimulus")) or kind == "looming_stimulus" or role == "looming_stimulus"
+
+
+def _write_audio_from_segments(
+    path: Path,
+    segments: list[dict[str, Any]],
+    *,
+    silence_all_audio: bool,
+    silence_looming_audio: bool = False,
+) -> float:
     import numpy as np
     import soundfile as sf
 
@@ -5147,7 +5168,11 @@ def _write_audio_from_segments(path: Path, segments: list[dict[str, Any]], *, si
     sample_rate = 0
     for segment in segments:
         duration_s = max(0.0, float(segment.get("duration_s") or 0.0))
-        should_silence = silence_all_audio
+        should_silence = _silence_segment_for_baseline(
+            segment,
+            silence_all_audio=silence_all_audio,
+            silence_looming_audio=silence_looming_audio,
+        )
         source_text = str(segment.get("path") or "").strip()
         source_path = Path(source_text) if source_text else Path()
         if source_text and _path_exists(source_path) and not should_silence:
@@ -5369,7 +5394,12 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
                     else:
                         source_stem = _descriptor_label(f"baseline_source_{variant_key}_soa{soa_ms:04d}ms")
                         baseline_source_path = work_dir / f"{source_stem}.wav"
-                        _write_audio_from_segments(baseline_source_path, segments, silence_all_audio=True)
+                        _write_audio_from_segments(
+                            baseline_source_path,
+                            segments,
+                            silence_all_audio=False,
+                            silence_looming_audio=True,
+                        )
                     tactile_onset_s = looming_onset_s + soa_ms / 1000.0
                     baseline_info = _audio_file_info(baseline_source_path)
                     tactile_duration_ms = _tactile_cue_duration_ms(int(baseline_info["sample_rate"]))
