@@ -11,8 +11,10 @@ from __future__ import annotations
 
 import argparse
 import csv
+import glob
 import json
 import math
+import os
 import statistics
 import sys
 import time
@@ -33,6 +35,8 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
+
+from peripersonal_space_toolkit.output_layout import _filesystem_path  # noqa: E402
 
 
 SCHEMA = "pps-protocol11-study5-readiness-audit.v1"
@@ -97,12 +101,68 @@ def _json_ready(value: Any) -> Any:
     return value
 
 
+def _mkdir(path: Path | str) -> None:
+    os.makedirs(_filesystem_path(Path(path)), exist_ok=True)
+
+
+def _path_exists(path: Path | str) -> bool:
+    return os.path.exists(_filesystem_path(Path(path)))
+
+
+def _path_is_file(path: Path | str) -> bool:
+    return os.path.isfile(_filesystem_path(Path(path)))
+
+
+def _path_is_dir(path: Path | str) -> bool:
+    return os.path.isdir(_filesystem_path(Path(path)))
+
+
+def _path_size(path: Path | str) -> int:
+    try:
+        return os.path.getsize(_filesystem_path(Path(path)))
+    except OSError:
+        return 0
+
+
+def _path_mtime(path: Path | str) -> float:
+    try:
+        return os.path.getmtime(_filesystem_path(Path(path)))
+    except OSError:
+        return 0.0
+
+
+def _display_path(value: str) -> Path:
+    if value.startswith("\\\\?\\UNC\\"):
+        return Path("\\\\" + value[len("\\\\?\\UNC\\") :])
+    if value.startswith("\\\\?\\"):
+        return Path(value[len("\\\\?\\") :])
+    return Path(value)
+
+
+def _glob_files(directory: Path, pattern: str, *, recursive: bool = False) -> list[Path]:
+    if not _path_is_dir(directory):
+        return []
+    matches = glob.glob(os.path.join(_filesystem_path(directory), pattern), recursive=recursive)
+    return sorted(_display_path(item) for item in matches)
+
+
+def _read_text(path: Path, *, encoding: str) -> str:
+    with open(_filesystem_path(path), "r", encoding=encoding) as handle:
+        return handle.read()
+
+
+def _write_text(path: Path, text: str) -> None:
+    _mkdir(path.parent)
+    with open(_filesystem_path(path), "w", encoding="utf-8") as handle:
+        handle.write(text)
+
+
 def _read_json(path: Path) -> dict[str, Any]:
-    if not path.is_file():
+    if not _path_is_file(path):
         return {}
     for encoding in ("utf-8", "utf-8-sig", "utf-16"):
         try:
-            return json.loads(path.read_text(encoding=encoding))
+            return json.loads(_read_text(path, encoding=encoding))
         except (UnicodeError, json.JSONDecodeError):
             continue
         except Exception:
@@ -111,15 +171,14 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 
 def _read_csv(path: Path) -> list[dict[str, str]]:
-    if not path.is_file():
+    if not _path_is_file(path):
         return []
-    with path.open(newline="", encoding="utf-8-sig") as handle:
+    with open(_filesystem_path(path), newline="", encoding="utf-8-sig") as handle:
         return list(csv.DictReader(handle))
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(_json_ready(payload), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    _write_text(path, json.dumps(_json_ready(payload), indent=2, sort_keys=True) + "\n")
 
 
 def _write_markdown(path: Path, report: dict[str, Any]) -> None:
@@ -148,8 +207,7 @@ def _write_markdown(path: Path, report: dict[str, Any]) -> None:
             "This audit verifies completed runner artifacts. It can prove XDF/local audio-evidence consistency and expected-vs-observed software behavior for the supplied run, but it does not replace physical loopback or Woojer mechanical-onset measurement.",
         ]
     )
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    _write_text(path, "\n".join(lines) + "\n")
 
 
 def _norm(value: Any) -> str:
@@ -206,10 +264,10 @@ def _resolve_path(value: Any, *, base: Path) -> Path:
     if path.is_absolute():
         return path
     base_candidate = base / path
-    if base_candidate.exists():
+    if _path_exists(base_candidate):
         return base_candidate
     repo_candidate = REPO_ROOT / path
-    if repo_candidate.exists():
+    if _path_exists(repo_candidate):
         return repo_candidate
     return base_candidate
 
@@ -220,7 +278,7 @@ def _path_is_set(path: Path | None) -> bool:
 
 def _first_existing(paths: Iterable[Path]) -> Path | None:
     for path in paths:
-        if _path_is_set(path) and path.exists():
+        if _path_is_set(path) and _path_exists(path):
             return path
     return None
 
@@ -235,10 +293,10 @@ def _latest_analysis_csv(session_dir: Path, suffix: str, *, analysis_dir: Path |
     matches: list[Path] = []
     for candidate in candidates:
         key = str(candidate)
-        if key in seen or not candidate.is_dir():
+        if key in seen or not _path_is_dir(candidate):
             continue
         seen.add(key)
-        matches.extend(sorted(candidate.glob(f"*_{suffix}.csv")))
+        matches.extend(_glob_files(candidate, f"*_{suffix}.csv"))
     return matches[-1] if matches else None
 
 
@@ -251,7 +309,7 @@ def _block_manifest_paths(session_dir: Path, manifest: dict[str, Any]) -> list[P
         if path:
             paths.append(path)
     if not paths:
-        paths.extend(sorted((session_dir / "blocks").glob("*.csv")))
+        paths.extend(_glob_files(session_dir / "blocks", "*.csv"))
     return list(dict.fromkeys(paths))
 
 
@@ -264,7 +322,7 @@ def _block_wav_paths(session_dir: Path, manifest: dict[str, Any]) -> list[Path]:
         if path:
             paths.append(path)
     if not paths:
-        paths.extend(sorted((session_dir / "blocks").glob("*.wav")))
+        paths.extend(_glob_files(session_dir / "blocks", "*.wav"))
     return list(dict.fromkeys(paths))
 
 
@@ -329,19 +387,19 @@ def _file_inventory(paths: dict[str, Path]) -> dict[str, dict[str, Any]]:
     for key, path in paths.items():
         inventory[key] = {
             "path": str(path),
-            "exists": path.is_file(),
-            "bytes": path.stat().st_size if path.is_file() else 0,
+            "exists": _path_is_file(path),
+            "bytes": _path_size(path) if _path_is_file(path) else 0,
         }
     return inventory
 
 
 def _xdf_summary(path: Path) -> dict[str, Any]:
-    if not path.is_file():
+    if not _path_is_file(path):
         return {"exists": False, "loaded": False, "sample_count": 0, "streams": [], "error": "missing"}
     try:
         import pyxdf  # type: ignore
 
-        streams, _header = pyxdf.load_xdf(str(path))
+        streams, _header = pyxdf.load_xdf(_filesystem_path(path))
     except Exception as exc:  # pragma: no cover - parser error surface is environment-specific
         return {"exists": True, "loaded": False, "sample_count": 0, "streams": [], "error": str(exc)}
     stream_summaries = []
@@ -365,10 +423,10 @@ def _xdf_summary(path: Path) -> dict[str, Any]:
 
 
 def _screenshot_summary(path: Path) -> dict[str, Any]:
-    if not path.is_file():
+    if not _path_is_file(path):
         return {"exists": False, "valid": False, "nonblank": False, "error": "missing"}
     try:
-        with Image.open(path) as image:
+        with Image.open(_filesystem_path(path)) as image:
             image.load()
             stat = ImageStat.Stat(image.convert("RGB"))
             extrema = image.convert("RGB").getextrema()
@@ -387,14 +445,15 @@ def _screenshot_summary(path: Path) -> dict[str, Any]:
 
 
 def _wav_scan(path: Path, *, blocksize: int = 65536) -> dict[str, Any]:
-    if not path.is_file():
+    if not _path_is_file(path):
         return {"exists": False, "readable": False, "error": "missing"}
     try:
-        info = sf.info(str(path))
+        audio_path = _filesystem_path(path)
+        info = sf.info(audio_path)
         peaks = np.zeros(int(info.channels), dtype=np.float64)
         rms_sum = np.zeros(int(info.channels), dtype=np.float64)
         frames_seen = 0
-        with sf.SoundFile(str(path)) as handle:
+        with sf.SoundFile(audio_path) as handle:
             while True:
                 chunk = handle.read(blocksize, dtype="float32", always_2d=True)
                 if chunk.size == 0:
@@ -532,13 +591,13 @@ def _analysis_selection_audit(
 
 def _response_marker_reports(artifact_dir: Path) -> list[dict[str, Any]]:
     reports = []
-    for path in sorted(artifact_dir.glob("**/response_marker_loopback_report.json")):
+    for path in _glob_files(artifact_dir, "**/response_marker_loopback_report.json", recursive=True):
         payload = _read_json(path)
         if not payload:
             continue
         payload = dict(payload)
         payload["_path"] = str(path)
-        payload["_mtime"] = path.stat().st_mtime
+        payload["_mtime"] = _path_mtime(path)
         reports.append(payload)
     return reports
 
@@ -558,7 +617,7 @@ def _response_marker_report_from_audio(
     recordings: list[Path],
     output_dir: Path,
 ) -> dict[str, Any]:
-    if not events_csv.is_file() or not recordings:
+    if not _path_is_file(events_csv) or not recordings:
         return {"exists": False, "passed": False, "generated": False, "error": "missing events.csv or audio evidence recordings"}
     try:
         from compare_response_marker_loopback import compare_loopback  # type: ignore
@@ -579,10 +638,10 @@ def _response_marker_report_from_audio(
 
 
 def _audio_evidence_records(session_dir: Path) -> list[dict[str, Any]]:
-    sidecars = sorted(session_dir.glob("*audio_evidence.output_evidence.json"))
+    sidecars = _glob_files(session_dir, "*audio_evidence.output_evidence.json")
     recordings_dir = session_dir / "recordings"
-    if not sidecars and recordings_dir.exists():
-        sidecars = sorted(recordings_dir.glob("*output_evidence.json"))
+    if not sidecars and _path_exists(recordings_dir):
+        sidecars = _glob_files(recordings_dir, "*output_evidence.json")
     records: list[dict[str, Any]] = []
     for sidecar_path in sidecars:
         sidecar = _read_json(sidecar_path)
@@ -601,7 +660,7 @@ def _audio_evidence_records(session_dir: Path) -> list[dict[str, Any]]:
             }
         )
     if not records:
-        for wav_path in sorted(session_dir.glob("*audio_evidence.wav")):
+        for wav_path in _glob_files(session_dir, "*audio_evidence.wav"):
             records.append({"sidecar_path": Path(), "wav_path": wav_path, "sidecar": {}, "scan": _wav_scan(wav_path)})
     return records
 
@@ -699,7 +758,7 @@ def _computed_reconciliation_report(
             for record in audio_records
         ],
     }
-    output_dir.mkdir(parents=True, exist_ok=True)
+    _mkdir(output_dir)
     _write_json(output_dir / "lsl_xdf_audio_reconciliation_report.json", report)
     return report
 
@@ -1185,7 +1244,14 @@ def audit_readiness(
     marker_audio_ok = bool(response_marker_report.get("passed")) and int(chosen_marker_report.get("expected_marker_count") or -1) == response_marker_count and float(chosen_marker_report.get("detection_rate") or 0.0) >= 0.95 and float(residual.get("p95_ms") or 0.0) <= 2.0
     add(Criterion("response_marker_path", "audio_evidence_response_marker_loopback_passed", marker_audio_ok, "Local audio-evidence response-marker pulse recovery passes with stable residuals.", evidence=response_marker_report))
 
-    analysis_files = {suffix: {"path": str(path) if path else "", "exists": bool(path and path.is_file()), "bytes": path.stat().st_size if path and path.is_file() else 0} for suffix, path in analysis_paths.items()}
+    analysis_files = {
+        suffix: {
+            "path": str(path) if path else "",
+            "exists": bool(path and _path_is_file(path)),
+            "bytes": _path_size(path) if path and _path_is_file(path) else 0,
+        }
+        for suffix, path in analysis_paths.items()
+    }
     add(Criterion("analysis_outputs", "all_expected_analysis_csvs_exist", all(item["exists"] and item["bytes"] > 0 for item in analysis_files.values()), "Expected analysis CSV family exists.", evidence=analysis_files))
     expected_hit_ok = (
         bool(analysis_selection["rows_match_declared_standard_tactile_count"])
