@@ -609,6 +609,7 @@ def test_focus_mode_default_capture_checkboxes_are_operator_opt_out(tmp_path: Pa
 def test_focus_mode_setup_submit_prepares_controller_before_start(tmp_path: Path):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
+        from PySide6.QtTest import QTest
         from PySide6.QtWidgets import QApplication
         from peripersonal_space_toolkit import focus_app
     except Exception as exc:  # pragma: no cover - depends on optional GUI deps
@@ -625,8 +626,15 @@ def test_focus_mode_setup_submit_prepares_controller_before_start(tmp_path: Path
             self.capture_options = capture_options
             self.runner_metadata = dict(runner_metadata or {})
             self.enable_topup = enable_topup
+            self.topup_approval_callback = _kwargs.get("topup_approval_callback")
             self.audio_engine = None
-            created.append(self.runner_metadata)
+            created.append(
+                {
+                    "runner_metadata": self.runner_metadata,
+                    "enable_topup": bool(enable_topup),
+                    "topup_approval_callback": self.topup_approval_callback,
+                }
+            )
 
     window = focus_app.FocusModeWindow(
         q,
@@ -644,9 +652,16 @@ def test_focus_mode_setup_submit_prepares_controller_before_start(tmp_path: Path
     assert not created
 
     _fill_required_setup(window)
-    assert window._submit_participant_setup()
+    QTest.mouseClick(window.setup_submit_button, q["Qt"].MouseButton.LeftButton)
+    app.processEvents()
 
-    assert created and created[0]["participant_name"] == "Mock Participant"
+    assert created and created[0]["runner_metadata"]["participant_name"] == "Mock Participant"
+    assert created[0]["enable_topup"] is True
+    callback = created[0]["topup_approval_callback"]
+    assert callable(callback)
+    assert callback({"missed_trial_count": 1, "topup_trial_count": 1, "filler_trial_count": 0}) is True
+    assert window.pending_topup_approval_request is None
+    assert window.validation_topup_approval_records[-1]["mode"] == "setup_checkbox_auto_play"
     assert window.demographics_submitted
     assert window.controller is not None
     assert window.start_button.isEnabled()

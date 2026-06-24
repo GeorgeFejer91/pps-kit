@@ -8,7 +8,7 @@ Validate that opt-in missed-trial top-up mode works as a complete runner workflo
 - deliberately missed tactile trials are captured by the live ledger;
 - one shortened top-up block is synthesized from existing trial WAVs;
 - row-structure filler trials are inserted only when needed;
-- the top-up block plays after operator approval;
+- the top-up block plays automatically when missed-trial top-up was enabled during setup;
 - final analysis replaces original missed outcomes with top-up rescue outcomes.
 
 ## Scope

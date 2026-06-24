@@ -345,8 +345,8 @@ failure mode.
 
 - [ ] A no-miss run logs `topup_not_needed` and creates no played top-up block.
 - [ ] Controlled misses produce `topup_ledger.csv/json`, a draft manifest,
-  `topup_block_ready`, approval, a played top-up block, and final analysis
-  rescue rows.
+  `topup_block_ready`, checked-setup auto-play, a played top-up block, and
+  final analysis rescue rows.
 - [ ] Miss reasons are covered: `response_deadline_expired`,
   `next_trial_started`, and `session_or_block_finished`.
 - [ ] A multi-part run creates part-aware top-up blocks after each part
@@ -358,8 +358,8 @@ failure mode.
 - [ ] Top-up response clicks bind only to their top-up rescue/filler trial and
   cannot retroactively convert an older original miss into a hit across block
   or top-up context boundaries.
-- [ ] Denied approval logs `topup_block_skipped` and leaves original misses
-  unresolved.
+- [ ] Top-up disabled at setup produces no ledger/draft/block and leaves the run
+  otherwise unaffected.
 - [ ] Top-up materialization failure logs `topup_block_materialize_failed` but
   still writes recoverable outputs.
 - [ ] Misses inside top-up do not recurse into another top-up block.
@@ -455,8 +455,8 @@ for each scenario:
 - Boundary-response synthetic run with deterministic early, late, double, and
   out-of-target clicks. The canonical fast software gate is
   `run_protocol11_controlled_response_matrix.py`.
-- Top-up adversarial run across two parts with approval accepted, denied, and
-  failed.
+- Top-up adversarial run across two parts with checked setup auto-play,
+  disabled-at-setup behavior, and materialization failure.
 - Capture-options matrix with LSL, XDF, trigger, and analysis toggles.
   `run_protocol11_capture_options_matrix.py` is the canonical fast local
   output-policy gate; it does not replace realtime Study 5 hardware/XDF/local
