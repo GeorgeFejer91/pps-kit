@@ -478,8 +478,9 @@ def _run_focus_mode_by_mouse(
             package_obj,
             audio_engine=engine,
             capture_options=capture_options,
-            enable_topup=False,
+            enable_topup=True,
             runner_metadata=kwargs.get("runner_metadata"),
+            topup_approval_callback=kwargs.get("topup_approval_callback"),
             instruction_continue_callback=kwargs.get("instruction_continue_callback"),
         )
         controller_holder["controller"] = controller
@@ -494,7 +495,7 @@ def _run_focus_mode_by_mouse(
             write_analysis_csvs=True,
             start_backup_recording=False,
         ),
-        enable_missed_trial_topup=False,
+        enable_missed_trial_topup=True,
         controller_factory=_factory,
     )
     mouse_clicks: list[dict[str, Any]] = []
@@ -708,7 +709,9 @@ def _run_standalone_launcher_validation(args: argparse.Namespace) -> int:
     try:
         focus_app.run_focus_window = _validation_focus_window
         previous_auto_click = os.environ.get("PPS_FOCUS_VALIDATION_LAUNCHER_AUTO_CLICK")
+        previous_auto_topup = os.environ.get("PPS_FOCUS_VALIDATION_AUTO_APPROVE_TOPUP")
         os.environ["PPS_FOCUS_VALIDATION_LAUNCHER_AUTO_CLICK"] = "1"
+        os.environ["PPS_FOCUS_VALIDATION_AUTO_APPROVE_TOPUP"] = "1"
         q["QTimer"].singleShot(300, _click_launcher)
         exit_code = focus_app.run_launcher_window(
             capture_options=SessionCaptureOptions(
@@ -717,7 +720,7 @@ def _run_standalone_launcher_validation(args: argparse.Namespace) -> int:
                 write_analysis_csvs=True,
                 start_backup_recording=False,
             ),
-            enable_missed_trial_topup=False,
+            enable_missed_trial_topup=True,
             participant_id=args.participant_id,
         )
     finally:
@@ -726,6 +729,10 @@ def _run_standalone_launcher_validation(args: argparse.Namespace) -> int:
             os.environ.pop("PPS_FOCUS_VALIDATION_LAUNCHER_AUTO_CLICK", None)
         else:
             os.environ["PPS_FOCUS_VALIDATION_LAUNCHER_AUTO_CLICK"] = previous_auto_click
+        if previous_auto_topup is None:
+            os.environ.pop("PPS_FOCUS_VALIDATION_AUTO_APPROVE_TOPUP", None)
+        else:
+            os.environ["PPS_FOCUS_VALIDATION_AUTO_APPROVE_TOPUP"] = previous_auto_topup
 
     focus_result = dict(focus_holder.get("focus_mode") or {})
     report = {
@@ -922,6 +929,7 @@ def _run_packaged_standalone_app_background_validation(args: argparse.Namespace)
     env["QT_QPA_PLATFORM"] = "offscreen"
     env["PPS_FOCUS_VALIDATION_FAST_AUDIO"] = "1"
     env["PPS_FOCUS_VALIDATION_AUTO_CLICK"] = "1"
+    env["PPS_FOCUS_VALIDATION_AUTO_APPROVE_TOPUP"] = "1"
     env["PPS_FOCUS_VALIDATION_LAUNCHER_AUTO_CLICK"] = "1"
     env["PPS_FOCUS_VALIDATION_PROFILE"] = STUDY5_TEMPLATE_ID
     env["PPS_FOCUS_VALIDATION_AUTO_CLOSE_MS"] = str(int(float(args.timeout_s) * 1000))
@@ -929,30 +937,37 @@ def _run_packaged_standalone_app_background_validation(args: argparse.Namespace)
     env["PPS_FOCUS_VALIDATION_REPORT"] = str(focus_report_path)
     env["PPS_FOCUS_VALIDATION_LAUNCHER_REPORT"] = str(launcher_report_path)
 
-    process = subprocess.Popen(
-        [
-            str(runner),
-            "--launcher",
-            "--no-lsl",
-            "--no-internal-xdf",
-            "--no-backup-recording",
-            "--participant-id",
-            args.participant_id,
-        ],
-        cwd=str(REPO_ROOT),
-        env=env,
-    )
+    stdout_path = output_dir / "packaged_runner_background_stdout.log"
+    stderr_path = output_dir / "packaged_runner_background_stderr.log"
     failures: list[str] = []
-    try:
-        exit_code = process.wait(timeout=float(args.timeout_s) + 20.0)
-    except subprocess.TimeoutExpired:
-        process.terminate()
+    with open(_filesystem_path(stdout_path), "w", encoding="utf-8", errors="replace") as stdout_file, open(
+        _filesystem_path(stderr_path), "w", encoding="utf-8", errors="replace"
+    ) as stderr_file:
+        process = subprocess.Popen(
+            [
+                str(runner),
+                "--launcher",
+                "--no-lsl",
+                "--no-internal-xdf",
+                "--no-backup-recording",
+                "--participant-id",
+                args.participant_id,
+            ],
+            cwd=str(REPO_ROOT),
+            env=env,
+            stdout=stdout_file,
+            stderr=stderr_file,
+        )
         try:
-            exit_code = process.wait(timeout=5.0)
+            exit_code = process.wait(timeout=float(args.timeout_s) + 20.0)
         except subprocess.TimeoutExpired:
-            process.kill()
-            exit_code = process.wait(timeout=5.0)
-        failures.append("Packaged runner process did not exit after the background validation timeout.")
+            process.terminate()
+            try:
+                exit_code = process.wait(timeout=5.0)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                exit_code = process.wait(timeout=5.0)
+            failures.append("Packaged runner process did not exit after the background validation timeout.")
 
     launcher_result: dict[str, Any] = {}
     focus_result: dict[str, Any] = {}
@@ -1003,6 +1018,8 @@ def _run_packaged_standalone_app_background_validation(args: argparse.Namespace)
         "click_mode": "offscreen_qt_mouse_events",
         "packaged_runner": str(runner),
         "process_exit_code": exit_code,
+        "stdout_log": str(stdout_path),
+        "stderr_log": str(stderr_path),
         "launcher_report": str(launcher_report_path),
         "focus_report": str(focus_report_path),
         "launcher": launcher_result,
@@ -1035,9 +1052,14 @@ def _run_packaged_standalone_app_validation(args: argparse.Namespace) -> int:
     env = os.environ.copy()
     env["PPS_FOCUS_VALIDATION_FAST_AUDIO"] = "1"
     env["PPS_FOCUS_VALIDATION_AUTO_CLICK"] = "1"
+    env["PPS_FOCUS_VALIDATION_AUTO_APPROVE_TOPUP"] = "1"
     env["PPS_FOCUS_VALIDATION_AUTO_CLOSE_MS"] = str(int(float(args.timeout_s) * 1000))
     env["PPS_FOCUS_VALIDATION_REPORT"] = str(focus_report_path)
 
+    stdout_path = output_dir / "packaged_runner_os_mouse_stdout.log"
+    stderr_path = output_dir / "packaged_runner_os_mouse_stderr.log"
+    stdout_file = open(_filesystem_path(stdout_path), "w", encoding="utf-8", errors="replace")
+    stderr_file = open(_filesystem_path(stderr_path), "w", encoding="utf-8", errors="replace")
     process = subprocess.Popen(
         [
             str(runner),
@@ -1050,6 +1072,8 @@ def _run_packaged_standalone_app_validation(args: argparse.Namespace) -> int:
         ],
         cwd=str(REPO_ROOT),
         env=env,
+        stdout=stdout_file,
+        stderr=stderr_file,
     )
     exit_code: int | None = None
     focus_result: dict[str, Any] = {}
@@ -1117,6 +1141,8 @@ def _run_packaged_standalone_app_validation(args: argparse.Namespace) -> int:
     finally:
         if process.poll() is None:
             process.terminate()
+        stdout_file.close()
+        stderr_file.close()
 
     if _is_file(focus_report_path):
         focus_result = json.loads(_read_text_file(focus_report_path))
@@ -1156,6 +1182,8 @@ def _run_packaged_standalone_app_validation(args: argparse.Namespace) -> int:
         "selected_profile": STUDY5_TEMPLATE_ID,
         "packaged_runner": str(runner),
         "process_exit_code": exit_code,
+        "stdout_log": str(stdout_path),
+        "stderr_log": str(stderr_path),
         "launcher_os_mouse_clicks": launcher_clicks,
         "screenshots": screenshots,
         "focus_report": str(focus_report_path),
