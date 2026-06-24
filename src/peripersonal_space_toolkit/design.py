@@ -6,8 +6,10 @@ import csv
 import itertools
 import json
 import math
+import os
 import random
 import re
+import sys
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
@@ -344,13 +346,26 @@ def expand_trial_strip_source_labels(
     return design
 
 
+def _filesystem_path(path: str | Path) -> str:
+    resolved = Path(path).resolve()
+    text = str(resolved)
+    if sys.platform == "win32" and not text.startswith("\\\\?\\"):
+        if text.startswith("\\\\"):
+            return "\\\\?\\UNC\\" + text.lstrip("\\")
+        return "\\\\?\\" + text
+    return text
+
+
 def load_design(path: Path) -> StimulusDesign:
-    return design_from_dict(json.loads(path.read_text(encoding="utf-8")))
+    with open(_filesystem_path(path), "r", encoding="utf-8") as handle:
+        return design_from_dict(json.loads(handle.read()))
 
 
 def save_design(design: StimulusDesign, path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(design_to_dict(design), indent=2), encoding="utf-8")
+    path = Path(path)
+    os.makedirs(_filesystem_path(path.parent), exist_ok=True)
+    with open(_filesystem_path(path), "w", encoding="utf-8") as handle:
+        handle.write(json.dumps(design_to_dict(design), indent=2))
 
 
 def audio_file_summary(path: Path) -> dict[str, Any]:

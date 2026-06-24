@@ -7737,13 +7737,14 @@ def _clear_profile_project_materialized_outputs(context: DashboardProjectContext
 def _clear_segment6_generated_outputs(segment6_dir: Path) -> None:
     _ensure_dir(segment6_dir)
     keep = {"instruction_library"}
-    for child in Path(segment6_dir).iterdir():
+    for child_name in os.listdir(_filesystem_path(segment6_dir)):
+        child = Path(segment6_dir) / child_name
         if child.name in keep:
             continue
-        if child.is_dir():
+        if os.path.isdir(_filesystem_path(child)):
             _remove_tree(child)
-        elif child.exists():
-            child.unlink()
+        elif os.path.exists(_filesystem_path(child)):
+            os.unlink(_filesystem_path(child))
 
 
 def _copy_materialize_ingredient_audio_file(path: Path, target_dir: Path, label: str, *, motion_mode: str = "") -> Path:
