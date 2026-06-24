@@ -73,6 +73,23 @@ def test_validation_start_gate_waits_for_ready_file(tmp_path: Path, monkeypatch)
     assert labels == ["start_gate_waiting", "start_gate_released"]
 
 
+def test_timeline_soa_display_marks_catch_trials_not_applicable():
+    from peripersonal_space_toolkit import focus_app
+
+    catch_segment = SimpleNamespace(family="catch", trial_label="Catch", soa_ms="0")
+    audio_only_segment = SimpleNamespace(family="audio_only", trial_label="Audio-only", soa_ms="0")
+    tactile_segment = SimpleNamespace(family="audio_tactile", trial_label="Audio-tactile", soa_ms="300")
+    missing_segment = SimpleNamespace(family="baseline", trial_label="Baseline", soa_ms="")
+
+    assert focus_app._timeline_soa_display_label(catch_segment) == "N/A"
+    assert focus_app._timeline_soa_display_label(audio_only_segment) == "N/A"
+    assert focus_app._timeline_soa_display_label(tactile_segment) == "300 ms"
+    assert focus_app._timeline_soa_display_label(missing_segment) == "SOA"
+    assert focus_app._timeline_row_label_optional("Type") is False
+    assert focus_app._timeline_row_label_optional("Noise") is False
+    assert focus_app._timeline_row_label_optional("SOA") is True
+
+
 def test_validation_external_mouse_click_uses_helper_python(monkeypatch):
     from peripersonal_space_toolkit import focus_app
 
