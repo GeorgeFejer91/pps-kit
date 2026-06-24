@@ -306,6 +306,84 @@ def test_block_event_schedule_can_flush_final_boundary_event():
     assert due[0].event_type == "trial_end"
 
 
+def test_block_event_schedule_uses_family_when_segment5_preview_columns_are_lowercase(tmp_path: Path):
+    manifest = tmp_path / "block_01.csv"
+    with manifest.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=[
+                "block_trial_index",
+                "family",
+                "row_label",
+                "noise_type",
+                "soa_ms",
+                "trial_start_s",
+                "trial_end_s",
+                "looming_segment_onset_s",
+                "tactile_onset_s",
+            ],
+        )
+        writer.writeheader()
+        writer.writerow(
+            {
+                "block_trial_index": 1,
+                "family": "audio_tactile",
+                "row_label": "Inhale",
+                "noise_type": "pink",
+                "soa_ms": "300",
+                "trial_start_s": "0.0",
+                "trial_end_s": "8.0",
+                "looming_segment_onset_s": "4.0",
+                "tactile_onset_s": "4.3",
+            }
+        )
+        writer.writerow(
+            {
+                "block_trial_index": 2,
+                "family": "catch",
+                "row_label": "Exhale",
+                "noise_type": "white",
+                "soa_ms": "0",
+                "trial_start_s": "8.0",
+                "trial_end_s": "16.0",
+                "looming_segment_onset_s": "4.0",
+                "tactile_onset_s": "4.0",
+            }
+        )
+        writer.writerow(
+            {
+                "block_trial_index": 3,
+                "family": "baseline",
+                "row_label": "Inhale",
+                "noise_type": "white",
+                "soa_ms": "800",
+                "trial_start_s": "16.0",
+                "trial_end_s": "24.0",
+                "looming_segment_onset_s": "",
+                "tactile_onset_s": "4.8",
+            }
+        )
+
+    schedule = BlockEventSchedule.from_block_manifest(
+        manifest,
+        block_index=1,
+        block_label="Block 01",
+        sample_rate=100,
+        trial_duration_s=8.0,
+    )
+
+    tactile_events = [event for event in schedule.events if event.event_type == "tactile_onset"]
+    looming_events = [event for event in schedule.events if event.event_type == "looming_onset"]
+
+    assert [event.payload["family"] for event in tactile_events] == ["audio_tactile", "baseline"]
+    assert [event.payload["family"] for event in looming_events] == ["audio_tactile", "catch"]
+    assert all(
+        event.payload["noise_type"]
+        for event in schedule.events
+        if str(event.payload.get("soa_ms") or "").strip() not in {"", "0"}
+    )
+
+
 def test_block_event_schedule_reads_deep_manifest_path(tmp_path: Path):
     deep_dir = tmp_path
     for index in range(16):

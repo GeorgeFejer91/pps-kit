@@ -100,6 +100,10 @@ class BlockEventSchedule:
             trial_number = _as_int(_row_value(row, "Trial_Number", "trial_number"), default=fallback_index)
             trial_uid = str(_row_value(row, "Trial_UID", "trial_uid", default=f"B{block_index:02d}_T{trial_number:03d}"))
             trial_type = str(_row_value(row, "Trial_Type", "trial_type", default="")).strip()
+            family = str(_row_value(row, "Family", "family", default="")).strip()
+            trial_kind = _trial_kind(trial_type, family)
+            has_looming = trial_kind in {"audio_tactile", "catch"}
+            has_tactile = trial_kind in {"audio_tactile", "baseline"}
             soa_ms = _as_float(_row_value(row, "SOA_ms", "soa_ms", default=0), default=0.0)
             trial_start_default = int(round((trial_number - 1) * max(0.0, trial_duration_s) * inferred_sample_rate)) if inferred_sample_rate else None
             trial_start_sample = _sample_index(
@@ -116,15 +120,15 @@ class BlockEventSchedule:
             )
             looming_default = (
                 trial_start_sample + int(round(max(0.0, stimulus_segment_onset_s) * inferred_sample_rate))
-                if trial_start_sample is not None and inferred_sample_rate and trial_type in {"Audio-Tactile", "Catch"}
+                if trial_start_sample is not None and inferred_sample_rate and has_looming
                 else None
             )
             tactile_default = (
                 trial_start_sample + int(round((max(0.0, stimulus_segment_onset_s) + (soa_ms / 1000.0)) * inferred_sample_rate))
-                if trial_start_sample is not None and inferred_sample_rate and trial_type in {"Audio-Tactile", "Baseline"}
+                if trial_start_sample is not None and inferred_sample_rate and has_tactile
                 else None
             )
-            response_default = looming_default if trial_type in {"Audio-Tactile", "Catch"} else tactile_default
+            response_default = looming_default if has_looming else tactile_default
             common = _trial_payload(
                 row,
                 participant_id=participant_id,
@@ -150,6 +154,10 @@ class BlockEventSchedule:
                 ),
                 ("trial_end", ("Trial_End_Sample", "trial_end_sample"), ("Trial_End_S", "trial_end_s"), trial_end_default),
             ):
+                if event_type == "looming_onset" and not has_looming:
+                    continue
+                if event_type == "tactile_onset" and not has_tactile:
+                    continue
                 sample_index = _sample_index(row, sample_keys, second_keys, inferred_sample_rate, default_sample=default_sample)
                 if sample_index is None:
                     continue
@@ -247,6 +255,18 @@ def _block_metadata_payload(metadata: dict[str, Any]) -> dict[str, Any]:
 
 def _normalize_key(key: str) -> str:
     return str(key).strip().lower().replace(" ", "_")
+
+
+def _trial_kind(trial_type: str, family: str = "") -> str:
+    for value in (trial_type, family):
+        key = str(value or "").strip().lower().replace("-", "_").replace(" ", "_")
+        if key in {"audio_tactile", "audiotactile"}:
+            return "audio_tactile"
+        if key in {"baseline", "tactile_only", "tactile_baseline"}:
+            return "baseline"
+        if key in {"catch", "catch_trial", "audio_only"}:
+            return "catch"
+    return ""
 
 
 def _row_value(row: dict[str, Any], *keys: str, default: Any = "") -> Any:
