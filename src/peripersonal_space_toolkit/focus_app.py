@@ -8569,6 +8569,8 @@ def run_launcher_window(
     initiate_button = q["QPushButton"]("Initiate New Data Collection Environment")
     initiate_button.setObjectName("initiateEnvironmentButton")
     initiate_button.setEnabled(False)
+    initiate_button.setDefault(True)
+    initiate_button.setAutoDefault(True)
     close_button = q["QPushButton"]("Close")
     buttons.addWidget(resume_button)
     buttons.addWidget(choose_folder_button)
@@ -8830,7 +8832,7 @@ def run_launcher_window(
         selected_action["open_environment"] = True
         dialog.accept()
 
-    def _start_environment_initialization() -> None:
+    def _start_environment_initialization_impl() -> None:
         errors = _validation_errors()
         if errors:
             message.setText(errors[0])
@@ -8860,6 +8862,21 @@ def run_launcher_window(
                 messages.put(("done", result))
 
         threading.Thread(target=_worker, name="pps-environment-init", daemon=True).start()
+
+    def _start_environment_initialization() -> None:
+        try:
+            _start_environment_initialization_impl()
+        except Exception as exc:
+            message.setText(f"Could not start data collection environment: {exc}")
+            _set_environment_busy(False)
+
+    def _try_start_environment_from_keyboard() -> None:
+        if initializing["busy"]:
+            return
+        if _can_initiate():
+            initiate_button.click()
+        else:
+            _refresh_initiate_state()
 
     def _drain_environment_messages() -> None:
         while not messages.empty():
@@ -8920,12 +8937,14 @@ def run_launcher_window(
     timer.start(100)
 
     output_folder_input.textChanged.connect(lambda _text: _refresh_initiate_state())
+    output_folder_input.returnPressed.connect(_try_start_environment_from_keyboard)
     profile_combo.currentIndexChanged.connect(lambda _index: _refresh_initiate_state())
     session_name_input.textChanged.connect(lambda _text: _refresh_initiate_state())
+    session_name_input.returnPressed.connect(_try_start_environment_from_keyboard)
     copy_button.clicked.connect(_copy_output_path)
     choose_folder_button.clicked.connect(_choose_parent_folder)
     resume_button.clicked.connect(_resume_environment)
-    initiate_button.clicked.connect(_start_environment_initialization)
+    initiate_button.clicked.connect(lambda _checked=False: _start_environment_initialization())
     close_button.clicked.connect(dialog.reject)
     gate_shortcuts["resume"] = q["QShortcut"](q["QKeySequence"]("1"), dialog)
     gate_shortcuts["resume"].setContext(q["Qt"].ShortcutContext.ApplicationShortcut)

@@ -1863,6 +1863,135 @@ def test_launcher_pick_empty_folder_unlocks_required_fields_and_initiate(tmp_pat
     assert errors == []
 
 
+def test_launcher_initiate_button_creates_environment_and_opens_operations(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    errors: list[BaseException] = []
+    calls: list[dict[str, object]] = []
+    operation_calls: list[dict[str, object]] = []
+    remembered = tmp_path / "remembered"
+    remembered.mkdir()
+    new_parent = tmp_path / "fresh_parent"
+    new_parent.mkdir()
+    environment_root = new_parent / "hoi_20260624_022151"
+    diary_path = environment_root / "Experiment_context_folder_DO_NOT_DELETE" / "runner_logs" / "hoi_LOG-DIARY_DO_NOT_DELETE.txt"
+
+    monkeypatch.setattr(
+        focus_app,
+        "load_profile_runner_settings",
+        lambda **_kwargs: {
+            "active_profile_id": focus_app.STUDY5_PROFILE_ID,
+            "active_output_folder": str(remembered),
+            "participant_id": "P001",
+        },
+    )
+    monkeypatch.setattr(
+        focus_app,
+        "load_runner_settings",
+        lambda *args, **kwargs: {
+            "last_experiment_name": "Remembered Study",
+            "last_profile_id": focus_app.STUDY5_PROFILE_ID,
+            "last_participant_id": "P001",
+        },
+    )
+    monkeypatch.setattr(focus_app, "finished_profile_options", lambda: [(focus_app.STUDY5_PROFILE_ID, "Study 5")])
+    monkeypatch.setattr(focus_app, "current_runner_diary_path", lambda: None)
+    monkeypatch.setattr(q["QFileDialog"], "getExistingDirectory", lambda *args, **kwargs: str(new_parent))
+
+    def fake_initiate_environment(**kwargs):
+        calls.append(kwargs)
+        callback = kwargs.get("progress_callback")
+        if callback:
+            callback({"message": "Creating output environment", "detail": str(kwargs["parent_folder"]), "current": 1, "total": 4})
+        environment_root.mkdir(parents=True, exist_ok=True)
+        return {
+            "environment_root": str(environment_root),
+            "diary_path": str(diary_path),
+            "profile_id": kwargs["profile_id"],
+            "session_name": kwargs["session_name"],
+            "participant_id": kwargs["participant_id"],
+            "bridge": {"bridge_manifest_path": str(environment_root / "bridge.json")},
+            "prepared_participants": {"prepared_count": 1},
+        }
+
+    def fake_environment_operations_window(**kwargs):
+        operation_calls.append(kwargs)
+        return 60
+
+    monkeypatch.setattr(focus_app, "initiate_data_collection_environment", fake_initiate_environment)
+    monkeypatch.setattr(focus_app, "_run_environment_operations_window", fake_environment_operations_window)
+
+    def reject_if_still_open() -> None:
+        if calls or errors:
+            return
+        errors.append(AssertionError("Launcher initiate click test timed out before the worker started."))
+        for widget in app.topLevelWidgets():
+            if widget.windowTitle() == "PPS Experiment Runner":
+                widget.reject()
+
+    def pick_folder_and_initiate() -> None:
+        try:
+            dialogs = [widget for widget in app.topLevelWidgets() if widget.windowTitle() == "PPS Experiment Runner"]
+            assert dialogs
+            dialog = dialogs[0]
+            choose_button = dialog.findChild(q["QPushButton"], "chooseOutputFolderButton")
+            profile_combo = dialog.findChild(q["QComboBox"], "environmentProfileCombo")
+            session_field = dialog.findChild(q["QLineEdit"], "sessionNameField")
+            initiate_button = dialog.findChild(q["QPushButton"], "initiateEnvironmentButton")
+            message_label = dialog.findChild(q["QLabel"], "gateStatusLabel")
+            assert choose_button is not None
+            assert profile_combo is not None
+            assert session_field is not None
+            assert initiate_button is not None
+            assert message_label is not None
+
+            QTest.mouseClick(choose_button, q["Qt"].MouseButton.LeftButton)
+            app.processEvents()
+            profile_index = profile_combo.findData(focus_app.STUDY5_PROFILE_ID)
+            assert profile_index >= 0
+            profile_combo.setCurrentIndex(profile_index)
+            session_field.setText("hoi")
+            app.processEvents()
+            assert initiate_button.isEnabled()
+            QTest.mouseClick(initiate_button, q["Qt"].MouseButton.LeftButton)
+            app.processEvents()
+            assert calls or "Creating data collection environment" in message_label.text()
+        except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
+            errors.append(exc)
+            for widget in app.topLevelWidgets():
+                if widget.windowTitle() == "PPS Experiment Runner":
+                    widget.reject()
+
+    q["QTimer"].singleShot(50, pick_folder_and_initiate)
+    q["QTimer"].singleShot(3000, reject_if_still_open)
+    exit_code = focus_app.run_launcher_window(
+        capture_options=SessionCaptureOptions(enable_lsl=False, write_internal_xdf=False, start_backup_recording=False),
+        participant_id="P001",
+    )
+    for widget in app.topLevelWidgets():
+        widget.close()
+        widget.deleteLater()
+    app.processEvents()
+
+    assert exit_code == 60
+    assert errors == []
+    assert len(calls) == 1
+    assert calls[0]["parent_folder"] == new_parent
+    assert calls[0]["profile_id"] == focus_app.STUDY5_PROFILE_ID
+    assert calls[0]["session_name"] == "hoi"
+    assert calls[0]["participant_id"] == "P001"
+    assert len(operation_calls) == 1
+    assert operation_calls[0]["participant_id"] == "P001"
+
+
 def test_launcher_existing_folder_keeps_fields_locked_and_resumes_selected_environment(tmp_path: Path, monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
