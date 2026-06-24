@@ -716,7 +716,7 @@ def run_scenario(
         "recording_paths": [str(path) for path in result.recording_paths],
         "limitations": [
             "Software stress only: fake realtime audio engine, no hardware loopback.",
-            "Top-up playback is auto-authorized by the harness to stress seamless end-of-session playback.",
+            "Top-up approval is auto-approved by the harness to stress seamless end-of-session playback.",
         ],
     }
     _write_csv(

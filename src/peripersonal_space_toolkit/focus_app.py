@@ -659,7 +659,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
         dest="enable_missed_trial_topup",
         action="store_true",
         default=True,
-        help="Prepare and play one final missed-trial top-up block without an additional prompt.",
+        help="Prepare and request approval for one final missed-trial top-up block.",
     )
     topup_group.add_argument(
         "--no-missed-trial-topup",
@@ -6215,8 +6215,14 @@ class FocusModeWindow:
             create=True,
         )
         self._response_click_filter_installed = False
-        self._last_response_mouse_press_signature: tuple[
-            tuple[int | None, int | None],
+        self._global_response_click_listener: Any | None = None
+        self._global_response_click_listener_error = ""
+        self._global_response_click_listener_lock = threading.Lock()
+        self._target_global_bounds_lock = threading.Lock()
+        self._target_global_bounds: tuple[int, int, int, int] | None = None
+        self._response_click_record_lock = threading.Lock()
+        self._last_response_click_signature: tuple[
+            tuple[int | None, int | None, bool],
             float,
         ] | None = None
         self._build()
@@ -6862,6 +6868,106 @@ class FocusModeWindow:
             pass
         self._response_click_filter_installed = False
 
+    def _refresh_target_global_bounds(self) -> None:
+        bounds: tuple[int, int, int, int] | None = None
+        try:
+            top_left = self.target_button.mapToGlobal(self.q["QPoint"](0, 0))
+            left = int(top_left.x())
+            top = int(top_left.y())
+            width = max(0, int(self.target_button.width()))
+            height = max(0, int(self.target_button.height()))
+            if width > 0 and height > 0:
+                bounds = (left, top, left + width, top + height)
+        except Exception:
+            bounds = None
+        with self._target_global_bounds_lock:
+            self._target_global_bounds = bounds
+
+    def _cached_target_contains_global_xy(self, x: int | None, y: int | None) -> bool:
+        if x is None or y is None:
+            return False
+        with self._target_global_bounds_lock:
+            bounds = self._target_global_bounds
+        if bounds is None:
+            return False
+        left, top, right, bottom = bounds
+        try:
+            return left <= int(x) <= right and top <= int(y) <= bottom
+        except Exception:
+            return False
+
+    def _is_left_mouse_button(self, button: Any) -> bool:
+        name = str(getattr(button, "name", "") or "").strip().lower()
+        if name == "left":
+            return True
+        text = str(button or "").strip().lower()
+        return text in {"left", "button.left", "mousebutton.left"} or text.endswith(".left")
+
+    def _start_global_response_click_listener(self) -> bool:
+        if self._offscreen_platform():
+            return False
+        with self._global_response_click_listener_lock:
+            if self._global_response_click_listener is not None:
+                return True
+            try:
+                from pynput import mouse  # type: ignore
+            except Exception as exc:
+                self._global_response_click_listener_error = str(exc)
+                _append_output_diary_event(
+                    "global_response_click_listener_unavailable",
+                    package=self.package,
+                    capture_options=self.capture_options.as_dict(),
+                    payload={"backend": "pynput", "message": str(exc)},
+                    create=True,
+                )
+                return False
+
+            def _on_click(x: Any, y: Any, button: Any, pressed: bool) -> None:
+                if not pressed or not self._is_left_mouse_button(button):
+                    return
+                self._handle_global_response_mouse_click(x, y)
+
+            try:
+                listener = mouse.Listener(on_click=_on_click)
+                listener.start()
+            except Exception as exc:
+                self._global_response_click_listener_error = str(exc)
+                _append_output_diary_event(
+                    "global_response_click_listener_unavailable",
+                    package=self.package,
+                    capture_options=self.capture_options.as_dict(),
+                    payload={"backend": "pynput", "message": str(exc)},
+                    create=True,
+                )
+                return False
+            self._global_response_click_listener = listener
+            self._global_response_click_listener_error = ""
+            _append_output_diary_event(
+                "global_response_click_listener_started",
+                package=self.package,
+                capture_options=self.capture_options.as_dict(),
+                payload={"backend": "pynput"},
+                create=True,
+            )
+            return True
+
+    def _stop_global_response_click_listener(self) -> None:
+        with self._global_response_click_listener_lock:
+            listener = self._global_response_click_listener
+            self._global_response_click_listener = None
+        if listener is None:
+            return
+        try:
+            listener.stop()
+        except Exception:
+            pass
+        try:
+            listener_ident = getattr(listener, "ident", None)
+            if listener_ident is None or listener_ident != threading.current_thread().ident:
+                listener.join(timeout=0.2)
+        except Exception:
+            pass
+
     def _object_is_target_button(self, watched: Any) -> bool:
         current = watched
         while current is not None:
@@ -6887,15 +6993,8 @@ class FocusModeWindow:
     def _target_contains_global_xy(self, x: int | None, y: int | None) -> bool:
         if x is None or y is None:
             return False
-        try:
-            top_left = self.target_button.mapToGlobal(self.q["QPoint"](0, 0))
-            left = int(top_left.x())
-            top = int(top_left.y())
-            right = left + int(self.target_button.width())
-            bottom = top + int(self.target_button.height())
-            return left <= int(x) <= right and top <= int(y) <= bottom
-        except Exception:
-            return False
+        self._refresh_target_global_bounds()
+        return self._cached_target_contains_global_xy(x, y)
 
     def _target_last_click_global_xy(self) -> tuple[int | None, int | None]:
         value = getattr(self.target_button, "last_click_global_pos", None)
@@ -6923,17 +7022,12 @@ class FocusModeWindow:
         in_target = self._target_contains_global_xy(x, y)
         if in_target:
             return
-        signature = (x, y)
-        now = time.perf_counter()
-        last_signature = self._last_response_mouse_press_signature
-        if last_signature is not None and last_signature[0] == signature and now - last_signature[1] < 0.05:
-            return
-        self._last_response_mouse_press_signature = (signature, now)
         self._log_response_click(
             x=x,
             y=y,
             in_target=False,
             diary_event_type="response_window_clicked",
+            source="qt_event_filter",
         )
 
     def _log_response_click(
@@ -6943,28 +7037,136 @@ class FocusModeWindow:
         y: int | None = None,
         in_target: bool,
         diary_event_type: str,
+        source: str,
     ) -> None:
         if self.controller is None:
             self.event_label.setText("Start the run before logging responses.")
             return
-        self.controller.log_click(x=x, y=y, in_target=bool(in_target))
+        payload = self._record_response_click_event(
+            x=x,
+            y=y,
+            in_target=in_target,
+            diary_event_type=diary_event_type,
+            source=source,
+        )
+        if payload is not None:
+            self._apply_response_click_to_ui(payload)
+
+    def _normalize_response_click_xy(self, x: Any, y: Any) -> tuple[int | None, int | None]:
+        try:
+            clean_x = int(x)
+        except Exception:
+            clean_x = None
+        try:
+            clean_y = int(y)
+        except Exception:
+            clean_y = None
+        return clean_x, clean_y
+
+    def _current_response_elapsed_s(self) -> float | str:
+        if not self.timeline_state.active:
+            return ""
+        elapsed = float(self.timeline_state.elapsed_s or 0.0)
+        anchor = self._timeline_perf_anchor
+        if anchor is not None and self._run_active:
+            elapsed = max(elapsed, time.perf_counter() - float(anchor))
+        duration = float(self.timeline_state.duration_s or 0.0)
+        if duration > 0:
+            elapsed = min(elapsed, duration)
+        return max(0.0, elapsed)
+
+    def _is_duplicate_response_click(
+        self,
+        signature: tuple[int | None, int | None, bool],
+        now: float,
+    ) -> bool:
+        last_signature = self._last_response_click_signature
+        if last_signature is None:
+            return False
+        previous, previous_time = last_signature
+        if now - previous_time >= 0.05:
+            return False
+        if previous[2] != signature[2]:
+            return False
+        previous_x, previous_y, _previous_target = previous
+        x, y, _target = signature
+        if previous_x is None or previous_y is None or x is None or y is None:
+            return previous_x == x and previous_y == y
+        return abs(previous_x - x) <= 2 and abs(previous_y - y) <= 2
+
+    def _record_response_click_event(
+        self,
+        *,
+        x: int | None = None,
+        y: int | None = None,
+        in_target: bool,
+        diary_event_type: str,
+        source: str,
+    ) -> dict[str, Any] | None:
+        clean_x, clean_y = self._normalize_response_click_xy(x, y)
+        target_hit = bool(in_target)
+        now = time.perf_counter()
+        signature = (clean_x, clean_y, target_hit)
+        with self._response_click_record_lock:
+            if self.controller is None:
+                return None
+            if self._is_duplicate_response_click(signature, now):
+                return None
+            self._last_response_click_signature = (signature, now)
+            elapsed_s = self._current_response_elapsed_s()
+            during_playback = bool(self._run_active)
+            self.controller.log_click(x=clean_x, y=clean_y, in_target=target_hit)
+        return {
+            "in_target": target_hit,
+            "x": "" if clean_x is None else clean_x,
+            "y": "" if clean_y is None else clean_y,
+            "during_playback": during_playback,
+            "elapsed_s": elapsed_s,
+            "diary_event_type": diary_event_type,
+            "source": str(source or ""),
+        }
+
+    def _apply_response_click_to_ui(self, payload: dict[str, Any]) -> None:
+        in_target = bool(payload.get("in_target"))
+        elapsed_s = payload.get("elapsed_s", "")
         if self.timeline_state.active:
-            self.timeline_state.record_click(self.timeline_state.elapsed_s)
+            try:
+                click_elapsed = float(elapsed_s)
+            except (TypeError, ValueError):
+                click_elapsed = self.timeline_state.elapsed_s
+            self.timeline_state.record_click(click_elapsed)
             self._update_tactile_timeline_display()
         self.event_label.setText("Participant click logged" if in_target else "Participant click logged outside target")
+        diary_event_type = str(payload.get("diary_event_type") or "response_clicked")
         _append_output_diary_event(
             diary_event_type,
             package=self.package,
             capture_options=self.capture_options.as_dict(),
             payload={
-                "in_target": bool(in_target),
-                "x": "" if x is None else int(x),
-                "y": "" if y is None else int(y),
-                "during_playback": self._run_active,
-                "elapsed_s": self.timeline_state.elapsed_s if self.timeline_state.active else "",
+                "in_target": in_target,
+                "x": payload.get("x", ""),
+                "y": payload.get("y", ""),
+                "during_playback": bool(payload.get("during_playback")),
+                "elapsed_s": elapsed_s,
+                "source": str(payload.get("source") or ""),
             },
             create=True,
         )
+
+    def _handle_global_response_mouse_click(self, x: Any, y: Any) -> None:
+        if not self._run_active or self.controller is None or self.pending_instruction_request is not None:
+            return
+        clean_x, clean_y = self._normalize_response_click_xy(x, y)
+        in_target = self._cached_target_contains_global_xy(clean_x, clean_y)
+        payload = self._record_response_click_event(
+            x=clean_x,
+            y=clean_y,
+            in_target=in_target,
+            diary_event_type="target_clicked" if in_target else "response_global_clicked",
+            source="global_mouse_listener",
+        )
+        if payload is not None:
+            self.messages.put(("response_click", payload))
 
     def _timeline_display_state(self) -> TactileTimelineState:
         if self.preview_display_block_index is not None:
@@ -8264,6 +8466,7 @@ class FocusModeWindow:
 
     def _handle_dialog_finished(self, _code: int) -> None:
         self._remove_response_click_filter()
+        self._stop_global_response_click_listener()
         self._stop()
         self._release_pending_operator_requests(source="runner_window_closed")
         self._close_external_labrecorder_for_runner_exit()
@@ -8291,7 +8494,7 @@ class FocusModeWindow:
                     capture_options=self.capture_options,
                     enable_topup=self.enable_missed_trial_topup,
                     runner_metadata=runner_metadata,
-                    topup_approval_callback=self._auto_approve_topup_playback if self.enable_missed_trial_topup else None,
+                    topup_approval_callback=self._request_topup_approval if self.enable_missed_trial_topup else None,
                     instruction_continue_callback=self._request_instruction_continue,
                 )
             else:
@@ -8301,7 +8504,7 @@ class FocusModeWindow:
                     capture_options=self.capture_options,
                     enable_topup=self.enable_missed_trial_topup,
                     runner_metadata=runner_metadata,
-                    topup_approval_callback=self._auto_approve_topup_playback if self.enable_missed_trial_topup else None,
+                    topup_approval_callback=self._request_topup_approval if self.enable_missed_trial_topup else None,
                     instruction_continue_callback=self._request_instruction_continue,
                 )
         except Exception as exc:
@@ -8793,8 +8996,11 @@ class FocusModeWindow:
         self.pause_button.setEnabled(True)
         self.stop_button.setEnabled(True)
         self.target_button.setEnabled(True)
+        self._last_response_click_signature = None
+        self._refresh_target_global_bounds()
         self._run_active = True
         self._run_paused = False
+        self._start_global_response_click_listener()
         self.run_state_chip.setText("Running")
         self.progress_label.setText("Starting playback")
         self.event_label.setText("Session event stream active")
@@ -8809,24 +9015,6 @@ class FocusModeWindow:
 
         self.thread = threading.Thread(target=_run, daemon=True)
         self.thread.start()
-
-    def _auto_approve_topup_playback(self, summary: dict[str, Any]) -> bool:
-        summary = dict(summary)
-        record = {
-            "summary": summary,
-            "approved": True,
-            "mode": "setup_checkbox_auto_play",
-            "timestamp_unix": time.time(),
-        }
-        self.validation_topup_approval_records.append(record)
-        _append_output_diary_event(
-            "topup_approval_resolved",
-            package=self.package,
-            capture_options=self.capture_options.as_dict(),
-            payload={"summary": summary, "approved": True, "mode": "setup_checkbox_auto_play"},
-            create=True,
-        )
-        return True
 
     def _request_topup_approval(self, summary: dict[str, Any]) -> bool:
         request = {"summary": dict(summary), "approved": False, "event": threading.Event()}
@@ -8910,7 +9098,7 @@ class FocusModeWindow:
             self.event_label.setText("Start the run before logging responses.")
             return
         x, y = self._target_last_click_global_xy()
-        self._log_response_click(x=x, y=y, in_target=True, diary_event_type="target_clicked")
+        self._log_response_click(x=x, y=y, in_target=True, diary_event_type="target_clicked", source="qt_response_target")
 
     def _continue_instruction_button(self) -> None:
         if self._part2_start_gate_pending():
@@ -8950,6 +9138,7 @@ class FocusModeWindow:
             create=True,
         )
         self._run_active = False
+        self._stop_global_response_click_listener()
         stop = getattr(self.controller, "stop", None)
         if callable(stop):
             stop()
@@ -9196,6 +9385,8 @@ class FocusModeWindow:
                 self.event_label.setText(str(payload))
                 if str(payload) in {"external_labrecorder_started", "session_start"}:
                     self._activate_response_target_window()
+            elif kind == "response_click":
+                self._apply_response_click_to_ui(dict(payload))
             elif kind == "prewarm_progress":
                 self.prewarm_label.setText(f"Next {payload.get('participant_id')}: {payload.get('message')}")
             elif kind == "prewarm":
@@ -9215,6 +9406,7 @@ class FocusModeWindow:
                 self._handle_output_test_done(payload)
             elif kind == "done":
                 self._handle_done(payload)
+        self._refresh_target_global_bounds()
         self._tick_tactile_clock()
         self._refresh_experiment_control_minimum_height()
 
@@ -9336,6 +9528,7 @@ class FocusModeWindow:
         self.exit_code = 0 if result.completed else 2
         self._run_active = False
         self._run_paused = False
+        self._stop_global_response_click_listener()
         self.timeline_state.active = False
         if self.active_display_block_index is not None:
             self.completed_display_block_indices.add(int(self.active_display_block_index))

@@ -609,7 +609,6 @@ def test_focus_mode_default_capture_checkboxes_are_operator_opt_out(tmp_path: Pa
 def test_focus_mode_setup_submit_prepares_controller_before_start(tmp_path: Path):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
-        from PySide6.QtTest import QTest
         from PySide6.QtWidgets import QApplication
         from peripersonal_space_toolkit import focus_app
     except Exception as exc:  # pragma: no cover - depends on optional GUI deps
@@ -626,15 +625,8 @@ def test_focus_mode_setup_submit_prepares_controller_before_start(tmp_path: Path
             self.capture_options = capture_options
             self.runner_metadata = dict(runner_metadata or {})
             self.enable_topup = enable_topup
-            self.topup_approval_callback = _kwargs.get("topup_approval_callback")
             self.audio_engine = None
-            created.append(
-                {
-                    "runner_metadata": self.runner_metadata,
-                    "enable_topup": bool(enable_topup),
-                    "topup_approval_callback": self.topup_approval_callback,
-                }
-            )
+            created.append(self.runner_metadata)
 
     window = focus_app.FocusModeWindow(
         q,
@@ -652,16 +644,9 @@ def test_focus_mode_setup_submit_prepares_controller_before_start(tmp_path: Path
     assert not created
 
     _fill_required_setup(window)
-    QTest.mouseClick(window.setup_submit_button, q["Qt"].MouseButton.LeftButton)
-    app.processEvents()
+    assert window._submit_participant_setup()
 
-    assert created and created[0]["runner_metadata"]["participant_name"] == "Mock Participant"
-    assert created[0]["enable_topup"] is True
-    callback = created[0]["topup_approval_callback"]
-    assert callable(callback)
-    assert callback({"missed_trial_count": 1, "topup_trial_count": 1, "filler_trial_count": 0}) is True
-    assert window.pending_topup_approval_request is None
-    assert window.validation_topup_approval_records[-1]["mode"] == "setup_checkbox_auto_play"
+    assert created and created[0]["participant_name"] == "Mock Participant"
     assert window.demographics_submitted
     assert window.controller is not None
     assert window.start_button.isEnabled()
@@ -1601,6 +1586,71 @@ def test_focus_mode_logs_response_clicks_outside_target_area(tmp_path: Path):
 
     QTest.mouseClick(window.target_button, q["Qt"].MouseButton.LeftButton)
     app.processEvents()
+
+    assert [click["in_target"] for click in logged_clicks] == [False, True]
+    assert window.timeline_state.click_count() == 2
+    window.dialog.close()
+
+
+def test_focus_mode_logs_global_response_clicks_inside_and_outside_target_area(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    logged_clicks: list[dict[str, object]] = []
+
+    class FakeController:
+        def __init__(self, package_obj, *, capture_options=None, **_kwargs):
+            self.package = package_obj
+            self.capture_options = capture_options
+            self.audio_engine = None
+
+        def log_click(self, *, x=None, y=None, in_target=True) -> None:
+            logged_clicks.append({"x": x, "y": y, "in_target": in_target})
+
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+        controller_factory=FakeController,
+    )
+    window.dialog.show()
+    app.processEvents()
+    _fill_required_setup(window)
+    assert window._submit_participant_setup()
+    window._run_active = True
+    window.target_button.setEnabled(True)
+    window.timeline_state.active = True
+    window.timeline_state.elapsed_s = 1.25
+    app.processEvents()
+    window._refresh_target_global_bounds()
+
+    target_center = window.target_button.mapToGlobal(
+        q["QPoint"](window.target_button.width() // 2, window.target_button.height() // 2)
+    )
+    inside_x, inside_y = int(target_center.x()), int(target_center.y())
+    outside_x = inside_x + int(window.target_button.width()) + 80
+    outside_y = inside_y + int(window.target_button.height()) + 80
+
+    window._handle_global_response_mouse_click(outside_x, outside_y)
+
+    assert len(logged_clicks) == 1
+    assert logged_clicks[0]["in_target"] is False
+    assert window.timeline_state.click_count() == 0
+
+    window._drain()
+
+    assert window.timeline_state.click_count() == 1
+    assert "outside target" in window.event_label.text()
+
+    window._handle_global_response_mouse_click(inside_x, inside_y)
+    window._drain()
 
     assert [click["in_target"] for click in logged_clicks] == [False, True]
     assert window.timeline_state.click_count() == 2

@@ -2802,7 +2802,7 @@ class SessionRunnerController:
             capture_options=self.capture_options,
             payload=summary,
         )
-        approved = True
+        approved = False
         if self._topup_approval_callback is not None:
             try:
                 approved = bool(self._topup_approval_callback(dict(summary)))
@@ -2815,6 +2815,8 @@ class SessionRunnerController:
                     payload={"message": str(exc), **summary},
                 )
                 self._run_warnings.append(f"Top-up approval failed: {exc}")
+        else:
+            self._run_warnings.append("Top-up block was prepared but not played because operator approval was not configured.")
         if not approved:
             self.events.log("topup_block_skipped", reason="operator_not_approved", **summary)
             _append_package_diary_event(

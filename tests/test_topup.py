@@ -465,7 +465,7 @@ class _TopupAwareMockAudioEngine:
         return None
 
 
-def test_session_runner_plays_enabled_topup_block_without_approval_callback_and_writes_final_outcomes(tmp_path: Path):
+def test_session_runner_plays_approved_topup_block_and_writes_final_outcomes(tmp_path: Path):
     run_manifest = _segment_run_setup_fixture(tmp_path)
     package = prepare_segment_run_package(
         run_manifest,
@@ -474,7 +474,7 @@ def test_session_runner_plays_enabled_topup_block_without_approval_callback_and_
         created_at=datetime(2026, 1, 2, 3, 4, 5),
     )
     engine = _TopupAwareMockAudioEngine()
-    controller = SessionRunnerController(package, audio_engine=engine, enable_topup=True)
+    controller = SessionRunnerController(package, audio_engine=engine, enable_topup=True, topup_approval_callback=lambda _summary: True)
     engine.on_tactile = lambda: controller.log_click(x=1, y=1)
 
     result = controller.run()
@@ -537,13 +537,7 @@ def test_session_runner_plays_one_topup_at_end_of_each_part(tmp_path: Path):
         created_at=datetime(2026, 1, 2, 3, 4, 5),
     )
     engine = _TopupAwareMockAudioEngine()
-    controller = SessionRunnerController(
-        package,
-        audio_engine=engine,
-        enable_topup=True,
-        topup_approval_callback=lambda _summary: True,
-        instruction_continue_callback=lambda _context: True,
-    )
+    controller = SessionRunnerController(package, audio_engine=engine, enable_topup=True, topup_approval_callback=lambda _summary: True)
     engine.on_tactile = lambda: controller.log_click(x=1, y=1)
 
     result = controller.run()
