@@ -37,11 +37,56 @@ from peripersonal_space_toolkit.session_runner import (  # noqa: E402
     SessionRunnerController,
     load_run_package,
 )
+from peripersonal_space_toolkit.output_layout import (  # noqa: E402
+    output_data_analytics_dir,
+    output_runner_logs_dir,
+    output_verbose_events_dir,
+)
 
 
 SCHEMA = "pps-study5-end-to-end-ui-mouse-validation.v1"
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "artifacts" / "validation_runs" / "s5_ui_mouse"
 STUDY5_TEMPLATE_ID = "study5_box_breathing_pps"
+
+
+def _filesystem_path(path: str | Path) -> str:
+    resolved = Path(path).resolve()
+    text = str(resolved)
+    if sys.platform == "win32" and not text.startswith("\\\\?\\"):
+        if text.startswith("\\\\"):
+            return "\\\\?\\UNC\\" + text.lstrip("\\")
+        return "\\\\?\\" + text
+    return text
+
+
+def _path_exists(path: str | Path) -> bool:
+    try:
+        return os.path.exists(_filesystem_path(path))
+    except OSError:
+        return False
+
+
+def _is_file(path: str | Path) -> bool:
+    try:
+        return os.path.isfile(_filesystem_path(path))
+    except OSError:
+        return False
+
+
+def _mkdir(path: str | Path) -> None:
+    os.makedirs(_filesystem_path(path), exist_ok=True)
+
+
+def _read_text_file(path: str | Path, *, encoding: str = "utf-8") -> str:
+    with open(_filesystem_path(path), "r", encoding=encoding) as handle:
+        return handle.read()
+
+
+def _read_json_file(path: str | Path) -> dict[str, Any]:
+    try:
+        return json.loads(_read_text_file(path))
+    except Exception:
+        return {}
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -74,8 +119,9 @@ def _json_ready(value: Any) -> Any:
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(_json_ready(payload), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    _mkdir(path.parent)
+    with open(_filesystem_path(path), "w", encoding="utf-8") as handle:
+        handle.write(json.dumps(_json_ready(payload), indent=2, sort_keys=True) + "\n")
 
 
 def _write_markdown(path: Path, report: dict[str, Any]) -> None:
@@ -95,8 +141,9 @@ def _write_markdown(path: Path, report: dict[str, Any]) -> None:
         "",
         "This validation uses browser/Qt mouse-click events. It does not use dashboard backend API calls to drive the workflow. Segment 6 launches a separate Focus Mode validation runner process through the normal runner command path. Hardware audio is replaced by a fast fake audio engine, so this proves UI behavior and runner software completion, not physical latency or electrical loopback.",
     ]
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    _mkdir(path.parent)
+    with open(_filesystem_path(path), "w", encoding="utf-8") as handle:
+        handle.write("\n".join(lines) + "\n")
 
 
 def _free_port(host: str) -> int:
@@ -125,7 +172,7 @@ class DashboardServer:
 
 
 def _write_validation_runner_cmd(path: Path, *, output_dir: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
+    _mkdir(path.parent)
     script = Path(__file__).resolve()
     qt_prefix = "set QT_QPA_PLATFORM=offscreen\r\n"
     command = (
@@ -133,7 +180,8 @@ def _write_validation_runner_cmd(path: Path, *, output_dir: Path) -> None:
         f"{qt_prefix}"
         f"\"{sys.executable}\" \"{script}\" --focus-child --output-dir \"{output_dir}\" %*\r\n"
     )
-    path.write_text(command, encoding="ascii")
+    with open(_filesystem_path(path), "w", encoding="ascii") as handle:
+        handle.write(command)
 
 
 def _start_dashboard_server(*, output_dir: Path, host: str, port: int, participant_id: str) -> DashboardServer:
@@ -143,17 +191,17 @@ def _start_dashboard_server(*, output_dir: Path, host: str, port: int, participa
         raise RuntimeError("uvicorn is required for the dashboard UI validation.") from exc
 
     work_dir = output_dir / "w"
-    work_dir.mkdir(parents=True, exist_ok=True)
+    _mkdir(work_dir)
     runner_cmd = output_dir / "focus_validation_runner.cmd"
     child_report = output_dir / "focus_child_report.json"
-    if child_report.exists():
-        child_report.unlink()
+    if _path_exists(child_report):
+        os.unlink(_filesystem_path(child_report))
     _write_validation_runner_cmd(runner_cmd, output_dir=output_dir)
     previous_runner_exe = os.environ.get("PPS_FOCUS_RUNNER_EXE")
     os.environ["PPS_FOCUS_RUNNER_EXE"] = str(runner_cmd)
 
     design_path = work_dir / "stimulus_design.generated.json"
-    if not design_path.exists():
+    if not _path_exists(design_path):
         save_design(default_design(), design_path)
 
     controller = dashboard_app.DashboardController(
@@ -200,10 +248,10 @@ def _start_dashboard_server(*, output_dir: Path, host: str, port: int, participa
 
 
 def _read_json_if_ready(path: Path) -> dict[str, Any] | None:
-    if not path.is_file():
+    if not _is_file(path):
         return None
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        return json.loads(_read_text_file(path))
     except json.JSONDecodeError:
         return None
 
@@ -255,7 +303,7 @@ def _launch_study5_from_dashboard(
         while time.time() < deadline:
             package = server.controller.current_run_package
             child_report = _read_json_if_ready(server.child_report_path)
-            if package is not None and Path(package.manifest_path).is_file() and child_report is not None:
+            if package is not None and _is_file(package.manifest_path) and child_report is not None:
                 break
             time.sleep(0.25)
         package = server.controller.current_run_package
@@ -386,13 +434,25 @@ class FastUiAudioEngine:
 
 def _event_counts(events_csv: Path) -> dict[str, int]:
     counts: dict[str, int] = {}
-    if not events_csv.exists():
+    if not _path_exists(events_csv):
         return counts
-    with events_csv.open(newline="", encoding="utf-8-sig") as handle:
+    with open(_filesystem_path(events_csv), newline="", encoding="utf-8-sig") as handle:
         for row in csv.DictReader(handle):
             event_type = str(row.get("event_type") or "")
             counts[event_type] = counts.get(event_type, 0) + 1
     return counts
+
+
+def _focus_output_paths(session_manifest: Path, package: Any) -> dict[str, Path]:
+    manifest = _read_json_file(session_manifest)
+    outputs = manifest.get("outputs") if isinstance(manifest.get("outputs"), dict) else {}
+    session_root = Path(package.session_dir).parent
+    session_id = str(package.session_id)
+    return {
+        "events_csv": Path(outputs.get("verbose_events_csv") or (output_verbose_events_dir(session_root) / session_id / "events.csv")),
+        "analysis_summary": Path(outputs.get("analysis_dir") or (output_data_analytics_dir(session_root) / session_id)) / "analysis_summary.txt",
+        "session_metadata": Path(outputs.get("session_metadata_json") or (output_runner_logs_dir(session_root) / session_id / "session_metadata.json")),
+    }
 
 
 def _run_focus_mode_by_mouse(
@@ -409,6 +469,7 @@ def _run_focus_mode_by_mouse(
     q = focus_app._require_qt()
     app = q["QApplication"].instance() or q["QApplication"](sys.argv[:1])
     package = load_run_package(session_manifest)
+    output_paths = _focus_output_paths(session_manifest, package)
     engine = FastUiAudioEngine()
     controller_holder: dict[str, SessionRunnerController] = {}
 
@@ -482,7 +543,7 @@ def _run_focus_mode_by_mouse(
     )
     app.processEvents()
 
-    counts = _event_counts(package.session_dir / "events.csv")
+    counts = _event_counts(output_paths["events_csv"])
     return {
         "exit_code": exit_code,
         "block_count": len(package.blocks),
@@ -498,9 +559,9 @@ def _run_focus_mode_by_mouse(
         "cursor_recenter_records": list(getattr(window, "recenter_records", [])),
         "played_block_count": len(engine.played_blocks),
         "played_instruction_count": len(engine.played_instructions),
-        "events_csv": str(package.session_dir / "events.csv"),
-        "analysis_summary": str(package.session_dir / "analysis_summary.txt"),
-        "session_metadata": str(package.session_dir / "session_metadata.json"),
+        "events_csv": str(output_paths["events_csv"]),
+        "analysis_summary": str(output_paths["analysis_summary"]),
+        "session_metadata": str(output_paths["session_metadata"]),
         "start_screenshot": str(output_dir / "focus_mode_start.png"),
         "complete_screenshot": str(output_dir / "focus_mode_complete.png"),
         "completed": bool(window.result is not None and getattr(window.result, "completed", False)),
@@ -511,9 +572,9 @@ def _evaluate_report(report: dict[str, Any]) -> tuple[bool, list[str]]:
     failures: list[str] = []
     if report.get("selected_template") != STUDY5_TEMPLATE_ID:
         failures.append("Study 5 was not the selected dashboard preload.")
-    if not Path(str(report.get("session_manifest") or "")).is_file():
+    if not _is_file(str(report.get("session_manifest") or "")):
         failures.append("Segment 6 did not produce a session manifest.")
-    if not Path(str(report.get("run_setup_manifest") or "")).is_file():
+    if not _is_file(str(report.get("run_setup_manifest") or "")):
         failures.append("Segment 6 did not produce a run setup manifest.")
     if int(report.get("instruction_clip_count") or 0) != 5:
         failures.append("Study 5 did not preload all five original run-level instruction clips.")
@@ -521,7 +582,7 @@ def _evaluate_report(report: dict[str, Any]) -> tuple[bool, list[str]]:
         failures.append("Study 5 session package contains no participant blocks.")
     if not report.get("segment6_external_runner_process"):
         failures.append("Segment 6 did not launch an external Focus Mode runner process.")
-    if not Path(str(report.get("external_focus_child_report") or "")).is_file():
+    if not _is_file(str(report.get("external_focus_child_report") or "")):
         failures.append("External Focus Mode runner process did not write a child validation report.")
     focus = dict(report.get("focus_mode") or {})
     if not focus.get("completed"):
@@ -545,7 +606,7 @@ def _evaluate_report(report: dict[str, Any]) -> tuple[bool, list[str]]:
 
 def _run_focus_child(args: argparse.Namespace) -> int:
     output_dir = args.output_dir.resolve()
-    output_dir.mkdir(parents=True, exist_ok=True)
+    _mkdir(output_dir)
     if args.session_manifest is None:
         raise RuntimeError("Focus child mode requires --session-manifest.")
     focus_result = _run_focus_mode_by_mouse(
@@ -581,13 +642,14 @@ def _write_standalone_markdown(path: Path, report: dict[str, Any]) -> None:
         "",
         "This validation opens the standalone Experiment Runner launcher, uses Qt mouse-click events on the finished-profile selector and Run Selected Profile button, then drives Focus Mode with Qt mouse-click events through the Study 5 session. Hardware audio is replaced by a fast fake audio engine.",
     ]
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    _mkdir(path.parent)
+    with open(_filesystem_path(path), "w", encoding="utf-8") as handle:
+        handle.write("\n".join(lines) + "\n")
 
 
 def _run_standalone_launcher_validation(args: argparse.Namespace) -> int:
     output_dir = args.output_dir.resolve()
-    output_dir.mkdir(parents=True, exist_ok=True)
+    _mkdir(output_dir)
     if not args.qt_headed:
         os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     from PySide6.QtTest import QTest
@@ -680,7 +742,7 @@ def _run_standalone_launcher_validation(args: argparse.Namespace) -> int:
         failures.append("Standalone runner profile selector was not clicked.")
     if not any(click.get("label") == "click Run Selected Profile" for click in launcher_clicks):
         failures.append("Standalone runner Run Selected Profile button was not clicked.")
-    if not Path(str(report.get("session_manifest") or "")).is_file():
+    if not _is_file(str(report.get("session_manifest") or "")):
         failures.append("Standalone runner did not prepare a Study 5 session manifest.")
     if not focus_result.get("completed"):
         failures.append("Focus Mode did not complete after standalone runner profile launch.")
@@ -789,7 +851,7 @@ def _save_window_screenshot(hwnd: int, path: Path) -> str:
     _raise_windows_window(hwnd)
     rect = win32gui.GetWindowRect(hwnd)
     image = ImageGrab.grab(bbox=rect)
-    path.parent.mkdir(parents=True, exist_ok=True)
+    _mkdir(path.parent)
     image.save(path)
     return str(path)
 
@@ -817,8 +879,9 @@ def _write_packaged_standalone_markdown(path: Path, report: dict[str, Any]) -> N
         "",
         "This validation launches the packaged standalone PPSExperimentRunner.exe, clicks the study/profile selector and Run Selected Profile, and completes Study 5 inside packaged Focus Mode with validation-only mouse events plus a fast fake audio engine.",
     ]
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    _mkdir(path.parent)
+    with open(_filesystem_path(path), "w", encoding="utf-8") as handle:
+        handle.write("\n".join(lines) + "\n")
 
 
 def _enable_process_dpi_awareness() -> None:
@@ -844,16 +907,16 @@ def _enable_process_dpi_awareness() -> None:
 
 def _run_packaged_standalone_app_background_validation(args: argparse.Namespace) -> int:
     output_dir = args.output_dir.resolve()
-    output_dir.mkdir(parents=True, exist_ok=True)
+    _mkdir(output_dir)
     runner = args.packaged_runner.resolve()
-    if not runner.is_file():
+    if not _is_file(runner):
         raise FileNotFoundError(f"Packaged runner exe was not found: {runner}")
 
     focus_report_path = output_dir / "packaged_focus_validation_report.json"
     launcher_report_path = output_dir / "packaged_launcher_validation_report.json"
     for path in (focus_report_path, launcher_report_path):
-        if path.exists():
-            path.unlink()
+        if _path_exists(path):
+            os.unlink(_filesystem_path(path))
 
     env = os.environ.copy()
     env["QT_QPA_PLATFORM"] = "offscreen"
@@ -892,12 +955,12 @@ def _run_packaged_standalone_app_background_validation(args: argparse.Namespace)
 
     launcher_result: dict[str, Any] = {}
     focus_result: dict[str, Any] = {}
-    if launcher_report_path.is_file():
-        launcher_result = json.loads(launcher_report_path.read_text(encoding="utf-8"))
+    if _is_file(launcher_report_path):
+        launcher_result = json.loads(_read_text_file(launcher_report_path))
     else:
         failures.append("Packaged standalone launcher did not write a validation report.")
-    if focus_report_path.is_file():
-        focus_result = json.loads(focus_report_path.read_text(encoding="utf-8"))
+    if _is_file(focus_report_path):
+        focus_result = json.loads(_read_text_file(focus_report_path))
     else:
         failures.append("Packaged Focus Mode did not write a validation report.")
 
@@ -956,14 +1019,14 @@ def _run_packaged_standalone_app_validation(args: argparse.Namespace) -> int:
 
     _enable_process_dpi_awareness()
     output_dir = args.output_dir.resolve()
-    output_dir.mkdir(parents=True, exist_ok=True)
+    _mkdir(output_dir)
     runner = args.packaged_runner.resolve()
-    if not runner.is_file():
+    if not _is_file(runner):
         raise FileNotFoundError(f"Packaged runner exe was not found: {runner}")
 
     focus_report_path = output_dir / "packaged_focus_validation_report.json"
-    if focus_report_path.exists():
-        focus_report_path.unlink()
+    if _path_exists(focus_report_path):
+        os.unlink(_filesystem_path(focus_report_path))
     launcher_clicks: list[dict[str, Any]] = []
     screenshots: dict[str, str] = {}
     env = os.environ.copy()
@@ -1029,12 +1092,12 @@ def _run_packaged_standalone_app_validation(args: argparse.Namespace) -> int:
 
         deadline = time.time() + float(args.timeout_s)
         while time.time() < deadline:
-            if focus_report_path.is_file():
+            if _is_file(focus_report_path):
                 break
             if process.poll() is not None:
                 break
             time.sleep(0.25)
-        if not focus_report_path.is_file() and process.poll() is None:
+        if not _is_file(focus_report_path) and process.poll() is None:
             screenshots["launcher_after_timeout"] = _save_window_screenshot(
                 launcher_hwnd, output_dir / "packaged_launcher_after_timeout.png"
             )
@@ -1052,8 +1115,8 @@ def _run_packaged_standalone_app_validation(args: argparse.Namespace) -> int:
         if process.poll() is None:
             process.terminate()
 
-    if focus_report_path.is_file():
-        focus_result = json.loads(focus_report_path.read_text(encoding="utf-8"))
+    if _is_file(focus_report_path):
+        focus_result = json.loads(_read_text_file(focus_report_path))
     else:
         failures.append("Packaged Focus Mode did not write a validation report.")
 
@@ -1105,13 +1168,13 @@ def main(argv: list[str] | None = None) -> int:
     args = build_arg_parser().parse_args(argv)
     if args.focus_child:
         return _run_focus_child(args)
-    if args.standalone_launcher:
-        return _run_standalone_launcher_validation(args)
     if args.packaged_standalone_app:
         return _run_packaged_standalone_app_validation(args)
+    if args.standalone_launcher:
+        return _run_standalone_launcher_validation(args)
 
     output_dir = args.output_dir.resolve()
-    output_dir.mkdir(parents=True, exist_ok=True)
+    _mkdir(output_dir)
     server: DashboardServer | None = None
     try:
         server = _start_dashboard_server(

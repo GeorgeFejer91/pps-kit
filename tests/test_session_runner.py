@@ -1124,7 +1124,7 @@ def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
     result = controller.run()
 
     assert result.completed
-    assert engine.played == [str(package.blocks[0].wav_path)]
+    assert engine.played == [session_runner_module._filesystem_path(package.blocks[0].wav_path)]
     assert result.events_csv.exists()
     assert result.events_xdf.exists()
     assert result.lsl_markers_csv and result.lsl_markers_csv.exists()
@@ -1550,7 +1550,7 @@ def test_session_runner_part2_transition_waits_for_button_without_instruction_sl
     result = controller.run()
 
     assert result.completed
-    assert engine.played == [str(path) for path in block_paths]
+    assert engine.played == [session_runner_module._filesystem_path(path) for path in block_paths]
     assert [context["next_action"] for context in contexts] == ["next_condition"]
     assert contexts[0]["button_label"] == "Start Part 2"
     assert contexts[0]["mode"] == "button"
@@ -1654,7 +1654,7 @@ def test_session_runner_logs_instruction_events_without_trial_response(tmp_path:
     result = controller.run()
 
     assert result.completed
-    assert engine.played[0] == f"instruction:{instruction}"
+    assert engine.played[0] == f"instruction:{session_runner_module._filesystem_path(instruction)}"
     events = list(csv.DictReader(result.events_csv.open(encoding="utf-8")))
     event_types = [row["event_type"] for row in events]
     assert "instruction_start" in event_types

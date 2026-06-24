@@ -2637,10 +2637,11 @@ class SessionRunnerController:
             result["ok"] = bool(success)
             finished.set()
 
+        playback_path = _soundfile_path(path)
         try:
-            returned = engine.play_instruction(str(path), _done)
+            returned = engine.play_instruction(playback_path, _done)
         except TypeError:
-            returned = engine.play_instruction(str(path))
+            returned = engine.play_instruction(playback_path)
             if isinstance(returned, bool):
                 result["ok"] = bool(returned)
                 finished.set()
@@ -3348,10 +3349,11 @@ class SessionRunnerController:
         progress_callback: Callable[[float], None],
         block_event_schedule: BlockEventSchedule | None,
     ) -> bool:
+        playback_path = _soundfile_path(block.wav_path)
         try:
             return bool(
                 engine.play_block(
-                    str(block.wav_path),
+                    playback_path,
                     progress_callback=progress_callback,
                     audio_event_callback=self.events.enqueue_callback_event,
                     block_event_schedule=block_event_schedule,
@@ -3360,7 +3362,7 @@ class SessionRunnerController:
         except TypeError:
             return bool(
                 engine.play_block(
-                    str(block.wav_path),
+                    playback_path,
                     progress_callback=progress_callback,
                     audio_event_callback=self.events.enqueue_callback_event,
                 )

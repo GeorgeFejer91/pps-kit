@@ -59,6 +59,25 @@ def _write_wired_loopback_evidence(path: Path, *, healthy: bool = True) -> None:
     path.with_name(path.stem + ".output_evidence.json").write_text(json.dumps(payload), encoding="utf-8")
 
 
+def test_study5_ui_mouse_prefers_packaged_runner_when_both_flags_are_set(tmp_path: Path, monkeypatch):
+    ui = _load_script("run_study5_end_to_end_ui_mouse_validation.py")
+    calls: list[tuple[str, bool, bool]] = []
+
+    def fake_packaged(args):
+        calls.append(("packaged", bool(args.packaged_standalone_app), bool(args.standalone_launcher)))
+        return 0
+
+    def fake_standalone(args):
+        calls.append(("standalone", bool(args.packaged_standalone_app), bool(args.standalone_launcher)))
+        return 0
+
+    monkeypatch.setattr(ui, "_run_packaged_standalone_app_validation", fake_packaged)
+    monkeypatch.setattr(ui, "_run_standalone_launcher_validation", fake_standalone)
+
+    assert ui.main(["--output-dir", str(tmp_path), "--standalone-launcher", "--packaged-standalone-app"]) == 0
+    assert calls == [("packaged", True, True)]
+
+
 def test_dummy_pulse_stimulus_has_coded_three_channel_shape(tmp_path: Path):
     make = _load_script("make_dummy_pulse_stimulus.py")
 
