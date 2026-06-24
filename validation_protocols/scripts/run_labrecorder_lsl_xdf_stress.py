@@ -30,6 +30,7 @@ if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 from peripersonal_space_toolkit.session_events import SessionEventLogger  # noqa: E402
+from peripersonal_space_toolkit.output_layout import _filesystem_path  # noqa: E402
 from peripersonal_space_toolkit.timing_events import (  # noqa: E402
     LSL_MARKER_CHANNELS,
     LSL_NUMERIC_SOURCE_ID_PREFIX,
@@ -45,6 +46,31 @@ def _default_output_dir() -> Path:
     return Path("artifacts") / "validation_runs" / f"labrecorder_lsl_xdf_{time.strftime('%Y%m%d_%H%M%S')}"
 
 
+def _mkdir(path: Path | str) -> None:
+    os.makedirs(_filesystem_path(Path(path)), exist_ok=True)
+
+
+def _path_exists(path: Path | str) -> bool:
+    return os.path.exists(_filesystem_path(Path(path)))
+
+
+def _path_is_file(path: Path | str) -> bool:
+    return os.path.isfile(_filesystem_path(Path(path)))
+
+
+def _path_size(path: Path | str) -> int:
+    try:
+        return os.path.getsize(_filesystem_path(Path(path)))
+    except OSError:
+        return 0
+
+
+def _write_text(path: Path, text: str) -> None:
+    _mkdir(path.parent)
+    with open(_filesystem_path(path), "w", encoding="utf-8") as handle:
+        handle.write(text)
+
+
 def _find_labrecorder_cli(explicit: Path | None = None) -> Path:
     candidates: list[Path] = []
     if explicit is not None:
@@ -55,7 +81,7 @@ def _find_labrecorder_cli(explicit: Path | None = None) -> Path:
             candidates.append(Path(found))
     candidates.extend(sorted(Path("local_data/software_tools/labrecorder").glob("**/LabRecorderCLI.exe")))
     for candidate in candidates:
-        if candidate.exists():
+        if _path_exists(candidate):
             return candidate
     raise FileNotFoundError(
         "LabRecorderCLI.exe was not found. Run validation_protocols/scripts/download_labrecorder.ps1 "
@@ -96,7 +122,7 @@ def _stream_name(stream: dict[str, Any]) -> str:
 def _load_xdf_streams(xdf_path: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
     import pyxdf  # type: ignore
 
-    streams, header = pyxdf.load_xdf(str(xdf_path))
+    streams, header = pyxdf.load_xdf(_filesystem_path(xdf_path))
     rich_rows: list[dict[str, Any]] = []
     numeric_rows: list[dict[str, Any]] = []
     for stream in streams:
@@ -127,8 +153,8 @@ def _load_xdf_streams(xdf_path: Path) -> tuple[list[dict[str, Any]], list[dict[s
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]], fieldnames: list[str]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", newline="", encoding="utf-8") as handle:
+    _mkdir(path.parent)
+    with open(_filesystem_path(path), "w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         for row in rows:
@@ -146,7 +172,7 @@ def _record_with_labrecorder(
     predicates = [f"source_id='{rich_source_id}'", f"source_id='{numeric_source_id}'"]
     creationflags = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
     process = subprocess.Popen(
-        [str(labrecorder_cli), str(xdf_path), *predicates],
+        [str(labrecorder_cli), _filesystem_path(xdf_path), *predicates],
         cwd=str(REPO_ROOT),
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
@@ -309,7 +335,7 @@ def run_stress(
     recorder_startup_s: float = 2.5,
     recorder_stop_timeout_s: float = 8.0,
 ) -> dict[str, Any]:
-    output_dir.mkdir(parents=True, exist_ok=True)
+    _mkdir(output_dir)
     labrecorder_cli = _find_labrecorder_cli(labrecorder_cli)
     session_id = f"labrecorder_xdf_{time.strftime('%Y%m%d_%H%M%S')}"
     participant_id = "VALIDATION_LABRECORDER"
@@ -340,11 +366,11 @@ def run_stress(
         time.sleep(0.5)
     finally:
         returncode, stdout, stderr = _stop_labrecorder(process, timeout_s=recorder_stop_timeout_s)
-        (output_dir / "labrecorder_stdout.txt").write_text(stdout, encoding="utf-8")
-        (output_dir / "labrecorder_stderr.txt").write_text(stderr, encoding="utf-8")
+        _write_text(output_dir / "labrecorder_stdout.txt", stdout)
+        _write_text(output_dir / "labrecorder_stderr.txt", stderr)
         hub.close()
 
-    if not xdf_path.exists() or xdf_path.stat().st_size == 0:
+    if not _path_exists(xdf_path) or _path_size(xdf_path) == 0:
         report = {
             "schema": SCHEMA,
             "passed": False,
@@ -355,7 +381,7 @@ def run_stress(
     else:
         rich_rows, numeric_rows, _header = _load_xdf_streams(xdf_path)
         marker_rows = []
-        with lsl_markers_csv.open(newline="", encoding="utf-8-sig") as handle:
+        with open(_filesystem_path(lsl_markers_csv), newline="", encoding="utf-8-sig") as handle:
             marker_rows = [dict(row) for row in csv.DictReader(handle)]
         comparison = compare_xdf_to_local(rich_rows=rich_rows, numeric_rows=numeric_rows, marker_rows=marker_rows)
         rich_csv_fields = [*LSL_MARKER_CHANNELS, "sample_lsl_timestamp"]
@@ -381,7 +407,7 @@ def run_stress(
                 "The numeric stream verifies trigger-code counts; full reconstruction uses PPSMarkersV2 or trigger_dictionary.json.",
             ],
         }
-    (output_dir / "labrecorder_lsl_xdf_report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+    _write_text(output_dir / "labrecorder_lsl_xdf_report.json", json.dumps(report, indent=2))
     _write_markdown_report(report, output_dir / "labrecorder_lsl_xdf_report.md")
     return report
 
@@ -414,7 +440,7 @@ def _write_markdown_report(report: dict[str, Any], path: Path) -> None:
         lines.append(f"- {limitation}")
     if report.get("error"):
         lines.extend(["", "## Error", "", str(report["error"])])
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    _write_text(path, "\n".join(lines) + "\n")
 
 
 def main(argv: list[str] | None = None) -> int:
