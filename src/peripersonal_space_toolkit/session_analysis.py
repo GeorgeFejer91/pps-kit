@@ -23,6 +23,18 @@ DEFAULT_MAX_RESPONSE_RT_S = 4.0
 AGGREGATION_SEPARATE_PARTS = "separate_parts"
 AGGREGATION_POOL_PARTS = "pooled_parts"
 DATA_BEHAVIOR_SCHEMA = "pps-exploratory-data-behavior.v1"
+CONDITION_LENS_SCHEMA = "pps-condition-lens-triage.v1"
+RECORDING_QUALITY_GATE_SCHEMA = "pps-recording-quality-gate.v1"
+CONDITION_LENS_TWO_BY_TWO = "two_by_two"
+CONDITION_LENS_PART = "part"
+CONDITION_LENS_STATE = "state"
+CONDITION_LENS_OVERALL = "overall"
+CONDITION_LENS_ORDER = (CONDITION_LENS_TWO_BY_TWO, CONDITION_LENS_PART, CONDITION_LENS_STATE, CONDITION_LENS_OVERALL)
+MODEL_EVIDENCE_STRONG = "strong"
+MODEL_EVIDENCE_MIXED = "mixed"
+MODEL_EVIDENCE_INSUFFICIENT = "insufficient"
+QUALITY_PASS = "PASS"
+QUALITY_FAIL = "FAIL"
 
 SIGNAL_EXPECTED = "Expected pattern"
 SIGNAL_MIXED = "Mixed / ambiguous"
@@ -64,6 +76,11 @@ class SessionAnalysisResult:
     fit_rows: list[dict[str, Any]] = field(default_factory=list)
     model_fit_rows: list[dict[str, Any]] = field(default_factory=list)
     model_comparison_rows: list[dict[str, Any]] = field(default_factory=list)
+    condition_lens_curve_rows: list[dict[str, Any]] = field(default_factory=list)
+    condition_lens_model_fit_rows: list[dict[str, Any]] = field(default_factory=list)
+    condition_lens_model_comparison_rows: list[dict[str, Any]] = field(default_factory=list)
+    condition_lens_triage_summary: dict[str, Any] = field(default_factory=dict)
+    recording_quality_gate: dict[str, Any] = field(default_factory=dict)
     data_behavior_rows: list[dict[str, Any]] = field(default_factory=list)
     exploratory_quality_summary: dict[str, Any] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
@@ -83,6 +100,13 @@ def analyze_session_events(
     result.summary_rows = _summarize_responses(analysis_rows)
     result.curve_rows, result.fit_rows, result.model_fit_rows, result.model_comparison_rows, curve_warnings = _build_pps_curves(analysis_rows)
     result.warnings.extend(curve_warnings)
+    (
+        result.condition_lens_curve_rows,
+        result.condition_lens_model_fit_rows,
+        result.condition_lens_model_comparison_rows,
+        result.condition_lens_triage_summary,
+    ) = _build_condition_lens_outputs(analysis_rows)
+    result.recording_quality_gate = _build_recording_quality_gate(result, rows)
     if not result.response_rows:
         result.warnings.append("No tactile response rows could be reconstructed from the event stream.")
     result.data_behavior_rows, result.exploratory_quality_summary = _build_data_behavior_review(result, rows)
@@ -101,6 +125,11 @@ def write_analysis_csvs(result: SessionAnalysisResult, output_dir: str | Path, s
         "fits": output_dir / f"{stem}_sigmoid_fits.csv",
         "model_fits": output_dir / f"{stem}_model_fits.csv",
         "model_fit_comparison": output_dir / f"{stem}_model_fit_comparison.csv",
+        "condition_lens_curves": output_dir / f"{stem}_condition_lens_curve_points.csv",
+        "condition_lens_model_fits": output_dir / f"{stem}_condition_lens_model_fits.csv",
+        "condition_lens_model_fit_comparison": output_dir / f"{stem}_condition_lens_model_fit_comparison.csv",
+        "condition_lens_triage_summary": output_dir / "condition_lens_triage_summary.json",
+        "recording_quality_gate": output_dir / "recording_quality_gate.v1.json",
         "data_behavior_by_scope": output_dir / "data_behavior_by_scope.csv",
         "exploratory_quality_summary": output_dir / "exploratory_quality_summary.json",
     }
@@ -112,6 +141,11 @@ def write_analysis_csvs(result: SessionAnalysisResult, output_dir: str | Path, s
     _write_rows(outputs["fits"], result.fit_rows)
     _write_rows(outputs["model_fits"], result.model_fit_rows)
     _write_rows(outputs["model_fit_comparison"], result.model_comparison_rows)
+    _write_rows(outputs["condition_lens_curves"], result.condition_lens_curve_rows)
+    _write_rows(outputs["condition_lens_model_fits"], result.condition_lens_model_fit_rows)
+    _write_rows(outputs["condition_lens_model_fit_comparison"], result.condition_lens_model_comparison_rows)
+    _write_json(outputs["condition_lens_triage_summary"], result.condition_lens_triage_summary)
+    _write_json(outputs["recording_quality_gate"], result.recording_quality_gate)
     _write_rows(outputs["data_behavior_by_scope"], result.data_behavior_rows)
     _write_json(outputs["exploratory_quality_summary"], result.exploratory_quality_summary)
     return outputs
@@ -801,6 +835,514 @@ def _summarize_responses(response_rows: list[dict[str, Any]]) -> list[dict[str, 
     return summary
 
 
+def _build_condition_lens_outputs(
+    response_rows: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+    curve_rows: list[dict[str, Any]] = []
+    model_fit_rows: list[dict[str, Any]] = []
+    model_comparison_rows: list[dict[str, Any]] = []
+    for lens in CONDITION_LENS_ORDER:
+        lens_curves, lens_models, lens_comparisons = _build_condition_lens_curves_for_lens(response_rows, analysis_lens=lens)
+        curve_rows.extend(lens_curves)
+        model_fit_rows.extend(lens_models)
+        model_comparison_rows.extend(lens_comparisons)
+    return curve_rows, model_fit_rows, model_comparison_rows, _condition_lens_triage_summary(curve_rows, model_fit_rows, model_comparison_rows)
+
+
+def _build_condition_lens_curves_for_lens(
+    response_rows: list[dict[str, Any]],
+    *,
+    analysis_lens: str,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    baseline = _condition_lens_baseline_means(response_rows, analysis_lens=analysis_lens)
+    audio_rows = [row for row in response_rows if row.get("trial_type") == "Audio-Tactile" and row.get("rt_ms") not in (None, "")]
+    groups: dict[tuple[str, str, str], list[dict[str, Any]]] = {}
+    for row in audio_rows:
+        scope, part_label, state_label = _condition_lens_context(row, analysis_lens=analysis_lens)
+        groups.setdefault((scope, part_label, state_label), []).append(row)
+
+    curve_rows: list[dict[str, Any]] = []
+    model_fit_rows: list[dict[str, Any]] = []
+    model_comparison_rows: list[dict[str, Any]] = []
+    for (scope, part_label, state_label), rows in sorted(groups.items(), key=lambda item: item[0]):
+        by_soa: dict[int, list[float]] = {}
+        for row in rows:
+            soa = _as_int(row.get("soa_ms"), None)
+            rt = _as_float(row.get("rt_ms"), math.nan)
+            if soa is None or not math.isfinite(rt):
+                continue
+            by_soa.setdefault(soa, []).append(rt)
+
+        xs: list[float] = []
+        ys: list[float] = []
+        metric = "facilitation_ms"
+        for soa, values in sorted(by_soa.items()):
+            mean_rt = statistics.mean(values)
+            rt_sd = statistics.stdev(values) if len(values) > 1 else 0.0
+            rt_sem = rt_sd / math.sqrt(len(values)) if len(values) > 1 else 0.0
+            base_stats = baseline.get((scope, soa))
+            base_rt = base_stats.get("mean") if base_stats is not None else None
+            facilitation = base_rt - mean_rt if base_rt is not None else None
+            baseline_sem = _as_float((base_stats or {}).get("sem"), math.nan)
+            facilitation_sem = math.sqrt(rt_sem**2 + baseline_sem**2) if facilitation is not None and math.isfinite(baseline_sem) else math.nan
+            baseline_sd = _as_float((base_stats or {}).get("sd"), math.nan)
+            facilitation_sd = math.sqrt(rt_sd**2 + baseline_sd**2) if facilitation is not None and math.isfinite(baseline_sd) else math.nan
+            y = facilitation if facilitation is not None else mean_rt
+            if facilitation is None:
+                metric = "mean_rt_ms"
+            curve_rows.append(
+                {
+                    "analysis_lens": analysis_lens,
+                    "analysis_lens_label": _condition_lens_label(analysis_lens),
+                    "display_scope": scope,
+                    "scope": scope,
+                    "aggregation_mode": analysis_lens,
+                    "aggregation_label": _aggregation_label(analysis_lens),
+                    "part_label": part_label,
+                    "state_label": state_label,
+                    "pooled_factors": _condition_lens_pooled_factors(analysis_lens),
+                    "part_number": "" if _part_number_from_label(part_label) is None else _part_number_from_label(part_label),
+                    "condition": "" if analysis_lens in {CONDITION_LENS_STATE, CONDITION_LENS_OVERALL} else part_label,
+                    "respiratory_phase": "" if state_label == "All states" else state_label,
+                    "noise_type": "All sources",
+                    "soa_ms": soa,
+                    "n": len(values),
+                    "mean_rt_ms": mean_rt,
+                    "sd_rt_ms": rt_sd if len(values) > 1 else "",
+                    "sem_rt_ms": rt_sem if len(values) > 1 else "",
+                    "baseline_mean_rt_ms": "" if base_rt is None else base_rt,
+                    "baseline_sd_rt_ms": "" if not math.isfinite(baseline_sd) or base_rt is None else baseline_sd,
+                    "baseline_sem_rt_ms": "" if not math.isfinite(baseline_sem) or base_rt is None else baseline_sem,
+                    "facilitation_ms": "" if facilitation is None else facilitation,
+                    "facilitation_sd_ms": "" if not math.isfinite(facilitation_sd) else facilitation_sd,
+                    "facilitation_sem_ms": "" if not math.isfinite(facilitation_sem) else facilitation_sem,
+                    "fit_metric": metric,
+                    "fit_metric_sd_ms": rt_sd if metric == "mean_rt_ms" and len(values) > 1 else ("" if not math.isfinite(facilitation_sd) else facilitation_sd),
+                    "fit_metric_sem_ms": rt_sem if metric == "mean_rt_ms" and len(values) > 1 else ("" if not math.isfinite(facilitation_sem) else facilitation_sem),
+                }
+            )
+            xs.append(float(soa))
+            ys.append(float(y))
+
+        model_rows = _fit_model_family(
+            np.asarray(xs),
+            np.asarray(ys),
+            scope=scope,
+            part_label=part_label,
+            condition="",
+            phase="" if state_label == "All states" else state_label,
+            noise="All sources",
+            metric=metric,
+            aggregation_mode=analysis_lens,
+        )
+        for model_row in model_rows:
+            model_row.update(
+                {
+                    "analysis_lens": analysis_lens,
+                    "analysis_lens_label": _condition_lens_label(analysis_lens),
+                    "display_scope": scope,
+                    "part_label": part_label,
+                    "state_label": state_label,
+                    "pooled_factors": _condition_lens_pooled_factors(analysis_lens),
+                    "evidence_tier": MODEL_EVIDENCE_INSUFFICIENT,
+                }
+            )
+        _mark_model_evidence_tiers(model_rows)
+        model_fit_rows.extend(model_rows)
+        if model_rows:
+            comparison = _model_comparison_from_rows(model_rows, scope=scope, analysis_lens=analysis_lens, part_label=part_label, state_label=state_label, metric=metric)
+            model_comparison_rows.append(comparison)
+    return curve_rows, model_fit_rows, model_comparison_rows
+
+
+def _condition_lens_baseline_means(response_rows: list[dict[str, Any]], *, analysis_lens: str) -> dict[tuple[str, int], dict[str, float]]:
+    groups: dict[tuple[str, int], list[float]] = {}
+    for row in response_rows:
+        if row.get("trial_type") != "Baseline" or row.get("rt_ms") in (None, ""):
+            continue
+        rt = _as_float(row.get("rt_ms"), math.nan)
+        soa = _as_int(row.get("soa_ms"), None)
+        if soa is None or not math.isfinite(rt):
+            continue
+        scope, _part_label, _state_label = _condition_lens_context(row, analysis_lens=analysis_lens)
+        groups.setdefault((scope, soa), []).append(rt)
+    return {key: _mean_sd_sem(values) for key, values in groups.items() if values}
+
+
+def _condition_lens_context(row: dict[str, Any], *, analysis_lens: str) -> tuple[str, str, str]:
+    part_number = _as_int(row.get("part_number"), None)
+    part_label = f"Part {part_number}" if part_number is not None else "All parts"
+    state_label = _state_label(row)
+    if analysis_lens == CONDITION_LENS_TWO_BY_TWO:
+        scope = _condition_lens_scope(part_label, state_label)
+        return scope, part_label, state_label
+    if analysis_lens == CONDITION_LENS_PART:
+        return part_label, part_label, "All states"
+    if analysis_lens == CONDITION_LENS_STATE:
+        return state_label, "All parts", state_label
+    return "All conditions", "All parts", "All states"
+
+
+def _state_label(row: dict[str, Any]) -> str:
+    for key in ("respiratory_phase", "row_label", "condition"):
+        value = str(row.get(key) or "").strip()
+        if value and not _condition_without_part_label(value) == "":
+            return value
+    return "All states"
+
+
+def _condition_lens_scope(part_label: Any, state_label: Any) -> str:
+    parts = [str(part) for part in (part_label, state_label) if str(part).strip() and str(part).strip() not in {"All parts", "All states"}]
+    return " / ".join(parts) or "All conditions"
+
+
+def _condition_lens_label(analysis_lens: str) -> str:
+    if analysis_lens == CONDITION_LENS_TWO_BY_TWO:
+        return "2 x 2"
+    if analysis_lens == CONDITION_LENS_PART:
+        return "Parts"
+    if analysis_lens == CONDITION_LENS_STATE:
+        return "States"
+    return "Overall"
+
+
+def _condition_lens_pooled_factors(analysis_lens: str) -> str:
+    if analysis_lens == CONDITION_LENS_TWO_BY_TWO:
+        return "noise/source"
+    if analysis_lens == CONDITION_LENS_PART:
+        return "state;noise/source"
+    if analysis_lens == CONDITION_LENS_STATE:
+        return "part;noise/source"
+    return "part;state;noise/source"
+
+
+def _mark_model_evidence_tiers(model_rows: list[dict[str, Any]]) -> None:
+    finite = sorted(
+        (_row_aicc(row), index)
+        for index, row in enumerate(model_rows)
+        if math.isfinite(_row_aicc(row))
+    )
+    if not finite:
+        return
+    best_aicc, best_index = finite[0]
+    delta = finite[1][0] - best_aicc if len(finite) > 1 else math.inf
+    tier = MODEL_EVIDENCE_STRONG if math.isfinite(delta) and delta > 4.0 else MODEL_EVIDENCE_MIXED
+    if not math.isfinite(delta):
+        tier = MODEL_EVIDENCE_INSUFFICIENT
+    for row in model_rows:
+        row["delta_aicc"] = ""
+        row["evidence_tier"] = MODEL_EVIDENCE_INSUFFICIENT
+    model_rows[best_index]["delta_aicc"] = "" if not math.isfinite(delta) else delta
+    model_rows[best_index]["evidence_tier"] = tier
+
+
+def _model_comparison_from_rows(
+    model_rows: list[dict[str, Any]],
+    *,
+    scope: str,
+    analysis_lens: str,
+    part_label: str,
+    state_label: str,
+    metric: str,
+) -> dict[str, Any]:
+    finite = sorted(((_row_aicc(row), row) for row in model_rows if math.isfinite(_row_aicc(row))), key=lambda item: item[0])
+    best_row = finite[0][1] if finite else min(model_rows, key=lambda row: _as_float(row.get("aic"), math.inf))
+    delta = finite[1][0] - finite[0][0] if len(finite) > 1 else math.inf
+    if len(finite) < 2:
+        tier = MODEL_EVIDENCE_INSUFFICIENT
+    else:
+        tier = MODEL_EVIDENCE_STRONG if delta > 4.0 else MODEL_EVIDENCE_MIXED
+    return {
+        "analysis_lens": analysis_lens,
+        "analysis_lens_label": _condition_lens_label(analysis_lens),
+        "scope": scope,
+        "display_scope": scope,
+        "aggregation_mode": analysis_lens,
+        "aggregation_label": _aggregation_label(analysis_lens),
+        "part_label": part_label,
+        "state_label": state_label,
+        "pooled_factors": _condition_lens_pooled_factors(analysis_lens),
+        "fit_metric": metric,
+        "n_points": best_row.get("n_points", ""),
+        "best_model": best_row.get("model", ""),
+        "best_aic": best_row.get("aic", ""),
+        "best_aicc": best_row.get("aicc", ""),
+        "best_r2": best_row.get("r2", ""),
+        "best_rmse": best_row.get("rmse", ""),
+        "delta_aicc": "" if not math.isfinite(delta) else delta,
+        "evidence_tier": tier,
+        "candidate_models": ";".join(str(row.get("model", "")) for row in sorted(model_rows, key=lambda item: str(item.get("model", "")))),
+    }
+
+
+def _condition_lens_triage_summary(
+    curve_rows: list[dict[str, Any]],
+    model_fit_rows: list[dict[str, Any]],
+    model_comparison_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    labels = _condition_lens_display_labels(curve_rows)
+    lens_scores = {
+        lens: {
+            "label": labels.get(lens, _condition_lens_label(lens)),
+            "curve_separation_score_ms": _lens_curve_separation_score(curve_rows, lens),
+            "boundary_shift_score_ms": _lens_boundary_shift_score(curve_rows, model_fit_rows, lens),
+        }
+        for lens in (CONDITION_LENS_TWO_BY_TWO, CONDITION_LENS_PART, CONDITION_LENS_STATE)
+    }
+    curve_winner = _score_winner(lens_scores, "curve_separation_score_ms")
+    boundary_winner = _score_winner(lens_scores, "boundary_shift_score_ms")
+    for lens, payload in lens_scores.items():
+        payload["curve_separation_winner"] = lens == curve_winner
+        payload["boundary_shift_winner"] = lens == boundary_winner
+
+    overall = next((row for row in model_comparison_rows if row.get("analysis_lens") == CONDITION_LENS_OVERALL), {})
+    per_cell_counts: dict[str, int] = {}
+    for row in model_comparison_rows:
+        if row.get("analysis_lens") == CONDITION_LENS_OVERALL:
+            continue
+        model = str(row.get("best_model") or "").strip()
+        if model and str(row.get("evidence_tier") or "") != MODEL_EVIDENCE_INSUFFICIENT:
+            per_cell_counts[model] = per_cell_counts.get(model, 0) + 1
+    default_model = str(overall.get("best_model") or "").strip()
+    if not default_model or str(overall.get("evidence_tier") or "") == MODEL_EVIDENCE_INSUFFICIENT:
+        default_model = "sigmoid"
+    model_buttons = _model_button_summaries(default_model, overall, per_cell_counts)
+    return {
+        "schema": CONDITION_LENS_SCHEMA,
+        "interpretation_note": (
+            "Condition and model winners are exploratory triage cues for the just-finished participant. "
+            "They summarize curve visibility and model support, not confirmatory statistics."
+        ),
+        "default_lens": CONDITION_LENS_TWO_BY_TWO if any(row.get("analysis_lens") == CONDITION_LENS_TWO_BY_TWO for row in curve_rows) else CONDITION_LENS_OVERALL,
+        "default_model": default_model,
+        "overall_model": dict(overall),
+        "model_button_summaries": model_buttons,
+        "condition_lens_buttons": lens_scores,
+        "curve_separation_winner": curve_winner,
+        "boundary_shift_winner": boundary_winner,
+        "model_wins_by_subcondition": per_cell_counts,
+    }
+
+
+def _condition_lens_display_labels(curve_rows: list[dict[str, Any]]) -> dict[str, str]:
+    parts = _ordered_unique(row.get("part_label") for row in curve_rows if row.get("analysis_lens") == CONDITION_LENS_TWO_BY_TWO)
+    states = _ordered_unique(row.get("state_label") for row in curve_rows if row.get("analysis_lens") == CONDITION_LENS_TWO_BY_TWO)
+    parts = [part for part in parts if part and part != "All parts"]
+    states = [state for state in states if state and state != "All states"]
+    return {
+        CONDITION_LENS_TWO_BY_TWO: "2 x 2" if len(parts) == 2 and len(states) == 2 else "Interaction",
+        CONDITION_LENS_PART: " | ".join(parts) if len(parts) == 2 else "Parts",
+        CONDITION_LENS_STATE: " | ".join(states) if len(states) == 2 else "States",
+        CONDITION_LENS_OVERALL: "Overall",
+    }
+
+
+def _ordered_unique(values: Iterable[Any]) -> list[str]:
+    seen: set[str] = set()
+    output: list[str] = []
+    preferred = {"inhale": 0, "exhale": 1}
+    for value in values:
+        text = str(value or "").strip()
+        if text and text not in seen:
+            seen.add(text)
+            output.append(text)
+    return sorted(output, key=lambda item: (preferred.get(item.lower(), 99), _part_number_from_label(item) or 999, item))
+
+
+def _lens_curve_separation_score(curve_rows: list[dict[str, Any]], lens: str) -> float | None:
+    by_soa: dict[float, dict[str, float]] = {}
+    for row in curve_rows:
+        if row.get("analysis_lens") != lens:
+            continue
+        scope = str(row.get("scope") or "").strip()
+        soa = _as_float(row.get("soa_ms"), math.nan)
+        y = _metric_value_for_row(row)
+        if scope and math.isfinite(soa) and math.isfinite(y):
+            by_soa.setdefault(soa, {})[scope] = y
+    ranges = [max(values.values()) - min(values.values()) for values in by_soa.values() if len(values) >= 2]
+    return statistics.mean(ranges) if ranges else None
+
+
+def _lens_boundary_shift_score(curve_rows: list[dict[str, Any]], model_fit_rows: list[dict[str, Any]], lens: str) -> float | None:
+    sampled_ranges: dict[str, tuple[float, float]] = {}
+    for row in curve_rows:
+        if row.get("analysis_lens") != lens:
+            continue
+        scope = str(row.get("scope") or "").strip()
+        soa = _as_float(row.get("soa_ms"), math.nan)
+        if not scope or not math.isfinite(soa):
+            continue
+        old = sampled_ranges.get(scope)
+        sampled_ranges[scope] = (soa, soa) if old is None else (min(old[0], soa), max(old[1], soa))
+    boundaries = []
+    for row in model_fit_rows:
+        if row.get("analysis_lens") != lens or row.get("model") != "sigmoid":
+            continue
+        scope = str(row.get("scope") or "").strip()
+        boundary = _as_float(row.get("pps_boundary_soa_ms"), math.nan)
+        sampled = sampled_ranges.get(scope)
+        if sampled is not None and math.isfinite(boundary) and sampled[0] <= boundary <= sampled[1]:
+            boundaries.append(boundary)
+    return max(boundaries) - min(boundaries) if len(boundaries) >= 2 else None
+
+
+def _score_winner(scores: dict[str, dict[str, Any]], key: str) -> str:
+    scored = [(float(payload[key]), lens) for lens, payload in scores.items() if payload.get(key) is not None]
+    if not scored:
+        return ""
+    value, lens = max(scored, key=lambda item: item[0])
+    return lens if value > 0 else ""
+
+
+def _model_button_summaries(default_model: str, overall: dict[str, Any], per_cell_counts: dict[str, int]) -> dict[str, dict[str, Any]]:
+    summaries: dict[str, dict[str, Any]] = {}
+    for model in ("sigmoid", "logarithmic_decay", "linear"):
+        if model == default_model:
+            tier = str(overall.get("evidence_tier") or MODEL_EVIDENCE_MIXED)
+        elif per_cell_counts.get(model, 0):
+            tier = MODEL_EVIDENCE_MIXED
+        else:
+            tier = MODEL_EVIDENCE_INSUFFICIENT
+        summaries[model] = {
+            "evidence_tier": tier,
+            "overall_winner": model == default_model,
+            "subcondition_wins": per_cell_counts.get(model, 0),
+        }
+    return summaries
+
+
+def _build_recording_quality_gate(result: SessionAnalysisResult, event_rows: list[dict[str, Any]]) -> dict[str, Any]:
+    final_rows = result.final_outcome_rows or result.response_rows
+    failures: list[dict[str, Any]] = []
+    warnings: list[dict[str, Any]] = []
+    metrics: dict[str, Any] = {
+        "response_rows": len(result.response_rows),
+        "final_outcome_rows": len(final_rows),
+    }
+    if not final_rows:
+        failures.append(_quality_issue("no_usable_tactile_responses", "No usable analysis-ready tactile responses were reconstructed.", "final_outcome_rows=0"))
+    hits = sum(1 for row in final_rows if _truthy(row.get("hit")))
+    hit_rate = hits / len(final_rows) if final_rows else 0.0
+    metrics["overall_hit_rate"] = hit_rate
+    if final_rows and hit_rate < 0.70:
+        failures.append(_quality_issue("overall_hit_rate_below_70pct", "Overall valid in-target tactile hit rate is below 70%.", f"hit_rate={hit_rate:.3f}"))
+
+    cell_rows = _quality_condition_cells(final_rows)
+    metrics["condition_cell_count"] = len(cell_rows)
+    for cell, rows in sorted(cell_rows.items()):
+        cell_hits = sum(1 for row in rows if _truthy(row.get("hit")))
+        cell_hit_rate = cell_hits / len(rows) if rows else 0.0
+        if cell_hit_rate < 0.50:
+            failures.append(_quality_issue("condition_cell_hit_rate_below_50pct", f"{cell} has valid in-target hit rate below 50%.", f"hit_rate={cell_hit_rate:.3f}; trials={len(rows)}"))
+        audio_hits = [row for row in rows if row.get("trial_type") == "Audio-Tactile" and _truthy(row.get("hit")) and row.get("rt_ms") not in (None, "")]
+        soas = {_as_int(row.get("soa_ms"), None) for row in audio_hits}
+        soas.discard(None)
+        if audio_hits and (len(soas) < 4 or len(audio_hits) < 8):
+            failures.append(
+                _quality_issue(
+                    "condition_cell_audio_tactile_coverage_low",
+                    f"{cell} has too little valid audio-tactile coverage for a serious per-cell curve.",
+                    f"valid_audio_tactile={len(audio_hits)}; distinct_soas={len(soas)}",
+                )
+            )
+
+    baseline_rows = [row for row in final_rows if row.get("trial_type") == "Baseline"]
+    if baseline_rows and not any(row.get("rt_ms") not in (None, "") and _truthy(row.get("hit")) for row in baseline_rows):
+        failures.append(_quality_issue("baseline_unreconstructable", "Baseline trials were present but no valid baseline responses were reconstructable.", f"baseline_rows={len(baseline_rows)}"))
+
+    timing_rows = [row for row in event_rows if str(row.get("event_type") or "").strip() in {"trial_start", "tactile_onset", "trial_end"}]
+    tactile_events = [row for row in event_rows if str(row.get("event_type") or "").strip() == "tactile_onset"]
+    if final_rows and event_rows and not tactile_events:
+        failures.append(_quality_issue("missing_tactile_timing_anchors", "No primary tactile timing anchors were logged.", "tactile_onset_events=0"))
+    qualities = [str(row.get("timestamp_quality") or "").strip().lower() for row in timing_rows if str(row.get("timestamp_quality") or "").strip()]
+    fallback_count = sum(1 for quality in qualities if "fallback" in quality or "invalid" in quality)
+    fallback_rate = fallback_count / len(qualities) if qualities else 0.0
+    metrics["timing_quality_rows"] = len(qualities)
+    metrics["timing_fallback_rate"] = fallback_rate
+    if qualities and fallback_rate > 0.20:
+        failures.append(_quality_issue("timing_fallback_rate_above_20pct", "Timing-critical event rows show pervasive fallback or invalid timestamp quality.", f"fallback_rate={fallback_rate:.3f}; timing_quality_rows={len(qualities)}"))
+
+    accepted_rts = [_as_float(row.get("rt_ms"), math.nan) for row in final_rows if _truthy(row.get("hit")) and row.get("rt_ms") not in (None, "")]
+    accepted_rts = [value for value in accepted_rts if math.isfinite(value)]
+    if accepted_rts:
+        median_rt = statistics.median(accepted_rts)
+        metrics["median_accepted_rt_ms"] = median_rt
+        if median_rt < 150.0 or median_rt > 2500.0:
+            failures.append(_quality_issue("accepted_rt_median_outside_compliance_range", "Accepted RT median suggests likely noncompliance.", f"median_rt_ms={median_rt:.3f}"))
+
+    mouse_events = [row for row in event_rows if str(row.get("event_type") or "").strip() == "mouse_click" and _truthy(row.get("during_playback", True))]
+    selected_clicks = {str(row.get("click_event_id") or "").strip() for row in final_rows if str(row.get("click_event_id") or "").strip()}
+    extra_clicks = [row for row in mouse_events if str(row.get("event_id") or "").strip() not in selected_clicks]
+    tactile_count = len(tactile_events) or len(final_rows)
+    extra_click_ratio = len(extra_clicks) / max(1, tactile_count)
+    metrics["extra_playback_click_ratio"] = extra_click_ratio
+    if tactile_count and extra_click_ratio > 0.50:
+        failures.append(_quality_issue("extra_playback_clicks_above_50pct", "Extra playback clicks exceed 50% of tactile trial count.", f"extra_clicks={len(extra_clicks)}; tactile_count={tactile_count}"))
+    anticipatory = _anticipatory_target_click_count(mouse_events, tactile_events)
+    anticipatory_ratio = anticipatory / max(1, tactile_count)
+    metrics["anticipatory_target_click_ratio"] = anticipatory_ratio
+    if tactile_count and anticipatory_ratio > 0.15:
+        failures.append(_quality_issue("anticipatory_target_clicks_above_15pct", "Anticipatory target clicks exceed 15% of tactile trials.", f"anticipatory_clicks={anticipatory}; tactile_count={tactile_count}"))
+
+    if not failures and not result.condition_lens_curve_rows:
+        warnings.append(_quality_issue("no_condition_lens_curves", "Condition-lens curves were unavailable, so the GUI will fall back to legacy review tables.", "condition_lens_curve_rows=0"))
+
+    status = QUALITY_FAIL if failures else QUALITY_PASS
+    return {
+        "schema": RECORDING_QUALITY_GATE_SCHEMA,
+        "status": status,
+        "primary_reason": failures[0]["message"] if failures else "No serious exclusion criteria were triggered.",
+        "failures": failures,
+        "warnings": warnings,
+        "metrics": metrics,
+        "criteria": {
+            "overall_hit_rate_min": 0.70,
+            "condition_cell_hit_rate_min": 0.50,
+            "condition_cell_distinct_soa_min": 4,
+            "condition_cell_valid_audio_tactile_min": 8,
+            "timing_fallback_rate_max": 0.20,
+            "accepted_rt_median_range_ms": [150.0, 2500.0],
+            "anticipatory_target_click_ratio_max": 0.15,
+            "extra_playback_click_ratio_max": 0.50,
+        },
+    }
+
+
+def _quality_condition_cells(rows: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    cells: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        part_number = _as_int(row.get("part_number"), None)
+        part_label = f"Part {part_number}" if part_number is not None else "All parts"
+        state = _state_label(row)
+        cells.setdefault(_condition_lens_scope(part_label, state), []).append(row)
+    return cells
+
+
+def _quality_issue(code: str, message: str, evidence: str) -> dict[str, Any]:
+    return {"code": code, "message": message, "evidence": evidence}
+
+
+def _anticipatory_target_click_count(mouse_events: list[dict[str, Any]], tactile_events: list[dict[str, Any]]) -> int:
+    if not mouse_events or not tactile_events:
+        return 0
+    tactile_sorted = sorted(tactile_events, key=lambda row: _as_float(row.get("unix_time"), math.inf))
+    count = 0
+    for click in mouse_events:
+        if not _truthy(click.get("in_target", True)):
+            continue
+        click_time = _as_float(click.get("unix_time"), math.nan)
+        if not math.isfinite(click_time):
+            continue
+        for tactile in tactile_sorted:
+            tactile_time = _as_float(tactile.get("unix_time"), math.nan)
+            if not math.isfinite(tactile_time):
+                continue
+            if 0.0 < tactile_time - click_time <= 0.15 and _same_trial_context(tactile, click):
+                count += 1
+                break
+    return count
+
+
 def _build_pps_curves(
     response_rows: list[dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[str]]:
@@ -921,6 +1463,7 @@ def _build_pps_curves_for_mode(
                     "n_points": best.get("n_points", ""),
                     "best_model": best.get("model", ""),
                     "best_aic": best.get("aic", ""),
+                    "best_aicc": best.get("aicc", ""),
                     "best_r2": best.get("r2", ""),
                     "candidate_models": ";".join(str(row.get("model", "")) for row in sorted(model_rows, key=lambda item: str(item.get("model", "")))),
                 }
@@ -1108,7 +1651,26 @@ def _fit_metrics(y: np.ndarray, predicted: np.ndarray, *, parameter_count: int) 
     r2 = 1.0 - (rss / ss_tot) if ss_tot else 1.0
     rmse = math.sqrt(rss / n) if n else math.nan
     aic = n * math.log(max(rss / max(n, 1), 1e-12)) + (2 * parameter_count) if n else math.inf
-    return {"rss": rss, "rmse": rmse, "r2": r2, "aic": aic}
+    aicc = _aicc(aic, n, parameter_count)
+    return {"rss": rss, "rmse": rmse, "r2": r2, "aic": aic, "aicc": "" if not math.isfinite(aicc) else aicc}
+
+
+def _aicc(aic: float, n: int, parameter_count: int) -> float:
+    if not math.isfinite(aic) or n <= parameter_count + 1:
+        return math.inf
+    return aic + (2.0 * parameter_count * (parameter_count + 1.0)) / (n - parameter_count - 1.0)
+
+
+def _row_aicc(row: dict[str, Any]) -> float:
+    aicc = _as_float(row.get("aicc"), math.nan)
+    if math.isfinite(aicc):
+        return aicc
+    aic = _as_float(row.get("aic"), math.inf)
+    n = _as_int(row.get("n_points"), None)
+    parameter_count = _as_int(row.get("parameter_count"), None)
+    if n is None or parameter_count is None:
+        return math.inf
+    return _aicc(aic, int(n), int(parameter_count))
 
 
 def _model_row(
@@ -1203,6 +1765,14 @@ def _part_number_from_label(value: Any) -> int | None:
 def _aggregation_label(value: str) -> str:
     if value == AGGREGATION_POOL_PARTS:
         return "Pool parts"
+    if value == CONDITION_LENS_TWO_BY_TWO:
+        return "2 x 2"
+    if value == CONDITION_LENS_PART:
+        return "Part lens"
+    if value == CONDITION_LENS_STATE:
+        return "State lens"
+    if value == CONDITION_LENS_OVERALL:
+        return "Overall lens"
     return "Separate parts"
 
 

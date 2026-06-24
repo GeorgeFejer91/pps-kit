@@ -27,6 +27,10 @@ from .audio_routing import (
     komplete_audio_asio_install_steps,
 )
 from .analysis_review import (
+    CONDITION_LENS_TWO_BY_TWO,
+    MODEL_EVIDENCE_INSUFFICIENT,
+    MODEL_EVIDENCE_MIXED,
+    MODEL_EVIDENCE_STRONG,
     MODEL_BEST,
     MODEL_COMPARE_ALL,
     MODEL_LABELS,
@@ -55,12 +59,19 @@ from .analysis_review import (
     behavior_signal_counts,
     behavior_signals_for_scope,
     best_model_for_scope,
+    condition_lens_button_rows,
+    condition_lens_observed_series,
+    condition_lens_prediction_series,
     fit_row_for_scope,
+    default_condition_lens,
+    default_condition_model,
     load_analysis_review_data,
+    model_button_rows,
     observed_points_for_scope,
     prediction_points_for_scope,
     prediction_series_for_scope,
     raw_points_for_scope,
+    recording_quality_status,
     scope_comparison_row,
     scopes_for_part_mode,
 )
@@ -2073,6 +2084,7 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
         def __init__(self) -> None:
             super().__init__()
             self.observed: list[dict[str, float | str]] = []
+            self.observed_series: list[dict[str, Any]] = []
             self.predicted: list[dict[str, float]] = []
             self.predicted_series: list[dict[str, Any]] = []
             self.raw_points: list[dict[str, float | str]] = []
@@ -2101,6 +2113,7 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
             boundary_x: float | None = None,
             boundary_label: str = "",
             raw_points: list[dict[str, float | str]] | None = None,
+            observed_series: list[dict[str, Any]] | None = None,
             show_observed: bool = True,
             show_uncertainty: bool = True,
             show_raw_points: bool = False,
@@ -2108,6 +2121,10 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
             show_low_n_markers: bool = True,
         ) -> None:
             self.observed = list(observed)
+            if observed_series is None:
+                self.observed_series = [{"label": "Observed mean", "points": list(observed), "color": "#8c2f2f"}] if observed else []
+            else:
+                self.observed_series = list(observed_series)
             self.predicted = list(predicted)
             if predicted_series is None:
                 self.predicted_series = [{"model": "", "label": "Model fit", "points": list(predicted)}] if predicted else []
@@ -2140,7 +2157,8 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                 bottom = 42
                 plot_width = max(1, width - left - right)
                 plot_height = max(1, height - top - bottom)
-                visible_observed = self.observed if self.show_observed else []
+                visible_observed_series = self.observed_series if self.show_observed else []
+                visible_observed = [point for series in visible_observed_series for point in list(series.get("points") or [])]
                 all_points = [(float(item["x"]), float(item["y"])) for item in visible_observed]
                 if self.show_raw_points:
                     all_points.extend((float(item["x"]), float(item["y"])) for item in self.raw_points)
@@ -2180,7 +2198,9 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                 def _y(value: float) -> float:
                     return top + (y_max - value) / (y_max - y_min) * plot_height
 
-                def _model_color(model: str) -> Any:
+                def _model_color(model: str, color: str = "") -> Any:
+                    if color:
+                        return q["QColor"](color)
                     if model == MODEL_SIGMOID:
                         return q["QColor"]("#246b55")
                     if model == MODEL_LINEAR:
@@ -2189,8 +2209,8 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                         return q["QColor"]("#a4631b")
                     return q["QColor"]("#246b55")
 
-                def _model_pen(model: str, *, width_px: int = 3) -> Any:
-                    pen = q["QPen"](_model_color(model))
+                def _model_pen(model: str, *, width_px: int = 3, color: str = "") -> Any:
+                    pen = q["QPen"](_model_color(model, color))
                     pen.setWidth(width_px)
                     if model == MODEL_LINEAR:
                         pen.setStyle(q["Qt"].PenStyle.DashLine)
@@ -2244,7 +2264,7 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                     range_color.setAlpha(34)
                     range_pen_color = q["QColor"]("#9a7629")
                     range_pen_color.setAlpha(82)
-                    if len(spread_points) >= 2:
+                    if len(visible_observed_series) <= 1 and len(spread_points) >= 2:
                         path = q["QPainterPath"]()
                         first = spread_points[0]
                         path.moveTo(_x(first[0]), _y(max(first[1], first[2])))
@@ -2278,7 +2298,7 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                     if not points:
                         continue
                     model = str(series.get("model") or "")
-                    painter.setPen(_model_pen(model))
+                    painter.setPen(_model_pen(model, color=str(series.get("color") or "")))
                     path = q["QPainterPath"]()
                     first = points[0]
                     path.moveTo(_x(float(first["x"])), _y(float(first["y"])))
@@ -2297,7 +2317,7 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                                 label = "Log decay"
                             item_x = legend_x + (index % 2) * 154
                             item_y = legend_y + (index // 2) * 18
-                            painter.setPen(_model_pen(model, width_px=2))
+                            painter.setPen(_model_pen(model, width_px=2, color=str(series.get("color") or "")))
                             painter.drawLine(
                                 int(round(item_x)),
                                 int(round(item_y + 7)),
@@ -2319,7 +2339,7 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                         for series in self.predicted_series:
                             model = str(series.get("model") or "")
                             label = str(series.get("label") or MODEL_LABELS.get(model, model))
-                            painter.setPen(_model_pen(model, width_px=2))
+                            painter.setPen(_model_pen(model, width_px=2, color=str(series.get("color") or "")))
                             painter.drawLine(
                                 int(round(legend_x)),
                                 int(round(legend_y + 7)),
@@ -2336,7 +2356,7 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                                 label,
                             )
                             legend_x += 138
-                if visible_observed:
+                if visible_observed and len(visible_observed_series) <= 1:
                     if compact_legend and len(self.predicted_series) > 1:
                         legend_y = 50
                         legend_x = max(left + 190, width - right - 322) + 154
@@ -2362,14 +2382,17 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                         "Observed mean",
                     )
 
-                if len(visible_observed) >= 2:
-                    mean_pen = q["QPen"](q["QColor"]("#8c2f2f"))
+                for series in visible_observed_series:
+                    points = list(series.get("points") or [])
+                    if len(points) < 2:
+                        continue
+                    mean_pen = q["QPen"](q["QColor"](str(series.get("color") or "#8c2f2f")))
                     mean_pen.setWidth(2)
                     painter.setPen(mean_pen)
                     mean_path = q["QPainterPath"]()
-                    first = visible_observed[0]
+                    first = points[0]
                     mean_path.moveTo(_x(float(first["x"])), _y(float(first["y"])))
-                    for point in visible_observed[1:]:
+                    for point in points[1:]:
                         mean_path.lineTo(_x(float(point["x"])), _y(float(point["y"])))
                     painter.drawPath(mean_path)
 
@@ -2385,22 +2408,26 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
                         y = int(round(_y(float(point["y"]))))
                         painter.drawEllipse(x - 3, y - 3, 6, 6)
 
-                point_pen = q["QPen"](q["QColor"]("#8c2f2f"))
-                point_pen.setWidth(2)
-                painter.setPen(point_pen)
-                painter.setBrush(q["QBrush"](q["QColor"]("#f4e2b8")))
-                for point in visible_observed:
-                    x = int(round(_x(float(point["x"]))))
-                    y = int(round(_y(float(point["y"]))))
-                    painter.drawEllipse(x - 5, y - 5, 10, 10)
-                    if self.show_low_n_markers and str(point.get("low_n") or "").strip():
-                        low_n_pen = q["QPen"](q["QColor"]("#a4631b"))
-                        low_n_pen.setWidth(2)
-                        painter.setPen(low_n_pen)
-                        painter.setBrush(q["Qt"].BrushStyle.NoBrush)
-                        painter.drawEllipse(x - 8, y - 8, 16, 16)
-                        painter.setPen(point_pen)
-                        painter.setBrush(q["QBrush"](q["QColor"]("#f4e2b8")))
+                for series in visible_observed_series:
+                    point_color = q["QColor"](str(series.get("color") or "#8c2f2f"))
+                    point_pen = q["QPen"](point_color)
+                    point_pen.setWidth(2)
+                    fill_color = q["QColor"](point_color)
+                    fill_color.setAlpha(46)
+                    painter.setPen(point_pen)
+                    painter.setBrush(q["QBrush"](fill_color))
+                    for point in list(series.get("points") or []):
+                        x = int(round(_x(float(point["x"]))))
+                        y = int(round(_y(float(point["y"]))))
+                        painter.drawEllipse(x - 5, y - 5, 10, 10)
+                        if self.show_low_n_markers and str(point.get("low_n") or "").strip():
+                            low_n_pen = q["QPen"](q["QColor"]("#a4631b"))
+                            low_n_pen.setWidth(2)
+                            painter.setPen(low_n_pen)
+                            painter.setBrush(q["Qt"].BrushStyle.NoBrush)
+                            painter.drawEllipse(x - 8, y - 8, 16, 16)
+                            painter.setPen(point_pen)
+                            painter.setBrush(q["QBrush"](fill_color))
 
                 painter.setPen(q["QPen"](q["QColor"]("#202621")))
                 painter.drawText(8, 6, width - 16, 18, int(q["Qt"].AlignmentFlag.AlignVCenter), self.model_label or "Model fit")
@@ -2425,6 +2452,11 @@ class AnalysisReviewDialog:
         self.data = data
         self.current_part_mode = data.default_part_mode
         self.current_view = VIEW_DATA_BEHAVIOR
+        self.current_condition_lens = default_condition_lens(data)
+        self.current_quick_model = default_condition_model(data)
+        self.quick_mode = True
+        self.condition_lens_buttons: dict[str, Any] = {}
+        self.quick_model_buttons: dict[str, Any] = {}
         self.part_mode_buttons: dict[str, Any] = {}
         self.view_buttons: dict[str, Any] = {}
         self.plot_toggles: dict[str, Any] = {}
@@ -2510,6 +2542,36 @@ QCheckBox#analysisPlotToggle {
 QCheckBox#analysisPlotToggle:disabled {
     color: #9ba59d;
 }
+QLabel#analysisQualityReason,
+QLabel#analysisTriageHint {
+    color: #4f5b52;
+    font-weight: 650;
+}
+QLabel#analysisQualityBadge {
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-weight: 900;
+}
+QPushButton#analysisConditionLensButton,
+QPushButton#analysisModelButton,
+QPushButton#analysisMoreButton {
+    border: 1px solid #bcc7bd;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #202621;
+    padding: 7px 12px;
+    min-height: 30px;
+    font-weight: 800;
+}
+QPushButton#analysisConditionLensButton:checked,
+QPushButton#analysisModelButton:checked {
+    background: #202621;
+    color: #ffffff;
+    border-color: #202621;
+}
+QWidget#analysisMoreContainer {
+    background: #f4f5f1;
+}
 QTableWidget#analysisOverviewTable {
     background: #ffffff;
     border: 1px solid #d9dfd6;
@@ -2559,11 +2621,83 @@ QTextEdit#analysisDetailsText {
         root.addWidget(header)
 
         subtitle = q["QLabel"](
-            "Exploratory data-behavior signals compare this recording with common PPS visualization patterns; they are not scientific conclusions or participant-readiness certification."
+            "Plot-first triage for this participant run. The quality grade is a strict data-exclusion gate; model and condition colors are exploratory cues."
         )
         subtitle.setObjectName("mutedLabel")
         subtitle.setWordWrap(True)
         root.addWidget(subtitle)
+
+        quality_row = q["QHBoxLayout"]()
+        quality_row.setContentsMargins(0, 0, 0, 0)
+        quality_row.setSpacing(8)
+        self.quality_badge = q["QLabel"]("Participant Run Quality: UNKNOWN")
+        self.quality_badge.setObjectName("analysisQualityBadge")
+        self.quality_reason = q["QLabel"]("")
+        self.quality_reason.setObjectName("analysisQualityReason")
+        self.quality_reason.setWordWrap(True)
+        quality_row.addWidget(self.quality_badge, 0)
+        quality_row.addWidget(self.quality_reason, 1)
+        root.addLayout(quality_row)
+
+        plot_panel, plot_layout = _panel(q, "PPS Response Curves")
+        self.plot_widget = _create_analysis_curve_plot_widget(q)
+        self.plot_widget.setObjectName("analysisCurvePlot")
+        self.plot_widget.setMinimumHeight(260)
+        plot_layout.addWidget(self.plot_widget)
+        root.addWidget(plot_panel, 1)
+
+        condition_row = q["QHBoxLayout"]()
+        condition_row.setContentsMargins(0, 0, 0, 0)
+        condition_row.setSpacing(8)
+        condition_row.addWidget(q["QLabel"]("Conditions"))
+        for payload in condition_lens_button_rows(self.data):
+            lens = str(payload.get("lens") or "")
+            button = q["QPushButton"](str(payload.get("label") or lens))
+            button.setObjectName("analysisConditionLensButton")
+            button.setCheckable(True)
+            button.setChecked(lens == self.current_condition_lens)
+            button.setToolTip(self._condition_button_tooltip(payload))
+            button.clicked.connect(lambda _checked=False, selected_lens=lens: self._set_condition_lens(selected_lens))
+            self.condition_lens_buttons[lens] = button
+            condition_row.addWidget(button)
+        condition_row.addStretch(1)
+        root.addLayout(condition_row)
+
+        model_row = q["QHBoxLayout"]()
+        model_row.setContentsMargins(0, 0, 0, 0)
+        model_row.setSpacing(8)
+        model_row.addWidget(q["QLabel"]("Model"))
+        for payload in model_button_rows(self.data):
+            model = str(payload.get("model") or "")
+            button = q["QPushButton"](str(payload.get("label") or model))
+            button.setObjectName("analysisModelButton")
+            button.setCheckable(True)
+            button.setChecked(model == self.current_quick_model)
+            button.setToolTip(self._model_button_tooltip(payload))
+            button.clicked.connect(lambda _checked=False, selected_model=model: self._set_quick_model(selected_model))
+            self.quick_model_buttons[model] = button
+            model_row.addWidget(button)
+        model_row.addStretch(1)
+        root.addLayout(model_row)
+
+        self.triage_hint = q["QLabel"]("")
+        self.triage_hint.setObjectName("analysisTriageHint")
+        self.triage_hint.setWordWrap(True)
+        root.addWidget(self.triage_hint)
+
+        self.more_button = q["QPushButton"]("More")
+        self.more_button.setObjectName("analysisMoreButton")
+        self.more_button.setCheckable(True)
+        self.more_button.toggled.connect(self._set_more_visible)
+        root.addWidget(self.more_button, 0)
+
+        self.more_container = q["QWidget"]()
+        self.more_container.setObjectName("analysisMoreContainer")
+        self.more_container.setVisible(False)
+        more_root = q["QVBoxLayout"](self.more_container)
+        more_root.setContentsMargins(0, 0, 0, 0)
+        more_root.setSpacing(8)
+        root.addWidget(self.more_container, 0)
 
         view_row = q["QHBoxLayout"]()
         view_row.setContentsMargins(0, 0, 0, 0)
@@ -2583,7 +2717,7 @@ QTextEdit#analysisDetailsText {
             self.view_buttons[view] = button
             view_layout.addWidget(button, index // 3, index % 3)
         view_row.addWidget(self.view_frame, 1)
-        root.addLayout(view_row)
+        more_root.addLayout(view_row)
 
         controls = q["QGridLayout"]()
         controls.setContentsMargins(0, 0, 0, 0)
@@ -2634,7 +2768,7 @@ QTextEdit#analysisDetailsText {
         controls.addWidget(q["QLabel"]("Grouping"), 2, 2)
         controls.addWidget(self.grouping_combo, 2, 3)
         controls.setColumnStretch(3, 1)
-        root.addLayout(controls)
+        more_root.addLayout(controls)
 
         toggle_panel = q["QFrame"]()
         toggle_panel.setObjectName("analysisTogglePanel")
@@ -2654,17 +2788,17 @@ QTextEdit#analysisDetailsText {
             box = q["QCheckBox"](label)
             box.setObjectName("analysisPlotToggle")
             box.setChecked(checked)
-            box.stateChanged.connect(lambda _state=0: self._refresh())
+            box.stateChanged.connect(lambda _state=0: self._refresh_detail_mode())
             self.plot_toggles[key] = box
             toggle_layout.addWidget(box, index // 4, index % 4)
-        root.addWidget(toggle_panel)
+        more_root.addWidget(toggle_panel)
 
         body = q["QSplitter"](q["Qt"].Orientation.Vertical)
         body.setChildrenCollapsible(False)
         body.setHandleWidth(8)
         body.setMinimumHeight(0)
         body.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Expanding)
-        root.addWidget(body, 1)
+        more_root.addWidget(body, 1)
 
         overview_panel, overview_layout = _panel(q, "Best Model Overview")
         self.overview_table = q["QTableWidget"](0, 7)
@@ -2692,12 +2826,6 @@ QTextEdit#analysisDetailsText {
         overview_layout.addWidget(self.overview_table)
         body.addWidget(overview_panel)
 
-        plot_panel, plot_layout = _panel(q, "Model Visualization")
-        self.plot_widget = _create_analysis_curve_plot_widget(q)
-        self.plot_widget.setObjectName("analysisCurvePlot")
-        plot_layout.addWidget(self.plot_widget)
-        body.addWidget(plot_panel)
-
         detail_panel, detail_layout = _panel(q, "Selected Fit Details")
         self.detail_text = q["QTextEdit"]()
         self.detail_text.setObjectName("analysisDetailsText")
@@ -2706,7 +2834,7 @@ QTextEdit#analysisDetailsText {
         self.detail_text.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Expanding)
         detail_layout.addWidget(self.detail_text)
         body.addWidget(detail_panel)
-        body.setSizes([104, 252, 88])
+        body.setSizes([112, 180])
 
         buttons = q["QHBoxLayout"]()
         buttons.setContentsMargins(12, 8, 12, 12)
@@ -2719,15 +2847,144 @@ QTextEdit#analysisDetailsText {
         buttons.addWidget(close_button)
         outer.addLayout(buttons)
 
-        self.scope_combo.currentIndexChanged.connect(lambda _index: self._refresh())
-        self.model_combo.currentIndexChanged.connect(lambda _index: self._refresh())
-        self.metric_combo.currentIndexChanged.connect(lambda _index: self._refresh())
-        self.source_combo.currentIndexChanged.connect(lambda _index: self._refresh())
-        self.grouping_combo.currentIndexChanged.connect(lambda _index: self._refresh())
+        self.scope_combo.currentIndexChanged.connect(lambda _index: self._refresh_detail_mode())
+        self.model_combo.currentIndexChanged.connect(lambda _index: self._refresh_detail_mode())
+        self.metric_combo.currentIndexChanged.connect(lambda _index: self._refresh_detail_mode())
+        self.source_combo.currentIndexChanged.connect(lambda _index: self._refresh_detail_mode())
+        self.grouping_combo.currentIndexChanged.connect(lambda _index: self._refresh_detail_mode())
         self._reload_scopes_for_part_mode()
         self._populate_overview_table()
+        self._refresh_quick_button_styles()
+
+    def _condition_button_tooltip(self, payload: dict[str, Any]) -> str:
+        cues = []
+        if payload.get("curve_separation_winner"):
+            cues.append("largest visual curve separation")
+        if payload.get("boundary_shift_winner"):
+            cues.append("largest valid sigmoid boundary shift")
+        return "Exploratory condition lens" + (": " + ", ".join(cues) if cues else "")
+
+    def _model_button_tooltip(self, payload: dict[str, Any]) -> str:
+        tier = str(payload.get("evidence_tier") or MODEL_EVIDENCE_INSUFFICIENT)
+        wins = payload.get("subcondition_wins", 0)
+        overall = "overall winner" if payload.get("overall_winner") else "not overall winner"
+        return f"AICc support: {tier}; {overall}; subcondition wins: {wins}"
+
+    def _set_condition_lens(self, lens: str) -> None:
+        self.quick_mode = True
+        self.current_condition_lens = str(lens or CONDITION_LENS_TWO_BY_TWO)
+        self._refresh_quick_button_styles()
+        self._refresh()
+
+    def _set_quick_model(self, model: str) -> None:
+        self.quick_mode = True
+        self.current_quick_model = str(model or MODEL_SIGMOID)
+        self._refresh_quick_button_styles()
+        self._refresh()
+
+    def _set_more_visible(self, visible: bool) -> None:
+        self.more_container.setVisible(bool(visible))
+        self.more_button.setText("Less" if visible else "More")
+        if visible:
+            self.detail_text.setPlainText(self._quick_detail_text())
+
+    def _refresh_detail_mode(self) -> None:
+        self.quick_mode = False
+        self._refresh()
+
+    def _refresh_quick_button_styles(self) -> None:
+        condition_payloads = {str(row.get("lens") or ""): row for row in condition_lens_button_rows(self.data)}
+        for lens, button in self.condition_lens_buttons.items():
+            payload = condition_payloads.get(lens, {})
+            if button.isChecked() != (lens == self.current_condition_lens):
+                button.setChecked(lens == self.current_condition_lens)
+            stripe = "#246b55" if payload.get("curve_separation_winner") else "#4b5fa8" if payload.get("boundary_shift_winner") else "#bcc7bd"
+            self._style_triage_button(button, selected=lens == self.current_condition_lens, stripe=stripe)
+        model_payloads = {str(row.get("model") or ""): row for row in model_button_rows(self.data)}
+        for model, button in self.quick_model_buttons.items():
+            payload = model_payloads.get(model, {})
+            if button.isChecked() != (model == self.current_quick_model):
+                button.setChecked(model == self.current_quick_model)
+            self._style_triage_button(button, selected=model == self.current_quick_model, stripe=self._evidence_color(str(payload.get("evidence_tier") or "")))
+
+    def _style_triage_button(self, button: Any, *, selected: bool, stripe: str) -> None:
+        if selected:
+            button.setStyleSheet(f"border: 1px solid #202621; border-left: 7px solid {stripe}; background: #202621; color: #ffffff;")
+        else:
+            button.setStyleSheet(f"border: 1px solid #bcc7bd; border-left: 7px solid {stripe}; background: #ffffff; color: #202621;")
+
+    def _evidence_color(self, tier: str) -> str:
+        if tier == MODEL_EVIDENCE_STRONG:
+            return "#246b55"
+        if tier == MODEL_EVIDENCE_MIXED:
+            return "#a4631b"
+        return "#9ba59d"
+
+    def _refresh_quality_badge(self) -> None:
+        status, reason = recording_quality_status(self.data)
+        self.quality_badge.setText(f"Participant Run Quality: {status}")
+        if status == "PASS":
+            self.quality_badge.setStyleSheet("background: #dceee5; color: #174f3e; border: 1px solid #8dc3aa;")
+        elif status == "FAIL":
+            self.quality_badge.setStyleSheet("background: #f4dddd; color: #7b2323; border: 1px solid #d39a9a;")
+        else:
+            self.quality_badge.setStyleSheet("background: #ecefeb; color: #4f5b52; border: 1px solid #bcc7bd;")
+        self.quality_reason.setText(reason)
+
+    def _refresh_quick(self) -> None:
+        self._refresh_quality_badge()
+        observed_series = condition_lens_observed_series(self.data, self.current_condition_lens)
+        if not observed_series and scopes_for_part_mode(self.data, self.current_part_mode):
+            self.quick_mode = False
+            self._refresh()
+            return
+        predicted_series = condition_lens_prediction_series(self.data, self.current_condition_lens, self.current_quick_model)
+        lens_payload = next((row for row in condition_lens_button_rows(self.data) if row.get("lens") == self.current_condition_lens), {})
+        model_payload = next((row for row in model_button_rows(self.data) if row.get("model") == self.current_quick_model), {})
+        lens_label = str(lens_payload.get("label") or self.current_condition_lens)
+        model_label = str(model_payload.get("label") or MODEL_LABELS.get(self.current_quick_model, self.current_quick_model))
+        tier = str(model_payload.get("evidence_tier") or MODEL_EVIDENCE_INSUFFICIENT)
+        self.triage_hint.setText(
+            f"{lens_label}: {len(observed_series)} curve(s). {model_label} AICc support: {tier}. "
+            "Button colors point to promising visual separation or model support, not confirmatory statistics."
+        )
+        self.plot_widget.set_series(
+            observed=[],
+            observed_series=observed_series,
+            predicted=[],
+            predicted_series=predicted_series,
+            model_label=f"{lens_label} | {model_label}",
+            metric_label="Facilitation / RT (ms)",
+            empty_text="No condition-lens curve points were available for this participant.",
+            show_observed=True,
+            show_uncertainty=True,
+            show_raw_points=False,
+            show_boundary=False,
+            show_low_n_markers=True,
+        )
+        self.detail_text.setPlainText(self._quick_detail_text())
+
+    def _quick_detail_text(self) -> str:
+        status, reason = recording_quality_status(self.data)
+        lines = [f"Participant Run Quality: {status}", reason]
+        lines.append(f"Condition lens: {self.current_condition_lens}")
+        lines.append(f"Model display: {MODEL_LABELS.get(self.current_quick_model, self.current_quick_model)}")
+        summary = self.data.condition_lens_triage_summary
+        if summary:
+            lines.append("")
+            lines.append(str(summary.get("interpretation_note") or ""))
+            wins = summary.get("model_wins_by_subcondition", {})
+            if isinstance(wins, dict) and wins:
+                lines.append("Model wins by subcondition: " + ", ".join(f"{key} {value}" for key, value in sorted(wins.items())))
+        failures = self.data.recording_quality_gate.get("failures", [])
+        if isinstance(failures, list) and failures:
+            lines.append("")
+            lines.append("Serious exclusion criteria")
+            lines.extend(f"- {row.get('message', '')} ({row.get('evidence', '')})" for row in failures[:8] if isinstance(row, dict))
+        return "\n".join(line for line in lines if line is not None)
 
     def _set_view(self, view: str) -> None:
+        self.quick_mode = False
         if view == self.current_view or view not in VIEW_ORDER:
             for button_view, button in self.view_buttons.items():
                 button.setChecked(button_view == self.current_view)
@@ -2740,6 +2997,7 @@ QTextEdit#analysisDetailsText {
         self._refresh()
 
     def _set_part_mode(self, mode: str) -> None:
+        self.quick_mode = False
         if mode == self.current_part_mode or mode not in self.data.part_modes:
             for button_mode, button in self.part_mode_buttons.items():
                 button.setChecked(button_mode == self.current_part_mode)
@@ -2819,6 +3077,10 @@ QTextEdit#analysisDetailsText {
         self.q["QDesktopServices"].openUrl(self.q["QUrl"].fromLocalFile(str(target)))
 
     def _refresh(self) -> None:
+        if self.quick_mode:
+            self._refresh_quick_button_styles()
+            self._refresh_quick()
+            return
         scopes = scopes_for_part_mode(self.data, self.current_part_mode)
         if not scopes:
             self.scope_combo.setEnabled(False)

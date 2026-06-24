@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from peripersonal_space_toolkit.analysis_review import (
+    CONDITION_LENS_TWO_BY_TWO,
     METRIC_HIT_RATE,
     MODEL_BEST,
     MODEL_COMPARE_ALL,
@@ -19,12 +20,18 @@ from peripersonal_space_toolkit.analysis_review import (
     behavior_signal_counts,
     behavior_signals_for_scope,
     best_model_for_scope,
+    condition_lens_button_rows,
+    condition_lens_observed_series,
+    condition_lens_prediction_series,
+    default_condition_model,
     fit_row_for_scope,
     load_analysis_review_data,
+    model_button_rows,
     observed_points_for_scope,
     prediction_points_for_scope,
     prediction_series_for_scope,
     raw_points_for_scope,
+    recording_quality_status,
     scopes_for_part_mode,
 )
 from peripersonal_space_toolkit.session_analysis import analyze_session_events, write_analysis_csvs
@@ -166,6 +173,95 @@ def test_analysis_review_handles_curve_points_without_model_fit():
     assert best_model_for_scope(data, scope) == ""
     assert fit_row_for_scope(data, scope, "sigmoid") is None
     assert prediction_points_for_scope(data, scope, "sigmoid") == []
+
+
+def test_session_analysis_writes_condition_lens_outputs_and_quality_gate(tmp_path: Path):
+    events = []
+    event_id = 1
+    soas = (100, 200, 400, 800)
+    for part in (1, 2):
+        for state_index, state in enumerate(("Inhale", "Exhale")):
+            for repeat in range(2):
+                for soa_index, soa in enumerate(soas):
+                    onset = len(events) * 0.5 + 10.0
+                    rt_s = 0.42 - soa_index * 0.035 + state_index * 0.005 + repeat * 0.002
+                    context = {
+                        "participant_id": "S001",
+                        "part_number": part,
+                        "block_number": part,
+                        "trial_number": len(events) + 1,
+                        "trial_uid": f"P{part}_{state}_{repeat}_{soa}",
+                        "trial_type": "Audio-Tactile",
+                        "soa_ms": soa,
+                        "respiratory_phase": state,
+                        "noise_type": "pink" if repeat == 0 else "white",
+                        "timestamp_quality": "dac_time_sample_exact",
+                    }
+                    events.append({"event_id": event_id, "event_type": "trial_start", "unix_time": onset - 0.25, **context})
+                    event_id += 1
+                    events.append({"event_id": event_id, "event_type": "tactile_onset", "unix_time": onset, **context})
+                    event_id += 1
+                    events.append(
+                        {
+                            "event_id": event_id,
+                            "event_type": "mouse_click",
+                            "unix_time": onset + rt_s,
+                            "in_target": True,
+                            "during_playback": True,
+                            "part_number": part,
+                            "block_number": part,
+                        }
+                    )
+                    event_id += 1
+
+    result = analyze_session_events(events)
+    outputs = write_analysis_csvs(result, tmp_path, "S001")
+
+    assert outputs["condition_lens_curves"].exists()
+    assert outputs["condition_lens_model_fits"].exists()
+    assert outputs["condition_lens_model_fit_comparison"].exists()
+    assert outputs["condition_lens_triage_summary"].exists()
+    assert outputs["recording_quality_gate"].exists()
+    assert result.recording_quality_gate["status"] == "PASS"
+    assert {row["analysis_lens"] for row in result.condition_lens_curve_rows}.issuperset({"two_by_two", "part", "state", "overall"})
+    two_by_two_scopes = {row["display_scope"] for row in result.condition_lens_curve_rows if row["analysis_lens"] == "two_by_two"}
+    assert two_by_two_scopes == {"Part 1 / Inhale", "Part 1 / Exhale", "Part 2 / Inhale", "Part 2 / Exhale"}
+    assert all(row["noise_type"] == "All sources" for row in result.condition_lens_curve_rows)
+
+    data = load_analysis_review_data(outputs, session_dir=tmp_path)
+    status, reason = recording_quality_status(data)
+    assert status == "PASS"
+    assert "No serious exclusion criteria" in reason
+    assert default_condition_model(data) in {"linear", "logarithmic_decay", "sigmoid"}
+    observed = condition_lens_observed_series(data, CONDITION_LENS_TWO_BY_TWO)
+    assert [series["label"] for series in observed] == ["Part 1 / Inhale", "Part 1 / Exhale", "Part 2 / Inhale", "Part 2 / Exhale"]
+    predictions = condition_lens_prediction_series(data, CONDITION_LENS_TWO_BY_TWO, default_condition_model(data), sample_count=5)
+    assert predictions
+    assert {row["label"] for row in condition_lens_button_rows(data)} == {"2 x 2", "Part 1 | Part 2", "Inhale | Exhale"}
+    assert {row["model"] for row in model_button_rows(data)} == {"sigmoid", "logarithmic_decay", "linear"}
+
+
+def test_session_analysis_quality_gate_fails_serious_exclusion_criteria():
+    events = []
+    for index, soa in enumerate((100, 200, 400, 800), start=1):
+        events.append(
+            {
+                "event_id": index,
+                "event_type": "tactile_onset",
+                "unix_time": float(index),
+                "trial_uid": f"T{index}",
+                "trial_type": "Audio-Tactile",
+                "soa_ms": soa,
+                "part_number": 1,
+                "respiratory_phase": "Inhale",
+            }
+        )
+
+    result = analyze_session_events(events)
+
+    assert result.recording_quality_gate["status"] == "FAIL"
+    failure_codes = {row["code"] for row in result.recording_quality_gate["failures"]}
+    assert "overall_hit_rate_below_70pct" in failure_codes
 
 
 def test_session_analysis_writes_exploratory_data_behavior_outputs(tmp_path: Path):

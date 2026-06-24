@@ -17,6 +17,16 @@ MODEL_LINEAR = "linear"
 MODEL_LOGARITHMIC_DECAY = "logarithmic_decay"
 PARTS_SEPARATE = "separate_parts"
 PARTS_POOLED = "pooled_parts"
+CONDITION_LENS_TWO_BY_TWO = "two_by_two"
+CONDITION_LENS_PART = "part"
+CONDITION_LENS_STATE = "state"
+CONDITION_LENS_OVERALL = "overall"
+CONDITION_LENS_ORDER = (CONDITION_LENS_TWO_BY_TWO, CONDITION_LENS_PART, CONDITION_LENS_STATE, CONDITION_LENS_OVERALL)
+MODEL_EVIDENCE_STRONG = "strong"
+MODEL_EVIDENCE_MIXED = "mixed"
+MODEL_EVIDENCE_INSUFFICIENT = "insufficient"
+QUALITY_PASS = "PASS"
+QUALITY_FAIL = "FAIL"
 VIEW_DATA_BEHAVIOR = "data_behavior"
 VIEW_MODEL_FITS = "model_fits"
 VIEW_RESPONSES = "responses"
@@ -51,6 +61,8 @@ MODEL_LABELS = {
     MODEL_LOGARITHMIC_DECAY: "Logarithmic decay",
 }
 MODEL_FIT_ORDER = (MODEL_SIGMOID, MODEL_LINEAR, MODEL_LOGARITHMIC_DECAY)
+QUICK_MODEL_ORDER = (MODEL_SIGMOID, MODEL_LOGARITHMIC_DECAY, MODEL_LINEAR)
+CONDITION_SERIES_COLORS = ("#246b55", "#4b5fa8", "#a4631b", "#8c2f2f", "#5f5a8a", "#2d6f8a")
 PART_AGGREGATION_ORDER = (PARTS_SEPARATE, PARTS_POOLED)
 PART_AGGREGATION_LABELS = {
     PARTS_SEPARATE: "Separate parts",
@@ -96,6 +108,11 @@ class AnalysisReviewData:
     curve_rows: list[dict[str, Any]] = field(default_factory=list)
     model_fit_rows: list[dict[str, Any]] = field(default_factory=list)
     model_comparison_rows: list[dict[str, Any]] = field(default_factory=list)
+    condition_lens_curve_rows: list[dict[str, Any]] = field(default_factory=list)
+    condition_lens_model_fit_rows: list[dict[str, Any]] = field(default_factory=list)
+    condition_lens_model_comparison_rows: list[dict[str, Any]] = field(default_factory=list)
+    condition_lens_triage_summary: dict[str, Any] = field(default_factory=dict)
+    recording_quality_gate: dict[str, Any] = field(default_factory=dict)
     summary_rows: list[dict[str, Any]] = field(default_factory=list)
     response_rows: list[dict[str, Any]] = field(default_factory=list)
     final_outcome_rows: list[dict[str, Any]] = field(default_factory=list)
@@ -109,7 +126,15 @@ class AnalysisReviewData:
 
     @property
     def has_analysis_tables(self) -> bool:
-        return bool(self.curve_rows or self.model_fit_rows or self.model_comparison_rows or self.summary_rows)
+        return bool(
+            self.curve_rows
+            or self.model_fit_rows
+            or self.model_comparison_rows
+            or self.condition_lens_curve_rows
+            or self.condition_lens_model_fit_rows
+            or self.condition_lens_model_comparison_rows
+            or self.summary_rows
+        )
 
     @property
     def scopes(self) -> list[str]:
@@ -142,6 +167,11 @@ def load_analysis_review_data(
     curves_path = _output_path(outputs, "curves", root, "*_pps_curve_points.csv")
     fits_path = _output_path(outputs, "model_fits", root, "*_model_fits.csv")
     comparison_path = _output_path(outputs, "model_fit_comparison", root, "*_model_fit_comparison.csv")
+    condition_curves_path = _output_path(outputs, "condition_lens_curves", root, "*_condition_lens_curve_points.csv")
+    condition_fits_path = _output_path(outputs, "condition_lens_model_fits", root, "*_condition_lens_model_fits.csv")
+    condition_comparison_path = _output_path(outputs, "condition_lens_model_fit_comparison", root, "*_condition_lens_model_fit_comparison.csv")
+    condition_summary_path = _output_path(outputs, "condition_lens_triage_summary", root, "condition_lens_triage_summary.json")
+    quality_gate_path = _output_path(outputs, "recording_quality_gate", root, "recording_quality_gate.v1.json")
     summary_path = _output_path(outputs, "summary", root, "*_summary.csv")
     responses_path = _output_path(outputs, "responses", root, "*_responses.csv")
     final_path = _output_path(outputs, "final_trial_outcomes", root, "*_final_trial_outcomes.csv")
@@ -153,6 +183,11 @@ def load_analysis_review_data(
     data.curve_rows = _read_csv_rows(curves_path, data.warnings, "curve points")
     data.model_fit_rows = _read_csv_rows(fits_path, data.warnings, "model fits")
     data.model_comparison_rows = _read_csv_rows(comparison_path, data.warnings, "model comparison")
+    data.condition_lens_curve_rows = _read_optional_csv_rows(condition_curves_path)
+    data.condition_lens_model_fit_rows = _read_optional_csv_rows(condition_fits_path)
+    data.condition_lens_model_comparison_rows = _read_optional_csv_rows(condition_comparison_path)
+    data.condition_lens_triage_summary = _read_json(condition_summary_path)
+    data.recording_quality_gate = _read_json(quality_gate_path)
     data.summary_rows = _read_csv_rows(summary_path, data.warnings, "summary")
     data.response_rows = _read_optional_csv_rows(responses_path)
     data.final_outcome_rows = _read_optional_csv_rows(final_path)
@@ -166,6 +201,11 @@ def load_analysis_review_data(
             "curve points": curves_path,
             "model fits": fits_path,
             "model comparison": comparison_path,
+            "condition lens curves": condition_curves_path,
+            "condition lens model fits": condition_fits_path,
+            "condition lens model comparison": condition_comparison_path,
+            "condition lens triage": condition_summary_path,
+            "recording quality gate": quality_gate_path,
             "summary": summary_path,
             "responses": responses_path,
             "final outcomes": final_path,
@@ -415,6 +455,237 @@ def artifact_rows_for_review(data: AnalysisReviewData) -> list[dict[str, str]]:
     for label, path in sorted(data.output_paths.items()):
         rows.append({"artifact": label, "path": str(path), "available": "yes" if path.is_file() else "no"})
     return rows
+
+
+def available_condition_lenses(data: AnalysisReviewData) -> list[str]:
+    lenses = {str(row.get("analysis_lens") or "").strip() for row in data.condition_lens_curve_rows}
+    ordered = [lens for lens in CONDITION_LENS_ORDER if lens in lenses and lens != CONDITION_LENS_OVERALL]
+    return ordered or ([CONDITION_LENS_TWO_BY_TWO] if data.curve_rows else [])
+
+
+def condition_lens_labels(data: AnalysisReviewData) -> dict[str, str]:
+    raw = data.condition_lens_triage_summary.get("condition_lens_buttons", {})
+    labels = {
+        str(lens): str(payload.get("label") or "").strip()
+        for lens, payload in raw.items()
+        if isinstance(payload, dict) and str(payload.get("label") or "").strip()
+    } if isinstance(raw, dict) else {}
+    labels.setdefault(CONDITION_LENS_TWO_BY_TWO, _fallback_lens_label(data, CONDITION_LENS_TWO_BY_TWO))
+    labels.setdefault(CONDITION_LENS_PART, _fallback_lens_label(data, CONDITION_LENS_PART))
+    labels.setdefault(CONDITION_LENS_STATE, _fallback_lens_label(data, CONDITION_LENS_STATE))
+    labels.setdefault(CONDITION_LENS_OVERALL, "Overall")
+    return labels
+
+
+def default_condition_lens(data: AnalysisReviewData) -> str:
+    requested = str(data.condition_lens_triage_summary.get("default_lens") or "").strip()
+    if requested and any(row.get("analysis_lens") == requested for row in data.condition_lens_curve_rows):
+        return requested
+    lenses = available_condition_lenses(data)
+    return lenses[0] if lenses else CONDITION_LENS_TWO_BY_TWO
+
+
+def default_condition_model(data: AnalysisReviewData) -> str:
+    requested = str(data.condition_lens_triage_summary.get("default_model") or "").strip()
+    if requested in QUICK_MODEL_ORDER:
+        return requested
+    overall = data.condition_lens_triage_summary.get("overall_model", {})
+    if isinstance(overall, dict):
+        model = str(overall.get("best_model") or "").strip()
+        if model in QUICK_MODEL_ORDER:
+            return model
+    return MODEL_SIGMOID
+
+
+def condition_lens_button_rows(data: AnalysisReviewData) -> list[dict[str, Any]]:
+    labels = condition_lens_labels(data)
+    summary = data.condition_lens_triage_summary.get("condition_lens_buttons", {})
+    output = []
+    for lens in (CONDITION_LENS_TWO_BY_TWO, CONDITION_LENS_PART, CONDITION_LENS_STATE):
+        payload = summary.get(lens, {}) if isinstance(summary, dict) else {}
+        payload = payload if isinstance(payload, dict) else {}
+        output.append(
+            {
+                "lens": lens,
+                "label": labels.get(lens, _fallback_lens_label(data, lens)),
+                "curve_separation_winner": bool(payload.get("curve_separation_winner")),
+                "boundary_shift_winner": bool(payload.get("boundary_shift_winner")),
+                "curve_separation_score_ms": payload.get("curve_separation_score_ms"),
+                "boundary_shift_score_ms": payload.get("boundary_shift_score_ms"),
+            }
+        )
+    return output
+
+
+def model_button_rows(data: AnalysisReviewData) -> list[dict[str, Any]]:
+    raw = data.condition_lens_triage_summary.get("model_button_summaries", {})
+    raw = raw if isinstance(raw, dict) else {}
+    return [
+        {
+            "model": model,
+            "label": "Log decay" if model == MODEL_LOGARITHMIC_DECAY else MODEL_LABELS.get(model, model),
+            "evidence_tier": str((raw.get(model) or {}).get("evidence_tier") or MODEL_EVIDENCE_INSUFFICIENT) if isinstance(raw.get(model), dict) else MODEL_EVIDENCE_INSUFFICIENT,
+            "overall_winner": bool((raw.get(model) or {}).get("overall_winner")) if isinstance(raw.get(model), dict) else False,
+            "subcondition_wins": (raw.get(model) or {}).get("subcondition_wins", 0) if isinstance(raw.get(model), dict) else 0,
+        }
+        for model in QUICK_MODEL_ORDER
+    ]
+
+
+def recording_quality_status(data: AnalysisReviewData) -> tuple[str, str]:
+    status = str(data.recording_quality_gate.get("status") or "").strip().upper()
+    if status not in {QUALITY_PASS, QUALITY_FAIL}:
+        return "UNKNOWN", "No recording-quality gate artifact was available."
+    reason = str(data.recording_quality_gate.get("primary_reason") or "").strip()
+    return status, reason or ("No serious exclusion criteria were triggered." if status == QUALITY_PASS else "A serious exclusion criterion was triggered.")
+
+
+def condition_lens_observed_series(
+    data: AnalysisReviewData,
+    lens: str,
+    *,
+    metric: str = METRIC_FACILITATION,
+) -> list[dict[str, Any]]:
+    rows = [row for row in data.condition_lens_curve_rows if str(row.get("analysis_lens") or "") == lens]
+    if not rows and lens == CONDITION_LENS_TWO_BY_TWO:
+        rows = [dict(row, analysis_lens=lens, display_scope=row.get("scope", "")) for row in data.curve_rows if _row_part_mode(row) == data.default_part_mode]
+    grouped: dict[str, list[dict[str, float | str]]] = {}
+    for row in rows:
+        scope = _condition_row_scope(row)
+        x = _as_float(row.get("soa_ms"), math.nan)
+        if not scope or not math.isfinite(x):
+            continue
+        y = _metric_value(row, metric)
+        if y is None:
+            continue
+        low, high, spread_label = _spread_bounds(row, metric, y)
+        point: dict[str, float | str] = {"x": x, "y": y, "metric": metric}
+        n = _as_float(row.get("n"), math.nan)
+        if math.isfinite(n):
+            point["n"] = n
+            if n < 3:
+                point["low_n"] = "yes"
+        if low is not None and high is not None:
+            point["y_low"] = low
+            point["y_high"] = high
+            point["spread_label"] = spread_label
+        grouped.setdefault(scope, []).append(point)
+    series = []
+    for index, (scope, points) in enumerate(sorted(grouped.items(), key=lambda item: _condition_scope_sort_key(item[0]))):
+        series.append(
+            {
+                "label": scope,
+                "scope": scope,
+                "color": CONDITION_SERIES_COLORS[index % len(CONDITION_SERIES_COLORS)],
+                "points": sorted(points, key=lambda item: float(item["x"])),
+            }
+        )
+    return series
+
+
+def condition_lens_prediction_series(
+    data: AnalysisReviewData,
+    lens: str,
+    model: str,
+    *,
+    sample_count: int = 480,
+) -> list[dict[str, Any]]:
+    observed = condition_lens_observed_series(data, lens)
+    by_scope = {str(series.get("scope") or series.get("label") or ""): series for series in observed}
+    output: list[dict[str, Any]] = []
+    for scope, observed_series in by_scope.items():
+        fit = condition_lens_fit_row(data, lens, scope, model)
+        if fit is None:
+            continue
+        points = list(observed_series.get("points") or [])
+        xs = [float(point["x"]) for point in points]
+        if not xs:
+            continue
+        if len(xs) == 1 or min(xs) == max(xs):
+            sample_xs = xs
+        else:
+            count = max(2, int(sample_count))
+            x_min = min(xs)
+            x_max = max(xs)
+            sample_xs = [x_min + (x_max - x_min) * index / (count - 1) for index in range(count)]
+        resolved_model = str(fit.get("model") or "").strip()
+        predicted = []
+        for x in sample_xs:
+            y = _predict_y(fit, resolved_model, x)
+            if y is not None and math.isfinite(y):
+                predicted.append({"x": float(x), "y": float(y)})
+        if predicted:
+            output.append(
+                {
+                    "model": resolved_model,
+                    "label": scope,
+                    "scope": scope,
+                    "points": predicted,
+                    "fit": fit,
+                    "color": observed_series.get("color", ""),
+                }
+            )
+    return output
+
+
+def condition_lens_fit_row(data: AnalysisReviewData, lens: str, scope: str, model: str) -> dict[str, Any] | None:
+    requested = str(model or "").strip()
+    scope = str(scope or "").strip()
+    if requested == MODEL_BEST:
+        comparison = next(
+            (
+                row
+                for row in data.condition_lens_model_comparison_rows
+                if str(row.get("analysis_lens") or "") == lens and _condition_row_scope(row) == scope
+            ),
+            None,
+        )
+        requested = str((comparison or {}).get("best_model") or "").strip()
+    matches = [
+        row
+        for row in data.condition_lens_model_fit_rows
+        if str(row.get("analysis_lens") or "") == lens
+        and _condition_row_scope(row) == scope
+        and str(row.get("model") or "").strip() == requested
+    ]
+    if not matches:
+        return None
+    return min(matches, key=lambda row: _as_float(row.get("aicc"), _as_float(row.get("aic"), math.inf)))
+
+
+def _fallback_lens_label(data: AnalysisReviewData, lens: str) -> str:
+    rows = [row for row in data.condition_lens_curve_rows if str(row.get("analysis_lens") or "") == CONDITION_LENS_TWO_BY_TWO]
+    parts = _ordered_unique(row.get("part_label") for row in rows if str(row.get("part_label") or "") not in {"", "All parts"})
+    states = _ordered_unique(row.get("state_label") for row in rows if str(row.get("state_label") or "") not in {"", "All states"})
+    if lens == CONDITION_LENS_TWO_BY_TWO:
+        return "2 x 2" if len(parts) == 2 and len(states) == 2 else "Interaction"
+    if lens == CONDITION_LENS_PART:
+        return " | ".join(parts) if len(parts) == 2 else "Parts"
+    if lens == CONDITION_LENS_STATE:
+        return " | ".join(states) if len(states) == 2 else "States"
+    return "Overall"
+
+
+def _condition_row_scope(row: dict[str, Any]) -> str:
+    return str(row.get("display_scope") or row.get("scope") or "").strip()
+
+
+def _condition_scope_sort_key(scope: str) -> tuple[int, int, str]:
+    part_match = scope.lower().split(" / ")[0] if scope else ""
+    part_number = _as_int(part_match.replace("part", "").strip(), 999) if part_match.startswith("part") else 999
+    state_rank = 0 if "inhale" in scope.lower() else 1 if "exhale" in scope.lower() else 9
+    return (part_number, state_rank, scope)
+
+
+def _ordered_unique(values: Any) -> list[str]:
+    seen: set[str] = set()
+    output: list[str] = []
+    for value in values:
+        text = str(value or "").strip()
+        if text and text not in seen:
+            seen.add(text)
+            output.append(text)
+    return sorted(output, key=lambda item: _condition_scope_sort_key(item))
 
 
 def _output_path(outputs: dict[str, Any], key: str, session_dir: Path | None, pattern: str) -> Path | None:

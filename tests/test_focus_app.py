@@ -265,6 +265,106 @@ def _write_analysis_review_outputs(session_dir: Path) -> dict[str, Path]:
         f"{pooled_scope},pooled_parts,Pool parts,sigmoid,9,0.98,facilitation_ms,4\n",
         encoding="utf-8",
     )
+    condition_curves = analysis_dir / f"{session_id}_condition_lens_curve_points.csv"
+    condition_curve_lines = [
+        "analysis_lens,analysis_lens_label,display_scope,scope,aggregation_mode,aggregation_label,part_label,state_label,pooled_factors,soa_ms,fit_metric,facilitation_ms,facilitation_sem_ms,mean_rt_ms,n",
+    ]
+    for part in (1, 2):
+        for state, offset in (("Inhale", 0), ("Exhale", 5)):
+            display = f"Part {part} / {state}"
+            for soa, facilitation in ((100, 10 + offset + part), (200, 20 + offset + part), (400, 34 + offset + part), (800, 43 + offset + part)):
+                condition_curve_lines.append(
+                    f"two_by_two,2 x 2,{display},{display},two_by_two,2 x 2,Part {part},{state},noise/source,{soa},facilitation_ms,{facilitation},2,{330 - facilitation},8"
+                )
+    for part in (1, 2):
+        display = f"Part {part}"
+        for soa, facilitation in ((100, 12 + part), (200, 23 + part), (400, 35 + part), (800, 44 + part)):
+            condition_curve_lines.append(
+                f"part,Parts,{display},{display},part,Part lens,Part {part},All states,state;noise/source,{soa},facilitation_ms,{facilitation},2,{330 - facilitation},16"
+            )
+    for state, offset in (("Inhale", 0), ("Exhale", 5)):
+        for soa, facilitation in ((100, 12 + offset), (200, 23 + offset), (400, 35 + offset), (800, 44 + offset)):
+            condition_curve_lines.append(
+                f"state,States,{state},{state},state,State lens,All parts,{state},part;noise/source,{soa},facilitation_ms,{facilitation},2,{330 - facilitation},16"
+            )
+    for soa, facilitation in ((100, 14), (200, 24), (400, 36), (800, 45)):
+        condition_curve_lines.append(
+            f"overall,Overall,All conditions,All conditions,overall,Overall lens,All parts,All states,part;state;noise/source,{soa},facilitation_ms,{facilitation},2,{330 - facilitation},32"
+        )
+    condition_curves.write_text("\n".join(condition_curve_lines) + "\n", encoding="utf-8")
+    condition_fits = analysis_dir / f"{session_id}_condition_lens_model_fits.csv"
+    condition_fit_lines = [
+        "analysis_lens,analysis_lens_label,display_scope,scope,aggregation_mode,aggregation_label,model,fit_metric,n_points,parameter_count,intercept,slope,log_slope,lower,upper,pps_boundary_soa_ms,aic,aicc,r2,rmse,delta_aicc,evidence_tier",
+    ]
+    for lens, display in (
+        ("two_by_two", "Part 1 / Inhale"),
+        ("two_by_two", "Part 1 / Exhale"),
+        ("two_by_two", "Part 2 / Inhale"),
+        ("two_by_two", "Part 2 / Exhale"),
+        ("part", "Part 1"),
+        ("part", "Part 2"),
+        ("state", "Inhale"),
+        ("state", "Exhale"),
+        ("overall", "All conditions"),
+    ):
+        label = "2 x 2" if lens == "two_by_two" else "Overall" if lens == "overall" else "Parts" if lens == "part" else "States"
+        condition_fit_lines.extend(
+            [
+                f"{lens},{label},{display},{display},{lens},{label},linear,facilitation_ms,4,2,8,0.05,,,,14,26,0.91,2.0,6,mixed",
+                f"{lens},{label},{display},{display},{lens},{label},logarithmic_decay,facilitation_ms,4,2,-12,,8,,,12,24,0.94,1.6,4,mixed",
+                f"{lens},{label},{display},{display},{lens},{label},sigmoid,facilitation_ms,4,4,,0.01,,5,50,300,10,,0.97,1.1,,insufficient",
+            ]
+        )
+    condition_fits.write_text("\n".join(condition_fit_lines) + "\n", encoding="utf-8")
+    condition_comparison = analysis_dir / f"{session_id}_condition_lens_model_fit_comparison.csv"
+    condition_comparison.write_text(
+        "analysis_lens,analysis_lens_label,display_scope,scope,aggregation_mode,aggregation_label,best_model,best_aic,best_aicc,best_r2,fit_metric,n_points,delta_aicc,evidence_tier,candidate_models\n"
+        "overall,Overall,All conditions,All conditions,overall,Overall lens,logarithmic_decay,12,24,0.94,facilitation_ms,4,2,mixed,linear;logarithmic_decay;sigmoid\n",
+        encoding="utf-8",
+    )
+    condition_triage = analysis_dir / "condition_lens_triage_summary.json"
+    condition_triage.write_text(
+        json.dumps(
+            {
+                "schema": "pps-condition-lens-triage.v1",
+                "default_lens": "two_by_two",
+                "default_model": "logarithmic_decay",
+                "interpretation_note": "Condition and model winners are exploratory triage cues.",
+                "model_wins_by_subcondition": {"logarithmic_decay": 4},
+                "model_button_summaries": {
+                    "sigmoid": {"evidence_tier": "insufficient", "overall_winner": False, "subcondition_wins": 0},
+                    "logarithmic_decay": {"evidence_tier": "mixed", "overall_winner": True, "subcondition_wins": 4},
+                    "linear": {"evidence_tier": "insufficient", "overall_winner": False, "subcondition_wins": 0},
+                },
+                "condition_lens_buttons": {
+                    "two_by_two": {"label": "2 x 2", "curve_separation_winner": True, "boundary_shift_winner": False},
+                    "part": {"label": "Part 1 | Part 2", "curve_separation_winner": False, "boundary_shift_winner": True},
+                    "state": {"label": "Inhale | Exhale", "curve_separation_winner": False, "boundary_shift_winner": False},
+                },
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    quality_gate = analysis_dir / "recording_quality_gate.v1.json"
+    quality_gate.write_text(
+        json.dumps(
+            {
+                "schema": "pps-recording-quality-gate.v1",
+                "status": "PASS",
+                "primary_reason": "No serious exclusion criteria were triggered.",
+                "failures": [],
+                "warnings": [],
+                "metrics": {"overall_hit_rate": 1.0},
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     summary = analysis_dir / f"{session_id}_summary.csv"
     summary.write_text(
         "scope,aggregation_mode,n,hit_rate\n"
@@ -299,6 +399,11 @@ def _write_analysis_review_outputs(session_dir: Path) -> dict[str, Path]:
         "model_fits": fits,
         "model_fit_comparison": comparison,
         "summary": summary,
+        "condition_lens_curves": condition_curves,
+        "condition_lens_model_fits": condition_fits,
+        "condition_lens_model_fit_comparison": condition_comparison,
+        "condition_lens_triage_summary": condition_triage,
+        "recording_quality_gate": quality_gate,
         "data_behavior_by_scope": behavior,
         "exploratory_quality_summary": behavior_summary,
     }
@@ -2089,6 +2194,27 @@ def test_focus_mode_opens_post_run_analysis_review_dialog(tmp_path: Path, monkey
     grouping_combo = dialog.findChild(q["QComboBox"], "analysisGroupingCombo")
     overview_table = dialog.findChild(q["QTableWidget"], "analysisOverviewTable")
     details = dialog.findChild(q["QTextEdit"], "analysisDetailsText")
+    quality_badge = dialog.findChild(q["QLabel"], "analysisQualityBadge")
+    triage_hint = dialog.findChild(q["QLabel"], "analysisTriageHint")
+    more_button = dialog.findChild(q["QPushButton"], "analysisMoreButton")
+    condition_buttons = [button for button in dialog.findChildren(q["QPushButton"], "analysisConditionLensButton")]
+    quick_model_buttons = [button for button in dialog.findChildren(q["QPushButton"], "analysisModelButton")]
+    assert quality_badge is not None and "Participant Run Quality: PASS" in quality_badge.text()
+    assert triage_hint is not None and "AICc support" in triage_hint.text()
+    assert {button.text() for button in condition_buttons} == {"2 x 2", "Part 1 | Part 2", "Inhale | Exhale"}
+    assert {button.text() for button in quick_model_buttons} == {"Sigmoid", "Log decay", "Linear"}
+    assert details is not None and "Participant Run Quality: PASS" in details.toPlainText()
+    state_button = next(button for button in condition_buttons if button.text() == "Inhale | Exhale")
+    state_button.click()
+    app.processEvents()
+    assert "Inhale | Exhale" in triage_hint.text()
+    linear_button = next(button for button in quick_model_buttons if button.text() == "Linear")
+    linear_button.click()
+    app.processEvents()
+    assert "Linear AICc support" in triage_hint.text()
+    assert more_button is not None
+    more_button.click()
+    app.processEvents()
     assert model_combo is not None and model_combo.count() == 5
     assert "Compare all three" in [model_combo.itemText(index) for index in range(model_combo.count())]
     assert metric_combo is not None and "Hit rate" in [metric_combo.itemText(index) for index in range(metric_combo.count())]
@@ -2100,17 +2226,15 @@ def test_focus_mode_opens_post_run_analysis_review_dialog(tmp_path: Path, monkey
     assert {button.text() for button in part_buttons}.issuperset({"Data Behavior", "Model Fits", "Responses", "Timing Evidence", "Top-Up", "Artifacts", "Separate parts", "Pool parts"})
     toggles = [box.text() for box in dialog.findChildren(q["QCheckBox"], "analysisPlotToggle")]
     assert {"Observed means", "Uncertainty band", "Raw trial points", "Rejected / extra clicks", "Top-up rescues", "PPS boundary", "All model fits", "Low-N markers"}.issubset(set(toggles))
-    assert details is not None and "Exploratory data-behavior signals" in details.toPlainText()
-    assert "Expected pattern" in details.toPlainText()
-    assert "participant-readiness certification" in details.toPlainText()
-    assert "pass" not in details.toPlainText().lower()
-    assert "fail" not in details.toPlainText().lower()
-    assert "Best model by AIC" in details.toPlainText()
-    assert "Displayed range: +/- SEM" in details.toPlainText()
     compare_index = model_combo.findText("Compare all three")
     assert compare_index >= 0
     model_combo.setCurrentIndex(compare_index)
     app.processEvents()
+    assert "Exploratory data-behavior signals" in details.toPlainText()
+    assert "Expected pattern" in details.toPlainText()
+    assert "participant-readiness certification" in details.toPlainText()
+    assert "Best model by AIC" in details.toPlainText()
+    assert "Displayed range: +/- SEM" in details.toPlainText()
     assert "Displayed models: Sigmoid, Linear, Logarithmic decay" in details.toPlainText()
     assert "Sigmoid PPS boundary" in details.toPlainText()
     pooled = next(button for button in part_buttons if button.text() == "Pool parts")
