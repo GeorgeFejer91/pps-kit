@@ -14,6 +14,7 @@ import sys
 import time
 from typing import Any, TextIO
 
+from .output_layout import _filesystem_path
 from .runtime_paths import writable_root
 from .timing_events import (
     LSL_NUMERIC_SOURCE_ID_PREFIX,
@@ -25,6 +26,21 @@ from .timing_events import (
 
 class LabRecorderCaptureError(RuntimeError):
     """Raised when runner-owned LabRecorder capture cannot be started."""
+
+
+def _mkdir(path: Path | str) -> None:
+    os.makedirs(_filesystem_path(Path(path)), exist_ok=True)
+
+
+def _path_is_file(path: Path | str) -> bool:
+    return os.path.isfile(_filesystem_path(Path(path)))
+
+
+def _path_size(path: Path | str) -> int:
+    try:
+        return os.path.getsize(_filesystem_path(Path(path)))
+    except OSError:
+        return 0
 
 
 def find_labrecorder_cli(explicit: str | Path | None = None) -> Path:
@@ -52,7 +68,7 @@ def find_labrecorder_cli(explicit: str | Path | None = None) -> Path:
         if key in seen:
             continue
         seen.add(key)
-        if resolved.is_file():
+        if _path_is_file(resolved):
             return resolved
     raise FileNotFoundError(
         "LabRecorderCLI.exe was not found. Install/extract LabRecorder under "
@@ -62,7 +78,7 @@ def find_labrecorder_cli(explicit: str | Path | None = None) -> Path:
 
 def labrecorder_gui_from_cli(cli_path: Path) -> Path:
     gui = Path(cli_path).with_name("LabRecorder.exe")
-    if gui.is_file():
+    if _path_is_file(gui):
         return gui.resolve()
     raise FileNotFoundError(f"LabRecorder.exe was not found beside LabRecorderCLI.exe: {gui}")
 
@@ -165,9 +181,9 @@ class LabRecorderCapture:
         if not bool(lsl.get("ready")):
             raise LabRecorderCaptureError(str(lsl.get("error") or "Runner LSL streams were not discoverable."))
 
-        self.xdf_path.parent.mkdir(parents=True, exist_ok=True)
-        self.stdout_path.parent.mkdir(parents=True, exist_ok=True)
-        self.stderr_path.parent.mkdir(parents=True, exist_ok=True)
+        _mkdir(self.xdf_path.parent)
+        _mkdir(self.stdout_path.parent)
+        _mkdir(self.stderr_path.parent)
         self.command = [str(self.labrecorder_exe), "-c", str(self.labrecorder_exe.with_name("LabRecorder.cfg"))]
         creationflags = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
         startupinfo = None
@@ -175,8 +191,8 @@ class LabRecorderCapture:
             startupinfo = subprocess.STARTUPINFO()  # type: ignore[attr-defined]
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW  # type: ignore[attr-defined]
             startupinfo.wShowWindow = 7  # SW_SHOWMINNOACTIVE: keep LabRecorder off the runner focus path.
-        self._stdout_handle = self.stdout_path.open("w", encoding="utf-8", errors="replace")
-        self._stderr_handle = self.stderr_path.open("w", encoding="utf-8", errors="replace")
+        self._stdout_handle = open(_filesystem_path(self.stdout_path), "w", encoding="utf-8", errors="replace")
+        self._stderr_handle = open(_filesystem_path(self.stderr_path), "w", encoding="utf-8", errors="replace")
         with _external_subprocess_dll_search_context():
             self.process = subprocess.Popen(
                 self.command,
@@ -259,7 +275,7 @@ class LabRecorderCapture:
                     process.terminate()
                     process.wait(timeout=2.0)
             else:
-                recording_stopped = self.xdf_path.is_file() and self.xdf_path.stat().st_size > 0
+                recording_stopped = _path_is_file(self.xdf_path) and _path_size(self.xdf_path) > 0
                 process.wait(timeout=0.1)
         except subprocess.TimeoutExpired:
             process.terminate()
@@ -343,7 +359,8 @@ def _decode_pipe(value: bytes | str | None) -> str:
 
 def _read_text(path: Path) -> str:
     try:
-        return path.read_text(encoding="utf-8", errors="replace")
+        with open(_filesystem_path(path), "r", encoding="utf-8", errors="replace") as handle:
+            return handle.read()
     except Exception:
         return ""
 
@@ -416,8 +433,8 @@ def _wait_for_file_quiet(path: Path, *, timeout_s: float) -> bool:
     previous_size = -1
     stable_count = 0
     while time.perf_counter() <= deadline:
-        if path.is_file():
-            size = path.stat().st_size
+        if _path_is_file(path):
+            size = _path_size(path)
             if size > 0 and size == previous_size:
                 stable_count += 1
                 if stable_count >= 2:
@@ -426,7 +443,7 @@ def _wait_for_file_quiet(path: Path, *, timeout_s: float) -> bool:
                 stable_count = 0
             previous_size = size
         time.sleep(0.25)
-    return path.is_file() and path.stat().st_size > 0
+    return _path_is_file(path) and _path_size(path) > 0
 
 
 def _wait_for_labrecorder_footer(stdout_path: Path, *, timeout_s: float, expected_streams: int = 2) -> bool:
