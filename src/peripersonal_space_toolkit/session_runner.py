@@ -376,8 +376,8 @@ class ParticipantTrialCsvWriter:
             return self.path
 
     def _write_header(self) -> None:
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        with self.path.open("w", newline="", encoding="utf-8") as handle:
+        _mkdir(self.path.parent)
+        with open(_filesystem_path(self.path), "w", newline="", encoding="utf-8") as handle:
             writer = csv.DictWriter(handle, fieldnames=PARTICIPANT_TRIAL_FIELDNAMES)
             writer.writeheader()
 
@@ -392,7 +392,7 @@ class ParticipantTrialCsvWriter:
         if key in self._written_keys:
             return
         row = self._resolved_trial_row(state)
-        with self.path.open("a", newline="", encoding="utf-8") as handle:
+        with open(_filesystem_path(self.path), "a", newline="", encoding="utf-8") as handle:
             writer = csv.DictWriter(handle, fieldnames=PARTICIPANT_TRIAL_FIELDNAMES)
             writer.writerow(row)
         self._written_keys.add(key)
@@ -842,7 +842,7 @@ def record_experiment_activity(
 ) -> Path:
     """Append a local dashboard activity event and update the resume pointer."""
     root = Path(state_root)
-    root.mkdir(parents=True, exist_ok=True)
+    _mkdir(root)
     created_at = datetime.now().isoformat(timespec="seconds")
     event = {
         "schema": LAST_EXPERIMENT_SCHEMA,
@@ -851,7 +851,7 @@ def record_experiment_activity(
         **_json_ready(payload),
     }
     log_path = root / "experiment_activity_log.jsonl"
-    with log_path.open("a", encoding="utf-8") as handle:
+    with open(_filesystem_path(log_path), "a", encoding="utf-8") as handle:
         handle.write(json.dumps(event, sort_keys=True) + "\n")
     _append_activity_diary_event(event)
 
@@ -863,7 +863,7 @@ def record_experiment_activity(
     pointer["schema"] = LAST_EXPERIMENT_SCHEMA
     pointer["updated_at"] = created_at
     pointer["last_event_type"] = event["event_type"]
-    pointer_path.write_text(json.dumps(pointer, indent=2), encoding="utf-8")
+    _write_text_file(pointer_path, json.dumps(pointer, indent=2), encoding="utf-8")
     return pointer_path
 
 
@@ -930,10 +930,9 @@ def _load_prepared_session_queue(state_root: Path = DEFAULT_DASHBOARD_STATE_ROOT
 
 def _write_prepared_session_queue(state_root: Path, queue_data: dict[str, Any]) -> Path:
     path = _prepared_session_queue_path(state_root)
-    path.parent.mkdir(parents=True, exist_ok=True)
     queue_data["schema"] = PREPARED_SESSION_QUEUE_SCHEMA
     queue_data["updated_at"] = datetime.now().isoformat(timespec="seconds")
-    path.write_text(json.dumps(_json_ready(queue_data), indent=2, sort_keys=True), encoding="utf-8")
+    _write_text_file(path, json.dumps(_json_ready(queue_data), indent=2, sort_keys=True), encoding="utf-8")
     return path
 
 
@@ -1371,7 +1370,7 @@ def _session_package_has_completed_data(package: RunPackage) -> tuple[bool, str]
     if not _path_exists(events_csv):
         return False, ""
     try:
-        with events_csv.open(newline="", encoding="utf-8-sig") as handle:
+        with open(_filesystem_path(events_csv), newline="", encoding="utf-8-sig") as handle:
             for row in csv.DictReader(handle):
                 if str(row.get("event_type") or "").strip() != "session_end":
                     continue
@@ -2358,11 +2357,7 @@ class SessionRunnerController:
         return result
 
     def _write_external_labrecorder_report(self, payload: dict[str, Any]) -> None:
-        self._external_labrecorder_report_path.parent.mkdir(parents=True, exist_ok=True)
-        self._external_labrecorder_report_path.write_text(
-            json.dumps(_json_ready(payload), indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
-        )
+        _write_json_file(self._external_labrecorder_report_path, payload)
         self._external_labrecorder_outputs["external_labrecorder_report"] = self._external_labrecorder_report_path
 
     def _start_external_labrecorder_capture(self) -> dict[str, Any]:
@@ -2468,9 +2463,8 @@ class SessionRunnerController:
             run_started_at=datetime.now().isoformat(timespec="seconds"),
             lsl_status=dict(self.events.lsl_status.__dict__),
         )
-        self.package.session_dir.mkdir(parents=True, exist_ok=True)
-        self._session_metadata_path.parent.mkdir(parents=True, exist_ok=True)
-        self._session_metadata_path.write_text(json.dumps(_json_ready(self._session_metadata), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        _mkdir(self.package.session_dir)
+        _write_json_file(self._session_metadata_path, self._session_metadata)
         return self._session_metadata_path
 
     def _handle_logged_event(self, event: Any) -> None:
@@ -3186,11 +3180,11 @@ class SessionRunnerController:
                 data = np.concatenate([data, pad], axis=1)
             padded.append(data)
         block_audio = np.concatenate(padded, axis=0)
-        wav_path.parent.mkdir(parents=True, exist_ok=True)
+        _mkdir(wav_path.parent)
         sf.write(_soundfile_path(wav_path), block_audio, sample_rate, subtype="PCM_16")
         _write_csv_rows(csv_path, trial_rows)
-        json_path.parent.mkdir(parents=True, exist_ok=True)
-        json_path.write_text(
+        _write_text_file(
+            json_path,
             json.dumps(
                 {
                     "schema": "pps-topup-block-manifest.v1",
@@ -3213,7 +3207,6 @@ class SessionRunnerController:
                 },
                 indent=2,
             ),
-            encoding="utf-8",
         )
         block = RunBlock(
             index=block_index,
@@ -3344,8 +3337,8 @@ class SessionRunnerController:
             self._analysis_outputs["session_metadata"] = self._session_metadata_path
         self._analysis_outputs.update(self._external_labrecorder_outputs)
         self._summary_text = format_analysis_summary(analysis)
-        self._analytics_dir.mkdir(parents=True, exist_ok=True)
-        (self._analytics_dir / "analysis_summary.txt").write_text(self._summary_text + "\n", encoding="utf-8")
+        _mkdir(self._analytics_dir)
+        _write_text_file(self._analytics_dir / "analysis_summary.txt", self._summary_text + "\n", encoding="utf-8")
 
     def _play_block_with_schedule(
         self,
@@ -3387,8 +3380,8 @@ class SessionRunnerController:
             self.events.log("recording_unavailable", block_number=block.index, block_label=block.label, reason="audio engine has no recording API")
             return False
         try:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            started = bool(engine.start_recording(str(path)))
+            _mkdir(path.parent)
+            started = bool(engine.start_recording(_filesystem_path(path)))
         except Exception as exc:
             self.events.log("recording_start_failed", block_number=block.index, block_label=block.label, path=str(path), message=str(exc))
             return False
@@ -3408,7 +3401,7 @@ class SessionRunnerController:
         if not started or not hasattr(engine, "stop_recording"):
             return
         try:
-            engine.stop_recording(str(path), interrupted=interrupted)
+            engine.stop_recording(_filesystem_path(path), interrupted=interrupted)
             self.events.log("recording_end", block_number=block.index, block_label=block.label, path=str(path), interrupted=interrupted)
         except Exception as exc:
             self.events.log("recording_stop_failed", block_number=block.index, block_label=block.label, path=str(path), message=str(exc))
@@ -3426,7 +3419,7 @@ class SessionRunnerController:
             )
             return False
         try:
-            path.parent.mkdir(parents=True, exist_ok=True)
+            _mkdir(path.parent)
             sample_rate = _as_int(
                 block.metadata.get("sample_rate_hz", block.metadata.get("sample_rate")),
                 default=0,
@@ -3440,7 +3433,7 @@ class SessionRunnerController:
                     sample_rate = 0
             started = bool(
                 engine.start_wired_loopback_recording(
-                    str(path),
+                    _filesystem_path(path),
                     mode=self.capture_options.wired_loopback_mode,
                     sample_rate=sample_rate or None,
                 )
@@ -3475,7 +3468,7 @@ class SessionRunnerController:
         if not started or not hasattr(engine, "stop_wired_loopback_recording"):
             return
         try:
-            engine.stop_wired_loopback_recording(str(path), interrupted=interrupted)
+            engine.stop_wired_loopback_recording(_filesystem_path(path), interrupted=interrupted)
             self.events.log(
                 "wired_loopback_end",
                 block_number=block.index,
@@ -4676,7 +4669,7 @@ def _materialize_segment_block_wav(
             data = np.concatenate([data, pad], axis=1)
         padded.append(data)
     block = np.concatenate(padded, axis=0)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    _mkdir(output_path.parent)
     sf.write(_soundfile_path(output_path), block, sample_rate, subtype="PCM_16")
     return float(block.shape[0] / sample_rate), sample_rate, target_channels, trial_rows, wav_infos
 
@@ -4970,7 +4963,7 @@ def _group_rows_by_block(rows: Iterable[dict[str, Any]]) -> list[tuple[str, list
 
 
 def _write_block_manifest(path: Path, rows: list[dict[str, Any]], participant_id: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
+    _mkdir(path.parent)
     fieldnames = [
         "Participant_ID",
         "Part_Number",
@@ -5012,7 +5005,7 @@ def _write_block_manifest(path: Path, rows: list[dict[str, Any]], participant_id
         "Baseline_Sample_Index",
         "Trial_Unit_Key",
     ]
-    with path.open("w", newline="", encoding="utf-8") as f:
+    with open(_filesystem_path(path), "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         for index, row in enumerate(rows, start=1):
@@ -5089,7 +5082,7 @@ def _materialize_block_wav(path: Path, rows: list[dict[str, Any]], wav_by_label:
             data = np.concatenate([data, pad], axis=1)
         padded.append(data)
     block = np.concatenate(padded, axis=0)
-    path.parent.mkdir(parents=True, exist_ok=True)
+    _mkdir(path.parent)
     sf.write(_soundfile_path(path), block, sample_rate)
     return float(block.shape[0] / sample_rate) if sample_rate else 0.0
 
@@ -5282,8 +5275,8 @@ def _write_timing_qc_csv(events: Iterable[Any], path: Path) -> Path:
             }
         )
 
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", newline="", encoding="utf-8") as f:
+    _mkdir(path.parent)
+    with open(_filesystem_path(path), "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(
             f,
             fieldnames=[

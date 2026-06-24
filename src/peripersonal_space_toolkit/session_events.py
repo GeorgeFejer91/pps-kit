@@ -5,7 +5,9 @@ from __future__ import annotations
 import csv
 import json
 import math
+import os
 import struct
+import sys
 import threading
 import time
 import uuid
@@ -17,6 +19,27 @@ from typing import Any, Iterable
 
 TRIAL_DURATION_S = 8.0
 STIMULUS_SEGMENT_ONSET_S = 4.0
+
+
+def _filesystem_path(path: str | Path) -> str:
+    resolved = Path(path).resolve()
+    text = str(resolved)
+    if sys.platform == "win32" and not text.startswith("\\\\?\\"):
+        if text.startswith("\\\\"):
+            return "\\\\?\\UNC\\" + text.lstrip("\\")
+        return "\\\\?\\" + text
+    return text
+
+
+def _path_exists(path: str | Path) -> bool:
+    try:
+        return os.path.exists(_filesystem_path(path))
+    except OSError:
+        return False
+
+
+def _mkdir(path: str | Path) -> None:
+    os.makedirs(_filesystem_path(path), exist_ok=True)
 
 
 @dataclass(frozen=True)
@@ -200,8 +223,8 @@ class SessionEventLogger:
 
     def write_csv(self, path: str | Path) -> Path:
         path = Path(path)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with path.open("w", newline="", encoding="utf-8") as f:
+        _mkdir(path.parent)
+        with open(_filesystem_path(path), "w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(
                 f,
                 fieldnames=["event_id", "event_type", "unix_time", "monotonic_time", "payload_json"],
@@ -221,7 +244,7 @@ class SessionEventLogger:
 
     def write_xdf(self, path: str | Path, *, metadata: dict[str, Any] | None = None) -> Path:
         path = Path(path)
-        path.parent.mkdir(parents=True, exist_ok=True)
+        _mkdir(path.parent)
         events = sorted(self.events, key=lambda item: (item.unix_time, item.event_id))
         metadata = dict(metadata or {})
         metadata.setdefault("participant_id", self.participant_id)
@@ -238,16 +261,16 @@ def derive_manifest_path(block_path: str | Path) -> Path:
         candidates.append(block_path.with_name(block_path.name.replace("_concatenated.wav", ".csv")))
     candidates.append(block_path.with_suffix(".csv"))
     for candidate in candidates:
-        if candidate.exists():
+        if _path_exists(candidate):
             return candidate
     return candidates[0]
 
 
 def load_block_manifest(block_path: str | Path) -> list[dict[str, str]]:
     manifest_path = derive_manifest_path(block_path)
-    if not manifest_path.exists():
+    if not _path_exists(manifest_path):
         return []
-    with manifest_path.open(newline="", encoding="utf-8-sig") as f:
+    with open(_filesystem_path(manifest_path), newline="", encoding="utf-8-sig") as f:
         return list(csv.DictReader(f))
 
 
@@ -258,7 +281,8 @@ def write_event_xdf(path: str | Path, events: Iterable[SessionEvent], *, metadat
     events = list(events)
     metadata = dict(metadata or {})
     stream_id = 1
-    with path.open("wb") as f:
+    _mkdir(path.parent)
+    with open(_filesystem_path(path), "wb") as f:
         f.write(b"XDF:")
         _write_chunk(f, 1, _file_header_xml())
         _write_chunk(f, 2, struct.pack("<I", stream_id) + _stream_header_xml(metadata))

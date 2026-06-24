@@ -5,8 +5,10 @@ from __future__ import annotations
 import csv
 import json
 import math
+import os
 import re
 import statistics
+import sys
 import warnings as py_warnings
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -37,6 +39,20 @@ COMMON_PPS_VISUALIZATION_FEATURES = [
     "Uncertainty/range around means",
     "Model parameter or fit tables",
 ]
+
+
+def _filesystem_path(path: str | Path) -> str:
+    resolved = Path(path).resolve()
+    text = str(resolved)
+    if sys.platform == "win32" and not text.startswith("\\\\?\\"):
+        if text.startswith("\\\\"):
+            return "\\\\?\\UNC\\" + text.lstrip("\\")
+        return "\\\\?\\" + text
+    return text
+
+
+def _mkdir(path: str | Path) -> None:
+    os.makedirs(_filesystem_path(path), exist_ok=True)
 
 
 @dataclass
@@ -75,7 +91,7 @@ def analyze_session_events(
 
 def write_analysis_csvs(result: SessionAnalysisResult, output_dir: str | Path, stem: str) -> dict[str, Path]:
     output_dir = Path(output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
+    _mkdir(output_dir)
     outputs = {
         "responses": output_dir / f"{stem}_responses.csv",
         "analysis_ready_trials": output_dir / f"{stem}_analysis_ready_trials.csv",
@@ -1142,15 +1158,17 @@ def _sigmoid(x: np.ndarray, lower: float, upper: float, x0: float, slope: float)
 
 def _write_rows(path: Path, rows: list[dict[str, Any]]) -> None:
     fieldnames = sorted({key for row in rows for key in row.keys()}) if rows else ["empty"]
-    with path.open("w", newline="", encoding="utf-8") as f:
+    _mkdir(path.parent)
+    with open(_filesystem_path(path), "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(_json_ready(payload), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    _mkdir(path.parent)
+    with open(_filesystem_path(path), "w", encoding="utf-8") as handle:
+        handle.write(json.dumps(_json_ready(payload), indent=2, sort_keys=True) + "\n")
 
 
 def _json_ready(value: Any) -> Any:

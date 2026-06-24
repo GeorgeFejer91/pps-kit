@@ -1190,6 +1190,36 @@ def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
     assert "Alice Example" not in diary.read_text(encoding="utf-8")
 
 
+def test_session_runner_controller_handles_deep_output_root(tmp_path: Path):
+    deep_root = tmp_path
+    for index in range(8):
+        deep_root = deep_root / f"study5_full_acceptance_deep_validation_segment_{index:02d}"
+    package = prepare_run_package(
+        _compact_design(),
+        "P001",
+        render_dir=_render_dir(tmp_path),
+        session_root=deep_root,
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+    engine = _MockAudioEngine()
+    controller = SessionRunnerController(
+        package,
+        audio_engine=engine,
+        runner_metadata={"participant_code": "P001"},
+    )
+
+    result = controller.run()
+
+    assert result.completed
+    assert session_runner_module._path_exists(result.session_metadata_path)
+    assert result.session_metadata_path.parent == output_runner_logs_dir(package.session_dir.parent) / package.session_id
+    assert session_runner_module._path_exists(result.analysis_outputs["participant_trials"])
+    assert session_runner_module._path_exists(result.recording_paths[0])
+    if os.name == "nt":
+        assert engine.recordings
+        assert engine.recordings[0].startswith("\\\\?\\")
+
+
 def test_session_runner_wired_loopback_proxy_records_per_block_artifact(tmp_path: Path):
     package = prepare_run_package(
         _compact_design(),
@@ -1209,7 +1239,8 @@ def test_session_runner_wired_loopback_proxy_records_per_block_artifact(tmp_path
 
     assert result.completed
     assert engine.wired_loopback_mode == "output4_tactile_proxy"
-    assert engine.wired_loopback_recordings == [str(package.session_dir / "block_01_wired_loopback_input4.wav")]
+    expected_loopback_path = package.session_dir / "block_01_wired_loopback_input4.wav"
+    assert engine.wired_loopback_recordings == [session_runner_module._filesystem_path(expected_loopback_path)]
     assert sorted(path.name for path in result.recording_paths) == [
         "block_01_audio_evidence.wav",
         "block_01_wired_loopback_input4.wav",

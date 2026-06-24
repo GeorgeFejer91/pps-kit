@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import csv
 import json
+import os
 import queue
 import struct
+import sys
 import threading
 import time
 import xml.etree.ElementTree as ET
@@ -57,6 +59,20 @@ RESERVED_TRIGGER_CODES = {
     "test_marker": 50,
     "timing_anchor_fallback": 90,
 }
+
+
+def _filesystem_path(path: str | Path) -> str:
+    resolved = Path(path).resolve()
+    text = str(resolved)
+    if sys.platform == "win32" and not text.startswith("\\\\?\\"):
+        if text.startswith("\\\\"):
+            return "\\\\?\\UNC\\" + text.lstrip("\\")
+        return "\\\\?\\" + text
+    return text
+
+
+def _mkdir(path: str | Path) -> None:
+    os.makedirs(_filesystem_path(path), exist_ok=True)
 
 
 @dataclass(frozen=True)
@@ -138,7 +154,6 @@ class TriggerDictionary:
 
     def write_json(self, path: str | Path, *, session_id: str = "", participant_id: str = "") -> Path:
         path = Path(path)
-        path.parent.mkdir(parents=True, exist_ok=True)
         payload = {
             "schema": "pps-trigger-dictionary.v1",
             "marker_version": MARKER_VERSION,
@@ -154,7 +169,9 @@ class TriggerDictionary:
                 for key in sorted(self.codes, key=lambda item: (self.codes[item], item))
             ],
         }
-        path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        _mkdir(path.parent)
+        with open(_filesystem_path(path), "w", encoding="utf-8") as handle:
+            handle.write(json.dumps(payload, indent=2, sort_keys=True) + "\n")
         return path
 
 
@@ -358,7 +375,7 @@ class TimingEventHub:
     def write_lsl_markers_csv(self, path: str | Path) -> Path:
         self.flush_callback_events()
         path = Path(path)
-        path.parent.mkdir(parents=True, exist_ok=True)
+        _mkdir(path.parent)
         fieldnames = [
             "event_id",
             "event_type",
@@ -373,7 +390,7 @@ class TimingEventHub:
             "pushed_to_lsl",
             "payload_json",
         ]
-        with path.open("w", newline="", encoding="utf-8") as handle:
+        with open(_filesystem_path(path), "w", newline="", encoding="utf-8") as handle:
             writer = csv.DictWriter(handle, fieldnames=fieldnames)
             writer.writeheader()
             for marker in self.marker_records:
@@ -676,11 +693,11 @@ def write_lsl_marker_xdf(
     """Write local XDF streams with the same records as the PPS LSL outlets."""
 
     path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
+    _mkdir(path.parent)
     markers = [dict(record) for record in marker_records]
     rich_stream_id = 1
     numeric_stream_id = 2
-    with path.open("wb") as handle:
+    with open(_filesystem_path(path), "wb") as handle:
         handle.write(b"XDF:")
         _write_xdf_chunk(handle, 1, _xdf_file_header_xml())
         _write_xdf_chunk(

@@ -1646,7 +1646,7 @@ def protocol_summary(design: StimulusDesign) -> dict[str, Any]:
 
 
 def export_protocol_csv(design: StimulusDesign, path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
+    os.makedirs(_filesystem_path(path.parent), exist_ok=True)
     rows = experiment_schedule_rows(design)
     fieldnames = [
         "participant_id",
@@ -1691,7 +1691,7 @@ def export_protocol_csv(design: StimulusDesign, path: Path) -> None:
         "baseline_sample_index",
         "trial_unit_key",
     ]
-    with path.open("w", newline="", encoding="utf-8") as f:
+    with open(_filesystem_path(path), "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(rows)
@@ -1812,9 +1812,9 @@ def trajectory_points(spec: TrajectorySpec, samples: int = 121) -> list[dict[str
 
 
 def export_trajectory_csv(design: StimulusDesign, path: Path, samples: int = 121) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
+    os.makedirs(_filesystem_path(path.parent), exist_ok=True)
     rows = trajectory_points(design.trajectory, samples=samples)
-    with path.open("w", newline="", encoding="utf-8") as f:
+    with open(_filesystem_path(path), "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
