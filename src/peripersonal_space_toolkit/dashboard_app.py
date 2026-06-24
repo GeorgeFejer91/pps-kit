@@ -400,7 +400,7 @@ class DashboardController:
         template = next((item for item in self.templates if item.template_id == DEFAULT_STUDY_TEMPLATE_ID), None)
         if template is None:
             return default_design()
-        return _normalize_dashboard_design(template.design)
+        return _normalize_dashboard_design(_copy_design(template.design))
 
     def snapshot(self) -> dict[str, Any]:
         with self._lock:
@@ -577,7 +577,7 @@ class DashboardController:
             raise KeyError(template_id)
         self.sync_preload_assets(template_id)
         with self._lock:
-            self.design = _normalize_dashboard_design(template.design)
+            self.design = _normalize_dashboard_design(_copy_design(template.design))
             project = self._ensure_project_context(self.design, clear_stale_profile_outputs=True)
             if self.design.study_profile_id:
                 _materialize_study_profile_segment1_ingredients(project, self.design)
@@ -7132,6 +7132,8 @@ def _should_replace_study5_instruction_path(path: str, metadata: dict[str, str])
         current_path = _resolve_dashboard_local_path(current)
         legacy_path = _resolve_dashboard_local_path(metadata["legacy_path"])
         original_path = _resolve_dashboard_local_path(metadata["path"])
+        if not _path_exists(current_path) and _path_exists(original_path):
+            return True
         if _path_exists(current_path) and _path_exists(original_path):
             if _local_file_sha256(current_path) == _local_file_sha256(original_path):
                 return False
@@ -7439,6 +7441,8 @@ def _study5_profile_contract_signature(design: StimulusDesign) -> dict[str, Any]
 def _profile_project_contract_stale(context: DashboardProjectContext, design: StimulusDesign) -> bool:
     if _is_custom_design(design) or not str(design.study_profile_id or "").strip():
         return False
+    if design.study_profile_id == DEFAULT_STUDY_TEMPLATE_ID and _study5_project_has_stale_baseline_artifacts(context):
+        return True
     active_design_path = context.profile_dir / "active_design.json"
     if not _path_exists(active_design_path):
         return any(
@@ -7460,6 +7464,32 @@ def _profile_project_contract_stale(context: DashboardProjectContext, design: St
         return True
     if design.study_profile_id == DEFAULT_STUDY_TEMPLATE_ID:
         return _study5_profile_contract_signature(previous) != _study5_profile_contract_signature(design)
+    return False
+
+
+def _study5_project_has_stale_baseline_artifacts(context: DashboardProjectContext) -> bool:
+    roots = [
+        _baseline_tactile_bake_root(context.project_dir),
+        _trial_pool_root(context.project_dir),
+        _block_csv_preview_root(context.project_dir),
+        _run_setup_root(context.project_dir),
+    ]
+    for root in roots:
+        if not _path_exists(root):
+            continue
+        for root_text, _dir_names, file_names in os.walk(_filesystem_path(root)):
+            for file_name in file_names:
+                if "baseline_silent" in file_name.lower():
+                    return True
+                if not file_name.lower().endswith((".csv", ".json")):
+                    continue
+                path = Path(root_text) / file_name
+                try:
+                    with open(_filesystem_path(path), "r", encoding="utf-8", errors="replace") as handle:
+                        if "baseline_silent" in handle.read().lower():
+                            return True
+                except OSError:
+                    continue
     return False
 
 

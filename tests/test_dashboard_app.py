@@ -1734,6 +1734,34 @@ def test_dashboard_study5_profile_preserves_trial_budget_with_two_sources(tmp_pa
         assert [row["row_label"] for row in block_rows] == ["Inhale trial type", "Exhale trial type"] * 17
 
 
+def test_dashboard_study5_baseline_silent_artifacts_mark_profile_stale(tmp_path: Path):
+    controller = DashboardController(
+        design_path=tmp_path / "active_design.json",
+        render_dir=_render_dir(tmp_path),
+        session_root=tmp_path / "sessions",
+        import_dir=tmp_path / "imports",
+        preview_dir=tmp_path / "previews",
+        project_registry_root=tmp_path / "dashboard_projects" / "0_study_project_registry",
+    )
+    controller.load_template("study5_box_breathing_pps", snapshot=False)
+    with controller._lock:
+        design = dashboard_app._copy_design(controller.design)
+        context = controller._ensure_project_context(design)
+
+    assert not dashboard_app._profile_project_contract_stale(context, design)
+
+    stale_path = (
+        context.project_dir
+        / "3_tactile_and_baseline_trials"
+        / "row_01__inhale_trial_type"
+        / "baseline"
+        / "baseline_silent_old.wav"
+    )
+    dashboard_app._write_text_file(stale_path, "old baseline artifact", encoding="utf-8")
+
+    assert dashboard_app._profile_project_contract_stale(context, design)
+
+
 def test_dashboard_loads_all_preloads_with_trajectory_inventory(tmp_path: Path):
     client = _client(tmp_path)
     root = Path(__file__).resolve().parents[1]

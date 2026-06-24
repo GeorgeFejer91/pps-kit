@@ -97,7 +97,7 @@ def find_output_diary(folder: Path) -> Path | None:
 
 def ensure_output_diary(project_root: Path, experiment_identifier: str | None = None) -> Path:
     root = Path(project_root).expanduser().resolve()
-    root.mkdir(parents=True, exist_ok=True)
+    os.makedirs(_filesystem_path(root), exist_ok=True)
     existing = find_output_diary(root)
     if existing is not None:
         return existing
@@ -118,7 +118,7 @@ def resolve_or_create_output_project(
     timestamp: str | None = None,
 ) -> OutputProjectResolution:
     selected = Path(selected_folder).expanduser().resolve()
-    selected.mkdir(parents=True, exist_ok=True)
+    os.makedirs(_filesystem_path(selected), exist_ok=True)
     existing = find_output_diary(selected)
     if existing is not None:
         append_diary_entry(
@@ -133,10 +133,10 @@ def resolve_or_create_output_project(
     slug = slugify_identifier(experiment_identifier)
     project_root = selected / f"{slug}_{stamp}"
     suffix = 2
-    while project_root.exists():
+    while os.path.exists(_filesystem_path(project_root)):
         project_root = selected / f"{slug}_{stamp}_{suffix}"
         suffix += 1
-    project_root.mkdir(parents=True, exist_ok=True)
+    os.makedirs(_filesystem_path(project_root), exist_ok=True)
     diary_path = output_runner_logs_dir(project_root) / diary_filename(slug)
     append_diary_entry(
         diary_path,

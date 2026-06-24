@@ -312,20 +312,20 @@ def prepare_acquisition_folder(
     capture_options: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     output = Path(output_folder).expanduser().resolve()
-    output.mkdir(parents=True, exist_ok=True)
+    os.makedirs(_filesystem_path(output), exist_ok=True)
     profile_id = str(profile_entry.get("profile_id") or "").strip()
     if not profile_id:
         raise ValueError("Profile id is required before preparing an acquisition folder.")
     source = Path(source_project_dir).resolve()
-    if not source.exists() or not source.is_dir():
+    if not os.path.isdir(_filesystem_path(source)):
         raise FileNotFoundError(f"Stored profile project folder is missing: {source}")
     snapshot_root = output_profile_snapshot_dir(output)
     snapshot_dir = (snapshot_root / profile_id).resolve()
     if output != snapshot_dir and output not in snapshot_dir.parents:
         raise ValueError("Acquisition profile snapshot path escapes the output folder.")
-    if snapshot_dir.exists():
+    if _path_exists(snapshot_dir):
         remove_project_tree(snapshot_dir)
-    snapshot_root.mkdir(parents=True, exist_ok=True)
+    os.makedirs(_filesystem_path(snapshot_root), exist_ok=True)
     copy_project_tree(source, snapshot_dir)
     rebase_project_copy_paths(snapshot_dir, old_root=source, new_root=snapshot_dir)
     refresh_project_dependency_hashes(snapshot_dir)
@@ -459,7 +459,7 @@ def write_bridge_manifest(
     capture_options: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     output = Path(output_folder).expanduser().resolve()
-    output.mkdir(parents=True, exist_ok=True)
+    os.makedirs(_filesystem_path(output), exist_ok=True)
     project_dir = Path(source_project_dir).resolve()
     segment_manifests = _segment_manifest_paths(project_dir)
     run_setup_text = str(segment_manifests.get("6_experiment_run_setup") or "")

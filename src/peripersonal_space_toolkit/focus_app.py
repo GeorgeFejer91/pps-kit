@@ -68,6 +68,7 @@ from .focus_layout import (
     render_focus_layout_profile,
     render_focus_style_sheet,
 )
+from .output_layout import _filesystem_path as _output_filesystem_path
 from .output_layout import output_root_for_metadata_path
 from .focus_timeline import TactileRecenterController, TactileTimelineCue, TactileTimelineState
 from .runner_diary import (
@@ -283,7 +284,7 @@ def set_runner_session_root(
     capture_options: dict[str, Any] | None = None,
 ) -> Path:
     root = Path(session_root).expanduser().resolve()
-    root.mkdir(parents=True, exist_ok=True)
+    os.makedirs(_output_filesystem_path(root), exist_ok=True)
     diary = diary_path or find_output_diary(root)
     update_runner_settings(
         state_root,
@@ -350,7 +351,7 @@ def create_runner_output_project(
 
 def create_timestamped_output_environment(parent_dir: Path, session_name: str) -> tuple[Path, Path, str]:
     parent = Path(parent_dir).expanduser().resolve()
-    if not parent.is_dir():
+    if not os.path.isdir(_output_filesystem_path(parent)):
         raise ValueError("Choose an existing output folder before initiating a new data collection environment.")
     slug = slugify_identifier(session_name, fallback="")
     if not slug:
@@ -358,10 +359,10 @@ def create_timestamped_output_environment(parent_dir: Path, session_name: str) -
     stamp = time.strftime("%Y%m%d_%H%M%S")
     root = parent / f"{slug}_{stamp}"
     suffix = 2
-    while root.exists():
+    while os.path.exists(_output_filesystem_path(root)):
         root = parent / f"{slug}_{stamp}_{suffix}"
         suffix += 1
-    root.mkdir(parents=True, exist_ok=False)
+    os.makedirs(_output_filesystem_path(root), exist_ok=False)
     diary = ensure_output_diary(root, session_name)
     return root, diary, slug
 
@@ -392,7 +393,7 @@ def initiate_data_collection_environment(
 ) -> dict[str, Any]:
     """Create a folder-local data collection environment and preload one participant."""
     parent = Path(parent_folder).expanduser()
-    if not parent.is_dir():
+    if not os.path.isdir(_output_filesystem_path(parent)):
         raise ValueError("Choose an existing output folder before initiating a new data collection environment.")
     profile = str(profile_id or "").strip()
     if not profile:
@@ -4708,7 +4709,7 @@ def _materialize_profile_run_setup(
 
     controller.load_template(profile_id, snapshot=False)
     with controller._lock:
-        project = controller._ensure_project_context(controller.design)
+        project = controller._ensure_project_context(controller.design, clear_stale_profile_outputs=True)
         design = dashboard_app._copy_design(controller.design)
     controller._ensure_profile_run_artifacts(project, design, progress_callback=progress_callback)
     with controller._lock:

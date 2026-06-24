@@ -325,7 +325,7 @@ def _audit_segment4(profile_dir: Path, criteria: list[Criterion]) -> None:
 
 def _audit_segment5(profile_dir: Path, criteria: list[Criterion]) -> None:
     block_dir = profile_dir / "5_block_csv_preview"
-    block_csvs = sorted(block_dir.glob("block_*_final.csv"))
+    block_csvs = _segment5_block_csvs(block_dir)
     criteria.append(
         Criterion(
             "segment5",
@@ -360,6 +360,31 @@ def _audit_segment5(profile_dir: Path, criteria: list[Criterion]) -> None:
             "Segment 5 blocks must not reference stale baseline_silent files.",
             evidence={"stale_examples": stale[:10]},
         )
+    )
+
+
+def _segment5_block_csvs(block_dir: Path) -> list[Path]:
+    manifest = _read_json(block_dir / "block_csv_preview_manifest.json")
+    paths: list[Path] = []
+    for block in manifest.get("blocks", []) if isinstance(manifest.get("blocks"), list) else []:
+        path = _resolve_path(block.get("csv_path"), base=block_dir)
+        if path.name.startswith("block_") and path.name.endswith("_final.csv") and _path_exists(path):
+            paths.append(path)
+    if paths:
+        return sorted(dict.fromkeys(paths), key=lambda path: path.name)
+    if not _is_dir(block_dir):
+        return []
+    try:
+        names = os.listdir(_filesystem_path(block_dir))
+    except OSError:
+        return []
+    return sorted(
+        [
+            block_dir / name
+            for name in names
+            if name.startswith("block_") and name.endswith("_final.csv") and _path_exists(block_dir / name)
+        ],
+        key=lambda path: path.name,
     )
 
 
@@ -456,11 +481,7 @@ def _audit_prepared_session(session_manifest: Path, criteria: list[Criterion], *
 
 
 def _audit_no_stale_baseline_stems(profile_dir: Path, criteria: list[Criterion], *, section: str) -> None:
-    stale_paths = [
-        str(path)
-        for path in profile_dir.rglob("*baseline_silent*")
-        if _path_exists(path)
-    ]
+    stale_paths = _stale_baseline_artifact_paths(profile_dir)
     criteria.append(
         Criterion(
             section,
@@ -470,6 +491,21 @@ def _audit_no_stale_baseline_stems(profile_dir: Path, criteria: list[Criterion],
             evidence={"examples": stale_paths[:20], "count": len(stale_paths)},
         )
     )
+
+
+def _stale_baseline_artifact_paths(profile_dir: Path) -> list[str]:
+    if not _is_dir(profile_dir):
+        return []
+    stale: list[str] = []
+    try:
+        walker = os.walk(_filesystem_path(profile_dir))
+        for root_text, _dir_names, file_names in walker:
+            for name in file_names:
+                if "baseline_silent" in name.lower():
+                    stale.append(str(Path(root_text) / name))
+    except OSError:
+        return stale
+    return sorted(stale)
 
 
 def _audit_block_rows(
