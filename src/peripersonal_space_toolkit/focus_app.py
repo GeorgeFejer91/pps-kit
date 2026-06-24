@@ -5714,7 +5714,8 @@ def _write_validation_focus_report(
 ) -> None:
     manifest_outputs: dict[str, Any] = {}
     try:
-        manifest_payload = json.loads(Path(session_manifest).read_text(encoding="utf-8"))
+        with open(_output_filesystem_path(session_manifest), "r", encoding="utf-8") as handle:
+            manifest_payload = json.loads(handle.read())
         if isinstance(manifest_payload.get("outputs"), dict):
             manifest_outputs = dict(manifest_payload.get("outputs") or {})
     except Exception:
@@ -5747,8 +5748,9 @@ def _write_validation_focus_report(
         payload["external_labrecorder_report"] = str(analysis_outputs.get("external_labrecorder_report") or "")
         payload["external_labrecorder_stdout"] = str(analysis_outputs.get("external_labrecorder_stdout") or "")
         payload["external_labrecorder_stderr"] = str(analysis_outputs.get("external_labrecorder_stderr") or "")
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    os.makedirs(_output_filesystem_path(path.parent), exist_ok=True)
+    with open(_output_filesystem_path(path), "w", encoding="utf-8") as handle:
+        handle.write(json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
 
 def _write_validation_launcher_report(
@@ -5768,8 +5770,9 @@ def _write_validation_launcher_report(
         "selected_profile": selected_profile,
         "validation_mouse_clicks": validation_clicks,
     }
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    os.makedirs(_output_filesystem_path(path.parent), exist_ok=True)
+    with open(_output_filesystem_path(path), "w", encoding="utf-8") as handle:
+        handle.write(json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
 
 class FocusModeWindow:
@@ -8958,14 +8961,40 @@ def run_launcher_window(
 
     def _validation_auto_environment() -> None:
         target_profile = os.environ.get("PPS_FOCUS_VALIDATION_PROFILE", STUDY5_PROFILE_ID).strip() or STUDY5_PROFILE_ID
-        parent = DEFAULT_SESSION_ROOT
-        parent.mkdir(parents=True, exist_ok=True)
+        parent = Path(os.environ.get("PPS_FOCUS_VALIDATION_OUTPUT_ROOT", "") or DEFAULT_SESSION_ROOT).expanduser()
+        os.makedirs(_output_filesystem_path(parent), exist_ok=True)
         _unlock_for_new_environment(parent)
-        index = profile_combo.findData(target_profile)
-        if index >= 0:
-            profile_combo.setCurrentIndex(index)
+        _set_profile_combo_current(target_profile)
         session_name_input.setText("Study 5 validation")
-        q["QTimer"].singleShot(250, lambda: initiate_button.click() if initiate_button.isEnabled() else None)
+
+        def _try_initiate(attempt: int = 0) -> None:
+            _refresh_initiate_state()
+            if initiate_button.isEnabled():
+                initiate_button.click()
+                return
+            if attempt < 20:
+                q["QTimer"].singleShot(250, lambda: _try_initiate(attempt + 1))
+                return
+            launcher_report_path = os.environ.get("PPS_FOCUS_VALIDATION_LAUNCHER_REPORT", "").strip()
+            if launcher_report_path:
+                _write_validation_launcher_report(
+                    Path(launcher_report_path),
+                    selected_manifest=None,
+                    exit_code=1,
+                    profile_count=len(profile_options),
+                    selected_profile=str(profile_combo.currentData() or ""),
+                    validation_clicks=[
+                        {
+                            "label": "auto environment initiation unavailable",
+                            "timestamp_unix": time.time(),
+                            "selected_profile": str(profile_combo.currentData() or ""),
+                            "message": "; ".join(_validation_errors()) or "Initiate button stayed disabled.",
+                        }
+                    ],
+                )
+            dialog.reject()
+
+        q["QTimer"].singleShot(250, _try_initiate)
 
     if _env_flag("PPS_FOCUS_VALIDATION_LAUNCHER_AUTO_CLICK"):
         q["QTimer"].singleShot(200, _validation_auto_environment)
