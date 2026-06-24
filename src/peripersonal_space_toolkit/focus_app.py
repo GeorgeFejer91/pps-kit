@@ -659,7 +659,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
         dest="enable_missed_trial_topup",
         action="store_true",
         default=True,
-        help="Prepare and request approval for one final missed-trial top-up block.",
+        help="Prepare and play one final missed-trial top-up block without an additional prompt.",
     )
     topup_group.add_argument(
         "--no-missed-trial-topup",
@@ -8494,7 +8494,7 @@ class FocusModeWindow:
                     capture_options=self.capture_options,
                     enable_topup=self.enable_missed_trial_topup,
                     runner_metadata=runner_metadata,
-                    topup_approval_callback=self._request_topup_approval if self.enable_missed_trial_topup else None,
+                    topup_approval_callback=self._auto_approve_topup_playback if self.enable_missed_trial_topup else None,
                     instruction_continue_callback=self._request_instruction_continue,
                 )
             else:
@@ -8504,7 +8504,7 @@ class FocusModeWindow:
                     capture_options=self.capture_options,
                     enable_topup=self.enable_missed_trial_topup,
                     runner_metadata=runner_metadata,
-                    topup_approval_callback=self._request_topup_approval if self.enable_missed_trial_topup else None,
+                    topup_approval_callback=self._auto_approve_topup_playback if self.enable_missed_trial_topup else None,
                     instruction_continue_callback=self._request_instruction_continue,
                 )
         except Exception as exc:
@@ -9015,6 +9015,24 @@ class FocusModeWindow:
 
         self.thread = threading.Thread(target=_run, daemon=True)
         self.thread.start()
+
+    def _auto_approve_topup_playback(self, summary: dict[str, Any]) -> bool:
+        summary = dict(summary)
+        record = {
+            "summary": summary,
+            "approved": True,
+            "mode": "setup_checkbox_auto_play",
+            "timestamp_unix": time.time(),
+        }
+        self.validation_topup_approval_records.append(record)
+        _append_output_diary_event(
+            "topup_approval_resolved",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            payload={"summary": summary, "approved": True, "mode": "setup_checkbox_auto_play"},
+            create=True,
+        )
+        return True
 
     def _request_topup_approval(self, summary: dict[str, Any]) -> bool:
         request = {"summary": dict(summary), "approved": False, "event": threading.Event()}

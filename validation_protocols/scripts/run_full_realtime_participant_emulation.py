@@ -439,7 +439,7 @@ def _write_markdown(path: Path, report: dict[str, Any]) -> None:
         f"- Standard tactile cues: `{evaluation.get('standard_tactile_cue_count')}`",
         f"- Planned/observed intentional misses: `{evaluation.get('planned_miss_count')}` / `{evaluation.get('intentional_miss_count')}`",
         f"- Standard/top-up response clicks: `{evaluation.get('standard_response_click_count')}` / `{evaluation.get('topup_response_click_count')}`",
-        f"- Top-up approvals: `{evaluation.get('topup_approval_count')}`",
+        f"- Top-up auto-play records: `{evaluation.get('topup_autoplay_count', evaluation.get('topup_approval_count'))}`",
         f"- Top-up rescue rows: `{evaluation.get('topup_rescue_row_count')}`",
         "",
         f"This is evaluation evidence only, not a public toolkit deliverable. {audio_note} It does not replace hardware loopback or participant-data collection SOPs.",
@@ -566,7 +566,7 @@ def _evaluate_focus_report(
     if not delay_values or len(set(round(value, 1) for value in delay_values[:20])) < 3:
         failures.append("Standard response delays were not varied enough to look randomized.")
     if not approvals:
-        failures.append("No top-up approval request was auto-approved.")
+        failures.append("No top-up auto-play authorization record was captured.")
     if not topup_manifest_paths or not rescue_rows:
         failures.append("No top-up rescue manifest rows were written.")
     if len(rescue_rows) < planned_misses:
@@ -602,6 +602,7 @@ def _evaluate_focus_report(
         "standard_response_click_count": len(standard_clicks),
         "topup_response_click_count": len(topup_clicks),
         "topup_approval_count": len(approvals),
+        "topup_autoplay_count": len(approvals),
         "topup_manifest_paths": [str(path) for path in topup_manifest_paths],
         "topup_rescue_row_count": len(rescue_rows),
         "topup_ledger_summary": ledger.get("summary", {}),

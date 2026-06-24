@@ -287,10 +287,10 @@ ASIO 3-channel, requested latency 0.010, blocksize 256.
 - [ ] **I3. Part-aware finalization.** At each part boundary, open trials for that
   part finalize; misses from Part 1 do not leak into Part 2's top-up and vice
   versa.
-- [ ] **I4. Operator approval gates playback.** `topup_block_ready` →
-  experimenter is prompted → `topup_block_approved` plays it; declining logs
-  `topup_block_skipped (operator_not_approved)` and does not play. Confirm the UI
-  actually surfaces the approval control (not keyboard-only).
+- [ ] **I4. Checked setup auto-plays top-up.** When missed-trial top-up is
+  submitted on, `topup_block_ready` proceeds to `topup_block_approved` and plays
+  without an additional operator prompt. When it is submitted off, no top-up
+  ledger/draft/block is produced.
 - [ ] **I5. Rescue content fidelity.** The top-up block replays the **actual
   missed tactile trials** from that part with their original stimulus identity,
   preserving Segment 2/3 row order; `source_trial_uid` links each rescue to its
@@ -430,7 +430,7 @@ at least one real block.*
 - [ ] **P2. Status is legible during run.** Header chips (Part, Block n/N, run
   state), live tactile timeline, cue/click counts, and next-cue countdown are
   visible and correct on the lab display.
-- [ ] **P3. Controls reachable.** CLICK target, run controls, and top-up approval
+- [ ] **P3. Controls reachable.** CLICK target, run controls, and top-up setup
   are mouse-reachable in taskbar-aware maximized mode (not clipped/off-screen);
   block-preview clicking never disturbs live playback/recenter.
 - [ ] **P4. `Open Session Folder` works.** Operator can open the session output
@@ -504,7 +504,7 @@ at least one real block.*
 | F | Playback timing | recording-layer anchor | full-length, real audio, real SOAs |
 | G | Response capture | simulated/emulated clicks | **real human clicks & perception** |
 | H | Event/LSL logging | one-block, labrecorder stress | full-session integrity |
-| I | Top-up | fake-audio topup stress | **real misses, operator approval** |
+| I | Top-up | fake-audio topup stress | **real misses, checked setup auto-play** |
 | J | Analysis / data quality | synthetic RT fixtures | **real behavioral PPS signal** |
 | K | Counterbalance/parts | UI emulation | full two-part real run |
 | L | Control/recovery | — | real interruption/crash/device-loss |
