@@ -9131,13 +9131,7 @@ class FocusModeWindow:
         return True
 
     def _request_topup_approval(self, summary: dict[str, Any]) -> bool:
-        request = {"summary": dict(summary), "approved": False, "event": threading.Event()}
-        self.pending_topup_approval_request = request
-        self.messages.put(("topup_approval", request))
-        request["event"].wait()
-        if self.pending_topup_approval_request is request:
-            self.pending_topup_approval_request = None
-        return bool(request["approved"])
+        return self._auto_approve_topup_playback(summary)
 
     def _request_instruction_continue(self, context: dict[str, Any]) -> bool:
         request = {"context": dict(context), "approved": False, "event": threading.Event()}
@@ -9570,70 +9564,10 @@ class FocusModeWindow:
         if hasattr(event, "is_set") and event.is_set():
             return
         self.pending_topup_approval_request = payload
-        q = self.q
         summary = dict(payload.get("summary") or {})
-        _append_output_diary_event(
-            "topup_approval_requested",
-            package=self.package,
-            capture_options=self.capture_options.as_dict(),
-            payload={"summary": summary},
-            create=True,
-        )
-        missed = int(summary.get("missed_trial_count") or 0)
-        topup_trials = int(summary.get("topup_trial_count") or 0)
-        fillers = int(summary.get("filler_trial_count") or 0)
-        part = str(summary.get("part_number") or "").strip()
-        part_text = f" for Part {part}" if part else ""
-        message = (
-            f"{missed} tactile trial(s) need top-up{part_text}.\n"
-            f"The prepared top-up block has {topup_trials} trial(s), including {fillers} row-structure filler trial(s).\n\n"
-            "Play the top-up block now?"
-        )
-        if _env_flag("PPS_FOCUS_VALIDATION_AUTO_APPROVE_TOPUP"):
-            self.validation_topup_approval_records.append(
-                {
-                    "summary": summary,
-                    "approved": True,
-                    "mode": "validation_auto_approve",
-                    "timestamp_unix": time.time(),
-                }
-            )
-            payload["approved"] = True
-            _append_output_diary_event(
-                "topup_approval_resolved",
-                package=self.package,
-                capture_options=self.capture_options.as_dict(),
-                payload={"summary": summary, "approved": True, "mode": "validation_auto_approve"},
-                create=True,
-            )
-            payload["event"].set()
-            if self.pending_topup_approval_request is payload:
-                self.pending_topup_approval_request = None
-            return
-        answer = q["QMessageBox"].question(
-            self.dialog,
-            "Play Top-up Block?",
-            message,
-            q["QMessageBox"].StandardButton.Yes | q["QMessageBox"].StandardButton.No,
-            q["QMessageBox"].StandardButton.No,
-        )
-        payload["approved"] = answer == q["QMessageBox"].StandardButton.Yes
-        self.validation_topup_approval_records.append(
-            {
-                "summary": summary,
-                "approved": bool(payload["approved"]),
-                "mode": "operator_dialog",
-                "timestamp_unix": time.time(),
-            }
-        )
-        _append_output_diary_event(
-            "topup_approval_resolved",
-            package=self.package,
-            capture_options=self.capture_options.as_dict(),
-            payload={"summary": summary, "approved": bool(payload["approved"]), "mode": "operator_dialog"},
-            create=True,
-        )
-        payload["event"].set()
+        payload["approved"] = self._auto_approve_topup_playback(summary)
+        if hasattr(event, "set"):
+            event.set()
         if self.pending_topup_approval_request is payload:
             self.pending_topup_approval_request = None
 
