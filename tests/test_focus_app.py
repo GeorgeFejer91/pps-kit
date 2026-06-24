@@ -1464,6 +1464,67 @@ def test_focus_mode_instruction_continue_accepts_target_click_and_keyboard(tmp_p
     window.dialog.close()
 
 
+def test_focus_mode_logs_response_clicks_outside_target_area(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    logged_clicks: list[dict[str, object]] = []
+
+    class FakeController:
+        def __init__(self, package_obj, *, capture_options=None, **_kwargs):
+            self.package = package_obj
+            self.capture_options = capture_options
+            self.audio_engine = None
+
+        def log_click(self, *, x=None, y=None, in_target=True) -> None:
+            logged_clicks.append({"x": x, "y": y, "in_target": in_target})
+
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+        controller_factory=FakeController,
+    )
+    window.dialog.show()
+    app.processEvents()
+    _fill_required_setup(window)
+    assert window._submit_participant_setup()
+    window._run_active = True
+    window.target_button.setEnabled(True)
+    window.timeline_state.active = True
+    window.timeline_state.elapsed_s = 1.25
+    app.processEvents()
+
+    QTest.mouseClick(
+        window.response_panel,
+        q["Qt"].MouseButton.LeftButton,
+        q["Qt"].KeyboardModifier.NoModifier,
+        q["QPoint"](4, 4),
+    )
+    app.processEvents()
+
+    assert len(logged_clicks) == 1
+    assert logged_clicks[0]["in_target"] is False
+    assert logged_clicks[0]["x"] not in (None, "")
+    assert logged_clicks[0]["y"] not in (None, "")
+    assert window.timeline_state.click_count() == 1
+
+    QTest.mouseClick(window.target_button, q["Qt"].MouseButton.LeftButton)
+    app.processEvents()
+
+    assert [click["in_target"] for click in logged_clicks] == [False, True]
+    assert window.timeline_state.click_count() == 2
+    window.dialog.close()
+
+
 def test_focus_mode_start_part2_button_controls_part_transition(tmp_path: Path):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
