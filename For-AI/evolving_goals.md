@@ -2,6 +2,10 @@
 
 This file is the dated project memory. Add a new dated entry when a chat or implementation changes project direction, product behavior, or release constraints.
 
+## 2026-06-24
+
+- Added a Study 5 original-instruction transcript library under `assets/preloads/study5_box_breathing_pps/05_run_setup/`, covering the five run-level instruction clips plus the within-trial inhale/exhale fixed cues. The JSON file is the machine-readable source and the Markdown companion is for human review; both point back to `assets/breathing/original_study5/spoken_assets_manifest.json` and preserve ASR provenance/review notes.
+
 ## 2026-06-21
 
 - Updated the runner-owned external LabRecorder output contract: when enabled, `SessionRunnerController` now gives `LabRecorder.exe` the participant session folder as the native XDF target and names the recording `<session_id>_external_labrecorder.xdf`, matching the `<session_id>_trials.csv` convention. LabRecorder stdout/stderr and `external_labrecorder_capture_report.json` remain under context `runner_logs/<session_id>/`; local event/LSL mirrors remain under context `verbose_events/<session_id>/`. Validation fallback still reads older rehearsals that used context `session_external_labrecorder.xdf`.
