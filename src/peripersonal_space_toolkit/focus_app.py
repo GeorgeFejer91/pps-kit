@@ -7048,6 +7048,7 @@ class FocusModeWindow:
         self.block_plan_items: list[dict[str, Any]] = []
         self.instruction_plan_items: list[dict[str, Any]] = []
         self.topup_draft_items: list[dict[str, Any]] = []
+        self._last_topup_completion: dict[str, Any] = {}
         self.part_buttons: dict[str, Any] = {}
         self.start_part2_button: Any | None = None
         self.active_display_block_index: int | None = None
@@ -8270,11 +8271,14 @@ class FocusModeWindow:
             return None
         return sorted(candidates, key=lambda item: item[0])[0][1]
 
-    def _auto_load_next_split_part_after_completion(self) -> bool:
+    def _auto_load_next_split_part_after_completion(self, *, completion_message: str = "") -> bool:
         manifest_path = self._next_split_part_manifest()
         if manifest_path is None:
             return False
         restore_submitted_setup = bool(self.demographics_submitted and self.controller is not None)
+        previous_output_summary = ""
+        if hasattr(self, "output_summary"):
+            previous_output_summary = str(self.output_summary.toPlainText() or "").strip()
         try:
             package = load_run_package(manifest_path)
         except Exception as exc:
@@ -8285,11 +8289,15 @@ class FocusModeWindow:
         self._prepare_continuous_external_labrecorder_handoff(package)
         self.selected_part_key = next_part_key
         next_label = _part_display_label(next_part_key)
-        self._replace_loaded_package(package, message=f"{next_label} loaded. Submit setup to start.")
+        prefix = str(completion_message or "Part 01 complete.").strip()
+        self._replace_loaded_package(package, message=f"{prefix} {next_label} loaded. Submit setup to start.")
         if restore_submitted_setup and self._submit_participant_setup():
             if hasattr(self, "event_label"):
-                self.event_label.setText(f"Part 01 complete. {next_label} loaded. Press {self.start_button.text()} when ready.")
+                self.event_label.setText(f"{prefix} {next_label} loaded. Press {self.start_button.text()} when ready.")
             self._set_setup_status_message(f"Setup submitted for {next_label}. Experiment Control is ready.")
+        if previous_output_summary and hasattr(self, "output_summary"):
+            handoff_status = f"{next_label} loaded for same-window continuation."
+            self.output_summary.setPlainText(f"{previous_output_summary}\n\n{handoff_status}")
         return True
 
     def _visible_plan_items(self) -> list[dict[str, Any]]:
@@ -9131,6 +9139,7 @@ class FocusModeWindow:
         self._timeline_perf_anchor = None
         self.planned_tactile_cue_count = 0
         self.topup_draft_items = []
+        self._last_topup_completion = {}
         self.active_display_block_index = None
         self._clear_block_preview()
         self.completed_display_block_indices.clear()
@@ -10638,6 +10647,9 @@ class FocusModeWindow:
                 if dict(payload).get("ui_event") == "topup_draft":
                     self._handle_topup_draft(dict(payload))
                     continue
+                if dict(payload).get("ui_event") == "topup_completion":
+                    self._handle_topup_completion(dict(payload))
+                    continue
                 duration = float(payload.get("duration_s") or 0.0)
                 elapsed = float(payload.get("elapsed_s") or 0.0)
                 display_index = _payload_display_block_index(dict(payload))
@@ -10707,6 +10719,37 @@ class FocusModeWindow:
                 )
                 self._refresh_experiment_control_minimum_height()
 
+    def _handle_topup_completion(self, payload: dict[str, Any]) -> None:
+        self._last_topup_completion = dict(payload)
+        message = str(payload.get("operator_completion_message") or "").strip()
+        outcome = str(payload.get("topup_outcome") or "").strip()
+        if not message:
+            if outcome == "not_needed":
+                part_number = str(payload.get("part_number") or "").strip()
+                message = (
+                    f"Part {part_number} data collected. No top-up needed. Part 02 will load automatically."
+                    if part_number == "1"
+                    else "Participant data collected. No top-up needed."
+                )
+            elif outcome == "played":
+                message = "Top-up completed."
+            elif outcome == "disabled":
+                message = "Data collected. Top-up disabled."
+        if message:
+            self.event_label.setText(message)
+            self.progress_label.setText(message)
+        if outcome == "not_needed":
+            self.run_state_chip.setText("No Top-Up Needed")
+        elif outcome in {"played", "disabled", "skipped"}:
+            self.run_state_chip.setText("Top-Up Done" if outcome == "played" else "Complete")
+        _append_output_diary_event(
+            "topup_completion_visible",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            payload=dict(payload),
+            create=True,
+        )
+
     def _handle_instruction_continue(self, payload: dict[str, Any]) -> None:
         event = payload.get("event")
         if hasattr(event, "is_set") and event.is_set():
@@ -10773,12 +10816,27 @@ class FocusModeWindow:
         self.progress.setValue(1000 if result.completed else self.progress.value())
         self.run_state_chip.setText("Complete" if result.completed else "Interrupted")
         self.progress_label.setText("Complete" if result.completed else "Interrupted")
+        operator_message = str(getattr(result, "operator_completion_message", "") or "").strip()
+        if operator_message:
+            self.event_label.setText(operator_message)
+            self.progress_label.setText(operator_message)
         if _package_is_split_part(self.package) and bool(result.completed):
             next_manifest = self._next_split_part_manifest()
-            if next_manifest is not None:
+            if next_manifest is not None and not operator_message:
                 current_part = _part_key_text(getattr(self.package, "part_number", "")) or "?"
                 self.event_label.setText(f"{_part_display_label(current_part)} complete; Part 02 ready.")
         lines = [str(result.summary_text or "").strip()]
+        if operator_message:
+            lines.append(f"Operator status: {operator_message}")
+        topup_summary = dict(getattr(result, "topup_summary", {}) or {})
+        if topup_summary:
+            lines.append(
+                "Top-up: "
+                f"{topup_summary.get('topup_outcome', 'unknown')} "
+                f"({topup_summary.get('hit_count', 0)} hits, "
+                f"{topup_summary.get('missed_needs_topup_count', 0)} misses, "
+                f"{topup_summary.get('topup_attempt_count', 0)} attempts)"
+            )
         lines.append(f"Session folder: {result.session_dir}")
         lines.append(f"Events CSV: {result.events_csv}")
         if result.capture_options.get("write_internal_xdf", True):
@@ -10811,6 +10869,8 @@ class FocusModeWindow:
                 "trigger_dictionary_path": str(getattr(result, "trigger_dictionary_path", "") or ""),
                 "session_metadata_path": str(getattr(result, "session_metadata_path", "") or ""),
                 "recording_paths": [str(path) for path in list(getattr(result, "recording_paths", []) or [])],
+                "topup_summary": dict(topup_summary),
+                "operator_completion_message": operator_message,
                 "warnings": list(getattr(result, "warnings", []) or []),
             },
             create=True,
@@ -10819,7 +10879,7 @@ class FocusModeWindow:
         self._shutdown_owned_audio_engine()
         self.timer.stop()
         if _package_is_split_part(self.package) and bool(result.completed):
-            self._auto_load_next_split_part_after_completion()
+            self._auto_load_next_split_part_after_completion(completion_message=operator_message)
 
     def _maybe_open_analysis_review(self, result: Any) -> None:
         if not bool(getattr(result, "completed", False)):

@@ -45,7 +45,7 @@ from .labrecorder_capture import LabRecorderCapture, LabRecorderCaptureError, fi
 from .tactile_latency import tactile_drive_onset_s, woojer_tactile_latency_policy
 from .timing_events import TimingEventHub, TriggerDictionary
 from .timing_schedule import BlockEventSchedule
-from .topup import TopUpLedger, write_topup_draft_manifest
+from .topup import HIT, MISSED_NEEDS_TOPUP, PENDING, TopUpLedger, write_topup_draft_manifest
 from .runtime_paths import repo_root, writable_root
 
 
@@ -309,6 +309,8 @@ class SessionRunResult:
     trigger_dictionary_path: Path | None = None
     session_metadata_path: Path | None = None
     capture_options: dict[str, Any] = field(default_factory=dict)
+    topup_summary: dict[str, Any] = field(default_factory=dict)
+    operator_completion_message: str = ""
 
 
 @dataclass(frozen=True)
@@ -2687,6 +2689,9 @@ class SessionRunnerController:
         self._instruction_wait_context: dict[str, Any] = {}
         self._progress_callback: ProgressCallback | None = None
         self._topup_draft_signature = ""
+        self._topup_outcome = "disabled" if self.topup_ledger is None else ""
+        self._topup_summary: dict[str, Any] = {}
+        self._operator_completion_message = ""
         self._configure_audio_engine_capture_options(self.audio_engine)
 
     def _adopt_external_labrecorder_state(self, state: dict[str, Any]) -> None:
@@ -3058,11 +3063,13 @@ class SessionRunnerController:
             else:
                 self._write_deferred_external_labrecorder_report(completed=completed, interrupted=interrupted)
             self._write_outputs()
+            self._operator_completion_message = self._build_operator_completion_message(completed=completed, interrupted=interrupted)
             self._write_part_completion_status(completed=completed, interrupted=interrupted)
             self._refresh_analysis_browser_outputs(completed=completed, interrupted=interrupted)
             if owns_engine and self.audio_engine is not None and hasattr(self.audio_engine, "shutdown"):
                 self.audio_engine.shutdown()
 
+        self._operator_completion_message = self._build_operator_completion_message(completed=completed, interrupted=interrupted)
         result = SessionRunResult(
             completed=completed,
             interrupted=interrupted,
@@ -3079,6 +3086,8 @@ class SessionRunnerController:
             trigger_dictionary_path=self._trigger_dictionary_path,
             session_metadata_path=self._session_metadata_path,
             capture_options=self.capture_options.as_dict(),
+            topup_summary=dict(self._topup_summary),
+            operator_completion_message=self._operator_completion_message,
         )
         _append_package_diary_event(
             self.package,
@@ -3095,6 +3104,8 @@ class SessionRunnerController:
                 "session_metadata_path": str(result.session_metadata_path or ""),
                 "recording_paths": [str(path) for path in result.recording_paths],
                 "analysis_outputs": {key: str(value) for key, value in result.analysis_outputs.items()},
+                "topup_summary": dict(result.topup_summary),
+                "operator_completion_message": result.operator_completion_message,
                 "warnings": list(result.warnings),
             },
         )
@@ -3121,6 +3132,8 @@ class SessionRunnerController:
                 session_id=self.package.session_id,
                 data_collected=bool(result.completed and not result.interrupted),
                 session_dir=str(self.package.session_dir),
+                topup_summary=dict(result.topup_summary),
+                operator_completion_message=result.operator_completion_message,
             )
             update_runner_settings(
                 state_root=DEFAULT_DASHBOARD_STATE_ROOT,
@@ -3436,6 +3449,94 @@ class SessionRunnerController:
             "missed_trials": missed_trials,
         }
 
+    def _topup_summary_payload(self, *, outcome: str, part_number: int | str | None = None, phase_label: str = "") -> dict[str, Any]:
+        summary = dict(self.topup_ledger.summary()) if self.topup_ledger is not None else {}
+        if self.topup_ledger is not None and part_number is not None:
+            selected_part = _part_suffix(part_number)
+            entries = [
+                entry
+                for entry in self.topup_ledger.entries
+                if _part_suffix(getattr(entry, "part_number", "")) == selected_part
+            ]
+            summary.update(
+                {
+                    "tracked_tactile_trials": len(entries),
+                    "pending": sum(1 for entry in entries if entry.status == PENDING),
+                    "hit": sum(1 for entry in entries if entry.status == HIT),
+                    "missed_needs_topup": sum(1 for entry in entries if entry.status == MISSED_NEEDS_TOPUP and not entry.is_topup),
+                    "topup_attempts": sum(1 for entry in entries if entry.is_topup),
+                    "parts": [selected_part] if selected_part else [],
+                }
+            )
+        payload = {
+            "ui_event": "topup_completion",
+            "topup_enabled": self.topup_ledger is not None,
+            "topup_outcome": str(outcome or ""),
+            "part_number": "" if part_number is None else _part_suffix(part_number),
+            "phase_label": phase_label,
+            "tracked_tactile_trials": int(summary.get("tracked_tactile_trials") or 0),
+            "hit_count": int(summary.get("hit") or 0),
+            "missed_needs_topup_count": int(summary.get("missed_needs_topup") or 0),
+            "topup_attempt_count": int(summary.get("topup_attempts") or 0),
+        }
+        payload["operator_completion_message"] = self._build_operator_completion_message(
+            completed=True,
+            interrupted=False,
+            topup_payload=payload,
+        )
+        return payload
+
+    def _record_topup_outcome(
+        self,
+        outcome: str,
+        *,
+        part_number: int | str | None = None,
+        phase_label: str = "",
+        progress_callback: ProgressCallback | None = None,
+    ) -> dict[str, Any]:
+        payload = self._topup_summary_payload(outcome=outcome, part_number=part_number, phase_label=phase_label)
+        self._topup_outcome = str(outcome or "")
+        self._topup_summary = dict(payload)
+        if progress_callback is not None:
+            try:
+                progress_callback(dict(payload))
+            except Exception:
+                pass
+        return payload
+
+    def _build_operator_completion_message(
+        self,
+        *,
+        completed: bool,
+        interrupted: bool,
+        topup_payload: dict[str, Any] | None = None,
+    ) -> str:
+        part_number = _part_suffix(getattr(self.package, "part_number", ""))
+        part_number_int = _as_int(part_number, default=0)
+        split_part_count = _package_split_part_count(self.package)
+        final_split_part = bool(_package_is_split_part(self.package) and part_number_int >= split_part_count)
+        part_label = "Participant" if final_split_part else (f"Part {part_number}" if part_number else "Participant")
+        if interrupted or not completed:
+            return f"{part_label} interrupted before data collection completed."
+        payload = dict(topup_payload or self._topup_summary or {})
+        outcome = str(payload.get("topup_outcome") or self._topup_outcome or ("disabled" if self.topup_ledger is None else "")).strip()
+        subject = f"{part_label} data collected" if part_label.startswith("Part ") else "Participant data collected"
+        if outcome == "not_needed":
+            suffix = " No top-up needed."
+        elif outcome == "played":
+            suffix = " Top-up completed."
+        elif outcome == "skipped":
+            suffix = " Top-up skipped."
+        elif outcome == "failed_to_materialize":
+            suffix = " Top-up could not be created; standard data was saved."
+        elif outcome == "disabled":
+            suffix = " Top-up disabled."
+        else:
+            suffix = ""
+        if _package_is_split_part(self.package) and part_number_int and part_number_int < split_part_count:
+            suffix = f"{suffix} Part 02 is ready."
+        return f"{subject}.{suffix}".strip()
+
     def _instruction_slot(self, slot_name: str) -> dict[str, Any] | None:
         profile = _normalize_instruction_profile(self.package.instruction_profile)
         for slot in profile.get("slots", []):
@@ -3595,13 +3696,28 @@ class SessionRunnerController:
         display_block_count: int | None = None,
     ) -> bool:
         if self.topup_ledger is None:
+            self._record_topup_outcome("disabled", part_number=part_number, phase_label=phase_label, progress_callback=progress_callback)
             return True
         self.events.flush_callback_events()
         self.topup_ledger.finalize_open_trials(part_number=part_number)
         self._persist_topup_state(part_number=part_number)
         misses = self.topup_ledger.missed_entries(include_topup=False, part_number=part_number)
         if not misses:
-            self.events.log("topup_not_needed", missed_trial_count=0, part_number="" if part_number is None else _part_suffix(part_number), phase_label=phase_label)
+            payload = self._record_topup_outcome(
+                "not_needed",
+                part_number=part_number,
+                phase_label=phase_label,
+                progress_callback=progress_callback,
+            )
+            self.events.log(
+                "topup_not_needed",
+                missed_trial_count=0,
+                part_number="" if part_number is None else _part_suffix(part_number),
+                phase_label=phase_label,
+                tracked_tactile_trials=payload["tracked_tactile_trials"],
+                hit_count=payload["hit_count"],
+                operator_completion_message=payload["operator_completion_message"],
+            )
             self._persist_topup_state(part_number=part_number)
             return True
         try:
@@ -3615,6 +3731,12 @@ class SessionRunnerController:
         except Exception as exc:
             self.events.log("topup_block_materialize_failed", missed_trial_count=len(misses), part_number="" if part_number is None else _part_suffix(part_number), phase_label=phase_label, message=str(exc))
             self._run_warnings.append(f"Top-up block could not be materialized: {exc}")
+            self._record_topup_outcome(
+                "failed_to_materialize",
+                part_number=part_number,
+                phase_label=phase_label,
+                progress_callback=progress_callback,
+            )
             self._persist_topup_state(part_number=part_number)
             return True
 
@@ -3669,6 +3791,7 @@ class SessionRunnerController:
                 payload={"reason": "operator_not_approved", **summary},
             )
             self._persist_topup_state(part_number=part_number)
+            self._record_topup_outcome("skipped", part_number=part_number, phase_label=phase_label, progress_callback=progress_callback)
             return True
 
         self.events.log("topup_block_approved", **summary)
@@ -3798,6 +3921,7 @@ class SessionRunnerController:
         if not ok:
             self._run_warnings.append("Top-up block was interrupted before completion.")
             return False
+        self._record_topup_outcome("played", part_number=part_number, phase_label=phase_label, progress_callback=progress_callback)
         return not self._stop_requested
 
     def stop(self) -> None:
@@ -4265,6 +4389,14 @@ class SessionRunnerController:
             "external_labrecorder_xdf": str(self._external_labrecorder_xdf_path),
             "external_labrecorder_group_xdf": str(_external_labrecorder_group_xdf_path(self.package)),
             "external_labrecorder_report": str(self._external_labrecorder_report_path),
+            "topup_enabled": self.topup_ledger is not None,
+            "topup_outcome": str(self._topup_summary.get("topup_outcome") or self._topup_outcome or ("disabled" if self.topup_ledger is None else "")),
+            "tracked_tactile_trials": int(self._topup_summary.get("tracked_tactile_trials") or 0),
+            "hit_count": int(self._topup_summary.get("hit_count") or 0),
+            "missed_needs_topup_count": int(self._topup_summary.get("missed_needs_topup_count") or 0),
+            "topup_attempt_count": int(self._topup_summary.get("topup_attempt_count") or 0),
+            "operator_completion_message": self._operator_completion_message
+            or self._build_operator_completion_message(completed=completed, interrupted=interrupted),
             "analysis_outputs": {key: str(value) for key, value in self._analysis_outputs.items()},
         }
         _write_json_file(status_path, payload)

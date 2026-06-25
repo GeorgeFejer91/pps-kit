@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import json
 import os
+import time
 from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
@@ -1206,6 +1207,55 @@ class _MockAudioEngine:
         return {"path": str(output_path or ""), "interrupted": bool(interrupted)}
 
 
+class _ClickEachTactileAudioEngine(_MockAudioEngine):
+    def __init__(self):
+        super().__init__()
+        self.on_tactile = None
+
+    def play_block(self, path: str, progress_callback=None, audio_event_callback=None, block_event_schedule=None) -> bool:
+        self.played.append(path)
+        if audio_event_callback:
+            if block_event_schedule is not None:
+                block_event_schedule.reset()
+                for event in block_event_schedule.consume_buffer(0, 44100 * 20):
+                    now_unix = time.time()
+                    now_perf = time.perf_counter()
+                    payload = dict(event.payload)
+                    payload.update(
+                        {
+                            "event_type": event.event_type,
+                            "sample_index": event.sample_index,
+                            "buffer_start_sample": 0,
+                            "sample_offset_in_buffer": event.sample_index,
+                            "sample_rate": 44100,
+                            "trigger_key": event.trigger_key,
+                            "callback_perf_counter": now_perf,
+                            "callback_unix_time": now_unix,
+                            "stream_current_time": now_perf,
+                            "stream_output_buffer_dac_time": now_perf,
+                        }
+                    )
+                    audio_event_callback(payload)
+                    if event.event_type == "tactile_onset" and self.on_tactile is not None:
+                        time.sleep(0.12)
+                        self.on_tactile()
+            else:
+                audio_event_callback(
+                    {
+                        "event_type": "audio_sample_zero",
+                        "sample_index": 0,
+                        "buffer_start_sample": 0,
+                        "sample_offset_in_buffer": 0,
+                        "sample_rate": 44100,
+                        "callback_perf_counter": 10.0,
+                    }
+                )
+        if progress_callback:
+            for value in self.progress_values:
+                progress_callback(value)
+        return not self.stopped
+
+
 def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
     design = _compact_design()
     package = prepare_run_package(
@@ -1415,6 +1465,85 @@ def test_split_part_controller_writes_part_identity_and_status_handoff(tmp_path:
     assert collected["data_collected"] is True
     assert collected["data_collection_status"] == "collected"
     assert collected["part_inventory"] == "Part 1 complete, Part 2 collected"
+
+
+def test_split_part_zero_miss_topup_writes_not_needed_status_and_progress(tmp_path: Path):
+    run_manifest = _two_part_segment_run_setup_fixture(tmp_path)
+    session_root = tmp_path / "sessions"
+    part1 = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=session_root,
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+    engine = _ClickEachTactileAudioEngine()
+    controller = SessionRunnerController(part1, audio_engine=engine, enable_topup=True)
+    engine.on_tactile = lambda: controller.log_click(x=1, y=1)
+    progress: list[dict[str, object]] = []
+
+    result = controller.run(progress_callback=progress.append)
+
+    assert result.completed
+    assert result.topup_summary["topup_outcome"] == "not_needed"
+    assert result.topup_summary["tracked_tactile_trials"] == 1
+    assert result.topup_summary["hit_count"] == 1
+    assert result.topup_summary["missed_needs_topup_count"] == 0
+    assert "No top-up needed" in result.operator_completion_message
+    assert "Part 02 is ready" in result.operator_completion_message
+    topup_payloads = [payload for payload in progress if payload.get("ui_event") == "topup_completion"]
+    assert topup_payloads
+    assert topup_payloads[-1]["topup_outcome"] == "not_needed"
+    assert topup_payloads[-1]["operator_completion_message"] == result.operator_completion_message
+
+    status_path = output_runner_logs_dir(session_root) / part1.session_group_id / "part_01" / "part_completion_status.json"
+    completion_status = json.loads(status_path.read_text(encoding="utf-8"))
+    assert completion_status["completed"] is True
+    assert completion_status["interrupted"] is False
+    assert completion_status["topup_enabled"] is True
+    assert completion_status["topup_outcome"] == "not_needed"
+    assert completion_status["tracked_tactile_trials"] == 1
+    assert completion_status["hit_count"] == 1
+    assert completion_status["missed_needs_topup_count"] == 0
+    assert completion_status["topup_attempt_count"] == 0
+    assert completion_status["operator_completion_message"] == result.operator_completion_message
+
+    with result.events_csv.open(newline="", encoding="utf-8") as handle:
+        event_rows = list(csv.DictReader(handle))
+    topup_not_needed = [row for row in event_rows if row["event_type"] == "topup_not_needed"]
+    assert topup_not_needed
+    payload = json.loads(topup_not_needed[-1]["payload_json"])
+    assert payload["tracked_tactile_trials"] == 1
+    assert payload["hit_count"] == 1
+    assert "No top-up needed" in payload["operator_completion_message"]
+
+    topup_dir = output_prepared_blocks_dir(session_root) / part1.session_group_id / "part_01" / "blocks"
+    assert not list(topup_dir.glob("*topup_missed_trials.wav"))
+
+
+def test_final_split_part_zero_miss_topup_reports_participant_collected(tmp_path: Path):
+    run_manifest = _two_part_segment_run_setup_fixture(tmp_path)
+    session_root = tmp_path / "sessions"
+    part1 = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=session_root,
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+    part2 = load_run_package(part1.sibling_part_manifest_paths[0])
+    engine = _ClickEachTactileAudioEngine()
+    controller = SessionRunnerController(part2, audio_engine=engine, enable_topup=True)
+    engine.on_tactile = lambda: controller.log_click(x=1, y=1)
+
+    result = controller.run()
+
+    assert result.completed
+    assert result.topup_summary["topup_outcome"] == "not_needed"
+    assert result.operator_completion_message == "Participant data collected. No top-up needed."
+    status_path = output_runner_logs_dir(session_root) / part2.session_group_id / "part_02" / "part_completion_status.json"
+    completion_status = json.loads(status_path.read_text(encoding="utf-8"))
+    assert completion_status["operator_completion_message"] == "Participant data collected. No top-up needed."
+    topup_dir = output_prepared_blocks_dir(session_root) / part2.session_group_id / "part_02" / "blocks"
+    assert not list(topup_dir.glob("*topup_missed_trials.wav"))
 
 
 def test_session_runner_controller_handles_deep_output_root(tmp_path: Path):

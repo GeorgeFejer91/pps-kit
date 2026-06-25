@@ -1631,6 +1631,105 @@ def test_focus_mode_block_plan_click_previews_trial_composition_and_live_bar(tmp
     window.dialog.close()
 
 
+def test_focus_mode_zero_miss_completion_auto_loads_part2_with_finished_sign(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    monkeypatch.setenv("PPS_FOCUS_DISABLE_ANALYSIS_POPUP", "1")
+    try:
+        from PIL import Image
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+        from peripersonal_space_toolkit.session_runner import prepare_segment_run_package
+        from test_session_runner import _two_part_segment_run_setup_fixture
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    run_manifest = _two_part_segment_run_setup_fixture(tmp_path)
+    package = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=tmp_path / "sessions",
+    )
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(
+            enable_lsl=False,
+            start_backup_recording=False,
+            start_external_labrecorder=False,
+        ),
+        enable_missed_trial_topup=True,
+    )
+    window.dialog.show()
+    app.processEvents()
+    _fill_required_setup(window)
+    assert window._submit_participant_setup()
+    app.processEvents()
+    assert window.start_button.text() == "Start Part 01"
+
+    message = "Part 1 data collected. No top-up needed. Part 02 is ready."
+    result = SimpleNamespace(
+        completed=True,
+        interrupted=False,
+        summary_text="Run complete.",
+        session_dir=package.session_dir,
+        events_csv=tmp_path / "events.csv",
+        events_xdf=tmp_path / "events.xdf",
+        lsl_markers_csv=None,
+        lsl_markers_xdf=None,
+        trigger_dictionary_path=None,
+        session_metadata_path=None,
+        recording_paths=[],
+        warnings=[],
+        capture_options={"write_internal_xdf": True},
+        analysis_outputs={},
+        topup_summary={
+            "topup_outcome": "not_needed",
+            "hit_count": 1,
+            "missed_needs_topup_count": 0,
+            "topup_attempt_count": 0,
+        },
+        operator_completion_message=message,
+    )
+
+    window._handle_topup_completion(
+        {
+            "ui_event": "topup_completion",
+            "topup_outcome": "not_needed",
+            "part_number": "1",
+            "hit_count": 1,
+            "missed_needs_topup_count": 0,
+            "topup_attempt_count": 0,
+            "operator_completion_message": message,
+        }
+    )
+    app.processEvents()
+    assert window.event_label.text() == message
+    assert window.run_state_chip.text() == "No Top-Up Needed"
+
+    window._handle_done(result)
+    app.processEvents()
+    assert "Operator status: Part 1 data collected. No top-up needed." in window.output_summary.toPlainText()
+    assert "Top-up: not_needed" in window.output_summary.toPlainText()
+    assert "Part 02 loaded for same-window continuation." in window.output_summary.toPlainText()
+    assert getattr(window.package, "part_number", None) == 2
+    assert window.selected_part_key == "2"
+    assert window.start_button.text() == "Start Part 02"
+    assert window.start_button.isEnabled()
+    assert "No top-up needed" in window.event_label.text()
+    assert "Part 02 loaded" in window.event_label.text()
+    screenshot = tmp_path / "no_topup_completion_part02_ready.png"
+    assert window.dialog.grab().save(str(screenshot))
+    image = Image.open(screenshot).convert("RGB")
+    pixels = np.asarray(image)
+    nonblank_pixels = int(np.sum(np.any(pixels != 255, axis=2)))
+    assert nonblank_pixels > 1000
+    window.timer.stop()
+    window.dialog.close()
+    app.processEvents()
+
+
 @pytest.mark.parametrize("available_width,available_height", [(1024, 600), (1366, 768), (1920, 1080)])
 def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, available_width: int, available_height: int):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
