@@ -47,6 +47,12 @@ from peripersonal_space_toolkit.output_layout import (  # noqa: E402
 SCHEMA = "pps-study5-end-to-end-ui-mouse-validation.v1"
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "artifacts" / "validation_runs" / "s5_ui_mouse"
 STUDY5_TEMPLATE_ID = "study5_box_breathing_pps"
+PART02_START_LABELS = {"Start Part 02", "Start Part 2"}
+PRIMARY_START_LABELS = {"Start Run", "Start Part 01", "Start Part 1", "Start Part 02", "Start Part 2"}
+
+
+def _has_click_label(clicks: list[dict[str, Any]], labels: set[str]) -> bool:
+    return any(str(click.get("label") or "") in labels for click in clicks)
 
 
 def _filesystem_path(path: str | Path) -> str:
@@ -519,33 +525,17 @@ def _run_focus_mode_by_mouse(
         _click(window.setup_submit_button, "Submit setup")
 
     def _start_when_ready() -> None:
+        if window.result is not None:
+            return
         _submit_setup()
         if window.start_button.isEnabled():
-            _click(window.start_button, "Start Run")
+            _click(window.start_button, str(window.start_button.text() or "Start Run"))
+            q["QTimer"].singleShot(250, _start_when_ready)
             return
         q["QTimer"].singleShot(100, _start_when_ready)
 
-    def _load_next_split_part_if_ready() -> bool:
-        next_manifest = None
-        next_manifest_func = getattr(window, "_next_split_part_manifest", None)
-        if callable(next_manifest_func):
-            try:
-                next_manifest = next_manifest_func()
-            except Exception:
-                next_manifest = None
-        button = getattr(window, "load_next_part_button", None)
-        if next_manifest is None or button is None or not button.isEnabled():
-            return False
-        focus_app._validation_capture_part_snapshot(window, label="before_load_next_part")
-        _click(button, "Load Part 2")
-        q["QTimer"].singleShot(250, _start_when_ready)
-        return True
-
     def _poll_instruction_requests() -> None:
         if window.result is not None:
-            if _load_next_split_part_if_ready():
-                q["QTimer"].singleShot(100, _poll_instruction_requests)
-                return
             focus_app._validation_capture_part_snapshot(window, label="final_report")
             window.grab_screenshot(output_dir / "focus_mode_complete.png")
             window.dialog.accept()
@@ -555,7 +545,7 @@ def _run_focus_mode_by_mouse(
             context = dict(request.get("context") or {})
             mode = str(context.get("mode") or "click")
             if getattr(window, "_part2_start_gate_pending", lambda: False)():
-                _click(getattr(window, "start_part2_button", None), "Start Part 2")
+                _click(getattr(window, "start_part2_button", None), "Start Part 02")
             elif mode == "button":
                 _click(window.instruction_button, f"instruction button: {context.get('instruction_label', '')}")
             else:
@@ -658,8 +648,10 @@ def _evaluate_report(report: dict[str, Any]) -> tuple[bool, list[str]]:
         failures.append("Focus Mode did not report a completed run.")
     if int(focus.get("expected_part_count") or 1) > 1 and not focus.get("all_parts_completed"):
         failures.append("Focus Mode did not complete every split Study 5 part.")
-    if int(focus.get("expected_part_count") or 1) > 1 and not any(click.get("label") == "Load Part 2" for click in focus.get("mouse_clicks", [])):
-        failures.append("Focus Mode did not activate Load Part 2 by a validation mouse click.")
+    if int(focus.get("expected_part_count") or 1) > 1 and not _has_click_label(
+        list(focus.get("mouse_clicks", []) or []), PART02_START_LABELS
+    ):
+        failures.append("Focus Mode did not activate Start Part 02 by a validation mouse click.")
     if int(focus.get("block_end_count") or 0) != int(focus.get("block_count") or -1):
         failures.append("Focus Mode did not finish every participant block.")
     scoped_counts = dict(focus.get("scoped_event_counts") or {})
@@ -670,7 +662,7 @@ def _evaluate_report(report: dict[str, Any]) -> tuple[bool, list[str]]:
         failures.append("Focus Mode did not emit all 408 standard Study 5 trial starts/ends.")
     if int(focus.get("played_instruction_count") or 0) < 5:
         failures.append("Focus Mode did not attempt the preloaded Study 5 instruction clips.")
-    if not any(click.get("label") == "Start Run" for click in focus.get("mouse_clicks", [])):
+    if not _has_click_label(list(focus.get("mouse_clicks", []) or []), PRIMARY_START_LABELS):
         failures.append("Focus Mode was not started through a mouse click.")
     planned_cues = int(focus.get("planned_tactile_cue_count") or 0)
     recentered_cues = int(focus.get("cursor_recenter_count") or 0)
@@ -833,8 +825,10 @@ def _run_standalone_launcher_validation(args: argparse.Namespace) -> int:
         failures.append("Focus Mode did not complete after standalone runner profile launch.")
     if int(focus_result.get("expected_part_count") or 1) > 1 and not focus_result.get("all_parts_completed"):
         failures.append("Standalone runner Focus Mode did not complete every split Study 5 part.")
-    if int(focus_result.get("expected_part_count") or 1) > 1 and not any(click.get("label") == "Load Part 2" for click in focus_result.get("mouse_clicks", [])):
-        failures.append("Standalone runner Focus Mode did not click Load Part 2.")
+    if int(focus_result.get("expected_part_count") or 1) > 1 and not _has_click_label(
+        list(focus_result.get("mouse_clicks", []) or []), PART02_START_LABELS
+    ):
+        failures.append("Standalone runner Focus Mode did not click Start Part 02.")
     if int(focus_result.get("block_end_count") or 0) != int(focus_result.get("block_count") or -1):
         failures.append("Focus Mode did not finish every block after standalone runner profile launch.")
     scoped_counts = dict(focus_result.get("scoped_event_counts") or {})
@@ -1087,16 +1081,16 @@ def _run_packaged_standalone_app_background_validation(args: argparse.Namespace)
         failures.append("Packaged Focus Mode did not complete Study 5.")
     if int(focus_result.get("expected_part_count") or 1) > 1 and not focus_result.get("all_parts_completed"):
         failures.append("Packaged Focus Mode did not complete every split Study 5 part.")
-    if int(focus_result.get("expected_part_count") or 1) > 1 and not any(click.get("label") == "Load Part 2" for click in focus_clicks):
-        failures.append("Packaged Focus Mode did not click Load Part 2.")
+    if int(focus_result.get("expected_part_count") or 1) > 1 and not _has_click_label(focus_clicks, PART02_START_LABELS):
+        failures.append("Packaged Focus Mode did not click Start Part 02.")
     if int(standard_counts.get("block_end") or 0) != 12:
         failures.append("Packaged Focus Mode did not complete all 12 Study 5 blocks.")
     if int(standard_counts.get("trial_start") or 0) != 408 or int(standard_counts.get("trial_end") or 0) != 408:
         failures.append("Packaged Focus Mode did not emit all 408 Study 5 trial starts/ends.")
     if int(focus_result.get("played_instruction_count") or 0) < 5:
         failures.append("Packaged Focus Mode did not attempt all five original Study 5 instruction clips.")
-    if not any(click.get("label") == "Start Run" for click in focus_clicks):
-        failures.append("Packaged Focus Mode Start Run was not activated by a validation mouse click.")
+    if not _has_click_label(focus_clicks, PRIMARY_START_LABELS):
+        failures.append("Packaged Focus Mode primary start was not activated by a validation mouse click.")
     planned_cues = int(focus_result.get("planned_tactile_cue_count") or 0)
     recentered_cues = int(focus_result.get("cursor_recenter_count") or 0)
     if planned_cues <= 0:
@@ -1254,16 +1248,17 @@ def _run_packaged_standalone_app_validation(args: argparse.Namespace) -> int:
         failures.append("Packaged Focus Mode did not complete Study 5.")
     if int(focus_result.get("expected_part_count") or 1) > 1 and not focus_result.get("all_parts_completed"):
         failures.append("Packaged Focus Mode did not complete every split Study 5 part.")
-    if int(focus_result.get("expected_part_count") or 1) > 1 and not any(click.get("label") == "Load Part 2" for click in focus_result.get("validation_mouse_clicks", [])):
-        failures.append("Packaged Focus Mode did not click Load Part 2.")
+    validation_clicks = list(focus_result.get("validation_mouse_clicks", []) or [])
+    if int(focus_result.get("expected_part_count") or 1) > 1 and not _has_click_label(validation_clicks, PART02_START_LABELS):
+        failures.append("Packaged Focus Mode did not click Start Part 02.")
     if int(standard_counts.get("block_end") or 0) != 12:
         failures.append("Packaged Focus Mode did not complete all 12 Study 5 blocks.")
     if int(standard_counts.get("trial_start") or 0) != 408 or int(standard_counts.get("trial_end") or 0) != 408:
         failures.append("Packaged Focus Mode did not emit all 408 Study 5 trial starts/ends.")
     if int(focus_result.get("played_instruction_count") or 0) < 5:
         failures.append("Packaged Focus Mode did not attempt all five original Study 5 instruction clips.")
-    if not any(click.get("label") == "Start Run" for click in focus_result.get("validation_mouse_clicks", [])):
-        failures.append("Packaged Focus Mode Start Run was not activated by a validation mouse click.")
+    if not _has_click_label(validation_clicks, PRIMARY_START_LABELS):
+        failures.append("Packaged Focus Mode primary start was not activated by a validation mouse click.")
     planned_cues = int(focus_result.get("planned_tactile_cue_count") or 0)
     recentered_cues = int(focus_result.get("cursor_recenter_count") or 0)
     if planned_cues <= 0:

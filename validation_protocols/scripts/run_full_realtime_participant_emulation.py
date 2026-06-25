@@ -600,8 +600,10 @@ def _evaluate_focus_report(
         failures.append("Focus Mode did not report completed=True.")
     if int(focus.get("expected_part_count") or 1) > 1 and not focus.get("all_parts_completed"):
         failures.append("Focus Mode did not complete every split Study 5 part.")
-    if int(focus.get("expected_part_count") or 1) > 1 and not any(record.get("label") == "Load Part 2" for record in click_records):
-        failures.append("The participant emulator did not activate Load Part 2.")
+    if int(focus.get("expected_part_count") or 1) > 1 and not any(
+        str(record.get("label") or "") in {"Start Part 02", "Start Part 2"} for record in click_records
+    ):
+        failures.append("The participant emulator did not activate Start Part 02.")
     hardware_realtime = str(audio_mode) == "hardware"
     full_stack = str(validation_lane) == VALIDATION_LANE_FULL_STACK
     if not hardware_realtime and not focus.get("validation_audio_realtime"):

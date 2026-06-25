@@ -156,7 +156,7 @@ def test_validation_focus_report_aggregates_split_session_group(tmp_path: Path) 
         package=package,
         exit_code=0,
         window=window,
-        validation_clicks=[{"label": "Start Run"}, {"label": "Load Part 2"}],
+        validation_clicks=[{"label": "Start Part 01"}, {"label": "Start Part 02"}],
         engine=engine,
     )
 

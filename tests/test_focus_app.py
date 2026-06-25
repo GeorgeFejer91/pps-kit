@@ -805,10 +805,11 @@ def test_focus_mode_start_button_is_red_and_tracks_selected_split_part(tmp_path:
     window.dialog.show()
     app.processEvents()
 
+    assert window.dialog.findChild(q["QPushButton"], "loadNextPartButton") is None
     assert window.start_button.objectName() == "startButton"
     assert "QPushButton#startButton" in window.dialog.styleSheet()
     assert "#8c2f2f" in window.dialog.styleSheet()
-    assert window.start_button.text() == "Start Part 1"
+    assert window.start_button.text() == "Start Part 01"
     assert not window.part_buttons["1"].isEnabled()
     assert not window.part_buttons["2"].isEnabled()
 
@@ -817,7 +818,7 @@ def test_focus_mode_start_button_is_red_and_tracks_selected_split_part(tmp_path:
     app.processEvents()
 
     assert window.start_button.isEnabled()
-    assert window.start_button.text() == "Start Part 1"
+    assert window.start_button.text() == "Start Part 01"
     assert window.part_buttons["1"].isEnabled()
     assert window.part_buttons["2"].isEnabled()
 
@@ -827,7 +828,7 @@ def test_focus_mode_start_button_is_red_and_tracks_selected_split_part(tmp_path:
     assert Path(window.package.manifest_path) == part2_manifest
     assert window.package.part_number == 2
     assert window.selected_part_key == "2"
-    assert window.start_button.text() == "Start Part 2"
+    assert window.start_button.text() == "Start Part 02"
     assert [item["part_key"] for item in window.block_plan_items] == ["2", "2"]
     assert window.demographics_submitted
     assert window.start_button.isEnabled()
@@ -846,7 +847,7 @@ def test_focus_mode_clicking_part2_adopts_same_window_labrecorder_handoff(tmp_pa
 
     q = focus_app._require_qt()
     app = QApplication.instance() or QApplication([])
-    part1_manifest, _part2_manifest = _write_split_focus_session_manifests(tmp_path)
+    part1_manifest, part2_manifest = _write_split_focus_session_manifests(tmp_path)
     package = load_run_package(part1_manifest)
     shared_lsl = object()
     created: list[object] = []
@@ -931,7 +932,7 @@ def test_focus_mode_clicking_part2_adopts_same_window_labrecorder_handoff(tmp_pa
     assert created[0].capture_options.external_labrecorder_scope == "session_group_same_window"
     assert created[0].kwargs["lsl_stream_session_id"] == package.session_group_id
     assert created[0].kwargs["external_labrecorder_stop_on_run_end"] is False
-    assert window.start_button.text() == "Start Part 1"
+    assert window.start_button.text() == "Start Part 01"
 
     QTest.mouseClick(window.start_button, q["Qt"].MouseButton.LeftButton)
     window.thread.join(timeout=2)
@@ -939,12 +940,12 @@ def test_focus_mode_clicking_part2_adopts_same_window_labrecorder_handoff(tmp_pa
     app.processEvents()
 
     assert created[0].run_called is True
-    assert "Part 1 complete" in window.event_label.text()
-    QTest.mouseClick(window.part_buttons["2"], q["Qt"].MouseButton.LeftButton)
-    app.processEvents()
-
+    assert "Part 02 loaded" in window.event_label.text()
     assert len(created) == 2
-    assert window.start_button.text() == "Start Part 2"
+    assert Path(window.package.manifest_path) == part2_manifest
+    assert window.package.part_number == 2
+    assert window.selected_part_key == "2"
+    assert window.start_button.text() == "Start Part 02"
     assert window.start_button.isEnabled()
     assert created[1].capture_options.external_labrecorder_scope == "session_group_same_window"
     assert created[1].kwargs["shared_lsl_outlet"] is shared_lsl
@@ -2068,7 +2069,7 @@ def test_focus_mode_start_part2_button_controls_part_transition(tmp_path: Path):
 
     assert window.start_part2_button.isEnabled()
     assert window.start_button.isEnabled()
-    assert window.start_button.text() == "Start Part 2"
+    assert window.start_button.text() == "Start Part 02"
     assert not window.target_button.isEnabled()
     assert not window.instruction_button.isVisible()
 

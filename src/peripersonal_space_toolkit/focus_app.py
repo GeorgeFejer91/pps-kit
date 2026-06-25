@@ -6141,30 +6141,26 @@ def _install_validation_auto_clicker(q: dict[str, Any], window: "FocusModeWindow
         except Exception as exc:
             clicks.append({"label": "participant_setup_submit_failed", "message": str(exc), "timestamp_unix": time.time()})
 
+    loaded_manifest_state = {"path": str(getattr(window.package, "manifest_path", ""))}
+
+    def _reset_if_loaded_package_changed() -> None:
+        current = str(getattr(window.package, "manifest_path", ""))
+        if current == loaded_manifest_state["path"]:
+            return
+        loaded_manifest_state["path"] = current
+        start_gate_state.clear()
+        instruction_attempts.clear()
+
     def _click_start_when_ready() -> None:
         if window.result is not None:
             return
+        _reset_if_loaded_package_changed()
         _submit_mock_setup_if_needed()
         if window.start_button.isEnabled() and _validation_start_gate_ready(clicks, start_gate_state, source="auto_clicker"):
-            _click(window.start_button, "Start Run")
+            _click(window.start_button, str(window.start_button.text() or "Start Run"))
+            q["QTimer"].singleShot(250, _click_start_when_ready)
             return
         q["QTimer"].singleShot(100, _click_start_when_ready)
-
-    def _load_next_split_part_if_ready() -> bool:
-        next_manifest = None
-        try:
-            next_manifest = window._next_split_part_manifest()
-        except Exception:
-            next_manifest = None
-        button = getattr(window, "load_next_part_button", None)
-        if next_manifest is None or button is None or not button.isEnabled():
-            return False
-        _validation_capture_part_snapshot(window, label="before_load_next_part")
-        _click(button, "Load Part 2")
-        start_gate_state.clear()
-        instruction_attempts.clear()
-        q["QTimer"].singleShot(250, _click_start_when_ready)
-        return True
 
     def _part2_start_gate_pending() -> bool:
         check = getattr(window, "_part2_start_gate_pending", None)
@@ -6185,12 +6181,10 @@ def _install_validation_auto_clicker(q: dict[str, Any], window: "FocusModeWindow
 
     def _poll() -> None:
         if window.result is not None:
-            if _load_next_split_part_if_ready():
-                q["QTimer"].singleShot(250, _poll)
-                return
             _validation_capture_part_snapshot(window, label="before_accept")
             q["QTimer"].singleShot(250, window.dialog.accept)
             return
+        _reset_if_loaded_package_changed()
         request = window.pending_instruction_request
         if request is not None:
             request_id = id(request)
@@ -6198,7 +6192,7 @@ def _install_validation_auto_clicker(q: dict[str, Any], window: "FocusModeWindow
             mode = str(context.get("mode") or "click")
             label = str(context.get("instruction_label") or "instruction")
             if _part2_start_gate_pending():
-                _click_instruction_once(getattr(window, "start_part2_button", None), "Start Part 2", request_id)
+                _click_instruction_once(getattr(window, "start_part2_button", None), "Start Part 02", request_id)
             elif mode == "button":
                 _click_instruction_once(window.instruction_button, f"instruction button: {label}", request_id)
             else:
@@ -6227,10 +6221,10 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
     scheduled_response_keys: set[str] = set()
     completed_events: set[str] = set()
     pending: list[dict[str, Any]] = []
-    start_clicked = {"value": False}
     start_gate_state: dict[str, Any] = {}
     miss_keys: set[str] | None = None
     instruction_attempts: dict[int, tuple[int, float]] = {}
+    loaded_manifest_state = {"path": str(getattr(window.package, "manifest_path", ""))}
 
     def _ensure_miss_plan() -> set[str]:
         nonlocal miss_keys
@@ -6320,24 +6314,15 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
         scheduled_response_keys.clear()
         completed_events.clear()
         pending.clear()
-        start_clicked["value"] = False
         start_gate_state.clear()
         instruction_attempts.clear()
 
-    def _load_next_split_part_if_ready() -> bool:
-        next_manifest = None
-        try:
-            next_manifest = window._next_split_part_manifest()
-        except Exception:
-            next_manifest = None
-        button = getattr(window, "load_next_part_button", None)
-        if next_manifest is None or button is None or not button.isEnabled():
-            return False
-        _validation_capture_part_snapshot(window, label="before_load_next_part")
-        backend = _click_widget(button, "Load Part 2", preferred_backend="qtest")
-        records.append({"label": "Load Part 2", "backend": backend, "timestamp_unix": time.time()})
+    def _reset_if_loaded_package_changed() -> None:
+        current = str(getattr(window.package, "manifest_path", ""))
+        if current == loaded_manifest_state["path"]:
+            return
+        loaded_manifest_state["path"] = current
         _reset_for_loaded_package()
-        return True
 
     def _activate_widget_for_os_click(widget: Any) -> None:
         try:
@@ -6618,10 +6603,10 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
         if part2_pending:
             button = getattr(window, "start_part2_button", None)
             if button is not None and button.isEnabled():
-                backend = _click_widget(button, "Start Part 2", preferred_backend="qtest")
+                backend = _click_widget(button, "Start Part 02", preferred_backend="qtest")
                 records.append(
                     {
-                        "label": "Start Part 2",
+                        "label": "Start Part 02",
                         "mode": "part_transition",
                         "backend": backend,
                         "timestamp_unix": time.time(),
@@ -6809,21 +6794,18 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
 
     def _poll() -> None:
         if window.result is not None:
-            if _load_next_split_part_if_ready():
-                q["QTimer"].singleShot(250, _poll)
-                return
             _validation_capture_part_snapshot(window, label="before_accept")
             q["QTimer"].singleShot(1000, window.dialog.accept)
             return
+        _reset_if_loaded_package_changed()
         _submit_mock_setup_if_needed()
         if (
-            not start_clicked["value"]
-            and window.start_button.isEnabled()
+            window.start_button.isEnabled()
             and _validation_start_gate_ready(records, start_gate_state, source="participant_emulator")
         ):
-            backend = _press_primary_key("Start Run")
-            start_clicked["value"] = True
-            records.append({"label": "Start Run", "backend": backend, "timestamp_unix": time.time()})
+            start_label = str(window.start_button.text() or "Start Run")
+            backend = _press_primary_key(start_label)
+            records.append({"label": start_label, "backend": backend, "timestamp_unix": time.time()})
         _continue_instruction_if_needed()
         _schedule_timeline_cues()
         _schedule_tactile_events()
@@ -7068,7 +7050,6 @@ class FocusModeWindow:
         self.topup_draft_items: list[dict[str, Any]] = []
         self.part_buttons: dict[str, Any] = {}
         self.start_part2_button: Any | None = None
-        self.load_next_part_button: Any | None = None
         self.active_display_block_index: int | None = None
         self.completed_display_block_indices: set[int] = set()
         self.recenter_controller = TactileRecenterController(self.timeline_state, self._move_cursor_to_target)
@@ -7593,21 +7574,13 @@ class FocusModeWindow:
             button.clicked.connect(lambda _checked=False, key=part_key: self._select_part_key(key, preview_first=True))
             self.part_buttons[part_key] = button
             part_selector_layout.addWidget(button)
-        self.start_part2_button = q["QPushButton"]("Start Part 2")
+        self.start_part2_button = q["QPushButton"]("Start Part 02")
         self.start_part2_button.setObjectName("startPart2Button")
         self.start_part2_button.setMinimumHeight(profile.button_min_height)
         self.start_part2_button.setEnabled(False)
-        self.start_part2_button.setToolTip("Part 2 can be started only after Part 1 has finished and the runner is waiting at the part boundary.")
+        self.start_part2_button.setToolTip("Part 02 can be started only after Part 01 has finished and the runner is waiting at the part boundary.")
         self.start_part2_button.clicked.connect(self._start_part2_button_clicked)
         part_selector_layout.addWidget(self.start_part2_button)
-        self.load_next_part_button = q["QPushButton"]("Load Part 2")
-        self.load_next_part_button.setObjectName("loadNextPartButton")
-        self.load_next_part_button.setMinimumHeight(profile.button_min_height)
-        self.load_next_part_button.setVisible(False)
-        self.load_next_part_button.setEnabled(False)
-        self.load_next_part_button.setToolTip("Load the next prepared part package and return to Data Logging.")
-        self.load_next_part_button.clicked.connect(self._load_next_part_button_clicked)
-        part_selector_layout.addWidget(self.load_next_part_button)
         part_selector_layout.addStretch(1)
         progress_layout.addWidget(self.part_selector_widget)
         self.block_plan_widget = _create_block_plan_widget(q, self)
@@ -8130,21 +8103,21 @@ class FocusModeWindow:
         manifest_path = self._split_part_manifest_map().get(str(part_key))
         if manifest_path is None:
             if hasattr(self, "event_label"):
-                self.event_label.setText(f"{_part_button_label(part_key)} is not prepared for this participant.")
+                self.event_label.setText(f"{_part_display_label(part_key)} is not prepared for this participant.")
             return
         try:
             package = load_run_package(manifest_path)
         except Exception as exc:
             if hasattr(self, "event_label"):
-                self.event_label.setText(f"Could not load {_part_button_label(part_key)}: {exc}")
+                self.event_label.setText(f"Could not load {_part_display_label(part_key)}: {exc}")
             return
         restore_submitted_setup = bool(self.demographics_submitted and self.controller is not None)
         self._prepare_continuous_external_labrecorder_handoff(package)
         self.selected_part_key = str(part_key)
-        self._replace_loaded_package(package, message=f"{_part_button_label(part_key)} ready. Submit setup, then start.")
+        self._replace_loaded_package(package, message=f"{_part_display_label(part_key)} ready. Submit setup, then start.")
         if restore_submitted_setup:
             if self._submit_participant_setup():
-                self.event_label.setText(f"{_part_button_label(part_key)} ready. Press {self.start_button.text()} when ready.")
+                self.event_label.setText(f"{_part_display_label(part_key)} ready. Press {self.start_button.text()} when ready.")
 
     def _prepare_continuous_external_labrecorder_handoff(self, next_package: Any) -> None:
         controller = self.controller
@@ -8186,9 +8159,9 @@ class FocusModeWindow:
             return
         part_key = self._start_button_part_key()
         if part_key:
-            label = f"Start {_part_button_label(part_key)}"
+            label = f"Start {_part_display_label(part_key)}"
             button.setText(label)
-            button.setToolTip(f"Start playback for {_part_button_label(part_key)}.")
+            button.setToolTip(f"Start playback for {_part_display_label(part_key)}.")
         else:
             button.setText("Start Run")
             button.setToolTip("Start playback for the selected run package.")
@@ -8219,13 +8192,13 @@ class FocusModeWindow:
         pending_part = self._pending_start_part_key()
         enabled = bool(has_part2 and pending_part == "2")
         button.setEnabled(enabled)
-        button.setText("Start Part 2")
+        button.setText("Start Part 02")
         if enabled:
-            button.setToolTip("Part 1 is complete. Click to continue acquisition into Part 2.")
+            button.setToolTip("Part 01 is complete. Click to continue acquisition into Part 02.")
         elif has_part2:
-            button.setToolTip("Part 2 can be started only after Part 1 has finished and the runner is waiting at the part boundary.")
+            button.setToolTip("Part 02 can be started only after Part 01 has finished and the runner is waiting at the part boundary.")
         else:
-            button.setToolTip("This run setup has no Part 2.")
+            button.setToolTip("This run setup has no Part 02.")
 
     def _part2_start_gate_pending(self) -> bool:
         return self._pending_start_part_key() == "2"
@@ -8236,7 +8209,7 @@ class FocusModeWindow:
     def _start_part2_gate(self, *, source: str) -> None:
         if not self._part2_start_gate_pending():
             if hasattr(self, "event_label"):
-                self.event_label.setText("Start Part 2 becomes available after Part 1 is complete.")
+                self.event_label.setText("Start Part 02 becomes available after Part 01 is complete.")
             self._refresh_start_part2_button()
             self._refresh_start_button_label()
             return
@@ -8297,34 +8270,27 @@ class FocusModeWindow:
             return None
         return sorted(candidates, key=lambda item: item[0])[0][1]
 
-    def _refresh_load_next_part_button(self, *, completed: bool = False) -> None:
-        button = getattr(self, "load_next_part_button", None)
-        if button is None:
-            return
-        next_manifest = self._next_split_part_manifest()
-        visible = bool(completed and next_manifest is not None)
-        button.setVisible(visible)
-        button.setEnabled(visible)
-        if visible:
-            button.setToolTip(f"Load the next prepared part package: {next_manifest}")
-        else:
-            button.setToolTip("The next split part appears here after the current part completes.")
-
-    def _load_next_part_button_clicked(self) -> None:
+    def _auto_load_next_split_part_after_completion(self) -> bool:
         manifest_path = self._next_split_part_manifest()
         if manifest_path is None:
-            if hasattr(self, "event_label"):
-                self.event_label.setText("No later prepared part package was found.")
-            self._refresh_load_next_part_button(completed=False)
-            return
+            return False
+        restore_submitted_setup = bool(self.demographics_submitted and self.controller is not None)
         try:
             package = load_run_package(manifest_path)
         except Exception as exc:
             if hasattr(self, "event_label"):
-                self.event_label.setText(f"Could not load next part: {exc}")
-            return
+                self.event_label.setText(f"Part 01 complete; could not load Part 02 automatically: {exc}")
+            return False
+        next_part_key = _part_key_text(getattr(package, "part_number", "")) or "2"
         self._prepare_continuous_external_labrecorder_handoff(package)
-        self._replace_loaded_package(package, message=f"Part {getattr(package, 'part_number', '')} ready. Submit setup to start.")
+        self.selected_part_key = next_part_key
+        next_label = _part_display_label(next_part_key)
+        self._replace_loaded_package(package, message=f"{next_label} loaded. Submit setup to start.")
+        if restore_submitted_setup and self._submit_participant_setup():
+            if hasattr(self, "event_label"):
+                self.event_label.setText(f"Part 01 complete. {next_label} loaded. Press {self.start_button.text()} when ready.")
+            self._set_setup_status_message(f"Setup submitted for {next_label}. Experiment Control is ready.")
+        return True
 
     def _visible_plan_items(self) -> list[dict[str, Any]]:
         selected = self._ensure_selected_part_key()
@@ -9114,9 +9080,6 @@ class FocusModeWindow:
         self.pending_topup_approval_request = None
         self.thread = None
         self.messages = queue.Queue()
-        if hasattr(self, "load_next_part_button"):
-            self.load_next_part_button.setVisible(False)
-            self.load_next_part_button.setEnabled(False)
         self._clear_participant_details()
         self._refresh_loaded_package_display()
         self._populate_participant_code_combo(self.package.participant_id)
@@ -9194,7 +9157,6 @@ class FocusModeWindow:
         if hasattr(self, "wired_loopback_checkbox"):
             self.wired_loopback_checkbox.setText(_wired_loopback_checkbox_text())
         self._refresh_run_plan(select_default=True)
-        self._refresh_load_next_part_button(completed=False)
         self._update_tactile_timeline_display()
         self._apply_participant_ledger_to_fields(self.package.participant_id)
         self._refresh_participant_ledger_summary()
@@ -10411,7 +10373,7 @@ class FocusModeWindow:
     def _click(self) -> None:
         if self.pending_instruction_request is not None:
             if self._part2_start_gate_pending():
-                self.event_label.setText("Use Start Part 2 to continue to Part 2.")
+                self.event_label.setText("Use Start Part 02 to continue to Part 02.")
                 return
             self._approve_pending_instruction_continue(source="click target")
             return
@@ -10423,7 +10385,7 @@ class FocusModeWindow:
 
     def _continue_instruction_button(self) -> None:
         if self._part2_start_gate_pending():
-            self.event_label.setText("Use Start Part 2 to continue to Part 2.")
+            self.event_label.setText("Use Start Part 02 to continue to Part 02.")
             return
         self._approve_pending_instruction_continue(source="button")
 
@@ -10759,7 +10721,7 @@ class FocusModeWindow:
             self.instruction_button.setText("Continue")
             self.selected_part_key = "2"
             self.start_button.setEnabled(True)
-            self.event_label.setText("Part 1 complete. Press Start Part 2 when ready.")
+            self.event_label.setText("Part 01 complete. Press Start Part 02 when ready.")
             self._set_primary_action_shortcuts_enabled(True)
             self._refresh_start_part2_button()
             self._refresh_start_button_label()
@@ -10807,7 +10769,6 @@ class FocusModeWindow:
         self.start_button.setEnabled(False)
         self._set_output_test_buttons_enabled(True)
         self._refresh_start_part2_button()
-        self._refresh_load_next_part_button(completed=bool(result.completed))
         self._set_primary_action_shortcuts_enabled(False)
         self.progress.setValue(1000 if result.completed else self.progress.value())
         self.run_state_chip.setText("Complete" if result.completed else "Interrupted")
@@ -10816,7 +10777,7 @@ class FocusModeWindow:
             next_manifest = self._next_split_part_manifest()
             if next_manifest is not None:
                 current_part = _part_key_text(getattr(self.package, "part_number", "")) or "?"
-                self.event_label.setText(f"Part {current_part} complete; Part 2 ready.")
+                self.event_label.setText(f"{_part_display_label(current_part)} complete; Part 02 ready.")
         lines = [str(result.summary_text or "").strip()]
         lines.append(f"Session folder: {result.session_dir}")
         lines.append(f"Events CSV: {result.events_csv}")
@@ -10857,6 +10818,8 @@ class FocusModeWindow:
         self._maybe_open_analysis_review(result)
         self._shutdown_owned_audio_engine()
         self.timer.stop()
+        if _package_is_split_part(self.package) and bool(result.completed):
+            self._auto_load_next_split_part_after_completion()
 
     def _maybe_open_analysis_review(self, result: Any) -> None:
         if not bool(getattr(result, "completed", False)):
