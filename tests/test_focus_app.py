@@ -2713,6 +2713,13 @@ def test_launcher_first_screen_is_environment_gate():
             assert resume_button is not None
             assert resume_button.text().startswith("1 ")
             assert resume_button.property("decisionTone") == "resume"
+            assert 'QPushButton[attention="current"][decisionTone="resume"]' in dialog.styleSheet()
+            resume_swatch = Path.cwd() / ".pytest_cache" / "launcher_resume_button.png"
+            assert resume_button.grab().save(str(resume_swatch))
+            resume_image = Image.open(resume_swatch).convert("RGB")
+            resume_mean = ImageStat.Stat(resume_image).mean
+            assert resume_mean[1] > resume_mean[0]
+            assert resume_mean[2] > resume_mean[0]
             labels = _collect_widget_texts(dialog, q["QLabel"])
             assert labels.index("Output Folder") < labels.index("Experiment Profile")
             assert labels.index("Experiment Profile") < labels.index("Session Name")

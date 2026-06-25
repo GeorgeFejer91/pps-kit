@@ -18,6 +18,9 @@ FOCUS_COLORS = {
     "attention": "#9a6500",
     "attention_soft": "#fff6dc",
     "attention_border": "#d28b00",
+    "decision_one": "#177f72",
+    "decision_one_soft": "#e3f7f2",
+    "decision_one_border": "#209a8b",
     "decision_two": "#1f6f8b",
     "decision_two_soft": "#e7f5fb",
     "decision_two_border": "#2b8db8",
@@ -353,6 +356,15 @@ QPushButton[attention="current"] {{
 QPushButton[attention="current"]:hover {{
     background: #fff1c2;
     border-color: {colors["attention"]};
+}}
+QPushButton[attention="current"][decisionTone="resume"] {{
+    background: {colors["decision_one_soft"]};
+    border: 2px solid {colors["decision_one_border"]};
+    color: {colors["text"]};
+}}
+QPushButton[attention="current"][decisionTone="resume"]:hover {{
+    background: #d4f2ec;
+    border-color: {colors["decision_one"]};
 }}
 QPushButton[attention="current"][decisionTone="folder"] {{
     background: {colors["decision_two_soft"]};
