@@ -291,6 +291,7 @@ def _configure_validation_env(args: argparse.Namespace, *, output_dir: Path, foc
     env["PPS_FOCUS_VALIDATION_PARTICIPANT_SEED"] = str(int(args.seed))
     env["PPS_FOCUS_VALIDATION_PARTICIPANT_MISS_RATE"] = str(float(args.miss_rate))
     env["PPS_FOCUS_VALIDATION_PARTICIPANT_MIN_MISSES"] = str(int(args.min_misses))
+    env["PPS_FOCUS_VALIDATION_PARTICIPANT_ID"] = str(args.participant_id)
     env["PPS_FOCUS_VALIDATION_REPORT"] = str(focus_report_path)
     env["PPS_FOCUS_VALIDATION_OUTPUT_ROOT"] = str(output_dir / "runner_sessions")
     env["PPS_FOCUS_VALIDATION_PROFILE"] = str(args.profile)

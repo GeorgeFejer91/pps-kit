@@ -1748,6 +1748,7 @@ def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_pa
     assert harness._standard_capture_requested(strict_args)
     assert "PPS_FOCUS_VALIDATION_REALTIME_AUDIO" not in strict_env
     assert strict_env["PPS_FOCUS_VALIDATION_PARTICIPANT_EMULATOR"] == "1"
+    assert strict_env["PPS_FOCUS_VALIDATION_PARTICIPANT_ID"] == "P001"
     assert strict_env["PPS_AUDIO_DEVICE_INDEX"] == "28"
     assert strict_env["PPS_PROTOCOL11_VALIDATION_LANE"] == "full-stack"
     assert strict_env["PPS_PROTOCOL11_WIRED_LOOPBACK"] == "output4-tactile-proxy"

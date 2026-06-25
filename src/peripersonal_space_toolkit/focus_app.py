@@ -6222,6 +6222,7 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
     completed_events: set[str] = set()
     pending: list[dict[str, Any]] = []
     start_gate_state: dict[str, Any] = {}
+    part2_gate_state: dict[str, Any] = {}
     miss_keys: set[str] | None = None
     instruction_attempts: dict[int, tuple[int, float]] = {}
     loaded_manifest_state = {"path": str(getattr(window.package, "manifest_path", ""))}
@@ -6315,6 +6316,7 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
         completed_events.clear()
         pending.clear()
         start_gate_state.clear()
+        part2_gate_state.clear()
         instruction_attempts.clear()
 
     def _reset_if_loaded_package_changed() -> None:
@@ -6601,17 +6603,7 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
             except Exception:
                 part2_pending = False
         if part2_pending:
-            button = getattr(window, "start_part2_button", None)
-            if button is not None and button.isEnabled():
-                backend = _click_widget(button, "Start Part 02", preferred_backend="qtest")
-                records.append(
-                    {
-                        "label": "Start Part 02",
-                        "mode": "part_transition",
-                        "backend": backend,
-                        "timestamp_unix": time.time(),
-                    }
-                )
+            _click_part2_start_gate(source="instruction")
             return
         backend = _press_primary_key(f"instruction: {label}")
         records.append(
@@ -6622,6 +6614,47 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
                 "timestamp_unix": time.time(),
             }
         )
+
+    def _part2_start_gate_ready() -> bool:
+        check_part2 = getattr(window, "_part2_start_gate_pending", None)
+        if callable(check_part2):
+            try:
+                if bool(check_part2()):
+                    return True
+            except Exception:
+                pass
+        for widget in (getattr(window, "start_part2_button", None), getattr(window, "start_button", None)):
+            try:
+                label = str(widget.text() or "")
+            except Exception:
+                label = ""
+            if widget is not None and widget.isEnabled() and label.strip() in {"Start Part 02", "Start Part 2"}:
+                return True
+        return False
+
+    def _click_part2_start_gate(*, source: str) -> bool:
+        if not _part2_start_gate_ready():
+            return False
+        now = time.perf_counter()
+        last_attempt = float(part2_gate_state.get("last_attempt_monotonic") or 0.0)
+        if now - last_attempt < 0.5:
+            return False
+        part2_gate_state["last_attempt_monotonic"] = now
+        for widget in (getattr(window, "start_part2_button", None), getattr(window, "start_button", None)):
+            if widget is None or not widget.isEnabled():
+                continue
+            backend = _click_widget(widget, "Start Part 02", preferred_backend="qtest")
+            records.append(
+                {
+                    "label": "Start Part 02",
+                    "mode": "part_transition",
+                    "source": source,
+                    "backend": backend,
+                    "timestamp_unix": time.time(),
+                }
+            )
+            return True
+        return False
 
     def _schedule_tactile_events() -> None:
         controller = window.controller
@@ -6793,13 +6826,18 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
             )
 
     def _poll() -> None:
+        _reset_if_loaded_package_changed()
+        if _click_part2_start_gate(source="result_boundary"):
+            q["QTimer"].singleShot(20, _poll)
+            return
         if window.result is not None:
             _validation_capture_part_snapshot(window, label="before_accept")
             q["QTimer"].singleShot(1000, window.dialog.accept)
             return
-        _reset_if_loaded_package_changed()
         _submit_mock_setup_if_needed()
+        part2_clicked = _click_part2_start_gate(source="poll")
         if (
+            not part2_clicked and
             window.start_button.isEnabled()
             and _validation_start_gate_ready(records, start_gate_state, source="participant_emulator")
         ):
@@ -11063,8 +11101,10 @@ def run_launcher_window(
         or diary_context.get("profile_id")
         or STUDY5_PROFILE_ID
     ).strip()
+    validation_participant = os.environ.get("PPS_FOCUS_VALIDATION_PARTICIPANT_ID", "").strip()
     initial_participant = str(
-        participant_id
+        validation_participant
+        or participant_id
         or runner_settings.get("participant_id")
         or diary_settings.get("last_participant_id")
         or diary_context.get("participant_id")
@@ -11324,7 +11364,7 @@ def run_launcher_window(
             {
                 "root": Path(parent).expanduser(),
                 "profile_id": "",
-                "participant_id": "P001",
+                "participant_id": initial_participant or "P001",
                 "session_name": "",
                 "runner_diary_path": None,
                 "kind": "new_parent",
@@ -11639,8 +11679,10 @@ def _run_environment_operations_window(
         or initial_diary_context.get("profile_id")
         or STUDY5_PROFILE_ID
     ).strip()
+    validation_participant = os.environ.get("PPS_FOCUS_VALIDATION_PARTICIPANT_ID", "").strip()
     initial_participant = str(
-        participant_id
+        validation_participant
+        or participant_id
         or runner_settings.get("participant_id")
         or initial_settings.get("last_participant_id")
         or initial_diary_context.get("participant_id")
@@ -12174,6 +12216,10 @@ def _run_environment_operations_window(
             index = profile_combo.findData(target)
             if index >= 0:
                 profile_combo.setCurrentIndex(index)
+        requested_participant = initial_participant or "P001"
+        participant_index = participant_combo.findData(requested_participant)
+        if participant_index >= 0:
+            participant_combo.setCurrentIndex(participant_index)
         if profile_combo.isEnabled():
             QTest.mouseClick(profile_combo, q["Qt"].MouseButton.LeftButton)
             validation_launcher_clicks.append(
@@ -12181,6 +12227,7 @@ def _run_environment_operations_window(
                     "label": "click Study/profile selector",
                     "timestamp_unix": time.time(),
                     "selected_profile": str(profile_combo.currentData() or ""),
+                    "selected_participant": _selected_participant(),
                 }
             )
         else:
@@ -12189,6 +12236,7 @@ def _run_environment_operations_window(
                     "label": "click Study/profile selector",
                     "timestamp_unix": time.time(),
                     "selected_profile": str(profile_combo.currentData() or ""),
+                    "selected_participant": _selected_participant(),
                     "mode": "locked_environment_profile",
                 }
             )
@@ -12204,6 +12252,7 @@ def _run_environment_operations_window(
                     "label": "click Run Selected Profile",
                     "timestamp_unix": time.time(),
                     "selected_profile": str(profile_combo.currentData() or ""),
+                    "selected_participant": _selected_participant(),
                 }
             )
 
