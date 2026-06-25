@@ -95,7 +95,7 @@ Record at least SDK tool versions, emulator serial, model/API, URL under test, s
 
 ## 2026-06-25 Fresh-PC Result
 
-The fresh-PC attempt installed local SDK tools and images, but emulator verification did not complete:
+The fresh-PC attempt installed local SDK tools and images. The current emulator was blocked without acceleration, but an archived emulator produced a usable boot path:
 
 - `adb.exe version`: platform-tools `37.0.0`.
 - `emulator.exe -version`: Android emulator `36.6.11.0`.
@@ -103,8 +103,10 @@ The fresh-PC attempt installed local SDK tools and images, but emulator verifica
 - Installed local images included `system-images;android-35;google_apis;x86_64`, `system-images;android-35;google_atd;x86_64`, and `system-images;android-35;aosp_atd;arm64-v8a`.
 - Windows firmware virtualization support was present, but `emulator -accel-check` reported `Android Emulator hypervisor driver is not installed on this machine`.
 - The shell was not elevated (`IS_ADMIN=False`), and `silent_install_safe.bat` did not install the `aehd` service; `sc.exe query aehd` returned service `1060`.
-- `x86_64` Google APIs and Google ATD AVDs exited before exposing `emulator-5554`/`emulator-5580`, with the warning `x86_64 emulation may not work without hardware acceleration`.
+- Current `x86_64` Google APIs and Google ATD AVDs exited or stayed offline before completing boot, with the warning `x86_64 emulation may not work without hardware acceleration`.
 - The ARM64 ATD image is not a viable x86_64-host fallback: the emulator exited with `Avd's CPU Architecture 'arm64' is not supported by the QEMU2 emulator on x86_64 host. System image must match the host architecture.`
+- A non-admin fallback booted after downloading Google's archived Windows emulator `32.1.11.0` (`emulator-windows_x64-9536276.zip`) into ignored `local_data/` and creating/running `system-images;android-30;google_atd;x86` with `-accel off`. The booted serial was `emulator-5620`, model `Android SDK built for x86`, Android `11`, API `30`, display `480x800`, density `240`, and `sys.boot_completed=1`.
+- The API 30 ATD image contained `com.android.webview` but no full browser package. A mobile-page smoke therefore needs a small WebView probe APK or a browser APK before it can render `http://10.0.2.2:<port>/`.
 - A physical ADB device was visible as `3487C10J0P01ZY device product:panther model:Quest_3S`, but that is not emulator evidence and should not be substituted for an emulator pass unless the user explicitly asks for physical-device verification.
 
-Current blocker: install an Android emulator acceleration provider from an elevated/admin shell, then rerun the x86_64 ATD boot and dashboard/download smoke above.
+Current Android-page blocker: the emulator can boot through the archived-emulator/API30-x86 fallback, but the WebView/browser probe still needs to be completed before claiming hosted download-page or dashboard rendering proof. For modern/current x86_64 emulator images, install an Android emulator acceleration provider from an elevated/admin shell.
