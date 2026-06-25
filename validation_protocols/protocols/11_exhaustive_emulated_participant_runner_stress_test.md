@@ -302,14 +302,14 @@ failure mode.
 - [ ] Validate nominal hits at varied RTs across SOAs, blocks, parts, noise
   types, and respiratory phases.
 - [ ] Boundary-test RT pairing: tactile +99 ms rejects, +100 ms accepts,
-  +4.0 s accepts, and >4.0 s rejects.
+  +1300 ms accepts, and >1300 ms rejects.
 - [ ] Verify noisy participant clicking is logged without corrupting analysis:
   all playback clicks remain in `events.csv`, but analysis and top-up use the
-  first in-target click between tactile onset +100 ms and
-  `min(tactile onset +4.0 s, next trial_start)`; double/random later clicks
-  cannot overwrite the selected response.
-- [ ] Verify a click at or after the next `trial_start` cannot bind to the
-  previous trial.
+  first in-target click from tactile onset +100 ms through tactile onset
+  +1300 ms; trial end and the next `trial_start` do not shorten that window.
+  Double/random later clicks cannot overwrite the selected response.
+- [ ] Verify a click at the next `trial_start` can still bind to the previous
+  tactile onset when it falls inside that previous onset's 100-1300 ms window.
 - [ ] Verify one click can bind to only one tactile onset.
 - [ ] Verify out-of-target and out-of-playback clicks are logged but excluded
   from analysis.
@@ -347,8 +347,8 @@ failure mode.
 - [ ] Controlled misses produce `topup_ledger.csv/json`, a draft manifest,
   `topup_block_ready`, checked-setup auto-play, a played top-up block, and
   final analysis rescue rows.
-- [ ] Miss reasons are covered: `response_deadline_expired`,
-  `next_trial_started`, and `session_or_block_finished`.
+- [ ] Miss reasons are covered: `response_deadline_expired` and
+  `session_or_block_finished`.
 - [ ] A multi-part run creates part-aware top-up blocks after each part
   boundary, not only at session end.
 - [ ] Filler rows appear only when needed, have `Topup_Role=filler`, and have

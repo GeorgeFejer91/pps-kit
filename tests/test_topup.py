@@ -13,6 +13,7 @@ from peripersonal_space_toolkit.session_analysis import analyze_session_events, 
 from peripersonal_space_toolkit.session_events import SessionEvent
 from peripersonal_space_toolkit.session_runner import SessionRunnerController, prepare_segment_run_package
 from peripersonal_space_toolkit.output_layout import output_prepared_blocks_dir
+from peripersonal_space_toolkit.response_policy import TACTILE_RESPONSE_MAX_RT_S
 from peripersonal_space_toolkit.topup import HIT, MISSED_NEEDS_TOPUP, PENDING, TopUpLedger
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -116,7 +117,32 @@ def test_response_pairing_accepts_click_after_next_trial_start_within_response_w
     assert result.response_rows[0]["click_event_id"] == 4
 
 
-def test_response_pairing_uses_four_second_window_and_first_valid_click(tmp_path: Path):
+def test_response_pairing_accepts_click_after_trial_end_within_tactile_window(tmp_path: Path):
+    events = [
+        _event(1, "trial_start", 9.0, trial_uid="T001", block_number=1),
+        _event(
+            2,
+            "tactile_onset",
+            10.0,
+            trial_uid="T001",
+            block_number=1,
+            Trial_Type="Audio-Tactile",
+            Family="audio_tactile",
+            SOA_ms=0,
+        ),
+        _event(3, "trial_end", 10.5, trial_uid="T001", block_number=1),
+        _event(4, "mouse_click", 11.0, block_number=1, in_target=True, during_playback=True),
+    ]
+
+    result = analyze_session_events(events)
+
+    assert result.response_rows[0]["trial_uid"] == "T001"
+    assert result.response_rows[0]["hit"] is True
+    assert result.response_rows[0]["click_event_id"] == 4
+    assert result.response_rows[0]["rt_ms"] == pytest.approx(1000.0)
+
+
+def test_response_pairing_uses_tactile_onset_window_and_first_valid_click(tmp_path: Path):
     events = [
         _event(1, "trial_start", 9.5, trial_uid="T001"),
         _event(
@@ -141,7 +167,7 @@ def test_response_pairing_uses_four_second_window_and_first_valid_click(tmp_path
             Family="audio_tactile",
             SOA_ms=0,
         ),
-        _event(8, "mouse_click", 24.0, in_target=True, during_playback=True),
+        _event(8, "mouse_click", 21.3, in_target=True, during_playback=True),
         _event(9, "trial_start", 29.5, trial_uid="T003"),
         _event(
             10,
@@ -152,7 +178,7 @@ def test_response_pairing_uses_four_second_window_and_first_valid_click(tmp_path
             Family="audio_tactile",
             SOA_ms=0,
         ),
-        _event(11, "mouse_click", 34.001, in_target=True, during_playback=True),
+        _event(11, "mouse_click", 31.301, in_target=True, during_playback=True),
     ]
 
     result = analyze_session_events(events)
@@ -162,7 +188,7 @@ def test_response_pairing_uses_four_second_window_and_first_valid_click(tmp_path
     assert by_uid["T001"]["click_event_id"] == 4
     assert by_uid["T001"]["rt_ms"] == pytest.approx(240.0)
     assert by_uid["T002"]["hit"] is True
-    assert by_uid["T002"]["rt_ms"] == pytest.approx(4000.0)
+    assert by_uid["T002"]["rt_ms"] == pytest.approx(1300.0)
     assert by_uid["T003"]["hit"] is False
 
 
@@ -188,6 +214,31 @@ def test_topup_ledger_accepts_click_after_next_trial_start_within_response_windo
     assert ledger.entries[0].status == HIT
     assert ledger.entries[0].click_event_id == 3
     assert ledger.entries[0].miss_reason == ""
+
+
+def test_topup_ledger_accepts_click_after_trial_end_within_tactile_window(tmp_path: Path):
+    ledger = TopUpLedger(tmp_path, participant_id="P001", session_id="S001")
+
+    ledger.observe_event(
+        _event(
+            1,
+            "tactile_onset",
+            10.0,
+            trial_uid="T001",
+            block_number=1,
+            Trial_Type="Audio-Tactile",
+            Family="audio_tactile",
+            Row_Label="Inhale",
+            SOA_ms=0,
+            Trial_File_Path="trial.wav",
+        )
+    )
+    ledger.observe_event(_event(2, "trial_end", 10.5, trial_uid="T001", block_number=1))
+    ledger.observe_event(_event(3, "mouse_click", 11.0, block_number=1, in_target=True, during_playback=True))
+
+    assert ledger.entries[0].status == HIT
+    assert ledger.entries[0].click_event_id == 3
+    assert ledger.entries[0].rt_ms == pytest.approx(1000.0)
 
 
 def test_topup_ledger_does_not_bind_topup_click_to_original_miss(tmp_path: Path):
@@ -238,7 +289,7 @@ def test_topup_ledger_does_not_bind_topup_click_to_original_miss(tmp_path: Path)
     assert ledger.entries[1].click_event_id == 3
 
 
-def test_topup_ledger_defaults_to_four_second_response_window(tmp_path: Path):
+def test_topup_ledger_defaults_to_tactile_response_window(tmp_path: Path):
     ledger = TopUpLedger(tmp_path, participant_id="P001", session_id="S001")
 
     ledger.observe_event(
@@ -254,9 +305,9 @@ def test_topup_ledger_defaults_to_four_second_response_window(tmp_path: Path):
             Trial_File_Path="trial.wav",
         )
     )
-    ledger.observe_event(_event(2, "mouse_click", 14.0, in_target=True, during_playback=True))
+    ledger.observe_event(_event(2, "mouse_click", 10.0 + TACTILE_RESPONSE_MAX_RT_S, in_target=True, during_playback=True))
     assert ledger.entries[0].status == HIT
-    assert ledger.entries[0].rt_ms == pytest.approx(4000.0)
+    assert ledger.entries[0].rt_ms == pytest.approx(1300.0)
 
     ledger.observe_event(
         _event(
@@ -271,8 +322,8 @@ def test_topup_ledger_defaults_to_four_second_response_window(tmp_path: Path):
             Trial_File_Path="trial.wav",
         )
     )
-    ledger.observe_event(_event(4, "mouse_click", 24.001, in_target=True, during_playback=True))
-    ledger.expire_due(24.001)
+    ledger.observe_event(_event(4, "mouse_click", 20.0 + TACTILE_RESPONSE_MAX_RT_S + 0.001, in_target=True, during_playback=True))
+    ledger.expire_due(20.0 + TACTILE_RESPONSE_MAX_RT_S + 0.001)
     assert ledger.entries[1].status == MISSED_NEEDS_TOPUP
     assert ledger.entries[1].click_event_id == ""
 

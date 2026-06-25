@@ -69,7 +69,7 @@ def _trial_specs() -> list[dict[str, Any]]:
         {
             "scenario_label": "early_99ms_reject",
             "family": "audio_tactile",
-            "duration_s": 0.420,
+            "duration_s": 1.550,
             "soa_ms": 0,
             "row_label": "Inhale",
             "action": "early",
@@ -79,7 +79,7 @@ def _trial_specs() -> list[dict[str, Any]]:
         {
             "scenario_label": "boundary_100ms_accept",
             "family": "audio_tactile",
-            "duration_s": 0.420,
+            "duration_s": 1.550,
             "soa_ms": 20,
             "row_label": "Exhale",
             "action": "boundary_accept",
@@ -90,7 +90,7 @@ def _trial_specs() -> list[dict[str, Any]]:
         {
             "scenario_label": "double_click_one_binding",
             "family": "audio_tactile",
-            "duration_s": 0.420,
+            "duration_s": 1.550,
             "soa_ms": 40,
             "row_label": "Inhale",
             "action": "hit",
@@ -104,7 +104,7 @@ def _trial_specs() -> list[dict[str, Any]]:
         {
             "scenario_label": "out_of_target_excluded",
             "family": "audio_tactile",
-            "duration_s": 0.420,
+            "duration_s": 1.550,
             "soa_ms": 60,
             "row_label": "Exhale",
             "action": "out_of_target",
@@ -114,7 +114,7 @@ def _trial_specs() -> list[dict[str, Any]]:
         {
             "scenario_label": "catch_no_tactile_channel",
             "family": "catch",
-            "duration_s": 0.420,
+            "duration_s": 1.550,
             "soa_ms": 0,
             "row_label": "Inhale",
             "action": "no_tactile_expected",
@@ -124,7 +124,7 @@ def _trial_specs() -> list[dict[str, Any]]:
         {
             "scenario_label": "baseline_tactile_hit",
             "family": "baseline",
-            "duration_s": 0.420,
+            "duration_s": 1.550,
             "soa_ms": 0,
             "row_label": "Exhale",
             "action": "hit",
@@ -135,7 +135,7 @@ def _trial_specs() -> list[dict[str, Any]]:
         {
             "scenario_label": "miss_no_click",
             "family": "audio_tactile",
-            "duration_s": 0.420,
+            "duration_s": 1.550,
             "soa_ms": 80,
             "row_label": "Inhale",
             "action": "miss",
@@ -165,25 +165,25 @@ def _trial_specs() -> list[dict[str, Any]]:
             "clicks": [{"delay_ms": 180.0, "in_target": True}],
         },
         {
-            "scenario_label": "boundary_4000ms_accept",
+            "scenario_label": "boundary_1300ms_accept",
             "family": "audio_tactile",
-            "duration_s": 4.250,
+            "duration_s": 1.550,
             "soa_ms": 0,
             "row_label": "Exhale",
             "action": "boundary_accept",
             "expected_hit": True,
-            "planned_rt_ms": 4000.0,
-            "clicks": [{"delay_ms": 4000.0, "in_target": True}],
+            "planned_rt_ms": 1300.0,
+            "clicks": [{"delay_ms": 1300.0, "in_target": True}],
         },
         {
-            "scenario_label": "late_4100ms_reject",
+            "scenario_label": "late_1301ms_reject",
             "family": "audio_tactile",
-            "duration_s": 4.250,
+            "duration_s": 1.550,
             "soa_ms": 0,
             "row_label": "Inhale",
             "action": "late",
             "expected_hit": False,
-            "clicks": [{"delay_ms": 4100.0, "in_target": True}],
+            "clicks": [{"delay_ms": 1301.0, "in_target": True}],
         },
     ]
 
@@ -763,7 +763,7 @@ def run_matrix(
         ],
     )
     engine.injection_complete.set()
-    thread.join(timeout=10.0)
+    thread.join(timeout=30.0)
     if thread.is_alive():
         engine.stop()
         thread.join(timeout=2.0)
@@ -821,8 +821,8 @@ def run_matrix(
         "baseline_tactile_hit": _truthy(by_uid[plan_trials[4]["trial_uid"]].get("hit")),
         "miss_no_click_rejected": not _truthy(by_uid[plan_trials[5]["trial_uid"]].get("hit")),
         "next_trial_start_click_accepted_previous": _truthy(by_uid[plan_trials[6]["trial_uid"]].get("hit")),
-        "max_4000ms_accepted": _truthy(by_uid[plan_trials[8]["trial_uid"]].get("hit")),
-        "late_4100ms_rejected": not _truthy(by_uid[plan_trials[9]["trial_uid"]].get("hit")),
+        "max_1300ms_accepted": _truthy(by_uid[plan_trials[8]["trial_uid"]].get("hit")),
+        "late_1301ms_rejected": not _truthy(by_uid[plan_trials[9]["trial_uid"]].get("hit")),
         "all_in_playback_clicks_have_markers": event_counts.get("mouse_click", 0) == event_counts.get("response_marker_start", 0),
         "timing_qc_marker_delay_stable": bool(marker_delta_values)
         and max(abs(value - response_marker_delay_ms) for value in marker_delta_values) <= 0.1,
