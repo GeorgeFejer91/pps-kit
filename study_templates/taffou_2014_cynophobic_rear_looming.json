@@ -1,0 +1,146 @@
+{
+  "template_id": "taffou_2014_cynophobic_rear_looming",
+  "title": "Taffou 2014 rear-field dog/sheep looming PPS",
+  "citation": "Taffou, M., & Viaud-Delmon, I. (2014). Cynophobic Fear Adaptively Extends Peri-Personal Space. Frontiers in Psychiatry, 5, 122.",
+  "source_url": "https://www.frontiersin.org/journals/psychiatry/articles/10.3389/fpsyt.2014.00122/full",
+  "doi": "10.3389/fpsyt.2014.00122",
+  "verification_status": "partial",
+  "notes": "Rear hemi-field binaural looming dog/sheep design. The GUI represents one representative rear-left path plus condition labels; exact dog/sheep sounds and LISTEN-HRTF rendering are not bundled.",
+  "reference_parameters": {
+    "source_database": "LISTEN HRTF in original paper",
+    "sound_duration_ms": 3000,
+    "tactile_delays_from_sound_onset_ms": [
+      0,
+      750,
+      1500,
+      2250,
+      3000
+    ],
+    "baseline_trial_times_from_trial_start_ms": [
+      350,
+      4650
+    ],
+    "hemispaces": [
+      "rear-left",
+      "rear-right"
+    ],
+    "implementation_gaps": [
+      "exact dog/sheep audio",
+      "left/right rear hemifield as separate trajectories",
+      "LISTEN HRTF rather than bundled FABIAN"
+    ]
+  },
+  "design": {
+    "name": "Taffou 2014 rear-field dog/sheep looming PPS",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Dog growl threatening placeholder",
+        "noise_type": "brown",
+        "azimuth_deg": -135,
+        "elevation_deg": 0.0,
+        "gain": 1.0
+      },
+      {
+        "label": "Sheep bleat non-threatening placeholder",
+        "noise_type": "white",
+        "azimuth_deg": -135,
+        "elevation_deg": 0.0,
+        "gain": 1.0
+      }
+    ],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "trajectory": {
+      "start_radius_m": 5.199999629,
+      "end_radius_m": 0.199999496,
+      "path_direction": "approach",
+      "coordinate_mode": "cartesian",
+      "start_x_m": -3.676955,
+      "start_y_m": -3.676955,
+      "start_z_m": 0.0,
+      "end_x_m": -0.141421,
+      "end_y_m": -0.141421,
+      "end_z_m": 0.0,
+      "path_length_m": 5.000000133,
+      "propagation_speed_mps": 0.75,
+      "azimuth_start_deg": -135.0,
+      "azimuth_end_deg": -135.0,
+      "elevation_deg": 0.0,
+      "padding_pre_s": 0.0,
+      "padding_post_s": 0.0,
+      "sample_rate": 44100,
+      "use_inverse_square": true
+    },
+    "protocol": {
+      "repetitions_per_condition": 8,
+      "soa_values_ms": [
+        0,
+        750,
+        1500,
+        2250,
+        3000
+      ],
+      "spatial_values_cm": [
+        520,
+        395,
+        270,
+        145,
+        20
+      ],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": [
+        "rear-left looming",
+        "rear-right looming"
+      ],
+      "tactile_sites": [
+        "left index finger"
+      ],
+      "catch_trial_percentage": 10.0,
+      "catch_trials_exact": 32,
+      "include_baseline_trials": true,
+      "baseline_soa_values_ms": [
+        350,
+        4650
+      ],
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 8,
+      "trial_randomization_strategy": "no_immediate_repeats",
+      "block_order_randomization": "counterbalanced_rotation",
+      "max_consecutive_same_trial_type": 2,
+      "trial_strips": [
+        {
+          "strip_id": "taffou-rear-looming-row",
+          "label": "Rear-field looming animal-sound trial",
+          "audio_tactile_percentage": 100.0,
+          "catch_percentage": 0.0,
+          "baseline_percentage": 0.0,
+          "elements": [
+            {
+              "element_id": "taffou-rear-looming-source",
+              "kind": "looming_stimulus",
+              "label": "Rear-field animal sound",
+              "source_label": "Dog growl threatening placeholder",
+              "source_labels": ["Dog growl threatening placeholder", "Sheep bleat non-threatening placeholder"],
+              "randomized": true
+            }
+          ]
+        }
+      ],
+      "participants": 30,
+      "random_seed": 20140903
+    }
+  },
+  "provenance": [
+    {
+      "field": "sound and HRTF",
+      "source": "Frontiers methods report dog growling/sheep bleating, 3000 ms sounds, 44.1 kHz, binaural rendering with non-individual LISTEN HRTFs."
+    },
+    {
+      "field": "SOAs/trials",
+      "source": "Frontiers methods report T1-T5 at 0, 750, 1500, 2250, and 3000 ms from sound onset, 224 tactile trials and 32 catch trials."
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "barumerli_2026_arm_movement_exp2",
+  "title": "Looming/receding PPS during arm movement, Experiment 2",
+  "citation": "Lamia, P., Shabani, N., & Candidi, M. (2026). Somatotopy-independent reduction of audio-tactile intersensory facilitation for looming sounds within the peripersonal space during arm movements execution. Scientific Reports.",
+  "doi": "10.1038/s41598-026-36796-5",
+  "source_url": "https://www.nature.com/articles/s41598-026-36796-5",
+  "verification_status": "verified",
+  "notes": "Experiment 2 extends auditory duration to 4000 ms and includes all five tactile delays in unisensory baseline blocks. The original two-speaker apparatus is treated as analog provenance; this profile recreates the reported near-far motion as a binaural spatialized trajectory.",
+  "reference_parameters": {},
+  "provenance": [
+    {
+      "field": "audio-tactile counts",
+      "source": "Methods report 10 trials for each 2 sound directions x 5 distances plus 10 catch trials per audio-tactile block."
+    },
+    {
+      "field": "SOA values",
+      "source": "Methods report T1-T5 as 800, 1300, 2000, 2700, and 3200 ms."
+    }
+  ]
+}

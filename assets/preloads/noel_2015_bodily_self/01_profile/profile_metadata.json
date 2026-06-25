@@ -1,0 +1,21 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "noel_2015_bodily_self",
+  "title": "PPS as the space of the bodily self",
+  "citation": "Noel, J.-P., Pfeiffer, C., Blanke, O., & Serino, A. (2015). Peripersonal space as the space of the bodily self. Cognition, 144, 49-57.",
+  "doi": "10.1016/j.cognition.2015.07.012",
+  "source_url": "https://noel-lab.org/wp-content/uploads/2024/05/noet-et-al-cognition-2015.pdf",
+  "verification_status": "verified",
+  "notes": "Audio-tactile PPS task intermingled with full-body-illusion stroking. The template captures the PPS trial schedule; FBI stroking and front/back experimental context must be configured in the lab protocol.",
+  "reference_parameters": {},
+  "provenance": [
+    {
+      "field": "trial counts",
+      "source": "Methods lines report 72 PPS trials, 24 baseline trials, and 12 catch trials per block."
+    },
+    {
+      "field": "SOAs and distances",
+      "source": "Methods lines report six sound distances D6-D1 with tactile timing corresponding to the spatial dimension."
+    }
+  ]
+}

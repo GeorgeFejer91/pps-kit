@@ -14,13 +14,25 @@ The script creates a local virtual environment and installs the package in edita
 
 ## 2. Review Or Edit The Design
 
-Open the stimulus designer:
+Open the local HTML dashboard:
+
+```bat
+windows\Launch_HTML_Dashboard.bat
+```
+
+or:
+
+```powershell
+pps-dashboard
+```
+
+The Qt stimulus designer remains available for comparison and fallback:
 
 ```bat
 windows\Launch_Stimulus_Designer.bat
 ```
 
-Use the Stimulus Design tab for noise types, azimuth/elevation, SOFA/HRIR source, custom looming files, prestimulus files, and trajectory geometry. Use the Trial Design tab for SOAs, spatial values, repetitions, catch trials, baseline trials, block structure, participant schedules, and randomization.
+Use the dashboard Segments for study profiles, noise types, custom looming files, prestimulus files, trajectory geometry, SOAs, repetitions, catch/baseline trials, block CSV preview, and experiment preparation. The fixed FABIAN/TU SOFA HRIR path is handled under the hood.
 
 ## 3. Generate Stimuli
 
@@ -40,17 +52,20 @@ Generated WAVs and participant sequences are written under `artifacts/`, which i
 
 ## 4. Run The Experiment
 
-List audio devices:
+For designed experiments, use Segment 6 in the HTML dashboard:
 
-```powershell
-pps-run --list-devices
-```
+1. Accept the Segment 5 block CSVs.
+2. Set planned participants and experiment parts.
+3. Press `Save Design and Start Experiment Runner`.
+4. The local backend prepares the participant session package and starts native Focus Mode.
+5. In Focus Mode, enter participant metadata and choose runner-owned options: optional fail-safe local recording, optional wired-loopback capture, optional full-session LabRecorder XDF capture, and optional missed-trial top-up at the end of each experiment part. Press `Submit setup` before starting the run; this prepares the session/controller metadata and creates the session-lifetime LSL outlets before playback is enabled. The LSL/event protocol, local marker mirror, trigger dictionary, `events.csv`, and analysis outputs are standard runner outputs.
 
-Start the runner:
+The integrated runner writes session outputs under `local_data\sessions\<participant_id>_<timestamp>\`.
 
-```powershell
-pps-run
-```
+For designed experiments, use `events.csv` / `events.xdf`, the internal `PPSMarkersV2`/`PPSTriggerCodes` marker mirror, and optional runner-owned LabRecorder `<session_id>_external_labrecorder.xdf` as reconstruction records. The native LabRecorder XDF is written directly into the participant session folder beside `<session_id>_trials.csv`. The runner keeps the LSL outlets alive for the participant session after setup submission. When requested, it waits for the session LSL streams, refreshes LabRecorder's stream list, selects all visible network LSL streams by default, and starts LabRecorder through RCS before playback. Closing the Focus Mode runner also closes the owned LabRecorder child; normal session teardown still waits for the final marker settle interval before stopping it. The optional local audio evidence WAV is a data-heavy safety copy of the runner's mixed output buffers, including tactile-channel response marker clicks. Physical electrical loopback WAVs are validation-only traces used to quantify how well those software records match the physical outputs.
+
+The legacy Tk runner is no longer a public launch path. Use Focus Mode through
+the dashboard handoff or `windows\Launch_Experiment_Runner.bat`.
 
 Local recordings, demographics, settings, and session outputs belong under `local_data/`, which is ignored by Git.
 

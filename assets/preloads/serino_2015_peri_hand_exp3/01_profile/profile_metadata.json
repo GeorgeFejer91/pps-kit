@@ -1,0 +1,34 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "serino_2015_peri_hand_exp3",
+  "title": "Serino 2015 peri-hand PPS Experiment 3",
+  "citation": "Serino, A., Noel, J. P., Galli, G., Canzoneri, E., Marmaroli, P., Lissek, H., & Blanke, O. (2015). Body part-centered and full body-centered peripersonal space representations. Scientific Reports, 5, 18603.",
+  "doi": "10.1038/srep18603",
+  "source_url": "https://www.nature.com/articles/srep18603",
+  "verification_status": "partial",
+  "notes": "Peri-hand branch of the Serino body-part mapping series. The original two-speaker analog setup is treated as apparatus provenance and recreated as a binaural moving-sound trajectory; lateralized hand placement is stored in notes but not yet a GUI coordinate field.",
+  "reference_parameters": {
+    "distances_cm": [
+      93,
+      71,
+      50,
+      27,
+      5
+    ],
+    "repetitions_reported": 16,
+    "analog_apparatus_recreation": "Original near/far speakers are modeled as the reported moving-sound trajectory in the binaural renderer.",
+    "implementation_gaps": [
+      "lateralized hand coordinate"
+    ]
+  },
+  "provenance": [
+    {
+      "field": "distances",
+      "source": "Scientific Reports Experiment 3 reports five distances: 5, 27, 50, 71, and 93 cm."
+    },
+    {
+      "field": "trial count",
+      "source": "Methods report 208 trials for Experiment 3 with 16 repetitions."
+    }
+  ]
+}

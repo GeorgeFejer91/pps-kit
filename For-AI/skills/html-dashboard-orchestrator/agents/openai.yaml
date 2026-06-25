@@ -1,0 +1,4 @@
+interface:
+  display_name: "HTML Dashboard Orchestrator"
+  short_description: "Make safe local-orchestrator HTML dashboard changes."
+  default_prompt: "Use this workflow when changing the PPS HTML dashboard or another local HTML GUI that orchestrates backend software."

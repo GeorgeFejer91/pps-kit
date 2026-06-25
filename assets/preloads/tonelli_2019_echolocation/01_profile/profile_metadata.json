@@ -1,0 +1,25 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "tonelli_2019_echolocation",
+  "title": "Enhanced audio-tactile PPS after echolocation training",
+  "citation": "Tonelli, A., et al. (2019). Enhanced audio-tactile multisensory interaction in a peripersonal task after echolocation. Experimental Brain Research.",
+  "doi": "10.1007/s00221-019-05469-3",
+  "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6394550/",
+  "verification_status": "partial",
+  "notes": "Seven-speaker looming apparatus on the participant's left side. Total counts are verified; exact temporal delays depend on the apparatus timing and should be checked from the full methods/figure before exact replication.",
+  "reference_parameters": {
+    "implementation_gaps": [
+      "apparatus-specific seven-speaker switching/timing details"
+    ]
+  },
+  "provenance": [
+    {
+      "field": "trial counts",
+      "source": "Methods report 140 trials: 28 tactile-only, 28 catch, and 12 trials for each audio-tactile combination."
+    },
+    {
+      "field": "apparatus",
+      "source": "Methods report a seven-speaker array with 17 cm between loudspeakers."
+    }
+  ]
+}

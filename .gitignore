@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.codex-remote-attachments/
 .venv/
 .venv-*/
 build/
@@ -10,6 +11,7 @@ configs/stimulus_design.generated.json
 models/
 artifacts/
 local_data/
+Example-configs/
 *.aup3
 *.aup3-shm
 *.aup3-wal
@@ -28,4 +30,8 @@ raw_recordings/
 *.m4a
 *.ogg
 assets/0. Head-Related Impulse Response (HRIR) model/
+!assets/0. Head-Related Impulse Response (HRIR) model/
+assets/0. Head-Related Impulse Response (HRIR) model/*
+!assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa
+!assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.manifest.json
 background_music/

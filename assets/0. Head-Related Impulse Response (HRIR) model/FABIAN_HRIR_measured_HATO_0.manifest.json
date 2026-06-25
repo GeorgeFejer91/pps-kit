@@ -1,0 +1,12 @@
+﻿{
+    "id":  "fabian_tu_berlin_hato_0",
+    "label":  "FABIAN neutral HRIR, HATO 0",
+    "role":  "fixed_standard_listener_hrir",
+    "experimenter_visible":  false,
+    "file":  "assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa",
+    "sha256":  "83ebbcd9a09d17679b95d201c9775438c0bb1199d565c3fc7a25448a905cdc3c",
+    "bytes":  43296979,
+    "source_record":  "https://depositonce.tu-berlin.de/items/3b423df7-a764-4ce1-9065-4e6034bba759",
+    "sofa_mirror":  "https://sofacoustics.org/data/database/tu-berlin/FABIAN_HRIR_measured_HATO_0.sofa",
+    "license":  "CC BY 4.0 according to the DepositOnce FABIAN record"
+}

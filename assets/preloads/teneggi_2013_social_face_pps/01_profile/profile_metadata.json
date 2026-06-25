@@ -1,0 +1,33 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "teneggi_2013_social_face_pps",
+  "title": "Teneggi 2013 social modulation face PPS",
+  "citation": "Teneggi, C., Canzoneri, E., di Pellegrino, G., & Serino, A. (2013). Social modulation of peripersonal space boundaries. Current Biology, 23(5), 406-411.",
+  "doi": "10.1016/j.cub.2013.01.043",
+  "source_url": "https://pubmed.ncbi.nlm.nih.gov/23394831/",
+  "verification_status": "partial",
+  "notes": "Face-centered social PPS task. The preload captures the audio-tactile face schedule, but social partner/mannequin/cooperation manipulations are not GUI fields yet.",
+  "reference_parameters": {
+    "profile_type": "face_audio_tactile_social_context",
+    "implemented_controls": [
+      "face tactile site",
+      "approaching/receding sound labels",
+      "five distance samples"
+    ],
+    "implementation_gaps": [
+      "other-person/mannequin context",
+      "economic-game manipulation",
+      "exact distance/timing table from supplement"
+    ]
+  },
+  "provenance": [
+    {
+      "field": "core task",
+      "source": "PubMed abstract reports tactile detection on the face with task-irrelevant approaching/receding sounds."
+    },
+    {
+      "field": "social manipulation gap",
+      "source": "The GUI currently has no social-context or economic-game factor fields, so this is an audio-tactile scaffold only."
+    }
+  ]
+}

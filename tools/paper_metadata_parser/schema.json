@@ -1,0 +1,283 @@
+{
+  "schema": "pps-paper-metadata-extraction-schema.v1",
+  "parser_version": "0.5.7",
+  "pdf_statuses": [
+    "downloaded",
+    "open_access_unavailable",
+    "paywalled",
+    "needs_user_download",
+    "not_applicable",
+    "bad_pdf"
+  ],
+  "supplement_statuses": [
+    "downloaded",
+    "not_found",
+    "needs_user_download",
+    "paywalled",
+    "not_applicable",
+    "not_checked"
+  ],
+  "extraction_statuses": [
+    "parsed",
+    "parsed_with_warnings",
+    "failed",
+    "pending_pdf"
+  ],
+  "field_statuses": [
+    "reported",
+    "derived",
+    "inferred_low_confidence",
+    "not_reported_after_review",
+    "not_applicable",
+    "source_unavailable"
+  ],
+  "confidence_labels": [
+    "not_applicable",
+    "pending_source",
+    "source_unavailable",
+    "source_acquired_unreviewed",
+    "partial_extraction",
+    "high_confidence_extraction"
+  ],
+  "automated_evidence": {
+    "status_values": [
+      "not_applicable",
+      "no_extracted_source",
+      "source_mined"
+    ],
+    "semantic_review_pass_status_values": [
+      "completed",
+      "completed_no_hits",
+      "source_unavailable",
+      "not_applicable"
+    ],
+    "semantic_review_strategy_count": 6,
+    "rule": "Store only short candidate values and page pointers; do not commit full text excerpts."
+  },
+  "supplement_extraction": {
+    "supported_local_formats": [
+      ".doc",
+      ".docx",
+      ".pdf",
+      ".ods",
+      ".csv",
+      ".tsv"
+    ],
+    "rule": "Supplement text extraction writes only ignored local text artifacts; tracked audit files store counts, statuses, and short evidence pointers."
+  },
+  "manual_reviews": {
+    "folder": "For-AI/audiotactile-paper-metadata-audit/manual_reviews/",
+    "index": "For-AI/audiotactile-paper-metadata-audit/manual_review_index.csv",
+    "schema": "pps-paper-metadata-manual-review.v1",
+    "rule": "Manual reviews promote auto-mined candidates only after repeated critical passes; store normalized values, an orientation ledger, field statuses, confidence scores, and short source pointers, not full text."
+  },
+  "pdf_retrieval_inventory": {
+    "path": "For-AI/audiotactile-paper-metadata-audit/pdf_retrieval_inventory.csv",
+    "rule": "One row per literature record; records whether the main publication PDF has been retrieved locally, gives the DOI/DOI URL for missing PDFs, and names the target local PDF path."
+  },
+  "protocol_lineage_candidates": {
+    "path": "For-AI/audiotactile-paper-metadata-audit/protocol_lineage_candidates.csv",
+    "rule": "Cited prior-protocol papers that may contain missing stimulus, trajectory, timing, apparatus, or count details for another audited paper; promote to the main literature database after screening when appropriate."
+  },
+  "pps_visualization_inventory": {
+    "path": "For-AI/audiotactile-paper-metadata-audit/pps_visualization_inventory.csv",
+    "schema": "pps-visualization-inventory.v1",
+    "visualization_types": [
+      {
+        "key": "rt_by_soa_or_distance_curve",
+        "label": "RT by SOA/distance curve",
+        "description": "Line, scatter, or point plot of tactile RT or facilitation across SOA, temporal delay, distance, or distance-at-touch."
+      },
+      {
+        "key": "sigmoid_psychometric_fit",
+        "label": "Sigmoid or psychometric fit",
+        "description": "Sigmoid, logistic, psychometric, cumulative-Gaussian, or similar fitted function used to estimate PPS shape or boundary."
+      },
+      {
+        "key": "pps_boundary_or_size_index",
+        "label": "PPS boundary or size index",
+        "description": "Single reported boundary, threshold, midpoint, index, area, width, or size estimate for PPS."
+      },
+      {
+        "key": "condition_group_bar_box_summary",
+        "label": "Condition/group bar or box summary",
+        "description": "Bar, box, violin, dot, or summary plot comparing PPS measures across conditions, groups, blocks, tools, posture, or phases."
+      },
+      {
+        "key": "spatial_map_heatmap_or_body_boundary",
+        "label": "Spatial map, heatmap, or body boundary",
+        "description": "Body-centered map, top-view boundary, heatmap, contour, spatial field, peri-hand/trunk/head map, or two-dimensional PPS representation."
+      },
+      {
+        "key": "near_far_or_distance_bin_plot",
+        "label": "Near/far or distance-bin plot",
+        "description": "Discrete near/far, proximal/distal, D1-Dn, or distance-bin visualization rather than a continuous fitted curve."
+      },
+      {
+        "key": "apparatus_trajectory_schematic",
+        "label": "Apparatus or trajectory schematic",
+        "description": "Figure, diagram, photograph, or schematic showing participant, tactile site, speakers, virtual source path, or looming/receding trajectory."
+      },
+      {
+        "key": "neural_trace_topography_or_brain_map",
+        "label": "Neural trace, topography, or brain map",
+        "description": "ERP, EEG, intracranial, TMS/MEP, fMRI, source-localization, scalp-topography, or brain-map visualization tied to PPS effects."
+      },
+      {
+        "key": "model_parameter_or_fit_table",
+        "label": "Model parameter or fit table",
+        "description": "Table or panel reporting fitted parameters, model comparison, slopes, boundaries, coefficients, or fit statistics."
+      }
+    ],
+    "rule": "One row per automated visualization-form candidate. Use it as a triage ledger for manual figure/caption review; every candidate requires visual verification of plotted parameters before confirmation. Do not commit figure screenshots or long source text."
+  },
+  "segment_fields": {
+    "segment_1_stimulus_reconstruction": [
+      {
+        "key": "stimulus_type",
+        "label": "Stimulus type",
+        "description": "Noise, tone, ecological sound, speech, or custom/baked stimulus class."
+      },
+      {
+        "key": "source_provenance",
+        "label": "Source/provenance",
+        "description": "Original asset, generated stimulus, licensed set, apparatus source, or supplement file."
+      },
+      {
+        "key": "trajectory_count",
+        "label": "Number of trajectories/tones",
+        "description": "Distinct looming/receding/static paths, tones, or auditory conditions."
+      },
+      {
+        "key": "trajectory_path",
+        "label": "Trajectory path",
+        "description": "Start/end distance, movement direction, participant-facing direction, speaker/source position, body anchor, azimuth/elevation, and spatial coordinate frame."
+      },
+      {
+        "key": "stimulus_duration",
+        "label": "Duration",
+        "description": "Auditory stimulus duration and any pre/post padding."
+      },
+      {
+        "key": "stimulus_speed",
+        "label": "Speed/path length",
+        "description": "Motion speed, path length, propagation timing, or distance-at-time mapping."
+      },
+      {
+        "key": "auditory_conditions",
+        "label": "Auditory conditions",
+        "description": "Valence, direction, semantic, movement, or apparatus conditions affecting the auditory stimulus."
+      },
+      {
+        "key": "gain_envelope",
+        "label": "Gain/envelope",
+        "description": "SPL, intensity law, gain curve, cross-fade, or amplitude-field information."
+      },
+      {
+        "key": "renderer_or_apparatus",
+        "label": "Renderer/HRTF/speaker apparatus",
+        "description": "Headphones, HRTF, Unity/3D Tune-In, physical speakers, arrays, room/speaker layout, or other rendering provenance."
+      }
+    ],
+    "segment_2_sequence_and_intermixing": [
+      {
+        "key": "trial_rows_families",
+        "label": "Trial rows/families",
+        "description": "Within-trial audio sequence families and task rows."
+      },
+      {
+        "key": "condition_intermixing",
+        "label": "Condition intermixing",
+        "description": "Whether systematic manipulations are intermixed with task trials or separated."
+      },
+      {
+        "key": "blocked_or_random_order",
+        "label": "Blocked/random order",
+        "description": "Blocked condition structure, random intermixing, and task-critical order constraints."
+      },
+      {
+        "key": "iti_jitter_policy",
+        "label": "ITI/jitter policy",
+        "description": "Fixed ITI, jitter values, jitter range, distribution, or hazard-control policy."
+      },
+      {
+        "key": "response_window",
+        "label": "Response window",
+        "description": "Allowed response interval, timeout, or scoring window."
+      },
+      {
+        "key": "task_sequence_rules",
+        "label": "Task-critical sequence rules",
+        "description": "Special trial scheduling, target/no-target logic, or expectancy controls."
+      }
+    ],
+    "segment_3_tactile_soa_baseline": [
+      {
+        "key": "tactile_stimulus",
+        "label": "Tactile stimulus",
+        "description": "Tactile modality, body site, waveform, duration, frequency, amplitude, and calibration."
+      },
+      {
+        "key": "soa_table",
+        "label": "SOA/distance-at-touch table",
+        "description": "SOA values, tactile timing values, or distance-at-tactile values."
+      },
+      {
+        "key": "baseline_strategy",
+        "label": "Baseline strategy",
+        "description": "Tactile-only, far/static, fastest-baseline, SOA-matched, direction-coupled, or other baseline type."
+      },
+      {
+        "key": "baseline_timing",
+        "label": "Baseline SOAs/timing",
+        "description": "Baseline SOA values, baseline timing relative to omitted sound, or fixed baseline schedule."
+      },
+      {
+        "key": "catch_trial_type",
+        "label": "Catch-trial type",
+        "description": "Auditory-only, tactile-only, omitted target, no-go, target-absent, or other catch rule."
+      }
+    ],
+    "segment_4_counts": [
+      {
+        "key": "repetitions_per_tactile_soa_condition",
+        "label": "Repetitions per tactile SOA/condition",
+        "description": "Trial repetitions for each tactile SOA crossed with relevant conditions."
+      },
+      {
+        "key": "baseline_count",
+        "label": "Baseline count",
+        "description": "Baseline trial count or percentage."
+      },
+      {
+        "key": "catch_count",
+        "label": "Catch count",
+        "description": "Catch/no-go/auditory-only trial count or percentage."
+      },
+      {
+        "key": "block_count",
+        "label": "Block count",
+        "description": "Number of blocks, sessions, or phases when task-relevant."
+      },
+      {
+        "key": "total_trial_count",
+        "label": "Total trial count",
+        "description": "Total trials per participant, block, condition, or experiment."
+      }
+    ]
+  },
+  "review_rule": {
+    "missing_value_rule": "Only mark not_reported_after_review after main PDF extraction, targeted methods/table search, supplement search, fallback extractor/source check, and cited prior-protocol lineage search have all been attempted.",
+    "orientation_frame_rule": "Before accepting a trajectory/direction value, record participant-facing direction, speaker/source room coordinates, body-relative mapping, tactile anchor, movement implementation, and evidence class; figure-left/right is not participant-left/right unless orientation is explicit.",
+    "visual_approximation_rule": "For every visual/spatial clue, record the raw page or figure clue, participant-facing vector, speaker/source vector, face-to-source relation, body-relative translation, and approximation grade; unscaled schematic evidence stays qualitative.",
+    "pps_visualization_rule": "For every reviewed study, record how PPS itself is visualized or summarized: axes, metric, model form, boundary/index definition, condition facets, uncertainty display, figure/table pointer, and visual verification status for plotted parameters.",
+    "plotted_parameter_visual_verification_rule": "Render or visually inspect each cited plot/table page and verify plotted SOA/distance/bin values, axis units, y-axis metric, model parameters, PPS boundary/index values, and uncertainty encodings against captions, methods, results text, or tables before marking a visualization form confirmed.",
+    "copyright_boundary": "Do not commit PDFs, supplements, extracted full text, screenshots of pages, or long verbatim passages.",
+    "automated_evidence_rule": "Automated evidence mining stores only short candidate values and page pointers; it is not a substitute for final human/AI critical review against PDFs and supplements."
+  },
+  "local_artifact_conventions": {
+    "main_pdf_filename": "artifacts/paper_metadata_audit/publication_pdfs/<record_id>.pdf",
+    "supplement_folder": "artifacts/paper_metadata_audit/supplements/<record_id>/",
+    "extracted_output_folder": "artifacts/paper_metadata_audit/extracted/"
+  }
+}

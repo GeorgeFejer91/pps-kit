@@ -1,0 +1,9 @@
+{
+  "schema": "pps-preload-run-setup-segment.v1",
+  "template_id": "tonelli_2019_echolocation",
+  "blocks": 1,
+  "participants": 44,
+  "random_seed": 20190101,
+  "trial_randomization_strategy": "no_immediate_repeats",
+  "block_order_randomization": "counterbalanced_rotation"
+}

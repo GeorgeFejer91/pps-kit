@@ -1,0 +1,37 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "canzoneri_2013_amputation_prosthesis",
+  "title": "Canzoneri 2013 amputation/prosthesis PPS",
+  "citation": "Canzoneri, E., Marzolla, M., Amoresano, A., Verni, G., & Serino, A. (2013). Amputation and prosthesis implantation shape body and peripersonal space representations. Scientific Reports, 3, 2844.",
+  "doi": "10.1038/srep02844",
+  "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3789144/",
+  "verification_status": "partial",
+  "notes": "Upper-limb amputation/prosthesis PPS profile. The publication confirms use of an auditory-tactile interaction task; this preload captures the dynamic sound/tactile scaffold while patient group, prosthesis-worn state, and tested limb/body-part factors remain metadata.",
+  "reference_parameters": {
+    "profile_type": "audio_tactile_clinical_upper_limb_pps",
+    "reported_groups": [
+      "upper-limb amputees",
+      "healthy controls"
+    ],
+    "prosthesis_factor": "prosthesis worn versus not worn, not yet a GUI factor",
+    "trial_family_scaffold": "Canzoneri-style dynamic IN/OUT pink-noise task",
+    "catch_subtype": "auditory-only no tactile target",
+    "response_rule": "speeded response to tactile target, ignore sound",
+    "implementation_gaps": [
+      "clinical group/session metadata",
+      "prosthesis-worn state",
+      "tested limb/body-part assignment",
+      "exact trial count and tactile calibration table from full paper"
+    ]
+  },
+  "provenance": [
+    {
+      "field": "study scope",
+      "source": "Open Scientific Reports abstract and article report PPS testing in upper-limb amputees with an audio-tactile interaction task."
+    },
+    {
+      "field": "task scaffold",
+      "source": "Profile uses the Canzoneri-family dynamic sound scaffold pending full-method verification."
+    }
+  ]
+}

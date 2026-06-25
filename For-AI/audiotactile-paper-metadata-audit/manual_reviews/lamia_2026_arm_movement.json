@@ -1,0 +1,314 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "lamia_2026_arm_movement",
+  "citation_short": "Lamia, Shabani, & Candidi (2026)",
+  "review_date": "2026-06-16",
+  "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
+  "confidence_score": 0.91,
+  "confidence_label": "high_confidence_extraction",
+  "confidence_basis": "Main PDF, OpenDataLoader markdown, pypdf fallback text, rendered methods/design pages, extracted Figure 1 image, supplement DOCX/text extraction, and the Canzoneri 2012 lineage review were checked. The paper reports enough Segment 1-4 information to recreate Exp. 1 and Exp. 2 as separate two-speaker looming/receding arm-movement profiles. Remaining uncertainty concerns exact original WAV/noise seeds, speaker model, full acoustic transfer, exact gain-curve files, and numeric ITI/jitter beyond participant-triggered trial starts.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats",
+    "reason": "Exp. 1 and Exp. 2 can be recreated as sagittal two-speaker pink-noise looming/receding profiles with separate durations, tactile-delay schedules, unisensory baselines, block structures, and trial counts. The profile should preserve the motor/static and hand/trunk block factors while treating original audio files, exact speaker acoustics, gain-curve files, and numeric ITI/jitter as approximations."
+  },
+  "orientation_ledger": {
+    "participant_frame": "Blindfolded participant seated at a table, facing the two-speaker line in front of the body; right hand rests on/holds the mouse on the sagittal movement path, left hand responds on the keyboard.",
+    "room_apparatus_frame": "Two physical speakers are positioned along the sagittal plane in front of the participant, 100 cm apart. The near speaker is 10 cm from the right hand; the motor barrier is 30 cm away on the table.",
+    "body_relative_mapping": "Looming is far-to-near/towards the participant's body; receding is near-to-far/away from the participant. For receding T1-T5 map to D1-D5; for looming the mapping is flipped from D5 to D1.",
+    "tactile_anchor": "Electrical tactile targets are delivered either to the radial aspect of the right index finger or to the center of the chest/trunk, in separate body-part blocks.",
+    "movement_implementation": "Apparent auditory motion is implemented by reciprocal near/far speaker gain envelopes. Right-hand movement is a separate motor manipulation, tracked with E-Prime at 20 Hz.",
+    "evidence_class": "Main-text methods, Figure 1 caption/image, rendered PDF pages 3-5, supplement distance-localization pilot text, and Canzoneri 2012 protocol lineage review."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf",
+      "source": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+      "status": "reviewed",
+      "scope": "PDF pages 3-5 for acoustic stimuli, tactile apparatus, Figure 1, general procedure, design, Table 1, RT scoring window, blocks, catches, baselines, and total counts."
+    },
+    {
+      "source_type": "opendataloader_markdown",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/lamia_2026_arm_movement.md",
+      "status": "reviewed",
+      "scope": "Used as the primary extracted-text map for five semantic searches over stimulus reconstruction, spatial geometry, timing/SOA, sequence/intermixing, baseline/catch/counts, and tactile apparatus."
+    },
+    {
+      "source_type": "opendataloader_figure_images",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/lamia_2026_arm_movement_images/imageFile1.png",
+      "status": "reviewed",
+      "scope": "Visual inspection of Figure 1 to confirm participant-facing direction, sagittal speaker line, 100 cm speaker separation, timing panels, and motor/static hand/trunk conditions."
+    },
+    {
+      "source_type": "supplement_docx",
+      "source": "artifacts/paper_metadata_audit/supplements/lamia_2026_arm_movement/41598_2026_36796_MOESM1_ESM.docx",
+      "status": "reviewed",
+      "scope": "Checked local supplement for sound-distance pilot, expectancy analyses, outlier checks, and movement-variability analyses; no original stimulus scripts or WAV files were present."
+    },
+    {
+      "source_type": "supplement_text_extraction",
+      "source": "artifacts/paper_metadata_audit/extracted/supplements/lamia_2026_arm_movement/41598_2026_36796_MOESM1_ESM.txt",
+      "status": "reviewed",
+      "scope": "Searched T1-T5, looming, receding, trial, baseline, catch, motor variability, and sound-distance localization terms."
+    },
+    {
+      "source_type": "fallback_text_extraction",
+      "source": "pypdf local extraction",
+      "status": "reviewed",
+      "scope": "Printed targeted snippets from PDF pages 3-6 to verify acoustic setup, tactile calibration, procedure, block formulas, Table 1, response/scoring window, and missing ITI/jitter."
+    },
+    {
+      "source_type": "rendered_pdf_pages",
+      "source": "tmp/pdfs/lamia_2026_review/page-03.png through page-05.png",
+      "status": "reviewed_not_tracked",
+      "scope": "Temporary rendered pages were visually checked for Figure 1 geometry, methods text, Table 1, and design/count paragraphs; page images were not committed."
+    },
+    {
+      "source_type": "protocol_lineage_review",
+      "source": "For-AI/audiotactile-paper-metadata-audit/manual_reviews/canzoneri_2012_dynamic_sounds.json",
+      "status": "reviewed",
+      "scope": "Checked the cited Canzoneri 2012 procedure lineage for two-speaker pink-noise/gain conventions and unresolved original stimulus-file caveats."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "OpenDataLoader PDF extraction",
+      "status": "completed",
+      "result": "Mapped 17/25 auto-mined candidate fields and identified the need to separate auditory apparent-motion speed from participant arm-movement speed."
+    },
+    {
+      "strategy": "Stimulus reconstruction pass",
+      "status": "completed",
+      "result": "Confirmed MATLAB/Audacity 44.1 kHz pink noise, two sagittal speakers, 55-70 dB reciprocal gain envelopes, 3000 ms Exp. 1 sounds, and 4000 ms Exp. 2 sounds."
+    },
+    {
+      "strategy": "Visual/spatial geometry pass",
+      "status": "completed",
+      "result": "Inspected Figure 1 and rendered methods pages; recorded participant facing, speaker/source room layout, body-relative looming/receding mapping, tactile anchors, and motor manipulation."
+    },
+    {
+      "strategy": "Tactile timing and baseline pass",
+      "status": "completed",
+      "result": "Separated Exp. 1 T1-T5 audio-tactile timing plus T1/T5 tactile-only baseline from Exp. 2's five matched audio-tactile and unisensory timings."
+    },
+    {
+      "strategy": "Trial sequence, intermixing, and count pass",
+      "status": "completed",
+      "result": "Confirmed separated body-part/hand-status blocks, looming/receding and distance rows within audio-tactile blocks, catch trials, randomized/counterbalanced block presentation, and Exp. 1/2 totals."
+    },
+    {
+      "strategy": "Supplement search",
+      "status": "completed",
+      "result": "Supplement confirmed the T1-T5 perceived-distance pilot and movement analyses but did not provide original stimulus files, scripts, speaker model, or ITI/jitter values."
+    },
+    {
+      "strategy": "Fallback extraction and rendered-page check",
+      "status": "completed",
+      "result": "pypdf snippets and rendered PDF pages 3-5 verified methods/table text and supported marking numeric ITI/jitter as not reported after review."
+    },
+    {
+      "strategy": "Protocol-lineage and ambiguity pass",
+      "status": "completed",
+      "result": "Canzoneri 2012 lineage supports the two-speaker gain-envelope convention, but exact author audio files and gain-curve files remain unavailable."
+    }
+  ],
+  "field_status_counts": {
+    "derived": 2,
+    "not_reported_after_review": 1,
+    "reported": 22
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "reported",
+        "value": "Pink-noise auditory samples at 44.1 kHz.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+        "page_or_section": "PDF p.3, Acoustic stimuli",
+        "evidence_note": "The paper reports pink-noise samples generated for both experiments."
+      },
+      "source_provenance": {
+        "status": "reported",
+        "value": "Pink-noise samples generated using MATLAB 2022b and Audacity 2.4.1; exact WAV files or random seeds are not supplied.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf; artifacts/paper_metadata_audit/extracted/supplements/lamia_2026_arm_movement/41598_2026_36796_MOESM1_ESM.txt",
+        "page_or_section": "PDF p.3, Acoustic stimuli; supplement searched",
+        "evidence_note": "Software provenance is reported; supplement does not add original stimulus files."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "Two auditory directions on the same two-speaker path: looming and receding. Exp. 1 and Exp. 2 use the same path but different sound durations/timing schedules.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+        "page_or_section": "PDF p.3 Acoustic stimuli; PDF p.4 Design",
+        "evidence_note": "Motor/static and hand/trunk are block factors, not additional auditory trajectories."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Two speakers along the sagittal plane in front of the participant, 100 cm apart; near speaker 10 cm from the right hand. Looming is far-to-near/towards body; receding is near-to-far/away.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf; artifacts/paper_metadata_audit/extracted/opendataloader/lamia_2026_arm_movement_images/imageFile1.png",
+        "page_or_section": "PDF p.3 Acoustic stimuli and Figure 1; Figure 1a",
+        "evidence_note": "Figure 1 confirms blindfolded participant facing the sagittal speaker line."
+      },
+      "stimulus_duration": {
+        "status": "reported",
+        "value": "Exp. 1 auditory stimulus duration was 3000 ms; Exp. 2 auditory stimulus duration was 4000 ms.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+        "page_or_section": "PDF p.3 Acoustic stimuli; Figure 1b",
+        "evidence_note": "Exp. 2 was lengthened to avoid too-early T1 during movement."
+      },
+      "stimulus_speed": {
+        "status": "derived",
+        "value": "No explicit auditory-source speed is reported; nominal apparent path is 100 cm over 3 s in Exp. 1 (33.3 cm/s) and 100 cm over 4 s in Exp. 2 (25 cm/s).",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+        "page_or_section": "PDF p.3 Acoustic stimuli; PDF p.4 General procedure",
+        "evidence_note": "The reported 10 and 7.5 cm/s values are hand-movement speeds, not sound speeds."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "Looming and receding sounds are included in audio-tactile blocks; sounds are task-irrelevant and crossed with hand/trunk tactile site and motor/static block factors.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+        "page_or_section": "PDF p.3 Acoustic stimuli; PDF p.4 Design",
+        "evidence_note": "Within audio-tactile blocks, both sound directions and five sound distances are included."
+      },
+      "gain_envelope": {
+        "status": "reported",
+        "value": "One stream exponentially increases 55 to 70 dB SPL and the other decreases 70 to 55 dB. Looming fades far speaker down and near speaker up; receding reverses it.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+        "page_or_section": "PDF p.3 Acoustic stimuli",
+        "evidence_note": "SPL was measured at subjects' ears; exact envelope files are not provided."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Two physical speakers on a sagittal/front path, MATLAB/Audacity stimulus generation, SPL audiometer calibration, E-Prime movement tracking, Logitech K120 response keyboard.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf; artifacts/paper_metadata_audit/extracted/opendataloader/lamia_2026_arm_movement_images/imageFile1.png",
+        "page_or_section": "PDF pp.3-4; Figure 1",
+        "evidence_note": "Speaker model and room transfer are not reported."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "Audio-tactile target trials, auditory-only catch trials inside audio-tactile blocks, and tactile-only unisensory baseline blocks.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+        "page_or_section": "PDF pp.4-5, Design and Table 1",
+        "evidence_note": "Audio-tactile and unisensory trials were not intermixed."
+      },
+      "condition_intermixing": {
+        "status": "reported",
+        "value": "Within each audio-tactile block, looming/receding and five distance rows were included. Body part and hand status were separated into trunk motor, trunk static, hand motor, and hand static blocks.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+        "page_or_section": "PDF pp.4-5, Design and Table 1",
+        "evidence_note": "Unisensory tactile blocks were separated from audio-tactile blocks."
+      },
+      "blocked_or_random_order": {
+        "status": "reported",
+        "value": "Exp. 1 used 4 audio-tactile blocks and 8 unisensory blocks; Exp. 2 used 4 audio-tactile blocks and 4 unisensory blocks. Block presentation was randomized/counterbalanced.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+        "page_or_section": "PDF pp.4-5, Design; Table 1",
+        "evidence_note": "Exp. 1 also reports unisensory blocks before and after audio-tactile blocks."
+      },
+      "iti_jitter_policy": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf; artifacts/paper_metadata_audit/extracted/supplements/lamia_2026_arm_movement/41598_2026_36796_MOESM1_ESM.txt",
+        "page_or_section": "PDF pp.3-6; supplement searched",
+        "evidence_note": "No numeric ITI/jitter found; only participant-triggered trial start is reported."
+      },
+      "response_window": {
+        "status": "reported",
+        "value": "Responses were left-key keyboard presses; analysis excluded RTs shorter than 100 ms or longer than 1000 ms. No separate online timeout is reported.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+        "page_or_section": "PDF p.4 General procedure; PDF p.5 Statistical analyses",
+        "evidence_note": "The 100-1000 ms interval is a scoring/exclusion window."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Participants responded only to tactile stimuli, ignored sounds, withheld responses on auditory-only catches, and started each trial by mouse key in Exp. 1 or pedal release in Exp. 2.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+        "page_or_section": "PDF p.4 General procedure",
+        "evidence_note": "Motor trials required 30 cm sagittal hand movement over the sound duration."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "Electrocutaneous pulses from Digitimer DS7A/D188; electrodes on right index finger radial aspect or center chest; 100 us trunk pulse, 200 us finger pulse, individually calibrated.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+        "page_or_section": "PDF pp.3-4, Tactile stimuli",
+        "evidence_note": "Calibration used ascending limits and 10/10 detection before blocks."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "Exp. 1 audio-tactile delays: 300, 800, 1500, 2200, 2700 ms. Exp. 2 delays: 800, 1300, 2000, 2700, 3200 ms from sound onset.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf; artifacts/paper_metadata_audit/extracted/opendataloader/lamia_2026_arm_movement_images/imageFile1.png",
+        "page_or_section": "PDF p.4; Figure 1b",
+        "evidence_note": "T1-T5 map to D1-D5 for receding and D5-D1 for looming."
+      },
+      "baseline_strategy": {
+        "status": "reported",
+        "value": "Separate tactile-only unisensory baseline blocks. Exp. 1 baselines only at endpoint timings; Exp. 2 baselines matched all five audio-tactile delays.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+        "page_or_section": "PDF pp.4-6, Design and analyses",
+        "evidence_note": "Exp. 2 used matched unisensory RT subtraction for expectancy correction."
+      },
+      "baseline_timing": {
+        "status": "reported",
+        "value": "Exp. 1 tactile-only baseline used T1 300 ms and T5 2700 ms from trial initiation. Exp. 2 baseline used 800, 1300, 2000, 2700, and 3200 ms from trial initiation.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+        "page_or_section": "PDF p.4, Tactile timing; PDF pp.4-5 Design",
+        "evidence_note": "No-sound baselines are timed from trial initiation rather than sound onset."
+      },
+      "catch_trial_type": {
+        "status": "reported",
+        "value": "Auditory-only catch trials in audio-tactile blocks, with no tactile stimulation and no response required.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+        "page_or_section": "PDF p.4 General procedure; PDF pp.4-5 Design",
+        "evidence_note": "Catch trials are excluded from unisensory tactile blocks."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "reported",
+        "value": "Exp. 1: 15 trials for each audio-tactile direction x distance row; unisensory blocks have 6 trials at T1 and 6 at T5. Exp. 2: 10 trials per audio-tactile row and 10 per unisensory delay.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+        "page_or_section": "PDF pp.4-5, Design; Table 1",
+        "evidence_note": "Counts are reported per condition and block family."
+      },
+      "baseline_count": {
+        "status": "reported",
+        "value": "Exp. 1 has 8 unisensory blocks x 12 trials = 96 baseline trials. Exp. 2 has 4 unisensory blocks x 50 trials = 200 baseline trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+        "page_or_section": "PDF pp.4-5, Design; Table 1",
+        "evidence_note": "Baseline blocks are tactile-only and separated from audio-tactile blocks."
+      },
+      "catch_count": {
+        "status": "derived",
+        "value": "Exp. 1 has 16 catches per audio-tactile block x 4 blocks = 64 catches. Exp. 2 has 10 catches per audio-tactile block x 4 blocks = 40 catches.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+        "page_or_section": "PDF pp.4-5, Design",
+        "evidence_note": "Per-block catch counts are reported; totals are simple multiplication."
+      },
+      "block_count": {
+        "status": "reported",
+        "value": "Exp. 1: 4 audio-tactile blocks plus 8 unisensory blocks. Exp. 2: 4 audio-tactile blocks plus 4 unisensory blocks.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+        "page_or_section": "PDF pp.4-5, Design; Table 1",
+        "evidence_note": "Audio-tactile blocks correspond to trunk/hand x motor/static."
+      },
+      "total_trial_count": {
+        "status": "reported",
+        "value": "Exp. 1 grand total is 760 trials: 664 audio-tactile/catch trials plus 96 unisensory trials. Exp. 2 grand total is 640 trials: 440 plus 200.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/lamia_2026_arm_movement.pdf",
+        "page_or_section": "PDF p.5, Design; Table 1",
+        "evidence_note": "Grand totals are explicitly reported."
+      }
+    }
+  },
+  "critical_caveats": [
+    "The exact original pink-noise WAV files, random/noise seeds, and gain-envelope files are not provided.",
+    "The speaker model, room acoustics, and full acoustic transfer function are not reported.",
+    "The auditory apparent-motion speed is derived from speaker separation and duration; the reported 10/7.5 cm/s values are arm-movement speeds.",
+    "No numeric ITI, jitter range, or inter-trial distribution was found; trials are participant-triggered by mouse press or pedal release.",
+    "Exp. 1 and Exp. 2 should be implemented as separate profiles because duration, tactile timings, baseline strategy, and trial counts differ.",
+    "Exp. 1 reports unisensory blocks before and after audio-tactile blocks while also stating randomized/counterbalanced block presentation; exact run-order constraints should be approximated.",
+    "The supplement verifies subjective distance and movement analyses but does not contain scripts or original stimuli."
+  ],
+  "next_manual_action": "Use this record to maintain two runnable Lamia 2026 implementation candidates: Exp. 1 with 3000 ms sounds and endpoint baselines, and Exp. 2 with 4000 ms sounds and five matched baseline delays. Preserve body-part and motor/static block factors, and approximate the original audio files, speaker acoustics, envelope files, and ITI/jitter policy."
+}

@@ -1,0 +1,187 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\title{Published-Study Audiotactile Task Recreation Audit}
+\author{Peripersonal Space Toolkit}
+\date{2026-06-13}
+\begin{document}
+\emergencystretch=3em
+\sloppy
+\maketitle
+
+\section*{Audit Goal}
+The goal of this audit is to turn the preload library into an explicit replication-readiness ledger. A profile passes only when the current Segment 0--4 dashboard/backend schema contains all publication-derived parameters needed to recreate the audiotactile PPS task profile; later segments are native toolkit materialization and runner handoff. Profiles that do not pass remain audit targets, separated into missing publication parameters and toolkit structural gaps. Clinical populations, interventions, non-audiotactile stimuli, and extra experimental conditions are treated as context notes rather than blockers unless they change the audiotactile PPS task execution itself. No visible GUI progress indicator or completeness panel is part of this task.
+
+The structural-gap category is intentionally narrow. It flags only standardization constraints inside the PPS task itself: trial-family and baseline logic, auditory stimulus type/provenance/rendering/gain law, spatial trajectory and apparatus geometry, tactile site/channel/calibration, response capture, and core timing/repetition parameters. Ordinary randomization and block order are reproducible runner defaults, not publication-acceptance blockers. Two-speaker analog setups are treated as apparatus provenance: when the paper reports enough motion/timing/source parameters, the toolkit recreates the motion as a binaural spatialized trajectory.
+
+\section*{Method}
+Every study template was rebuilt into a profile-parameter manifest in \texttt{assets/preloads/<template\_id>/}; the canonical file is \texttt{01\_profile/profile\_parameters\_manifest.json}. Each manifest records Segment 0 profile provenance, Segment 1 source assets and trajectories, Segment 2 trial rows, source sequence, and ITI/jitter boxes, Segment 3 SOA/tactile/baseline/catch settings, and Segment 4 repetition-pool settings. Segment 5 block generation and Segment 6 participant/run setup are native app outputs after the profile gate. Fields are marked as reported, inferred, defaulted, missing publication parameter, or unsupported toolkit structure.
+
+The batch materializer then attempted every profile. It prepared Segment 6 only for profiles whose manifests passed the profile checks and skipped blocked profiles with an explicit readiness reason. The runner was not launched.
+
+\section*{Overall Result}
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+Measure & Count \\
+\midrule
+Catalogued profiles & 22 \\
+Profiles passing checks & 8 \\
+Published-paper profiles passing checks & 6 \\
+Profiles with missing publication parameters & 12 \\
+Profiles with toolkit structural gaps & 7 \\
+Runner launched during audit & no \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The current audit found 8 profile(s) that can be materialized end-to-end. The unpublished lab profile(s) passing current checks are \texttt{study5\_\allowbreak{}box\_\allowbreak{}breathing\_\allowbreak{}pps}, \texttt{study5\_\allowbreak{}box\_\allowbreak{}breathing\_\allowbreak{}pps\_\allowbreak{}pink\_\allowbreak{}white}; the published-paper profile(s) passing current checks are \texttt{matsuda\_\allowbreak{}2021\_\allowbreak{}four\_\allowbreak{}directions}, \texttt{barumerli\_\allowbreak{}2026\_\allowbreak{}arm\_\allowbreak{}movement\_\allowbreak{}exp1}, \texttt{barumerli\_\allowbreak{}2026\_\allowbreak{}arm\_\allowbreak{}movement\_\allowbreak{}exp2}, \texttt{noel\_\allowbreak{}2015\_\allowbreak{}bodily\_\allowbreak{}self}, \texttt{pfeiffer\_\allowbreak{}2018\_\allowbreak{}lateral\_\allowbreak{}perihead\_\allowbreak{}left\_\allowbreak{}to\_\allowbreak{}right}, \texttt{serino\_\allowbreak{}2015\_\allowbreak{}peri\_\allowbreak{}trunk\_\allowbreak{}exp1}.
+
+\section*{Profiles Successfully Materialized}
+{\small
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.35\linewidth}p{0.13\linewidth}p{0.13\linewidth}p{0.13\linewidth}p{0.13\linewidth}}
+\toprule
+Profile & Segment 2 variants & Segment 3 files & Segment 4 rows & Segment 5 blocks \\
+\midrule
+\endhead
+\texttt{study5\_\allowbreak{}box\_\allowbreak{}breathing\_\allowbreak{}pps} & 8 & 88 & 204 & 6 \\
+\texttt{matsuda\_\allowbreak{}2021\_\allowbreak{}four\_\allowbreak{}directions} & 2 & 22 & 220 & 4 \\
+\texttt{barumerli\_\allowbreak{}2026\_\allowbreak{}arm\_\allowbreak{}movement\_\allowbreak{}exp1} & 2 & 22 & 330 & 4 \\
+\texttt{barumerli\_\allowbreak{}2026\_\allowbreak{}arm\_\allowbreak{}movement\_\allowbreak{}exp2} & 2 & 22 & 220 & 4 \\
+\texttt{noel\_\allowbreak{}2015\_\allowbreak{}bodily\_\allowbreak{}self} & 1 & 13 & 156 & 2 \\
+\texttt{pfeiffer\_\allowbreak{}2018\_\allowbreak{}lateral\_\allowbreak{}perihead\_\allowbreak{}left\_\allowbreak{}to\_\allowbreak{}right} & 2 & 22 & 22 & 1 \\
+\texttt{study5\_\allowbreak{}box\_\allowbreak{}breathing\_\allowbreak{}pps\_\allowbreak{}pink\_\allowbreak{}white} & not run & not run & not run & not run \\
+\texttt{serino\_\allowbreak{}2015\_\allowbreak{}peri\_\allowbreak{}trunk\_\allowbreak{}exp1} & not run & not run & not run & not run \\
+\bottomrule
+\end{longtable}
+}
+
+\section*{Published Profiles Needing Re-Audit Or Toolkit Expansion}
+{\footnotesize
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.29\linewidth}p{0.15\linewidth}p{0.07\linewidth}p{0.07\linewidth}>{\raggedright\arraybackslash}p{0.31\linewidth}}
+\toprule
+Profile & Primary outcome & Missing & Gaps & Short reason \\
+\midrule
+\endhead
+\texttt{canzoneri\_\allowbreak{}2013\_\allowbreak{}amputation\_\allowbreak{}prosthesis} & Missing publication parameters & 1 & 0 & exact trial count and tactile calibration table from full paper \\
+\texttt{canzoneri\_\allowbreak{}2013\_\allowbreak{}tool\_\allowbreak{}use\_\allowbreak{}reshaping} & Missing publication parameters & 1 & 0 & exact trial count and ITI table from full paper \\
+\texttt{canzoneri\_\allowbreak{}2012\_\allowbreak{}dynamic\_\allowbreak{}sounds} & Toolkit structural gap & 3 & 1 & direction-coupled tactile-only T0/T6 baseline trials \\
+\texttt{tonelli\_\allowbreak{}2019\_\allowbreak{}echolocation} & Toolkit structural gap & 1 & 1 & apparatus-specific seven-speaker switching/timing details \\
+\texttt{ferri\_\allowbreak{}2015\_\allowbreak{}artificial\_\allowbreak{}looming\_\allowbreak{}valence} & Missing publication parameters & 2 & 0 & exact auditory files \\
+\texttt{ferri\_\allowbreak{}2015\_\allowbreak{}ecological\_\allowbreak{}looming\_\allowbreak{}valence} & Missing publication parameters & 2 & 0 & licensed ecological sounds \\
+\texttt{galli\_\allowbreak{}2015\_\allowbreak{}wheelchair\_\allowbreak{}full\_\allowbreak{}body} & Toolkit structural gap & 0 & 1 & speaker-array Gaussian amplitude control \\
+\texttt{lerner\_\allowbreak{}2021\_\allowbreak{}3d\_\allowbreak{}audio\_\allowbreak{}tactile\_\allowbreak{}boundary} & Toolkit structural gap & 1 & 2 & body-scaled distance mode \\
+\texttt{noel\_\allowbreak{}2015\_\allowbreak{}walking\_\allowbreak{}full\_\allowbreak{}body\_\allowbreak{}action} & Missing publication parameters & 1 & 0 & exact sound distances and trial counts \\
+\texttt{serino\_\allowbreak{}2015\_\allowbreak{}front\_\allowbreak{}back\_\allowbreak{}trunk\_\allowbreak{}exp2} & Toolkit structural gap & 1 & 1 & physical 16-speaker array \\
+\texttt{serino\_\allowbreak{}2015\_\allowbreak{}peri\_\allowbreak{}hand\_\allowbreak{}exp3} & Toolkit structural gap & 0 & 1 & lateralized hand coordinate \\
+\texttt{serino\_\allowbreak{}2015\_\allowbreak{}toolless\_\allowbreak{}sync\_\allowbreak{}training} & Missing publication parameters & 2 & 0 & electrocutaneous tactile calibration \\
+\texttt{taffou\_\allowbreak{}2014\_\allowbreak{}cynophobic\_\allowbreak{}rear\_\allowbreak{}looming} & Toolkit structural gap & 2 & 1 & left/right rear hemifield as separate trajectories \\
+\texttt{teneggi\_\allowbreak{}2013\_\allowbreak{}social\_\allowbreak{}face\_\allowbreak{}pps} & Missing publication parameters & 1 & 0 & exact distance/timing table from supplement \\
+\bottomrule
+\end{longtable}
+}
+
+\section*{Missing Publication Parameters}
+\paragraph{\texttt{canzoneri\_\allowbreak{}2013\_\allowbreak{}amputation\_\allowbreak{}prosthesis}}
+\begin{itemize}
+\item exact trial count and tactile calibration table from full paper
+\end{itemize}
+\paragraph{\texttt{canzoneri\_\allowbreak{}2013\_\allowbreak{}tool\_\allowbreak{}use\_\allowbreak{}reshaping}}
+\begin{itemize}
+\item exact trial count and ITI table from full paper
+\end{itemize}
+\paragraph{\texttt{canzoneri\_\allowbreak{}2012\_\allowbreak{}dynamic\_\allowbreak{}sounds}}
+\begin{itemize}
+\item exact original SoundForge exponential gain/envelope files
+\item voice-key response capture
+\item electrical tactile threshold calibration
+\end{itemize}
+\paragraph{\texttt{tonelli\_\allowbreak{}2019\_\allowbreak{}echolocation}}
+\begin{itemize}
+\item apparatus-specific seven-speaker switching/timing details
+\end{itemize}
+\paragraph{\texttt{ferri\_\allowbreak{}2015\_\allowbreak{}artificial\_\allowbreak{}looming\_\allowbreak{}valence}}
+\begin{itemize}
+\item exact auditory files
+\item paper-specific gain envelope
+\end{itemize}
+\paragraph{\texttt{ferri\_\allowbreak{}2015\_\allowbreak{}ecological\_\allowbreak{}looming\_\allowbreak{}valence}}
+\begin{itemize}
+\item licensed ecological sounds
+\item exact amplitude envelopes
+\end{itemize}
+\paragraph{\texttt{lerner\_\allowbreak{}2021\_\allowbreak{}3d\_\allowbreak{}audio\_\allowbreak{}tactile\_\allowbreak{}boundary}}
+\begin{itemize}
+\item exact Unity/3D Tune-In stimulus engine behavior
+\end{itemize}
+\paragraph{\texttt{noel\_\allowbreak{}2015\_\allowbreak{}walking\_\allowbreak{}full\_\allowbreak{}body\_\allowbreak{}action}}
+\begin{itemize}
+\item exact sound distances and trial counts
+\end{itemize}
+\paragraph{\texttt{serino\_\allowbreak{}2015\_\allowbreak{}front\_\allowbreak{}back\_\allowbreak{}trunk\_\allowbreak{}exp2}}
+\begin{itemize}
+\item 13-distance internal schedule
+\end{itemize}
+\paragraph{\texttt{serino\_\allowbreak{}2015\_\allowbreak{}toolless\_\allowbreak{}sync\_\allowbreak{}training}}
+\begin{itemize}
+\item electrocutaneous tactile calibration
+\item voice-key response capture
+\end{itemize}
+\paragraph{\texttt{taffou\_\allowbreak{}2014\_\allowbreak{}cynophobic\_\allowbreak{}rear\_\allowbreak{}looming}}
+\begin{itemize}
+\item exact dog/sheep audio
+\item LISTEN HRTF rather than bundled FABIAN
+\end{itemize}
+\paragraph{\texttt{teneggi\_\allowbreak{}2013\_\allowbreak{}social\_\allowbreak{}face\_\allowbreak{}pps}}
+\begin{itemize}
+\item exact distance/timing table from supplement
+\end{itemize}
+
+\section*{Toolkit Structural Gaps}
+\paragraph{\texttt{canzoneri\_\allowbreak{}2012\_\allowbreak{}dynamic\_\allowbreak{}sounds}}
+\begin{itemize}
+\item direction-coupled tactile-only T0/T6 baseline trials
+\end{itemize}
+\paragraph{\texttt{tonelli\_\allowbreak{}2019\_\allowbreak{}echolocation}}
+\begin{itemize}
+\item apparatus-specific seven-speaker switching/timing details
+\end{itemize}
+\paragraph{\texttt{galli\_\allowbreak{}2015\_\allowbreak{}wheelchair\_\allowbreak{}full\_\allowbreak{}body}}
+\begin{itemize}
+\item speaker-array Gaussian amplitude control
+\end{itemize}
+\paragraph{\texttt{lerner\_\allowbreak{}2021\_\allowbreak{}3d\_\allowbreak{}audio\_\allowbreak{}tactile\_\allowbreak{}boundary}}
+\begin{itemize}
+\item body-scaled distance mode
+\item exact Unity/3D Tune-In stimulus engine behavior
+\end{itemize}
+\paragraph{\texttt{serino\_\allowbreak{}2015\_\allowbreak{}front\_\allowbreak{}back\_\allowbreak{}trunk\_\allowbreak{}exp2}}
+\begin{itemize}
+\item physical 16-speaker array
+\end{itemize}
+\paragraph{\texttt{serino\_\allowbreak{}2015\_\allowbreak{}peri\_\allowbreak{}hand\_\allowbreak{}exp3}}
+\begin{itemize}
+\item lateralized hand coordinate
+\end{itemize}
+\paragraph{\texttt{taffou\_\allowbreak{}2014\_\allowbreak{}cynophobic\_\allowbreak{}rear\_\allowbreak{}looming}}
+\begin{itemize}
+\item left/right rear hemifield as separate trajectories
+\end{itemize}
+
+\section*{Interpretation}
+A missing-publication finding means the paper or encoded source notes do not yet provide enough detail to fill a required current-toolkit field honestly. Examples include exact audio assets, timing or distance tables, tactile calibration, response-capture details, gain/envelope values, HRTF provenance, or apparatus-specific switching details.
+
+A toolkit-structural-gap finding means the study contains an audiotactile PPS task-execution element that cannot yet be represented as a faithful Segment 0--4 dashboard/backend profile. Examples in this ledger include direction-coupled tactile-only baseline subtypes, body-scaled distance modes, lateralized tactile coordinate fields, separate rear-hemifield trajectory families, speaker-array switching, Gaussian amplitude fields, and Unity/3D Tune-In audio-engine behavior.
+
+\section*{Machine-Readable Sources}
+\begin{itemize}
+\item \texttt{assets/preloads/profile\_recreation\_status.json}
+\item \texttt{assets/preloads/<template\_id>/01\_profile/profile\_parameters\_manifest.json}
+\item \texttt{local\_data/profile\_recreation\_batch/materialization\_summary.json}
+\end{itemize}
+\end{document}

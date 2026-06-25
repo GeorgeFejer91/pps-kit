@@ -1,0 +1,45 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "serino_2015_peri_hand_exp3",
+  "repetitions_per_condition": 16,
+  "soa_values_ms": [
+    0,
+    1000,
+    1955,
+    3000,
+    4000
+  ],
+  "spatial_values_cm": [
+    93,
+    71,
+    50,
+    27,
+    5
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "serino-peri-hand-row",
+      "label": "Peri-hand moving-sound trial",
+      "audio_tactile_percentage": 100.0,
+      "catch_percentage": 0.0,
+      "baseline_percentage": 0.0,
+      "elements": [
+        {
+          "element_id": "serino-peri-hand-moving-sound",
+          "kind": "looming_stimulus",
+          "label": "Hand moving sound",
+          "source_label": "Hand moving sound",
+          "source_labels": [
+            "Hand moving sound",
+            "Hand moving sound - receding"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 80
+}

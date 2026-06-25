@@ -1,0 +1,9 @@
+{
+  "schema": "pps-preload-run-setup-segment.v1",
+  "template_id": "noel_2015_bodily_self",
+  "blocks": 2,
+  "participants": 19,
+  "random_seed": 20150722,
+  "trial_randomization_strategy": "no_immediate_repeats",
+  "block_order_randomization": "counterbalanced_rotation"
+}

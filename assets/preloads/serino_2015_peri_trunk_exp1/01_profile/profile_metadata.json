@@ -1,0 +1,37 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "serino_2015_peri_trunk_exp1",
+  "title": "Serino 2015 peri-trunk PPS Experiment 1",
+  "citation": "Serino, A., Noel, J. P., Galli, G., Canzoneri, E., Marmaroli, P., Lissek, H., & Blanke, O. (2015). Body part-centered and full body-centered peripersonal space representations. Scientific Reports, 5, 18603.",
+  "doi": "10.1038/srep18603",
+  "source_url": "https://www.nature.com/articles/srep18603",
+  "verification_status": "partial",
+  "notes": "Peri-trunk looming/receding task originally implemented with a two-speaker analog setup. Timing, distance, and trial-count fields are literature-derived; the toolkit recreates the reported near-far trajectory with the binaural spatial renderer rather than treating the speakers as a separate audio source.",
+  "reference_parameters": {
+    "distances_cm": [
+      100,
+      81,
+      62,
+      43,
+      24,
+      5
+    ],
+    "near_far_speakers_cm": [
+      5,
+      100
+    ],
+    "repetitions_reported": 16,
+    "profile_check_complete": true,
+    "analog_apparatus_recreation": "Original near/far speakers are modeled as the reported 100 cm to 5 cm moving-sound trajectory in the binaural renderer."
+  },
+  "provenance": [
+    {
+      "field": "distances",
+      "source": "Scientific Reports results report D1-D6 as 5, 24, 43, 62, 81, and 100 cm."
+    },
+    {
+      "field": "trial count",
+      "source": "Methods report 240 trials: multisensory D1-D6 plus baselines and catch trials by two directions and 16 repetitions."
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "barumerli_2026_arm_movement_exp2",
+  "repetitions_per_condition": 10,
+  "soa_values_ms": [
+    800,
+    1300,
+    2000,
+    2700,
+    3200
+  ],
+  "spatial_values_cm": [
+    90.0,
+    77.5,
+    60.0,
+    42.5,
+    30.0
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "barumerli-exp2-sound-motion-row",
+      "label": "Arm-movement sound-motion trial",
+      "audio_tactile_percentage": 100.0,
+      "catch_percentage": 0.0,
+      "baseline_percentage": 0.0,
+      "elements": [
+        {
+          "element_id": "barumerli-exp2-looming-source",
+          "kind": "looming_stimulus",
+          "label": "Pink moving sound",
+          "source_label": "Pink moving sound",
+          "source_labels": [
+            "Pink moving sound",
+            "Pink moving sound - receding"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 400
+}

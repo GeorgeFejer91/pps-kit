@@ -1,0 +1,44 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "taffou_2014_cynophobic_rear_looming",
+  "title": "Taffou 2014 rear-field dog/sheep looming PPS",
+  "citation": "Taffou, M., & Viaud-Delmon, I. (2014). Cynophobic Fear Adaptively Extends Peri-Personal Space. Frontiers in Psychiatry, 5, 122.",
+  "doi": "10.3389/fpsyt.2014.00122",
+  "source_url": "https://www.frontiersin.org/journals/psychiatry/articles/10.3389/fpsyt.2014.00122/full",
+  "verification_status": "partial",
+  "notes": "Rear hemi-field binaural looming dog/sheep design. The GUI represents one representative rear-left path plus condition labels; exact dog/sheep sounds and LISTEN-HRTF rendering are not bundled.",
+  "reference_parameters": {
+    "source_database": "LISTEN HRTF in original paper",
+    "sound_duration_ms": 3000,
+    "tactile_delays_from_sound_onset_ms": [
+      0,
+      750,
+      1500,
+      2250,
+      3000
+    ],
+    "baseline_trial_times_from_trial_start_ms": [
+      350,
+      4650
+    ],
+    "hemispaces": [
+      "rear-left",
+      "rear-right"
+    ],
+    "implementation_gaps": [
+      "exact dog/sheep audio",
+      "left/right rear hemifield as separate trajectories",
+      "LISTEN HRTF rather than bundled FABIAN"
+    ]
+  },
+  "provenance": [
+    {
+      "field": "sound and HRTF",
+      "source": "Frontiers methods report dog growling/sheep bleating, 3000 ms sounds, 44.1 kHz, binaural rendering with non-individual LISTEN HRTFs."
+    },
+    {
+      "field": "SOAs/trials",
+      "source": "Frontiers methods report T1-T5 at 0, 750, 1500, 2250, and 3000 ms from sound onset, 224 tactile trials and 32 catch trials."
+    }
+  ]
+}

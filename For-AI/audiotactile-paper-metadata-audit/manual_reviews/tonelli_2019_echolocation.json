@@ -1,0 +1,283 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "tonelli_2019_echolocation",
+  "citation_short": "Tonelli et al. (2019)",
+  "review_date": "2026-06-16",
+  "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
+  "confidence_score": 0.9,
+  "confidence_label": "high_confidence_extraction",
+  "confidence_basis": "Main PDF, OpenDataLoader output, fallback pypdf extraction, rendered methods pages, Springer HTML, local DOCX supplement, extracted supplement text, and cited-protocol lineage to Canzoneri 2012 and Finisguerra 2015 were reviewed. The PPS task reports the lateral seven-speaker trajectory, white-noise stimulus, speed, tactile timing-distance mapping, baseline/catch rows, counts, manual ITI policy, and pre/post structure. Remaining uncertainty is mainly exact audio file, gain calibration, switching law, and response timeout.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats_lateral_head_looming_echolocation_profile",
+    "reason": "The PPS task can be recreated as a lateral left-of-head seven-speaker looming white-noise profile with neck vibration and pre/post training sessions. It is not a frontal trajectory: the speaker line is on the participant's left side, and the echolocation training object is a separate front/head-level task."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf",
+      "source": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+      "status": "reviewed",
+      "scope": "Reviewed methods, apparatus figure, PPS task, training/control tasks, procedure, analysis baseline, counts, and discussion for Segment 1-4 values."
+    },
+    {
+      "source_type": "opendataloader_json_md",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/tonelli_2019_echolocation.json",
+      "status": "reviewed",
+      "scope": "Used as primary extraction map for methods, speaker geometry, trial rows, and count fields, then checked against fallback text and page images."
+    },
+    {
+      "source_type": "fallback_text_extraction",
+      "source": "pypdf local extraction",
+      "status": "reviewed",
+      "scope": "Searched all pages for white noise, speaker, tactile, distance, delay, catch, unimodal, baseline, randomized, inter-trial, response, echolocation, and control-task terms."
+    },
+    {
+      "source_type": "rendered_pdf_pages",
+      "source": "tmp/pdfs/tonelli_2019_review/page-03.png through page-04.png",
+      "status": "reviewed_not_tracked",
+      "scope": "Temporary rendered pages were visually checked to verify the lateral left-of-head speaker line, distance labels, moving-sound arrow, tactile placement, trial counts, and manual ITI note."
+    },
+    {
+      "source_type": "supplement_docx_and_text",
+      "source": "artifacts/paper_metadata_audit/supplements/tonelli_2019_echolocation/221_2019_5469_MOESM1_ESM.docx",
+      "status": "reviewed",
+      "scope": "Supplement and extracted text were checked for additional Segment 1-4 details; it adds raw-RT analyses but no missing stimulus-generation or count parameters."
+    },
+    {
+      "source_type": "publisher_html_and_protocol_lineage",
+      "source": "https://link.springer.com/article/10.1007/s00221-019-05469-3",
+      "status": "reviewed",
+      "scope": "Springer HTML and reference list were checked for article status, methods context, and cited protocol lineage to Canzoneri 2012 and Finisguerra 2015."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "OpenDataLoader PDF extraction",
+      "status": "completed",
+      "result": "Captured the PPS task methods, seven-speaker apparatus, white-noise motion, trial families, baseline correction, and per-session count fields."
+    },
+    {
+      "strategy": "Fallback pypdf extraction",
+      "status": "completed",
+      "result": "Confirmed the distance values, 3 s duration, 34 cm/s speed, 12-per-distance count, 28 unimodal trials, 28 catch trials, and experimenter-started ITI."
+    },
+    {
+      "strategy": "Rendered-page visual verification",
+      "status": "completed",
+      "result": "Verified that the PPS speaker array is lateral to the participant's left side and approaches the head/neck, while the separate echolocation training object is frontal."
+    },
+    {
+      "strategy": "Supplement review",
+      "status": "completed",
+      "result": "Checked the DOCX supplement and extracted text; no hidden scripts, stimulus files, SPL/gain law, response timeout, or alternate counts were present."
+    },
+    {
+      "strategy": "Timing, baseline, and count pass",
+      "status": "completed",
+      "result": "Separated seven distance-defined audio-tactile timings from pre/post unimodal tactile baselines and auditory-only catch trials."
+    },
+    {
+      "strategy": "Protocol-lineage and semantic search pass",
+      "status": "completed",
+      "result": "Checked cited prior-protocol context from Canzoneri 2012 and Finisguerra 2015; Tonelli supplies its own lateral seven-position PPS implementation details."
+    }
+  ],
+  "field_status_counts": {
+    "derived": 1,
+    "not_reported_after_review": 2,
+    "reported": 22
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "reported",
+        "value": "Task-irrelevant looming auditory stimuli were white noise.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF p.3, PPS task",
+        "evidence_note": "The PPS task identifies the acoustic stimulus class as white noise."
+      },
+      "source_provenance": {
+        "status": "reported",
+        "value": "White noise was delivered through a custom seven-loudspeaker array controlled by custom Matlab code; exact file, seed, or source script is not supplied.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF p.3, PPS task",
+        "evidence_note": "Apparatus and software provenance are reported, but not a reusable audio asset."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "One lateral approaching trajectory toward the participant's left side/head, sampled at seven speaker distances.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF p.3, Fig. 1 and PPS task",
+        "evidence_note": "Figure and methods show one left-side approach trajectory."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Seven loudspeakers on a table to the participant's left at head elevation; sound approached from 119 cm to 17 cm from the head/neck in 17 cm steps.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF p.3, Fig. 1 and PPS task",
+        "evidence_note": "Rendered Fig. 1 confirms the path is lateral left-of-head, not frontal."
+      },
+      "stimulus_duration": {
+        "status": "reported",
+        "value": "The moving sound covered the speaker array in 3 s.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF p.3, PPS task",
+        "evidence_note": "Duration is reported directly with the path length and speed."
+      },
+      "stimulus_speed": {
+        "status": "reported",
+        "value": "Sound moved along 102 cm in 3 s, corresponding to 34 cm/s.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF p.3, PPS task",
+        "evidence_note": "Speed, duration, and path length are directly reported."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "PPS trials included looming white-noise audio-tactile trials, auditory-only catch trials, and no-sound tactile baseline trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF pp.3-4, PPS task",
+        "evidence_note": "The task rows define the auditory and no-audio conditions."
+      },
+      "gain_envelope": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf; artifacts/paper_metadata_audit/supplements/tonelli_2019_echolocation/221_2019_5469_MOESM1_ESM.docx",
+        "page_or_section": "PDF pp.3-4; supplement checked",
+        "evidence_note": "No SPL, gain, cross-fade, speaker-switch law, or calibration curve was found after main PDF, rendered-page, fallback, supplement, and source-route checks."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Custom device with seven serially connected loudspeakers, custom Matlab code, an 18 mm2 neck vibration motor, and microphone voice-response capture.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF pp.3-4, PPS task",
+        "evidence_note": "The apparatus elements and control/recording path are reported."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "Three PPS trial families: audio-tactile target trials, unimodal tactile-only trials, and auditory-only catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF pp.3-4, PPS task",
+        "evidence_note": "The three rows are listed with percentages and counts."
+      },
+      "condition_intermixing": {
+        "status": "reported",
+        "value": "Audio-tactile, unimodal tactile, and catch trials were randomized within the PPS experimental block.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF p.4, PPS task",
+        "evidence_note": "The paper states trial types were randomized in the experimental block."
+      },
+      "blocked_or_random_order": {
+        "status": "reported",
+        "value": "All participants completed PPS pre-test, group-specific ECHO/TIME/REST intervention, and PPS post-test; group assignment for TIME/REST was pseudo-random.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF p.4, Procedure",
+        "evidence_note": "PPS sessions bracket the intervention; this is a pre/post design."
+      },
+      "iti_jitter_policy": {
+        "status": "reported",
+        "value": "Inter-trial interval was not fixed because each trial was started by the experimenter.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF p.4, PPS task",
+        "evidence_note": "The ITI policy is explicit, but no numeric distribution is provided."
+      },
+      "response_window": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf; artifacts/paper_metadata_audit/supplements/tonelli_2019_echolocation/221_2019_5469_MOESM1_ESM.docx",
+        "page_or_section": "PDF pp.3-4; supplement checked",
+        "evidence_note": "Participants responded as fast as possible by saying TAH, but no numeric timeout or scoring response window was found."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Participants were blindfolded, ignored the sound, said TAH quickly to neck vibration, and withheld responses during auditory-only catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF pp.3-4, PPS task",
+        "evidence_note": "Task instructions and catch response rule are reported."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "A custom vibration motor with 18 mm2 surface delivered 20 ms vibrotactile stimulation on the left side of the participant's neck.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF p.3, PPS task",
+        "evidence_note": "Tactile device size, duration, and body site are reported."
+      },
+      "soa_table": {
+        "status": "derived",
+        "value": "Tactile timings corresponded to seven sound positions at 17, 34, 51, 68, 85, 102, and 119 cm; 17 cm spacing at 34 cm/s implies 500 ms timing steps over the 3 s sound.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF pp.3-4, Fig. 1 and PPS task",
+        "evidence_note": "Distance positions are reported; onset-indexed timing is derived from reported spacing, speed, and duration."
+      },
+      "baseline_strategy": {
+        "status": "reported",
+        "value": "Unimodal tactile-only trials without auditory stimulation were used as baseline correction; the fastest pre/post unimodal RT average was subtracted from bimodal RTs.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF pp.4-5, PPS task and RT processing",
+        "evidence_note": "The baseline correction rule is described in the task/analysis sections."
+      },
+      "baseline_timing": {
+        "status": "reported",
+        "value": "Unimodal tactile trials occurred at two delays: 500 ms before sound onset and 500 ms after sound offset.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF p.4, PPS task",
+        "evidence_note": "Baseline timing values are directly reported."
+      },
+      "catch_trial_type": {
+        "status": "reported",
+        "value": "Catch trials presented the auditory stimulus only and no tactile stimulus; participants were expected not to respond.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF p.4, PPS task",
+        "evidence_note": "Catch trials were included to reduce automatic/expected responses."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "reported",
+        "value": "Each PPS session had 12 trials for each audio-tactile sound-position/tactile-delay combination across seven distances, giving 84 audio-tactile trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF p.4, PPS task",
+        "evidence_note": "The paper reports 12 repetitions for each audio-tactile combination."
+      },
+      "baseline_count": {
+        "status": "reported",
+        "value": "Each PPS session had 28 unimodal tactile-only trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF p.4, PPS task",
+        "evidence_note": "Unimodal tactile count is directly reported."
+      },
+      "catch_count": {
+        "status": "reported",
+        "value": "Each PPS session had 28 auditory-only catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF p.4, PPS task",
+        "evidence_note": "Catch count is directly reported."
+      },
+      "block_count": {
+        "status": "reported",
+        "value": "The PPS task was administered twice, once before and once after the ECHO/TIME/REST intervention; each session contained one randomized experimental block.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF p.4, PPS task and Procedure",
+        "evidence_note": "Pre/post PPS structure and within-session block organization are reported."
+      },
+      "total_trial_count": {
+        "status": "reported",
+        "value": "Each PPS session had 140 trials: 84 audio-tactile, 28 tactile-only baseline, and 28 auditory-only catch; pre/post PPS implies 280 PPS trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tonelli_2019_echolocation.pdf",
+        "page_or_section": "PDF p.4, PPS task",
+        "evidence_note": "Total count and component counts are directly reported."
+      }
+    }
+  },
+  "critical_caveats": [
+    "Exact white-noise file, random seed, or reusable stimulus-generation script is not supplied.",
+    "No SPL, gain, speaker-switch, or cross-fade law is reported for the seven-speaker movement.",
+    "No numeric PPS response timeout/scoring window is reported.",
+    "ITI is manual and unfixed; no numeric ITI distribution is available.",
+    "The SOA table is distance-defined; onset-indexed millisecond values are derived from reported speed and 17 cm spacing.",
+    "The PPS trajectory is lateral left-of-head/neck, while the echolocation training object is a separate frontal/head-level task."
+  ],
+  "next_manual_action": "Use this as a high-confidence lateral head-centered PPS/echolocation profile. Lab recreation still needs explicit defaults for the audio asset, gain/switch law, ITI realization, and response timeout."
+}

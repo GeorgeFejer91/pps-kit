@@ -1,0 +1,13 @@
+{
+  "schema": "pps-preload-baseline-segment.v1",
+  "template_id": "lerner_2021_3d_audio_tactile_boundary",
+  "baseline_strategy": "tactile_only",
+  "include_baseline_trials": true,
+  "baseline_trial_percentage": 0.0,
+  "baseline_soa_values_ms": [
+    0,
+    5500
+  ],
+  "catch_trial_percentage": 10.0,
+  "catch_trials_exact": null
+}

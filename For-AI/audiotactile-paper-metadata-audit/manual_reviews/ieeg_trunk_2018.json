@@ -1,0 +1,278 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "ieeg_trunk_2018",
+  "citation_short": "Bernasconi/Noel et al. (2018)",
+  "review_date": "2026-06-16",
+  "manual_review_status": "manual_review_completed_main_pdf_supplement_blocked",
+  "confidence_score": 0.9,
+  "confidence_label": "high_confidence_extraction",
+  "confidence_basis": "Main PDF, OpenDataLoader output, fallback pypdf extraction, targeted methods searches, rendered methods pages, and OUP/PMC supplement-route checks were reviewed. The main paper reports enough stimulus, timing, tactile, randomization, ITI, and count information for a passive iEEG trunk PPS recreation; exact original binaural sound files, gain/envelope calibration, and OUP supplementary tables remain unavailable.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats_passive_ieeg_trunk_looming_profile",
+    "reason": "The paper can be recreated as a passive trunk-centered front-approach white-noise profile with A, T, and AT conditions, three tactile distances/timings, jitter, ITI, and per-condition repetition count. It is not a behavioral RT task and relies on prerecorded binaural earphone stimuli rather than a live speaker trajectory."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf",
+      "source": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+      "status": "reviewed",
+      "scope": "Reviewed abstract, Material and Apparatus, Procedures, preprocessing/baseline, and discussion checks for task conditions and PPS distance logic."
+    },
+    {
+      "source_type": "opendataloader_json_md",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/ieeg_trunk_2018.json",
+      "status": "reviewed",
+      "scope": "Used as primary extraction map for pages 1-4 and methods/procedure paragraphs, then checked against fallback extraction and rendered page images."
+    },
+    {
+      "source_type": "fallback_text_extraction",
+      "source": "pypdf local extraction",
+      "status": "reviewed",
+      "scope": "Searched all 13 pages for stimulus, speaker, white noise, timing, jitter, ITI, baseline, catch, response, and trial-count terms."
+    },
+    {
+      "source_type": "rendered_pdf_pages",
+      "source": "tmp/pdfs/ieeg_trunk_2018_review/page-03.png through page-04.png",
+      "status": "reviewed_not_tracked",
+      "scope": "Temporary rendered methods pages were visually checked to verify the apparatus/procedure paragraph and were not committed."
+    },
+    {
+      "source_type": "publisher_or_supplement_route",
+      "source": "https://academic.oup.com/cercor/article/28/9/3385/5052728",
+      "status": "checked_access_limited",
+      "scope": "OUP page and supplement route were checked; supplement remained access-limited from this environment."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "OpenDataLoader PDF extraction",
+      "status": "completed",
+      "result": "Identified the apparatus/procedure page with white-noise front approach, tactile timings, jitter, ITI, and 85-trial condition counts."
+    },
+    {
+      "strategy": "Fallback extraction verification",
+      "status": "completed",
+      "result": "pypdf confirmed the same key Segment 1-4 fields and clarified that no overt behavioral task was requested."
+    },
+    {
+      "strategy": "Rendered-page visual pass",
+      "status": "completed",
+      "result": "Visually verified the dense methods page where apparatus, trajectory, timing, jitter, ITI, and counts are reported."
+    },
+    {
+      "strategy": "Stimulus reconstruction pass",
+      "status": "completed",
+      "result": "Separated the simulated front-approach binaural white-noise stimulus from the physical 2-array prerecording apparatus."
+    },
+    {
+      "strategy": "Sequence, baseline, and count pass",
+      "status": "completed",
+      "result": "Mapped A, T, and AT randomized trials, tactile-only control/baseline logic, no behavioral catch task, 85 trials per condition, and derived total trials."
+    },
+    {
+      "strategy": "Supplement/source route check",
+      "status": "completed_access_limited",
+      "result": "Supplementary material is referenced by the article, but OUP access was limited; missing exact sound files/gain curves therefore remain caveats."
+    }
+  ],
+  "field_status_counts": {
+    "derived": 1,
+    "not_applicable": 3,
+    "not_reported_after_review": 2,
+    "reported": 19
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "reported",
+        "value": "White-noise auditory stimulus simulating an approaching sound from the front.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+        "page_or_section": "PDF p.3, Material and Apparatus",
+        "evidence_note": "The auditory stimulus is identified as white noise approaching from the front."
+      },
+      "source_provenance": {
+        "status": "reported",
+        "value": "Prerecorded using two 8-speaker arrays and a head-model binaural microphone; played back through insert earphones.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+        "page_or_section": "PDF p.3, Material and Apparatus",
+        "evidence_note": "The paper reports physical recording provenance but not the original audio files."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "One front-centered approaching auditory trajectory used in unisensory A and multisensory AT trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+        "page_or_section": "PDF p.3, Material and Apparatus/Procedures",
+        "evidence_note": "No receding or lateral trajectory is described."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Simulated front approach centered on the body from 2 m maximum distance; tactile samples correspond to 1.7, 1.0, and 0.3 m.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+        "page_or_section": "PDF p.3, Procedures",
+        "evidence_note": "Distance-at-touch values define the effective trajectory anchors."
+      },
+      "stimulus_duration": {
+        "status": "reported",
+        "value": "Approaching auditory stimulus lasted 3 s.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+        "page_or_section": "PDF p.3, Procedures",
+        "evidence_note": "Duration is directly reported for auditory trials."
+      },
+      "stimulus_speed": {
+        "status": "reported",
+        "value": "Simulated approach speed was 0.66 m/s.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+        "page_or_section": "PDF p.3, Procedures",
+        "evidence_note": "Speed is reported with the 2 m approach trajectory."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "Unisensory auditory A and multisensory audio-tactile AT conditions used the same approaching sound.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+        "page_or_section": "PDF p.3, Procedures",
+        "evidence_note": "The condition families are listed in the procedure."
+      },
+      "gain_envelope": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf; https://academic.oup.com/cercor/article/28/9/3385/5052728",
+        "page_or_section": "PDF p.3 methods; OUP supplement route checked 2026-06-16",
+        "evidence_note": "No SPL, gain law, or sound-file envelope parameters were found in accessible sources."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Etymotic ER-4P insert earphones; sounds prerecorded from two 8-speaker arrays with Omni binaural microphones; ExpyVR controlled delivery.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+        "page_or_section": "PDF p.3, Material and Apparatus",
+        "evidence_note": "The apparatus is reported in enough detail for a binaural-rendered approximation."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "Three trial families: auditory-only A, tactile-only T, and audio-tactile AT.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+        "page_or_section": "PDF p.3, Procedures",
+        "evidence_note": "The procedure enumerates the three trial types."
+      },
+      "condition_intermixing": {
+        "status": "reported",
+        "value": "A, T, and AT trials were presented in randomized order.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+        "page_or_section": "PDF p.3, Procedures",
+        "evidence_note": "Randomized presentation is directly reported."
+      },
+      "blocked_or_random_order": {
+        "status": "reported",
+        "value": "Trial order was randomized; no separate condition blocks are reported.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+        "page_or_section": "PDF p.3, Procedures",
+        "evidence_note": "The paper says trials were presented in randomized manner."
+      },
+      "iti_jitter_policy": {
+        "status": "reported",
+        "value": "Tactile timing jitter was 0-200 ms in 50 ms steps; ITI was randomly shuffled among 1.4, 1.7, and 1.9 s.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+        "page_or_section": "PDF p.3, Procedures",
+        "evidence_note": "Both within-trial tactile jitter and between-trial ITI values are reported."
+      },
+      "response_window": {
+        "status": "not_applicable",
+        "value": "No per-trial behavioral response window applies; patients had no overt task.",
+        "source_file": "",
+        "page_or_section": "",
+        "evidence_note": "The procedure states that no overt task was requested."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Patients lay reclined with eyes closed, attended to approaching sound/vibrations, and did not respond overtly.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+        "page_or_section": "PDF p.3, Procedures",
+        "evidence_note": "The passive attention rule is explicitly described."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "100 ms vibrotactile stimulation on upper sternum using Precision MicroDrives 312-101 motor, 150 Hz, 3 V, 60 mA.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+        "page_or_section": "PDF p.3, Material and Apparatus",
+        "evidence_note": "Tactile site, motor model, duration, and device parameters are reported."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "Tactile stimulation occurred at 500, 1500, and 2500 ms after trial/sound onset, plus 0-200 ms jitter.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+        "page_or_section": "PDF p.3, Procedures",
+        "evidence_note": "The same three timings are used for T and AT trials."
+      },
+      "baseline_strategy": {
+        "status": "reported",
+        "value": "Unisensory tactile T trials served as the control/baseline for tactile responses and anticipation checks.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+        "page_or_section": "PDF pp.3-5, Procedures and Statistical Analysis",
+        "evidence_note": "Analyses compare AT responses with tactile-only and EEG baseline responses."
+      },
+      "baseline_timing": {
+        "status": "reported",
+        "value": "Tactile-only control timings were 500, 1500, and 2500 ms; EEG baseline correction used -100 to 0 ms prestimulus.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+        "page_or_section": "PDF pp.3-4, Procedures and Preprocessing",
+        "evidence_note": "Both task-control timing and neural baseline window are reported."
+      },
+      "catch_trial_type": {
+        "status": "not_applicable",
+        "value": "No behavioral catch/no-go trials are applicable; auditory-only trials are unisensory controls.",
+        "source_file": "",
+        "page_or_section": "",
+        "evidence_note": "There was no overt response task."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "reported",
+        "value": "85 trials were presented for each A, T, and AT condition; T and AT trials each contained the three tactile timings.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+        "page_or_section": "PDF p.3, Procedures",
+        "evidence_note": "The per-condition trial count is explicit."
+      },
+      "baseline_count": {
+        "status": "reported",
+        "value": "85 tactile-only T trials were presented as the unisensory tactile control condition.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+        "page_or_section": "PDF p.3, Procedures",
+        "evidence_note": "T is one of the three 85-trial conditions."
+      },
+      "catch_count": {
+        "status": "not_applicable",
+        "value": "No catch/no-go count applies; 85 auditory-only trials are unisensory A controls, not behavioral catches.",
+        "source_file": "",
+        "page_or_section": "",
+        "evidence_note": "The passive task has no response-withholding catch rule."
+      },
+      "block_count": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf; https://academic.oup.com/cercor/article/28/9/3385/5052728",
+        "page_or_section": "PDF p.3 methods; OUP supplement route checked 2026-06-16",
+        "evidence_note": "Experiment duration is reported as about 20 minutes, but no block count was found."
+      },
+      "total_trial_count": {
+        "status": "derived",
+        "value": "255 trials total, derived from 85 trials x 3 conditions.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ieeg_trunk_2018.pdf",
+        "page_or_section": "PDF p.3, Procedures",
+        "evidence_note": "Total is derived from the explicit per-condition count."
+      }
+    }
+  },
+  "critical_caveats": [
+    "Exact original binaural white-noise sound files are not provided.",
+    "No SPL, gain law, or envelope details were found in accessible sources.",
+    "External 2-array recording geometry is summarized but full physical setup details are delegated to Serino protocol papers.",
+    "OUP supplementary material was referenced but access-limited from this environment.",
+    "No block count is reported.",
+    "The study is a passive iEEG endpoint, not a behavioral RT task."
+  ],
+  "next_manual_action": "Use this as a high-confidence passive trunk PPS protocol source for the Cell lineage audit; only exact audio assets/gain and block partitioning remain unresolved."
+}

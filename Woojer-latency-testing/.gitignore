@@ -1,0 +1,7 @@
+runs/
+*.wav
+*.xdf
+*.tmp
+*_capture.csv
+*_capture.json
+*_recording.wav

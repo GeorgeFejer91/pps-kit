@@ -1,0 +1,34 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "canzoneri_2013_tool_use_reshaping",
+  "title": "Canzoneri 2013 tool-use PPS reshaping",
+  "citation": "Canzoneri, E., Ubaldi, S., Rastelli, V., Finisguerra, A., Bassolino, M., & Serino, A. (2013). Tool-use reshapes the boundaries of body and peripersonal space representations. Experimental Brain Research, 228, 25-42.",
+  "doi": "10.1007/s00221-013-3532-2",
+  "source_url": "https://cris.unibo.it/handle/11585/152096",
+  "verification_status": "partial",
+  "notes": "Tool-use PPS plasticity profile. The publication reports an audio-tactile interaction task before and after use of a 1 m tool. This preload captures the canonical Canzoneri-style PPS measurement scaffold; tool-use versus control-training session structure remains metadata until the GUI supports ordered intervention phases.",
+  "reference_parameters": {
+    "profile_type": "audio_tactile_tool_use_plasticity",
+    "reported_intervention": "1 m tool-use training before/after PPS measurement",
+    "trial_family_scaffold": "Canzoneri-style dynamic IN/OUT pink-noise task",
+    "catch_subtype": "auditory-only no tactile target",
+    "baseline_subtype": "tactile-only timing controls during silence, exact table not verified from accessible source",
+    "response_rule": "speeded response to tactile target, ignore sound",
+    "implementation_gaps": [
+      "pre/post intervention phase order",
+      "tool-use versus pointing-control block factor",
+      "body-representation co-task metadata",
+      "exact trial count and ITI table from full paper"
+    ]
+  },
+  "provenance": [
+    {
+      "field": "study scope",
+      "source": "Repository/source abstract reports PPS measured with an audio-tactile interaction task before and after using a 1 m tool."
+    },
+    {
+      "field": "task scaffold",
+      "source": "Profile inherits the Canzoneri-family dynamic sound timing pending full-method verification."
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Generate 4-second spoken instruction WAV assets with Kokoro ONNX.
+"""Generate 4-second British spoken instruction WAV assets with Kokoro ONNX.
 
 The generated files are study seed assets, not participant data. Model files are
 downloaded into an ignored local cache by the Windows setup script or manually
@@ -100,6 +100,11 @@ def generate_assets(
         "voice": voice,
         "speed": speed,
         "lang": lang,
+        "accent": "British English" if voice.startswith(("bf_", "bm_")) else "English",
+        "provenance": (
+            "Synthetic spoken instruction assets generated from repository prompts "
+            "with Kokoro ONNX; source audio is not copied from Study 5 MP3 files."
+        ),
         "target_sample_rate": TARGET_SAMPLE_RATE,
         "target_seconds": TARGET_SECONDS,
         "files": {},
@@ -129,9 +134,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=ASSET_DIR)
     parser.add_argument("--model-dir", type=Path, default=MODEL_DIR)
-    parser.add_argument("--voice", default="af_sarah")
+    parser.add_argument("--voice", default="bf_emma")
     parser.add_argument("--speed", type=float, default=0.92)
-    parser.add_argument("--lang", default="en-us")
+    parser.add_argument("--lang", default="en-gb")
     parser.add_argument("--no-download", action="store_true", help="Require existing model files instead of downloading.")
     return parser
 

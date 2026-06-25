@@ -1,0 +1,90 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "serino_2015_peri_trunk_exp1",
+  "assets": [
+    {
+      "label": "Trunk moving sound",
+      "path": "assets/preloads/serino_2015_peri_trunk_exp1/02_looming_stimuli/looming_Trunk_moving_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_peri_trunk_exp1/02_looming_stimuli/looming_Trunk_moving_sound.wav",
+      "sha256": "3717896e6726f2a854edd2168cbc200ccf666d65a7cadc1853536bf1f2cfbf62",
+      "duration_s": 4.318005,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Trunk moving sound",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 100.0,
+        "end_distance_cm": 5.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 4.318,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.95,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.0,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.05,
+          "z_m": 0.0
+        }
+      }
+    },
+    {
+      "label": "Trunk moving sound - receding",
+      "path": "assets/preloads/serino_2015_peri_trunk_exp1/02_looming_stimuli/looming_Trunk_moving_sound_-_receding.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_peri_trunk_exp1/02_looming_stimuli/looming_Trunk_moving_sound_-_receding.wav",
+      "sha256": "2fc8eeb5af47218e467eaa030463a3d0d4820d641eb42ca364cca3e74db26550",
+      "duration_s": 4.318005,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "receding",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Trunk moving sound - receding",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 5.0,
+        "end_distance_cm": 100.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 4.318,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.95,
+        "coordinate_mode": "cartesian",
+        "path_direction": "recede",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 0.05,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.0,
+          "z_m": 0.0
+        }
+      }
+    }
+  ]
+}

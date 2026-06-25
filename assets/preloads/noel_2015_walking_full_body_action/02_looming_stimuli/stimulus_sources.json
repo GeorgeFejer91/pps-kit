@@ -1,0 +1,48 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "noel_2015_walking_full_body_action",
+  "assets": [
+    {
+      "label": "Walking PPS looming sound",
+      "path": "assets/preloads/noel_2015_walking_full_body_action/02_looming_stimuli/looming_Walking_PPS_looming_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/noel_2015_walking_full_body_action/02_looming_stimuli/looming_Walking_PPS_looming_sound.wav",
+      "sha256": "a321287ae6a6bd289ed7c3d1a027f36208576b2ec64f07bf3d6247cae64a3bae",
+      "duration_s": 3.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Walking PPS looming sound",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 200.0,
+        "end_distance_cm": 10.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 3.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.9,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 2.0,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.1,
+          "z_m": 0.0
+        }
+      }
+    }
+  ]
+}

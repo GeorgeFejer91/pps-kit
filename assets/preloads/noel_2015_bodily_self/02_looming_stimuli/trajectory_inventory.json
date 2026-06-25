@@ -1,0 +1,43 @@
+{
+  "schema": "pps-preload-trajectory-inventory.v1",
+  "template_id": "noel_2015_bodily_self",
+  "trajectories": [
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Looming sound",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 90.0,
+        "end_distance_cm": 15.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 1.14,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.75,
+        "coordinate_mode": "polar",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 0.9,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.15,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Looming sound"
+      ],
+      "tone_types": [
+        "pink"
+      ],
+      "asset_paths": [
+        "assets/preloads/noel_2015_bodily_self/02_looming_stimuli/looming_Looming_sound.wav"
+      ]
+    }
+  ]
+}

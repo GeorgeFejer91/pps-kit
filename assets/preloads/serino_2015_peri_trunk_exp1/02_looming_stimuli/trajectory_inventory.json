@@ -1,0 +1,80 @@
+{
+  "schema": "pps-preload-trajectory-inventory.v1",
+  "template_id": "serino_2015_peri_trunk_exp1",
+  "trajectories": [
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Trunk moving sound",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 100.0,
+        "end_distance_cm": 5.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 4.318,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.95,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.0,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.05,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Trunk moving sound"
+      ],
+      "tone_types": [
+        "pink"
+      ],
+      "asset_paths": [
+        "assets/preloads/serino_2015_peri_trunk_exp1/02_looming_stimuli/looming_Trunk_moving_sound.wav"
+      ]
+    },
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Trunk moving sound - receding",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 5.0,
+        "end_distance_cm": 100.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 4.318,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.95,
+        "coordinate_mode": "cartesian",
+        "path_direction": "recede",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 0.05,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.0,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Trunk moving sound - receding"
+      ],
+      "tone_types": [
+        "pink"
+      ],
+      "asset_paths": [
+        "assets/preloads/serino_2015_peri_trunk_exp1/02_looming_stimuli/looming_Trunk_moving_sound_-_receding.wav"
+      ]
+    }
+  ]
+}

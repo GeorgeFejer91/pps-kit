@@ -1,0 +1,131 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "lerner_2021_3d_audio_tactile_boundary",
+  "title": "Lerner 2021 3D audio-tactile PPS boundary",
+  "citation": "Lerner, F., Tahar, G., Bar, A., Koren, O., & Flash, T. (2021). VR Setup to Assess Peripersonal Space Audio-Tactile 3D Boundaries. Frontiers in Virtual Reality, 2, 644214.",
+  "doi": "10.3389/frvir.2021.644214",
+  "source_url": "https://www.frontiersin.org/journals/virtual-reality/articles/10.3389/frvir.2021.644214/full",
+  "verification_status": "partial",
+  "notes": "3D Tune-In/Unity PPS mapping study. The preload catalog expands the paper's twelve virtual source directions into local auditory-only trajectory assets for the dynamic and flat source types. Exact replication still needs body-scaled distance mode and the original Unity/3D Tune-In condition logic.",
+  "reference_parameters": {
+    "audio_engine": "3D Tune-In Toolkit in Unity",
+    "directions_reported": 12,
+    "virtual_sound_source_radius_m": 1.2,
+    "preload_end_radius_m": 0.01,
+    "virtual_sound_source_positions": [
+      {
+        "label": "direction_01",
+        "x_left_right_m": 0.0,
+        "y_down_top_m": 0.6,
+        "z_behind_front_m": 1.0392304845,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_02",
+        "x_left_right_m": 0.6,
+        "y_down_top_m": 1.0392304845,
+        "z_behind_front_m": 0.0,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_03",
+        "x_left_right_m": 1.0392304845,
+        "y_down_top_m": 0.0,
+        "z_behind_front_m": 0.6,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_04",
+        "x_left_right_m": 0.0,
+        "y_down_top_m": -0.6,
+        "z_behind_front_m": 1.0392304845,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_05",
+        "x_left_right_m": -0.6,
+        "y_down_top_m": 1.0392304845,
+        "z_behind_front_m": 0.0,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_06",
+        "x_left_right_m": 1.0392304845,
+        "y_down_top_m": 0.0,
+        "z_behind_front_m": -0.6,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_07",
+        "x_left_right_m": 0.0,
+        "y_down_top_m": -0.6,
+        "z_behind_front_m": -1.0392304845,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_08",
+        "x_left_right_m": -0.6,
+        "y_down_top_m": -1.0392304845,
+        "z_behind_front_m": 0.0,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_09",
+        "x_left_right_m": -1.0392304845,
+        "y_down_top_m": 0.0,
+        "z_behind_front_m": -0.6,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_10",
+        "x_left_right_m": 0.0,
+        "y_down_top_m": 0.6,
+        "z_behind_front_m": -1.0392304845,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_11",
+        "x_left_right_m": 0.6,
+        "y_down_top_m": -1.0392304845,
+        "z_behind_front_m": 0.0,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      },
+      {
+        "label": "direction_12",
+        "x_left_right_m": -1.0392304845,
+        "y_down_top_m": 0.0,
+        "z_behind_front_m": 0.6,
+        "end_radius_m": 0.01,
+        "movement_duration_s": 5.5
+      }
+    ],
+    "sound_velocity_mps": 0.22,
+    "distance_scale": "25-129 percent of arm length in results table; profile assumes 70 cm reference arm length for preload values",
+    "implementation_gaps": [
+      "body-scaled distance mode",
+      "flat versus dynamic condition as block factor",
+      "exact Unity/3D Tune-In stimulus engine behavior"
+    ]
+  },
+  "provenance": [
+    {
+      "field": "3D setup",
+      "source": "Frontiers article reports 12 virtual sound-source positions on a sphere with R = 1.2 m, dynamic and flat sounds, 3D Tune-In Toolkit anechoic rendering, and velocity around 22 cm/s."
+    },
+    {
+      "field": "distance scale",
+      "source": "Results describe thresholds as percent of arm length; current profile uses cm placeholders until body-scaled distance mode is implemented."
+    }
+  ]
+}

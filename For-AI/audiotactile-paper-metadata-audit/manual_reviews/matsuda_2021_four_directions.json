@@ -1,0 +1,281 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "matsuda_2021_four_directions",
+  "citation_short": "Matsuda et al. (2021)",
+  "review_date": "2026-06-16",
+  "manual_review_status": "manual_review_completed_main_pdf_and_publisher_html_no_supplement_found",
+  "confidence_score": 0.93,
+  "confidence_label": "high_confidence_extraction",
+  "confidence_basis": "Main PDF, OpenDataLoader output, fallback pypdf extraction, rendered methods pages, Nature HTML, and cited-protocol lineage to Canzoneri et al. 2012 were reviewed. The paper directly reports the four body-relative direction blocks, pink-noise motion, speaker geometry, gain range, tactile timings, condition rows, repetitions, catch trials, block count, and total trial count. Remaining uncertainty is mainly exact pink-noise file/seed, ITI distribution, and response timeout.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats_four_direction_dynamic_trunk_pps_profile",
+    "reason": "The study is a strong runnable four-direction trunk PPS profile: two physical speakers synthesize approaching/receding pink-noise motion in front, rear, left, and right blocks, with explicit tactile timings and per-row counts. Lab recreation still needs an approximate pink-noise source and a chosen ITI/response timeout because those are not numerically reported."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf",
+      "source": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+      "status": "reviewed",
+      "scope": "Reviewed overview, results timing description, methods page, Fig. 5, conditions, procedure, and data-availability section for Segment 1-4 values."
+    },
+    {
+      "source_type": "opendataloader_json_md",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/matsuda_2021_four_directions.json",
+      "status": "reviewed",
+      "scope": "Used as primary extraction map for methods and timing/count rows, then checked against fallback extraction and rendered page images."
+    },
+    {
+      "source_type": "fallback_text_extraction",
+      "source": "pypdf local extraction",
+      "status": "reviewed",
+      "scope": "Searched all 10 pages for stimulus, audio, tactile, temporal delay, catch, randomized, block, trial, response, ITI, and supplement terms."
+    },
+    {
+      "source_type": "rendered_pdf_pages",
+      "source": "tmp/pdfs/matsuda_2021_review/page-02.png and page-07.png",
+      "status": "reviewed_not_tracked",
+      "scope": "Temporary rendered pages were visually checked to verify timing rows, speaker layout, direction blocks, condition counts, and randomized procedure."
+    },
+    {
+      "source_type": "publisher_html_and_supplement_route",
+      "source": "https://www.nature.com/articles/s41598-021-90784-5",
+      "status": "checked_no_supplement_listing",
+      "scope": "Nature HTML was checked for supplementary-information links and methods details; no supplement listing was exposed, and all Segment 1-4 values came from the main article."
+    },
+    {
+      "source_type": "cited_protocol_lineage",
+      "source": "For-AI/audiotactile-paper-metadata-audit/manual_reviews/canzoneri_2012_dynamic_sounds.json",
+      "status": "reviewed",
+      "scope": "Matsuda states it adopted the Canzoneri 2012 audio-tactile PPS task; Canzoneri was checked as the base dynamic-audio protocol lineage."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "OpenDataLoader PDF extraction",
+      "status": "completed",
+      "result": "Captured the methods page with pink noise, speaker geometry, gain, tactile timing rows, condition percentages, counts, breaks, and randomization."
+    },
+    {
+      "strategy": "Fallback pypdf extraction",
+      "status": "completed",
+      "result": "Confirmed page 7 as the main source for apparatus and count fields and page 2 as the overview/timing source."
+    },
+    {
+      "strategy": "Rendered-page visual verification",
+      "status": "completed",
+      "result": "Verified Fig. 5 and methods text for IN/OUT gradients, 10/110 cm speaker layout, four direction orientations, and condition counts."
+    },
+    {
+      "strategy": "Timing and baseline pass",
+      "status": "completed",
+      "result": "Separated T1-T5 bimodal SOAs from Tbefore/Tafter unimodal baseline-like timings and confirmed that ITI was not numerically reported."
+    },
+    {
+      "strategy": "Count and catch pass",
+      "status": "completed",
+      "result": "Mapped 100 bimodal, 40 unimodal, and 60 catch trials per direction block, with 4 blocks and 800 total trials."
+    },
+    {
+      "strategy": "Publisher supplement and cited-protocol pass",
+      "status": "completed_no_supplement_found",
+      "result": "Nature HTML exposed no supplement listing; the paper cites Canzoneri 2012 as the base task, and the current Matsuda paper supplies its own four-direction implementation details."
+    }
+  ],
+  "field_status_counts": {
+    "not_reported_after_review": 2,
+    "reported": 23
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "reported",
+        "value": "Moving auditory stimuli were generated from 44.1 kHz pink noise.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF p.7, Audio stimuli",
+        "evidence_note": "The methods identify the sound class and sample rate."
+      },
+      "source_provenance": {
+        "status": "reported",
+        "value": "The paper says the audio stimuli were created from pink noise; exact source file, seed, or stimulus script is not supplied.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf; https://www.nature.com/articles/s41598-021-90784-5",
+        "page_or_section": "PDF p.7, Audio stimuli; Nature data availability",
+        "evidence_note": "Stimulus provenance is reported at the class level, but no reusable asset is linked."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "Eight auditory motion trajectories: approaching and receding motion in each of four body-relative directions.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF pp.2 and 7, overview/Fig. 5",
+        "evidence_note": "The design crosses two audio motions with front, rear, left, and right direction blocks."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Motion was synthesized between a near speaker 10 cm from the participant and a far speaker 110 cm away, with participants reoriented for front, rear, left, and right blocks.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF p.7, Fig. 5 and Audio stimuli",
+        "evidence_note": "Speaker distances and direction-block orientations are shown and described."
+      },
+      "stimulus_duration": {
+        "status": "reported",
+        "value": "Auditory motion lasted 3000 ms.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF p.7, Audio stimuli",
+        "evidence_note": "The duration is directly reported for both approaching and receding sounds."
+      },
+      "stimulus_speed": {
+        "status": "reported",
+        "value": "Pink-noise motion was linear and uniform at 33.3 cm/s between 10 and 110 cm.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF p.7, Audio stimuli",
+        "evidence_note": "Speed and spatial endpoints are explicitly reported."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "Approaching and receding auditory motion conditions were tested in front, rear, left, and right body-relative directions.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF pp.2 and 7, overview/Conditions",
+        "evidence_note": "The article describes the two audio motions and four direction blocks."
+      },
+      "gain_envelope": {
+        "status": "reported",
+        "value": "Sound pressure changed exponentially over 55-70 dBA, increasing for approaching and decreasing for receding motion.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF p.7, Audio stimuli",
+        "evidence_note": "The SPL range and direction of the envelope are reported."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Unity 5.6.1f1 controlled the sequence; two JBL Control 1 Pro loudspeakers at sternum height presented the moving sound.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF p.7, Stimuli/Audio stimuli",
+        "evidence_note": "Software and speaker model/placement are reported."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "Each direction block contained bimodal audio-tactile trials, unimodal tactile-only timing trials, and no-tactile catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF p.7, Conditions",
+        "evidence_note": "The three trial families are listed in the conditions section."
+      },
+      "condition_intermixing": {
+        "status": "reported",
+        "value": "Trials from the three families and timing/motion cells were randomized within each direction block.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF p.7, Procedure",
+        "evidence_note": "The procedure reports randomized trial order within each block."
+      },
+      "blocked_or_random_order": {
+        "status": "reported",
+        "value": "Four body-relative direction blocks were used; block order was counterbalanced across participants.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF p.7, Conditions/Procedure",
+        "evidence_note": "Direction was blocked, while block order was counterbalanced."
+      },
+      "iti_jitter_policy": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf; https://www.nature.com/articles/s41598-021-90784-5",
+        "page_or_section": "PDF p.7 methods; Nature HTML checked 2026-06-16",
+        "evidence_note": "No ITI, inter-trial interval, or jitter value/distribution was found after main PDF, fallback, visual, and publisher-route checks."
+      },
+      "response_window": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf; https://www.nature.com/articles/s41598-021-90784-5",
+        "page_or_section": "PDF pp.2 and 7, Results/Procedure",
+        "evidence_note": "Participants responded quickly; RTs outside 100-1300 ms were excluded analytically, but no response timeout was reported."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Participants were blindfolded, detected chest vibration regardless of sound, and withheld responses when no tactile stimulus occurred.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF p.7, Procedure",
+        "evidence_note": "Task instructions and catch-trial response rule are reported."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "A Nidec LD14-002 linear vibration actuator controlled by Arduino UNO delivered a 24 ms vibration on the chest.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF p.7, Tactile stimuli",
+        "evidence_note": "Tactile device, control hardware, site, and duration are reported."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "T1-T5 occurred 300, 800, 1500, 2200, and 2700 ms from sound onset; Tbefore was 700 ms before sound onset and Tafter was 700 ms after sound offset.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF pp.2 and 7, overview/Tactile stimuli",
+        "evidence_note": "All seven tactile timing values are directly reported."
+      },
+      "baseline_strategy": {
+        "status": "reported",
+        "value": "Unimodal tactile-only trials used Tbefore and Tafter timings as pre/post-sound baseline-like controls without audio.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF p.7, Conditions",
+        "evidence_note": "The unimodal family is explicitly defined as tactile stimulus without audio stimulus."
+      },
+      "baseline_timing": {
+        "status": "reported",
+        "value": "Baseline-like tactile-only timings were Tbefore at -700 ms relative to sound onset and Tafter at +700 ms after sound offset.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF pp.2 and 7, Tactile stimuli/Conditions",
+        "evidence_note": "The same Tbefore/Tafter values define the unimodal timing rows."
+      },
+      "catch_trial_type": {
+        "status": "reported",
+        "value": "Catch trials contained the sound sequence but no tactile stimulus; participants were instructed not to respond.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF p.7, Conditions/Procedure",
+        "evidence_note": "Catch trials were included to limit tactile-timing prediction."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "reported",
+        "value": "Per direction block, bimodal trials were 2 audio motions x 5 T1-T5 delays x 10 repetitions, giving 10 repetitions per motion-delay cell.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF p.7, Conditions",
+        "evidence_note": "The repetition formula is explicitly reported."
+      },
+      "baseline_count": {
+        "status": "reported",
+        "value": "Each direction block had 40 unimodal tactile-only trials: 2 audio-motion timing labels x Tbefore/Tafter x 10 repetitions.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF p.7, Conditions",
+        "evidence_note": "Unimodal baseline-like trial count and formula are reported."
+      },
+      "catch_count": {
+        "status": "reported",
+        "value": "Each direction block had 60 no-tactile catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF p.7, Conditions",
+        "evidence_note": "Catch count is directly reported."
+      },
+      "block_count": {
+        "status": "reported",
+        "value": "The experiment had four blocks, one each for front, rear, left, and right body-relative directions.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF p.7, Conditions/Procedure",
+        "evidence_note": "The direction-block structure is explicitly reported."
+      },
+      "total_trial_count": {
+        "status": "reported",
+        "value": "Each block had 200 trials, for 800 total trials across four direction blocks.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/matsuda_2021_four_directions.pdf",
+        "page_or_section": "PDF p.7, Conditions",
+        "evidence_note": "Per-block and total trial counts are reported."
+      }
+    }
+  },
+  "critical_caveats": [
+    "Exact pink-noise source file, random seed, and Unity implementation script are not supplied.",
+    "No ITI or jitter distribution was found.",
+    "No explicit response timeout is reported; only analysis exclusion cutoffs of 100-1300 ms are described.",
+    "Four directions were blocked by rotating participant orientation relative to the same two-speaker layout, not intermixed trial-by-trial.",
+    "Publisher HTML exposed no supplement listing; the automated supplement ledger previously had an HTTP 429 status rather than an actual downloaded supplement."
+  ],
+  "next_manual_action": "Use this as a high-confidence four-direction dynamic trunk PPS profile. Implement ITI and response timeout as explicit lab-default approximations unless a later source or author-provided data/script reveals them."
+}

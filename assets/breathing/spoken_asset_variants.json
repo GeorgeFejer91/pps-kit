@@ -1,0 +1,19 @@
+{
+  "active_root_variant": "british_kokoro",
+  "variants": {
+    "british_kokoro": {
+      "label": "British Kokoro voice",
+      "directory": "assets/breathing/british_kokoro",
+      "manifest": "assets/breathing/british_kokoro/spoken_assets_manifest.json",
+      "default_for_root_assets": true,
+      "description": "Synthetic British English Kokoro bf_emma instruction assets; exact 4-second WAVs."
+    },
+    "original_study5": {
+      "label": "Original Study 5 instruction audio",
+      "directory": "assets/breathing/original_study5",
+      "manifest": "assets/breathing/original_study5/spoken_assets_manifest.json",
+      "default_for_root_assets": false,
+      "description": "Original local Study 5 MP3 instruction assets decoded to public WAVs; trial-window inhale/exhale are normalized to 4 seconds, longer runner messages preserve decoded duration."
+    }
+  }
+}

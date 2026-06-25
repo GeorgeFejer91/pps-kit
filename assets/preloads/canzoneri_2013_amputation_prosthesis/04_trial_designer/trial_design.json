@@ -1,0 +1,45 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "canzoneri_2013_amputation_prosthesis",
+  "repetitions_per_condition": 8,
+  "soa_values_ms": [
+    300,
+    800,
+    1500,
+    2200,
+    2700
+  ],
+  "spatial_values_cm": [
+    100.0,
+    83.3,
+    60.0,
+    36.7,
+    20.0
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "canzoneri-amputation-dynamic-sound-row",
+      "label": "Dynamic sound PPS trial",
+      "audio_tactile_percentage": 100.0,
+      "catch_percentage": 0.0,
+      "baseline_percentage": 0.0,
+      "elements": [
+        {
+          "element_id": "canzoneri-amputation-moving-sound",
+          "kind": "looming_stimulus",
+          "label": "Pink moving sound",
+          "source_label": "Pink moving sound",
+          "source_labels": [
+            "Pink moving sound",
+            "Pink moving sound - receding"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 80
+}

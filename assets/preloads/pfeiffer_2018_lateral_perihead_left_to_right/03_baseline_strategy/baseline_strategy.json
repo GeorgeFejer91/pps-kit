@@ -1,0 +1,10 @@
+{
+  "schema": "pps-preload-baseline-segment.v1",
+  "template_id": "pfeiffer_2018_lateral_perihead_left_to_right",
+  "baseline_strategy": "tactile_only",
+  "include_baseline_trials": true,
+  "baseline_trial_percentage": 0.0,
+  "baseline_soa_values_ms": [],
+  "catch_trial_percentage": 10.0,
+  "catch_trials_exact": null
+}

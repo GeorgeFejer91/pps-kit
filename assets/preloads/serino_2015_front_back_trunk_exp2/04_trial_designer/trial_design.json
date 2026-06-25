@@ -1,0 +1,49 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "serino_2015_front_back_trunk_exp2",
+  "repetitions_per_condition": 12,
+  "soa_values_ms": [
+    143,
+    571,
+    1000,
+    1429,
+    1857,
+    2286,
+    2714
+  ],
+  "spatial_values_cm": [
+    95,
+    80,
+    65,
+    50,
+    35,
+    20,
+    5
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "serino-front-back-trunk-row",
+      "label": "Front/back trunk moving-sound trial",
+      "audio_tactile_percentage": 100.0,
+      "catch_percentage": 0.0,
+      "baseline_percentage": 0.0,
+      "elements": [
+        {
+          "element_id": "serino-front-back-moving-sound",
+          "kind": "looming_stimulus",
+          "label": "Front-back moving sound",
+          "source_label": "Front-back moving sound",
+          "source_labels": [
+            "Front-back moving sound",
+            "Front-back moving sound - back to front"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 168
+}

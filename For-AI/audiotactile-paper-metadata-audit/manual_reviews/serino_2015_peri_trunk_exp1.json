@@ -1,0 +1,294 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "serino_2015_peri_trunk_exp1",
+  "citation_short": "Serino et al. (2015), Exp. 1",
+  "review_date": "2026-06-16",
+  "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
+  "confidence_score": 0.86,
+  "confidence_label": "high_confidence_extraction",
+  "confidence_basis": "Main PDF, OpenDataLoader output, fallback text extraction, rendered methods pages, publisher HTML, and the downloaded supplement were checked. Segment 1-4 values are mostly reported, with remaining uncertainty around exact auditory file duration, precise SOA milliseconds, trial randomization/blocking, response timeout, and exact baseline/catch decomposition.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats",
+    "reason": "Experiment 1 can be recreated as a two-speaker or digital two-source trunk-anchored looming/receding pink-noise task with reported D1-D6 distances, 22 cm/s speed, dB envelopes, tactile apparatus, baseline strategy, ITI jitter, and total/repetition formula. Exact envelope files and the full count split for baseline/catch trials would need approximation."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf",
+      "source": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf",
+      "status": "reviewed",
+      "scope": "PDF pages 2-3 for Experiment 1 setup/results and pages 11-13 for Methods, Stimuli and Apparatus, Procedure, Design, and trial counts."
+    },
+    {
+      "source_type": "opendataloader_json",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/serino_2015_peri_trunk_exp1.json",
+      "status": "reviewed",
+      "scope": "Used as the primary extracted text map, then checked against rendered PDF pages and fallback extraction."
+    },
+    {
+      "source_type": "supplement_doc",
+      "source": "artifacts/paper_metadata_audit/supplements/serino_2015_peri_trunk_exp1/41598_2015_BFsrep18603_MOESM1_ESM.doc",
+      "status": "reviewed",
+      "scope": "Checked the 2-speaker setup, loudspeaker model, pink-noise provenance, dB envelopes, and validation section."
+    },
+    {
+      "source_type": "supplement_text_extraction",
+      "source": "artifacts/paper_metadata_audit/extracted/supplements/serino_2015_peri_trunk_exp1/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+      "status": "reviewed",
+      "scope": "Fallback supplement text was searched for speaker, pink noise, SoundForge, SPL, looming, receding, and validation terms."
+    },
+    {
+      "source_type": "fallback_text_extraction",
+      "source": "pdfplumber and pdftotext local extraction",
+      "status": "reviewed",
+      "scope": "Targeted searches for stimulus, apparatus, distance, speed, SOA, baseline, catch, trial count, repetition, ITI, and response parameters."
+    },
+    {
+      "source_type": "rendered_pdf_pages",
+      "source": "tmp/pdfs/serino_2015_exp1_review/page-11.png through page-13.png",
+      "status": "reviewed_not_tracked",
+      "scope": "Visual methods-page check; temporary rendered images were not committed."
+    },
+    {
+      "source_type": "publisher_html",
+      "source": "https://www.nature.com/articles/srep18603",
+      "status": "checked",
+      "scope": "Official article page checked for Experiment 1, Methods, Figure 1, and supplementary-information routes."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "OpenDataLoader PDF extraction",
+      "status": "completed",
+      "result": "Mapped candidate Segment 1-4 values across 20 of 25 fields."
+    },
+    {
+      "strategy": "Fallback extraction verification",
+      "status": "completed",
+      "result": "pdfplumber and pdftotext confirmed tactile apparatus, acoustic setup, D1-D6 distances, baseline/catch logic, total trials, repetitions, and ITI jitter."
+    },
+    {
+      "strategy": "Rendered-page layout pass",
+      "status": "completed",
+      "result": "Rendered methods pages were checked visually to verify page flow around apparatus, procedure, design, and trial-count paragraphs."
+    },
+    {
+      "strategy": "Supplement acoustic-provenance pass",
+      "status": "completed",
+      "result": "Supplement supplied loudspeaker model, 1 m separation, near/far placement, pink-noise samples, SoundForge provenance, and 55-70 dB exponential envelopes."
+    },
+    {
+      "strategy": "Stimulus reconstruction pass",
+      "status": "completed",
+      "result": "Separated Exp. 1 from the other six experiments and kept only the 2-speaker, trunk, D1-D6, 22 cm/s looming/receding profile."
+    },
+    {
+      "strategy": "Sequence, baseline, catch, and repetition pass",
+      "status": "completed",
+      "result": "Identified three trial families, two baseline timings, sound-only catches, x16 repetition formula, 240 total trials, and the unresolved baseline/catch exact split."
+    },
+    {
+      "strategy": "Publisher and supplement route check",
+      "status": "completed",
+      "result": "Official Nature page and local supplement were checked; no additional downloadable methods tables or stimulus files were found."
+    }
+  ],
+  "field_status_counts": {
+    "derived": 3,
+    "not_reported_after_review": 3,
+    "reported": 19
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "reported",
+        "value": "Pink-noise auditory samples at 44.1 kHz.",
+        "source_file": "artifacts/paper_metadata_audit/extracted/supplements/serino_2015_peri_trunk_exp1/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+        "page_or_section": "Supplement, 2-speakers setup",
+        "evidence_note": "Supplement reports pink-noise samples used for the auditory stimuli."
+      },
+      "source_provenance": {
+        "status": "reported",
+        "value": "SoundForge 4.5 shaped pink-noise samples; exact source WAV/noise seed is not reported.",
+        "source_file": "artifacts/paper_metadata_audit/extracted/supplements/serino_2015_peri_trunk_exp1/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+        "page_or_section": "Supplement, 2-speakers setup",
+        "evidence_note": "Software provenance is reported in the supplement, but not the original sound asset."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "Two auditory motion directions in Experiment 1: looming and receding.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf",
+        "page_or_section": "PDF pp.2, 11-12, Experiment 1 and Acoustic Stimuli",
+        "evidence_note": "Experiment 1 crossed Sound Direction with six distances."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Near speaker about 5 cm from the participant and far speaker about 1 m away; looming far-to-near, receding near-to-far, anchored to trunk/chest.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf; artifacts/paper_metadata_audit/extracted/supplements/serino_2015_peri_trunk_exp1/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+        "page_or_section": "PDF pp.2, 11-12; supplement 2-speakers setup",
+        "evidence_note": "Main paper gives D1-D6 distances; supplement gives physical near/far speaker placement."
+      },
+      "stimulus_duration": {
+        "status": "derived",
+        "value": "Full auditory path duration is not directly stated; 100 cm path at 22 cm/s implies about 4.55 s for the far-near motion.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf",
+        "page_or_section": "PDF pp.11-12, Acoustic Stimuli",
+        "evidence_note": "Derived from reported path length and velocity; exact file length is not independently reported."
+      },
+      "stimulus_speed": {
+        "status": "reported",
+        "value": "Experiment 1 auditory motion traveled at 22 cm/s over a 100 cm near-far speaker distance.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf",
+        "page_or_section": "PDF pp.11-12, Acoustic Stimuli",
+        "evidence_note": "The 2-speaker setup used 22 cm/s in Experiment 1, 4, and 5."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "Looming and receding sounds were used while tactile targets were delivered to the trunk/chest.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf",
+        "page_or_section": "PDF pp.2, 12, Experiment 1 and Acoustic Stimuli",
+        "evidence_note": "Experiment 1 uses both sound directions; looming drives the reported PPS effect."
+      },
+      "gain_envelope": {
+        "status": "reported",
+        "value": "Looming intensity rose exponentially from 55 to 70 dB SPL; receding decreased from 70 to 55 dB SPL, with near/far speaker intensities mirrored.",
+        "source_file": "artifacts/paper_metadata_audit/extracted/supplements/serino_2015_peri_trunk_exp1/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+        "page_or_section": "Supplement, 2-speakers setup",
+        "evidence_note": "Supplement gives dB endpoints and qualitative exponential mirror pattern."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Two M-Audio Studiophile AV 360 loudspeakers facing each other, one near and one far, coactivated with differential intensity.",
+        "source_file": "artifacts/paper_metadata_audit/extracted/supplements/serino_2015_peri_trunk_exp1/41598_2015_BFsrep18603_MOESM1_ESM.txt",
+        "page_or_section": "Supplement, 2-speakers setup",
+        "evidence_note": "Supplement reports speaker make/model and geometry; room transfer is not reported."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "Three trial families: bimodal audio-tactile target trials, unimodal tactile baseline trials, and unimodal auditory catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf",
+        "page_or_section": "PDF p.12, Design and Analysis",
+        "evidence_note": "The design section explicitly lists the three trial types."
+      },
+      "condition_intermixing": {
+        "status": "reported",
+        "value": "Experiment 1 combines multisensory D1-D6 trials, D1/D6 baselines, and catch trials within the same task; exact trial-order algorithm is not stated.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf",
+        "page_or_section": "PDF p.12, Design and Analysis",
+        "evidence_note": "Formula reports one combined experiment rather than separate task phases."
+      },
+      "blocked_or_random_order": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf; https://www.nature.com/articles/srep18603",
+        "page_or_section": "PDF pp.11-13, Procedure/Design; official Nature HTML checked 2026-06-16",
+        "evidence_note": "No explicit block count, block structure, or trial randomization algorithm was found for Experiment 1."
+      },
+      "iti_jitter_policy": {
+        "status": "reported",
+        "value": "Inter-trial intervals were randomly shuffled between 500 and 700 ms.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf",
+        "page_or_section": "PDF p.13, Design and Analysis",
+        "evidence_note": "The ITI range is reported after the per-experiment trial-count formulas."
+      },
+      "response_window": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf; https://www.nature.com/articles/srep18603",
+        "page_or_section": "PDF pp.11-13, Procedure/Design; official Nature HTML checked 2026-06-16",
+        "evidence_note": "Button-press response and catch withholding are reported, but no explicit response timeout/window was found."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Participants responded rapidly to tactile vibration, ignored sounds, withheld responses on sound-only catches, and baseline trials omitted sound.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf",
+        "page_or_section": "PDF pp.11-12, General Procedure and Design",
+        "evidence_note": "The procedure states the response rule and no-go catch rule."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "Single Precision MicroDrives 312-101 shaftless vibration motor on upper chest/sternum; 150 Hz motor; tactile stimulation lasted 100 ms.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf",
+        "page_or_section": "PDF p.11, Tactile Stimuli",
+        "evidence_note": "The Methods list motor model, body site, and stimulation duration for Experiment 1."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "Six distance-at-touch levels D1-D6: 5, 24, 43, 62, 81, and 100 cm; timing offsets are dictated by 22 cm/s and reverse for looming.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf",
+        "page_or_section": "PDF pp.2, 12, Experiment 1 and Design",
+        "evidence_note": "Distances are tabulated in prose; exact SOA milliseconds are not separately tabulated."
+      },
+      "baseline_strategy": {
+        "status": "reported",
+        "value": "Unimodal tactile-only baseline trials without auditory stimulation; fastest baseline RT was subtracted from multisensory RTs.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf",
+        "page_or_section": "PDF p.12, Design and Analysis",
+        "evidence_note": "The paper describes baseline correction using the fastest unimodal tactile condition."
+      },
+      "baseline_timing": {
+        "status": "reported",
+        "value": "Baseline trials used two temporal delays corresponding to the nearest and farthest sampled distances, D1 and D6.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf",
+        "page_or_section": "PDF p.12, Design and Analysis",
+        "evidence_note": "The exact millisecond timings are not tabulated but are tied to the D1/D6-equivalent timings."
+      },
+      "catch_trial_type": {
+        "status": "reported",
+        "value": "Unimodal auditory catch trials: sound presented without tactile stimulation; participants withheld response.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf",
+        "page_or_section": "PDF p.12, Design and Analysis",
+        "evidence_note": "Catch trials were used to prevent automatic responding and check attention."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "reported",
+        "value": "Experiment 1 formula reports [multisensory D1-D6 + baselines D1/D6 + catch trials] x 2 directions x 16 repetitions.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf",
+        "page_or_section": "PDF p.12, Design and Analysis",
+        "evidence_note": "The repetition factor is explicit, though catch/baseline decomposition is not."
+      },
+      "baseline_count": {
+        "status": "derived",
+        "value": "General design says about 20% unimodal tactile baselines; with 240 Exp.1 trials this is about 48, but exact D1/D6-by-direction split is not stated.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf",
+        "page_or_section": "PDF p.12, Design and Analysis",
+        "evidence_note": "Derived from the reported percentage and total; formula confirms two baseline timings."
+      },
+      "catch_count": {
+        "status": "derived",
+        "value": "General design says about 10% auditory catch trials; with 240 Exp.1 trials this is about 24, but exact catch count per sound direction is not stated.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf",
+        "page_or_section": "PDF p.12, Design and Analysis",
+        "evidence_note": "Derived from the reported percentage and total; paper does not give an exact Exp.1 catch count."
+      },
+      "block_count": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf; https://www.nature.com/articles/srep18603",
+        "page_or_section": "PDF pp.11-13, Methods; official Nature HTML checked 2026-06-16",
+        "evidence_note": "The paper says experiments never exceeded 60 minutes, but no Experiment 1 block count was found."
+      },
+      "total_trial_count": {
+        "status": "reported",
+        "value": "Experiment 1 consisted of 240 trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_trunk_exp1.pdf",
+        "page_or_section": "PDF p.12, Design and Analysis",
+        "evidence_note": "The total is explicitly reported in the design paragraph."
+      }
+    }
+  },
+  "critical_caveats": [
+    "Exact original pink-noise WAV/noise seed is not reported.",
+    "Exact SoundForge gain/envelope file is not provided beyond exponential direction and dB endpoints.",
+    "Auditory file duration is derived from path length and speed; no standalone file duration is reported.",
+    "Exact SOA milliseconds for D1-D6 and D1/D6 baselines are not tabulated.",
+    "Exact trial-order randomization, block count, and response timeout/window are not reported.",
+    "Exact Experiment 1 baseline and catch counts are only derivable approximately from percentages and total trials."
+  ],
+  "next_manual_action": "This paper is strong enough for a runnable trunk two-speaker/digital two-source profile, with exact gain files, exact SOA table, and exact baseline/catch count split treated as approximations unless author materials become available."
+}

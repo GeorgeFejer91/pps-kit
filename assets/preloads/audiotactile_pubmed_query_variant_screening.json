@@ -1,0 +1,496 @@
+{
+  "schema": "pps-audiotactile-pubmed-query-variant-screening.v1",
+  "screened_on": "2026-06-13",
+  "source_search_file": "artifacts/literature_audit/pubmed_query_variant_search.json",
+  "source_records_file": "artifacts/literature_audit/pubmed_query_variant_records.json",
+  "screening_scope": "Supplemental PubMed screening for records returned by auditory-tactile, vibrotactile, looming-sound, near-hand, and auditory-PPS query variants but not already covered by the original 48-record PubMed screen.",
+  "query_count": 8,
+  "unique_record_count": 70,
+  "original_pubmed_screen_count": 48,
+  "supplemental_screened_count": 22,
+  "promoted_to_coverage_count": 3,
+  "linked_existing_count": 6,
+  "excluded_count": 13,
+  "records": [
+    {
+      "pmid": "3244399",
+      "doi": "10.1007/BF00165633",
+      "title": "Conditioned behavioural responses to apomorphine: extinction and haloperidol-induced inhibition.",
+      "year": "1988",
+      "journal": "Naunyn Schmiedebergs Arch Pharmacol",
+      "publication_types": [
+        "Journal Article",
+        "Research Support, Non-U.S. Gov't"
+      ],
+      "query_hits": [
+        {
+          "query": "\"auditory-tactile extinction\"",
+          "rank": 4
+        }
+      ],
+      "screening_decision": "excluded_non_pps_conditioning_or_drug_context",
+      "linked_literature_record_ids": [],
+      "reason": "Animal conditioning/drug-response paper retrieved by auditory+tactile+extinction wording; not a PPS task."
+    },
+    {
+      "pmid": "11320157",
+      "doi": "10.1093/neucas/7.2.97",
+      "title": "Auditory peripersonal space in humans: a case of auditory-tactile extinction.",
+      "year": "2001",
+      "journal": "Neurocase",
+      "publication_types": [
+        "Case Reports",
+        "Comparative Study",
+        "Journal Article",
+        "Research Support, Non-U.S. Gov't"
+      ],
+      "query_hits": [
+        {
+          "query": "(\"auditory-tactile\" OR \"auditory tactile\") AND \"peripersonal space\"",
+          "rank": 6
+        },
+        {
+          "query": "\"auditory peripersonal space\"",
+          "rank": 4
+        },
+        {
+          "query": "\"auditory-tactile extinction\"",
+          "rank": 1
+        }
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "ladavas_2001_auditory_tactile_extinction"
+      ],
+      "reason": "Early auditory-tactile extinction paper now represented in the coverage ledger."
+    },
+    {
+      "pmid": "12419126",
+      "doi": "10.1162/089892902320474481",
+      "title": "Auditory peripersonal space in humans.",
+      "year": "2002",
+      "journal": "J Cogn Neurosci",
+      "publication_types": [
+        "Comparative Study",
+        "Journal Article",
+        "Research Support, Non-U.S. Gov't"
+      ],
+      "query_hits": [
+        {
+          "query": "(\"auditory-tactile\" OR \"auditory tactile\") AND \"peripersonal space\"",
+          "rank": 3
+        },
+        {
+          "query": "\"auditory peripersonal space\"",
+          "rank": 1
+        },
+        {
+          "query": "\"auditory-tactile extinction\"",
+          "rank": 2
+        }
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "farne_ladavas_2002_auditory_pps_humans"
+      ],
+      "reason": "Auditory PPS neuropsychology paper now represented in the coverage ledger."
+    },
+    {
+      "pmid": "15564590",
+      "doi": "10.1523/JNEUROSCI.3207-04.2004",
+      "title": "A role of ventral tegmental area glutamate in contextual cue-induced relapse to heroin seeking.",
+      "year": "2004",
+      "journal": "J Neurosci",
+      "publication_types": [
+        "Journal Article"
+      ],
+      "query_hits": [
+        {
+          "query": "\"auditory-tactile extinction\"",
+          "rank": 6
+        }
+      ],
+      "screening_decision": "excluded_non_pps_conditioning_or_drug_context",
+      "linked_literature_record_ids": [],
+      "reason": "Heroin-seeking/context-induced relapse paper; no audiotactile PPS task."
+    },
+    {
+      "pmid": "15477031",
+      "doi": "10.1016/j.jphysparis.2004.03.008",
+      "title": "Multisensory contributions to the 3-D representation of visuotactile peripersonal space in humans: evidence from the crossmodal congruency task.",
+      "year": "2004",
+      "journal": "J Physiol Paris",
+      "publication_types": [
+        "Journal Article",
+        "Review"
+      ],
+      "query_hits": [
+        {
+          "query": "vibrotactile AND \"peripersonal space\" AND auditory",
+          "rank": 3
+        }
+      ],
+      "screening_decision": "excluded_review_visual_tactile_or_non_auditory_pps",
+      "linked_literature_record_ids": [],
+      "reason": "Review centered on visuotactile/crossmodal-congruency PPS, not a distinct audiotactile task profile."
+    },
+    {
+      "pmid": "16467906",
+      "doi": "10.1007/s10339-004-0013-3",
+      "title": "The body schema and the multisensory representation(s) of peripersonal space.",
+      "year": "2004",
+      "journal": "Cogn Process",
+      "publication_types": [
+        "Journal Article"
+      ],
+      "query_hits": [
+        {
+          "query": "\"auditory peripersonal space\"",
+          "rank": 8
+        }
+      ],
+      "screening_decision": "excluded_review_theory_or_model",
+      "linked_literature_record_ids": [],
+      "reason": "Review/theory article about body schema and multisensory PPS, not a distinct task profile."
+    },
+    {
+      "pmid": "16341024",
+      "doi": "10.1038/sj.npp.1300977",
+      "title": "Activation of group II metabotropic glutamate receptors in the nucleus accumbens shell attenuates context-induced relapse to heroin seeking.",
+      "year": "2006",
+      "journal": "Neuropsychopharmacology",
+      "publication_types": [
+        "Comparative Study",
+        "Journal Article",
+        "Research Support, N.I.H., Intramural"
+      ],
+      "query_hits": [
+        {
+          "query": "\"auditory-tactile extinction\"",
+          "rank": 7
+        }
+      ],
+      "screening_decision": "excluded_non_pps_conditioning_or_drug_context",
+      "linked_literature_record_ids": [],
+      "reason": "Drug-context relapse paper; no audiotactile PPS task."
+    },
+    {
+      "pmid": "18003845",
+      "doi": "10.1523/JNEUROSCI.3926-07.2007",
+      "title": "Differential effects of blockade of dopamine D1-family receptors in nucleus accumbens core or shell on reinstatement of heroin seeking induced by contextual and discrete cues.",
+      "year": "2007",
+      "journal": "J Neurosci",
+      "publication_types": [
+        "Journal Article",
+        "Research Support, N.I.H., Intramural"
+      ],
+      "query_hits": [
+        {
+          "query": "\"auditory-tactile extinction\"",
+          "rank": 5
+        }
+      ],
+      "screening_decision": "excluded_non_pps_conditioning_or_drug_context",
+      "linked_literature_record_ids": [],
+      "reason": "Heroin-seeking contextual-cue paper; no audiotactile PPS task."
+    },
+    {
+      "pmid": "19305983",
+      "doi": "10.1007/s00221-009-1759-8",
+      "title": "Sound enhances touch perception.",
+      "year": "2009",
+      "journal": "Exp Brain Res",
+      "publication_types": [
+        "Journal Article",
+        "Research Support, U.S. Gov't, Non-P.H.S."
+      ],
+      "query_hits": [
+        {
+          "query": "\"sounds near the hand\" AND tactile",
+          "rank": 2
+        }
+      ],
+      "screening_decision": "excluded_non_pps_audiotactile_or_haptic",
+      "linked_literature_record_ids": [],
+      "reason": "General sound-enhancement of touch detection, not a peripersonal-space task."
+    },
+    {
+      "pmid": "19899363",
+      "doi": "10.1177/0018720809341735",
+      "title": "Using peripersonal warning signals to orient a driver's gaze.",
+      "year": "2009",
+      "journal": "Hum Factors",
+      "publication_types": [
+        "Journal Article",
+        "Research Support, Non-U.S. Gov't"
+      ],
+      "query_hits": [
+        {
+          "query": "vibrotactile AND \"peripersonal space\" AND auditory",
+          "rank": 4
+        }
+      ],
+      "screening_decision": "excluded_adjacent_warning_signal_application",
+      "linked_literature_record_ids": [],
+      "reason": "Applied driver-warning signal study inspired by PPS, not a PPS boundary/integration task profile."
+    },
+    {
+      "pmid": "19931547",
+      "doi": "10.1016/j.neuropsychologia.2009.11.009",
+      "title": "Everyday use of the computer mouse extends peripersonal space representation.",
+      "year": "2010",
+      "journal": "Neuropsychologia",
+      "publication_types": [
+        "Journal Article"
+      ],
+      "query_hits": [
+        {
+          "query": "\"sounds near the hand\" AND tactile",
+          "rank": 5
+        },
+        {
+          "query": "\"auditory peripersonal space\"",
+          "rank": 6
+        }
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "bassolino_2010_mouse_use"
+      ],
+      "reason": "Already tracked mouse-use PPS task; PubMed variant supplies DOI/source metadata."
+    },
+    {
+      "pmid": "23700131",
+      "doi": "10.1007/s00221-013-3574-5",
+      "title": "Audiotactile interactions beyond the space and body parts around the head.",
+      "year": "2013",
+      "journal": "Exp Brain Res",
+      "publication_types": [
+        "Journal Article",
+        "Randomized Controlled Trial",
+        "Research Support, Non-U.S. Gov't"
+      ],
+      "query_hits": [
+        {
+          "query": "\"sounds near the hand\" AND tactile",
+          "rank": 6
+        }
+      ],
+      "screening_decision": "promoted_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "teramoto_2013_beyond_head_audiotactile"
+      ],
+      "reason": "Audiotactile interaction task across body parts and spaces; promoted as unsupported body-site/static spatial mapping family."
+    },
+    {
+      "pmid": "23394831",
+      "doi": "10.1016/j.cub.2013.01.043",
+      "title": "Social modulation of peripersonal space boundaries.",
+      "year": "2013",
+      "journal": "Curr Biol",
+      "publication_types": [
+        "Journal Article",
+        "Research Support, Non-U.S. Gov't"
+      ],
+      "query_hits": [
+        {
+          "query": "\"tactile reaction\" AND sound AND \"peripersonal space\"",
+          "rank": 3
+        }
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "teneggi_2013_social_face"
+      ],
+      "reason": "Already tracked social modulation PPS task; PubMed variant supplies DOI/source metadata."
+    },
+    {
+      "pmid": "25281311",
+      "doi": "10.1016/j.neuropsychologia.2014.09.043",
+      "title": "Moving sounds within the peripersonal space modulate the motor system.",
+      "year": "2015",
+      "journal": "Neuropsychologia",
+      "publication_types": [
+        "Journal Article"
+      ],
+      "query_hits": [
+        {
+          "query": "\"looming sound\" AND tactile AND \"peripersonal space\"",
+          "rank": 1
+        }
+      ],
+      "screening_decision": "promoted_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "finisguerra_2015_moving_sounds_motor"
+      ],
+      "reason": "Moving-sound hand-PPS task with rare tactile targets and motor-system endpoint; promoted as unsupported voice/external-trigger task family."
+    },
+    {
+      "pmid": "27942884",
+      "doi": "10.1007/s00702-016-1663-x",
+      "title": "An exploratory cohort study of sensory extinction in acute stroke: prevalence, risk factors, and time course.",
+      "year": "2017",
+      "journal": "J Neural Transm (Vienna)",
+      "publication_types": [
+        "Journal Article",
+        "Research Support, Non-U.S. Gov't"
+      ],
+      "query_hits": [
+        {
+          "query": "\"auditory-tactile extinction\"",
+          "rank": 3
+        }
+      ],
+      "screening_decision": "excluded_clinical_extinction_methods_no_distinct_pps_task",
+      "linked_literature_record_ids": [],
+      "reason": "Acute-stroke sensory-extinction prevalence/methods study, not a distinct audiotactile PPS task profile."
+    },
+    {
+      "pmid": "28720524",
+      "doi": "10.1016/j.neuropsychologia.2017.07.018",
+      "title": "This racket is not mine: The influence of the tool-use on peripersonal space.",
+      "year": "2017",
+      "journal": "Neuropsychologia",
+      "publication_types": [
+        "Journal Article"
+      ],
+      "query_hits": [
+        {
+          "query": "\"sounds near the hand\" AND tactile",
+          "rank": 4
+        }
+      ],
+      "screening_decision": "promoted_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "biggio_2017_racket_tool_use"
+      ],
+      "reason": "Audio-tactile near/far PPS task while holding tennis racket; promoted as unsupported static near/far/voice-response task family."
+    },
+    {
+      "pmid": "31263231",
+      "doi": "10.1038/s41598-019-45755-2",
+      "title": "Reaching measures and feedback effects in auditory peripersonal space.",
+      "year": "2019",
+      "journal": "Sci Rep",
+      "publication_types": [
+        "Journal Article",
+        "Randomized Controlled Trial",
+        "Research Support, Non-U.S. Gov't"
+      ],
+      "query_hits": [
+        {
+          "query": "\"auditory peripersonal space\"",
+          "rank": 9
+        }
+      ],
+      "screening_decision": "excluded_auditory_only_or_reaching_feedback",
+      "linked_literature_record_ids": [],
+      "reason": "Auditory reachability/distance task using feedback; not an audiotactile PPS stimulus-response profile."
+    },
+    {
+      "pmid": "33636155",
+      "doi": "10.1016/j.neuropsychologia.2021.107790",
+      "title": "Action planning and affective states within the auditory peripersonal space in normal hearing and cochlear-implanted listeners.",
+      "year": "2021",
+      "journal": "Neuropsychologia",
+      "publication_types": [
+        "Journal Article",
+        "Research Support, Non-U.S. Gov't"
+      ],
+      "query_hits": [
+        {
+          "query": "\"auditory peripersonal space\"",
+          "rank": 5
+        }
+      ],
+      "screening_decision": "excluded_auditory_only_no_tactile_pps",
+      "linked_literature_record_ids": [],
+      "reason": "Auditory PPS action-planning/affective-sound task with arm responses, not an audiotactile task."
+    },
+    {
+      "pmid": "33441758",
+      "doi": "10.1038/s41598-020-79767-0",
+      "title": "Auditory roughness elicits defense reactions.",
+      "year": "2021",
+      "journal": "Sci Rep",
+      "publication_types": [
+        "Journal Article",
+        "Research Support, Non-U.S. Gov't"
+      ],
+      "query_hits": [
+        {
+          "query": "(\"auditory-tactile\" OR \"auditory tactile\") AND \"peripersonal space\"",
+          "rank": 2
+        },
+        {
+          "query": "\"tactile reaction\" AND sound AND \"peripersonal space\"",
+          "rank": 1
+        }
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "taffou_2021_auditory_roughness"
+      ],
+      "reason": "Already tracked rear-hemifield auditory-roughness plus tactile-detection PPS task."
+    },
+    {
+      "pmid": "36337523",
+      "doi": "10.3389/fpsyg.2022.983189",
+      "title": "Effects of guided exploration on reaching measures of auditory peripersonal space.",
+      "year": "2022",
+      "journal": "Front Psychol",
+      "publication_types": [
+        "Journal Article"
+      ],
+      "query_hits": [
+        {
+          "query": "\"auditory peripersonal space\"",
+          "rank": 3
+        }
+      ],
+      "screening_decision": "excluded_auditory_only_or_reaching_feedback",
+      "linked_literature_record_ids": [],
+      "reason": "Guided auditory-distance exploration with tactile feedback context, not an audiotactile PPS stimulus-response profile."
+    },
+    {
+      "pmid": "37015462",
+      "doi": "10.1109/TCYB.2022.3227161",
+      "title": "The Framework and Memristive Circuit Design for Multisensory Mutual Associative Memory Networks.",
+      "year": "2023",
+      "journal": "IEEE Trans Cybern",
+      "publication_types": [
+        "Journal Article"
+      ],
+      "query_hits": [
+        {
+          "query": "\"auditory-tactile extinction\"",
+          "rank": 8
+        }
+      ],
+      "screening_decision": "excluded_model_theory_or_non_pps_engineering",
+      "linked_literature_record_ids": [],
+      "reason": "Memristive associative-memory engineering/model paper, not a PPS task."
+    },
+    {
+      "pmid": "40474049",
+      "doi": "10.3758/s13414-025-03071-0",
+      "title": "Modulation of auditory peripersonal space by approaching and receding sources moving in discrete trajectories.",
+      "year": "2025",
+      "journal": "Atten Percept Psychophys",
+      "publication_types": [
+        "Journal Article"
+      ],
+      "query_hits": [
+        {
+          "query": "\"auditory peripersonal space\"",
+          "rank": 2
+        }
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "spiousas_2025_auditory_only"
+      ],
+      "reason": "Already tracked as adjacent auditory-only PPS/reachability false positive for this audiotactile audit."
+    }
+  ]
+}

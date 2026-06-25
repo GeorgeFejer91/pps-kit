@@ -1,0 +1,9 @@
+{
+  "schema": "pps-preload-run-setup-segment.v1",
+  "template_id": "matsuda_2021_four_directions",
+  "blocks": 4,
+  "participants": 20,
+  "random_seed": 20210501,
+  "trial_randomization_strategy": "no_immediate_repeats",
+  "block_order_randomization": "counterbalanced_rotation"
+}

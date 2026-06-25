@@ -1,0 +1,277 @@
+{
+  "schema": "pps-study5-instruction-transcript-library.v1",
+  "template_id": "study5_box_breathing_pps",
+  "title": "Study 5 instruction transcript library",
+  "source_variant": "original_study5",
+  "source_manifest": "assets/breathing/original_study5/spoken_assets_manifest.json",
+  "transcription_method": {
+    "primary_asr_model": "whisper-small",
+    "cross_check_asr_model": "whisper-base.en",
+    "language": "en",
+    "generated_on": "2026-06-24",
+    "segment_timestamps": "ASR estimates, not audio-authoritative sample timings",
+    "notes": [
+      "Run-level instruction clips were transcribed from the decoded original Study 5 WAV assets.",
+      "Within-trial inhale/exhale cue text was checked against the original Study 5 spoken asset manifest.",
+      "Both Whisper passes returned the phrase 'particles expand to their fullest capacity' in General_Instructions.wav; it is retained here pending human auditory review or recovery of the original script."
+    ]
+  },
+  "entries": [
+    {
+      "entry_id": "before_experiment_general_instructions",
+      "category": "run_level_instruction",
+      "slot": "before_experiment",
+      "label": "General instructions",
+      "source_audio": "assets/breathing/original_study5/General_Instructions.wav",
+      "source_file": "General_Instructions.mp3",
+      "duration_s": 85.707755,
+      "sample_rate": 44100,
+      "channels": 1,
+      "sha256": "fd51b2912d7d8f8afa7891569ce479b6f51cde3bbe7cd729b8356c1f7044deed",
+      "continue_mode": "click",
+      "button_label": "Start experiment",
+      "manifest_prompt_text": "Follow the breathing count. Click when you feel the vibration.",
+      "transcript_text": "Go ahead and make yourself comfortable. During this experiment, we will practice a form of box breathing. You'll inhale through your nose for a count of four. Hold the breath for a count of four. Exhale through your nose for a count of four. And hold the breath for a count of four. Please make sure to inhale through your nose as deeply as possible over four seconds. Try to make sure the particles expand to their fullest capacity. Then, during the retention periods, you will at some times feel a vibration on your chest. As soon as you do, press the mouse button as fast as possible while maintaining accuracy. Please only press the mouse if you feel a vibration while ignoring all other tones. And finally, please make sure to always keep your mouth closed and only breathe in and out through your nose. Now let's practice this breathing for a bit. And once you have experienced what it feels like to expand the particles to their fullest capacity during inhalation, let the experimenter know that you are ready to begin the experiment.",
+      "review_notes": [
+        "The existing spoken-assets manifest only stores a short prompt summary for this long clip, so this entry preserves the ASR transcript from the WAV.",
+        "The phrase 'particles expand' is an ASR-consistent ambiguous phrase and should be reviewed against the original script if available."
+      ],
+      "segments": [
+        {
+          "start_s": 0.0,
+          "end_s": 2.32,
+          "text": "Go ahead and make yourself comfortable."
+        },
+        {
+          "start_s": 7.28,
+          "end_s": 11.28,
+          "text": "During this experiment, we will practice a form of box breathing."
+        },
+        {
+          "start_s": 12.64,
+          "end_s": 15.36,
+          "text": "You'll inhale through your nose for a count of four."
+        },
+        {
+          "start_s": 16.48,
+          "end_s": 18.24,
+          "text": "Hold the breath for a count of four."
+        },
+        {
+          "start_s": 20.28,
+          "end_s": 22.6,
+          "text": "Exhale through your nose for a count of four."
+        },
+        {
+          "start_s": 24.0,
+          "end_s": 26.2,
+          "text": "And hold the breath for a count of four."
+        },
+        {
+          "start_s": 27.2,
+          "end_s": 32.2,
+          "text": "Please make sure to inhale through your nose as deeply as possible over four seconds."
+        },
+        {
+          "start_s": 33.2,
+          "end_s": 37.2,
+          "text": "Try to make sure the particles expand to their fullest capacity."
+        },
+        {
+          "start_s": 38.2,
+          "end_s": 45.2,
+          "text": "Then, during the retention periods, you will at some times feel a vibration on your chest."
+        },
+        {
+          "start_s": 46.2,
+          "end_s": 52.2,
+          "text": "As soon as you do, press the mouse button as fast as possible while maintaining accuracy."
+        },
+        {
+          "start_s": 53.2,
+          "end_s": 59.2,
+          "text": "Please only press the mouse if you feel a vibration while ignoring all other tones."
+        },
+        {
+          "start_s": 60.2,
+          "end_s": 69.2,
+          "text": "And finally, please make sure to always keep your mouth closed and only breathe in and out through your nose."
+        },
+        {
+          "start_s": 70.2,
+          "end_s": 72.2,
+          "text": "Now let's practice this breathing for a bit."
+        },
+        {
+          "start_s": 73.2,
+          "end_s": 80.2,
+          "text": "And once you have experienced what it feels like to expand the particles to their fullest capacity during inhalation,"
+        },
+        {
+          "start_s": 80.2,
+          "end_s": 85.2,
+          "text": "let the experimenter know that you are ready to begin the experiment."
+        }
+      ]
+    },
+    {
+      "entry_id": "before_each_block_pre_block_instruction",
+      "category": "run_level_instruction",
+      "slot": "before_each_block",
+      "label": "Pre-block instruction",
+      "source_audio": "assets/breathing/original_study5/Pre-Block_Instruction.wav",
+      "source_file": "Pre-Block_Instruction.mp3",
+      "duration_s": 8.418073,
+      "sample_rate": 44100,
+      "channels": 1,
+      "sha256": "461643e6b3e4baa38bfc89d47d81c901beca878e1d0049fdc74a8d36cd7bf5c3",
+      "continue_mode": "delay",
+      "button_label": "Start block",
+      "manifest_prompt_text": "Get ready. The next block will begin after your click.",
+      "transcript_text": "Please remember to always keep your mouth closed and only breathe in and out through your nose. Ready? Let's go!",
+      "segments": [
+        {
+          "start_s": 0.0,
+          "end_s": 6.88,
+          "text": "Please remember to always keep your mouth closed and only breathe in and out through your nose."
+        },
+        {
+          "start_s": 6.88,
+          "end_s": 8.4,
+          "text": "Ready? Let's go!"
+        }
+      ]
+    },
+    {
+      "entry_id": "after_each_block_post_block_instruction",
+      "category": "run_level_instruction",
+      "slot": "after_each_block",
+      "label": "Post-block instruction",
+      "source_audio": "assets/breathing/original_study5/Post-Block_Instruction.wav",
+      "source_file": "Post-Block_Instruction.mp3",
+      "duration_s": 8.829388,
+      "sample_rate": 44100,
+      "channels": 1,
+      "sha256": "0927fb12a0208acd4e042976210c44a92c15565d616f25265b4b9a85db010f21",
+      "continue_mode": "click",
+      "button_label": "Next block",
+      "manifest_prompt_text": "Block complete. Please rest and wait for the next block.",
+      "transcript_text": "You have finished this block. Feel free to close your eyes for a moment and click the mouse button when you are ready to continue.",
+      "segments": [
+        {
+          "start_s": 0.0,
+          "end_s": 2.5,
+          "text": "You have finished this block."
+        },
+        {
+          "start_s": 2.5,
+          "end_s": 5.5,
+          "text": "Feel free to close your eyes for a moment"
+        },
+        {
+          "start_s": 5.5,
+          "end_s": 9.5,
+          "text": "and click the mouse button when you are ready to continue."
+        }
+      ]
+    },
+    {
+      "entry_id": "between_conditions_interim_message",
+      "category": "run_level_instruction",
+      "slot": "between_conditions",
+      "label": "Condition transition",
+      "source_audio": "assets/breathing/original_study5/InterimMessage.wav",
+      "source_file": "InterimMessage.mp3",
+      "duration_s": 10.109388,
+      "sample_rate": 44100,
+      "channels": 1,
+      "sha256": "c77afc42a70d2df13aeeb07b54442f67a1ccfae554aadaf94eb8b8e4dbe940d3",
+      "continue_mode": "button",
+      "button_label": "Start next condition",
+      "manifest_prompt_text": "Halfway point. Take a short rest before continuing.",
+      "transcript_text": "You are now finished with part one of the experiment. Feel free to take a break and let the experimenter know when you are ready to continue with the second half.",
+      "segments": [
+        {
+          "start_s": 0.0,
+          "end_s": 3.04,
+          "text": "You are now finished with part one of the experiment."
+        },
+        {
+          "start_s": 4.08,
+          "end_s": 10.0,
+          "text": "Feel free to take a break and let the experimenter know when you are ready to continue with the second half."
+        }
+      ]
+    },
+    {
+      "entry_id": "after_experiment_finish_message",
+      "category": "run_level_instruction",
+      "slot": "after_experiment",
+      "label": "Finish message",
+      "source_audio": "assets/breathing/original_study5/FinishMessage.wav",
+      "source_file": "FinishMessage.mp3",
+      "duration_s": 7.000816,
+      "sample_rate": 44100,
+      "channels": 1,
+      "sha256": "a5f34ec47d40a1b8e062e8786722dadc9ca5310227725d82bd607610dea7ab88",
+      "continue_mode": "delay",
+      "button_label": "Finish",
+      "manifest_prompt_text": "Experiment complete. Please wait for the researcher.",
+      "transcript_text": "Well done! You have finished the experiment. Feel free to take off the headset whenever you please.",
+      "segments": [
+        {
+          "start_s": 0.0,
+          "end_s": 3.84,
+          "text": "Well done! You have finished the experiment."
+        },
+        {
+          "start_s": 3.84,
+          "end_s": 7.04,
+          "text": "Feel free to take off the headset whenever you please."
+        }
+      ]
+    },
+    {
+      "entry_id": "within_trial_inhale_instruction",
+      "category": "within_trial_instruction",
+      "trial_phase": "Inhale",
+      "label": "Inhale instruction",
+      "source_audio": "assets/breathing/original_study5/Inhale-2-3-4-hold_FIXED.wav",
+      "source_file": "Inhale/Inhale-2-3-4-hold.mp3",
+      "duration_s": 4.0,
+      "sample_rate": 44100,
+      "channels": 1,
+      "sha256": "c4470c0f1cea401337493359b1fcea1c14d55105c0fd5ca2b383b59fab86f5b4",
+      "manifest_prompt_text": "Inhale. Two. Three. Four. Hold.",
+      "transcript_text": "Inhale, two, three, four, hold.",
+      "segments": [
+        {
+          "start_s": 0.0,
+          "end_s": 4.0,
+          "text": "Inhale, two, three, four, hold."
+        }
+      ]
+    },
+    {
+      "entry_id": "within_trial_exhale_instruction",
+      "category": "within_trial_instruction",
+      "trial_phase": "Exhale",
+      "label": "Exhale instruction",
+      "source_audio": "assets/breathing/original_study5/Exhale-2-3-4-hold_FIXED.wav",
+      "source_file": "Exhale/Exhale-2-3-4-hold.mp3",
+      "duration_s": 4.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "sha256": "e4957a25f2e7dc1cd8998953f90eac239c15dcb71ee78e8a159470ecaefb807a",
+      "manifest_prompt_text": "Exhale. Two. Three. Four. Hold.",
+      "transcript_text": "Exhale, two, three, four, hold.",
+      "segments": [
+        {
+          "start_s": 0.0,
+          "end_s": 4.0,
+          "text": "Exhale, two, three, four, hold."
+        }
+      ]
+    }
+  ]
+}

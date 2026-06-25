@@ -1,0 +1,48 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "tonelli_2019_echolocation",
+  "repetitions_per_condition": 12,
+  "soa_values_ms": [
+    0,
+    500,
+    1000,
+    1500,
+    2000,
+    2500,
+    3000
+  ],
+  "spatial_values_cm": [
+    119.0,
+    102.0,
+    85.0,
+    68.0,
+    51.0,
+    34.0,
+    17.0
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "tonelli-echolocation-array-row",
+      "label": "Echolocation array PPS trial",
+      "audio_tactile_percentage": 100.0,
+      "catch_percentage": 0.0,
+      "baseline_percentage": 0.0,
+      "elements": [
+        {
+          "element_id": "tonelli-array-looming-source",
+          "kind": "looming_stimulus",
+          "label": "Moving sound array",
+          "source_label": "Moving sound array",
+          "source_labels": [
+            "Moving sound array"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 84
+}

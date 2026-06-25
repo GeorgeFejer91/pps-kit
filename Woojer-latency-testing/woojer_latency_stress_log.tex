@@ -1,0 +1,68 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{hyperref}
+
+\title{Woojer Audio Loopback Latency Stress Log}
+\author{Peripersonal Space Toolkit}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Scope}
+
+This log tracks an isolated Woojer audio pass-through latency workflow. The
+measurement target is the audio signal emitted by the Woojer output after a
+Komplete Audio 6 MK2 output pulse is sent into the Woojer. This is not a
+Woojer mechanical vibration onset measurement and must not be interpreted as
+participant tactile perception latency.
+
+\section{Protocol Scaffold}
+
+The first-run baseline state patches Komplete Output 3 directly to Komplete
+Input 3. The Woojer-loop state patches Komplete Output 3 into the Woojer analog
+input and routes the Woojer audio output back to Komplete Input 3. Both states
+use the native Komplete ASIO driver at 44.1 kHz, requested latency 0.010 s,
+blocksize 256, safe default amplitude 0.03, and a hard digital amplitude cap of
+0.10.
+
+\section{Run Ledger}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.16\linewidth}
+                  >{\raggedright\arraybackslash}p{0.14\linewidth}
+                  >{\raggedright\arraybackslash}p{0.20\linewidth}
+                  >{\raggedright\arraybackslash}p{0.12\linewidth}
+                  >{\raggedright\arraybackslash}p{0.13\linewidth}
+                  >{\raggedright\arraybackslash}p{0.13\linewidth}
+                  >{\raggedright\arraybackslash}p{0.08\linewidth}}
+Date & Mode & Run & Detection & Median latency ms & Added latency ms & Status \\
+\hline
+Initial scaffold & planned & no hardware run yet & -- & -- & -- & pending \\
+% AUTO_LOG_ENTRIES_START
+2026-06-23T22:54:03 & \texttt{direct-baseline} & \texttt{direct-baseline\_20260623\_225345} & 0/20 & -- & -- & \texttt{review\_required} \\
+2026-06-23T22:55:30 & \texttt{direct-baseline} & \texttt{direct-baseline\_20260623\_225516} & 0/20 & -- & -- & \texttt{review\_required} \\
+2026-06-23T22:56:21 & \texttt{direct-baseline} & \texttt{direct-baseline\_20260623\_225607} & 0/20 & -- & -- & \texttt{review\_required} \\
+2026-06-23T23:03:40 & \texttt{woojer-loop} & \texttt{woojer-loop\_20260623\_230326} & 0/20 & -- & -- & \texttt{review\_required} \\
+2026-06-23T23:04:15 & \texttt{woojer-loop} & \texttt{woojer-loop\_20260623\_230401} & 20/20 & 56.893 & -- & \texttt{pass} \\
+2026-06-23T23:04:58 & \texttt{woojer-loop} & \texttt{repeat\_01} & 20/20 & 56.848 & -- & \texttt{pass} \\
+2026-06-23T23:05:10 & \texttt{woojer-loop} & \texttt{repeat\_02} & 20/20 & 56.848 & -- & \texttt{pass} \\
+% AUTO_LOG_ENTRIES_END
+\end{longtable}
+
+\section{Open Notes}
+
+The current successful wired Woojer-loop observations used Komplete Output 4
+as the working drive route and Komplete Input 3 as the return route, with
+roughly 56.86 ms combined loop latency. Subtracting the earlier Komplete
+electrical baseline gives a provisional Woojer-added audio-path estimate of
+about 23 ms. This estimate is now used by the runner as a provisional prepared
+block-WAV compensation: nominal tactile timing remains unchanged in
+\texttt{Tactile\_Onset\_*}, while the tactile drive is emitted 23 ms earlier
+and documented in \texttt{Tactile\_Drive\_Onset\_*}. This remains an audio-path
+proxy and not a mechanical vibration-onset measurement. Generated WAVs,
+captures, JSON reports, and run folders are local artifacts and should remain
+ignored.
+
+\end{document}

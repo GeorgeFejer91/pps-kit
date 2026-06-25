@@ -1,0 +1,36 @@
+{
+  "name": "Pfeiffer-style left approach",
+  "sofa_file": "assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa",
+  "noises": [
+    {
+      "label": "Pink left approach",
+      "noise_type": "pink",
+      "azimuth_deg": 0.0,
+      "elevation_deg": 0.0,
+      "gain": 1.0
+    }
+  ],
+  "custom_looming_files": [],
+  "prestimulus_files": [],
+  "trajectory": {
+    "start_radius_m": 1.0,
+    "end_radius_m": 0.1,
+    "path_direction": "custom",
+    "coordinate_mode": "cartesian",
+    "start_x_m": -1.0,
+    "start_y_m": 0.0,
+    "start_z_m": 0.0,
+    "end_x_m": 0.0,
+    "end_y_m": 0.1,
+    "end_z_m": 0.0,
+    "path_length_m": 1.0049875621,
+    "propagation_speed_mps": 0.5024937811,
+    "azimuth_start_deg": -90.0,
+    "azimuth_end_deg": 0.0,
+    "elevation_deg": 0.0,
+    "padding_pre_s": 1.0,
+    "padding_post_s": 1.0,
+    "sample_rate": 44100,
+    "use_inverse_square": true
+  }
+}

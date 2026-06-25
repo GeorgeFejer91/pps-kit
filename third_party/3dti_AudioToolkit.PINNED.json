@@ -1,0 +1,28 @@
+{
+  "name": "3DTI AudioToolkit",
+  "repository": "https://github.com/3DTune-In/3dti_AudioToolkit",
+  "commit": "6bfee08705675308a8c348b4c3a4d582586d2f99",
+  "archive_url": "https://github.com/3DTune-In/3dti_AudioToolkit/archive/6bfee08705675308a8c348b4c3a4d582586d2f99.zip",
+  "archive_sha256": "a96038866bf9d86420c6f871e611b1888add245d2cc3307341fedcb41cef6b82",
+  "license": "LGPL-3.0-only",
+  "vendored_paths": [
+    "3dti_Toolkit",
+    "3dti_ResourceManager",
+    "docs",
+    "3DTI_AUDIOTOOLKIT_LICENSE",
+    "LICENSE",
+    "Readme.md",
+    "CHANGELOG.md",
+    ".gitmodules"
+  ],
+  "excluded_paths": [
+    "resources",
+    "docs/**/*.wav",
+    "docs/**/*.mp3",
+    "docs/**/*.flac",
+    "docs/**/*.ogg",
+    "docs/**/*.m4a",
+    "docs/**/*.sofa"
+  ],
+  "exclusion_reason": "Upstream sample audio and HRTF/BRIR resources are not needed for the source build snapshot and require separate redistribution review."
+}

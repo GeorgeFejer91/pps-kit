@@ -1,0 +1,150 @@
+{
+  "schema": "pps-preload-profile-assets.v1",
+  "template_id": "serino_2015_front_back_trunk_exp2",
+  "title": "Serino 2015 front/back peri-trunk Experiment 2",
+  "visible_variant_label": "A",
+  "publication_status": "published",
+  "profile_type": "",
+  "asset_mode": "bundled_local",
+  "retrieval_strategy": "bundled_or_download_from_github_pages",
+  "local_only": true,
+  "catalog_segments": [
+    {
+      "folder": "01_profile",
+      "label": "Profile",
+      "path": "assets/preloads/serino_2015_front_back_trunk_exp2/01_profile"
+    },
+    {
+      "folder": "02_looming_stimuli",
+      "label": "Looming Stimuli Builder",
+      "path": "assets/preloads/serino_2015_front_back_trunk_exp2/02_looming_stimuli"
+    },
+    {
+      "folder": "03_baseline_strategy",
+      "label": "Baseline Strategy",
+      "path": "assets/preloads/serino_2015_front_back_trunk_exp2/03_baseline_strategy"
+    },
+    {
+      "folder": "04_trial_designer",
+      "label": "Trial Designer",
+      "path": "assets/preloads/serino_2015_front_back_trunk_exp2/04_trial_designer"
+    },
+    {
+      "folder": "05_run_setup",
+      "label": "Run Setup",
+      "path": "assets/preloads/serino_2015_front_back_trunk_exp2/05_run_setup"
+    }
+  ],
+  "profile_parameters_manifest": "assets/preloads/serino_2015_front_back_trunk_exp2/01_profile/profile_parameters_manifest.json",
+  "recreation_status": {
+    "primary_category": "toolkit_structural_gap",
+    "category_label": "Toolkit structural gap",
+    "runner_readiness": "blocked_unsupported_toolkit_structure",
+    "profile_checks_passed": false,
+    "gui_recreatable": false,
+    "segment_0_to_4_profile_checks_passed": false,
+    "segment_1_to_6_materializable": false,
+    "finished_profile": false,
+    "segment_6_launchable": false,
+    "profile_completion_status": "unfinished_preload",
+    "missing_parameter_count": 1,
+    "unsupported_structure_count": 1
+  },
+  "render_contract": {
+    "stage": "auditory_looming_prebake",
+    "engine": "python-sofa-reference",
+    "include_tactile": false,
+    "tactile_policy": "deferred_until_session_preparation"
+  },
+  "assets": [
+    {
+      "label": "Front-back moving sound",
+      "path": "assets/preloads/serino_2015_front_back_trunk_exp2/02_looming_stimuli/looming_Front-back_moving_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_front_back_trunk_exp2/02_looming_stimuli/looming_Front-back_moving_sound.wav",
+      "sha256": "f2079c462d02111c0bda61970a96b95652cf0f333282ef99ae9e7f5cf6893f22",
+      "duration_s": 2.666667,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "front_to_back",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Front-back moving sound",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 100.0,
+        "end_distance_cm": 100.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 180.0,
+        "movement_duration_s": 2.6667,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 2.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "custom",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.0,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": -1.0,
+          "z_m": 0.0
+        }
+      }
+    },
+    {
+      "label": "Front-back moving sound - back to front",
+      "path": "assets/preloads/serino_2015_front_back_trunk_exp2/02_looming_stimuli/looming_Front-back_moving_sound_-_back_to_front.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_front_back_trunk_exp2/02_looming_stimuli/looming_Front-back_moving_sound_-_back_to_front.wav",
+      "sha256": "ae6d556d29268263f8a6480322f472c41789045ae8dbd8163bbac60602734b1e",
+      "duration_s": 2.666667,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "back_to_front",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Front-back moving sound - back to front",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 100.0,
+        "end_distance_cm": 100.0,
+        "start_rotation_deg": 180.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 2.6667,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 2.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "custom",
+        "start": {
+          "x_m": 0.0,
+          "y_m": -1.0,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.0,
+          "z_m": 0.0
+        }
+      }
+    }
+  ],
+  "notes": [
+    "Prebaked WAVs are local auditory-only profile assets.",
+    "Tactile timing is introduced later by session preparation from SOA/trial CSVs.",
+    "The browser dashboard only orchestrates local companion verification and use of these files."
+  ]
+}

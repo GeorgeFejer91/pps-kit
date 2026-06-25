@@ -1,0 +1,132 @@
+{
+  "template_id": "ferri_2015_artificial_looming_valence",
+  "title": "Ferri 2015 artificial emotional looming sounds",
+  "citation": "Ferri, F., Costantini, M., Tajadura-Jimenez, A., Valjamae, A., & Vastano, R. (2015). Emotion-inducing approaching sounds shape the boundaries of multisensory peripersonal space. Neuropsychologia, 70, 468-475.",
+  "source_url": "https://discovery.ucl.ac.uk/id/eprint/1464805/",
+  "doi": "10.1016/j.neuropsychologia.2015.03.001",
+  "verification_status": "partial",
+  "notes": "Captures the Canzoneri-style frontal audio-tactile scaffold and artificial 1/f versus 1/f2 looming sound labels. Exact emotional stimulus construction and ratings require the paper materials.",
+  "reference_parameters": {
+    "profile_type": "audio_tactile_looming_valence",
+    "implemented_controls": [
+      "approaching sound",
+      "right-hand tactile target",
+      "five SOA/distance samples",
+      "negative/neutral artificial sound labels"
+    ],
+    "implementation_gaps": [
+      "exact auditory files",
+      "emotional ratings",
+      "paper-specific gain envelope"
+    ]
+  },
+  "design": {
+    "name": "Ferri 2015 artificial emotional looming PPS",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Negative artificial 1/f2 looming",
+        "noise_type": "brown",
+        "azimuth_deg": 0.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0
+      },
+      {
+        "label": "Neutral artificial 1/f looming",
+        "noise_type": "pink",
+        "azimuth_deg": 0.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0
+      }
+    ],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "trajectory": {
+      "start_radius_m": 1.1,
+      "end_radius_m": 0.1,
+      "path_direction": "approach",
+      "coordinate_mode": "cartesian",
+      "start_x_m": 0.0,
+      "start_y_m": 1.1,
+      "start_z_m": 0.0,
+      "end_x_m": 0.0,
+      "end_y_m": 0.1,
+      "end_z_m": 0.0,
+      "path_length_m": 1.0,
+      "propagation_speed_mps": 0.333333333,
+      "azimuth_start_deg": 0.0,
+      "azimuth_end_deg": 0.0,
+      "elevation_deg": 0.0,
+      "padding_pre_s": 0.0,
+      "padding_post_s": 0.0,
+      "sample_rate": 44100,
+      "use_inverse_square": true
+    },
+    "protocol": {
+      "repetitions_per_condition": 12,
+      "soa_values_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "spatial_values_cm": [
+        100,
+        83.3,
+        60,
+        36.7,
+        20
+      ],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": [
+        "looming"
+      ],
+      "tactile_sites": [
+        "right hand"
+      ],
+      "catch_trial_percentage": 10.0,
+      "catch_trials_exact": null,
+      "include_baseline_trials": true,
+      "baseline_soa_values_ms": [],
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "trial_randomization_strategy": "no_immediate_repeats",
+      "block_order_randomization": "fixed",
+      "max_consecutive_same_trial_type": 2,
+      "trial_strips": [
+        {
+          "strip_id": "ferri-artificial-looming-valence-row",
+          "label": "Artificial looming valence trial",
+          "audio_tactile_percentage": 100.0,
+          "catch_percentage": 0.0,
+          "baseline_percentage": 0.0,
+          "elements": [
+            {
+              "element_id": "ferri-artificial-looming-source",
+              "kind": "looming_stimulus",
+              "label": "Artificial looming source",
+              "source_label": "Negative artificial 1/f2 looming",
+              "source_labels": ["Negative artificial 1/f2 looming", "Neutral artificial 1/f looming"],
+              "randomized": true
+            }
+          ]
+        }
+      ],
+      "participants": 1,
+      "random_seed": 20150301
+    }
+  },
+  "provenance": [
+    {
+      "field": "auditory stimuli",
+      "source": "UCL Discovery abstract reports intensity-changing artificial sound sources with neutral or negative valence."
+    },
+    {
+      "field": "template scope",
+      "source": "The profile reuses the Canzoneri-style five-point looming PPS scaffold because the exact sound files/envelopes are not bundled."
+    }
+  ]
+}

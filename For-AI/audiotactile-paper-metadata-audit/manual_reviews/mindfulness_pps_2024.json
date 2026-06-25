@@ -1,0 +1,264 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "mindfulness_pps_2024",
+  "citation_short": "Mindfulness and PPS boundaries (2024)",
+  "review_date": "2026-06-16",
+  "manual_review_status": "manual_review_completed_main_pdf",
+  "confidence_score": 0.86,
+  "confidence_label": "high_confidence_extraction",
+  "confidence_basis": "Main PDF, OpenDataLoader output, pdfplumber/pdftotext fallback, targeted methods review, and official publisher HTML were checked. Core Segment 1-4 task parameters are mostly reported; exact speaker model, exact pink-noise asset, T0/T6 offsets, and response timeout remain unresolved.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats",
+    "reason": "The PPS task can be recreated as an analog two-speaker or digital two-source pink-noise approach profile with the reported path, duration, gain law, SOAs, target/catch counts, and pre/post FAM session structure. Exact room/speaker transfer function and original noise sample are not reported."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf",
+      "source": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+      "status": "reviewed",
+      "scope": "PDF pages 4-6, sections 2.3, 2.4, 2.4.1, and 2.5."
+    },
+    {
+      "source_type": "opendataloader_json",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/mindfulness_pps_2024.json",
+      "status": "reviewed",
+      "scope": "Used as primary extracted-text map, then checked against PDF/fallback extraction."
+    },
+    {
+      "source_type": "fallback_text_extraction",
+      "source": "pdfplumber and pdftotext local extraction",
+      "status": "reviewed",
+      "scope": "Targeted apparatus, stimulus, task, timing, response, count, and analysis searches."
+    },
+    {
+      "source_type": "publisher_html",
+      "source": "https://www.mdpi.com/2076-328X/14/4/306",
+      "status": "checked",
+      "scope": "Official article page checked for supplementary materials and data availability; no supplementary-material section was found, and raw data are by request."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "OpenDataLoader PDF extraction",
+      "status": "completed",
+      "result": "Mapped candidate Segment 1-4 values across 22 of 25 fields."
+    },
+    {
+      "strategy": "Fallback extraction verification",
+      "status": "completed",
+      "result": "pdfplumber and pdftotext confirmed the apparatus, timing, SOA, count, and response details despite duplicate PDF text layers."
+    },
+    {
+      "strategy": "Stimulus reconstruction pass",
+      "status": "completed",
+      "result": "Identified pink noise, physical two-speaker far-to-near apparent trajectory, duration, cross-fade envelope, and apparatus."
+    },
+    {
+      "strategy": "Sequence, baseline, catch, and repetition pass",
+      "status": "completed",
+      "result": "Separated target trials, auditory-only catch trials, T0/T6 baseline-like trials, analyzed T1-T5 delays, and pre/post session structure."
+    },
+    {
+      "strategy": "Supplement/source route check",
+      "status": "completed_no_supplement_found",
+      "result": "Official MDPI HTML did not expose a supplementary-material section; remaining raw data are available only by request."
+    }
+  ],
+  "field_status_counts": {
+    "reported": 20,
+    "derived": 4,
+    "not_reported_after_review": 1
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "reported",
+        "value": "Pink-noise auditory samples at 44.1 kHz.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF p.4, section 2.3",
+        "evidence_note": "Reported as samples of pink noise used for the auditory stimuli."
+      },
+      "source_provenance": {
+        "status": "reported",
+        "value": "Pink-noise samples delivered by E-Prime 2.0 through physical loudspeakers; exact audio file/generation seed not reported.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF pp.4-5, sections 2.3-2.4",
+        "evidence_note": "Task software and stimulus class are reported; exact source asset is not."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "One auditory trajectory: IN/approaching sound from far loudspeaker to near loudspeaker.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF p.4, section 2.3",
+        "evidence_note": "No receding or alternate auditory trajectory is described for this task."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Far-to-near apparent path: near speaker 5 cm from left cheek; far speaker 100 cm from near speaker; same elevation, 100 cm.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF p.4, section 2.3",
+        "evidence_note": "Path is physical-speaker/intensity-based rather than HRTF-rendered."
+      },
+      "stimulus_duration": {
+        "status": "reported",
+        "value": "Sound duration 3000 ms, preceded and followed by 1000 ms silence.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF p.5, section 2.4.1",
+        "evidence_note": "This defines the trial audio timing envelope."
+      },
+      "stimulus_speed": {
+        "status": "derived",
+        "value": "No explicit speed reported; nominal apparent path is 100 cm over 3000 ms, about 0.33 m/s, under an exponential intensity cross-fade.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF pp.4-5, sections 2.3-2.4.1",
+        "evidence_note": "Derived only from speaker separation and sound duration; perceived motion is intensity-based."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "Approaching IN sound only, presented before and after the FAM intervention.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF pp.4-5, sections 2.3-2.4",
+        "evidence_note": "Pre/post is a session factor, not a different auditory stimulus family."
+      },
+      "gain_envelope": {
+        "status": "reported",
+        "value": "Exponential intensity manipulation from 55 to 70 dB SPL; far speaker decreases while near speaker rises.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF p.4, section 2.3",
+        "evidence_note": "Exact sample-by-sample gain curve is not provided."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Two physical loudspeakers in a soundproof room; near and far sources controlled by E-Prime 2.0.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF pp.4-5, sections 2.3-2.4",
+        "evidence_note": "Speaker model and acoustic calibration beyond SPL are not reported."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "Audio-tactile target trials plus auditory-only catch trials; practice/calibration used 10 trials including 2 catches.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF p.5, section 2.4.1",
+        "evidence_note": "Target trials cross tactile timing with the IN sound."
+      },
+      "condition_intermixing": {
+        "status": "reported",
+        "value": "T0-T6 target timings and 20 auditory-only catch trials were randomly intermingled within each 62-trial task session.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF p.5, section 2.4.1",
+        "evidence_note": "Pre-FAM and post-FAM sessions were separated by the intervention, not intermingled."
+      },
+      "blocked_or_random_order": {
+        "status": "reported",
+        "value": "Fixed session order: audio-tactile task, 15 min FAM, audio-tactile task; trial order within task sessions randomized/intermingled.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF p.5, sections 2.4 and 2.4.1",
+        "evidence_note": "No counterbalanced intervention order is described."
+      },
+      "iti_jitter_policy": {
+        "status": "reported",
+        "value": "Fixed 1000 ms silence before and after the 3000 ms sound; no variable ITI or jitter range reported.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF p.5, section 2.4.1",
+        "evidence_note": "The only explicitly reported inter-trial/timing padding is fixed silence."
+      },
+      "response_window": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf; https://www.mdpi.com/2076-328X/14/4/306",
+        "page_or_section": "PDF pp.5-6, sections 2.4.1 and 2.5; publisher HTML checked 2026-06-16",
+        "evidence_note": "Spacebar response and RT adjustment are reported, but no explicit timeout or response window was found."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Participants responded to cheek tactile targets, ignored sound-only catches, and repeated calibration if performance was incorrect.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF p.5, section 2.4.1",
+        "evidence_note": "Calibration intensity was adjusted by 5 mA steps after incorrect performance."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "Left-cheek electrical tactile pulse via DS7A Digitimer and neurological tip electrode; monophasic rectangular 100 us pulse, calibrated above threshold, 60-90 mA tested range.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF pp.4-5, sections 2.3 and 2.4.1",
+        "evidence_note": "The text reports both constant-current stimulator and constant-voltage pulse wording."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "T1 300 ms, T2 800 ms, T3 1500 ms, T4 2200 ms, T5 2700 ms from auditory onset; T0 before sound and T6 after sound also included.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF p.5, section 2.4.1",
+        "evidence_note": "Analysis retained D1-D5 and excluded T0/T6."
+      },
+      "baseline_strategy": {
+        "status": "derived",
+        "value": "Baseline-like timings are T0 and T6, tactile events before sound onset or after sound offset; they were excluded from main RT analysis.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF pp.5-6, sections 2.4.1 and 2.5",
+        "evidence_note": "The paper does not label these as baseline trials, but their role is outside-sound comparison timing."
+      },
+      "baseline_timing": {
+        "status": "reported",
+        "value": "T0 occurred before auditory onset and T6 after auditory offset; exact offsets within the 1000 ms pre/post silence windows are not reported.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF p.5, section 2.4.1",
+        "evidence_note": "Exact T0/T6 SOA values remain unresolved."
+      },
+      "catch_trial_type": {
+        "status": "reported",
+        "value": "Auditory-only catch trials with no tactile stimulation.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF p.5, section 2.4.1",
+        "evidence_note": "Catch trials were removed before RT analysis."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "reported",
+        "value": "Six target trials for each tactile timing T0-T6 per task session; analyzed D1-D5 therefore have six repetitions each per session.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF p.5, section 2.4.1",
+        "evidence_note": "Counts are per audio-tactile task session."
+      },
+      "baseline_count": {
+        "status": "derived",
+        "value": "T0 and T6 imply 12 baseline-like target trials per task session, six before sound and six after sound.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF p.5, section 2.4.1",
+        "evidence_note": "Derived from six target stimuli for each of seven temporal delays."
+      },
+      "catch_count": {
+        "status": "reported",
+        "value": "Twenty auditory-only catch trials per 62-trial task session; practice/calibration included 2 catch trials among 10 trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF p.5, section 2.4.1",
+        "evidence_note": "Experimental catch count is separate from practice/calibration."
+      },
+      "block_count": {
+        "status": "reported",
+        "value": "Two audio-tactile task sessions per participant: pre-FAM and post-FAM; no smaller task blocks reported.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF p.5, section 2.4",
+        "evidence_note": "FAM is an intervening session, not an audio-tactile block."
+      },
+      "total_trial_count": {
+        "status": "derived",
+        "value": "Sixty-two experimental trials per task session; two sessions imply 124 experimental task trials per participant, plus 10 practice/calibration trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/mindfulness_pps_2024.pdf",
+        "page_or_section": "PDF p.5, sections 2.4 and 2.4.1",
+        "evidence_note": "The 124 total is derived from the reported pre/post task repetition."
+      }
+    }
+  },
+  "critical_caveats": [
+    "Exact pink-noise sample file or generation seed is not reported.",
+    "Speaker model and room/acoustic transfer characteristics are not reported.",
+    "Exact T0 and T6 offsets within the pre/post silence windows are not reported.",
+    "No explicit response timeout/window is reported."
+  ],
+  "next_manual_action": "A runnable recreation can be scaffolded from this review, but exact source asset and physical-speaker transfer function would require author data or a stated approximation."
+}

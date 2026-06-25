@@ -1,0 +1,237 @@
+% Methods fragment for the peripersonal-space audio--tactile task.
+% Suggested packages in the parent manuscript:
+% \usepackage{booktabs}
+% \usepackage{xurl} % or \usepackage{url}; xurl gives better URL line breaks
+% \usepackage{natbib} % or another citation package compatible with \citep
+% Bibliography entries are provided in methods_references.bib.
+
+\section{Methods}
+
+\subsection{Audio--tactile peripersonal-space task}
+
+The experiment used an audio--tactile reaction-time paradigm designed to probe the
+spatial boundary of peripersonal space (PPS), following the logic of dynamic
+PPS tasks in which tactile processing is facilitated by task-irrelevant sounds
+approaching the body \citep{Canzoneri2012DynamicSounds,Serino2015BodyPart}.
+On each trial, participants heard a spoken breathing instruction followed by a
+binaural looming sound. A brief vibrotactile stimulus was delivered on a subset
+of trials, and participants were instructed to respond as quickly as possible
+when they detected the tactile stimulus while ignoring the auditory motion. The
+critical experimental manipulation was the temporal onset of the tactile pulse
+relative to the motion of the looming sound, which was used as a proxy for the
+instantaneous auditory-source distance from the stimulated body part. Faster
+responses at near than far source positions were interpreted as the behavioural
+signature of audio--tactile integration within PPS.
+
+\subsection{Experimental software and reproducibility}
+
+The task was implemented with the Peripersonal Space Toolkit
+\citep{Fejer2026PPSToolkit}, which was developed in the course of designing
+the present experiment. The toolkit served three functions. First, it generated
+and rendered the auditory and tactile stimulus sequences. Second, it controlled
+the experimental playback and response logging. Third, it provided a
+replication-oriented graphical interface for specifying PPS paradigms in terms
+of their experimentally relevant degrees of freedom, such as auditory
+trajectory, source spectrum, spatial reference frame, HRIR selection, tactile
+site, SOA structure, baseline and catch-trial policy, respiratory or task
+phase, block composition, and randomisation constraints. The software therefore
+acted both as the implementation of the present task and as a tool for
+replicating or modifying related audio--tactile PPS paradigms. Full software
+documentation, installation instructions, dependency lists, licenses, and
+implementation details are provided in the public repository; the manuscript
+describes only the operations that determined the experimental stimuli,
+timing, and analysis.
+
+The present protocol specified a repeated two-row structure in which an inhale
+or exhale instruction was paired with one of four frontal looming auditory
+sources. Each trial lasted 8.000~s: a 4.000~s spoken instruction segment was
+followed by a 4.000~s looming-sound segment. The session comprised six blocks,
+each containing 46 trials, for 276 trials per participant. Across the full
+schedule, each participant received 240 audio--tactile trials and 36 catch
+trials. Audio--tactile trials were balanced across inhale and exhale phases,
+across five tactile stimulus-onset asynchronies (SOAs), and across four
+auditory-source spectra. Catch trials contained the identical auditory sequence
+but no tactile pulse. Baseline tactile-only trials were not included in this
+protocol, although the software supports such trials for other PPS variants.
+
+The manuscript-facing software attribution was restricted to the components
+that performed the methodological heavy lifting (Table~\ref{tab:software-attribution}).
+
+\begin{table}[t]
+\centering
+\caption{Core software and scientific resources used for stimulus rendering, timing, and analysis.}
+\label{tab:software-attribution}
+\begin{tabular}{p{0.25\textwidth}p{0.48\textwidth}p{0.19\textwidth}}
+\toprule
+Component & Methodological role & Citation \\
+\midrule
+Peripersonal Space Toolkit & Project-developed stimulus generator, experiment player, replication interface, schedule generator, event logger, and analysis-output generator & \citep{Fejer2026PPSToolkit} \\
+3D Tune-In Audio Toolkit & Binaural rendering framework for the moving auditory source & \citep{CuevasRodriguez2019ThreeDTI} \\
+SOFA/AES69, \texttt{sofar}, and FABIAN & Standardized HRIR format, HRIR loading/inspection, and the non-individualized FABIAN HRIR used for rendering & \citep{Majdak2022SOFA,Sofar2026,Brinkmann2017FABIAN} \\
+NumPy and SciPy & Procedural signal generation, numerical signal operations, and reaction-time function fitting & \citep{Harris2020NumPy,Virtanen2020SciPy} \\
+\texttt{soundfile}/libsndfile & Audio read/write, stimulus inspection, and multichannel sequence assembly & \citep{SoundFile2026,Libsndfile2026} \\
+\texttt{sounddevice}/PortAudio & Multichannel audio playback and device-level audio timing interface & \citep{SoundDevice2026,Bencina2001PortAudio} \\
+Lab Streaming Layer & Optional synchronized marker stream for multimodal timing records & \citep{Kothe2025LSL} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Auditory source generation}
+
+The auditory stimulus was a 4.000~s binaural looming sound sampled at
+44.1~kHz. Four auditory source spectra were used: pink, blue, white, and
+brown noise. These sounds were first generated as monophonic source signals and
+were then rendered as frontal moving binaural sources, producing separate left-
+and right-ear signals for headphone presentation.
+
+The virtual auditory source moved along the listener's frontal midline. In the
+application coordinate convention, the listener was located at the origin, the
+positive \(y\)-axis pointed forward, the positive \(x\)-axis pointed to the
+listener's right, and the positive \(z\)-axis pointed upward. The source was
+specified at azimuth \(0^\circ\) and elevation \(0^\circ\). Each 4.000~s
+looming segment contained a 0.500~s far-position hold, a 3.000~s linear
+approach, and a 0.500~s near-position hold. During the approach phase, the
+source translated from 110~cm to 10~cm from the listener, corresponding to a
+1.000~m path traversed at 33.3~cm/s. The source trajectory therefore
+implemented a smooth approach from extrapersonal toward peripersonal space
+while preserving a constant frontal direction.
+
+The task schedule used five tactile SOAs, defined as the
+delay between the onset of the 4.000~s looming-sound segment and the onset of
+the tactile cue: 300, 800, 1500, 2200, and 2700~ms. The protocol labels these
+SOA levels with nominal source-distance factors of 100.0, 83.3, 60.0, 36.7,
+and 20.0~cm, respectively. The initial 0.500~s far-position hold was included
+to avoid an abrupt spatial transition at auditory-stimulus onset and to make
+the start of each auditory segment perceptually stable before the main approach
+phase. These SOA and distance labels were retained throughout stimulus
+generation and analysis so that reaction times could be related to the
+momentary position of the approaching sound.
+
+\subsection{Binaural rendering}
+
+Binaural spatialization followed the 3D Tune-In binaural-rendering framework
+\citep{CuevasRodriguez2019ThreeDTI}. In simple terms, binaural rendering
+transforms a sound source into the two signals that would reach the listener's
+left and right ears from a specified position in space. This transformation is
+based on head-related impulse responses (HRIRs), which are short acoustic
+filters describing how the head, torso, and outer ears shape a sound before it
+arrives at each ear. HRIRs provide the spectral and timing differences that
+allow a headphone signal to be perceived as coming from a particular direction
+and distance rather than from inside the head.
+
+The HRIRs were stored in SOFA format, the Spatially Oriented Format for
+Acoustics \citep{Majdak2022SOFA}. SOFA is a standardized way of storing
+spatial-acoustics measurements, including the source directions and the
+corresponding left- and right-ear impulse responses. The specific HRIR dataset
+was FABIAN, a high-resolution measurement of a head-and-torso mannequin
+\citep{Brinkmann2017FABIAN}. FABIAN was used as a non-individualized listener
+model: the same measured head-and-ear filtering was applied for all
+participants. The Python \texttt{sofar} package was used to read and inspect
+these SOFA-formatted HRIR data \citep{Sofar2026}.
+
+Rendering was anechoic and distance controlled. Reverberation was disabled, and
+direct-path distance attenuation was applied so that the auditory cue changed
+systematically as the source approached the listener. The rendered signal was
+peak-normalized to preserve digital headroom; this normalization was not an
+absolute sound-pressure-level calibration, so acoustic level should be
+calibrated at the headphone output before participant testing if absolute SPL
+is reported.
+
+\subsection{Spoken breathing instructions}
+
+Each trial began with a spoken instruction specifying the respiratory phase for
+that trial. The default protocol used British English spoken instruction
+recordings prepared as part of the toolkit stimulus set. The instruction
+recordings were normalized to exactly 4.000~s at 44.1~kHz, one channel, and
+16-bit resolution. Separate inhale and exhale instructions were used, and each
+instruction was matched in duration to the 4.000~s pre-stimulus segment.
+
+\subsection{Tactile stimulation, SOA manipulation, and trial types}
+
+The tactile cue was not an incidental overlay added to selected auditory trials;
+the SOA between looming-sound onset and tactile-cue onset was the central
+experimental manipulation of the paradigm. Each tactile-present trial therefore
+specified both an auditory source and an SOA, so that tactile processing was
+sampled at a defined moment after the onset of the task-irrelevant looming
+stimulus. The tactile stimulus itself was specified at the software level as a
+100~ms vibrotactile pulse. The software tactile waveform is a two-component
+sinusoidal pulse with a 200~Hz attack component and a 50~Hz decay component,
+shaped by a smooth envelope and normalized to a peak of 0.95 full scale.
+
+For acquisition, the auditory and tactile components were assembled on a
+common three-channel audio timeline. The first two channels contained the left
+and right binaural auditory signals, and the third channel contained the
+vibrotactile signal. On audio--tactile trials, the tactile pulse was placed in
+the third channel at the sample corresponding to the scheduled SOA after
+looming-sound onset. Thus, the SOA was realized by the temporal structure of
+the multichannel stimulus itself rather than by a separate software command
+issued during playback. Catch trials retained the same auditory sequence but
+contained no tactile pulse.
+
+Within each block, the scheduler generated two balanced trial rows, one for
+inhale trials and one for exhale trials. For each respiratory phase and block,
+the four auditory spectra were crossed with the five SOAs, yielding 20
+audio--tactile trials per phase per block. Three catch trials were added per
+phase per block, producing 23 trials for the inhale row and 23 trials for the
+exhale row. The two rows were interleaved to form a 46-trial block. Across the
+six-block session, this yielded 120 inhale and 120 exhale audio--tactile
+trials, plus 18 inhale and 18 exhale catch trials. Trial order was generated
+with seed 20250604 using a no-immediate-repeat strategy and a maximum of two
+consecutive trials of the same trial type. Participant block order was
+counterbalanced by seeded rotation across the 50-participant exported schedule.
+
+\subsection{Session control and event timing}
+
+Before data collection, a participant-specific trial order was generated from
+the experimental design. For each trial, the software specified the auditory
+source, the respiratory phase, whether a tactile cue was present, and the SOA
+for tactile-present trials. The resulting stimulus sequence was presented as a
+single synchronized multichannel stream, preserving the sample-level temporal
+relationship between the binaural auditory cue and the vibrotactile cue.
+
+Timing-sensitive sessions were run in a native full-screen response interface
+rather than in the design interface. Trial events were time-locked to the onset
+of audio playback and included trial onset, looming-sound onset, tactile onset
+for tactile-present trials, and block boundaries. Behavioural responses were
+logged as mouse-click events. An optional Lab Streaming Layer marker stream was
+available for synchronized multimodal recordings \citep{Kothe2025LSL}.
+
+\subsection{Hardware-level audio and tactile delivery}
+
+The hardware acquisition route was treated separately from the software
+schedule. The preferred route used a single synchronized multichannel audio
+interface, with two output channels routed to the headphones and a third output
+channel routed to the vibrotactile actuator. This arrangement was chosen to
+minimize relative latency between the three stimulus outputs: the two binaural
+headphone signals and the tactile signal were emitted by the same audio stream,
+through the same hardware device, under the same audio clock. The absolute
+audio-interface latency is therefore largely common to all channels, whereas
+the experimentally critical quantity is the residual inter-channel skew between
+the binaural audio and tactile outputs.
+
+Hardware loopback validation was used as the preferred timing quality-control
+procedure for the physical route. The validation routine tested inter-channel
+skew, residual jitter, drift, and timing offsets between the headphone and
+tactile output channels. This electrical validation establishes whether the
+three audio-interface outputs preserve the intended SOAs at the hardware
+output. Mechanical actuator latency, however, must be characterized separately
+whenever the tactile transducer, wearable actuator, cabling, or amplifier chain
+is changed.
+
+\subsection{Reaction-time extraction and quality control}
+
+Immediate quality-control analysis paired each tactile-onset event with the
+first behavioural response occurring between 100 and 3000~ms after tactile
+onset. Reaction times were summarized by participant, trial type, respiratory
+phase, auditory source, and SOA. For task variants including baseline
+tactile-only trials, the toolkit can compute SOA-matched baseline-corrected
+reaction times. For the present Study 5 preload, which omitted baseline trials,
+the primary exported quality-control metric was the mean reaction time at each
+SOA and condition. When at least four SOA levels were available, the software
+also fitted a sigmoid function to the reaction-time profile using SciPy
+\citep{Virtanen2020SciPy}, following the convention that the fitted transition
+point indexes the spatial boundary at which task-irrelevant auditory
+information begins to facilitate tactile processing
+\citep{Canzoneri2012DynamicSounds,Serino2015BodyPart}. Final inferential
+models, participant exclusions, and any preregistered analysis choices should
+be reported in the statistical-analysis section of the manuscript.

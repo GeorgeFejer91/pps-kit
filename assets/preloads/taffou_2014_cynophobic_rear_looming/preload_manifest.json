@@ -1,0 +1,234 @@
+{
+  "schema": "pps-preload-profile-assets.v1",
+  "template_id": "taffou_2014_cynophobic_rear_looming",
+  "title": "Taffou 2014 rear-field dog/sheep looming PPS",
+  "visible_variant_label": "",
+  "publication_status": "published",
+  "profile_type": "",
+  "asset_mode": "bundled_local",
+  "retrieval_strategy": "bundled_or_download_from_github_pages",
+  "local_only": true,
+  "catalog_segments": [
+    {
+      "folder": "01_profile",
+      "label": "Profile",
+      "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/01_profile"
+    },
+    {
+      "folder": "02_looming_stimuli",
+      "label": "Looming Stimuli Builder",
+      "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli"
+    },
+    {
+      "folder": "03_baseline_strategy",
+      "label": "Baseline Strategy",
+      "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/03_baseline_strategy"
+    },
+    {
+      "folder": "04_trial_designer",
+      "label": "Trial Designer",
+      "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/04_trial_designer"
+    },
+    {
+      "folder": "05_run_setup",
+      "label": "Run Setup",
+      "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/05_run_setup"
+    }
+  ],
+  "profile_parameters_manifest": "assets/preloads/taffou_2014_cynophobic_rear_looming/01_profile/profile_parameters_manifest.json",
+  "recreation_status": {
+    "primary_category": "toolkit_structural_gap",
+    "category_label": "Toolkit structural gap",
+    "runner_readiness": "blocked_unsupported_toolkit_structure",
+    "profile_checks_passed": false,
+    "gui_recreatable": false,
+    "segment_0_to_4_profile_checks_passed": false,
+    "segment_1_to_6_materializable": false,
+    "finished_profile": false,
+    "segment_6_launchable": false,
+    "profile_completion_status": "unfinished_preload",
+    "missing_parameter_count": 2,
+    "unsupported_structure_count": 1
+  },
+  "render_contract": {
+    "stage": "auditory_looming_prebake",
+    "engine": "python-sofa-reference",
+    "include_tactile": false,
+    "tactile_policy": "deferred_until_session_preparation"
+  },
+  "assets": [
+    {
+      "label": "Dog growl threatening placeholder",
+      "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Dog_growl_threatening_placeholder.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Dog_growl_threatening_placeholder.wav",
+      "sha256": "108c41e693514e8d34407863b83ca4aaac1798ef27cfd085e3ab0342f6e2b127",
+      "duration_s": 6.666667,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "brown",
+      "tone_type": "brown",
+      "motion_mode": "looming",
+      "direction_label": "rear_left_looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Dog growl threatening placeholder",
+        "source_kind": "generated_noise",
+        "noise_type": "brown",
+        "start_distance_cm": 520.0,
+        "end_distance_cm": 19.9999,
+        "start_rotation_deg": 225.0,
+        "end_rotation_deg": 225.0,
+        "movement_duration_s": 6.6667,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 5.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": -3.676955,
+          "y_m": -3.676955,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": -0.141421,
+          "y_m": -0.141421,
+          "z_m": 0.0
+        }
+      }
+    },
+    {
+      "label": "Dog growl threatening placeholder - rear right looming",
+      "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Dog_growl_threatening_placeholder_-_rear_right_looming.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Dog_growl_threatening_placeholder_-_rear_right_looming.wav",
+      "sha256": "bc564da49c87dc37aa2552cba0ee3558fd530b2fd58bba6a04c9346b7e18b620",
+      "duration_s": 6.666667,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "brown",
+      "tone_type": "brown",
+      "motion_mode": "looming",
+      "direction_label": "rear_right_looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Dog growl threatening placeholder - rear right looming",
+        "source_kind": "generated_noise",
+        "noise_type": "brown",
+        "start_distance_cm": 520.0,
+        "end_distance_cm": 19.9999,
+        "start_rotation_deg": 135.0,
+        "end_rotation_deg": 135.0,
+        "movement_duration_s": 6.6667,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 5.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "custom",
+        "start": {
+          "x_m": 3.676955,
+          "y_m": -3.676955,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.141421,
+          "y_m": -0.141421,
+          "z_m": 0.0
+        }
+      }
+    },
+    {
+      "label": "Sheep bleat non-threatening placeholder",
+      "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Sheep_bleat_non-threatening_placeholder.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Sheep_bleat_non-threatening_placeholder.wav",
+      "sha256": "97e0397b0a2d731fb878e43ba5a5facd9be995466fcd66c5624835d483be0bd3",
+      "duration_s": 6.666667,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "looming",
+      "direction_label": "rear_left_looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Sheep bleat non-threatening placeholder",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 520.0,
+        "end_distance_cm": 19.9999,
+        "start_rotation_deg": 225.0,
+        "end_rotation_deg": 225.0,
+        "movement_duration_s": 6.6667,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 5.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": -3.676955,
+          "y_m": -3.676955,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": -0.141421,
+          "y_m": -0.141421,
+          "z_m": 0.0
+        }
+      }
+    },
+    {
+      "label": "Sheep bleat non-threatening placeholder - rear right looming",
+      "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Sheep_bleat_non-threatening_placeholder_-_rear_right_looming.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Sheep_bleat_non-threatening_placeholder_-_rear_right_looming.wav",
+      "sha256": "a4408fd68139515c6b0e5de10416467ad94dca0f6c83dd8b82b9b1b58176c1dc",
+      "duration_s": 6.666667,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "looming",
+      "direction_label": "rear_right_looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Sheep bleat non-threatening placeholder - rear right looming",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 520.0,
+        "end_distance_cm": 19.9999,
+        "start_rotation_deg": 135.0,
+        "end_rotation_deg": 135.0,
+        "movement_duration_s": 6.6667,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 5.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "custom",
+        "start": {
+          "x_m": 3.676955,
+          "y_m": -3.676955,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.141421,
+          "y_m": -0.141421,
+          "z_m": 0.0
+        }
+      }
+    }
+  ],
+  "notes": [
+    "Prebaked WAVs are local auditory-only profile assets.",
+    "Tactile timing is introduced later by session preparation from SOA/trial CSVs.",
+    "The browser dashboard only orchestrates local companion verification and use of these files."
+  ]
+}

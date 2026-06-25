@@ -1,0 +1,34 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "ferri_2015_artificial_looming_valence",
+  "title": "Ferri 2015 artificial emotional looming sounds",
+  "citation": "Ferri, F., Costantini, M., Tajadura-Jimenez, A., Valjamae, A., & Vastano, R. (2015). Emotion-inducing approaching sounds shape the boundaries of multisensory peripersonal space. Neuropsychologia, 70, 468-475.",
+  "doi": "10.1016/j.neuropsychologia.2015.03.001",
+  "source_url": "https://discovery.ucl.ac.uk/id/eprint/1464805/",
+  "verification_status": "partial",
+  "notes": "Captures the Canzoneri-style frontal audio-tactile scaffold and artificial 1/f versus 1/f2 looming sound labels. Exact emotional stimulus construction and ratings require the paper materials.",
+  "reference_parameters": {
+    "profile_type": "audio_tactile_looming_valence",
+    "implemented_controls": [
+      "approaching sound",
+      "right-hand tactile target",
+      "five SOA/distance samples",
+      "negative/neutral artificial sound labels"
+    ],
+    "implementation_gaps": [
+      "exact auditory files",
+      "emotional ratings",
+      "paper-specific gain envelope"
+    ]
+  },
+  "provenance": [
+    {
+      "field": "auditory stimuli",
+      "source": "UCL Discovery abstract reports intensity-changing artificial sound sources with neutral or negative valence."
+    },
+    {
+      "field": "template scope",
+      "source": "The profile reuses the Canzoneri-style five-point looming PPS scaffold because the exact sound files/envelopes are not bundled."
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "serino_2015_toolless_sync_training",
+  "title": "Serino 2015 synchronous far audio-tactile PPS training",
+  "citation": "Serino, A., Canzoneri, E., Marzolla, M., di Pellegrino, G., & Magosso, E. (2015). Extending peripersonal space representation without tool-use: evidence from a combined behavioral-computational approach. Frontiers in Behavioral Neuroscience, 9, 4.",
+  "doi": "10.3389/fnbeh.2015.00004",
+  "source_url": "https://www.frontiersin.org/journals/behavioral-neuroscience/articles/10.3389/fnbeh.2015.00004/full",
+  "verification_status": "partial",
+  "notes": "Training-induced PPS plasticity profile. The preload captures the measurement task: 3000 ms pink-noise IN/OUT sounds, right-hand tactile detection, T1-T5 SOAs, and auditory-only catch trials. The synchronous versus asynchronous training protocol is stored as metadata until ordered training phases become a first-class GUI concept.",
+  "reference_parameters": {
+    "profile_type": "audio_tactile_training_plasticity",
+    "sound_duration_ms": 3000,
+    "tactile_target_probability": 0.77,
+    "catch_subtype": "auditory-only no tactile target",
+    "measurement_task": "right-hand speeded tactile detection with task-irrelevant IN/OUT pink noise",
+    "training_factor": "synchronous versus asynchronous far-audio/hand-tactile pairing",
+    "response_rule": "vocal response to tactile target, ignore sound",
+    "implementation_gaps": [
+      "ordered pre-training/training/post-training phase model",
+      "training train structure and timing",
+      "electrocutaneous tactile calibration",
+      "voice-key response capture"
+    ]
+  },
+  "provenance": [
+    {
+      "field": "measurement task",
+      "source": "Frontiers Methods report 3000 ms pink-noise IN/OUT sounds, right-hand tactile target detection, 77% target trials, and T1-T5 at 300, 800, 1500, 2200, and 2700 ms."
+    },
+    {
+      "field": "training manipulation",
+      "source": "Frontiers article reports synchronous versus asynchronous far auditory stimulation paired with hand tactile stimulation."
+    }
+  ]
+}

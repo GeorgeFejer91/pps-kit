@@ -1,0 +1,124 @@
+{
+  "template_id": "noel_2015_walking_full_body_action",
+  "title": "Noel 2015 walking full-body action PPS",
+  "citation": "Noel, J. P., Grivaz, P., Marmaroli, P., Lissek, H., Blanke, O., & Serino, A. (2015). Full body action remapping of peripersonal space: the case of walking. Neuropsychologia, 70, 375-384.",
+  "source_url": "https://pubmed.ncbi.nlm.nih.gov/25193502/",
+  "doi": "10.1016/j.neuropsychologia.2014.08.030",
+  "verification_status": "partial",
+  "notes": "Walking/treadmill PPS expansion profile. Locomotion and optic-flow manipulations are not represented in the current GUI; this profile captures the looming chest-tactile scaffold and extended distance range.",
+  "reference_parameters": {
+    "standing_boundary_reported_cm": "65-100",
+    "walking_boundary_reported_cm": 166,
+    "implementation_gaps": [
+      "treadmill state",
+      "optic flow condition",
+      "exact sound distances and trial counts"
+    ]
+  },
+  "design": {
+    "name": "Noel 2015 walking full-body action PPS",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Walking PPS looming sound",
+        "noise_type": "pink",
+        "azimuth_deg": 0.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0
+      }
+    ],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "trajectory": {
+      "start_radius_m": 2.0,
+      "end_radius_m": 0.1,
+      "path_direction": "approach",
+      "coordinate_mode": "cartesian",
+      "start_x_m": 0.0,
+      "start_y_m": 2.0,
+      "start_z_m": 0.0,
+      "end_x_m": 0.0,
+      "end_y_m": 0.1,
+      "end_z_m": 0.0,
+      "path_length_m": 1.9,
+      "propagation_speed_mps": 0.633333333,
+      "azimuth_start_deg": 0.0,
+      "azimuth_end_deg": 0.0,
+      "elevation_deg": 0.0,
+      "padding_pre_s": 0.0,
+      "padding_post_s": 0.0,
+      "sample_rate": 44100,
+      "use_inverse_square": true
+    },
+    "protocol": {
+      "repetitions_per_condition": 12,
+      "soa_values_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "spatial_values_cm": [
+        166,
+        133,
+        100,
+        65,
+        30
+      ],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": [
+        "standing looming",
+        "walking looming"
+      ],
+      "tactile_sites": [
+        "chest"
+      ],
+      "catch_trial_percentage": 10.0,
+      "catch_trials_exact": null,
+      "include_baseline_trials": true,
+      "baseline_soa_values_ms": [
+        300,
+        2700
+      ],
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 2,
+      "trial_randomization_strategy": "no_immediate_repeats",
+      "block_order_randomization": "counterbalanced_rotation",
+      "max_consecutive_same_trial_type": 2,
+      "trial_strips": [
+        {
+          "strip_id": "noel-walking-looming-row",
+          "label": "Walking PPS looming trial",
+          "audio_tactile_percentage": 100.0,
+          "catch_percentage": 0.0,
+          "baseline_percentage": 0.0,
+          "elements": [
+            {
+              "element_id": "noel-walking-looming-source",
+              "kind": "looming_stimulus",
+              "label": "Walking PPS looming sound",
+              "source_label": "",
+              "source_labels": [],
+              "randomized": true
+            }
+          ]
+        }
+      ],
+      "participants": 18,
+      "random_seed": 20150401
+    }
+  },
+  "provenance": [
+    {
+      "field": "boundary values",
+      "source": "PubMed abstract reports standing facilitation around 65-100 cm and walking expansion around 1.66 m."
+    },
+    {
+      "field": "implementation gap",
+      "source": "Current GUI does not encode treadmill or optic-flow condition; those remain protocol-level notes."
+    }
+  ]
+}

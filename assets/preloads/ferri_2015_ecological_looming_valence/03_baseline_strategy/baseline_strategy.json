@@ -1,0 +1,10 @@
+{
+  "schema": "pps-preload-baseline-segment.v1",
+  "template_id": "ferri_2015_ecological_looming_valence",
+  "baseline_strategy": "tactile_only",
+  "include_baseline_trials": true,
+  "baseline_trial_percentage": 0.0,
+  "baseline_soa_values_ms": [],
+  "catch_trial_percentage": 10.0,
+  "catch_trials_exact": null
+}

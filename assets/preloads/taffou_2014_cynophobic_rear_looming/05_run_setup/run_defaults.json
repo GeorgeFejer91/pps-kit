@@ -1,0 +1,9 @@
+{
+  "schema": "pps-preload-run-setup-segment.v1",
+  "template_id": "taffou_2014_cynophobic_rear_looming",
+  "blocks": 8,
+  "participants": 30,
+  "random_seed": 20140903,
+  "trial_randomization_strategy": "no_immediate_repeats",
+  "block_order_randomization": "counterbalanced_rotation"
+}

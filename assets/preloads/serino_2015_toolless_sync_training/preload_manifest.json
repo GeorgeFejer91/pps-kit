@@ -1,0 +1,150 @@
+{
+  "schema": "pps-preload-profile-assets.v1",
+  "template_id": "serino_2015_toolless_sync_training",
+  "title": "Serino 2015 synchronous far audio-tactile PPS training",
+  "visible_variant_label": "",
+  "publication_status": "published",
+  "profile_type": "audio_tactile_training_plasticity",
+  "asset_mode": "bundled_local",
+  "retrieval_strategy": "bundled_or_download_from_github_pages",
+  "local_only": true,
+  "catalog_segments": [
+    {
+      "folder": "01_profile",
+      "label": "Profile",
+      "path": "assets/preloads/serino_2015_toolless_sync_training/01_profile"
+    },
+    {
+      "folder": "02_looming_stimuli",
+      "label": "Looming Stimuli Builder",
+      "path": "assets/preloads/serino_2015_toolless_sync_training/02_looming_stimuli"
+    },
+    {
+      "folder": "03_baseline_strategy",
+      "label": "Baseline Strategy",
+      "path": "assets/preloads/serino_2015_toolless_sync_training/03_baseline_strategy"
+    },
+    {
+      "folder": "04_trial_designer",
+      "label": "Trial Designer",
+      "path": "assets/preloads/serino_2015_toolless_sync_training/04_trial_designer"
+    },
+    {
+      "folder": "05_run_setup",
+      "label": "Run Setup",
+      "path": "assets/preloads/serino_2015_toolless_sync_training/05_run_setup"
+    }
+  ],
+  "profile_parameters_manifest": "assets/preloads/serino_2015_toolless_sync_training/01_profile/profile_parameters_manifest.json",
+  "recreation_status": {
+    "primary_category": "missing_publication_parameters",
+    "category_label": "Missing publication parameters",
+    "runner_readiness": "blocked_missing_parameters",
+    "profile_checks_passed": false,
+    "gui_recreatable": false,
+    "segment_0_to_4_profile_checks_passed": false,
+    "segment_1_to_6_materializable": false,
+    "finished_profile": false,
+    "segment_6_launchable": false,
+    "profile_completion_status": "unfinished_preload",
+    "missing_parameter_count": 2,
+    "unsupported_structure_count": 0
+  },
+  "render_contract": {
+    "stage": "auditory_looming_prebake",
+    "engine": "python-sofa-reference",
+    "include_tactile": false,
+    "tactile_policy": "deferred_until_session_preparation"
+  },
+  "assets": [
+    {
+      "label": "Pink moving sound",
+      "path": "assets/preloads/serino_2015_toolless_sync_training/02_looming_stimuli/looming_Pink_moving_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_toolless_sync_training/02_looming_stimuli/looming_Pink_moving_sound.wav",
+      "sha256": "59fd15637e285001e6a5b57ba8e39695cda9fe33a8c226d6838fc15ebebdd635",
+      "duration_s": 3.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Pink moving sound",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 105.0,
+        "end_distance_cm": 5.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 3.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.05,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.05,
+          "z_m": 0.0
+        }
+      }
+    },
+    {
+      "label": "Pink moving sound - receding",
+      "path": "assets/preloads/serino_2015_toolless_sync_training/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_toolless_sync_training/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+      "sha256": "dc050cfde74073dfb6c4776a125e0a6e1eed88019df88350a5ad802b2561cf69",
+      "duration_s": 3.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "receding",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Pink moving sound - receding",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 5.0,
+        "end_distance_cm": 105.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 3.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "recede",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 0.05,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.05,
+          "z_m": 0.0
+        }
+      }
+    }
+  ],
+  "notes": [
+    "Prebaked WAVs are local auditory-only profile assets.",
+    "Tactile timing is introduced later by session preparation from SOA/trial CSVs.",
+    "The browser dashboard only orchestrates local companion verification and use of these files."
+  ]
+}

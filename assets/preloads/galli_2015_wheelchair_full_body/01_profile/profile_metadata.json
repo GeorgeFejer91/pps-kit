@@ -1,0 +1,42 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "galli_2015_wheelchair_full_body",
+  "title": "Galli 2015 wheelchair full-body PPS",
+  "citation": "Galli, G., Noel, J. P., Canzoneri, E., Blanke, O., & Serino, A. (2015). The wheelchair as a full-body tool extending the peripersonal space. Frontiers in Psychology, 6, 639.",
+  "doi": "10.3389/fpsyg.2015.00639",
+  "source_url": "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2015.00639/full",
+  "verification_status": "partial",
+  "notes": "Wheelchair-training PPS task. The profile captures trunk tactile timing and front/back looming structure; active/passive training condition is not yet a GUI factor.",
+  "reference_parameters": {
+    "sound_velocity_mps": 0.75,
+    "sound_path_m": 2.0,
+    "tactile_delays_ms": [
+      380,
+      760,
+      1140,
+      1520,
+      1900,
+      2280
+    ],
+    "reported_trials": {
+      "audio_tactile": 144,
+      "catch": 24,
+      "baseline": 48
+    },
+    "implementation_gaps": [
+      "wheelchair training condition",
+      "front/back block factors",
+      "speaker-array Gaussian amplitude control"
+    ]
+  },
+  "provenance": [
+    {
+      "field": "timing",
+      "source": "Frontiers methods report tactile delays at 380, 760, 1140, 1520, 1900, and 2280 ms from sound onset."
+    },
+    {
+      "field": "trials",
+      "source": "Methods report 144 audio-tactile trials, 24 auditory catch trials, and 48 tactile baseline trials."
+    }
+  ]
+}

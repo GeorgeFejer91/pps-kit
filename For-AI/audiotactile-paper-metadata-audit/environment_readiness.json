@@ -1,0 +1,20 @@
+{
+  "schema": "pps-paper-metadata-environment.v1",
+  "parser_version": "0.5.7",
+  "checked_on": "2026-06-16",
+  "java_available": false,
+  "java_source": "",
+  "opendataloader_pdf_installed": false,
+  "opendataloader_ready": false,
+  "fallback_extractors": {
+    "pdfplumber_installed": true,
+    "pypdf_installed": true,
+    "pdftoppm_available": false,
+    "pdfinfo_available": false
+  },
+  "notes": [
+    "OpenDataLoader PDF is the primary extraction route when Java and opendataloader_pdf are available.",
+    "Fallback extractor output is written only under ignored artifacts/paper_metadata_audit/extracted.",
+    "No executable paths are stored here to avoid local absolute paths in tracked project memory."
+  ]
+}

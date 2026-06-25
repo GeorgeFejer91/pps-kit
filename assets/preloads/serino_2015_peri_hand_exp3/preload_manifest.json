@@ -1,0 +1,150 @@
+{
+  "schema": "pps-preload-profile-assets.v1",
+  "template_id": "serino_2015_peri_hand_exp3",
+  "title": "Serino 2015 peri-hand PPS Experiment 3",
+  "visible_variant_label": "B",
+  "publication_status": "published",
+  "profile_type": "",
+  "asset_mode": "bundled_local",
+  "retrieval_strategy": "bundled_or_download_from_github_pages",
+  "local_only": true,
+  "catalog_segments": [
+    {
+      "folder": "01_profile",
+      "label": "Profile",
+      "path": "assets/preloads/serino_2015_peri_hand_exp3/01_profile"
+    },
+    {
+      "folder": "02_looming_stimuli",
+      "label": "Looming Stimuli Builder",
+      "path": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli"
+    },
+    {
+      "folder": "03_baseline_strategy",
+      "label": "Baseline Strategy",
+      "path": "assets/preloads/serino_2015_peri_hand_exp3/03_baseline_strategy"
+    },
+    {
+      "folder": "04_trial_designer",
+      "label": "Trial Designer",
+      "path": "assets/preloads/serino_2015_peri_hand_exp3/04_trial_designer"
+    },
+    {
+      "folder": "05_run_setup",
+      "label": "Run Setup",
+      "path": "assets/preloads/serino_2015_peri_hand_exp3/05_run_setup"
+    }
+  ],
+  "profile_parameters_manifest": "assets/preloads/serino_2015_peri_hand_exp3/01_profile/profile_parameters_manifest.json",
+  "recreation_status": {
+    "primary_category": "toolkit_structural_gap",
+    "category_label": "Toolkit structural gap",
+    "runner_readiness": "blocked_unsupported_toolkit_structure",
+    "profile_checks_passed": false,
+    "gui_recreatable": false,
+    "segment_0_to_4_profile_checks_passed": false,
+    "segment_1_to_6_materializable": false,
+    "finished_profile": false,
+    "segment_6_launchable": false,
+    "profile_completion_status": "unfinished_preload",
+    "missing_parameter_count": 0,
+    "unsupported_structure_count": 1
+  },
+  "render_contract": {
+    "stage": "auditory_looming_prebake",
+    "engine": "python-sofa-reference",
+    "include_tactile": false,
+    "tactile_policy": "deferred_until_session_preparation"
+  },
+  "assets": [
+    {
+      "label": "Hand moving sound",
+      "path": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound.wav",
+      "sha256": "8f825179f693f514146e7b985a36e73cd06f6aa6f27750b3940440c325a8a51a",
+      "duration_s": 3.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Hand moving sound",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 99.368,
+        "end_distance_cm": 35.3553,
+        "start_rotation_deg": 20.6235,
+        "end_rotation_deg": 81.8699,
+        "movement_duration_s": 3.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.88,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.35,
+          "y_m": 0.93,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.35,
+          "y_m": 0.05,
+          "z_m": 0.0
+        }
+      }
+    },
+    {
+      "label": "Hand moving sound - receding",
+      "path": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound_-_receding.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound_-_receding.wav",
+      "sha256": "4ba58b7cdd899afffe205d6db0d9f8fb9b892d6bbd262be679f9bd9dcd884ae0",
+      "duration_s": 3.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "receding",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Hand moving sound - receding",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 35.3553,
+        "end_distance_cm": 99.368,
+        "start_rotation_deg": 81.8699,
+        "end_rotation_deg": 20.6235,
+        "movement_duration_s": 3.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.88,
+        "coordinate_mode": "cartesian",
+        "path_direction": "recede",
+        "start": {
+          "x_m": 0.35,
+          "y_m": 0.05,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.35,
+          "y_m": 0.93,
+          "z_m": 0.0
+        }
+      }
+    }
+  ],
+  "notes": [
+    "Prebaked WAVs are local auditory-only profile assets.",
+    "Tactile timing is introduced later by session preparation from SOA/trial CSVs.",
+    "The browser dashboard only orchestrates local companion verification and use of these files."
+  ]
+}

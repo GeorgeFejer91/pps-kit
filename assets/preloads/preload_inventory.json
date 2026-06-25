@@ -1,0 +1,4130 @@
+{
+  "schema": "pps-preload-asset-inventory.v1",
+  "base_url": "https://georgefejer91.github.io/pps-kit/assets/preloads",
+  "inventory_policy": "GitHub stores the manifest and owned/generated preload assets. The browser never uploads local stimulus files or participant/session artifacts; the local companion verifies, downloads, or bakes assets.",
+  "catalog_policy": "Each profile folder mirrors the dashboard workflow segments so local storage stays aligned with the researcher decision surface.",
+  "default_policy": {
+    "asset_mode": "bundled_local",
+    "retrieval_strategy": "bundled_or_download_from_github_pages",
+    "local_only": true
+  },
+  "segments": [
+    {
+      "folder": "01_profile",
+      "label": "Profile"
+    },
+    {
+      "folder": "02_looming_stimuli",
+      "label": "Looming Stimuli Builder"
+    },
+    {
+      "folder": "03_baseline_strategy",
+      "label": "Baseline Strategy"
+    },
+    {
+      "folder": "04_trial_designer",
+      "label": "Trial Designer"
+    },
+    {
+      "folder": "05_run_setup",
+      "label": "Run Setup"
+    }
+  ],
+  "profiles": [
+    {
+      "template_id": "study5_box_breathing_pps",
+      "title": "Study 5 PPS box-breathing white/pink profile",
+      "visible_variant_label": "",
+      "variant_display": "Study 5 PPS box-breathing white/pink profile",
+      "publication_status": "unpublished_lab_profile",
+      "profile_type": "local_unpublished_study5_box_breathing_pps_white_pink",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/study5_box_breathing_pps/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/study5_box_breathing_pps/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "gui_recreatable",
+        "category_label": "GUI-recreatable",
+        "runner_readiness": "ready",
+        "profile_checks_passed": true,
+        "gui_recreatable": true,
+        "segment_0_to_4_profile_checks_passed": true,
+        "segment_1_to_6_materializable": true,
+        "finished_profile": true,
+        "segment_6_launchable": true,
+        "profile_completion_status": "finished_segment_6_launchable",
+        "missing_parameter_count": 0,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "primary_recreation_category": "gui_recreatable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/study5_box_breathing_pps/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/study5_box_breathing_pps/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/study5_box_breathing_pps/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/study5_box_breathing_pps/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/study5_box_breathing_pps/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Pink frontal",
+          "path": "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Pink_frontal.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Pink_frontal.wav",
+          "sha256": "2ff7c2286a5c04dfebab6e1ea33738849776bf3060e6acc2ee0ee66016e1e772",
+          "duration_s": 4.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Pink frontal",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 110.0,
+            "end_distance_cm": 10.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.5,
+            "end_hold_s": 0.5,
+            "path_length_m": 1.0,
+            "coordinate_mode": "polar",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "White frontal",
+          "path": "assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_White_frontal.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_White_frontal.wav",
+          "sha256": "9efe872d368f1f1e1ac126ed315c6534cbbd9c29f5803310e9dbde347d05393a",
+          "duration_s": 4.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "White frontal",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 110.0,
+            "end_distance_cm": 10.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.5,
+            "end_hold_s": 0.5,
+            "path_length_m": 1.0,
+            "coordinate_mode": "polar",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "matsuda_2021_four_directions",
+      "title": "Front, rear, left, and right audio-tactile PPS",
+      "visible_variant_label": "",
+      "variant_display": "Front, rear, left, and right audio-tactile PPS",
+      "publication_status": "published",
+      "profile_type": "",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/matsuda_2021_four_directions/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/matsuda_2021_four_directions/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "gui_recreatable",
+        "category_label": "GUI-recreatable",
+        "runner_readiness": "ready",
+        "profile_checks_passed": true,
+        "gui_recreatable": true,
+        "segment_0_to_4_profile_checks_passed": true,
+        "segment_1_to_6_materializable": true,
+        "finished_profile": true,
+        "segment_6_launchable": true,
+        "profile_completion_status": "finished_segment_6_launchable",
+        "missing_parameter_count": 0,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "primary_recreation_category": "gui_recreatable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/matsuda_2021_four_directions/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/matsuda_2021_four_directions/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/matsuda_2021_four_directions/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/matsuda_2021_four_directions/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/matsuda_2021_four_directions/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Pink moving sound",
+          "path": "assets/preloads/matsuda_2021_four_directions/02_looming_stimuli/looming_Pink_moving_sound.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/matsuda_2021_four_directions/02_looming_stimuli/looming_Pink_moving_sound.wav",
+          "sha256": "1c51bd1c0fb25dd998e599a0dfae0f26ffcfa9316f9fb1d401c801bbcbade379",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "approaching",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Pink moving sound",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 110.0,
+            "end_distance_cm": 10.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "polar",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Pink moving sound - receding",
+          "path": "assets/preloads/matsuda_2021_four_directions/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/matsuda_2021_four_directions/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+          "sha256": "e6ddb6c71fe1939fcffa0cd147758d8d4eaeb5cca118e1c3d1678c1baaf0292d",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "receding",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Pink moving sound - receding",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 10.0,
+            "end_distance_cm": 110.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "polar",
+            "path_direction": "recede",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "barumerli_2026_arm_movement_exp1",
+      "title": "Looming/receding PPS during arm movement, Experiment 1",
+      "visible_variant_label": "A",
+      "variant_display": "Looming/receding PPS during arm movement, Experiment 1 - Variant A",
+      "publication_status": "published",
+      "profile_type": "",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/barumerli_2026_arm_movement_exp1/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/barumerli_2026_arm_movement_exp1/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "gui_recreatable",
+        "category_label": "GUI-recreatable",
+        "runner_readiness": "ready",
+        "profile_checks_passed": true,
+        "gui_recreatable": true,
+        "segment_0_to_4_profile_checks_passed": true,
+        "segment_1_to_6_materializable": true,
+        "finished_profile": true,
+        "segment_6_launchable": true,
+        "profile_completion_status": "finished_segment_6_launchable",
+        "missing_parameter_count": 0,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "primary_recreation_category": "gui_recreatable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/barumerli_2026_arm_movement_exp1/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/barumerli_2026_arm_movement_exp1/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/barumerli_2026_arm_movement_exp1/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/barumerli_2026_arm_movement_exp1/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/barumerli_2026_arm_movement_exp1/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Pink moving sound",
+          "path": "assets/preloads/barumerli_2026_arm_movement_exp1/02_looming_stimuli/looming_Pink_moving_sound.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/barumerli_2026_arm_movement_exp1/02_looming_stimuli/looming_Pink_moving_sound.wav",
+          "sha256": "7d8d5c6c71dc0491670e571ab7838c1058165c9e791a5be02fb99a79a3bcb39c",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Pink moving sound",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 110.0,
+            "end_distance_cm": 10.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "polar",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Pink moving sound - receding",
+          "path": "assets/preloads/barumerli_2026_arm_movement_exp1/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/barumerli_2026_arm_movement_exp1/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+          "sha256": "0c72667d446067c197b4b0fabbaf04eb5b0a80502179356e347616a23d6fb65e",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "receding",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Pink moving sound - receding",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 10.0,
+            "end_distance_cm": 110.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "polar",
+            "path_direction": "recede",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "barumerli_2026_arm_movement_exp2",
+      "title": "Looming/receding PPS during arm movement, Experiment 2",
+      "visible_variant_label": "B",
+      "variant_display": "Looming/receding PPS during arm movement, Experiment 2 - Variant B",
+      "publication_status": "published",
+      "profile_type": "",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/barumerli_2026_arm_movement_exp2/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/barumerli_2026_arm_movement_exp2/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "gui_recreatable",
+        "category_label": "GUI-recreatable",
+        "runner_readiness": "ready",
+        "profile_checks_passed": true,
+        "gui_recreatable": true,
+        "segment_0_to_4_profile_checks_passed": true,
+        "segment_1_to_6_materializable": true,
+        "finished_profile": true,
+        "segment_6_launchable": true,
+        "profile_completion_status": "finished_segment_6_launchable",
+        "missing_parameter_count": 0,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "primary_recreation_category": "gui_recreatable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/barumerli_2026_arm_movement_exp2/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/barumerli_2026_arm_movement_exp2/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/barumerli_2026_arm_movement_exp2/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/barumerli_2026_arm_movement_exp2/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/barumerli_2026_arm_movement_exp2/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Pink moving sound",
+          "path": "assets/preloads/barumerli_2026_arm_movement_exp2/02_looming_stimuli/looming_Pink_moving_sound.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/barumerli_2026_arm_movement_exp2/02_looming_stimuli/looming_Pink_moving_sound.wav",
+          "sha256": "9fb3ac2775a221d1cae80b71947141c29179a5d6aea9e5b9e373ebbb41b0dff3",
+          "duration_s": 4.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Pink moving sound",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 110.0,
+            "end_distance_cm": 10.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 4.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "polar",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Pink moving sound - receding",
+          "path": "assets/preloads/barumerli_2026_arm_movement_exp2/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/barumerli_2026_arm_movement_exp2/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+          "sha256": "59a9f3d41384a76f1d0e213828294fd6630394cdeb03b9538e937b61167cd1a8",
+          "duration_s": 4.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "receding",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Pink moving sound - receding",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 10.0,
+            "end_distance_cm": 110.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 4.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "polar",
+            "path_direction": "recede",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "noel_2015_bodily_self",
+      "title": "PPS as the space of the bodily self",
+      "visible_variant_label": "",
+      "variant_display": "PPS as the space of the bodily self",
+      "publication_status": "published",
+      "profile_type": "",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/noel_2015_bodily_self/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/noel_2015_bodily_self/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "gui_recreatable",
+        "category_label": "GUI-recreatable",
+        "runner_readiness": "ready",
+        "profile_checks_passed": true,
+        "gui_recreatable": true,
+        "segment_0_to_4_profile_checks_passed": true,
+        "segment_1_to_6_materializable": true,
+        "finished_profile": true,
+        "segment_6_launchable": true,
+        "profile_completion_status": "finished_segment_6_launchable",
+        "missing_parameter_count": 0,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "primary_recreation_category": "gui_recreatable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 1,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/noel_2015_bodily_self/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/noel_2015_bodily_self/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/noel_2015_bodily_self/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/noel_2015_bodily_self/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/noel_2015_bodily_self/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Looming sound",
+          "path": "assets/preloads/noel_2015_bodily_self/02_looming_stimuli/looming_Looming_sound.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/noel_2015_bodily_self/02_looming_stimuli/looming_Looming_sound.wav",
+          "sha256": "8e4f54c9c7a1203a23f7692768ebe76131a387aa9d0760d32bcbad9494cecbaa",
+          "duration_s": 1.14,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Looming sound",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 90.0,
+            "end_distance_cm": 15.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 1.14,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.75,
+            "coordinate_mode": "polar",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 0.9,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.15,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "pfeiffer_2018_lateral_perihead_left_to_right",
+      "title": "Pfeiffer EJN2018 bilateral lateral trajectory profile",
+      "visible_variant_label": "",
+      "variant_display": "Pfeiffer EJN2018 bilateral lateral trajectory profile",
+      "publication_status": "published",
+      "profile_type": "",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/pfeiffer_2018_lateral_perihead_left_to_right/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/pfeiffer_2018_lateral_perihead_left_to_right/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "gui_recreatable",
+        "category_label": "GUI-recreatable",
+        "runner_readiness": "ready",
+        "profile_checks_passed": true,
+        "gui_recreatable": true,
+        "segment_0_to_4_profile_checks_passed": true,
+        "segment_1_to_6_materializable": true,
+        "finished_profile": true,
+        "segment_6_launchable": true,
+        "profile_completion_status": "finished_segment_6_launchable",
+        "missing_parameter_count": 0,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "primary_recreation_category": "gui_recreatable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/pfeiffer_2018_lateral_perihead_left_to_right/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/pfeiffer_2018_lateral_perihead_left_to_right/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/pfeiffer_2018_lateral_perihead_left_to_right/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/pfeiffer_2018_lateral_perihead_left_to_right/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/pfeiffer_2018_lateral_perihead_left_to_right/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Pink lateral source",
+          "path": "assets/preloads/pfeiffer_2018_lateral_perihead_left_to_right/02_looming_stimuli/looming_Pink_lateral_source.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/pfeiffer_2018_lateral_perihead_left_to_right/02_looming_stimuli/looming_Pink_lateral_source.wav",
+          "sha256": "93ac67ca0bb71637c597126cb14f16427eecdd7b0167ec41ab14fc6e06a688a9",
+          "duration_s": 4.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "left_to_right",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Pink lateral source",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 40.3113,
+            "end_distance_cm": 40.3113,
+            "start_rotation_deg": 277.125,
+            "end_rotation_deg": 82.875,
+            "movement_duration_s": 4.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.8,
+            "coordinate_mode": "cartesian",
+            "path_direction": "left_to_right",
+            "start": {
+              "x_m": -0.4,
+              "y_m": 0.05,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.4,
+              "y_m": 0.05,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Pink lateral source - right to left",
+          "path": "assets/preloads/pfeiffer_2018_lateral_perihead_left_to_right/02_looming_stimuli/looming_Pink_lateral_source_-_right_to_left.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/pfeiffer_2018_lateral_perihead_left_to_right/02_looming_stimuli/looming_Pink_lateral_source_-_right_to_left.wav",
+          "sha256": "de6a24ce3ff25c859da5c773bababf95f37f6a44a71263814215c7a860afdf71",
+          "duration_s": 4.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "right_to_left",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Pink lateral source - right to left",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 40.3113,
+            "end_distance_cm": 40.3113,
+            "start_rotation_deg": 82.875,
+            "end_rotation_deg": 277.125,
+            "movement_duration_s": 4.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.8,
+            "coordinate_mode": "cartesian",
+            "path_direction": "right_to_left",
+            "start": {
+              "x_m": 0.4,
+              "y_m": 0.05,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": -0.4,
+              "y_m": 0.05,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "canzoneri_2013_amputation_prosthesis",
+      "title": "Canzoneri 2013 amputation/prosthesis PPS",
+      "visible_variant_label": "",
+      "variant_display": "Canzoneri 2013 amputation/prosthesis PPS",
+      "publication_status": "published",
+      "profile_type": "audio_tactile_clinical_upper_limb_pps",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/canzoneri_2013_amputation_prosthesis/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/canzoneri_2013_amputation_prosthesis/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "missing_publication_parameters",
+        "category_label": "Missing publication parameters",
+        "runner_readiness": "blocked_missing_parameters",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 1,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "missing_publication_parameters",
+      "missing_parameter_count": 1,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/canzoneri_2013_amputation_prosthesis/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/canzoneri_2013_amputation_prosthesis/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/canzoneri_2013_amputation_prosthesis/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/canzoneri_2013_amputation_prosthesis/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/canzoneri_2013_amputation_prosthesis/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Pink moving sound",
+          "path": "assets/preloads/canzoneri_2013_amputation_prosthesis/02_looming_stimuli/looming_Pink_moving_sound.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/canzoneri_2013_amputation_prosthesis/02_looming_stimuli/looming_Pink_moving_sound.wav",
+          "sha256": "2ab6ea11664e1dc1115f3cbe90d4a2081da7449b2e8b256faf49e8ba6471b7ea",
+          "duration_s": 5.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Pink moving sound",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 110.0,
+            "end_distance_cm": 10.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 1.0,
+            "end_hold_s": 1.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Pink moving sound - receding",
+          "path": "assets/preloads/canzoneri_2013_amputation_prosthesis/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/canzoneri_2013_amputation_prosthesis/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+          "sha256": "be8f9d223d53c43bbe2fd5c0295de71b984f82f6e4aa8f440f0d5ed737eea543",
+          "duration_s": 5.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "receding",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Pink moving sound - receding",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 10.0,
+            "end_distance_cm": 110.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 1.0,
+            "end_hold_s": 1.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "recede",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "canzoneri_2013_tool_use_reshaping",
+      "title": "Canzoneri 2013 tool-use PPS reshaping",
+      "visible_variant_label": "",
+      "variant_display": "Canzoneri 2013 tool-use PPS reshaping",
+      "publication_status": "published",
+      "profile_type": "audio_tactile_tool_use_plasticity",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/canzoneri_2013_tool_use_reshaping/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/canzoneri_2013_tool_use_reshaping/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "missing_publication_parameters",
+        "category_label": "Missing publication parameters",
+        "runner_readiness": "blocked_missing_parameters",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 1,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "missing_publication_parameters",
+      "missing_parameter_count": 1,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/canzoneri_2013_tool_use_reshaping/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/canzoneri_2013_tool_use_reshaping/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/canzoneri_2013_tool_use_reshaping/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/canzoneri_2013_tool_use_reshaping/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/canzoneri_2013_tool_use_reshaping/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Pink moving sound",
+          "path": "assets/preloads/canzoneri_2013_tool_use_reshaping/02_looming_stimuli/looming_Pink_moving_sound.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/canzoneri_2013_tool_use_reshaping/02_looming_stimuli/looming_Pink_moving_sound.wav",
+          "sha256": "ffaeef334ae977bc12967e010bfe1eb891a6a841ac7976d5f3dbe14f8796c241",
+          "duration_s": 5.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Pink moving sound",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 110.0,
+            "end_distance_cm": 10.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 1.0,
+            "end_hold_s": 1.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Pink moving sound - receding",
+          "path": "assets/preloads/canzoneri_2013_tool_use_reshaping/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/canzoneri_2013_tool_use_reshaping/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+          "sha256": "b9608833bd98e45146860c55fbfe68286548b0f18f90ddf597f4ba5e61658346",
+          "duration_s": 5.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "receding",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Pink moving sound - receding",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 10.0,
+            "end_distance_cm": 110.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 1.0,
+            "end_hold_s": 1.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "recede",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "canzoneri_2012_dynamic_sounds",
+      "title": "Dynamic sounds capture PPS boundaries",
+      "visible_variant_label": "",
+      "variant_display": "Dynamic sounds capture PPS boundaries",
+      "publication_status": "published",
+      "profile_type": "canonical_dynamic_audio_tactile_pps",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/canzoneri_2012_dynamic_sounds/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/canzoneri_2012_dynamic_sounds/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "toolkit_structural_gap",
+        "category_label": "Toolkit structural gap",
+        "runner_readiness": "blocked_unsupported_toolkit_structure",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 3,
+        "unsupported_structure_count": 1
+      },
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "toolkit_structural_gap",
+      "missing_parameter_count": 3,
+      "unsupported_structure_count": 1,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/canzoneri_2012_dynamic_sounds/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/canzoneri_2012_dynamic_sounds/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/canzoneri_2012_dynamic_sounds/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/canzoneri_2012_dynamic_sounds/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/canzoneri_2012_dynamic_sounds/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Pink moving sound",
+          "path": "assets/preloads/canzoneri_2012_dynamic_sounds/02_looming_stimuli/looming_Pink_moving_sound.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/canzoneri_2012_dynamic_sounds/02_looming_stimuli/looming_Pink_moving_sound.wav",
+          "sha256": "d43c916d1d49ffd754a5ffbcd8571df69dd3dd4a0842d1da8682b252c91bde25",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Pink moving sound",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 110.0,
+            "end_distance_cm": 10.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "polar",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Pink moving sound - receding",
+          "path": "assets/preloads/canzoneri_2012_dynamic_sounds/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/canzoneri_2012_dynamic_sounds/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+          "sha256": "eaaa11c1c4e57ae1d94ef56650cbf01b88eda27b5776c3af5cff39f5cc016abc",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "receding",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Pink moving sound - receding",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 10.0,
+            "end_distance_cm": 110.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "polar",
+            "path_direction": "recede",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "tonelli_2019_echolocation",
+      "title": "Enhanced audio-tactile PPS after echolocation training",
+      "visible_variant_label": "",
+      "variant_display": "Enhanced audio-tactile PPS after echolocation training",
+      "publication_status": "published",
+      "profile_type": "",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/tonelli_2019_echolocation/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/tonelli_2019_echolocation/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "toolkit_structural_gap",
+        "category_label": "Toolkit structural gap",
+        "runner_readiness": "blocked_unsupported_toolkit_structure",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 1,
+        "unsupported_structure_count": 1
+      },
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "toolkit_structural_gap",
+      "missing_parameter_count": 1,
+      "unsupported_structure_count": 1,
+      "local_only": true,
+      "source_recipe_count": 1,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/tonelli_2019_echolocation/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/tonelli_2019_echolocation/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/tonelli_2019_echolocation/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/tonelli_2019_echolocation/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/tonelli_2019_echolocation/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Moving sound array",
+          "path": "assets/preloads/tonelli_2019_echolocation/02_looming_stimuli/looming_Moving_sound_array.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/tonelli_2019_echolocation/02_looming_stimuli/looming_Moving_sound_array.wav",
+          "sha256": "fb4f9350f660c5b6e65d0d96a48db85d4d4f0fef6c245c9ea2985702a884c5dd",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Moving sound array",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 119.0,
+            "end_distance_cm": 17.0,
+            "start_rotation_deg": 270.0,
+            "end_rotation_deg": 270.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.02,
+            "coordinate_mode": "polar",
+            "path_direction": "approach",
+            "start": {
+              "x_m": -1.19,
+              "y_m": 0.0,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": -0.17,
+              "y_m": 0.0,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "ferri_2015_artificial_looming_valence",
+      "title": "Ferri 2015 artificial emotional looming sounds",
+      "visible_variant_label": "A",
+      "variant_display": "Ferri 2015 artificial emotional looming sounds - Variant A",
+      "publication_status": "published",
+      "profile_type": "audio_tactile_looming_valence",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/ferri_2015_artificial_looming_valence/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/ferri_2015_artificial_looming_valence/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "missing_publication_parameters",
+        "category_label": "Missing publication parameters",
+        "runner_readiness": "blocked_missing_parameters",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 2,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "missing_publication_parameters",
+      "missing_parameter_count": 2,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/ferri_2015_artificial_looming_valence/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/ferri_2015_artificial_looming_valence/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/ferri_2015_artificial_looming_valence/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/ferri_2015_artificial_looming_valence/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Negative artificial 1/f2 looming",
+          "path": "assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Negative_artificial_1_f2_looming.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Negative_artificial_1_f2_looming.wav",
+          "sha256": "a936d98e08b90f28737b469f17bcd613a63986be2464c77d3cade39eae22f440",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "brown",
+          "tone_type": "brown",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Negative artificial 1/f2 looming",
+            "source_kind": "generated_noise",
+            "noise_type": "brown",
+            "start_distance_cm": 110.0,
+            "end_distance_cm": 10.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Neutral artificial 1/f looming",
+          "path": "assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Neutral_artificial_1_f_looming.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Neutral_artificial_1_f_looming.wav",
+          "sha256": "64b4f08281efe5a8c0d720a2f0f5285a1b5abd6a7f7c0bc3f5fcccd44d98294b",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Neutral artificial 1/f looming",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 110.0,
+            "end_distance_cm": 10.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "ferri_2015_ecological_looming_valence",
+      "title": "Ferri 2015 ecological emotional looming sounds",
+      "visible_variant_label": "B",
+      "variant_display": "Ferri 2015 ecological emotional looming sounds - Variant B",
+      "publication_status": "published",
+      "profile_type": "audio_tactile_ecological_valence",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/ferri_2015_ecological_looming_valence/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/ferri_2015_ecological_looming_valence/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "missing_publication_parameters",
+        "category_label": "Missing publication parameters",
+        "runner_readiness": "blocked_missing_parameters",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 2,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "missing_publication_parameters",
+      "missing_parameter_count": 2,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 3,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/ferri_2015_ecological_looming_valence/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/ferri_2015_ecological_looming_valence/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/ferri_2015_ecological_looming_valence/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/ferri_2015_ecological_looming_valence/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Negative ecological looming",
+          "path": "assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Negative_ecological_looming.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Negative_ecological_looming.wav",
+          "sha256": "ffa29042690ef4b01ee7f265dfb71c4d05d3458d28b20c174d8957e771efe9f4",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "brown",
+          "tone_type": "brown",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Negative ecological looming",
+            "source_kind": "generated_noise",
+            "noise_type": "brown",
+            "start_distance_cm": 110.0,
+            "end_distance_cm": 10.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Neutral ecological looming",
+          "path": "assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Neutral_ecological_looming.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Neutral_ecological_looming.wav",
+          "sha256": "67454c950ff97db5184a20551bdbf5786a4285264b67c9e7b250d6ff4391f823",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Neutral ecological looming",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 110.0,
+            "end_distance_cm": 10.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Positive ecological looming",
+          "path": "assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Positive_ecological_looming.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Positive_ecological_looming.wav",
+          "sha256": "78cc8a0aa039201fd18ed67f4ecf620000a352e8f128734807d36c020d21fb9f",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Positive ecological looming",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 110.0,
+            "end_distance_cm": 10.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "galli_2015_wheelchair_full_body",
+      "title": "Galli 2015 wheelchair full-body PPS",
+      "visible_variant_label": "",
+      "variant_display": "Galli 2015 wheelchair full-body PPS",
+      "publication_status": "published",
+      "profile_type": "",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/galli_2015_wheelchair_full_body/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/galli_2015_wheelchair_full_body/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "toolkit_structural_gap",
+        "category_label": "Toolkit structural gap",
+        "runner_readiness": "blocked_unsupported_toolkit_structure",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 0,
+        "unsupported_structure_count": 1
+      },
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "toolkit_structural_gap",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 1,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/galli_2015_wheelchair_full_body/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/galli_2015_wheelchair_full_body/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/galli_2015_wheelchair_full_body/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/galli_2015_wheelchair_full_body/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/galli_2015_wheelchair_full_body/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Wheelchair PPS broadband moving sound",
+          "path": "assets/preloads/galli_2015_wheelchair_full_body/02_looming_stimuli/looming_Wheelchair_PPS_broadband_moving_sound.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/galli_2015_wheelchair_full_body/02_looming_stimuli/looming_Wheelchair_PPS_broadband_moving_sound.wav",
+          "sha256": "38beeaa2e76361e73b4ddd48d5a4b8784b7fe7b2c5bc83e0cdcb4d18932cce3c",
+          "duration_s": 2.6,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "front_looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Wheelchair PPS broadband moving sound",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 200.0,
+            "end_distance_cm": 5.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 2.6,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.95,
+            "coordinate_mode": "cartesian",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 2.0,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.05,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Wheelchair PPS broadband moving sound - back looming",
+          "path": "assets/preloads/galli_2015_wheelchair_full_body/02_looming_stimuli/looming_Wheelchair_PPS_broadband_moving_sound_-_back_looming.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/galli_2015_wheelchair_full_body/02_looming_stimuli/looming_Wheelchair_PPS_broadband_moving_sound_-_back_looming.wav",
+          "sha256": "dcd2281133b837c65315f3e41071b7718fd6caed8e0f5fb2be452d494b7c02b6",
+          "duration_s": 2.6,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "back_looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Wheelchair PPS broadband moving sound - back looming",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 200.0,
+            "end_distance_cm": 5.0,
+            "start_rotation_deg": 180.0,
+            "end_rotation_deg": 180.0,
+            "movement_duration_s": 2.6,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.95,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": -0.0,
+              "y_m": -2.0,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": -0.0,
+              "y_m": -0.05,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "lerner_2021_3d_audio_tactile_boundary",
+      "title": "Lerner 2021 3D audio-tactile PPS boundary",
+      "visible_variant_label": "",
+      "variant_display": "Lerner 2021 3D audio-tactile PPS boundary",
+      "publication_status": "published",
+      "profile_type": "",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "toolkit_structural_gap",
+        "category_label": "Toolkit structural gap",
+        "runner_readiness": "blocked_unsupported_toolkit_structure",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 1,
+        "unsupported_structure_count": 2
+      },
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "toolkit_structural_gap",
+      "missing_parameter_count": 1,
+      "unsupported_structure_count": 2,
+      "local_only": true,
+      "source_recipe_count": 24,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Dynamic pink 3D sound",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound.wav",
+          "sha256": "f7c5960038004c18c1b3cfeaa74a71f075923f27beb9856be5bf6e2ae41d00f8",
+          "duration_s": 1.612449,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "direction_01",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Dynamic pink 3D sound",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.03923,
+              "z_m": 0.6
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.00866,
+              "z_m": 0.005
+            }
+          }
+        },
+        {
+          "label": "Dynamic pink 3D sound - direction 02",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_02.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_02.wav",
+          "sha256": "43f04cbb0191180018694aacedc837f5fce8115580677e27d15157c0992385f3",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "direction_02",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Dynamic pink 3D sound - direction 02",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 90.0,
+            "end_rotation_deg": 90.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 0.6,
+              "y_m": 0.0,
+              "z_m": 1.03923
+            },
+            "end": {
+              "x_m": 0.005,
+              "y_m": 0.0,
+              "z_m": 0.00866
+            }
+          }
+        },
+        {
+          "label": "Dynamic pink 3D sound - direction 03",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_03.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_03.wav",
+          "sha256": "5dd606f1359df08a3f82d926e0099031daf8db9d24ef6287afce5fad23476c10",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "direction_03",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Dynamic pink 3D sound - direction 03",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 60.0,
+            "end_rotation_deg": 60.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 1.03923,
+              "y_m": 0.6,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.00866,
+              "y_m": 0.005,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Dynamic pink 3D sound - direction 04",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_04.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_04.wav",
+          "sha256": "2f66851556061a040cfde7da63dbb4512663e5b91d9d4442af5834c758d069f3",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "direction_04",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Dynamic pink 3D sound - direction 04",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.03923,
+              "z_m": -0.6
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.00866,
+              "z_m": -0.005
+            }
+          }
+        },
+        {
+          "label": "Dynamic pink 3D sound - direction 05",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_05.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_05.wav",
+          "sha256": "34b359d65d06390356b95b635ac8890381d3ec4ba32c232eef6dbb9abbd345bf",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "direction_05",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Dynamic pink 3D sound - direction 05",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 270.0,
+            "end_rotation_deg": 270.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": -0.6,
+              "y_m": 0.0,
+              "z_m": 1.03923
+            },
+            "end": {
+              "x_m": -0.005,
+              "y_m": 0.0,
+              "z_m": 0.00866
+            }
+          }
+        },
+        {
+          "label": "Dynamic pink 3D sound - direction 06",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_06.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_06.wav",
+          "sha256": "a136dca7f20c4a4dff5f1a808f4c4867747e9de7cd8a153021c756f7e4919641",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "direction_06",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Dynamic pink 3D sound - direction 06",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 120.0,
+            "end_rotation_deg": 120.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 1.03923,
+              "y_m": -0.6,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.00866,
+              "y_m": -0.005,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Dynamic pink 3D sound - direction 07",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_07.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_07.wav",
+          "sha256": "3626e3c5245c6ea1d48d5003755f29cab3af657641db0ae950bb3d729f7f7680",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "direction_07",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Dynamic pink 3D sound - direction 07",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 180.0,
+            "end_rotation_deg": 180.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 0.0,
+              "y_m": -1.03923,
+              "z_m": -0.6
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": -0.00866,
+              "z_m": -0.005
+            }
+          }
+        },
+        {
+          "label": "Dynamic pink 3D sound - direction 08",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_08.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_08.wav",
+          "sha256": "6519750d355c17dcc0728f3b1f83b13310581bd3edf556a9432e6ea9303d4fc7",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "direction_08",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Dynamic pink 3D sound - direction 08",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 270.0,
+            "end_rotation_deg": 270.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": -0.6,
+              "y_m": 0.0,
+              "z_m": -1.03923
+            },
+            "end": {
+              "x_m": -0.005,
+              "y_m": 0.0,
+              "z_m": -0.00866
+            }
+          }
+        },
+        {
+          "label": "Dynamic pink 3D sound - direction 09",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_09.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_09.wav",
+          "sha256": "c606702211e8d5a06e62fa240bae3a7f7761ca92c42e501092597c4ddb700f07",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "direction_09",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Dynamic pink 3D sound - direction 09",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 240.0,
+            "end_rotation_deg": 240.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": -1.03923,
+              "y_m": -0.6,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": -0.00866,
+              "y_m": -0.005,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Dynamic pink 3D sound - direction 10",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_10.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_10.wav",
+          "sha256": "d8dba5d2fad1a8c5b6c51b217406c04c70d80c151dc827f2d8243d292638a5d5",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "direction_10",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Dynamic pink 3D sound - direction 10",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 180.0,
+            "end_rotation_deg": 180.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 0.0,
+              "y_m": -1.03923,
+              "z_m": 0.6
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": -0.00866,
+              "z_m": 0.005
+            }
+          }
+        },
+        {
+          "label": "Dynamic pink 3D sound - direction 11",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_11.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_11.wav",
+          "sha256": "e102617a7030470219c089c03069be31ca847d4e214c8c6914845a5fd7f86869",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "direction_11",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Dynamic pink 3D sound - direction 11",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 90.0,
+            "end_rotation_deg": 90.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 0.6,
+              "y_m": 0.0,
+              "z_m": -1.03923
+            },
+            "end": {
+              "x_m": 0.005,
+              "y_m": 0.0,
+              "z_m": -0.00866
+            }
+          }
+        },
+        {
+          "label": "Dynamic pink 3D sound - direction 12",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_12.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_12.wav",
+          "sha256": "775ef96b39b2918766fa9dd857de0e80a4366524a03721c9b18ad9f4ef4656f8",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "direction_12",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Dynamic pink 3D sound - direction 12",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 300.0,
+            "end_rotation_deg": 300.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": -1.03923,
+              "y_m": 0.6,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": -0.00866,
+              "y_m": 0.005,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Flat white 3D sound",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound.wav",
+          "sha256": "b6088f5eb5513773c655ac3f644d6e2f245bd081628853eafa3d536b43c790a5",
+          "duration_s": 1.612449,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "direction_01",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Flat white 3D sound",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.03923,
+              "z_m": 0.6
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.00866,
+              "z_m": 0.005
+            }
+          }
+        },
+        {
+          "label": "Flat white 3D sound - direction 02",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_02.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_02.wav",
+          "sha256": "04f118f20d2dbb26a41cf894269df357c169f8eee0f2ec1dea7511dcb8be6fab",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "direction_02",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Flat white 3D sound - direction 02",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 90.0,
+            "end_rotation_deg": 90.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 0.6,
+              "y_m": 0.0,
+              "z_m": 1.03923
+            },
+            "end": {
+              "x_m": 0.005,
+              "y_m": 0.0,
+              "z_m": 0.00866
+            }
+          }
+        },
+        {
+          "label": "Flat white 3D sound - direction 03",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_03.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_03.wav",
+          "sha256": "d4f541df1018de6378e0ee62935a84de062a3cf04846c2f6455b046034d8577b",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "direction_03",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Flat white 3D sound - direction 03",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 60.0,
+            "end_rotation_deg": 60.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 1.03923,
+              "y_m": 0.6,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.00866,
+              "y_m": 0.005,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Flat white 3D sound - direction 04",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_04.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_04.wav",
+          "sha256": "4030c526cd7b0c320fbc444a2584478e4fb6e791444ed9949e644733494cb03d",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "direction_04",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Flat white 3D sound - direction 04",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.03923,
+              "z_m": -0.6
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.00866,
+              "z_m": -0.005
+            }
+          }
+        },
+        {
+          "label": "Flat white 3D sound - direction 05",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_05.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_05.wav",
+          "sha256": "0beb47c1ca0d748a33ab744fee334da61d8efe5a6638fa0fc634512d0935ac7f",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "direction_05",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Flat white 3D sound - direction 05",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 270.0,
+            "end_rotation_deg": 270.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": -0.6,
+              "y_m": 0.0,
+              "z_m": 1.03923
+            },
+            "end": {
+              "x_m": -0.005,
+              "y_m": 0.0,
+              "z_m": 0.00866
+            }
+          }
+        },
+        {
+          "label": "Flat white 3D sound - direction 06",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_06.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_06.wav",
+          "sha256": "6a5831d93c3bc4e72013860f5e7935c8efee8cb06f32378849d85579a707773c",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "direction_06",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Flat white 3D sound - direction 06",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 120.0,
+            "end_rotation_deg": 120.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 1.03923,
+              "y_m": -0.6,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.00866,
+              "y_m": -0.005,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Flat white 3D sound - direction 07",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_07.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_07.wav",
+          "sha256": "285bcb7d59ef91f9ff327f60dd8462c0e59ff5531f15815d8eca09a79c3f96f3",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "direction_07",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Flat white 3D sound - direction 07",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 180.0,
+            "end_rotation_deg": 180.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 0.0,
+              "y_m": -1.03923,
+              "z_m": -0.6
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": -0.00866,
+              "z_m": -0.005
+            }
+          }
+        },
+        {
+          "label": "Flat white 3D sound - direction 08",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_08.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_08.wav",
+          "sha256": "c281692c901bbd10a655992d0b4763237a01e0a25fb57c44eaebda709e65e8da",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "direction_08",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Flat white 3D sound - direction 08",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 270.0,
+            "end_rotation_deg": 270.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": -0.6,
+              "y_m": 0.0,
+              "z_m": -1.03923
+            },
+            "end": {
+              "x_m": -0.005,
+              "y_m": 0.0,
+              "z_m": -0.00866
+            }
+          }
+        },
+        {
+          "label": "Flat white 3D sound - direction 09",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_09.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_09.wav",
+          "sha256": "574b8bbcab95cd06ab5617bb377700e5b164f7bac3c075c125e9d32ab50b889a",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "direction_09",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Flat white 3D sound - direction 09",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 240.0,
+            "end_rotation_deg": 240.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": -1.03923,
+              "y_m": -0.6,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": -0.00866,
+              "y_m": -0.005,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Flat white 3D sound - direction 10",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_10.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_10.wav",
+          "sha256": "ce27139ba07318c3bced9e616ce5cca3b882ac7fb6ade0b6969db5f7cd578f62",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "direction_10",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Flat white 3D sound - direction 10",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 180.0,
+            "end_rotation_deg": 180.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 0.0,
+              "y_m": -1.03923,
+              "z_m": 0.6
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": -0.00866,
+              "z_m": 0.005
+            }
+          }
+        },
+        {
+          "label": "Flat white 3D sound - direction 11",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_11.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_11.wav",
+          "sha256": "1543de0e35bb369d1e313e698c0a8de0493e365e338b6ec6108a0d15c1040f95",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "direction_11",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Flat white 3D sound - direction 11",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 90.0,
+            "end_rotation_deg": 90.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 0.6,
+              "y_m": 0.0,
+              "z_m": -1.03923
+            },
+            "end": {
+              "x_m": 0.005,
+              "y_m": 0.0,
+              "z_m": -0.00866
+            }
+          }
+        },
+        {
+          "label": "Flat white 3D sound - direction 12",
+          "path": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_12.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_12.wav",
+          "sha256": "c0171367de2ae12137f26a362fda690389b61241608539bcdb54caa1b7e05ea2",
+          "duration_s": 5.5,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "direction_12",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Flat white 3D sound - direction 12",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 120.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 300.0,
+            "end_rotation_deg": 300.0,
+            "movement_duration_s": 5.5,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.19,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": -1.03923,
+              "y_m": 0.6,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": -0.00866,
+              "y_m": 0.005,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "noel_2015_walking_full_body_action",
+      "title": "Noel 2015 walking full-body action PPS",
+      "visible_variant_label": "",
+      "variant_display": "Noel 2015 walking full-body action PPS",
+      "publication_status": "published",
+      "profile_type": "",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/noel_2015_walking_full_body_action/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/noel_2015_walking_full_body_action/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "missing_publication_parameters",
+        "category_label": "Missing publication parameters",
+        "runner_readiness": "blocked_missing_parameters",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 1,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "missing_publication_parameters",
+      "missing_parameter_count": 1,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 1,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/noel_2015_walking_full_body_action/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/noel_2015_walking_full_body_action/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/noel_2015_walking_full_body_action/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/noel_2015_walking_full_body_action/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/noel_2015_walking_full_body_action/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Walking PPS looming sound",
+          "path": "assets/preloads/noel_2015_walking_full_body_action/02_looming_stimuli/looming_Walking_PPS_looming_sound.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/noel_2015_walking_full_body_action/02_looming_stimuli/looming_Walking_PPS_looming_sound.wav",
+          "sha256": "a321287ae6a6bd289ed7c3d1a027f36208576b2ec64f07bf3d6247cae64a3bae",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Walking PPS looming sound",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 200.0,
+            "end_distance_cm": 10.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.9,
+            "coordinate_mode": "cartesian",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 2.0,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "serino_2015_front_back_trunk_exp2",
+      "title": "Serino 2015 front/back peri-trunk Experiment 2",
+      "visible_variant_label": "A",
+      "variant_display": "Serino 2015 front/back peri-trunk Experiment 2 - Variant A",
+      "publication_status": "published",
+      "profile_type": "",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/serino_2015_front_back_trunk_exp2/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/serino_2015_front_back_trunk_exp2/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "toolkit_structural_gap",
+        "category_label": "Toolkit structural gap",
+        "runner_readiness": "blocked_unsupported_toolkit_structure",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 1,
+        "unsupported_structure_count": 1
+      },
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "toolkit_structural_gap",
+      "missing_parameter_count": 1,
+      "unsupported_structure_count": 1,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/serino_2015_front_back_trunk_exp2/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/serino_2015_front_back_trunk_exp2/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/serino_2015_front_back_trunk_exp2/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/serino_2015_front_back_trunk_exp2/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/serino_2015_front_back_trunk_exp2/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Front-back moving sound",
+          "path": "assets/preloads/serino_2015_front_back_trunk_exp2/02_looming_stimuli/looming_Front-back_moving_sound.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_front_back_trunk_exp2/02_looming_stimuli/looming_Front-back_moving_sound.wav",
+          "sha256": "f2079c462d02111c0bda61970a96b95652cf0f333282ef99ae9e7f5cf6893f22",
+          "duration_s": 2.666667,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "front_to_back",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Front-back moving sound",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 100.0,
+            "end_distance_cm": 100.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 180.0,
+            "movement_duration_s": 2.6667,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 2.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.0,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": -1.0,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Front-back moving sound - back to front",
+          "path": "assets/preloads/serino_2015_front_back_trunk_exp2/02_looming_stimuli/looming_Front-back_moving_sound_-_back_to_front.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_front_back_trunk_exp2/02_looming_stimuli/looming_Front-back_moving_sound_-_back_to_front.wav",
+          "sha256": "ae6d556d29268263f8a6480322f472c41789045ae8dbd8163bbac60602734b1e",
+          "duration_s": 2.666667,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "back_to_front",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Front-back moving sound - back to front",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 100.0,
+            "end_distance_cm": 100.0,
+            "start_rotation_deg": 180.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 2.6667,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 2.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 0.0,
+              "y_m": -1.0,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 1.0,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "serino_2015_peri_hand_exp3",
+      "title": "Serino 2015 peri-hand PPS Experiment 3",
+      "visible_variant_label": "B",
+      "variant_display": "Serino 2015 peri-hand PPS Experiment 3 - Variant B",
+      "publication_status": "published",
+      "profile_type": "",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/serino_2015_peri_hand_exp3/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/serino_2015_peri_hand_exp3/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "toolkit_structural_gap",
+        "category_label": "Toolkit structural gap",
+        "runner_readiness": "blocked_unsupported_toolkit_structure",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 0,
+        "unsupported_structure_count": 1
+      },
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "toolkit_structural_gap",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 1,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/serino_2015_peri_hand_exp3/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/serino_2015_peri_hand_exp3/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/serino_2015_peri_hand_exp3/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/serino_2015_peri_hand_exp3/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Hand moving sound",
+          "path": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound.wav",
+          "sha256": "8f825179f693f514146e7b985a36e73cd06f6aa6f27750b3940440c325a8a51a",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Hand moving sound",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 99.368,
+            "end_distance_cm": 35.3553,
+            "start_rotation_deg": 20.6235,
+            "end_rotation_deg": 81.8699,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.88,
+            "coordinate_mode": "cartesian",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.35,
+              "y_m": 0.93,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.35,
+              "y_m": 0.05,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Hand moving sound - receding",
+          "path": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound_-_receding.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound_-_receding.wav",
+          "sha256": "4ba58b7cdd899afffe205d6db0d9f8fb9b892d6bbd262be679f9bd9dcd884ae0",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "receding",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Hand moving sound - receding",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 35.3553,
+            "end_distance_cm": 99.368,
+            "start_rotation_deg": 81.8699,
+            "end_rotation_deg": 20.6235,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.88,
+            "coordinate_mode": "cartesian",
+            "path_direction": "recede",
+            "start": {
+              "x_m": 0.35,
+              "y_m": 0.05,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.35,
+              "y_m": 0.93,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "serino_2015_peri_trunk_exp1",
+      "title": "Serino 2015 peri-trunk PPS Experiment 1",
+      "visible_variant_label": "C",
+      "variant_display": "Serino 2015 peri-trunk PPS Experiment 1 - Variant C",
+      "publication_status": "published",
+      "profile_type": "",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/serino_2015_peri_trunk_exp1/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/serino_2015_peri_trunk_exp1/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "gui_recreatable",
+        "category_label": "GUI-recreatable",
+        "runner_readiness": "ready",
+        "profile_checks_passed": true,
+        "gui_recreatable": true,
+        "segment_0_to_4_profile_checks_passed": true,
+        "segment_1_to_6_materializable": true,
+        "finished_profile": true,
+        "segment_6_launchable": true,
+        "profile_completion_status": "finished_segment_6_launchable",
+        "missing_parameter_count": 0,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "primary_recreation_category": "gui_recreatable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/serino_2015_peri_trunk_exp1/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/serino_2015_peri_trunk_exp1/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/serino_2015_peri_trunk_exp1/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/serino_2015_peri_trunk_exp1/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/serino_2015_peri_trunk_exp1/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Trunk moving sound",
+          "path": "assets/preloads/serino_2015_peri_trunk_exp1/02_looming_stimuli/looming_Trunk_moving_sound.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_peri_trunk_exp1/02_looming_stimuli/looming_Trunk_moving_sound.wav",
+          "sha256": "3717896e6726f2a854edd2168cbc200ccf666d65a7cadc1853536bf1f2cfbf62",
+          "duration_s": 4.318005,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Trunk moving sound",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 100.0,
+            "end_distance_cm": 5.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 4.318,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.95,
+            "coordinate_mode": "cartesian",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.0,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.05,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Trunk moving sound - receding",
+          "path": "assets/preloads/serino_2015_peri_trunk_exp1/02_looming_stimuli/looming_Trunk_moving_sound_-_receding.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_peri_trunk_exp1/02_looming_stimuli/looming_Trunk_moving_sound_-_receding.wav",
+          "sha256": "2fc8eeb5af47218e467eaa030463a3d0d4820d641eb42ca364cca3e74db26550",
+          "duration_s": 4.318005,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "receding",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Trunk moving sound - receding",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 5.0,
+            "end_distance_cm": 100.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 4.318,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.95,
+            "coordinate_mode": "cartesian",
+            "path_direction": "recede",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 0.05,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 1.0,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "serino_2015_toolless_sync_training",
+      "title": "Serino 2015 synchronous far audio-tactile PPS training",
+      "visible_variant_label": "",
+      "variant_display": "Serino 2015 synchronous far audio-tactile PPS training",
+      "publication_status": "published",
+      "profile_type": "audio_tactile_training_plasticity",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/serino_2015_toolless_sync_training/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/serino_2015_toolless_sync_training/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "missing_publication_parameters",
+        "category_label": "Missing publication parameters",
+        "runner_readiness": "blocked_missing_parameters",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 2,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "missing_publication_parameters",
+      "missing_parameter_count": 2,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/serino_2015_toolless_sync_training/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/serino_2015_toolless_sync_training/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/serino_2015_toolless_sync_training/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/serino_2015_toolless_sync_training/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/serino_2015_toolless_sync_training/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Pink moving sound",
+          "path": "assets/preloads/serino_2015_toolless_sync_training/02_looming_stimuli/looming_Pink_moving_sound.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_toolless_sync_training/02_looming_stimuli/looming_Pink_moving_sound.wav",
+          "sha256": "59fd15637e285001e6a5b57ba8e39695cda9fe33a8c226d6838fc15ebebdd635",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Pink moving sound",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 105.0,
+            "end_distance_cm": 5.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.05,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.05,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Pink moving sound - receding",
+          "path": "assets/preloads/serino_2015_toolless_sync_training/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_toolless_sync_training/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+          "sha256": "dc050cfde74073dfb6c4776a125e0a6e1eed88019df88350a5ad802b2561cf69",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "receding",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Pink moving sound - receding",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 5.0,
+            "end_distance_cm": 105.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "recede",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 0.05,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 1.05,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "taffou_2014_cynophobic_rear_looming",
+      "title": "Taffou 2014 rear-field dog/sheep looming PPS",
+      "visible_variant_label": "",
+      "variant_display": "Taffou 2014 rear-field dog/sheep looming PPS",
+      "publication_status": "published",
+      "profile_type": "",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/taffou_2014_cynophobic_rear_looming/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/taffou_2014_cynophobic_rear_looming/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "toolkit_structural_gap",
+        "category_label": "Toolkit structural gap",
+        "runner_readiness": "blocked_unsupported_toolkit_structure",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 2,
+        "unsupported_structure_count": 1
+      },
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "toolkit_structural_gap",
+      "missing_parameter_count": 2,
+      "unsupported_structure_count": 1,
+      "local_only": true,
+      "source_recipe_count": 4,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Dog growl threatening placeholder",
+          "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Dog_growl_threatening_placeholder.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Dog_growl_threatening_placeholder.wav",
+          "sha256": "108c41e693514e8d34407863b83ca4aaac1798ef27cfd085e3ab0342f6e2b127",
+          "duration_s": 6.666667,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "brown",
+          "tone_type": "brown",
+          "motion_mode": "looming",
+          "direction_label": "rear_left_looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Dog growl threatening placeholder",
+            "source_kind": "generated_noise",
+            "noise_type": "brown",
+            "start_distance_cm": 520.0,
+            "end_distance_cm": 19.9999,
+            "start_rotation_deg": 225.0,
+            "end_rotation_deg": 225.0,
+            "movement_duration_s": 6.6667,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 5.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "approach",
+            "start": {
+              "x_m": -3.676955,
+              "y_m": -3.676955,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": -0.141421,
+              "y_m": -0.141421,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Dog growl threatening placeholder - rear right looming",
+          "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Dog_growl_threatening_placeholder_-_rear_right_looming.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Dog_growl_threatening_placeholder_-_rear_right_looming.wav",
+          "sha256": "bc564da49c87dc37aa2552cba0ee3558fd530b2fd58bba6a04c9346b7e18b620",
+          "duration_s": 6.666667,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "brown",
+          "tone_type": "brown",
+          "motion_mode": "looming",
+          "direction_label": "rear_right_looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Dog growl threatening placeholder - rear right looming",
+            "source_kind": "generated_noise",
+            "noise_type": "brown",
+            "start_distance_cm": 520.0,
+            "end_distance_cm": 19.9999,
+            "start_rotation_deg": 135.0,
+            "end_rotation_deg": 135.0,
+            "movement_duration_s": 6.6667,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 5.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 3.676955,
+              "y_m": -3.676955,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.141421,
+              "y_m": -0.141421,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Sheep bleat non-threatening placeholder",
+          "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Sheep_bleat_non-threatening_placeholder.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Sheep_bleat_non-threatening_placeholder.wav",
+          "sha256": "97e0397b0a2d731fb878e43ba5a5facd9be995466fcd66c5624835d483be0bd3",
+          "duration_s": 6.666667,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "rear_left_looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Sheep bleat non-threatening placeholder",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 520.0,
+            "end_distance_cm": 19.9999,
+            "start_rotation_deg": 225.0,
+            "end_rotation_deg": 225.0,
+            "movement_duration_s": 6.6667,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 5.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "approach",
+            "start": {
+              "x_m": -3.676955,
+              "y_m": -3.676955,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": -0.141421,
+              "y_m": -0.141421,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Sheep bleat non-threatening placeholder - rear right looming",
+          "path": "assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Sheep_bleat_non-threatening_placeholder_-_rear_right_looming.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Sheep_bleat_non-threatening_placeholder_-_rear_right_looming.wav",
+          "sha256": "a4408fd68139515c6b0e5de10416467ad94dca0f6c83dd8b82b9b1b58176c1dc",
+          "duration_s": 6.666667,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "rear_right_looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Sheep bleat non-threatening placeholder - rear right looming",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 520.0,
+            "end_distance_cm": 19.9999,
+            "start_rotation_deg": 135.0,
+            "end_rotation_deg": 135.0,
+            "movement_duration_s": 6.6667,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 5.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 3.676955,
+              "y_m": -3.676955,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.141421,
+              "y_m": -0.141421,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "teneggi_2013_social_face_pps",
+      "title": "Teneggi 2013 social modulation face PPS",
+      "visible_variant_label": "",
+      "variant_display": "Teneggi 2013 social modulation face PPS",
+      "publication_status": "published",
+      "profile_type": "face_audio_tactile_social_context",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/teneggi_2013_social_face_pps/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/teneggi_2013_social_face_pps/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "missing_publication_parameters",
+        "category_label": "Missing publication parameters",
+        "runner_readiness": "blocked_missing_parameters",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 1,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "missing_publication_parameters",
+      "missing_parameter_count": 1,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/teneggi_2013_social_face_pps/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/teneggi_2013_social_face_pps/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/teneggi_2013_social_face_pps/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/teneggi_2013_social_face_pps/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Face-centered moving sound",
+          "path": "assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli/looming_Face-centered_moving_sound.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli/looming_Face-centered_moving_sound.wav",
+          "sha256": "1d3fbbe2a8457f7adfd7848d15b15ea653344cb28f2c480722050de7d334a3e6",
+          "duration_s": 4.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Face-centered moving sound",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 93.0,
+            "end_distance_cm": 5.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 4.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.88,
+            "coordinate_mode": "cartesian",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 0.93,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.05,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Face-centered moving sound - receding",
+          "path": "assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli/looming_Face-centered_moving_sound_-_receding.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli/looming_Face-centered_moving_sound_-_receding.wav",
+          "sha256": "09574004bd9d70992cb6767b4e1d099006cc6c1ba4849f5e247a21488e552c19",
+          "duration_s": 4.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "receding",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Face-centered moving sound - receding",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 5.0,
+            "end_distance_cm": 93.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 4.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.88,
+            "coordinate_mode": "cartesian",
+            "path_direction": "recede",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 0.05,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.93,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

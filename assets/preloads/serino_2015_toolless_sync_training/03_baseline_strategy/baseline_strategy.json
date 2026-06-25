@@ -1,0 +1,10 @@
+{
+  "schema": "pps-preload-baseline-segment.v1",
+  "template_id": "serino_2015_toolless_sync_training",
+  "baseline_strategy": "tactile_only",
+  "include_baseline_trials": false,
+  "baseline_trial_percentage": 0.0,
+  "baseline_soa_values_ms": [],
+  "catch_trial_percentage": 23.0,
+  "catch_trials_exact": null
+}

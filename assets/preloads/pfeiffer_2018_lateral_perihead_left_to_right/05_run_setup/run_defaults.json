@@ -1,0 +1,9 @@
+{
+  "schema": "pps-preload-run-setup-segment.v1",
+  "template_id": "pfeiffer_2018_lateral_perihead_left_to_right",
+  "blocks": 1,
+  "participants": 1,
+  "random_seed": 20180301,
+  "trial_randomization_strategy": "no_immediate_repeats",
+  "block_order_randomization": "fixed"
+}

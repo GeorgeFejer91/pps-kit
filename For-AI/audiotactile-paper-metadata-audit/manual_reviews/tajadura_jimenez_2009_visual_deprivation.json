@@ -1,0 +1,295 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "tajadura_jimenez_2009_visual_deprivation",
+  "citation_short": "Collignon et al. (2009) [legacy ID Tajadura-Jimenez]",
+  "review_date": "2026-06-16",
+  "manual_review_status": "manual_review_completed_main_pdf_and_supporting_figure_no_methods_supplement",
+  "confidence_score": 0.89,
+  "confidence_label": "high_confidence_extraction",
+  "confidence_basis": "Main PDF, OpenDataLoader markdown/figure images, pypdf fallback snippets, rendered methods pages, PubMed/Crossref routes, and Elsevier predictable supplement paths were checked. The paper reports the static left/right pink-noise bursts, speaker and hand geometry, electrical tactile waveform, simultaneous congruent audio-tactile timing, posture blocks, random trial order, ISI range, response mapping, and trial counts. The Elsevier mmc1 JPG is a supporting/results image and does not add methods parameters.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats_static_left_right_lateralization_not_looming",
+    "reason": "The task can be recreated as a static left/right lateralization profile with auditory-only, tactile-only, and congruent audio-tactile rows in crossed and uncrossed posture blocks. It should not be treated as a looming/receding PPS trajectory because the auditory sources are fixed speakers beside the hands."
+  },
+  "orientation_ledger": {
+    "participant_frame": "Participants sat blindfolded with head restrained by a chin rest, hands palm-down 30 cm in front of the body and 25 cm left/right of body midline.",
+    "room_apparatus_frame": "Two physical stereo speakers were immediately beside the left and right hands, also 25 cm to either side of body midline; Figure 1 is a top-view schematic.",
+    "body_relative_mapping": "Sources were external left/right hemispaces. Uncrossed posture matched anatomical and external side; crossed posture swapped hand side but responses stayed tied to external side.",
+    "tactile_anchor": "Ring electrodes stimulated the middle finger of each hand around proximal and distal interphalangeal joints.",
+    "movement_implementation": "No auditory motion was used; the manipulation was static external side plus crossed/uncrossed hand posture.",
+    "evidence_class": "Main-text procedure, Figure 1 caption/image, OpenDataLoader extracted figure image, and rendered PDF pages 2-3."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf",
+      "source": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+      "status": "reviewed",
+      "scope": "PDF pages 2-3 for Methods, Stimuli, Procedure, Figure 1, response mapping, ISI, blocks, practice trials, and analysis window."
+    },
+    {
+      "source_type": "opendataloader_markdown",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/tajadura_jimenez_2009_visual_deprivation.md",
+      "status": "reviewed",
+      "scope": "Used as the primary text map for stimulus, apparatus, tactile, sequence, baseline, count, and race-model searches."
+    },
+    {
+      "source_type": "opendataloader_figure_images",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/tajadura_jimenez_2009_visual_deprivation_images/imageFile3.png",
+      "status": "reviewed",
+      "scope": "Visual inspection of Figure 1 top-view setup for uncrossed/crossed posture, hand spacing, speaker side, external-side response mapping, and condition icons."
+    },
+    {
+      "source_type": "fallback_text_extraction",
+      "source": "pypdf local extraction",
+      "status": "reviewed",
+      "scope": "Targeted snippets from pages 1-3 verified title/authors, auditory/tactile stimulus parameters, procedure, response mapping, counts, ISI, blocks, and scoring window."
+    },
+    {
+      "source_type": "rendered_pdf_pages",
+      "source": "tmp/pdfs/tajadura_2009_review/page-2.png and page-3.png",
+      "status": "reviewed_not_tracked",
+      "scope": "Temporary rendered pages were inspected for Methods text, Figure 1 geometry/caption, and the trial-count paragraph; page images were not committed."
+    },
+    {
+      "source_type": "source_route_check",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2009.07.025; https://pubmed.ncbi.nlm.nih.gov/19666035/",
+      "status": "checked_no_methods_supplement_found",
+      "scope": "Web, Crossref, PubMed, and Elsevier predictable mmc1 document/archive/PDF paths were checked. A supporting/results JPG exists but contains performance plots rather than hidden stimulus or timing methods."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "OpenDataLoader PDF extraction",
+      "status": "completed",
+      "result": "Automated candidates covered only 6/25 fields, so the methods pages and figure were reviewed manually."
+    },
+    {
+      "strategy": "Stimulus reconstruction pass",
+      "status": "completed",
+      "result": "Confirmed 100 ms Adobe Audition 2.0 pink-noise bursts, 90 ms plateau, 5 ms rise/fall, 75 dB SPL, and fixed left/right Gigaworks T20 speakers."
+    },
+    {
+      "strategy": "Visual/spatial geometry pass",
+      "status": "completed",
+      "result": "Rendered pages and inspected Figure 1; recorded top-view participant frame, left/right speaker placement, crossed/uncrossed hand mapping, and no-motion status."
+    },
+    {
+      "strategy": "Tactile timing and baseline pass",
+      "status": "completed",
+      "result": "Confirmed five 1 ms biphasic pulses every 25 ms, 40 Hz/100 ms, simultaneous congruent audio-tactile trials, and unimodal rows as race-model comparison baselines."
+    },
+    {
+      "strategy": "Trial sequence and intermixing pass",
+      "status": "completed",
+      "result": "Confirmed randomized trials within each posture block, crossed/uncrossed blocks counterbalanced, mean ISI 1950 ms with 1200-2700 ms range, and 21 practice trials before each block."
+    },
+    {
+      "strategy": "Counts and catch pass",
+      "status": "completed",
+      "result": "Confirmed 300 test stimuli per posture: 2 sides x 3 modalities x 50, two posture blocks, 600 total test stimuli, no catch/no-go trials, and omission rejection."
+    },
+    {
+      "strategy": "Supplement/source route pass",
+      "status": "completed_no_methods_supplement",
+      "result": "PubMed/Crossref/source routes and Elsevier mmc1 document/archive/PDF probes found no methods supplement; the available mmc1 JPG is only a supporting/results figure."
+    }
+  ],
+  "field_status_counts": {
+    "not_applicable": 3,
+    "reported": 22
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "reported",
+        "value": "Auditory stimuli were 100 ms pink-noise bursts.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+        "page_or_section": "PDF p.2, Stimuli",
+        "evidence_note": "The sound class and duration are explicitly reported."
+      },
+      "source_provenance": {
+        "status": "reported",
+        "value": "Pink-noise bursts were produced with Adobe Audition 2.0; no original WAV, seed, or full recipe is supplied.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+        "page_or_section": "PDF p.2, Stimuli",
+        "evidence_note": "Software provenance is reported; exact asset provenance remains incomplete."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "Two static auditory source sides: left external hemispace and right external hemispace.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+        "page_or_section": "PDF pp.2-3, Procedure and Figure 1",
+        "evidence_note": "The task varies external side, not motion trajectory."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Static left/right speakers were immediately beside the hands, 25 cm left/right of body midline; hands were 30 cm in front of the body and 50 cm apart.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf; artifacts/paper_metadata_audit/extracted/opendataloader/tajadura_jimenez_2009_visual_deprivation_images/imageFile3.png",
+        "page_or_section": "PDF pp.2-3, Procedure and Figure 1",
+        "evidence_note": "Text reports distances; Figure 1 confirms the top-view left/right static layout."
+      },
+      "stimulus_duration": {
+        "status": "reported",
+        "value": "Auditory bursts lasted 100 ms, with 90 ms plateau and 5 ms rise/fall ramps.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+        "page_or_section": "PDF p.2, Stimuli",
+        "evidence_note": "Duration and envelope timing are stated together."
+      },
+      "stimulus_speed": {
+        "status": "not_applicable",
+        "value": "No looming, receding, moving, or apparent-motion auditory trajectory was used.",
+        "source_file": "",
+        "page_or_section": "",
+        "evidence_note": "This is a static lateralization task."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "Auditory-only left/right, tactile-only left/right, and congruent audio-tactile left/right conditions were used in both posture blocks.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+        "page_or_section": "PDF pp.2-3, Stimuli/Procedure",
+        "evidence_note": "The 2 sides x 3 condition formula and congruent bimodal rule are reported."
+      },
+      "gain_envelope": {
+        "status": "reported",
+        "value": "Pink-noise bursts had 90% normalized peak value, 90 ms plateau, 5 ms rise/fall, and 75 dB SPL in both channels.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+        "page_or_section": "PDF p.2, Stimuli",
+        "evidence_note": "Amplitude/envelope and SPL are explicitly reported."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Stereo speakers were Gigaworks T20 units; stimuli/RTs were controlled by Presentation on a Dell XPS Windows XP computer.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+        "page_or_section": "PDF p.2, Stimuli/Procedure",
+        "evidence_note": "Speaker model and control software/computer are reported."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "Rows were auditory-only, tactile-only, and congruent bimodal audio-tactile trials, each on left or right side.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+        "page_or_section": "PDF p.3, Procedure",
+        "evidence_note": "The paper gives the side x condition x repetition design formula."
+      },
+      "condition_intermixing": {
+        "status": "reported",
+        "value": "Within each posture block, left/right auditory, tactile, and bimodal stimuli were randomly presented.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+        "page_or_section": "PDF p.3, Procedure",
+        "evidence_note": "Random presentation applies to the full 2 x 3 trial set within posture."
+      },
+      "blocked_or_random_order": {
+        "status": "reported",
+        "value": "Uncrossed and crossed postures were separate blocks; posture order was counterbalanced across subjects.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+        "page_or_section": "PDF p.3, Procedure",
+        "evidence_note": "Posture is blocked; trial rows inside each posture block are random."
+      },
+      "iti_jitter_policy": {
+        "status": "reported",
+        "value": "Mean interstimulus interval was 1950 ms, with a 1200-2700 ms range.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+        "page_or_section": "PDF p.3, Procedure",
+        "evidence_note": "The paper reports the ISI mean and range, but not distribution shape."
+      },
+      "response_window": {
+        "status": "reported",
+        "value": "Participants responded as quickly/accurately as possible; analysis used RTs from 150-1000 ms post-stimulus for inverse efficiency scores.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+        "page_or_section": "PDF p.3, Procedure/Data analysis",
+        "evidence_note": "Online timeout is not stated; scoring window is reported."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Responses were by external left/right side; in crossed posture the responding hand swapped anatomically but still pressed the key for the external stimulus side.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf; artifacts/paper_metadata_audit/extracted/opendataloader/tajadura_jimenez_2009_visual_deprivation_images/imageFile3.png",
+        "page_or_section": "PDF p.3 and Figure 1 caption",
+        "evidence_note": "This external-side rule is critical for crossed-hand recreation."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "Each tactile stimulus was five 1 ms biphasic square pulses every 25 ms, 40 Hz for 100 ms, delivered by ring electrodes on the middle finger of each hand.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+        "page_or_section": "PDF p.2, Stimuli",
+        "evidence_note": "Waveform, pulse count, frequency/duration, site, and electrodes are reported."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "Bimodal audio-tactile trials were simultaneous and congruent, so the audio-tactile SOA was 0 ms for left and right bimodal rows.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+        "page_or_section": "PDF p.2, Stimuli",
+        "evidence_note": "The paper states simultaneous presentation for bimodal stimuli."
+      },
+      "baseline_strategy": {
+        "status": "reported",
+        "value": "Unimodal auditory-only and tactile-only rows served as race-model/comparison baselines; there was no looming PPS distance/SOA baseline ladder.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+        "page_or_section": "PDF pp.2-3, Stimuli and Race Model analysis",
+        "evidence_note": "Race-model bounds are computed from auditory-alone and tactile-alone conditions."
+      },
+      "baseline_timing": {
+        "status": "reported",
+        "value": "Unimodal baseline/comparison rows used the same 100 ms auditory or tactile event duration; no separate baseline SOA offsets were used.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+        "page_or_section": "PDF pp.2-3, Stimuli/Data analysis",
+        "evidence_note": "There is no T1-Tn or near/far timing ladder in this static task."
+      },
+      "catch_trial_type": {
+        "status": "not_applicable",
+        "value": "No catch/no-go trials are reported; missed responses were omissions and rejected.",
+        "source_file": "",
+        "page_or_section": "",
+        "evidence_note": "All reported test rows were auditory, tactile, or bimodal lateralization trials."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "reported",
+        "value": "Per posture block: 50 repetitions for each side x modality row, including 50 bimodal SOA=0 trials per side.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+        "page_or_section": "PDF p.3, Procedure",
+        "evidence_note": "The design formula reports 2 sides x 3 conditions x 50 stimuli."
+      },
+      "baseline_count": {
+        "status": "reported",
+        "value": "Per posture block, unimodal comparison rows comprised 100 auditory-only trials and 100 tactile-only trials: 50 per side for each modality.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+        "page_or_section": "PDF pp.2-3, Stimuli/Procedure",
+        "evidence_note": "Counts follow directly from the side x condition x repetition formula."
+      },
+      "catch_count": {
+        "status": "not_applicable",
+        "value": "No catch trials are reported.",
+        "source_file": "",
+        "page_or_section": "",
+        "evidence_note": "The task contains no sound-only no-go or tactile-absent catch family."
+      },
+      "block_count": {
+        "status": "reported",
+        "value": "Two test blocks were used, one uncrossed and one crossed posture, each about 10 minutes, with a 10-minute pause between blocks.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+        "page_or_section": "PDF p.3, Procedure",
+        "evidence_note": "Posture blocks and pause duration are reported."
+      },
+      "total_trial_count": {
+        "status": "reported",
+        "value": "300 test stimuli per posture block and 600 total test stimuli per participant, plus 21 practice trials before each block.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/tajadura_jimenez_2009_visual_deprivation.pdf",
+        "page_or_section": "PDF p.3, Procedure",
+        "evidence_note": "The per-posture total is explicit; total follows from two posture blocks."
+      }
+    }
+  },
+  "critical_caveats": [
+    "The local record ID/citation label says Tajadura-Jimenez, but the PDF and DOI are Collignon et al. (2009). Preserve the record ID for continuity and cite the actual paper in review notes.",
+    "This is a static left/right lateralization task, not a dynamic looming or receding PPS trajectory.",
+    "The exact pink-noise file, random seed, and full spectral recipe are not supplied beyond Adobe Audition 2.0 production and envelope/SPL settings.",
+    "The online response timeout is not reported; only the 150-1000 ms post-stimulus analysis window is reported.",
+    "ISI mean and range are reported, but the exact jitter distribution is not.",
+    "The supporting mmc1 JPG contains results plots, not hidden apparatus/stimulus methods."
+  ],
+  "next_manual_action": "Treat this as a high-confidence static external-left/right crossed-hands lateralization template candidate. Do not use it as a looming profile; if templated, preserve the external-side response mapping and posture block factor."
+}

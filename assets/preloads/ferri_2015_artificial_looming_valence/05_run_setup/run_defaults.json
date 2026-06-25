@@ -1,0 +1,9 @@
+{
+  "schema": "pps-preload-run-setup-segment.v1",
+  "template_id": "ferri_2015_artificial_looming_valence",
+  "blocks": 1,
+  "participants": 1,
+  "random_seed": 20150301,
+  "trial_randomization_strategy": "no_immediate_repeats",
+  "block_order_randomization": "fixed"
+}

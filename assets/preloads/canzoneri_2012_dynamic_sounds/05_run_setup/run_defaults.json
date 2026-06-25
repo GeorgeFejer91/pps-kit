@@ -1,0 +1,9 @@
+{
+  "schema": "pps-preload-run-setup-segment.v1",
+  "template_id": "canzoneri_2012_dynamic_sounds",
+  "blocks": 2,
+  "participants": 17,
+  "random_seed": 20120928,
+  "trial_randomization_strategy": "no_immediate_repeats",
+  "block_order_randomization": "counterbalanced_rotation"
+}

@@ -1,0 +1,129 @@
+{
+  "template_id": "serino_2015_peri_hand_exp3",
+  "title": "Serino 2015 peri-hand PPS Experiment 3",
+  "citation": "Serino, A., Noel, J. P., Galli, G., Canzoneri, E., Marmaroli, P., Lissek, H., & Blanke, O. (2015). Body part-centered and full body-centered peripersonal space representations. Scientific Reports, 5, 18603.",
+  "source_url": "https://www.nature.com/articles/srep18603",
+  "doi": "10.1038/srep18603",
+  "verification_status": "partial",
+  "notes": "Peri-hand branch of the Serino body-part mapping series. The original two-speaker analog setup is treated as apparatus provenance and recreated as a binaural moving-sound trajectory; lateralized hand placement is stored in notes but not yet a GUI coordinate field.",
+  "reference_parameters": {
+    "distances_cm": [
+      93,
+      71,
+      50,
+      27,
+      5
+    ],
+    "repetitions_reported": 16,
+    "analog_apparatus_recreation": "Original near/far speakers are modeled as the reported moving-sound trajectory in the binaural renderer.",
+    "implementation_gaps": [
+      "lateralized hand coordinate"
+    ]
+  },
+  "design": {
+    "name": "Serino 2015 peri-hand PPS Experiment 3",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Hand moving sound",
+        "noise_type": "pink",
+        "azimuth_deg": 0.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0
+      }
+    ],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "trajectory": {
+      "start_radius_m": 0.993680029,
+      "end_radius_m": 0.353553391,
+      "path_direction": "approach",
+      "coordinate_mode": "cartesian",
+      "start_x_m": 0.35,
+      "start_y_m": 0.93,
+      "start_z_m": 0.0,
+      "end_x_m": 0.35,
+      "end_y_m": 0.05,
+      "end_z_m": 0.0,
+      "path_length_m": 0.88,
+      "propagation_speed_mps": 0.293333333,
+      "azimuth_start_deg": 20.623531383,
+      "azimuth_end_deg": 81.869897646,
+      "elevation_deg": 0.0,
+      "padding_pre_s": 0.0,
+      "padding_post_s": 0.0,
+      "sample_rate": 44100,
+      "use_inverse_square": true
+    },
+    "protocol": {
+      "repetitions_per_condition": 16,
+      "soa_values_ms": [
+        0,
+        1000,
+        1955,
+        3000,
+        4000
+      ],
+      "spatial_values_cm": [
+        93,
+        71,
+        50,
+        27,
+        5
+      ],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": [
+        "looming",
+        "receding"
+      ],
+      "tactile_sites": [
+        "hand"
+      ],
+      "catch_trial_percentage": 10.0,
+      "catch_trials_exact": 16,
+      "include_baseline_trials": true,
+      "baseline_soa_values_ms": [
+        0,
+        4000
+      ],
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "trial_randomization_strategy": "no_immediate_repeats",
+      "block_order_randomization": "fixed",
+      "max_consecutive_same_trial_type": 2,
+      "trial_strips": [
+        {
+          "strip_id": "serino-peri-hand-row",
+          "label": "Peri-hand moving-sound trial",
+          "audio_tactile_percentage": 100.0,
+          "catch_percentage": 0.0,
+          "baseline_percentage": 0.0,
+          "elements": [
+            {
+              "element_id": "serino-peri-hand-moving-sound",
+              "kind": "looming_stimulus",
+              "label": "Hand moving sound",
+              "source_label": "Hand moving sound",
+              "source_labels": ["Hand moving sound"],
+              "randomized": true
+            }
+          ]
+        }
+      ],
+      "participants": 16,
+      "random_seed": 20151223
+    }
+  },
+  "provenance": [
+    {
+      "field": "distances",
+      "source": "Scientific Reports Experiment 3 reports five distances: 5, 27, 50, 71, and 93 cm."
+    },
+    {
+      "field": "trial count",
+      "source": "Methods report 208 trials for Experiment 3 with 16 repetitions."
+    }
+  ]
+}

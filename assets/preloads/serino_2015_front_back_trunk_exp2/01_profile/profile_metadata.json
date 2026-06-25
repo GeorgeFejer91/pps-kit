@@ -1,0 +1,37 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "serino_2015_front_back_trunk_exp2",
+  "title": "Serino 2015 front/back peri-trunk Experiment 2",
+  "citation": "Serino, A., Noel, J. P., Galli, G., Canzoneri, E., Marmaroli, P., Lissek, H., & Blanke, O. (2015). Body part-centered and full body-centered peripersonal space representations. Scientific Reports, 5, 18603.",
+  "doi": "10.1038/srep18603",
+  "source_url": "https://www.nature.com/articles/srep18603",
+  "verification_status": "partial",
+  "notes": "Front/back trunk mapping with sounds crossing the body. Current renderer can draw/render a linear pass-through path, but block-specific front/back tactile mapping is simplified.",
+  "reference_parameters": {
+    "distances_cm": [
+      95,
+      80,
+      65,
+      50,
+      35,
+      20,
+      5
+    ],
+    "reported_speed_note": "paper discusses faster trajectory than Experiment 1; current profile uses 35 cm/s approximation",
+    "implementation_gaps": [
+      "front/back block factor",
+      "13-distance internal schedule",
+      "physical 16-speaker array"
+    ]
+  },
+  "provenance": [
+    {
+      "field": "distances",
+      "source": "Scientific Reports Experiment 2 reports tactile stimulation at 14 delays mapping 5-95 cm in front and back."
+    },
+    {
+      "field": "speed/rendering",
+      "source": "The original used speaker arrays; this profile approximates with one linear 3D path."
+    }
+  ]
+}

@@ -1,0 +1,134 @@
+{
+  "template_id": "serino_2015_peri_trunk_exp1",
+  "title": "Serino 2015 peri-trunk PPS Experiment 1",
+  "citation": "Serino, A., Noel, J. P., Galli, G., Canzoneri, E., Marmaroli, P., Lissek, H., & Blanke, O. (2015). Body part-centered and full body-centered peripersonal space representations. Scientific Reports, 5, 18603.",
+  "source_url": "https://www.nature.com/articles/srep18603",
+  "doi": "10.1038/srep18603",
+  "verification_status": "partial",
+  "notes": "Peri-trunk looming/receding task originally implemented with a two-speaker analog setup. Timing, distance, and trial-count fields are literature-derived; the toolkit recreates the reported near-far trajectory with the binaural spatial renderer rather than treating the speakers as a separate audio source.",
+  "reference_parameters": {
+    "distances_cm": [
+      100,
+      81,
+      62,
+      43,
+      24,
+      5
+    ],
+    "near_far_speakers_cm": [
+      5,
+      100
+    ],
+    "repetitions_reported": 16,
+    "profile_check_complete": true,
+    "analog_apparatus_recreation": "Original near/far speakers are modeled as the reported 100 cm to 5 cm moving-sound trajectory in the binaural renderer."
+  },
+  "design": {
+    "name": "Serino 2015 peri-trunk PPS Experiment 1",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Trunk moving sound",
+        "noise_type": "pink",
+        "azimuth_deg": 0.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0
+      }
+    ],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "trajectory": {
+      "start_radius_m": 1.0,
+      "end_radius_m": 0.05,
+      "path_direction": "approach",
+      "coordinate_mode": "cartesian",
+      "start_x_m": 0.0,
+      "start_y_m": 1.0,
+      "start_z_m": 0.0,
+      "end_x_m": 0.0,
+      "end_y_m": 0.05,
+      "end_z_m": 0.0,
+      "path_length_m": 0.95,
+      "propagation_speed_mps": 0.220009264,
+      "azimuth_start_deg": 0.0,
+      "azimuth_end_deg": 0.0,
+      "elevation_deg": 0.0,
+      "padding_pre_s": 0.0,
+      "padding_post_s": 0.0,
+      "sample_rate": 44100,
+      "use_inverse_square": true
+    },
+    "protocol": {
+      "repetitions_per_condition": 16,
+      "soa_values_ms": [
+        0,
+        864,
+        1727,
+        2591,
+        3455,
+        4318
+      ],
+      "spatial_values_cm": [
+        100,
+        81,
+        62,
+        43,
+        24,
+        5
+      ],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": [
+        "looming",
+        "receding"
+      ],
+      "tactile_sites": [
+        "sternum/chest"
+      ],
+      "catch_trial_percentage": 10.0,
+      "catch_trials_exact": 32,
+      "include_baseline_trials": true,
+      "baseline_soa_values_ms": [
+        0,
+        4318
+      ],
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "trial_randomization_strategy": "no_immediate_repeats",
+      "block_order_randomization": "fixed",
+      "max_consecutive_same_trial_type": 2,
+      "trial_strips": [
+        {
+          "strip_id": "serino-peri-trunk-row",
+          "label": "Peri-trunk moving-sound trial",
+          "audio_tactile_percentage": 100.0,
+          "catch_percentage": 0.0,
+          "baseline_percentage": 0.0,
+          "elements": [
+            {
+              "element_id": "serino-peri-trunk-moving-sound",
+              "kind": "looming_stimulus",
+              "label": "Trunk moving sound",
+              "source_label": "Trunk moving sound",
+              "source_labels": ["Trunk moving sound"],
+              "randomized": true
+            }
+          ]
+        }
+      ],
+      "participants": 15,
+      "random_seed": 20151222
+    }
+  },
+  "provenance": [
+    {
+      "field": "distances",
+      "source": "Scientific Reports results report D1-D6 as 5, 24, 43, 62, 81, and 100 cm."
+    },
+    {
+      "field": "trial count",
+      "source": "Methods report 240 trials: multisensory D1-D6 plus baselines and catch trials by two directions and 16 repetitions."
+    }
+  ]
+}

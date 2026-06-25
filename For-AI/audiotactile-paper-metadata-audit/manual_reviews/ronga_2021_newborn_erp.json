@@ -1,0 +1,282 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "ronga_2021_newborn_erp",
+  "citation_short": "Ronga et al. (2021), newborn ERP",
+  "review_date": "2026-06-16",
+  "manual_review_status": "manual_review_completed_main_pdf_and_pnas_supplements",
+  "confidence_score": 0.9,
+  "confidence_label": "high_confidence_extraction",
+  "confidence_basis": "Main PDF, OpenDataLoader output, fallback pypdf extraction, Europe PMC full-text XML, two PNAS supplement PDFs, extracted supplement text, and rendered SI methods pages were reviewed. The supplement supplies stimulus, apparatus, condition, block, count, trigger/SOA, and EEG baseline details; remaining uncertainty is mainly exact loudspeaker model, exact ITI distribution beyond >2 s, and original tone file identity.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats_static_near_far_passive_erp_profile",
+    "reason": "The study can be recreated as a passive near/far hand-centered audio-tactile ERP profile with tones, electrical tactile pulses, five condition rows, pseudo-randomized blocks, and explicit condition counts. It is static near/far stimulation, not looming motion."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf",
+      "source": "artifacts/paper_metadata_audit/publication_pdfs/ronga_2021_newborn_erp.pdf",
+      "status": "reviewed",
+      "scope": "Reviewed the main PNAS brief report for high-level paradigm, condition names, near/far distances, and SI Appendix pointer."
+    },
+    {
+      "source_type": "pnas_supplement_pdf",
+      "source": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+      "status": "reviewed",
+      "scope": "Reviewed Supplementary text pages 2-3 for stimuli, task, blocks, trial counts, trigger timing, and EEG baseline."
+    },
+    {
+      "source_type": "pnas_participant_dataset_pdf",
+      "source": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sd01.pdf",
+      "status": "reviewed",
+      "scope": "Checked the participant-detail supplement; it did not add Segment 1-4 task parameters."
+    },
+    {
+      "source_type": "supplement_text_extraction",
+      "source": "artifacts/paper_metadata_audit/extracted/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.txt",
+      "status": "reviewed",
+      "scope": "Searched extracted SI text for auditory, tactile, condition, block, trial, inter-trial, trigger, baseline, and apparatus terms."
+    },
+    {
+      "source_type": "full_text_xml_and_download_route",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8000027/",
+      "status": "checked",
+      "scope": "Europe PMC/PMC XML exposed supplement filenames; PMC proof-of-work cookie was computed to retrieve the supplement PDFs."
+    },
+    {
+      "source_type": "rendered_pdf_pages",
+      "source": "tmp/pdfs/ronga_2021_newborn_review/sapp_page-2.png through sapp_page-3.png",
+      "status": "reviewed_not_tracked",
+      "scope": "Temporary rendered SI methods pages were visually checked to repair text-extraction loss around near/far speaker placement."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "OpenDataLoader PDF extraction",
+      "status": "completed",
+      "result": "Confirmed main-paper condition families, tone duration, and near/far distances, but found that detailed task mechanics were in SI."
+    },
+    {
+      "strategy": "Supplement acquisition pass",
+      "status": "completed",
+      "result": "Downloaded both PNAS supplement PDFs after resolving the PMC proof-of-work download gate and refreshed parser extraction."
+    },
+    {
+      "strategy": "Supplement methods extraction pass",
+      "status": "completed",
+      "result": "Captured tactile pulse/device/intensity, auditory tone properties, block/count rules, pseudo-randomization, and trigger offset."
+    },
+    {
+      "strategy": "Rendered-page visual verification",
+      "status": "completed",
+      "result": "Verified near speaker <5 cm and far speaker 140 cm after fallback text extraction dropped part of the line."
+    },
+    {
+      "strategy": "Timing, baseline, and SOA pass",
+      "status": "completed",
+      "result": "Identified >2 s ITI, 40 ms auditory delay after tactile/trigger, and -0.5 to 0 s EEG baseline."
+    },
+    {
+      "strategy": "Count and block pass",
+      "status": "completed",
+      "result": "Mapped newborn 3-6 blocks of 5 trials per condition and adult 3 blocks of 12 trials per condition."
+    }
+  ],
+  "field_status_counts": {
+    "derived": 1,
+    "not_applicable": 4,
+    "reported": 20
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "reported",
+        "value": "Auditory stimulation used 784 Hz tones.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+        "page_or_section": "SI Appendix p.2, Stimuli and experimental task",
+        "evidence_note": "The SI identifies the tone frequency and stimulus class."
+      },
+      "source_provenance": {
+        "status": "reported",
+        "value": "Tones were generated with Audacity; exact original audio file is not supplied.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+        "page_or_section": "SI Appendix p.2, Stimuli and experimental task",
+        "evidence_note": "Software provenance is reported, but no reusable sound asset is included."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "Two static auditory positions: near and far; used in auditory-only and audio-tactile rows.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/ronga_2021_newborn_erp.pdf",
+        "page_or_section": "PDF p.1, Methods and Fig. 1",
+        "evidence_note": "The main paper names ANear, AFar, TANear, and TAFar conditions."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Near speaker was less than 5 cm from the right stimulated hand; far speaker was 140 cm from the right hand.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+        "page_or_section": "SI Appendix pp.2-3, Stimuli and experimental task",
+        "evidence_note": "Rendered SI pages verified the near/far distances and body anchor."
+      },
+      "stimulus_duration": {
+        "status": "reported",
+        "value": "Tone duration was 50 ms, including 5 ms rise and fall times.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+        "page_or_section": "SI Appendix p.2, Stimuli and experimental task",
+        "evidence_note": "Duration and ramp timing are explicitly reported."
+      },
+      "stimulus_speed": {
+        "status": "not_applicable",
+        "value": "No auditory motion speed applies; stimulation used static near/far loudspeaker positions.",
+        "source_file": "",
+        "page_or_section": "",
+        "evidence_note": "The paradigm is static near/far, not looming or receding."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "Auditory-only near, auditory-only far, bimodal near, and bimodal far, plus tactile-only.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+        "page_or_section": "SI Appendix p.3, Stimuli and experimental task",
+        "evidence_note": "The SI enumerates the five experimental conditions."
+      },
+      "gain_envelope": {
+        "status": "reported",
+        "value": "Tone intensity about 64 dB; sinusoidal 50 Hz amplitude modulation; 5 ms rise/fall ramps.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+        "page_or_section": "SI Appendix p.2, Stimuli and experimental task",
+        "evidence_note": "Intensity and amplitude envelope parameters are reported."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Two loudspeakers controlled with a combined E-Prime-Arduino system; tactile pulses delivered by DS7A Digitimer.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+        "page_or_section": "SI Appendix pp.2-3, Stimuli and experimental task",
+        "evidence_note": "Control and stimulation apparatus are reported, but speaker model is not."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "Five conditions: T, ANear, AFar, TANear, and TAFar.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+        "page_or_section": "SI Appendix p.3, Stimuli and experimental task",
+        "evidence_note": "The auditory/tactile condition rows are listed directly."
+      },
+      "condition_intermixing": {
+        "status": "reported",
+        "value": "Trials from different conditions were intermixed in each block, with final counts matched across conditions.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+        "page_or_section": "SI Appendix p.3, Stimuli and experimental task",
+        "evidence_note": "The SI describes condition intermixing and matched final counts."
+      },
+      "blocked_or_random_order": {
+        "status": "reported",
+        "value": "Newborns completed 3-6 blocks; adults completed 3 blocks; order was pseudo-randomized with no more than two identical trials in a row.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+        "page_or_section": "SI Appendix p.3, Stimuli and experimental task",
+        "evidence_note": "Block and pseudo-randomization rules are reported."
+      },
+      "iti_jitter_policy": {
+        "status": "reported",
+        "value": "A long inter-trial interval greater than 2 s was used; exact distribution or fixed values are not reported.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+        "page_or_section": "SI Appendix p.3, Stimuli and experimental task",
+        "evidence_note": "The SI states the ITI lower bound and rationale but not the full distribution."
+      },
+      "response_window": {
+        "status": "not_applicable",
+        "value": "No per-trial behavioral response window applies; this was passive EEG/ERP stimulation.",
+        "source_file": "",
+        "page_or_section": "",
+        "evidence_note": "No response task is described."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Auditory stimuli occurred 40 ms after trigger in all auditory rows; in bimodal rows, auditory input followed tactile input by 40 ms.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+        "page_or_section": "SI Appendix p.3, Stimuli and experimental task",
+        "evidence_note": "The presentation-system delay is explained as task-critical timing."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "200 microsecond non-painful transcutaneous square-wave pulses to right hand dorsum via DS7A and bipolar electrodes.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+        "page_or_section": "SI Appendix p.2, Stimuli and experimental task",
+        "evidence_note": "Tactile modality, site, device, duration, and electrodes are reported."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "Bimodal auditory stimulus onset was 40 ms after tactile/trigger onset; no SOA ladder was manipulated.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+        "page_or_section": "SI Appendix p.3, Stimuli and experimental task",
+        "evidence_note": "The 40 ms offset is reported for bimodal and unimodal timing alignment."
+      },
+      "baseline_strategy": {
+        "status": "reported",
+        "value": "Unisensory T, ANear, and AFar rows were used to form sums/control responses; EEG baseline correction used prestimulus interval.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+        "page_or_section": "SI Appendix pp.3-4, EEG processing",
+        "evidence_note": "The analysis contrasts bimodal responses with summed unisensory responses."
+      },
+      "baseline_timing": {
+        "status": "reported",
+        "value": "EEG epochs used -0.5 to +1 s around stimulus trigger, with baseline correction from -0.5 to 0 s.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+        "page_or_section": "SI Appendix p.3, EEG processing",
+        "evidence_note": "Epoch and baseline windows are explicitly reported."
+      },
+      "catch_trial_type": {
+        "status": "not_applicable",
+        "value": "No catch or no-go trials are described.",
+        "source_file": "",
+        "page_or_section": "",
+        "evidence_note": "The five rows are active unisensory or bimodal conditions."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "reported",
+        "value": "Newborns: 5 trials per condition per block, 3-6 blocks; adults: 12 trials per condition per block, 3 blocks.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+        "page_or_section": "SI Appendix p.3, Stimuli and experimental task",
+        "evidence_note": "Per-block and per-condition counts are reported."
+      },
+      "baseline_count": {
+        "status": "reported",
+        "value": "Unisensory control rows had the same per-condition counts: newborn 15-30 each, adult 36 each.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+        "page_or_section": "SI Appendix p.3, Stimuli and experimental task",
+        "evidence_note": "Counts were matched across intermixed conditions."
+      },
+      "catch_count": {
+        "status": "not_applicable",
+        "value": "No catch/no-go count applies.",
+        "source_file": "",
+        "page_or_section": "",
+        "evidence_note": "No catch family is reported."
+      },
+      "block_count": {
+        "status": "reported",
+        "value": "Newborns completed 3-6 blocks; adults completed 3 blocks.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+        "page_or_section": "SI Appendix p.3, Stimuli and experimental task",
+        "evidence_note": "Block counts are reported separately for newborns and adults."
+      },
+      "total_trial_count": {
+        "status": "derived",
+        "value": "Newborns: 75-150 trials depending on 3-6 blocks; adults: 180 trials from 5 conditions x 36.",
+        "source_file": "artifacts/paper_metadata_audit/supplements/ronga_2021_newborn_erp/pnas.2024548118.sapp.pdf",
+        "page_or_section": "SI Appendix p.3, Stimuli and experimental task",
+        "evidence_note": "Totals are derived from reported five-condition block counts."
+      }
+    }
+  },
+  "critical_caveats": [
+    "The exact original tone WAV is not supplied, although Audacity generation parameters are reported.",
+    "The speaker model is not reported.",
+    "The ITI policy is only reported as greater than 2 s, without exact distribution or fixed values.",
+    "Newborn trial totals vary by compliance across 3-6 blocks.",
+    "This is a passive ERP endpoint rather than a behavioral RT task."
+  ],
+  "next_manual_action": "Use this as a high-confidence static near/far protocol source for Cell lineage and newborn/adult ERP profile recreation; exact ITI distribution and speaker model remain approximation points."
+}

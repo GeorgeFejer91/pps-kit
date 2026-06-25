@@ -1,0 +1,90 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "barumerli_2026_arm_movement_exp2",
+  "assets": [
+    {
+      "label": "Pink moving sound",
+      "path": "assets/preloads/barumerli_2026_arm_movement_exp2/02_looming_stimuli/looming_Pink_moving_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/barumerli_2026_arm_movement_exp2/02_looming_stimuli/looming_Pink_moving_sound.wav",
+      "sha256": "9fb3ac2775a221d1cae80b71947141c29179a5d6aea9e5b9e373ebbb41b0dff3",
+      "duration_s": 4.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Pink moving sound",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 110.0,
+        "end_distance_cm": 10.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 4.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.0,
+        "coordinate_mode": "polar",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.1,
+          "z_m": 0.0
+        }
+      }
+    },
+    {
+      "label": "Pink moving sound - receding",
+      "path": "assets/preloads/barumerli_2026_arm_movement_exp2/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/barumerli_2026_arm_movement_exp2/02_looming_stimuli/looming_Pink_moving_sound_-_receding.wav",
+      "sha256": "59a9f3d41384a76f1d0e213828294fd6630394cdeb03b9538e937b61167cd1a8",
+      "duration_s": 4.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "receding",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Pink moving sound - receding",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 10.0,
+        "end_distance_cm": 110.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 4.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.0,
+        "coordinate_mode": "polar",
+        "path_direction": "recede",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 0.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        }
+      }
+    }
+  ]
+}

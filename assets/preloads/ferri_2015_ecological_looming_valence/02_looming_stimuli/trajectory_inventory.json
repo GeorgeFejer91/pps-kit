@@ -1,0 +1,49 @@
+{
+  "schema": "pps-preload-trajectory-inventory.v1",
+  "template_id": "ferri_2015_ecological_looming_valence",
+  "trajectories": [
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Negative ecological looming",
+        "source_kind": "generated_noise",
+        "noise_type": "brown",
+        "start_distance_cm": 110.0,
+        "end_distance_cm": 10.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 3.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.1,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Negative ecological looming",
+        "Neutral ecological looming",
+        "Positive ecological looming"
+      ],
+      "tone_types": [
+        "brown",
+        "white",
+        "pink"
+      ],
+      "asset_paths": [
+        "assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Negative_ecological_looming.wav",
+        "assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Neutral_ecological_looming.wav",
+        "assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Positive_ecological_looming.wav"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "schema": "pps-preload-run-setup-segment.v1",
+  "template_id": "barumerli_2026_arm_movement_exp2",
+  "blocks": 4,
+  "participants": 24,
+  "random_seed": 20260402,
+  "trial_randomization_strategy": "no_immediate_repeats",
+  "block_order_randomization": "counterbalanced_rotation"
+}

@@ -1,0 +1,29 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "noel_2015_walking_full_body_action",
+  "title": "Noel 2015 walking full-body action PPS",
+  "citation": "Noel, J. P., Grivaz, P., Marmaroli, P., Lissek, H., Blanke, O., & Serino, A. (2015). Full body action remapping of peripersonal space: the case of walking. Neuropsychologia, 70, 375-384.",
+  "doi": "10.1016/j.neuropsychologia.2014.08.030",
+  "source_url": "https://pubmed.ncbi.nlm.nih.gov/25193502/",
+  "verification_status": "partial",
+  "notes": "Walking/treadmill PPS expansion profile. Locomotion and optic-flow manipulations are not represented in the current GUI; this profile captures the looming chest-tactile scaffold and extended distance range.",
+  "reference_parameters": {
+    "standing_boundary_reported_cm": "65-100",
+    "walking_boundary_reported_cm": 166,
+    "implementation_gaps": [
+      "treadmill state",
+      "optic flow condition",
+      "exact sound distances and trial counts"
+    ]
+  },
+  "provenance": [
+    {
+      "field": "boundary values",
+      "source": "PubMed abstract reports standing facilitation around 65-100 cm and walking expansion around 1.66 m."
+    },
+    {
+      "field": "implementation gap",
+      "source": "Current GUI does not encode treadmill or optic-flow condition; those remain protocol-level notes."
+    }
+  ]
+}

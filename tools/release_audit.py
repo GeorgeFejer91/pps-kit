@@ -5,8 +5,10 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import re
+import subprocess
 import sys
 import wave
 from pathlib import Path
@@ -21,8 +23,10 @@ IGNORED_DIRS = {
     "artifacts",
     "build",
     "dist",
+    "Example-configs",
     "local_data",
     "models",
+    "private_not_for_public",
 }
 TEXT_SUFFIXES = {
     ".bat",
@@ -48,10 +52,18 @@ FORBIDDEN_PATTERNS = [
     re.compile(r"raw_recordings", re.IGNORECASE),
     re.compile(r"decoder_outputs_name_bearing", re.IGNORECASE),
 ]
-FORBIDDEN_SUFFIXES = {".aup3", ".apk", ".xdf", ".sofa", ".hrir", ".mp3", ".flac", ".m4a", ".ogg"}
+FORBIDDEN_SUFFIXES = {".aup3", ".apk", ".xdf", ".zip", ".sofa", ".hrir", ".mp3", ".flac", ".m4a", ".ogg"}
+ALLOWED_STANDARD_HRTF = (
+    Path("assets")
+    / "0. Head-Related Impulse Response (HRIR) model"
+    / "FABIAN_HRIR_measured_HATO_0.sofa"
+)
+ALLOWED_STANDARD_HRTF_MANIFEST = ALLOWED_STANDARD_HRTF.with_suffix(".manifest.json")
 ALLOWED_WAV_PREFIXES = {
     Path("assets") / "breathing",
     Path("assets") / "click",
+    Path("assets") / "preloads",
+    Path("assets") / "tactile",
 }
 SPOKEN_ASSETS = [
     "Inhale-2-3-4-hold_FIXED.wav",
@@ -66,12 +78,37 @@ TARGET_RATE = 44100
 TARGET_FRAMES = 176400
 
 
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def iter_public_files(root: Path):
-    for path in root.rglob("*"):
-        if not path.is_file():
+    try:
+        completed = subprocess.run(
+            ["git", "ls-files", "-z"],
+            cwd=root,
+            check=True,
+            capture_output=True,
+        )
+        rel_paths = [Path(item.decode("utf-8")) for item in completed.stdout.split(b"\0") if item]
+    except Exception:
+        rel_paths = []
+        for path in root.rglob("*"):
+            try:
+                if not path.is_file():
+                    continue
+                rel_paths.append(path.relative_to(root))
+            except OSError:
+                continue
+    for rel_path in rel_paths:
+        if set(rel_path.parts) & IGNORED_DIRS:
             continue
-        parts = set(path.relative_to(root).parts)
-        if parts & IGNORED_DIRS:
+        path = root / rel_path
+        if not path.is_file():
             continue
         yield path
 
@@ -87,13 +124,14 @@ def _is_under(rel_path: Path, parent: Path) -> bool:
 def check_required_files() -> list[str]:
     required = [
         "README.md",
+        "AGENTS.md",
         "LICENSE",
         "CITATION.cff",
         "pyproject.toml",
         "configs/experiment.example.toml",
         "configs/stimulus_design.example.json",
         "windows/Setup_Windows_App.ps1",
-        "windows/Launch_PPS_App.bat",
+        "windows/Launch_Experiment_Runner.bat",
         "windows/Launch_Stimulus_Designer.bat",
         "windows/Create_Desktop_Shortcut.ps1",
         "docs/hardware_setup.md",
@@ -105,10 +143,30 @@ def check_required_files() -> list[str]:
         "docs/PARADIGM_LIBRARY.md",
         "docs/PPS_METADATA_REPRODUCIBILITY_AUDIT.md",
         "docs/PRIVACY_RELEASE.md",
+        "For-AI/README.md",
+        "For-AI/project_context.md",
+        "For-AI/evolving_goals.md",
+        "For-AI/agent_update_protocol.md",
         "assets/breathing/spoken_assets_manifest.json",
+        "assets/breathing/spoken_asset_variants.json",
+        "assets/breathing/british_kokoro/spoken_assets_manifest.json",
+        "assets/breathing/original_study5/spoken_assets_manifest.json",
         "assets/click/mouse_click_tone_1200Hz_50ms.wav",
+        "assets/tactile/default_tactile_cue.wav",
         "assets/master_blocks/Master_Block_1.csv",
         "assets/master_blocks/Master_Block_2.csv",
+        "assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa",
+        "assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.manifest.json",
+        "third_party/nlohmann_json.PINNED.json",
+        "third_party/nlohmann_json/LICENSE.MIT",
+        "third_party/nlohmann_json/single_include/nlohmann/json.hpp",
+        "third_party/3dti_AudioToolkit/3dti_ResourceManager/third_party_libraries/cereal/LICENSE",
+        "third_party/3dti_AudioToolkit/3dti_ResourceManager/third_party_libraries/cereal/include/cereal/archives/portable_binary.hpp",
+        "third_party/3dti_AudioToolkit/3dti_ResourceManager/third_party_libraries/eigen/COPYING.README",
+        "third_party/3dti_AudioToolkit/3dti_ResourceManager/third_party_libraries/eigen/Eigen/QR",
+        "third_party/3dti_AudioToolkit/3dti_ResourceManager/third_party_libraries/sofacoustics/libsofa/doc/LICENCE.txt",
+        "third_party/3dti_AudioToolkit/3dti_ResourceManager/third_party_libraries/sofacoustics/libsofa/src/SOFA.h",
+        "third_party/3dti_AudioToolkit/3dti_ResourceManager/third_party_libraries/sofacoustics/libsofa/dependencies/lib/win/x64/netcdf.dll",
         "data/sample/audio_tactile_with_facilitation_preregistered_2p5sd.csv",
     ]
     problems = []
@@ -123,16 +181,52 @@ def check_public_file_inventory() -> list[str]:
     for path in iter_public_files(REPO_ROOT):
         rel = path.relative_to(REPO_ROOT)
         suffix = path.suffix.lower()
-        if suffix in FORBIDDEN_SUFFIXES:
+        if suffix in FORBIDDEN_SUFFIXES and rel != ALLOWED_STANDARD_HRTF:
             problems.append(f"forbidden release artifact: {rel}")
         if suffix == ".wav" and not any(_is_under(rel, prefix) for prefix in ALLOWED_WAV_PREFIXES):
             problems.append(f"unapproved public WAV file: {rel}")
     return problems
 
 
+def check_standard_hrtf_bundle() -> list[str]:
+    problems = []
+    hrtf_path = REPO_ROOT / ALLOWED_STANDARD_HRTF
+    manifest_path = REPO_ROOT / ALLOWED_STANDARD_HRTF_MANIFEST
+    if not hrtf_path.exists():
+        problems.append(f"missing bundled standard HRTF: {ALLOWED_STANDARD_HRTF}")
+        return problems
+    if not manifest_path.exists():
+        problems.append(f"missing bundled standard HRTF manifest: {ALLOWED_STANDARD_HRTF_MANIFEST}")
+        return problems
+    data = json.loads(manifest_path.read_text(encoding="utf-8-sig"))
+    if data.get("id") != "fabian_tu_berlin_hato_0":
+        problems.append(f"{ALLOWED_STANDARD_HRTF_MANIFEST} has unexpected id")
+    if "CC BY" not in data.get("license", ""):
+        problems.append(f"{ALLOWED_STANDARD_HRTF_MANIFEST} missing CC BY license note")
+    if data.get("experimenter_visible") is not False:
+        problems.append(f"{ALLOWED_STANDARD_HRTF_MANIFEST} should mark experimenter_visible=false")
+    expected_hash = data.get("sha256")
+    actual_hash = sha256_file(hrtf_path)
+    if expected_hash != actual_hash:
+        problems.append(
+            f"{ALLOWED_STANDARD_HRTF_MANIFEST} hash mismatch for {ALLOWED_STANDARD_HRTF}: "
+            f"manifest {expected_hash}, actual {actual_hash}"
+        )
+    return problems
+
+
 def check_spoken_assets() -> list[str]:
     problems = []
     asset_dir = REPO_ROOT / "assets" / "breathing"
+    root_manifest_path = asset_dir / "spoken_assets_manifest.json"
+    if root_manifest_path.exists():
+        try:
+            root_manifest = json.loads(root_manifest_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            root_manifest = {}
+            problems.append(f"invalid spoken asset manifest JSON: {root_manifest_path.relative_to(REPO_ROOT)} ({exc})")
+        if root_manifest.get("voice") != "bf_emma" or root_manifest.get("lang") != "en-gb":
+            problems.append("root spoken assets should be British Kokoro bf_emma/en-gb")
     for filename in SPOKEN_ASSETS:
         path = asset_dir / filename
         if not path.exists():
@@ -142,13 +236,84 @@ def check_spoken_assets() -> list[str]:
             rate = wav.getframerate()
             frames = wav.getnframes()
             channels = wav.getnchannels()
-        if rate != TARGET_RATE or frames != TARGET_FRAMES:
+        if rate != TARGET_RATE:
+            seconds = frames / rate if rate else 0
+            problems.append(
+                f"{path.relative_to(REPO_ROOT)} is {seconds:.6f}s at {rate} Hz, expected 44100 Hz"
+            )
+        if frames != TARGET_FRAMES:
             seconds = frames / rate if rate else 0
             problems.append(
                 f"{path.relative_to(REPO_ROOT)} is {seconds:.6f}s at {rate} Hz, expected 4.000000s at 44100 Hz"
             )
         if channels < 1:
             problems.append(f"{path.relative_to(REPO_ROOT)} has no audio channels")
+    variants_path = asset_dir / "spoken_asset_variants.json"
+    if not variants_path.exists():
+        problems.append(f"missing spoken asset variants manifest: {variants_path.relative_to(REPO_ROOT)}")
+        return problems
+    try:
+        variants = json.loads(variants_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        problems.append(f"invalid spoken asset variants JSON: {variants_path.relative_to(REPO_ROOT)} ({exc})")
+        return problems
+    expected_variants = {"british_kokoro", "original_study5"}
+    found_variants = set(variants.get("variants", {}))
+    if variants.get("active_root_variant") != "british_kokoro":
+        problems.append("spoken asset root variant should be british_kokoro")
+    if found_variants != expected_variants:
+        problems.append(f"spoken asset variants should be {sorted(expected_variants)}, found {sorted(found_variants)}")
+    for variant_id in sorted(expected_variants & found_variants):
+        variant = variants["variants"][variant_id]
+        directory = REPO_ROOT / variant.get("directory", "")
+        manifest_path = REPO_ROOT / variant.get("manifest", "")
+        if not directory.is_dir():
+            problems.append(f"missing spoken asset variant directory: {directory.relative_to(REPO_ROOT)}")
+            continue
+        if not manifest_path.exists():
+            problems.append(f"missing spoken asset variant manifest: {manifest_path.relative_to(REPO_ROOT)}")
+            continue
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            problems.append(f"invalid spoken asset variant manifest: {manifest_path.relative_to(REPO_ROOT)} ({exc})")
+            continue
+        manifest_text = json.dumps(manifest)
+        if "C:\\" in manifest_text:
+            problems.append(f"spoken asset variant manifest leaks a local absolute path: {manifest_path.relative_to(REPO_ROOT)}")
+        if variant_id == "british_kokoro" and (
+            manifest.get("voice") != "bf_emma" or manifest.get("lang") != "en-gb"
+        ):
+            problems.append("british_kokoro variant should use bf_emma/en-gb")
+        if variant_id == "original_study5" and manifest.get("engine") != "original-study5-instruction-assets":
+            problems.append("original_study5 variant should be marked as original-study5-instruction-assets")
+        for filename in SPOKEN_ASSETS:
+            path = directory / filename
+            if not path.exists():
+                problems.append(f"missing spoken asset variant file: {path.relative_to(REPO_ROOT)}")
+                continue
+            expected = manifest.get("files", {}).get(filename, {})
+            with wave.open(str(path), "rb") as wav:
+                rate = wav.getframerate()
+                frames = wav.getnframes()
+                channels = wav.getnchannels()
+            if rate != TARGET_RATE:
+                problems.append(f"{path.relative_to(REPO_ROOT)} is at {rate} Hz, expected 44100 Hz")
+            if channels < 1:
+                problems.append(f"{path.relative_to(REPO_ROOT)} has no audio channels")
+            if expected and frames != expected.get("frames"):
+                problems.append(f"{path.relative_to(REPO_ROOT)} frame count does not match manifest")
+            if expected and expected.get("sha256") and sha256_file(path) != expected["sha256"]:
+                problems.append(f"{path.relative_to(REPO_ROOT)} hash does not match manifest")
+            if variant_id == "british_kokoro" or filename in {
+                "Inhale-2-3-4-hold_FIXED.wav",
+                "Exhale-2-3-4-hold_FIXED.wav",
+            }:
+                if frames != TARGET_FRAMES:
+                    seconds = frames / rate if rate else 0
+                    problems.append(
+                        f"{path.relative_to(REPO_ROOT)} is {seconds:.6f}s at {rate} Hz, expected 4.000000s at 44100 Hz"
+                    )
     return problems
 
 
@@ -172,8 +337,8 @@ def check_study_templates() -> list[str]:
     problems = []
     template_dir = REPO_ROOT / "study_templates"
     templates = sorted(template_dir.glob("*.json"))
-    if len(templates) < 5:
-        problems.append("expected at least five study template JSON files")
+    if len(templates) < 15:
+        problems.append("expected at least fifteen study template JSON files")
     for path in templates:
         data = json.loads(path.read_text(encoding="utf-8"))
         for key in ["template_id", "title", "citation", "source_url", "verification_status", "design"]:
@@ -212,6 +377,7 @@ def run_audit() -> list[str]:
     problems = []
     problems.extend(check_required_files())
     problems.extend(check_public_file_inventory())
+    problems.extend(check_standard_hrtf_bundle())
     problems.extend(check_spoken_assets())
     problems.extend(check_master_blocks())
     problems.extend(check_study_templates())

@@ -1,0 +1,131 @@
+{
+  "template_id": "pfeiffer_2018_lateral_perihead_left_to_right",
+  "title": "Pfeiffer EJN2018 bilateral lateral trajectory profile",
+  "citation": "Pfeiffer, C., Noel, J. P., Serino, A., & Blanke, O. (2018). Vestibular modulation of peripersonal space boundaries. European Journal of Neuroscience, 47(7), 800-811.",
+  "source_url": "https://doi.org/10.1111/ejn.13872",
+  "doi": "10.1111/ejn.13872",
+  "verification_status": "verified",
+  "notes": "Trajectory/noise profile from the local Pfeiffer_EJN2018 simulator reference. It encodes pink-noise lateral movement geometry, mirrored left-to-right/right-to-left source variants, and sample rate; FABIAN HRIR rendering remains the standardized under-the-hood app resource, not a Pfeiffer-specific user choice.",
+  "reference_parameters": {
+    "reference_file": "Example-configs/Pfeiffer_EJN2018.zip/12022013_MovingSoundSourceSimulator.m",
+    "model_dimensions": "2D horizontal spherical-head model",
+    "trajectory_plane_height_m": 0.0,
+    "trajectory_plane_label": "ear/head-center plane",
+    "start_x_m": -0.4,
+    "stop_x_m": 0.4,
+    "front_offset_y_m": 0.05,
+    "speed_mps": 0.2,
+    "movement_duration_s": 4.0,
+    "head_diameter_m": 0.18,
+    "sample_rate": 44100,
+    "noise_type": "pink",
+    "profile_direction_variants": ["left_to_right", "right_to_left"],
+    "script_stationary_hold_s": 4.0,
+    "reference_level_db": 100,
+    "distance_attenuation_factor_db": 40,
+    "directional_loss_left_db": "5/180 * doa_deg - 5",
+    "directional_loss_right_db": "-5/180 * doa_deg",
+    "final_output_peak_scale": 0.25,
+    "level_note": "The reference MATLAB script applies dB gain terms before final peak normalization; these values describe relative level shaping, not a calibrated SPL in the WAV file."
+  },
+  "design": {
+    "name": "Pfeiffer EJN2018 lateral trajectory profile",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Pink lateral source",
+        "noise_type": "pink",
+        "azimuth_deg": 0.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0
+      }
+    ],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "trajectory": {
+      "start_radius_m": 0.4031128874,
+      "end_radius_m": 0.4031128874,
+      "path_direction": "left_to_right",
+      "coordinate_mode": "cartesian",
+      "start_x_m": -0.4,
+      "start_y_m": 0.05,
+      "start_z_m": 0.0,
+      "end_x_m": 0.4,
+      "end_y_m": 0.05,
+      "end_z_m": 0.0,
+      "path_length_m": 0.8,
+      "propagation_speed_mps": 0.2,
+      "azimuth_start_deg": -82.87498365,
+      "azimuth_end_deg": 82.87498365,
+      "elevation_deg": 0.0,
+      "padding_pre_s": 0.0,
+      "padding_post_s": 0.0,
+      "sample_rate": 44100,
+      "use_inverse_square": true
+    },
+    "protocol": {
+      "repetitions_per_condition": 1,
+      "soa_values_ms": [300, 800, 1500, 2200, 2700],
+      "spatial_values_cm": [34.365681, 24.515301, 11.18034, 6.403124, 14.866069],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": ["left_to_right", "right_to_left"],
+      "tactile_sites": ["hand"],
+      "catch_trial_percentage": 10.0,
+      "catch_trials_exact": null,
+      "include_baseline_trials": true,
+      "baseline_soa_values_ms": [],
+      "respiratory_phases": ["Any"],
+      "blocks": 1,
+      "trial_randomization_strategy": "no_immediate_repeats",
+      "block_order_randomization": "fixed",
+      "max_consecutive_same_trial_type": 2,
+      "trial_strips": [
+        {
+          "strip_id": "pfeiffer-lateral-motion-row",
+          "label": "Lateral motion PPS trial",
+          "audio_tactile_percentage": 100.0,
+          "catch_percentage": 0.0,
+          "baseline_percentage": 0.0,
+          "elements": [
+            {
+              "element_id": "pfeiffer-lateral-looming-source",
+              "kind": "looming_stimulus",
+              "label": "Pink lateral source",
+              "source_label": "",
+              "source_labels": [],
+              "randomized": true
+            }
+          ]
+        }
+      ],
+      "participants": 1,
+      "random_seed": 20180301
+    }
+  },
+  "provenance": [
+    {
+      "field": "trajectory_plane_height_m",
+      "source": "The MATLAB reference uses only x/y coordinates: ears at [-head_diam/2, 0] and [+head_diam/2, 0], source path [x, ordinate]. There is no vertical coordinate, so the matching 3D convention is z = 0 at the ear/head-center plane."
+    },
+    {
+      "field": "front_offset_y_m",
+      "source": "Reference variable `ordinate = 0.05`, described as the distance between the source and the head at 0 degrees."
+    },
+    {
+      "field": "path and speed",
+      "source": "Reference variables `start = -0.4`, `stop = -start`, and `speed = 0.2`; movement duration is abs(stop-start)/speed = 4 s."
+    },
+    {
+      "field": "noise",
+      "source": "Reference script uses pink noise synthesis via a 1/F filter at 44100 Hz."
+    },
+    {
+      "field": "head_diameter_m",
+      "source": "Reference variable `head_diam = 0.18`; the 3DTI listener is created with matching head radius 0.09 m for customized ITD."
+    },
+    {
+      "field": "reference level and gains",
+      "source": "Reference variables `ref_dB = 100`, `att_factor = 40`, directional dB loss equations for each ear, and final `output_F = 0.25 * output_F ./ max(max(output_F))`; because of final peak normalization, the WAV is not absolutely SPL calibrated."
+    }
+  ]
+}

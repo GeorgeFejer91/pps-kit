@@ -1,0 +1,275 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "canzoneri_2012_dynamic_sounds",
+  "citation_short": "Canzoneri et al. (2012)",
+  "review_date": "2026-06-16",
+  "manual_review_status": "manual_review_completed_main_pdf",
+  "confidence_score": 0.92,
+  "confidence_label": "high_confidence_extraction",
+  "confidence_basis": "Main PDF, OpenDataLoader output, pdfplumber/pdftotext fallback, rendered methods pages, and official PLOS HTML were checked. Segment 1-4 task metadata are almost fully reported; exact original pink-noise asset, speaker model/acoustics, exact exponential gain curve, and response timeout remain unresolved.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats",
+    "reason": "The canonical dynamic-sound PPS task can be recreated as a two-speaker or digital two-source pink-noise IN/OUT profile with reported durations, gain direction, SOAs, baseline timings, repetition counts, catches, response modality, and blocks. Exact speaker transfer and original SoundForge envelope files would need approximation or author materials."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf",
+      "source": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+      "status": "reviewed",
+      "scope": "PDF pages 2-5, Methods, Procedures and Materials, Figure 1, Figure 2, and fitting/results sections."
+    },
+    {
+      "source_type": "opendataloader_json",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/canzoneri_2012_dynamic_sounds.json",
+      "status": "reviewed",
+      "scope": "Used as primary extracted-text map, then checked against rendered PDF and fallback extraction."
+    },
+    {
+      "source_type": "fallback_text_extraction",
+      "source": "pdfplumber and pdftotext local extraction",
+      "status": "reviewed",
+      "scope": "Targeted searches for stimulus, apparatus, SOA, baseline, catch, block, and count parameters."
+    },
+    {
+      "source_type": "rendered_pdf_pages",
+      "source": "tmp/pdfs/canzoneri_2012_review/page-2.png and page-3.png",
+      "status": "reviewed_not_tracked",
+      "scope": "Visual layout check of methods pages; temporary images were not committed."
+    },
+    {
+      "source_type": "publisher_html",
+      "source": "https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0044306",
+      "status": "checked",
+      "scope": "Official article page checked for methods, figure captions, download links, and supporting-information route; no separate supporting-information section was found."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "OpenDataLoader PDF extraction",
+      "status": "completed",
+      "result": "Mapped candidate Segment 1-4 values across 16 of 25 fields."
+    },
+    {
+      "strategy": "Fallback extraction verification",
+      "status": "completed",
+      "result": "pdfplumber and pdftotext confirmed trial timing, counts, voice relay, catches, blocks, and tactile apparatus."
+    },
+    {
+      "strategy": "Rendered-page layout pass",
+      "status": "completed",
+      "result": "Rendered methods pages confirmed the two-column text flow and corrected the tactile pulse duration to 100 microseconds."
+    },
+    {
+      "strategy": "Stimulus reconstruction pass",
+      "status": "completed",
+      "result": "Identified two mirrored IN/OUT trajectories, SoundForge 4.5 pink-noise envelopes, loudspeaker geometry, and dB range."
+    },
+    {
+      "strategy": "Sequence, baseline, catch, and repetition pass",
+      "status": "completed",
+      "result": "Separated T1-T5 audio-tactile timings, T0/T6 unimodal tactile baseline timings, 112 tactile-target trials, 76 auditory-only catches, and two blocks."
+    },
+    {
+      "strategy": "Supplement/source route check",
+      "status": "completed_no_supplement_found",
+      "result": "Official PLOS article page exposed article/PDF/XML links and figures but no separate supplementary-methods file."
+    }
+  ],
+  "field_status_counts": {
+    "derived": 3,
+    "not_reported_after_review": 1,
+    "reported": 21
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "reported",
+        "value": "Pink-noise auditory samples at 44.1 kHz.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF p.2, Methods, Procedures and Materials",
+        "evidence_note": "Reported as pink-noise samples used for the dynamic auditory stimuli."
+      },
+      "source_provenance": {
+        "status": "reported",
+        "value": "SoundForge 4.5 shaped two identical pink-noise samples for the two loudspeakers; exact source audio file is not reported.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF p.2, Methods, Procedures and Materials",
+        "evidence_note": "Software provenance is reported, but not the original WAV/noise seed."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "Two auditory trajectories: IN approaching and OUT receding.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF p.2, Methods, Procedures and Materials",
+        "evidence_note": "IN and OUT are mirrored intensity/timing conditions."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Near speaker on table by the right hand; far speaker on floor about 100 cm from near speaker; IN far-to-near, OUT near-to-far.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF p.2, Methods, Procedures and Materials",
+        "evidence_note": "Trajectory is physical-speaker/intensity-based on a frontal plane."
+      },
+      "stimulus_duration": {
+        "status": "reported",
+        "value": "Sound duration 3000 ms, preceded and followed by 1000 ms silence.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF p.3, Methods, Procedures and Materials",
+        "evidence_note": "Trial begins with silence, then sound, then post-sound silence."
+      },
+      "stimulus_speed": {
+        "status": "derived",
+        "value": "No explicit speed reported; nominal apparent path is about 100 cm over 3000 ms, roughly 0.33 m/s, under mirrored exponential intensity fades.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF pp.2-3, Methods, Procedures and Materials",
+        "evidence_note": "Derived from speaker separation and sound duration; perceived motion depends on intensity cues."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "IN/approaching and OUT/receding sounds.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF p.2, Methods, Procedures and Materials",
+        "evidence_note": "Both conditions were used in the main audio-tactile task."
+      },
+      "gain_envelope": {
+        "status": "reported",
+        "value": "IN: exponential rise 55 to 70 dB SPL; OUT: exponential fall 70 to 55 dB SPL; near/far speaker intensities mirror each other.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF p.2, Methods, Procedures and Materials",
+        "evidence_note": "Measured at the subjects' ears; exact gain curve file is not provided."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Two physical loudspeakers, SoundForge-generated pink-noise envelopes, audiometer SPL calibration, C.I.R.O. software control.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF pp.2-3, Methods, Procedures and Materials",
+        "evidence_note": "Speaker make/model and room transfer function are not reported."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "IN and OUT audio-tactile target trials across T0-T6 plus auditory-only catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF p.3, Methods, Procedures and Materials",
+        "evidence_note": "T0/T6 are tactile-only relative to sound timing but occur in trial structures with sound administration."
+      },
+      "condition_intermixing": {
+        "status": "reported",
+        "value": "Sound condition, tactile timing, and auditory-only catch trials were randomly combined/intermingled in the main experiment.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF p.3, Methods, Procedures and Materials",
+        "evidence_note": "The paper reports a random combination and random intermingling."
+      },
+      "blocked_or_random_order": {
+        "status": "reported",
+        "value": "Randomized/intermingled trials equally divided into two blocks of about 8 minutes each.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF p.3, Methods, Procedures and Materials",
+        "evidence_note": "No additional block-level condition separation is reported."
+      },
+      "iti_jitter_policy": {
+        "status": "reported",
+        "value": "Fixed 1000 ms silence before and after each 3000 ms sound; no variable ITI/jitter distribution reported.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF p.3, Methods, Procedures and Materials",
+        "evidence_note": "The report specifies fixed silence windows only."
+      },
+      "response_window": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf; https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0044306",
+        "page_or_section": "PDF pp.2-3, Methods/Results; official PLOS HTML checked 2026-06-16",
+        "evidence_note": "Vocal response and voice relay are reported, but no explicit response timeout/window was found."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Participants said TAH to tactile targets as fast as possible while ignoring sounds; calibration repeated after omissions or catch false alarms.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF pp.2-3, Methods, Procedures and Materials",
+        "evidence_note": "Calibration included 10 tactile stimuli intermingled with 5 catch trials."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "Right-index electrical tactile pulse via DS7A Digitimer and Neuroline electrodes; single rectangular monophasic pulse, 100 us, individually set above threshold, 60-90 mA tested range.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF pp.2-3, Methods, Procedures and Materials",
+        "evidence_note": "The text reports a constant-current stimulator and constant-voltage pulse wording."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "T1 300 ms, T2 800 ms, T3 1500 ms, T4 2200 ms, T5 2700 ms after sound onset; T0/T6 baseline timings also included.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF p.3, Methods, Procedures and Materials",
+        "evidence_note": "T1-T5 are crossed with both IN and OUT sounds."
+      },
+      "baseline_strategy": {
+        "status": "reported",
+        "value": "Unimodal tactile baseline condition without concurrent sound, implemented during pre-sound and post-sound silence periods.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF p.3, Methods, Procedures and Materials; PDF p.3, Results",
+        "evidence_note": "The results explicitly describe T0 and T6 as unimodal conditions."
+      },
+      "baseline_timing": {
+        "status": "reported",
+        "value": "T0 at 300 ms from trial start, before sound onset; T6 at 4600 ms from trial start, after sound administration.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF p.3, Methods, Procedures and Materials",
+        "evidence_note": "With sound onset after 1000 ms silence, T0 is -700 ms relative to sound onset and T6 is 3600 ms after onset."
+      },
+      "catch_trial_type": {
+        "status": "reported",
+        "value": "Auditory-only catch trials with no tactile stimulation.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF pp.2-3, Methods, Procedures and Materials",
+        "evidence_note": "Catches are used in calibration and the main experiment."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "reported",
+        "value": "Eight target trials for each temporal delay T0-T6 for each sound condition IN and OUT.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF p.3, Methods, Procedures and Materials",
+        "evidence_note": "This yields 112 tactile-target trials in the main task."
+      },
+      "baseline_count": {
+        "status": "derived",
+        "value": "T0 and T6 produce 32 baseline/unimodal tactile target trials total: 2 timings x 2 sound-condition trial contexts x 8 repetitions.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF p.3, Methods, Procedures and Materials",
+        "evidence_note": "Derived from the reported repetition structure and T0/T6 baseline role."
+      },
+      "catch_count": {
+        "status": "reported",
+        "value": "Seventy-six auditory-only catch trials in the main experiment; calibration used 5 catches intermingled with 10 tactile stimuli.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF pp.2-3, Methods, Procedures and Materials",
+        "evidence_note": "The main catch count is separate from calibration."
+      },
+      "block_count": {
+        "status": "reported",
+        "value": "Two blocks, about 8 minutes each.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF p.3, Methods, Procedures and Materials",
+        "evidence_note": "Trials were equally divided between the two blocks."
+      },
+      "total_trial_count": {
+        "status": "derived",
+        "value": "One hundred eighty-eight main-task trials total: 112 tactile-target trials plus 76 auditory-only catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/canzoneri_2012_dynamic_sounds.pdf",
+        "page_or_section": "PDF p.3, Methods, Procedures and Materials",
+        "evidence_note": "Total is derived from explicitly reported target and catch counts."
+      }
+    }
+  },
+  "critical_caveats": [
+    "Exact original pink-noise audio file or random/noise generation seed is not reported.",
+    "Exact exponential gain/envelope file or gain law parameters beyond dB endpoints are not reported.",
+    "Speaker model, room transfer, and detailed acoustic calibration are not reported beyond SPL at ear position.",
+    "No explicit response timeout/window is reported."
+  ],
+  "next_manual_action": "This paper is strong enough for a runnable canonical dynamic-sound profile, with the SoundForge envelopes and physical speaker transfer approximated unless author materials become available."
+}

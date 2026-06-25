@@ -1,0 +1,9 @@
+{
+  "schema": "pps-preload-run-setup-segment.v1",
+  "template_id": "serino_2015_front_back_trunk_exp2",
+  "blocks": 1,
+  "participants": 16,
+  "random_seed": 20151224,
+  "trial_randomization_strategy": "no_immediate_repeats",
+  "block_order_randomization": "fixed"
+}

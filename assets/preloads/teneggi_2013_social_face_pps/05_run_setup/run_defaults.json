@@ -1,0 +1,9 @@
+{
+  "schema": "pps-preload-run-setup-segment.v1",
+  "template_id": "teneggi_2013_social_face_pps",
+  "blocks": 1,
+  "participants": 1,
+  "random_seed": 20130304,
+  "trial_randomization_strategy": "no_immediate_repeats",
+  "block_order_randomization": "fixed"
+}

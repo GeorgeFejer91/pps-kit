@@ -1,0 +1,150 @@
+{
+  "schema": "pps-preload-profile-assets.v1",
+  "template_id": "teneggi_2013_social_face_pps",
+  "title": "Teneggi 2013 social modulation face PPS",
+  "visible_variant_label": "",
+  "publication_status": "published",
+  "profile_type": "face_audio_tactile_social_context",
+  "asset_mode": "bundled_local",
+  "retrieval_strategy": "bundled_or_download_from_github_pages",
+  "local_only": true,
+  "catalog_segments": [
+    {
+      "folder": "01_profile",
+      "label": "Profile",
+      "path": "assets/preloads/teneggi_2013_social_face_pps/01_profile"
+    },
+    {
+      "folder": "02_looming_stimuli",
+      "label": "Looming Stimuli Builder",
+      "path": "assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli"
+    },
+    {
+      "folder": "03_baseline_strategy",
+      "label": "Baseline Strategy",
+      "path": "assets/preloads/teneggi_2013_social_face_pps/03_baseline_strategy"
+    },
+    {
+      "folder": "04_trial_designer",
+      "label": "Trial Designer",
+      "path": "assets/preloads/teneggi_2013_social_face_pps/04_trial_designer"
+    },
+    {
+      "folder": "05_run_setup",
+      "label": "Run Setup",
+      "path": "assets/preloads/teneggi_2013_social_face_pps/05_run_setup"
+    }
+  ],
+  "profile_parameters_manifest": "assets/preloads/teneggi_2013_social_face_pps/01_profile/profile_parameters_manifest.json",
+  "recreation_status": {
+    "primary_category": "missing_publication_parameters",
+    "category_label": "Missing publication parameters",
+    "runner_readiness": "blocked_missing_parameters",
+    "profile_checks_passed": false,
+    "gui_recreatable": false,
+    "segment_0_to_4_profile_checks_passed": false,
+    "segment_1_to_6_materializable": false,
+    "finished_profile": false,
+    "segment_6_launchable": false,
+    "profile_completion_status": "unfinished_preload",
+    "missing_parameter_count": 1,
+    "unsupported_structure_count": 0
+  },
+  "render_contract": {
+    "stage": "auditory_looming_prebake",
+    "engine": "python-sofa-reference",
+    "include_tactile": false,
+    "tactile_policy": "deferred_until_session_preparation"
+  },
+  "assets": [
+    {
+      "label": "Face-centered moving sound",
+      "path": "assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli/looming_Face-centered_moving_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli/looming_Face-centered_moving_sound.wav",
+      "sha256": "1d3fbbe2a8457f7adfd7848d15b15ea653344cb28f2c480722050de7d334a3e6",
+      "duration_s": 4.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Face-centered moving sound",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 93.0,
+        "end_distance_cm": 5.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 4.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.88,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 0.93,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.05,
+          "z_m": 0.0
+        }
+      }
+    },
+    {
+      "label": "Face-centered moving sound - receding",
+      "path": "assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli/looming_Face-centered_moving_sound_-_receding.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli/looming_Face-centered_moving_sound_-_receding.wav",
+      "sha256": "09574004bd9d70992cb6767b4e1d099006cc6c1ba4849f5e247a21488e552c19",
+      "duration_s": 4.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "receding",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Face-centered moving sound - receding",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 5.0,
+        "end_distance_cm": 93.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 4.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.88,
+        "coordinate_mode": "cartesian",
+        "path_direction": "recede",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 0.05,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.93,
+          "z_m": 0.0
+        }
+      }
+    }
+  ],
+  "notes": [
+    "Prebaked WAVs are local auditory-only profile assets.",
+    "Tactile timing is introduced later by session preparation from SOA/trial CSVs.",
+    "The browser dashboard only orchestrates local companion verification and use of these files."
+  ]
+}

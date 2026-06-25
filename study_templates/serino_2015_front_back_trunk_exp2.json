@@ -1,0 +1,137 @@
+{
+  "template_id": "serino_2015_front_back_trunk_exp2",
+  "title": "Serino 2015 front/back peri-trunk Experiment 2",
+  "citation": "Serino, A., Noel, J. P., Galli, G., Canzoneri, E., Marmaroli, P., Lissek, H., & Blanke, O. (2015). Body part-centered and full body-centered peripersonal space representations. Scientific Reports, 5, 18603.",
+  "source_url": "https://www.nature.com/articles/srep18603",
+  "doi": "10.1038/srep18603",
+  "verification_status": "partial",
+  "notes": "Front/back trunk mapping with sounds crossing the body. Current renderer can draw/render a linear pass-through path, but block-specific front/back tactile mapping is simplified.",
+  "reference_parameters": {
+    "distances_cm": [
+      95,
+      80,
+      65,
+      50,
+      35,
+      20,
+      5
+    ],
+    "reported_speed_note": "paper discusses faster trajectory than Experiment 1; current profile uses 35 cm/s approximation",
+    "implementation_gaps": [
+      "front/back block factor",
+      "13-distance internal schedule",
+      "physical 16-speaker array"
+    ]
+  },
+  "design": {
+    "name": "Serino 2015 front/back peri-trunk PPS Experiment 2",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Front-back moving sound",
+        "noise_type": "pink",
+        "azimuth_deg": 0.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0
+      }
+    ],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "trajectory": {
+      "start_radius_m": 1.0,
+      "end_radius_m": 1.0,
+      "path_direction": "custom",
+      "coordinate_mode": "cartesian",
+      "start_x_m": 0.0,
+      "start_y_m": 1.0,
+      "start_z_m": 0.0,
+      "end_x_m": 0.0,
+      "end_y_m": -1.0,
+      "end_z_m": 0.0,
+      "path_length_m": 2.0,
+      "propagation_speed_mps": 0.75,
+      "azimuth_start_deg": 0.0,
+      "azimuth_end_deg": 180.0,
+      "elevation_deg": 0.0,
+      "padding_pre_s": 0.0,
+      "padding_post_s": 0.0,
+      "sample_rate": 44100,
+      "use_inverse_square": true
+    },
+    "protocol": {
+      "repetitions_per_condition": 12,
+      "soa_values_ms": [
+        143,
+        571,
+        1000,
+        1429,
+        1857,
+        2286,
+        2714
+      ],
+      "spatial_values_cm": [
+        95,
+        80,
+        65,
+        50,
+        35,
+        20,
+        5
+      ],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": [
+        "front_to_back",
+        "back_to_front"
+      ],
+      "tactile_sites": [
+        "sternum/chest",
+        "back"
+      ],
+      "catch_trial_percentage": 10.0,
+      "catch_trials_exact": 24,
+      "include_baseline_trials": true,
+      "baseline_soa_values_ms": [
+        143,
+        2714
+      ],
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "trial_randomization_strategy": "no_immediate_repeats",
+      "block_order_randomization": "fixed",
+      "max_consecutive_same_trial_type": 2,
+      "trial_strips": [
+        {
+          "strip_id": "serino-front-back-trunk-row",
+          "label": "Front/back trunk moving-sound trial",
+          "audio_tactile_percentage": 100.0,
+          "catch_percentage": 0.0,
+          "baseline_percentage": 0.0,
+          "elements": [
+            {
+              "element_id": "serino-front-back-moving-sound",
+              "kind": "looming_stimulus",
+              "label": "Front-back moving sound",
+              "source_label": "",
+              "source_labels": [],
+              "randomized": true
+            }
+          ]
+        }
+      ],
+      "participants": 16,
+      "random_seed": 20151224
+    }
+  },
+  "provenance": [
+    {
+      "field": "distances",
+      "source": "Scientific Reports Experiment 2 reports tactile stimulation at 14 delays mapping 5-95 cm in front and back."
+    },
+    {
+      "field": "speed/rendering",
+      "source": "The original used speaker arrays; this profile approximates with one linear 3D path."
+    }
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "schema": "pps-preload-profile-assets.v1",
+  "template_id": "ferri_2015_artificial_looming_valence",
+  "title": "Ferri 2015 artificial emotional looming sounds",
+  "visible_variant_label": "A",
+  "publication_status": "published",
+  "profile_type": "audio_tactile_looming_valence",
+  "asset_mode": "bundled_local",
+  "retrieval_strategy": "bundled_or_download_from_github_pages",
+  "local_only": true,
+  "catalog_segments": [
+    {
+      "folder": "01_profile",
+      "label": "Profile",
+      "path": "assets/preloads/ferri_2015_artificial_looming_valence/01_profile"
+    },
+    {
+      "folder": "02_looming_stimuli",
+      "label": "Looming Stimuli Builder",
+      "path": "assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli"
+    },
+    {
+      "folder": "03_baseline_strategy",
+      "label": "Baseline Strategy",
+      "path": "assets/preloads/ferri_2015_artificial_looming_valence/03_baseline_strategy"
+    },
+    {
+      "folder": "04_trial_designer",
+      "label": "Trial Designer",
+      "path": "assets/preloads/ferri_2015_artificial_looming_valence/04_trial_designer"
+    },
+    {
+      "folder": "05_run_setup",
+      "label": "Run Setup",
+      "path": "assets/preloads/ferri_2015_artificial_looming_valence/05_run_setup"
+    }
+  ],
+  "profile_parameters_manifest": "assets/preloads/ferri_2015_artificial_looming_valence/01_profile/profile_parameters_manifest.json",
+  "recreation_status": {
+    "primary_category": "missing_publication_parameters",
+    "category_label": "Missing publication parameters",
+    "runner_readiness": "blocked_missing_parameters",
+    "profile_checks_passed": false,
+    "gui_recreatable": false,
+    "segment_0_to_4_profile_checks_passed": false,
+    "segment_1_to_6_materializable": false,
+    "finished_profile": false,
+    "segment_6_launchable": false,
+    "profile_completion_status": "unfinished_preload",
+    "missing_parameter_count": 2,
+    "unsupported_structure_count": 0
+  },
+  "render_contract": {
+    "stage": "auditory_looming_prebake",
+    "engine": "python-sofa-reference",
+    "include_tactile": false,
+    "tactile_policy": "deferred_until_session_preparation"
+  },
+  "assets": [
+    {
+      "label": "Negative artificial 1/f2 looming",
+      "path": "assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Negative_artificial_1_f2_looming.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Negative_artificial_1_f2_looming.wav",
+      "sha256": "a936d98e08b90f28737b469f17bcd613a63986be2464c77d3cade39eae22f440",
+      "duration_s": 3.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "brown",
+      "tone_type": "brown",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Negative artificial 1/f2 looming",
+        "source_kind": "generated_noise",
+        "noise_type": "brown",
+        "start_distance_cm": 110.0,
+        "end_distance_cm": 10.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 3.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.1,
+          "z_m": 0.0
+        }
+      }
+    },
+    {
+      "label": "Neutral artificial 1/f looming",
+      "path": "assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Neutral_artificial_1_f_looming.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Neutral_artificial_1_f_looming.wav",
+      "sha256": "64b4f08281efe5a8c0d720a2f0f5285a1b5abd6a7f7c0bc3f5fcccd44d98294b",
+      "duration_s": 3.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Neutral artificial 1/f looming",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 110.0,
+        "end_distance_cm": 10.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 3.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.1,
+          "z_m": 0.0
+        }
+      }
+    }
+  ],
+  "notes": [
+    "Prebaked WAVs are local auditory-only profile assets.",
+    "Tactile timing is introduced later by session preparation from SOA/trial CSVs.",
+    "The browser dashboard only orchestrates local companion verification and use of these files."
+  ]
+}

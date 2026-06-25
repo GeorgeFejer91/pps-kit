@@ -1,0 +1,13 @@
+{
+  "schema": "pps-preload-baseline-segment.v1",
+  "template_id": "noel_2015_walking_full_body_action",
+  "baseline_strategy": "tactile_only",
+  "include_baseline_trials": true,
+  "baseline_trial_percentage": 0.0,
+  "baseline_soa_values_ms": [
+    300,
+    2700
+  ],
+  "catch_trial_percentage": 10.0,
+  "catch_trials_exact": null
+}

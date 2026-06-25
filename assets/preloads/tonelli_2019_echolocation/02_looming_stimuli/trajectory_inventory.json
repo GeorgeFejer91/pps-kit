@@ -1,0 +1,43 @@
+{
+  "schema": "pps-preload-trajectory-inventory.v1",
+  "template_id": "tonelli_2019_echolocation",
+  "trajectories": [
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Moving sound array",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 119.0,
+        "end_distance_cm": 17.0,
+        "start_rotation_deg": 270.0,
+        "end_rotation_deg": 270.0,
+        "movement_duration_s": 3.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.02,
+        "coordinate_mode": "polar",
+        "path_direction": "approach",
+        "start": {
+          "x_m": -1.19,
+          "y_m": 0.0,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": -0.17,
+          "y_m": 0.0,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Moving sound array"
+      ],
+      "tone_types": [
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/tonelli_2019_echolocation/02_looming_stimuli/looming_Moving_sound_array.wav"
+      ]
+    }
+  ]
+}

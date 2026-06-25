@@ -1,0 +1,9 @@
+{
+  "schema": "pps-preload-run-setup-segment.v1",
+  "template_id": "galli_2015_wheelchair_full_body",
+  "blocks": 1,
+  "participants": 1,
+  "random_seed": 20150518,
+  "trial_randomization_strategy": "no_immediate_repeats",
+  "block_order_randomization": "fixed"
+}

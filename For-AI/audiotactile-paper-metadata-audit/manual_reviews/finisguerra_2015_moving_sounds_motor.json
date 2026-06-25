@@ -1,0 +1,282 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "finisguerra_2015_moving_sounds_motor",
+  "citation_short": "Finisguerra et al. (2015)",
+  "review_date": "2026-06-16",
+  "manual_review_status": "manual_review_completed_main_pdf_no_supplement_found",
+  "confidence_score": 0.86,
+  "confidence_label": "high_confidence_extraction",
+  "confidence_basis": "Main PDF, OpenDataLoader output, fallback text search, rendered methods pages, and a supplement/source-route check were reviewed. The moving-sound trajectory, apparatus, speed, duration, gain calibration, TMS trigger positions, tactile probe structure, ITI, repetitions, blocks, and baseline strategy are reported. Remaining gaps are the exact sound waveform/source asset, exact speaker-volume algorithm, tactile pulse duration/current, and numeric response timeout.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats_tms_specific",
+    "reason": "The auditory trajectory and trial schedule can be recreated, but the scientific endpoint is TMS/MEP modulation rather than a normal behavioral tactile-detection PPS profile. A toolkit emulation would need a moving-sound plus rare-tactile attention schedule, while TMS/EMG would remain external instrumentation."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf",
+      "source": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+      "status": "reviewed",
+      "scope": "PDF pages 2-5 for Method, Figure 1, auditory apparatus, tactile probes, TMS timing, trial counts, baselines, and results sanity checks."
+    },
+    {
+      "source_type": "opendataloader_json",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/finisguerra_2015_moving_sounds_motor.json",
+      "status": "reviewed",
+      "scope": "Used as primary extracted text map and checked against rendered PDF pages and targeted text searches."
+    },
+    {
+      "source_type": "fallback_text_extraction",
+      "source": "pdfplumber and local text search",
+      "status": "reviewed",
+      "scope": "Targeted searches for sound, loudspeaker, IN/OUT, distance, TMS, tactile, baseline, catch, response, block, trial, ITI, and repetition terms."
+    },
+    {
+      "source_type": "rendered_pdf_pages",
+      "source": "tmp/pdfs/finisguerra_2015_review/page-2.png through page-5.png",
+      "status": "reviewed_not_tracked",
+      "scope": "Visual methods-page check; temporary rendered page images were not committed."
+    },
+    {
+      "source_type": "supplement_route_check",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2014.09.043",
+      "status": "checked_no_supplement_found",
+      "scope": "Tracked ledger and web/source search did not identify a downloadable supplement for this article."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "OpenDataLoader PDF extraction",
+      "status": "completed",
+      "result": "Mapped candidate Segment 1-4 values across 17 of 25 fields."
+    },
+    {
+      "strategy": "Stimulus reconstruction pass",
+      "status": "completed",
+      "result": "Confirmed the eight-loudspeaker array, 105 cm path, 3 s sound duration, 35 cm/s speed, IN/OUT directions, 70 dB near-hand calibration, and six sampled positions."
+    },
+    {
+      "strategy": "Sequence and TMS pass",
+      "status": "completed",
+      "result": "Separated TMS moving-sound trials from rare tactile no-TMS attention trials, PRE/POST MEP baselines, and the post-experiment localization control."
+    },
+    {
+      "strategy": "SOA, baseline, and tactile pass",
+      "status": "completed",
+      "result": "Confirmed TMS pulses 50 ms after the sound reached each sampled position, rare tactile probes on the right hand, PRE/POST no-noise baselines, and tactile-TMS separation."
+    },
+    {
+      "strategy": "Counts and intermixing pass",
+      "status": "completed",
+      "result": "Confirmed 12 TMS repetitions per direction-position cell, 144 TMS trials across 4 blocks, 24 tactile no-TMS trials randomly intermingled, and 10-12 s ITI."
+    },
+    {
+      "strategy": "Rendered-page layout pass",
+      "status": "completed",
+      "result": "Rendered pages 2-5 were inspected to verify the methods text, Figure 1 geometry, and trial-count paragraph."
+    },
+    {
+      "strategy": "Supplement/source route pass",
+      "status": "completed_no_hits",
+      "result": "No supplement was found in the tracked ledger or web/source route check; missing waveform and tactile-calibration details remain main-PDF gaps."
+    }
+  ],
+  "field_status_counts": {
+    "derived": 3,
+    "not_reported_after_review": 2,
+    "reported": 20
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf; https://doi.org/10.1016/j.neuropsychologia.2014.09.043",
+        "page_or_section": "PDF pp.2-5, Method/Figure 1; supplement route checked 2026-06-16",
+        "evidence_note": "The paper reports moving sounds but does not identify the waveform as noise, tone, or another sound class."
+      },
+      "source_provenance": {
+        "status": "reported",
+        "value": "Custom Matlab software and a microcontroller controlled an eight-speaker array; exact source sound file or waveform asset is not supplied.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF p.3, Main experiment",
+        "evidence_note": "Apparatus/software provenance is reported, while the audio asset is not."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "Two moving-sound directions: IN approaching the body/hand and OUT receding from it.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF pp.2-3, Introduction and Figure 1",
+        "evidence_note": "The hypotheses and Figure 1 explicitly distinguish IN and OUT sounds."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Sound moved along an eight-loudspeaker line beside the right hand, with loudspeakers 15 cm apart and sampled positions at 15, 30, 45, 60, 75, and 90 cm from the hand over a 105 cm device span.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF pp.3-4, Figure 1 and Main experiment",
+        "evidence_note": "Figure and methods give the speaker array and sampled distance positions."
+      },
+      "stimulus_duration": {
+        "status": "reported",
+        "value": "The moving sound traversed the 105 cm path in 3 s.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF p.3, Main experiment",
+        "evidence_note": "Duration is explicitly reported with path length and speed."
+      },
+      "stimulus_speed": {
+        "status": "reported",
+        "value": "Moving sounds traveled at 35 cm/s.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF p.3, Main experiment",
+        "evidence_note": "Speed is explicitly stated."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "Experimental factors were sound movement direction (IN, OUT) and sound position/distance (15, 30, 45, 60, 75, 90 cm). Sounds were task-irrelevant during TMS trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF pp.3-4, Main experiment",
+        "evidence_note": "The design paragraph gives the 2 x 6 direction-distance factor structure."
+      },
+      "gain_envelope": {
+        "status": "reported",
+        "value": "A microcontroller controlled volume flow across speakers; maximum intensity was calibrated by phonometer to 70 dB at the closest hand position for both IN and OUT sounds.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF p.3, Main experiment",
+        "evidence_note": "Calibration and cross-speaker volume control are reported; exact gain algorithm is not."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Custom-made eight-loudspeaker array hidden from view, Matlab control, microcontroller volume flow, CED interface triggering TMS, phonometer calibration.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF p.3, Figure 1 and Main experiment",
+        "evidence_note": "The auditory rendering apparatus is described in the main experiment section."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "Rows/families: PRE baseline MEP recording, EXP TMS moving-sound trials, EXP rare tactile no-TMS trials, POST baseline MEP recording, and a later sound-localization control task.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF pp.2-4, Main experiment and localization judgments",
+        "evidence_note": "The methods separate baseline, experimental, tactile-probe, and localization phases."
+      },
+      "condition_intermixing": {
+        "status": "reported",
+        "value": "Within EXP, TMS trials from the 2 x 6 direction-distance design were randomly combined and randomly intermingled with rare tactile no-TMS trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF p.4, Main experiment",
+        "evidence_note": "The design paragraph reports random combination and intermingling."
+      },
+      "blocked_or_random_order": {
+        "status": "reported",
+        "value": "The sequence was PRE baseline, EXP session, POST baseline; the 144 TMS trials were equally distributed across four experimental blocks and randomized within the design.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF pp.2-4, Main experiment",
+        "evidence_note": "Baseline order and four EXP blocks are explicitly reported."
+      },
+      "iti_jitter_policy": {
+        "status": "reported",
+        "value": "Software-controlled inter-trial interval was always greater than 10 s, precisely 10-12 s; tactile stimuli were at least 4-5 s apart from TMS pulses.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF p.4, Main experiment",
+        "evidence_note": "The ITI range and tactile-TMS separation are both reported."
+      },
+      "response_window": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf; https://doi.org/10.1016/j.neuropsychologia.2014.09.043",
+        "page_or_section": "PDF pp.3-4; supplement route checked 2026-06-16",
+        "evidence_note": "Participants responded verbally as fast as possible to rare tactile probes, but no numeric response deadline/window was found."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Subjects ignored task-irrelevant sounds during TMS trials, kept the hand relaxed, and responded verbally only to rare tactile stimulation on the dorsum of the right hand.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF pp.3-4, Main experiment",
+        "evidence_note": "The TMS/ignore-sound and tactile-response rules are reported."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "Rare tactile stimulation used a DS7A Digitimer constant-current electrical stimulator via Neuroline neurological electrodes on the dorsum of the right hand.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF pp.3-4, Main experiment",
+        "evidence_note": "Stimulator, electrode type, and body site are reported; pulse duration/current are not."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "Sampled sound positions were 15, 30, 45, 60, 75, and 90 cm from the hand; TMS was delivered 50 ms after the sound reached a sampled position, and tactile probes used the same six positions without TMS.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF pp.3-4, Main experiment and localization control",
+        "evidence_note": "The event table is reported as distance-at-event rather than a normal behavioral SOA ladder."
+      },
+      "baseline_strategy": {
+        "status": "reported",
+        "value": "MEP baseline used PRE and POST no-noise baseline recordings with subjects' eyes closed; averaged baseline MEPs were used to compute MEP modulation.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF pp.2-4, Main experiment and Data pre-processing",
+        "evidence_note": "Baseline blocks and baseline-normalized MEP index are described."
+      },
+      "baseline_timing": {
+        "status": "reported",
+        "value": "Baseline was phase-level rather than in-trial: one PRE and one POST block were run without sound/noise around the EXP session.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF pp.2-4, Main experiment and Data pre-processing",
+        "evidence_note": "No baseline SOA exists; baselines are pre/post recording phases."
+      },
+      "catch_trial_type": {
+        "status": "derived",
+        "value": "No conventional catch label is used. The 144 TMS moving-sound trials are tactile-absent/no-response trials while subjects wait for rare tactile probes; false alarms to tactile were tracked.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF pp.3-4, Main experiment",
+        "evidence_note": "Derived from rare tactile target instructions, target-absent TMS trials, and reported false alarms."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "reported",
+        "value": "TMS trials: each of the 12 direction-position cells was repeated 12 times. Rare tactile no-TMS trials: 2 repetitions per direction-position cell, 24 total. Localization control: 6 per cell, 72 total.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF p.4, Main experiment and localization judgments",
+        "evidence_note": "Repetition counts are explicit for TMS, tactile no-TMS, and localization-control trials."
+      },
+      "baseline_count": {
+        "status": "reported",
+        "value": "Two baseline blocks, PRE and POST, each had 12 baseline MEP trials; each baseline also included 2 tactile attention probes without TMS.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF pp.2-3, Main experiment",
+        "evidence_note": "Baseline block and tactile-probe counts are reported."
+      },
+      "catch_count": {
+        "status": "derived",
+        "value": "If tactile-absent no-response trials are treated as catch trials, EXP contains 144 target-absent TMS moving-sound trials; the paper does not use the term catch.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF pp.3-4, Main experiment",
+        "evidence_note": "Derived from 144 TMS trials without tactile targets and rare tactile-response instructions."
+      },
+      "block_count": {
+        "status": "reported",
+        "value": "Three main phases were run: PRE baseline, EXP, and POST baseline. EXP TMS trials were equally distributed across four experimental blocks.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF pp.2-4, Main experiment",
+        "evidence_note": "Phase and EXP block counts are explicitly reported."
+      },
+      "total_trial_count": {
+        "status": "derived",
+        "value": "Main experiment contains 144 TMS trials plus 24 EXP tactile no-TMS trials and 24 baseline MEP trials; baseline tactile probes add or are included as 2 per baseline, so total is about 192-196 depending on inclusion.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/finisguerra_2015_moving_sounds_motor.pdf",
+        "page_or_section": "PDF pp.2-4, Main experiment",
+        "evidence_note": "Derived from explicit counts; wording is ambiguous about whether baseline tactile probes are included in the 12 baseline trials."
+      }
+    }
+  },
+  "critical_caveats": [
+    "The paper does not report the exact sound waveform class, source file, noise seed, or frequency content.",
+    "The cross-speaker volume-flow algorithm is described only qualitatively, not as a reproducible gain table.",
+    "Tactile pulse duration and current/intensity calibration are not reported in the main PDF.",
+    "No numeric response deadline/window is reported for the rare tactile verbal responses.",
+    "This is a TMS/MEP motor-system design, not a standard behavioral tactile-reaction-time PPS profile.",
+    "The baseline tactile-probe count is reported, but it is ambiguous whether those probes are included in or additional to the 12 baseline MEP trials."
+  ],
+  "next_manual_action": "This paper is strong enough for a moving-sound/TMS-profile metadata template, but a behavioral toolkit emulation should label TMS/EMG as external instrumentation and approximate the unspecified waveform, exact gain algorithm, tactile pulse parameters, and response window."
+}

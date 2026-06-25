@@ -1,17 +1,17 @@
 {
   "template_id": "barumerli_2026_arm_movement_exp2",
   "title": "Looming/receding PPS during arm movement, Experiment 2",
-  "citation": "Barumerli, R., Geronazzo, M., & Cesari, P. (2026). Somatotopy-independent reduction of audio-tactile intersensory facilitation for looming sounds within the peripersonal space during arm movements execution. Scientific Reports.",
+  "citation": "Lamia, P., Shabani, N., & Candidi, M. (2026). Somatotopy-independent reduction of audio-tactile intersensory facilitation for looming sounds within the peripersonal space during arm movements execution. Scientific Reports.",
   "source_url": "https://www.nature.com/articles/s41598-026-36796-5",
   "doi": "10.1038/s41598-026-36796-5",
   "verification_status": "verified",
-  "notes": "Experiment 2 extends auditory duration to 4000 ms and includes all five tactile delays in unisensory baseline blocks.",
+  "notes": "Experiment 2 extends auditory duration to 4000 ms and includes all five tactile delays in unisensory baseline blocks. The original two-speaker apparatus is treated as analog provenance; this profile recreates the reported near-far motion as a binaural spatialized trajectory.",
   "design": {
-    "name": "Barumerli 2026 Experiment 2 arm movement PPS",
+    "name": "Lamia 2026 Experiment 2 arm movement PPS",
     "sofa_file": "",
     "noises": [
       {
-        "label": "Pink two-speaker motion",
+        "label": "Pink moving sound",
         "noise_type": "pink",
         "azimuth_deg": 0.0,
         "elevation_deg": 0.0,
@@ -45,6 +45,25 @@
       "baseline_soa_values_ms": [800, 1300, 2000, 2700, 3200],
       "respiratory_phases": ["Any"],
       "blocks": 4,
+      "trial_strips": [
+        {
+          "strip_id": "barumerli-exp2-sound-motion-row",
+          "label": "Arm-movement sound-motion trial",
+          "audio_tactile_percentage": 100.0,
+          "catch_percentage": 0.0,
+          "baseline_percentage": 0.0,
+          "elements": [
+            {
+              "element_id": "barumerli-exp2-looming-source",
+              "kind": "looming_stimulus",
+              "label": "Pink moving sound",
+              "source_label": "Pink moving sound",
+              "source_labels": ["Pink moving sound"],
+              "randomized": true
+            }
+          ]
+        }
+      ],
       "participants": 24,
       "random_seed": 20260402
     }

@@ -1,0 +1,80 @@
+{
+  "engine": "original-study5-instruction-assets",
+  "source_format": "mp3",
+  "target_format": "wav",
+  "target_sample_rate": 44100,
+  "trial_instruction_target_seconds": 4.0,
+  "provenance": "Decoded from the original Study 5 instruction MP3 files used by the local lab experiment materials; raw MP3 files and local source paths are not tracked.",
+  "files": {
+    "Inhale-2-3-4-hold_FIXED.wav": {
+      "text": "Inhale. Two. Three. Four. Hold.",
+      "source_file": "Inhale/Inhale-2-3-4-hold.mp3",
+      "conversion": "decoded_mp3_to_pcm16_wav_trim_or_pad_to_exact_4s",
+      "sample_rate": 44100,
+      "channels": 1,
+      "frames": 176400,
+      "seconds": 4.0,
+      "sha256": "c4470c0f1cea401337493359b1fcea1c14d55105c0fd5ca2b383b59fab86f5b4"
+    },
+    "Exhale-2-3-4-hold_FIXED.wav": {
+      "text": "Exhale. Two. Three. Four. Hold.",
+      "source_file": "Exhale/Exhale-2-3-4-hold.mp3",
+      "conversion": "decoded_mp3_to_pcm16_wav_trim_or_pad_to_exact_4s",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 176400,
+      "seconds": 4.0,
+      "sha256": "e4957a25f2e7dc1cd8998953f90eac239c15dcb71ee78e8a159470ecaefb807a"
+    },
+    "General_Instructions.wav": {
+      "text": "Follow the breathing count. Click when you feel the vibration.",
+      "source_file": "General_Instructions.mp3",
+      "conversion": "decoded_mp3_to_pcm16_wav_preserve_duration",
+      "sample_rate": 44100,
+      "channels": 1,
+      "frames": 3779712,
+      "seconds": 85.707755,
+      "sha256": "fd51b2912d7d8f8afa7891569ce479b6f51cde3bbe7cd729b8356c1f7044deed"
+    },
+    "Pre-Block_Instruction.wav": {
+      "text": "Get ready. The next block will begin after your click.",
+      "source_file": "Pre-Block_Instruction.mp3",
+      "conversion": "decoded_mp3_to_pcm16_wav_preserve_duration",
+      "sample_rate": 44100,
+      "channels": 1,
+      "frames": 371237,
+      "seconds": 8.418073,
+      "sha256": "461643e6b3e4baa38bfc89d47d81c901beca878e1d0049fdc74a8d36cd7bf5c3"
+    },
+    "Post-Block_Instruction.wav": {
+      "text": "Block complete. Please rest and wait for the next block.",
+      "source_file": "Post-Block_Instruction.mp3",
+      "conversion": "decoded_mp3_to_pcm16_wav_preserve_duration",
+      "sample_rate": 44100,
+      "channels": 1,
+      "frames": 389376,
+      "seconds": 8.829388,
+      "sha256": "0927fb12a0208acd4e042976210c44a92c15565d616f25265b4b9a85db010f21"
+    },
+    "InterimMessage.wav": {
+      "text": "Halfway point. Take a short rest before continuing.",
+      "source_file": "InterimMessage.mp3",
+      "conversion": "decoded_mp3_to_pcm16_wav_preserve_duration",
+      "sample_rate": 44100,
+      "channels": 1,
+      "frames": 445824,
+      "seconds": 10.109388,
+      "sha256": "c77afc42a70d2df13aeeb07b54442f67a1ccfae554aadaf94eb8b8e4dbe940d3"
+    },
+    "FinishMessage.wav": {
+      "text": "Experiment complete. Please wait for the researcher.",
+      "source_file": "FinishMessage.mp3",
+      "conversion": "decoded_mp3_to_pcm16_wav_preserve_duration",
+      "sample_rate": 44100,
+      "channels": 1,
+      "frames": 308736,
+      "seconds": 7.000816,
+      "sha256": "a5f34ec47d40a1b8e062e8786722dadc9ca5310227725d82bd607610dea7ab88"
+    }
+  }
+}

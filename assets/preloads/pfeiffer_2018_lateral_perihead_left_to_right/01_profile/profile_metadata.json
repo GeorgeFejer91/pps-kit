@@ -1,0 +1,61 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "pfeiffer_2018_lateral_perihead_left_to_right",
+  "title": "Pfeiffer EJN2018 bilateral lateral trajectory profile",
+  "citation": "Pfeiffer, C., Noel, J. P., Serino, A., & Blanke, O. (2018). Vestibular modulation of peripersonal space boundaries. European Journal of Neuroscience, 47(7), 800-811.",
+  "doi": "10.1111/ejn.13872",
+  "source_url": "https://doi.org/10.1111/ejn.13872",
+  "verification_status": "verified",
+  "notes": "Trajectory/noise profile from the local Pfeiffer_EJN2018 simulator reference. It encodes pink-noise lateral movement geometry, mirrored left-to-right/right-to-left source variants, and sample rate; FABIAN HRIR rendering remains the standardized under-the-hood app resource, not a Pfeiffer-specific user choice.",
+  "reference_parameters": {
+    "reference_file": "Example-configs/Pfeiffer_EJN2018.zip/12022013_MovingSoundSourceSimulator.m",
+    "model_dimensions": "2D horizontal spherical-head model",
+    "trajectory_plane_height_m": 0.0,
+    "trajectory_plane_label": "ear/head-center plane",
+    "start_x_m": -0.4,
+    "stop_x_m": 0.4,
+    "front_offset_y_m": 0.05,
+    "speed_mps": 0.2,
+    "movement_duration_s": 4.0,
+    "head_diameter_m": 0.18,
+    "sample_rate": 44100,
+    "noise_type": "pink",
+    "profile_direction_variants": [
+      "left_to_right",
+      "right_to_left"
+    ],
+    "script_stationary_hold_s": 4.0,
+    "reference_level_db": 100,
+    "distance_attenuation_factor_db": 40,
+    "directional_loss_left_db": "5/180 * doa_deg - 5",
+    "directional_loss_right_db": "-5/180 * doa_deg",
+    "final_output_peak_scale": 0.25,
+    "level_note": "The reference MATLAB script applies dB gain terms before final peak normalization; these values describe relative level shaping, not a calibrated SPL in the WAV file."
+  },
+  "provenance": [
+    {
+      "field": "trajectory_plane_height_m",
+      "source": "The MATLAB reference uses only x/y coordinates: ears at [-head_diam/2, 0] and [+head_diam/2, 0], source path [x, ordinate]. There is no vertical coordinate, so the matching 3D convention is z = 0 at the ear/head-center plane."
+    },
+    {
+      "field": "front_offset_y_m",
+      "source": "Reference variable `ordinate = 0.05`, described as the distance between the source and the head at 0 degrees."
+    },
+    {
+      "field": "path and speed",
+      "source": "Reference variables `start = -0.4`, `stop = -start`, and `speed = 0.2`; movement duration is abs(stop-start)/speed = 4 s."
+    },
+    {
+      "field": "noise",
+      "source": "Reference script uses pink noise synthesis via a 1/F filter at 44100 Hz."
+    },
+    {
+      "field": "head_diameter_m",
+      "source": "Reference variable `head_diam = 0.18`; the 3DTI listener is created with matching head radius 0.09 m for customized ITD."
+    },
+    {
+      "field": "reference level and gains",
+      "source": "Reference variables `ref_dB = 100`, `att_factor = 40`, directional dB loss equations for each ear, and final `output_F = 0.25 * output_F ./ max(max(output_F))`; because of final peak normalization, the WAV is not absolutely SPL calibrated."
+    }
+  ]
+}

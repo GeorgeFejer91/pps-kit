@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import math
 from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
@@ -10,6 +11,7 @@ from tkinter import filedialog, messagebox, ttk
 from .design import (
     AudioFileSpec,
     BlockSpec,
+    DEFAULT_SOFA_FILE,
     NoiseDefinition,
     ProtocolSpec,
     SUPPORTED_BLOCK_ORDER_RANDOMIZATION,
@@ -17,6 +19,7 @@ from .design import (
     StimulusDesign,
     TrajectorySpec,
     audio_file_summary,
+    cartesian_to_spherical,
     default_design,
     effective_block_specs,
     export_protocol_csv,
@@ -24,8 +27,7 @@ from .design import (
     load_design,
     protocol_summary,
     save_design,
-    snap_noises_to_sofa,
-    sofa_summary,
+    trajectory_endpoints_xyz,
     trajectory_points,
     validate_design,
 )
@@ -50,6 +52,15 @@ PALETTE = {
     "canvas_text": "#f2e7d8",
 }
 
+TRAJECTORY_DIRECTION_LABELS = {
+    "approach": "Approach",
+    "recede": "Recede",
+    "left_to_right": "Left to right",
+    "right_to_left": "Right to left",
+    "custom": "Custom",
+}
+TRAJECTORY_DIRECTION_BY_LABEL = {label: key for key, label in TRAJECTORY_DIRECTION_LABELS.items()}
+
 
 class StimulusDesignerApp:
     def __init__(self, root: tk.Tk, design_path: Path = DEFAULT_DESIGN_PATH):
@@ -68,7 +79,7 @@ class StimulusDesignerApp:
         self._configure_style()
 
         self.name_var = tk.StringVar()
-        self.sofa_var = tk.StringVar()
+        self.sofa_var = tk.StringVar(value=DEFAULT_SOFA_FILE)
         self.noise_label_var = tk.StringVar()
         self.noise_type_var = tk.StringVar()
         self.noise_azimuth_var = tk.StringVar()
@@ -92,6 +103,17 @@ class StimulusDesignerApp:
             "elevation_deg": tk.StringVar(),
             "padding_pre_s": tk.StringVar(),
             "padding_post_s": tk.StringVar(),
+        }
+        self.trajectory_direction_var = tk.StringVar()
+        self.space_radius_var = tk.StringVar()
+        self.movement_duration_var = tk.StringVar()
+        self.xyz_vars = {
+            "start_x_m": tk.StringVar(),
+            "start_y_m": tk.StringVar(),
+            "start_z_m": tk.StringVar(),
+            "end_x_m": tk.StringVar(),
+            "end_y_m": tk.StringVar(),
+            "end_z_m": tk.StringVar(),
         }
         self.protocol_vars = {
             "repetitions_per_condition": tk.StringVar(),
@@ -245,7 +267,6 @@ class StimulusDesignerApp:
         stimulus_body.add(stimulus_left, weight=2)
         stimulus_body.add(stimulus_right, weight=3)
 
-        self._build_sofa_panel(stimulus_left)
         self._build_noise_panel(stimulus_left)
         self._build_audio_preload_panel(stimulus_left)
         self._build_trajectory_panel(stimulus_right)
@@ -261,15 +282,6 @@ class StimulusDesignerApp:
         ttk.Button(footer, text="Export Protocol", command=self._export_protocol_clicked).pack(side="right", padx=4)
         ttk.Button(footer, text="Export Trajectory", command=self._export_trajectory_clicked).pack(side="right", padx=4)
         ttk.Button(footer, text="Check", command=self._check_design).pack(side="right", padx=4)
-
-    def _build_sofa_panel(self, parent: ttk.Frame) -> None:
-        panel = ttk.LabelFrame(parent, text="SOFA / HRIR Source")
-        panel.pack(fill="x", pady=(0, 6))
-        ttk.Label(panel, text="SOFA file").grid(row=0, column=0, sticky="w", padx=8, pady=5)
-        ttk.Entry(panel, textvariable=self.sofa_var).grid(row=0, column=1, sticky="ew", padx=4, pady=5)
-        ttk.Button(panel, text="Browse", command=self._browse_sofa).grid(row=0, column=2, padx=4, pady=5)
-        ttk.Button(panel, text="Validate", command=self._validate_sofa).grid(row=0, column=3, padx=(4, 8), pady=5)
-        panel.columnconfigure(1, weight=1)
 
     def _build_noise_panel(self, parent: ttk.Frame) -> None:
         panel = ttk.LabelFrame(parent, text="Noise Types And Orientations")
@@ -316,7 +328,6 @@ class StimulusDesignerApp:
         buttons.pack(fill="x", padx=8, pady=(2, 6))
         ttk.Button(buttons, text="Add / Update", command=self._add_or_update_noise).pack(side="left", padx=2)
         ttk.Button(buttons, text="Remove", command=self._remove_noise).pack(side="left", padx=2)
-        ttk.Button(buttons, text="Snap To SOFA", command=self._snap_noises).pack(side="left", padx=2)
 
     def _build_audio_preload_panel(self, parent: ttk.Frame) -> None:
         panel = ttk.LabelFrame(parent, text="Custom Audio Preloads")
@@ -478,57 +489,128 @@ class StimulusDesignerApp:
         panel.columnconfigure(4, weight=0)
 
     def _build_trajectory_panel(self, parent: ttk.Frame) -> None:
-        panel = ttk.LabelFrame(parent, text="Looming Trajectory")
+        panel = ttk.LabelFrame(parent, text="Sound Movement Path")
         panel.pack(fill="both", expand=True)
 
         controls = ttk.Frame(panel)
         controls.pack(fill="x", padx=8, pady=8)
+        controls.columnconfigure(1, weight=1)
 
-        rows = [
-            ("start_radius_m", "Start radius (m)", 0.01, 10.0, 0.05),
-            ("end_radius_m", "End radius (m)", 0.01, 10.0, 0.05),
-            ("path_length_m", "Path length (m)", 0.01, 20.0, 0.05),
-            ("propagation_speed_mps", "Speed (m/s)", 0.01, 5.0, 0.01),
-            ("azimuth_start_deg", "Start azimuth", -180, 180, 1),
-            ("azimuth_end_deg", "End azimuth", -180, 180, 1),
-            ("elevation_deg", "Elevation", -90, 90, 1),
-            ("padding_pre_s", "Lead padding (s)", 0, 5, 0.1),
-            ("padding_post_s", "Tail padding (s)", 0, 5, 0.1),
-        ]
-        for idx, (key, label, lo, hi, step) in enumerate(rows):
-            row = idx // 2
-            col = (idx % 2) * 2
-            ttk.Label(controls, text=label).grid(row=row, column=col, sticky="w", padx=5, pady=4)
-            spin = ttk.Spinbox(controls, textvariable=self.traj_vars[key], from_=lo, to=hi, increment=step, width=10, command=self._update_preview)
-            spin.grid(row=row, column=col + 1, sticky="w", padx=5, pady=4)
-            self.traj_vars[key].trace_add("write", lambda *_: self._update_preview())
-
-        ttk.Label(controls, text="Direction").grid(row=5, column=0, sticky="w", padx=5, pady=4)
-        ttk.Combobox(
+        ttk.Label(controls, text="Movement").grid(row=0, column=0, sticky="w", padx=5, pady=4)
+        direction_combo = ttk.Combobox(
             controls,
-            textvariable=self.traj_vars["path_direction"],
-            values=("approach", "recede", "left_to_right", "right_to_left", "custom"),
+            textvariable=self.trajectory_direction_var,
+            values=tuple(TRAJECTORY_DIRECTION_LABELS.values()),
             state="readonly",
-            width=16,
-        ).grid(row=5, column=1, sticky="w", padx=5, pady=4)
-        self.traj_vars["path_direction"].trace_add("write", lambda *_: self._update_preview())
+            width=12,
+        )
+        direction_combo.grid(row=0, column=1, sticky="ew", padx=5, pady=4)
+        direction_combo.bind("<<ComboboxSelected>>", lambda _event: self._apply_trajectory_preset())
+
+        ttk.Label(controls, text="Space radius (m)").grid(row=1, column=0, sticky="w", padx=5, pady=4)
+        ttk.Spinbox(
+            controls,
+            textvariable=self.space_radius_var,
+            from_=0.1,
+            to=10.0,
+            increment=0.05,
+            width=10,
+            command=self._update_preview,
+        ).grid(row=1, column=1, sticky="w", padx=5, pady=4)
+
+        ttk.Label(controls, text="Movement duration (s)").grid(row=2, column=0, sticky="w", padx=5, pady=4)
+        ttk.Spinbox(
+            controls,
+            textvariable=self.movement_duration_var,
+            from_=0.1,
+            to=30.0,
+            increment=0.1,
+            width=10,
+            command=self._update_preview,
+        ).grid(row=2, column=1, sticky="w", padx=5, pady=4)
+
+        ttk.Label(controls, text="Lead padding (s)").grid(row=3, column=0, sticky="w", padx=5, pady=4)
+        ttk.Spinbox(
+            controls,
+            textvariable=self.traj_vars["padding_pre_s"],
+            from_=0,
+            to=30,
+            increment=0.1,
+            width=10,
+            command=self._update_preview,
+        ).grid(row=3, column=1, sticky="w", padx=5, pady=4)
+        ttk.Label(controls, text="Tail padding (s)").grid(row=4, column=0, sticky="w", padx=5, pady=4)
+        ttk.Spinbox(
+            controls,
+            textvariable=self.traj_vars["padding_post_s"],
+            from_=0,
+            to=30,
+            increment=0.1,
+            width=10,
+            command=self._update_preview,
+        ).grid(row=4, column=1, sticky="w", padx=5, pady=4)
+        ttk.Button(controls, text="Reset Path", command=self._apply_trajectory_preset).grid(row=5, column=1, sticky="w", padx=5, pady=4)
 
         self.duration_label = ttk.Label(controls, text="")
-        self.duration_label.grid(row=5, column=2, columnspan=2, sticky="w", padx=5, pady=4)
+        self.duration_label.grid(row=6, column=0, columnspan=2, sticky="w", padx=5, pady=4)
+
+        coordinates = ttk.LabelFrame(panel, text="Source Coordinates Relative To Listener")
+        coordinates.pack(fill="x", padx=8, pady=(0, 8))
+        for col in range(1, 3):
+            coordinates.columnconfigure(col, weight=1)
+        for col, text in enumerate(("Axis", "Start", "End")):
+            ttk.Label(coordinates, text=text).grid(row=0, column=col, sticky="w", padx=6, pady=(6, 2))
+        for row, (axis, label) in enumerate((("x", "X (m)"), ("y", "Y (m)"), ("z", "Z (m)")), start=1):
+            ttk.Label(coordinates, text=label).grid(row=row, column=0, sticky="w", padx=6, pady=4)
+            for col, prefix in enumerate(("start", "end"), start=1):
+                key = f"{prefix}_{axis}_m"
+                ttk.Spinbox(
+                    coordinates,
+                    textvariable=self.xyz_vars[key],
+                    from_=-10.0,
+                    to=10.0,
+                    increment=0.05,
+                    width=6,
+                    command=self._update_preview,
+                ).grid(row=row, column=col, sticky="ew", padx=6, pady=4)
 
         self.canvas = tk.Canvas(panel, background=PALETTE["canvas"], highlightthickness=1, highlightbackground=PALETTE["border"])
         self.canvas.pack(fill="both", expand=True, padx=8, pady=(0, 8))
         self.canvas.bind("<Configure>", lambda _event: self._update_preview())
 
+        for var in (
+            self.trajectory_direction_var,
+            self.space_radius_var,
+            self.movement_duration_var,
+            self.traj_vars["padding_pre_s"],
+            self.traj_vars["padding_post_s"],
+            *self.xyz_vars.values(),
+        ):
+            var.trace_add("write", lambda *_: self._update_preview())
+
     def _load_into_fields(self, design: StimulusDesign) -> None:
         self.name_var.set(design.name)
-        self.sofa_var.set(design.sofa_file)
+        self.sofa_var.set(design.sofa_file or DEFAULT_SOFA_FILE)
         self.noises = list(design.noises)
         self.custom_looming_files = list(design.custom_looming_files)
         self.prestimulus_files = list(design.prestimulus_files)
         traj = design.trajectory
         for key, var in self.traj_vars.items():
             var.set(str(getattr(traj, key)))
+        self.trajectory_direction_var.set(TRAJECTORY_DIRECTION_LABELS.get(traj.path_direction, TRAJECTORY_DIRECTION_LABELS["custom"]))
+        start, end = trajectory_endpoints_xyz(traj)
+        for prefix, point in (("start", start), ("end", end)):
+            for axis in ("x", "y", "z"):
+                self.xyz_vars[f"{prefix}_{axis}_m"].set(f"{point[f'{axis}_m']:g}")
+        space_radius = max(
+            0.1,
+            math.sqrt(start["x_m"] ** 2 + start["y_m"] ** 2 + start["z_m"] ** 2),
+            math.sqrt(end["x_m"] ** 2 + end["y_m"] ** 2 + end["z_m"] ** 2),
+            traj.start_radius_m,
+            traj.end_radius_m,
+        )
+        self.space_radius_var.set(f"{space_radius:g}")
+        self.movement_duration_var.set(f"{max(traj.movement_duration_s, 0.1):g}")
         protocol = design.protocol
         self.protocol_vars["repetitions_per_condition"].set(str(protocol.repetitions_per_condition))
         self.protocol_vars["soa_values_ms"].set(", ".join(str(value) for value in protocol.soa_values_ms))
@@ -641,16 +723,79 @@ class StimulusDesignerApp:
             return None
         return self._parse_int(value, label)
 
+    def _trajectory_direction_key(self) -> str:
+        return TRAJECTORY_DIRECTION_BY_LABEL.get(
+            self.trajectory_direction_var.get(),
+            self.traj_vars["path_direction"].get() or "custom",
+        )
+
+    def _parse_xyz_points(self) -> tuple[dict[str, float], dict[str, float]]:
+        start = {
+            "x_m": self._parse_float(self.xyz_vars["start_x_m"].get(), "Start X"),
+            "y_m": self._parse_float(self.xyz_vars["start_y_m"].get(), "Start Y"),
+            "z_m": self._parse_float(self.xyz_vars["start_z_m"].get(), "Start Z"),
+        }
+        end = {
+            "x_m": self._parse_float(self.xyz_vars["end_x_m"].get(), "End X"),
+            "y_m": self._parse_float(self.xyz_vars["end_y_m"].get(), "End Y"),
+            "z_m": self._parse_float(self.xyz_vars["end_z_m"].get(), "End Z"),
+        }
+        return start, end
+
+    def _straight_path_length_m(self, start: dict[str, float], end: dict[str, float]) -> float:
+        return math.dist(
+            (start["x_m"], start["y_m"], start["z_m"]),
+            (end["x_m"], end["y_m"], end["z_m"]),
+        )
+
+    def _set_xyz_values(self, start: tuple[float, float, float], end: tuple[float, float, float]) -> None:
+        for prefix, values in (("start", start), ("end", end)):
+            for axis, value in zip(("x", "y", "z"), values):
+                self.xyz_vars[f"{prefix}_{axis}_m"].set(f"{value:g}")
+
+    def _apply_trajectory_preset(self) -> None:
+        try:
+            radius = max(0.1, self._parse_float(self.space_radius_var.get(), "Space radius"))
+        except ValueError:
+            radius = 1.1
+        near = min(0.1, radius * 0.25)
+        side = radius / math.sqrt(2.0)
+        front = radius / math.sqrt(2.0)
+        direction = self._trajectory_direction_key()
+        if direction == "approach":
+            self._set_xyz_values((0.0, radius, 0.0), (0.0, near, 0.0))
+        elif direction == "recede":
+            self._set_xyz_values((0.0, near, 0.0), (0.0, radius, 0.0))
+        elif direction == "left_to_right":
+            self._set_xyz_values((-side, front, 0.0), (side, front, 0.0))
+        elif direction == "right_to_left":
+            self._set_xyz_values((side, front, 0.0), (-side, front, 0.0))
+        self._update_preview()
+
     def _build_design_from_fields(self) -> StimulusDesign:
+        start, end = self._parse_xyz_points()
+        start_spherical = cartesian_to_spherical(start["x_m"], start["y_m"], start["z_m"])
+        end_spherical = cartesian_to_spherical(end["x_m"], end["y_m"], end["z_m"])
+        path_length = self._straight_path_length_m(start, end)
+        movement_duration = self._parse_float(self.movement_duration_var.get(), "Movement duration")
+        if movement_duration <= 0:
+            raise ValueError("Movement duration must be positive.")
         trajectory = TrajectorySpec(
-            start_radius_m=self._parse_float(self.traj_vars["start_radius_m"].get(), "Start radius"),
-            end_radius_m=self._parse_float(self.traj_vars["end_radius_m"].get(), "End radius"),
-            path_direction=self.traj_vars["path_direction"].get(),
-            path_length_m=self._parse_float(self.traj_vars["path_length_m"].get(), "Path length"),
-            propagation_speed_mps=self._parse_float(self.traj_vars["propagation_speed_mps"].get(), "Speed"),
-            azimuth_start_deg=self._parse_float(self.traj_vars["azimuth_start_deg"].get(), "Start azimuth"),
-            azimuth_end_deg=self._parse_float(self.traj_vars["azimuth_end_deg"].get(), "End azimuth"),
-            elevation_deg=self._parse_float(self.traj_vars["elevation_deg"].get(), "Elevation"),
+            start_radius_m=start_spherical["radius_m"],
+            end_radius_m=end_spherical["radius_m"],
+            path_direction=self._trajectory_direction_key(),
+            coordinate_mode="cartesian",
+            start_x_m=start["x_m"],
+            start_y_m=start["y_m"],
+            start_z_m=start["z_m"],
+            end_x_m=end["x_m"],
+            end_y_m=end["y_m"],
+            end_z_m=end["z_m"],
+            path_length_m=path_length,
+            propagation_speed_mps=path_length / movement_duration if movement_duration > 0 else 0.0,
+            azimuth_start_deg=start_spherical["azimuth_deg"],
+            azimuth_end_deg=end_spherical["azimuth_deg"],
+            elevation_deg=start_spherical["elevation_deg"],
             padding_pre_s=self._parse_float(self.traj_vars["padding_pre_s"].get(), "Lead padding"),
             padding_post_s=self._parse_float(self.traj_vars["padding_post_s"].get(), "Tail padding"),
         )
@@ -676,7 +821,7 @@ class StimulusDesignerApp:
         )
         return StimulusDesign(
             name=self.name_var.get().strip() or "Untitled PPS stimulus design",
-            sofa_file=self.sofa_var.get().strip(),
+            sofa_file=self.sofa_var.get().strip() or DEFAULT_SOFA_FILE,
             noises=list(self.noises),
             custom_looming_files=list(self.custom_looming_files),
             prestimulus_files=list(self.prestimulus_files),
@@ -906,14 +1051,6 @@ class StimulusDesignerApp:
         self._update_protocol_summary()
         self.status_var.set(f"Reset block design to {count} block(s).")
 
-    def _browse_sofa(self) -> None:
-        path = filedialog.askopenfilename(
-            title="Select SOFA HRIR file",
-            filetypes=[("SOFA files", "*.sofa"), ("All files", "*.*")],
-        )
-        if path:
-            self.sofa_var.set(path)
-
     def _load_template_clicked(self) -> None:
         selected = self.template_combo.current()
         if selected < 0 or selected >= len(self.templates):
@@ -928,35 +1065,6 @@ class StimulusDesignerApp:
                 "Template needs verification",
                 "This template contains partial literature metadata. Confirm the source paper before exact replication.",
             )
-
-    def _validate_sofa(self) -> None:
-        path = Path(self.sofa_var.get())
-        if not path.exists():
-            messagebox.showerror("SOFA file", f"File not found:\n{path}")
-            return
-        try:
-            summary = sofa_summary(path)
-        except Exception as exc:
-            messagebox.showerror("SOFA file", str(exc))
-            return
-        msg = (
-            f"{summary['positions']} positions\n"
-            f"Azimuth: {summary['azimuth_min']:.1f} to {summary['azimuth_max']:.1f} deg\n"
-            f"Elevation: {summary['elevation_min']:.1f} to {summary['elevation_max']:.1f} deg\n"
-            f"Sample rate: {summary['sample_rate'] or 'unknown'}"
-        )
-        messagebox.showinfo("SOFA file summary", msg)
-        self.status_var.set("SOFA file validated.")
-
-    def _snap_noises(self) -> None:
-        try:
-            design = snap_noises_to_sofa(self._build_design_from_fields())
-        except Exception as exc:
-            messagebox.showerror("Snap to SOFA", str(exc))
-            return
-        self.design = design
-        self._load_into_fields(design)
-        self.status_var.set("Noise azimuth/elevation values snapped to nearest SOFA positions.")
 
     def _check_design(self) -> None:
         try:
@@ -1085,6 +1193,114 @@ class StimulusDesignerApp:
         export_protocol_csv(design, Path(path))
         self.status_var.set(f"Exported {path}")
 
+    def _preview_space_radius(self, design: StimulusDesign, points: list[dict[str, float]]) -> float:
+        try:
+            configured_radius = self._parse_float(self.space_radius_var.get(), "Space radius")
+        except Exception:
+            configured_radius = 0.0
+        return max(
+            0.25,
+            configured_radius,
+            max(abs(p["x_m"]) for p in points),
+            max(abs(p["y_m"]) for p in points),
+            max(abs(p["z_m"]) for p in points),
+            design.trajectory.start_radius_m,
+            design.trajectory.end_radius_m,
+        )
+
+    def _draw_marker(self, canvas: tk.Canvas, x: float, y: float, color: str, label: str, anchor: str = "w") -> None:
+        canvas.create_oval(x - 6, y - 6, x + 6, y + 6, fill=color, outline="")
+        canvas.create_text(x + 9, y - 8, anchor=anchor, fill=PALETTE["canvas_text"], text=label)
+
+    def _draw_top_down_preview(
+        self,
+        canvas: tk.Canvas,
+        points: list[dict[str, float]],
+        bounds: tuple[float, float, float, float],
+        space_radius: float,
+    ) -> None:
+        left, top, right, bottom = bounds
+        width = right - left
+        height = bottom - top
+        cx, cy = left + width / 2, top + height * 0.56
+        scale = min(width, height) * 0.36 / space_radius
+
+        canvas.create_text(left + 12, top + 12, anchor="nw", fill=PALETTE["canvas_text"], text="Top-down X/Y")
+        for radius in (space_radius * 0.25, space_radius * 0.5, space_radius):
+            r = radius * scale
+            canvas.create_oval(cx - r, cy - r, cx + r, cy + r, outline=PALETTE["canvas_grid"])
+        canvas.create_line(cx, top + 36, cx, bottom - 20, fill=PALETTE["canvas_grid"])
+        canvas.create_line(left + 18, cy, right - 18, cy, fill=PALETTE["canvas_grid"])
+        canvas.create_text(cx, top + 38, fill=PALETTE["canvas_text"], text="+Y front")
+        canvas.create_text(cx, bottom - 14, fill=PALETTE["canvas_text"], text="-Y back")
+        canvas.create_text(left + 20, cy - 12, anchor="w", fill=PALETTE["canvas_text"], text="-X left")
+        canvas.create_text(right - 20, cy - 12, anchor="e", fill=PALETTE["canvas_text"], text="+X right")
+        canvas.create_oval(cx - 7, cy - 7, cx + 7, cy + 7, fill="#f3dcc3", outline="")
+        canvas.create_text(cx, cy + 20, fill=PALETTE["canvas_text"], text="Listener")
+
+        xy = []
+        for point in points:
+            xy.extend([cx + point["x_m"] * scale, cy - point["y_m"] * scale])
+        if len(xy) >= 4:
+            canvas.create_line(*xy, fill="#4fb3a6", width=3, arrow=tk.LAST, arrowshape=(10, 12, 5))
+        start = points[0]
+        end = points[-1]
+        self._draw_marker(canvas, cx + start["x_m"] * scale, cy - start["y_m"] * scale, "#a8d672", "Start")
+        self._draw_marker(canvas, cx + end["x_m"] * scale, cy - end["y_m"] * scale, "#df7c52", "End")
+
+    def _draw_3d_preview(
+        self,
+        canvas: tk.Canvas,
+        points: list[dict[str, float]],
+        bounds: tuple[float, float, float, float],
+        space_radius: float,
+    ) -> None:
+        left, top, right, bottom = bounds
+        width = right - left
+        height = bottom - top
+        cx, cy = left + width * 0.52, top + height * 0.64
+        scale = min(width, height) * 0.33 / space_radius
+
+        def project(x_m: float, y_m: float, z_m: float) -> tuple[float, float]:
+            return (
+                cx + (x_m - y_m * 0.42) * scale,
+                cy - (z_m + y_m * 0.30) * scale,
+            )
+
+        canvas.create_text(left + 12, top + 12, anchor="nw", fill=PALETTE["canvas_text"], text="3D path view")
+        circle = []
+        for idx in range(97):
+            theta = 2 * math.pi * idx / 96
+            circle.extend(project(space_radius * math.sin(theta), space_radius * math.cos(theta), 0.0))
+        canvas.create_line(*circle, fill=PALETTE["canvas_grid"])
+
+        for start, end, label in [
+            ((-space_radius, 0.0, 0.0), (space_radius, 0.0, 0.0), "X"),
+            ((0.0, -space_radius, 0.0), (0.0, space_radius, 0.0), "Y"),
+            ((0.0, 0.0, -space_radius * 0.35), (0.0, 0.0, space_radius * 0.65), "Z"),
+        ]:
+            sx, sy = project(*start)
+            ex, ey = project(*end)
+            canvas.create_line(sx, sy, ex, ey, fill=PALETTE["canvas_grid"])
+            canvas.create_text(ex + 4, ey - 4, anchor="w", fill=PALETTE["canvas_text"], text=label)
+
+        lx, ly = project(0.0, 0.0, 0.0)
+        canvas.create_oval(lx - 7, ly - 7, lx + 7, ly + 7, fill="#f3dcc3", outline="")
+        canvas.create_text(lx, ly + 20, fill=PALETTE["canvas_text"], text="Listener")
+
+        projected_path = []
+        for point in points:
+            projected_path.extend(project(point["x_m"], point["y_m"], point["z_m"]))
+        if len(projected_path) >= 4:
+            canvas.create_line(*projected_path, fill="#4fb3a6", width=3, arrow=tk.LAST, arrowshape=(10, 12, 5))
+
+        for point, color, label in ((points[0], "#a8d672", "Start"), (points[-1], "#df7c52", "End")):
+            gx, gy = project(point["x_m"], point["y_m"], 0.0)
+            px, py = project(point["x_m"], point["y_m"], point["z_m"])
+            if abs(point["z_m"]) > 0.01:
+                canvas.create_line(gx, gy, px, py, fill=PALETTE["canvas_grid"], dash=(3, 3))
+            self._draw_marker(canvas, px, py, color, label)
+
     def _update_preview(self) -> None:
         if not hasattr(self, "canvas"):
             return
@@ -1096,42 +1312,34 @@ class StimulusDesignerApp:
         points = trajectory_points(design.trajectory, samples=100)
         movement = design.trajectory.movement_duration_s
         total = design.trajectory.total_duration_s
-        self.duration_label.config(text=f"Movement: {movement:.3f}s   Total: {total:.3f}s")
+        self.duration_label.config(
+            text=f"Path: {design.trajectory.path_length_m:.2f} m   "
+            f"Speed: {design.trajectory.propagation_speed_mps:.2f} m/s   "
+            f"Move: {movement:.3f}s   "
+            f"Total: {total:.3f}s"
+        )
 
         canvas = self.canvas
         canvas.delete("all")
         w = max(canvas.winfo_width(), 320)
         h = max(canvas.winfo_height(), 240)
-        cx, cy = w / 2, h * 0.58
-        max_abs = max(
-            0.25,
-            max(abs(p["x_m"]) for p in points),
-            max(abs(p["y_m"]) for p in points),
-            design.trajectory.start_radius_m,
-            design.trajectory.end_radius_m,
-        )
-        scale = min(w, h) * 0.38 / max_abs
+        space_radius = self._preview_space_radius(design, points)
 
-        for radius in (0.25, 0.5, 1.0, 1.5, 2.0):
-            if radius <= max_abs * 1.1:
-                r = radius * scale
-                canvas.create_oval(cx - r, cy - r, cx + r, cy + r, outline=PALETTE["canvas_grid"])
+        if w >= 620:
+            gap = 18
+            mid = w / 2
+            top_bounds = (12, 12, mid - gap / 2, h - 12)
+            three_d_bounds = (mid + gap / 2, 12, w - 12, h - 12)
+            canvas.create_line(mid, 20, mid, h - 20, fill=PALETTE["canvas_grid"])
+        else:
+            gap = 16
+            mid = h / 2
+            top_bounds = (12, 12, w - 12, mid - gap / 2)
+            three_d_bounds = (12, mid + gap / 2, w - 12, h - 12)
+            canvas.create_line(20, mid, w - 20, mid, fill=PALETTE["canvas_grid"])
 
-        canvas.create_line(cx, 16, cx, h - 16, fill=PALETTE["canvas_grid"])
-        canvas.create_line(16, cy, w - 16, cy, fill=PALETTE["canvas_grid"])
-        canvas.create_oval(cx - 7, cy - 7, cx + 7, cy + 7, fill="#f3dcc3", outline="")
-        canvas.create_text(cx, cy + 20, fill=PALETTE["canvas_text"], text="Listener")
-
-        xy = []
-        for p in points:
-            xy.extend([cx + p["x_m"] * scale, cy - p["y_m"] * scale])
-        if len(xy) >= 4:
-            canvas.create_line(*xy, fill="#4fb3a6", width=3, smooth=True)
-        start = points[0]
-        end = points[-1]
-        canvas.create_oval(cx + start["x_m"] * scale - 6, cy - start["y_m"] * scale - 6, cx + start["x_m"] * scale + 6, cy - start["y_m"] * scale + 6, fill="#a8d672", outline="")
-        canvas.create_oval(cx + end["x_m"] * scale - 6, cy - end["y_m"] * scale - 6, cx + end["x_m"] * scale + 6, cy - end["y_m"] * scale + 6, fill="#df7c52", outline="")
-        canvas.create_text(18, 18, anchor="nw", fill=PALETTE["canvas_text"], text="Top-down trajectory preview")
+        self._draw_top_down_preview(canvas, points, top_bounds, space_radius)
+        self._draw_3d_preview(canvas, points, three_d_bounds, space_radius)
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -1141,11 +1349,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = build_arg_parser().parse_args(argv)
-    root = tk.Tk()
-    StimulusDesignerApp(root, design_path=args.design)
-    root.mainloop()
-    return 0
+    from .qt_designer_app import main as qt_main
+
+    return qt_main(argv)
 
 
 if __name__ == "__main__":

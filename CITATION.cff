@@ -1,4 +1,4 @@
-﻿cff-version: 1.2.0
+cff-version: 1.2.0
 message: "If you use this toolkit, please cite the repository and the associated Study 5 manuscript."
 title: "Peripersonal Space Toolkit"
 authors:
@@ -7,4 +7,28 @@ authors:
 version: "0.1.0"
 date-released: "2026-06-04"
 license: "MIT"
-repository-code: "https://github.com/GeorgeFejer91/peripersonal-space-toolkit"
+repository-code: "https://github.com/GeorgeFejer91/pps-kit"
+references:
+  - type: article
+    title: "3D Tune-In Toolkit: An open-source library for real-time binaural spatialisation"
+    authors:
+      - family-names: "Cuevas-Rodríguez"
+        given-names: "María"
+      - family-names: "Picinali"
+        given-names: "Lorenzo"
+      - family-names: "González-Toledo"
+        given-names: "Daniel"
+      - family-names: "Garre"
+        given-names: "Carlos"
+      - family-names: "de la Rubia-Cuestas"
+        given-names: "Ernesto"
+      - family-names: "Molina-Tanco"
+        given-names: "Luis"
+      - family-names: "Reyes-Lecuona"
+        given-names: "Arcadio"
+    journal: "PLOS ONE"
+    year: 2019
+    volume: 14
+    issue: 3
+    doi: "10.1371/journal.pone.0211899"
+    url: "https://doi.org/10.1371/journal.pone.0211899"

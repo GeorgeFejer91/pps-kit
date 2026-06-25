@@ -1,0 +1,45 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "teneggi_2013_social_face_pps",
+  "repetitions_per_condition": 12,
+  "soa_values_ms": [
+    0,
+    1000,
+    1955,
+    3000,
+    4000
+  ],
+  "spatial_values_cm": [
+    93,
+    71,
+    50,
+    27,
+    5
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "teneggi-social-face-row",
+      "label": "Social face PPS moving-sound trial",
+      "audio_tactile_percentage": 100.0,
+      "catch_percentage": 0.0,
+      "baseline_percentage": 0.0,
+      "elements": [
+        {
+          "element_id": "teneggi-face-moving-sound",
+          "kind": "looming_stimulus",
+          "label": "Face-centered moving sound",
+          "source_label": "Face-centered moving sound",
+          "source_labels": [
+            "Face-centered moving sound",
+            "Face-centered moving sound - receding"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 60
+}

@@ -1,0 +1,314 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "noel_2015_bodily_self",
+  "citation_short": "Noel et al. (2015a)",
+  "review_date": "2026-06-16",
+  "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
+  "confidence_score": 0.88,
+  "confidence_label": "high_confidence_extraction",
+  "confidence_basis": "Main PDF, OpenDataLoader markdown, pypdf fallback text, rendered methods/figure pages, extracted Figure 1 image, Elsevier supplement DOCX/text, DOI/Crossref/PMC source routes, and arithmetic checks were reviewed. The paper reports enough Segment 1-4 information to recreate the main front-space and back-space looming profiles, plus the supplemental front-space receding control. Remaining uncertainty concerns exact sound waveform/source, gain/SPL law, speaker model, and full audio-file duration.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats",
+    "reason": "The main experiments can be recreated as two 16-speaker-array trunk PPS profiles: front looming with chest vibration and back looming with back vibration, each under synchronous/asynchronous FBI blocks. A supplemental front-space receding control is also reconstructable at the same timing/count level. Exact audio asset class, source file, SPL/gain envelope, speaker model, and full sound offset remain approximations."
+  },
+  "orientation_ledger": {
+    "participant_frame": "Participants stood upright wearing an HMD and viewed a virtual body in front. Figure 1 and methods indicate the physical body faced the virtual body/front-space; no block-wise participant rotation is reported.",
+    "room_apparatus_frame": "Two physical arrays of 8 speakers each were placed beside the body, one left and one right, 50 cm from midline. Four speakers per side were in front-space and four per side in back-space, extending from 100 cm front to 100 cm back.",
+    "body_relative_mapping": "Experiment 1 tests front-space sounds looming toward the chest; Experiment 2 tests back-space sounds looming toward the back. The supplement adds a front-space receding control. Sounds were perceived from the center between the arrays.",
+    "tactile_anchor": "Precision MicroDrives vibration motor at stern level: chest in Experiment 1 and back in Experiment 2; supplemental receding control used chest stimulation.",
+    "movement_implementation": "Apparent motion is implemented by the loudspeaker arrays/dynamic auditory presentation; the exact speaker-switching or gain law is not reported. HMD/camera equipment belongs to the FBI manipulation, not the auditory renderer.",
+    "evidence_class": "Main-text methods, Figure 1 caption/image, rendered PDF page 3, supplement DOCX localization and receding-control methods, and fallback pypdf page snippets."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf",
+      "source": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf",
+      "status": "reviewed",
+      "scope": "PDF pages 2-8 for apparatus, speaker arrays, Figure 1 geometry, PPS timing, baseline/catch rules, procedure, counts, analyses, and supplemental-control references."
+    },
+    {
+      "source_type": "opendataloader_markdown",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2015_bodily_self.md",
+      "status": "reviewed",
+      "scope": "Used as the primary extracted-text map for semantic searches over stimulus reconstruction, geometry, timing/SOA, sequence/intermixing, baseline/catch/counts, and supplement references."
+    },
+    {
+      "source_type": "opendataloader_figure_images",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/noel_2015_bodily_self_images/imageFile4.png",
+      "status": "reviewed",
+      "scope": "Visual inspection of Figure 1 to confirm virtual body in front, physical body orientation, side loudspeaker arrays, front-space and back-space panels, and chest/back tactile anchors."
+    },
+    {
+      "source_type": "supplement_docx",
+      "source": "artifacts/paper_metadata_audit/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.docx",
+      "status": "reviewed",
+      "scope": "Elsevier supplement downloaded from the article CDN; checked sound-localization control and front-space receding-sound control methods/results."
+    },
+    {
+      "source_type": "supplement_text_extraction",
+      "source": "artifacts/paper_metadata_audit/extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+      "status": "reviewed",
+      "scope": "Searched sound, localization, receding, loudspeaker, stimuli, SOA, velocity, waveform/noise/tone, catch, baseline, and trial-count terms."
+    },
+    {
+      "source_type": "fallback_text_extraction",
+      "source": "pypdf local extraction",
+      "status": "reviewed",
+      "scope": "Printed targeted page snippets for loudspeakers, PPS measurement, procedure, counts, baseline/catch, supplement references, receding control, and response/scoring rules."
+    },
+    {
+      "source_type": "rendered_pdf_pages",
+      "source": "tmp/pdfs/noel_2015_bodily_self_review/page-2.png through page-4.png",
+      "status": "reviewed_not_tracked",
+      "scope": "Temporary rendered pages were visually checked for Figure 1, caption text, PPS measurement, and procedure/counts. Page images were not committed."
+    },
+    {
+      "source_type": "external_source_route",
+      "source": "https://ars.els-cdn.com/content/image/1-s2.0-S001002771530038X-mmc1.docx",
+      "status": "reviewed",
+      "scope": "Direct Elsevier supplement URL was checked and downloaded; Crossref and PMC routes were also checked, with PMC OA reporting the article is not open-access via that API."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "OpenDataLoader PDF extraction",
+      "status": "completed",
+      "result": "Mapped automated candidate fields and identified the main methods pages for speaker layout, 75 cm/s looming, T1-T6 SOAs, baseline/catch rows, and block counts."
+    },
+    {
+      "strategy": "Stimulus reconstruction pass",
+      "status": "completed",
+      "result": "Confirmed the two side 8-speaker arrays, front/back body-relative looming paths, 75 cm/s main-task speed, 190-1140 ms timing range, and missing waveform/gain details."
+    },
+    {
+      "strategy": "Visual/spatial geometry pass",
+      "status": "completed",
+      "result": "Inspected Figure 1 and rendered page 3; recorded participant facing, virtual-body/front direction, side loudspeaker arrays, front/back mapping, tactile anchors, and viewpoint caveat."
+    },
+    {
+      "strategy": "Trial sequence and intermixing pass",
+      "status": "completed",
+      "result": "Separated synchronous/asynchronous FBI blocks from intermingled PPS task trials and recorded the fixed three-trial plus 10 s FBI-only cycle."
+    },
+    {
+      "strategy": "Tactile timing and baseline pass",
+      "status": "completed",
+      "result": "Confirmed 100 ms chest/back vibration, T1-T6 190 ms increments, D6-to-D1 looming mapping, tactile-only D1/D6 baselines, and fastest-baseline analysis rule."
+    },
+    {
+      "strategy": "Counts and catch pass",
+      "status": "completed",
+      "result": "Confirmed per-stroking-block counts: 72 PPS trials, 24 baseline trials, and 12 auditory-only catch trials, giving 108 trials per block and 216 per experiment participant."
+    },
+    {
+      "strategy": "Supplement and source-route pass",
+      "status": "completed",
+      "result": "Downloaded Elsevier mmc1 DOCX, extracted text, and checked PMC/Crossref/DOI routes. Supplement adds localization and receding-control methods but no waveform/source/gain files."
+    },
+    {
+      "strategy": "Arithmetic and ambiguity pass",
+      "status": "completed",
+      "result": "Checked SOA x speed distance mapping, row x repetition totals, main-task 75 cm/s vs supplement localization 35 cm/s, and kept exact full sound duration/gain law unresolved."
+    }
+  ],
+  "field_status_counts": {
+    "derived": 2,
+    "not_reported_after_review": 4,
+    "reported": 19
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf; artifacts/paper_metadata_audit/extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+        "page_or_section": "PDF pp.2-3; supplement Methods searched",
+        "evidence_note": "The sources say looming/receding sound but do not identify noise, tone, file, waveform, or sound class."
+      },
+      "source_provenance": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf; artifacts/paper_metadata_audit/extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+        "page_or_section": "PDF pp.2-3 and Appendix A; supplement searched",
+        "evidence_note": "No original WAV, script, generator, software, or seed/source provenance was found."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "Two main body-relative looming profiles: Experiment 1 front-space toward chest and Experiment 2 back-space toward back. Supplement adds one front-space receding control profile.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf; artifacts/paper_metadata_audit/extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+        "page_or_section": "PDF p.3, PPS measurement; supplement Receding Methods",
+        "evidence_note": "Localization control is a validation task, not a separate main PPS profile."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Participants stood midway between two left/right 8-speaker arrays, each 50 cm from midline, spanning 100 cm front to 100 cm back. Sounds were perceived centrally; Exp. 1 used front-space approach and Exp. 2 back-space approach.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf; artifacts/paper_metadata_audit/extracted/opendataloader/noel_2015_bodily_self_images/imageFile4.png",
+        "page_or_section": "PDF pp.2-3 and Figure 1",
+        "evidence_note": "Figure 1 shows virtual body in front and side arrays beside the physical body."
+      },
+      "stimulus_duration": {
+        "status": "derived",
+        "value": "Task-relevant auditory sampling spans T1-T6 from 190 ms to 1.14 s after sound onset; the full sound file duration/offset is not separately reported.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf; artifacts/paper_metadata_audit/extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+        "page_or_section": "PDF p.3; supplement Peripersonal Space Measurement",
+        "evidence_note": "Use 1.14 s as the minimum task-critical segment; do not treat it as a fully reported audio-file length."
+      },
+      "stimulus_speed": {
+        "status": "reported",
+        "value": "Main PPS looming sounds approached at 75 cm/s; supplemental front-space receding sounds also used 75 cm/sec. The supplement localization control separately used 35 cm/s for a full front-to-back validation.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf; artifacts/paper_metadata_audit/extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+        "page_or_section": "PDF p.3; supplement Localization and Receding Methods",
+        "evidence_note": "Do not substitute the localization-control 35 cm/s for the main PPS task."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "Main experiments use task-irrelevant looming sounds in front-space or back-space while synchronous/asynchronous FBI stroking is blocked. Supplement tests front-space receding sounds as an attention-control profile.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf; artifacts/paper_metadata_audit/extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+        "page_or_section": "PDF pp.2-3 and p.8; supplement Receding Methods",
+        "evidence_note": "Synchronous/asynchronous is a visuo-tactile FBI manipulation, not an auditory waveform condition."
+      },
+      "gain_envelope": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf; artifacts/paper_metadata_audit/extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+        "page_or_section": "PDF pp.2-3; supplement searched",
+        "evidence_note": "No SPL, attenuation, cross-fade, speaker-switch, or gain law is reported."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Auditory apparatus used two physical 8-speaker arrays beside the chest, one right and one left, 50 cm from midline. FBI apparatus used Oculus Rift SDK HMD and Logitech C270 cameras.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf; artifacts/paper_metadata_audit/extracted/opendataloader/noel_2015_bodily_self_images/imageFile4.png",
+        "page_or_section": "PDF pp.2-3 and Figure 1",
+        "evidence_note": "Speaker model is not reported; HMD/cameras are for FBI, not auditory rendering."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "PPS audio-tactile trials, tactile-only baseline trials, auditory-only catch trials, and ongoing visuo-tactile FBI stroking/questionnaire blocks.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf",
+        "page_or_section": "PDF pp.2-3, PPS measurement and Procedure",
+        "evidence_note": "Baseline and catch rows are included in each stroking-condition block."
+      },
+      "condition_intermixing": {
+        "status": "reported",
+        "value": "Visuo-tactile FBI stimulation was intermingled with audio-tactile PPS trials. Synchronous and asynchronous stroking were not intermixed; they were separate blocks.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf",
+        "page_or_section": "PDF pp.2-3, FBI manipulations and PPS measurement",
+        "evidence_note": "Exact trial-level randomization of PPS, baseline, and catch rows is not stated."
+      },
+      "blocked_or_random_order": {
+        "status": "reported",
+        "value": "Synchronous and asynchronous visuo-tactile stroking were presented in separate blocks, with order counterbalanced between participants.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf",
+        "page_or_section": "PDF p.2, FBI manipulations",
+        "evidence_note": "Front-space and back-space are separate experiments with different participants."
+      },
+      "iti_jitter_policy": {
+        "status": "reported",
+        "value": "After a 60 s induction, three PPS task trials were given with 0.5 s between consecutive trials, followed by 10 s of FBI-only stroking; this cycle repeated until block end.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf; artifacts/paper_metadata_audit/extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+        "page_or_section": "PDF p.3 Procedure; supplement Procedure",
+        "evidence_note": "No variable ITI/jitter distribution is reported beyond the fixed cycle."
+      },
+      "response_window": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf; artifacts/paper_metadata_audit/extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+        "page_or_section": "PDF pp.3-6; supplement searched",
+        "evidence_note": "Participants responded as fast as possible; RT trimming used 2.5 SD, but no numeric response timeout/scoring window was found."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Participants pressed a gamepad button to vibrotactile targets and withheld responses on auditory-only catch trials while FBI stroking continued throughout each block.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf; artifacts/paper_metadata_audit/extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+        "page_or_section": "PDF p.3 PPS measurement and Procedure; supplement Procedure",
+        "evidence_note": "Questionnaire order was randomized, but that does not imply PPS trial order."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "Precision MicroDrives shaftless vibration motor model 312-101 delivered 100 ms vibrotactile stimulation at stern level: chest in Experiment 1 and back in Experiment 2.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf",
+        "page_or_section": "PDF pp.2-3, apparatus and PPS measurement",
+        "evidence_note": "Supplemental receding control used the same chest setup as Experiment 1."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "T1-T6 were 190, 380, 570, 760, 950, and 1140 ms after sound onset. For looming, T1-T6 map to D6-D1; distances are reported as 90, 75, 60, 45, 30, and 15 cm from body.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf; artifacts/paper_metadata_audit/extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+        "page_or_section": "PDF p.3; supplement Peripersonal Space Measurement",
+        "evidence_note": "Receding control maps T1-T6 from D1 close to D6 far."
+      },
+      "baseline_strategy": {
+        "status": "reported",
+        "value": "Baseline trials were unimodal tactile trials with no auditory stimulus at temporal equivalents of D1 or D6. Analyses compared audio-tactile RTs to each participant's fastest T1/T6 baseline averaged across synchrony.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf",
+        "page_or_section": "PDF pp.3 and 5, PPS measurement and baseline comparison",
+        "evidence_note": "Fastest-baseline correction is reported in the results analysis."
+      },
+      "baseline_timing": {
+        "status": "reported",
+        "value": "Baseline tactile timing used the temporal equivalent of D1 or D6, corresponding to T6 or T1 for looming sounds; counts paragraph names T1 and T6 baseline delays.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf; artifacts/paper_metadata_audit/extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+        "page_or_section": "PDF p.3 Procedure; supplement Procedure",
+        "evidence_note": "For receding control, T1 is close/D1 and T6 is far/D6."
+      },
+      "catch_trial_type": {
+        "status": "reported",
+        "value": "Catch trials were auditory-only trials with no tactile stimulus, requiring participants to withhold response.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf; artifacts/paper_metadata_audit/extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+        "page_or_section": "PDF p.3 PPS measurement; supplement PPS measurement",
+        "evidence_note": "Catch accuracy is reported for both main experiments."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "reported",
+        "value": "Each stroking-condition block had 72 PPS experimental trials: 12 repetitions x 6 sound distances.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf; artifacts/paper_metadata_audit/extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+        "page_or_section": "PDF p.3 Procedure; supplement Procedure",
+        "evidence_note": "Counts are per block, and each block corresponds to one stroking condition."
+      },
+      "baseline_count": {
+        "status": "reported",
+        "value": "Each stroking-condition block had 24 baseline trials: 12 repetitions x 2 baseline temporal delays T1 and T6.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf; artifacts/paper_metadata_audit/extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+        "page_or_section": "PDF p.3 Procedure; supplement Procedure",
+        "evidence_note": "Supplement phrases the same count as D1 and D6 for the receding control."
+      },
+      "catch_count": {
+        "status": "reported",
+        "value": "Each stroking-condition block had 12 auditory-only catch trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf; artifacts/paper_metadata_audit/extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+        "page_or_section": "PDF p.3 Procedure; supplement Procedure",
+        "evidence_note": "Catch count is explicitly listed with the block formula."
+      },
+      "block_count": {
+        "status": "reported",
+        "value": "Each main experiment had two stroking-condition blocks per participant: synchronous and asynchronous, with order counterbalanced. The supplemental receding control used the same block logic.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf; artifacts/paper_metadata_audit/extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+        "page_or_section": "PDF p.2 FBI manipulations; supplement Methods",
+        "evidence_note": "Experiment 1 and Experiment 2 used separate participant samples."
+      },
+      "total_trial_count": {
+        "status": "derived",
+        "value": "Per stroking block: 108 trials = 72 PPS + 24 baseline + 12 catch. Per participant per main experiment: 216 task trials across synchronous and asynchronous blocks.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/noel_2015_bodily_self.pdf; artifacts/paper_metadata_audit/extracted/supplements/noel_2015_bodily_self/1-s2.0-S001002771530038X-mmc1.txt",
+        "page_or_section": "PDF p.3 Procedure; supplement Procedure",
+        "evidence_note": "Total is derived from the reported per-block formula and two stroking blocks."
+      }
+    }
+  },
+  "critical_caveats": [
+    "Exact sound waveform or class is not reported; the paper and supplement say looming/receding sound but not noise, tone, file, or generator.",
+    "No original audio files, sound-generation scripts, random seeds, or software provenance were found in the main paper or supplement.",
+    "No SPL, gain/cross-fade, speaker-switching, or attenuation law is reported for the dynamic loudspeaker-array presentation.",
+    "The exact speaker model and room acoustic calibration are not reported.",
+    "The task-critical sampled auditory interval is T1-T6 up to 1.14 s, but full sound-file duration/offset is not explicitly stated.",
+    "The supplement sound-localization control reports a 35 cm/s full front-to-back validation trajectory; the main PPS and receding-control tasks report 75 cm/s and should be kept separate.",
+    "No fixed numeric response timeout is reported; only fast-response instruction and 2.5 SD RT trimming are described."
+  ],
+  "next_manual_action": "Use this as a high-confidence front/back FBI trunk PPS profile with a supplemental front-space receding control. Lab recreation needs explicit defaults for sound class, original asset substitute, speaker/gain law, SPL, full audio-file duration, and response timeout."
+}

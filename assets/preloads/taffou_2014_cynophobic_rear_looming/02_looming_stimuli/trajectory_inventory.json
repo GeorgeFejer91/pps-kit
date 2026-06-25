@@ -1,0 +1,86 @@
+{
+  "schema": "pps-preload-trajectory-inventory.v1",
+  "template_id": "taffou_2014_cynophobic_rear_looming",
+  "trajectories": [
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Dog growl threatening placeholder",
+        "source_kind": "generated_noise",
+        "noise_type": "brown",
+        "start_distance_cm": 520.0,
+        "end_distance_cm": 19.9999,
+        "start_rotation_deg": 225.0,
+        "end_rotation_deg": 225.0,
+        "movement_duration_s": 6.6667,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 5.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": -3.676955,
+          "y_m": -3.676955,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": -0.141421,
+          "y_m": -0.141421,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Dog growl threatening placeholder",
+        "Sheep bleat non-threatening placeholder"
+      ],
+      "tone_types": [
+        "brown",
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Dog_growl_threatening_placeholder.wav",
+        "assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Sheep_bleat_non-threatening_placeholder.wav"
+      ]
+    },
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Dog growl threatening placeholder - rear right looming",
+        "source_kind": "generated_noise",
+        "noise_type": "brown",
+        "start_distance_cm": 520.0,
+        "end_distance_cm": 19.9999,
+        "start_rotation_deg": 135.0,
+        "end_rotation_deg": 135.0,
+        "movement_duration_s": 6.6667,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 5.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "custom",
+        "start": {
+          "x_m": 3.676955,
+          "y_m": -3.676955,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.141421,
+          "y_m": -0.141421,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Dog growl threatening placeholder - rear right looming",
+        "Sheep bleat non-threatening placeholder - rear right looming"
+      ],
+      "tone_types": [
+        "brown",
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Dog_growl_threatening_placeholder_-_rear_right_looming.wav",
+        "assets/preloads/taffou_2014_cynophobic_rear_looming/02_looming_stimuli/looming_Sheep_bleat_non-threatening_placeholder_-_rear_right_looming.wav"
+      ]
+    }
+  ]
+}

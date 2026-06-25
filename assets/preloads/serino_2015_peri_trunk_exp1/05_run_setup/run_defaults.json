@@ -1,0 +1,9 @@
+{
+  "schema": "pps-preload-run-setup-segment.v1",
+  "template_id": "serino_2015_peri_trunk_exp1",
+  "blocks": 1,
+  "participants": 15,
+  "random_seed": 20151222,
+  "trial_randomization_strategy": "no_immediate_repeats",
+  "block_order_randomization": "fixed"
+}

@@ -1,0 +1,283 @@
+{
+  "schema": "pps-paper-metadata-manual-review.v1",
+  "record_id": "depersonalisation_2024",
+  "citation_short": "Ferroni et al. (2024/2025), depersonalisation PPS",
+  "review_date": "2026-06-16",
+  "manual_review_status": "manual_review_completed_main_pdf_supplement_blocked",
+  "confidence_score": 0.78,
+  "confidence_label": "partial_extraction",
+  "confidence_basis": "Main PDF, OpenDataLoader output, fallback text search, rendered methods pages, and the publisher supplement route were checked. Stimulus reconstruction, SOA/baseline timing, task families, and response rules are mostly reported, but exact PPS trial counts, repetition counts, ITI/jitter, response timeout, and detailed tactile calibration remain unavailable because the supplementary DOCX route was blocked by a JavaScript/Cookie challenge.",
+  "profile_recreation_assessment": {
+    "assessment": "possible_with_caveats",
+    "reason": "The PPS task can be recreated as a Canzoneri/Ferroni-style two-speaker looming-vs-flat pink-noise task with D0-D5 tactile timings. Exact participant-level trial counts, baseline/catch split, tactile calibration details, and response timeout would need approximation or the supplementary file."
+  },
+  "source_checks": [
+    {
+      "source_type": "publication_pdf",
+      "source": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf",
+      "status": "reviewed",
+      "scope": "PDF pages 4-6 for Design and experimental procedure, the PPS task, Figure 1, and separation of PPS from the MTT task."
+    },
+    {
+      "source_type": "opendataloader_json",
+      "source": "artifacts/paper_metadata_audit/extracted/opendataloader/depersonalisation_2024.json",
+      "status": "reviewed",
+      "scope": "Used as the primary text map for candidate Segment 1-4 values, then checked against rendered methods pages."
+    },
+    {
+      "source_type": "fallback_text_extraction",
+      "source": "pdfplumber and local text search",
+      "status": "reviewed",
+      "scope": "Targeted searches for PPS task, pink noise, loudspeaker, looming, flat, D0-D5, catch, baseline, trial, random, ITI, response, and repetition terms."
+    },
+    {
+      "source_type": "rendered_pdf_pages",
+      "source": "tmp/pdfs/depersonalisation_2024_review/page-04.png through page-06.png",
+      "status": "reviewed_not_tracked",
+      "scope": "Visual page check for methods layout and to prevent importing MTT-task counts into the PPS metadata."
+    },
+    {
+      "source_type": "publisher_supplement_route",
+      "source": "https://journals.sagepub.com/doi/suppl/10.1177/17470218241261645/suppl_file/sj-docx-1-qjp-10.1177_17470218241261645.docx",
+      "status": "blocked_by_javascript_challenge",
+      "scope": "Supplement route was found from the publisher page, but direct download was blocked by a Cloudflare JavaScript/Cookie challenge in this environment."
+    }
+  ],
+  "review_attempts": [
+    {
+      "strategy": "OpenDataLoader PDF extraction",
+      "status": "completed",
+      "result": "Mapped candidate Segment 1-4 values across 20 of 25 fields, including several MTT-task false positives."
+    },
+    {
+      "strategy": "PPS-versus-MTT disambiguation pass",
+      "status": "completed",
+      "result": "Separated the PPS audio-tactile metadata from the later Mental Time Travel task; excluded the MTT 24/72 trial counts from PPS counts."
+    },
+    {
+      "strategy": "Stimulus reconstruction pass",
+      "status": "completed",
+      "result": "Confirmed pink-noise 3000 ms sounds, 44.1 kHz sampling, flat and looming conditions, 55-70 dB exponential looming gain, 62.5 dB flat sound, and two-speaker near/far geometry."
+    },
+    {
+      "strategy": "SOA and baseline pass",
+      "status": "completed",
+      "result": "Confirmed D1-D5 tactile delays of 300, 800, 1500, 2200, and 2700 ms, plus a D0 tactile-only baseline at -700 ms during silence."
+    },
+    {
+      "strategy": "Counts and sequence pass",
+      "status": "completed",
+      "result": "Confirmed 60% audio-tactile target trials and a 40% remainder containing auditory-only catches and unimodal tactile baselines, but no exact PPS total or split."
+    },
+    {
+      "strategy": "Rendered-page layout pass",
+      "status": "completed",
+      "result": "Rendered pages 4-6 were checked visually to verify where the PPS task ends and the MTT-task count paragraph begins."
+    },
+    {
+      "strategy": "Supplement route pass",
+      "status": "blocked",
+      "result": "Publisher DOCX supplement route was identified but could not be downloaded due a JavaScript/Cookie challenge."
+    }
+  ],
+  "field_status_counts": {
+    "derived": 1,
+    "not_reported_after_review": 7,
+    "reported": 17
+  },
+  "segment_field_audit": {
+    "segment_1_stimulus_reconstruction": {
+      "stimulus_type": {
+        "status": "reported",
+        "value": "Pink-noise (1/f noise) auditory samples, presented either as a static flat sound or a dynamic looming sound.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf",
+        "page_or_section": "PDF pp.4-5, The PPS task and Figure 1",
+        "evidence_note": "The PPS methods identify pink-noise stimuli and flat versus looming sound classes."
+      },
+      "source_provenance": {
+        "status": "reported",
+        "value": "Auditory stimuli were pink-noise samples sampled at 44.1 kHz; exact source file, noise seed, or waveform asset is not provided in the main PDF.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf",
+        "page_or_section": "PDF p.4, The PPS task",
+        "evidence_note": "Sampling rate and stimulus class are reported; original files are not supplied."
+      },
+      "trajectory_count": {
+        "status": "reported",
+        "value": "Two auditory condition families: static/flat sound and dynamic/looming approaching sound.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf",
+        "page_or_section": "PDF pp.4-5, The PPS task and Figure 1",
+        "evidence_note": "The task contrasts flat rectangular and looming triangular sound conditions."
+      },
+      "trajectory_path": {
+        "status": "reported",
+        "value": "Two-speaker hand/body-centered path: near speaker about 10 cm from the right hand and far speaker 1 m from the participant's body; looming was implemented by far-speaker fade-out and near-speaker fade-in.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf",
+        "page_or_section": "PDF pp.4-5, The PPS task and Figure 1",
+        "evidence_note": "Near/far speaker locations and opposite intensity changes are reported."
+      },
+      "stimulus_duration": {
+        "status": "reported",
+        "value": "Auditory pink-noise stimuli lasted 3000 ms.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf",
+        "page_or_section": "PDF p.4, The PPS task",
+        "evidence_note": "Duration is explicitly reported in the PPS methods."
+      },
+      "stimulus_speed": {
+        "status": "derived",
+        "value": "Approximate physical path length is about 90 cm over 3000 ms, implying about 30 cm/s if treated as a continuous looming path; the paper does not state speed directly.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf",
+        "page_or_section": "PDF pp.4-5, The PPS task and Figure 1",
+        "evidence_note": "Derived from reported 1 m far position, about 10 cm near position, and 3000 ms duration."
+      },
+      "auditory_conditions": {
+        "status": "reported",
+        "value": "Flat sound with constant intensity and looming sound with increasing perceived approach; participants ignored the auditory stimulus while detecting tactile targets.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf",
+        "page_or_section": "PDF pp.4-5, The PPS task",
+        "evidence_note": "The two auditory conditions and ignore-sound instruction are reported."
+      },
+      "gain_envelope": {
+        "status": "reported",
+        "value": "Looming intensity rose exponentially from 55 to 70 dB; flat sounds stayed at 62.5 dB. For looming, far speaker decreased to silence while near speaker increased to maximum.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf",
+        "page_or_section": "PDF pp.4-5, The PPS task",
+        "evidence_note": "Main methods give dB endpoints and the two-speaker cross-intensity pattern."
+      },
+      "renderer_or_apparatus": {
+        "status": "reported",
+        "value": "Two physical loudspeakers delivered the auditory stimuli, one near the right hand and one far from the participant; no HRTF or headphone renderer was used.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf",
+        "page_or_section": "PDF pp.4-5, The PPS task",
+        "evidence_note": "The speaker geometry is shown in Figure 1 and described in the PPS task text."
+      }
+    },
+    "segment_2_sequence_and_intermixing": {
+      "trial_rows_families": {
+        "status": "reported",
+        "value": "PPS trial families included audio-tactile target trials, auditory-only catch trials with flat or looming sound, and unimodal tactile baseline trials.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf",
+        "page_or_section": "PDF p.5, The PPS task",
+        "evidence_note": "The PPS methods define the 60% target family and the 40% catch/baseline remainder."
+      },
+      "condition_intermixing": {
+        "status": "reported",
+        "value": "The PPS task mixed audio-tactile targets with auditory-only catches and unimodal tactile baselines within one PPS task; exact trial-order algorithm is not reported.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf",
+        "page_or_section": "PDF pp.4-5, Design and The PPS task",
+        "evidence_note": "Trial-family proportions are reported, but not the internal schedule algorithm."
+      },
+      "blocked_or_random_order": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf; https://journals.sagepub.com/doi/abs/10.1177/17470218241261645",
+        "page_or_section": "PDF pp.4-6; publisher supplement route checked 2026-06-16",
+        "evidence_note": "PPS-versus-MTT task order was balanced, but no PPS block count, block order, or trial randomization rule was found."
+      },
+      "iti_jitter_policy": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf; https://journals.sagepub.com/doi/abs/10.1177/17470218241261645",
+        "page_or_section": "PDF pp.4-6; publisher supplement route checked 2026-06-16",
+        "evidence_note": "No PPS ITI, jitter value, jitter range, or distribution was found; the 1000 ms interval belongs to the separate MTT task."
+      },
+      "response_window": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf; https://journals.sagepub.com/doi/abs/10.1177/17470218241261645",
+        "page_or_section": "PDF pp.4-6; publisher supplement route checked 2026-06-16",
+        "evidence_note": "Fast keyboard response is reported, but no PPS timeout, response deadline, or scoring window was found."
+      },
+      "task_sequence_rules": {
+        "status": "reported",
+        "value": "Participants responded as fast as possible to tactile targets with the left index finger on a keyboard, ignored auditory stimuli, and repeated a trial if they failed to answer.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf",
+        "page_or_section": "PDF pp.4-5, The PPS task",
+        "evidence_note": "The response rule, ignore-sound instruction, and failed-answer repetition rule are reported."
+      }
+    },
+    "segment_3_tactile_soa_baseline": {
+      "tactile_stimulus": {
+        "status": "reported",
+        "value": "Single constant-voltage rectangular monophasic pulse via DS3 Digitimer electrical stimulators and electrode pairs on the hairy surface of the right index finger.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf",
+        "page_or_section": "PDF p.4, The PPS task",
+        "evidence_note": "Main methods report tactile modality, stimulator model, waveform class, and body site."
+      },
+      "soa_table": {
+        "status": "reported",
+        "value": "D1-D5 tactile delays after auditory onset: 300, 800, 1500, 2200, and 2700 ms.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf",
+        "page_or_section": "PDF p.5, The PPS task",
+        "evidence_note": "The five PPS tactile delays are explicitly listed."
+      },
+      "baseline_strategy": {
+        "status": "reported",
+        "value": "Unimodal tactile baseline trials were delivered during silence periods before sound administration to control expectancy.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf",
+        "page_or_section": "PDF p.5, The PPS task",
+        "evidence_note": "The paper states the baseline purpose and no-sound context."
+      },
+      "baseline_timing": {
+        "status": "reported",
+        "value": "D0 tactile-only baseline occurred at -700 ms, preceding sound administration during silence.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf",
+        "page_or_section": "PDF p.5, The PPS task",
+        "evidence_note": "The D0 baseline timing is explicitly reported."
+      },
+      "catch_trial_type": {
+        "status": "reported",
+        "value": "Auditory-only catch trials used either looming or flat sounds, with no tactile target.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf",
+        "page_or_section": "PDF p.5, The PPS task",
+        "evidence_note": "Catch trials are described as auditory stimulation only."
+      }
+    },
+    "segment_4_counts": {
+      "repetitions_per_tactile_soa_condition": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf; https://journals.sagepub.com/doi/abs/10.1177/17470218241261645",
+        "page_or_section": "PDF pp.4-6 and PPS results; publisher supplement route checked 2026-06-16",
+        "evidence_note": "No exact repetition count per D1-D5 tactile delay and flat/looming condition was found."
+      },
+      "baseline_count": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf; https://journals.sagepub.com/doi/abs/10.1177/17470218241261645",
+        "page_or_section": "PDF p.5 and PPS results; publisher supplement route checked 2026-06-16",
+        "evidence_note": "Baseline trials are reported, but the exact baseline count or baseline-specific percentage is not."
+      },
+      "catch_count": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf; https://journals.sagepub.com/doi/abs/10.1177/17470218241261645",
+        "page_or_section": "PDF p.5 and PPS results; publisher supplement route checked 2026-06-16",
+        "evidence_note": "Auditory-only catches are reported as part of the 40% remainder, but exact catch count/split is not."
+      },
+      "block_count": {
+        "status": "reported",
+        "value": "The study had two same-day sessions, the PPS task and MTT task, with task order balanced across participants; no internal PPS block count is reported.",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf",
+        "page_or_section": "PDF p.4, Design and experimental procedure",
+        "evidence_note": "Session count and task-order balancing are reported."
+      },
+      "total_trial_count": {
+        "status": "not_reported_after_review",
+        "value": "",
+        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/depersonalisation_2024.pdf; https://journals.sagepub.com/doi/abs/10.1177/17470218241261645",
+        "page_or_section": "PDF pp.4-6 and PPS results; publisher supplement route checked 2026-06-16",
+        "evidence_note": "No PPS total trial count was found; the 72-trial count belongs to the separate MTT task."
+      }
+    }
+  },
+  "critical_caveats": [
+    "The exact PPS total trial count is not reported in the main PDF.",
+    "The exact repetitions per tactile delay and auditory condition are not reported.",
+    "The exact split between auditory-only catch trials and D0 unimodal tactile baselines is not reported.",
+    "No PPS ITI, jitter, or trial randomization algorithm is reported.",
+    "No numeric PPS response window or timeout is reported.",
+    "Tactile calibration details are deferred to supplementary materials, but the publisher DOCX supplement was blocked by a JavaScript/Cookie challenge.",
+    "The exact original pink-noise files/noise seed and gain files are not supplied."
+  ],
+  "next_manual_action": "Ask the user to download the Sage DOCX supplement for this DOI into artifacts/paper_metadata_audit/supplements/depersonalisation_2024/. The supplement may resolve tactile calibration and possibly trial-count details."
+}

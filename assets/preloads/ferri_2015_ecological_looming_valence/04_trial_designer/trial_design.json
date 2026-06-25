@@ -1,0 +1,46 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "ferri_2015_ecological_looming_valence",
+  "repetitions_per_condition": 8,
+  "soa_values_ms": [
+    300,
+    800,
+    1500,
+    2200,
+    2700
+  ],
+  "spatial_values_cm": [
+    100,
+    83.3,
+    60,
+    36.7,
+    20
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "ferri-ecological-looming-valence-row",
+      "label": "Ecological looming valence trial",
+      "audio_tactile_percentage": 100.0,
+      "catch_percentage": 0.0,
+      "baseline_percentage": 0.0,
+      "elements": [
+        {
+          "element_id": "ferri-ecological-looming-source",
+          "kind": "looming_stimulus",
+          "label": "Ecological looming source",
+          "source_label": "Negative ecological looming",
+          "source_labels": [
+            "Negative ecological looming",
+            "Neutral ecological looming",
+            "Positive ecological looming"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 120
+}

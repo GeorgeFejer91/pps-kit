@@ -1,0 +1,33 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "ferri_2015_ecological_looming_valence",
+  "title": "Ferri 2015 ecological emotional looming sounds",
+  "citation": "Ferri, F., Costantini, M., Tajadura-Jimenez, A., Valjamae, A., & Vastano, R. (2015). Emotion-inducing approaching sounds shape the boundaries of multisensory peripersonal space. Neuropsychologia, 70, 468-475.",
+  "doi": "10.1016/j.neuropsychologia.2015.03.001",
+  "source_url": "https://pubmed.ncbi.nlm.nih.gov/25744869/",
+  "verification_status": "partial",
+  "notes": "Ecological-sound variant. Current GUI can represent valence-labeled sound conditions but cannot bundle the original ecological audio assets.",
+  "reference_parameters": {
+    "profile_type": "audio_tactile_ecological_valence",
+    "implemented_controls": [
+      "negative/positive/neutral condition labels",
+      "frontal looming path",
+      "right-hand tactile target"
+    ],
+    "implementation_gaps": [
+      "licensed ecological sounds",
+      "sound-specific emotional validation",
+      "exact amplitude envelopes"
+    ]
+  },
+  "provenance": [
+    {
+      "field": "ecological valence conditions",
+      "source": "UCL Discovery abstract reports negative, positive, and neutral ecological sounds in Experiment 2."
+    },
+    {
+      "field": "implementation gap",
+      "source": "The original ecological recordings are not redistributed; labels are placeholders for user-supplied audio."
+    }
+  ]
+}

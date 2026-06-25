@@ -1,0 +1,443 @@
+{
+  "schema": "pps-audiotactile-pubmed-screening.v1",
+  "screened_on": "2026-06-13",
+  "query": "(\"audio-tactile\" OR audiotactile) AND \"peripersonal space\"",
+  "source_summary_file": "artifacts/literature_audit/pubmed_audio_tactile_pps_summary.json",
+  "source_abstract_file": "artifacts/literature_audit/pubmed_missing_screen_abstracts.json",
+  "screened_count": 48,
+  "screening_rule": "Include records only when they contain or plausibly reuse an audio-plus-tactile PPS task. Exclude corrections without new tasks, reviews/commentaries, auditory-only/visual-only/audiovisual-only papers, methods-only papers, and non-PPS audiotactile tasks. Clinical populations, interventions, and extra context do not exclude a record if the PPS task itself is audiotactile.",
+  "records": [
+    {
+      "pmid": "42156468",
+      "year": "2026",
+      "doi": "10.1038/s41598-026-52809-9",
+      "title": "Correction: Somatotopy-independent reduction of audio-tactile intersensory facilitation for looming sounds within the peripersonal space during arm movements execution.",
+      "decision": "excluded_duplicate_correction",
+      "linked_literature_record_ids": ["lamia_2026_arm_movement"],
+      "reason": "Correction notice for an already screened task; no new audiotactile PPS profile."
+    },
+    {
+      "pmid": "41923621",
+      "year": "2026",
+      "doi": "10.1016/j.xcrm.2026.102705",
+      "title": "Multisensory integration in peripersonal space indexes consciousness states in sleep and disorders of consciousness.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["cell_reports_medicine_2026_consciousness"],
+      "reason": "Likely audio-tactile PPS task; clinical/sleep endpoint is context, while task timing and physiology trigger requirements need extraction."
+    },
+    {
+      "pmid": "41634168",
+      "year": "2026",
+      "doi": "10.1038/s41598-026-36796-5",
+      "title": "Somatotopy-independent reduction of audio-tactile intersensory facilitation for looming sounds within the peripersonal space during arm movements execution.",
+      "decision": "included_current_runnable_profile",
+      "linked_literature_record_ids": ["lamia_2026_arm_movement"],
+      "reason": "Current Lamia 2026 Experiment 1/2 profiles pass the audiotactile task gate."
+    },
+    {
+      "pmid": "41418395",
+      "year": "2026",
+      "doi": "10.1016/j.cortex.2025.11.015",
+      "title": "Functional organization of distance-dependent audio-tactile integration is different in rear and front spaces.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["amiel_2025_front_rear"],
+      "reason": "Distance-dependent audio-tactile front/rear PPS task; methods need extraction."
+    },
+    {
+      "pmid": "41329741",
+      "year": "2025",
+      "doi": "10.1073/pnas.2516229122",
+      "title": "Interoception vs. Exteroception: Cardiac interoception competes with tactile perception, yet also facilitates self-relevance encoding.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["interoception_exteroception_2025"],
+      "reason": "Abstract describes an audio-tactile self-relevance manipulation using source location relative to peripersonal space; EEG/HEP endpoint needs task-specific extraction."
+    },
+    {
+      "pmid": "41211594",
+      "year": "2025",
+      "doi": "10.1001/jamanetworkopen.2024.51217",
+      "title": "The Proximity Prediction Hypothesis: How predictive coding of CT-touch explains Autonomous Sensory Meridian Response and its therapeutic applications.",
+      "decision": "excluded_review_or_theory_no_pps_task",
+      "linked_literature_record_ids": [],
+      "reason": "Theory/survey around ASMR and audio-tactile PPS network, not a published PPS task profile."
+    },
+    {
+      "pmid": "41094896",
+      "year": "2025",
+      "doi": "10.3390/s25196072",
+      "title": "Using Android Smartphones to Collect Precise Measures of Reaction Times to Multisensory Stimuli.",
+      "decision": "excluded_methods_reference_no_distinct_pps_task",
+      "linked_literature_record_ids": ["smartphone_rt_methods_2025"],
+      "reason": "Methods/device reference rather than a distinct audiotactile PPS task."
+    },
+    {
+      "pmid": "39128330",
+      "year": "2024",
+      "doi": "10.1016/j.bodyim.2024.101777",
+      "title": "The impact of body image on social cognition: Fear of negative evaluation mediates the relationship between body surveillance and interpersonal distance in women.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["body_image_social_cognition_2024"],
+      "reason": "Abstract reports PPS boundaries estimated with an audio-tactile reaction-time task; body-image variables are non-blocking context."
+    },
+    {
+      "pmid": "38839602",
+      "year": "2025",
+      "doi": "10.1177/17470218241261645",
+      "title": "Lost in time and space? Multisensory processing of peripersonal space and time perception in people with frequent experiences of depersonalisation.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["depersonalisation_2024"],
+      "reason": "Audio-tactile PPS plus time-perception task; PPS execution parameters need extraction."
+    },
+    {
+      "pmid": "38799571",
+      "year": "2024",
+      "doi": "10.1016/j.isci.2024.109820",
+      "title": "Localizing 3D motion through the fingertips: Following in the footsteps of elephants.",
+      "decision": "excluded_adjacent_non_pps_audiotactile_task",
+      "linked_literature_record_ids": [],
+      "reason": "Audio-tactile integration/haptic localization, but not a PPS boundary or PPS tactile-detection profile."
+    },
+    {
+      "pmid": "38667102",
+      "year": "2024",
+      "doi": "10.3390/bs14040306",
+      "title": "Mindfulness Affects the Boundaries of Bodily Self-Representation: The Effect of Focused-Attention Meditation in Fading the Boundary of Peripersonal Space.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["mindfulness_pps_2024"],
+      "reason": "Abstract reports a multisensory audio-tactile task to assess PPS boundaries; meditation context is non-blocking."
+    },
+    {
+      "pmid": "38319398",
+      "year": "2024",
+      "doi": "10.1007/s00221-024-06782-2",
+      "title": "Comparison of peripersonal space in front and rear spaces.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["teraoka_2024_front_rear"],
+      "reason": "Front/rear audio-tactile PPS task candidate; apparatus, baseline, and timing need extraction."
+    },
+    {
+      "pmid": "35708490",
+      "year": "2022",
+      "doi": "10.1093/schbul/sbac067",
+      "title": "Tool-use Extends Peripersonal Space Boundaries in Schizophrenic Patients.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["schizophrenia_tool_use_2022"],
+      "reason": "Audio-tactile PPS task before/after tool-use; group/intervention context is non-blocking."
+    },
+    {
+      "pmid": "34666298",
+      "year": "2021",
+      "doi": "10.1016/j.cortex.2021.08.004",
+      "title": "Seeming confines: Electrophysiological evidence of peripersonal space remapping following tool-use in humans.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["seeming_confines_2021"],
+      "reason": "Audio-tactile PPS remapping with electrophysiology; task parameters need extraction separate from EEG context."
+    },
+    {
+      "pmid": "34654814",
+      "year": "2021",
+      "doi": "10.1038/s41598-021-00048-5",
+      "title": "Frontal and parietal background connectivity and their dynamic changes account for individual differences in the multisensory representation of peripersonal space.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["spadone_2021_connectivity"],
+      "reason": "fMRI audio-tactile task with looming/flat and near/far conditions; task and scanner timing need separation."
+    },
+    {
+      "pmid": "34050213",
+      "year": "2021",
+      "doi": "10.1038/s41598-021-90784-5",
+      "title": "Peripersonal space in the front, rear, left and right directions for audio-tactile multisensory integration.",
+      "decision": "included_current_runnable_profile",
+      "linked_literature_record_ids": ["matsuda_2021_four_directions"],
+      "reason": "Current four-direction profile passes the audiotactile task gate."
+    },
+    {
+      "pmid": "33460913",
+      "year": "2021",
+      "doi": "10.1016/j.cortex.2020.11.021",
+      "title": "How ageing shapes body and space representations: A comparison study between healthy young and older adults.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["ageing_2021"],
+      "reason": "Likely audio-tactile PPS task; age group context is non-blocking."
+    },
+    {
+      "pmid": "32905815",
+      "year": "2020",
+      "doi": "10.1016/j.neuropsychologia.2020.107622",
+      "title": "Effect of tool-use observation on metric body representation and peripersonal space.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["ferroni_2020_tool_observation"],
+      "reason": "Likely audio-tactile PPS scaffold with tool-observation context; task details need extraction."
+    },
+    {
+      "pmid": "32488599",
+      "year": "2021",
+      "doi": "10.1007/s00426-020-01365-6",
+      "title": "Does musical interaction in a jazz duet modulate peripersonal space?",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["jazz_duet_2021"],
+      "reason": "Likely audio-tactile PPS task after musical/social context; any music-specific audio assets need extraction."
+    },
+    {
+      "pmid": "32193585",
+      "year": "2020",
+      "doi": "10.1007/s00221-020-05771-5",
+      "title": "Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size.",
+      "decision": "included_candidate_requires_static_near_far_support",
+      "linked_literature_record_ids": ["holmes_2020_four_experiments"],
+      "reason": "Four audio-tactile PPS experiments plus meta-analysis; experiments require static near/far and Go/NoGo target logic."
+    },
+    {
+      "pmid": "31805302",
+      "year": "2020",
+      "doi": "10.1016/j.jneumeth.2019.108534",
+      "title": "Capturing the dynamics of peripersonal space by integrating expectancy effects and sound propagation properties.",
+      "decision": "included_candidate_requires_toolkit_structure",
+      "linked_literature_record_ids": ["hobeika_2020_methods"],
+      "reason": "Method paper for expectancy/sound-propagation controlled PPS task; needs hazard and propagation parameters."
+    },
+    {
+      "pmid": "31598221",
+      "year": "2019",
+      "doi": "10.1098/rsos.181878",
+      "title": "Social coding of the multisensory space around us.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["social_coding_2019"],
+      "reason": "Likely audio-tactile PPS task; social context is non-blocking."
+    },
+    {
+      "pmid": "31545929",
+      "year": "2019",
+      "doi": "10.1177/0956797619869337",
+      "title": "Remapping Peripersonal Space by Using Foot-Sole Vibrations Without Any Body Movement.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["footsole_vibration_2019"],
+      "reason": "Uses looming sounds and tactile processing to estimate PPS; foot-sole vibration manipulation is context unless it changes PPS task execution."
+    },
+    {
+      "pmid": "31357147",
+      "year": "2019",
+      "doi": "10.1016/j.nicl.2019.101940",
+      "title": "Peri-personal space encoding in patients with disorders of consciousness and cognitive-motor dissociation.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["disorders_consciousness_2019"],
+      "reason": "Likely audio-tactile PPS task with neuroclinical endpoint; clinical endpoint is context."
+    },
+    {
+      "pmid": "31197224",
+      "year": "2019",
+      "doi": "10.1038/s41598-019-45224-w",
+      "title": "Enlarged representation of peripersonal space in pregnancy.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["pregnancy_2019"],
+      "reason": "Likely audio-tactile PPS task; pregnancy context is non-blocking."
+    },
+    {
+      "pmid": "30943757",
+      "year": "2019",
+      "doi": "10.1177/1362361319838950",
+      "title": "Altered bodily self-consciousness and peripersonal space in autism.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["autism_2019"],
+      "reason": "Likely audio-tactile PPS task; clinical context is non-blocking."
+    },
+    {
+      "pmid": "30617745",
+      "year": "2019",
+      "doi": "10.1007/s00221-019-05469-3",
+      "title": "Enhanced audio-tactile multisensory interaction in a peripersonal task after echolocation.",
+      "decision": "included_current_blocked_profile",
+      "linked_literature_record_ids": ["tonelli_2019_echolocation"],
+      "reason": "Current profile exists but requires seven-speaker switching/timing support."
+    },
+    {
+      "pmid": "30188779",
+      "year": "2019",
+      "doi": "10.1162/jocn_a_01334",
+      "title": "Increased Neural Strength and Reliability to Audiovisual Stimuli at the Boundary of Peripersonal Space.",
+      "decision": "excluded_non_audiotactile_pps_task",
+      "linked_literature_record_ids": [],
+      "reason": "The screened abstract concerns audiovisual PPS stimuli rather than an audio-tactile task profile."
+    },
+    {
+      "pmid": "30010843",
+      "year": "2018",
+      "doi": "10.1093/cercor/bhy156",
+      "title": "Audio-Tactile and Peripersonal Space Processing Around the Trunk in Human Parietal and Temporal Cortex: An Intracranial EEG Study.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["ieeg_trunk_2018"],
+      "reason": "Audio-tactile PPS task with iEEG endpoint; task needs extraction separate from physiology."
+    },
+    {
+      "pmid": "29655026",
+      "year": "2018",
+      "doi": "10.1016/j.cognition.2018.04.001",
+      "title": "Interoceptive influences on peripersonal space boundary.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["ardizzi_ferri_2018_interoceptive"],
+      "reason": "Audio-tactile PPS task with interoception context; task scaffold needs extraction."
+    },
+    {
+      "pmid": "29537917",
+      "year": "2018",
+      "doi": "10.1152/jn.00652.2017",
+      "title": "Neural adaptation accounts for the dynamic resizing of peripersonal space: evidence from a psychophysical-computational approach.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["noel_2018_neural_adaptation"],
+      "reason": "Psychophysical-computational PPS task; determine whether distinct runner profile is required."
+    },
+    {
+      "pmid": "29461657",
+      "year": "2018",
+      "doi": "10.1111/ejn.13872",
+      "title": "Vestibular modulation of peripersonal space boundaries.",
+      "decision": "included_current_runnable_profile",
+      "linked_literature_record_ids": ["pfeiffer_2018_vestibular"],
+      "reason": "Current Pfeiffer lateral peri-head profile passes the audiotactile task gate."
+    },
+    {
+      "pmid": "29255918",
+      "year": "2018",
+      "doi": "10.1007/s00221-017-5158-2",
+      "title": "Anisotropy of lateral peripersonal space is linked to handedness.",
+      "decision": "included_candidate_requires_toolkit_structure",
+      "linked_literature_record_ids": ["hobeika_2018_anisotropy"],
+      "reason": "Lateral PPS audio-tactile task; body-coordinate and timing details need extraction."
+    },
+    {
+      "pmid": "26833067",
+      "year": "2016",
+      "doi": "10.1016/j.tics.2016.01.005",
+      "title": "Variability in Multisensory Responses Predicts the Self-Space.",
+      "decision": "excluded_commentary_no_new_task",
+      "linked_literature_record_ids": [],
+      "reason": "Commentary on PPS findings, not a distinct task profile."
+    },
+    {
+      "pmid": "26231086",
+      "year": "2015",
+      "doi": "10.1016/j.cognition.2015.07.012",
+      "title": "Peripersonal space as the space of the bodily self.",
+      "decision": "included_current_runnable_profile",
+      "linked_literature_record_ids": ["noel_2015_bodily_self"],
+      "reason": "Current Noel bodily-self PPS profile passes the audiotactile task gate."
+    },
+    {
+      "pmid": "25698947",
+      "year": "2015",
+      "doi": "10.3389/fnbeh.2015.00004",
+      "title": "Extending peripersonal space representation without tool-use: evidence from a combined behavioral-computational approach.",
+      "decision": "included_current_blocked_profile",
+      "linked_literature_record_ids": ["serino_2015_toolless_sync_training"],
+      "reason": "Current profile exists but electrical tactile calibration and voice-key capture need extraction."
+    },
+    {
+      "pmid": "25498407",
+      "year": "2015",
+      "doi": "10.1016/j.neuropsychologia.2014.12.007",
+      "title": "Multisensory interactions in the depth plane in front and rear space: a review.",
+      "decision": "excluded_review_or_theory_no_pps_task",
+      "linked_literature_record_ids": [],
+      "reason": "Review article, not a new experimental task profile."
+    },
+    {
+      "pmid": "25447370",
+      "year": "2015",
+      "doi": "10.1016/j.neuropsychologia.2014.10.027",
+      "title": "Your place or mine: shared sensory experiences elicit a remapping of peripersonal space.",
+      "decision": "included_candidate_task_needs_full_text_audit",
+      "linked_literature_record_ids": ["maister_2015_shared_sensory"],
+      "reason": "Likely PPS measurement after shared sensory/social context; task parameters need extraction."
+    },
+    {
+      "pmid": "25193502",
+      "year": "2015",
+      "doi": "10.1016/j.neuropsychologia.2014.08.030",
+      "title": "Full body action remapping of peripersonal space: the case of walking.",
+      "decision": "included_current_blocked_profile",
+      "linked_literature_record_ids": ["noel_2015_walking"],
+      "reason": "Current profile exists but exact sound distances and trial counts need extraction."
+    },
+    {
+      "pmid": "24088746",
+      "year": "2013",
+      "doi": "10.1038/srep02844",
+      "title": "Amputation and prosthesis implantation shape body and peripersonal space representations.",
+      "decision": "included_current_blocked_profile",
+      "linked_literature_record_ids": ["canzoneri_2013_amputation_prosthesis"],
+      "reason": "Current profile exists but exact trial count and tactile calibration table need extraction."
+    },
+    {
+      "pmid": "23640106",
+      "year": "2013",
+      "doi": "10.1007/s00221-013-3532-2",
+      "title": "Tool-use reshapes the boundaries of body and peripersonal space representations.",
+      "decision": "included_current_blocked_profile",
+      "linked_literature_record_ids": ["canzoneri_2013_tool_use_reshaping"],
+      "reason": "Current profile exists but exact trial count and ITI table need extraction."
+    },
+    {
+      "pmid": "23028516",
+      "year": "2012",
+      "doi": "10.1371/journal.pone.0044306",
+      "title": "Dynamic sounds capture the boundaries of peripersonal space representation in humans.",
+      "decision": "included_current_blocked_profile",
+      "linked_literature_record_ids": ["canzoneri_2012_dynamic_sounds"],
+      "reason": "Current profile exists but direction-coupled baselines, exact gain files, voice-key capture, and tactile calibration block exact recreation."
+    },
+    {
+      "pmid": "22612281",
+      "year": "2013",
+      "doi": "10.1037/a0028416",
+      "title": "Auditory, tactile, and audiotactile information processing following visual deprivation.",
+      "decision": "included_candidate_requires_toolkit_structure",
+      "linked_literature_record_ids": ["teramoto_2013_visual_deprivation"],
+      "reason": "Audiotactile information-processing task; tactile response mapping and static spatial structure need extraction."
+    },
+    {
+      "pmid": "21391768",
+      "year": "2011",
+      "doi": "10.1162/jocn_a_00006",
+      "title": "Fronto-parietal areas necessary for a multisensory representation of peripersonal space in humans: an rTMS study.",
+      "decision": "included_candidate_requires_toolkit_structure",
+      "linked_literature_record_ids": ["serino_2011_rtms"],
+      "reason": "Audiotactile PPS task with rTMS context; static near/far and Go/NoGo task structure need support."
+    },
+    {
+      "pmid": "20621120",
+      "year": "2011",
+      "doi": "10.1016/j.neubiorev.2010.07.004",
+      "title": "Audiotactile interactions in front and rear space.",
+      "decision": "excluded_review_or_theory_no_pps_task",
+      "linked_literature_record_ids": [],
+      "reason": "Review article, not a new experimental task profile."
+    },
+    {
+      "pmid": "19672794",
+      "year": "2010",
+      "doi": "10.1080/17470210903068989",
+      "title": "Assessing the effect of sound complexity on the audiotactile cross-modal dynamic capture task.",
+      "decision": "excluded_adjacent_non_pps_audiotactile_task",
+      "linked_literature_record_ids": [],
+      "reason": "Audiotactile dynamic-capture task, but not a PPS boundary or PPS tactile-detection profile."
+    },
+    {
+      "pmid": "19666035",
+      "year": "2009",
+      "doi": "10.1016/j.neuropsychologia.2009.07.025",
+      "title": "Early visual deprivation alters multisensory processing in peripersonal space.",
+      "decision": "included_candidate_requires_toolkit_structure",
+      "linked_literature_record_ids": ["tajadura_jimenez_2009_visual_deprivation"],
+      "reason": "Auditory, tactile, and audiotactile lateralization task with posture/body-coordinate manipulation."
+    },
+    {
+      "pmid": "17614874",
+      "year": "2007",
+      "doi": "10.1111/j.1467-9280.2007.01952.x",
+      "title": "Extended multisensory space in blind cane users.",
+      "decision": "included_candidate_requires_toolkit_structure",
+      "linked_literature_record_ids": ["serino_2007_blind_cane_users"],
+      "reason": "Classic static near/far weak-target Go/NoGo PPS task; not yet supported as a first-class profile."
+    }
+  ]
+}

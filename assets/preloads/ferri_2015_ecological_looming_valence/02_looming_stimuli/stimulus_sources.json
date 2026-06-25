@@ -1,0 +1,132 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "ferri_2015_ecological_looming_valence",
+  "assets": [
+    {
+      "label": "Negative ecological looming",
+      "path": "assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Negative_ecological_looming.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Negative_ecological_looming.wav",
+      "sha256": "ffa29042690ef4b01ee7f265dfb71c4d05d3458d28b20c174d8957e771efe9f4",
+      "duration_s": 3.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "brown",
+      "tone_type": "brown",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Negative ecological looming",
+        "source_kind": "generated_noise",
+        "noise_type": "brown",
+        "start_distance_cm": 110.0,
+        "end_distance_cm": 10.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 3.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.1,
+          "z_m": 0.0
+        }
+      }
+    },
+    {
+      "label": "Neutral ecological looming",
+      "path": "assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Neutral_ecological_looming.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Neutral_ecological_looming.wav",
+      "sha256": "67454c950ff97db5184a20551bdbf5786a4285264b67c9e7b250d6ff4391f823",
+      "duration_s": 3.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Neutral ecological looming",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 110.0,
+        "end_distance_cm": 10.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 3.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.1,
+          "z_m": 0.0
+        }
+      }
+    },
+    {
+      "label": "Positive ecological looming",
+      "path": "assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Positive_ecological_looming.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Positive_ecological_looming.wav",
+      "sha256": "78cc8a0aa039201fd18ed67f4ecf620000a352e8f128734807d36c020d21fb9f",
+      "duration_s": 3.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Positive ecological looming",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 110.0,
+        "end_distance_cm": 10.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 3.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.1,
+          "z_m": 0.0
+        }
+      }
+    }
+  ]
+}

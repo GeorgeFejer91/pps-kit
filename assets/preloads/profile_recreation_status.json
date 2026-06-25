@@ -1,0 +1,1750 @@
+{
+  "schema": "pps-profile-recreation-status.v1",
+  "profile_count": 21,
+  "categories": {
+    "gui_recreatable": [
+      "study5_box_breathing_pps",
+      "matsuda_2021_four_directions",
+      "barumerli_2026_arm_movement_exp1",
+      "barumerli_2026_arm_movement_exp2",
+      "noel_2015_bodily_self",
+      "pfeiffer_2018_lateral_perihead_left_to_right",
+      "serino_2015_peri_trunk_exp1"
+    ],
+    "missing_publication_parameters": [
+      "canzoneri_2013_amputation_prosthesis",
+      "canzoneri_2013_tool_use_reshaping",
+      "canzoneri_2012_dynamic_sounds",
+      "tonelli_2019_echolocation",
+      "ferri_2015_artificial_looming_valence",
+      "ferri_2015_ecological_looming_valence",
+      "lerner_2021_3d_audio_tactile_boundary",
+      "noel_2015_walking_full_body_action",
+      "serino_2015_front_back_trunk_exp2",
+      "serino_2015_toolless_sync_training",
+      "taffou_2014_cynophobic_rear_looming",
+      "teneggi_2013_social_face_pps"
+    ],
+    "toolkit_structural_gap": [
+      "canzoneri_2012_dynamic_sounds",
+      "tonelli_2019_echolocation",
+      "galli_2015_wheelchair_full_body",
+      "lerner_2021_3d_audio_tactile_boundary",
+      "serino_2015_front_back_trunk_exp2",
+      "serino_2015_peri_hand_exp3",
+      "taffou_2014_cynophobic_rear_looming"
+    ]
+  },
+  "category_labels": {
+    "gui_recreatable": "GUI-recreatable",
+    "missing_publication_parameters": "Missing publication parameters",
+    "toolkit_structural_gap": "Toolkit structural gap"
+  },
+  "profiles": [
+    {
+      "template_id": "study5_box_breathing_pps",
+      "title": "Study 5 PPS box-breathing white/pink profile",
+      "citation": "PPS Toolkit Study 5 white/pink protocol (2026). Box-breathing audio-tactile PPS profile with white and pink looming sources. Unpublished lab profile.",
+      "doi": "",
+      "verification_status": "verified",
+      "publication_status": "unpublished_lab_profile",
+      "profile_type": "local_unpublished_study5_box_breathing_pps_white_pink",
+      "visible_variant_label": "",
+      "variant_display": "Study 5 PPS box-breathing white/pink profile",
+      "primary_category": "gui_recreatable",
+      "category_label": "GUI-recreatable",
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "gui_recreatable": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "segment_1_to_6_materializable": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": true,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/study5_box_breathing_pps/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "matsuda_2021_four_directions",
+      "title": "Front, rear, left, and right audio-tactile PPS",
+      "citation": "Matsuda, Y., et al. (2021). Peripersonal space in the front, rear, left and right directions for audio-tactile multisensory integration. Scientific Reports.",
+      "doi": "10.1038/s41598-021-90784-5",
+      "verification_status": "verified",
+      "publication_status": "published",
+      "profile_type": "",
+      "visible_variant_label": "",
+      "variant_display": "Front, rear, left, and right audio-tactile PPS",
+      "primary_category": "gui_recreatable",
+      "category_label": "GUI-recreatable",
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "gui_recreatable": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "segment_1_to_6_materializable": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": true,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/matsuda_2021_four_directions/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "barumerli_2026_arm_movement_exp1",
+      "title": "Looming/receding PPS during arm movement, Experiment 1",
+      "citation": "Lamia, P., Shabani, N., & Candidi, M. (2026). Somatotopy-independent reduction of audio-tactile intersensory facilitation for looming sounds within the peripersonal space during arm movements execution. Scientific Reports.",
+      "doi": "10.1038/s41598-026-36796-5",
+      "verification_status": "verified",
+      "publication_status": "published",
+      "profile_type": "",
+      "visible_variant_label": "A",
+      "variant_display": "Looming/receding PPS during arm movement, Experiment 1 - Variant A",
+      "primary_category": "gui_recreatable",
+      "category_label": "GUI-recreatable",
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "gui_recreatable": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "segment_1_to_6_materializable": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": true,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/barumerli_2026_arm_movement_exp1/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "barumerli_2026_arm_movement_exp2",
+      "title": "Looming/receding PPS during arm movement, Experiment 2",
+      "citation": "Lamia, P., Shabani, N., & Candidi, M. (2026). Somatotopy-independent reduction of audio-tactile intersensory facilitation for looming sounds within the peripersonal space during arm movements execution. Scientific Reports.",
+      "doi": "10.1038/s41598-026-36796-5",
+      "verification_status": "verified",
+      "publication_status": "published",
+      "profile_type": "",
+      "visible_variant_label": "B",
+      "variant_display": "Looming/receding PPS during arm movement, Experiment 2 - Variant B",
+      "primary_category": "gui_recreatable",
+      "category_label": "GUI-recreatable",
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "gui_recreatable": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "segment_1_to_6_materializable": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": true,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/barumerli_2026_arm_movement_exp2/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "noel_2015_bodily_self",
+      "title": "PPS as the space of the bodily self",
+      "citation": "Noel, J.-P., Pfeiffer, C., Blanke, O., & Serino, A. (2015). Peripersonal space as the space of the bodily self. Cognition, 144, 49-57.",
+      "doi": "10.1016/j.cognition.2015.07.012",
+      "verification_status": "verified",
+      "publication_status": "published",
+      "profile_type": "",
+      "visible_variant_label": "",
+      "variant_display": "PPS as the space of the bodily self",
+      "primary_category": "gui_recreatable",
+      "category_label": "GUI-recreatable",
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "gui_recreatable": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "segment_1_to_6_materializable": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": true,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/noel_2015_bodily_self/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "pfeiffer_2018_lateral_perihead_left_to_right",
+      "title": "Pfeiffer EJN2018 bilateral lateral trajectory profile",
+      "citation": "Pfeiffer, C., Noel, J. P., Serino, A., & Blanke, O. (2018). Vestibular modulation of peripersonal space boundaries. European Journal of Neuroscience, 47(7), 800-811.",
+      "doi": "10.1111/ejn.13872",
+      "verification_status": "verified",
+      "publication_status": "published",
+      "profile_type": "",
+      "visible_variant_label": "",
+      "variant_display": "Pfeiffer EJN2018 bilateral lateral trajectory profile",
+      "primary_category": "gui_recreatable",
+      "category_label": "GUI-recreatable",
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "gui_recreatable": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "segment_1_to_6_materializable": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": true,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/pfeiffer_2018_lateral_perihead_left_to_right/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "canzoneri_2013_amputation_prosthesis",
+      "title": "Canzoneri 2013 amputation/prosthesis PPS",
+      "citation": "Canzoneri, E., Marzolla, M., Amoresano, A., Verni, G., & Serino, A. (2013). Amputation and prosthesis implantation shape body and peripersonal space representations. Scientific Reports, 3, 2844.",
+      "doi": "10.1038/srep02844",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "audio_tactile_clinical_upper_limb_pps",
+      "visible_variant_label": "",
+      "variant_display": "Canzoneri 2013 amputation/prosthesis PPS",
+      "primary_category": "missing_publication_parameters",
+      "category_label": "Missing publication parameters",
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 1,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "exact trial count and tactile calibration table from full paper"
+              }
+            ]
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "exact trial count and tactile calibration table from full paper"
+        }
+      ],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/canzoneri_2013_amputation_prosthesis/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "canzoneri_2013_tool_use_reshaping",
+      "title": "Canzoneri 2013 tool-use PPS reshaping",
+      "citation": "Canzoneri, E., Ubaldi, S., Rastelli, V., Finisguerra, A., Bassolino, M., & Serino, A. (2013). Tool-use reshapes the boundaries of body and peripersonal space representations. Experimental Brain Research, 228, 25-42.",
+      "doi": "10.1007/s00221-013-3532-2",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "audio_tactile_tool_use_plasticity",
+      "visible_variant_label": "",
+      "variant_display": "Canzoneri 2013 tool-use PPS reshaping",
+      "primary_category": "missing_publication_parameters",
+      "category_label": "Missing publication parameters",
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 1,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "exact trial count and ITI table from full paper"
+              }
+            ]
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "exact trial count and ITI table from full paper"
+        }
+      ],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/canzoneri_2013_tool_use_reshaping/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "canzoneri_2012_dynamic_sounds",
+      "title": "Dynamic sounds capture PPS boundaries",
+      "citation": "Canzoneri, E., Magosso, E., & Serino, A. (2012). Dynamic sounds capture the boundaries of peripersonal space representation in humans. PLoS ONE, 7(9), e44306.",
+      "doi": "10.1371/journal.pone.0044306",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "canonical_dynamic_audio_tactile_pps",
+      "visible_variant_label": "",
+      "variant_display": "Dynamic sounds capture PPS boundaries",
+      "primary_category": "toolkit_structural_gap",
+      "category_label": "Toolkit structural gap",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 3,
+      "unsupported_structure_count": 1,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "exact original SoundForge exponential gain/envelope files"
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "direction-coupled tactile-only T0/T6 baseline trials"
+              }
+            ]
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": false,
+            "field_count": 6,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "voice-key response capture"
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "electrical tactile threshold calibration"
+              }
+            ]
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "exact original SoundForge exponential gain/envelope files"
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "voice-key response capture"
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "electrical tactile threshold calibration"
+        }
+      ],
+      "unsupported_toolkit_structures": [
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "direction-coupled tactile-only T0/T6 baseline trials"
+        }
+      ],
+      "profile_parameters_manifest": "assets/preloads/canzoneri_2012_dynamic_sounds/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "tonelli_2019_echolocation",
+      "title": "Enhanced audio-tactile PPS after echolocation training",
+      "citation": "Tonelli, A., et al. (2019). Enhanced audio-tactile multisensory interaction in a peripersonal task after echolocation. Experimental Brain Research.",
+      "doi": "10.1007/s00221-019-05469-3",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "",
+      "visible_variant_label": "",
+      "variant_display": "Enhanced audio-tactile PPS after echolocation training",
+      "primary_category": "toolkit_structural_gap",
+      "category_label": "Toolkit structural gap",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 1,
+      "unsupported_structure_count": 1,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 5,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "apparatus-specific seven-speaker switching/timing details"
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "apparatus-specific seven-speaker switching/timing details"
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "apparatus-specific seven-speaker switching/timing details"
+        }
+      ],
+      "unsupported_toolkit_structures": [
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "apparatus-specific seven-speaker switching/timing details"
+        }
+      ],
+      "profile_parameters_manifest": "assets/preloads/tonelli_2019_echolocation/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "ferri_2015_artificial_looming_valence",
+      "title": "Ferri 2015 artificial emotional looming sounds",
+      "citation": "Ferri, F., Costantini, M., Tajadura-Jimenez, A., Valjamae, A., & Vastano, R. (2015). Emotion-inducing approaching sounds shape the boundaries of multisensory peripersonal space. Neuropsychologia, 70, 468-475.",
+      "doi": "10.1016/j.neuropsychologia.2015.03.001",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "audio_tactile_looming_valence",
+      "visible_variant_label": "A",
+      "variant_display": "Ferri 2015 artificial emotional looming sounds - Variant A",
+      "primary_category": "missing_publication_parameters",
+      "category_label": "Missing publication parameters",
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 2,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": false,
+            "field_count": 5,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "exact auditory files"
+              }
+            ]
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "paper-specific gain envelope"
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "0",
+          "parameter": "profile_gap",
+          "reason": "exact auditory files"
+        },
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "paper-specific gain envelope"
+        }
+      ],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/ferri_2015_artificial_looming_valence/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "ferri_2015_ecological_looming_valence",
+      "title": "Ferri 2015 ecological emotional looming sounds",
+      "citation": "Ferri, F., Costantini, M., Tajadura-Jimenez, A., Valjamae, A., & Vastano, R. (2015). Emotion-inducing approaching sounds shape the boundaries of multisensory peripersonal space. Neuropsychologia, 70, 468-475.",
+      "doi": "10.1016/j.neuropsychologia.2015.03.001",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "audio_tactile_ecological_valence",
+      "visible_variant_label": "B",
+      "variant_display": "Ferri 2015 ecological emotional looming sounds - Variant B",
+      "primary_category": "missing_publication_parameters",
+      "category_label": "Missing publication parameters",
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 2,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 6,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "licensed ecological sounds"
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "exact amplitude envelopes"
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "licensed ecological sounds"
+        },
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "exact amplitude envelopes"
+        }
+      ],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/ferri_2015_ecological_looming_valence/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "galli_2015_wheelchair_full_body",
+      "title": "Galli 2015 wheelchair full-body PPS",
+      "citation": "Galli, G., Noel, J. P., Canzoneri, E., Blanke, O., & Serino, A. (2015). The wheelchair as a full-body tool extending the peripersonal space. Frontiers in Psychology, 6, 639.",
+      "doi": "10.3389/fpsyg.2015.00639",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "",
+      "visible_variant_label": "",
+      "variant_display": "Galli 2015 wheelchair full-body PPS",
+      "primary_category": "toolkit_structural_gap",
+      "category_label": "Toolkit structural gap",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 1,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "speaker-array Gaussian amplitude control"
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [],
+      "unsupported_toolkit_structures": [
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "speaker-array Gaussian amplitude control"
+        }
+      ],
+      "profile_parameters_manifest": "assets/preloads/galli_2015_wheelchair_full_body/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "lerner_2021_3d_audio_tactile_boundary",
+      "title": "Lerner 2021 3D audio-tactile PPS boundary",
+      "citation": "Lerner, F., Tahar, G., Bar, A., Koren, O., & Flash, T. (2021). VR Setup to Assess Peripersonal Space Audio-Tactile 3D Boundaries. Frontiers in Virtual Reality, 2, 644214.",
+      "doi": "10.3389/frvir.2021.644214",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "",
+      "visible_variant_label": "",
+      "variant_display": "Lerner 2021 3D audio-tactile PPS boundary",
+      "primary_category": "toolkit_structural_gap",
+      "category_label": "Toolkit structural gap",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 1,
+      "unsupported_structure_count": 2,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": false,
+            "field_count": 6,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "body-scaled distance mode"
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "exact Unity/3D Tune-In stimulus engine behavior"
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "exact Unity/3D Tune-In stimulus engine behavior"
+              }
+            ]
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "0",
+          "parameter": "profile_gap",
+          "reason": "exact Unity/3D Tune-In stimulus engine behavior"
+        }
+      ],
+      "unsupported_toolkit_structures": [
+        {
+          "segment": "0",
+          "parameter": "profile_gap",
+          "reason": "body-scaled distance mode"
+        },
+        {
+          "segment": "0",
+          "parameter": "profile_gap",
+          "reason": "exact Unity/3D Tune-In stimulus engine behavior"
+        }
+      ],
+      "profile_parameters_manifest": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "noel_2015_walking_full_body_action",
+      "title": "Noel 2015 walking full-body action PPS",
+      "citation": "Noel, J. P., Grivaz, P., Marmaroli, P., Lissek, H., Blanke, O., & Serino, A. (2015). Full body action remapping of peripersonal space: the case of walking. Neuropsychologia, 70, 375-384.",
+      "doi": "10.1016/j.neuropsychologia.2014.08.030",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "",
+      "visible_variant_label": "",
+      "variant_display": "Noel 2015 walking full-body action PPS",
+      "primary_category": "missing_publication_parameters",
+      "category_label": "Missing publication parameters",
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 1,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "exact sound distances and trial counts"
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "exact sound distances and trial counts"
+        }
+      ],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/noel_2015_walking_full_body_action/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "serino_2015_front_back_trunk_exp2",
+      "title": "Serino 2015 front/back peri-trunk Experiment 2",
+      "citation": "Serino, A., Noel, J. P., Galli, G., Canzoneri, E., Marmaroli, P., Lissek, H., & Blanke, O. (2015). Body part-centered and full body-centered peripersonal space representations. Scientific Reports, 5, 18603.",
+      "doi": "10.1038/srep18603",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "",
+      "visible_variant_label": "A",
+      "variant_display": "Serino 2015 front/back peri-trunk Experiment 2 - Variant A",
+      "primary_category": "toolkit_structural_gap",
+      "category_label": "Toolkit structural gap",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 1,
+      "unsupported_structure_count": 1,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "13-distance internal schedule"
+              }
+            ]
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "physical 16-speaker array"
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "0",
+          "parameter": "profile_gap",
+          "reason": "13-distance internal schedule"
+        }
+      ],
+      "unsupported_toolkit_structures": [
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "physical 16-speaker array"
+        }
+      ],
+      "profile_parameters_manifest": "assets/preloads/serino_2015_front_back_trunk_exp2/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "serino_2015_peri_hand_exp3",
+      "title": "Serino 2015 peri-hand PPS Experiment 3",
+      "citation": "Serino, A., Noel, J. P., Galli, G., Canzoneri, E., Marmaroli, P., Lissek, H., & Blanke, O. (2015). Body part-centered and full body-centered peripersonal space representations. Scientific Reports, 5, 18603.",
+      "doi": "10.1038/srep18603",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "",
+      "visible_variant_label": "B",
+      "variant_display": "Serino 2015 peri-hand PPS Experiment 3 - Variant B",
+      "primary_category": "toolkit_structural_gap",
+      "category_label": "Toolkit structural gap",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 1,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "lateralized hand coordinate"
+              }
+            ]
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [],
+      "unsupported_toolkit_structures": [
+        {
+          "segment": "0",
+          "parameter": "profile_gap",
+          "reason": "lateralized hand coordinate"
+        }
+      ],
+      "profile_parameters_manifest": "assets/preloads/serino_2015_peri_hand_exp3/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "serino_2015_peri_trunk_exp1",
+      "title": "Serino 2015 peri-trunk PPS Experiment 1",
+      "citation": "Serino, A., Noel, J. P., Galli, G., Canzoneri, E., Marmaroli, P., Lissek, H., & Blanke, O. (2015). Body part-centered and full body-centered peripersonal space representations. Scientific Reports, 5, 18603.",
+      "doi": "10.1038/srep18603",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "",
+      "visible_variant_label": "C",
+      "variant_display": "Serino 2015 peri-trunk PPS Experiment 1 - Variant C",
+      "primary_category": "gui_recreatable",
+      "category_label": "GUI-recreatable",
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "gui_recreatable": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "segment_1_to_6_materializable": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": true,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/serino_2015_peri_trunk_exp1/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "serino_2015_toolless_sync_training",
+      "title": "Serino 2015 synchronous far audio-tactile PPS training",
+      "citation": "Serino, A., Canzoneri, E., Marzolla, M., di Pellegrino, G., & Magosso, E. (2015). Extending peripersonal space representation without tool-use: evidence from a combined behavioral-computational approach. Frontiers in Behavioral Neuroscience, 9, 4.",
+      "doi": "10.3389/fnbeh.2015.00004",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "audio_tactile_training_plasticity",
+      "visible_variant_label": "",
+      "variant_display": "Serino 2015 synchronous far audio-tactile PPS training",
+      "primary_category": "missing_publication_parameters",
+      "category_label": "Missing publication parameters",
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 2,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": false,
+            "field_count": 6,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "electrocutaneous tactile calibration"
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "voice-key response capture"
+              }
+            ]
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "electrocutaneous tactile calibration"
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "voice-key response capture"
+        }
+      ],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/serino_2015_toolless_sync_training/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "taffou_2014_cynophobic_rear_looming",
+      "title": "Taffou 2014 rear-field dog/sheep looming PPS",
+      "citation": "Taffou, M., & Viaud-Delmon, I. (2014). Cynophobic Fear Adaptively Extends Peri-Personal Space. Frontiers in Psychiatry, 5, 122.",
+      "doi": "10.3389/fpsyt.2014.00122",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "",
+      "visible_variant_label": "",
+      "variant_display": "Taffou 2014 rear-field dog/sheep looming PPS",
+      "primary_category": "toolkit_structural_gap",
+      "category_label": "Toolkit structural gap",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 2,
+      "unsupported_structure_count": 1,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": false,
+            "field_count": 5,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "exact dog/sheep audio"
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "left/right rear hemifield as separate trajectories"
+              }
+            ]
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "LISTEN HRTF rather than bundled FABIAN"
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "0",
+          "parameter": "profile_gap",
+          "reason": "exact dog/sheep audio"
+        },
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "LISTEN HRTF rather than bundled FABIAN"
+        }
+      ],
+      "unsupported_toolkit_structures": [
+        {
+          "segment": "0",
+          "parameter": "profile_gap",
+          "reason": "left/right rear hemifield as separate trajectories"
+        }
+      ],
+      "profile_parameters_manifest": "assets/preloads/taffou_2014_cynophobic_rear_looming/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "teneggi_2013_social_face_pps",
+      "title": "Teneggi 2013 social modulation face PPS",
+      "citation": "Teneggi, C., Canzoneri, E., di Pellegrino, G., & Serino, A. (2013). Social modulation of peripersonal space boundaries. Current Biology, 23(5), 406-411.",
+      "doi": "10.1016/j.cub.2013.01.043",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "face_audio_tactile_social_context",
+      "visible_variant_label": "",
+      "variant_display": "Teneggi 2013 social modulation face PPS",
+      "primary_category": "missing_publication_parameters",
+      "category_label": "Missing publication parameters",
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 1,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": false,
+            "field_count": 6,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "exact distance/timing table from supplement"
+              }
+            ]
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "0",
+          "parameter": "profile_gap",
+          "reason": "exact distance/timing table from supplement"
+        }
+      ],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/teneggi_2013_social_face_pps/01_profile/profile_parameters_manifest.json"
+    }
+  ]
+}

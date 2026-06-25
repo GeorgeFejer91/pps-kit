@@ -1,0 +1,342 @@
+{
+  "schema": "pps-preload-trajectory-inventory.v1",
+  "template_id": "lerner_2021_3d_audio_tactile_boundary",
+  "trajectories": [
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Dynamic pink 3D sound",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 120.0,
+        "end_distance_cm": 1.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 5.5,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.19,
+        "coordinate_mode": "cartesian",
+        "path_direction": "custom",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.03923,
+          "z_m": 0.6
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.00866,
+          "z_m": 0.005
+        }
+      },
+      "source_labels": [
+        "Dynamic pink 3D sound",
+        "Dynamic pink 3D sound - direction 04",
+        "Flat white 3D sound",
+        "Flat white 3D sound - direction 04"
+      ],
+      "tone_types": [
+        "pink",
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound.wav",
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_04.wav",
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound.wav",
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_04.wav"
+      ]
+    },
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Dynamic pink 3D sound - direction 02",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 120.0,
+        "end_distance_cm": 1.0,
+        "start_rotation_deg": 90.0,
+        "end_rotation_deg": 90.0,
+        "movement_duration_s": 5.5,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.19,
+        "coordinate_mode": "cartesian",
+        "path_direction": "custom",
+        "start": {
+          "x_m": 0.6,
+          "y_m": 0.0,
+          "z_m": 1.03923
+        },
+        "end": {
+          "x_m": 0.005,
+          "y_m": 0.0,
+          "z_m": 0.00866
+        }
+      },
+      "source_labels": [
+        "Dynamic pink 3D sound - direction 02",
+        "Dynamic pink 3D sound - direction 11",
+        "Flat white 3D sound - direction 02",
+        "Flat white 3D sound - direction 11"
+      ],
+      "tone_types": [
+        "pink",
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_02.wav",
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_11.wav",
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_02.wav",
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_11.wav"
+      ]
+    },
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Dynamic pink 3D sound - direction 03",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 120.0,
+        "end_distance_cm": 1.0,
+        "start_rotation_deg": 60.0,
+        "end_rotation_deg": 60.0,
+        "movement_duration_s": 5.5,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.19,
+        "coordinate_mode": "cartesian",
+        "path_direction": "custom",
+        "start": {
+          "x_m": 1.03923,
+          "y_m": 0.6,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.00866,
+          "y_m": 0.005,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Dynamic pink 3D sound - direction 03",
+        "Flat white 3D sound - direction 03"
+      ],
+      "tone_types": [
+        "pink",
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_03.wav",
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_03.wav"
+      ]
+    },
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Dynamic pink 3D sound - direction 05",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 120.0,
+        "end_distance_cm": 1.0,
+        "start_rotation_deg": 270.0,
+        "end_rotation_deg": 270.0,
+        "movement_duration_s": 5.5,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.19,
+        "coordinate_mode": "cartesian",
+        "path_direction": "custom",
+        "start": {
+          "x_m": -0.6,
+          "y_m": 0.0,
+          "z_m": 1.03923
+        },
+        "end": {
+          "x_m": -0.005,
+          "y_m": 0.0,
+          "z_m": 0.00866
+        }
+      },
+      "source_labels": [
+        "Dynamic pink 3D sound - direction 05",
+        "Dynamic pink 3D sound - direction 08",
+        "Flat white 3D sound - direction 05",
+        "Flat white 3D sound - direction 08"
+      ],
+      "tone_types": [
+        "pink",
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_05.wav",
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_08.wav",
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_05.wav",
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_08.wav"
+      ]
+    },
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Dynamic pink 3D sound - direction 06",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 120.0,
+        "end_distance_cm": 1.0,
+        "start_rotation_deg": 120.0,
+        "end_rotation_deg": 120.0,
+        "movement_duration_s": 5.5,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.19,
+        "coordinate_mode": "cartesian",
+        "path_direction": "custom",
+        "start": {
+          "x_m": 1.03923,
+          "y_m": -0.6,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.00866,
+          "y_m": -0.005,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Dynamic pink 3D sound - direction 06",
+        "Flat white 3D sound - direction 06"
+      ],
+      "tone_types": [
+        "pink",
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_06.wav",
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_06.wav"
+      ]
+    },
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Dynamic pink 3D sound - direction 07",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 120.0,
+        "end_distance_cm": 1.0,
+        "start_rotation_deg": 180.0,
+        "end_rotation_deg": 180.0,
+        "movement_duration_s": 5.5,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.19,
+        "coordinate_mode": "cartesian",
+        "path_direction": "custom",
+        "start": {
+          "x_m": 0.0,
+          "y_m": -1.03923,
+          "z_m": -0.6
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": -0.00866,
+          "z_m": -0.005
+        }
+      },
+      "source_labels": [
+        "Dynamic pink 3D sound - direction 07",
+        "Dynamic pink 3D sound - direction 10",
+        "Flat white 3D sound - direction 07",
+        "Flat white 3D sound - direction 10"
+      ],
+      "tone_types": [
+        "pink",
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_07.wav",
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_10.wav",
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_07.wav",
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_10.wav"
+      ]
+    },
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Dynamic pink 3D sound - direction 09",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 120.0,
+        "end_distance_cm": 1.0,
+        "start_rotation_deg": 240.0,
+        "end_rotation_deg": 240.0,
+        "movement_duration_s": 5.5,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.19,
+        "coordinate_mode": "cartesian",
+        "path_direction": "custom",
+        "start": {
+          "x_m": -1.03923,
+          "y_m": -0.6,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": -0.00866,
+          "y_m": -0.005,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Dynamic pink 3D sound - direction 09",
+        "Flat white 3D sound - direction 09"
+      ],
+      "tone_types": [
+        "pink",
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_09.wav",
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_09.wav"
+      ]
+    },
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Dynamic pink 3D sound - direction 12",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 120.0,
+        "end_distance_cm": 1.0,
+        "start_rotation_deg": 300.0,
+        "end_rotation_deg": 300.0,
+        "movement_duration_s": 5.5,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.19,
+        "coordinate_mode": "cartesian",
+        "path_direction": "custom",
+        "start": {
+          "x_m": -1.03923,
+          "y_m": 0.6,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": -0.00866,
+          "y_m": 0.005,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Dynamic pink 3D sound - direction 12",
+        "Flat white 3D sound - direction 12"
+      ],
+      "tone_types": [
+        "pink",
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Dynamic_pink_3D_sound_-_direction_12.wav",
+        "assets/preloads/lerner_2021_3d_audio_tactile_boundary/02_looming_stimuli/looming_Flat_white_3D_sound_-_direction_12.wav"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "noel_2015_bodily_self",
+  "assets": [
+    {
+      "label": "Looming sound",
+      "path": "assets/preloads/noel_2015_bodily_self/02_looming_stimuli/looming_Looming_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/noel_2015_bodily_self/02_looming_stimuli/looming_Looming_sound.wav",
+      "sha256": "8e4f54c9c7a1203a23f7692768ebe76131a387aa9d0760d32bcbad9494cecbaa",
+      "duration_s": 1.14,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Looming sound",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 90.0,
+        "end_distance_cm": 15.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 1.14,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.75,
+        "coordinate_mode": "polar",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 0.9,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.15,
+          "z_m": 0.0
+        }
+      }
+    }
+  ]
+}

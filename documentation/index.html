@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PPS Toolkit Documentation</title>
+  <meta name="description" content="PPS Toolkit documentation for local audio-tactile peripersonal-space experiment design and runner handoff.">
+  <link rel="icon" type="image/png" href="../src/peripersonal_space_toolkit/dashboard/pps_toolkit_icon.png">
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      overflow: hidden;
+      background: #f4f5f1;
+    }
+
+    .dashboard-frame {
+      display: block;
+      width: 100%;
+      height: 100dvh;
+      border: 0;
+      background: #f4f5f1;
+    }
+
+    .fallback {
+      position: fixed;
+      inset: auto 1rem 1rem 1rem;
+      z-index: 1;
+      padding: 0.75rem 1rem;
+      border: 1px solid #ccd3cb;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #202621;
+      font-family: "Aptos", "Noto Sans", "Helvetica Neue", sans-serif;
+      box-shadow: 0 10px 24px rgba(21, 28, 24, 0.12);
+    }
+
+    .fallback a {
+      color: #246b55;
+      font-weight: 700;
+    }
+
+    @media (scripting: enabled) {
+      .fallback {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <iframe
+    class="dashboard-frame"
+    title="PPS Toolkit Documentation"
+    src="../src/peripersonal_space_toolkit/dashboard/index.html?page=documentation&v=20260624-study5-profile-refresh"
+  ></iframe>
+  <noscript>
+    <div class="fallback">
+      JavaScript is required for the documentation page.
+      <a href="../src/peripersonal_space_toolkit/dashboard/index.html?page=documentation&v=20260624-study5-profile-refresh">Open documentation directly</a>.
+    </div>
+  </noscript>
+</body>
+</html>

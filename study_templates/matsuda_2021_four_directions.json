@@ -2,16 +2,16 @@
   "template_id": "matsuda_2021_four_directions",
   "title": "Front, rear, left, and right audio-tactile PPS",
   "citation": "Matsuda, Y., et al. (2021). Peripersonal space in the front, rear, left and right directions for audio-tactile multisensory integration. Scientific Reports.",
-  "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8163804/",
-  "doi": "10.1038/s41598-021-92008-6",
+  "source_url": "https://www.nature.com/articles/s41598-021-90784-5",
+  "doi": "10.1038/s41598-021-90784-5",
   "verification_status": "verified",
-  "notes": "Four body-relative direction blocks. The template represents one direction block; duplicate with azimuth/body orientation changes for front, rear, left, and right.",
+  "notes": "Four body-relative direction blocks. The template represents one direction block; duplicate with azimuth/body orientation changes for front, rear, left, and right. Speaker apparatus references are treated as original analog setup provenance while the profile recreates reported motion with the binaural renderer.",
   "design": {
     "name": "Matsuda 2021 four-direction PPS block",
     "sofa_file": "",
     "noises": [
       {
-        "label": "Pink speaker motion",
+        "label": "Pink moving sound",
         "noise_type": "pink",
         "azimuth_deg": 0.0,
         "elevation_deg": 0.0,
@@ -45,6 +45,25 @@
       "baseline_soa_values_ms": [-700, 3700],
       "respiratory_phases": ["Any"],
       "blocks": 4,
+      "trial_strips": [
+        {
+          "strip_id": "matsuda-sound-motion-row",
+          "label": "Sound-motion PPS trial",
+          "audio_tactile_percentage": 100.0,
+          "catch_percentage": 0.0,
+          "baseline_percentage": 0.0,
+          "elements": [
+            {
+              "element_id": "matsuda-looming-source",
+              "kind": "looming_stimulus",
+              "label": "Pink moving sound",
+              "source_label": "Pink moving sound",
+              "source_labels": ["Pink moving sound"],
+              "randomized": true
+            }
+          ]
+        }
+      ],
       "participants": 20,
       "random_seed": 20210501
     }

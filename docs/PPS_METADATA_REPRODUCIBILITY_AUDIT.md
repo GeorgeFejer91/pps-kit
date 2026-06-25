@@ -4,6 +4,8 @@ Status: GUI-focused metadata checklist for recreating published audio-tactile pe
 
 Non-GUI details such as participant demographics, ethics text, complete clinical history, full VR scene aesthetics, and general theory are intentionally excluded unless they change an audio-tactile stimulus, trial schedule, event marker, or analysis setting.
 
+For the current per-study stress test of bundled profiles, including trial-family types, SOA semantics, jitter/procedure gaps, and a compact implementation strategy, see [PUBLISHED_PARADIGM_STRESS_TEST.md](PUBLISHED_PARADIGM_STRESS_TEST.md).
+
 ## Scope
 
 The target is a reusable GUI for audio-tactile PPS experiments: speaker-based, headphone/HRTF, SOFA/HRIR, imported looming audio, generated noise trajectories, tactile go/no-go events, block randomization, response capture, XDF events, and immediate PPS curve fitting.
@@ -11,7 +13,7 @@ The target is a reusable GUI for audio-tactile PPS experiments: speaker-based, h
 A field belongs in this checklist only if it can become one of these app surfaces:
 
 - Stimulus Design tab
-- Trial Design tab
+- Trial Assembler tab
 - Runner/Event Capture tab
 - Analysis tab
 - Template metadata/provenance panel
@@ -27,28 +29,30 @@ Holmes et al. (2020) remains the systematic anchor for this audit because it rev
 |---|---:|---|
 | design name | implemented | Saved/preloaded experiment identity. |
 | study template preload | implemented | Lets users load published paradigms as starting points. |
-| SOFA/HRIR file path | implemented | Enables reproducible spatial audio rendering. |
+| SOFA/HRIR file path | model-only | Fixed FABIAN/TU path is stored for generation/export, but not exposed as an experimenter control. |
 | noise label | implemented | Names condition-level auditory stimuli. |
-| noise type | implemented | Supports pink, blue, white, and brown noise variants. |
+| noise type | implemented | Supports pink, blue, violet, white, and brown noise variants. |
 | auditory azimuth | implemented | Required for front/rear/left/right and lateral PPS designs. |
 | auditory elevation | implemented | Required for 3D PPS designs such as Lerner et al. |
 | auditory gain | implemented | Encodes relative intensity between sound conditions. |
-| snap noise locations to SOFA grid | implemented | Prevents impossible or unsupported HRIR coordinates. |
-| custom looming audio file | implemented | Lets users preload published or externally generated looming stimuli. |
+| snap noise locations to SOFA grid | model-only | HRIR alignment belongs in generation/validation, not in the routine experimenter UI. |
+| custom looming audio file | implemented | Lets users import local dry tones for trajectory spatialization or preserve published/control looming stimuli as already-baked audio. |
 | custom prestimulus audio file | implemented | Lets users preload instruction, pre-cue, or baseline/prestimulus files. |
 | target imported audio duration | implemented | Useful for enforcing fixed 4 s imported chunks. |
-| trajectory start radius | implemented | Defines far/initial sound distance. |
-| trajectory end radius | implemented | Defines near/final sound distance. |
-| trajectory direction | implemented | Supports approach, recede, lateral, and custom paths. |
-| path length | implemented | Defines physical/virtual distance traveled by the auditory stimulus. |
-| propagation speed | implemented | Needed for Canzoneri/Noel/Tonelli/Lerner-style looming timing. |
-| start/end azimuth | implemented | Supports changing horizontal direction along the path. |
-| elevation | implemented | Supports 3D trajectory height. |
+| trajectory starting point distance | implemented | Defines the initial sound-source distance from the listener in cm. |
+| trajectory starting point rotation | implemented | Defines the initial sound-source angle around the listener with full 0-360 degree input. |
+| trajectory end point distance | implemented | Defines the final sound-source distance from the listener in cm. |
+| trajectory end point rotation | implemented | Defines the final sound-source angle around the listener with full 0-360 degree input. |
+| trajectory start/end X/Y/Z | model-only | Derived from distance/rotation controls and kept in saved design/export data. |
+| trajectory direction | model-only | Stored for compatibility; the current GUI preview uses the explicit start/end points and a linear path. |
+| path length | implemented | Derived from the explicit start/end points and defines physical/virtual distance traveled by the auditory stimulus. |
+| propagation speed | implemented | Derived from path length and movement duration for Canzoneri/Noel/Tonelli/Lerner-style looming timing. |
+| trajectory elevation | model-only | The current GUI keeps endpoint movement horizontal because the visible controls must match the supported SOFA generation path. |
 | lead/tail padding | implemented | Controls silence/prestimulus and poststimulus audio padding. |
 | sample rate | model-only | Stored in the model, but not yet exposed as a GUI control. |
 | inverse-square gain law | model-only | Stored in the model, but not yet exposed as a GUI control. |
 
-### Trial Design Tab
+### Trial Assembler Tab
 
 | GUI field | Current status | Why it matters for PPS replication |
 |---|---:|---|
@@ -96,11 +100,11 @@ Current trajectory duration is derived from path length, speed, and padding, whi
 
 2. Auditory envelope and gain law
 
-Add controls for constant intensity, linear rising intensity, inverse-square, two-speaker crossfade, custom start/end SPL, and custom gain curve. This is essential for Canzoneri, Ferri, Barumerli, and speaker-array variants.
+Add controls for constant intensity, linear rising intensity, inverse-square, custom start/end SPL, and custom gain curve. Two-speaker analog setups should be reconstructed from reported trajectory/timing parameters with the binaural renderer rather than added as a separate audio-source type; exact original gain/envelope files remain provenance when author-stimulus equivalence is required. This is most important for Canzoneri/Ferri-style gain envelopes and true speaker-array variants.
 
 3. Spatial rendering mode
 
-Add a dropdown for physical speakers, stereo crossfade, SOFA/HRIR binaural, HMD/ambisonic, imported baked audio, and intensity-only looming. The current SOFA field is useful, but the app should know how the sound is supposed to be rendered.
+If the app later supports multiple rendering setups, add an internal protocol/rendering profile for physical multi-speaker arrays, analog-apparatus provenance/gain envelopes, SOFA/HRIR binaural, HMD/ambisonic, imported baked audio, and intensity-only looming. For the current workflow, the FABIAN/TU SOFA HRIR source remains fixed under the hood.
 
 4. Tactile stimulus specification
 
@@ -120,7 +124,7 @@ Add prestimulus interval, inter-trial interval distribution, response window, an
 
 8. Block-level factor assignment
 
-Current blocks define which trial types are allowed. Add block-specific factors: allowed noise types, motion directions, body sites, azimuths/directions, SOA sets, and baseline/catch policy. This would let the GUI reproduce Matsuda-style directional blocks and Barumerli-style condition blocks cleanly.
+Current blocks define which trial types are allowed. Add block-specific factors only when they affect PPS task execution: allowed noise types, motion directions, body sites, azimuths/directions, SOA sets, and baseline/catch policy. This would let the toolkit reproduce Matsuda-style directional blocks, Lamia-style looming/receding source factors, front/back body mapping, and valence sound factors without treating clinical/intervention context as a blocker.
 
 9. Body-scaled distance mode
 
@@ -146,13 +150,13 @@ Add file hash, sample rate, duration, channel count, license/provenance, and val
 
 | Study | GUI-ready variables available | GUI-relevant missing fields |
 |---|---|---|
-| Canzoneri, Magosso & Serino (2012) | noise type, duration, near/far trajectory, SOAs, repetitions, catch count, tactile site, tactile pulse duration, sigmoid model | exact noise files, near speaker coordinate, gain/crossfade equation, C.I.R.O script, randomization seed/order, latency values |
+| Canzoneri, Magosso & Serino (2012) | noise type, duration, near/far trajectory, SOAs, repetitions, catch count, tactile site, tactile pulse duration, sigmoid model | direction-coupled T0/T6 baseline subtype, exact original gain/envelope files, C.I.R.O script, latency values |
 | Noel et al. (2015) | front/back trajectory labels, velocity, SOAs, distances, tactile site, baseline/catch counts, response device | exact audio rendering files, randomization, tactile calibration, latency, full baseline subtype details |
 | Ferri et al. (2015) | affective/custom sounds, 3000 ms duration, tactile site, 10 SOAs, catch counts, sigmoid boundary | proprietary IADS assets, exact artificial sounds, envelope/gain curve, randomization, Matlab/Cogent scripts, latency |
 | Matsuda et al. (2021) | direction blocks, approach/recede, SOAs, chest tactile site, trial counts, block counterbalancing | exact Unity audio settings, assets, tactile stim specs, randomization seed/order, latency |
 | Lerner, Tahar, Bar, Koren & Flash (2021) | 3D azimuth/elevation/radius, SOFA/HRIR-like spatialization, pink noise, 5.5 s duration, 22 cm/s speed, sternum tactile site, arm-length-scaled distances, sigmoid fit | Unity/MATLAB scripts, 3D Tune-In parameter files, HRIR/ITD values, exact trial table, randomization, latency, tactile calibration values |
 | Tonelli et al. (2019) | seven distances, white-noise motion, 3 s duration, neck tactile site, catch/unimodal counts, response mode | exact speaker-control code, white-noise files, ITI distribution, randomization, latency |
-| Barumerli, Geronazzo & Cesari (2026), Exp. 1/2 | duration, SOAs, approach/recede, tactile body sites, repetitions, catch counts, baseline SOAs, block factors, GLMM/linear analysis need | exact samples, E-Prime scripts, envelope equation/SPL details, randomization, latency |
+| Lamia, Shabani & Candidi (2026), Exp. 1/2 | duration, SOAs, approach/recede, tactile body sites, repetitions, catch counts, baseline SOAs, GLMM/linear analysis need | exact samples, E-Prime scripts, envelope equation/SPL details, randomization, latency |
 | Holmes et al. (2020) | static near/far template fields, response rules, trial counts, public code/data claim | depends on OSF completeness; less useful for dynamic looming generation |
 
 ## GUI Metadata To Store Per Saved Experiment
@@ -177,4 +181,4 @@ The saved design package should contain only GUI-operational metadata:
 - Matsuda et al. (2021), Scientific Reports: https://www.nature.com/articles/s41598-021-90784-5
 - Lerner, Tahar, Bar, Koren & Flash (2021), Frontiers in Virtual Reality: https://doi.org/10.3389/frvir.2021.644214
 - Tonelli et al. (2019), Experimental Brain Research: https://link.springer.com/article/10.1007/s00221-019-05469-3
-- Barumerli, Geronazzo & Cesari (2026), Scientific Reports: https://www.nature.com/articles/s41598-026-36796-5
+- Lamia, Shabani & Candidi (2026), Scientific Reports: https://www.nature.com/articles/s41598-026-36796-5

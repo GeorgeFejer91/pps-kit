@@ -1,0 +1,47 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "galli_2015_wheelchair_full_body",
+  "repetitions_per_condition": 12,
+  "soa_values_ms": [
+    380,
+    760,
+    1140,
+    1520,
+    1900,
+    2280
+  ],
+  "spatial_values_cm": [
+    171.5,
+    143,
+    114.5,
+    86,
+    57.5,
+    29
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "galli-wheelchair-moving-sound-row",
+      "label": "Wheelchair PPS moving-sound trial",
+      "audio_tactile_percentage": 100.0,
+      "catch_percentage": 0.0,
+      "baseline_percentage": 0.0,
+      "elements": [
+        {
+          "element_id": "galli-wheelchair-moving-sound",
+          "kind": "looming_stimulus",
+          "label": "Wheelchair PPS moving sound",
+          "source_label": "Wheelchair PPS broadband moving sound",
+          "source_labels": [
+            "Wheelchair PPS broadband moving sound",
+            "Wheelchair PPS broadband moving sound - back looming"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 144
+}

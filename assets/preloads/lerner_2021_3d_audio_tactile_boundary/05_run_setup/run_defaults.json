@@ -1,0 +1,9 @@
+{
+  "schema": "pps-preload-run-setup-segment.v1",
+  "template_id": "lerner_2021_3d_audio_tactile_boundary",
+  "blocks": 4,
+  "participants": 8,
+  "random_seed": 20210513,
+  "trial_randomization_strategy": "no_immediate_repeats",
+  "block_order_randomization": "counterbalanced_rotation"
+}

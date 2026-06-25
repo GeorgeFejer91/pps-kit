@@ -16,21 +16,47 @@ dependencies = [
   "soundfile>=0.13.1",
   "sounddevice>=0.4.7",
   "sofar>=1.1",
+  "netCDF4>=1.6",
   "pyaudiowpatch>=0.2.12; platform_system == 'Windows'",
   "pynput>=1.7.7",
+  "pyautogui>=0.9.54",
 ]
 
 [project.optional-dependencies]
 tts = ["kokoro-onnx==0.5.0", "soundfile>=0.13.1"]
 mp3 = ["pydub>=0.25.1"]
-dev = ["pytest>=8.0", "build>=1.2", "Pillow>=10.0"]
+gui = ["PySide6>=6.7,<6.8"]
+lsl = ["pylsl>=1.16"]
+web = ["fastapi>=0.110,<1", "uvicorn>=0.27,<1"]
+xdf = ["pyxdf>=1.17"]
+validation = ["pylsl>=1.16", "pyxdf>=1.17", "pytest>=8.0", "build>=1.2", "Pillow>=10.0", "httpx>=0.27"]
+dev = ["pytest>=8.0", "build>=1.2", "Pillow>=10.0", "httpx>=0.27"]
+package = ["pyinstaller>=6.0,<7"]
 
 [project.scripts]
 pps-generate = "peripersonal_space_toolkit.cli:generate"
-pps-run = "peripersonal_space_toolkit.cli:run"
+pps-render-design = "peripersonal_space_toolkit.cli:render_design"
 pps-decode = "peripersonal_space_toolkit.cli:decode"
 pps-analyze = "peripersonal_space_toolkit.cli:analyze"
-pps-design = "peripersonal_space_toolkit.designer_app:main"
+pps-design = "peripersonal_space_toolkit.qt_designer_app:main"
+pps-audio-stress = "peripersonal_space_toolkit.audio_device_stress:main"
+pps-latency-validate = "peripersonal_space_toolkit.latency_validation:main"
+pps-dashboard = "peripersonal_space_toolkit.dashboard_app:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+peripersonal_space_toolkit = [
+  "viewer/*.html",
+  "viewer/*.js",
+  "viewer/vendor/three/*.js",
+  "viewer/vendor/three/LICENSE",
+  "dashboard/*.html",
+  "dashboard/*.css",
+  "dashboard/*.js",
+  "dashboard/*.png",
+  "assets/*.ico",
+  "assets/*.png",
+  "assets/*.svg",
+]

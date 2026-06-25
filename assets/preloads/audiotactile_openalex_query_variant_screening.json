@@ -1,0 +1,484 @@
+{
+  "schema": "pps-audiotactile-openalex-query-variant-screening.v1",
+  "screened_on": "2026-06-13",
+  "source_summary_file": "artifacts/literature_audit/openalex_query_variant_full_results.json",
+  "screening_scope": "Candidate-like hits from complete OpenAlex query-variant result sets using auditory-tactile, auditory tactile, vibrotactile, looming sound, and near-hand terminology. This is an exhaustiveness supplement to the main OpenAlex broad screen.",
+  "query_count": 9,
+  "unique_returned_record_count": 822,
+  "candidate_like_screened_count": 22,
+  "promoted_to_coverage_count": 2,
+  "linked_or_duplicate_count": 8,
+  "excluded_count": 12,
+  "records": [
+    {
+      "openalex_id": "https://openalex.org/W2092823568",
+      "doi": "https://doi.org/10.1093/neucas/7.2.97",
+      "title": "Auditory Peripersonal Space in Humans: a Case of Auditory-Tactile Extinction",
+      "publication_year": 2001,
+      "type": "article",
+      "host_venue": "Neurocase",
+      "query_hits": [
+        {
+          "query": "\"auditory-tactile\" \"peripersonal space\"",
+          "rank": 3
+        },
+        {
+          "query": "\"auditory tactile\" \"peripersonal space\"",
+          "rank": 3
+        }
+      ],
+      "screening_decision": "promoted_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "ladavas_2001_auditory_tactile_extinction"
+      ],
+      "reason": "Original case report of auditory-tactile extinction as evidence for auditory PPS around the head; promoted as unsupported extinction-response task family."
+    },
+    {
+      "openalex_id": "https://openalex.org/W4255876091",
+      "doi": "https://doi.org/10.1076/neur.7.2.97.16261",
+      "title": "Auditory Peripersonal Space in Humans: a Case of Auditory-Tactile Extinction",
+      "publication_year": 2001,
+      "type": "article",
+      "host_venue": "Neurocase",
+      "query_hits": [
+        {
+          "query": "\"auditory-tactile\" \"peripersonal space\"",
+          "rank": 36
+        },
+        {
+          "query": "\"auditory tactile\" \"peripersonal space\"",
+          "rank": 36
+        }
+      ],
+      "screening_decision": "duplicate_or_supporting_source_linked_to_coverage_record",
+      "linked_literature_record_ids": [
+        "ladavas_2001_auditory_tactile_extinction"
+      ],
+      "reason": "Alternate DOI/source row for the 2001 Neurocase auditory-tactile extinction paper."
+    },
+    {
+      "openalex_id": "https://openalex.org/W4235073128",
+      "doi": "https://doi.org/10.1093/neucas/7.2.103",
+      "title": "Auditory peripersonal space in humans: a case of auditory-tactile extinction",
+      "publication_year": 2001,
+      "type": "article",
+      "host_venue": "Neurocase",
+      "query_hits": [
+        {
+          "query": "\"auditory-tactile\" \"peripersonal space\"",
+          "rank": 12
+        },
+        {
+          "query": "\"auditory tactile\" \"peripersonal space\"",
+          "rank": 12
+        }
+      ],
+      "screening_decision": "duplicate_or_supporting_source_linked_to_coverage_record",
+      "linked_literature_record_ids": [
+        "ladavas_2001_auditory_tactile_extinction"
+      ],
+      "reason": "Duplicate/page-variant source row for the same 2001 Neurocase auditory-tactile extinction paper."
+    },
+    {
+      "openalex_id": "https://openalex.org/W2171356923",
+      "doi": "https://doi.org/10.1162/089892902320474481",
+      "title": "Auditory Peripersonal Space in Humans",
+      "publication_year": 2002,
+      "type": "article",
+      "host_venue": "Journal of Cognitive Neuroscience",
+      "query_hits": [
+        {
+          "query": "\"auditory-tactile\" \"peripersonal space\"",
+          "rank": 1
+        },
+        {
+          "query": "\"auditory tactile\" \"peripersonal space\"",
+          "rank": 1
+        }
+      ],
+      "screening_decision": "promoted_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "farne_ladavas_2002_auditory_pps_humans"
+      ],
+      "reason": "Group neuropsychology paper using near/far and front/back auditory-tactile extinction around the head; promoted as unsupported extinction-response task family."
+    },
+    {
+      "openalex_id": "https://openalex.org/W1988800362",
+      "doi": "https://doi.org/10.1016/j.jphysparis.2004.03.008",
+      "title": "Multisensory contributions to the 3-D representation of visuotactile peripersonal space in humans: evidence from the crossmodal congruency task",
+      "publication_year": 2004,
+      "type": "review",
+      "host_venue": "Journal of Physiology-Paris",
+      "query_hits": [
+        {
+          "query": "\"vibrotactile\" \"peripersonal space\" auditory",
+          "rank": 2
+        }
+      ],
+      "screening_decision": "excluded_review_visual_tactile_or_non_auditory_pps",
+      "linked_literature_record_ids": [],
+      "reason": "Review of visuotactile/crossmodal-congruency PPS rather than a distinct audiotactile task profile."
+    },
+    {
+      "openalex_id": "https://openalex.org/W2122506370",
+      "doi": "https://doi.org/10.1016/j.neuropsychologia.2009.07.025",
+      "title": "Early visual deprivation alters multisensory processing in peripersonal space",
+      "publication_year": 2009,
+      "type": "article",
+      "host_venue": "Neuropsychologia",
+      "query_hits": [
+        {
+          "query": "\"audiotactile\" \"peripersonal space\"",
+          "rank": 2
+        },
+        {
+          "query": "\"auditory-tactile\" \"peripersonal space\"",
+          "rank": 4
+        },
+        {
+          "query": "\"auditory tactile\" \"peripersonal space\"",
+          "rank": 4
+        }
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "tajadura_jimenez_2009_visual_deprivation"
+      ],
+      "reason": "Already tracked early-visual-deprivation auditory/tactile/audiotactile lateralization record."
+    },
+    {
+      "openalex_id": "https://openalex.org/W2273989283",
+      "doi": "https://doi.org/10.1007/s00221-016-4571-2",
+      "title": "Approaching threat modulates visuotactile interactions in peripersonal space",
+      "publication_year": 2016,
+      "type": "article",
+      "host_venue": "Experimental Brain Research",
+      "query_hits": [
+        {
+          "query": "\"peripersonal space\" \"tactile reaction\" sound",
+          "rank": 2
+        },
+        {
+          "query": "\"peripersonal space\" \"tactile\" \"sound\" \"reaction time\"",
+          "rank": 4
+        }
+      ],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "linked_literature_record_ids": [],
+      "reason": "Approaching-threat PPS paper is explicitly visuotactile, not audiotactile."
+    },
+    {
+      "openalex_id": "https://openalex.org/W2752631267",
+      "doi": "https://doi.org/10.1016/j.cortex.2017.08.033",
+      "title": "Social perception of others shapes one's own multisensory peripersonal space",
+      "publication_year": 2017,
+      "type": "article",
+      "host_venue": "Cortex",
+      "query_hits": [
+        {
+          "query": "\"audio-tactile\" \"peripersonal space\"",
+          "rank": 13
+        },
+        {
+          "query": "\"vibrotactile\" \"peripersonal space\" auditory",
+          "rank": 5
+        },
+        {
+          "query": "\"peripersonal space\" \"tactile reaction\" sound",
+          "rank": 3
+        },
+        {
+          "query": "\"peripersonal space\" \"tactile\" \"sound\" \"reaction time\"",
+          "rank": 8
+        }
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "social_perception_2017"
+      ],
+      "reason": "Already tracked social-perception PPS task record; context remains non-blocking."
+    },
+    {
+      "openalex_id": "https://openalex.org/W2992764936",
+      "doi": "https://doi.org/10.1016/j.jneumeth.2019.108534",
+      "title": "Capturing the dynamics of peripersonal space by integrating expectancy effects and sound propagation properties",
+      "publication_year": 2019,
+      "type": "article",
+      "host_venue": "Journal of Neuroscience Methods",
+      "query_hits": [
+        {
+          "query": "\"audiotactile\" \"peripersonal space\"",
+          "rank": 12
+        },
+        {
+          "query": "\"peripersonal space\" \"tactile\" \"sound\" \"reaction time\"",
+          "rank": 15
+        }
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "hobeika_2020_methods"
+      ],
+      "reason": "Already tracked dynamic PPS methods paper requiring expectancy/sound-propagation controls."
+    },
+    {
+      "openalex_id": "https://openalex.org/W2966866071",
+      "doi": "https://doi.org/10.1098/rsos.181878",
+      "title": "Social coding of the multisensory space around us",
+      "publication_year": 2019,
+      "type": "article",
+      "host_venue": "Royal Society Open Science",
+      "query_hits": [
+        {
+          "query": "\"audiotactile\" \"peripersonal space\"",
+          "rank": 31
+        },
+        {
+          "query": "\"looming sound\" tactile \"peripersonal space\"",
+          "rank": 15
+        }
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "social_coding_2019"
+      ],
+      "reason": "Already tracked social-coding PPS task record; context remains non-blocking."
+    },
+    {
+      "openalex_id": "https://openalex.org/W3181668981",
+      "doi": "https://doi.org/10.1101/2020.06.01.127282",
+      "title": "Peripersonal and reaching space differ: evidence from their spatial extent and multisensory facilitation pattern",
+      "publication_year": 2020,
+      "type": "preprint",
+      "host_venue": "bioRxiv (Cold Spring Harbor Laboratory)",
+      "query_hits": [
+        {
+          "query": "\"sounds near the hand\" tactile reaction times",
+          "rank": 7
+        },
+        {
+          "query": "\"peripersonal space\" \"tactile reaction\" sound",
+          "rank": 27
+        }
+      ],
+      "screening_decision": "excluded_query_reference_hit_no_audiotactile_task_evidence",
+      "linked_literature_record_ids": [],
+      "reason": "Preprint/version hit from near-hand reference language; current title/available metadata do not establish an audiotactile PPS task."
+    },
+    {
+      "openalex_id": "https://openalex.org/W4200291518",
+      "doi": "https://doi.org/10.3758/s13414-021-02425-8",
+      "title": "Adaptation to delayed visual feedback of the body movement extends multisensory peripersonal space",
+      "publication_year": 2021,
+      "type": "article",
+      "host_venue": "Attention Perception & Psychophysics",
+      "query_hits": [
+        {
+          "query": "\"audiotactile\" \"peripersonal space\"",
+          "rank": 41
+        }
+      ],
+      "screening_decision": "excluded_visual_or_vr_feedback_no_audiotactile_task",
+      "linked_literature_record_ids": [],
+      "reason": "Delayed visual-feedback/VR body-movement PPS paper; available abstract does not indicate an auditory-tactile PPS stimulus pair."
+    },
+    {
+      "openalex_id": "https://openalex.org/W3133073062",
+      "doi": "https://doi.org/10.3390/brainsci11020255",
+      "title": "Interpersonal Motor Interactions Shape Multisensory Representations of the Peripersonal Space",
+      "publication_year": 2021,
+      "type": "article",
+      "host_venue": "Brain Sciences",
+      "query_hits": [
+        {
+          "query": "\"audio-tactile\" \"peripersonal space\"",
+          "rank": 35
+        },
+        {
+          "query": "\"audiotactile\" \"peripersonal space\"",
+          "rank": 23
+        },
+        {
+          "query": "\"vibrotactile\" \"peripersonal space\" auditory",
+          "rank": 23
+        },
+        {
+          "query": "\"peripersonal space\" \"tactile\" \"sound\" \"reaction time\"",
+          "rank": 30
+        }
+      ],
+      "screening_decision": "excluded_review_theory_or_model",
+      "linked_literature_record_ids": [],
+      "reason": "Perspective review, not a new original task profile; it discusses audio-tactile PPS literature."
+    },
+    {
+      "openalex_id": "https://openalex.org/W3173931308",
+      "doi": "https://doi.org/10.3758/s13423-021-01942-9",
+      "title": "Peripersonal and reaching space differ: Evidence from their spatial extent and multisensory facilitation pattern",
+      "publication_year": 2021,
+      "type": "article",
+      "host_venue": "Psychonomic Bulletin & Review",
+      "query_hits": [
+        {
+          "query": "\"sounds near the hand\" tactile reaction times",
+          "rank": 3
+        },
+        {
+          "query": "\"peripersonal space\" \"tactile reaction\" sound",
+          "rank": 25
+        }
+      ],
+      "screening_decision": "excluded_query_reference_hit_no_audiotactile_task_evidence",
+      "linked_literature_record_ids": [],
+      "reason": "Journal version of the near-hand/reaching-space hit; current metadata did not establish an audiotactile PPS task."
+    },
+    {
+      "openalex_id": "https://openalex.org/W4365145576",
+      "doi": "https://doi.org/10.1038/s41467-023-37575-w",
+      "title": "Peripersonal encoding of forelimb proprioception in the mouse somatosensory cortex",
+      "publication_year": 2023,
+      "type": "article",
+      "host_venue": "Nature Communications",
+      "query_hits": [
+        {
+          "query": "\"vibrotactile\" \"peripersonal space\" auditory",
+          "rank": 43
+        }
+      ],
+      "screening_decision": "excluded_nonhuman_or_non_runner_target",
+      "linked_literature_record_ids": [],
+      "reason": "Mouse proprioception/somatosensory-cortex PPS record, not a human audiotactile PPS task profile."
+    },
+    {
+      "openalex_id": "https://openalex.org/W4387085634",
+      "doi": "https://doi.org/10.3758/s13414-023-02788-0",
+      "title": "The left–right reversed visual feedback of the hand affects multisensory interaction within peripersonal space",
+      "publication_year": 2023,
+      "type": "article",
+      "host_venue": "Attention Perception & Psychophysics",
+      "query_hits": [
+        {
+          "query": "\"peripersonal space\" \"tactile\" \"sound\" \"reaction time\"",
+          "rank": 64
+        }
+      ],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "linked_literature_record_ids": [],
+      "reason": "Left-right reversed visual-feedback paper uses visual feedback and tactile target-location judgments/crossmodal congruency, not an auditory-tactile PPS task."
+    },
+    {
+      "openalex_id": "https://openalex.org/W4387579687",
+      "doi": "https://doi.org/10.3389/fnhum.2023.1203100",
+      "title": "Visual stimuli in the peripersonal space facilitate the spatial prediction of tactile events—A comparison between approach and nearness effects",
+      "publication_year": 2023,
+      "type": "article",
+      "host_venue": "Frontiers in Human Neuroscience",
+      "query_hits": [
+        {
+          "query": "\"peripersonal space\" \"tactile\" \"sound\" \"reaction time\"",
+          "rank": 49
+        }
+      ],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "linked_literature_record_ids": [],
+      "reason": "Visual-stimulus plus tactile prediction task, not auditory-tactile PPS."
+    },
+    {
+      "openalex_id": "https://openalex.org/W4399518123",
+      "doi": "https://doi.org/10.1016/j.chb.2024.108339",
+      "title": "Enhancing bodily self-consciousness in the virtual world with synchronous multisensory stimulation, interoceptive feedback and peripersonal space expansion: A narrative review",
+      "publication_year": 2024,
+      "type": "review",
+      "host_venue": "Computers in Human Behavior",
+      "query_hits": [
+        {
+          "query": "\"audio-tactile\" \"peripersonal space\"",
+          "rank": 63
+        }
+      ],
+      "screening_decision": "excluded_review_theory_or_model",
+      "linked_literature_record_ids": [],
+      "reason": "Narrative review about VR/body self-consciousness and PPS expansion, not a distinct original audiotactile task profile."
+    },
+    {
+      "openalex_id": "https://openalex.org/W4403788252",
+      "doi": "https://doi.org/10.1101/2024.10.25.619776",
+      "title": "Multisensory integration in Peripersonal Space indexes consciousness states in sleep and disorders of consciousness",
+      "publication_year": 2024,
+      "type": "preprint",
+      "host_venue": "bioRxiv (Cold Spring Harbor Laboratory)",
+      "query_hits": [
+        {
+          "query": "\"audiotactile\" \"peripersonal space\"",
+          "rank": 44
+        }
+      ],
+      "screening_decision": "duplicate_or_supporting_source_linked_to_coverage_record",
+      "linked_literature_record_ids": [
+        "cell_reports_medicine_2026_consciousness"
+      ],
+      "reason": "bioRxiv preprint source for the Cell Reports Medicine consciousness-state record already in the ledger."
+    },
+    {
+      "openalex_id": "https://openalex.org/W4416102760",
+      "doi": "https://doi.org/10.31234/osf.io/wmpn4_v1",
+      "title": "Architectural features of the environment shape the multisensory dynamics of peripersonal space remapping",
+      "publication_year": 2025,
+      "type": "preprint",
+      "host_venue": null,
+      "query_hits": [
+        {
+          "query": "\"auditory-tactile\" \"peripersonal space\"",
+          "rank": 42
+        },
+        {
+          "query": "\"auditory tactile\" \"peripersonal space\"",
+          "rank": 42
+        }
+      ],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "linked_literature_record_ids": [],
+      "reason": "OSF DOI row for architectural/VR visuo-tactile PPS remapping preprint."
+    },
+    {
+      "openalex_id": "https://openalex.org/W7113614847",
+      "doi": null,
+      "title": "Architectural features of the environment shape the multisensory dynamics of peripersonal space remapping",
+      "publication_year": 2025,
+      "type": "preprint",
+      "host_venue": "PsyArXiv (OSF Preprints)",
+      "query_hits": [
+        {
+          "query": "\"auditory-tactile\" \"peripersonal space\"",
+          "rank": 43
+        },
+        {
+          "query": "\"auditory tactile\" \"peripersonal space\"",
+          "rank": 43
+        }
+      ],
+      "screening_decision": "excluded_visual_tactile_or_non_auditory_pps",
+      "linked_literature_record_ids": [],
+      "reason": "PsyArXiv source row for architectural/VR visuo-tactile PPS remapping preprint."
+    },
+    {
+      "openalex_id": "https://openalex.org/W7147006552",
+      "doi": "https://doi.org/10.1016/j.xcrm.2026.102705",
+      "title": "Multisensory integration in peripersonal space indexes consciousness states in sleep and disorders of consciousness",
+      "publication_year": 2026,
+      "type": "article",
+      "host_venue": "Cell Reports Medicine",
+      "query_hits": [
+        {
+          "query": "\"audiotactile\" \"peripersonal space\"",
+          "rank": 47
+        }
+      ],
+      "screening_decision": "linked_to_coverage_ledger",
+      "linked_literature_record_ids": [
+        "cell_reports_medicine_2026_consciousness"
+      ],
+      "reason": "Published Cell Reports Medicine consciousness-state audio-tactile PPS record already in the ledger."
+    }
+  ]
+}
