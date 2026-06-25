@@ -90,6 +90,8 @@ from .profile_memory import (
     refresh_project_dependency_hashes,
     update_runner_settings as update_profile_runner_settings,
 )
+
+
 from .templates import (
     DEFAULT_STUDY_TEMPLATE_ID,
     StudyTemplate,
@@ -110,6 +112,37 @@ from .runner_diary import (
     runner_settings_path as diary_runner_settings_path,
     update_runner_settings as update_diary_runner_settings,
 )
+
+
+def _package_static_dir(package_name: str, package_relative: str) -> Path:
+    resource = files(package_name)
+    if isinstance(resource, Path):
+        return resource
+
+    relative_path = Path(*package_relative.split("/"))
+    candidates: list[Path] = []
+    for path in getattr(resource, "_paths", ()):
+        candidates.append(Path(path))
+
+    pyinstaller_root = getattr(sys, "_MEIPASS", "")
+    if pyinstaller_root:
+        candidates.append(Path(pyinstaller_root) / relative_path)
+
+    if getattr(sys, "frozen", False):
+        candidates.append(Path(sys.executable).resolve().parent / "_internal" / relative_path)
+
+    toolkit_root = os.environ.get("PPS_TOOLKIT_ROOT")
+    if toolkit_root:
+        root = Path(toolkit_root)
+        candidates.append(root / "src" / relative_path)
+        candidates.append(root / "dist" / "PPSDashboardLauncher" / "_internal" / relative_path)
+
+    for candidate in candidates:
+        if candidate.is_dir():
+            return candidate
+
+    checked = ", ".join(str(candidate) for candidate in candidates) or str(resource)
+    raise RuntimeError(f"Static resource directory for {package_name} was not found. Checked: {checked}")
 
 
 REPO_ROOT = repo_root()
@@ -2056,8 +2089,14 @@ def create_app(
             allow_headers=["Content-Type", TOKEN_HEADER],
             allow_credentials=False,
         )
-    dashboard_dir = files("peripersonal_space_toolkit.dashboard")
-    viewer_dir = files("peripersonal_space_toolkit.viewer")
+    dashboard_dir = _package_static_dir(
+        "peripersonal_space_toolkit.dashboard",
+        "peripersonal_space_toolkit/dashboard",
+    )
+    viewer_dir = _package_static_dir(
+        "peripersonal_space_toolkit.viewer",
+        "peripersonal_space_toolkit/viewer",
+    )
 
     @app.get("/")
     def index() -> Any:

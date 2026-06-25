@@ -15,5 +15,5 @@ For headset work, use the workspace-stable ADB wrapper so every project shares t
 - Run `adb devices -l` from a new terminal; it should resolve to `D:\GithubVR\tools\adb.cmd`.
 - If PATH is stale, run `D:\GithubVR\tools\adb.cmd devices -l`.
 - Expected authorized headset: `2G0YC1ZG1002QL device product:eureka model:Quest_3`.
-- Do not rotate or delete `C:\Users\Georgeous\.android\adbkey` or `C:\Users\Georgeous\.android\adbkey.pub`; `ADB_VENDOR_KEYS` is pinned to that folder.
+- Do not rotate or delete the `adbkey` or `adbkey.pub` files in the `ADB_VENDOR_KEYS`-pinned `.android` key folder.
 - If the headset reports `unauthorized`, approve **Always allow from this computer** inside the headset and see `D:\GithubVR\QUEST_HEADSET_ACCESS.md`.

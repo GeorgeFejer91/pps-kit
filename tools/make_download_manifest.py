@@ -111,7 +111,7 @@ def build_manifest(
             {
                 "kind": "dashboard",
                 "label": "PPS Toolkit Dashboard",
-                "path": "windows/Launch_HTML_Dashboard.bat",
+                "path": "dist/PPSDashboardLauncher/PPSDashboardLauncher.exe",
                 "shortcut": True,
             },
             {

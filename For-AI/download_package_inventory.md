@@ -29,14 +29,15 @@ release binaries.
 - Tracked installer source: `windows/downloader/`
 - Tracked installer package definition: `windows/installer_package_inventory.v1.json`
 - Package inventory generator and validator: `tools/package_inventory.py`
+- Installer protocol folder: `installer_protocols/`
 - Lightweight GitHub release output: `dist/PPS-Toolkit-Downloader.exe`
 - Download verification manifest: `dist/pps_download_manifest.v1.json`
 - Installed package inventory written into the target folder: `pps_package_inventory.v1.json`
 
 `dist/` stays ignored. Generated downloader binaries, packaged runner builds,
-runtime bundles, dependency bundles, and any assembled repository payloads are
-attached to GitHub Releases or fetched from declared upstream URLs; they are not
-committed to the source repo.
+packaged dashboard launcher builds, runtime bundles, dependency bundles, and any
+assembled repository payloads are attached to GitHub Releases or fetched from
+declared upstream URLs; they are not committed to the source repo.
 
 Do not point the public download page directly at
 `https://github.com/GeorgeFejer91/pps-kit/releases/latest/download/PPS-Toolkit-Downloader.exe`
@@ -49,10 +50,11 @@ not expose a dead direct-download button.
 
 The downloader must orchestrate downloads declared in
 `pps_download_manifest.v1.json`. That manifest should pin every payload by URL,
-filename, size, SHA256, version, and role. The primary payloads should come from
-GitHub Releases whenever possible so the public download path stays GitHub-based.
-If an external upstream URL is unavoidable, the manifest must include the URL,
-hash, license/provenance note, and whether the payload is required or optional.
+filename, size, SHA256, version, and role. The current release topology is a
+GitHub-hosted downloader and manifest plus a Zenodo-hosted heavyweight
+repo-shaped Windows payload. If any additional external upstream URL is
+unavoidable, the manifest must include the URL, hash, license/provenance note,
+and whether the payload is required or optional.
 
 External PC dependencies that are not PPS payloads belong under the manifest's
 `external_dependencies` list. The downloader may auto-download and locally cache
@@ -106,9 +108,10 @@ install folder. At minimum the installed folder must include:
 
 - `dist/PPSExperimentRunner/PPSExperimentRunner.exe` and its PyInstaller onedir resources.
 - The packaged Qt Windows platform plugin at `dist/PPSExperimentRunner/_internal/PySide6/plugins/platforms/qwindows.dll`; without it the runner shows "no Qt platform plugin could be initialized" and cannot start.
-- An exe entrypoint for the offline/local HTML GUI. It should start the local companion and open the dashboard without requiring users to run Python commands or batch files.
+- `dist/PPSDashboardLauncher/PPSDashboardLauncher.exe` and its PyInstaller onedir resources. This is the exe entrypoint for the offline/local HTML GUI; it should start the local companion and open the dashboard without requiring users to run Python commands or batch files.
 - Dashboard launchers kept for inspectability and fallback: `windows/Launch_HTML_Dashboard.bat`, `windows/Start_Website_Companion.bat`, and `windows/Launch_Experiment_Runner.bat`.
-- Installer/build support needed to audit or rebuild the package: `windows/downloader/`, `windows/Build_PPS_Downloader.ps1`, `windows/Build_PPS_Distribution.ps1`, `windows/Setup_Windows_App.ps1`, and `windows/Create_Desktop_Shortcut.ps1`.
+- Installer/build support needed to audit or rebuild the package: `windows/downloader/`, `windows/Build_PPS_Downloader.ps1`, `windows/Build_PPS_Distribution.ps1`, `windows/Build_Dashboard_Launcher_Exe.ps1`, `windows/Setup_Windows_App.ps1`, and `windows/Create_Desktop_Shortcut.ps1`.
+- Installer protocols and current missing-link ledger under `installer_protocols/`.
 - Local dashboard and hosted-dashboard assets: `src/peripersonal_space_toolkit/dashboard/`, root `index.html`, `.nojekyll`, and `src/peripersonal_space_toolkit/viewer/`.
 - App identity assets under `src/peripersonal_space_toolkit/assets/`.
 - Preload catalogs and readiness ledgers under `assets/preloads/`, including `preload_inventory.json` and `profile_recreation_status.json`.
@@ -122,9 +125,15 @@ install folder. At minimum the installed folder must include:
 - Release helper tools needed to audit, manifest, and rebuild the package.
 - A local runtime/dependency environment or runtime bootstrap metadata sufficient for the GUI exe and runner exe to work after installation.
 
-The old heavy offline ZIP/Zenodo plan is not the current primary release target.
-An offline ZIP may remain an internal fallback, but the public `/download` path
-should lead to the single sub-100 MiB downloader exe once that asset exists.
+The public `/download` path should lead to the single sub-100 MiB downloader exe
+once that asset exists. The heavy offline ZIP remains the Zenodo-hosted payload
+that the downloader installs after SHA256 and package-inventory verification;
+it is not the public first-click artifact.
+
+Do not include `For-AI/` in the end-user install payload. It remains tracked
+source-repo memory for future agents, while `installer_protocols/` carries the
+installer-facing build and missing-link protocols that should be visible in the
+installed package.
 
 Optional but preferred when available:
 
@@ -148,10 +157,10 @@ the changed behavior.
 1. Install dependencies into `.venv` with the Windows setup path or `python -m pip install -e ".[tts,gui,web,lsl,xdf,validation,dev,package]"`. The GUI extra is pinned to PySide6 6.7.x because newer PySide6 releases have broken Qt imports in the current Anaconda-based lab venv.
 2. Run tests and release audit before packaging.
 3. Build the packaged runner with `windows/Build_Experiment_Runner_Exe.ps1`. This must run `tools/check_qt_runtime.py` before and after PyInstaller so broken PySide6 imports or missing `qwindows.dll` fail the build. After any runner-functionality change, this packaged/local exe path must be refreshed and verified so the installable runner carries the new source behavior. After building, verify the packaged exe, not just source Python, can open `Komplete Audio ASIO Driver` through the real runner path because ASIO depends on the frozen entrypoint setting `SD_ENABLE_ASIO=1` before any sounddevice import.
-4. Build or stage the offline/local HTML GUI exe entrypoint that starts the companion and opens the dashboard.
+4. Build or stage `PPSDashboardLauncher.exe`, the offline/local HTML GUI exe entrypoint that starts the companion and opens the dashboard.
 5. Stage the repo-shaped program directory and all dependency/runtime payloads that the downloader will install.
 6. Let `tools/package_inventory.py --strict` validate the staged repository-shaped package and write `pps_package_inventory.v1.json`.
-7. Generate `pps_download_manifest.v1.json` with every GitHub-hosted payload URL, external dependency URL if unavoidable, SHA256, size, version, and role.
+7. Generate `pps_download_manifest.v1.json` with the final GitHub manifest/downloader context, Zenodo payload URL, external dependency URL if unavoidable, SHA256, size, version, and role.
 8. Build `PPS-Toolkit-Downloader.exe` with the final manifest URL embedded; fail the build if it is 100 MiB or larger.
 9. Attach the downloader, manifest, and any GitHub-hosted dependency/runtime/repo payloads to the GitHub Release.
 10. Test from the public download page on a clean Windows folder. The proof must show the single downloader exe downloading content, installing into a user-chosen location, creating/opening the offline HTML GUI exe, and launching `PPSExperimentRunner.exe`.

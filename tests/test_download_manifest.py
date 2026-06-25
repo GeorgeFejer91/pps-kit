@@ -56,6 +56,8 @@ def test_build_download_manifest_hashes_payload(tmp_path: Path):
     assert manifest["payloads"][0]["package_inventory"]["missing_required_count"] == 0
     assert len(manifest["payloads"][0]["package_inventory"]["sha256"]) == 64
     assert {entry["kind"] for entry in manifest["entrypoints"]} >= {"dashboard", "experiment_runner", "docs"}
+    dashboard_entrypoint = next(entry for entry in manifest["entrypoints"] if entry["kind"] == "dashboard")
+    assert dashboard_entrypoint["path"] == "dist/PPSDashboardLauncher/PPSDashboardLauncher.exe"
     dependencies = {dependency["kind"]: dependency for dependency in manifest["external_dependencies"]}
     assert dependencies["native_instruments_komplete_audio_asio"]["provider"] == "Native Instruments"
     assert dependencies["native_instruments_komplete_audio_asio"]["auto_download"] is False

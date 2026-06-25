@@ -24,12 +24,29 @@ Create a desktop shortcut:
 .\windows\Create_Desktop_Shortcut.ps1
 ```
 
-The shortcut uses the packaged PPS Toolkit icon and opens the standard local
-browser dashboard. It also creates a `PPS Experiment Runner` shortcut that opens
-the standalone Experiment Runner picker for resuming a session, choosing a
-session manifest, or launching a finished study/profile preset. The Qt designer
-and native Focus Mode set the same icon at runtime so their window/taskbar
-entries do not fall back to the generic Python icon.
+The source shortcut uses the packaged PPS Toolkit icon and opens the standard
+local browser dashboard through the Python development environment. Finished
+installer builds use `dist\PPSDashboardLauncher\PPSDashboardLauncher.exe`
+instead, so installed end users can open the local dashboard and companion
+without Python. The shortcut also creates a `PPS Experiment Runner` shortcut
+that opens the standalone Experiment Runner picker for resuming a session,
+choosing a session manifest, or launching a finished study/profile preset. The
+Qt designer and native Focus Mode set the same icon at runtime so their
+window/taskbar entries do not fall back to the generic Python icon.
+
+Build the packaged local dashboard launcher:
+
+```powershell
+.\windows\Build_Dashboard_Launcher_Exe.ps1
+```
+
+The build writes `dist\PPSDashboardLauncher\PPSDashboardLauncher.exe` as an
+onedir app that starts the local companion backend and opens the browser UI.
+When frozen, launcher startup and server logs are written under
+`local_data\logs\pps_dashboard_launcher.log` and
+`local_data\logs\pps_dashboard_launcher_stream.log` so installer smoke tests
+can diagnose failures even though the executable uses the Windows GUI
+subsystem.
 
 Build the native participant runner as a Windows program when you want the
 runner to appear as its own app rather than as Python:
@@ -62,7 +79,8 @@ For finished public releases, build the lightweight downloader separately:
 That creates a small `dist\PPS-Toolkit-Downloader.exe` intended for GitHub
 release upload. The full offline lab ZIP is built separately and hosted on
 Zenodo; the downloader verifies its SHA256 from `pps_download_manifest.v1.json`
-before extracting to `%LOCALAPPDATA%\PPS Toolkit\versions\`. See
+before extracting to `%LOCALAPPDATA%\PPS Toolkit\versions\` and launching the
+packaged dashboard launcher. See
 [PPS Download Distribution](PPS_DOWNLOADS.md).
 
 Open the Qt stimulus design layer for comparison:

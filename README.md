@@ -64,16 +64,21 @@ guidance instead of opening Focus Mode. The build runs a Qt runtime preflight
 and fails if the Windows Qt platform plugin is not packaged.
 
 Optional: build the lightweight release downloader and offline-lab distribution
-manifest:
+manifest. Public Windows releases use a GitHub-hosted downloader plus a
+Zenodo-hosted payload:
 
 ```powershell
+.\windows\Build_Experiment_Runner_Exe.ps1
+.\windows\Build_Dashboard_Launcher_Exe.ps1
 .\windows\Build_PPS_Downloader.ps1
-python tools\make_download_manifest.py --payload dist\PPS-Toolkit-v0.1.0-offline-lab-windows-x64.zip --payload-url "https://zenodo.org/records/<record>/files/PPS-Toolkit-v0.1.0-offline-lab-windows-x64.zip?download=1"
+.\windows\Build_PPS_Distribution.ps1 -Version 0.1.0 -ZenodoPayloadUrl "https://zenodo.org/records/<record>/files/PPS-Toolkit-v0.1.0-offline-lab-windows-x64.zip?download=1" -ZenodoDoi "10.5281/zenodo.<record>"
 ```
 
 `PPS-Toolkit-Downloader.exe` is the small GitHub-hosted bootstrapper and must
 stay below 100 MiB. The heavyweight offline lab ZIP belongs on Zenodo and is
-verified by `pps_download_manifest.v1.json` before extraction or launch.
+verified by `pps_download_manifest.v1.json` before extraction or launch. The
+installed dashboard opens through `dist\PPSDashboardLauncher\PPSDashboardLauncher.exe`
+so end users do not need Python for the local GUI.
 
 The same HTML interface can also be published as a static GitHub Pages site.
 In that mode, start the trusted local companion backend first:
@@ -193,13 +198,14 @@ lightweight `PPS-Toolkit-Downloader.exe`; Zenodo hosts the heavyweight
 `PPS-Toolkit-vX.Y.Z-offline-lab-windows-x64.zip`. The downloader reads
 `pps_download_manifest.v1.json`, downloads the Zenodo payload, verifies SHA256,
 extracts to `%LOCALAPPDATA%\PPS Toolkit\versions\vX.Y.Z`, creates shortcuts, and
-launches the dashboard only after verification. See
+launches the packaged dashboard only after verification. See
 [docs/PPS_DOWNLOADS.md](docs/PPS_DOWNLOADS.md).
 
 The repo contains the installer package source in `windows\downloader\` and the
 tracked offline-package inventory at `windows\installer_package_inventory.v1.json`;
 release binaries and ZIPs are generated into ignored `dist\` for GitHub
-Releases/Zenodo.
+Releases/Zenodo. Installer build and missing-link protocols live in
+`installer_protocols\`.
 
 ## Repository Layout
 
@@ -214,6 +220,7 @@ configs\                 Example experiment and stimulus-design configs
 data\sample\             Deidentified sample analysis CSVs
 docs\                    Hardware setup, replication, privacy, Windows, protocol, and paradigm notes
 For-AI\                  Project memory and required context for future AI agents
+installer_protocols\     Installer build, content, smoke-test, and missing-link protocols
 src\                     Python package and command entry points
 study_templates\         Literature-backed preloadable study profiles
 tests\                   Smoke and release-readiness tests
