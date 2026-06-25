@@ -518,8 +518,35 @@ def _run_focus_mode_by_mouse(
         _select_combo_data(window.gender_combo, "prefer_not_to_say")
         _click(window.setup_submit_button, "Submit setup")
 
+    def _start_when_ready() -> None:
+        _submit_setup()
+        if window.start_button.isEnabled():
+            _click(window.start_button, "Start Run")
+            return
+        q["QTimer"].singleShot(100, _start_when_ready)
+
+    def _load_next_split_part_if_ready() -> bool:
+        next_manifest = None
+        next_manifest_func = getattr(window, "_next_split_part_manifest", None)
+        if callable(next_manifest_func):
+            try:
+                next_manifest = next_manifest_func()
+            except Exception:
+                next_manifest = None
+        button = getattr(window, "load_next_part_button", None)
+        if next_manifest is None or button is None or not button.isEnabled():
+            return False
+        focus_app._validation_capture_part_snapshot(window, label="before_load_next_part")
+        _click(button, "Load Part 2")
+        q["QTimer"].singleShot(250, _start_when_ready)
+        return True
+
     def _poll_instruction_requests() -> None:
         if window.result is not None:
+            if _load_next_split_part_if_ready():
+                q["QTimer"].singleShot(100, _poll_instruction_requests)
+                return
+            focus_app._validation_capture_part_snapshot(window, label="final_report")
             window.grab_screenshot(output_dir / "focus_mode_complete.png")
             window.dialog.accept()
             return
@@ -527,14 +554,15 @@ def _run_focus_mode_by_mouse(
         if request is not None:
             context = dict(request.get("context") or {})
             mode = str(context.get("mode") or "click")
-            if mode == "button":
+            if getattr(window, "_part2_start_gate_pending", lambda: False)():
+                _click(getattr(window, "start_part2_button", None), "Start Part 2")
+            elif mode == "button":
                 _click(window.instruction_button, f"instruction button: {context.get('instruction_label', '')}")
             else:
                 _click(window.target_button, f"instruction target: {context.get('instruction_label', '')}")
         q["QTimer"].singleShot(50, _poll_instruction_requests)
 
-    q["QTimer"].singleShot(250, _submit_setup)
-    q["QTimer"].singleShot(450, lambda: _click(window.start_button, "Start Run"))
+    q["QTimer"].singleShot(250, _start_when_ready)
     q["QTimer"].singleShot(450, _poll_instruction_requests)
     exit_code = window.exec(
         fullscreen=bool(qt_headed),
@@ -544,28 +572,68 @@ def _run_focus_mode_by_mouse(
     )
     app.processEvents()
 
-    counts = _event_counts(output_paths["events_csv"])
+    focus_app._validation_capture_part_snapshot(window, label="final_report")
+    parts, group_manifest, _group_payload = focus_app._validation_split_part_reports(
+        Path(getattr(window.package, "manifest_path", session_manifest)),
+        window.package,
+        completed_override=bool(window.result is not None and getattr(window.result, "completed", False)),
+    )
+    snapshot_by_part = {
+        str(item.get("part_session_id") or ""): dict(item)
+        for item in list(getattr(window, "validation_part_snapshots", []) or [])
+        if str(item.get("part_session_id") or "").strip()
+    }
+    for part in parts:
+        snapshot = snapshot_by_part.get(str(part.get("part_session_id") or ""))
+        if snapshot:
+            part["planned_tactile_cue_count"] = int(snapshot.get("planned_tactile_cue_count") or 0)
+            part["cursor_recenter_count"] = int(snapshot.get("cursor_recenter_count") or 0)
+            part["cursor_recenter_records"] = list(snapshot.get("cursor_recenter_records") or [])
+    counts = focus_app._validation_merge_event_counts([dict(part.get("event_counts") or {}) for part in parts])
+    scoped_counts = focus_app._validation_merge_scoped_event_counts([dict(part.get("scoped_event_counts") or {}) for part in parts])
+    standard_counts = dict(scoped_counts.get("standard") or {})
+    standard_block_end_count = int(standard_counts.get("block_end") or counts.get("block_end") or 0)
+    standard_trial_start_count = int(standard_counts.get("trial_start") or counts.get("trial_start") or 0)
+    standard_trial_end_count = int(standard_counts.get("trial_end") or counts.get("trial_end") or 0)
+    aggregate_planned_cues = sum(int(part.get("planned_tactile_cue_count") or 0) for part in parts)
+    aggregate_recenter_count = sum(int(part.get("cursor_recenter_count") or 0) for part in parts)
+    if aggregate_planned_cues <= 0:
+        aggregate_planned_cues = int(getattr(window, "planned_tactile_cue_count", 0))
+    if aggregate_recenter_count <= 0:
+        aggregate_recenter_count = len(getattr(window, "recenter_records", []))
     return {
         "exit_code": exit_code,
-        "block_count": len(package.blocks),
+        "block_count": standard_block_end_count,
         "block_start_count": counts.get("block_start", 0),
-        "block_end_count": counts.get("block_end", 0),
+        "block_end_count": standard_block_end_count,
+        "trial_start_count": standard_trial_start_count,
+        "trial_end_count": standard_trial_end_count,
+        "total_block_end_count": counts.get("block_end", 0),
+        "total_trial_start_count": counts.get("trial_start", 0),
+        "total_trial_end_count": counts.get("trial_end", 0),
         "instruction_start_count": counts.get("instruction_start", 0),
         "instruction_continue_count": counts.get("instruction_continue", 0),
         "session_end_count": counts.get("session_end", 0),
         "event_counts": counts,
+        "scoped_event_counts": scoped_counts,
+        "session_group_manifest": str(group_manifest or ""),
+        "expected_part_count": len(parts) or 1,
+        "completed_part_count": sum(1 for part in parts if bool(part.get("completed"))),
+        "all_parts_completed": bool(parts) and all(bool(part.get("completed")) for part in parts),
+        "parts": parts,
         "mouse_clicks": mouse_clicks,
-        "planned_tactile_cue_count": int(getattr(window, "planned_tactile_cue_count", 0)),
-        "cursor_recenter_count": len(getattr(window, "recenter_records", [])),
+        "planned_tactile_cue_count": aggregate_planned_cues,
+        "cursor_recenter_count": aggregate_recenter_count,
         "cursor_recenter_records": list(getattr(window, "recenter_records", [])),
         "played_block_count": len(engine.played_blocks),
         "played_instruction_count": len(engine.played_instructions),
-        "events_csv": str(output_paths["events_csv"]),
+        "events_csv": str(parts[-1].get("events_csv") if parts else output_paths["events_csv"]),
+        "events_csvs": [str(part.get("events_csv") or "") for part in parts],
         "analysis_summary": str(output_paths["analysis_summary"]),
         "session_metadata": str(output_paths["session_metadata"]),
         "start_screenshot": str(output_dir / "focus_mode_start.png"),
         "complete_screenshot": str(output_dir / "focus_mode_complete.png"),
-        "completed": bool(window.result is not None and getattr(window.result, "completed", False)),
+        "completed": bool(parts) and all(bool(part.get("completed")) for part in parts),
     }
 
 
@@ -588,8 +656,18 @@ def _evaluate_report(report: dict[str, Any]) -> tuple[bool, list[str]]:
     focus = dict(report.get("focus_mode") or {})
     if not focus.get("completed"):
         failures.append("Focus Mode did not report a completed run.")
+    if int(focus.get("expected_part_count") or 1) > 1 and not focus.get("all_parts_completed"):
+        failures.append("Focus Mode did not complete every split Study 5 part.")
+    if int(focus.get("expected_part_count") or 1) > 1 and not any(click.get("label") == "Load Part 2" for click in focus.get("mouse_clicks", [])):
+        failures.append("Focus Mode did not activate Load Part 2 by a validation mouse click.")
     if int(focus.get("block_end_count") or 0) != int(focus.get("block_count") or -1):
         failures.append("Focus Mode did not finish every participant block.")
+    scoped_counts = dict(focus.get("scoped_event_counts") or {})
+    standard_counts = dict(scoped_counts.get("standard") or focus.get("event_counts") or {})
+    if int(standard_counts.get("block_end") or 0) != 12:
+        failures.append("Focus Mode did not complete all 12 standard Study 5 blocks.")
+    if int(standard_counts.get("trial_start") or 0) != 408 or int(standard_counts.get("trial_end") or 0) != 408:
+        failures.append("Focus Mode did not emit all 408 standard Study 5 trial starts/ends.")
     if int(focus.get("played_instruction_count") or 0) < 5:
         failures.append("Focus Mode did not attempt the preloaded Study 5 instruction clips.")
     if not any(click.get("label") == "Start Run" for click in focus.get("mouse_clicks", [])):
@@ -753,8 +831,18 @@ def _run_standalone_launcher_validation(args: argparse.Namespace) -> int:
         failures.append("Standalone runner did not prepare a Study 5 session manifest.")
     if not focus_result.get("completed"):
         failures.append("Focus Mode did not complete after standalone runner profile launch.")
+    if int(focus_result.get("expected_part_count") or 1) > 1 and not focus_result.get("all_parts_completed"):
+        failures.append("Standalone runner Focus Mode did not complete every split Study 5 part.")
+    if int(focus_result.get("expected_part_count") or 1) > 1 and not any(click.get("label") == "Load Part 2" for click in focus_result.get("mouse_clicks", [])):
+        failures.append("Standalone runner Focus Mode did not click Load Part 2.")
     if int(focus_result.get("block_end_count") or 0) != int(focus_result.get("block_count") or -1):
         failures.append("Focus Mode did not finish every block after standalone runner profile launch.")
+    scoped_counts = dict(focus_result.get("scoped_event_counts") or {})
+    standard_counts = dict(scoped_counts.get("standard") or focus_result.get("event_counts") or {})
+    if int(standard_counts.get("block_end") or 0) != 12:
+        failures.append("Standalone runner Focus Mode did not complete all 12 standard Study 5 blocks.")
+    if int(standard_counts.get("trial_start") or 0) != 408 or int(standard_counts.get("trial_end") or 0) != 408:
+        failures.append("Standalone runner Focus Mode did not emit all 408 standard Study 5 trial starts/ends.")
     if int(focus_result.get("played_instruction_count") or 0) < 5:
         failures.append("Standalone runner Study 5 launch did not play the original instruction profile.")
     planned_cues = int(focus_result.get("planned_tactile_cue_count") or 0)
@@ -997,6 +1085,10 @@ def _run_packaged_standalone_app_background_validation(args: argparse.Namespace)
         failures.append("Packaged standalone launcher Run Selected Profile was not clicked by a validation mouse event.")
     if not focus_result.get("completed"):
         failures.append("Packaged Focus Mode did not complete Study 5.")
+    if int(focus_result.get("expected_part_count") or 1) > 1 and not focus_result.get("all_parts_completed"):
+        failures.append("Packaged Focus Mode did not complete every split Study 5 part.")
+    if int(focus_result.get("expected_part_count") or 1) > 1 and not any(click.get("label") == "Load Part 2" for click in focus_clicks):
+        failures.append("Packaged Focus Mode did not click Load Part 2.")
     if int(standard_counts.get("block_end") or 0) != 12:
         failures.append("Packaged Focus Mode did not complete all 12 Study 5 blocks.")
     if int(standard_counts.get("trial_start") or 0) != 408 or int(standard_counts.get("trial_end") or 0) != 408:
@@ -1160,6 +1252,10 @@ def _run_packaged_standalone_app_validation(args: argparse.Namespace) -> int:
         failures.append("Standalone launcher Run Selected Profile was not clicked with an OS mouse event.")
     if not focus_result.get("completed"):
         failures.append("Packaged Focus Mode did not complete Study 5.")
+    if int(focus_result.get("expected_part_count") or 1) > 1 and not focus_result.get("all_parts_completed"):
+        failures.append("Packaged Focus Mode did not complete every split Study 5 part.")
+    if int(focus_result.get("expected_part_count") or 1) > 1 and not any(click.get("label") == "Load Part 2" for click in focus_result.get("validation_mouse_clicks", [])):
+        failures.append("Packaged Focus Mode did not click Load Part 2.")
     if int(standard_counts.get("block_end") or 0) != 12:
         failures.append("Packaged Focus Mode did not complete all 12 Study 5 blocks.")
     if int(standard_counts.get("trial_start") or 0) != 408 or int(standard_counts.get("trial_end") or 0) != 408:

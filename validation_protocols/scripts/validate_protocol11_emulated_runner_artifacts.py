@@ -13,6 +13,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import statistics
 import sys
 import time
@@ -27,6 +28,7 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from peripersonal_space_toolkit.output_layout import (  # noqa: E402
+    _filesystem_path,
     output_data_analytics_dir,
     output_runner_logs_dir,
     output_verbose_events_dir,
@@ -95,24 +97,26 @@ def _json_ready(value: Any) -> Any:
 
 
 def _read_json(path: Path) -> dict[str, Any]:
-    if not path.is_file():
+    if not os.path.isfile(_filesystem_path(path)):
         return {}
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        with open(_filesystem_path(path), "r", encoding="utf-8") as handle:
+            return json.loads(handle.read())
     except Exception:
         return {}
 
 
 def _read_csv(path: Path) -> list[dict[str, str]]:
-    if not path.is_file():
+    if not os.path.isfile(_filesystem_path(path)):
         return []
-    with path.open(newline="", encoding="utf-8-sig") as handle:
+    with open(_filesystem_path(path), newline="", encoding="utf-8-sig") as handle:
         return list(csv.DictReader(handle))
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(_json_ready(payload), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    os.makedirs(_filesystem_path(path.parent), exist_ok=True)
+    with open(_filesystem_path(path), "w", encoding="utf-8") as handle:
+        handle.write(json.dumps(_json_ready(payload), indent=2, sort_keys=True) + "\n")
 
 
 def _write_markdown(path: Path, report: dict[str, Any]) -> None:
@@ -140,8 +144,9 @@ def _write_markdown(path: Path, report: dict[str, Any]) -> None:
             "This audit verifies software/run artifacts from an emulated-participant scenario. It does not measure hardware latency, Woojer mechanical onset, participant comprehension, or scientific PPS interpretability.",
         ]
     )
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    os.makedirs(_filesystem_path(path.parent), exist_ok=True)
+    with open(_filesystem_path(path), "w", encoding="utf-8") as handle:
+        handle.write("\n".join(lines) + "\n")
 
 
 def _as_float(value: Any, default: float = math.nan) -> float:
@@ -189,9 +194,27 @@ def _path_is_set(path: Path | None) -> bool:
     return path is not None and str(path) not in {"", "."}
 
 
+def _path_exists(path: Path) -> bool:
+    return os.path.exists(_filesystem_path(path))
+
+
+def _path_is_file(path: Path) -> bool:
+    return os.path.isfile(_filesystem_path(path))
+
+
+def _path_is_dir(path: Path) -> bool:
+    return os.path.isdir(_filesystem_path(path))
+
+
+def _glob_files(directory: Path, pattern: str) -> list[Path]:
+    if not _path_is_dir(directory):
+        return []
+    return sorted(Path(item) for item in Path(_filesystem_path(directory)).glob(pattern))
+
+
 def _first_existing(paths: list[Path]) -> Path | None:
     for path in paths:
-        if _path_is_set(path) and path.exists():
+        if _path_is_set(path) and _path_exists(path):
             return path
     return None
 
@@ -209,6 +232,7 @@ def _session_manifest_path(session_dir: Path) -> Path:
         [
             session_dir / "session_manifest.json",
             output_runner_logs_dir(session_dir.parent) / session_dir.name / "session_manifest.json",
+            output_runner_logs_dir(session_dir.parent.parent) / session_dir.parent.name / session_dir.name / "session_manifest.json",
         ]
     ) or (session_dir / "session_manifest.json")
 
@@ -247,10 +271,10 @@ def _latest_analysis_csv(session_dir: Path, suffix: str, *, analysis_dir: Path |
     seen: set[str] = set()
     for candidate in candidates:
         key = str(candidate)
-        if not _path_is_set(candidate) or key in seen or not candidate.is_dir():
+        if not _path_is_set(candidate) or key in seen or not _path_is_dir(candidate):
             continue
         seen.add(key)
-        matches.extend(sorted(candidate.glob(f"*_{suffix}.csv")))
+        matches.extend(_glob_files(candidate, f"*_{suffix}.csv"))
     return matches[-1] if matches else None
 
 
@@ -259,10 +283,10 @@ def _analysis_file(session_dir: Path, filename: str, *, analysis_dir: Path | Non
         if candidate_dir is None or not _path_is_set(candidate_dir):
             continue
         path = candidate_dir / filename
-        if path.is_file():
+        if _path_is_file(path):
             return path
     path = session_dir / "analysis" / filename
-    return path if path.is_file() else None
+    return path if _path_is_file(path) else None
 
 
 def _trial_uid(row: dict[str, Any]) -> str:
@@ -351,8 +375,8 @@ def _inspect_wav(path: Path) -> dict[str, Any]:
         import numpy as np
         import soundfile as sf
 
-        info = sf.info(str(path))
-        data, sample_rate = sf.read(str(path), always_2d=True)
+        info = sf.info(_filesystem_path(path))
+        data, sample_rate = sf.read(_filesystem_path(path), always_2d=True)
         finite = bool(np.isfinite(data).all())
         peak = float(np.max(np.abs(data))) if data.size else 0.0
         return {
@@ -366,7 +390,7 @@ def _inspect_wav(path: Path) -> dict[str, Any]:
             "peak_abs": peak,
         }
     except Exception as exc:
-        return {"exists": path.exists(), "readable": False, "error": str(exc)}
+        return {"exists": _path_exists(path), "readable": False, "error": str(exc)}
 
 
 def _block_entries(manifest: dict[str, Any], session_dir: Path) -> list[dict[str, Any]]:
@@ -417,10 +441,10 @@ def _audit_session_resolution(
     metadata: dict[str, Any],
     require_local_data_root: bool,
 ) -> None:
-    _criterion(criteria, "launch_session_resolution", "session_manifest_exists", manifest_path.is_file(), str(manifest_path))
+    _criterion(criteria, "launch_session_resolution", "session_manifest_exists", _path_is_file(manifest_path), str(manifest_path))
     _criterion(criteria, "launch_session_resolution", "session_manifest_schema", manifest.get("schema") == "pps-run-session.v1", str(manifest.get("schema")))
-    _criterion(criteria, "launch_session_resolution", "session_metadata_exists", metadata_path.is_file(), str(metadata_path))
-    _criterion(criteria, "launch_session_resolution", "session_metadata_schema", metadata.get("schema") == "pps-runner-session-metadata.v1", str(metadata.get("schema")), required=metadata_path.exists())
+    _criterion(criteria, "launch_session_resolution", "session_metadata_exists", _path_is_file(metadata_path), str(metadata_path))
+    _criterion(criteria, "launch_session_resolution", "session_metadata_schema", metadata.get("schema") == "pps-runner-session-metadata.v1", str(metadata.get("schema")), required=_path_exists(metadata_path))
     if require_local_data_root:
         normalized = str(session_dir.resolve()).replace("\\", "/").lower()
         _criterion(criteria, "launch_session_resolution", "session_under_local_data", "/local_data/" in normalized, str(session_dir))
@@ -451,7 +475,7 @@ def _audit_stimulus_assembly(criteria: list[Criterion], *, blocks: list[dict[str
         wav = _inspect_wav(wav_path)
         block_rows = [row for row in rows if str(row.get("_block_manifest")) == str(manifest_path)]
         wav_audits.append({"block_index": block.get("index"), "manifest": manifest_path, "wav": wav_path, **wav, "trial_count": len(block_rows)})
-        if not manifest_path.is_file():
+        if not _path_is_file(manifest_path):
             schedule_failures.append(f"missing block manifest {manifest_path}")
             continue
         if not wav.get("readable"):
@@ -724,11 +748,11 @@ def _audit_topup(
     manifest_jsons: list[Path] = []
     for directory in search_dirs:
         key = str(directory)
-        if key in seen_dirs or not directory.is_dir():
+        if key in seen_dirs or not _path_is_dir(directory):
             continue
         seen_dirs.add(key)
-        manifest_csvs.extend(path for path in sorted(directory.glob("topup_block*manifest.csv")) if "draft" not in path.name.lower())
-        manifest_jsons.extend(path for path in sorted(directory.glob("topup_block*manifest.json")) if "draft" not in path.name.lower())
+        manifest_csvs.extend(path for path in _glob_files(directory, "topup_block*manifest.csv") if "draft" not in path.name.lower())
+        manifest_jsons.extend(path for path in _glob_files(directory, "topup_block*manifest.json") if "draft" not in path.name.lower())
     manifest_csvs = list(dict.fromkeys(manifest_csvs))
     manifest_jsons = list(dict.fromkeys(manifest_jsons))
     rescue_rows = []
@@ -744,7 +768,7 @@ def _audit_topup(
     topup_ready = [row for row in events if row.get("event_type") == "topup_block_ready"]
     topup_skipped = [row for row in events if row.get("event_type") == "topup_block_skipped"]
     if expect_enabled:
-        _criterion(criteria, "topup_module", "topup_ledger_written", ledger_csv.is_file() and ledger_json.is_file(), f"{ledger_csv}; {ledger_json}", required=required)
+        _criterion(criteria, "topup_module", "topup_ledger_written", _path_is_file(ledger_csv) and _path_is_file(ledger_json), f"{ledger_csv}; {ledger_json}", required=required)
         _criterion(criteria, "topup_module", "topup_manifest_written_when_needed", bool(manifest_csvs and manifest_jsons) or _truthy(expectation.get("not_needed")), f"csv={len(manifest_csvs)} json={len(manifest_jsons)}", required=required)
         _criterion(criteria, "topup_module", "topup_rescue_rows_reconciled", len(final_rescued) >= len(rescue_rows), f"final_rescued={len(final_rescued)} rescue_manifest={len(rescue_rows)}", required=bool(rescue_rows) or required)
         _criterion(criteria, "topup_module", "topup_filler_rows_excluded", all(not _truthy(row.get("Primary_Analysis_Included", True)) for row in filler_rows), f"filler={len(filler_rows)}", required=bool(filler_rows))
@@ -769,19 +793,19 @@ def _audit_outputs(
     summary_txt = output_paths["analysis_summary_txt"]
     exploratory_summary = output_paths["exploratory_quality_summary"]
     if capture_options.get("write_events_csv", True):
-        _criterion(criteria, "data_outputs_analysis", "events_csv_written", events_csv.is_file(), str(events_csv))
+        _criterion(criteria, "data_outputs_analysis", "events_csv_written", _path_is_file(events_csv), str(events_csv))
     else:
-        _criterion(criteria, "data_outputs_analysis", "events_csv_absent_when_disabled", not events_csv.exists(), str(events_csv), required=False)
+        _criterion(criteria, "data_outputs_analysis", "events_csv_absent_when_disabled", not _path_exists(events_csv), str(events_csv), required=False)
     if capture_options.get("write_internal_xdf", True):
-        _criterion(criteria, "data_outputs_analysis", "events_xdf_written_when_enabled", events_xdf.is_file(), str(events_xdf))
+        _criterion(criteria, "data_outputs_analysis", "events_xdf_written_when_enabled", _path_is_file(events_xdf), str(events_xdf))
     else:
-        _criterion(criteria, "data_outputs_analysis", "events_xdf_absent_when_disabled", not events_xdf.exists(), str(events_xdf), required=False)
-    _criterion(criteria, "data_outputs_analysis", "analysis_summary_written", summary_txt.is_file(), str(summary_txt), required=capture_options.get("write_analysis_csvs", True))
+        _criterion(criteria, "data_outputs_analysis", "events_xdf_absent_when_disabled", not _path_exists(events_xdf), str(events_xdf), required=False)
+    _criterion(criteria, "data_outputs_analysis", "analysis_summary_written", _path_is_file(summary_txt), str(summary_txt), required=capture_options.get("write_analysis_csvs", True))
     analysis_required = capture_options.get("write_analysis_csvs", True)
-    missing_analysis = [name for name, path in analysis_paths.items() if path is None or not path.is_file()]
+    missing_analysis = [name for name, path in analysis_paths.items() if path is None or not _path_is_file(path)]
     if analysis_required:
         _criterion(criteria, "data_outputs_analysis", "analysis_csv_family_written", not missing_analysis, ",".join(missing_analysis))
-        exploratory_payload = _read_json(exploratory_summary) if exploratory_summary.is_file() else {}
+        exploratory_payload = _read_json(exploratory_summary) if _path_is_file(exploratory_summary) else {}
         signal_labels = set(exploratory_payload.get("signal_labels") or [])
         signal_counts = exploratory_payload.get("signal_counts") or {}
         observed_labels = set(signal_counts.keys()) if isinstance(signal_counts, dict) else set()
@@ -790,7 +814,7 @@ def _audit_outputs(
             criteria,
             "data_outputs_analysis",
             "exploratory_quality_summary_written",
-            exploratory_summary.is_file() and bool(exploratory_payload),
+            _path_is_file(exploratory_summary) and bool(exploratory_payload),
             str(exploratory_summary),
         )
         _criterion(
@@ -801,24 +825,24 @@ def _audit_outputs(
             f"labels={sorted(signal_labels | observed_labels)}",
         )
     else:
-        present_analysis = [name for name, path in analysis_paths.items() if path is not None and path.is_file()]
+        present_analysis = [name for name, path in analysis_paths.items() if path is not None and _path_is_file(path)]
         _criterion(criteria, "data_outputs_analysis", "analysis_csv_family_absent_when_disabled", not present_analysis, ",".join(present_analysis), required=False)
         _criterion(
             criteria,
             "data_outputs_analysis",
             "exploratory_quality_summary_absent_when_disabled",
-            not exploratory_summary.exists(),
+            not _path_exists(exploratory_summary),
             str(exploratory_summary),
             required=False,
         )
     if capture_options.get("write_lsl_marker_mirror", True):
-        _criterion(criteria, "lsl_trigger_codes", "lsl_marker_mirrors_written_when_enabled", lsl_csv.is_file() and lsl_xdf.is_file(), f"{lsl_csv}; {lsl_xdf}")
+        _criterion(criteria, "lsl_trigger_codes", "lsl_marker_mirrors_written_when_enabled", _path_is_file(lsl_csv) and _path_is_file(lsl_xdf), f"{lsl_csv}; {lsl_xdf}")
     else:
-        _criterion(criteria, "lsl_trigger_codes", "lsl_marker_mirrors_absent_when_disabled", not lsl_csv.exists() and not lsl_xdf.exists(), f"{lsl_csv}; {lsl_xdf}", required=False)
+        _criterion(criteria, "lsl_trigger_codes", "lsl_marker_mirrors_absent_when_disabled", not _path_exists(lsl_csv) and not _path_exists(lsl_xdf), f"{lsl_csv}; {lsl_xdf}", required=False)
     if capture_options.get("write_trigger_dictionary", True):
-        _criterion(criteria, "lsl_trigger_codes", "trigger_dictionary_written_when_enabled", trigger_json.is_file(), str(trigger_json))
+        _criterion(criteria, "lsl_trigger_codes", "trigger_dictionary_written_when_enabled", _path_is_file(trigger_json), str(trigger_json))
     else:
-        _criterion(criteria, "lsl_trigger_codes", "trigger_dictionary_absent_when_disabled", not trigger_json.exists(), str(trigger_json), required=False)
+        _criterion(criteria, "lsl_trigger_codes", "trigger_dictionary_absent_when_disabled", not _path_exists(trigger_json), str(trigger_json), required=False)
 
 
 def _audit_lsl_and_triggers(
@@ -833,15 +857,15 @@ def _audit_lsl_and_triggers(
     lsl_csv = output_paths["lsl_markers_csv"]
     trigger_json = output_paths["trigger_dictionary_json"]
     if not capture_options.get("write_lsl_marker_mirror", True):
-        _criterion(criteria, "lsl_trigger_codes", "lsl_marker_event_ids_match_events", not lsl_csv.exists(), "LSL marker mirror disabled", required=False)
-    elif lsl_csv.is_file():
+        _criterion(criteria, "lsl_trigger_codes", "lsl_marker_event_ids_match_events", not _path_exists(lsl_csv), "LSL marker mirror disabled", required=False)
+    elif _path_is_file(lsl_csv):
         marker_rows = _read_csv(lsl_csv)
         event_ids = {str(row.get("event_id")) for row in events}
         marker_ids = {str(row.get("event_id")) for row in marker_rows}
         _criterion(criteria, "lsl_trigger_codes", "lsl_marker_event_ids_match_events", marker_ids == event_ids, f"events={len(event_ids)} markers={len(marker_ids)}")
     if not capture_options.get("write_trigger_dictionary", True):
-        _criterion(criteria, "lsl_trigger_codes", "trigger_dictionary_has_reserved_and_trial_codes", not trigger_json.exists(), "trigger dictionary disabled", required=False)
-    elif trigger_json.is_file():
+        _criterion(criteria, "lsl_trigger_codes", "trigger_dictionary_has_reserved_and_trial_codes", not _path_exists(trigger_json), "trigger dictionary disabled", required=False)
+    elif _path_is_file(trigger_json):
         trigger_payload = _read_json(trigger_json)
         reserved = trigger_payload.get("reserved_codes") or {}
         triggers = trigger_payload.get("triggers") or []
@@ -889,6 +913,10 @@ def validate_artifacts(
     manifest = _read_json(manifest_path)
     outputs = manifest.get("outputs") if isinstance(manifest.get("outputs"), dict) else {}
     manifest_base = manifest_path.parent if manifest_path.parent != Path() else session_dir
+    part_status_path = _manifest_output_path(outputs, "part_completion_status_json", base=manifest_base, fallback=Path())
+    part_status = _read_json(part_status_path)
+    if isinstance(part_status.get("analysis_outputs"), dict):
+        outputs = {**outputs, **part_status.get("analysis_outputs", {})}
     metadata_path = _first_existing(
         [
             _manifest_output_path(outputs, "session_metadata_json", base=manifest_base, fallback=Path()),
@@ -1089,22 +1117,145 @@ def validate_artifacts(
     return report
 
 
+def validate_session_group_artifacts(
+    session_group_manifest: Path,
+    *,
+    response_plan_path: Path | None = None,
+    output_dir: Path | None = None,
+    allow_timing_fallback: bool = False,
+    require_local_data_root: bool = False,
+) -> dict[str, Any]:
+    session_group_manifest = session_group_manifest.resolve()
+    group = _read_json(session_group_manifest)
+    output_dir = (output_dir or (session_group_manifest.parent / "protocol11_session_group_audit")).resolve()
+    criteria: list[Criterion] = []
+    _criterion(criteria, "session_group", "session_group_manifest_exists", _path_is_file(session_group_manifest), str(session_group_manifest))
+    _criterion(
+        criteria,
+        "session_group",
+        "session_group_manifest_schema",
+        str(group.get("schema") or "") == "pps-run-session-group.v1",
+        str(group.get("schema") or ""),
+        required=bool(group),
+    )
+    part_entries = [dict(item) for item in group.get("parts", []) if isinstance(item, dict)]
+    _criterion(criteria, "session_group", "parts_declared", bool(part_entries), f"parts={len(part_entries)}")
+    part_reports: list[dict[str, Any]] = []
+    aggregate_event_counts: dict[str, int] = {}
+    aggregate_expected_counts: dict[str, int] = {}
+    block_count = 0
+    trial_count = 0
+    for entry in sorted(part_entries, key=lambda item: _as_int(item.get("part_number"), default=0)):
+        part_number = str(entry.get("part_number") or "")
+        part_session_dir = Path(str(entry.get("session_dir") or ""))
+        part_output = output_dir / f"part_{int(part_number or 0):02d}" if part_number else output_dir / "part_unknown"
+        report = validate_artifacts(
+            part_session_dir,
+            response_plan_path=response_plan_path,
+            output_dir=part_output,
+            allow_timing_fallback=allow_timing_fallback,
+            require_local_data_root=require_local_data_root,
+        )
+        part_reports.append(
+            {
+                "part_number": entry.get("part_number"),
+                "part_session_id": entry.get("part_session_id"),
+                "session_dir": str(part_session_dir),
+                "session_manifest": entry.get("session_manifest_path", ""),
+                "completed": bool(entry.get("completed")),
+                "passed": bool(report.get("passed")),
+                "audit_report": str(Path(str(report.get("output_dir") or part_output)) / "protocol11_emulated_runner_artifact_audit.json"),
+                "report": report,
+            }
+        )
+        block_count += int(report.get("block_count") or 0)
+        trial_count += int(report.get("trial_count") or 0)
+        for key, value in dict(report.get("event_counts") or {}).items():
+            aggregate_event_counts[str(key)] = int(aggregate_event_counts.get(str(key), 0)) + int(value or 0)
+        for key, value in dict(report.get("expected_event_counts") or {}).items():
+            aggregate_expected_counts[str(key)] = int(aggregate_expected_counts.get(str(key), 0)) + int(value or 0)
+    _criterion(
+        criteria,
+        "session_group",
+        "all_declared_parts_completed",
+        bool(part_entries) and all(bool(entry.get("completed")) for entry in part_entries),
+        f"completed={sum(1 for entry in part_entries if bool(entry.get('completed')))}/{len(part_entries)}",
+        evidence={"parts": part_entries},
+    )
+    _criterion(
+        criteria,
+        "session_group",
+        "all_part_audits_passed",
+        bool(part_reports) and all(bool(item.get("passed")) for item in part_reports),
+        f"passed={sum(1 for item in part_reports if bool(item.get('passed')))}/{len(part_reports)}",
+    )
+    criteria_payload = [criterion.as_dict() for criterion in criteria]
+    sections: dict[str, dict[str, Any]] = {}
+    for item in criteria_payload:
+        section = sections.setdefault(item["section"], {"count": 0, "passed_count": 0, "required_count": 0, "required_passed_count": 0})
+        section["count"] += 1
+        if item["passed"]:
+            section["passed_count"] += 1
+        if item["required"]:
+            section["required_count"] += 1
+            if item["passed"]:
+                section["required_passed_count"] += 1
+    for section in sections.values():
+        section["passed"] = section["required_count"] == section["required_passed_count"]
+    required_items = [item for item in criteria_payload if item["required"]]
+    report = {
+        "schema": f"{SCHEMA}.session-group",
+        "created_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "passed": all(item["passed"] for item in required_items) and bool(required_items),
+        "session_group_manifest": str(session_group_manifest),
+        "session_group_id": str(group.get("session_group_id") or ""),
+        "participant_id": str(group.get("participant_id") or ""),
+        "output_dir": str(output_dir),
+        "part_count": len(part_entries),
+        "completed_part_count": sum(1 for entry in part_entries if bool(entry.get("completed"))),
+        "block_count": block_count,
+        "trial_count": trial_count,
+        "event_counts": aggregate_event_counts,
+        "expected_event_counts": aggregate_expected_counts,
+        "parts": part_reports,
+        "sections": sections,
+        "criteria": criteria_payload,
+        "required_count": len(required_items),
+        "required_passed_count": sum(1 for item in required_items if item["passed"]),
+    }
+    _write_json(output_dir / "protocol11_emulated_runner_artifact_audit.json", report)
+    _write_markdown(output_dir / "protocol11_emulated_runner_artifact_audit.md", report)
+    return report
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate Protocol 11 emulated-runner session artifacts.")
-    parser.add_argument("--session-dir", type=Path, required=True, help="Completed runner session folder containing session_manifest.json and events.csv.")
+    parser.add_argument("--session-dir", type=Path, default=None, help="Completed runner session folder containing session_manifest.json and events.csv.")
+    parser.add_argument("--session-group-manifest", type=Path, default=None, help="Split-session group manifest containing all prepared Study 5 parts.")
     parser.add_argument("--response-plan", type=Path, default=None, help="Optional Protocol 11 response plan JSON or CSV keyed by trial_uid.")
     parser.add_argument("--output-dir", type=Path, default=None, help="Directory for the audit JSON/Markdown report.")
     parser.add_argument("--allow-timing-fallback", action="store_true", help="Allow timing_anchor_fallback for degraded-timing scenarios.")
     parser.add_argument("--require-local-data-root", action="store_true", help="Require the session path to resolve under local_data/.")
     args = parser.parse_args(argv)
 
-    report = validate_artifacts(
-        args.session_dir,
-        response_plan_path=args.response_plan,
-        output_dir=args.output_dir,
-        allow_timing_fallback=args.allow_timing_fallback,
-        require_local_data_root=args.require_local_data_root,
-    )
+    if args.session_group_manifest is not None:
+        report = validate_session_group_artifacts(
+            args.session_group_manifest,
+            response_plan_path=args.response_plan,
+            output_dir=args.output_dir,
+            allow_timing_fallback=args.allow_timing_fallback,
+            require_local_data_root=args.require_local_data_root,
+        )
+    else:
+        if args.session_dir is None:
+            parser.error("--session-dir is required unless --session-group-manifest is supplied.")
+        report = validate_artifacts(
+            args.session_dir,
+            response_plan_path=args.response_plan,
+            output_dir=args.output_dir,
+            allow_timing_fallback=args.allow_timing_fallback,
+            require_local_data_root=args.require_local_data_root,
+        )
     print(f"Wrote Protocol 11 artifact audit: {Path(report['output_dir']) / 'protocol11_emulated_runner_artifact_audit.json'}")
     return 0 if report.get("passed") else 1
 

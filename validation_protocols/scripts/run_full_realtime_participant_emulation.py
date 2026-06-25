@@ -211,18 +211,29 @@ def _build_runner_command(args: argparse.Namespace, *, runner: Path, screenshot_
         command = [sys.executable, str(REPO_ROOT / "windows" / "focus_runner_entry.py")]
     else:
         command = [str(runner)]
-    command.extend(
-        [
-        "--profile",
-        str(args.profile),
-        "--participant-id",
-        str(args.participant_id),
-        "--manual-start",
-        "--enable-missed-trial-topup",
-        "--validation-screenshot",
-        str(screenshot_path),
-        ]
-    )
+    if bool(getattr(args, "launch_via_environment_gate", False)):
+        command.extend(
+            [
+                "--launcher",
+                "--participant-id",
+                str(args.participant_id),
+                "--validation-screenshot",
+                str(screenshot_path),
+            ]
+        )
+    else:
+        command.extend(
+            [
+                "--profile",
+                str(args.profile),
+                "--participant-id",
+                str(args.participant_id),
+                "--manual-start",
+                "--enable-missed-trial-topup",
+                "--validation-screenshot",
+                str(screenshot_path),
+            ]
+        )
     wired_loopback = str(getattr(args, "wired_loopback", WIRED_LOOPBACK_OFF) or WIRED_LOOPBACK_OFF)
     if wired_loopback != WIRED_LOOPBACK_OFF:
         command.extend(["--wired-loopback", wired_loopback])
@@ -281,6 +292,14 @@ def _configure_validation_env(args: argparse.Namespace, *, output_dir: Path, foc
     env["PPS_FOCUS_VALIDATION_PARTICIPANT_MISS_RATE"] = str(float(args.miss_rate))
     env["PPS_FOCUS_VALIDATION_PARTICIPANT_MIN_MISSES"] = str(int(args.min_misses))
     env["PPS_FOCUS_VALIDATION_REPORT"] = str(focus_report_path)
+    env["PPS_FOCUS_VALIDATION_OUTPUT_ROOT"] = str(output_dir / "runner_sessions")
+    env["PPS_FOCUS_VALIDATION_PROFILE"] = str(args.profile)
+    if bool(getattr(args, "launch_via_environment_gate", False)):
+        env["PPS_FOCUS_VALIDATION_LAUNCHER_AUTO_CLICK"] = "1"
+        env["PPS_FOCUS_VALIDATION_LAUNCHER_REPORT"] = str(output_dir / "launcher_validation_report.json")
+    else:
+        env.pop("PPS_FOCUS_VALIDATION_LAUNCHER_AUTO_CLICK", None)
+        env.pop("PPS_FOCUS_VALIDATION_LAUNCHER_REPORT", None)
     env["PPS_FOCUS_DISABLE_PREWARM"] = "1"
     env["PPS_PROTOCOL11_OUTPUT_DIR"] = str(output_dir)
     env["PPS_PROTOCOL11_VALIDATION_LANE"] = _resolved_validation_lane(args)
@@ -465,13 +484,43 @@ def _evaluate_focus_report(
         return {}, ["Packaged Focus Mode did not write its validation focus report."]
     session_manifest, manifest, manifest_base = _session_manifest(focus)
     session_dir = Path(str(focus.get("session_dir") or ""))
-    analysis_dir = _analysis_dir_from_manifest(session_dir, manifest, manifest_base)
-    topup_dir = _topup_dir_from_manifest(session_dir, manifest, manifest_base)
-    events_csv = Path(str(focus.get("events_csv") or ""))
-    events = _events(events_csv)
-    counts = _event_counts(events)
+    focus_parts = [dict(item) for item in focus.get("parts") or [] if isinstance(item, dict)]
+    if not focus_parts:
+        focus_parts = [
+            {
+                "session_manifest": str(session_manifest),
+                "session_dir": str(session_dir),
+                "events_csv": str(focus.get("events_csv") or ""),
+            }
+        ]
+    part_infos: list[dict[str, Any]] = []
+    events: list[dict[str, Any]] = []
+    counts: dict[str, int] = dict(focus.get("aggregate_event_counts") or focus.get("event_counts") or {})
+    for part in focus_parts:
+        part_manifest_path = Path(str(part.get("session_manifest") or ""))
+        part_manifest = _read_json(part_manifest_path)
+        part_base = part_manifest_path.parent if part_manifest_path.parent != Path() else manifest_base
+        part_session_dir = Path(str(part.get("session_dir") or part_manifest.get("session_dir") or ""))
+        part_analysis_dir = Path(str(part.get("analysis_dir") or "")) if str(part.get("analysis_dir") or "").strip() else _analysis_dir_from_manifest(part_session_dir, part_manifest, part_base)
+        part_topup_dir = Path(str(part.get("topup_dir") or "")) if str(part.get("topup_dir") or "").strip() else _topup_dir_from_manifest(part_session_dir, part_manifest, part_base)
+        part_events_csv = Path(str(part.get("events_csv") or ""))
+        part_events = _events(part_events_csv)
+        events.extend(part_events)
+        part_infos.append(
+            {
+                **part,
+                "session_manifest": str(part_manifest_path),
+                "session_dir": str(part_session_dir),
+                "analysis_dir": str(part_analysis_dir or ""),
+                "topup_dir": str(part_topup_dir or ""),
+                "events_csv": str(part_events_csv),
+                "event_counts": _event_counts(part_events) if part_events else dict(part.get("event_counts") or {}),
+            }
+        )
+    if not counts:
+        counts = _event_counts(events)
     click_records = list(focus.get("validation_mouse_clicks") or [])
-    plan = next((record for record in click_records if record.get("label") == "participant_emulator_plan"), {})
+    plans = [record for record in click_records if record.get("label") == "participant_emulator_plan"]
     intentional_misses = [
         record
         for record in click_records
@@ -493,20 +542,37 @@ def _evaluate_focus_report(
         if str(record.get("actual_delay_ms") or "").strip()
     ]
     approvals = list(focus.get("validation_topup_approvals") or [])
-    ledger = _read_json(topup_dir / "topup_ledger.json") if topup_dir else {}
-    topup_manifest_paths = [
-        path
-        for path in _glob_files(topup_dir or session_dir, "topup_block*manifest.csv")
-        if "draft" not in path.name.lower()
-    ]
+    ledger_summaries: list[dict[str, Any]] = []
+    topup_manifest_paths: list[Path] = []
+    for part in part_infos:
+        part_topup_dir = Path(str(part.get("topup_dir") or ""))
+        part_session_dir = Path(str(part.get("session_dir") or ""))
+        if _path_is_dir(part_topup_dir):
+            ledger = _read_json(part_topup_dir / "topup_ledger.json")
+            if ledger:
+                ledger_summaries.append(dict(ledger.get("summary") or {}))
+        search_dir = part_topup_dir if _path_is_dir(part_topup_dir) else part_session_dir
+        topup_manifest_paths.extend(
+            path
+            for path in _glob_files(search_dir, "topup_block*manifest.csv")
+            if "draft" not in path.name.lower()
+        )
     topup_manifest_rows = [row for path in topup_manifest_paths for row in _read_csv(path)]
     rescue_rows = [
         row
         for row in topup_manifest_rows
         if str(row.get("Topup_Role") or row.get("topup_role") or "").lower() == "rescue"
     ]
-    final_outcomes = _latest_analysis_csv(session_dir, "final_trial_outcomes", analysis_dir=analysis_dir)
-    final_rows = _read_csv(final_outcomes) if final_outcomes else []
+    final_outcomes_paths: list[Path] = []
+    for part in part_infos:
+        final_outcomes = _latest_analysis_csv(
+            Path(str(part.get("session_dir") or "")),
+            "final_trial_outcomes",
+            analysis_dir=Path(str(part.get("analysis_dir") or "")) if str(part.get("analysis_dir") or "").strip() else None,
+        )
+        if final_outcomes:
+            final_outcomes_paths.append(final_outcomes)
+    final_rows = [row for path in final_outcomes_paths for row in _read_csv(path)]
     rescued_final_rows = [
         row
         for row in final_rows
@@ -525,13 +591,17 @@ def _evaluate_focus_report(
     except (TypeError, ValueError):
         pass
 
-    planned_misses = int(plan.get("planned_miss_count") or 0)
-    planned_standard = int(plan.get("standard_tactile_cue_count") or 0)
+    planned_misses = sum(int(plan.get("planned_miss_count") or 0) for plan in plans)
+    planned_standard = sum(int(plan.get("standard_tactile_cue_count") or 0) for plan in plans)
     runner_label = "packaged runner" if runner_mode == "packaged" else "source runner"
     if exit_code != 0:
         failures.append(f"{runner_label.capitalize()} exited with code {exit_code}.")
     if not focus.get("completed"):
         failures.append("Focus Mode did not report completed=True.")
+    if int(focus.get("expected_part_count") or 1) > 1 and not focus.get("all_parts_completed"):
+        failures.append("Focus Mode did not complete every split Study 5 part.")
+    if int(focus.get("expected_part_count") or 1) > 1 and not any(record.get("label") == "Load Part 2" for record in click_records):
+        failures.append("The participant emulator did not activate Load Part 2.")
     hardware_realtime = str(audio_mode) == "hardware"
     full_stack = str(validation_lane) == VALIDATION_LANE_FULL_STACK
     if not hardware_realtime and not focus.get("validation_audio_realtime"):
@@ -541,8 +611,12 @@ def _evaluate_focus_report(
             failures.append("Full-stack validation did not use hardware audio mode.")
         if counts.get("recording_unavailable", 0):
             failures.append(f"Full-stack validation logged recording_unavailable {counts.get('recording_unavailable')} time(s).")
-        audio_evidence_wavs = _glob_files(session_dir, "*audio_evidence.wav")
-        audio_evidence_sidecars = _glob_files(session_dir, "*audio_evidence.output_evidence.json")
+        audio_evidence_wavs = [path for part in part_infos for path in _glob_files(Path(str(part.get("session_dir") or "")), "*audio_evidence.wav")]
+        audio_evidence_sidecars = [
+            path
+            for part in part_infos
+            for path in _glob_files(Path(str(part.get("session_dir") or "")), "*audio_evidence.output_evidence.json")
+        ]
         if not audio_evidence_wavs or len(audio_evidence_wavs) != len(audio_evidence_sidecars):
             failures.append(
                 f"Full-stack validation requires per-block audio-evidence WAV/sidecar sets; found wavs={len(audio_evidence_wavs)} sidecars={len(audio_evidence_sidecars)}."
@@ -589,9 +663,17 @@ def _evaluate_focus_report(
         "final_condition_candidate": full_stack,
         "session_manifest": str(session_manifest),
         "session_dir": str(session_dir),
-        "analysis_dir": str(analysis_dir or ""),
-        "topup_dir": str(topup_dir or ""),
-        "events_csv": str(events_csv),
+        "session_group_manifest": str(focus.get("session_group_manifest") or ""),
+        "expected_part_count": int(focus.get("expected_part_count") or len(part_infos) or 1),
+        "completed_part_count": int(focus.get("completed_part_count") or sum(1 for part in part_infos if bool(part.get("completed")))),
+        "all_parts_completed": bool(focus.get("all_parts_completed")) if int(focus.get("expected_part_count") or 1) > 1 else bool(focus.get("completed")),
+        "parts": part_infos,
+        "analysis_dir": str(part_infos[-1].get("analysis_dir") if part_infos else ""),
+        "topup_dir": str(part_infos[-1].get("topup_dir") if part_infos else ""),
+        "analysis_dirs": [str(part.get("analysis_dir") or "") for part in part_infos],
+        "topup_dirs": [str(part.get("topup_dir") or "") for part in part_infos],
+        "events_csv": str(part_infos[-1].get("events_csv") if part_infos else focus.get("events_csv", "")),
+        "events_csvs": [str(part.get("events_csv") or "") for part in part_infos],
         "event_counts": counts,
         "expected_realtime_duration_s": expected_duration_s,
         "played_block_duration_s": focus.get("played_block_duration_s"),
@@ -605,8 +687,10 @@ def _evaluate_focus_report(
         "topup_autoplay_count": len(approvals),
         "topup_manifest_paths": [str(path) for path in topup_manifest_paths],
         "topup_rescue_row_count": len(rescue_rows),
-        "topup_ledger_summary": ledger.get("summary", {}),
-        "final_outcomes_csv": str(final_outcomes or ""),
+        "topup_ledger_summaries": ledger_summaries,
+        "topup_ledger_summary": ledger_summaries[-1] if ledger_summaries else {},
+        "final_outcomes_csv": str(final_outcomes_paths[-1]) if final_outcomes_paths else "",
+        "final_outcomes_csvs": [str(path) for path in final_outcomes_paths],
         "final_topup_rescued_hit_count": len(rescued_final_rows),
         "cursor_recenter_count": recentered,
         "planned_tactile_cue_count": planned_cues,
@@ -633,6 +717,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--min-misses", type=int, default=8)
     parser.add_argument("--seed", type=int, default=20260615)
     parser.add_argument("--mouse-backend", default="pynput", choices=["pynput", "win32", "pyautogui", "qtest"])
+    parser.add_argument(
+        "--launch-via-environment-gate",
+        action="store_true",
+        help="Prepare the validation output root through the runner launcher before Focus Mode opens.",
+    )
     parser.add_argument(
         "--validation-lane",
         default=VALIDATION_LANE_AUTO,

@@ -15,7 +15,7 @@ import threading
 import time
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, Callable
+from typing import Any, Callable, Iterable
 
 from .app_assets import apply_qt_app_icon, set_windows_app_user_model_id
 from .analysis_catalog import (
@@ -89,7 +89,13 @@ from .focus_layout import (
     render_focus_style_sheet,
 )
 from .output_layout import _filesystem_path as _output_filesystem_path
-from .output_layout import output_project_state_dir, output_root_for_metadata_path
+from .output_layout import (
+    output_data_analytics_dir,
+    output_project_state_dir,
+    output_root_for_metadata_path,
+    output_runner_logs_dir,
+    output_verbose_events_dir,
+)
 from .focus_timeline import TactileRecenterController, TactileTimelineCue, TactileTimelineState
 from .runner_diary import (
     RUNNER_SETTINGS_SCHEMA,
@@ -4493,10 +4499,16 @@ def prepare_latest_focus_session(
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> Path:
     """Materialize a session package from the newest prepared Segment 6 setup."""
-    output_root = Path(session_root) if session_root is not None else active_output_folder(
-        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
-        fallback=DEFAULT_SESSION_ROOT,
-    )
+    validation_output_root = os.environ.get("PPS_FOCUS_VALIDATION_OUTPUT_ROOT", "").strip()
+    if session_root is not None:
+        output_root = Path(session_root)
+    elif validation_output_root:
+        output_root = Path(validation_output_root).expanduser()
+    else:
+        output_root = active_output_folder(
+            state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+            fallback=DEFAULT_SESSION_ROOT,
+        )
     run_setup = find_latest_dashboard_run_setup()
     if run_setup is None:
         raise FileNotFoundError("No prepared Segment 6 dashboard setup was found.")
@@ -5814,6 +5826,286 @@ def _validation_scoped_event_counts(events_csv: Path) -> dict[str, Any]:
     return scopes
 
 
+def _validation_merge_event_counts(items: Iterable[dict[str, Any]]) -> dict[str, int]:
+    merged: dict[str, int] = {}
+    for counts in items:
+        if not isinstance(counts, dict):
+            continue
+        for key, value in counts.items():
+            try:
+                merged[str(key)] = merged.get(str(key), 0) + int(value)
+            except (TypeError, ValueError):
+                continue
+    return merged
+
+
+def _validation_merge_scoped_event_counts(items: Iterable[dict[str, Any]]) -> dict[str, Any]:
+    merged: dict[str, Any] = {
+        "standard": {},
+        "topup": {},
+        "standard_trial_families": {},
+        "topup_trial_families": {},
+    }
+    for scopes in items:
+        if not isinstance(scopes, dict):
+            continue
+        for scope_key, counts in scopes.items():
+            if not isinstance(counts, dict):
+                continue
+            target = merged.setdefault(str(scope_key), {})
+            for event_type, value in counts.items():
+                try:
+                    target[str(event_type)] = int(target.get(str(event_type), 0)) + int(value)
+                except (TypeError, ValueError):
+                    continue
+    return merged
+
+
+def _validation_resolve_path(value: Any, base: Path | None = None, fallback: Path | None = None) -> Path | None:
+    text = str(value or "").strip()
+    if text:
+        path = Path(text)
+        if not path.is_absolute() and base is not None:
+            path = base / path
+        return path
+    return fallback
+
+
+def _validation_context_leaf(manifest: dict[str, Any]) -> Path:
+    session_group_id = str(manifest.get("session_group_id") or "").strip()
+    part_folder_name = str(manifest.get("part_folder_name") or "").strip()
+    if session_group_id and part_folder_name:
+        return Path(session_group_id) / part_folder_name
+    session_id = str(manifest.get("session_id") or manifest.get("part_session_id") or "").strip()
+    return Path(session_id or "session")
+
+
+def _validation_manifest_output_root(session_dir: Path, manifest: dict[str, Any]) -> Path:
+    output_root = str(manifest.get("output_root") or "").strip()
+    if output_root:
+        return Path(output_root)
+    if str(manifest.get("session_group_id") or "").strip():
+        return session_dir.parent.parent
+    return session_dir.parent
+
+
+def _validation_part_status_path(
+    manifest: dict[str, Any],
+    outputs: dict[str, Any],
+    manifest_base: Path,
+    *,
+    output_root: Path,
+    context_leaf: Path,
+    group_entry: dict[str, Any] | None = None,
+) -> Path:
+    fallback = output_runner_logs_dir(output_root) / context_leaf / "part_completion_status.json"
+    value = (
+        outputs.get("part_completion_status_json")
+        or manifest.get("part_completion_status_path")
+        or ((group_entry or {}).get("part_completion_status_path") if group_entry else "")
+    )
+    return _validation_resolve_path(value, manifest_base, fallback) or fallback
+
+
+def _validation_topup_dir_from_outputs(outputs: dict[str, Any], fallback: Path) -> Path:
+    for key, value in outputs.items():
+        if not str(key).startswith("topup_") or not str(value or "").strip():
+            continue
+        candidate = Path(str(value))
+        if candidate.suffix:
+            return candidate.parent
+        return candidate
+    return fallback
+
+
+def _validation_part_report(
+    manifest_path: Path,
+    *,
+    group_entry: dict[str, Any] | None = None,
+    fallback_package: Any | None = None,
+    completed_override: bool | None = None,
+) -> dict[str, Any]:
+    manifest_path = Path(manifest_path)
+    manifest_base = manifest_path.parent
+    manifest = _read_json_dict(manifest_path)
+    outputs = dict(manifest.get("outputs") or {})
+    if fallback_package is not None and not manifest:
+        try:
+            manifest = {
+                "participant_id": getattr(fallback_package, "participant_id", ""),
+                "session_id": getattr(fallback_package, "session_id", ""),
+                "session_group_id": getattr(fallback_package, "session_group_id", ""),
+                "part_session_id": getattr(fallback_package, "part_session_id", ""),
+                "part_number": getattr(fallback_package, "part_number", ""),
+                "part_folder_name": getattr(fallback_package, "part_folder_name", ""),
+                "session_dir": str(getattr(fallback_package, "session_dir", "")),
+            }
+        except Exception:
+            manifest = {}
+    session_dir = _validation_resolve_path(
+        manifest.get("session_dir") or ((group_entry or {}).get("session_dir") if group_entry else ""),
+        manifest_base,
+        Path(getattr(fallback_package, "session_dir", manifest_base)) if fallback_package is not None else manifest_base,
+    ) or manifest_base
+    output_root = _validation_manifest_output_root(session_dir, manifest)
+    context_leaf = _validation_context_leaf(manifest)
+    status_path = _validation_part_status_path(
+        manifest,
+        outputs,
+        manifest_base,
+        output_root=output_root,
+        context_leaf=context_leaf,
+        group_entry=group_entry,
+    )
+    status = _read_json_dict(status_path)
+    status_outputs = dict(status.get("analysis_outputs") or {})
+    merged_outputs = {**outputs, **status_outputs}
+    events_csv = _validation_resolve_path(
+        status.get("events_csv") or outputs.get("verbose_events_csv") or outputs.get("events_csv"),
+        manifest_base,
+        output_verbose_events_dir(output_root) / context_leaf / "events.csv",
+    )
+    analysis_dir = _validation_resolve_path(
+        outputs.get("analysis_dir") or manifest.get("data_analytics_dir"),
+        manifest_base,
+        output_data_analytics_dir(output_root) / context_leaf,
+    )
+    topup_dir = _validation_topup_dir_from_outputs(merged_outputs, output_runner_logs_dir(output_root) / context_leaf / "topup")
+    completed = bool(status.get("completed") or (group_entry or {}).get("completed"))
+    if completed_override is not None:
+        completed = bool(completed_override)
+    block_count = len(manifest.get("blocks") or [])
+    part_session_id = str(
+        manifest.get("part_session_id")
+        or status.get("part_session_id")
+        or (group_entry or {}).get("part_session_id")
+        or manifest.get("session_id")
+        or ""
+    )
+    report = {
+        "session_manifest": str(manifest_path),
+        "session_dir": str(session_dir),
+        "events_csv": str(events_csv or ""),
+        "analysis_dir": str(analysis_dir or ""),
+        "topup_dir": str(topup_dir),
+        "part_completion_status": str(status_path),
+        "completed": completed,
+        "block_count": int(block_count),
+        "participant_id": str(manifest.get("participant_id") or status.get("participant_id") or ""),
+        "session_id": str(manifest.get("session_id") or status.get("session_id") or ""),
+        "session_group_id": str(manifest.get("session_group_id") or status.get("session_group_id") or ""),
+        "part_session_id": part_session_id,
+        "part_number": manifest.get("part_number", status.get("part_number", (group_entry or {}).get("part_number") if group_entry else "")),
+        "part_folder_name": str(
+            manifest.get("part_folder_name")
+            or status.get("part_folder_name")
+            or ((group_entry or {}).get("part_folder_name") if group_entry else "")
+            or ""
+        ),
+        "outputs": {str(key): str(value) for key, value in merged_outputs.items()},
+    }
+    if events_csv is not None:
+        report["event_counts"] = _validation_event_counts(events_csv)
+        report["scoped_event_counts"] = _validation_scoped_event_counts(events_csv)
+    else:
+        report["event_counts"] = {}
+        report["scoped_event_counts"] = _validation_scoped_event_counts(Path(""))
+    return report
+
+
+def _validation_split_part_reports(
+    session_manifest: Path,
+    package: Any,
+    *,
+    completed_override: bool | None = None,
+) -> tuple[list[dict[str, Any]], Path | None, dict[str, Any]]:
+    active_manifest = Path(session_manifest)
+    manifest_payload = _read_json_dict(active_manifest)
+    outputs = dict(manifest_payload.get("outputs") or {})
+    group_manifest_path = _validation_resolve_path(
+        outputs.get("session_group_manifest_json") or manifest_payload.get("session_group_manifest_path"),
+        active_manifest.parent,
+        None,
+    )
+    if group_manifest_path is None and _package_is_split_part(package):
+        try:
+            group_manifest_path = output_runner_logs_dir(_package_output_root(package)) / str(package.session_group_id) / "session_group_manifest.json"
+        except Exception:
+            group_manifest_path = None
+    group_payload = _read_json_dict(group_manifest_path) if group_manifest_path is not None else {}
+    entries = group_payload.get("parts") if isinstance(group_payload.get("parts"), list) else []
+    part_reports: list[dict[str, Any]] = []
+    active_key = str(active_manifest.resolve()).lower() if _focus_path_is_file(active_manifest) else str(active_manifest).lower()
+    if entries:
+        for entry in entries:
+            if not isinstance(entry, dict):
+                continue
+            part_manifest = _validation_resolve_path(entry.get("session_manifest_path"), group_manifest_path.parent if group_manifest_path else active_manifest.parent)
+            if part_manifest is None:
+                continue
+            entry_key = str(part_manifest.resolve()).lower() if _focus_path_is_file(part_manifest) else str(part_manifest).lower()
+            part_reports.append(
+                _validation_part_report(
+                    part_manifest,
+                    group_entry=entry,
+                    fallback_package=package if entry_key == active_key else None,
+                    completed_override=completed_override if entry_key == active_key else None,
+                )
+            )
+    else:
+        manifests: list[Path] = [active_manifest]
+        for item in list(getattr(package, "sibling_part_manifest_paths", []) or []):
+            candidate = Path(item)
+            if str(candidate) and all(str(candidate) != str(existing) for existing in manifests):
+                manifests.append(candidate)
+        for manifest_path in manifests:
+            entry_key = str(manifest_path.resolve()).lower() if _focus_path_is_file(manifest_path) else str(manifest_path).lower()
+            part_reports.append(
+                _validation_part_report(
+                    manifest_path,
+                    fallback_package=package if entry_key == active_key else None,
+                    completed_override=completed_override if entry_key == active_key else None,
+                )
+            )
+    part_reports.sort(key=lambda item: _validation_int(item.get("part_number"), default=9999))
+    return part_reports, group_manifest_path, group_payload
+
+
+def _validation_capture_part_snapshot(window: "FocusModeWindow", *, label: str) -> dict[str, Any]:
+    package = window.package
+    manifest_path = Path(getattr(package, "manifest_path", ""))
+    completed = bool(window.result is not None and getattr(window.result, "completed", False))
+    report = _validation_part_report(manifest_path, fallback_package=package, completed_override=completed)
+    snapshot = {
+        "label": label,
+        "timestamp_unix": time.time(),
+        "session_manifest": str(manifest_path),
+        "session_dir": str(getattr(package, "session_dir", "")),
+        "session_id": str(getattr(package, "session_id", "")),
+        "session_group_id": str(getattr(package, "session_group_id", "")),
+        "part_session_id": str(getattr(package, "part_session_id", "") or getattr(package, "session_id", "")),
+        "part_number": getattr(package, "part_number", ""),
+        "part_folder_name": str(getattr(package, "part_folder_name", "")),
+        "completed": completed,
+        "event_counts": dict(report.get("event_counts") or {}),
+        "scoped_event_counts": dict(report.get("scoped_event_counts") or {}),
+        "planned_tactile_cue_count": int(getattr(window, "planned_tactile_cue_count", 0) or 0),
+        "cursor_recenter_count": len(getattr(window, "recenter_records", []) or []),
+        "cursor_recenter_records": list(getattr(window, "recenter_records", []) or []),
+        "validation_topup_approvals": list(getattr(window, "validation_topup_approval_records", []) or []),
+    }
+    snapshots = list(getattr(window, "validation_part_snapshots", []) or [])
+    key = str(snapshot["part_session_id"] or snapshot["session_manifest"])
+    retained = [
+        item
+        for item in snapshots
+        if str(item.get("part_session_id") or item.get("session_manifest") or "") != key
+    ]
+    retained.append(snapshot)
+    window.validation_part_snapshots = retained
+    return snapshot
+
+
 def _install_validation_auto_clicker(q: dict[str, Any], window: "FocusModeWindow") -> list[dict[str, Any]]:
     from PySide6.QtTest import QTest
 
@@ -5858,6 +6150,22 @@ def _install_validation_auto_clicker(q: dict[str, Any], window: "FocusModeWindow
             return
         q["QTimer"].singleShot(100, _click_start_when_ready)
 
+    def _load_next_split_part_if_ready() -> bool:
+        next_manifest = None
+        try:
+            next_manifest = window._next_split_part_manifest()
+        except Exception:
+            next_manifest = None
+        button = getattr(window, "load_next_part_button", None)
+        if next_manifest is None or button is None or not button.isEnabled():
+            return False
+        _validation_capture_part_snapshot(window, label="before_load_next_part")
+        _click(button, "Load Part 2")
+        start_gate_state.clear()
+        instruction_attempts.clear()
+        q["QTimer"].singleShot(250, _click_start_when_ready)
+        return True
+
     def _part2_start_gate_pending() -> bool:
         check = getattr(window, "_part2_start_gate_pending", None)
         if callable(check):
@@ -5877,6 +6185,10 @@ def _install_validation_auto_clicker(q: dict[str, Any], window: "FocusModeWindow
 
     def _poll() -> None:
         if window.result is not None:
+            if _load_next_split_part_if_ready():
+                q["QTimer"].singleShot(250, _poll)
+                return
+            _validation_capture_part_snapshot(window, label="before_accept")
             q["QTimer"].singleShot(250, window.dialog.accept)
             return
         request = window.pending_instruction_request
@@ -6000,6 +6312,32 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
                 records.append({"label": "Submit setup", "backend": backend, "timestamp_unix": time.time()})
         except Exception as exc:
             records.append({"label": "participant_setup_submit_failed", "message": str(exc), "timestamp_unix": time.time()})
+
+    def _reset_for_loaded_package() -> None:
+        nonlocal miss_keys
+        miss_keys = None
+        scheduled_events.clear()
+        scheduled_response_keys.clear()
+        completed_events.clear()
+        pending.clear()
+        start_clicked["value"] = False
+        start_gate_state.clear()
+        instruction_attempts.clear()
+
+    def _load_next_split_part_if_ready() -> bool:
+        next_manifest = None
+        try:
+            next_manifest = window._next_split_part_manifest()
+        except Exception:
+            next_manifest = None
+        button = getattr(window, "load_next_part_button", None)
+        if next_manifest is None or button is None or not button.isEnabled():
+            return False
+        _validation_capture_part_snapshot(window, label="before_load_next_part")
+        backend = _click_widget(button, "Load Part 2", preferred_backend="qtest")
+        records.append({"label": "Load Part 2", "backend": backend, "timestamp_unix": time.time()})
+        _reset_for_loaded_package()
+        return True
 
     def _activate_widget_for_os_click(widget: Any) -> None:
         try:
@@ -6471,6 +6809,10 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
 
     def _poll() -> None:
         if window.result is not None:
+            if _load_next_split_part_if_ready():
+                q["QTimer"].singleShot(250, _poll)
+                return
+            _validation_capture_part_snapshot(window, label="before_accept")
             q["QTimer"].singleShot(1000, window.dialog.accept)
             return
         _submit_mock_setup_if_needed()
@@ -6525,29 +6867,99 @@ def _write_validation_focus_report(
     validation_clicks: list[dict[str, Any]],
     engine: _ValidationFastAudioEngine | None,
 ) -> None:
-    manifest_outputs: dict[str, Any] = {}
-    try:
-        with open(_output_filesystem_path(session_manifest), "r", encoding="utf-8") as handle:
-            manifest_payload = json.loads(handle.read())
-        if isinstance(manifest_payload.get("outputs"), dict):
-            manifest_outputs = dict(manifest_payload.get("outputs") or {})
-    except Exception:
-        manifest_outputs = {}
-    events_csv = Path(str(manifest_outputs.get("verbose_events_csv") or manifest_outputs.get("events_csv") or package.session_dir / "events.csv"))
+    active_completed = bool(window.result is not None and getattr(window.result, "completed", False))
+    _validation_capture_part_snapshot(window, label="final_report")
+    parts, group_manifest_path, group_payload = _validation_split_part_reports(
+        Path(session_manifest),
+        package,
+        completed_override=active_completed,
+    )
+    snapshots = list(getattr(window, "validation_part_snapshots", []) or [])
+    snapshots_by_part_session = {
+        str(item.get("part_session_id") or ""): item
+        for item in snapshots
+        if str(item.get("part_session_id") or "").strip()
+    }
+    snapshots_by_manifest = {
+        str(item.get("session_manifest") or ""): item
+        for item in snapshots
+        if str(item.get("session_manifest") or "").strip()
+    }
+    for part in parts:
+        snapshot = snapshots_by_part_session.get(str(part.get("part_session_id") or "")) or snapshots_by_manifest.get(
+            str(part.get("session_manifest") or "")
+        )
+        if snapshot:
+            part["validation_snapshot"] = snapshot
+            part["planned_tactile_cue_count"] = int(snapshot.get("planned_tactile_cue_count") or 0)
+            part["cursor_recenter_count"] = int(snapshot.get("cursor_recenter_count") or 0)
+            part["cursor_recenter_records"] = list(snapshot.get("cursor_recenter_records") or [])
+            part["validation_topup_approvals"] = list(snapshot.get("validation_topup_approvals") or [])
+    if not parts:
+        parts = [_validation_part_report(Path(session_manifest), fallback_package=package, completed_override=active_completed)]
+    aggregate_event_counts = _validation_merge_event_counts([dict(part.get("event_counts") or {}) for part in parts])
+    aggregate_scoped_counts = _validation_merge_scoped_event_counts([dict(part.get("scoped_event_counts") or {}) for part in parts])
+    standard_event_counts = dict(aggregate_scoped_counts.get("standard") or {})
+    standard_block_end_count = int(standard_event_counts.get("block_end") or aggregate_event_counts.get("block_end") or 0)
+    standard_trial_start_count = int(standard_event_counts.get("trial_start") or aggregate_event_counts.get("trial_start") or 0)
+    standard_trial_end_count = int(standard_event_counts.get("trial_end") or aggregate_event_counts.get("trial_end") or 0)
+    expected_part_count = _validation_int(group_payload.get("parts_per_participant"), default=len(parts))
+    if expected_part_count <= 0:
+        expected_part_count = len(parts)
+    completed_part_count = sum(1 for part in parts if bool(part.get("completed")))
+    split_run = bool(group_manifest_path is not None or _package_is_split_part(package) or expected_part_count > 1 or len(parts) > 1)
+    all_parts_completed = bool(parts) and completed_part_count >= expected_part_count and all(bool(part.get("completed")) for part in parts)
+    active_manifest = str(Path(session_manifest))
+    active_part = next((part for part in parts if str(part.get("session_manifest") or "") == active_manifest), parts[-1])
+    cursor_recenter_records: list[dict[str, Any]] = []
+    validation_topup_approvals: list[dict[str, Any]] = []
+    planned_tactile_cue_count = 0
+    for snapshot in snapshots:
+        planned_tactile_cue_count += int(snapshot.get("planned_tactile_cue_count") or 0)
+        cursor_recenter_records.extend(list(snapshot.get("cursor_recenter_records") or []))
+        validation_topup_approvals.extend(list(snapshot.get("validation_topup_approvals") or []))
+    if not snapshots:
+        planned_tactile_cue_count = int(getattr(window, "planned_tactile_cue_count", 0) or 0)
+        cursor_recenter_records = list(getattr(window, "recenter_records", []) or [])
+        validation_topup_approvals = list(getattr(window, "validation_topup_approval_records", []) or [])
+    events_csvs = [str(part.get("events_csv") or "") for part in parts if str(part.get("events_csv") or "").strip()]
+    analysis_dirs = [str(part.get("analysis_dir") or "") for part in parts if str(part.get("analysis_dir") or "").strip()]
+    topup_dirs = [str(part.get("topup_dir") or "") for part in parts if str(part.get("topup_dir") or "").strip()]
     payload = {
         "schema": "pps-focus-mode-packaged-validation.v1",
         "session_manifest": str(session_manifest),
         "session_dir": str(package.session_dir),
-        "events_csv": str(events_csv),
+        "session_group_manifest": str(group_manifest_path or ""),
+        "session_group_id": str(group_payload.get("session_group_id") or getattr(package, "session_group_id", "") or ""),
+        "events_csv": str(active_part.get("events_csv") or ""),
+        "events_csvs": events_csvs,
+        "analysis_dir": str(active_part.get("analysis_dir") or ""),
+        "analysis_dirs": analysis_dirs,
+        "topup_dir": str(active_part.get("topup_dir") or ""),
+        "topup_dirs": topup_dirs,
         "exit_code": int(exit_code),
-        "completed": bool(window.result is not None and getattr(window.result, "completed", False)),
-        "event_counts": _validation_event_counts(events_csv),
-        "scoped_event_counts": _validation_scoped_event_counts(events_csv),
+        "completed": bool(all_parts_completed if split_run else active_completed),
+        "expected_part_count": int(expected_part_count),
+        "completed_part_count": int(completed_part_count),
+        "all_parts_completed": bool(all_parts_completed),
+        "parts": parts,
+        "event_counts": aggregate_event_counts,
+        "scoped_event_counts": aggregate_scoped_counts,
+        "aggregate_event_counts": aggregate_event_counts,
+        "aggregate_scoped_event_counts": aggregate_scoped_counts,
+        "block_count": standard_block_end_count,
+        "block_end_count": standard_block_end_count,
+        "trial_start_count": standard_trial_start_count,
+        "trial_end_count": standard_trial_end_count,
+        "total_block_end_count": int(aggregate_event_counts.get("block_end", 0)),
+        "total_trial_start_count": int(aggregate_event_counts.get("trial_start", 0)),
+        "total_trial_end_count": int(aggregate_event_counts.get("trial_end", 0)),
         "validation_mouse_clicks": validation_clicks,
-        "validation_topup_approvals": list(getattr(window, "validation_topup_approval_records", [])),
-        "planned_tactile_cue_count": int(getattr(window, "planned_tactile_cue_count", 0)),
-        "cursor_recenter_records": list(getattr(window, "recenter_records", [])),
-        "cursor_recenter_count": len(getattr(window, "recenter_records", [])),
+        "validation_topup_approvals": validation_topup_approvals,
+        "validation_part_snapshots": snapshots,
+        "planned_tactile_cue_count": int(planned_tactile_cue_count),
+        "cursor_recenter_records": cursor_recenter_records,
+        "cursor_recenter_count": len(cursor_recenter_records),
         "played_block_count": len(engine.played_blocks) if engine is not None else None,
         "played_block_duration_s": sum(getattr(engine, "played_block_durations_s", [])) if engine is not None else None,
         "played_block_durations_s": list(getattr(engine, "played_block_durations_s", [])) if engine is not None else [],
@@ -6639,6 +7051,7 @@ class FocusModeWindow:
         self.recenter_records: list[dict[str, Any]] = []
         self._last_recenter_backend_warning = ""
         self.validation_topup_approval_records: list[dict[str, Any]] = []
+        self.validation_part_snapshots: list[dict[str, Any]] = []
         self.planned_tactile_cue_count = 0
         self.analysis_review_dialog: AnalysisReviewDialog | None = None
         self.primary_action_shortcuts: list[Any] = []
@@ -7842,20 +8255,44 @@ class FocusModeWindow:
         except ValueError:
             current_number = 0
         candidates: list[tuple[int, Path]] = []
-        for manifest_path in list(getattr(self.package, "sibling_part_manifest_paths", []) or []):
+
+        def _add_candidate(manifest_path: Any, *, part_number_hint: Any = None, base: Path | None = None) -> None:
             path = Path(manifest_path)
-            if not path.exists():
-                continue
+            if not path.is_absolute() and base is not None:
+                path = base / path
+            if not _focus_path_is_file(path):
+                return
             try:
-                package = load_run_package(path)
+                next_package = load_run_package(path)
             except Exception:
-                continue
+                next_package = None
             try:
-                part_number = int(_part_key_text(getattr(package, "part_number", "")) or "0")
-            except ValueError:
+                part_number = int(_part_key_text(part_number_hint) or _part_key_text(getattr(next_package, "part_number", "")) or "0")
+            except (TypeError, ValueError):
                 part_number = 0
             if part_number > current_number:
-                candidates.append((part_number, package.manifest_path))
+                candidates.append((part_number, Path(getattr(next_package, "manifest_path", path))))
+
+        for manifest_path in list(getattr(self.package, "sibling_part_manifest_paths", []) or []):
+            _add_candidate(manifest_path)
+        if not candidates:
+            active_manifest = Path(getattr(self.package, "manifest_path", ""))
+            manifest_payload = _read_json_dict(active_manifest)
+            outputs = dict(manifest_payload.get("outputs") or {})
+            group_manifest_path = _validation_resolve_path(
+                outputs.get("session_group_manifest_json") or manifest_payload.get("session_group_manifest_path"),
+                active_manifest.parent if str(active_manifest) else None,
+                None,
+            )
+            group_payload = _read_json_dict(group_manifest_path) if group_manifest_path is not None else {}
+            for entry in group_payload.get("parts") if isinstance(group_payload.get("parts"), list) else []:
+                if not isinstance(entry, dict):
+                    continue
+                _add_candidate(
+                    entry.get("session_manifest_path"),
+                    part_number_hint=entry.get("part_number"),
+                    base=group_manifest_path.parent if group_manifest_path is not None else None,
+                )
         if not candidates:
             return None
         return sorted(candidates, key=lambda item: item[0])[0][1]
@@ -11232,6 +11669,7 @@ def _run_environment_operations_window(
             participant_id=str(initial_diary_context.get("participant_id") or initial_participant),
             capture_options=dict(initial_diary_context.get("capture_options") or {}),
         )
+    validation_launcher_auto = _env_flag("PPS_FOCUS_VALIDATION_LAUNCHER_AUTO_CLICK")
 
     asset_controls = q["QHBoxLayout"]()
     generate_button = q["QPushButton"]("Generate Audio Assets")
@@ -11252,10 +11690,10 @@ def _run_environment_operations_window(
         if readiness is not None:
             _clear_dialog_audio_selection_if_validated_route_ready(readiness)
         launcher_message = initial_message or (readiness.message() if readiness is not None else "")
-        show_driver_button = bool(readiness is not None and not readiness.publication_ready)
+        show_driver_button = bool(readiness is not None and not readiness.publication_ready and not validation_launcher_auto)
     except Exception as exc:
         launcher_message = initial_message or f"Audio preflight could not run: {exc}"
-        show_driver_button = not bool(initial_message)
+        show_driver_button = bool((not initial_message) and not validation_launcher_auto)
     message = q["QLabel"](launcher_message or "Ready")
     message.setObjectName("mutedLabel")
     message.setWordWrap(True)
@@ -11305,12 +11743,12 @@ def _run_environment_operations_window(
             readiness = readiness_state["readiness"]
             _clear_dialog_audio_selection_if_validated_route_ready(readiness)
             message.setText(readiness.message())
-            driver_button.setVisible(not readiness.publication_ready)
+            driver_button.setVisible(not readiness.publication_ready and not validation_launcher_auto)
             return readiness
         except Exception as exc:
             readiness_state["readiness"] = None
             message.setText(f"Audio preflight could not run: {exc}")
-            driver_button.setVisible(True)
+            driver_button.setVisible(not validation_launcher_auto)
             return None
 
     def _open_audio_dependency_dialog() -> None:
@@ -11326,15 +11764,15 @@ def _run_environment_operations_window(
                     f"left/right/tactile outputs {channel_text}; run independent channel and latency tests before "
                     "time-sensitive use."
                 )
-                driver_button.setVisible(True)
+                driver_button.setVisible(not validation_launcher_auto)
             else:
                 message.setText(refreshed.message())
-                driver_button.setVisible(not refreshed.publication_ready)
+                driver_button.setVisible(not refreshed.publication_ready and not validation_launcher_auto)
         else:
             _refresh_launcher_audio_preflight()
 
     driver_button.clicked.connect(_open_audio_dependency_dialog)
-    if show_driver_button and not initial_message:
+    if show_driver_button and not initial_message and not validation_launcher_auto:
         q["QTimer"].singleShot(100, _open_audio_dependency_dialog)
 
     def _current_profile() -> str:

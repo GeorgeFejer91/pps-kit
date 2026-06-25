@@ -431,6 +431,38 @@ def _xdf_summary(path: Path) -> dict[str, Any]:
     return {"exists": True, "loaded": True, "sample_count": total, "streams": stream_summaries, "error": ""}
 
 
+def _aggregate_xdf_summaries(summaries: list[dict[str, Any]]) -> dict[str, Any]:
+    if not summaries:
+        return {"exists": False, "loaded": False, "sample_count": 0, "streams": [], "error": "missing"}
+    streams: dict[tuple[str, str, int], dict[str, Any]] = {}
+    for summary in summaries:
+        for stream in summary.get("streams", []) or []:
+            key = (
+                str(stream.get("name") or ""),
+                str(stream.get("type") or ""),
+                _as_int(stream.get("channel_count"), default=0) or 0,
+            )
+            target = streams.setdefault(
+                key,
+                {
+                    "name": key[0],
+                    "type": key[1],
+                    "channel_count": key[2],
+                    "sample_count": 0,
+                },
+            )
+            target["sample_count"] = int(target.get("sample_count") or 0) + int(stream.get("sample_count") or 0)
+    errors = [str(summary.get("error") or "") for summary in summaries if str(summary.get("error") or "").strip()]
+    return {
+        "exists": all(bool(summary.get("exists")) for summary in summaries),
+        "loaded": all(bool(summary.get("loaded")) for summary in summaries),
+        "sample_count": sum(int(summary.get("sample_count") or 0) for summary in summaries),
+        "streams": list(streams.values()),
+        "parts": summaries,
+        "error": "; ".join(errors),
+    }
+
+
 def _screenshot_summary(path: Path) -> dict[str, Any]:
     if not _path_is_file(path):
         return {"exists": False, "valid": False, "nonblank": False, "error": "missing"}
@@ -722,6 +754,11 @@ def _computed_reconciliation_report(
 ) -> dict[str, Any]:
     audio_wavs = [Path(record["wav_path"]) for record in audio_records if _path_is_set(Path(record["wav_path"]))]
     session_dir_key = _canonical_path_text(session_dir)
+
+    def _inside_session_scope(path: Path) -> bool:
+        parent = _canonical_path_text(Path(path).parent)
+        return parent == session_dir_key or parent.startswith(session_dir_key.rstrip("/\\") + "/") or parent.startswith(session_dir_key.rstrip("/\\") + "\\")
+
     criteria = {
         "events_xdf_loadable": bool(xdf.get("events_xdf", {}).get("loaded")),
         "lsl_markers_xdf_loadable": bool(xdf.get("lsl_markers_xdf", {}).get("loaded")),
@@ -729,8 +766,7 @@ def _computed_reconciliation_report(
         "event_types_match_between_csv_layers": not reconciliation.get("event_type_mismatches"),
         "event_codes_match_between_csv_layers": not reconciliation.get("event_code_mismatches"),
         "trigger_keys_match_between_csv_layers": not reconciliation.get("trigger_key_mismatches"),
-        "xdf_and_audio_evidence_share_session_folder": bool(audio_wavs)
-        and all(_canonical_path_text(Path(path).parent) == session_dir_key for path in audio_wavs),
+        "xdf_and_audio_evidence_share_session_folder": bool(audio_wavs) and all(_inside_session_scope(Path(path)) for path in audio_wavs),
         "audio_evidence_is_komplete_asio": bool(audio_records) and all(_audio_record_ok(record) for record in audio_records),
         "audio_evidence_is_four_channel_runtime": bool(audio_records)
         and all(int((record.get("sidecar") or {}).get("runtime_output_channels") or 0) >= 4 for record in audio_records),
@@ -958,7 +994,20 @@ def _scope_summary(session_dir: Path, manifest: dict[str, Any], focus_report: di
     elif is_study5:
         expected_blocks = 12
     observed_block_count = len(blocks) if blocks else Counter(row.get("event_type", "") for row in events).get("block_start", 0)
+    if int(focus_report.get("expected_part_count") or 1) > 1:
+        scoped_counts = focus_report.get("aggregate_scoped_event_counts") or focus_report.get("scoped_event_counts") or {}
+        standard_counts = dict(scoped_counts.get("standard") or {})
+        aggregate_counts = dict(focus_report.get("aggregate_event_counts") or focus_report.get("event_counts") or {})
+        observed_block_count = int(
+            standard_counts.get("block_end")
+            or standard_counts.get("block_start")
+            or aggregate_counts.get("block_end")
+            or aggregate_counts.get("block_start")
+            or Counter(row.get("event_type", "") for row in events).get("block_end", 0)
+        )
     full_study5 = bool(is_study5 and expected_blocks and observed_block_count >= expected_blocks)
+    if int(focus_report.get("expected_part_count") or 1) > 1:
+        full_study5 = full_study5 and bool(focus_report.get("all_parts_completed"))
     realtime = bool(
         focus_report.get("validation_audio_realtime")
         or focus_report.get("hardware_audio_realtime")
@@ -979,6 +1028,9 @@ def _scope_summary(session_dir: Path, manifest: dict[str, Any], focus_report: di
         "validation_audio_realtime": realtime,
         "observed_block_count": observed_block_count,
         "expected_study5_block_count": expected_blocks,
+        "expected_part_count": int(focus_report.get("expected_part_count") or 1),
+        "completed_part_count": int(focus_report.get("completed_part_count") or 0),
+        "all_parts_completed": bool(focus_report.get("all_parts_completed")) if int(focus_report.get("expected_part_count") or 1) > 1 else True,
     }
 
 
@@ -1092,23 +1144,155 @@ def audit_readiness(
         "analysis_summary": _first_existing([analysis_dir / "analysis_summary.txt", session_dir / "analysis_summary.txt"])
         or (analysis_dir / "analysis_summary.txt"),
     }
+    part_contexts: list[dict[str, Any]] = []
+    focus_parts = [dict(item) for item in focus_report.get("parts") or [] if isinstance(item, dict)]
+    for index, part in enumerate(focus_parts, start=1):
+        part_manifest_path = _resolve_path(part.get("session_manifest"), base=artifact_dir)
+        part_manifest = _read_json(part_manifest_path)
+        part_base = part_manifest_path.parent if part_manifest_path.parent != Path() else artifact_dir
+        part_outputs = part_manifest.get("outputs") if isinstance(part_manifest.get("outputs"), dict) else {}
+        part_session_dir = _resolve_path(part.get("session_dir") or part_manifest.get("session_dir"), base=part_base)
+        if not _path_is_set(part_session_dir):
+            continue
+        part_analysis_dir = _first_existing(
+            [
+                _resolve_path(part.get("analysis_dir"), base=part_base),
+                _resolve_path(part_outputs.get("analysis_dir"), base=part_base),
+                part_session_dir / "analysis",
+                part_session_dir.parent.parent / "Data_Analytics" / part_session_dir.parent.name / part_session_dir.name,
+                part_session_dir.parent / "Data_Analytics" / part_session_dir.name,
+            ]
+        ) or (part_session_dir / "analysis")
+        part_paths = {
+            "session_manifest": part_manifest_path,
+            "events_csv": _first_existing(
+                [
+                    _resolve_path(part.get("events_csv"), base=part_base),
+                    _resolve_path(part_outputs.get("verbose_events_csv") or part_outputs.get("events_csv"), base=part_base),
+                    part_session_dir / "events.csv",
+                ]
+            )
+            or (part_session_dir / "events.csv"),
+            "events_xdf": _first_existing(
+                [
+                    _resolve_path(part_outputs.get("verbose_events_xdf") or part_outputs.get("events_xdf"), base=part_base),
+                    part_session_dir / "events.xdf",
+                ]
+            )
+            or (part_session_dir / "events.xdf"),
+            "lsl_markers_csv": _first_existing(
+                [
+                    _resolve_path(part_outputs.get("lsl_markers_csv"), base=part_base),
+                    part_session_dir / "lsl_markers.csv",
+                ]
+            )
+            or (part_session_dir / "lsl_markers.csv"),
+            "lsl_markers_xdf": _first_existing(
+                [
+                    _resolve_path(part_outputs.get("lsl_markers_xdf"), base=part_base),
+                    part_session_dir / "lsl_markers.xdf",
+                ]
+            )
+            or (part_session_dir / "lsl_markers.xdf"),
+            "trigger_dictionary": _first_existing(
+                [
+                    _resolve_path(part_outputs.get("trigger_dictionary_json"), base=part_base),
+                    part_session_dir / "trigger_dictionary.json",
+                ]
+            )
+            or (part_session_dir / "trigger_dictionary.json"),
+            "analysis_summary": _first_existing([part_analysis_dir / "analysis_summary.txt", part_session_dir / "analysis_summary.txt"])
+            or (part_analysis_dir / "analysis_summary.txt"),
+        }
+        part_contexts.append(
+            {
+                "part_number": part.get("part_number") or index,
+                "session_dir": part_session_dir,
+                "manifest": part_manifest,
+                "manifest_path": part_manifest_path,
+                "analysis_dir": part_analysis_dir,
+                "paths": part_paths,
+            }
+        )
+    if not part_contexts:
+        part_contexts = [
+            {
+                "part_number": manifest.get("part_number") or 1,
+                "session_dir": session_dir,
+                "manifest": manifest,
+                "manifest_path": manifest_path,
+                "analysis_dir": analysis_dir,
+                "paths": paths,
+            }
+        ]
+    if len(part_contexts) > 1:
+        for context in part_contexts:
+            prefix = f"part_{_as_int(context.get('part_number'), default=0) or len(paths):02d}"
+            part_paths = dict(context.get("paths") or {})
+            paths[f"{prefix}_session_manifest"] = part_paths["session_manifest"]
+            paths[f"{prefix}_events_csv"] = part_paths["events_csv"]
+            paths[f"{prefix}_lsl_markers_csv"] = part_paths["lsl_markers_csv"]
+            paths[f"{prefix}_analysis_summary"] = part_paths["analysis_summary"]
     screenshot_candidates = [artifact_dir / "focus_screenshot.png", artifact_dir / "live_desktop_after_first_cues.png"]
     screenshot_summaries = {path.name: _screenshot_summary(path) for path in screenshot_candidates}
 
-    events = _event_rows(paths["events_csv"])
-    markers = _read_csv(paths["lsl_markers_csv"])
+    events = [
+        row
+        for context in part_contexts
+        for row in _event_rows(dict(context.get("paths") or {})["events_csv"])
+    ]
+    markers = [
+        row
+        for context in part_contexts
+        for row in _read_csv(dict(context.get("paths") or {})["lsl_markers_csv"])
+    ]
     event_counts = dict(Counter(str(row.get("event_type") or "") for row in events))
     marker_counts = dict(Counter(str(row.get("event_type") or "") for row in markers))
-    scheduled_expected = _schedule_expected_counts(session_dir, manifest)
-    block_paths = _block_manifest_paths(session_dir, manifest)
-    block_wavs = _block_wav_paths(session_dir, manifest)
+    scheduled_expected = dict(
+        sum(
+            (
+                Counter(
+                    _schedule_expected_counts(
+                        Path(str(context.get("session_dir") or "")),
+                        dict(context.get("manifest") or {}),
+                    )
+                )
+                for context in part_contexts
+            ),
+            Counter(),
+        )
+    )
+    block_paths = [
+        path
+        for context in part_contexts
+        for path in _block_manifest_paths(Path(str(context.get("session_dir") or "")), dict(context.get("manifest") or {}))
+    ]
+    block_wavs = [
+        path
+        for context in part_contexts
+        for path in _block_wav_paths(Path(str(context.get("session_dir") or "")), dict(context.get("manifest") or {}))
+    ]
     sample_audit = _validate_manifest_samples(block_paths)
-    xdf = {"events_xdf": _xdf_summary(paths["events_xdf"]), "lsl_markers_xdf": _xdf_summary(paths["lsl_markers_xdf"])}
+    if len(part_contexts) > 1:
+        xdf = {
+            "events_xdf": _aggregate_xdf_summaries([
+                _xdf_summary(dict(context.get("paths") or {})["events_xdf"]) for context in part_contexts
+            ]),
+            "lsl_markers_xdf": _aggregate_xdf_summaries([
+                _xdf_summary(dict(context.get("paths") or {})["lsl_markers_xdf"]) for context in part_contexts
+            ]),
+        }
+    else:
+        xdf = {"events_xdf": _xdf_summary(paths["events_xdf"]), "lsl_markers_xdf": _xdf_summary(paths["lsl_markers_xdf"])}
     reconciliation = _event_id_reconciliation(events, markers)
-    audio_records = _audio_evidence_records(session_dir)
+    audio_records = [
+        record
+        for context in part_contexts
+        for record in _audio_evidence_records(Path(str(context.get("session_dir") or "")))
+    ]
     audio_wav_paths = [Path(record["wav_path"]) for record in audio_records if _path_is_set(Path(record["wav_path"]))]
     computed_reconciliation_report = _computed_reconciliation_report(
-        session_dir=session_dir,
+        session_dir=session_dir.parent if len(part_contexts) > 1 else session_dir,
         output_dir=output_dir,
         event_counts=event_counts,
         marker_counts=marker_counts,
@@ -1121,21 +1305,55 @@ def audit_readiness(
     response_marker_report = _best_response_marker_report(artifact_dir)
     expected_response_marker_count = event_counts.get("response_marker_start", 0)
     chosen_marker_report = response_marker_report.get("chosen", {}) if response_marker_report.get("exists") else {}
+    aggregate_events_csv = paths["events_csv"]
+    if len(part_contexts) > 1:
+        aggregate_events_csv = output_dir / "aggregate_events.csv"
+        raw_rows = [
+            row
+            for context in part_contexts
+            for row in _read_csv(dict(context.get("paths") or {})["events_csv"])
+        ]
+        fieldnames: list[str] = []
+        for row in raw_rows:
+            for key in row:
+                if key not in fieldnames:
+                    fieldnames.append(key)
+        if raw_rows and fieldnames:
+            _mkdir(aggregate_events_csv.parent)
+            with open(_filesystem_path(aggregate_events_csv), "w", newline="", encoding="utf-8") as handle:
+                writer = csv.DictWriter(handle, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerows(raw_rows)
     if (
         not response_marker_report.get("passed")
         or int(chosen_marker_report.get("expected_marker_count") or -1) != expected_response_marker_count
     ):
         response_marker_report = _response_marker_report_from_audio(
-            events_csv=paths["events_csv"],
+            events_csv=aggregate_events_csv,
             recordings=audio_wav_paths,
             output_dir=output_dir / "response_marker_audio_evidence_validation",
         )
     block_wav_scans = {path.name: _wav_scan(path) for path in block_wavs}
 
-    analysis_paths = {suffix: _latest_analysis_csv(session_dir, suffix, analysis_dir=analysis_dir) for suffix in EXPECTED_ANALYSIS_SUFFIXES}
-    response_rows = _read_csv(analysis_paths["responses"] or Path())
-    analysis_ready_rows = _read_csv(analysis_paths["analysis_ready_trials"] or Path())
-    timing_qc_rows = _read_csv(analysis_paths["timing_qc"] or Path())
+    analysis_paths_by_suffix = {
+        suffix: [
+            path
+            for context in part_contexts
+            for path in [
+                _latest_analysis_csv(
+                    Path(str(context.get("session_dir") or "")),
+                    suffix,
+                    analysis_dir=Path(str(context.get("analysis_dir") or "")),
+                )
+            ]
+            if path is not None
+        ]
+        for suffix in EXPECTED_ANALYSIS_SUFFIXES
+    }
+    analysis_paths = {suffix: (paths_for_suffix[-1] if paths_for_suffix else None) for suffix, paths_for_suffix in analysis_paths_by_suffix.items()}
+    response_rows = [row for path in analysis_paths_by_suffix["responses"] for row in _read_csv(path)]
+    analysis_ready_rows = [row for path in analysis_paths_by_suffix["analysis_ready_trials"] for row in _read_csv(path)]
+    timing_qc_rows = [row for path in analysis_paths_by_suffix["timing_qc"] for row in _read_csv(path)]
     analysis_rt = _analysis_rt_audit(
         focus_report,
         analysis_ready_rows,
@@ -1268,14 +1486,22 @@ def audit_readiness(
     add(Criterion("response_marker_path", "audio_evidence_response_marker_loopback_passed", marker_audio_ok, "Local audio-evidence response-marker pulse recovery passes with stable residuals.", evidence=response_marker_report))
 
     analysis_files = {
-        suffix: {
-            "path": str(path) if path else "",
-            "exists": bool(path and _path_is_file(path)),
-            "bytes": _path_size(path) if path and _path_is_file(path) else 0,
-        }
-        for suffix, path in analysis_paths.items()
+        suffix: [
+            {
+                "path": str(path),
+                "exists": _path_is_file(path),
+                "bytes": _path_size(path) if _path_is_file(path) else 0,
+            }
+            for path in analysis_paths_by_suffix.get(suffix, [])
+        ]
+        for suffix in EXPECTED_ANALYSIS_SUFFIXES
     }
-    add(Criterion("analysis_outputs", "all_expected_analysis_csvs_exist", all(item["exists"] and item["bytes"] > 0 for item in analysis_files.values()), "Expected analysis CSV family exists.", evidence=analysis_files))
+    expected_analysis_count = len(part_contexts)
+    analysis_files_ok = all(
+        len(items) >= expected_analysis_count and all(item["exists"] and item["bytes"] > 0 for item in items)
+        for items in analysis_files.values()
+    )
+    add(Criterion("analysis_outputs", "all_expected_analysis_csvs_exist", analysis_files_ok, "Expected analysis CSV family exists for every audited part.", evidence=analysis_files))
     expected_hit_ok = (
         bool(analysis_selection["rows_match_declared_standard_tactile_count"])
         and bool(analysis_selection["topup_rescues_match_miss_plan"])
@@ -1303,6 +1529,16 @@ def audit_readiness(
         "full_study5_realtime_ready": full_ready and required_count == required_passed_count,
         "scope": scope["scope"],
         "scope_summary": scope,
+        "parts": [
+            {
+                "part_number": context.get("part_number"),
+                "session_dir": str(context.get("session_dir") or ""),
+                "session_manifest": str(context.get("manifest_path") or ""),
+                "analysis_dir": str(context.get("analysis_dir") or ""),
+                "paths": {key: str(value) for key, value in dict(context.get("paths") or {}).items()},
+            }
+            for context in part_contexts
+        ],
         "required_count": required_count,
         "required_passed_count": required_passed_count,
         "criteria": criteria_dicts,
