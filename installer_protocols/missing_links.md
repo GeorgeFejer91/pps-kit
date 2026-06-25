@@ -22,5 +22,6 @@ The source repo can build and locally smoke-test the installer pipeline, but the
 
 - Missing public downloader proof from a clean Windows folder.
 - Missing public download-page proof that the downloaded `PPS-Toolkit-Downloader.exe` fetches the GitHub manifest, downloads the Zenodo ZIP, verifies SHA256, extracts the package, creates shortcuts, opens `PPSDashboardLauncher.exe`, and launches `PPSExperimentRunner.exe`.
+- Missing optional Android emulator proof for the hosted download page/local dashboard shell. The 2026-06-25 fresh-PC run installed SDK tools and AVD images under ignored `local_data/`, but emulator boot was blocked because the Android Emulator Hypervisor Driver was not installed and the current shell was not elevated. See `android_emulator_verification_protocol.md`.
 
 The hosted download page should continue linking to the GitHub Releases page, not a direct installer URL, until the GitHub release contains both the downloader and matching manifest.

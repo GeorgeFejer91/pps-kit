@@ -75,3 +75,9 @@ $proc.ExitCode
 ```
 
 Hardware readiness remains a separate lab-PC validation. A green installer state does not prove Komplete ASIO, LSL/XDF, or loopback readiness.
+
+## Optional Android Emulator Evidence
+
+If the release needs mobile-page or Android WebView evidence for the hosted download page/local dashboard shell, follow `installer_protocols/android_emulator_verification_protocol.md`. This is an optional browser/app-surface smoke and does not replace the Windows downloader install smoke.
+
+Current 2026-06-25 fresh-PC blocker: the Android SDK and AVDs can be installed locally, but this non-elevated shell cannot install the Android Emulator Hypervisor Driver. `x86_64` emulator images exit without hardware acceleration, and ARM64 images are rejected on the x86_64 host.
