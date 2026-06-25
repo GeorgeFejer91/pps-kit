@@ -1092,6 +1092,45 @@ def test_participant_trial_csv_writer_classifies_hit_miss_for_tactile_and_catch(
     assert rows[3]["stimulus_modality"] == "tactile"
 
 
+def test_participant_trial_csv_rewrite_uses_tactile_window_after_trial_end(tmp_path: Path):
+    package = SimpleNamespace(participant_id="P001", session_id="P001_20260102_030405", session_dir=tmp_path / "P001_20260102_030405")
+    writer = ParticipantTrialCsvWriter(
+        package.session_dir / f"{package.session_id}_trials.csv",
+        package=package,
+    )
+
+    base = {
+        "participant_id": "P001",
+        "session_id": package.session_id,
+        "block_number": 1,
+        "block_label": "Block 01",
+        "trial_number": 1,
+        "trial_uid": "T001",
+        "trial_type": "Audio-Tactile",
+        "family": "audio_tactile",
+        "row_label": "Inhale",
+        "respiratory_phase": "Inhale",
+        "soa_ms": "300",
+        "noise_type": "pink",
+    }
+    events = [
+        {"event_id": 1, "event_type": "trial_start", "unix_time": 100.0, **base},
+        {"event_id": 2, "event_type": "looming_onset", "unix_time": 100.5, **base},
+        {"event_id": 3, "event_type": "tactile_onset", "unix_time": 101.0, **base},
+        {"event_id": 4, "event_type": "response_window_onset", "unix_time": 101.0, **base},
+        {"event_id": 5, "event_type": "trial_end", "unix_time": 101.5, **base},
+        {"event_id": 6, "event_type": "mouse_click", "unix_time": 102.0, "block_number": 1, "in_target": True, "during_playback": True},
+    ]
+
+    writer.rewrite_from_events(events)
+
+    rows = list(csv.DictReader(writer.path.open(encoding="utf-8")))
+    assert rows[0]["outcome"] == "Hit"
+    assert rows[0]["rt_ms"] == "1000.000"
+    assert rows[0]["response_event_id"] == "6"
+    assert rows[0]["correctness_rule"] == "response within 100-1300 ms after tactile onset"
+
+
 class _MockAudioEngine:
     def __init__(self):
         self.played: list[str] = []

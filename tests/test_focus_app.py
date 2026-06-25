@@ -2730,7 +2730,7 @@ def test_focus_mode_recenter_uses_pyautogui_backend(tmp_path: Path, monkeypatch)
     window.dialog.close()
 
 
-def test_tactile_timeline_uses_four_second_response_window():
+def test_tactile_timeline_uses_tactile_onset_response_window():
     from peripersonal_space_toolkit.focus_timeline import TactileTimelineState
 
     state = TactileTimelineState()
@@ -2741,11 +2741,11 @@ def test_tactile_timeline_uses_four_second_response_window():
         ],
     )
 
-    accepted = state.record_click(5.0, trial_uid="T001")
-    rejected = state.record_click(5.002, trial_uid="T001")
+    accepted = state.record_click(2.3, trial_uid="T001")
+    rejected = state.record_click(2.302, trial_uid="T001")
 
     assert accepted.response_status == "tactile_response"
-    assert accepted.rt_s == pytest.approx(4.0)
+    assert accepted.rt_s == pytest.approx(1.3)
     assert rejected.response_status == "off_cue"
 
 

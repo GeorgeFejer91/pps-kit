@@ -34,7 +34,7 @@ for scientific usability — not just file presence.
 Legend for thresholds referenced below (Study 5 timing contract):
 trial = 8.000 s; instruction segment = 4.000 s; looming segment = 4.000 s;
 tactile cue = 100 ms; SOAs = 0/300/800/1500/2200/2700 ms; response window
-min RT = 0.1 s, max RT = 4.0 s; channels = ch0 left / ch1 right / ch2 tactile;
+min RT = 0.1 s, max RT = 1.3 s after tactile onset; channels = ch0 left / ch1 right / ch2 tactile;
 ASIO 3-channel, requested latency 0.010, blocksize 256.
 
 ---
@@ -233,8 +233,10 @@ ASIO 3-channel, requested latency 0.010, blocksize 256.
   LSL. Marker-minus-mouse delay ≈ the intended 8 ms (mean ~8.1 ms, SD < 0.1 ms
   in prior stress).
 - [ ] **G3. RT window correctness.** A click is credited only when
-  onset + 0.1 s ≤ click ≤ min(onset + 4.0 s, next trial_start). Verify a too-fast
-  (<100 ms) click and a too-late (>3 s) click are **not** credited.
+  tactile onset + 0.1 s <= click <= tactile onset + 1.3 s. Trial end or the
+  next `trial_start` must not shorten this tactile-onset-relative window.
+  Verify a too-fast (<100 ms) click and a too-late (>1300 ms) click are **not**
+  credited.
 - [ ] **G4. One click → one trial.** No click is credited to two tactile onsets;
   cross-block / cross-part clicks never bind to an earlier trial
   (`_same_trial_context`).
@@ -281,9 +283,9 @@ ASIO 3-channel, requested latency 0.010, blocksize 256.
   one row per tactile trial with status pending → hit/`missed_needs_topup`;
   `topup_draft` progress updates as response windows pass.
 - [ ] **I2. Miss reasons correct.** Misses are labeled `response_deadline_expired`
-  / `next_trial_started` / `session_or_block_finished` as appropriate; a real
-  participant's genuine misses are captured (engineer ≥ a few real misses to
-  exercise this — see A8).
+  or `session_or_block_finished` as appropriate; a real participant's genuine
+  misses are captured (engineer >= a few real misses to exercise this - see
+  A8).
 - [ ] **I3. Part-aware finalization.** At each part boundary, open trials for that
   part finalize; misses from Part 1 do not leak into Part 2's top-up and vice
   versa.
@@ -323,8 +325,9 @@ ASIO 3-channel, requested latency 0.010, blocksize 256.
   final `hit = true`.
 - [ ] **J3. RT plausibility (real human).** Hit `rt_ms` distribution is
   physiologically sensible (roughly ~200-900 ms mode, essentially none < 100 ms
-  after the floor, tail < 3000 ms). Flag any pile-up at the 100 ms floor (anticip-
-  ation) or 3000 ms ceiling (the participant may not understand the task).
+  after the floor, tail below the 1300 ms cutoff). Flag any pile-up at the
+  100 ms floor (anticipation) or 1300 ms ceiling (the participant may not
+  understand the task).
 - [ ] **J4. Hit rate sane by family.** Audio-tactile/baseline hit rate is high but
   not 100% (some genuine misses); catch trials generate essentially no spurious
   tactile "hits".

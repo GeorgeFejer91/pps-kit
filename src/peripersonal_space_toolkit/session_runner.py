@@ -38,6 +38,7 @@ from .output_layout import (
     output_verbose_events_dir,
 )
 from .analysis_catalog import refresh_analysis_browser_outputs
+from .response_policy import TACTILE_RESPONSE_MAX_RT_S, TACTILE_RESPONSE_MIN_RT_S, TACTILE_RESPONSE_RULE_LABEL
 from .session_analysis import analyze_session_events, format_analysis_summary, write_analysis_csvs
 from .session_events import SessionEventLogger
 from .runner_diary import append_diary_entry, ensure_output_diary, find_output_diary
@@ -408,8 +409,8 @@ class ParticipantTrialCsvWriter:
         *,
         package: RunPackage,
         participant_metadata: dict[str, Any] | None = None,
-        min_rt_s: float = 0.1,
-        max_rt_s: float = 4.0,
+        min_rt_s: float = TACTILE_RESPONSE_MIN_RT_S,
+        max_rt_s: float = TACTILE_RESPONSE_MAX_RT_S,
     ):
         self.path = Path(path)
         self.package = package
@@ -419,6 +420,7 @@ class ParticipantTrialCsvWriter:
         self._trial_states: dict[tuple[str, str], dict[str, Any]] = {}
         self._clicks: list[dict[str, Any]] = []
         self._written_keys: set[tuple[str, str]] = set()
+        self._used_click_ids: set[Any] = set()
         self._lock = threading.RLock()
         self._write_header()
 
@@ -444,6 +446,7 @@ class ParticipantTrialCsvWriter:
             self._trial_states = {}
             self._clicks = []
             self._written_keys = set()
+            self._used_click_ids = set()
             self._write_header()
             for event in sorted(
                 (_flat_event_row(item) for item in events),
@@ -458,8 +461,17 @@ class ParticipantTrialCsvWriter:
                     state = self._trial_states.setdefault(key, {"events": {}, "base": dict(event)})
                     state["events"][event_type] = dict(event)
                     state["base"].update({name: value for name, value in event.items() if value not in (None, "")})
-                    if event_type == "trial_end":
-                        self._append_resolved_trial(key, state)
+            states = sorted(
+                self._trial_states.items(),
+                key=lambda item: (
+                    _as_float(item[1].get("events", {}).get("trial_start", {}).get("unix_time"), default=0.0),
+                    _as_float(item[1].get("events", {}).get("trial_end", {}).get("unix_time"), default=0.0),
+                    item[0],
+                ),
+            )
+            for key, state in states:
+                if "trial_end" in state.get("events", {}):
+                    self._append_resolved_trial(key, state)
             return self.path
 
     def _write_header(self) -> None:
@@ -483,6 +495,9 @@ class ParticipantTrialCsvWriter:
             writer = csv.DictWriter(handle, fieldnames=PARTICIPANT_TRIAL_FIELDNAMES)
             writer.writerow(row)
         self._written_keys.add(key)
+        response_event_id = row.get("response_event_id", "")
+        if response_event_id not in (None, ""):
+            self._used_click_ids.add(response_event_id)
 
     def _resolved_trial_row(self, state: dict[str, Any]) -> dict[str, Any]:
         events = dict(state.get("events", {}) or {})
@@ -521,7 +536,7 @@ class ParticipantTrialCsvWriter:
             rt_ms = f"{(click_unix - tactile_unix) * 1000.0:.3f}"
         if tactile_present:
             outcome = "Hit" if valid_response else "Miss"
-            correctness_rule = "response within 4 s tactile response window"
+            correctness_rule = f"response within {TACTILE_RESPONSE_RULE_LABEL}"
         elif catch_trial:
             outcome = "Miss" if response_given else "Hit"
             correctness_rule = "withhold response during catch/audio-only trial"
@@ -584,10 +599,14 @@ class ParticipantTrialCsvWriter:
     ) -> tuple[dict[str, Any], bool, bool]:
         start = response_window_unix if response_window_unix > 0.0 else trial_start_unix
         end = trial_end_unix if trial_end_unix > start else start + self.max_rt_s
+        if tactile_present and tactile_unix > 0.0:
+            start = min(start, tactile_unix) if start > 0.0 else tactile_unix
+            end = max(end, tactile_unix + self.max_rt_s)
         candidates = [
             click
             for click in self._clicks
-            if _truthy(click.get("in_target", True))
+            if click.get("event_id") not in self._used_click_ids
+            and _truthy(click.get("in_target", True))
             and _truthy(click.get("during_playback", True))
             and str(_row_value(click, "block_number", "block_index", default="")).strip() == block_number
             and start <= _as_float(click.get("unix_time"), default=0.0) <= end
@@ -598,7 +617,7 @@ class ParticipantTrialCsvWriter:
         if tactile_present:
             tactile_start = tactile_unix if tactile_unix > 0.0 else start
             valid_start = tactile_start + self.min_rt_s
-            valid_end = min(end, tactile_start + self.max_rt_s)
+            valid_end = tactile_start + self.max_rt_s
             for click in candidates:
                 click_time = _as_float(click.get("unix_time"), default=0.0)
                 if valid_start <= click_time <= valid_end:

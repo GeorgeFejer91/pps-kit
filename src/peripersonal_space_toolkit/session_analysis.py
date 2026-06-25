@@ -17,9 +17,10 @@ from typing import Any, Iterable, Mapping
 import numpy as np
 from scipy.optimize import OptimizeWarning, curve_fit
 
+from .response_policy import TACTILE_RESPONSE_MAX_RT_S, TACTILE_RESPONSE_MIN_RT_S
 
-DEFAULT_MIN_RESPONSE_RT_S = 0.1
-DEFAULT_MAX_RESPONSE_RT_S = 4.0
+DEFAULT_MIN_RESPONSE_RT_S = TACTILE_RESPONSE_MIN_RT_S
+DEFAULT_MAX_RESPONSE_RT_S = TACTILE_RESPONSE_MAX_RT_S
 AGGREGATION_SEPARATE_PARTS = "separate_parts"
 AGGREGATION_POOL_PARTS = "pooled_parts"
 DATA_BEHAVIOR_SCHEMA = "pps-exploratory-data-behavior.v1"
@@ -695,17 +696,11 @@ def _pair_tactile_responses(events: list[dict[str, Any]], *, min_rt_s: float, ma
     clicks = [row for row in events if row.get("event_type") == "mouse_click" and _truthy(row.get("in_target", True))]
     clicks = [row for row in clicks if _truthy(row.get("during_playback", True))]
     clicks = sorted(clicks, key=lambda row: (_as_float(row.get("unix_time"), 0.0), row.get("event_id", 0)))
-    trial_bounds = _trial_bounds_by_key(events)
-
     used_click_ids: set[Any] = set()
     response_rows = []
     for tactile in tactile_events:
         onset = _as_float(tactile.get("unix_time"), 0.0)
-        bounds = trial_bounds.get(_trial_context_key(tactile), {})
-        response_onset = _as_float(bounds.get("response_window_onset"), 0.0)
-        trial_end = _as_float(bounds.get("trial_end"), 0.0)
-        response_start = response_onset if response_onset > 0.0 else onset
-        response_deadline = min(onset + max_rt_s, trial_end) if trial_end > response_start else onset + max_rt_s
+        response_deadline = onset + max_rt_s
         click = None
         for candidate in clicks:
             click_time = _as_float(candidate.get("unix_time"), 0.0)
@@ -713,12 +708,11 @@ def _pair_tactile_responses(events: list[dict[str, Any]], *, min_rt_s: float, ma
                 continue
             if not _same_trial_context(tactile, candidate):
                 continue
-            if click_time < response_start or click_time > response_deadline:
+            if click_time < onset + min_rt_s or click_time > response_deadline:
                 continue
-            if onset + min_rt_s <= click_time <= response_deadline:
-                click = candidate
-                used_click_ids.add(candidate.get("event_id"))
-                break
+            click = candidate
+            used_click_ids.add(candidate.get("event_id"))
+            break
         row = _response_base(tactile)
         row["tactile_unix_time"] = onset
         row["hit"] = click is not None
@@ -737,37 +731,6 @@ def _pair_tactile_responses(events: list[dict[str, Any]], *, min_rt_s: float, ma
             row["click_event_id"] = ""
         response_rows.append(row)
     return response_rows
-
-
-def _trial_bounds_by_key(events: list[dict[str, Any]]) -> dict[tuple[str, str, str], dict[str, float]]:
-    bounds: dict[tuple[str, str, str], dict[str, float]] = {}
-    for row in events:
-        event_type = str(row.get("event_type") or "").strip()
-        if event_type not in {"trial_start", "response_window_onset", "trial_end"}:
-            continue
-        key = _trial_context_key(row)
-        if not key[1]:
-            continue
-        entry = bounds.setdefault(key, {})
-        unix_time = _as_float(row.get("unix_time"), 0.0)
-        if unix_time <= 0.0:
-            continue
-        if event_type == "trial_start":
-            entry["trial_start"] = unix_time
-        elif event_type == "response_window_onset":
-            entry["response_window_onset"] = unix_time
-        elif event_type == "trial_end":
-            entry["trial_end"] = unix_time
-    return bounds
-
-
-def _trial_context_key(row: dict[str, Any]) -> tuple[str, str, str]:
-    part = str(_as_int(_field(row, "part_number", "Part_Number"), _field(row, "part_number", "Part_Number")) or "").strip()
-    block = str(_as_int(_field(row, "block_number", "Block_Number"), _field(row, "block_number", "Block_Number")) or "").strip()
-    trial = str(_field(row, "trial_uid", "Trial_UID")).strip()
-    if not trial:
-        trial = str(_as_int(_field(row, "trial_number", "Trial_Number"), _field(row, "trial_number", "Trial_Number")) or "").strip()
-    return (part, trial, block)
 
 
 def _response_base(event: dict[str, Any]) -> dict[str, Any]:
