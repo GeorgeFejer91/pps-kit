@@ -8006,6 +8006,8 @@ class FocusModeWindow:
 
     def _companion_allowed_commands(self) -> list[str]:
         allowed: list[str] = []
+        if bool(self.result is not None and bool(getattr(self.result, "completed", False))):
+            return allowed
         thread_alive = bool(self.thread is not None and self.thread.is_alive())
         setup_allowed = bool(not self._run_active and not thread_alive)
         if setup_allowed:
@@ -11443,7 +11445,8 @@ class FocusModeWindow:
         )
         self._maybe_open_analysis_review(result)
         self._shutdown_owned_audio_engine()
-        self.timer.stop()
+        if self.companion_service is None:
+            self.timer.stop()
         if _package_is_split_part(self.package) and bool(result.completed):
             self._auto_load_next_split_part_after_completion(completion_message=operator_message)
 

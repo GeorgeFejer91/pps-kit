@@ -1078,6 +1078,7 @@ def test_focus_mode_companion_setup_and_commands_use_existing_ui_paths(tmp_path:
     ledger = json.loads(focus_app.participant_ledger_path(tmp_path).read_text(encoding="utf-8"))
     assert ledger["participants"]["P001"]["participant_name"] == "Phone Participant"
     assert ledger["participants"]["P001"]["include_name_in_lsl"] is True
+    assert "start_part_1" in snapshot["allowed_commands"]
 
     starts: list[str] = []
     window.start = lambda: starts.append("start")  # type: ignore[method-assign]
@@ -1092,6 +1093,8 @@ def test_focus_mode_companion_setup_and_commands_use_existing_ui_paths(tmp_path:
     assert gate["event"].is_set()
     assert window.pending_instruction_request is None
     assert continue_snapshot["instruction_gate"]["waiting"] is False
+    window.result = SimpleNamespace(completed=True)
+    assert window._companion_snapshot()["allowed_commands"] == []
     window.dialog.close()
 
 

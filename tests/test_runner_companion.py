@@ -28,8 +28,16 @@ class FakeBridge:
         self.continued = 0
         self.started_parts: list[int] = []
         self.fail_continue = False
+        self.fail_health = False
+        self.fail_snapshot = False
 
     def health(self) -> dict[str, Any]:
+        if self.fail_health:
+            raise CompanionCommandError(
+                "Focus Mode did not answer the companion request in time.",
+                status_code=503,
+                reason="ui_timeout",
+            )
         return {
             "schema": HEALTH_SCHEMA,
             "status": "ok",
@@ -37,6 +45,12 @@ class FakeBridge:
         }
 
     def snapshot(self) -> dict[str, Any]:
+        if self.fail_snapshot:
+            raise CompanionCommandError(
+                "Focus Mode did not answer the companion request in time.",
+                status_code=503,
+                reason="ui_timeout",
+            )
         return {
             "schema": SNAPSHOT_SCHEMA,
             "sequence": self.sequence,
@@ -118,6 +132,22 @@ def test_health_is_public_but_snapshot_requires_token():
     allowed = client.get("/api/runner/snapshot", headers={TOKEN_HEADER: "secret"})
     assert allowed.status_code == 200
     assert allowed.json()["schema"] == SNAPSHOT_SCHEMA
+
+
+def test_bridge_timeout_errors_are_http_safe_for_health_and_snapshot():
+    bridge = FakeBridge()
+    client = _client(bridge)
+
+    bridge.fail_health = True
+    health = client.get("/api/runner/health")
+    assert health.status_code == 503
+    assert health.json()["detail"]["reason"] == "ui_timeout"
+
+    bridge.fail_health = False
+    bridge.fail_snapshot = True
+    snapshot = client.get("/api/runner/snapshot", headers={TOKEN_HEADER: "secret"})
+    assert snapshot.status_code == 503
+    assert snapshot.json()["detail"]["reason"] == "ui_timeout"
 
 
 def test_setup_and_commands_route_through_bridge():

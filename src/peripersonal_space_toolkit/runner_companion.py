@@ -153,7 +153,10 @@ def create_runner_companion_app(
 
     @app.get("/api/runner/health")
     def health() -> dict[str, Any]:
-        payload = dict(bridge.health())
+        try:
+            payload = dict(bridge.health())
+        except CompanionCommandError as exc:
+            _handle_command_error(exc)
         payload.setdefault("schema", HEALTH_SCHEMA)
         payload.setdefault("service", "pps-runner-companion")
         payload.setdefault("status", "ok")
@@ -163,7 +166,10 @@ def create_runner_companion_app(
     @app.get("/api/runner/snapshot")
     def snapshot(companion_token: str = Header(default="", alias=TOKEN_HEADER)) -> dict[str, Any]:
         _authorize_token(companion_token)
-        return bridge.snapshot()
+        try:
+            return bridge.snapshot()
+        except CompanionCommandError as exc:
+            _handle_command_error(exc)
 
     @app.post("/api/runner/setup")
     def setup(
@@ -217,7 +223,11 @@ def create_runner_companion_app(
         last_sequence: int | None = None
         try:
             while True:
-                snapshot_payload = bridge.snapshot()
+                try:
+                    snapshot_payload = bridge.snapshot()
+                except CompanionCommandError as exc:
+                    await websocket.close(code=1011, reason=exc.reason[:120])
+                    return
                 sequence = int(snapshot_payload.get("sequence") or 0)
                 snapshot_payload["message_type"] = "snapshot" if last_sequence != sequence else "heartbeat"
                 await websocket.send_json(snapshot_payload)
