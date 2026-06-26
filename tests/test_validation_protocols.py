@@ -1786,6 +1786,7 @@ def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_pa
             str(runner),
             "--mouse-backend",
             "none",
+            "--validation-windowed",
             "--timeout-s",
             "2",
             "--launch-via-environment-gate",
@@ -1799,7 +1800,10 @@ def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_pa
     assert passive_env["PPS_FOCUS_VALIDATION_MOUSE_BACKEND"] == "none"
     assert passive_env["PPS_FOCUS_VALIDATION_AUTO_CLOSE_MS"] == "2000"
     assert passive_env["PPS_FOCUS_VALIDATION_DISABLE_MOUSE_CAPTURE"] == "1"
+    assert passive_env["PPS_FOCUS_VALIDATION_DISABLE_CURSOR_RECENTER"] == "1"
     assert passive_env["PPS_FOCUS_VALIDATION_ENABLE_SYNTHETIC_CLICK_SHORTCUT"] == "1"
+    assert passive_env["PPS_FOCUS_VALIDATION_DISPLAY"] == "left"
+    assert passive_env["PPS_FOCUS_VALIDATION_RUNNER_WIDTH"] == "820"
     assert "PPS_FOCUS_VALIDATION_PARTICIPANT_EMULATOR" not in passive_env
     assert "PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON" not in passive_env
     assert "PPS_FOCUS_VALIDATION_LAUNCHER_AUTO_CLICK" not in passive_env

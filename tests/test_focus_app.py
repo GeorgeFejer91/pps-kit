@@ -2911,6 +2911,60 @@ def test_focus_mode_recenter_uses_pyautogui_backend(tmp_path: Path, monkeypatch)
     window.dialog.close()
 
 
+def test_focus_mode_validation_no_mouse_records_recenter_intent(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+        from peripersonal_space_toolkit.focus_timeline import TactileTimelineCue
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    moves: list[tuple[int, int, int]] = []
+
+    class FakePyAutoGUI:
+        FAILSAFE = True
+        PAUSE = 0.1
+
+        @staticmethod
+        def moveTo(x, y, duration=0):
+            moves.append((int(x), int(y), int(duration)))
+
+    monkeypatch.setitem(sys.modules, "pyautogui", FakePyAutoGUI)
+    monkeypatch.setenv("PPS_FOCUS_VALIDATION_DISABLE_MOUSE_CAPTURE", "1")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    window = focus_app.FocusModeWindow(q, package)
+    window.dialog.show()
+    app.processEvents()
+    monkeypatch.setattr(window, "_offscreen_platform", lambda: False)
+
+    cue = TactileTimelineCue(cue_id=1, trial_number=1, trial_uid="T001", time_s=4.0)
+    window._move_cursor_to_target(cue)
+
+    record = window.recenter_records[-1]
+    assert moves == []
+    assert record["mode"] == "recorded_intent"
+    assert record["cursor_move_suppressed"] is True
+    assert "cursor recenter disabled" in record["backend_warning"]
+    window.dialog.close()
+
+
+def test_validation_window_rect_from_env(monkeypatch):
+    from peripersonal_space_toolkit import focus_app
+
+    monkeypatch.setenv("PPS_FOCUS_VALIDATION_WINDOW_RECT", "-1920,5,820,1032")
+    assert focus_app._validation_window_rect_from_env() == (-1920, 5, 820, 1032)
+
+    monkeypatch.setenv("PPS_FOCUS_VALIDATION_WINDOW_RECT", "-1920,5,-1,1032")
+    assert focus_app._validation_window_rect_from_env() is None
+
+    monkeypatch.setenv("PPS_FOCUS_VALIDATION_WINDOW_RECT", "not,a,rect")
+    assert focus_app._validation_window_rect_from_env() is None
+
+
 def test_tactile_timeline_uses_tactile_onset_response_window():
     from peripersonal_space_toolkit.focus_timeline import TactileTimelineState
 

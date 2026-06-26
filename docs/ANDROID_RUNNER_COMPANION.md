@@ -62,7 +62,9 @@ validation (`--mouse-backend none`) or direct snapshot/API checks. Do not use
 `pynput`, `win32`, or `pyautogui` mouse backends unless the PC pointer is
 available for automation. Passive validation also disables Focus Mode's global
 response-click listener so ordinary PC clicks are not recorded as participant
-responses.
+responses. It also suppresses tactile-cue cursor recentering: the runner logs
+the intended recenter position in the validation report but does not move the OS
+cursor.
 
 On this lab PC, companion emulator screenshots should stay on the left display
 shown as Windows display `2`.
@@ -78,6 +80,17 @@ left slice, and gives the Android emulator the wider right slice for timeline
 resolution. Passive runs also enable the validation-only synthetic click
 shortcut `Ctrl+Alt+Shift+F12`, which logs one in-target runner response through
 the normal controller path without moving the PC mouse.
+
+For runner launches that happen before the placement script can see a window,
+use the validation placement environment as well:
+
+```powershell
+$env:PPS_FOCUS_VALIDATION_DISPLAY = "left"
+$env:PPS_FOCUS_VALIDATION_RUNNER_WIDTH = "820"
+```
+
+An exact rectangle can be supplied with `PPS_FOCUS_VALIDATION_WINDOW_RECT`, for
+example `-1920,5,820,1032`.
 
 Generated APKs, Gradle build outputs, and local Android SDK downloads are not
 tracked in Git. The committed Android source and Gradle wrapper are part of the

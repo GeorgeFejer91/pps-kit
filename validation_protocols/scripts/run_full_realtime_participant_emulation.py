@@ -299,12 +299,14 @@ def _configure_validation_env(args: argparse.Namespace, *, output_dir: Path, foc
         env.pop("PPS_FOCUS_VALIDATION_AUTO_APPROVE_TOPUP", None)
         env.pop("PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON", None)
         env["PPS_FOCUS_VALIDATION_DISABLE_MOUSE_CAPTURE"] = "1"
+        env["PPS_FOCUS_VALIDATION_DISABLE_CURSOR_RECENTER"] = "1"
         env["PPS_FOCUS_VALIDATION_ENABLE_SYNTHETIC_CLICK_SHORTCUT"] = "1"
         env["PPS_FOCUS_VALIDATION_AUTO_CLOSE_MS"] = str(max(1000, int(float(args.timeout_s) * 1000)))
     else:
         env["PPS_FOCUS_VALIDATION_PARTICIPANT_EMULATOR"] = "1"
         env["PPS_FOCUS_VALIDATION_AUTO_APPROVE_TOPUP"] = "1"
         env.pop("PPS_FOCUS_VALIDATION_DISABLE_MOUSE_CAPTURE", None)
+        env.pop("PPS_FOCUS_VALIDATION_DISABLE_CURSOR_RECENTER", None)
         env.pop("PPS_FOCUS_VALIDATION_ENABLE_SYNTHETIC_CLICK_SHORTCUT", None)
     if mouse_backend in OS_MOUSE_BACKENDS:
         env.setdefault("PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON", sys.executable)
@@ -318,6 +320,12 @@ def _configure_validation_env(args: argparse.Namespace, *, output_dir: Path, foc
     env["PPS_FOCUS_VALIDATION_COMPANION_PAIRING_REPORT"] = str(output_dir / "companion_pairing_report.json")
     env["PPS_FOCUS_VALIDATION_OUTPUT_ROOT"] = str(output_dir / "runner_sessions")
     env["PPS_FOCUS_VALIDATION_PROFILE"] = str(args.profile)
+    if bool(getattr(args, "validation_windowed", False)):
+        env.setdefault("PPS_FOCUS_VALIDATION_DISPLAY", "left")
+        env.setdefault("PPS_FOCUS_VALIDATION_RUNNER_WIDTH", "820")
+    else:
+        env.pop("PPS_FOCUS_VALIDATION_DISPLAY", None)
+        env.pop("PPS_FOCUS_VALIDATION_RUNNER_WIDTH", None)
     if bool(getattr(args, "launch_via_environment_gate", False)) and mouse_backend != PASSIVE_MOUSE_BACKEND:
         env["PPS_FOCUS_VALIDATION_LAUNCHER_AUTO_CLICK"] = "1"
         env["PPS_FOCUS_VALIDATION_LAUNCHER_REPORT"] = str(output_dir / "launcher_validation_report.json")

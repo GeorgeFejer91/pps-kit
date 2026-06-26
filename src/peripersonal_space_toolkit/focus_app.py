@@ -1438,6 +1438,7 @@ def _show_audio_dependency_dialog(
     dialog.resize(dialog_width, dialog_height)
     dialog.setMinimumSize(min_width, min_height)
     dialog.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
+    _prepare_validation_window_placement(q, dialog)
 
     layout = q["QVBoxLayout"](dialog)
     layout.setContentsMargins(14, 14, 14, 14)
@@ -5624,6 +5625,129 @@ def _env_int(name: str) -> int | None:
         return int(value)
     except ValueError:
         return None
+
+
+def _validation_no_mouse_mode() -> bool:
+    return (
+        _env_flag("PPS_FOCUS_VALIDATION_DISABLE_MOUSE_CAPTURE")
+        or _env_flag("PPS_FOCUS_VALIDATION_DISABLE_CURSOR_RECENTER")
+        or _env_flag("PPS_FOCUS_VALIDATION_NO_MOUSE")
+    )
+
+
+def _validation_window_rect_from_env() -> tuple[int, int, int, int] | None:
+    value = os.environ.get("PPS_FOCUS_VALIDATION_WINDOW_RECT", "").strip()
+    if not value:
+        return None
+    parts = [part.strip() for part in value.replace(";", ",").split(",")]
+    if len(parts) != 4:
+        return None
+    try:
+        x, y, width, height = (int(float(part)) for part in parts)
+    except ValueError:
+        return None
+    if width <= 0 or height <= 0:
+        return None
+    return x, y, width, height
+
+
+def _validation_window_rect_for_display(q: dict[str, Any]) -> tuple[int, int, int, int] | None:
+    explicit = _validation_window_rect_from_env()
+    if explicit is not None:
+        return explicit
+    display = os.environ.get("PPS_FOCUS_VALIDATION_DISPLAY", "").strip().lower()
+    if not display:
+        return None
+    app = q["QApplication"].instance()
+    if app is None or not hasattr(app, "screens"):
+        return None
+    try:
+        screens = list(app.screens())
+    except Exception:
+        screens = []
+    if not screens:
+        return None
+
+    def _screen_area(screen: Any) -> Any:
+        try:
+            return screen.availableGeometry()
+        except Exception:
+            return screen.geometry()
+
+    def _screen_name(screen: Any) -> str:
+        try:
+            return str(screen.name()).strip().lower()
+        except Exception:
+            return ""
+
+    selected = None
+    if display == "primary":
+        try:
+            selected = app.primaryScreen()
+        except Exception:
+            selected = None
+    elif display in {"left", "display2", "2"}:
+        if display in {"display2", "2"}:
+            selected = next(
+                (screen for screen in screens if _screen_name(screen).endswith("display2")),
+                None,
+            )
+        if selected is None:
+            selected = min(screens, key=lambda screen: int(_screen_area(screen).x()))
+    elif display == "right":
+        selected = max(screens, key=lambda screen: int(_screen_area(screen).x()))
+    else:
+        selected = next((screen for screen in screens if _screen_name(screen) == display), None)
+    if selected is None:
+        return None
+
+    area = _screen_area(selected)
+    x = int(area.x())
+    y = int(area.y())
+    area_width = max(1, int(area.width()))
+    area_height = max(1, int(area.height()))
+    requested_width = _env_int("PPS_FOCUS_VALIDATION_RUNNER_WIDTH") or 820
+    width = max(560, min(int(requested_width), int(area_width * 0.48), area_width))
+    height = area_height
+    return x, y, width, height
+
+
+def _apply_window_rect(dialog: Any, rect: tuple[int, int, int, int] | None) -> None:
+    if rect is None:
+        return
+    x, y, width, height = rect
+    try:
+        dialog.setGeometry(int(x), int(y), int(width), int(height))
+    except Exception:
+        pass
+    try:
+        dialog.move(int(x), int(y))
+        dialog.resize(int(width), int(height))
+    except Exception:
+        pass
+
+
+def _prepare_validation_window_placement(
+    q: dict[str, Any],
+    dialog: Any,
+    rect: tuple[int, int, int, int] | None = None,
+) -> tuple[int, int, int, int] | None:
+    resolved = rect if rect is not None else _validation_window_rect_for_display(q)
+    if resolved is None:
+        return None
+    _apply_window_rect(dialog, resolved)
+    try:
+        q["QTimer"].singleShot(
+            0,
+            lambda resolved=resolved: _apply_window_rect(dialog, resolved),
+        )
+        q["QTimer"].singleShot(
+            200,
+            lambda resolved=resolved: _apply_window_rect(dialog, resolved),
+        )
+    except Exception:
+        pass
+    return resolved
 
 
 def _path_is_within(path: str | Path, root: str | Path) -> bool:
@@ -11262,7 +11386,14 @@ class FocusModeWindow:
     def _move_cursor_to_target(self, cue: TactileTimelineCue) -> None:
         x, y, coordinate_source = _widget_screen_center(self.target_button)
         offscreen = self._offscreen_platform()
-        mode = "recorded_intent" if offscreen else self._move_os_cursor_to_global_center(x, y)
+        no_mouse_mode = _validation_no_mouse_mode()
+        self._last_recenter_backend_warning = ""
+        if offscreen or no_mouse_mode:
+            mode = "recorded_intent"
+            if no_mouse_mode and not offscreen:
+                self._last_recenter_backend_warning = "cursor recenter disabled by validation no-mouse mode"
+        else:
+            mode = self._move_os_cursor_to_global_center(x, y)
         record = {
             "cue_id": cue.cue_id,
             "trial_number": cue.trial_number,
@@ -11274,6 +11405,8 @@ class FocusModeWindow:
             "x": x,
             "y": y,
         }
+        if no_mouse_mode:
+            record["cursor_move_suppressed"] = True
         if self._last_recenter_backend_warning:
             record["backend_warning"] = self._last_recenter_backend_warning
         self.recenter_records.append(record)
@@ -11634,6 +11767,9 @@ class FocusModeWindow:
         os.makedirs(_output_filesystem_path(path.parent), exist_ok=True)
         self.dialog.grab().save(_output_filesystem_path(path))
 
+    def _apply_validation_window_rect(self, rect: tuple[int, int, int, int] | None) -> None:
+        _apply_window_rect(self.dialog, rect)
+
     def exec(
         self,
         *,
@@ -11651,12 +11787,16 @@ class FocusModeWindow:
             self.q["QTimer"].singleShot(int(auto_close_ms), self.dialog.accept)
         if not _env_flag("PPS_FOCUS_DISABLE_PREWARM"):
             self.q["QTimer"].singleShot(700, self.start_next_participant_prewarm)
+        validation_rect = None if fullscreen else _validation_window_rect_for_display(self.q)
+        _prepare_validation_window_placement(self.q, self.dialog, validation_rect)
         if fullscreen and hasattr(self.dialog, "showMaximized"):
             self.dialog.showMaximized()
         elif fullscreen and hasattr(self.dialog, "showFullScreen"):
             self.dialog.showFullScreen()
         else:
             self.dialog.show()
+        if validation_rect is not None:
+            self._apply_validation_window_rect(validation_rect)
         self.dialog.exec()
         return int(self.exit_code)
 
@@ -11816,6 +11956,7 @@ def run_launcher_window(
     dialog.setMinimumSize(760, 480)
     dialog.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
     apply_qt_app_icon(q, app=app, window=dialog)
+    _prepare_validation_window_placement(q, dialog)
 
     selected_action: dict[str, Any] = {"open_environment": False}
     initializing: dict[str, bool] = {"busy": False}
@@ -12130,6 +12271,7 @@ def run_launcher_window(
         setup_dialog.resize(640, 260)
         setup_dialog.setMinimumSize(560, 240)
         setup_dialog.setStyleSheet(dialog.styleSheet())
+        _prepare_validation_window_placement(q, setup_dialog)
         setup_layout = q["QVBoxLayout"](setup_dialog)
         setup_layout.setContentsMargins(16, 16, 16, 16)
         setup_layout.setSpacing(12)
@@ -12359,6 +12501,7 @@ def _run_environment_operations_window(
     dialog.setMinimumSize(760, 520)
     dialog.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
     apply_qt_app_icon(q, app=app, window=dialog)
+    _prepare_validation_window_placement(q, dialog)
 
     selected_manifest: dict[str, Path | None] = {"path": None}
     runner_settings = load_profile_runner_settings(state_root=DEFAULT_DASHBOARD_STATE_ROOT, default_output_folder=DEFAULT_SESSION_ROOT)
