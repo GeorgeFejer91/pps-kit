@@ -609,7 +609,7 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert window.mode_tabs.tabText(window.data_logging_tab_index) == "Data Logging"
     assert window.mode_tabs.tabText(window.experiment_control_tab_index) == "Experiment Control"
     assert window.mode_tabs.currentIndex() == window.data_logging_tab_index
-    assert not window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
+    assert window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
     assert "Data Logging / Experiment Settings" in joined
     assert "Data Logging" in joined
     assert "Experiment Control" in joined
@@ -644,8 +644,8 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert not window.participant_increment_button.isEnabled()
     assert not window.participant_decrement_button.isEnabled()
     assert window.participant_status_summary_label.objectName() == "participantLedgerSummary"
-    assert "P001: setup not saved; data not collected" in window.participant_status_summary_label.text()
-    assert "unlock Experiment Control" in window.setup_status_label.text()
+    assert "P001: setup not saved; tactile not calibrated; data not collected" in window.participant_status_summary_label.text()
+    assert "unlock start controls" in window.setup_status_label.text()
     assert not window.part_buttons["1"].isEnabled()
     assert not window.part_buttons["2"].isEnabled()
     assert window.preview_display_block_index is None
@@ -669,10 +669,12 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert window.output_34_volume_percent_box.singleStep() == pytest.approx(0.001)
     assert window.test_audio_button.objectName() == "testAudioOutputButton"
     assert window.test_tactile_button.objectName() == "testTactileOutputButton"
+    assert window.tactile_calibration_button.objectName() == "tactileCalibrationButton"
     assert not window.output_12_volume_slider.isEnabled()
     assert not window.output_34_volume_slider.isEnabled()
     assert not window.test_audio_button.isEnabled()
     assert not window.test_tactile_button.isEnabled()
+    assert window.tactile_calibration_button.isEnabled()
     assert window.backup_recording_checkbox.objectName() == "failSafeRecordingCheckbox"
     assert window.wired_loopback_checkbox.objectName() == "wiredLoopbackCheckbox"
     assert window.external_labrecorder_checkbox.objectName() == "externalLabRecorderCheckbox"
@@ -690,6 +692,7 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     QTest.mouseClick(window.setup_submit_button, q["Qt"].MouseButton.LeftButton)
     app.processEvents()
     assert window.demographics_submitted
+    assert not window.tactile_calibration_button.isEnabled()
     assert window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
     assert window.mode_tabs.currentIndex() == window.experiment_control_tab_index
     assert window.part_buttons["1"].isEnabled()
@@ -1006,7 +1009,7 @@ def test_focus_mode_setup_submit_prepares_controller_before_start(tmp_path: Path
 
     assert not window.start_button.isEnabled()
     assert window.mode_tabs.currentIndex() == window.data_logging_tab_index
-    assert not window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
+    assert window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
     assert window.start() is None
     assert not created
 
@@ -1224,8 +1227,192 @@ def test_focus_mode_participant_setup_ledger_restores_submitted_fields(tmp_path:
     assert restored.handedness_combo.currentData() == "right"
     assert restored.gender_combo.currentData() == "male"
     assert restored.include_name_lsl_checkbox.isChecked()
-    assert "P001: setup saved; data not collected" in restored.participant_status_summary_label.text()
+    assert "P001: setup saved; tactile not calibrated; data not collected" in restored.participant_status_summary_label.text()
     restored.dialog.close()
+
+
+def test_focus_mode_loads_participant_tactile_calibration_into_output_field(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+        from peripersonal_space_toolkit.tactile_calibration.persistence import save_calibration_attempt
+    except Exception as exc:  # pragma: no cover - depends on optional GUI smoke dependencies
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    save_calibration_attempt(
+        output_root=tmp_path,
+        participant_id="P001",
+        timestamp="20260626_130000",
+        report={
+            "schema": "pps-tactile-calibration.v1",
+            "participant_id": "P001",
+            "created_at": "2026-06-26T13:00:00",
+            "protocol": "quick_reliable_working_level.v1",
+            "accepted": True,
+            "status": "accepted",
+            "final_output_34_percent": 42.5,
+            "validation_hit_rate": 5 / 6,
+            "validation_false_alarm_rate": 0.0,
+        },
+        trials=[],
+    )
+
+    created: list[dict[str, object]] = []
+
+    class FakeController:
+        def __init__(self, package_obj, *, runner_metadata=None, **_kwargs):
+            self.package = package_obj
+            self.runner_metadata = dict(runner_metadata or {})
+            self.audio_engine = None
+            created.append(self.runner_metadata)
+
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+        controller_factory=FakeController,
+    )
+    window.dialog.show()
+    app.processEvents()
+
+    assert window.output_34_volume_percent == pytest.approx(42.5)
+    assert window.output_34_volume_percent_box.value() == pytest.approx(42.5)
+    assert "tactile 42.5%" in window.participant_status_summary_label.text()
+    metadata = window._runner_metadata()
+    assert metadata["tactile_calibration"]["final_output_34_percent"] == pytest.approx(42.5)
+
+    _fill_required_setup(window)
+    assert window._submit_participant_setup()
+    assert created[-1]["tactile_calibration"]["final_output_34_percent"] == pytest.approx(42.5)
+    assert not window.tactile_calibration_button.isEnabled()
+    window.dialog.close()
+
+
+def test_focus_mode_calibration_clicks_do_not_reach_trial_response_logger(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI smoke dependencies
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+
+    class FakeController:
+        def __init__(self):
+            self.logged = []
+
+        def log_click(self, **payload):
+            self.logged.append(payload)
+
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+    )
+    window.dialog.show()
+    app.processEvents()
+
+    fake_controller = FakeController()
+    window.controller = fake_controller
+    now = time.perf_counter()
+    window._tactile_calibration_active = True
+    window._tactile_calibration_collector.start_trial(
+        trial_index=1,
+        phase="search",
+        level_percent=35.0,
+        is_catch=False,
+        estimated_onset_perf=now - 0.2,
+        valid_start_perf=now - 0.1,
+        valid_end_perf=now + 1.0,
+    )
+    window._click()
+
+    response = window._tactile_calibration_collector.wait_for_response(until_perf=now + 0.1)
+    assert response is not None
+    assert fake_controller.logged == []
+    window.dialog.close()
+
+
+def test_focus_mode_calibrate_tactile_button_click_saves_and_applies_value(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+        from peripersonal_space_toolkit.tactile_calibration.persistence import load_latest_calibration
+    except Exception as exc:  # pragma: no cover - depends on optional GUI smoke dependencies
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    class FakeCalibrationRunner:
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+
+        def run(self):
+            return {
+                "report": {
+                    "schema": "pps-tactile-calibration.v1",
+                    "participant_id": self.kwargs["participant_id"],
+                    "created_at": "2026-06-26T15:00:00",
+                    "completed_at": "2026-06-26T15:00:02",
+                    "protocol": "quick_reliable_working_level.v1",
+                    "accepted": True,
+                    "status": "accepted",
+                    "message": "Accepted tactile Output 3/4 level 35%.",
+                    "final_output_34_percent": 35.0,
+                    "validation_hit_rate": 5 / 6,
+                    "validation_false_alarm_rate": 0.0,
+                },
+                "trials": [
+                    {
+                        "trial_index": 1,
+                        "phase": "validation",
+                        "level_percent": 35.0,
+                        "is_catch": False,
+                        "valid_response": True,
+                        "trial_outcome": "hit",
+                    }
+                ],
+            }
+
+    monkeypatch.setattr(focus_app, "TactileCalibrationRunner", FakeCalibrationRunner)
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+    )
+    window._output_test_engine = lambda: object()
+    window.dialog.show()
+    window.mode_tabs.setCurrentIndex(window.experiment_control_tab_index)
+    app.processEvents()
+
+    assert window.tactile_calibration_button.isEnabled()
+    QTest.mouseClick(window.tactile_calibration_button, q["Qt"].MouseButton.LeftButton)
+    deadline = time.time() + 2.0
+    while time.time() < deadline and window._tactile_calibration_active:
+        app.processEvents()
+        window._drain()
+        time.sleep(0.01)
+    app.processEvents()
+    window._drain()
+
+    assert not window._tactile_calibration_active
+    assert window.output_34_volume_percent == pytest.approx(35.0)
+    latest = load_latest_calibration(tmp_path, "P001")
+    assert latest is not None
+    assert latest["final_output_34_percent"] == pytest.approx(35.0)
+    assert "tactile calibration accepted" in window.event_label.text()
+    window.dialog.close()
 
 
 def test_focus_mode_output_volume_sliders_persist_and_apply_to_engine(tmp_path: Path, monkeypatch):
@@ -1471,6 +1658,8 @@ def test_focus_mode_participant_dropdown_switches_loaded_package(tmp_path: Path,
     except Exception as exc:  # pragma: no cover - depends on optional GUI deps
         pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
 
+    from peripersonal_space_toolkit.tactile_calibration.persistence import save_calibration_attempt
+
     q = focus_app._require_qt()
     app = QApplication.instance() or QApplication([])
     run_setup = tmp_path / "6_experiment_run_setup" / "experiment_run_setup_manifest.json"
@@ -1481,6 +1670,23 @@ def test_focus_mode_participant_dropdown_switches_loaded_package(tmp_path: Path,
     )
     package_p002 = load_run_package(
         _write_minimal_session_manifest(tmp_path, participant_id="P002", source_run_setup_manifest_path=run_setup)
+    )
+    save_calibration_attempt(
+        output_root=tmp_path,
+        participant_id="P002",
+        timestamp="20260626_140000",
+        report={
+            "schema": "pps-tactile-calibration.v1",
+            "participant_id": "P002",
+            "created_at": "2026-06-26T14:00:00",
+            "protocol": "quick_reliable_working_level.v1",
+            "accepted": True,
+            "status": "accepted",
+            "final_output_34_percent": 55.0,
+            "validation_hit_rate": 1.0,
+            "validation_false_alarm_rate": 0.0,
+        },
+        trials=[],
     )
     prepared: list[str] = []
 
@@ -1539,7 +1745,8 @@ def test_focus_mode_participant_dropdown_switches_loaded_package(tmp_path: Path,
     assert not window.include_name_lsl_checkbox.isChecked()
     assert window.participant_decrement_button.isEnabled()
     assert not window.participant_increment_button.isEnabled()
-    assert "P002: setup not saved; data collected" in window.participant_status_summary_label.text()
+    assert window.output_34_volume_percent == pytest.approx(55.0)
+    assert "P002: setup not saved; tactile 55%; data collected" in window.participant_status_summary_label.text()
     assert window.progress_label.text() == "Waiting to start"
     window.dialog.close()
 
@@ -1902,7 +2109,7 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     assert window.mode_tabs.count() == 3
     assert window.mode_tabs.currentIndex() == window.data_logging_tab_index
     assert window.mode_tabs.tabText(window.companion_tab_index) == "Companion Android App (Experimental)"
-    assert not window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
+    assert window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
     data_rect = _widget_rect(window.data_logging_column, window.dialog)
     settings_rect = _widget_rect(window.experiment_settings_column, window.dialog)
     if window.data_settings_columns_mode == "stacked":

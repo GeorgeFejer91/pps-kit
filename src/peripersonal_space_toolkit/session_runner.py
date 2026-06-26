@@ -4835,6 +4835,7 @@ def _build_runner_session_metadata(
             "lsl_event_protocol_standard": True,
             "local_audio_evidence_wav_label": "Fail-safe local audio evidence WAV",
             "playback_output_levels": _json_ready(raw.get("playback_output_levels") or {}),
+            "tactile_calibration": _json_ready(raw.get("tactile_calibration") or {}),
         },
         "lsl_status_at_start": dict(lsl_status or {}),
         "session_paths": _session_metadata_paths(package),

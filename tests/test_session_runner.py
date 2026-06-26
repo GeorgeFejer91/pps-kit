@@ -1322,6 +1322,12 @@ def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
                 "output_1_2_gain": 0.72,
                 "output_3_4_gain": 0.44,
             },
+            "tactile_calibration": {
+                "schema": "pps-tactile-calibration-latest.v1",
+                "participant_id": "P001",
+                "final_output_34_percent": 44,
+                "report_path": "P001/P001_tactile-calibration/latest.json",
+            },
         },
     )
     engine.on_audio_started = lambda: controller.log_click(x=10, y=12)
@@ -1354,6 +1360,7 @@ def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
     assert local_metadata["participant"]["participant_pseudonym"].startswith("PPS-")
     assert local_metadata["capture_policy"]["playback_output_levels"]["output_1_2_percent"] == 72
     assert local_metadata["capture_policy"]["playback_output_levels"]["output_3_4_percent"] == 44
+    assert local_metadata["capture_policy"]["tactile_calibration"]["final_output_34_percent"] == 44
     with result.lsl_markers_csv.open(newline="", encoding="utf-8") as handle:
         marker_rows = list(csv.DictReader(handle))
     session_start_payload = json.loads(next(row for row in marker_rows if row["event_type"] == "session_start")["payload_json"])
@@ -1377,6 +1384,7 @@ def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
     assert Path(manifest_outputs["external_labrecorder_xdf"]) == package.session_dir / f"{package.session_id}_external_labrecorder.xdf"
     participant_trial_rows = list(csv.DictReader(result.analysis_outputs["participant_trials"].open(encoding="utf-8")))
     assert participant_trial_rows
+    assert "tactile_calibration" not in participant_trial_rows[0]
     assert participant_trial_rows[0]["participant_age_years"] == "29"
     assert participant_trial_rows[0]["outcome"] in {"Hit", "Miss"}
     assert not (package.session_dir / "events.csv").exists()
