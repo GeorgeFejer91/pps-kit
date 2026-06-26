@@ -1,10 +1,12 @@
 param(
-    [ValidateSet("Emulator", "Left", "Primary", "Right")]
-    [string]$Monitor = "Left",
+    [ValidateSet("Display2", "Emulator", "Left", "Primary", "Right")]
+    [string]$Monitor = "Display2",
     [int]$RunnerWidth = 820,
     [int]$Gap = 8,
     [string]$RunnerTitlePattern = "PPS Experiment Runner",
-    [string]$EmulatorTitlePattern = "Android Emulator"
+    [string]$EmulatorTitlePattern = "Android Emulator",
+    [int]$KeepForSeconds = 0,
+    [int]$PollMilliseconds = 500
 )
 
 $ErrorActionPreference = "Stop"
@@ -19,6 +21,8 @@ namespace PPSWindowPlacement {
     public static class Native {
         [DllImport("user32.dll")]
         public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+        [DllImport("user32.dll")]
+        public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
     }
 }
 "@
@@ -35,6 +39,14 @@ $emulatorProcess = Get-Process -ErrorAction SilentlyContinue |
     Select-Object -First 1
 
 switch ($Monitor) {
+    "Display2" {
+        $screen = $screens |
+            Where-Object { $_.DeviceName -eq "\\.\DISPLAY2" } |
+            Select-Object -First 1
+        if ($null -eq $screen) {
+            $screen = $screens | Sort-Object { $_.WorkingArea.X } | Select-Object -First 1
+        }
+    }
     "Emulator" {
         if ($null -eq $emulatorProcess) {
             throw "Could not find an Android emulator window. Start the emulator or pass -Monitor Primary, Left, or Right explicitly."
@@ -104,6 +116,17 @@ function Move-MatchingWindow {
         [int]$Rect.Height,
         $true
     ) | Out-Null
+    $SWP_NOACTIVATE = 0x0010
+    $SWP_SHOWWINDOW = 0x0040
+    [PPSWindowPlacement.Native]::SetWindowPos(
+        $process.MainWindowHandle,
+        [IntPtr]::Zero,
+        [int]$Rect.X,
+        [int]$Rect.Y,
+        [int]$Rect.Width,
+        [int]$Rect.Height,
+        [uint32]($SWP_NOACTIVATE -bor $SWP_SHOWWINDOW)
+    ) | Out-Null
     return [pscustomobject]@{
         role   = $Role
         moved  = $true
@@ -117,10 +140,24 @@ function Move-MatchingWindow {
     }
 }
 
-$results = @(
-    (Move-MatchingWindow -Role "runner" -TitlePattern $RunnerTitlePattern -Rect $runnerRect),
-    (Move-MatchingWindow -Role "android_emulator" -TitlePattern $EmulatorTitlePattern -Rect $emulatorRect)
-)
+function Move-CompanionWindows {
+    return @(
+        (Move-MatchingWindow -Role "runner" -TitlePattern $RunnerTitlePattern -Rect $runnerRect),
+        (Move-MatchingWindow -Role "android_emulator" -TitlePattern $EmulatorTitlePattern -Rect $emulatorRect)
+    )
+}
+
+$results = Move-CompanionWindows
+
+$keepResults = @()
+if ($KeepForSeconds -gt 0) {
+    $deadline = [DateTime]::UtcNow.AddSeconds($KeepForSeconds)
+    $sleepMs = [Math]::Max(100, $PollMilliseconds)
+    while ([DateTime]::UtcNow -lt $deadline) {
+        Start-Sleep -Milliseconds $sleepMs
+        $keepResults += ,(Move-CompanionWindows)
+    }
+}
 
 [pscustomobject]@{
     monitor      = $Monitor
@@ -135,4 +172,6 @@ $results = @(
     runner_rect  = $runnerRect
     emulator_rect = $emulatorRect
     windows      = $results
+    keep_for_seconds = [int]$KeepForSeconds
+    keep_results = $keepResults
 } | ConvertTo-Json -Depth 5

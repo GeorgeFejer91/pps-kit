@@ -306,7 +306,7 @@ private fun RunnerScreen(
     var shareName by remember(snapshot?.participantId) { mutableStateOf(snapshot?.setup?.nameSharingOptIn ?: false) }
     val participantCode = snapshot?.participantId.orEmpty()
     val block = snapshot?.activeBlock
-    val setupVisible = snapshot?.setup?.ready != true || snapshot?.canSubmitSetup() == true
+    val setupVisible = snapshot?.setup?.ready != true
     val pauseEnabled = connected && snapshot?.canPause() == true
     val resumeEnabled = connected && snapshot?.canResume() == true
 

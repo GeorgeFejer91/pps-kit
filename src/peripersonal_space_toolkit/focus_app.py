@@ -5737,14 +5737,11 @@ def _prepare_validation_window_placement(
         return None
     _apply_window_rect(dialog, resolved)
     try:
-        q["QTimer"].singleShot(
-            0,
-            lambda resolved=resolved: _apply_window_rect(dialog, resolved),
-        )
-        q["QTimer"].singleShot(
-            200,
-            lambda resolved=resolved: _apply_window_rect(dialog, resolved),
-        )
+        for delay_ms in (0, 200, 500, 1000, 2000):
+            q["QTimer"].singleShot(
+                delay_ms,
+                lambda resolved=resolved: _apply_window_rect(dialog, resolved),
+            )
     except Exception:
         pass
     return resolved
@@ -6386,6 +6383,7 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
     topup_delay_max_ms = max(topup_delay_min_ms, _env_float("PPS_FOCUS_VALIDATION_TOPUP_DELAY_MAX_MS", 500.0))
     trial_end_margin_ms = max(0.0, _env_float("PPS_FOCUS_VALIDATION_TRIAL_END_MARGIN_MS", 650.0))
     backend_requested = os.environ.get("PPS_FOCUS_VALIDATION_MOUSE_BACKEND", "win32").strip().lower() or "win32"
+    responses_only = _env_flag("PPS_FOCUS_VALIDATION_PARTICIPANT_RESPONSES_ONLY")
     records: list[dict[str, Any]] = []
     scheduled_events: set[str] = set()
     scheduled_response_keys: set[str] = set()
@@ -6462,6 +6460,8 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
             pass
 
     def _submit_mock_setup_if_needed() -> None:
+        if responses_only:
+            return
         if bool(getattr(window, "demographics_submitted", False)):
             return
         try:
@@ -6753,6 +6753,8 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
         return "qtest"
 
     def _continue_instruction_if_needed() -> None:
+        if responses_only:
+            return
         request = window.pending_instruction_request
         if request is None:
             return
@@ -6803,6 +6805,8 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
         return False
 
     def _click_part2_start_gate(*, source: str) -> bool:
+        if responses_only:
+            return False
         if not _part2_start_gate_ready():
             return False
         now = time.perf_counter()
@@ -7007,6 +7011,7 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
         _submit_mock_setup_if_needed()
         part2_clicked = _click_part2_start_gate(source="poll")
         if (
+            not responses_only and
             not part2_clicked and
             window.start_button.isEnabled()
             and _validation_start_gate_ready(records, start_gate_state, source="participant_emulator")
