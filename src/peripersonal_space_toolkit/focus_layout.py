@@ -24,6 +24,9 @@ FOCUS_COLORS = {
     "decision_two": "#1f6f8b",
     "decision_two_soft": "#e7f5fb",
     "decision_two_border": "#2b8db8",
+    "decision_three": "#8a5d12",
+    "decision_three_soft": "#fff1d8",
+    "decision_three_border": "#c78a2c",
     "complete": "#1f745b",
     "complete_soft": "#edf7f2",
     "complete_border": "#8abda8",
@@ -357,23 +360,38 @@ QPushButton[attention="current"]:hover {{
     background: #fff1c2;
     border-color: {colors["attention"]};
 }}
-QPushButton[attention="current"][decisionTone="resume"] {{
+QPushButton[decisionTone="resume"][attention="current"],
+QPushButton[decisionTone="resume"][attention="available"] {{
     background: {colors["decision_one_soft"]};
     border: 2px solid {colors["decision_one_border"]};
     color: {colors["text"]};
 }}
-QPushButton[attention="current"][decisionTone="resume"]:hover {{
+QPushButton[decisionTone="resume"][attention="current"]:hover,
+QPushButton[decisionTone="resume"][attention="available"]:hover {{
     background: #d4f2ec;
     border-color: {colors["decision_one"]};
 }}
-QPushButton[attention="current"][decisionTone="folder"] {{
+QPushButton[decisionTone="custom"][attention="current"],
+QPushButton[decisionTone="custom"][attention="available"] {{
     background: {colors["decision_two_soft"]};
     border: 2px solid {colors["decision_two_border"]};
     color: {colors["text"]};
 }}
-QPushButton[attention="current"][decisionTone="folder"]:hover {{
+QPushButton[decisionTone="custom"][attention="current"]:hover,
+QPushButton[decisionTone="custom"][attention="available"]:hover {{
     background: #dff0f8;
     border-color: {colors["decision_two"]};
+}}
+QPushButton[decisionTone="start"][attention="current"],
+QPushButton[decisionTone="start"][attention="available"] {{
+    background: {colors["decision_three_soft"]};
+    border: 2px solid {colors["decision_three_border"]};
+    color: {colors["text"]};
+}}
+QPushButton[decisionTone="start"][attention="current"]:hover,
+QPushButton[decisionTone="start"][attention="available"]:hover {{
+    background: #ffe5bb;
+    border-color: {colors["decision_three"]};
 }}
 QPushButton[attention="available"] {{
     background: {colors["primary_soft"]};

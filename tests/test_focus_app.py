@@ -2872,7 +2872,7 @@ def test_validation_realtime_audio_engine_waits_for_buffer_deadlines(tmp_path: P
     assert engine.played_block_durations_s == pytest.approx([duration_s])
 
 
-def test_launcher_first_screen_is_environment_gate():
+def test_launcher_first_screen_is_three_option_environment_gate(tmp_path: Path, monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
         from PIL import Image, ImageStat
@@ -2884,6 +2884,29 @@ def test_launcher_first_screen_is_environment_gate():
     q = focus_app._require_qt()
     app = QApplication.instance() or QApplication([])
     errors: list[BaseException] = []
+    remembered = tmp_path / "remembered"
+    remembered.mkdir()
+
+    monkeypatch.setattr(
+        focus_app,
+        "load_profile_runner_settings",
+        lambda **_kwargs: {
+            "active_profile_id": focus_app.STUDY5_PROFILE_ID,
+            "active_output_folder": str(remembered),
+            "participant_id": "P001",
+        },
+    )
+    monkeypatch.setattr(
+        focus_app,
+        "load_runner_settings",
+        lambda *args, **kwargs: {
+            "last_experiment_name": "Study 5 gate test",
+            "last_profile_id": focus_app.STUDY5_PROFILE_ID,
+            "last_participant_id": "P001",
+        },
+    )
+    monkeypatch.setattr(focus_app, "finished_profile_options", lambda: [(focus_app.STUDY5_PROFILE_ID, "Study 5")])
+    monkeypatch.setattr(focus_app, "current_runner_diary_path", lambda: None)
 
     def inspect_launcher() -> None:
         try:
@@ -2905,27 +2928,41 @@ def test_launcher_first_screen_is_environment_gate():
             assert session_field.property("gateState") == "locked"
             step_label = dialog.findChild(q["QLabel"], "gateStepLabel")
             assert step_label is not None
-            assert "Step 1" in step_label.text()
+            assert "Resume Last Session" in step_label.text()
             assert step_label.property("attention") == "current"
-            choose_button = dialog.findChild(q["QPushButton"], "chooseOutputFolderButton")
-            assert choose_button is not None
-            assert choose_button.text().startswith("2 ")
-            assert choose_button.property("decisionTone") == "folder"
-            initiate_button = dialog.findChild(q["QPushButton"], "initiateEnvironmentButton")
-            assert initiate_button is not None
-            assert not initiate_button.isEnabled()
-            assert initiate_button.property("attention") == "locked"
-            resume_button = dialog.findChild(q["QPushButton"], "resumeExperimentButton")
+            resume_button = dialog.findChild(q["QPushButton"], "resumeLastSessionButton")
             assert resume_button is not None
-            assert resume_button.text().startswith("1 ")
+            assert resume_button.text() == "1 Resume Last Session"
             assert resume_button.property("decisionTone") == "resume"
-            assert 'QPushButton[attention="current"][decisionTone="resume"]' in dialog.styleSheet()
-            resume_swatch = Path.cwd() / ".pytest_cache" / "launcher_resume_button.png"
-            assert resume_button.grab().save(str(resume_swatch))
-            resume_image = Image.open(resume_swatch).convert("RGB")
-            resume_mean = ImageStat.Stat(resume_image).mean
-            assert resume_mean[1] > resume_mean[0]
-            assert resume_mean[2] > resume_mean[0]
+            custom_button = dialog.findChild(q["QPushButton"], "resumeCustomSessionButton")
+            assert custom_button is not None
+            assert custom_button.text() == "2 Resume Custom Session"
+            assert custom_button.property("decisionTone") == "custom"
+            start_button = dialog.findChild(q["QPushButton"], "startNewSessionButton")
+            assert start_button is not None
+            assert start_button.text() == "3 Start New Session"
+            assert start_button.property("decisionTone") == "start"
+            assert dialog.findChild(q["QPushButton"], "initiateEnvironmentButton") is None
+            assert dialog.findChild(q["QPushButton"], "chooseOutputFolderButton") is None
+            for key in ("1", "2", "3"):
+                assert [
+                    shortcut
+                    for shortcut in dialog.findChildren(q["QShortcut"])
+                    if shortcut.key().toString() == key
+                ]
+            assert 'decisionTone="start"' in dialog.styleSheet()
+            swatch_dir = Path.cwd() / ".pytest_cache"
+            swatch_dir.mkdir(parents=True, exist_ok=True)
+            means = []
+            for name, button in (
+                ("resume", resume_button),
+                ("custom", custom_button),
+                ("start", start_button),
+            ):
+                path = swatch_dir / f"launcher_{name}_button.png"
+                assert button.grab().save(str(path))
+                means.append(tuple(round(value, 1) for value in ImageStat.Stat(Image.open(path).convert("RGB")).mean))
+            assert len({tuple(int(value // 8) for value in mean) for mean in means}) == 3
             labels = _collect_widget_texts(dialog, q["QLabel"])
             assert labels.index("Output Folder") < labels.index("Experiment Profile")
             assert labels.index("Experiment Profile") < labels.index("Session Name")
@@ -2936,6 +2973,7 @@ def test_launcher_first_screen_is_environment_gate():
             assert "Generate Audio Assets" not in button_labels
             assert "Generate Range" not in button_labels
             assert "Run Selected Profile" not in button_labels
+            assert "Initiate New Data Collection Environment" not in button_labels
             screenshot = Path.cwd() / ".pytest_cache" / "launcher_environment_gate.png"
             screenshot.parent.mkdir(parents=True, exist_ok=True)
             assert dialog.grab().save(str(screenshot))
@@ -3030,7 +3068,7 @@ def test_launcher_resume_shortcut_opens_environment_operations(tmp_path: Path, m
                 for widget in app.topLevelWidgets()
                 if widget.windowTitle() == "PPS Experiment Runner"
                 and widget.isVisible()
-                and widget.findChild(q["QPushButton"], "resumeExperimentButton") is not None
+                and widget.findChild(q["QPushButton"], "resumeLastSessionButton") is not None
             ]
             if not dialogs and resume_attempts["count"] < 20:
                 resume_attempts["count"] += 1
@@ -3039,7 +3077,7 @@ def test_launcher_resume_shortcut_opens_environment_operations(tmp_path: Path, m
             assert dialogs
             dialog = dialogs[0]
             assert dialog.findChild(q["QComboBox"], "participantCombo") is None
-            resume = dialog.findChild(q["QPushButton"], "resumeExperimentButton")
+            resume = dialog.findChild(q["QPushButton"], "resumeLastSessionButton")
             assert resume is not None
             assert resume.isEnabled()
             resume_shortcuts = [
@@ -3073,7 +3111,7 @@ def test_launcher_resume_shortcut_opens_environment_operations(tmp_path: Path, m
     assert calls[0]["participant_id"] == "P001"
 
 
-def test_launcher_pick_empty_folder_unlocks_required_fields_and_initiate(tmp_path: Path, monkeypatch):
+def test_launcher_resume_custom_rejects_empty_folder_without_new_session_prompts(tmp_path: Path, monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
         from PIL import Image, ImageStat
@@ -3088,8 +3126,8 @@ def test_launcher_pick_empty_folder_unlocks_required_fields_and_initiate(tmp_pat
     errors: list[BaseException] = []
     remembered = tmp_path / "remembered"
     remembered.mkdir()
-    new_parent = tmp_path / "fresh_parent"
-    new_parent.mkdir()
+    empty_folder = tmp_path / "empty_folder"
+    empty_folder.mkdir()
 
     monkeypatch.setattr(
         focus_app,
@@ -3111,60 +3149,41 @@ def test_launcher_pick_empty_folder_unlocks_required_fields_and_initiate(tmp_pat
     )
     monkeypatch.setattr(focus_app, "finished_profile_options", lambda: [(focus_app.STUDY5_PROFILE_ID, "Study 5")])
     monkeypatch.setattr(focus_app, "current_runner_diary_path", lambda: None)
-    monkeypatch.setattr(q["QFileDialog"], "getExistingDirectory", lambda *args, **kwargs: str(new_parent))
+    monkeypatch.setattr(q["QFileDialog"], "getExistingDirectory", lambda *args, **kwargs: str(empty_folder))
 
-    def pick_folder_and_inspect() -> None:
+    def pick_empty_folder_and_inspect() -> None:
         try:
             dialogs = [widget for widget in app.topLevelWidgets() if widget.windowTitle() == "PPS Experiment Runner"]
             assert dialogs
             dialog = dialogs[0]
-            initial_choose_button = dialog.findChild(q["QPushButton"], "chooseOutputFolderButton")
-            assert initial_choose_button is not None
-            QTest.mouseClick(initial_choose_button, q["Qt"].MouseButton.LeftButton)
+            custom_button = dialog.findChild(q["QPushButton"], "resumeCustomSessionButton")
+            assert custom_button is not None
+            QTest.mouseClick(custom_button, q["Qt"].MouseButton.LeftButton)
             app.processEvents()
 
             output_field = dialog.findChild(q["QLineEdit"], "outputFolderField")
             profile_combo = dialog.findChild(q["QComboBox"], "environmentProfileCombo")
             session_field = dialog.findChild(q["QLineEdit"], "sessionNameField")
-            initiate_button = dialog.findChild(q["QPushButton"], "initiateEnvironmentButton")
-            resume_button = dialog.findChild(q["QPushButton"], "resumeExperimentButton")
-            choose_button = dialog.findChild(q["QPushButton"], "chooseOutputFolderButton")
+            start_dialog = dialog.findChild(q["QDialog"], "startNewSessionDialog")
+            message_label = dialog.findChild(q["QLabel"], "gateStatusLabel")
             assert output_field is not None
             assert profile_combo is not None
             assert session_field is not None
-            assert initiate_button is not None
-            assert resume_button is not None
-            assert choose_button is not None
+            assert message_label is not None
+            assert start_dialog is None
+            assert Path(output_field.text()) == remembered
+            assert output_field.isReadOnly()
+            assert not profile_combo.isEnabled()
+            assert session_field.isReadOnly()
+            assert "No PPS session metadata" in message_label.text()
 
-            assert Path(output_field.text()) == new_parent
-            assert not output_field.isReadOnly()
-            assert profile_combo.isEnabled()
-            assert not session_field.isReadOnly()
-            assert output_field.property("gateState") == "complete"
-            assert profile_combo.property("gateState") == "needed"
-            assert session_field.property("gateState") == "needed"
-            assert not resume_button.isEnabled()
-            assert not initiate_button.isEnabled()
-            assert initiate_button.property("attention") == "locked"
-            assert choose_button.property("attention") == "complete"
-
-            screenshot = Path.cwd() / ".pytest_cache" / "launcher_gate_new_parent_required.png"
+            screenshot = Path.cwd() / ".pytest_cache" / "launcher_gate_custom_empty_rejected.png"
             screenshot.parent.mkdir(parents=True, exist_ok=True)
             assert dialog.grab().save(str(screenshot))
             image = Image.open(screenshot).convert("RGB")
             assert image.width >= 760
             assert image.height >= 480
             assert max(ImageStat.Stat(image).stddev) > 0.0
-
-            profile_index = profile_combo.findData(focus_app.STUDY5_PROFILE_ID)
-            assert profile_index >= 0
-            profile_combo.setCurrentIndex(profile_index)
-            session_field.setText("Salience Pilot")
-            app.processEvents()
-            assert profile_combo.property("gateState") == "complete"
-            assert session_field.property("gateState") == "complete"
-            assert initiate_button.isEnabled()
-            assert initiate_button.property("attention") == "go"
         except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
             errors.append(exc)
         finally:
@@ -3172,7 +3191,7 @@ def test_launcher_pick_empty_folder_unlocks_required_fields_and_initiate(tmp_pat
                 if widget.windowTitle() == "PPS Experiment Runner":
                     widget.reject()
 
-    q["QTimer"].singleShot(50, pick_folder_and_inspect)
+    q["QTimer"].singleShot(50, pick_empty_folder_and_inspect)
     exit_code = focus_app.run_launcher_window(
         capture_options=SessionCaptureOptions(enable_lsl=False, write_internal_xdf=False, start_backup_recording=False),
         participant_id="P001",
@@ -3186,7 +3205,7 @@ def test_launcher_pick_empty_folder_unlocks_required_fields_and_initiate(tmp_pat
     assert errors == []
 
 
-def test_launcher_initiate_button_creates_environment_and_opens_operations(tmp_path: Path, monkeypatch):
+def test_launcher_start_new_session_modal_creates_environment_and_opens_operations(tmp_path: Path, monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
         from PySide6.QtTest import QTest
@@ -3260,40 +3279,59 @@ def test_launcher_initiate_button_creates_environment_and_opens_operations(tmp_p
             if widget.windowTitle() == "PPS Experiment Runner":
                 widget.reject()
 
-    def pick_folder_and_initiate() -> None:
+    def fill_start_new_dialog() -> None:
         try:
-            dialogs = [widget for widget in app.topLevelWidgets() if widget.windowTitle() == "PPS Experiment Runner"]
+            dialogs = [widget for widget in app.topLevelWidgets() if widget.objectName() == "startNewSessionDialog"]
             assert dialogs
-            dialog = dialogs[0]
-            choose_button = dialog.findChild(q["QPushButton"], "chooseOutputFolderButton")
-            profile_combo = dialog.findChild(q["QComboBox"], "environmentProfileCombo")
-            session_field = dialog.findChild(q["QLineEdit"], "sessionNameField")
-            initiate_button = dialog.findChild(q["QPushButton"], "initiateEnvironmentButton")
-            message_label = dialog.findChild(q["QLabel"], "gateStatusLabel")
-            assert choose_button is not None
+            setup_dialog = dialogs[0]
+            parent_button = setup_dialog.findChild(q["QPushButton"], "newSessionParentButton")
+            parent_field = setup_dialog.findChild(q["QLineEdit"], "newSessionParentField")
+            profile_combo = setup_dialog.findChild(q["QComboBox"], "newSessionProfileCombo")
+            session_field = setup_dialog.findChild(q["QLineEdit"], "newSessionNameField")
+            create_button = setup_dialog.findChild(q["QPushButton"], "createNewSessionButton")
+            assert parent_button is not None
+            assert parent_field is not None
             assert profile_combo is not None
             assert session_field is not None
-            assert initiate_button is not None
-            assert message_label is not None
+            assert create_button is not None
 
-            QTest.mouseClick(choose_button, q["Qt"].MouseButton.LeftButton)
+            QTest.mouseClick(parent_button, q["Qt"].MouseButton.LeftButton)
             app.processEvents()
+            assert Path(parent_field.text()) == new_parent
             profile_index = profile_combo.findData(focus_app.STUDY5_PROFILE_ID)
             assert profile_index >= 0
             profile_combo.setCurrentIndex(profile_index)
             session_field.setText("hoi")
             app.processEvents()
-            assert initiate_button.isEnabled()
-            QTest.mouseClick(initiate_button, q["Qt"].MouseButton.LeftButton)
-            app.processEvents()
-            assert calls or "Creating data collection environment" in message_label.text()
+            assert create_button.isEnabled()
+            screenshot = Path.cwd() / ".pytest_cache" / "launcher_start_new_session_dialog.png"
+            screenshot.parent.mkdir(parents=True, exist_ok=True)
+            assert setup_dialog.grab().save(str(screenshot))
+            QTest.mouseClick(create_button, q["Qt"].MouseButton.LeftButton)
         except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
             errors.append(exc)
             for widget in app.topLevelWidgets():
                 if widget.windowTitle() == "PPS Experiment Runner":
                     widget.reject()
 
-    q["QTimer"].singleShot(50, pick_folder_and_initiate)
+    def click_start_new() -> None:
+        try:
+            dialogs = [widget for widget in app.topLevelWidgets() if widget.windowTitle() == "PPS Experiment Runner"]
+            assert dialogs
+            dialog = dialogs[0]
+            start_button = dialog.findChild(q["QPushButton"], "startNewSessionButton")
+            assert start_button is not None
+            assert dialog.findChild(q["QDialog"], "startNewSessionDialog") is None
+            q["QTimer"].singleShot(100, fill_start_new_dialog)
+            QTest.mouseClick(start_button, q["Qt"].MouseButton.LeftButton)
+            app.processEvents()
+        except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
+            errors.append(exc)
+            for widget in app.topLevelWidgets():
+                if widget.windowTitle() == "PPS Experiment Runner":
+                    widget.reject()
+
+    q["QTimer"].singleShot(50, click_start_new)
     q["QTimer"].singleShot(3000, reject_if_still_open)
     exit_code = focus_app.run_launcher_window(
         capture_options=SessionCaptureOptions(enable_lsl=False, write_internal_xdf=False, start_backup_recording=False),
@@ -3315,7 +3353,7 @@ def test_launcher_initiate_button_creates_environment_and_opens_operations(tmp_p
     assert operation_calls[0]["participant_id"] == "P001"
 
 
-def test_launcher_existing_folder_keeps_fields_locked_and_resumes_selected_environment(tmp_path: Path, monkeypatch):
+def test_launcher_resume_custom_session_folder_opens_operations_immediately(tmp_path: Path, monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
         from PIL import Image, ImageStat
@@ -3397,49 +3435,10 @@ def test_launcher_existing_folder_keeps_fields_locked_and_resumes_selected_envir
             dialogs = [widget for widget in app.topLevelWidgets() if widget.windowTitle() == "PPS Experiment Runner"]
             assert dialogs
             dialog = dialogs[0]
-            choose_button = dialog.findChild(q["QPushButton"], "chooseOutputFolderButton")
-            assert choose_button is not None
-            QTest.mouseClick(choose_button, q["Qt"].MouseButton.LeftButton)
+            custom_button = dialog.findChild(q["QPushButton"], "resumeCustomSessionButton")
+            assert custom_button is not None
+            QTest.mouseClick(custom_button, q["Qt"].MouseButton.LeftButton)
             app.processEvents()
-
-            output_field = dialog.findChild(q["QLineEdit"], "outputFolderField")
-            profile_combo = dialog.findChild(q["QComboBox"], "environmentProfileCombo")
-            session_field = dialog.findChild(q["QLineEdit"], "sessionNameField")
-            resume_button = dialog.findChild(q["QPushButton"], "resumeExperimentButton")
-            initiate_button = dialog.findChild(q["QPushButton"], "initiateEnvironmentButton")
-            message_label = dialog.findChild(q["QLabel"], "gateStatusLabel")
-            assert output_field is not None
-            assert profile_combo is not None
-            assert session_field is not None
-            assert resume_button is not None
-            assert initiate_button is not None
-            assert message_label is not None
-
-            assert Path(output_field.text()) == existing_env
-            assert output_field.isReadOnly()
-            assert not profile_combo.isEnabled()
-            assert session_field.isReadOnly()
-            assert output_field.property("gateState") == "locked"
-            assert profile_combo.property("gateState") == "locked"
-            assert session_field.property("gateState") == "locked"
-            assert profile_combo.currentData() == focus_app.STUDY5_PROFILE_ID
-            assert session_field.text() == "Existing Salience Study"
-            assert "Existing experiment environment found" in message_label.text()
-            assert resume_button.isEnabled()
-            assert resume_button.property("attention") == "current"
-            assert not initiate_button.isEnabled()
-
-            screenshot = Path.cwd() / ".pytest_cache" / "launcher_gate_existing_environment.png"
-            screenshot.parent.mkdir(parents=True, exist_ok=True)
-            assert dialog.grab().save(str(screenshot))
-            image = Image.open(screenshot).convert("RGB")
-            assert image.width >= 760
-            assert image.height >= 480
-            assert max(ImageStat.Stat(image).stddev) > 0.0
-
-            dialog.activateWindow()
-            dialog.setFocus(q["Qt"].FocusReason.ShortcutFocusReason)
-            QTest.keyClick(dialog, q["Qt"].Key.Key_1)
         except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
             errors.append(exc)
             for widget in app.topLevelWidgets():

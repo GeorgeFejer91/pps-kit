@@ -11687,7 +11687,6 @@ def run_launcher_window(
     apply_qt_app_icon(q, app=app, window=dialog)
 
     selected_action: dict[str, Any] = {"open_environment": False}
-    setup_mode: dict[str, bool] = {"enabled": False}
     initializing: dict[str, bool] = {"busy": False}
     gate_shortcuts: dict[str, Any] = {}
     messages: queue.Queue[tuple[str, Any]] = queue.Queue()
@@ -11696,13 +11695,11 @@ def run_launcher_window(
     layout.setContentsMargins(16, 16, 16, 16)
     layout.setSpacing(14)
     panel, panel_layout = _panel(q, "Experiment Environment")
-    heading = q["QLabel"](
-        "Resume an existing data collection environment, or pick a folder and start a fresh timestamped environment."
-    )
+    heading = q["QLabel"]("Choose how to open a PPS data collection session.")
     heading.setObjectName("mutedLabel")
     heading.setWordWrap(True)
     panel_layout.addWidget(heading)
-    step_label = q["QLabel"]("Step 1: Choose 1 Resume or 2 Pick Output Folder / Start New Session.")
+    step_label = q["QLabel"]("Choose 1 Resume Last Session, 2 Resume Custom Session, or 3 Start New Session.")
     step_label.setObjectName("gateStepLabel")
     step_label.setWordWrap(True)
     panel_layout.addWidget(step_label)
@@ -11734,7 +11731,7 @@ def run_launcher_window(
 
     message = q["QLabel"](
         initial_message
-        or "Current decision: press 1 to resume a ready environment, or press 2 to pick an output folder."
+        or "Current decision: resume from memory, choose a session folder to scan, or start a new session."
     )
     message.setObjectName("gateStatusLabel")
     message.setWordWrap(True)
@@ -11746,22 +11743,20 @@ def run_launcher_window(
     panel_layout.addWidget(progress)
 
     buttons = q["QHBoxLayout"]()
-    resume_button = q["QPushButton"]("1 Resume Experiment")
-    resume_button.setObjectName("resumeExperimentButton")
+    resume_button = q["QPushButton"]("1 Resume Last Session")
+    resume_button.setObjectName("resumeLastSessionButton")
     resume_button.setProperty("class", "primary")
     resume_button.setProperty("decisionTone", "resume")
-    choose_folder_button = q["QPushButton"]("2 Pick Output Folder / Start New Session")
-    choose_folder_button.setObjectName("chooseOutputFolderButton")
-    choose_folder_button.setProperty("decisionTone", "folder")
-    initiate_button = q["QPushButton"]("Initiate New Data Collection Environment")
-    initiate_button.setObjectName("initiateEnvironmentButton")
-    initiate_button.setEnabled(False)
-    initiate_button.setDefault(True)
-    initiate_button.setAutoDefault(True)
+    resume_custom_button = q["QPushButton"]("2 Resume Custom Session")
+    resume_custom_button.setObjectName("resumeCustomSessionButton")
+    resume_custom_button.setProperty("decisionTone", "custom")
+    start_new_button = q["QPushButton"]("3 Start New Session")
+    start_new_button.setObjectName("startNewSessionButton")
+    start_new_button.setProperty("decisionTone", "start")
     close_button = q["QPushButton"]("Close")
     buttons.addWidget(resume_button)
-    buttons.addWidget(choose_folder_button)
-    buttons.addWidget(initiate_button)
+    buttons.addWidget(resume_custom_button)
+    buttons.addWidget(start_new_button)
     buttons.addStretch(1)
     buttons.addWidget(close_button)
     panel_layout.addLayout(buttons)
@@ -11810,59 +11805,39 @@ def run_launcher_window(
             profile_combo.blockSignals(was_blocked)
 
     def _decision_shortcuts_enabled() -> bool:
-        return (not initializing["busy"]) and (not setup_mode["enabled"])
+        return not initializing["busy"]
 
     def _update_decision_shortcuts() -> None:
         resume_shortcut = gate_shortcuts.get("resume")
-        choose_shortcut = gate_shortcuts.get("choose")
+        custom_shortcut = gate_shortcuts.get("custom")
+        start_shortcut = gate_shortcuts.get("start")
         if resume_shortcut is not None:
             resume_shortcut.setEnabled(_decision_shortcuts_enabled() and _resume_ready())
-        if choose_shortcut is not None:
-            choose_shortcut.setEnabled(_decision_shortcuts_enabled())
+        if custom_shortcut is not None:
+            custom_shortcut.setEnabled(_decision_shortcuts_enabled())
+        if start_shortcut is not None:
+            start_shortcut.setEnabled(_decision_shortcuts_enabled())
 
     def _refresh_gate_attention() -> None:
-        errors = _validation_errors()
-        if setup_mode["enabled"]:
-            if errors:
-                step_label.setText("Step 2: Fill the highlighted required fields.")
-                _set_attention(step_label, "current")
-            else:
-                step_label.setText("Step 3: Create the data collection environment.")
-                _set_attention(step_label, "complete")
-            _set_widget_gate_state(output_folder_input, "complete" if _selected_parent().is_dir() else "needed")
-            _set_widget_gate_state(profile_combo, "complete" if _selected_profile() else "needed")
-            _set_widget_gate_state(session_name_input, "complete" if _session_slug() else "needed")
-            _set_attention(resume_button, "locked")
-            _set_attention(choose_folder_button, "complete")
-            _set_attention(initiate_button, "go" if not errors else "locked")
-            _set_attention(message, "complete" if not errors else "current")
-        else:
-            step_label.setText("Step 1: Choose 1 Resume or 2 Pick Output Folder / Start New Session.")
-            _set_attention(step_label, "current")
-            _set_widget_gate_state(output_folder_input, "locked")
-            _set_widget_gate_state(profile_combo, "locked")
-            _set_widget_gate_state(session_name_input, "locked")
-            if _resume_ready():
-                _set_attention(resume_button, "current")
-                _set_attention(
-                    choose_folder_button,
-                    "available" if active_environment.get("kind") == "existing_environment" else "current",
-                )
-            else:
-                _set_attention(resume_button, "locked")
-                _set_attention(choose_folder_button, "current")
-            _set_attention(initiate_button, "locked")
-            _set_attention(message, "current")
+        step_label.setText("Choose 1 Resume Last Session, 2 Resume Custom Session, or 3 Start New Session.")
+        _set_attention(step_label, "current")
+        _set_widget_gate_state(output_folder_input, "locked")
+        _set_widget_gate_state(profile_combo, "locked")
+        _set_widget_gate_state(session_name_input, "locked")
+        _set_attention(resume_button, "current" if _resume_ready() else "locked")
+        _set_attention(resume_custom_button, "available")
+        _set_attention(start_new_button, "available")
+        _set_attention(message, "current")
         _update_decision_shortcuts()
 
     def _set_environment_busy(busy: bool) -> None:
         initializing["busy"] = busy
         resume_button.setEnabled((not busy) and _resume_ready())
-        choose_folder_button.setEnabled(not busy)
-        initiate_button.setEnabled((not busy) and _can_initiate())
+        resume_custom_button.setEnabled(not busy)
+        start_new_button.setEnabled(not busy)
         close_button.setEnabled(not busy)
         output_folder_input.setEnabled(not busy)
-        profile_combo.setEnabled((not busy) and setup_mode["enabled"])
+        profile_combo.setEnabled(False)
         session_name_input.setEnabled(not busy)
         copy_button.setEnabled(not busy)
         progress.setVisible(busy)
@@ -11873,59 +11848,7 @@ def run_launcher_window(
             progress.setValue(0)
         _refresh_gate_attention()
 
-    def _validation_errors() -> list[str]:
-        if not setup_mode["enabled"]:
-            return []
-        parent = _selected_parent()
-        if not output_folder_input.text().strip():
-            return ["Choose an output parent folder."]
-        if not parent.is_dir():
-            return ["Output folder must be an existing folder."]
-        if not _selected_profile():
-            return ["Choose an experiment profile."]
-        if not _session_slug():
-            return ["Enter a Windows-safe session name."]
-        return []
-
-    def _can_initiate() -> bool:
-        return setup_mode["enabled"] and not _validation_errors()
-
-    def _refresh_initiate_state() -> None:
-        errors = _validation_errors()
-        initiate_button.setEnabled((not initializing["busy"]) and setup_mode["enabled"] and not errors)
-        if setup_mode["enabled"]:
-            if errors:
-                message.setText(errors[0])
-            else:
-                preview = _selected_parent() / f"{_session_slug()}_<timestamp>"
-                message.setText(f"Ready to create {preview}.")
-        output_folder_input.setToolTip(output_folder_input.text().strip())
-        _refresh_gate_attention()
-
-    def _unlock_for_new_environment(parent: Path) -> None:
-        setup_mode["enabled"] = True
-        active_environment.update(
-            {
-                "root": Path(parent).expanduser(),
-                "profile_id": "",
-                "participant_id": initial_participant or "P001",
-                "session_name": "",
-                "runner_diary_path": None,
-                "kind": "new_parent",
-            }
-        )
-        output_folder_input.setReadOnly(False)
-        output_folder_input.setText(str(parent))
-        profile_combo.setEnabled(True)
-        profile_combo.setCurrentIndex(0)
-        session_name_input.setReadOnly(False)
-        session_name_input.setText("")
-        resume_button.setEnabled(False)
-        message.setText("New output parent selected. Experiment Profile and Session Name are now required.")
-        _refresh_initiate_state()
-
     def _lock_for_existing_environment(context: dict[str, Any]) -> None:
-        setup_mode["enabled"] = False
         root = Path(context.get("root") or initial_output_root).expanduser()
         profile_id = str(context.get("profile_id") or initial_profile or "").strip()
         participant = str(context.get("participant_id") or initial_participant or "P001").strip()
@@ -11948,22 +11871,22 @@ def run_launcher_window(
         session_name_input.setReadOnly(True)
         session_name_input.setText(session_name)
         resume_button.setEnabled(_resume_ready())
-        initiate_button.setEnabled(False)
         markers = ", ".join(context.get("markers") or ["environment marker"])
-        message.setText(f"Existing experiment environment found ({markers}). Press 1 or click Resume Experiment.")
+        message.setText(f"Existing session environment found ({markers}).")
         _refresh_gate_attention()
 
-    def _select_output_folder(folder: Path) -> None:
+    def _classify_custom_session_folder(folder: Path) -> dict[str, Any]:
         context = _classify_launcher_output_folder(
             folder,
-            fallback_profile_id=initial_profile,
-            fallback_session_name=initial_session_name,
+            fallback_profile_id="",
+            fallback_session_name="",
             fallback_participant_id=initial_participant,
         )
-        if context.get("kind") == "existing_environment":
-            _lock_for_existing_environment(context)
-        else:
-            _unlock_for_new_environment(Path(context.get("root") or folder))
+        if context.get("kind") != "existing_environment":
+            raise ValueError("No PPS session metadata was found in that folder. Use Start New Session for empty folders.")
+        if not str(context.get("profile_id") or "").strip():
+            raise ValueError("That folder has PPS metadata but no experiment profile. Choose a complete PPS session folder.")
+        return context
 
     def _copy_output_path() -> None:
         try:
@@ -11972,20 +11895,28 @@ def run_launcher_window(
         except Exception as exc:
             message.setText(f"Could not copy path: {exc}")
 
-    def _choose_parent_folder() -> None:
+    def _choose_custom_session_folder() -> None:
         current_root = Path(str(active_environment.get("root") or initial_output_root)).expanduser()
         start_folder = current_root if current_root.is_dir() else DEFAULT_SESSION_ROOT
-        parent = q["QFileDialog"].getExistingDirectory(
+        folder = q["QFileDialog"].getExistingDirectory(
             dialog,
-            "Choose Output Folder",
+            "Choose Session Folder",
             str(start_folder),
         )
-        if parent:
-            _select_output_folder(Path(parent))
+        if not folder:
+            return
+        try:
+            context = _classify_custom_session_folder(Path(folder))
+        except Exception as exc:
+            message.setText(str(exc))
+            _refresh_gate_attention()
+            return
+        _lock_for_existing_environment(context)
+        _resume_environment(event_type="resume_custom_session_clicked")
 
-    def _resume_environment() -> None:
+    def _resume_environment(*, event_type: str = "resume_last_session_clicked") -> None:
         if not _resume_ready():
-            message.setText("No remembered experiment environment is ready. Choose a new output folder first.")
+            message.setText("No remembered session is ready. Use Resume Custom Session or Start New Session.")
             return
         output_root = Path(active_environment.get("root") or initial_output_root).expanduser().resolve()
         profile_id = str(active_environment.get("profile_id") or initial_profile or "").strip()
@@ -12008,7 +11939,7 @@ def run_launcher_window(
             capture_options=_capture_options_for_launcher(),
         )
         _append_output_diary_event(
-            "resume_experiment_clicked",
+            event_type,
             session_root=output_root,
             experiment_name=session_name,
             profile_id=profile_id,
@@ -12019,16 +11950,21 @@ def run_launcher_window(
         selected_action["open_environment"] = True
         dialog.accept()
 
-    def _start_environment_initialization_impl() -> None:
-        errors = _validation_errors()
-        if errors:
-            message.setText(errors[0])
+    def _start_environment_initialization(parent: Path, profile_id: str, session_name: str) -> None:
+        parent = Path(parent).expanduser()
+        profile = str(profile_id or "").strip()
+        label = str(session_name or "").strip()
+        if not parent.is_dir():
+            message.setText("Choose an existing output parent folder.")
             return
-        parent = _selected_parent()
-        profile_id = _selected_profile()
-        session_name = _session_name()
+        if not profile:
+            message.setText("Choose an experiment profile.")
+            return
+        if not slugify_identifier(label, fallback=""):
+            message.setText("Enter a Windows-safe session name.")
+            return
         _set_environment_busy(True)
-        message.setText("Creating data collection environment...")
+        message.setText("Creating new session environment...")
 
         def _progress_callback(payload: dict[str, Any]) -> None:
             messages.put(("progress", dict(payload)))
@@ -12037,8 +11973,8 @@ def run_launcher_window(
             try:
                 result = initiate_data_collection_environment(
                     parent_folder=parent,
-                    profile_id=profile_id,
-                    session_name=session_name,
+                    profile_id=profile,
+                    session_name=label,
                     participant_id="P001",
                     capture_options=capture_options,
                     progress_callback=_progress_callback,
@@ -12050,20 +11986,135 @@ def run_launcher_window(
 
         threading.Thread(target=_worker, name="pps-environment-init", daemon=True).start()
 
-    def _start_environment_initialization() -> None:
-        try:
-            _start_environment_initialization_impl()
-        except Exception as exc:
-            message.setText(f"Could not start data collection environment: {exc}")
-            _set_environment_busy(False)
+    def _new_session_default_parent() -> Path:
+        current_root = Path(str(active_environment.get("root") or initial_output_root)).expanduser()
+        if current_root.is_dir() and current_root.name:
+            return current_root.parent if current_root.parent.is_dir() else current_root
+        return DEFAULT_SESSION_ROOT
 
-    def _try_start_environment_from_keyboard() -> None:
-        if initializing["busy"]:
+    def _open_start_new_session_dialog() -> dict[str, Any] | None:
+        setup_dialog = q["QDialog"](dialog)
+        setup_dialog.setObjectName("startNewSessionDialog")
+        setup_dialog.setWindowTitle("Start New Session")
+        setup_dialog.resize(640, 260)
+        setup_dialog.setMinimumSize(560, 240)
+        setup_dialog.setStyleSheet(dialog.styleSheet())
+        setup_layout = q["QVBoxLayout"](setup_dialog)
+        setup_layout.setContentsMargins(16, 16, 16, 16)
+        setup_layout.setSpacing(12)
+
+        intro = q["QLabel"]("Define the local parent folder, experiment profile, and session name.")
+        intro.setObjectName("mutedLabel")
+        intro.setWordWrap(True)
+        setup_layout.addWidget(intro)
+
+        parent_input = q["QLineEdit"](str(_new_session_default_parent()))
+        parent_input.setObjectName("newSessionParentField")
+        parent_input.setReadOnly(True)
+        parent_button = q["QPushButton"]("Choose Parent Folder")
+        parent_button.setObjectName("newSessionParentButton")
+        parent_widget = q["QWidget"]()
+        parent_layout = q["QHBoxLayout"](parent_widget)
+        parent_layout.setContentsMargins(0, 0, 0, 0)
+        parent_layout.setSpacing(8)
+        parent_layout.addWidget(parent_input, 1)
+        parent_layout.addWidget(parent_button)
+        setup_layout.addWidget(_field_row(q, "Parent Folder", parent_widget))
+
+        new_profile_combo = _combo(q, editable_profile_options, current=initial_profile)
+        new_profile_combo.setObjectName("newSessionProfileCombo")
+        setup_layout.addWidget(_field_row(q, "Experiment Profile", new_profile_combo))
+
+        new_session_name = q["QLineEdit"]("")
+        new_session_name.setObjectName("newSessionNameField")
+        new_session_name.setPlaceholderText("My Experiment")
+        setup_layout.addWidget(_field_row(q, "Session Name", new_session_name))
+
+        status = q["QLabel"]("")
+        status.setObjectName("newSessionStatusLabel")
+        status.setWordWrap(True)
+        setup_layout.addWidget(status)
+
+        action_row = q["QHBoxLayout"]()
+        create_button = q["QPushButton"]("Start Session")
+        create_button.setObjectName("createNewSessionButton")
+        create_button.setProperty("class", "primary")
+        cancel_button = q["QPushButton"]("Cancel")
+        action_row.addStretch(1)
+        action_row.addWidget(create_button)
+        action_row.addWidget(cancel_button)
+        setup_layout.addLayout(action_row)
+
+        result: dict[str, Any] = {}
+
+        def _new_session_errors() -> list[str]:
+            parent = Path(parent_input.text().strip()).expanduser()
+            if not parent_input.text().strip():
+                return ["Choose an output parent folder."]
+            if not parent.is_dir():
+                return ["Parent folder must already exist."]
+            if not str(new_profile_combo.currentData() or "").strip():
+                return ["Choose an experiment profile."]
+            if not slugify_identifier(new_session_name.text().strip(), fallback=""):
+                return ["Enter a Windows-safe session name."]
+            return []
+
+        def _refresh_new_session_state() -> None:
+            errors = _new_session_errors()
+            create_button.setEnabled(not errors)
+            if errors:
+                status.setText(errors[0])
+            else:
+                preview = Path(parent_input.text().strip()).expanduser() / f"{slugify_identifier(new_session_name.text(), fallback='session')}_<timestamp>"
+                status.setText(f"Ready to create {preview}.")
+
+        def _choose_new_parent() -> None:
+            current = Path(parent_input.text().strip()).expanduser()
+            folder = q["QFileDialog"].getExistingDirectory(
+                setup_dialog,
+                "Choose Parent Folder",
+                str(current if current.is_dir() else DEFAULT_SESSION_ROOT),
+            )
+            if folder:
+                parent_input.setText(str(Path(folder)))
+                _refresh_new_session_state()
+
+        def _accept_new_session() -> None:
+            errors = _new_session_errors()
+            if errors:
+                status.setText(errors[0])
+                return
+            result.update(
+                {
+                    "parent": Path(parent_input.text().strip()).expanduser(),
+                    "profile_id": str(new_profile_combo.currentData() or "").strip(),
+                    "session_name": new_session_name.text().strip(),
+                }
+            )
+            setup_dialog.accept()
+
+        parent_button.clicked.connect(_choose_new_parent)
+        parent_input.textChanged.connect(lambda _text: _refresh_new_session_state())
+        new_profile_combo.currentIndexChanged.connect(lambda _index: _refresh_new_session_state())
+        new_session_name.textChanged.connect(lambda _text: _refresh_new_session_state())
+        new_session_name.returnPressed.connect(_accept_new_session)
+        create_button.clicked.connect(_accept_new_session)
+        cancel_button.clicked.connect(setup_dialog.reject)
+        _refresh_new_session_state()
+
+        if setup_dialog.exec() != q["QDialog"].DialogCode.Accepted:
+            return None
+        return result
+
+    def _start_new_session() -> None:
+        result = _open_start_new_session_dialog()
+        if not result:
             return
-        if _can_initiate():
-            initiate_button.click()
-        else:
-            _refresh_initiate_state()
+        _start_environment_initialization(
+            Path(result["parent"]),
+            str(result["profile_id"]),
+            str(result["session_name"]),
+        )
 
     def _drain_environment_messages() -> None:
         while not messages.empty():
@@ -12082,7 +12133,6 @@ def run_launcher_window(
             elif kind == "error":
                 message.setText(str(payload))
                 _set_environment_busy(False)
-                _refresh_initiate_state()
             elif kind == "done":
                 root_text = str(payload.get("environment_root") or "").strip()
                 if root_text:
@@ -12096,49 +12146,47 @@ def run_launcher_window(
                             "kind": "existing_environment",
                         }
                     )
+                    _lock_for_existing_environment(active_environment)
                 selected_action["open_environment"] = True
                 message.setText("Environment ready.")
                 dialog.accept()
 
     def _focus_is_editing_gate_text() -> bool:
-        focus = app.focusWidget()
-        return bool(
-            focus in (output_folder_input, session_name_input)
-            and focus.isEnabled()
-            and hasattr(focus, "isReadOnly")
-            and not focus.isReadOnly()
-        )
+        return False
 
     def _resume_shortcut_activated() -> None:
         if _focus_is_editing_gate_text() or not _decision_shortcuts_enabled() or not resume_button.isEnabled():
             return
         resume_button.click()
 
-    def _choose_shortcut_activated() -> None:
-        if _focus_is_editing_gate_text() or not _decision_shortcuts_enabled() or not choose_folder_button.isEnabled():
+    def _custom_shortcut_activated() -> None:
+        if _focus_is_editing_gate_text() or not _decision_shortcuts_enabled() or not resume_custom_button.isEnabled():
             return
-        choose_folder_button.click()
+        resume_custom_button.click()
+
+    def _start_shortcut_activated() -> None:
+        if _focus_is_editing_gate_text() or not _decision_shortcuts_enabled() or not start_new_button.isEnabled():
+            return
+        start_new_button.click()
 
     timer = q["QTimer"](dialog)
     timer.timeout.connect(_drain_environment_messages)
     timer.start(100)
 
-    output_folder_input.textChanged.connect(lambda _text: _refresh_initiate_state())
-    output_folder_input.returnPressed.connect(_try_start_environment_from_keyboard)
-    profile_combo.currentIndexChanged.connect(lambda _index: _refresh_initiate_state())
-    session_name_input.textChanged.connect(lambda _text: _refresh_initiate_state())
-    session_name_input.returnPressed.connect(_try_start_environment_from_keyboard)
     copy_button.clicked.connect(_copy_output_path)
-    choose_folder_button.clicked.connect(_choose_parent_folder)
-    resume_button.clicked.connect(_resume_environment)
-    initiate_button.clicked.connect(lambda _checked=False: _start_environment_initialization())
+    resume_custom_button.clicked.connect(_choose_custom_session_folder)
+    resume_button.clicked.connect(lambda _checked=False: _resume_environment(event_type="resume_last_session_clicked"))
+    start_new_button.clicked.connect(_start_new_session)
     close_button.clicked.connect(dialog.reject)
     gate_shortcuts["resume"] = q["QShortcut"](q["QKeySequence"]("1"), dialog)
     gate_shortcuts["resume"].setContext(q["Qt"].ShortcutContext.ApplicationShortcut)
     gate_shortcuts["resume"].activated.connect(_resume_shortcut_activated)
-    gate_shortcuts["choose"] = q["QShortcut"](q["QKeySequence"]("2"), dialog)
-    gate_shortcuts["choose"].setContext(q["Qt"].ShortcutContext.ApplicationShortcut)
-    gate_shortcuts["choose"].activated.connect(_choose_shortcut_activated)
+    gate_shortcuts["custom"] = q["QShortcut"](q["QKeySequence"]("2"), dialog)
+    gate_shortcuts["custom"].setContext(q["Qt"].ShortcutContext.ApplicationShortcut)
+    gate_shortcuts["custom"].activated.connect(_custom_shortcut_activated)
+    gate_shortcuts["start"] = q["QShortcut"](q["QKeySequence"]("3"), dialog)
+    gate_shortcuts["start"].setContext(q["Qt"].ShortcutContext.ApplicationShortcut)
+    gate_shortcuts["start"].activated.connect(_start_shortcut_activated)
     resume_button.setEnabled(_resume_ready())
     _refresh_gate_attention()
 
@@ -12146,38 +12194,7 @@ def run_launcher_window(
         target_profile = os.environ.get("PPS_FOCUS_VALIDATION_PROFILE", STUDY5_PROFILE_ID).strip() or STUDY5_PROFILE_ID
         parent = Path(os.environ.get("PPS_FOCUS_VALIDATION_OUTPUT_ROOT", "") or DEFAULT_SESSION_ROOT).expanduser()
         os.makedirs(_output_filesystem_path(parent), exist_ok=True)
-        _unlock_for_new_environment(parent)
-        _set_profile_combo_current(target_profile)
-        session_name_input.setText("Study 5 validation")
-
-        def _try_initiate(attempt: int = 0) -> None:
-            _refresh_initiate_state()
-            if initiate_button.isEnabled():
-                initiate_button.click()
-                return
-            if attempt < 20:
-                q["QTimer"].singleShot(250, lambda: _try_initiate(attempt + 1))
-                return
-            launcher_report_path = os.environ.get("PPS_FOCUS_VALIDATION_LAUNCHER_REPORT", "").strip()
-            if launcher_report_path:
-                _write_validation_launcher_report(
-                    Path(launcher_report_path),
-                    selected_manifest=None,
-                    exit_code=1,
-                    profile_count=len(profile_options),
-                    selected_profile=str(profile_combo.currentData() or ""),
-                    validation_clicks=[
-                        {
-                            "label": "auto environment initiation unavailable",
-                            "timestamp_unix": time.time(),
-                            "selected_profile": str(profile_combo.currentData() or ""),
-                            "message": "; ".join(_validation_errors()) or "Initiate button stayed disabled.",
-                        }
-                    ],
-                )
-            dialog.reject()
-
-        q["QTimer"].singleShot(250, _try_initiate)
+        _start_environment_initialization(parent, target_profile, "Study 5 validation")
 
     if _env_flag("PPS_FOCUS_VALIDATION_LAUNCHER_AUTO_CLICK"):
         q["QTimer"].singleShot(200, _validation_auto_environment)

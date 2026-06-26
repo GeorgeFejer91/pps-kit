@@ -297,7 +297,7 @@ def _run_static_gates(commands_dir: Path, gates: list[dict[str, Any]]) -> bool:
             "pytest",
             "tests/test_dashboard_app.py::test_dashboard_validates_full_study5_segment0_to_3_pipeline",
             "tests/test_dashboard_app.py::test_dashboard_study5_profile_preserves_trial_budget_with_two_sources",
-            "tests/test_focus_app.py::test_launcher_initiate_button_creates_environment_and_opens_operations",
+            "tests/test_focus_app.py::test_launcher_start_new_session_modal_creates_environment_and_opens_operations",
             "tests/test_validation_protocols.py::test_desktop_full_mock_rehearsal_delegates_to_full_stack_harness",
             "tests/test_validation_protocols.py::test_desktop_full_mock_rehearsal_uses_runner_owned_labrecorder",
             "tests/test_validation_protocols.py::test_study5_baseline_no_looming_metrics_require_instruction_audio",
