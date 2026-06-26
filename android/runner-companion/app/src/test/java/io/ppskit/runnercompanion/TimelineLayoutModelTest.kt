@@ -49,6 +49,32 @@ class TimelineLayoutModelTest {
     }
 
     @Test
+    fun showsSoaAnnotationsOnlyWhenTrialIntervalsHaveRoom() {
+        assertTrue(
+            TimelineLayoutModel.shouldShowIntervalAnnotation(
+                startS = 0.0,
+                endS = 30.0,
+                durationS = 120.0,
+                plotWidthPx = 1080f,
+            )
+        )
+        assertFalse(
+            TimelineLayoutModel.shouldShowIntervalAnnotation(
+                startS = 0.0,
+                endS = 10.0,
+                durationS = 900.0,
+                plotWidthPx = 1080f,
+            )
+        )
+    }
+
+    @Test
+    fun showsRtAnnotationsOnlyWhenEventStreamIsReadable() {
+        assertTrue(TimelineLayoutModel.shouldShowEventAnnotations(eventCount = 24, plotWidthPx = 1080f))
+        assertFalse(TimelineLayoutModel.shouldShowEventAnnotations(eventCount = 120, plotWidthPx = 1080f))
+    }
+
+    @Test
     fun reducesMarkerWeightAndConnectorsForDenseEventStreams() {
         val sparse = TimelineLayoutModel.densityStyle(eventCount = 24, plotWidthPx = 1080f)
         val dense = TimelineLayoutModel.densityStyle(eventCount = 360, plotWidthPx = 1080f)

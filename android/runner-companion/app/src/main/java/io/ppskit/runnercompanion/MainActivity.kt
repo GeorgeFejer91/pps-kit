@@ -85,6 +85,8 @@ import kotlinx.coroutines.delay
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
     private val runnerClient = RunnerClient()
@@ -569,20 +571,24 @@ private fun LiveFeedbackPanel(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(if (compactLandscape) 6.dp else 10.dp),
         ) {
-            Text("Live Feedback", style = MaterialTheme.typography.titleLarge)
+            if (!compactLandscape) {
+                Text("Live Feedback", style = MaterialTheme.typography.titleLarge)
+            }
             Text(
                 listOfNotNull(block?.phaseLabel?.takeIf { it.isNotBlank() }, block?.blockLabel?.takeIf { it.isNotBlank() })
                     .joinToString(" - ")
                     .ifBlank { "No active block" },
-                style = MaterialTheme.typography.titleMedium,
+                style = if (compactLandscape) MaterialTheme.typography.titleSmall else MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
             LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                StatusChip("${formatSeconds(estimate.elapsedS)} / ${formatSeconds(duration)}")
-                StatusChip("${snapshot?.timeline?.tactilePassed ?: 0} / ${snapshot?.timeline?.tactileTotal ?: 0} cues")
-                StatusChip("${snapshot?.timeline?.clicks ?: 0} clicks")
-                StatusChip(snapshot?.runStatus?.stateLabel?.ifBlank { if (snapshot?.runStatus?.paused == true || block?.paused == true) "Paused" else "Waiting" } ?: "Waiting")
+            if (!compactLandscape) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    StatusChip("${formatSeconds(estimate.elapsedS)} / ${formatSeconds(duration)}")
+                    StatusChip("${snapshot?.timeline?.tactilePassed ?: 0} / ${snapshot?.timeline?.tactileTotal ?: 0} cues")
+                    StatusChip("${snapshot?.timeline?.clicks ?: 0} clicks")
+                    StatusChip(snapshot?.runStatus?.stateLabel?.ifBlank { if (snapshot?.runStatus?.paused == true || block?.paused == true) "Paused" else "Waiting" } ?: "Waiting")
+                }
             }
             val timelineModifier = if (expandedTimeline) {
                 Modifier
@@ -624,9 +630,14 @@ private fun BlockTimelineCanvas(
         1.0,
     )
     val cueById = cues.associateBy { it.cueId }
+    val cueSoaByTrialUid = cues
+        .filter { it.trialUid.isNotBlank() && it.soaMs.isNotBlank() }
+        .groupBy { it.trialUid }
+        .mapValues { (_, trialCues) -> trialCues.first().soaMs }
     val background = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
     val axis = MaterialTheme.colorScheme.outline
     val text = MaterialTheme.colorScheme.onSurface
+    val annotationText = MaterialTheme.colorScheme.onSurfaceVariant
     val trialPalette = listOf(
         Color(0xFFE8F1F2),
         Color(0xFFF4EEE2),
@@ -657,6 +668,10 @@ private fun BlockTimelineCanvas(
         val trialHeight = minOf(46.dp.toPx(), laneGap * 0.58f)
         val tactileY = top + laneGap * 1.55f
         val clickY = top + laneGap * 2.55f
+        val hasAnnotationSpace = laneGap >= 30.dp.toPx()
+        val cueHalfHeight = minOf(20.dp.toPx(), laneGap * if (hasAnnotationSpace) 0.24f else 0.34f)
+        val soaY = ((trialTop + trialHeight) + (tactileY - cueHalfHeight)) / 2f + 4.dp.toPx()
+        val rtY = ((tactileY + cueHalfHeight) + clickY) / 2f - 2.dp.toPx()
         fun xFor(seconds: Double): Float = left + ((seconds / duration).coerceIn(0.0, 1.0).toFloat() * plotWidth)
 
         val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -673,6 +688,17 @@ private fun BlockTimelineCanvas(
             color = axis.toArgb()
             textSize = 10.dp.toPx()
             textAlign = Paint.Align.CENTER
+        }
+        val annotationPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = annotationText.toArgb()
+            textSize = 9.dp.toPx()
+            textAlign = Paint.Align.CENTER
+        }
+        val rtPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = clickValid.toArgb()
+            textSize = 9.dp.toPx()
+            textAlign = Paint.Align.CENTER
+            isFakeBoldText = true
         }
         if (trials.isEmpty() && cues.isEmpty() && clicks.isEmpty()) {
             val placeholderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -697,7 +723,13 @@ private fun BlockTimelineCanvas(
             drawContext.canvas.nativeCanvas.drawText(tick.label, x, size.height - 8.dp.toPx(), axisPaint)
         }
         drawContext.canvas.nativeCanvas.drawText("Trials", left - 8.dp.toPx(), trialTop + trialHeight * 0.67f, labelPaint)
+        if (hasAnnotationSpace) {
+            drawContext.canvas.nativeCanvas.drawText("SOA", left - 8.dp.toPx(), soaY, labelPaint)
+        }
         drawContext.canvas.nativeCanvas.drawText("Tactile", left - 8.dp.toPx(), tactileY + 4.dp.toPx(), labelPaint)
+        if (hasAnnotationSpace && TimelineLayoutModel.shouldShowEventAnnotations(clicks.count { it.rtS != null }, plotWidth)) {
+            drawContext.canvas.nativeCanvas.drawText("RT", left - 8.dp.toPx(), rtY, labelPaint)
+        }
         drawContext.canvas.nativeCanvas.drawText("Clicks", left - 8.dp.toPx(), clickY + 4.dp.toPx(), labelPaint)
         val densityStyle = TimelineLayoutModel.densityStyle(cues.size + clicks.size, plotWidth)
         val cueRadius = 5.dp.toPx() * densityStyle.markerScale
@@ -735,7 +767,7 @@ private fun BlockTimelineCanvas(
                 "next", "recentered" -> cueUpcoming
                 else -> axis
             }
-            drawLine(color.copy(alpha = 0.8f), Offset(x, tactileY - 20.dp.toPx()), Offset(x, tactileY + 20.dp.toPx()), strokeWidth = (2.dp.toPx() * densityStyle.markerScale).coerceAtLeast(1.dp.toPx()))
+            drawLine(color.copy(alpha = 0.8f), Offset(x, tactileY - cueHalfHeight), Offset(x, tactileY + cueHalfHeight), strokeWidth = (2.dp.toPx() * densityStyle.markerScale).coerceAtLeast(1.dp.toPx()))
             drawCircle(color, radius = cueRadius, center = Offset(x, tactileY))
             if (cue.status == "next") {
                 drawCircle(color, radius = nextCueRadius, center = Offset(x, tactileY), style = Stroke(width = 2.dp.toPx()))
@@ -757,6 +789,47 @@ private fun BlockTimelineCanvas(
 
         val currentX = xFor(estimate.elapsedS)
         drawLine(playhead, Offset(currentX, top), Offset(currentX, bottom), strokeWidth = 3.dp.toPx())
+
+        if (hasAnnotationSpace) {
+            trials.forEach { trial ->
+                if (!TimelineLayoutModel.shouldShowIntervalAnnotation(trial.startS, trial.endS, duration, plotWidth)) {
+                    return@forEach
+                }
+                val startX = xFor(trial.startS)
+                val endX = xFor(trial.endS).coerceAtLeast(startX + 2.dp.toPx())
+                val soaLabel = formatSoaValue(trial.soaMs.ifBlank { cueSoaByTrialUid[trial.trialUid].orEmpty() })
+                if (soaLabel.isBlank()) return@forEach
+                val width = endX - startX
+                val horizontalPadding = 6.dp.toPx()
+                val compactLabel = compactSoaValue(soaLabel)
+                val labelToDraw = when {
+                    annotationPaint.measureText(soaLabel) <= width - horizontalPadding -> soaLabel
+                    compactLabel.isNotBlank() && annotationPaint.measureText(compactLabel) <= width - horizontalPadding -> compactLabel
+                    else -> ""
+                }
+                if (labelToDraw.isNotBlank()) {
+                    drawContext.canvas.nativeCanvas.drawText(labelToDraw, (startX + endX) / 2f, soaY, annotationPaint)
+                }
+            }
+        }
+
+        if (hasAnnotationSpace && TimelineLayoutModel.shouldShowEventAnnotations(clicks.count { it.rtS != null }, plotWidth)) {
+            var lastLabelRight = Float.NEGATIVE_INFINITY
+            val labelGap = 4.dp.toPx()
+            clicks.forEach { click ->
+                val rt = click.rtS ?: return@forEach
+                val label = formatMilliseconds(rt)
+                val labelWidth = rtPaint.measureText(label)
+                if (labelWidth >= plotWidth) return@forEach
+                val centerX = xFor(click.timeS).coerceIn(left + labelWidth / 2f, right - labelWidth / 2f)
+                val labelLeft = centerX - labelWidth / 2f
+                val labelRight = centerX + labelWidth / 2f
+                if (labelLeft > lastLabelRight + labelGap) {
+                    drawContext.canvas.nativeCanvas.drawText(label, centerX, rtY, rtPaint)
+                    lastLabelRight = labelRight
+                }
+            }
+        }
     }
 }
 
@@ -893,3 +966,23 @@ private fun bindScanner(
 private fun formatSeconds(value: Double): String = TimelineLayoutModel.formatTime(value)
 
 private fun formatMilliseconds(valueS: Double): String = "${(valueS.coerceAtLeast(0.0) * 1000.0).toInt()} ms"
+
+private fun formatSoaValue(value: String): String {
+    val clean = value.trim()
+    if (clean.isBlank() || clean.equals("nan", ignoreCase = true)) return ""
+    if (clean.equals("n/a", ignoreCase = true) || clean.equals("na", ignoreCase = true)) return "N/A"
+    val numericText = clean.replace(Regex("\\s*ms\\s*$", RegexOption.IGNORE_CASE), "").trim()
+    val numeric = numericText.toDoubleOrNull()
+    if (numeric != null) {
+        val rounded = numeric.roundToInt()
+        return if (abs(numeric - rounded) < 0.05) {
+            "$rounded ms"
+        } else {
+            String.format("%.1f ms", numeric)
+        }
+    }
+    return clean.take(12)
+}
+
+private fun compactSoaValue(value: String): String =
+    value.removeSuffix(" ms").takeIf { it != value && it.isNotBlank() } ?: value.take(6)

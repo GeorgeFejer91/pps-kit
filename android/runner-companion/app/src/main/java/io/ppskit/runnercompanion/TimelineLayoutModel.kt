@@ -71,12 +71,19 @@ object TimelineLayoutModel {
         durationS: Double,
         plotWidthPx: Float,
         minWidthPx: Float = 78f,
-    ): Boolean {
-        val duration = resolveDuration(durationS)
-        val start = startS.coerceIn(0.0, duration)
-        val end = endS.coerceIn(start, duration)
-        val width = ((end - start) / duration) * plotWidthPx
-        return width >= minWidthPx
+    ): Boolean = intervalWidthPx(startS, endS, durationS, plotWidthPx) >= minWidthPx
+
+    fun shouldShowIntervalAnnotation(
+        startS: Double,
+        endS: Double,
+        durationS: Double,
+        plotWidthPx: Float,
+        minWidthPx: Float = 46f,
+    ): Boolean = intervalWidthPx(startS, endS, durationS, plotWidthPx) >= minWidthPx
+
+    fun shouldShowEventAnnotations(eventCount: Int, plotWidthPx: Float, minSpacingPx: Float = 34f): Boolean {
+        if (eventCount <= 0) return true
+        return plotWidthPx / eventCount.coerceAtLeast(1) >= minSpacingPx
     }
 
     fun densityStyle(eventCount: Int, plotWidthPx: Float, minSpacingPx: Float = 7f): TimelineDensityStyle {
@@ -90,6 +97,18 @@ object TimelineLayoutModel {
             spacing < minSpacingPx * 1.8f -> TimelineDensityStyle(markerScale = 0.8f, drawCueClickConnectors = true)
             else -> TimelineDensityStyle(markerScale = 1f, drawCueClickConnectors = true)
         }
+    }
+
+    private fun intervalWidthPx(
+        startS: Double,
+        endS: Double,
+        durationS: Double,
+        plotWidthPx: Float,
+    ): Double {
+        val duration = resolveDuration(durationS)
+        val start = startS.coerceIn(0.0, duration)
+        val end = endS.coerceIn(start, duration)
+        return ((end - start) / duration) * plotWidthPx
     }
 
     private fun niceLargeStep(rawStep: Double): Double {
