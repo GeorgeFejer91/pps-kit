@@ -615,14 +615,14 @@ private fun BlockTimelineCanvas(
     val maxTrialEnd = trials.maxOfOrNull { it.endS } ?: 0.0
     val maxCueTime = cues.maxOfOrNull { it.timeS } ?: 0.0
     val maxClickTime = clicks.maxOfOrNull { it.timeS } ?: 0.0
-    val duration = listOf(
+    val duration = TimelineLayoutModel.resolveDuration(
         snapshot?.activeBlock?.durationS ?: 0.0,
         maxTrialEnd,
         maxCueTime,
         maxClickTime,
         estimate.elapsedS,
         1.0,
-    ).maxOrNull() ?: 1.0
+    )
     val cueById = cues.associateBy { it.cueId }
     val background = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
     val axis = MaterialTheme.colorScheme.outline
@@ -690,14 +690,20 @@ private fun BlockTimelineCanvas(
         }
 
         drawLine(axis, Offset(left, bottom), Offset(right, bottom), strokeWidth = 1.dp.toPx())
-        listOf(0.0, 0.25, 0.5, 0.75, 1.0).forEach { fraction ->
-            val x = left + (fraction.toFloat() * plotWidth)
+        val ticks = TimelineLayoutModel.ticks(duration, plotWidth)
+        ticks.forEach { tick ->
+            val x = xFor(tick.seconds)
             drawLine(axis.copy(alpha = 0.35f), Offset(x, top), Offset(x, bottom), strokeWidth = 1.dp.toPx())
-            drawContext.canvas.nativeCanvas.drawText("${(duration * fraction).toInt()}s", x, size.height - 8.dp.toPx(), axisPaint)
+            drawContext.canvas.nativeCanvas.drawText(tick.label, x, size.height - 8.dp.toPx(), axisPaint)
         }
         drawContext.canvas.nativeCanvas.drawText("Trials", left - 8.dp.toPx(), trialTop + trialHeight * 0.67f, labelPaint)
         drawContext.canvas.nativeCanvas.drawText("Tactile", left - 8.dp.toPx(), tactileY + 4.dp.toPx(), labelPaint)
         drawContext.canvas.nativeCanvas.drawText("Clicks", left - 8.dp.toPx(), clickY + 4.dp.toPx(), labelPaint)
+        val densityStyle = TimelineLayoutModel.densityStyle(cues.size + clicks.size, plotWidth)
+        val cueRadius = 5.dp.toPx() * densityStyle.markerScale
+        val nextCueRadius = 9.dp.toPx() * densityStyle.markerScale.coerceAtLeast(0.7f)
+        val clickRadius = 6.dp.toPx() * densityStyle.markerScale
+        val clickInnerRadius = 2.dp.toPx() * densityStyle.markerScale.coerceAtLeast(0.7f)
 
         trials.forEachIndexed { index, trial ->
             val startX = xFor(trial.startS)
@@ -716,7 +722,7 @@ private fun BlockTimelineCanvas(
                 cornerRadius = CornerRadius(6.dp.toPx()),
                 style = Stroke(width = 1.dp.toPx()),
             )
-            if (endX - startX > 54.dp.toPx()) {
+            if (TimelineLayoutModel.shouldShowTrialLabel(trial.startS, trial.endS, duration, plotWidth)) {
                 val label = trial.label.ifBlank { trial.noiseType.ifBlank { "Trial ${trial.trialNumber}" } }.take(18)
                 drawContext.canvas.nativeCanvas.drawText(label, startX + 5.dp.toPx(), trialTop + trialHeight * 0.62f, itemPaint)
             }
@@ -729,10 +735,10 @@ private fun BlockTimelineCanvas(
                 "next", "recentered" -> cueUpcoming
                 else -> axis
             }
-            drawLine(color.copy(alpha = 0.8f), Offset(x, tactileY - 20.dp.toPx()), Offset(x, tactileY + 20.dp.toPx()), strokeWidth = 2.dp.toPx())
-            drawCircle(color, radius = 5.dp.toPx(), center = Offset(x, tactileY))
+            drawLine(color.copy(alpha = 0.8f), Offset(x, tactileY - 20.dp.toPx()), Offset(x, tactileY + 20.dp.toPx()), strokeWidth = (2.dp.toPx() * densityStyle.markerScale).coerceAtLeast(1.dp.toPx()))
+            drawCircle(color, radius = cueRadius, center = Offset(x, tactileY))
             if (cue.status == "next") {
-                drawCircle(color, radius = 9.dp.toPx(), center = Offset(x, tactileY), style = Stroke(width = 2.dp.toPx()))
+                drawCircle(color, radius = nextCueRadius, center = Offset(x, tactileY), style = Stroke(width = 2.dp.toPx()))
             }
         }
 
@@ -741,12 +747,12 @@ private fun BlockTimelineCanvas(
             val valid = click.responseStatus == "tactile_response"
             val color = if (valid) clickValid else clickOffCue
             val cue = click.cueId?.let { cueById[it] }
-            if (cue != null) {
+            if (cue != null && densityStyle.drawCueClickConnectors) {
                 val cueX = xFor(cue.timeS)
                 drawLine(color.copy(alpha = 0.75f), Offset(cueX, tactileY + 12.dp.toPx()), Offset(x, clickY - 8.dp.toPx()), strokeWidth = 2.dp.toPx())
             }
-            drawCircle(color, radius = 6.dp.toPx(), center = Offset(x, clickY))
-            drawCircle(Color.White.copy(alpha = 0.85f), radius = 2.dp.toPx(), center = Offset(x, clickY))
+            drawCircle(color, radius = clickRadius, center = Offset(x, clickY))
+            drawCircle(Color.White.copy(alpha = 0.85f), radius = clickInnerRadius, center = Offset(x, clickY))
         }
 
         val currentX = xFor(estimate.elapsedS)
@@ -884,6 +890,6 @@ private fun bindScanner(
     }
 }
 
-private fun formatSeconds(value: Double): String = String.format("%.1fs", value.coerceAtLeast(0.0))
+private fun formatSeconds(value: Double): String = TimelineLayoutModel.formatTime(value)
 
 private fun formatMilliseconds(valueS: Double): String = "${(valueS.coerceAtLeast(0.0) * 1000.0).toInt()} ms"

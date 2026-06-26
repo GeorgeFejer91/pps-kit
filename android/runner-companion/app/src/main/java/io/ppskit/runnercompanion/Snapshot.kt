@@ -125,6 +125,9 @@ object SnapshotParser {
         val timeline = root.optJSONObject("timeline") ?: JSONObject()
         val counts = timeline.optJSONObject("counts") ?: JSONObject()
         val instructionGate = root.optJSONObject("instruction_gate") ?: JSONObject()
+        val trialRows = timeline.optJSONArray("trial_rows").toTrialRows()
+        val tactileCues = timeline.optJSONArray("tactile_cues").toTactileCues()
+        val clickMarkers = timeline.optJSONArray("clicks").toTimelineClicks()
         return RunnerSnapshot(
             sequence = root.optLong("sequence", 0),
             serverUnixMs = root.optLong("server_unix_ms", 0),
@@ -168,12 +171,12 @@ object SnapshotParser {
                 instructionWaiting = active.optBoolean("instruction_waiting", false),
             ),
             timeline = TimelineState(
-                trialRows = timeline.optJSONArray("trial_rows").toTrialRows(),
-                tactileCues = timeline.optJSONArray("tactile_cues").toTactileCues(),
-                clickMarkers = timeline.optJSONArray("clicks").toTimelineClicks(),
-                clicks = counts.optInt("clicks", 0),
-                tactileTotal = counts.optInt("tactile_total", 0),
-                tactilePassed = counts.optInt("tactile_passed", 0),
+                trialRows = trialRows,
+                tactileCues = tactileCues,
+                clickMarkers = clickMarkers,
+                clicks = counts.optInt("clicks", clickMarkers.size),
+                tactileTotal = counts.optInt("tactile_total", tactileCues.size),
+                tactilePassed = counts.optInt("tactile_passed", tactileCues.count { it.status == "passed" || it.status == "recentered" }),
             ),
             topupDraftCount = (root.optJSONObject("topup") ?: JSONObject()).optInt("draft_count", 0),
             instructionGate = InstructionGate(
@@ -198,16 +201,24 @@ private fun JSONArray?.toTrialRows(): List<TimelineTrial> {
     if (this == null) return emptyList()
     return (0 until length()).mapNotNull { index ->
         val item = optJSONObject(index) ?: return@mapNotNull null
+        val startS = item.optDoubleAny("start_s", "start_time_s", "trial_start_s", "onset_s", default = 0.0)
+        val explicitEndS = item.optDoubleAny("end_s", "end_time_s", "trial_end_s", default = Double.NaN)
+        val durationS = item.optDoubleAny("duration_s", "trial_duration_s", default = Double.NaN)
+        val endS = when {
+            explicitEndS.isFinite() -> explicitEndS
+            durationS.isFinite() -> startS + durationS
+            else -> startS
+        }.coerceAtLeast(startS)
         TimelineTrial(
             trialNumber = item.optInt("trial_number", 0),
             trialUid = item.optString("trial_uid", ""),
-            startS = item.optDouble("start_s", 0.0),
-            endS = item.optDouble("end_s", 0.0),
-            label = item.optString("trial_label", item.optString("clip_label", "")),
-            noiseType = item.optString("noise_type", ""),
-            soaMs = item.optString("soa_ms", ""),
+            startS = startS,
+            endS = endS,
+            label = item.optStringAny("trial_label", "clip_label", "display_label", "label", "family"),
+            noiseType = item.optStringAny("noise_type", "noise", "stimulus_type", "stimulus_label"),
+            soaMs = item.optStringAny("soa_ms", "soa", "soa_label"),
         )
-    }
+    }.sortedBy { it.startS }
 }
 
 private fun JSONArray?.toTactileCues(): List<TactileCue> {
@@ -218,13 +229,13 @@ private fun JSONArray?.toTactileCues(): List<TactileCue> {
             cueId = item.optInt("cue_id", 0),
             trialNumber = item.optInt("trial_number", 0),
             trialUid = item.optString("trial_uid", ""),
-            timeS = item.optDouble("time_s", 0.0),
-            rowLabel = item.optString("row_label", ""),
-            noiseType = item.optString("noise_type", ""),
-            soaMs = item.optString("soa_ms", ""),
+            timeS = item.optDoubleAny("time_s", "tactile_time_s", "onset_s", default = 0.0),
+            rowLabel = item.optStringAny("row_label", "phase_label", "label"),
+            noiseType = item.optStringAny("noise_type", "noise", "stimulus_type", "stimulus_label"),
+            soaMs = item.optStringAny("soa_ms", "soa", "soa_label"),
             status = item.optString("status", ""),
         )
-    }
+    }.sortedBy { it.timeS }
 }
 
 private fun JSONArray?.toTimelineClicks(): List<TimelineClick> {
@@ -233,12 +244,29 @@ private fun JSONArray?.toTimelineClicks(): List<TimelineClick> {
         val item = optJSONObject(index) ?: return@mapNotNull null
         TimelineClick(
             clickId = item.optInt("click_id", index + 1),
-            timeS = item.optDouble("time_s", 0.0),
+            timeS = item.optDoubleAny("time_s", "click_time_s", "elapsed_s", "timestamp_s", default = 0.0),
             trialUid = item.optString("trial_uid", ""),
             responseStatus = item.optString("response_status", "off_cue"),
             cueId = if (item.has("cue_id") && !item.isNull("cue_id")) item.optInt("cue_id") else null,
             cueTrialUid = item.optString("cue_trial_uid", ""),
             rtS = if (item.has("rt_s") && !item.isNull("rt_s")) item.optDouble("rt_s") else null,
         )
+    }.sortedBy { it.timeS }
+}
+
+private fun JSONObject.optDoubleAny(vararg keys: String, default: Double): Double {
+    for (key in keys) {
+        if (!has(key) || isNull(key)) continue
+        val value = optDouble(key, Double.NaN)
+        if (value.isFinite()) return value.coerceAtLeast(0.0)
     }
+    return default
+}
+
+private fun JSONObject.optStringAny(vararg keys: String): String {
+    for (key in keys) {
+        val value = optString(key, "")
+        if (value.isNotBlank()) return value
+    }
+    return ""
 }
