@@ -4,7 +4,7 @@ from pathlib import Path
 from importlib.util import find_spec
 import os
 
-from PyInstaller.utils.hooks import collect_data_files
+from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
 
 root = Path.cwd().resolve()
@@ -25,6 +25,12 @@ datas = collect_data_files(
         "viewer/*",
         "viewer/vendor/three/*",
     ],
+)
+companion_hiddenimports = (
+    collect_submodules("h11")
+    + collect_submodules("sniffio")
+    + collect_submodules("uvicorn.protocols.http")
+    + collect_submodules("uvicorn.protocols.websockets")
 )
 
 pyside_spec = find_spec("PySide6")
@@ -59,12 +65,15 @@ a = Analysis(
         "qrcode",
         "soundfile",
         "uvicorn.lifespan.on",
+        "uvicorn.loops.asyncio",
         "uvicorn.loops.auto",
         "uvicorn.protocols.http.auto",
+        "uvicorn.protocols.http.h11_impl",
         "uvicorn.protocols.websockets.auto",
         "uvicorn.protocols.websockets.websockets_impl",
         "websockets",
-    ],
+    ]
+    + companion_hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

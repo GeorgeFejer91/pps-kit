@@ -8,6 +8,7 @@ from io import BytesIO
 import secrets
 import socket
 import threading
+import time
 from typing import Any, Protocol
 from urllib.parse import urlencode
 
@@ -268,7 +269,11 @@ class RunnerCompanionService:
                     self.app,
                     host=self.config.host,
                     port=int(self.config.port),
+                    loop="asyncio",
+                    http="h11",
+                    ws="websockets",
                     log_level="warning",
+                    log_config=None,
                     access_log=False,
                 )
                 self._server = uvicorn.Server(server_config)
@@ -278,6 +283,16 @@ class RunnerCompanionService:
 
         self._thread = threading.Thread(target=_run, name="pps-runner-companion", daemon=True)
         self._thread.start()
+        deadline = time.monotonic() + 2.0
+        while time.monotonic() < deadline:
+            if self.error_message:
+                raise RuntimeError(self.error_message)
+            server = self._server
+            if server is not None and bool(getattr(server, "started", False)):
+                return
+            if self._thread is not None and not self._thread.is_alive():
+                raise RuntimeError(self.error_message or "Companion service stopped during startup.")
+            time.sleep(0.05)
 
     def stop(self, *, timeout_s: float = 2.0) -> None:
         server = self._server

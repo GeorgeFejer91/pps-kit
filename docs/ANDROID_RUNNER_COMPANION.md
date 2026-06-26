@@ -10,7 +10,8 @@ latest authorized runner snapshot.
 ## Pairing
 
 1. Start Focus Mode from `PPSExperimentRunner.exe`.
-2. In the Focus Mode Data Logging tab, scan the Phone Companion QR code.
+2. In Focus Mode, open the `Companion Android App (Experimental)` tab and scan
+   the QR code.
 3. The Android app opens `pps-companion://pair?...` and stores the runner host,
    port, session id, and per-run `X-PPS-Companion-Token`.
 4. Submit the participant setup fields from the phone or laptop.

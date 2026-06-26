@@ -1095,6 +1095,43 @@ def test_focus_mode_companion_setup_and_commands_use_existing_ui_paths(tmp_path:
     window.dialog.close()
 
 
+def test_focus_mode_companion_tab_shows_pairing_qr(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+        companion_advertise_ip="10.0.2.2",
+    )
+    window.dialog.show()
+    app.processEvents()
+
+    assert window.mode_tabs.tabText(window.companion_tab_index) == "Companion Android App (Experimental)"
+    window.mode_tabs.setCurrentIndex(window.companion_tab_index)
+    app.processEvents()
+
+    assert window.mode_tabs.currentIndex() == window.companion_tab_index
+    qr_label = window.companion_panel.findChild(q["QLabel"], "companionQrCode")
+    assert qr_label is not None
+    pixmap = qr_label.pixmap()
+    assert pixmap is not None and not pixmap.isNull()
+    uri_field = window.companion_panel.findChild(q["QLineEdit"], "companionPairingUriField")
+    assert uri_field is not None
+    assert uri_field.text().startswith("pps-companion://pair?")
+    assert "host=10.0.2.2" in uri_field.text()
+    window.dialog.close()
+
+
 def test_focus_mode_participant_setup_ledger_restores_submitted_fields(tmp_path: Path):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
@@ -1832,8 +1869,9 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     assert window.target_button.maximumHeight() == profile.target_min_height
     assert window.include_name_lsl_checkbox.minimumHeight() >= profile.button_min_height + 8
     assert window.output_summary.minimumHeight() == profile.output_min_height
-    assert window.mode_tabs.count() == 2
+    assert window.mode_tabs.count() == 3
     assert window.mode_tabs.currentIndex() == window.data_logging_tab_index
+    assert window.mode_tabs.tabText(window.companion_tab_index) == "Companion Android App (Experimental)"
     assert not window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
     data_rect = _widget_rect(window.data_logging_column, window.dialog)
     settings_rect = _widget_rect(window.experiment_settings_column, window.dialog)
@@ -1857,7 +1895,7 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     assert window.mode_tabs.currentIndex() == window.experiment_control_tab_index
     snapshot = window.layout_validation_snapshot()
     content_min = snapshot["experiment_control_debug"]["content_min_height"]
-    assert snapshot["splitters"]["mode_tabs"]["count"] == 2
+    assert snapshot["splitters"]["mode_tabs"]["count"] == 3
     assert snapshot["splitters"]["mode_tabs"]["experiment_control_enabled"] is True
     assert window.processing_panel.minimumHeight() >= profile.experiment_control_min_height
     assert window.processing_panel.minimumHeight() >= content_min

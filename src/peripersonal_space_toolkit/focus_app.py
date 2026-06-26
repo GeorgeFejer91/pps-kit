@@ -753,7 +753,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 def _require_qt() -> dict[str, Any]:
     try:
-        from PySide6.QtCore import QEvent, QLocale, QPoint, QTimer, Qt, QUrl, Signal
+        from PySide6.QtCore import QEvent, QLocale, QPoint, QSize, QTimer, Qt, QUrl, Signal
         from PySide6.QtGui import QBrush, QColor, QCursor, QDesktopServices, QFont, QFontDatabase, QFontMetrics, QIcon, QKeySequence, QPainter, QPainterPath, QPen, QPixmap, QShortcut
         from PySide6.QtWidgets import (
             QApplication,
@@ -815,6 +815,7 @@ def _require_qt() -> dict[str, Any]:
         "QPen": QPen,
         "QPixmap": QPixmap,
         "QPoint": QPoint,
+        "QSize": QSize,
         "QProgressBar": QProgressBar,
         "QPushButton": QPushButton,
         "QScrollArea": QScrollArea,
@@ -7133,6 +7134,7 @@ class FocusModeWindow:
             token=self.companion_token,
         )
         self.companion_qr_png: bytes = b""
+        self.companion_tab_index = -1
         self.companion_status_message = "Phone companion is disabled." if not self.companion_enabled else "Phone companion starting."
         if self.companion_enabled:
             try:
@@ -7568,30 +7570,6 @@ class FocusModeWindow:
         self.setup_status_label.setWordWrap(True)
         data_logging_layout.addWidget(self.setup_status_label)
 
-        data_logging_layout.addWidget(_subtitle(q, "Phone Companion"))
-        companion_row = q["QHBoxLayout"]()
-        companion_row.setContentsMargins(0, 0, 0, 0)
-        companion_row.setSpacing(10)
-        self.companion_qr_label = q["QLabel"]("")
-        self.companion_qr_label.setObjectName("companionQrCode")
-        self.companion_qr_label.setFixedSize(150, 150)
-        self.companion_qr_label.setAlignment(q["Qt"].AlignmentFlag.AlignCenter)
-        companion_row.addWidget(self.companion_qr_label)
-        companion_text_layout = q["QVBoxLayout"]()
-        companion_text_layout.setContentsMargins(0, 0, 0, 0)
-        companion_text_layout.setSpacing(4)
-        self.companion_status_label = q["QLabel"](self.companion_status_message)
-        self.companion_status_label.setObjectName("mutedLabel")
-        self.companion_status_label.setWordWrap(True)
-        self.companion_endpoint_label = q["QLabel"]("")
-        self.companion_endpoint_label.setObjectName("metricValue")
-        self.companion_endpoint_label.setWordWrap(True)
-        companion_text_layout.addWidget(self.companion_status_label)
-        companion_text_layout.addWidget(self.companion_endpoint_label)
-        companion_text_layout.addStretch(1)
-        companion_row.addLayout(companion_text_layout, 1)
-        data_logging_layout.addLayout(companion_row)
-        self._refresh_companion_panel()
         self._pre_run_controls.extend(
             [
                 self.participant_code_combo,
@@ -7694,6 +7672,31 @@ class FocusModeWindow:
         self._pre_run_controls.extend([self.backup_recording_checkbox, self.wired_loopback_checkbox, self.topup_checkbox])
         data_layout.addStretch(1)
         self.data_logging_tab_index = self.mode_tabs.addTab(data_panel, "Data Logging")
+
+        companion_panel, companion_layout = _panel(q, "Companion Android App (Experimental)", profile=profile)
+        self.companion_panel = companion_panel
+        companion_layout.setSpacing(max(10, profile.panel_spacing))
+        self.companion_status_label = q["QLabel"](self.companion_status_message)
+        self.companion_status_label.setObjectName("mutedLabel")
+        self.companion_status_label.setWordWrap(True)
+        companion_layout.addWidget(self.companion_status_label)
+        self.companion_qr_label = q["QLabel"]("")
+        self.companion_qr_label.setObjectName("companionQrCode")
+        self.companion_qr_label.setFixedSize(320, 320)
+        self.companion_qr_label.setAlignment(q["Qt"].AlignmentFlag.AlignCenter)
+        companion_layout.addWidget(self.companion_qr_label, 0, q["Qt"].AlignmentFlag.AlignHCenter)
+        self.companion_endpoint_label = q["QLabel"]("")
+        self.companion_endpoint_label.setObjectName("metricValue")
+        self.companion_endpoint_label.setWordWrap(True)
+        companion_layout.addWidget(self.companion_endpoint_label)
+        self.companion_uri_field = q["QLineEdit"]("")
+        self.companion_uri_field.setObjectName("companionPairingUriField")
+        self.companion_uri_field.setReadOnly(True)
+        self.companion_uri_field.setToolTip("Pairing URI encoded in the QR code.")
+        companion_layout.addWidget(self.companion_uri_field)
+        companion_layout.addStretch(1)
+        self.companion_tab_index = self.mode_tabs.addTab(companion_panel, "Companion Android App (Experimental)")
+        self._refresh_companion_panel()
 
         self.processing_splitter = None
 
@@ -7883,7 +7886,12 @@ class FocusModeWindow:
             else:
                 endpoint_label.setText("Disabled for this run.")
                 endpoint_label.setToolTip("")
-        qr_label = getattr(self, "companion_qr_label", None)
+        uri_field = getattr(self, "companion_uri_field", None)
+        if uri_field is not None:
+            uri_field.setText(self.companion_pairing_uri if self.companion_enabled else "")
+        self._refresh_companion_qr_label(getattr(self, "companion_qr_label", None), size=320)
+
+    def _refresh_companion_qr_label(self, qr_label: Any | None, *, size: int | None = None) -> None:
         if qr_label is None:
             return
         if not self.companion_enabled:
@@ -7897,9 +7905,12 @@ class FocusModeWindow:
         pixmap = self.q["QPixmap"]()
         if pixmap.loadFromData(self.companion_qr_png):
             qr_label.setText("")
+            target_size = qr_label.size()
+            if size is not None:
+                target_size = self.q["QSize"](int(size), int(size))
             qr_label.setPixmap(
                 pixmap.scaled(
-                    qr_label.size(),
+                    target_size,
                     self.q["Qt"].AspectRatioMode.KeepAspectRatio,
                     self.q["Qt"].TransformationMode.SmoothTransformation,
                 )

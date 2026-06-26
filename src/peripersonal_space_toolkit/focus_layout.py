@@ -430,6 +430,14 @@ QPushButton#startButton:disabled {{
 QPushButton#dangerButton {{
     color: {colors["danger"]};
 }}
+QLabel#companionQrCode {{
+    background: {colors["surface"]};
+    border: 1px solid {colors["border"]};
+    border-radius: 7px;
+    padding: 8px;
+    color: {colors["muted"]};
+    font-weight: 700;
+}}
 QPushButton#targetButton {{
     min-width: 0px;
     min-height: 0px;

@@ -71,12 +71,13 @@ for dashboard handoff, validation, and scripted workflows that intentionally
 bypass that gate.
 
 Focus Mode starts a local Android companion service by default on LAN port
-`8767` and shows a QR pairing panel in Data Logging. The service is protected
-by a per-run `X-PPS-Companion-Token`; the laptop remains the timing and command
-authority. Use `--no-companion` to disable it, or `--companion-host`,
-`--companion-port`, and `--companion-advertise-ip` when the laptop has multiple
-network interfaces. See [Android Runner Companion](ANDROID_RUNNER_COMPANION.md)
-for phone pairing, firewall, privacy, and APK build steps.
+`8767` and shows an unobtrusive `Companion Android App (Experimental)` tab with
+the QR pairing code. The service is protected by a per-run
+`X-PPS-Companion-Token`; the laptop remains the timing and command authority.
+Use `--no-companion` to disable it, or `--companion-host`, `--companion-port`,
+and `--companion-advertise-ip` when the laptop has multiple network interfaces.
+See [Android Runner Companion](ANDROID_RUNNER_COMPANION.md) for phone pairing,
+firewall, privacy, and APK build steps.
 
 Build the native Android companion debug APK:
 
