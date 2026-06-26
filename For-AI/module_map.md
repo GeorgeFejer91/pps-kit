@@ -14,6 +14,7 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
 - Provisional Woojer tactile-drive latency compensation: `tactile_latency.py`, consumed by `session_runner.py` during participant/top-up block WAV preparation.
 - Shared runner/dashboard profile memory and output-diary bridge: `runner_diary.py` now owns runner settings and diary helpers; future shared profile-catalogue code should live in a common Python seam consumed by both `dashboard_app.py` and `focus_app.py`, not separately in browser JS or runner UI code.
 - Event, timing, and output evidence contracts: `timing_events.py`, `session_events.py`, `output_evidence.py`, `topup.py`.
+- Optional LSL sender/receiver command acknowledgement helpers: `lsl_command_ack.py`, with real `pylsl` round-trip validation in `validation_protocols/scripts/run_lsl_command_ack_roundtrip.py`.
 - Published-study preload recreation gate: `profile_recreation.py`, `assets/preloads/`, `study_templates/`.
 - Core paper-audit read API: `peripersonal_space_toolkit.paper_audit`.
 - Paper-audit acquisition/refresh tools: `tools/paper_metadata_parser/`.
