@@ -11,6 +11,9 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import org.json.JSONObject
 import java.io.IOException
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 
 private const val TOKEN_HEADER = "X-PPS-Companion-Token"
 private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
@@ -27,8 +30,22 @@ data class SetupPayload(
 class RunnerClient(
     private val http: OkHttpClient = OkHttpClient(),
 ) {
+    private data class SocketCallbacks(
+        val onSnapshot: (RunnerSnapshot) -> Unit,
+        val onConnection: (Boolean) -> Unit,
+        val onError: (String) -> Unit,
+    )
+
+    @Volatile
     private var pairing: PairingInfo? = null
     private var webSocket: WebSocket? = null
+    @Volatile
+    private var socketGeneration = 0
+    private var reconnectAttempt = 0
+    private var reconnectFuture: ScheduledFuture<*>? = null
+    private val reconnectExecutor = Executors.newSingleThreadScheduledExecutor { runnable ->
+        Thread(runnable, "pps-runner-companion-reconnect").apply { isDaemon = true }
+    }
 
     fun connect(
         pairingInfo: PairingInfo,
@@ -38,6 +55,21 @@ class RunnerClient(
     ) {
         close()
         pairing = pairingInfo
+        socketGeneration += 1
+        reconnectAttempt = 0
+        openSocket(
+            pairingInfo,
+            SocketCallbacks(onSnapshot, onConnection, onError),
+            socketGeneration,
+        )
+    }
+
+    private fun openSocket(
+        pairingInfo: PairingInfo,
+        callbacks: SocketCallbacks,
+        generation: Int,
+    ) {
+        cancelReconnect()
         val request = Request.Builder()
             .url(pairingInfo.wsUrl)
             .header(TOKEN_HEADER, pairingInfo.token)
@@ -46,22 +78,29 @@ class RunnerClient(
             request,
             object : WebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: Response) {
-                    onConnection(true)
+                    if (!isCurrent(generation)) return
+                    reconnectAttempt = 0
+                    callbacks.onConnection(true)
                 }
 
                 override fun onMessage(webSocket: WebSocket, text: String) {
+                    if (!isCurrent(generation)) return
                     runCatching { SnapshotParser.parse(text) }
-                        .onSuccess(onSnapshot)
-                        .onFailure { onError(it.message ?: "Snapshot parse failed.") }
+                        .onSuccess(callbacks.onSnapshot)
+                        .onFailure { callbacks.onError(it.message ?: "Snapshot parse failed.") }
                 }
 
                 override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                    onConnection(false)
+                    if (!isCurrent(generation)) return
+                    callbacks.onConnection(false)
+                    scheduleReconnect(callbacks, generation)
                 }
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                    onConnection(false)
-                    onError(t.message ?: "WebSocket disconnected.")
+                    if (!isCurrent(generation)) return
+                    callbacks.onConnection(false)
+                    callbacks.onError(t.message ?: "WebSocket disconnected.")
+                    scheduleReconnect(callbacks, generation)
                 }
             },
         )
@@ -86,10 +125,46 @@ class RunnerClient(
         postSnapshot("/api/runner/commands/start-part", JSONObject().put("part_number", partNumber), onSnapshot, onError)
     }
 
+    fun pause(onSnapshot: (RunnerSnapshot) -> Unit, onError: (String) -> Unit) {
+        postSnapshot("/api/runner/commands/pause", JSONObject(), onSnapshot, onError)
+    }
+
+    fun resume(onSnapshot: (RunnerSnapshot) -> Unit, onError: (String) -> Unit) {
+        postSnapshot("/api/runner/commands/resume", JSONObject(), onSnapshot, onError)
+    }
+
     fun close() {
+        socketGeneration += 1
+        cancelReconnect()
+        pairing = null
         webSocket?.close(1000, "closed")
         webSocket = null
     }
+
+    private fun scheduleReconnect(callbacks: SocketCallbacks, generation: Int) {
+        val pairingInfo = pairing ?: return
+        cancelReconnect()
+        val attempt = reconnectAttempt.coerceAtMost(5)
+        reconnectAttempt += 1
+        val delayMs = (500L shl attempt).coerceAtMost(5_000L)
+        reconnectFuture = reconnectExecutor.schedule(
+            {
+                if (isCurrent(generation)) {
+                    openSocket(pairingInfo, callbacks, generation)
+                }
+            },
+            delayMs,
+            TimeUnit.MILLISECONDS,
+        )
+    }
+
+    private fun cancelReconnect() {
+        reconnectFuture?.cancel(false)
+        reconnectFuture = null
+    }
+
+    private fun isCurrent(generation: Int): Boolean =
+        generation == socketGeneration && pairing != null
 
     private fun postSnapshot(
         path: String,

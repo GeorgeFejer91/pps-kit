@@ -88,6 +88,13 @@ INVENTORY_ITEMS: list[dict[str, Any]] = [
         "source": "tracked",
     },
     {
+        "path": "windows/Set_Companion_Emulation_Layout.ps1",
+        "kind": "android_validation_support",
+        "role": "pins runner and Android emulator windows to the designated left-monitor validation screen",
+        "required": True,
+        "source": "tracked",
+    },
+    {
         "path": "android/runner-companion",
         "kind": "android_source_tree",
         "role": "native Kotlin/Compose runner companion source and Gradle wrapper",

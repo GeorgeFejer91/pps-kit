@@ -8,6 +8,7 @@ import threading
 import time
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
 
 import numpy as np
 import pytest
@@ -1042,6 +1043,7 @@ def test_focus_mode_companion_setup_and_commands_use_existing_ui_paths(tmp_path:
     app = QApplication.instance() or QApplication([])
     package = load_run_package(_write_minimal_session_manifest(tmp_path))
     created: list[dict[str, object]] = []
+    controllers: list[object] = []
 
     class FakeController:
         def __init__(self, package_obj, *, capture_options=None, runner_metadata=None, **_kwargs):
@@ -1049,7 +1051,15 @@ def test_focus_mode_companion_setup_and_commands_use_existing_ui_paths(tmp_path:
             self.capture_options = capture_options
             self.runner_metadata = dict(runner_metadata or {})
             self.audio_engine = None
+            self.calls: list[str] = []
             created.append(self.runner_metadata)
+            controllers.append(self)
+
+        def pause(self) -> None:
+            self.calls.append("pause")
+
+        def resume(self) -> None:
+            self.calls.append("resume")
 
     window = focus_app.FocusModeWindow(
         q,
@@ -1085,6 +1095,23 @@ def test_focus_mode_companion_setup_and_commands_use_existing_ui_paths(tmp_path:
     start_snapshot = window._companion_start_part(1)
     assert starts == ["start"]
     assert start_snapshot["schema"] == focus_app.SNAPSHOT_SCHEMA
+
+    window._run_active = True
+    window.controller = controllers[-1]
+    window.pause_button.setEnabled(True)
+    window.resume_button.setEnabled(False)
+    pause_snapshot = window._companion_set_paused(True)
+    assert controllers[-1].calls == ["pause"]
+    assert pause_snapshot["run_status"]["paused"] is True
+    assert window.pause_button.isEnabled() is False
+    assert window.resume_button.isEnabled() is True
+    assert "resume" in pause_snapshot["allowed_commands"]
+    resume_snapshot = window._companion_set_paused(False)
+    assert controllers[-1].calls == ["pause", "resume"]
+    assert resume_snapshot["run_status"]["paused"] is False
+    assert window.pause_button.isEnabled() is True
+    assert window.resume_button.isEnabled() is False
+    assert "pause" in resume_snapshot["allowed_commands"]
 
     gate = {"context": {"instruction_label": "Gate", "button_label": "Continue"}, "approved": False, "event": threading.Event()}
     window.pending_instruction_request = gate
@@ -1921,7 +1948,7 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
         window.run_controls_widget,
         window.start_button,
         window.pause_button,
-        window.stop_button,
+        window.resume_button,
         window.processing_panel,
         window.output_levels_panel,
         window.part_selector_widget,
@@ -1934,6 +1961,7 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
         visible_widgets.append(window.topup_draft_widget)
     if window.block_preview_label.isVisible():
         visible_widgets.append(window.block_preview_label)
+    assert not window.stop_button.isVisible()
     for widget in visible_widgets:
         _assert_widget_inside_dialog(widget, window.dialog)
 
@@ -2369,11 +2397,10 @@ def test_focus_mode_operator_keyboard_shortcuts_control_ui(tmp_path: Path):
 
     shortcut_map = window.keyboard_shortcut_map()
     assert shortcut_map["pause_resume"] == ["Ctrl+P"]
-    assert shortcut_map["stop"] == ["Ctrl+Shift+S"]
+    assert "stop" not in shortcut_map
     assert shortcut_map["select_part_2"] == ["Alt+2"]
     assert set(window.operator_action_shortcuts) >= {
         "pause_resume",
-        "stop",
         "close",
         "select_part_1",
         "select_part_2",
@@ -2395,20 +2422,19 @@ def test_focus_mode_operator_keyboard_shortcuts_control_ui(tmp_path: Path):
 
     fake = FakeController()
     window.controller = fake  # type: ignore[assignment]
+    window._run_active = True
+    window._run_paused = False
     window.pause_button.setEnabled(True)
-    window.stop_button.setEnabled(True)
+    window.resume_button.setEnabled(False)
     ctrl = q["Qt"].KeyboardModifier.ControlModifier
-    ctrl_shift = q["Qt"].KeyboardModifier.ControlModifier | q["Qt"].KeyboardModifier.ShiftModifier
     alt = q["Qt"].KeyboardModifier.AltModifier
 
     QTest.keyClick(window.dialog, q["Qt"].Key.Key_P, ctrl)
     app.processEvents()
     QTest.keyClick(window.dialog, q["Qt"].Key.Key_P, ctrl)
     app.processEvents()
-    QTest.keyClick(window.dialog, q["Qt"].Key.Key_S, ctrl_shift)
-    app.processEvents()
 
-    assert fake.calls == ["pause", "resume", "stop"]
+    assert fake.calls == ["pause", "resume"]
 
     QTest.keyClick(window.dialog, q["Qt"].Key.Key_2, alt)
     app.processEvents()
@@ -2419,6 +2445,55 @@ def test_focus_mode_operator_keyboard_shortcuts_control_ui(tmp_path: Path):
     selected = window._run_plan_item_by_number(window.selected_display_block_index or 0)
     assert selected is not None
     assert selected["kind"] == "topup"
+    window.dialog.close()
+
+
+def test_focus_mode_validation_synthetic_click_shortcut_is_opt_in(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_focus_preview_session_manifest(tmp_path))
+
+    monkeypatch.delenv("PPS_FOCUS_VALIDATION_ENABLE_SYNTHETIC_CLICK_SHORTCUT", raising=False)
+    default_window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+    )
+    assert "validation_synthetic_click" not in default_window.keyboard_shortcut_map()
+    default_window.dialog.close()
+
+    monkeypatch.setenv("PPS_FOCUS_VALIDATION_ENABLE_SYNTHETIC_CLICK_SHORTCUT", "1")
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+    )
+    window.dialog.show()
+    app.processEvents()
+    assert window.keyboard_shortcut_map()["validation_synthetic_click"] == ["Ctrl+Alt+Shift+F12"]
+    assert "validation_synthetic_click" in window.operator_action_shortcuts
+
+    class FakeController:
+        def __init__(self) -> None:
+            self.clicks: list[dict[str, Any]] = []
+
+        def log_click(self, **payload: Any) -> None:
+            self.clicks.append(dict(payload))
+
+    fake = FakeController()
+    window.controller = fake  # type: ignore[assignment]
+    window._run_active = True
+    window._handle_validation_synthetic_click_shortcut()
+
+    assert len(fake.clicks) == 1
+    assert fake.clicks[0]["in_target"] is True
     window.dialog.close()
 
 
@@ -3917,6 +3992,58 @@ def test_prepare_profile_focus_session_uses_finished_profile_gate(tmp_path: Path
     assert calls["participant_id"] == "P123"
     assert calls["queue"]["participant_id"] == "P123"
     assert calls["settings"]["profile_id"] == "study5_box_breathing_pps"
+
+
+def test_prepare_profile_focus_session_honors_validation_output_root(tmp_path: Path, monkeypatch):
+    from peripersonal_space_toolkit import focus_app
+
+    validation_root = tmp_path / "validation_runner_sessions"
+    remembered_root = tmp_path / "remembered_dashboard_output"
+    manifest = validation_root / "P124_run" / "session_manifest.json"
+    manifest.parent.mkdir(parents=True)
+    manifest.write_text("{}", encoding="utf-8")
+    run_setup = tmp_path / "profile" / "6_experiment_run_setup" / "experiment_run_setup_manifest.json"
+    run_setup.parent.mkdir(parents=True)
+    run_setup.write_text("{}", encoding="utf-8")
+    calls: dict[str, object] = {}
+
+    monkeypatch.setenv("PPS_FOCUS_VALIDATION_OUTPUT_ROOT", str(validation_root))
+    monkeypatch.setattr(focus_app, "active_output_folder", lambda **_kwargs: remembered_root)
+    monkeypatch.setattr(
+        focus_app,
+        "_materialize_profile_run_setup",
+        lambda profile_id, progress_callback=None: (
+            SimpleNamespace(design_path=tmp_path / "design.json"),
+            SimpleNamespace(),
+            run_setup,
+        ),
+    )
+    monkeypatch.setattr(focus_app, "claim_prepared_session", lambda *_args, **_kwargs: None)
+
+    def fake_prepare_segment_run_package(run_setup_path, participant_id, **kwargs):
+        calls["run_setup_path"] = run_setup_path
+        calls["participant_id"] = participant_id
+        calls["prepare_kwargs"] = dict(kwargs)
+        return SimpleNamespace(
+            manifest_path=manifest,
+            source_run_setup_manifest_path=run_setup,
+            session_dir=manifest.parent,
+            blocks=[object()],
+        )
+
+    monkeypatch.setattr(focus_app, "prepare_segment_run_package", fake_prepare_segment_run_package)
+    monkeypatch.setattr(focus_app, "record_prepared_session_queue", lambda **kwargs: calls.setdefault("queue", kwargs))
+    monkeypatch.setattr(focus_app, "record_experiment_activity", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        focus_app,
+        "resolve_profile_entry",
+        lambda *_args, **_kwargs: {"kind": "bundled", "dashboard_project_id": "profile_study5_box_breathing_pps"},
+    )
+    monkeypatch.setattr(focus_app, "update_profile_runner_settings", lambda **kwargs: calls.setdefault("settings", kwargs))
+
+    assert focus_app.prepare_profile_focus_session("study5_box_breathing_pps", "P124") == manifest
+    assert calls["prepare_kwargs"]["session_root"] == validation_root
+    assert calls["settings"]["output_folder"] == validation_root
 
 
 def test_runner_output_project_setting_creates_timestamped_folder(tmp_path: Path, monkeypatch):

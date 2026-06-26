@@ -748,6 +748,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--validation-screenshot", type=Path, help=argparse.SUPPRESS)
     parser.add_argument("--validation-auto-close-ms", type=int, default=None, help=argparse.SUPPRESS)
+    parser.add_argument("--validation-windowed", action="store_true", help=argparse.SUPPRESS)
     return parser
 
 
@@ -4589,10 +4590,16 @@ def prepare_last_or_latest_focus_session(
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> Path:
     """Open the last launchable session, falling back to the newest prepared setup."""
-    output_root = Path(session_root) if session_root is not None else active_output_folder(
-        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
-        fallback=DEFAULT_SESSION_ROOT,
-    )
+    validation_output_root = os.environ.get("PPS_FOCUS_VALIDATION_OUTPUT_ROOT", "").strip()
+    if session_root is not None:
+        output_root = Path(session_root)
+    elif validation_output_root:
+        output_root = Path(validation_output_root).expanduser()
+    else:
+        output_root = active_output_folder(
+            state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+            fallback=DEFAULT_SESSION_ROOT,
+        )
     pointer = load_last_experiment_pointer()
     session_text = str(pointer.get("session_manifest_path") or "").strip()
     session_manifest = Path(session_text) if session_text else Path()
@@ -5525,10 +5532,16 @@ def prepare_profile_focus_session(
                 "timestamp_unix": time.time(),
             }
         )
-    output_root = Path(session_root) if session_root is not None else active_output_folder(
-        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
-        fallback=DEFAULT_SESSION_ROOT,
-    )
+    validation_output_root = os.environ.get("PPS_FOCUS_VALIDATION_OUTPUT_ROOT", "").strip()
+    if session_root is not None:
+        output_root = Path(session_root)
+    elif validation_output_root:
+        output_root = Path(validation_output_root).expanduser()
+    else:
+        output_root = active_output_folder(
+            state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+            fallback=DEFAULT_SESSION_ROOT,
+        )
     environment = _environment_design_and_run_setup(profile, output_root)
     if environment is not None:
         design, run_setup_manifest_path = environment
@@ -7089,6 +7102,12 @@ class _FocusCompanionBridge:
     def start_part(self, part_number: int) -> dict[str, Any]:
         return self._call(lambda: self.window._companion_start_part(part_number), timeout_s=5.0)
 
+    def pause(self) -> dict[str, Any]:
+        return self._call(lambda: self.window._companion_set_paused(True), timeout_s=5.0)
+
+    def resume(self) -> dict[str, Any]:
+        return self._call(lambda: self.window._companion_set_paused(False), timeout_s=5.0)
+
 
 class FocusModeWindow:
     """Dashboard-styled native participant runner window."""
@@ -7133,6 +7152,9 @@ class FocusModeWindow:
             session_id=str(getattr(package, "session_id", "") or ""),
             token=self.companion_token,
         )
+        self._validation_companion_pairing_report = os.environ.get(
+            "PPS_FOCUS_VALIDATION_COMPANION_PAIRING_REPORT", ""
+        ).strip()
         self.companion_qr_png: bytes = b""
         self.companion_tab_index = -1
         self.companion_status_message = "Phone companion is disabled." if not self.companion_enabled else "Phone companion starting."
@@ -7327,17 +7349,21 @@ class FocusModeWindow:
         self.start_button.setObjectName("startButton")
         self.start_button.setEnabled(False)
         self.pause_button = q["QPushButton"]("Pause")
-        self.stop_button = q["QPushButton"]("Stop")
+        self.resume_button = q["QPushButton"]("Resume")
+        self.stop_button = q["QPushButton"]("Stop", self.dialog)
         self.stop_button.setObjectName("dangerButton")
+        self.stop_button.setVisible(False)
         self.close_button = q["QPushButton"]("Close", self.dialog)
         self.close_button.setVisible(False)
         self.pause_button.setEnabled(False)
+        self.resume_button.setEnabled(False)
         self.stop_button.setEnabled(False)
-        for button in (self.start_button, self.pause_button, self.stop_button, self.close_button):
+        for button in (self.start_button, self.pause_button, self.resume_button, self.stop_button, self.close_button):
             button.setAutoDefault(False)
             button.setDefault(False)
         self.start_button.clicked.connect(self.start)
-        self.pause_button.clicked.connect(self._toggle_pause)
+        self.pause_button.clicked.connect(self._pause)
+        self.resume_button.clicked.connect(self._resume)
         self.stop_button.clicked.connect(self._stop)
         self.close_button.clicked.connect(self._close)
         self._install_primary_action_shortcuts()
@@ -7719,7 +7745,7 @@ class FocusModeWindow:
         run_controls_layout.setSpacing(6)
         run_controls_layout.addWidget(self.start_button)
         run_controls_layout.addWidget(self.pause_button)
-        run_controls_layout.addWidget(self.stop_button)
+        run_controls_layout.addWidget(self.resume_button)
         run_controls_layout.addWidget(self.instruction_button)
         run_controls_layout.addStretch(1)
         progress_layout.addWidget(self.run_controls_widget)
@@ -7934,7 +7960,32 @@ class FocusModeWindow:
             except Exception as exc:
                 self.companion_qr_png = b""
                 self.companion_status_message = f"Phone companion QR unavailable: {exc}"
+        self._write_validation_companion_pairing_report(service_started=self.companion_service is not None)
         self._refresh_companion_panel()
+
+    def _write_validation_companion_pairing_report(self, *, service_started: bool) -> None:
+        path_text = str(getattr(self, "_validation_companion_pairing_report", "") or "").strip()
+        if not path_text:
+            return
+        path = Path(path_text).expanduser()
+        payload = {
+            "schema": "pps-focus-mode-validation-companion-pairing.v1",
+            "created_at": datetime.now().isoformat(timespec="seconds"),
+            "companion_enabled": bool(self.companion_enabled),
+            "service_started": bool(service_started),
+            "status_message": str(self.companion_status_message or ""),
+            "endpoint": f"http://{self.companion_config.advertised_host}:{self.companion_config.port}",
+            "pairing_uri": str(self.companion_pairing_uri or ""),
+            "session_id": str(getattr(self.package, "session_id", "") or ""),
+            "session_group_id": str(getattr(self.package, "session_group_id", "") or ""),
+            "part_session_id": str(getattr(self.package, "part_session_id", "") or ""),
+            "participant_id": str(getattr(self.package, "participant_id", "") or ""),
+            "token_header": "X-PPS-Companion-Token",
+            "validation_only": True,
+        }
+        os.makedirs(_output_filesystem_path(path.parent), exist_ok=True)
+        with open(_output_filesystem_path(path), "w", encoding="utf-8") as handle:
+            handle.write(json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
     def _start_companion_service(self) -> None:
         if not self.companion_enabled:
@@ -7956,6 +8007,7 @@ class FocusModeWindow:
         except Exception as exc:
             self.companion_service = None
             self.companion_status_message = f"Phone companion could not start: {exc}"
+        self._write_validation_companion_pairing_report(service_started=self.companion_service is not None)
         self._refresh_companion_panel()
 
     def _stop_companion_service(self) -> None:
@@ -8020,6 +8072,14 @@ class FocusModeWindow:
                 allowed.append("start_part_1")
             if start_key == "2" or self._part2_start_gate_pending():
                 allowed.append("start_part_2")
+        pause_button = getattr(self, "pause_button", None)
+        resume_button = getattr(self, "resume_button", None)
+        if self.controller is not None and self._run_active:
+            if bool(self._run_paused):
+                if resume_button is not None and resume_button.isEnabled():
+                    allowed.append("resume")
+            elif pause_button is not None and pause_button.isEnabled():
+                allowed.append("pause")
         return allowed
 
     def _companion_setup_payload(self) -> dict[str, Any]:
@@ -8274,6 +8334,25 @@ class FocusModeWindow:
         self.start()
         return self._companion_snapshot()
 
+    def _companion_set_paused(self, paused: bool) -> dict[str, Any]:
+        desired = bool(paused)
+        pause_button = getattr(self, "pause_button", None)
+        resume_button = getattr(self, "resume_button", None)
+        if self.controller is None or not self._run_active:
+            raise CompanionCommandError(reason="pause_not_allowed")
+        if bool(self._run_paused) == desired:
+            return self._companion_snapshot()
+        active_button = pause_button if desired else resume_button
+        if active_button is None or not active_button.isEnabled():
+            raise CompanionCommandError(reason="pause_not_allowed")
+        if desired:
+            self._pause()
+        else:
+            self._resume()
+        if bool(self._run_paused) != desired:
+            raise CompanionCommandError(reason="pause_state_not_changed")
+        return self._companion_snapshot()
+
     def _install_response_click_filter(self) -> None:
         app = self.q["QApplication"].instance()
         if app is None or self._response_click_filter_installed:
@@ -8328,6 +8407,16 @@ class FocusModeWindow:
 
     def _start_global_response_click_listener(self) -> bool:
         if self._offscreen_platform():
+            return False
+        if _env_flag("PPS_FOCUS_VALIDATION_DISABLE_MOUSE_CAPTURE"):
+            self._global_response_click_listener_error = "disabled_by_validation"
+            _append_output_diary_event(
+                "global_response_click_listener_disabled",
+                package=self.package,
+                capture_options=self.capture_options.as_dict(),
+                payload={"reason": "PPS_FOCUS_VALIDATION_DISABLE_MOUSE_CAPTURE"},
+                create=True,
+            )
             return False
         with self._global_response_click_listener_lock:
             if self._global_response_click_listener is not None:
@@ -10356,15 +10445,17 @@ class FocusModeWindow:
                 pass
 
     def keyboard_shortcut_map(self) -> dict[str, list[str]]:
-        return {
+        shortcuts = {
             "start_or_continue": ["Space", "Return", "Enter"],
             "pause_resume": ["Ctrl+P"],
-            "stop": ["Ctrl+Shift+S"],
             "close": ["Ctrl+W"],
             "select_part_1": ["Alt+1"],
             "select_part_2": ["Alt+2"],
             "select_topup_preview": ["Ctrl+T"],
         }
+        if _env_flag("PPS_FOCUS_VALIDATION_ENABLE_SYNTHETIC_CLICK_SHORTCUT"):
+            shortcuts["validation_synthetic_click"] = ["Ctrl+Alt+Shift+F12"]
+        return shortcuts
 
     def _install_operator_action_shortcuts(self) -> None:
         q = self.q
@@ -10377,8 +10468,6 @@ class FocusModeWindow:
 
         for sequence in self.keyboard_shortcut_map()["pause_resume"]:
             _add("pause_resume", sequence, self._handle_pause_resume_shortcut)
-        for sequence in self.keyboard_shortcut_map()["stop"]:
-            _add("stop", sequence, self._handle_stop_shortcut)
         for sequence in self.keyboard_shortcut_map()["close"]:
             _add("close", sequence, self._handle_close_shortcut)
         for sequence in self.keyboard_shortcut_map()["select_part_1"]:
@@ -10387,10 +10476,14 @@ class FocusModeWindow:
             _add("select_part_2", sequence, lambda key="2": self._handle_part_shortcut(key))
         for sequence in self.keyboard_shortcut_map()["select_topup_preview"]:
             _add("select_topup_preview", sequence, self._handle_topup_preview_shortcut)
+        for sequence in self.keyboard_shortcut_map().get("validation_synthetic_click", []):
+            _add("validation_synthetic_click", sequence, self._handle_validation_synthetic_click_shortcut)
 
     def _handle_pause_resume_shortcut(self) -> None:
         if self.pause_button.isEnabled():
-            self._toggle_pause()
+            self._pause()
+        elif self.resume_button.isEnabled():
+            self._resume()
 
     def _handle_stop_shortcut(self) -> None:
         if self.stop_button.isEnabled():
@@ -10407,6 +10500,27 @@ class FocusModeWindow:
     def _handle_topup_preview_shortcut(self) -> None:
         if self._topup_slots_enabled_for_plan():
             self._select_current_part_topup_slot()
+
+    def _handle_validation_synthetic_click_shortcut(self) -> None:
+        if not _env_flag("PPS_FOCUS_VALIDATION_ENABLE_SYNTHETIC_CLICK_SHORTCUT"):
+            return
+        if self.controller is None or not self._run_active or self.pending_instruction_request is not None:
+            return
+        self._refresh_target_global_bounds()
+        bounds = self._target_global_bounds
+        if bounds is None:
+            x = y = None
+        else:
+            left, top, right, bottom = bounds
+            x = int(round((left + right) / 2))
+            y = int(round((top + bottom) / 2))
+        self._log_response_click(
+            x=x,
+            y=y,
+            in_target=True,
+            diary_event_type="validation_synthetic_target_clicked",
+            source="validation_hotkey_ctrl_alt_shift_f12",
+        )
 
     def _dialog_relative_rect(self, widget: Any) -> dict[str, int]:
         top_left = widget.mapTo(self.dialog, widget.rect().topLeft())
@@ -10435,6 +10549,7 @@ class FocusModeWindow:
             "run_controls_widget": self.run_controls_widget,
             "start_button": self.start_button,
             "pause_button": self.pause_button,
+            "resume_button": self.resume_button,
             "stop_button": self.stop_button,
         }
         if getattr(self, "data_selection_panel", None) is not None:
@@ -10778,12 +10893,12 @@ class FocusModeWindow:
         self._refresh_start_part2_button()
         self._refresh_start_button_label()
         self._set_primary_action_shortcuts_enabled(False)
-        self.pause_button.setEnabled(True)
-        self.stop_button.setEnabled(True)
-        self.target_button.setEnabled(True)
-        self._last_response_click_signature = None
         self._run_active = True
         self._run_paused = False
+        self._refresh_pause_resume_buttons()
+        self.stop_button.setEnabled(False)
+        self.target_button.setEnabled(True)
+        self._last_response_click_signature = None
         self._lock_experiment_window_geometry()
         self._refresh_target_global_bounds()
         self._start_global_response_click_listener()
@@ -10965,24 +11080,38 @@ class FocusModeWindow:
             return
         self._approve_pending_instruction_continue(source="button")
 
-    def _toggle_pause(self) -> None:
-        if self.controller is None:
+    def _refresh_pause_resume_buttons(self) -> None:
+        pause_enabled = bool(self.controller is not None and self._run_active and not self._run_paused)
+        resume_enabled = bool(self.controller is not None and self._run_active and self._run_paused)
+        self.pause_button.setEnabled(pause_enabled)
+        self.resume_button.setEnabled(resume_enabled)
+
+    def _pause(self) -> None:
+        if self.controller is None or not self._run_active or self._run_paused:
+            self._refresh_pause_resume_buttons()
             return
-        if self.pause_button.text() == "Pause":
-            self.controller.pause()
-            self.pause_button.setText("Resume")
-            self._run_paused = True
-            self.run_state_chip.setText("Paused")
-            self.progress_label.setText("Paused")
-            event_type = "pause_clicked"
-        else:
-            self.controller.resume()
-            self.pause_button.setText("Pause")
-            self._run_paused = False
-            self.run_state_chip.setText("Running")
-            event_type = "resume_clicked"
+        self.controller.pause()
+        self._run_paused = True
+        self._refresh_pause_resume_buttons()
+        self.run_state_chip.setText("Paused")
+        self.progress_label.setText("Paused")
         _append_output_diary_event(
-            event_type,
+            "pause_clicked",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            create=True,
+        )
+
+    def _resume(self) -> None:
+        if self.controller is None or not self._run_active or not self._run_paused:
+            self._refresh_pause_resume_buttons()
+            return
+        self.controller.resume()
+        self._run_paused = False
+        self._refresh_pause_resume_buttons()
+        self.run_state_chip.setText("Running")
+        _append_output_diary_event(
+            "resume_clicked",
             package=self.package,
             capture_options=self.capture_options.as_dict(),
             create=True,
@@ -10997,6 +11126,7 @@ class FocusModeWindow:
             create=True,
         )
         self._run_active = False
+        self._refresh_pause_resume_buttons()
         self._stop_global_response_click_listener()
         stop = getattr(self.controller, "stop", None)
         if callable(stop):
@@ -11376,6 +11506,7 @@ class FocusModeWindow:
             self.block_plan_widget.update()
         self.target_button.setEnabled(False)
         self.pause_button.setEnabled(False)
+        self.resume_button.setEnabled(False)
         self.stop_button.setEnabled(False)
         self.start_button.setEnabled(False)
         self._set_output_test_buttons_enabled(True)
@@ -12885,6 +13016,7 @@ def main(argv: list[str] | None = None) -> int:
                 enable_missed_trial_topup=args.enable_missed_trial_topup,
                 **companion_kwargs,
                 manual_start=args.manual_start,
+                fullscreen=not bool(args.validation_windowed),
                 auto_close_ms=args.validation_auto_close_ms,
                 screenshot_path=args.validation_screenshot,
             )
@@ -12905,6 +13037,7 @@ def main(argv: list[str] | None = None) -> int:
                 enable_missed_trial_topup=args.enable_missed_trial_topup,
                 **companion_kwargs,
                 manual_start=args.manual_start,
+                fullscreen=not bool(args.validation_windowed),
                 auto_close_ms=args.validation_auto_close_ms,
                 screenshot_path=args.validation_screenshot,
             )

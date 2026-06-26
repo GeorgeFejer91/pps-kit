@@ -77,8 +77,12 @@ Focus Mode starts a local Android companion service by default on LAN port
 `8767` and shows an unobtrusive `Companion Android App (Experimental)` tab with
 the QR pairing code. The service is protected by a per-run
 `X-PPS-Companion-Token`; the laptop remains the timing and command authority.
-Use `--no-companion` to disable it, or `--companion-host`, `--companion-port`,
-and `--companion-advertise-ip` when the laptop has multiple network interfaces.
+The phone can request setup submission, Start Part 01/02, separate Pause and
+Resume commands, and instruction continuation only when the runner advertises
+those commands. The Pause and Resume controls are mutually exclusive and the
+phone shows play/pause state only after a runner snapshot confirms it. Use
+`--no-companion` to disable it, or `--companion-host`, `--companion-port`, and
+`--companion-advertise-ip` when the laptop has multiple network interfaces.
 See [Android Runner Companion](ANDROID_RUNNER_COMPANION.md) for phone pairing,
 firewall, privacy, and APK build steps.
 

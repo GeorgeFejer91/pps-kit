@@ -1728,6 +1728,9 @@ def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_pa
             "1.5",
             "--labrecorder-stop-timeout-s",
             "11",
+            "--companion-advertise-ip",
+            "10.0.2.2",
+            "--validation-windowed",
         ]
     )
     strict_command = harness._build_runner_command(strict_args, runner=runner, screenshot_path=screenshot)
@@ -1740,8 +1743,11 @@ def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_pa
     assert "--wired-loopback" in strict_command
     assert "output4-tactile-proxy" in strict_command
     assert "--external-labrecorder" in strict_command
+    assert "--no-external-labrecorder" not in strict_command
     assert "--labrecorder-cli" in strict_command
     assert str(labrecorder_cli) in strict_command
+    assert strict_command[strict_command.index("--companion-advertise-ip") + 1] == "10.0.2.2"
+    assert "--validation-windowed" in strict_command
     assert strict_command[strict_command.index("--labrecorder-stream-timeout-s") + 1] == "14.0"
     assert strict_command[strict_command.index("--labrecorder-startup-s") + 1] == "1.5"
     assert strict_command[strict_command.index("--labrecorder-stop-timeout-s") + 1] == "11.0"
@@ -1752,6 +1758,7 @@ def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_pa
     assert strict_env["PPS_AUDIO_DEVICE_INDEX"] == "28"
     assert strict_env["PPS_PROTOCOL11_VALIDATION_LANE"] == "full-stack"
     assert strict_env["PPS_PROTOCOL11_WIRED_LOOPBACK"] == "output4-tactile-proxy"
+    assert strict_env["PPS_FOCUS_VALIDATION_COMPANION_PAIRING_REPORT"] == str(tmp_path / "companion_pairing_report.json")
     assert strict_env["PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON"] == sys.executable
 
     legacy_args = harness.build_arg_parser().parse_args(["--runner", str(runner)])
@@ -1761,6 +1768,7 @@ def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_pa
     assert "--no-lsl" in legacy_command
     assert "--no-internal-xdf" in legacy_command
     assert "--no-backup-recording" in legacy_command
+    assert "--no-external-labrecorder" in legacy_command
     assert "--wired-loopback" not in legacy_command
     assert legacy_env["PPS_PROTOCOL11_VALIDATION_LANE"] == "software-only"
     assert legacy_env["PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON"] == sys.executable
@@ -1771,6 +1779,30 @@ def test_full_realtime_harness_strict_mode_uses_hardware_standard_capture(tmp_pa
         focus_report_path=tmp_path / "focus_validation_report.json",
     )
     assert "PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON" not in qtest_env
+
+    passive_args = harness.build_arg_parser().parse_args(
+        [
+            "--runner",
+            str(runner),
+            "--mouse-backend",
+            "none",
+            "--timeout-s",
+            "2",
+            "--launch-via-environment-gate",
+        ]
+    )
+    passive_env = harness._configure_validation_env(
+        passive_args,
+        output_dir=tmp_path,
+        focus_report_path=tmp_path / "focus_validation_report.json",
+    )
+    assert passive_env["PPS_FOCUS_VALIDATION_MOUSE_BACKEND"] == "none"
+    assert passive_env["PPS_FOCUS_VALIDATION_AUTO_CLOSE_MS"] == "2000"
+    assert passive_env["PPS_FOCUS_VALIDATION_DISABLE_MOUSE_CAPTURE"] == "1"
+    assert passive_env["PPS_FOCUS_VALIDATION_ENABLE_SYNTHETIC_CLICK_SHORTCUT"] == "1"
+    assert "PPS_FOCUS_VALIDATION_PARTICIPANT_EMULATOR" not in passive_env
+    assert "PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON" not in passive_env
+    assert "PPS_FOCUS_VALIDATION_LAUNCHER_AUTO_CLICK" not in passive_env
 
     source_args = harness.build_arg_parser().parse_args(
         [

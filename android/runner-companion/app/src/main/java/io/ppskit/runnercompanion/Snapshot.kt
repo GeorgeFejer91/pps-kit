@@ -24,6 +24,8 @@ data class RunnerSnapshot(
     fun canStartPart(partNumber: Int): Boolean = allowedCommands.contains("start_part_$partNumber")
     fun canContinueInstruction(): Boolean = allowedCommands.contains("continue_instruction")
     fun canSubmitSetup(): Boolean = allowedCommands.contains("setup")
+    fun canPause(): Boolean = allowedCommands.contains("pause")
+    fun canResume(): Boolean = allowedCommands.contains("resume")
 }
 
 data class SetupStatus(
@@ -68,6 +70,7 @@ data class ActiveBlock(
 data class TimelineState(
     val trialRows: List<TimelineTrial>,
     val tactileCues: List<TactileCue>,
+    val clickMarkers: List<TimelineClick>,
     val clicks: Int,
     val tactileTotal: Int,
     val tactilePassed: Int,
@@ -92,6 +95,16 @@ data class TactileCue(
     val noiseType: String,
     val soaMs: String,
     val status: String,
+)
+
+data class TimelineClick(
+    val clickId: Int,
+    val timeS: Double,
+    val trialUid: String,
+    val responseStatus: String,
+    val cueId: Int?,
+    val cueTrialUid: String,
+    val rtS: Double?,
 )
 
 data class InstructionGate(
@@ -157,6 +170,7 @@ object SnapshotParser {
             timeline = TimelineState(
                 trialRows = timeline.optJSONArray("trial_rows").toTrialRows(),
                 tactileCues = timeline.optJSONArray("tactile_cues").toTactileCues(),
+                clickMarkers = timeline.optJSONArray("clicks").toTimelineClicks(),
                 clicks = counts.optInt("clicks", 0),
                 tactileTotal = counts.optInt("tactile_total", 0),
                 tactilePassed = counts.optInt("tactile_passed", 0),
@@ -209,6 +223,22 @@ private fun JSONArray?.toTactileCues(): List<TactileCue> {
             noiseType = item.optString("noise_type", ""),
             soaMs = item.optString("soa_ms", ""),
             status = item.optString("status", ""),
+        )
+    }
+}
+
+private fun JSONArray?.toTimelineClicks(): List<TimelineClick> {
+    if (this == null) return emptyList()
+    return (0 until length()).mapNotNull { index ->
+        val item = optJSONObject(index) ?: return@mapNotNull null
+        TimelineClick(
+            clickId = item.optInt("click_id", index + 1),
+            timeS = item.optDouble("time_s", 0.0),
+            trialUid = item.optString("trial_uid", ""),
+            responseStatus = item.optString("response_status", "off_cue"),
+            cueId = if (item.has("cue_id") && !item.isNull("cue_id")) item.optInt("cue_id") else null,
+            cueTrialUid = item.optString("cue_trial_uid", ""),
+            rtS = if (item.has("rt_s") && !item.isNull("rt_s")) item.optDouble("rt_s") else null,
         )
     }
 }

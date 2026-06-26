@@ -27,6 +27,8 @@ class FakeBridge:
         self.setup_payloads: list[dict[str, Any]] = []
         self.continued = 0
         self.started_parts: list[int] = []
+        self.paused = 0
+        self.resumed = 0
         self.fail_continue = False
         self.fail_health = False
         self.fail_snapshot = False
@@ -57,7 +59,7 @@ class FakeBridge:
             "server_unix_ms": 1000,
             "server_perf_counter_s": 12.5,
             "connection_state": "online",
-            "allowed_commands": ["setup", "start_part_1"],
+            "allowed_commands": ["setup", "start_part_1", "pause"],
             "participant": {"participant_id": "P001"},
             "setup": {"submitted": False},
             "part_status": {"available_parts": ["1", "2"]},
@@ -90,6 +92,16 @@ class FakeBridge:
 
     def start_part(self, part_number: int) -> dict[str, Any]:
         self.started_parts.append(int(part_number))
+        self.sequence += 1
+        return self.snapshot()
+
+    def pause(self) -> dict[str, Any]:
+        self.paused += 1
+        self.sequence += 1
+        return self.snapshot()
+
+    def resume(self) -> dict[str, Any]:
+        self.resumed += 1
         self.sequence += 1
         return self.snapshot()
 
@@ -180,6 +192,13 @@ def test_setup_and_commands_route_through_bridge():
     assert part2.status_code == 200
     assert bridge.started_parts == [1, 2]
 
+    pause = client.post("/api/runner/commands/pause", headers=headers)
+    resume = client.post("/api/runner/commands/resume", headers=headers)
+    assert pause.status_code == 200
+    assert resume.status_code == 200
+    assert bridge.paused == 1
+    assert bridge.resumed == 1
+
 
 def test_command_gating_errors_are_http_safe():
     bridge = FakeBridge()
@@ -195,10 +214,11 @@ def test_command_gating_errors_are_http_safe():
     assert invalid_part.json()["detail"]["reason"] == "invalid_part_number"
 
 
-def test_no_pause_stop_or_participant_switching_endpoints_exist():
+def test_pause_resume_exist_but_stop_and_participant_switching_stay_laptop_only():
     paths = {route.path for route in create_runner_companion_app(FakeBridge(), token="secret").routes}
 
-    assert "/api/runner/commands/pause" not in paths
+    assert "/api/runner/commands/pause" in paths
+    assert "/api/runner/commands/resume" in paths
     assert "/api/runner/commands/stop" not in paths
     assert "/api/runner/participants" not in paths
 

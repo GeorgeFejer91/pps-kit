@@ -4,8 +4,9 @@ The Android companion is a local Wi-Fi control surface for the native
 `PPSExperimentRunner.exe`. The laptop runner remains the timing authority,
 owns playback, LSL, LabRecorder, ledgers, output files, top-up, and analysis.
 The phone only submits the existing setup form, starts Part 01 or Part 02 when
-the runner already allows it, continues instruction gates, and displays the
-latest authorized runner snapshot.
+the runner already allows it, requests pause/resume when the runner advertises
+those commands, continues instruction gates, and displays the latest authorized
+runner snapshot.
 
 ## Pairing
 
@@ -15,8 +16,12 @@ latest authorized runner snapshot.
 3. The Android app opens `pps-companion://pair?...` and stores the runner host,
    port, session id, and per-run `X-PPS-Companion-Token`.
 4. Submit the participant setup fields from the phone or laptop.
-5. Use the phone `Start Part 01`, `Continue`, and `Start Part 02` controls only
-   when they are enabled by the runner snapshot.
+5. Use the phone `Start Part 01`, separate `Pause` and `Resume`, `Continue`,
+   and `Start Part 02` controls only when they are enabled by the runner
+   snapshot. `Pause` and `Resume` are mutually exclusive: only the command
+   currently confirmed as available by the runner is enabled. The app never
+   flips its own play/pause state optimistically; it waits for a runner
+   snapshot or command response before showing the confirmed state.
 
 The QR code contains a per-run bearer token. Do not share screenshots of it.
 Closing Focus Mode stops the companion service and invalidates that token.
@@ -42,6 +47,37 @@ in the QR payload or health endpoint. Authorized snapshots can include setup
 state so the paired phone can reflect the form; name-sharing opt-in still
 controls whether the runner writes the participant name into local session/LSL
 metadata.
+
+## Live Feedback
+
+The app is designed for landscape phone viewing. During an active block it
+collapses controls into a top command strip so the current-block timeline uses
+the full phone width. The visualization shows current trial bands, tactile cue
+ticks, the runner-confirmed playhead, cue-linked mouse-click markers, and recent
+reaction times. These values are copied from runner snapshots; Android does not
+run the experiment clock, write the ledger, or consume LSL directly.
+
+For visible emulator checks while someone is using the PC, use passive
+validation (`--mouse-backend none`) or direct snapshot/API checks. Do not use
+`pynput`, `win32`, or `pyautogui` mouse backends unless the PC pointer is
+available for automation. Passive validation also disables Focus Mode's global
+response-click listener so ordinary PC clicks are not recorded as participant
+responses.
+
+On this lab PC, companion emulator screenshots should stay on the left display
+shown as Windows display `2`.
+Use:
+
+```powershell
+.\windows\Set_Companion_Emulation_Layout.ps1
+```
+
+The script defaults to the leftmost Windows monitor, currently `DISPLAY2`
+(`-1920,5 1920x1032` working area), places `PPSExperimentRunner.exe` in the
+left slice, and gives the Android emulator the wider right slice for timeline
+resolution. Passive runs also enable the validation-only synthetic click
+shortcut `Ctrl+Alt+Shift+F12`, which logs one in-target runner response through
+the normal controller path without moving the PC mouse.
 
 Generated APKs, Gradle build outputs, and local Android SDK downloads are not
 tracked in Git. The committed Android source and Gradle wrapper are part of the

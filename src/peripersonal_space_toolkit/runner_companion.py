@@ -50,6 +50,12 @@ class RunnerCompanionBridge(Protocol):
     def start_part(self, part_number: int) -> dict[str, Any]:
         ...
 
+    def pause(self) -> dict[str, Any]:
+        ...
+
+    def resume(self) -> dict[str, Any]:
+        ...
+
 
 @dataclass(frozen=True)
 class RunnerCompanionConfig:
@@ -211,6 +217,22 @@ def create_runner_companion_app(
             )
         try:
             return bridge.start_part(part_number)
+        except CompanionCommandError as exc:
+            _handle_command_error(exc)
+
+    @app.post("/api/runner/commands/pause")
+    def pause(companion_token: str = Header(default="", alias=TOKEN_HEADER)) -> dict[str, Any]:
+        _authorize_token(companion_token)
+        try:
+            return bridge.pause()
+        except CompanionCommandError as exc:
+            _handle_command_error(exc)
+
+    @app.post("/api/runner/commands/resume")
+    def resume(companion_token: str = Header(default="", alias=TOKEN_HEADER)) -> dict[str, Any]:
+        _authorize_token(companion_token)
+        try:
+            return bridge.resume()
         except CompanionCommandError as exc:
             _handle_command_error(exc)
 

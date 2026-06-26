@@ -72,6 +72,13 @@
       "source": "tracked"
     },
     {
+      "kind": "android_validation_support",
+      "path": "windows/Set_Companion_Emulation_Layout.ps1",
+      "required": true,
+      "role": "pins runner and Android emulator windows to the designated left-monitor validation screen",
+      "source": "tracked"
+    },
+    {
       "kind": "android_source_tree",
       "path": "android/runner-companion",
       "required": true,
@@ -324,10 +331,10 @@
   "schema": "pps-installer-package-inventory.v1",
   "stage_root": "",
   "summary": {
-    "item_count": 45,
+    "item_count": 46,
     "missing_required_count": 0,
     "optional_absent_count": 0,
     "optional_item_count": 2,
-    "required_item_count": 43
+    "required_item_count": 44
   }
 }
