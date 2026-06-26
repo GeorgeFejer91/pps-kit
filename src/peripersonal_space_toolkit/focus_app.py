@@ -13,6 +13,7 @@ import queue
 import sys
 import threading
 import time
+from concurrent.futures import Future, TimeoutError as FutureTimeoutError
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Callable, Iterable
@@ -108,6 +109,19 @@ from .runner_diary import (
     runner_settings_path as _runner_settings_path,
     slugify_identifier,
     update_runner_settings as _update_runner_settings,
+)
+from .runner_companion import (
+    DEFAULT_COMPANION_HOST,
+    DEFAULT_COMPANION_PORT,
+    HEALTH_SCHEMA,
+    SNAPSHOT_SCHEMA,
+    CompanionCommandError,
+    RunnerCompanionConfig,
+    RunnerCompanionService,
+    build_pairing_uri,
+    choose_lan_ipv4,
+    generate_companion_token,
+    pairing_qr_png_bytes,
 )
 from .session_runner import (
     DEFAULT_DASHBOARD_STATE_ROOT,
@@ -686,6 +700,10 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--profile", default="", help="Load a finished study/profile preload directly in the runner, for example study5_box_breathing_pps.")
     parser.add_argument("--participant-id", default="", help="Participant ID to materialize when using --latest-dashboard-setup.")
     parser.add_argument("--manual-start", action="store_true", help="Open the runner window but wait for Start Run before playback.")
+    parser.add_argument("--no-companion", action="store_true", help="Do not start the LAN phone companion service.")
+    parser.add_argument("--companion-host", default=DEFAULT_COMPANION_HOST, help="Host interface for the phone companion service.")
+    parser.add_argument("--companion-port", type=int, default=DEFAULT_COMPANION_PORT, help="LAN port for the phone companion service.")
+    parser.add_argument("--companion-advertise-ip", default="", help="Explicit IP address to put in the phone companion QR code.")
     parser.add_argument("--no-lsl", action="store_true", help="Do not create live LSL marker outlets for this run.")
     parser.add_argument("--no-internal-xdf", action="store_true", help="Do not write the local events.xdf mirror.")
     parser.add_argument("--no-analysis-csv", action="store_true", help="Do not write immediate analysis CSV outputs.")
@@ -735,8 +753,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 def _require_qt() -> dict[str, Any]:
     try:
-        from PySide6.QtCore import QEvent, QPoint, QTimer, Qt, QUrl, Signal
-        from PySide6.QtGui import QBrush, QColor, QCursor, QDesktopServices, QFont, QFontDatabase, QFontMetrics, QIcon, QKeySequence, QPainter, QPainterPath, QPen, QShortcut
+        from PySide6.QtCore import QEvent, QLocale, QPoint, QTimer, Qt, QUrl, Signal
+        from PySide6.QtGui import QBrush, QColor, QCursor, QDesktopServices, QFont, QFontDatabase, QFontMetrics, QIcon, QKeySequence, QPainter, QPainterPath, QPen, QPixmap, QShortcut
         from PySide6.QtWidgets import (
             QApplication,
             QCheckBox,
@@ -778,6 +796,7 @@ def _require_qt() -> dict[str, Any]:
         "QDialog": QDialog,
         "QDoubleSpinBox": QDoubleSpinBox,
         "QEvent": QEvent,
+        "QLocale": QLocale,
         "QFileDialog": QFileDialog,
         "QFrame": QFrame,
         "QFont": QFont,
@@ -794,6 +813,7 @@ def _require_qt() -> dict[str, Any]:
         "QPainter": QPainter,
         "QPainterPath": QPainterPath,
         "QPen": QPen,
+        "QPixmap": QPixmap,
         "QPoint": QPoint,
         "QProgressBar": QProgressBar,
         "QPushButton": QPushButton,
@@ -2023,6 +2043,17 @@ def _output_volume_slider_row(
             super().__init__()
             self.lineEdit().installEventFilter(self)
 
+        def valueFromText(self, text: str) -> float:  # noqa: N802 - Qt override
+            clean = str(text or "").replace("%", "").strip().replace(",", ".")
+            try:
+                value = float(clean)
+            except ValueError:
+                return float(self.value())
+            return _coerce_volume_percent(value) if math.isfinite(value) else float(self.value())
+
+        def textFromValue(self, value: float) -> str:  # noqa: N802 - Qt override
+            return f"{_coerce_volume_percent(value):.{OUTPUT_VOLUME_PERCENT_DECIMALS}f}"
+
         def _commit_text_value(self) -> None:
             text = self.lineEdit().text().replace("%", "").strip().replace(",", ".")
             try:
@@ -2074,6 +2105,7 @@ def _output_volume_slider_row(
     percent.setDecimals(OUTPUT_VOLUME_PERCENT_DECIMALS)
     percent.setSingleStep(OUTPUT_VOLUME_PERCENT_STEP)
     percent.setSuffix("%")
+    percent.setLocale(q["QLocale"].c())
     percent.setKeyboardTracking(False)
     percent.setValue(_coerce_volume_percent(value))
     percent.setMinimumWidth(78)
@@ -7021,6 +7053,42 @@ def _write_validation_launcher_report(
         handle.write(json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
 
+class _FocusCompanionBridge:
+    """Marshals companion API calls onto the Focus Mode Qt/UI thread."""
+
+    def __init__(self, window: "FocusModeWindow") -> None:
+        self.window = window
+
+    def _call(self, callback: Callable[[], dict[str, Any]], *, timeout_s: float = 5.0) -> dict[str, Any]:
+        if threading.get_ident() == getattr(self.window, "_ui_thread_id", None):
+            return callback()
+        future: Future[dict[str, Any]] = Future()
+        self.window._companion_command_queue.put((future, callback))
+        try:
+            return future.result(timeout=max(0.1, float(timeout_s)))
+        except FutureTimeoutError as exc:
+            raise CompanionCommandError(
+                "Focus Mode did not answer the companion request in time.",
+                status_code=503,
+                reason="ui_timeout",
+            ) from exc
+
+    def health(self) -> dict[str, Any]:
+        return self._call(self.window._companion_health, timeout_s=2.0)
+
+    def snapshot(self) -> dict[str, Any]:
+        return self._call(self.window._companion_snapshot, timeout_s=2.0)
+
+    def submit_setup(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._call(lambda: self.window._companion_submit_setup(payload), timeout_s=10.0)
+
+    def continue_instruction(self) -> dict[str, Any]:
+        return self._call(self.window._companion_continue_instruction, timeout_s=5.0)
+
+    def start_part(self, part_number: int) -> dict[str, Any]:
+        return self._call(lambda: self.window._companion_start_part(part_number), timeout_s=5.0)
+
+
 class FocusModeWindow:
     """Dashboard-styled native participant runner window."""
 
@@ -7033,6 +7101,10 @@ class FocusModeWindow:
         enable_missed_trial_topup: bool = True,
         controller_factory: Callable[..., Any] | None = None,
         layout_profile: FocusLayoutProfile | None = None,
+        companion_enabled: bool = True,
+        companion_host: str = DEFAULT_COMPANION_HOST,
+        companion_port: int = DEFAULT_COMPANION_PORT,
+        companion_advertise_ip: str = "",
     ) -> None:
         self.q = q
         self.package = package
@@ -7042,6 +7114,31 @@ class FocusModeWindow:
         self.output_12_volume_percent, self.output_34_volume_percent = _load_output_channel_volume_percentages()
         self.controller_factory = controller_factory
         self.messages: queue.Queue[tuple[str, Any]] = queue.Queue()
+        self._ui_thread_id = threading.get_ident()
+        self._companion_command_queue: queue.Queue[tuple[Future[dict[str, Any]], Callable[[], dict[str, Any]]]] = queue.Queue()
+        self._companion_sequence = 0
+        self._companion_snapshot_signature = ""
+        self.companion_enabled = bool(companion_enabled)
+        self.companion_config = RunnerCompanionConfig(
+            host=str(companion_host or DEFAULT_COMPANION_HOST),
+            port=int(companion_port or DEFAULT_COMPANION_PORT),
+            advertise_ip=str(companion_advertise_ip or choose_lan_ipv4() or ""),
+        )
+        self.companion_token = generate_companion_token()
+        self.companion_service: RunnerCompanionService | None = None
+        self.companion_pairing_uri = build_pairing_uri(
+            host=self.companion_config.advertised_host,
+            port=self.companion_config.port,
+            session_id=str(getattr(package, "session_id", "") or ""),
+            token=self.companion_token,
+        )
+        self.companion_qr_png: bytes = b""
+        self.companion_status_message = "Phone companion is disabled." if not self.companion_enabled else "Phone companion starting."
+        if self.companion_enabled:
+            try:
+                self.companion_qr_png = pairing_qr_png_bytes(self.companion_pairing_uri)
+            except Exception as exc:
+                self.companion_status_message = f"Phone companion QR unavailable: {exc}"
         self.controller: SessionRunnerController | None = None
         self._continuous_external_labrecorder_state: dict[str, Any] | None = None
         self._owned_audio_engine: Any | None = None
@@ -7470,6 +7567,31 @@ class FocusModeWindow:
         self.setup_status_label.setObjectName("mutedLabel")
         self.setup_status_label.setWordWrap(True)
         data_logging_layout.addWidget(self.setup_status_label)
+
+        data_logging_layout.addWidget(_subtitle(q, "Phone Companion"))
+        companion_row = q["QHBoxLayout"]()
+        companion_row.setContentsMargins(0, 0, 0, 0)
+        companion_row.setSpacing(10)
+        self.companion_qr_label = q["QLabel"]("")
+        self.companion_qr_label.setObjectName("companionQrCode")
+        self.companion_qr_label.setFixedSize(150, 150)
+        self.companion_qr_label.setAlignment(q["Qt"].AlignmentFlag.AlignCenter)
+        companion_row.addWidget(self.companion_qr_label)
+        companion_text_layout = q["QVBoxLayout"]()
+        companion_text_layout.setContentsMargins(0, 0, 0, 0)
+        companion_text_layout.setSpacing(4)
+        self.companion_status_label = q["QLabel"](self.companion_status_message)
+        self.companion_status_label.setObjectName("mutedLabel")
+        self.companion_status_label.setWordWrap(True)
+        self.companion_endpoint_label = q["QLabel"]("")
+        self.companion_endpoint_label.setObjectName("metricValue")
+        self.companion_endpoint_label.setWordWrap(True)
+        companion_text_layout.addWidget(self.companion_status_label)
+        companion_text_layout.addWidget(self.companion_endpoint_label)
+        companion_text_layout.addStretch(1)
+        companion_row.addLayout(companion_text_layout, 1)
+        data_logging_layout.addLayout(companion_row)
+        self._refresh_companion_panel()
         self._pre_run_controls.extend(
             [
                 self.participant_code_combo,
@@ -7746,6 +7868,398 @@ class FocusModeWindow:
         label = getattr(self, "setup_status_label", None)
         if label is not None:
             label.setText(str(message or ""))
+
+    def _refresh_companion_panel(self) -> None:
+        status_label = getattr(self, "companion_status_label", None)
+        if status_label is not None:
+            status_label.setText(str(self.companion_status_message or ""))
+        endpoint_label = getattr(self, "companion_endpoint_label", None)
+        if endpoint_label is not None:
+            if self.companion_enabled:
+                endpoint_label.setText(
+                    f"http://{self.companion_config.advertised_host}:{self.companion_config.port}"
+                )
+                endpoint_label.setToolTip(self.companion_pairing_uri)
+            else:
+                endpoint_label.setText("Disabled for this run.")
+                endpoint_label.setToolTip("")
+        qr_label = getattr(self, "companion_qr_label", None)
+        if qr_label is None:
+            return
+        if not self.companion_enabled:
+            qr_label.setText("Off")
+            qr_label.setPixmap(self.q["QPixmap"]())
+            return
+        if not self.companion_qr_png:
+            qr_label.setText("QR unavailable")
+            qr_label.setPixmap(self.q["QPixmap"]())
+            return
+        pixmap = self.q["QPixmap"]()
+        if pixmap.loadFromData(self.companion_qr_png):
+            qr_label.setText("")
+            qr_label.setPixmap(
+                pixmap.scaled(
+                    qr_label.size(),
+                    self.q["Qt"].AspectRatioMode.KeepAspectRatio,
+                    self.q["Qt"].TransformationMode.SmoothTransformation,
+                )
+            )
+        else:
+            qr_label.setText("QR unavailable")
+            qr_label.setPixmap(self.q["QPixmap"]())
+
+    def _refresh_companion_pairing_payload(self) -> None:
+        self.companion_pairing_uri = build_pairing_uri(
+            host=self.companion_config.advertised_host,
+            port=self.companion_config.port,
+            session_id=str(getattr(self.package, "session_id", "") or ""),
+            token=self.companion_token,
+        )
+        if self.companion_enabled:
+            try:
+                self.companion_qr_png = pairing_qr_png_bytes(self.companion_pairing_uri)
+                if not str(self.companion_status_message or "").strip():
+                    self.companion_status_message = "Phone companion ready."
+            except Exception as exc:
+                self.companion_qr_png = b""
+                self.companion_status_message = f"Phone companion QR unavailable: {exc}"
+        self._refresh_companion_panel()
+
+    def _start_companion_service(self) -> None:
+        if not self.companion_enabled:
+            self.companion_status_message = "Phone companion is disabled."
+            self._refresh_companion_panel()
+            return
+        if self.companion_service is not None:
+            return
+        self._refresh_companion_pairing_payload()
+        bridge = _FocusCompanionBridge(self)
+        try:
+            self.companion_service = RunnerCompanionService(
+                bridge,
+                token=self.companion_token,
+                config=self.companion_config,
+            )
+            self.companion_service.start()
+            self.companion_status_message = "Scan to pair a trusted phone on this LAN."
+        except Exception as exc:
+            self.companion_service = None
+            self.companion_status_message = f"Phone companion could not start: {exc}"
+        self._refresh_companion_panel()
+
+    def _stop_companion_service(self) -> None:
+        service = self.companion_service
+        self.companion_service = None
+        if service is None:
+            return
+        try:
+            service.stop()
+        finally:
+            self.companion_status_message = "Phone companion stopped."
+            self._refresh_companion_panel()
+
+    def _drain_companion_commands(self) -> None:
+        while not self._companion_command_queue.empty():
+            future, callback = self._companion_command_queue.get_nowait()
+            if future.cancelled():
+                continue
+            try:
+                future.set_result(callback())
+            except Exception as exc:  # noqa: BLE001 - propagate API failures to the HTTP thread.
+                future.set_exception(exc)
+
+    def _companion_health(self) -> dict[str, Any]:
+        return {
+            "schema": HEALTH_SCHEMA,
+            "service": "pps-runner-companion",
+            "status": "ok" if self.companion_enabled else "disabled",
+            "snapshot_schema": SNAPSHOT_SCHEMA,
+            "session_id": str(getattr(self.package, "session_id", "") or ""),
+            "participant_id": str(getattr(self.package, "participant_id", "") or ""),
+            "port": int(self.companion_config.port),
+            "token_header": "X-PPS-Companion-Token",
+        }
+
+    def _companion_select_combo_data(self, combo: Any, value: str) -> bool:
+        clean = str(value or "").strip()
+        index = combo.findData(clean)
+        if index < 0:
+            for candidate in range(combo.count()):
+                if str(combo.itemText(candidate) or "").strip().lower() == clean.lower():
+                    index = candidate
+                    break
+        if index < 0:
+            return False
+        combo.setCurrentIndex(index)
+        return True
+
+    def _companion_allowed_commands(self) -> list[str]:
+        allowed: list[str] = []
+        thread_alive = bool(self.thread is not None and self.thread.is_alive())
+        setup_allowed = bool(not self._run_active and not thread_alive)
+        if setup_allowed:
+            allowed.append("setup")
+        if self.pending_instruction_request is not None and not self._part2_start_gate_pending():
+            allowed.append("continue_instruction")
+        if self.demographics_submitted and self.controller is not None and not thread_alive:
+            start_key = self._start_button_part_key()
+            if start_key == "1" and not self._part2_start_gate_pending():
+                allowed.append("start_part_1")
+            if start_key == "2" or self._part2_start_gate_pending():
+                allowed.append("start_part_2")
+        return allowed
+
+    def _companion_setup_payload(self) -> dict[str, Any]:
+        failures = self._participant_setup_failures() if not self.demographics_submitted else []
+        return {
+            "submitted": bool(self.demographics_submitted),
+            "ready": bool(self.demographics_submitted and self.controller is not None),
+            "required_missing": failures,
+            "participant_code": self._selected_participant_code() or str(getattr(self.package, "participant_id", "") or ""),
+            "participant_name": str(self.participant_name_input.text() or ""),
+            "participant_name_present": bool(str(self.participant_name_input.text() or "").strip()),
+            "name_sharing_opt_in": bool(self.include_name_lsl_checkbox.isChecked()),
+            "age": str(self.age_input.text() or ""),
+            "handedness": str(self.handedness_combo.currentData() or ""),
+            "gender": str(self.gender_combo.currentData() or ""),
+        }
+
+    def _companion_run_plan_payload(self) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        active = self.active_display_block_index
+        completed = set(getattr(self, "completed_display_block_indices", set()) or set())
+        for item in list(getattr(self, "all_block_plan_items", []) or []):
+            row = dict(item)
+            try:
+                number = int(row.get("number") or 0)
+            except (TypeError, ValueError):
+                number = 0
+            if active is not None and number == int(active):
+                status = "active"
+            elif number in completed:
+                status = "complete"
+            else:
+                status = "pending"
+            row["status"] = status
+            rows.append(row)
+        return rows
+
+    def _companion_active_block_payload(self, *, server_perf_counter_s: float) -> dict[str, Any]:
+        state = self.timeline_state
+        elapsed = max(0.0, float(state.elapsed_s or 0.0))
+        duration = max(0.0, float(state.duration_s or 0.0))
+        if duration > 0:
+            elapsed = min(elapsed, duration)
+        anchor = self._timeline_perf_anchor
+        if anchor is None:
+            anchor = server_perf_counter_s - elapsed
+        return {
+            "active": bool(state.active),
+            "part_number": str(state.part_number or ""),
+            "phase_label": str(state.phase_label or ""),
+            "block_index": str(state.block_index or ""),
+            "block_label": str(state.block_label or ""),
+            "display_block_index": self.active_display_block_index,
+            "duration_s": duration,
+            "elapsed_s": elapsed,
+            "last_anchor_server_perf_counter_s": float(anchor),
+            "running": bool(self._run_active and state.active),
+            "paused": bool(self._run_paused),
+            "instruction_waiting": bool(self.pending_instruction_request is not None),
+        }
+
+    def _companion_timeline_payload(self) -> dict[str, Any]:
+        state = self.timeline_state
+        trial_rows = [
+            {
+                "trial_number": segment.trial_number,
+                "trial_uid": segment.trial_uid,
+                "start_s": segment.start_s,
+                "end_s": segment.end_s,
+                "clip_label": segment.clip_label,
+                "trial_label": segment.trial_label,
+                "noise_type": segment.noise_type,
+                "soa_ms": segment.soa_ms,
+                "family": segment.family,
+            }
+            for segment in state.trial_segments
+        ]
+        instruction_rows = [
+            {
+                "slot": segment.slot,
+                "label": segment.label,
+                "start_s": segment.start_s,
+                "end_s": segment.end_s,
+                "color": segment.color,
+            }
+            for segment in state.instruction_segments
+        ]
+        cues = [
+            {
+                "cue_id": cue.cue_id,
+                "trial_number": cue.trial_number,
+                "trial_uid": cue.trial_uid,
+                "time_s": cue.time_s,
+                "sample_index": cue.sample_index,
+                "soa_ms": cue.soa_ms,
+                "family": cue.family,
+                "row_label": cue.row_label,
+                "clip_label": cue.clip_label,
+                "trial_label": cue.trial_label,
+                "noise_type": cue.noise_type,
+                "recentered": cue.recentered,
+                "status": state.cue_status(cue),
+            }
+            for cue in state.cues
+        ]
+        clicks = [
+            {
+                "click_id": marker.click_id,
+                "time_s": marker.time_s,
+                "trial_uid": marker.trial_uid,
+                "response_status": marker.response_status,
+                "cue_id": marker.cue_id,
+                "cue_trial_uid": marker.cue_trial_uid,
+                "rt_s": marker.rt_s,
+            }
+            for marker in state.click_markers
+        ]
+        return {
+            "trial_rows": trial_rows,
+            "instruction_rows": instruction_rows,
+            "tactile_cues": cues,
+            "clicks": clicks,
+            "counts": {
+                "tactile_total": len(state.cues),
+                "tactile_passed": state.passed_count(),
+                "clicks": state.click_count(),
+                "recentered": state.recentered_count(),
+                "planned_tactile_cues": int(getattr(self, "planned_tactile_cue_count", 0) or 0),
+            },
+        }
+
+    def _companion_instruction_gate_payload(self) -> dict[str, Any]:
+        request = self.pending_instruction_request
+        if request is None:
+            return {"waiting": False}
+        context = dict(request.get("context") or {})
+        return {
+            "waiting": True,
+            "request_id": id(request),
+            "part2_start_gate": bool(self._part2_start_gate_pending()),
+            "instruction_label": str(context.get("instruction_label") or "instruction"),
+            "button_label": str(context.get("button_label") or "Continue"),
+            "next_action": str(context.get("next_action") or ""),
+            "context": context,
+        }
+
+    def _companion_snapshot(self) -> dict[str, Any]:
+        self._tick_tactile_clock()
+        server_perf = time.perf_counter()
+        state_payload = {
+            "connection_state": "online",
+            "allowed_commands": self._companion_allowed_commands(),
+            "participant": {
+                "participant_id": str(getattr(self.package, "participant_id", "") or ""),
+                "selected_participant_id": self._selected_participant_code(),
+                "session_id": str(getattr(self.package, "session_id", "") or ""),
+                "session_group_id": str(getattr(self.package, "session_group_id", "") or ""),
+                "part_session_id": str(getattr(self.package, "part_session_id", "") or ""),
+            },
+            "setup": self._companion_setup_payload(),
+            "part_status": {
+                "available_parts": self._available_part_keys(),
+                "selected_part": self._ensure_selected_part_key(),
+                "current_package_part": self._current_package_part_key(),
+                "pending_start_part": self._pending_start_part_key(),
+            },
+            "run_status": {
+                "state_label": str(self.run_state_chip.text() if hasattr(self, "run_state_chip") else ""),
+                "progress_label": str(self.progress_label.text() if hasattr(self, "progress_label") else ""),
+                "event_label": str(self.event_label.text() if hasattr(self, "event_label") else ""),
+                "running": bool(self._run_active),
+                "paused": bool(self._run_paused),
+                "thread_alive": bool(self.thread is not None and self.thread.is_alive()),
+                "complete": bool(self.result is not None and bool(getattr(self.result, "completed", False))),
+            },
+            "run_plan": self._companion_run_plan_payload(),
+            "active_block": self._companion_active_block_payload(server_perf_counter_s=server_perf),
+            "timeline": self._companion_timeline_payload(),
+            "topup": {
+                "enabled": bool(self._topup_slots_enabled_for_plan()),
+                "draft_count": len(self._visible_topup_draft_items()),
+            },
+            "instruction_gate": self._companion_instruction_gate_payload(),
+        }
+        signature = json.dumps(state_payload, sort_keys=True, default=str)
+        if signature != self._companion_snapshot_signature:
+            self._companion_sequence += 1
+            self._companion_snapshot_signature = signature
+        return {
+            "schema": SNAPSHOT_SCHEMA,
+            "sequence": int(self._companion_sequence),
+            "server_unix_ms": int(time.time() * 1000),
+            "server_perf_counter_s": server_perf,
+            **state_payload,
+        }
+
+    def _companion_submit_setup(self, payload: dict[str, Any]) -> dict[str, Any]:
+        if self._run_active or (self.thread is not None and self.thread.is_alive()):
+            raise CompanionCommandError(reason="setup_locked_while_running")
+        participant_code = str(payload.get("participant_code") or payload.get("participant_id") or "").strip()
+        selected = self._selected_participant_code() or str(getattr(self.package, "participant_id", "") or "")
+        if participant_code and participant_code != selected:
+            raise CompanionCommandError(reason="participant_switching_is_laptop_only")
+        name = str(payload.get("participant_name") or payload.get("name") or "").strip()
+        age = str(payload.get("age") or payload.get("age_years") or "").strip()
+        handedness = str(payload.get("handedness") or "").strip()
+        gender = str(payload.get("gender") or "").strip()
+        share_name = bool(
+            payload.get("name_sharing_opt_in")
+            if "name_sharing_opt_in" in payload
+            else payload.get("include_name_in_lsl", payload.get("share_participant_name", False))
+        )
+        self.participant_name_input.setText(name)
+        self.age_input.setText(age)
+        self.include_name_lsl_checkbox.setChecked(share_name)
+        if handedness and not self._companion_select_combo_data(self.handedness_combo, handedness):
+            raise CompanionCommandError(reason="invalid_handedness")
+        if gender and not self._companion_select_combo_data(self.gender_combo, gender):
+            raise CompanionCommandError(reason="invalid_gender")
+        if not self._submit_participant_setup():
+            raise CompanionCommandError(reason="setup_incomplete")
+        return self._companion_snapshot()
+
+    def _companion_continue_instruction(self) -> dict[str, Any]:
+        if self.pending_instruction_request is None:
+            raise CompanionCommandError(reason="no_instruction_gate")
+        if self._part2_start_gate_pending():
+            raise CompanionCommandError(reason="use_start_part_2")
+        if not self._approve_pending_instruction_continue(source="phone companion"):
+            raise CompanionCommandError(reason="continue_instruction_failed")
+        return self._companion_snapshot()
+
+    def _companion_start_part(self, part_number: int) -> dict[str, Any]:
+        part = int(part_number)
+        thread_alive = bool(self.thread is not None and self.thread.is_alive())
+        if part == 2 and self._part2_start_gate_pending():
+            self._start_part2_gate(source="phone companion")
+            return self._companion_snapshot()
+        if thread_alive or self._run_active:
+            raise CompanionCommandError(reason="run_already_active")
+        if not self.demographics_submitted or self.controller is None:
+            raise CompanionCommandError(reason="setup_required")
+        target_key = str(part)
+        if target_key not in self._available_part_keys() and target_key != self._start_button_part_key():
+            raise CompanionCommandError(reason="part_not_available")
+        if target_key != self._start_button_part_key():
+            self._select_part_key(target_key, preview_first=True)
+        if target_key != self._start_button_part_key():
+            raise CompanionCommandError(reason=f"start_part_{part}_not_available")
+        if not self.start_button.isEnabled() and not self._part2_start_gate_pending():
+            raise CompanionCommandError(reason=f"start_part_{part}_not_allowed")
+        self.start()
+        return self._companion_snapshot()
 
     def _install_response_click_filter(self) -> None:
         app = self.q["QApplication"].instance()
@@ -9129,6 +9643,7 @@ class FocusModeWindow:
         self._clear_participant_details()
         self._refresh_loaded_package_display()
         self._populate_participant_code_combo(self.package.participant_id)
+        self._refresh_companion_pairing_payload()
         if hasattr(self, "mode_tabs"):
             self._set_experiment_control_tab_ready(False)
             self.mode_tabs.setCurrentIndex(self.data_logging_tab_index)
@@ -9692,6 +10207,7 @@ class FocusModeWindow:
         self.controller = None
 
     def _handle_dialog_finished(self, _code: int) -> None:
+        self._stop_companion_service()
         self._remove_response_click_filter()
         self._stop_global_response_click_listener()
         self._stop()
@@ -10676,6 +11192,7 @@ class FocusModeWindow:
             pass
 
     def _drain(self) -> None:
+        self._drain_companion_commands()
         while not self.messages.empty():
             kind, payload = self.messages.get_nowait()
             if kind == "progress":
@@ -10980,6 +11497,7 @@ class FocusModeWindow:
         auto_close_ms: int | None = None,
         screenshot_path: Path | None = None,
     ) -> int:
+        self._start_companion_service()
         if auto_start:
             self.q["QTimer"].singleShot(350, self.start)
         if screenshot_path is not None:
@@ -11003,6 +11521,10 @@ def run_focus_window(
     *,
     capture_options: SessionCaptureOptions | None = None,
     enable_missed_trial_topup: bool = True,
+    companion_enabled: bool = True,
+    companion_host: str = DEFAULT_COMPANION_HOST,
+    companion_port: int = DEFAULT_COMPANION_PORT,
+    companion_advertise_ip: str = "",
     manual_start: bool = False,
     fullscreen: bool = True,
     auto_close_ms: int | None = None,
@@ -11048,6 +11570,10 @@ def run_focus_window(
         capture_options=capture_options,
         enable_missed_trial_topup=enable_missed_trial_topup,
         controller_factory=controller_factory,
+        companion_enabled=companion_enabled,
+        companion_host=companion_host,
+        companion_port=companion_port,
+        companion_advertise_ip=companion_advertise_ip,
     )
     apply_qt_app_icon(q, app=app, window=window.dialog)
     validation_clicks: list[dict[str, Any]] = []
@@ -11083,6 +11609,10 @@ def run_launcher_window(
     *,
     capture_options: SessionCaptureOptions | None = None,
     enable_missed_trial_topup: bool = True,
+    companion_enabled: bool = True,
+    companion_host: str = DEFAULT_COMPANION_HOST,
+    companion_port: int = DEFAULT_COMPANION_PORT,
+    companion_advertise_ip: str = "",
     participant_id: str = "",
     initial_message: str = "",
 ) -> int:
@@ -12276,6 +12806,10 @@ def _run_environment_operations_window(
         selected_manifest["path"],
         capture_options=capture_options,
         enable_missed_trial_topup=enable_missed_trial_topup,
+        companion_enabled=companion_enabled,
+        companion_host=companion_host,
+        companion_port=companion_port,
+        companion_advertise_ip=companion_advertise_ip,
         manual_start=True,
         fullscreen=True,
     )
@@ -12295,6 +12829,12 @@ def _run_environment_operations_window(
 def main(argv: list[str] | None = None) -> int:
     args = build_arg_parser().parse_args(argv)
     options = _capture_options_from_args(args)
+    companion_kwargs = {
+        "companion_enabled": not bool(args.no_companion),
+        "companion_host": args.companion_host,
+        "companion_port": int(args.companion_port),
+        "companion_advertise_ip": args.companion_advertise_ip,
+    }
     single_instance = _acquire_runner_single_instance()
     if not single_instance.acquired:
         _show_runner_single_instance_notice(single_instance.message)
@@ -12304,6 +12844,7 @@ def main(argv: list[str] | None = None) -> int:
             return run_launcher_window(
                 capture_options=options,
                 enable_missed_trial_topup=args.enable_missed_trial_topup,
+                **companion_kwargs,
                 participant_id=args.participant_id,
             )
         if args.session_manifest is not None:
@@ -12311,6 +12852,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.session_manifest,
                 capture_options=options,
                 enable_missed_trial_topup=args.enable_missed_trial_topup,
+                **companion_kwargs,
                 manual_start=args.manual_start,
                 auto_close_ms=args.validation_auto_close_ms,
                 screenshot_path=args.validation_screenshot,
@@ -12322,6 +12864,7 @@ def main(argv: list[str] | None = None) -> int:
                 return run_launcher_window(
                     capture_options=options,
                     enable_missed_trial_topup=args.enable_missed_trial_topup,
+                    **companion_kwargs,
                     participant_id=args.participant_id,
                     initial_message=str(exc),
                 )
@@ -12329,6 +12872,7 @@ def main(argv: list[str] | None = None) -> int:
                 manifest,
                 capture_options=options,
                 enable_missed_trial_topup=args.enable_missed_trial_topup,
+                **companion_kwargs,
                 manual_start=args.manual_start,
                 auto_close_ms=args.validation_auto_close_ms,
                 screenshot_path=args.validation_screenshot,
@@ -12340,6 +12884,7 @@ def main(argv: list[str] | None = None) -> int:
                 return run_launcher_window(
                     capture_options=options,
                     enable_missed_trial_topup=args.enable_missed_trial_topup,
+                    **companion_kwargs,
                     participant_id=args.participant_id,
                     initial_message=str(exc),
                 )
@@ -12347,6 +12892,7 @@ def main(argv: list[str] | None = None) -> int:
                 manifest,
                 capture_options=options,
                 enable_missed_trial_topup=args.enable_missed_trial_topup,
+                **companion_kwargs,
                 manual_start=args.manual_start,
                 auto_close_ms=args.validation_auto_close_ms,
                 screenshot_path=args.validation_screenshot,
@@ -12354,6 +12900,7 @@ def main(argv: list[str] | None = None) -> int:
         return run_launcher_window(
             capture_options=options,
             enable_missed_trial_topup=args.enable_missed_trial_topup,
+            **companion_kwargs,
             participant_id=args.participant_id,
         )
     finally:

@@ -65,6 +65,20 @@
       "source": "tracked"
     },
     {
+      "kind": "android_build_script",
+      "path": "windows/Build_Android_Companion.ps1",
+      "required": true,
+      "role": "builds the native Android runner companion debug APK from source",
+      "source": "tracked"
+    },
+    {
+      "kind": "android_source_tree",
+      "path": "android/runner-companion",
+      "required": true,
+      "role": "native Kotlin/Compose runner companion source and Gradle wrapper",
+      "source": "tracked"
+    },
+    {
       "kind": "launcher_support",
       "path": "windows/Setup_Windows_App.ps1",
       "required": true,
@@ -310,10 +324,10 @@
   "schema": "pps-installer-package-inventory.v1",
   "stage_root": "",
   "summary": {
-    "item_count": 43,
+    "item_count": 45,
     "missing_required_count": 0,
     "optional_absent_count": 0,
     "optional_item_count": 2,
-    "required_item_count": 41
+    "required_item_count": 43
   }
 }

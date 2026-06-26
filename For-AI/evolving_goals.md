@@ -2,6 +2,12 @@
 
 This file is the dated project memory. Add a new dated entry when a chat or implementation changes project direction, product behavior, or release constraints.
 
+## 2026-06-26
+
+- Focus Mode now has a local Android runner companion v1. The runner hosts `runner_companion.py` on LAN port `8767` by default while Focus Mode is open, displays a QR code with `pps-companion://pair?...`, and protects snapshot/command APIs with a per-run `X-PPS-Companion-Token`. The phone can submit the existing participant setup fields, start Part 01 or Part 02 only when `allowed_commands` permits it, continue non-Part-02 instruction gates, and display live timeline/clock state. Pause, stop, participant switching, output tests, playback, timing, LSL, LabRecorder, ledgers, top-up, and analysis remain laptop-only.
+- The companion snapshot contract is additive and sequence-based: authorized snapshots include server wall/perf clocks, allowed commands, participant/setup status, part/run/block status, run plan rows, active-block timing anchors, timeline trial rows, tactile cues, click counts, top-up draft count, and current instruction gate. The Android app extrapolates elapsed time only while the last snapshot says the block is running and not paused or instruction-waiting; offline estimates are capped at block duration and marked stale until WebSocket reconnect resyncs.
+- Release packaging now treats `android/runner-companion/` and `windows/Build_Android_Companion.ps1` as tracked source/build materials for the offline lab package, while generated APKs, Android `build/`, and `.gradle/` outputs remain ignored unless a release explicitly attaches a reviewed APK artifact. The runner PyInstaller build installs the Python `web` extra and includes hidden imports for FastAPI, uvicorn WebSocket support, websockets, QR generation, and Pillow.
+
 ## 2026-06-25
 
 - Focus Mode now makes zero-miss top-up an explicit completed state instead of a quiet skip. When a part finishes with top-up enabled but no missed tactile trials, `SessionRunnerController` emits `ui_event = "topup_completion"` with `topup_outcome = "not_needed"`, writes the outcome/counts/operator message into `part_completion_status.json`, carries the same summary on `SessionRunResult`, and the Focus Mode UI shows the no-top-up-needed status while continuing into the auto-loaded Part 02 / `Start Part 02` handoff.

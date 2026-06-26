@@ -11,6 +11,7 @@ This map records the intended ownership boundaries for the current Python-first 
 | Segment manifests | Segment 0-6 artifact state, stale-upstream checks, deterministic manifest hashes | currently in `dashboard_app.py`, target split into manifest/segment modules |
 | Stimulus and render | Looming/tactile generation, trajectory sampling, SOFA/FABIAN and native 3DTI handoff | `design.py`, `stimulus_generation.py`, `render_backend.py`, `timing_schedule.py` |
 | Runtime and events | Session package materialization, participant playback, event logs, LSL/XDF mirrors, output evidence | `session_runner.py`, `focus_app.py`, `timing_events.py`, `session_events.py`, `output_evidence.py` |
+| Runner phone companion | Token-gated LAN snapshot/command API hosted by Focus Mode, plus native Android pairing/setup/timeline controls | `runner_companion.py`, `focus_app.py`, `android/runner-companion/` |
 | Validation evidence | Software, UI, hardware, LSL/XDF, loopback, and publication-readiness protocols | `validation_protocols/`, `tests/` |
 | Preloads and profile recreation | Published-study templates, preload catalogs, Segment 0-4 gates, Protocol 12 | `study_templates/`, `assets/preloads/`, `profile_recreation.py` |
 | Literature and paper audit | Paper/supplement metadata extraction, source-pointer ledgers, implementation blockers, profile-candidate evidence | `peripersonal_space_toolkit.paper_audit`, `tools/paper_metadata_parser/`, `For-AI/audiotactile-paper-metadata-audit/` |

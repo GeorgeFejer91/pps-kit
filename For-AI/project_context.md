@@ -24,7 +24,7 @@ Primary users are cognitive neuroscience and psychology researchers who need to 
 
 - Raw participant recordings or name-bearing outputs in Git.
 - Generated participant WAVs and local session artifacts in Git.
-- APKs, VR source code, or headset-specific app builds unless a future project explicitly adds them.
+- Generated APKs or headset-specific app builds unless a future release explicitly adds them; the native Android runner companion source is now in scope as a local phone companion for Focus Mode.
 - Redistribution of SOFA/HRIR files, background music, proprietary sound sets, or other third-party assets unless rights are verified.
 - Full visual/VR/social PPS reconstruction unless those details directly affect audio-tactile timing, spatial audio, tactile cues, responses, or analysis.
 
@@ -36,6 +36,7 @@ Primary users are cognitive neuroscience and psychology researchers who need to 
 - The paper metadata audit is now exposed through the read-only package module `peripersonal_space_toolkit.paper_audit` so tests and future profile-scaffolding code can consume tracked paper-audit ledgers without importing the refresh/acquisition CLI. The refresh/acquisition implementation remains under `tools/paper_metadata_parser/`, and raw PDFs, supplements, extracted full text, page images, and local resume ZIPs remain ignored under `artifacts/paper_metadata_audit/`.
 - Validation tiers are documented in `docs/VALIDATION.md` and implemented by `tools/check_all.ps1`. `Quick` is the fresh-clone-safe routine check, `Standard` adds the full tracked pytest suite, and `Deep` is reserved for explicit generated-artifact or hardware/lab-PC checks.
 - Public CLIs are `pps-generate`, `pps-design`, `pps-dashboard`, `pps-render-design`, `pps-audio-stress`, `pps-latency-validate`, `pps-decode`, and `pps-analyze`. The only active operator experiment runner is the packaged `dist\PPSExperimentRunner\PPSExperimentRunner.exe`; `focus_app.py` remains the exe implementation and validation import target, not a separate public runner CLI, and direct module launch exits with retirement guidance. Runner startup is guarded by the `Local\PPSExperimentRunnerSingleInstance` Windows mutex so only one Experiment Runner instance can be open in a user session at a time. The old `pps-run`/Tk participant runner is no longer a public entry point.
+- `src/peripersonal_space_toolkit/runner_companion.py` is the Focus Mode-hosted LAN companion API for trusted phones. It is bound by default to port `8767`, exposes public health plus token-gated snapshot/WebSocket/setup/start/continue endpoints, and delegates commands back onto the Qt UI thread through `focus_app.py` so timing, playback, LSL, LabRecorder, ledgers, and output logic stay laptop-owned. `android/runner-companion/` is the native Kotlin/Compose Material 3 phone app with QR pairing, setup, live timeline, offline clock extrapolation, and Start/Continue controls only.
 - `configs/` contains example experiment and stimulus-design settings.
 - `Example-configs/` may contain reference archives for external-study stimulus-generation materials; verify redistribution rights before treating any bundled third-party WAVs or scripts as public release assets.
 - `study_templates/` contains preloadable literature-backed template JSON files.

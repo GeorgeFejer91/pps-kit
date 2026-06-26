@@ -3,7 +3,7 @@
 The finished Windows distribution uses two download layers:
 
 - `PPS-Toolkit-Downloader.exe` is the small GitHub-hosted bootstrapper. It must stay below 100 MiB, should stay below 50 MiB, and preferably stays below 25 MiB.
-- `PPS-Toolkit-vX.Y.Z-offline-lab-windows-x64.zip` is the heavyweight Zenodo-hosted offline lab package. It contains the runner, packaged dashboard launcher, dashboard files, redistributable assets, FABIAN SOFA resource, approved 3DTI files, docs, licenses, and Windows launchers.
+- `PPS-Toolkit-vX.Y.Z-offline-lab-windows-x64.zip` is the heavyweight Zenodo-hosted offline lab package. It contains the runner, packaged dashboard launcher, dashboard files, Android companion source/build files, redistributable assets, FABIAN SOFA resource, approved 3DTI files, docs, licenses, and Windows launchers.
 
 The repo contains the installer package source under `windows/downloader/`
 and the tracked package definition at
@@ -25,6 +25,12 @@ Build the packaged dashboard launcher:
 
 ```powershell
 windows\Build_Dashboard_Launcher_Exe.ps1
+```
+
+Build the optional Android companion debug APK from source:
+
+```powershell
+windows\Build_Android_Companion.ps1
 ```
 
 Build the release package and manifest:
@@ -71,6 +77,11 @@ The dashboard entrypoint is `dist/PPSDashboardLauncher/PPSDashboardLauncher.exe`
 The downloader refuses to extract or launch the package until the payload hash
 matches the manifest, and it rejects manifests whose package inventory reports
 missing required items.
+
+Generated APKs are build outputs and stay outside Git and the release source
+inventory unless a release explicitly attaches an APK artifact. The offline lab
+package includes `android/runner-companion/` and
+`windows/Build_Android_Companion.ps1` so labs can rebuild/install locally.
 
 ## Release Order
 

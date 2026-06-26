@@ -1030,6 +1030,71 @@ def test_focus_mode_setup_submit_prepares_controller_before_start(tmp_path: Path
     window.dialog.close()
 
 
+def test_focus_mode_companion_setup_and_commands_use_existing_ui_paths(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    created: list[dict[str, object]] = []
+
+    class FakeController:
+        def __init__(self, package_obj, *, capture_options=None, runner_metadata=None, **_kwargs):
+            self.package = package_obj
+            self.capture_options = capture_options
+            self.runner_metadata = dict(runner_metadata or {})
+            self.audio_engine = None
+            created.append(self.runner_metadata)
+
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+        controller_factory=FakeController,
+        companion_enabled=False,
+    )
+    window.dialog.show()
+    app.processEvents()
+
+    snapshot = window._companion_submit_setup(
+        {
+            "participant_code": "P001",
+            "participant_name": "Phone Participant",
+            "age": "31",
+            "handedness": "left",
+            "gender": "prefer_not_to_say",
+            "name_sharing_opt_in": True,
+        }
+    )
+
+    assert snapshot["setup"]["submitted"] is True
+    assert created[-1]["participant_name"] == "Phone Participant"
+    assert created[-1]["include_name_in_lsl"] is True
+    ledger = json.loads(focus_app.participant_ledger_path(tmp_path).read_text(encoding="utf-8"))
+    assert ledger["participants"]["P001"]["participant_name"] == "Phone Participant"
+    assert ledger["participants"]["P001"]["include_name_in_lsl"] is True
+
+    starts: list[str] = []
+    window.start = lambda: starts.append("start")  # type: ignore[method-assign]
+    start_snapshot = window._companion_start_part(1)
+    assert starts == ["start"]
+    assert start_snapshot["schema"] == focus_app.SNAPSHOT_SCHEMA
+
+    gate = {"context": {"instruction_label": "Gate", "button_label": "Continue"}, "approved": False, "event": threading.Event()}
+    window.pending_instruction_request = gate
+    continue_snapshot = window._companion_continue_instruction()
+    assert gate["approved"] is True
+    assert gate["event"].is_set()
+    assert window.pending_instruction_request is None
+    assert continue_snapshot["instruction_gate"]["waiting"] is False
+    window.dialog.close()
+
+
 def test_focus_mode_participant_setup_ledger_restores_submitted_fields(tmp_path: Path):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:

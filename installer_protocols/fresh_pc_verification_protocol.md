@@ -92,7 +92,7 @@ Current local smoke result on this fresh PC:
 - Rebuilt `dist/PPS-Toolkit-Downloader.exe` with default manifest URL `http://127.0.0.1:8788/pps_download_manifest.v1.json`; size was 6.43 MiB.
 - Served `dist/` from `http://127.0.0.1:8788/`.
 - Ran the downloader with `--quiet --manifest http://127.0.0.1:8788/pps_download_manifest.v1.json --install-dir local_data\installer_smoke\installed --force --no-shortcuts`; exit code was `0`.
-- Download cache was `C:\Users\gfeje\AppData\Local\PPS Toolkit\downloads\PPS-Toolkit-v0.1.0-offline-lab-windows-x64.zip`, size `442928793`, SHA256 `359549779c35d878b0a50ad73e93c91961e4115863751737c97bac99044fb74d`, matching the manifest.
+- Download cache was `%LOCALAPPDATA%\PPS Toolkit\downloads\PPS-Toolkit-v0.1.0-offline-lab-windows-x64.zip`, size `442928793`, SHA256 `359549779c35d878b0a50ad73e93c91961e4115863751737c97bac99044fb74d`, matching the manifest.
 - Installed package inventory reported `missing_required_count = 0`.
 - Installed payload contained `dist/PPSDashboardLauncher/PPSDashboardLauncher.exe`, `dist/PPSExperimentRunner/PPSExperimentRunner.exe`, Qt `qwindows.dll`, Windows batch launchers, docs, assets, source, study templates, and `installer_protocols/`.
 - Installed payload did not include `For-AI/`.

@@ -102,6 +102,7 @@ $Items = @(
     "pyproject.toml",
     "index.html",
     ".nojekyll",
+    "android",
     "configs",
     "docs",
     "installer_protocols",

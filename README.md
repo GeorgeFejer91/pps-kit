@@ -63,6 +63,12 @@ harnesses, but direct Python/module runner invocation exits with retirement
 guidance instead of opening Focus Mode. The build runs a Qt runtime preflight
 and fails if the Windows Qt platform plugin is not packaged.
 
+Focus Mode also hosts a token-gated Android runner companion service on the
+local LAN by default. The QR pairing panel in the runner lets a trusted phone
+submit setup fields, start Part 01/Part 02 when the runner allows it, continue
+instruction gates, and display the live timeline without becoming the timing
+authority. See [docs/ANDROID_RUNNER_COMPANION.md](docs/ANDROID_RUNNER_COMPANION.md).
+
 Optional: build the lightweight release downloader and offline-lab distribution
 manifest. Public Windows releases use a GitHub-hosted downloader plus a
 Zenodo-hosted payload:
@@ -216,6 +222,7 @@ assets\0. Head-Related...\FABIAN_HRIR_measured_HATO_0.sofa
                          Bundled standardized FABIAN/TU HRIR resource
 assets\master_blocks\    Study block templates
 assets\preloads\         Profile file-cabinet catalogs and prebaked looming WAVs
+android\runner-companion\ Native Kotlin/Compose Android phone companion source
 configs\                 Example experiment and stimulus-design configs
 data\sample\             Deidentified sample analysis CSVs
 docs\                    Hardware setup, replication, privacy, Windows, protocol, and paradigm notes

@@ -37,7 +37,9 @@ release binaries.
 `dist/` stays ignored. Generated downloader binaries, packaged runner builds,
 packaged dashboard launcher builds, runtime bundles, dependency bundles, and any
 assembled repository payloads are attached to GitHub Releases or fetched from
-declared upstream URLs; they are not committed to the source repo.
+declared upstream URLs; they are not committed to the source repo. Generated
+Android APKs and Gradle build outputs are also ignored unless a release
+explicitly attaches a reviewed APK artifact.
 
 Do not point the public download page directly at
 `https://github.com/GeorgeFejer91/pps-kit/releases/latest/download/PPS-Toolkit-Downloader.exe`
@@ -110,7 +112,8 @@ install folder. At minimum the installed folder must include:
 - The packaged Qt Windows platform plugin at `dist/PPSExperimentRunner/_internal/PySide6/plugins/platforms/qwindows.dll`; without it the runner shows "no Qt platform plugin could be initialized" and cannot start.
 - `dist/PPSDashboardLauncher/PPSDashboardLauncher.exe` and its PyInstaller onedir resources. This is the exe entrypoint for the offline/local HTML GUI; it should start the local companion and open the dashboard without requiring users to run Python commands or batch files.
 - Dashboard launchers kept for inspectability and fallback: `windows/Launch_HTML_Dashboard.bat`, `windows/Start_Website_Companion.bat`, and `windows/Launch_Experiment_Runner.bat`.
-- Installer/build support needed to audit or rebuild the package: `windows/downloader/`, `windows/Build_PPS_Downloader.ps1`, `windows/Build_PPS_Distribution.ps1`, `windows/Build_Dashboard_Launcher_Exe.ps1`, `windows/Setup_Windows_App.ps1`, and `windows/Create_Desktop_Shortcut.ps1`.
+- Installer/build support needed to audit or rebuild the package: `windows/downloader/`, `windows/Build_PPS_Downloader.ps1`, `windows/Build_PPS_Distribution.ps1`, `windows/Build_Dashboard_Launcher_Exe.ps1`, `windows/Build_Android_Companion.ps1`, `windows/Setup_Windows_App.ps1`, and `windows/Create_Desktop_Shortcut.ps1`.
+- Native Android runner companion source/build files under `android/runner-companion/`; generated APKs remain build outputs, not tracked source.
 - Installer protocols and current missing-link ledger under `installer_protocols/`.
 - Local dashboard and hosted-dashboard assets: `src/peripersonal_space_toolkit/dashboard/`, root `index.html`, `.nojekyll`, and `src/peripersonal_space_toolkit/viewer/`.
 - App identity assets under `src/peripersonal_space_toolkit/assets/`.
@@ -158,19 +161,20 @@ the changed behavior.
 2. Run tests and release audit before packaging.
 3. Build the packaged runner with `windows/Build_Experiment_Runner_Exe.ps1`. This must run `tools/check_qt_runtime.py` before and after PyInstaller so broken PySide6 imports or missing `qwindows.dll` fail the build. After any runner-functionality change, this packaged/local exe path must be refreshed and verified so the installable runner carries the new source behavior. After building, verify the packaged exe, not just source Python, can open `Komplete Audio ASIO Driver` through the real runner path because ASIO depends on the frozen entrypoint setting `SD_ENABLE_ASIO=1` before any sounddevice import.
 4. Build or stage `PPSDashboardLauncher.exe`, the offline/local HTML GUI exe entrypoint that starts the companion and opens the dashboard.
-5. Stage the repo-shaped program directory and all dependency/runtime payloads that the downloader will install.
-6. Let `tools/package_inventory.py --strict` validate the staged repository-shaped package and write `pps_package_inventory.v1.json`.
-7. Generate `pps_download_manifest.v1.json` with the final GitHub manifest/downloader context, Zenodo payload URL, external dependency URL if unavoidable, SHA256, size, version, and role.
-8. Build `PPS-Toolkit-Downloader.exe` with the final manifest URL embedded; fail the build if it is 100 MiB or larger.
-9. Attach the downloader, manifest, and any GitHub-hosted dependency/runtime/repo payloads to the GitHub Release.
-10. Test from the public download page on a clean Windows folder. The proof must show the single downloader exe downloading content, installing into a user-chosen location, creating/opening the offline HTML GUI exe, and launching `PPSExperimentRunner.exe`.
-11. On a clean Windows lab PC without Komplete ASIO, verify the downloader/setup
+5. Build the Android companion source when phone APK evidence is needed with `windows/Build_Android_Companion.ps1`; do not commit the generated APK.
+6. Stage the repo-shaped program directory and all dependency/runtime payloads that the downloader will install.
+7. Let `tools/package_inventory.py --strict` validate the staged repository-shaped package and write `pps_package_inventory.v1.json`.
+8. Generate `pps_download_manifest.v1.json` with the final GitHub manifest/downloader context, Zenodo payload URL, external dependency URL if unavoidable, SHA256, size, version, and role.
+9. Build `PPS-Toolkit-Downloader.exe` with the final manifest URL embedded; fail the build if it is 100 MiB or larger.
+10. Attach the downloader, manifest, and any GitHub-hosted dependency/runtime/repo payloads to the GitHub Release.
+11. Test from the public download page on a clean Windows folder. The proof must show the single downloader exe downloading content, installing into a user-chosen location, creating/opening the offline HTML GUI exe, and launching `PPSExperimentRunner.exe`.
+12. On a clean Windows lab PC without Komplete ASIO, verify the downloader/setup
     opens the official NI driver page, reports provider action required, and the
     runner launcher shows an audio dependency message plus an `Audio Driver
     Instructions` action with official links and Retry Audio Detection. After
     installing the NI driver, rerun the PC audit and
     `pps-audio-stress --device-query Komplete --channels 3`.
-12. On a Windows lab PC where the NI driver is installed but the interface is
+13. On a Windows lab PC where the NI driver is installed but the interface is
     unplugged or not enumerated, verify setup/runner messaging switches to the
     reconnect/power-cycle/retry path and does not keep telling the user to
     download the driver. After the interface appears, the runner should proceed
@@ -179,4 +183,4 @@ the changed behavior.
 
 ## Do Not Package
 
-Do not include raw participant data, name-bearing exports, generated participant/session outputs, local validation artifacts, downloaded model caches, private local paths, credentials, or unreviewed third-party audio/assets. Local runtime folders such as `local_data/`, `artifacts/`, and `models/` remain ignored.
+Do not include raw participant data, name-bearing exports, generated participant/session outputs, generated APKs unless explicitly release-reviewed, local validation artifacts, downloaded model caches, private local paths, credentials, or unreviewed third-party audio/assets. Local runtime folders such as `local_data/`, `artifacts/`, and `models/` remain ignored.

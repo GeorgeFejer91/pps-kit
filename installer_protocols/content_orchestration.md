@@ -10,6 +10,7 @@ The installed payload is a repo-shaped program directory for researchers, not th
 - Dashboard/static assets: `src/peripersonal_space_toolkit/dashboard/`, `src/peripersonal_space_toolkit/viewer/`, root `index.html`, `.nojekyll`.
 - Runtime assets: `assets/preloads/`, `assets/breathing/`, `assets/click/`, `assets/tactile/`, and the approved FABIAN SOFA asset.
 - Researcher-facing source/config/docs: `src/`, `configs/`, `study_templates/`, `data/sample/`, `docs/`, `README.md`, `LICENSE`, `THIRD_PARTY_LICENSES.md`, `CITATION.cff`.
+- Android companion source/build materials: `android/runner-companion/` and `windows/Build_Android_Companion.ps1`.
 - Windows launchers and build/audit helpers needed to inspect the installation.
 - `installer_protocols/` so installer package decisions and missing links are visible in the installed package.
 
@@ -18,6 +19,7 @@ The installed payload is a repo-shaped program directory for researchers, not th
 - `For-AI/`; it is source-repo project memory for future agents, not an end-user install surface.
 - `dist/` artifacts other than the staged packaged exes copied into the payload.
 - Generated sessions, participant outputs, XDF/WAV validation artifacts, model caches, private paths, credentials, raw recordings, and local hardware notes.
+- Generated APKs and Android `build/` or `.gradle/` outputs unless a release explicitly attaches a reviewed APK artifact.
 
 ## Entrypoints
 

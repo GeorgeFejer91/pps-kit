@@ -87,15 +87,18 @@ def test_focus_app_cli_defaults_enable_labrecorder_wired_loopback_and_topup():
     assert options.wired_loopback_mode == "output4_tactile_proxy"
     assert options.start_external_labrecorder is True
     assert args.enable_missed_trial_topup is True
+    assert args.no_companion is False
+    assert args.companion_port == focus_app.DEFAULT_COMPANION_PORT
 
     unchecked_args = focus_app.build_arg_parser().parse_args(
-        ["--wired-loopback", "off", "--no-external-labrecorder", "--no-missed-trial-topup"]
+        ["--wired-loopback", "off", "--no-external-labrecorder", "--no-missed-trial-topup", "--no-companion"]
     )
     unchecked_options = focus_app._capture_options_from_args(unchecked_args)
 
     assert unchecked_options.wired_loopback_mode == "off"
     assert unchecked_options.start_external_labrecorder is False
     assert unchecked_args.enable_missed_trial_topup is False
+    assert unchecked_args.no_companion is True
 
 
 def test_focus_runner_command_requires_packaged_exe(tmp_path: Path, monkeypatch):

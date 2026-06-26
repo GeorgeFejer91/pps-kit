@@ -81,6 +81,20 @@ INVENTORY_ITEMS: list[dict[str, Any]] = [
         "source": "tracked",
     },
     {
+        "path": "windows/Build_Android_Companion.ps1",
+        "kind": "android_build_script",
+        "role": "builds the native Android runner companion debug APK from source",
+        "required": True,
+        "source": "tracked",
+    },
+    {
+        "path": "android/runner-companion",
+        "kind": "android_source_tree",
+        "role": "native Kotlin/Compose runner companion source and Gradle wrapper",
+        "required": True,
+        "source": "tracked",
+    },
+    {
         "path": "windows/Setup_Windows_App.ps1",
         "kind": "launcher_support",
         "role": "creates local venv for source installs",

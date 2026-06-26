@@ -6,6 +6,8 @@ __pycache__/
 .venv-*/
 build/
 dist/
+android/**/.gradle/
+android/**/build/
 *.egg-info/
 configs/stimulus_design.generated.json
 models/
