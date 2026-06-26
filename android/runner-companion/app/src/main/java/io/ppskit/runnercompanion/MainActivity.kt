@@ -1,6 +1,7 @@
 package io.ppskit.runnercompanion
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
@@ -67,20 +68,29 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.delay
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 
 class MainActivity : ComponentActivity() {
     private val runnerClient = RunnerClient()
+    private var latestPairing by mutableStateOf<PairingInfo?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val initialPairing = PairingInfo.parseOrNull(intent?.dataString)
+        latestPairing = PairingInfo.parseOrNull(intent?.dataString)
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    RunnerCompanionApp(initialPairing, runnerClient)
+                    RunnerCompanionApp(latestPairing, runnerClient)
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        latestPairing = PairingInfo.parseOrNull(intent.dataString)
     }
 
     override fun onDestroy() {
@@ -98,6 +108,14 @@ private fun RunnerCompanionApp(initialPairing: PairingInfo?, client: RunnerClien
     var connected by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf("") }
     var estimate by remember { mutableStateOf(EstimatedClock(0.0, stale = true, cappedAtBlockEnd = false)) }
+
+    LaunchedEffect(initialPairing) {
+        val incoming = initialPairing ?: return@LaunchedEffect
+        pairing = incoming
+        snapshot = null
+        connected = false
+        error = ""
+    }
 
     LaunchedEffect(pairing) {
         val current = pairing ?: return@LaunchedEffect
@@ -396,11 +414,19 @@ private fun ChoiceRow(label: String, selected: String, options: List<String>, on
 private fun QrScanner(modifier: Modifier = Modifier, onCode: (String) -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val cleanupRef = remember { AtomicReference<(() -> Unit)?>(null) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            cleanupRef.getAndSet(null)?.invoke()
+        }
+    }
+
     AndroidView(
         modifier = modifier,
         factory = { ctx ->
             PreviewView(ctx).also { previewView ->
-                bindScanner(context, lifecycleOwner, previewView, onCode)
+                cleanupRef.set(bindScanner(context, lifecycleOwner, previewView, onCode))
             }
         },
     )
@@ -412,9 +438,12 @@ private fun bindScanner(
     lifecycleOwner: androidx.lifecycle.LifecycleOwner,
     previewView: PreviewView,
     onCode: (String) -> Unit,
-) {
+): () -> Unit {
     val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
     val executor = Executors.newSingleThreadExecutor()
+    val mainExecutor = ContextCompat.getMainExecutor(context)
+    val active = AtomicBoolean(true)
+    val delivered = AtomicBoolean(false)
     val scanner = BarcodeScanning.getClient(
         BarcodeScannerOptions.Builder()
             .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
@@ -422,6 +451,9 @@ private fun bindScanner(
     )
     cameraProviderFuture.addListener(
         {
+            if (!active.get()) {
+                return@addListener
+            }
             val cameraProvider = cameraProviderFuture.get()
             val preview = Preview.Builder().build().also {
                 it.setSurfaceProvider(previewView.surfaceProvider)
@@ -430,6 +462,10 @@ private fun bindScanner(
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
             analysis.setAnalyzer(executor) { imageProxy ->
+                if (!active.get()) {
+                    imageProxy.close()
+                    return@setAnalyzer
+                }
                 val mediaImage = imageProxy.image
                 if (mediaImage == null) {
                     imageProxy.close()
@@ -437,9 +473,10 @@ private fun bindScanner(
                 }
                 val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
                 scanner.process(image)
-                    .addOnSuccessListener { barcodes ->
+                    .addOnSuccessListener(mainExecutor) { barcodes ->
                         val value = barcodes.firstOrNull()?.rawValue
-                        if (!value.isNullOrBlank()) {
+                        if (!value.isNullOrBlank() && delivered.compareAndSet(false, true)) {
+                            active.set(false)
                             onCode(value)
                         }
                     }
@@ -448,8 +485,18 @@ private fun bindScanner(
             cameraProvider.unbindAll()
             cameraProvider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, analysis)
         },
-        ContextCompat.getMainExecutor(context),
+        mainExecutor,
     )
+    return {
+        active.set(false)
+        runCatching {
+            if (cameraProviderFuture.isDone) {
+                cameraProviderFuture.get().unbindAll()
+            }
+        }
+        runCatching { scanner.close() }
+        executor.shutdownNow()
+    }
 }
 
 private fun formatSeconds(value: Double): String = String.format("%.1fs", value.coerceAtLeast(0.0))
