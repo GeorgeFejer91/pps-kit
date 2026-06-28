@@ -23,6 +23,7 @@ from .design import (
     DISPLAY_ROTATION_DEG_MIN,
     DISTANCE_CM_MAX,
     DISTANCE_CM_MIN,
+    PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
     ROTATION_DEG_MAX,
     ROTATION_DEG_MIN,
     AudioFileSpec,
@@ -39,6 +40,7 @@ from .design import (
     export_protocol_csv,
     export_trajectory_csv,
     block_trial_rows,
+    gold_standard_looming_source_parameters,
     load_design,
     participant_block_orders,
     point_from_distance_rotation_height,
@@ -2140,14 +2142,23 @@ class QtStimulusDesigner:
         self.noise_gain.setValue(noise.gain)
 
     def _add_or_update_noise(self) -> None:
+        row = self._selected_row(self.noise_table)
+        existing = self.design.noises[row] if row is not None and row < len(self.design.noises) else None
+        source_profile = existing.source_profile if existing and existing.source_profile else PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+        source_profile_parameters = (
+            dict(existing.source_profile_parameters)
+            if existing and existing.source_profile_parameters
+            else gold_standard_looming_source_parameters()
+        )
         noise = NoiseDefinition(
             label=self.noise_label.text().strip() or self.noise_type.currentText().title(),
             noise_type=self.noise_type.currentText(),
             azimuth_deg=self.noise_azimuth.value(),
             elevation_deg=0.0,
             gain=self.noise_gain.value(),
+            source_profile=source_profile,
+            source_profile_parameters=source_profile_parameters,
         )
-        row = self._selected_row(self.noise_table)
         if row is None:
             self.design.noises.append(noise)
         else:

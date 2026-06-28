@@ -42,12 +42,32 @@ SUPPORTED_BLOCK_ORDER_RANDOMIZATION = ("counterbalanced_rotation", "seeded_rando
 DEFAULT_SOFA_FILE = "assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa"
 DEFAULT_TRAJECTORY_PLANE_HEIGHT_M = 0.0
 DEFAULT_TRAJECTORY_PLANE_LABEL = "listener head/ear center plane"
+PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE = "dynaspace_gaussian_burst_train"
+PPS_LOOMING_GOLD_STANDARD_SOURCE_PARAMETERS: dict[str, Any] = {
+    "burst_count": 33,
+    "burst_duration_s": 0.030,
+    "rise_fall_s": 0.010,
+    "inter_burst_interval_s": 0.065,
+    "onset_s": 0.300,
+    "standard_basis": (
+        "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found "
+        "33 peaks at about 95 ms IOI; Consensus evidence supports broadband transients for "
+        "localization/salience while 3DTI/SOFA owns binaural spatial cues."
+    ),
+}
 DISTANCE_CM_MIN = 1.0
 DISTANCE_CM_MAX = 1000.0
 ROTATION_DEG_MIN = -180.0
 ROTATION_DEG_MAX = 180.0
 DISPLAY_ROTATION_DEG_MIN = 0.0
 DISPLAY_ROTATION_DEG_MAX = 360.0
+
+
+def gold_standard_looming_source_parameters(overrides: dict[str, Any] | None = None) -> dict[str, Any]:
+    parameters = dict(PPS_LOOMING_GOLD_STANDARD_SOURCE_PARAMETERS)
+    if overrides:
+        parameters.update(overrides)
+    return parameters
 
 
 @dataclass
@@ -74,6 +94,8 @@ class NoiseDefinition:
     azimuth_deg: float = 0.0
     elevation_deg: float = 0.0
     gain: float = 1.0
+    source_profile: str = ""
+    source_profile_parameters: dict[str, Any] = field(default_factory=dict)
     prebaked_path: str = ""
     sequence_order: int = 0
     motion_mode: str = "looming"
@@ -1431,6 +1453,8 @@ def _sound_source_from_noise(noise: NoiseDefinition) -> dict[str, Any]:
         "azimuth_deg": noise.azimuth_deg,
         "elevation_deg": noise.elevation_deg,
         "gain": noise.gain,
+        "source_profile": noise.source_profile,
+        "source_profile_parameters": dict(noise.source_profile_parameters),
         "source_path": noise.prebaked_path,
         "prebaked_path": noise.prebaked_path,
         "source_kind": "procedural_noise",

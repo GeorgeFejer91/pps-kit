@@ -61,7 +61,7 @@
       "label": "DynaSpace proxy looming burst train",
       "path": "assets/preloads/roussel_2025_dynaspace_mobile_pps/02_looming_stimuli/looming_DynaSpace_proxy_looming_burst_train.wav",
       "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/roussel_2025_dynaspace_mobile_pps/02_looming_stimuli/looming_DynaSpace_proxy_looming_burst_train.wav",
-      "sha256": "ffad6206ad134c6df5843f7d10e9b43bce9871098b5ef45ab1f3729908a5a1ea",
+      "sha256": "e193ce4cad8a46ec822063984328671269eabd8e37ba75d5389a550b0f0fbdcf",
       "duration_s": 3.85,
       "sample_rate": 44100,
       "channels": 2,
@@ -97,13 +97,22 @@
           "y_m": 0.141421,
           "z_m": 0.0
         }
+      },
+      "source_profile": "dynaspace_gaussian_burst_train",
+      "source_profile_parameters": {
+        "burst_count": 33,
+        "burst_duration_s": 0.03,
+        "rise_fall_s": 0.01,
+        "inter_burst_interval_s": 0.065,
+        "onset_s": 0.3,
+        "evidence_basis": "Raw DynaSpace WAV audit detected 33 peaks with about 95 ms median IOI; Hobeika lineage reports 30 ms Gaussian white-noise bursts, 10 ms rise/fall, and 65 ms inter-burst interval."
       }
     },
     {
       "label": "DynaSpace proxy fixed 640 cm burst train",
       "path": "assets/preloads/roussel_2025_dynaspace_mobile_pps/02_looming_stimuli/looming_DynaSpace_proxy_fixed_640_cm_burst_train.wav",
       "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/roussel_2025_dynaspace_mobile_pps/02_looming_stimuli/looming_DynaSpace_proxy_fixed_640_cm_burst_train.wav",
-      "sha256": "24ecc84b3728d5b7823b90e30cda69480065c01954faacb1443c8ceb6b92d04c",
+      "sha256": "56b7c6f88d093d8731915a72781993c3fab44e80434a1b2ab36f3134f9b8908a",
       "duration_s": 3.85,
       "sample_rate": 44100,
       "channels": 2,
@@ -139,6 +148,15 @@
           "y_m": 4.525483,
           "z_m": 0.0
         }
+      },
+      "source_profile": "dynaspace_gaussian_burst_train",
+      "source_profile_parameters": {
+        "burst_count": 33,
+        "burst_duration_s": 0.03,
+        "rise_fall_s": 0.01,
+        "inter_burst_interval_s": 0.065,
+        "onset_s": 0.3,
+        "evidence_basis": "Raw DynaSpace WAV audit detected 33 peaks with about 95 ms median IOI; Hobeika lineage reports 30 ms Gaussian white-noise bursts, 10 ms rise/fall, and 65 ms inter-burst interval."
       }
     }
   ],

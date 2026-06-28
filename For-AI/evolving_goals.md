@@ -485,6 +485,10 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   not as hardware timing, raw WAV decoding, LSL/XDF, or exact published-profile
   recreation evidence.
 
+## 2026-06-29
+
+- Adopted the DynaSpace/Hobeika plus 3DTI/SOFA best-of-both-worlds protocol as the PPS-kit golden standard for newly generated looming stimuli. Generated-noise looming bakes should default to `dynaspace_gaussian_burst_train` (33 broadband Gaussian white-noise bursts, 30 ms burst duration, 10 ms rise/fall, 65 ms inter-burst interval, 300 ms onset), while HRTF spectrum, ILD, ITD, near-field behavior, distance attenuation, propagation delay, future trajectory angles, and optional room/DRR/IACC cues remain renderer-owned through 3DTI/SOFA or the Python SOFA/FABIAN preview path. Published-study templates may override this only when the source paper/app specifies another waveform or apparatus constraint, and the exception must be documented in metadata. The persistent standard is now `For-AI/looming_stimulus_generation_standard.md`; the source audit, Consensus browser/MCP export, implementation rationale, and PDF report live under `docs/dynaspace_spectral_feature_audit/`.
+
 ## Active Implementation Backlog
 
 - Hide randomization strategy, block-order strategy, max-consecutive-same-type, and seed from the main Trial Assembler UI.

@@ -25,6 +25,7 @@ from peripersonal_space_toolkit.dashboard_app import DashboardController, create
 from peripersonal_space_toolkit.design import (
     AudioFileSpec,
     NoiseDefinition,
+    PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
     ProtocolSpec,
     default_design,
     design_from_dict,
@@ -32,6 +33,7 @@ from peripersonal_space_toolkit.design import (
     load_design,
     point_from_distance_rotation_height,
     save_design,
+    gold_standard_looming_source_parameters,
     trajectory_point_at_time,
 )
 from peripersonal_space_toolkit.render_backend import (
@@ -2215,6 +2217,9 @@ def test_dashboard_bake_stimulus_job_adds_source_after_render(tmp_path: Path, mo
         qc.write_text("", encoding="utf-8")
         tactile.write_text("", encoding="utf-8")
         assert label == "Manual blue"
+        assert design_data["noises"][0]["source_profile"] == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+        assert design_data["noises"][0]["source_profile_parameters"]["burst_count"] == 33
+        assert design_data["noises"][0]["source_profile_parameters"]["inter_burst_interval_s"] == pytest.approx(0.065)
         assert seed == custom["design"]["protocol"]["random_seed"]
         assert engine == "python-sofa-reference"
         assert include_tactile is False
@@ -2261,6 +2266,8 @@ def test_dashboard_bake_stimulus_job_adds_source_after_render(tmp_path: Path, mo
     assert ingredient_manifest["schema"] == "pps-core-audio-ingredients.v1"
     assert ingredient_manifest["ingredients"][0]["descriptor"] == "manual_blue_looming10ms"
     assert baked_noise["noise_type"] == "blue"
+    assert baked_noise["source_profile"] == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+    assert baked_noise["source_profile_parameters"] == gold_standard_looming_source_parameters()
     assert baked_noise["trajectory_snapshot"]["start_distance_cm"] == pytest.approx(95.0)
     assert baked_noise["trajectory_snapshot"]["end_distance_cm"] == pytest.approx(15.0)
     assert baked_noise["trajectory_snapshot"]["start_rotation_deg"] == pytest.approx(270.0)

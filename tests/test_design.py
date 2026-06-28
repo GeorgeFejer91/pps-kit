@@ -14,11 +14,13 @@ from peripersonal_space_toolkit.design import (
     DEFAULT_SOFA_FILE,
     DEFAULT_TRAJECTORY_PLANE_HEIGHT_M,
     NoiseDefinition,
+    PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
     ProtocolSpec,
     horizontal_point_from_distance_rotation,
     block_trial_rows,
     default_design,
     design_from_dict,
+    design_to_dict,
     experiment_schedule_rows,
     export_protocol_csv,
     export_trajectory_csv,
@@ -27,6 +29,7 @@ from peripersonal_space_toolkit.design import (
     point_from_distance_rotation_height,
     protocol_summary,
     save_design,
+    gold_standard_looming_source_parameters,
     trajectory_point_at_time,
     trajectory_points,
     trajectory_points_with_holds,
@@ -341,6 +344,84 @@ def test_3dti_render_config_preserves_app_coordinate_convention(tmp_path: Path):
         "y_m": pytest.approx(-1.1),
         "z_m": pytest.approx(0.25),
     }
+
+
+def test_source_profile_round_trips_and_reaches_render_config(tmp_path: Path):
+    design = default_design()
+    design.noises = design.noises[:1]
+    design.noises[0].source_profile = PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+    design.noises[0].source_profile_parameters = gold_standard_looming_source_parameters({"onset_s": 0.125})
+
+    loaded = design_from_dict(design_to_dict(design))
+    config = build_render_config(loaded, seed=987, output_dir=tmp_path)
+
+    assert loaded.noises[0].source_profile == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+    assert loaded.noises[0].source_profile_parameters["burst_count"] == 33
+    assert loaded.noises[0].source_profile_parameters["onset_s"] == pytest.approx(0.125)
+    assert config["source"]["noises"][0]["source_profile"] == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+    assert config["source"]["noises"][0]["source_profile_parameters"]["inter_burst_interval_s"] == pytest.approx(0.065)
+
+
+def test_dynaspace_burst_train_source_profile_renders_pulsed_audio(tmp_path: Path):
+    import numpy as np
+    import soundfile as sf
+    from scipy import signal
+
+    design = default_design()
+    design.noises = [
+        NoiseDefinition(
+            label="DynaSpace burst source",
+            noise_type="white",
+            azimuth_deg=-45.0,
+            motion_mode="stationary",
+            source_profile=PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
+            source_profile_parameters=gold_standard_looming_source_parameters(
+                {
+                    "burst_count": 6,
+                    "onset_s": 0.100,
+                    "rise_fall_s": 0.005,
+                }
+            ),
+        )
+    ]
+    design.trajectory.path_length_m = 0.2
+    design.trajectory.propagation_speed_mps = 1.0
+    design.trajectory.padding_pre_s = 0.1
+    design.trajectory.padding_post_s = 0.4
+    design.protocol.soa_values_ms = [150]
+    design.protocol.spatial_values_cm = [100.0]
+
+    design_path = tmp_path / "dynaspace_burst.design.json"
+    output_dir = tmp_path / "rendered"
+    save_design(design, design_path)
+    result = render_design_with_3dti(
+        design_path,
+        output_dir,
+        seed=31415,
+        engine="python-sofa-reference",
+        include_tactile=False,
+    )
+
+    assert result.status == "rendered_reference"
+    audio, sample_rate = sf.read(result.wav_paths[0], always_2d=True)
+    mono = np.mean(audio[:, :2], axis=1)
+    frame = int(round(0.020 * sample_rate))
+    hop = int(round(0.0025 * sample_rate))
+    rms = np.array(
+        [
+            np.sqrt(np.mean(mono[start : start + frame] * mono[start : start + frame]))
+            for start in range(0, len(mono) - frame, hop)
+        ]
+    )
+    peaks, _properties = signal.find_peaks(rms, distance=int(round(0.060 * sample_rate / hop)), prominence=np.max(rms) * 0.08)
+    peak_times = peaks * hop / sample_rate
+
+    assert len(peaks) >= 5
+    assert np.median(np.diff(peak_times[:6])) == pytest.approx(0.095, abs=0.018)
+    with result.qc_path.open(newline="", encoding="utf-8") as f:
+        qc_rows = list(csv.DictReader(f))
+    assert qc_rows[0]["source_profile"] == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+    assert '"burst_count": 6' in qc_rows[0]["source_profile_parameters"]
 
 
 def test_gui_style_saved_design_round_trip_controls_noise_trajectory_and_soas(tmp_path: Path):

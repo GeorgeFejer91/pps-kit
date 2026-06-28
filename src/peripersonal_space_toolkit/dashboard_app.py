@@ -33,6 +33,7 @@ from .design import (
     BlockSpec,
     CUSTOM_AUDIO_NOISE_TYPE,
     NoiseDefinition,
+    PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
     SUPPORTED_BASELINE_STRATEGIES,
     SUPPORTED_NOISE_TYPES,
     StimulusDesign,
@@ -44,6 +45,7 @@ from .design import (
     design_from_dict,
     design_to_dict,
     expand_trial_strip_source_labels,
+    gold_standard_looming_source_parameters,
     has_trial_strips,
     load_design,
     participant_block_orders,
@@ -6569,12 +6571,19 @@ def _design_for_bake_recipe(design: StimulusDesign, recipe: dict[str, Any], labe
         noise_type = str(recipe.get("noise_type") or "").strip().lower()
         if noise_type not in SUPPORTED_NOISE_TYPES:
             raise ValueError(f"Unsupported generated-noise type: {noise_type or 'missing'}")
+        source_profile = str(recipe.get("source_profile") or PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE).strip()
+        raw_source_parameters = recipe.get("source_profile_parameters")
+        source_profile_parameters = raw_source_parameters if isinstance(raw_source_parameters, dict) else {}
+        if source_profile == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE:
+            source_profile_parameters = gold_standard_looming_source_parameters(source_profile_parameters)
         source = {
             "label": label,
             "noise_type": noise_type,
             "azimuth_deg": 0.0,
             "elevation_deg": 0.0,
             "gain": max(0.01, _float(recipe.get("gain"), 1.0)),
+            "source_profile": source_profile,
+            "source_profile_parameters": dict(source_profile_parameters),
             "motion_mode": "looming",
         }
         bake_design.noises = [NoiseDefinition(**source)]

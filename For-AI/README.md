@@ -10,6 +10,7 @@ Read this file before modifying the repository. Then read:
 - [download_package_inventory.md](download_package_inventory.md) for the installer/offline-package inventory and release packaging boundary.
 - [module_map.md](module_map.md) for the current source ownership map and refactor direction.
 - [loudness_calibration.md](loudness_calibration.md) for the Study 5 headphone/interface loudness calibration findings and policy direction.
+- [looming_stimulus_generation_standard.md](looming_stimulus_generation_standard.md) for the current DynaSpace-derived golden standard for generated looming stimuli.
 - [dashboard_gui_behavior.md](dashboard_gui_behavior.md) for current HTML dashboard edit/view-mode and downward-decision-propagation behavior.
 - [audiotactile-paper-metadata-audit/README.md](audiotactile-paper-metadata-audit/README.md) for the standalone paper/PDF/supplement metadata extraction audit that is independent from GUI profile recreation.
 - [agent_update_protocol.md](agent_update_protocol.md) for how to keep this folder current.

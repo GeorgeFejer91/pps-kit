@@ -13,6 +13,7 @@ from .design import (
     BlockSpec,
     DEFAULT_SOFA_FILE,
     NoiseDefinition,
+    PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
     ProtocolSpec,
     SUPPORTED_BLOCK_ORDER_RANDOMIZATION,
     SUPPORTED_TRIAL_RANDOMIZATION,
@@ -24,6 +25,7 @@ from .design import (
     effective_block_specs,
     export_protocol_csv,
     export_trajectory_csv,
+    gold_standard_looming_source_parameters,
     load_design,
     protocol_summary,
     save_design,
@@ -841,6 +843,14 @@ class StimulusDesignerApp:
         self.noise_gain_var.set(str(noise.gain))
 
     def _add_or_update_noise(self) -> None:
+        selected = self.noise_tree.selection()
+        existing = self.noises[int(selected[0])] if selected else None
+        source_profile = existing.source_profile if existing and existing.source_profile else PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+        source_profile_parameters = (
+            dict(existing.source_profile_parameters)
+            if existing and existing.source_profile_parameters
+            else gold_standard_looming_source_parameters()
+        )
         try:
             noise = NoiseDefinition(
                 label=self.noise_label_var.get().strip() or self.noise_type_var.get().title(),
@@ -848,12 +858,13 @@ class StimulusDesignerApp:
                 azimuth_deg=self._parse_float(self.noise_azimuth_var.get(), "Noise azimuth"),
                 elevation_deg=self._parse_float(self.noise_elevation_var.get(), "Noise elevation"),
                 gain=self._parse_float(self.noise_gain_var.get(), "Noise gain"),
+                source_profile=source_profile,
+                source_profile_parameters=source_profile_parameters,
             )
         except ValueError as exc:
             messagebox.showerror("Invalid noise", str(exc))
             return
 
-        selected = self.noise_tree.selection()
         if selected:
             self.noises[int(selected[0])] = noise
         else:

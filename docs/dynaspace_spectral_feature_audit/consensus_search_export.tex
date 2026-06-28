@@ -1,0 +1,121 @@
+\section*{Consensus Search Export}
+
+Manual Consensus searches were first run through the user's logged-in browser session on 2026-06-29. After the Consensus MCP bridge was verified locally, the same assumptions were rechecked through the read-only \texttt{Consensus Academic Research v3.4.0} MCP search tool. The searches were designed to test the specific assumptions behind adopting DynaSpace-style burst-train looming while keeping PPS-kit's 3DTI/SOFA renderer responsible for binaural spatial cues. Browser search pages and MCP-returned paper URLs are listed so the search trail can be re-opened later.
+
+\begin{longtable}{P{0.21\linewidth} P{0.31\linewidth} P{0.23\linewidth} P{0.17\linewidth}}
+\caption{Consensus searches and implementation relevance.}\\
+\toprule
+Question tested & Consensus result & Critical caveat & PPS-kit decision\\
+\midrule
+\endfirsthead
+\toprule
+Question tested & Consensus result & Critical caveat & PPS-kit decision\\
+\midrule
+\endhead
+Do approaching looming sounds with rising intensity facilitate faster detection or orienting responses compared with receding or constant sounds?
+\newline\url{https://consensus.app/search/approaching-looming-sound-detection/FUKQWKFNSbicvSXmbMchkA/}
+& The result was a moderate-to-strong Yes: approaching/rising-intensity sounds are usually more salient and often produce faster orienting or detection responses.
+& Some multisensory or visual-dominant tasks show no special looming advantage once task structure and cue type are controlled.
+& Keep a strong approach/rising-salience profile, but treat it as a salience-plus-distance manipulation unless matched-level controls are present.\\
+\addlinespace
+Are repeated broadband noise bursts or onset transients useful for auditory spatial localization compared with continuous narrowband sounds?
+\newline\url{https://consensus.app/search/auditory-spatial-localization-cues/85JQWFkfR3-f9kbKCELhBA/}
+& The result was Yes: repeated broadband bursts and onset transients usually improve localization relative to continuous narrowband stimuli because they expose richer spectral, binaural, and onset cues.
+& Repetition is not always superior to a longer single broadband burst; benefit depends on duration, reverberation, and task.
+& Adopt the DynaSpace/Hobeika burst-train source profile as the dry source for the smartphone replication profile.\\
+\addlinespace
+Are HRTF spectral cues, interaural level differences, and interaural time differences the main cues for binaural spatial hearing and localization?
+\newline\url{https://consensus.app/search/binaural-spatial-hearing-cues/3cA7IcmZQD2Vu5c-vJDfLw/}
+& Consensus meter: 7 of 7 Yes. The evidence base treats HRTF spectral filtering, ILD, and ITD as the core binaural localization cues, with motion and reverberation adding support.
+& Generic HRTFs can be adequate for horizontal lateralization but are weaker for elevation, front/back resolution, and individualized externalization.
+& Do not imitate these cues by static spectral hacks in the dry WAV; render them through 3DTI/SOFA and record the chosen HRTF.\\
+\addlinespace
+Do reverberation, interaural coherence, and direct-to-reverberant ratio affect auditory externalization and distance perception in spatial audio?
+\newline\url{https://consensus.app/search/auditory-externalization-spatial-audio/ZupUZceiRGGFHlFGafdDDQ/}
+& Consensus meter: 10 of 10 Yes. Reverberation, IACC/coherence structure, and DRR all affect externalization and auditory distance.
+& Diotic or poorly structured reverberation can support distance without producing convincing externalization; reverb must be spatially meaningful.
+& Add reverb/DRR/IACC as explicit optional QC targets, not as untracked stereo decorrelation.\\
+\addlinespace
+Are near-field binaural cues important for auditory distance perception and localization for sources within one meter of the head?
+\newline\url{https://consensus.app/search/near-field-binaural-auditory-cues/Fz9jdMNQS3e8cbWB0ziT3Q/}
+& Consensus meter: 16 papers, 88 percent Yes and 13 percent Mixed. Near-field cues matter under 1 m, especially lateral ILD changes, but are not sufficient alone.
+& The strongest near-field effects are lateral/off-midline and interact with level and DRR; ITD changes little with distance.
+& Keep the 20 cm endpoint, but prefer native 3DTI near-field-capable rendering for publication stimuli.\\
+\addlinespace
+Do dynamic approaching sounds facilitate tactile reaction time in peripersonal-space tasks compared with receding or fixed sounds?
+\newline\url{https://consensus.app/search/dynamic-sounds-and-tactile-reaction/dw8vS7TcQheii5_C_uOoNQ/}
+& The result was Yes with caveats: approaching sounds usually speed tactile responses more than receding or fixed sounds in PPS tasks; prior summaries estimate near-far benefits on the order of tens of milliseconds.
+& Expectancy and timing structure can inflate apparent PPS boundaries; Hobeika/Holmes-style critiques require clean controls.
+& Use the DynaSpace looming-vs-fixed contrast for smartphone replication, but include matched-level and expectancy-aware variants for stronger inference.\\
+\addlinespace
+Does individualized or high-quality HRTF rendering improve spatial audio localization and externalization compared with generic non-individual HRTFs?
+\newline\url{https://consensus.app/search/individualized-hrtf-spatial-audio/2eIYeqrxTeOiKpEOs8tCNg/}
+& The result was mostly Yes: individualized HRTFs improve localization and usually externalization, strongest for elevation, front/back, and VR-like spatial presence.
+& Carefully selected generic HRTFs can approach individual performance for some horizontal tasks.
+& FABIAN remains an acceptable redistributable default, but the profile should make HRTF identity visible and allow higher-quality/individualized HRTFs later.\\
+\addlinespace
+Is rising intensity alone sufficient to create auditory looming perception, or do spectral, binaural, and reverberation cues add important spatial information?
+\newline\url{https://consensus.app/search/auditory-looming-perception-cues/kEdiFP76QhasleThXrXE-Q/}
+& The result was No as a complete account: rising intensity can create classic looming/warning effects, but spectral, binaural, and reverberation cues add spatial information.
+& Intensity is often the dominant cue, so a strong gain ramp can masquerade as spatial looming if controls are weak.
+& Use rising intensity as one declared component of approach, while preserving independent 3DTI-rendered HRTF, ILD, ITD, near-field, and room cues.\\
+\bottomrule
+\end{longtable}
+
+\subsection*{Consensus MCP Paper Export}
+
+The following compact export records the read-only MCP searches. The bracket numbers are search-local paper numbers returned by Consensus for that query, not global bibliography numbers. Full abstracts were not copied into this public report; the export preserves query text, result counts, representative titles, and direct Consensus paper URLs.
+
+\begin{longtable}{P{0.20\linewidth} P{0.24\linewidth} P{0.48\linewidth}}
+\caption{Consensus MCP query export.}\\
+\toprule
+Evidence target & Query and count & Representative MCP-returned papers\\
+\midrule
+\endfirsthead
+\toprule
+Evidence target & Query and count & Representative MCP-returned papers\\
+\midrule
+\endhead
+Looming salience and warnings
+& \texttt{approaching looming sounds rising intensity reaction time detection orienting receding constant sounds}; 20 papers.
+& [3] Bach et al. (2009), ``Looming sounds as warning signals: the function of motion cues,'' \url{https://consensus.app/papers/details/45a18fb1f74b5912b30c9465fbb620b3/?utm_source=claude_desktop}. [6] Neuhoff (2001), ``An Adaptive Bias in the Perception of Looming Auditory Motion,'' \url{https://consensus.app/papers/details/0e0c538196b35477ab39922740f634dd/?utm_source=claude_desktop}. [8] Ignatiadis et al. (2024), ``Threat-related corticocortical connectivity elicited by rapid auditory looms,'' \url{https://consensus.app/papers/details/2114c61c357f5e8c854bbc197c06b63a/?utm_source=claude_desktop}.\\
+\addlinespace
+Broadband bursts and localization
+& \texttt{auditory localization broadband noise bursts onset transients narrowband continuous sounds}; 20 papers.
+& [1] Middlebrooks (1992), ``Narrow-band sound localization related to external ear acoustics,'' \url{https://consensus.app/papers/details/cef5e85bb5ae529d9543673adde4bf82/?utm_source=claude_desktop}. [2] Kim et al. (2024), ``Median Plane Localization of Short Noise Bursts in the Presence of Horizontally Spread White Noise Masker,'' \url{https://consensus.app/papers/details/dade8599ab9b5fdb849828fd8f9de951/?utm_source=claude_desktop}. [4] Macpherson et al. (2000), ``Localization of brief sounds: effects of level and background noise,'' \url{https://consensus.app/papers/details/b3bdb5d148d550bd8851c3c821390133/?utm_source=claude_desktop}.\\
+\addlinespace
+Binaural/HRTF cue ownership
+& \texttt{binaural spatial hearing HRTF interaural level difference interaural time difference sound localization}; 19 papers.
+& [4] Carlini et al. (2024), ``Auditory localization: a comprehensive practical review,'' \url{https://consensus.app/papers/details/ce0b49c63a025ebaa3abe91f3c12f873/?utm_source=claude_desktop}. [3] Gutierrez-Parera et al. (2022), ``Interaural time difference individualization in HRTF by scaling through anthropometric parameters,'' \url{https://consensus.app/papers/details/f79647e2cfc358ef8f3d52a1350d9051/?utm_source=claude_desktop}. [1] Lee et al. (2025), ``Binaural Sound Event Localization and Detection based on HRTF Cues for Humanoid Robots,'' \url{https://consensus.app/papers/details/11d9437d97a45d93b74195c9a49b37c0/?utm_source=claude_desktop}.\\
+\addlinespace
+Reverb, IACC, DRR, externalization
+& \texttt{reverberation interaural coherence direct-to-reverberant ratio auditory externalization distance perception}; 20 papers.
+& [1] Choe et al. (2023), ``Impact of direct-to-reverberation ratio and interaural cross-correlation on externalization in binaural audio rendering,'' \url{https://consensus.app/papers/details/e1c815e6c9a55a8db398292d85a3c401/?utm_source=claude_desktop}. [2] Lavandier et al. (2025), ``Reverberation cues underlying virtual auditory distance perception for a frontal source,'' \url{https://consensus.app/papers/details/dd37a407e06a51cbab6251c5ac60e131/?utm_source=claude_desktop}. [5] Kolarik et al. (2013), ``Discrimination of virtual auditory distance using level and direct-to-reverberant ratio cues,'' \url{https://consensus.app/papers/details/9b0b8eedb09d5eff8fbcca667b091eec/?utm_source=claude_desktop}.\\
+\addlinespace
+Near-field distance cues
+& \texttt{near-field binaural cues auditory distance perception within one meter ILD ITD}; 20 papers.
+& [2] Brungart et al. (1999), ``Auditory localization of nearby sources. Head-related transfer functions,'' \url{https://consensus.app/papers/details/830a7bfa7d5c5bb4b88e4822debf326d/?utm_source=claude_desktop}. [4] Zhu et al. (2023), ``The contributions of level and near-field head-related transfer functions cues on auditory distance perception in a free field,'' \url{https://consensus.app/papers/details/cd5157c315985b23ab71320b317f770a/?utm_source=claude_desktop}. [5] Guo et al. (2023), ``Distance discrimination thresholds of proximal sound sources in a real anechoic environment,'' \url{https://consensus.app/papers/details/e2c5ce9ed8fd5672aec2443b05c4b141/?utm_source=claude_desktop}.\\
+\addlinespace
+PPS tactile RT phenomenon
+& \texttt{peripersonal space dynamic approaching sounds tactile reaction time fixed receding}; 19 papers.
+& [1] Canzoneri et al. (2012), ``Dynamic Sounds Capture the Boundaries of Peripersonal Space Representation in Humans,'' \url{https://consensus.app/papers/details/a947a34ca17b5728b5ae5429d47f8579/?utm_source=claude_desktop}. [2] Matsuda et al. (2021), ``Peripersonal space in the front, rear, left and right directions for audio-tactile multisensory integration,'' \url{https://consensus.app/papers/details/c34b54676bdf50eda323e11dc189b316/?utm_source=claude_desktop}. [3] Hobeika et al. (2019), ``Capturing the dynamics of peripersonal space by integrating sound propagation properties and expectancy effects,'' \url{https://consensus.app/papers/details/53d4e77477fd5a2cad2abd9ea1789dca/?utm_source=claude_desktop}.\\
+\addlinespace
+Individualized/high-quality HRTF value
+& \texttt{individualized HRTF generic HRTF localization externalization spatial audio}; 20 papers.
+& [1] Jenny et al. (2020), ``Usability of Individualized Head-Related Transfer Functions in Virtual Reality,'' \url{https://consensus.app/papers/details/f3acff26460c5eadba2bc04664a8a177/?utm_source=claude_desktop}. [2] Frankenbach et al. (2025), ``Evaluating Localization Accuracy of Dynamic Binaural Synthesis,'' \url{https://consensus.app/papers/details/ed8f8111a884542faaac73d52f5f30fa/?utm_source=claude_desktop}. [4] SADIE II case study (2018), ``A Perceptual Evaluation of Individual and Non-Individual HRTFs,'' \url{https://consensus.app/papers/details/c390fc1e332f5147a003b318974b735a/?utm_source=claude_desktop}.\\
+\addlinespace
+Intensity is not the whole spatial cue set
+& \texttt{auditory looming rising intensity spectral cues binaural reverberation distance perception}; 20 papers.
+& [3] Kolarik et al. (2015), ``Auditory distance perception in humans: a review of cues,'' \url{https://consensus.app/papers/details/fde5d69ba97851afac0015ca1cf942c9/?utm_source=claude_desktop}. [4] Baumgartner et al. (2017), ``Asymmetries in behavioral and neural responses to spectral cues demonstrate the generality of auditory looming bias,'' \url{https://consensus.app/papers/details/40f6ff7efbcc50f980772b493696877b/?utm_source=claude_desktop}. [5] Mershon et al. (1975), ``Intensity and reverberation as factors in the auditory perception of egocentric distance,'' \url{https://consensus.app/papers/details/af28b552a18a54db9113a715842b4601/?utm_source=claude_desktop}.\\
+\bottomrule
+\end{longtable}
+
+\subsection*{Consensus-Derived Implementation Claims}
+
+\begin{enumerate}
+  \item The dry source should be a burst train. This is supported by the raw DynaSpace files, the Hobeika lineage, and Consensus evidence that broadband transients support localization and attentional salience.
+  \item Spatialization should be delegated to 3DTI/SOFA rather than baked into a static waveform. Consensus strongly supports HRTF, ILD, ITD, near-field, reverberation, and DRR as spatial cues that belong in the renderer.
+  \item The original smartphone fixed-vs-looming contrast remains a replication target, but it is not a clean causal design by itself. Rising intensity and fixed-source level differences can drive response facilitation unless matched-level control variants are included.
+  \item Reverb and low interaural coherence are plausible missing externalization features in the current proxy, but they should be implemented as explicit room/BRIR parameters with QC output.
+  \item The toolkit should preserve trajectory flexibility: DynaSpace's 45-degree left approach is one profile, not a hard-coded spatial renderer.
+\end{enumerate}

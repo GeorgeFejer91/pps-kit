@@ -6,7 +6,7 @@
   "doi": "10.3390/s25196072",
   "source_url": "https://doi.org/10.3390/s25196072",
   "verification_status": "verified",
-  "notes": "Smartphone/DynaSpace audio-tactile PPS validation profile. The profile encodes the reported left-hemispace looming trajectory, fixed 640 cm comparator, six tactile timing anchors, no-vibration catch trials, and 72 recorded-trial distribution from the paper and app source. Bundled preload WAVs are toolkit-generated broadband proxies rendered with the PPS Toolkit FABIAN/SOFA path; the original Android bursttrain WAVs are recorded as provenance but not redistributed.",
+  "notes": "Smartphone/DynaSpace audio-tactile PPS validation profile. The profile encodes the reported left-hemispace looming trajectory, fixed 640 cm comparator, six tactile timing anchors, no-vibration catch trials, and 72 recorded-trial distribution from the paper and app source. Bundled preload WAVs are toolkit-generated DynaSpace-style Gaussian white-noise burst trains rendered with the PPS Toolkit FABIAN/SOFA path; the original Android bursttrain WAVs are recorded as provenance but not redistributed.",
   "reference_parameters": {
     "profile_type": "published_mobile_dynaspace_pps_validation",
     "publication_status": "published",
@@ -75,13 +75,26 @@
         "redistributed_in_pps_toolkit": false
       }
     ],
-    "stimulus_asset_policy": "The public PPS Toolkit profile does not redistribute the Android app's raw WAVs. The preload catalog bakes 44.1 kHz toolkit-generated broadband proxy sources through the existing FABIAN/SOFA renderer so the profile remains runnable and publication-safe.",
+    "stimulus_asset_policy": "The public PPS Toolkit profile does not redistribute the Android app's raw WAVs. The preload catalog bakes 44.1 kHz toolkit-generated DynaSpace-style burst-train sources through the existing FABIAN/SOFA renderer so the profile remains runnable and publication-safe.",
     "original_audio_engine": "Max/MSP Spat with LISTEN HRTFs for source creation, then Android Oboe playback in the DynaSpace app",
     "toolkit_audio_engine": "PPS Toolkit 3DTI-compatible Python SOFA/FABIAN reference renderer",
     "toolkit_renderer_sample_rate_hz": 44100,
     "original_android_wav_sample_rate_hz": 48000,
-    "toolkit_source_type": "white-noise broadband burst-train proxy",
-    "source_asset_equivalence": "trajectory and condition logic are matched; exact Android burst waveform, Spat/LISTEN renderer, phone transducer response, and motor mechanics are not bit-matched",
+    "toolkit_source_type": "Gaussian white-noise burst-train dry source rendered through FABIAN/SOFA",
+    "source_asset_equivalence": "trajectory, condition logic, 33-burst temporal structure, and approximate 95 ms burst spacing are matched; exact Android noise seed, Spat/LISTEN renderer, room response, phone transducer response, and motor mechanics are not bit-matched",
+    "stimulus_generation_operating_protocol": {
+      "schema": "pps-dynaspace-consensus-generation-v1",
+      "decision": "Adopt the DynaSpace/Hobeika burst-train dry source as the smartphone-profile source profile while delegating spatialization to the 3DTI/SOFA renderer.",
+      "evidence_basis": [
+        "Raw DynaSpace WAV audit detected 33 bursts with about 95 ms median inter-onset interval.",
+        "Hobeika lineage reports Gaussian white-noise bursts with 30 ms duration, 10 ms rise/fall, and 65 ms inter-burst interval.",
+        "Consensus searches supported broadband onset transients for localization/salience and supported HRTF/ILD/ITD/reverb/near-field cues as renderer-level spatial properties.",
+        "Consensus searches warned that rising intensity alone can produce looming salience, so matched-level controls remain necessary for causal inference."
+      ],
+      "dry_source_profile": "dynaspace_gaussian_burst_train",
+      "spatialization_policy": "Render HRTF, ILD, ITD, near-field, distance attenuation, future trajectory angle, and optional room/DRR/IACC cues through 3DTI/SOFA rather than hard-coding them into the dry source.",
+      "control_policy": "Keep the DynaSpace replication contrast available, and add matched-level control variants for inference-focused future studies."
+    },
     "auditory_conditions": [
       {
         "label": "looming",

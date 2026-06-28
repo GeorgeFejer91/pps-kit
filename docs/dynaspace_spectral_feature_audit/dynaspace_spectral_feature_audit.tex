@@ -27,7 +27,7 @@
 
 \title{DynaSpace Smartphone PPS Looming Stimulus\\Spectral and Spatial Feature Audit}
 \author{PPS-kit derived report}
-\date{2026-06-28}
+\date{2026-06-29}
 
 \begin{document}
 \maketitle
@@ -36,7 +36,7 @@
 
 The smartphone DynaSpace stimulus should not be copied as an opaque WAV into PPS-kit. It should be decomposed into a parameterized dry burst train plus a 3DTI/SOFA trajectory renderer. The useful smartphone-study features are: a broadband Gaussian white-noise burst train, a strong but not extreme rising distance/intensity envelope, the 6.4 m to 0.2 m constant-bearing trajectory, log-spaced tactile anchors, and room/externalization cues visible in the low interaural coherence of the baked WAV. Those are worth adopting as explicit parameters.
 
-The features that PPS-kit/3DTI should handle instead of imitating by raw spectral hacks are HRTF spectral filtering, ILD, ITD, near-field corrections, future trajectory angles, and any controlled reverberation/direct-to-reverberant behavior. The current PPS-kit proxy file does not yet match the raw DynaSpace audio: it is continuous rather than burst-train-like, much higher in RMS level, less bright, highly interaurally coherent, and has a stable opposite-signed ILD/ITD convention relative to the DynaSpace raw files. The target 3DTI framework is a better conceptual approach, but the present proxy render is not yet a faithful DynaSpace-style implementation.
+The features that PPS-kit/3DTI should handle instead of imitating by raw spectral hacks are HRTF spectral filtering, ILD, ITD, near-field corrections, future trajectory angles, and any controlled reverberation/direct-to-reverberant behavior. The initial PPS-kit proxy audit found a usable but imperfect placeholder: it was continuous rather than burst-train-like, much higher in RMS level, less bright, highly interaurally coherent, and had an opposite-signed ILD/ITD convention relative to the DynaSpace raw files. The implementation decision documented here is therefore a best-of-both-worlds protocol: adopt the DynaSpace dry-source burst train as a source profile, but keep spatial texture and future trajectory flexibility inside the 3DTI/SOFA rendering path.
 
 \section*{Scope and Inputs}
 
@@ -52,7 +52,7 @@ The compared audio files are:
 
 \section*{Search and Consensus Method}
 
-Search date: 2026-06-28. I used web searches across the smartphone PPS paper, DynaSpace app, Hobeika burst-train lineage, Canzoneri PPS looming task, auditory looming intensity literature, auditory localization/distance reviews, and 3DTI documentation. The requested Consensus search was attempted through tool discovery, but no Consensus connector was exposed in this Codex session; the available discovered tools were unrelated Gmail tools. Therefore, this report uses a documented web/primary-source evidence base instead of a Consensus API result.
+Search dates: 2026-06-28 to 2026-06-29. I used web searches across the smartphone PPS paper, DynaSpace app, Hobeika burst-train lineage, Canzoneri PPS looming task, auditory looming intensity literature, auditory localization/distance reviews, and 3DTI documentation. I then manually accessed Consensus through the user's browser and ran targeted searches that attempted to prove or disprove the assumptions behind each candidate feature. Those Consensus searches are exported in this report as a separate LaTeX section with re-openable search URLs.
 
 \begin{longtable}{P{0.23\linewidth} P{0.34\linewidth} P{0.35\linewidth}}
 \caption{Search iterations and evidence role.}\\
@@ -71,8 +71,33 @@ Rising level and looming warning value & Queries for auditory looming bias, risi
 Localization cue inventory & Queries for auditory localization ITD, ILD, HRTF, bandwidth, reverberation, direct-to-reverberant ratio. & Reviews identify ITD, ILD, HRTF spectral filtering, bandwidth, intensity, reverberation, and direct-to-reverberant ratio as spatial/distance cues \cite{carlini2024,kolarik2016}.\\
 3DTI capability & Queries for 3D Tune-In Toolkit, SOFA, HRTF, distance attenuation, near-field, BRIR, reverberation. & 3DTI supports SOFA/HRIR convolution, ITD customization, distance attenuation, near-field corrections, movement smoothing, and BRIR/Ambisonic reverberation in the full toolkit \cite{cuevas2019}.\\
 Local PPS-kit implementation & Repository search for FABIAN, SOFA, gain law, nearest HRIR, reverb, and generated proxy assets. & PPS-kit stores FABIAN as the standard redistributable HRTF resource, records LISTEN as excluded pending license audit, and the current Python reference renderer uses nearest HRIR lookup, 1/r gain when enabled, peak normalization unless loudness policy is enabled, and reverb disabled.\\
+Consensus targeted checks & Browser-based Consensus searches for looming salience, burst/onset localization, HRTF/ILD/ITD, reverberation/DRR/IACC, near-field cues, PPS tactile RT effects, individualized HRTF value, and whether intensity alone is sufficient. & The Consensus pass supported adopting a burst-train source and keeping spatialization in 3DTI/SOFA, while warning that rising intensity and level imbalance can masquerade as spatial PPS effects unless matched-level controls are added.\\
 \bottomrule
 \end{longtable}
+
+\section*{Source Summary}
+
+\begin{longtable}{P{0.22\linewidth} P{0.34\linewidth} P{0.36\linewidth}}
+\caption{Source-by-source role in the final decision.}\\
+\toprule
+Source group & What it contributed & What it did not justify\\
+\midrule
+\endfirsthead
+\toprule
+Source group & What it contributed & What it did not justify\\
+\midrule
+\endhead
+Roussel et al. smartphone PPS paper and DynaSpace app & Established the runnable smartphone validation task: 3.25 s auditory stimulus inside a 3.85 s file, 6.4 m to 0.2 m left-hemispace trajectory at about 2.1 m/s, fixed 6.4 m comparator, six tactile anchors, no-vibration catches, Android playback, and app-level timing parameters. & It does not prove that the baked Android WAV is the best long-term stimulus representation for PPS-kit, because it fixes one trajectory and one non-individual HRTF/room render.\\
+Raw DynaSpace WAV audit & Established the actual stimulus waveform properties: 33 bursts, about 95 ms inter-onset interval, clean headroom, high crest factor, bright broadband spectrum, rising active level for looming, low IACC consistent with non-anechoic spatial rendering, and a large fixed-vs-looming level difference. & It does not isolate which feature caused behavioral facilitation; the raw file combines source transients, intensity growth, HRTF, reverb, and level asymmetry.\\
+Hobeika/Canzoneri/Serino PPS lineage & Justified dynamic approaching sounds and repeated burst-train auditory sources as established PPS-task ingredients, not arbitrary stimulus choices. & It does not remove expectancy and timing confounds; matched timing and level controls remain needed.\\
+Auditory looming literature & Supported rising intensity as an intrinsic warning/salience cue and explained why looming sounds often speed detection or orienting. & It does not establish rising intensity as a pure spatial cue; intensity can drive effects without robust externalized distance perception.\\
+Auditory localization/distance literature & Confirmed that broadband content, HRTF spectral filtering, ITD, ILD, near-field behavior, reverberation, and direct-to-reverberant ratio are the relevant spatial cue classes. & It does not support baking these cues into one static WAV when a parameterized renderer can represent them more transparently.\\
+3DTI/SOFA documentation and PPS-kit code & Confirmed that the toolkit can keep the source waveform separate from spatial rendering and can expose trajectory/HRTF/level metadata in generated assets. & The current Python reference renderer is not a complete 3DTI substitute for publication-grade near-field/reverb rendering.\\
+Consensus searches & Independently checked each assumption: burst/onset salience, HRTF/ILD/ITD primacy, reverb/DRR/IACC relevance, near-field importance, PPS tactile RT facilitation, individualized HRTF value, and the insufficiency of intensity alone. & The searches do not replace the need for local signal QC and behavioral validation; they justify the generation protocol, not the success of any future dataset.\\
+\bottomrule
+\end{longtable}
+
+\input{consensus_search_export.tex}
 
 \section*{Measured Raw Signal Inventory}
 
@@ -89,18 +114,18 @@ Metric & Dyna loom & Dyna fixed & PPS loom & PPS fixed\\
 Sample rate (Hz) & 48000 & 48000 & 44100 & 44100\\
 Duration (s) & 3.850 & 3.850 & 3.850 & 3.850\\
 Peak (dBFS) & -3.19 & -33.48 & -0.91 & -0.91\\
-RMS (dBFS) & -37.28 & -53.25 & -22.95 & -16.66\\
-Crest factor (dB) & 34.10 & 19.77 & 22.03 & 15.74\\
-Detected burst peaks & 33 & 33 & 0 & 0\\
-Median burst IOI (ms) & 95.0 & 95.0 & n/a & n/a\\
-Active p90-p10 level span (dB) & 18.20 & 8.09 & 29.22 & 0.88\\
-Active level slope (dB/s) & 4.31 & -1.16 & 9.40 & 0.02\\
-Spectral centroid (Hz) & 10948 & 9319 & 8094 & 8115\\
-95\% rolloff (Hz) & 19910 & 19846 & 15558 & 15558\\
-ILD L-R (dB) & -6.34 & -4.26 & 12.72 & 12.68\\
+RMS (dBFS) & -37.28 & -53.25 & -31.33 & -24.64\\
+Crest factor (dB) & 34.10 & 19.77 & 30.42 & 23.73\\
+Detected burst peaks & 33 & 33 & 33 & 33\\
+Median burst IOI (ms) & 95.0 & 95.0 & 94.8 & 94.8\\
+Active p90-p10 level span (dB) & 18.20 & 8.09 & 33.66 & 42.20\\
+Active level slope (dB/s) & 4.31 & -1.16 & 8.33 & -0.15\\
+Spectral centroid (Hz) & 10948 & 9319 & 8107 & 8173\\
+95\% rolloff (Hz) & 19910 & 19846 & 15515 & 15601\\
+ILD L-R (dB) & -6.34 & -4.26 & 12.61 & 12.70\\
 Cross-corr lag (us) & 187.5 & 187.5 & -362.8 & -362.8\\
-IACC abs & 0.229 & 0.132 & 0.695 & 0.696\\
-Moving 100 ms IACC range & 0.043--0.269 & 0.043--0.228 & 0.668--0.718 & 0.666--0.719\\
+IACC abs & 0.229 & 0.132 & 0.703 & 0.690\\
+Moving 100 ms IACC range & 0.043--0.269 & 0.043--0.228 & 0.647--0.751 & 0.646--0.727\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -108,7 +133,7 @@ Moving 100 ms IACC range & 0.043--0.269 & 0.043--0.228 & 0.668--0.718 & 0.666--0
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.92\linewidth]{figures/rms_envelope_comparison.png}
-\caption{20 ms RMS envelope comparison. DynaSpace raw looming is pulsed and rises over the trial; PPS-kit proxy looming is continuous and uses a stronger smooth gain ramp.}
+\caption{20 ms RMS envelope comparison. DynaSpace raw looming is pulsed and rises over the trial; the regenerated PPS-kit proxy now uses the same burst-train timing but still carries a stronger level ramp.}
 \end{figure}
 
 \begin{figure}[h]
@@ -136,24 +161,24 @@ Feature & Raw DynaSpace evidence & Spatialization or PPS rationale & PPS-kit / 3
 Feature & Raw DynaSpace evidence & Spatialization or PPS rationale & PPS-kit / 3DTI status & Decision\\
 \midrule
 \endhead
-Broadband Gaussian/noise source & Raw files are broadband stereo noise bursts. DynaSpace looming centroid is 10.95 kHz and 95\% rolloff is 19.91 kHz. & Broadband content makes HRTF spectral filtering, ILD, and localization cues more available than narrowband tones \cite{carlini2024}. It also matches the Hobeika PPS lineage \cite{hobeika2020}. & PPS proxy uses generated white noise, so the class is correct, but its spectrum is less bright and continuous. 3DTI can spatialize any dry source; the dry source spectrum should be controlled before rendering. & \statusmodify\\
-Burst train temporal structure & Raw looming and fixed files both contain 33 detected peaks, median IOI 95 ms. Measured half-prominence widths are 55 ms looming and 70 ms fixed, inflated by ramps/reverb/detector relative to dry burst design. & The burst train creates repeated onsets while preserving a continuous trial. Onsets are strong for alerting and localization, and the 95 ms spacing agrees with the Hobeika lineage. & Current PPS proxy has no comparable burst structure under peak-prominence detection. This is the clearest missing feature. & \statuskeep\\
+Broadband Gaussian/noise source & Raw files are broadband stereo noise bursts. DynaSpace looming centroid is 10.95 kHz and 95\% rolloff is 19.91 kHz. & Broadband content makes HRTF spectral filtering, ILD, and localization cues more available than narrowband tones \cite{carlini2024}. It also matches the Hobeika PPS lineage \cite{hobeika2020}. & The regenerated PPS proxy now uses generated white-noise bursts, but its spectrum remains less bright than the raw DynaSpace file. 3DTI can spatialize any dry source; the dry source spectrum should be controlled before rendering. & \statusmodify\\
+Burst train temporal structure & Raw looming and fixed files both contain 33 detected peaks, median IOI 95 ms. Measured half-prominence widths are 55 ms looming and 70 ms fixed, inflated by ramps/reverb/detector relative to dry burst design. & The burst train creates repeated onsets while preserving a continuous trial. Onsets are strong for alerting and localization, and the 95 ms spacing agrees with the Hobeika lineage. & The regenerated PPS proxy now has 33 detected bursts and about 94.8 ms median IOI. This feature is adopted as the default source profile. & \statuskeep\\
 Burst ramps and click control & The lineage uses short burst ramps; measured raw files have high crest factors but no clipping. & Ramps avoid click artifacts while retaining salient attacks. & PPS generator should create dry bursts with explicit raised-cosine rise/fall parameters, not rely on random noise fluctuations. & \statuskeep\\
 Overall duration and silence window & Raw files are 3.85 s. Paper reports a 3250 ms auditory stimulus preceded by 300 ms silence and followed by a randomized 1000--1400 ms silence at trial level \cite{roussel2025}. & Timing window matters because tactile anchors sample distance over the approach. & PPS profile matches 3.85 s proxy duration and anchor logic. Keep metadata explicit because paper-level and raw-file-level timings are not identical descriptions. & \statusmodify\\
 Distance trajectory & Paper trajectory: 640 cm to 20 cm at ear level, constant speed 210 cm/s, left hemispace azimuth 45 degrees; anchors map to 640, 320, 160, 80, 40, and 20 cm \cite{roussel2025}. & This is the main PPS geometry. It separates temporal expectancy from spatial proximity through fixed-vs-looming contrast. & PPS template already encodes 6.4 m to 0.2 m, 2.105 m/s, signed -45 degrees, and anchors. 3DTI is better than a baked file for future angles. & \statusalready\\
-Rising intensity / distance gain & DynaSpace raw looming active p90-p10 span is 18.20 dB; PPS proxy is 29.22 dB. Raw fixed is much quieter overall than raw looming. & Rising level is a core auditory looming warning cue \cite{bach2008,neuhoff2016}; distance intensity is also a primary distance cue \cite{kolarik2016,carlini2024}. & PPS proxy has a stronger smooth gain ramp and is much higher RMS. Current Python path applies 1/r amplitude gain when gain law is enabled, then peak-normalizes unless loudness policy disables it. Native 3DTI can express direct-path attenuation more cleanly. & \statusmodify\\
-Fixed comparator level & Raw fixed peak is -33.48 dBFS and RMS is -53.25 dBFS, far lower than raw looming. & A far fixed comparator may intentionally represent source distance, but it also risks making the main effect partly a loudness/salience contrast. & PPS fixed proxy is loud and continuous, not DynaSpace-like. For exact replication, preserve far-level comparator; for clean inference, add a matched-level control profile. & \statusskip\\
-High-frequency brightness & DynaSpace looming centroid is 10.95 kHz; PPS proxy is 8.09 kHz. Raw 95\% rolloff is near 19.9 kHz, proxy near 15.6 kHz. & High frequencies strengthen ILD and pinna/HRTF spectral cues; broad bandwidth improves localization \cite{carlini2024}. & 3DTI should supply HRTF coloration, but the dry source should remain bright enough. Add optional spectrum matching/shelf only as a dry-source setting, not as a fake spatializer. & \statusmodify\\
+Rising intensity / distance gain & DynaSpace raw looming active p90-p10 span is 18.20 dB; regenerated PPS proxy is 33.66 dB. Raw fixed is much quieter overall than raw looming. & Rising level is a core auditory looming warning cue \cite{bach2008,neuhoff2016}; distance intensity is also a primary distance cue \cite{kolarik2016,carlini2024}. & PPS proxy still has a stronger gain ramp and higher RMS than the raw looming file. Current Python path applies 1/r amplitude gain when gain law is enabled, then peak-normalizes unless loudness policy disables it. Native 3DTI can express direct-path attenuation more cleanly. & \statusmodify\\
+Fixed comparator level & Raw fixed peak is -33.48 dBFS and RMS is -53.25 dBFS, far lower than raw looming. & A far fixed comparator may intentionally represent source distance, but it also risks making the main effect partly a loudness/salience contrast. & PPS fixed proxy now shares burst timing but remains much louder than the raw fixed file. For exact replication, preserve far-level comparator; for clean inference, add a matched-level control profile. & \statusskip\\
+High-frequency brightness & DynaSpace looming centroid is 10.95 kHz; regenerated PPS proxy is 8.11 kHz. Raw 95\% rolloff is near 19.9 kHz, proxy near 15.5 kHz. & High frequencies strengthen ILD and pinna/HRTF spectral cues; broad bandwidth improves localization \cite{carlini2024}. & 3DTI should supply HRTF coloration, but the dry source should remain bright enough. Add optional spectrum matching/shelf only as a dry-source setting, not as a fake spatializer. & \statusmodify\\
 HRTF spectral filtering & Paper reports Max/MSP Spat and non-individual LISTEN HRTFs for direct sound and early reflections \cite{roussel2025}. & HRTFs carry head/pinna/torso spectral cues for externalized spatial location \cite{carlini2024}. & PPS-kit uses FABIAN SOFA as a redistributable standard; LISTEN is excluded pending license audit. Full 3DTI/SOFA rendering is a stronger, parameterized approach than baking the raw spectral coloration. & \statusalready\\
-ILD & DynaSpace looming global ILD L-R is -6.34 dB; moving-window ILD ranges -7.78 to 0.48 dB. PPS proxy global ILD is +12.72 dB and nearly static. & ILD is a main lateralization cue, especially at high frequencies and near-field positions \cite{carlini2024}. & 3DTI should implement ILD through HRTF, distance, head shadow, and near-field corrections. Current proxy sign/magnitude mismatch means coordinate/channel convention must be audited before using the profile for left/right claims. & \statusmodify\\
+ILD & DynaSpace looming global ILD L-R is -6.34 dB; moving-window ILD ranges -7.78 to 0.48 dB. PPS proxy global ILD is +12.61 dB and nearly static. & ILD is a main lateralization cue, especially at high frequencies and near-field positions \cite{carlini2024}. & 3DTI should implement ILD through HRTF, distance, head shadow, and near-field corrections. Current proxy sign/magnitude mismatch means coordinate/channel convention must be audited before using the profile for left/right claims. & \statusmodify\\
 ITD / cross-ear lag & DynaSpace raw lag is +187.5 us; PPS proxy lag is -362.8 us by the same script convention. & ITD is a principal horizontal cue, especially for lower-frequency components; broadband bursts provide onset information too \cite{carlini2024}. & Full 3DTI supports customized ITD and propagation. The Python proxy uses nearest HRIR frames and does not prove correct signed ITD. Add a channel-sign validation file. & \statusmodify\\
-Interaural coherence / IACC & DynaSpace looming IACC abs is 0.229 globally and 0.043--0.269 in 100 ms windows. PPS proxy is much more coherent at about 0.695 globally. & Low interaural coherence is consistent with reflected/reverberant binaural energy and can aid externalization, but excessive decorrelation can weaken precise lateral localization. & 3DTI with BRIR/Ambisonic reverb is a better controlled way to add this than arbitrary decorrelation. Current PPS profile has reverb disabled. & \statusmodify\\
+Interaural coherence / IACC & DynaSpace looming IACC abs is 0.229 globally and 0.043--0.269 in 100 ms windows. PPS proxy is much more coherent at about 0.703 globally. & Low interaural coherence is consistent with reflected/reverberant binaural energy and can aid externalization, but excessive decorrelation can weaken precise lateral localization. & 3DTI with BRIR/Ambisonic reverb is a better controlled way to add this than arbitrary decorrelation. Current PPS profile has reverb disabled. & \statusmodify\\
 Early reflections and late reverb & Paper reports direct sound, early reflections, and late reverberation in the smartphone stimuli \cite{roussel2025}. Raw low IACC supports the presence of non-anechoic spatial rendering. & Reverberation contributes distance/externalization information; direct-to-reverberant ratio is a major distance cue \cite{kolarik2016,carlini2024}. & Full 3DTI supports BRIR/Ambisonic reverberation \cite{cuevas2019}; current PPS Python reference config declares reverb disabled. Add an optional DynaSpace-room profile rather than always-on reverb. & \statuskeep\\
 Direct-to-reverberant ratio & Not directly measured from the stereo WAV without the dry/render components, but low IACC and paper methods imply a baked direct-plus-reflection mixture. & DRR can provide distance information that is less dependent on source level than raw intensity \cite{kolarik2016}. & 3DTI can model this better if a room/BRIR configuration is explicit. Current proxy has no explicit DRR target. & \statusmodify\\
 Near-field distance cues & Endpoint is 20 cm, inside near field. & Near-field ILD/head-shadow changes become important close to the head; source distance changes are perceptually larger near the body. & 3DTI full high-quality path includes near-field corrections \cite{cuevas2019}; current Python proxy is a simplified reference render. Use native 3DTI for publication-grade near-field stimuli. & \statusalready\\
 Trajectory flexibility & Raw WAV is a single baked 45-degree left-hemispace stimulus. & Future studies need different approach angles and maybe curved trajectories. & PPS-kit/3DTI is clearly better here because the trajectory is metadata-driven. Do not encode spatial path as immutable audio. & \statusalready\\
 Sample rate / bit depth & DynaSpace raw files are 48 kHz, 16-bit PCM. PPS proxy files are 44.1 kHz. Paper text reports 44.1 kHz source preparation, while Android raw files are 48 kHz. & Sample rate affects top-band content and exact asset playback, but it is not itself a spatial cue. & Match the HRTF/SOFA/render chain sample rate and document resampling. Use 48 kHz only for exact Android playback replication, not because it is inherently better. & \statusskip\\
-Peak/RMS/crest quality & Raw looming peak -3.19 dBFS, no clipping, RMS -37.28 dBFS, crest 34.10 dB. PPS proxy peak -0.91 dBFS, RMS -22.95 dBFS, crest 22.03 dB. & High crest is expected for sparse burst trains. Hidden peak normalization can destroy intended absolute or relative level policies. & PPS should disable hidden peak normalization in calibrated mode and store SPL/RMS targets. Raw DynaSpace quality is usable, but its fixed-vs-looming level asymmetry must be declared. & \statusmodify\\
+Peak/RMS/crest quality & Raw looming peak -3.19 dBFS, no clipping, RMS -37.28 dBFS, crest 34.10 dB. Regenerated PPS proxy peak -0.91 dBFS, RMS -31.33 dBFS, crest 30.42 dB. & High crest is expected for sparse burst trains. Hidden peak normalization can destroy intended absolute or relative level policies. & PPS should disable hidden peak normalization in calibrated mode and store SPL/RMS targets. Raw DynaSpace quality is usable, but its fixed-vs-looming level asymmetry must be declared. & \statusmodify\\
 Phone/transducer chain & Paper used an Android phone and headphones; the raw file alone does not encode the full playback chain. & Smartphone output and headphone response can affect level and spectrum, but this is apparatus, not a spatial rendering principle. & PPS-kit should not mimic unknown phone coloration unless validating Android playback specifically. Use measured audio-interface/headphone calibration instead. & \statusskip\\
 Tactile vibration timing & Paper vibration: 155 Hz, about 50 ms; source profile records Android code timing details. & This affects PPS RT alignment, not audio spatial quality. & Keep DynaSpace timing anchors and vibration metadata in the study profile, but do not mix haptic waveform design into audio spectral matching. & \statusmodify\\
 \bottomrule
@@ -163,7 +188,7 @@ Tactile vibration timing & Paper vibration: 155 Hz, about 50 ms; source profile 
 
 The DynaSpace raw looming WAV is technically clean for a behavioral stimulus: it has no clipping, large headroom, high crest factor consistent with a pulse train, and a stable 33-burst temporal pattern. Its level is low on average because most of the file is sparse/noisy and because distance/reverberation were baked into the render. The raw fixed file is also clean, but its peak and RMS are much lower than the looming file. That fixed-vs-looming level gap is not a file-quality problem; it is a design property that can become an interpretive problem if a future study tries to attribute all facilitation to spatial proximity rather than level/salience.
 
-The PPS-kit proxy files are also technically clean, but they are not DynaSpace-equivalent. They are continuous broadband noises, not burst trains; they are peak-normalized close to full scale; the looming proxy has a stronger gain ramp than the raw DynaSpace looming file; and the proxy binaural image is much more coherent. This makes the present proxy useful as a runnable placeholder, but not a final smartphone-style replication stimulus.
+The PPS-kit proxy files are also technically clean. After this implementation pass they now match the core DynaSpace burst-train timing: 33 detected bursts and about 95 ms median IOI. They are still not fully DynaSpace-equivalent: they are peak-normalized close to full scale, the looming proxy has a stronger gain ramp than the raw DynaSpace looming file, the dry/source spectrum is less bright, and the proxy binaural image is much more coherent. This makes the present proxy a stronger smartphone-style source approximation, but not a bit-matched recreation of the original Spat/LISTEN/room/phone render.
 
 \section*{Best-of-Both-Worlds Generation Protocol}
 
@@ -179,12 +204,26 @@ The PPS-kit proxy files are also technically clean, but they are not DynaSpace-e
 \section*{Implementation Consequences for PPS-kit}
 
 \begin{itemize}
-  \item The next toolkit change should be a \texttt{dynaspace\_burst\_train} source generator, not another pre-rendered WAV copy.
+  \item PPS-kit should treat the best-of-both-worlds protocol as the new default operating standard for ops-generated looming stimuli: a DynaSpace/Hobeika-style broadband burst-train source, explicit level policy, and 3DTI/SOFA-owned spatial rendering.
+  \item New generated-noise looming bakes should default to a named \texttt{dynaspace\_gaussian\_burst\_train} source profile: 33 bursts, 30 ms burst duration, 10 ms rise/fall, 65 ms inter-burst interval, and 300 ms onset. Published-study profiles may override this only when the source paper specifies a different waveform or apparatus constraint.
   \item The DynaSpace profile should expose two level-policy presets: \texttt{smartphone\_replication} and \texttt{matched\_level\_control}.
   \item The renderer should prefer native 3DTI for DynaSpace-style publication stimuli; the Python SOFA reference path is acceptable for preview/proxy but should be flagged as simplified.
   \item Reverb/BRIR should be optional but first-class. The original smartphone stimulus used reflections/reverb, and the measured low IACC shows that current PPS proxy externalization is not equivalent.
   \item Before changing left/right signs, run a channel-orientation audit. The raw files and current proxy disagree in ILD/ITD sign, and that can be a coordinate convention issue rather than a true stimulus mismatch.
 \end{itemize}
+
+\section*{Golden-Standard Operating Protocol}
+
+The adopted standard is not ``copy the phone WAV.'' It is source-renderer separation:
+
+\begin{enumerate}
+  \item \textbf{Dry source}: generate a salient, bright, broadband Gaussian white-noise burst train using the DynaSpace/Hobeika timing defaults unless the target study has a documented different source.
+  \item \textbf{Trajectory}: store approach geometry as editable metadata: start/end distance, speed, azimuth/elevation, endpoint holds, and SOA/distance anchors.
+  \item \textbf{Spatial rendering}: use 3DTI/SOFA for HRTF spectral filtering, ILD, ITD, distance attenuation, propagation delay, near-field behavior, and future trajectory angles.
+  \item \textbf{Externalization}: add room/BRIR/reverb/DRR/IACC only through explicit renderer parameters and QC outputs, not hidden stereo decorrelation.
+  \item \textbf{Controls}: provide both replication-like high-salience contrasts and matched-level causal controls wherever the research question needs to distinguish PPS proximity from raw salience.
+  \item \textbf{QC}: every generated looming source should report no clipping, source-profile metadata, burst count/IOI, peak/RMS/level policy, trajectory anchors, channel-sign/azimuth expectations, and room metrics when reverb is enabled.
+\end{enumerate}
 
 \section*{Bottom Line}
 

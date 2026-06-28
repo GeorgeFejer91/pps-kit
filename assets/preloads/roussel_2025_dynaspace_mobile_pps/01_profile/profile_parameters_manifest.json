@@ -95,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 31,
+      "value": 32,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {

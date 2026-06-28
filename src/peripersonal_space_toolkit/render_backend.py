@@ -23,6 +23,8 @@ from typing import Any
 from .design import (
     CUSTOM_AUDIO_NOISE_TYPE,
     DEFAULT_SOFA_FILE,
+    PPS_LOOMING_GOLD_STANDARD_SOURCE_PARAMETERS,
+    PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
     StimulusDesign,
     cartesian_to_spherical,
     design_from_dict,
@@ -144,6 +146,12 @@ def _noise_rows(design: StimulusDesign) -> list[dict[str, Any]]:
             "tone_type": source.get("tone_type", source["noise_type"]),
             "gain": source.get("gain", 1.0),
         }
+        source_profile = source.get("source_profile", "")
+        source_profile_parameters = source.get("source_profile_parameters", {})
+        if source_profile:
+            row["source_profile"] = source_profile
+        if source_profile_parameters:
+            row["source_profile_parameters"] = source_profile_parameters
         if source.get("source_path"):
             row["source_path"] = source.get("source_path", "")
         if source.get("prebaked_path"):
@@ -309,6 +317,73 @@ def _generate_noise(noise_type: str, samples: int, sample_rate: int, seed: int) 
         raise ValueError(f"Unsupported noise type: {noise_type}")
     peak = float(np.max(np.abs(result))) if samples else 0.0
     return result / peak if peak > 0 else result
+
+
+def _raised_cosine_edge(length: int, edge: int) -> "Any":
+    import numpy as np
+
+    envelope = np.ones(length, dtype=float)
+    if length <= 0 or edge <= 0:
+        return envelope
+    edge = min(edge, max(1, length // 2))
+    phase = np.linspace(0.0, np.pi, edge, endpoint=False)
+    attack = 0.5 - 0.5 * np.cos(phase)
+    envelope[:edge] = attack
+    envelope[-edge:] = attack[::-1]
+    return envelope
+
+
+def _generate_dynaspace_burst_train(
+    noise_type: str,
+    samples: int,
+    sample_rate: int,
+    seed: int,
+    parameters: dict[str, Any] | None = None,
+) -> "Any":
+    import numpy as np
+
+    params = parameters if isinstance(parameters, dict) else {}
+    defaults = PPS_LOOMING_GOLD_STANDARD_SOURCE_PARAMETERS
+    burst_count = max(1, int(params.get("burst_count", defaults["burst_count"])))
+    burst_duration_s = max(0.001, float(params.get("burst_duration_s", defaults["burst_duration_s"])))
+    rise_fall_s = max(0.0, float(params.get("rise_fall_s", defaults["rise_fall_s"])))
+    inter_burst_interval_s = max(0.0, float(params.get("inter_burst_interval_s", defaults["inter_burst_interval_s"])))
+    onset_s = max(0.0, float(params.get("onset_s", defaults["onset_s"])))
+    period_s = burst_duration_s + inter_burst_interval_s
+    total_duration_s = samples / float(sample_rate)
+    source = np.zeros(samples, dtype=float)
+    burst_samples = max(1, int(round(burst_duration_s * sample_rate)))
+    edge_samples = int(round(rise_fall_s * sample_rate))
+    envelope = _raised_cosine_edge(burst_samples, edge_samples)
+
+    for index in range(burst_count):
+        burst_onset_s = onset_s + index * period_s
+        if burst_onset_s >= total_duration_s:
+            break
+        start = int(round(burst_onset_s * sample_rate))
+        stop = min(samples, start + burst_samples)
+        if stop <= start:
+            continue
+        burst = _generate_noise(noise_type, stop - start, sample_rate, seed + index * 37)
+        source[start:stop] += burst * envelope[: stop - start]
+
+    peak = float(np.max(np.abs(source))) if samples else 0.0
+    return source / peak if peak > 0 else source
+
+
+def _generate_procedural_source(source: dict[str, Any], samples: int, sample_rate: int, seed: int) -> "Any":
+    profile = str(source.get("source_profile") or "").strip().lower()
+    if profile in {"", "continuous_noise", "procedural_noise"}:
+        return _generate_noise(source["noise_type"], samples, sample_rate, seed)
+    if profile == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE:
+        return _generate_dynaspace_burst_train(
+            source["noise_type"],
+            samples,
+            sample_rate,
+            seed,
+            source.get("source_profile_parameters"),
+        )
+    raise ValueError(f"Unsupported source profile: {source.get('source_profile')}")
 
 
 def _loudness_control_enabled(config: dict[str, Any]) -> bool:
@@ -834,6 +909,8 @@ def write_render_qc(path: Path, rows: list[dict[str, Any]]) -> None:
         "status",
         "noise_label",
         "noise_type",
+        "source_profile",
+        "source_profile_parameters",
         "source_kind",
         "source_render_mode",
         "source_path",
@@ -985,7 +1062,7 @@ def render_with_python_sofa_reference(config: dict[str, Any], output_dir: Path, 
             }
         else:
             dry_seed = int(config["source"]["seed"]) + noise_index * 1009
-            dry = _generate_noise(noise["noise_type"], total_samples, sample_rate, dry_seed)
+            dry = _generate_procedural_source(noise, total_samples, sample_rate, dry_seed)
         loudness_metadata: dict[str, Any] = {}
         if _loudness_control_enabled(config):
             dry = _apply_loudness_envelope(dry, config["loudness_policy"], sample_rate)
@@ -1026,6 +1103,8 @@ def render_with_python_sofa_reference(config: dict[str, Any], output_dir: Path, 
                 "status": "rendered_reference",
                 "noise_label": noise["label"],
                 "noise_type": noise["noise_type"],
+                "source_profile": noise.get("source_profile", ""),
+                "source_profile_parameters": json.dumps(noise.get("source_profile_parameters", {}), sort_keys=True),
                 "source_kind": source_kind,
                 **imported_metadata,
                 "duration_s": f"{total_samples / sample_rate:.6f}",
