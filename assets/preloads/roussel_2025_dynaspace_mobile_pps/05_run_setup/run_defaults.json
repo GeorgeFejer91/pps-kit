@@ -1,0 +1,9 @@
+{
+  "schema": "pps-preload-run-setup-segment.v1",
+  "template_id": "roussel_2025_dynaspace_mobile_pps",
+  "blocks": 1,
+  "participants": 20,
+  "random_seed": 20251001,
+  "trial_randomization_strategy": "balanced_shuffle",
+  "block_order_randomization": "fixed"
+}

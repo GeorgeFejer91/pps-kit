@@ -1,9 +1,10 @@
 {
   "schema": "pps-profile-recreation-status.v1",
-  "profile_count": 21,
+  "profile_count": 22,
   "categories": {
     "gui_recreatable": [
       "study5_box_breathing_pps",
+      "roussel_2025_dynaspace_mobile_pps",
       "matsuda_2021_four_directions",
       "barumerli_2026_arm_movement_exp1",
       "barumerli_2026_arm_movement_exp2",
@@ -107,6 +108,73 @@
       "missing_publication_parameters": [],
       "unsupported_toolkit_structures": [],
       "profile_parameters_manifest": "assets/preloads/study5_box_breathing_pps/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "roussel_2025_dynaspace_mobile_pps",
+      "title": "DynaSpace smartphone PPS validation profile",
+      "citation": "Roussel, A., et al. (2025). Using Android Smartphones to Collect Precise Measures of Reaction Times to Multisensory Stimuli. Sensors, 25(19), 6072.",
+      "doi": "10.3390/s25196072",
+      "verification_status": "verified",
+      "publication_status": "published",
+      "profile_type": "published_mobile_dynaspace_pps_validation",
+      "visible_variant_label": "",
+      "variant_display": "DynaSpace smartphone PPS validation profile",
+      "primary_category": "gui_recreatable",
+      "category_label": "GUI-recreatable",
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "gui_recreatable": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "segment_1_to_6_materializable": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": true,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 4,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/roussel_2025_dynaspace_mobile_pps/01_profile/profile_parameters_manifest.json"
     },
     {
       "template_id": "matsuda_2021_four_directions",

@@ -269,6 +269,8 @@ def asset_metadata(
         source_kind=source_kind,
         noise_type=tone_type,
     )
+    if getattr(source, "motion_mode", "looming") == "stationary":
+        snapshot = stationary_snapshot(snapshot)
     rel_path = rel(path)
     return {
         "label": source.label,
@@ -287,6 +289,24 @@ def asset_metadata(
         "include_tactile": False,
         "trajectory_snapshot": snapshot,
     }
+
+
+def stationary_snapshot(snapshot: dict[str, Any]) -> dict[str, Any]:
+    """Represent a fixed-source preload without reusing the moving endpoint."""
+
+    stationary = dict(snapshot)
+    start = dict(stationary.get("start") or {})
+    stationary.update(
+        {
+            "end_distance_cm": stationary.get("start_distance_cm", 0.0),
+            "end_rotation_deg": stationary.get("start_rotation_deg", 0.0),
+            "movement_duration_s": 0.0,
+            "path_length_m": 0.0,
+            "path_direction": "stationary",
+            "end": start,
+        }
+    )
+    return stationary
 
 
 def source_direction_variants(template: StudyTemplate, design: Any, source: NoiseDefinition) -> list[dict[str, Any]]:

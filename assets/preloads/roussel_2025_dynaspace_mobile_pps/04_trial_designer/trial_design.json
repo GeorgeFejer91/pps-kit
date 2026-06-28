@@ -1,0 +1,66 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "roussel_2025_dynaspace_mobile_pps",
+  "repetitions_per_condition": 4,
+  "soa_values_ms": [
+    105,
+    1625,
+    2385,
+    2765,
+    2955,
+    3050
+  ],
+  "spatial_values_cm": [
+    640.0,
+    320.0,
+    160.0,
+    80.0,
+    40.0,
+    20.0
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "dynaspace-looming-row",
+      "label": "DynaSpace looming source",
+      "audio_tactile_percentage": 66.666667,
+      "catch_percentage": 33.333333,
+      "baseline_percentage": 0.0,
+      "elements": [
+        {
+          "element_id": "dynaspace-looming-source",
+          "kind": "looming_stimulus",
+          "label": "DynaSpace proxy looming burst train",
+          "source_label": "DynaSpace proxy looming burst train",
+          "source_labels": [
+            "DynaSpace proxy looming burst train"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    },
+    {
+      "strip_id": "dynaspace-fixed-row",
+      "label": "DynaSpace fixed 640 cm source",
+      "audio_tactile_percentage": 66.666667,
+      "catch_percentage": 33.333333,
+      "baseline_percentage": 0.0,
+      "elements": [
+        {
+          "element_id": "dynaspace-fixed-source",
+          "kind": "looming_stimulus",
+          "label": "DynaSpace proxy fixed 640 cm burst train",
+          "source_label": "DynaSpace proxy fixed 640 cm burst train",
+          "source_labels": [
+            "DynaSpace proxy fixed 640 cm burst train"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 72
+}

@@ -66,9 +66,9 @@
       "year": "2025",
       "doi": "10.3390/s25196072",
       "title": "Using Android Smartphones to Collect Precise Measures of Reaction Times to Multisensory Stimuli.",
-      "decision": "excluded_methods_reference_no_distinct_pps_task",
+      "decision": "included_current_runnable_profile",
       "linked_literature_record_ids": ["smartphone_rt_methods_2025"],
-      "reason": "Methods/device reference rather than a distinct audiotactile PPS task."
+      "reason": "The DynaSpace Android methods paper includes an audio-tactile PPS-style looming versus fixed-source validation task now represented by the runnable toolkit profile roussel_2025_dynaspace_mobile_pps."
     },
     {
       "pmid": "39128330",

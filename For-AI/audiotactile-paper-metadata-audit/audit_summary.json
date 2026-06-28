@@ -1,41 +1,41 @@
 {
   "schema": "pps-paper-metadata-audit-summary.v1",
-  "generated_on": "2026-06-16",
+  "generated_on": "2026-06-28",
   "parser_version": "0.5.7",
   "record_count": 74,
   "doi_record_count": 72,
   "missing_doi_record_count": 2,
   "pdf_retrieved_record_count": 26,
-  "pdf_missing_or_unavailable_record_count": 43,
-  "pdf_not_applicable_record_count": 5,
+  "pdf_missing_or_unavailable_record_count": 44,
+  "pdf_not_applicable_record_count": 4,
   "pdf_status_counts": {
     "downloaded": 26,
-    "needs_user_download": 12,
-    "not_applicable": 5,
+    "needs_user_download": 13,
+    "not_applicable": 4,
     "open_access_unavailable": 13,
     "paywalled": 18
   },
   "supplement_status_counts": {
     "downloaded": 10,
     "needs_user_download": 17,
-    "not_applicable": 5,
+    "not_applicable": 4,
     "not_checked": 6,
-    "not_found": 21,
+    "not_found": 22,
     "paywalled": 15
   },
   "extraction_status_counts": {
-    "parsed_with_warnings": 31,
-    "pending_pdf": 43
+    "parsed_with_warnings": 30,
+    "pending_pdf": 44
   },
   "metadata_confidence_label_counts": {
-    "not_applicable": 5,
+    "not_applicable": 4,
     "partial_extraction": 28,
-    "pending_source": 12,
+    "pending_source": 13,
     "source_unavailable": 29
   },
   "automated_evidence_status_counts": {
-    "no_extracted_source": 41,
-    "not_applicable": 5,
+    "no_extracted_source": 42,
+    "not_applicable": 4,
     "source_mined": 28
   },
   "automated_evidence_field_total": 477,
@@ -46,16 +46,16 @@
   "semantic_review_pass_status_counts": {
     "completed": 164,
     "completed_no_hits": 4,
-    "not_applicable": 30,
-    "source_unavailable": 246
+    "not_applicable": 24,
+    "source_unavailable": 252
   },
   "pps_visualization_type_count": 9,
   "pps_visualization_candidate_record_count": 27,
   "pps_visualization_candidate_total": 173,
   "pps_visualization_status_counts": {
-    "no_extracted_source": 41,
+    "no_extracted_source": 42,
     "no_visualization_terms_found": 1,
-    "not_applicable": 5,
+    "not_applicable": 4,
     "source_mined": 27
   },
   "pps_visualization_type_counts": {
@@ -69,7 +69,7 @@
     "sigmoid_psychometric_fit": 14,
     "spatial_map_heatmap_or_body_boundary": 11
   },
-  "missing_download_request_count": 81,
+  "missing_download_request_count": 82,
   "tracked_pdf_folder": "artifacts/paper_metadata_audit/publication_pdfs/",
   "tracked_supplement_folder": "artifacts/paper_metadata_audit/supplements/",
   "tracked_extraction_folder": "artifacts/paper_metadata_audit/extracted/",

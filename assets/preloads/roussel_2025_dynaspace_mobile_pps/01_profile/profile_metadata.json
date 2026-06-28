@@ -1,0 +1,179 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "roussel_2025_dynaspace_mobile_pps",
+  "title": "DynaSpace smartphone PPS validation profile",
+  "citation": "Roussel, A., et al. (2025). Using Android Smartphones to Collect Precise Measures of Reaction Times to Multisensory Stimuli. Sensors, 25(19), 6072.",
+  "doi": "10.3390/s25196072",
+  "source_url": "https://doi.org/10.3390/s25196072",
+  "verification_status": "verified",
+  "notes": "Smartphone/DynaSpace audio-tactile PPS validation profile. The profile encodes the reported left-hemispace looming trajectory, fixed 640 cm comparator, six tactile timing anchors, no-vibration catch trials, and 72 recorded-trial distribution from the paper and app source. Bundled preload WAVs are toolkit-generated broadband proxies rendered with the PPS Toolkit FABIAN/SOFA path; the original Android bursttrain WAVs are recorded as provenance but not redistributed.",
+  "reference_parameters": {
+    "profile_type": "published_mobile_dynaspace_pps_validation",
+    "publication_status": "published",
+    "paper_role": "smartphone methods validation using an audio-tactile PPS-style looming versus fixed-source task",
+    "source_app_name": "DynaSpace",
+    "source_app_repo": "https://forge-2.ircam.fr/roussel/dynaspace/",
+    "source_app_project": "DynaSpaceIrcam",
+    "source_code_parameters": {
+      "main_activity": "DynaSpaceIrcam/app/src/main/java/com/example/osc/MainActivity.kt",
+      "randomization_source": "DynaSpaceIrcam/app/src/main/cpp/rand.cpp",
+      "audio_player_source": "DynaSpaceIrcam/app/src/main/cpp/WavAudioPlayer.cpp",
+      "max_runs_including_practice": 77,
+      "practice_trial_count": 5,
+      "recorded_trial_count": 72,
+      "time_array_ms": [
+        105,
+        1625,
+        2385,
+        2765,
+        2955,
+        3050,
+        0
+      ],
+      "noncatch_java_delay_offset_ms": 300,
+      "cpp_vibration_sleep_offset_ms": 50,
+      "source_code_vibration_duration_ms": 60,
+      "paper_reported_vibration_duration_ms": 50,
+      "vibration_amplitude_android": 255,
+      "restart_delay_range_ms": [
+        700,
+        1100
+      ],
+      "restart_delay_offset_ms": 300,
+      "restart_delay_effective_range_ms": [
+        1000,
+        1400
+      ],
+      "recorded_condition_distribution": {
+        "looming_audio_tactile": 24,
+        "fixed_audio_tactile": 24,
+        "looming_no_vibration_catch": 12,
+        "fixed_no_vibration_catch": 12
+      }
+    },
+    "original_audio_assets": [
+      {
+        "label": "Android looming burst train",
+        "filename": "bursttrainlooming.wav",
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "frames": 184800,
+        "duration_s": 3.85,
+        "subtype": "PCM_16",
+        "sha256": "610c9a9c22329f6dfb4a37917cfdead552042e6d2f2987dacc418385e7570da2",
+        "redistributed_in_pps_toolkit": false
+      },
+      {
+        "label": "Android fixed burst train",
+        "filename": "bursttrainfixe.wav",
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "frames": 184800,
+        "duration_s": 3.85,
+        "subtype": "PCM_16",
+        "sha256": "56f8afff1b0985a0e3585bdb525f3a76c0bd1f57cf711a667bcbfa03b1f69fe1",
+        "redistributed_in_pps_toolkit": false
+      }
+    ],
+    "stimulus_asset_policy": "The public PPS Toolkit profile does not redistribute the Android app's raw WAVs. The preload catalog bakes 44.1 kHz toolkit-generated broadband proxy sources through the existing FABIAN/SOFA renderer so the profile remains runnable and publication-safe.",
+    "original_audio_engine": "Max/MSP Spat with LISTEN HRTFs for source creation, then Android Oboe playback in the DynaSpace app",
+    "toolkit_audio_engine": "PPS Toolkit 3DTI-compatible Python SOFA/FABIAN reference renderer",
+    "toolkit_renderer_sample_rate_hz": 44100,
+    "original_android_wav_sample_rate_hz": 48000,
+    "toolkit_source_type": "white-noise broadband burst-train proxy",
+    "source_asset_equivalence": "trajectory and condition logic are matched; exact Android burst waveform, Spat/LISTEN renderer, phone transducer response, and motor mechanics are not bit-matched",
+    "auditory_conditions": [
+      {
+        "label": "looming",
+        "movement": "left 45-degree approach",
+        "start_distance_cm": 640,
+        "end_distance_cm": 20,
+        "trajectory_start_time_ms": 105,
+        "trajectory_end_time_ms": 3050,
+        "derived_speed_mps": 2.1052631579,
+        "azimuth_deg_toolkit_signed": -45.0,
+        "elevation_deg": 0.0
+      },
+      {
+        "label": "fixed",
+        "movement": "stationary comparator",
+        "distance_cm": 640,
+        "azimuth_deg_toolkit_signed": -45.0,
+        "elevation_deg": 0.0
+      }
+    ],
+    "trajectory_anchor_table": [
+      {
+        "anchor": "T1",
+        "soa_ms": 105,
+        "distance_cm": 640
+      },
+      {
+        "anchor": "T2",
+        "soa_ms": 1625,
+        "distance_cm": 320
+      },
+      {
+        "anchor": "T3",
+        "soa_ms": 2385,
+        "distance_cm": 160
+      },
+      {
+        "anchor": "T4",
+        "soa_ms": 2765,
+        "distance_cm": 80
+      },
+      {
+        "anchor": "T5",
+        "soa_ms": 2955,
+        "distance_cm": 40
+      },
+      {
+        "anchor": "T6",
+        "soa_ms": 3050,
+        "distance_cm": 20
+      }
+    ],
+    "no_vibration_catch_code": {
+      "time_array_value_ms": 0,
+      "semantic": "auditory-only catch trial with no phone vibration",
+      "toolkit_family": "Catch"
+    },
+    "primary_analysis_contrast": "looming audio-tactile RT pattern compared with fixed-source audio-tactile RT pattern across matched vibration timing anchors",
+    "baseline_policy": "No tactile-only baseline is encoded for this profile because the smartphone task's main validation contrast is looming versus fixed sound with no-vibration catches.",
+    "trajectory_override_policy": "Future variants should change azimuth_start_deg and azimuth_end_deg together for another constant-bearing approach angle, or provide cartesian endpoints for curved or non-radial paths while preserving the same anchor-table logic.",
+    "participants_recruited": 20,
+    "participants_analyzed_reported": 18,
+    "profile_check_complete": true
+  },
+  "provenance": [
+    {
+      "field": "paper identity",
+      "source": "Sensors 2025 article DOI 10.3390/s25196072 and PubMed PMID 41094896 identify the smartphone RT methods paper."
+    },
+    {
+      "field": "app source",
+      "source": "DynaSpace source repository at https://forge-2.ircam.fr/roussel/dynaspace/ contains the Android DynaSpaceIrcam app used for the task."
+    },
+    {
+      "field": "SOA anchors and catch code",
+      "source": "MainActivity.kt defines timeArray = [105, 1625, 2385, 2765, 2955, 3050, 0], with the zero value used as a no-vibration catch."
+    },
+    {
+      "field": "trial distribution",
+      "source": "rand.cpp creates 48 recorded audio-tactile rows across two sound modes, six timing values, and four repeats, plus 24 no-vibration catch rows; five practice rows are prepended."
+    },
+    {
+      "field": "audio assets",
+      "source": "The Android raw assets bursttrainlooming.wav and bursttrainfixe.wav are stereo 48 kHz PCM_16 files with 184800 frames, i.e. 3.85 s duration."
+    },
+    {
+      "field": "vibration implementation",
+      "source": "WavAudioPlayer.cpp schedules phone vibration after the requested delay plus a 50 ms sleep offset and calls the Android vibrator for 60 ms when the delay is nonzero."
+    },
+    {
+      "field": "toolkit recreation policy",
+      "source": "The PPS Toolkit public preload uses generated broadband proxy WAVs through the bundled FABIAN/SOFA renderer and records the original Android WAVs as non-redistributed provenance."
+    }
+  ]
+}

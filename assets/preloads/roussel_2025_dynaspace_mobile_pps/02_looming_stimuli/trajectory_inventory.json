@@ -1,0 +1,80 @@
+{
+  "schema": "pps-preload-trajectory-inventory.v1",
+  "template_id": "roussel_2025_dynaspace_mobile_pps",
+  "trajectories": [
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "DynaSpace proxy looming burst train",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 640.0,
+        "end_distance_cm": 20.0,
+        "start_rotation_deg": 315.0,
+        "end_rotation_deg": 315.0,
+        "movement_duration_s": 2.945,
+        "start_hold_s": 0.105,
+        "end_hold_s": 0.8,
+        "path_length_m": 6.2,
+        "coordinate_mode": "polar",
+        "path_direction": "approach",
+        "start": {
+          "x_m": -4.525483,
+          "y_m": 4.525483,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": -0.141421,
+          "y_m": 0.141421,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "DynaSpace proxy looming burst train"
+      ],
+      "tone_types": [
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/roussel_2025_dynaspace_mobile_pps/02_looming_stimuli/looming_DynaSpace_proxy_looming_burst_train.wav"
+      ]
+    },
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "DynaSpace proxy fixed 640 cm burst train",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 640.0,
+        "end_distance_cm": 640.0,
+        "start_rotation_deg": 315.0,
+        "end_rotation_deg": 315.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.105,
+        "end_hold_s": 0.8,
+        "path_length_m": 0.0,
+        "coordinate_mode": "polar",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": -4.525483,
+          "y_m": 4.525483,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": -4.525483,
+          "y_m": 4.525483,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "DynaSpace proxy fixed 640 cm burst train"
+      ],
+      "tone_types": [
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/roussel_2025_dynaspace_mobile_pps/02_looming_stimuli/looming_DynaSpace_proxy_fixed_640_cm_burst_train.wav"
+      ]
+    }
+  ]
+}

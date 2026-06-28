@@ -469,6 +469,7 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 
 ## 2026-06-28
 
+- Added the published smartphone/DynaSpace PPS validation preload `roussel_2025_dynaspace_mobile_pps`. It encodes the Sensors 2025 Android app task as a left 45-degree looming source moving from 640 cm to 20 cm over 2.945 s with tactile anchors at 105/1625/2385/2765/2955/3050 ms, plus a fixed 640 cm comparator, 48 audio-tactile trials, 24 no-vibration catch trials, and the app's practice/recorded-trial provenance. Public preload WAVs are toolkit-generated FABIAN/SOFA broadband proxies; the original Android `bursttrainlooming.wav` and `bursttrainfixe.wav` are recorded only as metadata/hashes because redistribution rights were not verified.
 - Added `mobile_pps_replication.py` plus
   `validation_protocols/scripts/analyze_mobile_pps_replication.py` to test
   whether collected PPS CSV data reproduce basic smartphone/mobile PPS

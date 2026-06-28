@@ -183,6 +183,157 @@
       ]
     },
     {
+      "template_id": "roussel_2025_dynaspace_mobile_pps",
+      "title": "DynaSpace smartphone PPS validation profile",
+      "visible_variant_label": "",
+      "variant_display": "DynaSpace smartphone PPS validation profile",
+      "publication_status": "published",
+      "profile_type": "published_mobile_dynaspace_pps_validation",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/roussel_2025_dynaspace_mobile_pps/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/roussel_2025_dynaspace_mobile_pps/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "gui_recreatable",
+        "category_label": "GUI-recreatable",
+        "runner_readiness": "ready",
+        "profile_checks_passed": true,
+        "gui_recreatable": true,
+        "segment_0_to_4_profile_checks_passed": true,
+        "segment_1_to_6_materializable": true,
+        "finished_profile": true,
+        "segment_6_launchable": true,
+        "profile_completion_status": "finished_segment_6_launchable",
+        "missing_parameter_count": 0,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "primary_recreation_category": "gui_recreatable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/roussel_2025_dynaspace_mobile_pps/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/roussel_2025_dynaspace_mobile_pps/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/roussel_2025_dynaspace_mobile_pps/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/roussel_2025_dynaspace_mobile_pps/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/roussel_2025_dynaspace_mobile_pps/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "DynaSpace proxy looming burst train",
+          "path": "assets/preloads/roussel_2025_dynaspace_mobile_pps/02_looming_stimuli/looming_DynaSpace_proxy_looming_burst_train.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/roussel_2025_dynaspace_mobile_pps/02_looming_stimuli/looming_DynaSpace_proxy_looming_burst_train.wav",
+          "sha256": "ffad6206ad134c6df5843f7d10e9b43bce9871098b5ef45ab1f3729908a5a1ea",
+          "duration_s": 3.85,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "DynaSpace proxy looming burst train",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 640.0,
+            "end_distance_cm": 20.0,
+            "start_rotation_deg": 315.0,
+            "end_rotation_deg": 315.0,
+            "movement_duration_s": 2.945,
+            "start_hold_s": 0.105,
+            "end_hold_s": 0.8,
+            "path_length_m": 6.2,
+            "coordinate_mode": "polar",
+            "path_direction": "approach",
+            "start": {
+              "x_m": -4.525483,
+              "y_m": 4.525483,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": -0.141421,
+              "y_m": 0.141421,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "DynaSpace proxy fixed 640 cm burst train",
+          "path": "assets/preloads/roussel_2025_dynaspace_mobile_pps/02_looming_stimuli/looming_DynaSpace_proxy_fixed_640_cm_burst_train.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/roussel_2025_dynaspace_mobile_pps/02_looming_stimuli/looming_DynaSpace_proxy_fixed_640_cm_burst_train.wav",
+          "sha256": "24ecc84b3728d5b7823b90e30cda69480065c01954faacb1443c8ceb6b92d04c",
+          "duration_s": 3.85,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "stationary",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "DynaSpace proxy fixed 640 cm burst train",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 640.0,
+            "end_distance_cm": 640.0,
+            "start_rotation_deg": 315.0,
+            "end_rotation_deg": 315.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.105,
+            "end_hold_s": 0.8,
+            "path_length_m": 0.0,
+            "coordinate_mode": "polar",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": -4.525483,
+              "y_m": 4.525483,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": -4.525483,
+              "y_m": 4.525483,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
       "template_id": "matsuda_2021_four_directions",
       "title": "Front, rear, left, and right audio-tactile PPS",
       "visible_variant_label": "",
