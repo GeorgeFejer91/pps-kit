@@ -1,0 +1,148 @@
+from __future__ import annotations
+
+import csv
+import json
+from pathlib import Path
+
+from peripersonal_space_toolkit.mobile_phone_runtime import (
+    MOBILE_PACKAGE_SCHEMA,
+    MOBILE_RUN_COMPLETE_SCHEMA,
+    build_mobile_package_manifest,
+    mobile_asset_path,
+    mobile_package_id,
+    write_mobile_runtime_events,
+)
+from peripersonal_space_toolkit.output_layout import output_runner_logs_dir
+from peripersonal_space_toolkit.session_runner import RunBlock, RunPackage
+
+
+def _package(tmp_path: Path) -> RunPackage:
+    wav = tmp_path / "block_01.wav"
+    wav.write_bytes(b"RIFF....WAVE")
+    block_manifest = tmp_path / "block_01.csv"
+    with block_manifest.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=[
+                "Trial_Number",
+                "Trial_UID",
+                "Trial_Type",
+                "Family",
+                "SOA_ms",
+                "Row_Label",
+                "Noise_Type",
+                "Trial_Start_S",
+                "Trial_Duration_S",
+                "Trial_End_S",
+                "Tactile_Onset_S",
+                "Response_Window_Onset_S",
+            ],
+        )
+        writer.writeheader()
+        writer.writerow(
+            {
+                "Trial_Number": "1",
+                "Trial_UID": "trial-a",
+                "Trial_Type": "audio_tactile",
+                "Family": "audio_tactile",
+                "SOA_ms": "300",
+                "Row_Label": "inhale",
+                "Noise_Type": "white",
+                "Trial_Start_S": "2.000",
+                "Trial_Duration_S": "4.000",
+                "Trial_End_S": "6.000",
+                "Tactile_Onset_S": "1.250",
+                "Response_Window_Onset_S": "1.250",
+            }
+        )
+        writer.writerow(
+            {
+                "Trial_Number": "2",
+                "Trial_UID": "trial-b",
+                "Trial_Type": "catch",
+                "Family": "catch",
+                "SOA_ms": "",
+                "Row_Label": "exhale",
+                "Noise_Type": "pink",
+                "Trial_Start_S": "6.000",
+                "Trial_Duration_S": "4.000",
+                "Trial_End_S": "10.000",
+                "Tactile_Onset_S": "",
+                "Response_Window_Onset_S": "1.250",
+            }
+        )
+    return RunPackage(
+        participant_id="P001",
+        session_id="session-001",
+        created_at="2026-06-28T00:00:00Z",
+        session_dir=tmp_path / "sessions" / "P001" / "session-001",
+        design_path=tmp_path / "design.json",
+        protocol_path=tmp_path / "protocol.json",
+        manifest_path=tmp_path / "session_manifest.json",
+        render_manifest_path=None,
+        blocks=[
+            RunBlock(
+                index=1,
+                label="Block 01",
+                manifest_path=block_manifest,
+                wav_path=wav,
+                trial_count=2,
+                duration_s=10.0,
+            )
+        ],
+    )
+
+
+def test_mobile_package_manifest_exports_assets_trials_and_phone_tactile_cues(tmp_path):
+    package = _package(tmp_path)
+
+    manifest = build_mobile_package_manifest(package)
+
+    assert manifest["schema"] == MOBILE_PACKAGE_SCHEMA
+    assert manifest["package_id"] == mobile_package_id(package)
+    assert manifest["mobile_runnable"] is True
+    assert manifest["assets"][0]["sha256"]
+    assert manifest["blocks"][0]["trials"][0]["trial_uid"] == "trial-a"
+    assert manifest["blocks"][0]["tactile_cues"] == [
+        {
+            "cue_id": 1,
+            "trial_number": 1,
+            "trial_uid": "trial-a",
+            "time_s": 3.25,
+            "trial_relative_time_s": 1.25,
+            "soa_ms": "300",
+            "row_label": "inhale",
+            "noise_type": "white",
+        }
+    ]
+    assert mobile_asset_path(package, manifest["package_id"], "block-01-audio") == package.blocks[0].wav_path
+
+
+def test_mobile_runtime_upload_writes_runner_log_artifacts(tmp_path):
+    package = _package(tmp_path)
+    output_root = tmp_path / "output"
+    payload = {
+        "package_id": mobile_package_id(package),
+        "events": [
+            {"type": "block_start", "block_id": "block-01", "elapsed_ms": 0},
+            {"type": "tap", "trial_uid": "trial-a", "elapsed_ms": 3500, "rt_ms": 250},
+        ],
+    }
+
+    result = write_mobile_runtime_events(
+        package,
+        output_root=output_root,
+        run_id="run-001",
+        payload=payload,
+        complete=True,
+    )
+
+    assert result["schema"] == MOBILE_RUN_COMPLETE_SCHEMA
+    artifact = Path(result["artifact_path"])
+    assert artifact.is_file()
+    loaded = json.loads(artifact.read_text(encoding="utf-8"))
+    assert loaded["complete"] is True
+    assert loaded["event_count"] == 2
+    assert (output_runner_logs_dir(output_root) / "mobile_phone_runtime" / "P001").is_dir()
+    assert (artifact.parent / "events.jsonl").read_text(encoding="utf-8").count("\n") == 2
+    assert (artifact.parent / "events.csv").is_file()

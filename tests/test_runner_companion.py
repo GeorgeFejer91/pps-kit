@@ -14,6 +14,12 @@ from peripersonal_space_toolkit.runner_companion import (
     create_runner_companion_app,
     pairing_qr_png_bytes,
 )
+from peripersonal_space_toolkit.mobile_phone_runtime import (
+    MOBILE_PACKAGE_LIST_SCHEMA,
+    MOBILE_PACKAGE_SCHEMA,
+    MOBILE_RUN_COMPLETE_SCHEMA,
+    MOBILE_RUN_EVENTS_SCHEMA,
+)
 
 
 pytest.importorskip("fastapi")
@@ -32,6 +38,9 @@ class FakeBridge:
         self.fail_continue = False
         self.fail_health = False
         self.fail_snapshot = False
+        self.mobile_event_uploads: list[tuple[str, dict[str, Any]]] = []
+        self.mobile_complete_uploads: list[tuple[str, dict[str, Any]]] = []
+        self.mobile_asset_path = ""
 
     def health(self) -> dict[str, Any]:
         if self.fail_health:
@@ -104,6 +113,59 @@ class FakeBridge:
         self.resumed += 1
         self.sequence += 1
         return self.snapshot()
+
+    def mobile_packages(self) -> dict[str, Any]:
+        return {
+            "schema": MOBILE_PACKAGE_LIST_SCHEMA,
+            "active_package_id": "pkg-001",
+            "packages": [
+                {
+                    "package_id": "pkg-001",
+                    "participant_id": "P001",
+                    "session_id": "session-001",
+                    "block_count": 1,
+                    "asset_count": 1,
+                    "total_asset_bytes": 4,
+                    "mobile_runnable": True,
+                    "warnings": [],
+                }
+            ],
+        }
+
+    def mobile_package_manifest(self, package_id: str) -> dict[str, Any]:
+        if package_id != "pkg-001":
+            raise CompanionCommandError(status_code=404, reason="mobile_package_not_found")
+        return {
+            "schema": MOBILE_PACKAGE_SCHEMA,
+            "package_id": package_id,
+            "participant_id": "P001",
+            "blocks": [{"block_id": "block-01", "audio_asset_id": "block-01-audio", "tactile_cues": []}],
+            "assets": [{"asset_id": "block-01-audio", "filename": "block.wav", "media_type": "audio/wav"}],
+            "mobile_runnable": True,
+        }
+
+    def mobile_package_asset_path(self, package_id: str, asset_id: str) -> tuple[str, str]:
+        if package_id != "pkg-001" or asset_id != "block-01-audio" or not self.mobile_asset_path:
+            raise CompanionCommandError(status_code=404, reason="mobile_asset_not_found")
+        return self.mobile_asset_path, "audio/wav"
+
+    def mobile_run_events(self, run_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        self.mobile_event_uploads.append((run_id, dict(payload)))
+        return {
+            "schema": MOBILE_RUN_EVENTS_SCHEMA,
+            "status": "accepted",
+            "run_id": run_id,
+            "event_count": len(payload.get("events") or []),
+        }
+
+    def mobile_run_complete(self, run_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        self.mobile_complete_uploads.append((run_id, dict(payload)))
+        return {
+            "schema": MOBILE_RUN_COMPLETE_SCHEMA,
+            "status": "accepted",
+            "run_id": run_id,
+            "event_count": len(payload.get("events") or []),
+        }
 
 
 def _client(bridge: FakeBridge, token: str = "secret") -> TestClient:
@@ -221,6 +283,49 @@ def test_pause_resume_exist_but_stop_and_participant_switching_stay_laptop_only(
     assert "/api/runner/commands/resume" in paths
     assert "/api/runner/commands/stop" not in paths
     assert "/api/runner/participants" not in paths
+
+
+def test_mobile_package_routes_are_token_gated_and_route_through_bridge(tmp_path):
+    bridge = FakeBridge()
+    asset = tmp_path / "block.wav"
+    asset.write_bytes(b"RIFF")
+    bridge.mobile_asset_path = str(asset)
+    client = _client(bridge)
+    headers = {TOKEN_HEADER: "secret"}
+
+    denied = client.get("/api/mobile/packages")
+    assert denied.status_code == 403
+
+    packages = client.get("/api/mobile/packages", headers=headers)
+    assert packages.status_code == 200
+    assert packages.json()["schema"] == MOBILE_PACKAGE_LIST_SCHEMA
+    assert packages.json()["packages"][0]["mobile_runnable"] is True
+
+    manifest = client.get("/api/mobile/packages/pkg-001/manifest", headers=headers)
+    assert manifest.status_code == 200
+    assert manifest.json()["schema"] == MOBILE_PACKAGE_SCHEMA
+    assert manifest.json()["blocks"][0]["audio_asset_id"] == "block-01-audio"
+
+    downloaded = client.get("/api/mobile/packages/pkg-001/assets/block-01-audio", headers=headers)
+    assert downloaded.status_code == 200
+    assert downloaded.content == b"RIFF"
+
+    events = client.post(
+        "/api/mobile/runs/run-001/events",
+        headers=headers,
+        json={"package_id": "pkg-001", "events": [{"type": "tap"}]},
+    )
+    complete = client.post(
+        "/api/mobile/runs/run-001/complete",
+        headers=headers,
+        json={"package_id": "pkg-001", "events": [{"type": "complete"}]},
+    )
+    assert events.status_code == 200
+    assert events.json()["schema"] == MOBILE_RUN_EVENTS_SCHEMA
+    assert complete.status_code == 200
+    assert complete.json()["schema"] == MOBILE_RUN_COMPLETE_SCHEMA
+    assert bridge.mobile_event_uploads[-1][0] == "run-001"
+    assert bridge.mobile_complete_uploads[-1][1]["events"][0]["type"] == "complete"
 
 
 def test_websocket_replays_snapshot_and_marks_heartbeats():

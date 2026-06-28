@@ -123,6 +123,14 @@ from .runner_companion import (
     generate_companion_token,
     pairing_qr_png_bytes,
 )
+from .mobile_phone_runtime import (
+    MobileRuntimePackageError,
+    build_mobile_package_list,
+    build_mobile_package_manifest,
+    mobile_asset_path,
+    mobile_package_id,
+    write_mobile_runtime_events,
+)
 from .session_runner import (
     DEFAULT_DASHBOARD_STATE_ROOT,
     DEFAULT_PROJECT_REGISTRY_ROOT,
@@ -7253,6 +7261,25 @@ class _FocusCompanionBridge:
     def resume(self) -> dict[str, Any]:
         return self._call(lambda: self.window._companion_set_paused(False), timeout_s=5.0)
 
+    def mobile_packages(self) -> dict[str, Any]:
+        return self._call(self.window._companion_mobile_packages, timeout_s=10.0)
+
+    def mobile_package_manifest(self, package_id: str) -> dict[str, Any]:
+        return self._call(lambda: self.window._companion_mobile_package_manifest(package_id), timeout_s=30.0)
+
+    def mobile_package_asset_path(self, package_id: str, asset_id: str) -> tuple[str, str]:
+        payload = self._call(
+            lambda: self.window._companion_mobile_package_asset_path(package_id, asset_id),
+            timeout_s=5.0,
+        )
+        return str(payload.get("path") or ""), str(payload.get("media_type") or "application/octet-stream")
+
+    def mobile_run_events(self, run_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._call(lambda: self.window._companion_mobile_run_events(run_id, payload), timeout_s=10.0)
+
+    def mobile_run_complete(self, run_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._call(lambda: self.window._companion_mobile_run_complete(run_id, payload), timeout_s=10.0)
+
 
 class _FocusTactileCalibrationCollector:
     """Thread-safe target-click collector for tactile calibration trials."""
@@ -8320,7 +8347,123 @@ class FocusModeWindow:
             "participant_id": str(getattr(self.package, "participant_id", "") or ""),
             "port": int(self.companion_config.port),
             "token_header": "X-PPS-Companion-Token",
+            "mobile_runtime": self._companion_mobile_runtime_payload(),
         }
+
+    def _companion_mobile_runtime_payload(self) -> dict[str, Any]:
+        try:
+            package_list = build_mobile_package_list(self._companion_mobile_available_packages())
+        except Exception as exc:  # noqa: BLE001 - surfaced as a phone capability warning.
+            return {
+                "enabled": False,
+                "package_count": 0,
+                "active_package_id": "",
+                "mobile_runnable": False,
+                "warnings": [str(exc)],
+            }
+        packages = list(package_list.get("packages") or [])
+        active = dict(packages[0]) if packages else {}
+        return {
+            "enabled": True,
+            "package_count": len(packages),
+            "active_package_id": str(package_list.get("active_package_id") or ""),
+            "mobile_runnable": bool(active.get("mobile_runnable")),
+            "warnings": list(active.get("warnings") or []),
+            "runtime_limitations": list(active.get("runtime_limitations") or []),
+        }
+
+    def _companion_mobile_packages(self) -> dict[str, Any]:
+        return build_mobile_package_list(self._companion_mobile_available_packages())
+
+    def _companion_mobile_package_manifest(self, package_id: str) -> dict[str, Any]:
+        package = self._companion_mobile_package_for_id(package_id)
+        if package is None:
+            raise CompanionCommandError(status_code=404, reason="mobile_package_not_found")
+        return build_mobile_package_manifest(package)
+
+    def _companion_mobile_package_asset_path(self, package_id: str, asset_id: str) -> dict[str, Any]:
+        package = self._companion_mobile_package_for_id(package_id)
+        if package is None:
+            raise CompanionCommandError(status_code=404, reason="mobile_package_not_found")
+        try:
+            path = mobile_asset_path(package, package_id, asset_id)
+        except MobileRuntimePackageError as exc:
+            raise CompanionCommandError(str(exc), status_code=404, reason="mobile_asset_not_found") from exc
+        return {"path": str(path), "media_type": "audio/wav"}
+
+    def _companion_mobile_run_events(self, run_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        package = self._companion_mobile_package_for_id(str(payload.get("package_id") or ""))
+        if package is None:
+            raise CompanionCommandError(status_code=404, reason="mobile_package_not_found")
+        try:
+            result = write_mobile_runtime_events(
+                package,
+                output_root=_package_output_root(package),
+                run_id=run_id,
+                payload=dict(payload or {}),
+                complete=False,
+            )
+        except MobileRuntimePackageError as exc:
+            raise CompanionCommandError(str(exc), status_code=409, reason="mobile_runtime_upload_rejected") from exc
+        _append_output_diary_event(
+            "mobile_phone_runtime_events_uploaded",
+            package=package,
+            payload={
+                "run_id": result.get("run_id", ""),
+                "package_id": result.get("package_id", ""),
+                "event_count": result.get("event_count", 0),
+                "artifact_path": result.get("artifact_path", ""),
+            },
+        )
+        return result
+
+    def _companion_mobile_run_complete(self, run_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        package = self._companion_mobile_package_for_id(str(payload.get("package_id") or ""))
+        if package is None:
+            raise CompanionCommandError(status_code=404, reason="mobile_package_not_found")
+        try:
+            result = write_mobile_runtime_events(
+                package,
+                output_root=_package_output_root(package),
+                run_id=run_id,
+                payload=dict(payload or {}),
+                complete=True,
+            )
+        except MobileRuntimePackageError as exc:
+            raise CompanionCommandError(str(exc), status_code=409, reason="mobile_runtime_upload_rejected") from exc
+        _append_output_diary_event(
+            "mobile_phone_runtime_completed",
+            package=package,
+            payload={
+                "run_id": result.get("run_id", ""),
+                "package_id": result.get("package_id", ""),
+                "event_count": result.get("event_count", 0),
+                "artifact_path": result.get("artifact_path", ""),
+            },
+        )
+        return result
+
+    def _companion_mobile_available_packages(self) -> list[Any]:
+        packages: list[Any] = [self.package]
+        seen = {mobile_package_id(self.package)}
+        for raw_path in list(getattr(self.package, "sibling_part_manifest_paths", []) or []):
+            try:
+                sibling = load_run_package(Path(raw_path))
+            except Exception:
+                continue
+            package_id = mobile_package_id(sibling)
+            if package_id in seen:
+                continue
+            seen.add(package_id)
+            packages.append(sibling)
+        return packages
+
+    def _companion_mobile_package_for_id(self, package_id: str) -> Any | None:
+        clean = str(package_id or "").strip()
+        for package in self._companion_mobile_available_packages():
+            if mobile_package_id(package) == clean:
+                return package
+        return None
 
     def _companion_select_combo_data(self, combo: Any, value: str) -> bool:
         clean = str(value or "").strip()
@@ -8542,6 +8685,7 @@ class FocusModeWindow:
                 "draft_count": len(self._visible_topup_draft_items()),
             },
             "instruction_gate": self._companion_instruction_gate_payload(),
+            "mobile_runtime": self._companion_mobile_runtime_payload(),
         }
         signature = json.dumps(state_payload, sort_keys=True, default=str)
         if signature != self._companion_snapshot_signature:

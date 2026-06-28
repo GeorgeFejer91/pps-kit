@@ -10,7 +10,10 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import org.json.JSONObject
+import java.io.File
 import java.io.IOException
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
@@ -133,6 +136,86 @@ class RunnerClient(
         postSnapshot("/api/runner/commands/resume", JSONObject(), onSnapshot, onError)
     }
 
+    fun listMobilePackages(onPackages: (MobilePackageList) -> Unit, onError: (String) -> Unit) {
+        getText(
+            "/api/mobile/packages",
+            onText = { text ->
+                runCatching { MobilePackageParser.parseList(text) }
+                    .onSuccess(onPackages)
+                    .onFailure { onError(it.message ?: "Mobile package list parse failed.") }
+            },
+            onError = onError,
+        )
+    }
+
+    fun fetchMobilePackage(packageId: String, onPackage: (MobileRunPackage) -> Unit, onError: (String) -> Unit) {
+        getText(
+            "/api/mobile/packages/${pathSegment(packageId)}/manifest",
+            onText = { text ->
+                runCatching { MobilePackageParser.parseManifest(text) }
+                    .onSuccess(onPackage)
+                    .onFailure { onError(it.message ?: "Mobile package parse failed.") }
+            },
+            onError = onError,
+        )
+    }
+
+    fun downloadMobileAsset(
+        packageId: String,
+        assetId: String,
+        targetFile: File,
+        onDownloaded: (File) -> Unit,
+        onError: (String) -> Unit,
+    ) {
+        val pairingInfo = pairing
+        if (pairingInfo == null) {
+            onError("Phone is not paired.")
+            return
+        }
+        val request = Request.Builder()
+            .url("${pairingInfo.baseHttpUrl}/api/mobile/packages/${pathSegment(packageId)}/assets/${pathSegment(assetId)}")
+            .header(TOKEN_HEADER, pairingInfo.token)
+            .build()
+        http.newCall(request).enqueue(
+            object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    onError(e.message ?: "Asset download failed.")
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    response.use {
+                        if (!it.isSuccessful) {
+                            onError(errorMessage(it.body?.string().orEmpty(), it.code))
+                            return
+                        }
+                        val body = it.body
+                        if (body == null) {
+                            onError("Asset download returned an empty body.")
+                            return
+                        }
+                        runCatching {
+                            targetFile.parentFile?.mkdirs()
+                            targetFile.outputStream().use { output ->
+                                body.byteStream().use { input -> input.copyTo(output) }
+                            }
+                            targetFile
+                        }
+                            .onSuccess(onDownloaded)
+                            .onFailure { error -> onError(error.message ?: "Asset save failed.") }
+                    }
+                }
+            },
+        )
+    }
+
+    fun postMobileEvents(runId: String, payload: JSONObject, onAccepted: (JSONObject) -> Unit, onError: (String) -> Unit) {
+        postJson("/api/mobile/runs/${pathSegment(runId)}/events", payload, onAccepted, onError)
+    }
+
+    fun postMobileComplete(runId: String, payload: JSONObject, onAccepted: (JSONObject) -> Unit, onError: (String) -> Unit) {
+        postJson("/api/mobile/runs/${pathSegment(runId)}/complete", payload, onAccepted, onError)
+    }
+
     fun close() {
         socketGeneration += 1
         cancelReconnect()
@@ -204,10 +287,81 @@ class RunnerClient(
         )
     }
 
+    private fun getText(path: String, onText: (String) -> Unit, onError: (String) -> Unit) {
+        val pairingInfo = pairing
+        if (pairingInfo == null) {
+            onError("Phone is not paired.")
+            return
+        }
+        val request = Request.Builder()
+            .url("${pairingInfo.baseHttpUrl}$path")
+            .header(TOKEN_HEADER, pairingInfo.token)
+            .build()
+        http.newCall(request).enqueue(
+            object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    onError(e.message ?: "Request failed.")
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    response.use {
+                        val text = it.body?.string().orEmpty()
+                        if (!it.isSuccessful) {
+                            onError(errorMessage(text, it.code))
+                            return
+                        }
+                        onText(text)
+                    }
+                }
+            },
+        )
+    }
+
+    private fun postJson(
+        path: String,
+        payload: JSONObject,
+        onAccepted: (JSONObject) -> Unit,
+        onError: (String) -> Unit,
+    ) {
+        val pairingInfo = pairing
+        if (pairingInfo == null) {
+            onError("Phone is not paired.")
+            return
+        }
+        val request = Request.Builder()
+            .url("${pairingInfo.baseHttpUrl}$path")
+            .header(TOKEN_HEADER, pairingInfo.token)
+            .post(payload.toString().toRequestBody(JSON_MEDIA_TYPE))
+            .build()
+        http.newCall(request).enqueue(
+            object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    onError(e.message ?: "Request failed.")
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    response.use {
+                        val text = it.body?.string().orEmpty()
+                        if (!it.isSuccessful) {
+                            onError(errorMessage(text, it.code))
+                            return
+                        }
+                        runCatching { JSONObject(text) }
+                            .onSuccess(onAccepted)
+                            .onFailure { error -> onError(error.message ?: "Response parse failed.") }
+                    }
+                }
+            },
+        )
+    }
+
     private fun errorMessage(text: String, code: Int): String {
         return runCatching {
             val detail = JSONObject(text).optJSONObject("detail")
             detail?.optString("reason")?.takeIf { it.isNotBlank() }
         }.getOrNull() ?: "Runner command failed ($code)."
     }
+
+    private fun pathSegment(value: String): String =
+        URLEncoder.encode(value, StandardCharsets.UTF_8.name()).replace("+", "%20")
 }

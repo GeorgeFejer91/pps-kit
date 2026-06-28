@@ -56,6 +56,21 @@ class RunnerCompanionBridge(Protocol):
     def resume(self) -> dict[str, Any]:
         ...
 
+    def mobile_packages(self) -> dict[str, Any]:
+        ...
+
+    def mobile_package_manifest(self, package_id: str) -> dict[str, Any]:
+        ...
+
+    def mobile_package_asset_path(self, package_id: str, asset_id: str) -> tuple[str, str]:
+        ...
+
+    def mobile_run_events(self, run_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        ...
+
+    def mobile_run_complete(self, run_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        ...
+
 
 @dataclass(frozen=True)
 class RunnerCompanionConfig:
@@ -135,6 +150,7 @@ def create_runner_companion_app(
 ) -> Any:
     try:
         from fastapi import Body, FastAPI, Header, HTTPException, WebSocket, WebSocketDisconnect
+        from fastapi.responses import FileResponse
     except ImportError as exc:
         raise RuntimeError("Install the web extra to run the runner companion service.") from exc
     globals()["WebSocket"] = WebSocket
@@ -233,6 +249,62 @@ def create_runner_companion_app(
         _authorize_token(companion_token)
         try:
             return bridge.resume()
+        except CompanionCommandError as exc:
+            _handle_command_error(exc)
+
+    @app.get("/api/mobile/packages")
+    def mobile_packages(companion_token: str = Header(default="", alias=TOKEN_HEADER)) -> dict[str, Any]:
+        _authorize_token(companion_token)
+        try:
+            return bridge.mobile_packages()
+        except CompanionCommandError as exc:
+            _handle_command_error(exc)
+
+    @app.get("/api/mobile/packages/{package_id}/manifest")
+    def mobile_package_manifest(
+        package_id: str,
+        companion_token: str = Header(default="", alias=TOKEN_HEADER),
+    ) -> dict[str, Any]:
+        _authorize_token(companion_token)
+        try:
+            return bridge.mobile_package_manifest(package_id)
+        except CompanionCommandError as exc:
+            _handle_command_error(exc)
+
+    @app.get("/api/mobile/packages/{package_id}/assets/{asset_id}")
+    def mobile_package_asset(
+        package_id: str,
+        asset_id: str,
+        companion_token: str = Header(default="", alias=TOKEN_HEADER),
+    ) -> Any:
+        _authorize_token(companion_token)
+        try:
+            path, media_type = bridge.mobile_package_asset_path(package_id, asset_id)
+        except CompanionCommandError as exc:
+            _handle_command_error(exc)
+        return FileResponse(path, media_type=media_type or "application/octet-stream")
+
+    @app.post("/api/mobile/runs/{run_id}/events")
+    def mobile_run_events(
+        run_id: str,
+        payload: dict[str, Any] | None = Body(default=None),
+        companion_token: str = Header(default="", alias=TOKEN_HEADER),
+    ) -> dict[str, Any]:
+        _authorize_token(companion_token)
+        try:
+            return bridge.mobile_run_events(run_id, dict(payload or {}))
+        except CompanionCommandError as exc:
+            _handle_command_error(exc)
+
+    @app.post("/api/mobile/runs/{run_id}/complete")
+    def mobile_run_complete(
+        run_id: str,
+        payload: dict[str, Any] | None = Body(default=None),
+        companion_token: str = Header(default="", alias=TOKEN_HEADER),
+    ) -> dict[str, Any]:
+        _authorize_token(companion_token)
+        try:
+            return bridge.mobile_run_complete(run_id, dict(payload or {}))
         except CompanionCommandError as exc:
             _handle_command_error(exc)
 

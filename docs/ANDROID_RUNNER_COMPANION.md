@@ -1,12 +1,23 @@
 # Android Runner Companion
 
-The Android companion is a local Wi-Fi control surface for the native
-`PPSExperimentRunner.exe`. The laptop runner remains the timing authority,
-owns playback, LSL, LabRecorder, ledgers, output files, top-up, and analysis.
-The phone only submits the existing setup form, starts Part 01 or Part 02 when
-the runner already allows it, requests pause/resume when the runner advertises
-those commands, continues instruction gates, and displays the latest authorized
-runner snapshot.
+The Android companion has two paired modes:
+
+- `PC Runner Control` is a local Wi-Fi control surface for the native
+  `PPSExperimentRunner.exe`. The laptop runner remains the timing authority,
+  owns playback, LSL, LabRecorder, ledgers, output files, top-up, and analysis.
+  The phone submits setup, starts enabled parts, requests pause/resume,
+  continues instruction gates, and displays authorized runner snapshots.
+- `Run Experiment On Phone` is an experimental phone-local runtime. It downloads
+  prepared runner packages from the PC, verifies block WAV checksums, plays the
+  block WAVs locally, schedules Android vibration cues from the prepared block
+  manifests, records touch responses, and uploads phone runtime artifacts back
+  to the PC.
+
+The phone-local runtime can run a full two-part Study 5 preparation after both
+part packages are synced with `Sync All`. It does not replace the PC runner for
+hardware-timed collection: Android vibration timing, phone audio output, and
+touch timestamps are phone-runtime evidence only and do not provide LSL,
+LabRecorder, Woojer, or wired-loopback guarantees.
 
 ## Pairing
 
@@ -15,8 +26,11 @@ runner snapshot.
    the QR code.
 3. The Android app opens `pps-companion://pair?...` and stores the runner host,
    port, session id, and per-run `X-PPS-Companion-Token`.
-4. Submit the participant setup fields from the phone or laptop.
-5. Use the phone `Start Part 01`, separate `Pause` and `Resume`, `Continue`,
+4. Choose `PC Runner Control` for the native PC timing path, or
+   `Run Experiment On Phone` for the experimental phone-local runtime.
+5. In `PC Runner Control`, submit the participant setup fields from the phone or
+   laptop.
+6. Use the phone `Start Part 01`, separate `Pause` and `Resume`, `Continue`,
    and `Start Part 02` controls only when they are enabled by the runner
    snapshot. `Pause` and `Resume` are mutually exclusive: only the command
    currently confirmed as available by the runner is enabled. The app never
@@ -34,6 +48,12 @@ Closing Focus Mode stops the companion service and invalidates that token.
   `--companion-advertise-ip`.
 - Health endpoint: `GET /api/runner/health` is public and non-sensitive.
 - All state and command endpoints require `X-PPS-Companion-Token`.
+- Phone-runtime package and upload endpoints also require
+  `X-PPS-Companion-Token`: `GET /api/mobile/packages`,
+  `GET /api/mobile/packages/{package_id}/manifest`,
+  `GET /api/mobile/packages/{package_id}/assets/{asset_id}`,
+  `POST /api/mobile/runs/{run_id}/events`, and
+  `POST /api/mobile/runs/{run_id}/complete`.
 - Windows Firewall must allow inbound local-network TCP traffic to the runner
   process on the selected port.
 - The phone and laptop must be on the same trusted LAN. Guest Wi-Fi, client
@@ -47,6 +67,51 @@ in the QR payload or health endpoint. Authorized snapshots can include setup
 state so the paired phone can reflect the form; name-sharing opt-in still
 controls whether the runner writes the participant name into local session/LSL
 metadata.
+
+Phone-runtime uploads are written under the selected acquisition folder's
+protected context in
+`Experiment_context_folder_DO_NOT_DELETE/runner_logs/mobile_phone_runtime/
+<participant>/<package_id>/<run_id>/`. The uploaded `events.jsonl`,
+`events.csv`, and `completion.json` files are local experiment artifacts and are
+not committed.
+
+## Run Experiment On Phone
+
+After pairing, choose `Run Experiment On Phone`.
+
+- `Refresh` reads the currently prepared phone packages from the PC companion
+  service. Split Study 5 preparations expose separate Part 1 and Part 2
+  packages.
+- `Sync` downloads and checksum-verifies the selected package.
+- `Sync All` downloads and checksum-verifies every listed package, which is the
+  expected path for the full two-part Study 5 profile.
+- `Start Phone Run` runs only the selected synced package.
+- `Start Full Experiment` runs all synced packages in listed order, so a synced
+  Study 5 pre/post preparation plays Part 1 and Part 2 on the phone and uploads
+  a completion artifact for each part.
+
+The phone runtime uses Android `MediaPlayer` for prepared block WAV playback,
+`SystemClock.elapsedRealtime()` for phone-side timestamps, and the Android
+vibrator service for tactile cue signaling. Treat it as an experimental mobile
+collection mode until physical phone timing validation is added.
+
+## Emulator Evidence
+
+On 2026-06-29, the full Study 5 phone path was verified on the local API 30 x86
+ATD emulator (`emulator-5556`). The app paired to a token-gated companion
+service at `10.0.2.2:8767`, listed both Study 5 part packages, synced all
+824 MiB of prepared block WAV assets, enabled `Start Full Experiment`, and ran
+both parts to completion in real time. The PC received two `completion.json`
+artifacts:
+
+- `P001_20260626_150806_part_01-part1`: 246 uploaded phone events, 52 scripted
+  tap responses, 8 valid cue-linked taps.
+- `P001_20260626_150806_part_02-part2`: 246 uploaded phone events, 52 scripted
+  tap responses, 11 valid cue-linked taps.
+
+This confirms the app can sync and run the whole prepared Study 5 profile from
+the phone runtime path. It remains emulator/software evidence, not physical
+phone timing certification.
 
 ## Live Feedback
 

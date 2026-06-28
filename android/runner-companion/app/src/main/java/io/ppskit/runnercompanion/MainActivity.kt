@@ -1,12 +1,19 @@
 package io.ppskit.runnercompanion
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Paint
+import android.media.MediaPlayer
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -59,8 +66,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,12 +91,25 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.File
+import java.security.MessageDigest
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 class MainActivity : ComponentActivity() {
     private val runnerClient = RunnerClient()
@@ -116,6 +139,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+private enum class CompanionMode {
+    PcRunnerControl,
+    RunExperimentOnPhone,
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RunnerCompanionApp(initialPairing: PairingInfo?, client: RunnerClient) {
@@ -125,6 +153,7 @@ private fun RunnerCompanionApp(initialPairing: PairingInfo?, client: RunnerClien
     var connected by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf("") }
     var estimate by remember { mutableStateOf(EstimatedClock(0.0, stale = true, cappedAtBlockEnd = false)) }
+    var mode by remember { mutableStateOf<CompanionMode?>(null) }
 
     LaunchedEffect(initialPairing) {
         val incoming = initialPairing ?: return@LaunchedEffect
@@ -132,6 +161,7 @@ private fun RunnerCompanionApp(initialPairing: PairingInfo?, client: RunnerClien
         snapshot = null
         connected = false
         error = ""
+        mode = null
     }
 
     LaunchedEffect(pairing) {
@@ -180,52 +210,128 @@ private fun RunnerCompanionApp(initialPairing: PairingInfo?, client: RunnerClien
                     },
                 )
             } else {
-                RunnerScreen(
-                    pairing = pairing!!,
-                    snapshot = snapshot,
-                    connected = connected,
-                    error = error,
-                    estimate = estimate,
-                    onSubmitSetup = { payload ->
-                        client.submitSetup(
-                            payload,
-                            onSnapshot = { incoming -> mainHandler.post { snapshot = incoming } },
-                            onError = { message -> mainHandler.post { error = message } },
-                        )
-                    },
-                    onContinue = {
-                        client.continueInstruction(
-                            onSnapshot = { incoming -> mainHandler.post { snapshot = incoming } },
-                            onError = { message -> mainHandler.post { error = message } },
-                        )
-                    },
-                    onStartPart = { part ->
-                        client.startPart(
-                            part,
-                            onSnapshot = { incoming -> mainHandler.post { snapshot = incoming } },
-                            onError = { message -> mainHandler.post { error = message } },
-                        )
-                    },
-                    onPause = {
-                        client.pause(
-                            onSnapshot = { incoming -> mainHandler.post { snapshot = incoming } },
-                            onError = { message -> mainHandler.post { error = message } },
-                        )
-                    },
-                    onResume = {
-                        client.resume(
-                            onSnapshot = { incoming -> mainHandler.post { snapshot = incoming } },
-                            onError = { message -> mainHandler.post { error = message } },
-                        )
-                    },
-                    onUnpair = {
-                        client.close()
-                        pairing = null
-                        snapshot = null
-                        connected = false
-                    },
-                )
+                val currentPairing = pairing!!
+                when (mode) {
+                    null -> ModeSelectionScreen(
+                        pairing = currentPairing,
+                        connected = connected,
+                        error = error,
+                        snapshot = snapshot,
+                        onMode = { selected -> mode = selected },
+                        onUnpair = {
+                            client.close()
+                            pairing = null
+                            snapshot = null
+                            connected = false
+                            mode = null
+                        },
+                    )
+                    CompanionMode.PcRunnerControl -> RunnerScreen(
+                        pairing = currentPairing,
+                        snapshot = snapshot,
+                        connected = connected,
+                        error = error,
+                        estimate = estimate,
+                        onSubmitSetup = { payload ->
+                            client.submitSetup(
+                                payload,
+                                onSnapshot = { incoming -> mainHandler.post { snapshot = incoming } },
+                                onError = { message -> mainHandler.post { error = message } },
+                            )
+                        },
+                        onContinue = {
+                            client.continueInstruction(
+                                onSnapshot = { incoming -> mainHandler.post { snapshot = incoming } },
+                                onError = { message -> mainHandler.post { error = message } },
+                            )
+                        },
+                        onStartPart = { part ->
+                            client.startPart(
+                                part,
+                                onSnapshot = { incoming -> mainHandler.post { snapshot = incoming } },
+                                onError = { message -> mainHandler.post { error = message } },
+                            )
+                        },
+                        onPause = {
+                            client.pause(
+                                onSnapshot = { incoming -> mainHandler.post { snapshot = incoming } },
+                                onError = { message -> mainHandler.post { error = message } },
+                            )
+                        },
+                        onResume = {
+                            client.resume(
+                                onSnapshot = { incoming -> mainHandler.post { snapshot = incoming } },
+                                onError = { message -> mainHandler.post { error = message } },
+                            )
+                        },
+                        onChooseMode = { mode = null },
+                        onUnpair = {
+                            client.close()
+                            pairing = null
+                            snapshot = null
+                            connected = false
+                            mode = null
+                        },
+                    )
+                    CompanionMode.RunExperimentOnPhone -> PhoneRuntimeScreen(
+                        pairing = currentPairing,
+                        client = client,
+                        connected = connected,
+                        mainHandler = mainHandler,
+                        onChooseMode = { mode = null },
+                        onUnpair = {
+                            client.close()
+                            pairing = null
+                            snapshot = null
+                            connected = false
+                            mode = null
+                        },
+                    )
+                }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ModeSelectionScreen(
+    pairing: PairingInfo,
+    connected: Boolean,
+    error: String,
+    snapshot: RunnerSnapshot?,
+    onMode: (CompanionMode) -> Unit,
+    onUnpair: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        Text("Experiment Mode", style = MaterialTheme.typography.headlineMedium)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            StatusChip(if (connected) "Online" else "Offline")
+            StatusChip("Session ${pairing.sessionId}")
+            StatusChip(snapshot?.participantId?.ifBlank { "Participant" } ?: "Participant")
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Button(onClick = { onMode(CompanionMode.PcRunnerControl) }) {
+                Icon(Icons.Default.PlayArrow, contentDescription = null)
+                Spacer(Modifier.padding(3.dp))
+                Text("PC Runner Control")
+            }
+            Button(onClick = { onMode(CompanionMode.RunExperimentOnPhone) }, enabled = connected) {
+                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null)
+                Spacer(Modifier.padding(3.dp))
+                Text("Run Experiment On Phone")
+            }
+        }
+        OutlinedButton(onClick = onUnpair) {
+            Text("Unpair")
+        }
+        if (error.isNotBlank()) {
+            Text(error, color = MaterialTheme.colorScheme.error)
         }
     }
 }
@@ -288,6 +394,314 @@ private fun PairingScreen(error: String, onPair: (String) -> Unit) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
+private fun PhoneRuntimeScreen(
+    pairing: PairingInfo,
+    client: RunnerClient,
+    connected: Boolean,
+    mainHandler: Handler,
+    onChooseMode: () -> Unit,
+    onUnpair: () -> Unit,
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var packages by remember { mutableStateOf<List<MobilePackageSummary>>(emptyList()) }
+    var selectedPackageId by remember { mutableStateOf("") }
+    var status by remember { mutableStateOf("Ready") }
+    var error by remember { mutableStateOf("") }
+    var syncing by remember { mutableStateOf(false) }
+    var running by remember { mutableStateOf(false) }
+    var activeBlockLabel by remember { mutableStateOf("") }
+    var runProgress by remember { mutableStateOf("") }
+    var uploadedArtifact by remember { mutableStateOf("") }
+    var session by remember { mutableStateOf<PhoneRunSession?>(null) }
+    var runJob by remember { mutableStateOf<Job?>(null) }
+    val logLines = remember { mutableStateListOf<String>() }
+    val syncedPackages = remember { mutableStateMapOf<String, MobileRunPackage>() }
+
+    fun log(message: String) {
+        logLines.add(0, message)
+        while (logLines.size > 8) logLines.removeAt(logLines.lastIndex)
+    }
+
+    fun refreshPackages() {
+        client.listMobilePackages(
+            onPackages = { listing ->
+                mainHandler.post {
+                    packages = listing.packages
+                    selectedPackageId = listing.activePackageId.ifBlank { listing.packages.firstOrNull()?.packageId.orEmpty() }
+                    syncedPackages.keys.retainAll(listing.packages.map { it.packageId }.toSet())
+                    status = if (listing.packages.isEmpty()) "No phone packages" else "Package list ready"
+                    error = ""
+                    log(status)
+                }
+            },
+            onError = { message ->
+                mainHandler.post {
+                    error = message
+                    log(message)
+                }
+            },
+        )
+    }
+
+    LaunchedEffect(pairing) {
+        refreshPackages()
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            runJob?.cancel()
+        }
+    }
+
+    val selectedSummary = packages.firstOrNull { it.packageId == selectedPackageId } ?: packages.firstOrNull()
+    val selectedManifest = selectedSummary?.let { syncedPackages[it.packageId] }
+    val fullExperimentSynced = packages.isNotEmpty() && packages.all { syncedPackages.containsKey(it.packageId) }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            StatusChip(if (connected) "Online" else "Offline")
+            StatusChip("Session ${pairing.sessionId}")
+            StatusChip(status)
+            if (activeBlockLabel.isNotBlank()) StatusChip(activeBlockLabel)
+            if (runProgress.isNotBlank()) StatusChip(runProgress)
+        }
+        if (error.isNotBlank()) {
+            Text(error, color = MaterialTheme.colorScheme.error)
+        }
+        if (uploadedArtifact.isNotBlank()) {
+            Text(uploadedArtifact, style = MaterialTheme.typography.labelMedium)
+        }
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            packages.forEach { item ->
+                FilterChip(
+                    selected = item.packageId == selectedPackageId,
+                    onClick = {
+                        selectedPackageId = item.packageId
+                    },
+                    label = {
+                        val suffix = if (syncedPackages.containsKey(item.packageId)) " synced" else ""
+                        Text("${item.title.ifBlank { item.packageId }}$suffix")
+                    },
+                )
+            }
+        }
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = { refreshPackages() }, enabled = !running && !syncing) {
+                Text("Refresh")
+            }
+            Button(
+                onClick = {
+                    val target = selectedSummary ?: return@Button
+                    scope.launch {
+                        syncing = true
+                        status = "Syncing"
+                        error = ""
+                        uploadedArtifact = ""
+                        runCatching {
+                            val synced = syncMobilePackage(context, client, target) { message ->
+                                status = message
+                                log(message)
+                            }
+                            syncedPackages[synced.packageId] = synced
+                            status = "Synced"
+                            log("Synced ${synced.blocks.size} blocks")
+                        }.onFailure {
+                            error = it.message ?: "Sync failed."
+                            log(error)
+                        }
+                        syncing = false
+                    }
+                },
+                enabled = connected && selectedSummary != null && !running && !syncing,
+            ) {
+                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null)
+                Spacer(Modifier.padding(3.dp))
+                Text(if (syncing) "Syncing" else "Sync")
+            }
+            Button(
+                onClick = {
+                    val runPackage = selectedManifest ?: return@Button
+                    val job = scope.launch {
+                        val activeSession = PhoneRunSession(runPackage.packageId)
+                        session = activeSession
+                        running = true
+                        activeBlockLabel = ""
+                        runProgress = ""
+                        status = "Running"
+                        error = ""
+                        uploadedArtifact = ""
+                        runCatching {
+                            val result = runPhonePackage(
+                                context = context,
+                                client = client,
+                                runPackage = runPackage,
+                                session = activeSession,
+                                onStatus = { message ->
+                                    status = message
+                                    log(message)
+                                },
+                                onBlock = { label -> activeBlockLabel = label },
+                                onProgress = { progress -> runProgress = progress },
+                            )
+                            status = "Complete"
+                            uploadedArtifact = "Uploaded ${result.optString("artifact_path", "")}"
+                            log("Complete")
+                        }.onFailure {
+                            error = it.message ?: "Phone run failed."
+                            status = "Stopped"
+                            log(error)
+                        }
+                        running = false
+                        activeBlockLabel = ""
+                        runProgress = ""
+                    }
+                    runJob = job
+                },
+                enabled = connected && selectedManifest?.mobileRunnable == true && !running && !syncing,
+            ) {
+                Icon(Icons.Default.PlayArrow, contentDescription = null)
+                Spacer(Modifier.padding(3.dp))
+                Text("Start Phone Run")
+            }
+            Button(
+                onClick = {
+                    scope.launch {
+                        syncing = true
+                        status = "Syncing all"
+                        error = ""
+                        uploadedArtifact = ""
+                        runCatching {
+                            packages.forEachIndexed { index, item ->
+                                val already = syncedPackages[item.packageId]
+                                if (already == null) {
+                                    val synced = syncMobilePackage(context, client, item) { message ->
+                                        status = "Part ${index + 1}/${packages.size} $message"
+                                        log(status)
+                                    }
+                                    syncedPackages[synced.packageId] = synced
+                                }
+                            }
+                            status = "Full experiment synced"
+                            log("Synced ${syncedPackages.size} packages")
+                        }.onFailure {
+                            error = it.message ?: "Sync all failed."
+                            log(error)
+                        }
+                        syncing = false
+                    }
+                },
+                enabled = connected && packages.isNotEmpty() && !running && !syncing,
+            ) {
+                Text("Sync All")
+            }
+            Button(
+                onClick = {
+                    val runPackages = packages.mapNotNull { syncedPackages[it.packageId] }
+                    val job = scope.launch {
+                        running = true
+                        activeBlockLabel = ""
+                        runProgress = ""
+                        status = "Running full experiment"
+                        error = ""
+                        uploadedArtifact = ""
+                        runCatching {
+                            val artifacts = mutableListOf<String>()
+                            runPackages.forEachIndexed { index, runPackage ->
+                                val activeSession = PhoneRunSession(runPackage.packageId)
+                                session = activeSession
+                                status = "Part ${index + 1}/${runPackages.size}"
+                                val result = runPhonePackage(
+                                    context = context,
+                                    client = client,
+                                    runPackage = runPackage,
+                                    session = activeSession,
+                                    onStatus = { message ->
+                                        status = "Part ${index + 1}/${runPackages.size} $message"
+                                        log(status)
+                                    },
+                                    onBlock = { label -> activeBlockLabel = label },
+                                    onProgress = { progress -> runProgress = progress },
+                                )
+                                artifacts.add(result.optString("artifact_path", ""))
+                            }
+                            status = "Full experiment complete"
+                            uploadedArtifact = "Uploaded ${artifacts.size} part artifacts"
+                            log("Full experiment complete")
+                        }.onFailure {
+                            error = it.message ?: "Full phone experiment failed."
+                            status = "Stopped"
+                            log(error)
+                        }
+                        running = false
+                        activeBlockLabel = ""
+                        runProgress = ""
+                    }
+                    runJob = job
+                },
+                enabled = connected && fullExperimentSynced && !running && !syncing,
+            ) {
+                Icon(Icons.Default.PlayArrow, contentDescription = null)
+                Spacer(Modifier.padding(3.dp))
+                Text("Start Full Experiment")
+            }
+            OutlinedButton(
+                onClick = {
+                    runJob?.cancel()
+                    running = false
+                    status = "Stopped"
+                },
+                enabled = running,
+            ) {
+                Text("Stop")
+            }
+            OutlinedButton(onClick = onChooseMode, enabled = !running) {
+                Text("Modes")
+            }
+            OutlinedButton(onClick = onUnpair, enabled = !running) {
+                Text("Unpair")
+            }
+        }
+        val runSession = session
+        Button(
+            onClick = {
+                val recorded = runSession?.recordTap() ?: return@Button
+                status = "Tap $recorded"
+            },
+            enabled = running && runSession != null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(128.dp),
+        ) {
+            Text("Tap Response", style = MaterialTheme.typography.headlineMedium)
+        }
+        if (selectedSummary != null) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                StatusChip("${selectedSummary.blockCount} blocks")
+                StatusChip("${selectedSummary.trialCount} trials")
+                StatusChip(formatBytes(selectedSummary.totalAssetBytes))
+                StatusChip(if (selectedSummary.mobileRunnable) "Runnable" else "Not runnable")
+                StatusChip(if (selectedManifest != null) "Synced" else "Not synced")
+            }
+            selectedSummary.warnings.take(3).forEach { warning ->
+                Text(warning, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+            }
+        }
+        if (logLines.isNotEmpty()) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                logLines.take(4).forEach { line -> StatusChip(line.take(36)) }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
 private fun RunnerScreen(
     pairing: PairingInfo,
     snapshot: RunnerSnapshot?,
@@ -299,6 +713,7 @@ private fun RunnerScreen(
     onStartPart: (Int) -> Unit,
     onPause: () -> Unit,
     onResume: () -> Unit,
+    onChooseMode: () -> Unit,
     onUnpair: () -> Unit,
 ) {
     var participantName by remember(snapshot?.participantId) { mutableStateOf("") }
@@ -412,8 +827,13 @@ private fun RunnerScreen(
                     Text("Start Part 02")
                 }
             }
-            OutlinedButton(onClick = onUnpair) {
-                Text("Unpair")
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedButton(onClick = onChooseMode) {
+                    Text("Modes")
+                }
+                OutlinedButton(onClick = onUnpair) {
+                    Text("Unpair")
+                }
             }
         }
     }
@@ -962,6 +1382,357 @@ private fun bindScanner(
         executor.shutdownNow()
     }
 }
+
+private suspend fun syncMobilePackage(
+    context: Context,
+    client: RunnerClient,
+    summary: MobilePackageSummary,
+    onStatus: (String) -> Unit,
+): MobileRunPackage {
+    onStatus("Fetching manifest")
+    val runPackage = client.awaitMobilePackage(summary.packageId)
+    require(runPackage.mobileRunnable) { "Selected package is not phone-runnable." }
+    val dir = mobilePackageDir(context, runPackage.packageId)
+    withContext(Dispatchers.IO) { dir.mkdirs() }
+    runPackage.assets.forEachIndexed { index, asset ->
+        require(asset.available) { "Missing asset ${asset.assetId}." }
+        val target = mobileAssetFile(context, runPackage.packageId, asset)
+        val alreadySynced = withContext(Dispatchers.IO) {
+            target.isFile && target.length() == asset.sizeBytes && asset.sha256.isNotBlank() && sha256File(target) == asset.sha256
+        }
+        if (!alreadySynced) {
+            onStatus("Downloading ${index + 1}/${runPackage.assets.size}")
+            client.awaitDownloadMobileAsset(runPackage.packageId, asset.assetId, target)
+        }
+        if (asset.sha256.isNotBlank()) {
+            val digest = withContext(Dispatchers.IO) { sha256File(target) }
+            require(digest == asset.sha256) { "Checksum mismatch for ${asset.filename}." }
+        }
+    }
+    return runPackage
+}
+
+private suspend fun runPhonePackage(
+    context: Context,
+    client: RunnerClient,
+    runPackage: MobileRunPackage,
+    session: PhoneRunSession,
+    onStatus: (String) -> Unit,
+    onBlock: (String) -> Unit,
+    onProgress: (String) -> Unit,
+): JSONObject {
+    session.addRunStart(runPackage)
+    client.awaitPostMobileEvents(session.runId, session.drainPayload())
+    for (block in runPackage.blocks) {
+        val asset = runPackage.asset(block.audioAssetId) ?: error("Missing audio asset for ${block.label}.")
+        val audioFile = mobileAssetFile(context, runPackage.packageId, asset)
+        require(audioFile.isFile) { "Synced audio file is missing for ${block.label}." }
+        onBlock(block.label)
+        onStatus("Running ${block.index}/${runPackage.blocks.size}")
+        session.startBlock(block)
+        coroutineScope {
+            val cueJobs = block.tactileCues.map { cue ->
+                launch {
+                    delay((cue.timeS * 1000.0).roundToLong().coerceAtLeast(0L))
+                    vibratePhone(context)
+                    session.addCue(block, cue)
+                }
+            }
+            try {
+                playBlockAudio(audioFile) { elapsedMs, durationMs ->
+                    val duration = durationMs.coerceAtLeast((block.durationS * 1000.0).roundToLong())
+                    onProgress("${formatMillisecondsShort(elapsedMs)} / ${formatMillisecondsShort(duration)}")
+                }
+            } finally {
+                cueJobs.forEach { it.cancel() }
+            }
+        }
+        session.finishBlock(block)
+        client.awaitPostMobileEvents(session.runId, session.drainPayload())
+    }
+    session.addRunComplete()
+    onStatus("Uploading")
+    return client.awaitPostMobileComplete(session.runId, session.drainPayload(complete = true))
+}
+
+private class PhoneRunSession(val packageId: String) {
+    val runId: String = "phone-${System.currentTimeMillis()}"
+    private val events = mutableListOf<JSONObject>()
+    private val pendingEvents = mutableListOf<JSONObject>()
+    private var activeBlock: MobileBlock? = null
+    private var blockStartElapsedMs: Long = 0L
+    private val startedUnixMs: Long = System.currentTimeMillis()
+    private var completedUnixMs: Long = 0L
+    private var tapCount: Int = 0
+    private var validTapCount: Int = 0
+
+    @Synchronized
+    fun addRunStart(runPackage: MobileRunPackage) {
+        addEventLocked(
+            "run_start",
+            JSONObject()
+                .put("participant_id", runPackage.participantId)
+                .put("session_id", runPackage.sessionId)
+                .put("block_count", runPackage.blocks.size),
+        )
+    }
+
+    @Synchronized
+    fun startBlock(block: MobileBlock) {
+        activeBlock = block
+        blockStartElapsedMs = SystemClock.elapsedRealtime()
+        addEventLocked(
+            "block_start",
+            JSONObject()
+                .put("block_id", block.blockId)
+                .put("block_index", block.index)
+                .put("block_label", block.label)
+                .put("duration_s", block.durationS)
+                .put("trial_count", block.trialCount),
+        )
+    }
+
+    @Synchronized
+    fun addCue(block: MobileBlock, cue: MobileCue) {
+        addEventLocked(
+            "vibration_cue",
+            JSONObject()
+                .put("block_id", block.blockId)
+                .put("block_index", block.index)
+                .put("cue_id", cue.cueId)
+                .put("trial_number", cue.trialNumber)
+                .put("trial_uid", cue.trialUid)
+                .put("scheduled_block_time_ms", (cue.timeS * 1000.0).roundToLong())
+                .put("actual_block_time_ms", currentBlockElapsedMs())
+                .put("soa_ms", cue.soaMs)
+                .put("row_label", cue.rowLabel)
+                .put("noise_type", cue.noiseType),
+        )
+    }
+
+    @Synchronized
+    fun finishBlock(block: MobileBlock) {
+        addEventLocked(
+            "block_complete",
+            JSONObject()
+                .put("block_id", block.blockId)
+                .put("block_index", block.index)
+                .put("block_label", block.label)
+                .put("actual_block_duration_ms", currentBlockElapsedMs()),
+        )
+        activeBlock = null
+    }
+
+    @Synchronized
+    fun addRunComplete() {
+        completedUnixMs = System.currentTimeMillis()
+        addEventLocked("run_complete", JSONObject().put("total_events", events.size))
+    }
+
+    @Synchronized
+    fun recordTap(): Int {
+        tapCount += 1
+        val block = activeBlock
+        val elapsedMs = currentBlockElapsedMs()
+        val priorCue = block?.tactileCues
+            ?.filter { elapsedMs >= (it.timeS * 1000.0).roundToLong() }
+            ?.minByOrNull { cue -> abs(elapsedMs - (cue.timeS * 1000.0).roundToLong()) }
+        val cueMs = priorCue?.let { (it.timeS * 1000.0).roundToLong() }
+        val rtMs = cueMs?.let { elapsedMs - it }
+        val valid = rtMs != null && rtMs in 0L..2_000L
+        if (valid) validTapCount += 1
+        val payload = JSONObject()
+            .put("tap_index", tapCount)
+            .put("block_elapsed_ms", elapsedMs)
+            .put("response_status", if (valid) "tactile_response" else "off_cue")
+        if (block != null) {
+            payload
+                .put("block_id", block.blockId)
+                .put("block_index", block.index)
+                .put("block_label", block.label)
+        }
+        if (priorCue != null) {
+            payload
+                .put("cue_id", priorCue.cueId)
+                .put("trial_uid", priorCue.trialUid)
+                .put("trial_number", priorCue.trialNumber)
+                .put("rt_ms", rtMs)
+        }
+        addEventLocked("tap", payload)
+        return tapCount
+    }
+
+    @Synchronized
+    fun drainPayload(complete: Boolean = false): JSONObject {
+        val eventsArray = JSONArray()
+        pendingEvents.forEach { eventsArray.put(JSONObject(it.toString())) }
+        pendingEvents.clear()
+        return JSONObject()
+            .put("schema", if (complete) "pps-mobile-run-complete.v1" else "pps-mobile-run-events.v1")
+            .put("package_id", packageId)
+            .put("run_id", runId)
+            .put("completed", complete)
+            .put("events", eventsArray)
+            .put("summary", summaryLocked())
+    }
+
+    private fun currentBlockElapsedMs(): Long =
+        if (blockStartElapsedMs <= 0L) 0L else (SystemClock.elapsedRealtime() - blockStartElapsedMs).coerceAtLeast(0L)
+
+    private fun addEventLocked(type: String, payload: JSONObject) {
+        val event = JSONObject(payload.toString())
+            .put("type", type)
+            .put("package_id", packageId)
+            .put("run_id", runId)
+            .put("phone_unix_ms", System.currentTimeMillis())
+            .put("phone_elapsed_realtime_ms", SystemClock.elapsedRealtime())
+        events.add(event)
+        pendingEvents.add(event)
+    }
+
+    private fun summaryLocked(): JSONObject =
+        JSONObject()
+            .put("started_unix_ms", startedUnixMs)
+            .put("completed_unix_ms", completedUnixMs)
+            .put("total_event_count", events.size)
+            .put("tap_count", tapCount)
+            .put("valid_tap_count", validTapCount)
+}
+
+private suspend fun playBlockAudio(file: File, onProgress: (Long, Long) -> Unit) {
+    withContext(Dispatchers.Main) {
+        val player = MediaPlayer()
+        val handler = Handler(Looper.getMainLooper())
+        var released = false
+        fun releasePlayer() {
+            if (!released) {
+                released = true
+                runCatching { player.stop() }
+                runCatching { player.release() }
+            }
+        }
+        try {
+            player.setDataSource(file.absolutePath)
+            player.prepare()
+            suspendCancellableCoroutine<Unit> { continuation ->
+                val ticker = object : Runnable {
+                    override fun run() {
+                        if (!released) {
+                            onProgress(player.currentPosition.toLong(), player.duration.toLong().coerceAtLeast(0L))
+                            handler.postDelayed(this, 250L)
+                        }
+                    }
+                }
+                player.setOnCompletionListener {
+                    handler.removeCallbacks(ticker)
+                    if (continuation.isActive) continuation.resume(Unit)
+                }
+                player.setOnErrorListener { _, _, _ ->
+                    handler.removeCallbacks(ticker)
+                    if (continuation.isActive) continuation.resumeWithException(RuntimeException("Audio playback failed."))
+                    true
+                }
+                continuation.invokeOnCancellation {
+                    handler.removeCallbacks(ticker)
+                    releasePlayer()
+                }
+                player.start()
+                ticker.run()
+            }
+        } finally {
+            releasePlayer()
+        }
+    }
+}
+
+private fun vibratePhone(context: Context) {
+    val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val manager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+        manager.defaultVibrator
+    } else {
+        @Suppress("DEPRECATION")
+        context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    }
+    if (!vibrator.hasVibrator()) return
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        vibrator.vibrate(VibrationEffect.createOneShot(60L, VibrationEffect.DEFAULT_AMPLITUDE))
+    } else {
+        @Suppress("DEPRECATION")
+        vibrator.vibrate(60L)
+    }
+}
+
+private suspend fun RunnerClient.awaitMobilePackage(packageId: String): MobileRunPackage =
+    suspendCancellableCoroutine { continuation ->
+        fetchMobilePackage(
+            packageId,
+            onPackage = { if (continuation.isActive) continuation.resume(it) },
+            onError = { if (continuation.isActive) continuation.resumeWithException(RuntimeException(it)) },
+        )
+    }
+
+private suspend fun RunnerClient.awaitDownloadMobileAsset(packageId: String, assetId: String, targetFile: File): File =
+    suspendCancellableCoroutine { continuation ->
+        downloadMobileAsset(
+            packageId,
+            assetId,
+            targetFile,
+            onDownloaded = { if (continuation.isActive) continuation.resume(it) },
+            onError = { if (continuation.isActive) continuation.resumeWithException(RuntimeException(it)) },
+        )
+    }
+
+private suspend fun RunnerClient.awaitPostMobileEvents(runId: String, payload: JSONObject): JSONObject =
+    suspendCancellableCoroutine { continuation ->
+        postMobileEvents(
+            runId,
+            payload,
+            onAccepted = { if (continuation.isActive) continuation.resume(it) },
+            onError = { if (continuation.isActive) continuation.resumeWithException(RuntimeException(it)) },
+        )
+    }
+
+private suspend fun RunnerClient.awaitPostMobileComplete(runId: String, payload: JSONObject): JSONObject =
+    suspendCancellableCoroutine { continuation ->
+        postMobileComplete(
+            runId,
+            payload,
+            onAccepted = { if (continuation.isActive) continuation.resume(it) },
+            onError = { if (continuation.isActive) continuation.resumeWithException(RuntimeException(it)) },
+        )
+    }
+
+private fun mobilePackageDir(context: Context, packageId: String): File =
+    File(context.filesDir, "mobile_packages/${safeFileName(packageId)}")
+
+private fun mobileAssetFile(context: Context, packageId: String, asset: MobileAsset): File =
+    File(mobilePackageDir(context, packageId), "${safeFileName(asset.assetId)}__${safeFileName(asset.filename)}")
+
+private fun safeFileName(value: String): String =
+    value.replace(Regex("[^A-Za-z0-9._-]+"), "-").trim('-', '.', '_').ifBlank { "asset" }
+
+private fun sha256File(file: File): String {
+    val digest = MessageDigest.getInstance("SHA-256")
+    file.inputStream().use { input ->
+        val buffer = ByteArray(1024 * 1024)
+        while (true) {
+            val read = input.read(buffer)
+            if (read <= 0) break
+            digest.update(buffer, 0, read)
+        }
+    }
+    return digest.digest().joinToString("") { "%02x".format(it) }
+}
+
+private fun formatBytes(value: Long): String =
+    when {
+        value >= 1024L * 1024L * 1024L -> String.format("%.1f GB", value / (1024.0 * 1024.0 * 1024.0))
+        value >= 1024L * 1024L -> String.format("%.1f MB", value / (1024.0 * 1024.0))
+        value >= 1024L -> String.format("%.1f KB", value / 1024.0)
+        else -> "$value B"
+    }
+
+private fun formatMillisecondsShort(value: Long): String = formatSeconds(value / 1000.0)
 
 private fun formatSeconds(value: Double): String = TimelineLayoutModel.formatTime(value)
 
