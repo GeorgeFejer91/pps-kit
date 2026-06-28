@@ -466,6 +466,23 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 - The shared LabRecorder/XDF stress and reconciliation helper also needs long-path-safe handling because Gate 4 reuses its CSV/report writers for external XDF post-processing under the deep desktop-rehearsal validation folder. `run_labrecorder_lsl_xdf_stress.py` now uses the shared long-path helper for output creation, LabRecorder stdout/stderr/report writes, marker CSV reads, rich/numeric XDF sample CSVs, and XDF loading so completed Study 5 hardware rehearsals can finish post-run reconciliation instead of failing on Windows path depth.
 - Protocol 11 readiness audits are part of the same full-acceptance path-depth contract. `audit_protocol11_study5_readiness.py` now uses long-path-safe helpers for focus/launch/session/analysis CSV/JSON reads, XDF/WAV/screenshot inspection, response-marker report discovery, audio evidence globbing, computed reconciliation output, and final Protocol 11 JSON/Markdown writes so final hardware rehearsals can be audited in place under deep validation roots.
 - Study 5 response windows can legitimately extend past the next trial start for late-SOA tactile cues. The runner top-up ledger and offline `session_analysis.py` now keep response windows open until the configured tactile response deadline instead of truncating at the next trial boundary, and Protocol 11 treats top-up as a runtime rescue mechanism: final readiness requires the 360-row standard tactile pool to be fully covered with unique/logged selected click IDs, not exact equality between planned OS-click counts and final selected responses. Protocol 11's real OS-click p95 RT default is now 40 ms, while max RT error remains bounded, and standard trials rescued in top-up are excluded from original-click RT-plan comparisons. Focus Mode screenshot capture also writes through the long-path helper so future packaged full-acceptance runs should produce the required `focus_screenshot.png`.
+
+## 2026-06-28
+
+- Added `mobile_pps_replication.py` plus
+  `validation_protocols/scripts/analyze_mobile_pps_replication.py` to test
+  whether collected PPS CSV data reproduce basic smartphone/mobile PPS
+  behavioral assumptions: response integrity, low catch false alarms, rare
+  anticipations, audio-tactile facilitation versus tactile-only baseline,
+  SOA/distance approach gradients, collapsed SOA model shape, and
+  sigmoid-boundary viability. The script accepts one CSV or scans a collection
+  folder for OSF-style `master_successful_participants.csv`, pps-kit
+  `analysis_ready_trials.csv`, `final_trial_outcomes.csv`, or participant
+  `*_trials.csv` files and writes ignored validation reports. Treat this as a
+  behavioral replication/data-shape check against the smartphone-methods anchor,
+  not as hardware timing, raw WAV decoding, LSL/XDF, or exact published-profile
+  recreation evidence.
+
 ## Active Implementation Backlog
 
 - Hide randomization strategy, block-order strategy, max-consecutive-same-type, and seed from the main Trial Assembler UI.

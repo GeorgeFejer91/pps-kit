@@ -19,6 +19,9 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
 - Left-monitor companion emulator window placement: `windows/Set_Companion_Emulation_Layout.ps1` pins the packaged runner and Android emulator to `DISPLAY2` by default, can keep reapplying placement during launch, and raises windows with `SWP_NOACTIVATE` so validation stays visible without stealing the user's mouse/keyboard focus; `focus_app.py` also honors `PPS_FOCUS_VALIDATION_DISPLAY`, `PPS_FOCUS_VALIDATION_RUNNER_WIDTH`, and `PPS_FOCUS_VALIDATION_WINDOW_RECT` so windowed runner validation opens directly on that display. `PPS_FOCUS_VALIDATION_PARTICIPANT_RESPONSES_ONLY=1` keeps app-driven companion command tests from being preempted by validation auto-start/continue helpers.
 - Published-study preload recreation gate: `profile_recreation.py`, `assets/preloads/`, `study_templates/`.
 - Core paper-audit read API: `peripersonal_space_toolkit.paper_audit`.
+- Behavioral PPS replication checks for collected/public derived CSVs:
+  `mobile_pps_replication.py`, with the folder-capable validation helper in
+  `validation_protocols/scripts/analyze_mobile_pps_replication.py`.
 - Paper-audit acquisition/refresh tools: `tools/paper_metadata_parser/`.
 - Tracked paper-audit memory and ledgers: `For-AI/audiotactile-paper-metadata-audit/`.
 - Validation protocols and lab evidence scripts: `validation_protocols/`.
