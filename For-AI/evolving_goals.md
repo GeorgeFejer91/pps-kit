@@ -78,6 +78,22 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   tap/block-complete events, and writes the updated diary/artifacts before
   final run completion. This is phone-runtime top-up playback, but final
   rescue-response analysis/replacement remains pending.
+- Android now has a strict phone-side LSL command/status protocol layer even
+  before the native transport is linked. `PhoneLslProtocol.kt` mirrors the PC
+  runner `PPSCommandSignalsV1` / `PPSCommandAcksV1` string-sample field order,
+  token-gates commands with `token` / `companion_token`, rejects wrong-session,
+  wrong-token, and unsupported-command samples before a handler runs, and builds
+  applied/rejected ack samples after local application. Every phone-owned run
+  now writes `lsl_runtime_status.json` and embeds the same object in
+  `latest_events.json` / `completion.json`; the status explicitly reports
+  `native_transport_available=false`,
+  `reason=native_liblsl_android_layer_not_present`, stream names, channel
+  order, supported commands, token requirements, and the privacy boundary that
+  demographics remain metadata/payload artifacts rather than stream names. The
+  PC mobile-runtime upload writer preserves this Android LSL runtime status
+  beside uploaded marker mirrors. This does not yet make Android a live LSL
+  broadcaster or receiver; that still requires the pinned liblsl Android layer
+  and emulator/physical network validation.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only

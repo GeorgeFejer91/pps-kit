@@ -161,6 +161,11 @@ def test_mobile_runtime_upload_writes_runner_log_artifacts(tmp_path):
         "command_diary": [
             {"command": "start_experiment", "status": "applied"},
         ],
+        "lsl_runtime_status": {
+            "schema": "pps-android-lsl-runtime-status.v1",
+            "native_transport_available": False,
+            "current_android_source_behavior": "local_lsl_marker_mirror",
+        },
     }
 
     result = write_mobile_runtime_events(
@@ -183,3 +188,5 @@ def test_mobile_runtime_upload_writes_runner_log_artifacts(tmp_path):
     assert (artifact.parent / "events.csv").is_file()
     assert (artifact.parent / "lsl_marker_mirror.csv").is_file()
     assert (artifact.parent / "command_diary.jsonl").read_text(encoding="utf-8").count("\n") == 1
+    assert loaded["lsl_runtime_status"]["schema"] == "pps-android-lsl-runtime-status.v1"
+    assert (artifact.parent / "lsl_runtime_status.json").is_file()

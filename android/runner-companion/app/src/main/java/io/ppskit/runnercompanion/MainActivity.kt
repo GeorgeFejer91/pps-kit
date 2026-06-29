@@ -1667,9 +1667,11 @@ private class PhoneRunSession(
     private var completedUnixMs: Long = 0L
     private var tapCount: Int = 0
     private var validTapCount: Int = 0
+    private var latestLslRuntimeStatus: JSONObject = JSONObject()
 
     @Synchronized
     fun addRunStart(runPackage: MobileRunPackage) {
+        latestLslRuntimeStatus = phoneLslRuntimeStatus(runPackage, runId)
         addEventLocked(
             "session_metadata",
             JSONObject()
@@ -1702,7 +1704,8 @@ private class PhoneRunSession(
                         .put("command_acks_name", lslContract.commandAcksName.ifBlank { "PPSCommandAcksV1" })
                         .put("native_android_lsl_required", lslContract.nativeAndroidLslRequired)
                         .put("current_android_source_behavior", lslContract.currentAndroidSourceBehavior.ifBlank { "local_lsl_marker_mirror" }),
-                ),
+                )
+                .put("lsl_runtime_status", JSONObject(latestLslRuntimeStatus.toString())),
         )
         addEventLocked(
             "run_start",
@@ -1868,6 +1871,7 @@ private class PhoneRunSession(
             .put("events", eventsArray)
             .put("participant_metadata", JSONObject(participantMetadata.toString()))
             .put("haptic", JSONObject(hapticMetadata.toString()))
+            .put("lsl_runtime_status", JSONObject(latestLslRuntimeStatus.toString()))
             .put("lsl_marker_mirror", JSONArray().also { array -> lslMarkers.forEach { array.put(JSONObject(it.toString())) } })
             .put("command_diary", JSONArray().also { array -> commandDiary.forEach { array.put(JSONObject(it.toString())) } })
             .put("summary", summaryLocked())
@@ -1883,6 +1887,9 @@ private class PhoneRunSession(
         val packageManifestSha256 = sha256Text(packageManifestText)
         val packageManifestFile = File(dir, "run_package_manifest.json")
         val reconstructionFile = File(dir, "reconstruction_contract.json")
+        val lslRuntimeStatus = phoneLslRuntimeStatus(runPackage, runId)
+        latestLslRuntimeStatus = JSONObject(lslRuntimeStatus.toString())
+        val lslRuntimeStatusFile = File(dir, "lsl_runtime_status.json")
         val responseReview = buildPhoneResponseReview(runPackage, events)
         val responseLedgerFile = File(dir, "phone_response_ledger.csv")
         val topupPlanFile = File(dir, "phone_topup_plan.json")
@@ -1932,6 +1939,13 @@ private class PhoneRunSession(
                     .put("filename", reconstructionFile.name)
                     .put("schema", "pps-mobile-phone-run-reconstruction.v1"),
             )
+            .put(
+                "lsl_runtime_status_artifact",
+                JSONObject()
+                    .put("filename", lslRuntimeStatusFile.name)
+                    .put("schema", PHONE_LSL_RUNTIME_STATUS_SCHEMA),
+            )
+            .put("lsl_runtime_status", JSONObject(lslRuntimeStatus.toString()))
             .put("events", eventsArray)
             .put("lsl_marker_mirror", JSONArray().also { array -> lslMarkers.forEach { array.put(JSONObject(it.toString())) } })
             .put("command_diary", JSONArray().also { array -> commandDiary.forEach { array.put(JSONObject(it.toString())) } })
@@ -1943,6 +1957,7 @@ private class PhoneRunSession(
         val artifactFile = File(dir, if (complete) "completion.json" else "latest_events.json")
         packageManifestFile.writeText(packageManifestText, Charsets.UTF_8)
         reconstructionFile.writeText(phoneRunReconstructionArtifact(runPackage, packageManifestSha256).toString(2), Charsets.UTF_8)
+        lslRuntimeStatusFile.writeText(lslRuntimeStatus.toString(2), Charsets.UTF_8)
         artifactFile.writeText(payload.toString(2), Charsets.UTF_8)
         writePhoneEventsCsv(File(dir, "events.csv"), events)
         writePhoneEventsCsv(File(dir, "lsl_marker_mirror.csv"), lslMarkers)
@@ -1962,6 +1977,7 @@ private class PhoneRunSession(
             .put("artifact_dir", dir.absolutePath)
             .put("package_manifest_path", packageManifestFile.absolutePath)
             .put("reconstruction_artifact_path", reconstructionFile.absolutePath)
+            .put("lsl_runtime_status_path", lslRuntimeStatusFile.absolutePath)
             .put("response_ledger_path", responseLedgerFile.absolutePath)
             .put("topup_plan_path", topupPlanFile.absolutePath)
             .put("topup_materialization_path", topupMaterializationFile.absolutePath)
@@ -2020,6 +2036,7 @@ private class PhoneRunSession(
             .put("tap_count", tapCount)
             .put("valid_tap_count", validTapCount)
             .put("lsl_marker_mirror_count", lslMarkers.size)
+            .put("native_lsl_transport_available", latestLslRuntimeStatus.optBoolean("native_transport_available", false))
             .put("command_diary_count", commandDiary.size)
 }
 

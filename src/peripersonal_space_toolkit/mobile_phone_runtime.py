@@ -359,6 +359,7 @@ def write_mobile_runtime_events(
         "event_count": len(events),
         "phone_payload": payload,
         "participant_metadata": dict(payload.get("participant_metadata") or {}),
+        "lsl_runtime_status": dict(payload.get("lsl_runtime_status") or {}),
         "lsl_marker_mirror": list(payload.get("lsl_marker_mirror") or []),
         "command_diary": list(payload.get("command_diary") or []),
         "paths": {
@@ -369,6 +370,11 @@ def write_mobile_runtime_events(
             "command_diary_jsonl": str(out_dir / "command_diary.jsonl"),
         },
     }
+    if artifact["lsl_runtime_status"]:
+        lsl_status_path = out_dir / "lsl_runtime_status.json"
+        with open(_filesystem_path(lsl_status_path), "w", encoding="utf-8") as handle:
+            handle.write(json.dumps(artifact["lsl_runtime_status"], indent=2, sort_keys=True, default=str) + "\n")
+        artifact["paths"]["lsl_runtime_status_json"] = str(lsl_status_path)
     _write_lsl_marker_mirror_csv(out_dir / "lsl_marker_mirror.csv", list(payload.get("lsl_marker_mirror") or events))
     _write_command_diary(out_dir / "command_diary.jsonl", list(payload.get("command_diary") or []))
     artifact_path = out_dir / ("completion.json" if complete else "latest_events_upload.json")
