@@ -133,7 +133,10 @@ Required validation levels:
    `python validation_protocols/scripts/validate_android_lsl_runtime_artifact.py <phone-run-dir>`.
    The same validator also accepts Controller-mode
    `phone_controller_runtime_status.json` and
-   `phone_controller_command_outbox.jsonl` artifacts.
+   `phone_controller_command_outbox.jsonl` artifacts, plus PC-admin
+   `pc_android_lsl_admin_status.json` and
+   `pc_android_lsl_command_outbox.jsonl` artifacts from
+   `pps-android-lsl-command`.
 3. Emulator smoke test: install APK, run a phone-owned package, export ZIP, and
    validate `lsl_runtime_status.json`.
 4. Native LSL network test with the AAR/JNI integration: resolve Android
@@ -165,6 +168,12 @@ Android runner is idle with a synced package or actively playing a block:
 .\.venv\Scripts\pps-android-lsl-command.exe start_experiment --session-id <part_session_id> --token <pairing-token> --package-id <package_id> --require-ack
 .\.venv\Scripts\pps-android-lsl-command.exe pause --session-id <part_session_id> --token <pairing-token> --require-ack
 .\.venv\Scripts\pps-android-lsl-command.exe resume --session-id <part_session_id> --token <pairing-token> --require-ack
+```
+
+Then validate the PC-admin outbox/status pair:
+
+```powershell
+.\.venv\Scripts\python.exe validation_protocols\scripts\validate_android_lsl_runtime_artifact.py <pc_android_lsl_command_outbox.jsonl> --expect-native-transport --expect-command-acks
 ```
 
 Until that strict validator passes together with external LSL/XDF capture, the

@@ -24,6 +24,12 @@ from peripersonal_space_toolkit.lsl_command_ack import (  # noqa: E402
     LSL_COMMAND_CHANNELS,
     LSL_COMMAND_STREAM_NAME,
 )
+from peripersonal_space_toolkit.android_lsl_admin import (  # noqa: E402
+    PC_ANDROID_LSL_ADMIN_OUTBOX,
+    PC_ANDROID_LSL_ADMIN_ROW_SCHEMA,
+    PC_ANDROID_LSL_ADMIN_STATUS,
+    PC_ANDROID_LSL_ADMIN_STATUS_SCHEMA,
+)
 
 
 ANDROID_LSL_RUNTIME_STATUS_SCHEMA = "pps-android-lsl-runtime-status.v1"
@@ -36,6 +42,10 @@ EXPECTED_STREAMS = {
     "command_acks": LSL_ACK_STREAM_NAME,
 }
 EXPECTED_CONTROLLER_STREAMS = {
+    "command_signals": LSL_COMMAND_STREAM_NAME,
+    "command_acks": LSL_ACK_STREAM_NAME,
+}
+EXPECTED_PC_ADMIN_STREAMS = {
     "command_signals": LSL_COMMAND_STREAM_NAME,
     "command_acks": LSL_ACK_STREAM_NAME,
 }
@@ -189,6 +199,58 @@ def validate_controller_status(
     )
 
 
+def validate_pc_admin_status(
+    status: dict[str, Any],
+    *,
+    source_path: str = "",
+    outbox_rows: list[dict[str, Any]] | None = None,
+    expect_native_transport: bool = False,
+    expect_command_acks: bool = False,
+) -> AndroidLslValidationResult:
+    failures: list[str] = []
+    warnings: list[str] = []
+    if status.get("schema") != PC_ANDROID_LSL_ADMIN_STATUS_SCHEMA:
+        failures.append("pc_android_lsl_admin_status schema mismatch")
+    if status.get("role") != "pc_android_lsl_admin":
+        failures.append("PC Android LSL admin status must declare role='pc_android_lsl_admin'")
+
+    streams = status.get("streams") if isinstance(status.get("streams"), dict) else {}
+    for key, expected in EXPECTED_PC_ADMIN_STREAMS.items():
+        if streams.get(key) != expected:
+            failures.append(f"PC admin stream {key} expected {expected!r}, got {streams.get(key)!r}")
+
+    protocol = status.get("command_protocol") if isinstance(status.get("command_protocol"), dict) else {}
+    _validate_command_protocol(protocol, failures)
+
+    if status.get("native_transport") != "liblsl":
+        message = "PC Android LSL admin status does not report native_transport='liblsl'"
+        if expect_native_transport:
+            failures.append(message)
+        else:
+            warnings.append(message)
+
+    rows = outbox_rows or []
+    if (expect_native_transport or expect_command_acks) and not rows:
+        failures.append("PC admin strict validation requires at least one command outbox row")
+
+    for index, row in enumerate(rows, start=1):
+        _validate_pc_admin_outbox_row(
+            row,
+            row_index=index,
+            failures=failures,
+            expect_native_transport=expect_native_transport,
+            expect_command_acks=expect_command_acks,
+        )
+
+    return AndroidLslValidationResult(
+        ok=not failures,
+        source_path=source_path,
+        status=status,
+        failures=failures,
+        warnings=warnings,
+    )
+
+
 def validate_run_artifact(
     path: Path,
     *,
@@ -198,6 +260,14 @@ def validate_run_artifact(
     loaded = _load_status_inputs(path)
     if loaded.get("kind") == "controller":
         return validate_controller_status(
+            loaded["status"],
+            source_path=str(path),
+            outbox_rows=loaded.get("outbox_rows") or [],
+            expect_native_transport=expect_native_transport,
+            expect_command_acks=expect_command_acks,
+        )
+    if loaded.get("kind") == "pc_admin":
+        return validate_pc_admin_status(
             loaded["status"],
             source_path=str(path),
             outbox_rows=loaded.get("outbox_rows") or [],
@@ -232,21 +302,40 @@ def _load_status_inputs(path: Path) -> dict[str, Any]:
                 "status": _read_json(controller_status_path),
                 "outbox_rows": _read_jsonl(outbox_path) if outbox_path.is_file() else [],
             }
-        raise FileNotFoundError(f"Missing {status_path} or {controller_status_path}")
+        pc_admin_status_path = path / PC_ANDROID_LSL_ADMIN_STATUS
+        if pc_admin_status_path.is_file():
+            outbox_path = path / PC_ANDROID_LSL_ADMIN_OUTBOX
+            return {
+                "kind": "pc_admin",
+                "status": _read_json(pc_admin_status_path),
+                "outbox_rows": _read_jsonl(outbox_path) if outbox_path.is_file() else [],
+            }
+        raise FileNotFoundError(f"Missing {status_path}, {controller_status_path}, or {pc_admin_status_path}")
     if path.suffix.lower() == ".zip":
         return _load_from_zip(path)
     if path.suffix.lower() == ".jsonl":
         status_path = path.with_name("phone_controller_runtime_status.json")
-        if not status_path.is_file():
-            raise FileNotFoundError(f"Missing {status_path} beside controller outbox")
-        return {
-            "kind": "controller",
-            "status": _read_json(status_path),
-            "outbox_rows": _read_jsonl(path),
-        }
+        if status_path.is_file():
+            return {
+                "kind": "controller",
+                "status": _read_json(status_path),
+                "outbox_rows": _read_jsonl(path),
+            }
+        pc_admin_status_path = path.with_name(PC_ANDROID_LSL_ADMIN_STATUS)
+        if pc_admin_status_path.is_file():
+            return {
+                "kind": "pc_admin",
+                "status": _read_json(pc_admin_status_path),
+                "outbox_rows": _read_jsonl(path),
+            }
+        raise FileNotFoundError(f"Missing {status_path} or {pc_admin_status_path} beside command outbox")
     data = _read_json(path)
     if data.get("schema") == ANDROID_LSL_RUNTIME_STATUS_SCHEMA:
-        return {"kind": "runner", "status": data, "completion": None}
+        return {
+            "kind": "runner",
+            "status": data,
+            "completion": None,
+        }
     if data.get("schema") == ANDROID_CONTROLLER_RUNTIME_STATUS_SCHEMA:
         outbox_path = path.with_name("phone_controller_command_outbox.jsonl")
         return {
@@ -254,10 +343,20 @@ def _load_status_inputs(path: Path) -> dict[str, Any]:
             "status": data,
             "outbox_rows": _read_jsonl(outbox_path) if outbox_path.is_file() else [],
         }
+    if data.get("schema") == PC_ANDROID_LSL_ADMIN_STATUS_SCHEMA:
+        outbox_path = path.with_name(PC_ANDROID_LSL_ADMIN_OUTBOX)
+        return {
+            "kind": "pc_admin",
+            "status": data,
+            "outbox_rows": _read_jsonl(outbox_path) if outbox_path.is_file() else [],
+        }
     embedded = data.get("lsl_runtime_status")
     if isinstance(embedded, dict):
         return {"kind": "runner", "status": embedded, "completion": data}
-    raise ValueError(f"{path} is not an Android LSL status, completion, controller status, or controller outbox artifact")
+    raise ValueError(
+        f"{path} is not an Android LSL status, completion, controller status, controller outbox, "
+        "PC Android admin status, or PC Android admin outbox artifact"
+    )
 
 
 def _load_from_zip(path: Path) -> dict[str, Any]:
@@ -360,6 +459,53 @@ def _validate_controller_outbox_row(
                 failures.append(f"{prefix} ack command_id does not match command sample")
 
 
+def _validate_pc_admin_outbox_row(
+    row: dict[str, Any],
+    *,
+    row_index: int,
+    failures: list[str],
+    expect_native_transport: bool,
+    expect_command_acks: bool,
+) -> None:
+    prefix = f"PC admin outbox row {row_index}"
+    if row.get("schema") != PC_ANDROID_LSL_ADMIN_ROW_SCHEMA:
+        failures.append(f"{prefix} schema mismatch")
+    sample = list(row.get("command_sample") or [])
+    if len(sample) != len(LSL_COMMAND_CHANNELS):
+        failures.append(f"{prefix} command sample channel count mismatch")
+        return
+    if sample[0] != COMMAND_SCHEMA:
+        failures.append(f"{prefix} command sample schema mismatch")
+    if row.get("command_id") and sample[1] != row.get("command_id"):
+        failures.append(f"{prefix} command_id differs from command sample")
+    if row.get("target_session_id") and sample[2] != row.get("target_session_id"):
+        failures.append(f"{prefix} target_session_id differs from command sample")
+    if not str(sample[3]).strip():
+        failures.append(f"{prefix} sender_id is empty")
+    if row.get("sender_id") and sample[3] != row.get("sender_id"):
+        failures.append(f"{prefix} sender_id differs from command sample")
+    if row.get("command") and sample[4] != row.get("command"):
+        failures.append(f"{prefix} command differs from command sample")
+    payload = _parse_json_object(sample[6], f"{prefix} command payload", failures)
+    if payload is not None:
+        token = str(payload.get("token") or payload.get("companion_token") or "")
+        if not token:
+            failures.append(f"{prefix} command payload is missing the pairing token")
+    if expect_native_transport and row.get("native_lsl_sent") is not True:
+        failures.append(f"{prefix} was expected to send over native LSL")
+    if expect_command_acks:
+        if row.get("ack_received") is not True:
+            failures.append(f"{prefix} was expected to receive a matching command ack")
+        ack_sample = list(row.get("ack_sample") or [])
+        if len(ack_sample) != len(LSL_ACK_CHANNELS):
+            failures.append(f"{prefix} ack sample channel count mismatch")
+        else:
+            if ack_sample[0] != ACK_SCHEMA:
+                failures.append(f"{prefix} ack sample schema mismatch")
+            if ack_sample[1] != sample[1]:
+                failures.append(f"{prefix} ack command_id does not match command sample")
+
+
 def _parse_json_object(raw: str, label: str, failures: list[str]) -> dict[str, Any] | None:
     try:
         parsed = json.loads(raw or "{}")
@@ -377,26 +523,41 @@ def _write_report(result: AndroidLslValidationResult, output_dir: Path) -> None:
     report_json = output_dir / "android_lsl_runtime_artifact_validation.json"
     report_md = output_dir / "android_lsl_runtime_artifact_validation.md"
     is_controller = result.status.get("schema") == ANDROID_CONTROLLER_RUNTIME_STATUS_SCHEMA
+    is_pc_admin = result.status.get("schema") == PC_ANDROID_LSL_ADMIN_STATUS_SCHEMA
     report_json.write_text(json.dumps(result.to_json(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
     lines = [
         "# Android LSL Runtime Artifact Validation",
         "",
         f"- Source: `{result.source_path}`",
         f"- Result: `{'PASS' if result.ok else 'FAIL'}`",
-        f"- Native transport available: `{bool(result.status.get('native_transport_available'))}`",
-        (
-            f"- Native controller transport enabled: `{bool(result.status.get('native_controller_transport_enabled'))}`"
-            if is_controller
-            else f"- Native marker transport enabled: `{bool(result.status.get('native_marker_transport_enabled'))}`"
-        ),
-        (
-            f"- Role: `{result.status.get('role', '')}`"
-            if is_controller
-            else f"- Command receiver available: `{bool(result.status.get('command_receiver_available'))}`"
-        ),
-        f"- Current Android source behavior: `{result.status.get('current_android_source_behavior', '')}`",
-        "",
     ]
+    if is_pc_admin:
+        lines.extend(
+            [
+                f"- Native transport: `{result.status.get('native_transport', '')}`",
+                f"- Role: `{result.status.get('role', '')}`",
+                f"- Current PC source behavior: `{result.status.get('current_pc_source_behavior', '')}`",
+                "",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                f"- Native transport available: `{bool(result.status.get('native_transport_available'))}`",
+                (
+                    f"- Native controller transport enabled: `{bool(result.status.get('native_controller_transport_enabled'))}`"
+                    if is_controller
+                    else f"- Native marker transport enabled: `{bool(result.status.get('native_marker_transport_enabled'))}`"
+                ),
+                (
+                    f"- Role: `{result.status.get('role', '')}`"
+                    if is_controller
+                    else f"- Command receiver available: `{bool(result.status.get('command_receiver_available'))}`"
+                ),
+                f"- Current Android source behavior: `{result.status.get('current_android_source_behavior', '')}`",
+                "",
+            ]
+        )
     if result.failures:
         lines.extend(["## Failures", *[f"- {item}" for item in result.failures], ""])
     if result.warnings:
@@ -411,7 +572,8 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         help=(
             "Phone run folder, ZIP, completion JSON, lsl_runtime_status.json, "
-            "phone_controller_runtime_status.json, or phone_controller_command_outbox.jsonl."
+            "phone_controller_runtime_status.json, phone_controller_command_outbox.jsonl, "
+            "pc_android_lsl_admin_status.json, or pc_android_lsl_command_outbox.jsonl."
         ),
     )
     parser.add_argument("--expect-native-transport", action="store_true", help="Fail unless native Android LSL transport is active.")

@@ -89,9 +89,12 @@ marker payload artifacts by default rather than discoverable stream names.
 Use `validation_protocols/scripts/validate_android_lsl_runtime_artifact.py` on
 phone-run folders, exported ZIPs, `lsl_runtime_status.json`, Controller-mode
 `phone_controller_runtime_status.json`, or
-`phone_controller_command_outbox.jsonl`. Add `--expect-native-transport` for
-native marker/command/controller transport checks and `--expect-command-acks`
-when a controller-runner test should prove matching acknowledgements.
+`phone_controller_command_outbox.jsonl`, or PC-admin
+`pc_android_lsl_admin_status.json` /
+`pc_android_lsl_command_outbox.jsonl`. Add `--expect-native-transport` for
+native marker/command/controller/PC-admin transport checks and
+`--expect-command-acks` when a controller-runner or PC-runner test should prove
+matching acknowledgements.
 
 The PC side can also administer a phone-owned Android runner directly over the
 same command stream with the `pps-android-lsl-command` helper. It writes
@@ -104,6 +107,9 @@ pps-android-lsl-command start_experiment --session-id <part_session_id> --token 
 pps-android-lsl-command pause --session-id <part_session_id> --token <pairing-token> --require-ack
 pps-android-lsl-command resume --session-id <part_session_id> --token <pairing-token> --require-ack
 ```
+
+Validate the resulting PC-admin outbox/status pair with the same Android LSL
+artifact validator when auditing a rehearsal.
 
 ## References
 

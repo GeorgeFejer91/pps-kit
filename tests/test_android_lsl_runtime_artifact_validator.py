@@ -108,6 +108,61 @@ def test_android_lsl_runtime_validator_can_require_controller_acks(tmp_path: Pat
     assert "expected to receive a matching command ack" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_accepts_pc_admin_outbox_artifact(tmp_path: Path):
+    admin_dir = tmp_path / "pc-android-admin"
+    admin_dir.mkdir()
+    (admin_dir / "pc_android_lsl_admin_status.json").write_text(json.dumps(_pc_admin_status()), encoding="utf-8")
+    (admin_dir / "pc_android_lsl_command_outbox.jsonl").write_text(
+        json.dumps(_pc_admin_row(native_sent=True, ack_received=True)) + "\n",
+        encoding="utf-8",
+    )
+
+    result = validator.validate_run_artifact(admin_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is True
+    assert result.failures == []
+    assert result.status["role"] == "pc_android_lsl_admin"
+
+
+def test_android_lsl_runtime_validator_requires_pc_admin_rows_in_strict_mode(tmp_path: Path):
+    status_path = tmp_path / "pc_android_lsl_admin_status.json"
+    status_path.write_text(json.dumps(_pc_admin_status()), encoding="utf-8")
+
+    result = validator.validate_run_artifact(status_path, expect_native_transport=True)
+
+    assert result.ok is False
+    assert "requires at least one command outbox row" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_requires_pc_admin_native_send_in_strict_mode(tmp_path: Path):
+    admin_dir = tmp_path / "pc-android-admin"
+    admin_dir.mkdir()
+    (admin_dir / "pc_android_lsl_admin_status.json").write_text(json.dumps(_pc_admin_status()), encoding="utf-8")
+    (admin_dir / "pc_android_lsl_command_outbox.jsonl").write_text(
+        json.dumps(_pc_admin_row(native_sent=False, ack_received=False)) + "\n",
+        encoding="utf-8",
+    )
+
+    result = validator.validate_run_artifact(admin_dir, expect_native_transport=True)
+
+    assert result.ok is False
+    assert "expected to send over native LSL" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_can_require_pc_admin_acks(tmp_path: Path):
+    outbox_path = tmp_path / "pc_android_lsl_command_outbox.jsonl"
+    (tmp_path / "pc_android_lsl_admin_status.json").write_text(json.dumps(_pc_admin_status()), encoding="utf-8")
+    outbox_path.write_text(
+        json.dumps(_pc_admin_row(native_sent=True, ack_received=False)) + "\n",
+        encoding="utf-8",
+    )
+
+    result = validator.validate_run_artifact(outbox_path, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    assert "expected to receive a matching command ack" in "\n".join(result.failures)
+
+
 def _status(*, native: bool) -> dict:
     return {
         "schema": "pps-android-lsl-runtime-status.v1",
@@ -279,6 +334,118 @@ def _controller_row(*, native_sent: bool, ack_received: bool) -> dict:
         "command_sample": command_sample,
         "payload": {"token": "secret", "package_id": "pkg-001"},
         "ack_received": ack_received,
+    }
+    if ack_received:
+        row["ack_sample"] = [
+            "pps-lsl-command-ack.v1",
+            command_id,
+            "part-001",
+            "android_phone",
+            "applied",
+            "",
+            "42.010000000",
+            "42.020000000",
+            "42.030000000",
+            json.dumps({"command": "pause"}),
+        ]
+    return row
+
+
+def _pc_admin_status() -> dict:
+    return {
+        "schema": "pps-pc-android-lsl-admin-status.v1",
+        "role": "pc_android_lsl_admin",
+        "native_transport": "liblsl",
+        "current_pc_source_behavior": "pc_native_lsl_admin_with_local_outbox",
+        "streams": {
+            "command_signals": "PPSCommandSignalsV1",
+            "command_acks": "PPSCommandAcksV1",
+        },
+        "command_protocol": {
+            "command_schema": "pps-lsl-command.v1",
+            "ack_schema": "pps-lsl-command-ack.v1",
+            "command_channels": [
+                "schema",
+                "command_id",
+                "session_id",
+                "sender_id",
+                "command",
+                "issued_lsl_time",
+                "payload_json",
+            ],
+            "ack_channels": [
+                "schema",
+                "command_id",
+                "session_id",
+                "receiver_id",
+                "status",
+                "reason",
+                "received_lsl_time",
+                "applied_lsl_time",
+                "ack_lsl_time",
+                "payload_json",
+            ],
+            "supported_commands": ["start_experiment", "pause", "resume"],
+            "token_required": True,
+            "token_payload_fields": ["token", "companion_token"],
+        },
+    }
+
+
+def _pc_admin_row(*, native_sent: bool, ack_received: bool) -> dict:
+    command_id = "cmd-pc-admin-001"
+    command_sample = [
+        "pps-lsl-command.v1",
+        command_id,
+        "part-001",
+        "pc_runner",
+        "pause",
+        "42.000000000",
+        json.dumps({"token": "secret", "package_id": "pkg-001", "requested_by": "pc_runner_lsl_admin"}),
+    ]
+    row = {
+        "schema": "pps-pc-android-lsl-admin-command-row.v1",
+        "ok": bool(native_sent and ack_received),
+        "status": "ack_applied" if ack_received else ("sent_no_ack" if native_sent else "send_failed"),
+        "reason": "",
+        "command_id": command_id,
+        "command": "pause",
+        "target_session_id": "part-001",
+        "sender_id": "pc_runner",
+        "package_id": "pkg-001",
+        "participant_id": "P001",
+        "native_transport": "liblsl",
+        "command_stream": "PPSCommandSignalsV1",
+        "ack_stream": "PPSCommandAcksV1",
+        "consumer_ready": native_sent,
+        "native_lsl_sent": native_sent,
+        "ack_required": ack_received,
+        "ack_received": ack_received,
+        "ack_status": "applied" if ack_received else "",
+        "command_channels": [
+            "schema",
+            "command_id",
+            "session_id",
+            "sender_id",
+            "command",
+            "issued_lsl_time",
+            "payload_json",
+        ],
+        "ack_channels": [
+            "schema",
+            "command_id",
+            "session_id",
+            "receiver_id",
+            "status",
+            "reason",
+            "received_lsl_time",
+            "applied_lsl_time",
+            "ack_lsl_time",
+            "payload_json",
+        ],
+        "command_sample": command_sample,
+        "ack_sample": [],
+        "payload": {"token": "secret", "package_id": "pkg-001", "requested_by": "pc_runner_lsl_admin"},
     }
     if ack_received:
         row["ack_sample"] = [
