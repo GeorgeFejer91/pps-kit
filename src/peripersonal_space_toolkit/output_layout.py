@@ -17,6 +17,9 @@ RUNNER_LOGS_DIRNAME = "runner_logs"
 VERBOSE_EVENTS_DIRNAME = "verbose_events"
 VALIDATION_REPORTS_DIRNAME = "validation_reports"
 DATA_ANALYTICS_DIRNAME = "Data_Analytics"
+DATA_MIN_DIRNAME = "1.Data_min"
+DATA_MAX_DIRNAME = "2.Data_max"
+DATA_MIN_MASTER_FILENAME = "master_successful_participants.csv"
 CONTEXT_CHILD_DIRNAMES = {
     PROJECT_STATE_DIRNAME,
     PROFILE_SNAPSHOT_DIRNAME,
@@ -73,6 +76,40 @@ def output_validation_reports_dir(output_folder: Path | str) -> Path:
 
 def output_data_analytics_dir(output_folder: Path | str) -> Path:
     return Path(output_folder).expanduser() / DATA_ANALYTICS_DIRNAME
+
+
+def output_data_min_dir(output_folder: Path | str) -> Path:
+    return Path(output_folder).expanduser() / DATA_MIN_DIRNAME
+
+
+def output_data_max_dir(output_folder: Path | str) -> Path:
+    return Path(output_folder).expanduser() / DATA_MAX_DIRNAME
+
+
+def output_data_min_master_csv(output_folder: Path | str) -> Path:
+    return output_data_min_dir(output_folder) / DATA_MIN_MASTER_FILENAME
+
+
+def safe_output_participant_id(value: str | None) -> str:
+    text = str(value or "").strip()
+    cleaned = []
+    for char in text:
+        if char.isalnum() or char in {"_", "-", "."}:
+            cleaned.append(char)
+        else:
+            cleaned.append("_")
+    result = "".join(cleaned).strip("._-")
+    return result or "participant"
+
+
+def output_data_min_participant_csv(output_folder: Path | str, participant_id: str | None) -> Path:
+    participant = safe_output_participant_id(participant_id)
+    return output_data_min_dir(output_folder) / f"{participant}.csv"
+
+
+def output_data_max_participant_dir(output_folder: Path | str, participant_id: str | None) -> Path:
+    participant = safe_output_participant_id(participant_id)
+    return output_data_max_dir(output_folder) / participant
 
 
 def output_diary_path(output_folder: Path | str) -> Path:

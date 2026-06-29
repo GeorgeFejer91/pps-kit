@@ -30,7 +30,11 @@ from .loudness import (
     normalize_loudness_policy,
 )
 from .output_layout import (
+    output_data_max_participant_dir,
     output_data_analytics_dir,
+    output_data_min_dir,
+    output_data_min_master_csv,
+    output_data_min_participant_csv,
     output_metadata_dir,
     output_prepared_blocks_dir,
     output_runner_logs_dir,
@@ -84,6 +88,25 @@ PARTICIPANT_TRIAL_CSV_SUFFIX = "_trials.csv"
 EXTERNAL_LABRECORDER_SCOPE_PART = "part"
 EXTERNAL_LABRECORDER_SCOPE_SESSION_GROUP = "session_group_same_window"
 PART1_TOPUP_REPEAT_BLOCK_INDEXES = (1, 2)
+DATA_MIN_FIELDNAMES = [
+    "participant_id",
+    "session_id",
+    "part_session_id",
+    "part_number",
+    "block_number",
+    "block_label",
+    "trial_number",
+    "trial_number_global",
+    "trial_uid",
+    "condition",
+    "phase",
+    "noise_type",
+    "trial_type",
+    "soa_ms",
+    "response_given",
+    "hit_miss",
+    "reaction_time_ms",
+]
 
 
 def _package_output_root(package: "RunPackage") -> Path:
@@ -210,6 +233,35 @@ def _audio_evidence_path(package: "RunPackage", block: "RunBlock") -> Path:
 
 def _wired_loopback_path(package: "RunPackage", block: "RunBlock") -> Path:
     return Path(package.session_dir) / f"block_{int(block.index):02d}_wired_loopback_input4.wav"
+
+
+def _data_max_context_leaf(package: "RunPackage") -> Path:
+    if _package_is_split_part(package):
+        return Path(package.session_group_id) / package.part_folder_name
+    return Path(package.session_id)
+
+
+def _data_max_session_leaf(package: "RunPackage") -> Path:
+    return output_data_max_participant_dir(_package_output_root(package), package.participant_id) / "sessions" / _data_max_context_leaf(package)
+
+
+def _data_max_group_session_dir(package: "RunPackage") -> Path:
+    participant_root = output_data_max_participant_dir(_package_output_root(package), package.participant_id)
+    if _package_is_split_part(package):
+        return participant_root / "sessions" / package.session_group_id
+    return participant_root / "sessions" / package.session_id
+
+
+def _data_max_runner_logs_leaf(package: "RunPackage") -> Path:
+    return output_data_max_participant_dir(_package_output_root(package), package.participant_id) / "runner_logs" / _data_max_context_leaf(package)
+
+
+def _data_max_analysis_leaf(package: "RunPackage") -> Path:
+    return output_data_max_participant_dir(_package_output_root(package), package.participant_id) / "analysis_outputs" / _data_max_context_leaf(package)
+
+
+def _data_max_prepared_blocks_leaf(package: "RunPackage") -> Path:
+    return output_data_max_participant_dir(_package_output_root(package), package.participant_id) / "prepared_blocks" / _data_max_context_leaf(package) / "blocks"
 
 
 WIRED_LOOPBACK_OFF = "off"
@@ -627,6 +679,307 @@ class ParticipantTrialCsvWriter:
         if catch_trial:
             return candidates[0], False, True
         return candidates[0], False, True
+
+
+def _normalize_data_min_phase(value: Any) -> str:
+    text = str(value or "").strip()
+    lowered = text.lower()
+    if "inhale" in lowered:
+        return "Inhale"
+    if "exhale" in lowered:
+        return "Exhale"
+    return text
+
+
+def _normalize_data_min_bool(value: Any) -> str:
+    return "true" if _truthy(value) else "false"
+
+
+def _normalize_data_min_outcome(value: Any) -> str:
+    text = str(value or "").strip()
+    lowered = text.lower()
+    if "miss" in lowered:
+        return "Miss"
+    if "hit" in lowered:
+        return "Hit"
+    return text
+
+
+def _is_data_min_filler_or_debug(row: dict[str, Any]) -> bool:
+    role = str(_row_value(row, "topup_role", "Topup_Role", default="")).strip().lower()
+    trial_type = str(_row_value(row, "trial_type", "Trial_Type", default="")).strip().lower()
+    family = str(_row_value(row, "family", "Family", default="")).strip().lower()
+    if role in {"filler", "debug"}:
+        return True
+    if trial_type in {"filler", "debug"} or family in {"filler", "debug"}:
+        return True
+    return False
+
+
+def _data_min_row_from_rich(row: dict[str, Any], *, trial_number_global: int) -> dict[str, Any]:
+    return {
+        "participant_id": _row_value(row, "participant_id", "Participant_ID", default=""),
+        "session_id": _row_value(row, "session_id", "Session_ID", default=""),
+        "part_session_id": _row_value(row, "part_session_id", "Part_Session_ID", default=""),
+        "part_number": _row_value(row, "part_number", "Part_Number", default=""),
+        "block_number": _row_value(row, "block_number", "block_index", "Block_Number", default=""),
+        "block_label": _row_value(row, "block_label", "Block_Label", default=""),
+        "trial_number": _row_value(row, "trial_number", "trial_index", "Trial_Number", default=""),
+        "trial_number_global": str(trial_number_global),
+        "trial_uid": _row_value(row, "trial_uid", "Trial_UID", default=""),
+        "condition": _row_value(row, "condition", "Condition", default=""),
+        "phase": _normalize_data_min_phase(_row_value(row, "respiratory_phase", "phase", "Row_Label", default="")),
+        "noise_type": _row_value(row, "noise_type", "Noise_Type", "noise_label", default=""),
+        "trial_type": _row_value(row, "trial_type", "Trial_Type", default=""),
+        "soa_ms": _row_value(row, "soa_ms", "SOA_ms", default=""),
+        "response_given": _normalize_data_min_bool(_row_value(row, "response_given", "Response_Given", default=False)),
+        "hit_miss": _normalize_data_min_outcome(_row_value(row, "outcome", "hit_miss", "Hit_Miss", default="")),
+        "reaction_time_ms": _row_value(row, "rt_ms", "RT_ms", "reaction_time_ms", default=""),
+    }
+
+
+def _data_min_rows_from_participant_trials(paths: Iterable[Path]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    global_index = 1
+    for path in paths:
+        for row in _read_csv_rows(path):
+            if _is_data_min_filler_or_debug(row):
+                continue
+            rows.append(_data_min_row_from_rich(row, trial_number_global=global_index))
+            global_index += 1
+    return rows
+
+
+def _write_data_min_csv(path: Path, rows: list[dict[str, Any]]) -> Path:
+    _mkdir(path.parent)
+    with open(_filesystem_path(path), "w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=DATA_MIN_FIELDNAMES, extrasaction="ignore")
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({field: row.get(field, "") for field in DATA_MIN_FIELDNAMES})
+    return path
+
+
+def _data_min_csv_header(path: Path) -> list[str]:
+    try:
+        with open(_filesystem_path(path), newline="", encoding="utf-8") as handle:
+            reader = csv.reader(handle)
+            return next(reader, [])
+    except Exception:
+        return []
+
+
+def _is_data_min_participant_csv(path: Path, output_root: Path) -> bool:
+    master_name = output_data_min_master_csv(output_root).name
+    return path.name != master_name and path.suffix.lower() == ".csv" and _data_min_csv_header(path) == DATA_MIN_FIELDNAMES
+
+
+def _data_min_participant_csvs(output_root: Path) -> list[Path]:
+    data_min = output_data_min_dir(output_root)
+    return [path for path in sorted(data_min.glob("*.csv"), key=lambda item: item.name.lower()) if _is_data_min_participant_csv(path, output_root)]
+
+
+def _prune_data_min_dir(output_root: Path) -> None:
+    data_min = output_data_min_dir(output_root)
+    if not _path_exists(data_min):
+        return
+    master_name = output_data_min_master_csv(output_root).name
+    try:
+        children = list(Path(data_min).iterdir())
+    except Exception:
+        return
+    for child in children:
+        if child.name == master_name:
+            continue
+        if child.is_file() and _is_data_min_participant_csv(child, output_root):
+            continue
+        try:
+            if child.is_dir():
+                shutil.rmtree(_filesystem_path(child))
+            else:
+                child.unlink()
+        except Exception:
+            continue
+
+
+def _refresh_data_min_master_csv(output_root: Path) -> Path:
+    participant_csvs = _data_min_participant_csvs(output_root)
+    master = output_data_min_master_csv(output_root)
+    _mkdir(master.parent)
+    with open(_filesystem_path(master), "w", newline="", encoding="utf-8") as output:
+        writer = csv.DictWriter(output, fieldnames=DATA_MIN_FIELDNAMES, extrasaction="ignore")
+        writer.writeheader()
+        for participant_csv in participant_csvs:
+            for row in _read_csv_rows(participant_csv):
+                writer.writerow({field: row.get(field, "") for field in DATA_MIN_FIELDNAMES})
+    return master
+
+
+def _package_group_completed(package: "RunPackage") -> bool:
+    if not _package_is_split_part(package):
+        return True
+    manifest = _load_json(_session_group_manifest_path(package))
+    parts = [part for part in manifest.get("parts", []) if isinstance(part, dict)] if isinstance(manifest, dict) else []
+    if not parts:
+        return False
+    return all(bool(part.get("completed")) for part in parts)
+
+
+def _participant_trial_paths_for_completed_package(package: "RunPackage") -> list[Path]:
+    if not _package_is_split_part(package):
+        return [_participant_trials_csv_path(package)] if _path_is_file(_participant_trials_csv_path(package)) else []
+    if not _package_group_completed(package):
+        return []
+    manifest = _load_json(_session_group_manifest_path(package))
+    paths: list[Path] = []
+    for part in sorted(manifest.get("parts", []), key=lambda item: _as_int(item.get("part_number"), default=0)):
+        try:
+            part_package = load_run_package(Path(str(part.get("session_manifest_path") or "")))
+        except Exception:
+            continue
+        trials = _participant_trials_csv_path(part_package)
+        if _path_is_file(trials):
+            paths.append(trials)
+    return paths
+
+
+def write_data_min_publication_outputs(package: "RunPackage") -> dict[str, Path]:
+    paths = _participant_trial_paths_for_completed_package(package)
+    if not paths:
+        return {}
+    output_root = _package_output_root(package)
+    participant_csv = output_data_min_participant_csv(output_root, package.participant_id)
+    rows = _data_min_rows_from_participant_trials(paths)
+    _write_data_min_csv(participant_csv, rows)
+    _prune_data_min_dir(output_root)
+    master_csv = _refresh_data_min_master_csv(output_root)
+    return {
+        "data_min_participant_csv": participant_csv,
+        "data_min_master_successful_participants_csv": master_csv,
+    }
+
+
+def _copy_existing_path(source: Path, destination: Path) -> Path | None:
+    if not source or not _path_exists(source):
+        return None
+    try:
+        if _path_is_file(source):
+            _mkdir(destination.parent)
+            shutil.copy2(_filesystem_path(source), _filesystem_path(destination))
+            return destination
+        _mkdir(destination)
+        shutil.copytree(_filesystem_path(source), _filesystem_path(destination), dirs_exist_ok=True)
+        return destination
+    except Exception:
+        return None
+
+
+def _copy_directory_contents(source: Path, destination: Path) -> None:
+    if not source or not _path_exists(source):
+        return
+    _mkdir(destination)
+    try:
+        for child in sorted(Path(source).iterdir(), key=lambda item: item.name):
+            _copy_existing_path(child, destination / child.name)
+    except Exception:
+        return
+
+
+def mirror_data_max_outputs(package: "RunPackage", *, analysis_outputs: dict[str, Path] | None = None) -> dict[str, Path]:
+    participant_root = output_data_max_participant_dir(_package_output_root(package), package.participant_id)
+    participant_label = participant_root.name
+    demographics_dir = participant_root / f"{participant_label}_demographics"
+    calibration_dir = participant_root / f"{participant_label}_tactile-calibration"
+    session_leaf = _data_max_session_leaf(package)
+    runner_logs_leaf = _data_max_runner_logs_leaf(package)
+    analysis_leaf = _data_max_analysis_leaf(package)
+    prepared_leaf = _data_max_prepared_blocks_leaf(package)
+    outputs: dict[str, Path] = {"data_max_participant_dir": participant_root, "data_max_session_dir": session_leaf}
+
+    for directory in (
+        demographics_dir,
+        calibration_dir,
+        participant_root / "sessions",
+        participant_root / "prepared_blocks",
+        participant_root / "analysis_outputs",
+        participant_root / "runner_logs",
+    ):
+        _mkdir(directory)
+
+    _copy_directory_contents(Path(package.session_dir), session_leaf)
+    session_sources = [
+        package.manifest_path,
+        package.design_path,
+        package.protocol_path,
+        _loudness_manifest_path(package),
+        _session_metadata_path(package),
+        _verbose_events_csv_path(package),
+        _verbose_events_xdf_path(package),
+        _lsl_markers_csv_path(package),
+        _lsl_markers_xdf_path(package),
+        _trigger_dictionary_path(package),
+    ]
+    if _package_is_split_part(package):
+        session_sources.append(_part_completion_status_path(package))
+    for source in session_sources:
+        copied = _copy_existing_path(Path(source), session_leaf / Path(source).name) if source else None
+        if copied is not None:
+            outputs[f"data_max_{Path(source).stem}"] = copied
+
+    if _package_is_split_part(package):
+        group_manifest = _session_group_manifest_path(package)
+        copied = _copy_existing_path(group_manifest, _data_max_group_session_dir(package) / group_manifest.name)
+        if copied is not None:
+            outputs["data_max_session_group_manifest"] = copied
+
+    _copy_directory_contents(_package_runner_log_dir(package), runner_logs_leaf)
+    _copy_directory_contents(_package_analytics_dir(package), analysis_leaf)
+    _copy_directory_contents(_package_prepared_blocks_dir(package), prepared_leaf)
+    if analysis_outputs:
+        for key, source in analysis_outputs.items():
+            source_path = Path(source)
+            if not _path_exists(source_path):
+                continue
+            if source_path.parent == _package_analytics_dir(package):
+                copied = _copy_existing_path(source_path, analysis_leaf / source_path.name)
+            else:
+                copied = _copy_existing_path(source_path, session_leaf / source_path.name)
+            if copied is not None:
+                outputs[f"data_max_{key}"] = copied
+
+    output_root = _package_output_root(package)
+    raw_participant_id = str(package.participant_id or "").strip()
+    calibration_sources = [
+        output_root / raw_participant_id / f"{raw_participant_id}_tactile-calibration",
+        output_root / participant_label / f"{participant_label}_tactile-calibration",
+    ]
+    seen_calibration_sources: set[Path] = set()
+    for source in calibration_sources:
+        source = Path(source)
+        if source in seen_calibration_sources:
+            continue
+        seen_calibration_sources.add(source)
+        if _path_exists(source):
+            _copy_directory_contents(source, calibration_dir)
+            outputs["data_max_tactile_calibration_dir"] = calibration_dir
+            break
+
+    metadata = _load_json(_session_metadata_path(package))
+    participant_metadata = metadata.get("participant", {}) if isinstance(metadata, dict) else {}
+    if isinstance(participant_metadata, dict) and participant_metadata:
+        payload = {
+            "schema": "pps-private-participant-demographics.v1",
+            "participant_id": package.participant_id,
+            "session_id": package.session_id,
+            "session_group_id": package.session_group_id,
+            "part_session_id": package.part_session_id,
+            "part_number": package.part_number,
+            "participant": participant_metadata,
+        }
+        _write_json_file(demographics_dir / "participant_metadata.private.json", payload)
+        _write_json_file(demographics_dir / "setup_submission.private.json", payload)
+        outputs["data_max_demographics_dir"] = demographics_dir
+    return outputs
 
 
 ProgressCallback = Callable[[dict[str, Any]], None]
@@ -3126,6 +3479,8 @@ class SessionRunnerController:
             self._operator_completion_message = self._build_operator_completion_message(completed=completed, interrupted=interrupted)
             self._write_part_completion_status(completed=completed, interrupted=interrupted)
             self._refresh_analysis_browser_outputs(completed=completed, interrupted=interrupted)
+            self._mirror_data_max_outputs()
+            self._refresh_data_min_outputs(completed=completed, interrupted=interrupted)
             if owns_engine and self.audio_engine is not None and hasattr(self.audio_engine, "shutdown"):
                 self.audio_engine.shutdown()
 
@@ -3205,6 +3560,24 @@ class SessionRunnerController:
         except Exception:
             pass
         return result
+
+    def _mirror_data_max_outputs(self) -> None:
+        try:
+            outputs = mirror_data_max_outputs(self.package, analysis_outputs=self._analysis_outputs)
+        except Exception as exc:  # noqa: BLE001 - backup organization must not hide run completion.
+            self._run_warnings.append(f"2.Data_max mirror failed: {exc}")
+            return
+        self._analysis_outputs.update(outputs)
+
+    def _refresh_data_min_outputs(self, *, completed: bool, interrupted: bool) -> None:
+        if not completed or interrupted:
+            return
+        try:
+            outputs = write_data_min_publication_outputs(self.package)
+        except Exception as exc:  # noqa: BLE001 - public export must not hide run completion.
+            self._run_warnings.append(f"1.Data_min export failed: {exc}")
+            return
+        self._analysis_outputs.update(outputs)
 
     def _write_external_labrecorder_report(self, payload: dict[str, Any]) -> None:
         _write_json_file(self._external_labrecorder_report_path, payload)

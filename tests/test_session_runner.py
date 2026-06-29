@@ -33,7 +33,11 @@ from peripersonal_space_toolkit.session_runner import (
 )
 from peripersonal_space_toolkit.runner_diary import find_output_diary, read_diary_entries
 from peripersonal_space_toolkit.output_layout import (
+    output_data_max_participant_dir,
     output_data_analytics_dir,
+    output_data_min_dir,
+    output_data_min_master_csv,
+    output_data_min_participant_csv,
     output_prepared_blocks_dir,
     output_runner_logs_dir,
     output_shared_instructions_dir,
@@ -1195,6 +1199,93 @@ def test_participant_trial_csv_rewrite_uses_tactile_window_after_trial_end(tmp_p
     assert rows[0]["correctness_rule"] == "response within 100-1300 ms after tactile onset"
 
 
+def test_data_min_export_keeps_original_and_real_topup_trials_only(tmp_path: Path):
+    rich_csv = tmp_path / "P001_rich_trials.csv"
+    rows = [
+        {
+            "participant_id": "P001",
+            "session_id": "P001_20260102_030405",
+            "part_session_id": "P001_20260102_030405_part01",
+            "part_number": "1",
+            "condition": "near",
+            "block_number": "1",
+            "block_label": "Block 01",
+            "trial_number": "1",
+            "trial_uid": "P001-B01-T001",
+            "trial_type": "Audio-Tactile",
+            "family": "audio_tactile",
+            "respiratory_phase": "Inhale",
+            "noise_type": "pink",
+            "soa_ms": "300",
+            "response_given": "false",
+            "outcome": "Miss",
+            "rt_ms": "",
+            "is_topup": "false",
+            "topup_role": "",
+            "primary_analysis_included": "true",
+        },
+        {
+            "participant_id": "P001",
+            "session_id": "P001_20260102_030405",
+            "part_session_id": "P001_20260102_030405_part01",
+            "part_number": "1",
+            "condition": "near",
+            "block_number": "2",
+            "block_label": "Top-up",
+            "trial_number": "1",
+            "trial_uid": "P001-B02-T001",
+            "trial_type": "Audio-Tactile",
+            "family": "audio_tactile",
+            "respiratory_phase": "Inhale",
+            "noise_type": "pink",
+            "soa_ms": "300",
+            "response_given": "true",
+            "outcome": "Hit",
+            "rt_ms": "420.000",
+            "is_topup": "true",
+            "topup_role": "rescue",
+            "source_trial_uid": "P001-B01-T001",
+            "primary_analysis_included": "true",
+        },
+        {
+            "participant_id": "P001",
+            "session_id": "P001_20260102_030405",
+            "part_session_id": "P001_20260102_030405_part01",
+            "part_number": "1",
+            "condition": "near",
+            "block_number": "2",
+            "block_label": "Top-up",
+            "trial_number": "2",
+            "trial_uid": "P001-B02-T002",
+            "trial_type": "Audio-Tactile",
+            "family": "audio_tactile",
+            "respiratory_phase": "Inhale",
+            "noise_type": "pink",
+            "soa_ms": "300",
+            "response_given": "false",
+            "outcome": "Miss",
+            "rt_ms": "",
+            "is_topup": "true",
+            "topup_role": "filler",
+            "primary_analysis_included": "false",
+        },
+    ]
+    with rich_csv.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=session_runner_module.PARTICIPANT_TRIAL_FIELDNAMES)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({field: row.get(field, "") for field in session_runner_module.PARTICIPANT_TRIAL_FIELDNAMES})
+
+    data_min_rows = session_runner_module._data_min_rows_from_participant_trials([rich_csv])
+
+    assert list(data_min_rows[0].keys()) == session_runner_module.DATA_MIN_FIELDNAMES
+    assert len(data_min_rows) == 2
+    assert [row["trial_uid"] for row in data_min_rows] == ["P001-B01-T001", "P001-B02-T001"]
+    assert [row["trial_number_global"] for row in data_min_rows] == ["1", "2"]
+    assert [row["hit_miss"] for row in data_min_rows] == ["Miss", "Hit"]
+    assert [row["reaction_time_ms"] for row in data_min_rows] == ["", "420.000"]
+
+
 class _MockAudioEngine:
     def __init__(self):
         self.played: list[str] = []
@@ -1394,6 +1485,17 @@ def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
             },
         },
     )
+    calibration_dir = package.session_dir.parent / "P001" / "P001_tactile-calibration"
+    calibration_dir.mkdir(parents=True)
+    (calibration_dir / "latest_tactile_calibration.json").write_text(
+        json.dumps({"schema": "pps-tactile-calibration-latest.v1", "participant_id": "P001"}),
+        encoding="utf-8",
+    )
+    seeded_data_min = output_data_min_dir(package.session_dir.parent)
+    seeded_data_min.mkdir()
+    (seeded_data_min / "README.txt").write_text("not allowed in the publication folder", encoding="utf-8")
+    (seeded_data_min / "data_dictionary.csv").write_text("private_field\nvalue\n", encoding="utf-8")
+    (seeded_data_min / "logs").mkdir()
     engine.on_audio_started = lambda: controller.log_click(x=10, y=12)
 
     result = controller.run()
@@ -1451,6 +1553,31 @@ def test_session_runner_controller_writes_events_and_analysis(tmp_path: Path):
     assert "tactile_calibration" not in participant_trial_rows[0]
     assert participant_trial_rows[0]["participant_age_years"] == "29"
     assert participant_trial_rows[0]["outcome"] in {"Hit", "Miss"}
+    data_min_dir = output_data_min_dir(package.session_dir.parent)
+    assert sorted(path.name for path in data_min_dir.iterdir()) == ["P001.csv", "master_successful_participants.csv"]
+    data_min_path = output_data_min_participant_csv(package.session_dir.parent, "P001")
+    with data_min_path.open(newline="", encoding="utf-8") as handle:
+        data_min_reader = csv.DictReader(handle)
+        data_min_rows = list(data_min_reader)
+    assert data_min_reader.fieldnames == session_runner_module.DATA_MIN_FIELDNAMES
+    assert data_min_rows
+    assert all(set(row) == set(session_runner_module.DATA_MIN_FIELDNAMES) for row in data_min_rows)
+    assert "participant_age_years" not in data_min_reader.fieldnames
+    assert "participant_gender" not in data_min_reader.fieldnames
+    assert "tactile_calibration" not in data_min_reader.fieldnames
+    with output_data_min_master_csv(package.session_dir.parent).open(newline="", encoding="utf-8") as handle:
+        master_reader = csv.DictReader(handle)
+        master_rows = list(master_reader)
+    assert master_reader.fieldnames == session_runner_module.DATA_MIN_FIELDNAMES
+    assert master_rows == data_min_rows
+    data_max_root = output_data_max_participant_dir(package.session_dir.parent, "P001")
+    data_max_session = data_max_root / "sessions" / package.session_id
+    assert data_max_session.joinpath(f"{package.session_id}_trials.csv").exists()
+    assert data_max_session.joinpath("block_01_audio_evidence.wav").exists()
+    assert data_max_session.joinpath("events.csv").exists()
+    assert data_max_session.joinpath("session_metadata.json").exists()
+    assert data_max_root.joinpath("P001_demographics", "participant_metadata.private.json").exists()
+    assert data_max_root.joinpath("P001_tactile-calibration", "latest_tactile_calibration.json").exists()
     assert not (package.session_dir / "events.csv").exists()
     assert not (package.session_dir / "lsl_markers.csv").exists()
     assert not (package.session_dir / "trigger_dictionary.json").exists()
@@ -1538,6 +1665,10 @@ def test_split_part_controller_writes_part_identity_and_status_handoff(tmp_path:
     participant_rows = list(csv.DictReader(result1.analysis_outputs["participant_trials"].open(encoding="utf-8")))
     assert participant_rows[0]["session_group_id"] == part1.session_group_id
     assert participant_rows[0]["part_session_id"] == part1.part_session_id
+    assert not output_data_min_participant_csv(session_root, "P001").exists()
+    data_max_part1 = output_data_max_participant_dir(session_root, "P001") / "sessions" / part1.session_group_id / "part_01"
+    assert data_max_part1.joinpath(f"{part1.session_id}_trials.csv").exists()
+    assert data_max_part1.joinpath("events.csv").exists()
 
     after_part1 = prepared_session_asset_status(
         run_manifest,
@@ -1566,6 +1697,23 @@ def test_split_part_controller_writes_part_identity_and_status_handoff(tmp_path:
     assert result2.analysis_outputs["analysis_catalog"].exists()
     combined_analysis = output_data_analytics_dir(session_root) / "P001" / "P001_analysis_ready_trials.csv"
     assert combined_analysis.exists()
+    data_min_path = output_data_min_participant_csv(session_root, "P001")
+    assert data_min_path.exists()
+    with data_min_path.open(newline="", encoding="utf-8") as handle:
+        data_min_reader = csv.DictReader(handle)
+        data_min_rows = list(data_min_reader)
+    assert data_min_reader.fieldnames == session_runner_module.DATA_MIN_FIELDNAMES
+    assert data_min_rows
+    part_numbers = [row["part_number"] for row in data_min_rows]
+    assert set(part_numbers) == {"1", "2"}
+    first_part2_index = part_numbers.index("2")
+    assert part_numbers[:first_part2_index] == ["1"] * first_part2_index
+    assert part_numbers[first_part2_index:] == ["2"] * (len(part_numbers) - first_part2_index)
+    assert {row["part_session_id"] for row in data_min_rows} == {part1.part_session_id, part2.part_session_id}
+    assert [row["trial_number_global"] for row in data_min_rows] == [str(index) for index in range(1, len(data_min_rows) + 1)]
+    assert output_data_min_master_csv(session_root).exists()
+    data_max_part2 = output_data_max_participant_dir(session_root, "P001") / "sessions" / part2.session_group_id / "part_02"
+    assert data_max_part2.joinpath(f"{part2.session_id}_trials.csv").exists()
 
     collected = prepared_session_asset_status(
         run_manifest,
@@ -2364,6 +2512,11 @@ def test_session_runner_diary_records_interrupted_session(tmp_path: Path):
     assert entries[-1]["event_type"] == "session_interrupted"
     assert entries[-1]["payload"]["completed"] is False
     assert entries[-1]["payload"]["interrupted"] is True
+    assert not output_data_min_participant_csv(package.session_dir.parent, "P001").exists()
+    assert not output_data_min_master_csv(package.session_dir.parent).exists()
+    data_max_session = output_data_max_participant_dir(package.session_dir.parent, "P001") / "sessions" / package.session_id
+    assert data_max_session.exists()
+    assert data_max_session.joinpath("events.csv").exists()
 
 
 def test_session_runner_emits_live_topup_draft_after_response_window(tmp_path: Path):
@@ -2390,6 +2543,12 @@ def test_session_runner_emits_live_topup_draft_after_response_window(tmp_path: P
     missed = final_draft["missed_trials"][0]
     assert missed["trial_type"] == "Audio-Tactile"
     assert missed["respiratory_phase"] == "Inhale"
+    participant_rows = list(csv.DictReader(result.analysis_outputs["participant_trials"].open(encoding="utf-8")))
+    public_rows = list(csv.DictReader(output_data_min_participant_csv(package.session_dir.parent, "P001").open(encoding="utf-8")))
+    included_trial_uids = [row["trial_uid"] for row in participant_rows if row["topup_role"].lower() != "filler"]
+    assert included_trial_uids
+    assert [row["trial_uid"] for row in public_rows] == included_trial_uids
+    assert any(row["is_topup"].lower() == "true" for row in participant_rows)
 
 
 def test_session_runner_logs_instruction_events_without_trial_response(tmp_path: Path):

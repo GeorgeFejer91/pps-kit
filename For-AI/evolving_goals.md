@@ -2,6 +2,33 @@
 
 This file is the dated project memory. Add a new dated entry when a chat or implementation changes project direction, product behavior, or release constraints.
 
+## 2026-06-30
+
+- Native Experiment Runner outputs now use a two-tier acquisition-root contract:
+  `1.Data_min/` is the OSF/publication-ready participant trial export, and
+  `2.Data_max/` is the participant-organized reconstruction/backup mirror.
+  This change is runner-only; Android/phone-owned output remains a later pass.
+- `1.Data_min/` must contain only `P###.csv` participant files plus
+  `master_successful_participants.csv`. Each participant file has exactly the
+  17-column curated schema
+  `participant_id,session_id,part_session_id,part_number,block_number,block_label,trial_number,trial_number_global,trial_uid,condition,phase,noise_type,trial_type,soa_ms,response_given,hit_miss,reaction_time_ms`.
+  The exporter reads the rich runner participant-trials CSV, not
+  `analysis_ready_trials` or final-outcome replacement tables, so original
+  missed trials remain present even when later real top-up repeat/rescue rows
+  repair the condition. Only filler/debug rows are excluded.
+- Completed one-part participants write `1.Data_min/P###.csv` at run end.
+  Split participants write the public file only after all required parts are
+  complete; interrupted or incomplete runs stay out of `1.Data_min`.
+  Refreshing the master file concatenates only CSVs that already match the
+  public 17-column schema, and the runner prunes stray README/manifest/log/data
+  dictionary files from the minimal folder.
+- `2.Data_max/P###/` now receives the rich reconstructive mirror: canonical
+  `P###_demographics/`, `P###_tactile-calibration/`, `sessions/...`,
+  `prepared_blocks/`, `analysis_outputs/`, and `runner_logs/` folders, with
+  session manifests, rich trial CSVs, event/LSL/XDF/trigger/session metadata,
+  WAV evidence, top-up ledgers, prepared blocks, calibration artifacts, and
+  private setup metadata kept there rather than in `1.Data_min/`.
+
 ## 2026-06-29
 
 - Android companion emulator validation must preserve the emulator's fixed AVD
