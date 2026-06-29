@@ -21,6 +21,7 @@ PAIRING_SCHEME = "pps-companion"
 SNAPSHOT_SCHEMA = "pps-runner-companion-snapshot.v1"
 HEALTH_SCHEMA = "pps-runner-companion-health.v1"
 PAIRING_SCHEMA_VERSION = "1"
+PHONE_EXPORT_PAIRING_SCHEMA_VERSION = "2"
 
 
 class CompanionCommandError(RuntimeError):
@@ -115,16 +116,28 @@ def build_pairing_uri(
     port: int,
     session_id: str,
     token: str,
+    mode: str = "pc_runner",
+    transfer_id: str = "",
+    transport: str = "lan",
 ) -> str:
-    query = urlencode(
-        {
-            "v": PAIRING_SCHEMA_VERSION,
-            "host": str(host),
-            "port": str(int(port)),
-            "session_id": str(session_id),
-            "token": str(token),
-        }
-    )
+    payload = {
+        "v": PAIRING_SCHEMA_VERSION,
+        "host": str(host),
+        "port": str(int(port)),
+        "session_id": str(session_id),
+        "token": str(token),
+    }
+    if str(mode or "pc_runner") != "pc_runner" or str(transfer_id or "").strip() or str(transport or "lan") != "lan":
+        payload.update(
+            {
+                "v": PHONE_EXPORT_PAIRING_SCHEMA_VERSION,
+                "mode": str(mode or "pc_runner"),
+                "transport": str(transport or "lan"),
+            }
+        )
+        if str(transfer_id or "").strip():
+            payload["transfer_id"] = str(transfer_id)
+    query = urlencode(payload)
     return f"{PAIRING_SCHEME}://pair?{query}"
 
 

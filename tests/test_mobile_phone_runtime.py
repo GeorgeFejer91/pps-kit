@@ -7,6 +7,7 @@ from pathlib import Path
 from peripersonal_space_toolkit.mobile_phone_runtime import (
     MOBILE_PACKAGE_SCHEMA,
     MOBILE_RUN_COMPLETE_SCHEMA,
+    build_mobile_package_list,
     build_mobile_package_manifest,
     mobile_asset_path,
     mobile_package_id,
@@ -116,6 +117,17 @@ def test_mobile_package_manifest_exports_assets_trials_and_phone_tactile_cues(tm
         }
     ]
     assert mobile_asset_path(package, manifest["package_id"], "block-01-audio") == package.blocks[0].wav_path
+
+
+def test_mobile_package_list_and_manifest_can_mark_phone_owned_sessions(tmp_path):
+    package = _package(tmp_path)
+
+    listing = build_mobile_package_list(package, phone_owned_session=True)
+    manifest = build_mobile_package_manifest(package, phone_owned_session=True)
+
+    assert listing["packages"][0]["phone_owned_session"] is True
+    assert manifest["phone_owned_session"] is True
+    assert manifest["runtime"]["session_owner"] == "phone"
 
 
 def test_mobile_runtime_upload_writes_runner_log_artifacts(tmp_path):

@@ -10,6 +10,7 @@ import json
 import math
 import os
 import queue
+import subprocess
 import sys
 import threading
 import time
@@ -7281,6 +7282,202 @@ class _FocusCompanionBridge:
         return self._call(lambda: self.window._companion_mobile_run_complete(run_id, payload), timeout_s=10.0)
 
 
+def _windows_wifi_direct_status() -> dict[str, Any]:
+    status = {
+        "available": False,
+        "adapter_detected": False,
+        "hosted_network_supported": False,
+        "wireless_display_supported": False,
+        "message": "Wi-Fi Direct status was not checked.",
+    }
+    try:
+        completed = subprocess.run(
+            ["netsh", "wlan", "show", "drivers"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=4,
+        )
+    except Exception as exc:  # noqa: BLE001 - status-only diagnostic
+        status["message"] = f"Wi-Fi Direct check unavailable: {exc}"
+        return status
+    output = str(completed.stdout or completed.stderr or "")
+    lower = output.lower()
+    status["wireless_display_supported"] = "wireless display supported" in lower and "yes" in lower
+    status["hosted_network_supported"] = "hosted network supported" in lower and "yes" in lower
+    try:
+        adapters = subprocess.run(
+            [
+                "powershell",
+                "-NoProfile",
+                "-Command",
+                "Get-CimInstance -ClassName Win32_NetworkAdapter | "
+                "Where-Object { $_.Name -match 'Wi-Fi Direct' } | "
+                "Select-Object -ExpandProperty Name",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=4,
+        )
+        status["adapter_detected"] = bool(str(adapters.stdout or "").strip())
+    except Exception:
+        status["adapter_detected"] = False
+    status["available"] = bool(status["adapter_detected"] or status["wireless_display_supported"])
+    if status["available"]:
+        status["message"] = (
+            "Wi-Fi Direct-capable Windows adapter detected. Use this fallback after the phone and PC are "
+            "joined to the same direct link; same-Wi-Fi LAN remains the primary transfer path."
+        )
+    else:
+        status["message"] = "No usable Windows Wi-Fi Direct adapter was detected. Use same-Wi-Fi LAN or the manual URI."
+    if "hosted network supported" in lower and not status["hosted_network_supported"]:
+        status["message"] += " Legacy hosted-network commands are not supported by this driver."
+    return status
+
+
+class _PhoneTransferBridge:
+    """Companion bridge for phone-owned experiment transfer without PC playback."""
+
+    def __init__(
+        self,
+        *,
+        packages: list[Any],
+        transfer_id: str,
+        profile_id: str,
+        participant_id: str,
+        port: int,
+    ) -> None:
+        self.packages = list(packages)
+        self.transfer_id = str(transfer_id or "")
+        self.profile_id = str(profile_id or "")
+        self.participant_id = str(participant_id or "")
+        self.port = int(port)
+        self.sequence = 0
+
+    def health(self) -> dict[str, Any]:
+        package_list = build_mobile_package_list(self.packages, phone_owned_session=True)
+        package_rows = list(package_list.get("packages") or [])
+        return {
+            "schema": HEALTH_SCHEMA,
+            "service": "pps-phone-transfer",
+            "status": "ok",
+            "session_id": self.transfer_id,
+            "participant_id": self.participant_id,
+            "profile_id": self.profile_id,
+            "port": self.port,
+            "transfer_mode": "phone_export",
+            "mobile_runtime": {
+                "enabled": True,
+                "phone_owned_session": True,
+                "package_count": len(package_rows),
+                "active_package_id": str(package_list.get("active_package_id") or ""),
+                "mobile_runnable": bool(package_rows) and all(bool(item.get("mobile_runnable")) for item in package_rows),
+            },
+        }
+
+    def snapshot(self) -> dict[str, Any]:
+        self.sequence += 1
+        return {
+            "schema": SNAPSHOT_SCHEMA,
+            "sequence": self.sequence,
+            "server_unix_ms": int(time.time() * 1000),
+            "server_perf_counter_s": time.perf_counter(),
+            "connection_state": "phone_export_ready",
+            "allowed_commands": [],
+            "participant": {
+                "participant_id": self.participant_id,
+                "session_id": self.transfer_id,
+                "selected_participant_id": self.participant_id,
+            },
+            "setup": {
+                "submitted": True,
+                "ready": True,
+                "participant_name_present": False,
+                "name_sharing_opt_in": False,
+                "age": "",
+                "handedness": "",
+                "gender": "",
+            },
+            "part_status": {"available_parts": [], "selected_part": "", "current_package_part": "", "pending_start_part": ""},
+            "run_status": {
+                "running": False,
+                "paused": False,
+                "complete": False,
+                "state_label": "Phone export ready",
+                "event_label": "Phone owns the run session.",
+            },
+            "active_block": {"active": False, "running": False, "paused": False, "instruction_waiting": False},
+            "timeline": {"trial_rows": [], "tactile_cues": [], "clicks": [], "counts": {}},
+            "topup": {"draft_count": 0},
+            "instruction_gate": {"waiting": False, "part2_start_gate": False, "instruction_label": "", "button_label": ""},
+        }
+
+    def _phone_export_only(self) -> dict[str, Any]:
+        raise CompanionCommandError(
+            "This QR serves phone-owned experiment packages only.",
+            status_code=409,
+            reason="phone_export_only",
+        )
+
+    def submit_setup(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._phone_export_only()
+
+    def continue_instruction(self) -> dict[str, Any]:
+        return self._phone_export_only()
+
+    def start_part(self, part_number: int) -> dict[str, Any]:
+        return self._phone_export_only()
+
+    def pause(self) -> dict[str, Any]:
+        return self._phone_export_only()
+
+    def resume(self) -> dict[str, Any]:
+        return self._phone_export_only()
+
+    def mobile_packages(self) -> dict[str, Any]:
+        return build_mobile_package_list(self.packages, phone_owned_session=True)
+
+    def mobile_package_manifest(self, package_id: str) -> dict[str, Any]:
+        package = self._package_for_id(package_id)
+        if package is None:
+            raise CompanionCommandError(status_code=404, reason="mobile_package_not_found")
+        return build_mobile_package_manifest(package, phone_owned_session=True)
+
+    def mobile_package_asset_path(self, package_id: str, asset_id: str) -> tuple[str, str]:
+        package = self._package_for_id(package_id)
+        if package is None:
+            raise CompanionCommandError(status_code=404, reason="mobile_package_not_found")
+        try:
+            path = mobile_asset_path(package, package_id, asset_id)
+        except MobileRuntimePackageError as exc:
+            raise CompanionCommandError(str(exc), status_code=404, reason="mobile_asset_not_found") from exc
+        return str(path), "audio/wav"
+
+    def mobile_run_events(self, run_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "schema": "pps-mobile-run-events.v1",
+            "status": "accepted_phone_owned_no_pc_copy",
+            "run_id": str(run_id or ""),
+            "event_count": len(list((payload or {}).get("events") or [])),
+        }
+
+    def mobile_run_complete(self, run_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "schema": "pps-mobile-run-complete.v1",
+            "status": "accepted_phone_owned_no_pc_copy",
+            "run_id": str(run_id or ""),
+            "event_count": len(list((payload or {}).get("events") or [])),
+        }
+
+    def _package_for_id(self, package_id: str) -> Any | None:
+        clean = str(package_id or "").strip()
+        for package in self.packages:
+            if mobile_package_id(package) == clean:
+                return package
+        return None
+
+
 class _FocusTactileCalibrationCollector:
     """Thread-safe target-click collector for tactile calibration trials."""
 
@@ -12468,7 +12665,7 @@ def run_launcher_window(
     apply_qt_app_icon(q, app=app, window=dialog)
     _prepare_validation_window_placement(q, dialog)
 
-    selected_action: dict[str, Any] = {"open_environment": False}
+    selected_action: dict[str, Any] = {"open_environment": False, "phone_transfer": False}
     initializing: dict[str, bool] = {"busy": False}
     gate_shortcuts: dict[str, Any] = {}
     messages: queue.Queue[tuple[str, Any]] = queue.Queue()
@@ -12481,7 +12678,9 @@ def run_launcher_window(
     heading.setObjectName("mutedLabel")
     heading.setWordWrap(True)
     panel_layout.addWidget(heading)
-    step_label = q["QLabel"]("Choose 1 Resume Last Session, 2 Resume Custom Session, or 3 Start New Session.")
+    step_label = q["QLabel"](
+        "Choose 1 Resume Last Session, 2 Resume Custom Session, 3 Start New Session, or 4 Send To Phone."
+    )
     step_label.setObjectName("gateStepLabel")
     step_label.setWordWrap(True)
     panel_layout.addWidget(step_label)
@@ -12535,10 +12734,14 @@ def run_launcher_window(
     start_new_button = q["QPushButton"]("3 Start New Session")
     start_new_button.setObjectName("startNewSessionButton")
     start_new_button.setProperty("decisionTone", "start")
+    phone_button = q["QPushButton"]("4 Send To Phone")
+    phone_button.setObjectName("sendToPhoneButton")
+    phone_button.setProperty("decisionTone", "phone")
     close_button = q["QPushButton"]("Close")
     buttons.addWidget(resume_button)
     buttons.addWidget(resume_custom_button)
     buttons.addWidget(start_new_button)
+    buttons.addWidget(phone_button)
     buttons.addStretch(1)
     buttons.addWidget(close_button)
     panel_layout.addLayout(buttons)
@@ -12593,15 +12796,20 @@ def run_launcher_window(
         resume_shortcut = gate_shortcuts.get("resume")
         custom_shortcut = gate_shortcuts.get("custom")
         start_shortcut = gate_shortcuts.get("start")
+        phone_shortcut = gate_shortcuts.get("phone")
         if resume_shortcut is not None:
             resume_shortcut.setEnabled(_decision_shortcuts_enabled() and _resume_ready())
         if custom_shortcut is not None:
             custom_shortcut.setEnabled(_decision_shortcuts_enabled())
         if start_shortcut is not None:
             start_shortcut.setEnabled(_decision_shortcuts_enabled())
+        if phone_shortcut is not None:
+            phone_shortcut.setEnabled(_decision_shortcuts_enabled())
 
     def _refresh_gate_attention() -> None:
-        step_label.setText("Choose 1 Resume Last Session, 2 Resume Custom Session, or 3 Start New Session.")
+        step_label.setText(
+            "Choose 1 Resume Last Session, 2 Resume Custom Session, 3 Start New Session, or 4 Send To Phone."
+        )
         _set_attention(step_label, "current")
         _set_widget_gate_state(output_folder_input, "locked")
         _set_widget_gate_state(profile_combo, "locked")
@@ -12609,6 +12817,7 @@ def run_launcher_window(
         _set_attention(resume_button, "current" if _resume_ready() else "locked")
         _set_attention(resume_custom_button, "available")
         _set_attention(start_new_button, "available")
+        _set_attention(phone_button, "available")
         _set_attention(message, "current")
         _update_decision_shortcuts()
 
@@ -12617,6 +12826,7 @@ def run_launcher_window(
         resume_button.setEnabled((not busy) and _resume_ready())
         resume_custom_button.setEnabled(not busy)
         start_new_button.setEnabled(not busy)
+        phone_button.setEnabled(not busy)
         close_button.setEnabled(not busy)
         output_folder_input.setEnabled(not busy)
         profile_combo.setEnabled(False)
@@ -12899,6 +13109,11 @@ def run_launcher_window(
             str(result["session_name"]),
         )
 
+    def _send_to_phone() -> None:
+        selected_action["phone_transfer"] = True
+        selected_action["open_environment"] = False
+        dialog.accept()
+
     def _drain_environment_messages() -> None:
         while not messages.empty():
             kind, payload = messages.get_nowait()
@@ -12952,6 +13167,11 @@ def run_launcher_window(
             return
         start_new_button.click()
 
+    def _phone_shortcut_activated() -> None:
+        if _focus_is_editing_gate_text() or not _decision_shortcuts_enabled() or not phone_button.isEnabled():
+            return
+        phone_button.click()
+
     timer = q["QTimer"](dialog)
     timer.timeout.connect(_drain_environment_messages)
     timer.start(100)
@@ -12960,6 +13180,7 @@ def run_launcher_window(
     resume_custom_button.clicked.connect(_choose_custom_session_folder)
     resume_button.clicked.connect(lambda _checked=False: _resume_environment(event_type="resume_last_session_clicked"))
     start_new_button.clicked.connect(_start_new_session)
+    phone_button.clicked.connect(_send_to_phone)
     close_button.clicked.connect(dialog.reject)
     gate_shortcuts["resume"] = q["QShortcut"](q["QKeySequence"]("1"), dialog)
     gate_shortcuts["resume"].setContext(q["Qt"].ShortcutContext.ApplicationShortcut)
@@ -12970,6 +13191,9 @@ def run_launcher_window(
     gate_shortcuts["start"] = q["QShortcut"](q["QKeySequence"]("3"), dialog)
     gate_shortcuts["start"].setContext(q["Qt"].ShortcutContext.ApplicationShortcut)
     gate_shortcuts["start"].activated.connect(_start_shortcut_activated)
+    gate_shortcuts["phone"] = q["QShortcut"](q["QKeySequence"]("4"), dialog)
+    gate_shortcuts["phone"].setContext(q["Qt"].ShortcutContext.ApplicationShortcut)
+    gate_shortcuts["phone"].activated.connect(_phone_shortcut_activated)
     resume_button.setEnabled(_resume_ready())
     _refresh_gate_attention()
 
@@ -12983,19 +13207,393 @@ def run_launcher_window(
         q["QTimer"].singleShot(200, _validation_auto_environment)
 
     accepted = dialog.exec() == q["QDialog"].DialogCode.Accepted
+    if accepted and selected_action.get("phone_transfer"):
+        return _run_phone_transfer_window(
+            capture_options=capture_options,
+            companion_enabled=companion_enabled,
+            companion_host=companion_host,
+            companion_port=companion_port,
+            companion_advertise_ip=companion_advertise_ip,
+            participant_id=str(active_environment.get("participant_id") or initial_participant or "P001"),
+        )
     if not accepted or not selected_action.get("open_environment"):
         return 1
     return _run_environment_operations_window(
         capture_options=capture_options,
         enable_missed_trial_topup=enable_missed_trial_topup,
+        companion_enabled=companion_enabled,
+        companion_host=companion_host,
+        companion_port=companion_port,
+        companion_advertise_ip=companion_advertise_ip,
         participant_id=str(active_environment.get("participant_id") or initial_participant or "P001"),
     )
+
+
+def _phone_transfer_packages_for_manifest(manifest_path: Path) -> list[Any]:
+    package = load_run_package(Path(manifest_path))
+    packages: list[Any] = [package]
+    seen = {mobile_package_id(package)}
+    for raw_path in list(getattr(package, "sibling_part_manifest_paths", []) or []):
+        try:
+            sibling = load_run_package(Path(raw_path))
+        except Exception:
+            continue
+        package_id = mobile_package_id(sibling)
+        if package_id in seen:
+            continue
+        seen.add(package_id)
+        packages.append(sibling)
+    return packages
+
+
+def _run_phone_transfer_window(
+    *,
+    capture_options: SessionCaptureOptions | None = None,
+    companion_enabled: bool = True,
+    companion_host: str = DEFAULT_COMPANION_HOST,
+    companion_port: int = DEFAULT_COMPANION_PORT,
+    companion_advertise_ip: str = "",
+    participant_id: str = "",
+    initial_message: str = "",
+) -> int:
+    q = _require_qt()
+    set_windows_app_user_model_id("PPS.Toolkit.FocusMode")
+    app = q["QApplication"].instance() or q["QApplication"](sys.argv[:1])
+    app.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
+
+    dialog = q["QDialog"]()
+    _enable_standard_window_controls(q, dialog)
+    dialog.setWindowTitle("PPS Experiment Runner - Send To Phone")
+    dialog.resize(920, 720)
+    dialog.setMinimumSize(760, 620)
+    dialog.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
+    apply_qt_app_icon(q, app=app, window=dialog)
+    _prepare_validation_window_placement(q, dialog)
+
+    runner_settings = load_profile_runner_settings(state_root=DEFAULT_DASHBOARD_STATE_ROOT, default_output_folder=DEFAULT_SESSION_ROOT)
+    initial_settings = load_runner_settings()
+    initial_diary = current_runner_diary_path()
+    initial_diary_context = latest_diary_context(initial_diary) if initial_diary is not None else {}
+    initial_profile = str(
+        runner_settings.get("active_profile_id")
+        or initial_settings.get("last_profile_id")
+        or initial_diary_context.get("profile_id")
+        or STUDY5_PROFILE_ID
+    ).strip()
+    initial_participant = str(
+        participant_id
+        or runner_settings.get("participant_id")
+        or initial_settings.get("last_participant_id")
+        or initial_diary_context.get("participant_id")
+        or "P001"
+    ).strip()
+    output_root_state: dict[str, Path] = {
+        "path": Path(runner_settings.get("active_output_folder") or current_runner_session_root()).expanduser()
+    }
+    service_state: dict[str, Any] = {
+        "service": None,
+        "packages": [],
+        "pairing_uri": "",
+        "qr_png": b"",
+        "transfer_id": "",
+    }
+    preparation_messages: queue.Queue[tuple[str, Any]] = queue.Queue()
+    preparation_cancel = threading.Event()
+    preparation_thread: dict[str, threading.Thread | None] = {"thread": None}
+
+    layout = q["QVBoxLayout"](dialog)
+    layout.setContentsMargins(16, 16, 16, 16)
+    layout.setSpacing(12)
+    panel, panel_layout = _panel(q, "Send Experiment To Phone")
+    heading = q["QLabel"](
+        "Prepare the selected profile for a phone-owned run. The PC only serves the study package; "
+        "the Android app stores the experiment session locally."
+    )
+    heading.setObjectName("mutedLabel")
+    heading.setWordWrap(True)
+    panel_layout.addWidget(heading)
+
+    profile_options = finished_profile_options()
+    available_profiles = {profile_id for profile_id, _label in profile_options}
+    profile_combo = _combo(q, profile_options, current=initial_profile if initial_profile in available_profiles else STUDY5_PROFILE_ID)
+    profile_combo.setObjectName("phoneTransferProfileCombo")
+    if profile_combo.currentIndex() < 0 and profile_options:
+        profile_combo.setCurrentIndex(0)
+    panel_layout.addWidget(_field_row(q, "Experiment Profile", profile_combo))
+
+    participant_combo = q["QComboBox"]()
+    participant_combo.setObjectName("phoneTransferParticipantCombo")
+    panel_layout.addWidget(_field_row(q, "Phone Schedule", participant_combo))
+
+    output_folder_input = q["QLineEdit"](str(output_root_state["path"]))
+    output_folder_input.setObjectName("phoneTransferOutputFolderField")
+    output_folder_input.setReadOnly(True)
+    output_folder_input.setToolTip("Used only as a staging/cache location for prepared phone assets.")
+    panel_layout.addWidget(_field_row(q, "Asset Staging Folder", output_folder_input))
+
+    transport_combo = q["QComboBox"]()
+    transport_combo.setObjectName("phoneTransferTransportCombo")
+    transport_combo.addItem("Same Wi-Fi LAN", "lan")
+    transport_combo.addItem("Wi-Fi Direct fallback", "wifi_direct")
+    panel_layout.addWidget(_field_row(q, "Bridge", transport_combo))
+
+    wifi_status = _windows_wifi_direct_status()
+    wifi_label = q["QLabel"](str(wifi_status.get("message") or ""))
+    wifi_label.setObjectName("mutedLabel")
+    wifi_label.setWordWrap(True)
+    panel_layout.addWidget(wifi_label)
+
+    message = q["QLabel"](initial_message or "Choose a profile and schedule, then prepare the phone package.")
+    message.setObjectName("mutedLabel")
+    message.setWordWrap(True)
+    panel_layout.addWidget(message)
+    progress = q["QProgressBar"]()
+    progress.setRange(0, 1000)
+    progress.setValue(0)
+    progress.setVisible(False)
+    panel_layout.addWidget(progress)
+
+    package_label = q["QLabel"]("No phone package prepared yet.")
+    package_label.setObjectName("metricValue")
+    package_label.setWordWrap(True)
+    panel_layout.addWidget(package_label)
+
+    qr_label = q["QLabel"]("")
+    qr_label.setObjectName("companionQrCode")
+    qr_label.setFixedSize(320, 320)
+    qr_label.setAlignment(q["Qt"].AlignmentFlag.AlignCenter)
+    panel_layout.addWidget(qr_label, 0, q["Qt"].AlignmentFlag.AlignHCenter)
+    endpoint_label = q["QLabel"]("")
+    endpoint_label.setObjectName("metricValue")
+    endpoint_label.setWordWrap(True)
+    panel_layout.addWidget(endpoint_label)
+    uri_field = q["QLineEdit"]("")
+    uri_field.setObjectName("phoneTransferPairingUriField")
+    uri_field.setReadOnly(True)
+    panel_layout.addWidget(uri_field)
+
+    buttons = q["QHBoxLayout"]()
+    prepare_button = q["QPushButton"]("Prepare And Show QR")
+    prepare_button.setObjectName("phoneTransferPrepareButton")
+    prepare_button.setProperty("class", "primary")
+    stop_button = q["QPushButton"]("Stop Bridge")
+    stop_button.setObjectName("phoneTransferStopButton")
+    stop_button.setEnabled(False)
+    close_button = q["QPushButton"]("Close")
+    buttons.addWidget(prepare_button)
+    buttons.addWidget(stop_button)
+    buttons.addStretch(1)
+    buttons.addWidget(close_button)
+    panel_layout.addLayout(buttons)
+    layout.addWidget(panel)
+
+    def _current_profile() -> str:
+        return str(profile_combo.currentData() or "").strip()
+
+    def _selected_participant() -> str:
+        return str(participant_combo.currentData() or "").strip()
+
+    def _refresh_participant_options(preferred: str = "") -> None:
+        profile = _current_profile()
+        participants = profile_participant_ids(profile) if profile else []
+        current = preferred or _selected_participant() or initial_participant or "P001"
+        participant_combo.blockSignals(True)
+        participant_combo.clear()
+        for participant in participants:
+            participant_combo.addItem(participant, participant)
+        index = participant_combo.findData(current)
+        participant_combo.setCurrentIndex(index if index >= 0 else (0 if participants else -1))
+        participant_combo.blockSignals(False)
+        prepare_button.setEnabled(bool(profile and participants and companion_enabled))
+
+    def _set_busy(busy: bool) -> None:
+        profile_combo.setEnabled(not busy)
+        participant_combo.setEnabled(not busy)
+        transport_combo.setEnabled(not busy)
+        prepare_button.setEnabled((not busy) and companion_enabled and bool(_current_profile()) and bool(_selected_participant()))
+        close_button.setEnabled(not busy)
+        stop_button.setEnabled((not busy) and service_state.get("service") is not None)
+        progress.setVisible(busy)
+        progress.setRange(0, 0 if busy else 1000)
+        if not busy:
+            progress.setValue(0)
+
+    def _refresh_qr() -> None:
+        uri = str(service_state.get("pairing_uri") or "")
+        uri_field.setText(uri)
+        endpoint_label.setText("")
+        if uri:
+            endpoint_label.setText(f"Bridge ready at http://{config.advertised_host}:{config.port}")
+        pixmap = q["QPixmap"]()
+        qr_png = service_state.get("qr_png") or b""
+        if qr_png and pixmap.loadFromData(qr_png):
+            qr_label.setText("")
+            qr_label.setPixmap(
+                pixmap.scaled(
+                    q["QSize"](320, 320),
+                    q["Qt"].AspectRatioMode.KeepAspectRatio,
+                    q["Qt"].TransformationMode.SmoothTransformation,
+                )
+            )
+        else:
+            qr_label.setPixmap(q["QPixmap"]())
+            qr_label.setText("QR appears after preparation")
+
+    def _stop_service() -> None:
+        service = service_state.get("service")
+        service_state["service"] = None
+        if service is not None:
+            try:
+                service.stop()
+            except Exception:
+                pass
+        stop_button.setEnabled(False)
+        if service is not None:
+            message.setText("Phone bridge stopped.")
+
+    config = RunnerCompanionConfig(
+        host=str(companion_host or DEFAULT_COMPANION_HOST),
+        port=int(companion_port or DEFAULT_COMPANION_PORT),
+        advertise_ip=str(companion_advertise_ip or choose_lan_ipv4() or ""),
+    )
+
+    def _start_service(packages: list[Any]) -> None:
+        _stop_service()
+        token = generate_companion_token()
+        profile = _current_profile()
+        participant = _selected_participant()
+        transfer_id = slugify_identifier(
+            f"{profile}-{participant}-phone-{datetime.now().strftime('%Y%m%d-%H%M%S')}",
+            fallback=f"phone-{int(time.time())}",
+        )
+        transport = str(transport_combo.currentData() or "lan")
+        pairing_uri = build_pairing_uri(
+            host=config.advertised_host,
+            port=config.port,
+            session_id=transfer_id,
+            token=token,
+            mode="phone_export",
+            transfer_id=transfer_id,
+            transport=transport,
+        )
+        bridge = _PhoneTransferBridge(
+            packages=packages,
+            transfer_id=transfer_id,
+            profile_id=profile,
+            participant_id=participant,
+            port=config.port,
+        )
+        service = RunnerCompanionService(bridge, token=token, config=config)
+        service.start()
+        service_state.update(
+            {
+                "service": service,
+                "packages": packages,
+                "pairing_uri": pairing_uri,
+                "qr_png": pairing_qr_png_bytes(pairing_uri),
+                "transfer_id": transfer_id,
+            }
+        )
+        total_bytes = sum(
+            int(asset.get("size_bytes") or 0)
+            for package in packages
+            for asset in build_mobile_package_manifest(package, phone_owned_session=True).get("assets", [])
+        )
+        package_label.setText(
+            f"{len(packages)} phone package(s) ready, {total_bytes / (1024 * 1024):.1f} MiB assets. "
+            "Scan with the Android companion and choose Run Experiment On Phone."
+        )
+        if transport == "wifi_direct":
+            message.setText("Wi-Fi Direct fallback selected. Join the phone and PC to the same direct link, then scan this QR.")
+        else:
+            message.setText("Same-Wi-Fi bridge ready. Scan this QR from the Android companion.")
+        stop_button.setEnabled(True)
+        _refresh_qr()
+
+    def _progress_callback(payload: dict[str, Any]) -> None:
+        if preparation_cancel.is_set():
+            raise RuntimeError("Preparation cancelled.")
+        preparation_messages.put(("progress", dict(payload)))
+
+    def _start_preparation() -> None:
+        active = preparation_thread.get("thread")
+        if active is not None and active.is_alive():
+            return
+        if not companion_enabled:
+            message.setText("Phone companion bridge is disabled for this launch.")
+            return
+        profile = _current_profile()
+        participant = _selected_participant()
+        if not profile or not participant:
+            message.setText("Choose a profile and phone schedule first.")
+            return
+        preparation_cancel.clear()
+        _set_busy(True)
+        message.setText("Preparing phone package...")
+
+        def _worker() -> None:
+            try:
+                manifest = prepare_profile_focus_session(
+                    profile,
+                    participant,
+                    session_root=output_root_state["path"],
+                    progress_callback=_progress_callback,
+                )
+                packages = _phone_transfer_packages_for_manifest(Path(manifest))
+            except Exception as exc:
+                preparation_messages.put(("error", str(exc)))
+            else:
+                preparation_messages.put(("done", packages))
+
+        worker = threading.Thread(target=_worker, name="pps-phone-transfer-prep", daemon=True)
+        preparation_thread["thread"] = worker
+        worker.start()
+
+    def _drain_messages() -> None:
+        while not preparation_messages.empty():
+            kind, payload = preparation_messages.get_nowait()
+            if kind == "progress":
+                total = int(payload.get("total") or 0)
+                current = int(payload.get("current") or 0)
+                if total > 0:
+                    progress.setRange(0, 1000)
+                    progress.setValue(int(max(0.0, min(1.0, current / total)) * 1000))
+                else:
+                    progress.setRange(0, 0)
+                detail = str(payload.get("detail") or payload.get("phase") or "").strip()
+                message.setText(f"{payload.get('message') or 'Preparing phone package'}: {detail}" if detail else str(payload.get("message") or "Preparing phone package"))
+            elif kind == "error":
+                message.setText(str(payload))
+                _set_busy(False)
+            elif kind == "done":
+                try:
+                    _start_service(list(payload or []))
+                except Exception as exc:
+                    message.setText(f"Phone bridge could not start: {exc}")
+                _set_busy(False)
+
+    profile_combo.currentIndexChanged.connect(lambda _index: _refresh_participant_options())
+    prepare_button.clicked.connect(_start_preparation)
+    stop_button.clicked.connect(_stop_service)
+    close_button.clicked.connect(dialog.accept)
+    timer = q["QTimer"](dialog)
+    timer.timeout.connect(_drain_messages)
+    timer.start(100)
+    _refresh_participant_options(initial_participant)
+    _refresh_qr()
+    accepted = dialog.exec() == q["QDialog"].DialogCode.Accepted
+    _stop_service()
+    return 0 if accepted else 1
 
 
 def _run_environment_operations_window(
     *,
     capture_options: SessionCaptureOptions | None = None,
     enable_missed_trial_topup: bool = True,
+    companion_enabled: bool = True,
+    companion_host: str = DEFAULT_COMPANION_HOST,
+    companion_port: int = DEFAULT_COMPANION_PORT,
+    companion_advertise_ip: str = "",
     participant_id: str = "",
     initial_message: str = "",
 ) -> int:

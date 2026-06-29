@@ -3208,7 +3208,7 @@ def test_validation_realtime_audio_engine_waits_for_buffer_deadlines(tmp_path: P
     assert engine.played_block_durations_s == pytest.approx([duration_s])
 
 
-def test_launcher_first_screen_is_three_option_environment_gate(tmp_path: Path, monkeypatch):
+def test_launcher_first_screen_is_four_option_environment_gate(tmp_path: Path, monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
         from PIL import Image, ImageStat
@@ -3264,7 +3264,7 @@ def test_launcher_first_screen_is_three_option_environment_gate(tmp_path: Path, 
             assert session_field.property("gateState") == "locked"
             step_label = dialog.findChild(q["QLabel"], "gateStepLabel")
             assert step_label is not None
-            assert "Resume Last Session" in step_label.text()
+            assert "Send To Phone" in step_label.text()
             assert step_label.property("attention") == "current"
             resume_button = dialog.findChild(q["QPushButton"], "resumeLastSessionButton")
             assert resume_button is not None
@@ -3278,9 +3278,13 @@ def test_launcher_first_screen_is_three_option_environment_gate(tmp_path: Path, 
             assert start_button is not None
             assert start_button.text() == "3 Start New Session"
             assert start_button.property("decisionTone") == "start"
+            phone_button = dialog.findChild(q["QPushButton"], "sendToPhoneButton")
+            assert phone_button is not None
+            assert phone_button.text() == "4 Send To Phone"
+            assert phone_button.property("decisionTone") == "phone"
             assert dialog.findChild(q["QPushButton"], "initiateEnvironmentButton") is None
             assert dialog.findChild(q["QPushButton"], "chooseOutputFolderButton") is None
-            for key in ("1", "2", "3"):
+            for key in ("1", "2", "3", "4"):
                 assert [
                     shortcut
                     for shortcut in dialog.findChildren(q["QShortcut"])
@@ -3294,11 +3298,12 @@ def test_launcher_first_screen_is_three_option_environment_gate(tmp_path: Path, 
                 ("resume", resume_button),
                 ("custom", custom_button),
                 ("start", start_button),
+                ("phone", phone_button),
             ):
                 path = swatch_dir / f"launcher_{name}_button.png"
                 assert button.grab().save(str(path))
                 means.append(tuple(round(value, 1) for value in ImageStat.Stat(Image.open(path).convert("RGB")).mean))
-            assert len({tuple(int(value // 8) for value in mean) for mean in means}) == 3
+            assert len({tuple(int(value // 8) for value in mean) for mean in means}) == 4
             labels = _collect_widget_texts(dialog, q["QLabel"])
             assert labels.index("Output Folder") < labels.index("Experiment Profile")
             assert labels.index("Experiment Profile") < labels.index("Session Name")
@@ -3329,6 +3334,191 @@ def test_launcher_first_screen_is_three_option_environment_gate(tmp_path: Path, 
         capture_options=SessionCaptureOptions(enable_lsl=False, write_internal_xdf=False, start_backup_recording=False),
         participant_id="P001",
         initial_message="inspection",
+    )
+    for widget in app.topLevelWidgets():
+        widget.close()
+        widget.deleteLater()
+    app.processEvents()
+
+    assert exit_code == 1
+    assert errors == []
+
+
+def test_launcher_send_to_phone_click_opens_transfer_window(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    for widget in app.topLevelWidgets():
+        widget.close()
+        widget.deleteLater()
+    app.processEvents()
+    errors: list[BaseException] = []
+    calls: list[dict[str, object]] = []
+    capture_options = SessionCaptureOptions(enable_lsl=False, write_internal_xdf=False, start_backup_recording=False)
+
+    monkeypatch.setattr(
+        focus_app,
+        "load_profile_runner_settings",
+        lambda **_kwargs: {
+            "active_profile_id": focus_app.STUDY5_PROFILE_ID,
+            "active_output_folder": str(tmp_path),
+            "participant_id": "P321",
+        },
+    )
+    monkeypatch.setattr(
+        focus_app,
+        "load_runner_settings",
+        lambda *args, **kwargs: {
+            "last_experiment_name": "Study 5 phone transfer",
+            "last_profile_id": focus_app.STUDY5_PROFILE_ID,
+            "last_participant_id": "P321",
+        },
+    )
+    monkeypatch.setattr(focus_app, "finished_profile_options", lambda: [(focus_app.STUDY5_PROFILE_ID, "Study 5")])
+    monkeypatch.setattr(focus_app, "current_runner_diary_path", lambda: None)
+
+    def fake_phone_transfer_window(**kwargs):
+        calls.append(kwargs)
+        return 77
+
+    monkeypatch.setattr(focus_app, "_run_phone_transfer_window", fake_phone_transfer_window)
+
+    def reject_if_still_open() -> None:
+        if calls or errors:
+            return
+        errors.append(AssertionError("Launcher Send To Phone click test timed out before handoff."))
+        for widget in app.topLevelWidgets():
+            if widget.windowTitle() == "PPS Experiment Runner":
+                widget.reject()
+
+    def click_send_to_phone() -> None:
+        try:
+            dialogs = [widget for widget in app.topLevelWidgets() if widget.windowTitle() == "PPS Experiment Runner"]
+            assert dialogs
+            dialog = dialogs[0]
+            phone_button = dialog.findChild(q["QPushButton"], "sendToPhoneButton")
+            assert phone_button is not None
+            assert phone_button.isEnabled()
+            QTest.mouseClick(phone_button, q["Qt"].MouseButton.LeftButton)
+        except BaseException as exc:  # noqa: BLE001 - surfaced after modal exits
+            errors.append(exc)
+            for widget in app.topLevelWidgets():
+                if widget.windowTitle() == "PPS Experiment Runner":
+                    widget.reject()
+
+    q["QTimer"].singleShot(50, click_send_to_phone)
+    q["QTimer"].singleShot(1000, reject_if_still_open)
+    exit_code = focus_app.run_launcher_window(
+        capture_options=capture_options,
+        participant_id="P321",
+        initial_message="phone transfer click",
+        companion_host="0.0.0.0",
+        companion_port=8877,
+        companion_advertise_ip="192.168.1.50",
+    )
+    for widget in app.topLevelWidgets():
+        widget.close()
+        widget.deleteLater()
+    app.processEvents()
+
+    assert errors == []
+    assert exit_code == 77
+    assert len(calls) == 1
+    assert calls[0]["capture_options"] is capture_options
+    assert calls[0]["companion_enabled"] is True
+    assert calls[0]["companion_host"] == "0.0.0.0"
+    assert calls[0]["companion_port"] == 8877
+    assert calls[0]["companion_advertise_ip"] == "192.168.1.50"
+    assert calls[0]["participant_id"] == "P321"
+
+
+def test_phone_transfer_window_initial_layout_renders(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PIL import Image, ImageStat
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    for widget in app.topLevelWidgets():
+        widget.close()
+        widget.deleteLater()
+    app.processEvents()
+    errors: list[BaseException] = []
+
+    monkeypatch.setattr(
+        focus_app,
+        "load_profile_runner_settings",
+        lambda **_kwargs: {
+            "active_profile_id": focus_app.STUDY5_PROFILE_ID,
+            "active_output_folder": str(tmp_path),
+            "participant_id": "P001",
+        },
+    )
+    monkeypatch.setattr(
+        focus_app,
+        "load_runner_settings",
+        lambda *args, **kwargs: {
+            "last_experiment_name": "Study 5 phone transfer",
+            "last_profile_id": focus_app.STUDY5_PROFILE_ID,
+            "last_participant_id": "P001",
+        },
+    )
+    monkeypatch.setattr(focus_app, "current_runner_diary_path", lambda: None)
+    monkeypatch.setattr(focus_app, "finished_profile_options", lambda: [(focus_app.STUDY5_PROFILE_ID, "Study 5")])
+    monkeypatch.setattr(focus_app, "profile_participant_ids", lambda _profile: ["P001", "P002"])
+    monkeypatch.setattr(
+        focus_app,
+        "_windows_wifi_direct_status",
+        lambda: {"message": "Wi-Fi Direct test status.", "available": True},
+    )
+
+    def inspect_transfer_window() -> None:
+        try:
+            dialogs = [
+                widget
+                for widget in app.topLevelWidgets()
+                if widget.windowTitle() == "PPS Experiment Runner - Send To Phone"
+            ]
+            assert dialogs
+            dialog = dialogs[0]
+            assert dialog.findChild(q["QComboBox"], "phoneTransferProfileCombo") is not None
+            participant_combo = dialog.findChild(q["QComboBox"], "phoneTransferParticipantCombo")
+            assert participant_combo is not None
+            assert participant_combo.count() == 2
+            assert dialog.findChild(q["QComboBox"], "phoneTransferTransportCombo") is not None
+            assert dialog.findChild(q["QPushButton"], "phoneTransferPrepareButton") is not None
+            assert dialog.findChild(q["QPushButton"], "phoneTransferStopButton") is not None
+            assert dialog.findChild(q["QLabel"], "companionQrCode") is not None
+            assert dialog.findChild(q["QLineEdit"], "phoneTransferPairingUriField") is not None
+            screenshot = Path.cwd() / ".pytest_cache" / "phone_transfer_window.png"
+            screenshot.parent.mkdir(parents=True, exist_ok=True)
+            assert dialog.grab().save(str(screenshot))
+            image = Image.open(screenshot).convert("RGB")
+            assert image.width >= 760
+            assert image.height >= 620
+            assert max(ImageStat.Stat(image).stddev) > 0.0
+        except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
+            errors.append(exc)
+        finally:
+            for widget in app.topLevelWidgets():
+                if widget.windowTitle() == "PPS Experiment Runner - Send To Phone":
+                    widget.reject()
+
+    q["QTimer"].singleShot(50, inspect_transfer_window)
+    exit_code = focus_app._run_phone_transfer_window(
+        participant_id="P001",
+        initial_message="layout proof",
     )
     for widget in app.topLevelWidgets():
         widget.close()

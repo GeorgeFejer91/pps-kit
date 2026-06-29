@@ -44,11 +44,20 @@ def mobile_package_id(package: Any) -> str:
     return clean or "active-package"
 
 
-def build_mobile_package_list(package: Any | Sequence[Any] | None) -> dict[str, Any]:
+def build_mobile_package_list(
+    package: Any | Sequence[Any] | None,
+    *,
+    phone_owned_session: bool = False,
+) -> dict[str, Any]:
     packages: list[dict[str, Any]] = []
     active_id = ""
     for item in _coerce_packages(package):
-        manifest = build_mobile_package_manifest(item, include_trials=False, include_sha256=False)
+        manifest = build_mobile_package_manifest(
+            item,
+            include_trials=False,
+            include_sha256=False,
+            phone_owned_session=phone_owned_session,
+        )
         if not active_id:
             active_id = str(manifest.get("package_id") or "")
         packages.append(
@@ -64,6 +73,7 @@ def build_mobile_package_list(package: Any | Sequence[Any] | None) -> dict[str, 
                 "asset_count": len(manifest.get("assets") or []),
                 "total_asset_bytes": sum(int(asset.get("size_bytes") or 0) for asset in manifest.get("assets") or []),
                 "mobile_runnable": bool(manifest.get("mobile_runnable")),
+                "phone_owned_session": bool(manifest.get("phone_owned_session")),
                 "warnings": list(manifest.get("warnings") or []),
                 "runtime_limitations": list(MOBILE_RUNTIME_LIMITATIONS),
             }
@@ -89,6 +99,7 @@ def build_mobile_package_manifest(
     *,
     include_trials: bool = True,
     include_sha256: bool = True,
+    phone_owned_session: bool = False,
 ) -> dict[str, Any]:
     package_id = mobile_package_id(package)
     blocks_payload: list[dict[str, Any]] = []
@@ -140,12 +151,14 @@ def build_mobile_package_manifest(
         "blocks": blocks_payload,
         "assets": assets,
         "mobile_runnable": bool(blocks_payload and all(bool(asset.get("available")) for asset in assets)),
+        "phone_owned_session": bool(phone_owned_session),
         "warnings": warnings,
         "runtime": {
             "mode": "mobile_phone_runtime",
             "response_input": "touch",
             "tactile_output": "android_vibrator",
             "clock": "android_elapsed_realtime",
+            "session_owner": "phone" if phone_owned_session else "pc_runner_bridge",
             "limitations": list(MOBILE_RUNTIME_LIMITATIONS),
         },
     }

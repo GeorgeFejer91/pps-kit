@@ -9,12 +9,19 @@ data class PairingInfo(
     val port: Int,
     val sessionId: String,
     val token: String,
+    val version: Int = 1,
+    val mode: String = "pc_runner",
+    val transferId: String = "",
+    val transport: String = "lan",
 ) {
     val baseHttpUrl: String
         get() = "http://$host:$port"
 
     val wsUrl: String
         get() = "ws://$host:$port/api/runner/ws"
+
+    val isPhoneExport: Boolean
+        get() = mode == "phone_export"
 
     companion object {
         fun parse(raw: String): PairingInfo {
@@ -26,11 +33,24 @@ data class PairingInfo(
             val port = query["port"]?.toIntOrNull()
             val sessionId = query["session_id"].orEmpty().trim()
             val token = query["token"].orEmpty().trim()
+            val version = query["v"]?.toIntOrNull() ?: 1
+            val mode = query["mode"].orEmpty().ifBlank { "pc_runner" }.trim()
+            val transferId = query["transfer_id"].orEmpty().trim()
+            val transport = query["transport"].orEmpty().ifBlank { "lan" }.trim()
             require(host.isNotEmpty()) { "Pairing host is missing." }
             require(port in 1..65535) { "Pairing port is invalid." }
             require(sessionId.isNotEmpty()) { "Session id is missing." }
             require(token.isNotEmpty()) { "Pairing token is missing." }
-            return PairingInfo(host = host, port = port!!, sessionId = sessionId, token = token)
+            return PairingInfo(
+                host = host,
+                port = port!!,
+                sessionId = sessionId,
+                token = token,
+                version = version,
+                mode = mode,
+                transferId = transferId,
+                transport = transport,
+            )
         }
 
         fun parseOrNull(raw: String?): PairingInfo? =

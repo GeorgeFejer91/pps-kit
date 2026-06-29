@@ -185,6 +185,27 @@ def test_pairing_uri_contains_lan_endpoint_session_and_token():
     assert query["token"] == ["tok"]
 
 
+def test_phone_export_pairing_uri_marks_mode_transport_and_transfer():
+    uri = build_pairing_uri(
+        host="192.168.1.50",
+        port=8767,
+        session_id="transfer-1",
+        token="tok",
+        mode="phone_export",
+        transfer_id="transfer-1",
+        transport="wifi_direct",
+    )
+    parsed = urlparse(uri)
+    query = parse_qs(parsed.query)
+
+    assert parsed.scheme == "pps-companion"
+    assert query["v"] == ["2"]
+    assert query["mode"] == ["phone_export"]
+    assert query["transport"] == ["wifi_direct"]
+    assert query["transfer_id"] == ["transfer-1"]
+    assert query["token"] == ["tok"]
+
+
 def test_pairing_qr_generation_returns_png_bytes():
     pytest.importorskip("qrcode")
     png = pairing_qr_png_bytes("pps-companion://pair?host=127.0.0.1&token=t")

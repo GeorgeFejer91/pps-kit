@@ -21,6 +21,7 @@ data class MobilePackageSummary(
     val assetCount: Int,
     val totalAssetBytes: Long,
     val mobileRunnable: Boolean,
+    val phoneOwnedSession: Boolean,
     val warnings: List<String>,
 )
 
@@ -32,6 +33,7 @@ data class MobileRunPackage(
     val blocks: List<MobileBlock>,
     val assets: List<MobileAsset>,
     val mobileRunnable: Boolean,
+    val phoneOwnedSession: Boolean,
     val warnings: List<String>,
 ) {
     fun asset(assetId: String): MobileAsset? = assets.firstOrNull { it.assetId == assetId }
@@ -104,6 +106,7 @@ object MobilePackageParser {
             blocks = root.optJSONArray("blocks").toMobileBlocks(),
             assets = root.optJSONArray("assets").toMobileAssets(),
             mobileRunnable = root.optBoolean("mobile_runnable", false),
+            phoneOwnedSession = root.optBoolean("phone_owned_session", false),
             warnings = root.optJSONArray("warnings").toStringList(),
         )
     }
@@ -123,6 +126,7 @@ private fun JSONArray?.toPackageSummaries(): List<MobilePackageSummary> {
             assetCount = item.optInt("asset_count", 0),
             totalAssetBytes = item.optLong("total_asset_bytes", 0L),
             mobileRunnable = item.optBoolean("mobile_runnable", false),
+            phoneOwnedSession = item.optBoolean("phone_owned_session", false),
             warnings = item.optJSONArray("warnings").toStringList(),
         )
     }

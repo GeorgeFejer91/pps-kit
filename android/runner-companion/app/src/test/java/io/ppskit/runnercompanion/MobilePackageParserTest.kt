@@ -23,6 +23,7 @@ class MobilePackageParserTest {
                   "asset_count": 1,
                   "total_asset_bytes": 12,
                   "mobile_runnable": true,
+                  "phone_owned_session": true,
                   "warnings": []
                 }
               ]
@@ -32,6 +33,7 @@ class MobilePackageParserTest {
         assertEquals("pkg-001", list.activePackageId)
         assertEquals(1, list.packages.size)
         assertTrue(list.packages.first().mobileRunnable)
+        assertTrue(list.packages.first().phoneOwnedSession)
 
         val manifest = MobilePackageParser.parseManifest(
             """
@@ -42,6 +44,7 @@ class MobilePackageParserTest {
               "session_id": "session-001",
               "title": "Participant P001",
               "mobile_runnable": true,
+              "phone_owned_session": true,
               "warnings": [],
               "assets": [
                 {"asset_id": "block-01-audio", "filename": "block.wav", "media_type": "audio/wav", "size_bytes": 12, "sha256": "abc", "available": true}
@@ -67,6 +70,7 @@ class MobilePackageParserTest {
         )
 
         assertEquals("pkg-001", manifest.packageId)
+        assertTrue(manifest.phoneOwnedSession)
         assertEquals("block-01-audio", manifest.blocks.first().audioAssetId)
         assertEquals("trial-a", manifest.blocks.first().trials.first().trialUid)
         assertEquals(3.25, manifest.blocks.first().tactileCues.first().timeS, 0.001)

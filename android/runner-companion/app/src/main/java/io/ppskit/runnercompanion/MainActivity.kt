@@ -86,6 +86,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
@@ -101,10 +102,13 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.io.FileOutputStream
 import java.security.MessageDigest
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.math.abs
@@ -144,6 +148,9 @@ private enum class CompanionMode {
     RunExperimentOnPhone,
 }
 
+private fun modeForPairing(pairing: PairingInfo): CompanionMode? =
+    if (pairing.isPhoneExport) CompanionMode.RunExperimentOnPhone else null
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RunnerCompanionApp(initialPairing: PairingInfo?, client: RunnerClient) {
@@ -153,7 +160,7 @@ private fun RunnerCompanionApp(initialPairing: PairingInfo?, client: RunnerClien
     var connected by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf("") }
     var estimate by remember { mutableStateOf(EstimatedClock(0.0, stale = true, cappedAtBlockEnd = false)) }
-    var mode by remember { mutableStateOf<CompanionMode?>(null) }
+    var mode by remember { mutableStateOf<CompanionMode?>(initialPairing?.let { modeForPairing(it) }) }
 
     LaunchedEffect(initialPairing) {
         val incoming = initialPairing ?: return@LaunchedEffect
@@ -161,7 +168,7 @@ private fun RunnerCompanionApp(initialPairing: PairingInfo?, client: RunnerClien
         snapshot = null
         connected = false
         error = ""
-        mode = null
+        mode = modeForPairing(incoming)
     }
 
     LaunchedEffect(pairing) {
@@ -204,6 +211,7 @@ private fun RunnerCompanionApp(initialPairing: PairingInfo?, client: RunnerClien
                         runCatching { PairingInfo.parse(raw) }
                             .onSuccess {
                                 pairing = it
+                                mode = modeForPairing(it)
                                 error = ""
                             }
                             .onFailure { error = it.message ?: "Pairing failed." }
@@ -413,6 +421,7 @@ private fun PhoneRuntimeScreen(
     var activeBlockLabel by remember { mutableStateOf("") }
     var runProgress by remember { mutableStateOf("") }
     var uploadedArtifact by remember { mutableStateOf("") }
+    var lastRunDir by remember { mutableStateOf("") }
     var session by remember { mutableStateOf<PhoneRunSession?>(null) }
     var runJob by remember { mutableStateOf<Job?>(null) }
     val logLines = remember { mutableStateListOf<String>() }
@@ -456,6 +465,7 @@ private fun PhoneRuntimeScreen(
 
     val selectedSummary = packages.firstOrNull { it.packageId == selectedPackageId } ?: packages.firstOrNull()
     val selectedManifest = selectedSummary?.let { syncedPackages[it.packageId] }
+    val phoneOwnedSession = pairing.isPhoneExport || selectedManifest?.phoneOwnedSession == true || selectedSummary?.phoneOwnedSession == true
     val fullExperimentSynced = packages.isNotEmpty() && packages.all { syncedPackages.containsKey(it.packageId) }
     Column(
         modifier = Modifier
@@ -467,6 +477,8 @@ private fun PhoneRuntimeScreen(
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             StatusChip(if (connected) "Online" else "Offline")
             StatusChip("Session ${pairing.sessionId}")
+            if (pairing.isPhoneExport) StatusChip("Phone-owned")
+            if (pairing.transport == "wifi_direct") StatusChip("Wi-Fi Direct")
             StatusChip(status)
             if (activeBlockLabel.isNotBlank()) StatusChip(activeBlockLabel)
             if (runProgress.isNotBlank()) StatusChip(runProgress)
@@ -476,6 +488,22 @@ private fun PhoneRuntimeScreen(
         }
         if (uploadedArtifact.isNotBlank()) {
             Text(uploadedArtifact, style = MaterialTheme.typography.labelMedium)
+        }
+        if (lastRunDir.isNotBlank()) {
+            OutlinedButton(
+                onClick = {
+                    runCatching {
+                        val zip = exportPhoneRunZip(context, File(lastRunDir))
+                        sharePhoneRunZip(context, zip)
+                        uploadedArtifact = "Exported ${zip.name}"
+                    }.onFailure {
+                        error = it.message ?: "Export failed."
+                    }
+                },
+                enabled = !running && !syncing,
+            ) {
+                Text("Export Last Session")
+            }
         }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             packages.forEach { item ->
@@ -536,12 +564,14 @@ private fun PhoneRuntimeScreen(
                         status = "Running"
                         error = ""
                         uploadedArtifact = ""
+                        lastRunDir = ""
                         runCatching {
                             val result = runPhonePackage(
                                 context = context,
                                 client = client,
                                 runPackage = runPackage,
                                 session = activeSession,
+                                phoneOwnedSession = phoneOwnedSession || runPackage.phoneOwnedSession,
                                 onStatus = { message ->
                                     status = message
                                     log(message)
@@ -550,7 +580,12 @@ private fun PhoneRuntimeScreen(
                                 onProgress = { progress -> runProgress = progress },
                             )
                             status = "Complete"
-                            uploadedArtifact = "Uploaded ${result.optString("artifact_path", "")}"
+                            lastRunDir = result.optString("artifact_dir", "")
+                            uploadedArtifact = if (phoneOwnedSession || runPackage.phoneOwnedSession) {
+                                "Saved ${result.optString("artifact_path", "")}"
+                            } else {
+                                "Uploaded ${result.optString("artifact_path", "")}"
+                            }
                             log("Complete")
                         }.onFailure {
                             error = it.message ?: "Phone run failed."
@@ -610,8 +645,10 @@ private fun PhoneRuntimeScreen(
                         status = "Running full experiment"
                         error = ""
                         uploadedArtifact = ""
+                        lastRunDir = ""
                         runCatching {
                             val artifacts = mutableListOf<String>()
+                            val artifactDirs = mutableListOf<String>()
                             runPackages.forEachIndexed { index, runPackage ->
                                 val activeSession = PhoneRunSession(runPackage.packageId)
                                 session = activeSession
@@ -621,6 +658,7 @@ private fun PhoneRuntimeScreen(
                                     client = client,
                                     runPackage = runPackage,
                                     session = activeSession,
+                                    phoneOwnedSession = phoneOwnedSession || runPackage.phoneOwnedSession,
                                     onStatus = { message ->
                                         status = "Part ${index + 1}/${runPackages.size} $message"
                                         log(status)
@@ -629,9 +667,16 @@ private fun PhoneRuntimeScreen(
                                     onProgress = { progress -> runProgress = progress },
                                 )
                                 artifacts.add(result.optString("artifact_path", ""))
+                                result.optString("artifact_dir", "").takeIf { it.isNotBlank() }?.let { artifactDirs.add(it) }
                             }
                             status = "Full experiment complete"
-                            uploadedArtifact = "Uploaded ${artifacts.size} part artifacts"
+                            uploadedArtifact = if (phoneOwnedSession) {
+                                lastRunDir = createPhoneRunBundle(context, artifactDirs).absolutePath
+                                "Saved ${artifacts.size} part artifact(s)"
+                            } else {
+                                lastRunDir = artifactDirs.lastOrNull().orEmpty()
+                                "Uploaded ${artifacts.size} part artifacts"
+                            }
                             log("Full experiment complete")
                         }.onFailure {
                             error = it.message ?: "Full phone experiment failed."
@@ -1417,12 +1462,17 @@ private suspend fun runPhonePackage(
     client: RunnerClient,
     runPackage: MobileRunPackage,
     session: PhoneRunSession,
+    phoneOwnedSession: Boolean,
     onStatus: (String) -> Unit,
     onBlock: (String) -> Unit,
     onProgress: (String) -> Unit,
 ): JSONObject {
     session.addRunStart(runPackage)
-    client.awaitPostMobileEvents(session.runId, session.drainPayload())
+    if (phoneOwnedSession) {
+        withContext(Dispatchers.IO) { session.writeLocalArtifact(context, runPackage, complete = false) }
+    } else {
+        client.awaitPostMobileEvents(session.runId, session.drainPayload())
+    }
     for (block in runPackage.blocks) {
         val asset = runPackage.asset(block.audioAssetId) ?: error("Missing audio asset for ${block.label}.")
         val audioFile = mobileAssetFile(context, runPackage.packageId, asset)
@@ -1448,11 +1498,20 @@ private suspend fun runPhonePackage(
             }
         }
         session.finishBlock(block)
-        client.awaitPostMobileEvents(session.runId, session.drainPayload())
+        if (phoneOwnedSession) {
+            withContext(Dispatchers.IO) { session.writeLocalArtifact(context, runPackage, complete = false) }
+        } else {
+            client.awaitPostMobileEvents(session.runId, session.drainPayload())
+        }
     }
     session.addRunComplete()
-    onStatus("Uploading")
-    return client.awaitPostMobileComplete(session.runId, session.drainPayload(complete = true))
+    return if (phoneOwnedSession) {
+        onStatus("Saving")
+        withContext(Dispatchers.IO) { session.writeLocalArtifact(context, runPackage, complete = true) }
+    } else {
+        onStatus("Uploading")
+        client.awaitPostMobileComplete(session.runId, session.drainPayload(complete = true))
+    }
 }
 
 private class PhoneRunSession(val packageId: String) {
@@ -1574,6 +1633,42 @@ private class PhoneRunSession(val packageId: String) {
             .put("completed", complete)
             .put("events", eventsArray)
             .put("summary", summaryLocked())
+    }
+
+    @Synchronized
+    fun writeLocalArtifact(context: Context, runPackage: MobileRunPackage, complete: Boolean): JSONObject {
+        val dir = phoneRunDir(context, runId)
+        dir.mkdirs()
+        val eventsArray = JSONArray()
+        events.forEach { eventsArray.put(JSONObject(it.toString())) }
+        val payload = JSONObject()
+            .put("schema", if (complete) "pps-mobile-run-complete.v1" else "pps-mobile-run-events.v1")
+            .put("status", if (complete) "complete" else "in_progress")
+            .put("package_id", packageId)
+            .put("run_id", runId)
+            .put("completed", complete)
+            .put("phone_owned_session", true)
+            .put(
+                "package",
+                JSONObject()
+                    .put("participant_id", runPackage.participantId)
+                    .put("session_id", runPackage.sessionId)
+                    .put("title", runPackage.title)
+                    .put("block_count", runPackage.blocks.size),
+            )
+            .put("events", eventsArray)
+            .put("summary", summaryLocked())
+        val artifactFile = File(dir, if (complete) "completion.json" else "latest_events.json")
+        artifactFile.writeText(payload.toString(2), Charsets.UTF_8)
+        writePhoneEventsCsv(File(dir, "events.csv"), events)
+        return JSONObject()
+            .put("schema", if (complete) "pps-mobile-run-complete.v1" else "pps-mobile-run-events.v1")
+            .put("status", if (complete) "saved" else "saved_partial")
+            .put("package_id", packageId)
+            .put("run_id", runId)
+            .put("event_count", events.size)
+            .put("artifact_path", artifactFile.absolutePath)
+            .put("artifact_dir", dir.absolutePath)
     }
 
     private fun currentBlockElapsedMs(): Long =
@@ -1707,6 +1802,103 @@ private fun mobilePackageDir(context: Context, packageId: String): File =
 
 private fun mobileAssetFile(context: Context, packageId: String, asset: MobileAsset): File =
     File(mobilePackageDir(context, packageId), "${safeFileName(asset.assetId)}__${safeFileName(asset.filename)}")
+
+private fun phoneRunDir(context: Context, runId: String): File =
+    File(context.filesDir, "phone_runs/${safeFileName(runId)}")
+
+private fun writePhoneEventsCsv(path: File, events: List<JSONObject>) {
+    val keys = linkedSetOf<String>()
+    events.forEach { event ->
+        event.keys().forEach { key ->
+            val value = event.opt(key)
+            if (value == null || value is String || value is Number || value is Boolean) {
+                keys.add(key)
+            }
+        }
+    }
+    if (keys.isEmpty()) return
+    path.parentFile?.mkdirs()
+    path.writeText(
+        buildString {
+            append(keys.joinToString(",") { csvCell(it) })
+            append("\n")
+            events.forEach { event ->
+                append(keys.joinToString(",") { key -> csvCell(event.opt(key)?.toString().orEmpty()) })
+                append("\n")
+            }
+        },
+        Charsets.UTF_8,
+    )
+}
+
+private fun exportPhoneRunZip(context: Context, runDir: File): File {
+    require(runDir.isDirectory) { "No completed phone session is available to export." }
+    val exportDir = File(context.cacheDir, "exports")
+    exportDir.mkdirs()
+    val zip = File(exportDir, "${safeFileName(runDir.name)}.zip")
+    ZipOutputStream(FileOutputStream(zip)).use { output ->
+        addZipEntries(output, runDir, "")
+    }
+    return zip
+}
+
+private fun addZipEntries(output: ZipOutputStream, root: File, prefix: String) {
+    root.listFiles()?.sortedBy { it.name }?.forEach { file ->
+        val entryName = if (prefix.isBlank()) file.name else "$prefix/${file.name}"
+        if (file.isDirectory) {
+            addZipEntries(output, file, entryName)
+        } else if (file.isFile) {
+            output.putNextEntry(ZipEntry(entryName))
+            file.inputStream().use { input -> input.copyTo(output) }
+            output.closeEntry()
+        }
+    }
+}
+
+private fun createPhoneRunBundle(context: Context, artifactDirs: List<String>): File {
+    val bundle = File(context.filesDir, "phone_run_bundles/full-${System.currentTimeMillis()}")
+    bundle.mkdirs()
+    val manifest = JSONArray()
+    artifactDirs.forEachIndexed { index, rawDir ->
+        val source = File(rawDir)
+        if (!source.isDirectory) return@forEachIndexed
+        val target = File(bundle, "part-${index + 1}-${safeFileName(source.name)}")
+        copyDirectory(source, target)
+        manifest.put(JSONObject().put("part_index", index + 1).put("source_dir", source.absolutePath).put("bundle_dir", target.name))
+    }
+    File(bundle, "bundle_manifest.json").writeText(
+        JSONObject()
+            .put("schema", "pps-mobile-phone-run-bundle.v1")
+            .put("created_unix_ms", System.currentTimeMillis())
+            .put("parts", manifest)
+            .toString(2),
+        Charsets.UTF_8,
+    )
+    return bundle
+}
+
+private fun copyDirectory(source: File, target: File) {
+    target.mkdirs()
+    source.listFiles()?.forEach { file ->
+        val destination = File(target, file.name)
+        if (file.isDirectory) {
+            copyDirectory(file, destination)
+        } else if (file.isFile) {
+            file.copyTo(destination, overwrite = true)
+        }
+    }
+}
+
+private fun sharePhoneRunZip(context: Context, zip: File) {
+    val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", zip)
+    val intent = Intent(Intent.ACTION_SEND)
+        .setType("application/zip")
+        .putExtra(Intent.EXTRA_STREAM, uri)
+        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    context.startActivity(Intent.createChooser(intent, "Export PPS phone session"))
+}
+
+private fun csvCell(value: String): String = "\"${value.replace("\"", "\"\"")}\""
 
 private fun safeFileName(value: String): String =
     value.replace(Regex("[^A-Za-z0-9._-]+"), "-").trim('-', '.', '_').ifBlank { "asset" }
