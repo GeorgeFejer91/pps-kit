@@ -20,10 +20,20 @@ internal fun buildPhoneResponseReview(
     val tapEvents = events
         .filter { it.optString("type") == "tap" && it.optString("trial_uid").isNotBlank() }
         .sortedWith(compareBy({ it.optInt("event_id", Int.MAX_VALUE) }, { it.optLong("phone_elapsed_realtime_ms", Long.MAX_VALUE) }))
+    val completedBlockIds = events
+        .filter { it.optString("type") == "block_complete" }
+        .mapNotNull { it.optString("block_id").takeIf { value -> value.isNotBlank() } }
+        .toSet()
+    val completedBlockIndexes = events
+        .filter { it.optString("type") == "block_complete" }
+        .mapNotNull { it.optInt("block_index", -1).takeIf { value -> value > 0 } }
+        .toSet()
 
     val ledgerRows = mutableListOf<JSONObject>()
     val topupRows = mutableListOf<JSONObject>()
     for (block in runPackage.blocks.sortedBy { it.index }) {
+        val blockCompleted = block.blockId in completedBlockIds || block.index in completedBlockIndexes
+        if (!blockCompleted) continue
         val cuesByTrialUid = block.tactileCues.associateBy { it.trialUid }
         for (trial in block.trials.sortedBy { it.startS }) {
             val cue = cuesByTrialUid[trial.trialUid] ?: continue

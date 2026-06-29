@@ -1790,6 +1790,23 @@ private class PhoneRunSession(
         val responseReview = buildPhoneResponseReview(runPackage, events)
         val responseLedgerFile = File(dir, "phone_response_ledger.csv")
         val topupPlanFile = File(dir, "phone_topup_plan.json")
+        val topupMaterializationFile = File(dir, "phone_topup_materialization.json")
+        val topupMaterialization = if (complete) {
+            runCatching {
+                materializePhoneTopupBlock(
+                    runPackage = runPackage,
+                    topupPlan = responseReview.topupPlan,
+                    outputDir = dir,
+                    assetFileForId = { assetId -> runPackage.asset(assetId)?.let { mobileAssetFile(context, runPackage.packageId, it) } },
+                )?.manifest ?: notNeededPhoneTopupMaterialization()
+            }.getOrElse { error -> failedPhoneTopupMaterialization(error.message ?: error::class.java.simpleName) }
+        } else {
+            JSONObject()
+                .put("schema", "pps-android-phone-topup-materialization.v1")
+                .put("status", "not_evaluated")
+                .put("synthesis_strategy", "pcm_wav_concat_without_ffmpeg")
+                .put("reason", "session_in_progress")
+        }
         val payload = JSONObject()
             .put("schema", if (complete) "pps-mobile-run-complete.v1" else "pps-mobile-run-events.v1")
             .put("status", if (complete) "complete" else "in_progress")
@@ -1825,6 +1842,7 @@ private class PhoneRunSession(
             .put("phone_response_summary", JSONObject(responseReview.summary.toString()))
             .put("phone_response_ledger", JSONArray().also { array -> responseReview.ledgerRows.forEach { array.put(JSONObject(it.toString())) } })
             .put("phone_topup_plan", JSONObject(responseReview.topupPlan.toString()))
+            .put("phone_topup_materialization", JSONObject(topupMaterialization.toString()))
             .put("summary", summaryLocked())
         val artifactFile = File(dir, if (complete) "completion.json" else "latest_events.json")
         packageManifestFile.writeText(packageManifestText, Charsets.UTF_8)
@@ -1834,6 +1852,7 @@ private class PhoneRunSession(
         writePhoneEventsCsv(File(dir, "lsl_marker_mirror.csv"), lslMarkers)
         writePhoneEventsCsv(responseLedgerFile, responseReview.ledgerRows)
         topupPlanFile.writeText(responseReview.topupPlan.toString(2), Charsets.UTF_8)
+        topupMaterializationFile.writeText(topupMaterialization.toString(2), Charsets.UTF_8)
         writeCommandDiaryJsonl(File(dir, "command_diary.jsonl"), commandDiary)
         File(dir, "participant_metadata.json").writeText(participantMetadata.toString(2), Charsets.UTF_8)
         File(dir, "haptic_capability.json").writeText(hapticMetadata.toString(2), Charsets.UTF_8)
@@ -1849,6 +1868,7 @@ private class PhoneRunSession(
             .put("reconstruction_artifact_path", reconstructionFile.absolutePath)
             .put("response_ledger_path", responseLedgerFile.absolutePath)
             .put("topup_plan_path", topupPlanFile.absolutePath)
+            .put("topup_materialization_path", topupMaterializationFile.absolutePath)
     }
 
     private fun currentBlockElapsedMs(): Long =
@@ -2286,7 +2306,7 @@ private fun String.markerToken(): String =
 private fun safeFileName(value: String): String =
     value.replace(Regex("[^A-Za-z0-9._-]+"), "-").trim('-', '.', '_').ifBlank { "asset" }
 
-private fun sha256File(file: File): String {
+internal fun sha256File(file: File): String {
     val digest = MessageDigest.getInstance("SHA-256")
     file.inputStream().use { input ->
         val buffer = ByteArray(1024 * 1024)

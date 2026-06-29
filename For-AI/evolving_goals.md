@@ -62,6 +62,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `synthesis_strategy = pcm_wav_concat_without_ffmpeg`. This is still a
   planned-not-played top-up artifact; the phone does not yet assemble and play
   the rescue WAV automatically.
+- Android can now materialize a phone-side top-up WAV artifact without FFmpeg:
+  `PhoneTopupAssembler.kt` validates that the selected trial building-block
+  WAVs share a PCM format, concatenates their data chunks into
+  `phone_topup_block.wav`, writes `phone_topup_materialization.json`, and keeps
+  a generated top-up block schedule/cue map. Completed phone-run artifacts now
+  attempt this materialization and record `not_needed`, `materialized`, or
+  `failed` with a concrete reason. Automatic playback/analysis integration of
+  the materialized top-up block remains pending.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only

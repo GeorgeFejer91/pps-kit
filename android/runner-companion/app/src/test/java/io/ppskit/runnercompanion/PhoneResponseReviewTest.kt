@@ -47,6 +47,11 @@ class PhoneResponseReviewTest {
         )
         val events = listOf(
             JSONObject()
+                .put("type", "block_complete")
+                .put("event_id", 9)
+                .put("block_id", "block-01")
+                .put("block_index", 1),
+            JSONObject()
                 .put("type", "tap")
                 .put("event_id", 10)
                 .put("block_index", 1)
