@@ -3153,6 +3153,9 @@ class AnalysisReviewDialog:
         self.plot_toggles: dict[str, Any] = {}
         self.response_metric_labels: dict[str, tuple[Any, Any]] = {}
         self.assumption_buttons: dict[str, Any] = {}
+        self.analysis_level_panels: dict[str, Any] = {}
+        self.analysis_level_buttons: dict[str, Any] = {}
+        self.current_analysis_level = "level1"
         self.assumption_detail_dialog = None
         self.dialog = q["QDialog"](parent)
         _enable_standard_window_controls(q, self.dialog)
@@ -3207,6 +3210,44 @@ QFrame#analysisTogglePanel {
     background: #ffffff;
     border: 1px solid #d9dfd6;
     border-radius: 6px;
+}
+QFrame#analysisLevelNavPanel {
+    background: #ffffff;
+    border: 1px solid #bcc7bd;
+    border-radius: 6px;
+}
+QPushButton#analysisLevelNavButton {
+    border: 0;
+    border-left: 1px solid #d9dfd6;
+    border-radius: 0;
+    background: #ffffff;
+    color: #202621;
+    padding: 7px 12px;
+    min-height: 30px;
+    font-weight: 800;
+}
+QPushButton#analysisLevelNavButton:hover {
+    background: #f3f6f2;
+}
+QPushButton#analysisLevelNavButton:checked {
+    background: #246b55;
+    color: #ffffff;
+}
+QFrame#analysisLevel1Panel,
+QFrame#analysisLevel2Panel,
+QFrame#analysisLevel3Panel {
+    background: #ffffff;
+    border: 1px solid #cfd8cf;
+    border-radius: 8px;
+}
+QLabel#analysisLevelTitle {
+    color: #182231;
+    font-size: 18px;
+    font-weight: 900;
+}
+QLabel#analysisLevelSubtitle {
+    color: #647067;
+    font-weight: 650;
 }
 QPushButton#analysisSegmentButton {
     border: 0;
@@ -3364,18 +3405,43 @@ QTextEdit#analysisDetailsText {
         dataset_row.addWidget(self.dataset_combo, 1)
         root.addLayout(dataset_row)
 
-        self.response_quality_panel = self._build_response_quality_panel()
-        root.addWidget(self.response_quality_panel)
+        self.analysis_level_nav_panel = self._build_analysis_level_navigation()
+        root.addWidget(self.analysis_level_nav_panel)
 
+        self.level1_panel, level1_layout = self._build_analysis_level_panel(
+            "level1",
+            "Level 1: Response Quality",
+            "Did the participant respond adequately?",
+        )
+        self.response_quality_panel = self._build_response_quality_panel()
+        level1_layout.addWidget(self.response_quality_panel)
+        root.addWidget(self.level1_panel)
+
+        self.level2_panel, level2_layout = self._build_analysis_level_panel(
+            "level2",
+            "Level 2: Basic PPS Assumptions",
+            "Did this run meet the minimal baseline and distance-dependent facilitation checks?",
+        )
         self.assumption_panel = self._build_basic_assumption_panel()
-        root.addWidget(self.assumption_panel)
+        level2_layout.addWidget(self.assumption_panel)
+        self.assumption_preview_plot = _create_assumption_beta_plot_widget(q)
+        self.assumption_preview_plot.setObjectName("analysisAssumptionPreviewPlot")
+        self.assumption_preview_plot.setMinimumHeight(170)
+        level2_layout.addWidget(self.assumption_preview_plot)
+        root.addWidget(self.level2_panel)
+
+        self.level3_panel, level3_layout = self._build_analysis_level_panel(
+            "level3",
+            "Level 3: PPS Model Fit",
+            "What shape does the participant's PPS response curve appear to have?",
+        )
 
         plot_panel, plot_layout = _panel(q, "PPS Response Curves")
         self.plot_widget = _create_analysis_curve_plot_widget(q)
         self.plot_widget.setObjectName("analysisCurvePlot")
         self.plot_widget.setMinimumHeight(260)
         plot_layout.addWidget(self.plot_widget)
-        root.addWidget(plot_panel, 1)
+        level3_layout.addWidget(plot_panel)
 
         condition_row = q["QHBoxLayout"]()
         condition_row.setContentsMargins(0, 0, 0, 0)
@@ -3392,7 +3458,7 @@ QTextEdit#analysisDetailsText {
             self.condition_lens_buttons[lens] = button
             condition_row.addWidget(button)
         condition_row.addStretch(1)
-        root.addLayout(condition_row)
+        level3_layout.addLayout(condition_row)
 
         model_row = q["QHBoxLayout"]()
         model_row.setContentsMargins(0, 0, 0, 0)
@@ -3409,18 +3475,18 @@ QTextEdit#analysisDetailsText {
             self.quick_model_buttons[model] = button
             model_row.addWidget(button)
         model_row.addStretch(1)
-        root.addLayout(model_row)
+        level3_layout.addLayout(model_row)
 
         self.triage_hint = q["QLabel"]("")
         self.triage_hint.setObjectName("analysisTriageHint")
         self.triage_hint.setWordWrap(True)
-        root.addWidget(self.triage_hint)
+        level3_layout.addWidget(self.triage_hint)
 
         self.more_button = q["QPushButton"]("More")
         self.more_button.setObjectName("analysisMoreButton")
         self.more_button.setCheckable(True)
         self.more_button.toggled.connect(self._set_more_visible)
-        root.addWidget(self.more_button, 0)
+        level3_layout.addWidget(self.more_button, 0)
 
         self.more_container = q["QWidget"]()
         self.more_container.setObjectName("analysisMoreContainer")
@@ -3428,7 +3494,7 @@ QTextEdit#analysisDetailsText {
         more_root = q["QVBoxLayout"](self.more_container)
         more_root.setContentsMargins(0, 0, 0, 0)
         more_root.setSpacing(8)
-        root.addWidget(self.more_container, 0)
+        level3_layout.addWidget(self.more_container, 0)
 
         view_row = q["QHBoxLayout"]()
         view_row.setContentsMargins(0, 0, 0, 0)
@@ -3566,6 +3632,7 @@ QTextEdit#analysisDetailsText {
         detail_layout.addWidget(self.detail_text)
         body.addWidget(detail_panel)
         body.setSizes([112, 180])
+        root.addWidget(self.level3_panel)
 
         buttons = q["QHBoxLayout"]()
         buttons.setContentsMargins(12, 8, 12, 12)
@@ -3586,6 +3653,63 @@ QTextEdit#analysisDetailsText {
         self._reload_scopes_for_part_mode()
         self._populate_overview_table()
         self._refresh_quick_button_styles()
+
+    def _build_analysis_level_navigation(self) -> Any:
+        q = self.q
+        panel = q["QFrame"]()
+        panel.setObjectName("analysisLevelNavPanel")
+        layout = q["QHBoxLayout"](panel)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        for level_key, label in (
+            ("level1", "1 Response"),
+            ("level2", "2 Assumptions"),
+            ("level3", "3 Model Fit"),
+        ):
+            button = q["QPushButton"](label)
+            button.setObjectName("analysisLevelNavButton")
+            button.setCheckable(True)
+            button.setChecked(level_key == self.current_analysis_level)
+            button.clicked.connect(lambda _checked=False, selected_level=level_key: self._scroll_to_analysis_level(selected_level))
+            self.analysis_level_buttons[level_key] = button
+            layout.addWidget(button, 1)
+        return panel
+
+    def _build_analysis_level_panel(self, level_key: str, title_text: str, subtitle_text: str) -> tuple[Any, Any]:
+        q = self.q
+        panel = q["QFrame"]()
+        number = "".join(char for char in str(level_key) if char.isdigit()) or "1"
+        panel.setObjectName(f"analysisLevel{number}Panel")
+        layout = q["QVBoxLayout"](panel)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(8)
+        title = q["QLabel"](title_text)
+        title.setObjectName("analysisLevelTitle")
+        title.setWordWrap(True)
+        layout.addWidget(title)
+        subtitle = q["QLabel"](subtitle_text)
+        subtitle.setObjectName("analysisLevelSubtitle")
+        subtitle.setWordWrap(True)
+        layout.addWidget(subtitle)
+        self.analysis_level_panels[level_key] = panel
+        return panel, layout
+
+    def _scroll_to_analysis_level(self, level_key: str) -> None:
+        level_key = str(level_key or "level1")
+        panel = self.analysis_level_panels.get(level_key)
+        if panel is None:
+            return
+        self.current_analysis_level = level_key
+        self._refresh_analysis_level_buttons()
+        try:
+            self.scroll_area.ensureWidgetVisible(panel, 0, 8)
+        except Exception:
+            pass
+
+    def _refresh_analysis_level_buttons(self) -> None:
+        for level_key, button in self.analysis_level_buttons.items():
+            if button.isChecked() != (level_key == self.current_analysis_level):
+                button.setChecked(level_key == self.current_analysis_level)
 
     def _build_response_quality_panel(self) -> Any:
         q = self.q
@@ -3716,6 +3840,8 @@ QTextEdit#analysisDetailsText {
             button.setText("Baseline Assumption" if key == "baseline" else "Peripersonal Space Assumption")
             button.setToolTip(self._assumption_tooltip(key, payload))
             self._style_assumption_button(button, passed=passed)
+        if hasattr(self, "assumption_preview_plot"):
+            self.assumption_preview_plot.set_payload("pps", self._assumption_payload("pps"))
 
     def _assumption_payload(self, key: str) -> dict[str, Any]:
         checks = getattr(self.data, "assumption_checks", {}) or {}
@@ -3907,8 +4033,16 @@ QFrame#analysisAssumptionDetailPanel {
         if not data.has_analysis_tables:
             self.triage_hint.setText("Selected analysis dataset has no plotted analysis tables.")
             return
+        if self.assumption_detail_dialog is not None:
+            try:
+                self.assumption_detail_dialog.close()
+            except Exception:
+                pass
+            self.assumption_detail_dialog = None
         self.data = data
         self.current_dataset_id = dataset_id
+        self.current_analysis_level = "level1"
+        self._refresh_analysis_level_buttons()
         self.current_part_mode = data.default_part_mode
         self.current_condition_lens = default_condition_lens(data)
         self.current_quick_model = default_condition_model(data)

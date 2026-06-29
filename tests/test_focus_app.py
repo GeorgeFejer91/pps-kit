@@ -3203,10 +3203,14 @@ def test_focus_mode_opens_post_run_analysis_review_dialog(tmp_path: Path, monkey
     grouping_combo = dialog.findChild(q["QComboBox"], "analysisGroupingCombo")
     overview_table = dialog.findChild(q["QTableWidget"], "analysisOverviewTable")
     details = dialog.findChild(q["QTextEdit"], "analysisDetailsText")
+    level1_panel = dialog.findChild(q["QFrame"], "analysisLevel1Panel")
+    level2_panel = dialog.findChild(q["QFrame"], "analysisLevel2Panel")
+    level3_panel = dialog.findChild(q["QFrame"], "analysisLevel3Panel")
     response_panel = dialog.findChild(q["QFrame"], "analysisResponseQualityPanel")
     assumption_panel = dialog.findChild(q["QFrame"], "analysisAssumptionPanel")
     baseline_assumption_button = dialog.findChild(q["QPushButton"], "analysisBaselineAssumptionButton")
     pps_assumption_button = dialog.findChild(q["QPushButton"], "analysisPpsAssumptionButton")
+    assumption_preview_plot = dialog.findChild(q["QWidget"], "analysisAssumptionPreviewPlot")
     response_bars = dialog.findChild(q["QWidget"], "analysisResponseQualityBars")
     tactile_hits_percent = dialog.findChild(q["QLabel"], "analysisResponseMetricTactileHitsPercent")
     tactile_hits_count = dialog.findChild(q["QLabel"], "analysisResponseMetricTactileHitsCount")
@@ -3217,11 +3221,17 @@ def test_focus_mode_opens_post_run_analysis_review_dialog(tmp_path: Path, monkey
     triage_hint = dialog.findChild(q["QLabel"], "analysisTriageHint")
     analysis_plot = dialog.findChild(q["QWidget"], "analysisCurvePlot")
     more_button = dialog.findChild(q["QPushButton"], "analysisMoreButton")
+    level_nav_buttons = [button for button in dialog.findChildren(q["QPushButton"], "analysisLevelNavButton")]
     condition_buttons = [button for button in dialog.findChildren(q["QPushButton"], "analysisConditionLensButton")]
     quick_model_buttons = [button for button in dialog.findChildren(q["QPushButton"], "analysisModelButton")]
     assert dataset_combo is not None and dataset_combo.count() == 1
+    assert level1_panel is not None
+    assert level2_panel is not None
+    assert level3_panel is not None
+    assert [button.text() for button in level_nav_buttons] == ["1 Response", "2 Assumptions", "3 Model Fit"]
     assert response_panel is not None
     assert assumption_panel is not None
+    assert assumption_preview_plot is not None
     assert baseline_assumption_button is not None and baseline_assumption_button.text() == "Baseline Assumption"
     assert pps_assumption_button is not None and pps_assumption_button.text() == "Peripersonal Space Assumption"
     assert "#238d5a" in baseline_assumption_button.styleSheet()
@@ -3238,8 +3248,24 @@ def test_focus_mode_opens_post_run_analysis_review_dialog(tmp_path: Path, monkey
     assert triage_hint is not None and "AICc support" in triage_hint.text()
     assert "Baseline: pooled across SOAs within condition" in triage_hint.text()
     assert analysis_plot is not None and getattr(analysis_plot, "metric_label", "") == "Baseline-corrected facilitation (ms)"
-    assert _widget_rect(response_panel, dialog)["bottom"] <= _widget_rect(assumption_panel, dialog)["y"]
-    assert _widget_rect(assumption_panel, dialog)["bottom"] <= _widget_rect(analysis_plot, dialog)["y"]
+    assert _widget_rect(level1_panel, dialog)["bottom"] <= _widget_rect(level2_panel, dialog)["y"]
+    assert _widget_rect(level2_panel, dialog)["bottom"] <= _widget_rect(level3_panel, dialog)["y"]
+    assert _widget_rect(level1_panel, dialog)["y"] <= _widget_rect(response_panel, dialog)["y"] <= _widget_rect(level1_panel, dialog)["bottom"]
+    assert _widget_rect(level2_panel, dialog)["y"] <= _widget_rect(assumption_panel, dialog)["y"] <= _widget_rect(level2_panel, dialog)["bottom"]
+    assert _widget_rect(level2_panel, dialog)["y"] <= _widget_rect(assumption_preview_plot, dialog)["y"] <= _widget_rect(level2_panel, dialog)["bottom"]
+    assert _widget_rect(level3_panel, dialog)["y"] <= _widget_rect(analysis_plot, dialog)["y"] <= _widget_rect(level3_panel, dialog)["bottom"]
+    scrollbar = window.analysis_review_dialog.scroll_area.verticalScrollBar()
+    level3_nav = next(button for button in level_nav_buttons if button.text() == "3 Model Fit")
+    level1_nav = next(button for button in level_nav_buttons if button.text() == "1 Response")
+    level3_nav.click()
+    app.processEvents()
+    model_scroll_value = scrollbar.value()
+    assert model_scroll_value > 0
+    assert level3_nav.isChecked()
+    level1_nav.click()
+    app.processEvents()
+    assert scrollbar.value() < model_scroll_value
+    assert level1_nav.isChecked()
     pps_assumption_button.click()
     app.processEvents()
     assumption_dialog = window.analysis_review_dialog.assumption_detail_dialog
@@ -3454,8 +3480,10 @@ def test_analysis_review_dialog_missing_assumption_artifact_falls_back_to_red(tm
 
     baseline_button = dialog.findChild(q["QPushButton"], "analysisBaselineAssumptionButton")
     pps_button = dialog.findChild(q["QPushButton"], "analysisPpsAssumptionButton")
+    assumption_preview_plot = dialog.findChild(q["QWidget"], "analysisAssumptionPreviewPlot")
     assert baseline_button is not None and "#d9544b" in baseline_button.styleSheet()
     assert pps_button is not None and "#d9544b" in pps_button.styleSheet()
+    assert assumption_preview_plot is not None
     assert "basic_assumption_checks.v1.json was not available" in pps_button.toolTip()
     pps_button.click()
     app.processEvents()
