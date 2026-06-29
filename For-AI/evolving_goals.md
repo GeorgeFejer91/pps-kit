@@ -196,6 +196,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   sends with `--expect-native-transport`, and can require matching acks with
   `--expect-command-acks`. Use this for non-emulator audits of the
   phone-to-phone controller contract before claiming live Android LSL evidence.
+- The PC side now has a reusable Android LSL administration sender. The
+  `android_lsl_admin.py` module and `pps-android-lsl-command` entry point send
+  token-gated `PPSCommandSignalsV1` samples from the runner/PC environment,
+  optionally require matching `PPSCommandAcksV1`, and persist
+  `pc_android_lsl_command_outbox.jsonl` plus
+  `pc_android_lsl_admin_status.json`. This is the PC counterpart to Android
+  Controller mode and is the intended non-UI sender seam for PC-runner-to-phone
+  start/pause/resume/snapshot validation.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only

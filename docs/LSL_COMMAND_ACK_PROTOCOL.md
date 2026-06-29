@@ -93,6 +93,18 @@ phone-run folders, exported ZIPs, `lsl_runtime_status.json`, Controller-mode
 native marker/command/controller transport checks and `--expect-command-acks`
 when a controller-runner test should prove matching acknowledgements.
 
+The PC side can also administer a phone-owned Android runner directly over the
+same command stream with the `pps-android-lsl-command` helper. It writes
+`pc_android_lsl_command_outbox.jsonl` and
+`pc_android_lsl_admin_status.json` while sending `PPSCommandSignalsV1` samples
+and optionally requiring matching `PPSCommandAcksV1` samples:
+
+```powershell
+pps-android-lsl-command start_experiment --session-id <part_session_id> --token <pairing-token> --package-id <package_id> --require-ack
+pps-android-lsl-command pause --session-id <part_session_id> --token <pairing-token> --require-ack
+pps-android-lsl-command resume --session-id <part_session_id> --token <pairing-token> --require-ack
+```
+
 ## References
 
 - [Lab Streaming Layer overview](https://labstreaminglayer.org/)

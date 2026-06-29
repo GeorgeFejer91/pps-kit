@@ -16,6 +16,11 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   `PPSCommandSignalsV1` samples to `phone_controller_command_outbox.jsonl` and,
   when native liblsl is present, keeps a long-lived `PPSCommandSignalsV1` outlet
   open for button-press commands.
+- The PC-side helper `pps-android-lsl-command` sends the same token-gated
+  `PPSCommandSignalsV1` samples from the runner/PC environment, waits for
+  `PPSCommandAcksV1` when requested, and writes
+  `pc_android_lsl_command_outbox.jsonl` plus
+  `pc_android_lsl_admin_status.json`.
 - Commands are token-gated through `token` or `companion_token` in
   `payload_json` before any local handler runs.
 - Acks are shaped as applied/rejected command acknowledgements after the local
@@ -26,10 +31,12 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   `PPSCommandAcksV1` outlet, polls commands during AudioTrack playback, token
   gates them, applies or rejects them locally, and pushes one ack sample after
   the handler returns.
-- The current phone command handler applies `start_experiment`/`start_part` as
-  already-running no-ops, applies `continue_instruction`, `request_snapshot`,
-  and `operator_note` as diary/snapshot actions, and applies `pause`/`resume`
-  through the phone-owned `AudioTrack` pause gate during active phone blocks.
+- When Runner mode is idle with a synced selected package, the native command
+  listener acknowledges `start_experiment`/`start_part` and then launches the
+  phone run. During active playback, those start commands are acknowledged as
+  already-running no-ops; `continue_instruction`, `request_snapshot`, and
+  `operator_note` are diary/snapshot actions, and `pause`/`resume` go through
+  the phone-owned `AudioTrack` pause gate during active phone blocks.
   Pause/resume commands record `phone_playback_pause` /
   `phone_playback_resume` diary and marker-mirror events with pause-adjusted
   block elapsed time. `stop_after_block` now records
@@ -149,6 +156,15 @@ a matching acknowledgement, validate the Controller outbox as well:
 
 ```powershell
 .\.venv\Scripts\python.exe validation_protocols\scripts\validate_android_lsl_runtime_artifact.py <phone_controller_command_outbox.jsonl> --expect-native-transport --expect-command-acks
+```
+
+For a PC-to-phone command check, send commands from the PC helper while the
+Android runner is idle with a synced package or actively playing a block:
+
+```powershell
+.\.venv\Scripts\pps-android-lsl-command.exe start_experiment --session-id <part_session_id> --token <pairing-token> --package-id <package_id> --require-ack
+.\.venv\Scripts\pps-android-lsl-command.exe pause --session-id <part_session_id> --token <pairing-token> --require-ack
+.\.venv\Scripts\pps-android-lsl-command.exe resume --session-id <part_session_id> --token <pairing-token> --require-ack
 ```
 
 Until that strict validator passes together with external LSL/XDF capture, the

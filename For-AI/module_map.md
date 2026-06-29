@@ -51,7 +51,7 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
 - Provisional Woojer tactile-drive latency compensation: `tactile_latency.py`, consumed by `session_runner.py` during participant/top-up block WAV preparation.
 - Shared runner/dashboard profile memory and output-diary bridge: `runner_diary.py` now owns runner settings and diary helpers; future shared profile-catalogue code should live in a common Python seam consumed by both `dashboard_app.py` and `focus_app.py`, not separately in browser JS or runner UI code.
 - Event, timing, and output evidence contracts: `timing_events.py`, `session_events.py`, `output_evidence.py`, `topup.py`.
-- Optional LSL sender/receiver command acknowledgement helpers: `lsl_command_ack.py`, with real `pylsl` round-trip validation in `validation_protocols/scripts/run_lsl_command_ack_roundtrip.py`.
+- Optional LSL sender/receiver command acknowledgement helpers: `lsl_command_ack.py`, with real `pylsl` round-trip validation in `validation_protocols/scripts/run_lsl_command_ack_roundtrip.py`. PC-to-Android phone-owned administration lives in `android_lsl_admin.py` and the `pps-android-lsl-command` console entry point; it sends token-gated `PPSCommandSignalsV1` samples, optionally requires `PPSCommandAcksV1`, and writes `pc_android_lsl_command_outbox.jsonl` plus `pc_android_lsl_admin_status.json`.
 - Android native LSL integration guidance is tracked in
   `docs/ANDROID_LSL_INTEGRATION.md`. The phone-run artifact validator lives at
   `validation_protocols/scripts/validate_android_lsl_runtime_artifact.py` and
