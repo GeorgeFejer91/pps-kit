@@ -14703,6 +14703,34 @@ def _phone_transfer_lsl_admin_context(
     }
 
 
+def _send_phone_transfer_lsl_admin_command(
+    context: dict[str, str],
+    command: str,
+    *,
+    require_ack: bool,
+) -> dict[str, Any]:
+    target_session_id = str(context.get("target_session_id") or "").strip()
+    token = str(context.get("token") or "").strip()
+    clean_command = str(command or "").strip()
+    if not target_session_id:
+        raise ValueError("Phone LSL target session id is missing.")
+    if not token:
+        raise ValueError("Phone LSL pairing token is missing.")
+    if not clean_command:
+        raise ValueError("Phone LSL command is missing.")
+    result = send_android_lsl_command(
+        target_session_id=target_session_id,
+        token=token,
+        command=clean_command,
+        package_id=str(context.get("package_id") or ""),
+        participant_id=str(context.get("participant_id") or ""),
+        part_number=str(context.get("part_number") or ""),
+        output_dir=Path(str(context.get("output_dir") or "")),
+        require_ack=bool(require_ack),
+    )
+    return dict(result.row)
+
+
 def _run_phone_transfer_window(
     *,
     capture_options: SessionCaptureOptions | None = None,
@@ -15066,20 +15094,15 @@ def _run_phone_transfer_window(
 
         def _worker() -> None:
             try:
-                result = send_android_lsl_command(
-                    target_session_id=str(context.get("target_session_id") or ""),
-                    token=str(context.get("token") or ""),
+                row = _send_phone_transfer_lsl_admin_command(
+                    context,
                     command=command,
-                    package_id=str(context.get("package_id") or ""),
-                    participant_id=str(context.get("participant_id") or ""),
-                    part_number=str(context.get("part_number") or ""),
-                    output_dir=Path(str(context.get("output_dir") or "")),
                     require_ack=bool(lsl_require_ack_checkbox.isChecked()),
                 )
             except Exception as exc:  # noqa: BLE001 - surfaced in the dialog status.
                 preparation_messages.put(("lsl_admin_error", str(exc)))
             else:
-                preparation_messages.put(("lsl_admin_done", dict(result.row)))
+                preparation_messages.put(("lsl_admin_done", row))
 
         worker = threading.Thread(target=_worker, name="pps-phone-transfer-lsl-admin", daemon=True)
         lsl_admin_thread["thread"] = worker

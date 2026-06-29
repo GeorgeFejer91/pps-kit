@@ -4006,6 +4006,42 @@ def test_phone_transfer_lsl_admin_context_prefers_part_session_and_runner_logs(t
     assert str(output_runner_logs_dir(tmp_path) / "android_lsl_admin" / "transfer_001") == context["output_dir"]
 
 
+def test_phone_transfer_lsl_admin_command_sends_expected_context(tmp_path: Path, monkeypatch):
+    from peripersonal_space_toolkit import focus_app
+
+    context = {
+        "target_session_id": "part-001",
+        "token": "secret-token",
+        "package_id": "pkg-001",
+        "participant_id": "P321",
+        "part_number": "01",
+        "output_dir": str(tmp_path / "pc-admin"),
+    }
+    calls: list[dict[str, object]] = []
+
+    def fake_send_android_lsl_command(**kwargs):
+        calls.append(dict(kwargs))
+        return SimpleNamespace(row={"status": "ack_applied", "command": kwargs["command"], "outbox_path": "outbox.jsonl"})
+
+    monkeypatch.setattr(focus_app, "send_android_lsl_command", fake_send_android_lsl_command)
+
+    row = focus_app._send_phone_transfer_lsl_admin_command(context, "pause", require_ack=True)
+
+    assert row["status"] == "ack_applied"
+    assert calls == [
+        {
+            "target_session_id": "part-001",
+            "token": "secret-token",
+            "command": "pause",
+            "package_id": "pkg-001",
+            "participant_id": "P321",
+            "part_number": "01",
+            "output_dir": tmp_path / "pc-admin",
+            "require_ack": True,
+        }
+    ]
+
+
 def test_launcher_resume_shortcut_opens_environment_operations(tmp_path: Path, monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
