@@ -108,6 +108,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   scheduled block to have a matching
   `phone_scheduled_block_materialization` event, materialization JSON manifest,
   and generated WAV whose SHA-256 matches the recorded reconstruction hash.
+- Android now preserves the mobile package `asset_strategy` through its parsed
+  Kotlin model and all phone-owned reconstruction surfaces: session metadata
+  diary, `completion.json`/`latest_events.json` package summary,
+  `run_package_manifest.json` fallback snapshots, `reconstruction_contract.json`,
+  `lsl_runtime_status.json`, native LSL stream description metadata, and
+  `phone_run_catalog_entry.json`. This keeps building-block-only
+  `trial_building_blocks_only` runs distinguishable from prepared-block WAV
+  compatibility runs during offline reconstruction.
 - Android phone-owned runs now derive a phone-local tactile response ledger
   using the shared 100-1300 ms post-tactile response window and write
   `phone_response_ledger.csv` plus `phone_topup_plan.json` into the local run

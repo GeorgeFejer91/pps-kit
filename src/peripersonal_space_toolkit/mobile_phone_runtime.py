@@ -120,6 +120,7 @@ def build_mobile_package_list(
                 "part_number": manifest.get("part_number"),
                 "part_session_id": manifest.get("part_session_id", ""),
                 "title": manifest.get("title", ""),
+                "asset_strategy": str(manifest.get("asset_strategy") or ""),
                 "block_count": len(manifest.get("blocks") or []),
                 "trial_count": sum(int(block.get("trial_count") or 0) for block in manifest.get("blocks") or []),
                 "asset_count": len(manifest.get("assets") or []),

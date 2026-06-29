@@ -343,6 +343,7 @@ private class ReflectiveLiblslBridge private constructor(
                 "session_metadata_json",
                 JSONObject()
                     .put("package_id", runPackage.packageId)
+                    .put("asset_strategy", mobilePackageAssetStrategy(runPackage))
                     .put("privacy_default", runPackage.lsl.privacyDefault.ifBlank { "metadata_payload_only" })
                     .put("demographics_in_stream_name", false)
                     .toString(),

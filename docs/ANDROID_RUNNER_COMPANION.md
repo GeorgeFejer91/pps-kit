@@ -156,8 +156,13 @@ Phone-owned local artifacts now include `participant_metadata.json`,
 `haptic_capability.json`, `events.csv`, `lsl_marker_mirror.csv`,
 `command_diary.jsonl`, `lsl_runtime_status.json`, reconstruction/package
 snapshots, response/top-up ledgers, and `completion.json` in the exported phone
-session ZIP. Participant age, handedness, gender, and tactile threshold stay in
-metadata and marker payloads rather than discoverable LSL stream names.
+session ZIP. The phone preserves the package `asset_strategy` across the parsed
+model, LSL runtime status, native LSL stream description metadata,
+reconstruction snapshot, and phone run catalog so a lightweight
+`trial_building_blocks_only` run can be distinguished from a prepared-block WAV
+compatibility run during later reconstruction. Participant age, handedness,
+gender, and tactile threshold stay in metadata and marker payloads rather than
+discoverable LSL stream names.
 
 Default Android builds do not ship liblsl. If a local validation build adds the
 ignored `android/runner-companion/app/libs/liblsl-Android.aar`, runner mode opens

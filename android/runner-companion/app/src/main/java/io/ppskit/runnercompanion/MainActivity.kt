@@ -2225,6 +2225,7 @@ private class PhoneRunSession(
                         .put("part_session_id", runPackage.partSessionId)
                         .put("part_number", runPackage.partNumber)
                         .put("title", runPackage.title)
+                        .put("asset_strategy", mobilePackageAssetStrategy(runPackage))
                         .put("block_count", runPackage.blocks.size)
                         .put("asset_count", runPackage.assets.size)
                         .put("building_block_count", runPackage.buildingBlocks.size)
@@ -2801,6 +2802,7 @@ private class PhoneRunSession(
                     .put("participant_id", runPackage.participantId)
                     .put("session_id", runPackage.sessionId)
                     .put("title", runPackage.title)
+                    .put("asset_strategy", mobilePackageAssetStrategy(runPackage))
                     .put("block_count", runPackage.blocks.size),
             )
             .put(
@@ -2991,6 +2993,7 @@ private fun phoneRunPackageManifestText(runPackage: MobileRunPackage): String =
             .put("part_session_id", runPackage.partSessionId)
             .put("part_number", runPackage.partNumber)
             .put("title", runPackage.title)
+            .put("asset_strategy", mobilePackageAssetStrategy(runPackage))
             .put("block_count", runPackage.blocks.size)
             .put("asset_count", runPackage.assets.size)
             .put("building_block_count", runPackage.buildingBlocks.size)
@@ -3007,6 +3010,7 @@ private fun phoneRunReconstructionArtifact(runPackage: MobileRunPackage, manifes
         .put("session_group_id", runPackage.sessionGroupId)
         .put("part_session_id", runPackage.partSessionId)
         .put("part_number", runPackage.partNumber)
+        .put("asset_strategy", mobilePackageAssetStrategy(runPackage))
         .put("run_package_manifest_sha256", manifestSha256)
         .put(
             "reconstruction",
@@ -3015,6 +3019,7 @@ private fun phoneRunReconstructionArtifact(runPackage: MobileRunPackage, manifes
                 .put("authority", runPackage.reconstruction.authority)
                 .put("fallback_execution_strategy", runPackage.reconstruction.fallbackExecutionStrategy)
                 .put("preferred_lightweight_strategy", runPackage.reconstruction.preferredLightweightStrategy)
+                .put("package_asset_strategy", runPackage.reconstruction.packageAssetStrategy)
                 .put("source_run_setup_sha256", runPackage.reconstruction.sourceRunSetupSha256)
                 .put("schedule_hash", runPackage.reconstruction.scheduleHash)
                 .put("building_block_count", runPackage.reconstruction.buildingBlockCount)

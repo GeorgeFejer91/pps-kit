@@ -166,6 +166,7 @@ def test_mobile_package_list_can_report_lightweight_transfer_assets(tmp_path):
     package_row = listing["packages"][0]
 
     assert package_row["mobile_runnable"] is True
+    assert package_row["asset_strategy"] == "trial_building_blocks_only"
     assert package_row["asset_count"] == 1
     assert package_row["total_asset_bytes"] == package.blocks[0].wav_path.stat().st_size
 

@@ -39,7 +39,11 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `validate_mobile_phone_package.py --require-lightweight-scheduled-blocks`.
   `_PhoneTransferBridge` in `focus_app.py` uses this lightweight path for the
   native runner's `Send To Phone` transfer bridge; regular Focus Mode companion
-  packages still default to prepared block WAV assets.
+  packages still default to prepared block WAV assets. Android parses this
+  strategy in `MobileRuntimeModels.kt` and preserves it in runtime status,
+  stream description metadata, local reconstruction snapshots, and
+  `PhoneRunCatalog.kt` entries so offline reviewers can distinguish
+  lightweight building-block materializations from prepared WAV replay.
 - Optional native Android LSL marker/command transport lives in
   `PhoneNativeLslBridge.kt`. A local ignored
   `android/runner-companion/app/libs/liblsl-Android.aar` is included by Gradle

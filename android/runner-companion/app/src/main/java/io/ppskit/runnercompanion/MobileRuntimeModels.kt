@@ -18,6 +18,7 @@ data class MobilePackageSummary(
     val participantId: String,
     val sessionId: String,
     val title: String,
+    val assetStrategy: String,
     val blockCount: Int,
     val trialCount: Int,
     val assetCount: Int,
@@ -35,6 +36,7 @@ data class MobileRunPackage(
     val partSessionId: String,
     val partNumber: String,
     val title: String,
+    val assetStrategy: String,
     val blocks: List<MobileBlock>,
     val assets: List<MobileAsset>,
     val buildingBlocks: List<MobileBuildingBlock>,
@@ -78,6 +80,7 @@ data class MobileReconstructionContract(
     val authority: String,
     val fallbackExecutionStrategy: String,
     val preferredLightweightStrategy: String,
+    val packageAssetStrategy: String,
     val sourceRunSetupSha256: String,
     val scheduleHash: String,
     val buildingBlockCount: Int,
@@ -85,7 +88,7 @@ data class MobileReconstructionContract(
     val trialCount: Int,
 ) {
     companion object {
-        val empty = MobileReconstructionContract("", "", "", "", "", "", 0, 0, 0)
+        val empty = MobileReconstructionContract("", "", "", "", "", "", "", 0, 0, 0)
     }
 }
 
@@ -169,6 +172,7 @@ object MobilePackageParser {
             partSessionId = root.optString("part_session_id", ""),
             partNumber = root.optString("part_number", ""),
             title = root.optString("title", ""),
+            assetStrategy = root.optString("asset_strategy", root.optJSONObject("reconstruction")?.optString("package_asset_strategy", "") ?: ""),
             blocks = root.optJSONArray("blocks").toMobileBlocks(),
             assets = root.optJSONArray("assets").toMobileAssets(),
             buildingBlocks = root.optJSONArray("building_blocks").toMobileBuildingBlocks(),
@@ -191,6 +195,7 @@ private fun JSONArray?.toPackageSummaries(): List<MobilePackageSummary> {
             participantId = item.optString("participant_id", ""),
             sessionId = item.optString("session_id", ""),
             title = item.optString("title", ""),
+            assetStrategy = item.optString("asset_strategy", ""),
             blockCount = item.optInt("block_count", 0),
             trialCount = item.optInt("trial_count", 0),
             assetCount = item.optInt("asset_count", 0),
@@ -246,6 +251,7 @@ private fun JSONObject?.toMobileReconstructionContract(): MobileReconstructionCo
         authority = optString("authority", ""),
         fallbackExecutionStrategy = optString("fallback_execution_strategy", ""),
         preferredLightweightStrategy = optString("preferred_lightweight_strategy", ""),
+        packageAssetStrategy = optString("package_asset_strategy", ""),
         sourceRunSetupSha256 = optString("source_run_setup_sha256", ""),
         scheduleHash = optString("schedule_hash", ""),
         buildingBlockCount = optInt("building_block_count", 0),
@@ -309,6 +315,9 @@ private fun JSONArray?.toMobileTrials(): List<MobileTrial> {
         )
     }.sortedBy { it.startS }
 }
+
+internal fun mobilePackageAssetStrategy(runPackage: MobileRunPackage): String =
+    runPackage.assetStrategy.ifBlank { runPackage.reconstruction.packageAssetStrategy }
 
 private fun JSONArray?.toMobileCues(): List<MobileCue> {
     if (this == null) return emptyList()

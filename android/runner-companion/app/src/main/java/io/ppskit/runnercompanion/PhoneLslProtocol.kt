@@ -209,6 +209,7 @@ internal fun phoneLslRuntimeStatus(
         .put("session_group_id", runPackage.sessionGroupId)
         .put("part_session_id", runPackage.partSessionId)
         .put("part_number", runPackage.partNumber)
+        .put("asset_strategy", mobilePackageAssetStrategy(runPackage))
         .put("runtime_authority", runPackage.lsl.runtimeAuthority.ifBlank { "android_phone" })
         .put("native_android_lsl_required", runPackage.lsl.nativeAndroidLslRequired)
         .put("native_transport", "liblsl")
