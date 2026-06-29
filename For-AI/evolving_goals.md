@@ -94,6 +94,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   beside uploaded marker mirrors. This does not yet make Android a live LSL
   broadcaster or receiver; that still requires the pinned liblsl Android layer
   and emulator/physical network validation.
+- The native Android LSL integration route is now documented in
+  `docs/ANDROID_LSL_INTEGRATION.md`, including the official liblsl Android/AAR
+  path, Android Wi-Fi/multicast caveats, and validation levels from protocol
+  unit tests through physical-phone LabRecorder/XDF capture. The new validator
+  `validation_protocols/scripts/validate_android_lsl_runtime_artifact.py`
+  accepts a phone run folder, exported ZIP, `completion.json`, or
+  `lsl_runtime_status.json`; by default it verifies the current non-native
+  marker-mirror status and command/ack schema, while `--expect-native-transport`
+  becomes the strict gate after liblsl is actually linked.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only
