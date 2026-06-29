@@ -1923,17 +1923,31 @@ private suspend fun runPhonePackage(
             )
             break
         }
-        val asset = runPackage.asset(block.audioAssetId) ?: error("Missing audio asset for ${block.label}.")
-        val audioFile = mobileAssetFile(context, runPackage.packageId, asset)
-        require(audioFile.isFile) { "Synced audio file is missing for ${block.label}." }
-        onBlock(block.label)
-        onStatus("Running ${block.index}/${runPackage.blocks.size}")
-        val wavInfo = readPhonePcmWavInfo(audioFile)
-        session.startBlock(block, wavInfo)
+        val playback = withContext(Dispatchers.IO) {
+            resolvePhoneBlockPlayback(
+                context = context,
+                runPackage = runPackage,
+                runId = session.runId,
+                block = block,
+            )
+        }
+        playback.materialization?.let { materialization ->
+            session.addScheduledBlockMaterialization(materialization)
+            session.recordCommand(
+                command = "phone_scheduled_block_materialize",
+                status = "applied",
+                payload = materialization,
+            )
+        }
+        val playbackBlock = playback.block
+        onBlock(playbackBlock.label)
+        onStatus("Running ${playbackBlock.index}/${runPackage.blocks.size}")
+        val wavInfo = readPhonePcmWavInfo(playback.file)
+        session.startBlock(playbackBlock, wavInfo)
         playBlockAudioWithAudioTrack(
-            file = audioFile,
+            file = playback.file,
             wavInfo = wavInfo,
-            cues = block.tactileCues,
+            cues = playbackBlock.tactileCues,
             playbackGate = session.playbackGate,
             onWhilePaused = {
                 session.pollNativeCommands(runPackage)
@@ -1942,22 +1956,22 @@ private suspend fun runPhonePackage(
                 session.pollNativeCommands(runPackage)
                 withContext(Dispatchers.Main) {
                     vibratePhone(context, session.vibrationAmplitude())
-                    session.addCue(block, cue, delivery)
+                    session.addCue(playbackBlock, cue, delivery)
                 }
             },
             onProgress = { elapsedMs, durationMs ->
                 session.pollNativeCommands(runPackage)
                 withContext(Dispatchers.Main) {
-                    val duration = durationMs.coerceAtLeast((block.durationS * 1000.0).roundToLong())
+                    val duration = durationMs.coerceAtLeast((playbackBlock.durationS * 1000.0).roundToLong())
                     onProgress("${formatMillisecondsShort(elapsedMs)} / ${formatMillisecondsShort(duration)}")
                 }
             }
         )
-        session.finishBlock(block)
+        session.finishBlock(playbackBlock)
         session.pollNativeCommands(runPackage)
         if (session.stopAfterBlockRequested()) {
             session.addStopAfterBlockBoundary(
-                lastCompletedBlock = block,
+                lastCompletedBlock = playbackBlock,
                 skippedBlocks = runPackage.blocks.drop(blockOrderIndex + 1),
                 skippedTopup = true,
             )
@@ -2011,6 +2025,44 @@ private suspend fun runPhonePackage(
         onStatus("Uploading")
         client.awaitPostMobileComplete(session.runId, session.drainPayload(complete = true))
     }
+}
+
+private data class PhoneBlockPlayback(
+    val file: File,
+    val block: MobileBlock,
+    val materialization: JSONObject? = null,
+)
+
+private fun resolvePhoneBlockPlayback(
+    context: Context,
+    runPackage: MobileRunPackage,
+    runId: String,
+    block: MobileBlock,
+): PhoneBlockPlayback {
+    val asset = runPackage.asset(block.audioAssetId)
+    val audioFile = asset?.let { mobileAssetFile(context, runPackage.packageId, it) }
+    if (audioFile?.isFile == true) return PhoneBlockPlayback(file = audioFile, block = block)
+
+    val materialized = materializePhoneScheduledBlock(
+        runPackage = runPackage,
+        block = block,
+        outputDir = File(phoneRunDir(context, runId), "materialized_blocks"),
+        assetFileForId = { assetId -> runPackage.asset(assetId)?.let { mobileAssetFile(context, runPackage.packageId, it) } },
+    )
+    if (materialized != null) {
+        return PhoneBlockPlayback(
+            file = materialized.wavFile,
+            block = materialized.block,
+            materialization = materialized.manifest,
+        )
+    }
+
+    val reason = if (asset == null) {
+        "Missing audio asset ${block.audioAssetId} for ${block.label}."
+    } else {
+        "Synced audio file is missing for ${block.label}."
+    }
+    error("$reason Could not materialize the scheduled block from trial_building_block assets.")
 }
 
 private suspend fun runPhoneTopupIfNeeded(
@@ -2324,6 +2376,11 @@ private class PhoneRunSession(
     @Synchronized
     fun addTopupMaterialization(materialization: JSONObject) {
         addEventLocked("phone_topup_materialization", JSONObject(materialization.toString()))
+    }
+
+    @Synchronized
+    fun addScheduledBlockMaterialization(materialization: JSONObject) {
+        addEventLocked("phone_scheduled_block_materialization", JSONObject(materialization.toString()))
     }
 
     @Synchronized
@@ -3123,6 +3180,7 @@ private fun phoneEventCode(eventType: String): Int =
         "block_complete" -> 11
         "vibration_cue" -> 21
         "tap" -> 30
+        "phone_scheduled_block_materialization" -> 34
         "phone_topup_materialization" -> 35
         "operator_command" -> 41
         "phone_playback_pause" -> 42

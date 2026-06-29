@@ -111,15 +111,20 @@ After pairing, choose `Run Experiment On Phone`.
 The phone runtime parses PCM WAV blocks and plays them with Android
 `AudioTrack`, schedules tactile cue delivery from the AudioTrack playback head,
 uses `SystemClock.elapsedRealtime()` for phone-side timestamps, and drives the
-Android vibrator service for tactile cue signaling. Treat it as an experimental
-mobile collection mode until physical phone timing validation is added.
+Android vibrator service for tactile cue signaling. If a prepared block WAV is
+missing but every scheduled trial references a synced `trial_building_block`
+asset, the phone can materialize that scheduled block locally by deterministic
+PCM WAV concatenation, then run the same AudioTrack playback-head cue scheduler.
+Treat it as an experimental mobile collection mode until physical phone timing
+validation is added.
 
 Synced v2 packages include:
 
-- prepared block WAV assets with role `block_audio`, which remain the current
-  playback path
+- prepared block WAV assets with role `block_audio`, which remain the default
+  compatibility playback path
 - optional reusable Segment 3 trial WAV assets with role
-  `trial_building_block`, used by lightweight replay/top-up logic
+  `trial_building_block`, used by lightweight scheduled-block replay and
+  phone top-up logic
 - `reconstruction` metadata with source Segment 6 hashes and schedule hash
 - `lsl` metadata declaring `PPSMarkersV2`, `PPSTriggerCodes`,
   `PPSCommandSignalsV1`, and `PPSCommandAcksV1`
@@ -180,9 +185,11 @@ not calibrated physical vibration-strength or Woojer timing measurements.
 
 FFmpeg-style synthesis is technically possible on Android through native FFmpeg
 builds, but the app does not depend on FFmpegKit because that wrapper project is
-retired. For top-up and lightweight phone replay, prefer a small deterministic
-PCM WAV assembler over a broad FFmpeg runtime unless future requirements need
-general resampling or transcoding.
+retired. Scheduled-block fallback and phone top-up both use a small deterministic
+PCM WAV assembler over a broad FFmpeg runtime. All source WAVs must already have
+matching PCM format, sample rate, channel count, bit depth, and block alignment;
+future requirements for general resampling or transcoding would need a separate
+native audio/FFmpeg integration.
 
 ## Emulator Evidence
 

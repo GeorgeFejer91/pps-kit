@@ -81,6 +81,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   the building-block catalog plus per-block trial asset-id order in its local
   reconstruction artifact. This is the schema prerequisite for deterministic
   phone-side missed-trial/top-up WAV assembly without FFmpeg.
+- Android phone-owned scheduled-block playback now has a lightweight fallback
+  path: when the prepared `block_audio` WAV is absent but each trial references
+  a synced `trial_building_block` WAV, `PhoneTopupAssembler.kt` materializes
+  `materialized_blocks/phone_materialized_block_XX.wav` by deterministic PCM
+  concatenation, recalculates block-relative trial/cue timing from source WAV
+  frame counts, writes
+  `pps-android-phone-scheduled-block-materialization.v1`, and records a
+  `phone_scheduled_block_materialization` marker/diary event before AudioTrack
+  playback. The default prepared block WAV path is unchanged.
 - Android phone-owned runs now derive a phone-local tactile response ledger
   using the shared 100-1300 ms post-tactile response window and write
   `phone_response_ledger.csv` plus `phone_topup_plan.json` into the local run

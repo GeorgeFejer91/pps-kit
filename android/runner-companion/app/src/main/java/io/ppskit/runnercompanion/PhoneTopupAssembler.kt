@@ -14,6 +14,13 @@ internal data class PhoneTopupAssemblyResult(
     val block: MobileBlock,
 )
 
+internal data class PhoneScheduledBlockAssemblyResult(
+    val wavFile: File,
+    val manifestFile: File,
+    val manifest: JSONObject,
+    val block: MobileBlock,
+)
+
 internal fun materializePhoneTopupBlock(
     runPackage: MobileRunPackage,
     topupPlan: JSONObject,
@@ -133,6 +140,119 @@ internal fun materializePhoneTopupBlock(
     return PhoneTopupAssemblyResult(wavFile = wavFile, manifestFile = manifestFile, manifest = manifest, block = block)
 }
 
+internal fun materializePhoneScheduledBlock(
+    runPackage: MobileRunPackage,
+    block: MobileBlock,
+    outputDir: File,
+    assetFileForId: (String) -> File?,
+): PhoneScheduledBlockAssemblyResult? {
+    if (block.trials.isEmpty()) return null
+    if (block.trials.any { it.buildingBlockAssetId.isBlank() }) return null
+    outputDir.mkdirs()
+
+    val sources = block.trials.sortedBy { it.startS }.map { trial ->
+        val assetId = trial.buildingBlockAssetId
+        val sourceFile = assetFileForId(assetId)
+        require(sourceFile?.isFile == true) { "Scheduled block source WAV is missing for asset $assetId." }
+        PhoneScheduledBlockSource(trial = trial, assetId = assetId, file = sourceFile, wavInfo = readPhonePcmWavInfo(sourceFile))
+    }
+    val reference = sources.first().wavInfo
+    sources.drop(1).forEach { source ->
+        require(source.wavInfo.formatTag == reference.formatTag) { "Scheduled block WAV format mismatch for ${source.assetId}." }
+        require(source.wavInfo.sampleRateHz == reference.sampleRateHz) { "Scheduled block WAV sample-rate mismatch for ${source.assetId}." }
+        require(source.wavInfo.channelCount == reference.channelCount) { "Scheduled block WAV channel-count mismatch for ${source.assetId}." }
+        require(source.wavInfo.bitsPerSample == reference.bitsPerSample) { "Scheduled block WAV bit-depth mismatch for ${source.assetId}." }
+        require(source.wavInfo.blockAlignBytes == reference.blockAlignBytes) { "Scheduled block WAV block-alignment mismatch for ${source.assetId}." }
+    }
+    val totalDataSize = sources.sumOf { it.wavInfo.dataSizeBytes }
+    require(totalDataSize <= 0xFFFF_FFFFL - 36L) { "Scheduled block WAV is too large for RIFF WAV output." }
+
+    val wavFile = File(outputDir, "phone_materialized_block_${block.index.toString().padStart(2, '0')}.wav")
+    writeConcatenatedScheduledPcmWav(wavFile, reference, sources)
+
+    val trials = mutableListOf<MobileTrial>()
+    val cues = mutableListOf<MobileCue>()
+    val trialRows = JSONArray()
+    var cursorFrames = 0L
+    sources.forEachIndexed { index, source ->
+        val sourceTrial = source.trial
+        val startS = cursorFrames.toDouble() / reference.sampleRateHz
+        val durationS = source.wavInfo.frameCount.toDouble() / reference.sampleRateHz
+        val endS = startS + durationS
+        trials.add(
+            sourceTrial.copy(
+                trialNumber = index + 1,
+                startS = startS,
+                endS = endS,
+                durationS = durationS,
+            ),
+        )
+        val tactileOnsetS = sourceTrial.tactileOnsetS
+        if (tactileOnsetS != null) {
+            cues.add(
+                MobileCue(
+                    cueId = cues.size + 1,
+                    trialNumber = index + 1,
+                    trialUid = sourceTrial.trialUid,
+                    timeS = startS + tactileOnsetS,
+                    trialRelativeTimeS = tactileOnsetS,
+                    soaMs = sourceTrial.soaMs,
+                    rowLabel = sourceTrial.rowLabel,
+                    noiseType = sourceTrial.noiseType,
+                ),
+            )
+        }
+        trialRows.put(
+            JSONObject()
+                .put("trial_number", index + 1)
+                .put("trial_uid", sourceTrial.trialUid)
+                .put("building_block_asset_id", source.assetId)
+                .put("trial_type", sourceTrial.trialType)
+                .put("family", sourceTrial.family)
+                .put("soa_ms", sourceTrial.soaMs)
+                .put("row_label", sourceTrial.rowLabel)
+                .put("noise_type", sourceTrial.noiseType)
+                .put("start_s", startS)
+                .put("end_s", endS)
+                .put("duration_s", durationS)
+                .put("tactile_onset_s", sourceTrial.tactileOnsetS)
+                .put("response_window_onset_s", sourceTrial.responseWindowOnsetS),
+        )
+        cursorFrames += source.wavInfo.frameCount
+    }
+
+    val materializedBlock = block.copy(
+        durationS = cursorFrames.toDouble() / reference.sampleRateHz,
+        trialCount = trials.size,
+        audioAssetId = "phone-materialized-${block.blockId}-audio",
+        trials = trials,
+        tactileCues = cues,
+    )
+    val manifest = JSONObject()
+        .put("schema", "pps-android-phone-scheduled-block-materialization.v1")
+        .put("status", "materialized")
+        .put("synthesis_strategy", "pcm_wav_concat_without_ffmpeg")
+        .put("package_id", runPackage.packageId)
+        .put("participant_id", runPackage.participantId)
+        .put("source_block_id", block.blockId)
+        .put("source_block_index", block.index)
+        .put("source_block_label", block.label)
+        .put("wav_filename", wavFile.name)
+        .put("wav_sha256", sha256File(wavFile))
+        .put("sample_rate_hz", reference.sampleRateHz)
+        .put("channel_count", reference.channelCount)
+        .put("bits_per_sample", reference.bitsPerSample)
+        .put("encoding", reference.encodingLabel)
+        .put("frame_count", cursorFrames)
+        .put("duration_ms", (cursorFrames * 1000.0 / reference.sampleRateHz).roundToLong())
+        .put("trial_count", trials.size)
+        .put("tactile_cue_count", cues.size)
+        .put("trials", trialRows)
+    val manifestFile = File(outputDir, "phone_materialized_block_${block.index.toString().padStart(2, '0')}.json")
+    manifestFile.writeText(manifest.toString(2), Charsets.UTF_8)
+    return PhoneScheduledBlockAssemblyResult(wavFile = wavFile, manifestFile = manifestFile, manifest = manifest, block = materializedBlock)
+}
+
 internal fun failedPhoneTopupMaterialization(reason: String): JSONObject =
     JSONObject()
         .put("schema", "pps-android-phone-topup-materialization.v1")
@@ -152,6 +272,38 @@ private data class PhoneTopupSource(
     val file: File,
     val wavInfo: PhonePcmWavInfo,
 )
+
+private data class PhoneScheduledBlockSource(
+    val trial: MobileTrial,
+    val assetId: String,
+    val file: File,
+    val wavInfo: PhonePcmWavInfo,
+)
+
+private fun writeConcatenatedScheduledPcmWav(
+    output: File,
+    wavInfo: PhonePcmWavInfo,
+    sources: List<PhoneScheduledBlockSource>,
+) {
+    val totalDataSize = sources.sumOf { it.wavInfo.dataSizeBytes }
+    output.parentFile?.mkdirs()
+    output.outputStream().use { out ->
+        out.writeAscii("RIFF")
+        out.writeUInt32Le((36L + totalDataSize).toInt())
+        out.writeAscii("WAVE")
+        out.writeAscii("fmt ")
+        out.writeUInt32Le(16)
+        out.writeUInt16Le(wavInfo.formatTag)
+        out.writeUInt16Le(wavInfo.channelCount)
+        out.writeUInt32Le(wavInfo.sampleRateHz)
+        out.writeUInt32Le(wavInfo.sampleRateHz * wavInfo.blockAlignBytes)
+        out.writeUInt16Le(wavInfo.blockAlignBytes)
+        out.writeUInt16Le(wavInfo.bitsPerSample)
+        out.writeAscii("data")
+        out.writeUInt32Le(totalDataSize.toInt())
+        sources.forEach { source -> copyWavDataChunk(source.file, source.wavInfo, out) }
+    }
+}
 
 private fun writeConcatenatedPcmWav(
     output: File,

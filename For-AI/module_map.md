@@ -22,6 +22,14 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `start_part` before launching the selected synced package. Default builds without the
   local liblsl AAR still report native transport unavailable; do not present
   local marker mirrors or protocol unit tests as live Android LSL evidence.
+- Android phone-owned scheduled-block and top-up PCM materialization lives in
+  `PhoneTopupAssembler.kt`. Prepared `block_audio` WAVs remain the default
+  phone playback path, but `MainActivity.kt` can fall back to a
+  `trial_building_block`-only scheduled block by concatenating matching PCM WAV
+  data chunks into `materialized_blocks/phone_materialized_block_XX.wav`,
+  recalculating trial/cue timing from frame counts, and recording
+  `phone_scheduled_block_materialization` before the same AudioTrack
+  playback-head cue scheduler runs.
 - Optional native Android LSL marker/command transport lives in
   `PhoneNativeLslBridge.kt`. A local ignored
   `android/runner-companion/app/libs/liblsl-Android.aar` is included by Gradle
