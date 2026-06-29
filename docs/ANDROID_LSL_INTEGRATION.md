@@ -124,6 +124,9 @@ Required validation levels:
    runtime-status schema.
 2. Artifact validator:
    `python validation_protocols/scripts/validate_android_lsl_runtime_artifact.py <phone-run-dir>`.
+   The same validator also accepts Controller-mode
+   `phone_controller_runtime_status.json` and
+   `phone_controller_command_outbox.jsonl` artifacts.
 3. Emulator smoke test: install APK, run a phone-owned package, export ZIP, and
    validate `lsl_runtime_status.json`.
 4. Native LSL network test with the AAR/JNI integration: resolve Android
@@ -139,6 +142,13 @@ Use strict mode only after native transport exists:
 
 ```powershell
 .\.venv\Scripts\python.exe validation_protocols\scripts\validate_android_lsl_runtime_artifact.py <phone-run-dir> --expect-native-transport
+```
+
+For a two-phone Controller-to-Runner check where every button press should have
+a matching acknowledgement, validate the Controller outbox as well:
+
+```powershell
+.\.venv\Scripts\python.exe validation_protocols\scripts\validate_android_lsl_runtime_artifact.py <phone_controller_command_outbox.jsonl> --expect-native-transport --expect-command-acks
 ```
 
 Until that strict validator passes together with external LSL/XDF capture, the

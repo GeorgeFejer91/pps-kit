@@ -68,9 +68,30 @@ The script writes `lsl_command_ack_roundtrip_report.json` and `.md` under `artif
 
 ## Companion Boundary
 
-The Android companion app still uses the token-gated local HTTP/WebSocket companion service for PC-runner control. That is intentional: LSL does not provide request authentication, privacy, or command authorization by itself.
+The Android companion app still uses the token-gated local HTTP/WebSocket
+companion service for ordinary PC-runner control. That remains intentional:
+LSL does not provide request authentication, privacy, or command authorization
+by itself.
 
-Phone-owned packages now declare an Android LSL contract in `pps-mobile-run-package.v2`, and the Android runtime writes a local PPSMarkersV2-shaped marker mirror plus command diary in its exported artifacts. Live native Android LSL broadcast is the next integration step: it should use the same stream names and command/ack fields, keep the pairing token in command payloads, emit `applied`/`rejected` acks after local phone state changes, and keep demographics in stream metadata/payloads rather than discoverable stream names by default.
+Phone-owned packages declare an Android LSL contract in
+`pps-mobile-run-package.v2`. In default public builds, the Android runtime
+writes a PPSMarkersV2-shaped local marker mirror, command diary, controller
+outbox, and runtime status artifacts. When the ignored local
+`android/runner-companion/app/libs/liblsl-Android.aar` is supplied for a
+validation build, the same app can open native `PPSMarkersV2` /
+`PPSTriggerCodes` outlets, receive token-gated `PPSCommandSignalsV1` samples,
+emit `PPSCommandAcksV1`, and let Controller mode publish command-button samples
+over native LSL while still keeping the local outbox.
+
+The pairing token stays in the command payload (`token` or `companion_token`),
+not in stream names. Demographics and tactile thresholds stay in metadata and
+marker payload artifacts by default rather than discoverable stream names.
+Use `validation_protocols/scripts/validate_android_lsl_runtime_artifact.py` on
+phone-run folders, exported ZIPs, `lsl_runtime_status.json`, Controller-mode
+`phone_controller_runtime_status.json`, or
+`phone_controller_command_outbox.jsonl`. Add `--expect-native-transport` for
+native marker/command/controller transport checks and `--expect-command-acks`
+when a controller-runner test should prove matching acknowledgements.
 
 ## References
 

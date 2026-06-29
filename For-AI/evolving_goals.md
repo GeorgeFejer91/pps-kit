@@ -175,6 +175,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `tactile_threshold_source=android_haptic_calibration`, and uses the mapped
   amplitude for phone vibration cues. This is a phone-vibrator working
   threshold only, not Woojer/physical vibration timing evidence.
+- The Android LSL artifact validator now treats Controller-mode evidence as a
+  first-class artifact type. In addition to phone-run folders/ZIPs and
+  `lsl_runtime_status.json`, `validate_android_lsl_runtime_artifact.py` accepts
+  `phone_controller_runtime_status.json` and
+  `phone_controller_command_outbox.jsonl`, verifies the PC-compatible
+  command/ack channel order and token payload, can require native controller
+  sends with `--expect-native-transport`, and can require matching acks with
+  `--expect-command-acks`. Use this for non-emulator audits of the
+  phone-to-phone controller contract before claiming live Android LSL evidence.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only
