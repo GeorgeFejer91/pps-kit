@@ -9,20 +9,21 @@
   - `python -m compileall -q src/peripersonal_space_toolkit/focus_app.py src/peripersonal_space_toolkit/tactile_calibration`
   - `python -m pytest -q tests/test_tactile_calibration.py tests/test_focus_app.py`
 
-## What Remains
+## Local Packaged Runner Completed
 
-The packaged runner still needs to be rebuilt and smoke-validated after these source changes. The rebuild was started but interrupted at the user's request. Before rebuilding, make sure no old packaged runner or PyInstaller process is holding files in `dist/PPSExperimentRunner`.
+The local packaged runner was rebuilt after closing the stale `PPSExperimentRunner.exe` process that locked `dist/PPSExperimentRunner`.
 
-Recommended finish sequence:
+Completed commands:
 
-1. Check and close stale runner/build processes:
-   `Get-CimInstance Win32_Process | Where-Object { $_.Name -like '*PPS*' -or $_.Name -like '*pyinstaller*' -or $_.CommandLine -like '*Build_Experiment_Runner*' -or $_.CommandLine -like '*PPSExperimentRunner*' }`
-2. If needed, stop only the stale `PPSExperimentRunner.exe`, PyInstaller, or `Build_Experiment_Runner_Exe.ps1` processes. Do not stop unrelated Python/http-server work.
-3. Rebuild the packaged runner:
-   `powershell -ExecutionPolicy Bypass -File .\windows\Build_Experiment_Runner_Exe.ps1`
-4. Run packaged-runner smoke validation:
-   `python validation_protocols/scripts/run_study5_end_to_end_ui_mouse_validation.py --packaged-standalone-app --output-dir artifacts/validation_runs/tactile_calibration_success_return_packaged_runner_20260629 --participant-id P901 --timeout-s 240`
-5. Commit and push the rebuild-confirmation follow-up if any tracked files are changed. `dist/` and validation artifacts are ignored, so record validation status in the final response or a relevant `For-AI/` note if the handoff is completed later.
+- `powershell -ExecutionPolicy Bypass -File .\windows\Build_Experiment_Runner_Exe.ps1`
+- `python validation_protocols/scripts/run_study5_end_to_end_ui_mouse_validation.py --packaged-standalone-app --output-dir artifacts/validation_runs/tactile_calibration_success_return_packaged_runner_20260629 --participant-id P901 --timeout-s 240`
+
+Result:
+
+- Rebuilt local exe: `dist/PPSExperimentRunner/PPSExperimentRunner.exe`
+- Rebuilt exe timestamp on this PC: `2026-06-29 16:09:08`
+- Packaged-runner validation: passed, no failures, exit code 0.
+- Validation report: `artifacts/validation_runs/tactile_calibration_success_return_packaged_runner_20260629/packaged_standalone_runner_background_mouse_validation.json`
 
 ## Build Blocker Seen
 
