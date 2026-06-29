@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260629-burst-source-mode">
+  <link rel="stylesheet" href="styles.css?v=20260629-stationary-baseline">
 </head>
 <body>
   <div class="app-shell">
@@ -208,7 +208,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="../viewer/index.html?v=20260629-burst-source-mode"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="../viewer/index.html?v=20260629-stationary-baseline"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -349,6 +349,7 @@
                 <option value="max_anchor">Maximum SOA anchor</option>
                 <option value="min_max">Minimum + maximum SOA anchors</option>
                 <option value="tactile_only">Full SOA tactile-only</option>
+                <option value="stationary_burst">Full SOA stationary bursts</option>
                 <option value="custom">Custom timings</option>
                 <option value="soa_zero">Legacy sound onset</option>
                 <option value="sound_offset">Legacy sound offset</option>
@@ -387,6 +388,11 @@
                 <input type="checkbox" name="baseline-option" value="tactile_only">
                 <span class="baseline-option-title">Full SOA tactile-only</span>
                 <span class="baseline-option-copy">Preserve fixed clips and jitter, silence looming segments, and add tactile at every SOA.</span>
+              </label>
+              <label class="baseline-option-card" data-baseline-option="stationary_burst">
+                <input type="checkbox" name="baseline-option" value="stationary_burst">
+                <span class="baseline-option-title">Full SOA stationary bursts</span>
+                <span class="baseline-option-copy">Preserve fixed clips and jitter, replace looming segments with stationary bursts, and add tactile at every SOA.</span>
               </label>
               <label class="baseline-option-card baseline-custom" data-baseline-option="custom">
                 <input type="checkbox" name="baseline-option" value="custom">
@@ -1129,7 +1135,7 @@
       </form>
     </div>
   </div>
-  <script src="hardware_pixel_art.js?v=20260629-burst-source-mode"></script>
-  <script src="app.js?v=20260629-burst-source-mode"></script>
+  <script src="hardware_pixel_art.js?v=20260629-stationary-baseline"></script>
+  <script src="app.js?v=20260629-stationary-baseline"></script>
 </body>
 </html>

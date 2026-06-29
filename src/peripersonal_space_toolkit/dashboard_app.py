@@ -4943,6 +4943,11 @@ def _baseline_anchor_specs(design: StimulusDesign) -> list[dict[str, Any]]:
             {"anchor_label": f"full_soa_{soa_ms}ms", "soa_ms": soa_ms, "mode": "tactile_only"}
             for soa_ms in soas
         ]
+    if strategy == "stationary_burst":
+        return [
+            {"anchor_label": f"stationary_burst_{soa_ms}ms", "soa_ms": soa_ms, "mode": "stationary_burst"}
+            for soa_ms in soas
+        ]
     if strategy == "custom":
         return [
             {"anchor_label": f"custom_{soa_ms}ms", "soa_ms": soa_ms, "mode": mode}
@@ -5017,7 +5022,10 @@ def _trial_bake_file_stem(
     baseline_mode: str = "",
 ) -> str:
     if family == "baseline":
-        mode = "no_looming" if baseline_mode == "tactile_only" else "audio"
+        mode = {
+            "tactile_only": "no_looming",
+            "stationary_burst": "stationary_burst",
+        }.get(baseline_mode, "audio")
         descriptor = _compact_trial_content_descriptor(variant, max_length=28)
         stem = f"baseline_{mode}_{descriptor}_soa{_duration_token(soa_ms)}_tac{_duration_token(tactile_duration_ms)}_total{_duration_token(total_duration_ms)}_ch3"
     elif family == "catch":
@@ -5196,12 +5204,121 @@ def _silence_segment_for_baseline(
     return bool(segment.get("is_looming_stimulus")) or kind == "looming_stimulus" or role == "looming_stimulus"
 
 
+def _source_noise_by_label(design: StimulusDesign, label: str) -> NoiseDefinition | None:
+    key = _source_key(label)
+    for noise in design.noises:
+        if _source_key(noise.label) == key:
+            return noise
+    return None
+
+
+def _stationary_burst_seed(label: str, noise_type: str) -> int:
+    digest = hashlib.sha256(f"stationary-burst-baseline:{label}:{noise_type}".encode("utf-8")).hexdigest()
+    return int(digest[:8], 16)
+
+
+def _stationary_burst_source_for_segment(
+    design: StimulusDesign,
+    segment: dict[str, Any],
+    work_dir: Path,
+    cache: dict[str, Path],
+) -> Path:
+    label = str(segment.get("label") or "").strip()
+    key = _source_key(label)
+    if key in cache:
+        return cache[key]
+    noise = _source_noise_by_label(design, label)
+    if noise is None:
+        raise ValueError(f"Stationary-burst baseline could not find a generated source named {label!r}.")
+    noise_type = str(noise.noise_type or "").strip().lower()
+    if noise_type not in SUPPORTED_NOISE_TYPES:
+        raise ValueError(f"Stationary-burst baseline requires a generated noise source, not {noise_type or 'unknown'}: {label}.")
+
+    source_profile = str(noise.source_profile or PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE).strip()
+    source_parameters = dict(noise.source_profile_parameters or {})
+    if source_profile == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE:
+        source_parameters = gold_standard_looming_source_parameters(source_parameters)
+
+    stationary_design = _copy_design(design)
+    stationary_design.name = f"{design.name} stationary baseline {label}".strip()
+    stationary_design.noises = [
+        NoiseDefinition(
+            label=label,
+            noise_type=noise_type,
+            azimuth_deg=noise.azimuth_deg,
+            elevation_deg=noise.elevation_deg,
+            gain=1.0,
+            source_profile=source_profile,
+            source_profile_parameters=source_parameters,
+            sequence_order=1,
+            motion_mode="stationary",
+            trajectory_snapshot=dict(noise.trajectory_snapshot or {}),
+        )
+    ]
+    stationary_design.custom_looming_files = []
+    stationary_design.prestimulus_files = []
+    stationary_design.protocol.soa_values_ms = [0]
+    stationary_design.protocol.spatial_values_cm = [float(design.trajectory.start_radius_m) * 100.0]
+    stationary_design.protocol.include_catch_trials = False
+    stationary_design.protocol.include_baseline_trials = False
+
+    source_dir = work_dir / "stationary_burst_sources" / _descriptor_label(label)
+    _ensure_dir(source_dir)
+    design_path = source_dir / "stationary_burst.design.json"
+    _write_text_file(design_path, json.dumps(design_to_dict(stationary_design), indent=2), encoding="utf-8")
+    result = render_backend.render_design_with_3dti(
+        Path(_filesystem_path(design_path)),
+        Path(_filesystem_path(source_dir)),
+        seed=_stationary_burst_seed(label, noise_type),
+        engine="python-sofa-reference",
+        include_tactile=False,
+    )
+    if not result.wav_paths:
+        raise RuntimeError(f"Stationary-burst baseline render produced no WAV for {label}.")
+    cache[key] = Path(result.wav_paths[0])
+    return cache[key]
+
+
+def _fit_audio_to_duration(data: Any, sample_rate: int, duration_s: float) -> Any:
+    import numpy as np
+
+    target_frames = max(0, int(round(max(0.0, duration_s) * sample_rate)))
+    if target_frames <= 0:
+        return np.zeros((0, data.shape[1] if getattr(data, "ndim", 0) == 2 else 2), dtype="float32")
+    if data.shape[0] > target_frames:
+        return data[:target_frames, :]
+    if data.shape[0] < target_frames:
+        padding = np.zeros((target_frames - data.shape[0], data.shape[1]), dtype=data.dtype)
+        return np.concatenate([data, padding], axis=0)
+    return data
+
+
+def _stationary_burst_replacements_for_segments(
+    design: StimulusDesign,
+    segments: list[dict[str, Any]],
+    work_dir: Path,
+    cache: dict[str, Path],
+) -> dict[str, Path]:
+    replacements: dict[str, Path] = {}
+    for segment in segments:
+        if not _silence_segment_for_baseline(
+            segment,
+            silence_all_audio=False,
+            silence_looming_audio=True,
+        ):
+            continue
+        path = _stationary_burst_source_for_segment(design, segment, work_dir, cache)
+        replacements[_source_key(str(segment.get("label") or ""))] = path
+    return replacements
+
+
 def _write_audio_from_segments(
     path: Path,
     segments: list[dict[str, Any]],
     *,
     silence_all_audio: bool,
     silence_looming_audio: bool = False,
+    looming_replacement_paths: dict[str, Path] | None = None,
 ) -> float:
     import numpy as np
     import soundfile as sf
@@ -5218,10 +5335,19 @@ def _write_audio_from_segments(
         )
         source_text = str(segment.get("path") or "").strip()
         source_path = Path(source_text) if source_text else Path()
+        replacement_path = None
+        if should_silence and looming_replacement_paths is not None:
+            replacement_path = looming_replacement_paths.get(_source_key(str(segment.get("label") or "")))
+            if replacement_path is not None:
+                source_path = Path(replacement_path)
+                source_text = str(source_path)
+                should_silence = False
         if source_text and _path_exists(source_path) and not should_silence:
             data, rate = _read_stereo_audio(source_path, target_sample_rate=sample_rate)
             if not sample_rate:
                 sample_rate = rate
+            if replacement_path is not None:
+                data = _fit_audio_to_duration(data, sample_rate, duration_s)
             chunks.append(data * max(0.0, float(segment.get("gain", 1.0))))
         else:
             if not sample_rate:
@@ -5270,6 +5396,7 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
     work_dir = root / "_work"
     file_rows: list[dict[str, Any]] = []
     row_summaries: dict[tuple[str, int, str], dict[str, Any]] = {}
+    stationary_burst_cache: dict[str, Path] = {}
 
     def record_row_summary(family: str, row_index: int, row_label: str, row_folder: Path) -> None:
         key = (family, row_index, str(row_folder))
@@ -5434,6 +5561,22 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
                     anchor_label = str(anchor.get("anchor_label") or f"soa_{soa_ms}ms")
                     if mode == "audio_tactile":
                         baseline_source_path = source_path
+                    elif mode == "stationary_burst":
+                        source_stem = _descriptor_label(f"baseline_stationary_source_{variant_key}_soa{soa_ms:04d}ms")
+                        baseline_source_path = work_dir / f"{source_stem}.wav"
+                        stationary_replacements = _stationary_burst_replacements_for_segments(
+                            design,
+                            segments,
+                            work_dir,
+                            stationary_burst_cache,
+                        )
+                        _write_audio_from_segments(
+                            baseline_source_path,
+                            segments,
+                            silence_all_audio=False,
+                            silence_looming_audio=True,
+                            looming_replacement_paths=stationary_replacements,
+                        )
                     else:
                         source_stem = _descriptor_label(f"baseline_source_{variant_key}_soa{soa_ms:04d}ms")
                         baseline_source_path = work_dir / f"{source_stem}.wav"
@@ -7037,7 +7180,7 @@ def _normalize_study5_full_soa_baseline_defaults(design: StimulusDesign) -> Stim
     design.protocol.include_baseline_trials = True
     design.protocol.include_catch_trials = True
     design.protocol.catch_trial_percentage = 0.0
-    design.protocol.baseline_strategy = "tactile_only"
+    design.protocol.baseline_strategy = "stationary_burst"
     design.protocol.baseline_custom_trial_mode = "tactile_only"
     design.protocol.baseline_soa_values_ms = []
     for strip in design.protocol.trial_strips:
@@ -8128,10 +8271,11 @@ def _study_settings_manifest(context: DashboardProjectContext, design: StimulusD
                 for element in strip.elements
             ],
         })
+    full_soa_baseline = str(protocol.baseline_strategy or "").strip().lower() in {"tactile_only", "stationary_burst"}
     baseline_note = (
         "Empty baseline_soa_values_ms means full-SOA baseline generation uses the main soa_values_ms list."
         if protocol.include_baseline_trials
-        and str(protocol.baseline_strategy or "").strip().lower() == "tactile_only"
+        and full_soa_baseline
         and not protocol.baseline_soa_values_ms
         else ""
     )
@@ -8339,7 +8483,7 @@ def _study_settings_manifest(context: DashboardProjectContext, design: StimulusD
                 "effective_soa_values_ms": [int(anchor["soa_ms"]) for anchor in baseline_anchors],
                 "full_soa_uses_main_soa_values": bool(
                     protocol.include_baseline_trials
-                    and str(protocol.baseline_strategy or "").strip().lower() == "tactile_only"
+                    and full_soa_baseline
                     and not protocol.baseline_soa_values_ms
                 ),
             },

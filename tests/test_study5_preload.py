@@ -140,7 +140,7 @@ def test_dashboard_replaces_noncanonical_study5_saved_profile_on_load(tmp_path: 
     assert "outdated trial rows" not in state["design"]["study_profile_notes"]
     assert state["design"]["protocol"]["include_catch_trials"] is True
     assert state["design"]["protocol"]["include_baseline_trials"] is True
-    assert state["design"]["protocol"]["baseline_strategy"] == "tactile_only"
+    assert state["design"]["protocol"]["baseline_strategy"] == "stationary_burst"
     assert state["design"]["protocol"]["baseline_custom_trial_mode"] == "tactile_only"
     assert state["design"]["protocol"]["baseline_soa_values_ms"] == []
     assert state["design"]["protocol"]["trial_pool_repetition_defaults"] == {
@@ -165,7 +165,7 @@ def test_unpublished_study5_template_preloads_breathing_assets_and_filmstrip():
     assert design.protocol.include_catch_trials is True
     assert design.protocol.catch_trial_percentage == pytest.approx(0.0)
     assert design.protocol.include_baseline_trials is True
-    assert design.protocol.baseline_strategy == "tactile_only"
+    assert design.protocol.baseline_strategy == "stationary_burst"
     assert design.protocol.baseline_custom_trial_mode == "tactile_only"
     assert design.protocol.baseline_soa_values_ms == []
     assert design.protocol.trial_pool_repetition_defaults == {

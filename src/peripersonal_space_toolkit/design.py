@@ -32,6 +32,7 @@ SUPPORTED_BASELINE_STRATEGIES = (
     "max_anchor",
     "min_max",
     "tactile_only",
+    "stationary_burst",
     "soa_zero",
     "sound_offset",
     "custom",

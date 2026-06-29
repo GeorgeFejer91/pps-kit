@@ -274,6 +274,10 @@ const BASELINE_STRATEGY_NOTES = {
     label: "Full SOA tactile-only",
     note: "Fixed clips and jitter are preserved, looming segments are silenced, and tactile is added at every SOA."
   },
+  stationary_burst: {
+    label: "Full SOA stationary bursts",
+    note: "Fixed clips and jitter are preserved, looming segments are replaced by stationary burst trains, and tactile is added at every SOA."
+  },
   min_max: {
     label: "Minimum + maximum SOA anchors",
     note: "The full trial audio is preserved and tactile is added at the first and last entered SOA."
@@ -3925,6 +3929,9 @@ function baselineAnchorSpecsFromInputs() {
   if (strategy === "tactile_only") {
     return soaValues.map((soa) => ({ label: "full SOA tactile-only", soa_ms: soa, mode: "tactile_only" }));
   }
+  if (strategy === "stationary_burst") {
+    return soaValues.map((soa) => ({ label: "full SOA stationary burst", soa_ms: soa, mode: "stationary_burst" }));
+  }
   if (strategy === "custom") {
     const mode = $("baseline-custom-audio-tactile")?.checked ? "audio_tactile" : "tactile_only";
     return parseIntegerList($("baseline-soa-values").value).map((soa) => ({ label: "custom", soa_ms: soa, mode }));
@@ -4099,9 +4106,11 @@ function strategyFromBaselineCheckboxes(changedInput = null) {
   if (changed === "none" && changedInput.checked) return "none";
   if (changed === "custom" && changedInput.checked) return "custom";
   if (changed === "tactile_only" && changedInput.checked) return "tactile_only";
+  if (changed === "stationary_burst" && changedInput.checked) return "stationary_burst";
   checked.delete("none");
   checked.delete("custom");
   checked.delete("tactile_only");
+  checked.delete("stationary_burst");
   const wantsMin = checked.has("min_anchor");
   const wantsMax = checked.has("max_anchor");
   if (wantsMin && wantsMax) return "min_max";

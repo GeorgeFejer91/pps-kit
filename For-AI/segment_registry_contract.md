@@ -209,6 +209,9 @@ Filename convention:
 - Include total trial duration in milliseconds.
 - Mark that tactile is in channel 3.
 - Do not include row numbers in the WAV filename. Row/family identity belongs in the folder and manifest.
+- Legacy tactile-only/no-looming baselines use `baseline_no_looming_...`;
+  stationary-burst baselines, including the current Study 5 default, use
+  `baseline_stationary_burst_...`.
 
 Example:
 
@@ -219,8 +222,8 @@ Example:
       inhale4000ms_pinklooming4000ms_soa300ms_tac120ms_total8000ms_ch3.wav
       inhale4000ms_pinklooming4000ms_soa800ms_tac120ms_total8000ms_ch3.wav
     baseline/
-      baseline_no_looming_inhale4000ms_pinklooming4000ms_soa300ms_tac120ms_total8000ms_ch3.wav
-      baseline_no_looming_inhale4000ms_pinklooming4000ms_soa800ms_tac120ms_total8000ms_ch3.wav
+      baseline_stationary_burst_inhale4000ms_pinklooming4000ms_soa300ms_tac120ms_total8000ms_ch3.wav
+      baseline_stationary_burst_inhale4000ms_pinklooming4000ms_soa800ms_tac120ms_total8000ms_ch3.wav
     catch_trials/
       catch_inhale4000ms_pinklooming4000ms_total8000ms_audio.wav
 ```

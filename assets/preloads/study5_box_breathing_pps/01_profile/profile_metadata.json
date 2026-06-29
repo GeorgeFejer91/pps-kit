@@ -6,7 +6,7 @@
   "doi": "",
   "source_url": "docs/STUDY5_PROTOCOL.md",
   "verification_status": "verified",
-  "notes": "Local unpublished Study 5 preload using white and pink frontal looming sources. This is the canonical Study 5 profile in this repository. It retains the Study 5 timing, SOA, baseline, catch, instruction, trajectory, block, and participant defaults, and scales Segment 4 family repetitions for the two-source pool so the prepared trial pool preserves 204 rows and six 34-trial blocks.",
+  "notes": "Local unpublished Study 5 preload using white and pink frontal looming burst sources. This is the canonical Study 5 profile in this repository. It retains the Study 5 timing, SOA, stationary-burst baseline, catch, instruction, trajectory, block, and participant defaults, and scales Segment 4 family repetitions for the two-source pool so the prepared trial pool preserves 204 rows and six 34-trial blocks.",
   "reference_parameters": {
     "profile_type": "local_unpublished_study5_box_breathing_pps_white_pink",
     "publication_status": "unpublished_lab_profile",
@@ -150,7 +150,7 @@
     "canonical_study5_profile": true,
     "source_pool_profile": "white_pink",
     "source_pool_profile_note": "The repository retains only the white/pink Study 5 source pool as the canonical Study 5 profile.",
-    "notes": "Local unpublished Study 5 preload using white and pink frontal looming sources. This is the canonical Study 5 profile in this repository. It retains the Study 5 timing, SOA, baseline, catch, instruction, trajectory, block, and participant defaults, and scales Segment 4 family repetitions for the two-source pool so the prepared trial pool preserves 204 rows and six 34-trial blocks."
+    "notes": "Local unpublished Study 5 preload using white and pink frontal looming burst sources. This is the canonical Study 5 profile in this repository. It retains the Study 5 timing, SOA, stationary-burst baseline, catch, instruction, trajectory, block, and participant defaults, and scales Segment 4 family repetitions for the two-source pool so the prepared trial pool preserves 204 rows and six 34-trial blocks."
   },
   "provenance": [
     {

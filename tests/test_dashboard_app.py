@@ -213,7 +213,7 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260629-burst-source-mode"
+    static_version = "20260629-stationary-baseline"
     assert f'href="styles.css?v={static_version}"' in html
     assert f'src="hardware_pixel_art.js?v={static_version}"' in html
     assert f'src="app.js?v={static_version}"' in html
@@ -407,6 +407,7 @@ def test_dashboard_static_assets_are_packaged():
     assert "Minimum SOA anchor" in html
     assert "Maximum SOA anchor" in html
     assert "Full SOA tactile-only" in html
+    assert "Full SOA stationary bursts" in html
     assert "Custom timings" in html
     assert 'id="baseline-custom-audio-tactile"' in html
     assert 'id="bake-trial-files"' in html
@@ -729,7 +730,7 @@ def test_dashboard_creates_profile_and_custom_project_folders(tmp_path: Path):
     study_manifest = json.loads(study_manifest_path.read_text(encoding="utf-8"))
     assert study_manifest["schema"] == "pps-dashboard-study-settings-manifest.v1"
     assert study_manifest["gui_settings_inventory"]["baseline_strategy"]["segment"] == "3_tactile_and_baseline_trials"
-    assert study_manifest["default_settings"]["baseline_generation"]["strategy"] == "tactile_only"
+    assert study_manifest["default_settings"]["baseline_generation"]["strategy"] == "stationary_burst"
     segments = state["project_segments"]
     assert segments["0_profile"]["status"] == "ready"
     assert Path(segments["0_profile"]["study_manifest_path"]).name == "study_manifest.json"
@@ -1136,7 +1137,7 @@ def test_dashboard_loads_unpublished_study5_preload_with_instruction_events(tmp_
     assert protocol["include_catch_trials"] is True
     assert protocol["catch_trial_percentage"] == 0.0
     assert protocol["include_baseline_trials"] is True
-    assert protocol["baseline_strategy"] == "tactile_only"
+    assert protocol["baseline_strategy"] == "stationary_burst"
     assert protocol["baseline_custom_trial_mode"] == "tactile_only"
     assert protocol["baseline_soa_values_ms"] == []
     assert protocol["trial_pool_repetition_defaults"] == {
@@ -1170,7 +1171,7 @@ def test_dashboard_loads_unpublished_study5_preload_with_instruction_events(tmp_
         "catch": 6,
     }
     assert study_manifest["gui_settings_inventory"]["include_catch_trials"]["value"] is True
-    assert study_manifest["gui_settings_inventory"]["baseline_strategy"]["value"] == "tactile_only"
+    assert study_manifest["gui_settings_inventory"]["baseline_strategy"]["value"] == "stationary_burst"
     assert study_manifest["gui_settings_inventory"]["trial_pool_family_repetitions"]["value"]["baseline"] == 3
 
     strips = design["protocol"]["trial_strips"]
@@ -1528,13 +1529,13 @@ def test_dashboard_validates_full_study5_segment0_to_3_pipeline(tmp_path: Path):
     catch_wav, catch_sr = sf.read(dashboard_app._soundfile_path(catch_row["file_path"]), dtype="float32", always_2d=True)
     assert baseline_sr == baseline_row["sample_rate_hz"]
     assert baseline_wav.shape[1] == 3
-    assert baseline_row["baseline_mode"] == "tactile_only"
+    assert baseline_row["baseline_mode"] == "stationary_burst"
     assert baseline_row["channel_role_map"]["3"] == "tactile cue"
-    assert "baseline_no_looming" in Path(baseline_row["file_path"]).name
+    assert "baseline_stationary_burst" in Path(baseline_row["file_path"]).name
     looming_onset_frame = int(round(float(baseline_row["looming_segment_onset_s"]) * baseline_sr))
     assert looming_onset_frame > 0
     assert np.max(np.abs(baseline_wav[:looming_onset_frame, :2])) > 0.01
-    assert np.max(np.abs(baseline_wav[looming_onset_frame:, :2])) == pytest.approx(0.0)
+    assert np.max(np.abs(baseline_wav[looming_onset_frame:, :2])) > 0.01
     assert np.max(np.abs(baseline_wav[:, 2])) > 0.01
     assert catch_sr == catch_row["sample_rate_hz"]
     assert catch_wav.shape[1] == 2
