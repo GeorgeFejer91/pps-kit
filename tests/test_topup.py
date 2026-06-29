@@ -17,7 +17,7 @@ from peripersonal_space_toolkit.response_policy import TACTILE_RESPONSE_MAX_RT_S
 from peripersonal_space_toolkit.topup import HIT, MISSED_NEEDS_TOPUP, PENDING, TopUpLedger
 
 sys.path.insert(0, str(Path(__file__).parent))
-from test_session_runner import _segment_run_setup_fixture
+from test_session_runner import _segment_run_setup_fixture, _sha256
 
 
 def _event(event_id: int, event_type: str, unix_time: float, **payload):
@@ -617,3 +617,105 @@ def test_session_runner_plays_one_topup_at_end_of_each_part(tmp_path: Path):
     part2_rows = list(csv.DictReader(result.analysis_outputs["topup_block_manifest_part2"].open(encoding="utf-8")))
     assert {row["Part_Number"] for row in part1_rows} == {"1"}
     assert {row["Part_Number"] for row in part2_rows} == {"2"}
+
+
+def test_split_part1_topup_repeats_part_blocks_01_and_02(tmp_path: Path):
+    run_manifest = _segment_run_setup_fixture(tmp_path)
+    manifest = json.loads(run_manifest.read_text(encoding="utf-8"))
+    project_root = run_manifest.parent.parent
+    block_root = project_root / "5_block_csv_preview"
+    block1_csv = block_root / "block_01_final.csv"
+    block2_csv = block_root / "block_02_final.csv"
+    block2_csv.write_text(block1_csv.read_text(encoding="utf-8"), encoding="utf-8")
+
+    block_manifest = block_root / "block_csv_preview_manifest.json"
+    block_manifest_payload = json.loads(block_manifest.read_text(encoding="utf-8"))
+    block_manifest_payload["blocks"] = [
+        {"block_index": 1, "csv_path": str(block1_csv), "csv_file_name": block1_csv.name, "trial_count": 2},
+        {"block_index": 2, "csv_path": str(block2_csv), "csv_file_name": block2_csv.name, "trial_count": 2},
+    ]
+    block_manifest.write_text(json.dumps(block_manifest_payload), encoding="utf-8")
+
+    order_csv = Path(manifest["csv_path"])
+    fieldnames = [
+        "participant_id",
+        "participant_index",
+        "experiment_structure",
+        "phase",
+        "phase_label",
+        "phase_index",
+        "participant_block_position",
+        "source_block_index",
+        "block_label",
+        "block_csv_file",
+        "block_csv_path",
+        "trial_count",
+        "duration_ms",
+        "sequence_seed",
+    ]
+    with order_csv.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        for position, source_index, source_csv, phase, phase_label, phase_index in (
+            (1, 1, block1_csv, "pre", "Part 1", 1),
+            (2, 2, block2_csv, "pre", "Part 1", 1),
+            (1, 1, block1_csv, "post", "Part 2", 2),
+        ):
+            writer.writerow(
+                {
+                    "participant_id": "P001",
+                    "participant_index": 1,
+                    "experiment_structure": "pre_post",
+                    "phase": phase,
+                    "phase_label": phase_label,
+                    "phase_index": phase_index,
+                    "participant_block_position": position,
+                    "source_block_index": source_index,
+                    "block_label": f"Block {source_index:02d}",
+                    "block_csv_file": source_csv.name,
+                    "block_csv_path": str(source_csv),
+                    "trial_count": 2,
+                    "duration_ms": 15,
+                    "sequence_seed": 123 + source_index,
+                }
+            )
+    manifest.update(
+        {
+            "experiment_structure": "pre_post",
+            "participant_count": 1,
+            "parts_per_participant": 2,
+            "blocks_per_part": 2,
+            "total_block_runs": 3,
+            "source_segment5_manifest_sha256": _sha256(block_manifest),
+        }
+    )
+    run_manifest.write_text(json.dumps(manifest), encoding="utf-8")
+
+    package = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=tmp_path / "sessions",
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+        split_parts=True,
+    )
+    engine = _TopupAwareMockAudioEngine()
+    controller = SessionRunnerController(
+        package,
+        audio_engine=engine,
+        enable_topup=True,
+        topup_approval_callback=lambda _summary: True,
+        instruction_continue_callback=lambda _context: True,
+    )
+
+    result = controller.run()
+
+    assert result.completed
+    assert len(engine.played) == 3
+    assert Path(engine.played[2]).name == "Block_03_part1_topup_repeat_blocks_01_02.wav"
+    assert result.topup_summary["topup_outcome"] == "played"
+    assert result.analysis_outputs["topup_block_wav_part1"].exists()
+    manifest_rows = list(csv.DictReader(result.analysis_outputs["topup_block_manifest_part1"].open(encoding="utf-8")))
+    assert len(manifest_rows) == 4
+    assert {row["Topup_Role"] for row in manifest_rows} == {"repeat"}
+    assert [row["Topup_Repeat_Source_Block_Index"] for row in manifest_rows] == ["1", "1", "2", "2"]
+    assert {row["Primary_Analysis_Included"] for row in manifest_rows} == {"true"}

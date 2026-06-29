@@ -83,6 +83,7 @@ LAUNCHABLE_ACTIVITY_EVENTS = {"run_setup_prepared", "session_prepared", "runner_
 PARTICIPANT_TRIAL_CSV_SUFFIX = "_trials.csv"
 EXTERNAL_LABRECORDER_SCOPE_PART = "part"
 EXTERNAL_LABRECORDER_SCOPE_SESSION_GROUP = "session_group_same_window"
+PART1_TOPUP_REPEAT_BLOCK_INDEXES = (1, 2)
 
 
 def _package_output_root(package: "RunPackage") -> Path:
@@ -3761,7 +3762,8 @@ class SessionRunnerController:
         self.topup_ledger.finalize_open_trials(part_number=part_number)
         self._persist_topup_state(part_number=part_number)
         misses = self.topup_ledger.missed_entries(include_topup=False, part_number=part_number)
-        if not misses:
+        repeat_blocks = _part1_topup_repeat_blocks(self.package, part_number=part_number)
+        if not misses and not repeat_blocks:
             payload = self._record_topup_outcome(
                 "not_needed",
                 part_number=part_number,
@@ -3786,6 +3788,7 @@ class SessionRunnerController:
                 phase_label=phase_label,
                 display_block_index=display_block_index,
                 display_block_count=display_block_count,
+                repeat_blocks=repeat_blocks,
             )
         except Exception as exc:
             self.events.log("topup_block_materialize_failed", missed_trial_count=len(misses), part_number="" if part_number is None else _part_suffix(part_number), phase_label=phase_label, message=str(exc))
@@ -3816,6 +3819,9 @@ class SessionRunnerController:
             "topup_trial_count": block.trial_count,
             "rescue_trial_count": int(block.metadata.get("rescue_trial_count", 0) or 0),
             "filler_trial_count": int(block.metadata.get("filler_trial_count", 0) or 0),
+            "repeat_trial_count": int(block.metadata.get("repeat_trial_count", 0) or 0),
+            "topup_source_mode": str(block.metadata.get("topup_source_mode") or ""),
+            "repeat_block_indexes": block.metadata.get("repeat_block_indexes") or [],
             "part_number": "" if part_number is None else _part_suffix(part_number),
             "phase_label": phase_label,
             "manifest_path": str(block.manifest_path),
@@ -4076,6 +4082,7 @@ class SessionRunnerController:
         phase_label: str = "",
         display_block_index: int | None = None,
         display_block_count: int | None = None,
+        repeat_blocks: list[RunBlock] | None = None,
     ) -> tuple[RunBlock, dict[str, Path]]:
         try:
             import numpy as np
@@ -4083,53 +4090,68 @@ class SessionRunnerController:
         except ImportError as exc:
             raise RuntimeError("Install numpy and soundfile to prepare a top-up block.") from exc
 
-        source_by_uid, row_order, rows_by_label = _topup_source_index(self.package, part_number=part_number)
-        if not row_order:
-            row_order = sorted({str(getattr(entry, "row_label", "") or "row") for entry in misses})
-        missed_uids = {str(getattr(entry, "trial_uid", "") or "") for entry in misses}
-        hit_entries = self.topup_ledger.hit_entries(include_topup=False, part_number=part_number) if self.topup_ledger is not None else []
-        hit_filler_by_label: dict[str, list[tuple[dict[str, Any], Path, RunBlock]]] = {}
-        for entry in hit_entries:
-            source = source_by_uid.get(str(entry.trial_uid))
-            if source is None:
-                continue
-            label = _topup_row_label(source[0]) or str(entry.row_label or "")
-            hit_filler_by_label.setdefault(label, []).append(source)
-
-        miss_queues: dict[str, list[tuple[Any, dict[str, Any], Path, RunBlock]]] = {}
-        for entry in misses:
-            source = source_by_uid.get(str(entry.trial_uid))
-            if source is None:
-                source = (_topup_entry_source_row(entry), self.package.session_dir, self.package.blocks[-1] if self.package.blocks else _empty_topup_source_block())
-            label = _topup_row_label(source[0]) or str(getattr(entry, "row_label", "") or "row")
-            if label not in row_order:
-                row_order.append(label)
-            miss_queues.setdefault(label, []).append((entry, source[0], source[1], source[2]))
-
-        filler_index_by_label: dict[str, int] = {}
-
-        def _filler_for(label: str) -> tuple[dict[str, Any], Path, RunBlock] | None:
-            candidates = hit_filler_by_label.get(label) or [
-                item for item in rows_by_label.get(label, []) if str(item[0].get("Trial_UID") or "") not in missed_uids
-            ] or rows_by_label.get(label, [])
-            if not candidates:
-                return None
-            index = filler_index_by_label.get(label, 0)
-            filler_index_by_label[label] = index + 1
-            return candidates[index % len(candidates)]
-
+        repeat_blocks = list(repeat_blocks or [])
+        repeat_mode = bool(repeat_blocks)
         emitted: list[tuple[str, Any | None, dict[str, Any], Path, RunBlock]] = []
-        while any(queue for queue in miss_queues.values()):
-            for label in row_order:
-                queue = miss_queues.get(label, [])
-                if queue:
-                    entry, row, base_dir, source_block = queue.pop(0)
-                    emitted.append(("rescue", entry, row, base_dir, source_block))
-                elif any(queue for queue in miss_queues.values()):
-                    filler = _filler_for(label)
-                    if filler is not None:
-                        row, base_dir, source_block = filler
-                        emitted.append(("filler", None, row, base_dir, source_block))
+        if repeat_mode:
+            row_order: list[str] = []
+            for source_block in repeat_blocks:
+                source_rows = _read_csv_rows(source_block.manifest_path)
+                if not source_rows:
+                    raise ValueError(f"Top-up repeat source block has no rows: {source_block.manifest_path}")
+                for source_row in source_rows:
+                    row = dict(source_row)
+                    label = _topup_row_label(row) or "row"
+                    if label not in row_order:
+                        row_order.append(label)
+                    emitted.append(("repeat", None, row, source_block.manifest_path.parent, source_block))
+        else:
+            source_by_uid, row_order, rows_by_label = _topup_source_index(self.package, part_number=part_number)
+            if not row_order:
+                row_order = sorted({str(getattr(entry, "row_label", "") or "row") for entry in misses})
+            missed_uids = {str(getattr(entry, "trial_uid", "") or "") for entry in misses}
+            hit_entries = self.topup_ledger.hit_entries(include_topup=False, part_number=part_number) if self.topup_ledger is not None else []
+            hit_filler_by_label: dict[str, list[tuple[dict[str, Any], Path, RunBlock]]] = {}
+            for entry in hit_entries:
+                source = source_by_uid.get(str(entry.trial_uid))
+                if source is None:
+                    continue
+                label = _topup_row_label(source[0]) or str(entry.row_label or "")
+                hit_filler_by_label.setdefault(label, []).append(source)
+
+            miss_queues: dict[str, list[tuple[Any, dict[str, Any], Path, RunBlock]]] = {}
+            for entry in misses:
+                source = source_by_uid.get(str(entry.trial_uid))
+                if source is None:
+                    source = (_topup_entry_source_row(entry), self.package.session_dir, self.package.blocks[-1] if self.package.blocks else _empty_topup_source_block())
+                label = _topup_row_label(source[0]) or str(getattr(entry, "row_label", "") or "row")
+                if label not in row_order:
+                    row_order.append(label)
+                miss_queues.setdefault(label, []).append((entry, source[0], source[1], source[2]))
+
+            filler_index_by_label: dict[str, int] = {}
+
+            def _filler_for(label: str) -> tuple[dict[str, Any], Path, RunBlock] | None:
+                candidates = hit_filler_by_label.get(label) or [
+                    item for item in rows_by_label.get(label, []) if str(item[0].get("Trial_UID") or "") not in missed_uids
+                ] or rows_by_label.get(label, [])
+                if not candidates:
+                    return None
+                index = filler_index_by_label.get(label, 0)
+                filler_index_by_label[label] = index + 1
+                return candidates[index % len(candidates)]
+
+            while any(queue for queue in miss_queues.values()):
+                for label in row_order:
+                    queue = miss_queues.get(label, [])
+                    if queue:
+                        entry, row, base_dir, source_block = queue.pop(0)
+                        emitted.append(("rescue", entry, row, base_dir, source_block))
+                    elif any(queue for queue in miss_queues.values()):
+                        filler = _filler_for(label)
+                        if filler is not None:
+                            row, base_dir, source_block = filler
+                            emitted.append(("filler", None, row, base_dir, source_block))
         if not emitted:
             raise ValueError("No missed tactile rows were available for top-up block generation.")
 
@@ -4137,9 +4159,20 @@ class SessionRunnerController:
         display_index = _as_int(display_block_index, default=block_index)
         display_count = _as_int(display_block_count, default=display_index)
         part_label = _part_suffix(part_number)
-        multi_part = len(_package_part_numbers(self.package)) > 1
-        block_label = f"Part {part_label} top-up missed tactile trials" if multi_part and part_label else "Top-up missed tactile trials"
-        block_stem = f"Block_{block_index:02d}_{'part' + part_label + '_' if multi_part and part_label else ''}topup_missed_trials"
+        multi_part = _package_is_split_part(self.package) or len(_package_part_numbers(self.package)) > 1
+        repeat_indexes = _repeat_block_indexes(repeat_blocks)
+        repeat_label = ", ".join(f"{index:02d}" for index in repeat_indexes)
+        repeat_stem = "_".join(f"{index:02d}" for index in repeat_indexes)
+        if repeat_mode:
+            block_label = (
+                f"Part {part_label} top-up repeat blocks {repeat_label}"
+                if multi_part and part_label
+                else f"Top-up repeat blocks {repeat_label}"
+            )
+            block_stem = f"Block_{block_index:02d}_{'part' + part_label + '_' if multi_part and part_label else ''}topup_repeat_blocks_{repeat_stem}"
+        else:
+            block_label = f"Part {part_label} top-up missed tactile trials" if multi_part and part_label else "Top-up missed tactile trials"
+            block_stem = f"Block_{block_index:02d}_{'part' + part_label + '_' if multi_part and part_label else ''}topup_missed_trials"
         wav_path = _package_prepared_blocks_dir(self.package) / f"{block_stem}.wav"
         manifest_stem = f"topup_block_part{part_label}_manifest" if multi_part and part_label else "topup_block_manifest"
         csv_path = self._topup_dir / f"{manifest_stem}.csv"
@@ -4220,14 +4253,23 @@ class SessionRunnerController:
             row["Block_Label"] = block_label
             row["Is_Topup"] = "true"
             row["Topup_Role"] = role
-            row["Primary_Analysis_Included"] = "true" if role == "rescue" else "false"
+            row["Primary_Analysis_Included"] = "true" if role in {"rescue", "repeat"} else "false"
             row["Source_Trial_UID"] = source_uid
             row["Original_Trial_UID"] = source_uid
             row["Topup_Source_Ledger_ID"] = "" if entry is None else getattr(entry, "ledger_id", "")
             row["Topup_Source_Block_Number"] = _row_value(source_row, "Block_Number", "block_number", default=getattr(entry, "block_number", ""))
             row["Topup_Source_Trial_Number"] = _row_value(source_row, "Trial_Number", "trial_number", default=getattr(entry, "trial_number", ""))
-            row["Topup_Attempt_Number"] = 2 if role == "rescue" else 1
-            row["Topup_Rescue_Analysis_Role"] = "primary_rescue" if role == "rescue" else "row_structure_filler"
+            row["Topup_Attempt_Number"] = 2 if role in {"rescue", "repeat"} else 1
+            row["Topup_Rescue_Analysis_Role"] = (
+                "primary_rescue" if role == "rescue" else ("block_repeat" if role == "repeat" else "row_structure_filler")
+            )
+            if role == "repeat":
+                row["Topup_Repeat_Source_Block_Index"] = _as_int(
+                    source_block.metadata.get("part_block_number", source_block.index),
+                    default=source_block.index,
+                )
+                row["Topup_Repeat_Source_Block_Label"] = source_block.label
+                row["Topup_Repeat_Source_Block_Manifest"] = str(source_block.manifest_path)
             trial_rows.append(row)
             frame_cursor = trial_end_sample
 
@@ -4258,9 +4300,13 @@ class SessionRunnerController:
                     "display_block_count": display_count,
                     "block_label": block_label,
                     "row_order": row_order,
+                    "topup_source_mode": "repeat_blocks" if repeat_mode else "missed_trials",
+                    "repeat_block_indexes": repeat_indexes,
+                    "repeat_block_manifest_paths": [str(block.manifest_path) for block in repeat_blocks],
                     "missed_trial_count": len(misses),
                     "rescue_trial_count": sum(1 for row in trial_rows if row.get("Topup_Role") == "rescue"),
                     "filler_trial_count": sum(1 for row in trial_rows if row.get("Topup_Role") == "filler"),
+                    "repeat_trial_count": sum(1 for row in trial_rows if row.get("Topup_Role") == "repeat"),
                     "csv_path": str(csv_path),
                     "wav_path": str(wav_path),
                     "rows": _json_ready(trial_rows),
@@ -4286,8 +4332,12 @@ class SessionRunnerController:
                 "part_number": _as_int(_row_value(trial_rows[0], "Part_Number", default=1), default=1) if trial_rows else 1,
                 "sample_rate_hz": sample_rate,
                 "channels": target_channels,
+                "topup_source_mode": "repeat_blocks" if repeat_mode else "missed_trials",
+                "repeat_block_indexes": repeat_indexes,
+                "repeat_block_manifest_paths": [str(block.manifest_path) for block in repeat_blocks],
                 "rescue_trial_count": sum(1 for row in trial_rows if row.get("Topup_Role") == "rescue"),
                 "filler_trial_count": sum(1 for row in trial_rows if row.get("Topup_Role") == "filler"),
+                "repeat_trial_count": sum(1 for row in trial_rows if row.get("Topup_Role") == "repeat"),
                 "topup_manifest_json": str(json_path),
                 "topup_part_number": "" if part_number is None else part_label,
                 "topup_phase_label": phase_label,
@@ -4350,7 +4400,7 @@ class SessionRunnerController:
                 key = f"topup_block_manifest_json_part{match.group(1)}" if match else part_json.stem
                 topup_outputs[key] = part_json
             topup_block_dir = _package_prepared_blocks_dir(self.package)
-            for topup_wav in sorted(topup_block_dir.glob("*topup_missed_trials.wav")):
+            for topup_wav in sorted(topup_block_dir.glob("*topup*.wav")):
                 match = re.search(r"_part([^_]+)_topup", topup_wav.stem)
                 if match:
                     topup_outputs[f"topup_block_wav_part{match.group(1)}"] = topup_wav
@@ -5310,6 +5360,38 @@ def _timeline_trial_segments(schedule: BlockEventSchedule | None) -> list[dict[s
             }
         )
     return segments
+
+
+def _part1_topup_repeat_blocks(
+    package: RunPackage,
+    *,
+    part_number: int | str | None,
+) -> list[RunBlock]:
+    """Return the part-local blocks that should be replayed by the Part 1 top-up."""
+    if _part_suffix(part_number) != "1":
+        return []
+    if not _package_is_split_part(package) or _package_split_part_count(package) < 2:
+        return []
+    wanted = {int(index) for index in PART1_TOPUP_REPEAT_BLOCK_INDEXES}
+    matches: dict[int, RunBlock] = {}
+    for block in package.blocks:
+        if _truthy(block.metadata.get("is_topup_block")):
+            continue
+        if _block_part_key(block) != "1":
+            continue
+        part_block_index = _as_int(block.metadata.get("part_block_number", block.index), default=block.index)
+        if part_block_index in wanted:
+            matches[int(part_block_index)] = block
+    if set(matches) != wanted:
+        return []
+    return [matches[index] for index in PART1_TOPUP_REPEAT_BLOCK_INDEXES]
+
+
+def _repeat_block_indexes(blocks: list[RunBlock]) -> list[int]:
+    return [
+        _as_int(block.metadata.get("part_block_number", block.index), default=block.index)
+        for block in blocks
+    ]
 
 
 def _topup_source_index(
