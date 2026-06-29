@@ -111,6 +111,7 @@ class MobilePackageParserTest {
         assertEquals("schedulehash", manifest.reconstruction.scheduleHash)
         assertEquals("PPSMarkersV2", manifest.lsl.richMarkersName)
         assertTrue(manifest.lsl.supportedCommands.contains("pause"))
+        assertTrue(manifest.rawManifestJson.contains("\"package_id\""))
     }
 
     @Test

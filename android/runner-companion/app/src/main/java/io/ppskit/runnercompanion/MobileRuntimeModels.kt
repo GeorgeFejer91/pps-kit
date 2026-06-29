@@ -43,6 +43,7 @@ data class MobileRunPackage(
     val mobileRunnable: Boolean,
     val phoneOwnedSession: Boolean,
     val warnings: List<String>,
+    val rawManifestJson: String = "",
 ) {
     fun asset(assetId: String): MobileAsset? = assets.firstOrNull { it.assetId == assetId }
 }
@@ -175,6 +176,7 @@ object MobilePackageParser {
             mobileRunnable = root.optBoolean("mobile_runnable", false),
             phoneOwnedSession = root.optBoolean("phone_owned_session", false),
             warnings = root.optJSONArray("warnings").toStringList(),
+            rawManifestJson = root.toString(2),
         )
     }
 }

@@ -1783,6 +1783,10 @@ private class PhoneRunSession(
         dir.mkdirs()
         val eventsArray = JSONArray()
         events.forEach { eventsArray.put(JSONObject(it.toString())) }
+        val packageManifestText = phoneRunPackageManifestText(runPackage)
+        val packageManifestSha256 = sha256Text(packageManifestText)
+        val packageManifestFile = File(dir, "run_package_manifest.json")
+        val reconstructionFile = File(dir, "reconstruction_contract.json")
         val payload = JSONObject()
             .put("schema", if (complete) "pps-mobile-run-complete.v1" else "pps-mobile-run-events.v1")
             .put("status", if (complete) "complete" else "in_progress")
@@ -1800,11 +1804,25 @@ private class PhoneRunSession(
                     .put("title", runPackage.title)
                     .put("block_count", runPackage.blocks.size),
             )
+            .put(
+                "package_manifest",
+                JSONObject()
+                    .put("filename", packageManifestFile.name)
+                    .put("sha256", packageManifestSha256),
+            )
+            .put(
+                "reconstruction_artifact",
+                JSONObject()
+                    .put("filename", reconstructionFile.name)
+                    .put("schema", "pps-mobile-phone-run-reconstruction.v1"),
+            )
             .put("events", eventsArray)
             .put("lsl_marker_mirror", JSONArray().also { array -> lslMarkers.forEach { array.put(JSONObject(it.toString())) } })
             .put("command_diary", JSONArray().also { array -> commandDiary.forEach { array.put(JSONObject(it.toString())) } })
             .put("summary", summaryLocked())
         val artifactFile = File(dir, if (complete) "completion.json" else "latest_events.json")
+        packageManifestFile.writeText(packageManifestText, Charsets.UTF_8)
+        reconstructionFile.writeText(phoneRunReconstructionArtifact(runPackage, packageManifestSha256).toString(2), Charsets.UTF_8)
         artifactFile.writeText(payload.toString(2), Charsets.UTF_8)
         writePhoneEventsCsv(File(dir, "events.csv"), events)
         writePhoneEventsCsv(File(dir, "lsl_marker_mirror.csv"), lslMarkers)
@@ -1819,6 +1837,8 @@ private class PhoneRunSession(
             .put("event_count", events.size)
             .put("artifact_path", artifactFile.absolutePath)
             .put("artifact_dir", dir.absolutePath)
+            .put("package_manifest_path", packageManifestFile.absolutePath)
+            .put("reconstruction_artifact_path", reconstructionFile.absolutePath)
     }
 
     private fun currentBlockElapsedMs(): Long =
@@ -1876,6 +1896,93 @@ private class PhoneRunSession(
             .put("lsl_marker_mirror_count", lslMarkers.size)
             .put("command_diary_count", commandDiary.size)
 }
+
+private fun phoneRunPackageManifestText(runPackage: MobileRunPackage): String =
+    runPackage.rawManifestJson.ifBlank {
+        JSONObject()
+            .put("schema", MOBILE_PACKAGE_SCHEMA)
+            .put("package_id", runPackage.packageId)
+            .put("participant_id", runPackage.participantId)
+            .put("session_id", runPackage.sessionId)
+            .put("session_group_id", runPackage.sessionGroupId)
+            .put("part_session_id", runPackage.partSessionId)
+            .put("part_number", runPackage.partNumber)
+            .put("title", runPackage.title)
+            .put("block_count", runPackage.blocks.size)
+            .put("asset_count", runPackage.assets.size)
+            .put("building_block_count", runPackage.buildingBlocks.size)
+            .put("schedule_hash", runPackage.reconstruction.scheduleHash)
+            .toString(2)
+    }
+
+private fun phoneRunReconstructionArtifact(runPackage: MobileRunPackage, manifestSha256: String): JSONObject =
+    JSONObject()
+        .put("schema", "pps-mobile-phone-run-reconstruction.v1")
+        .put("package_id", runPackage.packageId)
+        .put("participant_id", runPackage.participantId)
+        .put("session_id", runPackage.sessionId)
+        .put("session_group_id", runPackage.sessionGroupId)
+        .put("part_session_id", runPackage.partSessionId)
+        .put("part_number", runPackage.partNumber)
+        .put("run_package_manifest_sha256", manifestSha256)
+        .put(
+            "reconstruction",
+            JSONObject()
+                .put("schema", runPackage.reconstruction.schema)
+                .put("authority", runPackage.reconstruction.authority)
+                .put("fallback_execution_strategy", runPackage.reconstruction.fallbackExecutionStrategy)
+                .put("preferred_lightweight_strategy", runPackage.reconstruction.preferredLightweightStrategy)
+                .put("source_run_setup_sha256", runPackage.reconstruction.sourceRunSetupSha256)
+                .put("schedule_hash", runPackage.reconstruction.scheduleHash)
+                .put("building_block_count", runPackage.reconstruction.buildingBlockCount)
+                .put("block_count", runPackage.reconstruction.blockCount)
+                .put("trial_count", runPackage.reconstruction.trialCount),
+        )
+        .put(
+            "lsl",
+            JSONObject()
+                .put("schema", runPackage.lsl.schema)
+                .put("runtime_authority", runPackage.lsl.runtimeAuthority)
+                .put("rich_markers_name", runPackage.lsl.richMarkersName)
+                .put("numeric_triggers_name", runPackage.lsl.numericTriggersName)
+                .put("command_signals_name", runPackage.lsl.commandSignalsName)
+                .put("command_acks_name", runPackage.lsl.commandAcksName)
+                .put("native_android_lsl_required", runPackage.lsl.nativeAndroidLslRequired)
+                .put("current_android_source_behavior", runPackage.lsl.currentAndroidSourceBehavior),
+        )
+        .put(
+            "assets",
+            JSONArray().also { array ->
+                runPackage.assets.forEach { asset ->
+                    array.put(
+                        JSONObject()
+                            .put("asset_id", asset.assetId)
+                            .put("filename", asset.filename)
+                            .put("role", asset.role)
+                            .put("media_type", asset.mediaType)
+                            .put("size_bytes", asset.sizeBytes)
+                            .put("sha256", asset.sha256),
+                    )
+                }
+            },
+        )
+        .put(
+            "blocks",
+            JSONArray().also { array ->
+                runPackage.blocks.forEach { block ->
+                    array.put(
+                        JSONObject()
+                            .put("block_id", block.blockId)
+                            .put("index", block.index)
+                            .put("label", block.label)
+                            .put("duration_s", block.durationS)
+                            .put("trial_count", block.trialCount)
+                            .put("audio_asset_id", block.audioAssetId)
+                            .put("tactile_cue_count", block.tactileCues.size),
+                    )
+                }
+            },
+        )
 
 private fun phoneParticipantMetadata(
     runPackage: MobileRunPackage,
@@ -2151,6 +2258,12 @@ private fun sha256File(file: File): String {
             digest.update(buffer, 0, read)
         }
     }
+    return digest.digest().joinToString("") { "%02x".format(it) }
+}
+
+private fun sha256Text(value: String): String {
+    val digest = MessageDigest.getInstance("SHA-256")
+    digest.update(value.toByteArray(Charsets.UTF_8))
     return digest.digest().joinToString("") { "%02x".format(it) }
 }
 

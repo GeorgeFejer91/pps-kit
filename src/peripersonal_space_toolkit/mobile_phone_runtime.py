@@ -24,7 +24,7 @@ MOBILE_RUNTIME_ARTIFACT_SCHEMA = "pps-mobile-runtime-artifact.v1"
 MOBILE_RECONSTRUCTION_SCHEMA = "pps-mobile-reconstruction-contract.v1"
 MOBILE_LSL_CONTRACT_SCHEMA = "pps-mobile-lsl-contract.v1"
 MOBILE_RUNTIME_LIMITATIONS = [
-    "Phone runtime plays prepared block WAVs locally and records phone touch timestamps.",
+    "Phone runtime plays prepared PCM block WAVs locally through Android AudioTrack and records phone touch timestamps.",
     "Phone vibration is driven by Android vibrator timing and is not equivalent to the PC tactile audio output.",
     "Phone runtime writes a local LSL-compatible marker mirror; native Android LSL broadcast requires the optional liblsl Android layer.",
     "Phone runtime does not own LabRecorder, Woojer, or hardware loopback evidence.",
@@ -281,6 +281,8 @@ def build_mobile_package_manifest(
         "warnings": warnings,
         "runtime": {
             "mode": "mobile_phone_runtime",
+            "audio_playback_strategy": "audiotrack_pcm_wav_playback_head",
+            "tactile_cue_scheduler": "audiotrack_playback_head",
             "response_input": "touch",
             "tactile_output": "android_vibrator",
             "clock": "android_elapsed_realtime",
