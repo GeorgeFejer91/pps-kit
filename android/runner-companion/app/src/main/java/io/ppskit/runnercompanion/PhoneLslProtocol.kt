@@ -178,6 +178,7 @@ internal fun phoneLslRuntimeStatus(
     runId: String,
     nativeBridgeStatus: PhoneNativeLslBridgeStatus = PhoneNativeLslBridgeFactory.create().status(),
     markerTransportStatus: PhoneNativeLslBridgeStatus? = null,
+    commandTransportStatus: PhoneNativeLslBridgeStatus? = null,
     commandReceiverAvailable: Boolean = false,
 ): JSONObject {
     val richName = runPackage.lsl.richMarkersName.ifBlank { "PPSMarkersV2" }
@@ -185,8 +186,20 @@ internal fun phoneLslRuntimeStatus(
     val commandName = runPackage.lsl.commandSignalsName.ifBlank { PHONE_LSL_COMMAND_STREAM_NAME }
     val ackName = runPackage.lsl.commandAcksName.ifBlank { PHONE_LSL_ACK_STREAM_NAME }
     val activeMarkerTransport = markerTransportStatus?.enabled == true
+    val activeCommandTransport = commandTransportStatus?.enabled == true || commandReceiverAvailable
     val nativeAvailable = nativeBridgeStatus.available
-    val reason = markerTransportStatus?.reason?.ifBlank { nativeBridgeStatus.reason } ?: nativeBridgeStatus.reason
+    val reason = when {
+        !nativeAvailable -> nativeBridgeStatus.reason
+        markerTransportStatus != null && !activeMarkerTransport -> markerTransportStatus.reason
+        commandTransportStatus != null && !activeCommandTransport -> commandTransportStatus.reason
+        else -> nativeBridgeStatus.reason
+    }
+    val sourceBehavior = when {
+        activeMarkerTransport && activeCommandTransport -> "native_lsl_markers_and_commands_with_local_mirror"
+        activeMarkerTransport -> "native_lsl_markers_with_local_mirror"
+        activeCommandTransport -> "native_lsl_commands_with_local_marker_mirror"
+        else -> runPackage.lsl.currentAndroidSourceBehavior.ifBlank { "local_lsl_marker_mirror" }
+    }
     return JSONObject()
         .put("schema", PHONE_LSL_RUNTIME_STATUS_SCHEMA)
         .put("package_id", runPackage.packageId)
@@ -202,14 +215,10 @@ internal fun phoneLslRuntimeStatus(
         .put("native_transport_available", nativeAvailable)
         .put("native_marker_transport_enabled", activeMarkerTransport)
         .put("native_marker_timestamp_strategy", "android_elapsed_realtime_plus_open_lsl_clock_offset")
-        .put("command_receiver_available", commandReceiverAvailable)
-        .put(
-            "current_android_source_behavior",
-            if (activeMarkerTransport) "native_lsl_markers_with_local_mirror"
-            else runPackage.lsl.currentAndroidSourceBehavior.ifBlank { "local_lsl_marker_mirror" },
-        )
-        .put("reason", if (activeMarkerTransport) "" else reason.ifBlank { "native_lsl_marker_transport_not_enabled" })
-        .put("native_bridge", phoneNativeLslStatusJson(nativeBridgeStatus, markerTransportStatus))
+        .put("command_receiver_available", activeCommandTransport)
+        .put("current_android_source_behavior", sourceBehavior)
+        .put("reason", if (activeMarkerTransport && activeCommandTransport) "" else reason.ifBlank { "native_lsl_transport_not_fully_enabled" })
+        .put("native_bridge", phoneNativeLslStatusJson(nativeBridgeStatus, markerTransportStatus, commandTransportStatus))
         .put(
             "streams",
             JSONObject()

@@ -11,11 +11,14 @@ class PhoneNativeLslBridgeTest {
     fun bridgeReportsUnavailableWhenLiblslAndroidAarIsAbsent() {
         val bridge = PhoneNativeLslBridgeFactory.create()
         val status = bridge.status()
+        val commandTransport = bridge.openCommandTransport(emptyPackage(), "run-001")
 
         assertFalse(status.available)
         assertFalse(status.enabled)
         assertEquals("liblsl-android-reflection", status.backend)
         assertTrue(status.reason.contains("liblsl_android_class_unavailable"))
+        assertFalse(commandTransport.status.available)
+        assertFalse(commandTransport.status.enabled)
     }
 
     @Test
@@ -31,8 +34,11 @@ class PhoneNativeLslBridgeTest {
 
         assertEquals("PPSMarkersV2", status.getJSONObject("stream_names").getString("rich_markers"))
         assertEquals("PPSTriggerCodes", status.getJSONObject("stream_names").getString("numeric_triggers"))
+        assertTrue(status.isNull("command_transport"))
         assertEquals("marker_version", status.getJSONArray("marker_channels").getString(0))
         assertEquals("payload_json", status.getJSONArray("marker_channels").getString(PHONE_LSL_MARKER_CHANNELS.size - 1))
+        assertEquals("schema", status.getJSONArray("command_channels").getString(0))
+        assertEquals("payload_json", status.getJSONArray("ack_channels").getString(PHONE_LSL_ACK_CHANNELS.size - 1))
     }
 
     @Test
@@ -65,4 +71,25 @@ class PhoneNativeLslBridgeTest {
         assertEquals("{\"ok\":true}", sample[15])
         assertEquals(500, phoneMarkerTriggerCode(marker))
     }
+
+    private fun emptyPackage(): MobileRunPackage =
+        MobilePackageParser.parseManifest(
+            """
+            {
+              "schema": "$MOBILE_PACKAGE_SCHEMA",
+              "package_id": "pkg-native-bridge-test",
+              "participant_id": "P001",
+              "session_id": "session-001",
+              "session_group_id": "group-001",
+              "part_session_id": "part-001",
+              "part_number": "1",
+              "mobile_runnable": true,
+              "phone_owned_session": true,
+              "assets": [],
+              "blocks": [],
+              "building_blocks": [],
+              "warnings": []
+            }
+            """.trimIndent(),
+        )
 }

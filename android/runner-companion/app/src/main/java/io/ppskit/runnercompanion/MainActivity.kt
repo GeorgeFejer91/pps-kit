@@ -613,6 +613,7 @@ private fun PhoneRuntimeScreen(
                                 participantMetadata = phoneParticipantMetadata(runPackage, phoneAge, phoneHandedness, phoneGender, tactileThreshold),
                                 hapticMetadata = hapticCapability,
                                 lslContract = runPackage.lsl,
+                                expectedCommandToken = pairing.token,
                             )
                             session = activeSession
                             running = true
@@ -754,6 +755,7 @@ private fun PhoneRuntimeScreen(
                                         participantMetadata = phoneParticipantMetadata(runPackage, phoneAge, phoneHandedness, phoneGender, tactileThreshold),
                                         hapticMetadata = hapticCapability,
                                         lslContract = runPackage.lsl,
+                                        expectedCommandToken = pairing.token,
                                     )
                                     session = activeSession
                                     status = "Part ${index + 1}/${runPackages.size}"
@@ -1576,6 +1578,7 @@ private suspend fun runPhonePackage(
             .put("phone_owned_session", phoneOwnedSession),
     )
     session.addRunStart(runPackage)
+    session.pollNativeCommands(runPackage)
     if (phoneOwnedSession) {
         withContext(Dispatchers.IO) { session.writeLocalArtifact(context, runPackage, complete = false) }
     } else {
@@ -1594,12 +1597,14 @@ private suspend fun runPhonePackage(
             wavInfo = wavInfo,
             cues = block.tactileCues,
             onCue = { cue, delivery ->
+                session.pollNativeCommands(runPackage)
                 withContext(Dispatchers.Main) {
                     vibratePhone(context, session.vibrationAmplitude())
                     session.addCue(block, cue, delivery)
                 }
             },
             onProgress = { elapsedMs, durationMs ->
+                session.pollNativeCommands(runPackage)
                 withContext(Dispatchers.Main) {
                     val duration = durationMs.coerceAtLeast((block.durationS * 1000.0).roundToLong())
                     onProgress("${formatMillisecondsShort(elapsedMs)} / ${formatMillisecondsShort(duration)}")
@@ -1607,6 +1612,7 @@ private suspend fun runPhonePackage(
             }
         )
         session.finishBlock(block)
+        session.pollNativeCommands(runPackage)
         if (phoneOwnedSession) {
             withContext(Dispatchers.IO) { session.writeLocalArtifact(context, runPackage, complete = false) }
         } else {
@@ -1678,6 +1684,7 @@ private suspend fun runPhoneTopupIfNeeded(
     }
 
     session.addTopupMaterialization(result.manifest)
+    session.pollNativeCommands(runPackage)
     session.recordCommand(
         command = "phone_topup_materialize",
         status = "applied",
@@ -1692,18 +1699,21 @@ private suspend fun runPhoneTopupIfNeeded(
         wavInfo = wavInfo,
         cues = result.block.tactileCues,
         onCue = { cue, delivery ->
+            session.pollNativeCommands(runPackage)
             withContext(Dispatchers.Main) {
                 vibratePhone(context, session.vibrationAmplitude())
                 session.addCue(result.block, cue, delivery)
             }
         },
         onProgress = { elapsedMs, durationMs ->
+            session.pollNativeCommands(runPackage)
             withContext(Dispatchers.Main) {
                 onProgress("${formatMillisecondsShort(elapsedMs)} / ${formatMillisecondsShort(durationMs)}")
             }
         },
     )
     session.finishBlock(result.block)
+    session.pollNativeCommands(runPackage)
     session.recordCommand(
         command = "phone_topup_complete",
         status = "applied",
@@ -1720,6 +1730,7 @@ private class PhoneRunSession(
     participantMetadata: JSONObject = JSONObject(),
     hapticMetadata: JSONObject = JSONObject(),
     private val lslContract: MobileLslContract = MobileLslContract.empty,
+    private val expectedCommandToken: String = "",
     private val nativeLslBridge: PhoneNativeLslBridge = PhoneNativeLslBridgeFactory.create(),
 ) {
     val runId: String = "phone-${System.currentTimeMillis()}"
@@ -1737,13 +1748,21 @@ private class PhoneRunSession(
     private var validTapCount: Int = 0
     private var latestLslRuntimeStatus: JSONObject = JSONObject()
     private var markerTransport: PhoneLslMarkerTransport? = null
+    private var commandTransport: PhoneLslCommandTransport? = null
+    private var lastCommandTransportResolveAttemptMs: Long = 0L
     private var nativeLslClockOffsetS: Double = 0.0
     private var nativeLslPushedCount: Int = 0
     private var nativeLslFailedCount: Int = 0
+    private var nativeLslCommandReceivedCount: Int = 0
+    private var nativeLslCommandAckCount: Int = 0
+    private var nativeLslCommandAckFailedCount: Int = 0
+    private var nativeLslCommandRejectedCount: Int = 0
 
     @Synchronized
     fun addRunStart(runPackage: MobileRunPackage) {
         markerTransport = nativeLslBridge.openMarkerTransport(runPackage, runId)
+        commandTransport = nativeLslBridge.openCommandTransport(runPackage, runId)
+        lastCommandTransportResolveAttemptMs = SystemClock.elapsedRealtime()
         nativeLslClockOffsetS = markerTransport?.let { transport ->
             transport.localClock() - (SystemClock.elapsedRealtime() / 1000.0)
         } ?: 0.0
@@ -1752,6 +1771,7 @@ private class PhoneRunSession(
             runId = runId,
             nativeBridgeStatus = nativeLslBridge.status(),
             markerTransportStatus = markerTransport?.status,
+            commandTransportStatus = commandTransport?.status,
         )
         addEventLocked(
             "session_metadata",
@@ -1875,10 +1895,63 @@ private class PhoneRunSession(
     }
 
     @Synchronized
+    fun pollNativeCommands(runPackage: MobileRunPackage, maxCommands: Int = 4) {
+        val transport = commandTransportForPollingLocked(runPackage) ?: return
+        repeat(maxCommands.coerceAtLeast(1)) {
+            val sample = transport.pullCommandSample(timeoutS = 0.0) ?: return
+            nativeLslCommandReceivedCount += 1
+            val parsedSignal = runCatching { phoneCommandFromSample(sample.sample) }.getOrNull()
+            val receivedClock = sample.timestamp.takeIf { it > 0.0 } ?: transport.localClock()
+            val ack = phoneCommandAckForSample(
+                sample = sample.sample,
+                runPackage = runPackage,
+                expectedToken = expectedCommandToken,
+                receiverId = "android_phone",
+                receivedLslTime = receivedClock,
+                appliedLslTime = transport.localClock(),
+                ackLslTime = transport.localClock(),
+            ) { signal ->
+                applyNativePhoneCommandLocked(signal)
+            }.copy(ackLslTime = transport.localClock())
+            val ackSent = transport.sendAck(ack)
+            if (ackSent) {
+                nativeLslCommandAckCount += 1
+            } else {
+                nativeLslCommandAckFailedCount += 1
+            }
+            if (ack.status != "applied") {
+                nativeLslCommandRejectedCount += 1
+            }
+            recordNativeCommandAckLocked(parsedSignal, ack, ackSent)
+        }
+    }
+
+    private fun commandTransportForPollingLocked(runPackage: MobileRunPackage): PhoneLslCommandTransport? {
+        val existing = commandTransport
+        if (existing?.status?.enabled == true) return existing
+        if (!nativeLslBridge.status().available) return existing
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastCommandTransportResolveAttemptMs < 1000L) return existing
+        lastCommandTransportResolveAttemptMs = now
+        existing?.close()
+        val reopened = nativeLslBridge.openCommandTransport(runPackage, runId)
+        commandTransport = reopened
+        latestLslRuntimeStatus = phoneLslRuntimeStatus(
+            runPackage = runPackage,
+            runId = runId,
+            nativeBridgeStatus = nativeLslBridge.status(),
+            markerTransportStatus = markerTransport?.status,
+            commandTransportStatus = reopened.status,
+        )
+        return reopened.takeIf { it.status.enabled }
+    }
+
+    @Synchronized
     fun recordCommand(command: String, status: String, reason: String = "", payload: JSONObject = JSONObject()) {
         val row = JSONObject()
             .put("schema", "pps-android-command-diary.v1")
             .put("command_id", "phone-${commandDiary.size + 1}")
+            .put("command_source", "phone_ui_or_runtime")
             .put("command", command)
             .put("status", status)
             .put("reason", reason)
@@ -1896,6 +1969,98 @@ private class PhoneRunSession(
                 .put("status", status)
                 .put("reason", reason)
                 .put("payload", JSONObject(payload.toString())),
+        )
+    }
+
+    private fun applyNativePhoneCommandLocked(signal: PhoneLslCommandSignal): PhoneLslCommandApplicationResult =
+        when (signal.command) {
+            "request_snapshot" -> PhoneLslCommandApplicationResult(
+                status = "applied",
+                reason = "snapshot_recorded_in_ack_payload",
+                payload = nativeCommandStatePayloadLocked(signal.command),
+            )
+            "operator_note" -> PhoneLslCommandApplicationResult(
+                status = "applied",
+                reason = "operator_note_recorded",
+                payload = nativeCommandStatePayloadLocked(signal.command)
+                    .put("note", signal.payload.optString("note")),
+            )
+            "start_experiment", "start_part" -> PhoneLslCommandApplicationResult(
+                status = "applied",
+                reason = "already_running_on_phone",
+                payload = nativeCommandStatePayloadLocked(signal.command),
+            )
+            "continue_instruction" -> PhoneLslCommandApplicationResult(
+                status = "applied",
+                reason = "no_instruction_gate_active_in_phone_runtime",
+                payload = nativeCommandStatePayloadLocked(signal.command),
+            )
+            "pause", "resume", "stop_after_block" -> PhoneLslCommandApplicationResult(
+                status = "rejected",
+                reason = "phone_runtime_command_not_yet_supported",
+                payload = nativeCommandStatePayloadLocked(signal.command),
+            )
+            else -> PhoneLslCommandApplicationResult(
+                status = "rejected",
+                reason = "unsupported_phone_native_command",
+                payload = nativeCommandStatePayloadLocked(signal.command),
+            )
+        }
+
+    private fun nativeCommandStatePayloadLocked(command: String): JSONObject =
+        JSONObject()
+            .put("command", command)
+            .put("run_id", runId)
+            .put("package_id", packageId)
+            .put("active_block_id", activeBlock?.blockId.orEmpty())
+            .put("active_block_index", activeBlock?.index ?: JSONObject.NULL)
+            .put("active_block_elapsed_ms", currentBlockElapsedMs())
+            .put("event_count", events.size)
+            .put("tap_count", tapCount)
+            .put("valid_tap_count", validTapCount)
+            .put("phone_unix_ms", System.currentTimeMillis())
+            .put("phone_elapsed_realtime_ms", SystemClock.elapsedRealtime())
+
+    private fun recordNativeCommandAckLocked(
+        signal: PhoneLslCommandSignal?,
+        ack: PhoneLslCommandAck,
+        ackSent: Boolean,
+    ) {
+        val ackSample = phoneAckToSample(ack)
+        val command = signal?.command ?: "invalid_lsl_command"
+        val commandId = ack.commandId.ifBlank { signal?.commandId ?: "native-${commandDiary.size + 1}" }
+        val row = JSONObject()
+            .put("schema", "pps-android-command-diary.v1")
+            .put("command_id", commandId)
+            .put("command_source", "native_lsl")
+            .put("sender_id", signal?.senderId.orEmpty())
+            .put("session_id", ack.sessionId)
+            .put("command", command)
+            .put("status", ack.status)
+            .put("reason", ack.reason)
+            .put("payload", JSONObject(ack.payload.toString()))
+            .put("package_id", packageId)
+            .put("run_id", runId)
+            .put("received_lsl_time", ack.receivedLslTime)
+            .put("applied_lsl_time", ack.appliedLslTime)
+            .put("ack_lsl_time", ack.ackLslTime)
+            .put("ack_sent", ackSent)
+            .put("ack_channels", jsonStringArray(PHONE_LSL_ACK_CHANNELS))
+            .put("ack_sample", jsonStringArray(ackSample))
+            .put("phone_unix_ms", System.currentTimeMillis())
+            .put("phone_elapsed_realtime_ms", SystemClock.elapsedRealtime())
+        commandDiary.add(row)
+        addEventLocked(
+            "operator_command",
+            JSONObject()
+                .put("command_id", commandId)
+                .put("command_source", "native_lsl")
+                .put("sender_id", signal?.senderId.orEmpty())
+                .put("command", command)
+                .put("status", ack.status)
+                .put("reason", ack.reason)
+                .put("ack_sent", ackSent)
+                .put("payload", JSONObject(ack.payload.toString())),
         )
     }
 
@@ -1975,6 +2140,7 @@ private class PhoneRunSession(
             runId = runId,
             nativeBridgeStatus = nativeLslBridge.status(),
             markerTransportStatus = markerTransport?.status,
+            commandTransportStatus = commandTransport?.status,
         )
         latestLslRuntimeStatus = JSONObject(lslRuntimeStatus.toString())
         val lslRuntimeStatusFile = File(dir, "lsl_runtime_status.json")
@@ -2107,6 +2273,8 @@ private class PhoneRunSession(
     private fun closeNativeLslTransportLocked() {
         markerTransport?.close()
         markerTransport = null
+        commandTransport?.close()
+        commandTransport = null
     }
 
     private fun markerFromEvent(event: JSONObject): JSONObject {
@@ -2147,10 +2315,15 @@ private class PhoneRunSession(
             .put("lsl_marker_mirror_count", lslMarkers.size)
             .put("native_lsl_transport_available", latestLslRuntimeStatus.optBoolean("native_transport_available", false))
             .put("native_lsl_marker_transport_enabled", latestLslRuntimeStatus.optBoolean("native_marker_transport_enabled", false))
+            .put("native_lsl_command_receiver_available", latestLslRuntimeStatus.optBoolean("command_receiver_available", false))
             .put("native_lsl_timestamp_strategy", "android_elapsed_realtime_plus_open_lsl_clock_offset")
             .put("native_lsl_clock_offset_s", nativeLslClockOffsetS)
             .put("native_lsl_pushed_count", nativeLslPushedCount)
             .put("native_lsl_failed_count", nativeLslFailedCount)
+            .put("native_lsl_command_received_count", nativeLslCommandReceivedCount)
+            .put("native_lsl_command_ack_count", nativeLslCommandAckCount)
+            .put("native_lsl_command_ack_failed_count", nativeLslCommandAckFailedCount)
+            .put("native_lsl_command_rejected_count", nativeLslCommandRejectedCount)
             .put("command_diary_count", commandDiary.size)
 }
 
@@ -2523,6 +2696,9 @@ private fun sharePhoneRunZip(context: Context, zip: File) {
 }
 
 private fun csvCell(value: String): String = "\"${value.replace("\"", "\"\"")}\""
+
+private fun jsonStringArray(values: List<String>): JSONArray =
+    JSONArray().also { array -> values.forEach { array.put(it) } }
 
 private fun String.markerToken(): String =
     trim()

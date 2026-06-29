@@ -1,10 +1,11 @@
 # Android LSL Integration Boundary
 
-The Android companion now has phone-owned PPS runtime artifacts and a strict
-phone-side command/status protocol, but it does not yet ship a live native LSL
-transport. Current phone runs write `lsl_runtime_status.json` with
-`native_transport_available=false` and
-`reason=native_liblsl_android_layer_not_present`.
+The Android companion now has phone-owned PPS runtime artifacts, a strict
+phone-side command/status protocol, and an optional native liblsl bridge. The
+repository does not ship liblsl binaries. Default builds therefore write
+`lsl_runtime_status.json` with `native_transport_available=false` and a
+`liblsl_android_class_unavailable` reason. Local validation builds can add an
+ignored `liblsl-Android.aar` to enable native LSL behavior.
 
 ## Current Implemented Layer
 
@@ -12,12 +13,23 @@ transport. Current phone runs write `lsl_runtime_status.json` with
   `PPSCommandAcksV1` string-sample field order.
 - The phone-owned screen has explicit `Runner` and `Controller` roles. Runner
   mode owns local package playback; Controller mode writes token-gated
-  `PPSCommandSignalsV1` samples to `phone_controller_command_outbox.jsonl` for
-  the future native bridge.
+  `PPSCommandSignalsV1` samples to `phone_controller_command_outbox.jsonl`.
 - Commands are token-gated through `token` or `companion_token` in
   `payload_json` before any local handler runs.
 - Acks are shaped as applied/rejected command acknowledgements after the local
   handler returns.
+- When the ignored local `liblsl-Android.aar` is present, Runner mode opens
+  long-lived `PPSMarkersV2` / `PPSTriggerCodes` outlets and attempts to resolve
+  a `PPSCommandSignalsV1` stream. If command resolution succeeds, it opens a
+  `PPSCommandAcksV1` outlet, polls commands during AudioTrack playback, token
+  gates them, applies or rejects them locally, and pushes one ack sample after
+  the handler returns.
+- The current phone command handler applies `start_experiment`/`start_part` as
+  already-running no-ops, applies `continue_instruction`, `request_snapshot`,
+  and `operator_note` as diary/snapshot actions, and rejects
+  `pause`/`resume`/`stop_after_block` with
+  `phone_runtime_command_not_yet_supported`. This is intentional until phone
+  playback has a true pauseable AudioTrack state machine.
 - Phone-owned run folders and ZIP exports include `lsl_runtime_status.json`.
 - Controller-mode outboxes include `phone_controller_runtime_status.json` with
   `native_transport_available=false` and
@@ -25,9 +37,10 @@ transport. Current phone runs write `lsl_runtime_status.json` with
 - PC-side phone uploads preserve `lsl_runtime_status.json` beside
   `lsl_marker_mirror.csv` and `command_diary.jsonl`.
 
-This layer is useful because it keeps the PC runner, Android runner mode, and a
-future Android controller mode on the same command/ack schema. It is not
-evidence that Android is currently broadcasting LSL.
+This layer is useful because it keeps the PC runner, Android runner mode, and
+Android controller mode on the same command/ack schema. Default builds are not
+evidence that Android is broadcasting LSL; native builds with the AAR must still
+pass network/XDF validation before they are treated as live LSL evidence.
 
 ## Native Transport Route
 
@@ -42,16 +55,18 @@ Use a pinned native Android liblsl layer instead of ad hoc sockets:
   under the project source tree:
   <https://github.com/sccn/liblsl>.
 
-The integration should add a pinned AAR/JNI dependency, then implement one
-Android bridge that can create long-lived outlets/inlets for:
+The integration uses a pinned local AAR/JNI dependency and one Android bridge
+that can create long-lived outlets/inlets for:
 
 - `PPSMarkersV2`
 - `PPSTriggerCodes`
 - `PPSCommandSignalsV1`
 - `PPSCommandAcksV1`
 
-The bridge must keep outlets alive for the full phone run, use one command/ack
-sample per push, and send a command ack only after the local Android handler has
+The bridge keeps marker outlets alive for the full phone run, attempts command
+resolution at run start, retries command-stream resolution during playback when
+liblsl is available but no command stream was found, uses one command/ack sample
+per push, and sends a command ack only after the local Android handler has
 accepted or rejected the state transition.
 
 The app is already wired for the local AAR path. Put a locally built or release
@@ -64,9 +79,10 @@ android/runner-companion/app/libs/liblsl-Android.aar
 That file is ignored by Git. When it is absent, the reflection bridge records
 `liblsl_android_class_unavailable` and native status remains false. When it is
 present, `PhoneNativeLslBridge.kt` can create the rich `PPSMarkersV2` and
-numeric `PPSTriggerCodes` outlets, append PC-compatible channel metadata, and
-push every local marker mirror row to native LSL while preserving the local CSV
-mirror.
+numeric `PPSTriggerCodes` outlets, append PC-compatible channel metadata, push
+every local marker mirror row to native LSL while preserving the local CSV
+mirror, resolve `PPSCommandSignalsV1`, and emit `PPSCommandAcksV1` for handled
+commands.
 
 Phone marker timestamps use
 `android_elapsed_realtime_plus_open_lsl_clock_offset`: the app samples
@@ -91,10 +107,10 @@ Required validation levels:
    `python validation_protocols/scripts/validate_android_lsl_runtime_artifact.py <phone-run-dir>`.
 3. Emulator smoke test: install APK, run a phone-owned package, export ZIP, and
    validate `lsl_runtime_status.json`.
-4. Native LSL network test after AAR/JNI integration: resolve Android
-   `PPSMarkersV2` / `PPSTriggerCodes` from the PC, send
-   `PPSCommandSignalsV1`, receive matching `PPSCommandAcksV1`, and record an
-   XDF with LabRecorder.
+4. Native LSL network test with the AAR/JNI integration: resolve Android
+   `PPSMarkersV2` / `PPSTriggerCodes` from the PC, send a token-gated
+   `PPSCommandSignalsV1` command before or during playback, receive the matching
+   `PPSCommandAcksV1`, and record an XDF with LabRecorder.
 5. Physical phone test on same-Wi-Fi and phone-hotspot networks, including a
    failure-mode report for multicast discovery, reconnect, and command rejection
    behavior.

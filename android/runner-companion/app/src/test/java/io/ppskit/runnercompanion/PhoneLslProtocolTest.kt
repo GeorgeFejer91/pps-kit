@@ -117,6 +117,31 @@ class PhoneLslProtocolTest {
         assertTrue(status.getJSONObject("command_protocol").getBoolean("token_required"))
     }
 
+    @Test
+    fun runtimeStatusSeparatesNativeMarkerAndCommandTransportState() {
+        val bridge = PhoneNativeLslBridgeStatus(
+            available = true,
+            enabled = false,
+            backend = "liblsl-android-reflection",
+        )
+        val marker = bridge.copy(enabled = true)
+        val command = bridge.copy(enabled = true)
+
+        val status = phoneLslRuntimeStatus(
+            runPackage = packageWithLslCommands(),
+            runId = "phone-run-002",
+            nativeBridgeStatus = bridge,
+            markerTransportStatus = marker,
+            commandTransportStatus = command,
+        )
+
+        assertTrue(status.getBoolean("native_transport_available"))
+        assertTrue(status.getBoolean("native_marker_transport_enabled"))
+        assertTrue(status.getBoolean("command_receiver_available"))
+        assertEquals("native_lsl_markers_and_commands_with_local_mirror", status.getString("current_android_source_behavior"))
+        assertTrue(status.getJSONObject("native_bridge").getJSONObject("command_transport").getBoolean("enabled"))
+    }
+
     private fun packageWithLslCommands(): MobileRunPackage =
         MobilePackageParser.parseManifest(
             """

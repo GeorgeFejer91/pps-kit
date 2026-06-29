@@ -90,13 +90,24 @@ def validate_runtime_status(
     native_available = bool(status.get("native_transport_available"))
     marker_enabled = bool(status.get("native_marker_transport_enabled"))
     receiver_available = bool(status.get("command_receiver_available"))
+    native_bridge = status.get("native_bridge") if isinstance(status.get("native_bridge"), dict) else {}
+    marker_transport = native_bridge.get("marker_transport") if isinstance(native_bridge.get("marker_transport"), dict) else {}
+    command_transport = native_bridge.get("command_transport") if isinstance(native_bridge.get("command_transport"), dict) else {}
     if expect_native_transport:
         if not native_available:
             failures.append("native Android LSL transport was expected but is not available")
         if not marker_enabled:
             failures.append("native Android LSL marker transport was expected but is not enabled")
+        if not marker_transport:
+            failures.append("native bridge marker_transport status is missing")
+        elif marker_transport.get("enabled") is not True:
+            failures.append("native bridge marker_transport is not enabled")
         if not receiver_available:
             failures.append("native command receiver was expected but is not available")
+        if not command_transport:
+            failures.append("native bridge command_transport status is missing")
+        elif command_transport.get("enabled") is not True:
+            failures.append("native bridge command_transport is not enabled")
     elif native_available:
         warnings.append("native Android LSL transport is marked available; rerun with --expect-native-transport for strict checks")
     elif not str(status.get("reason") or "").strip():

@@ -8,6 +8,7 @@ internal const val PHONE_NATIVE_LSL_BRIDGE_STATUS_SCHEMA = "pps-android-native-l
 internal interface PhoneNativeLslBridge {
     fun status(): PhoneNativeLslBridgeStatus
     fun openMarkerTransport(runPackage: MobileRunPackage, runId: String): PhoneLslMarkerTransport
+    fun openCommandTransport(runPackage: MobileRunPackage, runId: String): PhoneLslCommandTransport
 }
 
 internal interface PhoneLslMarkerTransport : AutoCloseable {
@@ -15,6 +16,18 @@ internal interface PhoneLslMarkerTransport : AutoCloseable {
     fun localClock(): Double
     fun pushMarker(marker: JSONObject, timestamp: Double = localClock()): Boolean
 }
+
+internal interface PhoneLslCommandTransport : AutoCloseable {
+    val status: PhoneNativeLslBridgeStatus
+    fun localClock(): Double
+    fun pullCommandSample(timeoutS: Double = 0.0): PhoneLslCommandSample?
+    fun sendAck(ack: PhoneLslCommandAck): Boolean
+}
+
+internal data class PhoneLslCommandSample(
+    val sample: List<String>,
+    val timestamp: Double,
+)
 
 internal data class PhoneNativeLslBridgeStatus(
     val available: Boolean,
@@ -45,6 +58,9 @@ private class MissingPhoneNativeLslBridge(private val status: PhoneNativeLslBrid
 
     override fun openMarkerTransport(runPackage: MobileRunPackage, runId: String): PhoneLslMarkerTransport =
         NoopPhoneLslMarkerTransport(status)
+
+    override fun openCommandTransport(runPackage: MobileRunPackage, runId: String): PhoneLslCommandTransport =
+        NoopPhoneLslCommandTransport(status)
 }
 
 private class NoopPhoneLslMarkerTransport(override val status: PhoneNativeLslBridgeStatus) : PhoneLslMarkerTransport {
@@ -53,10 +69,18 @@ private class NoopPhoneLslMarkerTransport(override val status: PhoneNativeLslBri
     override fun close() = Unit
 }
 
+private class NoopPhoneLslCommandTransport(override val status: PhoneNativeLslBridgeStatus) : PhoneLslCommandTransport {
+    override fun localClock(): Double = System.nanoTime() / 1_000_000_000.0
+    override fun pullCommandSample(timeoutS: Double): PhoneLslCommandSample? = null
+    override fun sendAck(ack: PhoneLslCommandAck): Boolean = false
+    override fun close() = Unit
+}
+
 private class ReflectiveLiblslBridge private constructor(
     private val lslClass: Class<*>,
     private val streamInfoClass: Class<*>,
     private val streamOutletClass: Class<*>,
+    private val streamInletClass: Class<*>,
     private val channelFormatClass: Class<*>,
     private val xmlElementClass: Class<*>,
     private val status: PhoneNativeLslBridgeStatus,
@@ -107,6 +131,40 @@ private class ReflectiveLiblslBridge private constructor(
         }
     }
 
+    override fun openCommandTransport(runPackage: MobileRunPackage, runId: String): PhoneLslCommandTransport {
+        if (!status.available) return NoopPhoneLslCommandTransport(status)
+        return runCatching {
+            val commandInfo = resolveOneStream(
+                name = runPackage.lsl.commandSignalsName.ifBlank { PHONE_LSL_COMMAND_STREAM_NAME },
+                timeoutS = 0.05,
+            ) ?: return NoopPhoneLslCommandTransport(status.copy(enabled = false, reason = "command_stream_not_resolved"))
+            val ackInfo = streamInfo(
+                name = runPackage.lsl.commandAcksName.ifBlank { PHONE_LSL_ACK_STREAM_NAME },
+                type = "CommandAcks",
+                channelCount = PHONE_LSL_ACK_CHANNELS.size,
+                channelFormat = channelFormat("string"),
+                sourceId = "pps-android-command-acks-v1-${sourceIdToken(runId)}",
+            )
+            appendCommandDescription(
+                info = ackInfo,
+                runPackage = runPackage,
+                runId = runId,
+                schema = PHONE_LSL_ACK_SCHEMA,
+                channelLabels = PHONE_LSL_ACK_CHANNELS,
+            )
+            ReflectivePhoneLslCommandTransport(
+                bridge = this,
+                commandInlet = inlet(commandInfo),
+                ackOutlet = outlet(ackInfo),
+                status = status.copy(enabled = true, reason = ""),
+            )
+        }.getOrElse { error ->
+            NoopPhoneLslCommandTransport(
+                status.copy(enabled = false, reason = "could_not_create_command_transport:${error.message ?: error::class.java.simpleName}"),
+            )
+        }
+    }
+
     fun localClock(): Double =
         runCatching { (lslClass.getMethod("local_clock").invoke(null) as Number).toDouble() }
             .getOrDefault(System.nanoTime() / 1_000_000_000.0)
@@ -127,8 +185,37 @@ private class ReflectiveLiblslBridge private constructor(
             true
         }.getOrDefault(false)
 
+    fun pullStringSample(inlet: Any, channelCount: Int, timeoutS: Double): PhoneLslCommandSample? =
+        runCatching {
+            val sample = Array(channelCount) { "" }
+            val timestamp = (streamInletClass
+                .getMethod("pull_sample", Array<String>::class.java, java.lang.Double.TYPE)
+                .invoke(inlet, sample, timeoutS) as Number).toDouble()
+            if (timestamp > 0.0) PhoneLslCommandSample(sample.toList(), timestamp) else null
+        }.getOrNull()
+
     fun closeOutlet(outlet: Any) {
         runCatching { streamOutletClass.getMethod("close").invoke(outlet) }
+    }
+
+    fun closeInlet(inlet: Any) {
+        runCatching { streamInletClass.getMethod("close_stream").invoke(inlet) }
+        runCatching { streamInletClass.getMethod("close").invoke(inlet) }
+    }
+
+    private fun resolveOneStream(name: String, timeoutS: Double): Any? {
+        val result = lslClass
+            .getMethod(
+                "resolve_stream",
+                String::class.java,
+                String::class.java,
+                java.lang.Integer.TYPE,
+                java.lang.Double.TYPE,
+            )
+            .invoke(null, "name", name, 1, timeoutS) ?: return null
+        val length = java.lang.reflect.Array.getLength(result)
+        if (length <= 0) return null
+        return java.lang.reflect.Array.get(result, 0)
     }
 
     private fun streamInfo(name: String, type: String, channelCount: Int, channelFormat: Int, sourceId: String): Any =
@@ -145,6 +232,11 @@ private class ReflectiveLiblslBridge private constructor(
 
     private fun outlet(info: Any): Any =
         streamOutletClass.getConstructor(streamInfoClass).newInstance(info)
+
+    private fun inlet(info: Any): Any =
+        streamInletClass
+            .getConstructor(streamInfoClass, java.lang.Integer.TYPE, java.lang.Integer.TYPE, java.lang.Boolean.TYPE)
+            .newInstance(info, 1, 1, true)
 
     private fun channelFormat(name: String): Int =
         channelFormatClass.getField(name).getInt(null)
@@ -187,12 +279,35 @@ private class ReflectiveLiblslBridge private constructor(
         xmlElementClass.getMethod("append_child_value", String::class.java, String::class.java).invoke(element, name, value)
     }
 
+    private fun appendCommandDescription(
+        info: Any,
+        runPackage: MobileRunPackage,
+        runId: String,
+        schema: String,
+        channelLabels: List<String>,
+    ) {
+        runCatching {
+            val desc = streamInfoClass.getMethod("desc").invoke(info) ?: return@runCatching
+            appendChildValue(desc, "schema", schema)
+            appendChildValue(desc, "session_id", runPackage.sessionId)
+            appendChildValue(desc, "participant_id", runPackage.participantId)
+            appendChildValue(desc, "run_id", runId)
+            val channels = xmlElementClass.getMethod("append_child", String::class.java).invoke(desc, "channels") ?: return@runCatching
+            channelLabels.forEach { label ->
+                val channel = xmlElementClass.getMethod("append_child", String::class.java).invoke(channels, "channel") ?: return@forEach
+                appendChildValue(channel, "label", label)
+                appendChildValue(channel, "type", "Command")
+            }
+        }
+    }
+
     companion object {
         fun create(classLoader: ClassLoader): PhoneNativeLslBridge {
             return try {
                 val lslClass = Class.forName("edu.ucsd.sccn.LSL", true, classLoader)
                 val streamInfoClass = Class.forName("edu.ucsd.sccn.LSL\$StreamInfo", true, classLoader)
                 val streamOutletClass = Class.forName("edu.ucsd.sccn.LSL\$StreamOutlet", true, classLoader)
+                val streamInletClass = Class.forName("edu.ucsd.sccn.LSL\$StreamInlet", true, classLoader)
                 val channelFormatClass = Class.forName("edu.ucsd.sccn.LSL\$ChannelFormat", true, classLoader)
                 val xmlElementClass = Class.forName("edu.ucsd.sccn.LSL\$XMLElement", true, classLoader)
                 val version = runCatching { lslClass.getMethod("library_version").invoke(null)?.toString().orEmpty() }.getOrDefault("")
@@ -201,6 +316,7 @@ private class ReflectiveLiblslBridge private constructor(
                     lslClass = lslClass,
                     streamInfoClass = streamInfoClass,
                     streamOutletClass = streamOutletClass,
+                    streamInletClass = streamInletClass,
                     channelFormatClass = channelFormatClass,
                     xmlElementClass = xmlElementClass,
                     status = PhoneNativeLslBridgeStatus(
@@ -245,13 +361,35 @@ private class ReflectivePhoneLslMarkerTransport(
     }
 }
 
+private class ReflectivePhoneLslCommandTransport(
+    private val bridge: ReflectiveLiblslBridge,
+    private val commandInlet: Any,
+    private val ackOutlet: Any,
+    override val status: PhoneNativeLslBridgeStatus,
+) : PhoneLslCommandTransport {
+    override fun localClock(): Double = bridge.localClock()
+
+    override fun pullCommandSample(timeoutS: Double): PhoneLslCommandSample? =
+        bridge.pullStringSample(commandInlet, PHONE_LSL_COMMAND_CHANNELS.size, timeoutS)
+
+    override fun sendAck(ack: PhoneLslCommandAck): Boolean =
+        bridge.pushStringSample(ackOutlet, phoneAckToSample(ack), ack.ackLslTime)
+
+    override fun close() {
+        bridge.closeInlet(commandInlet)
+        bridge.closeOutlet(ackOutlet)
+    }
+}
+
 internal fun phoneNativeLslStatusJson(
     bridgeStatus: PhoneNativeLslBridgeStatus,
     markerTransportStatus: PhoneNativeLslBridgeStatus? = null,
+    commandTransportStatus: PhoneNativeLslBridgeStatus? = null,
 ): JSONObject =
     JSONObject()
         .put("bridge", bridgeStatus.toJson())
         .put("marker_transport", markerTransportStatus?.toJson() ?: JSONObject.NULL)
+        .put("command_transport", commandTransportStatus?.toJson() ?: JSONObject.NULL)
         .put("required_local_aar", "android/runner-companion/app/libs/liblsl-Android.aar")
         .put("stream_names", JSONObject()
             .put("rich_markers", PHONE_LSL_RICH_MARKER_STREAM_NAME)
@@ -259,6 +397,8 @@ internal fun phoneNativeLslStatusJson(
             .put("command_signals", PHONE_LSL_COMMAND_STREAM_NAME)
             .put("command_acks", PHONE_LSL_ACK_STREAM_NAME))
         .put("marker_channels", stringArray(PHONE_LSL_MARKER_CHANNELS))
+        .put("command_channels", stringArray(PHONE_LSL_COMMAND_CHANNELS))
+        .put("ack_channels", stringArray(PHONE_LSL_ACK_CHANNELS))
 
 private fun sourceIdToken(value: String): String =
     value.replace(Regex("[^A-Za-z0-9._-]+"), "-").trim('-', '.', '_').ifBlank { "phone-run" }

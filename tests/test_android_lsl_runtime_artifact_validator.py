@@ -50,6 +50,18 @@ def test_android_lsl_runtime_validator_rejects_command_channel_drift(tmp_path: P
     assert "command channel order" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_requires_command_transport_in_strict_mode(tmp_path: Path):
+    status = _status(native=True)
+    status["native_bridge"]["command_transport"]["enabled"] = False
+    status_path = tmp_path / "lsl_runtime_status.json"
+    status_path.write_text(json.dumps(status), encoding="utf-8")
+
+    result = validator.validate_run_artifact(status_path, expect_native_transport=True)
+
+    assert result.ok is False
+    assert "command_transport is not enabled" in "\n".join(result.failures)
+
+
 def _status(*, native: bool) -> dict:
     return {
         "schema": "pps-android-lsl-runtime-status.v1",
@@ -91,6 +103,29 @@ def _status(*, native: bool) -> dict:
             "supported_commands": ["start_experiment", "pause"],
             "token_required": True,
             "token_payload_fields": ["token", "companion_token"],
+        },
+        "native_bridge": {
+            "bridge": {
+                "schema": "pps-android-native-lsl-bridge-status.v1",
+                "available": native,
+                "enabled": False,
+                "backend": "liblsl-android-reflection",
+                "reason": "" if native else "native_liblsl_android_layer_not_present",
+            },
+            "marker_transport": {
+                "schema": "pps-android-native-lsl-bridge-status.v1",
+                "available": native,
+                "enabled": native,
+                "backend": "liblsl-android-reflection",
+                "reason": "" if native else "native_liblsl_android_layer_not_present",
+            },
+            "command_transport": {
+                "schema": "pps-android-native-lsl-bridge-status.v1",
+                "available": native,
+                "enabled": native,
+                "backend": "liblsl-android-reflection",
+                "reason": "" if native else "native_liblsl_android_layer_not_present",
+            },
         },
         "privacy": {
             "default": "metadata_payload_only",

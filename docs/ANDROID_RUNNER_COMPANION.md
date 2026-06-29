@@ -99,10 +99,11 @@ After pairing, choose `Run Experiment On Phone`.
   Study 5 pre/post preparation plays Part 1 and Part 2 on the phone and uploads
   a completion artifact for each part.
 
-The phone runtime uses Android `MediaPlayer` for prepared block WAV playback,
-`SystemClock.elapsedRealtime()` for phone-side timestamps, and the Android
-vibrator service for tactile cue signaling. Treat it as an experimental mobile
-collection mode until physical phone timing validation is added.
+The phone runtime parses PCM WAV blocks and plays them with Android
+`AudioTrack`, schedules tactile cue delivery from the AudioTrack playback head,
+uses `SystemClock.elapsedRealtime()` for phone-side timestamps, and drives the
+Android vibrator service for tactile cue signaling. Treat it as an experimental
+mobile collection mode until physical phone timing validation is added.
 
 Synced v2 packages include:
 
@@ -116,9 +117,18 @@ Synced v2 packages include:
 
 Phone-owned local artifacts now include `participant_metadata.json`,
 `haptic_capability.json`, `events.csv`, `lsl_marker_mirror.csv`,
-`command_diary.jsonl`, and `completion.json` in the exported phone session ZIP.
-Participant age, handedness, gender, and tactile threshold stay in metadata and
-marker payloads rather than discoverable LSL stream names.
+`command_diary.jsonl`, `lsl_runtime_status.json`, reconstruction/package
+snapshots, response/top-up ledgers, and `completion.json` in the exported phone
+session ZIP. Participant age, handedness, gender, and tactile threshold stay in
+metadata and marker payloads rather than discoverable LSL stream names.
+
+Default Android builds do not ship liblsl. If a local validation build adds the
+ignored `android/runner-companion/app/libs/liblsl-Android.aar`, runner mode opens
+native `PPSMarkersV2` / `PPSTriggerCodes` outlets and can resolve
+`PPSCommandSignalsV1` to emit token-gated `PPSCommandAcksV1`. Current command
+handling records snapshot/note/continue actions and explicitly rejects
+pause/resume/stop-after-block until the phone runner has a true pauseable
+AudioTrack state machine.
 
 Android vibration calibration is device-limited. If Android reports amplitude
 control, the entered threshold percent is mapped to the `VibrationEffect`

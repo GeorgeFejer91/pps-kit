@@ -130,6 +130,20 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   the AAR, the bridge is a no-op and `lsl_runtime_status.json` records
   `liblsl_android_class_unavailable`; strict validation now also requires
   `native_marker_transport_enabled=true`, not only class availability.
+- The optional Android native LSL bridge now also owns the runner-side command
+  receiver boundary. With the local liblsl AAR present, phone-owned runner
+  sessions attempt to resolve `PPSCommandSignalsV1`, open `PPSCommandAcksV1`,
+  poll token-gated command samples during AudioTrack playback, retry command
+  stream resolution while the run is active if no command stream was initially
+  found, and write every applied/rejected ack sample into `command_diary.jsonl`
+  plus the ordinary marker mirror. `request_snapshot`, `operator_note`,
+  `continue_instruction`, and already-running start commands are acknowledged as
+  local diary/snapshot actions; `pause`, `resume`, and `stop_after_block` are
+  deliberately rejected with `phone_runtime_command_not_yet_supported` until
+  Android playback has a real pauseable AudioTrack state machine.
+  `lsl_runtime_status.json` now separates bridge, marker transport, and command
+  transport details; strict validation requires the native command receiver and
+  enabled `native_bridge.command_transport` as well as marker transport.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only
