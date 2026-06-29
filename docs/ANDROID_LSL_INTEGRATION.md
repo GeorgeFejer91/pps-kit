@@ -151,7 +151,11 @@ Required validation levels:
    `python validation_protocols/scripts/validate_android_lsl_runtime_artifact.py <phone-run-dir>`.
    Add `--expect-run-catalog` for new phone-owned run folders/ZIPs where
    `phone_run_catalog_entry.json` should be present and consistent with
-   `lsl_runtime_status.json`. The same validator also accepts Controller-mode
+   `lsl_runtime_status.json`. Add `--expect-lightweight-materializations` for
+   building-block-only `Send To Phone` runs; this requires one
+   `phone_scheduled_block_materialization` event plus matching
+   `materialized_blocks/phone_materialized_block_XX.json` and WAV hash evidence
+   for every scheduled block. The same validator also accepts Controller-mode
    `phone_controller_runtime_status.json` and
    `phone_controller_command_outbox.jsonl` artifacts, plus PC-admin
    `pc_android_lsl_admin_status.json` and
@@ -181,6 +185,13 @@ For new phone-owned run exports, also require the catalog entry:
 
 ```powershell
 .\.venv\Scripts\python.exe validation_protocols\scripts\validate_android_lsl_runtime_artifact.py <phone-run-dir-or-zip> --expect-run-catalog
+```
+
+For building-block-only `Send To Phone` exports, also require the scheduled
+block materialization evidence:
+
+```powershell
+.\.venv\Scripts\python.exe validation_protocols\scripts\validate_android_lsl_runtime_artifact.py <phone-run-dir-or-zip> --expect-run-catalog --expect-lightweight-materializations
 ```
 
 For a two-phone Controller-to-Runner check where every button press should have

@@ -100,6 +100,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   package path still serves prepared block WAVs for compatibility. The mobile
   package validator can enforce this path with
   `--require-lightweight-scheduled-blocks`.
+- Android phone-run artifact validation can now prove the lightweight replay
+  path after the fact. `validate_android_lsl_runtime_artifact.py
+  --expect-lightweight-materializations` reads run folders or exported ZIPs,
+  loads `run_package_manifest.json`, `completion.json`, and
+  `materialized_blocks/`, then requires every `trial_building_blocks_only`
+  scheduled block to have a matching
+  `phone_scheduled_block_materialization` event, materialization JSON manifest,
+  and generated WAV whose SHA-256 matches the recorded reconstruction hash.
 - Android phone-owned runs now derive a phone-local tactile response ledger
   using the shared 100-1300 ms post-tactile response window and write
   `phone_response_ledger.csv` plus `phone_topup_plan.json` into the local run

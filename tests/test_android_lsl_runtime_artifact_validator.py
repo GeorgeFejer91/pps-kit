@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import sys
@@ -121,6 +122,44 @@ def test_android_lsl_runtime_validator_loads_phone_run_catalog_from_zip(tmp_path
     assert result.failures == []
 
 
+def test_android_lsl_runtime_validator_accepts_lightweight_materialization_evidence(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+
+    result = validator.validate_run_artifact(run_dir, expect_lightweight_materializations=True)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_rejects_missing_lightweight_materialization_event(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir, include_materialization_event=False)
+
+    result = validator.validate_run_artifact(run_dir, expect_lightweight_materializations=True)
+
+    assert result.ok is False
+    assert "missing phone_scheduled_block_materialization event" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_loads_lightweight_materialization_from_zip(tmp_path: Path):
+    source_dir = tmp_path / "phone-run-source"
+    source_dir.mkdir()
+    _write_lightweight_phone_run(source_dir)
+    archive_path = tmp_path / "phone-run.zip"
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        for path in source_dir.rglob("*"):
+            if path.is_file():
+                archive.write(path, f"phone-run/{path.relative_to(source_dir).as_posix()}")
+
+    result = validator.validate_run_artifact(archive_path, expect_lightweight_materializations=True)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
 def test_android_lsl_runtime_validator_accepts_controller_outbox_artifact(tmp_path: Path):
     controller_dir = tmp_path / "phone-controller"
     controller_dir.mkdir()
@@ -220,6 +259,69 @@ def test_android_lsl_runtime_validator_can_require_pc_admin_acks(tmp_path: Path)
 
     assert result.ok is False
     assert "expected to receive a matching command ack" in "\n".join(result.failures)
+
+
+def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event: bool = True) -> None:
+    status = _status(native=False)
+    wav_bytes = b"RIFF....WAVE"
+    wav_sha256 = hashlib.sha256(wav_bytes).hexdigest()
+    materialization = {
+        "schema": "pps-android-phone-scheduled-block-materialization.v1",
+        "status": "materialized",
+        "synthesis_strategy": "pcm_wav_concat_without_ffmpeg",
+        "package_id": "pkg-001",
+        "participant_id": "P001",
+        "source_block_id": "block-01",
+        "source_block_index": 1,
+        "source_block_label": "Block 01",
+        "wav_filename": "phone_materialized_block_01.wav",
+        "wav_sha256": wav_sha256,
+        "sample_rate_hz": 44100,
+        "channel_count": 2,
+        "bits_per_sample": 16,
+        "encoding": "PCM_16",
+        "frame_count": 44100,
+        "duration_ms": 1000,
+        "trial_count": 1,
+        "tactile_cue_count": 1,
+    }
+    package_manifest = {
+        "schema": "pps-mobile-run-package.v2",
+        "package_id": "pkg-001",
+        "participant_id": "P001",
+        "asset_strategy": "trial_building_blocks_only",
+        "assets": [
+            {
+                "asset_id": "trial-asset-001",
+                "role": "trial_building_block",
+                "filename": "trial.wav",
+                "available": True,
+                "size_bytes": 12,
+                "sha256": "source-sha",
+            }
+        ],
+        "blocks": [
+            {
+                "block_id": "block-01",
+                "index": 1,
+                "label": "Block 01",
+                "trial_count": 1,
+                "audio_asset_id": "block-01-audio",
+                "trials": [{"trial_uid": "trial-001", "building_block_asset_id": "trial-asset-001"}],
+            }
+        ],
+        "reconstruction": {"package_asset_strategy": "trial_building_blocks_only"},
+    }
+    events = [{"type": "run_start", "package_id": "pkg-001"}]
+    if include_materialization_event:
+        events.append({"type": "phone_scheduled_block_materialization", **materialization})
+    materialized_dir = run_dir / "materialized_blocks"
+    materialized_dir.mkdir()
+    (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
+    (run_dir / "run_package_manifest.json").write_text(json.dumps(package_manifest), encoding="utf-8")
+    (run_dir / "completion.json").write_text(json.dumps({"lsl_runtime_status": status, "events": events}), encoding="utf-8")
+    (materialized_dir / "phone_materialized_block_01.json").write_text(json.dumps(materialization), encoding="utf-8")
+    (materialized_dir / "phone_materialized_block_01.wav").write_bytes(wav_bytes)
 
 
 def _status(*, native: bool) -> dict:

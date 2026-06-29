@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 import tempfile
@@ -49,6 +50,7 @@ from peripersonal_space_toolkit.timing_events import (  # noqa: E402
 ANDROID_LSL_RUNTIME_STATUS_SCHEMA = "pps-android-lsl-runtime-status.v1"
 ANDROID_PHONE_RUN_CATALOG_ENTRY_SCHEMA = "pps-android-phone-run-catalog-entry.v1"
 ANDROID_PHONE_RUN_CATALOG_ENTRY = "phone_run_catalog_entry.json"
+ANDROID_SCHEDULED_BLOCK_MATERIALIZATION_SCHEMA = "pps-android-phone-scheduled-block-materialization.v1"
 ANDROID_CONTROLLER_RUNTIME_STATUS_SCHEMA = "pps-android-controller-runtime-status.v1"
 ANDROID_CONTROLLER_COMMAND_ROW_SCHEMA = "pps-android-controller-command-row.v1"
 EXPECTED_STREAMS = {
@@ -98,8 +100,12 @@ def validate_runtime_status(
     source_path: str = "",
     completion: dict[str, Any] | None = None,
     catalog_entry: dict[str, Any] | None = None,
+    package_manifest: dict[str, Any] | None = None,
+    materialization_manifests: list[dict[str, Any]] | None = None,
+    materialized_wav_hashes: dict[str, str] | None = None,
     expect_native_transport: bool = False,
     expect_run_catalog: bool = False,
+    expect_lightweight_materializations: bool = False,
 ) -> AndroidLslValidationResult:
     failures: list[str] = []
     warnings: list[str] = []
@@ -156,6 +162,15 @@ def validate_runtime_status(
             warnings.append("completion/latest-events artifact does not embed lsl_runtime_status")
 
     _validate_phone_run_catalog_entry(status, catalog_entry, failures, warnings, expect_run_catalog=expect_run_catalog)
+    _validate_lightweight_materializations(
+        completion=completion,
+        package_manifest=package_manifest,
+        materialization_manifests=materialization_manifests or [],
+        materialized_wav_hashes=materialized_wav_hashes or {},
+        failures=failures,
+        warnings=warnings,
+        expect_lightweight_materializations=expect_lightweight_materializations,
+    )
 
     return AndroidLslValidationResult(
         ok=not failures,
@@ -359,6 +374,7 @@ def validate_run_artifact(
     expect_native_transport: bool = False,
     expect_command_acks: bool = False,
     expect_run_catalog: bool = False,
+    expect_lightweight_materializations: bool = False,
 ) -> AndroidLslValidationResult:
     loaded = _load_status_inputs(path)
     if loaded.get("kind") == "controller":
@@ -390,8 +406,12 @@ def validate_run_artifact(
         source_path=str(path),
         completion=loaded.get("completion"),
         catalog_entry=loaded.get("catalog_entry"),
+        package_manifest=loaded.get("package_manifest"),
+        materialization_manifests=loaded.get("materialization_manifests") or [],
+        materialized_wav_hashes=loaded.get("materialized_wav_hashes") or {},
         expect_native_transport=expect_native_transport,
         expect_run_catalog=expect_run_catalog,
+        expect_lightweight_materializations=expect_lightweight_materializations,
     )
 
 
@@ -403,11 +423,13 @@ def _load_status_inputs(path: Path) -> dict[str, Any]:
             if not completion_path.is_file():
                 completion_path = path / "latest_events.json"
             catalog_path = path / ANDROID_PHONE_RUN_CATALOG_ENTRY
+            sidecars = _load_phone_run_sidecars_from_dir(path)
             return {
                 "kind": "runner",
                 "status": _read_json(status_path),
                 "completion": _read_json(completion_path) if completion_path.is_file() else None,
                 "catalog_entry": _read_json(catalog_path) if catalog_path.is_file() else None,
+                **sidecars,
             }
         controller_status_path = path / "phone_controller_runtime_status.json"
         if controller_status_path.is_file():
@@ -464,11 +486,16 @@ def _load_status_inputs(path: Path) -> dict[str, Any]:
     data = _read_json(path)
     if data.get("schema") == ANDROID_LSL_RUNTIME_STATUS_SCHEMA:
         catalog_path = path.with_name(ANDROID_PHONE_RUN_CATALOG_ENTRY)
+        completion_path = path.with_name("completion.json")
+        if not completion_path.is_file():
+            completion_path = path.with_name("latest_events.json")
+        sidecars = _load_phone_run_sidecars_from_dir(path.parent)
         return {
             "kind": "runner",
             "status": data,
-            "completion": None,
+            "completion": _read_json(completion_path) if completion_path.is_file() else None,
             "catalog_entry": _read_json(catalog_path) if catalog_path.is_file() else None,
+            **sidecars,
         }
     if data.get("schema") == ANDROID_CONTROLLER_RUNTIME_STATUS_SCHEMA:
         outbox_path = path.with_name("phone_controller_command_outbox.jsonl")
@@ -507,7 +534,13 @@ def _load_status_inputs(path: Path) -> dict[str, Any]:
         if catalog_entry is None:
             catalog_path = path.with_name(ANDROID_PHONE_RUN_CATALOG_ENTRY)
             catalog_entry = _read_json(catalog_path) if catalog_path.is_file() else None
-        return {"kind": "runner", "status": embedded, "completion": data, "catalog_entry": catalog_entry}
+        return {
+            "kind": "runner",
+            "status": embedded,
+            "completion": data,
+            "catalog_entry": catalog_entry,
+            **_load_phone_run_sidecars_from_dir(path.parent),
+        }
     raise ValueError(
         f"{path} is not an Android LSL status, completion, controller status, controller outbox, "
         "PC Android admin status/outbox, or PC Android LSL monitor artifact"
@@ -526,6 +559,17 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 name for name in archive.namelist() if name.endswith("completion.json") or name.endswith("latest_events.json")
             ]
             catalog_members = [name for name in archive.namelist() if name.endswith(ANDROID_PHONE_RUN_CATALOG_ENTRY)]
+            package_manifest_members = [name for name in archive.namelist() if name.endswith("run_package_manifest.json")]
+            materialization_members = [
+                name
+                for name in archive.namelist()
+                if "materialized_blocks/" in name.replace("\\", "/") and name.endswith(".json")
+            ]
+            materialized_wav_members = [
+                name
+                for name in archive.namelist()
+                if "materialized_blocks/" in name.replace("\\", "/") and name.endswith(".wav")
+            ]
             archive.extract(status_name, temp_root)
             completion = None
             if completion_members:
@@ -537,12 +581,57 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 catalog_name = sorted(catalog_members)[0]
                 archive.extract(catalog_name, temp_root)
                 catalog_entry = _read_json(temp_root / catalog_name)
+            package_manifest = None
+            if package_manifest_members:
+                package_manifest_name = sorted(package_manifest_members)[0]
+                archive.extract(package_manifest_name, temp_root)
+                package_manifest = _read_json(temp_root / package_manifest_name)
+            materialization_manifests: list[dict[str, Any]] = []
+            for member in sorted(materialization_members):
+                archive.extract(member, temp_root)
+                materialization_manifests.append(_read_json(temp_root / member))
+            materialized_wav_hashes = {
+                Path(member).name: _sha256_bytes(archive.read(member))
+                for member in materialized_wav_members
+            }
             return {
                 "kind": "runner",
                 "status": _read_json(temp_root / status_name),
                 "completion": completion,
                 "catalog_entry": catalog_entry,
+                "package_manifest": package_manifest,
+                "materialization_manifests": materialization_manifests,
+                "materialized_wav_hashes": materialized_wav_hashes,
             }
+
+
+def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
+    package_manifest_path = path / "run_package_manifest.json"
+    materialized_dir = path / "materialized_blocks"
+    materialization_manifests: list[dict[str, Any]] = []
+    materialized_wav_hashes: dict[str, str] = {}
+    if materialized_dir.is_dir():
+        for manifest_path in sorted(materialized_dir.glob("*.json")):
+            materialization_manifests.append(_read_json(manifest_path))
+        for wav_path in sorted(materialized_dir.glob("*.wav")):
+            materialized_wav_hashes[wav_path.name] = _sha256_file(wav_path)
+    return {
+        "package_manifest": _read_json(package_manifest_path) if package_manifest_path.is_file() else None,
+        "materialization_manifests": materialization_manifests,
+        "materialized_wav_hashes": materialized_wav_hashes,
+    }
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _sha256_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -629,6 +718,148 @@ def _validate_phone_run_catalog_entry(
     reconstruction = catalog_entry.get("reconstruction") if isinstance(catalog_entry.get("reconstruction"), dict) else {}
     if not str(reconstruction.get("schedule_hash") or "").strip():
         warnings.append("phone run catalog entry does not include a reconstruction schedule_hash")
+
+
+def _validate_lightweight_materializations(
+    *,
+    completion: dict[str, Any] | None,
+    package_manifest: dict[str, Any] | None,
+    materialization_manifests: list[dict[str, Any]],
+    materialized_wav_hashes: dict[str, str],
+    failures: list[str],
+    warnings: list[str],
+    expect_lightweight_materializations: bool,
+) -> None:
+    if not package_manifest:
+        if expect_lightweight_materializations:
+            failures.append("lightweight materialization validation requires run_package_manifest.json")
+        return
+
+    reconstruction = package_manifest.get("reconstruction") if isinstance(package_manifest.get("reconstruction"), dict) else {}
+    strategy = str(package_manifest.get("asset_strategy") or reconstruction.get("package_asset_strategy") or "")
+    assets = [asset for asset in list(package_manifest.get("assets") or []) if isinstance(asset, dict)]
+    block_audio_assets = [asset for asset in assets if str(asset.get("role") or "") == "block_audio"]
+    is_lightweight = strategy == "trial_building_blocks_only"
+    if not is_lightweight:
+        if expect_lightweight_materializations:
+            failures.append("run package is not marked asset_strategy='trial_building_blocks_only'")
+        return
+    if block_audio_assets:
+        failures.append("lightweight run package still contains block_audio assets")
+    if not expect_lightweight_materializations:
+        warnings.append("lightweight phone package detected; rerun with --expect-lightweight-materializations for strict checks")
+        return
+
+    blocks = [block for block in list(package_manifest.get("blocks") or []) if isinstance(block, dict)]
+    if not blocks:
+        failures.append("lightweight run package has no scheduled blocks")
+        return
+    events = [event for event in list((completion or {}).get("events") or []) if isinstance(event, dict)]
+    if not events:
+        failures.append("lightweight materialization validation requires completion events")
+        return
+
+    materialization_events = [event for event in events if event.get("type") == "phone_scheduled_block_materialization"]
+    event_by_block = _unique_by_source_block_id(materialization_events, label="phone_scheduled_block_materialization event", failures=failures)
+    manifest_by_block = _unique_by_source_block_id(materialization_manifests, label="scheduled-block materialization manifest", failures=failures)
+
+    for block in blocks:
+        block_id = str(block.get("block_id") or "")
+        if not block_id:
+            failures.append("lightweight run package block is missing block_id")
+            continue
+        expected_trial_count = _safe_int(block.get("trial_count"), fallback=len(list(block.get("trials") or [])))
+        expected_index = _safe_int(block.get("index"))
+        event = event_by_block.get(block_id)
+        if event is None:
+            failures.append(f"block {block_id} is missing phone_scheduled_block_materialization event")
+        else:
+            _validate_scheduled_block_materialization_record(
+                event,
+                label=f"block {block_id} materialization event",
+                expected_block_id=block_id,
+                expected_block_index=expected_index,
+                expected_trial_count=expected_trial_count,
+                materialized_wav_hashes=materialized_wav_hashes,
+                failures=failures,
+            )
+        manifest = manifest_by_block.get(block_id)
+        if manifest is None:
+            failures.append(f"block {block_id} is missing materialized_blocks JSON manifest")
+        else:
+            _validate_scheduled_block_materialization_record(
+                manifest,
+                label=f"block {block_id} materialized_blocks manifest",
+                expected_block_id=block_id,
+                expected_block_index=expected_index,
+                expected_trial_count=expected_trial_count,
+                materialized_wav_hashes=materialized_wav_hashes,
+                failures=failures,
+            )
+            if event is not None:
+                for key in ("wav_filename", "wav_sha256", "trial_count", "tactile_cue_count"):
+                    if str(event.get(key) or "") != str(manifest.get(key) or ""):
+                        failures.append(f"block {block_id} materialization event {key} differs from materialized_blocks manifest")
+
+
+def _unique_by_source_block_id(rows: list[dict[str, Any]], *, label: str, failures: list[str]) -> dict[str, dict[str, Any]]:
+    by_id: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        block_id = str(row.get("source_block_id") or "")
+        if not block_id:
+            failures.append(f"{label} is missing source_block_id")
+            continue
+        if block_id in by_id:
+            failures.append(f"duplicate {label} for source_block_id {block_id!r}")
+            continue
+        by_id[block_id] = row
+    return by_id
+
+
+def _validate_scheduled_block_materialization_record(
+    record: dict[str, Any],
+    *,
+    label: str,
+    expected_block_id: str,
+    expected_block_index: int,
+    expected_trial_count: int,
+    materialized_wav_hashes: dict[str, str],
+    failures: list[str],
+) -> None:
+    if record.get("schema") != ANDROID_SCHEDULED_BLOCK_MATERIALIZATION_SCHEMA:
+        failures.append(f"{label} schema mismatch")
+    if record.get("status") != "materialized":
+        failures.append(f"{label} status must be materialized")
+    if record.get("synthesis_strategy") != "pcm_wav_concat_without_ffmpeg":
+        failures.append(f"{label} synthesis_strategy must be pcm_wav_concat_without_ffmpeg")
+    if str(record.get("source_block_id") or "") != expected_block_id:
+        failures.append(f"{label} source_block_id differs from run package")
+    observed_index = _safe_int(record.get("source_block_index"))
+    if expected_block_index and observed_index and observed_index != expected_block_index:
+        failures.append(f"{label} source_block_index differs from run package")
+    observed_trial_count = _safe_int(record.get("trial_count"))
+    if observed_trial_count != expected_trial_count:
+        failures.append(f"{label} trial_count differs from run package")
+    wav_filename = str(record.get("wav_filename") or "")
+    wav_sha256 = str(record.get("wav_sha256") or "")
+    if not wav_filename:
+        failures.append(f"{label} is missing wav_filename")
+        return
+    if not wav_sha256:
+        failures.append(f"{label} is missing wav_sha256")
+        return
+    observed_hash = materialized_wav_hashes.get(wav_filename)
+    if not observed_hash:
+        failures.append(f"{label} referenced materialized WAV {wav_filename!r} is missing")
+    elif observed_hash != wav_sha256:
+        failures.append(f"{label} wav_sha256 does not match materialized WAV {wav_filename!r}")
+
+
+def _safe_int(value: Any, *, fallback: int = 0) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return fallback
 
 
 def _validate_controller_outbox_row(
@@ -863,6 +1094,11 @@ def main(argv: list[str] | None = None) -> int:
         help="For controller, PC-admin, or monitor artifacts, fail unless matching command acknowledgements are present.",
     )
     parser.add_argument("--expect-run-catalog", action="store_true", help="For phone-run artifacts, fail unless phone_run_catalog_entry.json is present and consistent.")
+    parser.add_argument(
+        "--expect-lightweight-materializations",
+        action="store_true",
+        help="For building-block-only phone runs, fail unless every scheduled block has materialization event/JSON/WAV evidence.",
+    )
     parser.add_argument("--output-dir", type=Path, help="Optional directory for JSON/Markdown validation reports.")
     args = parser.parse_args(argv)
 
@@ -871,6 +1107,7 @@ def main(argv: list[str] | None = None) -> int:
         expect_native_transport=args.expect_native_transport,
         expect_command_acks=args.expect_command_acks,
         expect_run_catalog=args.expect_run_catalog,
+        expect_lightweight_materializations=args.expect_lightweight_materializations,
     )
     if args.output_dir:
         _write_report(result, args.output_dir)
