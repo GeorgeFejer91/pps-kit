@@ -163,6 +163,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   traps the runner inside the paused audio wait loop; a PC runner or second
   phone Controller can send `resume` and have it applied during the pause,
   with the existing pause-adjusted block elapsed-time accounting preserved.
+- Android Runner mode now has a native idle command-listener boundary for
+  validation builds with the local liblsl AAR. When a selected package is synced
+  and the phone is idle, Runner mode resolves `PPSCommandSignalsV1`, emits a
+  token-gated `PPSCommandAcksV1` response to `start_experiment` / `start_part`,
+  and then launches the same single-package phone-run path as the local Start
+  button. Other active-run commands are rejected while idle except
+  `request_snapshot`, which returns an idle status payload.
 - Android Controller mode now has the matching optional native sender boundary.
   It still writes `phone_controller_command_outbox.jsonl` and
   `phone_controller_runtime_status.json` as the durable audit trail in every

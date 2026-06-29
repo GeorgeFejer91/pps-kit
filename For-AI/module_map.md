@@ -17,7 +17,9 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   token-gates `PPSCommandSignalsV1` samples, emits applied/rejected
   `PPSCommandAcksV1` samples after local handlers return, writes
   `lsl_runtime_status.json` for phone-owned runs, and separates bridge,
-  marker-transport, and command-transport status. Default builds without the
+  marker-transport, and command-transport status. `MainActivity.kt` owns the
+  Runner-mode idle command listener that acks native `start_experiment` /
+  `start_part` before launching the selected synced package. Default builds without the
   local liblsl AAR still report native transport unavailable; do not present
   local marker mirrors or protocol unit tests as live Android LSL evidence.
 - Optional native Android LSL marker/command transport lives in

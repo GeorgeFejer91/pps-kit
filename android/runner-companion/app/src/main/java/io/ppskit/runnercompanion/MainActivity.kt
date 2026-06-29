@@ -95,6 +95,7 @@ import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -463,7 +464,9 @@ private fun PhoneRuntimeScreen(
     var hapticCalibrationStatus by remember(pairing.sessionId) { mutableStateOf("") }
     var phoneRole by remember(pairing.sessionId) { mutableStateOf(PhoneRuntimeRole.Runner) }
     var session by remember { mutableStateOf<PhoneRunSession?>(null) }
+    val nativeRunnerBridge = remember(pairing.sessionId) { PhoneNativeLslBridgeFactory.create() }
     val nativeControllerBridge = remember(pairing.sessionId) { PhoneNativeLslBridgeFactory.create() }
+    var idleRunnerCommandStatus by remember(pairing.sessionId) { mutableStateOf<PhoneNativeLslBridgeStatus?>(null) }
     var controllerTransport by remember(pairing.sessionId) { mutableStateOf<PhoneLslControllerTransport?>(null) }
     var runJob by remember { mutableStateOf<Job?>(null) }
     val logLines = remember { mutableStateListOf<String>() }
@@ -527,6 +530,120 @@ private fun PhoneRuntimeScreen(
     val selectedManifest = selectedSummary?.let { syncedPackages[it.packageId] }
     val phoneOwnedSession = pairing.isPhoneExport || selectedManifest?.phoneOwnedSession == true || selectedSummary?.phoneOwnedSession == true
     val fullExperimentSynced = packages.isNotEmpty() && packages.all { syncedPackages.containsKey(it.packageId) }
+
+    fun newPhoneRunSession(runPackage: MobileRunPackage): PhoneRunSession =
+        PhoneRunSession(
+            packageId = runPackage.packageId,
+            participantMetadata = phoneParticipantMetadata(runPackage, phoneAge, phoneHandedness, phoneGender, tactileThreshold, hapticCalibration),
+            hapticMetadata = hapticCapability,
+            lslContract = runPackage.lsl,
+            expectedCommandToken = pairing.token,
+        )
+
+    fun startPhoneRun(runPackage: MobileRunPackage): Boolean {
+        if (running || syncing || !runPackage.mobileRunnable) return false
+        if (!connected && !phoneOwnedSession && !runPackage.phoneOwnedSession) return false
+        val activeSession = newPhoneRunSession(runPackage)
+        session = activeSession
+        running = true
+        activeBlockLabel = ""
+        runProgress = ""
+        status = "Running"
+        error = ""
+        uploadedArtifact = ""
+        lastRunDir = ""
+        val job = scope.launch {
+            runCatching {
+                val result = runPhonePackage(
+                    context = context,
+                    client = client,
+                    runPackage = runPackage,
+                    session = activeSession,
+                    phoneOwnedSession = phoneOwnedSession || runPackage.phoneOwnedSession,
+                    onStatus = { message ->
+                        status = message
+                        log(message)
+                    },
+                    onBlock = { label -> activeBlockLabel = label },
+                    onProgress = { progress -> runProgress = progress },
+                )
+                status = "Complete"
+                lastRunDir = result.optString("artifact_dir", "")
+                uploadedArtifact = if (phoneOwnedSession || runPackage.phoneOwnedSession) {
+                    "Saved ${result.optString("artifact_path", "")}"
+                } else {
+                    "Uploaded ${result.optString("artifact_path", "")}"
+                }
+                log("Complete")
+            }.onFailure {
+                error = it.message ?: "Phone run failed."
+                status = "Stopped"
+                log(error)
+            }
+            running = false
+            activeBlockLabel = ""
+            runProgress = ""
+        }
+        runJob = job
+        return true
+    }
+
+    fun startFullPhoneExperiment(runPackages: List<MobileRunPackage>): Boolean {
+        if (running || syncing || runPackages.isEmpty()) return false
+        if (!connected && !phoneOwnedSession && runPackages.none { it.phoneOwnedSession }) return false
+        running = true
+        activeBlockLabel = ""
+        runProgress = ""
+        status = "Running full experiment"
+        error = ""
+        uploadedArtifact = ""
+        lastRunDir = ""
+        val job = scope.launch {
+            runCatching {
+                val artifacts = mutableListOf<String>()
+                val artifactDirs = mutableListOf<String>()
+                runPackages.forEachIndexed { index, runPackage ->
+                    val activeSession = newPhoneRunSession(runPackage)
+                    session = activeSession
+                    status = "Part ${index + 1}/${runPackages.size}"
+                    val result = runPhonePackage(
+                        context = context,
+                        client = client,
+                        runPackage = runPackage,
+                        session = activeSession,
+                        phoneOwnedSession = phoneOwnedSession || runPackage.phoneOwnedSession,
+                        onStatus = { message ->
+                            status = "Part ${index + 1}/${runPackages.size} $message"
+                            log(status)
+                        },
+                        onBlock = { label -> activeBlockLabel = label },
+                        onProgress = { progress -> runProgress = progress },
+                    )
+                    artifacts.add(result.optString("artifact_path", ""))
+                    result.optString("artifact_dir", "").takeIf { it.isNotBlank() }?.let { artifactDirs.add(it) }
+                }
+                status = "Full experiment complete"
+                uploadedArtifact = if (phoneOwnedSession) {
+                    lastRunDir = createPhoneRunBundle(context, artifactDirs).absolutePath
+                    "Saved ${artifacts.size} part artifact(s)"
+                } else {
+                    lastRunDir = artifactDirs.lastOrNull().orEmpty()
+                    "Uploaded ${artifacts.size} part artifacts"
+                }
+                log("Full experiment complete")
+            }.onFailure {
+                error = it.message ?: "Full phone experiment failed."
+                status = "Stopped"
+                log(error)
+            }
+            running = false
+            activeBlockLabel = ""
+            runProgress = ""
+        }
+        runJob = job
+        return true
+    }
+
     DisposableEffect(
         phoneRole,
         selectedPackageId,
@@ -560,6 +677,127 @@ private fun PhoneRuntimeScreen(
             }
         }
     }
+
+    LaunchedEffect(
+        phoneRole,
+        selectedManifest?.packageId,
+        selectedManifest?.partSessionId,
+        selectedManifest?.sessionId,
+        running,
+        syncing,
+        connected,
+        phoneOwnedSession,
+        pairing.token,
+    ) {
+        val runPackage = selectedManifest
+        if (phoneRole != PhoneRuntimeRole.Runner || runPackage == null || running || syncing) {
+            idleRunnerCommandStatus = null
+            return@LaunchedEffect
+        }
+        var transport: PhoneLslCommandTransport? = null
+        val idleRunId = "idle-${runPackage.packageId}-${SystemClock.elapsedRealtime()}"
+        try {
+            while (isActive) {
+                val activeTransport = transport?.takeIf { it.status.enabled } ?: run {
+                    transport?.close()
+                    val opened = withContext(Dispatchers.IO) {
+                        nativeRunnerBridge.openCommandTransport(runPackage, idleRunId)
+                    }
+                    transport = opened
+                    idleRunnerCommandStatus = opened.status
+                    opened
+                }
+                if (activeTransport.status.enabled) {
+                    repeat(4) {
+                        val sample = withContext(Dispatchers.IO) { activeTransport.pullCommandSample(timeoutS = 0.0) } ?: return@repeat
+                        val signal = runCatching { phoneCommandFromSample(sample.sample) }.getOrNull()
+                        var startAfterAck = false
+                        val receivedClock = sample.timestamp.takeIf { it > 0.0 } ?: activeTransport.localClock()
+                        val ack = phoneCommandAckForSample(
+                            sample = sample.sample,
+                            runPackage = runPackage,
+                            expectedToken = pairing.token,
+                            receiverId = "android_phone_idle_runner",
+                            receivedLslTime = receivedClock,
+                            appliedLslTime = activeTransport.localClock(),
+                            ackLslTime = activeTransport.localClock(),
+                        ) { commandSignal ->
+                            when (commandSignal.command) {
+                                "start_experiment", "start_part" -> {
+                                    val canStart = runPackage.mobileRunnable && !running && !syncing && (connected || phoneOwnedSession || runPackage.phoneOwnedSession)
+                                    if (canStart) {
+                                        startAfterAck = true
+                                        PhoneLslCommandApplicationResult(
+                                            status = "applied",
+                                            reason = "starting_phone_run",
+                                            payload = JSONObject()
+                                                .put("command", commandSignal.command)
+                                                .put("package_id", runPackage.packageId)
+                                                .put("idle_runner_listener", true)
+                                                .put("state_changed", true),
+                                        )
+                                    } else {
+                                        PhoneLslCommandApplicationResult(
+                                            status = "rejected",
+                                            reason = "phone_runner_not_ready_to_start",
+                                            payload = JSONObject()
+                                                .put("command", commandSignal.command)
+                                                .put("package_id", runPackage.packageId)
+                                                .put("mobile_runnable", runPackage.mobileRunnable)
+                                                .put("connected", connected)
+                                                .put("phone_owned_session", phoneOwnedSession || runPackage.phoneOwnedSession)
+                                                .put("running", running)
+                                                .put("syncing", syncing),
+                                        )
+                                    }
+                                }
+                                "request_snapshot" -> PhoneLslCommandApplicationResult(
+                                    status = "applied",
+                                    reason = "idle_snapshot_recorded_in_ack_payload",
+                                    payload = JSONObject()
+                                        .put("command", commandSignal.command)
+                                        .put("package_id", runPackage.packageId)
+                                        .put("idle_runner_listener", true)
+                                        .put("running", running)
+                                        .put("syncing", syncing)
+                                        .put("selected_package_id", runPackage.packageId)
+                                        .put("synced_package_count", syncedPackages.size),
+                                )
+                                else -> PhoneLslCommandApplicationResult(
+                                    status = "rejected",
+                                    reason = "no_active_phone_run",
+                                    payload = JSONObject()
+                                        .put("command", commandSignal.command)
+                                        .put("package_id", runPackage.packageId)
+                                        .put("idle_runner_listener", true),
+                                )
+                            }
+                        }.copy(ackLslTime = activeTransport.localClock())
+                        val ackSent = withContext(Dispatchers.IO) { activeTransport.sendAck(ack) }
+                        log(
+                            if (ack.status == "applied") {
+                                "Idle LSL ${signal?.command ?: "command"} ack=${if (ackSent) "sent" else "failed"}"
+                            } else {
+                                "Idle LSL rejected ${signal?.command ?: "command"}"
+                            },
+                        )
+                        if (startAfterAck) {
+                            startPhoneRun(runPackage)
+                            return@LaunchedEffect
+                        }
+                    }
+                }
+                delay(if (activeTransport.status.enabled) 50L else 1000L)
+            }
+        } finally {
+            val closingStatus = transport?.status
+            transport?.close()
+            if (idleRunnerCommandStatus == closingStatus) {
+                idleRunnerCommandStatus = null
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -574,6 +812,9 @@ private fun PhoneRuntimeScreen(
             StatusChip(if (phoneRole == PhoneRuntimeRole.Runner) "Runner mode" else "Controller mode")
             if (phoneRole == PhoneRuntimeRole.Controller) {
                 StatusChip(if (controllerTransport?.status?.enabled == true) "LSL controller" else "Controller outbox")
+            }
+            if (phoneRole == PhoneRuntimeRole.Runner && idleRunnerCommandStatus?.enabled == true) {
+                StatusChip("LSL idle start")
             }
             if (pairing.transport == "wifi_direct") StatusChip("Wi-Fi Direct")
             StatusChip(status)
@@ -727,55 +968,7 @@ private fun PhoneRuntimeScreen(
             if (phoneRole == PhoneRuntimeRole.Runner) {
                 Button(
                     onClick = {
-                        val runPackage = selectedManifest ?: return@Button
-                        val job = scope.launch {
-                            val activeSession = PhoneRunSession(
-                                packageId = runPackage.packageId,
-                                participantMetadata = phoneParticipantMetadata(runPackage, phoneAge, phoneHandedness, phoneGender, tactileThreshold, hapticCalibration),
-                                hapticMetadata = hapticCapability,
-                                lslContract = runPackage.lsl,
-                                expectedCommandToken = pairing.token,
-                            )
-                            session = activeSession
-                            running = true
-                            activeBlockLabel = ""
-                            runProgress = ""
-                            status = "Running"
-                            error = ""
-                            uploadedArtifact = ""
-                            lastRunDir = ""
-                            runCatching {
-                                val result = runPhonePackage(
-                                    context = context,
-                                    client = client,
-                                    runPackage = runPackage,
-                                    session = activeSession,
-                                    phoneOwnedSession = phoneOwnedSession || runPackage.phoneOwnedSession,
-                                    onStatus = { message ->
-                                        status = message
-                                        log(message)
-                                    },
-                                    onBlock = { label -> activeBlockLabel = label },
-                                    onProgress = { progress -> runProgress = progress },
-                                )
-                                status = "Complete"
-                                lastRunDir = result.optString("artifact_dir", "")
-                                uploadedArtifact = if (phoneOwnedSession || runPackage.phoneOwnedSession) {
-                                    "Saved ${result.optString("artifact_path", "")}"
-                                } else {
-                                    "Uploaded ${result.optString("artifact_path", "")}"
-                                }
-                                log("Complete")
-                            }.onFailure {
-                                error = it.message ?: "Phone run failed."
-                                status = "Stopped"
-                                log(error)
-                            }
-                            running = false
-                            activeBlockLabel = ""
-                            runProgress = ""
-                        }
-                        runJob = job
+                        selectedManifest?.let { startPhoneRun(it) }
                     },
                     enabled = connected && selectedManifest?.mobileRunnable == true && !running && !syncing,
                 ) {
@@ -873,62 +1066,7 @@ private fun PhoneRuntimeScreen(
                 Button(
                     onClick = {
                         val runPackages = packages.mapNotNull { syncedPackages[it.packageId] }
-                        val job = scope.launch {
-                            running = true
-                            activeBlockLabel = ""
-                            runProgress = ""
-                            status = "Running full experiment"
-                            error = ""
-                            uploadedArtifact = ""
-                            lastRunDir = ""
-                            runCatching {
-                                val artifacts = mutableListOf<String>()
-                                val artifactDirs = mutableListOf<String>()
-                                runPackages.forEachIndexed { index, runPackage ->
-                                    val activeSession = PhoneRunSession(
-                                        packageId = runPackage.packageId,
-                                        participantMetadata = phoneParticipantMetadata(runPackage, phoneAge, phoneHandedness, phoneGender, tactileThreshold, hapticCalibration),
-                                        hapticMetadata = hapticCapability,
-                                        lslContract = runPackage.lsl,
-                                        expectedCommandToken = pairing.token,
-                                    )
-                                    session = activeSession
-                                    status = "Part ${index + 1}/${runPackages.size}"
-                                    val result = runPhonePackage(
-                                        context = context,
-                                        client = client,
-                                        runPackage = runPackage,
-                                        session = activeSession,
-                                        phoneOwnedSession = phoneOwnedSession || runPackage.phoneOwnedSession,
-                                        onStatus = { message ->
-                                            status = "Part ${index + 1}/${runPackages.size} $message"
-                                            log(status)
-                                        },
-                                        onBlock = { label -> activeBlockLabel = label },
-                                        onProgress = { progress -> runProgress = progress },
-                                    )
-                                    artifacts.add(result.optString("artifact_path", ""))
-                                    result.optString("artifact_dir", "").takeIf { it.isNotBlank() }?.let { artifactDirs.add(it) }
-                                }
-                                status = "Full experiment complete"
-                                uploadedArtifact = if (phoneOwnedSession) {
-                                    lastRunDir = createPhoneRunBundle(context, artifactDirs).absolutePath
-                                    "Saved ${artifacts.size} part artifact(s)"
-                                } else {
-                                    lastRunDir = artifactDirs.lastOrNull().orEmpty()
-                                    "Uploaded ${artifacts.size} part artifacts"
-                                }
-                                log("Full experiment complete")
-                            }.onFailure {
-                                error = it.message ?: "Full phone experiment failed."
-                                status = "Stopped"
-                                log(error)
-                            }
-                            running = false
-                            activeBlockLabel = ""
-                            runProgress = ""
-                        }
-                        runJob = job
+                        startFullPhoneExperiment(runPackages)
                     },
                     enabled = connected && fullExperimentSynced && !running && !syncing,
                 ) {

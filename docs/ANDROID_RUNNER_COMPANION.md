@@ -134,9 +134,13 @@ metadata and marker payloads rather than discoverable LSL stream names.
 Default Android builds do not ship liblsl. If a local validation build adds the
 ignored `android/runner-companion/app/libs/liblsl-Android.aar`, runner mode opens
 native `PPSMarkersV2` / `PPSTriggerCodes` outlets and can resolve
-`PPSCommandSignalsV1` to emit token-gated `PPSCommandAcksV1`. Current command
-handling records snapshot/note/continue actions, applies pause/resume through
-the phone-owned `AudioTrack` pause gate during active phone blocks, and records
+`PPSCommandSignalsV1` to emit token-gated `PPSCommandAcksV1`. When Runner mode
+is idle with a synced selected package, it also keeps a native idle command
+listener open so a PC runner or Controller phone can send `start_experiment` /
+`start_part` and receive an ack before the phone launches the same run path as
+the local Start button. Current active-run command handling records
+snapshot/note/continue actions, applies pause/resume through the phone-owned
+`AudioTrack` pause gate during active phone blocks, and records
 `phone_playback_pause` / `phone_playback_resume` diary and marker-mirror events.
 While paused, the AudioTrack wait loop keeps polling native commands so a
 PC-runner or Controller-phone `resume` command can actually release the gate.
