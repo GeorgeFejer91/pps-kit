@@ -68,7 +68,9 @@ The script writes `lsl_command_ack_roundtrip_report.json` and `.md` under `artif
 
 ## Companion Boundary
 
-The Android companion app still uses the token-gated local HTTP/WebSocket companion service for v1. That is intentional: LSL does not provide request authentication, privacy, or command authorization by itself. If a future Android build adds an LSL-native control path, it should keep the same per-run token in the command payload and continue to let the runner reject commands through the same allowed-command gates.
+The Android companion app still uses the token-gated local HTTP/WebSocket companion service for PC-runner control. That is intentional: LSL does not provide request authentication, privacy, or command authorization by itself.
+
+Phone-owned packages now declare an Android LSL contract in `pps-mobile-run-package.v2`, and the Android runtime writes a local PPSMarkersV2-shaped marker mirror plus command diary in its exported artifacts. Live native Android LSL broadcast is the next integration step: it should use the same stream names and command/ack fields, keep the pairing token in command payloads, emit `applied`/`rejected` acks after local phone state changes, and keep demographics in stream metadata/payloads rather than discoverable stream names by default.
 
 ## References
 

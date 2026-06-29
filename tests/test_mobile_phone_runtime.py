@@ -37,6 +37,8 @@ def _package(tmp_path: Path) -> RunPackage:
                 "Trial_End_S",
                 "Tactile_Onset_S",
                 "Response_Window_Onset_S",
+                "Trial_File_Path",
+                "Source_SHA256",
             ],
         )
         writer.writeheader()
@@ -54,6 +56,8 @@ def _package(tmp_path: Path) -> RunPackage:
                 "Trial_End_S": "6.000",
                 "Tactile_Onset_S": "1.250",
                 "Response_Window_Onset_S": "1.250",
+                "Trial_File_Path": str(wav),
+                "Source_SHA256": "",
             }
         )
         writer.writerow(
@@ -70,6 +74,8 @@ def _package(tmp_path: Path) -> RunPackage:
                 "Trial_End_S": "10.000",
                 "Tactile_Onset_S": "",
                 "Response_Window_Onset_S": "1.250",
+                "Trial_File_Path": str(wav),
+                "Source_SHA256": "",
             }
         )
     return RunPackage(
@@ -100,6 +106,10 @@ def test_mobile_package_manifest_exports_assets_trials_and_phone_tactile_cues(tm
     manifest = build_mobile_package_manifest(package)
 
     assert manifest["schema"] == MOBILE_PACKAGE_SCHEMA
+    assert manifest["reconstruction"]["schema"] == "pps-mobile-reconstruction-contract.v1"
+    assert manifest["lsl"]["stream_names"]["rich_markers"] == "PPSMarkersV2"
+    assert manifest["building_blocks"][0]["role"] == "trial_building_block"
+    assert manifest["schedule"]["execution_order"] == ["block-01"]
     assert manifest["package_id"] == mobile_package_id(package)
     assert manifest["mobile_runnable"] is True
     assert manifest["assets"][0]["sha256"]
@@ -135,9 +145,17 @@ def test_mobile_runtime_upload_writes_runner_log_artifacts(tmp_path):
     output_root = tmp_path / "output"
     payload = {
         "package_id": mobile_package_id(package),
+        "participant_metadata": {"participant_id": "P001", "age_years": "30"},
         "events": [
             {"type": "block_start", "block_id": "block-01", "elapsed_ms": 0},
             {"type": "tap", "trial_uid": "trial-a", "elapsed_ms": 3500, "rt_ms": 250},
+        ],
+        "lsl_marker_mirror": [
+            {"event_type": "block_start", "event_id": 1, "participant_id": "P001"},
+            {"event_type": "tap", "event_id": 2, "participant_id": "P001", "trial_uid": "trial-a"},
+        ],
+        "command_diary": [
+            {"command": "start_experiment", "status": "applied"},
         ],
     }
 
@@ -155,6 +173,9 @@ def test_mobile_runtime_upload_writes_runner_log_artifacts(tmp_path):
     loaded = json.loads(artifact.read_text(encoding="utf-8"))
     assert loaded["complete"] is True
     assert loaded["event_count"] == 2
+    assert loaded["participant_metadata"]["age_years"] == "30"
     assert (output_runner_logs_dir(output_root) / "mobile_phone_runtime" / "P001").is_dir()
     assert (artifact.parent / "events.jsonl").read_text(encoding="utf-8").count("\n") == 2
     assert (artifact.parent / "events.csv").is_file()
+    assert (artifact.parent / "lsl_marker_mirror.csv").is_file()
+    assert (artifact.parent / "command_diary.jsonl").read_text(encoding="utf-8").count("\n") == 1

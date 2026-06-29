@@ -4,6 +4,25 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 
 ## 2026-06-29
 
+- Android phone-owned runtime planning has moved into a first implementation
+  slice. Mobile package export now emits `pps-mobile-run-package.v2` and
+  `pps-mobile-run-package-list.v2`, with legacy v1 accepted by Android. The v2
+  manifest keeps prepared block WAV replay as the compatibility execution path
+  while adding a reconstruction contract, Segment 6/source schedule hashes,
+  optional downloadable `trial_building_block` assets derived from
+  `Trial_File_Path`, and an Android LSL contract for `PPSMarkersV2`,
+  `PPSTriggerCodes`, `PPSCommandSignalsV1`, and `PPSCommandAcksV1`. The Android
+  app now collects phone-run age/handedness/gender/tactile-threshold metadata,
+  records haptic capability including amplitude-control availability, writes
+  `participant_metadata.json`, `haptic_capability.json`,
+  `lsl_marker_mirror.csv`, and `command_diary.jsonl` beside phone-owned
+  `events.csv`/`completion.json`, and includes those artifacts in phone ZIP
+  exports. This is still a local marker-mirror and reconstruction contract; live
+  native Android LSL broadcast requires a pinned liblsl Android integration.
+  Participant demographics stay in metadata/payloads by default rather than
+  discoverable stream names. Android FFmpeg-style synthesis remains feasible via
+  native builds, but the preferred PPS top-up path is a deterministic PCM WAV
+  assembler rather than FFmpegKit, because FFmpegKit is retired.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only

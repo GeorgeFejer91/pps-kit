@@ -3,8 +3,10 @@ package io.ppskit.runnercompanion
 import org.json.JSONArray
 import org.json.JSONObject
 
-const val MOBILE_PACKAGE_LIST_SCHEMA = "pps-mobile-run-package-list.v1"
-const val MOBILE_PACKAGE_SCHEMA = "pps-mobile-run-package.v1"
+const val MOBILE_PACKAGE_LIST_SCHEMA = "pps-mobile-run-package-list.v2"
+const val MOBILE_PACKAGE_SCHEMA = "pps-mobile-run-package.v2"
+const val MOBILE_PACKAGE_LIST_SCHEMA_V1 = "pps-mobile-run-package-list.v1"
+const val MOBILE_PACKAGE_SCHEMA_V1 = "pps-mobile-run-package.v1"
 
 data class MobilePackageList(
     val activePackageId: String,
@@ -29,9 +31,15 @@ data class MobileRunPackage(
     val packageId: String,
     val participantId: String,
     val sessionId: String,
+    val sessionGroupId: String,
+    val partSessionId: String,
+    val partNumber: String,
     val title: String,
     val blocks: List<MobileBlock>,
     val assets: List<MobileAsset>,
+    val buildingBlocks: List<MobileBuildingBlock>,
+    val reconstruction: MobileReconstructionContract,
+    val lsl: MobileLslContract,
     val mobileRunnable: Boolean,
     val phoneOwnedSession: Boolean,
     val warnings: List<String>,
@@ -43,10 +51,59 @@ data class MobileAsset(
     val assetId: String,
     val filename: String,
     val mediaType: String,
+    val role: String,
     val sizeBytes: Long,
     val sha256: String,
     val available: Boolean,
 )
+
+data class MobileBuildingBlock(
+    val assetId: String,
+    val filename: String,
+    val role: String,
+    val sha256: String,
+    val trialType: String,
+    val family: String,
+    val rowLabel: String,
+    val soaMs: String,
+    val noiseType: String,
+    val durationS: Double,
+    val tactileOnsetS: Double?,
+    val responseWindowOnsetS: Double?,
+)
+
+data class MobileReconstructionContract(
+    val schema: String,
+    val authority: String,
+    val fallbackExecutionStrategy: String,
+    val preferredLightweightStrategy: String,
+    val sourceRunSetupSha256: String,
+    val scheduleHash: String,
+    val buildingBlockCount: Int,
+    val blockCount: Int,
+    val trialCount: Int,
+) {
+    companion object {
+        val empty = MobileReconstructionContract("", "", "", "", "", "", 0, 0, 0)
+    }
+}
+
+data class MobileLslContract(
+    val schema: String,
+    val runtimeAuthority: String,
+    val privacyDefault: String,
+    val richMarkersName: String,
+    val numericTriggersName: String,
+    val commandSignalsName: String,
+    val commandAcksName: String,
+    val nativeAndroidLslRequired: Boolean,
+    val currentAndroidSourceBehavior: String,
+    val supportedCommands: List<String>,
+) {
+    companion object {
+        val empty = MobileLslContract("", "", "", "", "", "", "", false, "", emptyList())
+    }
+}
 
 data class MobileBlock(
     val blockId: String,
@@ -88,7 +145,9 @@ data class MobileCue(
 object MobilePackageParser {
     fun parseList(raw: String): MobilePackageList {
         val root = JSONObject(raw)
-        require(root.optString("schema") == MOBILE_PACKAGE_LIST_SCHEMA) { "Unsupported mobile package list schema." }
+        require(root.optString("schema") in setOf(MOBILE_PACKAGE_LIST_SCHEMA, MOBILE_PACKAGE_LIST_SCHEMA_V1)) {
+            "Unsupported mobile package list schema."
+        }
         return MobilePackageList(
             activePackageId = root.optString("active_package_id", ""),
             packages = root.optJSONArray("packages").toPackageSummaries(),
@@ -97,14 +156,22 @@ object MobilePackageParser {
 
     fun parseManifest(raw: String): MobileRunPackage {
         val root = JSONObject(raw)
-        require(root.optString("schema") == MOBILE_PACKAGE_SCHEMA) { "Unsupported mobile package schema." }
+        require(root.optString("schema") in setOf(MOBILE_PACKAGE_SCHEMA, MOBILE_PACKAGE_SCHEMA_V1)) {
+            "Unsupported mobile package schema."
+        }
         return MobileRunPackage(
             packageId = root.optString("package_id", ""),
             participantId = root.optString("participant_id", ""),
             sessionId = root.optString("session_id", ""),
+            sessionGroupId = root.optString("session_group_id", ""),
+            partSessionId = root.optString("part_session_id", ""),
+            partNumber = root.optString("part_number", ""),
             title = root.optString("title", ""),
             blocks = root.optJSONArray("blocks").toMobileBlocks(),
             assets = root.optJSONArray("assets").toMobileAssets(),
+            buildingBlocks = root.optJSONArray("building_blocks").toMobileBuildingBlocks(),
+            reconstruction = root.optJSONObject("reconstruction").toMobileReconstructionContract(),
+            lsl = root.optJSONObject("lsl").toMobileLslContract(),
             mobileRunnable = root.optBoolean("mobile_runnable", false),
             phoneOwnedSession = root.optBoolean("phone_owned_session", false),
             warnings = root.optJSONArray("warnings").toStringList(),
@@ -140,11 +207,65 @@ private fun JSONArray?.toMobileAssets(): List<MobileAsset> {
             assetId = item.optString("asset_id", ""),
             filename = item.optString("filename", ""),
             mediaType = item.optString("media_type", "application/octet-stream"),
+            role = item.optString("role", ""),
             sizeBytes = item.optLong("size_bytes", 0L),
             sha256 = item.optString("sha256", ""),
             available = item.optBoolean("available", true),
         )
     }
+}
+
+private fun JSONArray?.toMobileBuildingBlocks(): List<MobileBuildingBlock> {
+    if (this == null) return emptyList()
+    return (0 until length()).mapNotNull { index ->
+        val item = optJSONObject(index) ?: return@mapNotNull null
+        MobileBuildingBlock(
+            assetId = item.optString("asset_id", ""),
+            filename = item.optString("filename", ""),
+            role = item.optString("role", "trial_building_block"),
+            sha256 = item.optString("sha256", ""),
+            trialType = item.optString("trial_type", ""),
+            family = item.optString("family", ""),
+            rowLabel = item.optString("row_label", ""),
+            soaMs = item.optString("soa_ms", ""),
+            noiseType = item.optString("noise_type", ""),
+            durationS = item.optDouble("duration_s", 0.0).coerceAtLeast(0.0),
+            tactileOnsetS = item.optNullableDouble("tactile_onset_s"),
+            responseWindowOnsetS = item.optNullableDouble("response_window_onset_s"),
+        )
+    }
+}
+
+private fun JSONObject?.toMobileReconstructionContract(): MobileReconstructionContract {
+    if (this == null) return MobileReconstructionContract.empty
+    return MobileReconstructionContract(
+        schema = optString("schema", ""),
+        authority = optString("authority", ""),
+        fallbackExecutionStrategy = optString("fallback_execution_strategy", ""),
+        preferredLightweightStrategy = optString("preferred_lightweight_strategy", ""),
+        sourceRunSetupSha256 = optString("source_run_setup_sha256", ""),
+        scheduleHash = optString("schedule_hash", ""),
+        buildingBlockCount = optInt("building_block_count", 0),
+        blockCount = optInt("block_count", 0),
+        trialCount = optInt("trial_count", 0),
+    )
+}
+
+private fun JSONObject?.toMobileLslContract(): MobileLslContract {
+    if (this == null) return MobileLslContract.empty
+    val streamNames = optJSONObject("stream_names")
+    return MobileLslContract(
+        schema = optString("schema", ""),
+        runtimeAuthority = optString("runtime_authority", ""),
+        privacyDefault = optString("privacy_default", ""),
+        richMarkersName = streamNames?.optString("rich_markers", "") ?: "",
+        numericTriggersName = streamNames?.optString("numeric_triggers", "") ?: "",
+        commandSignalsName = streamNames?.optString("command_signals", "") ?: "",
+        commandAcksName = streamNames?.optString("command_acks", "") ?: "",
+        nativeAndroidLslRequired = optBoolean("native_android_lsl_required", false),
+        currentAndroidSourceBehavior = optString("current_android_source_behavior", ""),
+        supportedCommands = optJSONArray("supported_commands").toStringList(),
+    )
 }
 
 private fun JSONArray?.toMobileBlocks(): List<MobileBlock> {

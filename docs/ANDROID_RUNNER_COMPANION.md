@@ -19,6 +19,15 @@ hardware-timed collection: Android vibration timing, phone audio output, and
 touch timestamps are phone-runtime evidence only and do not provide LSL,
 LabRecorder, Woojer, or wired-loopback guarantees.
 
+The phone package schema is now `pps-mobile-run-package.v2`. It remains
+backward-compatible with the original prepared-block WAV replay path, but it
+also carries a reconstruction contract: Segment 6 source hashes, block order,
+trial identities, a reusable trial-building-block asset catalog when
+`Trial_File_Path` is available, and the Android phone LSL contract. The current
+Android build writes a PPSMarkersV2-shaped local marker mirror and command diary
+beside the phone event log; live native LSL broadcast is the next integration
+step and requires a pinned liblsl Android native layer.
+
 ## Pairing
 
 1. Start Focus Mode from `PPSExperimentRunner.exe`.
@@ -94,6 +103,35 @@ The phone runtime uses Android `MediaPlayer` for prepared block WAV playback,
 `SystemClock.elapsedRealtime()` for phone-side timestamps, and the Android
 vibrator service for tactile cue signaling. Treat it as an experimental mobile
 collection mode until physical phone timing validation is added.
+
+Synced v2 packages include:
+
+- prepared block WAV assets with role `block_audio`, which remain the current
+  playback path
+- optional reusable Segment 3 trial WAV assets with role
+  `trial_building_block`, used by future lightweight replay/top-up logic
+- `reconstruction` metadata with source Segment 6 hashes and schedule hash
+- `lsl` metadata declaring `PPSMarkersV2`, `PPSTriggerCodes`,
+  `PPSCommandSignalsV1`, and `PPSCommandAcksV1`
+
+Phone-owned local artifacts now include `participant_metadata.json`,
+`haptic_capability.json`, `events.csv`, `lsl_marker_mirror.csv`,
+`command_diary.jsonl`, and `completion.json` in the exported phone session ZIP.
+Participant age, handedness, gender, and tactile threshold stay in metadata and
+marker payloads rather than discoverable LSL stream names.
+
+Android vibration calibration is device-limited. If Android reports amplitude
+control, the entered threshold percent is mapped to the `VibrationEffect`
+amplitude range for phone vibration cues. If the phone has a vibrator but no
+amplitude control, the app records the device as binary detection only and uses
+default-amplitude pulses; that value should not be interpreted as a calibrated
+physical vibration strength.
+
+FFmpeg-style synthesis is technically possible on Android through native FFmpeg
+builds, but the app does not depend on FFmpegKit because that wrapper project is
+retired. For top-up and lightweight phone replay, prefer a small deterministic
+PCM WAV assembler over a broad FFmpeg runtime unless future requirements need
+general resampling or transcoding.
 
 ## Emulator Evidence
 

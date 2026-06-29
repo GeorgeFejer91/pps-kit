@@ -422,10 +422,15 @@ private fun PhoneRuntimeScreen(
     var runProgress by remember { mutableStateOf("") }
     var uploadedArtifact by remember { mutableStateOf("") }
     var lastRunDir by remember { mutableStateOf("") }
+    var phoneAge by remember(pairing.sessionId) { mutableStateOf("") }
+    var phoneHandedness by remember(pairing.sessionId) { mutableStateOf("right") }
+    var phoneGender by remember(pairing.sessionId) { mutableStateOf("prefer_not_to_say") }
+    var tactileThreshold by remember(pairing.sessionId) { mutableStateOf("") }
     var session by remember { mutableStateOf<PhoneRunSession?>(null) }
     var runJob by remember { mutableStateOf<Job?>(null) }
     val logLines = remember { mutableStateListOf<String>() }
     val syncedPackages = remember { mutableStateMapOf<String, MobileRunPackage>() }
+    val hapticCapability = remember { phoneHapticCapability(context) }
 
     fun log(message: String) {
         logLines.add(0, message)
@@ -482,6 +487,8 @@ private fun PhoneRuntimeScreen(
             StatusChip(status)
             if (activeBlockLabel.isNotBlank()) StatusChip(activeBlockLabel)
             if (runProgress.isNotBlank()) StatusChip(runProgress)
+            StatusChip(if (hapticCapability.optBoolean("has_vibrator")) "Vibrator" else "No vibrator")
+            if (hapticCapability.optBoolean("has_amplitude_control")) StatusChip("Amplitude control")
         }
         if (error.isNotBlank()) {
             Text(error, color = MaterialTheme.colorScheme.error)
@@ -517,6 +524,31 @@ private fun PhoneRuntimeScreen(
                         Text("${item.title.ifBlank { item.packageId }}$suffix")
                     },
                 )
+            }
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Phone Participant Metadata", style = MaterialTheme.typography.titleMedium)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = phoneAge,
+                    onValueChange = { phoneAge = it.filter(Char::isDigit) },
+                    label = { Text("Age") },
+                    enabled = !running && !syncing,
+                    modifier = Modifier.width(132.dp),
+                )
+                OutlinedTextField(
+                    value = tactileThreshold,
+                    onValueChange = { tactileThreshold = it.filter { char -> char.isDigit() || char == '.' } },
+                    label = { Text("Threshold %") },
+                    enabled = !running && !syncing,
+                    modifier = Modifier.width(168.dp),
+                )
+            }
+            ChoiceRow("Handedness", phoneHandedness, listOf("right", "left", "ambidextrous", "prefer_not_to_say")) {
+                phoneHandedness = it
+            }
+            ChoiceRow("Gender", phoneGender, listOf("male", "female", "other", "prefer_not_to_say")) {
+                phoneGender = it
             }
         }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -556,7 +588,12 @@ private fun PhoneRuntimeScreen(
                 onClick = {
                     val runPackage = selectedManifest ?: return@Button
                     val job = scope.launch {
-                        val activeSession = PhoneRunSession(runPackage.packageId)
+                        val activeSession = PhoneRunSession(
+                            packageId = runPackage.packageId,
+                            participantMetadata = phoneParticipantMetadata(runPackage, phoneAge, phoneHandedness, phoneGender, tactileThreshold),
+                            hapticMetadata = hapticCapability,
+                            lslContract = runPackage.lsl,
+                        )
                         session = activeSession
                         running = true
                         activeBlockLabel = ""
@@ -650,7 +687,12 @@ private fun PhoneRuntimeScreen(
                             val artifacts = mutableListOf<String>()
                             val artifactDirs = mutableListOf<String>()
                             runPackages.forEachIndexed { index, runPackage ->
-                                val activeSession = PhoneRunSession(runPackage.packageId)
+                                val activeSession = PhoneRunSession(
+                                    packageId = runPackage.packageId,
+                                    participantMetadata = phoneParticipantMetadata(runPackage, phoneAge, phoneHandedness, phoneGender, tactileThreshold),
+                                    hapticMetadata = hapticCapability,
+                                    lslContract = runPackage.lsl,
+                                )
                                 session = activeSession
                                 status = "Part ${index + 1}/${runPackages.size}"
                                 val result = runPhonePackage(
@@ -732,6 +774,12 @@ private fun PhoneRuntimeScreen(
                 StatusChip(formatBytes(selectedSummary.totalAssetBytes))
                 StatusChip(if (selectedSummary.mobileRunnable) "Runnable" else "Not runnable")
                 StatusChip(if (selectedManifest != null) "Synced" else "Not synced")
+                if (selectedManifest?.lsl?.richMarkersName?.isNotBlank() == true) {
+                    StatusChip("${selectedManifest.lsl.richMarkersName} mirror")
+                }
+                if ((selectedManifest?.buildingBlocks?.size ?: 0) > 0) {
+                    StatusChip("${selectedManifest?.buildingBlocks?.size ?: 0} building blocks")
+                }
             }
             selectedSummary.warnings.take(3).forEach { warning ->
                 Text(warning, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
@@ -1467,6 +1515,14 @@ private suspend fun runPhonePackage(
     onBlock: (String) -> Unit,
     onProgress: (String) -> Unit,
 ): JSONObject {
+    session.recordCommand(
+        command = "start_experiment",
+        status = "applied",
+        payload = JSONObject()
+            .put("package_id", runPackage.packageId)
+            .put("block_count", runPackage.blocks.size)
+            .put("phone_owned_session", phoneOwnedSession),
+    )
     session.addRunStart(runPackage)
     if (phoneOwnedSession) {
         withContext(Dispatchers.IO) { session.writeLocalArtifact(context, runPackage, complete = false) }
@@ -1484,7 +1540,7 @@ private suspend fun runPhonePackage(
             val cueJobs = block.tactileCues.map { cue ->
                 launch {
                     delay((cue.timeS * 1000.0).roundToLong().coerceAtLeast(0L))
-                    vibratePhone(context)
+                    vibratePhone(context, session.vibrationAmplitude())
                     session.addCue(block, cue)
                 }
             }
@@ -1505,6 +1561,11 @@ private suspend fun runPhonePackage(
         }
     }
     session.addRunComplete()
+    session.recordCommand(
+        command = "run_complete",
+        status = "applied",
+        payload = JSONObject().put("package_id", runPackage.packageId),
+    )
     return if (phoneOwnedSession) {
         onStatus("Saving")
         withContext(Dispatchers.IO) { session.writeLocalArtifact(context, runPackage, complete = true) }
@@ -1514,10 +1575,19 @@ private suspend fun runPhonePackage(
     }
 }
 
-private class PhoneRunSession(val packageId: String) {
+private class PhoneRunSession(
+    val packageId: String,
+    participantMetadata: JSONObject = JSONObject(),
+    hapticMetadata: JSONObject = JSONObject(),
+    private val lslContract: MobileLslContract = MobileLslContract.empty,
+) {
     val runId: String = "phone-${System.currentTimeMillis()}"
     private val events = mutableListOf<JSONObject>()
     private val pendingEvents = mutableListOf<JSONObject>()
+    private val lslMarkers = mutableListOf<JSONObject>()
+    private val commandDiary = mutableListOf<JSONObject>()
+    private val participantMetadata = JSONObject(participantMetadata.toString())
+    private val hapticMetadata = JSONObject(hapticMetadata.toString())
     private var activeBlock: MobileBlock? = null
     private var blockStartElapsedMs: Long = 0L
     private val startedUnixMs: Long = System.currentTimeMillis()
@@ -1527,6 +1597,40 @@ private class PhoneRunSession(val packageId: String) {
 
     @Synchronized
     fun addRunStart(runPackage: MobileRunPackage) {
+        addEventLocked(
+            "session_metadata",
+            JSONObject()
+                .put("participant_metadata", JSONObject(participantMetadata.toString()))
+                .put("haptic", JSONObject(hapticMetadata.toString()))
+                .put(
+                    "package",
+                    JSONObject()
+                        .put("package_id", runPackage.packageId)
+                        .put("participant_id", runPackage.participantId)
+                        .put("session_id", runPackage.sessionId)
+                        .put("session_group_id", runPackage.sessionGroupId)
+                        .put("part_session_id", runPackage.partSessionId)
+                        .put("part_number", runPackage.partNumber)
+                        .put("title", runPackage.title)
+                        .put("block_count", runPackage.blocks.size)
+                        .put("asset_count", runPackage.assets.size)
+                        .put("building_block_count", runPackage.buildingBlocks.size)
+                        .put("schedule_hash", runPackage.reconstruction.scheduleHash),
+                )
+                .put(
+                    "lsl",
+                    JSONObject()
+                        .put("schema", lslContract.schema)
+                        .put("runtime_authority", lslContract.runtimeAuthority.ifBlank { "android_phone" })
+                        .put("privacy_default", lslContract.privacyDefault)
+                        .put("rich_markers_name", lslContract.richMarkersName.ifBlank { "PPSMarkersV2" })
+                        .put("numeric_triggers_name", lslContract.numericTriggersName.ifBlank { "PPSTriggerCodes" })
+                        .put("command_signals_name", lslContract.commandSignalsName.ifBlank { "PPSCommandSignalsV1" })
+                        .put("command_acks_name", lslContract.commandAcksName.ifBlank { "PPSCommandAcksV1" })
+                        .put("native_android_lsl_required", lslContract.nativeAndroidLslRequired)
+                        .put("current_android_source_behavior", lslContract.currentAndroidSourceBehavior.ifBlank { "local_lsl_marker_mirror" }),
+                ),
+        )
         addEventLocked(
             "run_start",
             JSONObject()
@@ -1589,6 +1693,38 @@ private class PhoneRunSession(val packageId: String) {
     }
 
     @Synchronized
+    fun recordCommand(command: String, status: String, reason: String = "", payload: JSONObject = JSONObject()) {
+        val row = JSONObject()
+            .put("schema", "pps-android-command-diary.v1")
+            .put("command_id", "phone-${commandDiary.size + 1}")
+            .put("command", command)
+            .put("status", status)
+            .put("reason", reason)
+            .put("payload", JSONObject(payload.toString()))
+            .put("package_id", packageId)
+            .put("run_id", runId)
+            .put("phone_unix_ms", System.currentTimeMillis())
+            .put("phone_elapsed_realtime_ms", SystemClock.elapsedRealtime())
+        commandDiary.add(row)
+        addEventLocked(
+            "operator_command",
+            JSONObject()
+                .put("command_id", row.optString("command_id"))
+                .put("command", command)
+                .put("status", status)
+                .put("reason", reason)
+                .put("payload", JSONObject(payload.toString())),
+        )
+    }
+
+    fun vibrationAmplitude(): Int {
+        if (!hapticMetadata.optBoolean("has_amplitude_control", false)) return VibrationEffect.DEFAULT_AMPLITUDE
+        val threshold = participantMetadata.optDouble("tactile_threshold_percent", Double.NaN)
+        if (threshold.isNaN() || threshold.isInfinite() || threshold <= 0.0) return VibrationEffect.DEFAULT_AMPLITUDE
+        return ((threshold.coerceIn(1.0, 100.0) / 100.0) * 255.0).roundToInt().coerceIn(1, 255)
+    }
+
+    @Synchronized
     fun recordTap(): Int {
         tapCount += 1
         val block = activeBlock
@@ -1632,6 +1768,10 @@ private class PhoneRunSession(val packageId: String) {
             .put("run_id", runId)
             .put("completed", complete)
             .put("events", eventsArray)
+            .put("participant_metadata", JSONObject(participantMetadata.toString()))
+            .put("haptic", JSONObject(hapticMetadata.toString()))
+            .put("lsl_marker_mirror", JSONArray().also { array -> lslMarkers.forEach { array.put(JSONObject(it.toString())) } })
+            .put("command_diary", JSONArray().also { array -> commandDiary.forEach { array.put(JSONObject(it.toString())) } })
             .put("summary", summaryLocked())
     }
 
@@ -1648,6 +1788,8 @@ private class PhoneRunSession(val packageId: String) {
             .put("run_id", runId)
             .put("completed", complete)
             .put("phone_owned_session", true)
+            .put("participant_metadata", JSONObject(participantMetadata.toString()))
+            .put("haptic", JSONObject(hapticMetadata.toString()))
             .put(
                 "package",
                 JSONObject()
@@ -1657,10 +1799,16 @@ private class PhoneRunSession(val packageId: String) {
                     .put("block_count", runPackage.blocks.size),
             )
             .put("events", eventsArray)
+            .put("lsl_marker_mirror", JSONArray().also { array -> lslMarkers.forEach { array.put(JSONObject(it.toString())) } })
+            .put("command_diary", JSONArray().also { array -> commandDiary.forEach { array.put(JSONObject(it.toString())) } })
             .put("summary", summaryLocked())
         val artifactFile = File(dir, if (complete) "completion.json" else "latest_events.json")
         artifactFile.writeText(payload.toString(2), Charsets.UTF_8)
         writePhoneEventsCsv(File(dir, "events.csv"), events)
+        writePhoneEventsCsv(File(dir, "lsl_marker_mirror.csv"), lslMarkers)
+        writeCommandDiaryJsonl(File(dir, "command_diary.jsonl"), commandDiary)
+        File(dir, "participant_metadata.json").writeText(participantMetadata.toString(2), Charsets.UTF_8)
+        File(dir, "haptic_capability.json").writeText(hapticMetadata.toString(2), Charsets.UTF_8)
         return JSONObject()
             .put("schema", if (complete) "pps-mobile-run-complete.v1" else "pps-mobile-run-events.v1")
             .put("status", if (complete) "saved" else "saved_partial")
@@ -1675,14 +1823,45 @@ private class PhoneRunSession(val packageId: String) {
         if (blockStartElapsedMs <= 0L) 0L else (SystemClock.elapsedRealtime() - blockStartElapsedMs).coerceAtLeast(0L)
 
     private fun addEventLocked(type: String, payload: JSONObject) {
+        val eventId = events.size + 1
         val event = JSONObject(payload.toString())
             .put("type", type)
+            .put("event_id", eventId)
             .put("package_id", packageId)
             .put("run_id", runId)
             .put("phone_unix_ms", System.currentTimeMillis())
             .put("phone_elapsed_realtime_ms", SystemClock.elapsedRealtime())
         events.add(event)
         pendingEvents.add(event)
+        lslMarkers.add(markerFromEvent(event))
+    }
+
+    private fun markerFromEvent(event: JSONObject): JSONObject {
+        val payload = JSONObject(event.toString())
+        val eventType = event.optString("type", "")
+        val blockIndex = event.optString("block_index", event.optString("block_id", ""))
+        val trialUid = event.optString("trial_uid", "")
+        val participantId = participantMetadata.optString("participant_id", "")
+        val partSessionId = participantMetadata.optString("part_session_id", "")
+        val partNumber = participantMetadata.optString("part_number", "")
+        return JSONObject()
+            .put("marker_version", "2.0")
+            .put("event_id", event.optInt("event_id"))
+            .put("event_type", eventType)
+            .put("event_code", phoneEventCode(eventType))
+            .put("trigger_key", phoneTriggerKey(eventType, blockIndex, trialUid))
+            .put("marker_name", phoneMarkerName(participantId, eventType, blockIndex, trialUid, event))
+            .put("session_id", participantMetadata.optString("session_id", ""))
+            .put("participant_id", participantId)
+            .put("session_group_id", participantMetadata.optString("session_group_id", ""))
+            .put("part_session_id", partSessionId)
+            .put("part_number", partNumber)
+            .put("block_index", blockIndex)
+            .put("trial_uid", trialUid)
+            .put("timestamp_quality", "android_elapsed_realtime")
+            .put("phone_unix_ms", event.optLong("phone_unix_ms"))
+            .put("phone_elapsed_realtime_ms", event.optLong("phone_elapsed_realtime_ms"))
+            .put("payload_json", payload.toString())
     }
 
     private fun summaryLocked(): JSONObject =
@@ -1692,6 +1871,8 @@ private class PhoneRunSession(val packageId: String) {
             .put("total_event_count", events.size)
             .put("tap_count", tapCount)
             .put("valid_tap_count", validTapCount)
+            .put("lsl_marker_mirror_count", lslMarkers.size)
+            .put("command_diary_count", commandDiary.size)
 }
 
 private suspend fun playBlockAudio(file: File, onProgress: (Long, Long) -> Unit) {
@@ -1740,21 +1921,101 @@ private suspend fun playBlockAudio(file: File, onProgress: (Long, Long) -> Unit)
     }
 }
 
-private fun vibratePhone(context: Context) {
-    val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+private fun phoneParticipantMetadata(
+    runPackage: MobileRunPackage,
+    age: String,
+    handedness: String,
+    gender: String,
+    tactileThreshold: String,
+): JSONObject =
+    JSONObject()
+        .put("schema", "pps-android-phone-participant-metadata.v1")
+        .put("participant_id", runPackage.participantId)
+        .put("session_id", runPackage.sessionId)
+        .put("session_group_id", runPackage.sessionGroupId)
+        .put("part_session_id", runPackage.partSessionId)
+        .put("part_number", runPackage.partNumber)
+        .put("age_years", age)
+        .put("handedness", handedness)
+        .put("gender", gender)
+        .put("tactile_threshold_percent", tactileThreshold)
+        .put("stream_privacy", "metadata_payload_only")
+
+private fun phoneHapticCapability(context: Context): JSONObject {
+    val vibrator = resolveVibrator(context)
+    val hasVibrator = vibrator?.hasVibrator() == true
+    val hasAmplitude = hasVibrator && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && vibrator?.hasAmplitudeControl() == true
+    return JSONObject()
+        .put("schema", "pps-android-haptic-capability.v1")
+        .put("has_vibrator", hasVibrator)
+        .put("has_amplitude_control", hasAmplitude)
+        .put("calibration_policy", if (hasAmplitude) "amplitude_percent_supported" else "binary_detection_only")
+        .put("device_model", Build.MODEL ?: "")
+        .put("android_sdk", Build.VERSION.SDK_INT)
+}
+
+private fun resolveVibrator(context: Context): Vibrator? =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         val manager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
         manager.defaultVibrator
     } else {
         @Suppress("DEPRECATION")
         context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
     }
+
+private fun vibratePhone(context: Context, amplitude: Int = VibrationEffect.DEFAULT_AMPLITUDE) {
+    val vibrator = resolveVibrator(context) ?: return
     if (!vibrator.hasVibrator()) return
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        vibrator.vibrate(VibrationEffect.createOneShot(60L, VibrationEffect.DEFAULT_AMPLITUDE))
+        val resolvedAmplitude = if (amplitude in 1..255 || amplitude == VibrationEffect.DEFAULT_AMPLITUDE) {
+            amplitude
+        } else {
+            VibrationEffect.DEFAULT_AMPLITUDE
+        }
+        vibrator.vibrate(VibrationEffect.createOneShot(60L, resolvedAmplitude))
     } else {
         @Suppress("DEPRECATION")
         vibrator.vibrate(60L)
     }
+}
+
+private fun phoneEventCode(eventType: String): Int =
+    when (eventType) {
+        "session_metadata" -> 8
+        "run_start" -> 1
+        "run_complete" -> 2
+        "block_start" -> 10
+        "block_complete" -> 11
+        "vibration_cue" -> 21
+        "tap" -> 30
+        "operator_command" -> 41
+        else -> 500
+    }
+
+private fun phoneTriggerKey(eventType: String, blockIndex: String, trialUid: String): String =
+    if (trialUid.isNotBlank()) {
+        "trial:$trialUid:$eventType"
+    } else if (blockIndex.isNotBlank()) {
+        "block:$blockIndex:$eventType"
+    } else {
+        "control:$eventType"
+    }
+
+private fun phoneMarkerName(
+    participantId: String,
+    eventType: String,
+    blockIndex: String,
+    trialUid: String,
+    event: JSONObject,
+): String {
+    val participant = participantId.ifBlank { "PXX" }.markerToken()
+    val block = blockIndex.ifBlank { "blockXX" }.markerToken()
+    val row = event.optString("row_label", "").markerToken()
+    val noise = event.optString("noise_type", "").markerToken()
+    val soa = event.optString("soa_ms", "").markerToken()
+    return listOf(participant, block, row, noise, if (soa.isNotBlank()) "SOA$soa" else "", trialUid.markerToken(), eventType.markerToken())
+        .filter { it.isNotBlank() }
+        .joinToString("_")
 }
 
 private suspend fun RunnerClient.awaitMobilePackage(packageId: String): MobileRunPackage =
@@ -1831,6 +2092,20 @@ private fun writePhoneEventsCsv(path: File, events: List<JSONObject>) {
     )
 }
 
+private fun writeCommandDiaryJsonl(path: File, rows: List<JSONObject>) {
+    if (rows.isEmpty()) return
+    path.parentFile?.mkdirs()
+    path.writeText(
+        buildString {
+            rows.forEach { row ->
+                append(row.toString())
+                append("\n")
+            }
+        },
+        Charsets.UTF_8,
+    )
+}
+
 private fun exportPhoneRunZip(context: Context, runDir: File): File {
     require(runDir.isDirectory) { "No completed phone session is available to export." }
     val exportDir = File(context.cacheDir, "exports")
@@ -1899,6 +2174,13 @@ private fun sharePhoneRunZip(context: Context, zip: File) {
 }
 
 private fun csvCell(value: String): String = "\"${value.replace("\"", "\"\"")}\""
+
+private fun String.markerToken(): String =
+    trim()
+        .replace("+", "plus")
+        .map { char -> if (char.isLetterOrDigit()) char else '_' }
+        .joinToString("")
+        .trim('_')
 
 private fun safeFileName(value: String): String =
     value.replace(Regex("[^A-Za-z0-9._-]+"), "-").trim('-', '.', '_').ifBlank { "asset" }
