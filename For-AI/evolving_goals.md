@@ -103,8 +103,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `phone_topup_block.wav`, plays it through the same AudioTrack playback-head
   cue scheduler, records `phone_topup_materialization`, top-up block start/cue/
   tap/block-complete events, and writes the updated diary/artifacts before
-  final run completion. This is phone-runtime top-up playback, but final
-  rescue-response analysis/replacement remains pending.
+  final run completion. The phone-local response review now appends
+  `topup_rescue` rows to `phone_response_ledger.csv`, marks source misses as
+  `missed_rescued_by_topup` or `missed_topup_missed`, sets the top-up plan
+  status to `played` after the phone top-up block completes, and stores
+  `topup_hit_count`, `final_rescued_hit_count`, and
+  `final_unresolved_miss_count` in the phone response summary. This is still
+  phone-runtime response evidence, not physical vibration/audio proof.
 - Android now has a strict phone-side LSL command/status protocol layer even
   before the native transport is linked. `PhoneLslProtocol.kt` mirrors the PC
   runner `PPSCommandSignalsV1` / `PPSCommandAcksV1` string-sample field order,

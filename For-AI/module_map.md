@@ -48,6 +48,13 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   only, while native liblsl validation builds also send button presses over a
   long-lived `PPSCommandSignalsV1` outlet and record native send/ack outcomes in
   the outbox row.
+- Android phone-owned response/top-up review lives in
+  `PhoneResponseReview.kt`. It applies the shared 100-1300 ms post-tactile
+  response policy to standard phone blocks, plans missed-trial rescue top-ups
+  from reusable building-block assets, and after a played phone top-up appends
+  `topup_rescue` ledger rows while marking source misses as rescued or still
+  unresolved. This is phone-runtime response evidence, not physical
+  audio/vibration timing evidence.
 - Provisional Woojer tactile-drive latency compensation: `tactile_latency.py`, consumed by `session_runner.py` during participant/top-up block WAV preparation.
 - Shared runner/dashboard profile memory and output-diary bridge: `runner_diary.py` now owns runner settings and diary helpers; future shared profile-catalogue code should live in a common Python seam consumed by both `dashboard_app.py` and `focus_app.py`, not separately in browser JS or runner UI code.
 - Event, timing, and output evidence contracts: `timing_events.py`, `session_events.py`, `output_evidence.py`, `topup.py`.
