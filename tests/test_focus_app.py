@@ -430,11 +430,40 @@ def _write_analysis_review_outputs(session_dir: Path) -> dict[str, Path]:
         + "\n",
         encoding="utf-8",
     )
+    participant_trials = session_dir / f"{session_id}_trials.csv"
+    trial_header = (
+        "trial_uid,trial_number,trial_type,stimulus_modality,tactile_present,catch_trial,response_given,"
+        "outcome,hit,part_number,condition,respiratory_phase,noise_type,soa_ms,rt_ms,is_topup,topup_role"
+    )
+    trial_rows = [
+        "T001,1,Audio-Tactile,audio_tactile,true,false,true,Hit,true,1,,Inhale,pink,100,310,false,",
+        "T002,2,Audio-Tactile,audio_tactile,true,false,true,Hit,true,1,,Inhale,pink,200,300,false,",
+        "T003,3,Baseline,tactile,true,false,true,Hit,true,1,,Inhale,pink,,330,false,",
+        "T004,4,Audio-Tactile,audio_tactile,true,false,false,Miss,false,1,,Inhale,pink,400,,false,",
+        "TU001,5,Audio-Tactile,audio_tactile,true,false,true,Hit,true,1,,Inhale,pink,800,280,true,rescue",
+        "C001,6,Catch,audio,false,true,false,Hit,true,1,,Inhale,pink,,,false,",
+        "C002,7,Catch,audio,false,true,false,Hit,true,1,,Inhale,pink,,,false,",
+        "C003,8,Catch,audio,false,true,false,Hit,true,1,,Inhale,pink,,,false,",
+        "C004,9,Catch,audio,false,true,true,Miss,false,1,,Inhale,pink,,,false,",
+    ]
+    participant_trials.write_text("\n".join([trial_header, *trial_rows]) + "\n", encoding="utf-8")
+    responses = analysis_dir / f"{session_id}_responses.csv"
+    final_trial_outcomes = analysis_dir / f"{session_id}_final_trial_outcomes.csv"
+    response_header = "trial_uid,trial_type,hit,part_number,condition,respiratory_phase,noise_type,soa_ms,rt_ms,is_topup,topup_role"
+    response_rows = [
+        "T001,Audio-Tactile,true,1,,Inhale,pink,100,310,false,",
+        "T002,Audio-Tactile,true,1,,Inhale,pink,200,300,false,",
+        "T003,Baseline,true,1,,Inhale,pink,,330,false,",
+        "T004,Audio-Tactile,false,1,,Inhale,pink,400,,false,",
+        "TU001,Audio-Tactile,true,1,,Inhale,pink,800,280,true,rescue",
+    ]
+    responses.write_text("\n".join([response_header, *response_rows]) + "\n", encoding="utf-8")
+    final_trial_outcomes.write_text("\n".join([response_header, *response_rows]) + "\n", encoding="utf-8")
     summary = analysis_dir / f"{session_id}_summary.csv"
     summary.write_text(
         "scope,aggregation_mode,n,hit_rate\n"
-        f"{scope},separate_parts,4,1.0\n"
-        f"{pooled_scope},pooled_parts,8,1.0\n",
+        f"{scope},separate_parts,5,0.8\n"
+        f"{pooled_scope},pooled_parts,10,0.8\n",
         encoding="utf-8",
     )
     behavior = analysis_dir / "data_behavior_by_scope.csv"
@@ -469,6 +498,9 @@ def _write_analysis_review_outputs(session_dir: Path) -> dict[str, Path]:
         "condition_lens_model_fit_comparison": condition_comparison,
         "condition_lens_triage_summary": condition_triage,
         "recording_quality_gate": quality_gate,
+        "participant_trials": participant_trials,
+        "responses": responses,
+        "final_trial_outcomes": final_trial_outcomes,
         "data_behavior_by_scope": behavior,
         "exploratory_quality_summary": behavior_summary,
     }
@@ -3122,20 +3154,34 @@ def test_focus_mode_opens_post_run_analysis_review_dialog(tmp_path: Path, monkey
     grouping_combo = dialog.findChild(q["QComboBox"], "analysisGroupingCombo")
     overview_table = dialog.findChild(q["QTableWidget"], "analysisOverviewTable")
     details = dialog.findChild(q["QTextEdit"], "analysisDetailsText")
-    quality_badge = dialog.findChild(q["QLabel"], "analysisQualityBadge")
+    response_panel = dialog.findChild(q["QFrame"], "analysisResponseQualityPanel")
+    response_bars = dialog.findChild(q["QWidget"], "analysisResponseQualityBars")
+    tactile_hits_percent = dialog.findChild(q["QLabel"], "analysisResponseMetricTactileHitsPercent")
+    tactile_hits_count = dialog.findChild(q["QLabel"], "analysisResponseMetricTactileHitsCount")
+    tactile_misses_percent = dialog.findChild(q["QLabel"], "analysisResponseMetricTactileMissesPercent")
+    catch_correct_percent = dialog.findChild(q["QLabel"], "analysisResponseMetricCatchCorrectPercent")
+    catch_false_alarm_percent = dialog.findChild(q["QLabel"], "analysisResponseMetricCatchFalseAlarmsPercent")
+    catch_false_alarm_count = dialog.findChild(q["QLabel"], "analysisResponseMetricCatchFalseAlarmsCount")
     triage_hint = dialog.findChild(q["QLabel"], "analysisTriageHint")
     analysis_plot = dialog.findChild(q["QWidget"], "analysisCurvePlot")
     more_button = dialog.findChild(q["QPushButton"], "analysisMoreButton")
     condition_buttons = [button for button in dialog.findChildren(q["QPushButton"], "analysisConditionLensButton")]
     quick_model_buttons = [button for button in dialog.findChildren(q["QPushButton"], "analysisModelButton")]
     assert dataset_combo is not None and dataset_combo.count() == 1
-    assert quality_badge is not None and "Participant Run Quality: PASS" in quality_badge.text()
+    assert response_panel is not None
+    assert response_bars is not None
+    assert tactile_hits_percent is not None and tactile_hits_percent.text() == "80.0%"
+    assert tactile_hits_count is not None and tactile_hits_count.text() == "4 / 5"
+    assert tactile_misses_percent is not None and tactile_misses_percent.text() == "20.0%"
+    assert catch_correct_percent is not None and catch_correct_percent.text() == "75.0%"
+    assert catch_false_alarm_percent is not None and catch_false_alarm_percent.text() == "25.0%"
+    assert catch_false_alarm_count is not None and catch_false_alarm_count.text() == "1 / 4"
     assert triage_hint is not None and "AICc support" in triage_hint.text()
     assert "Baseline: pooled across SOAs within condition" in triage_hint.text()
     assert analysis_plot is not None and getattr(analysis_plot, "metric_label", "") == "Baseline-corrected facilitation (ms)"
     assert {button.text() for button in condition_buttons} == {"2 x 2", "Part 1 | Part 2", "Inhale | Exhale"}
     assert {button.text() for button in quick_model_buttons} == {"Sigmoid", "Log decay", "Linear"}
-    assert details is not None and "Participant Run Quality: PASS" in details.toPlainText()
+    assert details is not None and "Condition lens: two_by_two" in details.toPlainText()
     state_button = next(button for button in condition_buttons if button.text() == "Inhale | Exhale")
     state_button.click()
     app.processEvents()
@@ -3212,6 +3258,22 @@ def test_analysis_review_dialog_switches_saved_datasets(tmp_path: Path, monkeypa
         + "\n",
         encoding="utf-8",
     )
+    outputs_2["participant_trials"].write_text(
+        "\n".join(
+            [
+                (
+                    "trial_uid,trial_number,trial_type,stimulus_modality,tactile_present,catch_trial,response_given,"
+                    "outcome,hit,part_number,condition,respiratory_phase,noise_type,soa_ms,rt_ms,is_topup,topup_role"
+                ),
+                "T001,1,Audio-Tactile,audio_tactile,true,false,true,Hit,true,1,,Inhale,pink,100,310,false,",
+                "T002,2,Audio-Tactile,audio_tactile,true,false,false,Miss,false,1,,Inhale,pink,200,,false,",
+                "C001,3,Catch,audio,false,true,false,Hit,true,1,,Inhale,pink,,,false,",
+                "C002,4,Catch,audio,false,true,true,Miss,false,1,,Inhale,pink,,,false,",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     entries = [
         {
             "dataset_id": "participant:P001",
@@ -3243,15 +3305,18 @@ def test_analysis_review_dialog_switches_saved_datasets(tmp_path: Path, monkeypa
     dialog.show()
     app.processEvents()
     dataset_combo = dialog.findChild(q["QComboBox"], "analysisDatasetCombo")
-    quality_badge = dialog.findChild(q["QLabel"], "analysisQualityBadge")
+    tactile_hits_percent = dialog.findChild(q["QLabel"], "analysisResponseMetricTactileHitsPercent")
+    catch_false_alarm_percent = dialog.findChild(q["QLabel"], "analysisResponseMetricCatchFalseAlarmsPercent")
     assert dataset_combo is not None and dataset_combo.count() == 2
-    assert quality_badge is not None and "PASS" in quality_badge.text()
+    assert tactile_hits_percent is not None and tactile_hits_percent.text() == "80.0%"
+    assert catch_false_alarm_percent is not None and catch_false_alarm_percent.text() == "25.0%"
 
     dataset_combo.setCurrentIndex(dataset_combo.findData("participant:P002"))
     app.processEvents()
 
     assert dialog_controller.current_dataset_id == "participant:P002"
-    assert "FAIL" in quality_badge.text()
+    assert tactile_hits_percent.text() == "50.0%"
+    assert catch_false_alarm_percent.text() == "50.0%"
     dialog.close()
 
 

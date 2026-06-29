@@ -81,7 +81,7 @@ from .analysis_review import (
     prediction_points_for_scope,
     prediction_series_for_scope,
     raw_points_for_scope,
-    recording_quality_status,
+    response_quality_summary,
     scope_comparison_row,
     scopes_for_part_mode,
 )
@@ -2870,6 +2870,157 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
     return AnalysisCurvePlotWidget()
 
 
+def _create_response_quality_bars_widget(q: dict[str, Any]) -> Any:
+    class ResponseQualityBarsWidget(q["QWidget"]):
+        def __init__(self) -> None:
+            super().__init__()
+            self.summary: dict[str, Any] = {}
+            self.setMinimumHeight(188)
+            self.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Minimum)
+
+        def set_summary(self, summary: dict[str, Any]) -> None:
+            self.summary = dict(summary or {})
+            self.update()
+
+        def paintEvent(self, _event: Any) -> None:  # noqa: N802 - Qt API
+            painter = q["QPainter"](self)
+            try:
+                painter.setRenderHint(q["QPainter"].RenderHint.Antialiasing, True)
+                painter.fillRect(self.rect(), q["QColor"]("#ffffff"))
+                width = max(1, int(self.width()))
+                height = max(1, int(self.height()))
+                left = 186 if width >= 820 else 150
+                right = 164 if width >= 820 else 128
+                top = 40
+                bar_height = 32
+                row_gap = max(58, int((height - top - 24) / 2))
+                bar_left = left
+                bar_right = max(bar_left + 120, width - right)
+                bar_width = max(1, bar_right - bar_left)
+
+                title_font = q["QFont"](painter.font())
+                title_font.setPointSizeF(10.5)
+                title_font.setBold(True)
+                painter.setFont(title_font)
+                painter.setPen(q["QPen"](q["QColor"]("#182231")))
+                painter.drawText(16, 8, width - 32, 22, q["Qt"].AlignmentFlag.AlignLeft, "Response Quality")
+
+                tick_font = q["QFont"](painter.font())
+                tick_font.setPointSizeF(8.5)
+                tick_font.setBold(False)
+                painter.setFont(tick_font)
+                painter.setPen(q["QPen"](q["QColor"]("#7a8794")))
+                grid_pen = q["QPen"](q["QColor"]("#e4ebf2"))
+                grid_pen.setWidth(1)
+                for tick in (0, 25, 50, 75, 100):
+                    x = int(bar_left + bar_width * tick / 100.0)
+                    painter.setPen(grid_pen)
+                    painter.drawLine(x, top - 3, x, min(height - 18, top + row_gap + bar_height + 3))
+                    painter.setPen(q["QPen"](q["QColor"]("#7a8794")))
+                    painter.drawText(x - 22, top - 25, 44, 16, q["Qt"].AlignmentFlag.AlignCenter, f"{tick}%")
+
+                rows = [
+                    (
+                        "Tactile cue trials",
+                        "Hit",
+                        "Miss",
+                        dict((self.summary.get("tactile") or {})),
+                        "hits",
+                        "misses",
+                        "hit_rate",
+                    ),
+                    (
+                        "Catch trials",
+                        "Correct no-response",
+                        "False alarm",
+                        dict((self.summary.get("catch") or {})),
+                        "correct",
+                        "false_alarms",
+                        "correct_rate",
+                    ),
+                ]
+                label_font = q["QFont"](painter.font())
+                label_font.setPointSizeF(10.0)
+                label_font.setBold(True)
+                sub_font = q["QFont"](painter.font())
+                sub_font.setPointSizeF(8.8)
+                value_font = q["QFont"](painter.font())
+                value_font.setPointSizeF(13.0)
+                value_font.setBold(True)
+                side_font = q["QFont"](painter.font())
+                side_font.setPointSizeF(8.8)
+
+                for index, (label, good_label, bad_label, payload, good_key, bad_key, rate_key) in enumerate(rows):
+                    y = top + index * row_gap
+                    total = int(payload.get("total") or 0)
+                    good = int(payload.get(good_key) or 0)
+                    bad = int(payload.get(bad_key) or 0)
+                    good_rate = payload.get(rate_key)
+                    good_fraction = max(0.0, min(1.0, float(good_rate))) if good_rate is not None else 0.0
+                    good_width = int(round(bar_width * good_fraction)) if total else 0
+
+                    painter.setFont(label_font)
+                    painter.setPen(q["QPen"](q["QColor"]("#182231")))
+                    painter.drawText(16, y + 2, left - 26, 22, q["Qt"].AlignmentFlag.AlignLeft, label)
+                    painter.setFont(sub_font)
+                    painter.setPen(q["QPen"](q["QColor"]("#5b6674")))
+                    painter.drawText(16, y + 27, left - 26, 18, q["Qt"].AlignmentFlag.AlignLeft, good_label)
+                    painter.setPen(q["QPen"](q["QColor"]("#238d5a" if total else "#7a8794")))
+                    painter.drawText(16, y + 47, left - 26, 18, q["Qt"].AlignmentFlag.AlignLeft, _analysis_count_text(good, total))
+
+                    painter.setPen(q["QPen"](q["QColor"]("#e25d55" if total else "#d7dee5")))
+                    painter.setBrush(q["QBrush"](q["QColor"]("#e25d55" if total else "#e9edf2")))
+                    painter.drawRoundedRect(bar_left, y + 8, bar_width, bar_height, 13, 13)
+                    if total and good_width > 0:
+                        painter.setPen(q["QPen"](q["QColor"]("#2aa164")))
+                        painter.setBrush(q["QBrush"](q["QColor"]("#2aa164")))
+                        painter.drawRoundedRect(bar_left, y + 8, min(bar_width, good_width), bar_height, 13, 13)
+
+                    painter.setFont(value_font)
+                    if total:
+                        painter.setPen(q["QPen"](q["QColor"]("#ffffff" if good_width > 74 else "#182231")))
+                        value_x = bar_left if good_width > 74 else bar_left + 8
+                        value_w = good_width if good_width > 74 else min(bar_width, 112)
+                        painter.drawText(value_x, y + 8, max(1, value_w), bar_height, q["Qt"].AlignmentFlag.AlignCenter, _analysis_rate_text(good_rate))
+                    else:
+                        painter.setPen(q["QPen"](q["QColor"]("#5b6674")))
+                        painter.drawText(bar_left, y + 8, bar_width, bar_height, q["Qt"].AlignmentFlag.AlignCenter, "No trials")
+
+                    side_x = bar_right + 18
+                    side_w = max(92, width - side_x - 18)
+                    painter.setPen(q["QPen"](q["QColor"]("#f0b7b2" if total else "#d7dee5")))
+                    painter.setBrush(q["QBrush"](q["QColor"]("#fff2f0" if total else "#f6f8fa")))
+                    painter.drawRoundedRect(side_x, y + 8, side_w, bar_height, 7, 7)
+                    painter.setFont(side_font)
+                    painter.setPen(q["QPen"](q["QColor"]("#5b6674")))
+                    painter.drawText(side_x + 10, y + 10, side_w - 20, 14, q["Qt"].AlignmentFlag.AlignLeft, bad_label)
+                    painter.setPen(q["QPen"](q["QColor"]("#d9544b" if total else "#7a8794")))
+                    painter.drawText(side_x + 10, y + 25, side_w - 20, 14, q["Qt"].AlignmentFlag.AlignLeft, _analysis_count_text(bad, total))
+                    painter.drawText(side_x + 10, y + 16, side_w - 20, 22, q["Qt"].AlignmentFlag.AlignRight, _analysis_rate_text((bad / total) if total else None))
+            finally:
+                painter.end()
+
+    return ResponseQualityBarsWidget()
+
+
+def _analysis_rate_text(rate: Any) -> str:
+    if rate is None:
+        return "N/A"
+    try:
+        return f"{float(rate) * 100.0:.1f}%"
+    except (TypeError, ValueError):
+        return "N/A"
+
+
+def _analysis_count_text(count: Any, total: Any) -> str:
+    try:
+        count_int = int(count or 0)
+        total_int = int(total or 0)
+    except (TypeError, ValueError):
+        return "0 / 0"
+    return f"{count_int} / {total_int}"
+
+
 class AnalysisReviewDialog:
     """Read-only post-run model-fit review dialog."""
 
@@ -2897,6 +3048,7 @@ class AnalysisReviewDialog:
         self.part_mode_buttons: dict[str, Any] = {}
         self.view_buttons: dict[str, Any] = {}
         self.plot_toggles: dict[str, Any] = {}
+        self.response_metric_labels: dict[str, tuple[Any, Any]] = {}
         self.dialog = q["QDialog"](parent)
         _enable_standard_window_controls(q, self.dialog)
         self.dialog.setWindowTitle("PPS Instant Analysis")
@@ -2979,15 +3131,43 @@ QCheckBox#analysisPlotToggle {
 QCheckBox#analysisPlotToggle:disabled {
     color: #9ba59d;
 }
-QLabel#analysisQualityReason,
 QLabel#analysisTriageHint {
     color: #4f5b52;
     font-weight: 650;
 }
-QLabel#analysisQualityBadge {
-    border-radius: 6px;
-    padding: 6px 10px;
+QFrame#analysisResponseQualityPanel {
+    background: #ffffff;
+    border: 1px solid #cddbea;
+    border-radius: 8px;
+}
+QFrame#analysisResponseMetricGood {
+    background: #eaf7f0;
+    border: 1px solid #c9ead8;
+    border-radius: 7px;
+}
+QFrame#analysisResponseMetricBad {
+    background: #fff0ee;
+    border: 1px solid #f0c4be;
+    border-radius: 7px;
+}
+QLabel#analysisResponseMetricTitle {
+    color: #5b6674;
+    font-weight: 650;
+}
+QLabel#analysisResponseMetricGoodPercent {
+    color: #1b7550;
     font-weight: 900;
+}
+QLabel#analysisResponseMetricBadPercent {
+    color: #bf4741;
+    font-weight: 900;
+}
+QLabel#analysisResponseMetricCount {
+    color: #182231;
+    font-weight: 850;
+}
+QWidget#analysisResponseQualityBars {
+    background: #ffffff;
 }
 QPushButton#analysisConditionLensButton,
 QPushButton#analysisModelButton,
@@ -3057,9 +3237,7 @@ QTextEdit#analysisDetailsText {
         header.setObjectName("appTitle")
         root.addWidget(header)
 
-        subtitle = q["QLabel"](
-            "Plot-first triage for this participant run. The quality grade is a strict data-exclusion gate; model and condition colors are exploratory cues."
-        )
+        subtitle = q["QLabel"]("Participant Run Feedback")
         subtitle.setObjectName("mutedLabel")
         subtitle.setWordWrap(True)
         root.addWidget(subtitle)
@@ -3076,17 +3254,8 @@ QTextEdit#analysisDetailsText {
         dataset_row.addWidget(self.dataset_combo, 1)
         root.addLayout(dataset_row)
 
-        quality_row = q["QHBoxLayout"]()
-        quality_row.setContentsMargins(0, 0, 0, 0)
-        quality_row.setSpacing(8)
-        self.quality_badge = q["QLabel"]("Participant Run Quality: UNKNOWN")
-        self.quality_badge.setObjectName("analysisQualityBadge")
-        self.quality_reason = q["QLabel"]("")
-        self.quality_reason.setObjectName("analysisQualityReason")
-        self.quality_reason.setWordWrap(True)
-        quality_row.addWidget(self.quality_badge, 0)
-        quality_row.addWidget(self.quality_reason, 1)
-        root.addLayout(quality_row)
+        self.response_quality_panel = self._build_response_quality_panel()
+        root.addWidget(self.response_quality_panel)
 
         plot_panel, plot_layout = _panel(q, "PPS Response Curves")
         self.plot_widget = _create_analysis_curve_plot_widget(q)
@@ -3305,6 +3474,99 @@ QTextEdit#analysisDetailsText {
         self._populate_overview_table()
         self._refresh_quick_button_styles()
 
+    def _build_response_quality_panel(self) -> Any:
+        q = self.q
+        panel = q["QFrame"]()
+        panel.setObjectName("analysisResponseQualityPanel")
+        layout = q["QVBoxLayout"](panel)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(10)
+
+        header_row = q["QHBoxLayout"]()
+        header_row.setContentsMargins(0, 0, 0, 0)
+        header_row.setSpacing(8)
+        title = q["QLabel"]("Response Quality")
+        title.setObjectName("appSectionTitle")
+        header_row.addWidget(title, 0)
+        header_row.addStretch(1)
+        all_trials = q["QLabel"]("All trials")
+        all_trials.setAlignment(q["Qt"].AlignmentFlag.AlignCenter)
+        all_trials.setStyleSheet(
+            "background: #eef5fb; color: #2f4f6f; border: 1px solid #c4d8eb; "
+            "border-radius: 14px; padding: 4px 16px; font-weight: 750;"
+        )
+        header_row.addWidget(all_trials, 0)
+        layout.addLayout(header_row)
+
+        metrics = q["QGridLayout"]()
+        metrics.setContentsMargins(0, 0, 0, 0)
+        metrics.setHorizontalSpacing(8)
+        metrics.setVerticalSpacing(8)
+        for column, (key, title_text, tone) in enumerate(
+            (
+                ("tactile_hits", "Tactile hits", "good"),
+                ("tactile_misses", "Tactile misses", "bad"),
+                ("catch_correct", "Catch correct", "good"),
+                ("catch_false_alarms", "Catch false alarms", "bad"),
+            )
+        ):
+            metrics.addWidget(self._build_response_metric_card(key, title_text, tone), 0, column)
+            metrics.setColumnStretch(column, 1)
+        layout.addLayout(metrics)
+
+        self.response_quality_bars = _create_response_quality_bars_widget(q)
+        self.response_quality_bars.setObjectName("analysisResponseQualityBars")
+        layout.addWidget(self.response_quality_bars)
+        return panel
+
+    def _build_response_metric_card(self, key: str, title_text: str, tone: str) -> Any:
+        q = self.q
+        card = q["QFrame"]()
+        card.setObjectName("analysisResponseMetricGood" if tone == "good" else "analysisResponseMetricBad")
+        layout = q["QVBoxLayout"](card)
+        layout.setContentsMargins(12, 10, 12, 10)
+        layout.setSpacing(4)
+        title = q["QLabel"](title_text)
+        title.setObjectName("analysisResponseMetricTitle")
+        percent = q["QLabel"]("N/A")
+        percent.setObjectName(f"analysisResponseMetric{''.join(part.capitalize() for part in key.split('_'))}Percent")
+        percent.setAlignment(self.q["Qt"].AlignmentFlag.AlignRight)
+        percent.setStyleSheet(
+            "font-size: 24px; font-weight: 900; color: "
+            + ("#1b7550;" if tone == "good" else "#bf4741;")
+        )
+        count = q["QLabel"]("0 / 0")
+        count.setObjectName(f"analysisResponseMetric{''.join(part.capitalize() for part in key.split('_'))}Count")
+        count.setStyleSheet("font-size: 14px; font-weight: 850; color: #182231;")
+        row = q["QHBoxLayout"]()
+        row.setContentsMargins(0, 0, 0, 0)
+        row.setSpacing(8)
+        row.addWidget(title, 1)
+        row.addWidget(percent, 0)
+        layout.addLayout(row)
+        layout.addWidget(count)
+        self.response_metric_labels[key] = (percent, count)
+        return card
+
+    def _refresh_response_quality_panel(self) -> None:
+        summary = response_quality_summary(self.data)
+        tactile = dict(summary.get("tactile") or {})
+        catch = dict(summary.get("catch") or {})
+        payloads = {
+            "tactile_hits": (tactile.get("hits", 0), tactile.get("total", 0), tactile.get("hit_rate")),
+            "tactile_misses": (tactile.get("misses", 0), tactile.get("total", 0), tactile.get("miss_rate")),
+            "catch_correct": (catch.get("correct", 0), catch.get("total", 0), catch.get("correct_rate")),
+            "catch_false_alarms": (catch.get("false_alarms", 0), catch.get("total", 0), catch.get("false_alarm_rate")),
+        }
+        for key, (count, total, rate) in payloads.items():
+            labels = self.response_metric_labels.get(key)
+            if labels is None:
+                continue
+            percent_label, count_label = labels
+            percent_label.setText(_analysis_rate_text(rate))
+            count_label.setText(_analysis_count_text(count, total))
+        self.response_quality_bars.set_summary(summary)
+
     def _populate_dataset_combo(self) -> None:
         if not hasattr(self, "dataset_combo"):
             return
@@ -3436,20 +3698,7 @@ QTextEdit#analysisDetailsText {
             return "#a4631b"
         return "#9ba59d"
 
-    def _refresh_quality_badge(self) -> None:
-        status, reason = recording_quality_status(self.data)
-        label = str(getattr(self.data, "quality_label", "") or "Participant Run Quality")
-        self.quality_badge.setText(f"{label}: {status}")
-        if status == "PASS":
-            self.quality_badge.setStyleSheet("background: #dceee5; color: #174f3e; border: 1px solid #8dc3aa;")
-        elif status == "FAIL":
-            self.quality_badge.setStyleSheet("background: #f4dddd; color: #7b2323; border: 1px solid #d39a9a;")
-        else:
-            self.quality_badge.setStyleSheet("background: #ecefeb; color: #4f5b52; border: 1px solid #bcc7bd;")
-        self.quality_reason.setText(reason)
-
     def _refresh_quick(self) -> None:
-        self._refresh_quality_badge()
         observed_series = condition_lens_observed_series(self.data, self.current_condition_lens)
         if not observed_series and scopes_for_part_mode(self.data, self.current_part_mode):
             self.quick_mode = False
@@ -3483,9 +3732,7 @@ QTextEdit#analysisDetailsText {
         self.detail_text.setPlainText(self._quick_detail_text())
 
     def _quick_detail_text(self) -> str:
-        status, reason = recording_quality_status(self.data)
-        quality_label = str(getattr(self.data, "quality_label", "") or "Participant Run Quality")
-        lines = [f"{quality_label}: {status}", reason]
+        lines: list[str] = []
         if str(getattr(self.data, "dataset_kind", "") or "") == DATASET_KIND_POOL:
             lines.append(
                 f"Pool inclusion: {getattr(self.data, 'pool_included_count', 0)} PASS participant(s), "
@@ -3500,11 +3747,6 @@ QTextEdit#analysisDetailsText {
             wins = summary.get("model_wins_by_subcondition", {})
             if isinstance(wins, dict) and wins:
                 lines.append("Model wins by subcondition: " + ", ".join(f"{key} {value}" for key, value in sorted(wins.items())))
-        failures = self.data.recording_quality_gate.get("failures", [])
-        if isinstance(failures, list) and failures:
-            lines.append("")
-            lines.append("Serious exclusion criteria")
-            lines.extend(f"- {row.get('message', '')} ({row.get('evidence', '')})" for row in failures[:8] if isinstance(row, dict))
         return "\n".join(line for line in lines if line is not None)
 
     def _set_view(self, view: str) -> None:
@@ -3601,6 +3843,7 @@ QTextEdit#analysisDetailsText {
         self.q["QDesktopServices"].openUrl(self.q["QUrl"].fromLocalFile(str(target)))
 
     def _refresh(self) -> None:
+        self._refresh_response_quality_panel()
         if self.quick_mode:
             self._refresh_quick_button_styles()
             self._refresh_quick()

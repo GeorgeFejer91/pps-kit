@@ -474,6 +474,9 @@ def _entry_for_analysis_dir(output_root: Path, analysis_dir: Path) -> dict[str, 
     participant_id = _first_value(rows, "participant_id", "Participant_ID")
     session_id = _session_id_from_stem(Path(analysis_ready).name)
     rel_parts = analysis_dir.relative_to(output_data_analytics_dir(output_root)).parts
+    participant_trials = _participant_trials_for_analysis_dir(output_root, rel_parts, session_id)
+    if participant_trials is not None:
+        outputs["participant_trials"] = participant_trials
     dataset_kind = DATASET_KIND_PARTICIPANT
     selectable = True
     session_group_id = ""
@@ -552,6 +555,13 @@ def _is_top_level_participant_analysis_dir(output_root: Path, analysis_dir: Path
         return True
     participant = str(participant_id or "").strip()
     return bool(participant and analysis_dir.name == _safe_path_name(participant))
+
+
+def _participant_trials_for_analysis_dir(output_root: Path, rel_parts: tuple[str, ...], session_id: str) -> Path | None:
+    if not rel_parts or not session_id:
+        return None
+    candidate = output_runner_logs_dir(output_root).joinpath(*rel_parts) / f"{session_id}_trials.csv"
+    return candidate if candidate.is_file() else None
 
 
 def _participant_analysis_exists(output_root: Path, participant_id: str) -> bool:

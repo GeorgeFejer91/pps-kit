@@ -122,6 +122,7 @@ class AnalysisReviewData:
     condition_lens_triage_summary: dict[str, Any] = field(default_factory=dict)
     recording_quality_gate: dict[str, Any] = field(default_factory=dict)
     summary_rows: list[dict[str, Any]] = field(default_factory=list)
+    participant_trial_rows: list[dict[str, Any]] = field(default_factory=list)
     response_rows: list[dict[str, Any]] = field(default_factory=list)
     final_outcome_rows: list[dict[str, Any]] = field(default_factory=list)
     timing_qc_rows: list[dict[str, Any]] = field(default_factory=list)
@@ -197,6 +198,7 @@ def load_analysis_review_data(
     condition_summary_path = _output_path(outputs, "condition_lens_triage_summary", root, "condition_lens_triage_summary.json")
     quality_gate_path = _output_path(outputs, "recording_quality_gate", root, "recording_quality_gate.v1.json")
     summary_path = _output_path(outputs, "summary", root, "*_summary.csv")
+    participant_trials_path = _output_path(outputs, "participant_trials", root, "*_trials.csv")
     responses_path = _output_path(outputs, "responses", root, "*_responses.csv")
     final_path = _output_path(outputs, "final_trial_outcomes", root, "*_final_trial_outcomes.csv")
     timing_qc_path = _output_path(outputs, "timing_qc", root, "*_timing_qc.csv")
@@ -213,6 +215,7 @@ def load_analysis_review_data(
     data.condition_lens_triage_summary = _read_json(condition_summary_path)
     data.recording_quality_gate = _read_json(quality_gate_path)
     data.summary_rows = _read_csv_rows(summary_path, data.warnings, "summary")
+    data.participant_trial_rows = _read_optional_csv_rows(participant_trials_path)
     data.response_rows = _read_optional_csv_rows(responses_path)
     data.final_outcome_rows = _read_optional_csv_rows(final_path)
     data.timing_qc_rows = _read_optional_csv_rows(timing_qc_path)
@@ -231,6 +234,7 @@ def load_analysis_review_data(
             "condition lens triage": condition_summary_path,
             "recording quality gate": quality_gate_path,
             "summary": summary_path,
+            "participant trials": participant_trials_path,
             "responses": responses_path,
             "final outcomes": final_path,
             "timing QC": timing_qc_path,
@@ -564,6 +568,32 @@ def recording_quality_status(data: AnalysisReviewData) -> tuple[str, str]:
     return status, reason or ("No serious exclusion criteria were triggered." if status == QUALITY_PASS else "A serious exclusion criterion was triggered.")
 
 
+def response_quality_summary(data: AnalysisReviewData) -> dict[str, Any]:
+    rows = _response_quality_source_rows(data)
+    tactile_rows = [row for row in rows if _response_quality_row_is_tactile(row)]
+    catch_rows = [row for row in rows if _response_quality_row_is_catch(row)]
+    tactile_hits = sum(1 for row in tactile_rows if _response_quality_tactile_hit(row))
+    catch_false_alarms = sum(1 for row in catch_rows if _response_quality_catch_false_alarm(row))
+    tactile_total = len(tactile_rows)
+    catch_total = len(catch_rows)
+    return {
+        "tactile": {
+            "total": tactile_total,
+            "hits": tactile_hits,
+            "misses": max(0, tactile_total - tactile_hits),
+            "hit_rate": tactile_hits / tactile_total if tactile_total else None,
+            "miss_rate": (tactile_total - tactile_hits) / tactile_total if tactile_total else None,
+        },
+        "catch": {
+            "total": catch_total,
+            "correct": max(0, catch_total - catch_false_alarms),
+            "false_alarms": catch_false_alarms,
+            "correct_rate": (catch_total - catch_false_alarms) / catch_total if catch_total else None,
+            "false_alarm_rate": catch_false_alarms / catch_total if catch_total else None,
+        },
+    }
+
+
 def condition_lens_metric_label(data: AnalysisReviewData, lens: str) -> str:
     rows = _condition_lens_rows(data, lens)
     if any(_metric_name(row) == METRIC_FACILITATION for row in rows):
@@ -887,6 +917,86 @@ def _source_response_rows(data: AnalysisReviewData, source_mode: str) -> list[di
         ]
         return rows
     return final_rows
+
+
+def _response_quality_source_rows(data: AnalysisReviewData) -> list[dict[str, Any]]:
+    if data.participant_trial_rows:
+        return list(data.participant_trial_rows)
+    rows = list(data.response_rows or data.final_outcome_rows or [])
+    if rows and not any(_response_quality_row_is_catch(row) for row in rows):
+        catch_rows = [row for row in data.final_outcome_rows if _response_quality_row_is_catch(row)]
+        if catch_rows:
+            rows.extend(catch_rows)
+    return rows
+
+
+def _response_quality_row_is_catch(row: dict[str, Any]) -> bool:
+    if _truthy(row.get("catch_trial")) or _truthy(row.get("is_catch")):
+        return True
+    text = _response_quality_row_text(row)
+    return any(token in text for token in ("catch", "audio-only", "audio only", "auditory-only", "auditory only", "no-target", "no target"))
+
+
+def _response_quality_row_is_tactile(row: dict[str, Any]) -> bool:
+    if _response_quality_row_is_catch(row):
+        return False
+    if _truthy(row.get("tactile_present")) or _truthy(row.get("tactile_event")):
+        return True
+    text = _response_quality_row_text(row)
+    if any(token in text for token in ("audio-tactile", "audio_tactile", "baseline", "tactile")):
+        return True
+    return any(_has_row_value(row, key) for key in ("hit", "rt_ms", "reaction_time_ms", "tactile_onset_unix_time", "tactile_cue_time_s"))
+
+
+def _response_quality_tactile_hit(row: dict[str, Any]) -> bool:
+    if _has_row_value(row, "hit"):
+        return _truthy(row.get("hit"))
+    outcome = str(row.get("outcome") or row.get("trial_outcome") or row.get("Outcome") or "").strip().lower()
+    if "miss" in outcome:
+        return False
+    if "hit" in outcome or "response" in outcome:
+        return True
+    for key in ("response_given", "response_detected", "click_detected", "detected"):
+        if _has_row_value(row, key):
+            return _truthy(row.get(key))
+    return any(_has_row_value(row, key) for key in ("rt_ms", "reaction_time_ms", "click_unix_time", "click_time_s"))
+
+
+def _response_quality_catch_false_alarm(row: dict[str, Any]) -> bool:
+    for key in ("false_alarm", "catch_false_alarm"):
+        if _has_row_value(row, key):
+            return _truthy(row.get(key))
+    for key in ("response_given", "response_detected", "click_detected", "detected"):
+        if _has_row_value(row, key):
+            return _truthy(row.get(key))
+    outcome = str(row.get("outcome") or row.get("trial_outcome") or row.get("Outcome") or "").strip().lower().replace("-", "_").replace(" ", "_")
+    if outcome in {"false_alarm", "catch_false_alarm", "responded", "response"}:
+        return True
+    if outcome in {"correct_rejection", "correct_no_response", "no_response", "hit", "correct"}:
+        return False
+    if _has_row_value(row, "hit"):
+        return not _truthy(row.get("hit"))
+    return False
+
+
+def _response_quality_row_text(row: dict[str, Any]) -> str:
+    return " ".join(
+        str(row.get(key) or "").strip().lower()
+        for key in (
+            "trial_type",
+            "Trial_Type",
+            "family",
+            "Family",
+            "stimulus_modality",
+            "SOA_type",
+            "condition",
+            "outcome",
+        )
+    )
+
+
+def _has_row_value(row: dict[str, Any], key: str) -> bool:
+    return row.get(key) not in (None, "")
 
 
 def _scope_from_response_row(row: dict[str, Any], part_mode: str) -> str:
