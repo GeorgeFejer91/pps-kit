@@ -6,7 +6,7 @@
   <title>PPS Toolkit Dashboard</title>
   <meta name="description" content="PPS Toolkit dashboard for local audio-tactile peripersonal-space experiment design, preparation, and native runner handoff.">
   <link rel="icon" type="image/png" href="pps_toolkit_icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260624-study5-profile-refresh">
+  <link rel="stylesheet" href="styles.css?v=20260629-burst-source-mode">
 </head>
 <body>
   <div class="app-shell">
@@ -208,7 +208,7 @@
                 <button id="reset-camera" type="button" data-preview-view-control>Reset Camera</button>
               </div>
             </div>
-            <iframe id="trajectory-frame" title="Trajectory preview" src="../viewer/index.html?v=20260624-study5-profile-refresh"></iframe>
+            <iframe id="trajectory-frame" title="Trajectory preview" src="../viewer/index.html?v=20260629-burst-source-mode"></iframe>
           </section>
 
           <section id="stimulus-pool" class="panel stimulus-pool-panel" data-step-panel="stimulus" data-resizable-panel data-panel-id="stimulus-pool">
@@ -237,6 +237,19 @@
                 <div class="field-row">
                   <label for="bake-label">Bake label</label>
                   <input id="bake-label" type="text" autocomplete="off">
+                </div>
+                <div id="generated-source-mode-control" class="source-mode-row" aria-label="Generated source mode">
+                  <span>Source mode</span>
+                  <div class="segmented-control compact" role="radiogroup" aria-label="Generated source mode">
+                    <label>
+                      <input type="radio" name="generated-source-mode" value="dynaspace_gaussian_burst_train" checked>
+                      <span>Burst train</span>
+                    </label>
+                    <label>
+                      <input type="radio" name="generated-source-mode" value="continuous_noise">
+                      <span>Continuous</span>
+                    </label>
+                  </div>
                 </div>
                 <input id="bake-gain" type="hidden" value="1">
                 <div class="loudness-panel" aria-label="Loudness policy">
@@ -1116,7 +1129,7 @@
       </form>
     </div>
   </div>
-  <script src="hardware_pixel_art.js?v=20260624-study5-profile-refresh"></script>
-  <script src="app.js?v=20260624-study5-profile-refresh"></script>
+  <script src="hardware_pixel_art.js?v=20260629-burst-source-mode"></script>
+  <script src="app.js?v=20260629-burst-source-mode"></script>
 </body>
 </html>

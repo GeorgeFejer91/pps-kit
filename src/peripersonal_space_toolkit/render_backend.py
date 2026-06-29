@@ -26,6 +26,7 @@ from .design import (
     PPS_LOOMING_GOLD_STANDARD_SOURCE_PARAMETERS,
     PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
     StimulusDesign,
+    gold_standard_looming_source_parameters,
     cartesian_to_spherical,
     design_from_dict,
     design_to_dict,
@@ -145,6 +146,7 @@ def _noise_rows(design: StimulusDesign) -> list[dict[str, Any]]:
             "noise_type": source["noise_type"],
             "tone_type": source.get("tone_type", source["noise_type"]),
             "gain": source.get("gain", 1.0),
+            "motion_mode": source.get("motion_mode", "looming"),
         }
         source_profile = source.get("source_profile", "")
         source_profile_parameters = source.get("source_profile_parameters", {})
@@ -172,7 +174,18 @@ def _noise_rows(design: StimulusDesign) -> list[dict[str, Any]]:
 def _trajectory_profiled_noise_rows(design: StimulusDesign) -> list[dict[str, Any]]:
     rows = _noise_rows(design)
     for row in rows:
-        if str(row.get("source_profile", "")).strip().lower() != PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE:
+        profile = str(row.get("source_profile", "")).strip()
+        if (
+            not profile
+            and str(row.get("source_kind", "procedural_noise")) != "imported_audio"
+            and str(row.get("motion_mode", "looming")).strip().lower() != "stationary"
+        ):
+            row["source_profile"] = PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+            row["source_profile_parameters"] = gold_standard_looming_source_parameters(
+                row.get("source_profile_parameters") if isinstance(row.get("source_profile_parameters"), dict) else {}
+            )
+            profile = row["source_profile"]
+        if profile.lower() != PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE:
             continue
         raw_parameters = dict(row.get("source_profile_parameters") or {})
         legacy_fixed_count = (
@@ -396,7 +409,7 @@ def _dynaspace_burst_onsets(
     defaults = PPS_LOOMING_GOLD_STANDARD_SOURCE_PARAMETERS
     burst_duration_s = max(0.001, _profile_float(params, defaults, "burst_duration_s", 0.030))
     rise_fall_s = max(0.0, _profile_float(params, defaults, "rise_fall_s", 0.010))
-    onset_s = max(0.0, _profile_float(params, defaults, "onset_s", 0.300))
+    requested_onset_s = max(0.0, _profile_float(params, defaults, "onset_s", 0.300))
     if "target_period_s" in params:
         target_period_s = max(0.001, float(params["target_period_s"]))
     elif "inter_burst_interval_s" in params:
@@ -408,6 +421,9 @@ def _dynaspace_burst_onsets(
         inter_burst_interval_s = max(0.0, _profile_float(params, defaults, "inter_burst_interval_s", 0.065))
         target_period_s = burst_duration_s + inter_burst_interval_s
     total_duration_s = samples / float(sample_rate)
+    burst_fit_duration_s = min(burst_duration_s, total_duration_s) if total_duration_s > 0 else 0.0
+    latest_audible_onset_s = max(0.0, total_duration_s - burst_fit_duration_s)
+    onset_s = min(requested_onset_s, latest_audible_onset_s)
     end_margin_s = max(0.0, _profile_float(params, defaults, "end_margin_s", 0.0))
     active_window_value = params.get("active_window_s", defaults.get("active_window_s"))
     if active_window_value is None:
@@ -437,7 +453,7 @@ def _dynaspace_burst_onsets(
         burst_count = max(1, int(params.get("burst_count", defaults.get("burst_count", 1))))
         onsets = [onset_s + index * target_period_s for index in range(burst_count)]
         onsets = [value for value in onsets if value < total_duration_s]
-        return onsets, {
+        resolved = {
             "burst_count": len(onsets),
             "burst_duration_s": burst_duration_s,
             "rise_fall_s": rise_fall_s,
@@ -448,6 +464,10 @@ def _dynaspace_burst_onsets(
             "spacing_policy": spacing_policy,
             "burst_count_mode": burst_count_mode,
         }
+        if requested_onset_s != onset_s:
+            resolved["requested_onset_s"] = requested_onset_s
+            resolved["onset_fit_policy"] = "clamped_to_available_duration"
+        return onsets, resolved
 
     span_s = max(0.0, active_window_s - burst_duration_s)
     if burst_count_mode in {"fixed", "explicit"} and "burst_count" in params:
@@ -473,7 +493,7 @@ def _dynaspace_burst_onsets(
         onsets = [onset_s + index * actual_period_s for index in range(burst_count)]
 
     onsets = [value for value in onsets if value < total_duration_s]
-    return onsets, {
+    resolved = {
         "burst_count": len(onsets),
         "burst_duration_s": burst_duration_s,
         "rise_fall_s": rise_fall_s,
@@ -484,6 +504,10 @@ def _dynaspace_burst_onsets(
         "spacing_policy": spacing_policy,
         "burst_count_mode": burst_count_mode,
     }
+    if requested_onset_s != onset_s:
+        resolved["requested_onset_s"] = requested_onset_s
+        resolved["onset_fit_policy"] = "clamped_to_available_duration"
+    return onsets, resolved
 
 
 def _generate_dynaspace_burst_train(

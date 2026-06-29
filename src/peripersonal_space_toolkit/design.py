@@ -74,6 +74,34 @@ def gold_standard_looming_source_parameters(overrides: dict[str, Any] | None = N
     return parameters
 
 
+def should_apply_gold_standard_looming_source_profile(noise: "NoiseDefinition") -> bool:
+    """Return whether a generated source should inherit the toolkit looming source standard."""
+
+    if str(noise.source_profile or "").strip():
+        return False
+    if str(noise.motion_mode or "looming").strip().lower() == "stationary":
+        return False
+    return str(noise.noise_type or "").strip().lower() in SUPPORTED_NOISE_TYPES
+
+
+def apply_gold_standard_looming_source_profile(noise: "NoiseDefinition") -> "NoiseDefinition":
+    source_profile = str(noise.source_profile or "").strip()
+    if source_profile == "continuous_noise":
+        noise.source_profile_parameters = {}
+    elif source_profile == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE:
+        noise.source_profile_parameters = gold_standard_looming_source_parameters(noise.source_profile_parameters)
+    elif should_apply_gold_standard_looming_source_profile(noise):
+        noise.source_profile = PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+        noise.source_profile_parameters = gold_standard_looming_source_parameters(noise.source_profile_parameters)
+    return noise
+
+
+def normalize_generated_looming_source_profiles(design: "StimulusDesign") -> "StimulusDesign":
+    for noise in design.noises:
+        apply_gold_standard_looming_source_profile(noise)
+    return design
+
+
 @dataclass
 class AudioFileSpec:
     label: str
@@ -210,16 +238,19 @@ class StimulusDesign:
 
 
 def default_design() -> StimulusDesign:
-    return StimulusDesign(
-        sofa_file=DEFAULT_SOFA_FILE,
-        noises=[
-            NoiseDefinition("Pink frontal", "pink", 0.0),
-            NoiseDefinition("White frontal", "white", 0.0),
-        ]
+    return normalize_generated_looming_source_profiles(
+        StimulusDesign(
+            sofa_file=DEFAULT_SOFA_FILE,
+            noises=[
+                NoiseDefinition("Pink frontal", "pink", 0.0),
+                NoiseDefinition("White frontal", "white", 0.0),
+            ],
+        )
     )
 
 
 def design_to_dict(design: StimulusDesign) -> dict[str, Any]:
+    normalize_generated_looming_source_profiles(design)
     return asdict(design)
 
 
@@ -328,18 +359,20 @@ def design_from_dict(data: dict[str, Any]) -> StimulusDesign:
             or protocol_data.get("catch_trials_exact") not in (None, 0, "")
         )
     protocol = ProtocolSpec(**protocol_data)
-    return StimulusDesign(
-        name=data.get("name", "Study 5 PPS white/pink design"),
-        study_profile_id=data.get("study_profile_id", ""),
-        study_profile_title=data.get("study_profile_title", ""),
-        study_profile_notes=data.get("study_profile_notes", ""),
-        study_profile_reference_parameters=dict(data.get("study_profile_reference_parameters", {})),
-        sofa_file=data.get("sofa_file") or DEFAULT_SOFA_FILE,
-        noises=noises,
-        custom_looming_files=custom_looming_files,
-        prestimulus_files=prestimulus_files,
-        trajectory=trajectory,
-        protocol=protocol,
+    return normalize_generated_looming_source_profiles(
+        StimulusDesign(
+            name=data.get("name", "Study 5 PPS white/pink design"),
+            study_profile_id=data.get("study_profile_id", ""),
+            study_profile_title=data.get("study_profile_title", ""),
+            study_profile_notes=data.get("study_profile_notes", ""),
+            study_profile_reference_parameters=dict(data.get("study_profile_reference_parameters", {})),
+            sofa_file=data.get("sofa_file") or DEFAULT_SOFA_FILE,
+            noises=noises,
+            custom_looming_files=custom_looming_files,
+            prestimulus_files=prestimulus_files,
+            trajectory=trajectory,
+            protocol=protocol,
+        )
     )
 
 
@@ -1450,6 +1483,15 @@ def protocol_sound_sources(design: StimulusDesign) -> list[dict[str, Any]]:
 
 
 def _sound_source_from_noise(noise: NoiseDefinition) -> dict[str, Any]:
+    source_profile = str(noise.source_profile or "").strip()
+    source_profile_parameters = dict(noise.source_profile_parameters)
+    if should_apply_gold_standard_looming_source_profile(noise):
+        source_profile = PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+        source_profile_parameters = gold_standard_looming_source_parameters(source_profile_parameters)
+    elif source_profile == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE:
+        source_profile_parameters = gold_standard_looming_source_parameters(source_profile_parameters)
+    elif source_profile == "continuous_noise":
+        source_profile_parameters = {}
     return {
         "label": noise.label,
         "noise_type": noise.noise_type,
@@ -1457,11 +1499,12 @@ def _sound_source_from_noise(noise: NoiseDefinition) -> dict[str, Any]:
         "azimuth_deg": noise.azimuth_deg,
         "elevation_deg": noise.elevation_deg,
         "gain": noise.gain,
-        "source_profile": noise.source_profile,
-        "source_profile_parameters": dict(noise.source_profile_parameters),
+        "source_profile": source_profile,
+        "source_profile_parameters": source_profile_parameters,
         "source_path": noise.prebaked_path,
         "prebaked_path": noise.prebaked_path,
         "source_kind": "procedural_noise",
+        "motion_mode": noise.motion_mode,
         "trajectory_snapshot": dict(noise.trajectory_snapshot),
     }
 

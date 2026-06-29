@@ -74,6 +74,14 @@ def test_default_design_matches_four_second_study5_timing():
     assert validate_design(design) == []
     assert design.trajectory.movement_duration_s == 3.0
     assert design.trajectory.total_duration_s == 4.0
+    assert [noise.source_profile for noise in design.noises] == [
+        PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
+        PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
+    ]
+    assert all(
+        noise.source_profile_parameters["burst_count_mode"] == "duration_derived"
+        for noise in design.noises
+    )
     points = trajectory_points(design.trajectory, samples=5)
     assert points[0]["radius_m"] == pytest.approx(1.1)
     assert points[-1]["radius_m"] == pytest.approx(0.1)
@@ -371,6 +379,21 @@ def test_source_profile_round_trips_and_reaches_render_config(tmp_path: Path):
     )
 
 
+def test_continuous_noise_source_profile_is_explicit_opt_out(tmp_path: Path):
+    design = default_design()
+    design.noises = [
+        NoiseDefinition("Continuous pink", "pink", source_profile="continuous_noise")
+    ]
+
+    loaded = design_from_dict(design_to_dict(design))
+    config = build_render_config(loaded, seed=4321, output_dir=tmp_path)
+
+    assert loaded.noises[0].source_profile == "continuous_noise"
+    assert loaded.noises[0].source_profile_parameters == {}
+    assert config["source"]["noises"][0]["source_profile"] == "continuous_noise"
+    assert "source_profile_parameters" not in config["source"]["noises"][0]
+
+
 def test_dynaspace_burst_train_derives_symmetric_spacing_from_active_window():
     import numpy as np
 
@@ -539,9 +562,20 @@ def test_gui_style_saved_design_round_trip_controls_noise_trajectory_and_soas(tm
     assert loaded.protocol.soa_values_ms == [120, 480]
     assert loaded.protocol.spatial_values_cm == [95.0, 15.0]
     assert loaded.protocol.repetitions_per_condition == 3
-    assert config["source"]["noises"] == [
-        {"label": "GUI pink test", "noise_type": "pink", "tone_type": "pink", "gain": 0.7}
-    ]
+    assert len(config["source"]["noises"]) == 1
+    config_noise = config["source"]["noises"][0]
+    assert config_noise["label"] == "GUI pink test"
+    assert config_noise["noise_type"] == "pink"
+    assert config_noise["tone_type"] == "pink"
+    assert config_noise["gain"] == pytest.approx(0.7)
+    assert config_noise["motion_mode"] == "looming"
+    assert config_noise["source_profile"] == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+    assert config_noise["source_profile_parameters"]["burst_count_mode"] == "duration_derived"
+    assert config_noise["source_profile_parameters"]["active_window_s"] == pytest.approx(2.5)
+    assert (
+        config_noise["source_profile_parameters"]["active_window_s_source"]
+        == "trajectory.movement_duration_s"
+    )
     assert config["protocol"]["soa_values_ms"] == [120, 480]
     assert config["protocol"]["spatial_values_cm"] == [95.0, 15.0]
     assert [event["soa_ms"] for event in config["tactile"]["events"]] == [120, 480]
@@ -670,7 +704,7 @@ def test_auto_render_writes_reference_wav_with_binaural_and_tactile_channels(tmp
     design.trajectory.end_y_m = 0.05
     design.trajectory.end_z_m = 0.0
     design.trajectory.path_length_m = 0.8
-    design.trajectory.propagation_speed_mps = 4.0
+    design.trajectory.propagation_speed_mps = 1.0
     design.trajectory.padding_pre_s = 0.0
     design.trajectory.padding_post_s = 0.0
     design.protocol.soa_values_ms = [50]
@@ -693,7 +727,7 @@ def test_auto_render_writes_reference_wav_with_binaural_and_tactile_channels(tmp
     assert result.tactile_events_path and result.tactile_events_path.exists()
     audio, sample_rate = sf.read(result.wav_paths[0], always_2d=True)
     assert sample_rate == 44100
-    assert audio.shape == (8820, 3)
+    assert audio.shape == (35280, 3)
     assert np.max(np.abs(audio[:, 0])) > 0.01
     assert np.max(np.abs(audio[:, 1])) > 0.01
     onset = int(0.05 * sample_rate)

@@ -6572,10 +6572,14 @@ def _design_for_bake_recipe(design: StimulusDesign, recipe: dict[str, Any], labe
         if noise_type not in SUPPORTED_NOISE_TYPES:
             raise ValueError(f"Unsupported generated-noise type: {noise_type or 'missing'}")
         source_profile = str(recipe.get("source_profile") or PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE).strip()
+        if source_profile not in {PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE, "continuous_noise"}:
+            raise ValueError(f"Unsupported generated-noise source mode: {source_profile or 'missing'}")
         raw_source_parameters = recipe.get("source_profile_parameters")
         source_profile_parameters = raw_source_parameters if isinstance(raw_source_parameters, dict) else {}
         if source_profile == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE:
             source_profile_parameters = gold_standard_looming_source_parameters(source_profile_parameters)
+        else:
+            source_profile_parameters = {}
         source = {
             "label": label,
             "noise_type": noise_type,

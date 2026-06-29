@@ -69,6 +69,20 @@ SOFA/FABIAN renderer is a preview/proxy path and should be described that way.
 Apply this standard to newly generated PPS-kit looming stimuli and dashboard
 generated-noise bakes.
 
+As of 2026-06-29, this is system-wide behavior for generated looming sources:
+
+- missing generated-noise `source_profile` values are normalized to
+  `dynaspace_gaussian_burst_train` when designs are loaded, saved, rendered, or
+  exported into source/preload manifests
+- explicit `source_profile: "continuous_noise"` is the only supported
+  continuous-noise opt-out for generated sources
+- Segment 1 exposes this choice as a `Source mode` segmented control, with
+  `Burst train` selected by default and `Continuous` available for deliberate
+  control/legacy bakes
+- preload catalog rebuilds should regenerate generated-noise WAVs and QC rows
+  after renderer/default-source-profile changes so bundled profiles match the
+  current toolkit standard
+
 Published-study recreations may override the default only when the original
 paper or verified source material specifies a different waveform, apparatus, or
 control logic. Any override must be explicit in the study template metadata and

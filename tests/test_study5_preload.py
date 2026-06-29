@@ -8,7 +8,13 @@ import pytest
 
 from peripersonal_space_toolkit import dashboard_app
 from peripersonal_space_toolkit.dashboard_app import DashboardController
-from peripersonal_space_toolkit.design import block_trial_rows, default_design, save_design, validate_design
+from peripersonal_space_toolkit.design import (
+    PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
+    block_trial_rows,
+    default_design,
+    save_design,
+    validate_design,
+)
 from peripersonal_space_toolkit.preload_inventory import load_preload_inventory, profile_asset_status
 from peripersonal_space_toolkit.templates import DEFAULT_STUDY_TEMPLATE_ID, load_templates, study_template_citation_label
 
@@ -210,6 +216,11 @@ def test_unpublished_study5_template_preloads_breathing_assets_and_filmstrip():
         assert slot["continue_mode"] == continue_mode
         assert slot["source"] == "original_study5"
     assert [asset.label for asset in design.noises] == ["Pink frontal", "White frontal"]
+    assert [asset.source_profile for asset in design.noises] == [
+        PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
+        PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
+    ]
+    assert all(asset.source_profile_parameters["burst_count_mode"] == "duration_derived" for asset in design.noises)
     assert design.custom_looming_files == []
 
     for clip in design.prestimulus_files:
@@ -326,6 +337,10 @@ def test_study5_profile_keeps_trial_budget_with_two_sources():
     assert design.name == "Study 5 PPS box-breathing white/pink design"
     assert [asset.label for asset in design.noises] == ["Pink frontal", "White frontal"]
     assert [asset.noise_type for asset in design.noises] == ["pink", "white"]
+    assert [asset.source_profile for asset in design.noises] == [
+        PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
+        PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
+    ]
     assert all(DEFAULT_STUDY_TEMPLATE_ID in asset.prebaked_path for asset in design.noises)
     assert design.protocol.trial_pool_repetition_defaults == {
         "default": 6.0,

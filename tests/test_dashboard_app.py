@@ -213,7 +213,7 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260624-study5-profile-refresh"
+    static_version = "20260629-burst-source-mode"
     assert f'href="styles.css?v={static_version}"' in html
     assert f'src="hardware_pixel_art.js?v={static_version}"' in html
     assert f'src="app.js?v={static_version}"' in html
@@ -922,14 +922,18 @@ def test_dashboard_gui_to_3dti_config_handoff_stress_grid(tmp_path: Path):
         assert loaded.trajectory.propagation_speed_mps == pytest.approx(expected_path_length / controls["movement_duration_s"])
         assert config["design"] == state["design"]
         assert config["source"]["seed"] == loaded.protocol.random_seed
-        assert config["source"]["noises"] == [
-                {
-                    "label": f"Stress source {index}",
-                    "noise_type": noise_types[index - 1],
-                    "tone_type": noise_types[index - 1],
-                    "gain": pytest.approx(0.25 + index * 0.1),
-                }
-            ]
+        assert len(config["source"]["noises"]) == 1
+        config_noise = config["source"]["noises"][0]
+        assert config_noise["label"] == f"Stress source {index}"
+        assert config_noise["noise_type"] == noise_types[index - 1]
+        assert config_noise["tone_type"] == noise_types[index - 1]
+        assert config_noise["gain"] == pytest.approx(0.25 + index * 0.1)
+        assert config_noise["motion_mode"] == "looming"
+        assert config_noise["source_profile"] == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+        assert config_noise["source_profile_parameters"]["burst_count_mode"] == "duration_derived"
+        assert config_noise["source_profile_parameters"]["active_window_s"] == pytest.approx(
+            controls["movement_duration_s"]
+        )
         assert config["protocol"]["soa_values_ms"] == soas
         assert config["protocol"]["spatial_values_cm"] == spatial
         assert config["trajectory"]["start_hold_s"] == pytest.approx(controls["start_hold_s"])
@@ -2281,6 +2285,68 @@ def test_dashboard_bake_stimulus_job_adds_source_after_render(tmp_path: Path, mo
     assert state["custom_workflow"]["ready_to_render"] is False
     assert state["custom_workflow"]["current_step"] == "trials"
     assert "Bake Segment 2 trial sequences." in state["custom_workflow"]["missing"]
+
+
+def test_dashboard_bake_generated_noise_can_use_continuous_source_mode(tmp_path: Path, monkeypatch):
+    client = _client(tmp_path)
+    custom = client.post("/api/templates/__custom__/load").json()
+    custom["design"]["name"] = "Continuous source bake"
+    custom["design"]["protocol"]["soa_values_ms"] = [300]
+    custom["design"]["protocol"]["spatial_values_cm"] = [100.0]
+    custom["design"]["protocol"]["include_baseline_trials"] = False
+    custom["design"]["protocol"]["baseline_strategy"] = "none"
+
+    def fake_render(design_path, output_dir, *, seed, engine="auto", include_tactile=True, **_kwargs):
+        design_data = json.loads(Path(design_path).read_text(encoding="utf-8"))
+        wav_path = Path(output_dir) / "looming_continuous_blue.wav"
+        sf.write(wav_path, np.zeros((441, 2), dtype=np.float32), 44100)
+        manifest = Path(output_dir) / "render_manifest.json"
+        qc = Path(output_dir) / "render_qc.csv"
+        tactile = Path(output_dir) / "render_tactile_events.csv"
+        manifest.write_text(
+            json.dumps({"status": "rendered_reference", "wav_outputs": [{"path": str(wav_path), "sha256": "test"}]}),
+            encoding="utf-8",
+        )
+        qc.write_text("", encoding="utf-8")
+        tactile.write_text("", encoding="utf-8")
+        assert design_data["noises"][0]["source_profile"] == "continuous_noise"
+        assert design_data["noises"][0]["source_profile_parameters"] == {}
+        assert seed == custom["design"]["protocol"]["random_seed"]
+        assert engine == "python-sofa-reference"
+        assert include_tactile is False
+        return RenderResult(
+            "rendered_reference",
+            0,
+            Path(output_dir),
+            Path(design_path),
+            manifest,
+            qc,
+            wav_paths=(wav_path,),
+            tactile_events_path=tactile,
+        )
+
+    monkeypatch.setattr(dashboard_app.render_backend, "render_design_with_3dti", fake_render)
+    job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "",
+            "design": custom["design"],
+            "bake_recipe": {
+                "kind": "generated_noise",
+                "noise_type": "blue",
+                "label": "Continuous blue",
+                "source_profile": "continuous_noise",
+                "source_profile_parameters": gold_standard_looming_source_parameters(),
+            },
+        },
+    ).json()
+    done = _wait_job(client, job["job_id"])
+    state = client.get("/api/state").json()
+
+    assert done["status"] == "succeeded"
+    baked_noise = next(noise for noise in state["design"]["noises"] if noise["label"] == "Continuous blue")
+    assert baked_noise["source_profile"] == "continuous_noise"
+    assert baked_noise["source_profile_parameters"] == {}
 
 
 def test_dashboard_batch_bakes_trial_sequence_row_variant_folders(tmp_path: Path):

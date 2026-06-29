@@ -136,7 +136,6 @@
       "parameter": "stimulus_duration",
       "status": "reported",
       "value": [
-        1.612449,
         5.5
       ],
       "note": "Duration comes from generated WAV metadata."

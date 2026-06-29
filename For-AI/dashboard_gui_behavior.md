@@ -24,6 +24,23 @@ The tracked preload `study5_box_breathing_pps` is the only Study 5 lab profile i
 
 In the HTML dashboard study selector, `study5_box_breathing_pps` should appear as the first/default bundled Study 5 profile. Do not add or restore a second Study 5 profile.
 
+## Segment 1 Generated Source Mode
+
+Segment 1 `Generate Looming Noise` now has a `Source mode` segmented control.
+`Burst train` is the default and writes `source_profile:
+dynaspace_gaussian_burst_train`; `Continuous` writes `source_profile:
+continuous_noise` as an explicit opt-out. The browser records only the
+researcher decision. The local backend validates the two supported modes,
+normalizes burst-train parameters, clears stale burst parameters for
+continuous-noise bakes, and then owns WAV generation.
+
+Existing generated source cards display a compact `Burst train` or
+`Continuous` chip and keep the saved `source_profile`,
+`source_profile_parameters`, and `motion_mode` fields in hidden form state.
+Missing generated looming source profiles should resolve to `Burst train` when
+designs are loaded/saved/rendered, while imported/fixed custom clips remain
+outside this generated-noise toggle.
+
 ## Static Profile Segment 3-5 Previews
 
 Hosted/static mode cannot write WAVs or CSVs, but finished bundled profiles must still show the same downstream decisions that the local companion would materialize. `staticStateForTemplate()` therefore derives read-only virtual Segment 3 trial files, Segment 4 repetition-pool rows, and already-randomized Segment 5 block previews from the committed profile parameters. Study 5 should show 44 virtual Segment 3 WAVs, 204 planned Segment 4 pool rows, and 6 accepted static block previews of 34 trials each. Static previews must use the same seeded, row-order-preserving Gellermann-style block scheduler concept as the local companion and expose `Download Randomization` for the browser-generated CSV/manifest. The local companion still performs actual file/CSV materialization when launching or preparing a run.

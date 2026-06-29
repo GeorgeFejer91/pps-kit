@@ -2266,6 +2266,27 @@ select:focus {
   justify-self: end;
 }
 
+.source-mode-row {
+  display: grid;
+  grid-template-columns: minmax(88px, 0.35fr) minmax(210px, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.source-mode-row > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.segmented-control.compact {
+  min-height: 32px;
+}
+
+.segmented-control.compact label span {
+  padding: 6px 10px;
+}
+
 .loudness-panel {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -2873,6 +2894,26 @@ select:focus {
   border-radius: 50%;
   background: var(--source-card-color);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+.source-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 8px;
+}
+
+.source-mode-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 2px 7px;
+  border: 1px solid #cad7cf;
+  border-radius: 999px;
+  background: #f4f7f3;
+  color: #334039;
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .source-card-fields {
