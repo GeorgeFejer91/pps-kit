@@ -694,7 +694,7 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     QTest.mouseClick(window.setup_submit_button, q["Qt"].MouseButton.LeftButton)
     app.processEvents()
     assert window.demographics_submitted
-    assert not window.tactile_calibration_button.isEnabled()
+    assert window.tactile_calibration_button.isEnabled()
     assert window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
     assert window.mode_tabs.currentIndex() == window.experiment_control_tab_index
     assert window.part_buttons["1"].isEnabled()
@@ -717,6 +717,9 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     output_stack_rect = _widget_rect(window.output_stack_cell, window.dialog)
     output_levels_rect = _widget_rect(window.output_levels_panel, window.dialog)
     output_rect = _widget_rect(window.output_panel, window.dialog)
+    test_audio_rect = _widget_rect(window.test_audio_button, window.dialog)
+    test_tactile_rect = _widget_rect(window.test_tactile_button, window.dialog)
+    tactile_threshold_rect = _widget_rect(window.tactile_calibration_button, window.dialog)
     response_cell_rect = _widget_rect(window.response_cell, window.dialog)
     processing_rect = _widget_rect(window.processing_panel, window.dialog)
     run_controls_rect = _widget_rect(window.run_controls_widget, window.dialog)
@@ -729,6 +732,11 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert output_stack_rect["x"] >= response_rect["right"]
     assert output_levels_rect["x"] >= output_stack_rect["x"]
     assert output_levels_rect["right"] <= output_stack_rect["right"]
+    assert test_audio_rect["height"] >= window.layout_profile.button_min_height
+    assert test_tactile_rect["height"] >= window.layout_profile.button_min_height
+    assert test_audio_rect["bottom"] < tactile_threshold_rect["y"]
+    assert test_tactile_rect["bottom"] < tactile_threshold_rect["y"]
+    assert tactile_threshold_rect["bottom"] <= output_levels_rect["bottom"]
     if window.output_panel.isVisible():
         assert output_rect["y"] >= output_levels_rect["bottom"]
         assert output_rect["x"] >= output_stack_rect["x"]
@@ -1293,7 +1301,7 @@ def test_focus_mode_loads_participant_tactile_calibration_into_output_field(tmp_
     _fill_required_setup(window)
     assert window._submit_participant_setup()
     assert created[-1]["tactile_calibration"]["final_output_34_percent"] == pytest.approx(42.5)
-    assert not window.tactile_calibration_button.isEnabled()
+    assert window.tactile_calibration_button.isEnabled()
     window.dialog.close()
 
 
@@ -1442,9 +1450,13 @@ def test_focus_mode_calibrate_tactile_button_click_saves_and_applies_value(tmp_p
     )
     window._output_test_engine = lambda: object()
     window.dialog.show()
-    window.mode_tabs.setCurrentIndex(window.experiment_control_tab_index)
     app.processEvents()
 
+    _fill_required_setup(window)
+    assert window._submit_participant_setup()
+    app.processEvents()
+    assert window.mode_tabs.currentIndex() == window.experiment_control_tab_index
+    assert window.start_button.isEnabled()
     assert window.tactile_calibration_button.isEnabled()
     QTest.mouseClick(window.tactile_calibration_button, q["Qt"].MouseButton.LeftButton)
     deadline = time.time() + 2.0
@@ -2268,7 +2280,7 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
         assert output_rect["x"] >= output_stack_rect["x"]
         assert output_rect["right"] <= output_stack_rect["right"]
     else:
-        assert window.layout_profile.screen_class == "constrained"
+        assert window.layout_profile.screen_class in {"constrained", "compact"}
     assert processing_rect["y"] >= run_rect["bottom"]
     assert processing_rect["width"] >= workspace_rect["width"] - 8
     assert not window.layout_validation_failures()

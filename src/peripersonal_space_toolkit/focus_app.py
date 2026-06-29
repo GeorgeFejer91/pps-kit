@@ -7825,12 +7825,20 @@ class FocusModeWindow:
         self.output_levels_panel = output_levels_panel
         output_levels_panel.setMinimumWidth(profile.response_panel_side)
         output_levels_panel.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Fixed)
+        output_levels_heading_height = max(16, profile.input_min_height - 8)
+        output_test_button_min_height = profile.button_min_height + 4
+        output_test_spacing = max(10, profile.panel_spacing)
+        output_test_stack_min_height = (output_test_button_min_height * 2) + output_test_spacing
         output_levels_panel_min_height = max(
             150,
-            (profile.input_min_height * 4) + (profile.panel_margin * 2) + (profile.panel_spacing * 2),
+            output_levels_heading_height
+            + (profile.input_min_height * 2)
+            + output_test_stack_min_height
+            + (profile.panel_margin * 2)
+            + (profile.panel_spacing * 3),
         )
         output_levels_panel.setMinimumHeight(output_levels_panel_min_height)
-        output_levels_panel.setMaximumHeight(max(output_levels_panel_min_height, 184))
+        output_levels_panel.setMaximumHeight(output_levels_panel_min_height)
         (
             output_12_row,
             self.output_12_volume_slider,
@@ -7859,21 +7867,29 @@ class FocusModeWindow:
         output_levels_layout.addWidget(output_34_row)
         output_test_controls = q["QGridLayout"]()
         output_test_controls.setContentsMargins(0, 0, 0, 0)
-        output_test_controls.setSpacing(6)
+        output_test_controls.setHorizontalSpacing(6)
+        output_test_controls.setVerticalSpacing(output_test_spacing)
         self.test_audio_button = q["QPushButton"]("Test Audio")
         self.test_audio_button.setObjectName("testAudioOutputButton")
+        self.test_audio_button.setMinimumHeight(output_test_button_min_height)
         self.test_audio_button.setToolTip("Play one Study 5 pink frontal looming burst-train stimulus through Komplete outputs 1/2 using the current Output 1/2 level.")
         self.test_audio_button.clicked.connect(lambda _checked=False: self._run_output_test("audio"))
         self.test_tactile_button = q["QPushButton"]("Test Tactile")
         self.test_tactile_button.setObjectName("testTactileOutputButton")
+        self.test_tactile_button.setMinimumHeight(output_test_button_min_height)
         self.test_tactile_button.setToolTip("Play four standardized tactile pulses one second apart through output 3, mirrored to output 4, using the current Output 3/4 level.")
         self.test_tactile_button.clicked.connect(lambda _checked=False: self._run_output_test("tactile"))
         self.tactile_calibration_button = q["QPushButton"]("Tactile Threshold")
         self.tactile_calibration_button.setObjectName("tactileCalibrationButton")
+        self.tactile_calibration_button.setMinimumHeight(output_test_button_min_height)
         self.tactile_calibration_button.setToolTip(
             "Run the participant-specific 2-down/1-up tactile threshold staircase. Verbally instruct the participant to press the mouse whenever a tactile pulse is felt."
         )
         self.tactile_calibration_button.clicked.connect(lambda _checked=False: self._run_tactile_calibration())
+        output_test_controls.setColumnStretch(0, 1)
+        output_test_controls.setColumnStretch(1, 1)
+        output_test_controls.setRowMinimumHeight(0, output_test_button_min_height)
+        output_test_controls.setRowMinimumHeight(1, output_test_button_min_height)
         output_test_controls.addWidget(self.test_audio_button, 0, 0)
         output_test_controls.addWidget(self.test_tactile_button, 0, 1)
         output_test_controls.addWidget(self.tactile_calibration_button, 1, 0, 1, 2)
@@ -7900,7 +7916,7 @@ class FocusModeWindow:
         self.output_summary.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Expanding)
         self.output_summary.setPlainText("Session outputs will appear here after the run.")
         output_layout.addWidget(self.output_summary)
-        show_output_summary_panel = profile.screen_class != "constrained"
+        show_output_summary_panel = profile.screen_class not in {"constrained", "compact"}
         output_panel.setVisible(show_output_summary_panel)
         output_stack_cell = q["QWidget"]()
         output_stack_cell.setObjectName("outputStackCell")
@@ -8365,10 +8381,13 @@ class FocusModeWindow:
 
     def _tactile_calibration_allowed(self) -> bool:
         thread_alive = bool(self.thread is not None and self.thread.is_alive())
+        setup_state_safe = (
+            (not self.demographics_submitted and self.controller is None)
+            or (self.demographics_submitted and self.controller is not None)
+        )
         return bool(
             getattr(self, "tactile_calibration_button", None) is not None
-            and not self.demographics_submitted
-            and self.controller is None
+            and setup_state_safe
             and not self._run_active
             and not thread_alive
             and not self._output_test_active
@@ -10882,14 +10901,15 @@ class FocusModeWindow:
 
     def _run_tactile_calibration(self) -> bool:
         if not self._tactile_calibration_allowed():
-            if self.demographics_submitted or self.controller is not None:
-                self.event_label.setText("Tactile threshold assay is available before participant setup is submitted.")
-            elif self._output_test_active:
+            thread_alive = bool(self.thread is not None and self.thread.is_alive())
+            if self._output_test_active:
                 self.event_label.setText("Wait for the current output test before running the tactile threshold assay.")
             elif self._tactile_calibration_active:
                 self.event_label.setText("Tactile threshold assay is already running.")
+            elif self._run_active or thread_alive:
+                self.event_label.setText("Tactile threshold assay is available before experiment playback starts.")
             else:
-                self.event_label.setText("Tactile threshold assay is available before playback starts.")
+                self.event_label.setText("Select or submit a participant before running the tactile threshold assay.")
             return False
         try:
             engine = self._output_test_engine()

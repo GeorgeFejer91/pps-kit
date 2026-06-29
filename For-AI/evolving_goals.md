@@ -510,6 +510,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   folder exists. This protects deep dashboard project folders, including pytest
   temp roots and installed repo-shaped workspaces, from Windows MAX_PATH
   failures when writing or reading `stimulus_design.bake_*.json`.
+- Focus Mode Output Levels now reserves explicit height and vertical spacing
+  for the `Test Audio`/`Test Tactile` row plus the disabled/enabled
+  `Tactile Threshold` row. In the submitted-setup `LSL Ready` state, ordinary
+  output tests and participant-specific tactile threshold calibration must
+  remain enabled and unobstructed before playback starts. Compact and
+  constrained runner profiles hide the optional Output Summary panel so the
+  tactile test controls stay visible inside the window.
 
 ## Active Implementation Backlog
 
