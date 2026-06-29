@@ -25,12 +25,14 @@ from .schema import (
     SEARCH_LEVELS_PERCENT,
     STAIRCASE_CATCH_INTERVAL_SIGNALS,
     STAIRCASE_DOWN_AFTER_HITS,
+    STAIRCASE_LOWER_BOUND_HITS,
     STAIRCASE_MAX_FALSE_ALARMS,
     STAIRCASE_MIN_CATCH_TRIALS,
     STAIRCASE_REVERSALS_TO_AVERAGE,
     STAIRCASE_STOP_REVERSALS,
     STAIRCASE_TARGET_DETECTION_RATE,
     STAIRCASE_UP_AFTER_MISSES,
+    TACTILE_OUTPUT_34_MAX_PERCENT,
     VALID_RESPONSE_END_MS,
     VALID_RESPONSE_START_MS,
 )
@@ -71,6 +73,7 @@ class TactileCalibrationRunner:
         playback_output_levels_before: dict[str, Any] | None = None,
         package_context: dict[str, Any] | None = None,
         progress_callback: Any | None = None,
+        recenter_callback: Any | None = None,
         cancel_event: threading.Event | None = None,
         rng_seed: int | None = None,
     ) -> None:
@@ -79,10 +82,14 @@ class TactileCalibrationRunner:
         self.participant_id = str(participant_id or "")
         self.output_root = str(output_root)
         self.source_pulse_path = Path(source_pulse_path) if source_pulse_path else None
-        self.current_output_34_percent = max(0.0, min(100.0, float(current_output_34_percent or 0.0)))
+        self.current_output_34_percent = max(
+            0.0,
+            min(float(TACTILE_OUTPUT_34_MAX_PERCENT), float(current_output_34_percent or 0.0)),
+        )
         self.playback_output_levels_before = dict(playback_output_levels_before or {})
         self.package_context = dict(package_context or {})
         self.progress_callback = progress_callback
+        self.recenter_callback = recenter_callback
         self.cancel_event = cancel_event or threading.Event()
         self.created_at = datetime.now().isoformat(timespec="seconds")
         self.rng_seed = int(rng_seed if rng_seed is not None else time.time_ns() & 0xFFFFFFFF)
@@ -97,6 +104,37 @@ class TactileCalibrationRunner:
     def _check_cancelled(self) -> None:
         if self.cancel_event.is_set():
             raise RuntimeError("calibration cancelled")
+
+    def _set_audio_engine_tactile_level(self, level_percent: float) -> None:
+        gain = max(0.0, min(float(TACTILE_OUTPUT_34_MAX_PERCENT), float(level_percent or 0.0))) / 100.0
+        setter = getattr(self.audio_engine, "set_tactile_volume", None)
+        if callable(setter):
+            setter(gain)
+        else:
+            setattr(self.audio_engine, "tactile_volume", gain)
+
+    def _request_recenter(
+        self,
+        *,
+        trial_index: int,
+        phase: str,
+        level_percent: float,
+        is_catch: bool,
+    ) -> dict[str, Any]:
+        if not callable(self.recenter_callback):
+            return {}
+        try:
+            result = self.recenter_callback(
+                {
+                    "trial_index": int(trial_index),
+                    "phase": str(phase),
+                    "level_percent": float(level_percent),
+                    "is_catch": bool(is_catch),
+                }
+            )
+        except Exception as exc:
+            return {"mode": "failed", "error": str(exc)}
+        return dict(result or {})
 
     def _play_trial(
         self,
@@ -124,6 +162,7 @@ class TactileCalibrationRunner:
             is_catch=is_catch,
             source_pulse_path=self.source_pulse_path,
             pre_silence_ms=pre_silence_ms,
+            pulse_scale_percent=100.0,
         )
         self.stimuli.append(asdict(stimulus))
         start_perf = time.perf_counter()
@@ -138,6 +177,12 @@ class TactileCalibrationRunner:
             estimated_onset_perf=onset_perf,
             valid_start_perf=valid_start,
             valid_end_perf=valid_end,
+        )
+        recenter_record = self._request_recenter(
+            trial_index=trial_index,
+            phase=phase,
+            level_percent=level_percent,
+            is_catch=is_catch,
         )
         phase_label = "threshold staircase" if phase == "staircase" else phase
         self._progress(
@@ -154,11 +199,14 @@ class TactileCalibrationRunner:
             consecutive_hits="" if consecutive_hits is None else int(consecutive_hits),
             consecutive_misses="" if consecutive_misses is None else int(consecutive_misses),
             step_index="" if step_index is None else int(step_index),
+            max_calibration_events=MAX_CALIBRATION_EVENTS,
+            recenter=dict(recenter_record),
         )
         play_block = getattr(self.audio_engine, "play_block", None)
         if not callable(play_block):
             raise RuntimeError("audio engine has no block playback API")
         try:
+            self._set_audio_engine_tactile_level(0.0 if is_catch else level_percent)
             success = bool(play_block(str(wav_path)))
         finally:
             response = self.response_collector.wait_for_response(until_perf=valid_end)
@@ -167,6 +215,10 @@ class TactileCalibrationRunner:
             raise RuntimeError("audio engine rejected tactile calibration trial playback")
         response_perf = response.get("response_perf") if isinstance(response, dict) else ""
         latency_ms = response.get("response_latency_ms") if isinstance(response, dict) else ""
+        response_x = response.get("response_x", "") if isinstance(response, dict) else ""
+        response_y = response.get("response_y", "") if isinstance(response, dict) else ""
+        response_in_target = response.get("response_in_target", "") if isinstance(response, dict) else ""
+        response_source = response.get("response_source", "") if isinstance(response, dict) else ""
         response_present = isinstance(response, dict)
         valid = bool(response.get("valid_response")) if isinstance(response, dict) else False
         if is_catch:
@@ -195,8 +247,22 @@ class TactileCalibrationRunner:
             "valid_response": valid,
             "response_present": response_present,
             "trial_outcome": outcome,
+            "response_x": response_x,
+            "response_y": response_y,
+            "response_in_target": response_in_target,
+            "response_source": response_source,
+            "recenter_mode": recenter_record.get("mode", ""),
+            "recenter_x": recenter_record.get("x", ""),
+            "recenter_y": recenter_record.get("y", ""),
+            "recenter_coordinate_source": recenter_record.get("coordinate_source", ""),
         }
         self.trials.append(trial)
+        self._progress(
+            f"Tactile threshold trial {trial_index}: {outcome}",
+            ui_event="trial_complete",
+            **trial,
+            max_calibration_events=MAX_CALIBRATION_EVENTS,
+        )
         return trial
 
     def _next_inter_trial_interval_ms(self) -> float:
@@ -209,7 +275,7 @@ class TactileCalibrationRunner:
         return max(0.0, float(inter_trial_interval_ms) - prior_tail_ms)
 
     def _starting_level_index(self, levels: list[float]) -> int:
-        start_level = min(100.0, max(FAMILIARIZATION_MIN_LEVEL_PERCENT, self.current_output_34_percent))
+        start_level = min(max(levels), max(FAMILIARIZATION_MIN_LEVEL_PERCENT, self.current_output_34_percent))
         for index, level in enumerate(levels):
             if level >= start_level:
                 return index
@@ -226,6 +292,7 @@ class TactileCalibrationRunner:
         reversal_levels: list[float],
         reversal_trial_indices: list[int],
         threshold_estimate: float | None,
+        threshold_censoring: str = "",
     ) -> dict[str, Any]:
         used_reversals = reversal_levels[-STAIRCASE_REVERSALS_TO_AVERAGE:]
         return {
@@ -245,6 +312,7 @@ class TactileCalibrationRunner:
             "reversal_levels_used_percent": [float(level) for level in used_reversals],
             "threshold_estimator": f"mean_last_{STAIRCASE_REVERSALS_TO_AVERAGE}_reversals",
             "threshold_estimate_output_34_percent": "" if threshold_estimate is None else float(threshold_estimate),
+            "threshold_censoring": str(threshold_censoring or ""),
             "passed": threshold_estimate is not None and false_alarms <= STAIRCASE_MAX_FALSE_ALARMS,
         }
 
@@ -269,12 +337,14 @@ class TactileCalibrationRunner:
         hits = 0
         misses = 0
         false_alarms = 0
+        lowest_level_hits = 0
         next_catch_after_signal_count = STAIRCASE_CATCH_INTERVAL_SIGNALS
         reversal_levels: list[float] = []
         reversal_trial_indices: list[int] = []
+        threshold_censoring = ""
         with tempfile.TemporaryDirectory(prefix="pps_tactile_calibration_") as temp_text:
             temp_dir = Path(temp_text)
-            familiarization_level = min(100.0, max(FAMILIARIZATION_MIN_LEVEL_PERCENT, self.current_output_34_percent))
+            familiarization_level = min(max(levels), max(FAMILIARIZATION_MIN_LEVEL_PERCENT, self.current_output_34_percent))
             for _ in range(FAMILIARIZATION_TRIAL_COUNT):
                 if not self._has_event_capacity(trial_index):
                     status = "inconclusive_max_events"
@@ -342,6 +412,10 @@ class TactileCalibrationRunner:
                     step_direction = ""
                     if bool(trial.get("valid_response")):
                         hits += 1
+                        if current_index == 0:
+                            lowest_level_hits += 1
+                        else:
+                            lowest_level_hits = 0
                         consecutive_hits += 1
                         consecutive_misses = 0
                         if consecutive_hits >= STAIRCASE_DOWN_AFTER_HITS:
@@ -349,6 +423,8 @@ class TactileCalibrationRunner:
                             consecutive_hits = 0
                     else:
                         misses += 1
+                        if current_index == 0:
+                            lowest_level_hits = 0
                         consecutive_misses += 1
                         consecutive_hits = 0
                         if consecutive_misses >= STAIRCASE_UP_AFTER_MISSES:
@@ -372,9 +448,26 @@ class TactileCalibrationRunner:
                     trial["consecutive_hits"] = consecutive_hits
                     trial["consecutive_misses"] = consecutive_misses
                     trial["step_index"] = step_index
+                    if (
+                        current_index == 0
+                        and lowest_level_hits >= STAIRCASE_LOWER_BOUND_HITS
+                        and catch_trials >= STAIRCASE_MIN_CATCH_TRIALS
+                        and false_alarms <= STAIRCASE_MAX_FALSE_ALARMS
+                    ):
+                        threshold_estimate = float(levels[0])
+                        accepted_level = float(levels[0])
+                        threshold_censoring = "lower_bound"
+                        status = "accepted_lower_bound_censored"
+                        message = (
+                            f"Accepted capped tactile threshold at <= {accepted_level:g}% Output 3/4; "
+                            f"participant detected the lowest candidate level on {lowest_level_hits} signal trials."
+                        )
+                        break
 
                 if status != "invalid_false_alarm":
-                    if len(reversal_levels) >= STAIRCASE_STOP_REVERSALS and catch_trials >= STAIRCASE_MIN_CATCH_TRIALS:
+                    if accepted_level is not None:
+                        pass
+                    elif len(reversal_levels) >= STAIRCASE_STOP_REVERSALS and catch_trials >= STAIRCASE_MIN_CATCH_TRIALS:
                         used_reversals = reversal_levels[-STAIRCASE_REVERSALS_TO_AVERAGE:]
                         threshold_estimate = sum(used_reversals) / len(used_reversals)
                         accepted_level = float(threshold_estimate)
@@ -384,8 +477,11 @@ class TactileCalibrationRunner:
                             f"from {len(reversal_levels)} staircase reversals."
                         )
                     elif hits == 0:
-                        status = "failed_no_detection"
-                        message = "Participant did not report feeling the tactile pulse during the staircase."
+                        status = "failed_no_detection_at_max"
+                        message = (
+                            f"Participant did not report feeling the tactile pulse during the staircase, "
+                            f"including at the capped maximum {TACTILE_OUTPUT_34_MAX_PERCENT:g}% Output 3/4."
+                        )
 
         staircase_summary = self._staircase_summary(
             signal_trials=signal_trials,
@@ -396,6 +492,7 @@ class TactileCalibrationRunner:
             reversal_levels=reversal_levels,
             reversal_trial_indices=reversal_trial_indices,
             threshold_estimate=threshold_estimate,
+            threshold_censoring=threshold_censoring,
         )
         threshold_value: float | str = "" if accepted_level is None else accepted_level
         report = {
@@ -415,6 +512,9 @@ class TactileCalibrationRunner:
             "search_levels_percent": levels,
             "staircase_levels_percent": levels,
             "starting_level_percent": starting_level,
+            "max_output_34_percent": TACTILE_OUTPUT_34_MAX_PERCENT,
+            "output_level_control": "candidate_output_34_percent_sets_audio_engine_tactile_gain",
+            "threshold_censoring": threshold_censoring,
             "max_calibration_events": MAX_CALIBRATION_EVENTS,
             "timing": {
                 "pulse_duration_ms": DEFAULT_PULSE_DURATION_MS,
@@ -429,6 +529,7 @@ class TactileCalibrationRunner:
                 "up_after_misses": STAIRCASE_UP_AFTER_MISSES,
                 "stop_reversals": STAIRCASE_STOP_REVERSALS,
                 "reversals_to_average": STAIRCASE_REVERSALS_TO_AVERAGE,
+                "lower_bound_hits": STAIRCASE_LOWER_BOUND_HITS,
                 "minimum_catch_trials": STAIRCASE_MIN_CATCH_TRIALS,
                 "catch_interval_signal_trials": STAIRCASE_CATCH_INTERVAL_SIGNALS,
                 "max_false_alarms": STAIRCASE_MAX_FALSE_ALARMS,

@@ -182,6 +182,7 @@ from .runtime_paths import repo_root
 from .tactile_calibration import (
     CALIBRATION_SCHEMA,
     PROTOCOL_NAME as TACTILE_CALIBRATION_PROTOCOL_NAME,
+    TACTILE_OUTPUT_34_MAX_PERCENT,
     TactileCalibrationRunner,
     load_latest_calibration,
     save_calibration_attempt,
@@ -495,43 +496,49 @@ OUTPUT_VOLUME_PERCENT_DECIMALS = 3
 OUTPUT_VOLUME_PERCENT_STEP = 0.001
 
 
-def _coerce_volume_percent(value: Any, *, default: float = 100.0) -> float:
+def _coerce_volume_percent(value: Any, *, default: float = 100.0, maximum: float = 100.0) -> float:
     try:
         number = float(value)
     except (TypeError, ValueError):
         number = float(default)
     if not math.isfinite(number):
         number = float(default)
-    return round(max(0.0, min(100.0, number)), OUTPUT_VOLUME_PERCENT_DECIMALS)
+    maximum_value = max(0.0, float(maximum))
+    return round(max(0.0, min(maximum_value, number)), OUTPUT_VOLUME_PERCENT_DECIMALS)
 
 
-def _volume_percent_to_slider_value(value: Any) -> int:
-    return int(round(_coerce_volume_percent(value) * OUTPUT_VOLUME_SLIDER_SCALE))
+def _coerce_tactile_output_percent(value: Any, *, default: float = TACTILE_OUTPUT_34_MAX_PERCENT) -> float:
+    return _coerce_volume_percent(value, default=default, maximum=TACTILE_OUTPUT_34_MAX_PERCENT)
 
 
-def _slider_value_to_volume_percent(value: Any) -> float:
+def _volume_percent_to_slider_value(value: Any, *, maximum: float = 100.0) -> int:
+    return int(round(_coerce_volume_percent(value, maximum=maximum) * OUTPUT_VOLUME_SLIDER_SCALE))
+
+
+def _slider_value_to_volume_percent(value: Any, *, maximum: float = 100.0) -> float:
     try:
         number = float(value)
     except (TypeError, ValueError):
-        number = 100.0 * OUTPUT_VOLUME_SLIDER_SCALE
+        number = float(maximum) * OUTPUT_VOLUME_SLIDER_SCALE
     if not math.isfinite(number):
-        number = 100.0 * OUTPUT_VOLUME_SLIDER_SCALE
-    return _coerce_volume_percent(number / OUTPUT_VOLUME_SLIDER_SCALE)
+        number = float(maximum) * OUTPUT_VOLUME_SLIDER_SCALE
+    return _coerce_volume_percent(number / OUTPUT_VOLUME_SLIDER_SCALE, maximum=maximum)
 
 
-def _output_volume_gain(percent: Any) -> float:
-    return _coerce_volume_percent(percent) / 100.0
+def _output_volume_gain(percent: Any, *, maximum: float = 100.0) -> float:
+    return _coerce_volume_percent(percent, maximum=maximum) / 100.0
 
 
 def _output_channel_volume_payload(output_12_percent: Any, output_34_percent: Any) -> dict[str, Any]:
     output_12 = _coerce_volume_percent(output_12_percent)
-    output_34 = _coerce_volume_percent(output_34_percent)
+    output_34 = _coerce_tactile_output_percent(output_34_percent)
     return {
         "schema": OUTPUT_CHANNEL_VOLUME_SCHEMA,
         "output_1_2_percent": output_12,
         "output_3_4_percent": output_34,
         "output_1_2_linear_gain": _output_volume_gain(output_12),
-        "output_3_4_linear_gain": _output_volume_gain(output_34),
+        "output_3_4_linear_gain": _output_volume_gain(output_34, maximum=TACTILE_OUTPUT_34_MAX_PERCENT),
+        "output_3_4_max_percent": TACTILE_OUTPUT_34_MAX_PERCENT,
     }
 
 
@@ -547,7 +554,7 @@ def _load_output_channel_volume_percentages(state_root: Path | None = None) -> t
         "output_3_4_percent",
         settings.get(OUTPUT_34_VOLUME_PERCENT_KEY, settings.get("tactile_volume_percent", 100)),
     )
-    return _coerce_volume_percent(output_12), _coerce_volume_percent(output_34)
+    return _coerce_volume_percent(output_12), _coerce_tactile_output_percent(output_34)
 
 
 def _persist_output_channel_volumes(
@@ -557,7 +564,7 @@ def _persist_output_channel_volumes(
     state_root: Path | None = None,
 ) -> dict[str, Any]:
     output_12 = _coerce_volume_percent(output_12_percent)
-    output_34 = _coerce_volume_percent(output_34_percent)
+    output_34 = _coerce_tactile_output_percent(output_34_percent)
     return update_runner_settings(
         DEFAULT_DASHBOARD_STATE_ROOT if state_root is None else state_root,
         **{
@@ -2064,7 +2071,10 @@ def _output_volume_slider_row(
     object_name: str,
     tooltip: str,
     on_change: Callable[[float], None],
+    maximum_percent: float = 100.0,
 ) -> tuple[Any, Any, Any]:
+    max_percent = max(0.0, float(maximum_percent))
+
     class VolumePercentSpinBox(q["QDoubleSpinBox"]):
         def __init__(self) -> None:
             super().__init__()
@@ -2076,10 +2086,10 @@ def _output_volume_slider_row(
                 value = float(clean)
             except ValueError:
                 return float(self.value())
-            return _coerce_volume_percent(value) if math.isfinite(value) else float(self.value())
+            return _coerce_volume_percent(value, maximum=max_percent) if math.isfinite(value) else float(self.value())
 
         def textFromValue(self, value: float) -> str:  # noqa: N802 - Qt override
-            return f"{_coerce_volume_percent(value):.{OUTPUT_VOLUME_PERCENT_DECIMALS}f}"
+            return f"{_coerce_volume_percent(value, maximum=max_percent):.{OUTPUT_VOLUME_PERCENT_DECIMALS}f}"
 
         def _commit_text_value(self) -> None:
             text = self.lineEdit().text().replace("%", "").strip().replace(",", ".")
@@ -2089,7 +2099,7 @@ def _output_volume_slider_row(
                 self.interpretText()
                 return
             if math.isfinite(value):
-                self.setValue(_coerce_volume_percent(value))
+                self.setValue(_coerce_volume_percent(value, maximum=max_percent))
             else:
                 self.interpretText()
 
@@ -2119,22 +2129,22 @@ def _output_volume_slider_row(
     key.setObjectName("metricLabel")
     slider = q["QSlider"](q["Qt"].Orientation.Horizontal)
     slider.setObjectName(object_name)
-    slider.setRange(0, 100 * OUTPUT_VOLUME_SLIDER_SCALE)
+    slider.setRange(0, int(round(max_percent * OUTPUT_VOLUME_SLIDER_SCALE)))
     slider.setSingleStep(1)
     slider.setPageStep(10)
     slider.setTickInterval(100)
     slider.setToolTip(tooltip)
-    slider.setValue(_volume_percent_to_slider_value(value))
+    slider.setValue(_volume_percent_to_slider_value(value, maximum=max_percent))
     slider.setMinimumWidth(120)
     percent = VolumePercentSpinBox()
     percent.setObjectName(object_name.replace("Slider", "PercentBox"))
-    percent.setRange(0.0, 100.0)
+    percent.setRange(0.0, max_percent)
     percent.setDecimals(OUTPUT_VOLUME_PERCENT_DECIMALS)
     percent.setSingleStep(OUTPUT_VOLUME_PERCENT_STEP)
     percent.setSuffix("%")
     percent.setLocale(q["QLocale"].c())
     percent.setKeyboardTracking(False)
-    percent.setValue(_coerce_volume_percent(value))
+    percent.setValue(_coerce_volume_percent(value, maximum=max_percent))
     percent.setMinimumWidth(78)
     percent.setMaximumWidth(96)
     percent.setToolTip(tooltip)
@@ -2143,15 +2153,15 @@ def _output_volume_slider_row(
     layout.addWidget(percent)
 
     def _slider_changed(changed: int) -> None:
-        percent_value = _slider_value_to_volume_percent(changed)
+        percent_value = _slider_value_to_volume_percent(changed, maximum=max_percent)
         previous = percent.blockSignals(True)
         percent.setValue(percent_value)
         percent.blockSignals(previous)
         on_change(percent_value)
 
     def _percent_changed(changed: float) -> None:
-        percent_value = _coerce_volume_percent(changed)
-        slider_value = _volume_percent_to_slider_value(percent_value)
+        percent_value = _coerce_volume_percent(changed, maximum=max_percent)
+        slider_value = _volume_percent_to_slider_value(percent_value, maximum=max_percent)
         previous = slider.blockSignals(True)
         slider.setValue(slider_value)
         slider.blockSignals(previous)
@@ -2160,6 +2170,234 @@ def _output_volume_slider_row(
     slider.valueChanged.connect(_slider_changed)
     percent.valueChanged.connect(_percent_changed)
     return row, slider, percent
+
+
+def _format_tactile_percent(value: Any) -> str:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return ""
+    if not math.isfinite(number):
+        return ""
+    return f"{number:.3f}%"
+
+
+def _create_tactile_calibration_timeline_widget(q: dict[str, Any]) -> Any:
+    class TactileCalibrationTimelineWidget(q["QWidget"]):
+        def __init__(self) -> None:
+            super().__init__()
+            self.events: list[dict[str, Any]] = []
+            self.max_events = 60
+            self.setMinimumHeight(74)
+            self.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Fixed)
+
+        def set_events(self, events: list[dict[str, Any]], *, max_events: int) -> None:
+            self.events = [dict(event) for event in events]
+            self.max_events = max(1, int(max_events or 1))
+            self.update()
+
+        def paintEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
+            super().paintEvent(event)
+            painter = q["QPainter"](self)
+            try:
+                painter.setRenderHint(q["QPainter"].RenderHint.Antialiasing, True)
+                rect = self.rect()
+                painter.fillRect(rect, q["QColor"]("#f7fafc"))
+                left = 12
+                right = max(left + 1, rect.width() - 12)
+                mid_y = rect.height() // 2
+                painter.setPen(q["QPen"](q["QColor"]("#b7c3d0"), 2))
+                painter.drawLine(left, mid_y, right, mid_y)
+                for event_record in self.events:
+                    try:
+                        index = int(event_record.get("trial_index") or 0)
+                    except Exception:
+                        index = 0
+                    if index <= 0:
+                        continue
+                    frac = min(1.0, max(0.0, (index - 1) / max(1, self.max_events - 1)))
+                    x = int(round(left + frac * (right - left)))
+                    is_catch = bool(event_record.get("is_catch"))
+                    outcome = str(event_record.get("trial_outcome") or "").strip().lower()
+                    current = bool(event_record.get("current"))
+                    if "false_alarm" in outcome:
+                        color = "#b42318"
+                    elif outcome in {"hit", "correct_reject"}:
+                        color = "#16794c"
+                    elif outcome in {"miss", "catch_response_out_of_window"}:
+                        color = "#d47c00"
+                    elif is_catch:
+                        color = "#64748b"
+                    else:
+                        color = "#2563eb"
+                    radius = 6 if current else 4
+                    painter.setBrush(q["QBrush"](q["QColor"](color)))
+                    painter.setPen(q["QPen"](q["QColor"]("#ffffff"), 1))
+                    painter.drawEllipse(q["QPoint"](x, mid_y), radius, radius)
+                painter.setPen(q["QPen"](q["QColor"]("#475569"), 1))
+                painter.drawText(12, rect.height() - 8, f"0 / {self.max_events} event cap")
+            finally:
+                painter.end()
+
+    return TactileCalibrationTimelineWidget()
+
+
+def _create_tactile_calibration_monitor_dialog(q: dict[str, Any], owner: Any, participant: str) -> Any:
+    class TactileCalibrationMonitorDialog(q["QDialog"]):
+        def __init__(self) -> None:
+            super().__init__(owner.dialog)
+            self.setWindowTitle(f"Tactile Calibration Monitor - {participant}")
+            self.setModal(False)
+            self.setObjectName("tactileCalibrationMonitor")
+            self.events: list[dict[str, Any]] = []
+            self.current_row_by_trial: dict[int, int] = {}
+            self.resize(760, 620)
+
+            root = q["QVBoxLayout"](self)
+            root.setContentsMargins(14, 14, 14, 14)
+            root.setSpacing(10)
+
+            self.status_label = q["QLabel"]("Preparing tactile threshold assay")
+            self.status_label.setObjectName("sectionTitle")
+            self.status_label.setWordWrap(True)
+            root.addWidget(self.status_label)
+
+            target_panel = q["QFrame"]()
+            target_layout = q["QVBoxLayout"](target_panel)
+            target_layout.setContentsMargins(8, 8, 8, 8)
+            target_layout.setSpacing(8)
+            target_layout.addWidget(_subtitle(q, "Participant Response Target"))
+            self.target_button = _create_response_target_button(q, DEFAULT_FOCUS_LAYOUT_PROFILE)
+            self.target_button.setObjectName("tactileCalibrationTargetButton")
+            self.target_button.setEnabled(True)
+            self.target_button.clicked.connect(lambda _checked=False: owner._record_tactile_calibration_target_click("calibration_monitor_target"))
+            target_layout.addWidget(self.target_button, 0, q["Qt"].AlignmentFlag.AlignHCenter)
+            root.addWidget(target_panel)
+
+            metrics = q["QFrame"]()
+            metrics_layout = q["QGridLayout"](metrics)
+            metrics_layout.setContentsMargins(0, 0, 0, 0)
+            metrics_layout.setHorizontalSpacing(12)
+            metrics_layout.setVerticalSpacing(6)
+            self.intensity_label = q["QLabel"]("Intensity: --")
+            self.window_label = q["QLabel"]("Response window: --")
+            self.reversal_label = q["QLabel"]("Reversals: 0")
+            self.response_label = q["QLabel"]("Last response: --")
+            for label in (self.intensity_label, self.window_label, self.reversal_label, self.response_label):
+                label.setObjectName("metricValue")
+                label.setWordWrap(True)
+            self.intensity_bar = q["QProgressBar"]()
+            self.intensity_bar.setRange(0, int(round(TACTILE_OUTPUT_34_MAX_PERCENT * OUTPUT_VOLUME_SLIDER_SCALE)))
+            self.intensity_bar.setTextVisible(True)
+            self.intensity_bar.setValue(0)
+            metrics_layout.addWidget(self.intensity_label, 0, 0)
+            metrics_layout.addWidget(self.window_label, 0, 1)
+            metrics_layout.addWidget(self.reversal_label, 1, 0)
+            metrics_layout.addWidget(self.response_label, 1, 1)
+            metrics_layout.addWidget(self.intensity_bar, 2, 0, 1, 2)
+            root.addWidget(metrics)
+
+            self.timeline = _create_tactile_calibration_timeline_widget(q)
+            root.addWidget(self.timeline)
+
+            self.table = q["QTableWidget"](0, 6)
+            self.table.setObjectName("tactileCalibrationTrialTable")
+            self.table.setHorizontalHeaderLabels(["#", "Phase", "Level", "Pulse", "Response", "Outcome"])
+            self.table.setEditTriggers(q["QTableWidget"].EditTrigger.NoEditTriggers)
+            self.table.verticalHeader().setVisible(False)
+            self.table.horizontalHeader().setSectionResizeMode(q["QHeaderView"].ResizeMode.Stretch)
+            root.addWidget(self.table, 1)
+
+            buttons = q["QHBoxLayout"]()
+            buttons.addStretch(1)
+            self.abort_button = q["QPushButton"]("Abort")
+            self.abort_button.setObjectName("dangerButton")
+            self.abort_button.clicked.connect(lambda _checked=False: owner._abort_tactile_calibration())
+            self.close_button = q["QPushButton"]("Close")
+            self.close_button.setEnabled(False)
+            self.close_button.clicked.connect(self.accept)
+            buttons.addWidget(self.abort_button)
+            buttons.addWidget(self.close_button)
+            root.addLayout(buttons)
+
+        def update_progress(self, payload: dict[str, Any]) -> None:
+            trial_index = int(payload.get("trial_index") or 0)
+            level = payload.get("level_percent", "")
+            is_catch = bool(payload.get("is_catch"))
+            message = str(payload.get("message") or "Tactile calibration running")
+            self.status_label.setText(message)
+            self.intensity_label.setText(f"Intensity: {_format_tactile_percent(level)} Output 3/4")
+            try:
+                self.intensity_bar.setValue(int(round(float(level) * OUTPUT_VOLUME_SLIDER_SCALE)))
+            except Exception:
+                self.intensity_bar.setValue(0)
+            self.intensity_bar.setFormat(_format_tactile_percent(level))
+            self.window_label.setText("Response window: 100-1500 ms after pulse onset")
+            reversal = payload.get("reversal_index", "")
+            self.reversal_label.setText(f"Reversals: {reversal if str(reversal) else 0}")
+            if trial_index:
+                event_record = {
+                    "trial_index": trial_index,
+                    "phase": str(payload.get("phase") or ""),
+                    "level_percent": level,
+                    "is_catch": is_catch,
+                    "current": True,
+                }
+                for event_item in self.events:
+                    event_item["current"] = False
+                self.events.append(event_record)
+                row = self.table.rowCount()
+                self.current_row_by_trial[trial_index] = row
+                self.table.insertRow(row)
+                values = [
+                    trial_index,
+                    str(payload.get("phase") or ""),
+                    _format_tactile_percent(level),
+                    "Catch" if is_catch else "Pulse",
+                    "Waiting",
+                    "",
+                ]
+                for column, value in enumerate(values):
+                    self.table.setItem(row, column, q["QTableWidgetItem"](str(value)))
+                self.table.scrollToBottom()
+            self.timeline.set_events(self.events, max_events=int(payload.get("max_calibration_events") or 60))
+
+        def record_response(self, payload: dict[str, Any]) -> None:
+            trial_index = int(payload.get("trial_index") or 0)
+            valid = bool(payload.get("valid_response"))
+            latency = payload.get("response_latency_ms", "")
+            try:
+                latency_text = f"{float(latency):.0f} ms"
+            except Exception:
+                latency_text = "out of window"
+            source = str(payload.get("response_source") or payload.get("source") or "mouse")
+            self.response_label.setText(
+                f"Last response: {'valid' if valid else 'ignored'} {latency_text} ({source})"
+            )
+            row = self.current_row_by_trial.get(trial_index)
+            if row is not None:
+                self.table.setItem(row, 4, q["QTableWidgetItem"]("valid " + latency_text if valid else "ignored"))
+
+        def finish_trial(self, trial: dict[str, Any]) -> None:
+            trial_index = int(trial.get("trial_index") or 0)
+            outcome = str(trial.get("trial_outcome") or "")
+            row = self.current_row_by_trial.get(trial_index)
+            if row is not None:
+                self.table.setItem(row, 5, q["QTableWidgetItem"](outcome))
+                if not bool(trial.get("response_present")):
+                    self.table.setItem(row, 4, q["QTableWidgetItem"]("none"))
+            for event_item in self.events:
+                if int(event_item.get("trial_index") or 0) == trial_index:
+                    event_item.update({"current": False, "trial_outcome": outcome})
+            self.timeline.set_events(self.events, max_events=60)
+
+        def finish_assay(self, report: dict[str, Any]) -> None:
+            accepted = bool(report.get("accepted"))
+            self.status_label.setText(str(report.get("message") or ("Calibration accepted" if accepted else "Calibration failed")))
+            self.abort_button.setEnabled(False)
+            self.close_button.setEnabled(True)
+
+    return TactileCalibrationMonitorDialog()
 
 
 def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
@@ -7496,7 +7734,8 @@ class _FocusTactileCalibrationCollector:
     def __init__(self) -> None:
         self._condition = threading.Condition()
         self._trial: dict[str, Any] | None = None
-        self._response: dict[str, Any] | None = None
+        self._first_response: dict[str, Any] | None = None
+        self._valid_response: dict[str, Any] | None = None
 
     def start_trial(
         self,
@@ -7519,38 +7758,57 @@ class _FocusTactileCalibrationCollector:
                 "valid_start_perf": float(valid_start_perf),
                 "valid_end_perf": float(valid_end_perf),
             }
-            self._response = None
+            self._first_response = None
+            self._valid_response = None
             self._condition.notify_all()
 
-    def record_click(self, *, in_target: bool = True) -> bool:
+    def record_click(
+        self,
+        *,
+        in_target: bool = True,
+        x: int | None = None,
+        y: int | None = None,
+        source: str = "",
+    ) -> dict[str, Any] | None:
         now = time.perf_counter()
         with self._condition:
             trial = dict(self._trial or {})
             if not trial:
-                return False
-            valid = bool(in_target) and float(trial["valid_start_perf"]) <= now <= float(trial["valid_end_perf"])
-            if valid and self._response is None:
-                self._response = {
-                    "response_perf": now,
-                    "response_latency_ms": (now - float(trial["estimated_onset_perf"])) * 1000.0,
-                    "valid_response": True,
-                }
+                return None
+            valid = float(trial["valid_start_perf"]) <= now <= float(trial["valid_end_perf"])
+            response = {
+                "trial_index": int(trial.get("trial_index") or 0),
+                "response_perf": now,
+                "response_latency_ms": (now - float(trial["estimated_onset_perf"])) * 1000.0,
+                "valid_response": bool(valid),
+                "response_x": "" if x is None else int(x),
+                "response_y": "" if y is None else int(y),
+                "response_in_target": bool(in_target),
+                "response_source": str(source or ""),
+            }
+            if self._first_response is None:
+                self._first_response = dict(response)
+            if valid and self._valid_response is None:
+                self._valid_response = dict(response)
                 self._condition.notify_all()
-                return True
-            return False
+            return response
 
     def wait_for_response(self, *, until_perf: float) -> dict[str, Any] | None:
         with self._condition:
-            while self._response is None:
+            while self._valid_response is None:
                 remaining = float(until_perf) - time.perf_counter()
                 if remaining <= 0:
                     break
                 self._condition.wait(timeout=min(0.1, remaining))
-            return None if self._response is None else dict(self._response)
+            if self._valid_response is not None:
+                return dict(self._valid_response)
+            return None if self._first_response is None else dict(self._first_response)
 
     def finish_trial(self) -> None:
         with self._condition:
             self._trial = None
+            self._first_response = None
+            self._valid_response = None
             self._condition.notify_all()
 
 
@@ -7634,6 +7892,7 @@ class FocusModeWindow:
         self._tactile_calibration_cancel_event: threading.Event | None = None
         self._tactile_calibration_started_global_listener = False
         self._tactile_calibration_collector = _FocusTactileCalibrationCollector()
+        self.tactile_calibration_monitor_dialog: Any | None = None
         self._latest_tactile_calibration: dict[str, Any] = {}
         self._timeline_perf_anchor: float | None = None
         self.timeline_state = TactileTimelineState()
@@ -7860,8 +8119,9 @@ class FocusModeWindow:
             label="Output 3/4",
             value=self.output_34_volume_percent,
             object_name="output34VolumeSlider",
-            tooltip="Linear gain for tactile output 3 and its output 4 mirror.",
+            tooltip="Linear gain for tactile output 3 and its output 4 mirror. Capped at 0.5% for participant comfort.",
             on_change=lambda value: self._set_output_volume("output_3_4", value),
+            maximum_percent=TACTILE_OUTPUT_34_MAX_PERCENT,
         )
         output_levels_layout.addWidget(output_12_row)
         output_levels_layout.addWidget(output_34_row)
@@ -7877,7 +8137,7 @@ class FocusModeWindow:
         self.test_tactile_button = q["QPushButton"]("Test Tactile")
         self.test_tactile_button.setObjectName("testTactileOutputButton")
         self.test_tactile_button.setMinimumHeight(output_test_button_min_height)
-        self.test_tactile_button.setToolTip("Play four standardized tactile pulses one second apart through output 3, mirrored to output 4, using the current Output 3/4 level.")
+        self.test_tactile_button.setToolTip("Play four standardized tactile pulses one second apart through output 3, mirrored to output 4, using the capped current Output 3/4 level.")
         self.test_tactile_button.clicked.connect(lambda _checked=False: self._run_output_test("tactile"))
         self.tactile_calibration_button = q["QPushButton"]("Tactile Threshold")
         self.tactile_calibration_button.setObjectName("tactileCalibrationButton")
@@ -8447,7 +8707,21 @@ class FocusModeWindow:
             "trials_csv_path",
             "latest_path",
         }
-        return {key: current.get(key, "") for key in keys if key in current}
+        payload = {key: current.get(key, "") for key in keys if key in current}
+        for percent_key in (
+            "final_output_34_percent",
+            "detection_threshold_output_34_percent",
+            "recommended_output_34_percent",
+            "confirmation_level_output_34_percent",
+        ):
+            if percent_key in payload:
+                try:
+                    payload[percent_key] = _coerce_tactile_output_percent(float(payload.get(percent_key)))
+                except (TypeError, ValueError):
+                    payload[percent_key] = payload.get(percent_key, "")
+        if payload:
+            payload["max_output_34_percent"] = TACTILE_OUTPUT_34_MAX_PERCENT
+        return payload
 
     def _apply_latest_tactile_calibration(self, participant_id: str | None = None, *, show_message: bool = True) -> bool:
         participant = str(participant_id or self._selected_participant_code() or self.package.participant_id or "").strip()
@@ -8455,11 +8729,28 @@ class FocusModeWindow:
         if latest is None:
             self._latest_tactile_calibration = {}
             return False
+        raw_percent = float(latest.get("recommended_output_34_percent", latest["final_output_34_percent"]))
+        percent = _coerce_tactile_output_percent(raw_percent)
         self._latest_tactile_calibration = dict(latest)
-        percent = float(latest.get("recommended_output_34_percent", latest["final_output_34_percent"]))
+        if percent != raw_percent:
+            self._latest_tactile_calibration["legacy_recommended_output_34_percent_before_cap"] = raw_percent
+            for percent_key in (
+                "final_output_34_percent",
+                "detection_threshold_output_34_percent",
+                "recommended_output_34_percent",
+                "confirmation_level_output_34_percent",
+            ):
+                if percent_key in self._latest_tactile_calibration:
+                    self._latest_tactile_calibration[percent_key] = percent
+            self._latest_tactile_calibration["max_output_34_percent"] = TACTILE_OUTPUT_34_MAX_PERCENT
         self._set_output_volume("output_3_4", percent)
         if show_message and hasattr(self, "event_label"):
-            self.event_label.setText(f"{participant}: loaded tactile threshold {percent:g}%")
+            if percent != raw_percent:
+                self.event_label.setText(
+                    f"{participant}: loaded tactile threshold {raw_percent:g}%, clamped to {percent:g}%"
+                )
+            else:
+                self.event_label.setText(f"{participant}: loaded tactile threshold {percent:g}%")
         return True
 
     def _refresh_companion_panel(self) -> None:
@@ -9200,6 +9491,31 @@ class FocusModeWindow:
         self._refresh_target_global_bounds()
         return self._cached_target_contains_global_xy(x, y)
 
+    def _tactile_calibration_target_widget(self) -> Any | None:
+        monitor = getattr(self, "tactile_calibration_monitor_dialog", None)
+        target = getattr(monitor, "target_button", None) if monitor is not None else None
+        if target is not None and target.isVisible():
+            return target
+        return getattr(self, "target_button", None)
+
+    def _tactile_calibration_target_center(self) -> tuple[int | None, int | None, str]:
+        target = self._tactile_calibration_target_widget()
+        if target is None:
+            return None, None, "unavailable"
+        return _widget_screen_center(target)
+
+    def _tactile_calibration_contains_global_xy(self, x: int | None, y: int | None) -> bool:
+        if x is None or y is None:
+            return False
+        target = self._tactile_calibration_target_widget()
+        if target is None:
+            return False
+        try:
+            point = target.mapFromGlobal(self.q["QPoint"](int(x), int(y)))
+            return bool(target.rect().contains(point))
+        except Exception:
+            return self._target_contains_global_xy(x, y)
+
     def _target_last_click_global_xy(self) -> tuple[int | None, int | None]:
         value = getattr(self.target_button, "last_click_global_pos", None)
         if isinstance(value, tuple) and len(value) == 2:
@@ -9360,17 +9676,18 @@ class FocusModeWindow:
     def _handle_global_response_mouse_click(self, x: Any, y: Any) -> None:
         if self._tactile_calibration_active:
             clean_x, clean_y = self._normalize_response_click_xy(x, y)
-            in_target = self._cached_target_contains_global_xy(clean_x, clean_y)
-            if self._tactile_calibration_collector.record_click(in_target=True):
+            in_target = self._tactile_calibration_contains_global_xy(clean_x, clean_y)
+            payload = self._tactile_calibration_collector.record_click(
+                in_target=in_target,
+                x=clean_x,
+                y=clean_y,
+                source="global_mouse_listener",
+            )
+            if payload:
                 self.messages.put(
                     (
                         "tactile_calibration_click",
-                        {
-                            "x": "" if clean_x is None else clean_x,
-                            "y": "" if clean_y is None else clean_y,
-                            "in_target": in_target,
-                            "source": "global_mouse_listener",
-                        },
+                        payload,
                     )
                 )
             return
@@ -10278,7 +10595,9 @@ class FocusModeWindow:
         setup_text = "setup saved" if self._participant_ledger_entry_for(selected) else "setup not saved"
         calibration = load_latest_calibration(self.output_root, selected)
         if calibration:
-            percent = float(calibration.get("recommended_output_34_percent", calibration["final_output_34_percent"]))
+            percent = _coerce_tactile_output_percent(
+                calibration.get("recommended_output_34_percent", calibration["final_output_34_percent"])
+            )
             calibration_text = f"tactile threshold {percent:g}%"
         else:
             calibration_text = "tactile threshold not calibrated"
@@ -10633,7 +10952,7 @@ class FocusModeWindow:
         if engine is None:
             return
         audio_gain = _output_volume_gain(self.output_12_volume_percent)
-        tactile_gain = _output_volume_gain(self.output_34_volume_percent)
+        tactile_gain = _output_volume_gain(self.output_34_volume_percent, maximum=TACTILE_OUTPUT_34_MAX_PERCENT)
         setter = getattr(engine, "set_main_volume", None)
         if callable(setter):
             try:
@@ -10644,8 +10963,8 @@ class FocusModeWindow:
             setattr(engine, "audio_volume", audio_gain)
         setattr(engine, "tactile_volume", tactile_gain)
 
-    def _set_output_volume(self, target: str, value: float) -> None:
-        percent = _coerce_volume_percent(value)
+    def _set_output_volume(self, target: str, value: float, *, persist: bool = True) -> None:
+        percent = _coerce_tactile_output_percent(value) if target == "output_3_4" else _coerce_volume_percent(value)
         if target == "output_1_2":
             self.output_12_volume_percent = percent
             if hasattr(self, "output_12_volume_slider"):
@@ -10660,7 +10979,9 @@ class FocusModeWindow:
             self.output_34_volume_percent = percent
             if hasattr(self, "output_34_volume_slider"):
                 previous = self.output_34_volume_slider.blockSignals(True)
-                self.output_34_volume_slider.setValue(_volume_percent_to_slider_value(percent))
+                self.output_34_volume_slider.setValue(
+                    _volume_percent_to_slider_value(percent, maximum=TACTILE_OUTPUT_34_MAX_PERCENT)
+                )
                 self.output_34_volume_slider.blockSignals(previous)
             if hasattr(self, "output_34_volume_percent_box"):
                 previous = self.output_34_volume_percent_box.blockSignals(True)
@@ -10670,10 +10991,11 @@ class FocusModeWindow:
         controller_engine = getattr(self.controller, "audio_engine", None) if self.controller is not None else None
         if controller_engine is not self._owned_audio_engine:
             self._apply_output_volumes_to_engine(controller_engine)
-        _persist_output_channel_volumes(
-            self.output_12_volume_percent,
-            self.output_34_volume_percent,
-        )
+        if persist:
+            _persist_output_channel_volumes(
+                self.output_12_volume_percent,
+                self.output_34_volume_percent,
+            )
 
     def _set_output_test_buttons_enabled(self, enabled: bool) -> None:
         enabled = bool(enabled) and not self._run_active and not self._output_test_active and not self._tactile_calibration_active
@@ -10899,6 +11221,44 @@ class FocusModeWindow:
             "part_number": str(getattr(self.package, "part_number", "") or ""),
         }
 
+    def _open_tactile_calibration_monitor(self, participant: str) -> None:
+        existing = getattr(self, "tactile_calibration_monitor_dialog", None)
+        if existing is not None:
+            try:
+                existing.close()
+            except Exception:
+                pass
+        monitor = _create_tactile_calibration_monitor_dialog(self.q, self, participant)
+        self.tactile_calibration_monitor_dialog = monitor
+        monitor.show()
+        try:
+            monitor.raise_()
+            monitor.activateWindow()
+        except Exception:
+            pass
+
+    def _abort_tactile_calibration(self) -> None:
+        if self._tactile_calibration_cancel_event is not None:
+            self._tactile_calibration_cancel_event.set()
+        self.event_label.setText("Tactile threshold assay abort requested.")
+        monitor = getattr(self, "tactile_calibration_monitor_dialog", None)
+        if monitor is not None:
+            try:
+                monitor.status_label.setText("Abort requested; waiting for the current trial to finish.")
+                monitor.abort_button.setEnabled(False)
+            except Exception:
+                pass
+
+    def _request_tactile_calibration_recenter_from_worker(self, payload: dict[str, Any]) -> dict[str, Any]:
+        if threading.get_ident() == self._ui_thread_id:
+            return self._move_cursor_to_tactile_calibration_target(payload)
+        future: Future[dict[str, Any]] = Future()
+        self.messages.put(("tactile_calibration_recenter", {"context": dict(payload), "future": future}))
+        try:
+            return dict(future.result(timeout=1.0))
+        except Exception as exc:
+            return {"mode": "recenter_timeout", "error": str(exc), **dict(payload)}
+
     def _run_tactile_calibration(self) -> bool:
         if not self._tactile_calibration_allowed():
             thread_alive = bool(self.thread is not None and self.thread.is_alive())
@@ -10926,6 +11286,7 @@ class FocusModeWindow:
         self._set_output_test_buttons_enabled(False)
         self.target_button.setEnabled(True)
         self._refresh_target_global_bounds()
+        self._open_tactile_calibration_monitor(participant)
         self._start_tactile_calibration_response_listener()
         self.event_label.setText(
             "Adaptive tactile threshold assay running: instruct participant to press the mouse when a tactile pulse is felt."
@@ -10985,6 +11346,7 @@ class FocusModeWindow:
                     playback_output_levels_before=playback_before,
                     package_context=self._tactile_calibration_package_context(),
                     progress_callback=_progress,
+                    recenter_callback=self._request_tactile_calibration_recenter_from_worker,
                     cancel_event=cancel_event,
                 )
                 result = runner.run()
@@ -11035,6 +11397,24 @@ class FocusModeWindow:
     def _handle_tactile_calibration_progress(self, payload: dict[str, Any]) -> None:
         message = str(payload.get("message") or "Adaptive tactile threshold assay running")
         self.event_label.setText(message)
+        monitor = getattr(self, "tactile_calibration_monitor_dialog", None)
+        if str(payload.get("ui_event") or "") == "trial_complete":
+            if monitor is not None:
+                try:
+                    monitor.finish_trial(payload)
+                except Exception:
+                    pass
+            return
+        if "level_percent" in payload:
+            try:
+                self._set_output_volume("output_3_4", float(payload.get("level_percent")), persist=False)
+            except Exception:
+                pass
+        if monitor is not None:
+            try:
+                monitor.update_progress(payload)
+            except Exception:
+                pass
 
     def _handle_tactile_calibration_done(self, payload: dict[str, Any]) -> None:
         self._tactile_calibration_active = False
@@ -11059,6 +11439,15 @@ class FocusModeWindow:
         else:
             message = str(report.get("message") or "threshold assay did not pass")
             self.event_label.setText(f"{participant}: tactile threshold failed - {message}")
+            playback_before = dict(report.get("playback_output_levels_before") or {})
+            if "output_3_4_percent" in playback_before:
+                self._set_output_volume("output_3_4", playback_before.get("output_3_4_percent"))
+        monitor = getattr(self, "tactile_calibration_monitor_dialog", None)
+        if monitor is not None:
+            try:
+                monitor.finish_assay(report)
+            except Exception:
+                pass
         self._refresh_participant_ledger_summary()
         _append_output_diary_event(
             "tactile_calibration_finished",
@@ -11239,6 +11628,13 @@ class FocusModeWindow:
         cancel_event = getattr(self, "_tactile_calibration_cancel_event", None)
         if cancel_event is not None:
             cancel_event.set()
+        monitor = getattr(self, "tactile_calibration_monitor_dialog", None)
+        if monitor is not None:
+            try:
+                monitor.close()
+            except Exception:
+                pass
+            self.tactile_calibration_monitor_dialog = None
         self._stop_tactile_calibration_response_listener()
         self._stop_companion_service()
         self._remove_response_click_filter()
@@ -11568,10 +11964,25 @@ class FocusModeWindow:
                 f"window {dialog['width']}x{dialog['height']} exceeds available "
                 f"{profile.available_width}x{profile.available_height}"
             )
+        experiment_control_debug = snapshot.get("experiment_control_debug") or {}
         for name, rect in widgets.items():
             if not bool(widget_visibility.get(name, True)):
                 continue
-            if rect["x"] < 0 or rect["y"] < 0 or rect["right"] > dialog["width"] or rect["bottom"] > dialog["height"]:
+            overflow_left = max(0, -int(rect.get("x", 0)))
+            overflow_top = max(0, -int(rect.get("y", 0)))
+            overflow_right = max(0, int(rect.get("right", 0)) - int(dialog["width"]))
+            overflow_bottom = max(0, int(rect.get("bottom", 0)) - int(dialog["height"]))
+            lower_panel_chrome_only = (
+                name == "processing_panel"
+                and overflow_left == 0
+                and overflow_top == 0
+                and overflow_right == 0
+                and 0 < overflow_bottom <= max(1, int(profile.root_margin))
+                and not list(experiment_control_debug.get("clipped_widgets") or [])
+                and not list(experiment_control_debug.get("too_short_widgets") or [])
+                and not list(experiment_control_debug.get("overlap_pairs") or [])
+            )
+            if (overflow_left or overflow_top or overflow_right or overflow_bottom) and not lower_panel_chrome_only:
                 failures.append(f"{name} is clipped outside the dialog: {rect}")
         target = widgets.get("target_button", {})
         target_visible = bool(widget_visibility.get("target_button", True))
@@ -11584,7 +11995,6 @@ class FocusModeWindow:
                 "processing_panel is shorter than the profile minimum "
                 f"{profile.experiment_control_min_height}px: {processing}"
             )
-        experiment_control_debug = snapshot.get("experiment_control_debug") or {}
         content_min_height = int(experiment_control_debug.get("content_min_height") or 0)
         if processing and processing_visible and content_min_height and processing.get("height", 0) < content_min_height:
             failures.append(
@@ -11996,8 +12406,7 @@ class FocusModeWindow:
 
     def _click(self) -> None:
         if self._tactile_calibration_active:
-            if self._tactile_calibration_collector.record_click(in_target=True):
-                self.event_label.setText("Tactile threshold response recorded.")
+            self._record_tactile_calibration_target_click("focus_target")
             return
         if self.pending_instruction_request is not None:
             if self._part2_start_gate_pending():
@@ -12010,6 +12419,24 @@ class FocusModeWindow:
             return
         x, y = self._target_last_click_global_xy()
         self._log_response_click(x=x, y=y, in_target=True, diary_event_type="target_clicked", source="qt_response_target")
+
+    def _record_tactile_calibration_target_click(self, source: str) -> None:
+        if not self._tactile_calibration_active:
+            return
+        x, y, _coordinate_source = self._tactile_calibration_target_center()
+        payload = self._tactile_calibration_collector.record_click(
+            in_target=True,
+            x=x,
+            y=y,
+            source=source,
+        )
+        if payload:
+            self.messages.put(("tactile_calibration_click", payload))
+            self.event_label.setText(
+                "Tactile threshold response recorded."
+                if bool(payload.get("valid_response"))
+                else "Tactile threshold click outside the response window."
+            )
 
     def _continue_instruction_button(self) -> None:
         if self._part2_start_gate_pending():
@@ -12224,6 +12651,34 @@ class FocusModeWindow:
             record["backend_warning"] = self._last_recenter_backend_warning
         self.recenter_records.append(record)
 
+    def _move_cursor_to_tactile_calibration_target(self, context: dict[str, Any] | None = None) -> dict[str, Any]:
+        x, y, coordinate_source = self._tactile_calibration_target_center()
+        offscreen = self._offscreen_platform()
+        no_mouse_mode = _validation_no_mouse_mode()
+        self._last_recenter_backend_warning = ""
+        if x is None or y is None:
+            mode = "target_unavailable"
+        elif offscreen or no_mouse_mode:
+            mode = "recorded_intent"
+            if no_mouse_mode and not offscreen:
+                self._last_recenter_backend_warning = "cursor recenter disabled by validation no-mouse mode"
+        else:
+            mode = self._move_os_cursor_to_global_center(int(x), int(y))
+        record = {
+            "source": "tactile_calibration",
+            "mode": mode,
+            "coordinate_source": coordinate_source,
+            "x": "" if x is None else int(x),
+            "y": "" if y is None else int(y),
+            **dict(context or {}),
+        }
+        if no_mouse_mode:
+            record["cursor_move_suppressed"] = True
+        if self._last_recenter_backend_warning:
+            record["backend_warning"] = self._last_recenter_backend_warning
+        self.recenter_records.append(record)
+        return record
+
     def _move_os_cursor_to_global_center(self, x: int, y: int) -> str:
         self._last_recenter_backend_warning = ""
         try:
@@ -12327,7 +12782,29 @@ class FocusModeWindow:
             elif kind == "response_click":
                 self._apply_response_click_to_ui(dict(payload))
             elif kind == "tactile_calibration_click":
-                self.event_label.setText("Tactile threshold response recorded.")
+                response_payload = dict(payload)
+                self.event_label.setText(
+                    "Tactile threshold response recorded."
+                    if bool(response_payload.get("valid_response"))
+                    else "Tactile threshold click outside the response window."
+                )
+                monitor = getattr(self, "tactile_calibration_monitor_dialog", None)
+                if monitor is not None:
+                    try:
+                        monitor.record_response(response_payload)
+                    except Exception:
+                        pass
+            elif kind == "tactile_calibration_recenter":
+                recenter_payload = dict(payload)
+                future = recenter_payload.get("future")
+                try:
+                    result = self._move_cursor_to_tactile_calibration_target(
+                        dict(recenter_payload.get("context") or {})
+                    )
+                except Exception as exc:
+                    result = {"mode": "failed", "error": str(exc)}
+                if hasattr(future, "set_result"):
+                    future.set_result(result)
             elif kind == "prewarm_progress":
                 self.prewarm_label.setText(f"Next {payload.get('participant_id')}: {payload.get('message')}")
             elif kind == "prewarm":

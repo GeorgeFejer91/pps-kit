@@ -20,9 +20,12 @@ from peripersonal_space_toolkit.tactile_calibration.schema import (
     INTER_TRIAL_INTERVAL_MIN_MS,
     LATEST_CALIBRATION_SCHEMA,
     PROTOCOL_NAME,
+    SEARCH_LEVELS_PERCENT,
+    STAIRCASE_LOWER_BOUND_HITS,
     STAIRCASE_MIN_CATCH_TRIALS,
     STAIRCASE_STOP_REVERSALS,
     STAIRCASE_TARGET_DETECTION_RATE,
+    TACTILE_OUTPUT_34_MAX_PERCENT,
 )
 from peripersonal_space_toolkit.tactile_calibration.stimulus import write_calibration_trial_wav
 
@@ -100,6 +103,7 @@ def test_tactile_calibration_stimulus_uses_three_channel_tactile_route(tmp_path:
     assert info.sample_rate_hz == 44_100
     assert info.channels == 3
     assert info.used_fallback_pulse is False
+    assert info.pulse_scale_percent == pytest.approx(50.0)
     assert info.pulse_duration_ms == pytest.approx(100.0, abs=0.05)
     with wave.open(str(wav_path), "rb") as handle:
         assert handle.getframerate() == 44_100
@@ -173,15 +177,17 @@ def _run_protocol(tmp_path: Path, collector: _ScriptedCollector) -> dict:
 
 
 def test_tactile_calibration_protocol_accepts_adaptive_staircase_threshold(tmp_path: Path):
-    result = _run_protocol(tmp_path, _ScriptedCollector(detection_threshold=25.0))
+    result = _run_protocol(tmp_path, _ScriptedCollector(detection_threshold=0.1))
 
     report = result["report"]
     assert report["accepted"] is True
     assert report["protocol"] == PROTOCOL_NAME
     assert report["threshold_method"] == "two_down_one_up_transformed_adaptive_staircase_with_catches"
-    assert 18.0 <= float(report["final_output_34_percent"]) <= 25.0
+    assert 0.075 <= float(report["final_output_34_percent"]) <= 0.1
     assert report["detection_threshold_output_34_percent"] == pytest.approx(report["final_output_34_percent"])
     assert report["recommended_output_34_percent"] == pytest.approx(report["final_output_34_percent"])
+    assert report["max_output_34_percent"] == pytest.approx(TACTILE_OUTPUT_34_MAX_PERCENT)
+    assert report["search_levels_percent"] == pytest.approx(list(SEARCH_LEVELS_PERCENT))
     assert report["adaptive_staircase"]["target_detection_rate"] == pytest.approx(STAIRCASE_TARGET_DETECTION_RATE)
     assert report["staircase_summary"]["reversals"] >= STAIRCASE_STOP_REVERSALS
     assert report["staircase_summary"]["catch_trials"] >= STAIRCASE_MIN_CATCH_TRIALS
@@ -197,21 +203,33 @@ def test_tactile_calibration_protocol_accepts_adaptive_staircase_threshold(tmp_p
 
 
 def test_tactile_calibration_protocol_tracks_lower_thresholds(tmp_path: Path):
-    result = _run_protocol(tmp_path, _ScriptedCollector(detection_threshold=18.0))
+    result = _run_protocol(tmp_path, _ScriptedCollector(detection_threshold=0.02))
 
     report = result["report"]
     assert report["accepted"] is True
-    assert 12.0 <= float(report["final_output_34_percent"]) <= 18.0
+    assert 0.015 <= float(report["final_output_34_percent"]) <= 0.02
     staircase_levels = [trial["level_percent"] for trial in result["trials"] if trial["phase"] == "staircase"]
-    assert 12.0 in staircase_levels
-    assert 18.0 in staircase_levels
+    assert 0.015 in staircase_levels
+    assert 0.02 in staircase_levels
     assert report["staircase_summary"]["reversals"] >= STAIRCASE_STOP_REVERSALS
+
+
+def test_tactile_calibration_protocol_accepts_lower_bound_censored_threshold(tmp_path: Path):
+    result = _run_protocol(tmp_path, _ScriptedCollector(detection_threshold=SEARCH_LEVELS_PERCENT[0]))
+
+    report = result["report"]
+    assert report["accepted"] is True
+    assert report["status"] == "accepted_lower_bound_censored"
+    assert report["threshold_censoring"] == "lower_bound"
+    assert report["final_output_34_percent"] == pytest.approx(SEARCH_LEVELS_PERCENT[0])
+    assert report["adaptive_staircase"]["lower_bound_hits"] == STAIRCASE_LOWER_BOUND_HITS
+    assert report["staircase_summary"]["threshold_censoring"] == "lower_bound"
 
 
 def test_tactile_calibration_protocol_rejects_false_alarm_bias(tmp_path: Path):
     result = _run_protocol(
         tmp_path,
-        _ScriptedCollector(detection_threshold=18.0, false_alarm=True),
+        _ScriptedCollector(detection_threshold=0.02, false_alarm=True),
     )
 
     report = result["report"]
@@ -227,7 +245,7 @@ def test_tactile_calibration_protocol_fails_without_any_detection(tmp_path: Path
     report = result["report"]
     assert report["accepted"] is False
     assert report["final_output_34_percent"] == ""
-    assert report["status"] == "failed_no_detection"
+    assert report["status"] == "failed_no_detection_at_max"
     assert "did not report" in report["message"]
 
 

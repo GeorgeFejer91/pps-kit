@@ -15,6 +15,7 @@ from .protocol import (
 from .schema import (
     CALIBRATION_SCHEMA,
     PROTOCOL_NAME,
+    TACTILE_OUTPUT_34_MAX_PERCENT,
     TRIAL_FIELDNAMES,
     VALID_RESPONSE_END_MS,
     VALID_RESPONSE_START_MS,
@@ -23,6 +24,7 @@ from .schema import (
 __all__ = [
     "CALIBRATION_SCHEMA",
     "PROTOCOL_NAME",
+    "TACTILE_OUTPUT_34_MAX_PERCENT",
     "TRIAL_FIELDNAMES",
     "VALID_RESPONSE_END_MS",
     "VALID_RESPONSE_START_MS",

@@ -663,11 +663,12 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert window.output_12_volume_slider.minimum() == 0
     assert window.output_12_volume_slider.maximum() == 100_000
     assert window.output_34_volume_slider.minimum() == 0
-    assert window.output_34_volume_slider.maximum() == 100_000
+    assert window.output_34_volume_slider.maximum() == 500
     assert window.output_12_volume_percent_box.objectName() == "output12VolumePercentBox"
     assert window.output_34_volume_percent_box.objectName() == "output34VolumePercentBox"
     assert window.output_34_volume_percent_box.decimals() == 3
     assert window.output_34_volume_percent_box.singleStep() == pytest.approx(0.001)
+    assert window.output_34_volume_percent_box.maximum() == pytest.approx(0.5)
     assert window.test_audio_button.objectName() == "testAudioOutputButton"
     assert window.test_tactile_button.objectName() == "testTactileOutputButton"
     assert window.tactile_calibration_button.objectName() == "tactileCalibrationButton"
@@ -1291,16 +1292,17 @@ def test_focus_mode_loads_participant_tactile_calibration_into_output_field(tmp_
     window.dialog.show()
     app.processEvents()
 
-    assert window.output_34_volume_percent == pytest.approx(42.5)
-    assert window.output_34_volume_percent_box.value() == pytest.approx(42.5)
-    assert "tactile threshold 42.5%" in window.participant_status_summary_label.text()
+    assert window.output_34_volume_percent == pytest.approx(0.5)
+    assert window.output_34_volume_percent_box.value() == pytest.approx(0.5)
+    assert "tactile threshold 0.5%" in window.participant_status_summary_label.text()
     metadata = window._runner_metadata()
-    assert metadata["tactile_calibration"]["final_output_34_percent"] == pytest.approx(42.5)
-    assert metadata["tactile_calibration"]["recommended_output_34_percent"] == pytest.approx(42.5)
+    assert metadata["tactile_calibration"]["final_output_34_percent"] == pytest.approx(0.5)
+    assert metadata["tactile_calibration"]["recommended_output_34_percent"] == pytest.approx(0.5)
+    assert metadata["tactile_calibration"]["max_output_34_percent"] == pytest.approx(0.5)
 
     _fill_required_setup(window)
     assert window._submit_participant_setup()
-    assert created[-1]["tactile_calibration"]["final_output_34_percent"] == pytest.approx(42.5)
+    assert created[-1]["tactile_calibration"]["final_output_34_percent"] == pytest.approx(0.5)
     assert window.tactile_calibration_button.isEnabled()
     window.dialog.close()
 
@@ -1374,6 +1376,7 @@ def test_focus_mode_calibrate_tactile_button_click_saves_and_applies_value(tmp_p
     try:
         from PySide6.QtTest import QTest
         from PySide6.QtWidgets import QApplication
+        from PIL import Image, ImageStat
         from peripersonal_space_toolkit import focus_app
         from peripersonal_space_toolkit.tactile_calibration.persistence import load_latest_calibration
     except Exception as exc:  # pragma: no cover - depends on optional GUI smoke dependencies
@@ -1393,11 +1396,11 @@ def test_focus_mode_calibrate_tactile_button_click_saves_and_applies_value(tmp_p
                     "protocol": PROTOCOL_NAME,
                     "accepted": True,
                     "status": "accepted",
-                    "message": "Accepted adaptive tactile threshold at Output 3/4 level 35% from 6 staircase reversals.",
+                    "message": "Accepted adaptive tactile threshold at Output 3/4 level 0.35% from 6 staircase reversals.",
                     "threshold_method": "two_down_one_up_transformed_adaptive_staircase_with_catches",
-                    "final_output_34_percent": 35.0,
-                    "detection_threshold_output_34_percent": 35.0,
-                    "recommended_output_34_percent": 35.0,
+                    "final_output_34_percent": 0.35,
+                    "detection_threshold_output_34_percent": 0.35,
+                    "recommended_output_34_percent": 0.35,
                     "adaptive_staircase": {
                         "target_detection_rate": 0.7071067811865476,
                         "down_after_hits": 2,
@@ -1415,8 +1418,8 @@ def test_focus_mode_calibrate_tactile_button_click_saves_and_applies_value(tmp_p
                         "false_alarms": 0,
                         "catch_trials": 3,
                         "reversals": 6,
-                        "reversal_levels_percent": [50.0, 35.0, 25.0, 35.0, 25.0, 35.0],
-                        "reversal_levels_used_percent": [25.0, 35.0, 25.0, 35.0],
+                        "reversal_levels_percent": [0.5, 0.35, 0.25, 0.35, 0.25, 0.35],
+                        "reversal_levels_used_percent": [0.25, 0.35, 0.25, 0.35],
                         "hit_rate": 0.7,
                         "false_alarm_rate": 0.0,
                     },
@@ -1428,7 +1431,7 @@ def test_focus_mode_calibrate_tactile_button_click_saves_and_applies_value(tmp_p
                     {
                         "trial_index": 1,
                         "phase": "staircase",
-                        "level_percent": 35.0,
+                            "level_percent": 0.35,
                         "staircase_index": 5,
                         "staircase_direction": "down",
                         "is_catch": False,
@@ -1468,11 +1471,18 @@ def test_focus_mode_calibrate_tactile_button_click_saves_and_applies_value(tmp_p
     window._drain()
 
     assert not window._tactile_calibration_active
-    assert window.output_34_volume_percent == pytest.approx(35.0)
+    assert window.output_34_volume_percent == pytest.approx(0.35)
+    assert window.tactile_calibration_monitor_dialog is not None
+    assert window.tactile_calibration_monitor_dialog.isVisible()
+    assert window.tactile_calibration_monitor_dialog.close_button.isEnabled()
+    screenshot = tmp_path / "tactile_calibration_monitor.png"
+    assert window.tactile_calibration_monitor_dialog.grab().save(str(screenshot))
+    image = Image.open(screenshot).convert("RGB")
+    assert max(ImageStat.Stat(image).stddev) > 0.0
     latest = load_latest_calibration(tmp_path, "P001")
     assert latest is not None
-    assert latest["final_output_34_percent"] == pytest.approx(35.0)
-    assert latest["recommended_output_34_percent"] == pytest.approx(35.0)
+    assert latest["final_output_34_percent"] == pytest.approx(0.35)
+    assert latest["recommended_output_34_percent"] == pytest.approx(0.35)
     assert "tactile threshold accepted" in window.event_label.text()
     window.dialog.close()
 
@@ -1603,13 +1613,14 @@ def test_focus_mode_output_test_buttons_use_standard_assets_and_current_gains(tm
 
     window.output_12_volume_percent_box.setValue(41)
     window.output_34_volume_percent_box.setValue(23)
+    assert window.output_34_volume_percent_box.value() == pytest.approx(0.5)
     QTest.mouseClick(window.test_audio_button, q["Qt"].MouseButton.LeftButton)
     app.processEvents()
     window._drain()
 
     assert engine.instruction_paths == [str(focus_app.OUTPUT_TEST_AUDIO_PATH)]
     assert engine.audio_volume == pytest.approx(0.41)
-    assert engine.tactile_volume == pytest.approx(0.23)
+    assert engine.tactile_volume == pytest.approx(0.005)
     assert window.test_audio_button.isEnabled()
     assert "Test Audio complete" in window.event_label.text()
 
@@ -1768,9 +1779,9 @@ def test_focus_mode_participant_dropdown_switches_loaded_package(tmp_path: Path,
             "protocol": PROTOCOL_NAME,
             "accepted": True,
             "status": "accepted",
-            "final_output_34_percent": 55.0,
-            "detection_threshold_output_34_percent": 55.0,
-            "recommended_output_34_percent": 55.0,
+                "final_output_34_percent": 0.35,
+                "detection_threshold_output_34_percent": 0.35,
+                "recommended_output_34_percent": 0.35,
             "validation_hit_rate": 1.0,
             "validation_false_alarm_rate": 0.0,
         },
@@ -1833,8 +1844,8 @@ def test_focus_mode_participant_dropdown_switches_loaded_package(tmp_path: Path,
     assert not window.include_name_lsl_checkbox.isChecked()
     assert window.participant_decrement_button.isEnabled()
     assert not window.participant_increment_button.isEnabled()
-    assert window.output_34_volume_percent == pytest.approx(55.0)
-    assert "P002: setup not saved; tactile threshold 55%; data collected" in window.participant_status_summary_label.text()
+    assert window.output_34_volume_percent == pytest.approx(0.35)
+    assert "P002: setup not saved; tactile threshold 0.35%; data collected" in window.participant_status_summary_label.text()
     assert window.progress_label.text() == "Waiting to start"
     window.dialog.close()
 

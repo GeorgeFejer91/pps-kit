@@ -28,6 +28,7 @@ class TactileStimulusInfo:
     pulse_duration_ms: float
     post_silence_ms: float
     level_percent: float
+    pulse_scale_percent: float
     is_catch: bool
     source_pulse_path: str
     used_fallback_pulse: bool
@@ -99,12 +100,14 @@ def write_calibration_trial_wav(
     pre_silence_ms: float = DEFAULT_PRE_SILENCE_MS,
     pulse_duration_ms: float = DEFAULT_PULSE_DURATION_MS,
     post_silence_ms: float = DEFAULT_POST_SILENCE_MS,
+    pulse_scale_percent: float | None = None,
 ) -> TactileStimulusInfo:
     """Write a transient 3-channel calibration WAV and return its geometry."""
 
     if channels < 3:
         raise ValueError("Tactile calibration WAVs require at least three channels.")
     level = max(0.0, min(100.0, float(level_percent)))
+    pulse_scale = level if pulse_scale_percent is None else max(0.0, min(100.0, float(pulse_scale_percent)))
     pre_frames = max(0, int(round(sample_rate_hz * float(pre_silence_ms) / 1000.0)))
     post_frames = max(0, int(round(sample_rate_hz * float(post_silence_ms) / 1000.0)))
     pulse, used_fallback, source_text = _source_or_fallback_pulse(
@@ -115,7 +118,7 @@ def write_calibration_trial_wav(
     if is_catch:
         pulse = np.zeros_like(pulse)
     else:
-        pulse = np.clip(pulse * (level / 100.0), -1.0, 1.0)
+        pulse = np.clip(pulse * (pulse_scale / 100.0), -1.0, 1.0)
     frames = pre_frames + int(pulse.shape[0]) + post_frames
     data = np.zeros((frames, channels), dtype=np.float32)
     if pulse.size:
@@ -137,6 +140,7 @@ def write_calibration_trial_wav(
         pulse_duration_ms=float(pulse.shape[0]) / float(sample_rate_hz) * 1000.0,
         post_silence_ms=float(post_silence_ms),
         level_percent=level,
+        pulse_scale_percent=pulse_scale,
         is_catch=bool(is_catch),
         source_pulse_path=source_text,
         used_fallback_pulse=bool(used_fallback),
