@@ -54,6 +54,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   the building-block catalog plus per-block trial asset-id order in its local
   reconstruction artifact. This is the schema prerequisite for deterministic
   phone-side missed-trial/top-up WAV assembly without FFmpeg.
+- Android phone-owned runs now derive a phone-local tactile response ledger
+  using the shared 100-1300 ms post-tactile response window and write
+  `phone_response_ledger.csv` plus `phone_topup_plan.json` into the local run
+  folder/ZIP. The plan marks missed tactile trials as rescue candidates and
+  points each one to its reusable `trial_building_block` asset id with
+  `synthesis_strategy = pcm_wav_concat_without_ffmpeg`. This is still a
+  planned-not-played top-up artifact; the phone does not yet assemble and play
+  the rescue WAV automatically.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only

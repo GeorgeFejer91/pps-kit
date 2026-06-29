@@ -1736,7 +1736,7 @@ private class PhoneRunSession(
             ?.minByOrNull { cue -> abs(elapsedMs - (cue.timeS * 1000.0).roundToLong()) }
         val cueMs = priorCue?.let { (it.timeS * 1000.0).roundToLong() }
         val rtMs = cueMs?.let { elapsedMs - it }
-        val valid = rtMs != null && rtMs in 0L..2_000L
+        val valid = rtMs != null && rtMs in PHONE_RESPONSE_MIN_RT_MS..PHONE_RESPONSE_MAX_RT_MS
         if (valid) validTapCount += 1
         val payload = JSONObject()
             .put("tap_index", tapCount)
@@ -1787,6 +1787,9 @@ private class PhoneRunSession(
         val packageManifestSha256 = sha256Text(packageManifestText)
         val packageManifestFile = File(dir, "run_package_manifest.json")
         val reconstructionFile = File(dir, "reconstruction_contract.json")
+        val responseReview = buildPhoneResponseReview(runPackage, events)
+        val responseLedgerFile = File(dir, "phone_response_ledger.csv")
+        val topupPlanFile = File(dir, "phone_topup_plan.json")
         val payload = JSONObject()
             .put("schema", if (complete) "pps-mobile-run-complete.v1" else "pps-mobile-run-events.v1")
             .put("status", if (complete) "complete" else "in_progress")
@@ -1819,6 +1822,9 @@ private class PhoneRunSession(
             .put("events", eventsArray)
             .put("lsl_marker_mirror", JSONArray().also { array -> lslMarkers.forEach { array.put(JSONObject(it.toString())) } })
             .put("command_diary", JSONArray().also { array -> commandDiary.forEach { array.put(JSONObject(it.toString())) } })
+            .put("phone_response_summary", JSONObject(responseReview.summary.toString()))
+            .put("phone_response_ledger", JSONArray().also { array -> responseReview.ledgerRows.forEach { array.put(JSONObject(it.toString())) } })
+            .put("phone_topup_plan", JSONObject(responseReview.topupPlan.toString()))
             .put("summary", summaryLocked())
         val artifactFile = File(dir, if (complete) "completion.json" else "latest_events.json")
         packageManifestFile.writeText(packageManifestText, Charsets.UTF_8)
@@ -1826,6 +1832,8 @@ private class PhoneRunSession(
         artifactFile.writeText(payload.toString(2), Charsets.UTF_8)
         writePhoneEventsCsv(File(dir, "events.csv"), events)
         writePhoneEventsCsv(File(dir, "lsl_marker_mirror.csv"), lslMarkers)
+        writePhoneEventsCsv(responseLedgerFile, responseReview.ledgerRows)
+        topupPlanFile.writeText(responseReview.topupPlan.toString(2), Charsets.UTF_8)
         writeCommandDiaryJsonl(File(dir, "command_diary.jsonl"), commandDiary)
         File(dir, "participant_metadata.json").writeText(participantMetadata.toString(2), Charsets.UTF_8)
         File(dir, "haptic_capability.json").writeText(hapticMetadata.toString(2), Charsets.UTF_8)
@@ -1839,6 +1847,8 @@ private class PhoneRunSession(
             .put("artifact_dir", dir.absolutePath)
             .put("package_manifest_path", packageManifestFile.absolutePath)
             .put("reconstruction_artifact_path", reconstructionFile.absolutePath)
+            .put("response_ledger_path", responseLedgerFile.absolutePath)
+            .put("topup_plan_path", topupPlanFile.absolutePath)
     }
 
     private fun currentBlockElapsedMs(): Long =
