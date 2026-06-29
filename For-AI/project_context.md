@@ -61,6 +61,12 @@ Primary users are cognitive neuroscience and psychology researchers who need to 
   continuous_noise`. Segment 1 exposes this as a `Source mode` toggle with
   `Burst train` as the default; the renderer still owns SOFA/FABIAN/3DTI
   spatialization instead of baking binaural cues into the dry source.
+- Focus Mode `Test Audio` is a pre-run comfort/channel check using the same
+  Study 5 burst-train source standard: it plays the pink frontal preload
+  `assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Pink_frontal.wav`
+  through Output 1/2 at the current headphone gain. It should not be reverted
+  to the older spoken routing clip unless a separate speech-output check is
+  intentionally added.
 - Local custom study profiles live under ignored `local_data/dashboard_projects/0_study_project_registry/` and are catalogued alongside bundled preloads through the shared profile memory layer. The normalized catalogue is derived from preload inventory plus dashboard project manifests, not hand-edited. Catalogue entries record profile kind, display label, stable profile key, source template/profile, dashboard project id, asset roots, Segment 1-6 manifest paths, Segment 6 readiness, participant count/list, and missing/stale asset reasons so the HTML GUI and `PPSExperimentRunner.exe` make the same launchability decisions. Keep saved profiles and output folders conceptually separate: saved profiles are reusable local snapshots of experiment settings/assets, while output/acquisition folders are user-selected collection workspaces with diary, runner settings, bridge manifest, and a copied profile snapshot for execution. When copying project/profile trees, rebase paths and refresh downstream Segment 3-6 dependency hashes so the copy stays launchable after absolute paths change.
 - `src/peripersonal_space_toolkit/assets/` contains packaged app identity assets such as the PPS Toolkit SVG/PNG/ICO logo used by Qt windows, the dashboard desktop shortcut, and the local dashboard favicon.
 - `data/sample/` contains deidentified sample CSVs.

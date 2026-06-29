@@ -1622,14 +1622,38 @@ def test_focus_mode_output_test_buttons_use_standard_assets_and_current_gains(tm
 def test_runner_output_test_assets_match_expected_routes_and_levels():
     from peripersonal_space_toolkit import focus_app
 
-    audio, audio_sr = sf.read(focus_app.OUTPUT_TEST_AUDIO_PATH, dtype="float32")
+    audio, audio_sr = sf.read(focus_app.OUTPUT_TEST_AUDIO_PATH, dtype="float32", always_2d=True)
     audio_arr = audio if audio.ndim > 1 else audio[:, None]
     tactile, tactile_sr = sf.read(focus_app.OUTPUT_TEST_TACTILE_PATH, dtype="float32")
 
-    assert audio_sr == 22050
-    assert 1.5 <= audio_arr.shape[0] / audio_sr <= 3.0
-    assert 0.15 <= float(np.sqrt(np.mean(np.square(audio_arr)))) <= 0.22
-    assert float(np.max(np.abs(audio_arr))) <= 0.90
+    repo = Path(__file__).resolve().parents[1]
+    expected_rel = Path("assets") / "preloads" / focus_app.STUDY5_PROFILE_ID / "02_looming_stimuli" / "looming_Pink_frontal.wav"
+    assert focus_app.OUTPUT_TEST_AUDIO_PATH == repo / expected_rel
+    source_manifest = json.loads((repo / expected_rel.parent / "stimulus_sources.json").read_text(encoding="utf-8"))
+    source_entry = next(asset for asset in source_manifest["assets"] if asset["label"] == "Pink frontal")
+    assert Path(str(source_entry["path"])) == expected_rel
+    assert source_entry["source_profile"] == "dynaspace_gaussian_burst_train"
+    source_params = source_entry["source_profile_parameters"]
+    assert source_params["burst_count_mode"] == "duration_derived"
+    assert source_params["target_period_s"] == pytest.approx(0.095)
+    assert source_params["burst_duration_s"] == pytest.approx(0.030)
+
+    assert audio_sr == 44100
+    assert audio_arr.shape[1] == 2
+    assert audio_arr.shape[0] / audio_sr == pytest.approx(4.0)
+    assert float(np.max(np.abs(audio_arr))) <= 0.901
+    squared_mono = np.mean(np.square(audio_arr), axis=1)
+    window = max(1, int(round(0.005 * audio_sr)))
+    envelope = np.sqrt(np.convolve(squared_mono, np.ones(window, dtype=np.float32) / window, mode="same"))
+    active = envelope > max(1e-5, float(np.max(envelope)) * 0.15)
+    assert 0.03 <= float(np.mean(active)) <= 0.20
+    raw_starts = np.flatnonzero(np.diff(active.astype(np.int8), prepend=0) == 1)
+    burst_starts: list[int] = []
+    minimum_gap = int(round(0.040 * audio_sr))
+    for start in raw_starts:
+        if not burst_starts or int(start) - burst_starts[-1] >= minimum_gap:
+            burst_starts.append(int(start))
+    assert 25 <= len(burst_starts) <= 40
 
     assert tactile_sr == 44100
     assert tactile.ndim == 2

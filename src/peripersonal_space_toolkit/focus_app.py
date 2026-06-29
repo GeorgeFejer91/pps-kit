@@ -207,7 +207,14 @@ OUTPUT_12_VOLUME_PERCENT_KEY = "output_1_2_volume_percent"
 OUTPUT_34_VOLUME_PERCENT_KEY = "output_3_4_volume_percent"
 OUTPUT_CHANNEL_VOLUME_SETTINGS_KEY = "output_channel_volumes"
 OUTPUT_CHANNEL_VOLUME_SCHEMA = "pps-output-channel-volumes.v1"
-OUTPUT_TEST_AUDIO_PATH = repo_root() / "assets" / "breathing" / "runner_output_test_audio.wav"
+OUTPUT_TEST_AUDIO_PATH = (
+    repo_root()
+    / "assets"
+    / "preloads"
+    / STUDY5_PROFILE_ID
+    / "02_looming_stimuli"
+    / "looming_Pink_frontal.wav"
+)
 OUTPUT_TEST_TACTILE_PATH = repo_root() / "assets" / "tactile" / "runner_output_test_tactile.wav"
 TACTILE_CALIBRATION_SOURCE_PULSE_PATH = repo_root() / "assets" / "tactile" / "default_tactile_cue.wav"
 
@@ -5905,6 +5912,9 @@ class _ValidationFastAudioEngine:
                 )
                 for lead_time in lead_times:
                     progress_callback(lead_time)
+                    # Let the Qt drain timer process each synthetic cue before the next block replaces the timeline.
+                    time.sleep(0.005)
+                time.sleep(0.150)
         cursor = 0
         while cursor < frames_total and not self._stop_requested.is_set():
             frames = min(self.chunk_frames, frames_total - cursor)
@@ -7852,7 +7862,7 @@ class FocusModeWindow:
         output_test_controls.setSpacing(6)
         self.test_audio_button = q["QPushButton"]("Test Audio")
         self.test_audio_button.setObjectName("testAudioOutputButton")
-        self.test_audio_button.setToolTip("Play the standardized spoken test through Komplete outputs 1/2 using the current Output 1/2 level.")
+        self.test_audio_button.setToolTip("Play one Study 5 pink frontal looming burst-train stimulus through Komplete outputs 1/2 using the current Output 1/2 level.")
         self.test_audio_button.clicked.connect(lambda _checked=False: self._run_output_test("audio"))
         self.test_tactile_button = q["QPushButton"]("Test Tactile")
         self.test_tactile_button.setObjectName("testTactileOutputButton")
@@ -12496,6 +12506,11 @@ class FocusModeWindow:
             },
             create=True,
         )
+        if _env_flag("PPS_FOCUS_VALIDATION_REPORT") or _env_flag("PPS_FOCUS_VALIDATION_AUTO_CLICK"):
+            try:
+                _validation_capture_part_snapshot(self, label="part_complete")
+            except Exception:
+                pass
         self._maybe_open_analysis_review(result)
         self._shutdown_owned_audio_engine()
         if self.companion_service is None:

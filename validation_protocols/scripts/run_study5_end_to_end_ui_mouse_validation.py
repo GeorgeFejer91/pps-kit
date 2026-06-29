@@ -379,6 +379,9 @@ class FastUiAudioEngine:
                 )
                 for lead_time in lead_times:
                     progress_callback(lead_time)
+                    # Let the Qt drain timer process each synthetic cue before the next block replaces the timeline.
+                    time.sleep(0.005)
+                time.sleep(0.150)
         cursor = 0
         while cursor < frames_total and not self._stop_requested.is_set():
             frames = min(self.chunk_frames, frames_total - cursor)
