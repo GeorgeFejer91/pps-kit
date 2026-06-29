@@ -70,6 +70,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   attempt this materialization and record `not_needed`, `materialized`, or
   `failed` with a concrete reason. Automatic playback/analysis integration of
   the materialized top-up block remains pending.
+- Android phone-owned runs now attempt one materialized phone top-up phase
+  immediately after all standard package blocks complete. If missed tactile
+  trials have reusable building-block WAVs, the app materializes
+  `phone_topup_block.wav`, plays it through the same AudioTrack playback-head
+  cue scheduler, records `phone_topup_materialization`, top-up block start/cue/
+  tap/block-complete events, and writes the updated diary/artifacts before
+  final run completion. This is phone-runtime top-up playback, but final
+  rescue-response analysis/replacement remains pending.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only

@@ -1546,6 +1546,21 @@ private suspend fun runPhonePackage(
             client.awaitPostMobileEvents(session.runId, session.drainPayload())
         }
     }
+    val topupPlayed = runPhoneTopupIfNeeded(
+        context = context,
+        runPackage = runPackage,
+        session = session,
+        onStatus = onStatus,
+        onBlock = onBlock,
+        onProgress = onProgress,
+    )
+    if (topupPlayed) {
+        if (phoneOwnedSession) {
+            withContext(Dispatchers.IO) { session.writeLocalArtifact(context, runPackage, complete = false) }
+        } else {
+            client.awaitPostMobileEvents(session.runId, session.drainPayload())
+        }
+    }
     session.addRunComplete()
     session.recordCommand(
         command = "run_complete",
@@ -1559,6 +1574,78 @@ private suspend fun runPhonePackage(
         onStatus("Uploading")
         client.awaitPostMobileComplete(session.runId, session.drainPayload(complete = true))
     }
+}
+
+private suspend fun runPhoneTopupIfNeeded(
+    context: Context,
+    runPackage: MobileRunPackage,
+    session: PhoneRunSession,
+    onStatus: (String) -> Unit,
+    onBlock: (String) -> Unit,
+    onProgress: (String) -> Unit,
+): Boolean {
+    val review = session.responseReview(runPackage)
+    val materialization = withContext(Dispatchers.IO) {
+        runCatching {
+            materializePhoneTopupBlock(
+                runPackage = runPackage,
+                topupPlan = review.topupPlan,
+                outputDir = phoneRunDir(context, session.runId),
+                assetFileForId = { assetId -> runPackage.asset(assetId)?.let { mobileAssetFile(context, runPackage.packageId, it) } },
+            )
+        }
+    }
+    if (materialization.isFailure) {
+        val reason = materialization.exceptionOrNull()?.message ?: "phone top-up materialization failed"
+        val failure = failedPhoneTopupMaterialization(reason)
+        session.addTopupMaterialization(failure)
+        session.recordCommand("phone_topup_materialize", "rejected", reason = reason, payload = failure)
+        return false
+    }
+    val result = materialization.getOrNull()
+    if (result == null) {
+        val notNeeded = notNeededPhoneTopupMaterialization()
+        session.addTopupMaterialization(notNeeded)
+        session.recordCommand("phone_topup_materialize", "applied", payload = notNeeded)
+        return false
+    }
+
+    session.addTopupMaterialization(result.manifest)
+    session.recordCommand(
+        command = "phone_topup_materialize",
+        status = "applied",
+        payload = result.manifest,
+    )
+    onBlock(result.block.label)
+    onStatus("Running phone top-up")
+    val wavInfo = readPhonePcmWavInfo(result.wavFile)
+    session.startBlock(result.block, wavInfo)
+    playBlockAudioWithAudioTrack(
+        file = result.wavFile,
+        wavInfo = wavInfo,
+        cues = result.block.tactileCues,
+        onCue = { cue, delivery ->
+            withContext(Dispatchers.Main) {
+                vibratePhone(context, session.vibrationAmplitude())
+                session.addCue(result.block, cue, delivery)
+            }
+        },
+        onProgress = { elapsedMs, durationMs ->
+            withContext(Dispatchers.Main) {
+                onProgress("${formatMillisecondsShort(elapsedMs)} / ${formatMillisecondsShort(durationMs)}")
+            }
+        },
+    )
+    session.finishBlock(result.block)
+    session.recordCommand(
+        command = "phone_topup_complete",
+        status = "applied",
+        payload = JSONObject()
+            .put("block_id", result.block.blockId)
+            .put("trial_count", result.block.trialCount)
+            .put("wav_filename", result.wavFile.name),
+    )
+    return true
 }
 
 private class PhoneRunSession(
@@ -1686,6 +1773,15 @@ private class PhoneRunSession(
                 .put("actual_block_duration_ms", currentBlockElapsedMs()),
         )
         activeBlock = null
+    }
+
+    @Synchronized
+    fun responseReview(runPackage: MobileRunPackage): PhoneResponseReview =
+        buildPhoneResponseReview(runPackage, events.map { JSONObject(it.toString()) })
+
+    @Synchronized
+    fun addTopupMaterialization(materialization: JSONObject) {
+        addEventLocked("phone_topup_materialization", JSONObject(materialization.toString()))
     }
 
     @Synchronized
@@ -2109,6 +2205,7 @@ private fun phoneEventCode(eventType: String): Int =
         "block_complete" -> 11
         "vibration_cue" -> 21
         "tap" -> 30
+        "phone_topup_materialization" -> 35
         "operator_command" -> 41
         else -> 500
     }
