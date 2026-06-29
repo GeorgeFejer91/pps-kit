@@ -103,6 +103,18 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `lsl_runtime_status.json`; by default it verifies the current non-native
   marker-mirror status and command/ack schema, while `--expect-native-transport`
   becomes the strict gate after liblsl is actually linked.
+- Android phone-owned mode now exposes an explicit `Runner` / `Controller`
+  role toggle. Runner mode keeps the local phone playback/tap-response controls.
+  Controller mode hides local run controls and produces token-gated
+  `PPSCommandSignalsV1` command samples for `start_experiment`, `pause`,
+  `resume`, `continue_instruction`, and `request_snapshot` into
+  `phone_controller_command_outbox.jsonl`, with
+  `phone_controller_runtime_status.json` marking
+  `native_transport_available=false` and
+  `current_android_source_behavior=local_controller_outbox_only`. This gives
+  the future native LSL bridge a tested UI/outbox contract for another phone to
+  control a runner phone, but it still does not send live LSL samples until the
+  liblsl Android transport is wired.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only

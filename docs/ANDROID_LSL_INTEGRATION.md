@@ -10,11 +10,18 @@ transport. Current phone runs write `lsl_runtime_status.json` with
 
 - `PhoneLslProtocol.kt` mirrors the PC runner `PPSCommandSignalsV1` and
   `PPSCommandAcksV1` string-sample field order.
+- The phone-owned screen has explicit `Runner` and `Controller` roles. Runner
+  mode owns local package playback; Controller mode writes token-gated
+  `PPSCommandSignalsV1` samples to `phone_controller_command_outbox.jsonl` for
+  the future native bridge.
 - Commands are token-gated through `token` or `companion_token` in
   `payload_json` before any local handler runs.
 - Acks are shaped as applied/rejected command acknowledgements after the local
   handler returns.
 - Phone-owned run folders and ZIP exports include `lsl_runtime_status.json`.
+- Controller-mode outboxes include `phone_controller_runtime_status.json` with
+  `native_transport_available=false` and
+  `current_android_source_behavior=local_controller_outbox_only`.
 - PC-side phone uploads preserve `lsl_runtime_status.json` beside
   `lsl_marker_mirror.csv` and `command_diary.jsonl`.
 

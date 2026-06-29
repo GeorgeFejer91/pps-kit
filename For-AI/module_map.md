@@ -20,6 +20,12 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   deliberately `native_transport_available=false` /
   `native_liblsl_android_layer_not_present`; do not present local marker mirrors
   or protocol unit tests as live Android LSL broadcast evidence.
+- Android controller-role scaffolding lives in `PhoneControllerCommands.kt` and
+  the `Runner` / `Controller` toggle inside `PhoneRuntimeScreen`. Controller
+  mode writes token-gated command samples to
+  `phone_controller_command_outbox.jsonl` plus
+  `phone_controller_runtime_status.json`; it is a local outbox contract for the
+  future native bridge, not live command transport.
 - Provisional Woojer tactile-drive latency compensation: `tactile_latency.py`, consumed by `session_runner.py` during participant/top-up block WAV preparation.
 - Shared runner/dashboard profile memory and output-diary bridge: `runner_diary.py` now owns runner settings and diary helpers; future shared profile-catalogue code should live in a common Python seam consumed by both `dashboard_app.py` and `focus_app.py`, not separately in browser JS or runner UI code.
 - Event, timing, and output evidence contracts: `timing_events.py`, `session_events.py`, `output_evidence.py`, `topup.py`.
