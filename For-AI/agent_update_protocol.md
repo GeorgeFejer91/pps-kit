@@ -88,9 +88,14 @@ the emulator window to make the UI pass; smartphones have fixed viewports, and
 flicker/reflow from window manipulation invalidates the usability signal. Run
 ADB/uiautomator/button-press checks against the AVD's configured screen size,
 capture screenshots at that size, and treat scrolling, clipping, cramped
-controls, or hidden buttons as app/product findings to fix or document. It is
-acceptable to place the emulator window somewhere nonintrusive on the desktop,
-but the validation target is the phone viewport, not a stretched desktop pane.
+controls, or hidden buttons as app/product findings to fix or document. Do not
+run validation automation that moves or resizes Android emulator windows; manual
+desktop arrangement by the human operator is outside the validation signal, and
+the target remains the phone viewport, not a stretched desktop pane. Do not run
+persistent desktop placement loops against Android emulator windows.
+`windows/Set_Companion_Emulation_Layout.ps1` intentionally leaves emulator
+windows untouched and accepts old `-KeepForSeconds` arguments only as inert
+compatibility input.
 
 ## Preload Catalog Storage Rule
 

@@ -71,21 +71,10 @@ if ($null -eq $screen) {
 $area = $screen.WorkingArea
 $usableWidth = [Math]::Max(640, [int]$area.Width)
 $runnerWidth = [Math]::Max(560, [Math]::Min([int]$RunnerWidth, [int]($usableWidth * 0.48)))
-$emulatorWidth = [Math]::Max(640, $usableWidth - $runnerWidth - [Math]::Max(0, $Gap))
-if (($runnerWidth + $Gap + $emulatorWidth) -gt $usableWidth) {
-    $runnerWidth = [Math]::Max(520, $usableWidth - $Gap - $emulatorWidth)
-}
-
 $runnerRect = [pscustomobject]@{
     X      = [int]$area.X
     Y      = [int]$area.Y
     Width  = [int]$runnerWidth
-    Height = [int]$area.Height
-}
-$emulatorRect = [pscustomobject]@{
-    X      = [int]($area.X + $runnerWidth + $Gap)
-    Y      = [int]$area.Y
-    Width  = [int]($area.Width - $runnerWidth - $Gap)
     Height = [int]$area.Height
 }
 
@@ -143,20 +132,22 @@ function Move-MatchingWindow {
 function Move-CompanionWindows {
     return @(
         (Move-MatchingWindow -Role "runner" -TitlePattern $RunnerTitlePattern -Rect $runnerRect),
-        (Move-MatchingWindow -Role "android_emulator" -TitlePattern $EmulatorTitlePattern -Rect $emulatorRect)
+        [pscustomobject]@{
+            role   = "android_emulator"
+            moved  = $false
+            reason = "skipped_fixed_avd_viewport"
+            title_pattern = $EmulatorTitlePattern
+            note   = "Android emulator windows are never resized, widened, or repeatedly repositioned by this helper."
+        }
     )
 }
 
 $results = Move-CompanionWindows
 
 $keepResults = @()
-if ($KeepForSeconds -gt 0) {
-    $deadline = [DateTime]::UtcNow.AddSeconds($KeepForSeconds)
-    $sleepMs = [Math]::Max(100, $PollMilliseconds)
-    while ([DateTime]::UtcNow -lt $deadline) {
-        Start-Sleep -Milliseconds $sleepMs
-        $keepResults += ,(Move-CompanionWindows)
-    }
+$keepDisabledReason = ""
+if ($KeepForSeconds -gt 0 -or $PollMilliseconds -ne 500) {
+    $keepDisabledReason = "Persistent placement loops are disabled so validation cannot fight the Android emulator window."
 }
 
 [pscustomobject]@{
@@ -170,8 +161,9 @@ if ($KeepForSeconds -gt 0) {
         height = [int]$area.Height
     }
     runner_rect  = $runnerRect
-    emulator_rect = $emulatorRect
+    emulator_policy = "fixed_avd_viewport_not_moved_or_resized"
     windows      = $results
     keep_for_seconds = [int]$KeepForSeconds
+    keep_disabled_reason = $keepDisabledReason
     keep_results = $keepResults
 } | ConvertTo-Json -Depth 5

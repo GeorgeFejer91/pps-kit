@@ -90,7 +90,7 @@ INVENTORY_ITEMS: list[dict[str, Any]] = [
     {
         "path": "windows/Set_Companion_Emulation_Layout.ps1",
         "kind": "android_validation_support",
-        "role": "pins runner and Android emulator windows to the designated left-monitor validation screen",
+        "role": "places the runner on the designated validation screen while leaving the Android emulator fixed-size",
         "required": True,
         "source": "tracked",
     },

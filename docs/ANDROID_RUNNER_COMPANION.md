@@ -169,7 +169,7 @@ responses. It also suppresses tactile-cue cursor recentering: the runner logs
 the intended recenter position in the validation report but does not move the OS
 cursor.
 
-On this lab PC, companion emulator screenshots should stay on the left display
+On this lab PC, runner-side validation windows may be placed on the left display
 shown as Windows display `2`.
 Use:
 
@@ -178,11 +178,15 @@ Use:
 ```
 
 The script defaults to the leftmost Windows monitor, currently `DISPLAY2`
-(`-1920,5 1920x1032` working area), places `PPSExperimentRunner.exe` in the
-left slice, and gives the Android emulator the wider right slice for timeline
-resolution. Passive runs also enable the validation-only synthetic click
-shortcut `Ctrl+Alt+Shift+F12`, which logs one in-target runner response through
-the normal controller path without moving the PC mouse.
+(`-1920,5 1920x1032` working area), and places only
+`PPSExperimentRunner.exe` in the runner slice. It deliberately does not move,
+resize, widen, or poll the Android emulator window: emulator validation uses
+the AVD's fixed phone viewport, and clipping, scrolling burden, hidden controls,
+or cramped buttons are app findings. Older calls that pass `-KeepForSeconds`
+are accepted for compatibility but no longer start a persistent placement loop.
+Passive runs also enable the validation-only synthetic click shortcut
+`Ctrl+Alt+Shift+F12`, which logs one in-target runner response through the
+normal controller path without moving the PC mouse.
 
 For runner launches that happen before the placement script can see a window,
 use the validation placement environment as well:
