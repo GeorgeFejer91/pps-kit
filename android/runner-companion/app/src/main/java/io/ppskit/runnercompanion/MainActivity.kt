@@ -2695,6 +2695,7 @@ private class PhoneRunSession(
         val responseLedgerFile = File(dir, "phone_response_ledger.csv")
         val topupPlanFile = File(dir, "phone_topup_plan.json")
         val topupMaterializationFile = File(dir, "phone_topup_materialization.json")
+        val artifactFile = File(dir, if (complete) "completion.json" else "latest_events.json")
         val topupMaterialization = if (complete && phoneTopupSkippedByStopAfterBlock) {
             JSONObject()
                 .put("schema", "pps-android-phone-topup-materialization.v1")
@@ -2717,6 +2718,17 @@ private class PhoneRunSession(
                 .put("synthesis_strategy", "pcm_wav_concat_without_ffmpeg")
                 .put("reason", "session_in_progress")
         }
+        val summary = summaryLocked()
+        val catalogEntry = buildPhoneRunCatalogEntry(
+            runPackage = runPackage,
+            runId = runId,
+            runDir = dir,
+            artifactFile = artifactFile,
+            complete = complete,
+            participantMetadata = participantMetadata,
+            lslRuntimeStatus = lslRuntimeStatus,
+            summary = summary,
+        )
         val payload = JSONObject()
             .put("schema", if (complete) "pps-mobile-run-complete.v1" else "pps-mobile-run-events.v1")
             .put("status", if (complete) "complete" else "in_progress")
@@ -2752,6 +2764,12 @@ private class PhoneRunSession(
                     .put("filename", lslRuntimeStatusFile.name)
                     .put("schema", PHONE_LSL_RUNTIME_STATUS_SCHEMA),
             )
+            .put(
+                "phone_run_catalog_artifact",
+                JSONObject()
+                    .put("filename", "phone_run_catalog_entry.json")
+                    .put("schema", PHONE_RUN_CATALOG_ENTRY_SCHEMA),
+            )
             .put("lsl_runtime_status", JSONObject(lslRuntimeStatus.toString()))
             .put("events", eventsArray)
             .put("lsl_marker_mirror", JSONArray().also { array -> lslMarkers.forEach { array.put(JSONObject(it.toString())) } })
@@ -2760,8 +2778,8 @@ private class PhoneRunSession(
             .put("phone_response_ledger", JSONArray().also { array -> responseReview.ledgerRows.forEach { array.put(JSONObject(it.toString())) } })
             .put("phone_topup_plan", JSONObject(responseReview.topupPlan.toString()))
             .put("phone_topup_materialization", JSONObject(topupMaterialization.toString()))
-            .put("summary", summaryLocked())
-        val artifactFile = File(dir, if (complete) "completion.json" else "latest_events.json")
+            .put("phone_run_catalog_entry", JSONObject(catalogEntry.toString()))
+            .put("summary", JSONObject(summary.toString()))
         packageManifestFile.writeText(packageManifestText, Charsets.UTF_8)
         reconstructionFile.writeText(phoneRunReconstructionArtifact(runPackage, packageManifestSha256).toString(2), Charsets.UTF_8)
         lslRuntimeStatusFile.writeText(lslRuntimeStatus.toString(2), Charsets.UTF_8)
@@ -2774,6 +2792,7 @@ private class PhoneRunSession(
         writeCommandDiaryJsonl(File(dir, "command_diary.jsonl"), commandDiary)
         File(dir, "participant_metadata.json").writeText(participantMetadata.toString(2), Charsets.UTF_8)
         File(dir, "haptic_capability.json").writeText(hapticMetadata.toString(2), Charsets.UTF_8)
+        val catalogWrite = writePhoneRunCatalog(context.filesDir, dir, catalogEntry)
         if (complete) closeNativeLslTransportLocked()
         return JSONObject()
             .put("schema", if (complete) "pps-mobile-run-complete.v1" else "pps-mobile-run-events.v1")
@@ -2789,6 +2808,9 @@ private class PhoneRunSession(
             .put("response_ledger_path", responseLedgerFile.absolutePath)
             .put("topup_plan_path", topupPlanFile.absolutePath)
             .put("topup_materialization_path", topupMaterializationFile.absolutePath)
+            .put("catalog_entry_path", catalogWrite.optString("entry_path"))
+            .put("catalog_participant_runs_path", catalogWrite.optString("participant_runs_path"))
+            .put("catalog_index_path", catalogWrite.optString("index_path"))
     }
 
     private fun currentBlockElapsedMs(): Long =

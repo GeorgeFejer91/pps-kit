@@ -213,6 +213,16 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   default, sends Start/Pause/Resume/Snapshot/Stop-after-block through the same
   helper on a worker thread, and saves the PC-admin outbox/status under runner
   logs for that phone transfer.
+- Android phone-owned runs now maintain an app-private participant/session
+  catalog in addition to each run folder. Every partial and completed
+  `writeLocalArtifact` call writes `phone_run_catalog_entry.json` into the run
+  folder/ZIP and upserts the same run into
+  `phone_run_catalog/<participant>/runs.jsonl`, `latest_run.json`, and the
+  global `phone_run_catalog/index.json`. Catalog entries carry package id,
+  session/part-session ids, reconstruction schedule hash, artifact filenames,
+  command diary and marker counts, native LSL status booleans, completion
+  reason, and privacy-safe participant metadata summaries; they explicitly keep
+  demographics out of stream names.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only

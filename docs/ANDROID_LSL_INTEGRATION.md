@@ -48,6 +48,14 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   remaining scheduled phone blocks plus phone top-up, and closes the run with
   `completion_reason=stopped_after_block`.
 - Phone-owned run folders and ZIP exports include `lsl_runtime_status.json`.
+- Phone-owned run folders and ZIP exports also include
+  `phone_run_catalog_entry.json`. The app-private
+  `phone_run_catalog/<participant>/runs.jsonl` and
+  `phone_run_catalog/index.json` files keep a participant/run diary across
+  phone-owned sessions so completed and partial phone runs can be traced back
+  to package ids, part-session ids, reconstruction hashes, local artifact
+  filenames, command-diary counts, LSL status, and privacy-safe participant
+  metadata summaries.
 - Controller-mode outboxes include `phone_controller_runtime_status.json`.
   Default builds record `current_android_source_behavior=local_controller_outbox_only`;
   native builds record `native_lsl_controller_with_local_outbox` when the
