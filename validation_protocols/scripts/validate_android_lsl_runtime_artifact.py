@@ -50,6 +50,7 @@ from peripersonal_space_toolkit.timing_events import (  # noqa: E402
 ANDROID_LSL_RUNTIME_STATUS_SCHEMA = "pps-android-lsl-runtime-status.v1"
 ANDROID_PHONE_RUN_CATALOG_ENTRY_SCHEMA = "pps-android-phone-run-catalog-entry.v1"
 ANDROID_PHONE_RUN_CATALOG_ENTRY = "phone_run_catalog_entry.json"
+ANDROID_PHONE_RUN_RECONSTRUCTION_ARTIFACT = "reconstruction_contract.json"
 ANDROID_SCHEDULED_BLOCK_MATERIALIZATION_SCHEMA = "pps-android-phone-scheduled-block-materialization.v1"
 ANDROID_CONTROLLER_RUNTIME_STATUS_SCHEMA = "pps-android-controller-runtime-status.v1"
 ANDROID_CONTROLLER_COMMAND_ROW_SCHEMA = "pps-android-controller-command-row.v1"
@@ -101,6 +102,7 @@ def validate_runtime_status(
     completion: dict[str, Any] | None = None,
     catalog_entry: dict[str, Any] | None = None,
     package_manifest: dict[str, Any] | None = None,
+    reconstruction_artifact: dict[str, Any] | None = None,
     materialization_manifests: list[dict[str, Any]] | None = None,
     materialized_wav_hashes: dict[str, str] | None = None,
     expect_native_transport: bool = False,
@@ -161,6 +163,16 @@ def validate_runtime_status(
         else:
             warnings.append("completion/latest-events artifact does not embed lsl_runtime_status")
 
+    _validate_asset_strategy_consistency(
+        status=status,
+        completion=completion,
+        catalog_entry=catalog_entry,
+        package_manifest=package_manifest,
+        reconstruction_artifact=reconstruction_artifact,
+        failures=failures,
+        warnings=warnings,
+        expect_lightweight_materializations=expect_lightweight_materializations,
+    )
     _validate_phone_run_catalog_entry(status, catalog_entry, failures, warnings, expect_run_catalog=expect_run_catalog)
     _validate_lightweight_materializations(
         completion=completion,
@@ -407,6 +419,7 @@ def validate_run_artifact(
         completion=loaded.get("completion"),
         catalog_entry=loaded.get("catalog_entry"),
         package_manifest=loaded.get("package_manifest"),
+        reconstruction_artifact=loaded.get("reconstruction_artifact"),
         materialization_manifests=loaded.get("materialization_manifests") or [],
         materialized_wav_hashes=loaded.get("materialized_wav_hashes") or {},
         expect_native_transport=expect_native_transport,
@@ -486,10 +499,10 @@ def _load_status_inputs(path: Path) -> dict[str, Any]:
     data = _read_json(path)
     if data.get("schema") == ANDROID_LSL_RUNTIME_STATUS_SCHEMA:
         catalog_path = path.with_name(ANDROID_PHONE_RUN_CATALOG_ENTRY)
+        sidecars = _load_phone_run_sidecars_from_dir(path.parent)
         completion_path = path.with_name("completion.json")
         if not completion_path.is_file():
             completion_path = path.with_name("latest_events.json")
-        sidecars = _load_phone_run_sidecars_from_dir(path.parent)
         return {
             "kind": "runner",
             "status": data,
@@ -560,6 +573,7 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
             ]
             catalog_members = [name for name in archive.namelist() if name.endswith(ANDROID_PHONE_RUN_CATALOG_ENTRY)]
             package_manifest_members = [name for name in archive.namelist() if name.endswith("run_package_manifest.json")]
+            reconstruction_members = [name for name in archive.namelist() if name.endswith(ANDROID_PHONE_RUN_RECONSTRUCTION_ARTIFACT)]
             materialization_members = [
                 name
                 for name in archive.namelist()
@@ -586,6 +600,11 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 package_manifest_name = sorted(package_manifest_members)[0]
                 archive.extract(package_manifest_name, temp_root)
                 package_manifest = _read_json(temp_root / package_manifest_name)
+            reconstruction_artifact = None
+            if reconstruction_members:
+                reconstruction_name = sorted(reconstruction_members)[0]
+                archive.extract(reconstruction_name, temp_root)
+                reconstruction_artifact = _read_json(temp_root / reconstruction_name)
             materialization_manifests: list[dict[str, Any]] = []
             for member in sorted(materialization_members):
                 archive.extract(member, temp_root)
@@ -600,6 +619,7 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 "completion": completion,
                 "catalog_entry": catalog_entry,
                 "package_manifest": package_manifest,
+                "reconstruction_artifact": reconstruction_artifact,
                 "materialization_manifests": materialization_manifests,
                 "materialized_wav_hashes": materialized_wav_hashes,
             }
@@ -607,6 +627,7 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
 
 def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
     package_manifest_path = path / "run_package_manifest.json"
+    reconstruction_artifact_path = path / ANDROID_PHONE_RUN_RECONSTRUCTION_ARTIFACT
     materialized_dir = path / "materialized_blocks"
     materialization_manifests: list[dict[str, Any]] = []
     materialized_wav_hashes: dict[str, str] = {}
@@ -617,6 +638,7 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
             materialized_wav_hashes[wav_path.name] = _sha256_file(wav_path)
     return {
         "package_manifest": _read_json(package_manifest_path) if package_manifest_path.is_file() else None,
+        "reconstruction_artifact": _read_json(reconstruction_artifact_path) if reconstruction_artifact_path.is_file() else None,
         "materialization_manifests": materialization_manifests,
         "materialized_wav_hashes": materialized_wav_hashes,
     }
@@ -667,6 +689,87 @@ def _validate_command_protocol(protocol: dict[str, Any], failures: list[str], *,
         failures.append("ack channel order does not match PC runner protocol")
     if protocol.get(token_field) is not True:
         failures.append("command protocol must require the pairing token")
+
+
+def _validate_asset_strategy_consistency(
+    *,
+    status: dict[str, Any],
+    completion: dict[str, Any] | None,
+    catalog_entry: dict[str, Any] | None,
+    package_manifest: dict[str, Any] | None,
+    reconstruction_artifact: dict[str, Any] | None,
+    failures: list[str],
+    warnings: list[str],
+    expect_lightweight_materializations: bool,
+) -> None:
+    package_summary = completion.get("package") if isinstance(completion, dict) and isinstance(completion.get("package"), dict) else {}
+    manifest_reconstruction = (
+        package_manifest.get("reconstruction")
+        if isinstance(package_manifest, dict) and isinstance(package_manifest.get("reconstruction"), dict)
+        else {}
+    )
+    artifact_reconstruction = (
+        reconstruction_artifact.get("reconstruction")
+        if isinstance(reconstruction_artifact, dict) and isinstance(reconstruction_artifact.get("reconstruction"), dict)
+        else {}
+    )
+    catalog_reconstruction = (
+        catalog_entry.get("reconstruction")
+        if isinstance(catalog_entry, dict) and isinstance(catalog_entry.get("reconstruction"), dict)
+        else {}
+    )
+    sources = {
+        "lsl_runtime_status.asset_strategy": status.get("asset_strategy"),
+        "completion.package.asset_strategy": package_summary.get("asset_strategy"),
+        "run_package_manifest.asset_strategy": package_manifest.get("asset_strategy") if isinstance(package_manifest, dict) else "",
+        "run_package_manifest.reconstruction.package_asset_strategy": manifest_reconstruction.get("package_asset_strategy"),
+        "reconstruction_contract.asset_strategy": reconstruction_artifact.get("asset_strategy") if isinstance(reconstruction_artifact, dict) else "",
+        "reconstruction_contract.reconstruction.package_asset_strategy": artifact_reconstruction.get("package_asset_strategy"),
+        "phone_run_catalog_entry.asset_strategy": catalog_entry.get("asset_strategy") if isinstance(catalog_entry, dict) else "",
+        "phone_run_catalog_entry.reconstruction.package_asset_strategy": catalog_reconstruction.get("package_asset_strategy"),
+    }
+    present = {name: str(value).strip() for name, value in sources.items() if str(value or "").strip()}
+    if not present:
+        return
+    unique = sorted(set(present.values()))
+    if len(unique) > 1:
+        observed = ", ".join(f"{name}={value!r}" for name, value in sorted(present.items()))
+        failures.append(f"asset_strategy differs across phone run artifacts: {observed}")
+        return
+
+    strategy = unique[0]
+    if expect_lightweight_materializations:
+        if strategy != "trial_building_blocks_only":
+            failures.append("lightweight materialization evidence must use asset_strategy='trial_building_blocks_only'")
+        for required in (
+            "lsl_runtime_status.asset_strategy",
+            "run_package_manifest.asset_strategy",
+            "run_package_manifest.reconstruction.package_asset_strategy",
+        ):
+            if not str(sources.get(required) or "").strip():
+                failures.append(f"{required} is missing from lightweight phone-run artifact")
+        if completion and not str(sources.get("completion.package.asset_strategy") or "").strip():
+            failures.append("completion.package.asset_strategy is missing from lightweight phone-run artifact")
+        if reconstruction_artifact:
+            for required in (
+                "reconstruction_contract.asset_strategy",
+                "reconstruction_contract.reconstruction.package_asset_strategy",
+            ):
+                if not str(sources.get(required) or "").strip():
+                    failures.append(f"{required} is missing from lightweight phone-run artifact")
+        if catalog_entry:
+            for required in (
+                "phone_run_catalog_entry.asset_strategy",
+                "phone_run_catalog_entry.reconstruction.package_asset_strategy",
+            ):
+                if not str(sources.get(required) or "").strip():
+                    failures.append(f"{required} is missing from lightweight phone-run artifact")
+    elif (
+        isinstance(package_manifest, dict)
+        and str(package_manifest.get("asset_strategy") or "").strip()
+        and not str(status.get("asset_strategy") or "").strip()
+    ):
+        warnings.append("run package declares asset_strategy but lsl_runtime_status does not mirror it")
 
 
 def _validate_phone_run_catalog_entry(

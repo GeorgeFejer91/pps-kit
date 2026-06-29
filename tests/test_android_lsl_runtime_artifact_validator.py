@@ -133,6 +133,36 @@ def test_android_lsl_runtime_validator_accepts_lightweight_materialization_evide
     assert result.failures == []
 
 
+def test_android_lsl_runtime_validator_rejects_asset_strategy_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    manifest_path = run_dir / "run_package_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["asset_strategy"] = "prepared_block_wavs_plus_trial_building_blocks"
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir)
+
+    assert result.ok is False
+    assert "asset_strategy differs across phone run artifacts" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_requires_status_strategy_for_strict_lightweight_runs(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    status_path = run_dir / "lsl_runtime_status.json"
+    status = json.loads(status_path.read_text(encoding="utf-8"))
+    status.pop("asset_strategy")
+    status_path.write_text(json.dumps(status), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_lightweight_materializations=True)
+
+    assert result.ok is False
+    assert "lsl_runtime_status.asset_strategy is missing" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_rejects_missing_lightweight_materialization_event(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -263,6 +293,7 @@ def test_android_lsl_runtime_validator_can_require_pc_admin_acks(tmp_path: Path)
 
 def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event: bool = True) -> None:
     status = _status(native=False)
+    status["asset_strategy"] = "trial_building_blocks_only"
     wav_bytes = b"RIFF....WAVE"
     wav_sha256 = hashlib.sha256(wav_bytes).hexdigest()
     materialization = {
@@ -312,6 +343,19 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
         ],
         "reconstruction": {"package_asset_strategy": "trial_building_blocks_only"},
     }
+    reconstruction_artifact = {
+        "schema": "pps-mobile-phone-run-reconstruction.v1",
+        "package_id": "pkg-001",
+        "participant_id": "P001",
+        "asset_strategy": "trial_building_blocks_only",
+        "reconstruction": {
+            "package_asset_strategy": "trial_building_blocks_only",
+            "schedule_hash": "schedulehash",
+            "building_block_count": 1,
+            "block_count": 1,
+            "trial_count": 1,
+        },
+    }
     events = [{"type": "run_start", "package_id": "pkg-001"}]
     if include_materialization_event:
         events.append({"type": "phone_scheduled_block_materialization", **materialization})
@@ -319,7 +363,17 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
     materialized_dir.mkdir()
     (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
     (run_dir / "run_package_manifest.json").write_text(json.dumps(package_manifest), encoding="utf-8")
-    (run_dir / "completion.json").write_text(json.dumps({"lsl_runtime_status": status, "events": events}), encoding="utf-8")
+    (run_dir / "reconstruction_contract.json").write_text(json.dumps(reconstruction_artifact), encoding="utf-8")
+    (run_dir / "completion.json").write_text(
+        json.dumps(
+            {
+                "lsl_runtime_status": status,
+                "package": {"asset_strategy": "trial_building_blocks_only"},
+                "events": events,
+            }
+        ),
+        encoding="utf-8",
+    )
     (materialized_dir / "phone_materialized_block_01.json").write_text(json.dumps(materialization), encoding="utf-8")
     (materialized_dir / "phone_materialized_block_01.wav").write_bytes(wav_bytes)
 

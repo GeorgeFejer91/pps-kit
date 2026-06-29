@@ -88,7 +88,7 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   phone-run `phone_run_catalog_entry.json` when present or when
   `--expect-run-catalog` is set, lightweight scheduled-block materialization
   events/manifests/WAV hashes when `--expect-lightweight-materializations` is
-  set,
+  set, package `asset_strategy` consistency across phone-run sidecars,
   Controller-mode `phone_controller_runtime_status.json` /
   `phone_controller_command_outbox.jsonl`, PC-admin
   `pc_android_lsl_admin_status.json` /

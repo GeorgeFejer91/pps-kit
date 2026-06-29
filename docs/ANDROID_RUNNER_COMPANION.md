@@ -150,7 +150,8 @@ is present or any scheduled block cannot be reconstructed from
 The validator checks the Segment 0-6 to phone-runtime hierarchy, schedule hash,
 block/order consistency, reusable building-block references, asset availability,
 AudioTrack playback-head timing contract, privacy-safe Android LSL stream names,
-and required phone command set.
+required phone command set, and the phone-run `asset_strategy` consistency
+across status, manifest, reconstruction, completion, and catalog artifacts.
 
 Phone-owned local artifacts now include `participant_metadata.json`,
 `haptic_capability.json`, `events.csv`, `lsl_marker_mirror.csv`,

@@ -115,7 +115,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `lsl_runtime_status.json`, native LSL stream description metadata, and
   `phone_run_catalog_entry.json`. This keeps building-block-only
   `trial_building_blocks_only` runs distinguishable from prepared-block WAV
-  compatibility runs during offline reconstruction.
+  compatibility runs during offline reconstruction. The Android run artifact
+  validator now checks that strategy for consistency across the status,
+  manifest, reconstruction, completion, and catalog sidecars, and strict
+  lightweight-materialization validation requires it in the status and package
+  manifest contract.
 - Android phone-owned runs now derive a phone-local tactile response ledger
   using the shared 100-1300 ms post-tactile response window and write
   `phone_response_ledger.csv` plus `phone_topup_plan.json` into the local run
