@@ -25,7 +25,14 @@ from peripersonal_space_toolkit.output_layout import (
     output_runner_logs_dir,
 )
 from peripersonal_space_toolkit.session_runner import RUN_PACKAGE_SCHEMA, SessionCaptureOptions, load_run_package
-from peripersonal_space_toolkit.tactile_calibration.schema import CALIBRATION_SCHEMA, PROTOCOL_NAME
+from peripersonal_space_toolkit.tactile_calibration.schema import (
+    CALIBRATION_SCHEMA,
+    CONFIRMATION_REQUIRED_CLEAN_CATCHES,
+    CONFIRMATION_REQUIRED_CONSECUTIVE_HITS,
+    PROTOCOL_NAME,
+    VALID_RESPONSE_END_MS,
+    VALID_RESPONSE_START_MS,
+)
 
 
 def _write_minimal_session_manifest(
@@ -1396,11 +1403,16 @@ def test_focus_mode_calibrate_tactile_button_click_saves_and_applies_value(tmp_p
                     "protocol": PROTOCOL_NAME,
                     "accepted": True,
                     "status": "accepted",
-                    "message": "Accepted adaptive tactile threshold at Output 3/4 level 0.35% from 6 staircase reversals.",
+                    "message": "Accepted confirmed tactile task level at Output 3/4 0.36%.",
                     "threshold_method": "two_down_one_up_transformed_adaptive_staircase_with_catches",
-                    "final_output_34_percent": 0.35,
+                    "final_output_34_percent": 0.36,
                     "detection_threshold_output_34_percent": 0.35,
-                    "recommended_output_34_percent": 0.35,
+                    "recommended_output_34_percent": 0.36,
+                    "confirmation_level_output_34_percent": 0.36,
+                    "timing": {
+                        "valid_response_start_ms": VALID_RESPONSE_START_MS,
+                        "valid_response_end_ms": VALID_RESPONSE_END_MS,
+                    },
                     "adaptive_staircase": {
                         "target_detection_rate": 0.7071067811865476,
                         "down_after_hits": 2,
@@ -1408,7 +1420,13 @@ def test_focus_mode_calibrate_tactile_button_click_saves_and_applies_value(tmp_p
                         "stop_reversals": 6,
                         "reversals_to_average": 4,
                         "minimum_catch_trials": 3,
-                        "max_false_alarms": 0,
+                        "max_false_alarms": 3,
+                    },
+                    "confirmation_criteria": {
+                        "required_consecutive_hits": CONFIRMATION_REQUIRED_CONSECUTIVE_HITS,
+                        "required_clean_catches": CONFIRMATION_REQUIRED_CLEAN_CATCHES,
+                        "level_increment_percent": 0.01,
+                        "max_false_alarms": 3,
                     },
                     "staircase_summary": {
                         "target_detection_rate": 0.7071067811865476,
@@ -1423,15 +1441,29 @@ def test_focus_mode_calibrate_tactile_button_click_saves_and_applies_value(tmp_p
                         "hit_rate": 0.7,
                         "false_alarm_rate": 0.0,
                     },
+                    "confirmation_summary": {
+                        "hits": 10,
+                        "misses": 1,
+                        "signal_trials": 11,
+                        "false_alarms": 0,
+                        "catch_trials": 5,
+                        "clean_catches": 5,
+                        "consecutive_hits": 10,
+                        "hit_rate": 10 / 11,
+                        "false_alarm_rate": 0.0,
+                        "confirmed_output_34_percent": 0.36,
+                        "passed": True,
+                    },
                     "staircase_hit_rate": 0.7,
-                    "validation_hit_rate": 0.7,
+                    "confirmation_hit_rate": 10 / 11,
+                    "validation_hit_rate": 10 / 11,
                     "validation_false_alarm_rate": 0.0,
                 },
                 "trials": [
                     {
                         "trial_index": 1,
                         "phase": "staircase",
-                            "level_percent": 0.35,
+                        "level_percent": 0.35,
                         "staircase_index": 5,
                         "staircase_direction": "down",
                         "is_catch": False,
@@ -1471,32 +1503,93 @@ def test_focus_mode_calibrate_tactile_button_click_saves_and_applies_value(tmp_p
     window._drain()
 
     assert not window._tactile_calibration_active
-    assert window.output_34_volume_percent == pytest.approx(0.35)
+    assert window.output_34_volume_percent == pytest.approx(0.36)
     assert window.tactile_calibration_monitor_dialog is not None
     assert window.tactile_calibration_monitor_dialog.isVisible()
     assert window.tactile_calibration_monitor_dialog.close_button.isEnabled()
-    assert "Calibration successful" in window.tactile_calibration_monitor_dialog.status_label.text()
-    assert "0.350%" in window.tactile_calibration_monitor_dialog.status_label.text()
+    assert window.tactile_calibration_monitor_dialog.close_button.text() == "Continue"
+    assert "Calibration yielded a value" in window.tactile_calibration_monitor_dialog.status_label.text()
+    assert "0.360%" in window.tactile_calibration_monitor_dialog.status_label.text()
+    assert "Final hits: 10/10" in window.tactile_calibration_monitor_dialog.confirmation_hits_label.text()
+    assert "Clean catches: 5/5" in window.tactile_calibration_monitor_dialog.confirmation_catches_label.text()
     screenshot = tmp_path / "tactile_calibration_monitor.png"
     assert window.tactile_calibration_monitor_dialog.grab().save(str(screenshot))
     image = Image.open(screenshot).convert("RGB")
     assert max(ImageStat.Stat(image).stddev) > 0.0
     deadline = time.time() + 3.0
-    while time.time() < deadline and window.tactile_calibration_monitor_dialog is not None:
+    while time.time() < deadline:
         app.processEvents()
         window._drain()
         time.sleep(0.01)
+    app.processEvents()
+    assert window.tactile_calibration_monitor_dialog is not None
+    QTest.mouseClick(window.tactile_calibration_monitor_dialog.close_button, q["Qt"].MouseButton.LeftButton)
     app.processEvents()
     assert window.tactile_calibration_monitor_dialog is None
     assert window.mode_tabs.currentIndex() == window.experiment_control_tab_index
     assert window.start_button.isEnabled()
     latest = load_latest_calibration(tmp_path, "P001")
     assert latest is not None
-    assert latest["final_output_34_percent"] == pytest.approx(0.35)
-    assert latest["recommended_output_34_percent"] == pytest.approx(0.35)
+    assert latest["final_output_34_percent"] == pytest.approx(0.36)
+    assert latest["recommended_output_34_percent"] == pytest.approx(0.36)
+    assert latest["detection_threshold_output_34_percent"] == pytest.approx(0.35)
     assert "tactile calibration successful" in window.event_label.text()
     assert "Ready to start" in window.event_label.text()
     window.dialog.close()
+
+
+def test_tactile_calibration_monitor_catch_false_alarm_shows_red_warning(monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication, QDialog
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI smoke dependencies
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    owner_dialog = QDialog()
+    returned: list[bool] = []
+    owner = SimpleNamespace(
+        dialog=owner_dialog,
+        _record_tactile_calibration_target_click=lambda _source: None,
+        _abort_tactile_calibration=lambda: None,
+        _return_from_successful_tactile_calibration=lambda: returned.append(True),
+    )
+    monitor = focus_app._create_tactile_calibration_monitor_dialog(q, owner, "P001")
+    monitor.show()
+    app.processEvents()
+    monitor.update_progress(
+        {
+            "trial_index": 1,
+            "phase": "confirmation",
+            "level_percent": 0.35,
+            "is_catch": True,
+            "max_calibration_events": 120,
+        }
+    )
+    monitor.finish_trial(
+        {
+            "trial_index": 1,
+            "phase": "confirmation",
+            "level_percent": 0.35,
+            "is_catch": True,
+            "response_present": True,
+            "valid_response": True,
+            "trial_outcome": "false_alarm",
+            "warning": "Only press when you feel the tactile pulse.",
+            "confirmation_consecutive_hits": 3,
+            "confirmation_clean_catches": 0,
+        }
+    )
+    app.processEvents()
+
+    assert monitor.warning_label.isVisible()
+    assert monitor.warning_label.text() == "Only press when you feel the tactile pulse."
+    assert "#b3261e" in monitor.target_panel.styleSheet()
+    assert "Clean catches: 0/5" in monitor.confirmation_catches_label.text()
+    monitor.close()
+    owner_dialog.close()
 
 
 def test_focus_mode_output_volume_sliders_persist_and_apply_to_engine(tmp_path: Path, monkeypatch):

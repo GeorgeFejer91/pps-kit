@@ -2,29 +2,22 @@
 
 ## Current State
 
-- Source changes are implemented in `src/peripersonal_space_toolkit/focus_app.py`.
-- Successful tactile calibration now shows `Calibration successful`, displays the adopted Output 3/4 value, updates the final reversal count, adopts the value via `_set_output_volume("output_3_4", final_percent)`, then automatically returns to the Experiment Control tab and focuses the Start button when setup is already submitted.
-- GUI coverage is in `tests/test_focus_app.py::test_focus_mode_calibrate_tactile_button_click_saves_and_applies_value`.
-- Validation already run successfully:
-  - `python -m compileall -q src/peripersonal_space_toolkit/focus_app.py src/peripersonal_space_toolkit/tactile_calibration`
-  - `python -m pytest -q tests/test_tactile_calibration.py tests/test_focus_app.py`
+- Source changes are implemented in `src/peripersonal_space_toolkit/tactile_calibration/`, `src/peripersonal_space_toolkit/focus_app.py`, and the matching tests.
+- The active tactile calibration protocol keeps the 2-down/1-up staircase as the detection-threshold estimator, then runs a final confirmation phase before saving a participant preset.
+- The saved staircase estimate is `detection_threshold_output_34_percent`; the confirmed task preset is `recommended_output_34_percent`, with `final_output_34_percent` retained as the legacy-compatible alias.
+- Confirmation accepts only after 10 consecutive tactile hits and 5 clean confirmation catch trials using the shared 100-1300 ms tactile response window.
+- Confirmation misses reset the hit streak, raise the level by +0.01% Output 3/4, and continue until the 0.5% cap. A miss at the cap fails with `failed_confirmation_at_max`.
+- Confirmation catch false alarms show the red warning `Only press when you feel the tactile pulse.`, reset only the clean-catch streak, do not change intensity, and fail on the third cumulative false alarm.
+- Successful calibration no longer auto-returns to the Experiment Control tab. The monitor displays the saved-value summary and enables `Continue`, which returns to the PPS runner UI.
 
-## Local Packaged Runner Completed
+## Validation Notes
 
-The local packaged runner was rebuilt after closing the stale `PPSExperimentRunner.exe` process that locked `dist/PPSExperimentRunner`.
+- Focused validation for this implementation should include:
+  - `.\.venv\Scripts\python.exe -m pytest -q tests\test_tactile_calibration.py`
+  - `.\.venv\Scripts\python.exe -m pytest -q tests\test_focus_app.py -k "tactile_calibration"`
+  - Packaged-runner visual validation after rebuilding `dist/PPSExperimentRunner/PPSExperimentRunner.exe`.
+- On this PC, visible runner validation may pin the PC runner window to Display 2 with `PPS_FOCUS_VALIDATION_DISPLAY=display2` or an exact runner window rectangle. Do not resize, widen, or repeatedly reposition the Android emulator to make companion UI checks pass; Android emulator validation must use the AVD's fixed phone viewport and treat clipping, scroll burden, or hidden controls as app findings.
 
-Completed commands:
+## Historical Supersession
 
-- `powershell -ExecutionPolicy Bypass -File .\windows\Build_Experiment_Runner_Exe.ps1`
-- `python validation_protocols/scripts/run_study5_end_to_end_ui_mouse_validation.py --packaged-standalone-app --output-dir artifacts/validation_runs/tactile_calibration_success_return_packaged_runner_20260629 --participant-id P901 --timeout-s 240`
-
-Result:
-
-- Rebuilt local exe: `dist/PPSExperimentRunner/PPSExperimentRunner.exe`
-- Rebuilt exe timestamp on this PC: `2026-06-29 16:09:08`
-- Packaged-runner validation: passed, no failures, exit code 0.
-- Validation report: `artifacts/validation_runs/tactile_calibration_success_return_packaged_runner_20260629/packaged_standalone_runner_background_mouse_validation.json`
-
-## Build Blocker Seen
-
-Two rebuild attempts failed before the user interruption because a running `PPSExperimentRunner.exe` locked files under `dist/PPSExperimentRunner/_internal`, especially `charset_normalizer/cd.cp312-win_amd64.pyd`. After the interruption, the lingering `Build_Experiment_Runner_Exe.ps1`, PyInstaller Python processes, and `PPSExperimentRunner.exe` were stopped.
+The earlier same-day handoff documented the previous success-return behavior (`Calibration successful` plus automatic return). That behavior is superseded by the confirmation counters, red catch-warning state, success summary, and explicit `Continue` button described above.

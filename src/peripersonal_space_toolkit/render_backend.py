@@ -47,10 +47,11 @@ from .loudness import (
     relative_loudness_envelope,
     rms_dbfs_to_estimated_spl,
 )
+from .runtime_paths import repo_root
 from .subprocess_utils import windows_no_console_kwargs
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = repo_root()
 THIRD_PARTY_3DTI_DIR = REPO_ROOT / "third_party" / "3dti_AudioToolkit"
 THREEDTI_REPOSITORY = "https://github.com/3DTune-In/3dti_AudioToolkit"
 THREEDTI_COMMIT = "6bfee08705675308a8c348b4c3a4d582586d2f99"

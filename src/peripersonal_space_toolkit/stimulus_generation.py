@@ -28,6 +28,8 @@ import numpy as np
 import scipy.signal as signal
 import soundfile as sf
 
+from .runtime_paths import repo_root, writable_root
+
 try:
     from pydub import AudioSegment
     HAS_PYDUB = True
@@ -42,11 +44,12 @@ _BREATHING_CACHE = {}
 # GLOBAL CONFIGURATION - CHANGE THESE DIRECTORIES
 # ========================================================================
 
-# Repository root when running from an editable checkout.
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+# Readable resource root for source checkouts and frozen PyInstaller builds.
+PROJECT_ROOT = repo_root()
+WRITABLE_PROJECT_ROOT = writable_root()
 
 # ROOT DIRECTORY: Base directory for generated stimulus artifacts.
-ROOT_DIRECTORY = PROJECT_ROOT / "artifacts" / "stimuli"
+ROOT_DIRECTORY = WRITABLE_PROJECT_ROOT / "artifacts" / "stimuli"
 
 # INPUT DIRECTORY: Where the required input files are located
 # This folder should contain:

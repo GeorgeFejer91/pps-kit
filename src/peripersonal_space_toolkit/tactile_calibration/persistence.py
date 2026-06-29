@@ -59,9 +59,12 @@ def _latest_payload(report: dict[str, Any], *, report_path: Path, trials_path: P
     recommended_percent = report.get("recommended_output_34_percent", report.get("final_output_34_percent", ""))
     threshold_percent = report.get("detection_threshold_output_34_percent", recommended_percent)
     staircase_summary = dict(report.get("staircase_summary") or {})
-    legacy_source = report.get("confirmation_summary") or ({} if staircase_summary else report.get("validation_summary"))
+    confirmation_summary = dict(report.get("confirmation_summary") or {})
+    validation_summary = dict(report.get("validation_summary") or {})
+    legacy_source = confirmation_summary or ({} if staircase_summary else validation_summary)
     legacy_summary = dict(legacy_source or {})
-    summary = staircase_summary or legacy_summary
+    catch_summary = confirmation_summary or validation_summary or staircase_summary
+    criteria = dict(report.get("confirmation_criteria") or {})
     return {
         "schema": LATEST_CALIBRATION_SCHEMA,
         "participant_id": str(report.get("participant_id") or ""),
@@ -91,11 +94,20 @@ def _latest_payload(report: dict[str, Any], *, report_path: Path, trials_path: P
             "staircase_false_alarm_rate",
             staircase_summary.get("false_alarm_rate", ""),
         ),
+        "staircase_catch_trials": staircase_summary.get("catch_trials", ""),
+        "staircase_catch_false_alarms": staircase_summary.get("false_alarms", ""),
         "adaptive_staircase": dict(report.get("adaptive_staircase") or {}),
         "confirmation_hits": legacy_summary.get("hits", ""),
+        "confirmation_misses": legacy_summary.get("misses", ""),
+        "confirmation_consecutive_hits": confirmation_summary.get("consecutive_hits", ""),
+        "confirmation_clean_catches": confirmation_summary.get("clean_catches", ""),
+        "confirmation_catch_trials": confirmation_summary.get("catch_trials", ""),
+        "confirmation_catch_false_alarms": confirmation_summary.get("false_alarms", ""),
+        "confirmation_required_consecutive_hits": criteria.get("required_consecutive_hits", ""),
+        "confirmation_required_clean_catches": criteria.get("required_clean_catches", ""),
         "confirmation_signal_trials": legacy_summary.get("signal_trials", ""),
-        "catch_false_alarms": summary.get("false_alarms", ""),
-        "catch_trials": summary.get("catch_trials", ""),
+        "catch_false_alarms": catch_summary.get("false_alarms", ""),
+        "catch_trials": catch_summary.get("catch_trials", ""),
         "confirmation_hit_rate": report.get("confirmation_hit_rate", report.get("validation_hit_rate", "")),
         "confirmation_false_alarm_rate": report.get(
             "confirmation_false_alarm_rate",

@@ -42,6 +42,10 @@ if pyside_spec and pyside_spec.submodule_search_locations:
             datas.append((str(plugin_dir), f"PySide6/plugins/{plugin_name}"))
 
 for source, target in (
+    (
+        root / "assets" / "0. Head-Related Impulse Response (HRIR) model",
+        "assets/0. Head-Related Impulse Response (HRIR) model",
+    ),
     (root / "assets" / "preloads", "assets/preloads"),
     (root / "assets" / "breathing", "assets/breathing"),
     (root / "assets" / "click", "assets/click"),

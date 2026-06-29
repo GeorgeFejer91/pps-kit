@@ -27,6 +27,10 @@ datas = collect_data_files(
 )
 
 for source, target in (
+    (
+        root / "assets" / "0. Head-Related Impulse Response (HRIR) model",
+        "assets/0. Head-Related Impulse Response (HRIR) model",
+    ),
     (root / "assets" / "preloads", "assets/preloads"),
     (root / "assets" / "breathing", "assets/breathing"),
     (root / "assets" / "click", "assets/click"),

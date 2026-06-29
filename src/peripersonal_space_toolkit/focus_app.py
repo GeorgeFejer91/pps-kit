@@ -181,9 +181,13 @@ from .profile_memory import (
 from .runtime_paths import repo_root
 from .tactile_calibration import (
     CALIBRATION_SCHEMA,
+    CONFIRMATION_REQUIRED_CLEAN_CATCHES,
+    CONFIRMATION_REQUIRED_CONSECUTIVE_HITS,
     PROTOCOL_NAME as TACTILE_CALIBRATION_PROTOCOL_NAME,
     TACTILE_OUTPUT_34_MAX_PERCENT,
     TactileCalibrationRunner,
+    VALID_RESPONSE_END_MS,
+    VALID_RESPONSE_START_MS,
     load_latest_calibration,
     save_calibration_attempt,
 )
@@ -494,8 +498,6 @@ def _default_focus_capture_options() -> SessionCaptureOptions:
 OUTPUT_VOLUME_SLIDER_SCALE = 1000
 OUTPUT_VOLUME_PERCENT_DECIMALS = 3
 OUTPUT_VOLUME_PERCENT_STEP = 0.001
-TACTILE_CALIBRATION_SUCCESS_RETURN_MS = 1400
-
 
 def _coerce_volume_percent(value: Any, *, default: float = 100.0, maximum: float = 100.0) -> float:
     try:
@@ -2252,6 +2254,7 @@ def _create_tactile_calibration_monitor_dialog(q: dict[str, Any], owner: Any, pa
             self.setObjectName("tactileCalibrationMonitor")
             self.events: list[dict[str, Any]] = []
             self.current_row_by_trial: dict[int, int] = {}
+            self._accepted_assay = False
             self.resize(760, 620)
 
             root = q["QVBoxLayout"](self)
@@ -2263,8 +2266,9 @@ def _create_tactile_calibration_monitor_dialog(q: dict[str, Any], owner: Any, pa
             self.status_label.setWordWrap(True)
             root.addWidget(self.status_label)
 
-            target_panel = q["QFrame"]()
-            target_layout = q["QVBoxLayout"](target_panel)
+            self.target_panel = q["QFrame"]()
+            self.target_panel.setObjectName("tactileCalibrationTargetPanel")
+            target_layout = q["QVBoxLayout"](self.target_panel)
             target_layout.setContentsMargins(8, 8, 8, 8)
             target_layout.setSpacing(8)
             target_layout.addWidget(_subtitle(q, "Participant Response Target"))
@@ -2273,7 +2277,13 @@ def _create_tactile_calibration_monitor_dialog(q: dict[str, Any], owner: Any, pa
             self.target_button.setEnabled(True)
             self.target_button.clicked.connect(lambda _checked=False: owner._record_tactile_calibration_target_click("calibration_monitor_target"))
             target_layout.addWidget(self.target_button, 0, q["Qt"].AlignmentFlag.AlignHCenter)
-            root.addWidget(target_panel)
+            self.warning_label = q["QLabel"]("")
+            self.warning_label.setObjectName("tactileCalibrationWarning")
+            self.warning_label.setWordWrap(True)
+            self.warning_label.setStyleSheet("color: #991b1b; font-weight: 700;")
+            self.warning_label.setVisible(False)
+            target_layout.addWidget(self.warning_label)
+            root.addWidget(self.target_panel)
 
             metrics = q["QFrame"]()
             metrics_layout = q["QGridLayout"](metrics)
@@ -2284,7 +2294,20 @@ def _create_tactile_calibration_monitor_dialog(q: dict[str, Any], owner: Any, pa
             self.window_label = q["QLabel"]("Response window: --")
             self.reversal_label = q["QLabel"]("Reversals: 0")
             self.response_label = q["QLabel"]("Last response: --")
-            for label in (self.intensity_label, self.window_label, self.reversal_label, self.response_label):
+            self.confirmation_hits_label = q["QLabel"](
+                f"Final hits: 0/{CONFIRMATION_REQUIRED_CONSECUTIVE_HITS}"
+            )
+            self.confirmation_catches_label = q["QLabel"](
+                f"Clean catches: 0/{CONFIRMATION_REQUIRED_CLEAN_CATCHES}"
+            )
+            for label in (
+                self.intensity_label,
+                self.window_label,
+                self.reversal_label,
+                self.response_label,
+                self.confirmation_hits_label,
+                self.confirmation_catches_label,
+            ):
                 label.setObjectName("metricValue")
                 label.setWordWrap(True)
             self.intensity_bar = q["QProgressBar"]()
@@ -2295,7 +2318,9 @@ def _create_tactile_calibration_monitor_dialog(q: dict[str, Any], owner: Any, pa
             metrics_layout.addWidget(self.window_label, 0, 1)
             metrics_layout.addWidget(self.reversal_label, 1, 0)
             metrics_layout.addWidget(self.response_label, 1, 1)
-            metrics_layout.addWidget(self.intensity_bar, 2, 0, 1, 2)
+            metrics_layout.addWidget(self.confirmation_hits_label, 2, 0)
+            metrics_layout.addWidget(self.confirmation_catches_label, 2, 1)
+            metrics_layout.addWidget(self.intensity_bar, 3, 0, 1, 2)
             root.addWidget(metrics)
 
             self.timeline = _create_tactile_calibration_timeline_widget(q)
@@ -2316,16 +2341,55 @@ def _create_tactile_calibration_monitor_dialog(q: dict[str, Any], owner: Any, pa
             self.abort_button.clicked.connect(lambda _checked=False: owner._abort_tactile_calibration())
             self.close_button = q["QPushButton"]("Close")
             self.close_button.setEnabled(False)
-            self.close_button.clicked.connect(self.accept)
+            self.close_button.clicked.connect(self._close_or_continue)
             buttons.addWidget(self.abort_button)
             buttons.addWidget(self.close_button)
             root.addLayout(buttons)
+
+        def _close_or_continue(self) -> None:
+            if self._accepted_assay:
+                owner._return_from_successful_tactile_calibration()
+            else:
+                self.accept()
+
+        def _set_catch_warning(self, active: bool, text: str = "") -> None:
+            if active:
+                self.target_panel.setStyleSheet(
+                    "QFrame#tactileCalibrationTargetPanel { "
+                    "border: 2px solid #b3261e; border-radius: 6px; background: #fff1f2; }"
+                )
+                self.warning_label.setText(text or "Only press when you feel the tactile pulse.")
+                self.warning_label.setVisible(True)
+            else:
+                self.target_panel.setStyleSheet("")
+                self.warning_label.setText("")
+                self.warning_label.setVisible(False)
+
+        def update_confirmation(self, payload: dict[str, Any]) -> None:
+            def _count(key: str) -> int:
+                try:
+                    return max(0, int(payload.get(key) or 0))
+                except Exception:
+                    return 0
+
+            hits = _count("confirmation_consecutive_hits")
+            catches = _count("confirmation_clean_catches")
+            self.confirmation_hits_label.setText(
+                f"Final hits: {hits}/{CONFIRMATION_REQUIRED_CONSECUTIVE_HITS}"
+            )
+            self.confirmation_catches_label.setText(
+                f"Clean catches: {catches}/{CONFIRMATION_REQUIRED_CLEAN_CATCHES}"
+            )
+            warning = str(payload.get("warning") or "").strip()
+            if warning:
+                self._set_catch_warning(True, warning)
 
         def update_progress(self, payload: dict[str, Any]) -> None:
             trial_index = int(payload.get("trial_index") or 0)
             level = payload.get("level_percent", "")
             is_catch = bool(payload.get("is_catch"))
             message = str(payload.get("message") or "Tactile calibration running")
+            self._set_catch_warning(False)
             self.status_label.setText(message)
             self.intensity_label.setText(f"Intensity: {_format_tactile_percent(level)} Output 3/4")
             try:
@@ -2333,9 +2397,13 @@ def _create_tactile_calibration_monitor_dialog(q: dict[str, Any], owner: Any, pa
             except Exception:
                 self.intensity_bar.setValue(0)
             self.intensity_bar.setFormat(_format_tactile_percent(level))
-            self.window_label.setText("Response window: 100-1500 ms after pulse onset")
+            self.window_label.setText(
+                f"Response window: {VALID_RESPONSE_START_MS:.0f}-{VALID_RESPONSE_END_MS:.0f} ms after pulse onset"
+            )
             reversal = payload.get("reversal_index", "")
             self.reversal_label.setText(f"Reversals: {reversal if str(reversal) else 0}")
+            if str(payload.get("phase") or "") == "confirmation":
+                self.update_confirmation(payload)
             if trial_index:
                 event_record = {
                     "trial_index": trial_index,
@@ -2382,6 +2450,11 @@ def _create_tactile_calibration_monitor_dialog(q: dict[str, Any], owner: Any, pa
         def finish_trial(self, trial: dict[str, Any]) -> None:
             trial_index = int(trial.get("trial_index") or 0)
             outcome = str(trial.get("trial_outcome") or "")
+            if str(trial.get("phase") or "") == "confirmation":
+                self.update_confirmation(trial)
+            warning = str(trial.get("warning") or "").strip()
+            if warning or outcome == "false_alarm":
+                self._set_catch_warning(True, warning or "Only press when you feel the tactile pulse.")
             row = self.current_row_by_trial.get(trial_index)
             if row is not None:
                 self.table.setItem(row, 5, q["QTableWidgetItem"](outcome))
@@ -2390,17 +2463,22 @@ def _create_tactile_calibration_monitor_dialog(q: dict[str, Any], owner: Any, pa
             for event_item in self.events:
                 if int(event_item.get("trial_index") or 0) == trial_index:
                     event_item.update({"current": False, "trial_outcome": outcome})
-            self.timeline.set_events(self.events, max_events=60)
+            self.timeline.set_events(self.events, max_events=int(getattr(self.timeline, "max_events", 60)))
 
         def finish_assay(self, report: dict[str, Any]) -> None:
             accepted = bool(report.get("accepted"))
+            self._accepted_assay = accepted
             final_value = report.get("recommended_output_34_percent", report.get("final_output_34_percent", ""))
             final_text = _format_tactile_percent(final_value)
             summary = dict(report.get("staircase_summary") or {})
+            confirmation = dict(report.get("confirmation_summary") or {})
             reversals = summary.get("reversals", "")
             if accepted:
+                self._set_catch_warning(False)
                 self.status_label.setText(
-                    f"Calibration successful. Output 3/4 set to {final_text}. Returning to Experiment Runner."
+                    f"Calibration yielded a value of {final_text} Output 3/4.\n"
+                    "This value has been saved as part of the data log and implemented as the preset for this participant.\n"
+                    "You may now continue with the experiment."
                 )
                 if final_text:
                     self.intensity_label.setText(f"Accepted threshold: {final_text} Output 3/4")
@@ -2413,7 +2491,15 @@ def _create_tactile_calibration_monitor_dialog(q: dict[str, Any], owner: Any, pa
                 self.status_label.setText(str(report.get("message") or "Calibration failed"))
             if str(reversals):
                 self.reversal_label.setText(f"Reversals: {reversals}")
+            if confirmation:
+                self.update_confirmation(
+                    {
+                        "confirmation_consecutive_hits": confirmation.get("consecutive_hits", ""),
+                        "confirmation_clean_catches": confirmation.get("clean_catches", ""),
+                    }
+                )
             self.abort_button.setEnabled(False)
+            self.close_button.setText("Continue" if accepted else "Close")
             self.close_button.setEnabled(True)
 
     return TactileCalibrationMonitorDialog()
@@ -8709,7 +8795,16 @@ class FocusModeWindow:
             "staircase_misses",
             "staircase_hit_rate",
             "staircase_false_alarm_rate",
+            "staircase_catch_trials",
+            "staircase_catch_false_alarms",
             "confirmation_hits",
+            "confirmation_misses",
+            "confirmation_consecutive_hits",
+            "confirmation_clean_catches",
+            "confirmation_catch_trials",
+            "confirmation_catch_false_alarms",
+            "confirmation_required_consecutive_hits",
+            "confirmation_required_clean_catches",
             "confirmation_signal_trials",
             "catch_false_alarms",
             "catch_trials",
@@ -11452,6 +11547,18 @@ class FocusModeWindow:
         message = str(payload.get("message") or "Adaptive tactile threshold assay running")
         self.event_label.setText(message)
         monitor = getattr(self, "tactile_calibration_monitor_dialog", None)
+        if str(payload.get("ui_event") or "") == "confirmation_update":
+            if "next_level_percent" in payload:
+                try:
+                    self._set_output_volume("output_3_4", float(payload.get("next_level_percent")), persist=False)
+                except Exception:
+                    pass
+            if monitor is not None:
+                try:
+                    monitor.update_confirmation(payload)
+                except Exception:
+                    pass
+            return
         if str(payload.get("ui_event") or "") == "trial_complete":
             if monitor is not None:
                 try:
@@ -11505,11 +11612,6 @@ class FocusModeWindow:
                 monitor.finish_assay(report)
             except Exception:
                 pass
-        if accepted:
-            self.q["QTimer"].singleShot(
-                TACTILE_CALIBRATION_SUCCESS_RETURN_MS,
-                self._return_from_successful_tactile_calibration,
-            )
         self._refresh_participant_ledger_summary()
         _append_output_diary_event(
             "tactile_calibration_finished",
