@@ -504,6 +504,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   dashboard bakes. The full committed preload catalog was force-rebuilt so
   bundled generated-noise WAVs, hashes, QC rows, and source manifests carry the
   current source-profile standard.
+- Segment 1 generated-source bakes now pass long-path-safe `\\?\` filesystem
+  `Path` objects into the renderer after explicitly ensuring the ingredient
+  folder exists. This protects deep dashboard project folders, including pytest
+  temp roots and installed repo-shaped workspaces, from Windows MAX_PATH
+  failures when writing or reading `stimulus_design.bake_*.json`.
 
 ## Active Implementation Backlog
 

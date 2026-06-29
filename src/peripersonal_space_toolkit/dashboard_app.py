@@ -1232,10 +1232,11 @@ class DashboardController:
         def _bake() -> dict[str, Any]:
             _ensure_dir(ingredient_dir)
             design_path = ingredient_dir / f"stimulus_design.bake_{_slug(label)}.json"
+            _ensure_dir(design_path.parent)
             _save_design_file(bake_design, design_path)
             result = render_backend.render_design_with_3dti(
-                design_path,
-                ingredient_dir,
+                Path(_filesystem_path(design_path)),
+                Path(_filesystem_path(ingredient_dir)),
                 seed=seed,
                 engine="python-sofa-reference",
                 include_tactile=False,
