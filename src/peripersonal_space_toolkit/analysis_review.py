@@ -121,6 +121,7 @@ class AnalysisReviewData:
     condition_lens_model_comparison_rows: list[dict[str, Any]] = field(default_factory=list)
     condition_lens_triage_summary: dict[str, Any] = field(default_factory=dict)
     recording_quality_gate: dict[str, Any] = field(default_factory=dict)
+    assumption_checks: dict[str, Any] = field(default_factory=dict)
     summary_rows: list[dict[str, Any]] = field(default_factory=list)
     participant_trial_rows: list[dict[str, Any]] = field(default_factory=list)
     response_rows: list[dict[str, Any]] = field(default_factory=list)
@@ -197,6 +198,7 @@ def load_analysis_review_data(
     condition_comparison_path = _output_path(outputs, "condition_lens_model_fit_comparison", root, "*_condition_lens_model_fit_comparison.csv")
     condition_summary_path = _output_path(outputs, "condition_lens_triage_summary", root, "condition_lens_triage_summary.json")
     quality_gate_path = _output_path(outputs, "recording_quality_gate", root, "recording_quality_gate.v1.json")
+    assumption_checks_path = _output_path(outputs, "basic_assumption_checks", root, "basic_assumption_checks.v1.json")
     summary_path = _output_path(outputs, "summary", root, "*_summary.csv")
     participant_trials_path = _output_path(outputs, "participant_trials", root, "*_trials.csv")
     responses_path = _output_path(outputs, "responses", root, "*_responses.csv")
@@ -214,6 +216,7 @@ def load_analysis_review_data(
     data.condition_lens_model_comparison_rows = _read_optional_csv_rows(condition_comparison_path)
     data.condition_lens_triage_summary = _read_json(condition_summary_path)
     data.recording_quality_gate = _read_json(quality_gate_path)
+    data.assumption_checks = _read_json(assumption_checks_path)
     data.summary_rows = _read_csv_rows(summary_path, data.warnings, "summary")
     data.participant_trial_rows = _read_optional_csv_rows(participant_trials_path)
     data.response_rows = _read_optional_csv_rows(responses_path)
@@ -233,6 +236,7 @@ def load_analysis_review_data(
             "condition lens model comparison": condition_comparison_path,
             "condition lens triage": condition_summary_path,
             "recording quality gate": quality_gate_path,
+            "basic assumption checks": assumption_checks_path,
             "summary": summary_path,
             "participant trials": participant_trials_path,
             "responses": responses_path,

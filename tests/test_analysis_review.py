@@ -55,6 +55,89 @@ def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
         writer.writerows(rows)
 
 
+def _basic_assumption_rows(
+    *,
+    baseline_kind: str = "flat",
+    audio_kind: str = "flat",
+    soas: tuple[int, ...] = (100, 200, 400, 800),
+    baseline_repeats: int = 8,
+    audio_repeats: int = 10,
+    nuisance_imbalance: bool = False,
+) -> list[dict[str, object]]:
+    rows: list[dict[str, object]] = []
+    trial_index = 0
+    for repeat in range(baseline_repeats):
+        for soa_index, soa in enumerate(soas):
+            trial_index += 1
+            if baseline_kind == "sloped":
+                rt = 470.0 - soa_index * 35.0 + (repeat % 3 - 1) * 1.0
+            else:
+                rt = 410.0 + (repeat % 3 - 1) * 2.0
+            rows.append(
+                _basic_assumption_row(
+                    trial_index,
+                    "Baseline",
+                    soa,
+                    rt,
+                    repeat=repeat,
+                    soa_index=soa_index,
+                    nuisance_imbalance=nuisance_imbalance,
+                )
+            )
+    for repeat in range(audio_repeats):
+        for soa_index, soa in enumerate(soas):
+            trial_index += 1
+            if audio_kind == "pps":
+                rt = 480.0 - soa_index * 55.0 + (repeat % 4 - 1.5) * 3.0
+            elif audio_kind == "opposite":
+                rt = 300.0 + soa_index * 35.0 + (repeat % 4 - 1.5) * 3.0
+            else:
+                rt = 390.0 + (repeat % 4 - 1.5) * 3.0
+            rows.append(
+                _basic_assumption_row(
+                    trial_index,
+                    "Audio-Tactile",
+                    soa,
+                    rt,
+                    repeat=repeat,
+                    soa_index=soa_index,
+                    nuisance_imbalance=nuisance_imbalance,
+                )
+            )
+    return rows
+
+
+def _basic_assumption_row(
+    trial_index: int,
+    trial_type: str,
+    soa: int,
+    rt: float,
+    *,
+    repeat: int,
+    soa_index: int,
+    nuisance_imbalance: bool,
+) -> dict[str, object]:
+    if nuisance_imbalance:
+        part_number = 1 if soa_index == 0 else 2
+        phase = "Inhale" if soa_index != 1 else "Exhale"
+        noise = "pink" if repeat % 2 else "white"
+    else:
+        part_number = 1
+        phase = "Inhale"
+        noise = "pink"
+    return {
+        "trial_uid": f"{trial_type[:1]}{trial_index:03d}",
+        "trial_type": trial_type,
+        "hit": True,
+        "soa_ms": soa,
+        "rt_ms": rt,
+        "part_number": part_number,
+        "respiratory_phase": phase,
+        "noise_type": noise,
+        "primary_analysis_included": True,
+    }
+
+
 def test_analysis_review_loads_existing_outputs_and_predicts_model_curves(tmp_path: Path):
     analysis_dir = tmp_path / "analysis"
     curve_path = analysis_dir / "S001_pps_curve_points.csv"
@@ -231,7 +314,9 @@ def test_session_analysis_writes_condition_lens_outputs_and_quality_gate(tmp_pat
     assert outputs["condition_lens_model_fit_comparison"].exists()
     assert outputs["condition_lens_triage_summary"].exists()
     assert outputs["recording_quality_gate"].exists()
+    assert outputs["basic_assumption_checks"].exists()
     assert result.recording_quality_gate["status"] == "PASS"
+    assert result.basic_assumption_checks["schema"] == "pps-basic-assumption-checks.v1"
     assert {row["analysis_lens"] for row in result.condition_lens_curve_rows}.issuperset({"two_by_two", "part", "state", "overall"})
     two_by_two_scopes = {row["display_scope"] for row in result.condition_lens_curve_rows if row["analysis_lens"] == "two_by_two"}
     assert two_by_two_scopes == {"Part 1 / Inhale", "Part 1 / Exhale", "Part 2 / Inhale", "Part 2 / Exhale"}
@@ -241,6 +326,7 @@ def test_session_analysis_writes_condition_lens_outputs_and_quality_gate(tmp_pat
     status, reason = recording_quality_status(data)
     assert status == "PASS"
     assert "No serious exclusion criteria" in reason
+    assert data.assumption_checks["schema"] == "pps-basic-assumption-checks.v1"
     assert default_condition_model(data) in {"linear", "logarithmic_decay", "sigmoid"}
     observed = condition_lens_observed_series(data, CONDITION_LENS_TWO_BY_TWO)
     assert [series["label"] for series in observed] == ["Part 1 / Inhale", "Part 1 / Exhale", "Part 2 / Inhale", "Part 2 / Exhale"]
@@ -248,6 +334,108 @@ def test_session_analysis_writes_condition_lens_outputs_and_quality_gate(tmp_pat
     assert predictions
     assert {row["label"] for row in condition_lens_button_rows(data)} == {"2 x 2", "Part 1 | Part 2", "Inhale | Exhale"}
     assert {row["model"] for row in model_button_rows(data)} == {"sigmoid", "logarithmic_decay", "linear"}
+
+
+def test_basic_assumption_baseline_green_when_no_significant_proximity_trend():
+    result = analyze_analysis_ready_trials(_basic_assumption_rows(audio_kind="flat"))
+    baseline = result.basic_assumption_checks["baseline_assumption"]
+
+    assert baseline["status"] == "PASS"
+    assert baseline["reason_code"] == "baseline_proximity_not_significant"
+    assert baseline["coverage"]["n"] == 32
+    assert baseline["coverage"]["distinct_soa_count"] == 4
+    assert baseline["p_two_sided"] >= 0.05
+
+
+def test_basic_assumption_baseline_red_when_baseline_varies_by_proximity():
+    result = analyze_analysis_ready_trials(_basic_assumption_rows(baseline_kind="sloped", audio_kind="flat"))
+    baseline = result.basic_assumption_checks["baseline_assumption"]
+
+    assert baseline["status"] == "FAIL"
+    assert baseline["reason_code"] == "baseline_proximity_significant"
+    assert baseline["beta"] < 0
+    assert baseline["p_two_sided"] < 0.05
+
+
+def test_basic_assumption_pps_green_when_audio_tactile_speeds_up_more_than_baseline():
+    result = analyze_analysis_ready_trials(_basic_assumption_rows(audio_kind="pps"))
+    pps = result.basic_assumption_checks["peripersonal_space_assumption"]
+
+    assert pps["status"] == "PASS"
+    assert pps["reason_code"] == "interaction_predicted_significant"
+    assert pps["interaction_beta"] < 0
+    assert pps["p_one_sided_negative"] < 0.05
+    assert pps["pps_far_to_near_gain_ms"] > 0
+
+
+def test_basic_assumption_pps_red_when_flat_opposite_or_undercovered():
+    flat = analyze_analysis_ready_trials(_basic_assumption_rows(audio_kind="flat")).basic_assumption_checks["peripersonal_space_assumption"]
+    opposite = analyze_analysis_ready_trials(_basic_assumption_rows(audio_kind="opposite")).basic_assumption_checks["peripersonal_space_assumption"]
+    undercovered = analyze_analysis_ready_trials(
+        _basic_assumption_rows(audio_kind="pps", soas=(100, 200), baseline_repeats=3, audio_repeats=4)
+    ).basic_assumption_checks["peripersonal_space_assumption"]
+
+    assert flat["status"] == "FAIL"
+    assert flat["reason_code"] == "interaction_not_significant"
+    assert opposite["status"] == "FAIL"
+    assert opposite["reason_code"] == "interaction_sign_opposite_or_zero"
+    assert undercovered["status"] == "FAIL"
+    assert undercovered["reason_code"] in {"audio_tactile_valid_rt_count_low", "audio_tactile_distinct_soa_count_low"}
+
+
+def test_basic_assumption_handles_unequal_repetitions_and_missing_middle_soas():
+    rows: list[dict[str, object]] = []
+    trial_index = 0
+    soas = (100, 400, 1200)
+    for repeat, soa in enumerate([100, 100, 100, 400, 1200, 1200, 1200, 1200]):
+        trial_index += 1
+        rows.append(
+            _basic_assumption_row(
+                trial_index,
+                "Baseline",
+                soa,
+                410.0 + (repeat % 2) * 2.0,
+                repeat=repeat,
+                soa_index=soas.index(soa),
+                nuisance_imbalance=True,
+            )
+        )
+    for repeat, soa in enumerate([100] * 4 + [400] * 5 + [1200] * 6):
+        trial_index += 1
+        soa_index = soas.index(soa)
+        rows.append(
+            _basic_assumption_row(
+                trial_index,
+                "Audio-Tactile",
+                soa,
+                480.0 - soa_index * 70.0 + (repeat % 3 - 1) * 3.0,
+                repeat=repeat,
+                soa_index=soa_index,
+                nuisance_imbalance=True,
+            )
+        )
+
+    checks = analyze_analysis_ready_trials(rows).basic_assumption_checks
+    pps = checks["peripersonal_space_assumption"]
+
+    assert checks["proximity_coding"]["method"] == "centered_soa_rank"
+    assert checks["proximity_coding"]["levels"] == [100.0, 400.0, 1200.0]
+    assert pps["status"] == "PASS"
+    assert pps["coverage"]["audio_tactile"]["counts_by_soa_ms"] == {"100": 4, "400": 5, "1200": 6}
+    assert pps["coverage"]["baseline"]["counts_by_soa_ms"] == {"100": 3, "400": 1, "1200": 4}
+    assert set(pps["dropped_nuisance_terms"]).issuperset({"noise_type", "respiratory_phase"})
+
+
+def test_basic_assumption_nuisance_imbalance_only_changes_nuisance_adjusted_estimation():
+    balanced = analyze_analysis_ready_trials(_basic_assumption_rows(audio_kind="pps")).basic_assumption_checks["peripersonal_space_assumption"]
+    imbalanced = analyze_analysis_ready_trials(
+        _basic_assumption_rows(audio_kind="pps", nuisance_imbalance=True)
+    ).basic_assumption_checks["peripersonal_space_assumption"]
+
+    assert balanced["status"] == "PASS"
+    assert imbalanced["status"] == "PASS"
+    assert imbalanced["interaction_beta"] == pytest.approx(balanced["interaction_beta"], abs=1e-12)
+    assert set(imbalanced["included_nuisance_terms"]).issuperset({"part_number", "respiratory_phase", "noise_type"})
 
 
 def test_session_analysis_quality_gate_fails_serious_exclusion_criteria():

@@ -16,6 +16,7 @@ from typing import Any, Iterable, Mapping
 
 import numpy as np
 from scipy.optimize import OptimizeWarning, curve_fit
+from scipy import stats as scipy_stats
 
 from .response_policy import TACTILE_RESPONSE_MAX_RT_S, TACTILE_RESPONSE_MIN_RT_S
 
@@ -26,6 +27,7 @@ AGGREGATION_POOL_PARTS = "pooled_parts"
 DATA_BEHAVIOR_SCHEMA = "pps-exploratory-data-behavior.v1"
 CONDITION_LENS_SCHEMA = "pps-condition-lens-triage.v1"
 RECORDING_QUALITY_GATE_SCHEMA = "pps-recording-quality-gate.v1"
+BASIC_ASSUMPTION_CHECKS_SCHEMA = "pps-basic-assumption-checks.v1"
 CONDITION_LENS_TWO_BY_TWO = "two_by_two"
 CONDITION_LENS_PART = "part"
 CONDITION_LENS_STATE = "state"
@@ -83,6 +85,7 @@ class SessionAnalysisResult:
     condition_lens_model_comparison_rows: list[dict[str, Any]] = field(default_factory=list)
     condition_lens_triage_summary: dict[str, Any] = field(default_factory=dict)
     recording_quality_gate: dict[str, Any] = field(default_factory=dict)
+    basic_assumption_checks: dict[str, Any] = field(default_factory=dict)
     data_behavior_rows: list[dict[str, Any]] = field(default_factory=list)
     exploratory_quality_summary: dict[str, Any] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
@@ -146,6 +149,7 @@ def _analyze_response_rows(
         result.condition_lens_triage_summary,
     ) = _build_condition_lens_outputs(analysis_rows)
     result.recording_quality_gate = _build_recording_quality_gate(result, event_rows)
+    result.basic_assumption_checks = _build_basic_assumption_checks(analysis_rows)
     result.data_behavior_rows, result.exploratory_quality_summary = _build_data_behavior_review(result, event_rows)
     return result
 
@@ -167,6 +171,7 @@ def write_analysis_csvs(result: SessionAnalysisResult, output_dir: str | Path, s
         "condition_lens_model_fit_comparison": output_dir / f"{stem}_condition_lens_model_fit_comparison.csv",
         "condition_lens_triage_summary": output_dir / "condition_lens_triage_summary.json",
         "recording_quality_gate": output_dir / "recording_quality_gate.v1.json",
+        "basic_assumption_checks": output_dir / "basic_assumption_checks.v1.json",
         "data_behavior_by_scope": output_dir / "data_behavior_by_scope.csv",
         "exploratory_quality_summary": output_dir / "exploratory_quality_summary.json",
     }
@@ -183,6 +188,7 @@ def write_analysis_csvs(result: SessionAnalysisResult, output_dir: str | Path, s
     _write_rows(outputs["condition_lens_model_fit_comparison"], result.condition_lens_model_comparison_rows)
     _write_json(outputs["condition_lens_triage_summary"], result.condition_lens_triage_summary)
     _write_json(outputs["recording_quality_gate"], result.recording_quality_gate)
+    _write_json(outputs["basic_assumption_checks"], result.basic_assumption_checks)
     _write_rows(outputs["data_behavior_by_scope"], result.data_behavior_rows)
     _write_json(outputs["exploratory_quality_summary"], result.exploratory_quality_summary)
     return outputs
@@ -1345,6 +1351,563 @@ def _build_recording_quality_gate(result: SessionAnalysisResult, event_rows: lis
             "anticipatory_target_click_ratio_max": 0.15,
             "extra_playback_click_ratio_max": 0.50,
         },
+    }
+
+
+def _build_basic_assumption_checks(response_rows: list[dict[str, Any]]) -> dict[str, Any]:
+    rows = _assumption_valid_rt_rows(response_rows)
+    proximity = _assumption_proximity_payload(rows)
+    for row in rows:
+        row["proximity"] = proximity["row_scores"].get(row["_assumption_row_id"], math.nan)
+    rows = [row for row in rows if math.isfinite(_as_float(row.get("proximity"), math.nan))]
+    baseline_rows = [row for row in rows if row.get("trial_type") == "Baseline"]
+    audio_tactile_rows = [row for row in rows if row.get("trial_type") == "Audio-Tactile"]
+    baseline = _baseline_assumption_check(baseline_rows)
+    pps = _pps_assumption_check(baseline_rows, audio_tactile_rows)
+    return {
+        "schema": BASIC_ASSUMPTION_CHECKS_SCHEMA,
+        "alpha": 0.05,
+        "outcome": "log_rt_ms",
+        "statistical_note": (
+            "Pragmatic post-run QC only: baseline green means no detected SOA/proximity trend at alpha=.05; "
+            "PPS green means the baseline-adjusted audio-tactile proximity interaction has the predicted negative sign "
+            "with one-sided p<.05."
+        ),
+        "proximity_coding": {key: value for key, value in proximity.items() if key != "row_scores"},
+        "nuisance_terms_requested": ["part_number", "respiratory_phase", "noise_type"],
+        "rows_used": {
+            "baseline": len(baseline_rows),
+            "audio_tactile": len(audio_tactile_rows),
+            "total": len(rows),
+        },
+        "baseline_assumption": baseline,
+        "peripersonal_space_assumption": pps,
+    }
+
+
+def _baseline_assumption_check(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    coverage = _assumption_coverage(rows)
+    payload = _assumption_base_payload(
+        "Baseline Assumption",
+        "baseline_log_rt_proximity_slope",
+        "log(RT_ms) ~ proximity + nuisance_terms",
+        coverage,
+    )
+    insufficient = _baseline_coverage_failure(coverage)
+    if insufficient:
+        payload.update(
+            {
+                "status": QUALITY_FAIL,
+                "passed": False,
+                "reason_code": insufficient,
+                "summary": _baseline_insufficient_summary(coverage),
+            }
+        )
+        return payload
+    y = np.asarray([math.log(float(row["rt_ms"])) for row in rows], dtype=float)
+    model = _fit_assumption_ols(
+        rows,
+        y,
+        primary_columns=[("proximity", lambda row: _as_float(row.get("proximity"), math.nan))],
+    )
+    payload["model"] = _assumption_model_payload(model)
+    if model.get("error"):
+        payload.update(
+            {
+                "status": QUALITY_FAIL,
+                "passed": False,
+                "reason_code": str(model.get("error")),
+                "summary": str(model.get("message") or "Baseline proximity slope was not estimable."),
+            }
+        )
+        return payload
+    if int(model.get("df_resid", 0)) < 2:
+        payload.update(
+            {
+                "status": QUALITY_FAIL,
+                "passed": False,
+                "reason_code": "residual_df_low",
+                "summary": "Insufficient baseline residual degrees of freedom for the proximity slope check.",
+            }
+        )
+        return payload
+    stats = _assumption_coefficient_stats(model, "proximity")
+    p_value = stats.get("p_two_sided")
+    significant = p_value is not None and float(p_value) < 0.05
+    payload.update(
+        {
+            "beta": stats.get("beta"),
+            "se": stats.get("se"),
+            "t": stats.get("t"),
+            "p_two_sided": p_value,
+            "df_resid": model.get("df_resid"),
+            "included_nuisance_terms": model.get("included_nuisance_terms", []),
+            "dropped_nuisance_terms": model.get("dropped_nuisance_terms", []),
+            "status": QUALITY_FAIL if significant else QUALITY_PASS,
+            "passed": not significant,
+            "reason_code": "baseline_proximity_significant" if significant else "baseline_proximity_not_significant",
+            "summary": (
+                "Baseline RTs showed a significant proximity/SOA trend, so the pragmatic flatness check failed."
+                if significant
+                else "No significant baseline proximity/SOA trend was detected; pragmatic baseline flatness was accepted."
+            ),
+        }
+    )
+    return payload
+
+
+def _pps_assumption_check(
+    baseline_rows: list[dict[str, Any]],
+    audio_tactile_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    rows = list(baseline_rows) + list(audio_tactile_rows)
+    coverage = {
+        "baseline": _assumption_coverage(baseline_rows),
+        "audio_tactile": _assumption_coverage(audio_tactile_rows),
+        "combined": _assumption_coverage(rows),
+    }
+    payload = _assumption_base_payload(
+        "Peripersonal Space Assumption",
+        "audio_tactile_by_proximity_interaction",
+        "log(RT_ms) ~ pps_trial + proximity + pps_trial:proximity + nuisance_terms",
+        coverage,
+    )
+    insufficient = _pps_coverage_failure(coverage)
+    if insufficient:
+        payload.update(
+            {
+                "status": QUALITY_FAIL,
+                "passed": False,
+                "reason_code": insufficient,
+                "summary": _pps_insufficient_summary(coverage),
+            }
+        )
+        return payload
+    y = np.asarray([math.log(float(row["rt_ms"])) for row in rows], dtype=float)
+    model = _fit_assumption_ols(
+        rows,
+        y,
+        primary_columns=[
+            ("pps_trial", lambda row: 1.0 if row.get("trial_type") == "Audio-Tactile" else 0.0),
+            ("proximity", lambda row: _as_float(row.get("proximity"), math.nan)),
+            (
+                "pps_trial:proximity",
+                lambda row: (1.0 if row.get("trial_type") == "Audio-Tactile" else 0.0)
+                * _as_float(row.get("proximity"), math.nan),
+            ),
+        ],
+    )
+    payload["model"] = _assumption_model_payload(model)
+    if model.get("error"):
+        payload.update(
+            {
+                "status": QUALITY_FAIL,
+                "passed": False,
+                "reason_code": str(model.get("error")),
+                "summary": str(model.get("message") or "The PPS proximity interaction was not estimable."),
+            }
+        )
+        return payload
+    if int(model.get("df_resid", 0)) < 2:
+        payload.update(
+            {
+                "status": QUALITY_FAIL,
+                "passed": False,
+                "reason_code": "residual_df_low",
+                "summary": "Insufficient residual degrees of freedom for the PPS interaction check.",
+            }
+        )
+        return payload
+    stats = _assumption_coefficient_stats(model, "pps_trial:proximity")
+    p_value = stats.get("p_one_sided_negative")
+    beta = stats.get("beta")
+    predicted_sign = beta is not None and float(beta) < 0.0
+    significant = p_value is not None and float(p_value) < 0.05
+    effects = _pps_far_to_near_effects(model, rows)
+    passed = bool(predicted_sign and significant)
+    if not predicted_sign:
+        reason_code = "interaction_sign_opposite_or_zero"
+        summary = "The audio-tactile proximity interaction did not have the predicted negative sign."
+    elif not significant:
+        reason_code = "interaction_not_significant"
+        summary = "The audio-tactile proximity interaction had the predicted sign but was not significant at one-sided p<.05."
+    else:
+        reason_code = "interaction_predicted_significant"
+        summary = "Audio-tactile RTs sped up from far to near more than baseline, with the predicted significant interaction."
+    payload.update(
+        {
+            "interaction_beta": beta,
+            "interaction_se": stats.get("se"),
+            "interaction_t": stats.get("t"),
+            "p_one_sided_negative": p_value,
+            "p_two_sided": stats.get("p_two_sided"),
+            "df_resid": model.get("df_resid"),
+            "included_nuisance_terms": model.get("included_nuisance_terms", []),
+            "dropped_nuisance_terms": model.get("dropped_nuisance_terms", []),
+            "baseline_slope_beta": effects.get("baseline_slope_beta"),
+            "audio_tactile_slope_beta": effects.get("audio_tactile_slope_beta"),
+            "baseline_far_to_near_speedup_ms": effects.get("baseline_far_to_near_speedup_ms"),
+            "audio_tactile_far_to_near_speedup_ms": effects.get("audio_tactile_far_to_near_speedup_ms"),
+            "pps_far_to_near_gain_ms": effects.get("pps_far_to_near_gain_ms"),
+            "status": QUALITY_PASS if passed else QUALITY_FAIL,
+            "passed": passed,
+            "reason_code": reason_code,
+            "summary": summary,
+        }
+    )
+    return payload
+
+
+def _assumption_base_payload(label: str, test: str, formula: str, coverage: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "label": label,
+        "test": test,
+        "formula": formula,
+        "status": QUALITY_FAIL,
+        "passed": False,
+        "alpha": 0.05,
+        "coverage": coverage,
+        "summary": "Insufficient evidence for this assumption check.",
+    }
+
+
+def _baseline_coverage_failure(coverage: dict[str, Any]) -> str:
+    if int(coverage.get("n", 0)) < 6:
+        return "baseline_valid_rt_count_low"
+    if int(coverage.get("distinct_soa_count", 0)) < 2:
+        return "baseline_distinct_soa_count_low"
+    return ""
+
+
+def _pps_coverage_failure(coverage: dict[str, Any]) -> str:
+    baseline = dict(coverage.get("baseline") or {})
+    audio = dict(coverage.get("audio_tactile") or {})
+    if int(audio.get("n", 0)) < 12:
+        return "audio_tactile_valid_rt_count_low"
+    if int(audio.get("distinct_soa_count", 0)) < 3:
+        return "audio_tactile_distinct_soa_count_low"
+    if int(baseline.get("n", 0)) < 6:
+        return "baseline_valid_rt_count_low"
+    if int(baseline.get("distinct_soa_count", 0)) < 2:
+        return "baseline_distinct_soa_count_low"
+    return ""
+
+
+def _baseline_insufficient_summary(coverage: dict[str, Any]) -> str:
+    return (
+        "Insufficient baseline coverage for the pragmatic flatness check "
+        f"(valid RTs={coverage.get('n', 0)}, SOA levels={coverage.get('distinct_soa_count', 0)})."
+    )
+
+
+def _pps_insufficient_summary(coverage: dict[str, Any]) -> str:
+    baseline = dict(coverage.get("baseline") or {})
+    audio = dict(coverage.get("audio_tactile") or {})
+    return (
+        "Insufficient coverage for the PPS interaction check "
+        f"(audio-tactile valid RTs={audio.get('n', 0)}, audio-tactile SOA levels={audio.get('distinct_soa_count', 0)}, "
+        f"baseline valid RTs={baseline.get('n', 0)}, baseline SOA levels={baseline.get('distinct_soa_count', 0)})."
+    )
+
+
+def _assumption_valid_rt_rows(response_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for index, source in enumerate(response_rows):
+        if not _primary_analysis_included(source):
+            continue
+        trial_type = _assumption_trial_type(source.get("trial_type"))
+        if trial_type not in {"Baseline", "Audio-Tactile"}:
+            continue
+        if "hit" in source and source.get("hit") not in (None, "") and not _truthy(source.get("hit")):
+            continue
+        rt = _as_float(source.get("rt_ms"), math.nan)
+        soa = _as_float(source.get("soa_ms"), math.nan)
+        if not (math.isfinite(rt) and rt > 0.0 and math.isfinite(soa)):
+            continue
+        row = dict(source)
+        row["_assumption_row_id"] = f"row_{index}"
+        row["trial_type"] = trial_type
+        row["rt_ms"] = float(rt)
+        row["soa_ms"] = float(soa)
+        rows.append(row)
+    return rows
+
+
+def _assumption_trial_type(value: Any) -> str:
+    text = str(value or "").strip()
+    lowered = re.sub(r"[\s_]+", "-", text.lower())
+    if lowered == "baseline":
+        return "Baseline"
+    if lowered in {"audio-tactile", "audiotactile"} or ("audio" in lowered and "tactile" in lowered):
+        return "Audio-Tactile"
+    return text
+
+
+def _assumption_proximity_payload(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    distance_key = _assumption_distance_key(rows)
+    row_scores: dict[str, float] = {}
+    if distance_key:
+        logs = [_assumption_log_distance(row, distance_key) for row in rows]
+        finite_logs = [value for value in logs if math.isfinite(value)]
+        mean_log = statistics.mean(finite_logs)
+        sd_log = statistics.pstdev(finite_logs)
+        if sd_log > 0:
+            for row, value in zip(rows, logs):
+                row_scores[str(row["_assumption_row_id"])] = -((value - mean_log) / sd_log)
+            return {
+                "method": "-z(log(distance_cm))",
+                "distance_column": distance_key,
+                "levels": sorted({float(_as_float(row.get(distance_key), math.nan)) for row in rows if math.isfinite(_as_float(row.get(distance_key), math.nan))}),
+                "row_scores": row_scores,
+            }
+    soas = sorted({float(row["soa_ms"]) for row in rows if math.isfinite(_as_float(row.get("soa_ms"), math.nan))})
+    center = (len(soas) - 1) / 2.0 if soas else 0.0
+    scores = {soa: float(index - center) for index, soa in enumerate(soas)}
+    for row in rows:
+        row_scores[str(row["_assumption_row_id"])] = scores.get(float(row["soa_ms"]), math.nan)
+    return {
+        "method": "centered_soa_rank",
+        "orientation": "sorted_unique_soa_as_far_to_near",
+        "levels": soas,
+        "scores_by_soa_ms": {str(_assumption_soa_key(soa)): score for soa, score in scores.items()},
+        "row_scores": row_scores,
+    }
+
+
+def _assumption_distance_key(rows: list[dict[str, Any]]) -> str:
+    for key in ("distance_cm", "source_distance_cm", "sound_distance_cm", "distance_at_touch_cm"):
+        values = [_as_float(row.get(key), math.nan) for row in rows]
+        finite = [value for value in values if math.isfinite(value) and value > 0.0]
+        if rows and len(finite) == len(rows) and len({round(value, 9) for value in finite}) >= 2:
+            return key
+    return ""
+
+
+def _assumption_log_distance(row: dict[str, Any], key: str) -> float:
+    value = _as_float(row.get(key), math.nan)
+    return math.log(value) if math.isfinite(value) and value > 0.0 else math.nan
+
+
+def _assumption_soa_key(value: float) -> int | float:
+    return int(value) if float(value).is_integer() else float(value)
+
+
+def _assumption_coverage(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    soas = sorted({float(row["soa_ms"]) for row in rows if math.isfinite(_as_float(row.get("soa_ms"), math.nan))})
+    proximities = sorted({float(row["proximity"]) for row in rows if math.isfinite(_as_float(row.get("proximity"), math.nan))})
+    by_soa: dict[str, int] = {}
+    for row in rows:
+        soa = _as_float(row.get("soa_ms"), math.nan)
+        if math.isfinite(soa):
+            key = str(_assumption_soa_key(soa))
+            by_soa[key] = by_soa.get(key, 0) + 1
+    return {
+        "n": len(rows),
+        "distinct_soa_count": len(soas),
+        "distinct_proximity_count": len(proximities),
+        "soas_ms": [_assumption_soa_key(soa) for soa in soas],
+        "counts_by_soa_ms": by_soa,
+    }
+
+
+def _fit_assumption_ols(
+    rows: list[dict[str, Any]],
+    y: np.ndarray,
+    *,
+    primary_columns: list[tuple[str, Any]],
+) -> dict[str, Any]:
+    try:
+        X, names, term_by_column, included_terms, dropped_terms = _assumption_design_matrix(rows, primary_columns)
+    except ValueError as exc:
+        return {"error": "primary_design_not_estimable", "message": str(exc)}
+    n = int(X.shape[0])
+    rank = int(np.linalg.matrix_rank(X))
+    if rank < X.shape[1]:
+        return {
+            "error": "primary_design_rank_deficient",
+            "message": "Primary assumption terms were rank-deficient after nuisance terms were dropped.",
+            "rank": rank,
+            "column_count": int(X.shape[1]),
+            "n": n,
+            "included_nuisance_terms": included_terms,
+            "dropped_nuisance_terms": dropped_terms,
+        }
+    df_resid = n - rank
+    try:
+        beta = np.linalg.lstsq(X, y, rcond=None)[0]
+        residual = y - X @ beta
+        xtx_inv = np.linalg.pinv(X.T @ X)
+        leverage = np.sum((X @ xtx_inv) * X, axis=1)
+        denom = np.maximum(1.0 - leverage, 1e-8)
+        hc3_weights = (residual / denom) ** 2
+        meat = X.T @ (X * hc3_weights[:, None])
+        covariance = xtx_inv @ meat @ xtx_inv
+    except Exception as exc:  # noqa: BLE001 - this is a QC artifact, so return a readable failure.
+        return {"error": "ols_fit_failed", "message": str(exc)}
+    coefficients = {name: float(value) for name, value in zip(names, beta)}
+    covariance_diag = {name: float(covariance[index, index]) for index, name in enumerate(names)}
+    return {
+        "n": n,
+        "rank": rank,
+        "column_count": int(X.shape[1]),
+        "df_resid": int(df_resid),
+        "columns": names,
+        "term_by_column": term_by_column,
+        "coefficients": coefficients,
+        "covariance_diag": covariance_diag,
+        "included_nuisance_terms": included_terms,
+        "dropped_nuisance_terms": dropped_terms,
+    }
+
+
+def _assumption_design_matrix(
+    rows: list[dict[str, Any]],
+    primary_columns: list[tuple[str, Any]],
+) -> tuple[np.ndarray, list[str], list[str], list[str], list[str]]:
+    if not rows:
+        raise ValueError("No valid rows were available.")
+    primary_data: list[np.ndarray] = []
+    primary_names: list[str] = []
+    for name, getter in primary_columns:
+        values = np.asarray([float(getter(row)) for row in rows], dtype=float)
+        if not np.all(np.isfinite(values)):
+            raise ValueError(f"Primary column {name} contained non-finite values.")
+        primary_names.append(name)
+        primary_data.append(values)
+    nuisance_specs = _assumption_nuisance_columns(rows)
+    included_terms = [term for term, _names, _columns in nuisance_specs]
+    dropped_terms: list[str] = []
+    while True:
+        X, names, term_by_column = _assumption_matrix_from_terms(primary_names, primary_data, nuisance_specs, included_terms)
+        if np.linalg.matrix_rank(X) >= X.shape[1]:
+            return X, names, term_by_column, included_terms, dropped_terms
+        droppable = next((term for term in ("noise_type", "respiratory_phase", "part_number") if term in included_terms), "")
+        if not droppable:
+            return X, names, term_by_column, included_terms, dropped_terms
+        included_terms = [term for term in included_terms if term != droppable]
+        dropped_terms.append(droppable)
+
+
+def _assumption_nuisance_columns(rows: list[dict[str, Any]]) -> list[tuple[str, list[str], list[np.ndarray]]]:
+    specs: list[tuple[str, list[str], list[np.ndarray]]] = []
+    for term in ("part_number", "respiratory_phase", "noise_type"):
+        values = [_assumption_nuisance_value(row, term) for row in rows]
+        levels = sorted({value for value in values if value})
+        if len(levels) < 2:
+            continue
+        names: list[str] = []
+        columns: list[np.ndarray] = []
+        for level in levels[1:]:
+            names.append(f"{term}[{level}]")
+            columns.append(np.asarray([1.0 if value == level else 0.0 for value in values], dtype=float))
+        if columns:
+            specs.append((term, names, columns))
+    return specs
+
+
+def _assumption_nuisance_value(row: dict[str, Any], term: str) -> str:
+    if term == "part_number":
+        part = _as_int(row.get("part_number"), None)
+        return "" if part is None else f"Part {part}"
+    return str(row.get(term) or "").strip()
+
+
+def _assumption_matrix_from_terms(
+    primary_names: list[str],
+    primary_data: list[np.ndarray],
+    nuisance_specs: list[tuple[str, list[str], list[np.ndarray]]],
+    included_terms: list[str],
+) -> tuple[np.ndarray, list[str], list[str]]:
+    n = len(primary_data[0]) if primary_data else sum(1 for _ in [])
+    columns = [np.ones(n, dtype=float), *primary_data]
+    names = ["intercept", *primary_names]
+    term_by_column = ["intercept", *primary_names]
+    included = set(included_terms)
+    for term, nuisance_names, nuisance_columns in nuisance_specs:
+        if term not in included:
+            continue
+        columns.extend(nuisance_columns)
+        names.extend(nuisance_names)
+        term_by_column.extend([term] * len(nuisance_columns))
+    return np.column_stack(columns), names, term_by_column
+
+
+def _assumption_model_payload(model: dict[str, Any]) -> dict[str, Any]:
+    if model.get("error"):
+        return dict(model)
+    return {
+        "n": model.get("n"),
+        "rank": model.get("rank"),
+        "column_count": model.get("column_count"),
+        "df_resid": model.get("df_resid"),
+        "columns": model.get("columns", []),
+        "included_nuisance_terms": model.get("included_nuisance_terms", []),
+        "dropped_nuisance_terms": model.get("dropped_nuisance_terms", []),
+    }
+
+
+def _assumption_coefficient_stats(model: dict[str, Any], name: str) -> dict[str, float | None]:
+    coefficients = dict(model.get("coefficients") or {})
+    covariance_diag = dict(model.get("covariance_diag") or {})
+    beta = _as_float(coefficients.get(name), math.nan)
+    variance = _as_float(covariance_diag.get(name), math.nan)
+    df = int(model.get("df_resid", 0) or 0)
+    if not math.isfinite(beta) or df <= 0:
+        return {"beta": None, "se": None, "t": None, "p_two_sided": None, "p_one_sided_negative": None}
+    if not math.isfinite(variance) or variance < 0.0:
+        return {"beta": beta, "se": None, "t": None, "p_two_sided": None, "p_one_sided_negative": None}
+    se = math.sqrt(max(0.0, variance))
+    if se <= 1e-12:
+        t_value = 0.0 if abs(beta) <= 1e-12 else math.copysign(math.inf, beta)
+    else:
+        t_value = beta / se
+    if math.isinf(t_value):
+        p_two = 0.0
+        p_one_negative = 0.0 if t_value < 0 else 1.0
+    else:
+        p_two = float(2.0 * scipy_stats.t.sf(abs(t_value), df))
+        p_one_negative = float(scipy_stats.t.cdf(t_value, df))
+    return {
+        "beta": float(beta),
+        "se": float(se),
+        "t": float(t_value),
+        "p_two_sided": p_two,
+        "p_one_sided_negative": p_one_negative,
+    }
+
+
+def _pps_far_to_near_effects(model: dict[str, Any], rows: list[dict[str, Any]]) -> dict[str, float | None]:
+    coefficients = dict(model.get("coefficients") or {})
+    intercept = _as_float(coefficients.get("intercept"), math.nan)
+    pps_beta = _as_float(coefficients.get("pps_trial"), math.nan)
+    proximity_beta = _as_float(coefficients.get("proximity"), math.nan)
+    interaction_beta = _as_float(coefficients.get("pps_trial:proximity"), math.nan)
+    proximities = [_as_float(row.get("proximity"), math.nan) for row in rows]
+    proximities = [value for value in proximities if math.isfinite(value)]
+    if len(proximities) < 2 or not all(math.isfinite(value) for value in (intercept, pps_beta, proximity_beta, interaction_beta)):
+        return {
+            "baseline_slope_beta": None,
+            "audio_tactile_slope_beta": None,
+            "baseline_far_to_near_speedup_ms": None,
+            "audio_tactile_far_to_near_speedup_ms": None,
+            "pps_far_to_near_gain_ms": None,
+        }
+    far = min(proximities)
+    near = max(proximities)
+    baseline_slope = proximity_beta
+    audio_slope = proximity_beta + interaction_beta
+    baseline_far = math.exp(intercept + baseline_slope * far)
+    baseline_near = math.exp(intercept + baseline_slope * near)
+    audio_far = math.exp(intercept + pps_beta + audio_slope * far)
+    audio_near = math.exp(intercept + pps_beta + audio_slope * near)
+    baseline_speedup = baseline_far - baseline_near
+    audio_speedup = audio_far - audio_near
+    return {
+        "baseline_slope_beta": float(baseline_slope),
+        "audio_tactile_slope_beta": float(audio_slope),
+        "baseline_far_to_near_speedup_ms": float(baseline_speedup),
+        "audio_tactile_far_to_near_speedup_ms": float(audio_speedup),
+        "pps_far_to_near_gain_ms": float(audio_speedup - baseline_speedup),
     }
 
 

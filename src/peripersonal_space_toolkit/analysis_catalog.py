@@ -617,6 +617,7 @@ def _outputs_for_analysis_dir(analysis_dir: Path) -> dict[str, Path]:
     fixed = {
         "condition_lens_triage_summary": "condition_lens_triage_summary.json",
         "recording_quality_gate": "recording_quality_gate.v1.json",
+        "basic_assumption_checks": "basic_assumption_checks.v1.json",
         "data_behavior_by_scope": "data_behavior_by_scope.csv",
         "exploratory_quality_summary": "exploratory_quality_summary.json",
     }

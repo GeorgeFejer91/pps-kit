@@ -430,6 +430,54 @@ def _write_analysis_review_outputs(session_dir: Path) -> dict[str, Path]:
         + "\n",
         encoding="utf-8",
     )
+    assumption_checks = analysis_dir / "basic_assumption_checks.v1.json"
+    assumption_checks.write_text(
+        json.dumps(
+            {
+                "schema": "pps-basic-assumption-checks.v1",
+                "alpha": 0.05,
+                "outcome": "log_rt_ms",
+                "proximity_coding": {
+                    "method": "centered_soa_rank",
+                    "orientation": "sorted_unique_soa_as_far_to_near",
+                    "levels": [100.0, 200.0, 400.0, 800.0],
+                    "scores_by_soa_ms": {"100": -1.5, "200": -0.5, "400": 0.5, "800": 1.5},
+                },
+                "baseline_assumption": {
+                    "label": "Baseline Assumption",
+                    "status": "PASS",
+                    "passed": True,
+                    "summary": "No significant baseline proximity/SOA trend was detected; pragmatic baseline flatness was accepted.",
+                    "beta": -0.001,
+                    "p_two_sided": 0.72,
+                    "df_resid": 18,
+                    "coverage": {"n": 12, "distinct_soa_count": 4, "counts_by_soa_ms": {"100": 3, "200": 3, "400": 3, "800": 3}},
+                },
+                "peripersonal_space_assumption": {
+                    "label": "Peripersonal Space Assumption",
+                    "status": "PASS",
+                    "passed": True,
+                    "summary": "Audio-tactile RTs sped up from far to near more than baseline, with the predicted significant interaction.",
+                    "interaction_beta": -0.12,
+                    "p_one_sided_negative": 0.012,
+                    "df_resid": 28,
+                    "baseline_slope_beta": -0.001,
+                    "audio_tactile_slope_beta": -0.121,
+                    "baseline_far_to_near_speedup_ms": 2.0,
+                    "audio_tactile_far_to_near_speedup_ms": 68.0,
+                    "pps_far_to_near_gain_ms": 66.0,
+                    "coverage": {
+                        "baseline": {"n": 12, "distinct_soa_count": 4, "counts_by_soa_ms": {"100": 3, "200": 3, "400": 3, "800": 3}},
+                        "audio_tactile": {"n": 24, "distinct_soa_count": 4, "counts_by_soa_ms": {"100": 6, "200": 6, "400": 6, "800": 6}},
+                    },
+                },
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     participant_trials = session_dir / f"{session_id}_trials.csv"
     trial_header = (
         "trial_uid,trial_number,trial_type,stimulus_modality,tactile_present,catch_trial,response_given,"
@@ -498,6 +546,7 @@ def _write_analysis_review_outputs(session_dir: Path) -> dict[str, Path]:
         "condition_lens_model_fit_comparison": condition_comparison,
         "condition_lens_triage_summary": condition_triage,
         "recording_quality_gate": quality_gate,
+        "basic_assumption_checks": assumption_checks,
         "participant_trials": participant_trials,
         "responses": responses,
         "final_trial_outcomes": final_trial_outcomes,
@@ -3155,6 +3204,9 @@ def test_focus_mode_opens_post_run_analysis_review_dialog(tmp_path: Path, monkey
     overview_table = dialog.findChild(q["QTableWidget"], "analysisOverviewTable")
     details = dialog.findChild(q["QTextEdit"], "analysisDetailsText")
     response_panel = dialog.findChild(q["QFrame"], "analysisResponseQualityPanel")
+    assumption_panel = dialog.findChild(q["QFrame"], "analysisAssumptionPanel")
+    baseline_assumption_button = dialog.findChild(q["QPushButton"], "analysisBaselineAssumptionButton")
+    pps_assumption_button = dialog.findChild(q["QPushButton"], "analysisPpsAssumptionButton")
     response_bars = dialog.findChild(q["QWidget"], "analysisResponseQualityBars")
     tactile_hits_percent = dialog.findChild(q["QLabel"], "analysisResponseMetricTactileHitsPercent")
     tactile_hits_count = dialog.findChild(q["QLabel"], "analysisResponseMetricTactileHitsCount")
@@ -3169,6 +3221,13 @@ def test_focus_mode_opens_post_run_analysis_review_dialog(tmp_path: Path, monkey
     quick_model_buttons = [button for button in dialog.findChildren(q["QPushButton"], "analysisModelButton")]
     assert dataset_combo is not None and dataset_combo.count() == 1
     assert response_panel is not None
+    assert assumption_panel is not None
+    assert baseline_assumption_button is not None and baseline_assumption_button.text() == "Baseline Assumption"
+    assert pps_assumption_button is not None and pps_assumption_button.text() == "Peripersonal Space Assumption"
+    assert "#238d5a" in baseline_assumption_button.styleSheet()
+    assert "#238d5a" in pps_assumption_button.styleSheet()
+    assert "two-sided p" in baseline_assumption_button.toolTip()
+    assert "one-sided p" in pps_assumption_button.toolTip()
     assert response_bars is not None
     assert tactile_hits_percent is not None and tactile_hits_percent.text() == "80.0%"
     assert tactile_hits_count is not None and tactile_hits_count.text() == "4 / 5"
@@ -3179,6 +3238,18 @@ def test_focus_mode_opens_post_run_analysis_review_dialog(tmp_path: Path, monkey
     assert triage_hint is not None and "AICc support" in triage_hint.text()
     assert "Baseline: pooled across SOAs within condition" in triage_hint.text()
     assert analysis_plot is not None and getattr(analysis_plot, "metric_label", "") == "Baseline-corrected facilitation (ms)"
+    assert _widget_rect(response_panel, dialog)["bottom"] <= _widget_rect(assumption_panel, dialog)["y"]
+    assert _widget_rect(assumption_panel, dialog)["bottom"] <= _widget_rect(analysis_plot, dialog)["y"]
+    pps_assumption_button.click()
+    app.processEvents()
+    assumption_dialog = window.analysis_review_dialog.assumption_detail_dialog
+    assert assumption_dialog is not None and assumption_dialog.isVisible()
+    assumption_plot = assumption_dialog.findChild(q["QWidget"], "analysisAssumptionBetaPlot")
+    assumption_summary = assumption_dialog.findChild(q["QLabel"], "analysisAssumptionDetailSummary")
+    assert assumption_plot is not None
+    assert assumption_summary is not None and "Green:" in assumption_summary.text()
+    assert assumption_dialog.grab().size().width() > 0
+    assumption_dialog.close()
     assert {button.text() for button in condition_buttons} == {"2 x 2", "Part 1 | Part 2", "Inhale | Exhale"}
     assert {button.text() for button in quick_model_buttons} == {"Sigmoid", "Log decay", "Linear"}
     assert details is not None and "Condition lens: two_by_two" in details.toPlainText()
@@ -3274,6 +3345,35 @@ def test_analysis_review_dialog_switches_saved_datasets(tmp_path: Path, monkeypa
         + "\n",
         encoding="utf-8",
     )
+    outputs_2["basic_assumption_checks"].write_text(
+        json.dumps(
+            {
+                "schema": "pps-basic-assumption-checks.v1",
+                "baseline_assumption": {
+                    "status": "FAIL",
+                    "summary": "Baseline RTs showed a significant proximity/SOA trend, so the pragmatic flatness check failed.",
+                    "beta": -0.08,
+                    "p_two_sided": 0.01,
+                    "coverage": {"n": 6, "distinct_soa_count": 2},
+                },
+                "peripersonal_space_assumption": {
+                    "status": "FAIL",
+                    "summary": "The audio-tactile proximity interaction had the predicted sign but was not significant at one-sided p<.05.",
+                    "interaction_beta": -0.01,
+                    "p_one_sided_negative": 0.34,
+                    "pps_far_to_near_gain_ms": 4.0,
+                    "coverage": {
+                        "baseline": {"n": 6, "distinct_soa_count": 2},
+                        "audio_tactile": {"n": 12, "distinct_soa_count": 3},
+                    },
+                },
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     entries = [
         {
             "dataset_id": "participant:P001",
@@ -3307,9 +3407,11 @@ def test_analysis_review_dialog_switches_saved_datasets(tmp_path: Path, monkeypa
     dataset_combo = dialog.findChild(q["QComboBox"], "analysisDatasetCombo")
     tactile_hits_percent = dialog.findChild(q["QLabel"], "analysisResponseMetricTactileHitsPercent")
     catch_false_alarm_percent = dialog.findChild(q["QLabel"], "analysisResponseMetricCatchFalseAlarmsPercent")
+    pps_assumption_button = dialog.findChild(q["QPushButton"], "analysisPpsAssumptionButton")
     assert dataset_combo is not None and dataset_combo.count() == 2
     assert tactile_hits_percent is not None and tactile_hits_percent.text() == "80.0%"
     assert catch_false_alarm_percent is not None and catch_false_alarm_percent.text() == "25.0%"
+    assert pps_assumption_button is not None and "#238d5a" in pps_assumption_button.styleSheet()
 
     dataset_combo.setCurrentIndex(dataset_combo.findData("participant:P002"))
     app.processEvents()
@@ -3317,6 +3419,50 @@ def test_analysis_review_dialog_switches_saved_datasets(tmp_path: Path, monkeypa
     assert dialog_controller.current_dataset_id == "participant:P002"
     assert tactile_hits_percent.text() == "50.0%"
     assert catch_false_alarm_percent.text() == "50.0%"
+    assert "#d9544b" in pps_assumption_button.styleSheet()
+    assert "not significant" in pps_assumption_button.toolTip()
+    dialog.close()
+
+
+def test_analysis_review_dialog_missing_assumption_artifact_falls_back_to_red(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+        from peripersonal_space_toolkit.analysis_catalog import load_analysis_dataset
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    outputs = _write_analysis_review_outputs(tmp_path / "P003")
+    outputs["basic_assumption_checks"].unlink()
+    entry = {
+        "dataset_id": "participant:P003",
+        "dataset_kind": "participant",
+        "dataset_label": "P003",
+        "participant_id": "P003",
+        "quality_status": "PASS",
+        "analysis_dir": str(tmp_path / "P003" / "analysis"),
+        "outputs": {key: str(value) for key, value in outputs.items()},
+    }
+
+    dialog_controller = focus_app.AnalysisReviewDialog(q, None, load_analysis_dataset(entry), dataset_entries=[entry], selected_dataset_id="participant:P003")
+    dialog = dialog_controller.dialog
+    dialog.show()
+    app.processEvents()
+
+    baseline_button = dialog.findChild(q["QPushButton"], "analysisBaselineAssumptionButton")
+    pps_button = dialog.findChild(q["QPushButton"], "analysisPpsAssumptionButton")
+    assert baseline_button is not None and "#d9544b" in baseline_button.styleSheet()
+    assert pps_button is not None and "#d9544b" in pps_button.styleSheet()
+    assert "basic_assumption_checks.v1.json was not available" in pps_button.toolTip()
+    pps_button.click()
+    app.processEvents()
+    assumption_dialog = dialog_controller.assumption_detail_dialog
+    assert assumption_dialog is not None and assumption_dialog.isVisible()
+    assert assumption_dialog.findChild(q["QWidget"], "analysisAssumptionBetaPlot") is not None
+    assumption_dialog.close()
     dialog.close()
 
 

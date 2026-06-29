@@ -3003,6 +3003,109 @@ def _create_response_quality_bars_widget(q: dict[str, Any]) -> Any:
     return ResponseQualityBarsWidget()
 
 
+def _create_assumption_beta_plot_widget(q: dict[str, Any]) -> Any:
+    class AssumptionBetaPlotWidget(q["QWidget"]):
+        def __init__(self) -> None:
+            super().__init__()
+            self.kind = "pps"
+            self.payload: dict[str, Any] = {}
+            self.setMinimumHeight(174)
+            self.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Minimum)
+
+        def set_payload(self, kind: str, payload: dict[str, Any]) -> None:
+            self.kind = str(kind or "pps")
+            self.payload = dict(payload or {})
+            self.update()
+
+        def paintEvent(self, _event: Any) -> None:  # noqa: N802 - Qt API
+            painter = q["QPainter"](self)
+            try:
+                painter.setRenderHint(q["QPainter"].RenderHint.Antialiasing, True)
+                painter.fillRect(self.rect(), q["QColor"]("#ffffff"))
+                width = max(1, int(self.width()))
+                height = max(1, int(self.height()))
+                left = 118
+                right = 28
+                top = 28
+                bottom = 40
+                plot_width = max(1, width - left - right)
+                plot_height = max(1, height - top - bottom)
+                values = self._values()
+                finite = [value for _label, value, _color in values if value is not None and math.isfinite(float(value))]
+                if not finite:
+                    painter.setPen(q["QPen"](q["QColor"]("#647067")))
+                    painter.drawText(self.rect(), q["Qt"].AlignmentFlag.AlignCenter, "Insufficient evidence")
+                    return
+                span = max(max(abs(value) for value in finite), 0.001)
+                x_min = -span * 1.18
+                x_max = span * 1.18
+
+                def _x(value: float) -> int:
+                    return int(round(left + (value - x_min) / (x_max - x_min) * plot_width))
+
+                zero_x = _x(0.0)
+                grid_pen = q["QPen"](q["QColor"]("#d9dfd6"))
+                grid_pen.setWidth(1)
+                painter.setPen(grid_pen)
+                for index in range(5):
+                    x = left + int(round(plot_width * index / 4))
+                    painter.drawLine(x, top, x, top + plot_height)
+                axis_pen = q["QPen"](q["QColor"]("#647067"))
+                axis_pen.setWidth(2)
+                painter.setPen(axis_pen)
+                painter.drawLine(left, top + plot_height, width - right, top + plot_height)
+                painter.drawLine(zero_x, top, zero_x, top + plot_height)
+
+                title_font = q["QFont"](painter.font())
+                title_font.setPointSizeF(10.0)
+                title_font.setBold(True)
+                painter.setFont(title_font)
+                painter.setPen(q["QPen"](q["QColor"]("#202621")))
+                painter.drawText(8, 6, width - 16, 18, q["Qt"].AlignmentFlag.AlignLeft, "Proximity slope beta on log(RT)")
+
+                label_font = q["QFont"](painter.font())
+                label_font.setPointSizeF(9.0)
+                label_font.setBold(True)
+                value_font = q["QFont"](painter.font())
+                value_font.setPointSizeF(8.6)
+                row_gap = plot_height / max(1, len(values))
+                for index, (label, value, color) in enumerate(values):
+                    y_center = top + int(round(row_gap * (index + 0.5)))
+                    painter.setFont(label_font)
+                    painter.setPen(q["QPen"](q["QColor"]("#202621")))
+                    painter.drawText(8, y_center - 10, left - 18, 20, int(q["Qt"].AlignmentFlag.AlignRight | q["Qt"].AlignmentFlag.AlignVCenter), label)
+                    if value is None or not math.isfinite(float(value)):
+                        painter.setPen(q["QPen"](q["QColor"]("#647067")))
+                        painter.drawText(left, y_center - 10, plot_width, 20, q["Qt"].AlignmentFlag.AlignCenter, "n/a")
+                        continue
+                    value = float(value)
+                    x_value = _x(value)
+                    bar_left = min(zero_x, x_value)
+                    bar_width = max(3, abs(x_value - zero_x))
+                    painter.setPen(q["QPen"](q["QColor"](color)))
+                    painter.setBrush(q["QBrush"](q["QColor"](color)))
+                    painter.drawRoundedRect(bar_left, y_center - 10, bar_width, 20, 6, 6)
+                    painter.setFont(value_font)
+                    painter.setPen(q["QPen"](q["QColor"]("#202621")))
+                    text_x = x_value + 8 if value >= 0 else x_value - 78
+                    painter.drawText(text_x, y_center - 9, 70, 18, q["Qt"].AlignmentFlag.AlignCenter, _fmt_analysis_value(value))
+                painter.setFont(value_font)
+                painter.setPen(q["QPen"](q["QColor"]("#647067")))
+                painter.drawText(left, height - 26, plot_width, 18, q["Qt"].AlignmentFlag.AlignCenter, "negative = faster RTs with greater proximity")
+            finally:
+                painter.end()
+
+        def _values(self) -> list[tuple[str, float | None, str]]:
+            if self.kind == "baseline":
+                return [("Baseline", _analysis_float(self.payload.get("beta")), "#4b5fa8")]
+            return [
+                ("Baseline", _analysis_float(self.payload.get("baseline_slope_beta")), "#4b5fa8"),
+                ("Audio-Tactile", _analysis_float(self.payload.get("audio_tactile_slope_beta")), "#246b55"),
+            ]
+
+    return AssumptionBetaPlotWidget()
+
+
 def _analysis_rate_text(rate: Any) -> str:
     if rate is None:
         return "N/A"
@@ -3049,6 +3152,8 @@ class AnalysisReviewDialog:
         self.view_buttons: dict[str, Any] = {}
         self.plot_toggles: dict[str, Any] = {}
         self.response_metric_labels: dict[str, tuple[Any, Any]] = {}
+        self.assumption_buttons: dict[str, Any] = {}
+        self.assumption_detail_dialog = None
         self.dialog = q["QDialog"](parent)
         _enable_standard_window_controls(q, self.dialog)
         self.dialog.setWindowTitle("PPS Instant Analysis")
@@ -3169,6 +3274,11 @@ QLabel#analysisResponseMetricCount {
 QWidget#analysisResponseQualityBars {
     background: #ffffff;
 }
+QFrame#analysisAssumptionPanel {
+    background: #ffffff;
+    border: 1px solid #d9dfd6;
+    border-radius: 8px;
+}
 QPushButton#analysisConditionLensButton,
 QPushButton#analysisModelButton,
 QPushButton#analysisMoreButton {
@@ -3256,6 +3366,9 @@ QTextEdit#analysisDetailsText {
 
         self.response_quality_panel = self._build_response_quality_panel()
         root.addWidget(self.response_quality_panel)
+
+        self.assumption_panel = self._build_basic_assumption_panel()
+        root.addWidget(self.assumption_panel)
 
         plot_panel, plot_layout = _panel(q, "PPS Response Curves")
         self.plot_widget = _create_analysis_curve_plot_widget(q)
@@ -3548,6 +3661,35 @@ QTextEdit#analysisDetailsText {
         self.response_metric_labels[key] = (percent, count)
         return card
 
+    def _build_basic_assumption_panel(self) -> Any:
+        q = self.q
+        panel = q["QFrame"]()
+        panel.setObjectName("analysisAssumptionPanel")
+        layout = q["QVBoxLayout"](panel)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(8)
+
+        title = q["QLabel"]("Basic PPS Assumptions")
+        title.setObjectName("appSectionTitle")
+        layout.addWidget(title)
+
+        row = q["QHBoxLayout"]()
+        row.setContentsMargins(0, 0, 0, 0)
+        row.setSpacing(8)
+        for key, label, object_name in (
+            ("baseline", "Baseline Assumption", "analysisBaselineAssumptionButton"),
+            ("pps", "Peripersonal Space Assumption", "analysisPpsAssumptionButton"),
+        ):
+            button = q["QPushButton"](label)
+            button.setObjectName(object_name)
+            button.setMinimumHeight(48)
+            button.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Fixed)
+            button.clicked.connect(lambda _checked=False, selected_key=key: self._open_assumption_details(selected_key))
+            self.assumption_buttons[key] = button
+            row.addWidget(button, 1)
+        layout.addLayout(row)
+        return panel
+
     def _refresh_response_quality_panel(self) -> None:
         summary = response_quality_summary(self.data)
         tactile = dict(summary.get("tactile") or {})
@@ -3566,6 +3708,156 @@ QTextEdit#analysisDetailsText {
             percent_label.setText(_analysis_rate_text(rate))
             count_label.setText(_analysis_count_text(count, total))
         self.response_quality_bars.set_summary(summary)
+
+    def _refresh_assumption_panel(self) -> None:
+        for key, button in self.assumption_buttons.items():
+            payload = self._assumption_payload(key)
+            passed = str(payload.get("status") or "").strip().upper() == "PASS"
+            button.setText("Baseline Assumption" if key == "baseline" else "Peripersonal Space Assumption")
+            button.setToolTip(self._assumption_tooltip(key, payload))
+            self._style_assumption_button(button, passed=passed)
+
+    def _assumption_payload(self, key: str) -> dict[str, Any]:
+        checks = getattr(self.data, "assumption_checks", {}) or {}
+        if not isinstance(checks, dict) or not checks:
+            return {
+                "status": "FAIL",
+                "summary": "Insufficient evidence: basic_assumption_checks.v1.json was not available.",
+                "reason_code": "missing_artifact",
+                "coverage": {},
+            }
+        if key == "baseline":
+            payload = checks.get("baseline_assumption")
+        else:
+            payload = checks.get("peripersonal_space_assumption") or checks.get("pps_assumption")
+        if isinstance(payload, dict):
+            return dict(payload)
+        return {
+            "status": "FAIL",
+            "summary": "Insufficient evidence: this assumption result was not available in the saved artifact.",
+            "reason_code": "missing_result",
+            "coverage": {},
+        }
+
+    def _style_assumption_button(self, button: Any, *, passed: bool) -> None:
+        background = "#238d5a" if passed else "#d9544b"
+        border = "#1b7550" if passed else "#bf4741"
+        hover = "#2aa164" if passed else "#e25d55"
+        button.setStyleSheet(
+            "QPushButton {"
+            f"background: {background}; border: 1px solid {border}; color: #ffffff; "
+            "border-radius: 7px; padding: 8px 12px; font-size: 15px; font-weight: 900;"
+            "}"
+            "QPushButton:hover {"
+            f"background: {hover};"
+            "}"
+        )
+
+    def _assumption_tooltip(self, key: str, payload: dict[str, Any]) -> str:
+        summary = str(payload.get("summary") or "Insufficient evidence.").strip()
+        if key == "baseline":
+            beta = payload.get("beta")
+            p_value = payload.get("p_two_sided")
+            p_label = "two-sided p"
+        else:
+            beta = payload.get("interaction_beta")
+            p_value = payload.get("p_one_sided_negative")
+            p_label = "one-sided p"
+        lines = [
+            summary,
+            f"beta={_fmt_analysis_value(beta)}; {p_label}={_fmt_analysis_value(p_value)}",
+            self._assumption_coverage_text(key, payload),
+        ]
+        if key != "baseline":
+            lines.append(f"far-to-near gain={_fmt_analysis_value(payload.get('pps_far_to_near_gain_ms'))} ms")
+        return "\n".join(line for line in lines if line)
+
+    def _assumption_coverage_text(self, key: str, payload: dict[str, Any]) -> str:
+        coverage = payload.get("coverage") if isinstance(payload.get("coverage"), dict) else {}
+        if key == "baseline":
+            return f"coverage: baseline n={coverage.get('n', 0)}, SOA levels={coverage.get('distinct_soa_count', 0)}"
+        baseline = dict(coverage.get("baseline") or {})
+        audio = dict(coverage.get("audio_tactile") or {})
+        return (
+            f"coverage: baseline n={baseline.get('n', 0)}, SOA levels={baseline.get('distinct_soa_count', 0)}; "
+            f"audio-tactile n={audio.get('n', 0)}, SOA levels={audio.get('distinct_soa_count', 0)}"
+        )
+
+    def _open_assumption_details(self, key: str) -> None:
+        q = self.q
+        payload = self._assumption_payload(key)
+        dialog = q["QDialog"](self.dialog)
+        dialog.setObjectName("analysisAssumptionDetailsDialog")
+        dialog.setWindowTitle("Baseline Assumption" if key == "baseline" else "Peripersonal Space Assumption")
+        dialog.setModal(False)
+        dialog.resize(560, 430)
+        dialog.setStyleSheet(
+            _focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE)
+            + """
+QDialog {
+    background: #f4f5f1;
+}
+QFrame#analysisAssumptionDetailPanel {
+    background: #ffffff;
+    border: 1px solid #d9dfd6;
+    border-radius: 8px;
+}
+"""
+        )
+        root = q["QVBoxLayout"](dialog)
+        root.setContentsMargins(12, 12, 12, 12)
+        root.setSpacing(8)
+        panel = q["QFrame"]()
+        panel.setObjectName("analysisAssumptionDetailPanel")
+        panel_layout = q["QVBoxLayout"](panel)
+        panel_layout.setContentsMargins(12, 12, 12, 12)
+        panel_layout.setSpacing(8)
+        title = q["QLabel"]("Baseline Assumption" if key == "baseline" else "Peripersonal Space Assumption")
+        title.setObjectName("appSectionTitle")
+        panel_layout.addWidget(title)
+        summary = q["QLabel"](self._assumption_detail_sentence(key, payload))
+        summary.setObjectName("analysisAssumptionDetailSummary")
+        summary.setWordWrap(True)
+        panel_layout.addWidget(summary)
+        stats = q["QLabel"](self._assumption_detail_stats(key, payload))
+        stats.setObjectName("mutedLabel")
+        stats.setWordWrap(True)
+        panel_layout.addWidget(stats)
+        plot = _create_assumption_beta_plot_widget(q)
+        plot.setObjectName("analysisAssumptionBetaPlot")
+        plot.set_payload("baseline" if key == "baseline" else "pps", payload)
+        panel_layout.addWidget(plot)
+        root.addWidget(panel, 1)
+        button_row = q["QHBoxLayout"]()
+        button_row.addStretch(1)
+        close = q["QPushButton"]("Close")
+        close.clicked.connect(dialog.close)
+        button_row.addWidget(close)
+        root.addLayout(button_row)
+        self.assumption_detail_dialog = dialog
+        dialog.show()
+        dialog.raise_()
+
+    def _assumption_detail_sentence(self, key: str, payload: dict[str, Any]) -> str:
+        status = str(payload.get("status") or "").strip().upper()
+        summary = str(payload.get("summary") or "Insufficient evidence for this assumption check.").strip()
+        prefix = "Green:" if status == "PASS" else "Red:"
+        return f"{prefix} {summary}"
+
+    def _assumption_detail_stats(self, key: str, payload: dict[str, Any]) -> str:
+        coverage = self._assumption_coverage_text(key, payload)
+        if key == "baseline":
+            return (
+                f"baseline beta={_fmt_analysis_value(payload.get('beta'))}; "
+                f"two-sided p={_fmt_analysis_value(payload.get('p_two_sided'))}; "
+                f"{coverage}; df={_fmt_analysis_value(payload.get('df_resid'))}"
+            )
+        return (
+            f"interaction beta={_fmt_analysis_value(payload.get('interaction_beta'))}; "
+            f"one-sided p={_fmt_analysis_value(payload.get('p_one_sided_negative'))}; "
+            f"far-to-near gain={_fmt_analysis_value(payload.get('pps_far_to_near_gain_ms'))} ms; "
+            f"{coverage}; df={_fmt_analysis_value(payload.get('df_resid'))}"
+        )
 
     def _populate_dataset_combo(self) -> None:
         if not hasattr(self, "dataset_combo"):
@@ -3844,6 +4136,7 @@ QTextEdit#analysisDetailsText {
 
     def _refresh(self) -> None:
         self._refresh_response_quality_panel()
+        self._refresh_assumption_panel()
         if self.quick_mode:
             self._refresh_quick_button_styles()
             self._refresh_quick()

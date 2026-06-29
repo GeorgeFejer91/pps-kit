@@ -42,6 +42,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   reconstruction/timing spine for prepared WAV replay, but it is still
   phone-runtime evidence only until physical-device validation and native
   Android LSL broadcast are wired and audited.
+- Phone-owned Android run folders now keep a full `run_package_manifest.json`
+  snapshot and a compact `reconstruction_contract.json` beside
+  `events.csv`, `lsl_marker_mirror.csv`, `command_diary.jsonl`,
+  participant metadata, and haptic capability artifacts. ZIP exports therefore
+  carry enough package/schedule/asset identity to reconstruct the run without
+  asking the PC bridge for its original manifest.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only
@@ -66,6 +72,7 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 - Android `Run Experiment On Phone` now treats v2 phone-export pairings as phone-owned sessions. The app opens directly into the phone runtime, downloads and verifies package assets, can run the full split experiment locally, stores phone-side event/completion artifacts under app-private storage, and can export the last session as a ZIP for later retrieval. PC-runner LSL, LabRecorder, Woojer, wired-loopback, and instant-analysis guarantees remain available only in `PC Runner Control` / laptop-owned Focus Mode runs.
 - Same-Wi-Fi LAN is the primary phone-transfer bridge. The runner exposes a Wi-Fi Direct fallback selection and Windows availability/status check, but this PC reports legacy hosted-network support as unavailable; treat Wi-Fi Direct as a manually joined direct-link fallback, not an automatic Windows hotspot setup.
 - The native `PPSExperimentRunner.exe` post-run `PPS Instant Analysis` popup replaced the old visible participant run quality badge with a top response-quality panel. The panel is intentionally simple and descriptive: all-trials tactile hits/misses and catch correct/false-alarm rates are shown as four metric cards plus two horizontal stacked bars above the PPS curves, including top-up rows when present. The panel reads the runner participant-trials CSV when available and falls back to analysis response/final-outcome rows. `recording_quality_gate.v1.json` remains a saved artifact and participant-pool inclusion mechanism, but it is no longer the primary operator feedback widget in the popup.
+- The native post-run popup now has a Level 2 `Basic PPS Assumptions` panel between response quality and PPS curves. `session_analysis.py` writes `basic_assumption_checks.v1.json`; `analysis_catalog.py` and `analysis_review.py` load it for participant and participant-pool datasets. The artifact runs two single trial-level OLS/HC3 checks on `log(RT_ms)` with centered proximity ranks and estimable nuisance fixed effects (`part_number`, `respiratory_phase`, `noise_type`): a pragmatic baseline flatness slope check and a directional audio-tactile-by-proximity interaction check. The UI reduces those to two red/green buttons (`Baseline Assumption`, `Peripersonal Space Assumption`) with tooltips and compact beta/slope detail dialogs. Missing older artifacts intentionally show red/insufficient rather than crashing. This is immediate operator QC, not confirmatory participant-level inference.
 
 ## 2026-06-26
 
