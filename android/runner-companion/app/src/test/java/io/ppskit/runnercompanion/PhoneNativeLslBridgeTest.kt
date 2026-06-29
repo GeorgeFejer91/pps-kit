@@ -12,6 +12,13 @@ class PhoneNativeLslBridgeTest {
         val bridge = PhoneNativeLslBridgeFactory.create()
         val status = bridge.status()
         val commandTransport = bridge.openCommandTransport(emptyPackage(), "run-001")
+        val controllerTransport = bridge.openControllerTransport(
+            commandSignalsName = PHONE_LSL_COMMAND_STREAM_NAME,
+            commandAcksName = PHONE_LSL_ACK_STREAM_NAME,
+            sessionId = "session-001",
+            participantId = "P001",
+            controllerId = "android_controller",
+        )
 
         assertFalse(status.available)
         assertFalse(status.enabled)
@@ -19,6 +26,8 @@ class PhoneNativeLslBridgeTest {
         assertTrue(status.reason.contains("liblsl_android_class_unavailable"))
         assertFalse(commandTransport.status.available)
         assertFalse(commandTransport.status.enabled)
+        assertFalse(controllerTransport.status.available)
+        assertFalse(controllerTransport.status.enabled)
     }
 
     @Test
@@ -35,6 +44,7 @@ class PhoneNativeLslBridgeTest {
         assertEquals("PPSMarkersV2", status.getJSONObject("stream_names").getString("rich_markers"))
         assertEquals("PPSTriggerCodes", status.getJSONObject("stream_names").getString("numeric_triggers"))
         assertTrue(status.isNull("command_transport"))
+        assertTrue(status.isNull("controller_transport"))
         assertEquals("marker_version", status.getJSONArray("marker_channels").getString(0))
         assertEquals("payload_json", status.getJSONArray("marker_channels").getString(PHONE_LSL_MARKER_CHANNELS.size - 1))
         assertEquals("schema", status.getJSONArray("command_channels").getString(0))

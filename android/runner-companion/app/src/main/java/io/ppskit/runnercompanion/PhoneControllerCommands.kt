@@ -19,6 +19,10 @@ internal fun buildPhoneControllerCommandRow(
     issuedLslTime: Double = 0.0,
     phoneUnixMs: Long = System.currentTimeMillis(),
     phoneElapsedRealtimeMs: Long = SystemClock.elapsedRealtime(),
+    nativeTransportAvailable: Boolean = false,
+    nativeControllerTransportEnabled: Boolean = false,
+    currentAndroidSourceBehavior: String = "local_controller_outbox_only",
+    timestampQuality: String = "android_elapsed_realtime_not_lsl_local_clock",
 ): JSONObject {
     val targetSessionId = runPackage?.partSessionId?.ifBlank { runPackage.sessionId }
         ?: runPackage?.sessionId
@@ -34,9 +38,10 @@ internal fun buildPhoneControllerCommandRow(
         .put("target_session_group_id", runPackage?.sessionGroupId.orEmpty())
         .put("target_part_number", runPackage?.partNumber.orEmpty())
         .put("requested_by", "android_controller")
-        .put("native_transport_available", false)
-        .put("current_android_source_behavior", "local_controller_outbox_only")
-        .put("timestamp_quality", "android_elapsed_realtime_not_lsl_local_clock")
+        .put("native_transport_available", nativeTransportAvailable)
+        .put("native_controller_transport_enabled", nativeControllerTransportEnabled)
+        .put("current_android_source_behavior", currentAndroidSourceBehavior)
+        .put("timestamp_quality", timestampQuality)
     val signal = PhoneLslCommandSignal(
         commandId = commandId,
         sessionId = targetSessionId,
@@ -55,8 +60,10 @@ internal fun buildPhoneControllerCommandRow(
         .put("target_session_id", targetSessionId)
         .put("phone_unix_ms", phoneUnixMs)
         .put("phone_elapsed_realtime_ms", phoneElapsedRealtimeMs)
-        .put("native_transport_available", false)
-        .put("current_android_source_behavior", "local_controller_outbox_only")
+        .put("native_transport_available", nativeTransportAvailable)
+        .put("native_controller_transport_enabled", nativeControllerTransportEnabled)
+        .put("native_lsl_sent", false)
+        .put("current_android_source_behavior", currentAndroidSourceBehavior)
         .put("command_channels", stringArray(PHONE_LSL_COMMAND_CHANNELS))
         .put("command_sample", stringArray(sample))
         .put("payload", payload)
@@ -68,38 +75,76 @@ internal fun writePhoneControllerCommandOutbox(
     runPackage: MobileRunPackage?,
     summary: MobilePackageSummary?,
     command: String,
+    nativeBridgeStatus: PhoneNativeLslBridgeStatus = PhoneNativeLslBridgeFactory.create().status(),
+    controllerTransport: PhoneLslControllerTransport? = null,
 ): JSONObject {
     val dir = phoneControllerDir(context, pairing.sessionId)
     dir.mkdirs()
+    val nativeEnabled = controllerTransport?.status?.enabled == true
+    val sourceBehavior = if (nativeEnabled) "native_lsl_controller_with_local_outbox" else "local_controller_outbox_only"
+    val timestampQuality = if (nativeEnabled) "lsl_local_clock" else "android_elapsed_realtime_not_lsl_local_clock"
     val row = buildPhoneControllerCommandRow(
         pairing = pairing,
         runPackage = runPackage,
         summary = summary,
         command = command,
-        issuedLslTime = SystemClock.elapsedRealtimeNanos() / 1_000_000_000.0,
+        issuedLslTime = controllerTransport?.takeIf { nativeEnabled }?.localClock()
+            ?: (SystemClock.elapsedRealtimeNanos() / 1_000_000_000.0),
+        nativeTransportAvailable = nativeBridgeStatus.available,
+        nativeControllerTransportEnabled = nativeEnabled,
+        currentAndroidSourceBehavior = sourceBehavior,
+        timestampQuality = timestampQuality,
     )
+    val sampleJson = row.getJSONArray("command_sample")
+    val signal = phoneCommandFromSample((0 until sampleJson.length()).map { sampleJson.getString(it) })
+    val nativeSent = controllerTransport?.takeIf { nativeEnabled }?.sendCommand(signal) == true
+    row.put("native_lsl_sent", nativeSent)
+    val ack = if (nativeSent) waitForControllerAck(controllerTransport, signal.commandId) else null
+    if (ack != null) {
+        row
+            .put("ack_received", true)
+            .put("ack_status", ack.status)
+            .put("ack_reason", ack.reason)
+            .put("ack_channels", stringArray(PHONE_LSL_ACK_CHANNELS))
+            .put("ack_sample", stringArray(phoneAckToSample(ack)))
+    } else {
+        row.put("ack_received", false)
+    }
     val outbox = File(dir, "phone_controller_command_outbox.jsonl")
     outbox.appendText(row.toString() + "\n", Charsets.UTF_8)
-    val status = phoneControllerRuntimeStatus(pairing, runPackage, summary)
+    val status = phoneControllerRuntimeStatus(
+        pairing = pairing,
+        runPackage = runPackage,
+        summary = summary,
+        nativeBridgeStatus = nativeBridgeStatus,
+        controllerTransportStatus = controllerTransport?.status,
+    )
     val statusFile = File(dir, "phone_controller_runtime_status.json")
     statusFile.writeText(status.toString(2), Charsets.UTF_8)
     return JSONObject()
         .put("schema", "pps-android-controller-command-write.v1")
-        .put("status", "queued_local_outbox")
+        .put("status", if (nativeSent) "sent_native_lsl_and_queued_outbox" else "queued_local_outbox")
         .put("command", command)
         .put("command_id", row.optString("command_id"))
         .put("outbox_path", outbox.absolutePath)
         .put("runtime_status_path", statusFile.absolutePath)
-        .put("native_transport_available", false)
+        .put("native_transport_available", nativeBridgeStatus.available)
+        .put("native_controller_transport_enabled", nativeEnabled)
+        .put("native_lsl_sent", nativeSent)
+        .put("ack_received", ack != null)
+        .put("ack_status", ack?.status ?: "")
 }
 
 internal fun phoneControllerRuntimeStatus(
     pairing: PairingInfo,
     runPackage: MobileRunPackage?,
     summary: MobilePackageSummary?,
+    nativeBridgeStatus: PhoneNativeLslBridgeStatus = PhoneNativeLslBridgeFactory.create().status(),
+    controllerTransportStatus: PhoneNativeLslBridgeStatus? = null,
 ): JSONObject {
     val supportedCommands = runPackage?.lsl?.supportedCommands?.takeIf { it.isNotEmpty() }
         ?: listOf("start_experiment", "pause", "resume", "continue_instruction", "request_snapshot", "operator_note")
+    val controllerEnabled = controllerTransportStatus?.enabled == true
     return JSONObject()
         .put("schema", PHONE_CONTROLLER_RUNTIME_STATUS_SCHEMA)
         .put("session_id", pairing.sessionId)
@@ -107,9 +152,11 @@ internal fun phoneControllerRuntimeStatus(
         .put("participant_id", runPackage?.participantId ?: summary?.participantId.orEmpty())
         .put("role", "controller")
         .put("native_transport", "liblsl")
-        .put("native_transport_available", false)
-        .put("current_android_source_behavior", "local_controller_outbox_only")
-        .put("reason", "native_liblsl_android_layer_not_present")
+        .put("native_transport_available", nativeBridgeStatus.available)
+        .put("native_controller_transport_enabled", controllerEnabled)
+        .put("current_android_source_behavior", if (controllerEnabled) "native_lsl_controller_with_local_outbox" else "local_controller_outbox_only")
+        .put("reason", if (controllerEnabled) "" else controllerTransportStatus?.reason?.ifBlank { nativeBridgeStatus.reason } ?: nativeBridgeStatus.reason.ifBlank { "native_lsl_controller_transport_not_enabled" })
+        .put("native_bridge", phoneNativeLslStatusJson(nativeBridgeStatus, controllerTransportStatus = controllerTransportStatus))
         .put(
             "streams",
             JSONObject()
@@ -126,6 +173,15 @@ internal fun phoneControllerRuntimeStatus(
                 .put("supported_commands", stringArray(supportedCommands))
                 .put("token_required", true),
         )
+}
+
+private fun waitForControllerAck(transport: PhoneLslControllerTransport, commandId: String): PhoneLslCommandAck? {
+    repeat(6) {
+        val sample = transport.pullAckSample(timeoutS = 0.05) ?: return@repeat
+        val ack = runCatching { phoneAckFromSample(sample.sample) }.getOrNull() ?: return@repeat
+        if (ack.commandId == commandId) return ack
+    }
+    return null
 }
 
 private fun phoneControllerDir(context: Context, sessionId: String): File =

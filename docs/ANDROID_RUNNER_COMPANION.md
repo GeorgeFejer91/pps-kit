@@ -130,6 +130,13 @@ handling records snapshot/note/continue actions and explicitly rejects
 pause/resume/stop-after-block until the phone runner has a true pauseable
 AudioTrack state machine.
 
+Controller mode always writes `phone_controller_command_outbox.jsonl` as the
+local audit trail. In a native liblsl validation build it also keeps a
+`PPSCommandSignalsV1` outlet open while Controller mode is selected, sends button
+presses over LSL, polls for matching `PPSCommandAcksV1` samples, and records the
+native send/ack result in the outbox row plus
+`phone_controller_runtime_status.json`.
+
 Android vibration calibration is device-limited. If Android reports amplitude
 control, the entered threshold percent is mapped to the `VibrationEffect`
 amplitude range for phone vibration cues. If the phone has a vibrator but no

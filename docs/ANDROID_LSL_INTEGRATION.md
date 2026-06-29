@@ -12,8 +12,10 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
 - `PhoneLslProtocol.kt` mirrors the PC runner `PPSCommandSignalsV1` and
   `PPSCommandAcksV1` string-sample field order.
 - The phone-owned screen has explicit `Runner` and `Controller` roles. Runner
-  mode owns local package playback; Controller mode writes token-gated
-  `PPSCommandSignalsV1` samples to `phone_controller_command_outbox.jsonl`.
+  mode owns local package playback; Controller mode always writes token-gated
+  `PPSCommandSignalsV1` samples to `phone_controller_command_outbox.jsonl` and,
+  when native liblsl is present, keeps a long-lived `PPSCommandSignalsV1` outlet
+  open for button-press commands.
 - Commands are token-gated through `token` or `companion_token` in
   `payload_json` before any local handler runs.
 - Acks are shaped as applied/rejected command acknowledgements after the local
@@ -31,9 +33,12 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   `phone_runtime_command_not_yet_supported`. This is intentional until phone
   playback has a true pauseable AudioTrack state machine.
 - Phone-owned run folders and ZIP exports include `lsl_runtime_status.json`.
-- Controller-mode outboxes include `phone_controller_runtime_status.json` with
-  `native_transport_available=false` and
-  `current_android_source_behavior=local_controller_outbox_only`.
+- Controller-mode outboxes include `phone_controller_runtime_status.json`.
+  Default builds record `current_android_source_behavior=local_controller_outbox_only`;
+  native builds record `native_lsl_controller_with_local_outbox` when the
+  command outlet is live. Each controller command row records whether the sample
+  was sent over native LSL and whether a matching `PPSCommandAcksV1` sample was
+  observed.
 - PC-side phone uploads preserve `lsl_runtime_status.json` beside
   `lsl_marker_mirror.csv` and `command_diary.jsonl`.
 
@@ -63,11 +68,12 @@ that can create long-lived outlets/inlets for:
 - `PPSCommandSignalsV1`
 - `PPSCommandAcksV1`
 
-The bridge keeps marker outlets alive for the full phone run, attempts command
-resolution at run start, retries command-stream resolution during playback when
-liblsl is available but no command stream was found, uses one command/ack sample
-per push, and sends a command ack only after the local Android handler has
-accepted or rejected the state transition.
+The bridge keeps marker outlets alive for the full phone run, attempts runner
+command resolution at run start, retries command-stream resolution during
+playback when liblsl is available but no command stream was found, keeps a
+controller command outlet alive while Controller mode is selected, uses one
+command/ack sample per push, and sends a command ack only after the local
+Android handler has accepted or rejected the state transition.
 
 The app is already wired for the local AAR path. Put a locally built or release
 downloaded `liblsl-Android.aar` at:
@@ -81,8 +87,9 @@ That file is ignored by Git. When it is absent, the reflection bridge records
 present, `PhoneNativeLslBridge.kt` can create the rich `PPSMarkersV2` and
 numeric `PPSTriggerCodes` outlets, append PC-compatible channel metadata, push
 every local marker mirror row to native LSL while preserving the local CSV
-mirror, resolve `PPSCommandSignalsV1`, and emit `PPSCommandAcksV1` for handled
-commands.
+mirror, resolve runner-side `PPSCommandSignalsV1`, emit `PPSCommandAcksV1` for
+handled commands, and create controller-side `PPSCommandSignalsV1` outlets with
+optional `PPSCommandAcksV1` ack polling.
 
 Phone marker timestamps use
 `android_elapsed_realtime_plus_open_lsl_clock_offset`: the app samples
@@ -110,7 +117,8 @@ Required validation levels:
 4. Native LSL network test with the AAR/JNI integration: resolve Android
    `PPSMarkersV2` / `PPSTriggerCodes` from the PC, send a token-gated
    `PPSCommandSignalsV1` command before or during playback, receive the matching
-   `PPSCommandAcksV1`, and record an XDF with LabRecorder.
+   `PPSCommandAcksV1`, send a command from Controller mode on a second Android
+   app/build, and record an XDF with LabRecorder.
 5. Physical phone test on same-Wi-Fi and phone-hotspot networks, including a
    failure-mode report for multicast discovery, reconnect, and command rejection
    behavior.

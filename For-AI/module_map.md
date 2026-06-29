@@ -27,7 +27,9 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `PPSMarkersV2`/`PPSTriggerCodes` outlets before `session_metadata`, pushes
   every local marker mirror row while preserving CSV artifacts, resolves
   `PPSCommandSignalsV1`, retries command-stream resolution during active phone
-  playback if needed, and emits token-gated `PPSCommandAcksV1`. The current
+  playback if needed, emits token-gated `PPSCommandAcksV1`, and creates a
+  controller-side `PPSCommandSignalsV1` outlet with optional
+  `PPSCommandAcksV1` polling while Controller mode is selected. The current
   phone command handler records snapshot/note/continue actions and rejects
   pause/resume/stop-after-block until phone playback has a true pauseable
   AudioTrack state machine. Strict native validation must require both
@@ -37,8 +39,10 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   the `Runner` / `Controller` toggle inside `PhoneRuntimeScreen`. Controller
   mode writes token-gated command samples to
   `phone_controller_command_outbox.jsonl` plus
-  `phone_controller_runtime_status.json`; it is a local outbox contract for the
-  future native bridge, not live command transport.
+  `phone_controller_runtime_status.json`; default builds remain local-outbox
+  only, while native liblsl validation builds also send button presses over a
+  long-lived `PPSCommandSignalsV1` outlet and record native send/ack outcomes in
+  the outbox row.
 - Provisional Woojer tactile-drive latency compensation: `tactile_latency.py`, consumed by `session_runner.py` during participant/top-up block WAV preparation.
 - Shared runner/dashboard profile memory and output-diary bridge: `runner_diary.py` now owns runner settings and diary helpers; future shared profile-catalogue code should live in a common Python seam consumed by both `dashboard_app.py` and `focus_app.py`, not separately in browser JS or runner UI code.
 - Event, timing, and output evidence contracts: `timing_events.py`, `session_events.py`, `output_evidence.py`, `topup.py`.

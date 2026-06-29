@@ -49,9 +49,35 @@ class PhoneControllerCommandsTest {
         assertEquals(PHONE_CONTROLLER_RUNTIME_STATUS_SCHEMA, status.getString("schema"))
         assertEquals("controller", status.getString("role"))
         assertFalse(status.getBoolean("native_transport_available"))
-        assertEquals("native_liblsl_android_layer_not_present", status.getString("reason"))
+        assertTrue(status.getString("reason").contains("liblsl_android_class_unavailable"))
         assertTrue(status.getJSONObject("command_protocol").getBoolean("token_required"))
         assertEquals("PPSCommandSignalsV1", status.getJSONObject("streams").getString("command_signals"))
+    }
+
+    @Test
+    fun controllerRuntimeStatusDocumentsNativeControllerTransportWhenEnabled() {
+        val pairing = PairingInfo.parse(
+            "pps-companion://pair?host=127.0.0.1&port=8767&session_id=session-001&token=secret",
+        )
+        val bridge = PhoneNativeLslBridgeStatus(
+            available = true,
+            enabled = false,
+            backend = "liblsl-android-reflection",
+        )
+        val controller = bridge.copy(enabled = true)
+
+        val status = phoneControllerRuntimeStatus(
+            pairing = pairing,
+            runPackage = runPackage(),
+            summary = null,
+            nativeBridgeStatus = bridge,
+            controllerTransportStatus = controller,
+        )
+
+        assertTrue(status.getBoolean("native_transport_available"))
+        assertTrue(status.getBoolean("native_controller_transport_enabled"))
+        assertEquals("native_lsl_controller_with_local_outbox", status.getString("current_android_source_behavior"))
+        assertTrue(status.getJSONObject("native_bridge").getJSONObject("controller_transport").getBoolean("enabled"))
     }
 
     private fun runPackage(): MobileRunPackage =

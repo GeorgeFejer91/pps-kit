@@ -144,6 +144,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `lsl_runtime_status.json` now separates bridge, marker transport, and command
   transport details; strict validation requires the native command receiver and
   enabled `native_bridge.command_transport` as well as marker transport.
+- Android Controller mode now has the matching optional native sender boundary.
+  It still writes `phone_controller_command_outbox.jsonl` and
+  `phone_controller_runtime_status.json` as the durable audit trail in every
+  build, but with the local liblsl AAR present it keeps a controller-side
+  `PPSCommandSignalsV1` outlet open while Controller mode is selected, sends
+  button-press commands over native LSL, polls for matching
+  `PPSCommandAcksV1` samples, and records native send/ack outcomes in each
+  outbox row. Default builds remain `local_controller_outbox_only`.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only

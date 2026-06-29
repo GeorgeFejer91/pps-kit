@@ -425,12 +425,15 @@ private fun PhoneRuntimeScreen(
     var runProgress by remember { mutableStateOf("") }
     var uploadedArtifact by remember { mutableStateOf("") }
     var lastRunDir by remember { mutableStateOf("") }
+    var controllerSending by remember { mutableStateOf(false) }
     var phoneAge by remember(pairing.sessionId) { mutableStateOf("") }
     var phoneHandedness by remember(pairing.sessionId) { mutableStateOf("right") }
     var phoneGender by remember(pairing.sessionId) { mutableStateOf("prefer_not_to_say") }
     var tactileThreshold by remember(pairing.sessionId) { mutableStateOf("") }
     var phoneRole by remember(pairing.sessionId) { mutableStateOf(PhoneRuntimeRole.Runner) }
     var session by remember { mutableStateOf<PhoneRunSession?>(null) }
+    val nativeControllerBridge = remember(pairing.sessionId) { PhoneNativeLslBridgeFactory.create() }
+    var controllerTransport by remember(pairing.sessionId) { mutableStateOf<PhoneLslControllerTransport?>(null) }
     var runJob by remember { mutableStateOf<Job?>(null) }
     val logLines = remember { mutableStateListOf<String>() }
     val syncedPackages = remember { mutableStateMapOf<String, MobileRunPackage>() }
@@ -476,6 +479,39 @@ private fun PhoneRuntimeScreen(
     val selectedManifest = selectedSummary?.let { syncedPackages[it.packageId] }
     val phoneOwnedSession = pairing.isPhoneExport || selectedManifest?.phoneOwnedSession == true || selectedSummary?.phoneOwnedSession == true
     val fullExperimentSynced = packages.isNotEmpty() && packages.all { syncedPackages.containsKey(it.packageId) }
+    DisposableEffect(
+        phoneRole,
+        selectedPackageId,
+        selectedManifest?.lsl?.commandSignalsName,
+        selectedManifest?.lsl?.commandAcksName,
+        selectedManifest?.partSessionId,
+        selectedManifest?.sessionId,
+        selectedSummary?.participantId,
+    ) {
+        if (phoneRole != PhoneRuntimeRole.Controller || selectedSummary == null) {
+            controllerTransport = null
+            onDispose { }
+        } else {
+            val targetSessionId = selectedManifest?.partSessionId?.ifBlank { selectedManifest.sessionId }
+                ?: selectedManifest?.sessionId
+                ?: pairing.sessionId
+            val participantId = selectedManifest?.participantId ?: selectedSummary.participantId
+            val transport = nativeControllerBridge.openControllerTransport(
+                commandSignalsName = selectedManifest?.lsl?.commandSignalsName?.ifBlank { PHONE_LSL_COMMAND_STREAM_NAME }
+                    ?: PHONE_LSL_COMMAND_STREAM_NAME,
+                commandAcksName = selectedManifest?.lsl?.commandAcksName?.ifBlank { PHONE_LSL_ACK_STREAM_NAME }
+                    ?: PHONE_LSL_ACK_STREAM_NAME,
+                sessionId = targetSessionId,
+                participantId = participantId,
+                controllerId = "android_controller",
+            )
+            controllerTransport = transport
+            onDispose {
+                transport.close()
+                controllerTransport = null
+            }
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -488,6 +524,9 @@ private fun PhoneRuntimeScreen(
             StatusChip("Session ${pairing.sessionId}")
             if (pairing.isPhoneExport) StatusChip("Phone-owned")
             StatusChip(if (phoneRole == PhoneRuntimeRole.Runner) "Runner mode" else "Controller mode")
+            if (phoneRole == PhoneRuntimeRole.Controller) {
+                StatusChip(if (controllerTransport?.status?.enabled == true) "LSL controller" else "Controller outbox")
+            }
             if (pairing.transport == "wifi_direct") StatusChip("Wi-Fi Direct")
             StatusChip(status)
             if (activeBlockLabel.isNotBlank()) StatusChip(activeBlockLabel)
@@ -706,24 +745,38 @@ private fun PhoneRuntimeScreen(
                 ).filter { (command, _) -> command in supportedCommands }.forEach { (command, label) ->
                     Button(
                         onClick = {
-                            runCatching {
-                                writePhoneControllerCommandOutbox(
-                                    context = context,
-                                    pairing = pairing,
-                                    runPackage = selectedManifest,
-                                    summary = selectedSummary,
-                                    command = command,
-                                )
-                            }.onSuccess { result ->
-                                status = "Queued $label"
-                                uploadedArtifact = "Controller outbox ${result.optString("outbox_path", "")}"
-                                log("Queued $command")
-                            }.onFailure {
-                                error = it.message ?: "Controller command failed."
-                                log(error)
+                            scope.launch {
+                                controllerSending = true
+                                runCatching {
+                                    withContext(Dispatchers.IO) {
+                                        writePhoneControllerCommandOutbox(
+                                            context = context,
+                                            pairing = pairing,
+                                            runPackage = selectedManifest,
+                                            summary = selectedSummary,
+                                            command = command,
+                                            nativeBridgeStatus = nativeControllerBridge.status(),
+                                            controllerTransport = controllerTransport,
+                                        )
+                                    }
+                                }.onSuccess { result ->
+                                    val sentNative = result.optBoolean("native_lsl_sent", false)
+                                    val ackStatus = result.optString("ack_status", "")
+                                    status = if (sentNative) "Sent $label" else "Queued $label"
+                                    uploadedArtifact = buildString {
+                                        append(if (sentNative) "Native LSL command sent" else "Controller outbox")
+                                        if (ackStatus.isNotBlank()) append(" ack=$ackStatus")
+                                        append(" ${result.optString("outbox_path", "")}")
+                                    }
+                                    log(if (sentNative) "Sent $command" else "Queued $command")
+                                }.onFailure {
+                                    error = it.message ?: "Controller command failed."
+                                    log(error)
+                                }
+                                controllerSending = false
                             }
                         },
-                        enabled = selectedSummary != null && !running && !syncing,
+                        enabled = selectedSummary != null && !running && !syncing && !controllerSending,
                     ) {
                         Icon(
                             if (command == "pause") Icons.Default.Pause else Icons.AutoMirrored.Filled.Send,
