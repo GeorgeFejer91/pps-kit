@@ -517,6 +517,17 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   remain enabled and unobstructed before playback starts. Compact and
   constrained runner profiles hide the optional Output Summary panel so the
   tactile test controls stay visible inside the window.
+- Bundled profile audio propagation now treats Segment 1 working copies as
+  generated canonical files, not durable sources. Profile materialization
+  overwrites deterministic ingredient filenames from the bundled catalog,
+  removes stale `__N` sidecar copies for the same descriptor, and falls back to
+  the catalog source whenever a saved design points inside the generated
+  Segment 1 folder. Startup/template load marks a project stale when catalog
+  hashes differ from canonical Segment 1 copies and clears downstream Segment
+  2-6 products before rematerializing. The experiment-runner block cache now
+  includes actual trial WAV content hashes in its cache key, validates cached
+  trial hashes before reuse, and prepared-session status rejects packages whose
+  source trial WAVs changed even if the Segment 5 CSV wrapper did not.
 
 ## Active Implementation Backlog
 

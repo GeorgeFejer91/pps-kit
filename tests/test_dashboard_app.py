@@ -1259,6 +1259,55 @@ def test_dashboard_startup_replaces_stale_study5_working_copy(tmp_path: Path):
     assert not (stale_segment5_dir / "stale_block_preview_marker.txt").exists()
 
 
+def test_dashboard_startup_overwrites_stale_study5_canonical_ingredient(tmp_path: Path):
+    design_path = tmp_path / "design.json"
+    save_design(_compact_design(), design_path)
+    render_dir = _render_dir(tmp_path)
+    registry_root = tmp_path / "dashboard_projects" / "0_study_project_registry"
+    controller = DashboardController(
+        design_path=design_path,
+        render_dir=render_dir,
+        session_root=tmp_path / "sessions",
+        import_dir=tmp_path / "imports",
+        preview_dir=tmp_path / "previews",
+        project_registry_root=registry_root,
+    )
+    loaded = controller.load_template("study5_box_breathing_pps")
+    project_dir = Path(loaded["project"]["project_dir"])
+    segment1_dir = Path(loaded["project"]["segment_folders"]["1_core_audio_ingredients"])
+    ingredient_manifest = _read_json_file(segment1_dir / "stimulus_ingredients_manifest.json")
+    pink_row = next(item for item in ingredient_manifest["ingredients"] if item["label"] == "Pink frontal")
+    pink_path = Path(pink_row["path"])
+    source_path = Path(pink_row["provenance"]["source_catalog_path"])
+    expected_hash = dashboard_app._local_file_sha256(source_path)
+
+    sf.write(pink_path, np.zeros((441, 1), dtype=np.float32), 44100)
+    assert dashboard_app._local_file_sha256(pink_path) != expected_hash
+    sidecar = pink_path.with_name(f"{pink_path.stem}__2{pink_path.suffix}")
+    dashboard_app._copy_file(source_path, sidecar)
+    stale_segment5_dir = project_dir / "5_block_csv_preview"
+    stale_segment5_dir.mkdir(parents=True, exist_ok=True)
+    (stale_segment5_dir / "stale_block_preview_marker.txt").write_text("stale downstream", encoding="utf-8")
+
+    restarted = DashboardController(
+        design_path=design_path,
+        render_dir=render_dir,
+        session_root=tmp_path / "sessions",
+        import_dir=tmp_path / "imports",
+        preview_dir=tmp_path / "previews",
+        project_registry_root=registry_root,
+    )
+    state = restarted.snapshot()
+    pink_noise = next(item for item in state["design"]["noises"] if item["label"] == "Pink frontal")
+
+    assert Path(pink_noise["prebaked_path"]) == pink_path
+    assert dashboard_app._local_file_sha256(pink_path) == expected_hash
+    assert not sidecar.exists()
+    assert not (stale_segment5_dir / "stale_block_preview_marker.txt").exists()
+    refreshed_manifest = _read_json_file(segment1_dir / "stimulus_ingredients_manifest.json")
+    assert refreshed_manifest["ingredient_count"] == 4
+
+
 def test_dashboard_blocks_runner_launch_for_incomplete_published_profile(tmp_path: Path):
     client = _client(tmp_path)
 

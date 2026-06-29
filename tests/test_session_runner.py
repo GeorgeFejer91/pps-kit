@@ -594,6 +594,32 @@ def test_prepare_segment_run_package_rebuilds_invalid_block_cache(tmp_path: Path
     assert rebuilt.blocks[0].metadata["block_cache_status"] == "miss_stored"
 
 
+def test_prepare_segment_run_package_rejects_stale_cached_block_when_trial_wav_changes(tmp_path: Path):
+    run_manifest = _segment_run_setup_fixture(tmp_path)
+    cache_root = tmp_path / "block_cache"
+    first = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=tmp_path / "sessions",
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+        block_cache_root=cache_root,
+    )
+    assert first.blocks[0].metadata["block_cache_status"] == "miss_stored"
+
+    target = tmp_path / "target.wav"
+    replacement = np.column_stack([np.ones(441) * 0.2, np.ones(441) * 0.1, np.ones(441) * 0.05]).astype(np.float32)
+    sf.write(target, replacement, 44100)
+
+    with pytest.raises(ValueError, match="Trial WAV hash mismatch"):
+        prepare_segment_run_package(
+            run_manifest,
+            "P002",
+            session_root=tmp_path / "sessions",
+            created_at=datetime(2026, 1, 2, 3, 4, 6),
+            block_cache_root=cache_root,
+        )
+
+
 def test_block_cache_link_falls_back_to_copy(tmp_path: Path, monkeypatch):
     source = tmp_path / "cached.wav"
     target = tmp_path / "session" / "block.wav"
@@ -783,6 +809,44 @@ def test_prepared_session_status_rejects_stale_source_block_csv(tmp_path: Path):
     queue = json.loads((state_root / "prepared_session_queue.v1.json").read_text(encoding="utf-8"))
     assert queue["entries"][-1]["status"] == "stale"
     assert "source CSV changed" in queue["entries"][-1]["message"]
+
+
+def test_prepared_session_status_rejects_stale_source_trial_wav(tmp_path: Path):
+    run_manifest = _segment_run_setup_fixture(tmp_path)
+    session_root = tmp_path / "sessions"
+    state_root = tmp_path / "state"
+    package = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=session_root,
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+    record_prepared_session_queue(
+        participant_id="P001",
+        run_setup_manifest_path=run_manifest,
+        session_manifest_path=package.manifest_path,
+        status="ready",
+        state_root=state_root,
+    )
+
+    target = tmp_path / "target.wav"
+    replacement = np.column_stack([np.ones(441) * 0.3, np.ones(441) * 0.2, np.ones(441) * 0.1]).astype(np.float32)
+    sf.write(target, replacement, 44100)
+
+    stale_status = prepared_session_asset_status(
+        run_manifest,
+        "P001",
+        state_root=state_root,
+        session_root=session_root,
+    )
+
+    assert stale_status["generated"] is False
+    assert stale_status["status"] == "not_generated"
+    assert "source trial WAV changed" in stale_status["message"]
+    assert claim_prepared_session(run_manifest, "P001", state_root=state_root, session_root=session_root) is None
+    queue = json.loads((state_root / "prepared_session_queue.v1.json").read_text(encoding="utf-8"))
+    assert queue["entries"][-1]["status"] == "stale"
+    assert "source trial WAV changed" in queue["entries"][-1]["message"]
 
 
 def test_run_playback_numbering_places_topups_in_play_order():

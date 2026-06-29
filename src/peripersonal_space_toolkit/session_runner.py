@@ -76,7 +76,7 @@ SEGMENT_BLOCK_PREVIEW_SCHEMA = "pps-block-csv-preview.v1"
 LAST_EXPERIMENT_SCHEMA = "pps-last-experiment.v1"
 PREPARED_SESSION_QUEUE_SCHEMA = "pps-prepared-session-queue.v1"
 BLOCK_WAV_CACHE_SCHEMA = "pps-session-block-cache.v1"
-BLOCK_WAV_CACHE_VERSION = "2026-06-23.woojer-compensation.v1"
+BLOCK_WAV_CACHE_VERSION = "2026-06-29.source-file-content.v1"
 RESPONSE_MARKER_GAIN = 0.05
 EXTERNAL_LABRECORDER_FINAL_MARKER_SETTLE_S = 1.0
 LAUNCHABLE_ACTIVITY_EVENTS = {"run_setup_prepared", "session_prepared", "runner_launched"}
@@ -1391,6 +1391,31 @@ def _prepared_session_sources_current(package: RunPackage, run_setup_manifest_pa
                 f"Prepared block {block.index} trial count is stale: "
                 f"{block.trial_count} prepared vs {len(source_rows)} source rows."
             )
+        prepared_csv = _session_package_path(package, block.manifest_path)
+        try:
+            prepared_rows = _read_csv_rows(prepared_csv)
+        except Exception as exc:
+            return False, f"Prepared block manifest cannot be read: {exc}"
+        if len(prepared_rows) != int(block.trial_count):
+            return False, (
+                f"Prepared block {block.index} manifest row count is stale: "
+                f"{block.trial_count} expected vs {len(prepared_rows)} prepared rows."
+            )
+        ordered_source_rows = sorted(source_rows, key=lambda row: _as_int(row.get("block_trial_index"), default=0))
+        for source_row, prepared_row in zip(ordered_source_rows, prepared_rows):
+            trial_path = _resolve_relative_path(
+                _row_value(source_row, "Trial_File_Path", "trial_file_path", default=""),
+                source_csv.parent,
+            )
+            if not _path_exists(trial_path):
+                return False, f"Prepared block {block.index} source trial WAV is missing: {trial_path}"
+            current_hash = _sha256_file(trial_path)
+            declared_hash = str(_row_value(source_row, "Source_SHA256", "source_sha256", default="")).strip()
+            prepared_hash = str(_row_value(prepared_row, "Source_SHA256", "source_sha256", default="")).strip()
+            if declared_hash and declared_hash != current_hash:
+                return False, f"Prepared block {block.index} is stale because a source trial WAV changed: {trial_path}"
+            if prepared_hash and prepared_hash != current_hash:
+                return False, f"Prepared block {block.index} is stale because a source trial WAV changed: {trial_path}"
     return True, "Prepared local audio package is available."
 
 
@@ -1728,12 +1753,13 @@ def _segment_block_cache_key(
     row_payload: list[dict[str, str]] = []
     for row in ordered_rows:
         trial_path = _resolve_relative_path(_row_value(row, "trial_file_path", "Trial_File_Path", default=""), source_csv.parent)
-        expected_hash = str(_row_value(row, "source_sha256", "Source_SHA256", default="")).strip()
-        actual_hash = expected_hash or (_sha256_file(trial_path) if _path_exists(trial_path) else "")
+        declared_hash = str(_row_value(row, "source_sha256", "Source_SHA256", default="")).strip()
+        actual_hash = _sha256_file(trial_path) if _path_exists(trial_path) else ""
         row_payload.append(
             {
                 "trial_file_path": str(trial_path.resolve()) if trial_path else "",
                 "source_sha256": actual_hash,
+                "declared_source_sha256": declared_hash,
                 "block_trial_index": str(_row_value(row, "block_trial_index", "Block_Trial_Index", default="")),
                 "family": str(_row_value(row, "family", "Family", default="")),
                 "soa_ms": str(_row_value(row, "soa_ms", "SOA_ms", default="")),
@@ -1851,6 +1877,20 @@ def _read_valid_block_cache(
     trials = manifest.get("trials", [])
     if not isinstance(trials, list) or len(trials) != len(source_rows):
         return None
+    ordered_rows = sorted(source_rows, key=lambda row: _as_int(row.get("block_trial_index"), default=0))
+    for row, cached in zip(ordered_rows, trials):
+        if not isinstance(cached, dict):
+            return None
+        trial_path = _resolve_relative_path(_row_value(row, "trial_file_path", "Trial_File_Path", default=""), source_csv.parent)
+        if not _path_exists(trial_path):
+            return None
+        current_hash = _sha256_file(trial_path)
+        declared_hash = str(_row_value(row, "source_sha256", "Source_SHA256", default="")).strip()
+        cached_hash = str(cached.get("source_sha256") or "").strip()
+        if declared_hash and declared_hash != current_hash:
+            return None
+        if cached_hash != current_hash:
+            return None
     return wav_path, manifest
 
 

@@ -3258,15 +3258,16 @@ def _record_ingredient_file(
         "sha256": _local_file_sha256(path),
     }
     manifest = _load_ingredient_manifest(project)
-    rows = [
-        item
-        for item in manifest.get("ingredients", [])
-        if str(item.get("path") or "") != str(path)
-        and not (
-            str(item.get("descriptor") or "") == descriptor
-            and str(item.get("sha256") or "") == row["sha256"]
-        )
-    ]
+    rows = []
+    for item in manifest.get("ingredients", []):
+        item_path = str(item.get("path") or "")
+        if item_path and not _path_exists(Path(item_path)):
+            continue
+        if item_path == str(path):
+            continue
+        if str(item.get("descriptor") or "") == descriptor and str(item.get("sha256") or "") == row["sha256"]:
+            continue
+        rows.append(item)
     rows.append(row)
     manifest = {
         "schema": INGREDIENT_MANIFEST_SCHEMA,
@@ -7491,9 +7492,86 @@ def _study5_profile_contract_signature(design: StimulusDesign) -> dict[str, Any]
     }
 
 
+def _study_profile_catalog_asset_requirements(design: StimulusDesign) -> list[tuple[str, dict[str, Any], str]]:
+    assets = _preload_assets_by_label(design.study_profile_id)
+    if not assets:
+        return []
+    requirements: list[tuple[str, dict[str, Any], str]] = []
+    for noise in design.noises:
+        asset = assets.get(_source_key(noise.label))
+        if asset:
+            requirements.append((noise.label, asset, "looming"))
+    for audio in design.custom_looming_files:
+        asset = assets.get(_source_key(audio.label))
+        if asset:
+            requirements.append((audio.label, asset, audio.motion_mode or "looming"))
+    for audio in design.prestimulus_files:
+        asset = assets.get(_source_key(audio.label))
+        if asset:
+            requirements.append((audio.label, asset, "stationary"))
+    return requirements
+
+
+def _canonical_ingredient_target_path(
+    context: DashboardProjectContext,
+    *,
+    label: str,
+    asset: dict[str, Any],
+    motion_mode: str,
+) -> Path | None:
+    source_text = str(asset.get("path") or "").strip()
+    if not source_text:
+        return None
+    source_path = _resolve_dashboard_local_path(source_text)
+    if not _path_exists(source_path):
+        return None
+    duration_ms = _audio_file_duration_ms(source_path)
+    descriptor = _descriptor_label(_ingredient_descriptor(label, duration_ms, motion_mode=motion_mode))
+    return context.segment1_dir / f"{descriptor}{source_path.suffix or '.wav'}"
+
+
+def _study_profile_catalog_assets_stale(context: DashboardProjectContext, design: StimulusDesign) -> bool:
+    requirements = _study_profile_catalog_asset_requirements(design)
+    if not requirements:
+        return False
+    manifest = _load_ingredient_manifest(context) if _path_exists(_ingredient_manifest_path(context)) else {"ingredients": []}
+    ingredients = manifest.get("ingredients", []) if isinstance(manifest.get("ingredients"), list) else []
+    existing_project = _path_exists(context.profile_dir / "active_design.json") or _project_has_generated_outputs(context.project_dir)
+    for label, asset, motion_mode in requirements:
+        expected_hash = str(asset.get("sha256") or "").strip()
+        if not expected_hash:
+            continue
+        target = _canonical_ingredient_target_path(context, label=label, asset=asset, motion_mode=motion_mode)
+        if target is None:
+            continue
+        if not _path_exists(target):
+            if existing_project:
+                return True
+            continue
+        try:
+            if _local_file_sha256(target) != expected_hash:
+                return True
+        except OSError:
+            return True
+        matching_rows = [
+            item
+            for item in ingredients
+            if _source_key(str(item.get("label") or "")) == _source_key(label)
+            and str(item.get("path") or "") == str(target)
+        ]
+        if matching_rows:
+            provenance = dict(matching_rows[-1].get("provenance") or {})
+            recorded_hash = str(provenance.get("source_catalog_sha256") or "").strip()
+            if recorded_hash and recorded_hash != expected_hash:
+                return True
+    return False
+
+
 def _profile_project_contract_stale(context: DashboardProjectContext, design: StimulusDesign) -> bool:
     if _is_custom_design(design) or not str(design.study_profile_id or "").strip():
         return False
+    if _study_profile_catalog_assets_stale(context, design):
+        return True
     if design.study_profile_id == DEFAULT_STUDY_TEMPLATE_ID and _study5_project_has_stale_baseline_artifacts(context):
         return True
     active_design_path = context.profile_dir / "active_design.json"
@@ -7830,7 +7908,47 @@ def _clear_segment6_generated_outputs(segment6_dir: Path) -> None:
             os.unlink(_filesystem_path(child))
 
 
-def _copy_materialize_ingredient_audio_file(path: Path, target_dir: Path, label: str, *, motion_mode: str = "") -> Path:
+def _remove_canonical_ingredient_siblings(target_dir: Path, descriptor: str, suffix: str, keep: Path) -> None:
+    for candidate in target_dir.glob(f"{descriptor}*{suffix}"):
+        if candidate.resolve() == keep.resolve():
+            continue
+        if candidate.stem == descriptor or candidate.stem.startswith(f"{descriptor}__"):
+            try:
+                os.unlink(_filesystem_path(candidate))
+            except OSError:
+                pass
+
+
+def _study_profile_custom_clip_asset(design: StimulusDesign, label: str) -> dict[str, Any]:
+    params = dict(design.study_profile_reference_parameters or {})
+    for item in params.get("custom_clip_assets", []):
+        if isinstance(item, dict) and _source_key(str(item.get("label") or "")) == _source_key(label):
+            return dict(item)
+    return {}
+
+
+def _profile_materialization_source_path(
+    current_path: str | Path,
+    project: DashboardProjectContext,
+    asset: dict[str, Any],
+) -> Path:
+    source_path = _resolve_dashboard_local_path(current_path)
+    catalog_text = str(asset.get("path") or "").strip()
+    if catalog_text:
+        catalog_path = _resolve_dashboard_local_path(catalog_text)
+        if _path_exists(catalog_path) and (not _path_exists(source_path) or _path_is_within(source_path, project.segment1_dir)):
+            return catalog_path
+    return source_path
+
+
+def _copy_materialize_ingredient_audio_file(
+    path: Path,
+    target_dir: Path,
+    label: str,
+    *,
+    motion_mode: str = "",
+    overwrite_canonical: bool = False,
+) -> Path:
     source = Path(path)
     if not _path_exists(source):
         raise FileNotFoundError(f"Profile source audio is missing: {source}")
@@ -7839,6 +7957,18 @@ def _copy_materialize_ingredient_audio_file(path: Path, target_dir: Path, label:
     suffix = source.suffix or ".wav"
     descriptor = _descriptor_label(stem)
     target = target_dir / f"{descriptor}{suffix}"
+    if overwrite_canonical:
+        _ensure_dir(target_dir)
+        try:
+            source_hash = _local_file_sha256(source)
+            target_hash = _local_file_sha256(target) if _path_exists(target) else ""
+            if source.resolve() != target.resolve() and source_hash != target_hash:
+                _copy_file(source, target)
+        except OSError:
+            if source.resolve() != target.resolve():
+                _copy_file(source, target)
+        _remove_canonical_ingredient_siblings(target_dir, descriptor, suffix, target)
+        return target
     try:
         source_hash = _local_file_sha256(source)
         for candidate in sorted(target_dir.glob(f"{descriptor}*{suffix}")):
@@ -7860,14 +7990,15 @@ def _copy_materialize_ingredient_audio_file(path: Path, target_dir: Path, label:
 def _materialize_study_profile_segment1_ingredients(project: DashboardProjectContext, design: StimulusDesign) -> None:
     assets = _preload_assets_by_label(design.study_profile_id)
     for noise in design.noises:
-        source_path = _resolve_dashboard_local_path(noise.prebaked_path)
         asset = assets.get(_source_key(noise.label), {})
+        source_path = _profile_materialization_source_path(noise.prebaked_path, project, asset)
         trajectory_snapshot = noise.trajectory_snapshot or dict(asset.get("trajectory_snapshot") or {})
         target_path = _copy_materialize_ingredient_audio_file(
             source_path,
             project.segment1_dir,
             noise.label,
             motion_mode="looming",
+            overwrite_canonical=True,
         )
         noise.prebaked_path = str(target_path)
         if trajectory_snapshot:
@@ -7887,14 +8018,15 @@ def _materialize_study_profile_segment1_ingredients(project: DashboardProjectCon
             },
         )
     for audio in design.custom_looming_files:
-        source_path = _resolve_dashboard_local_path(audio.path)
         asset = assets.get(_source_key(audio.label), {})
+        source_path = _profile_materialization_source_path(audio.path, project, asset)
         trajectory_snapshot = audio.trajectory_snapshot or dict(asset.get("trajectory_snapshot") or {})
         target_path = _copy_materialize_ingredient_audio_file(
             source_path,
             project.segment1_dir,
             audio.label,
             motion_mode=audio.motion_mode or "looming",
+            overwrite_canonical=True,
         )
         info = _audio_file_info(target_path)
         audio.path = str(target_path)
@@ -7920,12 +8052,14 @@ def _materialize_study_profile_segment1_ingredients(project: DashboardProjectCon
             },
         )
     for audio in design.prestimulus_files:
-        source_path = _resolve_dashboard_local_path(audio.path)
+        asset = assets.get(_source_key(audio.label), {}) or _study_profile_custom_clip_asset(design, audio.label)
+        source_path = _profile_materialization_source_path(audio.path, project, asset)
         target_path = _copy_materialize_ingredient_audio_file(
             source_path,
             project.segment1_dir,
             audio.label,
             motion_mode="stationary",
+            overwrite_canonical=True,
         )
         info = _audio_file_info(target_path)
         audio.path = str(target_path)
@@ -7941,6 +8075,7 @@ def _materialize_study_profile_segment1_ingredients(project: DashboardProjectCon
             motion_mode="stationary",
             provenance={
                 "source_catalog_path": str(source_path),
+                "source_catalog_sha256": str(asset.get("sha256") or ""),
                 "read_only_catalog": True,
                 "loudness_policy": loudness_policy_for_design(design),
             },
