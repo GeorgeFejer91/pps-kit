@@ -13,10 +13,6 @@ from typing import Any, Protocol
 
 from .schema import (
     CALIBRATION_SCHEMA,
-    CONFIRMATION_CATCH_TRIALS,
-    CONFIRMATION_MAX_FALSE_ALARMS,
-    CONFIRMATION_REQUIRED_HITS,
-    CONFIRMATION_SIGNAL_TRIALS,
     DEFAULT_POST_SILENCE_MS,
     DEFAULT_PRE_SILENCE_MS,
     DEFAULT_PULSE_DURATION_MS,
@@ -27,6 +23,14 @@ from .schema import (
     MAX_CALIBRATION_EVENTS,
     PROTOCOL_NAME,
     SEARCH_LEVELS_PERCENT,
+    STAIRCASE_CATCH_INTERVAL_SIGNALS,
+    STAIRCASE_DOWN_AFTER_HITS,
+    STAIRCASE_MAX_FALSE_ALARMS,
+    STAIRCASE_MIN_CATCH_TRIALS,
+    STAIRCASE_REVERSALS_TO_AVERAGE,
+    STAIRCASE_STOP_REVERSALS,
+    STAIRCASE_TARGET_DETECTION_RATE,
+    STAIRCASE_UP_AFTER_MISSES,
     VALID_RESPONSE_END_MS,
     VALID_RESPONSE_START_MS,
 )
@@ -104,6 +108,12 @@ class TactileCalibrationRunner:
         is_catch: bool = False,
         candidate_level_percent: float | None = None,
         inter_trial_interval_ms: float | None = None,
+        staircase_index: int | None = None,
+        staircase_direction: str = "",
+        reversal_index: int | None = None,
+        consecutive_hits: int | None = None,
+        consecutive_misses: int | None = None,
+        step_index: int | None = None,
     ) -> dict[str, Any]:
         self._check_cancelled()
         wav_path = temp_dir / f"trial_{trial_index:03d}_{phase}.wav"
@@ -129,7 +139,7 @@ class TactileCalibrationRunner:
             valid_start_perf=valid_start,
             valid_end_perf=valid_end,
         )
-        phase_label = "threshold" if phase == "confirmation" else phase
+        phase_label = "threshold staircase" if phase == "staircase" else phase
         self._progress(
             f"Tactile {phase_label}: trial {trial_index}, level {level_percent:g}%",
             trial_index=trial_index,
@@ -138,6 +148,12 @@ class TactileCalibrationRunner:
             is_catch=is_catch,
             candidate_level_percent="" if candidate_level_percent is None else float(candidate_level_percent),
             inter_trial_interval_ms="" if inter_trial_interval_ms is None else float(inter_trial_interval_ms),
+            staircase_index="" if staircase_index is None else int(staircase_index),
+            staircase_direction=str(staircase_direction or ""),
+            reversal_index="" if reversal_index is None else int(reversal_index),
+            consecutive_hits="" if consecutive_hits is None else int(consecutive_hits),
+            consecutive_misses="" if consecutive_misses is None else int(consecutive_misses),
+            step_index="" if step_index is None else int(step_index),
         )
         play_block = getattr(self.audio_engine, "play_block", None)
         if not callable(play_block):
@@ -162,6 +178,12 @@ class TactileCalibrationRunner:
             "phase": phase,
             "level_percent": float(level_percent),
             "candidate_level_percent": "" if candidate_level_percent is None else float(candidate_level_percent),
+            "staircase_index": "" if staircase_index is None else int(staircase_index),
+            "staircase_direction": str(staircase_direction or ""),
+            "reversal_index": "" if reversal_index is None else int(reversal_index),
+            "consecutive_hits": "" if consecutive_hits is None else int(consecutive_hits),
+            "consecutive_misses": "" if consecutive_misses is None else int(consecutive_misses),
+            "step_index": "" if step_index is None else int(step_index),
             "is_catch": bool(is_catch),
             "pulse_present": not bool(is_catch),
             "inter_trial_interval_ms": "" if inter_trial_interval_ms is None else float(inter_trial_interval_ms),
@@ -186,20 +208,44 @@ class TactileCalibrationRunner:
         prior_tail_ms = float(DEFAULT_PULSE_DURATION_MS) + float(DEFAULT_POST_SILENCE_MS)
         return max(0.0, float(inter_trial_interval_ms) - prior_tail_ms)
 
-    def _confirmation_summary(self, trials: list[dict[str, Any]], *, candidate_level_percent: float) -> dict[str, Any]:
-        signal = [trial for trial in trials if not bool(trial.get("is_catch"))]
-        catch = [trial for trial in trials if bool(trial.get("is_catch"))]
-        hits = sum(1 for trial in signal if bool(trial.get("valid_response")))
-        false_alarms = sum(1 for trial in catch if bool(trial.get("valid_response")))
+    def _starting_level_index(self, levels: list[float]) -> int:
+        start_level = min(100.0, max(FAMILIARIZATION_MIN_LEVEL_PERCENT, self.current_output_34_percent))
+        for index, level in enumerate(levels):
+            if level >= start_level:
+                return index
+        return max(0, len(levels) - 1)
+
+    def _staircase_summary(
+        self,
+        *,
+        signal_trials: int,
+        catch_trials: int,
+        hits: int,
+        misses: int,
+        false_alarms: int,
+        reversal_levels: list[float],
+        reversal_trial_indices: list[int],
+        threshold_estimate: float | None,
+    ) -> dict[str, Any]:
+        used_reversals = reversal_levels[-STAIRCASE_REVERSALS_TO_AVERAGE:]
         return {
-            "candidate_level_percent": float(candidate_level_percent),
-            "hits": hits,
-            "signal_trials": len(signal),
-            "false_alarms": false_alarms,
-            "catch_trials": len(catch),
-            "hit_rate": hits / len(signal) if signal else 0.0,
-            "false_alarm_rate": false_alarms / len(catch) if catch else 0.0,
-            "passed": hits >= CONFIRMATION_REQUIRED_HITS and false_alarms <= CONFIRMATION_MAX_FALSE_ALARMS,
+            "target_detection_rate": STAIRCASE_TARGET_DETECTION_RATE,
+            "down_after_hits": STAIRCASE_DOWN_AFTER_HITS,
+            "up_after_misses": STAIRCASE_UP_AFTER_MISSES,
+            "signal_trials": int(signal_trials),
+            "catch_trials": int(catch_trials),
+            "hits": int(hits),
+            "misses": int(misses),
+            "false_alarms": int(false_alarms),
+            "hit_rate": hits / signal_trials if signal_trials else 0.0,
+            "false_alarm_rate": false_alarms / catch_trials if catch_trials else 0.0,
+            "reversals": len(reversal_levels),
+            "reversal_levels_percent": [float(level) for level in reversal_levels],
+            "reversal_trial_indices": [int(index) for index in reversal_trial_indices],
+            "reversal_levels_used_percent": [float(level) for level in used_reversals],
+            "threshold_estimator": f"mean_last_{STAIRCASE_REVERSALS_TO_AVERAGE}_reversals",
+            "threshold_estimate_output_34_percent": "" if threshold_estimate is None else float(threshold_estimate),
+            "passed": threshold_estimate is not None and false_alarms <= STAIRCASE_MAX_FALSE_ALARMS,
         }
 
     def _has_event_capacity(self, trial_index: int, needed: int = 1) -> bool:
@@ -209,11 +255,23 @@ class TactileCalibrationRunner:
         levels = [float(level) for level in SEARCH_LEVELS_PERCENT]
         trial_index = 0
         accepted_level: float | None = None
-        confirmation_summary: dict[str, Any] = {}
-        candidate_summaries: list[dict[str, Any]] = []
-        first_detected_level: float | None = None
-        status = "failed"
-        message = "No tactile level passed confirmation."
+        threshold_estimate: float | None = None
+        status = "inconclusive_max_events"
+        message = f"Tactile threshold staircase reached the {MAX_CALIBRATION_EVENTS} event cap before converging."
+        current_index = self._starting_level_index(levels)
+        starting_level = levels[current_index]
+        last_step_direction = ""
+        consecutive_hits = 0
+        consecutive_misses = 0
+        step_index = 0
+        signal_trials = 0
+        catch_trials = 0
+        hits = 0
+        misses = 0
+        false_alarms = 0
+        next_catch_after_signal_count = STAIRCASE_CATCH_INTERVAL_SIGNALS
+        reversal_levels: list[float] = []
+        reversal_trial_indices: list[int] = []
         with tempfile.TemporaryDirectory(prefix="pps_tactile_calibration_") as temp_text:
             temp_dir = Path(temp_text)
             familiarization_level = min(100.0, max(FAMILIARIZATION_MIN_LEVEL_PERCENT, self.current_output_34_percent))
@@ -230,72 +288,115 @@ class TactileCalibrationRunner:
                     level_percent=familiarization_level,
                 )
             else:
-                first_detected_index = -1
-                for level_index, level in enumerate(levels):
-                    if not self._has_event_capacity(trial_index):
-                        status = "inconclusive_max_events"
-                        message = f"Tactile threshold assay reached the {MAX_CALIBRATION_EVENTS} event cap during ascending search."
+                while self._has_event_capacity(trial_index):
+                    if len(reversal_levels) >= STAIRCASE_STOP_REVERSALS and catch_trials >= STAIRCASE_MIN_CATCH_TRIALS:
                         break
-                    trial_index += 1
-                    trial = self._play_trial(
-                        temp_dir,
-                        trial_index=trial_index,
-                        phase="search",
-                        level_percent=level,
-                        inter_trial_interval_ms=self._next_inter_trial_interval_ms(),
-                    )
-                    if bool(trial.get("valid_response")):
-                        first_detected_index = level_index
-                        first_detected_level = float(level)
-                        break
-                if first_detected_index < 0 and status != "inconclusive_max_events":
-                    status = "failed_no_detection"
-                    message = "Participant did not report feeling the tactile pulse at any search level."
-                elif first_detected_index >= 0:
-                    block_size = CONFIRMATION_SIGNAL_TRIALS + CONFIRMATION_CATCH_TRIALS
-                    for level in levels[first_detected_index:]:
-                        if not self._has_event_capacity(trial_index, block_size):
-                            status = "inconclusive_max_events"
-                            message = (
-                                f"Tactile threshold assay reached the {MAX_CALIBRATION_EVENTS} event cap before "
-                                f"confirmation at {level:g}% could be completed."
-                            )
-                            break
-                        confirmation_plan = [False] * CONFIRMATION_SIGNAL_TRIALS + [True] * CONFIRMATION_CATCH_TRIALS
-                        self.rng.shuffle(confirmation_plan)
-                        confirmation_trials: list[dict[str, Any]] = []
-                        for is_catch in confirmation_plan:
-                            trial_index += 1
-                            confirmation_trials.append(
-                                self._play_trial(
-                                    temp_dir,
-                                    trial_index=trial_index,
-                                    phase="confirmation",
-                                    level_percent=level,
-                                    is_catch=is_catch,
-                                    candidate_level_percent=level,
-                                    inter_trial_interval_ms=self._next_inter_trial_interval_ms(),
-                                )
-                            )
-                        confirmation_summary = self._confirmation_summary(
-                            confirmation_trials,
+                    level = levels[current_index]
+                    if (
+                        catch_trials < STAIRCASE_MIN_CATCH_TRIALS
+                        and signal_trials >= next_catch_after_signal_count
+                    ):
+                        trial_index += 1
+                        trial = self._play_trial(
+                            temp_dir,
+                            trial_index=trial_index,
+                            phase="staircase",
+                            level_percent=level,
+                            is_catch=True,
                             candidate_level_percent=level,
+                            inter_trial_interval_ms=self._next_inter_trial_interval_ms(),
+                            staircase_index=current_index,
+                            reversal_index=len(reversal_levels),
+                            consecutive_hits=consecutive_hits,
+                            consecutive_misses=consecutive_misses,
+                            step_index=step_index,
                         )
-                        candidate_summaries.append(dict(confirmation_summary))
-                        if int(confirmation_summary.get("false_alarms") or 0) > CONFIRMATION_MAX_FALSE_ALARMS:
+                        catch_trials += 1
+                        next_catch_after_signal_count += STAIRCASE_CATCH_INTERVAL_SIGNALS
+                        if bool(trial.get("valid_response")):
+                            false_alarms += 1
+                        if false_alarms > STAIRCASE_MAX_FALSE_ALARMS:
                             status = "invalid_false_alarm"
                             message = (
-                                "Tactile threshold assay invalidated by a click during a catch trial; "
+                                "Tactile threshold staircase invalidated by a click during a catch trial; "
                                 "repeat after reinstruction."
                             )
                             break
-                        if bool(confirmation_summary.get("passed")):
-                            accepted_level = float(level)
-                            status = "accepted"
-                            message = f"Accepted tactile detection threshold at Output 3/4 level {accepted_level:g}%."
-                            break
-                    if accepted_level is None and status == "failed":
-                        message = "No candidate level passed 10/10 tactile detections with 0/3 catch false alarms."
+                        continue
+
+                    trial_index += 1
+                    level = levels[current_index]
+                    trial = self._play_trial(
+                        temp_dir,
+                        trial_index=trial_index,
+                        phase="staircase",
+                        level_percent=level,
+                        inter_trial_interval_ms=self._next_inter_trial_interval_ms(),
+                        staircase_index=current_index,
+                        reversal_index=len(reversal_levels),
+                        consecutive_hits=consecutive_hits,
+                        consecutive_misses=consecutive_misses,
+                        step_index=step_index,
+                    )
+                    signal_trials += 1
+                    step_direction = ""
+                    if bool(trial.get("valid_response")):
+                        hits += 1
+                        consecutive_hits += 1
+                        consecutive_misses = 0
+                        if consecutive_hits >= STAIRCASE_DOWN_AFTER_HITS:
+                            step_direction = "down"
+                            consecutive_hits = 0
+                    else:
+                        misses += 1
+                        consecutive_misses += 1
+                        consecutive_hits = 0
+                        if consecutive_misses >= STAIRCASE_UP_AFTER_MISSES:
+                            step_direction = "up"
+                            consecutive_misses = 0
+
+                    if step_direction:
+                        next_index = current_index - 1 if step_direction == "down" else current_index + 1
+                        next_index = max(0, min(len(levels) - 1, next_index))
+                        if next_index != current_index:
+                            step_index += 1
+                            if last_step_direction and step_direction != last_step_direction:
+                                reversal_levels.append(float(level))
+                                reversal_trial_indices.append(int(trial_index))
+                                trial["reversal_index"] = len(reversal_levels)
+                            last_step_direction = step_direction
+                            current_index = next_index
+                        else:
+                            step_direction = f"{step_direction}_limit"
+                    trial["staircase_direction"] = step_direction
+                    trial["consecutive_hits"] = consecutive_hits
+                    trial["consecutive_misses"] = consecutive_misses
+                    trial["step_index"] = step_index
+
+                if status != "invalid_false_alarm":
+                    if len(reversal_levels) >= STAIRCASE_STOP_REVERSALS and catch_trials >= STAIRCASE_MIN_CATCH_TRIALS:
+                        used_reversals = reversal_levels[-STAIRCASE_REVERSALS_TO_AVERAGE:]
+                        threshold_estimate = sum(used_reversals) / len(used_reversals)
+                        accepted_level = float(threshold_estimate)
+                        status = "accepted"
+                        message = (
+                            f"Accepted adaptive tactile threshold at Output 3/4 level {accepted_level:g}% "
+                            f"from {len(reversal_levels)} staircase reversals."
+                        )
+                    elif hits == 0:
+                        status = "failed_no_detection"
+                        message = "Participant did not report feeling the tactile pulse during the staircase."
+
+        staircase_summary = self._staircase_summary(
+            signal_trials=signal_trials,
+            catch_trials=catch_trials,
+            hits=hits,
+            misses=misses,
+            false_alarms=false_alarms,
+            reversal_levels=reversal_levels,
+            reversal_trial_indices=reversal_trial_indices,
+            threshold_estimate=threshold_estimate,
+        )
         threshold_value: float | str = "" if accepted_level is None else accepted_level
         report = {
             "schema": CALIBRATION_SCHEMA,
@@ -306,12 +407,14 @@ class TactileCalibrationRunner:
             "accepted": accepted_level is not None,
             "status": status,
             "message": message,
-            "threshold_method": "ascending_search_plus_10_of_10_confirmation_with_catches",
+            "threshold_method": "two_down_one_up_transformed_adaptive_staircase_with_catches",
             "threshold_definition": (
-                "Lowest Output 3/4 percent with 10/10 confirmed tactile detections and 0/3 catch false alarms."
+                f"Mean of the last {STAIRCASE_REVERSALS_TO_AVERAGE} reversal levels from a 2-down/1-up "
+                "adaptive staircase targeting approximately 70.7% tactile detection; catch false alarms invalidate the attempt."
             ),
             "search_levels_percent": levels,
-            "first_detected_level_percent": "" if first_detected_level is None else first_detected_level,
+            "staircase_levels_percent": levels,
+            "starting_level_percent": starting_level,
             "max_calibration_events": MAX_CALIBRATION_EVENTS,
             "timing": {
                 "pulse_duration_ms": DEFAULT_PULSE_DURATION_MS,
@@ -320,19 +423,15 @@ class TactileCalibrationRunner:
                 "inter_trial_interval_min_ms": INTER_TRIAL_INTERVAL_MIN_MS,
                 "inter_trial_interval_max_ms": INTER_TRIAL_INTERVAL_MAX_MS,
             },
-            "confirmation_criteria": {
-                "signal_trials": CONFIRMATION_SIGNAL_TRIALS,
-                "catch_trials": CONFIRMATION_CATCH_TRIALS,
-                "required_hits": CONFIRMATION_REQUIRED_HITS,
-                "max_false_alarms": CONFIRMATION_MAX_FALSE_ALARMS,
-                "valid_response_start_ms": VALID_RESPONSE_START_MS,
-                "valid_response_end_ms": VALID_RESPONSE_END_MS,
-            },
-            "validation_criteria": {
-                "signal_trials": CONFIRMATION_SIGNAL_TRIALS,
-                "catch_trials": CONFIRMATION_CATCH_TRIALS,
-                "min_hits": CONFIRMATION_REQUIRED_HITS,
-                "max_false_alarms": CONFIRMATION_MAX_FALSE_ALARMS,
+            "adaptive_staircase": {
+                "target_detection_rate": STAIRCASE_TARGET_DETECTION_RATE,
+                "down_after_hits": STAIRCASE_DOWN_AFTER_HITS,
+                "up_after_misses": STAIRCASE_UP_AFTER_MISSES,
+                "stop_reversals": STAIRCASE_STOP_REVERSALS,
+                "reversals_to_average": STAIRCASE_REVERSALS_TO_AVERAGE,
+                "minimum_catch_trials": STAIRCASE_MIN_CATCH_TRIALS,
+                "catch_interval_signal_trials": STAIRCASE_CATCH_INTERVAL_SIGNALS,
+                "max_false_alarms": STAIRCASE_MAX_FALSE_ALARMS,
                 "valid_response_start_ms": VALID_RESPONSE_START_MS,
                 "valid_response_end_ms": VALID_RESPONSE_END_MS,
             },
@@ -340,13 +439,15 @@ class TactileCalibrationRunner:
             "detection_threshold_output_34_percent": threshold_value,
             "recommended_output_34_percent": threshold_value,
             "confirmation_level_output_34_percent": threshold_value,
-            "confirmation_hit_rate": confirmation_summary.get("hit_rate", ""),
-            "confirmation_false_alarm_rate": confirmation_summary.get("false_alarm_rate", ""),
-            "validation_hit_rate": confirmation_summary.get("hit_rate", ""),
-            "validation_false_alarm_rate": confirmation_summary.get("false_alarm_rate", ""),
-            "confirmation_summary": confirmation_summary,
-            "validation_summary": confirmation_summary,
-            "candidate_summaries": candidate_summaries,
+            "staircase_hit_rate": staircase_summary.get("hit_rate", ""),
+            "staircase_false_alarm_rate": staircase_summary.get("false_alarm_rate", ""),
+            "staircase_summary": staircase_summary,
+            "confirmation_hit_rate": "",
+            "confirmation_false_alarm_rate": "",
+            "validation_hit_rate": staircase_summary.get("hit_rate", ""),
+            "validation_false_alarm_rate": staircase_summary.get("false_alarm_rate", ""),
+            "confirmation_summary": {},
+            "validation_summary": staircase_summary,
             "trial_count": len(self.trials),
             "rng_seed": self.rng_seed,
             "output_root": self.output_root,

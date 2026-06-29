@@ -7861,7 +7861,7 @@ class FocusModeWindow:
         self.tactile_calibration_button = q["QPushButton"]("Tactile Threshold")
         self.tactile_calibration_button.setObjectName("tactileCalibrationButton")
         self.tactile_calibration_button.setToolTip(
-            "Run the participant-specific tactile detection-threshold assay. Verbally instruct the participant to press the mouse whenever a tactile pulse is felt."
+            "Run the participant-specific 2-down/1-up tactile threshold staircase. Verbally instruct the participant to press the mouse whenever a tactile pulse is felt."
         )
         self.tactile_calibration_button.clicked.connect(lambda _checked=False: self._run_tactile_calibration())
         output_test_controls.addWidget(self.test_audio_button, 0, 0)
@@ -8392,6 +8392,15 @@ class FocusModeWindow:
             "detection_threshold_output_34_percent",
             "recommended_output_34_percent",
             "confirmation_level_output_34_percent",
+            "staircase_target_detection_rate",
+            "staircase_reversals",
+            "staircase_reversal_levels_percent",
+            "staircase_reversal_levels_used_percent",
+            "staircase_signal_trials",
+            "staircase_hits",
+            "staircase_misses",
+            "staircase_hit_rate",
+            "staircase_false_alarm_rate",
             "confirmation_hits",
             "confirmation_signal_trials",
             "catch_false_alarms",
@@ -8402,6 +8411,8 @@ class FocusModeWindow:
             "validation_false_alarm_rate",
             "trial_count",
             "timing",
+            "adaptive_staircase",
+            "staircase_criteria",
             "confirmation_criteria",
             "report_path",
             "trials_csv_path",
@@ -10887,7 +10898,7 @@ class FocusModeWindow:
         self._refresh_target_global_bounds()
         self._start_tactile_calibration_response_listener()
         self.event_label.setText(
-            "Tactile threshold assay running: instruct participant to press the mouse when a tactile pulse is felt."
+            "Adaptive tactile threshold assay running: instruct participant to press the mouse when a tactile pulse is felt."
         )
         playback_before = self._output_channel_volume_payload()
         output_12_percent = self.output_12_volume_percent
@@ -10920,6 +10931,10 @@ class FocusModeWindow:
                 "final_output_34_percent": "",
                 "detection_threshold_output_34_percent": "",
                 "recommended_output_34_percent": "",
+                "staircase_hit_rate": "",
+                "staircase_false_alarm_rate": "",
+                "staircase_summary": {},
+                "adaptive_staircase": {},
                 "validation_hit_rate": "",
                 "validation_false_alarm_rate": "",
                 "output_root": str(self.output_root),
@@ -10988,7 +11003,7 @@ class FocusModeWindow:
         return True
 
     def _handle_tactile_calibration_progress(self, payload: dict[str, Any]) -> None:
-        message = str(payload.get("message") or "Tactile threshold assay running")
+        message = str(payload.get("message") or "Adaptive tactile threshold assay running")
         self.event_label.setText(message)
 
     def _handle_tactile_calibration_done(self, payload: dict[str, Any]) -> None:
@@ -11027,6 +11042,8 @@ class FocusModeWindow:
                 "final_output_34_percent": report.get("final_output_34_percent", ""),
                 "detection_threshold_output_34_percent": report.get("detection_threshold_output_34_percent", ""),
                 "recommended_output_34_percent": report.get("recommended_output_34_percent", ""),
+                "staircase_summary": _json_ready(report.get("staircase_summary") or {}),
+                "adaptive_staircase": _json_ready(report.get("adaptive_staircase") or {}),
                 "confirmation_summary": _json_ready(report.get("confirmation_summary") or {}),
                 "timing": _json_ready(report.get("timing") or {}),
                 "report_path": str(paths.get("report_path") or report.get("report_path") or ""),

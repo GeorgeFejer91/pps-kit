@@ -16,12 +16,13 @@ from peripersonal_space_toolkit.tactile_calibration.persistence import (
 from peripersonal_space_toolkit.tactile_calibration.protocol import TactileCalibrationRunner
 from peripersonal_space_toolkit.tactile_calibration.schema import (
     CALIBRATION_SCHEMA,
-    CONFIRMATION_CATCH_TRIALS,
-    CONFIRMATION_SIGNAL_TRIALS,
     INTER_TRIAL_INTERVAL_MAX_MS,
     INTER_TRIAL_INTERVAL_MIN_MS,
     LATEST_CALIBRATION_SCHEMA,
     PROTOCOL_NAME,
+    STAIRCASE_MIN_CATCH_TRIALS,
+    STAIRCASE_STOP_REVERSALS,
+    STAIRCASE_TARGET_DETECTION_RATE,
 )
 from peripersonal_space_toolkit.tactile_calibration.stimulus import write_calibration_trial_wav
 
@@ -41,8 +42,21 @@ def test_calibration_persistence_latest_success_only(tmp_path: Path):
         "final_output_34_percent": 35.0,
         "detection_threshold_output_34_percent": 35.0,
         "recommended_output_34_percent": 35.0,
-        "validation_hit_rate": 1.0,
-        "validation_false_alarm_rate": 0.0,
+        "staircase_summary": {
+            "target_detection_rate": STAIRCASE_TARGET_DETECTION_RATE,
+            "signal_trials": 20,
+            "catch_trials": STAIRCASE_MIN_CATCH_TRIALS,
+            "hits": 14,
+            "misses": 6,
+            "false_alarms": 0,
+            "reversals": STAIRCASE_STOP_REVERSALS,
+            "reversal_levels_percent": [50.0, 35.0, 25.0, 35.0, 25.0, 35.0],
+            "reversal_levels_used_percent": [25.0, 35.0, 25.0, 35.0],
+            "hit_rate": 0.7,
+            "false_alarm_rate": 0.0,
+        },
+        "staircase_hit_rate": 0.7,
+        "staircase_false_alarm_rate": 0.0,
     }
     paths = save_calibration_attempt(
         output_root=tmp_path,
@@ -114,9 +128,8 @@ class _FakeAudioEngine:
 
 
 class _ScriptedCollector:
-    def __init__(self, *, search_detect_at: float | None, confirmation_pass_at: float | None, false_alarm: bool = False):
-        self.search_detect_at = search_detect_at
-        self.confirmation_pass_at = confirmation_pass_at
+    def __init__(self, *, detection_threshold: float | None, false_alarm: bool = False):
+        self.detection_threshold = detection_threshold
         self.false_alarm = false_alarm
         self.current: dict[str, object] = {}
 
@@ -128,12 +141,10 @@ class _ScriptedCollector:
         level = float(self.current.get("level_percent") or 0.0)
         is_catch = bool(self.current.get("is_catch"))
         should_click = False
-        if phase == "search" and self.search_detect_at is not None:
-            should_click = level >= self.search_detect_at
-        elif phase == "confirmation" and is_catch:
+        if phase == "staircase" and is_catch:
             should_click = self.false_alarm
-        elif phase == "confirmation" and self.confirmation_pass_at is not None:
-            should_click = level >= self.confirmation_pass_at
+        elif phase == "staircase" and self.detection_threshold is not None:
+            should_click = level >= self.detection_threshold
         if not should_click:
             return None
         onset = float(self.current.get("estimated_onset_perf") or 0.0)
@@ -161,57 +172,62 @@ def _run_protocol(tmp_path: Path, collector: _ScriptedCollector) -> dict:
     return runner.run()
 
 
-def test_tactile_calibration_protocol_accepts_lowest_confirmed_threshold(tmp_path: Path):
-    result = _run_protocol(tmp_path, _ScriptedCollector(search_detect_at=25.0, confirmation_pass_at=25.0))
+def test_tactile_calibration_protocol_accepts_adaptive_staircase_threshold(tmp_path: Path):
+    result = _run_protocol(tmp_path, _ScriptedCollector(detection_threshold=25.0))
 
     report = result["report"]
     assert report["accepted"] is True
     assert report["protocol"] == PROTOCOL_NAME
-    assert report["final_output_34_percent"] == pytest.approx(25.0)
-    assert report["detection_threshold_output_34_percent"] == pytest.approx(25.0)
-    assert report["recommended_output_34_percent"] == pytest.approx(25.0)
-    assert report["confirmation_summary"]["hits"] == CONFIRMATION_SIGNAL_TRIALS
-    assert report["confirmation_summary"]["false_alarms"] == 0
+    assert report["threshold_method"] == "two_down_one_up_transformed_adaptive_staircase_with_catches"
+    assert 18.0 <= float(report["final_output_34_percent"]) <= 25.0
+    assert report["detection_threshold_output_34_percent"] == pytest.approx(report["final_output_34_percent"])
+    assert report["recommended_output_34_percent"] == pytest.approx(report["final_output_34_percent"])
+    assert report["adaptive_staircase"]["target_detection_rate"] == pytest.approx(STAIRCASE_TARGET_DETECTION_RATE)
+    assert report["staircase_summary"]["reversals"] >= STAIRCASE_STOP_REVERSALS
+    assert report["staircase_summary"]["catch_trials"] >= STAIRCASE_MIN_CATCH_TRIALS
+    assert report["staircase_summary"]["false_alarms"] == 0
     assert report["timing"]["inter_trial_interval_min_ms"] == pytest.approx(INTER_TRIAL_INTERVAL_MIN_MS)
     assert report["timing"]["inter_trial_interval_max_ms"] == pytest.approx(INTER_TRIAL_INTERVAL_MAX_MS)
     assert any(trial["phase"] == "familiarization" for trial in result["trials"])
-    jittered = [trial["inter_trial_interval_ms"] for trial in result["trials"] if trial["phase"] == "confirmation"]
+    assert any(trial["staircase_direction"] == "down" for trial in result["trials"])
+    assert any(trial["staircase_direction"] == "up" for trial in result["trials"])
+    jittered = [trial["inter_trial_interval_ms"] for trial in result["trials"] if trial["phase"] == "staircase"]
     assert jittered
     assert all(INTER_TRIAL_INTERVAL_MIN_MS <= float(value) <= INTER_TRIAL_INTERVAL_MAX_MS for value in jittered)
 
 
-def test_tactile_calibration_protocol_escalates_after_failed_confirmation(tmp_path: Path):
-    result = _run_protocol(tmp_path, _ScriptedCollector(search_detect_at=12.0, confirmation_pass_at=18.0))
+def test_tactile_calibration_protocol_tracks_lower_thresholds(tmp_path: Path):
+    result = _run_protocol(tmp_path, _ScriptedCollector(detection_threshold=18.0))
 
     report = result["report"]
     assert report["accepted"] is True
-    assert report["final_output_34_percent"] == pytest.approx(18.0)
-    confirmation_levels = [trial["level_percent"] for trial in result["trials"] if trial["phase"] == "confirmation"]
-    assert 12.0 in confirmation_levels
-    assert 18.0 in confirmation_levels
-    assert report["candidate_summaries"][0]["hits"] == 0
-    assert report["candidate_summaries"][1]["hits"] == CONFIRMATION_SIGNAL_TRIALS
+    assert 12.0 <= float(report["final_output_34_percent"]) <= 18.0
+    staircase_levels = [trial["level_percent"] for trial in result["trials"] if trial["phase"] == "staircase"]
+    assert 12.0 in staircase_levels
+    assert 18.0 in staircase_levels
+    assert report["staircase_summary"]["reversals"] >= STAIRCASE_STOP_REVERSALS
 
 
 def test_tactile_calibration_protocol_rejects_false_alarm_bias(tmp_path: Path):
     result = _run_protocol(
         tmp_path,
-        _ScriptedCollector(search_detect_at=18.0, confirmation_pass_at=18.0, false_alarm=True),
+        _ScriptedCollector(detection_threshold=18.0, false_alarm=True),
     )
 
     report = result["report"]
     assert report["accepted"] is False
     assert report["status"] == "invalid_false_alarm"
     assert report["final_output_34_percent"] == ""
-    assert report["confirmation_summary"]["false_alarms"] == CONFIRMATION_CATCH_TRIALS
+    assert report["staircase_summary"]["false_alarms"] == 1
 
 
-def test_tactile_calibration_protocol_fails_without_any_search_detection(tmp_path: Path):
-    result = _run_protocol(tmp_path, _ScriptedCollector(search_detect_at=None, confirmation_pass_at=None))
+def test_tactile_calibration_protocol_fails_without_any_detection(tmp_path: Path):
+    result = _run_protocol(tmp_path, _ScriptedCollector(detection_threshold=None))
 
     report = result["report"]
     assert report["accepted"] is False
     assert report["final_output_34_percent"] == ""
+    assert report["status"] == "failed_no_detection"
     assert "did not report" in report["message"]
 
 
@@ -226,13 +242,26 @@ def test_latest_calibration_json_is_small_summary(tmp_path: Path):
         "final_output_34_percent": 50.0,
         "detection_threshold_output_34_percent": 50.0,
         "recommended_output_34_percent": 50.0,
-        "confirmation_summary": {
-            "hits": CONFIRMATION_SIGNAL_TRIALS,
-            "signal_trials": CONFIRMATION_SIGNAL_TRIALS,
-            "false_alarms": 0,
-            "catch_trials": CONFIRMATION_CATCH_TRIALS,
+        "adaptive_staircase": {
+            "target_detection_rate": STAIRCASE_TARGET_DETECTION_RATE,
+            "stop_reversals": STAIRCASE_STOP_REVERSALS,
+            "minimum_catch_trials": STAIRCASE_MIN_CATCH_TRIALS,
         },
-        "validation_hit_rate": 1.0,
+        "staircase_summary": {
+            "target_detection_rate": STAIRCASE_TARGET_DETECTION_RATE,
+            "hits": 16,
+            "misses": 6,
+            "signal_trials": 22,
+            "false_alarms": 0,
+            "catch_trials": STAIRCASE_MIN_CATCH_TRIALS,
+            "reversals": STAIRCASE_STOP_REVERSALS,
+            "reversal_levels_percent": [70.0, 50.0, 35.0, 50.0, 35.0, 50.0],
+            "reversal_levels_used_percent": [35.0, 50.0, 35.0, 50.0],
+            "hit_rate": 16 / 22,
+            "false_alarm_rate": 0.0,
+        },
+        "staircase_hit_rate": 16 / 22,
+        "validation_hit_rate": 16 / 22,
         "validation_false_alarm_rate": 0.0,
         "extra_verbose": {"not": "copied"},
     }
@@ -242,5 +271,8 @@ def test_latest_calibration_json_is_small_summary(tmp_path: Path):
     assert latest_payload["schema"] == LATEST_CALIBRATION_SCHEMA
     assert latest_payload["final_output_34_percent"] == 50.0
     assert latest_payload["recommended_output_34_percent"] == 50.0
-    assert latest_payload["confirmation_hits"] == CONFIRMATION_SIGNAL_TRIALS
+    assert latest_payload["staircase_reversals"] == STAIRCASE_STOP_REVERSALS
+    assert latest_payload["staircase_target_detection_rate"] == pytest.approx(STAIRCASE_TARGET_DETECTION_RATE)
+    assert latest_payload["staircase_signal_trials"] == 22
+    assert latest_payload["catch_trials"] == STAIRCASE_MIN_CATCH_TRIALS
     assert "extra_verbose" not in latest_payload

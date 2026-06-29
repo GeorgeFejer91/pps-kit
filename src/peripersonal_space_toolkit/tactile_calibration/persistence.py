@@ -58,7 +58,10 @@ def _write_trials_csv(path: Path, trials: list[dict[str, Any]]) -> None:
 def _latest_payload(report: dict[str, Any], *, report_path: Path, trials_path: Path) -> dict[str, Any]:
     recommended_percent = report.get("recommended_output_34_percent", report.get("final_output_34_percent", ""))
     threshold_percent = report.get("detection_threshold_output_34_percent", recommended_percent)
-    confirmation_summary = dict(report.get("confirmation_summary") or report.get("validation_summary") or {})
+    staircase_summary = dict(report.get("staircase_summary") or {})
+    legacy_source = report.get("confirmation_summary") or ({} if staircase_summary else report.get("validation_summary"))
+    legacy_summary = dict(legacy_source or {})
+    summary = staircase_summary or legacy_summary
     return {
         "schema": LATEST_CALIBRATION_SCHEMA,
         "participant_id": str(report.get("participant_id") or ""),
@@ -73,10 +76,26 @@ def _latest_payload(report: dict[str, Any], *, report_path: Path, trials_path: P
         "detection_threshold_output_34_percent": threshold_percent,
         "recommended_output_34_percent": recommended_percent,
         "confirmation_level_output_34_percent": report.get("confirmation_level_output_34_percent", threshold_percent),
-        "confirmation_hits": confirmation_summary.get("hits", ""),
-        "confirmation_signal_trials": confirmation_summary.get("signal_trials", ""),
-        "catch_false_alarms": confirmation_summary.get("false_alarms", ""),
-        "catch_trials": confirmation_summary.get("catch_trials", ""),
+        "staircase_target_detection_rate": staircase_summary.get(
+            "target_detection_rate",
+            dict(report.get("adaptive_staircase") or {}).get("target_detection_rate", ""),
+        ),
+        "staircase_reversals": staircase_summary.get("reversals", ""),
+        "staircase_reversal_levels_percent": list(staircase_summary.get("reversal_levels_percent") or []),
+        "staircase_reversal_levels_used_percent": list(staircase_summary.get("reversal_levels_used_percent") or []),
+        "staircase_signal_trials": staircase_summary.get("signal_trials", ""),
+        "staircase_hits": staircase_summary.get("hits", ""),
+        "staircase_misses": staircase_summary.get("misses", ""),
+        "staircase_hit_rate": report.get("staircase_hit_rate", staircase_summary.get("hit_rate", "")),
+        "staircase_false_alarm_rate": report.get(
+            "staircase_false_alarm_rate",
+            staircase_summary.get("false_alarm_rate", ""),
+        ),
+        "adaptive_staircase": dict(report.get("adaptive_staircase") or {}),
+        "confirmation_hits": legacy_summary.get("hits", ""),
+        "confirmation_signal_trials": legacy_summary.get("signal_trials", ""),
+        "catch_false_alarms": summary.get("false_alarms", ""),
+        "catch_trials": summary.get("catch_trials", ""),
         "confirmation_hit_rate": report.get("confirmation_hit_rate", report.get("validation_hit_rate", "")),
         "confirmation_false_alarm_rate": report.get(
             "confirmation_false_alarm_rate",
@@ -87,6 +106,7 @@ def _latest_payload(report: dict[str, Any], *, report_path: Path, trials_path: P
         "trial_count": report.get("trial_count", ""),
         "timing": dict(report.get("timing") or {}),
         "confirmation_criteria": dict(report.get("confirmation_criteria") or {}),
+        "staircase_criteria": dict(report.get("adaptive_staircase") or {}),
         "report_path": str(report_path),
         "trials_csv_path": str(trials_path),
         "run_setup_manifest_path": str(report.get("run_setup_manifest_path") or ""),
