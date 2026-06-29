@@ -1637,7 +1637,15 @@ private suspend fun runPhonePackage(
     } else {
         client.awaitPostMobileEvents(session.runId, session.drainPayload())
     }
-    for (block in runPackage.blocks) {
+    for ((blockOrderIndex, block) in runPackage.blocks.withIndex()) {
+        if (session.stopAfterBlockRequested()) {
+            session.addStopAfterBlockBoundary(
+                lastCompletedBlock = null,
+                skippedBlocks = runPackage.blocks.drop(blockOrderIndex),
+                skippedTopup = true,
+            )
+            break
+        }
         val asset = runPackage.asset(block.audioAssetId) ?: error("Missing audio asset for ${block.label}.")
         val audioFile = mobileAssetFile(context, runPackage.packageId, asset)
         require(audioFile.isFile) { "Synced audio file is missing for ${block.label}." }
@@ -1667,20 +1675,39 @@ private suspend fun runPhonePackage(
         )
         session.finishBlock(block)
         session.pollNativeCommands(runPackage)
+        if (session.stopAfterBlockRequested()) {
+            session.addStopAfterBlockBoundary(
+                lastCompletedBlock = block,
+                skippedBlocks = runPackage.blocks.drop(blockOrderIndex + 1),
+                skippedTopup = true,
+            )
+            if (phoneOwnedSession) {
+                withContext(Dispatchers.IO) { session.writeLocalArtifact(context, runPackage, complete = false) }
+            } else {
+                client.awaitPostMobileEvents(session.runId, session.drainPayload())
+            }
+            break
+        }
         if (phoneOwnedSession) {
             withContext(Dispatchers.IO) { session.writeLocalArtifact(context, runPackage, complete = false) }
         } else {
             client.awaitPostMobileEvents(session.runId, session.drainPayload())
         }
     }
-    val topupPlayed = runPhoneTopupIfNeeded(
-        context = context,
-        runPackage = runPackage,
-        session = session,
-        onStatus = onStatus,
-        onBlock = onBlock,
-        onProgress = onProgress,
-    )
+    val topupPlayed = if (session.stopAfterBlockRequested()) {
+        session.addTopupSkippedByStopAfterBlock()
+        onStatus("Stopped after current block")
+        false
+    } else {
+        runPhoneTopupIfNeeded(
+            context = context,
+            runPackage = runPackage,
+            session = session,
+            onStatus = onStatus,
+            onBlock = onBlock,
+            onProgress = onProgress,
+        )
+    }
     if (topupPlayed) {
         if (phoneOwnedSession) {
             withContext(Dispatchers.IO) { session.writeLocalArtifact(context, runPackage, complete = false) }
@@ -1688,11 +1715,14 @@ private suspend fun runPhonePackage(
             client.awaitPostMobileEvents(session.runId, session.drainPayload())
         }
     }
-    session.addRunComplete()
+    val completionReason = if (session.stopAfterBlockRequested()) "stopped_after_block" else "completed"
+    session.addRunComplete(completionReason)
     session.recordCommand(
         command = "run_complete",
         status = "applied",
-        payload = JSONObject().put("package_id", runPackage.packageId),
+        payload = JSONObject()
+            .put("package_id", runPackage.packageId)
+            .put("completion_reason", completionReason),
     )
     return if (phoneOwnedSession) {
         onStatus("Saving")
@@ -1769,6 +1799,13 @@ private suspend fun runPhoneTopupIfNeeded(
     )
     session.finishBlock(result.block)
     session.pollNativeCommands(runPackage)
+    if (session.stopAfterBlockRequested()) {
+        session.addStopAfterBlockBoundary(
+            lastCompletedBlock = result.block,
+            skippedBlocks = emptyList(),
+            skippedTopup = false,
+        )
+    }
     session.recordCommand(
         command = "phone_topup_complete",
         status = "applied",
@@ -1817,6 +1854,11 @@ private class PhoneRunSession(
     private var nativeLslCommandRejectedCount: Int = 0
     private var phonePauseCount: Int = 0
     private var phoneResumeCount: Int = 0
+    private var stopAfterBlockRequested: Boolean = false
+    private var phoneStopAfterBlockRequestCount: Int = 0
+    private var stopAfterBlockBoundaryRecorded: Boolean = false
+    private var phoneTopupSkippedByStopAfterBlock: Boolean = false
+    private var completionReason: String = "in_progress"
 
     @Synchronized
     fun addRunStart(runPackage: MobileRunPackage) {
@@ -1944,6 +1986,55 @@ private class PhoneRunSession(
     }
 
     @Synchronized
+    fun stopAfterBlockRequested(): Boolean = stopAfterBlockRequested
+
+    @Synchronized
+    fun addStopAfterBlockBoundary(
+        lastCompletedBlock: MobileBlock?,
+        skippedBlocks: List<MobileBlock>,
+        skippedTopup: Boolean,
+    ) {
+        if (!stopAfterBlockRequested || stopAfterBlockBoundaryRecorded) return
+        stopAfterBlockBoundaryRecorded = true
+        addEventLocked(
+            "phone_stop_after_block_boundary",
+            JSONObject()
+                .put("last_completed_block_id", lastCompletedBlock?.blockId.orEmpty())
+                .put("last_completed_block_index", lastCompletedBlock?.index ?: JSONObject.NULL)
+                .put("last_completed_block_label", lastCompletedBlock?.label.orEmpty())
+                .put("skipped_block_count", skippedBlocks.size)
+                .put(
+                    "skipped_blocks",
+                    JSONArray().also { array ->
+                        skippedBlocks.forEach { block ->
+                            array.put(
+                                JSONObject()
+                                    .put("block_id", block.blockId)
+                                    .put("block_index", block.index)
+                                    .put("block_label", block.label)
+                                    .put("trial_count", block.trialCount),
+                            )
+                        }
+                    },
+                )
+                .put("skipped_phone_topup", skippedTopup),
+        )
+    }
+
+    @Synchronized
+    fun addTopupSkippedByStopAfterBlock() {
+        if (phoneTopupSkippedByStopAfterBlock) return
+        phoneTopupSkippedByStopAfterBlock = true
+        addTopupMaterialization(
+            JSONObject()
+                .put("schema", "pps-android-phone-topup-materialization.v1")
+                .put("status", "skipped")
+                .put("synthesis_strategy", "pcm_wav_concat_without_ffmpeg")
+                .put("reason", "stop_after_block_requested"),
+        )
+    }
+
+    @Synchronized
     fun responseReview(runPackage: MobileRunPackage): PhoneResponseReview =
         buildPhoneResponseReview(runPackage, events.map { JSONObject(it.toString()) })
 
@@ -1953,9 +2044,15 @@ private class PhoneRunSession(
     }
 
     @Synchronized
-    fun addRunComplete() {
+    fun addRunComplete(reason: String = "completed") {
+        completionReason = reason
         completedUnixMs = System.currentTimeMillis()
-        addEventLocked("run_complete", JSONObject().put("total_events", events.size))
+        addEventLocked(
+            "run_complete",
+            JSONObject()
+                .put("total_events", events.size)
+                .put("completion_reason", reason),
+        )
     }
 
     @Synchronized
@@ -2061,11 +2158,7 @@ private class PhoneRunSession(
             )
             "pause" -> applyPhonePauseLocked(signal.command)
             "resume" -> applyPhoneResumeLocked(signal.command)
-            "stop_after_block" -> PhoneLslCommandApplicationResult(
-                status = "rejected",
-                reason = "phone_runtime_command_not_yet_supported",
-                payload = nativeCommandStatePayloadLocked(signal.command),
-            )
+            "stop_after_block" -> applyPhoneStopAfterBlockLocked(signal)
             else -> PhoneLslCommandApplicationResult(
                 status = "rejected",
                 reason = "unsupported_phone_native_command",
@@ -2136,6 +2229,38 @@ private class PhoneRunSession(
         )
     }
 
+    private fun applyPhoneStopAfterBlockLocked(signal: PhoneLslCommandSignal): PhoneLslCommandApplicationResult {
+        val changed = !stopAfterBlockRequested
+        if (changed) {
+            stopAfterBlockRequested = true
+            phoneStopAfterBlockRequestCount += 1
+            val block = activeBlock
+            addEventLocked(
+                "phone_stop_after_block_request",
+                JSONObject()
+                    .put("command_id", signal.commandId)
+                    .put("sender_id", signal.senderId)
+                    .put("active_block_id", block?.blockId.orEmpty())
+                    .put("active_block_index", block?.index ?: JSONObject.NULL)
+                    .put("active_block_label", block?.label.orEmpty())
+                    .put("active_block_elapsed_ms", currentBlockElapsedMs())
+                    .put("boundary_policy", if (block == null) "stop_before_next_block" else "finish_active_block_then_stop"),
+            )
+        }
+        val reason = when {
+            !changed -> "stop_after_block_already_requested"
+            activeBlock == null -> "will_stop_before_next_block"
+            else -> "will_stop_after_current_block"
+        }
+        return PhoneLslCommandApplicationResult(
+            status = "applied",
+            reason = reason,
+            payload = nativeCommandStatePayloadLocked(signal.command)
+                .put("state_changed", changed)
+                .put("boundary_policy", if (activeBlock == null) "stop_before_next_block" else "finish_active_block_then_stop"),
+        )
+    }
+
     private fun nativeCommandStatePayloadLocked(command: String): JSONObject =
         JSONObject()
             .put("command", command)
@@ -2150,6 +2275,10 @@ private class PhoneRunSession(
             .put("paused", playbackGate.isPaused())
             .put("phone_pause_count", phonePauseCount)
             .put("phone_resume_count", phoneResumeCount)
+            .put("stop_after_block_requested", stopAfterBlockRequested)
+            .put("phone_stop_after_block_request_count", phoneStopAfterBlockRequestCount)
+            .put("stop_after_block_boundary_recorded", stopAfterBlockBoundaryRecorded)
+            .put("phone_topup_skipped_by_stop_after_block", phoneTopupSkippedByStopAfterBlock)
             .put("block_paused_accumulated_ms", blockPausedAccumulatedMs + currentLivePauseDurationMs())
             .put("phone_unix_ms", System.currentTimeMillis())
             .put("phone_elapsed_realtime_ms", SystemClock.elapsedRealtime())
@@ -2281,7 +2410,13 @@ private class PhoneRunSession(
         val responseLedgerFile = File(dir, "phone_response_ledger.csv")
         val topupPlanFile = File(dir, "phone_topup_plan.json")
         val topupMaterializationFile = File(dir, "phone_topup_materialization.json")
-        val topupMaterialization = if (complete) {
+        val topupMaterialization = if (complete && phoneTopupSkippedByStopAfterBlock) {
+            JSONObject()
+                .put("schema", "pps-android-phone-topup-materialization.v1")
+                .put("status", "skipped")
+                .put("synthesis_strategy", "pcm_wav_concat_without_ffmpeg")
+                .put("reason", "stop_after_block_requested")
+        } else if (complete) {
             runCatching {
                 materializePhoneTopupBlock(
                     runPackage = runPackage,
@@ -2460,6 +2595,11 @@ private class PhoneRunSession(
             .put("phone_playback_paused", playbackGate.isPaused())
             .put("phone_pause_count", phonePauseCount)
             .put("phone_resume_count", phoneResumeCount)
+            .put("stop_after_block_requested", stopAfterBlockRequested)
+            .put("phone_stop_after_block_request_count", phoneStopAfterBlockRequestCount)
+            .put("stop_after_block_boundary_recorded", stopAfterBlockBoundaryRecorded)
+            .put("phone_topup_skipped_by_stop_after_block", phoneTopupSkippedByStopAfterBlock)
+            .put("completion_reason", completionReason)
             .put("block_paused_accumulated_ms", blockPausedAccumulatedMs + currentLivePauseDurationMs())
             .put("lsl_marker_mirror_count", lslMarkers.size)
             .put("native_lsl_transport_available", latestLslRuntimeStatus.optBoolean("native_transport_available", false))
@@ -2662,6 +2802,8 @@ private fun phoneEventCode(eventType: String): Int =
         "operator_command" -> 41
         "phone_playback_pause" -> 42
         "phone_playback_resume" -> 43
+        "phone_stop_after_block_request" -> 44
+        "phone_stop_after_block_boundary" -> 45
         else -> 500
     }
 

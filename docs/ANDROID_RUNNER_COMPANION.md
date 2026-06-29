@@ -129,8 +129,10 @@ native `PPSMarkersV2` / `PPSTriggerCodes` outlets and can resolve
 handling records snapshot/note/continue actions, applies pause/resume through
 the phone-owned `AudioTrack` pause gate during active phone blocks, and records
 `phone_playback_pause` / `phone_playback_resume` diary and marker-mirror events.
-Stop-after-block remains rejected until the phone runner has a block-boundary
-stop policy.
+Stop-after-block now records a request, lets the active phone block finish,
+records the block-boundary stop, skips remaining scheduled phone blocks and
+phone top-up, and closes the local run artifacts with
+`completion_reason=stopped_after_block`.
 
 Controller mode always writes `phone_controller_command_outbox.jsonl` as the
 local audit trail. In a native liblsl validation build it also keeps a

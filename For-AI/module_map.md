@@ -32,8 +32,10 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `PPSCommandAcksV1` polling while Controller mode is selected. The current
   phone command handler records snapshot/note/continue actions, applies
   pause/resume through the phone-owned `AudioTrack` pause gate during active
-  blocks, and still rejects stop-after-block until a block-boundary stop policy
-  exists. Strict native validation must require both
+  blocks, and applies stop-after-block by finishing the current block, recording
+  `phone_stop_after_block_request` / `phone_stop_after_block_boundary`, and
+  skipping remaining phone blocks plus phone top-up. Strict native validation
+  must require both
   `native_marker_transport_enabled=true` and `command_receiver_available=true`
   plus enabled bridge transport details.
 - Android controller-role scaffolding lives in `PhoneControllerCommands.kt` and

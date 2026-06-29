@@ -32,9 +32,11 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   through the phone-owned `AudioTrack` pause gate during active phone blocks.
   Pause/resume commands record `phone_playback_pause` /
   `phone_playback_resume` diary and marker-mirror events with pause-adjusted
-  block elapsed time. `stop_after_block` is still rejected with
-  `phone_runtime_command_not_yet_supported` until a block-boundary stop policy
-  exists.
+  block elapsed time. `stop_after_block` now records
+  `phone_stop_after_block_request`, finishes the current `AudioTrack` block
+  without truncating audio, records `phone_stop_after_block_boundary`, skips
+  remaining scheduled phone blocks plus phone top-up, and closes the run with
+  `completion_reason=stopped_after_block`.
 - Phone-owned run folders and ZIP exports include `lsl_runtime_status.json`.
 - Controller-mode outboxes include `phone_controller_runtime_status.json`.
   Default builds record `current_android_source_behavior=local_controller_outbox_only`;

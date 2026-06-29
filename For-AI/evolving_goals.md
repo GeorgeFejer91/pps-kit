@@ -141,9 +141,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   local diary/snapshot actions; `pause` and `resume` now apply a phone-owned
   AudioTrack pause gate during active blocks, write `phone_playback_pause` /
   `phone_playback_resume` events, and keep block elapsed time pause-adjusted in
-  command payloads and artifacts. `stop_after_block` is still deliberately
-  rejected with `phone_runtime_command_not_yet_supported` until Android has a
-  block-boundary stop policy.
+  command payloads and artifacts. `stop_after_block` now applies a phone-owned
+  block-boundary stop policy: it records `phone_stop_after_block_request`,
+  finishes the current AudioTrack block without truncating audio, records
+  `phone_stop_after_block_boundary`, skips remaining phone blocks plus phone
+  top-up, and closes artifacts with `completion_reason=stopped_after_block`.
   `lsl_runtime_status.json` now separates bridge, marker transport, and command
   transport details; strict validation requires the native command receiver and
   enabled `native_bridge.command_transport` as well as marker transport.
