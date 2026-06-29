@@ -1797,6 +1797,9 @@ private suspend fun runPhonePackage(
             wavInfo = wavInfo,
             cues = block.tactileCues,
             playbackGate = session.playbackGate,
+            onWhilePaused = {
+                session.pollNativeCommands(runPackage)
+            },
             onCue = { cue, delivery ->
                 session.pollNativeCommands(runPackage)
                 withContext(Dispatchers.Main) {
@@ -1922,6 +1925,9 @@ private suspend fun runPhoneTopupIfNeeded(
         wavInfo = wavInfo,
         cues = result.block.tactileCues,
         playbackGate = session.playbackGate,
+        onWhilePaused = {
+            session.pollNativeCommands(runPackage)
+        },
         onCue = { cue, delivery ->
             session.pollNativeCommands(runPackage)
             withContext(Dispatchers.Main) {

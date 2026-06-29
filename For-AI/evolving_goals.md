@@ -158,6 +158,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `lsl_runtime_status.json` now separates bridge, marker transport, and command
   transport details; strict validation requires the native command receiver and
   enabled `native_bridge.command_transport` as well as marker transport.
+- The phone-owned AudioTrack pause gate now keeps polling native Android LSL
+  commands while playback is paused. A `pause` command therefore no longer
+  traps the runner inside the paused audio wait loop; a PC runner or second
+  phone Controller can send `resume` and have it applied during the pause,
+  with the existing pause-adjusted block elapsed-time accounting preserved.
 - Android Controller mode now has the matching optional native sender boundary.
   It still writes `phone_controller_command_outbox.jsonl` and
   `phone_controller_runtime_status.json` as the durable audit trail in every

@@ -62,13 +62,14 @@ internal class PhoneAudioPlaybackGate {
 
     fun resume(): Boolean = paused.compareAndSet(true, false)
 
-    suspend fun awaitIfPaused(audioTrack: AudioTrack) {
+    suspend fun awaitIfPaused(audioTrack: AudioTrack, onWhilePaused: suspend () -> Unit = {}) {
         var pausedTrack = false
         while (currentCoroutineContext().isActive && paused.get()) {
             if (!pausedTrack) {
                 runCatching { audioTrack.pause() }
                 pausedTrack = true
             }
+            onWhilePaused()
             delay(20L)
         }
         if (pausedTrack && currentCoroutineContext().isActive) {
@@ -141,6 +142,7 @@ internal suspend fun playBlockAudioWithAudioTrack(
     wavInfo: PhonePcmWavInfo,
     cues: List<MobileCue>,
     playbackGate: PhoneAudioPlaybackGate? = null,
+    onWhilePaused: suspend () -> Unit = {},
     onCue: suspend (MobileCue, PhoneAudioCueDelivery) -> Unit,
     onProgress: suspend (Long, Long) -> Unit,
 ) = withContext(Dispatchers.IO) {
@@ -149,11 +151,11 @@ internal suspend fun playBlockAudioWithAudioTrack(
         audioTrack.play()
         coroutineScope {
             val cueJob = launch {
-                deliverCuesFromAudioTrack(audioTrack, wavInfo, cues, playbackGate, onCue)
+                deliverCuesFromAudioTrack(audioTrack, wavInfo, cues, playbackGate, onWhilePaused, onCue)
             }
-            streamPcmWavData(file, wavInfo, audioTrack, playbackGate, onProgress)
+            streamPcmWavData(file, wavInfo, audioTrack, playbackGate, onWhilePaused, onProgress)
             cueJob.join()
-            waitForPlaybackDrain(audioTrack, wavInfo, playbackGate, onProgress)
+            waitForPlaybackDrain(audioTrack, wavInfo, playbackGate, onWhilePaused, onProgress)
         }
     } finally {
         runCatching { audioTrack.pause() }
@@ -206,6 +208,7 @@ private suspend fun streamPcmWavData(
     wavInfo: PhonePcmWavInfo,
     audioTrack: AudioTrack,
     playbackGate: PhoneAudioPlaybackGate?,
+    onWhilePaused: suspend () -> Unit,
     onProgress: suspend (Long, Long) -> Unit,
 ) {
     val buffer = ByteArray(max(4096, wavInfo.bytesPerFrame * 2048))
@@ -214,12 +217,12 @@ private suspend fun streamPcmWavData(
     RandomAccessFile(file, "r").use { wav ->
         wav.seek(wavInfo.dataOffsetBytes)
         while (remaining > 0L && currentCoroutineContext().isActive) {
-            playbackGate?.awaitIfPaused(audioTrack)
+            playbackGate?.awaitIfPaused(audioTrack, onWhilePaused)
             val read = wav.read(buffer, 0, min(buffer.size.toLong(), remaining).toInt())
             if (read <= 0) break
             var written = 0
             while (written < read && currentCoroutineContext().isActive) {
-                playbackGate?.awaitIfPaused(audioTrack)
+                playbackGate?.awaitIfPaused(audioTrack, onWhilePaused)
                 val count = audioTrack.write(buffer, written, read - written, AudioTrack.WRITE_BLOCKING)
                 if (count < 0) throw IllegalStateException("AudioTrack write failed with code $count")
                 written += count
@@ -239,6 +242,7 @@ private suspend fun deliverCuesFromAudioTrack(
     wavInfo: PhonePcmWavInfo,
     cues: List<MobileCue>,
     playbackGate: PhoneAudioPlaybackGate?,
+    onWhilePaused: suspend () -> Unit,
     onCue: suspend (MobileCue, PhoneAudioCueDelivery) -> Unit,
 ) {
     val scheduled = cues
@@ -246,7 +250,7 @@ private suspend fun deliverCuesFromAudioTrack(
         .sortedBy { it.second }
     for ((cue, scheduledFrame) in scheduled) {
         while (currentCoroutineContext().isActive) {
-            playbackGate?.awaitIfPaused(audioTrack)
+            playbackGate?.awaitIfPaused(audioTrack, onWhilePaused)
             val headFrame = playbackHeadFrame(audioTrack)
             if (headFrame >= scheduledFrame) {
                 val jitterFrames = headFrame - scheduledFrame
@@ -273,10 +277,11 @@ private suspend fun waitForPlaybackDrain(
     audioTrack: AudioTrack,
     wavInfo: PhonePcmWavInfo,
     playbackGate: PhoneAudioPlaybackGate?,
+    onWhilePaused: suspend () -> Unit,
     onProgress: suspend (Long, Long) -> Unit,
 ) {
     while (currentCoroutineContext().isActive && playbackHeadFrame(audioTrack) < wavInfo.frameCount) {
-        playbackGate?.awaitIfPaused(audioTrack)
+        playbackGate?.awaitIfPaused(audioTrack, onWhilePaused)
         emitAudioTrackProgress(audioTrack, wavInfo, onProgress)
         delay(100L)
     }

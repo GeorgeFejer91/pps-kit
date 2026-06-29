@@ -138,6 +138,8 @@ native `PPSMarkersV2` / `PPSTriggerCodes` outlets and can resolve
 handling records snapshot/note/continue actions, applies pause/resume through
 the phone-owned `AudioTrack` pause gate during active phone blocks, and records
 `phone_playback_pause` / `phone_playback_resume` diary and marker-mirror events.
+While paused, the AudioTrack wait loop keeps polling native commands so a
+PC-runner or Controller-phone `resume` command can actually release the gate.
 Stop-after-block now records a request, lets the active phone block finish,
 records the block-boundary stop, skips remaining scheduled phone blocks and
 phone top-up, and closes the local run artifacts with
