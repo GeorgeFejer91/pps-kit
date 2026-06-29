@@ -28,10 +28,13 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   the handler returns.
 - The current phone command handler applies `start_experiment`/`start_part` as
   already-running no-ops, applies `continue_instruction`, `request_snapshot`,
-  and `operator_note` as diary/snapshot actions, and rejects
-  `pause`/`resume`/`stop_after_block` with
-  `phone_runtime_command_not_yet_supported`. This is intentional until phone
-  playback has a true pauseable AudioTrack state machine.
+  and `operator_note` as diary/snapshot actions, and applies `pause`/`resume`
+  through the phone-owned `AudioTrack` pause gate during active phone blocks.
+  Pause/resume commands record `phone_playback_pause` /
+  `phone_playback_resume` diary and marker-mirror events with pause-adjusted
+  block elapsed time. `stop_after_block` is still rejected with
+  `phone_runtime_command_not_yet_supported` until a block-boundary stop policy
+  exists.
 - Phone-owned run folders and ZIP exports include `lsl_runtime_status.json`.
 - Controller-mode outboxes include `phone_controller_runtime_status.json`.
   Default builds record `current_android_source_behavior=local_controller_outbox_only`;

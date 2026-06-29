@@ -138,9 +138,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   found, and write every applied/rejected ack sample into `command_diary.jsonl`
   plus the ordinary marker mirror. `request_snapshot`, `operator_note`,
   `continue_instruction`, and already-running start commands are acknowledged as
-  local diary/snapshot actions; `pause`, `resume`, and `stop_after_block` are
-  deliberately rejected with `phone_runtime_command_not_yet_supported` until
-  Android playback has a real pauseable AudioTrack state machine.
+  local diary/snapshot actions; `pause` and `resume` now apply a phone-owned
+  AudioTrack pause gate during active blocks, write `phone_playback_pause` /
+  `phone_playback_resume` events, and keep block elapsed time pause-adjusted in
+  command payloads and artifacts. `stop_after_block` is still deliberately
+  rejected with `phone_runtime_command_not_yet_supported` until Android has a
+  block-boundary stop policy.
   `lsl_runtime_status.json` now separates bridge, marker transport, and command
   transport details; strict validation requires the native command receiver and
   enabled `native_bridge.command_transport` as well as marker transport.

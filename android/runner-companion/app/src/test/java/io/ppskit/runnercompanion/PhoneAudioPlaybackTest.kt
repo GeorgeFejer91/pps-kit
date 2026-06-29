@@ -1,6 +1,8 @@
 package io.ppskit.runnercompanion
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
 import java.io.ByteArrayOutputStream
@@ -61,6 +63,19 @@ class PhoneAudioPlaybackTest {
         )
 
         assertIllegalArgument { readPhonePcmWavInfo(file) }
+    }
+
+    @Test
+    fun playbackGateTracksPauseResumeTransitions() {
+        val gate = PhoneAudioPlaybackGate()
+
+        assertFalse(gate.isPaused())
+        assertTrue(gate.pause())
+        assertTrue(gate.isPaused())
+        assertFalse(gate.pause())
+        assertTrue(gate.resume())
+        assertFalse(gate.isPaused())
+        assertFalse(gate.resume())
     }
 
     private fun tempWav(

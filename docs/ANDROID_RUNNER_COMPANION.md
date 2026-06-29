@@ -126,9 +126,11 @@ Default Android builds do not ship liblsl. If a local validation build adds the
 ignored `android/runner-companion/app/libs/liblsl-Android.aar`, runner mode opens
 native `PPSMarkersV2` / `PPSTriggerCodes` outlets and can resolve
 `PPSCommandSignalsV1` to emit token-gated `PPSCommandAcksV1`. Current command
-handling records snapshot/note/continue actions and explicitly rejects
-pause/resume/stop-after-block until the phone runner has a true pauseable
-AudioTrack state machine.
+handling records snapshot/note/continue actions, applies pause/resume through
+the phone-owned `AudioTrack` pause gate during active phone blocks, and records
+`phone_playback_pause` / `phone_playback_resume` diary and marker-mirror events.
+Stop-after-block remains rejected until the phone runner has a block-boundary
+stop policy.
 
 Controller mode always writes `phone_controller_command_outbox.jsonl` as the
 local audit trail. In a native liblsl validation build it also keeps a

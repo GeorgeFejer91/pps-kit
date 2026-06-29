@@ -1649,6 +1649,7 @@ private suspend fun runPhonePackage(
             file = audioFile,
             wavInfo = wavInfo,
             cues = block.tactileCues,
+            playbackGate = session.playbackGate,
             onCue = { cue, delivery ->
                 session.pollNativeCommands(runPackage)
                 withContext(Dispatchers.Main) {
@@ -1751,6 +1752,7 @@ private suspend fun runPhoneTopupIfNeeded(
         file = result.wavFile,
         wavInfo = wavInfo,
         cues = result.block.tactileCues,
+        playbackGate = session.playbackGate,
         onCue = { cue, delivery ->
             session.pollNativeCommands(runPackage)
             withContext(Dispatchers.Main) {
@@ -1787,6 +1789,7 @@ private class PhoneRunSession(
     private val nativeLslBridge: PhoneNativeLslBridge = PhoneNativeLslBridgeFactory.create(),
 ) {
     val runId: String = "phone-${System.currentTimeMillis()}"
+    val playbackGate = PhoneAudioPlaybackGate()
     private val events = mutableListOf<JSONObject>()
     private val pendingEvents = mutableListOf<JSONObject>()
     private val lslMarkers = mutableListOf<JSONObject>()
@@ -1795,6 +1798,8 @@ private class PhoneRunSession(
     private val hapticMetadata = JSONObject(hapticMetadata.toString())
     private var activeBlock: MobileBlock? = null
     private var blockStartElapsedMs: Long = 0L
+    private var blockPausedAccumulatedMs: Long = 0L
+    private var pauseStartedElapsedMs: Long = 0L
     private val startedUnixMs: Long = System.currentTimeMillis()
     private var completedUnixMs: Long = 0L
     private var tapCount: Int = 0
@@ -1810,6 +1815,8 @@ private class PhoneRunSession(
     private var nativeLslCommandAckCount: Int = 0
     private var nativeLslCommandAckFailedCount: Int = 0
     private var nativeLslCommandRejectedCount: Int = 0
+    private var phonePauseCount: Int = 0
+    private var phoneResumeCount: Int = 0
 
     @Synchronized
     fun addRunStart(runPackage: MobileRunPackage) {
@@ -1874,6 +1881,8 @@ private class PhoneRunSession(
     fun startBlock(block: MobileBlock, wavInfo: PhonePcmWavInfo? = null) {
         activeBlock = block
         blockStartElapsedMs = SystemClock.elapsedRealtime()
+        blockPausedAccumulatedMs = 0L
+        pauseStartedElapsedMs = if (playbackGate.isPaused()) blockStartElapsedMs else 0L
         val payload = JSONObject()
             .put("block_id", block.blockId)
             .put("block_index", block.index)
@@ -1930,6 +1939,8 @@ private class PhoneRunSession(
                 .put("actual_block_duration_ms", currentBlockElapsedMs()),
         )
         activeBlock = null
+        blockPausedAccumulatedMs = 0L
+        pauseStartedElapsedMs = 0L
     }
 
     @Synchronized
@@ -2048,7 +2059,9 @@ private class PhoneRunSession(
                 reason = "no_instruction_gate_active_in_phone_runtime",
                 payload = nativeCommandStatePayloadLocked(signal.command),
             )
-            "pause", "resume", "stop_after_block" -> PhoneLslCommandApplicationResult(
+            "pause" -> applyPhonePauseLocked(signal.command)
+            "resume" -> applyPhoneResumeLocked(signal.command)
+            "stop_after_block" -> PhoneLslCommandApplicationResult(
                 status = "rejected",
                 reason = "phone_runtime_command_not_yet_supported",
                 payload = nativeCommandStatePayloadLocked(signal.command),
@@ -2059,6 +2072,69 @@ private class PhoneRunSession(
                 payload = nativeCommandStatePayloadLocked(signal.command),
             )
         }
+
+    private fun applyPhonePauseLocked(command: String): PhoneLslCommandApplicationResult {
+        val block = activeBlock
+        if (block == null) {
+            return PhoneLslCommandApplicationResult(
+                status = "rejected",
+                reason = "no_active_phone_block_to_pause",
+                payload = nativeCommandStatePayloadLocked(command),
+            )
+        }
+        val changed = playbackGate.pause()
+        if (changed) {
+            pauseStartedElapsedMs = SystemClock.elapsedRealtime()
+            phonePauseCount += 1
+            addEventLocked(
+                "phone_playback_pause",
+                JSONObject()
+                    .put("block_id", block.blockId)
+                    .put("block_index", block.index)
+                    .put("block_label", block.label)
+                    .put("block_elapsed_ms", currentBlockElapsedMs()),
+            )
+        }
+        return PhoneLslCommandApplicationResult(
+            status = "applied",
+            reason = if (changed) "phone_playback_paused" else "already_paused",
+            payload = nativeCommandStatePayloadLocked(command)
+                .put("state_changed", changed),
+        )
+    }
+
+    private fun applyPhoneResumeLocked(command: String): PhoneLslCommandApplicationResult {
+        if (!playbackGate.isPaused()) {
+            return PhoneLslCommandApplicationResult(
+                status = "applied",
+                reason = "already_running",
+                payload = nativeCommandStatePayloadLocked(command)
+                    .put("state_changed", false),
+            )
+        }
+        val now = SystemClock.elapsedRealtime()
+        if (pauseStartedElapsedMs > 0L) {
+            blockPausedAccumulatedMs += (now - pauseStartedElapsedMs).coerceAtLeast(0L)
+        }
+        pauseStartedElapsedMs = 0L
+        val changed = playbackGate.resume()
+        phoneResumeCount += 1
+        addEventLocked(
+            "phone_playback_resume",
+            JSONObject()
+                .put("block_id", activeBlock?.blockId.orEmpty())
+                .put("block_index", activeBlock?.index ?: JSONObject.NULL)
+                .put("block_label", activeBlock?.label.orEmpty())
+                .put("block_elapsed_ms", currentBlockElapsedMs())
+                .put("paused_accumulated_ms", blockPausedAccumulatedMs),
+        )
+        return PhoneLslCommandApplicationResult(
+            status = "applied",
+            reason = if (changed) "phone_playback_resumed" else "already_running",
+            payload = nativeCommandStatePayloadLocked(command)
+                .put("state_changed", changed),
+        )
+    }
 
     private fun nativeCommandStatePayloadLocked(command: String): JSONObject =
         JSONObject()
@@ -2071,6 +2147,10 @@ private class PhoneRunSession(
             .put("event_count", events.size)
             .put("tap_count", tapCount)
             .put("valid_tap_count", validTapCount)
+            .put("paused", playbackGate.isPaused())
+            .put("phone_pause_count", phonePauseCount)
+            .put("phone_resume_count", phoneResumeCount)
+            .put("block_paused_accumulated_ms", blockPausedAccumulatedMs + currentLivePauseDurationMs())
             .put("phone_unix_ms", System.currentTimeMillis())
             .put("phone_elapsed_realtime_ms", SystemClock.elapsedRealtime())
 
@@ -2292,7 +2372,19 @@ private class PhoneRunSession(
     }
 
     private fun currentBlockElapsedMs(): Long =
-        if (blockStartElapsedMs <= 0L) 0L else (SystemClock.elapsedRealtime() - blockStartElapsedMs).coerceAtLeast(0L)
+        if (blockStartElapsedMs <= 0L) {
+            0L
+        } else {
+            (SystemClock.elapsedRealtime() - blockStartElapsedMs - blockPausedAccumulatedMs - currentLivePauseDurationMs())
+                .coerceAtLeast(0L)
+        }
+
+    private fun currentLivePauseDurationMs(): Long =
+        if (playbackGate.isPaused() && pauseStartedElapsedMs > 0L) {
+            (SystemClock.elapsedRealtime() - pauseStartedElapsedMs).coerceAtLeast(0L)
+        } else {
+            0L
+        }
 
     private fun addEventLocked(type: String, payload: JSONObject) {
         val eventId = events.size + 1
@@ -2365,6 +2457,10 @@ private class PhoneRunSession(
             .put("total_event_count", events.size)
             .put("tap_count", tapCount)
             .put("valid_tap_count", validTapCount)
+            .put("phone_playback_paused", playbackGate.isPaused())
+            .put("phone_pause_count", phonePauseCount)
+            .put("phone_resume_count", phoneResumeCount)
+            .put("block_paused_accumulated_ms", blockPausedAccumulatedMs + currentLivePauseDurationMs())
             .put("lsl_marker_mirror_count", lslMarkers.size)
             .put("native_lsl_transport_available", latestLslRuntimeStatus.optBoolean("native_transport_available", false))
             .put("native_lsl_marker_transport_enabled", latestLslRuntimeStatus.optBoolean("native_marker_transport_enabled", false))
@@ -2564,6 +2660,8 @@ private fun phoneEventCode(eventType: String): Int =
         "tap" -> 30
         "phone_topup_materialization" -> 35
         "operator_command" -> 41
+        "phone_playback_pause" -> 42
+        "phone_playback_resume" -> 43
         else -> 500
     }
 
