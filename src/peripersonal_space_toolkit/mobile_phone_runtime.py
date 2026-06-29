@@ -98,15 +98,17 @@ def build_mobile_package_list(
     package: Any | Sequence[Any] | None,
     *,
     phone_owned_session: bool = False,
+    include_block_audio: bool = True,
 ) -> dict[str, Any]:
     packages: list[dict[str, Any]] = []
     active_id = ""
     for item in _coerce_packages(package):
         manifest = build_mobile_package_manifest(
             item,
-            include_trials=False,
+            include_trials=not include_block_audio,
             include_sha256=False,
             phone_owned_session=phone_owned_session,
+            include_block_audio=include_block_audio,
         )
         if not active_id:
             active_id = str(manifest.get("package_id") or "")
@@ -150,6 +152,7 @@ def build_mobile_package_manifest(
     include_trials: bool = True,
     include_sha256: bool = True,
     phone_owned_session: bool = False,
+    include_block_audio: bool = True,
 ) -> dict[str, Any]:
     package_id = mobile_package_id(package)
     blocks_payload: list[dict[str, Any]] = []
@@ -161,10 +164,11 @@ def build_mobile_package_manifest(
     for block in list(getattr(package, "blocks", []) or []):
         wav_path = Path(getattr(block, "wav_path", "") or "")
         block_audio_asset_id = f"block-{int(getattr(block, 'index', len(blocks_payload) + 1)):02d}-audio"
-        asset = _asset_payload(block_audio_asset_id, wav_path, include_sha256=include_sha256)
-        if not bool(asset.get("available")):
-            warnings.append(f"Missing audio asset for block {getattr(block, 'index', '?')}: {wav_path}")
-        assets.append(asset)
+        if include_block_audio:
+            asset = _asset_payload(block_audio_asset_id, wav_path, include_sha256=include_sha256)
+            if not bool(asset.get("available")):
+                warnings.append(f"Missing audio asset for block {getattr(block, 'index', '?')}: {wav_path}")
+            assets.append(asset)
 
         trials, cues = _block_trial_payloads(block) if include_trials else ([], [])
         for trial in trials:
@@ -223,16 +227,26 @@ def build_mobile_package_manifest(
                 }
             )
             known_asset_ids.add(asset_id)
+    asset_by_id_for_runnable = {str(asset.get("asset_id") or ""): asset for asset in assets}
+    lightweight_materializable = _all_blocks_reference_available_building_blocks(
+        blocks_payload,
+        building_blocks,
+        asset_by_id_for_runnable,
+    )
+    if not include_block_audio and blocks_payload and not lightweight_materializable:
+        warnings.append("Lightweight package cannot materialize every scheduled block from trial_building_block assets.")
     source_run_setup = getattr(package, "source_run_setup_manifest_path", None)
     source_run_setup_sha256 = _sha256(Path(source_run_setup)) if source_run_setup and Path(source_run_setup).is_file() else ""
     session_group_id = str(getattr(package, "session_group_id", "") or "")
     part_session_id = str(getattr(package, "part_session_id", "") or getattr(package, "session_id", "") or "")
     part_number = getattr(package, "part_number", None)
+    asset_strategy = "prepared_block_wavs_plus_trial_building_blocks" if include_block_audio else "trial_building_blocks_only"
     reconstruction = {
         "schema": MOBILE_RECONSTRUCTION_SCHEMA,
         "authority": "android_phone",
         "fallback_execution_strategy": "prepared_block_wavs",
         "preferred_lightweight_strategy": "replay_schedule_from_trial_building_blocks",
+        "package_asset_strategy": asset_strategy,
         "study_hierarchy": [
             "study_profile",
             "segment_1_audio_ingredients",
@@ -255,7 +269,11 @@ def build_mobile_package_manifest(
         "block_count": len(blocks_payload),
         "trial_count": sum(int(block.get("trial_count") or 0) for block in blocks_payload),
         "notes": [
-            "Block WAV assets remain available for current Android playback compatibility.",
+            (
+                "Block WAV assets remain available for current Android playback compatibility."
+                if include_block_audio
+                else "Prepared block WAV assets are omitted; Android must materialize scheduled blocks from reusable trial WAVs."
+            ),
             "Building-block records identify reusable Segment 3 trial WAVs when source block CSVs expose Trial_File_Path.",
         ],
     }
@@ -307,6 +325,7 @@ def build_mobile_package_manifest(
         "blocks": blocks_payload,
         "assets": assets,
         "building_blocks": building_blocks,
+        "asset_strategy": asset_strategy,
         "schedule": {
             "blocks": schedule_blocks,
             "execution_order": [block["block_id"] for block in schedule_blocks],
@@ -322,12 +341,17 @@ def build_mobile_package_manifest(
             "tactile_threshold_value": "",
             "name_sharing_opt_in": False,
         },
-        "mobile_runnable": bool(blocks_payload and all(bool(asset.get("available")) for asset in assets)),
+        "mobile_runnable": bool(
+            blocks_payload
+            and all(bool(asset.get("available")) for asset in assets)
+            and (include_block_audio or lightweight_materializable)
+        ),
         "phone_owned_session": bool(phone_owned_session),
         "warnings": warnings,
         "runtime": {
             "mode": "mobile_phone_runtime",
             "audio_playback_strategy": "audiotrack_pcm_wav_playback_head",
+            "scheduled_block_materialization_strategy": "pcm_wav_concat_without_ffmpeg",
             "tactile_cue_scheduler": "audiotrack_playback_head",
             "response_input": "touch",
             "tactile_output": "android_vibrator",
@@ -346,6 +370,7 @@ def validate_mobile_package_manifest(
     require_phone_owned_session: bool = False,
     require_building_blocks: bool = False,
     require_available_assets: bool = True,
+    require_lightweight_scheduled_blocks: bool = False,
 ) -> MobilePackageValidationResult:
     """Validate the Android phone-owned run package hierarchy and replay contract."""
 
@@ -372,8 +397,11 @@ def validate_mobile_package_manifest(
         if isinstance(block, dict)
     }
     block_ids = [str(block.get("block_id") or "") for block in blocks if isinstance(block, dict)]
+    block_audio_assets = [asset for asset in assets if isinstance(asset, dict) and str(asset.get("role") or "") == "block_audio"]
     if not blocks:
         failures.append("package must contain at least one prepared block")
+    if require_lightweight_scheduled_blocks and block_audio_assets:
+        failures.append("lightweight scheduled-block validation requires omitting block_audio assets")
     if execution_order and execution_order != block_ids:
         failures.append("schedule.execution_order must match prepared block order")
     if schedule_blocks and [str(block.get("block_id") or "") for block in schedule_blocks if isinstance(block, dict)] != block_ids:
@@ -385,18 +413,40 @@ def validate_mobile_package_manifest(
             continue
         block_id = str(block.get("block_id") or "")
         audio_asset_id = str(block.get("audio_asset_id") or "")
+        trials = _json_list(block.get("trials"))
+        block_materializable = _block_can_materialize_from_building_blocks(
+            trials,
+            building_block_by_id,
+            asset_by_id,
+            require_available_assets=require_available_assets,
+        )
+        if require_lightweight_scheduled_blocks and not block_materializable:
+            failures.append(f"block {block_id or index} cannot be materialized from trial_building_block assets")
         if not block_id:
             failures.append(f"block {index} is missing block_id")
         if not audio_asset_id:
             failures.append(f"block {block_id or index} is missing audio_asset_id")
         elif audio_asset_id not in asset_by_id:
-            failures.append(f"block {block_id or index} audio_asset_id {audio_asset_id!r} is not listed in assets")
+            if block_materializable:
+                warnings.append(
+                    f"block {block_id or index} audio_asset_id {audio_asset_id!r} is omitted; "
+                    "Android must materialize the scheduled block from trial_building_block assets"
+                )
+            else:
+                failures.append(f"block {block_id or index} audio_asset_id {audio_asset_id!r} is not listed in assets")
         else:
             asset = asset_by_id[audio_asset_id]
             if str(asset.get("role") or "") != "block_audio":
                 failures.append(f"asset {audio_asset_id!r} must have role='block_audio'")
-            _validate_asset_availability(audio_asset_id, asset, failures, warnings, require_available=require_available_assets)
-        trials = _json_list(block.get("trials"))
+            elif _asset_is_available_for_runtime(asset, require_sha=require_available_assets):
+                _validate_asset_availability(audio_asset_id, asset, failures, warnings, require_available=require_available_assets)
+            elif block_materializable:
+                warnings.append(
+                    f"block {block_id or index} block_audio asset {audio_asset_id!r} is unavailable; "
+                    "Android can materialize the scheduled block from trial_building_block assets"
+                )
+            else:
+                _validate_asset_availability(audio_asset_id, asset, failures, warnings, require_available=require_available_assets)
         tactile_cues = _json_list(block.get("tactile_cues"))
         trial_by_uid = {str(trial.get("trial_uid") or ""): trial for trial in trials if isinstance(trial, dict)}
         if int(block.get("trial_count") or 0) != len(trials):
@@ -448,13 +498,27 @@ def validate_mobile_package_manifest(
         "package_id": str(manifest.get("package_id") or ""),
         "participant_id": str(manifest.get("participant_id") or ""),
         "phone_owned_session": bool(manifest.get("phone_owned_session")),
+        "asset_strategy": str(manifest.get("asset_strategy") or ""),
         "block_count": len(blocks),
         "trial_count": sum(len(_json_list(block.get("trials"))) for block in blocks if isinstance(block, dict)),
         "tactile_cue_count": sum(len(_json_list(block.get("tactile_cues"))) for block in blocks if isinstance(block, dict)),
         "asset_count": len(assets),
+        "block_audio_asset_count": len(block_audio_assets),
+        "trial_building_block_asset_count": len(
+            [asset for asset in assets if isinstance(asset, dict) and str(asset.get("role") or "") == "trial_building_block"]
+        ),
         "building_block_count": len(building_blocks),
         "schedule_hash": str((manifest.get("reconstruction") or {}).get("schedule_hash") or "") if isinstance(manifest.get("reconstruction"), dict) else "",
         "mobile_runnable": bool(manifest.get("mobile_runnable")),
+        "lightweight_scheduled_blocks": bool(blocks) and len(block_audio_assets) == 0 and all(
+            isinstance(block, dict) and _block_can_materialize_from_building_blocks(
+                _json_list(block.get("trials")),
+                building_block_by_id,
+                asset_by_id,
+                require_available_assets=require_available_assets,
+            )
+            for block in blocks
+        ),
     }
     return MobilePackageValidationResult(
         ok=not failures,
@@ -596,6 +660,65 @@ def _validate_asset_availability(
             warnings.append(message)
 
 
+def _asset_is_available_for_runtime(asset: dict[str, Any], *, require_sha: bool) -> bool:
+    if asset.get("available") is not True:
+        return False
+    if int(asset.get("size_bytes") or 0) <= 0:
+        return False
+    if require_sha and not str(asset.get("sha256") or "").strip():
+        return False
+    return True
+
+
+def _all_blocks_reference_available_building_blocks(
+    blocks: list[dict[str, Any]],
+    building_blocks: list[dict[str, Any]],
+    asset_by_id: dict[str, dict[str, Any]],
+) -> bool:
+    building_block_by_id = {
+        str(block.get("asset_id") or ""): block
+        for block in building_blocks
+        if isinstance(block, dict)
+    }
+    return bool(blocks) and all(
+        isinstance(block, dict) and _block_can_materialize_from_building_blocks(
+            _json_list(block.get("trials")),
+            building_block_by_id,
+            asset_by_id,
+            require_available_assets=True,
+            require_sha=False,
+        )
+        for block in blocks
+    )
+
+
+def _block_can_materialize_from_building_blocks(
+    trials: list[Any],
+    building_block_by_id: dict[str, dict[str, Any]],
+    asset_by_id: dict[str, dict[str, Any]],
+    *,
+    require_available_assets: bool,
+    require_sha: bool | None = None,
+) -> bool:
+    if not trials:
+        return False
+    for trial in trials:
+        if not isinstance(trial, dict):
+            return False
+        asset_id = str(trial.get("building_block_asset_id") or "")
+        if not asset_id or asset_id not in building_block_by_id:
+            return False
+        asset = asset_by_id.get(asset_id)
+        if asset is None or str(asset.get("role") or "") != "trial_building_block":
+            return False
+        if require_available_assets and not _asset_is_available_for_runtime(
+            asset,
+            require_sha=require_available_assets if require_sha is None else require_sha,
+        ):
+            return False
+    return True
+
+
 def _validate_building_block_reference(
     asset_id: str,
     building_block_by_id: dict[str, dict[str, Any]],
@@ -658,6 +781,12 @@ def _validate_reconstruction_contract(
         failures.append("reconstruction preferred_lightweight_strategy must use trial building blocks")
     if reconstruction.get("fallback_execution_strategy") != "prepared_block_wavs":
         failures.append("reconstruction fallback_execution_strategy must preserve prepared block WAV replay")
+    strategy = str(reconstruction.get("package_asset_strategy") or "")
+    manifest_strategy = str(manifest.get("asset_strategy") or "")
+    if strategy and strategy not in {"prepared_block_wavs_plus_trial_building_blocks", "trial_building_blocks_only"}:
+        failures.append("reconstruction package_asset_strategy is not recognized")
+    if strategy and manifest_strategy and strategy != manifest_strategy:
+        failures.append("reconstruction package_asset_strategy does not match manifest asset_strategy")
     expected_hash = _json_sha256(schedule_blocks)
     observed_hash = str(reconstruction.get("schedule_hash") or "")
     if observed_hash != expected_hash:

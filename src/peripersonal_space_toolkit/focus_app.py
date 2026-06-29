@@ -8382,7 +8382,7 @@ class _PhoneTransferBridge:
         self.sequence = 0
 
     def health(self) -> dict[str, Any]:
-        package_list = build_mobile_package_list(self.packages, phone_owned_session=True)
+        package_list = build_mobile_package_list(self.packages, phone_owned_session=True, include_block_audio=False)
         package_rows = list(package_list.get("packages") or [])
         return {
             "schema": HEALTH_SCHEMA,
@@ -8462,13 +8462,13 @@ class _PhoneTransferBridge:
         return self._phone_export_only()
 
     def mobile_packages(self) -> dict[str, Any]:
-        return build_mobile_package_list(self.packages, phone_owned_session=True)
+        return build_mobile_package_list(self.packages, phone_owned_session=True, include_block_audio=False)
 
     def mobile_package_manifest(self, package_id: str) -> dict[str, Any]:
         package = self._package_for_id(package_id)
         if package is None:
             raise CompanionCommandError(status_code=404, reason="mobile_package_not_found")
-        return build_mobile_package_manifest(package, phone_owned_session=True)
+        return build_mobile_package_manifest(package, phone_owned_session=True, include_block_audio=False)
 
     def mobile_package_asset_path(self, package_id: str, asset_id: str) -> tuple[str, str]:
         package = self._package_for_id(package_id)
@@ -15062,7 +15062,7 @@ def _run_phone_transfer_window(
         total_bytes = sum(
             int(asset.get("size_bytes") or 0)
             for package in packages
-            for asset in build_mobile_package_manifest(package, phone_owned_session=True).get("assets", [])
+            for asset in build_mobile_package_manifest(package, phone_owned_session=True, include_block_audio=False).get("assets", [])
         )
         package_label.setText(
             f"{len(packages)} phone package(s) ready, {total_bytes / (1024 * 1024):.1f} MiB assets. "

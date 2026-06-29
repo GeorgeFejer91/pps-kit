@@ -108,6 +108,12 @@ After pairing, choose `Run Experiment On Phone`.
   Study 5 pre/post preparation plays Part 1 and Part 2 on the phone and uploads
   a completion artifact for each part.
 
+Packages served from the native runner's `Send To Phone` entry point are
+lightweight by default: they omit prepared `block_audio` assets and transfer
+only reusable `trial_building_block` WAVs plus the v2 schedule/reconstruction
+manifest. Older Focus Mode companion packages still expose prepared block WAVs
+for compatibility.
+
 The phone runtime parses PCM WAV blocks and plays them with Android
 `AudioTrack`, schedules tactile cue delivery from the AudioTrack playback head,
 uses `SystemClock.elapsedRealtime()` for phone-side timestamps, and drives the
@@ -135,6 +141,11 @@ execution:
 ```powershell
 .\.venv\Scripts\python.exe validation_protocols\scripts\validate_mobile_phone_package.py <manifest-json-or-package-dir> --require-phone-owned-session --require-building-blocks
 ```
+
+For building-block-only `Send To Phone` packages, add
+`--require-lightweight-scheduled-blocks`; this fails if any `block_audio` asset
+is present or any scheduled block cannot be reconstructed from
+`trial_building_block` assets.
 
 The validator checks the Segment 0-6 to phone-runtime hierarchy, schedule hash,
 block/order consistency, reusable building-block references, asset availability,

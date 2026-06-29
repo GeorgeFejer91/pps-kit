@@ -38,6 +38,28 @@ def test_mobile_phone_package_validator_loads_manifest_from_folder(tmp_path: Pat
     assert result.summary["package_id"] == manifest["package_id"]
 
 
+def test_mobile_phone_package_validator_accepts_lightweight_scheduled_block_package(tmp_path: Path, capsys):
+    manifest = build_mobile_package_manifest(_package(tmp_path), phone_owned_session=True, include_block_audio=False)
+    manifest_path = tmp_path / "lightweight-manifest.json"
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    exit_code = validator.main(
+        [
+            str(manifest_path),
+            "--require-phone-owned-session",
+            "--require-building-blocks",
+            "--require-lightweight-scheduled-blocks",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    report = json.loads(captured.out)
+    assert exit_code == 0
+    assert report["ok"] is True
+    assert report["summary"]["lightweight_scheduled_blocks"] is True
+    assert report["summary"]["block_audio_asset_count"] == 0
+
+
 def _package(tmp_path: Path) -> RunPackage:
     wav = tmp_path / "block_01.wav"
     wav.write_bytes(b"RIFF....WAVE")

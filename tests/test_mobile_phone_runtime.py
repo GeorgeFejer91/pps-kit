@@ -134,6 +134,42 @@ def test_mobile_package_manifest_exports_assets_trials_and_phone_tactile_cues(tm
     assert mobile_asset_path(package, manifest["package_id"], "block-01-audio") == package.blocks[0].wav_path
 
 
+def test_mobile_package_manifest_can_export_lightweight_building_block_only_package(tmp_path):
+    package = _package(tmp_path)
+
+    manifest = build_mobile_package_manifest(package, phone_owned_session=True, include_block_audio=False)
+    result = validate_mobile_package_manifest(
+        manifest,
+        require_phone_owned_session=True,
+        require_building_blocks=True,
+        require_lightweight_scheduled_blocks=True,
+    )
+
+    assert result.ok is True
+    assert manifest["asset_strategy"] == "trial_building_blocks_only"
+    assert manifest["reconstruction"]["package_asset_strategy"] == "trial_building_blocks_only"
+    assert manifest["mobile_runnable"] is True
+    assert manifest["runtime"]["scheduled_block_materialization_strategy"] == "pcm_wav_concat_without_ffmpeg"
+    assert {asset["role"] for asset in manifest["assets"]} == {"trial_building_block"}
+    assert manifest["blocks"][0]["audio_asset_id"] == "block-01-audio"
+    assert "block-01-audio" not in {asset["asset_id"] for asset in manifest["assets"]}
+    assert result.summary["lightweight_scheduled_blocks"] is True
+    assert result.summary["block_audio_asset_count"] == 0
+    assert result.summary["trial_building_block_asset_count"] == 1
+    assert any("audio_asset_id 'block-01-audio' is omitted" in warning for warning in result.warnings)
+
+
+def test_mobile_package_list_can_report_lightweight_transfer_assets(tmp_path):
+    package = _package(tmp_path)
+
+    listing = build_mobile_package_list(package, phone_owned_session=True, include_block_audio=False)
+    package_row = listing["packages"][0]
+
+    assert package_row["mobile_runnable"] is True
+    assert package_row["asset_count"] == 1
+    assert package_row["total_asset_bytes"] == package.blocks[0].wav_path.stat().st_size
+
+
 def test_mobile_package_list_and_manifest_can_mark_phone_owned_sessions(tmp_path):
     package = _package(tmp_path)
 

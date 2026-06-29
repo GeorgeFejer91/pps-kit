@@ -30,6 +30,16 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   recalculating trial/cue timing from frame counts, and recording
   `phone_scheduled_block_materialization` before the same AudioTrack
   playback-head cue scheduler runs.
+- Lightweight phone package export/validation lives in
+  `mobile_phone_runtime.py`. `include_block_audio=False` produces
+  `asset_strategy = trial_building_blocks_only` manifests, keeps block
+  `audio_asset_id` values as compatibility ids, omits `block_audio` assets,
+  requires every scheduled trial to reference an available
+  `trial_building_block`, and is enforced by
+  `validate_mobile_phone_package.py --require-lightweight-scheduled-blocks`.
+  `_PhoneTransferBridge` in `focus_app.py` uses this lightweight path for the
+  native runner's `Send To Phone` transfer bridge; regular Focus Mode companion
+  packages still default to prepared block WAV assets.
 - Optional native Android LSL marker/command transport lives in
   `PhoneNativeLslBridge.kt`. A local ignored
   `android/runner-companion/app/libs/liblsl-Android.aar` is included by Gradle

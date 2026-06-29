@@ -83,6 +83,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--allow-legacy-schema", action="store_true", help=f"Do not require {MOBILE_PACKAGE_SCHEMA}.")
     parser.add_argument("--require-phone-owned-session", action="store_true")
     parser.add_argument("--require-building-blocks", action="store_true")
+    parser.add_argument("--require-lightweight-scheduled-blocks", action="store_true")
     parser.add_argument("--allow-missing-assets", action="store_true")
     parser.add_argument("--output-dir", type=Path, help="Optional directory for JSON/Markdown validation reports.")
     args = parser.parse_args(argv)
@@ -92,6 +93,7 @@ def main(argv: list[str] | None = None) -> int:
         require_v2=not args.allow_legacy_schema,
         require_phone_owned_session=args.require_phone_owned_session,
         require_building_blocks=args.require_building_blocks,
+        require_lightweight_scheduled_blocks=args.require_lightweight_scheduled_blocks,
         require_available_assets=not args.allow_missing_assets,
     ).to_json()
     if args.output_dir:

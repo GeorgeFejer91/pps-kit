@@ -24,7 +24,7 @@ from peripersonal_space_toolkit.output_layout import (
     output_project_state_dir,
     output_runner_logs_dir,
 )
-from peripersonal_space_toolkit.session_runner import RUN_PACKAGE_SCHEMA, SessionCaptureOptions, load_run_package
+from peripersonal_space_toolkit.session_runner import RUN_PACKAGE_SCHEMA, RunBlock, RunPackage, SessionCaptureOptions, load_run_package
 from peripersonal_space_toolkit.tactile_calibration.schema import (
     CALIBRATION_SCHEMA,
     CONFIRMATION_REQUIRED_CLEAN_CATCHES,
@@ -97,6 +97,66 @@ def test_timeline_soa_display_marks_catch_trials_not_applicable():
     assert focus_app._timeline_row_label_optional("Type") is False
     assert focus_app._timeline_row_label_optional("Noise") is False
     assert focus_app._timeline_row_label_optional("SOA") is True
+
+
+def test_phone_transfer_bridge_serves_lightweight_building_block_packages(tmp_path: Path):
+    from peripersonal_space_toolkit import focus_app
+
+    wav = tmp_path / "trial.wav"
+    wav.write_bytes(b"RIFF....WAVE")
+    block_manifest = tmp_path / "block_01.csv"
+    block_manifest.write_text(
+        "\n".join(
+            [
+                "Trial_Number,Trial_UID,Trial_Type,Family,SOA_ms,Row_Label,Noise_Type,Trial_Start_S,Trial_Duration_S,Trial_End_S,Tactile_Onset_S,Response_Window_Onset_S,Trial_File_Path,Source_SHA256",
+                f"1,trial-a,audio_tactile,audio_tactile,300,inhale,white,0.000,4.000,4.000,1.250,1.250,{wav},",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    package = RunPackage(
+        participant_id="P001",
+        session_id="session-001",
+        created_at="2026-06-30T00:00:00Z",
+        session_dir=tmp_path / "sessions" / "P001" / "session-001",
+        design_path=tmp_path / "design.json",
+        protocol_path=tmp_path / "protocol.json",
+        manifest_path=tmp_path / "session_manifest.json",
+        render_manifest_path=None,
+        blocks=[
+            RunBlock(
+                index=1,
+                label="Block 01",
+                manifest_path=block_manifest,
+                wav_path=tmp_path / "full_block.wav",
+                trial_count=1,
+                duration_s=4.0,
+            )
+        ],
+    )
+    bridge = focus_app._PhoneTransferBridge(
+        packages=[package],
+        transfer_id="transfer-001",
+        profile_id="study5",
+        participant_id="P001",
+        port=8767,
+    )
+
+    listing = bridge.mobile_packages()
+    package_id = listing["active_package_id"]
+    manifest = bridge.mobile_package_manifest(package_id)
+    assets = {asset["asset_id"]: asset for asset in manifest["assets"]}
+    building_block_asset_id = manifest["blocks"][0]["trials"][0]["building_block_asset_id"]
+    path, media_type = bridge.mobile_package_asset_path(package_id, building_block_asset_id)
+
+    assert bridge.health()["mobile_runtime"]["mobile_runnable"] is True
+    assert listing["packages"][0]["asset_count"] == 1
+    assert manifest["asset_strategy"] == "trial_building_blocks_only"
+    assert {asset["role"] for asset in manifest["assets"]} == {"trial_building_block"}
+    assert "block-01-audio" not in assets
+    assert path == str(wav)
+    assert media_type == "audio/wav"
 
 
 def test_validation_external_mouse_click_uses_helper_python(monkeypatch):

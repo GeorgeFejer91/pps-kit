@@ -90,6 +90,16 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `pps-android-phone-scheduled-block-materialization.v1`, and records a
   `phone_scheduled_block_materialization` marker/diary event before AudioTrack
   playback. The default prepared block WAV path is unchanged.
+- The native runner's `Send To Phone` bridge now serves building-block-only v2
+  packages by default. `build_mobile_package_manifest(...,
+  include_block_audio=False)` omits `block_audio` assets while preserving each
+  block's compatibility `audio_asset_id`, sets `asset_strategy =
+  trial_building_blocks_only`, requires every scheduled trial to reference an
+  available reusable `trial_building_block`, and lets Android's scheduled-block
+  materialization fallback own playback. The regular Focus Mode companion
+  package path still serves prepared block WAVs for compatibility. The mobile
+  package validator can enforce this path with
+  `--require-lightweight-scheduled-blocks`.
 - Android phone-owned runs now derive a phone-local tactile response ledger
   using the shared 100-1300 ms post-tactile response window and write
   `phone_response_ledger.csv` plus `phone_topup_plan.json` into the local run
