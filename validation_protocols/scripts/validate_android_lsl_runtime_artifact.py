@@ -33,6 +33,8 @@ from peripersonal_space_toolkit.android_lsl_admin import (  # noqa: E402
 
 
 ANDROID_LSL_RUNTIME_STATUS_SCHEMA = "pps-android-lsl-runtime-status.v1"
+ANDROID_PHONE_RUN_CATALOG_ENTRY_SCHEMA = "pps-android-phone-run-catalog-entry.v1"
+ANDROID_PHONE_RUN_CATALOG_ENTRY = "phone_run_catalog_entry.json"
 ANDROID_CONTROLLER_RUNTIME_STATUS_SCHEMA = "pps-android-controller-runtime-status.v1"
 ANDROID_CONTROLLER_COMMAND_ROW_SCHEMA = "pps-android-controller-command-row.v1"
 EXPECTED_STREAMS = {
@@ -75,7 +77,9 @@ def validate_runtime_status(
     *,
     source_path: str = "",
     completion: dict[str, Any] | None = None,
+    catalog_entry: dict[str, Any] | None = None,
     expect_native_transport: bool = False,
+    expect_run_catalog: bool = False,
 ) -> AndroidLslValidationResult:
     failures: list[str] = []
     warnings: list[str] = []
@@ -130,6 +134,8 @@ def validate_runtime_status(
                 failures.append("completion.json embedded LSL streams differ from lsl_runtime_status.json")
         else:
             warnings.append("completion/latest-events artifact does not embed lsl_runtime_status")
+
+    _validate_phone_run_catalog_entry(status, catalog_entry, failures, warnings, expect_run_catalog=expect_run_catalog)
 
     return AndroidLslValidationResult(
         ok=not failures,
@@ -256,6 +262,7 @@ def validate_run_artifact(
     *,
     expect_native_transport: bool = False,
     expect_command_acks: bool = False,
+    expect_run_catalog: bool = False,
 ) -> AndroidLslValidationResult:
     loaded = _load_status_inputs(path)
     if loaded.get("kind") == "controller":
@@ -278,7 +285,9 @@ def validate_run_artifact(
         loaded["status"],
         source_path=str(path),
         completion=loaded.get("completion"),
+        catalog_entry=loaded.get("catalog_entry"),
         expect_native_transport=expect_native_transport,
+        expect_run_catalog=expect_run_catalog,
     )
 
 
@@ -289,10 +298,12 @@ def _load_status_inputs(path: Path) -> dict[str, Any]:
             completion_path = path / "completion.json"
             if not completion_path.is_file():
                 completion_path = path / "latest_events.json"
+            catalog_path = path / ANDROID_PHONE_RUN_CATALOG_ENTRY
             return {
                 "kind": "runner",
                 "status": _read_json(status_path),
                 "completion": _read_json(completion_path) if completion_path.is_file() else None,
+                "catalog_entry": _read_json(catalog_path) if catalog_path.is_file() else None,
             }
         controller_status_path = path / "phone_controller_runtime_status.json"
         if controller_status_path.is_file():
@@ -331,10 +342,12 @@ def _load_status_inputs(path: Path) -> dict[str, Any]:
         raise FileNotFoundError(f"Missing {status_path} or {pc_admin_status_path} beside command outbox")
     data = _read_json(path)
     if data.get("schema") == ANDROID_LSL_RUNTIME_STATUS_SCHEMA:
+        catalog_path = path.with_name(ANDROID_PHONE_RUN_CATALOG_ENTRY)
         return {
             "kind": "runner",
             "status": data,
             "completion": None,
+            "catalog_entry": _read_json(catalog_path) if catalog_path.is_file() else None,
         }
     if data.get("schema") == ANDROID_CONTROLLER_RUNTIME_STATUS_SCHEMA:
         outbox_path = path.with_name("phone_controller_command_outbox.jsonl")
@@ -352,7 +365,11 @@ def _load_status_inputs(path: Path) -> dict[str, Any]:
         }
     embedded = data.get("lsl_runtime_status")
     if isinstance(embedded, dict):
-        return {"kind": "runner", "status": embedded, "completion": data}
+        catalog_entry = data.get("phone_run_catalog_entry") if isinstance(data.get("phone_run_catalog_entry"), dict) else None
+        if catalog_entry is None:
+            catalog_path = path.with_name(ANDROID_PHONE_RUN_CATALOG_ENTRY)
+            catalog_entry = _read_json(catalog_path) if catalog_path.is_file() else None
+        return {"kind": "runner", "status": embedded, "completion": data, "catalog_entry": catalog_entry}
     raise ValueError(
         f"{path} is not an Android LSL status, completion, controller status, controller outbox, "
         "PC Android admin status, or PC Android admin outbox artifact"
@@ -370,13 +387,24 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
             completion_members = [
                 name for name in archive.namelist() if name.endswith("completion.json") or name.endswith("latest_events.json")
             ]
+            catalog_members = [name for name in archive.namelist() if name.endswith(ANDROID_PHONE_RUN_CATALOG_ENTRY)]
             archive.extract(status_name, temp_root)
             completion = None
             if completion_members:
                 completion_name = sorted(completion_members)[0]
                 archive.extract(completion_name, temp_root)
                 completion = _read_json(temp_root / completion_name)
-            return {"kind": "runner", "status": _read_json(temp_root / status_name), "completion": completion}
+            catalog_entry = None
+            if catalog_members:
+                catalog_name = sorted(catalog_members)[0]
+                archive.extract(catalog_name, temp_root)
+                catalog_entry = _read_json(temp_root / catalog_name)
+            return {
+                "kind": "runner",
+                "status": _read_json(temp_root / status_name),
+                "completion": completion,
+                "catalog_entry": catalog_entry,
+            }
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -412,6 +440,57 @@ def _validate_command_protocol(protocol: dict[str, Any], failures: list[str]) ->
         failures.append("ack channel order does not match PC runner protocol")
     if protocol.get("token_required") is not True:
         failures.append("command protocol must require the pairing token")
+
+
+def _validate_phone_run_catalog_entry(
+    status: dict[str, Any],
+    catalog_entry: dict[str, Any] | None,
+    failures: list[str],
+    warnings: list[str],
+    *,
+    expect_run_catalog: bool,
+) -> None:
+    if not catalog_entry:
+        message = "phone run catalog entry is missing"
+        if expect_run_catalog:
+            failures.append(message)
+        else:
+            warnings.append(f"{message}; rerun with --expect-run-catalog for strict checks")
+        return
+    if catalog_entry.get("schema") != ANDROID_PHONE_RUN_CATALOG_ENTRY_SCHEMA:
+        failures.append("phone run catalog entry schema mismatch")
+    privacy = catalog_entry.get("privacy") if isinstance(catalog_entry.get("privacy"), dict) else {}
+    if privacy.get("demographics_in_stream_name") is not False:
+        failures.append("phone run catalog entry must keep demographics out of stream names")
+
+    for field in (
+        "package_id",
+        "run_id",
+        "participant_id",
+        "session_id",
+        "session_group_id",
+        "part_session_id",
+        "part_number",
+    ):
+        expected = str(status.get(field) or "").strip()
+        observed = str(catalog_entry.get(field) or "").strip()
+        if expected and observed and expected != observed:
+            failures.append(f"phone run catalog entry {field} differs from lsl_runtime_status")
+
+    bool_fields = {
+        "native_lsl_transport_available": "native_transport_available",
+        "native_lsl_marker_transport_enabled": "native_marker_transport_enabled",
+        "native_lsl_command_receiver_available": "command_receiver_available",
+    }
+    for catalog_field, status_field in bool_fields.items():
+        if status_field in status and catalog_field in catalog_entry:
+            if bool(catalog_entry.get(catalog_field)) != bool(status.get(status_field)):
+                failures.append(f"phone run catalog entry {catalog_field} differs from lsl_runtime_status")
+    if not str(catalog_entry.get("artifact_file") or "").strip():
+        failures.append("phone run catalog entry is missing artifact_file")
+    reconstruction = catalog_entry.get("reconstruction") if isinstance(catalog_entry.get("reconstruction"), dict) else {}
+    if not str(reconstruction.get("schedule_hash") or "").strip():
+        warnings.append("phone run catalog entry does not include a reconstruction schedule_hash")
 
 
 def _validate_controller_outbox_row(
@@ -578,6 +657,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--expect-native-transport", action="store_true", help="Fail unless native Android LSL transport is active.")
     parser.add_argument("--expect-command-acks", action="store_true", help="For controller outboxes, fail unless every command has a matching ack.")
+    parser.add_argument("--expect-run-catalog", action="store_true", help="For phone-run artifacts, fail unless phone_run_catalog_entry.json is present and consistent.")
     parser.add_argument("--output-dir", type=Path, help="Optional directory for JSON/Markdown validation reports.")
     args = parser.parse_args(argv)
 
@@ -585,6 +665,7 @@ def main(argv: list[str] | None = None) -> int:
         args.artifact,
         expect_native_transport=args.expect_native_transport,
         expect_command_acks=args.expect_command_acks,
+        expect_run_catalog=args.expect_run_catalog,
     )
     if args.output_dir:
         _write_report(result, args.output_dir)

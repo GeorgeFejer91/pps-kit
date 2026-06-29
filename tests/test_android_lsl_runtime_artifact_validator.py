@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import sys
+import zipfile
 from pathlib import Path
 
 
@@ -60,6 +61,64 @@ def test_android_lsl_runtime_validator_requires_command_transport_in_strict_mode
 
     assert result.ok is False
     assert "command_transport is not enabled" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_accepts_phone_run_catalog_entry(tmp_path: Path):
+    status = _status(native=False)
+    status.update(_catalog_identity())
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
+    (run_dir / "completion.json").write_text(json.dumps({"lsl_runtime_status": status}), encoding="utf-8")
+    (run_dir / "phone_run_catalog_entry.json").write_text(json.dumps(_catalog_entry(native=False)), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_run_catalog=True)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_can_require_phone_run_catalog_entry(tmp_path: Path):
+    status = _status(native=False)
+    status.update(_catalog_identity())
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_run_catalog=True)
+
+    assert result.ok is False
+    assert "phone run catalog entry is missing" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_phone_run_catalog_identity_drift(tmp_path: Path):
+    status = _status(native=False)
+    status.update(_catalog_identity())
+    catalog = _catalog_entry(native=False)
+    catalog["part_session_id"] = "other-part"
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
+    (run_dir / "phone_run_catalog_entry.json").write_text(json.dumps(catalog), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir)
+
+    assert result.ok is False
+    assert "part_session_id differs" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_loads_phone_run_catalog_from_zip(tmp_path: Path):
+    status = _status(native=True)
+    status.update(_catalog_identity())
+    archive_path = tmp_path / "phone-run.zip"
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        archive.writestr("phone-run/lsl_runtime_status.json", json.dumps(status))
+        archive.writestr("phone-run/phone_run_catalog_entry.json", json.dumps(_catalog_entry(native=True)))
+
+    result = validator.validate_run_artifact(archive_path, expect_native_transport=True, expect_run_catalog=True)
+
+    assert result.ok is True
+    assert result.failures == []
 
 
 def test_android_lsl_runtime_validator_accepts_controller_outbox_artifact(tmp_path: Path):
@@ -232,6 +291,47 @@ def _status(*, native: bool) -> dict:
             "default": "metadata_payload_only",
             "participant_demographics_location": "metadata_and_payload_artifacts",
             "demographics_in_stream_name": False,
+        },
+    }
+
+
+def _catalog_identity() -> dict:
+    return {
+        "package_id": "pkg-001",
+        "run_id": "phone-run-001",
+        "participant_id": "P001",
+        "session_id": "session-001",
+        "session_group_id": "group-001",
+        "part_session_id": "part-001",
+        "part_number": "01",
+    }
+
+
+def _catalog_entry(*, native: bool) -> dict:
+    return {
+        "schema": "pps-android-phone-run-catalog-entry.v1",
+        **_catalog_identity(),
+        "completed": True,
+        "completion_reason": "completed",
+        "artifact_file": "completion.json",
+        "native_lsl_transport_available": native,
+        "native_lsl_marker_transport_enabled": native,
+        "native_lsl_command_receiver_available": native,
+        "participant_metadata_summary": {
+            "participant_id": "P001",
+            "age_years": "30",
+            "handedness": "right",
+            "gender": "prefer_not_to_say",
+        },
+        "privacy": {
+            "scope": "app_private_local_catalog",
+            "demographics_in_stream_name": False,
+        },
+        "reconstruction": {
+            "schedule_hash": "schedulehash",
+            "building_block_count": 6,
+            "block_count": 6,
+            "trial_count": 180,
         },
     }
 

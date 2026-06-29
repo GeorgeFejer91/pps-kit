@@ -223,6 +223,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   command diary and marker counts, native LSL status booleans, completion
   reason, and privacy-safe participant metadata summaries; they explicitly keep
   demographics out of stream names.
+- The Android LSL artifact validator now understands the phone-run catalog
+  entry. `validate_android_lsl_runtime_artifact.py` loads
+  `phone_run_catalog_entry.json` from phone-run folders and ZIPs, checks schema,
+  privacy, identity fields, native LSL status booleans, and artifact filename
+  consistency, and can fail missing catalog entries with
+  `--expect-run-catalog` for new phone-owned exports.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only
