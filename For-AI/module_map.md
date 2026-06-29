@@ -20,6 +20,13 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   deliberately `native_transport_available=false` /
   `native_liblsl_android_layer_not_present`; do not present local marker mirrors
   or protocol unit tests as live Android LSL broadcast evidence.
+- Optional native Android LSL marker transport lives in
+  `PhoneNativeLslBridge.kt`. A local ignored
+  `android/runner-companion/app/libs/liblsl-Android.aar` is included by Gradle
+  when present; the bridge reflects `edu.ucsd.sccn.LSL`, creates
+  `PPSMarkersV2`/`PPSTriggerCodes` outlets before `session_metadata`, and pushes
+  every local marker mirror row while preserving CSV artifacts. Strict native
+  validation must require `native_marker_transport_enabled=true`.
 - Android controller-role scaffolding lives in `PhoneControllerCommands.kt` and
   the `Runner` / `Controller` toggle inside `PhoneRuntimeScreen`. Controller
   mode writes token-gated command samples to

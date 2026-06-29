@@ -54,6 +54,7 @@ def _status(*, native: bool) -> dict:
     return {
         "schema": "pps-android-lsl-runtime-status.v1",
         "native_transport_available": native,
+        "native_marker_transport_enabled": native,
         "command_receiver_available": native,
         "current_android_source_behavior": "native_lsl" if native else "local_lsl_marker_mirror",
         "reason": "" if native else "native_liblsl_android_layer_not_present",

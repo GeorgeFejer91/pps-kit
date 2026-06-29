@@ -111,7 +111,7 @@ class PhoneLslProtocolTest {
         assertEquals(PHONE_LSL_RUNTIME_STATUS_SCHEMA, status.getString("schema"))
         assertEquals("local_lsl_marker_mirror", status.getString("current_android_source_behavior"))
         assertFalse(status.getBoolean("native_transport_available"))
-        assertEquals("native_liblsl_android_layer_not_present", status.getString("reason"))
+        assertTrue(status.getString("reason").contains("liblsl_android_class_unavailable"))
         assertEquals("PPSCommandSignalsV1", status.getJSONObject("streams").getString("command_signals"))
         assertFalse(status.getJSONObject("privacy").getBoolean("demographics_in_stream_name"))
         assertTrue(status.getJSONObject("command_protocol").getBoolean("token_required"))

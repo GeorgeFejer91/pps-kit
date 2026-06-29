@@ -88,10 +88,13 @@ def validate_runtime_status(
         failures.append("participant demographics must not be encoded in discoverable stream names")
 
     native_available = bool(status.get("native_transport_available"))
+    marker_enabled = bool(status.get("native_marker_transport_enabled"))
     receiver_available = bool(status.get("command_receiver_available"))
     if expect_native_transport:
         if not native_available:
             failures.append("native Android LSL transport was expected but is not available")
+        if not marker_enabled:
+            failures.append("native Android LSL marker transport was expected but is not enabled")
         if not receiver_available:
             failures.append("native command receiver was expected but is not available")
     elif native_available:
@@ -191,6 +194,7 @@ def _write_report(result: AndroidLslValidationResult, output_dir: Path) -> None:
         f"- Source: `{result.source_path}`",
         f"- Result: `{'PASS' if result.ok else 'FAIL'}`",
         f"- Native transport available: `{bool(result.status.get('native_transport_available'))}`",
+        f"- Native marker transport enabled: `{bool(result.status.get('native_marker_transport_enabled'))}`",
         f"- Command receiver available: `{bool(result.status.get('command_receiver_available'))}`",
         f"- Current Android source behavior: `{result.status.get('current_android_source_behavior', '')}`",
         "",

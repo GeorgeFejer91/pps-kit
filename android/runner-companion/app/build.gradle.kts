@@ -28,6 +28,7 @@ android {
 
 dependencies {
     val composeBom = platform("androidx.compose:compose-bom:2026.06.00")
+    val optionalLiblslAndroidAar = file("libs/liblsl-Android.aar")
     implementation(composeBom)
     androidTestImplementation(composeBom)
 
@@ -48,6 +49,9 @@ dependencies {
     implementation("com.google.mlkit:barcode-scanning:17.3.0")
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    if (optionalLiblslAndroidAar.exists()) {
+        implementation(files(optionalLiblslAndroidAar))
+    }
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.json:json:20240303")

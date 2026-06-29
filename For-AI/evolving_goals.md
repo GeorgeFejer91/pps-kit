@@ -115,6 +115,21 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   the future native LSL bridge a tested UI/outbox contract for another phone to
   control a runner phone, but it still does not send live LSL samples until the
   liblsl Android transport is wired.
+- Android native LSL transport now has an optional local-AAR bridge boundary.
+  `android/runner-companion/app/libs/liblsl-Android.aar` is ignored by Git but,
+  when supplied for a local validation build, Gradle includes it and
+  `PhoneNativeLslBridge.kt` reflects the official Java binding classes
+  (`edu.ucsd.sccn.LSL`) to create long-lived rich `PPSMarkersV2` and numeric
+  `PPSTriggerCodes` outlets. Phone-owned sessions open those outlets before the
+  `session_metadata` marker and push every local marker mirror row through the
+  native bridge while still writing `lsl_marker_mirror.csv`. Native marker
+  timestamps map Android `elapsedRealtime` event times into the liblsl
+  `local_clock()` domain using an outlet-open offset and are labeled
+  `android_elapsed_realtime_plus_open_lsl_clock_offset`; this remains
+  phone-runtime evidence until XDF and physical timing validation pass. Without
+  the AAR, the bridge is a no-op and `lsl_runtime_status.json` records
+  `liblsl_android_class_unavailable`; strict validation now also requires
+  `native_marker_transport_enabled=true`, not only class availability.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only

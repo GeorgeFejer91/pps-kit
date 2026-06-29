@@ -4,10 +4,32 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 internal const val PHONE_LSL_RUNTIME_STATUS_SCHEMA = "pps-android-lsl-runtime-status.v1"
+internal const val PHONE_LSL_MARKER_VERSION = "2.0"
+internal const val PHONE_LSL_RICH_MARKER_STREAM_NAME = "PPSMarkersV2"
+internal const val PHONE_LSL_NUMERIC_TRIGGER_STREAM_NAME = "PPSTriggerCodes"
 internal const val PHONE_LSL_COMMAND_SCHEMA = "pps-lsl-command.v1"
 internal const val PHONE_LSL_ACK_SCHEMA = "pps-lsl-command-ack.v1"
 internal const val PHONE_LSL_COMMAND_STREAM_NAME = "PPSCommandSignalsV1"
 internal const val PHONE_LSL_ACK_STREAM_NAME = "PPSCommandAcksV1"
+
+internal val PHONE_LSL_MARKER_CHANNELS = listOf(
+    "marker_version",
+    "event_id",
+    "event_type",
+    "event_code",
+    "trigger_key",
+    "marker_name",
+    "session_id",
+    "participant_id",
+    "session_group_id",
+    "part_session_id",
+    "part_number",
+    "block_index",
+    "trial_uid",
+    "sample_index",
+    "timestamp_quality",
+    "payload_json",
+)
 
 internal val PHONE_LSL_COMMAND_CHANNELS = listOf(
     "schema",
@@ -18,6 +40,29 @@ internal val PHONE_LSL_COMMAND_CHANNELS = listOf(
     "issued_lsl_time",
     "payload_json",
 )
+
+internal fun phoneMarkerToRichSample(marker: JSONObject): List<String> =
+    listOf(
+        marker.optString("marker_version", PHONE_LSL_MARKER_VERSION),
+        marker.optString("event_id", ""),
+        marker.optString("event_type", ""),
+        marker.optString("event_code", ""),
+        marker.optString("trigger_key", ""),
+        marker.optString("marker_name", ""),
+        marker.optString("session_id", ""),
+        marker.optString("participant_id", ""),
+        marker.optString("session_group_id", ""),
+        marker.optString("part_session_id", ""),
+        marker.optString("part_number", ""),
+        marker.optString("block_index", ""),
+        marker.optString("trial_uid", ""),
+        marker.optString("sample_index", ""),
+        marker.optString("timestamp_quality", ""),
+        marker.optString("payload_json", "{}"),
+    )
+
+internal fun phoneMarkerTriggerCode(marker: JSONObject): Int =
+    marker.optInt("event_code", 0)
 
 internal val PHONE_LSL_ACK_CHANNELS = listOf(
     "schema",
@@ -131,14 +176,17 @@ internal fun phoneAckFromSample(sample: List<Any?>): PhoneLslCommandAck {
 internal fun phoneLslRuntimeStatus(
     runPackage: MobileRunPackage,
     runId: String,
-    nativeTransportAvailable: Boolean = false,
+    nativeBridgeStatus: PhoneNativeLslBridgeStatus = PhoneNativeLslBridgeFactory.create().status(),
+    markerTransportStatus: PhoneNativeLslBridgeStatus? = null,
     commandReceiverAvailable: Boolean = false,
-    reason: String = "native_liblsl_android_layer_not_present",
 ): JSONObject {
     val richName = runPackage.lsl.richMarkersName.ifBlank { "PPSMarkersV2" }
     val numericName = runPackage.lsl.numericTriggersName.ifBlank { "PPSTriggerCodes" }
     val commandName = runPackage.lsl.commandSignalsName.ifBlank { PHONE_LSL_COMMAND_STREAM_NAME }
     val ackName = runPackage.lsl.commandAcksName.ifBlank { PHONE_LSL_ACK_STREAM_NAME }
+    val activeMarkerTransport = markerTransportStatus?.enabled == true
+    val nativeAvailable = nativeBridgeStatus.available
+    val reason = markerTransportStatus?.reason?.ifBlank { nativeBridgeStatus.reason } ?: nativeBridgeStatus.reason
     return JSONObject()
         .put("schema", PHONE_LSL_RUNTIME_STATUS_SCHEMA)
         .put("package_id", runPackage.packageId)
@@ -151,10 +199,17 @@ internal fun phoneLslRuntimeStatus(
         .put("runtime_authority", runPackage.lsl.runtimeAuthority.ifBlank { "android_phone" })
         .put("native_android_lsl_required", runPackage.lsl.nativeAndroidLslRequired)
         .put("native_transport", "liblsl")
-        .put("native_transport_available", nativeTransportAvailable)
+        .put("native_transport_available", nativeAvailable)
+        .put("native_marker_transport_enabled", activeMarkerTransport)
+        .put("native_marker_timestamp_strategy", "android_elapsed_realtime_plus_open_lsl_clock_offset")
         .put("command_receiver_available", commandReceiverAvailable)
-        .put("current_android_source_behavior", runPackage.lsl.currentAndroidSourceBehavior.ifBlank { "local_lsl_marker_mirror" })
-        .put("reason", if (nativeTransportAvailable) "" else reason)
+        .put(
+            "current_android_source_behavior",
+            if (activeMarkerTransport) "native_lsl_markers_with_local_mirror"
+            else runPackage.lsl.currentAndroidSourceBehavior.ifBlank { "local_lsl_marker_mirror" },
+        )
+        .put("reason", if (activeMarkerTransport) "" else reason.ifBlank { "native_lsl_marker_transport_not_enabled" })
+        .put("native_bridge", phoneNativeLslStatusJson(nativeBridgeStatus, markerTransportStatus))
         .put(
             "streams",
             JSONObject()

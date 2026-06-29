@@ -54,6 +54,27 @@ The bridge must keep outlets alive for the full phone run, use one command/ack
 sample per push, and send a command ack only after the local Android handler has
 accepted or rejected the state transition.
 
+The app is already wired for the local AAR path. Put a locally built or release
+downloaded `liblsl-Android.aar` at:
+
+```text
+android/runner-companion/app/libs/liblsl-Android.aar
+```
+
+That file is ignored by Git. When it is absent, the reflection bridge records
+`liblsl_android_class_unavailable` and native status remains false. When it is
+present, `PhoneNativeLslBridge.kt` can create the rich `PPSMarkersV2` and
+numeric `PPSTriggerCodes` outlets, append PC-compatible channel metadata, and
+push every local marker mirror row to native LSL while preserving the local CSV
+mirror.
+
+Phone marker timestamps use
+`android_elapsed_realtime_plus_open_lsl_clock_offset`: the app samples
+`liblsl.local_clock()` when outlets open and maps Android `elapsedRealtime`
+event times into that clock domain. This is the correct clock domain for LSL
+samples, but it remains phone-runtime evidence until external XDF and physical
+timing validation pass.
+
 ## Network Caveats
 
 Android LSL validation must treat Wi-Fi as a real experimental dependency.

@@ -7,7 +7,10 @@ __pycache__/
 build/
 dist/
 android/**/.gradle/
+android/**/.kotlin/
 android/**/build/
+android/runner-companion/app/libs/*.aar
+!android/runner-companion/app/libs/README.md
 *.egg-info/
 configs/stimulus_design.generated.json
 models/

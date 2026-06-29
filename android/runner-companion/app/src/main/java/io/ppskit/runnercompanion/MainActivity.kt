@@ -1720,6 +1720,7 @@ private class PhoneRunSession(
     participantMetadata: JSONObject = JSONObject(),
     hapticMetadata: JSONObject = JSONObject(),
     private val lslContract: MobileLslContract = MobileLslContract.empty,
+    private val nativeLslBridge: PhoneNativeLslBridge = PhoneNativeLslBridgeFactory.create(),
 ) {
     val runId: String = "phone-${System.currentTimeMillis()}"
     private val events = mutableListOf<JSONObject>()
@@ -1735,10 +1736,23 @@ private class PhoneRunSession(
     private var tapCount: Int = 0
     private var validTapCount: Int = 0
     private var latestLslRuntimeStatus: JSONObject = JSONObject()
+    private var markerTransport: PhoneLslMarkerTransport? = null
+    private var nativeLslClockOffsetS: Double = 0.0
+    private var nativeLslPushedCount: Int = 0
+    private var nativeLslFailedCount: Int = 0
 
     @Synchronized
     fun addRunStart(runPackage: MobileRunPackage) {
-        latestLslRuntimeStatus = phoneLslRuntimeStatus(runPackage, runId)
+        markerTransport = nativeLslBridge.openMarkerTransport(runPackage, runId)
+        nativeLslClockOffsetS = markerTransport?.let { transport ->
+            transport.localClock() - (SystemClock.elapsedRealtime() / 1000.0)
+        } ?: 0.0
+        latestLslRuntimeStatus = phoneLslRuntimeStatus(
+            runPackage = runPackage,
+            runId = runId,
+            nativeBridgeStatus = nativeLslBridge.status(),
+            markerTransportStatus = markerTransport?.status,
+        )
         addEventLocked(
             "session_metadata",
             JSONObject()
@@ -1930,7 +1944,7 @@ private class PhoneRunSession(
         val eventsArray = JSONArray()
         pendingEvents.forEach { eventsArray.put(JSONObject(it.toString())) }
         pendingEvents.clear()
-        return JSONObject()
+        val payload = JSONObject()
             .put("schema", if (complete) "pps-mobile-run-complete.v1" else "pps-mobile-run-events.v1")
             .put("package_id", packageId)
             .put("run_id", runId)
@@ -1942,6 +1956,8 @@ private class PhoneRunSession(
             .put("lsl_marker_mirror", JSONArray().also { array -> lslMarkers.forEach { array.put(JSONObject(it.toString())) } })
             .put("command_diary", JSONArray().also { array -> commandDiary.forEach { array.put(JSONObject(it.toString())) } })
             .put("summary", summaryLocked())
+        if (complete) closeNativeLslTransportLocked()
+        return payload
     }
 
     @Synchronized
@@ -1954,7 +1970,12 @@ private class PhoneRunSession(
         val packageManifestSha256 = sha256Text(packageManifestText)
         val packageManifestFile = File(dir, "run_package_manifest.json")
         val reconstructionFile = File(dir, "reconstruction_contract.json")
-        val lslRuntimeStatus = phoneLslRuntimeStatus(runPackage, runId)
+        val lslRuntimeStatus = phoneLslRuntimeStatus(
+            runPackage = runPackage,
+            runId = runId,
+            nativeBridgeStatus = nativeLslBridge.status(),
+            markerTransportStatus = markerTransport?.status,
+        )
         latestLslRuntimeStatus = JSONObject(lslRuntimeStatus.toString())
         val lslRuntimeStatusFile = File(dir, "lsl_runtime_status.json")
         val responseReview = buildPhoneResponseReview(runPackage, events)
@@ -2034,6 +2055,7 @@ private class PhoneRunSession(
         writeCommandDiaryJsonl(File(dir, "command_diary.jsonl"), commandDiary)
         File(dir, "participant_metadata.json").writeText(participantMetadata.toString(2), Charsets.UTF_8)
         File(dir, "haptic_capability.json").writeText(hapticMetadata.toString(2), Charsets.UTF_8)
+        if (complete) closeNativeLslTransportLocked()
         return JSONObject()
             .put("schema", if (complete) "pps-mobile-run-complete.v1" else "pps-mobile-run-events.v1")
             .put("status", if (complete) "saved" else "saved_partial")
@@ -2064,7 +2086,27 @@ private class PhoneRunSession(
             .put("phone_elapsed_realtime_ms", SystemClock.elapsedRealtime())
         events.add(event)
         pendingEvents.add(event)
-        lslMarkers.add(markerFromEvent(event))
+        val marker = markerFromEvent(event)
+        lslMarkers.add(marker)
+        pushNativeLslMarkerLocked(marker)
+    }
+
+    private fun pushNativeLslMarkerLocked(marker: JSONObject) {
+        val transport = markerTransport ?: return
+        val timestamp = marker.optDouble("phone_elapsed_realtime_ms", Double.NaN)
+            .takeIf { it.isFinite() }
+            ?.let { (it / 1000.0) + nativeLslClockOffsetS }
+            ?: transport.localClock()
+        if (transport.pushMarker(marker, timestamp)) {
+            nativeLslPushedCount += 1
+        } else {
+            nativeLslFailedCount += 1
+        }
+    }
+
+    private fun closeNativeLslTransportLocked() {
+        markerTransport?.close()
+        markerTransport = null
     }
 
     private fun markerFromEvent(event: JSONObject): JSONObject {
@@ -2104,6 +2146,11 @@ private class PhoneRunSession(
             .put("valid_tap_count", validTapCount)
             .put("lsl_marker_mirror_count", lslMarkers.size)
             .put("native_lsl_transport_available", latestLslRuntimeStatus.optBoolean("native_transport_available", false))
+            .put("native_lsl_marker_transport_enabled", latestLslRuntimeStatus.optBoolean("native_marker_transport_enabled", false))
+            .put("native_lsl_timestamp_strategy", "android_elapsed_realtime_plus_open_lsl_clock_offset")
+            .put("native_lsl_clock_offset_s", nativeLslClockOffsetS)
+            .put("native_lsl_pushed_count", nativeLslPushedCount)
+            .put("native_lsl_failed_count", nativeLslFailedCount)
             .put("command_diary_count", commandDiary.size)
 }
 
