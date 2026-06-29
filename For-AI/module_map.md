@@ -65,7 +65,12 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   PC-monitor `pc_android_lsl_monitor_report.json` /
   `pc_android_lsl_monitor_events.jsonl`, token requirement, privacy boundary,
   strict native-transport/send/observed-stream evidence, and optional
-  controller/PC-admin/monitor ack receipt.
+  controller/PC-admin/monitor ack receipt. The expected-vs-observed Android
+  LSL rehearsal check lives in
+  `reconcile_android_lsl_monitor_with_phone_run.py`; it compares a phone-run
+  `lsl_marker_mirror.csv` or ZIP against PC-observed monitor rows and numeric
+  trigger-code sequence, but remains network LSL evidence rather than physical
+  timing proof.
 - Android emulator validation policy: the AVD viewport is the fixed phone-screen truth. Do not use window resizing, widening, or repeated placement scripts to make the Android companion UI pass; flicker, hidden controls, scrolling burden, and clipped buttons are product findings. `windows/Set_Companion_Emulation_Layout.ps1` now places only the PC runner window, deliberately leaves Android emulator windows untouched, and treats old `-KeepForSeconds` calls as non-polling compatibility input. `focus_app.py` still honors `PPS_FOCUS_VALIDATION_DISPLAY`, `PPS_FOCUS_VALIDATION_RUNNER_WIDTH`, and `PPS_FOCUS_VALIDATION_WINDOW_RECT` for the PC runner window, and `PPS_FOCUS_VALIDATION_PARTICIPANT_RESPONSES_ONLY=1` keeps app-driven companion command tests from being preempted by validation auto-start/continue helpers.
 - Published-study preload recreation gate: `profile_recreation.py`, `assets/preloads/`, `study_templates/`.
 - Core paper-audit read API: `peripersonal_space_toolkit.paper_audit`.

@@ -222,6 +222,17 @@ Then validate the monitor report:
 .\.venv\Scripts\python.exe validation_protocols\scripts\validate_android_lsl_runtime_artifact.py artifacts\android_lsl_monitor\rehearsal_001 --expect-native-transport --expect-command-acks
 ```
 
+To compare the PC-observed monitor rows against the phone's local
+`lsl_marker_mirror.csv` from the same run:
+
+```powershell
+.\.venv\Scripts\python.exe validation_protocols\scripts\reconcile_android_lsl_monitor_with_phone_run.py <phone-run-dir-or-zip> artifacts\android_lsl_monitor\rehearsal_001 --expect-numeric-triggers --expect-command-acks --output-dir artifacts\android_lsl_monitor\rehearsal_001\reconciliation
+```
+
+This reconciliation checks whether the PC saw the same rich marker event ids,
+metadata fields, and numeric trigger-code sequence that the phone wrote locally.
+It is still network LSL evidence, not physical vibration/audio timing proof.
+
 Until that strict validator passes together with external LSL/XDF capture, the
 phone app remains a local phone-owned runner with LSL-compatible artifacts, not a
 publication-grade live LSL broadcaster.

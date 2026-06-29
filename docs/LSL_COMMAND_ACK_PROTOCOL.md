@@ -125,6 +125,16 @@ pps-android-lsl-monitor --duration-s 30 --require-markers --require-triggers --r
 python validation_protocols/scripts/validate_android_lsl_runtime_artifact.py artifacts/android_lsl_monitor --expect-native-transport --expect-command-acks
 ```
 
+For rehearsals with an exported phone-run folder or ZIP, follow the monitor
+validation with:
+
+```powershell
+python validation_protocols/scripts/reconcile_android_lsl_monitor_with_phone_run.py <phone-run-dir-or-zip> artifacts/android_lsl_monitor --expect-numeric-triggers --expect-command-acks
+```
+
+That reconciliation compares the phone-local `lsl_marker_mirror.csv` against
+the PC-observed rich marker rows and numeric trigger sequence.
+
 ## References
 
 - [Lab Streaming Layer overview](https://labstreaminglayer.org/)
