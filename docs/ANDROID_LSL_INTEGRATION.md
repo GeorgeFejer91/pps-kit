@@ -24,6 +24,13 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   window exposes the same helper as a small Phone LSL Control strip after a
   package bridge is prepared, using the prepared package part-session id as the
   default command target.
+- The PC-side helper `pps-android-lsl-monitor` resolves Android
+  `PPSMarkersV2`, `PPSTriggerCodes`, and `PPSCommandAcksV1` streams for a
+  bounded monitoring window and writes `pc_android_lsl_monitor_events.jsonl`,
+  `pc_android_lsl_monitor_report.json`, and
+  `pc_android_lsl_monitor_status.json`. This is the intended lightweight
+  "watch the phone runner from another PC" seam before a full LabRecorder/XDF
+  capture.
 - Commands are token-gated through `token` or `companion_token` in
   `payload_json` before any local handler runs.
 - Acks are shaped as applied/rejected command acknowledgements after the local
@@ -149,7 +156,10 @@ Required validation levels:
    `phone_controller_command_outbox.jsonl` artifacts, plus PC-admin
    `pc_android_lsl_admin_status.json` and
    `pc_android_lsl_command_outbox.jsonl` artifacts from
-   `pps-android-lsl-command`.
+   `pps-android-lsl-command`, and PC-monitor
+   `pc_android_lsl_monitor_report.json` /
+   `pc_android_lsl_monitor_events.jsonl` artifacts from
+   `pps-android-lsl-monitor`.
 3. Emulator smoke test: install APK, run a phone-owned package, export ZIP, and
    validate `lsl_runtime_status.json`.
 4. Native LSL network test with the AAR/JNI integration: resolve Android
@@ -197,6 +207,19 @@ Then validate the PC-admin outbox/status pair:
 
 ```powershell
 .\.venv\Scripts\python.exe validation_protocols\scripts\validate_android_lsl_runtime_artifact.py <pc_android_lsl_command_outbox.jsonl> --expect-native-transport --expect-command-acks
+```
+
+To monitor whether another PC can observe the Android runner's LSL evidence
+stream while commands are being sent:
+
+```powershell
+.\.venv\Scripts\pps-android-lsl-monitor.exe --duration-s 30 --require-markers --require-triggers --require-acks --output-dir artifacts\android_lsl_monitor\rehearsal_001
+```
+
+Then validate the monitor report:
+
+```powershell
+.\.venv\Scripts\python.exe validation_protocols\scripts\validate_android_lsl_runtime_artifact.py artifacts\android_lsl_monitor\rehearsal_001 --expect-native-transport --expect-command-acks
 ```
 
 Until that strict validator passes together with external LSL/XDF capture, the

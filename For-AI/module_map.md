@@ -51,7 +51,7 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
 - Provisional Woojer tactile-drive latency compensation: `tactile_latency.py`, consumed by `session_runner.py` during participant/top-up block WAV preparation.
 - Shared runner/dashboard profile memory and output-diary bridge: `runner_diary.py` now owns runner settings and diary helpers; future shared profile-catalogue code should live in a common Python seam consumed by both `dashboard_app.py` and `focus_app.py`, not separately in browser JS or runner UI code.
 - Event, timing, and output evidence contracts: `timing_events.py`, `session_events.py`, `output_evidence.py`, `topup.py`.
-- Optional LSL sender/receiver command acknowledgement helpers: `lsl_command_ack.py`, with real `pylsl` round-trip validation in `validation_protocols/scripts/run_lsl_command_ack_roundtrip.py`. PC-to-Android phone-owned administration lives in `android_lsl_admin.py` and the `pps-android-lsl-command` console entry point; it sends token-gated `PPSCommandSignalsV1` samples, optionally requires `PPSCommandAcksV1`, and writes `pc_android_lsl_command_outbox.jsonl` plus `pc_android_lsl_admin_status.json`.
+- Optional LSL sender/receiver command acknowledgement helpers: `lsl_command_ack.py`, with real `pylsl` round-trip validation in `validation_protocols/scripts/run_lsl_command_ack_roundtrip.py`. PC-to-Android phone-owned administration lives in `android_lsl_admin.py` and the `pps-android-lsl-command` console entry point; it sends token-gated `PPSCommandSignalsV1` samples, optionally requires `PPSCommandAcksV1`, and writes `pc_android_lsl_command_outbox.jsonl` plus `pc_android_lsl_admin_status.json`. PC-side Android LSL monitoring lives in `android_lsl_monitor.py` and the `pps-android-lsl-monitor` console entry point; it resolves Android `PPSMarkersV2`, `PPSTriggerCodes`, and `PPSCommandAcksV1` streams, writes `pc_android_lsl_monitor_events.jsonl` plus report/status JSON, and is the lightweight non-XDF observation seam for PC/phone-to-phone rehearsals.
 - Android native LSL integration guidance is tracked in
   `docs/ANDROID_LSL_INTEGRATION.md`. The phone-run artifact validator lives at
   `validation_protocols/scripts/validate_android_lsl_runtime_artifact.py` and
@@ -62,8 +62,10 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `phone_controller_command_outbox.jsonl`, PC-admin
   `pc_android_lsl_admin_status.json` /
   `pc_android_lsl_command_outbox.jsonl`, command/ack schema/channel order,
-  token requirement, privacy boundary, strict native-transport/send evidence,
-  and optional controller/PC-admin ack receipt.
+  PC-monitor `pc_android_lsl_monitor_report.json` /
+  `pc_android_lsl_monitor_events.jsonl`, token requirement, privacy boundary,
+  strict native-transport/send/observed-stream evidence, and optional
+  controller/PC-admin/monitor ack receipt.
 - Android emulator validation policy: the AVD viewport is the fixed phone-screen truth. Do not use window resizing, widening, or repeated placement scripts to make the Android companion UI pass; flicker, hidden controls, scrolling burden, and clipped buttons are product findings. `windows/Set_Companion_Emulation_Layout.ps1` now places only the PC runner window, deliberately leaves Android emulator windows untouched, and treats old `-KeepForSeconds` calls as non-polling compatibility input. `focus_app.py` still honors `PPS_FOCUS_VALIDATION_DISPLAY`, `PPS_FOCUS_VALIDATION_RUNNER_WIDTH`, and `PPS_FOCUS_VALIDATION_WINDOW_RECT` for the PC runner window, and `PPS_FOCUS_VALIDATION_PARTICIPANT_RESPONSES_ONLY=1` keeps app-driven companion command tests from being preempted by validation auto-start/continue helpers.
 - Published-study preload recreation gate: `profile_recreation.py`, `assets/preloads/`, `study_templates/`.
 - Core paper-audit read API: `peripersonal_space_toolkit.paper_audit`.

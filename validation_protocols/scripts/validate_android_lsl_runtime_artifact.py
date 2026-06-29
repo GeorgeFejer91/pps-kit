@@ -30,6 +30,20 @@ from peripersonal_space_toolkit.android_lsl_admin import (  # noqa: E402
     PC_ANDROID_LSL_ADMIN_STATUS,
     PC_ANDROID_LSL_ADMIN_STATUS_SCHEMA,
 )
+from peripersonal_space_toolkit.android_lsl_monitor import (  # noqa: E402
+    PC_ANDROID_LSL_MONITOR_EVENTS,
+    PC_ANDROID_LSL_MONITOR_REPORT,
+    PC_ANDROID_LSL_MONITOR_REPORT_SCHEMA,
+    PC_ANDROID_LSL_MONITOR_ROW_SCHEMA,
+    PC_ANDROID_LSL_MONITOR_STATUS,
+    PC_ANDROID_LSL_MONITOR_STATUS_SCHEMA,
+)
+from peripersonal_space_toolkit.timing_events import (  # noqa: E402
+    LSL_MARKER_CHANNELS,
+    LSL_NUMERIC_STREAM_NAME,
+    LSL_STREAM_NAME,
+    MARKER_VERSION,
+)
 
 
 ANDROID_LSL_RUNTIME_STATUS_SCHEMA = "pps-android-lsl-runtime-status.v1"
@@ -50,6 +64,12 @@ EXPECTED_CONTROLLER_STREAMS = {
 EXPECTED_PC_ADMIN_STREAMS = {
     "command_signals": LSL_COMMAND_STREAM_NAME,
     "command_acks": LSL_ACK_STREAM_NAME,
+}
+EXPECTED_PC_MONITOR_STREAMS = {
+    "rich_markers": LSL_STREAM_NAME,
+    "numeric_triggers": LSL_NUMERIC_STREAM_NAME,
+    "command_acks": LSL_ACK_STREAM_NAME,
+    "command_signals": LSL_COMMAND_STREAM_NAME,
 }
 
 
@@ -257,6 +277,82 @@ def validate_pc_admin_status(
     )
 
 
+def validate_pc_monitor_report(
+    report: dict[str, Any],
+    *,
+    source_path: str = "",
+    event_rows: list[dict[str, Any]] | None = None,
+    expect_native_transport: bool = False,
+    expect_command_acks: bool = False,
+) -> AndroidLslValidationResult:
+    failures: list[str] = []
+    warnings: list[str] = []
+    if report.get("schema") != PC_ANDROID_LSL_MONITOR_REPORT_SCHEMA:
+        failures.append("pc_android_lsl_monitor_report schema mismatch")
+    if report.get("role") != "pc_android_lsl_monitor":
+        failures.append("PC Android LSL monitor report must declare role='pc_android_lsl_monitor'")
+    if report.get("native_transport") != "liblsl":
+        failures.append("PC Android LSL monitor report must declare native_transport='liblsl'")
+
+    status = report.get("status") if isinstance(report.get("status"), dict) else {}
+    if status:
+        if status.get("schema") != PC_ANDROID_LSL_MONITOR_STATUS_SCHEMA:
+            failures.append("embedded PC Android LSL monitor status schema mismatch")
+        streams = status.get("streams") if isinstance(status.get("streams"), dict) else {}
+        for key, expected in EXPECTED_PC_MONITOR_STREAMS.items():
+            if streams.get(key) != expected:
+                failures.append(f"PC monitor stream {key} expected {expected!r}, got {streams.get(key)!r}")
+        protocol = status.get("command_protocol") if isinstance(status.get("command_protocol"), dict) else {}
+        _validate_command_protocol(protocol, failures, token_field="token_required_for_commands")
+        marker_protocol = status.get("marker_protocol") if isinstance(status.get("marker_protocol"), dict) else {}
+        if marker_protocol.get("marker_version") != MARKER_VERSION:
+            failures.append("PC monitor marker_version does not match PPSMarkersV2")
+        if list(marker_protocol.get("rich_marker_channels") or []) != list(LSL_MARKER_CHANNELS):
+            failures.append("PC monitor rich marker channel order does not match PPSMarkersV2")
+    else:
+        failures.append("PC Android LSL monitor report is missing embedded status")
+
+    rows = event_rows or []
+    stream_counts = report.get("stream_counts") if isinstance(report.get("stream_counts"), dict) else {}
+    if not rows and stream_counts and sum(int(stream_counts.get(key) or 0) for key in EXPECTED_PC_MONITOR_STREAMS) > 0:
+        warnings.append("PC monitor report has nonzero stream counts but event rows were not loaded")
+    if (expect_native_transport or expect_command_acks) and not rows:
+        failures.append("PC monitor strict validation requires monitor event rows")
+    for index, row in enumerate(rows, start=1):
+        _validate_pc_monitor_event_row(row, row_index=index, failures=failures)
+
+    effective_counts = dict(stream_counts)
+    if rows:
+        effective_counts = {key: 0 for key in ("rich_markers", "numeric_triggers", "command_acks")}
+        for row in rows:
+            key = str(row.get("stream_key") or "")
+            if key in effective_counts:
+                effective_counts[key] += 1
+
+    if expect_native_transport:
+        if int(effective_counts.get("rich_markers") or 0) <= 0:
+            failures.append("PC monitor strict validation expected at least one PPSMarkersV2 sample")
+        if int(effective_counts.get("numeric_triggers") or 0) <= 0:
+            failures.append("PC monitor strict validation expected at least one PPSTriggerCodes sample")
+    elif int(effective_counts.get("rich_markers") or 0) <= 0:
+        warnings.append("PC monitor did not observe PPSMarkersV2 samples; rerun with --expect-native-transport for strict checks")
+
+    if expect_command_acks and int(effective_counts.get("command_acks") or 0) <= 0:
+        failures.append("PC monitor strict ack validation expected at least one PPSCommandAcksV1 sample")
+
+    missing_required = list(report.get("missing_required_streams") or [])
+    if missing_required:
+        failures.append(f"PC monitor missing required streams: {', '.join(str(item) for item in missing_required)}")
+
+    return AndroidLslValidationResult(
+        ok=not failures,
+        source_path=source_path,
+        status=report,
+        failures=failures,
+        warnings=warnings,
+    )
+
+
 def validate_run_artifact(
     path: Path,
     *,
@@ -278,6 +374,14 @@ def validate_run_artifact(
             loaded["status"],
             source_path=str(path),
             outbox_rows=loaded.get("outbox_rows") or [],
+            expect_native_transport=expect_native_transport,
+            expect_command_acks=expect_command_acks,
+        )
+    if loaded.get("kind") == "pc_monitor":
+        return validate_pc_monitor_report(
+            loaded["status"],
+            source_path=str(path),
+            event_rows=loaded.get("event_rows") or [],
             expect_native_transport=expect_native_transport,
             expect_command_acks=expect_command_acks,
         )
@@ -321,7 +425,17 @@ def _load_status_inputs(path: Path) -> dict[str, Any]:
                 "status": _read_json(pc_admin_status_path),
                 "outbox_rows": _read_jsonl(outbox_path) if outbox_path.is_file() else [],
             }
-        raise FileNotFoundError(f"Missing {status_path}, {controller_status_path}, or {pc_admin_status_path}")
+        pc_monitor_report_path = path / PC_ANDROID_LSL_MONITOR_REPORT
+        if pc_monitor_report_path.is_file():
+            events_path = path / PC_ANDROID_LSL_MONITOR_EVENTS
+            return {
+                "kind": "pc_monitor",
+                "status": _read_json(pc_monitor_report_path),
+                "event_rows": _read_jsonl(events_path) if events_path.is_file() else [],
+            }
+        raise FileNotFoundError(
+            f"Missing {status_path}, {controller_status_path}, {pc_admin_status_path}, or {pc_monitor_report_path}"
+        )
     if path.suffix.lower() == ".zip":
         return _load_from_zip(path)
     if path.suffix.lower() == ".jsonl":
@@ -339,7 +453,14 @@ def _load_status_inputs(path: Path) -> dict[str, Any]:
                 "status": _read_json(pc_admin_status_path),
                 "outbox_rows": _read_jsonl(path),
             }
-        raise FileNotFoundError(f"Missing {status_path} or {pc_admin_status_path} beside command outbox")
+        pc_monitor_report_path = path.with_name(PC_ANDROID_LSL_MONITOR_REPORT)
+        if pc_monitor_report_path.is_file() and path.name == PC_ANDROID_LSL_MONITOR_EVENTS:
+            return {
+                "kind": "pc_monitor",
+                "status": _read_json(pc_monitor_report_path),
+                "event_rows": _read_jsonl(path),
+            }
+        raise FileNotFoundError(f"Missing {status_path}, {pc_admin_status_path}, or {pc_monitor_report_path} beside JSONL artifact")
     data = _read_json(path)
     if data.get("schema") == ANDROID_LSL_RUNTIME_STATUS_SCHEMA:
         catalog_path = path.with_name(ANDROID_PHONE_RUN_CATALOG_ENTRY)
@@ -363,6 +484,23 @@ def _load_status_inputs(path: Path) -> dict[str, Any]:
             "status": data,
             "outbox_rows": _read_jsonl(outbox_path) if outbox_path.is_file() else [],
         }
+    if data.get("schema") == PC_ANDROID_LSL_MONITOR_REPORT_SCHEMA:
+        events_path = path.with_name(PC_ANDROID_LSL_MONITOR_EVENTS)
+        return {
+            "kind": "pc_monitor",
+            "status": data,
+            "event_rows": _read_jsonl(events_path) if events_path.is_file() else [],
+        }
+    if data.get("schema") == PC_ANDROID_LSL_MONITOR_STATUS_SCHEMA:
+        report_path = path.with_name(PC_ANDROID_LSL_MONITOR_REPORT)
+        events_path = path.with_name(PC_ANDROID_LSL_MONITOR_EVENTS)
+        if not report_path.is_file():
+            raise FileNotFoundError(f"Missing {report_path} beside PC Android monitor status")
+        return {
+            "kind": "pc_monitor",
+            "status": _read_json(report_path),
+            "event_rows": _read_jsonl(events_path) if events_path.is_file() else [],
+        }
     embedded = data.get("lsl_runtime_status")
     if isinstance(embedded, dict):
         catalog_entry = data.get("phone_run_catalog_entry") if isinstance(data.get("phone_run_catalog_entry"), dict) else None
@@ -372,7 +510,7 @@ def _load_status_inputs(path: Path) -> dict[str, Any]:
         return {"kind": "runner", "status": embedded, "completion": data, "catalog_entry": catalog_entry}
     raise ValueError(
         f"{path} is not an Android LSL status, completion, controller status, controller outbox, "
-        "PC Android admin status, or PC Android admin outbox artifact"
+        "PC Android admin status/outbox, or PC Android LSL monitor artifact"
     )
 
 
@@ -429,7 +567,7 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def _validate_command_protocol(protocol: dict[str, Any], failures: list[str]) -> None:
+def _validate_command_protocol(protocol: dict[str, Any], failures: list[str], *, token_field: str = "token_required") -> None:
     if protocol.get("command_schema") != COMMAND_SCHEMA:
         failures.append("command schema does not match PC runner protocol")
     if protocol.get("ack_schema") != ACK_SCHEMA:
@@ -438,7 +576,7 @@ def _validate_command_protocol(protocol: dict[str, Any], failures: list[str]) ->
         failures.append("command channel order does not match PC runner protocol")
     if list(protocol.get("ack_channels") or []) != list(LSL_ACK_CHANNELS):
         failures.append("ack channel order does not match PC runner protocol")
-    if protocol.get("token_required") is not True:
+    if protocol.get(token_field) is not True:
         failures.append("command protocol must require the pairing token")
 
 
@@ -585,6 +723,57 @@ def _validate_pc_admin_outbox_row(
                 failures.append(f"{prefix} ack command_id does not match command sample")
 
 
+def _validate_pc_monitor_event_row(row: dict[str, Any], *, row_index: int, failures: list[str]) -> None:
+    prefix = f"PC monitor event row {row_index}"
+    if row.get("schema") != PC_ANDROID_LSL_MONITOR_ROW_SCHEMA:
+        failures.append(f"{prefix} schema mismatch")
+    stream_key = str(row.get("stream_key") or "")
+    sample = list(row.get("sample") or [])
+    channel_labels = list(row.get("channel_labels") or [])
+    if stream_key == "rich_markers":
+        if row.get("stream_name") != LSL_STREAM_NAME:
+            failures.append(f"{prefix} rich marker stream_name mismatch")
+        if channel_labels != list(LSL_MARKER_CHANNELS):
+            failures.append(f"{prefix} rich marker channel order mismatch")
+        if len(sample) != len(LSL_MARKER_CHANNELS):
+            failures.append(f"{prefix} rich marker sample channel count mismatch")
+            return
+        if str(sample[0]) != MARKER_VERSION:
+            failures.append(f"{prefix} rich marker version mismatch")
+        if row.get("event_type") and str(sample[2]) != str(row.get("event_type")):
+            failures.append(f"{prefix} event_type differs from sample")
+    elif stream_key == "numeric_triggers":
+        if row.get("stream_name") != LSL_NUMERIC_STREAM_NAME:
+            failures.append(f"{prefix} numeric trigger stream_name mismatch")
+        if channel_labels != ["event_code"]:
+            failures.append(f"{prefix} numeric trigger channel order mismatch")
+        if len(sample) != 1:
+            failures.append(f"{prefix} numeric trigger sample channel count mismatch")
+        else:
+            try:
+                sample_code = int(float(sample[0]))
+                row_code = int(row.get("event_code") or 0)
+            except (TypeError, ValueError):
+                failures.append(f"{prefix} numeric trigger sample is not an integer code")
+            else:
+                if str(row.get("event_code") or "") and sample_code != row_code:
+                    failures.append(f"{prefix} event_code differs from sample")
+    elif stream_key == "command_acks":
+        if row.get("stream_name") != LSL_ACK_STREAM_NAME:
+            failures.append(f"{prefix} command ack stream_name mismatch")
+        if channel_labels != list(LSL_ACK_CHANNELS):
+            failures.append(f"{prefix} command ack channel order mismatch")
+        if len(sample) != len(LSL_ACK_CHANNELS):
+            failures.append(f"{prefix} command ack sample channel count mismatch")
+            return
+        if sample[0] != ACK_SCHEMA:
+            failures.append(f"{prefix} command ack schema mismatch")
+        if row.get("command_id") and sample[1] != row.get("command_id"):
+            failures.append(f"{prefix} command_id differs from ack sample")
+    else:
+        failures.append(f"{prefix} unsupported stream_key {stream_key!r}")
+
+
 def _parse_json_object(raw: str, label: str, failures: list[str]) -> dict[str, Any] | None:
     try:
         parsed = json.loads(raw or "{}")
@@ -603,6 +792,7 @@ def _write_report(result: AndroidLslValidationResult, output_dir: Path) -> None:
     report_md = output_dir / "android_lsl_runtime_artifact_validation.md"
     is_controller = result.status.get("schema") == ANDROID_CONTROLLER_RUNTIME_STATUS_SCHEMA
     is_pc_admin = result.status.get("schema") == PC_ANDROID_LSL_ADMIN_STATUS_SCHEMA
+    is_pc_monitor = result.status.get("schema") == PC_ANDROID_LSL_MONITOR_REPORT_SCHEMA
     report_json.write_text(json.dumps(result.to_json(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
     lines = [
         "# Android LSL Runtime Artifact Validation",
@@ -610,7 +800,17 @@ def _write_report(result: AndroidLslValidationResult, output_dir: Path) -> None:
         f"- Source: `{result.source_path}`",
         f"- Result: `{'PASS' if result.ok else 'FAIL'}`",
     ]
-    if is_pc_admin:
+    if is_pc_monitor:
+        lines.extend(
+            [
+                f"- Native transport: `{result.status.get('native_transport', '')}`",
+                f"- Role: `{result.status.get('role', '')}`",
+                f"- Current PC source behavior: `{result.status.get('current_pc_source_behavior', '')}`",
+                f"- Stream counts: `{json.dumps(result.status.get('stream_counts') or {}, sort_keys=True)}`",
+                "",
+            ]
+        )
+    elif is_pc_admin:
         lines.extend(
             [
                 f"- Native transport: `{result.status.get('native_transport', '')}`",
@@ -652,11 +852,16 @@ def main(argv: list[str] | None = None) -> int:
         help=(
             "Phone run folder, ZIP, completion JSON, lsl_runtime_status.json, "
             "phone_controller_runtime_status.json, phone_controller_command_outbox.jsonl, "
-            "pc_android_lsl_admin_status.json, or pc_android_lsl_command_outbox.jsonl."
+            "pc_android_lsl_admin_status.json, pc_android_lsl_command_outbox.jsonl, "
+            "or pc_android_lsl_monitor_report.json/events JSONL."
         ),
     )
     parser.add_argument("--expect-native-transport", action="store_true", help="Fail unless native Android LSL transport is active.")
-    parser.add_argument("--expect-command-acks", action="store_true", help="For controller outboxes, fail unless every command has a matching ack.")
+    parser.add_argument(
+        "--expect-command-acks",
+        action="store_true",
+        help="For controller, PC-admin, or monitor artifacts, fail unless matching command acknowledgements are present.",
+    )
     parser.add_argument("--expect-run-catalog", action="store_true", help="For phone-run artifacts, fail unless phone_run_catalog_entry.json is present and consistent.")
     parser.add_argument("--output-dir", type=Path, help="Optional directory for JSON/Markdown validation reports.")
     args = parser.parse_args(argv)

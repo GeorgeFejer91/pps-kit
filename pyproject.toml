@@ -51,6 +51,7 @@ pps-audio-stress = "peripersonal_space_toolkit.audio_device_stress:main"
 pps-latency-validate = "peripersonal_space_toolkit.latency_validation:main"
 pps-dashboard = "peripersonal_space_toolkit.dashboard_app:main"
 pps-android-lsl-command = "peripersonal_space_toolkit.android_lsl_admin:main"
+pps-android-lsl-monitor = "peripersonal_space_toolkit.android_lsl_monitor:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

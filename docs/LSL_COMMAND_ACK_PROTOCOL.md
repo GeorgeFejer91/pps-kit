@@ -113,6 +113,18 @@ pps-android-lsl-command resume --session-id <part_session_id> --token <pairing-t
 Validate the resulting PC-admin outbox/status pair with the same Android LSL
 artifact validator when auditing a rehearsal.
 
+Use `pps-android-lsl-monitor` when the question is whether a separate PC can
+observe the Android runner/controller streams during a rehearsal. It resolves
+`PPSMarkersV2`, `PPSTriggerCodes`, and `PPSCommandAcksV1`, writes
+`pc_android_lsl_monitor_events.jsonl` plus
+`pc_android_lsl_monitor_report.json`, and can be validated with the Android LSL
+artifact validator:
+
+```powershell
+pps-android-lsl-monitor --duration-s 30 --require-markers --require-triggers --require-acks
+python validation_protocols/scripts/validate_android_lsl_runtime_artifact.py artifacts/android_lsl_monitor --expect-native-transport --expect-command-acks
+```
+
 ## References
 
 - [Lab Streaming Layer overview](https://labstreaminglayer.org/)
