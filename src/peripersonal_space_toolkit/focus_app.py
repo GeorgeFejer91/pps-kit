@@ -124,6 +124,7 @@ from .runner_companion import (
     generate_companion_token,
     pairing_qr_png_bytes,
 )
+from .android_lsl_admin import send_android_lsl_command
 from .mobile_phone_runtime import (
     MobileRuntimePackageError,
     build_mobile_package_list,
@@ -14674,6 +14675,34 @@ def _phone_transfer_packages_for_manifest(manifest_path: Path) -> list[Any]:
     return packages
 
 
+def _phone_transfer_lsl_admin_context(
+    packages: list[Any],
+    *,
+    transfer_id: str,
+    token: str,
+    output_root: Path,
+    participant_id: str,
+) -> dict[str, str]:
+    active_package = packages[0] if packages else None
+    package_id = mobile_package_id(active_package) if active_package is not None else ""
+    target_session_id = (
+        str(getattr(active_package, "part_session_id", "") or "").strip()
+        or str(getattr(active_package, "session_id", "") or "").strip()
+        or str(getattr(active_package, "session_group_id", "") or "").strip()
+        or package_id
+        or str(transfer_id or "").strip()
+    )
+    safe_transfer = slugify_identifier(str(transfer_id or target_session_id or "phone-transfer"), fallback="phone-transfer")
+    return {
+        "target_session_id": target_session_id,
+        "token": str(token or ""),
+        "package_id": package_id,
+        "participant_id": str(getattr(active_package, "participant_id", "") or participant_id or ""),
+        "part_number": str(getattr(active_package, "part_number", "") or ""),
+        "output_dir": str(output_runner_logs_dir(Path(output_root)) / "android_lsl_admin" / safe_transfer),
+    }
+
+
 def _run_phone_transfer_window(
     *,
     capture_options: SessionCaptureOptions | None = None,
@@ -14724,10 +14753,13 @@ def _run_phone_transfer_window(
         "pairing_uri": "",
         "qr_png": b"",
         "transfer_id": "",
+        "token": "",
+        "lsl_admin_context": {},
     }
     preparation_messages: queue.Queue[tuple[str, Any]] = queue.Queue()
     preparation_cancel = threading.Event()
     preparation_thread: dict[str, threading.Thread | None] = {"thread": None}
+    lsl_admin_thread: dict[str, threading.Thread | None] = {"thread": None}
 
     layout = q["QVBoxLayout"](dialog)
     layout.setContentsMargins(16, 16, 16, 16)
@@ -14800,6 +14832,43 @@ def _run_phone_transfer_window(
     uri_field.setReadOnly(True)
     panel_layout.addWidget(uri_field)
 
+    panel_layout.addWidget(_subtitle(q, "Phone LSL Control"))
+    lsl_target_field = q["QLineEdit"]("")
+    lsl_target_field.setObjectName("phoneTransferLslTargetField")
+    lsl_target_field.setReadOnly(True)
+    lsl_target_field.setPlaceholderText("Prepare package first")
+    lsl_target_field.setToolTip("Target session id used for token-gated PPSCommandSignalsV1 commands.")
+    panel_layout.addWidget(_field_row(q, "Target", lsl_target_field))
+    lsl_command_combo = q["QComboBox"]()
+    lsl_command_combo.setObjectName("phoneTransferLslCommandCombo")
+    for label, command in [
+        ("Start", "start_experiment"),
+        ("Pause", "pause"),
+        ("Resume", "resume"),
+        ("Snapshot", "request_snapshot"),
+        ("Stop After Block", "stop_after_block"),
+    ]:
+        lsl_command_combo.addItem(label, command)
+    lsl_require_ack_checkbox = q["QCheckBox"]("Require Ack")
+    lsl_require_ack_checkbox.setObjectName("phoneTransferLslRequireAckCheckbox")
+    lsl_require_ack_checkbox.setChecked(True)
+    lsl_require_ack_checkbox.setToolTip("Wait for a matching PPSCommandAcksV1 sample and mark the local row failed if none arrives.")
+    lsl_send_button = q["QPushButton"]("Send LSL")
+    lsl_send_button.setObjectName("phoneTransferLslSendButton")
+    lsl_send_button.setToolTip("Send the selected token-gated LSL command to the prepared Android phone runner.")
+    lsl_command_row = q["QWidget"]()
+    lsl_command_layout = q["QHBoxLayout"](lsl_command_row)
+    lsl_command_layout.setContentsMargins(0, 0, 0, 0)
+    lsl_command_layout.setSpacing(8)
+    lsl_command_layout.addWidget(lsl_command_combo, 1)
+    lsl_command_layout.addWidget(lsl_require_ack_checkbox)
+    lsl_command_layout.addWidget(lsl_send_button)
+    panel_layout.addWidget(_field_row(q, "Command", lsl_command_row))
+    lsl_status_label = q["QLabel"]("Prepare a package to enable PC-to-phone LSL commands.")
+    lsl_status_label.setObjectName("mutedLabel")
+    lsl_status_label.setWordWrap(True)
+    panel_layout.addWidget(lsl_status_label)
+
     buttons = q["QHBoxLayout"]()
     prepare_button = q["QPushButton"]("Prepare And Show QR")
     prepare_button.setObjectName("phoneTransferPrepareButton")
@@ -14845,6 +14914,27 @@ def _run_phone_transfer_window(
         progress.setRange(0, 0 if busy else 1000)
         if not busy:
             progress.setValue(0)
+        _refresh_lsl_admin_controls()
+
+    def _set_lsl_busy(busy: bool) -> None:
+        lsl_command_combo.setEnabled(not busy and bool(service_state.get("lsl_admin_context")))
+        lsl_require_ack_checkbox.setEnabled(not busy and bool(service_state.get("lsl_admin_context")))
+        lsl_send_button.setEnabled(not busy and bool(service_state.get("lsl_admin_context")))
+        if busy:
+            lsl_status_label.setText("Sending LSL command...")
+
+    def _refresh_lsl_admin_controls() -> None:
+        context = dict(service_state.get("lsl_admin_context") or {})
+        target = str(context.get("target_session_id") or "")
+        lsl_target_field.setText(target)
+        worker = lsl_admin_thread.get("thread")
+        busy = worker is not None and worker.is_alive()
+        enabled = bool(target and context.get("token") and service_state.get("service") is not None and not busy)
+        lsl_command_combo.setEnabled(enabled)
+        lsl_require_ack_checkbox.setEnabled(enabled)
+        lsl_send_button.setEnabled(enabled)
+        if not target and not busy:
+            lsl_status_label.setText("Prepare a package to enable PC-to-phone LSL commands.")
 
     def _refresh_qr() -> None:
         uri = str(service_state.get("pairing_uri") or "")
@@ -14870,6 +14960,8 @@ def _run_phone_transfer_window(
     def _stop_service() -> None:
         service = service_state.get("service")
         service_state["service"] = None
+        service_state["token"] = ""
+        service_state["lsl_admin_context"] = {}
         if service is not None:
             try:
                 service.stop()
@@ -14878,6 +14970,7 @@ def _run_phone_transfer_window(
         stop_button.setEnabled(False)
         if service is not None:
             message.setText("Phone bridge stopped.")
+        _refresh_lsl_admin_controls()
 
     config = RunnerCompanionConfig(
         host=str(companion_host or DEFAULT_COMPANION_HOST),
@@ -14911,6 +15004,13 @@ def _run_phone_transfer_window(
             participant_id=participant,
             port=config.port,
         )
+        lsl_admin_context = _phone_transfer_lsl_admin_context(
+            packages,
+            transfer_id=transfer_id,
+            token=token,
+            output_root=output_root_state["path"],
+            participant_id=participant,
+        )
         service = RunnerCompanionService(
             bridge,
             token=token,
@@ -14927,6 +15027,8 @@ def _run_phone_transfer_window(
                 "pairing_uri": pairing_uri,
                 "qr_png": pairing_qr_png_bytes(pairing_uri),
                 "transfer_id": transfer_id,
+                "token": token,
+                "lsl_admin_context": lsl_admin_context,
             }
         )
         total_bytes = sum(
@@ -14943,7 +15045,45 @@ def _run_phone_transfer_window(
         else:
             message.setText("Same-Wi-Fi bridge ready. Scan this QR from the Android companion.")
         stop_button.setEnabled(True)
+        lsl_status_label.setText(
+            f"LSL target ready: {lsl_admin_context.get('target_session_id', '')}. "
+            "Use after the Android phone has synced this package."
+        )
         _refresh_qr()
+        _refresh_lsl_admin_controls()
+
+    def _send_lsl_admin_command() -> None:
+        active = lsl_admin_thread.get("thread")
+        if active is not None and active.is_alive():
+            return
+        context = dict(service_state.get("lsl_admin_context") or {})
+        command = str(lsl_command_combo.currentData() or "").strip()
+        if not command or not context.get("target_session_id") or not context.get("token"):
+            lsl_status_label.setText("Prepare a package before sending LSL commands.")
+            _refresh_lsl_admin_controls()
+            return
+        _set_lsl_busy(True)
+
+        def _worker() -> None:
+            try:
+                result = send_android_lsl_command(
+                    target_session_id=str(context.get("target_session_id") or ""),
+                    token=str(context.get("token") or ""),
+                    command=command,
+                    package_id=str(context.get("package_id") or ""),
+                    participant_id=str(context.get("participant_id") or ""),
+                    part_number=str(context.get("part_number") or ""),
+                    output_dir=Path(str(context.get("output_dir") or "")),
+                    require_ack=bool(lsl_require_ack_checkbox.isChecked()),
+                )
+            except Exception as exc:  # noqa: BLE001 - surfaced in the dialog status.
+                preparation_messages.put(("lsl_admin_error", str(exc)))
+            else:
+                preparation_messages.put(("lsl_admin_done", dict(result.row)))
+
+        worker = threading.Thread(target=_worker, name="pps-phone-transfer-lsl-admin", daemon=True)
+        lsl_admin_thread["thread"] = worker
+        worker.start()
 
     def _progress_callback(payload: dict[str, Any]) -> None:
         if preparation_cancel.is_set():
@@ -15006,9 +15146,26 @@ def _run_phone_transfer_window(
                 except Exception as exc:
                     message.setText(f"Phone bridge could not start: {exc}")
                 _set_busy(False)
+            elif kind == "lsl_admin_error":
+                lsl_status_label.setText(f"LSL command failed before send: {payload}")
+                _refresh_lsl_admin_controls()
+            elif kind == "lsl_admin_done":
+                row = dict(payload or {})
+                status = str(row.get("status") or "unknown")
+                command = str(row.get("command") or "")
+                outbox_path = str(row.get("outbox_path") or service_state.get("lsl_admin_context", {}).get("output_dir") or "")
+                ack = str(row.get("ack_status") or "")
+                detail = f"{command}: {status}"
+                if ack:
+                    detail += f" ({ack})"
+                if outbox_path:
+                    detail += f". Audit: {outbox_path}"
+                lsl_status_label.setText(detail)
+                _refresh_lsl_admin_controls()
 
     profile_combo.currentIndexChanged.connect(lambda _index: _refresh_participant_options())
     prepare_button.clicked.connect(_start_preparation)
+    lsl_send_button.clicked.connect(_send_lsl_admin_command)
     stop_button.clicked.connect(_stop_service)
     close_button.clicked.connect(dialog.accept)
     timer = q["QTimer"](dialog)
@@ -15016,6 +15173,7 @@ def _run_phone_transfer_window(
     timer.start(100)
     _refresh_participant_options(initial_participant)
     _refresh_qr()
+    _refresh_lsl_admin_controls()
     accepted = dialog.exec() == q["QDialog"].DialogCode.Accepted
     _stop_service()
     return 0 if accepted else 1

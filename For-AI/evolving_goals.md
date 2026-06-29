@@ -207,7 +207,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   now accepts the PC-admin status/outbox pair as a first-class artifact type,
   verifies the same command/ack schema/channel order and token payload, can
   require recorded native LSL sends, and can require matching
-  `PPSCommandAcksV1` rows for PC-runner-to-phone rehearsals.
+  `PPSCommandAcksV1` rows for PC-runner-to-phone rehearsals. The native
+  runner's `Send To Phone` window now exposes a Phone LSL Control strip after
+  package preparation; it targets the prepared package part-session id by
+  default, sends Start/Pause/Resume/Snapshot/Stop-after-block through the same
+  helper on a worker thread, and saves the PC-admin outbox/status under runner
+  logs for that phone transfer.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only

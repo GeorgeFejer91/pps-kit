@@ -3942,6 +3942,13 @@ def test_phone_transfer_window_initial_layout_renders(tmp_path: Path, monkeypatc
             assert dialog.findChild(q["QComboBox"], "phoneTransferTransportCombo") is not None
             assert dialog.findChild(q["QPushButton"], "phoneTransferPrepareButton") is not None
             assert dialog.findChild(q["QPushButton"], "phoneTransferStopButton") is not None
+            lsl_target = dialog.findChild(q["QLineEdit"], "phoneTransferLslTargetField")
+            lsl_command = dialog.findChild(q["QComboBox"], "phoneTransferLslCommandCombo")
+            lsl_send = dialog.findChild(q["QPushButton"], "phoneTransferLslSendButton")
+            assert lsl_target is not None
+            assert lsl_command is not None
+            assert lsl_send is not None
+            assert lsl_send.isEnabled() is False
             assert dialog.findChild(q["QLabel"], "companionQrCode") is not None
             assert dialog.findChild(q["QLineEdit"], "phoneTransferPairingUriField") is not None
             screenshot = Path.cwd() / ".pytest_cache" / "phone_transfer_window.png"
@@ -3970,6 +3977,33 @@ def test_phone_transfer_window_initial_layout_renders(tmp_path: Path, monkeypatc
 
     assert exit_code == 1
     assert errors == []
+
+
+def test_phone_transfer_lsl_admin_context_prefers_part_session_and_runner_logs(tmp_path: Path):
+    from peripersonal_space_toolkit import focus_app
+
+    package = SimpleNamespace(
+        participant_id="P321",
+        session_id="session-001",
+        session_group_id="group-001",
+        part_session_id="part-001",
+        part_number="01",
+    )
+
+    context = focus_app._phone_transfer_lsl_admin_context(
+        [package],
+        transfer_id="transfer-001",
+        token="secret-token",
+        output_root=tmp_path,
+        participant_id="P321",
+    )
+
+    assert context["target_session_id"] == "part-001"
+    assert context["token"] == "secret-token"
+    assert context["package_id"] == "part-001-part01"
+    assert context["participant_id"] == "P321"
+    assert context["part_number"] == "01"
+    assert str(output_runner_logs_dir(tmp_path) / "android_lsl_admin" / "transfer_001") == context["output_dir"]
 
 
 def test_launcher_resume_shortcut_opens_environment_operations(tmp_path: Path, monkeypatch):

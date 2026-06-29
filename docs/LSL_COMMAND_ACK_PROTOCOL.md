@@ -100,7 +100,9 @@ The PC side can also administer a phone-owned Android runner directly over the
 same command stream with the `pps-android-lsl-command` helper. It writes
 `pc_android_lsl_command_outbox.jsonl` and
 `pc_android_lsl_admin_status.json` while sending `PPSCommandSignalsV1` samples
-and optionally requiring matching `PPSCommandAcksV1` samples:
+and optionally requiring matching `PPSCommandAcksV1` samples. The native
+runner's `Send To Phone` dialog exposes the same sender after package
+preparation, defaulting the target to the prepared package part-session id:
 
 ```powershell
 pps-android-lsl-command start_experiment --session-id <part_session_id> --token <pairing-token> --package-id <package_id> --require-ack

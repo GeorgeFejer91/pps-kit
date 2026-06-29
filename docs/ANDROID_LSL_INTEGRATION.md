@@ -20,7 +20,10 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   `PPSCommandSignalsV1` samples from the runner/PC environment, waits for
   `PPSCommandAcksV1` when requested, and writes
   `pc_android_lsl_command_outbox.jsonl` plus
-  `pc_android_lsl_admin_status.json`.
+  `pc_android_lsl_admin_status.json`. The native runner's `Send To Phone`
+  window exposes the same helper as a small Phone LSL Control strip after a
+  package bridge is prepared, using the prepared package part-session id as the
+  default command target.
 - Commands are token-gated through `token` or `companion_token` in
   `payload_json` before any local handler runs.
 - Acks are shaped as applied/rejected command acknowledgements after the local
@@ -169,6 +172,10 @@ Android runner is idle with a synced package or actively playing a block:
 .\.venv\Scripts\pps-android-lsl-command.exe pause --session-id <part_session_id> --token <pairing-token> --require-ack
 .\.venv\Scripts\pps-android-lsl-command.exe resume --session-id <part_session_id> --token <pairing-token> --require-ack
 ```
+
+The `Send To Phone` window can send the same Start/Pause/Resume/Snapshot/
+Stop-after-block commands after package preparation. It stores the same
+PC-admin outbox/status artifacts under runner logs for that phone transfer.
 
 Then validate the PC-admin outbox/status pair:
 
