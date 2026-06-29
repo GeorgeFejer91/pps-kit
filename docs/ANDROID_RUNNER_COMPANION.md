@@ -55,6 +55,15 @@ Closing Focus Mode stops the companion service and invalidates that token.
 - Service host: all LAN interfaces by default, configurable with
   `PPSExperimentRunner.exe --companion-host`, `--companion-port`, and
   `--companion-advertise-ip`.
+- Discovery: while the companion service is running, the PC emits token-free
+  `pps-runner-companion-discovery.v1` UDP packets to multicast
+  `239.255.77.83:48767` and limited broadcast `255.255.255.255:48767`. The
+  packet advertises host, port, session id, mode, transport, and whether a
+  token is required; it never contains `X-PPS-Companion-Token`, participant
+  demographics, or stream names with participant metadata. Android's pairing
+  screen can listen for the packet on same-Wi-Fi or local phone-hotspot
+  networks, but pairing still requires scanning the QR or pasting the full
+  token-bearing URI.
 - Health endpoint: `GET /api/runner/health` is public and non-sensitive.
 - All state and command endpoints require `X-PPS-Companion-Token`.
 - Phone-runtime package and upload endpoints also require

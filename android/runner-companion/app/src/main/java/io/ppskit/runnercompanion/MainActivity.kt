@@ -47,6 +47,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -350,8 +351,11 @@ private fun ModeSelectionScreen(
 @Composable
 private fun PairingScreen(error: String, onPair: (String) -> Unit) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var rawUri by remember { mutableStateOf("") }
     var scannerVisible by remember { mutableStateOf(false) }
+    var discoveryStatus by remember { mutableStateOf("") }
+    var discovering by remember { mutableStateOf(false) }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         scannerVisible = granted
     }
@@ -379,11 +383,35 @@ private fun PairingScreen(error: String, onPair: (String) -> Unit) {
                 Spacer(Modifier.padding(3.dp))
                 Text("Scan")
             }
+            OutlinedButton(
+                onClick = {
+                    discovering = true
+                    discoveryStatus = "Listening"
+                    scope.launch {
+                        val discovered = runCatching { listenForCompanionDiscoveryOnce(context) }
+                        val advertisement = discovered.getOrNull()
+                        discoveryStatus = when {
+                            advertisement != null -> "Found ${advertisement.endpointLabel} (${advertisement.transport})"
+                            discovered.isFailure -> discovered.exceptionOrNull()?.message ?: "Discovery failed"
+                            else -> "No runner found"
+                        }
+                        discovering = false
+                    }
+                },
+                enabled = !discovering,
+            ) {
+                Icon(Icons.Default.Search, contentDescription = null)
+                Spacer(Modifier.padding(3.dp))
+                Text(if (discovering) "Listening" else "Discover")
+            }
             Button(onClick = { onPair(rawUri) }, enabled = rawUri.isNotBlank()) {
                 Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null)
                 Spacer(Modifier.padding(3.dp))
                 Text("Pair")
             }
+        }
+        if (discoveryStatus.isNotBlank()) {
+            Text(discoveryStatus, style = MaterialTheme.typography.bodyMedium)
         }
         if (error.isNotBlank()) {
             Text(error, color = MaterialTheme.colorScheme.error)

@@ -7,10 +7,15 @@ import pytest
 
 from peripersonal_space_toolkit.dashboard_backend.security import TOKEN_HEADER
 from peripersonal_space_toolkit.runner_companion import (
+    DISCOVERY_SCHEMA,
     HEALTH_SCHEMA,
     SNAPSHOT_SCHEMA,
     CompanionCommandError,
+    RunnerCompanionConfig,
+    RunnerCompanionService,
+    build_companion_discovery_payload,
     build_pairing_uri,
+    companion_discovery_payload_json,
     create_runner_companion_app,
     pairing_qr_png_bytes,
 )
@@ -211,6 +216,54 @@ def test_pairing_qr_generation_returns_png_bytes():
     png = pairing_qr_png_bytes("pps-companion://pair?host=127.0.0.1&token=t")
 
     assert png.startswith(b"\x89PNG\r\n\x1a\n")
+
+
+def test_discovery_payload_advertises_endpoint_without_pairing_token():
+    payload = build_companion_discovery_payload(
+        host="192.168.43.1",
+        port=8767,
+        session_id="session-001",
+        mode="phone_export",
+        transfer_id="transfer-001",
+        transport="phone_hotspot",
+    )
+    raw = companion_discovery_payload_json(payload)
+
+    assert payload["schema"] == DISCOVERY_SCHEMA
+    assert payload["network_scope"] == "same_lan_or_local_hotspot"
+    assert payload["discovery"]["also_sent_as_limited_broadcast"] is True
+    assert payload["pairing"]["host"] == "192.168.43.1"
+    assert payload["pairing"]["token_required"] is True
+    assert payload["pairing"]["token_delivery"] == "qr_or_manual_uri_only"
+    assert "secret" not in raw.lower()
+    assert '"token":' not in raw
+
+
+def test_discovery_payload_json_rejects_token_leakage():
+    payload = build_companion_discovery_payload(host="127.0.0.1", port=8767, session_id="session-001")
+    payload["pairing"]["token"] = "secret"
+
+    with pytest.raises(ValueError, match="pairing tokens"):
+        companion_discovery_payload_json(payload)
+
+
+def test_service_discovery_payload_can_advertise_phone_export_transfer():
+    service = RunnerCompanionService(
+        FakeBridge(),
+        token="secret",
+        config=RunnerCompanionConfig(host="0.0.0.0", port=8767, advertise_ip="192.168.43.1"),
+        discovery_mode="phone_export",
+        discovery_transfer_id="transfer-001",
+        discovery_transport="phone_hotspot",
+    )
+
+    payload = service.discovery_payload()
+
+    assert payload["pairing"]["host"] == "192.168.43.1"
+    assert payload["pairing"]["mode"] == "phone_export"
+    assert payload["pairing"]["transfer_id"] == "transfer-001"
+    assert payload["pairing"]["transport"] == "phone_hotspot"
+    assert "token" not in payload["pairing"]
 
 
 def test_health_is_public_but_snapshot_requires_token():

@@ -14911,7 +14911,14 @@ def _run_phone_transfer_window(
             participant_id=participant,
             port=config.port,
         )
-        service = RunnerCompanionService(bridge, token=token, config=config)
+        service = RunnerCompanionService(
+            bridge,
+            token=token,
+            config=config,
+            discovery_mode="phone_export",
+            discovery_transfer_id=transfer_id,
+            discovery_transport=transport,
+        )
         service.start()
         service_state.update(
             {

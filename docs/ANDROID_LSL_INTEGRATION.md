@@ -111,6 +111,13 @@ some Wi-Fi devices and suggest an external USB Wi-Fi dongle as a practical
 workaround when discovery is unreliable. Therefore emulator success, local unit
 tests, and local marker mirrors are not enough.
 
+The companion pairing layer now has its own token-free discovery packet:
+`pps-runner-companion-discovery.v1` is sent by the PC bridge to multicast
+`239.255.77.83:48767` and limited broadcast `255.255.255.255:48767`. This is a
+LAN/local-hotspot convenience for finding the bridge endpoint only. It does not
+carry the companion token, participant demographics, or non-generic stream
+names; QR/manual URI pairing remains the authorization step.
+
 Required validation levels:
 
 1. Protocol-only unit tests: command/ack sample order, token rejection,

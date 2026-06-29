@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from dataclasses import dataclass
 from io import BytesIO
 import secrets
@@ -22,6 +23,10 @@ SNAPSHOT_SCHEMA = "pps-runner-companion-snapshot.v1"
 HEALTH_SCHEMA = "pps-runner-companion-health.v1"
 PAIRING_SCHEMA_VERSION = "1"
 PHONE_EXPORT_PAIRING_SCHEMA_VERSION = "2"
+DISCOVERY_SCHEMA = "pps-runner-companion-discovery.v1"
+DISCOVERY_MULTICAST_GROUP = "239.255.77.83"
+DISCOVERY_PORT = 48767
+DISCOVERY_INTERVAL_S = 1.0
 
 
 class CompanionCommandError(RuntimeError):
@@ -139,6 +144,135 @@ def build_pairing_uri(
             payload["transfer_id"] = str(transfer_id)
     query = urlencode(payload)
     return f"{PAIRING_SCHEME}://pair?{query}"
+
+
+def build_companion_discovery_payload(
+    *,
+    host: str,
+    port: int,
+    session_id: str,
+    mode: str = "pc_runner",
+    transfer_id: str = "",
+    transport: str = "lan",
+    service_name: str = "PPS Runner Companion",
+) -> dict[str, Any]:
+    """Build the token-free LAN discovery packet advertised by the companion service."""
+
+    clean_mode = str(mode or "pc_runner")
+    clean_transport = str(transport or "lan")
+    clean_transfer_id = str(transfer_id or "").strip()
+    payload: dict[str, Any] = {
+        "schema": DISCOVERY_SCHEMA,
+        "service": "pps-runner-companion",
+        "service_name": str(service_name or "PPS Runner Companion"),
+        "generated_unix_ms": int(time.time() * 1000),
+        "network_scope": "same_lan_or_local_hotspot",
+        "discovery": {
+            "udp_multicast_group": DISCOVERY_MULTICAST_GROUP,
+            "udp_port": DISCOVERY_PORT,
+            "also_sent_as_limited_broadcast": True,
+            "ttl": 1,
+        },
+        "pairing": {
+            "scheme": PAIRING_SCHEME,
+            "host": str(host),
+            "port": int(port),
+            "session_id": str(session_id),
+            "mode": clean_mode,
+            "transport": clean_transport,
+            "token_required": True,
+            "token_delivery": "qr_or_manual_uri_only",
+        },
+        "privacy": {
+            "contains_pairing_token": False,
+            "contains_participant_demographics": False,
+            "stream_names_are_generic": True,
+        },
+    }
+    if clean_transfer_id:
+        payload["pairing"]["transfer_id"] = clean_transfer_id
+    return payload
+
+
+def companion_discovery_payload_json(payload: dict[str, Any]) -> str:
+    if "token" in payload or "companion_token" in payload:
+        raise ValueError("Discovery payloads must not contain pairing tokens.")
+    pairing = payload.get("pairing") if isinstance(payload.get("pairing"), dict) else {}
+    if "token" in pairing or "companion_token" in pairing:
+        raise ValueError("Discovery pairing metadata must not contain pairing tokens.")
+    return json.dumps(payload, sort_keys=True, separators=(",", ":"))
+
+
+class RunnerCompanionDiscoveryAdvertiser:
+    """Best-effort local UDP discovery announcer for QR/manual companion pairing."""
+
+    def __init__(
+        self,
+        payload_factory: Any,
+        *,
+        multicast_group: str = DISCOVERY_MULTICAST_GROUP,
+        port: int = DISCOVERY_PORT,
+        interval_s: float = DISCOVERY_INTERVAL_S,
+    ) -> None:
+        self.payload_factory = payload_factory
+        self.multicast_group = str(multicast_group)
+        self.port = int(port)
+        self.interval_s = max(0.25, float(interval_s))
+        self.sent_count = 0
+        self.last_error = ""
+        self._stop = threading.Event()
+        self._thread: threading.Thread | None = None
+
+    def start(self) -> None:
+        if self._thread is not None and self._thread.is_alive():
+            return
+        self._stop.clear()
+        self._thread = threading.Thread(target=self._run, name="pps-companion-discovery", daemon=True)
+        self._thread.start()
+
+    def stop(self, *, timeout_s: float = 1.0) -> None:
+        self._stop.set()
+        thread = self._thread
+        if thread is not None and thread.is_alive():
+            thread.join(timeout=max(0.0, float(timeout_s)))
+
+    def status(self) -> dict[str, Any]:
+        return {
+            "schema": "pps-runner-companion-discovery-advertiser-status.v1",
+            "enabled": self._thread is not None and self._thread.is_alive(),
+            "multicast_group": self.multicast_group,
+            "port": self.port,
+            "interval_s": self.interval_s,
+            "sent_count": self.sent_count,
+            "last_error": self.last_error,
+        }
+
+    def _run(self) -> None:
+        while not self._stop.is_set():
+            try:
+                payload = self.payload_factory()
+                self._send(companion_discovery_payload_json(payload).encode("utf-8"))
+                self.sent_count += 1
+                self.last_error = ""
+            except Exception as exc:  # noqa: BLE001 - discovery must never break the runner.
+                self.last_error = str(exc)
+            self._stop.wait(self.interval_s)
+
+    def _send(self, data: bytes) -> None:
+        errors: list[str] = []
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as udp:
+            udp.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 1)
+            try:
+                udp.sendto(data, (self.multicast_group, self.port))
+            except Exception as exc:  # noqa: BLE001 - try limited broadcast below.
+                errors.append(f"multicast: {exc}")
+            udp.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            try:
+                udp.sendto(data, ("255.255.255.255", self.port))
+            except Exception as exc:  # noqa: BLE001 - surfaced as nonfatal advertiser status.
+                errors.append(f"broadcast: {exc}")
+        if len(errors) >= 2:
+            raise RuntimeError("; ".join(errors))
 
 
 def pairing_qr_png_bytes(uri: str) -> bytes:
@@ -355,13 +489,20 @@ class RunnerCompanionService:
         *,
         config: RunnerCompanionConfig | None = None,
         token: str | None = None,
+        discovery_mode: str = "pc_runner",
+        discovery_transfer_id: str = "",
+        discovery_transport: str = "lan",
     ) -> None:
         self.bridge = bridge
         self.config = config or RunnerCompanionConfig()
         self.token = token or generate_companion_token()
+        self.discovery_mode = str(discovery_mode or "pc_runner")
+        self.discovery_transfer_id = str(discovery_transfer_id or "")
+        self.discovery_transport = str(discovery_transport or "lan")
         self.app = create_runner_companion_app(bridge, token=self.token)
         self._server: Any | None = None
         self._thread: threading.Thread | None = None
+        self.discovery = RunnerCompanionDiscoveryAdvertiser(self.discovery_payload)
         self.error_message = ""
 
     @property
@@ -372,6 +513,23 @@ class RunnerCompanionService:
             port=self.config.port,
             session_id=session_id,
             token=self.token,
+        )
+
+    def discovery_payload(
+        self,
+        *,
+        mode: str = "",
+        transfer_id: str = "",
+        transport: str = "",
+    ) -> dict[str, Any]:
+        session_id = str(self.bridge.health().get("session_id") or "")
+        return build_companion_discovery_payload(
+            host=self.config.advertised_host,
+            port=self.config.port,
+            session_id=session_id,
+            mode=str(mode or self.discovery_mode),
+            transfer_id=str(transfer_id or self.discovery_transfer_id),
+            transport=str(transport or self.discovery_transport),
         )
 
     def start(self) -> None:
@@ -406,12 +564,14 @@ class RunnerCompanionService:
                 raise RuntimeError(self.error_message)
             server = self._server
             if server is not None and bool(getattr(server, "started", False)):
+                self.discovery.start()
                 return
             if self._thread is not None and not self._thread.is_alive():
                 raise RuntimeError(self.error_message or "Companion service stopped during startup.")
             time.sleep(0.05)
 
     def stop(self, *, timeout_s: float = 2.0) -> None:
+        self.discovery.stop(timeout_s=timeout_s)
         server = self._server
         if server is not None:
             try:

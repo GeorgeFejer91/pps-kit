@@ -1,0 +1,73 @@
+package io.ppskit.runnercompanion
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class CompanionDiscoveryTest {
+    @Test
+    fun parsesTokenFreeDiscoveryAdvertisementAndBuildsPairingUriWithSuppliedToken() {
+        val advertisement = CompanionDiscoveryAdvertisement.parse(
+            """
+            {
+              "schema": "$COMPANION_DISCOVERY_SCHEMA",
+              "service": "pps-runner-companion",
+              "service_name": "PPS Runner Companion",
+              "network_scope": "same_lan_or_local_hotspot",
+              "discovery": {
+                "udp_multicast_group": "$COMPANION_DISCOVERY_MULTICAST_GROUP",
+                "udp_port": $COMPANION_DISCOVERY_PORT,
+                "also_sent_as_limited_broadcast": true
+              },
+              "pairing": {
+                "scheme": "pps-companion",
+                "host": "192.168.43.1",
+                "port": 8767,
+                "session_id": "transfer-001",
+                "mode": "phone_export",
+                "transport": "phone_hotspot",
+                "transfer_id": "transfer-001",
+                "token_required": true,
+                "token_delivery": "qr_or_manual_uri_only"
+              },
+              "privacy": {
+                "contains_pairing_token": false,
+                "contains_participant_demographics": false
+              }
+            }
+            """.trimIndent(),
+        )
+
+        assertEquals("192.168.43.1", advertisement.host)
+        assertEquals(8767, advertisement.port)
+        assertEquals("transfer-001", advertisement.sessionId)
+        assertEquals("phone_hotspot", advertisement.transport)
+        assertTrue(advertisement.tokenRequired)
+
+        val pairing = advertisement.toPairingInfo("secret-token")
+
+        assertEquals("192.168.43.1", pairing.host)
+        assertEquals("phone_export", pairing.mode)
+        assertEquals("phone_hotspot", pairing.transport)
+        assertEquals("secret-token", pairing.token)
+        assertEquals("transfer-001", pairing.transferId)
+    }
+
+    @Test
+    fun rejectsDiscoveryAdvertisementThatLeaksToken() {
+        val advertisement = """
+            {
+              "schema": "$COMPANION_DISCOVERY_SCHEMA",
+              "pairing": {
+                "host": "192.168.43.1",
+                "port": 8767,
+                "session_id": "session-001",
+                "token": "secret"
+              }
+            }
+            """.trimIndent()
+
+        assertNull(CompanionDiscoveryAdvertisement.parseOrNull(advertisement))
+    }
+}

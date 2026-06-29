@@ -103,6 +103,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `lsl_runtime_status.json`; by default it verifies the current non-native
   marker-mirror status and command/ack schema, while `--expect-native-transport`
   becomes the strict gate after liblsl is actually linked.
+- The PC companion bridge now emits token-free
+  `pps-runner-companion-discovery.v1` UDP advertisements to multicast
+  `239.255.77.83:48767` and limited broadcast `255.255.255.255:48767`, so
+  Android phones on same-Wi-Fi or a local phone hotspot can discover the bridge
+  endpoint without reading the QR first. Discovery packets contain host/port,
+  session id, mode, and transport only; they never carry the companion token,
+  demographics, or participant-coded stream names. Android parses and listens
+  for the packet from the pairing screen, but authorization still requires the
+  QR/manual token-bearing pairing URI.
 - Android phone-owned mode now exposes an explicit `Runner` / `Controller`
   role toggle. Runner mode keeps the local phone playback/tap-response controls.
   Controller mode hides local run controls and produces token-gated
