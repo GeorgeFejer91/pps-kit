@@ -1475,15 +1475,27 @@ def test_focus_mode_calibrate_tactile_button_click_saves_and_applies_value(tmp_p
     assert window.tactile_calibration_monitor_dialog is not None
     assert window.tactile_calibration_monitor_dialog.isVisible()
     assert window.tactile_calibration_monitor_dialog.close_button.isEnabled()
+    assert "Calibration successful" in window.tactile_calibration_monitor_dialog.status_label.text()
+    assert "0.350%" in window.tactile_calibration_monitor_dialog.status_label.text()
     screenshot = tmp_path / "tactile_calibration_monitor.png"
     assert window.tactile_calibration_monitor_dialog.grab().save(str(screenshot))
     image = Image.open(screenshot).convert("RGB")
     assert max(ImageStat.Stat(image).stddev) > 0.0
+    deadline = time.time() + 3.0
+    while time.time() < deadline and window.tactile_calibration_monitor_dialog is not None:
+        app.processEvents()
+        window._drain()
+        time.sleep(0.01)
+    app.processEvents()
+    assert window.tactile_calibration_monitor_dialog is None
+    assert window.mode_tabs.currentIndex() == window.experiment_control_tab_index
+    assert window.start_button.isEnabled()
     latest = load_latest_calibration(tmp_path, "P001")
     assert latest is not None
     assert latest["final_output_34_percent"] == pytest.approx(0.35)
     assert latest["recommended_output_34_percent"] == pytest.approx(0.35)
-    assert "tactile threshold accepted" in window.event_label.text()
+    assert "tactile calibration successful" in window.event_label.text()
+    assert "Ready to start" in window.event_label.text()
     window.dialog.close()
 
 

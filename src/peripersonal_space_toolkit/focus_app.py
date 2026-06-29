@@ -494,6 +494,7 @@ def _default_focus_capture_options() -> SessionCaptureOptions:
 OUTPUT_VOLUME_SLIDER_SCALE = 1000
 OUTPUT_VOLUME_PERCENT_DECIMALS = 3
 OUTPUT_VOLUME_PERCENT_STEP = 0.001
+TACTILE_CALIBRATION_SUCCESS_RETURN_MS = 1400
 
 
 def _coerce_volume_percent(value: Any, *, default: float = 100.0, maximum: float = 100.0) -> float:
@@ -2393,7 +2394,25 @@ def _create_tactile_calibration_monitor_dialog(q: dict[str, Any], owner: Any, pa
 
         def finish_assay(self, report: dict[str, Any]) -> None:
             accepted = bool(report.get("accepted"))
-            self.status_label.setText(str(report.get("message") or ("Calibration accepted" if accepted else "Calibration failed")))
+            final_value = report.get("recommended_output_34_percent", report.get("final_output_34_percent", ""))
+            final_text = _format_tactile_percent(final_value)
+            summary = dict(report.get("staircase_summary") or {})
+            reversals = summary.get("reversals", "")
+            if accepted:
+                self.status_label.setText(
+                    f"Calibration successful. Output 3/4 set to {final_text}. Returning to Experiment Runner."
+                )
+                if final_text:
+                    self.intensity_label.setText(f"Accepted threshold: {final_text} Output 3/4")
+                    self.intensity_bar.setFormat(final_text)
+                    try:
+                        self.intensity_bar.setValue(int(round(float(final_value) * OUTPUT_VOLUME_SLIDER_SCALE)))
+                    except Exception:
+                        pass
+            else:
+                self.status_label.setText(str(report.get("message") or "Calibration failed"))
+            if str(reversals):
+                self.reversal_label.setText(f"Reversals: {reversals}")
             self.abort_button.setEnabled(False)
             self.close_button.setEnabled(True)
 
@@ -11230,6 +11249,14 @@ class FocusModeWindow:
                 pass
         monitor = _create_tactile_calibration_monitor_dialog(self.q, self, participant)
         self.tactile_calibration_monitor_dialog = monitor
+        def _clear_monitor_reference(_code: int, monitor_ref: Any = monitor) -> None:
+            if getattr(self, "tactile_calibration_monitor_dialog", None) is monitor_ref:
+                self.tactile_calibration_monitor_dialog = None
+
+        try:
+            monitor.finished.connect(_clear_monitor_reference)
+        except Exception:
+            pass
         monitor.show()
         try:
             monitor.raise_()
@@ -11258,6 +11285,33 @@ class FocusModeWindow:
             return dict(future.result(timeout=1.0))
         except Exception as exc:
             return {"mode": "recenter_timeout", "error": str(exc), **dict(payload)}
+
+    def _return_from_successful_tactile_calibration(self) -> None:
+        monitor = getattr(self, "tactile_calibration_monitor_dialog", None)
+        if monitor is not None:
+            try:
+                monitor.accept()
+            except Exception:
+                try:
+                    monitor.close()
+                except Exception:
+                    pass
+            if getattr(self, "tactile_calibration_monitor_dialog", None) is monitor:
+                self.tactile_calibration_monitor_dialog = None
+        try:
+            self.mode_tabs.setCurrentIndex(self.experiment_control_tab_index)
+        except Exception:
+            pass
+        try:
+            self.dialog.raise_()
+            self.dialog.activateWindow()
+        except Exception:
+            pass
+        focus_target = self.start_button if self.start_button.isEnabled() else self.tactile_calibration_button
+        try:
+            focus_target.setFocus()
+        except Exception:
+            pass
 
     def _run_tactile_calibration(self) -> bool:
         if not self._tactile_calibration_allowed():
@@ -11435,7 +11489,10 @@ class FocusModeWindow:
             self._set_output_volume("output_3_4", final_percent)
             latest = load_latest_calibration(self.output_root, participant)
             self._latest_tactile_calibration = dict(latest or {})
-            self.event_label.setText(f"{participant}: tactile threshold accepted at {final_percent:g}%")
+            ready_text = "Ready to start the experiment." if self.start_button.isEnabled() else "Submit setup to start the experiment."
+            self.event_label.setText(
+                f"{participant}: tactile calibration successful at {final_percent:g}% Output 3/4. {ready_text}"
+            )
         else:
             message = str(report.get("message") or "threshold assay did not pass")
             self.event_label.setText(f"{participant}: tactile threshold failed - {message}")
@@ -11448,6 +11505,11 @@ class FocusModeWindow:
                 monitor.finish_assay(report)
             except Exception:
                 pass
+        if accepted:
+            self.q["QTimer"].singleShot(
+                TACTILE_CALIBRATION_SUCCESS_RETURN_MS,
+                self._return_from_successful_tactile_calibration,
+            )
         self._refresh_participant_ledger_summary()
         _append_output_diary_event(
             "tactile_calibration_finished",
