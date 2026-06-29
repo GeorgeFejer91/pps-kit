@@ -9,6 +9,7 @@ from peripersonal_space_toolkit.mobile_phone_runtime import (
     MOBILE_RUN_COMPLETE_SCHEMA,
     build_mobile_package_list,
     build_mobile_package_manifest,
+    validate_mobile_package_manifest,
     mobile_asset_path,
     mobile_package_id,
     write_mobile_runtime_events,
@@ -142,6 +143,61 @@ def test_mobile_package_list_and_manifest_can_mark_phone_owned_sessions(tmp_path
     assert listing["packages"][0]["phone_owned_session"] is True
     assert manifest["phone_owned_session"] is True
     assert manifest["runtime"]["session_owner"] == "phone"
+
+
+def test_mobile_package_validation_accepts_strict_phone_owned_hierarchy(tmp_path):
+    package = _package(tmp_path)
+
+    manifest = build_mobile_package_manifest(package, phone_owned_session=True)
+    result = validate_mobile_package_manifest(
+        manifest,
+        require_phone_owned_session=True,
+        require_building_blocks=True,
+    )
+
+    assert result.ok is True
+    assert result.failures == []
+    assert result.summary["block_count"] == 1
+    assert result.summary["building_block_count"] == 1
+    assert result.summary["schedule_hash"] == manifest["reconstruction"]["schedule_hash"]
+
+
+def test_mobile_package_validation_rejects_hierarchy_and_schedule_drift(tmp_path):
+    package = _package(tmp_path)
+    manifest = build_mobile_package_manifest(package, phone_owned_session=True)
+    manifest["schedule"]["execution_order"] = ["wrong-block"]
+    manifest["reconstruction"]["study_hierarchy"] = ["study_profile", "phone_runtime_package"]
+    manifest["reconstruction"]["schedule_hash"] = "wrong"
+
+    result = validate_mobile_package_manifest(
+        manifest,
+        require_phone_owned_session=True,
+        require_building_blocks=True,
+    )
+
+    assert result.ok is False
+    failures = "\n".join(result.failures)
+    assert "execution_order" in failures
+    assert "study_hierarchy" in failures
+    assert "schedule_hash" in failures
+
+
+def test_mobile_package_validation_rejects_missing_building_block_reference(tmp_path):
+    package = _package(tmp_path)
+    manifest = build_mobile_package_manifest(package, phone_owned_session=True)
+    manifest["building_blocks"] = []
+    manifest["assets"] = [asset for asset in manifest["assets"] if asset["role"] != "trial_building_block"]
+
+    result = validate_mobile_package_manifest(
+        manifest,
+        require_phone_owned_session=True,
+        require_building_blocks=True,
+    )
+
+    assert result.ok is False
+    failures = "\n".join(result.failures)
+    assert "trial_building_block records" in failures
+    assert "not listed in building_blocks" in failures
 
 
 def test_mobile_runtime_upload_writes_runner_log_artifacts(tmp_path):

@@ -6,6 +6,7 @@ import csv
 import hashlib
 import json
 import re
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from collections.abc import Sequence
@@ -29,10 +30,54 @@ MOBILE_RUNTIME_LIMITATIONS = [
     "Phone runtime writes a local LSL-compatible marker mirror; native Android LSL broadcast requires the optional liblsl Android layer.",
     "Phone runtime does not own LabRecorder, Woojer, or hardware loopback evidence.",
 ]
+MOBILE_REQUIRED_STUDY_HIERARCHY = [
+    "study_profile",
+    "segment_1_audio_ingredients",
+    "segment_2_trial_sequence_designs",
+    "segment_3_tactile_baseline_catch_trials",
+    "segment_4_trial_repetition_pool",
+    "segment_5_block_csv_preview",
+    "segment_6_participant_part_order",
+    "phone_runtime_package",
+    "phone_runtime_events",
+]
+MOBILE_REQUIRED_LSL_STREAM_NAMES = {
+    "rich_markers": "PPSMarkersV2",
+    "numeric_triggers": "PPSTriggerCodes",
+    "command_signals": "PPSCommandSignalsV1",
+    "command_acks": "PPSCommandAcksV1",
+}
+MOBILE_REQUIRED_PHONE_COMMANDS = {
+    "start_experiment",
+    "start_part",
+    "pause",
+    "resume",
+    "continue_instruction",
+    "stop_after_block",
+    "request_snapshot",
+    "operator_note",
+}
 
 
 class MobileRuntimePackageError(RuntimeError):
     """Raised when a prepared runner package cannot be exported for phone runtime."""
+
+
+@dataclass(frozen=True)
+class MobilePackageValidationResult:
+    ok: bool
+    failures: list[str]
+    warnings: list[str]
+    summary: dict[str, Any]
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            "schema": "pps-mobile-run-package-validation.v1",
+            "ok": self.ok,
+            "failures": list(self.failures),
+            "warnings": list(self.warnings),
+            "summary": dict(self.summary),
+        }
 
 
 def mobile_package_id(package: Any) -> str:
@@ -294,6 +339,131 @@ def build_mobile_package_manifest(
     }
 
 
+def validate_mobile_package_manifest(
+    manifest: dict[str, Any],
+    *,
+    require_v2: bool = True,
+    require_phone_owned_session: bool = False,
+    require_building_blocks: bool = False,
+    require_available_assets: bool = True,
+) -> MobilePackageValidationResult:
+    """Validate the Android phone-owned run package hierarchy and replay contract."""
+
+    failures: list[str] = []
+    warnings: list[str] = []
+    schema = str(manifest.get("schema") or "")
+    if require_v2 and schema != MOBILE_PACKAGE_SCHEMA:
+        failures.append(f"package schema must be {MOBILE_PACKAGE_SCHEMA!r}, got {schema!r}")
+    elif schema not in {MOBILE_PACKAGE_SCHEMA, MOBILE_PACKAGE_SCHEMA_V1}:
+        failures.append(f"unsupported mobile package schema {schema!r}")
+    if require_phone_owned_session and manifest.get("phone_owned_session") is not True:
+        failures.append("phone-owned validation requires phone_owned_session=true")
+
+    blocks = _json_list(manifest.get("blocks"))
+    assets = _json_list(manifest.get("assets"))
+    building_blocks = _json_list(manifest.get("building_blocks"))
+    schedule = manifest.get("schedule") if isinstance(manifest.get("schedule"), dict) else {}
+    schedule_blocks = _json_list(schedule.get("blocks"))
+    execution_order = [str(item) for item in _json_list(schedule.get("execution_order"))]
+    asset_by_id = {str(asset.get("asset_id") or ""): asset for asset in assets if isinstance(asset, dict)}
+    building_block_by_id = {
+        str(block.get("asset_id") or ""): block
+        for block in building_blocks
+        if isinstance(block, dict)
+    }
+    block_ids = [str(block.get("block_id") or "") for block in blocks if isinstance(block, dict)]
+    if not blocks:
+        failures.append("package must contain at least one prepared block")
+    if execution_order and execution_order != block_ids:
+        failures.append("schedule.execution_order must match prepared block order")
+    if schedule_blocks and [str(block.get("block_id") or "") for block in schedule_blocks if isinstance(block, dict)] != block_ids:
+        failures.append("schedule.blocks block_id order must match prepared blocks")
+
+    for index, block in enumerate(blocks, start=1):
+        if not isinstance(block, dict):
+            failures.append(f"block {index} is not a JSON object")
+            continue
+        block_id = str(block.get("block_id") or "")
+        audio_asset_id = str(block.get("audio_asset_id") or "")
+        if not block_id:
+            failures.append(f"block {index} is missing block_id")
+        if not audio_asset_id:
+            failures.append(f"block {block_id or index} is missing audio_asset_id")
+        elif audio_asset_id not in asset_by_id:
+            failures.append(f"block {block_id or index} audio_asset_id {audio_asset_id!r} is not listed in assets")
+        else:
+            asset = asset_by_id[audio_asset_id]
+            if str(asset.get("role") or "") != "block_audio":
+                failures.append(f"asset {audio_asset_id!r} must have role='block_audio'")
+            _validate_asset_availability(audio_asset_id, asset, failures, warnings, require_available=require_available_assets)
+        trials = _json_list(block.get("trials"))
+        tactile_cues = _json_list(block.get("tactile_cues"))
+        trial_by_uid = {str(trial.get("trial_uid") or ""): trial for trial in trials if isinstance(trial, dict)}
+        if int(block.get("trial_count") or 0) != len(trials):
+            failures.append(f"block {block_id or index} trial_count does not match trials length")
+        for trial_index, trial in enumerate(trials, start=1):
+            if not isinstance(trial, dict):
+                failures.append(f"block {block_id or index} trial {trial_index} is not a JSON object")
+                continue
+            trial_uid = str(trial.get("trial_uid") or "")
+            if not trial_uid:
+                failures.append(f"block {block_id or index} trial {trial_index} is missing trial_uid")
+            asset_id = str(trial.get("building_block_asset_id") or "")
+            if asset_id:
+                _validate_building_block_reference(asset_id, building_block_by_id, asset_by_id, failures, warnings, require_available_assets)
+            elif require_building_blocks and _trial_needs_building_block(trial):
+                failures.append(f"trial {trial_uid or trial_index} is missing building_block_asset_id")
+        for cue_index, cue in enumerate(tactile_cues, start=1):
+            if not isinstance(cue, dict):
+                failures.append(f"block {block_id or index} tactile cue {cue_index} is not a JSON object")
+                continue
+            trial_uid = str(cue.get("trial_uid") or "")
+            if trial_uid not in trial_by_uid:
+                failures.append(f"tactile cue {cue_index} in block {block_id or index} references unknown trial_uid {trial_uid!r}")
+            else:
+                trial = trial_by_uid[trial_uid]
+                cue_time = _float(cue.get("time_s"))
+                start_s = _float(trial.get("start_s"))
+                end_s = _float(trial.get("end_s"))
+                if cue_time < start_s or (end_s > start_s and cue_time > end_s):
+                    warnings.append(f"tactile cue {cue_index} in block {block_id or index} falls outside its trial window")
+
+    if require_building_blocks and not building_blocks:
+        failures.append("reconstructable phone package requires trial_building_block records")
+    for asset_id, building_block in building_block_by_id.items():
+        if not asset_id:
+            failures.append("building block is missing asset_id")
+            continue
+        _validate_building_block_reference(asset_id, building_block_by_id, asset_by_id, failures, warnings, require_available_assets)
+        if str(building_block.get("role") or "") != "trial_building_block":
+            failures.append(f"building block {asset_id!r} must have role='trial_building_block'")
+
+    _validate_schedule_building_blocks(schedule_blocks, building_block_by_id, failures, require_building_blocks=require_building_blocks)
+    _validate_reconstruction_contract(manifest, schedule_blocks, blocks, building_blocks, failures, warnings)
+    _validate_lsl_contract(manifest, failures, warnings)
+    _validate_runtime_contract(manifest, failures)
+
+    summary = {
+        "schema": schema,
+        "package_id": str(manifest.get("package_id") or ""),
+        "participant_id": str(manifest.get("participant_id") or ""),
+        "phone_owned_session": bool(manifest.get("phone_owned_session")),
+        "block_count": len(blocks),
+        "trial_count": sum(len(_json_list(block.get("trials"))) for block in blocks if isinstance(block, dict)),
+        "tactile_cue_count": sum(len(_json_list(block.get("tactile_cues"))) for block in blocks if isinstance(block, dict)),
+        "asset_count": len(assets),
+        "building_block_count": len(building_blocks),
+        "schedule_hash": str((manifest.get("reconstruction") or {}).get("schedule_hash") or "") if isinstance(manifest.get("reconstruction"), dict) else "",
+        "mobile_runnable": bool(manifest.get("mobile_runnable")),
+    }
+    return MobilePackageValidationResult(
+        ok=not failures,
+        failures=failures,
+        warnings=warnings,
+        summary=summary,
+    )
+
+
 def mobile_asset_path(package: Any, package_id: str, asset_id: str) -> Path:
     expected_package_id = mobile_package_id(package)
     if str(package_id) != expected_package_id:
@@ -404,6 +574,153 @@ def _asset_payload(asset_id: str, path: Path, *, include_sha256: bool) -> dict[s
         "sha256": _sha256(path) if include_sha256 and available else "",
         "available": bool(available),
     }
+
+
+def _validate_asset_availability(
+    asset_id: str,
+    asset: dict[str, Any],
+    failures: list[str],
+    warnings: list[str],
+    *,
+    require_available: bool,
+) -> None:
+    if require_available and asset.get("available") is not True:
+        failures.append(f"asset {asset_id!r} is not available")
+    if require_available and int(asset.get("size_bytes") or 0) <= 0:
+        failures.append(f"asset {asset_id!r} has no recorded size_bytes")
+    if not str(asset.get("sha256") or "").strip():
+        message = f"asset {asset_id!r} has no sha256"
+        if require_available:
+            failures.append(message)
+        else:
+            warnings.append(message)
+
+
+def _validate_building_block_reference(
+    asset_id: str,
+    building_block_by_id: dict[str, dict[str, Any]],
+    asset_by_id: dict[str, dict[str, Any]],
+    failures: list[str],
+    warnings: list[str],
+    require_available_assets: bool,
+) -> None:
+    if asset_id not in building_block_by_id:
+        failures.append(f"building_block_asset_id {asset_id!r} is not listed in building_blocks")
+    asset = asset_by_id.get(asset_id)
+    if asset is None:
+        failures.append(f"building_block_asset_id {asset_id!r} is not listed in assets")
+        return
+    if str(asset.get("role") or "") != "trial_building_block":
+        failures.append(f"asset {asset_id!r} must have role='trial_building_block'")
+    _validate_asset_availability(asset_id, asset, failures, warnings, require_available=require_available_assets)
+
+
+def _validate_schedule_building_blocks(
+    schedule_blocks: list[Any],
+    building_block_by_id: dict[str, dict[str, Any]],
+    failures: list[str],
+    *,
+    require_building_blocks: bool,
+) -> None:
+    for index, block in enumerate(schedule_blocks, start=1):
+        if not isinstance(block, dict):
+            failures.append(f"schedule block {index} is not a JSON object")
+            continue
+        trial_uids = _json_list(block.get("trial_uids"))
+        asset_ids = [str(value) for value in _json_list(block.get("building_block_asset_ids"))]
+        if trial_uids and len(asset_ids) != len(trial_uids):
+            failures.append(f"schedule block {block.get('block_id') or index} building-block list length does not match trial_uids")
+        for asset_id in asset_ids:
+            if asset_id and asset_id not in building_block_by_id:
+                failures.append(f"schedule references unknown building block asset {asset_id!r}")
+            elif require_building_blocks and not asset_id:
+                failures.append(f"schedule block {block.get('block_id') or index} has an empty building-block asset id")
+
+
+def _validate_reconstruction_contract(
+    manifest: dict[str, Any],
+    schedule_blocks: list[Any],
+    blocks: list[Any],
+    building_blocks: list[Any],
+    failures: list[str],
+    warnings: list[str],
+) -> None:
+    reconstruction = manifest.get("reconstruction") if isinstance(manifest.get("reconstruction"), dict) else {}
+    if not reconstruction:
+        failures.append("reconstruction contract is missing")
+        return
+    if reconstruction.get("schema") != MOBILE_RECONSTRUCTION_SCHEMA:
+        failures.append("reconstruction schema mismatch")
+    hierarchy = [str(item) for item in _json_list(reconstruction.get("study_hierarchy"))]
+    if hierarchy != MOBILE_REQUIRED_STUDY_HIERARCHY:
+        failures.append("reconstruction study_hierarchy must preserve Segment 0-6 -> phone runtime order")
+    if reconstruction.get("preferred_lightweight_strategy") != "replay_schedule_from_trial_building_blocks":
+        failures.append("reconstruction preferred_lightweight_strategy must use trial building blocks")
+    if reconstruction.get("fallback_execution_strategy") != "prepared_block_wavs":
+        failures.append("reconstruction fallback_execution_strategy must preserve prepared block WAV replay")
+    expected_hash = _json_sha256(schedule_blocks)
+    observed_hash = str(reconstruction.get("schedule_hash") or "")
+    if observed_hash != expected_hash:
+        failures.append("reconstruction schedule_hash does not match schedule.blocks")
+    if int(reconstruction.get("building_block_count") or 0) != len(building_blocks):
+        failures.append("reconstruction building_block_count does not match building_blocks length")
+    if int(reconstruction.get("block_count") or 0) != len(blocks):
+        failures.append("reconstruction block_count does not match blocks length")
+    trial_count = sum(len(_json_list(block.get("trials"))) for block in blocks if isinstance(block, dict))
+    if int(reconstruction.get("trial_count") or 0) != trial_count:
+        failures.append("reconstruction trial_count does not match block trial payloads")
+    if not str(reconstruction.get("source_run_setup_sha256") or "").strip():
+        warnings.append("reconstruction source_run_setup_sha256 is missing")
+
+
+def _validate_lsl_contract(manifest: dict[str, Any], failures: list[str], warnings: list[str]) -> None:
+    lsl = manifest.get("lsl") if isinstance(manifest.get("lsl"), dict) else {}
+    if not lsl:
+        failures.append("Android LSL contract is missing")
+        return
+    if lsl.get("schema") != MOBILE_LSL_CONTRACT_SCHEMA:
+        failures.append("Android LSL contract schema mismatch")
+    if lsl.get("runtime_authority") != "android_phone":
+        failures.append("Android LSL contract runtime_authority must be android_phone")
+    if lsl.get("privacy_default") != "metadata_payload_only":
+        failures.append("Android LSL contract privacy_default must be metadata_payload_only")
+    streams = lsl.get("stream_names") if isinstance(lsl.get("stream_names"), dict) else {}
+    for key, expected in MOBILE_REQUIRED_LSL_STREAM_NAMES.items():
+        if streams.get(key) != expected:
+            failures.append(f"Android LSL stream {key} expected {expected!r}, got {streams.get(key)!r}")
+    participant_id = str(manifest.get("participant_id") or "")
+    if participant_id:
+        for key, value in streams.items():
+            if participant_id in str(value):
+                failures.append(f"Android LSL stream {key} must not contain the participant id")
+    commands = {str(item) for item in _json_list(lsl.get("supported_commands"))}
+    missing_commands = sorted(MOBILE_REQUIRED_PHONE_COMMANDS - commands)
+    if missing_commands:
+        failures.append(f"Android LSL contract is missing supported commands: {', '.join(missing_commands)}")
+    if lsl.get("native_android_lsl_required") is not True:
+        warnings.append("Android LSL contract does not require native Android LSL")
+
+
+def _validate_runtime_contract(manifest: dict[str, Any], failures: list[str]) -> None:
+    runtime = manifest.get("runtime") if isinstance(manifest.get("runtime"), dict) else {}
+    if not runtime:
+        failures.append("runtime contract is missing")
+        return
+    if runtime.get("audio_playback_strategy") != "audiotrack_pcm_wav_playback_head":
+        failures.append("runtime audio playback must use AudioTrack playback-head timing")
+    if runtime.get("tactile_cue_scheduler") != "audiotrack_playback_head":
+        failures.append("runtime tactile scheduler must use AudioTrack playback-head timing")
+    if manifest.get("phone_owned_session") is True and runtime.get("session_owner") != "phone":
+        failures.append("phone-owned package runtime.session_owner must be phone")
+
+
+def _trial_needs_building_block(trial: dict[str, Any]) -> bool:
+    text = f"{trial.get('family', '')} {trial.get('trial_type', '')}".lower()
+    return "catch" not in text
+
+
+def _json_list(value: Any) -> list[Any]:
+    return list(value) if isinstance(value, list) else []
 
 
 def _building_block_from_trial(trial: dict[str, Any]) -> tuple[str, dict[str, Any] | None]:

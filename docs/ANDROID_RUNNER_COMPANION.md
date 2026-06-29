@@ -119,10 +119,22 @@ Synced v2 packages include:
 - prepared block WAV assets with role `block_audio`, which remain the current
   playback path
 - optional reusable Segment 3 trial WAV assets with role
-  `trial_building_block`, used by future lightweight replay/top-up logic
+  `trial_building_block`, used by lightweight replay/top-up logic
 - `reconstruction` metadata with source Segment 6 hashes and schedule hash
 - `lsl` metadata declaring `PPSMarkersV2`, `PPSTriggerCodes`,
   `PPSCommandSignalsV1`, and `PPSCommandAcksV1`
+
+Validate exported or prepared v2 packages before relying on phone-owned
+execution:
+
+```powershell
+.\.venv\Scripts\python.exe validation_protocols\scripts\validate_mobile_phone_package.py <manifest-json-or-package-dir> --require-phone-owned-session --require-building-blocks
+```
+
+The validator checks the Segment 0-6 to phone-runtime hierarchy, schedule hash,
+block/order consistency, reusable building-block references, asset availability,
+AudioTrack playback-head timing contract, privacy-safe Android LSL stream names,
+and required phone command set.
 
 Phone-owned local artifacts now include `participant_metadata.json`,
 `haptic_capability.json`, `events.csv`, `lsl_marker_mirror.csv`,
