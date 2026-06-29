@@ -2218,8 +2218,12 @@ def test_dashboard_bake_stimulus_job_adds_source_after_render(tmp_path: Path, mo
         tactile.write_text("", encoding="utf-8")
         assert label == "Manual blue"
         assert design_data["noises"][0]["source_profile"] == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
-        assert design_data["noises"][0]["source_profile_parameters"]["burst_count"] == 33
-        assert design_data["noises"][0]["source_profile_parameters"]["inter_burst_interval_s"] == pytest.approx(0.065)
+        assert design_data["noises"][0]["source_profile_parameters"]["burst_count_mode"] == "duration_derived"
+        assert design_data["noises"][0]["source_profile_parameters"]["target_period_s"] == pytest.approx(0.095)
+        assert (
+            design_data["noises"][0]["source_profile_parameters"]["active_window_source"]
+            == "trajectory_movement_duration"
+        )
         assert seed == custom["design"]["protocol"]["random_seed"]
         assert engine == "python-sofa-reference"
         assert include_tactile is False

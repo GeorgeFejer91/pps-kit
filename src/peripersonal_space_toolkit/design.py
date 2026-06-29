@@ -44,15 +44,19 @@ DEFAULT_TRAJECTORY_PLANE_HEIGHT_M = 0.0
 DEFAULT_TRAJECTORY_PLANE_LABEL = "listener head/ear center plane"
 PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE = "dynaspace_gaussian_burst_train"
 PPS_LOOMING_GOLD_STANDARD_SOURCE_PARAMETERS: dict[str, Any] = {
-    "burst_count": 33,
+    "burst_count_mode": "duration_derived",
     "burst_duration_s": 0.030,
     "rise_fall_s": 0.010,
-    "inter_burst_interval_s": 0.065,
+    "target_period_s": 0.095,
     "onset_s": 0.300,
+    "active_window_source": "trajectory_movement_duration",
+    "spacing_policy": "symmetric_fit",
     "standard_basis": (
         "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found "
-        "33 peaks at about 95 ms IOI; Consensus evidence supports broadband transients for "
-        "localization/salience while 3DTI/SOFA owns binaural spatial cues."
+        "33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and "
+        "equal symmetric spacing from the configured active window so future trajectories can "
+        "change duration without truncating the final burst. Consensus evidence supports "
+        "broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
     ),
 }
 DISTANCE_CM_MIN = 1.0

@@ -24,18 +24,26 @@ Profile id: `dynaspace_gaussian_burst_train`.
 
 Default parameters:
 
-- `burst_count`: 33
+- `burst_count_mode`: `duration_derived`
 - `burst_duration_s`: 0.030
 - `rise_fall_s`: 0.010
-- `inter_burst_interval_s`: 0.065
+- `target_period_s`: 0.095
 - `onset_s`: 0.300
+- `active_window_source`: `trajectory_movement_duration`
+- `spacing_policy`: `symmetric_fit`
+
+The default does not hard-code a universal burst count. It derives the count
+from the configured active window and target period, then refits the actual
+burst spacing so the first and final burst sit symmetrically inside the active
+window. This avoids a clipped final burst when a trajectory duration is not an
+exact multiple of the target period.
 
 Evidence basis:
 
 - Raw DynaSpace Android WAV audit found 33 bursts with about 95 ms median
-  inter-onset interval.
+  inter-onset interval for the smartphone profile's active burst window.
 - Hobeika/DynaSpace lineage supports Gaussian white-noise bursts with short
-  rise/fall ramps.
+  rise/fall ramps and about 95 ms burst onset spacing.
 - Consensus searches supported broadband transients/onsets for salience and
   localization, and supported HRTF/ILD/ITD/reverb/near-field cues as spatial
   renderer properties rather than dry-waveform hacks.
@@ -83,7 +91,8 @@ Every generated looming WAV should record or export:
 - no-clipping status
 - peak/RMS or calibrated SPL policy
 - source profile and parameters
-- burst count and median inter-onset interval
+- resolved burst count, active window, target period, and actual median
+  inter-onset interval
 - trajectory anchors and source position at tactile events
 - HRTF/SOFA resource identity
 - expected ILD/ITD/channel-sign direction for the requested azimuth

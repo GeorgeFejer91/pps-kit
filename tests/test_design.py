@@ -47,6 +47,8 @@ from peripersonal_space_toolkit.render_backend import (
     THREEDTI_COMMIT,
     app_to_3dti_coordinates,
     build_render_config,
+    _dynaspace_burst_onsets,
+    _generate_dynaspace_burst_train,
     load_render_design,
     postprocess_native_manifest,
     render_design_with_3dti,
@@ -356,10 +358,65 @@ def test_source_profile_round_trips_and_reaches_render_config(tmp_path: Path):
     config = build_render_config(loaded, seed=987, output_dir=tmp_path)
 
     assert loaded.noises[0].source_profile == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
-    assert loaded.noises[0].source_profile_parameters["burst_count"] == 33
+    assert loaded.noises[0].source_profile_parameters["burst_count_mode"] == "duration_derived"
     assert loaded.noises[0].source_profile_parameters["onset_s"] == pytest.approx(0.125)
     assert config["source"]["noises"][0]["source_profile"] == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
-    assert config["source"]["noises"][0]["source_profile_parameters"]["inter_burst_interval_s"] == pytest.approx(0.065)
+    assert config["source"]["noises"][0]["source_profile_parameters"]["target_period_s"] == pytest.approx(0.095)
+    assert config["source"]["noises"][0]["source_profile_parameters"]["active_window_s"] == pytest.approx(
+        design.trajectory.movement_duration_s
+    )
+    assert (
+        config["source"]["noises"][0]["source_profile_parameters"]["active_window_s_source"]
+        == "trajectory.movement_duration_s"
+    )
+
+
+def test_dynaspace_burst_train_derives_symmetric_spacing_from_active_window():
+    import numpy as np
+
+    sample_rate = 10_000
+    samples = int(round(0.800 * sample_rate))
+    parameters = gold_standard_looming_source_parameters(
+        {
+            "active_window_s": 0.475,
+            "burst_duration_s": 0.030,
+            "onset_s": 0.100,
+            "rise_fall_s": 0.002,
+            "target_period_s": 0.095,
+        }
+    )
+
+    onsets, resolved = _dynaspace_burst_onsets(samples=samples, sample_rate=sample_rate, parameters=parameters)
+    source = _generate_dynaspace_burst_train("white", samples, sample_rate, 123, parameters)
+    active_indices = np.flatnonzero(np.abs(source) > 1e-8)
+    breaks = np.where(np.diff(active_indices) > int(round(0.010 * sample_rate)))[0]
+    starts = np.r_[active_indices[0], active_indices[breaks + 1]]
+    stops = np.r_[active_indices[breaks], active_indices[-1]]
+
+    assert len(onsets) == 6
+    assert resolved["actual_period_s"] == pytest.approx(0.089, abs=1e-9)
+    assert onsets[0] == pytest.approx(0.100)
+    assert onsets[-1] + resolved["burst_duration_s"] == pytest.approx(0.575)
+    assert len(starts) == 6
+    assert np.median(np.diff(starts) / sample_rate) == pytest.approx(0.089, abs=1.0 / sample_rate)
+    assert (stops[-1] + 1) / sample_rate <= 0.575 + (1.0 / sample_rate)
+
+
+def test_dynaspace_burst_train_keeps_legacy_fixed_interval_parameters():
+    onsets, resolved = _dynaspace_burst_onsets(
+        samples=10_000,
+        sample_rate=10_000,
+        parameters={
+            "burst_count": 4,
+            "burst_duration_s": 0.020,
+            "inter_burst_interval_s": 0.080,
+            "onset_s": 0.050,
+        },
+    )
+
+    assert resolved["spacing_policy"] == "fixed_period_truncate"
+    assert resolved["actual_period_s"] == pytest.approx(0.100)
+    assert onsets == pytest.approx([0.050, 0.150, 0.250, 0.350])
 
 
 def test_dynaspace_burst_train_source_profile_renders_pulsed_audio(tmp_path: Path):
@@ -378,6 +435,8 @@ def test_dynaspace_burst_train_source_profile_renders_pulsed_audio(tmp_path: Pat
             source_profile_parameters=gold_standard_looming_source_parameters(
                 {
                     "burst_count": 6,
+                    "burst_count_mode": "fixed",
+                    "active_window_s": 0.505,
                     "onset_s": 0.100,
                     "rise_fall_s": 0.005,
                 }

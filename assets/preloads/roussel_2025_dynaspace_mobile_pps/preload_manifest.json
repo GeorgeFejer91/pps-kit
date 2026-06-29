@@ -100,12 +100,15 @@
       },
       "source_profile": "dynaspace_gaussian_burst_train",
       "source_profile_parameters": {
-        "burst_count": 33,
+        "burst_count_mode": "duration_derived",
         "burst_duration_s": 0.03,
         "rise_fall_s": 0.01,
-        "inter_burst_interval_s": 0.065,
+        "target_period_s": 0.095,
         "onset_s": 0.3,
-        "evidence_basis": "Raw DynaSpace WAV audit detected 33 peaks with about 95 ms median IOI; Hobeika lineage reports 30 ms Gaussian white-noise bursts, 10 ms rise/fall, and 65 ms inter-burst interval."
+        "active_window_s": 3.07,
+        "active_window_source": "raw_dynaspace_active_burst_window",
+        "spacing_policy": "symmetric_fit",
+        "evidence_basis": "Raw DynaSpace WAV audit detected 33 peaks with about 95 ms median IOI. Hobeika lineage reports 30 ms Gaussian white-noise bursts, 10 ms rise/fall, and 65 ms inter-burst interval; PPS-kit derives burst count from the active window and target IOI instead of hard-coding 33."
       }
     },
     {
@@ -151,12 +154,15 @@
       },
       "source_profile": "dynaspace_gaussian_burst_train",
       "source_profile_parameters": {
-        "burst_count": 33,
+        "burst_count_mode": "duration_derived",
         "burst_duration_s": 0.03,
         "rise_fall_s": 0.01,
-        "inter_burst_interval_s": 0.065,
+        "target_period_s": 0.095,
         "onset_s": 0.3,
-        "evidence_basis": "Raw DynaSpace WAV audit detected 33 peaks with about 95 ms median IOI; Hobeika lineage reports 30 ms Gaussian white-noise bursts, 10 ms rise/fall, and 65 ms inter-burst interval."
+        "active_window_s": 3.07,
+        "active_window_source": "raw_dynaspace_active_burst_window",
+        "spacing_policy": "symmetric_fit",
+        "evidence_basis": "Raw DynaSpace WAV audit detected 33 peaks with about 95 ms median IOI. Hobeika lineage reports 30 ms Gaussian white-noise bursts, 10 ms rise/fall, and 65 ms inter-burst interval; PPS-kit derives burst count from the active window and target IOI instead of hard-coding 33."
       }
     }
   ],
