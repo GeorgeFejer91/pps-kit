@@ -137,7 +137,7 @@ object SnapshotParser {
             participantId = root.optJSONObject("participant")?.optString("participant_id").orEmpty(),
             setup = SetupStatus(
                 submitted = setup.optBoolean("submitted", false),
-                ready = setup.optBoolean("ready", false),
+                ready = setup.optBoolean("ready", setup.optBoolean("submitted", false)),
                 participantNamePresent = setup.optBoolean("participant_name_present", false),
                 nameSharingOptIn = setup.optBoolean("name_sharing_opt_in", false),
                 age = setup.optString("age", ""),

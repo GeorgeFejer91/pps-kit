@@ -33,6 +33,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   discoverable stream names. Android FFmpeg-style synthesis remains feasible via
   native builds, but the preferred PPS top-up path is a deterministic PCM WAV
   assembler rather than FFmpegKit, because FFmpegKit is retired.
+- The Android phone-owned playback path now parses prepared block WAV files as
+  PCM, plays them with AudioTrack instead of MediaPlayer, and schedules
+  vibration cues from the AudioTrack playback head instead of coroutine
+  wall-clock delays. Phone-owned block/cue artifacts now record sample rate,
+  channel count, bit depth, frame count, duration, scheduled audio frame,
+  playback-head delivery frame, and cue jitter. This improves the local
+  reconstruction/timing spine for prepared WAV replay, but it is still
+  phone-runtime evidence only until physical-device validation and native
+  Android LSL broadcast are wired and audited.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only

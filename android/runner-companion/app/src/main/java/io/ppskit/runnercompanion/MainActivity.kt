@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Paint
-import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -94,7 +93,6 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -965,20 +963,7 @@ private fun RunnerScreen(
                 )
             }
         } else if (maxWidth > maxHeight) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
-            ) {
-                controls(Modifier.width(320.dp).fillMaxHeight())
-                LiveFeedbackPanel(
-                    snapshot = snapshot,
-                    estimate = estimate,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .padding(vertical = 12.dp),
-                )
-            }
+            controls(Modifier.fillMaxSize())
         } else {
             Column(
                 modifier = Modifier
@@ -1535,24 +1520,25 @@ private suspend fun runPhonePackage(
         require(audioFile.isFile) { "Synced audio file is missing for ${block.label}." }
         onBlock(block.label)
         onStatus("Running ${block.index}/${runPackage.blocks.size}")
-        session.startBlock(block)
-        coroutineScope {
-            val cueJobs = block.tactileCues.map { cue ->
-                launch {
-                    delay((cue.timeS * 1000.0).roundToLong().coerceAtLeast(0L))
+        val wavInfo = readPhonePcmWavInfo(audioFile)
+        session.startBlock(block, wavInfo)
+        playBlockAudioWithAudioTrack(
+            file = audioFile,
+            wavInfo = wavInfo,
+            cues = block.tactileCues,
+            onCue = { cue, delivery ->
+                withContext(Dispatchers.Main) {
                     vibratePhone(context, session.vibrationAmplitude())
-                    session.addCue(block, cue)
+                    session.addCue(block, cue, delivery)
                 }
-            }
-            try {
-                playBlockAudio(audioFile) { elapsedMs, durationMs ->
+            },
+            onProgress = { elapsedMs, durationMs ->
+                withContext(Dispatchers.Main) {
                     val duration = durationMs.coerceAtLeast((block.durationS * 1000.0).roundToLong())
                     onProgress("${formatMillisecondsShort(elapsedMs)} / ${formatMillisecondsShort(duration)}")
                 }
-            } finally {
-                cueJobs.forEach { it.cancel() }
             }
-        }
+        )
         session.finishBlock(block)
         if (phoneOwnedSession) {
             withContext(Dispatchers.IO) { session.writeLocalArtifact(context, runPackage, complete = false) }
@@ -1641,36 +1627,52 @@ private class PhoneRunSession(
     }
 
     @Synchronized
-    fun startBlock(block: MobileBlock) {
+    fun startBlock(block: MobileBlock, wavInfo: PhonePcmWavInfo? = null) {
         activeBlock = block
         blockStartElapsedMs = SystemClock.elapsedRealtime()
-        addEventLocked(
-            "block_start",
-            JSONObject()
-                .put("block_id", block.blockId)
-                .put("block_index", block.index)
-                .put("block_label", block.label)
-                .put("duration_s", block.durationS)
-                .put("trial_count", block.trialCount),
-        )
+        val payload = JSONObject()
+            .put("block_id", block.blockId)
+            .put("block_index", block.index)
+            .put("block_label", block.label)
+            .put("duration_s", block.durationS)
+            .put("trial_count", block.trialCount)
+            .put("audio_timing_strategy", "audiotrack_pcm_wav_playback_head")
+        if (wavInfo != null) {
+            payload
+                .put("audio_sample_rate_hz", wavInfo.sampleRateHz)
+                .put("audio_channel_count", wavInfo.channelCount)
+                .put("audio_bits_per_sample", wavInfo.bitsPerSample)
+                .put("audio_encoding", wavInfo.encodingLabel)
+                .put("audio_frame_count", wavInfo.frameCount)
+                .put("audio_duration_ms", wavInfo.durationMs)
+                .put("audio_data_size_bytes", wavInfo.dataSizeBytes)
+        }
+        addEventLocked("block_start", payload)
     }
 
     @Synchronized
-    fun addCue(block: MobileBlock, cue: MobileCue) {
-        addEventLocked(
-            "vibration_cue",
-            JSONObject()
-                .put("block_id", block.blockId)
-                .put("block_index", block.index)
-                .put("cue_id", cue.cueId)
-                .put("trial_number", cue.trialNumber)
-                .put("trial_uid", cue.trialUid)
-                .put("scheduled_block_time_ms", (cue.timeS * 1000.0).roundToLong())
-                .put("actual_block_time_ms", currentBlockElapsedMs())
-                .put("soa_ms", cue.soaMs)
-                .put("row_label", cue.rowLabel)
-                .put("noise_type", cue.noiseType),
-        )
+    fun addCue(block: MobileBlock, cue: MobileCue, delivery: PhoneAudioCueDelivery? = null) {
+        val payload = JSONObject()
+            .put("block_id", block.blockId)
+            .put("block_index", block.index)
+            .put("cue_id", cue.cueId)
+            .put("trial_number", cue.trialNumber)
+            .put("trial_uid", cue.trialUid)
+            .put("scheduled_block_time_ms", (cue.timeS * 1000.0).roundToLong())
+            .put("actual_block_time_ms", currentBlockElapsedMs())
+            .put("soa_ms", cue.soaMs)
+            .put("row_label", cue.rowLabel)
+            .put("noise_type", cue.noiseType)
+        if (delivery != null) {
+            payload
+                .put("audio_scheduler", "audiotrack_playback_head")
+                .put("scheduled_audio_frame", delivery.scheduledAudioFrame)
+                .put("audio_playback_head_frame", delivery.playbackHeadFrame)
+                .put("audio_delivery_elapsed_realtime_ms", delivery.deliveryElapsedRealtimeMs)
+                .put("audio_cue_jitter_frames", delivery.jitterFrames)
+                .put("audio_cue_jitter_ms", delivery.jitterMs)
+        }
+        addEventLocked("vibration_cue", payload)
     }
 
     @Synchronized
@@ -1873,52 +1875,6 @@ private class PhoneRunSession(
             .put("valid_tap_count", validTapCount)
             .put("lsl_marker_mirror_count", lslMarkers.size)
             .put("command_diary_count", commandDiary.size)
-}
-
-private suspend fun playBlockAudio(file: File, onProgress: (Long, Long) -> Unit) {
-    withContext(Dispatchers.Main) {
-        val player = MediaPlayer()
-        val handler = Handler(Looper.getMainLooper())
-        var released = false
-        fun releasePlayer() {
-            if (!released) {
-                released = true
-                runCatching { player.stop() }
-                runCatching { player.release() }
-            }
-        }
-        try {
-            player.setDataSource(file.absolutePath)
-            player.prepare()
-            suspendCancellableCoroutine<Unit> { continuation ->
-                val ticker = object : Runnable {
-                    override fun run() {
-                        if (!released) {
-                            onProgress(player.currentPosition.toLong(), player.duration.toLong().coerceAtLeast(0L))
-                            handler.postDelayed(this, 250L)
-                        }
-                    }
-                }
-                player.setOnCompletionListener {
-                    handler.removeCallbacks(ticker)
-                    if (continuation.isActive) continuation.resume(Unit)
-                }
-                player.setOnErrorListener { _, _, _ ->
-                    handler.removeCallbacks(ticker)
-                    if (continuation.isActive) continuation.resumeWithException(RuntimeException("Audio playback failed."))
-                    true
-                }
-                continuation.invokeOnCancellation {
-                    handler.removeCallbacks(ticker)
-                    releasePlayer()
-                }
-                player.start()
-                ticker.run()
-            }
-        } finally {
-            releasePlayer()
-        }
-    }
 }
 
 private fun phoneParticipantMetadata(
