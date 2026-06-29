@@ -48,6 +48,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   participant metadata, and haptic capability artifacts. ZIP exports therefore
   carry enough package/schedule/asset identity to reconstruct the run without
   asking the PC bridge for its original manifest.
+- Mobile v2 manifests now explicitly link scheduled trial rows back to reusable
+  `trial_building_block` assets through `building_block_asset_id`, and schedule
+  blocks mirror those ids in play order. Android parses this field and includes
+  the building-block catalog plus per-block trial asset-id order in its local
+  reconstruction artifact. This is the schema prerequisite for deterministic
+  phone-side missed-trial/top-up WAV assembly without FFmpeg.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only

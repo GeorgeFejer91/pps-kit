@@ -130,6 +130,7 @@ data class MobileTrial(
     val durationS: Double,
     val tactileOnsetS: Double?,
     val responseWindowOnsetS: Double?,
+    val buildingBlockAssetId: String,
 )
 
 data class MobileCue(
@@ -304,6 +305,7 @@ private fun JSONArray?.toMobileTrials(): List<MobileTrial> {
             durationS = item.optDouble("duration_s", 0.0).coerceAtLeast(0.0),
             tactileOnsetS = item.optNullableDouble("tactile_onset_s"),
             responseWindowOnsetS = item.optNullableDouble("response_window_onset_s"),
+            buildingBlockAssetId = item.optString("building_block_asset_id", ""),
         )
     }.sortedBy { it.startS }
 }

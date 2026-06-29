@@ -149,6 +149,7 @@ def build_mobile_package_manifest(
                 "trial_count": block_payload["trial_count"],
                 "compatibility_audio_asset_id": block_audio_asset_id,
                 "trial_uids": [trial.get("trial_uid", "") for trial in trials],
+                "building_block_asset_ids": [trial.get("building_block_asset_id", "") for trial in trials],
                 "tactile_cue_count": len(cues),
                 "source_block_csv_path": str((getattr(block, "metadata", {}) or {}).get("source_block_csv_path", "")),
                 "source_block_csv_sha256": str((getattr(block, "metadata", {}) or {}).get("source_block_csv_sha256", "")),
@@ -467,6 +468,9 @@ def _block_trial_payloads(block: Any) -> tuple[list[dict[str, Any]], list[dict[s
             "source_sha256": _first(row, "Source_SHA256", "source_sha256", "Trial_File_SHA256", "trial_file_sha256"),
             "source_file_name": _first(row, "Source_File_Name", "source_file_name"),
         }
+        building_block_asset_id, _building_block = _building_block_from_trial(trial_payload)
+        if building_block_asset_id:
+            trial_payload["building_block_asset_id"] = building_block_asset_id
         trials.append(trial_payload)
         if tactile_onset is not None and _has_tactile(row, family=family, trial_type=trial_type):
             cues.append(

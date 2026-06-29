@@ -89,7 +89,7 @@ class MobilePackageParserTest {
                   "trial_count": 2,
                   "audio_asset_id": "block-01-audio",
                   "trials": [
-                    {"trial_number": 1, "trial_uid": "trial-a", "trial_type": "audio_tactile", "family": "audio_tactile", "soa_ms": "300", "row_label": "inhale", "noise_type": "white", "start_s": 2.0, "end_s": 6.0, "duration_s": 4.0, "tactile_onset_s": 1.25}
+                    {"trial_number": 1, "trial_uid": "trial-a", "trial_type": "audio_tactile", "family": "audio_tactile", "soa_ms": "300", "row_label": "inhale", "noise_type": "white", "start_s": 2.0, "end_s": 6.0, "duration_s": 4.0, "tactile_onset_s": 1.25, "building_block_asset_id": "trial-1"}
                   ],
                   "tactile_cues": [
                     {"cue_id": 1, "trial_number": 1, "trial_uid": "trial-a", "time_s": 3.25, "trial_relative_time_s": 1.25, "soa_ms": "300", "row_label": "inhale", "noise_type": "white"}
@@ -105,6 +105,7 @@ class MobilePackageParserTest {
         assertTrue(manifest.phoneOwnedSession)
         assertEquals("block-01-audio", manifest.blocks.first().audioAssetId)
         assertEquals("trial-a", manifest.blocks.first().trials.first().trialUid)
+        assertEquals("trial-1", manifest.blocks.first().trials.first().buildingBlockAssetId)
         assertEquals(3.25, manifest.blocks.first().tactileCues.first().timeS, 0.001)
         assertEquals("abc", manifest.asset("block-01-audio")?.sha256)
         assertEquals("trial-1", manifest.buildingBlocks.first().assetId)

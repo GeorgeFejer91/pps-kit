@@ -115,6 +115,8 @@ def test_mobile_package_manifest_exports_assets_trials_and_phone_tactile_cues(tm
     assert manifest["runtime"]["audio_playback_strategy"] == "audiotrack_pcm_wav_playback_head"
     assert manifest["runtime"]["tactile_cue_scheduler"] == "audiotrack_playback_head"
     assert manifest["assets"][0]["sha256"]
+    assert manifest["blocks"][0]["trials"][0]["building_block_asset_id"] == manifest["building_blocks"][0]["asset_id"]
+    assert manifest["schedule"]["blocks"][0]["building_block_asset_ids"][0] == manifest["building_blocks"][0]["asset_id"]
     assert manifest["blocks"][0]["trials"][0]["trial_uid"] == "trial-a"
     assert manifest["blocks"][0]["tactile_cues"] == [
         {

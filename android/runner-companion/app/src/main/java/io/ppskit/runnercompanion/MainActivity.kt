@@ -1967,6 +1967,28 @@ private fun phoneRunReconstructionArtifact(runPackage: MobileRunPackage, manifes
             },
         )
         .put(
+            "building_blocks",
+            JSONArray().also { array ->
+                runPackage.buildingBlocks.forEach { buildingBlock ->
+                    array.put(
+                        JSONObject()
+                            .put("asset_id", buildingBlock.assetId)
+                            .put("filename", buildingBlock.filename)
+                            .put("role", buildingBlock.role)
+                            .put("sha256", buildingBlock.sha256)
+                            .put("trial_type", buildingBlock.trialType)
+                            .put("family", buildingBlock.family)
+                            .put("row_label", buildingBlock.rowLabel)
+                            .put("soa_ms", buildingBlock.soaMs)
+                            .put("noise_type", buildingBlock.noiseType)
+                            .put("duration_s", buildingBlock.durationS)
+                            .put("tactile_onset_s", buildingBlock.tactileOnsetS)
+                            .put("response_window_onset_s", buildingBlock.responseWindowOnsetS),
+                    )
+                }
+            },
+        )
+        .put(
             "blocks",
             JSONArray().also { array ->
                 runPackage.blocks.forEach { block ->
@@ -1978,6 +2000,12 @@ private fun phoneRunReconstructionArtifact(runPackage: MobileRunPackage, manifes
                             .put("duration_s", block.durationS)
                             .put("trial_count", block.trialCount)
                             .put("audio_asset_id", block.audioAssetId)
+                            .put(
+                                "trial_building_block_asset_ids",
+                                JSONArray().also { ids ->
+                                    block.trials.forEach { trial -> ids.put(trial.buildingBlockAssetId) }
+                                },
+                            )
                             .put("tactile_cue_count", block.tactileCues.size),
                     )
                 }
