@@ -150,12 +150,15 @@ presses over LSL, polls for matching `PPSCommandAcksV1` samples, and records the
 native send/ack result in the outbox row plus
 `phone_controller_runtime_status.json`.
 
-Android vibration calibration is device-limited. If Android reports amplitude
-control, the entered threshold percent is mapped to the `VibrationEffect`
-amplitude range for phone vibration cues. If the phone has a vibrator but no
-amplitude control, the app records the device as binary detection only and uses
-default-amplitude pulses; that value should not be interpreted as a calibrated
-physical vibration strength.
+Android vibration calibration is device-limited. The phone-run metadata panel
+now includes a `Haptic Calibration` control. On phones with amplitude control it
+runs an ascending perceptual threshold check over fixed percent levels, saves
+the first felt level as `pps-android-phone-haptic-calibration.v1`, copies that
+percent into participant metadata, and uses the mapped `VibrationEffect`
+amplitude for phone vibration cues. On phones with a vibrator but no amplitude
+control, the app records a binary detection-only calibration and uses
+default-amplitude pulses. These values are phone-vibrator working thresholds,
+not calibrated physical vibration-strength or Woojer timing measurements.
 
 FFmpeg-style synthesis is technically possible on Android through native FFmpeg
 builds, but the app does not depend on FFmpegKit because that wrapper project is

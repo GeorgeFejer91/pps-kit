@@ -458,6 +458,9 @@ private fun PhoneRuntimeScreen(
     var phoneHandedness by remember(pairing.sessionId) { mutableStateOf("right") }
     var phoneGender by remember(pairing.sessionId) { mutableStateOf("prefer_not_to_say") }
     var tactileThreshold by remember(pairing.sessionId) { mutableStateOf("") }
+    var hapticCalibration by remember(pairing.sessionId) { mutableStateOf<JSONObject?>(null) }
+    var hapticCalibrationSession by remember(pairing.sessionId) { mutableStateOf<PhoneHapticCalibrationSession?>(null) }
+    var hapticCalibrationStatus by remember(pairing.sessionId) { mutableStateOf("") }
     var phoneRole by remember(pairing.sessionId) { mutableStateOf(PhoneRuntimeRole.Runner) }
     var session by remember { mutableStateOf<PhoneRunSession?>(null) }
     val nativeControllerBridge = remember(pairing.sessionId) { PhoneNativeLslBridgeFactory.create() }
@@ -465,11 +468,28 @@ private fun PhoneRuntimeScreen(
     var runJob by remember { mutableStateOf<Job?>(null) }
     val logLines = remember { mutableStateListOf<String>() }
     val syncedPackages = remember { mutableStateMapOf<String, MobileRunPackage>() }
-    val hapticCapability = remember { phoneHapticCapability(context) }
+    val hapticCapability = remember(hapticCalibration?.toString().orEmpty()) { phoneHapticCapability(context, hapticCalibration) }
 
     fun log(message: String) {
         logLines.add(0, message)
         while (logLines.size > 8) logLines.removeAt(logLines.lastIndex)
+    }
+
+    fun applyHapticCalibrationResult(result: PhoneHapticCalibrationResult) {
+        val artifact = result.toJson()
+        hapticCalibration = artifact
+        val recommended = result.recommendedThresholdPercent
+        if (recommended != null) {
+            tactileThreshold = recommended.toString()
+        }
+        hapticCalibrationStatus = when (result.status) {
+            "threshold_detected" -> "Threshold ${recommended ?: "N/A"}%"
+            "binary_detected" -> "Binary vibration detected"
+            "not_detected_at_max" -> "Not detected at max"
+            "no_vibrator" -> "No vibrator"
+            else -> result.status
+        }
+        log("Haptic calibration ${result.status}")
     }
 
     fun refreshPackages() {
@@ -635,6 +655,40 @@ private fun PhoneRuntimeScreen(
                 ChoiceRow("Gender", phoneGender, listOf("male", "female", "other", "prefer_not_to_say")) {
                     phoneGender = it
                 }
+                HapticCalibrationControls(
+                    hapticCapability = hapticCapability,
+                    calibrationSession = hapticCalibrationSession,
+                    calibrationStatus = hapticCalibrationStatus,
+                    enabled = !running && !syncing,
+                    onStart = {
+                        val started = PhoneHapticCalibrationSession.start(
+                            hasVibrator = hapticCapability.optBoolean("has_vibrator", false),
+                            hasAmplitudeControl = hapticCapability.optBoolean("has_amplitude_control", false),
+                        )
+                        hapticCalibrationSession = started
+                        hapticCalibrationStatus = if (started.hasAmplitudeControl) {
+                            "Pulse ${started.currentThresholdPercent}%"
+                        } else {
+                            "Binary pulse"
+                        }
+                    },
+                    onPulse = { session ->
+                        vibratePhone(context, session.currentAmplitude)
+                    },
+                    onResponse = { felt ->
+                        val current = hapticCalibrationSession
+                        if (current != null) {
+                            val update = current.record(felt)
+                            hapticCalibrationSession = update.session
+                            val result = update.result
+                            if (result != null) {
+                                applyHapticCalibrationResult(result)
+                            } else {
+                                hapticCalibrationStatus = "Pulse ${update.session.currentThresholdPercent}%"
+                            }
+                        }
+                    },
+                )
             }
         }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -677,7 +731,7 @@ private fun PhoneRuntimeScreen(
                         val job = scope.launch {
                             val activeSession = PhoneRunSession(
                                 packageId = runPackage.packageId,
-                                participantMetadata = phoneParticipantMetadata(runPackage, phoneAge, phoneHandedness, phoneGender, tactileThreshold),
+                                participantMetadata = phoneParticipantMetadata(runPackage, phoneAge, phoneHandedness, phoneGender, tactileThreshold, hapticCalibration),
                                 hapticMetadata = hapticCapability,
                                 lslContract = runPackage.lsl,
                                 expectedCommandToken = pairing.token,
@@ -833,7 +887,7 @@ private fun PhoneRuntimeScreen(
                                 runPackages.forEachIndexed { index, runPackage ->
                                     val activeSession = PhoneRunSession(
                                         packageId = runPackage.packageId,
-                                        participantMetadata = phoneParticipantMetadata(runPackage, phoneAge, phoneHandedness, phoneGender, tactileThreshold),
+                                        participantMetadata = phoneParticipantMetadata(runPackage, phoneAge, phoneHandedness, phoneGender, tactileThreshold, hapticCalibration),
                                         hapticMetadata = hapticCapability,
                                         lslContract = runPackage.lsl,
                                         expectedCommandToken = pairing.token,
@@ -1496,6 +1550,63 @@ private fun ResponseTimingStrip(snapshot: RunnerSnapshot?) {
                     StatusChip("#${click.clickId} $rt")
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun HapticCalibrationControls(
+    hapticCapability: JSONObject,
+    calibrationSession: PhoneHapticCalibrationSession?,
+    calibrationStatus: String,
+    enabled: Boolean,
+    onStart: () -> Unit,
+    onPulse: (PhoneHapticCalibrationSession) -> Unit,
+    onResponse: (Boolean) -> Unit,
+) {
+    val hasVibrator = hapticCapability.optBoolean("has_vibrator", false)
+    val hasAmplitudeControl = hapticCapability.optBoolean("has_amplitude_control", false)
+    val current = calibrationSession
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text("Haptic Calibration", style = MaterialTheme.typography.titleSmall)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            OutlinedButton(
+                onClick = onStart,
+                enabled = enabled && hasVibrator,
+            ) {
+                Text(if (current == null) "Start" else "Restart")
+            }
+            Button(
+                onClick = { current?.let(onPulse) },
+                enabled = enabled && current != null && !current.isComplete,
+            ) {
+                Text(
+                    if (current == null) {
+                        "Pulse"
+                    } else if (hasAmplitudeControl) {
+                        "Pulse ${current.currentThresholdPercent}%"
+                    } else {
+                        "Pulse"
+                    },
+                )
+            }
+            OutlinedButton(
+                onClick = { onResponse(false) },
+                enabled = enabled && current != null && !current.isComplete,
+            ) {
+                Text("Not Felt")
+            }
+            Button(
+                onClick = { onResponse(true) },
+                enabled = enabled && current != null && !current.isComplete,
+            ) {
+                Text("Felt")
+            }
+        }
+        if (calibrationStatus.isNotBlank()) {
+            Text(calibrationStatus, style = MaterialTheme.typography.labelMedium)
+        } else if (!hasVibrator) {
+            Text("No vibrator", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.error)
         }
     }
 }
@@ -2357,8 +2468,10 @@ private class PhoneRunSession(
     fun vibrationAmplitude(): Int {
         if (!hapticMetadata.optBoolean("has_amplitude_control", false)) return VibrationEffect.DEFAULT_AMPLITUDE
         val threshold = participantMetadata.optDouble("tactile_threshold_percent", Double.NaN)
+            .takeIf { it.isFinite() && it > 0.0 }
+            ?: hapticMetadata.optDouble("recommended_threshold_percent", Double.NaN)
         if (threshold.isNaN() || threshold.isInfinite() || threshold <= 0.0) return VibrationEffect.DEFAULT_AMPLITUDE
-        return ((threshold.coerceIn(1.0, 100.0) / 100.0) * 255.0).roundToInt().coerceIn(1, 255)
+        return phoneHapticAmplitudeFromPercent(threshold, hasAmplitudeControl = true)
     }
 
     @Synchronized
@@ -2765,8 +2878,10 @@ private fun phoneParticipantMetadata(
     handedness: String,
     gender: String,
     tactileThreshold: String,
-): JSONObject =
-    JSONObject()
+    hapticCalibration: JSONObject? = null,
+): JSONObject {
+    val source = if (hapticCalibration != null) "android_haptic_calibration" else "manual_entry"
+    val payload = JSONObject()
         .put("schema", "pps-android-phone-participant-metadata.v1")
         .put("participant_id", runPackage.participantId)
         .put("session_id", runPackage.sessionId)
@@ -2777,19 +2892,35 @@ private fun phoneParticipantMetadata(
         .put("handedness", handedness)
         .put("gender", gender)
         .put("tactile_threshold_percent", tactileThreshold)
+        .put("tactile_threshold_source", source)
         .put("stream_privacy", "metadata_payload_only")
+    if (hapticCalibration != null) {
+        payload
+            .put("tactile_threshold_calibration_schema", hapticCalibration.optString("schema", PHONE_HAPTIC_CALIBRATION_SCHEMA))
+            .put("tactile_threshold_calibration_status", hapticCalibration.optString("status", ""))
+    }
+    return payload
+}
 
-private fun phoneHapticCapability(context: Context): JSONObject {
+private fun phoneHapticCapability(context: Context, hapticCalibration: JSONObject? = null): JSONObject {
     val vibrator = resolveVibrator(context)
     val hasVibrator = vibrator?.hasVibrator() == true
     val hasAmplitude = hasVibrator && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && vibrator?.hasAmplitudeControl() == true
-    return JSONObject()
+    val payload = JSONObject()
         .put("schema", "pps-android-haptic-capability.v1")
         .put("has_vibrator", hasVibrator)
         .put("has_amplitude_control", hasAmplitude)
         .put("calibration_policy", if (hasAmplitude) "amplitude_percent_supported" else "binary_detection_only")
         .put("device_model", Build.MODEL ?: "")
         .put("android_sdk", Build.VERSION.SDK_INT)
+    if (hapticCalibration != null) {
+        payload
+            .put("calibration_result", JSONObject(hapticCalibration.toString()))
+            .put("calibration_status", hapticCalibration.optString("status", ""))
+            .put("recommended_threshold_percent", hapticCalibration.opt("recommended_threshold_percent"))
+            .put("recommended_amplitude", hapticCalibration.optInt("recommended_amplitude", PHONE_HAPTIC_DEFAULT_AMPLITUDE))
+    }
+    return payload
 }
 
 private fun resolveVibrator(context: Context): Vibrator? =

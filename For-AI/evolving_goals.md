@@ -166,6 +166,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   button-press commands over native LSL, polls for matching
   `PPSCommandAcksV1` samples, and records native send/ack outcomes in each
   outbox row. Default builds remain `local_controller_outbox_only`.
+- Android phone-owned mode now includes a device-limited phone-vibrator
+  calibration workflow. `PhoneHapticCalibration.kt` runs an ascending
+  perceptual threshold check over fixed percent levels when Android reports
+  amplitude control, records binary detection-only status otherwise, writes
+  `pps-android-phone-haptic-calibration.v1` into haptic metadata/artifacts,
+  copies the recommended percent into participant metadata with
+  `tactile_threshold_source=android_haptic_calibration`, and uses the mapped
+  amplitude for phone vibration cues. This is a phone-vibrator working
+  threshold only, not Woojer/physical vibration timing evidence.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only
