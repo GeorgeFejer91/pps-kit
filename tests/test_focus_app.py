@@ -25,6 +25,7 @@ from peripersonal_space_toolkit.output_layout import (
     output_runner_logs_dir,
 )
 from peripersonal_space_toolkit.session_runner import RUN_PACKAGE_SCHEMA, SessionCaptureOptions, load_run_package
+from peripersonal_space_toolkit.tactile_calibration.schema import CALIBRATION_SCHEMA, PROTOCOL_NAME
 
 
 def _write_minimal_session_manifest(
@@ -644,7 +645,7 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert not window.participant_increment_button.isEnabled()
     assert not window.participant_decrement_button.isEnabled()
     assert window.participant_status_summary_label.objectName() == "participantLedgerSummary"
-    assert "P001: setup not saved; tactile not calibrated; data not collected" in window.participant_status_summary_label.text()
+    assert "P001: setup not saved; tactile threshold not calibrated; data not collected" in window.participant_status_summary_label.text()
     assert "unlock start controls" in window.setup_status_label.text()
     assert not window.part_buttons["1"].isEnabled()
     assert not window.part_buttons["2"].isEnabled()
@@ -670,6 +671,7 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert window.test_audio_button.objectName() == "testAudioOutputButton"
     assert window.test_tactile_button.objectName() == "testTactileOutputButton"
     assert window.tactile_calibration_button.objectName() == "tactileCalibrationButton"
+    assert "Threshold" in window.tactile_calibration_button.text()
     assert not window.output_12_volume_slider.isEnabled()
     assert not window.output_34_volume_slider.isEnabled()
     assert not window.test_audio_button.isEnabled()
@@ -1227,7 +1229,7 @@ def test_focus_mode_participant_setup_ledger_restores_submitted_fields(tmp_path:
     assert restored.handedness_combo.currentData() == "right"
     assert restored.gender_combo.currentData() == "male"
     assert restored.include_name_lsl_checkbox.isChecked()
-    assert "P001: setup saved; tactile not calibrated; data not collected" in restored.participant_status_summary_label.text()
+    assert "P001: setup saved; tactile threshold not calibrated; data not collected" in restored.participant_status_summary_label.text()
     restored.dialog.close()
 
 
@@ -1248,14 +1250,16 @@ def test_focus_mode_loads_participant_tactile_calibration_into_output_field(tmp_
         participant_id="P001",
         timestamp="20260626_130000",
         report={
-            "schema": "pps-tactile-calibration.v1",
+            "schema": CALIBRATION_SCHEMA,
             "participant_id": "P001",
             "created_at": "2026-06-26T13:00:00",
-            "protocol": "quick_reliable_working_level.v1",
+            "protocol": PROTOCOL_NAME,
             "accepted": True,
             "status": "accepted",
             "final_output_34_percent": 42.5,
-            "validation_hit_rate": 5 / 6,
+            "detection_threshold_output_34_percent": 42.5,
+            "recommended_output_34_percent": 42.5,
+            "validation_hit_rate": 1.0,
             "validation_false_alarm_rate": 0.0,
         },
         trials=[],
@@ -1281,9 +1285,10 @@ def test_focus_mode_loads_participant_tactile_calibration_into_output_field(tmp_
 
     assert window.output_34_volume_percent == pytest.approx(42.5)
     assert window.output_34_volume_percent_box.value() == pytest.approx(42.5)
-    assert "tactile 42.5%" in window.participant_status_summary_label.text()
+    assert "tactile threshold 42.5%" in window.participant_status_summary_label.text()
     metadata = window._runner_metadata()
     assert metadata["tactile_calibration"]["final_output_34_percent"] == pytest.approx(42.5)
+    assert metadata["tactile_calibration"]["recommended_output_34_percent"] == pytest.approx(42.5)
 
     _fill_required_setup(window)
     assert window._submit_participant_setup()
@@ -1337,6 +1342,22 @@ def test_focus_mode_calibration_clicks_do_not_reach_trial_response_logger(tmp_pa
     response = window._tactile_calibration_collector.wait_for_response(until_perf=now + 0.1)
     assert response is not None
     assert fake_controller.logged == []
+
+    now = time.perf_counter()
+    window._tactile_calibration_collector.start_trial(
+        trial_index=2,
+        phase="confirmation",
+        level_percent=35.0,
+        is_catch=False,
+        estimated_onset_perf=now - 0.2,
+        valid_start_perf=now - 0.1,
+        valid_end_perf=now + 1.0,
+    )
+    window._handle_global_response_mouse_click(123, 456)
+
+    global_response = window._tactile_calibration_collector.wait_for_response(until_perf=now + 0.1)
+    assert global_response is not None
+    assert fake_controller.logged == []
     window.dialog.close()
 
 
@@ -1357,22 +1378,32 @@ def test_focus_mode_calibrate_tactile_button_click_saves_and_applies_value(tmp_p
         def run(self):
             return {
                 "report": {
-                    "schema": "pps-tactile-calibration.v1",
+                    "schema": CALIBRATION_SCHEMA,
                     "participant_id": self.kwargs["participant_id"],
                     "created_at": "2026-06-26T15:00:00",
                     "completed_at": "2026-06-26T15:00:02",
-                    "protocol": "quick_reliable_working_level.v1",
+                    "protocol": PROTOCOL_NAME,
                     "accepted": True,
                     "status": "accepted",
-                    "message": "Accepted tactile Output 3/4 level 35%.",
+                    "message": "Accepted tactile detection threshold at Output 3/4 level 35%.",
                     "final_output_34_percent": 35.0,
-                    "validation_hit_rate": 5 / 6,
+                    "detection_threshold_output_34_percent": 35.0,
+                    "recommended_output_34_percent": 35.0,
+                    "confirmation_summary": {
+                        "hits": 10,
+                        "signal_trials": 10,
+                        "false_alarms": 0,
+                        "catch_trials": 3,
+                        "hit_rate": 1.0,
+                        "false_alarm_rate": 0.0,
+                    },
+                    "validation_hit_rate": 1.0,
                     "validation_false_alarm_rate": 0.0,
                 },
                 "trials": [
                     {
                         "trial_index": 1,
-                        "phase": "validation",
+                        "phase": "confirmation",
                         "level_percent": 35.0,
                         "is_catch": False,
                         "valid_response": True,
@@ -1411,7 +1442,8 @@ def test_focus_mode_calibrate_tactile_button_click_saves_and_applies_value(tmp_p
     latest = load_latest_calibration(tmp_path, "P001")
     assert latest is not None
     assert latest["final_output_34_percent"] == pytest.approx(35.0)
-    assert "tactile calibration accepted" in window.event_label.text()
+    assert latest["recommended_output_34_percent"] == pytest.approx(35.0)
+    assert "tactile threshold accepted" in window.event_label.text()
     window.dialog.close()
 
 
@@ -1676,13 +1708,15 @@ def test_focus_mode_participant_dropdown_switches_loaded_package(tmp_path: Path,
         participant_id="P002",
         timestamp="20260626_140000",
         report={
-            "schema": "pps-tactile-calibration.v1",
+            "schema": CALIBRATION_SCHEMA,
             "participant_id": "P002",
             "created_at": "2026-06-26T14:00:00",
-            "protocol": "quick_reliable_working_level.v1",
+            "protocol": PROTOCOL_NAME,
             "accepted": True,
             "status": "accepted",
             "final_output_34_percent": 55.0,
+            "detection_threshold_output_34_percent": 55.0,
+            "recommended_output_34_percent": 55.0,
             "validation_hit_rate": 1.0,
             "validation_false_alarm_rate": 0.0,
         },
@@ -1746,7 +1780,7 @@ def test_focus_mode_participant_dropdown_switches_loaded_package(tmp_path: Path,
     assert window.participant_decrement_button.isEnabled()
     assert not window.participant_increment_button.isEnabled()
     assert window.output_34_volume_percent == pytest.approx(55.0)
-    assert "P002: setup not saved; tactile 55%; data collected" in window.participant_status_summary_label.text()
+    assert "P002: setup not saved; tactile threshold 55%; data collected" in window.participant_status_summary_label.text()
     assert window.progress_label.text() == "Waiting to start"
     window.dialog.close()
 

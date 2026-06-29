@@ -14,6 +14,15 @@ from peripersonal_space_toolkit.tactile_calibration.persistence import (
     sanitize_participant_id,
 )
 from peripersonal_space_toolkit.tactile_calibration.protocol import TactileCalibrationRunner
+from peripersonal_space_toolkit.tactile_calibration.schema import (
+    CALIBRATION_SCHEMA,
+    CONFIRMATION_CATCH_TRIALS,
+    CONFIRMATION_SIGNAL_TRIALS,
+    INTER_TRIAL_INTERVAL_MAX_MS,
+    INTER_TRIAL_INTERVAL_MIN_MS,
+    LATEST_CALIBRATION_SCHEMA,
+    PROTOCOL_NAME,
+)
 from peripersonal_space_toolkit.tactile_calibration.stimulus import write_calibration_trial_wav
 
 
@@ -23,14 +32,16 @@ DEFAULT_TACTILE_CUE = REPO_ROOT / "assets" / "tactile" / "default_tactile_cue.wa
 
 def test_calibration_persistence_latest_success_only(tmp_path: Path):
     report = {
-        "schema": "pps-tactile-calibration.v1",
+        "schema": CALIBRATION_SCHEMA,
         "participant_id": "P001",
         "created_at": "2026-06-26T12:00:00",
-        "protocol": "quick_reliable_working_level.v1",
+        "protocol": PROTOCOL_NAME,
         "accepted": True,
         "status": "accepted",
         "final_output_34_percent": 35.0,
-        "validation_hit_rate": 5 / 6,
+        "detection_threshold_output_34_percent": 35.0,
+        "recommended_output_34_percent": 35.0,
+        "validation_hit_rate": 1.0,
         "validation_false_alarm_rate": 0.0,
     }
     paths = save_calibration_attempt(
@@ -103,9 +114,9 @@ class _FakeAudioEngine:
 
 
 class _ScriptedCollector:
-    def __init__(self, *, search_detect_at: float | None, validation_pass_at: float | None, false_alarm: bool = False):
+    def __init__(self, *, search_detect_at: float | None, confirmation_pass_at: float | None, false_alarm: bool = False):
         self.search_detect_at = search_detect_at
-        self.validation_pass_at = validation_pass_at
+        self.confirmation_pass_at = confirmation_pass_at
         self.false_alarm = false_alarm
         self.current: dict[str, object] = {}
 
@@ -119,10 +130,10 @@ class _ScriptedCollector:
         should_click = False
         if phase == "search" and self.search_detect_at is not None:
             should_click = level >= self.search_detect_at
-        elif phase == "validation" and is_catch:
+        elif phase == "confirmation" and is_catch:
             should_click = self.false_alarm
-        elif phase == "validation" and self.validation_pass_at is not None:
-            should_click = level >= self.validation_pass_at
+        elif phase == "confirmation" and self.confirmation_pass_at is not None:
+            should_click = level >= self.confirmation_pass_at
         if not should_click:
             return None
         onset = float(self.current.get("estimated_onset_perf") or 0.0)
@@ -150,30 +161,53 @@ def _run_protocol(tmp_path: Path, collector: _ScriptedCollector) -> dict:
     return runner.run()
 
 
-def test_tactile_calibration_protocol_accepts_lowest_validated_level(tmp_path: Path):
-    result = _run_protocol(tmp_path, _ScriptedCollector(search_detect_at=25.0, validation_pass_at=25.0))
+def test_tactile_calibration_protocol_accepts_lowest_confirmed_threshold(tmp_path: Path):
+    result = _run_protocol(tmp_path, _ScriptedCollector(search_detect_at=25.0, confirmation_pass_at=25.0))
 
     report = result["report"]
     assert report["accepted"] is True
+    assert report["protocol"] == PROTOCOL_NAME
     assert report["final_output_34_percent"] == pytest.approx(25.0)
-    assert report["validation_summary"]["hits"] == 6
-    assert report["validation_summary"]["false_alarms"] == 0
-    assert any(trial["phase"] == "practice" for trial in result["trials"])
+    assert report["detection_threshold_output_34_percent"] == pytest.approx(25.0)
+    assert report["recommended_output_34_percent"] == pytest.approx(25.0)
+    assert report["confirmation_summary"]["hits"] == CONFIRMATION_SIGNAL_TRIALS
+    assert report["confirmation_summary"]["false_alarms"] == 0
+    assert report["timing"]["inter_trial_interval_min_ms"] == pytest.approx(INTER_TRIAL_INTERVAL_MIN_MS)
+    assert report["timing"]["inter_trial_interval_max_ms"] == pytest.approx(INTER_TRIAL_INTERVAL_MAX_MS)
+    assert any(trial["phase"] == "familiarization" for trial in result["trials"])
+    jittered = [trial["inter_trial_interval_ms"] for trial in result["trials"] if trial["phase"] == "confirmation"]
+    assert jittered
+    assert all(INTER_TRIAL_INTERVAL_MIN_MS <= float(value) <= INTER_TRIAL_INTERVAL_MAX_MS for value in jittered)
 
 
-def test_tactile_calibration_protocol_escalates_after_failed_validation(tmp_path: Path):
-    result = _run_protocol(tmp_path, _ScriptedCollector(search_detect_at=12.0, validation_pass_at=18.0))
+def test_tactile_calibration_protocol_escalates_after_failed_confirmation(tmp_path: Path):
+    result = _run_protocol(tmp_path, _ScriptedCollector(search_detect_at=12.0, confirmation_pass_at=18.0))
 
     report = result["report"]
     assert report["accepted"] is True
     assert report["final_output_34_percent"] == pytest.approx(18.0)
-    validation_levels = [trial["level_percent"] for trial in result["trials"] if trial["phase"] == "validation"]
-    assert 12.0 in validation_levels
-    assert 18.0 in validation_levels
+    confirmation_levels = [trial["level_percent"] for trial in result["trials"] if trial["phase"] == "confirmation"]
+    assert 12.0 in confirmation_levels
+    assert 18.0 in confirmation_levels
+    assert report["candidate_summaries"][0]["hits"] == 0
+    assert report["candidate_summaries"][1]["hits"] == CONFIRMATION_SIGNAL_TRIALS
+
+
+def test_tactile_calibration_protocol_rejects_false_alarm_bias(tmp_path: Path):
+    result = _run_protocol(
+        tmp_path,
+        _ScriptedCollector(search_detect_at=18.0, confirmation_pass_at=18.0, false_alarm=True),
+    )
+
+    report = result["report"]
+    assert report["accepted"] is False
+    assert report["status"] == "invalid_false_alarm"
+    assert report["final_output_34_percent"] == ""
+    assert report["confirmation_summary"]["false_alarms"] == CONFIRMATION_CATCH_TRIALS
 
 
 def test_tactile_calibration_protocol_fails_without_any_search_detection(tmp_path: Path):
-    result = _run_protocol(tmp_path, _ScriptedCollector(search_detect_at=None, validation_pass_at=None))
+    result = _run_protocol(tmp_path, _ScriptedCollector(search_detect_at=None, confirmation_pass_at=None))
 
     report = result["report"]
     assert report["accepted"] is False
@@ -183,13 +217,21 @@ def test_tactile_calibration_protocol_fails_without_any_search_detection(tmp_pat
 
 def test_latest_calibration_json_is_small_summary(tmp_path: Path):
     report = {
-        "schema": "pps-tactile-calibration.v1",
+        "schema": CALIBRATION_SCHEMA,
         "participant_id": "P002",
         "created_at": "2026-06-26T12:00:00",
-        "protocol": "quick_reliable_working_level.v1",
+        "protocol": PROTOCOL_NAME,
         "accepted": True,
         "status": "accepted",
         "final_output_34_percent": 50.0,
+        "detection_threshold_output_34_percent": 50.0,
+        "recommended_output_34_percent": 50.0,
+        "confirmation_summary": {
+            "hits": CONFIRMATION_SIGNAL_TRIALS,
+            "signal_trials": CONFIRMATION_SIGNAL_TRIALS,
+            "false_alarms": 0,
+            "catch_trials": CONFIRMATION_CATCH_TRIALS,
+        },
         "validation_hit_rate": 1.0,
         "validation_false_alarm_rate": 0.0,
         "extra_verbose": {"not": "copied"},
@@ -197,6 +239,8 @@ def test_latest_calibration_json_is_small_summary(tmp_path: Path):
     save_calibration_attempt(output_root=tmp_path, participant_id="P002", report=report, trials=[], timestamp="t")
 
     latest_payload = json.loads(latest_calibration_path(tmp_path, "P002").read_text(encoding="utf-8"))
-    assert latest_payload["schema"] == "pps-tactile-calibration-latest.v1"
+    assert latest_payload["schema"] == LATEST_CALIBRATION_SCHEMA
     assert latest_payload["final_output_34_percent"] == 50.0
+    assert latest_payload["recommended_output_34_percent"] == 50.0
+    assert latest_payload["confirmation_hits"] == CONFIRMATION_SIGNAL_TRIALS
     assert "extra_verbose" not in latest_payload

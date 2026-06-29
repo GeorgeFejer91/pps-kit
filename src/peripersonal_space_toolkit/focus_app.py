@@ -180,6 +180,8 @@ from .profile_memory import (
 )
 from .runtime_paths import repo_root
 from .tactile_calibration import (
+    CALIBRATION_SCHEMA,
+    PROTOCOL_NAME as TACTILE_CALIBRATION_PROTOCOL_NAME,
     TactileCalibrationRunner,
     load_latest_calibration,
     save_calibration_attempt,
@@ -7524,7 +7526,8 @@ class _FocusTactileCalibrationCollector:
                     "valid_response": True,
                 }
                 self._condition.notify_all()
-            return True
+                return True
+            return False
 
     def wait_for_response(self, *, until_perf: float) -> dict[str, Any] | None:
         with self._condition:
@@ -7619,6 +7622,7 @@ class FocusModeWindow:
         self._tactile_calibration_active = False
         self._tactile_calibration_worker: threading.Thread | None = None
         self._tactile_calibration_cancel_event: threading.Event | None = None
+        self._tactile_calibration_started_global_listener = False
         self._tactile_calibration_collector = _FocusTactileCalibrationCollector()
         self._latest_tactile_calibration: dict[str, Any] = {}
         self._timeline_perf_anchor: float | None = None
@@ -7854,13 +7858,15 @@ class FocusModeWindow:
         self.test_tactile_button.setObjectName("testTactileOutputButton")
         self.test_tactile_button.setToolTip("Play four standardized tactile pulses one second apart through output 3, mirrored to output 4, using the current Output 3/4 level.")
         self.test_tactile_button.clicked.connect(lambda _checked=False: self._run_output_test("tactile"))
-        self.tactile_calibration_button = q["QPushButton"]("Calibrate Tactile")
+        self.tactile_calibration_button = q["QPushButton"]("Tactile Threshold")
         self.tactile_calibration_button.setObjectName("tactileCalibrationButton")
-        self.tactile_calibration_button.setToolTip("Run a quick participant-specific tactile calibration and apply the accepted Output 3/4 level.")
+        self.tactile_calibration_button.setToolTip(
+            "Run the participant-specific tactile detection-threshold assay. Verbally instruct the participant to press the mouse whenever a tactile pulse is felt."
+        )
         self.tactile_calibration_button.clicked.connect(lambda _checked=False: self._run_tactile_calibration())
         output_test_controls.addWidget(self.test_audio_button, 0, 0)
         output_test_controls.addWidget(self.test_tactile_button, 0, 1)
-        output_test_controls.addWidget(self.tactile_calibration_button, 1, 1)
+        output_test_controls.addWidget(self.tactile_calibration_button, 1, 0, 1, 2)
         output_levels_layout.addLayout(output_test_controls)
         self._pre_run_controls.append(self.tactile_calibration_button)
 
@@ -8380,9 +8386,23 @@ class FocusModeWindow:
             "status",
             "created_at",
             "protocol",
+            "threshold_method",
+            "threshold_definition",
             "final_output_34_percent",
+            "detection_threshold_output_34_percent",
+            "recommended_output_34_percent",
+            "confirmation_level_output_34_percent",
+            "confirmation_hits",
+            "confirmation_signal_trials",
+            "catch_false_alarms",
+            "catch_trials",
+            "confirmation_hit_rate",
+            "confirmation_false_alarm_rate",
             "validation_hit_rate",
             "validation_false_alarm_rate",
+            "trial_count",
+            "timing",
+            "confirmation_criteria",
             "report_path",
             "trials_csv_path",
             "latest_path",
@@ -8396,9 +8416,10 @@ class FocusModeWindow:
             self._latest_tactile_calibration = {}
             return False
         self._latest_tactile_calibration = dict(latest)
-        self._set_output_volume("output_3_4", float(latest["final_output_34_percent"]))
+        percent = float(latest.get("recommended_output_34_percent", latest["final_output_34_percent"]))
+        self._set_output_volume("output_3_4", percent)
         if show_message and hasattr(self, "event_label"):
-            self.event_label.setText(f"{participant}: loaded tactile calibration {float(latest['final_output_34_percent']):g}%")
+            self.event_label.setText(f"{participant}: loaded tactile threshold {percent:g}%")
         return True
 
     def _refresh_companion_panel(self) -> None:
@@ -9100,6 +9121,17 @@ class FocusModeWindow:
         except Exception:
             pass
 
+    def _start_tactile_calibration_response_listener(self) -> None:
+        with self._global_response_click_listener_lock:
+            already_running = self._global_response_click_listener is not None
+        started = self._start_global_response_click_listener()
+        self._tactile_calibration_started_global_listener = bool(started and not already_running)
+
+    def _stop_tactile_calibration_response_listener(self) -> None:
+        if self._tactile_calibration_started_global_listener:
+            self._stop_global_response_click_listener()
+        self._tactile_calibration_started_global_listener = False
+
     def _object_is_target_button(self, watched: Any) -> bool:
         current = watched
         while current is not None:
@@ -9286,6 +9318,22 @@ class FocusModeWindow:
         )
 
     def _handle_global_response_mouse_click(self, x: Any, y: Any) -> None:
+        if self._tactile_calibration_active:
+            clean_x, clean_y = self._normalize_response_click_xy(x, y)
+            in_target = self._cached_target_contains_global_xy(clean_x, clean_y)
+            if self._tactile_calibration_collector.record_click(in_target=True):
+                self.messages.put(
+                    (
+                        "tactile_calibration_click",
+                        {
+                            "x": "" if clean_x is None else clean_x,
+                            "y": "" if clean_y is None else clean_y,
+                            "in_target": in_target,
+                            "source": "global_mouse_listener",
+                        },
+                    )
+                )
+            return
         if not self._run_active or self.controller is None or self.pending_instruction_request is not None:
             return
         clean_x, clean_y = self._normalize_response_click_xy(x, y)
@@ -10190,9 +10238,10 @@ class FocusModeWindow:
         setup_text = "setup saved" if self._participant_ledger_entry_for(selected) else "setup not saved"
         calibration = load_latest_calibration(self.output_root, selected)
         if calibration:
-            calibration_text = f"tactile {float(calibration['final_output_34_percent']):g}%"
+            percent = float(calibration.get("recommended_output_34_percent", calibration["final_output_34_percent"]))
+            calibration_text = f"tactile threshold {percent:g}%"
         else:
-            calibration_text = "tactile not calibrated"
+            calibration_text = "tactile threshold not calibrated"
         data_text = self._participant_data_summary(status)
         collected_others = [
             participant
@@ -10813,21 +10862,21 @@ class FocusModeWindow:
     def _run_tactile_calibration(self) -> bool:
         if not self._tactile_calibration_allowed():
             if self.demographics_submitted or self.controller is not None:
-                self.event_label.setText("Tactile calibration is available before participant setup is submitted.")
+                self.event_label.setText("Tactile threshold assay is available before participant setup is submitted.")
             elif self._output_test_active:
-                self.event_label.setText("Wait for the current output test before calibrating tactile output.")
+                self.event_label.setText("Wait for the current output test before running the tactile threshold assay.")
             elif self._tactile_calibration_active:
-                self.event_label.setText("Tactile calibration is already running.")
+                self.event_label.setText("Tactile threshold assay is already running.")
             else:
-                self.event_label.setText("Tactile calibration is available before playback starts.")
+                self.event_label.setText("Tactile threshold assay is available before playback starts.")
             return False
         try:
             engine = self._output_test_engine()
         except Exception as exc:
-            self.event_label.setText(f"Tactile calibration could not initialize audio: {exc}")
+            self.event_label.setText(f"Tactile threshold assay could not initialize audio: {exc}")
             return False
         if engine is None:
-            self.event_label.setText("Tactile calibration could not initialize audio.")
+            self.event_label.setText("Tactile threshold assay could not initialize audio.")
             return False
         participant = self._selected_participant_code() or self.package.participant_id
         cancel_event = threading.Event()
@@ -10835,7 +10884,11 @@ class FocusModeWindow:
         self._tactile_calibration_active = True
         self._set_output_test_buttons_enabled(False)
         self.target_button.setEnabled(True)
-        self.event_label.setText("Tactile calibration running: click the target only when vibration is felt.")
+        self._refresh_target_global_bounds()
+        self._start_tactile_calibration_response_listener()
+        self.event_label.setText(
+            "Tactile threshold assay running: instruct participant to press the mouse when a tactile pulse is felt."
+        )
         playback_before = self._output_channel_volume_payload()
         output_12_percent = self.output_12_volume_percent
         _append_output_diary_event(
@@ -10844,7 +10897,7 @@ class FocusModeWindow:
             participant_id=participant,
             capture_options=self.capture_options.as_dict(),
             payload={
-                "protocol": "quick_reliable_working_level.v1",
+                "protocol": TACTILE_CALIBRATION_PROTOCOL_NAME,
                 "playback_output_levels_before": playback_before,
             },
             create=True,
@@ -10856,15 +10909,17 @@ class FocusModeWindow:
         def _failure_report(message: str) -> dict[str, Any]:
             now = datetime.now().isoformat(timespec="seconds")
             return {
-                "schema": "pps-tactile-calibration.v1",
+                "schema": CALIBRATION_SCHEMA,
                 "participant_id": participant,
                 "created_at": now,
                 "completed_at": now,
-                "protocol": "quick_reliable_working_level.v1",
+                "protocol": TACTILE_CALIBRATION_PROTOCOL_NAME,
                 "accepted": False,
                 "status": "failed",
                 "message": message,
                 "final_output_34_percent": "",
+                "detection_threshold_output_34_percent": "",
+                "recommended_output_34_percent": "",
                 "validation_hit_rate": "",
                 "validation_false_alarm_rate": "",
                 "output_root": str(self.output_root),
@@ -10895,7 +10950,9 @@ class FocusModeWindow:
                 trials = [] if runner is None else [dict(trial) for trial in runner.trials]
             if bool(report.get("accepted")):
                 try:
-                    final_percent = float(report.get("final_output_34_percent"))
+                    final_percent = float(
+                        report.get("recommended_output_34_percent", report.get("final_output_34_percent"))
+                    )
                 except (TypeError, ValueError):
                     final_percent = self.output_34_volume_percent
                 report["playback_output_levels_after"] = _output_channel_volume_payload(output_12_percent, final_percent)
@@ -10912,7 +10969,7 @@ class FocusModeWindow:
             except Exception as exc:
                 report["accepted"] = False
                 report["status"] = "failed"
-                report["message"] = f"{report.get('message') or 'Calibration failed'}; could not save artifacts: {exc}"
+                report["message"] = f"{report.get('message') or 'Threshold assay failed'}; could not save artifacts: {exc}"
                 path_payload = {}
             self.messages.put(
                 (
@@ -10931,12 +10988,13 @@ class FocusModeWindow:
         return True
 
     def _handle_tactile_calibration_progress(self, payload: dict[str, Any]) -> None:
-        message = str(payload.get("message") or "Tactile calibration running")
+        message = str(payload.get("message") or "Tactile threshold assay running")
         self.event_label.setText(message)
 
     def _handle_tactile_calibration_done(self, payload: dict[str, Any]) -> None:
         self._tactile_calibration_active = False
         self._tactile_calibration_cancel_event = None
+        self._stop_tactile_calibration_response_listener()
         self._tactile_calibration_collector.finish_trial()
         self.target_button.setEnabled(False)
         self._set_output_level_controls_enabled(bool(self.demographics_submitted))
@@ -10946,16 +11004,16 @@ class FocusModeWindow:
         accepted = bool(report.get("accepted"))
         if accepted:
             try:
-                final_percent = float(report.get("final_output_34_percent"))
+                final_percent = float(report.get("recommended_output_34_percent", report.get("final_output_34_percent")))
             except (TypeError, ValueError):
                 final_percent = self.output_34_volume_percent
             self._set_output_volume("output_3_4", final_percent)
             latest = load_latest_calibration(self.output_root, participant)
             self._latest_tactile_calibration = dict(latest or {})
-            self.event_label.setText(f"{participant}: tactile calibration accepted at {final_percent:g}%")
+            self.event_label.setText(f"{participant}: tactile threshold accepted at {final_percent:g}%")
         else:
-            message = str(report.get("message") or "calibration did not pass")
-            self.event_label.setText(f"{participant}: tactile calibration failed - {message}")
+            message = str(report.get("message") or "threshold assay did not pass")
+            self.event_label.setText(f"{participant}: tactile threshold failed - {message}")
         self._refresh_participant_ledger_summary()
         _append_output_diary_event(
             "tactile_calibration_finished",
@@ -10967,6 +11025,10 @@ class FocusModeWindow:
                 "status": str(report.get("status") or ""),
                 "message": str(report.get("message") or ""),
                 "final_output_34_percent": report.get("final_output_34_percent", ""),
+                "detection_threshold_output_34_percent": report.get("detection_threshold_output_34_percent", ""),
+                "recommended_output_34_percent": report.get("recommended_output_34_percent", ""),
+                "confirmation_summary": _json_ready(report.get("confirmation_summary") or {}),
+                "timing": _json_ready(report.get("timing") or {}),
                 "report_path": str(paths.get("report_path") or report.get("report_path") or ""),
                 "trials_csv_path": str(paths.get("trials_csv_path") or report.get("trials_csv_path") or ""),
                 "latest_path": str(paths.get("latest_path") or ""),
@@ -11130,6 +11192,7 @@ class FocusModeWindow:
         cancel_event = getattr(self, "_tactile_calibration_cancel_event", None)
         if cancel_event is not None:
             cancel_event.set()
+        self._stop_tactile_calibration_response_listener()
         self._stop_companion_service()
         self._remove_response_click_filter()
         self._stop_global_response_click_listener()
@@ -11887,7 +11950,7 @@ class FocusModeWindow:
     def _click(self) -> None:
         if self._tactile_calibration_active:
             if self._tactile_calibration_collector.record_click(in_target=True):
-                self.event_label.setText("Tactile calibration click recorded.")
+                self.event_label.setText("Tactile threshold response recorded.")
             return
         if self.pending_instruction_request is not None:
             if self._part2_start_gate_pending():
@@ -12216,6 +12279,8 @@ class FocusModeWindow:
                     self._activate_response_target_window()
             elif kind == "response_click":
                 self._apply_response_click_to_ui(dict(payload))
+            elif kind == "tactile_calibration_click":
+                self.event_label.setText("Tactile threshold response recorded.")
             elif kind == "prewarm_progress":
                 self.prewarm_label.setText(f"Next {payload.get('participant_id')}: {payload.get('message')}")
             elif kind == "prewarm":

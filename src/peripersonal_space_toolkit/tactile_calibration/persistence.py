@@ -56,6 +56,9 @@ def _write_trials_csv(path: Path, trials: list[dict[str, Any]]) -> None:
 
 
 def _latest_payload(report: dict[str, Any], *, report_path: Path, trials_path: Path) -> dict[str, Any]:
+    recommended_percent = report.get("recommended_output_34_percent", report.get("final_output_34_percent", ""))
+    threshold_percent = report.get("detection_threshold_output_34_percent", recommended_percent)
+    confirmation_summary = dict(report.get("confirmation_summary") or report.get("validation_summary") or {})
     return {
         "schema": LATEST_CALIBRATION_SCHEMA,
         "participant_id": str(report.get("participant_id") or ""),
@@ -64,9 +67,26 @@ def _latest_payload(report: dict[str, Any], *, report_path: Path, trials_path: P
         "created_at": str(report.get("created_at") or ""),
         "updated_at": datetime.now().isoformat(timespec="seconds"),
         "protocol": str(report.get("protocol") or ""),
-        "final_output_34_percent": report.get("final_output_34_percent", ""),
+        "threshold_method": str(report.get("threshold_method") or ""),
+        "threshold_definition": str(report.get("threshold_definition") or ""),
+        "final_output_34_percent": recommended_percent,
+        "detection_threshold_output_34_percent": threshold_percent,
+        "recommended_output_34_percent": recommended_percent,
+        "confirmation_level_output_34_percent": report.get("confirmation_level_output_34_percent", threshold_percent),
+        "confirmation_hits": confirmation_summary.get("hits", ""),
+        "confirmation_signal_trials": confirmation_summary.get("signal_trials", ""),
+        "catch_false_alarms": confirmation_summary.get("false_alarms", ""),
+        "catch_trials": confirmation_summary.get("catch_trials", ""),
+        "confirmation_hit_rate": report.get("confirmation_hit_rate", report.get("validation_hit_rate", "")),
+        "confirmation_false_alarm_rate": report.get(
+            "confirmation_false_alarm_rate",
+            report.get("validation_false_alarm_rate", ""),
+        ),
         "validation_hit_rate": report.get("validation_hit_rate", ""),
         "validation_false_alarm_rate": report.get("validation_false_alarm_rate", ""),
+        "trial_count": report.get("trial_count", ""),
+        "timing": dict(report.get("timing") or {}),
+        "confirmation_criteria": dict(report.get("confirmation_criteria") or {}),
         "report_path": str(report_path),
         "trials_csv_path": str(trials_path),
         "run_setup_manifest_path": str(report.get("run_setup_manifest_path") or ""),
@@ -112,11 +132,18 @@ def load_latest_calibration(output_root: Path | str, participant_id: str | None)
     if not bool(payload.get("accepted")):
         return None
     try:
-        percent = float(payload.get("final_output_34_percent"))
+        percent = float(payload.get("recommended_output_34_percent", payload.get("final_output_34_percent")))
     except (TypeError, ValueError):
         return None
     if percent < 0.0 or percent > 100.0:
         return None
     payload["final_output_34_percent"] = percent
+    payload["recommended_output_34_percent"] = percent
+    try:
+        payload["detection_threshold_output_34_percent"] = float(
+            payload.get("detection_threshold_output_34_percent", percent)
+        )
+    except (TypeError, ValueError):
+        payload["detection_threshold_output_34_percent"] = percent
     payload["latest_path"] = str(path)
     return payload
