@@ -63,6 +63,12 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   to package ids, part-session ids, reconstruction hashes, local artifact
   filenames, command-diary counts, LSL status, and privacy-safe participant
   metadata summaries.
+- Completed phone-owned run folders now also write
+  `phone_owned_data_export.json` and an app-private `phone_owned_exports/`
+  snapshot. `1.Data_min/` contains a participant CSV and
+  `master_successful_participants.csv` with the same 17-column public schema as
+  the PC runner, while `2.Data_max/<participant>/runs/<run_id>/` mirrors the
+  rich reconstructive phone-run folder.
 - Controller-mode outboxes include `phone_controller_runtime_status.json`.
   Default builds record `current_android_source_behavior=local_controller_outbox_only`;
   native builds record `native_lsl_controller_with_local_outbox` when the
@@ -160,16 +166,18 @@ Required validation levels:
    `lsl_runtime_status.json`. Add `--expect-lightweight-materializations` for
    building-block-only `Send To Phone` runs; this requires one
    `phone_scheduled_block_materialization` event plus matching
-   `materialized_blocks/phone_materialized_block_XX.json` and WAV hash evidence
-   for every scheduled block. The same validator also accepts Controller-mode
-   `phone_controller_runtime_status.json` and
-   `phone_controller_command_outbox.jsonl` artifacts, plus PC-admin
-   `pc_android_lsl_admin_status.json` and
-   `pc_android_lsl_command_outbox.jsonl` artifacts from
-   `pps-android-lsl-command`, and PC-monitor
-   `pc_android_lsl_monitor_report.json` /
-   `pc_android_lsl_monitor_events.jsonl` artifacts from
-   `pps-android-lsl-monitor`.
+    `materialized_blocks/phone_materialized_block_XX.json` and WAV hash evidence
+    for every scheduled block. The same validator also accepts Controller-mode
+    `phone_controller_runtime_status.json` and
+    `phone_controller_command_outbox.jsonl` artifacts, PC-admin
+    `pc_android_lsl_admin_status.json` /
+    `pc_android_lsl_command_outbox.jsonl` artifacts from
+    `pps-android-lsl-command`, and PC-monitor
+    `pc_android_lsl_monitor_report.json` /
+    `pc_android_lsl_monitor_events.jsonl` artifacts from
+    `pps-android-lsl-monitor`. Add `--expect-phone-owned-data-export` for
+    completed phone-owned runs when the local `1.Data_min`/`2.Data_max` phone
+    export layer should be present.
 3. Emulator smoke test: install APK, run a phone-owned package, export ZIP, and
    validate `lsl_runtime_status.json`.
 4. Native LSL network test with the AAR/JNI integration: resolve Android

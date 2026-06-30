@@ -199,6 +199,12 @@ embedded `phone_response_ledger`, `phone_topup_plan.json`, the
 Strict lightweight scheduled-block validation automatically enables this check
 because building-block-only phone runs should prove both the scheduled-block
 fallback and the missed-trial rescue/top-up chain.
+For completed phone-owned participant exports, add
+`--expect-phone-owned-data-export`; this requires `phone_owned_data_export.json`,
+an app-private `phone_owned_exports/1.Data_min/` participant CSV plus
+`master_successful_participants.csv` with the same 17-column public schema used
+by the PC runner, and a `phone_owned_exports/2.Data_max/<participant>/runs/`
+copy of the reconstructive phone-run folder.
 When validating PC-runner or Controller-phone administration, add
 `--expect-command-acks`; for phone-run artifacts this now requires
 `command_diary.jsonl` or embedded `command_diary` rows with native
@@ -210,10 +216,12 @@ Phone-owned local artifacts now include `participant_metadata.json`,
 `phone_topup_plan.json`, `phone_topup_materialization.json`, any
 `phone_topup_block.wav`, reconstruction/package snapshots, and
 `completion.json` in the exported phone session ZIP. The exported ZIP also
-includes a snapshot of the app-private `phone_run_catalog/` tree when present,
-including the global `index.json`, participant `runs.jsonl`, and
-`latest_run.json` pointers used to reconstruct which phone-owned runs happened
-for each participant. The phone preserves the package `asset_strategy` across
+includes snapshots of the app-private `phone_run_catalog/` and
+`phone_owned_exports/` trees when present. The catalog snapshot includes the
+global `index.json`, participant `runs.jsonl`, and `latest_run.json` pointers
+used to reconstruct which phone-owned runs happened for each participant. The
+phone-owned export snapshot carries the minimal public CSV layer and the rich
+per-run backup mirror. The phone preserves the package `asset_strategy` across
 the parsed model, LSL runtime status, native LSL stream description metadata,
 reconstruction snapshot, and phone run catalog so a lightweight
 `trial_building_blocks_only` run can be distinguished from a prepared-block WAV

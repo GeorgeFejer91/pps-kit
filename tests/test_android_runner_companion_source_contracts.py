@@ -77,8 +77,11 @@ def test_android_phone_run_zip_exports_catalog_snapshot() -> None:
     main_activity = _source("MainActivity.kt")
 
     assert "addPhoneRunCatalogSnapshot(output, context.filesDir)" in main_activity
+    assert "addPhoneOwnedExportsSnapshot(output, context.filesDir)" in main_activity
     assert 'File(filesDir, "phone_run_catalog")' in main_activity
     assert 'addZipEntries(output, catalogRoot, "phone_run_catalog")' in main_activity
+    assert 'File(filesDir, "phone_owned_exports")' in main_activity
+    assert 'addZipEntries(output, exportRoot, "phone_owned_exports")' in main_activity
 
 
 def test_android_phone_run_writes_plain_event_diary() -> None:
@@ -88,3 +91,18 @@ def test_android_phone_run_writes_plain_event_diary() -> None:
     assert 'writePhoneEventsCsv(File(dir, "lsl_marker_mirror.csv"), lslMarkers)' in main_activity
     assert 'writePhoneTriggerCodesCsv(File(dir, "trigger_codes.csv"), lslMarkers)' in main_activity
     assert "private fun writePhoneTriggerCodesCsv" in main_activity
+
+
+def test_android_phone_run_writes_phone_owned_min_max_export() -> None:
+    main_activity = _source("MainActivity.kt")
+    catalog = _source("PhoneRunCatalog.kt")
+
+    assert 'PHONE_OWNED_DATA_EXPORT_SCHEMA = "pps-android-phone-owned-data-export.v1"' in catalog
+    assert 'File(filesDir, "phone_owned_exports")' in catalog
+    assert 'File(exportRoot, "1.Data_min")' in catalog
+    assert 'File(File(File(exportRoot, "2.Data_max"), participantId), "runs/$runId")' in catalog
+    assert '"master_successful_participants.csv"' in catalog
+    assert '"participant_id",' in catalog
+    assert '"reaction_time_ms",' in catalog
+    assert "writePhoneOwnedDataExport(" in main_activity
+    assert '.put("phone_owned_data_export_path", dataExport?.optString("artifact_path").orEmpty())' in main_activity

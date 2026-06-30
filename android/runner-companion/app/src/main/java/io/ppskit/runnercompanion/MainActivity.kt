@@ -2754,6 +2754,7 @@ private class PhoneRunSession(
         val topupPlanFile = File(dir, "phone_topup_plan.json")
         val topupMaterializationFile = File(dir, "phone_topup_materialization.json")
         val artifactFile = File(dir, if (complete) "completion.json" else "latest_events.json")
+        val dataExportArtifactFile = File(dir, "phone_owned_data_export.json")
         val topupMaterialization = if (complete && phoneTopupSkippedByStopAfterBlock) {
             JSONObject()
                 .put("schema", "pps-android-phone-topup-materialization.v1")
@@ -2829,6 +2830,13 @@ private class PhoneRunSession(
                     .put("filename", "phone_run_catalog_entry.json")
                     .put("schema", PHONE_RUN_CATALOG_ENTRY_SCHEMA),
             )
+            .put(
+                "phone_owned_data_export_artifact",
+                JSONObject()
+                    .put("filename", dataExportArtifactFile.name)
+                    .put("schema", PHONE_OWNED_DATA_EXPORT_SCHEMA)
+                    .put("written_when_complete", true),
+            )
             .put("lsl_runtime_status", JSONObject(lslRuntimeStatus.toString()))
             .put("events", eventsArray)
             .put("lsl_marker_mirror", JSONArray().also { array -> lslMarkers.forEach { array.put(JSONObject(it.toString())) } })
@@ -2853,6 +2861,17 @@ private class PhoneRunSession(
         File(dir, "participant_metadata.json").writeText(participantMetadata.toString(2), Charsets.UTF_8)
         File(dir, "haptic_capability.json").writeText(hapticMetadata.toString(2), Charsets.UTF_8)
         val catalogWrite = writePhoneRunCatalog(context.filesDir, dir, catalogEntry)
+        val dataExport = if (complete) {
+            writePhoneOwnedDataExport(
+                filesDir = context.filesDir,
+                runPackage = runPackage,
+                runDir = dir,
+                catalogEntry = catalogEntry,
+                responseLedgerRows = responseReview.ledgerRows,
+            )
+        } else {
+            null
+        }
         if (complete) closeNativeLslTransportLocked()
         return JSONObject()
             .put("schema", if (complete) "pps-mobile-run-complete.v1" else "pps-mobile-run-events.v1")
@@ -2871,6 +2890,10 @@ private class PhoneRunSession(
             .put("catalog_entry_path", catalogWrite.optString("entry_path"))
             .put("catalog_participant_runs_path", catalogWrite.optString("participant_runs_path"))
             .put("catalog_index_path", catalogWrite.optString("index_path"))
+            .put("phone_owned_data_export_path", dataExport?.optString("artifact_path").orEmpty())
+            .put("phone_owned_data_min_participant_csv", dataExport?.optString("data_min_participant_csv").orEmpty())
+            .put("phone_owned_data_min_master_csv", dataExport?.optString("data_min_master_successful_participants_csv").orEmpty())
+            .put("phone_owned_data_max_run_dir", dataExport?.optString("data_max_run_dir").orEmpty())
     }
 
     private fun currentBlockElapsedMs(): Long =
@@ -3341,6 +3364,7 @@ private fun exportPhoneRunZip(context: Context, runDir: File): File {
     ZipOutputStream(FileOutputStream(zip)).use { output ->
         addZipEntries(output, runDir, "")
         addPhoneRunCatalogSnapshot(output, context.filesDir)
+        addPhoneOwnedExportsSnapshot(output, context.filesDir)
     }
     return zip
 }
@@ -3349,6 +3373,13 @@ private fun addPhoneRunCatalogSnapshot(output: ZipOutputStream, filesDir: File) 
     val catalogRoot = File(filesDir, "phone_run_catalog")
     if (catalogRoot.isDirectory) {
         addZipEntries(output, catalogRoot, "phone_run_catalog")
+    }
+}
+
+private fun addPhoneOwnedExportsSnapshot(output: ZipOutputStream, filesDir: File) {
+    val exportRoot = File(filesDir, "phone_owned_exports")
+    if (exportRoot.isDirectory) {
+        addZipEntries(output, exportRoot, "phone_owned_exports")
     }
 }
 

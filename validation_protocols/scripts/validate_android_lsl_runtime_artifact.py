@@ -61,6 +61,7 @@ ANDROID_PHONE_RESPONSE_LEDGER_SCHEMA = "pps-android-phone-response-ledger.v1"
 ANDROID_PHONE_RESPONSE_SUMMARY_SCHEMA = "pps-android-phone-response-summary.v1"
 ANDROID_PHONE_TOPUP_PLAN_SCHEMA = "pps-android-phone-topup-plan.v1"
 ANDROID_PHONE_TOPUP_MATERIALIZATION_SCHEMA = "pps-android-phone-topup-materialization.v1"
+ANDROID_PHONE_OWNED_DATA_EXPORT_SCHEMA = "pps-android-phone-owned-data-export.v1"
 ANDROID_CONTROLLER_RUNTIME_STATUS_SCHEMA = "pps-android-controller-runtime-status.v1"
 ANDROID_CONTROLLER_COMMAND_ROW_SCHEMA = "pps-android-controller-command-row.v1"
 ANDROID_AUDIO_TIMING_STRATEGY = "audiotrack_pcm_wav_playback_head"
@@ -84,6 +85,25 @@ PHONE_TOPUP_MATERIALIZATION_STATUSES = {
     "not_evaluated",
     "skipped",
 }
+PHONE_DATA_MIN_FIELDNAMES = [
+    "participant_id",
+    "session_id",
+    "part_session_id",
+    "part_number",
+    "block_number",
+    "block_label",
+    "trial_number",
+    "trial_number_global",
+    "trial_uid",
+    "condition",
+    "phase",
+    "noise_type",
+    "trial_type",
+    "soa_ms",
+    "response_given",
+    "hit_miss",
+    "reaction_time_ms",
+]
 ANDROID_PHONE_EVENT_CODES = {
     "session_metadata": 8,
     "run_start": 1,
@@ -165,6 +185,12 @@ def validate_runtime_status(
     topup_plan: dict[str, Any] | None = None,
     topup_materialization: dict[str, Any] | None = None,
     topup_wav_hashes: dict[str, str] | None = None,
+    phone_owned_data_export: dict[str, Any] | None = None,
+    phone_data_min_header: list[str] | None = None,
+    phone_data_min_rows: list[dict[str, Any]] | None = None,
+    phone_data_min_master_header: list[str] | None = None,
+    phone_data_min_master_rows: list[dict[str, Any]] | None = None,
+    phone_data_max_has_completion: bool = False,
     expect_native_transport: bool = False,
     expect_command_acks: bool = False,
     expect_run_catalog: bool = False,
@@ -174,6 +200,7 @@ def validate_runtime_status(
     expect_lightweight_materializations: bool = False,
     expect_phone_topup_evidence: bool = False,
     expect_audiotrack_timing_evidence: bool = False,
+    expect_phone_owned_data_export: bool = False,
 ) -> AndroidLslValidationResult:
     failures: list[str] = []
     warnings: list[str] = []
@@ -315,6 +342,19 @@ def validate_runtime_status(
         failures=failures,
         warnings=warnings,
         expect_phone_topup_evidence=expect_phone_topup_evidence or expect_lightweight_materializations,
+    )
+    _validate_phone_owned_data_export(
+        export=phone_owned_data_export,
+        data_min_header=phone_data_min_header or [],
+        data_min_rows=phone_data_min_rows or [],
+        data_min_master_header=phone_data_min_master_header or [],
+        data_min_master_rows=phone_data_min_master_rows or [],
+        data_max_has_completion=phone_data_max_has_completion,
+        completion=completion,
+        response_ledger_rows=response_ledger_rows or [],
+        failures=failures,
+        warnings=warnings,
+        expect_phone_owned_data_export=expect_phone_owned_data_export,
     )
 
     return AndroidLslValidationResult(
@@ -525,6 +565,7 @@ def validate_run_artifact(
     expect_lightweight_materializations: bool = False,
     expect_phone_topup_evidence: bool = False,
     expect_audiotrack_timing_evidence: bool = False,
+    expect_phone_owned_data_export: bool = False,
 ) -> AndroidLslValidationResult:
     loaded = _load_status_inputs(path)
     if loaded.get("kind") == "controller":
@@ -573,6 +614,12 @@ def validate_run_artifact(
         topup_plan=loaded.get("topup_plan"),
         topup_materialization=loaded.get("topup_materialization"),
         topup_wav_hashes=loaded.get("topup_wav_hashes") or {},
+        phone_owned_data_export=loaded.get("phone_owned_data_export"),
+        phone_data_min_header=loaded.get("phone_data_min_header") or [],
+        phone_data_min_rows=loaded.get("phone_data_min_rows") or [],
+        phone_data_min_master_header=loaded.get("phone_data_min_master_header") or [],
+        phone_data_min_master_rows=loaded.get("phone_data_min_master_rows") or [],
+        phone_data_max_has_completion=bool(loaded.get("phone_data_max_has_completion")),
         expect_native_transport=expect_native_transport,
         expect_command_acks=expect_command_acks,
         expect_run_catalog=expect_run_catalog,
@@ -582,6 +629,7 @@ def validate_run_artifact(
         expect_lightweight_materializations=expect_lightweight_materializations,
         expect_phone_topup_evidence=expect_phone_topup_evidence,
         expect_audiotrack_timing_evidence=expect_audiotrack_timing_evidence,
+        expect_phone_owned_data_export=expect_phone_owned_data_export,
     )
 
 
@@ -753,6 +801,25 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
             marker_mirror_members = [name for name in archive.namelist() if name.endswith("lsl_marker_mirror.csv")]
             trigger_code_members = [name for name in archive.namelist() if name.endswith("trigger_codes.csv")]
             response_ledger_members = [name for name in archive.namelist() if name.endswith("phone_response_ledger.csv")]
+            data_export_members = [name for name in archive.namelist() if name.endswith("phone_owned_data_export.json")]
+            data_min_members = [
+                name
+                for name in archive.namelist()
+                if "phone_owned_exports/1.Data_min/" in name.replace("\\", "/")
+                and name.endswith(".csv")
+                and not name.endswith("master_successful_participants.csv")
+            ]
+            data_min_master_members = [
+                name
+                for name in archive.namelist()
+                if name.replace("\\", "/").endswith("phone_owned_exports/1.Data_min/master_successful_participants.csv")
+            ]
+            data_max_completion_members = [
+                name
+                for name in archive.namelist()
+                if "phone_owned_exports/2.Data_max/" in name.replace("\\", "/")
+                and (name.endswith("completion.json") or name.endswith("latest_events.json"))
+            ]
             topup_plan_members = [name for name in archive.namelist() if name.endswith("phone_topup_plan.json")]
             topup_materialization_members = [
                 name
@@ -854,6 +921,25 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 response_ledger_name = sorted(response_ledger_members)[0]
                 archive.extract(response_ledger_name, temp_root)
                 response_ledger_rows = _read_csv(temp_root / response_ledger_name)
+            phone_owned_data_export = None
+            if data_export_members:
+                data_export_name = sorted(data_export_members)[0]
+                archive.extract(data_export_name, temp_root)
+                phone_owned_data_export = _read_json(temp_root / data_export_name)
+            phone_data_min_header: list[str] = []
+            phone_data_min_rows: list[dict[str, Any]] = []
+            for member in sorted(data_min_members):
+                archive.extract(member, temp_root)
+                header, rows = _read_csv_with_header(temp_root / member)
+                if not phone_data_min_header:
+                    phone_data_min_header = header
+                phone_data_min_rows.extend(rows)
+            phone_data_min_master_header: list[str] = []
+            phone_data_min_master_rows: list[dict[str, Any]] = []
+            if data_min_master_members:
+                data_min_master_name = sorted(data_min_master_members)[0]
+                archive.extract(data_min_master_name, temp_root)
+                phone_data_min_master_header, phone_data_min_master_rows = _read_csv_with_header(temp_root / data_min_master_name)
             topup_plan = None
             if topup_plan_members:
                 topup_plan_name = sorted(topup_plan_members)[0]
@@ -887,6 +973,12 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 "materialization_manifests": materialization_manifests,
                 "materialized_wav_hashes": materialized_wav_hashes,
                 "response_ledger_rows": response_ledger_rows,
+                "phone_owned_data_export": phone_owned_data_export,
+                "phone_data_min_header": phone_data_min_header,
+                "phone_data_min_rows": phone_data_min_rows,
+                "phone_data_min_master_header": phone_data_min_master_header,
+                "phone_data_min_master_rows": phone_data_min_master_rows,
+                "phone_data_max_has_completion": bool(data_max_completion_members),
                 "topup_plan": topup_plan,
                 "topup_materialization": topup_materialization,
                 "topup_wav_hashes": topup_wav_hashes,
@@ -903,6 +995,7 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
     marker_mirror_path = path / "lsl_marker_mirror.csv"
     trigger_code_path = path / "trigger_codes.csv"
     response_ledger_path = path / "phone_response_ledger.csv"
+    data_export_path = path / "phone_owned_data_export.json"
     topup_plan_path = path / "phone_topup_plan.json"
     topup_materialization_path = path / "phone_topup_materialization.json"
     topup_wav_path = path / "phone_topup_block.wav"
@@ -914,6 +1007,17 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
             materialization_manifests.append(_read_json(manifest_path))
         for wav_path in sorted(materialized_dir.glob("*.wav")):
             materialized_wav_hashes[wav_path.name] = _sha256_file(wav_path)
+    export_root = _find_phone_owned_export_root(path)
+    phone_data_min_header: list[str] = []
+    phone_data_min_rows: list[dict[str, Any]] = []
+    phone_data_min_master_header: list[str] = []
+    phone_data_min_master_rows: list[dict[str, Any]] = []
+    phone_data_max_has_completion = False
+    if export_root:
+        phone_data_min_header, phone_data_min_rows = _load_phone_data_min_rows(export_root)
+        phone_data_min_master_header, phone_data_min_master_rows = _load_phone_data_min_master_rows(export_root)
+        phone_data_max_has_completion = _phone_data_max_has_completion(export_root)
+
     sidecars = {
         "package_manifest": _read_json(package_manifest_path) if package_manifest_path.is_file() else None,
         "reconstruction_artifact": _read_json(reconstruction_artifact_path) if reconstruction_artifact_path.is_file() else None,
@@ -926,6 +1030,12 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
         "materialization_manifests": materialization_manifests,
         "materialized_wav_hashes": materialized_wav_hashes,
         "response_ledger_rows": _read_csv(response_ledger_path) if response_ledger_path.is_file() else [],
+        "phone_owned_data_export": _read_json(data_export_path) if data_export_path.is_file() else None,
+        "phone_data_min_header": phone_data_min_header,
+        "phone_data_min_rows": phone_data_min_rows,
+        "phone_data_min_master_header": phone_data_min_master_header,
+        "phone_data_min_master_rows": phone_data_min_master_rows,
+        "phone_data_max_has_completion": phone_data_max_has_completion,
         "topup_plan": _read_json(topup_plan_path) if topup_plan_path.is_file() else None,
         "topup_materialization": _read_json(topup_materialization_path) if topup_materialization_path.is_file() else None,
         "topup_wav_hashes": {topup_wav_path.name: _sha256_file(topup_wav_path)} if topup_wav_path.is_file() else {},
@@ -952,6 +1062,50 @@ def _find_phone_run_catalog_root(path: Path) -> Path | None:
         if (candidate / "index.json").is_file() or any(candidate.glob("*/runs.jsonl")):
             return candidate
     return None
+
+
+def _find_phone_owned_export_root(path: Path) -> Path | None:
+    candidates: list[Path] = []
+    for candidate in (
+        path / "phone_owned_exports",
+        path.parent / "phone_owned_exports",
+        path.parent.parent / "phone_owned_exports",
+        path.parent.parent.parent / "phone_owned_exports",
+    ):
+        if candidate not in candidates:
+            candidates.append(candidate)
+    for candidate in candidates:
+        if not candidate.is_dir():
+            continue
+        if (candidate / "1.Data_min").is_dir() or (candidate / "2.Data_max").is_dir():
+            return candidate
+    return None
+
+
+def _load_phone_data_min_rows(export_root: Path) -> tuple[list[str], list[dict[str, Any]]]:
+    data_min = export_root / "1.Data_min"
+    rows: list[dict[str, Any]] = []
+    header: list[str] = []
+    for csv_path in sorted(data_min.glob("*.csv")):
+        if csv_path.name == "master_successful_participants.csv":
+            continue
+        observed_header, observed_rows = _read_csv_with_header(csv_path)
+        if not header:
+            header = observed_header
+        rows.extend(observed_rows)
+    return header, rows
+
+
+def _load_phone_data_min_master_rows(export_root: Path) -> tuple[list[str], list[dict[str, Any]]]:
+    master = export_root / "1.Data_min" / "master_successful_participants.csv"
+    if not master.is_file():
+        return [], []
+    return _read_csv_with_header(master)
+
+
+def _phone_data_max_has_completion(export_root: Path) -> bool:
+    data_max = export_root / "2.Data_max"
+    return any(data_max.glob("*/runs/*/completion.json")) or any(data_max.glob("*/runs/*/latest_events.json"))
 
 
 def _load_phone_run_catalog_root(root: Path) -> dict[str, Any]:
@@ -1011,6 +1165,12 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
 def _read_csv(path: Path) -> list[dict[str, Any]]:
     with path.open(newline="", encoding="utf-8") as handle:
         return [dict(row) for row in csv.DictReader(handle)]
+
+
+def _read_csv_with_header(path: Path) -> tuple[list[str], list[dict[str, Any]]]:
+    with path.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        return list(reader.fieldnames or []), [dict(row) for row in reader]
 
 
 def _clean_int(value: Any) -> int:
@@ -2218,6 +2378,80 @@ def _validate_phone_response_topup_artifacts(
         )
 
 
+def _validate_phone_owned_data_export(
+    *,
+    export: dict[str, Any] | None,
+    data_min_header: list[str],
+    data_min_rows: list[dict[str, Any]],
+    data_min_master_header: list[str],
+    data_min_master_rows: list[dict[str, Any]],
+    data_max_has_completion: bool,
+    completion: dict[str, Any] | None,
+    response_ledger_rows: list[dict[str, Any]],
+    failures: list[str],
+    warnings: list[str],
+    expect_phone_owned_data_export: bool,
+) -> None:
+    if export is None:
+        message = "phone-owned data export is missing"
+        if expect_phone_owned_data_export:
+            failures.append(message)
+        elif completion:
+            warnings.append(f"{message}; rerun with --expect-phone-owned-data-export for strict checks")
+        return
+    if export.get("schema") != ANDROID_PHONE_OWNED_DATA_EXPORT_SCHEMA:
+        failures.append("phone-owned data export schema mismatch")
+    privacy = export.get("privacy") if isinstance(export.get("privacy"), dict) else {}
+    if privacy.get("demographics_in_stream_name") is not False:
+        failures.append("phone-owned data export must keep demographics out of stream names")
+    if privacy.get("participant_names_exported") is not False:
+        failures.append("phone-owned data export must not export participant names")
+    fieldnames = export.get("data_min_fieldnames") if isinstance(export.get("data_min_fieldnames"), list) else []
+    if fieldnames and [str(item) for item in fieldnames] != PHONE_DATA_MIN_FIELDNAMES:
+        failures.append("phone-owned data export data_min_fieldnames differ from the 17-column PC runner schema")
+    if data_min_header and data_min_header != PHONE_DATA_MIN_FIELDNAMES:
+        failures.append("phone-owned 1.Data_min participant CSV header differs from the 17-column PC runner schema")
+    elif expect_phone_owned_data_export and not data_min_header:
+        failures.append("strict phone-owned data export requires a 1.Data_min participant CSV")
+    if data_min_master_header and data_min_master_header != PHONE_DATA_MIN_FIELDNAMES:
+        failures.append("phone-owned master_successful_participants.csv header differs from the 17-column PC runner schema")
+    elif expect_phone_owned_data_export and not data_min_master_header:
+        failures.append("strict phone-owned data export requires master_successful_participants.csv")
+    if expect_phone_owned_data_export and not data_min_rows:
+        failures.append("strict phone-owned data export requires at least one 1.Data_min participant row")
+    exported_count = _clean_int(export.get("data_min_row_count"))
+    if exported_count and data_min_rows and exported_count != len(data_min_rows):
+        failures.append(f"phone-owned data export data_min_row_count expected {len(data_min_rows)}, got {exported_count}")
+    if response_ledger_rows and data_min_rows and len(data_min_rows) != len(response_ledger_rows):
+        failures.append("phone-owned 1.Data_min row count differs from phone_response_ledger row count")
+    if data_min_rows:
+        for index, row in enumerate(data_min_rows, start=1):
+            prefix = f"phone-owned 1.Data_min row {index}"
+            missing = [field for field in PHONE_DATA_MIN_FIELDNAMES if field not in row]
+            if missing:
+                failures.append(f"{prefix} is missing fields: {', '.join(missing)}")
+            if str(row.get("response_given") or "").lower() not in {"true", "false"}:
+                failures.append(f"{prefix} response_given must be true or false")
+            if str(row.get("hit_miss") or "") not in {"Hit", "Miss"}:
+                failures.append(f"{prefix} hit_miss must be Hit or Miss")
+            if not str(row.get("trial_uid") or "").strip():
+                failures.append(f"{prefix} is missing trial_uid")
+    if data_min_rows and data_min_master_rows:
+        missing_in_master = {
+            str(row.get("trial_uid") or "")
+            for row in data_min_rows
+            if str(row.get("trial_uid") or "")
+        } - {
+            str(row.get("trial_uid") or "")
+            for row in data_min_master_rows
+            if str(row.get("trial_uid") or "")
+        }
+        if missing_in_master:
+            failures.append(f"phone-owned master CSV is missing participant trial_uids: {sorted(missing_in_master)}")
+    if expect_phone_owned_data_export and not data_max_has_completion:
+        failures.append("strict phone-owned data export requires a 2.Data_max run-folder completion copy")
+
+
 def _empty_response_ledger_stats() -> dict[str, int]:
     return {
         "ledger_row_count": 0,
@@ -2942,6 +3176,14 @@ def main(argv: list[str] | None = None) -> int:
             "AudioTrack playback-head timing fields and coherent frame/jitter metadata."
         ),
     )
+    parser.add_argument(
+        "--expect-phone-owned-data-export",
+        action="store_true",
+        help=(
+            "For phone-run artifacts, fail unless phone_owned_data_export.json, 1.Data_min participant/master CSVs, "
+            "and a 2.Data_max run-folder completion copy are present and internally consistent."
+        ),
+    )
     parser.add_argument("--output-dir", type=Path, help="Optional directory for JSON/Markdown validation reports.")
     args = parser.parse_args(argv)
 
@@ -2956,6 +3198,7 @@ def main(argv: list[str] | None = None) -> int:
         expect_lightweight_materializations=args.expect_lightweight_materializations,
         expect_phone_topup_evidence=args.expect_phone_topup_evidence,
         expect_audiotrack_timing_evidence=args.expect_audiotrack_timing_evidence,
+        expect_phone_owned_data_export=args.expect_phone_owned_data_export,
     )
     if args.output_dir:
         _write_report(result, args.output_dir)

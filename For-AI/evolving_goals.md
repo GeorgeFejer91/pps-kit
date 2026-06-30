@@ -7,7 +7,8 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 - Native Experiment Runner outputs now use a two-tier acquisition-root contract:
   `1.Data_min/` is the OSF/publication-ready participant trial export, and
   `2.Data_max/` is the participant-organized reconstruction/backup mirror.
-  This change is runner-only; Android/phone-owned output remains a later pass.
+  Android phone-owned completed runs now have an app-private analogue rather
+  than using the PC acquisition root directly.
 - `1.Data_min/` must contain only `P###.csv` participant files plus
   `master_successful_participants.csv`. Each participant file has exactly the
   17-column curated schema
@@ -28,6 +29,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   session manifests, rich trial CSVs, event/LSL/XDF/trigger/session metadata,
   WAV evidence, top-up ledgers, prepared blocks, calibration artifacts, and
   private setup metadata kept there rather than in `1.Data_min/`.
+- Completed Android phone-owned runs now write `phone_owned_data_export.json`
+  and update app-private `phone_owned_exports/1.Data_min/` plus
+  `phone_owned_exports/2.Data_max/`. The phone `1.Data_min` participant CSV and
+  `master_successful_participants.csv` use the same 17-column public schema as
+  the PC runner, derived from the phone response ledger and package schedule;
+  the phone `2.Data_max/<participant>/runs/<run_id>/` mirror copies the rich
+  reconstructive run folder. ZIP export includes this `phone_owned_exports/`
+  snapshot when present, and the Android artifact validator can enforce it with
+  `--expect-phone-owned-data-export`.
 - Android phone-run artifact validation now treats response and top-up
   reconstruction as strict evidence when requested. The Android validator loads
   `phone_response_ledger.csv`, `phone_topup_plan.json`,

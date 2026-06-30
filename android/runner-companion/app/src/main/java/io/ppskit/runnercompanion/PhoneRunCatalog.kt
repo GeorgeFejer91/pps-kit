@@ -7,6 +7,26 @@ import java.io.File
 internal const val PHONE_RUN_CATALOG_ENTRY_SCHEMA = "pps-android-phone-run-catalog-entry.v1"
 internal const val PHONE_RUN_CATALOG_SCHEMA = "pps-android-phone-run-catalog.v1"
 internal const val PHONE_RUN_CATALOG_WRITE_SCHEMA = "pps-android-phone-run-catalog-write.v1"
+internal const val PHONE_OWNED_DATA_EXPORT_SCHEMA = "pps-android-phone-owned-data-export.v1"
+internal val PHONE_DATA_MIN_FIELDNAMES = listOf(
+    "participant_id",
+    "session_id",
+    "part_session_id",
+    "part_number",
+    "block_number",
+    "block_label",
+    "trial_number",
+    "trial_number_global",
+    "trial_uid",
+    "condition",
+    "phase",
+    "noise_type",
+    "trial_type",
+    "soa_ms",
+    "response_given",
+    "hit_miss",
+    "reaction_time_ms",
+)
 
 internal fun buildPhoneRunCatalogEntry(
     runPackage: MobileRunPackage,
@@ -87,6 +107,113 @@ internal fun writePhoneRunCatalog(filesDir: File, runDir: File, entry: JSONObjec
         .put("entry", entryCopy)
 }
 
+internal fun writePhoneOwnedDataExport(
+    filesDir: File,
+    runPackage: MobileRunPackage,
+    runDir: File,
+    catalogEntry: JSONObject,
+    responseLedgerRows: List<JSONObject>,
+): JSONObject {
+    val participantId = safePhoneRunCatalogName(
+        runPackage.participantId.ifBlank { catalogEntry.optString("participant_id", "PXX") }.ifBlank { "PXX" },
+    )
+    val runId = safePhoneRunCatalogName(catalogEntry.optString("run_id", runDir.name).ifBlank { runDir.name })
+    val exportRoot = File(filesDir, "phone_owned_exports")
+    val dataMinDir = File(exportRoot, "1.Data_min")
+    val dataMaxRunDir = File(File(File(exportRoot, "2.Data_max"), participantId), "runs/$runId")
+    dataMinDir.mkdirs()
+
+    val rows = buildPhoneDataMinRows(runPackage, responseLedgerRows)
+    val participantCsv = File(dataMinDir, "$participantId.csv")
+    writePhoneDataMinCsv(participantCsv, rows)
+    val masterCsv = refreshPhoneDataMinMaster(dataMinDir)
+
+    val export = JSONObject()
+        .put("schema", PHONE_OWNED_DATA_EXPORT_SCHEMA)
+        .put("participant_id", participantId)
+        .put("run_id", runId)
+        .put("package_id", runPackage.packageId)
+        .put("session_id", runPackage.sessionId)
+        .put("part_session_id", runPackage.partSessionId)
+        .put("part_number", runPackage.partNumber)
+        .put("phone_owned_session", true)
+        .put("data_min_schema", "pps-data-min-publication-trials.v1")
+        .put("data_min_fieldnames", JSONArray().also { array -> PHONE_DATA_MIN_FIELDNAMES.forEach { array.put(it) } })
+        .put("data_min_participant_csv", participantCsv.absolutePath)
+        .put("data_min_master_successful_participants_csv", masterCsv.absolutePath)
+        .put("data_min_row_count", rows.size)
+        .put("data_max_run_dir", dataMaxRunDir.absolutePath)
+        .put("data_max_source_run_dir", runDir.absolutePath)
+        .put("privacy", JSONObject()
+            .put("scope", "app_private_phone_owned_export")
+            .put("demographics_in_stream_name", false)
+            .put("participant_names_exported", false))
+
+    val exportFile = File(runDir, "phone_owned_data_export.json")
+    exportFile.writeText(export.toString(2), Charsets.UTF_8)
+    dataMaxRunDir.deleteRecursively()
+    dataMaxRunDir.parentFile?.mkdirs()
+    runDir.copyRecursively(dataMaxRunDir, overwrite = true)
+    return export.put("artifact_path", exportFile.absolutePath)
+}
+
+internal fun buildPhoneDataMinRows(
+    runPackage: MobileRunPackage,
+    responseLedgerRows: List<JSONObject>,
+): List<Map<String, String>> {
+    val trialLookup = mutableMapOf<String, Pair<MobileBlock, MobileTrial>>()
+    runPackage.blocks.forEach { block ->
+        block.trials.forEach { trial ->
+            if (trial.trialUid.isNotBlank()) trialLookup[trial.trialUid] = block to trial
+        }
+    }
+    var globalIndex = 1
+    return responseLedgerRows
+        .filter { row ->
+            val role = row.optString("ledger_role", "source_trial")
+            role == "source_trial" || role == "topup_rescue"
+        }
+        .map { row ->
+            val role = row.optString("ledger_role", "source_trial")
+            val sourceTrialUid = if (role == "topup_rescue") {
+                row.optString("source_trial_uid", "")
+            } else {
+                row.optString("trial_uid", "")
+            }
+            val source = trialLookup[sourceTrialUid]
+            val block = source?.first
+            val trial = source?.second
+            val hit = row.optBoolean("hit", false)
+            val trialType = trial?.trialType.orEmpty()
+            val trialFamily = trial?.family.orEmpty()
+            val condition = trialFamily.ifBlank { trialType }
+            val blockNumber = if (role == "topup_rescue") {
+                (runPackage.blocks.maxOfOrNull { it.index } ?: 0) + 1
+            } else {
+                row.optInt("block_index", block?.index ?: 0)
+            }
+            mapOf(
+                "participant_id" to runPackage.participantId,
+                "session_id" to runPackage.sessionId,
+                "part_session_id" to runPackage.partSessionId,
+                "part_number" to runPackage.partNumber,
+                "block_number" to blockNumber.toString(),
+                "block_label" to if (role == "topup_rescue") "Phone top-up" else (block?.label ?: row.optString("block_id", "")),
+                "trial_number" to row.optString("trial_number", trial?.trialNumber?.toString() ?: ""),
+                "trial_number_global" to (globalIndex++).toString(),
+                "trial_uid" to row.optString("trial_uid", ""),
+                "condition" to condition,
+                "phase" to normalizePhoneDataMinPhase(trial?.rowLabel ?: ""),
+                "noise_type" to (trial?.noiseType ?: ""),
+                "trial_type" to trialType,
+                "soa_ms" to (trial?.soaMs ?: ""),
+                "response_given" to hit.toString(),
+                "hit_miss" to if (hit) "Hit" else "Miss",
+                "reaction_time_ms" to row.optString("rt_ms", ""),
+            )
+        }
+}
+
 private fun upsertCatalogJsonl(path: File, entry: JSONObject) {
     val runId = entry.optString("run_id")
     val rows = mutableListOf<JSONObject>()
@@ -142,3 +269,57 @@ private fun rebuildPhoneRunCatalogIndex(root: File): JSONObject {
 
 internal fun safePhoneRunCatalogName(value: String): String =
     value.replace(Regex("[^A-Za-z0-9._-]+"), "-").trim('-', '.', '_').ifBlank { "participant" }
+
+private fun writePhoneDataMinCsv(path: File, rows: List<Map<String, String>>) {
+    path.parentFile?.mkdirs()
+    path.writeText(
+        buildString {
+            append(PHONE_DATA_MIN_FIELDNAMES.joinToString(","))
+            append("\n")
+            rows.forEach { row ->
+                append(PHONE_DATA_MIN_FIELDNAMES.joinToString(",") { field -> phoneCsvCell(row[field].orEmpty()) })
+                append("\n")
+            }
+        },
+        Charsets.UTF_8,
+    )
+}
+
+private fun refreshPhoneDataMinMaster(dataMinDir: File): File {
+    val master = File(dataMinDir, "master_successful_participants.csv")
+    val participantCsvs = dataMinDir.listFiles()
+        ?.filter { it.isFile && it.name.endsWith(".csv") && it.name != master.name }
+        ?.sortedBy { it.name.lowercase() }
+        ?: emptyList()
+    master.writeText(
+        buildString {
+            append(PHONE_DATA_MIN_FIELDNAMES.joinToString(","))
+            append("\n")
+            participantCsvs.forEach { csv ->
+                csv.readLines(Charsets.UTF_8)
+                    .drop(1)
+                    .filter { it.isNotBlank() }
+                    .forEach { line ->
+                        append(line)
+                        append("\n")
+                    }
+            }
+        },
+        Charsets.UTF_8,
+    )
+    return master
+}
+
+private fun normalizePhoneDataMinPhase(value: String): String =
+    when (value.trim().lowercase()) {
+        "inhale", "inhalation", "inspiration" -> "Inhale"
+        "exhale", "exhalation", "expiration" -> "Exhale"
+        else -> value
+    }
+
+private fun phoneCsvCell(value: String): String =
+    if (value.any { it == ',' || it == '"' || it == '\n' || it == '\r' }) {
+        "\"${value.replace("\"", "\"\"")}\""
+    } else {
+        value
+    }

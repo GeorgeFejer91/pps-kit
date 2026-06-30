@@ -225,6 +225,29 @@ def test_android_lsl_runtime_validator_accepts_audiotrack_timing_evidence(tmp_pa
     assert result.failures == []
 
 
+def test_android_lsl_runtime_validator_accepts_phone_owned_data_export(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    _write_phone_owned_data_export(run_dir)
+
+    result = validator.validate_run_artifact(run_dir, expect_phone_owned_data_export=True)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_requires_phone_owned_data_export_when_expected(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+
+    result = validator.validate_run_artifact(run_dir, expect_phone_owned_data_export=True)
+
+    assert result.ok is False
+    assert "phone-owned data export is missing" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_accepts_phone_event_diary(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -476,6 +499,27 @@ def test_android_lsl_runtime_validator_loads_lightweight_materialization_from_zi
         expect_trigger_code_mirror=True,
         expect_lightweight_materializations=True,
     )
+
+    assert result.ok is True
+    assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_loads_phone_owned_data_export_from_zip(tmp_path: Path):
+    source_dir = tmp_path / "phone-run-source"
+    source_dir.mkdir()
+    _write_lightweight_phone_run(source_dir)
+    _write_phone_owned_data_export(source_dir)
+    archive_path = tmp_path / "phone-run.zip"
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        for path in source_dir.rglob("*"):
+            if path.is_file():
+                archive.write(path, f"phone-run/{path.relative_to(source_dir).as_posix()}")
+        export_root = source_dir.parent / "phone_owned_exports"
+        for path in export_root.rglob("*"):
+            if path.is_file():
+                archive.write(path, f"phone_owned_exports/{path.relative_to(export_root).as_posix()}")
+
+    result = validator.validate_run_artifact(archive_path, expect_phone_owned_data_export=True)
 
     assert result.ok is True
     assert result.failures == []
@@ -1154,6 +1198,83 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
     (run_dir / "phone_topup_block.wav").write_bytes(topup_wav_bytes)
     (materialized_dir / "phone_materialized_block_01.json").write_text(json.dumps(materialization), encoding="utf-8")
     (materialized_dir / "phone_materialized_block_01.wav").write_bytes(wav_bytes)
+
+
+def _write_phone_owned_data_export(run_dir: Path) -> None:
+    export_root = run_dir.parent / "phone_owned_exports"
+    data_min = export_root / "1.Data_min"
+    data_min.mkdir(parents=True)
+    rows = [
+        {
+            "participant_id": "P001",
+            "session_id": "session-001",
+            "part_session_id": "part-001",
+            "part_number": "01",
+            "block_number": "1",
+            "block_label": "Block 01",
+            "trial_number": "1",
+            "trial_number_global": "1",
+            "trial_uid": "trial-001",
+            "condition": "standard",
+            "phase": "Inhale",
+            "noise_type": "looming",
+            "trial_type": "audio_tactile",
+            "soa_ms": "100",
+            "response_given": "false",
+            "hit_miss": "Miss",
+            "reaction_time_ms": "",
+        },
+        {
+            "participant_id": "P001",
+            "session_id": "session-001",
+            "part_session_id": "part-001",
+            "part_number": "01",
+            "block_number": "2",
+            "block_label": "Phone top-up",
+            "trial_number": "1",
+            "trial_number_global": "2",
+            "trial_uid": "phone-topup-1-trial-001",
+            "condition": "standard",
+            "phase": "Inhale",
+            "noise_type": "looming",
+            "trial_type": "audio_tactile",
+            "soa_ms": "100",
+            "response_given": "true",
+            "hit_miss": "Hit",
+            "reaction_time_ms": "200",
+        },
+    ]
+    for name in ("P001.csv", "master_successful_participants.csv"):
+        with (data_min / name).open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=validator.PHONE_DATA_MIN_FIELDNAMES)
+            writer.writeheader()
+            writer.writerows(rows)
+    data_max = export_root / "2.Data_max" / "P001" / "runs" / run_dir.name
+    data_max.mkdir(parents=True)
+    (data_max / "completion.json").write_text((run_dir / "completion.json").read_text(encoding="utf-8"), encoding="utf-8")
+    export = {
+        "schema": "pps-android-phone-owned-data-export.v1",
+        "participant_id": "P001",
+        "run_id": run_dir.name,
+        "package_id": "pkg-001",
+        "session_id": "session-001",
+        "part_session_id": "part-001",
+        "part_number": "01",
+        "phone_owned_session": True,
+        "data_min_schema": "pps-data-min-publication-trials.v1",
+        "data_min_fieldnames": validator.PHONE_DATA_MIN_FIELDNAMES,
+        "data_min_participant_csv": str(data_min / "P001.csv"),
+        "data_min_master_successful_participants_csv": str(data_min / "master_successful_participants.csv"),
+        "data_min_row_count": len(rows),
+        "data_max_run_dir": str(data_max),
+        "data_max_source_run_dir": str(run_dir),
+        "privacy": {
+            "scope": "app_private_phone_owned_export",
+            "demographics_in_stream_name": False,
+            "participant_names_exported": False,
+        },
+    }
+    (run_dir / "phone_owned_data_export.json").write_text(json.dumps(export), encoding="utf-8")
 
 
 def _status(*, native: bool) -> dict:

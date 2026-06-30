@@ -106,4 +106,101 @@ class PhoneRunCatalogTest {
         assertEquals(1, index.getInt("run_count"))
         assertEquals("phone-run-001", index.getJSONArray("participants").getJSONObject(0).getString("latest_run_id"))
     }
+
+    @Test
+    fun writesPhoneOwnedDataMinAndDataMaxExport() {
+        val filesDir = File.createTempFile("pps-phone-data-export", "").apply {
+            delete()
+            mkdirs()
+        }
+        val runDir = File(filesDir, "phone_runs/phone-run-001").apply { mkdirs() }
+        File(runDir, "completion.json").writeText("{}", Charsets.UTF_8)
+        val runPackage = MobilePackageParser.parseManifest(
+            """
+            {
+              "schema": "$MOBILE_PACKAGE_SCHEMA",
+              "package_id": "pkg-001",
+              "participant_id": "P001",
+              "session_id": "session-001",
+              "session_group_id": "group-001",
+              "part_session_id": "part-001",
+              "part_number": "01",
+              "title": "Participant P001",
+              "mobile_runnable": true,
+              "phone_owned_session": true,
+              "reconstruction": {"schedule_hash": "schedulehash"},
+              "assets": [],
+              "building_blocks": [{"asset_id": "trial-hit"}, {"asset_id": "trial-miss"}],
+              "blocks": [
+                {
+                  "block_id": "block-01",
+                  "index": 1,
+                  "label": "Block 01",
+                  "duration_s": 8.0,
+                  "trial_count": 2,
+                  "trials": [
+                    {"trial_number": 1, "trial_uid": "trial-hit", "trial_type": "audio_tactile", "family": "audio_tactile", "soa_ms": "100", "row_label": "inhale", "noise_type": "white", "start_s": 0.0, "end_s": 4.0, "duration_s": 4.0, "tactile_onset_s": 1.0, "building_block_asset_id": "trial-hit"},
+                    {"trial_number": 2, "trial_uid": "trial-miss", "trial_type": "audio_tactile", "family": "audio_tactile", "soa_ms": "300", "row_label": "exhale", "noise_type": "pink", "start_s": 4.0, "end_s": 8.0, "duration_s": 4.0, "tactile_onset_s": 1.0, "building_block_asset_id": "trial-miss"}
+                  ],
+                  "tactile_cues": []
+                }
+              ],
+              "warnings": []
+            }
+            """.trimIndent(),
+        )
+        val entry = JSONObject()
+            .put("run_id", "phone-run-001")
+            .put("participant_id", "P001")
+        val ledgerRows = listOf(
+            JSONObject()
+                .put("ledger_role", "source_trial")
+                .put("block_index", 1)
+                .put("trial_number", 1)
+                .put("trial_uid", "trial-hit")
+                .put("hit", true)
+                .put("rt_ms", 220),
+            JSONObject()
+                .put("ledger_role", "source_trial")
+                .put("block_index", 1)
+                .put("trial_number", 2)
+                .put("trial_uid", "trial-miss")
+                .put("hit", false)
+                .put("status", "missed_rescued_by_topup"),
+            JSONObject()
+                .put("ledger_role", "topup_rescue")
+                .put("source_trial_uid", "trial-miss")
+                .put("trial_number", 1)
+                .put("trial_uid", "phone-topup-1-trial-miss")
+                .put("hit", true)
+                .put("rt_ms", 260),
+        )
+
+        val export = writePhoneOwnedDataExport(
+            filesDir = filesDir,
+            runPackage = runPackage,
+            runDir = runDir,
+            catalogEntry = entry,
+            responseLedgerRows = ledgerRows,
+        )
+
+        assertEquals(PHONE_OWNED_DATA_EXPORT_SCHEMA, export.getString("schema"))
+        assertEquals(3, export.getInt("data_min_row_count"))
+        val participantCsv = File(export.getString("data_min_participant_csv"))
+        val masterCsv = File(export.getString("data_min_master_successful_participants_csv"))
+        val dataMaxRunDir = File(export.getString("data_max_run_dir"))
+        assertTrue(participantCsv.isFile)
+        assertTrue(masterCsv.isFile)
+        assertTrue(dataMaxRunDir.resolve("completion.json").isFile)
+        assertTrue(dataMaxRunDir.resolve("phone_owned_data_export.json").isFile)
+        val rows = participantCsv.readLines(Charsets.UTF_8)
+        assertEquals(PHONE_DATA_MIN_FIELDNAMES.joinToString(","), rows.first())
+        assertEquals(4, rows.size)
+        assertTrue(rows[1].contains("trial-hit,audio_tactile,Inhale,white,audio_tactile,100,true,Hit,220"))
+        assertTrue(rows[2].contains("trial-miss,audio_tactile,Exhale,pink,audio_tactile,300,false,Miss,"))
+        assertTrue(rows[3].contains("Phone top-up,1,3,phone-topup-1-trial-miss,audio_tactile,Exhale,pink,audio_tactile,300,true,Hit,260"))
+        assertEquals(rows, masterCsv.readLines(Charsets.UTF_8))
+        val artifact = JSONObject(File(export.getString("artifact_path")).readText(Charsets.UTF_8))
+        assertFalse(artifact.getJSONObject("privacy").getBoolean("demographics_in_stream_name"))
+    }
 }
