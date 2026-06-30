@@ -77,7 +77,10 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   Android validator compares those summaries against `participant_metadata.json`
   and `haptic_capability.json` so age/handedness/gender/tactile threshold and
   phone-vibration recommendations remain reconstructable from LSL metadata
-  without putting demographics into stream names.
+  without putting demographics into stream names. The same validator now parses
+  `lsl_marker_mirror.csv` and checks the local `session_metadata` marker
+  payload against `participant_metadata.json`, `haptic_capability.json`, and
+  package provenance, including full haptic calibration response rows.
 - Optional native Android LSL marker/command transport lives in
   `PhoneNativeLslBridge.kt`. A local ignored
   `android/runner-companion/app/libs/liblsl-Android.aar` is included by Gradle

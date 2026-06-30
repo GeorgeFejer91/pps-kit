@@ -317,8 +317,12 @@ calibration response rows stay in the haptic sidecar and first marker payload.
 Strict artifact validation checks that the exported
 `lsl_runtime_status.json` stream descriptions match the package provenance
 and participant/haptic summaries whenever native evidence, provenance-bearing
-packages, or participant sidecars are expected. The app also carries the
-Segment 0-6 hierarchy into the session metadata marker payload and
+packages, or participant sidecars are expected. It also parses
+`lsl_marker_mirror.csv` and requires the `session_metadata` marker payload to
+match `participant_metadata.json`, `haptic_capability.json`, and any
+`run_package_manifest.json` provenance fields, so the local marker mirror is a
+usable reconstruction anchor rather than only an event echo. The app also
+carries the Segment 0-6 hierarchy into the session metadata marker payload and
 `reconstruction_contract.json`, letting strict validation reject hierarchy drift
 inside phone-owned artifacts. Participant age, handedness,
 gender, and tactile threshold stay in metadata and marker payloads rather than

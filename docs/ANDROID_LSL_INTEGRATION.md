@@ -250,18 +250,22 @@ Required validation levels:
    `source_segment_hashes`) across the run manifest, `session_metadata` event
    package payload, `reconstruction_contract.json`, and
    `phone_run_catalog_entry.json`, so marker-stream reconstruction evidence
-   cannot silently drift away from the packaged randomization/order source. The
+   cannot silently drift away from the packaged randomization/order source. It
+   now also checks the `session_metadata` row in `lsl_marker_mirror.csv`
+   against `participant_metadata.json`, `haptic_capability.json`, and package
+   provenance, including full haptic calibration response rows, so a captured
+   marker stream can be audited back to the phone sidecars. The
    same validator also accepts Controller-mode
-    `phone_controller_runtime_status.json` and
-    `phone_controller_command_outbox.jsonl` artifacts, PC-admin
-    `pc_android_lsl_admin_status.json` /
-    `pc_android_lsl_command_outbox.jsonl` artifacts from
-    `pps-android-lsl-command`, and PC-monitor
-    `pc_android_lsl_monitor_report.json` /
-    `pc_android_lsl_monitor_events.jsonl` artifacts from
-    `pps-android-lsl-monitor`. Controller and PC-admin outbox rows are checked
-    for exact row-payload versus command-sample-payload consistency, including
-    required `operator_note` note text when that command is used.
+   `phone_controller_runtime_status.json` and
+   `phone_controller_command_outbox.jsonl` artifacts, PC-admin
+   `pc_android_lsl_admin_status.json` /
+   `pc_android_lsl_command_outbox.jsonl` artifacts from
+   `pps-android-lsl-command`, and PC-monitor
+   `pc_android_lsl_monitor_report.json` /
+   `pc_android_lsl_monitor_events.jsonl` artifacts from
+   `pps-android-lsl-monitor`. Controller and PC-admin outbox rows are checked
+   for exact row-payload versus command-sample-payload consistency, including
+   required `operator_note` note text when that command is used.
     Phone-run `command_diary.jsonl` rows are also checked against matching
     `operator_command` events and native `PPSCommandAcksV1` samples: strict ack
     validation requires the ack payload to match the diary payload and preserve

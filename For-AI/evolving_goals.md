@@ -101,7 +101,10 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   the haptic sidecar and first `session_metadata` marker payload. The Android
   runtime artifact validator rejects summary drift against participant/haptic
   sidecars, so LSL metadata, local artifacts, and native XML descriptions stay
-  aligned.
+  aligned. The validator now also opens `lsl_marker_mirror.csv` itself and
+  rejects drift inside the `session_metadata` marker payload when participant
+  metadata, haptic calibration/capability, or package provenance differs from
+  the sidecars/manifests.
 
 ## 2026-06-29
 

@@ -354,6 +354,9 @@ def validate_runtime_status(
     _validate_phone_marker_mirror(
         status=status,
         completion=completion,
+        package_manifest=package_manifest,
+        participant_metadata=participant_metadata,
+        haptic_capability=haptic_capability,
         marker_mirror_rows=marker_mirror_rows or [],
         failures=failures,
         warnings=warnings,
@@ -3109,6 +3112,9 @@ def _validate_phone_marker_mirror(
     *,
     status: dict[str, Any],
     completion: dict[str, Any] | None,
+    package_manifest: dict[str, Any] | None,
+    participant_metadata: dict[str, Any] | None,
+    haptic_capability: dict[str, Any] | None,
     marker_mirror_rows: list[dict[str, Any]],
     failures: list[str],
     warnings: list[str],
@@ -3141,6 +3147,25 @@ def _validate_phone_marker_mirror(
         failures.append(f"phone marker mirror has duplicate event ids: {', '.join(str(item) for item in duplicate_ids[:10])}")
     if events and len(rows) != len(events):
         failures.append("phone marker mirror row count differs from completion events")
+
+    expected_participant = (
+        participant_metadata
+        or (
+            completion.get("participant_metadata")
+            if isinstance(completion, dict) and isinstance(completion.get("participant_metadata"), dict)
+            else None
+        )
+    )
+    expected_haptic = (
+        haptic_capability
+        or (
+            completion.get("haptic")
+            if isinstance(completion, dict) and isinstance(completion.get("haptic"), dict)
+            else None
+        )
+    )
+    expected_provenance = _phone_run_provenance_from_manifest(package_manifest)
+    session_metadata_marker_seen = False
 
     events_by_id = {
         _clean_int(event.get("event_id")): event
@@ -3183,6 +3208,16 @@ def _validate_phone_marker_mirror(
             failures.append(f"{prefix} payload event_id differs from marker")
         if event_type and str(payload.get("type") or "") != event_type:
             failures.append(f"{prefix} payload type differs from marker event_type")
+        if event_type == "session_metadata":
+            session_metadata_marker_seen = True
+            _validate_phone_session_metadata_marker_payload(
+                prefix,
+                payload,
+                expected_provenance=expected_provenance,
+                participant_metadata=expected_participant,
+                haptic_capability=expected_haptic,
+                failures=failures,
+            )
         for field in ("package_id", "run_id"):
             marker_value = str(row.get(field) or "")
             payload_value = str(payload.get(field) or "")
@@ -3207,6 +3242,88 @@ def _validate_phone_marker_mirror(
 
     if rows and not events:
         warnings.append("phone marker mirror was present without completion events; only marker self-consistency was checked")
+    if rows and events and (expected_participant or expected_haptic or expected_provenance) and not session_metadata_marker_seen:
+        failures.append("phone marker mirror is missing a session_metadata marker payload")
+
+
+def _validate_phone_session_metadata_marker_payload(
+    prefix: str,
+    payload: dict[str, Any],
+    *,
+    expected_provenance: dict[str, Any],
+    participant_metadata: dict[str, Any] | None,
+    haptic_capability: dict[str, Any] | None,
+    failures: list[str],
+) -> None:
+    package_payload = payload.get("package") if isinstance(payload.get("package"), dict) else None
+    if expected_provenance:
+        if package_payload is None:
+            failures.append(f"{prefix} session_metadata payload is missing package provenance")
+        else:
+            _validate_phone_run_provenance_payload(
+                f"{prefix} session_metadata package",
+                package_payload,
+                expected_provenance,
+                failures,
+            )
+
+    participant_payload = payload.get("participant_metadata") if isinstance(payload.get("participant_metadata"), dict) else None
+    if participant_metadata:
+        if participant_payload is None:
+            failures.append(f"{prefix} session_metadata payload is missing participant_metadata")
+        else:
+            _compare_metadata_fields(
+                participant_payload,
+                participant_metadata,
+                fields=[
+                    "schema",
+                    "participant_id",
+                    "session_id",
+                    "session_group_id",
+                    "part_session_id",
+                    "part_number",
+                    "age_years",
+                    "handedness",
+                    "gender",
+                    "tactile_threshold_percent",
+                    "tactile_threshold_source",
+                    "stream_privacy",
+                    "tactile_threshold_calibration_schema",
+                    "tactile_threshold_calibration_status",
+                ],
+                label=f"{prefix} session_metadata participant_metadata",
+                other_label="participant_metadata.json",
+                failures=failures,
+            )
+
+    haptic_payload = payload.get("haptic") if isinstance(payload.get("haptic"), dict) else None
+    if haptic_capability:
+        if haptic_payload is None:
+            failures.append(f"{prefix} session_metadata payload is missing haptic")
+        else:
+            _compare_metadata_fields(
+                haptic_payload,
+                haptic_capability,
+                fields=[
+                    "schema",
+                    "has_vibrator",
+                    "has_amplitude_control",
+                    "calibration_policy",
+                    "device_model",
+                    "android_sdk",
+                    "calibration_status",
+                    "recommended_threshold_percent",
+                    "recommended_amplitude",
+                ],
+                label=f"{prefix} session_metadata haptic",
+                other_label="haptic_capability.json",
+                failures=failures,
+            )
+            expected_calibration = haptic_capability.get("calibration_result")
+            observed_calibration = haptic_payload.get("calibration_result")
+            if expected_calibration is not None or observed_calibration is not None:
+                if _command_diary_value(observed_calibration) != _command_diary_value(expected_calibration):
+                    failures.append(f"{prefix} session_metadata haptic calibration_result differs from haptic_capability.json")
 
 
 def _validate_phone_trigger_code_mirror(

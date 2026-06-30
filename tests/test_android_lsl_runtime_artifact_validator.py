@@ -362,6 +362,44 @@ def test_android_lsl_runtime_validator_rejects_stream_description_haptic_summary
     )
 
 
+def test_android_lsl_runtime_validator_rejects_session_metadata_marker_participant_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    marker_rows = _read_csv_rows(run_dir / "lsl_marker_mirror.csv")
+    session_row = next(row for row in marker_rows if row["event_type"] == "session_metadata")
+    payload = json.loads(session_row["payload_json"])
+    payload["participant_metadata"]["handedness"] = "left"
+    session_row["payload_json"] = json.dumps(payload)
+    _write_marker_csv(run_dir / "lsl_marker_mirror.csv", marker_rows)
+
+    result = validator.validate_run_artifact(run_dir)
+
+    assert result.ok is False
+    assert "session_metadata participant_metadata handedness differs from participant_metadata.json" in "\n".join(
+        result.failures
+    )
+
+
+def test_android_lsl_runtime_validator_rejects_session_metadata_marker_haptic_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    marker_rows = _read_csv_rows(run_dir / "lsl_marker_mirror.csv")
+    session_row = next(row for row in marker_rows if row["event_type"] == "session_metadata")
+    payload = json.loads(session_row["payload_json"])
+    payload["haptic"]["calibration_result"]["responses"][1]["amplitude"] = 50
+    session_row["payload_json"] = json.dumps(payload)
+    _write_marker_csv(run_dir / "lsl_marker_mirror.csv", marker_rows)
+
+    result = validator.validate_run_artifact(run_dir)
+
+    assert result.ok is False
+    assert "session_metadata haptic calibration_result differs from haptic_capability.json" in "\n".join(
+        result.failures
+    )
+
+
 def test_android_lsl_runtime_validator_accepts_phone_topup_evidence(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -1290,8 +1328,15 @@ def _write_phone_run_with_command_diary(
     status = _status(native=False)
     status.update(_catalog_identity())
     event_source = operator_command_source if operator_command_source is not None else row["command_source"]
+    participant_metadata = _participant_metadata()
+    haptic_capability = _haptic_capability()
     events = [
-        _phone_event(1, "session_metadata"),
+        _phone_session_metadata_event(
+            1,
+            status=status,
+            participant_metadata=participant_metadata,
+            haptic_capability=haptic_capability,
+        ),
         _phone_event(2, "run_start"),
         _phone_event(
             3,
@@ -1307,8 +1352,6 @@ def _write_phone_run_with_command_diary(
         ),
     ]
     markers = [_phone_marker(event) for event in events]
-    participant_metadata = _participant_metadata()
-    haptic_capability = _haptic_capability()
     (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
     (run_dir / "completion.json").write_text(
         json.dumps(
@@ -1341,11 +1384,21 @@ def _write_phone_run_with_native_command_diary(
     status = _status(native=True)
     status.update(_catalog_identity())
     row = row or _phone_native_command_row(ack_sent=ack_sent)
-    events = [_phone_event(1, "run_start")]
+    participant_metadata = _participant_metadata()
+    haptic_capability = _haptic_capability()
+    events = [
+        _phone_session_metadata_event(
+            1,
+            status=status,
+            participant_metadata=participant_metadata,
+            haptic_capability=haptic_capability,
+        ),
+        _phone_event(2, "run_start"),
+    ]
     if include_operator_event:
         events.append(
             _phone_event(
-                2,
+                3,
                 "operator_command",
                 command_id=row["command_id"],
                 command_source="native_lsl",
@@ -1358,8 +1411,6 @@ def _write_phone_run_with_native_command_diary(
             )
         )
     markers = [_phone_marker(event) for event in events]
-    participant_metadata = _participant_metadata()
-    haptic_capability = _haptic_capability()
     (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
     (run_dir / "completion.json").write_text(
         json.dumps(
@@ -1548,6 +1599,34 @@ def _phone_event(event_id: int, event_type: str, **extra: object) -> dict:
     }
     event.update(extra)
     return event
+
+
+def _phone_session_metadata_event(
+    event_id: int,
+    *,
+    status: dict | None = None,
+    participant_metadata: dict | None = None,
+    haptic_capability: dict | None = None,
+    package: dict | None = None,
+) -> dict:
+    return _phone_event(
+        event_id,
+        "session_metadata",
+        participant_metadata=participant_metadata or _participant_metadata(),
+        haptic=haptic_capability or _haptic_capability(),
+        package=package
+        or {
+            "package_id": "pkg-001",
+            "participant_id": "P001",
+            "session_id": "session-001",
+            "session_group_id": "group-001",
+            "part_session_id": "part-001",
+            "part_number": "01",
+            "asset_strategy": "trial_building_blocks_only",
+            "schedule_hash": "schedulehash",
+        },
+        lsl_runtime_status=status or _status(native=False),
+    )
 
 
 def _phone_audiotrack_block_start_event(event_id: int, *, block_id: str, block_index: int, block_label: str) -> dict:
@@ -1812,8 +1891,12 @@ def _inject_phone_run_provenance(
     }
     completion.setdefault("package", {}).update(package_payload)
     events = [event for event in completion.get("events", []) if isinstance(event, dict)]
-    next_event_id = max((int(event.get("event_id") or 0) for event in events), default=0) + 1
-    events.append(_phone_event(next_event_id, "session_metadata", package=package_payload))
+    session_event = next((event for event in events if str(event.get("type") or "") == "session_metadata"), None)
+    if session_event is not None:
+        session_event["package"] = package_payload
+    else:
+        next_event_id = max((int(event.get("event_id") or 0) for event in events), default=0) + 1
+        events.append(_phone_session_metadata_event(next_event_id, package=package_payload))
     markers = [_phone_marker(event) for event in events]
     completion["events"] = events
     completion["lsl_marker_mirror"] = markers
@@ -2121,6 +2204,8 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
             "trial_count": 1,
         },
     }
+    participant_metadata = _participant_metadata()
+    haptic_capability = _haptic_capability()
     events = [_phone_event(1, "run_start")]
     if include_materialization_event:
         events.append(_phone_event(2, "phone_scheduled_block_materialization", **materialization))
@@ -2132,9 +2217,15 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
     events.append(_phone_audiotrack_cue_event(8, block_id="phone-topup-01", block_index=2, trial_uid="phone-topup-1-trial-001"))
     events.append(_phone_event(9, "block_complete", block_id="phone-topup-01", block_index=2, trial_count=1))
     events.append(_phone_event(10, "tap", block_id="phone-topup-01", block_index=2, trial_uid="phone-topup-1-trial-001", rt_ms=200))
+    events.append(
+        _phone_session_metadata_event(
+            11,
+            status=status,
+            participant_metadata=participant_metadata,
+            haptic_capability=haptic_capability,
+        )
+    )
     markers = [_phone_marker(event) for event in events]
-    participant_metadata = _participant_metadata()
-    haptic_capability = _haptic_capability()
     materialized_dir = run_dir / "materialized_blocks"
     materialized_dir.mkdir()
     (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
