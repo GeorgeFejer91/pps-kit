@@ -3730,6 +3730,7 @@ def _validate_lightweight_materializations(
             continue
         expected_trial_count = _safe_int(block.get("trial_count"), fallback=len(list(block.get("trials") or [])))
         expected_index = _safe_int(block.get("index"))
+        expected_trials = _scheduled_block_expected_trials(block)
         event = event_by_block.get(block_id)
         if event is None:
             failures.append(f"block {block_id} is missing phone_scheduled_block_materialization event")
@@ -3740,6 +3741,7 @@ def _validate_lightweight_materializations(
                 expected_block_id=block_id,
                 expected_block_index=expected_index,
                 expected_trial_count=expected_trial_count,
+                expected_trials=expected_trials,
                 materialized_wav_hashes=materialized_wav_hashes,
                 failures=failures,
             )
@@ -3753,6 +3755,7 @@ def _validate_lightweight_materializations(
                 expected_block_id=block_id,
                 expected_block_index=expected_index,
                 expected_trial_count=expected_trial_count,
+                expected_trials=expected_trials,
                 materialized_wav_hashes=materialized_wav_hashes,
                 failures=failures,
             )
@@ -3776,6 +3779,18 @@ def _unique_by_source_block_id(rows: list[dict[str, Any]], *, label: str, failur
     return by_id
 
 
+def _scheduled_block_expected_trials(block: dict[str, Any]) -> list[dict[str, Any]]:
+    rows = [trial for trial in _json_list(block.get("trials")) if isinstance(trial, dict)]
+    indexed_rows = list(enumerate(rows))
+    return [
+        row
+        for _index, row in sorted(
+            indexed_rows,
+            key=lambda item: (_safe_float(item[1].get("start_s"), fallback=0.0), item[0]),
+        )
+    ]
+
+
 def _validate_scheduled_block_materialization_record(
     record: dict[str, Any],
     *,
@@ -3783,6 +3798,7 @@ def _validate_scheduled_block_materialization_record(
     expected_block_id: str,
     expected_block_index: int,
     expected_trial_count: int,
+    expected_trials: list[dict[str, Any]],
     materialized_wav_hashes: dict[str, str],
     failures: list[str],
 ) -> None:
@@ -3813,6 +3829,42 @@ def _validate_scheduled_block_materialization_record(
         failures.append(f"{label} referenced materialized WAV {wav_filename!r} is missing")
     elif observed_hash != wav_sha256:
         failures.append(f"{label} wav_sha256 does not match materialized WAV {wav_filename!r}")
+    _validate_scheduled_block_trial_sequence(
+        record,
+        label=label,
+        expected_trials=expected_trials,
+        failures=failures,
+    )
+
+
+def _validate_scheduled_block_trial_sequence(
+    record: dict[str, Any],
+    *,
+    label: str,
+    expected_trials: list[dict[str, Any]],
+    failures: list[str],
+) -> None:
+    rows = [row for row in _json_list(record.get("trials")) if isinstance(row, dict)]
+    if not rows:
+        if expected_trials:
+            failures.append(f"{label} is missing materialized trial sequence")
+        return
+    if len(rows) != len(expected_trials):
+        failures.append(f"{label} materialized trial sequence length differs from run package")
+        return
+    for index, (observed, expected) in enumerate(zip(rows, expected_trials), start=1):
+        prefix = f"{label} materialized trial {index}"
+        observed_number = _safe_int(observed.get("trial_number"))
+        if observed_number != index:
+            failures.append(f"{prefix} trial_number is not sequential")
+        expected_uid = str(expected.get("trial_uid") or "")
+        observed_uid = str(observed.get("trial_uid") or "")
+        if expected_uid and observed_uid != expected_uid:
+            failures.append(f"{prefix} trial_uid differs from run package")
+        expected_asset_id = str(expected.get("building_block_asset_id") or "")
+        observed_asset_id = str(observed.get("building_block_asset_id") or "")
+        if expected_asset_id and observed_asset_id != expected_asset_id:
+            failures.append(f"{prefix} building_block_asset_id differs from run package")
 
 
 def _safe_int(value: Any, *, fallback: int = 0) -> int:

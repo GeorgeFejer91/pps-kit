@@ -604,6 +604,36 @@ def test_android_lsl_runtime_validator_rejects_missing_lightweight_materializati
     assert "missing phone_scheduled_block_materialization event" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_lightweight_materialized_trial_sequence_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    artifact_path = run_dir / "materialized_blocks" / "phone_materialized_block_01.json"
+    artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+    artifact["trials"][0]["building_block_asset_id"] = "wrong-trial-asset"
+    artifact_path.write_text(json.dumps(artifact), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_lightweight_materializations=True)
+
+    assert result.ok is False
+    assert "building_block_asset_id differs from run package" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_lightweight_materialized_trial_number_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    artifact_path = run_dir / "materialized_blocks" / "phone_materialized_block_01.json"
+    artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+    artifact["trials"][0]["trial_number"] = 0
+    artifact_path.write_text(json.dumps(artifact), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_lightweight_materializations=True)
+
+    assert result.ok is False
+    assert "trial_number is not sequential" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_rejects_phone_marker_mirror_drift(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -1547,6 +1577,23 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
         "duration_ms": 1000,
         "trial_count": 1,
         "tactile_cue_count": 1,
+        "trials": [
+            {
+                "trial_number": 1,
+                "trial_uid": "trial-001",
+                "building_block_asset_id": "trial-asset-001",
+                "trial_type": "audio_tactile",
+                "family": "standard",
+                "soa_ms": "100",
+                "row_label": "inhale",
+                "noise_type": "looming",
+                "start_s": 0.0,
+                "end_s": 1.0,
+                "duration_s": 1.0,
+                "tactile_onset_s": 0.5,
+                "response_window_onset_s": 0.5,
+            }
+        ],
     }
     response_ledger = [
         {

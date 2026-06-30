@@ -229,8 +229,11 @@ Required validation levels:
    `lsl_runtime_status.json`. Add `--expect-lightweight-materializations` for
    building-block-only `Send To Phone` runs; this requires one
    `phone_scheduled_block_materialization` event plus matching
-    `materialized_blocks/phone_materialized_block_XX.json` and WAV hash evidence
-    for every scheduled block. The same validator also accepts Controller-mode
+   `materialized_blocks/phone_materialized_block_XX.json` and WAV hash evidence
+   for every scheduled block, and it compares each materialized trial
+   sequence's `trial_uid`, sequential `trial_number`, and
+   `building_block_asset_id` order against `run_package_manifest.json`. The
+   same validator also accepts Controller-mode
     `phone_controller_runtime_status.json` and
     `phone_controller_command_outbox.jsonl` artifacts, PC-admin
     `pc_android_lsl_admin_status.json` /

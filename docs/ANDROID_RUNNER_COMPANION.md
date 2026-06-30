@@ -229,6 +229,15 @@ and to match the `event_id`, `event_code`, `event_type`, `trigger_key`, and
 phone elapsed-time sequence implied by `lsl_marker_mirror.csv`. This is the
 phone-local expected `PPSTriggerCodes` mirror used before or alongside PC-side
 LSL/XDF monitor reconciliation.
+For lightweight scheduled-block reconstruction, add
+`--expect-lightweight-materializations`; this requires every
+`trial_building_blocks_only` package block to have a
+`phone_scheduled_block_materialization` event, a matching
+`materialized_blocks/phone_materialized_block_XX.json` sidecar, a generated WAV
+whose SHA-256 matches the sidecar, and a materialized trial sequence whose
+`trial_uid`, sequential `trial_number`, and `building_block_asset_id` order
+matches `run_package_manifest.json`. This lets a six-building-block phone
+package be audited for participant-specific playback-order drift after export.
 For phone-owned timing reconstruction, add
 `--expect-audiotrack-timing-evidence`; this requires `block_start` events to
 declare `audio_timing_strategy = audiotrack_pcm_wav_playback_head` with positive

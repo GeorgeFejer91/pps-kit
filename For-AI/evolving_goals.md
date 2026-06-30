@@ -168,7 +168,9 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `materialized_blocks/`, then requires every `trial_building_blocks_only`
   scheduled block to have a matching
   `phone_scheduled_block_materialization` event, materialization JSON manifest,
-  and generated WAV whose SHA-256 matches the recorded reconstruction hash.
+  generated WAV whose SHA-256 matches the recorded reconstruction hash, and a
+  materialized trial sequence whose `trial_uid`, sequential `trial_number`, and
+  `building_block_asset_id` order matches `run_package_manifest.json`.
 - Android now preserves the mobile package `asset_strategy` through its parsed
   Kotlin model and all phone-owned reconstruction surfaces: session metadata
   diary, `completion.json`/`latest_events.json` package summary,
