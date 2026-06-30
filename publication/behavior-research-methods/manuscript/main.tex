@@ -47,6 +47,27 @@ Behavior Research Methods is an appropriate target because the manuscript is abo
 
 The paper therefore provides three reusable products. The first is the design-run-recreation suite itself, including new-study construction, published-profile recreation, native acquisition, validation evidence, and exploratory analysis review. The second is a design-decision evidence matrix that maps visible GUI and runner choices to methodological variation in the PPS literature. The third is a reporting template: the manuscript distinguishes reusable profiles, local generated assets, participant outputs, timing evidence, tactile perception evidence, and exploratory analysis. This aligns with growing concern that research assets can exist in principle yet still be difficult to execute, inspect, or reuse computationally \citep{Ellis2024}.
 
+\subsection{Tutorial Use of the Manuscript and Source Package}
+
+The article is written to be used as a tutorial and audit guide, not only as a software announcement. Table~\ref{tab:reader-guide} maps the main reader questions to the manuscript sections and source files that answer them. This organization follows the practical pattern of behavioral software papers: describe the tool, show how task logic becomes executable, identify the evidence needed for timing-sensitive claims, and make reusable materials easy to inspect \citep{AnwylIrvine2018,Peirce2019,Akam2022,DeLeeuw2022}.
+
+\begin{table}[t]
+\caption{Reader guide for using the manuscript and source package.}
+\label{tab:reader-guide}
+\footnotesize
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.22\textwidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.28\textwidth}}
+\toprule
+Reader question & Where to look & Practical use \\
+\midrule
+What design choices differ across PPS studies? & Design-decision evidence matrix, \code{evidence\_matrix.csv}, and \code{gui\_control\_coverage.csv}. & Identify which GUI and runner controls are scientific design decisions and which are operational controls. \\
+How do I build a new PPS task? & PPS Toolkit overview and the design-run-recreation pathway. & Follow Segments 0--6 from profile/project selection through source generation, trial assembly, block review, and runner handoff. \\
+How do I recreate a published paradigm? & Profiles and project registry, published-profile use case, and validation-evidence summary. & Inspect represented fields, missing apparatus details, local substitutions, verification status, and profile caveats before adapting the profile. \\
+What evidence supports a run? & Technical method, validation/use cases, and archive-layer table. & Keep software schedules, digital audio evidence, electrical loopback evidence, and tactile perceptual evidence separate. \\
+What should I report or share? & Reporting checklist, declarations, open-practices statement, and \code{submission\_readiness\_audit.md}. & Report provenance, hashes, baseline choices, response rules, validation tiers, analysis labels, and any artifacts that support the claims made. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 \section{PPS Toolkit Overview}
 
 \toolkit{} treats an experiment as a chain of decisions rather than as a single monolithic script. Each dashboard segment owns a registry layer and writes artifacts that downstream segments consume. This is intentionally close to the way researchers reason about PPS paradigms: choose the study profile, define the sound, define the within-trial sequence, define tactile timing and controls, decide how many trials are needed, inspect the block schedule, and finally hand the accepted design to the runner.

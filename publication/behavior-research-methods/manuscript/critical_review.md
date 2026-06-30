@@ -579,3 +579,36 @@ Methods manuscript draft. It is a working audit, not manuscript text.
   Hardware timing, tactile perception, and any quantified participant hit-rate
   claims still require traceable external artifacts before the final paper can
   make those claims.
+
+## Iteration 16: Tutorial Reader-guide Pass
+
+### Main Critiques
+
+- The manuscript was correctly framed as a full suite, but the tutorial value
+  was partly implicit. A BRM reader could see the evidence matrix, reporting
+  checklist, pathway, and validation section, but there was no compact guide
+  explaining which artifact answers which practical question.
+- The article should help three kinds of reader: a lab designing a new task, a
+  lab recreating a published paradigm, and a reviewer checking whether the
+  claims are supported by the right evidence tier.
+- Another Consensus software-methods search again favored a practical article
+  pattern: usable tools should explain task logic, runnable materials,
+  reproducibility boundaries, and validation examples rather than functioning
+  only as software advertisements.
+
+### Resolution In This Revision
+
+- Added a short `Tutorial Use of the Manuscript and Source Package` subsection
+  after `Contribution and Journal Fit`.
+- Added Table `Reader guide for using the manuscript and source package`,
+  mapping five reader questions to the relevant manuscript sections and source
+  artifacts: design variation, new-task construction, published-profile
+  recreation, run evidence, and reporting/sharing.
+- Updated `submission_readiness_audit.md` so tutorial-style reader orientation
+  is now an explicit source-ready requirement.
+
+### Residual Concerns
+
+- The reader-guide table improves navigability, but it still depends on the
+  final release archive and validation artifacts being supplied before
+  submission.

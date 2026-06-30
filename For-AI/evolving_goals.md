@@ -167,6 +167,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   final-submission blockers such as release DOI/commit, author/declaration
   metadata, publication-hardware validation, and traceable artifacts for any
   quantified tactile hit-rate claims.
+- Continued the BRM manuscript self-review loop with a tutorial reader-guide
+  pass. `main.tex` now includes a `Tutorial Use of the Manuscript and Source
+  Package` subsection and reader-guide table that maps practical BRM-reader
+  questions to the manuscript sections and source artifacts for design
+  variation, new-task construction, published-profile recreation, run evidence,
+  and reporting/sharing. The submission-readiness audit now tracks this
+  tutorial orientation as source-ready.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation
