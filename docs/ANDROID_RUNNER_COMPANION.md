@@ -176,6 +176,12 @@ requires `events.csv` to be present and to match the embedded
 run/package identity, phone timestamps, duplicate-id checks, and primitive
 event fields. This is the quick human-readable log of what the phone runtime
 did before the richer marker/XDF checks.
+For strict local numeric-trigger reconstruction, add
+`--expect-trigger-code-mirror`; this requires `trigger_codes.csv` to be present
+and to match the `event_id`, `event_code`, `event_type`, `trigger_key`, and
+phone elapsed-time sequence implied by `lsl_marker_mirror.csv`. This is the
+phone-local expected `PPSTriggerCodes` mirror used before or alongside PC-side
+LSL/XDF monitor reconciliation.
 For phone-owned timing reconstruction, add
 `--expect-audiotrack-timing-evidence`; this requires `block_start` events to
 declare `audio_timing_strategy = audiotrack_pcm_wav_playback_head` with positive
@@ -199,7 +205,7 @@ When validating PC-runner or Controller-phone administration, add
 
 Phone-owned local artifacts now include `participant_metadata.json`,
 `haptic_capability.json`, `events.csv`, `lsl_marker_mirror.csv`,
-`command_diary.jsonl`, `lsl_runtime_status.json`, `phone_response_ledger.csv`,
+`trigger_codes.csv`, `command_diary.jsonl`, `lsl_runtime_status.json`, `phone_response_ledger.csv`,
 `phone_topup_plan.json`, `phone_topup_materialization.json`, any
 `phone_topup_block.wav`, reconstruction/package snapshots, and
 `completion.json` in the exported phone session ZIP. The exported ZIP also

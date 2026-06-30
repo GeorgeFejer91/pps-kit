@@ -269,6 +269,52 @@ def test_android_lsl_runtime_validator_rejects_phone_event_diary_drift(tmp_path:
     assert "events.csv row 1 type differs from completion event" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_accepts_trigger_code_mirror(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+
+    result = validator.validate_run_artifact(run_dir, expect_trigger_code_mirror=True)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_requires_trigger_code_mirror_when_expected(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    status = _status(native=False)
+    status.update(_catalog_identity())
+    events = [_phone_event(1, "run_start")]
+    markers = [_phone_marker(event) for event in events]
+    (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
+    (run_dir / "completion.json").write_text(
+        json.dumps({"lsl_runtime_status": status, "events": events, "lsl_marker_mirror": markers}),
+        encoding="utf-8",
+    )
+    _write_marker_csv(run_dir / "lsl_marker_mirror.csv", markers)
+
+    result = validator.validate_run_artifact(run_dir, expect_trigger_code_mirror=True)
+
+    assert result.ok is False
+    assert "phone trigger-code mirror trigger_codes.csv is missing" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_trigger_code_mirror_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    trigger_path = run_dir / "trigger_codes.csv"
+    rows = _read_csv_rows(trigger_path)
+    rows[0]["event_code"] = "999"
+    _write_marker_csv(trigger_path, rows)
+
+    result = validator.validate_run_artifact(run_dir, expect_trigger_code_mirror=True)
+
+    assert result.ok is False
+    assert "trigger_codes.csv row 1 event_code differs from lsl_marker_mirror" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_rejects_audiotrack_strategy_drift(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -427,6 +473,7 @@ def test_android_lsl_runtime_validator_loads_lightweight_materialization_from_zi
     result = validator.validate_run_artifact(
         archive_path,
         expect_event_diary=True,
+        expect_trigger_code_mirror=True,
         expect_lightweight_materializations=True,
     )
 
@@ -629,6 +676,7 @@ def _write_phone_run_with_native_command_diary(
     (run_dir / "haptic_capability.json").write_text(json.dumps(haptic_capability), encoding="utf-8")
     (run_dir / "command_diary.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
     _write_marker_csv(run_dir / "lsl_marker_mirror.csv", markers)
+    _write_trigger_codes_csv(run_dir / "trigger_codes.csv", markers)
 
 
 def _phone_native_command_row(*, ack_sent: bool = True) -> dict:
@@ -801,6 +849,20 @@ def _write_android_events_csv(path: Path, events: list[dict]) -> None:
         writer.writeheader()
         for event in events:
             writer.writerow({key: _android_csv_cell(event.get(key)) for key in fieldnames})
+
+
+def _write_trigger_codes_csv(path: Path, markers: list[dict]) -> None:
+    rows = [
+        {
+            "event_id": marker.get("event_id", ""),
+            "event_code": marker.get("event_code", ""),
+            "event_type": marker.get("event_type", ""),
+            "trigger_key": marker.get("trigger_key", ""),
+            "phone_elapsed_realtime_ms": marker.get("phone_elapsed_realtime_ms", ""),
+        }
+        for marker in markers
+    ]
+    _write_marker_csv(path, rows)
 
 
 def _android_csv_cell(value: object) -> str:
@@ -1085,6 +1147,7 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
     (run_dir / "haptic_capability.json").write_text(json.dumps(haptic_capability), encoding="utf-8")
     _write_android_events_csv(run_dir / "events.csv", events)
     _write_marker_csv(run_dir / "lsl_marker_mirror.csv", markers)
+    _write_trigger_codes_csv(run_dir / "trigger_codes.csv", markers)
     _write_marker_csv(run_dir / "phone_response_ledger.csv", response_ledger)
     (run_dir / "phone_topup_plan.json").write_text(json.dumps(topup_plan), encoding="utf-8")
     (run_dir / "phone_topup_materialization.json").write_text(json.dumps(topup_materialization), encoding="utf-8")

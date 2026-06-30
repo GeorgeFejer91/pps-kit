@@ -158,6 +158,7 @@ def validate_runtime_status(
     event_rows: list[dict[str, Any]] | None = None,
     command_diary_rows: list[dict[str, Any]] | None = None,
     marker_mirror_rows: list[dict[str, Any]] | None = None,
+    trigger_code_rows: list[dict[str, Any]] | None = None,
     materialization_manifests: list[dict[str, Any]] | None = None,
     materialized_wav_hashes: dict[str, str] | None = None,
     response_ledger_rows: list[dict[str, Any]] | None = None,
@@ -169,6 +170,7 @@ def validate_runtime_status(
     expect_run_catalog: bool = False,
     expect_run_catalog_index: bool = False,
     expect_event_diary: bool = False,
+    expect_trigger_code_mirror: bool = False,
     expect_lightweight_materializations: bool = False,
     expect_phone_topup_evidence: bool = False,
     expect_audiotrack_timing_evidence: bool = False,
@@ -279,6 +281,14 @@ def validate_runtime_status(
         failures=failures,
         warnings=warnings,
         expect_native_transport=expect_native_transport,
+    )
+    _validate_phone_trigger_code_mirror(
+        completion=completion,
+        marker_mirror_rows=marker_mirror_rows or [],
+        trigger_code_rows=trigger_code_rows or [],
+        failures=failures,
+        warnings=warnings,
+        expect_trigger_code_mirror=expect_trigger_code_mirror,
     )
     _validate_phone_audiotrack_timing_evidence(
         completion=completion,
@@ -511,6 +521,7 @@ def validate_run_artifact(
     expect_run_catalog: bool = False,
     expect_run_catalog_index: bool = False,
     expect_event_diary: bool = False,
+    expect_trigger_code_mirror: bool = False,
     expect_lightweight_materializations: bool = False,
     expect_phone_topup_evidence: bool = False,
     expect_audiotrack_timing_evidence: bool = False,
@@ -555,6 +566,7 @@ def validate_run_artifact(
         event_rows=loaded.get("event_rows") or [],
         command_diary_rows=loaded.get("command_diary_rows") or [],
         marker_mirror_rows=loaded.get("marker_mirror_rows") or [],
+        trigger_code_rows=loaded.get("trigger_code_rows") or [],
         materialization_manifests=loaded.get("materialization_manifests") or [],
         materialized_wav_hashes=loaded.get("materialized_wav_hashes") or {},
         response_ledger_rows=loaded.get("response_ledger_rows") or [],
@@ -566,6 +578,7 @@ def validate_run_artifact(
         expect_run_catalog=expect_run_catalog,
         expect_run_catalog_index=expect_run_catalog_index,
         expect_event_diary=expect_event_diary,
+        expect_trigger_code_mirror=expect_trigger_code_mirror,
         expect_lightweight_materializations=expect_lightweight_materializations,
         expect_phone_topup_evidence=expect_phone_topup_evidence,
         expect_audiotrack_timing_evidence=expect_audiotrack_timing_evidence,
@@ -738,6 +751,7 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
             event_members = [name for name in archive.namelist() if name.endswith("events.csv")]
             command_diary_members = [name for name in archive.namelist() if name.endswith("command_diary.jsonl")]
             marker_mirror_members = [name for name in archive.namelist() if name.endswith("lsl_marker_mirror.csv")]
+            trigger_code_members = [name for name in archive.namelist() if name.endswith("trigger_codes.csv")]
             response_ledger_members = [name for name in archive.namelist() if name.endswith("phone_response_ledger.csv")]
             topup_plan_members = [name for name in archive.namelist() if name.endswith("phone_topup_plan.json")]
             topup_materialization_members = [
@@ -830,6 +844,11 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 marker_mirror_name = sorted(marker_mirror_members)[0]
                 archive.extract(marker_mirror_name, temp_root)
                 marker_mirror_rows = _read_csv(temp_root / marker_mirror_name)
+            trigger_code_rows: list[dict[str, Any]] = []
+            if trigger_code_members:
+                trigger_code_name = sorted(trigger_code_members)[0]
+                archive.extract(trigger_code_name, temp_root)
+                trigger_code_rows = _read_csv(temp_root / trigger_code_name)
             response_ledger_rows: list[dict[str, Any]] = []
             if response_ledger_members:
                 response_ledger_name = sorted(response_ledger_members)[0]
@@ -864,6 +883,7 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 "event_rows": event_rows,
                 "command_diary_rows": command_diary_rows,
                 "marker_mirror_rows": marker_mirror_rows,
+                "trigger_code_rows": trigger_code_rows,
                 "materialization_manifests": materialization_manifests,
                 "materialized_wav_hashes": materialized_wav_hashes,
                 "response_ledger_rows": response_ledger_rows,
@@ -881,6 +901,7 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
     event_diary_path = path / "events.csv"
     command_diary_path = path / "command_diary.jsonl"
     marker_mirror_path = path / "lsl_marker_mirror.csv"
+    trigger_code_path = path / "trigger_codes.csv"
     response_ledger_path = path / "phone_response_ledger.csv"
     topup_plan_path = path / "phone_topup_plan.json"
     topup_materialization_path = path / "phone_topup_materialization.json"
@@ -901,6 +922,7 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
         "event_rows": _read_csv(event_diary_path) if event_diary_path.is_file() else [],
         "command_diary_rows": _read_jsonl(command_diary_path) if command_diary_path.is_file() else [],
         "marker_mirror_rows": _read_csv(marker_mirror_path) if marker_mirror_path.is_file() else [],
+        "trigger_code_rows": _read_csv(trigger_code_path) if trigger_code_path.is_file() else [],
         "materialization_manifests": materialization_manifests,
         "materialized_wav_hashes": materialized_wav_hashes,
         "response_ledger_rows": _read_csv(response_ledger_path) if response_ledger_path.is_file() else [],
@@ -1824,6 +1846,78 @@ def _validate_phone_marker_mirror(
 
     if rows and not events:
         warnings.append("phone marker mirror was present without completion events; only marker self-consistency was checked")
+
+
+def _validate_phone_trigger_code_mirror(
+    *,
+    completion: dict[str, Any] | None,
+    marker_mirror_rows: list[dict[str, Any]],
+    trigger_code_rows: list[dict[str, Any]],
+    failures: list[str],
+    warnings: list[str],
+    expect_trigger_code_mirror: bool,
+) -> None:
+    embedded_markers = [
+        row
+        for row in list((completion or {}).get("lsl_marker_mirror") or [])
+        if isinstance(row, dict)
+    ]
+    marker_rows = marker_mirror_rows or embedded_markers
+    if not trigger_code_rows:
+        message = "phone trigger-code mirror trigger_codes.csv is missing"
+        if expect_trigger_code_mirror:
+            failures.append(message)
+        elif marker_rows:
+            warnings.append(f"{message}; rerun with --expect-trigger-code-mirror for strict checks")
+        return
+
+    required_fields = ("event_id", "event_code", "event_type", "trigger_key", "phone_elapsed_realtime_ms")
+    for index, row in enumerate(trigger_code_rows, start=1):
+        prefix = f"trigger_codes.csv row {index}"
+        for field in required_fields:
+            if field not in row or not str(row.get(field) or "").strip():
+                failures.append(f"{prefix} is missing {field}")
+
+    event_ids = [_clean_int(row.get("event_id")) for row in trigger_code_rows if _clean_int(row.get("event_id")) > 0]
+    duplicate_ids = _duplicate_ints(event_ids)
+    if duplicate_ids:
+        failures.append(f"trigger_codes.csv has duplicate event ids: {', '.join(str(item) for item in duplicate_ids[:10])}")
+
+    if not marker_rows:
+        warnings.append("trigger_codes.csv was present without marker mirror rows; only trigger-code self-consistency was checked")
+        return
+
+    marker_ids = [_clean_int(row.get("event_id")) for row in marker_rows if _clean_int(row.get("event_id")) > 0]
+    if event_ids != marker_ids:
+        failures.append("trigger_codes.csv event ids differ from lsl_marker_mirror event ids")
+    if len(trigger_code_rows) != len(marker_rows):
+        failures.append("trigger_codes.csv row count differs from lsl_marker_mirror rows")
+
+    marker_by_id = {
+        _clean_int(row.get("event_id")): row
+        for row in marker_rows
+        if _clean_int(row.get("event_id")) > 0
+    }
+    missing_marker_ids = sorted(set(marker_by_id) - set(event_ids))
+    extra_trigger_ids = sorted(set(event_ids) - set(marker_by_id))
+    if missing_marker_ids:
+        failures.append(f"trigger_codes.csv is missing marker event ids: {', '.join(str(item) for item in missing_marker_ids[:10])}")
+    if extra_trigger_ids:
+        failures.append(f"trigger_codes.csv has extra marker event ids: {', '.join(str(item) for item in extra_trigger_ids[:10])}")
+
+    for index, row in enumerate(trigger_code_rows, start=1):
+        event_id = _clean_int(row.get("event_id"))
+        marker = marker_by_id.get(event_id)
+        if marker is None:
+            continue
+        prefix = f"trigger_codes.csv row {index}"
+        for field in ("event_code", "event_type", "trigger_key", "phone_elapsed_realtime_ms"):
+            observed = _csv_scalar(row.get(field))
+            expected = _csv_scalar(marker.get(field))
+            if observed and expected and observed != expected:
+                failures.append(f"{prefix} {field} differs from lsl_marker_mirror")
+        if not _clean_int(row.get("event_code")):
+            failures.append(f"{prefix} event_code must be an integer trigger code")
 
 
 def _validate_phone_audiotrack_timing_evidence(
@@ -2823,6 +2917,11 @@ def main(argv: list[str] | None = None) -> int:
         help="For phone-run artifacts, fail unless events.csv is present and matches completion/latest-events event rows.",
     )
     parser.add_argument(
+        "--expect-trigger-code-mirror",
+        action="store_true",
+        help="For phone-run artifacts, fail unless trigger_codes.csv is present and matches the local PPSTriggerCodes sequence implied by lsl_marker_mirror.csv.",
+    )
+    parser.add_argument(
         "--expect-lightweight-materializations",
         action="store_true",
         help="For building-block-only phone runs, fail unless every scheduled block has materialization event/JSON/WAV evidence.",
@@ -2853,6 +2952,7 @@ def main(argv: list[str] | None = None) -> int:
         expect_run_catalog=args.expect_run_catalog,
         expect_run_catalog_index=args.expect_run_catalog_index,
         expect_event_diary=args.expect_event_diary,
+        expect_trigger_code_mirror=args.expect_trigger_code_mirror,
         expect_lightweight_materializations=args.expect_lightweight_materializations,
         expect_phone_topup_evidence=args.expect_phone_topup_evidence,
         expect_audiotrack_timing_evidence=args.expect_audiotrack_timing_evidence,

@@ -365,6 +365,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   primitive field consistency against embedded `completion.json` /
   `latest_events.json` events. This gives operators a CSV audit trail of what
   the phone runtime did, separate from marker mirrors and command diaries.
+- Android phone-owned runs now write a local numeric trigger-code mirror,
+  `trigger_codes.csv`, beside `lsl_marker_mirror.csv`. It records the
+  `event_id`, `event_code`, `event_type`, `trigger_key`, and phone elapsed-time
+  sequence that the optional native bridge pushes to `PPSTriggerCodes`.
+  `validate_android_lsl_runtime_artifact.py --expect-trigger-code-mirror` loads
+  that mirror from folders or ZIPs and compares it to the rich marker mirror so
+  phone-local numeric-trigger reconstruction can be checked before PC monitor or
+  LabRecorder/XDF evidence.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only

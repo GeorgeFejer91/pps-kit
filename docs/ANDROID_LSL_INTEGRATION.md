@@ -70,7 +70,7 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   was sent over native LSL and whether a matching `PPSCommandAcksV1` sample was
   observed.
 - PC-side phone uploads preserve `lsl_runtime_status.json` beside
-  `lsl_marker_mirror.csv` and `command_diary.jsonl`.
+  `lsl_marker_mirror.csv`, `trigger_codes.csv`, and `command_diary.jsonl`.
 
 This layer is useful because it keeps the PC runner, Android runner mode, and
 Android controller mode on the same command/ack schema. Default builds are not
@@ -116,10 +116,11 @@ That file is ignored by Git. When it is absent, the reflection bridge records
 `liblsl_android_class_unavailable` and native status remains false. When it is
 present, `PhoneNativeLslBridge.kt` can create the rich `PPSMarkersV2` and
 numeric `PPSTriggerCodes` outlets, append PC-compatible channel metadata, push
-every local marker mirror row to native LSL while preserving the local CSV
-mirror, resolve runner-side `PPSCommandSignalsV1`, emit `PPSCommandAcksV1` for
-handled commands, and create controller-side `PPSCommandSignalsV1` outlets with
-optional `PPSCommandAcksV1` ack polling.
+every local marker mirror row to native LSL while preserving the local rich CSV
+mirror and the expected numeric `trigger_codes.csv` mirror, resolve runner-side
+`PPSCommandSignalsV1`, emit `PPSCommandAcksV1` for handled commands, and create
+controller-side `PPSCommandSignalsV1` outlets with optional `PPSCommandAcksV1`
+ack polling.
 
 Phone marker timestamps use
 `android_elapsed_realtime_plus_open_lsl_clock_offset`: the app samples
@@ -246,7 +247,8 @@ To compare the PC-observed monitor rows against the phone's local
 ```
 
 This reconciliation checks whether the PC saw the same rich marker event ids,
-metadata fields, and numeric trigger-code sequence that the phone wrote locally.
+metadata fields, and numeric trigger-code sequence that the phone wrote locally
+in `trigger_codes.csv`.
 It is still network LSL evidence, not physical vibration/audio timing proof.
 
 Until that strict validator passes together with external LSL/XDF capture, the

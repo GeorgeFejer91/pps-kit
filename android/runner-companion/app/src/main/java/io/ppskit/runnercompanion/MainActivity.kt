@@ -2845,6 +2845,7 @@ private class PhoneRunSession(
         artifactFile.writeText(payload.toString(2), Charsets.UTF_8)
         writePhoneEventsCsv(File(dir, "events.csv"), events)
         writePhoneEventsCsv(File(dir, "lsl_marker_mirror.csv"), lslMarkers)
+        writePhoneTriggerCodesCsv(File(dir, "trigger_codes.csv"), lslMarkers)
         writePhoneEventsCsv(responseLedgerFile, responseReview.ledgerRows)
         topupPlanFile.writeText(responseReview.topupPlan.toString(2), Charsets.UTF_8)
         topupMaterializationFile.writeText(topupMaterialization.toString(2), Charsets.UTF_8)
@@ -3288,6 +3289,29 @@ private fun writePhoneEventsCsv(path: File, events: List<JSONObject>) {
             append("\n")
             events.forEach { event ->
                 append(keys.joinToString(",") { key -> csvCell(event.opt(key)?.toString().orEmpty()) })
+                append("\n")
+            }
+        },
+        Charsets.UTF_8,
+    )
+}
+
+private fun writePhoneTriggerCodesCsv(path: File, markers: List<JSONObject>) {
+    if (markers.isEmpty()) return
+    path.parentFile?.mkdirs()
+    path.writeText(
+        buildString {
+            append("event_id,event_code,event_type,trigger_key,phone_elapsed_realtime_ms\n")
+            markers.forEach { marker ->
+                append(
+                    listOf(
+                        marker.optString("event_id", ""),
+                        marker.optString("event_code", ""),
+                        marker.optString("event_type", ""),
+                        marker.optString("trigger_key", ""),
+                        marker.optString("phone_elapsed_realtime_ms", ""),
+                    ).joinToString(",") { csvCell(it) },
+                )
                 append("\n")
             }
         },

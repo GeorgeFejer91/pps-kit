@@ -86,3 +86,5 @@ def test_android_phone_run_writes_plain_event_diary() -> None:
 
     assert 'writePhoneEventsCsv(File(dir, "events.csv"), events)' in main_activity
     assert 'writePhoneEventsCsv(File(dir, "lsl_marker_mirror.csv"), lslMarkers)' in main_activity
+    assert 'writePhoneTriggerCodesCsv(File(dir, "trigger_codes.csv"), lslMarkers)' in main_activity
+    assert "private fun writePhoneTriggerCodesCsv" in main_activity

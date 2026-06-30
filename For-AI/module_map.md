@@ -107,6 +107,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `pc_android_lsl_command_outbox.jsonl`, command/ack schema/channel order,
   phone-run `command_diary.jsonl` / embedded command diary native ack rows,
   phone-run `lsl_marker_mirror.csv` / embedded marker mirror reconstruction,
+  phone-run `trigger_codes.csv` expected local `PPSTriggerCodes` sequence when
+  `--expect-trigger-code-mirror` is set,
   phone-run `participant_metadata.json` and `haptic_capability.json` sidecars,
   PC-monitor `pc_android_lsl_monitor_report.json` /
   `pc_android_lsl_monitor_events.jsonl`, token requirement, privacy boundary,
