@@ -147,6 +147,7 @@ def test_android_command_acks_echo_nonsecret_target_identity() -> None:
 
     assert "PHONE_LSL_COMMAND_REJECTION_PAYLOAD_SCHEMA" in lsl_protocol
     assert "PHONE_LSL_COMMAND_SAMPLE_REJECTION_PAYLOAD_SCHEMA" in lsl_protocol
+    assert "PHONE_LSL_COMMAND_HANDLER_REJECTION_PAYLOAD_SCHEMA" in lsl_protocol
     assert "PHONE_COMMAND_ACK_ECHO_PAYLOAD_FIELDS" in lsl_protocol
     for field in [
         "package_id",
@@ -166,6 +167,10 @@ def test_android_command_acks_echo_nonsecret_target_identity() -> None:
     assert "private fun phoneRejectedCommandAckPayload" in lsl_protocol
     assert "payload = phoneRejectedCommandAckPayload(signal, runPackage, rejection)" in lsl_protocol
     assert "private fun phoneMalformedCommandSampleAckPayload" in lsl_protocol
+    assert "private fun phoneHandlerRejectedCommandAckPayload" in lsl_protocol
+    assert "phoneHandlerRejectedCommandAckPayload(signal, runPackage, result.reason, result.payload)" in lsl_protocol
+    assert '.put("rejected_before_handler", false)' in lsl_protocol
+    assert '.put("handler_payload", JSONObject(handlerPayload.toString()))' in lsl_protocol
     assert '.put("raw_sample_preview", stringArray(redactedCommandSamplePreview(rawValues)))' in lsl_protocol
     assert 'if (index >= 6 && value.isNotBlank()) "<redacted>" else value' in lsl_protocol
     assert '.put("requested_package_id", signal.payload.optString("package_id"))' in lsl_protocol

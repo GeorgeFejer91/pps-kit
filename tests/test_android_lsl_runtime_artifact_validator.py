@@ -1996,6 +1996,34 @@ def test_android_lsl_runtime_validator_rejects_phone_run_rejected_command_payloa
     assert "rejected ack payload schema mismatch" in failures
 
 
+def test_android_lsl_runtime_validator_accepts_phone_run_handler_rejected_command_ack_payload(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_phone_run_with_native_command_diary(run_dir, row=_phone_native_handler_rejected_command_row())
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_rejects_phone_run_handler_rejection_payload_schema_gap(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    row = _phone_native_handler_rejected_command_row()
+    payload = dict(row["payload"])
+    payload.pop("schema")
+    row["payload"] = payload
+    row["ack_sample"][9] = json.dumps(payload)
+    _write_phone_run_with_native_command_diary(run_dir, row=row)
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True, expect_command_acks=True)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "rejected ack payload schema mismatch" in failures
+
+
 def test_android_lsl_runtime_validator_accepts_phone_run_malformed_command_sample_ack_payload(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -2583,6 +2611,119 @@ def _phone_native_rejected_command_row() -> dict:
         "ack_sample": ack_sample,
         "phone_unix_ms": 1780000000500,
         "phone_elapsed_realtime_ms": 123956,
+    }
+
+
+def _phone_native_handler_rejected_command_row() -> dict:
+    command_sample = _phone_command_sample(
+        "cmd-phone-handler-rejected-001",
+        "pc_runner",
+        "pause",
+        issued_lsl_time="42.600000000",
+    )
+    handler_payload = {
+        "schema": "pps-android-phone-runtime-command-state.v1",
+        "command": "pause",
+        "run_id": "phone-run-001",
+        "package_id": "pkg-001",
+        "run_state": "",
+        "active_block_id": "",
+    }
+    payload = {
+        "schema": "pps-android-phone-command-handler-rejection.v1",
+        "status": "rejected",
+        "reason": "no_active_phone_block_to_pause",
+        "rejected_before_handler": False,
+        "handler_completed": True,
+        "command": "pause",
+        "package_id": "pkg-001",
+        "participant_id": "P001",
+        "session_id": "session-001",
+        "part_session_id": "part-001",
+        "session_group_id": "group-001",
+        "part_number": "1",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+        "target_part_number": "1",
+        "requested_session_id": "part-001",
+        "requested_package_id": "pkg-001",
+        "requested_participant_id": "P001",
+        "requested_target_session_id": "part-001",
+        "requested_target_part_session_id": "part-001",
+        "requested_target_session_group_id": "group-001",
+        "requested_target_part_number": "1",
+        "handler_payload_schema": "pps-android-phone-runtime-command-state.v1",
+        "handler_payload": handler_payload,
+        "supported_commands": [
+            "start_experiment",
+            "start_part",
+            "pause",
+            "resume",
+            "continue_instruction",
+            "stop_after_block",
+            "request_snapshot",
+            "operator_note",
+        ],
+    }
+    ack_sample = [
+        "pps-lsl-command-ack.v1",
+        "cmd-phone-handler-rejected-001",
+        "part-001",
+        "android_phone",
+        "rejected",
+        "no_active_phone_block_to_pause",
+        "42.610000000",
+        "42.620000000",
+        "42.630000000",
+        json.dumps(payload),
+    ]
+    return {
+        "schema": "pps-android-command-diary.v1",
+        "command_id": "cmd-phone-handler-rejected-001",
+        "command_source": "native_lsl",
+        "sender_id": "pc_runner",
+        "session_id": "part-001",
+        "command": "pause",
+        "status": "rejected",
+        "reason": "no_active_phone_block_to_pause",
+        "payload": dict(payload),
+        "package_id": "pkg-001",
+        "participant_id": "P001",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+        "target_part_number": "1",
+        "run_id": "phone-run-001",
+        "received_lsl_time": 42.61,
+        "applied_lsl_time": 42.62,
+        "ack_lsl_time": 42.63,
+        "ack_sent": True,
+        "command_channels": [
+            "schema",
+            "command_id",
+            "session_id",
+            "sender_id",
+            "command",
+            "issued_lsl_time",
+            "payload_json",
+        ],
+        "command_sample": command_sample,
+        "ack_channels": [
+            "schema",
+            "command_id",
+            "session_id",
+            "receiver_id",
+            "status",
+            "reason",
+            "received_lsl_time",
+            "applied_lsl_time",
+            "ack_lsl_time",
+            "payload_json",
+        ],
+        "ack_sample": ack_sample,
+        "phone_unix_ms": 1780000000600,
+        "phone_elapsed_realtime_ms": 124056,
     }
 
 

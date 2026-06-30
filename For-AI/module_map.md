@@ -208,7 +208,12 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   receiver identity, requested target identity, rejection reason,
   `rejected_before_handler`, and supported commands; strict phone-run,
   Controller/PC-admin, and monitor validation reject incomplete rejected-ack
-  payloads. Malformed command samples that fail before `PPSCommandSignalsV1`
+  payloads. Handler-side runtime rejections now use
+  `pps-android-phone-command-handler-rejection.v1` payloads with
+  `rejected_before_handler=false`, handler completion/payload evidence,
+  receiver/requested identity, and supported commands, so parsed commands that
+  fail local phone runtime conditions are distinguishable from token/session
+  gate failures. Malformed command samples that fail before `PPSCommandSignalsV1`
   parsing now use `pps-android-phone-command-sample-rejection.v1` payloads with
   stable synthetic ids when needed, receiver identity, raw non-secret sample
   diagnostics, and a redacted raw-sample preview; strict phone-run validation
@@ -290,7 +295,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `PPSCommandSignalsV1` `command_sample` evidence in strict ack mode, native
   ack payload versus command diary payload consistency with pairing-token
   exclusion, strict version/field checks for malformed-sample
-  `pps-android-phone-command-sample-rejection.v1`, `request_snapshot`
+  `pps-android-phone-command-sample-rejection.v1`, handler-rejected
+  `pps-android-phone-command-handler-rejection.v1`, `request_snapshot`
   `pps-android-phone-runtime-command-state.v1`, and rejected-command
   `pps-android-phone-command-rejection.v1` ack state reports, and command
   diary payload versus

@@ -72,6 +72,7 @@ ANDROID_CONTROLLER_COMMAND_ROW_SCHEMA = "pps-android-controller-command-row.v1"
 ANDROID_LSL_STREAM_DESCRIPTIONS_SCHEMA = "pps-android-lsl-stream-descriptions.v1"
 ANDROID_COMMAND_REJECTION_PAYLOAD_SCHEMA = "pps-android-phone-command-rejection.v1"
 ANDROID_COMMAND_SAMPLE_REJECTION_PAYLOAD_SCHEMA = "pps-android-phone-command-sample-rejection.v1"
+ANDROID_COMMAND_HANDLER_REJECTION_PAYLOAD_SCHEMA = "pps-android-phone-command-handler-rejection.v1"
 ANDROID_AUDIO_TIMING_STRATEGY = "audiotrack_pcm_wav_playback_head"
 ANDROID_CUE_AUDIO_SCHEDULER = "audiotrack_playback_head"
 PHONE_RESPONSE_MIN_RT_MS = 100
@@ -3839,12 +3840,22 @@ def _validate_phone_command_ack_payload(
     if command == "request_snapshot" and payload_command == "request_snapshot":
         _validate_phone_runtime_snapshot_payload(ack_payload, prefix=prefix, failures=failures)
     if status == "rejected":
-        _validate_phone_command_rejection_payload(
-            ack_payload,
-            reason=_metadata_value(row.get("reason")),
-            prefix=prefix,
-            failures=failures,
-        )
+        schema = _metadata_value(ack_payload.get("schema"))
+        if schema == ANDROID_COMMAND_HANDLER_REJECTION_PAYLOAD_SCHEMA:
+            _validate_phone_command_handler_rejection_payload(
+                ack_payload,
+                row=row,
+                reason=_metadata_value(row.get("reason")),
+                prefix=prefix,
+                failures=failures,
+            )
+        else:
+            _validate_phone_command_rejection_payload(
+                ack_payload,
+                reason=_metadata_value(row.get("reason")),
+                prefix=prefix,
+                failures=failures,
+            )
 
     row_package_id = _metadata_value(row.get("package_id"))
     payload_package_id = _metadata_value(ack_payload.get("package_id"))
@@ -4060,6 +4071,79 @@ def _validate_phone_command_rejection_payload(
     supported = ack_payload.get("supported_commands")
     if not isinstance(supported, list) or not supported:
         failures.append(f"{prefix} rejected ack payload supported_commands must be a nonempty array")
+
+
+def _validate_phone_command_handler_rejection_payload(
+    ack_payload: dict[str, Any],
+    *,
+    row: dict[str, Any],
+    reason: str,
+    prefix: str,
+    failures: list[str],
+) -> None:
+    if _metadata_value(ack_payload.get("schema")) != ANDROID_COMMAND_HANDLER_REJECTION_PAYLOAD_SCHEMA:
+        failures.append(f"{prefix} handler rejected ack payload schema mismatch")
+    if _metadata_value(ack_payload.get("status")) != "rejected":
+        failures.append(f"{prefix} handler rejected ack payload status must be rejected")
+    payload_reason = _metadata_value(ack_payload.get("reason"))
+    if not payload_reason:
+        failures.append(f"{prefix} handler rejected ack payload is missing reason")
+    elif reason and payload_reason != reason:
+        failures.append(f"{prefix} handler rejected ack payload reason differs from ack reason")
+    if ack_payload.get("rejected_before_handler") is not False:
+        failures.append(f"{prefix} handler rejected ack payload rejected_before_handler must be false")
+    if not isinstance(ack_payload.get("handler_completed"), bool):
+        failures.append(f"{prefix} handler rejected ack payload handler_completed must be boolean")
+
+    for field in (
+        "package_id",
+        "participant_id",
+        "session_id",
+        "part_session_id",
+        "session_group_id",
+        "part_number",
+        "requested_session_id",
+        "requested_package_id",
+        "requested_participant_id",
+        "requested_target_session_id",
+        "requested_target_part_session_id",
+        "requested_target_session_group_id",
+        "requested_target_part_number",
+    ):
+        if field not in ack_payload:
+            failures.append(f"{prefix} handler rejected ack payload is missing {field}")
+
+    supported = ack_payload.get("supported_commands")
+    if not isinstance(supported, list) or not supported:
+        failures.append(f"{prefix} handler rejected ack payload supported_commands must be a nonempty array")
+
+    handler_payload = ack_payload.get("handler_payload")
+    if not isinstance(handler_payload, dict):
+        failures.append(f"{prefix} handler rejected ack payload handler_payload must be an object")
+    else:
+        if _metadata_value(handler_payload.get("token")) or _metadata_value(handler_payload.get("companion_token")):
+            failures.append(f"{prefix} handler rejected ack payload handler_payload must not echo the pairing token")
+        handler_schema = _metadata_value(handler_payload.get("schema"))
+        recorded_schema = _metadata_value(ack_payload.get("handler_payload_schema"))
+        if handler_schema and recorded_schema and handler_schema != recorded_schema:
+            failures.append(f"{prefix} handler rejected ack payload handler_payload_schema differs from handler_payload")
+        payload_command = _metadata_value(handler_payload.get("command"))
+        row_command = _metadata_value(row.get("command"))
+        if payload_command and row_command and payload_command != row_command:
+            failures.append(f"{prefix} handler rejected ack payload handler_payload command differs from diary row")
+
+    for row_field, payload_field in (
+        ("package_id", "package_id"),
+        ("participant_id", "participant_id"),
+        ("target_session_id", "target_session_id"),
+        ("target_part_session_id", "target_part_session_id"),
+        ("target_session_group_id", "target_session_group_id"),
+        ("target_part_number", "target_part_number"),
+    ):
+        row_value = _metadata_value(row.get(row_field))
+        payload_value = _metadata_value(ack_payload.get(payload_field))
+        if row_value and payload_value and row_value != payload_value:
+            failures.append(f"{prefix} handler rejected ack payload {payload_field} differs from diary row")
 
 
 def _compare_command_diary_rows(

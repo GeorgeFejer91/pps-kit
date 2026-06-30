@@ -14,6 +14,7 @@ internal const val PHONE_LSL_COMMAND_STREAM_NAME = "PPSCommandSignalsV1"
 internal const val PHONE_LSL_ACK_STREAM_NAME = "PPSCommandAcksV1"
 internal const val PHONE_LSL_COMMAND_REJECTION_PAYLOAD_SCHEMA = "pps-android-phone-command-rejection.v1"
 internal const val PHONE_LSL_COMMAND_SAMPLE_REJECTION_PAYLOAD_SCHEMA = "pps-android-phone-command-sample-rejection.v1"
+internal const val PHONE_LSL_COMMAND_HANDLER_REJECTION_PAYLOAD_SCHEMA = "pps-android-phone-command-handler-rejection.v1"
 
 internal val PHONE_LSL_MARKER_CHANNELS = listOf(
     "marker_version",
@@ -485,16 +486,22 @@ internal fun phoneCommandAckForSignal(
             payload = JSONObject().put("exception", error::class.java.simpleName),
         )
     }
+    val status = result.status.ifBlank { "applied" }
+    val payload = if (status == "rejected") {
+        phoneHandlerRejectedCommandAckPayload(signal, runPackage, result.reason, result.payload)
+    } else {
+        phoneCommandAckPayload(signal, result.payload)
+    }
     return PhoneLslCommandAck(
         commandId = signal.commandId,
         sessionId = signal.sessionId,
         receiverId = receiverId,
-        status = result.status.ifBlank { "applied" },
+        status = status,
         reason = result.reason,
         receivedLslTime = receivedLslTime,
         appliedLslTime = appliedLslTime,
         ackLslTime = ackLslTime,
-        payload = phoneCommandAckPayload(signal, result.payload),
+        payload = payload,
     )
 }
 
@@ -588,6 +595,39 @@ private fun phoneMalformedCommandSampleAckPayload(
         .put("raw_payload_redacted", rawValues.drop(6).any { it.isNotBlank() })
         .put("raw_sample_preview", stringArray(redactedCommandSamplePreview(rawValues)))
         .put("supported_commands", stringArray(supportedPhoneCommands(runPackage)))
+
+private fun phoneHandlerRejectedCommandAckPayload(
+    signal: PhoneLslCommandSignal,
+    runPackage: MobileRunPackage,
+    reason: String,
+    handlerPayload: JSONObject,
+): JSONObject =
+    phoneCommandAckPayload(
+        signal,
+        JSONObject()
+            .put("schema", PHONE_LSL_COMMAND_HANDLER_REJECTION_PAYLOAD_SCHEMA)
+            .put("status", "rejected")
+            .put("reason", reason)
+            .put("rejected_before_handler", false)
+            .put("handler_completed", !handlerPayload.has("exception"))
+            .put("command", signal.command)
+            .put("package_id", runPackage.packageId)
+            .put("participant_id", runPackage.participantId)
+            .put("session_id", runPackage.sessionId)
+            .put("part_session_id", runPackage.partSessionId)
+            .put("session_group_id", runPackage.sessionGroupId)
+            .put("part_number", runPackage.partNumber)
+            .put("requested_session_id", signal.sessionId)
+            .put("requested_package_id", signal.payload.optString("package_id"))
+            .put("requested_participant_id", signal.payload.optString("participant_id"))
+            .put("requested_target_session_id", signal.payload.optString("target_session_id"))
+            .put("requested_target_part_session_id", signal.payload.optString("target_part_session_id"))
+            .put("requested_target_session_group_id", signal.payload.optString("target_session_group_id"))
+            .put("requested_target_part_number", signal.payload.optString("target_part_number"))
+            .put("handler_payload_schema", handlerPayload.optString("schema"))
+            .put("handler_payload", JSONObject(handlerPayload.toString()))
+            .put("supported_commands", stringArray(supportedPhoneCommands(runPackage))),
+    )
 
 private fun phoneCommandRejection(
     signal: PhoneLslCommandSignal,

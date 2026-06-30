@@ -147,6 +147,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   PC-monitor validation reject incomplete rejected-ack payloads, so bad
   controller/PC commands remain reconstructable instead of becoming bare
   `rejected` status rows.
+- Parsed Android native commands that pass pre-handler gates but are rejected by
+  the phone runtime now use
+  `pps-android-phone-command-handler-rejection.v1` payloads. These acks preserve
+  `rejected_before_handler=false`, receiver/requested identity, supported
+  commands, handler completion status, and the handler's non-secret payload
+  under `handler_payload`, so cases such as Pause with no active phone block are
+  reconstructable without being mislabeled as token/package/session failures.
+  Strict phone-run validation plus the command-admin and PC-monitor
+  reconcilers now accept and enforce this handler-side rejection family.
 - The Android sender/receiver command-admin reconciler and PC-monitor
   reconciler now enforce the same rejected-ack contract directly. Direct
   reconciliation runs fail when a rejected `PPSCommandAcksV1` payload omits the

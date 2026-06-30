@@ -230,6 +230,40 @@ def test_reconcile_android_command_admin_accepts_matching_rejected_ack_payload()
     assert result.report["mismatch_count"] == 0
 
 
+def test_reconcile_android_command_admin_accepts_matching_handler_rejected_ack_payload():
+    sender = _sender_row()
+    phone = _phone_command_row()
+    rejected_payload = _handler_rejected_ack_payload()
+    sender["ack_status"] = "rejected"
+    sender["ack_sample"] = _ack_sample(
+        "cmd-001",
+        "pause",
+        rejected_payload,
+        status="rejected",
+        reason="no_active_phone_block_to_pause",
+    )
+    phone["status"] = "rejected"
+    phone["reason"] = "no_active_phone_block_to_pause"
+    phone["payload"] = dict(rejected_payload)
+    phone["ack_sample"] = _ack_sample(
+        "cmd-001",
+        "pause",
+        rejected_payload,
+        status="rejected",
+        reason="no_active_phone_block_to_pause",
+    )
+
+    result = reconciler.reconcile_command_admin_with_phone_run(
+        [sender],
+        [phone],
+        expect_native_sends=True,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is True
+    assert result.report["mismatch_count"] == 0
+
+
 def test_reconcile_android_command_admin_rejects_rejected_ack_schema_gap():
     sender = _sender_row()
     phone = _phone_command_row()
@@ -414,6 +448,41 @@ def _rejected_ack_payload() -> dict:
         "requested_target_part_session_id": "part-001",
         "requested_target_session_group_id": "group-001",
         "requested_target_part_number": "1",
+        "supported_commands": ["start_experiment", "pause", "resume"],
+    }
+
+
+def _handler_rejected_ack_payload() -> dict:
+    return {
+        "schema": "pps-android-phone-command-handler-rejection.v1",
+        "status": "rejected",
+        "reason": "no_active_phone_block_to_pause",
+        "rejected_before_handler": False,
+        "handler_completed": True,
+        "command": "pause",
+        "package_id": "pkg-001",
+        "participant_id": "P001",
+        "session_id": "session-001",
+        "part_session_id": "part-001",
+        "session_group_id": "group-001",
+        "part_number": "1",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+        "target_part_number": "1",
+        "requested_session_id": "part-001",
+        "requested_package_id": "pkg-001",
+        "requested_participant_id": "P001",
+        "requested_target_session_id": "part-001",
+        "requested_target_part_session_id": "part-001",
+        "requested_target_session_group_id": "group-001",
+        "requested_target_part_number": "1",
+        "handler_payload_schema": "pps-android-phone-runtime-command-state.v1",
+        "handler_payload": {
+            "schema": "pps-android-phone-runtime-command-state.v1",
+            "command": "pause",
+            "run_id": "phone-run-001",
+        },
         "supported_commands": ["start_experiment", "pause", "resume"],
     }
 

@@ -60,6 +60,13 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   package/session identity, requested target identity, rejection reason,
   `rejected_before_handler=true`, and supported commands while still excluding
   pairing tokens.
+- If a parsed command passes token/package/session gating but the phone runtime
+  rejects it during local handling, such as Pause when no phone block is active,
+  the ack uses `pps-android-phone-command-handler-rejection.v1` with
+  `rejected_before_handler=false`, receiver/requested identity fields,
+  supported commands, and the handler's non-secret payload nested under
+  `handler_payload`. This keeps controller/PC button failures reconstructable
+  without mislabeling them as token or package-gate failures.
 - If a received command sample is malformed before it can be parsed as
   `PPSCommandSignalsV1`, Runner mode still emits a reconstructable rejected ack.
   The ack carries a stable raw-sample-derived command id when the incoming
@@ -324,7 +331,9 @@ Required validation levels:
    `pps-android-lsl-monitor`. Controller and PC-admin outbox rows are checked
    for exact row-payload versus command-sample-payload consistency, including
    required `operator_note` note text when that command is used; rejected ack
-   payloads must carry the `pps-android-phone-command-rejection.v1` schema and
+   payloads must carry either the pre-handler
+   `pps-android-phone-command-rejection.v1` schema or the handler-side
+   `pps-android-phone-command-handler-rejection.v1` schema with
    requested/receiver identity; the serialized command-sample payload must
    contain `token` or `companion_token`, not only the surrounding row metadata.
     Phone-run `command_diary.jsonl` rows are also checked against matching
@@ -457,9 +466,14 @@ That reconciliation checks the sender row payload against the serialized
 `PPSCommandSignalsV1` sample payload and fails if the actual sample omitted the
 pairing token, then compares the resulting command and ack evidence with the
 Runner phone's `native_lsl` command diary. Rejected ack pairs are also checked
-for the `pps-android-phone-command-rejection.v1` schema, reason,
-`rejected_before_handler`, receiver/requested identity fields, and supported
-command list on both the sender and phone copies.
+for structured rejection schemas: pre-handler
+`pps-android-phone-command-rejection.v1` acks must preserve reason,
+`rejected_before_handler=true`, receiver/requested identity fields, and
+supported commands, while handler-side
+`pps-android-phone-command-handler-rejection.v1` acks must preserve
+`rejected_before_handler=false`, handler completion/payload evidence,
+receiver/requested identity fields, and supported commands on both the sender
+and phone copies.
 
 To monitor whether another PC can observe the Android runner's LSL evidence
 stream while commands are being sent:
@@ -498,8 +512,9 @@ observed command acknowledgements echo the command name plus any source command
 payload `package_id`, `participant_id`, target session, target part session,
 session group, and target part number fields that define which phone-owned part
 was administered, while rejecting ack payloads that echo `token` or
-`companion_token`. Rejected observed acks must preserve the structured
-`pps-android-phone-command-rejection.v1` payload.
+`companion_token`. Rejected observed acks must preserve either the structured
+pre-handler `pps-android-phone-command-rejection.v1` payload or the structured
+handler-side `pps-android-phone-command-handler-rejection.v1` payload.
 It is still network LSL evidence, not physical vibration/audio timing proof.
 
 Until that strict validator passes together with external LSL/XDF capture, the

@@ -181,6 +181,56 @@ class PhoneLslProtocolTest {
     }
 
     @Test
+    fun handlerRejectedCommandProducesStructuredAckWithoutTokenEcho() {
+        val runPackage = packageWithLslCommands()
+        val signal = PhoneLslCommandSignal(
+            commandId = "cmd-handler-rejected",
+            sessionId = "part-001",
+            senderId = "controller-phone",
+            command = "pause",
+            issuedLslTime = 12.5,
+            payload = JSONObject()
+                .put("token", "secret")
+                .put("package_id", "pkg-001")
+                .put("participant_id", "P001")
+                .put("target_session_id", "part-001")
+                .put("target_part_session_id", "part-001")
+                .put("target_session_group_id", "group-001")
+                .put("target_part_number", "1"),
+        )
+
+        val ack = phoneCommandAckForSignal(
+            signal = signal,
+            runPackage = runPackage,
+            expectedToken = "secret",
+        ) {
+            PhoneLslCommandApplicationResult(
+                status = "rejected",
+                reason = "no_active_phone_block_to_pause",
+                payload = JSONObject()
+                    .put("schema", "pps-android-phone-runtime-command-state.v1")
+                    .put("command", "pause")
+                    .put("run_id", "phone-run-001"),
+            )
+        }
+        val payload = ack.payload
+
+        assertEquals("rejected", ack.status)
+        assertEquals("no_active_phone_block_to_pause", ack.reason)
+        assertEquals(PHONE_LSL_COMMAND_HANDLER_REJECTION_PAYLOAD_SCHEMA, payload.getString("schema"))
+        assertEquals("rejected", payload.getString("status"))
+        assertFalse(payload.getBoolean("rejected_before_handler"))
+        assertTrue(payload.getBoolean("handler_completed"))
+        assertEquals("pause", payload.getString("command"))
+        assertEquals("part-001", payload.getString("requested_session_id"))
+        assertEquals("part-001", payload.getString("requested_target_part_session_id"))
+        assertEquals("pps-android-phone-runtime-command-state.v1", payload.getString("handler_payload_schema"))
+        assertEquals("phone-run-001", payload.getJSONObject("handler_payload").getString("run_id"))
+        assertFalse(payload.has("token"))
+        assertFalse(payload.toString().contains("secret"))
+    }
+
+    @Test
     fun commandAckRejectsExplicitPackageOrPartIdentityDrift() {
         val runPackage = packageWithLslCommands()
         val badPackageSignal = PhoneLslCommandSignal(

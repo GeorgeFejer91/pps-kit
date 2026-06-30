@@ -41,6 +41,7 @@ COMMAND_ACK_PAYLOAD_IDENTITY_FIELDS = (
 COMMAND_ACK_PAIRING_TOKEN_FIELDS = ("token", "companion_token")
 COMMANDS_REQUIRING_NOTE = {"operator_note"}
 ANDROID_COMMAND_REJECTION_PAYLOAD_SCHEMA = "pps-android-phone-command-rejection.v1"
+ANDROID_COMMAND_HANDLER_REJECTION_PAYLOAD_SCHEMA = "pps-android-phone-command-handler-rejection.v1"
 REJECTED_ACK_REQUIRED_FIELDS = (
     "package_id",
     "participant_id",
@@ -490,12 +491,16 @@ def _append_rejected_ack_payload_mismatches(
     if not ack_payload:
         mismatches.append(_command_ack_mismatch(command_id, "payload.rejected_payload", "structured rejection payload", ""))
         return
-    if _clean(ack_payload.get("schema")) != ANDROID_COMMAND_REJECTION_PAYLOAD_SCHEMA:
+    schema = _clean(ack_payload.get("schema"))
+    if schema == ANDROID_COMMAND_HANDLER_REJECTION_PAYLOAD_SCHEMA:
+        _append_handler_rejected_ack_payload_mismatches(mismatches, ack_row, ack_payload)
+        return
+    if schema != ANDROID_COMMAND_REJECTION_PAYLOAD_SCHEMA:
         mismatches.append(
             _command_ack_mismatch(
                 command_id,
                 "payload.schema",
-                ANDROID_COMMAND_REJECTION_PAYLOAD_SCHEMA,
+                f"{ANDROID_COMMAND_REJECTION_PAYLOAD_SCHEMA} or {ANDROID_COMMAND_HANDLER_REJECTION_PAYLOAD_SCHEMA}",
                 _clean(ack_payload.get("schema")),
             )
         )
@@ -519,6 +524,42 @@ def _append_rejected_ack_payload_mismatches(
     supported = ack_payload.get("supported_commands")
     if not isinstance(supported, list) or not supported:
         mismatches.append(_command_ack_mismatch(command_id, "payload.supported_commands", "nonempty array", ""))
+
+
+def _append_handler_rejected_ack_payload_mismatches(
+    mismatches: list[dict[str, Any]],
+    ack_row: dict[str, Any],
+    ack_payload: dict[str, Any],
+) -> None:
+    command_id = _command_id(ack_row)
+    if _clean(ack_payload.get("status")) != "rejected":
+        mismatches.append(_command_ack_mismatch(command_id, "payload.status", "rejected", _clean(ack_payload.get("status"))))
+    reason = _clean(ack_row.get("ack_reason"))
+    if reason and _clean(ack_payload.get("reason")) != reason:
+        mismatches.append(_command_ack_mismatch(command_id, "payload.reason", reason, _clean(ack_payload.get("reason"))))
+    if ack_payload.get("rejected_before_handler") is not False:
+        mismatches.append(
+            _command_ack_mismatch(
+                command_id,
+                "payload.rejected_before_handler",
+                "false",
+                _clean(ack_payload.get("rejected_before_handler")),
+            )
+        )
+    if not isinstance(ack_payload.get("handler_completed"), bool):
+        mismatches.append(_command_ack_mismatch(command_id, "payload.handler_completed", "boolean", ""))
+    for field in REJECTED_ACK_REQUIRED_FIELDS:
+        if field not in ack_payload:
+            mismatches.append(_command_ack_mismatch(command_id, f"payload.{field}", "<present>", ""))
+    supported = ack_payload.get("supported_commands")
+    if not isinstance(supported, list) or not supported:
+        mismatches.append(_command_ack_mismatch(command_id, "payload.supported_commands", "nonempty array", ""))
+    handler_payload = ack_payload.get("handler_payload")
+    if not isinstance(handler_payload, dict):
+        mismatches.append(_command_ack_mismatch(command_id, "payload.handler_payload", "object", ""))
+    else:
+        for field in _ack_pairing_token_fields(handler_payload):
+            mismatches.append(_command_ack_mismatch(command_id, f"payload.handler_payload.{field}", "", "<redacted>"))
 
 
 def _ack_pairing_token_fields(payload: dict[str, Any]) -> list[str]:

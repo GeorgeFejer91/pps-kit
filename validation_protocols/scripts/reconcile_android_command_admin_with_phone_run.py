@@ -15,6 +15,7 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from validate_android_lsl_runtime_artifact import (  # noqa: E402
     ACK_SCHEMA,
+    ANDROID_COMMAND_HANDLER_REJECTION_PAYLOAD_SCHEMA,
     ANDROID_COMMAND_REJECTION_PAYLOAD_SCHEMA,
     ANDROID_CONTROLLER_COMMAND_ROW_SCHEMA,
     LSL_ACK_CHANNELS,
@@ -330,9 +331,24 @@ def _append_rejected_ack_payload_mismatches(
     if not payload:
         mismatches.append(_mismatch(command_id, f"{side}.rejected_payload", "structured rejection payload", "missing"))
         return
-    if _clean(payload.get("schema")) != ANDROID_COMMAND_REJECTION_PAYLOAD_SCHEMA:
+    schema = _clean(payload.get("schema"))
+    if schema == ANDROID_COMMAND_HANDLER_REJECTION_PAYLOAD_SCHEMA:
+        _append_handler_rejected_ack_payload_mismatches(
+            mismatches,
+            command_id,
+            payload,
+            side=side,
+            reason=reason,
+        )
+        return
+    if schema != ANDROID_COMMAND_REJECTION_PAYLOAD_SCHEMA:
         mismatches.append(
-            _mismatch(command_id, f"{side}.schema", ANDROID_COMMAND_REJECTION_PAYLOAD_SCHEMA, payload.get("schema"))
+            _mismatch(
+                command_id,
+                f"{side}.schema",
+                f"{ANDROID_COMMAND_REJECTION_PAYLOAD_SCHEMA} or {ANDROID_COMMAND_HANDLER_REJECTION_PAYLOAD_SCHEMA}",
+                payload.get("schema"),
+            )
         )
     if _clean(payload.get("status")) != "rejected":
         mismatches.append(_mismatch(command_id, f"{side}.status", "rejected", payload.get("status")))
@@ -346,6 +362,35 @@ def _append_rejected_ack_payload_mismatches(
     supported = payload.get("supported_commands")
     if not isinstance(supported, list) or not supported:
         mismatches.append(_mismatch(command_id, f"{side}.supported_commands", "nonempty array", supported))
+
+
+def _append_handler_rejected_ack_payload_mismatches(
+    mismatches: list[dict[str, Any]],
+    command_id: str,
+    payload: dict[str, Any],
+    *,
+    side: str,
+    reason: str,
+) -> None:
+    if _clean(payload.get("status")) != "rejected":
+        mismatches.append(_mismatch(command_id, f"{side}.status", "rejected", payload.get("status")))
+    if reason and _clean(payload.get("reason")) != reason:
+        mismatches.append(_mismatch(command_id, f"{side}.reason", reason, payload.get("reason")))
+    if payload.get("rejected_before_handler") is not False:
+        mismatches.append(_mismatch(command_id, f"{side}.rejected_before_handler", False, payload.get("rejected_before_handler")))
+    if not isinstance(payload.get("handler_completed"), bool):
+        mismatches.append(_mismatch(command_id, f"{side}.handler_completed", "boolean", payload.get("handler_completed")))
+    for field in REJECTED_ACK_REQUIRED_FIELDS:
+        if field not in payload:
+            mismatches.append(_mismatch(command_id, f"{side}.{field}", "<present>", "missing"))
+    supported = payload.get("supported_commands")
+    if not isinstance(supported, list) or not supported:
+        mismatches.append(_mismatch(command_id, f"{side}.supported_commands", "nonempty array", supported))
+    handler_payload = payload.get("handler_payload")
+    if not isinstance(handler_payload, dict):
+        mismatches.append(_mismatch(command_id, f"{side}.handler_payload", "object", handler_payload))
+    elif _payload_has_pairing_token(handler_payload):
+        mismatches.append(_mismatch(command_id, f"{side}.handler_payload.token_echo", "no pairing token", "token present"))
 
 
 def _sender_kind_from_rows(rows: list[dict[str, Any]]) -> str:
