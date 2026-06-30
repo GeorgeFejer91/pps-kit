@@ -27,6 +27,10 @@ MOBILE_RECONSTRUCTION_SCHEMA = "pps-mobile-reconstruction-contract.v1"
 MOBILE_LSL_CONTRACT_SCHEMA = "pps-mobile-lsl-contract.v1"
 MOBILE_SOURCE_SEGMENT_HASHES_SCHEMA = "pps-mobile-source-segment-hashes.v1"
 MOBILE_PHONE_OWNED_DATA_EXPORT_SCHEMA = "pps-android-phone-owned-data-export.v1"
+MOBILE_PHONE_RUN_RECONSTRUCTION_ARTIFACT_SCHEMA = "pps-mobile-phone-run-reconstruction.v1"
+MOBILE_PHONE_RUN_ARTIFACT_FILE_INVENTORY_SCHEMA = "pps-android-phone-run-artifact-file-inventory.v1"
+MOBILE_PHONE_RUN_ARTIFACT_FILE_INVENTORY_JSON = "artifact_file_inventory.json"
+MOBILE_PHONE_RUN_ARTIFACT_FILE_INVENTORY_CSV = "artifact_file_inventory.csv"
 PHONE_DATA_MIN_FIELDNAMES = [
     "participant_id",
     "session_id",
@@ -70,6 +74,12 @@ PHONE_RESPONSE_LEDGER_FIELDNAMES = [
     "topup_hit",
     "topup_rt_ms",
     "topup_tap_event_id",
+]
+PHONE_ARTIFACT_FILE_INVENTORY_FIELDNAMES = [
+    "relative_path",
+    "size_bytes",
+    "sha256",
+    "modified_unix_ms",
 ]
 MOBILE_RUNTIME_LIMITATIONS = [
     "Phone runtime plays prepared PCM block WAVs locally through Android AudioTrack and records phone touch timestamps.",
@@ -645,6 +655,19 @@ def write_mobile_runtime_events(
     response_ledger_rows = _json_dict_rows(payload.get("phone_response_ledger"))
     topup_plan = _json_dict(payload.get("phone_topup_plan"))
     topup_materialization = _json_dict(payload.get("phone_topup_materialization"))
+    run_package_manifest = _mobile_runtime_upload_package_manifest(package, payload)
+    run_package_manifest_path = out_dir / "run_package_manifest.json"
+    with open(_filesystem_path(run_package_manifest_path), "w", encoding="utf-8") as handle:
+        handle.write(json.dumps(run_package_manifest, indent=2, sort_keys=True, default=str) + "\n")
+    run_package_manifest_sha256 = _sha256(run_package_manifest_path)
+    reconstruction_artifact = _mobile_runtime_upload_reconstruction_artifact(
+        package,
+        manifest=run_package_manifest,
+        manifest_sha256=run_package_manifest_sha256,
+    )
+    reconstruction_artifact_path = out_dir / "reconstruction_contract.json"
+    with open(_filesystem_path(reconstruction_artifact_path), "w", encoding="utf-8") as handle:
+        handle.write(json.dumps(reconstruction_artifact, indent=2, sort_keys=True, default=str) + "\n")
     event_path = out_dir / "events.jsonl"
     if events:
         with open(_filesystem_path(event_path), "a", encoding="utf-8") as handle:
@@ -666,6 +689,15 @@ def write_mobile_runtime_events(
         "session_id": str(getattr(package, "session_id", "") or ""),
         "event_count": len(events),
         "phone_payload": payload,
+        "package_manifest": {
+            "filename": run_package_manifest_path.name,
+            "schema": str(run_package_manifest.get("schema") or ""),
+            "sha256": run_package_manifest_sha256,
+        },
+        "reconstruction_artifact": {
+            "filename": reconstruction_artifact_path.name,
+            "schema": MOBILE_PHONE_RUN_RECONSTRUCTION_ARTIFACT_SCHEMA,
+        },
         "participant_metadata": dict(payload.get("participant_metadata") or {}),
         "lsl_runtime_status": dict(payload.get("lsl_runtime_status") or {}),
         "lsl_marker_mirror": marker_rows,
@@ -673,6 +705,8 @@ def write_mobile_runtime_events(
         "command_diary": command_rows,
         "paths": {
             "directory": str(out_dir),
+            "run_package_manifest_json": str(run_package_manifest_path),
+            "reconstruction_contract_json": str(reconstruction_artifact_path),
             "events_jsonl": str(event_path),
             "events_csv": str(out_dir / "events.csv"),
             "lsl_marker_mirror_csv": str(out_dir / "lsl_marker_mirror.csv"),
@@ -729,9 +763,28 @@ def write_mobile_runtime_events(
             phone_owned_data_export.get("data_min_master_successful_participants_csv") or ""
         )
         artifact["paths"]["phone_owned_data_max_run_dir"] = str(phone_owned_data_export.get("data_max_run_dir") or "")
+    if complete:
+        artifact_inventory_path = out_dir / MOBILE_PHONE_RUN_ARTIFACT_FILE_INVENTORY_JSON
+        artifact_inventory_csv_path = out_dir / MOBILE_PHONE_RUN_ARTIFACT_FILE_INVENTORY_CSV
+        artifact["artifact_file_inventory_artifact"] = {
+            "filename": artifact_inventory_path.name,
+            "csv_filename": artifact_inventory_csv_path.name,
+            "schema": MOBILE_PHONE_RUN_ARTIFACT_FILE_INVENTORY_SCHEMA,
+            "self_included": False,
+            "generated_by": "pc_mobile_runtime_upload_mirror",
+        }
+        artifact["paths"]["artifact_file_inventory_json"] = str(artifact_inventory_path)
+        artifact["paths"]["artifact_file_inventory_csv"] = str(artifact_inventory_csv_path)
     artifact_path = out_dir / ("completion.json" if complete else "latest_events_upload.json")
     with open(_filesystem_path(artifact_path), "w", encoding="utf-8") as handle:
         handle.write(json.dumps(artifact, indent=2, sort_keys=True, default=str) + "\n")
+    if complete:
+        _write_mobile_runtime_artifact_file_inventory(
+            out_dir,
+            run_id=clean_run_id,
+            package_id=package_id,
+            complete=complete,
+        )
     if phone_owned_data_export:
         _copy_phone_owned_data_max(out_dir, Path(str(phone_owned_data_export.get("data_max_run_dir") or "")))
     return {
@@ -1309,6 +1362,134 @@ def _write_command_diary(path: Path, rows: list[dict[str, Any]]) -> None:
     with open(_filesystem_path(path), "w", encoding="utf-8") as handle:
         for row in rows:
             handle.write(json.dumps(row, sort_keys=True, default=str) + "\n")
+
+
+def _mobile_runtime_upload_package_manifest(package: Any, payload: dict[str, Any]) -> dict[str, Any]:
+    package_payload = payload.get("package") if isinstance(payload.get("package"), dict) else {}
+    asset_strategy = str(package_payload.get("asset_strategy") or payload.get("asset_strategy") or "").strip()
+    include_block_audio = asset_strategy != "trial_building_blocks_only"
+    return build_mobile_package_manifest(
+        package,
+        phone_owned_session=bool(payload.get("phone_owned_session") or package_payload.get("phone_owned_session")),
+        include_block_audio=include_block_audio,
+    )
+
+
+def _mobile_runtime_upload_reconstruction_artifact(
+    package: Any,
+    *,
+    manifest: dict[str, Any],
+    manifest_sha256: str,
+) -> dict[str, Any]:
+    reconstruction = manifest.get("reconstruction") if isinstance(manifest.get("reconstruction"), dict) else {}
+    lsl = manifest.get("lsl") if isinstance(manifest.get("lsl"), dict) else {}
+    stream_names = lsl.get("stream_names") if isinstance(lsl.get("stream_names"), dict) else {}
+    return {
+        "schema": MOBILE_PHONE_RUN_RECONSTRUCTION_ARTIFACT_SCHEMA,
+        "package_id": str(manifest.get("package_id") or mobile_package_id(package)),
+        "participant_id": str(manifest.get("participant_id") or getattr(package, "participant_id", "") or ""),
+        "session_id": str(manifest.get("session_id") or getattr(package, "session_id", "") or ""),
+        "session_group_id": str(manifest.get("session_group_id") or getattr(package, "session_group_id", "") or ""),
+        "part_session_id": str(manifest.get("part_session_id") or getattr(package, "part_session_id", "") or ""),
+        "part_number": manifest.get("part_number", getattr(package, "part_number", "")),
+        "asset_strategy": str(manifest.get("asset_strategy") or ""),
+        "run_package_manifest_sha256": str(manifest_sha256 or ""),
+        "participant_roster_count": len(_json_list(manifest.get("participant_roster"))),
+        "randomization_seed": str(manifest.get("randomization_seed") or ""),
+        "source_segment_hashes": dict(manifest.get("source_segment_hashes") or {}),
+        "reconstruction": dict(reconstruction),
+        "lsl": {
+            "schema": str(lsl.get("schema") or ""),
+            "runtime_authority": str(lsl.get("runtime_authority") or ""),
+            "rich_markers_name": str(stream_names.get("rich_markers") or ""),
+            "numeric_triggers_name": str(stream_names.get("numeric_triggers") or ""),
+            "command_signals_name": str(stream_names.get("command_signals") or ""),
+            "command_acks_name": str(stream_names.get("command_acks") or ""),
+            "native_android_lsl_required": bool(lsl.get("native_android_lsl_required")),
+            "current_android_source_behavior": str(lsl.get("current_android_source_behavior") or ""),
+        },
+        "assets": [
+            {
+                "asset_id": str(asset.get("asset_id") or ""),
+                "filename": str(asset.get("filename") or ""),
+                "role": str(asset.get("role") or ""),
+                "media_type": str(asset.get("media_type") or ""),
+                "size_bytes": int(asset.get("size_bytes") or 0),
+                "sha256": str(asset.get("sha256") or ""),
+            }
+            for asset in _json_list(manifest.get("assets"))
+            if isinstance(asset, dict)
+        ],
+        "building_blocks": [
+            dict(building_block)
+            for building_block in _json_list(manifest.get("building_blocks"))
+            if isinstance(building_block, dict)
+        ],
+        "blocks": [
+            {
+                "block_id": str(block.get("block_id") or ""),
+                "index": block.get("index", ""),
+                "label": str(block.get("label") or ""),
+                "duration_s": block.get("duration_s", ""),
+                "trial_count": block.get("trial_count", ""),
+                "audio_asset_id": str(block.get("audio_asset_id") or ""),
+                "trial_building_block_asset_ids": [
+                    str(trial.get("building_block_asset_id") or "")
+                    for trial in _json_list(block.get("trials"))
+                    if isinstance(trial, dict)
+                ],
+                "tactile_cue_count": len(_json_list(block.get("tactile_cues"))),
+            }
+            for block in _json_list(manifest.get("blocks"))
+            if isinstance(block, dict)
+        ],
+    }
+
+
+def _write_mobile_runtime_artifact_file_inventory(
+    out_dir: Path,
+    *,
+    run_id: str,
+    package_id: str,
+    complete: bool,
+) -> dict[str, Any]:
+    inventory_path = out_dir / MOBILE_PHONE_RUN_ARTIFACT_FILE_INVENTORY_JSON
+    inventory_csv_path = out_dir / MOBILE_PHONE_RUN_ARTIFACT_FILE_INVENTORY_CSV
+    rows: list[dict[str, Any]] = []
+    for file_path in sorted(item for item in out_dir.rglob("*") if item.is_file()):
+        relative_path = file_path.relative_to(out_dir).as_posix()
+        if relative_path in {
+            MOBILE_PHONE_RUN_ARTIFACT_FILE_INVENTORY_JSON,
+            MOBILE_PHONE_RUN_ARTIFACT_FILE_INVENTORY_CSV,
+        }:
+            continue
+        stat = file_path.stat()
+        rows.append(
+            {
+                "relative_path": relative_path,
+                "size_bytes": int(stat.st_size),
+                "sha256": _sha256(file_path),
+                "modified_unix_ms": int(stat.st_mtime * 1000),
+            }
+        )
+    inventory = {
+        "schema": MOBILE_PHONE_RUN_ARTIFACT_FILE_INVENTORY_SCHEMA,
+        "run_id": str(run_id or ""),
+        "package_id": str(package_id or ""),
+        "complete": bool(complete),
+        "generated_unix_ms": int(datetime.now(timezone.utc).timestamp() * 1000),
+        "self_included": False,
+        "file_count": len(rows),
+        "files": rows,
+    }
+    with open(_filesystem_path(inventory_path), "w", encoding="utf-8") as handle:
+        handle.write(json.dumps(inventory, indent=2, sort_keys=True, default=str) + "\n")
+    _write_rows_csv(
+        inventory_csv_path,
+        rows,
+        _dynamic_fieldnames(rows, preferred=PHONE_ARTIFACT_FILE_INVENTORY_FIELDNAMES),
+    )
+    return inventory
 
 
 def _write_phone_owned_upload_export(

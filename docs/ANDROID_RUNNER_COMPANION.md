@@ -280,6 +280,11 @@ copy of the reconstructive phone-run folder.
 PC-side mobile completion uploads with embedded Android response ledgers now
 write the same phone-owned data-export sidecars and mirror tree under
 `runner_logs/mobile_phone_runtime/<participant>/<package_id>/phone_owned_exports/`.
+The PC upload mirror also writes `run_package_manifest.json`,
+`reconstruction_contract.json`, `artifact_file_inventory.json`, and
+`artifact_file_inventory.csv` beside `completion.json` before copying the run
+folder into the PC-side `2.Data_max` mirror, so uploaded Android completions
+carry the same file-diary reconstruction spine as exported phone run folders.
 When validating PC-runner or Controller-phone administration, add
 `--expect-command-acks`; for phone-run artifacts this now requires
 `command_diary.jsonl` or embedded `command_diary` rows with native

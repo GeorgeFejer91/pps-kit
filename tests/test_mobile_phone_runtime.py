@@ -372,6 +372,37 @@ def test_mobile_runtime_upload_writes_runner_log_artifacts(tmp_path):
     assert (artifact.parent / "command_diary.jsonl").read_text(encoding="utf-8").count("\n") == 1
     assert loaded["lsl_runtime_status"]["schema"] == "pps-android-lsl-runtime-status.v1"
     assert (artifact.parent / "lsl_runtime_status.json").is_file()
+    assert loaded["package_manifest"]["filename"] == "run_package_manifest.json"
+    assert loaded["reconstruction_artifact"]["filename"] == "reconstruction_contract.json"
+    assert loaded["artifact_file_inventory_artifact"] == {
+        "filename": "artifact_file_inventory.json",
+        "csv_filename": "artifact_file_inventory.csv",
+        "schema": "pps-android-phone-run-artifact-file-inventory.v1",
+        "self_included": False,
+        "generated_by": "pc_mobile_runtime_upload_mirror",
+    }
+    inventory = json.loads((artifact.parent / "artifact_file_inventory.json").read_text(encoding="utf-8"))
+    assert inventory["schema"] == "pps-android-phone-run-artifact-file-inventory.v1"
+    assert inventory["run_id"] == "run-001"
+    assert inventory["package_id"] == mobile_package_id(package)
+    assert inventory["self_included"] is False
+    inventory_paths = {row["relative_path"] for row in inventory["files"]}
+    assert {
+        "completion.json",
+        "run_package_manifest.json",
+        "reconstruction_contract.json",
+        "events.csv",
+        "lsl_runtime_status.json",
+        "lsl_marker_mirror.csv",
+        "trigger_codes.csv",
+        "command_diary.jsonl",
+    }.issubset(inventory_paths)
+    assert "artifact_file_inventory.json" not in inventory_paths
+    assert "artifact_file_inventory.csv" not in inventory_paths
+    completion_row = next(row for row in inventory["files"] if row["relative_path"] == "completion.json")
+    assert completion_row["sha256"] == hashlib.sha256(artifact.read_bytes()).hexdigest()
+    inventory_csv_rows = list(csv.DictReader((artifact.parent / "artifact_file_inventory.csv").open(encoding="utf-8")))
+    assert {row["relative_path"] for row in inventory_csv_rows} == inventory_paths
 
 
 def test_mobile_runtime_completion_upload_mirrors_phone_owned_response_export(tmp_path):
@@ -483,3 +514,10 @@ def test_mobile_runtime_completion_upload_mirrors_phone_owned_response_export(tm
     data_max_run_dir = Path(export["data_max_run_dir"])
     assert (data_max_run_dir / "completion.json").is_file()
     assert (data_max_run_dir / "phone_owned_data_export.json").is_file()
+    assert (data_max_run_dir / "artifact_file_inventory.json").is_file()
+    assert (data_max_run_dir / "artifact_file_inventory.csv").is_file()
+    inventory = json.loads((run_dir / "artifact_file_inventory.json").read_text(encoding="utf-8"))
+    inventory_paths = {row["relative_path"] for row in inventory["files"]}
+    assert "phone_owned_data_export.json" in inventory_paths
+    assert "run_package_manifest.json" in inventory_paths
+    assert "reconstruction_contract.json" in inventory_paths

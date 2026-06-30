@@ -143,9 +143,13 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
 - PC-side phone uploads preserve `lsl_runtime_status.json` beside
   `lsl_marker_mirror.csv`, `trigger_codes.csv`, and `command_diary.jsonl`.
   Completion uploads that include Android response/top-up reconstruction fields
-  also write `phone_response_ledger.csv`, `phone_topup_plan.json`,
-  `phone_topup_materialization.json`, `phone_owned_data_export.json`, and a
-  PC-side `phone_owned_exports/1.Data_min` plus `2.Data_max` mirror.
+  also write `run_package_manifest.json`, `reconstruction_contract.json`,
+  `phone_response_ledger.csv`, `phone_topup_plan.json`,
+  `phone_topup_materialization.json`, `phone_owned_data_export.json`,
+  `artifact_file_inventory.json`, `artifact_file_inventory.csv`, and a PC-side
+  `phone_owned_exports/1.Data_min` plus `2.Data_max` mirror. The inventory is
+  generated after `completion.json` and before the `2.Data_max` copy so the PC
+  mirror can be rehashed like an exported phone run folder.
 
 This layer is useful because it keeps the PC runner, Android runner mode, and
 Android controller mode on the same command/ack schema. Default builds are not

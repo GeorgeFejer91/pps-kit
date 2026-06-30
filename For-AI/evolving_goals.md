@@ -42,12 +42,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 - Android completion uploads to the PC companion now include
   `phone_response_summary`, `phone_response_ledger`, `phone_topup_plan`, and
   `phone_topup_materialization` when the run package is available. The PC
-  `mobile_phone_runtime.py` upload writer persists those fields as sidecars and
-  derives a PC-side `phone_owned_data_export.json` plus
+  `mobile_phone_runtime.py` upload writer persists those fields as sidecars,
+  writes `run_package_manifest.json`, `reconstruction_contract.json`,
+  `artifact_file_inventory.json`, and `artifact_file_inventory.csv`, and derives
+  a PC-side `phone_owned_data_export.json` plus
   `phone_owned_exports/1.Data_min/` and `2.Data_max/` mirror under
   `runner_logs/mobile_phone_runtime/<participant>/<package_id>/` so uploaded
-  phone-run completions can be reconstructed even when the phone is the timing
-  owner.
+  phone-run completions can be reconstructed and rehashed even when the phone is
+  the timing owner.
 - Android phone-run artifact validation now treats response and top-up
   reconstruction as strict evidence when requested. The Android validator loads
   `phone_response_ledger.csv`, `phone_topup_plan.json`,
