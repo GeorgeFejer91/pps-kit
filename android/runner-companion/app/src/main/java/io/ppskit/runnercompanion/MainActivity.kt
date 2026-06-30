@@ -2270,7 +2270,7 @@ private class PhoneRunSession(
 
     @Synchronized
     fun addRunStart(runPackage: MobileRunPackage) {
-        markerTransport = nativeLslBridge.openMarkerTransport(runPackage, runId)
+        markerTransport = nativeLslBridge.openMarkerTransport(runPackage, runId, participantMetadata, hapticMetadata)
         commandTransport = nativeLslBridge.openCommandTransport(runPackage, runId)
         lastCommandTransportResolveAttemptMs = SystemClock.elapsedRealtime()
         nativeLslClockOffsetS = markerTransport?.let { transport ->
@@ -2282,6 +2282,8 @@ private class PhoneRunSession(
             nativeBridgeStatus = nativeLslBridge.status(),
             markerTransportStatus = markerTransport?.status,
             commandTransportStatus = commandTransport?.status,
+            participantMetadata = participantMetadata,
+            hapticCapability = hapticMetadata,
         )
         addEventLocked(
             "session_metadata",
@@ -2521,6 +2523,8 @@ private class PhoneRunSession(
             nativeBridgeStatus = nativeLslBridge.status(),
             markerTransportStatus = markerTransport?.status,
             commandTransportStatus = reopened.status,
+            participantMetadata = participantMetadata,
+            hapticCapability = hapticMetadata,
         )
         return reopened.takeIf { it.status.enabled }
     }
@@ -2857,6 +2861,8 @@ private class PhoneRunSession(
             nativeBridgeStatus = nativeLslBridge.status(),
             markerTransportStatus = markerTransport?.status,
             commandTransportStatus = commandTransport?.status,
+            participantMetadata = participantMetadata,
+            hapticCapability = hapticMetadata,
         )
         latestLslRuntimeStatus = JSONObject(lslRuntimeStatus.toString())
         val lslRuntimeStatusFile = File(dir, "lsl_runtime_status.json")

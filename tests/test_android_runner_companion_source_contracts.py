@@ -33,13 +33,13 @@ def test_android_phone_runtime_preserves_mobile_package_asset_strategy() -> None
     assert 'root.optString("asset_strategy"' in models
     assert 'optString("package_asset_strategy", "")' in models
 
-    for source in [main_activity, lsl_protocol, native_bridge, catalog]:
+    for source in [main_activity, lsl_protocol, catalog]:
         assert "mobilePackageAssetStrategy(runPackage)" in source
+    assert "phoneLslSessionMetadataJson(runPackage" in native_bridge
 
     assert '.put("asset_strategy", mobilePackageAssetStrategy(runPackage))' in main_activity
     assert '.put("package_asset_strategy", runPackage.reconstruction.packageAssetStrategy)' in main_activity
     assert '.put("asset_strategy", mobilePackageAssetStrategy(runPackage))' in lsl_protocol
-    assert '.put("asset_strategy", mobilePackageAssetStrategy(runPackage))' in native_bridge
     assert '.put("asset_strategy", mobilePackageAssetStrategy(runPackage))' in catalog
     assert '.put("package_asset_strategy", runPackage.reconstruction.packageAssetStrategy)' in catalog
 
@@ -69,21 +69,25 @@ def test_android_phone_session_metadata_preserves_source_provenance() -> None:
     assert 'randomizationSeed = root.optString("randomization_seed", "")' in models
     assert 'sourceSegmentHashes = root.optJSONObject("source_segment_hashes").toMobileSourceSegmentHashes()' in models
 
-    for source in [main_activity, native_bridge, catalog]:
+    for source in [main_activity, catalog]:
         assert '.put("participant_roster_count", runPackage.participantRoster.size)' in source
         assert '.put("randomization_seed", runPackage.randomizationSeed)' in source
         assert '.put("source_segment_hashes", runPackage.sourceSegmentHashes.toJsonObject())' in source
 
-    assert '.put("schedule_hash", runPackage.reconstruction.scheduleHash)' in native_bridge
+    assert "phoneLslSessionMetadataJson(runPackage" in native_bridge
 
 
 def test_android_lsl_runtime_status_exports_stream_descriptions() -> None:
     lsl_protocol = _source("PhoneLslProtocol.kt")
 
     assert "phoneLslStreamDescriptions" in lsl_protocol
-    assert '.put("stream_descriptions", phoneLslStreamDescriptions(runPackage, runId))' in lsl_protocol
+    assert 'phoneLslStreamDescriptions(runPackage, runId, participantMetadata, hapticCapability)' in lsl_protocol
     assert "phoneLslSessionMetadataJson" in lsl_protocol
     assert '.put("session_metadata_json", sessionMetadataJson)' in lsl_protocol
+    assert "phoneParticipantMetadataSummary" in lsl_protocol
+    assert "phoneHapticCapabilitySummary" in lsl_protocol
+    assert '"pps-android-lsl-participant-metadata-summary.v1"' in lsl_protocol
+    assert '"pps-android-lsl-haptic-capability-summary.v1"' in lsl_protocol
     assert '"pps-android-lsl-stream-descriptions.v1"' in lsl_protocol
     assert '"PPSMarkersV2"' in lsl_protocol
     assert '"PPSTriggerCodes"' in lsl_protocol

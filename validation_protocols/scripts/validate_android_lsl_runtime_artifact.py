@@ -6,6 +6,7 @@ import argparse
 import csv
 import hashlib
 import json
+import math
 import sys
 import tempfile
 import zipfile
@@ -234,6 +235,8 @@ def validate_runtime_status(
         status=status,
         streams=streams,
         package_manifest=package_manifest,
+        participant_metadata=participant_metadata,
+        haptic_capability=haptic_capability,
         failures=failures,
         warnings=warnings,
         expect_native_transport=expect_native_transport,
@@ -1410,6 +1413,8 @@ def _validate_android_lsl_stream_descriptions(
     status: dict[str, Any],
     streams: dict[str, Any],
     package_manifest: dict[str, Any] | None,
+    participant_metadata: dict[str, Any] | None,
+    haptic_capability: dict[str, Any] | None,
     failures: list[str],
     warnings: list[str],
     expect_native_transport: bool,
@@ -1504,6 +1509,8 @@ def _validate_android_lsl_stream_descriptions(
         status=status,
         descriptions=descriptions,
         package_manifest=package_manifest,
+        participant_metadata=participant_metadata,
+        haptic_capability=haptic_capability,
         failures=failures,
         warnings=warnings,
         expect_native_transport=expect_native_transport,
@@ -1515,6 +1522,8 @@ def _validate_android_lsl_session_metadata_descriptions(
     status: dict[str, Any],
     descriptions: dict[str, Any],
     package_manifest: dict[str, Any] | None,
+    participant_metadata: dict[str, Any] | None,
+    haptic_capability: dict[str, Any] | None,
     failures: list[str],
     warnings: list[str],
     expect_native_transport: bool,
@@ -1582,6 +1591,19 @@ def _validate_android_lsl_session_metadata_descriptions(
         if metadata.get("demographics_in_stream_name") is not False:
             failures.append(f"Android LSL stream description {key}.session_metadata_json must keep demographics out of stream names")
 
+        _validate_lsl_participant_metadata_summary(
+            f"Android LSL stream description {key}.session_metadata_json",
+            metadata,
+            participant_metadata,
+            failures,
+        )
+        _validate_lsl_haptic_capability_summary(
+            f"Android LSL stream description {key}.session_metadata_json",
+            metadata,
+            haptic_capability,
+            failures,
+        )
+
         if expected_provenance:
             _validate_phone_run_provenance_payload(
                 f"Android LSL stream description {key}.session_metadata_json",
@@ -1589,6 +1611,84 @@ def _validate_android_lsl_session_metadata_descriptions(
                 expected_provenance,
                 failures,
             )
+
+
+def _validate_lsl_participant_metadata_summary(
+    label: str,
+    metadata: dict[str, Any],
+    participant_metadata: dict[str, Any] | None,
+    failures: list[str],
+) -> None:
+    if not isinstance(participant_metadata, dict):
+        return
+    summary = metadata.get("participant_metadata_summary")
+    if not isinstance(summary, dict):
+        failures.append(f"{label} is missing participant_metadata_summary")
+        return
+    if summary.get("schema") != "pps-android-lsl-participant-metadata-summary.v1":
+        failures.append(f"{label} participant_metadata_summary schema mismatch")
+    for field in (
+        "participant_id",
+        "session_id",
+        "session_group_id",
+        "part_session_id",
+        "part_number",
+        "age_years",
+        "handedness",
+        "gender",
+        "tactile_threshold_source",
+        "tactile_threshold_calibration_status",
+        "stream_privacy",
+    ):
+        expected = _metadata_value(participant_metadata.get(field))
+        observed = _metadata_value(summary.get(field))
+        if expected and observed != expected:
+            failures.append(f"{label} participant_metadata_summary {field} differs from participant_metadata")
+        elif expected and not observed:
+            failures.append(f"{label} participant_metadata_summary is missing {field}")
+    expected_threshold = _safe_float(participant_metadata.get("tactile_threshold_percent"))
+    observed_threshold = _safe_float(summary.get("tactile_threshold_percent"))
+    if not math.isnan(expected_threshold):
+        if math.isnan(observed_threshold):
+            failures.append(f"{label} participant_metadata_summary is missing tactile_threshold_percent")
+        elif abs(expected_threshold - observed_threshold) > 1e-6:
+            failures.append(f"{label} participant_metadata_summary tactile_threshold_percent differs from participant_metadata")
+    if summary.get("stream_privacy") != "metadata_payload_only":
+        failures.append(f"{label} participant_metadata_summary stream_privacy must be metadata_payload_only")
+
+
+def _validate_lsl_haptic_capability_summary(
+    label: str,
+    metadata: dict[str, Any],
+    haptic_capability: dict[str, Any] | None,
+    failures: list[str],
+) -> None:
+    if not isinstance(haptic_capability, dict):
+        return
+    summary = metadata.get("haptic_capability_summary")
+    if not isinstance(summary, dict):
+        failures.append(f"{label} is missing haptic_capability_summary")
+        return
+    if summary.get("schema") != "pps-android-lsl-haptic-capability-summary.v1":
+        failures.append(f"{label} haptic_capability_summary schema mismatch")
+    for field in ("has_vibrator", "has_amplitude_control"):
+        if field in haptic_capability and summary.get(field) is not bool(haptic_capability.get(field)):
+            failures.append(f"{label} haptic_capability_summary {field} differs from haptic_capability")
+    for field in ("calibration_policy", "calibration_status"):
+        expected = _metadata_value(haptic_capability.get(field))
+        observed = _metadata_value(summary.get(field))
+        if expected and observed != expected:
+            failures.append(f"{label} haptic_capability_summary {field} differs from haptic_capability")
+        elif expected and not observed:
+            failures.append(f"{label} haptic_capability_summary is missing {field}")
+    for field in ("recommended_threshold_percent", "recommended_amplitude"):
+        expected_number = _safe_float(haptic_capability.get(field))
+        observed_number = _safe_float(summary.get(field))
+        if not math.isnan(expected_number):
+            if math.isnan(observed_number):
+                failures.append(f"{label} haptic_capability_summary is missing {field}")
+            elif abs(expected_number - observed_number) > 1e-6:
+                failures.append(f"{label} haptic_capability_summary {field} differs from haptic_capability")
 
 
 def _validate_android_controller_lsl_stream_descriptions(

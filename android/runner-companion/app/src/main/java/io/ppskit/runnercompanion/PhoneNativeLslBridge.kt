@@ -7,7 +7,12 @@ internal const val PHONE_NATIVE_LSL_BRIDGE_STATUS_SCHEMA = "pps-android-native-l
 
 internal interface PhoneNativeLslBridge {
     fun status(): PhoneNativeLslBridgeStatus
-    fun openMarkerTransport(runPackage: MobileRunPackage, runId: String): PhoneLslMarkerTransport
+    fun openMarkerTransport(
+        runPackage: MobileRunPackage,
+        runId: String,
+        participantMetadata: JSONObject? = null,
+        hapticCapability: JSONObject? = null,
+    ): PhoneLslMarkerTransport
     fun openCommandTransport(runPackage: MobileRunPackage, runId: String): PhoneLslCommandTransport
     fun openControllerTransport(
         commandSignalsName: String,
@@ -75,7 +80,12 @@ internal object PhoneNativeLslBridgeFactory {
 private class MissingPhoneNativeLslBridge(private val status: PhoneNativeLslBridgeStatus) : PhoneNativeLslBridge {
     override fun status(): PhoneNativeLslBridgeStatus = status
 
-    override fun openMarkerTransport(runPackage: MobileRunPackage, runId: String): PhoneLslMarkerTransport =
+    override fun openMarkerTransport(
+        runPackage: MobileRunPackage,
+        runId: String,
+        participantMetadata: JSONObject?,
+        hapticCapability: JSONObject?,
+    ): PhoneLslMarkerTransport =
         NoopPhoneLslMarkerTransport(status)
 
     override fun openCommandTransport(runPackage: MobileRunPackage, runId: String): PhoneLslCommandTransport =
@@ -121,7 +131,12 @@ private class ReflectiveLiblslBridge private constructor(
 ) : PhoneNativeLslBridge {
     override fun status(): PhoneNativeLslBridgeStatus = status
 
-    override fun openMarkerTransport(runPackage: MobileRunPackage, runId: String): PhoneLslMarkerTransport {
+    override fun openMarkerTransport(
+        runPackage: MobileRunPackage,
+        runId: String,
+        participantMetadata: JSONObject?,
+        hapticCapability: JSONObject?,
+    ): PhoneLslMarkerTransport {
         if (!status.available) return NoopPhoneLslMarkerTransport(status)
         return runCatching {
             val richInfo = streamInfo(
@@ -137,6 +152,8 @@ private class ReflectiveLiblslBridge private constructor(
                 runId = runId,
                 channelLabels = PHONE_LSL_MARKER_CHANNELS,
                 channelType = "Marker",
+                participantMetadata = participantMetadata,
+                hapticCapability = hapticCapability,
             )
             val numericInfo = streamInfo(
                 name = runPackage.lsl.numericTriggersName.ifBlank { PHONE_LSL_NUMERIC_TRIGGER_STREAM_NAME },
@@ -151,6 +168,8 @@ private class ReflectiveLiblslBridge private constructor(
                 runId = runId,
                 channelLabels = listOf("event_code"),
                 channelType = "Trigger",
+                participantMetadata = participantMetadata,
+                hapticCapability = hapticCapability,
             )
             ReflectivePhoneLslMarkerTransport(
                 bridge = this,
@@ -328,6 +347,8 @@ private class ReflectiveLiblslBridge private constructor(
         runId: String,
         channelLabels: List<String>,
         channelType: String,
+        participantMetadata: JSONObject? = null,
+        hapticCapability: JSONObject? = null,
     ) {
         runCatching {
             val desc = streamInfoClass.getMethod("desc").invoke(info) ?: return@runCatching
@@ -341,16 +362,7 @@ private class ReflectiveLiblslBridge private constructor(
             appendChildValue(
                 desc,
                 "session_metadata_json",
-                JSONObject()
-                    .put("package_id", runPackage.packageId)
-                    .put("asset_strategy", mobilePackageAssetStrategy(runPackage))
-                    .put("schedule_hash", runPackage.reconstruction.scheduleHash)
-                    .put("participant_roster_count", runPackage.participantRoster.size)
-                    .put("randomization_seed", runPackage.randomizationSeed)
-                    .put("source_segment_hashes", runPackage.sourceSegmentHashes.toJsonObject())
-                    .put("privacy_default", runPackage.lsl.privacyDefault.ifBlank { "metadata_payload_only" })
-                    .put("demographics_in_stream_name", false)
-                    .toString(),
+                phoneLslSessionMetadataJson(runPackage, participantMetadata, hapticCapability),
             )
             val channels = xmlElementClass.getMethod("append_child", String::class.java).invoke(desc, "channels") ?: return@runCatching
             channelLabels.forEach { label ->

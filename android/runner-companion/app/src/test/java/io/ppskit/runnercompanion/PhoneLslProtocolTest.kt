@@ -106,7 +106,12 @@ class PhoneLslProtocolTest {
 
     @Test
     fun runtimeStatusDocumentsMissingNativeTransportAndPrivacyBoundary() {
-        val status = phoneLslRuntimeStatus(packageWithLslCommands(), runId = "phone-run-001")
+        val status = phoneLslRuntimeStatus(
+            packageWithLslCommands(),
+            runId = "phone-run-001",
+            participantMetadata = participantMetadata(),
+            hapticCapability = hapticCapability(),
+        )
 
         assertEquals(PHONE_LSL_RUNTIME_STATUS_SCHEMA, status.getString("schema"))
         assertEquals("local_lsl_marker_mirror", status.getString("current_android_source_behavior"))
@@ -114,6 +119,9 @@ class PhoneLslProtocolTest {
         assertTrue(status.getString("reason").contains("liblsl_android_class_unavailable"))
         assertEquals("PPSCommandSignalsV1", status.getJSONObject("streams").getString("command_signals"))
         assertFalse(status.getJSONObject("privacy").getBoolean("demographics_in_stream_name"))
+        assertEquals("30", status.getJSONObject("participant_metadata_summary").getString("age_years"))
+        assertEquals("right", status.getJSONObject("participant_metadata_summary").getString("handedness"))
+        assertEquals(20, status.getJSONObject("haptic_capability_summary").getInt("recommended_threshold_percent"))
         assertTrue(status.getJSONObject("command_protocol").getBoolean("token_required"))
 
         val descriptions = status.getJSONObject("stream_descriptions")
@@ -140,6 +148,22 @@ class PhoneLslProtocolTest {
             richSessionMetadata.getJSONObject("source_segment_hashes").getString("source_segment5_manifest_sha256"),
         )
         assertFalse(richSessionMetadata.getBoolean("demographics_in_stream_name"))
+        val participantSummary = richSessionMetadata.getJSONObject("participant_metadata_summary")
+        assertEquals("pps-android-lsl-participant-metadata-summary.v1", participantSummary.getString("schema"))
+        assertEquals("P001", participantSummary.getString("participant_id"))
+        assertEquals("30", participantSummary.getString("age_years"))
+        assertEquals("right", participantSummary.getString("handedness"))
+        assertEquals("prefer_not_to_say", participantSummary.getString("gender"))
+        assertEquals("20", participantSummary.getString("tactile_threshold_percent"))
+        assertEquals("android_haptic_calibration", participantSummary.getString("tactile_threshold_source"))
+        assertEquals("metadata_payload_only", participantSummary.getString("stream_privacy"))
+        val hapticSummary = richSessionMetadata.getJSONObject("haptic_capability_summary")
+        assertEquals("pps-android-lsl-haptic-capability-summary.v1", hapticSummary.getString("schema"))
+        assertTrue(hapticSummary.getBoolean("has_vibrator"))
+        assertTrue(hapticSummary.getBoolean("has_amplitude_control"))
+        assertEquals("amplitude_percent_supported", hapticSummary.getString("calibration_policy"))
+        assertEquals(20, hapticSummary.getInt("recommended_threshold_percent"))
+        assertEquals(51, hapticSummary.getInt("recommended_amplitude"))
 
         val numericTriggers = descriptions.getJSONObject("numeric_triggers")
         assertEquals("PPSTriggerCodes", numericTriggers.getString("name"))
@@ -306,4 +330,30 @@ class PhoneLslProtocolTest {
             }
             """.trimIndent(),
         )
+
+    private fun participantMetadata(): JSONObject =
+        JSONObject()
+            .put("schema", "pps-android-phone-participant-metadata.v1")
+            .put("participant_id", "P001")
+            .put("session_id", "session-001")
+            .put("session_group_id", "group-001")
+            .put("part_session_id", "part-001")
+            .put("part_number", "1")
+            .put("age_years", "30")
+            .put("handedness", "right")
+            .put("gender", "prefer_not_to_say")
+            .put("tactile_threshold_percent", "20")
+            .put("tactile_threshold_source", "android_haptic_calibration")
+            .put("tactile_threshold_calibration_status", "threshold_detected")
+            .put("stream_privacy", "metadata_payload_only")
+
+    private fun hapticCapability(): JSONObject =
+        JSONObject()
+            .put("schema", "pps-android-haptic-capability.v1")
+            .put("has_vibrator", true)
+            .put("has_amplitude_control", true)
+            .put("calibration_policy", "amplitude_percent_supported")
+            .put("calibration_status", "threshold_detected")
+            .put("recommended_threshold_percent", 20)
+            .put("recommended_amplitude", 51)
 }

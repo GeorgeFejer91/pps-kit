@@ -71,7 +71,13 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   event package payload, `reconstruction_contract.json`,
   `phone_run_catalog_entry.json`, and stream-description metadata, comparing the
   roster count, randomization seed, Segment 6/5 hashes, and phone-side source
-  block CSV count.
+  block CSV count. Rich-marker and numeric-trigger stream descriptions also
+  carry compact `participant_metadata_summary` and
+  `haptic_capability_summary` objects when the phone has those sidecars; the
+  Android validator compares those summaries against `participant_metadata.json`
+  and `haptic_capability.json` so age/handedness/gender/tactile threshold and
+  phone-vibration recommendations remain reconstructable from LSL metadata
+  without putting demographics into stream names.
 - Optional native Android LSL marker/command transport lives in
   `PhoneNativeLslBridge.kt`. A local ignored
   `android/runner-companion/app/libs/liblsl-Android.aar` is included by Gradle

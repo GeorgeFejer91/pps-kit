@@ -91,6 +91,17 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   as the common phone-hotspot `192.168.43.255` target. Android rejects discovery
   packets that omit the directed-broadcast fallback while keeping the same
   no-token/no-demographics/no-stream-name privacy boundary.
+- Android LSL stream-description reconstruction now carries compact
+  participant/haptic summaries in addition to package provenance. The phone
+  passes `participant_metadata.json` and `haptic_capability.json` into
+  `phoneLslRuntimeStatus(...)` and the optional native liblsl marker transport;
+  rich-marker and numeric-trigger `session_metadata_json` now include
+  `participant_metadata_summary` and `haptic_capability_summary` while keeping
+  discoverable stream names generic. Full calibration response rows remain in
+  the haptic sidecar and first `session_metadata` marker payload. The Android
+  runtime artifact validator rejects summary drift against participant/haptic
+  sidecars, so LSL metadata, local artifacts, and native XML descriptions stay
+  aligned.
 
 ## 2026-06-29
 

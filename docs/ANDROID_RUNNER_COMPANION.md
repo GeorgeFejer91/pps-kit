@@ -308,10 +308,17 @@ compatibility run during later reconstruction. The first `session_metadata`
 marker and rich-marker/numeric-trigger stream-description
 `session_metadata_json` also carry the package provenance summary: schedule
 hash, participant roster count, randomization seed, and source segment hash
-summary. Strict artifact validation checks that the exported
+summary. When participant/haptic sidecars are present, the same
+`session_metadata_json` also carries compact `participant_metadata_summary` and
+`haptic_capability_summary` objects so age, handedness, gender, tactile
+threshold source/value, calibration status, and recommended phone vibration
+amplitude reconstruct from LSL metadata while stream names remain generic. Full
+calibration response rows stay in the haptic sidecar and first marker payload.
+Strict artifact validation checks that the exported
 `lsl_runtime_status.json` stream descriptions match the package provenance
-whenever native evidence or provenance-bearing packages are expected. The app
-also carries the Segment 0-6 hierarchy into the session metadata marker payload and
+and participant/haptic summaries whenever native evidence, provenance-bearing
+packages, or participant sidecars are expected. The app also carries the
+Segment 0-6 hierarchy into the session metadata marker payload and
 `reconstruction_contract.json`, letting strict validation reject hierarchy drift
 inside phone-owned artifacts. Participant age, handedness,
 gender, and tactile threshold stay in metadata and marker payloads rather than

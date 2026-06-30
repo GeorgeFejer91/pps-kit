@@ -77,7 +77,14 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   `pps-android-lsl-stream-descriptions.v1`: stream names, LSL roles, channel
   formats/counts, PC-compatible channel labels, source IDs/source patterns,
   nominal rates, marker version, and the privacy rule that demographics stay
-  out of discoverable stream names.
+  out of discoverable stream names. The rich-marker and numeric-trigger
+  `session_metadata_json` descriptions now also include compact
+  `participant_metadata_summary` and `haptic_capability_summary` objects when
+  available, so age/handedness/gender/tactile-threshold policy and the
+  recommended phone-vibration threshold can be reconstructed from LSL metadata
+  without encoding those values into stream names. Full haptic calibration
+  response rows stay in `haptic_capability.json` and the first
+  `session_metadata` marker payload.
 - Phone-owned run folders and ZIP exports include `reconstruction_contract.json`.
   The phone copies the v2 package's Segment 0-6 hierarchy, schedule hash,
   source setup hash/path, asset strategy, reusable building-block catalog, and

@@ -324,6 +324,44 @@ def test_android_lsl_runtime_validator_rejects_stream_description_metadata_drift
     )
 
 
+def test_android_lsl_runtime_validator_rejects_stream_description_participant_summary_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    status_path = run_dir / "lsl_runtime_status.json"
+    status = json.loads(status_path.read_text(encoding="utf-8"))
+    metadata = json.loads(status["stream_descriptions"]["rich_markers"]["session_metadata_json"])
+    metadata["participant_metadata_summary"]["handedness"] = "left"
+    status["stream_descriptions"]["rich_markers"]["session_metadata_json"] = json.dumps(metadata)
+    status_path.write_text(json.dumps(status), encoding="utf-8")
+    _update_completion_payload(run_dir, lsl_runtime_status=status)
+
+    result = validator.validate_run_artifact(run_dir)
+
+    assert result.ok is False
+    assert "participant_metadata_summary handedness differs from participant_metadata" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_stream_description_haptic_summary_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    status_path = run_dir / "lsl_runtime_status.json"
+    status = json.loads(status_path.read_text(encoding="utf-8"))
+    metadata = json.loads(status["stream_descriptions"]["numeric_triggers"]["session_metadata_json"])
+    metadata["haptic_capability_summary"]["recommended_amplitude"] = 200
+    status["stream_descriptions"]["numeric_triggers"]["session_metadata_json"] = json.dumps(metadata)
+    status_path.write_text(json.dumps(status), encoding="utf-8")
+    _update_completion_payload(run_dir, lsl_runtime_status=status)
+
+    result = validator.validate_run_artifact(run_dir)
+
+    assert result.ok is False
+    assert "haptic_capability_summary recommended_amplitude differs from haptic_capability" in "\n".join(
+        result.failures
+    )
+
+
 def test_android_lsl_runtime_validator_accepts_phone_topup_evidence(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -1790,19 +1828,54 @@ def _stream_session_metadata_json(
     participant_roster_count: int = 0,
     randomization_seed: str = "",
     source_hashes: dict | None = None,
+    participant_metadata: dict | None = None,
+    haptic_capability: dict | None = None,
 ) -> str:
-    return json.dumps(
-        {
-            "package_id": "pkg-001",
-            "asset_strategy": "trial_building_blocks_only",
-            "schedule_hash": "schedulehash",
-            "participant_roster_count": participant_roster_count,
-            "randomization_seed": randomization_seed,
-            "source_segment_hashes": source_hashes or _phone_run_source_hash_summary(_phone_run_source_segment_hashes()),
-            "privacy_default": "metadata_payload_only",
-            "demographics_in_stream_name": False,
-        }
-    )
+    payload = {
+        "package_id": "pkg-001",
+        "asset_strategy": "trial_building_blocks_only",
+        "schedule_hash": "schedulehash",
+        "participant_roster_count": participant_roster_count,
+        "randomization_seed": randomization_seed,
+        "source_segment_hashes": source_hashes or _phone_run_source_hash_summary(_phone_run_source_segment_hashes()),
+        "privacy_default": "metadata_payload_only",
+        "demographics_in_stream_name": False,
+    }
+    metadata = participant_metadata if participant_metadata is not None else _participant_metadata()
+    haptic = haptic_capability if haptic_capability is not None else _haptic_capability()
+    payload["participant_metadata_summary"] = _lsl_participant_metadata_summary(metadata)
+    payload["haptic_capability_summary"] = _lsl_haptic_capability_summary(haptic)
+    return json.dumps(payload)
+
+
+def _lsl_participant_metadata_summary(participant_metadata: dict) -> dict:
+    return {
+        "schema": "pps-android-lsl-participant-metadata-summary.v1",
+        "participant_id": participant_metadata.get("participant_id", ""),
+        "session_id": participant_metadata.get("session_id", ""),
+        "session_group_id": participant_metadata.get("session_group_id", ""),
+        "part_session_id": participant_metadata.get("part_session_id", ""),
+        "part_number": participant_metadata.get("part_number", ""),
+        "age_years": participant_metadata.get("age_years", ""),
+        "handedness": participant_metadata.get("handedness", ""),
+        "gender": participant_metadata.get("gender", ""),
+        "tactile_threshold_percent": participant_metadata.get("tactile_threshold_percent"),
+        "tactile_threshold_source": participant_metadata.get("tactile_threshold_source", ""),
+        "tactile_threshold_calibration_status": participant_metadata.get("tactile_threshold_calibration_status", ""),
+        "stream_privacy": participant_metadata.get("stream_privacy", "metadata_payload_only"),
+    }
+
+
+def _lsl_haptic_capability_summary(haptic_capability: dict) -> dict:
+    return {
+        "schema": "pps-android-lsl-haptic-capability-summary.v1",
+        "has_vibrator": haptic_capability.get("has_vibrator", False),
+        "has_amplitude_control": haptic_capability.get("has_amplitude_control", False),
+        "calibration_policy": haptic_capability.get("calibration_policy", ""),
+        "calibration_status": haptic_capability.get("calibration_status", ""),
+        "recommended_threshold_percent": haptic_capability.get("recommended_threshold_percent"),
+        "recommended_amplitude": haptic_capability.get("recommended_amplitude"),
+    }
 
 
 def _update_stream_description_session_metadata(

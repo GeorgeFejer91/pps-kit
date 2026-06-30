@@ -180,6 +180,8 @@ internal fun phoneLslRuntimeStatus(
     markerTransportStatus: PhoneNativeLslBridgeStatus? = null,
     commandTransportStatus: PhoneNativeLslBridgeStatus? = null,
     commandReceiverAvailable: Boolean = false,
+    participantMetadata: JSONObject? = null,
+    hapticCapability: JSONObject? = null,
 ): JSONObject {
     val richName = runPackage.lsl.richMarkersName.ifBlank { "PPSMarkersV2" }
     val numericName = runPackage.lsl.numericTriggersName.ifBlank { "PPSTriggerCodes" }
@@ -200,7 +202,7 @@ internal fun phoneLslRuntimeStatus(
         activeCommandTransport -> "native_lsl_commands_with_local_marker_mirror"
         else -> runPackage.lsl.currentAndroidSourceBehavior.ifBlank { "local_lsl_marker_mirror" }
     }
-    return JSONObject()
+    val status = JSONObject()
         .put("schema", PHONE_LSL_RUNTIME_STATUS_SCHEMA)
         .put("package_id", runPackage.packageId)
         .put("run_id", runId)
@@ -228,7 +230,6 @@ internal fun phoneLslRuntimeStatus(
                 .put("command_signals", commandName)
                 .put("command_acks", ackName),
         )
-        .put("stream_descriptions", phoneLslStreamDescriptions(runPackage, runId))
         .put(
             "command_protocol",
             JSONObject()
@@ -247,15 +248,24 @@ internal fun phoneLslRuntimeStatus(
                 .put("participant_demographics_location", "metadata_and_payload_artifacts")
                 .put("demographics_in_stream_name", false),
         )
+    phoneParticipantMetadataSummary(participantMetadata)?.let { status.put("participant_metadata_summary", it) }
+    phoneHapticCapabilitySummary(hapticCapability)?.let { status.put("haptic_capability_summary", it) }
+    status.put("stream_descriptions", phoneLslStreamDescriptions(runPackage, runId, participantMetadata, hapticCapability))
+    return status
 }
 
-internal fun phoneLslStreamDescriptions(runPackage: MobileRunPackage, runId: String): JSONObject {
+internal fun phoneLslStreamDescriptions(
+    runPackage: MobileRunPackage,
+    runId: String,
+    participantMetadata: JSONObject? = null,
+    hapticCapability: JSONObject? = null,
+): JSONObject {
     val richName = runPackage.lsl.richMarkersName.ifBlank { PHONE_LSL_RICH_MARKER_STREAM_NAME }
     val numericName = runPackage.lsl.numericTriggersName.ifBlank { PHONE_LSL_NUMERIC_TRIGGER_STREAM_NAME }
     val commandName = runPackage.lsl.commandSignalsName.ifBlank { PHONE_LSL_COMMAND_STREAM_NAME }
     val ackName = runPackage.lsl.commandAcksName.ifBlank { PHONE_LSL_ACK_STREAM_NAME }
     val runToken = phoneLslSourceIdToken(runId)
-    val sessionMetadataJson = phoneLslSessionMetadataJson(runPackage)
+    val sessionMetadataJson = phoneLslSessionMetadataJson(runPackage, participantMetadata, hapticCapability)
     return JSONObject()
         .put("schema", "pps-android-lsl-stream-descriptions.v1")
         .put("runtime_authority", runPackage.lsl.runtimeAuthority.ifBlank { "android_phone" })
@@ -329,8 +339,12 @@ internal fun phoneLslStreamDescriptions(runPackage: MobileRunPackage, runId: Str
         )
 }
 
-internal fun phoneLslSessionMetadataJson(runPackage: MobileRunPackage): String =
-    JSONObject()
+internal fun phoneLslSessionMetadataJson(
+    runPackage: MobileRunPackage,
+    participantMetadata: JSONObject? = null,
+    hapticCapability: JSONObject? = null,
+): String {
+    val payload = JSONObject()
         .put("package_id", runPackage.packageId)
         .put("asset_strategy", mobilePackageAssetStrategy(runPackage))
         .put("schedule_hash", runPackage.reconstruction.scheduleHash)
@@ -339,7 +353,40 @@ internal fun phoneLslSessionMetadataJson(runPackage: MobileRunPackage): String =
         .put("source_segment_hashes", runPackage.sourceSegmentHashes.toJsonObject())
         .put("privacy_default", runPackage.lsl.privacyDefault.ifBlank { "metadata_payload_only" })
         .put("demographics_in_stream_name", false)
-        .toString()
+    phoneParticipantMetadataSummary(participantMetadata)?.let { payload.put("participant_metadata_summary", it) }
+    phoneHapticCapabilitySummary(hapticCapability)?.let { payload.put("haptic_capability_summary", it) }
+    return payload.toString()
+}
+
+internal fun phoneParticipantMetadataSummary(participantMetadata: JSONObject?): JSONObject? {
+    if (participantMetadata == null || participantMetadata.length() == 0) return null
+    return JSONObject()
+        .put("schema", "pps-android-lsl-participant-metadata-summary.v1")
+        .put("participant_id", participantMetadata.optString("participant_id", ""))
+        .put("session_id", participantMetadata.optString("session_id", ""))
+        .put("session_group_id", participantMetadata.optString("session_group_id", ""))
+        .put("part_session_id", participantMetadata.optString("part_session_id", ""))
+        .put("part_number", participantMetadata.optString("part_number", ""))
+        .put("age_years", participantMetadata.optString("age_years", ""))
+        .put("handedness", participantMetadata.optString("handedness", ""))
+        .put("gender", participantMetadata.optString("gender", ""))
+        .put("tactile_threshold_percent", participantMetadata.opt("tactile_threshold_percent") ?: JSONObject.NULL)
+        .put("tactile_threshold_source", participantMetadata.optString("tactile_threshold_source", ""))
+        .put("tactile_threshold_calibration_status", participantMetadata.optString("tactile_threshold_calibration_status", ""))
+        .put("stream_privacy", participantMetadata.optString("stream_privacy", "metadata_payload_only"))
+}
+
+internal fun phoneHapticCapabilitySummary(hapticCapability: JSONObject?): JSONObject? {
+    if (hapticCapability == null || hapticCapability.length() == 0) return null
+    return JSONObject()
+        .put("schema", "pps-android-lsl-haptic-capability-summary.v1")
+        .put("has_vibrator", hapticCapability.optBoolean("has_vibrator", false))
+        .put("has_amplitude_control", hapticCapability.optBoolean("has_amplitude_control", false))
+        .put("calibration_policy", hapticCapability.optString("calibration_policy", ""))
+        .put("calibration_status", hapticCapability.optString("calibration_status", ""))
+        .put("recommended_threshold_percent", hapticCapability.opt("recommended_threshold_percent") ?: JSONObject.NULL)
+        .put("recommended_amplitude", hapticCapability.opt("recommended_amplitude") ?: JSONObject.NULL)
+}
 
 internal fun phoneCommandAckForSample(
     sample: List<Any?>,
