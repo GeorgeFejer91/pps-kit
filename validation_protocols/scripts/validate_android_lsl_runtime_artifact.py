@@ -155,6 +155,7 @@ def validate_runtime_status(
     reconstruction_artifact: dict[str, Any] | None = None,
     participant_metadata: dict[str, Any] | None = None,
     haptic_capability: dict[str, Any] | None = None,
+    event_rows: list[dict[str, Any]] | None = None,
     command_diary_rows: list[dict[str, Any]] | None = None,
     marker_mirror_rows: list[dict[str, Any]] | None = None,
     materialization_manifests: list[dict[str, Any]] | None = None,
@@ -167,6 +168,7 @@ def validate_runtime_status(
     expect_command_acks: bool = False,
     expect_run_catalog: bool = False,
     expect_run_catalog_index: bool = False,
+    expect_event_diary: bool = False,
     expect_lightweight_materializations: bool = False,
     expect_phone_topup_evidence: bool = False,
     expect_audiotrack_timing_evidence: bool = False,
@@ -254,6 +256,13 @@ def validate_runtime_status(
         haptic_capability=haptic_capability,
         failures=failures,
         warnings=warnings,
+    )
+    _validate_phone_event_diary(
+        completion=completion,
+        event_rows=event_rows or [],
+        failures=failures,
+        warnings=warnings,
+        expect_event_diary=expect_event_diary,
     )
     _validate_phone_command_diary(
         status=status,
@@ -501,6 +510,7 @@ def validate_run_artifact(
     expect_command_acks: bool = False,
     expect_run_catalog: bool = False,
     expect_run_catalog_index: bool = False,
+    expect_event_diary: bool = False,
     expect_lightweight_materializations: bool = False,
     expect_phone_topup_evidence: bool = False,
     expect_audiotrack_timing_evidence: bool = False,
@@ -542,6 +552,7 @@ def validate_run_artifact(
         reconstruction_artifact=loaded.get("reconstruction_artifact"),
         participant_metadata=loaded.get("participant_metadata"),
         haptic_capability=loaded.get("haptic_capability"),
+        event_rows=loaded.get("event_rows") or [],
         command_diary_rows=loaded.get("command_diary_rows") or [],
         marker_mirror_rows=loaded.get("marker_mirror_rows") or [],
         materialization_manifests=loaded.get("materialization_manifests") or [],
@@ -554,6 +565,7 @@ def validate_run_artifact(
         expect_command_acks=expect_command_acks,
         expect_run_catalog=expect_run_catalog,
         expect_run_catalog_index=expect_run_catalog_index,
+        expect_event_diary=expect_event_diary,
         expect_lightweight_materializations=expect_lightweight_materializations,
         expect_phone_topup_evidence=expect_phone_topup_evidence,
         expect_audiotrack_timing_evidence=expect_audiotrack_timing_evidence,
@@ -723,6 +735,7 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
             reconstruction_members = [name for name in archive.namelist() if name.endswith(ANDROID_PHONE_RUN_RECONSTRUCTION_ARTIFACT)]
             participant_metadata_members = [name for name in archive.namelist() if name.endswith("participant_metadata.json")]
             haptic_capability_members = [name for name in archive.namelist() if name.endswith("haptic_capability.json")]
+            event_members = [name for name in archive.namelist() if name.endswith("events.csv")]
             command_diary_members = [name for name in archive.namelist() if name.endswith("command_diary.jsonl")]
             marker_mirror_members = [name for name in archive.namelist() if name.endswith("lsl_marker_mirror.csv")]
             response_ledger_members = [name for name in archive.namelist() if name.endswith("phone_response_ledger.csv")]
@@ -794,6 +807,11 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 haptic_capability_name = sorted(haptic_capability_members)[0]
                 archive.extract(haptic_capability_name, temp_root)
                 haptic_capability = _read_json(temp_root / haptic_capability_name)
+            event_rows: list[dict[str, Any]] = []
+            if event_members:
+                event_name = sorted(event_members)[0]
+                archive.extract(event_name, temp_root)
+                event_rows = _read_csv(temp_root / event_name)
             materialization_manifests: list[dict[str, Any]] = []
             for member in sorted(materialization_members):
                 archive.extract(member, temp_root)
@@ -843,6 +861,7 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 "reconstruction_artifact": reconstruction_artifact,
                 "participant_metadata": participant_metadata,
                 "haptic_capability": haptic_capability,
+                "event_rows": event_rows,
                 "command_diary_rows": command_diary_rows,
                 "marker_mirror_rows": marker_mirror_rows,
                 "materialization_manifests": materialization_manifests,
@@ -859,6 +878,7 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
     reconstruction_artifact_path = path / ANDROID_PHONE_RUN_RECONSTRUCTION_ARTIFACT
     participant_metadata_path = path / "participant_metadata.json"
     haptic_capability_path = path / "haptic_capability.json"
+    event_diary_path = path / "events.csv"
     command_diary_path = path / "command_diary.jsonl"
     marker_mirror_path = path / "lsl_marker_mirror.csv"
     response_ledger_path = path / "phone_response_ledger.csv"
@@ -878,6 +898,7 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
         "reconstruction_artifact": _read_json(reconstruction_artifact_path) if reconstruction_artifact_path.is_file() else None,
         "participant_metadata": _read_json(participant_metadata_path) if participant_metadata_path.is_file() else None,
         "haptic_capability": _read_json(haptic_capability_path) if haptic_capability_path.is_file() else None,
+        "event_rows": _read_csv(event_diary_path) if event_diary_path.is_file() else [],
         "command_diary_rows": _read_jsonl(command_diary_path) if command_diary_path.is_file() else [],
         "marker_mirror_rows": _read_csv(marker_mirror_path) if marker_mirror_path.is_file() else [],
         "materialization_manifests": materialization_manifests,
@@ -1497,6 +1518,93 @@ def _compare_metadata_fields(
             continue
         if _metadata_value(left.get(field)) != _metadata_value(right.get(field)):
             failures.append(f"{label} {field} differs from {other_label}")
+
+
+def _validate_phone_event_diary(
+    *,
+    completion: dict[str, Any] | None,
+    event_rows: list[dict[str, Any]],
+    failures: list[str],
+    warnings: list[str],
+    expect_event_diary: bool,
+) -> None:
+    embedded_events = [
+        event
+        for event in list((completion or {}).get("events") or [])
+        if isinstance(event, dict)
+    ]
+    if not event_rows:
+        message = "phone event diary events.csv is missing"
+        if expect_event_diary:
+            failures.append(message)
+        elif embedded_events:
+            warnings.append(f"{message}; rerun with --expect-event-diary for strict checks")
+        return
+
+    event_ids = [_clean_int(row.get("event_id")) for row in event_rows if _clean_int(row.get("event_id")) > 0]
+    duplicate_ids = _duplicate_ints(event_ids)
+    if duplicate_ids:
+        failures.append(f"events.csv has duplicate event ids: {', '.join(str(item) for item in duplicate_ids[:10])}")
+
+    required_fields = ("event_id", "type", "package_id", "run_id", "phone_unix_ms", "phone_elapsed_realtime_ms")
+    for index, row in enumerate(event_rows, start=1):
+        prefix = f"events.csv row {index}"
+        for field in required_fields:
+            if field not in row or not str(row.get(field) or "").strip():
+                failures.append(f"{prefix} is missing {field}")
+
+    if not embedded_events:
+        warnings.append("events.csv was present without completion events; only event-diary self-consistency was checked")
+        return
+
+    embedded_ids = [_clean_int(event.get("event_id")) for event in embedded_events if _clean_int(event.get("event_id")) > 0]
+    if event_ids != embedded_ids:
+        failures.append("events.csv event ids differ from completion.json embedded events")
+    if len(event_rows) != len(embedded_events):
+        failures.append("events.csv row count differs from completion events")
+
+    embedded_by_id = {
+        _clean_int(event.get("event_id")): event
+        for event in embedded_events
+        if _clean_int(event.get("event_id")) > 0
+    }
+    missing_event_ids = sorted(set(embedded_by_id) - set(event_ids))
+    extra_event_ids = sorted(set(event_ids) - set(embedded_by_id))
+    if missing_event_ids:
+        failures.append(f"events.csv is missing event ids: {', '.join(str(item) for item in missing_event_ids[:10])}")
+    if extra_event_ids:
+        failures.append(f"events.csv has extra event ids: {', '.join(str(item) for item in extra_event_ids[:10])}")
+
+    for index, row in enumerate(event_rows, start=1):
+        event_id = _clean_int(row.get("event_id"))
+        event = embedded_by_id.get(event_id)
+        if event is None:
+            continue
+        prefix = f"events.csv row {index}"
+        for field, expected_value in _primitive_event_fields(event).items():
+            if field not in row:
+                failures.append(f"{prefix} is missing primitive field {field}")
+                continue
+            observed = _csv_scalar(row.get(field))
+            expected = _csv_scalar(expected_value)
+            if observed != expected:
+                failures.append(f"{prefix} {field} differs from completion event")
+
+
+def _primitive_event_fields(event: dict[str, Any]) -> dict[str, Any]:
+    return {
+        key: value
+        for key, value in event.items()
+        if value is None or isinstance(value, (str, int, float, bool))
+    }
+
+
+def _csv_scalar(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    return str(value).strip()
 
 
 def _validate_phone_command_diary(
@@ -2710,6 +2818,11 @@ def main(argv: list[str] | None = None) -> int:
         ),
     )
     parser.add_argument(
+        "--expect-event-diary",
+        action="store_true",
+        help="For phone-run artifacts, fail unless events.csv is present and matches completion/latest-events event rows.",
+    )
+    parser.add_argument(
         "--expect-lightweight-materializations",
         action="store_true",
         help="For building-block-only phone runs, fail unless every scheduled block has materialization event/JSON/WAV evidence.",
@@ -2739,6 +2852,7 @@ def main(argv: list[str] | None = None) -> int:
         expect_command_acks=args.expect_command_acks,
         expect_run_catalog=args.expect_run_catalog,
         expect_run_catalog_index=args.expect_run_catalog_index,
+        expect_event_diary=args.expect_event_diary,
         expect_lightweight_materializations=args.expect_lightweight_materializations,
         expect_phone_topup_evidence=args.expect_phone_topup_evidence,
         expect_audiotrack_timing_evidence=args.expect_audiotrack_timing_evidence,

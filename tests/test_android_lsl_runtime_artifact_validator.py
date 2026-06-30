@@ -225,6 +225,50 @@ def test_android_lsl_runtime_validator_accepts_audiotrack_timing_evidence(tmp_pa
     assert result.failures == []
 
 
+def test_android_lsl_runtime_validator_accepts_phone_event_diary(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+
+    result = validator.validate_run_artifact(run_dir, expect_event_diary=True)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_requires_phone_event_diary_when_expected(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    status = _status(native=False)
+    status.update(_catalog_identity())
+    events = [_phone_event(1, "run_start")]
+    (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
+    (run_dir / "completion.json").write_text(
+        json.dumps({"lsl_runtime_status": status, "events": events}),
+        encoding="utf-8",
+    )
+
+    result = validator.validate_run_artifact(run_dir, expect_event_diary=True)
+
+    assert result.ok is False
+    assert "phone event diary events.csv is missing" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_phone_event_diary_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    events_path = run_dir / "events.csv"
+    rows = _read_csv_rows(events_path)
+    rows[0]["type"] = "wrong_event"
+    _write_marker_csv(events_path, rows)
+
+    result = validator.validate_run_artifact(run_dir, expect_event_diary=True)
+
+    assert result.ok is False
+    assert "events.csv row 1 type differs from completion event" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_rejects_audiotrack_strategy_drift(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -380,7 +424,11 @@ def test_android_lsl_runtime_validator_loads_lightweight_materialization_from_zi
             if path.is_file():
                 archive.write(path, f"phone-run/{path.relative_to(source_dir).as_posix()}")
 
-    result = validator.validate_run_artifact(archive_path, expect_lightweight_materializations=True)
+    result = validator.validate_run_artifact(
+        archive_path,
+        expect_event_diary=True,
+        expect_lightweight_materializations=True,
+    )
 
     assert result.ok is True
     assert result.failures == []
@@ -576,6 +624,7 @@ def _write_phone_run_with_native_command_diary(
         ),
         encoding="utf-8",
     )
+    _write_android_events_csv(run_dir / "events.csv", events)
     (run_dir / "participant_metadata.json").write_text(json.dumps(participant_metadata), encoding="utf-8")
     (run_dir / "haptic_capability.json").write_text(json.dumps(haptic_capability), encoding="utf-8")
     (run_dir / "command_diary.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
@@ -739,6 +788,27 @@ def _write_marker_csv(path: Path, rows: list[dict]) -> None:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
+
+
+def _write_android_events_csv(path: Path, events: list[dict]) -> None:
+    fieldnames: list[str] = []
+    for event in events:
+        for key, value in event.items():
+            if (value is None or isinstance(value, (str, int, float, bool))) and key not in fieldnames:
+                fieldnames.append(key)
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        for event in events:
+            writer.writerow({key: _android_csv_cell(event.get(key)) for key in fieldnames})
+
+
+def _android_csv_cell(value: object) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    return str(value)
 
 
 def _read_csv_rows(path: Path) -> list[dict]:
@@ -1013,6 +1083,7 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
     )
     (run_dir / "participant_metadata.json").write_text(json.dumps(participant_metadata), encoding="utf-8")
     (run_dir / "haptic_capability.json").write_text(json.dumps(haptic_capability), encoding="utf-8")
+    _write_android_events_csv(run_dir / "events.csv", events)
     _write_marker_csv(run_dir / "lsl_marker_mirror.csv", markers)
     _write_marker_csv(run_dir / "phone_response_ledger.csv", response_ledger)
     (run_dir / "phone_topup_plan.json").write_text(json.dumps(topup_plan), encoding="utf-8")

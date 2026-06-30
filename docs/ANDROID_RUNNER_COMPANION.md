@@ -170,6 +170,12 @@ For strict app-private participant/session catalog reconstruction, add
 `phone_run_catalog/index.json`, each participant `runs.jsonl`, and
 `latest_run.json` to agree on run identity, latest-run pointers, artifact file,
 native LSL status booleans, and reconstruction schedule hash.
+For strict phone event diary reconstruction, add `--expect-event-diary`; this
+requires `events.csv` to be present and to match the embedded
+`completion.json`/`latest_events.json` event list by event id, event type,
+run/package identity, phone timestamps, duplicate-id checks, and primitive
+event fields. This is the quick human-readable log of what the phone runtime
+did before the richer marker/XDF checks.
 For phone-owned timing reconstruction, add
 `--expect-audiotrack-timing-evidence`; this requires `block_start` events to
 declare `audio_timing_strategy = audiotrack_pcm_wav_playback_head` with positive

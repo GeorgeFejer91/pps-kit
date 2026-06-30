@@ -358,6 +358,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   and enforce it with `--expect-run-catalog-index`, checking global
   `index.json`, participant `runs.jsonl`, and `latest_run.json` against the
   current phone-run identity and per-run catalog entry.
+- Android phone-run artifact validation can now treat the plain event diary as
+  a strict reconstruction sidecar. `validate_android_lsl_runtime_artifact.py
+  --expect-event-diary` loads `events.csv` from run folders or ZIPs, checks
+  duplicate event IDs, required phone timestamp/run identity fields, and
+  primitive field consistency against embedded `completion.json` /
+  `latest_events.json` events. This gives operators a CSV audit trail of what
+  the phone runtime did, separate from marker mirrors and command diaries.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only

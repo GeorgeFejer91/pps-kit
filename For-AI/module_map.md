@@ -88,7 +88,9 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   phone-run `phone_run_catalog_entry.json` when present or when
   `--expect-run-catalog` is set, app-private `phone_run_catalog/index.json`,
   participant `runs.jsonl`, and `latest_run.json` when
-  `--expect-run-catalog-index` is set, lightweight scheduled-block materialization
+  `--expect-run-catalog-index` is set, phone-run `events.csv` event-diary
+  rows against embedded completion/latest-events when `--expect-event-diary`
+  is set, lightweight scheduled-block materialization
   events/manifests/WAV hashes when `--expect-lightweight-materializations` is
   set, package `asset_strategy` consistency across phone-run sidecars,
   phone-run response/top-up reconstruction evidence from

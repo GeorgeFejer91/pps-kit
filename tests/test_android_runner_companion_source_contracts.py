@@ -79,3 +79,10 @@ def test_android_phone_run_zip_exports_catalog_snapshot() -> None:
     assert "addPhoneRunCatalogSnapshot(output, context.filesDir)" in main_activity
     assert 'File(filesDir, "phone_run_catalog")' in main_activity
     assert 'addZipEntries(output, catalogRoot, "phone_run_catalog")' in main_activity
+
+
+def test_android_phone_run_writes_plain_event_diary() -> None:
+    main_activity = _source("MainActivity.kt")
+
+    assert 'writePhoneEventsCsv(File(dir, "events.csv"), events)' in main_activity
+    assert 'writePhoneEventsCsv(File(dir, "lsl_marker_mirror.csv"), lslMarkers)' in main_activity
