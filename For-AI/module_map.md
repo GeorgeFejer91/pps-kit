@@ -165,6 +165,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   strict native marker-push completeness from completion `summary`
   (`native_lsl_pushed_count == lsl_marker_mirror_count` and
   `native_lsl_failed_count == 0`) when marker evidence is present,
+  strict native command summary counts against `native_lsl` command diary rows
+  when `--expect-command-acks` is set,
   phone-run `phone_run_catalog_entry.json` when present or when
   `--expect-run-catalog` is set, app-private `phone_run_catalog/index.json`,
   participant `runs.jsonl`, and `latest_run.json` when

@@ -1294,6 +1294,28 @@ def test_android_lsl_runtime_validator_requires_phone_run_ack_sent_in_strict_mod
     assert "expected to send a PPSCommandAcksV1 sample" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_native_command_summary_count_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_phone_run_with_native_command_diary(run_dir)
+    completion_path = run_dir / "completion.json"
+    completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    completion["summary"]["native_lsl_command_received_count"] = 0
+    completion["summary"]["native_lsl_command_ack_count"] = 0
+    completion["summary"]["native_lsl_command_ack_failed_count"] = 1
+    completion["summary"]["native_lsl_command_rejected_count"] = 1
+    completion_path.write_text(json.dumps(completion), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    failures = "\n".join(result.failures)
+    assert "completion summary native_lsl_command_received_count expected 1, got 0" in failures
+    assert "completion summary native_lsl_command_ack_count expected 1, got 0" in failures
+    assert "completion summary native_lsl_command_ack_failed_count expected 0, got 1" in failures
+    assert "completion summary native_lsl_command_rejected_count expected 0, got 1" in failures
+
+
 def test_android_lsl_runtime_validator_requires_phone_run_operator_command_event_for_ack_evidence(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()

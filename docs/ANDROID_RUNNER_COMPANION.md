@@ -227,6 +227,9 @@ command id. For native `PPSCommandAcksV1` rows, strict validation also parses
 the ack sample payload and compares it with the diary payload, requiring the
 ack payload to preserve the applied command plus package identity and, for
 active-run commands such as pause/resume/stop-after-block, the phone run id.
+With `--expect-command-acks`, the completion `summary` native command counters
+must also agree with the diary: received commands, sent ack samples, failed ack
+sends, and rejected commands are counted from the `native_lsl` rows.
 New runs should distinguish `phone_ui`, `phone_runtime`, and `native_lsl`; the
 validator still accepts the older `phone_ui_or_runtime` label for historical
 artifacts.

@@ -303,7 +303,10 @@ Required validation levels:
     `operator_command` events and native `PPSCommandAcksV1` samples: strict ack
     validation requires the ack payload to match the diary payload and preserve
     the applied command plus package identity, with run id required for
-    active-run control commands.
+    active-run control commands. It also compares completion `summary`
+    command counters against the native command diary: received commands,
+    sent acks, failed ack sends, and rejected commands must match the
+    `native_lsl` rows.
     Add `--expect-artifact-inventory` for new
     phone-run folders/ZIPs where the file inventory should prove relative
     paths, byte sizes, and SHA-256 hashes. Add

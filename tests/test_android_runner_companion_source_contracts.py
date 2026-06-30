@@ -261,6 +261,11 @@ def test_android_phone_run_writes_plain_event_diary() -> None:
     assert '.put("lsl_marker_mirror_count", lslMarkers.size)' in main_activity
     assert '.put("native_lsl_pushed_count", nativeLslPushedCount)' in main_activity
     assert '.put("native_lsl_failed_count", nativeLslFailedCount)' in main_activity
+    assert '.put("native_lsl_command_received_count", nativeLslCommandReceivedCount)' in main_activity
+    assert '.put("native_lsl_command_ack_count", nativeLslCommandAckCount)' in main_activity
+    assert '.put("native_lsl_command_ack_failed_count", nativeLslCommandAckFailedCount)' in main_activity
+    assert '.put("native_lsl_command_rejected_count", nativeLslCommandRejectedCount)' in main_activity
+    assert '.put("command_diary_count", commandDiary.size)' in main_activity
 
 
 def test_android_phone_run_writes_artifact_file_inventory() -> None:

@@ -2980,6 +2980,8 @@ def _validate_phone_command_diary(
     command_sources = {"native_lsl", "phone_ui", "phone_runtime", "phone_ui_or_runtime"}
     native_rows = 0
     native_ack_rows = 0
+    native_ack_sent_rows = 0
+    native_rejected_rows = 0
     for index, row in enumerate(rows, start=1):
         prefix = f"phone command diary row {index}"
         if row.get("schema") != "pps-android-command-diary.v1":
@@ -3022,6 +3024,10 @@ def _validate_phone_command_diary(
         if command_source != "native_lsl":
             continue
         native_rows += 1
+        if row_status != "applied":
+            native_rejected_rows += 1
+        if row.get("ack_sent") is True:
+            native_ack_sent_rows += 1
         ack_channels = list(row.get("ack_channels") or [])
         if ack_channels and ack_channels != list(LSL_ACK_CHANNELS):
             failures.append(f"{prefix} ack channel order mismatch")
@@ -3071,8 +3077,45 @@ def _validate_phone_command_diary(
             failures.append("phone-run command ack validation requires matching operator_command events")
         if native_ack_rows <= 0:
             failures.append("phone-run command ack validation expected at least one PPSCommandAcksV1 ack sample")
+        _validate_native_lsl_command_summary_counts(
+            completion=completion,
+            native_rows=native_rows,
+            native_ack_sent_rows=native_ack_sent_rows,
+            native_rejected_rows=native_rejected_rows,
+            failures=failures,
+        )
     elif native_rows > 0 and native_ack_rows <= 0:
         warnings.append("native_lsl command diary rows do not include ack samples; rerun with --expect-command-acks for strict checks")
+
+
+def _validate_native_lsl_command_summary_counts(
+    *,
+    completion: dict[str, Any] | None,
+    native_rows: int,
+    native_ack_sent_rows: int,
+    native_rejected_rows: int,
+    failures: list[str],
+) -> None:
+    if native_rows <= 0:
+        return
+    summary = (
+        completion.get("summary")
+        if isinstance(completion, dict) and isinstance(completion.get("summary"), dict)
+        else None
+    )
+    if summary is None:
+        failures.append("phone-run command ack validation requires completion summary for native command counts")
+        return
+    expected = {
+        "native_lsl_command_received_count": native_rows,
+        "native_lsl_command_ack_count": native_ack_sent_rows,
+        "native_lsl_command_ack_failed_count": native_rows - native_ack_sent_rows,
+        "native_lsl_command_rejected_count": native_rejected_rows,
+    }
+    for field, value in expected.items():
+        observed = _safe_int(summary.get(field), fallback=-1)
+        if observed != value:
+            failures.append(f"completion summary {field} expected {value}, got {observed}")
 
 
 def _validate_phone_command_ack_payload(

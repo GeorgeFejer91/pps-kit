@@ -87,6 +87,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `native_lsl_failed_count == 0`, so local `PPSMarkersV2` /
   `PPSTriggerCodes` mirror files cannot be mistaken for complete native LSL
   broadcast evidence if the native outlet path dropped samples.
+- Strict native command-ack validation now compares completion `summary`
+  command counters against `native_lsl` command diary rows when
+  `--expect-command-acks` is set. The validator requires received-command,
+  sent-ack, failed-ack, and rejected-command counts to match the diary so a
+  valid-looking `PPSCommandAcksV1` sample cannot hide summary-level dropped or
+  failed native ack accounting.
 - Companion discovery is now a stricter local-network contract rather than a
   best-effort loose JSON shape. PC discovery payload serialization validates
   `schema`, `service`, `network_scope = same_lan_or_local_hotspot`, multicast
