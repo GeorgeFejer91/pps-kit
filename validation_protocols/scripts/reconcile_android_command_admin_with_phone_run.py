@@ -15,6 +15,7 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from validate_android_lsl_runtime_artifact import (  # noqa: E402
     ACK_SCHEMA,
+    ANDROID_COMMAND_REJECTION_PAYLOAD_SCHEMA,
     ANDROID_CONTROLLER_COMMAND_ROW_SCHEMA,
     LSL_ACK_CHANNELS,
     LSL_COMMAND_CHANNELS,
@@ -27,6 +28,21 @@ from validate_android_lsl_runtime_artifact import (  # noqa: E402
 RECONCILIATION_SCHEMA = "pps-android-command-admin-phone-run-reconciliation.v1"
 REPORT_JSON = "android_command_admin_phone_run_reconciliation.json"
 REPORT_MD = "android_command_admin_phone_run_reconciliation.md"
+REJECTED_ACK_REQUIRED_FIELDS = (
+    "package_id",
+    "participant_id",
+    "session_id",
+    "part_session_id",
+    "session_group_id",
+    "part_number",
+    "requested_session_id",
+    "requested_package_id",
+    "requested_participant_id",
+    "requested_target_session_id",
+    "requested_target_part_session_id",
+    "requested_target_session_group_id",
+    "requested_target_part_number",
+)
 
 
 @dataclass(frozen=True)
@@ -279,6 +295,21 @@ def _compare_sender_phone_command_pair(
                 mismatches.append(_mismatch(command_id, "sender_ack_payload.token_echo", "no pairing token", "token present"))
             if _payload_has_pairing_token(phone_ack_payload):
                 mismatches.append(_mismatch(command_id, "phone_ack_payload.token_echo", "no pairing token", "token present"))
+            if _clean(sender_ack_sample[4]) == "rejected":
+                _append_rejected_ack_payload_mismatches(
+                    mismatches,
+                    command_id,
+                    ack_payload,
+                    side="sender_ack_payload",
+                    reason=_clean(sender_ack_sample[5]),
+                )
+                _append_rejected_ack_payload_mismatches(
+                    mismatches,
+                    command_id,
+                    phone_ack_payload,
+                    side="phone_ack_payload",
+                    reason=_clean(phone_ack_sample[5]),
+                )
             if ack_payload and phone_ack_payload and _canonical_json(ack_payload) != _canonical_json(phone_ack_payload):
                 mismatches.append(_mismatch(command_id, "ack_payload", ack_payload, phone_ack_payload))
             if ack_payload and phone_payload and _canonical_json(ack_payload) != _canonical_json(phone_payload):
@@ -286,6 +317,35 @@ def _compare_sender_phone_command_pair(
             if phone_ack_payload and phone_payload and _canonical_json(phone_ack_payload) != _canonical_json(phone_payload):
                 mismatches.append(_mismatch(command_id, "phone_ack_payload", phone_ack_payload, phone_payload))
     return mismatches
+
+
+def _append_rejected_ack_payload_mismatches(
+    mismatches: list[dict[str, Any]],
+    command_id: str,
+    payload: dict[str, Any],
+    *,
+    side: str,
+    reason: str,
+) -> None:
+    if not payload:
+        mismatches.append(_mismatch(command_id, f"{side}.rejected_payload", "structured rejection payload", "missing"))
+        return
+    if _clean(payload.get("schema")) != ANDROID_COMMAND_REJECTION_PAYLOAD_SCHEMA:
+        mismatches.append(
+            _mismatch(command_id, f"{side}.schema", ANDROID_COMMAND_REJECTION_PAYLOAD_SCHEMA, payload.get("schema"))
+        )
+    if _clean(payload.get("status")) != "rejected":
+        mismatches.append(_mismatch(command_id, f"{side}.status", "rejected", payload.get("status")))
+    if reason and _clean(payload.get("reason")) != reason:
+        mismatches.append(_mismatch(command_id, f"{side}.reason", reason, payload.get("reason")))
+    if payload.get("rejected_before_handler") is not True:
+        mismatches.append(_mismatch(command_id, f"{side}.rejected_before_handler", True, payload.get("rejected_before_handler")))
+    for field in REJECTED_ACK_REQUIRED_FIELDS:
+        if field not in payload:
+            mismatches.append(_mismatch(command_id, f"{side}.{field}", "<present>", "missing"))
+    supported = payload.get("supported_commands")
+    if not isinstance(supported, list) or not supported:
+        mismatches.append(_mismatch(command_id, f"{side}.supported_commands", "nonempty array", supported))
 
 
 def _sender_kind_from_rows(rows: list[dict[str, Any]]) -> str:

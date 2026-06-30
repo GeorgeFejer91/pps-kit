@@ -448,7 +448,10 @@ Use the same sender/receiver reconciliation for PC-admin rehearsals:
 That reconciliation checks the sender row payload against the serialized
 `PPSCommandSignalsV1` sample payload and fails if the actual sample omitted the
 pairing token, then compares the resulting command and ack evidence with the
-Runner phone's `native_lsl` command diary.
+Runner phone's `native_lsl` command diary. Rejected ack pairs are also checked
+for the `pps-android-phone-command-rejection.v1` schema, reason,
+`rejected_before_handler`, receiver/requested identity fields, and supported
+command list on both the sender and phone copies.
 
 To monitor whether another PC can observe the Android runner's LSL evidence
 stream while commands are being sent:
@@ -487,7 +490,8 @@ observed command acknowledgements echo the command name plus any source command
 payload `package_id`, `participant_id`, target session, target part session,
 session group, and target part number fields that define which phone-owned part
 was administered, while rejecting ack payloads that echo `token` or
-`companion_token`.
+`companion_token`. Rejected observed acks must preserve the structured
+`pps-android-phone-command-rejection.v1` payload.
 It is still network LSL evidence, not physical vibration/audio timing proof.
 
 Until that strict validator passes together with external LSL/XDF capture, the

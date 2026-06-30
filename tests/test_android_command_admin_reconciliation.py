@@ -196,6 +196,77 @@ def test_reconcile_android_command_admin_rejects_ack_payload_token_echo():
     assert "phone_ack_payload.token_echo" in fields
 
 
+def test_reconcile_android_command_admin_accepts_matching_rejected_ack_payload():
+    sender = _sender_row()
+    phone = _phone_command_row()
+    rejected_payload = _rejected_ack_payload()
+    sender["ack_status"] = "rejected"
+    sender["ack_sample"] = _ack_sample(
+        "cmd-001",
+        "pause",
+        rejected_payload,
+        status="rejected",
+        reason="invalid_token",
+    )
+    phone["status"] = "rejected"
+    phone["reason"] = "invalid_token"
+    phone["payload"] = dict(rejected_payload)
+    phone["ack_sample"] = _ack_sample(
+        "cmd-001",
+        "pause",
+        rejected_payload,
+        status="rejected",
+        reason="invalid_token",
+    )
+
+    result = reconciler.reconcile_command_admin_with_phone_run(
+        [sender],
+        [phone],
+        expect_native_sends=True,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is True
+    assert result.report["mismatch_count"] == 0
+
+
+def test_reconcile_android_command_admin_rejects_rejected_ack_schema_gap():
+    sender = _sender_row()
+    phone = _phone_command_row()
+    rejected_payload = _rejected_ack_payload()
+    rejected_payload.pop("schema")
+    sender["ack_status"] = "rejected"
+    sender["ack_sample"] = _ack_sample(
+        "cmd-001",
+        "pause",
+        rejected_payload,
+        status="rejected",
+        reason="invalid_token",
+    )
+    phone["status"] = "rejected"
+    phone["reason"] = "invalid_token"
+    phone["payload"] = dict(rejected_payload)
+    phone["ack_sample"] = _ack_sample(
+        "cmd-001",
+        "pause",
+        rejected_payload,
+        status="rejected",
+        reason="invalid_token",
+    )
+
+    result = reconciler.reconcile_command_admin_with_phone_run(
+        [sender],
+        [phone],
+        expect_native_sends=True,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is False
+    fields = {item["field"] for item in result.report["mismatches"]}
+    assert "sender_ack_payload.schema" in fields
+    assert "phone_ack_payload.schema" in fields
+
+
 def test_reconcile_android_command_admin_reports_missing_target_identity_in_phone_payload():
     phone = _phone_command_row()
     del phone["payload"]["target_part_session_id"]
@@ -319,14 +390,49 @@ def _ack_payload(command: str) -> dict:
     }
 
 
-def _ack_sample(command_id: str, command: str, payload: dict) -> list[str]:
+def _rejected_ack_payload() -> dict:
+    return {
+        "schema": "pps-android-phone-command-rejection.v1",
+        "status": "rejected",
+        "reason": "invalid_token",
+        "rejected_before_handler": True,
+        "command": "pause",
+        "package_id": "pkg-001",
+        "participant_id": "P001",
+        "session_id": "session-001",
+        "part_session_id": "part-001",
+        "session_group_id": "group-001",
+        "part_number": "1",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+        "target_part_number": "1",
+        "requested_session_id": "part-001",
+        "requested_package_id": "pkg-001",
+        "requested_participant_id": "P001",
+        "requested_target_session_id": "part-001",
+        "requested_target_part_session_id": "part-001",
+        "requested_target_session_group_id": "group-001",
+        "requested_target_part_number": "1",
+        "supported_commands": ["start_experiment", "pause", "resume"],
+    }
+
+
+def _ack_sample(
+    command_id: str,
+    command: str,
+    payload: dict,
+    *,
+    status: str = "applied",
+    reason: str | None = None,
+) -> list[str]:
     return [
         "pps-lsl-command-ack.v1",
         command_id,
         "part-001",
         "android_phone",
-        "applied",
-        "phone_playback_paused" if command == "pause" else "command_applied",
+        status,
+        reason if reason is not None else ("phone_playback_paused" if command == "pause" else "command_applied"),
         "42.010000000",
         "42.020000000",
         "42.030000000",

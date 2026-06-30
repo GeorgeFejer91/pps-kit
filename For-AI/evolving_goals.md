@@ -147,6 +147,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   PC-monitor validation reject incomplete rejected-ack payloads, so bad
   controller/PC commands remain reconstructable instead of becoming bare
   `rejected` status rows.
+- The Android sender/receiver command-admin reconciler and PC-monitor
+  reconciler now enforce the same rejected-ack contract directly. Direct
+  reconciliation runs fail when a rejected `PPSCommandAcksV1` payload omits the
+  `pps-android-phone-command-rejection.v1` schema, reason,
+  `rejected_before_handler`, receiver/requested identity fields, or supported
+  command list, so bypassing the standalone artifact validator cannot turn
+  incomplete rejection evidence into a passing two-phone/PC-monitor audit.
 - Android phone-owned `phone_owned_data_export.json` now carries a
   `portable_paths` map with archive-relative locations for
   `phone_owned_exports/1.Data_min`, the participant/master public CSVs, and the

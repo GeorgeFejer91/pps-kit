@@ -336,6 +336,56 @@ def test_reconcile_android_lsl_monitor_rejects_command_ack_token_echo():
     assert "secret" not in json.dumps(result.report)
 
 
+def test_reconcile_android_lsl_monitor_accepts_rejected_command_ack_payload():
+    phone_markers = [_phone_marker(event_id="1", event_type="session_metadata", event_code="8")]
+    monitor_rows = [
+        _monitor_rich_row(phone_markers[0], timestamp=1.0),
+        _monitor_command_row(command_id="cmd-rejected", command="pause"),
+        _monitor_ack_row(
+            command_id="cmd-rejected",
+            status="rejected",
+            reason="invalid_token",
+            payload=_rejected_ack_payload(),
+        ),
+    ]
+
+    result = reconciler.reconcile_android_lsl_monitor(
+        phone_markers,
+        monitor_rows,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is True
+    assert result.report["command_ack_pair_summary"]["mismatch_count"] == 0
+
+
+def test_reconcile_android_lsl_monitor_rejects_rejected_ack_payload_schema_gap():
+    phone_markers = [_phone_marker(event_id="1", event_type="session_metadata", event_code="8")]
+    rejected_payload = _rejected_ack_payload()
+    rejected_payload.pop("schema")
+    monitor_rows = [
+        _monitor_rich_row(phone_markers[0], timestamp=1.0),
+        _monitor_command_row(command_id="cmd-rejected-gap", command="pause"),
+        _monitor_ack_row(
+            command_id="cmd-rejected-gap",
+            status="rejected",
+            reason="invalid_token",
+            payload=rejected_payload,
+        ),
+    ]
+
+    result = reconciler.reconcile_android_lsl_monitor(
+        phone_markers,
+        monitor_rows,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is False
+    summary = result.report["command_ack_pair_summary"]
+    assert summary["mismatch_count"] == 1
+    assert summary["mismatches"][0]["field"] == "payload.schema"
+
+
 def test_reconcile_android_lsl_monitor_reports_command_ack_target_identity_drift():
     phone_markers = [_phone_marker(event_id="1", event_type="session_metadata", event_code="8")]
     ack_payload = {"command": "start_experiment", **_target_identity_payload()}
@@ -478,6 +528,34 @@ def _target_identity_payload() -> dict[str, str]:
     }
 
 
+def _rejected_ack_payload() -> dict:
+    return {
+        "schema": "pps-android-phone-command-rejection.v1",
+        "status": "rejected",
+        "reason": "invalid_token",
+        "rejected_before_handler": True,
+        "command": "pause",
+        "package_id": "pkg-001",
+        "participant_id": "P001",
+        "session_id": "session-001",
+        "part_session_id": "part-001",
+        "session_group_id": "group-001",
+        "part_number": "1",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+        "target_part_number": "1",
+        "requested_session_id": "part-001",
+        "requested_package_id": "pkg-001",
+        "requested_participant_id": "P001",
+        "requested_target_session_id": "part-001",
+        "requested_target_part_session_id": "part-001",
+        "requested_target_session_group_id": "group-001",
+        "requested_target_part_number": "1",
+        "supported_commands": ["start_experiment", "pause", "resume"],
+    }
+
+
 def _monitor_command_row(*, command_id: str, command: str, payload: dict | None = None) -> dict:
     return monitor.build_android_lsl_monitor_row(
         stream_key="command_signals",
@@ -495,7 +573,13 @@ def _monitor_command_row(*, command_id: str, command: str, payload: dict | None 
     )
 
 
-def _monitor_ack_row(*, command_id: str, payload: dict | None = None) -> dict:
+def _monitor_ack_row(
+    *,
+    command_id: str,
+    payload: dict | None = None,
+    status: str = "applied",
+    reason: str = "ok",
+) -> dict:
     return monitor.build_android_lsl_monitor_row(
         stream_key="command_acks",
         sample=ack_to_sample(
@@ -503,8 +587,8 @@ def _monitor_ack_row(*, command_id: str, payload: dict | None = None) -> dict:
                 command_id=command_id,
                 session_id="part-001",
                 receiver_id="android_runner",
-                status="applied",
-                reason="ok",
+                status=status,
+                reason=reason,
                 received_lsl_time=1.0,
                 applied_lsl_time=1.1,
                 ack_lsl_time=1.2,
