@@ -19,6 +19,9 @@ manuscript for PPS Toolkit.
   current local dashboard source confirming that the observed not-ready badge
   glyph/layout change is operational UI and does not introduce a new
   literature-bearing PPS design decision.
+- `claim_boundary_audit.csv`: claim-to-evidence ledger that separates safe
+  manuscript phrasing from overclaims and lists the artifact needed before each
+  stronger claim could be made.
 - `brm_comparator_articles.csv`: source-pointer table of same-journal BRM
   software, toolbox, tutorial, sharing, and timing-validation papers used as
   article-style comparators.
@@ -63,6 +66,9 @@ workflow explicitly asks for an archived submission snapshot.
 - `dashboard_control_recheck_20260630.md` is a point-in-time source audit of
   the local dashboard worktree. It is not GUI usability validation and should be
   rerun if dashboard controls change before submission.
+- `claim_boundary_audit.csv` is a self-review and submission-safety ledger. It
+  does not add new empirical evidence; it records which claims are source-ready,
+  partially supported, blocked, or unsafe until additional artifacts exist.
 - `brm_comparator_articles.csv` is a style and journal-fit audit, not a claim
   that PPS Toolkit has the same maturity, user base, or validation scope as the
   comparator tools.

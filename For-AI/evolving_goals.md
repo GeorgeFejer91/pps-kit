@@ -228,6 +228,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `gui_control_coverage.csv`; the only detected dirty-dashboard label/status
   change was a not-ready readiness-badge glyph/styling change, which remains
   operational UI rather than a new literature-bearing PPS design decision.
+- Continued the BRM manuscript self-review loop with a claim-boundary audit
+  pass. `claim_boundary_audit.csv` maps major manuscript claims to current
+  evidence, safe phrasing, unsafe or premature phrasing, and the artifact needed
+  before stronger claims can be made, protecting suite, recreation, validation,
+  HRTF, tactile, and analysis language from overclaiming.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

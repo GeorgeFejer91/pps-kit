@@ -846,3 +846,37 @@ Methods manuscript draft. It is a working audit, not manuscript text.
   validation. If dashboard controls change before submission, rerun the source
   audit and, for GUI/readiness claims, use the project-required visual and
   click-validation workflows.
+
+## Iteration 24: Claim Boundary Audit Pass
+
+### Main Critiques
+
+- The manuscript has become increasingly careful, but its boundaries are spread
+  across prose, tables, CSV files, and readiness notes. A reviewer or future
+  editor could still accidentally strengthen a sentence beyond the evidence.
+- The riskiest terms are "suite", "recreation", "validation", "HRTF", "tactile
+  calibration", "adaptive threshold", and "analysis". Each is acceptable when
+  tied to the proper evidence layer, and risky when promoted to a participant,
+  hardware, or exact-replication claim.
+- The user's requested self-review loop needs a compact artifact that states
+  not only what the paper says, but what it must not say until additional
+  release, hardware, profile-source, or participant artifacts exist.
+
+### Resolution In This Revision
+
+- Added `claim_boundary_audit.csv`, a claim-to-evidence ledger covering BRM
+  article type, literature-review scope, GUI decision coverage, full-suite
+  framing, profile recreation, Study 5-style example, source/loudness/spatial
+  decisions, tactile calibration, adaptive threshold, randomization, native
+  acquisition, exploratory analysis, figures/materials, and declarations.
+- Each row records the evidence needed for a strong claim, current source
+  evidence, status, safe submission phrasing, unsafe phrasing, and the next
+  artifact required before stronger wording would be defensible.
+- Updated the manuscript README and readiness audit so future edits treat the
+  claim ledger as part of the manuscript safety scaffolding.
+
+### Residual Concerns
+
+- The ledger prevents overclaiming only if it is kept current. Any new empirical
+  result, profile-recreation claim, hardware timing claim, or final figure must
+  update the claim boundary audit and the readiness audit before submission.
