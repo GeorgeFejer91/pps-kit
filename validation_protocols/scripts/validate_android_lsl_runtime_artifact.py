@@ -678,6 +678,8 @@ def validate_pc_monitor_report(
 
     if expect_command_acks and int(effective_counts.get("command_acks") or 0) <= 0:
         failures.append("PC monitor strict ack validation expected at least one PPSCommandAcksV1 sample")
+    if expect_command_acks and int(effective_counts.get("command_signals") or 0) <= 0:
+        failures.append("PC monitor strict ack validation expected at least one PPSCommandSignalsV1 sample")
     if expect_command_acks and rows:
         observed_command_ids = {
             str(row.get("command_id") or "").strip()
@@ -694,6 +696,12 @@ def validate_pc_monitor_report(
             failures.append(
                 "PC monitor strict ack validation missing acks for observed command ids: "
                 + ", ".join(missing_acks)
+            )
+        extra_acks = sorted(acked_command_ids - observed_command_ids)
+        if extra_acks:
+            failures.append(
+                "PC monitor strict ack validation observed ack ids without command signals: "
+                + ", ".join(extra_acks)
             )
 
     missing_required = list(report.get("missing_required_streams") or [])
@@ -5399,6 +5407,24 @@ def _validate_pc_monitor_event_row(row: dict[str, Any], *, row_index: int, failu
             failures.append(f"{prefix} command ack schema mismatch")
         if row.get("command_id") and sample[1] != row.get("command_id"):
             failures.append(f"{prefix} command_id differs from ack sample")
+        if row.get("ack_status") and sample[4] != row.get("ack_status"):
+            failures.append(f"{prefix} ack_status differs from ack sample")
+        payload = _parse_json_object(
+            str(sample[9] or "{}"),
+            f"{prefix} command ack payload",
+            failures,
+        )
+        row_payload = _parse_json_object(str(row.get("payload_json") or "{}"), f"{prefix} payload_json", failures)
+        if payload is not None:
+            token = str(payload.get("token") or payload.get("companion_token") or "")
+            if token.strip():
+                failures.append(f"{prefix} command ack payload must not echo the pairing token")
+        if (
+            payload is not None
+            and row_payload is not None
+            and _canonical_json(payload) != _canonical_json(row_payload)
+        ):
+            failures.append(f"{prefix} payload_json differs from command ack sample payload")
     elif stream_key == "command_signals":
         if row.get("stream_name") != LSL_COMMAND_STREAM_NAME:
             failures.append(f"{prefix} command signal stream_name mismatch")

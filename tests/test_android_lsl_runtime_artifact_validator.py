@@ -8,6 +8,9 @@ import sys
 import zipfile
 from pathlib import Path
 
+from peripersonal_space_toolkit import android_lsl_monitor as monitor
+from peripersonal_space_toolkit.lsl_command_ack import LSLCommandAck, LSLCommandSignal, ack_to_sample, command_to_sample
+
 
 SCRIPT_PATH = Path("validation_protocols/scripts/validate_android_lsl_runtime_artifact.py")
 spec = importlib.util.spec_from_file_location("validate_android_lsl_runtime_artifact", SCRIPT_PATH)
@@ -1675,6 +1678,47 @@ def test_android_lsl_runtime_validator_rejects_pc_admin_ack_payload_token_echo(t
 
     assert result.ok is False
     assert "PC admin outbox row 1 ack payload must not echo the pairing token" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_accepts_pc_monitor_command_ack_pair():
+    rows = [
+        _pc_monitor_command_row(command_id="cmd-monitor-001", command="pause"),
+        _pc_monitor_ack_row(command_id="cmd-monitor-001", command="pause"),
+    ]
+    report = monitor.build_android_lsl_monitor_report(rows)
+
+    result = validator.validate_pc_monitor_report(report, event_rows=rows, expect_command_acks=True)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_rejects_pc_monitor_ack_without_observed_command():
+    rows = [
+        _pc_monitor_ack_row(command_id="cmd-orphan", command="pause"),
+    ]
+    report = monitor.build_android_lsl_monitor_report(rows)
+
+    result = validator.validate_pc_monitor_report(report, event_rows=rows, expect_command_acks=True)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "expected at least one PPSCommandSignalsV1 sample" in failures
+    assert "observed ack ids without command signals: cmd-orphan" in failures
+
+
+def test_android_lsl_runtime_validator_rejects_pc_monitor_ack_payload_token_echo():
+    rows = [
+        _pc_monitor_command_row(command_id="cmd-monitor-token", command="pause"),
+        _pc_monitor_ack_row(command_id="cmd-monitor-token", command="pause", payload={"command": "pause", "token": "secret"}),
+    ]
+    report = monitor.build_android_lsl_monitor_report(rows)
+
+    result = validator.validate_pc_monitor_report(report, event_rows=rows, expect_command_acks=True)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "PC monitor event row 2 command ack payload must not echo the pairing token" in failures
 
 
 def test_android_lsl_runtime_validator_accepts_phone_run_command_diary_ack_evidence(tmp_path: Path):
@@ -3648,3 +3692,42 @@ def _pc_admin_row(*, native_sent: bool, ack_received: bool) -> dict:
             json.dumps(ack_payload),
         ]
     return row
+
+
+def _pc_monitor_command_row(*, command_id: str, command: str, payload: dict | None = None) -> dict:
+    sample = command_to_sample(
+        LSLCommandSignal(
+            command_id=command_id,
+            session_id="part-001",
+            sender_id="pc_runner",
+            command=command,
+            issued_lsl_time=42.0,
+            payload=payload or {"token": "secret", "package_id": "pkg-001"},
+        )
+    )
+    return monitor.build_android_lsl_monitor_row(
+        stream_key="command_signals",
+        sample=sample,
+        lsl_timestamp=42.0,
+    )
+
+
+def _pc_monitor_ack_row(*, command_id: str, command: str, payload: dict | None = None) -> dict:
+    sample = ack_to_sample(
+        LSLCommandAck(
+            command_id=command_id,
+            session_id="part-001",
+            receiver_id="android_runner",
+            status="applied",
+            reason="ok",
+            received_lsl_time=42.01,
+            applied_lsl_time=42.02,
+            ack_lsl_time=42.03,
+            payload=payload or {"command": command, "package_id": "pkg-001"},
+        )
+    )
+    return monitor.build_android_lsl_monitor_row(
+        stream_key="command_acks",
+        sample=sample,
+        lsl_timestamp=42.03,
+    )

@@ -129,7 +129,9 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `operator_note` commands must include a nonblank `note`, and the summarized
   row `payload_json` must match the raw LSL sample payload channel; payload
   drift is reported with redacted placeholders so pairing secrets stay out of
-  validation artifacts. Ack payloads that echo pairing tokens remain invalid.
+  validation artifacts. Ack payloads that echo pairing tokens remain invalid,
+  and strict artifact validation rejects orphan `PPSCommandAcksV1` ids that lack
+  captured `PPSCommandSignalsV1` rows.
 - Sender/receiver command-admin reconciliation is in
   `validation_protocols/scripts/reconcile_android_command_admin_with_phone_run.py`.
   It compares Android Controller or PC-admin native command outboxes against the

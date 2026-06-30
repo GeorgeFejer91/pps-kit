@@ -35,6 +35,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   payload channel. Payload drift reports are redacted so pairing tokens do not
   leak into validation artifacts; `PPSCommandAcksV1` payloads still fail if they
   echo a pairing token.
+- Strict PC-monitor artifact validation now requires observed command acks to
+  have matching captured command-signal ids when `--expect-command-acks` is in
+  force, requires at least one captured `PPSCommandSignalsV1` sample, checks
+  ack `payload_json` against the raw ack sample payload, and rejects ack payloads
+  that echo `token` or `companion_token`. This keeps noisy monitor/XDF captures
+  from being accepted as two-way administration evidence when they only contain
+  orphan acknowledgements.
 - Receiver-side Android native command diary rows now preserve
   `command_channels` and the exact received `PPSCommandSignalsV1`
   `command_sample` alongside the outgoing ack evidence. Strict phone-run
