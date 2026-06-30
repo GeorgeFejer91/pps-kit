@@ -394,6 +394,7 @@ def validate_runtime_status(
         command_diary_rows=command_diary_rows or [],
         failures=failures,
         warnings=warnings,
+        expect_event_diary=expect_event_diary,
         expect_command_acks=expect_command_acks,
     )
     _validate_phone_completion_summary_counts(
@@ -3531,6 +3532,7 @@ def _validate_phone_command_diary(
     command_diary_rows: list[dict[str, Any]],
     failures: list[str],
     warnings: list[str],
+    expect_event_diary: bool,
     expect_command_acks: bool,
 ) -> None:
     embedded_rows = [
@@ -3594,10 +3596,14 @@ def _validate_phone_command_diary(
             failures.append(f"{prefix} package_id differs from lsl_runtime_status")
         if status.get("run_id") and row.get("run_id") and str(row.get("run_id")) != str(status.get("run_id")):
             failures.append(f"{prefix} run_id differs from lsl_runtime_status")
-        if command_id and operator_events:
+        if command_id:
             event = event_by_command_id.get(command_id)
             if event is None:
-                failures.append(f"{prefix} is missing matching operator_command event")
+                message = f"{prefix} is missing matching operator_command event"
+                if expect_command_acks or expect_event_diary or operator_events:
+                    failures.append(message)
+                else:
+                    warnings.append(f"{message}; rerun with --expect-event-diary for strict command/event mirror checks")
             else:
                 if command and str(event.get("command") or "") != command:
                     failures.append(f"{prefix} command differs from matching operator_command event")

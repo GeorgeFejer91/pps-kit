@@ -371,6 +371,10 @@ Required validation levels:
     For completed phone-run artifacts with a `summary`, validator count fields
     (`total_event_count`, `lsl_marker_mirror_count`, and `command_diary_count`)
     must match the corresponding event, marker, and command diary rows.
+    In strict event-diary mode, every command diary row must also have its
+    matching `operator_command` event mirror, so local phone buttons and runtime
+    commands are reconstructable from the event diary as well as from
+    `command_diary.jsonl`.
 3. Emulator smoke test: install APK, run a phone-owned package, export ZIP, and
    validate `lsl_runtime_status.json`. The
    `run_android_companion_emulator_ui_stress.py` report now treats Android live

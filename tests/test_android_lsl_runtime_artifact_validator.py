@@ -2524,6 +2524,37 @@ def test_android_lsl_runtime_validator_accepts_phone_ui_command_diary_source(tmp
     assert result.failures == []
 
 
+def test_android_lsl_runtime_validator_requires_phone_ui_operator_command_event_in_strict_event_diary(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_phone_run_with_command_diary(
+        run_dir,
+        _phone_ui_command_row(),
+        include_operator_event=False,
+    )
+
+    result = validator.validate_run_artifact(run_dir, expect_event_diary=True)
+
+    assert result.ok is False
+    assert "phone command diary row 1 is missing matching operator_command event" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_warns_for_missing_phone_ui_operator_command_event_without_strict_event_diary(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_phone_run_with_command_diary(
+        run_dir,
+        _phone_ui_command_row(),
+        include_operator_event=False,
+    )
+
+    result = validator.validate_run_artifact(run_dir)
+
+    assert result.ok is True
+    assert result.failures == []
+    assert "strict command/event mirror checks" in "\n".join(result.warnings)
+
+
 def test_android_lsl_runtime_validator_requires_phone_command_source_to_match_operator_event(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -2578,6 +2609,7 @@ def _write_phone_run_with_command_diary(
     row: dict,
     *,
     operator_command_source: str | None = None,
+    include_operator_event: bool = True,
 ) -> None:
     status = _status(native=False)
     status.update(_catalog_identity())
@@ -2592,19 +2624,22 @@ def _write_phone_run_with_command_diary(
             haptic_capability=haptic_capability,
         ),
         _phone_event(2, "run_start"),
-        _phone_event(
-            3,
-            "operator_command",
-            command_id=row["command_id"],
-            command_source=event_source,
-            sender_id=row["sender_id"],
-            command=row["command"],
-            status=row["status"],
-            reason=row["reason"],
-            ack_sent=row["ack_sent"],
-            payload=row["payload"],
-        ),
     ]
+    if include_operator_event:
+        events.append(
+            _phone_event(
+                3,
+                "operator_command",
+                command_id=row["command_id"],
+                command_source=event_source,
+                sender_id=row["sender_id"],
+                command=row["command"],
+                status=row["status"],
+                reason=row["reason"],
+                ack_sent=row["ack_sent"],
+                payload=row["payload"],
+            )
+        )
     markers = [_phone_marker(event) for event in events]
     (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
     (run_dir / "completion.json").write_text(

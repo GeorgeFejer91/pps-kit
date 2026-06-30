@@ -708,6 +708,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   planned rescue source/building-block sequence, and report contiguous
   top-up trial start/end/duration timing so a lightweight phone top-up can be
   reconstructed without trusting only the final WAV hash.
+- Strict phone event-diary validation now requires every phone command diary row
+  to have its matching `operator_command` event mirror, including local
+  `phone_ui` and `phone_runtime` rows. Loose validation still warns for older
+  artifacts, but new strict run folders must prove what was pressed or
+  internally commanded in both `command_diary.jsonl` and the event diary.
 - The phone-owned AudioTrack pause gate now keeps polling native Android LSL
   commands while playback is paused. A `pause` command therefore no longer
   traps the runner inside the paused audio wait loop; a PC runner or second

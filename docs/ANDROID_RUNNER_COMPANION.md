@@ -228,7 +228,9 @@ also match the event, marker, and command diary artifacts. This is the quick
 human-readable log of what the phone runtime did before the richer marker/XDF
 checks.
 Phone-run command diaries are also checked against matching `operator_command`
-events when present, including the command source and payload. When both
+events, including the command source and payload; with `--expect-event-diary`,
+missing `operator_command` mirrors are failures for local phone UI/runtime rows
+as well as native LSL rows. When both
 `command_diary.jsonl` and embedded `completion.json`/`latest_events.json`
 `command_diary` rows are present, the validator checks that schema, source,
 status, payload, ack evidence, timing, and identity fields agree for each
