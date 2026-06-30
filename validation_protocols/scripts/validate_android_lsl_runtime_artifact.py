@@ -306,6 +306,13 @@ def validate_runtime_status(
         expect_lightweight_materializations=expect_lightweight_materializations,
     )
     _validate_phone_run_catalog_entry(status, catalog_entry, failures, warnings, expect_run_catalog=expect_run_catalog)
+    _validate_phone_run_provenance_consistency(
+        completion=completion,
+        package_manifest=package_manifest,
+        reconstruction_artifact=reconstruction_artifact,
+        catalog_entry=catalog_entry,
+        failures=failures,
+    )
     _validate_phone_run_catalog_index(
         status=status,
         catalog_entry=catalog_entry,
@@ -1975,6 +1982,143 @@ def _validate_phone_run_catalog_entry(
         warnings.append("phone run catalog entry does not include a reconstruction schedule_hash")
 
 
+def _validate_phone_run_provenance_consistency(
+    *,
+    completion: dict[str, Any] | None,
+    package_manifest: dict[str, Any] | None,
+    reconstruction_artifact: dict[str, Any] | None,
+    catalog_entry: dict[str, Any] | None,
+    failures: list[str],
+) -> None:
+    expected = _phone_run_provenance_from_manifest(package_manifest)
+    if not expected:
+        return
+
+    if reconstruction_artifact:
+        _validate_phone_run_provenance_payload(
+            "reconstruction_contract",
+            reconstruction_artifact,
+            expected,
+            failures,
+        )
+    if catalog_entry:
+        _validate_phone_run_provenance_payload(
+            "phone_run_catalog_entry",
+            catalog_entry,
+            expected,
+            failures,
+        )
+
+    if not completion:
+        return
+    session_packages = _completion_session_metadata_packages(completion)
+    if session_packages:
+        for index, package in enumerate(session_packages, start=1):
+            label = "session_metadata package" if len(session_packages) == 1 else f"session_metadata package {index}"
+            _validate_phone_run_provenance_payload(label, package, expected, failures)
+        return
+
+    completion_package = completion.get("package") if isinstance(completion.get("package"), dict) else {}
+    if _phone_run_payload_has_provenance(completion_package):
+        _validate_phone_run_provenance_payload("completion.package", completion_package, expected, failures)
+    elif list((completion or {}).get("events") or []):
+        failures.append("session_metadata package is missing run_package_manifest provenance")
+
+
+def _phone_run_provenance_from_manifest(package_manifest: dict[str, Any] | None) -> dict[str, Any]:
+    if not isinstance(package_manifest, dict):
+        return {}
+    participant_roster = [
+        str(item).strip()
+        for item in _json_list(package_manifest.get("participant_roster"))
+        if str(item).strip()
+    ]
+    source_segment_hashes = _source_segment_hash_signature(package_manifest.get("source_segment_hashes"))
+    expected: dict[str, Any] = {}
+    if participant_roster:
+        expected["participant_roster_count"] = len(participant_roster)
+    randomization_seed = _metadata_value(package_manifest.get("randomization_seed"))
+    if randomization_seed:
+        expected["randomization_seed"] = randomization_seed
+    if source_segment_hashes:
+        expected["source_segment_hashes"] = source_segment_hashes
+    return expected
+
+
+def _completion_session_metadata_packages(completion: dict[str, Any]) -> list[dict[str, Any]]:
+    packages: list[dict[str, Any]] = []
+    for event in list(completion.get("events") or []):
+        if not isinstance(event, dict) or str(event.get("type") or "") != "session_metadata":
+            continue
+        package = event.get("package") if isinstance(event.get("package"), dict) else None
+        if package is not None:
+            packages.append(package)
+    return packages
+
+
+def _phone_run_payload_has_provenance(payload: dict[str, Any]) -> bool:
+    return any(
+        field in payload
+        for field in (
+            "participant_roster_count",
+            "randomization_seed",
+            "source_segment_hashes",
+        )
+    )
+
+
+def _validate_phone_run_provenance_payload(
+    label: str,
+    payload: dict[str, Any],
+    expected: dict[str, Any],
+    failures: list[str],
+) -> None:
+    if "participant_roster_count" in expected:
+        if "participant_roster_count" not in payload:
+            failures.append(f"{label} participant_roster_count is missing from run_package_manifest provenance")
+        elif _clean_int(payload.get("participant_roster_count")) != int(expected["participant_roster_count"]):
+            failures.append(f"{label} participant_roster_count differs from run_package_manifest")
+
+    expected_seed = _metadata_value(expected.get("randomization_seed"))
+    if expected_seed:
+        observed_seed = _metadata_value(payload.get("randomization_seed"))
+        if not observed_seed:
+            failures.append(f"{label} randomization_seed is missing from run_package_manifest provenance")
+        elif observed_seed != expected_seed:
+            failures.append(f"{label} randomization_seed differs from run_package_manifest")
+
+    expected_hashes = expected.get("source_segment_hashes") if isinstance(expected.get("source_segment_hashes"), dict) else {}
+    if expected_hashes:
+        observed_hashes = _source_segment_hash_signature(payload.get("source_segment_hashes"))
+        if not observed_hashes:
+            failures.append(f"{label} source_segment_hashes is missing from run_package_manifest provenance")
+        elif observed_hashes != expected_hashes:
+            failures.append(f"{label} source_segment_hashes differ from run_package_manifest")
+
+
+def _source_segment_hash_signature(value: Any) -> dict[str, str]:
+    if not isinstance(value, dict):
+        return {}
+    signature: dict[str, str] = {}
+    for field in (
+        "schema",
+        "source_run_setup_manifest_sha256",
+        "source_segment5_manifest_sha256",
+        "segment6_order_csv_sha256",
+    ):
+        text = _metadata_value(value.get(field))
+        if text:
+            signature[field] = text
+
+    block_csvs = _json_list(value.get("segment5_block_csvs"))
+    count_value = value.get("segment5_block_csv_count")
+    if block_csvs:
+        signature["segment5_block_csv_count"] = str(len(block_csvs))
+    elif count_value is not None and _metadata_value(count_value):
+        signature["segment5_block_csv_count"] = str(_clean_int(count_value))
+    return signature
+
+
 def _validate_phone_run_catalog_index(
     *,
     status: dict[str, Any],
@@ -2115,6 +2259,19 @@ def _compare_phone_run_catalog_entry(
         observed_value = _catalog_text(observed.get(field))
         if expected_value and observed_value and expected_value != observed_value:
             failures.append(f"{label} {field} differs from phone_run_catalog_entry.json")
+    for field in ("participant_roster_count", "randomization_seed"):
+        expected_value = _catalog_text(expected.get(field))
+        observed_value = _catalog_text(observed.get(field))
+        if expected_value and observed_value and expected_value != observed_value:
+            failures.append(f"{label} {field} differs from phone_run_catalog_entry.json")
+        elif expected_value and not observed_value:
+            failures.append(f"{label} {field} is missing from phone_run_catalog_entry.json provenance")
+    expected_hashes = _source_segment_hash_signature(expected.get("source_segment_hashes"))
+    observed_hashes = _source_segment_hash_signature(observed.get("source_segment_hashes"))
+    if expected_hashes and observed_hashes and expected_hashes != observed_hashes:
+        failures.append(f"{label} source_segment_hashes differ from phone_run_catalog_entry.json")
+    elif expected_hashes and not observed_hashes:
+        failures.append(f"{label} source_segment_hashes is missing from phone_run_catalog_entry.json provenance")
     expected_reconstruction = expected.get("reconstruction") if isinstance(expected.get("reconstruction"), dict) else {}
     observed_reconstruction = observed.get("reconstruction") if isinstance(observed.get("reconstruction"), dict) else {}
     expected_hash = _catalog_text(expected_reconstruction.get("schedule_hash"))

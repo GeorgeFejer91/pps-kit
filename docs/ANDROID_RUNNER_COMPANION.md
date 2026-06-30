@@ -178,12 +178,14 @@ is present or any scheduled block cannot be reconstructed from
 `trial_building_block` assets.
 
 The validator checks the Segment 0-6 to phone-runtime hierarchy, schedule hash,
-source provenance roster/seed/hash consistency, block/order consistency,
-reusable building-block references, asset availability, AudioTrack
-playback-head timing contract, privacy-safe Android LSL stream names,
-required phone command set, and the phone-run `asset_strategy` plus
-`reconstruction_contract.json` consistency across status, manifest,
-reconstruction, completion, and catalog artifacts. It
+source provenance roster/seed/hash consistency across the package manifest,
+`session_metadata` event package payload, `reconstruction_contract.json`, and
+`phone_run_catalog_entry.json`, block/order consistency, reusable
+building-block references, asset availability, AudioTrack playback-head timing
+contract, privacy-safe Android LSL stream names, required phone command set,
+and the phone-run `asset_strategy` plus `reconstruction_contract.json`
+consistency across status, manifest, reconstruction, completion, and catalog
+artifacts. It
 also checks `lsl_runtime_status.json` `stream_descriptions` when present, and
 requires them in strict native mode, so `PPSMarkersV2`, `PPSTriggerCodes`,
 `PPSCommandSignalsV1`, and `PPSCommandAcksV1` keep their expected LSL roles,

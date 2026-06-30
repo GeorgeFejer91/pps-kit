@@ -233,6 +233,12 @@ Required validation levels:
    for every scheduled block, and it compares each materialized trial
    sequence's `trial_uid`, sequential `trial_number`, and
    `building_block_asset_id` order against `run_package_manifest.json`. The
+   same run-artifact validator also compares package provenance
+   (`participant_roster_count`, `randomization_seed`, and
+   `source_segment_hashes`) across the run manifest, `session_metadata` event
+   package payload, `reconstruction_contract.json`, and
+   `phone_run_catalog_entry.json`, so marker-stream reconstruction evidence
+   cannot silently drift away from the packaged randomization/order source. The
    same validator also accepts Controller-mode
     `phone_controller_runtime_status.json` and
     `phone_controller_command_outbox.jsonl` artifacts, PC-admin

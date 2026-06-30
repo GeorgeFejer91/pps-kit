@@ -172,7 +172,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   event and native LSL stream-description `session_metadata_json` now also carry
   the provenance summary so a single marker stream can expose the package's
   source randomization/order evidence without depending only on private app
-  files.
+  files. The Android runtime artifact validator now rejects provenance drift
+  across `run_package_manifest.json`, the `session_metadata` package payload,
+  `reconstruction_contract.json`, and `phone_run_catalog_entry.json`, comparing
+  the package roster count, randomization seed, Segment 6/5 hashes, and compact
+  source block CSV count used by the phone app.
 - Android phone-run artifact validation can now prove the lightweight replay
   path after the fact. `validate_android_lsl_runtime_artifact.py
   --expect-lightweight-materializations` reads run folders or exported ZIPs,

@@ -65,7 +65,12 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   trace them back to the source randomization/order evidence. The
   `session_metadata` event and native LSL stream-description
   `session_metadata_json` carry the same provenance summary for marker-stream
-  reconstruction.
+  reconstruction. `validate_android_lsl_runtime_artifact.py` now enforces that
+  package provenance across `run_package_manifest.json`, the `session_metadata`
+  event package payload, `reconstruction_contract.json`, and
+  `phone_run_catalog_entry.json`, comparing the roster count,
+  randomization seed, Segment 6/5 hashes, and phone-side source block CSV
+  count.
 - Optional native Android LSL marker/command transport lives in
   `PhoneNativeLslBridge.kt`. A local ignored
   `android/runner-companion/app/libs/liblsl-Android.aar` is included by Gradle

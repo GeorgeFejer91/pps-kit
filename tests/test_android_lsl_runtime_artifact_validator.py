@@ -227,6 +227,82 @@ def test_android_lsl_runtime_validator_accepts_lightweight_materialization_evide
     assert result.failures == []
 
 
+def test_android_lsl_runtime_validator_accepts_phone_run_provenance_consistency(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    _inject_phone_run_provenance(run_dir)
+
+    result = validator.validate_run_artifact(
+        run_dir,
+        expect_lightweight_materializations=True,
+        expect_run_catalog=True,
+    )
+
+    assert result.ok is True
+    assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_rejects_session_metadata_provenance_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    _inject_phone_run_provenance(run_dir, session_seed="wrong-seed")
+
+    result = validator.validate_run_artifact(run_dir, expect_run_catalog=True)
+
+    assert result.ok is False
+    assert "session_metadata package randomization_seed differs from run_package_manifest" in "\n".join(
+        result.failures
+    )
+
+
+def test_android_lsl_runtime_validator_rejects_phone_run_provenance_source_hash_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    bad_reconstruction_hashes = _phone_run_source_hash_summary(
+        _phone_run_source_segment_hashes(source_segment5_hash="wrong-segment5hash")
+    )
+    bad_catalog_hashes = _phone_run_source_hash_summary(
+        _phone_run_source_segment_hashes(order_hash="wrong-orderhash")
+    )
+    _inject_phone_run_provenance(
+        run_dir,
+        reconstruction_source_hashes=bad_reconstruction_hashes,
+        catalog_source_hashes=bad_catalog_hashes,
+    )
+
+    result = validator.validate_run_artifact(run_dir, expect_run_catalog=True)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "reconstruction_contract source_segment_hashes differ from run_package_manifest" in failures
+    assert "phone_run_catalog_entry source_segment_hashes differ from run_package_manifest" in failures
+
+
+def test_android_lsl_runtime_validator_rejects_catalog_index_provenance_drift(tmp_path: Path):
+    files_dir = tmp_path / "files"
+    run_dir = files_dir / "phone_runs" / "phone-run-001"
+    run_dir.mkdir(parents=True)
+    _write_lightweight_phone_run(run_dir)
+    _inject_phone_run_provenance(run_dir)
+    catalog = json.loads((run_dir / "phone_run_catalog_entry.json").read_text(encoding="utf-8"))
+    catalog["randomization_seed"] = "wrong-seed"
+    _write_phone_run_catalog_root(files_dir, catalog)
+
+    result = validator.validate_run_artifact(
+        run_dir,
+        expect_run_catalog=True,
+        expect_run_catalog_index=True,
+    )
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "phone run catalog runs.jsonl randomization_seed differs from phone_run_catalog_entry.json" in failures
+    assert "phone run catalog latest_run.json randomization_seed differs from phone_run_catalog_entry.json" in failures
+
+
 def test_android_lsl_runtime_validator_accepts_phone_topup_evidence(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -1549,6 +1625,93 @@ def _haptic_capability() -> dict:
         "recommended_threshold_percent": 20,
         "recommended_amplitude": 51,
     }
+
+
+def _phone_run_source_segment_hashes(
+    *,
+    setup_hash: str = "runhash",
+    source_segment5_hash: str = "segment5hash",
+    order_hash: str = "orderhash",
+    block_hash: str = "blockhash",
+) -> dict:
+    return {
+        "schema": "pps-mobile-source-segment-hashes.v1",
+        "source_run_setup_manifest_sha256": setup_hash,
+        "source_segment5_manifest_sha256": source_segment5_hash,
+        "segment6_order_csv_sha256": order_hash,
+        "segment5_block_csvs": [{"block_id": "block-01", "sha256": block_hash}],
+    }
+
+
+def _phone_run_source_hash_summary(source_hashes: dict) -> dict:
+    block_csvs = source_hashes.get("segment5_block_csvs") if isinstance(source_hashes.get("segment5_block_csvs"), list) else []
+    return {
+        "schema": str(source_hashes.get("schema") or ""),
+        "source_run_setup_manifest_sha256": str(source_hashes.get("source_run_setup_manifest_sha256") or ""),
+        "source_segment5_manifest_sha256": str(source_hashes.get("source_segment5_manifest_sha256") or ""),
+        "segment6_order_csv_sha256": str(source_hashes.get("segment6_order_csv_sha256") or ""),
+        "segment5_block_csv_count": len(block_csvs),
+    }
+
+
+def _inject_phone_run_provenance(
+    run_dir: Path,
+    *,
+    session_seed: str = "seed-123",
+    reconstruction_seed: str = "seed-123",
+    catalog_seed: str = "seed-123",
+    reconstruction_source_hashes: dict | None = None,
+    catalog_source_hashes: dict | None = None,
+    session_source_hashes: dict | None = None,
+) -> None:
+    manifest_source_hashes = _phone_run_source_segment_hashes()
+    phone_source_hashes = _phone_run_source_hash_summary(manifest_source_hashes)
+    roster = ["P001", "P002"]
+
+    manifest_path = run_dir / "run_package_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["participant_roster"] = roster
+    manifest["randomization_seed"] = "seed-123"
+    manifest["source_segment_hashes"] = manifest_source_hashes
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    reconstruction_path = run_dir / "reconstruction_contract.json"
+    reconstruction = json.loads(reconstruction_path.read_text(encoding="utf-8"))
+    reconstruction["participant_roster_count"] = len(roster)
+    reconstruction["randomization_seed"] = reconstruction_seed
+    reconstruction["source_segment_hashes"] = reconstruction_source_hashes or phone_source_hashes
+    reconstruction_path.write_text(json.dumps(reconstruction), encoding="utf-8")
+
+    catalog = _catalog_entry(native=False)
+    catalog["asset_strategy"] = "trial_building_blocks_only"
+    catalog["participant_roster_count"] = len(roster)
+    catalog["randomization_seed"] = catalog_seed
+    catalog["source_segment_hashes"] = catalog_source_hashes or phone_source_hashes
+    catalog["reconstruction"]["package_asset_strategy"] = "trial_building_blocks_only"
+    (run_dir / "phone_run_catalog_entry.json").write_text(json.dumps(catalog), encoding="utf-8")
+
+    completion_path = run_dir / "completion.json"
+    completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    package_payload = {
+        "package_id": "pkg-001",
+        "participant_id": "P001",
+        "asset_strategy": "trial_building_blocks_only",
+        "schedule_hash": "schedulehash",
+        "participant_roster_count": len(roster),
+        "randomization_seed": session_seed,
+        "source_segment_hashes": session_source_hashes or phone_source_hashes,
+    }
+    completion.setdefault("package", {}).update(package_payload)
+    events = [event for event in completion.get("events", []) if isinstance(event, dict)]
+    next_event_id = max((int(event.get("event_id") or 0) for event in events), default=0) + 1
+    events.append(_phone_event(next_event_id, "session_metadata", package=package_payload))
+    markers = [_phone_marker(event) for event in events]
+    completion["events"] = events
+    completion["lsl_marker_mirror"] = markers
+    completion_path.write_text(json.dumps(completion), encoding="utf-8")
+    _write_android_events_csv(run_dir / "events.csv", events)
+    _write_marker_csv(run_dir / "lsl_marker_mirror.csv", markers)
+    _write_trigger_codes_csv(run_dir / "trigger_codes.csv", markers)
 
 
 def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event: bool = True) -> None:
