@@ -304,7 +304,10 @@ native send/ack result in the outbox row plus
 `phone_controller_runtime_status.json`. That status includes controller
 `stream_descriptions` for the command-signal outlet and command-ack inlet, so
 strict validation can reject channel-order or source-identity drift before
-controller button presses are treated as live LSL evidence.
+controller button presses are treated as live LSL evidence. The Controller
+screen exposes Start, Pause, Resume, Continue, Stop After Block, and Snapshot
+when the selected package advertises those commands; Stop After Block sends the
+same `stop_after_block` signal used by the PC helper.
 
 Android vibration calibration is device-limited. The phone-run metadata panel
 now includes a `Haptic Calibration` control. On phones with amplitude control it

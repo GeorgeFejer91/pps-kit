@@ -1029,12 +1029,13 @@ private fun PhoneRuntimeScreen(
             }
             if (phoneRole == PhoneRuntimeRole.Controller) {
                 val supportedCommands = selectedManifest?.lsl?.supportedCommands?.takeIf { it.isNotEmpty() }
-                    ?: listOf("start_experiment", "pause", "resume", "continue_instruction", "request_snapshot")
+                    ?: listOf("start_experiment", "pause", "resume", "continue_instruction", "stop_after_block", "request_snapshot")
                 listOf(
                     "start_experiment" to "Start",
                     "pause" to "Pause",
                     "resume" to "Resume",
                     "continue_instruction" to "Continue",
+                    "stop_after_block" to "Stop After Block",
                     "request_snapshot" to "Snapshot",
                 ).filter { (command, _) -> command in supportedCommands }.forEach { (command, label) ->
                     Button(

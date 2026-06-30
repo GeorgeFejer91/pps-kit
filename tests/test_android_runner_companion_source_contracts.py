@@ -78,6 +78,7 @@ def test_android_lsl_runtime_status_exports_stream_descriptions() -> None:
 
 def test_android_controller_runtime_status_exports_stream_descriptions() -> None:
     controller_commands = _source("PhoneControllerCommands.kt")
+    main_activity = _source("MainActivity.kt")
 
     assert "phoneControllerLslStreamDescriptions" in controller_commands
     assert '.put("stream_descriptions", phoneControllerLslStreamDescriptions(pairing, runPackage, summary))' in controller_commands
@@ -89,6 +90,8 @@ def test_android_controller_runtime_status_exports_stream_descriptions() -> None
     assert '"inlet"' in controller_commands
     assert '"pps-android-controller-signals-v1-$sessionToken-$controllerToken"' in controller_commands
     assert '"pps-*-command-acks-v1-*"' in controller_commands
+    assert '"stop_after_block"' in controller_commands
+    assert '"stop_after_block" to "Stop After Block"' in main_activity
     assert '.put("channel_labels", stringArray(PHONE_LSL_COMMAND_CHANNELS))' in controller_commands
     assert '.put("channel_labels", stringArray(PHONE_LSL_ACK_CHANNELS))' in controller_commands
     assert '.put("demographics_in_stream_name", false)' in controller_commands

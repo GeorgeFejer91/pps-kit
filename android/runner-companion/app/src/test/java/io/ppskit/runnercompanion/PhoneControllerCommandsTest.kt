@@ -39,6 +39,29 @@ class PhoneControllerCommandsTest {
     }
 
     @Test
+    fun controllerCommandRowCanSendStopAfterBlock() {
+        val pairing = PairingInfo.parse(
+            "pps-companion://pair?host=127.0.0.1&port=8767&session_id=session-001&token=secret&mode=phone_export",
+        )
+        val row = buildPhoneControllerCommandRow(
+            pairing = pairing,
+            runPackage = runPackage(),
+            summary = null,
+            command = "stop_after_block",
+            commandId = "cmd-controller-stop-1",
+            issuedLslTime = 43.0,
+            phoneUnixMs = 1001L,
+            phoneElapsedRealtimeMs = 2001L,
+        )
+
+        val sample = row.getJSONArray("command_sample")
+        assertEquals("stop_after_block", sample.getString(4))
+        val parsed = phoneCommandFromSample((0 until sample.length()).map { sample.getString(it) })
+        assertEquals("stop_after_block", parsed.command)
+        assertEquals("secret", parsed.payload.getString("token"))
+    }
+
+    @Test
     fun controllerRuntimeStatusDeclaresStrictNativeBoundary() {
         val pairing = PairingInfo.parse(
             "pps-companion://pair?host=127.0.0.1&port=8767&session_id=session-001&token=secret",
@@ -51,6 +74,9 @@ class PhoneControllerCommandsTest {
         assertFalse(status.getBoolean("native_transport_available"))
         assertTrue(status.getString("reason").contains("liblsl_android_class_unavailable"))
         assertTrue(status.getJSONObject("command_protocol").getBoolean("token_required"))
+        val commands = status.getJSONObject("command_protocol").getJSONArray("supported_commands")
+        val commandNames = (0 until commands.length()).map { commands.getString(it) }
+        assertTrue(commandNames.contains("stop_after_block"))
         assertEquals("PPSCommandSignalsV1", status.getJSONObject("streams").getString("command_signals"))
 
         val descriptions = status.getJSONObject("stream_descriptions")
@@ -132,7 +158,7 @@ class PhoneControllerCommandsTest {
                 },
                 "native_android_lsl_required": true,
                 "current_android_source_behavior": "local_lsl_marker_mirror",
-                "supported_commands": ["start_experiment", "pause", "resume", "continue_instruction", "request_snapshot"]
+                "supported_commands": ["start_experiment", "pause", "resume", "continue_instruction", "stop_after_block", "request_snapshot"]
               },
               "assets": [],
               "blocks": [],

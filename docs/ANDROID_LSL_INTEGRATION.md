@@ -108,7 +108,10 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   observed. Controller runtime status also includes `stream_descriptions` for
   the controller `PPSCommandSignalsV1` outlet and `PPSCommandAcksV1` inlet, so
   two-phone command rehearsals have the same channel-order and privacy evidence
-  as phone-owned runner artifacts.
+  as phone-owned runner artifacts. Controller mode exposes Stop After Block
+  when `stop_after_block` is in the selected package command set, letting a
+  second Android phone request a clean boundary stop over the same LSL schema as
+  the PC helper.
 - PC-side phone uploads preserve `lsl_runtime_status.json` beside
   `lsl_marker_mirror.csv`, `trigger_codes.csv`, and `command_diary.jsonl`.
   Completion uploads that include Android response/top-up reconstruction fields
@@ -279,6 +282,7 @@ Android runner is idle with a synced package or actively playing a block:
 .\.venv\Scripts\pps-android-lsl-command.exe start_experiment --session-id <part_session_id> --token <pairing-token> --package-id <package_id> --require-ack
 .\.venv\Scripts\pps-android-lsl-command.exe pause --session-id <part_session_id> --token <pairing-token> --require-ack
 .\.venv\Scripts\pps-android-lsl-command.exe resume --session-id <part_session_id> --token <pairing-token> --require-ack
+.\.venv\Scripts\pps-android-lsl-command.exe stop_after_block --session-id <part_session_id> --token <pairing-token> --require-ack
 ```
 
 The `Send To Phone` window can send the same Start/Pause/Resume/Snapshot/

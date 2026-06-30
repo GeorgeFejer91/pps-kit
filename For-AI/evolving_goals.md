@@ -344,7 +344,10 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `PPSCommandSignalsV1` outlet open while Controller mode is selected, sends
   button-press commands over native LSL, polls for matching
   `PPSCommandAcksV1` samples, and records native send/ack outcomes in each
-  outbox row. Default builds remain `local_controller_outbox_only`.
+  outbox row. The Controller screen now includes Stop After Block when
+  `stop_after_block` is advertised, so a second Android phone can request the
+  same clean block-boundary stop as the PC helper. Default builds remain
+  `local_controller_outbox_only`.
 - Android phone-owned mode now includes a device-limited phone-vibrator
   calibration workflow. `PhoneHapticCalibration.kt` runs an ascending
   perceptual threshold check over fixed percent levels when Android reports
