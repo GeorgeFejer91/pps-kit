@@ -351,6 +351,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   privacy, identity fields, native LSL status booleans, and artifact filename
   consistency, and can fail missing catalog entries with
   `--expect-run-catalog` for new phone-owned exports.
+- Android phone-owned ZIP export now includes an app-private
+  `phone_run_catalog/` snapshot when present, not only the run-local
+  `phone_run_catalog_entry.json`. The Android LSL artifact validator can now
+  load that snapshot from ZIPs or the real app-private sibling folder layout
+  and enforce it with `--expect-run-catalog-index`, checking global
+  `index.json`, participant `runs.jsonl`, and `latest_run.json` against the
+  current phone-run identity and per-run catalog entry.
 - Study 5 future participants now use salient DynaSpace-style looming burst
   stimuli as the standard approaching audio-tactile sources and full-SOA
   stationary burst baselines instead of the previous no-looming/tactile-only

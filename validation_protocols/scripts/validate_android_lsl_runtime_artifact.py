@@ -50,6 +50,7 @@ from peripersonal_space_toolkit.timing_events import (  # noqa: E402
 
 ANDROID_LSL_RUNTIME_STATUS_SCHEMA = "pps-android-lsl-runtime-status.v1"
 ANDROID_PHONE_RUN_CATALOG_ENTRY_SCHEMA = "pps-android-phone-run-catalog-entry.v1"
+ANDROID_PHONE_RUN_CATALOG_SCHEMA = "pps-android-phone-run-catalog.v1"
 ANDROID_PHONE_RUN_CATALOG_ENTRY = "phone_run_catalog_entry.json"
 ANDROID_PHONE_RUN_RECONSTRUCTION_ARTIFACT = "reconstruction_contract.json"
 ANDROID_PHONE_PARTICIPANT_METADATA_SCHEMA = "pps-android-phone-participant-metadata.v1"
@@ -147,6 +148,9 @@ def validate_runtime_status(
     source_path: str = "",
     completion: dict[str, Any] | None = None,
     catalog_entry: dict[str, Any] | None = None,
+    catalog_index: dict[str, Any] | None = None,
+    catalog_runs_rows: list[dict[str, Any]] | None = None,
+    catalog_latest_entries: list[dict[str, Any]] | None = None,
     package_manifest: dict[str, Any] | None = None,
     reconstruction_artifact: dict[str, Any] | None = None,
     participant_metadata: dict[str, Any] | None = None,
@@ -162,6 +166,7 @@ def validate_runtime_status(
     expect_native_transport: bool = False,
     expect_command_acks: bool = False,
     expect_run_catalog: bool = False,
+    expect_run_catalog_index: bool = False,
     expect_lightweight_materializations: bool = False,
     expect_phone_topup_evidence: bool = False,
     expect_audiotrack_timing_evidence: bool = False,
@@ -231,6 +236,16 @@ def validate_runtime_status(
         expect_lightweight_materializations=expect_lightweight_materializations,
     )
     _validate_phone_run_catalog_entry(status, catalog_entry, failures, warnings, expect_run_catalog=expect_run_catalog)
+    _validate_phone_run_catalog_index(
+        status=status,
+        catalog_entry=catalog_entry,
+        catalog_index=catalog_index,
+        catalog_runs_rows=catalog_runs_rows or [],
+        catalog_latest_entries=catalog_latest_entries or [],
+        failures=failures,
+        warnings=warnings,
+        expect_run_catalog_index=expect_run_catalog_index,
+    )
     _validate_participant_and_haptic_metadata(
         status=status,
         completion=completion,
@@ -485,6 +500,7 @@ def validate_run_artifact(
     expect_native_transport: bool = False,
     expect_command_acks: bool = False,
     expect_run_catalog: bool = False,
+    expect_run_catalog_index: bool = False,
     expect_lightweight_materializations: bool = False,
     expect_phone_topup_evidence: bool = False,
     expect_audiotrack_timing_evidence: bool = False,
@@ -519,6 +535,9 @@ def validate_run_artifact(
         source_path=str(path),
         completion=loaded.get("completion"),
         catalog_entry=loaded.get("catalog_entry"),
+        catalog_index=loaded.get("catalog_index"),
+        catalog_runs_rows=loaded.get("catalog_runs_rows") or [],
+        catalog_latest_entries=loaded.get("catalog_latest_entries") or [],
         package_manifest=loaded.get("package_manifest"),
         reconstruction_artifact=loaded.get("reconstruction_artifact"),
         participant_metadata=loaded.get("participant_metadata"),
@@ -534,6 +553,7 @@ def validate_run_artifact(
         expect_native_transport=expect_native_transport,
         expect_command_acks=expect_command_acks,
         expect_run_catalog=expect_run_catalog,
+        expect_run_catalog_index=expect_run_catalog_index,
         expect_lightweight_materializations=expect_lightweight_materializations,
         expect_phone_topup_evidence=expect_phone_topup_evidence,
         expect_audiotrack_timing_evidence=expect_audiotrack_timing_evidence,
@@ -684,6 +704,21 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 name for name in archive.namelist() if name.endswith("completion.json") or name.endswith("latest_events.json")
             ]
             catalog_members = [name for name in archive.namelist() if name.endswith(ANDROID_PHONE_RUN_CATALOG_ENTRY)]
+            catalog_index_members = [
+                name
+                for name in archive.namelist()
+                if name.replace("\\", "/").endswith("phone_run_catalog/index.json")
+            ]
+            catalog_runs_members = [
+                name
+                for name in archive.namelist()
+                if "phone_run_catalog/" in name.replace("\\", "/") and name.endswith("/runs.jsonl")
+            ]
+            catalog_latest_members = [
+                name
+                for name in archive.namelist()
+                if "phone_run_catalog/" in name.replace("\\", "/") and name.endswith("/latest_run.json")
+            ]
             package_manifest_members = [name for name in archive.namelist() if name.endswith("run_package_manifest.json")]
             reconstruction_members = [name for name in archive.namelist() if name.endswith(ANDROID_PHONE_RUN_RECONSTRUCTION_ARTIFACT)]
             participant_metadata_members = [name for name in archive.namelist() if name.endswith("participant_metadata.json")]
@@ -720,6 +755,25 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 catalog_name = sorted(catalog_members)[0]
                 archive.extract(catalog_name, temp_root)
                 catalog_entry = _read_json(temp_root / catalog_name)
+            catalog_index = None
+            if catalog_index_members:
+                catalog_index_name = sorted(catalog_index_members)[0]
+                archive.extract(catalog_index_name, temp_root)
+                catalog_index = _read_json(temp_root / catalog_index_name)
+            catalog_runs_rows: list[dict[str, Any]] = []
+            for member in sorted(catalog_runs_members):
+                archive.extract(member, temp_root)
+                participant_dir = Path(member.replace("\\", "/")).parent.name
+                for row in _read_jsonl(temp_root / member):
+                    row.setdefault("_catalog_participant_dir", participant_dir)
+                    catalog_runs_rows.append(row)
+            catalog_latest_entries: list[dict[str, Any]] = []
+            for member in sorted(catalog_latest_members):
+                archive.extract(member, temp_root)
+                participant_dir = Path(member.replace("\\", "/")).parent.name
+                latest = _read_json(temp_root / member)
+                latest.setdefault("_catalog_participant_dir", participant_dir)
+                catalog_latest_entries.append(latest)
             package_manifest = None
             if package_manifest_members:
                 package_manifest_name = sorted(package_manifest_members)[0]
@@ -782,6 +836,9 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 "status": _read_json(temp_root / status_name),
                 "completion": completion,
                 "catalog_entry": catalog_entry,
+                "catalog_index": catalog_index,
+                "catalog_runs_rows": catalog_runs_rows,
+                "catalog_latest_entries": catalog_latest_entries,
                 "package_manifest": package_manifest,
                 "reconstruction_artifact": reconstruction_artifact,
                 "participant_metadata": participant_metadata,
@@ -816,7 +873,7 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
             materialization_manifests.append(_read_json(manifest_path))
         for wav_path in sorted(materialized_dir.glob("*.wav")):
             materialized_wav_hashes[wav_path.name] = _sha256_file(wav_path)
-    return {
+    sidecars = {
         "package_manifest": _read_json(package_manifest_path) if package_manifest_path.is_file() else None,
         "reconstruction_artifact": _read_json(reconstruction_artifact_path) if reconstruction_artifact_path.is_file() else None,
         "participant_metadata": _read_json(participant_metadata_path) if participant_metadata_path.is_file() else None,
@@ -829,6 +886,48 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
         "topup_plan": _read_json(topup_plan_path) if topup_plan_path.is_file() else None,
         "topup_materialization": _read_json(topup_materialization_path) if topup_materialization_path.is_file() else None,
         "topup_wav_hashes": {topup_wav_path.name: _sha256_file(topup_wav_path)} if topup_wav_path.is_file() else {},
+    }
+    catalog_root = _find_phone_run_catalog_root(path)
+    if catalog_root:
+        sidecars.update(_load_phone_run_catalog_root(catalog_root))
+    return sidecars
+
+
+def _find_phone_run_catalog_root(path: Path) -> Path | None:
+    candidates: list[Path] = []
+    for candidate in (
+        path / "phone_run_catalog",
+        path.parent / "phone_run_catalog",
+        path.parent.parent / "phone_run_catalog",
+        path.parent.parent.parent / "phone_run_catalog",
+    ):
+        if candidate not in candidates:
+            candidates.append(candidate)
+    for candidate in candidates:
+        if not candidate.is_dir():
+            continue
+        if (candidate / "index.json").is_file() or any(candidate.glob("*/runs.jsonl")):
+            return candidate
+    return None
+
+
+def _load_phone_run_catalog_root(root: Path) -> dict[str, Any]:
+    catalog_index_path = root / "index.json"
+    catalog_runs_rows: list[dict[str, Any]] = []
+    catalog_latest_entries: list[dict[str, Any]] = []
+    for runs_path in sorted(root.glob("*/runs.jsonl")):
+        participant_dir = runs_path.parent.name
+        for row in _read_jsonl(runs_path):
+            row.setdefault("_catalog_participant_dir", participant_dir)
+            catalog_runs_rows.append(row)
+    for latest_path in sorted(root.glob("*/latest_run.json")):
+        latest = _read_json(latest_path)
+        latest.setdefault("_catalog_participant_dir", latest_path.parent.name)
+        catalog_latest_entries.append(latest)
+    return {
+        "catalog_index": _read_json(catalog_index_path) if catalog_index_path.is_file() else None,
+        "catalog_runs_rows": catalog_runs_rows,
+        "catalog_latest_entries": catalog_latest_entries,
     }
 
 
@@ -1046,6 +1145,168 @@ def _validate_phone_run_catalog_entry(
     reconstruction = catalog_entry.get("reconstruction") if isinstance(catalog_entry.get("reconstruction"), dict) else {}
     if not str(reconstruction.get("schedule_hash") or "").strip():
         warnings.append("phone run catalog entry does not include a reconstruction schedule_hash")
+
+
+def _validate_phone_run_catalog_index(
+    *,
+    status: dict[str, Any],
+    catalog_entry: dict[str, Any] | None,
+    catalog_index: dict[str, Any] | None,
+    catalog_runs_rows: list[dict[str, Any]],
+    catalog_latest_entries: list[dict[str, Any]],
+    failures: list[str],
+    warnings: list[str],
+    expect_run_catalog_index: bool,
+) -> None:
+    has_catalog_index_evidence = bool(catalog_index) or bool(catalog_runs_rows) or bool(catalog_latest_entries)
+    if not has_catalog_index_evidence:
+        message = "phone run catalog index is missing"
+        if expect_run_catalog_index:
+            failures.append(message)
+        elif catalog_entry:
+            warnings.append(f"{message}; rerun with --expect-run-catalog-index for strict checks")
+        return
+
+    if not catalog_index:
+        if expect_run_catalog_index:
+            failures.append("phone run catalog index is missing")
+        return
+    if catalog_index.get("schema") != ANDROID_PHONE_RUN_CATALOG_SCHEMA:
+        failures.append("phone run catalog index schema mismatch")
+
+    participants = catalog_index.get("participants") if isinstance(catalog_index.get("participants"), list) else []
+    if "participant_count" in catalog_index and _clean_int(catalog_index.get("participant_count")) != len(participants):
+        failures.append("phone run catalog index participant_count differs from participants list length")
+    if "run_count" in catalog_index and catalog_runs_rows and _clean_int(catalog_index.get("run_count")) != len(catalog_runs_rows):
+        failures.append("phone run catalog index run_count differs from loaded runs.jsonl row count")
+
+    participant_id = _first_nonblank(
+        catalog_entry.get("participant_id") if catalog_entry else "",
+        status.get("participant_id"),
+    )
+    run_id = _first_nonblank(
+        catalog_entry.get("run_id") if catalog_entry else "",
+        status.get("run_id"),
+    )
+    participant_row = None
+    if participant_id:
+        for row in participants:
+            if isinstance(row, dict) and _catalog_text(row.get("participant_id")) == participant_id:
+                participant_row = row
+                break
+        if participant_row is None:
+            message = f"phone run catalog index is missing participant_id {participant_id}"
+            if expect_run_catalog_index:
+                failures.append(message)
+            else:
+                warnings.append(message)
+
+    if participant_row is not None:
+        participant_dir = _catalog_text(participant_row.get("participant_dir"))
+        if not participant_dir:
+            failures.append("phone run catalog index participant row is missing participant_dir")
+        if _clean_int(participant_row.get("run_count")) <= 0:
+            failures.append("phone run catalog index participant row has no runs")
+        if not _catalog_text(participant_row.get("latest_run_id")):
+            failures.append("phone run catalog index participant row is missing latest_run_id")
+
+    matching_run_rows = [row for row in catalog_runs_rows if _catalog_text(row.get("run_id")) == run_id] if run_id else []
+    if not catalog_runs_rows:
+        if expect_run_catalog_index:
+            failures.append("phone run catalog runs.jsonl rows are missing")
+    elif run_id and not matching_run_rows:
+        message = f"phone run catalog runs.jsonl is missing run_id {run_id}"
+        if expect_run_catalog_index:
+            failures.append(message)
+        else:
+            warnings.append(message)
+    elif matching_run_rows and catalog_entry:
+        _compare_phone_run_catalog_entry(
+            label="phone run catalog runs.jsonl",
+            observed=matching_run_rows[-1],
+            expected=catalog_entry,
+            failures=failures,
+        )
+
+    if not catalog_latest_entries:
+        if expect_run_catalog_index:
+            failures.append("phone run catalog latest_run.json entries are missing")
+        return
+
+    latest_for_participant = None
+    if participant_id:
+        for latest in catalog_latest_entries:
+            if _catalog_text(latest.get("participant_id")) == participant_id:
+                latest_for_participant = latest
+                break
+            if participant_row is not None and _catalog_text(latest.get("_catalog_participant_dir")) == _catalog_text(participant_row.get("participant_dir")):
+                latest_for_participant = latest
+                break
+    if latest_for_participant is None:
+        message = f"phone run catalog latest_run.json is missing participant_id {participant_id}" if participant_id else "phone run catalog latest_run.json cannot be matched to this participant"
+        if expect_run_catalog_index:
+            failures.append(message)
+        else:
+            warnings.append(message)
+        return
+
+    latest_run_id = _catalog_text(participant_row.get("latest_run_id")) if participant_row is not None else ""
+    if latest_run_id and _catalog_text(latest_for_participant.get("run_id")) != latest_run_id:
+        failures.append("phone run catalog latest_run.json run_id differs from index latest_run_id")
+    if catalog_entry and run_id and (not latest_run_id or latest_run_id == run_id):
+        _compare_phone_run_catalog_entry(
+            label="phone run catalog latest_run.json",
+            observed=latest_for_participant,
+            expected=catalog_entry,
+            failures=failures,
+        )
+
+
+def _compare_phone_run_catalog_entry(
+    *,
+    label: str,
+    observed: dict[str, Any],
+    expected: dict[str, Any],
+    failures: list[str],
+) -> None:
+    for field in (
+        "schema",
+        "package_id",
+        "run_id",
+        "participant_id",
+        "session_id",
+        "session_group_id",
+        "part_session_id",
+        "part_number",
+        "artifact_file",
+        "asset_strategy",
+        "completed",
+        "completion_reason",
+    ):
+        expected_value = _catalog_text(expected.get(field))
+        observed_value = _catalog_text(observed.get(field))
+        if expected_value and observed_value and expected_value != observed_value:
+            failures.append(f"{label} {field} differs from phone_run_catalog_entry.json")
+    expected_reconstruction = expected.get("reconstruction") if isinstance(expected.get("reconstruction"), dict) else {}
+    observed_reconstruction = observed.get("reconstruction") if isinstance(observed.get("reconstruction"), dict) else {}
+    expected_hash = _catalog_text(expected_reconstruction.get("schedule_hash"))
+    observed_hash = _catalog_text(observed_reconstruction.get("schedule_hash"))
+    if expected_hash and observed_hash and expected_hash != observed_hash:
+        failures.append(f"{label} reconstruction.schedule_hash differs from phone_run_catalog_entry.json")
+
+
+def _first_nonblank(*values: Any) -> str:
+    for value in values:
+        text = _catalog_text(value)
+        if text:
+            return text
+    return ""
+
+
+def _catalog_text(value: Any) -> str:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    return str(value or "").strip()
 
 
 def _validate_participant_and_haptic_metadata(
@@ -2441,6 +2702,14 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--expect-run-catalog", action="store_true", help="For phone-run artifacts, fail unless phone_run_catalog_entry.json is present and consistent.")
     parser.add_argument(
+        "--expect-run-catalog-index",
+        action="store_true",
+        help=(
+            "For phone-run artifacts, fail unless the app-private phone_run_catalog index, "
+            "participant runs.jsonl, and latest_run.json snapshot are present and consistent."
+        ),
+    )
+    parser.add_argument(
         "--expect-lightweight-materializations",
         action="store_true",
         help="For building-block-only phone runs, fail unless every scheduled block has materialization event/JSON/WAV evidence.",
@@ -2469,6 +2738,7 @@ def main(argv: list[str] | None = None) -> int:
         expect_native_transport=args.expect_native_transport,
         expect_command_acks=args.expect_command_acks,
         expect_run_catalog=args.expect_run_catalog,
+        expect_run_catalog_index=args.expect_run_catalog_index,
         expect_lightweight_materializations=args.expect_lightweight_materializations,
         expect_phone_topup_evidence=args.expect_phone_topup_evidence,
         expect_audiotrack_timing_evidence=args.expect_audiotrack_timing_evidence,

@@ -164,6 +164,12 @@ with a PC-side LSL monitor. Participant and haptic sidecars are also checked
 when present: `participant_metadata.json` must use metadata-payload-only privacy
 and match embedded/catalog run identity, while `haptic_capability.json` must
 declare the vibrator/amplitude policy and any calibration result consistently.
+For strict app-private participant/session catalog reconstruction, add
+`--expect-run-catalog --expect-run-catalog-index`; this requires the per-run
+`phone_run_catalog_entry.json`, the exported/global
+`phone_run_catalog/index.json`, each participant `runs.jsonl`, and
+`latest_run.json` to agree on run identity, latest-run pointers, artifact file,
+native LSL status booleans, and reconstruction schedule hash.
 For phone-owned timing reconstruction, add
 `--expect-audiotrack-timing-evidence`; this requires `block_start` events to
 declare `audio_timing_strategy = audiotrack_pcm_wav_playback_head` with positive
@@ -190,9 +196,13 @@ Phone-owned local artifacts now include `participant_metadata.json`,
 `command_diary.jsonl`, `lsl_runtime_status.json`, `phone_response_ledger.csv`,
 `phone_topup_plan.json`, `phone_topup_materialization.json`, any
 `phone_topup_block.wav`, reconstruction/package snapshots, and
-`completion.json` in the exported phone session ZIP. The phone preserves the
-package `asset_strategy` across the parsed model, LSL runtime status, native LSL
-stream description metadata, reconstruction snapshot, and phone run catalog so a lightweight
+`completion.json` in the exported phone session ZIP. The exported ZIP also
+includes a snapshot of the app-private `phone_run_catalog/` tree when present,
+including the global `index.json`, participant `runs.jsonl`, and
+`latest_run.json` pointers used to reconstruct which phone-owned runs happened
+for each participant. The phone preserves the package `asset_strategy` across
+the parsed model, LSL runtime status, native LSL stream description metadata,
+reconstruction snapshot, and phone run catalog so a lightweight
 `trial_building_blocks_only` run can be distinguished from a prepared-block WAV
 compatibility run during later reconstruction. Participant age, handedness,
 gender, and tactile threshold stay in metadata and marker payloads rather than

@@ -3316,8 +3316,16 @@ private fun exportPhoneRunZip(context: Context, runDir: File): File {
     val zip = File(exportDir, "${safeFileName(runDir.name)}.zip")
     ZipOutputStream(FileOutputStream(zip)).use { output ->
         addZipEntries(output, runDir, "")
+        addPhoneRunCatalogSnapshot(output, context.filesDir)
     }
     return zip
+}
+
+private fun addPhoneRunCatalogSnapshot(output: ZipOutputStream, filesDir: File) {
+    val catalogRoot = File(filesDir, "phone_run_catalog")
+    if (catalogRoot.isDirectory) {
+        addZipEntries(output, catalogRoot, "phone_run_catalog")
+    }
 }
 
 private fun addZipEntries(output: ZipOutputStream, root: File, prefix: String) {

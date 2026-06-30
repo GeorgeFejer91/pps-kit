@@ -71,3 +71,11 @@ def test_android_companion_discovery_preserves_local_hotspot_privacy_contract() 
     assert 'optBoolean("stream_names_are_generic", false)' in discovery
     assert "createMulticastLock" in discovery
     assert "MulticastSocket(null)" in discovery
+
+
+def test_android_phone_run_zip_exports_catalog_snapshot() -> None:
+    main_activity = _source("MainActivity.kt")
+
+    assert "addPhoneRunCatalogSnapshot(output, context.filesDir)" in main_activity
+    assert 'File(filesDir, "phone_run_catalog")' in main_activity
+    assert 'addZipEntries(output, catalogRoot, "phone_run_catalog")' in main_activity

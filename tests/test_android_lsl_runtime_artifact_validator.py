@@ -112,15 +112,84 @@ def test_android_lsl_runtime_validator_rejects_phone_run_catalog_identity_drift(
 def test_android_lsl_runtime_validator_loads_phone_run_catalog_from_zip(tmp_path: Path):
     status = _status(native=True)
     status.update(_catalog_identity())
+    catalog = _catalog_entry(native=True)
     archive_path = tmp_path / "phone-run.zip"
     with zipfile.ZipFile(archive_path, "w") as archive:
         archive.writestr("phone-run/lsl_runtime_status.json", json.dumps(status))
-        archive.writestr("phone-run/phone_run_catalog_entry.json", json.dumps(_catalog_entry(native=True)))
+        archive.writestr("phone-run/phone_run_catalog_entry.json", json.dumps(catalog))
+        _write_phone_run_catalog_to_zip(archive, catalog)
 
-    result = validator.validate_run_artifact(archive_path, expect_native_transport=True, expect_run_catalog=True)
+    result = validator.validate_run_artifact(
+        archive_path,
+        expect_native_transport=True,
+        expect_run_catalog=True,
+        expect_run_catalog_index=True,
+    )
 
     assert result.ok is True
     assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_accepts_phone_run_catalog_index(tmp_path: Path):
+    files_dir = tmp_path / "files"
+    run_dir = files_dir / "phone_runs" / "phone-run-001"
+    run_dir.mkdir(parents=True)
+    status = _status(native=False)
+    status.update(_catalog_identity())
+    catalog = _catalog_entry(native=False)
+    (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
+    (run_dir / "completion.json").write_text(json.dumps({"lsl_runtime_status": status}), encoding="utf-8")
+    (run_dir / "phone_run_catalog_entry.json").write_text(json.dumps(catalog), encoding="utf-8")
+    _write_phone_run_catalog_root(files_dir, catalog)
+
+    result = validator.validate_run_artifact(
+        run_dir,
+        expect_run_catalog=True,
+        expect_run_catalog_index=True,
+    )
+
+    assert result.ok is True
+    assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_rejects_missing_phone_run_catalog_index_when_expected(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    status = _status(native=False)
+    status.update(_catalog_identity())
+    (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
+    (run_dir / "phone_run_catalog_entry.json").write_text(json.dumps(_catalog_entry(native=False)), encoding="utf-8")
+
+    result = validator.validate_run_artifact(
+        run_dir,
+        expect_run_catalog=True,
+        expect_run_catalog_index=True,
+    )
+
+    assert result.ok is False
+    assert "phone run catalog index is missing" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_catalog_runs_missing_current_run(tmp_path: Path):
+    files_dir = tmp_path / "files"
+    run_dir = files_dir / "phone_runs" / "phone-run-001"
+    run_dir.mkdir(parents=True)
+    status = _status(native=False)
+    status.update(_catalog_identity())
+    catalog = _catalog_entry(native=False)
+    other_catalog = {**catalog, "run_id": "phone-run-other"}
+    (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
+    (run_dir / "phone_run_catalog_entry.json").write_text(json.dumps(catalog), encoding="utf-8")
+    _write_phone_run_catalog_root(files_dir, other_catalog)
+
+    result = validator.validate_run_artifact(
+        run_dir,
+        expect_run_catalog=True,
+        expect_run_catalog_index=True,
+    )
+
+    assert result.ok is False
+    assert "phone run catalog runs.jsonl is missing run_id phone-run-001" in "\n".join(result.failures)
 
 
 def test_android_lsl_runtime_validator_accepts_lightweight_materialization_evidence(tmp_path: Path):
@@ -1065,6 +1134,43 @@ def _catalog_entry(*, native: bool) -> dict:
             "trial_count": 180,
         },
     }
+
+
+def _catalog_index(entry: dict) -> dict:
+    return {
+        "schema": "pps-android-phone-run-catalog.v1",
+        "updated_unix_ms": 1780000000100,
+        "participant_count": 1,
+        "run_count": 1,
+        "participants": [
+            {
+                "participant_id": entry["participant_id"],
+                "participant_dir": entry["participant_id"],
+                "run_count": 1,
+                "latest_run_id": entry["run_id"],
+                "latest_completed": bool(entry.get("completed")),
+                "latest_updated_unix_ms": entry.get("updated_unix_ms", 1780000000000),
+            }
+        ],
+    }
+
+
+def _write_phone_run_catalog_root(files_dir: Path, entry: dict) -> None:
+    catalog_root = files_dir / "phone_run_catalog"
+    participant_dir = catalog_root / entry["participant_id"]
+    participant_dir.mkdir(parents=True)
+    normalized_entry = {**entry, "updated_unix_ms": entry.get("updated_unix_ms", 1780000000000)}
+    (participant_dir / "runs.jsonl").write_text(json.dumps(normalized_entry) + "\n", encoding="utf-8")
+    (participant_dir / "latest_run.json").write_text(json.dumps(normalized_entry), encoding="utf-8")
+    (catalog_root / "index.json").write_text(json.dumps(_catalog_index(normalized_entry)), encoding="utf-8")
+
+
+def _write_phone_run_catalog_to_zip(archive: zipfile.ZipFile, entry: dict) -> None:
+    normalized_entry = {**entry, "updated_unix_ms": entry.get("updated_unix_ms", 1780000000000)}
+    participant_dir = f"phone_run_catalog/{normalized_entry['participant_id']}"
+    archive.writestr("phone_run_catalog/index.json", json.dumps(_catalog_index(normalized_entry)))
+    archive.writestr(f"{participant_dir}/runs.jsonl", json.dumps(normalized_entry) + "\n")
+    archive.writestr(f"{participant_dir}/latest_run.json", json.dumps(normalized_entry))
 
 
 def _controller_status(*, native: bool) -> dict:
