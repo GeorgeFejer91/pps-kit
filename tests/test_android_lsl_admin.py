@@ -85,7 +85,13 @@ def test_send_android_lsl_command_writes_auditable_ack_row(tmp_path, monkeypatch
         received_lsl_time=10.1,
         applied_lsl_time=10.2,
         ack_lsl_time=10.3,
-        payload={"state_changed": True},
+        payload={
+            "command": "start_experiment",
+            "package_id": "pkg-001",
+            "participant_id": "P001",
+            "target_session_id": "part-001",
+            "state_changed": True,
+        },
     )
     monkeypatch.setattr(admin, "LSLCommandOutlet", _FakeCommandOutlet)
     monkeypatch.setattr(admin, "LSLCommandAckInlet", _FakeAckInlet)
@@ -149,6 +155,69 @@ def test_send_android_lsl_command_can_require_ack(tmp_path, monkeypatch):
     assert result.row["ack_received"] is False
 
 
+def test_send_android_lsl_command_rejects_ack_session_drift(tmp_path, monkeypatch):
+    _FakeCommandOutlet.sent_signals.clear()
+    _FakeAckInlet.ack = LSLCommandAck(
+        command_id="cmd-session-drift",
+        session_id="other-part",
+        receiver_id="android_phone",
+        status="applied",
+        reason="wrong_session",
+        received_lsl_time=10.1,
+        applied_lsl_time=10.2,
+        ack_lsl_time=10.3,
+        payload={"command": "pause", "target_session_id": "other-part"},
+    )
+    monkeypatch.setattr(admin, "LSLCommandOutlet", _FakeCommandOutlet)
+    monkeypatch.setattr(admin, "LSLCommandAckInlet", _FakeAckInlet)
+
+    result = admin.send_android_lsl_command(
+        target_session_id="part-001",
+        token="secret",
+        command="pause",
+        command_id="cmd-session-drift",
+        output_dir=tmp_path,
+        require_ack=True,
+    )
+
+    assert result.ok is False
+    assert result.row["status"] == "invalid_ack"
+    assert result.row["ack_received"] is True
+    assert result.row["ack_sample"] == ack_to_sample(_FakeAckInlet.ack)
+    assert "session_id does not match" in result.row["reason"]
+
+
+def test_send_android_lsl_command_rejects_ack_token_echo(tmp_path, monkeypatch):
+    _FakeCommandOutlet.sent_signals.clear()
+    _FakeAckInlet.ack = LSLCommandAck(
+        command_id="cmd-token-echo",
+        session_id="part-001",
+        receiver_id="android_phone",
+        status="applied",
+        reason="bad_ack",
+        received_lsl_time=10.1,
+        applied_lsl_time=10.2,
+        ack_lsl_time=10.3,
+        payload={"command": "pause", "token": "secret"},
+    )
+    monkeypatch.setattr(admin, "LSLCommandOutlet", _FakeCommandOutlet)
+    monkeypatch.setattr(admin, "LSLCommandAckInlet", _FakeAckInlet)
+
+    result = admin.send_android_lsl_command(
+        target_session_id="part-001",
+        token="secret",
+        command="pause",
+        command_id="cmd-token-echo",
+        output_dir=tmp_path,
+        require_ack=True,
+    )
+
+    assert result.ok is False
+    assert result.row["status"] == "invalid_ack"
+    assert result.row["ack_received"] is True
+    assert "pairing token" in result.row["reason"]
+
+
 def test_send_android_lsl_operator_note_requires_note():
     with pytest.raises(ValueError, match="operator_note requires"):
         admin.send_android_lsl_command(
@@ -177,7 +246,7 @@ def test_send_android_lsl_operator_note_writes_note_payload(tmp_path, monkeypatc
         received_lsl_time=10.1,
         applied_lsl_time=10.2,
         ack_lsl_time=10.3,
-        payload={"note": "participant asked for a pause"},
+        payload={"command": "operator_note", "note": "participant asked for a pause"},
     )
     monkeypatch.setattr(admin, "LSLCommandOutlet", _FakeCommandOutlet)
     monkeypatch.setattr(admin, "LSLCommandAckInlet", _FakeAckInlet)

@@ -99,9 +99,14 @@ def build_android_lsl_admin_row(
     ack_sample = ack_to_sample(ack) if ack is not None else []
     ok = bool(native_lsl_sent and (ack is not None or not require_ack))
     if ack is not None:
-        status = f"ack_{ack.status or 'received'}"
-        reason = ack.reason
-        ok = ok and ack.status == "applied"
+        if ack_error:
+            status = "invalid_ack"
+            reason = ack_error
+            ok = False
+        else:
+            status = f"ack_{ack.status or 'received'}"
+            reason = ack.reason
+            ok = ok and ack.status == "applied"
     elif native_lsl_sent and require_ack:
         status = "missing_ack"
         reason = ack_error or "No matching PPSCommandAcksV1 sample received."
@@ -210,6 +215,8 @@ def send_android_lsl_command(
             ack_stream_name=ack_stream_name,
             timeout_s=ack_timeout_s,
         )
+        if ack is not None:
+            ack_error = _validate_ack_for_signal(signal, ack)
     except Exception as exc:  # noqa: BLE001 - persisted in the admin row for field debugging.
         ack_error = str(exc)
 
@@ -329,6 +336,38 @@ def _wait_for_ack(*, command_id: str, ack_stream_name: str, timeout_s: float) ->
     if last_error is not None:
         return None
     return None
+
+
+def _validate_ack_for_signal(signal: LSLCommandSignal, ack: LSLCommandAck) -> str:
+    if ack.command_id != signal.command_id:
+        return "Received command ack id does not match the sent command id."
+    if ack.session_id != signal.session_id:
+        return "Received command ack session_id does not match the sent command session_id."
+    payload = dict(ack.payload or {})
+    if str(payload.get("token") or payload.get("companion_token") or "").strip():
+        return "Received command ack payload echoed the pairing token."
+    payload_command = str(payload.get("command") or "").strip()
+    if payload_command and payload_command != signal.command:
+        return "Received command ack payload command does not match the sent command."
+    expected_payload = dict(signal.payload or {})
+    identity_fields = (
+        "package_id",
+        "participant_id",
+        "target_part_session_id",
+        "target_session_group_id",
+        "target_part_number",
+        "requested_by",
+        "current_pc_source_behavior",
+    )
+    for field in identity_fields:
+        expected = str(expected_payload.get(field) or "").strip()
+        observed = str(payload.get(field) or "").strip()
+        if expected and observed and observed != expected:
+            return f"Received command ack payload {field} does not match the sent command."
+    target_session = str(payload.get("target_session_id") or "").strip()
+    if target_session and target_session != signal.session_id:
+        return "Received command ack payload target_session_id does not match the sent command."
+    return ""
 
 
 def _json_payload(value: str) -> dict[str, Any]:

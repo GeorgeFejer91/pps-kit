@@ -42,6 +42,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   that echo `token` or `companion_token`. This keeps noisy monitor/XDF captures
   from being accepted as two-way administration evidence when they only contain
   orphan acknowledgements.
+- PC-to-Android LSL admin sends now validate the received
+  `PPSCommandAcksV1` sample before reporting live success. A same-command-id
+  ack is recorded but marked `invalid_ack` if its `session_id` or echoed target
+  identity conflicts with the sent command, if its payload command conflicts,
+  or if the ack payload echoes `token` / `companion_token`. This prevents stale
+  or unsafe acks from making the PC helper claim that a phone command was
+  successfully applied, while preserving the bad ack sample in the outbox for
+  reconstruction.
 - Receiver-side Android native command diary rows now preserve
   `command_channels` and the exact received `PPSCommandSignalsV1`
   `command_sample` alongside the outgoing ack evidence. Strict phone-run
