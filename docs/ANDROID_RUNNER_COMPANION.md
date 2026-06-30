@@ -264,7 +264,10 @@ local audit trail. In a native liblsl validation build it also keeps a
 `PPSCommandSignalsV1` outlet open while Controller mode is selected, sends button
 presses over LSL, polls for matching `PPSCommandAcksV1` samples, and records the
 native send/ack result in the outbox row plus
-`phone_controller_runtime_status.json`.
+`phone_controller_runtime_status.json`. That status includes controller
+`stream_descriptions` for the command-signal outlet and command-ack inlet, so
+strict validation can reject channel-order or source-identity drift before
+controller button presses are treated as live LSL evidence.
 
 Android vibration calibration is device-limited. The phone-run metadata panel
 now includes a `Haptic Calibration` control. On phones with amplitude control it

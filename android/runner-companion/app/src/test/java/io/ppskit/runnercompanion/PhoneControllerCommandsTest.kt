@@ -52,6 +52,27 @@ class PhoneControllerCommandsTest {
         assertTrue(status.getString("reason").contains("liblsl_android_class_unavailable"))
         assertTrue(status.getJSONObject("command_protocol").getBoolean("token_required"))
         assertEquals("PPSCommandSignalsV1", status.getJSONObject("streams").getString("command_signals"))
+
+        val descriptions = status.getJSONObject("stream_descriptions")
+        assertEquals("pps-android-lsl-stream-descriptions.v1", descriptions.getString("schema"))
+        assertEquals("controller", descriptions.getString("role"))
+        assertFalse(descriptions.getJSONObject("privacy").getBoolean("demographics_in_stream_name"))
+
+        val commandSignals = descriptions.getJSONObject("command_signals")
+        assertEquals("PPSCommandSignalsV1", commandSignals.getString("name"))
+        assertEquals("CommandSignals", commandSignals.getString("type"))
+        assertEquals("outlet", commandSignals.getString("role"))
+        assertEquals(PHONE_LSL_COMMAND_CHANNELS.size, commandSignals.getInt("channel_count"))
+        assertEquals("payload_json", commandSignals.getJSONArray("channel_labels").getString(PHONE_LSL_COMMAND_CHANNELS.size - 1))
+        assertTrue(commandSignals.getBoolean("token_required"))
+        assertTrue(commandSignals.getString("source_id").startsWith("pps-android-controller-signals-v1-part-001-android_controller"))
+
+        val commandAcks = descriptions.getJSONObject("command_acks")
+        assertEquals("PPSCommandAcksV1", commandAcks.getString("name"))
+        assertEquals("CommandAcks", commandAcks.getString("type"))
+        assertEquals("inlet", commandAcks.getString("role"))
+        assertEquals(PHONE_LSL_ACK_CHANNELS.size, commandAcks.getInt("channel_count"))
+        assertEquals("pps-*-command-acks-v1-*", commandAcks.getString("source_id_pattern"))
     }
 
     @Test
@@ -78,6 +99,12 @@ class PhoneControllerCommandsTest {
         assertTrue(status.getBoolean("native_controller_transport_enabled"))
         assertEquals("native_lsl_controller_with_local_outbox", status.getString("current_android_source_behavior"))
         assertTrue(status.getJSONObject("native_bridge").getJSONObject("controller_transport").getBoolean("enabled"))
+        assertEquals(
+            "outlet",
+            status.getJSONObject("stream_descriptions")
+                .getJSONObject("command_signals")
+                .getString("role"),
+        )
     }
 
     private fun runPackage(): MobileRunPackage =

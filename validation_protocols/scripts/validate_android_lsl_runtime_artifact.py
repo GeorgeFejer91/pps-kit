@@ -397,6 +397,13 @@ def validate_controller_status(
     for key, expected in EXPECTED_CONTROLLER_STREAMS.items():
         if streams.get(key) != expected:
             failures.append(f"controller stream {key} expected {expected!r}, got {streams.get(key)!r}")
+    _validate_android_controller_lsl_stream_descriptions(
+        status=status,
+        streams=streams,
+        failures=failures,
+        warnings=warnings,
+        expect_native_transport=expect_native_transport,
+    )
 
     protocol = status.get("command_protocol") if isinstance(status.get("command_protocol"), dict) else {}
     _validate_command_protocol(protocol, failures)
@@ -1310,6 +1317,82 @@ def _validate_android_lsl_stream_descriptions(
             failures.append(f"Android LSL stream description {key}.marker_version expected {spec['marker_version']!r}")
         if "token_required" in spec and row.get("token_required") is not spec["token_required"]:
             failures.append(f"Android LSL stream description {key}.token_required must be true")
+
+
+def _validate_android_controller_lsl_stream_descriptions(
+    *,
+    status: dict[str, Any],
+    streams: dict[str, Any],
+    failures: list[str],
+    warnings: list[str],
+    expect_native_transport: bool,
+) -> None:
+    descriptions = status.get("stream_descriptions") if isinstance(status.get("stream_descriptions"), dict) else None
+    if descriptions is None:
+        message = "Android controller LSL stream descriptions are missing"
+        if expect_native_transport:
+            failures.append(message)
+        elif status.get("native_transport_available") is True:
+            warnings.append(f"{message}; rerun with --expect-native-transport for strict checks")
+        return
+    if descriptions.get("schema") != ANDROID_LSL_STREAM_DESCRIPTIONS_SCHEMA:
+        failures.append("Android controller LSL stream descriptions schema mismatch")
+    if descriptions.get("role") != "controller":
+        failures.append("Android controller LSL stream descriptions must declare role='controller'")
+    privacy = descriptions.get("privacy") if isinstance(descriptions.get("privacy"), dict) else {}
+    if privacy.get("demographics_in_stream_name") is not False:
+        failures.append("Android controller LSL stream descriptions must keep demographics out of stream names")
+    expected = {
+        "command_signals": {
+            "name": streams.get("command_signals") or EXPECTED_CONTROLLER_STREAMS["command_signals"],
+            "type": "CommandSignals",
+            "role": "outlet",
+            "channel_format": "string",
+            "channel_count": len(LSL_COMMAND_CHANNELS),
+            "channel_labels": list(LSL_COMMAND_CHANNELS),
+            "source_id_prefix": "pps-android-controller-signals-v1-",
+            "token_required": True,
+        },
+        "command_acks": {
+            "name": streams.get("command_acks") or EXPECTED_CONTROLLER_STREAMS["command_acks"],
+            "type": "CommandAcks",
+            "role": "inlet",
+            "channel_format": "string",
+            "channel_count": len(LSL_ACK_CHANNELS),
+            "channel_labels": list(LSL_ACK_CHANNELS),
+            "source_id_pattern": "pps-*-command-acks-v1-*",
+        },
+    }
+    for key, spec in expected.items():
+        row = descriptions.get(key) if isinstance(descriptions.get(key), dict) else None
+        if row is None:
+            failures.append(f"Android controller LSL stream description {key} is missing")
+            continue
+        for field in ("name", "type", "role", "channel_format"):
+            if str(row.get(field) or "") != str(spec[field]):
+                failures.append(
+                    f"Android controller LSL stream description {key}.{field} expected {spec[field]!r}, got {row.get(field)!r}"
+                )
+        if _clean_int(row.get("channel_count")) != int(spec["channel_count"]):
+            failures.append(
+                f"Android controller LSL stream description {key}.channel_count expected {spec['channel_count']}, got {row.get('channel_count')!r}"
+            )
+        labels = [str(item) for item in row.get("channel_labels") or []] if isinstance(row.get("channel_labels"), list) else []
+        if labels != list(spec["channel_labels"]):
+            failures.append(f"Android controller LSL stream description {key}.channel_labels differ from the PC-compatible channel order")
+        nominal = _safe_float(row.get("nominal_srate_hz"), fallback=-1.0)
+        if nominal != 0.0:
+            failures.append(f"Android controller LSL stream description {key}.nominal_srate_hz must be 0.0 for irregular command streams")
+        if "source_id_prefix" in spec:
+            source_id = str(row.get("source_id") or "")
+            if not source_id.startswith(str(spec["source_id_prefix"])):
+                failures.append(f"Android controller LSL stream description {key}.source_id must start with {spec['source_id_prefix']!r}")
+        if "source_id_pattern" in spec and str(row.get("source_id_pattern") or "") != str(spec["source_id_pattern"]):
+            failures.append(
+                f"Android controller LSL stream description {key}.source_id_pattern expected {spec['source_id_pattern']!r}"
+            )
+        if "token_required" in spec and row.get("token_required") is not spec["token_required"]:
+            failures.append(f"Android controller LSL stream description {key}.token_required must be true")
 
 
 def _validate_command_protocol(protocol: dict[str, Any], failures: list[str], *, token_field: str = "token_required") -> None:

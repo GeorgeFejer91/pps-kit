@@ -565,6 +565,32 @@ def test_android_lsl_runtime_validator_accepts_controller_outbox_artifact(tmp_pa
     assert result.status["role"] == "controller"
 
 
+def test_android_lsl_runtime_validator_requires_controller_stream_descriptions_in_strict_mode(tmp_path: Path):
+    controller_dir = tmp_path / "phone-controller"
+    controller_dir.mkdir()
+    status = _controller_status(native=True)
+    status.pop("stream_descriptions")
+    (controller_dir / "phone_controller_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
+
+    result = validator.validate_run_artifact(controller_dir, expect_native_transport=True)
+
+    assert result.ok is False
+    assert "Android controller LSL stream descriptions are missing" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_controller_stream_description_drift(tmp_path: Path):
+    controller_dir = tmp_path / "phone-controller"
+    controller_dir.mkdir()
+    status = _controller_status(native=True)
+    status["stream_descriptions"]["command_signals"]["role"] = "inlet"
+    (controller_dir / "phone_controller_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
+
+    result = validator.validate_run_artifact(controller_dir, expect_native_transport=True)
+
+    assert result.ok is False
+    assert "command_signals.role" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_requires_native_controller_send_in_strict_mode(tmp_path: Path):
     controller_dir = tmp_path / "phone-controller"
     controller_dir.mkdir()
@@ -1541,6 +1567,7 @@ def _controller_status(*, native: bool) -> dict:
             "command_signals": "PPSCommandSignalsV1",
             "command_acks": "PPSCommandAcksV1",
         },
+        "stream_descriptions": _controller_stream_descriptions(),
         "command_protocol": {
             "command_schema": "pps-lsl-command.v1",
             "ack_schema": "pps-lsl-command-ack.v1",
@@ -1567,6 +1594,42 @@ def _controller_status(*, native: bool) -> dict:
             ],
             "supported_commands": ["start_experiment", "pause", "resume"],
             "token_required": True,
+        },
+    }
+
+
+def _controller_stream_descriptions() -> dict:
+    return {
+        "schema": "pps-android-lsl-stream-descriptions.v1",
+        "runtime_authority": "android_controller",
+        "role": "controller",
+        "target_session_id": "part-001",
+        "participant_id": "P001",
+        "privacy": {
+            "default": "metadata_payload_only",
+            "participant_demographics_location": "metadata_and_payload_artifacts",
+            "demographics_in_stream_name": False,
+        },
+        "command_signals": {
+            "name": "PPSCommandSignalsV1",
+            "type": "CommandSignals",
+            "role": "outlet",
+            "channel_format": "string",
+            "channel_count": len(validator.LSL_COMMAND_CHANNELS),
+            "nominal_srate_hz": 0.0,
+            "source_id": "pps-android-controller-signals-v1-part-001-android_controller",
+            "channel_labels": list(validator.LSL_COMMAND_CHANNELS),
+            "token_required": True,
+        },
+        "command_acks": {
+            "name": "PPSCommandAcksV1",
+            "type": "CommandAcks",
+            "role": "inlet",
+            "channel_format": "string",
+            "channel_count": len(validator.LSL_ACK_CHANNELS),
+            "nominal_srate_hz": 0.0,
+            "source_id_pattern": "pps-*-command-acks-v1-*",
+            "channel_labels": list(validator.LSL_ACK_CHANNELS),
         },
     }
 

@@ -74,7 +74,11 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `phone_controller_runtime_status.json`; default builds remain local-outbox
   only, while native liblsl validation builds also send button presses over a
   long-lived `PPSCommandSignalsV1` outlet and record native send/ack outcomes in
-  the outbox row.
+  the outbox row. Controller runtime status now also includes
+  `pps-android-lsl-stream-descriptions.v1` descriptions for the controller
+  command-signal outlet and command-ack inlet, and strict controller validation
+  checks those roles, source identity/patterns, privacy, and PC-compatible
+  channel order.
 - Android phone-owned response/top-up review lives in
   `PhoneResponseReview.kt`. It applies the shared 100-1300 ms post-tactile
   response policy to standard phone blocks, plans missed-trial rescue top-ups
@@ -107,7 +111,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   events when `--expect-audiotrack-timing-evidence` is set, including
   playback-head scheduler fields and coherent cue-jitter metadata,
   Controller-mode `phone_controller_runtime_status.json` /
-  `phone_controller_command_outbox.jsonl`, PC-admin
+  `phone_controller_command_outbox.jsonl` including controller LSL stream
+  descriptions, PC-admin
   `pc_android_lsl_admin_status.json` /
   `pc_android_lsl_command_outbox.jsonl`, command/ack schema/channel order,
   phone-run `command_diary.jsonl` / embedded command diary native ack rows,

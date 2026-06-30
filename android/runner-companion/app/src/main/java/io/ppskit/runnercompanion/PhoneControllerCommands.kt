@@ -163,6 +163,7 @@ internal fun phoneControllerRuntimeStatus(
                 .put("command_signals", runPackage?.lsl?.commandSignalsName?.ifBlank { PHONE_LSL_COMMAND_STREAM_NAME } ?: PHONE_LSL_COMMAND_STREAM_NAME)
                 .put("command_acks", runPackage?.lsl?.commandAcksName?.ifBlank { PHONE_LSL_ACK_STREAM_NAME } ?: PHONE_LSL_ACK_STREAM_NAME),
         )
+        .put("stream_descriptions", phoneControllerLslStreamDescriptions(pairing, runPackage, summary))
         .put(
             "command_protocol",
             JSONObject()
@@ -172,6 +173,63 @@ internal fun phoneControllerRuntimeStatus(
                 .put("ack_channels", stringArray(PHONE_LSL_ACK_CHANNELS))
                 .put("supported_commands", stringArray(supportedCommands))
                 .put("token_required", true),
+        )
+}
+
+internal fun phoneControllerLslStreamDescriptions(
+    pairing: PairingInfo,
+    runPackage: MobileRunPackage?,
+    summary: MobilePackageSummary?,
+): JSONObject {
+    val targetSessionId = runPackage?.partSessionId?.ifBlank { runPackage.sessionId }
+        ?: runPackage?.sessionId
+        ?: pairing.sessionId
+    val commandName = runPackage?.lsl?.commandSignalsName?.ifBlank { PHONE_LSL_COMMAND_STREAM_NAME }
+        ?: PHONE_LSL_COMMAND_STREAM_NAME
+    val ackName = runPackage?.lsl?.commandAcksName?.ifBlank { PHONE_LSL_ACK_STREAM_NAME }
+        ?: PHONE_LSL_ACK_STREAM_NAME
+    val privacyDefault = runPackage?.lsl?.privacyDefault?.ifBlank { "metadata_payload_only" }
+        ?: "metadata_payload_only"
+    val participantId = runPackage?.participantId ?: summary?.participantId.orEmpty()
+    val sessionToken = safePhoneControllerName(targetSessionId)
+    val controllerToken = safePhoneControllerName("android_controller")
+    return JSONObject()
+        .put("schema", "pps-android-lsl-stream-descriptions.v1")
+        .put("runtime_authority", "android_controller")
+        .put("role", "controller")
+        .put("target_session_id", targetSessionId)
+        .put("participant_id", participantId)
+        .put(
+            "privacy",
+            JSONObject()
+                .put("default", privacyDefault)
+                .put("demographics_in_stream_name", false)
+                .put("participant_demographics_location", "metadata_and_payload_artifacts"),
+        )
+        .put(
+            "command_signals",
+            JSONObject()
+                .put("name", commandName)
+                .put("type", "CommandSignals")
+                .put("role", "outlet")
+                .put("channel_format", "string")
+                .put("channel_count", PHONE_LSL_COMMAND_CHANNELS.size)
+                .put("nominal_srate_hz", 0.0)
+                .put("source_id", "pps-android-controller-signals-v1-$sessionToken-$controllerToken")
+                .put("channel_labels", stringArray(PHONE_LSL_COMMAND_CHANNELS))
+                .put("token_required", true),
+        )
+        .put(
+            "command_acks",
+            JSONObject()
+                .put("name", ackName)
+                .put("type", "CommandAcks")
+                .put("role", "inlet")
+                .put("channel_format", "string")
+                .put("channel_count", PHONE_LSL_ACK_CHANNELS.size)
+                .put("nominal_srate_hz", 0.0)
+                .put("source_id_pattern", "pps-*-command-acks-v1-*")
+                .put("channel_labels", stringArray(PHONE_LSL_ACK_CHANNELS)),
         )
 }
 

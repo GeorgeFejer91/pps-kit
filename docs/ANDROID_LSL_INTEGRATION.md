@@ -79,7 +79,10 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   native builds record `native_lsl_controller_with_local_outbox` when the
   command outlet is live. Each controller command row records whether the sample
   was sent over native LSL and whether a matching `PPSCommandAcksV1` sample was
-  observed.
+  observed. Controller runtime status also includes `stream_descriptions` for
+  the controller `PPSCommandSignalsV1` outlet and `PPSCommandAcksV1` inlet, so
+  two-phone command rehearsals have the same channel-order and privacy evidence
+  as phone-owned runner artifacts.
 - PC-side phone uploads preserve `lsl_runtime_status.json` beside
   `lsl_marker_mirror.csv`, `trigger_codes.csv`, and `command_diary.jsonl`.
   Completion uploads that include Android response/top-up reconstruction fields
@@ -212,7 +215,10 @@ Strict native validation requires enabled native marker and command transport
 plus `stream_descriptions` for the rich marker, numeric trigger, command
 signal, and command ack streams. The descriptions must preserve the
 PC-compatible channel orders and keep participant demographics out of
-discoverable stream names.
+discoverable stream names. Controller-mode strict validation similarly requires
+stream descriptions for the Android controller command-signal outlet and
+command-ack inlet before button presses count as reconstructable native LSL
+evidence.
 
 For new phone-owned run exports, also require the catalog entry:
 
