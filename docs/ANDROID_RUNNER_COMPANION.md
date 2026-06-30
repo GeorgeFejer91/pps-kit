@@ -464,9 +464,10 @@ after the sender outbox and Runner phone folder/ZIP exist. It compares
 Controller or PC-admin native-sent command rows against the Runner phone's
 `native_lsl` command diary rows by `command_id`, target session, sender id,
 command, package identity, non-secret target payload fields, and exact
-`PPSCommandAcksV1` sample. This is the offline artifact proof that a controller
-button press or PC helper command was received and acknowledged by the phone
-runner; it is still separate from live network/XDF and physical timing proof.
+`PPSCommandAcksV1` sample while rejecting ack payloads that echo the pairing
+token. This is the offline artifact proof that a controller button press or PC
+helper command was received and acknowledged by the phone runner; it is still
+separate from live network/XDF and physical timing proof.
 
 The PC runner's Send To Phone window mirrors that administration path. After a
 phone package is prepared it can send Start, Pause, Resume, Continue, Snapshot,

@@ -235,6 +235,10 @@ def _compare_sender_phone_command_pair(
             _compare_field(mismatches, command_id, "ack_reason", sender_ack_sample[5], phone.get("reason"))
             ack_payload = _safe_json_object(sender_ack_sample[9])
             phone_ack_payload = _safe_json_object(phone_ack_sample[9])
+            if _payload_has_pairing_token(ack_payload):
+                mismatches.append(_mismatch(command_id, "sender_ack_payload.token_echo", "no pairing token", "token present"))
+            if _payload_has_pairing_token(phone_ack_payload):
+                mismatches.append(_mismatch(command_id, "phone_ack_payload.token_echo", "no pairing token", "token present"))
             if ack_payload and phone_ack_payload and _canonical_json(ack_payload) != _canonical_json(phone_ack_payload):
                 mismatches.append(_mismatch(command_id, "ack_payload", ack_payload, phone_ack_payload))
             if ack_payload and phone_payload and _canonical_json(ack_payload) != _canonical_json(phone_payload):
@@ -360,6 +364,10 @@ def _safe_json_object(raw: Any) -> dict[str, Any]:
     except json.JSONDecodeError:
         return {}
     return parsed if isinstance(parsed, dict) else {}
+
+
+def _payload_has_pairing_token(payload: dict[str, Any]) -> bool:
+    return bool(_clean(payload.get("token")) or _clean(payload.get("companion_token")))
 
 
 def _canonical_json(value: Any) -> str:

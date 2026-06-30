@@ -107,6 +107,28 @@ def test_reconcile_android_command_admin_reports_ack_payload_drift():
     assert "ack_payload" in fields
 
 
+def test_reconcile_android_command_admin_rejects_ack_payload_token_echo():
+    sender = _sender_row()
+    phone = _phone_command_row()
+    ack_payload = _ack_payload("pause")
+    ack_payload["token"] = "secret"
+    sender["ack_sample"] = _ack_sample("cmd-001", "pause", ack_payload)
+    phone["ack_sample"] = _ack_sample("cmd-001", "pause", ack_payload)
+    phone["payload"] = dict(ack_payload)
+
+    result = reconciler.reconcile_command_admin_with_phone_run(
+        [sender],
+        [phone],
+        expect_native_sends=True,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is False
+    fields = {item["field"] for item in result.report["mismatches"]}
+    assert "sender_ack_payload.token_echo" in fields
+    assert "phone_ack_payload.token_echo" in fields
+
+
 def test_reconcile_android_command_admin_reports_missing_target_identity_in_phone_payload():
     phone = _phone_command_row()
     del phone["payload"]["target_part_session_id"]

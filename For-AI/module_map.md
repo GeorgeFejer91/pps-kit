@@ -151,7 +151,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   echoes; the phone-run command diary validator applies the same token-exclusion
   rule to native ack samples. The command-admin reconciler compares those echoed
   target payload fields
-  between sender outbox and receiver command diary; the PC monitor/XDF reconciler
+  between sender outbox and receiver command diary and rejects ack payload
+  pairing-token echoes even when both sides match; the PC monitor/XDF reconciler
   now checks the same non-secret command/ack target identity fields when both
   command-signal and acknowledgement streams are captured. Controller runtime
   status now also includes
