@@ -271,7 +271,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `phone_response_ledger.csv`, `phone_topup_plan.json`,
   `phone_topup_materialization.json`, and `phone_topup_block.wav` when
   `--expect-phone-topup-evidence` is set or lightweight materializations are
-  strict, with sidecar-vs-embedded completion comparisons and WAV hash checks,
+  strict, with sidecar-vs-embedded completion comparisons, plan-vs-materialized
+  rescue trial signature checks, contiguous top-up trial timing checks, and WAV hash checks,
   phone-run AudioTrack timing evidence from `block_start`,
   `audio_playback_start`, and `vibration_cue` events when
   `--expect-audiotrack-timing-evidence` is set, including playback-head origin,

@@ -1165,6 +1165,67 @@ def test_android_lsl_runtime_validator_rejects_phone_topup_wav_hash_drift(tmp_pa
     assert "phone_topup_materialization wav_sha256 does not match" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_phone_topup_materialization_sidecar_trial_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    materialization_path = run_dir / "phone_topup_materialization.json"
+    materialization = json.loads(materialization_path.read_text(encoding="utf-8"))
+    materialization["trials"][0]["building_block_asset_id"] = "wrong-trial-asset"
+    materialization_path.write_text(json.dumps(materialization), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_phone_topup_evidence=True)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "phone_topup_materialization.json trials differ from completion.json embedded phone_topup_materialization" in failures
+
+
+def test_android_lsl_runtime_validator_rejects_phone_topup_materialization_plan_trial_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    materialization = json.loads((run_dir / "phone_topup_materialization.json").read_text(encoding="utf-8"))
+    materialization["trials"][0]["source_trial_uid"] = "other-source-trial"
+    _write_phone_topup_materialization(run_dir, materialization)
+
+    result = validator.validate_run_artifact(run_dir, expect_phone_topup_evidence=True)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "phone_topup_materialization trials differ from phone_topup_plan" in failures
+
+
+def test_android_lsl_runtime_validator_rejects_phone_topup_materialization_source_plan_schema_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    materialization = json.loads((run_dir / "phone_topup_materialization.json").read_text(encoding="utf-8"))
+    materialization["source_plan_schema"] = "wrong-schema"
+    _write_phone_topup_materialization(run_dir, materialization)
+
+    result = validator.validate_run_artifact(run_dir, expect_phone_topup_evidence=True)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "phone_topup_materialization source_plan_schema must be pps-android-phone-topup-plan.v1" in failures
+
+
+def test_android_lsl_runtime_validator_rejects_phone_topup_materialization_timing_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    materialization = json.loads((run_dir / "phone_topup_materialization.json").read_text(encoding="utf-8"))
+    materialization["trials"][0]["topup_duration_s"] = 2.0
+    _write_phone_topup_materialization(run_dir, materialization)
+
+    result = validator.validate_run_artifact(run_dir, expect_phone_topup_evidence=True)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "phone_topup_materialization trial 1 topup_duration_s differs from topup_end_s - topup_start_s" in failures
+
+
 def test_android_lsl_runtime_validator_rejects_phone_response_ledger_sidecar_drift(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -3486,6 +3547,17 @@ def _update_completion_payload(run_dir: Path, **updates) -> None:
     completion_path = run_dir / "completion.json"
     completion = json.loads(completion_path.read_text(encoding="utf-8"))
     completion.update(updates)
+    completion_path.write_text(json.dumps(completion), encoding="utf-8")
+
+
+def _write_phone_topup_materialization(run_dir: Path, materialization: dict) -> None:
+    (run_dir / "phone_topup_materialization.json").write_text(json.dumps(materialization), encoding="utf-8")
+    completion_path = run_dir / "completion.json"
+    completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    completion["phone_topup_materialization"] = materialization
+    for event in completion.get("events", []):
+        if isinstance(event, dict) and event.get("type") == "phone_topup_materialization":
+            event.update(materialization)
     completion_path.write_text(json.dumps(completion), encoding="utf-8")
 
 

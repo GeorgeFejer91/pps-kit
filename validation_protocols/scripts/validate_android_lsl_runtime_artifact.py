@@ -4858,6 +4858,7 @@ def _validate_phone_response_topup_artifacts(
             fields=[
                 "schema",
                 "status",
+                "source_plan_schema",
                 "synthesis_strategy",
                 "reason",
                 "wav_filename",
@@ -4873,6 +4874,8 @@ def _validate_phone_response_topup_artifacts(
             other_label="completion phone_topup_materialization",
             failures=failures,
         )
+        if _topup_plan_trial_signatures(topup_materialization) != _topup_plan_trial_signatures(embedded_materialization):
+            failures.append("phone_topup_materialization.json trials differ from completion.json embedded phone_topup_materialization")
     elif embedded_materialization and not topup_materialization:
         warnings.append("completion embeds phone_topup_materialization but phone_topup_materialization.json sidecar is missing")
 
@@ -5428,7 +5431,7 @@ def _validate_phone_topup_materialization(
     latest_event = [event for event in events if event.get("type") == "phone_topup_materialization"]
     if latest_event:
         event = latest_event[-1]
-        for field in ("schema", "status", "synthesis_strategy", "wav_filename", "wav_sha256", "trial_count", "tactile_cue_count"):
+        for field in ("schema", "status", "source_plan_schema", "synthesis_strategy", "wav_filename", "wav_sha256", "trial_count", "tactile_cue_count"):
             event_value = str(event.get(field) or "")
             materialization_value = str(materialization.get(field) or "")
             if event_value and materialization_value and event_value != materialization_value:
@@ -5456,6 +5459,8 @@ def _validate_phone_topup_materialization(
 
     if status != "materialized":
         return
+    if str(materialization.get("source_plan_schema") or "") != ANDROID_PHONE_TOPUP_PLAN_SCHEMA:
+        failures.append("phone_topup_materialization source_plan_schema must be pps-android-phone-topup-plan.v1")
     wav_filename = str(materialization.get("wav_filename") or "")
     wav_sha256 = str(materialization.get("wav_sha256") or "")
     if not wav_filename:
@@ -5475,11 +5480,32 @@ def _validate_phone_topup_materialization(
         failures.append("phone_topup_materialization trial_count differs from trials length")
     if plan_trial_count and _safe_int(materialization.get("trial_count")) != plan_trial_count:
         failures.append("phone_topup_materialization trial_count differs from phone_topup_plan")
+    plan_signatures = _topup_plan_trial_signatures(topup_plan)
+    materialization_signatures = _topup_plan_trial_signatures(materialization)
+    if plan_signatures and materialization_signatures and materialization_signatures != plan_signatures:
+        failures.append("phone_topup_materialization trials differ from phone_topup_plan")
+    previous_end_s = 0.0
     for index, row in enumerate(trials, start=1):
         prefix = f"phone_topup_materialization trial {index}"
         for field in ("source_trial_uid", "topup_trial_uid", "building_block_asset_id", "topup_start_s", "topup_end_s", "topup_duration_s"):
             if field not in row or row.get(field) is None or str(row.get(field)).strip() == "":
                 failures.append(f"{prefix} is missing {field}")
+        start_s = _safe_float(row.get("topup_start_s"))
+        end_s = _safe_float(row.get("topup_end_s"))
+        duration_s = _safe_float(row.get("topup_duration_s"))
+        if any(math.isnan(value) for value in (start_s, end_s, duration_s)):
+            continue
+        if index == 1 and abs(start_s) > 0.001:
+            failures.append(f"{prefix} topup_start_s must start at 0")
+        if index > 1 and abs(start_s - previous_end_s) > 0.001:
+            failures.append(f"{prefix} topup_start_s does not continue previous top-up trial")
+        if end_s <= start_s:
+            failures.append(f"{prefix} topup_end_s must be after topup_start_s")
+        if duration_s <= 0:
+            failures.append(f"{prefix} topup_duration_s must be positive")
+        if abs((end_s - start_s) - duration_s) > 0.001:
+            failures.append(f"{prefix} topup_duration_s differs from topup_end_s - topup_start_s")
+        previous_end_s = end_s
 
 
 def _validate_rt_field(value: Any, label: str, failures: list[str]) -> None:
@@ -5540,6 +5566,12 @@ def _topup_plan_trial_signature(row: dict[str, Any]) -> tuple[str, ...]:
         "response_window_onset_s",
     )
     return tuple(_normalized_artifact_value(row.get(field)) for field in fields)
+
+
+def _topup_plan_trial_signatures(value: dict[str, Any] | None) -> list[tuple[str, ...]]:
+    if not isinstance(value, dict):
+        return []
+    return [_topup_plan_trial_signature(row) for row in list(value.get("trials") or []) if isinstance(row, dict)]
 
 
 def _normalized_artifact_value(value: Any) -> str:

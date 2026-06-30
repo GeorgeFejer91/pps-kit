@@ -701,6 +701,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   payload field on observed `PPSCommandAcksV1` samples. This makes the
   controller-vs-runner hierarchy auditable after two-phone or PC-to-phone LSL
   rehearsals instead of treating runner identity as a UI-only assumption.
+- Strict phone top-up artifact validation now compares
+  `phone_topup_materialization.json` trial signatures against both the embedded
+  completion materialization and `phone_topup_plan.json`. Materialized top-up
+  WAV evidence must reference `pps-android-phone-topup-plan.v1`, keep the
+  planned rescue source/building-block sequence, and report contiguous
+  top-up trial start/end/duration timing so a lightweight phone top-up can be
+  reconstructed without trusting only the final WAV hash.
 - The phone-owned AudioTrack pause gate now keeps polling native Android LSL
   commands while playback is paused. A `pause` command therefore no longer
   traps the runner inside the paused audio wait loop; a PC runner or second

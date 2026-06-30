@@ -321,7 +321,13 @@ Required validation levels:
    package payload, `reconstruction_contract.json`, and
    `phone_run_catalog_entry.json`, so marker-stream reconstruction evidence
    cannot silently drift away from the packaged randomization/order source. It
-   now also checks the `session_metadata` row in `lsl_marker_mirror.csv`
+   also compares `phone_topup_materialization.json` against the embedded
+   completion copy and the `phone_topup_plan.json` trial signatures;
+   materialized top-up WAVs must reference
+   `pps-android-phone-topup-plan.v1`, preserve the planned rescue
+   trial order/building-block ids, and carry contiguous `topup_start_s` /
+   `topup_end_s` / `topup_duration_s` timing. It now also checks the
+   `session_metadata` row in `lsl_marker_mirror.csv`
    against `participant_metadata.json`, `haptic_capability.json`, and package
    provenance, including full haptic calibration response rows, so a captured
    marker stream can be audited back to the phone sidecars. The
