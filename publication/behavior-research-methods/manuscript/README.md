@@ -22,6 +22,9 @@ manuscript for PPS Toolkit.
   method families to toolkit profile/scaffold representations and caveats.
 - `figure_source_plan.csv`: planned figure/source-artifact map for the final
   submission, including the evidence boundary for each figure.
+- `procedural_gap_register.csv`: procedural gap register listing the screening,
+  timing, tactile-delivery, spatial-perception, rights, and analysis-governance
+  evidence that should be closed or caveated before final submission.
 - `validation_evidence.csv`: committed source-pointer summary of validation
   evidence used in the draft; generated raw reports remain under ignored
   validation folders.
@@ -62,6 +65,8 @@ workflow explicitly asks for an archived submission snapshot.
 - `figure_source_plan.csv` is a publication-preparation scaffold, not generated
   figure evidence. Final figures must be generated from redistributable toolkit
   artifacts and should cite or archive the exact source files used.
+- `procedural_gap_register.csv` is a reviewer-facing readiness scaffold, not a
+  claim that those procedural validations have already been completed.
 - `submission_readiness_audit.md` is a maintenance/readiness ledger, not
   manuscript prose. It should remain honest about the distinction between a
   source-ready draft and a final submission package.

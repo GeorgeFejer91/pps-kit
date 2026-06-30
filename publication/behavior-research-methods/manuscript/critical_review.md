@@ -716,3 +716,38 @@ Methods manuscript draft. It is a working audit, not manuscript text.
   figures still need to be rendered from release-state screenshots, manifests,
   schemas, validation reports, and deidentified sample outputs, then visually
   checked for readability in the Springer layout.
+
+## Iteration 20: Procedural Gap Register Pass
+
+### Main Critiques
+
+- The draft named evidence boundaries throughout the manuscript, but a reviewer
+  still had to assemble the remaining procedural gaps from several places:
+  listening/headphone checks, route timing, tactile mechanical delivery, spatial
+  perception, rights/provenance, and analysis governance.
+- Same-journal timing, psychoacoustic, tactile, and platform-validation papers
+  make a repeated stylistic move: they separate tool capability from local
+  route validation. The draft needed that separation in one concise table.
+- Without a gap register, future revisions could close one validation layer
+  while accidentally implying that all layers were closed.
+
+### Resolution In This Revision
+
+- Added `procedural_gap_register.csv`, a source-pointer register of five
+  procedural gaps: auditory eligibility/listening checks, route-specific timing,
+  tactile mechanical and perceptual delivery, spatial-audio perception/HRTF
+  assumptions, and recreation/analysis governance.
+- Added a `Procedural Gap Register` subsection to the validation/use-case
+  section. The table names current toolkit coverage, publication-ready evidence,
+  and the boundary for each procedural gap.
+- Added missing BRM comparator citations for auditory synchronization,
+  high-resolution timing, touchscreen/keyboard timing, web psychoacoustics,
+  headphone screening, and browser/mobile tactile delivery.
+
+### Residual Concerns
+
+- The register is not a validation artifact. It makes the remaining procedural
+  work easier to close, but final submission still needs actual screening
+  scripts, hardware route diagrams, loopback reports, tactile actuator evidence,
+  profile rights/source checks, and preregistered analysis choices where claims
+  require them.

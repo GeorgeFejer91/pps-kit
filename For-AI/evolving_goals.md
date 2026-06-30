@@ -197,6 +197,16 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   redistributable toolkit screenshots, manifests, schemas, validation outputs,
   and deidentified sample artifacts, not copyrighted source-paper figures or
   private participant data.
+- Continued the BRM manuscript self-review loop with a procedural gap register
+  pass. `procedural_gap_register.csv` now lists the reviewer-facing procedural
+  methods that still need final artifacts or explicit caveats: auditory
+  eligibility and headphone/listening checks, route-specific timing and
+  synchronization, tactile mechanical/perceptual delivery, spatial-audio
+  perception/HRTF assumptions, and profile recreation/rights/analysis
+  governance. `main.tex` includes a matching table in the validation/use-cases
+  section and adds same-journal BRM citations for auditory synchronization,
+  web timing, headphone screening, web psychoacoustics, touchscreen/keyboard
+  timing, and browser/mobile tactile delivery.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

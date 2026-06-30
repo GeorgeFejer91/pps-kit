@@ -394,6 +394,27 @@ Sharing & Publish design/profile, validation, and deidentified participant layer
 \end{tabularx}
 \end{table}
 
+\subsection{Procedural Gap Register}
+
+The manuscript also needs to say what is not yet solved by the suite. This is not a failure of the method. It is a BRM-style evidence boundary: timing-sensitive and sensory tool papers commonly separate what the software can schedule from what a route, device, participant, or analysis plan has actually validated \citep{Bridges2020,Reimers2016,Garaizar2019,Hirst2026}. Table~\ref{tab:gap-register} lists the procedural gaps that should either be incorporated into the final publication example or explicitly kept as caveats. The same register is stored in \code{procedural\_gap\_register.csv}.
+
+\begin{table}[t]
+\caption{Procedural gaps that should be closed or explicitly caveated before submission.}
+\label{tab:gap-register}
+\footnotesize
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.17\textwidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.28\textwidth} >{\raggedright\arraybackslash}p{0.22\textwidth}}
+\toprule
+Gap & Toolkit coverage & Publication-ready addition & Boundary \\
+\midrule
+Auditory eligibility & The runner records route settings and output checks. & Add hearing/headphone/listening-room screening and sound-level measurement or level-setting artifacts \citep{Mok2023,Milne2021}. & Route selection is not hearing, headphone, externalization, or ear-level SPL evidence. \\
+Route timing & The toolkit writes software schedules, event logs, audio evidence, LSL/XDF mirrors, and optional loopback reports. & Attach a publication-hardware archive with route diagram, channel map, response-device check, loopback method, reconciliation report, and hashes \citep{Bridges2020,Reimers2016,Garaizar2019,Pronk2020}. & Software markers do not prove physical output onset or response latency. \\
+Tactile delivery & Focus Mode has threshold calibration, miss logging, top-up, and the two-miss adaptive nudge. & Add calibration examples, adaptive-threshold ledgers, and mechanical/electrical timing evidence where available \citep{Hirst2026,Merchel2020,Mikkelsen2020,Goble1993,Pate2024}. & The adaptive nudge is a safeguard, not a validated habituation correction. \\
+Spatial perception & Renderer manifests record SOFA/HRTF resource, trajectory, channel layout, hashes, and loudness policy. & Add localization, externalization, individualized-HRTF, or spatial-route screening evidence for any strong spatial claim \citep{CuevasRodriguez2019,Salvador2018,Parseihian2014,Kan2009,Spagnol2017}. & HRTF provenance is not participant-level perceived-distance evidence. \\
+Recreation and analysis governance & Profiles record represented fields, missing fields, substitutions, baselines, response rules, and exploratory model choices. & Before exact-recreation or empirical claims, attach profile source audits, rights ledger, archived hashes, data dictionary, and preregistered analysis choices \citep{Holmes2020,DeLeeuw2022,Ellis2024}. & A runnable scaffold is not an exact apparatus or confirmatory-analysis replication. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 \subsection{Post-run Analysis Review}
 
 The fourth use case loads a completed sample or deidentified run and shows the instant-analysis outputs: response integrity, baseline assumption, PPS assumption, model-fit families, low-N warnings, and artifact paths. The key validation criterion is not that the sample produces a strong PPS effect. It is that the analysis labels its own limits, preserves baseline metadata, and prevents exploratory operator feedback from becoming a hidden confirmatory pipeline.
