@@ -2942,7 +2942,18 @@ def _validate_phone_audiotrack_timing_evidence(
                 failures.append(f"{prefix} has no matching block_start event")
             continue
         sample_rate = _safe_int(block.get("audio_sample_rate_hz"))
+        frame_count = _safe_int(block.get("audio_frame_count"))
+        scheduled_block_time_ms = _safe_float(event.get("scheduled_block_time_ms"))
         jitter_ms = _safe_float(event.get("audio_cue_jitter_ms"))
+        if sample_rate > 0 and scheduled_frame >= 0 and scheduled_block_time_ms == scheduled_block_time_ms:
+            expected_scheduled_frame = int(scheduled_block_time_ms * sample_rate / 1000.0 + 0.5)
+            tolerance_frames = max(1, int(sample_rate / 2000.0 + 1))
+            if abs(scheduled_frame - expected_scheduled_frame) > tolerance_frames:
+                failures.append(f"{prefix} scheduled_audio_frame differs from scheduled_block_time_ms and block sample rate")
+        if frame_count > 0 and scheduled_frame > frame_count:
+            failures.append(f"{prefix} scheduled_audio_frame exceeds block audio_frame_count")
+        if frame_count > 0 and head_frame > frame_count:
+            failures.append(f"{prefix} audio_playback_head_frame exceeds block audio_frame_count")
         if sample_rate > 0 and jitter_frames >= 0 and jitter_ms == jitter_ms:
             expected_jitter_ms = jitter_frames * 1000.0 / sample_rate
             if abs(jitter_ms - expected_jitter_ms) > 0.25:

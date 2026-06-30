@@ -123,7 +123,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   strict, with sidecar-vs-embedded completion comparisons and WAV hash checks,
   phone-run AudioTrack timing evidence from `block_start` and `vibration_cue`
   events when `--expect-audiotrack-timing-evidence` is set, including
-  playback-head scheduler fields and coherent cue-jitter metadata,
+  playback-head scheduler fields, scheduled-frame/block-time/frame-count
+  coherence, and coherent cue-jitter metadata,
   phone-run `reconstruction_contract.json` Segment 0-6 hierarchy and
   schedule/count consistency,
   Controller-mode `phone_controller_runtime_status.json` /

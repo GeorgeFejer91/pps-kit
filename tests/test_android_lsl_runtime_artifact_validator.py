@@ -483,6 +483,44 @@ def test_android_lsl_runtime_validator_rejects_audiotrack_cue_jitter_drift(tmp_p
     assert "audio_cue_jitter_frames differs" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_audiotrack_scheduled_frame_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    completion_path = run_dir / "completion.json"
+    completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    cue = next(event for event in completion["events"] if event["type"] == "vibration_cue")
+    cue["scheduled_audio_frame"] = 123
+    cue["audio_playback_head_frame"] = 133
+    cue["audio_cue_jitter_frames"] = 10
+    completion_path.write_text(json.dumps(completion), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_audiotrack_timing_evidence=True)
+
+    assert result.ok is False
+    assert "scheduled_audio_frame differs from scheduled_block_time_ms" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_audiotrack_cue_frame_outside_block(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    completion_path = run_dir / "completion.json"
+    completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    cue = next(event for event in completion["events"] if event["type"] == "vibration_cue")
+    cue["scheduled_block_time_ms"] = 1001
+    cue["scheduled_audio_frame"] = 44145
+    cue["audio_playback_head_frame"] = 44155
+    cue["audio_cue_jitter_frames"] = 10
+    cue["audio_cue_jitter_ms"] = 10 * 1000.0 / 44100
+    completion_path.write_text(json.dumps(completion), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_audiotrack_timing_evidence=True)
+
+    assert result.ok is False
+    assert "scheduled_audio_frame exceeds block audio_frame_count" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_rejects_phone_topup_wav_hash_drift(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()

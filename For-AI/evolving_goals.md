@@ -66,9 +66,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `audio_timing_strategy = audiotrack_pcm_wav_playback_head`, positive PCM WAV
   facts, and `vibration_cue` rows with
   `audio_scheduler = audiotrack_playback_head`, scheduled/playback-head frames,
-  elapsed delivery time, and coherent frame/ms cue jitter. This proves the
-  exported artifact carries phone-runtime playback-head timing metadata; it is
-  still not physical audio/vibration onset evidence.
+  elapsed delivery time, coherent frame/ms cue jitter, scheduled-frame versus
+  scheduled-block-time/sample-rate alignment, and cue frames inside the block
+  frame count. This proves the exported artifact carries phone-runtime
+  playback-head timing metadata; it is still not physical audio/vibration onset
+  evidence.
 - Companion discovery is now a stricter local-network contract rather than a
   best-effort loose JSON shape. PC discovery payload serialization validates
   `schema`, `service`, `network_scope = same_lan_or_local_hotspot`, multicast
