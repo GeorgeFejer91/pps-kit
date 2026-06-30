@@ -179,6 +179,24 @@ class PhoneControllerCommandsTest {
     }
 
     @Test
+    fun controllerAckValidationRejectsReceiverRoleDrift() {
+        val signal = controllerSignal()
+        val missingRolePayload = controllerAckPayload(signal).apply {
+            remove("receiver_role")
+        }
+        val controllerRolePayload = controllerAckPayload(signal).put("receiver_role", "controller")
+
+        assertEquals(
+            "missing_receiver_role",
+            validateControllerAckForSignal(signal, controllerAck(signal, payload = missingRolePayload)),
+        )
+        assertEquals(
+            "receiver_role_mismatch",
+            validateControllerAckForSignal(signal, controllerAck(signal, payload = controllerRolePayload)),
+        )
+    }
+
+    @Test
     fun controllerRuntimeStatusDeclaresStrictNativeBoundary() {
         val pairing = PairingInfo.parse(
             "pps-companion://pair?host=127.0.0.1&port=8767&session_id=session-001&token=secret",
@@ -344,6 +362,7 @@ class PhoneControllerCommandsTest {
 
     private fun controllerAckPayload(signal: PhoneLslCommandSignal): JSONObject =
         JSONObject()
+            .put("receiver_role", "runner")
             .put("command", signal.command)
             .put("package_id", signal.payload.getString("package_id"))
             .put("participant_id", signal.payload.getString("participant_id"))

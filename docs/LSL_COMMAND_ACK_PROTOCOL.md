@@ -94,7 +94,10 @@ phone-run folders, exported ZIPs, `lsl_runtime_status.json`, Controller-mode
 `pc_android_lsl_command_outbox.jsonl`. Add `--expect-native-transport` for
 native marker/command/controller/PC-admin transport checks and
 `--expect-command-acks` when a controller-runner or PC-runner test should prove
-matching acknowledgements.
+matching acknowledgements. Android runner acknowledgements must include
+`receiver_role="runner"` in the ack payload; the live Controller and PC-admin
+senders, the Android artifact validator, and the command-admin/monitor
+reconcilers reject missing or non-runner receiver roles.
 
 The PC side can also administer a phone-owned Android runner directly over the
 same command stream with the `pps-android-lsl-command` helper. It writes

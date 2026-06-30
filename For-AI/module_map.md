@@ -146,8 +146,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   and the validator recomputes them from event rows so report summaries cannot
   drift from the JSONL evidence. Payload drift is reported with redacted
   placeholders so pairing secrets stay out of validation artifacts. Ack payloads
-  that echo pairing tokens remain invalid, and strict artifact validation
-  rejects orphan `PPSCommandAcksV1` ids that lack captured
+  that echo pairing tokens or omit `receiver_role=runner` remain invalid, and
+  strict artifact validation rejects orphan `PPSCommandAcksV1` ids that lack captured
   `PPSCommandSignalsV1` rows. The monitor reconciler also checks rejected
   `PPSCommandAcksV1` payloads for the structured rejection schema and
   receiver/requested identity fields.
@@ -161,7 +161,9 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   XDF/physical validation claims. The reconciler also compares the sender row
   payload with the serialized `PPSCommandSignalsV1` payload and requires both
   sender and phone received command sample payloads to contain `token` or
-  `companion_token`. For rejected acks it now also enforces
+  `companion_token`. It also requires sender-observed and phone-emitted ack
+  payloads to carry `receiver_role=runner`, so Controller-mode acks cannot be
+  confused with Runner-phone acknowledgements. For rejected acks it now also enforces
   `pps-android-phone-command-rejection.v1` schema/reason,
   `rejected_before_handler`, receiver/requested identity fields, and supported
   commands on both sender and phone ack payload copies.

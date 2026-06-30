@@ -461,13 +461,14 @@ it requires the serialized command-sample payload to carry the pairing token
 plus nonblank note text for `operator_note`. Under
 `--expect-command-acks`, Controller and PC-admin outbox validation also parses
 the stored ack sample payload: it must not echo the pairing token, and it must
-agree with the command sample on command, target session, package, participant,
-part session, session group, part number, requester, and source-behavior fields
-whenever those non-secret fields were available. Runner-mode ack/diary payloads
-echo the same accepted target identity from the command sample while keeping
-the pairing token out of the ack sample. Commands that explicitly name a
-different package or split-part identity are rejected before the phone applies a
-local state change.
+declare `receiver_role="runner"` before the outbox row is treated as valid
+Runner-phone evidence. It must also agree with the command sample on command,
+target session, package, participant, part session, session group, part number,
+requester, and source-behavior fields whenever those non-secret fields were
+available. Runner-mode ack/diary payloads echo the same accepted target
+identity from the command sample while keeping the pairing token out of the ack
+sample. Commands that explicitly name a different package or split-part
+identity are rejected before the phone applies a local state change.
 
 In native liblsl builds, Runner mode resolves up to eight visible
 `PPSCommandSignalsV1` streams and polls every opened command inlet, so a PC
@@ -483,13 +484,14 @@ Controller or PC-admin native-sent command rows against the Runner phone's
 `native_lsl` command diary rows by `command_id`, target session, sender id,
 command, package identity, non-secret target payload fields, and exact
 `PPSCommandAcksV1` sample while rejecting ack payloads that echo the pairing
-token. The reconciler also compares the sender row payload with the serialized
-`PPSCommandSignalsV1` sample payload and fails if that actual sample omitted
-the pairing token. This is the offline artifact proof that a controller button
-press or PC helper command was received and acknowledged by the phone runner;
-it is still separate from live network/XDF and physical timing proof.
-The PC monitor/XDF reconciler applies the same ack-token privacy rule to
-externally observed `PPSCommandAcksV1` rows.
+token or omit `receiver_role="runner"`. The reconciler also compares the sender
+row payload with the serialized `PPSCommandSignalsV1` sample payload and fails
+if that actual sample omitted the pairing token. This is the offline artifact
+proof that a controller button press or PC helper command was received and
+acknowledged by the phone runner; it is still separate from live network/XDF
+and physical timing proof. The PC monitor/XDF reconciler applies the same
+ack-token privacy and runner-role rules to externally observed
+`PPSCommandAcksV1` rows.
 
 The PC runner's Send To Phone window mirrors that administration path. After a
 phone package is prepared it can send Start, Pause, Resume, Continue, Snapshot,

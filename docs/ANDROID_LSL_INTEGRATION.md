@@ -236,7 +236,10 @@ opened command inlets, so a PC helper and one or more Controller phones can
 coexist on the same LSL network. Controller mode likewise resolves multiple
 `PPSCommandAcksV1` streams when polling for the matching ack. Token, session,
 package, and split-part validation still decide whether any sampled command is
-accepted.
+accepted. Sender-side ack validation and offline artifact reconciliation also
+require each Android runner ack payload to declare `receiver_role="runner"`, so
+a Controller-phone or monitor stream cannot be mistaken for the active Runner
+receiver.
 
 The app is already wired for the local AAR path. Put a locally built or release
 downloaded `liblsl-Android.aar` at:
@@ -336,7 +339,9 @@ Required validation levels:
    rows include `ack_valid`, `ack_validation_status`, and
    `ack_validation_reason`, those fields are recomputed from the stored
    `PPSCommandAcksV1` sample so a handler-side command rejection remains a
-   valid ack while stale/session-drifted/token-echoing acks remain invalid.
+   valid ack while stale/session-drifted/token-echoing/non-runner-role acks
+   remain invalid. Stored sender and monitor ack payloads must declare
+   `receiver_role=runner`.
    Rejected ack payloads must carry either the pre-handler
    `pps-android-phone-command-rejection.v1` schema or the handler-side
    `pps-android-phone-command-handler-rejection.v1` schema with

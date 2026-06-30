@@ -144,7 +144,7 @@ def test_reconcile_android_lsl_monitor_accepts_matching_command_ack_pair():
         _monitor_command_row(command_id="cmd-1", command="pause"),
         _monitor_ack_row(
             command_id="cmd-1",
-            payload={"command": "pause", **_target_identity_payload(), "run_id": "phone-run-001"},
+            payload={"receiver_role": "runner", "command": "pause", **_target_identity_payload(), "run_id": "phone-run-001"},
         ),
     ]
 
@@ -171,7 +171,7 @@ def test_reconcile_android_lsl_monitor_rejects_command_signal_without_token():
         ),
         _monitor_ack_row(
             command_id="cmd-no-token",
-            payload={"command": "pause", **_target_identity_payload()},
+            payload={"receiver_role": "runner", "command": "pause", **_target_identity_payload()},
         ),
     ]
 
@@ -196,7 +196,7 @@ def test_reconcile_android_lsl_monitor_accepts_command_signal_with_companion_tok
         _monitor_command_row(command_id="cmd-companion-token", command="resume", payload=command_payload),
         _monitor_ack_row(
             command_id="cmd-companion-token",
-            payload={"command": "resume", **_target_identity_payload()},
+            payload={"receiver_role": "runner", "command": "resume", **_target_identity_payload()},
         ),
     ]
 
@@ -217,7 +217,7 @@ def test_reconcile_android_lsl_monitor_rejects_operator_note_without_note_payloa
         _monitor_command_row(command_id="cmd-note", command="operator_note"),
         _monitor_ack_row(
             command_id="cmd-note",
-            payload={"command": "operator_note", **_target_identity_payload()},
+            payload={"receiver_role": "runner", "command": "operator_note", **_target_identity_payload()},
         ),
     ]
 
@@ -246,7 +246,7 @@ def test_reconcile_android_lsl_monitor_reports_command_signal_sample_payload_dri
         command_row,
         _monitor_ack_row(
             command_id="cmd-sample-drift",
-            payload={"command": "pause", **_target_identity_payload()},
+            payload={"receiver_role": "runner", "command": "pause", **_target_identity_payload()},
         ),
     ]
 
@@ -294,7 +294,7 @@ def test_reconcile_android_lsl_monitor_reports_command_ack_payload_drift():
         ),
         _monitor_ack_row(
             command_id="cmd-2",
-            payload={"command": "pause", "package_id": "pkg-other"},
+            payload={"receiver_role": "runner", "command": "pause", "package_id": "pkg-other"},
         ),
     ]
 
@@ -318,7 +318,7 @@ def test_reconcile_android_lsl_monitor_rejects_command_ack_token_echo():
         _monitor_command_row(command_id="cmd-token", command="pause"),
         _monitor_ack_row(
             command_id="cmd-token",
-            payload={"command": "pause", **_target_identity_payload(), "token": "secret"},
+            payload={"receiver_role": "runner", "command": "pause", **_target_identity_payload(), "token": "secret"},
         ),
     ]
 
@@ -334,6 +334,31 @@ def test_reconcile_android_lsl_monitor_rejects_command_ack_token_echo():
     assert summary["mismatches"][0]["field"] == "payload.token"
     assert summary["mismatches"][0]["observed"] == "<redacted>"
     assert "secret" not in json.dumps(result.report)
+
+
+def test_reconcile_android_lsl_monitor_rejects_command_ack_receiver_role_drift():
+    phone_markers = [_phone_marker(event_id="1", event_type="session_metadata", event_code="8")]
+    monitor_rows = [
+        _monitor_rich_row(phone_markers[0], timestamp=1.0),
+        _monitor_command_row(command_id="cmd-role", command="pause"),
+        _monitor_ack_row(
+            command_id="cmd-role",
+            payload={"receiver_role": "controller", "command": "pause", **_target_identity_payload()},
+        ),
+    ]
+
+    result = reconciler.reconcile_android_lsl_monitor(
+        phone_markers,
+        monitor_rows,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is False
+    summary = result.report["command_ack_pair_summary"]
+    assert summary["mismatch_count"] == 1
+    assert summary["mismatches"][0]["field"] == "payload.receiver_role"
+    assert summary["mismatches"][0]["expected"] == "runner"
+    assert summary["mismatches"][0]["observed"] == "controller"
 
 
 def test_reconcile_android_lsl_monitor_accepts_rejected_command_ack_payload():
@@ -411,7 +436,7 @@ def test_reconcile_android_lsl_monitor_rejects_rejected_ack_payload_schema_gap()
 
 def test_reconcile_android_lsl_monitor_reports_command_ack_target_identity_drift():
     phone_markers = [_phone_marker(event_id="1", event_type="session_metadata", event_code="8")]
-    ack_payload = {"command": "start_experiment", **_target_identity_payload()}
+    ack_payload = {"receiver_role": "runner", "command": "start_experiment", **_target_identity_payload()}
     ack_payload["target_part_session_id"] = "part-999"
     monitor_rows = [
         _monitor_rich_row(phone_markers[0], timestamp=1.0),
@@ -554,6 +579,7 @@ def _target_identity_payload() -> dict[str, str]:
 def _rejected_ack_payload() -> dict:
     return {
         "schema": "pps-android-phone-command-rejection.v1",
+        "receiver_role": "runner",
         "status": "rejected",
         "reason": "invalid_token",
         "rejected_before_handler": True,
@@ -582,6 +608,7 @@ def _rejected_ack_payload() -> dict:
 def _handler_rejected_ack_payload() -> dict:
     return {
         "schema": "pps-android-phone-command-handler-rejection.v1",
+        "receiver_role": "runner",
         "status": "rejected",
         "reason": "no_active_phone_block_to_pause",
         "rejected_before_handler": False,
@@ -650,7 +677,7 @@ def _monitor_ack_row(
                 received_lsl_time=1.0,
                 applied_lsl_time=1.1,
                 ack_lsl_time=1.2,
-                payload=payload or {},
+                payload=payload or {"receiver_role": "runner"},
             )
         ),
         lsl_timestamp=1.2,

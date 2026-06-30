@@ -695,6 +695,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   phone-run command-diary validation rejects receiver-role drift, so raw ack
   samples can be classified as Runner-phone evidence without relying only on
   filenames or UI state.
+- Controller-mode and PC-admin live ack validation, strict controller/PC-admin
+  outbox validation, PC monitor event validation, and both command-admin and
+  monitor reconciliation scripts now require the same `receiver_role="runner"`
+  payload field on observed `PPSCommandAcksV1` samples. This makes the
+  controller-vs-runner hierarchy auditable after two-phone or PC-to-phone LSL
+  rehearsals instead of treating runner identity as a UI-only assumption.
 - The phone-owned AudioTrack pause gate now keeps polling native Android LSL
   commands while playback is paused. A `pause` command therefore no longer
   traps the runner inside the paused audio wait loop; a PC runner or second

@@ -1620,6 +1620,22 @@ def test_android_lsl_runtime_validator_rejects_controller_ack_payload_identity_d
     assert "controller outbox row 1 ack payload package_id differs from command sample" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_controller_ack_receiver_role_drift(tmp_path: Path):
+    controller_dir = tmp_path / "phone-controller"
+    controller_dir.mkdir()
+    (controller_dir / "phone_controller_runtime_status.json").write_text(json.dumps(_controller_status(native=True)), encoding="utf-8")
+    row = _controller_row(native_sent=True, ack_received=True)
+    ack_payload = json.loads(row["ack_sample"][9])
+    ack_payload["receiver_role"] = "controller"
+    row["ack_sample"][9] = json.dumps(ack_payload)
+    (controller_dir / "phone_controller_command_outbox.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+    result = validator.validate_run_artifact(controller_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    assert "controller outbox row 1 ack payload receiver_role must be runner" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_accepts_controller_rejected_ack_payload(tmp_path: Path):
     controller_dir = tmp_path / "phone-controller"
     controller_dir.mkdir()
@@ -1628,6 +1644,7 @@ def test_android_lsl_runtime_validator_accepts_controller_rejected_ack_payload(t
     command_payload = dict(row["payload"])
     ack_payload = {
         "schema": "pps-android-phone-command-rejection.v1",
+        "receiver_role": "runner",
         "status": "rejected",
         "reason": "invalid_token",
         "rejected_before_handler": True,
@@ -1672,6 +1689,7 @@ def test_android_lsl_runtime_validator_accepts_controller_handler_rejected_ack_p
     command_payload = dict(row["payload"])
     ack_payload = {
         "schema": "pps-android-phone-command-handler-rejection.v1",
+        "receiver_role": "runner",
         "status": "rejected",
         "reason": "no_active_phone_block_to_pause",
         "rejected_before_handler": False,
@@ -1933,6 +1951,22 @@ def test_android_lsl_runtime_validator_rejects_pc_admin_ack_payload_token_echo(t
     assert "PC admin outbox row 1 ack payload must not echo the pairing token" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_pc_admin_ack_receiver_role_drift(tmp_path: Path):
+    admin_dir = tmp_path / "pc-android-admin"
+    admin_dir.mkdir()
+    (admin_dir / "pc_android_lsl_admin_status.json").write_text(json.dumps(_pc_admin_status()), encoding="utf-8")
+    row = _pc_admin_row(native_sent=True, ack_received=True)
+    ack_payload = json.loads(row["ack_sample"][9])
+    ack_payload.pop("receiver_role")
+    row["ack_sample"][9] = json.dumps(ack_payload)
+    (admin_dir / "pc_android_lsl_command_outbox.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+    result = validator.validate_run_artifact(admin_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    assert "PC admin outbox row 1 ack payload receiver_role must be runner" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_accepts_pc_admin_handler_rejected_ack_payload(tmp_path: Path):
     admin_dir = tmp_path / "pc-android-admin"
     admin_dir.mkdir()
@@ -1941,6 +1975,7 @@ def test_android_lsl_runtime_validator_accepts_pc_admin_handler_rejected_ack_pay
     command_payload = dict(row["payload"])
     ack_payload = {
         "schema": "pps-android-phone-command-handler-rejection.v1",
+        "receiver_role": "runner",
         "status": "rejected",
         "reason": "no_active_phone_block_to_pause",
         "rejected_before_handler": False,
@@ -2036,7 +2071,7 @@ def test_android_lsl_runtime_validator_rejects_pc_monitor_ack_without_observed_c
 def test_android_lsl_runtime_validator_rejects_pc_monitor_ack_payload_token_echo():
     rows = [
         _pc_monitor_command_row(command_id="cmd-monitor-token", command="pause"),
-        _pc_monitor_ack_row(command_id="cmd-monitor-token", command="pause", payload={"command": "pause", "token": "secret"}),
+        _pc_monitor_ack_row(command_id="cmd-monitor-token", command="pause", payload={"receiver_role": "runner", "command": "pause", "token": "secret"}),
     ]
     report = monitor.build_android_lsl_monitor_report(rows)
 
@@ -2045,6 +2080,24 @@ def test_android_lsl_runtime_validator_rejects_pc_monitor_ack_payload_token_echo
     failures = "\n".join(result.failures)
     assert result.ok is False
     assert "PC monitor event row 2 command ack payload must not echo the pairing token" in failures
+
+
+def test_android_lsl_runtime_validator_rejects_pc_monitor_ack_receiver_role_drift():
+    rows = [
+        _pc_monitor_command_row(command_id="cmd-monitor-role", command="pause"),
+        _pc_monitor_ack_row(
+            command_id="cmd-monitor-role",
+            command="pause",
+            payload={"receiver_role": "controller", "command": "pause", "package_id": "pkg-001"},
+        ),
+    ]
+    report = monitor.build_android_lsl_monitor_report(rows)
+
+    result = validator.validate_pc_monitor_report(report, event_rows=rows, expect_command_acks=True)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "PC monitor event row 2 command ack payload receiver_role must be runner" in failures
 
 
 def test_android_lsl_runtime_validator_rejects_pc_monitor_command_signal_row_target_identity_drift():
@@ -2065,6 +2118,7 @@ def test_android_lsl_runtime_validator_rejects_pc_monitor_command_ack_row_target
             command_id="cmd-monitor-ack-drift",
             command="pause",
             payload={
+                "receiver_role": "runner",
                 "command": "pause",
                 "package_id": "pkg-001",
                 "participant_id": "P001",
@@ -4530,6 +4584,7 @@ def _controller_row(*, native_sent: bool, ack_received: bool) -> dict:
     }
     if ack_received:
         ack_payload = {key: value for key, value in command_payload.items() if key not in {"token", "companion_token"}}
+        ack_payload["receiver_role"] = "runner"
         ack_payload["command"] = "pause"
         row["ack_sample"] = [
             "pps-lsl-command-ack.v1",
@@ -4700,7 +4755,7 @@ def _pc_admin_row(*, native_sent: bool, ack_received: bool) -> dict:
     }
     if ack_received:
         ack_payload = {key: value for key, value in command_payload.items() if key not in {"token", "companion_token"}}
-        ack_payload.update({"command": "pause", "target_session_id": "part-001"})
+        ack_payload.update({"receiver_role": "runner", "command": "pause", "target_session_id": "part-001"})
         row["ack_valid"] = True
         row["ack_validation_status"] = "valid_ack"
         row["ack_validation_reason"] = ""
@@ -4757,7 +4812,7 @@ def _pc_monitor_ack_row(*, command_id: str, command: str, payload: dict | None =
             received_lsl_time=42.01,
             applied_lsl_time=42.02,
             ack_lsl_time=42.03,
-            payload=payload or {"command": command, "package_id": "pkg-001"},
+            payload=payload or {"receiver_role": "runner", "command": command, "package_id": "pkg-001"},
         )
     )
     return monitor.build_android_lsl_monitor_row(

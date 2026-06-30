@@ -315,6 +315,9 @@ internal fun validateControllerAckForSignal(signal: PhoneLslCommandSignal, ack: 
     ) {
         return "ack_echoed_pairing_token"
     }
+    val receiverRole = ack.payload.optString("receiver_role")
+    if (receiverRole.isBlank()) return "missing_receiver_role"
+    if (receiverRole != "runner") return "receiver_role_mismatch"
     val ackCommand = ack.payload.optString("command")
     if (ackCommand.isBlank()) return "missing_command"
     if (ackCommand != signal.command) return "command_mismatch"

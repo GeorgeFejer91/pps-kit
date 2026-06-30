@@ -385,6 +385,9 @@ def _command_ack_pair_summary(command_rows: list[dict[str, Any]], ack_rows: list
         ack_payload = _payload_object(ack_row.get("payload_json"))
         for field in _ack_pairing_token_fields(ack_payload):
             mismatches.append(_command_ack_mismatch(_command_id(ack_row), f"payload.{field}", "", "<redacted>"))
+        receiver_role = _clean(ack_payload.get("receiver_role"))
+        if receiver_role != "runner":
+            mismatches.append(_command_ack_mismatch(_command_id(ack_row), "payload.receiver_role", "runner", receiver_role))
         if _clean(ack_row.get("ack_status")) == "rejected":
             _append_rejected_ack_payload_mismatches(mismatches, ack_row, ack_payload)
     for command_id in sorted(set(command_ids) & set(ack_ids), key=_event_id_sort_key):

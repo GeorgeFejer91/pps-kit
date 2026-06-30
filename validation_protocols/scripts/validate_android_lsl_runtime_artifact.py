@@ -5939,6 +5939,8 @@ def _validate_outbox_ack_payload(
         return
     if str(ack_payload.get("token") or ack_payload.get("companion_token") or "").strip():
         failures.append(f"{prefix} ack payload must not echo the pairing token")
+    if _metadata_value(ack_payload.get("receiver_role")) != "runner":
+        failures.append(f"{prefix} ack payload receiver_role must be runner")
 
     command = _metadata_value(command_sample[4])
     ack_command = _metadata_value(ack_payload.get("command"))
@@ -6159,6 +6161,8 @@ def _validate_pc_monitor_event_row(row: dict[str, Any], *, row_index: int, failu
             token = str(payload.get("token") or payload.get("companion_token") or "")
             if token.strip():
                 failures.append(f"{prefix} command ack payload must not echo the pairing token")
+            if _metadata_value(payload.get("receiver_role")) != "runner":
+                failures.append(f"{prefix} command ack payload receiver_role must be runner")
             if _metadata_value(sample[4]) == "rejected":
                 _validate_phone_command_rejection_payload(
                     payload,

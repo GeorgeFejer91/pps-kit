@@ -92,7 +92,9 @@ def test_reconcile_android_command_admin_reports_missing_phone_diary_row():
 
 def test_reconcile_android_command_admin_reports_ack_payload_drift():
     phone = _phone_command_row()
-    phone["ack_sample"][9] = json.dumps({"command": "resume", "package_id": "pkg-001", "run_id": "phone-run-001"})
+    phone["ack_sample"][9] = json.dumps(
+        {"receiver_role": "runner", "command": "resume", "package_id": "pkg-001", "run_id": "phone-run-001"}
+    )
 
     result = reconciler.reconcile_command_admin_with_phone_run(
         [_sender_row()],
@@ -194,6 +196,30 @@ def test_reconcile_android_command_admin_rejects_ack_payload_token_echo():
     fields = {item["field"] for item in result.report["mismatches"]}
     assert "sender_ack_payload.token_echo" in fields
     assert "phone_ack_payload.token_echo" in fields
+
+
+def test_reconcile_android_command_admin_rejects_ack_receiver_role_drift():
+    sender = _sender_row()
+    phone = _phone_command_row()
+    sender_payload = _ack_payload("pause")
+    phone_payload = _ack_payload("pause")
+    sender_payload["receiver_role"] = "controller"
+    phone_payload.pop("receiver_role")
+    sender["ack_sample"] = _ack_sample("cmd-001", "pause", sender_payload)
+    phone["ack_sample"] = _ack_sample("cmd-001", "pause", phone_payload)
+    phone["payload"] = dict(phone_payload)
+
+    result = reconciler.reconcile_command_admin_with_phone_run(
+        [sender],
+        [phone],
+        expect_native_sends=True,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is False
+    fields = {item["field"] for item in result.report["mismatches"]}
+    assert "sender_ack_payload.receiver_role" in fields
+    assert "phone_ack_payload.receiver_role" in fields
 
 
 def test_reconcile_android_command_admin_accepts_matching_rejected_ack_payload():
@@ -412,6 +438,7 @@ def _command_sample(command_id: str, sender_id: str, command: str) -> list[str]:
 
 def _ack_payload(command: str) -> dict:
     return {
+        "receiver_role": "runner",
         "command": command,
         "package_id": "pkg-001",
         "participant_id": "P001",
@@ -427,6 +454,7 @@ def _ack_payload(command: str) -> dict:
 def _rejected_ack_payload() -> dict:
     return {
         "schema": "pps-android-phone-command-rejection.v1",
+        "receiver_role": "runner",
         "status": "rejected",
         "reason": "invalid_token",
         "rejected_before_handler": True,
@@ -455,6 +483,7 @@ def _rejected_ack_payload() -> dict:
 def _handler_rejected_ack_payload() -> dict:
     return {
         "schema": "pps-android-phone-command-handler-rejection.v1",
+        "receiver_role": "runner",
         "status": "rejected",
         "reason": "no_active_phone_block_to_pause",
         "rejected_before_handler": False,

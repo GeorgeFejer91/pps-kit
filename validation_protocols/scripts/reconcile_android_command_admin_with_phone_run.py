@@ -296,6 +296,8 @@ def _compare_sender_phone_command_pair(
                 mismatches.append(_mismatch(command_id, "sender_ack_payload.token_echo", "no pairing token", "token present"))
             if _payload_has_pairing_token(phone_ack_payload):
                 mismatches.append(_mismatch(command_id, "phone_ack_payload.token_echo", "no pairing token", "token present"))
+            _append_ack_receiver_role_mismatch(mismatches, command_id, ack_payload, side="sender_ack_payload")
+            _append_ack_receiver_role_mismatch(mismatches, command_id, phone_ack_payload, side="phone_ack_payload")
             if _clean(sender_ack_sample[4]) == "rejected":
                 _append_rejected_ack_payload_mismatches(
                     mismatches,
@@ -318,6 +320,18 @@ def _compare_sender_phone_command_pair(
             if phone_ack_payload and phone_payload and _canonical_json(phone_ack_payload) != _canonical_json(phone_payload):
                 mismatches.append(_mismatch(command_id, "phone_ack_payload", phone_ack_payload, phone_payload))
     return mismatches
+
+
+def _append_ack_receiver_role_mismatch(
+    mismatches: list[dict[str, Any]],
+    command_id: str,
+    payload: dict[str, Any],
+    *,
+    side: str,
+) -> None:
+    observed = _clean(payload.get("receiver_role"))
+    if observed != "runner":
+        mismatches.append(_mismatch(command_id, f"{side}.receiver_role", "runner", observed or "missing"))
 
 
 def _append_rejected_ack_payload_mismatches(

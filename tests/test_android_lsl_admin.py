@@ -92,6 +92,7 @@ def test_send_android_lsl_command_writes_auditable_ack_row(tmp_path, monkeypatch
         applied_lsl_time=10.2,
         ack_lsl_time=10.3,
         payload={
+            "receiver_role": "runner",
             "command": "start_experiment",
             "package_id": "pkg-001",
             "participant_id": "P001",
@@ -171,6 +172,7 @@ def test_send_android_lsl_command_records_handler_rejection_as_valid_ack(tmp_pat
         ack_lsl_time=10.3,
         payload={
             "schema": "pps-android-phone-command-handler-rejection.v1",
+            "receiver_role": "runner",
             "status": "rejected",
             "reason": "no_active_phone_block_to_pause",
             "rejected_before_handler": False,
@@ -320,6 +322,39 @@ def test_send_android_lsl_command_rejects_ack_token_echo(tmp_path, monkeypatch):
     assert "pairing token" in result.row["reason"]
 
 
+def test_send_android_lsl_command_rejects_ack_receiver_role_drift(tmp_path, monkeypatch):
+    _FakeCommandOutlet.sent_signals.clear()
+    _FakeAckInlet.ack = LSLCommandAck(
+        command_id="cmd-role-drift",
+        session_id="part-001",
+        receiver_id="android_phone",
+        status="applied",
+        reason="bad_ack",
+        received_lsl_time=10.1,
+        applied_lsl_time=10.2,
+        ack_lsl_time=10.3,
+        payload={"receiver_role": "controller", "command": "pause", "target_session_id": "part-001"},
+    )
+    monkeypatch.setattr(admin, "LSLCommandOutlet", _FakeCommandOutlet)
+    monkeypatch.setattr(admin, "LSLCommandAckInlet", _FakeAckInlet)
+
+    result = admin.send_android_lsl_command(
+        target_session_id="part-001",
+        token="secret",
+        command="pause",
+        command_id="cmd-role-drift",
+        output_dir=tmp_path,
+        require_ack=True,
+    )
+
+    assert result.ok is False
+    assert result.row["status"] == "invalid_ack"
+    assert result.row["ack_received"] is True
+    assert result.row["ack_valid"] is False
+    assert result.row["ack_validation_status"] == "invalid_ack"
+    assert "receiver_role must be runner" in result.row["reason"]
+
+
 def test_send_android_lsl_command_rejects_missing_ack_identity(tmp_path, monkeypatch):
     _FakeCommandOutlet.sent_signals.clear()
     _FakeAckInlet.ack = LSLCommandAck(
@@ -332,6 +367,7 @@ def test_send_android_lsl_command_rejects_missing_ack_identity(tmp_path, monkeyp
         applied_lsl_time=10.2,
         ack_lsl_time=10.3,
         payload={
+            "receiver_role": "runner",
             "command": "pause",
             "target_session_id": "part-001",
             "requested_by": "pc_runner_lsl_admin",
@@ -420,6 +456,7 @@ def test_send_android_lsl_operator_note_writes_note_payload(tmp_path, monkeypatc
         applied_lsl_time=10.2,
         ack_lsl_time=10.3,
         payload={
+            "receiver_role": "runner",
             "command": "operator_note",
             "target_session_id": "part-001",
             "requested_by": "pc_runner_lsl_admin",

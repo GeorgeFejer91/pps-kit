@@ -372,6 +372,11 @@ def _validate_ack_for_signal(signal: LSLCommandSignal, ack: LSLCommandAck) -> st
     payload = dict(ack.payload or {})
     if str(payload.get("token") or payload.get("companion_token") or "").strip():
         return "Received command ack payload echoed the pairing token."
+    receiver_role = str(payload.get("receiver_role") or "").strip()
+    if not receiver_role:
+        return "Received command ack payload is missing receiver_role."
+    if receiver_role != "runner":
+        return "Received command ack payload receiver_role must be runner."
     payload_command = str(payload.get("command") or "").strip()
     if not payload_command:
         return "Received command ack payload is missing command."
