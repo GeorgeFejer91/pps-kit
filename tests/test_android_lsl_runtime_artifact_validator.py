@@ -1547,6 +1547,23 @@ def test_android_lsl_runtime_validator_rejects_controller_ack_payload_identity_d
     assert "controller outbox row 1 ack payload package_id differs from command sample" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_controller_ack_validation_metadata_drift(tmp_path: Path):
+    controller_dir = tmp_path / "phone-controller"
+    controller_dir.mkdir()
+    (controller_dir / "phone_controller_runtime_status.json").write_text(json.dumps(_controller_status(native=True)), encoding="utf-8")
+    row = _controller_row(native_sent=True, ack_received=True)
+    row["ack_validation_status"] = "invalid_ack"
+    row["ack_validation_reason"] = "session_mismatch"
+    (controller_dir / "phone_controller_command_outbox.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+    result = validator.validate_run_artifact(controller_dir, expect_native_transport=True, expect_command_acks=True)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "controller outbox row 1 ack_validation_status expected valid_ack, got invalid_ack" in failures
+    assert "controller outbox row 1 ack_validation_reason expected '', got 'session_mismatch'" in failures
+
+
 def test_android_lsl_runtime_validator_rejects_controller_row_target_identity_drift(tmp_path: Path):
     controller_dir = tmp_path / "phone-controller"
     controller_dir.mkdir()
@@ -3686,6 +3703,9 @@ def _controller_row(*, native_sent: bool, ack_received: bool) -> dict:
             "42.030000000",
             json.dumps(ack_payload),
         ]
+        row["ack_valid"] = True
+        row["ack_validation_status"] = "valid_ack"
+        row["ack_validation_reason"] = ""
     return row
 
 

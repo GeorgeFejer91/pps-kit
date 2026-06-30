@@ -101,12 +101,16 @@ internal fun writePhoneControllerCommandOutbox(
     val signal = phoneCommandFromSample((0 until sampleJson.length()).map { sampleJson.getString(it) })
     val nativeSent = controllerTransport?.takeIf { nativeEnabled }?.sendCommand(signal) == true
     row.put("native_lsl_sent", nativeSent)
-    val ack = if (nativeSent) waitForControllerAck(controllerTransport, signal.commandId) else null
-    if (ack != null) {
+    val ackObservation = if (nativeSent) waitForControllerAck(controllerTransport, signal) else null
+    if (ackObservation != null) {
+        val ack = ackObservation.ack
         row
             .put("ack_received", true)
             .put("ack_status", ack.status)
             .put("ack_reason", ack.reason)
+            .put("ack_valid", ackObservation.valid)
+            .put("ack_validation_status", if (ackObservation.valid) "valid_ack" else "invalid_ack")
+            .put("ack_validation_reason", ackObservation.reason)
             .put("ack_channels", stringArray(PHONE_LSL_ACK_CHANNELS))
             .put("ack_sample", stringArray(phoneAckToSample(ack)))
     } else {
@@ -125,7 +129,14 @@ internal fun writePhoneControllerCommandOutbox(
     statusFile.writeText(status.toString(2), Charsets.UTF_8)
     return JSONObject()
         .put("schema", "pps-android-controller-command-write.v1")
-        .put("status", if (nativeSent) "sent_native_lsl_and_queued_outbox" else "queued_local_outbox")
+        .put(
+            "status",
+            when {
+                !nativeSent -> "queued_local_outbox"
+                ackObservation?.valid == false -> "invalid_ack"
+                else -> "sent_native_lsl_and_queued_outbox"
+            },
+        )
         .put("command", command)
         .put("command_id", row.optString("command_id"))
         .put("outbox_path", outbox.absolutePath)
@@ -133,8 +144,11 @@ internal fun writePhoneControllerCommandOutbox(
         .put("native_transport_available", nativeBridgeStatus.available)
         .put("native_controller_transport_enabled", nativeEnabled)
         .put("native_lsl_sent", nativeSent)
-        .put("ack_received", ack != null)
-        .put("ack_status", ack?.status ?: "")
+        .put("ack_received", ackObservation != null)
+        .put("ack_valid", ackObservation?.valid ?: false)
+        .put("ack_validation_status", ackObservation?.let { if (it.valid) "valid_ack" else "invalid_ack" } ?: "")
+        .put("ack_validation_reason", ackObservation?.reason ?: "")
+        .put("ack_status", ackObservation?.ack?.status ?: "")
 }
 
 internal fun phoneControllerRuntimeStatus(
@@ -281,11 +295,65 @@ private fun resolvePhoneControllerTarget(
     )
 }
 
-private fun waitForControllerAck(transport: PhoneLslControllerTransport, commandId: String): PhoneLslCommandAck? {
+internal data class PhoneControllerAckObservation(
+    val ack: PhoneLslCommandAck,
+    val valid: Boolean,
+    val reason: String = "",
+)
+
+internal fun validateControllerAckForSignal(signal: PhoneLslCommandSignal, ack: PhoneLslCommandAck): String? {
+    if (ack.commandId != signal.commandId) return "command_id_mismatch"
+    if (ack.sessionId != signal.sessionId) return "session_mismatch"
+    if (ack.status !in setOf("applied", "rejected")) return "unrecognized_status"
+    if (
+        ack.payload.optString("token").isNotBlank()
+        || ack.payload.optString("companion_token").isNotBlank()
+    ) {
+        return "ack_echoed_pairing_token"
+    }
+    val ackCommand = ack.payload.optString("command")
+    if (ackCommand.isBlank()) return "missing_command"
+    if (ackCommand != signal.command) return "command_mismatch"
+
+    val identityFields = listOf(
+        "target_session_id",
+        "package_id",
+        "participant_id",
+        "target_part_session_id",
+        "target_session_group_id",
+        "target_part_number",
+        "requested_by",
+        "current_android_source_behavior",
+        "current_pc_source_behavior",
+    )
+    identityFields.forEach { field ->
+        val expected = controllerAckExpectedIdentity(field, signal)
+        if (expected.isBlank()) return@forEach
+        val observed = ack.payload.optString(field)
+        if (observed.isBlank()) return "missing_$field"
+        if (observed != expected) return "${field}_mismatch"
+    }
+    return null
+}
+
+private fun controllerAckExpectedIdentity(field: String, signal: PhoneLslCommandSignal): String =
+    when (field) {
+        "target_session_id" -> signal.payload.optString(field).ifBlank { signal.sessionId }
+        else -> signal.payload.optString(field)
+    }
+
+private fun waitForControllerAck(transport: PhoneLslControllerTransport, signal: PhoneLslCommandSignal): PhoneControllerAckObservation? {
     repeat(6) {
         val sample = transport.pullAckSample(timeoutS = 0.05) ?: return@repeat
         val ack = runCatching { phoneAckFromSample(sample.sample) }.getOrNull() ?: return@repeat
-        if (ack.commandId == commandId) return ack
+        if (ack.commandId == signal.commandId) {
+            val reason = validateControllerAckForSignal(signal, ack)
+            return PhoneControllerAckObservation(
+                ack = ack,
+                valid = reason == null,
+                reason = reason ?: "",
+            )
+        }
     }
     return null
 }

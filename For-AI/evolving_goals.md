@@ -96,6 +96,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   applied ack missing `command`, `target_session_id`, or any nonblank expected
   package/participant/part/requester/source field is recorded but marked
   `invalid_ack`, matching the strict offline outbox validator.
+- Android Controller-mode live ack handling now applies the same same-command
+  `PPSCommandAcksV1` validation before reporting a sent command as cleanly
+  acknowledged. Same-command acks with stale session ids, wrong commands,
+  missing echoed non-secret target identity, or token echoes are preserved in
+  `phone_controller_command_outbox.jsonl` but marked with `ack_valid=false`,
+  `ack_validation_status=invalid_ack`, and a concrete
+  `ack_validation_reason`; the UI surfaces these as invalid acks instead of a
+  reassuring sent state. Strict controller outbox validation recomputes those
+  validation fields from the raw command/ack samples.
 - Focus Mode Send-to-Phone LSL control and Android Controller mode now expose
   `start_part` as `Start Part` alongside `start_experiment` as `Start Full`.
   `start_part` launches the selected/synced package part, while

@@ -5426,6 +5426,14 @@ def _validate_controller_outbox_row(
                 ack_sample=ack_sample,
                 failures=failures,
             )
+            _validate_controller_ack_validation_fields(
+                prefix,
+                row=row,
+                command_sample=sample,
+                command_payload=payload,
+                ack_sample=ack_sample,
+                failures=failures,
+            )
 
 
 def _validate_pc_admin_outbox_row(
@@ -5572,6 +5580,94 @@ def _validate_outbox_ack_payload(
             failures.append(f"{prefix} ack payload is missing {field}")
         elif observed != expected:
             failures.append(f"{prefix} ack payload {field} differs from command sample")
+
+
+def _validate_controller_ack_validation_fields(
+    prefix: str,
+    *,
+    row: dict[str, Any],
+    command_sample: list[Any],
+    command_payload: dict[str, Any] | None,
+    ack_sample: list[Any],
+    failures: list[str],
+) -> None:
+    validation_fields_present = any(
+        field in row
+        for field in ("ack_valid", "ack_validation_status", "ack_validation_reason")
+    )
+    if not validation_fields_present:
+        return
+    reason = _outbox_ack_validation_reason(
+        command_sample=command_sample,
+        command_payload=command_payload,
+        ack_sample=ack_sample,
+    )
+    expected_valid = reason == ""
+    observed_valid = row.get("ack_valid")
+    if isinstance(observed_valid, bool) and observed_valid is not expected_valid:
+        failures.append(f"{prefix} ack_valid differs from ack sample validation")
+    expected_status = "valid_ack" if expected_valid else "invalid_ack"
+    observed_status = _metadata_value(row.get("ack_validation_status"))
+    if observed_status and observed_status != expected_status:
+        failures.append(f"{prefix} ack_validation_status expected {expected_status}, got {observed_status}")
+    observed_reason = _metadata_value(row.get("ack_validation_reason"))
+    if observed_reason != reason:
+        failures.append(f"{prefix} ack_validation_reason expected {reason!r}, got {observed_reason!r}")
+
+
+def _outbox_ack_validation_reason(
+    *,
+    command_sample: list[Any],
+    command_payload: dict[str, Any] | None,
+    ack_sample: list[Any],
+) -> str:
+    if len(command_sample) != len(LSL_COMMAND_CHANNELS) or len(ack_sample) != len(LSL_ACK_CHANNELS):
+        return "channel_count_mismatch"
+    if _metadata_value(ack_sample[1]) != _metadata_value(command_sample[1]):
+        return "command_id_mismatch"
+    if _metadata_value(ack_sample[2]) != _metadata_value(command_sample[2]):
+        return "session_mismatch"
+    if _metadata_value(ack_sample[4]) not in {"applied", "rejected"}:
+        return "unrecognized_status"
+    ack_payload = _json_object_or_none(str(ack_sample[9] or "{}"))
+    if ack_payload is None:
+        return "invalid_ack_payload_json"
+    if _metadata_value(ack_payload.get("token")) or _metadata_value(ack_payload.get("companion_token")):
+        return "ack_echoed_pairing_token"
+    ack_command = _metadata_value(ack_payload.get("command"))
+    if not ack_command:
+        return "missing_command"
+    if ack_command != _metadata_value(command_sample[4]):
+        return "command_mismatch"
+    payload = command_payload or {}
+    for field in (
+        "target_session_id",
+        "package_id",
+        "participant_id",
+        "target_part_session_id",
+        "target_session_group_id",
+        "target_part_number",
+        "requested_by",
+        "current_android_source_behavior",
+        "current_pc_source_behavior",
+    ):
+        expected = _expected_outbox_ack_identity(field, {}, command_sample, payload)
+        if not expected:
+            continue
+        observed = _metadata_value(ack_payload.get(field))
+        if not observed:
+            return f"missing_{field}"
+        if observed != expected:
+            return f"{field}_mismatch"
+    return ""
+
+
+def _json_object_or_none(raw: str) -> dict[str, Any] | None:
+    try:
+        parsed = json.loads(raw or "{}")
+    except json.JSONDecodeError:
+        return None
+    return parsed if isinstance(parsed, dict) else None
 
 
 def _expected_outbox_ack_identity(

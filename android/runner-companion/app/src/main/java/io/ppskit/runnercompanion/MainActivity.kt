@@ -1149,10 +1149,17 @@ private fun PhoneRuntimeScreen(
                         }.onSuccess { result ->
                             val sentNative = result.optBoolean("native_lsl_sent", false)
                             val ackStatus = result.optString("ack_status", "")
-                            status = if (sentNative) "Sent $label" else "Queued $label"
+                            val writeStatus = result.optString("status", "")
+                            status = when (writeStatus) {
+                                "invalid_ack" -> "Invalid ack for $label"
+                                else -> if (sentNative) "Sent $label" else "Queued $label"
+                            }
                             uploadedArtifact = buildString {
                                 append(if (sentNative) "Native LSL command sent" else "Controller outbox")
                                 if (ackStatus.isNotBlank()) append(" ack=$ackStatus")
+                                result.optString("ack_validation_status", "").takeIf { it == "invalid_ack" }?.let {
+                                    append(" invalid_ack=${result.optString("ack_validation_reason", "")}")
+                                }
                                 append(" ${result.optString("outbox_path", "")}")
                             }
                             log(if (sentNative) "Sent $command" else "Queued $command")

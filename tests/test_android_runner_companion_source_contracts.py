@@ -200,6 +200,11 @@ def test_android_controller_runtime_status_exports_stream_descriptions() -> None
     assert '"Operator note"' in main_activity
     assert "commandPayload: JSONObject" in controller_commands
     assert 'JSONObject().put("note", note)' in main_activity
+    assert "validateControllerAckForSignal" in controller_commands
+    assert '"invalid_ack"' in controller_commands
+    assert '"ack_validation_status"' in controller_commands
+    assert '"ack_validation_reason"' in controller_commands
+    assert '"Invalid ack for $label"' in main_activity
     assert '.put("channel_labels", stringArray(PHONE_LSL_COMMAND_CHANNELS))' in controller_commands
     assert '.put("channel_labels", stringArray(PHONE_LSL_ACK_CHANNELS))' in controller_commands
     assert '.put("demographics_in_stream_name", false)' in controller_commands

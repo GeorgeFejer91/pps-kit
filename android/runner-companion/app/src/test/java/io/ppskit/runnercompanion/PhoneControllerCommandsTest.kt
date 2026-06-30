@@ -118,6 +118,47 @@ class PhoneControllerCommandsTest {
     }
 
     @Test
+    fun controllerAckValidationAcceptsMatchingAck() {
+        val signal = controllerSignal()
+        val ack = controllerAck(signal)
+
+        val reason = validateControllerAckForSignal(signal, ack)
+
+        assertEquals(null, reason)
+    }
+
+    @Test
+    fun controllerAckValidationRejectsStaleSessionOrCommandDrift() {
+        val signal = controllerSignal()
+        val wrongSessionAck = controllerAck(signal).copy(sessionId = "other-session")
+        val wrongCommandAck = controllerAck(
+            signal,
+            payload = controllerAckPayload(signal).put("command", "resume"),
+        )
+
+        assertEquals("session_mismatch", validateControllerAckForSignal(signal, wrongSessionAck))
+        assertEquals("command_mismatch", validateControllerAckForSignal(signal, wrongCommandAck))
+    }
+
+    @Test
+    fun controllerAckValidationRejectsMissingIdentityAndTokenEcho() {
+        val signal = controllerSignal()
+        val missingGroupPayload = controllerAckPayload(signal).apply {
+            remove("target_session_group_id")
+        }
+        val tokenEchoPayload = controllerAckPayload(signal).put("token", "secret")
+
+        assertEquals(
+            "missing_target_session_group_id",
+            validateControllerAckForSignal(signal, controllerAck(signal, payload = missingGroupPayload)),
+        )
+        assertEquals(
+            "ack_echoed_pairing_token",
+            validateControllerAckForSignal(signal, controllerAck(signal, payload = tokenEchoPayload)),
+        )
+    }
+
+    @Test
     fun controllerRuntimeStatusDeclaresStrictNativeBoundary() {
         val pairing = PairingInfo.parse(
             "pps-companion://pair?host=127.0.0.1&port=8767&session_id=session-001&token=secret",
@@ -242,4 +283,48 @@ class PhoneControllerCommandsTest {
             phoneOwnedSession = true,
             warnings = emptyList(),
         )
+
+    private fun controllerSignal(): PhoneLslCommandSignal =
+        PhoneLslCommandSignal(
+            commandId = "cmd-controller-ack-1",
+            sessionId = "part-001",
+            senderId = "android_controller",
+            command = "pause",
+            issuedLslTime = 46.0,
+            payload = JSONObject()
+                .put("token", "secret")
+                .put("package_id", "pkg-001")
+                .put("participant_id", "P001")
+                .put("target_session_id", "part-001")
+                .put("target_part_session_id", "part-001")
+                .put("target_session_group_id", "group-001")
+                .put("target_part_number", "1")
+                .put("requested_by", "android_controller")
+                .put("current_android_source_behavior", "native_lsl_controller_with_local_outbox"),
+        )
+
+    private fun controllerAck(signal: PhoneLslCommandSignal, payload: JSONObject = controllerAckPayload(signal)): PhoneLslCommandAck =
+        PhoneLslCommandAck(
+            commandId = signal.commandId,
+            sessionId = signal.sessionId,
+            receiverId = "android_phone",
+            status = "applied",
+            reason = "",
+            receivedLslTime = 46.1,
+            appliedLslTime = 46.2,
+            ackLslTime = 46.3,
+            payload = payload,
+        )
+
+    private fun controllerAckPayload(signal: PhoneLslCommandSignal): JSONObject =
+        JSONObject()
+            .put("command", signal.command)
+            .put("package_id", signal.payload.getString("package_id"))
+            .put("participant_id", signal.payload.getString("participant_id"))
+            .put("target_session_id", signal.payload.getString("target_session_id"))
+            .put("target_part_session_id", signal.payload.getString("target_part_session_id"))
+            .put("target_session_group_id", signal.payload.getString("target_session_group_id"))
+            .put("target_part_number", signal.payload.getString("target_part_number"))
+            .put("requested_by", signal.payload.getString("requested_by"))
+            .put("current_android_source_behavior", signal.payload.getString("current_android_source_behavior"))
 }
