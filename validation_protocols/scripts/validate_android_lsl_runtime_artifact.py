@@ -2814,6 +2814,11 @@ def _validate_haptic_capability(haptic: dict[str, Any], failures: list[str]) -> 
     if calibration is not None:
         if calibration.get("schema") != ANDROID_HAPTIC_CALIBRATION_SCHEMA:
             failures.append("haptic_capability calibration_result schema mismatch")
+        _validate_haptic_calibration_status_consistency(
+            haptic=haptic,
+            calibration=calibration,
+            failures=failures,
+        )
         status = str(calibration.get("status") or "").strip()
         if not status:
             failures.append("haptic_capability calibration_result is missing status")
@@ -2933,6 +2938,47 @@ def _validate_haptic_calibration_responses(
                 failures.append("haptic_capability calibration_result recommended_amplitude must match first felt response")
     elif status == "not_detected_at_max" and felt_rows:
         failures.append("haptic_capability calibration_result not_detected_at_max must not include felt responses")
+
+
+def _validate_haptic_calibration_status_consistency(
+    *,
+    haptic: dict[str, Any],
+    calibration: dict[str, Any],
+    failures: list[str],
+) -> None:
+    status = str(calibration.get("status") or "").strip()
+    has_vibrator = haptic.get("has_vibrator") is True
+    has_amplitude_control = haptic.get("has_amplitude_control") is True
+    for field in ("has_vibrator", "has_amplitude_control"):
+        if isinstance(calibration.get(field), bool) and isinstance(haptic.get(field), bool):
+            if calibration.get(field) is not haptic.get(field):
+                failures.append(f"haptic_capability calibration_result {field} differs from haptic_capability")
+
+    threshold_present = calibration.get("recommended_threshold_percent") not in (None, "")
+    amplitude_present = calibration.get("recommended_amplitude") not in (None, "")
+    if status == "no_vibrator":
+        if has_vibrator:
+            failures.append("haptic_capability calibration_result no_vibrator status requires has_vibrator=false")
+        if threshold_present:
+            failures.append("haptic_capability calibration_result no_vibrator status must not recommend a threshold")
+        if amplitude_present and _safe_int(calibration.get("recommended_amplitude"), fallback=0) != -1:
+            failures.append("haptic_capability calibration_result no_vibrator status must use default amplitude")
+        responses = calibration.get("responses")
+        if isinstance(responses, list) and responses:
+            failures.append("haptic_capability calibration_result no_vibrator status must not include response rows")
+        return
+
+    if status in {"threshold_detected", "binary_detected", "not_detected_at_max"}:
+        if not has_vibrator:
+            failures.append(f"haptic_capability calibration_result {status} status requires has_vibrator=true")
+        if not threshold_present:
+            failures.append(f"haptic_capability calibration_result {status} status requires recommended_threshold_percent")
+        if not amplitude_present:
+            failures.append(f"haptic_capability calibration_result {status} status requires recommended_amplitude")
+    if status == "threshold_detected" and not has_amplitude_control:
+        failures.append("haptic_capability calibration_result threshold_detected status requires amplitude control")
+    if status == "binary_detected" and has_amplitude_control:
+        failures.append("haptic_capability calibration_result binary_detected status requires no amplitude control")
 
 
 def _is_number(value: float) -> bool:

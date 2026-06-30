@@ -484,9 +484,11 @@ amplitude for phone vibration cues. On phones with a vibrator but no amplitude
 control, the app records a binary detection-only calibration and uses
 default-amplitude pulses. The run-artifact validator cross-checks the
 participant metadata threshold, haptic sidecar recommendation, calibration
-result, response rows, and amplitude mapping. These values are phone-vibrator
-working thresholds, not calibrated physical vibration-strength or Woojer timing
-measurements.
+result, response rows, amplitude mapping, and status semantics: `no_vibrator`
+cannot recommend a threshold or carry response rows, `threshold_detected`
+requires amplitude control, and `binary_detected` requires a no-amplitude
+device. These values are phone-vibrator working thresholds, not calibrated
+physical vibration-strength or Woojer timing measurements.
 
 FFmpeg-style synthesis is technically possible on Android through native FFmpeg
 builds, but the app does not depend on FFmpegKit because that wrapper project is

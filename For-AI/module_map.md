@@ -235,7 +235,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `--expect-phone-owned-data-export` is set,
   phone-run `participant_metadata.json` and `haptic_capability.json` sidecars
   plus Android haptic calibration threshold/status/amplitude-response
-  consistency,
+  consistency, including no-vibrator, binary-detection, and amplitude-control
+  status semantics,
   phone-run `artifact_file_inventory.json` / `.csv` sidecar advertisement from
   completion/latest-events JSON and strict inventory sidecar presence,
   PC-monitor `pc_android_lsl_monitor_report.json` /

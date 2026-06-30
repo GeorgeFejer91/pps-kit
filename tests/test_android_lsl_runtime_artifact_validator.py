@@ -1048,6 +1048,74 @@ def test_android_lsl_runtime_validator_rejects_haptic_response_amplitude_drift(t
     assert "calibration_result response 2 amplitude does not match threshold_percent" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_no_vibrator_threshold_artifacts(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    haptic_path = run_dir / "haptic_capability.json"
+    haptic = json.loads(haptic_path.read_text(encoding="utf-8"))
+    haptic.update(
+        {
+            "has_vibrator": False,
+            "has_amplitude_control": False,
+            "calibration_policy": "binary_detection_only",
+            "recommended_amplitude": -1,
+        }
+    )
+    haptic["calibration_result"].update(
+        {
+            "status": "no_vibrator",
+            "has_vibrator": False,
+            "has_amplitude_control": False,
+            "recommended_threshold_percent": 20,
+            "recommended_amplitude": 50,
+            "responses": [{"trial_index": 1, "threshold_percent": 20, "amplitude": -1, "felt": False}],
+        }
+    )
+    haptic_path.write_text(json.dumps(haptic), encoding="utf-8")
+    _update_completion_payload(run_dir, haptic=haptic)
+
+    result = validator.validate_run_artifact(run_dir)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "no_vibrator status must not recommend a threshold" in failures
+    assert "no_vibrator status must use default amplitude" in failures
+    assert "no_vibrator status must not include response rows" in failures
+
+
+def test_android_lsl_runtime_validator_rejects_threshold_detected_without_amplitude_control(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    haptic_path = run_dir / "haptic_capability.json"
+    haptic = json.loads(haptic_path.read_text(encoding="utf-8"))
+    haptic.update(
+        {
+            "has_amplitude_control": False,
+            "calibration_policy": "binary_detection_only",
+            "recommended_threshold_percent": 20,
+            "recommended_amplitude": -1,
+        }
+    )
+    haptic["calibration_result"].update(
+        {
+            "status": "threshold_detected",
+            "has_amplitude_control": False,
+            "recommended_threshold_percent": 20,
+            "recommended_amplitude": -1,
+            "responses": [{"trial_index": 1, "threshold_percent": 20, "amplitude": -1, "felt": True}],
+        }
+    )
+    haptic_path.write_text(json.dumps(haptic), encoding="utf-8")
+    _update_completion_payload(run_dir, haptic=haptic)
+
+    result = validator.validate_run_artifact(run_dir)
+
+    assert result.ok is False
+    assert "threshold_detected status requires amplitude control" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_loads_lightweight_materialization_from_zip(tmp_path: Path):
     source_dir = tmp_path / "phone-run-source"
     source_dir.mkdir()
