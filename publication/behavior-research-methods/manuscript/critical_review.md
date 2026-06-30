@@ -498,3 +498,48 @@ Methods manuscript draft. It is a working audit, not manuscript text.
 - Final submission still needs release metadata, author/affiliation/funding
   fields, and publication-hardware validation evidence before strong timing
   claims can be made.
+
+## Iteration 14: Parsimony And Archive-layer Pass
+
+### Main Critiques
+
+- A paragraph-length audit found that the main remaining long prose paragraph
+  was the archive-layer paragraph in the `Design, Run, and Recreation Pathway`
+  section. It compressed design archives, profile-recreation archives,
+  validation archives, participant archives, computational reproducibility, and
+  the conditional suite claim into one paragraph.
+- That compression weakened the BRM-style tutorial value. A reader should be
+  able to see what each suite entry point produces and what claim each archive
+  layer can support without unpacking a dense prose block.
+- The technical-method response-classification paragraph also carried two
+  ideas in one paragraph: the actual click-classification rule and the reason
+  response probability matters for interpreting PPS RT curves.
+- A fresh Consensus search on behavioral software tools returned the familiar
+  BRM/software pattern: graphical tools should lower implementation barriers
+  while keeping task logic, timing, runnable assets, and reproducibility
+  visible. This supported a parsimony edit rather than a new citation-heavy
+  detour.
+
+### Resolution In This Revision
+
+- Replaced the dense archive-layer paragraph with a short lead-in plus a new
+  table, `Recommended archive layers for PPS Toolkit studies`, separating
+  design, profile-recreation, validation, and participant archives.
+- Shortened the suite boundary paragraph so it states one central claim:
+  public and executable assets still require local validation when hardware,
+  tactile actuators, HRTFs, stimuli, or populations change.
+- Split the response-classification paragraph into one paragraph that states
+  the current 100-1300 ms tactile-onset response rule and one paragraph that
+  explains why response-probability visibility matters for PPS interpretation.
+- Re-ran the paragraph-length audit. The remaining 120+ word entries are tables,
+  the abstract, and two introduction-style overview paragraphs rather than
+  hidden multi-idea method blocks.
+
+### Residual Concerns
+
+- The new archive-layer table improves manuscript readability, but final
+  submission still needs actual release DOIs, exact repository commit, and a
+  publication-hardware validation archive before the table can point to final
+  external artifacts.
+- The response-window default is clearer, but confirmatory studies still need a
+  preregistered or study-specific justification for the exact response window.

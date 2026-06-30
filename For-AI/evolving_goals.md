@@ -151,6 +151,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `evidence_matrix.csv` as the literature-bearing design-decision scaffold from
   the control-level coverage ledger, and the manuscript README documents the
   boundary.
+- Continued the BRM manuscript self-review loop with a parsimony and
+  archive-layer pass. A paragraph-length audit found the remaining dense prose
+  in the design-run-recreation pathway; `main.tex` now replaces that block with
+  a `Recommended archive layers for PPS Toolkit studies` table separating
+  design, profile-recreation, validation, and deidentified participant archives.
+  The response-classification technical-method paragraph was also split so the
+  100-1300 ms tactile-onset response rule is separate from the interpretive
+  reason response probability must be visible before RT curves are read.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

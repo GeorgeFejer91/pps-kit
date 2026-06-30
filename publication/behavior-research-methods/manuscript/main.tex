@@ -228,7 +228,25 @@ Native acquisition & Accepted Segment 6 package & Launch Focus Mode for setup, o
 \end{tabularx}
 \end{table}
 
-The resulting package should be archived in layers. A design archive contains the profile snapshot, manifest chain, source hashes, accepted block CSVs, and the evidence matrix row(s) that justify unusual choices. A profile-recreation archive adds the source-paper pointer, represented parameters, missing or approximated fields, and a statement about whether the profile is faithful, partial, or a local proxy. A validation archive contains the software run, operating-system and hardware route, local event logs, digital audio evidence, optional LSL/XDF captures, and optional electrical loopback reports. A participant archive, if shared, contains only deidentified analysis-ready rows plus declared response-window, exclusion, baseline, and model-fitting rules. Keeping these layers separate is not clerical overhead: computational reproducibility studies show that research assets can be public but still difficult to execute, and simulation/validation tools can reveal experiment errors before participant data are interpreted \citep{Ellis2024,DeLeeuw2022}. For PPS Toolkit, the practical suite claim is therefore conditional: another lab should be able to design a new task, recreate a reported paradigm as an auditable profile, and run the accepted design through the native evidence pipeline, but any new hardware route, tactile actuator, HRTF choice, original-stimulus substitution, or participant population must still be validated locally.
+The resulting package should be archived in layers rather than as one undifferentiated experiment folder. Table~\ref{tab:archive-layers} names those layers and the claim each layer can support.
+
+\begin{table}[t]
+\caption{Recommended archive layers for PPS Toolkit studies.}
+\label{tab:archive-layers}
+\footnotesize
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.20\textwidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.25\textwidth}}
+\toprule
+Archive layer & Include & Claim supported \\
+\midrule
+Design archive & Profile snapshot, manifest chain, source hashes, accepted block CSVs, and evidence-matrix rows for unusual choices. & The experiment was specified and can be inspected or rebuilt. \\
+Profile-recreation archive & Source-paper pointer, represented parameters, missing or approximated fields, profile status, and local substitutions. & A published paradigm was translated into an auditable scaffold. \\
+Validation archive & Software run, operating-system and hardware route, event logs, digital audio evidence, optional LSL/XDF captures, and optional electrical loopback reports. & The prepared package executed on a stated route with stated evidence tiers. \\
+Participant archive & Deidentified analysis-ready rows plus declared response-window, exclusion, baseline, and model-fitting rules. & Participant data can be interpreted without exposing private acquisition artifacts. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Keeping these layers separate is not clerical overhead. Computational reproducibility studies show that research assets can be public but still difficult to execute, and simulation or validation tools can reveal experiment errors before participant data are interpreted \citep{Ellis2024,DeLeeuw2022}. For PPS Toolkit, the practical suite claim is therefore conditional: another lab should be able to design a new task, recreate a reported paradigm as an auditable profile, and run the accepted design through the native evidence pipeline, but any new hardware route, tactile actuator, HRTF choice, original-stimulus substitution, or participant population must still be validated locally.
 
 \section{Technical Method}
 
@@ -250,7 +268,9 @@ The runner prepares participant blocks as multichannel WAV assets and plays them
 
 The toolkit separates four evidence tiers. First, software schedule evidence records planned trial starts, looming onsets, tactile onsets, response windows, and sample positions. Second, digital audio evidence records the mixed output buffers that the runner attempted to play. Third, electrical loopback evidence records an analog return path, such as the output-4 tactile mirror patched into an input. Fourth, tactile perceptual evidence comes from participant calibration and responses. These tiers answer different questions. Electrical loopback can check an audio-interface route; it does not measure Woojer mechanical vibration onset or tactile sensation. Local audio evidence can prove what samples were mixed; it does not prove what a participant felt.
 
-Response classification is another part of the runtime method rather than an afterthought. The current Focus Mode runner assigns participant clicks to tactile onsets using a tactile-onset-anchored valid window from 100 to 1300 ms. Earlier clicks and later clicks remain in the event record, but they are not credited as valid tactile responses; the next trial start does not shorten a still-open tactile response deadline. Catch trials are classified separately as correct no-responses or false alarms, and missed standard trials can be marked for optional top-up with selected click identifiers preserved. These rules make response probability, anticipations, late responses, and rescue trials visible before any RT curve is interpreted, which is important because response probability and trial composition can influence apparent near-far benefits \citep{Holmes2020}. They remain operational rules that should be preregistered or justified for a confirmatory study.
+Response classification is another part of the runtime method rather than an afterthought. The current Focus Mode runner assigns participant clicks to tactile onsets using a tactile-onset-anchored valid window from 100 to 1300 ms. Earlier clicks and later clicks remain in the event record, but they are not credited as valid tactile responses; the next trial start does not shorten a still-open tactile response deadline. Catch trials are classified separately as correct no-responses or false alarms, and missed standard trials can be marked for optional top-up with selected click identifiers preserved.
+
+These rules make response probability, anticipations, late responses, and rescue trials visible before any RT curve is interpreted. That visibility matters because response probability and trial composition can influence apparent near-far benefits \citep{Holmes2020}. The rules remain operational defaults that should be preregistered or justified for a confirmatory study.
 
 \subsection{Tactile Threshold Calibration}
 
