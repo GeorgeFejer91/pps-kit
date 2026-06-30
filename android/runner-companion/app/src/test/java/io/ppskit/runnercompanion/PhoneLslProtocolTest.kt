@@ -81,7 +81,15 @@ class PhoneLslProtocolTest {
             senderId = "controller-phone",
             command = "pause",
             issuedLslTime = 12.0,
-            payload = JSONObject().put("companion_token", "secret"),
+            payload = JSONObject()
+                .put("companion_token", "secret")
+                .put("package_id", "pkg-001")
+                .put("participant_id", "P001")
+                .put("target_session_id", "part-001")
+                .put("target_part_session_id", "part-001")
+                .put("target_session_group_id", "group-001")
+                .put("target_part_number", "1")
+                .put("requested_by", "android_controller"),
         )
 
         val ack = phoneCommandAckForSignal(
@@ -102,6 +110,58 @@ class PhoneLslProtocolTest {
         assertEquals(12.2, ack.appliedLslTime, 0.0001)
         assertEquals("pause", ack.payload.getString("command"))
         assertTrue(ack.payload.getBoolean("state_changed"))
+        assertEquals("pkg-001", ack.payload.getString("package_id"))
+        assertEquals("P001", ack.payload.getString("participant_id"))
+        assertEquals("part-001", ack.payload.getString("target_session_id"))
+        assertEquals("part-001", ack.payload.getString("target_part_session_id"))
+        assertEquals("group-001", ack.payload.getString("target_session_group_id"))
+        assertEquals("1", ack.payload.getString("target_part_number"))
+        assertEquals("android_controller", ack.payload.getString("requested_by"))
+        assertFalse(ack.payload.has("companion_token"))
+        assertFalse(ack.payload.has("token"))
+    }
+
+    @Test
+    fun commandAckRejectsExplicitPackageOrPartIdentityDrift() {
+        val runPackage = packageWithLslCommands()
+        val badPackageSignal = PhoneLslCommandSignal(
+            commandId = "cmd-package-drift",
+            sessionId = "part-001",
+            senderId = "controller-phone",
+            command = "pause",
+            issuedLslTime = 12.0,
+            payload = JSONObject()
+                .put("token", "secret")
+                .put("package_id", "wrong-package")
+                .put("target_part_session_id", "part-001"),
+        )
+        val badPartSignal = PhoneLslCommandSignal(
+            commandId = "cmd-part-drift",
+            sessionId = "part-001",
+            senderId = "controller-phone",
+            command = "pause",
+            issuedLslTime = 12.0,
+            payload = JSONObject()
+                .put("token", "secret")
+                .put("package_id", "pkg-001")
+                .put("target_part_session_id", "wrong-part"),
+        )
+
+        val packageAck = phoneCommandAckForSignal(
+            signal = badPackageSignal,
+            runPackage = runPackage,
+            expectedToken = "secret",
+        ) { PhoneLslCommandApplicationResult(status = "applied") }
+        val partAck = phoneCommandAckForSignal(
+            signal = badPartSignal,
+            runPackage = runPackage,
+            expectedToken = "secret",
+        ) { PhoneLslCommandApplicationResult(status = "applied") }
+
+        assertEquals("rejected", packageAck.status)
+        assertEquals("package_mismatch", packageAck.reason)
+        assertEquals("rejected", partAck.status)
+        assertEquals("part_session_mismatch", partAck.reason)
     }
 
     @Test

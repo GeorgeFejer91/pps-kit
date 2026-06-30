@@ -48,7 +48,14 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
 - Commands are token-gated through `token` or `companion_token` in
   `payload_json` before any local handler runs.
 - Acks are shaped as applied/rejected command acknowledgements after the local
-  handler returns.
+  handler returns. Ack payloads echo only non-secret accepted target identity
+  fields from the command sample (`package_id`, `participant_id`,
+  `target_session_id`, `target_part_session_id`, `target_session_group_id`,
+  `target_part_number`, and requester/source-behavior fields); pairing tokens
+  are not copied into ack payloads. If a command explicitly names a package,
+  part session, session group, or part number that does not match the selected
+  run package, Runner mode rejects it before applying the local state
+  transition.
 - Phone-owned command diaries now distinguish `phone_ui`,
   `phone_runtime`, and `native_lsl` command sources. Local Runner-mode start
   buttons plus local Pause, Resume, and Stop After Block controls write

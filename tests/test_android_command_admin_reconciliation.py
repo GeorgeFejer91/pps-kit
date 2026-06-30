@@ -107,6 +107,23 @@ def test_reconcile_android_command_admin_reports_ack_payload_drift():
     assert "ack_payload" in fields
 
 
+def test_reconcile_android_command_admin_reports_missing_target_identity_in_phone_payload():
+    phone = _phone_command_row()
+    del phone["payload"]["target_part_session_id"]
+    phone["ack_sample"] = _ack_sample("cmd-001", "pause", phone["payload"])
+
+    result = reconciler.reconcile_command_admin_with_phone_run(
+        [_sender_row()],
+        [phone],
+        expect_native_sends=True,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is False
+    fields = {item["field"] for item in result.report["mismatches"]}
+    assert "payload.target_part_session_id" in fields
+
+
 def test_reconcile_android_command_admin_can_reject_extra_phone_native_commands():
     result = reconciler.reconcile_command_admin_with_phone_run(
         [_sender_row()],
@@ -131,7 +148,11 @@ def _sender_row(
     command_payload = {
         "token": "secret",
         "package_id": "pkg-001",
+        "participant_id": "P001",
         "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+        "target_part_number": "1",
     }
     ack_payload = _ack_payload(command)
     return {
@@ -190,6 +211,11 @@ def _ack_payload(command: str) -> dict:
     return {
         "command": command,
         "package_id": "pkg-001",
+        "participant_id": "P001",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+        "target_part_number": "1",
         "run_id": "phone-run-001",
         "state_changed": True,
     }

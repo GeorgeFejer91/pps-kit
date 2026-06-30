@@ -199,6 +199,22 @@ def _compare_sender_phone_command_pair(
 
     sender_ack_sample = _json_list(sender.get("ack_sample"))
     phone_ack_sample = _json_list(phone.get("ack_sample"))
+    phone_payload = phone.get("payload") if isinstance(phone.get("payload"), dict) else {}
+    _compare_required_field(
+        mismatches,
+        command_id,
+        "payload.target_session_id",
+        _first_nonblank(sender.get("target_session_id"), sample_payload.get("target_session_id"), sample[2]),
+        _first_nonblank(phone_payload.get("target_session_id"), phone.get("target_session_id"), phone.get("session_id")),
+    )
+    for field in ["target_part_session_id", "target_session_group_id", "target_part_number", "participant_id"]:
+        _compare_required_field(
+            mismatches,
+            command_id,
+            f"payload.{field}",
+            _first_nonblank(sender.get(field), sample_payload.get(field)),
+            _first_nonblank(phone_payload.get(field), phone.get(field)),
+        )
     if sender.get("ack_received") is True or phone.get("ack_sent") is True:
         if len(sender_ack_sample) != len(LSL_ACK_CHANNELS):
             mismatches.append(
@@ -219,7 +235,6 @@ def _compare_sender_phone_command_pair(
             _compare_field(mismatches, command_id, "ack_reason", sender_ack_sample[5], phone.get("reason"))
             ack_payload = _safe_json_object(sender_ack_sample[9])
             phone_ack_payload = _safe_json_object(phone_ack_sample[9])
-            phone_payload = phone.get("payload") if isinstance(phone.get("payload"), dict) else {}
             if ack_payload and phone_ack_payload and _canonical_json(ack_payload) != _canonical_json(phone_ack_payload):
                 mismatches.append(_mismatch(command_id, "ack_payload", ack_payload, phone_ack_payload))
             if ack_payload and phone_payload and _canonical_json(ack_payload) != _canonical_json(phone_payload):
@@ -258,6 +273,21 @@ def _compare_field(
     expected_value = _clean(expected)
     observed_value = _clean(observed)
     if expected_value and observed_value and expected_value != observed_value:
+        mismatches.append(_mismatch(command_id, field, expected_value, observed_value))
+
+
+def _compare_required_field(
+    mismatches: list[dict[str, Any]],
+    command_id: str,
+    field: str,
+    expected: Any,
+    observed: Any,
+) -> None:
+    expected_value = _clean(expected)
+    if not expected_value:
+        return
+    observed_value = _clean(observed)
+    if observed_value != expected_value:
         mismatches.append(_mismatch(command_id, field, expected_value, observed_value))
 
 

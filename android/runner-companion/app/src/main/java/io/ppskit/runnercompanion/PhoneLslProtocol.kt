@@ -446,9 +446,12 @@ internal fun phoneCommandAckForSignal(
             receivedLslTime = receivedLslTime,
             appliedLslTime = appliedLslTime,
             ackLslTime = ackLslTime,
-            payload = JSONObject()
-                .put("command", signal.command)
-                .put("package_id", runPackage.packageId),
+            payload = phoneCommandAckPayload(
+                signal,
+                JSONObject()
+                    .put("command", signal.command)
+                    .put("package_id", runPackage.packageId),
+            ),
         )
     }
     val result = try {
@@ -469,8 +472,36 @@ internal fun phoneCommandAckForSignal(
         receivedLslTime = receivedLslTime,
         appliedLslTime = appliedLslTime,
         ackLslTime = ackLslTime,
-        payload = JSONObject(result.payload.toString()),
+        payload = phoneCommandAckPayload(signal, result.payload),
     )
+}
+
+private val PHONE_COMMAND_ACK_ECHO_PAYLOAD_FIELDS = listOf(
+    "package_id",
+    "participant_id",
+    "target_session_id",
+    "target_part_session_id",
+    "target_session_group_id",
+    "target_part_number",
+    "requested_by",
+    "current_android_source_behavior",
+    "current_pc_source_behavior",
+)
+
+private fun phoneCommandAckPayload(signal: PhoneLslCommandSignal, basePayload: JSONObject): JSONObject {
+    val payload = JSONObject(basePayload.toString())
+    if (!payload.has("command")) {
+        payload.put("command", signal.command)
+    }
+    if (!payload.has("target_session_id") && signal.sessionId.isNotBlank()) {
+        payload.put("target_session_id", signal.sessionId)
+    }
+    PHONE_COMMAND_ACK_ECHO_PAYLOAD_FIELDS.forEach { field ->
+        if (!payload.has(field) && signal.payload.has(field) && !signal.payload.isNull(field)) {
+            payload.put(field, signal.payload.opt(field))
+        }
+    }
+    return payload
 }
 
 private fun phoneCommandRejection(
@@ -496,6 +527,22 @@ private fun phoneCommandRejection(
     }
     if (signal.command !in supportedPhoneCommands(runPackage)) {
         return "unsupported_command"
+    }
+    val payloadPackageId = signal.payload.optString("package_id")
+    if (payloadPackageId.isNotBlank() && runPackage.packageId.isNotBlank() && payloadPackageId != runPackage.packageId) {
+        return "package_mismatch"
+    }
+    val targetPartSessionId = signal.payload.optString("target_part_session_id")
+    if (targetPartSessionId.isNotBlank() && runPackage.partSessionId.isNotBlank() && targetPartSessionId != runPackage.partSessionId) {
+        return "part_session_mismatch"
+    }
+    val targetSessionGroupId = signal.payload.optString("target_session_group_id")
+    if (targetSessionGroupId.isNotBlank() && runPackage.sessionGroupId.isNotBlank() && targetSessionGroupId != runPackage.sessionGroupId) {
+        return "session_group_mismatch"
+    }
+    val targetPartNumber = signal.payload.optString("target_part_number")
+    if (targetPartNumber.isNotBlank() && runPackage.partNumber.isNotBlank() && targetPartNumber != runPackage.partNumber) {
+        return "part_number_mismatch"
     }
     return null
 }

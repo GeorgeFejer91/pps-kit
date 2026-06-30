@@ -131,8 +131,14 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   Start/Pause/Resume/Continue/Snapshot plus Stop After Block and Operator Note
   when those commands are advertised by the selected package, allowing two-phone
   rehearsals to request the same boundary stop as the PC helper and to record
-  operator observations as typed command payloads. Controller runtime status now
-  also includes
+  operator observations as typed command payloads. Runner-mode command acks now
+  echo non-secret accepted target identity from the command sample
+  (`package_id`, `participant_id`, target session/part/group/part-number, and
+  requester/source-behavior fields) while excluding pairing tokens; explicit
+  package or split-part identity drift is rejected before state changes. The
+  command-admin reconciler compares those echoed target payload fields between
+  sender outbox and receiver command diary. Controller runtime status now also
+  includes
   `pps-android-lsl-stream-descriptions.v1` descriptions for the controller
   command-signal outlet and command-ack inlet, and strict controller validation
   checks those roles, source identity/patterns, privacy, and PC-compatible

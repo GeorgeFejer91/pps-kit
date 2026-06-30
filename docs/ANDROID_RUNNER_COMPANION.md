@@ -405,17 +405,22 @@ inside the token-gated command payload so operator observations reconstruct
 through the same outbox, LSL command, ack, and receiver diary path. The Android
 LSL artifact validator rejects Controller or PC-admin command outbox rows whose
 stored `payload` object differs from the serialized command-sample payload, and
-it requires nonblank note text for `operator_note`.
+it requires nonblank note text for `operator_note`. Runner-mode ack/diary
+payloads echo the non-secret accepted target identity from the command sample,
+including package, participant, target session, part session, session group, and
+part number, but never the pairing token. Commands that explicitly name a
+different package or split-part identity are rejected before the phone applies a
+local state change.
 
 For two-phone or PC-to-phone rehearsals, run
 `validation_protocols/scripts/reconcile_android_command_admin_with_phone_run.py`
 after the sender outbox and Runner phone folder/ZIP exist. It compares
 Controller or PC-admin native-sent command rows against the Runner phone's
 `native_lsl` command diary rows by `command_id`, target session, sender id,
-command, package identity, and exact `PPSCommandAcksV1` sample. This is the
-offline artifact proof that a controller button press or PC helper command was
-received and acknowledged by the phone runner; it is still separate from live
-network/XDF and physical timing proof.
+command, package identity, non-secret target payload fields, and exact
+`PPSCommandAcksV1` sample. This is the offline artifact proof that a controller
+button press or PC helper command was received and acknowledged by the phone
+runner; it is still separate from live network/XDF and physical timing proof.
 
 The PC runner's Send To Phone window mirrors that administration path. After a
 phone package is prepared it can send Start, Pause, Resume, Continue, Snapshot,

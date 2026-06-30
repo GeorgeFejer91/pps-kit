@@ -143,6 +143,16 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   session. This lets a second phone send Start/Pause/Resume/Continue/Snapshot,
   Stop After Block, or Operator Note to the exact part session that Runner mode
   is listening on before the Controller phone has downloaded the full manifest.
+- Runner-mode Android command acknowledgements now carry reconstructive,
+  non-secret accepted target identity in their ack/diary payloads. The phone
+  echoes package id, participant id, target session, part session, session
+  group, part number, and requester/source-behavior fields from the accepted
+  command sample, but never echoes `token` or `companion_token`. Explicit
+  package/part/session-group/part-number drift is rejected before the local
+  state transition. The offline command-admin reconciler now fails if sender
+  target fields are absent or different in the receiver phone-run command
+  diary/ack payload, tightening two-phone and PC-to-phone reconstruction
+  evidence without claiming live network/XDF or physical timing proof.
 
 ## 2026-06-29
 

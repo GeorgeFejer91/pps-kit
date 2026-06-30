@@ -120,6 +120,29 @@ def test_android_lsl_runtime_status_exports_stream_descriptions() -> None:
     assert '.put("demographics_in_stream_name", false)' in lsl_protocol
 
 
+def test_android_command_acks_echo_nonsecret_target_identity() -> None:
+    lsl_protocol = _source("PhoneLslProtocol.kt")
+
+    assert "PHONE_COMMAND_ACK_ECHO_PAYLOAD_FIELDS" in lsl_protocol
+    for field in [
+        "package_id",
+        "participant_id",
+        "target_session_id",
+        "target_part_session_id",
+        "target_session_group_id",
+        "target_part_number",
+        "requested_by",
+    ]:
+        assert f'"{field}"' in lsl_protocol
+    echo_allow_list = lsl_protocol.split("PHONE_COMMAND_ACK_ECHO_PAYLOAD_FIELDS", maxsplit=1)[1].split(")", maxsplit=1)[0]
+    assert '"token"' not in echo_allow_list
+    assert '"companion_token"' not in echo_allow_list
+    assert "private fun phoneCommandAckPayload" in lsl_protocol
+    assert "phoneCommandAckPayload(signal, result.payload)" in lsl_protocol
+    assert 'return "package_mismatch"' in lsl_protocol
+    assert 'return "part_session_mismatch"' in lsl_protocol
+
+
 def test_android_controller_runtime_status_exports_stream_descriptions() -> None:
     models = _source("MobileRuntimeModels.kt")
     controller_commands = _source("PhoneControllerCommands.kt")
