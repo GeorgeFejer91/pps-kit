@@ -307,7 +307,10 @@ strict validation can reject channel-order or source-identity drift before
 controller button presses are treated as live LSL evidence. The Controller
 screen exposes Start, Pause, Resume, Continue, Stop After Block, and Snapshot
 when the selected package advertises those commands; Stop After Block sends the
-same `stop_after_block` signal used by the PC helper.
+same `stop_after_block` signal used by the PC helper. When `operator_note` is
+advertised, Controller mode also shows a compact note field and sends the note
+inside the token-gated command payload so operator observations reconstruct
+through the same outbox, LSL command, ack, and receiver diary path.
 
 Android vibration calibration is device-limited. The phone-run metadata panel
 now includes a `Haptic Calibration` control. On phones with amplitude control it

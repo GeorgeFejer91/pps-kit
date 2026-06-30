@@ -348,6 +348,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `stop_after_block` is advertised, so a second Android phone can request the
   same clean block-boundary stop as the PC helper. Default builds remain
   `local_controller_outbox_only`.
+- Android Controller mode now also exposes `operator_note` when the selected
+  package advertises it. The Controller UI keeps this as a compact single-line
+  note field plus send button, writes the note into the
+  `PPSCommandSignalsV1` payload while preserving token/session metadata
+  authority, and stores the same payload in
+  `phone_controller_command_outbox.jsonl`; Runner mode already acknowledges
+  the command as an operator diary/snapshot action.
 - Android phone-owned mode now includes a device-limited phone-vibrator
   calibration workflow. `PhoneHapticCalibration.kt` runs an ascending
   perceptual threshold check over fixed percent levels when Android reports

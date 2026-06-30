@@ -15,6 +15,7 @@ internal fun buildPhoneControllerCommandRow(
     runPackage: MobileRunPackage?,
     summary: MobilePackageSummary?,
     command: String,
+    commandPayload: JSONObject = JSONObject(),
     commandId: String = "android-controller-${UUID.randomUUID()}",
     issuedLslTime: Double = 0.0,
     phoneUnixMs: Long = System.currentTimeMillis(),
@@ -29,7 +30,7 @@ internal fun buildPhoneControllerCommandRow(
         ?: pairing.sessionId
     val packageId = runPackage?.packageId ?: summary?.packageId.orEmpty()
     val participantId = runPackage?.participantId ?: summary?.participantId.orEmpty()
-    val payload = JSONObject()
+    val payload = JSONObject(commandPayload.toString())
         .put("token", pairing.token)
         .put("package_id", packageId)
         .put("participant_id", participantId)
@@ -75,6 +76,7 @@ internal fun writePhoneControllerCommandOutbox(
     runPackage: MobileRunPackage?,
     summary: MobilePackageSummary?,
     command: String,
+    commandPayload: JSONObject = JSONObject(),
     nativeBridgeStatus: PhoneNativeLslBridgeStatus = PhoneNativeLslBridgeFactory.create().status(),
     controllerTransport: PhoneLslControllerTransport? = null,
 ): JSONObject {
@@ -88,6 +90,7 @@ internal fun writePhoneControllerCommandOutbox(
         runPackage = runPackage,
         summary = summary,
         command = command,
+        commandPayload = commandPayload,
         issuedLslTime = controllerTransport?.takeIf { nativeEnabled }?.localClock()
             ?: (SystemClock.elapsedRealtimeNanos() / 1_000_000_000.0),
         nativeTransportAvailable = nativeBridgeStatus.available,

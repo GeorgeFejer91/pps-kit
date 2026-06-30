@@ -4,6 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.json.JSONObject
 
 class PhoneControllerCommandsTest {
     @Test
@@ -59,6 +60,34 @@ class PhoneControllerCommandsTest {
         val parsed = phoneCommandFromSample((0 until sample.length()).map { sample.getString(it) })
         assertEquals("stop_after_block", parsed.command)
         assertEquals("secret", parsed.payload.getString("token"))
+    }
+
+    @Test
+    fun controllerCommandRowCanSendOperatorNotePayload() {
+        val pairing = PairingInfo.parse(
+            "pps-companion://pair?host=127.0.0.1&port=8767&session_id=session-001&token=secret&mode=phone_export",
+        )
+        val row = buildPhoneControllerCommandRow(
+            pairing = pairing,
+            runPackage = runPackage(),
+            summary = null,
+            command = "operator_note",
+            commandPayload = JSONObject()
+                .put("note", "participant asked for a pause")
+                .put("token", "wrong-token"),
+            commandId = "cmd-controller-note-1",
+            issuedLslTime = 44.0,
+            phoneUnixMs = 1002L,
+            phoneElapsedRealtimeMs = 2002L,
+        )
+
+        val sample = row.getJSONArray("command_sample")
+        assertEquals("operator_note", sample.getString(4))
+        val parsed = phoneCommandFromSample((0 until sample.length()).map { sample.getString(it) })
+        assertEquals("operator_note", parsed.command)
+        assertEquals("participant asked for a pause", parsed.payload.getString("note"))
+        assertEquals("secret", parsed.payload.getString("token"))
+        assertEquals("participant asked for a pause", row.getJSONObject("payload").getString("note"))
     }
 
     @Test
@@ -158,7 +187,7 @@ class PhoneControllerCommandsTest {
                 },
                 "native_android_lsl_required": true,
                 "current_android_source_behavior": "local_lsl_marker_mirror",
-                "supported_commands": ["start_experiment", "pause", "resume", "continue_instruction", "stop_after_block", "request_snapshot"]
+                "supported_commands": ["start_experiment", "pause", "resume", "continue_instruction", "stop_after_block", "request_snapshot", "operator_note"]
               },
               "assets": [],
               "blocks": [],

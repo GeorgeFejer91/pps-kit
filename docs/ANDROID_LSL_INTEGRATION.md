@@ -111,7 +111,9 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   as phone-owned runner artifacts. Controller mode exposes Stop After Block
   when `stop_after_block` is in the selected package command set, letting a
   second Android phone request a clean boundary stop over the same LSL schema as
-  the PC helper.
+  the PC helper. It also exposes `operator_note` when advertised; the typed
+  note text is carried in the command payload, written to the controller outbox,
+  and acknowledged by Runner mode as a diary/snapshot action.
 - PC-side phone uploads preserve `lsl_runtime_status.json` beside
   `lsl_marker_mirror.csv`, `trigger_codes.csv`, and `command_diary.jsonl`.
   Completion uploads that include Android response/top-up reconstruction fields

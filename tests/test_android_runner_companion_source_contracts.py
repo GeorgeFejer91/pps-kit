@@ -92,6 +92,11 @@ def test_android_controller_runtime_status_exports_stream_descriptions() -> None
     assert '"pps-*-command-acks-v1-*"' in controller_commands
     assert '"stop_after_block"' in controller_commands
     assert '"stop_after_block" to "Stop After Block"' in main_activity
+    assert '"operator_note"' in controller_commands
+    assert '"operator_note"' in main_activity
+    assert '"Operator note"' in main_activity
+    assert "commandPayload: JSONObject" in controller_commands
+    assert 'JSONObject().put("note", note)' in main_activity
     assert '.put("channel_labels", stringArray(PHONE_LSL_COMMAND_CHANNELS))' in controller_commands
     assert '.put("channel_labels", stringArray(PHONE_LSL_ACK_CHANNELS))' in controller_commands
     assert '.put("demographics_in_stream_name", false)' in controller_commands

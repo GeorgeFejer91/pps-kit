@@ -465,6 +465,7 @@ private fun PhoneRuntimeScreen(
     var uploadedArtifact by remember { mutableStateOf("") }
     var lastRunDir by remember { mutableStateOf("") }
     var controllerSending by remember { mutableStateOf(false) }
+    var controllerOperatorNote by remember(pairing.sessionId) { mutableStateOf("") }
     var phoneAge by remember(pairing.sessionId) { mutableStateOf("") }
     var phoneHandedness by remember(pairing.sessionId) { mutableStateOf("right") }
     var phoneGender by remember(pairing.sessionId) { mutableStateOf("prefer_not_to_say") }
@@ -1029,7 +1030,46 @@ private fun PhoneRuntimeScreen(
             }
             if (phoneRole == PhoneRuntimeRole.Controller) {
                 val supportedCommands = selectedManifest?.lsl?.supportedCommands?.takeIf { it.isNotEmpty() }
-                    ?: listOf("start_experiment", "pause", "resume", "continue_instruction", "stop_after_block", "request_snapshot")
+                    ?: listOf("start_experiment", "pause", "resume", "continue_instruction", "stop_after_block", "request_snapshot", "operator_note")
+                fun sendControllerCommand(
+                    command: String,
+                    label: String,
+                    commandPayload: JSONObject = JSONObject(),
+                    afterQueued: () -> Unit = {},
+                ) {
+                    scope.launch {
+                        controllerSending = true
+                        runCatching {
+                            withContext(Dispatchers.IO) {
+                                writePhoneControllerCommandOutbox(
+                                    context = context,
+                                    pairing = pairing,
+                                    runPackage = selectedManifest,
+                                    summary = selectedSummary,
+                                    command = command,
+                                    commandPayload = commandPayload,
+                                    nativeBridgeStatus = nativeControllerBridge.status(),
+                                    controllerTransport = controllerTransport,
+                                )
+                            }
+                        }.onSuccess { result ->
+                            val sentNative = result.optBoolean("native_lsl_sent", false)
+                            val ackStatus = result.optString("ack_status", "")
+                            status = if (sentNative) "Sent $label" else "Queued $label"
+                            uploadedArtifact = buildString {
+                                append(if (sentNative) "Native LSL command sent" else "Controller outbox")
+                                if (ackStatus.isNotBlank()) append(" ack=$ackStatus")
+                                append(" ${result.optString("outbox_path", "")}")
+                            }
+                            log(if (sentNative) "Sent $command" else "Queued $command")
+                            afterQueued()
+                        }.onFailure {
+                            error = it.message ?: "Controller command failed."
+                            log(error)
+                        }
+                        controllerSending = false
+                    }
+                }
                 listOf(
                     "start_experiment" to "Start",
                     "pause" to "Pause",
@@ -1039,38 +1079,7 @@ private fun PhoneRuntimeScreen(
                     "request_snapshot" to "Snapshot",
                 ).filter { (command, _) -> command in supportedCommands }.forEach { (command, label) ->
                     Button(
-                        onClick = {
-                            scope.launch {
-                                controllerSending = true
-                                runCatching {
-                                    withContext(Dispatchers.IO) {
-                                        writePhoneControllerCommandOutbox(
-                                            context = context,
-                                            pairing = pairing,
-                                            runPackage = selectedManifest,
-                                            summary = selectedSummary,
-                                            command = command,
-                                            nativeBridgeStatus = nativeControllerBridge.status(),
-                                            controllerTransport = controllerTransport,
-                                        )
-                                    }
-                                }.onSuccess { result ->
-                                    val sentNative = result.optBoolean("native_lsl_sent", false)
-                                    val ackStatus = result.optString("ack_status", "")
-                                    status = if (sentNative) "Sent $label" else "Queued $label"
-                                    uploadedArtifact = buildString {
-                                        append(if (sentNative) "Native LSL command sent" else "Controller outbox")
-                                        if (ackStatus.isNotBlank()) append(" ack=$ackStatus")
-                                        append(" ${result.optString("outbox_path", "")}")
-                                    }
-                                    log(if (sentNative) "Sent $command" else "Queued $command")
-                                }.onFailure {
-                                    error = it.message ?: "Controller command failed."
-                                    log(error)
-                                }
-                                controllerSending = false
-                            }
-                        },
+                        onClick = { sendControllerCommand(command, label) },
                         enabled = selectedSummary != null && !running && !syncing && !controllerSending,
                     ) {
                         Icon(
@@ -1079,6 +1088,35 @@ private fun PhoneRuntimeScreen(
                         )
                         Spacer(Modifier.padding(3.dp))
                         Text(label)
+                    }
+                }
+                if ("operator_note" in supportedCommands) {
+                    val noteReady = controllerOperatorNote.trim().isNotBlank()
+                    OutlinedTextField(
+                        value = controllerOperatorNote,
+                        onValueChange = { controllerOperatorNote = it.take(240) },
+                        label = { Text("Operator note") },
+                        singleLine = true,
+                        enabled = selectedSummary != null && !running && !syncing && !controllerSending,
+                        modifier = Modifier.width(260.dp).heightIn(min = 56.dp),
+                    )
+                    Button(
+                        onClick = {
+                            val note = controllerOperatorNote.trim()
+                            if (note.isNotBlank()) {
+                                sendControllerCommand(
+                                    command = "operator_note",
+                                    label = "Note",
+                                    commandPayload = JSONObject().put("note", note),
+                                    afterQueued = { controllerOperatorNote = "" },
+                                )
+                            }
+                        },
+                        enabled = selectedSummary != null && noteReady && !running && !syncing && !controllerSending,
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null)
+                        Spacer(Modifier.padding(3.dp))
+                        Text("Note")
                     }
                 }
             }

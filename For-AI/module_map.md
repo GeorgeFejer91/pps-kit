@@ -83,9 +83,10 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   only, while native liblsl validation builds also send button presses over a
   long-lived `PPSCommandSignalsV1` outlet and record native send/ack outcomes in
   the outbox row. Controller mode exposes Start/Pause/Resume/Continue/Snapshot
-  plus Stop After Block when `stop_after_block` is advertised by the selected
-  package, allowing two-phone rehearsals to request the same boundary stop as
-  the PC helper. Controller runtime status now also includes
+  plus Stop After Block and Operator Note when those commands are advertised by
+  the selected package, allowing two-phone rehearsals to request the same
+  boundary stop as the PC helper and to record operator observations as typed
+  command payloads. Controller runtime status now also includes
   `pps-android-lsl-stream-descriptions.v1` descriptions for the controller
   command-signal outlet and command-ack inlet, and strict controller validation
   checks those roles, source identity/patterns, privacy, and PC-compatible
