@@ -283,7 +283,7 @@ def main() -> None:
             filename="looming_burst_train_waveform.svg",
             title="Looming Bursts",
             subtitle="Discrete Gaussian noise bursts with a rising approach envelope.",
-            label="DYNASPACE-STYLE BURST TRAIN",
+            label="Hobeika et al. (2020) burst train",
             mode="burst",
             description=(
                 "A stylized Audacity-like waveform for the PPS-kit burst-train source mode: "

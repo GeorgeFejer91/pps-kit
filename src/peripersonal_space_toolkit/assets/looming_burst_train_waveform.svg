@@ -102,7 +102,7 @@
     <rect x="96" y="98" width="792" height="166" fill="none" stroke="#253a2e" stroke-width="1.2"/>
   </g>
   <g font-family="Cascadia Mono, SFMono-Regular, Consolas, monospace" font-size="10" letter-spacing="0.03em">
-    <text x="108" y="116" fill="#8aaa9e">DYNASPACE-STYLE BURST TRAIN</text>
+    <text x="108" y="116" fill="#8aaa9e">Hobeika et al. (2020) burst train</text>
     <text x="888" y="86" text-anchor="end" fill="#68746c">PEAK ENVELOPE</text>
   </g>
   
