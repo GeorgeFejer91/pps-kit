@@ -508,6 +508,74 @@ def point_from_distance_rotation_height(
     }
 
 
+def apply_trajectory_snapshot_to_trajectory(spec: TrajectorySpec, snapshot: dict[str, Any]) -> bool:
+    """Apply a source-level trajectory snapshot to a mutable trajectory spec."""
+
+    if not isinstance(snapshot, dict) or not snapshot:
+        return False
+
+    def snapshot_float(key: str, fallback: float) -> float:
+        try:
+            value = snapshot.get(key, fallback)
+            return float(fallback if value in (None, "") else value)
+        except (TypeError, ValueError):
+            return float(fallback)
+
+    def snapshot_point(key: str) -> dict[str, float] | None:
+        point = snapshot.get(key)
+        if not isinstance(point, dict):
+            return None
+        try:
+            return {
+                "x_m": float(point["x_m"]),
+                "y_m": float(point["y_m"]),
+                "z_m": float(point.get("z_m", 0.0)),
+            }
+        except (KeyError, TypeError, ValueError):
+            return None
+
+    start = snapshot_point("start")
+    end = snapshot_point("end")
+    if start is None or end is None:
+        start = point_from_distance_rotation_height(
+            snapshot_float("start_distance_cm", spec.start_radius_m * 100.0),
+            snapshot_float("start_rotation_deg", azimuth_to_display_rotation_deg(spec.azimuth_start_deg)),
+            snapshot_float("start_height_cm", 0.0),
+        )
+        end = point_from_distance_rotation_height(
+            snapshot_float("end_distance_cm", spec.end_radius_m * 100.0),
+            snapshot_float("end_rotation_deg", azimuth_to_display_rotation_deg(spec.azimuth_end_deg)),
+            snapshot_float("end_height_cm", 0.0),
+        )
+
+    start_spherical = cartesian_to_spherical(start["x_m"], start["y_m"], start["z_m"])
+    end_spherical = cartesian_to_spherical(end["x_m"], end["y_m"], end["z_m"])
+    path_length = snapshot_float(
+        "path_length_m",
+        math.dist((start["x_m"], start["y_m"], start["z_m"]), (end["x_m"], end["y_m"], end["z_m"])),
+    )
+    movement_duration_s = snapshot_float("movement_duration_s", spec.movement_duration_s)
+
+    spec.coordinate_mode = str(snapshot.get("coordinate_mode") or "cartesian")
+    spec.path_direction = str(snapshot.get("path_direction") or "custom")
+    spec.start_x_m = start["x_m"]
+    spec.start_y_m = start["y_m"]
+    spec.start_z_m = start["z_m"]
+    spec.end_x_m = end["x_m"]
+    spec.end_y_m = end["y_m"]
+    spec.end_z_m = end["z_m"]
+    spec.start_radius_m = float(start_spherical["radius_m"])
+    spec.end_radius_m = float(end_spherical["radius_m"])
+    spec.azimuth_start_deg = float(start_spherical["azimuth_deg"])
+    spec.azimuth_end_deg = float(end_spherical["azimuth_deg"])
+    spec.elevation_deg = float(start_spherical["elevation_deg"])
+    spec.path_length_m = max(0.0, float(path_length))
+    spec.propagation_speed_mps = spec.path_length_m / movement_duration_s if movement_duration_s > 0 else 0.0
+    spec.padding_pre_s = max(0.0, snapshot_float("start_hold_s", spec.padding_pre_s))
+    spec.padding_post_s = max(0.0, snapshot_float("end_hold_s", spec.padding_post_s))
+    return True
+
+
 def trajectory_endpoints_xyz(spec: TrajectorySpec) -> tuple[dict[str, float], dict[str, float]]:
     if _uses_cartesian_coordinates(spec) and all(
         value is not None

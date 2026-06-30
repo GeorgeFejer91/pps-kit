@@ -4,7 +4,7 @@ Status: working audit for converting published audio-tactile peripersonal-space 
 
 ## Result
 
-The current preload library contains 21 JSON profiles in `study_templates/`. A profile is considered runnable for exact toolkit recreation only when its `01_profile/profile_parameters_manifest.json` passes the profile checks. Loading through `load_templates()` or having generated preload WAVs is not sufficient by itself.
+The current preload library contains 23 JSON profiles in `study_templates/`: two unpublished Study 5 workflows and 21 published-study profiles. A profile is considered runnable for exact toolkit recreation only when its `01_profile/profile_parameters_manifest.json` passes the profile checks. Loading through `load_templates()` or having generated preload WAVs is not sufficient by itself.
 
 The strongest current coverage is the Canzoneri-style dynamic audio-tactile family: a moving task-irrelevant sound, speeded tactile detection, SOA/distance mapping, baseline or catch trials, and RT-based PPS estimation. Current standardization gaps should be interpreted narrowly as PPS-task execution constraints: unsupported trial families, baseline/catch logic, audio rendering or source-asset types, tactile/response mappings, core timing/repetition rules, body-relative coordinate systems, or apparatus geometry. Clinical populations, interventions, non-audiotactile stimuli, and experimental contexts are notes only unless they change those audiotactile task mechanics.
 

@@ -28,6 +28,7 @@ from peripersonal_space_toolkit.dashboard_app import _stimulus_trajectory_snapsh
 from peripersonal_space_toolkit.design import (
     AudioFileSpec,
     NoiseDefinition,
+    apply_trajectory_snapshot_to_trajectory,
     audio_file_summary,
     block_trial_rows,
     cartesian_to_spherical,
@@ -424,6 +425,7 @@ def source_variant(
     label: str | None = None,
 ) -> dict[str, Any]:
     variant_design = design_from_dict(design_to_dict(design))
+    apply_trajectory_snapshot_to_trajectory(variant_design.trajectory, dict(source.trajectory_snapshot or {}))
     if transform == "identity":
         pass
     elif transform == "reverse":

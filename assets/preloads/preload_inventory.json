@@ -1194,6 +1194,183 @@
       ]
     },
     {
+      "template_id": "study5_dynaspace_lateral_45_pps",
+      "title": "Study 5 DynaSpace lateral 45 profile",
+      "visible_variant_label": "",
+      "variant_display": "Study 5 DynaSpace lateral 45 profile",
+      "publication_status": "unpublished_lab_profile",
+      "profile_type": "local_unpublished_study5_dynaspace_lateral_45_pps",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/study5_dynaspace_lateral_45_pps/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/study5_dynaspace_lateral_45_pps/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "gui_recreatable",
+        "category_label": "GUI-recreatable",
+        "runner_readiness": "ready",
+        "profile_checks_passed": true,
+        "gui_recreatable": true,
+        "segment_0_to_4_profile_checks_passed": true,
+        "segment_1_to_6_materializable": true,
+        "finished_profile": true,
+        "segment_6_launchable": true,
+        "profile_completion_status": "finished_segment_6_launchable",
+        "missing_parameter_count": 0,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "primary_recreation_category": "gui_recreatable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/study5_dynaspace_lateral_45_pps/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/study5_dynaspace_lateral_45_pps/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/study5_dynaspace_lateral_45_pps/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/study5_dynaspace_lateral_45_pps/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/study5_dynaspace_lateral_45_pps/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "DynaSpace looming left 45",
+          "path": "assets/preloads/study5_dynaspace_lateral_45_pps/02_looming_stimuli/looming_DynaSpace_looming_left_45.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/study5_dynaspace_lateral_45_pps/02_looming_stimuli/looming_DynaSpace_looming_left_45.wav",
+          "sha256": "820d2af6f9b6d16ae053746613cf786a5a9762a230c0c20ece2d15e27291e7f0",
+          "duration_s": 3.85,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "DynaSpace looming left 45",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 639.9999,
+            "end_distance_cm": 19.9999,
+            "start_rotation_deg": 315.0,
+            "end_rotation_deg": 315.0,
+            "movement_duration_s": 2.945,
+            "start_hold_s": 0.105,
+            "end_hold_s": 0.8,
+            "path_length_m": 6.2,
+            "coordinate_mode": "cartesian",
+            "path_direction": "approach",
+            "start": {
+              "x_m": -4.525483,
+              "y_m": 4.525483,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": -0.141421,
+              "y_m": 0.141421,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "dynaspace_gaussian_burst_train",
+          "source_profile_parameters": {
+            "burst_count_mode": "duration_derived",
+            "burst_duration_s": 0.03,
+            "rise_fall_s": 0.01,
+            "target_period_s": 0.095,
+            "onset_s": 0.3,
+            "active_window_source": "raw_dynaspace_active_burst_window",
+            "spacing_policy": "symmetric_fit",
+            "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues.",
+            "active_window_s": 3.07,
+            "evidence_basis": "Raw DynaSpace WAV audit detected 33 peaks with about 95 ms median IOI. Hobeika lineage reports 30 ms Gaussian white-noise bursts, 10 ms rise/fall, and 65 ms inter-burst interval; PPS-kit derives burst count from the active window and target IOI instead of hard-coding 33."
+          }
+        },
+        {
+          "label": "DynaSpace looming right 45",
+          "path": "assets/preloads/study5_dynaspace_lateral_45_pps/02_looming_stimuli/looming_DynaSpace_looming_right_45.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/study5_dynaspace_lateral_45_pps/02_looming_stimuli/looming_DynaSpace_looming_right_45.wav",
+          "sha256": "c4e49270d601f69063e8375c0af754daa7be58c0892af3dbbd87b5e017d6ee7e",
+          "duration_s": 3.85,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "DynaSpace looming right 45",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 639.9999,
+            "end_distance_cm": 19.9999,
+            "start_rotation_deg": 45.0,
+            "end_rotation_deg": 45.0,
+            "movement_duration_s": 2.945,
+            "start_hold_s": 0.105,
+            "end_hold_s": 0.8,
+            "path_length_m": 6.2,
+            "coordinate_mode": "cartesian",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 4.525483,
+              "y_m": 4.525483,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.141421,
+              "y_m": 0.141421,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "dynaspace_gaussian_burst_train",
+          "source_profile_parameters": {
+            "burst_count_mode": "duration_derived",
+            "burst_duration_s": 0.03,
+            "rise_fall_s": 0.01,
+            "target_period_s": 0.095,
+            "onset_s": 0.3,
+            "active_window_source": "raw_dynaspace_active_burst_window",
+            "spacing_policy": "symmetric_fit",
+            "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues.",
+            "active_window_s": 3.07,
+            "evidence_basis": "Raw DynaSpace WAV audit detected 33 peaks with about 95 ms median IOI. Hobeika lineage reports 30 ms Gaussian white-noise bursts, 10 ms rise/fall, and 65 ms inter-burst interval; PPS-kit derives burst count from the active window and target IOI instead of hard-coding 33."
+          }
+        }
+      ]
+    },
+    {
       "template_id": "canzoneri_2013_amputation_prosthesis",
       "title": "Canzoneri 2013 amputation/prosthesis PPS",
       "visible_variant_label": "",

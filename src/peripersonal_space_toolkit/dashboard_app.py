@@ -37,6 +37,7 @@ from .design import (
     SUPPORTED_BASELINE_STRATEGIES,
     SUPPORTED_NOISE_TYPES,
     StimulusDesign,
+    apply_trajectory_snapshot_to_trajectory,
     azimuth_to_display_rotation_deg,
     audio_file_summary,
     block_trial_rows,
@@ -5240,6 +5241,7 @@ def _stationary_burst_source_for_segment(
         source_parameters = gold_standard_looming_source_parameters(source_parameters)
 
     stationary_design = _copy_design(design)
+    apply_trajectory_snapshot_to_trajectory(stationary_design.trajectory, dict(noise.trajectory_snapshot or {}))
     stationary_design.name = f"{design.name} stationary baseline {label}".strip()
     stationary_design.noises = [
         NoiseDefinition(

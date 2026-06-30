@@ -1,15 +1,22 @@
 # Study 5 Protocol Notes
 
-This toolkit packages the audio-tactile peripersonal-space task used for Study 5.
+This toolkit packages the audio-tactile peripersonal-space task used for Study 5, plus an approved lateral DynaSpace variant for pilot work.
 
 ## Timing Contract
 
 - spoken breathing instruction: exactly 4.000 s
-- looming stimulus segment: exactly 4.000 s
-- full trial: exactly 8.000 s
+- canonical white/pink looming stimulus segment: exactly 4.000 s
+- canonical full trial: exactly 8.000 s
 - tactile cue duration: 100 ms
 - tactile SOAs: 0, 300, 800, 1500, 2200, 2700 ms
-- looming approach: 110 cm to 10 cm over 3 s, embedded in a 4 s stimulus window
+- canonical looming approach: 110 cm to 10 cm over 3 s, embedded in a 4 s stimulus window
+
+The `study5_dynaspace_lateral_45_pps` variant keeps the 4-second original
+Study 5 inhale/exhale instruction clips and Segment 6 run-instruction workflow,
+but swaps the looming segment to the smartphone DynaSpace timing: 3.850 s total,
+0.105 s pre-hold, 2.945 s movement, 0.800 s post-hold, and SOA/distance anchors
+at `105, 1625, 2385, 2765, 2955, 3050` ms mapped to `640, 320, 160, 80, 40,
+20` cm.
 
 Prepared participant block WAVs apply a provisional Woojer audio-path
 compensation: the tactile drive on channel 3 is emitted 23 ms before the
@@ -52,11 +59,15 @@ click used only to continue an instruction is not counted as a trial response.
 
 Study 5 includes owned 4-second auditory-only looming WAVs for the canonical white/pink source pool under `assets/preloads/study5_box_breathing_pps/02_looming_stimuli/`. The profile keeps only `Pink frontal` and `White frontal` as active looming sources. These files are binaural/source stimuli only; tactile events are still introduced later from the SOA schedule during session preparation. Segment 4 family repetitions are audio-tactile `6.0`, baseline `3.0`, and catch `6.0`, preserving the prepared pool at 204 rows and six 34-trial blocks.
 
-The preload asset inventory lives at `assets/preloads/preload_inventory.json`, with a Study 5 profile manifest at `assets/preloads/study5_box_breathing_pps/preload_manifest.json`. Each preload profile uses the same local file-cabinet structure as the HTML dashboard: `01_profile`, `02_looming_stimuli`, `03_baseline_strategy`, `04_trial_designer`, and `05_run_setup`. The dashboard/backend use this inventory to verify local assets and read source, trajectory, baseline, trial, and run-default metadata.
+The lateral DynaSpace Study 5 variant lives under `assets/preloads/study5_dynaspace_lateral_45_pps/02_looming_stimuli/`. It contains two 3.85-second auditory-only white-noise burst-train WAVs, `DynaSpace looming left 45` and `DynaSpace looming right 45`, with source-level trajectory snapshots at display rotations 315 and 45 degrees. Segment 3 stationary-burst baseline generation uses the matching side-specific source snapshot, so baseline and looming families preserve the same left/right factor.
+
+The preload asset inventory lives at `assets/preloads/preload_inventory.json`, with Study 5 profile manifests at `assets/preloads/study5_box_breathing_pps/preload_manifest.json` and `assets/preloads/study5_dynaspace_lateral_45_pps/preload_manifest.json`. Each preload profile uses the same local file-cabinet structure as the HTML dashboard: `01_profile`, `02_looming_stimuli`, `03_baseline_strategy`, `04_trial_designer`, and `05_run_setup`. The dashboard/backend use this inventory to verify local assets and read source, trajectory, baseline, trial, and run-default metadata.
 
 ## Dashboard Preload
 
-The HTML dashboard profile `study5_box_breathing_pps` is the unpublished local Study 5 preload and the only Study 5 profile in the repository. It is separate from published-study profiles such as Canzoneri et al. (2012) and preloads both instruction variants, bundled 4-second auditory-only white/pink source WAVs, and the default `Inhale instruction | Looming Stimulus` and `Exhale instruction | Looming Stimulus` within-block trial type rows. The rows are logged as `trial_type_label` values and scheduled sequentially top-to-bottom, so Study 5 plays the inhale trial type followed by the exhale trial type. Instruction snippet loading and selection belong in the Trial Designer segment, not in the Looming Stimuli Builder.
+The HTML dashboard profile `study5_box_breathing_pps` is the first/default unpublished local Study 5 preload. It is separate from published-study profiles such as Canzoneri et al. (2012) and preloads both instruction variants, bundled 4-second auditory-only white/pink source WAVs, and the default `Inhale instruction | Looming Stimulus` and `Exhale instruction | Looming Stimulus` within-block trial type rows. The rows are logged as `trial_type_label` values and scheduled sequentially top-to-bottom, so Study 5 plays the inhale trial type followed by the exhale trial type. Instruction snippet loading and selection belong in the Trial Designer segment, not in the Looming Stimuli Builder.
+
+The HTML dashboard also exposes `study5_dynaspace_lateral_45_pps` as the approved lateral Study 5 variant. It uses the same two inhale/exhale row labels and fixed instruction clips, but the randomized looming box alternates between left and right 45-degree DynaSpace source labels. Its Segment 4 defaults, audio-tactile `5.0`, baseline `2.5`, and catch `6.0`, preserve the 204-row / six 34-trial-block budget while balancing inhale/exhale and left/right counts.
 
 This profile is the default dashboard startup profile. Fresh launches and scratch-custom startup states initialize from Study 5 so the current lab workflow is ready without selecting a profile manually.
 

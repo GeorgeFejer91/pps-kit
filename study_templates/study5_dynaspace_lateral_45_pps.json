@@ -1,0 +1,737 @@
+{
+  "template_id": "study5_dynaspace_lateral_45_pps",
+  "title": "Study 5 DynaSpace lateral 45 profile",
+  "citation": "PPS Toolkit Study 5 DynaSpace lateral 45 protocol (2026). Box-breathing Study 5 variant adapted from the DynaSpace smartphone PPS validation stimuli. Unpublished lab profile.",
+  "source_url": "docs/STUDY5_PROTOCOL.md",
+  "doi": "",
+  "verification_status": "verified",
+  "notes": "Unpublished Study 5 variant using original inhale/exhale instruction clips with the DynaSpace smartphone PPS white burst-train timing, 640-to-20 cm looming path, fixed-640 cm stationary-burst baseline comparator, six tactile anchors, and balanced left/right 45-degree source trajectories.",
+  "reference_parameters": {
+    "profile_type": "local_unpublished_study5_dynaspace_lateral_45_pps",
+    "publication_status": "unpublished_lab_profile",
+    "profile_family": "study5_variant",
+    "source_profile_id": "study5_dynaspace_lateral_45_pps",
+    "customized_from_profile_id": "study5_box_breathing_pps",
+    "smartphone_reference_profile_id": "roussel_2025_dynaspace_mobile_pps",
+    "paper_role": "Study 5 respiratory-phase PPS variant using the DynaSpace smartphone looming/fixed-source timing and left/right 45-degree trajectory orientation.",
+    "instruction_assets_bundled": true,
+    "custom_clips_preloaded": true,
+    "instruction_duration_s": 4.0,
+    "default_instruction_asset_variant": "original_study5",
+    "inhale_instruction_asset": "assets/breathing/original_study5/Inhale-2-3-4-hold_FIXED.wav",
+    "exhale_instruction_asset": "assets/breathing/original_study5/Exhale-2-3-4-hold_FIXED.wav",
+    "instruction_asset_variants": {
+      "british_kokoro": {
+        "label": "British Kokoro voice",
+        "manifest": "assets/breathing/british_kokoro/spoken_assets_manifest.json",
+        "inhale_instruction_asset": "assets/breathing/british_kokoro/Inhale-2-3-4-hold_FIXED.wav",
+        "exhale_instruction_asset": "assets/breathing/british_kokoro/Exhale-2-3-4-hold_FIXED.wav"
+      },
+      "original_study5": {
+        "label": "Original Study 5 instruction audio",
+        "manifest": "assets/breathing/original_study5/spoken_assets_manifest.json",
+        "inhale_instruction_asset": "assets/breathing/original_study5/Inhale-2-3-4-hold_FIXED.wav",
+        "exhale_instruction_asset": "assets/breathing/original_study5/Exhale-2-3-4-hold_FIXED.wav"
+      }
+    },
+    "custom_clip_assets": [
+      {
+        "label": "Inhale instruction",
+        "phase": "Inhale",
+        "variant": "original_study5",
+        "path": "assets/breathing/original_study5/Inhale-2-3-4-hold_FIXED.wav",
+        "duration_s": 4.0,
+        "default": true
+      },
+      {
+        "label": "Exhale instruction",
+        "phase": "Exhale",
+        "variant": "original_study5",
+        "path": "assets/breathing/original_study5/Exhale-2-3-4-hold_FIXED.wav",
+        "duration_s": 4.0,
+        "default": true
+      }
+    ],
+    "dashboard_run_setup": {
+      "experiment_structure": "pre_post",
+      "seed": 20260745,
+      "instruction_profile": {
+        "schema": "pps-run-instructions.v1",
+        "slots": [
+          {
+            "slot": "before_experiment",
+            "label": "General instructions",
+            "enabled": true,
+            "required": false,
+            "path": "assets/breathing/original_study5/General_Instructions.wav",
+            "duration_s": 85.707755,
+            "sample_rate": 44100,
+            "channels": 1,
+            "continue_mode": "click",
+            "delay_s": 0.0,
+            "button_label": "Start experiment",
+            "source": "original_study5"
+          },
+          {
+            "slot": "before_each_block",
+            "label": "Pre-block instruction",
+            "enabled": true,
+            "required": false,
+            "path": "assets/breathing/original_study5/Pre-Block_Instruction.wav",
+            "duration_s": 8.418073,
+            "sample_rate": 44100,
+            "channels": 1,
+            "continue_mode": "delay",
+            "delay_s": 0.0,
+            "button_label": "Start block",
+            "source": "original_study5"
+          },
+          {
+            "slot": "after_each_block",
+            "label": "Post-block instruction",
+            "enabled": true,
+            "required": false,
+            "path": "assets/breathing/original_study5/Post-Block_Instruction.wav",
+            "duration_s": 8.829388,
+            "sample_rate": 44100,
+            "channels": 1,
+            "continue_mode": "click",
+            "delay_s": 0.0,
+            "button_label": "Next block",
+            "source": "original_study5"
+          },
+          {
+            "slot": "between_conditions",
+            "label": "Condition transition",
+            "enabled": true,
+            "required": false,
+            "path": "assets/breathing/original_study5/InterimMessage.wav",
+            "duration_s": 10.109388,
+            "sample_rate": 44100,
+            "channels": 1,
+            "continue_mode": "button",
+            "delay_s": 0.0,
+            "button_label": "Start next condition",
+            "source": "original_study5"
+          },
+          {
+            "slot": "after_experiment",
+            "label": "Finish message",
+            "enabled": true,
+            "required": false,
+            "path": "assets/breathing/original_study5/FinishMessage.wav",
+            "duration_s": 7.000816,
+            "sample_rate": 44100,
+            "channels": 1,
+            "continue_mode": "delay",
+            "delay_s": 0.0,
+            "button_label": "Finish",
+            "source": "original_study5"
+          }
+        ]
+      }
+    },
+    "trial_unit_duration_s": 7.85,
+    "instruction_window_s": 4.0,
+    "auditory_stimulus_window_s": 3.85,
+    "looming_stimulus_window_s": 3.85,
+    "movement_duration_s": 2.945,
+    "movement_start_distance_cm": 640.0,
+    "movement_end_distance_cm": 20.0,
+    "start_hold_s": 0.105,
+    "end_hold_s": 0.8,
+    "tactile_pulse_duration_ms": 100,
+    "dynaspace_tactile_anchor_ms": [
+      105,
+      1625,
+      2385,
+      2765,
+      2955,
+      3050
+    ],
+    "dynaspace_spatial_anchor_cm": [
+      640.0,
+      320.0,
+      160.0,
+      80.0,
+      40.0,
+      20.0
+    ],
+    "trajectory_balance_policy": "Two source-level trajectory snapshots encode left -45 degrees and right +45 degrees. Segment 4 repetitions preserve equal left/right counts across audio-tactile, stationary-burst baseline, and catch families.",
+    "baseline_policy": "The smartphone fixed 640 cm comparator is mapped onto the Study 5 Segment 3 stationary_burst baseline family: each looming source is replaced by a fixed DynaSpace-style burst train at the same left/right 45-degree start anchor while tactile timing remains matched to the six DynaSpace anchors.",
+    "source_asset_equivalence": "trajectory, condition logic, 33-burst temporal structure, and approximate 95 ms burst spacing are matched; exact Android noise seed, Spat/LISTEN renderer, room response, phone transducer response, and motor mechanics are not bit-matched",
+    "stimulus_generation_operating_protocol": {
+      "schema": "pps-dynaspace-consensus-generation-v1",
+      "decision": "Adopt the DynaSpace/Hobeika burst-train dry source as the smartphone-profile source profile while delegating spatialization to the 3DTI/SOFA renderer.",
+      "evidence_basis": [
+        "Raw DynaSpace WAV audit detected 33 bursts with about 95 ms median inter-onset interval.",
+        "Hobeika lineage reports Gaussian white-noise bursts with 30 ms duration, 10 ms rise/fall, and 65 ms inter-burst interval.",
+        "Consensus searches supported broadband onset transients for localization/salience and supported HRTF/ILD/ITD/reverb/near-field cues as renderer-level spatial properties.",
+        "Consensus searches warned that rising intensity alone can produce looming salience, so matched-level controls remain necessary for causal inference."
+      ],
+      "dry_source_profile": "dynaspace_gaussian_burst_train",
+      "spatialization_policy": "Render HRTF, ILD, ITD, near-field, distance attenuation, future trajectory angle, and optional room/DRR/IACC cues through 3DTI/SOFA rather than hard-coding them into the dry source.",
+      "control_policy": "Keep the DynaSpace replication contrast available, and add matched-level control variants for inference-focused future studies."
+    },
+    "original_audio_assets": [
+      {
+        "label": "Android looming burst train",
+        "filename": "bursttrainlooming.wav",
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "frames": 184800,
+        "duration_s": 3.85,
+        "subtype": "PCM_16",
+        "sha256": "610c9a9c22329f6dfb4a37917cfdead552042e6d2f2987dacc418385e7570da2",
+        "redistributed_in_pps_toolkit": false
+      },
+      {
+        "label": "Android fixed burst train",
+        "filename": "bursttrainfixe.wav",
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "frames": 184800,
+        "duration_s": 3.85,
+        "subtype": "PCM_16",
+        "sha256": "56f8afff1b0985a0e3585bdb525f3a76c0bd1f57cf711a667bcbfa03b1f69fe1",
+        "redistributed_in_pps_toolkit": false
+      }
+    ],
+    "stimulus_asset_policy": "The public PPS Toolkit profile does not redistribute the Android app's raw WAVs. The preload catalog bakes 44.1 kHz toolkit-generated DynaSpace-style burst-train sources through the existing FABIAN/SOFA renderer so the profile remains runnable and publication-safe.",
+    "local_only_assets": true,
+    "canonical_study5_profile": false,
+    "source_pool_profile": "dynaspace_lateral_45_white_burst",
+    "noise_source_policy": "Two DynaSpace-style white burst-train looming sources, left -45 degrees and right +45 degrees, with stationary-burst baselines generated from the same source snapshots. Segment 4 repetitions are audio-tactile 5.0, baseline 2.5, and catch 6.0 to retain the 204-row Study 5 budget despite six DynaSpace SOA anchors.",
+    "profile_check_complete": true
+  },
+  "design": {
+    "name": "Study 5 DynaSpace lateral 45 PPS design",
+    "sofa_file": "assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa",
+    "noises": [
+      {
+        "label": "DynaSpace looming left 45",
+        "noise_type": "white",
+        "azimuth_deg": -45.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0,
+        "source_profile": "dynaspace_gaussian_burst_train",
+        "source_profile_parameters": {
+          "burst_count_mode": "duration_derived",
+          "burst_duration_s": 0.03,
+          "rise_fall_s": 0.01,
+          "target_period_s": 0.095,
+          "onset_s": 0.3,
+          "active_window_s": 3.07,
+          "active_window_source": "raw_dynaspace_active_burst_window",
+          "spacing_policy": "symmetric_fit",
+          "evidence_basis": "Raw DynaSpace WAV audit detected 33 peaks with about 95 ms median IOI. Hobeika lineage reports 30 ms Gaussian white-noise bursts, 10 ms rise/fall, and 65 ms inter-burst interval; PPS-kit derives burst count from the active window and target IOI instead of hard-coding 33."
+        },
+        "prebaked_path": "assets/preloads/study5_dynaspace_lateral_45_pps/02_looming_stimuli/looming_DynaSpace_looming_left_45.wav",
+        "sequence_order": 2,
+        "motion_mode": "looming",
+        "trajectory_snapshot": {
+          "schema": "pps-stimulus-trajectory.v1",
+          "label": "DynaSpace looming left 45",
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "start_distance_cm": 640.0,
+          "end_distance_cm": 20.0,
+          "start_rotation_deg": 315.0,
+          "end_rotation_deg": 315.0,
+          "movement_duration_s": 2.945,
+          "start_hold_s": 0.105,
+          "end_hold_s": 0.8,
+          "path_length_m": 6.2,
+          "coordinate_mode": "cartesian",
+          "path_direction": "approach",
+          "start": {
+            "x_m": -4.525483,
+            "y_m": 4.525483,
+            "z_m": 0.0
+          },
+          "end": {
+            "x_m": -0.141421,
+            "y_m": 0.141421,
+            "z_m": 0.0
+          }
+        }
+      },
+      {
+        "label": "DynaSpace looming right 45",
+        "noise_type": "white",
+        "azimuth_deg": 45.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0,
+        "source_profile": "dynaspace_gaussian_burst_train",
+        "source_profile_parameters": {
+          "burst_count_mode": "duration_derived",
+          "burst_duration_s": 0.03,
+          "rise_fall_s": 0.01,
+          "target_period_s": 0.095,
+          "onset_s": 0.3,
+          "active_window_s": 3.07,
+          "active_window_source": "raw_dynaspace_active_burst_window",
+          "spacing_policy": "symmetric_fit",
+          "evidence_basis": "Raw DynaSpace WAV audit detected 33 peaks with about 95 ms median IOI. Hobeika lineage reports 30 ms Gaussian white-noise bursts, 10 ms rise/fall, and 65 ms inter-burst interval; PPS-kit derives burst count from the active window and target IOI instead of hard-coding 33."
+        },
+        "prebaked_path": "assets/preloads/study5_dynaspace_lateral_45_pps/02_looming_stimuli/looming_DynaSpace_looming_right_45.wav",
+        "sequence_order": 2,
+        "motion_mode": "looming",
+        "trajectory_snapshot": {
+          "schema": "pps-stimulus-trajectory.v1",
+          "label": "DynaSpace looming right 45",
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "start_distance_cm": 640.0,
+          "end_distance_cm": 20.0,
+          "start_rotation_deg": 45.0,
+          "end_rotation_deg": 45.0,
+          "movement_duration_s": 2.945,
+          "start_hold_s": 0.105,
+          "end_hold_s": 0.8,
+          "path_length_m": 6.2,
+          "coordinate_mode": "cartesian",
+          "path_direction": "approach",
+          "start": {
+            "x_m": 4.525483,
+            "y_m": 4.525483,
+            "z_m": 0.0
+          },
+          "end": {
+            "x_m": 0.141421,
+            "y_m": 0.141421,
+            "z_m": 0.0
+          }
+        }
+      }
+    ],
+    "custom_looming_files": [],
+    "prestimulus_files": [
+      {
+        "label": "Inhale instruction",
+        "path": "assets/breathing/original_study5/Inhale-2-3-4-hold_FIXED.wav",
+        "target_duration_s": 4.0,
+        "render_mode": "preserve",
+        "gain": 1.0,
+        "placement": "before",
+        "target_source_label": "",
+        "phase": "Inhale",
+        "gap_s": 0.0,
+        "sequence_order": 1,
+        "motion_mode": "stationary"
+      },
+      {
+        "label": "Exhale instruction",
+        "path": "assets/breathing/original_study5/Exhale-2-3-4-hold_FIXED.wav",
+        "target_duration_s": 4.0,
+        "render_mode": "preserve",
+        "gain": 1.0,
+        "placement": "before",
+        "target_source_label": "",
+        "phase": "Exhale",
+        "gap_s": 0.0,
+        "sequence_order": 1,
+        "motion_mode": "stationary"
+      }
+    ],
+    "trajectory": {
+      "start_radius_m": 6.4,
+      "end_radius_m": 0.2,
+      "path_direction": "approach",
+      "coordinate_mode": "cartesian",
+      "start_x_m": -4.525483,
+      "start_y_m": 4.525483,
+      "start_z_m": 0.0,
+      "end_x_m": -0.141421,
+      "end_y_m": 0.141421,
+      "end_z_m": 0.0,
+      "path_length_m": 6.2,
+      "propagation_speed_mps": 2.1052631579,
+      "azimuth_start_deg": -45.0,
+      "azimuth_end_deg": -45.0,
+      "elevation_deg": 0.0,
+      "padding_pre_s": 0.105,
+      "padding_post_s": 0.8,
+      "sample_rate": 44100,
+      "use_inverse_square": true
+    },
+    "protocol": {
+      "repetitions_per_condition": 1,
+      "trial_pool_repetition_defaults": {
+        "default": 5.0,
+        "audio_tactile": 5.0,
+        "baseline": 2.5,
+        "catch": 6.0
+      },
+      "soa_values_ms": [
+        105,
+        1625,
+        2385,
+        2765,
+        2955,
+        3050
+      ],
+      "spatial_values_cm": [
+        640.0,
+        320.0,
+        160.0,
+        80.0,
+        40.0,
+        20.0
+      ],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": [
+        "source_trajectory"
+      ],
+      "tactile_sites": [
+        "hand"
+      ],
+      "include_catch_trials": true,
+      "catch_trial_percentage": 0.0,
+      "catch_trials_exact": null,
+      "include_baseline_trials": true,
+      "baseline_strategy": "stationary_burst",
+      "baseline_trial_percentage": 0.0,
+      "baseline_soa_values_ms": [],
+      "baseline_custom_trial_mode": "tactile_only",
+      "respiratory_phases": [
+        "Inhale",
+        "Exhale"
+      ],
+      "blocks": 6,
+      "block_specs": [
+        {
+          "label": "Block 1",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 2",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 3",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 4",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 5",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 6",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        }
+      ],
+      "trial_strips": [
+        {
+          "strip_id": "study5-inhale-row",
+          "label": "Inhale trial type",
+          "audio_tactile_percentage": 100.0,
+          "catch_percentage": 0.0,
+          "baseline_percentage": 0.0,
+          "elements": [
+            {
+              "element_id": "study5-inhale-instruction",
+              "kind": "fixed_audio",
+              "label": "Inhale instruction",
+              "source_label": "Inhale instruction",
+              "source_labels": [],
+              "randomized": false
+            },
+            {
+              "element_id": "study5-inhale-looming",
+              "kind": "looming_stimulus",
+              "label": "Looming Stimulus",
+              "source_label": "",
+              "source_labels": [
+                "DynaSpace looming left 45",
+                "DynaSpace looming right 45"
+              ],
+              "randomized": true
+            }
+          ]
+        },
+        {
+          "strip_id": "study5-exhale-row",
+          "label": "Exhale trial type",
+          "audio_tactile_percentage": 100.0,
+          "catch_percentage": 0.0,
+          "baseline_percentage": 0.0,
+          "elements": [
+            {
+              "element_id": "study5-exhale-instruction",
+              "kind": "fixed_audio",
+              "label": "Exhale instruction",
+              "source_label": "Exhale instruction",
+              "source_labels": [],
+              "randomized": false
+            },
+            {
+              "element_id": "study5-exhale-looming",
+              "kind": "looming_stimulus",
+              "label": "Looming Stimulus",
+              "source_label": "",
+              "source_labels": [
+                "DynaSpace looming left 45",
+                "DynaSpace looming right 45"
+              ],
+              "randomized": true
+            }
+          ]
+        }
+      ],
+      "trial_randomization_strategy": "no_immediate_repeats",
+      "block_order_randomization": "counterbalanced_rotation",
+      "max_consecutive_same_trial_type": 2,
+      "participants": 50,
+      "random_seed": 20260745
+    },
+    "study_profile_title": "Study 5 DynaSpace lateral 45 profile",
+    "study_profile_notes": "Unpublished Study 5 variant using original inhale/exhale instruction clips with the DynaSpace smartphone PPS white burst-train timing, 640-to-20 cm looming path, fixed-640 cm stationary-burst baseline comparator, six tactile anchors, and balanced left/right 45-degree source trajectories.",
+    "study_profile_reference_parameters": {
+      "profile_type": "local_unpublished_study5_dynaspace_lateral_45_pps",
+      "publication_status": "unpublished_lab_profile",
+      "profile_family": "study5_variant",
+      "source_profile_id": "study5_dynaspace_lateral_45_pps",
+      "customized_from_profile_id": "study5_box_breathing_pps",
+      "smartphone_reference_profile_id": "roussel_2025_dynaspace_mobile_pps",
+      "paper_role": "Study 5 respiratory-phase PPS variant using the DynaSpace smartphone looming/fixed-source timing and left/right 45-degree trajectory orientation.",
+      "instruction_assets_bundled": true,
+      "custom_clips_preloaded": true,
+      "instruction_duration_s": 4.0,
+      "default_instruction_asset_variant": "original_study5",
+      "inhale_instruction_asset": "assets/breathing/original_study5/Inhale-2-3-4-hold_FIXED.wav",
+      "exhale_instruction_asset": "assets/breathing/original_study5/Exhale-2-3-4-hold_FIXED.wav",
+      "instruction_asset_variants": {
+        "british_kokoro": {
+          "label": "British Kokoro voice",
+          "manifest": "assets/breathing/british_kokoro/spoken_assets_manifest.json",
+          "inhale_instruction_asset": "assets/breathing/british_kokoro/Inhale-2-3-4-hold_FIXED.wav",
+          "exhale_instruction_asset": "assets/breathing/british_kokoro/Exhale-2-3-4-hold_FIXED.wav"
+        },
+        "original_study5": {
+          "label": "Original Study 5 instruction audio",
+          "manifest": "assets/breathing/original_study5/spoken_assets_manifest.json",
+          "inhale_instruction_asset": "assets/breathing/original_study5/Inhale-2-3-4-hold_FIXED.wav",
+          "exhale_instruction_asset": "assets/breathing/original_study5/Exhale-2-3-4-hold_FIXED.wav"
+        }
+      },
+      "custom_clip_assets": [
+        {
+          "label": "Inhale instruction",
+          "phase": "Inhale",
+          "variant": "original_study5",
+          "path": "assets/breathing/original_study5/Inhale-2-3-4-hold_FIXED.wav",
+          "duration_s": 4.0,
+          "default": true
+        },
+        {
+          "label": "Exhale instruction",
+          "phase": "Exhale",
+          "variant": "original_study5",
+          "path": "assets/breathing/original_study5/Exhale-2-3-4-hold_FIXED.wav",
+          "duration_s": 4.0,
+          "default": true
+        }
+      ],
+      "dashboard_run_setup": {
+        "experiment_structure": "pre_post",
+        "seed": 20260745,
+        "instruction_profile": {
+          "schema": "pps-run-instructions.v1",
+          "slots": [
+            {
+              "slot": "before_experiment",
+              "label": "General instructions",
+              "enabled": true,
+              "required": false,
+              "path": "assets/breathing/original_study5/General_Instructions.wav",
+              "duration_s": 85.707755,
+              "sample_rate": 44100,
+              "channels": 1,
+              "continue_mode": "click",
+              "delay_s": 0.0,
+              "button_label": "Start experiment",
+              "source": "original_study5"
+            },
+            {
+              "slot": "before_each_block",
+              "label": "Pre-block instruction",
+              "enabled": true,
+              "required": false,
+              "path": "assets/breathing/original_study5/Pre-Block_Instruction.wav",
+              "duration_s": 8.418073,
+              "sample_rate": 44100,
+              "channels": 1,
+              "continue_mode": "delay",
+              "delay_s": 0.0,
+              "button_label": "Start block",
+              "source": "original_study5"
+            },
+            {
+              "slot": "after_each_block",
+              "label": "Post-block instruction",
+              "enabled": true,
+              "required": false,
+              "path": "assets/breathing/original_study5/Post-Block_Instruction.wav",
+              "duration_s": 8.829388,
+              "sample_rate": 44100,
+              "channels": 1,
+              "continue_mode": "click",
+              "delay_s": 0.0,
+              "button_label": "Next block",
+              "source": "original_study5"
+            },
+            {
+              "slot": "between_conditions",
+              "label": "Condition transition",
+              "enabled": true,
+              "required": false,
+              "path": "assets/breathing/original_study5/InterimMessage.wav",
+              "duration_s": 10.109388,
+              "sample_rate": 44100,
+              "channels": 1,
+              "continue_mode": "button",
+              "delay_s": 0.0,
+              "button_label": "Start next condition",
+              "source": "original_study5"
+            },
+            {
+              "slot": "after_experiment",
+              "label": "Finish message",
+              "enabled": true,
+              "required": false,
+              "path": "assets/breathing/original_study5/FinishMessage.wav",
+              "duration_s": 7.000816,
+              "sample_rate": 44100,
+              "channels": 1,
+              "continue_mode": "delay",
+              "delay_s": 0.0,
+              "button_label": "Finish",
+              "source": "original_study5"
+            }
+          ]
+        }
+      },
+      "trial_unit_duration_s": 7.85,
+      "instruction_window_s": 4.0,
+      "auditory_stimulus_window_s": 3.85,
+      "looming_stimulus_window_s": 3.85,
+      "movement_duration_s": 2.945,
+      "movement_start_distance_cm": 640.0,
+      "movement_end_distance_cm": 20.0,
+      "start_hold_s": 0.105,
+      "end_hold_s": 0.8,
+      "tactile_pulse_duration_ms": 100,
+      "dynaspace_tactile_anchor_ms": [
+        105,
+        1625,
+        2385,
+        2765,
+        2955,
+        3050
+      ],
+      "dynaspace_spatial_anchor_cm": [
+        640.0,
+        320.0,
+        160.0,
+        80.0,
+        40.0,
+        20.0
+      ],
+      "trajectory_balance_policy": "Two source-level trajectory snapshots encode left -45 degrees and right +45 degrees. Segment 4 repetitions preserve equal left/right counts across audio-tactile, stationary-burst baseline, and catch families.",
+      "baseline_policy": "The smartphone fixed 640 cm comparator is mapped onto the Study 5 Segment 3 stationary_burst baseline family: each looming source is replaced by a fixed DynaSpace-style burst train at the same left/right 45-degree start anchor while tactile timing remains matched to the six DynaSpace anchors.",
+      "source_asset_equivalence": "trajectory, condition logic, 33-burst temporal structure, and approximate 95 ms burst spacing are matched; exact Android noise seed, Spat/LISTEN renderer, room response, phone transducer response, and motor mechanics are not bit-matched",
+      "stimulus_generation_operating_protocol": {
+        "schema": "pps-dynaspace-consensus-generation-v1",
+        "decision": "Adopt the DynaSpace/Hobeika burst-train dry source as the smartphone-profile source profile while delegating spatialization to the 3DTI/SOFA renderer.",
+        "evidence_basis": [
+          "Raw DynaSpace WAV audit detected 33 bursts with about 95 ms median inter-onset interval.",
+          "Hobeika lineage reports Gaussian white-noise bursts with 30 ms duration, 10 ms rise/fall, and 65 ms inter-burst interval.",
+          "Consensus searches supported broadband onset transients for localization/salience and supported HRTF/ILD/ITD/reverb/near-field cues as renderer-level spatial properties.",
+          "Consensus searches warned that rising intensity alone can produce looming salience, so matched-level controls remain necessary for causal inference."
+        ],
+        "dry_source_profile": "dynaspace_gaussian_burst_train",
+        "spatialization_policy": "Render HRTF, ILD, ITD, near-field, distance attenuation, future trajectory angle, and optional room/DRR/IACC cues through 3DTI/SOFA rather than hard-coding them into the dry source.",
+        "control_policy": "Keep the DynaSpace replication contrast available, and add matched-level control variants for inference-focused future studies."
+      },
+      "original_audio_assets": [
+        {
+          "label": "Android looming burst train",
+          "filename": "bursttrainlooming.wav",
+          "sample_rate_hz": 48000,
+          "channels": 2,
+          "frames": 184800,
+          "duration_s": 3.85,
+          "subtype": "PCM_16",
+          "sha256": "610c9a9c22329f6dfb4a37917cfdead552042e6d2f2987dacc418385e7570da2",
+          "redistributed_in_pps_toolkit": false
+        },
+        {
+          "label": "Android fixed burst train",
+          "filename": "bursttrainfixe.wav",
+          "sample_rate_hz": 48000,
+          "channels": 2,
+          "frames": 184800,
+          "duration_s": 3.85,
+          "subtype": "PCM_16",
+          "sha256": "56f8afff1b0985a0e3585bdb525f3a76c0bd1f57cf711a667bcbfa03b1f69fe1",
+          "redistributed_in_pps_toolkit": false
+        }
+      ],
+      "stimulus_asset_policy": "The public PPS Toolkit profile does not redistribute the Android app's raw WAVs. The preload catalog bakes 44.1 kHz toolkit-generated DynaSpace-style burst-train sources through the existing FABIAN/SOFA renderer so the profile remains runnable and publication-safe.",
+      "local_only_assets": true,
+      "canonical_study5_profile": false,
+      "source_pool_profile": "dynaspace_lateral_45_white_burst",
+      "noise_source_policy": "Two DynaSpace-style white burst-train looming sources, left -45 degrees and right +45 degrees, with stationary-burst baselines generated from the same source snapshots. Segment 4 repetitions are audio-tactile 5.0, baseline 2.5, and catch 6.0 to retain the 204-row Study 5 budget despite six DynaSpace SOA anchors.",
+      "profile_check_complete": true
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study 5 respiratory context",
+      "source": "Derived from the repository canonical Study 5 profile: original 4-second inhale/exhale clips, Study 5 row order, pre/post run structure, catch family, and stationary-burst baseline workflow are preserved for the local lab context."
+    },
+    {
+      "field": "DynaSpace stimulus timing",
+      "source": "The smartphone validation profile encodes 3.85 s DynaSpace audio, 105 ms pre-hold, 2.945 s movement, 0.8 s post-hold, 640-to-20 cm approach, and tactile anchors at 105/1625/2385/2765/2955/3050 ms."
+    },
+    {
+      "field": "trajectory orientation",
+      "source": "This local variant creates source-level left -45 degree and right +45 degree approach snapshots so Segment 4 can balance half of trials to each side."
+    },
+    {
+      "field": "baseline comparator",
+      "source": "The DynaSpace fixed 640 cm comparator is implemented as Study 5 stationary_burst baseline files generated from each left/right source snapshot, preserving fixed instruction audio and matched tactile anchors."
+    },
+    {
+      "field": "public asset policy",
+      "source": "The original Android bursttrain WAVs are not redistributed; the profile uses PPS Toolkit generated DynaSpace-style Gaussian white-noise burst trains rendered through the bundled FABIAN/SOFA path."
+    },
+    {
+      "field": "trial budget",
+      "source": "Segment 4 repetitions use audio-tactile 5.0, baseline 2.5, and catch 6.0 to keep the Study 5 204-row total while adding the six DynaSpace tactile anchors and preserving balanced inhale/exhale and left/right counts."
+    }
+  ]
+}
