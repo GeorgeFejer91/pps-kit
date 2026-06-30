@@ -107,6 +107,38 @@ def test_reconcile_android_command_admin_reports_ack_payload_drift():
     assert "ack_payload" in fields
 
 
+def test_reconcile_android_command_admin_reports_missing_phone_command_sample():
+    phone = _phone_command_row()
+    del phone["command_sample"]
+
+    result = reconciler.reconcile_command_admin_with_phone_run(
+        [_sender_row()],
+        [phone],
+        expect_native_sends=True,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is False
+    fields = {item["field"] for item in result.report["mismatches"]}
+    assert "phone.command_sample.channel_count" in fields
+
+
+def test_reconcile_android_command_admin_reports_received_command_sample_drift():
+    phone = _phone_command_row()
+    phone["command_sample"][4] = "resume"
+
+    result = reconciler.reconcile_command_admin_with_phone_run(
+        [_sender_row()],
+        [phone],
+        expect_native_sends=True,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is False
+    fields = {item["field"] for item in result.report["mismatches"]}
+    assert "received_command_sample" in fields
+
+
 def test_reconcile_android_command_admin_rejects_command_sample_missing_pairing_token():
     sender = _sender_row()
     sample_payload = json.loads(sender["command_sample"][6])
@@ -202,15 +234,7 @@ def _sender_row(
     schema: str = "pps-android-controller-command-row.v1",
     sender_id: str = "android_controller",
 ) -> dict:
-    command_payload = {
-        "token": "secret",
-        "package_id": "pkg-001",
-        "participant_id": "P001",
-        "target_session_id": "part-001",
-        "target_part_session_id": "part-001",
-        "target_session_group_id": "group-001",
-        "target_part_number": "1",
-    }
+    command_payload = _command_payload()
     ack_payload = _ack_payload(command)
     return {
         "schema": schema,
@@ -223,15 +247,7 @@ def _sender_row(
         "native_lsl_sent": True,
         "ack_received": True,
         "ack_status": "applied",
-        "command_sample": [
-            "pps-lsl-command.v1",
-            command_id,
-            "part-001",
-            sender_id,
-            command,
-            "42.000000000",
-            json.dumps(command_payload, sort_keys=True),
-        ],
+        "command_sample": _command_sample(command_id, sender_id, command),
         "payload": command_payload,
         "ack_sample": _ack_sample(command_id, command, ack_payload),
     }
@@ -260,8 +276,33 @@ def _phone_command_row(
         "applied_lsl_time": 42.02,
         "ack_lsl_time": 42.03,
         "ack_sent": True,
+        "command_sample": _command_sample(command_id, sender_id, command),
         "ack_sample": _ack_sample(command_id, command, ack_payload),
     }
+
+
+def _command_payload() -> dict:
+    return {
+        "token": "secret",
+        "package_id": "pkg-001",
+        "participant_id": "P001",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+        "target_part_number": "1",
+    }
+
+
+def _command_sample(command_id: str, sender_id: str, command: str) -> list[str]:
+    return [
+        "pps-lsl-command.v1",
+        command_id,
+        "part-001",
+        sender_id,
+        command,
+        "42.000000000",
+        json.dumps(_command_payload(), sort_keys=True),
+    ]
 
 
 def _ack_payload(command: str) -> dict:

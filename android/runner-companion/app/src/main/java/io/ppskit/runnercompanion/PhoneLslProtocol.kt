@@ -95,6 +95,7 @@ internal data class PhoneLslCommandSignal(
     val command: String,
     val issuedLslTime: Double,
     val payload: JSONObject = JSONObject(),
+    val rawSample: List<String> = emptyList(),
 )
 
 internal data class PhoneLslCommandApplicationResult(
@@ -138,6 +139,7 @@ internal fun phoneCommandFromSample(sample: List<Any?>): PhoneLslCommandSignal {
         command = values[4],
         issuedLslTime = values[5].toDoubleOrNull() ?: 0.0,
         payload = jsonObjectFromString(values[6]),
+        rawSample = values,
     )
 }
 

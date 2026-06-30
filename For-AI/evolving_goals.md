@@ -28,6 +28,17 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   row metadata. The reconciler fails if the sample payload omits
   `token`/`companion_token` or drifts from the stored sender payload, while
   still rejecting any `PPSCommandAcksV1` payload that echoes pairing tokens.
+- Receiver-side Android native command diary rows now preserve
+  `command_channels` and the exact received `PPSCommandSignalsV1`
+  `command_sample` alongside the outgoing ack evidence. Strict phone-run
+  validation requires that received sample, checks its channel/schema/identity
+  fields and token-bearing payload, and compares file versus embedded command
+  diary copies. The offline command-admin reconciler now compares the sender's
+  serialized command sample against the phone-run received sample before
+  accepting a matched ack pair. Idle native `start_experiment` / `start_part`
+  evidence carries the same raw command sample into the newly launched run
+  artifact. This is a stronger offline artifact proof; live LSL/XDF and
+  physical timing validation remain separate gates.
 
 - The local HTML dashboard launcher now treats `/api/health` as the fast
   already-running probe before falling back to `/api/state`. This prevents a

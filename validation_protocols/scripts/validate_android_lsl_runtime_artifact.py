@@ -3416,6 +3416,23 @@ def _validate_phone_command_diary(
             native_rejected_rows += 1
         if row.get("ack_sent") is True:
             native_ack_sent_rows += 1
+        command_channels = list(row.get("command_channels") or [])
+        if command_channels and command_channels != list(LSL_COMMAND_CHANNELS):
+            failures.append(f"{prefix} command channel order mismatch")
+        command_sample = list(row.get("command_sample") or [])
+        if not command_sample:
+            if expect_command_acks:
+                failures.append(f"{prefix} expected to preserve the received PPSCommandSignalsV1 sample")
+            else:
+                warnings.append(f"{prefix} does not include received command_sample evidence")
+        else:
+            _validate_phone_command_sample(
+                command_sample,
+                row=row,
+                prefix=prefix,
+                failures=failures,
+                expect_command_acks=expect_command_acks,
+            )
         ack_channels = list(row.get("ack_channels") or [])
         if ack_channels and ack_channels != list(LSL_ACK_CHANNELS):
             failures.append(f"{prefix} ack channel order mismatch")
@@ -3506,6 +3523,54 @@ def _validate_native_lsl_command_summary_counts(
             failures.append(f"completion summary {field} expected {value}, got {observed}")
 
 
+def _validate_phone_command_sample(
+    command_sample: list[Any],
+    *,
+    row: dict[str, Any],
+    prefix: str,
+    failures: list[str],
+    expect_command_acks: bool,
+) -> None:
+    if len(command_sample) != len(LSL_COMMAND_CHANNELS):
+        failures.append(f"{prefix} command sample channel count mismatch")
+        return
+    if command_sample[0] != COMMAND_SCHEMA:
+        failures.append(f"{prefix} command sample schema mismatch")
+    row_command_id = _metadata_value(row.get("command_id"))
+    if row_command_id and _metadata_value(command_sample[1]) != row_command_id:
+        failures.append(f"{prefix} command sample command_id differs from diary row")
+    row_session_id = _metadata_value(row.get("session_id"))
+    if row_session_id and _metadata_value(command_sample[2]) != row_session_id:
+        failures.append(f"{prefix} command sample session_id differs from diary row")
+    row_sender_id = _metadata_value(row.get("sender_id"))
+    if row_sender_id and _metadata_value(command_sample[3]) != row_sender_id:
+        failures.append(f"{prefix} command sample sender_id differs from diary row")
+    row_command = _metadata_value(row.get("command"))
+    if row_command and _metadata_value(command_sample[4]) != row_command:
+        failures.append(f"{prefix} command sample command differs from diary row")
+    try:
+        float(command_sample[5])
+    except (TypeError, ValueError):
+        failures.append(f"{prefix} command sample issued_lsl_time is not numeric")
+
+    command_payload = _parse_json_object(str(command_sample[6] or "{}"), f"{prefix} command payload", failures)
+    if command_payload is None:
+        return
+    if not (
+        _metadata_value(command_payload.get("token"))
+        or _metadata_value(command_payload.get("companion_token"))
+    ):
+        failures.append(f"{prefix} command payload is missing the pairing token")
+    row_package_id = _metadata_value(row.get("package_id"))
+    payload_package_id = _metadata_value(command_payload.get("package_id"))
+    if row_package_id:
+        if payload_package_id:
+            if payload_package_id != row_package_id:
+                failures.append(f"{prefix} command payload package_id differs from diary row")
+        elif expect_command_acks:
+            failures.append(f"{prefix} command payload is missing package_id")
+
+
 def _validate_phone_command_ack_payload(
     ack_payload: dict[str, Any],
     *,
@@ -3574,6 +3639,8 @@ def _compare_command_diary_rows(
         "applied_lsl_time",
         "ack_lsl_time",
         "ack_sent",
+        "command_channels",
+        "command_sample",
         "ack_channels",
         "ack_sample",
     ]

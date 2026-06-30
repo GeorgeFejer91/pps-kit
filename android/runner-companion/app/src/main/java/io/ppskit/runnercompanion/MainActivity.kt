@@ -162,6 +162,7 @@ private data class PhoneStartCommandEvidence(
     val signal: PhoneLslCommandSignal,
     val ack: PhoneLslCommandAck,
     val ackSent: Boolean,
+    val commandSample: List<String>,
 )
 
 private fun modeForPairing(pairing: PairingInfo): CompanionMode? =
@@ -885,12 +886,16 @@ private fun PhoneRuntimeScreen(
                             },
                         )
                         if (startAfterAck) {
-                            val evidence = startSignal?.let { PhoneStartCommandEvidence(signal = it, ack = ack, ackSent = ackSent) }
+                            val evidence = startSignal?.let {
+                                PhoneStartCommandEvidence(signal = it, ack = ack, ackSent = ackSent, commandSample = sample.sample)
+                            }
                             startPhoneRun(runPackage, evidence)
                             return@LaunchedEffect
                         }
                         if (startFullAfterAck) {
-                            val evidence = startSignal?.let { PhoneStartCommandEvidence(signal = it, ack = ack, ackSent = ackSent) }
+                            val evidence = startSignal?.let {
+                                PhoneStartCommandEvidence(signal = it, ack = ack, ackSent = ackSent, commandSample = sample.sample)
+                            }
                             startFullPhoneExperiment(fullRunPackagesAfterAck, evidence)
                             return@LaunchedEffect
                         }
@@ -2071,6 +2076,7 @@ private suspend fun runPhonePackage(
             signal = startCommandEvidence.signal,
             ack = startCommandEvidence.ack,
             ackSent = startCommandEvidence.ackSent,
+            commandSample = startCommandEvidence.commandSample,
         )
     } else {
         session.recordCommand(
@@ -2649,7 +2655,7 @@ private class PhoneRunSession(
             if (ack.status != "applied") {
                 nativeLslCommandRejectedCount += 1
             }
-            recordNativeCommandAckLocked(parsedSignal, ack, ackSent)
+            recordNativeCommandAckLocked(parsedSignal, ack, ackSent, sample.sample)
         }
     }
 
@@ -2758,8 +2764,9 @@ private class PhoneRunSession(
         signal: PhoneLslCommandSignal,
         ack: PhoneLslCommandAck,
         ackSent: Boolean,
+        commandSample: List<String> = signal.rawSample,
     ) {
-        recordNativeCommandAckLocked(signal, ack, ackSent)
+        recordNativeCommandAckLocked(signal, ack, ackSent, commandSample)
     }
 
     private fun applyNativePhoneCommandLocked(signal: PhoneLslCommandSignal): PhoneLslCommandApplicationResult =
@@ -2916,8 +2923,10 @@ private class PhoneRunSession(
         signal: PhoneLslCommandSignal?,
         ack: PhoneLslCommandAck,
         ackSent: Boolean,
+        commandSample: List<String> = signal?.rawSample.orEmpty(),
     ) {
         val ackSample = phoneAckToSample(ack)
+        val receivedCommandSample = commandSample.ifEmpty { signal?.rawSample.orEmpty() }
         val command = signal?.command ?: "invalid_lsl_command"
         val commandId = ack.commandId.ifBlank { signal?.commandId ?: "native-${commandDiary.size + 1}" }
         val row = JSONObject()
@@ -2936,6 +2945,8 @@ private class PhoneRunSession(
             .put("applied_lsl_time", ack.appliedLslTime)
             .put("ack_lsl_time", ack.ackLslTime)
             .put("ack_sent", ackSent)
+            .put("command_channels", jsonStringArray(PHONE_LSL_COMMAND_CHANNELS))
+            .put("command_sample", jsonStringArray(receivedCommandSample))
             .put("ack_channels", jsonStringArray(PHONE_LSL_ACK_CHANNELS))
             .put("ack_sample", jsonStringArray(ackSample))
             .put("phone_unix_ms", System.currentTimeMillis())
@@ -2951,6 +2962,8 @@ private class PhoneRunSession(
                 .put("status", ack.status)
                 .put("reason", ack.reason)
                 .put("ack_sent", ackSent)
+                .put("command_channels", jsonStringArray(PHONE_LSL_COMMAND_CHANNELS))
+                .put("command_sample", jsonStringArray(receivedCommandSample))
                 .put("payload", JSONObject(ack.payload.toString())),
         )
     }

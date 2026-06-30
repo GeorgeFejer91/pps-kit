@@ -183,11 +183,37 @@ def _compare_sender_phone_command_pair(
     mismatches: list[dict[str, Any]] = []
     sample = _sender_command_sample(sender)
     sample_payload = _sample_payload(sample)
+    phone_sample = _phone_command_sample(phone)
+    phone_sample_payload = _sample_payload(phone_sample)
     if len(sample) != len(LSL_COMMAND_CHANNELS):
         mismatches.append(_mismatch(command_id, "command_sample.channel_count", len(LSL_COMMAND_CHANNELS), len(sample)))
         return mismatches
     if sample[0] != COMMAND_SCHEMA:
         mismatches.append(_mismatch(command_id, "command_sample.schema", COMMAND_SCHEMA, sample[0]))
+    if len(phone_sample) != len(LSL_COMMAND_CHANNELS):
+        mismatches.append(
+            _mismatch(command_id, "phone.command_sample.channel_count", len(LSL_COMMAND_CHANNELS), len(phone_sample))
+        )
+    else:
+        if phone_sample[0] != COMMAND_SCHEMA:
+            mismatches.append(_mismatch(command_id, "phone.command_sample.schema", COMMAND_SCHEMA, phone_sample[0]))
+        if _canonical_json(sample) != _canonical_json(phone_sample):
+            mismatches.append(_mismatch(command_id, "received_command_sample", sample, phone_sample))
+        if not _payload_has_pairing_token(phone_sample_payload):
+            mismatches.append(
+                _mismatch(
+                    command_id,
+                    "phone_command_sample_payload.token_missing",
+                    "token or companion_token present in received PPSCommandSignalsV1 payload",
+                    "missing",
+                )
+            )
+        if (
+            sample_payload
+            and phone_sample_payload
+            and _canonical_json(sample_payload) != _canonical_json(phone_sample_payload)
+        ):
+            mismatches.append(_mismatch(command_id, "received_command_sample_payload", sample_payload, phone_sample_payload))
     sender_payload = sender.get("payload") if isinstance(sender.get("payload"), dict) else {}
     if not _payload_has_pairing_token(sample_payload):
         mismatches.append(
@@ -272,6 +298,10 @@ def _sender_kind_from_rows(rows: list[dict[str, Any]]) -> str:
 
 
 def _sender_command_sample(row: dict[str, Any]) -> list[str]:
+    return [str(value) for value in _json_list(row.get("command_sample"))]
+
+
+def _phone_command_sample(row: dict[str, Any]) -> list[str]:
     return [str(value) for value in _json_list(row.get("command_sample"))]
 
 

@@ -320,7 +320,7 @@ def test_android_phone_run_command_diary_separates_local_ui_runtime_and_native_s
     assert "private data class PhoneStartCommandEvidence" in main_activity
     assert "startCommandEvidence: PhoneStartCommandEvidence? = null" in main_activity
     assert "startSignal = commandSignal" in main_activity
-    assert "PhoneStartCommandEvidence(signal = it, ack = ack, ackSent = ackSent)" in main_activity
+    assert "PhoneStartCommandEvidence(signal = it, ack = ack, ackSent = ackSent, commandSample = sample.sample)" in main_activity
     assert "startFullPhoneExperiment(fullRunPackagesAfterAck, evidence)" in main_activity
     assert 'reason = "starting_full_phone_experiment"' in main_activity
     assert '.put("full_experiment_synced", fullExperimentSynced)' in main_activity
@@ -336,6 +336,10 @@ def test_android_phone_run_command_diary_separates_local_ui_runtime_and_native_s
     assert 'startCommandAction = "start_phone_run"' in main_activity
     assert 'startCommandAction = "start_full_experiment_part"' in main_activity
     assert '.put("command_source", "native_lsl")' in main_activity
+    assert "val commandSample: List<String>" in main_activity
+    assert "commandSample = startCommandEvidence.commandSample" in main_activity
+    assert ".put(\"command_channels\", jsonStringArray(PHONE_LSL_COMMAND_CHANNELS))" in main_activity
+    assert ".put(\"command_sample\", jsonStringArray(receivedCommandSample))" in main_activity
 
 
 def test_android_runner_mode_local_controls_use_command_diary_path() -> None:

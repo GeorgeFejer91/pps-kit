@@ -18,12 +18,14 @@ class PhoneLslProtocolTest {
             payload = JSONObject().put("token", "secret"),
         )
 
-        val parsedSignal = phoneCommandFromSample(phoneCommandToSample(signal))
+        val commandSample = phoneCommandToSample(signal)
+        val parsedSignal = phoneCommandFromSample(commandSample)
 
         assertEquals(PHONE_LSL_COMMAND_SCHEMA, phoneCommandToSample(signal)[0])
         assertEquals("cmd-1", parsedSignal.commandId)
         assertEquals("start_experiment", parsedSignal.command)
         assertEquals("secret", parsedSignal.payload.getString("token"))
+        assertEquals(commandSample, parsedSignal.rawSample)
 
         val ack = PhoneLslCommandAck(
             commandId = parsedSignal.commandId,

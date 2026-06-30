@@ -26,11 +26,15 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   command diaries distinguish `phone_ui`, `phone_runtime`, and `native_lsl`
   command sources and mirror each row as an `operator_command` event so direct
   Android button presses and received LSL commands reconstruct through the same
-  event/marker path. Idle Runner-mode `start_experiment` / `start_part`
-  commands now carry their received signal, ack sample, and `ack_sent` outcome
-  into the newly launched `PhoneRunSession` so remotely started phone runs are
-  recorded as `native_lsl` receiver-side command evidence rather than local UI
-  starts. For multi-part preparations, idle `start_experiment` now requires the
+  event/marker path. Native receiver rows now preserve `command_channels` plus
+  the exact received `PPSCommandSignalsV1` `command_sample` beside
+  `ack_channels` and `ack_sample`, so the phone diary can prove which
+  token-gated command sample it acted on. Idle Runner-mode `start_experiment`
+  / `start_part` commands now carry their received signal, raw command sample,
+  ack sample, and `ack_sent` outcome into the newly launched `PhoneRunSession`
+  so remotely started phone runs are recorded as `native_lsl` receiver-side
+  command evidence rather than local UI starts. For multi-part preparations,
+  idle `start_experiment` now requires the
   full listed package set to be synced and then launches that full synced order;
   `start_part` remains the selected-package path, and incomplete multi-part
   starts are rejected with package/sync counts in the ack payload instead of
@@ -123,11 +127,13 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `validation_protocols/scripts/reconcile_android_command_admin_with_phone_run.py`.
   It compares Android Controller or PC-admin native command outboxes against the
   Runner phone `command_diary.jsonl` by command id, target session, sender id,
-  command, package identity, and exact `PPSCommandAcksV1` sample so two-phone
-  or PC-to-phone command rehearsals have an offline artifact gate before live
+  command, package identity, exact received `PPSCommandSignalsV1`
+  `command_sample`, and exact `PPSCommandAcksV1` sample so two-phone or
+  PC-to-phone command rehearsals have an offline artifact gate before live
   XDF/physical validation claims. The reconciler also compares the sender row
-  payload with the serialized `PPSCommandSignalsV1` payload and requires the
-  actual sample payload to contain `token` or `companion_token`.
+  payload with the serialized `PPSCommandSignalsV1` payload and requires both
+  sender and phone received command sample payloads to contain `token` or
+  `companion_token`.
 - Android controller-role scaffolding lives in `PhoneControllerCommands.kt` and
   the `Runner` / `Controller` toggle inside `PhoneRuntimeScreen`. Controller
   mode writes token-gated command samples to
@@ -229,9 +235,10 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   payload_json versus sample-payload consistency plus observed command/ack id
   pairing under `--expect-command-acks`,
   phone-run `command_diary.jsonl` / embedded command diary native ack rows and
-  sidecar-vs-embedded command field consistency, native ack payload versus
-  command diary payload consistency with pairing-token exclusion, and command
-  diary payload versus
+  sidecar-vs-embedded command field consistency, required receiver-side
+  `PPSCommandSignalsV1` `command_sample` evidence in strict ack mode, native
+  ack payload versus command diary payload consistency with pairing-token
+  exclusion, and command diary payload versus
   `operator_command` event payload consistency,
   phone-run `lsl_marker_mirror.csv` / embedded marker mirror reconstruction,
   phone-run `trigger_codes.csv` expected local `PPSTriggerCodes` sequence when

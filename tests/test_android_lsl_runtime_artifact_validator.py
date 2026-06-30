@@ -1647,6 +1647,34 @@ def test_android_lsl_runtime_validator_accepts_idle_native_start_command_evidenc
     assert result.failures == []
 
 
+def test_android_lsl_runtime_validator_requires_phone_run_received_command_sample(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    row = _phone_native_command_row()
+    del row["command_sample"]
+    _write_phone_run_with_native_command_diary(run_dir, row=row)
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    assert "phone command diary row 1 expected to preserve the received PPSCommandSignalsV1 sample" in "\n".join(
+        result.failures
+    )
+
+
+def test_android_lsl_runtime_validator_rejects_phone_run_received_command_sample_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    row = _phone_native_command_row()
+    row["command_sample"][3] = "unexpected_sender"
+    _write_phone_run_with_native_command_diary(run_dir, row=row)
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    assert "phone command diary row 1 command sample sender_id differs from diary row" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_rejects_phone_run_ack_payload_drift(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -1947,6 +1975,7 @@ def _write_phone_run_with_native_command_diary(
 
 
 def _phone_native_command_row(*, ack_sent: bool = True) -> dict:
+    command_sample = _phone_command_sample("cmd-phone-001", "pc_runner", "pause", issued_lsl_time="42.000000000")
     payload = {
         "command": "pause",
         "package_id": "pkg-001",
@@ -1981,6 +2010,16 @@ def _phone_native_command_row(*, ack_sent: bool = True) -> dict:
         "applied_lsl_time": 42.02,
         "ack_lsl_time": 42.03,
         "ack_sent": ack_sent,
+        "command_channels": [
+            "schema",
+            "command_id",
+            "session_id",
+            "sender_id",
+            "command",
+            "issued_lsl_time",
+            "payload_json",
+        ],
+        "command_sample": command_sample,
         "ack_channels": [
             "schema",
             "command_id",
@@ -2000,6 +2039,12 @@ def _phone_native_command_row(*, ack_sent: bool = True) -> dict:
 
 
 def _phone_native_start_command_row() -> dict:
+    command_sample = _phone_command_sample(
+        "cmd-phone-start-001",
+        "pc_runner",
+        "start_experiment",
+        issued_lsl_time="41.000000000",
+    )
     ack_sample = [
         "pps-lsl-command-ack.v1",
         "cmd-phone-start-001",
@@ -2040,6 +2085,16 @@ def _phone_native_start_command_row() -> dict:
         "applied_lsl_time": 41.02,
         "ack_lsl_time": 41.03,
         "ack_sent": True,
+        "command_channels": [
+            "schema",
+            "command_id",
+            "session_id",
+            "sender_id",
+            "command",
+            "issued_lsl_time",
+            "payload_json",
+        ],
+        "command_sample": command_sample,
         "ack_channels": [
             "schema",
             "command_id",
@@ -2056,6 +2111,28 @@ def _phone_native_start_command_row() -> dict:
         "phone_unix_ms": 1780000000000,
         "phone_elapsed_realtime_ms": 123456,
     }
+
+
+def _phone_command_sample(command_id: str, sender_id: str, command: str, *, issued_lsl_time: str) -> list[str]:
+    return [
+        "pps-lsl-command.v1",
+        command_id,
+        "part-001",
+        sender_id,
+        command,
+        issued_lsl_time,
+        json.dumps(
+            {
+                "token": "secret",
+                "package_id": "pkg-001",
+                "participant_id": "P001",
+                "target_session_id": "part-001",
+                "target_part_session_id": "part-001",
+                "target_session_group_id": "group-001",
+                "target_part_number": "1",
+            }
+        ),
+    ]
 
 
 def _phone_ui_command_row() -> dict:
