@@ -97,6 +97,18 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   with no unresolved citation/reference, rerun, float-too-large, or overfull-box
   warnings after this pass; generated LaTeX artifacts and the PDF were removed
   afterward.
+- Continued the BRM manuscript self-review loop with a response-window and
+  classification pass. Focus Mode's current tactile response rule is now named
+  as a first-class methods decision: clicks are credited only from 100 to 1300 ms
+  after tactile onset, early/late clicks remain logged but uncredited, the next
+  trial start does not truncate an open tactile-response deadline, catch trials
+  distinguish false alarms from correct no-responses, and top-up preserves
+  selected click identifiers. `main.tex`, the reporting checklist, and
+  `evidence_matrix.csv` now describe that rule as audit provenance rather than
+  tactile-perception or PPS-effect validation. The matrix now has 43 rows. The
+  Springer `sn-apa` source compiles to a 25-page PDF with no unresolved
+  citation/reference, rerun, float-too-large, or overfull-box warnings after this
+  pass; generated LaTeX artifacts and the PDF were removed afterward.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

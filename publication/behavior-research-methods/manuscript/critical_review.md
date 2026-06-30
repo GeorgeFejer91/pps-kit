@@ -286,3 +286,48 @@ Methods manuscript draft. It is a working audit, not manuscript text.
   DOI.
 - The dashboard-boundary language is now clearer, but it does not replace
   publication-hardware timing, acoustic, tactile, or participant validation.
+
+## Iteration 9: Response-Window and Classification Pass
+
+### Main Critiques
+
+- The manuscript named response rules in the abstract and reporting checklist,
+  and the evidence matrix contained an `Instant analysis: response layer` row,
+  but the runner's response-classification policy was not yet described as a
+  first-class methods decision.
+- That omission mattered because PPS RT evidence depends on how participant
+  clicks are assigned to tactile onsets, how anticipations and late clicks are
+  handled, how catch false alarms are separated from correct no-responses, and
+  how missed trials become eligible for top-up. Without those rules, another
+  lab could reproduce the stimuli while silently changing the behavioral
+  estimand.
+- A fresh Consensus search for audio-tactile PPS response-window/catch/false
+  alarm terms returned the same core methodological anchors already in the
+  draft: Canzoneri-style tactile RT plus catch logic, Holmes et al.'s response
+  probability critique, and Roussel et al.'s smartphone RT-validation boundary.
+
+### Resolution In This Revision
+
+- Added a runner-table row for `Response rule and classification`.
+- Added a full `evidence_matrix.csv` row for `Focus Mode: response window and
+  classification`, bringing the matrix to 43 source-pointer rows.
+- Added a technical-method paragraph stating the current Focus Mode rule:
+  participant clicks are credited only from 100 to 1300 ms after tactile onset;
+  earlier and later clicks remain logged but are not valid tactile responses;
+  the next trial start does not shorten an open tactile-response deadline; catch
+  trials separate false alarms from correct no-responses; and top-up preserves
+  selected click identifiers.
+- Added a reporting-checklist row requiring future papers to report response
+  device, tactile-onset anchor, valid RT window, anticipation/late-click rule,
+  catch false-alarm policy, miss/top-up policy, and selected click IDs.
+- Recompiled the Springer `sn-apa` manuscript to a 25-page PDF. The final log
+  scan found no unresolved citations/references, rerun warnings, float-too-large
+  warnings, or overfull boxes; generated LaTeX artifacts and the PDF were
+  removed afterward.
+
+### Residual Concerns
+
+- The 100-1300 ms window is a toolkit default and should be justified or
+  preregistered for confirmatory participant studies.
+- Response classification improves auditability, but it does not validate
+  tactile perception, hardware timing, or the presence of a PPS effect.

@@ -130,6 +130,7 @@ Decision cluster & Toolkit control & Literature variation and rationale & Main c
 \midrule
 Tactile calibration and misses & Pre-run threshold assay; run-local adaptive nudge after repeated misses & Vibrotactile thresholds vary with method, reliability, and adaptation \citep{Merchel2020,Mikkelsen2020,Morioka2002,Goble1993,Pate2024}. & Pilot miss-rate observations are anecdotal until tied to traceable artifacts. \\
 Randomization and blocks & Repetition pools, seeded distribution, block acceptance, participant permutations & Reproducible experiment-builder workflows benefit from saved schedules and auditable randomization \citep{AnwylIrvine2018,Peirce2019,Ellis2024}. & Randomization artifacts do not replace preregistration or power analysis. \\
+Response rule and classification & Participant response target; tactile-onset response window; catch and top-up labels & RT-based PPS inference is sensitive to response probability, catch errors, and response-device timing \citep{Holmes2020,Canzoneri2012,Roussel2025,Bridges2020}. & Classification rules audit responses; they do not validate tactile perception or a PPS effect. \\
 Analysis choices & Raw RT curves, baseline-corrected facilitation, sigmoid, log-decay, linear fits & Canonical sigmoid boundaries and logarithmic/linear distance arguments coexist with small-effect and control-condition critiques \citep{Canzoneri2012,Hobeika2019,Holmes2020}. & Instant analysis is exploratory operator feedback, not confirmatory inference. \\
 \bottomrule
 \end{tabularx}
@@ -182,6 +183,7 @@ The evidence matrix is intended to support reporting, not merely development. Ta
 \begin{table}[t]
 \caption{Minimum reporting checklist for PPS Toolkit experiments.}
 \label{tab:reporting}
+\footnotesize
 \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.20\textwidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.26\textwidth}}
 \toprule
 Topic & Report from toolkit artifacts & Boundary to state \\
@@ -195,6 +197,7 @@ Trial sequence and SOA & Sequence rows, audio boxes, jitter durations, looming o
 Baseline and repetition pool & Baseline strategy, baseline SOAs, stationary/fixed-distance source files, catch proportion, repetition counts, and condition totals. & Baseline correction changes the estimand; raw and corrected curves should remain distinguishable. \\
 Randomization and participant structure & Random seed, accepted block CSVs, family-order constraints, participant block-order manifest, and one-part or two-part schedule. & Constrained randomization should be justified and inspectable; it does not replace counterbalancing. \\
 Runner and validation evidence & Output levels, tactile threshold file, adaptive-threshold log, top-up ledger, event logs, LSL/XDF files, audio evidence, and loopback report when available. & Software, digital audio, electrical loopback, mechanical tactile output, and perception are separate evidence tiers. \\
+Response classification & Response device, tactile-onset anchor, valid RT window, anticipation/late-click rule, catch false-alarm rule, miss/top-up policy, and selected click identifiers. & RT curves are interpretable only after response probability, catch performance, and exclusion rules are stated. \\
 Analysis & Response integrity summary, baseline method, included trials, exclusion rules, model families, AICc table, low-N warnings, and exploratory labels. & Instant analysis is review support unless the model and exclusions were prespecified. \\
 \bottomrule
 \end{tabularx}
@@ -219,6 +222,8 @@ This technical layer is reported conservatively. A renderer can provide consiste
 The runner prepares participant blocks as multichannel WAV assets and plays them through the lab audio interface. Channels 1 and 2 carry binaural headphone output. Channel 3 carries the tactile cue, and on canonical four-channel routes output 4 mirrors the tactile channel for an analog duplicate proxy. Planned event times are anchored to audio sample positions and mirrored through local event logs, rich LSL markers, numeric trigger codes, and optional LabRecorder XDF capture.
 
 The toolkit separates four evidence tiers. First, software schedule evidence records planned trial starts, looming onsets, tactile onsets, response windows, and sample positions. Second, digital audio evidence records the mixed output buffers that the runner attempted to play. Third, electrical loopback evidence records an analog return path, such as the output-4 tactile mirror patched into an input. Fourth, tactile perceptual evidence comes from participant calibration and responses. These tiers answer different questions. Electrical loopback can check an audio-interface route; it does not measure Woojer mechanical vibration onset or tactile sensation. Local audio evidence can prove what samples were mixed; it does not prove what a participant felt.
+
+Response classification is another part of the runtime method rather than an afterthought. The current Focus Mode runner assigns participant clicks to tactile onsets using a tactile-onset-anchored valid window from 100 to 1300 ms. Earlier clicks and later clicks remain in the event record, but they are not credited as valid tactile responses; the next trial start does not shorten a still-open tactile response deadline. Catch trials are classified separately as correct no-responses or false alarms, and missed standard trials can be marked for optional top-up with selected click identifiers preserved. These rules make response probability, anticipations, late responses, and rescue trials visible before any RT curve is interpreted, which is important because response probability and trial composition can influence apparent near-far benefits \citep{Holmes2020}. They remain operational rules that should be preregistered or justified for a confirmatory study.
 
 \subsection{Tactile Threshold Calibration}
 
