@@ -55,7 +55,11 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   are not copied into ack payloads. If a command explicitly names a package,
   part session, session group, or part number that does not match the selected
   run package, Runner mode rejects it before applying the local state
-  transition.
+  transition. Rejected pre-handler acks carry
+  `pps-android-phone-command-rejection.v1` payloads with receiver
+  package/session identity, requested target identity, rejection reason,
+  `rejected_before_handler=true`, and supported commands while still excluding
+  pairing tokens.
 - Phone-owned command diaries now distinguish `phone_ui`,
   `phone_runtime`, and `native_lsl` command sources. Local Runner-mode start
   buttons plus local Pause, Resume, and Stop After Block controls write
@@ -311,9 +315,10 @@ Required validation levels:
    `pc_android_lsl_monitor_events.jsonl` artifacts from
    `pps-android-lsl-monitor`. Controller and PC-admin outbox rows are checked
    for exact row-payload versus command-sample-payload consistency, including
-   required `operator_note` note text when that command is used; the serialized
-   command-sample payload must contain `token` or `companion_token`, not only
-   the surrounding row metadata.
+   required `operator_note` note text when that command is used; rejected ack
+   payloads must carry the `pps-android-phone-command-rejection.v1` schema and
+   requested/receiver identity; the serialized command-sample payload must
+   contain `token` or `companion_token`, not only the surrounding row metadata.
     Phone-run `command_diary.jsonl` rows are also checked against matching
     `operator_command` events and native `PPSCommandAcksV1` samples: strict ack
     validation requires the ack payload to match the diary payload and preserve

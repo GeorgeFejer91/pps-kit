@@ -1604,6 +1604,50 @@ def test_android_lsl_runtime_validator_rejects_controller_ack_payload_identity_d
     assert "controller outbox row 1 ack payload package_id differs from command sample" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_accepts_controller_rejected_ack_payload(tmp_path: Path):
+    controller_dir = tmp_path / "phone-controller"
+    controller_dir.mkdir()
+    (controller_dir / "phone_controller_runtime_status.json").write_text(json.dumps(_controller_status(native=True)), encoding="utf-8")
+    row = _controller_row(native_sent=True, ack_received=True)
+    command_payload = dict(row["payload"])
+    ack_payload = {
+        "schema": "pps-android-phone-command-rejection.v1",
+        "status": "rejected",
+        "reason": "invalid_token",
+        "rejected_before_handler": True,
+        "command": row["command"],
+        "package_id": command_payload["package_id"],
+        "participant_id": command_payload["participant_id"],
+        "session_id": "session-001",
+        "part_session_id": command_payload["target_part_session_id"],
+        "session_group_id": command_payload["target_session_group_id"],
+        "part_number": command_payload["target_part_number"],
+        "target_session_id": command_payload["target_session_id"],
+        "target_part_session_id": command_payload["target_part_session_id"],
+        "target_session_group_id": command_payload["target_session_group_id"],
+        "target_part_number": command_payload["target_part_number"],
+        "requested_by": command_payload["requested_by"],
+        "current_android_source_behavior": command_payload["current_android_source_behavior"],
+        "requested_session_id": command_payload["target_session_id"],
+        "requested_package_id": command_payload["package_id"],
+        "requested_participant_id": command_payload["participant_id"],
+        "requested_target_session_id": command_payload["target_session_id"],
+        "requested_target_part_session_id": command_payload["target_part_session_id"],
+        "requested_target_session_group_id": command_payload["target_session_group_id"],
+        "requested_target_part_number": command_payload["target_part_number"],
+        "supported_commands": ["start_experiment", "pause", "resume"],
+    }
+    row["ack_sample"][4] = "rejected"
+    row["ack_sample"][5] = "invalid_token"
+    row["ack_sample"][9] = json.dumps(ack_payload)
+    (controller_dir / "phone_controller_command_outbox.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+    result = validator.validate_run_artifact(controller_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
 def test_android_lsl_runtime_validator_rejects_controller_ack_validation_metadata_drift(tmp_path: Path):
     controller_dir = tmp_path / "phone-controller"
     controller_dir.mkdir()
@@ -1922,6 +1966,34 @@ def test_android_lsl_runtime_validator_accepts_phone_run_command_diary_ack_evide
 
     assert result.ok is True
     assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_accepts_phone_run_rejected_command_ack_payload(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_phone_run_with_native_command_diary(run_dir, row=_phone_native_rejected_command_row())
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_rejects_phone_run_rejected_command_payload_schema_gap(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    row = _phone_native_rejected_command_row()
+    payload = dict(row["payload"])
+    payload.pop("schema")
+    row["payload"] = payload
+    row["ack_sample"][9] = json.dumps(payload)
+    _write_phone_run_with_native_command_diary(run_dir, row=row)
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True, expect_command_acks=True)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "rejected ack payload schema mismatch" in failures
 
 
 def test_android_lsl_runtime_validator_accepts_phone_run_request_snapshot_ack_payload(tmp_path: Path):
@@ -2378,6 +2450,111 @@ def _phone_native_command_row(*, ack_sent: bool = True) -> dict:
         "ack_sample": ack_sample,
         "phone_unix_ms": 1780000000000,
         "phone_elapsed_realtime_ms": 123456,
+    }
+
+
+def _phone_native_rejected_command_row() -> dict:
+    command_sample = _phone_command_sample(
+        "cmd-phone-rejected-001",
+        "pc_runner",
+        "pause",
+        issued_lsl_time="42.500000000",
+    )
+    command_payload = json.loads(command_sample[6])
+    command_payload["token"] = "wrong-token"
+    command_sample[6] = json.dumps(command_payload)
+    payload = {
+        "schema": "pps-android-phone-command-rejection.v1",
+        "status": "rejected",
+        "reason": "invalid_token",
+        "rejected_before_handler": True,
+        "command": "pause",
+        "package_id": "pkg-001",
+        "participant_id": "P001",
+        "session_id": "session-001",
+        "part_session_id": "part-001",
+        "session_group_id": "group-001",
+        "part_number": "1",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+        "target_part_number": "1",
+        "requested_session_id": "part-001",
+        "requested_package_id": "pkg-001",
+        "requested_participant_id": "P001",
+        "requested_target_session_id": "part-001",
+        "requested_target_part_session_id": "part-001",
+        "requested_target_session_group_id": "group-001",
+        "requested_target_part_number": "1",
+        "supported_commands": [
+            "start_experiment",
+            "start_part",
+            "pause",
+            "resume",
+            "continue_instruction",
+            "stop_after_block",
+            "request_snapshot",
+            "operator_note",
+        ],
+    }
+    ack_sample = [
+        "pps-lsl-command-ack.v1",
+        "cmd-phone-rejected-001",
+        "part-001",
+        "android_phone",
+        "rejected",
+        "invalid_token",
+        "42.510000000",
+        "42.520000000",
+        "42.530000000",
+        json.dumps(payload),
+    ]
+    return {
+        "schema": "pps-android-command-diary.v1",
+        "command_id": "cmd-phone-rejected-001",
+        "command_source": "native_lsl",
+        "sender_id": "pc_runner",
+        "session_id": "part-001",
+        "command": "pause",
+        "status": "rejected",
+        "reason": "invalid_token",
+        "payload": dict(payload),
+        "package_id": "pkg-001",
+        "participant_id": "P001",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+        "target_part_number": "1",
+        "run_id": "phone-run-001",
+        "received_lsl_time": 42.51,
+        "applied_lsl_time": 42.52,
+        "ack_lsl_time": 42.53,
+        "ack_sent": True,
+        "command_channels": [
+            "schema",
+            "command_id",
+            "session_id",
+            "sender_id",
+            "command",
+            "issued_lsl_time",
+            "payload_json",
+        ],
+        "command_sample": command_sample,
+        "ack_channels": [
+            "schema",
+            "command_id",
+            "session_id",
+            "receiver_id",
+            "status",
+            "reason",
+            "received_lsl_time",
+            "applied_lsl_time",
+            "ack_lsl_time",
+            "payload_json",
+        ],
+        "ack_sample": ack_sample,
+        "phone_unix_ms": 1780000000500,
+        "phone_elapsed_realtime_ms": 123956,
     }
 
 

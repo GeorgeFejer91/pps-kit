@@ -71,6 +71,15 @@ class PhoneLslProtocolTest {
 
         assertEquals("rejected", ack.status)
         assertEquals("invalid_token", ack.reason)
+        assertEquals(PHONE_LSL_COMMAND_REJECTION_PAYLOAD_SCHEMA, ack.payload.getString("schema"))
+        assertEquals("rejected", ack.payload.getString("status"))
+        assertEquals("invalid_token", ack.payload.getString("reason"))
+        assertTrue(ack.payload.getBoolean("rejected_before_handler"))
+        assertEquals("pkg-001", ack.payload.getString("package_id"))
+        assertEquals("P001", ack.payload.getString("participant_id"))
+        assertEquals("session-001", ack.payload.getString("session_id"))
+        assertEquals("session-001", ack.payload.getString("requested_session_id"))
+        assertFalse(ack.payload.has("token"))
         assertFalse(handlerRan)
     }
 
@@ -178,10 +187,15 @@ class PhoneLslProtocolTest {
 
         assertEquals("rejected", packageAck.status)
         assertEquals("package_mismatch", packageAck.reason)
+        assertEquals(PHONE_LSL_COMMAND_REJECTION_PAYLOAD_SCHEMA, packageAck.payload.getString("schema"))
+        assertEquals("pkg-001", packageAck.payload.getString("package_id"))
+        assertEquals("wrong-package", packageAck.payload.getString("requested_package_id"))
         assertEquals("rejected", targetSessionAck.status)
         assertEquals("target_session_mismatch", targetSessionAck.reason)
+        assertEquals("wrong-session", targetSessionAck.payload.getString("requested_target_session_id"))
         assertEquals("rejected", partAck.status)
         assertEquals("part_session_mismatch", partAck.reason)
+        assertEquals("wrong-part", partAck.payload.getString("requested_target_part_session_id"))
     }
 
     @Test

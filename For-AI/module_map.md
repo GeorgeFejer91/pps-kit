@@ -198,7 +198,12 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   pairing-token echoes even when both sides match; the PC monitor/XDF reconciler
   now checks the same non-secret command/ack target identity fields when both
   command-signal and acknowledgement streams are captured, and it rejects
-  observed ack payloads that echo `token` or `companion_token`. Controller runtime
+  observed ack payloads that echo `token` or `companion_token`. Rejected Runner
+  command acks now use `pps-android-phone-command-rejection.v1` payloads with
+  receiver identity, requested target identity, rejection reason,
+  `rejected_before_handler`, and supported commands; strict phone-run,
+  Controller/PC-admin, and monitor validation reject incomplete rejected-ack
+  payloads. Controller runtime
   status now also includes
   `pps-android-lsl-stream-descriptions.v1` descriptions for the controller
   command-signal outlet and command-ack inlet, and strict controller validation

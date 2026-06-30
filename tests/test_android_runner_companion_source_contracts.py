@@ -145,6 +145,7 @@ def test_android_native_lsl_bridge_resolves_multiple_command_and_ack_streams() -
 def test_android_command_acks_echo_nonsecret_target_identity() -> None:
     lsl_protocol = _source("PhoneLslProtocol.kt")
 
+    assert "PHONE_LSL_COMMAND_REJECTION_PAYLOAD_SCHEMA" in lsl_protocol
     assert "PHONE_COMMAND_ACK_ECHO_PAYLOAD_FIELDS" in lsl_protocol
     for field in [
         "package_id",
@@ -161,6 +162,11 @@ def test_android_command_acks_echo_nonsecret_target_identity() -> None:
     assert '"companion_token"' not in echo_allow_list
     assert "private fun phoneCommandAckPayload" in lsl_protocol
     assert "phoneCommandAckPayload(signal, result.payload)" in lsl_protocol
+    assert "private fun phoneRejectedCommandAckPayload" in lsl_protocol
+    assert "payload = phoneRejectedCommandAckPayload(signal, runPackage, rejection)" in lsl_protocol
+    assert '.put("requested_package_id", signal.payload.optString("package_id"))' in lsl_protocol
+    assert '.put("requested_target_part_session_id", signal.payload.optString("target_part_session_id"))' in lsl_protocol
+    assert '.put("supported_commands", stringArray(supportedPhoneCommands(runPackage)))' in lsl_protocol
     assert 'return "package_mismatch"' in lsl_protocol
     assert 'return "target_session_mismatch"' in lsl_protocol
     assert 'return "part_session_mismatch"' in lsl_protocol

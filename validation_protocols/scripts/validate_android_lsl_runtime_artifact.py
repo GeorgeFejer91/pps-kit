@@ -70,6 +70,7 @@ ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY_CSV = "artifact_file_inventory.csv"
 ANDROID_CONTROLLER_RUNTIME_STATUS_SCHEMA = "pps-android-controller-runtime-status.v1"
 ANDROID_CONTROLLER_COMMAND_ROW_SCHEMA = "pps-android-controller-command-row.v1"
 ANDROID_LSL_STREAM_DESCRIPTIONS_SCHEMA = "pps-android-lsl-stream-descriptions.v1"
+ANDROID_COMMAND_REJECTION_PAYLOAD_SCHEMA = "pps-android-phone-command-rejection.v1"
 ANDROID_AUDIO_TIMING_STRATEGY = "audiotrack_pcm_wav_playback_head"
 ANDROID_CUE_AUDIO_SCHEDULER = "audiotrack_playback_head"
 PHONE_RESPONSE_MIN_RT_MS = 100
@@ -3822,6 +3823,13 @@ def _validate_phone_command_ack_payload(
         failures.append(f"{prefix} ack payload command differs from diary row")
     if command == "request_snapshot" and payload_command == "request_snapshot":
         _validate_phone_runtime_snapshot_payload(ack_payload, prefix=prefix, failures=failures)
+    if status == "rejected":
+        _validate_phone_command_rejection_payload(
+            ack_payload,
+            reason=_metadata_value(row.get("reason")),
+            prefix=prefix,
+            failures=failures,
+        )
 
     row_package_id = _metadata_value(row.get("package_id"))
     payload_package_id = _metadata_value(ack_payload.get("package_id"))
@@ -3904,6 +3912,46 @@ def _validate_phone_runtime_snapshot_payload(
     ):
         if not isinstance(ack_payload.get(field), bool):
             failures.append(f"{prefix} request_snapshot ack payload {field} must be boolean")
+
+
+def _validate_phone_command_rejection_payload(
+    ack_payload: dict[str, Any],
+    *,
+    reason: str,
+    prefix: str,
+    failures: list[str],
+) -> None:
+    if _metadata_value(ack_payload.get("schema")) != ANDROID_COMMAND_REJECTION_PAYLOAD_SCHEMA:
+        failures.append(f"{prefix} rejected ack payload schema mismatch")
+    if _metadata_value(ack_payload.get("status")) != "rejected":
+        failures.append(f"{prefix} rejected ack payload status must be rejected")
+    payload_reason = _metadata_value(ack_payload.get("reason"))
+    if not payload_reason:
+        failures.append(f"{prefix} rejected ack payload is missing reason")
+    elif reason and payload_reason != reason:
+        failures.append(f"{prefix} rejected ack payload reason differs from ack reason")
+    if ack_payload.get("rejected_before_handler") is not True:
+        failures.append(f"{prefix} rejected ack payload rejected_before_handler must be true")
+    for field in (
+        "package_id",
+        "participant_id",
+        "session_id",
+        "part_session_id",
+        "session_group_id",
+        "part_number",
+        "requested_session_id",
+        "requested_package_id",
+        "requested_participant_id",
+        "requested_target_session_id",
+        "requested_target_part_session_id",
+        "requested_target_session_group_id",
+        "requested_target_part_number",
+    ):
+        if field not in ack_payload:
+            failures.append(f"{prefix} rejected ack payload is missing {field}")
+    supported = ack_payload.get("supported_commands")
+    if not isinstance(supported, list) or not supported:
+        failures.append(f"{prefix} rejected ack payload supported_commands must be a nonempty array")
 
 
 def _compare_command_diary_rows(
@@ -5694,6 +5742,13 @@ def _validate_outbox_ack_payload(
         failures.append(f"{prefix} ack payload command differs from command sample")
     if command == "request_snapshot" and ack_command == "request_snapshot":
         _validate_phone_runtime_snapshot_payload(ack_payload, prefix=prefix, failures=failures)
+    if _metadata_value(ack_sample[4]) == "rejected":
+        _validate_phone_command_rejection_payload(
+            ack_payload,
+            reason=_metadata_value(ack_sample[5]),
+            prefix=prefix,
+            failures=failures,
+        )
 
     identity_fields = (
         "target_session_id",
@@ -5889,6 +5944,13 @@ def _validate_pc_monitor_event_row(row: dict[str, Any], *, row_index: int, failu
             token = str(payload.get("token") or payload.get("companion_token") or "")
             if token.strip():
                 failures.append(f"{prefix} command ack payload must not echo the pairing token")
+            if _metadata_value(sample[4]) == "rejected":
+                _validate_phone_command_rejection_payload(
+                    payload,
+                    reason=_metadata_value(sample[5]),
+                    prefix=prefix,
+                    failures=failures,
+                )
         if (
             payload is not None
             and row_payload is not None

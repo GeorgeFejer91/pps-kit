@@ -138,6 +138,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   software state from `PPSCommandAcksV1` and command diaries without parsing
   private UI state. Strict phone-run and sender outbox validation now rejects
   unversioned or incomplete `request_snapshot` ack payloads.
+- Rejected Android native command acknowledgements now use the versioned
+  `pps-android-phone-command-rejection.v1` payload before the local handler is
+  allowed to run. The payload preserves receiver package/session identity,
+  requested package/participant/target-part identity, the rejection reason,
+  `rejected_before_handler=true`, and the supported command list while still
+  excluding pairing tokens. Strict phone-run, Controller/PC-admin outbox, and
+  PC-monitor validation reject incomplete rejected-ack payloads, so bad
+  controller/PC commands remain reconstructable instead of becoming bare
+  `rejected` status rows.
 - Android phone-owned `phone_owned_data_export.json` now carries a
   `portable_paths` map with archive-relative locations for
   `phone_owned_exports/1.Data_min`, the participant/master public CSVs, and the
