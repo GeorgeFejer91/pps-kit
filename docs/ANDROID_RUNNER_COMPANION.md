@@ -151,7 +151,11 @@ The validator checks the Segment 0-6 to phone-runtime hierarchy, schedule hash,
 block/order consistency, reusable building-block references, asset availability,
 AudioTrack playback-head timing contract, privacy-safe Android LSL stream names,
 required phone command set, and the phone-run `asset_strategy` consistency
-across status, manifest, reconstruction, completion, and catalog artifacts.
+across status, manifest, reconstruction, completion, and catalog artifacts. It
+also checks `lsl_marker_mirror.csv` or embedded `lsl_marker_mirror` rows against
+completion events, marker payload JSON, Android phone event codes, and duplicate
+event ids so local phone evidence stays reconstructable even before comparing it
+with a PC-side LSL monitor.
 When validating PC-runner or Controller-phone administration, add
 `--expect-command-acks`; for phone-run artifacts this now requires
 `command_diary.jsonl` or embedded `command_diary` rows with native

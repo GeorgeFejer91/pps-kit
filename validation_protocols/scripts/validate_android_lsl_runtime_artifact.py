@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import json
 import sys
@@ -54,6 +55,23 @@ ANDROID_PHONE_RUN_RECONSTRUCTION_ARTIFACT = "reconstruction_contract.json"
 ANDROID_SCHEDULED_BLOCK_MATERIALIZATION_SCHEMA = "pps-android-phone-scheduled-block-materialization.v1"
 ANDROID_CONTROLLER_RUNTIME_STATUS_SCHEMA = "pps-android-controller-runtime-status.v1"
 ANDROID_CONTROLLER_COMMAND_ROW_SCHEMA = "pps-android-controller-command-row.v1"
+ANDROID_PHONE_EVENT_CODES = {
+    "session_metadata": 8,
+    "run_start": 1,
+    "run_complete": 2,
+    "block_start": 10,
+    "block_complete": 11,
+    "vibration_cue": 21,
+    "tap": 30,
+    "phone_scheduled_block_materialization": 34,
+    "phone_topup_materialization": 35,
+    "operator_command": 41,
+    "phone_playback_pause": 42,
+    "phone_playback_resume": 43,
+    "phone_stop_after_block_request": 44,
+    "phone_stop_after_block_boundary": 45,
+}
+ANDROID_UNKNOWN_EVENT_CODE = 500
 EXPECTED_STREAMS = {
     "rich_markers": "PPSMarkersV2",
     "numeric_triggers": "PPSTriggerCodes",
@@ -104,6 +122,7 @@ def validate_runtime_status(
     package_manifest: dict[str, Any] | None = None,
     reconstruction_artifact: dict[str, Any] | None = None,
     command_diary_rows: list[dict[str, Any]] | None = None,
+    marker_mirror_rows: list[dict[str, Any]] | None = None,
     materialization_manifests: list[dict[str, Any]] | None = None,
     materialized_wav_hashes: dict[str, str] | None = None,
     expect_native_transport: bool = False,
@@ -183,6 +202,14 @@ def validate_runtime_status(
         failures=failures,
         warnings=warnings,
         expect_command_acks=expect_command_acks,
+    )
+    _validate_phone_marker_mirror(
+        status=status,
+        completion=completion,
+        marker_mirror_rows=marker_mirror_rows or [],
+        failures=failures,
+        warnings=warnings,
+        expect_native_transport=expect_native_transport,
     )
     _validate_lightweight_materializations(
         completion=completion,
@@ -431,6 +458,7 @@ def validate_run_artifact(
         package_manifest=loaded.get("package_manifest"),
         reconstruction_artifact=loaded.get("reconstruction_artifact"),
         command_diary_rows=loaded.get("command_diary_rows") or [],
+        marker_mirror_rows=loaded.get("marker_mirror_rows") or [],
         materialization_manifests=loaded.get("materialization_manifests") or [],
         materialized_wav_hashes=loaded.get("materialized_wav_hashes") or {},
         expect_native_transport=expect_native_transport,
@@ -587,6 +615,7 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
             package_manifest_members = [name for name in archive.namelist() if name.endswith("run_package_manifest.json")]
             reconstruction_members = [name for name in archive.namelist() if name.endswith(ANDROID_PHONE_RUN_RECONSTRUCTION_ARTIFACT)]
             command_diary_members = [name for name in archive.namelist() if name.endswith("command_diary.jsonl")]
+            marker_mirror_members = [name for name in archive.namelist() if name.endswith("lsl_marker_mirror.csv")]
             materialization_members = [
                 name
                 for name in archive.namelist()
@@ -631,6 +660,11 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 command_diary_name = sorted(command_diary_members)[0]
                 archive.extract(command_diary_name, temp_root)
                 command_diary_rows = _read_jsonl(temp_root / command_diary_name)
+            marker_mirror_rows: list[dict[str, Any]] = []
+            if marker_mirror_members:
+                marker_mirror_name = sorted(marker_mirror_members)[0]
+                archive.extract(marker_mirror_name, temp_root)
+                marker_mirror_rows = _read_csv(temp_root / marker_mirror_name)
             return {
                 "kind": "runner",
                 "status": _read_json(temp_root / status_name),
@@ -639,6 +673,7 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 "package_manifest": package_manifest,
                 "reconstruction_artifact": reconstruction_artifact,
                 "command_diary_rows": command_diary_rows,
+                "marker_mirror_rows": marker_mirror_rows,
                 "materialization_manifests": materialization_manifests,
                 "materialized_wav_hashes": materialized_wav_hashes,
             }
@@ -648,6 +683,7 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
     package_manifest_path = path / "run_package_manifest.json"
     reconstruction_artifact_path = path / ANDROID_PHONE_RUN_RECONSTRUCTION_ARTIFACT
     command_diary_path = path / "command_diary.jsonl"
+    marker_mirror_path = path / "lsl_marker_mirror.csv"
     materialized_dir = path / "materialized_blocks"
     materialization_manifests: list[dict[str, Any]] = []
     materialized_wav_hashes: dict[str, str] = {}
@@ -660,6 +696,7 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
         "package_manifest": _read_json(package_manifest_path) if package_manifest_path.is_file() else None,
         "reconstruction_artifact": _read_json(reconstruction_artifact_path) if reconstruction_artifact_path.is_file() else None,
         "command_diary_rows": _read_jsonl(command_diary_path) if command_diary_path.is_file() else [],
+        "marker_mirror_rows": _read_csv(marker_mirror_path) if marker_mirror_path.is_file() else [],
         "materialization_manifests": materialization_manifests,
         "materialized_wav_hashes": materialized_wav_hashes,
     }
@@ -697,6 +734,28 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
                 raise ValueError(f"{path}:{line_number} did not contain a JSON object")
             rows.append(data)
     return rows
+
+
+def _read_csv(path: Path) -> list[dict[str, Any]]:
+    with path.open(newline="", encoding="utf-8") as handle:
+        return [dict(row) for row in csv.DictReader(handle)]
+
+
+def _clean_int(value: Any) -> int:
+    try:
+        return int(float(str(value).strip()))
+    except (TypeError, ValueError):
+        return 0
+
+
+def _duplicate_ints(values: list[int]) -> list[int]:
+    seen: set[int] = set()
+    duplicates: list[int] = []
+    for value in values:
+        if value in seen and value not in duplicates:
+            duplicates.append(value)
+        seen.add(value)
+    return duplicates
 
 
 def _validate_command_protocol(protocol: dict[str, Any], failures: list[str], *, token_field: str = "token_required") -> None:
@@ -957,6 +1016,110 @@ def _validate_phone_command_diary(
             failures.append("phone-run command ack validation expected at least one PPSCommandAcksV1 ack sample")
     elif native_rows > 0 and native_ack_rows <= 0:
         warnings.append("native_lsl command diary rows do not include ack samples; rerun with --expect-command-acks for strict checks")
+
+
+def _validate_phone_marker_mirror(
+    *,
+    status: dict[str, Any],
+    completion: dict[str, Any] | None,
+    marker_mirror_rows: list[dict[str, Any]],
+    failures: list[str],
+    warnings: list[str],
+    expect_native_transport: bool,
+) -> None:
+    embedded_rows = [
+        row
+        for row in list((completion or {}).get("lsl_marker_mirror") or [])
+        if isinstance(row, dict)
+    ]
+    events = [
+        event
+        for event in list((completion or {}).get("events") or [])
+        if isinstance(event, dict)
+    ]
+    rows = marker_mirror_rows or embedded_rows
+    if not rows:
+        if events:
+            failures.append("phone marker mirror is missing while completion events are present")
+        return
+    if marker_mirror_rows and embedded_rows:
+        file_ids = [_clean_int(row.get("event_id")) for row in marker_mirror_rows]
+        embedded_ids = [_clean_int(row.get("event_id")) for row in embedded_rows]
+        if file_ids != embedded_ids:
+            failures.append("lsl_marker_mirror.csv event ids differ from completion.json embedded marker mirror")
+
+    event_ids = [_clean_int(row.get("event_id")) for row in rows if _clean_int(row.get("event_id")) > 0]
+    duplicate_ids = _duplicate_ints(event_ids)
+    if duplicate_ids:
+        failures.append(f"phone marker mirror has duplicate event ids: {', '.join(str(item) for item in duplicate_ids[:10])}")
+    if events and len(rows) != len(events):
+        failures.append("phone marker mirror row count differs from completion events")
+
+    events_by_id = {
+        _clean_int(event.get("event_id")): event
+        for event in events
+        if _clean_int(event.get("event_id")) > 0
+    }
+    if events:
+        missing_event_ids = sorted(set(events_by_id) - set(event_ids))
+        extra_marker_ids = sorted(set(event_ids) - set(events_by_id))
+        if missing_event_ids:
+            failures.append(f"phone marker mirror is missing event ids: {', '.join(str(item) for item in missing_event_ids[:10])}")
+        if extra_marker_ids:
+            failures.append(f"phone marker mirror has extra event ids: {', '.join(str(item) for item in extra_marker_ids[:10])}")
+
+    required_marker_fields = [
+        field for field in LSL_MARKER_CHANNELS if field != "sample_index"
+    ]
+    for index, row in enumerate(rows, start=1):
+        prefix = f"phone marker mirror row {index}"
+        for field in required_marker_fields:
+            if field not in row:
+                failures.append(f"{prefix} is missing {field}")
+        event_id = _clean_int(row.get("event_id"))
+        event_type = str(row.get("event_type") or "")
+        if str(row.get("marker_version") or "") != MARKER_VERSION:
+            failures.append(f"{prefix} marker_version mismatch")
+        expected_code = ANDROID_PHONE_EVENT_CODES.get(event_type, ANDROID_UNKNOWN_EVENT_CODE)
+        if _clean_int(row.get("event_code")) != expected_code:
+            failures.append(f"{prefix} event_code does not match Android phone event type")
+        if str(row.get("timestamp_quality") or "") != "android_elapsed_realtime":
+            failures.append(f"{prefix} timestamp_quality must be android_elapsed_realtime")
+        if not str(row.get("trigger_key") or "").strip():
+            failures.append(f"{prefix} is missing trigger_key")
+        if not str(row.get("marker_name") or "").strip():
+            failures.append(f"{prefix} is missing marker_name")
+        payload = _parse_json_object(str(row.get("payload_json") or "{}"), f"{prefix} payload_json", failures)
+        if payload is None:
+            continue
+        if event_id and _clean_int(payload.get("event_id")) != event_id:
+            failures.append(f"{prefix} payload event_id differs from marker")
+        if event_type and str(payload.get("type") or "") != event_type:
+            failures.append(f"{prefix} payload type differs from marker event_type")
+        for field in ("package_id", "run_id"):
+            marker_value = str(row.get(field) or "")
+            payload_value = str(payload.get(field) or "")
+            if marker_value and payload_value and marker_value != payload_value:
+                failures.append(f"{prefix} payload {field} differs from marker")
+            status_value = str(status.get(field) or "")
+            if expect_native_transport and status_value and marker_value and marker_value != status_value:
+                failures.append(f"{prefix} {field} differs from lsl_runtime_status")
+        for field in ("session_id", "participant_id", "session_group_id", "part_session_id", "part_number"):
+            status_value = str(status.get(field) or "")
+            marker_value = str(row.get(field) or "")
+            if expect_native_transport and status_value and marker_value and marker_value != status_value:
+                failures.append(f"{prefix} {field} differs from lsl_runtime_status")
+        event = events_by_id.get(event_id)
+        if event is not None:
+            if str(event.get("type") or "") != event_type:
+                failures.append(f"{prefix} event_type differs from completion event")
+            if str(event.get("package_id") or "") and str(payload.get("package_id") or "") != str(event.get("package_id") or ""):
+                failures.append(f"{prefix} payload package_id differs from completion event")
+            if str(event.get("run_id") or "") and str(payload.get("run_id") or "") != str(event.get("run_id") or ""):
+                failures.append(f"{prefix} payload run_id differs from completion event")
+
+    if rows and not events:
+        warnings.append("phone marker mirror was present without completion events; only marker self-consistency was checked")
 
 
 def _validate_lightweight_materializations(

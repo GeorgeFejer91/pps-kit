@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import hashlib
 import importlib.util
 import json
@@ -172,6 +173,21 @@ def test_android_lsl_runtime_validator_rejects_missing_lightweight_materializati
 
     assert result.ok is False
     assert "missing phone_scheduled_block_materialization event" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_phone_marker_mirror_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    marker_path = run_dir / "lsl_marker_mirror.csv"
+    rows = _read_csv_rows(marker_path)
+    rows[0]["event_type"] = "wrong_event"
+    _write_marker_csv(marker_path, rows)
+
+    result = validator.validate_run_artifact(run_dir)
+
+    assert result.ok is False
+    assert "payload type differs from marker event_type" in "\n".join(result.failures)
 
 
 def test_android_lsl_runtime_validator_loads_lightweight_materialization_from_zip(tmp_path: Path):
@@ -347,33 +363,37 @@ def _write_phone_run_with_native_command_diary(
     status = _status(native=True)
     status.update(_catalog_identity())
     row = _phone_native_command_row(ack_sent=ack_sent)
-    events = [{"type": "run_start", "package_id": "pkg-001"}]
+    events = [_phone_event(1, "run_start")]
     if include_operator_event:
         events.append(
-            {
-                "type": "operator_command",
-                "command_id": row["command_id"],
-                "command_source": "native_lsl",
-                "sender_id": row["sender_id"],
-                "command": row["command"],
-                "status": row["status"],
-                "reason": row["reason"],
-                "ack_sent": row["ack_sent"],
-                "payload": row["payload"],
-            }
+            _phone_event(
+                2,
+                "operator_command",
+                command_id=row["command_id"],
+                command_source="native_lsl",
+                sender_id=row["sender_id"],
+                command=row["command"],
+                status=row["status"],
+                reason=row["reason"],
+                ack_sent=row["ack_sent"],
+                payload=row["payload"],
+            )
         )
+    markers = [_phone_marker(event) for event in events]
     (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
     (run_dir / "completion.json").write_text(
         json.dumps(
             {
                 "lsl_runtime_status": status,
                 "events": events,
+                "lsl_marker_mirror": markers,
                 "command_diary": [row],
             }
         ),
         encoding="utf-8",
     )
     (run_dir / "command_diary.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
+    _write_marker_csv(run_dir / "lsl_marker_mirror.csv", markers)
 
 
 def _phone_native_command_row(*, ack_sent: bool = True) -> dict:
@@ -421,6 +441,80 @@ def _phone_native_command_row(*, ack_sent: bool = True) -> dict:
         "phone_unix_ms": 1780000000000,
         "phone_elapsed_realtime_ms": 123456,
     }
+
+
+PHONE_EVENT_CODES = {
+    "session_metadata": 8,
+    "run_start": 1,
+    "run_complete": 2,
+    "block_start": 10,
+    "block_complete": 11,
+    "vibration_cue": 21,
+    "tap": 30,
+    "phone_scheduled_block_materialization": 34,
+    "phone_topup_materialization": 35,
+    "operator_command": 41,
+    "phone_playback_pause": 42,
+    "phone_playback_resume": 43,
+    "phone_stop_after_block_request": 44,
+    "phone_stop_after_block_boundary": 45,
+}
+
+
+def _phone_event(event_id: int, event_type: str, **extra: object) -> dict:
+    event = {
+        "type": event_type,
+        "event_id": event_id,
+        "package_id": "pkg-001",
+        "run_id": "phone-run-001",
+        "phone_unix_ms": 1780000000000 + event_id,
+        "phone_elapsed_realtime_ms": 123456 + event_id,
+    }
+    event.update(extra)
+    return event
+
+
+def _phone_marker(event: dict) -> dict:
+    event_type = str(event.get("type") or "")
+    event_id = int(event.get("event_id") or 0)
+    block_index = str(event.get("block_index") or event.get("block_id") or "")
+    trial_uid = str(event.get("trial_uid") or "")
+    return {
+        "marker_version": "2.0",
+        "event_id": event_id,
+        "event_type": event_type,
+        "event_code": PHONE_EVENT_CODES.get(event_type, 500),
+        "trigger_key": f"trial:{trial_uid}:{event_type}" if trial_uid else (f"block:{block_index}:{event_type}" if block_index else f"control:{event_type}"),
+        "marker_name": f"P001_{block_index or 'blockXX'}_{trial_uid}_{event_type}".replace("__", "_").strip("_"),
+        "session_id": "session-001",
+        "participant_id": "P001",
+        "session_group_id": "group-001",
+        "part_session_id": "part-001",
+        "part_number": "01",
+        "block_index": block_index,
+        "trial_uid": trial_uid,
+        "timestamp_quality": "android_elapsed_realtime",
+        "phone_unix_ms": event.get("phone_unix_ms"),
+        "phone_elapsed_realtime_ms": event.get("phone_elapsed_realtime_ms"),
+        "payload_json": json.dumps(event, sort_keys=True),
+    }
+
+
+def _write_marker_csv(path: Path, rows: list[dict]) -> None:
+    fieldnames: list[str] = []
+    for row in rows:
+        for key in row:
+            if key not in fieldnames:
+                fieldnames.append(key)
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def _read_csv_rows(path: Path) -> list[dict]:
+    with path.open(newline="", encoding="utf-8") as handle:
+        return [dict(row) for row in csv.DictReader(handle)]
 
 
 def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event: bool = True) -> None:
@@ -488,9 +582,10 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
             "trial_count": 1,
         },
     }
-    events = [{"type": "run_start", "package_id": "pkg-001"}]
+    events = [_phone_event(1, "run_start")]
     if include_materialization_event:
-        events.append({"type": "phone_scheduled_block_materialization", **materialization})
+        events.append(_phone_event(2, "phone_scheduled_block_materialization", **materialization))
+    markers = [_phone_marker(event) for event in events]
     materialized_dir = run_dir / "materialized_blocks"
     materialized_dir.mkdir()
     (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
@@ -502,10 +597,12 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
                 "lsl_runtime_status": status,
                 "package": {"asset_strategy": "trial_building_blocks_only"},
                 "events": events,
+                "lsl_marker_mirror": markers,
             }
         ),
         encoding="utf-8",
     )
+    _write_marker_csv(run_dir / "lsl_marker_mirror.csv", markers)
     (materialized_dir / "phone_materialized_block_01.json").write_text(json.dumps(materialization), encoding="utf-8")
     (materialized_dir / "phone_materialized_block_01.wav").write_bytes(wav_bytes)
 

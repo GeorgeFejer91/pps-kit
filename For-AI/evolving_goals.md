@@ -128,6 +128,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `ack_sent=true`, and corresponding `operator_command` events. This makes
   PC-runner/controller-to-phone LSL administration auditable from the phone run
   artifact, not only from sender outboxes.
+- The same validator now loads `lsl_marker_mirror.csv` from phone-run folders
+  or exported ZIPs, falls back to embedded `completion.json` marker rows, and
+  checks marker mirror reconstructability against completion events, payload
+  JSON, Android phone event-code mappings, duplicate event ids, and required
+  marker fields. This keeps the local PPSMarkersV2-shaped mirror auditable
+  before a PC-side LSL monitor/XDF comparison is available.
 - Android phone-owned runs now derive a phone-local tactile response ledger
   using the shared 100-1300 ms post-tactile response window and write
   `phone_response_ledger.csv` plus `phone_topup_plan.json` into the local run
