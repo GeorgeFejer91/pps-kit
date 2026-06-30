@@ -1092,17 +1092,38 @@ def test_android_lsl_runtime_validator_accepts_controller_operator_note_payload(
     status["command_protocol"]["supported_commands"].append("operator_note")
     (controller_dir / "phone_controller_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
     row = _controller_row(native_sent=True, ack_received=True)
-    note_payload = {"token": "secret", "package_id": "pkg-001", "note": "participant asked for a pause"}
+    note_payload = dict(row["payload"])
+    note_payload["note"] = "participant asked for a pause"
     row["command"] = "operator_note"
     row["command_sample"][4] = "operator_note"
     row["command_sample"][6] = json.dumps(note_payload)
     row["payload"] = dict(note_payload)
+    ack_payload = json.loads(row["ack_sample"][9])
+    ack_payload["command"] = "operator_note"
+    ack_payload["note"] = note_payload["note"]
+    row["ack_sample"][9] = json.dumps(ack_payload)
     (controller_dir / "phone_controller_command_outbox.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
 
     result = validator.validate_run_artifact(controller_dir, expect_native_transport=True, expect_command_acks=True)
 
     assert result.ok is True
     assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_rejects_controller_ack_payload_identity_drift(tmp_path: Path):
+    controller_dir = tmp_path / "phone-controller"
+    controller_dir.mkdir()
+    (controller_dir / "phone_controller_runtime_status.json").write_text(json.dumps(_controller_status(native=True)), encoding="utf-8")
+    row = _controller_row(native_sent=True, ack_received=True)
+    ack_payload = json.loads(row["ack_sample"][9])
+    ack_payload["package_id"] = "other-package"
+    row["ack_sample"][9] = json.dumps(ack_payload)
+    (controller_dir / "phone_controller_command_outbox.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+    result = validator.validate_run_artifact(controller_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    assert "controller outbox row 1 ack payload package_id differs from command sample" in "\n".join(result.failures)
 
 
 def test_android_lsl_runtime_validator_rejects_controller_operator_note_missing_from_sample(tmp_path: Path):
@@ -1112,10 +1133,12 @@ def test_android_lsl_runtime_validator_rejects_controller_operator_note_missing_
     status["command_protocol"]["supported_commands"].append("operator_note")
     (controller_dir / "phone_controller_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
     row = _controller_row(native_sent=True, ack_received=True)
+    note_payload = dict(row["payload"])
+    note_payload["note"] = "participant asked for a pause"
     row["command"] = "operator_note"
     row["command_sample"][4] = "operator_note"
-    row["command_sample"][6] = json.dumps({"token": "secret", "package_id": "pkg-001"})
-    row["payload"] = {"token": "secret", "package_id": "pkg-001", "note": "participant asked for a pause"}
+    row["command_sample"][6] = json.dumps({key: value for key, value in note_payload.items() if key != "note"})
+    row["payload"] = note_payload
     (controller_dir / "phone_controller_command_outbox.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
 
     result = validator.validate_run_artifact(controller_dir, expect_native_transport=True, expect_command_acks=True)
@@ -1232,6 +1255,22 @@ def test_android_lsl_runtime_validator_rejects_pc_admin_payload_drift(tmp_path: 
 
     assert result.ok is False
     assert "PC admin outbox row 1 row payload differs from command sample payload" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_pc_admin_ack_payload_token_echo(tmp_path: Path):
+    admin_dir = tmp_path / "pc-android-admin"
+    admin_dir.mkdir()
+    (admin_dir / "pc_android_lsl_admin_status.json").write_text(json.dumps(_pc_admin_status()), encoding="utf-8")
+    row = _pc_admin_row(native_sent=True, ack_received=True)
+    ack_payload = json.loads(row["ack_sample"][9])
+    ack_payload["token"] = "secret"
+    row["ack_sample"][9] = json.dumps(ack_payload)
+    (admin_dir / "pc_android_lsl_command_outbox.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+    result = validator.validate_run_artifact(admin_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    assert "PC admin outbox row 1 ack payload must not echo the pairing token" in "\n".join(result.failures)
 
 
 def test_android_lsl_runtime_validator_accepts_phone_run_command_diary_ack_evidence(tmp_path: Path):
@@ -2831,6 +2870,17 @@ def _controller_stream_descriptions() -> dict:
 
 def _controller_row(*, native_sent: bool, ack_received: bool) -> dict:
     command_id = "cmd-controller-001"
+    command_payload = {
+        "token": "secret",
+        "package_id": "pkg-001",
+        "participant_id": "P001",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "session-group-001",
+        "target_part_number": "1",
+        "requested_by": "android_controller",
+        "current_android_source_behavior": "native_lsl_controller_with_local_outbox" if native_sent else "local_controller_outbox_only",
+    }
     command_sample = [
         "pps-lsl-command.v1",
         command_id,
@@ -2838,7 +2888,7 @@ def _controller_row(*, native_sent: bool, ack_received: bool) -> dict:
         "android_controller",
         "pause",
         "42.000000000",
-        json.dumps({"token": "secret", "package_id": "pkg-001"}),
+        json.dumps(command_payload),
     ]
     row = {
         "schema": "pps-android-controller-command-row.v1",
@@ -2861,10 +2911,12 @@ def _controller_row(*, native_sent: bool, ack_received: bool) -> dict:
             "payload_json",
         ],
         "command_sample": command_sample,
-        "payload": {"token": "secret", "package_id": "pkg-001"},
+        "payload": dict(command_payload),
         "ack_received": ack_received,
     }
     if ack_received:
+        ack_payload = {key: value for key, value in command_payload.items() if key not in {"token", "companion_token"}}
+        ack_payload["command"] = "pause"
         row["ack_sample"] = [
             "pps-lsl-command-ack.v1",
             command_id,
@@ -2875,7 +2927,7 @@ def _controller_row(*, native_sent: bool, ack_received: bool) -> dict:
             "42.010000000",
             "42.020000000",
             "42.030000000",
-            json.dumps({"command": "pause"}),
+            json.dumps(ack_payload),
         ]
     return row
 
@@ -2961,6 +3013,14 @@ def _pc_admin_stream_descriptions() -> dict:
 
 def _pc_admin_row(*, native_sent: bool, ack_received: bool) -> dict:
     command_id = "cmd-pc-admin-001"
+    command_payload = {
+        "token": "secret",
+        "package_id": "pkg-001",
+        "participant_id": "P001",
+        "target_part_number": "1",
+        "requested_by": "pc_runner_lsl_admin",
+        "current_pc_source_behavior": "pc_native_lsl_admin_with_local_outbox",
+    }
     command_sample = [
         "pps-lsl-command.v1",
         command_id,
@@ -2968,7 +3028,7 @@ def _pc_admin_row(*, native_sent: bool, ack_received: bool) -> dict:
         "pc_runner",
         "pause",
         "42.000000000",
-        json.dumps({"token": "secret", "package_id": "pkg-001", "requested_by": "pc_runner_lsl_admin"}),
+        json.dumps(command_payload),
     ]
     row = {
         "schema": "pps-pc-android-lsl-admin-command-row.v1",
@@ -3012,9 +3072,11 @@ def _pc_admin_row(*, native_sent: bool, ack_received: bool) -> dict:
         ],
         "command_sample": command_sample,
         "ack_sample": [],
-        "payload": {"token": "secret", "package_id": "pkg-001", "requested_by": "pc_runner_lsl_admin"},
+        "payload": dict(command_payload),
     }
     if ack_received:
+        ack_payload = {key: value for key, value in command_payload.items() if key not in {"token", "companion_token"}}
+        ack_payload.update({"command": "pause", "target_session_id": "part-001"})
         row["ack_sample"] = [
             "pps-lsl-command-ack.v1",
             command_id,
@@ -3025,6 +3087,6 @@ def _pc_admin_row(*, native_sent: bool, ack_received: bool) -> dict:
             "42.010000000",
             "42.020000000",
             "42.030000000",
-            json.dumps({"command": "pause"}),
+            json.dumps(ack_payload),
         ]
     return row

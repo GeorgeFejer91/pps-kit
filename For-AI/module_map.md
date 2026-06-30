@@ -138,9 +138,11 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   (`package_id`, `participant_id`, target session/part/group/part-number, and
   requester/source-behavior fields) while excluding pairing tokens; explicit
   package or split-part identity drift is rejected before state changes. The
-  command-admin reconciler compares those echoed target payload fields between
-  sender outbox and receiver command diary; the PC monitor/XDF reconciler now
-  checks the same non-secret command/ack target identity fields when both
+  strict Controller/PC-admin outbox validator now parses stored ack samples and
+  requires that same non-secret ack payload identity while rejecting pairing-token
+  echoes. The command-admin reconciler compares those echoed target payload fields
+  between sender outbox and receiver command diary; the PC monitor/XDF reconciler
+  now checks the same non-secret command/ack target identity fields when both
   command-signal and acknowledgement streams are captured. Controller runtime
   status now also includes
   `pps-android-lsl-stream-descriptions.v1` descriptions for the controller
@@ -199,7 +201,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `pc_android_lsl_admin_status.json` /
   `pc_android_lsl_command_outbox.jsonl`, command/ack schema/channel order,
   Controller/PC-admin row-payload versus command-sample-payload consistency,
-  nonblank `operator_note` note payloads,
+  Controller/PC-admin ack payload command/target identity plus pairing-token
+  exclusion, nonblank `operator_note` note payloads,
   PC-monitor observed command-signal payload token/note evidence and
   payload_json versus sample-payload consistency plus observed command/ack id
   pairing under `--expect-command-acks`,

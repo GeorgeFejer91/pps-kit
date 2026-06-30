@@ -421,12 +421,15 @@ inside the token-gated command payload so operator observations reconstruct
 through the same outbox, LSL command, ack, and receiver diary path. The Android
 LSL artifact validator rejects Controller or PC-admin command outbox rows whose
 stored `payload` object differs from the serialized command-sample payload, and
-it requires nonblank note text for `operator_note`. Runner-mode ack/diary
-payloads echo the non-secret accepted target identity from the command sample,
-including package, participant, target session, part session, session group, and
-part number, but never the pairing token. Commands that explicitly name a
-different package or split-part identity are rejected before the phone applies a
-local state change.
+it requires nonblank note text for `operator_note`. Under
+`--expect-command-acks`, Controller and PC-admin outbox validation also parses
+the stored ack sample payload: it must not echo the pairing token, and it must
+agree with the command sample on command, target session, package, participant,
+part session, session group, part number, requester, and source-behavior fields
+whenever those non-secret fields were available. Runner-mode ack/diary payloads
+echo the same accepted target identity from the command sample. Commands that
+explicitly name a different package or split-part identity are rejected before
+the phone applies a local state change.
 
 In native liblsl builds, Runner mode resolves up to eight visible
 `PPSCommandSignalsV1` streams and polls every opened command inlet, so a PC

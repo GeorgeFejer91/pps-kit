@@ -4654,6 +4654,14 @@ def _validate_controller_outbox_row(
                 failures.append(f"{prefix} ack sample schema mismatch")
             if ack_sample[1] != sample[1]:
                 failures.append(f"{prefix} ack command_id does not match command sample")
+            _validate_outbox_ack_payload(
+                prefix,
+                row=row,
+                command_sample=sample,
+                command_payload=payload,
+                ack_sample=ack_sample,
+                failures=failures,
+            )
 
 
 def _validate_pc_admin_outbox_row(
@@ -4708,6 +4716,14 @@ def _validate_pc_admin_outbox_row(
                 failures.append(f"{prefix} ack sample schema mismatch")
             if ack_sample[1] != sample[1]:
                 failures.append(f"{prefix} ack command_id does not match command sample")
+            _validate_outbox_ack_payload(
+                prefix,
+                row=row,
+                command_sample=sample,
+                command_payload=payload,
+                ack_sample=ack_sample,
+                failures=failures,
+            )
 
 
 def _validate_command_outbox_payload(
@@ -4726,6 +4742,77 @@ def _validate_command_outbox_payload(
         failures.append(f"{prefix} row payload differs from command sample payload")
     if command == "operator_note" and not str(payload.get("note") or "").strip():
         failures.append(f"{prefix} operator_note command payload is missing note")
+
+
+def _validate_outbox_ack_payload(
+    prefix: str,
+    *,
+    row: dict[str, Any],
+    command_sample: list[Any],
+    command_payload: dict[str, Any] | None,
+    ack_sample: list[Any],
+    failures: list[str],
+) -> None:
+    if len(command_sample) != len(LSL_COMMAND_CHANNELS) or len(ack_sample) != len(LSL_ACK_CHANNELS):
+        return
+    if ack_sample[2] != command_sample[2]:
+        failures.append(f"{prefix} ack session_id does not match command sample")
+    if ack_sample[4] not in {"applied", "rejected"}:
+        failures.append(f"{prefix} ack status is not recognized")
+    ack_payload = _parse_json_object(str(ack_sample[9] or "{}"), f"{prefix} ack payload", failures)
+    if ack_payload is None:
+        return
+    if str(ack_payload.get("token") or ack_payload.get("companion_token") or "").strip():
+        failures.append(f"{prefix} ack payload must not echo the pairing token")
+
+    command = _metadata_value(command_sample[4])
+    ack_command = _metadata_value(ack_payload.get("command"))
+    if not ack_command:
+        failures.append(f"{prefix} ack payload is missing command")
+    elif command and ack_command != command:
+        failures.append(f"{prefix} ack payload command differs from command sample")
+
+    identity_fields = (
+        "target_session_id",
+        "package_id",
+        "participant_id",
+        "target_part_session_id",
+        "target_session_group_id",
+        "target_part_number",
+        "requested_by",
+        "current_android_source_behavior",
+        "current_pc_source_behavior",
+    )
+    for field in identity_fields:
+        expected = _expected_outbox_ack_identity(field, row, command_sample, command_payload)
+        if not expected:
+            continue
+        observed = _metadata_value(ack_payload.get(field))
+        if not observed:
+            failures.append(f"{prefix} ack payload is missing {field}")
+        elif observed != expected:
+            failures.append(f"{prefix} ack payload {field} differs from command sample")
+
+
+def _expected_outbox_ack_identity(
+    field: str,
+    row: dict[str, Any],
+    command_sample: list[Any],
+    command_payload: dict[str, Any] | None,
+) -> str:
+    payload = command_payload if isinstance(command_payload, dict) else {}
+    candidates: list[Any] = []
+    if field == "target_session_id":
+        candidates.extend([payload.get(field), row.get(field), command_sample[2]])
+    elif field == "target_part_number":
+        candidates.extend([payload.get(field), row.get(field), row.get("part_number")])
+    else:
+        candidates.extend([payload.get(field), row.get(field)])
+    for candidate in candidates:
+        value = _metadata_value(candidate)
+        if value:
+            return value
+    return ""
 
 
 def _canonical_json(value: Any) -> str:
