@@ -282,6 +282,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   rejects drift inside the `session_metadata` marker payload when participant
   metadata, haptic calibration/capability, or package provenance differs from
   the sidecars/manifests.
+- Android phone-run LSL `session_metadata_json` now carries
+  `package_asset_strategy`, `study_hierarchy`, and
+  `source_run_setup_manifest_path` alongside schedule/source hashes. Strict
+  validation compares these fields against `run_package_manifest.json` while
+  accepting nested reconstruction fields in sidecar artifacts, so native
+  `PPSMarkersV2`/`PPSTriggerCodes` stream descriptions preserve the Segment
+  0-6 reconstruction spine without relying only on private app files.
 - PC-side Android LSL monitor reconciliation now compares captured rich-marker
   `payload_json` values against the phone marker mirror using canonical JSON.
   This means event-id and trigger-code agreement is no longer enough: if the

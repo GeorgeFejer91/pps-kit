@@ -349,10 +349,13 @@ internal fun phoneLslSessionMetadataJson(
     val payload = JSONObject()
         .put("package_id", runPackage.packageId)
         .put("asset_strategy", mobilePackageAssetStrategy(runPackage))
+        .put("package_asset_strategy", runPackage.reconstruction.packageAssetStrategy)
         .put("schedule_hash", runPackage.reconstruction.scheduleHash)
         .put("participant_roster_count", runPackage.participantRoster.size)
         .put("randomization_seed", runPackage.randomizationSeed)
         .put("source_segment_hashes", runPackage.sourceSegmentHashes.toJsonObject())
+        .put("study_hierarchy", stringArray(runPackage.reconstruction.studyHierarchy))
+        .put("source_run_setup_manifest_path", runPackage.reconstruction.sourceRunSetupManifestPath)
         .put("privacy_default", runPackage.lsl.privacyDefault.ifBlank { "metadata_payload_only" })
         .put("demographics_in_stream_name", false)
     phoneParticipantMetadataSummary(participantMetadata)?.let { payload.put("participant_metadata_summary", it) }

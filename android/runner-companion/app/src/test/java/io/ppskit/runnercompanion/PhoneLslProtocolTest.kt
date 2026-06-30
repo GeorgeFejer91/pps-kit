@@ -221,11 +221,20 @@ class PhoneLslProtocolTest {
         assertEquals("phone-run-001", richMarkers.getString("run_id"))
         val richSessionMetadata = JSONObject(richMarkers.getString("session_metadata_json"))
         assertEquals("pkg-001", richSessionMetadata.getString("package_id"))
+        assertEquals("trial_building_blocks_only", richSessionMetadata.getString("package_asset_strategy"))
         assertEquals("seed-123", richSessionMetadata.getString("randomization_seed"))
         assertEquals(2, richSessionMetadata.getInt("participant_roster_count"))
         assertEquals(
             "segment5hash",
             richSessionMetadata.getJSONObject("source_segment_hashes").getString("source_segment5_manifest_sha256"),
+        )
+        assertEquals(
+            "segment_0_study_profile",
+            richSessionMetadata.getJSONArray("study_hierarchy").getString(0),
+        )
+        assertEquals(
+            "runs/setup.json",
+            richSessionMetadata.getString("source_run_setup_manifest_path"),
         )
         assertFalse(richSessionMetadata.getBoolean("demographics_in_stream_name"))
         val participantSummary = richSessionMetadata.getJSONObject("participant_metadata_summary")
@@ -353,7 +362,18 @@ class PhoneLslProtocolTest {
               "reconstruction": {
                 "schema": "pps-mobile-reconstruction-contract.v2",
                 "package_asset_strategy": "trial_building_blocks_only",
-                "schedule_hash": "schedulehash"
+                "schedule_hash": "schedulehash",
+                "study_hierarchy": [
+                  "segment_0_study_profile",
+                  "segment_1_project_context",
+                  "segment_2_trial_design",
+                  "segment_3_condition_space",
+                  "segment_4_runtime_parameters",
+                  "segment_5_randomized_blocks",
+                  "segment_6_participant_part_order",
+                  "phone_runtime_package"
+                ],
+                "source_run_setup_manifest_path": "runs/setup.json"
               },
               "lsl": {
                 "schema": "pps-mobile-lsl-contract.v1",

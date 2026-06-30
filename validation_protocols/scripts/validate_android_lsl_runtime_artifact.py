@@ -2613,6 +2613,11 @@ def _validate_phone_run_provenance_consistency(
 def _phone_run_provenance_from_manifest(package_manifest: dict[str, Any] | None) -> dict[str, Any]:
     if not isinstance(package_manifest, dict):
         return {}
+    reconstruction = (
+        package_manifest.get("reconstruction")
+        if isinstance(package_manifest.get("reconstruction"), dict)
+        else {}
+    )
     participant_roster = [
         str(item).strip()
         for item in _json_list(package_manifest.get("participant_roster"))
@@ -2627,6 +2632,15 @@ def _phone_run_provenance_from_manifest(package_manifest: dict[str, Any] | None)
         expected["randomization_seed"] = randomization_seed
     if source_segment_hashes:
         expected["source_segment_hashes"] = source_segment_hashes
+    package_asset_strategy = _metadata_value(reconstruction.get("package_asset_strategy"))
+    if package_asset_strategy:
+        expected["package_asset_strategy"] = package_asset_strategy
+    study_hierarchy = [str(item) for item in _json_list(reconstruction.get("study_hierarchy"))]
+    if study_hierarchy:
+        expected["study_hierarchy"] = study_hierarchy
+    source_run_setup_manifest_path = _metadata_value(reconstruction.get("source_run_setup_manifest_path"))
+    if source_run_setup_manifest_path:
+        expected["source_run_setup_manifest_path"] = source_run_setup_manifest_path
     return expected
 
 
@@ -2648,6 +2662,9 @@ def _phone_run_payload_has_provenance(payload: dict[str, Any]) -> bool:
             "participant_roster_count",
             "randomization_seed",
             "source_segment_hashes",
+            "package_asset_strategy",
+            "study_hierarchy",
+            "source_run_setup_manifest_path",
         )
     )
 
@@ -2679,6 +2696,46 @@ def _validate_phone_run_provenance_payload(
             failures.append(f"{label} source_segment_hashes is missing from run_package_manifest provenance")
         elif observed_hashes != expected_hashes:
             failures.append(f"{label} source_segment_hashes differ from run_package_manifest")
+
+    expected_strategy = _metadata_value(expected.get("package_asset_strategy"))
+    if expected_strategy:
+        observed_strategy = _phone_run_provenance_field(payload, "package_asset_strategy")
+        if not observed_strategy:
+            failures.append(f"{label} package_asset_strategy is missing from run_package_manifest provenance")
+        elif observed_strategy != expected_strategy:
+            failures.append(f"{label} package_asset_strategy differs from run_package_manifest")
+
+    expected_hierarchy = [str(item) for item in _json_list(expected.get("study_hierarchy"))]
+    if expected_hierarchy:
+        observed_hierarchy = _phone_run_provenance_list(payload, "study_hierarchy")
+        if not observed_hierarchy:
+            failures.append(f"{label} study_hierarchy is missing from run_package_manifest provenance")
+        elif observed_hierarchy != expected_hierarchy:
+            failures.append(f"{label} study_hierarchy differs from run_package_manifest")
+
+    expected_setup_path = _metadata_value(expected.get("source_run_setup_manifest_path"))
+    if expected_setup_path:
+        observed_setup_path = _phone_run_provenance_field(payload, "source_run_setup_manifest_path")
+        if not observed_setup_path:
+            failures.append(f"{label} source_run_setup_manifest_path is missing from run_package_manifest provenance")
+        elif observed_setup_path != expected_setup_path:
+            failures.append(f"{label} source_run_setup_manifest_path differs from run_package_manifest")
+
+
+def _phone_run_provenance_field(payload: dict[str, Any], field: str) -> str:
+    value = _metadata_value(payload.get(field))
+    if value:
+        return value
+    reconstruction = payload.get("reconstruction") if isinstance(payload.get("reconstruction"), dict) else {}
+    return _metadata_value(reconstruction.get(field))
+
+
+def _phone_run_provenance_list(payload: dict[str, Any], field: str) -> list[str]:
+    value = [str(item) for item in _json_list(payload.get(field))]
+    if value:
+        return value
+    reconstruction = payload.get("reconstruction") if isinstance(payload.get("reconstruction"), dict) else {}
+    return [str(item) for item in _json_list(reconstruction.get(field))]
 
 
 def _source_segment_hash_signature(value: Any) -> dict[str, str]:
