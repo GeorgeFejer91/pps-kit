@@ -250,6 +250,11 @@ Required validation levels:
     `pps-android-lsl-monitor`. Controller and PC-admin outbox rows are checked
     for exact row-payload versus command-sample-payload consistency, including
     required `operator_note` note text when that command is used.
+    Phone-run `command_diary.jsonl` rows are also checked against matching
+    `operator_command` events and native `PPSCommandAcksV1` samples: strict ack
+    validation requires the ack payload to match the diary payload and preserve
+    the applied command plus package identity, with run id required for
+    active-run control commands.
     Add `--expect-artifact-inventory` for new
     phone-run folders/ZIPs where the file inventory should prove relative
     paths, byte sizes, and SHA-256 hashes. Add

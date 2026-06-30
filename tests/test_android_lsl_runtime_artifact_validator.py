@@ -1093,6 +1093,39 @@ def test_android_lsl_runtime_validator_accepts_idle_native_start_command_evidenc
     assert result.failures == []
 
 
+def test_android_lsl_runtime_validator_rejects_phone_run_ack_payload_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    row = _phone_native_command_row()
+    row["ack_sample"][9] = json.dumps({"command": "pause", "package_id": "pkg-001", "run_id": "other-run"})
+    _write_phone_run_with_native_command_diary(run_dir, row=row)
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True, expect_command_acks=True)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "phone command diary row 1 ack payload differs from diary row payload" in failures
+    assert "phone command diary row 1 ack payload run_id differs from diary row" in failures
+
+
+def test_android_lsl_runtime_validator_rejects_operator_command_payload_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_phone_run_with_native_command_diary(run_dir)
+    completion_path = run_dir / "completion.json"
+    completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    operator_event = next(event for event in completion["events"] if event["type"] == "operator_command")
+    operator_event["payload"]["state_changed"] = False
+    completion_path.write_text(json.dumps(completion), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    assert "phone command diary row 1 payload differs from matching operator_command event" in "\n".join(
+        result.failures
+    )
+
+
 def test_android_lsl_runtime_validator_requires_phone_run_command_diary_when_acks_expected(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -1291,6 +1324,12 @@ def _write_phone_run_with_native_command_diary(
 
 
 def _phone_native_command_row(*, ack_sent: bool = True) -> dict:
+    payload = {
+        "command": "pause",
+        "package_id": "pkg-001",
+        "run_id": "phone-run-001",
+        "state_changed": True,
+    }
     ack_sample = [
         "pps-lsl-command-ack.v1",
         "cmd-phone-001",
@@ -1301,7 +1340,7 @@ def _phone_native_command_row(*, ack_sent: bool = True) -> dict:
         "42.010000000",
         "42.020000000",
         "42.030000000",
-        json.dumps({"command": "pause", "state_changed": True}),
+        json.dumps(payload),
     ]
     return {
         "schema": "pps-android-command-diary.v1",
@@ -1312,7 +1351,7 @@ def _phone_native_command_row(*, ack_sent: bool = True) -> dict:
         "command": "pause",
         "status": "applied",
         "reason": "phone_playback_paused",
-        "payload": {"command": "pause", "state_changed": True},
+        "payload": dict(payload),
         "package_id": "pkg-001",
         "run_id": "phone-run-001",
         "received_lsl_time": 42.01,

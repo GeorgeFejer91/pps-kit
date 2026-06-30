@@ -214,13 +214,17 @@ run/package identity, phone timestamps, duplicate-id checks, and primitive
 event fields. This is the quick human-readable log of what the phone runtime
 did before the richer marker/XDF checks.
 Phone-run command diaries are also checked against matching `operator_command`
-events when present, including the command source. When both
+events when present, including the command source and payload. When both
 `command_diary.jsonl` and embedded `completion.json`/`latest_events.json`
 `command_diary` rows are present, the validator checks that schema, source,
 status, payload, ack evidence, timing, and identity fields agree for each
-command id. New runs should distinguish `phone_ui`, `phone_runtime`, and
-`native_lsl`; the validator still accepts the older `phone_ui_or_runtime` label
-for historical artifacts.
+command id. For native `PPSCommandAcksV1` rows, strict validation also parses
+the ack sample payload and compares it with the diary payload, requiring the
+ack payload to preserve the applied command plus package identity and, for
+active-run commands such as pause/resume/stop-after-block, the phone run id.
+New runs should distinguish `phone_ui`, `phone_runtime`, and `native_lsl`; the
+validator still accepts the older `phone_ui_or_runtime` label for historical
+artifacts.
 For strict run-folder file reconstruction, add `--expect-artifact-inventory`;
 this requires `artifact_file_inventory.json` to list every run-folder file
 except the inventory sidecars themselves with relative paths, byte sizes, and
@@ -274,8 +278,9 @@ write the same phone-owned data-export sidecars and mirror tree under
 When validating PC-runner or Controller-phone administration, add
 `--expect-command-acks`; for phone-run artifacts this now requires
 `command_diary.jsonl` or embedded `command_diary` rows with native
-`PPSCommandAcksV1` samples and matching `operator_command` events. PC-runner
-administration status also includes `stream_descriptions` for the PC
+`PPSCommandAcksV1` samples, ack payloads that match the command diary payload,
+and matching `operator_command` events. PC-runner administration status also
+includes `stream_descriptions` for the PC
 command-signal outlet and Android command-ack inlet, including the row-derived
 command source ID when an outbox row has been written.
 

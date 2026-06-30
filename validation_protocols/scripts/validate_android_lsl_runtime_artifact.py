@@ -2772,6 +2772,9 @@ def _validate_phone_command_diary(
                 event_source = str(event.get("command_source") or "")
                 if command_source in command_sources and event_source and event_source != command_source:
                     failures.append(f"{prefix} command_source differs from matching operator_command event")
+                if "payload" in row and "payload" in event:
+                    if _canonical_json(row.get("payload")) != _canonical_json(event.get("payload")):
+                        failures.append(f"{prefix} payload differs from matching operator_command event")
 
         if command_source != "native_lsl":
             continue
@@ -2804,7 +2807,17 @@ def _validate_phone_command_diary(
                     continue
                 if abs(sample_value - row_value) > 1e-6:
                     failures.append(f"{prefix} ack {field} differs from diary row")
-            _parse_json_object(str(ack_sample[9] or "{}"), f"{prefix} ack payload", failures)
+            ack_payload = _parse_json_object(str(ack_sample[9] or "{}"), f"{prefix} ack payload", failures)
+            if ack_payload is not None:
+                _validate_phone_command_ack_payload(
+                    ack_payload,
+                    row=row,
+                    command=command,
+                    status=row_status,
+                    prefix=prefix,
+                    failures=failures,
+                    expect_command_acks=expect_command_acks,
+                )
         if expect_command_acks and row.get("ack_sent") is not True:
             failures.append(f"{prefix} was expected to send a PPSCommandAcksV1 sample")
 
@@ -2817,6 +2830,46 @@ def _validate_phone_command_diary(
             failures.append("phone-run command ack validation expected at least one PPSCommandAcksV1 ack sample")
     elif native_rows > 0 and native_ack_rows <= 0:
         warnings.append("native_lsl command diary rows do not include ack samples; rerun with --expect-command-acks for strict checks")
+
+
+def _validate_phone_command_ack_payload(
+    ack_payload: dict[str, Any],
+    *,
+    row: dict[str, Any],
+    command: str,
+    status: str,
+    prefix: str,
+    failures: list[str],
+    expect_command_acks: bool,
+) -> None:
+    row_payload = row.get("payload") if isinstance(row.get("payload"), dict) else {}
+    if row_payload and _canonical_json(row_payload) != _canonical_json(ack_payload):
+        failures.append(f"{prefix} ack payload differs from diary row payload")
+    if command == "invalid_lsl_command":
+        return
+    payload_command = _metadata_value(ack_payload.get("command"))
+    if not payload_command:
+        failures.append(f"{prefix} ack payload is missing command")
+    elif payload_command != command:
+        failures.append(f"{prefix} ack payload command differs from diary row")
+
+    row_package_id = _metadata_value(row.get("package_id"))
+    payload_package_id = _metadata_value(ack_payload.get("package_id"))
+    if row_package_id:
+        if payload_package_id:
+            if payload_package_id != row_package_id:
+                failures.append(f"{prefix} ack payload package_id differs from diary row")
+        elif expect_command_acks and status == "applied":
+            failures.append(f"{prefix} ack payload is missing package_id")
+
+    row_run_id = _metadata_value(row.get("run_id"))
+    payload_run_id = _metadata_value(ack_payload.get("run_id"))
+    if row_run_id and command not in {"start_experiment", "start_part"} and status == "applied":
+        if payload_run_id:
+            if payload_run_id != row_run_id:
+                failures.append(f"{prefix} ack payload run_id differs from diary row")
+        elif expect_command_acks:
+            failures.append(f"{prefix} ack payload is missing run_id")
 
 
 def _compare_command_diary_rows(

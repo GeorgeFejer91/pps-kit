@@ -206,13 +206,17 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   command rows to carry valid `PPSCommandAcksV1` samples, matching ack times,
   `ack_sent=true`, and corresponding `operator_command` events. This makes
   PC-runner/controller-to-phone LSL administration auditable from the phone run
-  artifact, not only from sender outboxes.
+  artifact, not only from sender outboxes. The strict ack path now also parses
+  the ack sample payload, requires it to match the command diary payload, and
+  checks that applied native acks preserve the command plus package identity
+  and, for active-run control commands, the phone `run_id`.
 - Android phone-run command diary validation now also reconciles duplicate
   command diary copies. When `command_diary.jsonl` and embedded
   completion/latest-events `command_diary` rows are both present, the validator
   compares schema, source, status, payload, ack evidence, timing, and identity
-  fields for each command id so the phone's local command log cannot silently
-  diverge from the exported completion snapshot.
+  fields for each command id, and compares the command diary payload with the
+  matching `operator_command` event payload, so the phone's local command log
+  cannot silently diverge from the exported completion or marker snapshot.
 - Android phone-owned local UI actions are now reconstructable from the same
   command diary path. `MainActivity.kt` records local Runner-mode start button
   presses as `command_source=phone_ui`, internal phone-runtime materialization
