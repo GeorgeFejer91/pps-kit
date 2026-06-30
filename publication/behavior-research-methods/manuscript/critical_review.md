@@ -651,3 +651,35 @@ Methods manuscript draft. It is a working audit, not manuscript text.
   submission still needs profile-by-profile source checks, release archive
   links, and hardware/perceptual validation artifacts before exact replication
   or timing/tactile claims are made.
+
+## Iteration 18: Same-journal Comparator Pass
+
+### Main Critiques
+
+- The paper cited several behavioral software articles, but the BRM-style model
+  was still implicit. A reviewer should be able to see why the draft reads as a
+  methods/software article rather than as a PPS empirical-results article.
+- The same-journal comparator set includes broad experiment builders,
+  specialized toolboxes, hosting/sharing workflows, timing comparisons, and
+  simulation/validation papers. Those genres imply different writing duties:
+  explain the user workflow, show a runnable example, name validation evidence,
+  and avoid overclaiming platform equivalence.
+- Without a source-pointer comparator table, future revisions could add or
+  remove journal-fit claims without knowing which BRM examples motivated them.
+
+### Resolution In This Revision
+
+- Added `brm_comparator_articles.csv`, a source-pointer table mapping BRM
+  comparator clusters to style lessons for PPS Toolkit.
+- Added a compact same-journal comparator table in `Contribution and Journal
+  Fit`. The table ties general experiment builders, hosting/sharing workflows,
+  specialized domain toolboxes, and timing/validation exemplars to the
+  corresponding PPS Toolkit manuscript choices.
+- Added missing bibliography entries for lab.js, OpenSesame, PsyToolkit, Open
+  Lab, vexptoolbox, OpenMaze, and the browser psychophysics timing comparison.
+
+### Residual Concerns
+
+- The comparator pass strengthens journal fit, but the draft still needs final
+  copy editing to keep the added table from making the introduction feel too
+  front-loaded once figures and release links are added.

@@ -182,6 +182,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   includes an operator procedure and evidence handoff table covering pre-run
   setup, output/calibration, execution, post-run review, and sharing, with
   explicit evidence boundaries for each stage.
+- Continued the BRM manuscript self-review loop with a same-journal comparator
+  pass. `brm_comparator_articles.csv` now records BRM software/toolbox,
+  hosting/sharing, tutorial, and timing-validation comparator articles, and
+  `main.tex` includes a compact `Behavior Research Methods` comparator table in
+  the journal-fit section. The table makes explicit that PPS Toolkit should
+  follow BRM software-paper conventions: state the barrier, show the tool, walk
+  through runnable examples, separate validation tiers, and preserve reuse
+  boundaries.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

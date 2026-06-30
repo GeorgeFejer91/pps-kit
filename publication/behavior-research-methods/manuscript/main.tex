@@ -45,6 +45,24 @@ Behavior Research Methods is an appropriate target because the manuscript is abo
 
 \toolkit{} is also narrower than general experiment builders. Gorilla and PsychoPy support broad classes of behavioral experiments \citep{AnwylIrvine2018,Peirce2019}; pyControl and related systems emphasize flexible hardware control and task logic \citep{Akam2022}. PPS Toolkit instead specializes in a difficult corner case: audio-tactile PPS studies where auditory motion, tactile timing, baseline logic, multichannel output, response logging, and spatial rendering all have to agree. This specialization is the reason the user interface is segmented. Each segment corresponds to a methods decision that would otherwise be hidden in a script, a folder of WAV files, or a post-hoc analysis notebook.
 
+The same-journal comparator set also shaped the manuscript style. Table~\ref{tab:brm-comparators} summarizes the article models used for this draft, with the source audit stored in \code{brm\_comparator\_articles.csv}. The goal is not to imitate any one paper, but to follow the recurring BRM pattern: state the barrier, show the tool, walk through a runnable example, provide validation evidence, and make reuse boundaries explicit.
+
+\begin{table}[t]
+\caption{Behavior Research Methods comparator articles used as style models.}
+\label{tab:brm-comparators}
+\footnotesize
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.20\textwidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.30\textwidth}}
+\toprule
+Comparator cluster & Style lesson & PPS Toolkit implication \\
+\midrule
+General experiment builders & Gorilla, PsychoPy2, lab.js, OpenSesame, and PsyToolkit foreground usable tool workflows, graphical/scriptable access, timing-sensitive tasks, open materials, and examples \citep{AnwylIrvine2018,Peirce2019,Henninger2021,Mathot2011,Stoet2010}. & Present PPS Toolkit as an executable suite, not as a claim about a new PPS effect. \\
+Hosting and sharing workflows & Open Lab and lab.js emphasize deployment, sharing, editable reuse, and transparent archiving while noting platform boundaries \citep{Shevchenko2022,Henninger2021}. & Separate hosted/static profile inspection from local native acquisition and participant outputs. \\
+Specialized domain toolboxes & Vizard, virtual-navigation, and broad behavioral-control toolboxes show design objectives, supported hardware boundaries, standardized outputs, and concrete examples \citep{Schuetz2022,AlsburyNealy2021,Otto2023}. & Keep PPS-specific controls visible: auditory motion, SOA/tactile timing, baselines, HRTFs, runner route, and output artifacts. \\
+Timing and validation exemplars & Timing-comparison and simulation papers separate usability from route-specific timing evidence and encourage automated checks before participant interpretation \citep{Bridges2020,DeLeeuw2015,DeLeeuw2022}. & Report software, digital audio, electrical loopback, and perceptual tactile evidence as distinct layers. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 The paper therefore provides three reusable products. The first is the design-run-recreation suite itself, including new-study construction, published-profile recreation, native acquisition, validation evidence, and exploratory analysis review. The second is a design-decision evidence matrix that maps visible GUI and runner choices to methodological variation in the PPS literature. The third is a reporting template: the manuscript distinguishes reusable profiles, local generated assets, participant outputs, timing evidence, tactile perception evidence, and exploratory analysis. This aligns with growing concern that research assets can exist in principle yet still be difficult to execute, inspect, or reuse computationally \citep{Ellis2024}.
 
 \subsection{Tutorial Use of the Manuscript and Source Package}
