@@ -11,6 +11,10 @@ manuscript for PPS Toolkit.
   repo paper-audit notes, and Springer/software policy pointers.
 - `evidence_matrix.csv`: source-pointer design-decision matrix mapping visible
   PPS Toolkit GUI/runner controls to literature variation and caveats.
+- `gui_control_coverage.csv`: dashboard control-level coverage audit that maps
+  visible Segment 0-6 controls either to evidence-matrix rows or to explicit
+  non-method roles such as navigation, folder inspection, documentation, or
+  modal workflow mechanics.
 - `validation_evidence.csv`: committed source-pointer summary of validation
   evidence used in the draft; generated raw reports remain under ignored
   validation folders.
@@ -36,6 +40,9 @@ workflow explicitly asks for an archived submission snapshot.
 - The draft is a methods/software manuscript, not a formal meta-analysis.
 - The evidence matrix is a structured literature audit scaffold, not a PRISMA
   extraction log.
+- `gui_control_coverage.csv` is an interface coverage ledger, not a second
+  literature matrix. It exists to show which visible controls are scientific
+  design decisions and which are ordinary suite/navigation mechanics.
 - The tactile hit-rate decline noted during pilot use is treated only as
   anecdotal design motivation until traceable runner artifacts are attached.
 - No copyrighted paper PDFs, participant outputs, local SOFA files, or private

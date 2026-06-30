@@ -141,6 +141,16 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   source compiles to a 27-page PDF with no unresolved citation/reference,
   rerun, float-too-large, or overfull-box warnings after this pass; generated
   LaTeX artifacts and the PDF were removed afterward.
+- Continued the BRM manuscript self-review loop with a GUI control coverage
+  pass. Added `publication/behavior-research-methods/manuscript/gui_control_coverage.csv`
+  as a 64-row source-level audit of visible dashboard controls, mapping
+  literature-bearing Segment 0-6 decisions and suite execution gates back to
+  existing evidence-matrix rows while explicitly classifying navigation,
+  documentation, camera controls, folder openers, refresh actions, and modal
+  mechanics as non-method UI. The manuscript now distinguishes
+  `evidence_matrix.csv` as the literature-bearing design-decision scaffold from
+  the control-level coverage ledger, and the manuscript README documents the
+  boundary.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

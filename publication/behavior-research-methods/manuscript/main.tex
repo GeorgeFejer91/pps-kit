@@ -99,7 +99,9 @@ The runner writes a minimal public-data layer and a reconstructive private/sessi
 
 \section{Design-decision Evidence Matrix}
 
-Tables~\ref{tab:matrix-core} and \ref{tab:matrix-runner} summarize the manuscript-level matrix. The complete editable source is provided as \code{evidence\_matrix.csv}. The matrix is not a formal systematic review. It is a source-pointer scaffold: each row connects a visible toolkit control to methodological variation in the literature, a design rationale, and a caveat that should be preserved in reporting.
+Tables~\ref{tab:matrix-core} and \ref{tab:matrix-runner} summarize the manuscript-level matrix. The complete editable source is provided as \code{evidence\_matrix.csv}. The matrix is not a formal systematic review. It is a source-pointer scaffold: each row connects a literature-bearing toolkit control to methodological variation in the literature, a design rationale, and a caveat that should be preserved in reporting.
+
+The source package also includes \code{gui\_control\_coverage.csv}. That file audits the visible dashboard surface at the control level and distinguishes scientific design decisions from execution gates, artifact-review displays, suite boundaries, and ordinary navigation or documentation controls. This distinction is important for the suite claim. Camera presets, modal close buttons, folder openers, documentation tabs, and refresh controls support inspection and operation, but they are not treated as PPS design decisions unless they change provenance, materialization state, acquisition boundary, or runner handoff. Conversely, controls that alter source form, trajectory, SOA, baseline, repetition, block order, participant structure, instruction behavior, or runner preparation are mapped back to the evidence matrix and reporting checklist.
 
 \begin{table}[t]
 \caption{Condensed design-decision matrix for PPS Toolkit: design and stimulus layers. The accompanying CSV contains the full row-level audit for Segment 0-6 controls and runner decisions.}
@@ -275,7 +277,7 @@ Validation is organized around four reusable use cases. In the present draft the
 Validation item & Result summary & Evidence layer & Boundary \\
 \midrule
 Protocol 12 published-profile recreation interface matrix & On 30 June 2026, the scripted matrix passed 30/30 required criteria: seven ready published profiles passed gates and materialized through Segment 6, and two blocked samples were blocked as expected. & Software/profile materialization and runner-handoff artifacts. & Does not prove physical timing, Woojer mechanical onset, tactile perception, individualized spatial perception, or exact reuse of private original-author stimuli. \\
-Springer source compile check & The manuscript source compiled with the preserved Springer Nature template to a 25-page PDF with no unresolved citations or references after this revision. & Publication source integrity. & Does not validate runtime behavior or participant-level scientific claims. \\
+Springer source compile check & The manuscript source compiled with the preserved Springer Nature template with no unresolved citations or references after this revision. & Publication source integrity. & Does not validate runtime behavior or participant-level scientific claims. \\
 \bottomrule
 \end{tabularx}
 \end{table}

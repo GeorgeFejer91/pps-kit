@@ -456,3 +456,45 @@ Methods manuscript draft. It is a working audit, not manuscript text.
 - The practical pathway is clearer, but the final submission still needs final
   release metadata and a publication-hardware validation archive before it can
   make strong claims about timing on a specific lab setup.
+
+## Iteration 13: GUI Control Coverage Pass
+
+### Main Critiques
+
+- The manuscript now presented PPS Toolkit as a full design-run-recreation
+  suite, but it still relied on the phrase `visible toolkit control` too
+  broadly. A reviewer could reasonably ask whether every dashboard button was
+  being treated as a literature-backed methods decision.
+- The evidence matrix covered the scientific and runner decisions, but there
+  was no explicit source artifact showing how ordinary UI controls such as
+  tabs, camera presets, modal close buttons, folder openers, and refresh
+  actions were classified.
+- Without that distinction, the suite framing risked becoming less parsimonious:
+  operational controls help researchers inspect, materialize, or launch the
+  experiment, but only some controls alter PPS design, provenance, acquisition
+  boundary, or runner handoff.
+
+### Resolution In This Revision
+
+- Added `gui_control_coverage.csv`, a 64-row dashboard coverage ledger. It maps
+  visible Segment 0-6 and shell controls either to existing evidence-matrix rows
+  or to explicit non-method categories such as navigation, documentation,
+  folder inspection, artifact review, or modal workflow mechanics.
+- Revised the design-decision matrix introduction so it describes
+  `evidence_matrix.csv` as a literature-bearing control scaffold, and names
+  `gui_control_coverage.csv` as the control-level audit behind the
+  every-visible-control claim.
+- Updated the manuscript README to document the new coverage file and its
+  boundary: it is an interface coverage ledger, not another literature matrix.
+- Removed a stale page-count-specific compile statement from the validation
+  evidence table so the manuscript does not drift when small text changes alter
+  pagination.
+
+### Residual Concerns
+
+- The coverage ledger proves source-level interface coverage, not usability.
+  A separate click-through validation remains necessary for GUI behavior
+  changes; this revision did not change the dashboard itself.
+- Final submission still needs release metadata, author/affiliation/funding
+  fields, and publication-hardware validation evidence before strong timing
+  claims can be made.
