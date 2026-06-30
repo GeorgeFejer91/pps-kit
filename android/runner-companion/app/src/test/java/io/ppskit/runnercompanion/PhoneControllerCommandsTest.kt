@@ -63,6 +63,33 @@ class PhoneControllerCommandsTest {
     }
 
     @Test
+    fun controllerCommandRowTargetsPartSessionFromUnsyncedSummary() {
+        val pairing = PairingInfo.parse(
+            "pps-companion://pair?host=127.0.0.1&port=8767&session_id=transfer-session&token=secret&mode=phone_export",
+        )
+        val row = buildPhoneControllerCommandRow(
+            pairing = pairing,
+            runPackage = null,
+            summary = summary(),
+            command = "start_experiment",
+            commandId = "cmd-summary-start-1",
+            issuedLslTime = 45.0,
+            phoneUnixMs = 1003L,
+            phoneElapsedRealtimeMs = 2003L,
+        )
+
+        assertEquals("part-001", row.getString("target_session_id"))
+        val sample = row.getJSONArray("command_sample")
+        assertEquals("part-001", sample.getString(2))
+        val parsed = phoneCommandFromSample((0 until sample.length()).map { sample.getString(it) })
+        assertEquals("part-001", parsed.sessionId)
+        assertEquals("part-001", parsed.payload.getString("target_part_session_id"))
+        assertEquals("group-001", parsed.payload.getString("target_session_group_id"))
+        assertEquals("1", parsed.payload.getString("target_part_number"))
+        assertEquals("pkg-001", parsed.payload.getString("package_id"))
+    }
+
+    @Test
     fun controllerCommandRowCanSendOperatorNotePayload() {
         val pairing = PairingInfo.parse(
             "pps-companion://pair?host=127.0.0.1&port=8767&session_id=session-001&token=secret&mode=phone_export",
@@ -195,5 +222,24 @@ class PhoneControllerCommandsTest {
               "warnings": []
             }
             """.trimIndent(),
+        )
+
+    private fun summary(): MobilePackageSummary =
+        MobilePackageSummary(
+            packageId = "pkg-001",
+            participantId = "P001",
+            sessionId = "session-001",
+            sessionGroupId = "group-001",
+            partSessionId = "part-001",
+            partNumber = "1",
+            title = "Participant P001",
+            assetStrategy = "trial_building_blocks_only",
+            blockCount = 1,
+            trialCount = 2,
+            assetCount = 6,
+            totalAssetBytes = 1234L,
+            mobileRunnable = true,
+            phoneOwnedSession = true,
+            warnings = emptyList(),
         )
 }

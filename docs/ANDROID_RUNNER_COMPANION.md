@@ -391,10 +391,15 @@ native send/ack result in the outbox row plus
 `phone_controller_runtime_status.json`. That status includes controller
 `stream_descriptions` for the command-signal outlet and command-ack inlet, so
 strict validation can reject channel-order or source-identity drift before
-controller button presses are treated as live LSL evidence. The Controller
-screen exposes Start, Pause, Resume, Continue, Stop After Block, and Snapshot
-when the selected package advertises those commands; Stop After Block sends the
-same `stop_after_block` signal used by the PC helper. When `operator_note` is
+controller button presses are treated as live LSL evidence. Controller target
+identity is resolved from the synced manifest first, then from the package-list
+summary fields `session_group_id`, `part_session_id`, and `part_number`, and
+only then from the pairing session. This lets an unsynced Controller phone send
+Start/Pause/Resume/Continue/Snapshot/Stop After Block/Note to the exact split
+part-session id that Runner mode is listening on. The Controller screen exposes
+Start, Pause, Resume, Continue, Stop After Block, and Snapshot when the selected
+package advertises those commands; Stop After Block sends the same
+`stop_after_block` signal used by the PC helper. When `operator_note` is
 advertised, Controller mode also shows a compact note field and sends the note
 inside the token-gated command payload so operator observations reconstruct
 through the same outbox, LSL command, ack, and receiver diary path. The Android

@@ -121,11 +121,23 @@ def test_android_lsl_runtime_status_exports_stream_descriptions() -> None:
 
 
 def test_android_controller_runtime_status_exports_stream_descriptions() -> None:
+    models = _source("MobileRuntimeModels.kt")
     controller_commands = _source("PhoneControllerCommands.kt")
     main_activity = _source("MainActivity.kt")
 
+    assert "data class MobilePackageSummary" in models
+    assert "val sessionGroupId: String" in models
+    assert "val partSessionId: String" in models
+    assert "val partNumber: String" in models
+    assert 'sessionGroupId = item.optString("session_group_id", "")' in models
+    assert 'partSessionId = item.optString("part_session_id", "")' in models
+    assert 'partNumber = item.optString("part_number", "")' in models
     assert "phoneControllerLslStreamDescriptions" in controller_commands
+    assert "private fun resolvePhoneControllerTarget" in controller_commands
+    assert "summary.partSessionId.ifBlank { summary.sessionId }" in controller_commands
     assert '.put("stream_descriptions", phoneControllerLslStreamDescriptions(pairing, runPackage, summary))' in controller_commands
+    assert '.put("target_session_id", target.sessionId)' in controller_commands
+    assert "selectedSummary?.partSessionId" in main_activity
     assert '"pps-android-lsl-stream-descriptions.v1"' in controller_commands
     assert '"android_controller"' in controller_commands
     assert "PHONE_LSL_COMMAND_STREAM_NAME" in controller_commands

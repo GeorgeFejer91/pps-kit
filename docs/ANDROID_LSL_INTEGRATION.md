@@ -15,7 +15,11 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   mode owns local package playback; Controller mode always writes token-gated
   `PPSCommandSignalsV1` samples to `phone_controller_command_outbox.jsonl` and,
   when native liblsl is present, keeps a long-lived `PPSCommandSignalsV1` outlet
-  open for button-press commands.
+  open for button-press commands. Controller targets resolve from the synced
+  manifest first, then from the `pps-mobile-run-package-list.v2` summary fields
+  `session_group_id`, `part_session_id`, and `part_number`, then finally from
+  the pairing session id; this lets a second phone address an unsynced split
+  part before it downloads the full manifest.
 - The PC-side helper `pps-android-lsl-command` sends the same token-gated
   `PPSCommandSignalsV1` samples from the runner/PC environment, waits for
   `PPSCommandAcksV1` when requested, and writes
@@ -139,7 +143,10 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   and acknowledged by Runner mode as a diary/snapshot action. The artifact
   validator compares the row `payload` object against the serialized
   `PPSCommandSignalsV1` sample payload and rejects missing operator-note text,
-  so controller diaries cannot drift from what was actually sent.
+  so controller diaries cannot drift from what was actually sent. For split
+  packages, controller rows and source IDs target the part `part_session_id`
+  even when only the package-list summary has been loaded; the broad pairing or
+  transfer session is only a last fallback.
 - PC-side phone uploads preserve `lsl_runtime_status.json` beside
   `lsl_marker_mirror.csv`, `trigger_codes.csv`, and `command_diary.jsonl`.
   Completion uploads that include Android response/top-up reconstruction fields

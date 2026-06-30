@@ -186,6 +186,7 @@ def build_mobile_package_list(
                 "package_id": str(manifest.get("package_id") or ""),
                 "participant_id": manifest.get("participant_id", ""),
                 "session_id": manifest.get("session_id", ""),
+                "session_group_id": manifest.get("session_group_id", ""),
                 "part_number": manifest.get("part_number"),
                 "part_session_id": manifest.get("part_session_id", ""),
                 "title": manifest.get("title", ""),

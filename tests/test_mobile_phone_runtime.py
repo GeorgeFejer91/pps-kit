@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+from dataclasses import replace
 from pathlib import Path
 
 from peripersonal_space_toolkit.mobile_phone_runtime import (
@@ -130,6 +131,17 @@ def _package(tmp_path: Path) -> RunPackage:
     )
 
 
+def _split_package(tmp_path: Path) -> RunPackage:
+    return replace(
+        _package(tmp_path),
+        session_group_id="group-001",
+        part_session_id="part-001",
+        part_number=1,
+        part_folder_name="part_01",
+        part_split_schema="pps-split-part.v1",
+    )
+
+
 def _session_metadata_package_payload(manifest: dict[str, object]) -> dict[str, object]:
     reconstruction = manifest["reconstruction"]
     assert isinstance(reconstruction, dict)
@@ -233,11 +245,14 @@ def test_mobile_package_manifest_can_export_lightweight_building_block_only_pack
 
 
 def test_mobile_package_list_can_report_lightweight_transfer_assets(tmp_path):
-    package = _package(tmp_path)
+    package = _split_package(tmp_path)
 
     listing = build_mobile_package_list(package, phone_owned_session=True, include_block_audio=False)
     package_row = listing["packages"][0]
 
+    assert package_row["session_group_id"] == "group-001"
+    assert package_row["part_session_id"] == "part-001"
+    assert package_row["part_number"] == 1
     assert package_row["mobile_runnable"] is True
     assert package_row["asset_strategy"] == "trial_building_blocks_only"
     assert package_row["asset_count"] == 1

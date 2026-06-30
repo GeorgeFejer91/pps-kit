@@ -17,6 +17,9 @@ class MobilePackageParserTest {
                   "package_id": "pkg-001",
                   "participant_id": "P001",
                   "session_id": "session-001",
+                  "session_group_id": "group-001",
+                  "part_session_id": "part-001",
+                  "part_number": "1",
                   "title": "Participant P001",
                   "block_count": 1,
                   "trial_count": 2,
@@ -32,6 +35,9 @@ class MobilePackageParserTest {
         )
         assertEquals("pkg-001", list.activePackageId)
         assertEquals(1, list.packages.size)
+        assertEquals("group-001", list.packages.first().sessionGroupId)
+        assertEquals("part-001", list.packages.first().partSessionId)
+        assertEquals("1", list.packages.first().partNumber)
         assertTrue(list.packages.first().mobileRunnable)
         assertTrue(list.packages.first().phoneOwnedSession)
 

@@ -714,15 +714,18 @@ private fun PhoneRuntimeScreen(
         selectedManifest?.lsl?.commandAcksName,
         selectedManifest?.partSessionId,
         selectedManifest?.sessionId,
+        selectedSummary?.partSessionId,
+        selectedSummary?.sessionId,
         selectedSummary?.participantId,
     ) {
         if (phoneRole != PhoneRuntimeRole.Controller || selectedSummary == null) {
             controllerTransport = null
             onDispose { }
         } else {
+            val summarySessionId = selectedSummary.partSessionId.ifBlank { selectedSummary.sessionId }
             val targetSessionId = selectedManifest?.partSessionId?.ifBlank { selectedManifest.sessionId }
                 ?: selectedManifest?.sessionId
-                ?: pairing.sessionId
+                ?: summarySessionId.ifBlank { pairing.sessionId }
             val participantId = selectedManifest?.participantId ?: selectedSummary.participantId
             val transport = nativeControllerBridge.openControllerTransport(
                 commandSignalsName = selectedManifest?.lsl?.commandSignalsName?.ifBlank { PHONE_LSL_COMMAND_STREAM_NAME }

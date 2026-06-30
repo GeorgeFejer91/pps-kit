@@ -134,6 +134,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   artifacts agree before claiming that a controller button press or PC helper
   command was applied by the phone runner; live LSL/XDF and physical timing
   validation remain separate gates.
+- Android Controller mode now targets unsynced split packages from package-list
+  identity instead of falling back to the broad pairing/transfer session. The
+  PC `pps-mobile-run-package-list.v2` rows include `session_group_id`,
+  `part_session_id`, and `part_number`; Android `MobilePackageSummary` parses
+  them; and Controller command rows, samples, payloads, and stream descriptions
+  resolve target identity from synced manifest first, then summary, then pairing
+  session. This lets a second phone send Start/Pause/Resume/Continue/Snapshot,
+  Stop After Block, or Operator Note to the exact part session that Runner mode
+  is listening on before the Controller phone has downloaded the full manifest.
 
 ## 2026-06-29
 

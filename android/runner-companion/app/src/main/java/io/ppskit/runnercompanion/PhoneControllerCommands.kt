@@ -25,19 +25,15 @@ internal fun buildPhoneControllerCommandRow(
     currentAndroidSourceBehavior: String = "local_controller_outbox_only",
     timestampQuality: String = "android_elapsed_realtime_not_lsl_local_clock",
 ): JSONObject {
-    val targetSessionId = runPackage?.partSessionId?.ifBlank { runPackage.sessionId }
-        ?: runPackage?.sessionId
-        ?: pairing.sessionId
-    val packageId = runPackage?.packageId ?: summary?.packageId.orEmpty()
-    val participantId = runPackage?.participantId ?: summary?.participantId.orEmpty()
+    val target = resolvePhoneControllerTarget(pairing, runPackage, summary)
     val payload = JSONObject(commandPayload.toString())
         .put("token", pairing.token)
-        .put("package_id", packageId)
-        .put("participant_id", participantId)
-        .put("target_session_id", targetSessionId)
-        .put("target_part_session_id", runPackage?.partSessionId.orEmpty())
-        .put("target_session_group_id", runPackage?.sessionGroupId.orEmpty())
-        .put("target_part_number", runPackage?.partNumber.orEmpty())
+        .put("package_id", target.packageId)
+        .put("participant_id", target.participantId)
+        .put("target_session_id", target.sessionId)
+        .put("target_part_session_id", target.partSessionId)
+        .put("target_session_group_id", target.sessionGroupId)
+        .put("target_part_number", target.partNumber)
         .put("requested_by", "android_controller")
         .put("native_transport_available", nativeTransportAvailable)
         .put("native_controller_transport_enabled", nativeControllerTransportEnabled)
@@ -45,7 +41,7 @@ internal fun buildPhoneControllerCommandRow(
         .put("timestamp_quality", timestampQuality)
     val signal = PhoneLslCommandSignal(
         commandId = commandId,
-        sessionId = targetSessionId,
+        sessionId = target.sessionId,
         senderId = "android_controller",
         command = command,
         issuedLslTime = issuedLslTime,
@@ -56,9 +52,9 @@ internal fun buildPhoneControllerCommandRow(
         .put("schema", PHONE_CONTROLLER_COMMAND_ROW_SCHEMA)
         .put("command_id", commandId)
         .put("command", command)
-        .put("package_id", packageId)
-        .put("participant_id", participantId)
-        .put("target_session_id", targetSessionId)
+        .put("package_id", target.packageId)
+        .put("participant_id", target.participantId)
+        .put("target_session_id", target.sessionId)
         .put("phone_unix_ms", phoneUnixMs)
         .put("phone_elapsed_realtime_ms", phoneElapsedRealtimeMs)
         .put("native_transport_available", nativeTransportAvailable)
@@ -184,24 +180,21 @@ internal fun phoneControllerLslStreamDescriptions(
     runPackage: MobileRunPackage?,
     summary: MobilePackageSummary?,
 ): JSONObject {
-    val targetSessionId = runPackage?.partSessionId?.ifBlank { runPackage.sessionId }
-        ?: runPackage?.sessionId
-        ?: pairing.sessionId
+    val target = resolvePhoneControllerTarget(pairing, runPackage, summary)
     val commandName = runPackage?.lsl?.commandSignalsName?.ifBlank { PHONE_LSL_COMMAND_STREAM_NAME }
         ?: PHONE_LSL_COMMAND_STREAM_NAME
     val ackName = runPackage?.lsl?.commandAcksName?.ifBlank { PHONE_LSL_ACK_STREAM_NAME }
         ?: PHONE_LSL_ACK_STREAM_NAME
     val privacyDefault = runPackage?.lsl?.privacyDefault?.ifBlank { "metadata_payload_only" }
         ?: "metadata_payload_only"
-    val participantId = runPackage?.participantId ?: summary?.participantId.orEmpty()
-    val sessionToken = safePhoneControllerName(targetSessionId)
+    val sessionToken = safePhoneControllerName(target.sessionId)
     val controllerToken = safePhoneControllerName("android_controller")
     return JSONObject()
         .put("schema", "pps-android-lsl-stream-descriptions.v1")
         .put("runtime_authority", "android_controller")
         .put("role", "controller")
-        .put("target_session_id", targetSessionId)
-        .put("participant_id", participantId)
+        .put("target_session_id", target.sessionId)
+        .put("participant_id", target.participantId)
         .put(
             "privacy",
             JSONObject()
@@ -234,6 +227,50 @@ internal fun phoneControllerLslStreamDescriptions(
                 .put("source_id_pattern", "pps-*-command-acks-v1-*")
                 .put("channel_labels", stringArray(PHONE_LSL_ACK_CHANNELS)),
         )
+}
+
+private data class PhoneControllerTarget(
+    val sessionId: String,
+    val packageId: String,
+    val participantId: String,
+    val partSessionId: String,
+    val sessionGroupId: String,
+    val partNumber: String,
+)
+
+private fun resolvePhoneControllerTarget(
+    pairing: PairingInfo,
+    runPackage: MobileRunPackage?,
+    summary: MobilePackageSummary?,
+): PhoneControllerTarget {
+    if (runPackage != null) {
+        return PhoneControllerTarget(
+            sessionId = runPackage.partSessionId.ifBlank { runPackage.sessionId }.ifBlank { pairing.sessionId },
+            packageId = runPackage.packageId,
+            participantId = runPackage.participantId,
+            partSessionId = runPackage.partSessionId,
+            sessionGroupId = runPackage.sessionGroupId,
+            partNumber = runPackage.partNumber,
+        )
+    }
+    if (summary != null) {
+        return PhoneControllerTarget(
+            sessionId = summary.partSessionId.ifBlank { summary.sessionId }.ifBlank { pairing.sessionId },
+            packageId = summary.packageId,
+            participantId = summary.participantId,
+            partSessionId = summary.partSessionId,
+            sessionGroupId = summary.sessionGroupId,
+            partNumber = summary.partNumber,
+        )
+    }
+    return PhoneControllerTarget(
+        sessionId = pairing.sessionId,
+        packageId = "",
+        participantId = "",
+        partSessionId = "",
+        sessionGroupId = "",
+        partNumber = "",
+    )
 }
 
 private fun waitForControllerAck(transport: PhoneLslControllerTransport, commandId: String): PhoneLslCommandAck? {
