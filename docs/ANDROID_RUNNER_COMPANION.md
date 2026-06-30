@@ -228,8 +228,9 @@ events when present, including the command source and payload. When both
 status, payload, ack evidence, timing, and identity fields agree for each
 command id. For native `PPSCommandAcksV1` rows, strict validation also parses
 the ack sample payload and compares it with the diary payload, requiring the
-ack payload to preserve the applied command plus package identity and, for
-active-run commands such as pause/resume/stop-after-block, the phone run id.
+ack payload to preserve the applied command plus package identity without
+echoing the pairing token and, for active-run commands such as
+pause/resume/stop-after-block, the phone run id.
 With `--expect-command-acks`, the completion `summary` native command counters
 must also agree with the diary: received commands, sent ack samples, failed ack
 sends, and rejected commands are counted from the `native_lsl` rows.
@@ -440,9 +441,10 @@ the stored ack sample payload: it must not echo the pairing token, and it must
 agree with the command sample on command, target session, package, participant,
 part session, session group, part number, requester, and source-behavior fields
 whenever those non-secret fields were available. Runner-mode ack/diary payloads
-echo the same accepted target identity from the command sample. Commands that
-explicitly name a different package or split-part identity are rejected before
-the phone applies a local state change.
+echo the same accepted target identity from the command sample while keeping
+the pairing token out of the ack sample. Commands that explicitly name a
+different package or split-part identity are rejected before the phone applies a
+local state change.
 
 In native liblsl builds, Runner mode resolves up to eight visible
 `PPSCommandSignalsV1` streams and polls every opened command inlet, so a PC

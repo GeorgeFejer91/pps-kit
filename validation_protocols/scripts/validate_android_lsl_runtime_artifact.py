@@ -3187,6 +3187,11 @@ def _validate_phone_command_ack_payload(
     row_payload = row.get("payload") if isinstance(row.get("payload"), dict) else {}
     if row_payload and _canonical_json(row_payload) != _canonical_json(ack_payload):
         failures.append(f"{prefix} ack payload differs from diary row payload")
+    if (
+        _metadata_value(ack_payload.get("token"))
+        or _metadata_value(ack_payload.get("companion_token"))
+    ):
+        failures.append(f"{prefix} ack payload must not echo the pairing token")
     if command == "invalid_lsl_command":
         return
     payload_command = _metadata_value(ack_payload.get("command"))

@@ -1344,6 +1344,21 @@ def test_android_lsl_runtime_validator_rejects_phone_run_ack_payload_drift(tmp_p
     assert "phone command diary row 1 ack payload run_id differs from diary row" in failures
 
 
+def test_android_lsl_runtime_validator_rejects_phone_run_ack_payload_token_echo(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    row = _phone_native_command_row()
+    ack_payload = json.loads(row["ack_sample"][9])
+    ack_payload["token"] = "secret"
+    row["ack_sample"][9] = json.dumps(ack_payload)
+    _write_phone_run_with_native_command_diary(run_dir, row=row)
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    assert "phone command diary row 1 ack payload must not echo the pairing token" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_rejects_operator_command_payload_drift(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()

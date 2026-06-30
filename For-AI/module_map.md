@@ -145,7 +145,9 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   package or split-part identity drift is rejected before state changes. The
   strict Controller/PC-admin outbox validator now parses stored ack samples and
   requires that same non-secret ack payload identity while rejecting pairing-token
-  echoes. The command-admin reconciler compares those echoed target payload fields
+  echoes; the phone-run command diary validator applies the same token-exclusion
+  rule to native ack samples. The command-admin reconciler compares those echoed
+  target payload fields
   between sender outbox and receiver command diary; the PC monitor/XDF reconciler
   now checks the same non-secret command/ack target identity fields when both
   command-signal and acknowledgement streams are captured. Controller runtime
@@ -214,7 +216,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   pairing under `--expect-command-acks`,
   phone-run `command_diary.jsonl` / embedded command diary native ack rows and
   sidecar-vs-embedded command field consistency, native ack payload versus
-  command diary payload consistency, and command diary payload versus
+  command diary payload consistency with pairing-token exclusion, and command
+  diary payload versus
   `operator_command` event payload consistency,
   phone-run `lsl_marker_mirror.csv` / embedded marker mirror reconstruction,
   phone-run `trigger_codes.csv` expected local `PPSTriggerCodes` sequence when
