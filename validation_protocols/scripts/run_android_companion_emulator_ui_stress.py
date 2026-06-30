@@ -41,6 +41,17 @@ from peripersonal_space_toolkit.runner_companion import (  # noqa: E402
 APP_ID = "io.ppskit.runnercompanion"
 TOKEN = "android-validation-token"
 SCHEMA = "pps-android-companion-emulator-ui-stress.v1"
+EMULATOR_VIEWPORT_POLICY = "fixed_avd_viewport_no_resize_no_reposition"
+FORBIDDEN_EMULATOR_VIEWPORT_COMMANDS = [
+    "wm size",
+    "wm density",
+    "settings put system user_rotation",
+    "settings put system accelerometer_rotation",
+    "cmd window",
+    "MoveWindow",
+    "SetWindowPos",
+    "Set_Companion_Emulation_Layout",
+]
 
 
 def _default_output_dir() -> Path:
@@ -633,6 +644,28 @@ def run_lsl_roundtrip(output_dir: Path, *, count: int) -> dict[str, Any]:
     }
 
 
+def android_emulator_viewport_policy_assessment() -> dict[str, Any]:
+    source_text = Path(__file__).read_text(encoding="utf-8", errors="ignore")
+    forbidden_found = [
+        command
+        for command in FORBIDDEN_EMULATOR_VIEWPORT_COMMANDS
+        if source_text.count(command) > 1
+    ]
+    return {
+        "name": "android_emulator_fixed_viewport_policy",
+        "passed": not forbidden_found,
+        "expected_to_pass": True,
+        "policy": EMULATOR_VIEWPORT_POLICY,
+        "forbidden_commands_found": forbidden_found,
+        "reason": (
+            "Android UI stress validation uses the AVD's configured viewport, "
+            "ADB taps, uiautomator dumps, and screencap output only. It must not "
+            "resize, widen, rotate, repeatedly reposition, or otherwise fight the "
+            "emulator window to make the UI pass."
+        ),
+    }
+
+
 def android_lsl_capability_assessment() -> dict[str, Any]:
     project_root = REPO_ROOT / "android" / "runner-companion"
     app_root = project_root / "app"
@@ -763,6 +796,7 @@ def main(argv: list[str] | None = None) -> int:
             results.append(run_phone_runtime_ui(device, phone_pairing_uri, bridge, output_dir))
         if not args.skip_lsl_roundtrip:
             results.append(run_lsl_roundtrip(output_dir, count=max(1, int(args.lsl_count))))
+        results.append(android_emulator_viewport_policy_assessment())
         results.append(android_lsl_capability_assessment())
     finally:
         service.stop()

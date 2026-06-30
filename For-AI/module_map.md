@@ -248,8 +248,11 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
 - Android emulator stress reporting lives in
   `validation_protocols/scripts/run_android_companion_emulator_ui_stress.py`.
   It now reports optional native Android LSL source capability and local AAR
-  presence separately from live network proof, so default builds should be read
-  as source-supported/local-mirror-only rather than as failed live LSL runs.
+  presence separately from live network proof, plus an
+  `android_emulator_fixed_viewport_policy` result proving the harness did not
+  use AVD size/density/rotation or desktop window-placement commands, so default
+  builds should be read as source-supported/local-mirror-only rather than as
+  failed live LSL runs.
 - Companion discovery contract: `runner_companion.py` owns the
   `pps-runner-companion-discovery.v1` payload builder/validator and UDP
   advertiser. Discovery remains token-free and local-only: same-LAN or local

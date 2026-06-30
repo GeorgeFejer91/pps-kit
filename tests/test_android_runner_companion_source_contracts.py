@@ -359,6 +359,7 @@ def test_android_runner_mode_local_controls_use_command_diary_path() -> None:
 def test_android_emulator_stress_reports_native_lsl_source_capability() -> None:
     stress = _load_python_script("validation_protocols/scripts/run_android_companion_emulator_ui_stress.py")
     report = stress.android_lsl_capability_assessment()
+    viewport_report = stress.android_emulator_viewport_policy_assessment()
     source = (REPO_ROOT / "validation_protocols" / "scripts" / "run_android_companion_emulator_ui_stress.py").read_text(
         encoding="utf-8"
     )
@@ -369,10 +370,14 @@ def test_android_emulator_stress_reports_native_lsl_source_capability() -> None:
     assert report["controller_command_sender_supported_by_source"] is True
     assert report["token_gated_command_ack_supported_by_source"] is True
     assert report["native_lsl_runtime_requires_local_aar"] is True
+    assert viewport_report["passed"] is True
+    assert viewport_report["policy"] == "fixed_avd_viewport_no_resize_no_reposition"
+    assert viewport_report["forbidden_commands_found"] == []
     assert report["live_validation_state"] in {
         "source_supported_default_build_local_mirror_only",
         "source_supported_aar_present_requires_live_network_validation",
     }
+    assert "android_emulator_viewport_policy_assessment()" in source
     assert "not_implemented_expected_failure" not in source
     assert '"pause_experiment"' not in source
     assert '"resume_experiment"' not in source
