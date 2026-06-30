@@ -28,6 +28,18 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   session manifests, rich trial CSVs, event/LSL/XDF/trigger/session metadata,
   WAV evidence, top-up ledgers, prepared blocks, calibration artifacts, and
   private setup metadata kept there rather than in `1.Data_min/`.
+- Android phone-run artifact validation now treats response and top-up
+  reconstruction as strict evidence when requested. The Android validator loads
+  `phone_response_ledger.csv`, `phone_topup_plan.json`,
+  `phone_topup_materialization.json`, and `phone_topup_block.wav` from local run
+  folders or exported ZIPs, compares sidecars against embedded completion
+  copies, checks the shared 100-1300 ms response-window policy and summary
+  counts, validates rescue-plan status/count consistency, and verifies
+  materialized top-up WAV SHA-256 hashes. The new
+  `--expect-phone-topup-evidence` flag enables this gate directly, and
+  `--expect-lightweight-materializations` now enables it automatically so
+  building-block-only phone runs prove both scheduled-block replay and the
+  missed-trial top-up chain.
 
 ## 2026-06-29
 

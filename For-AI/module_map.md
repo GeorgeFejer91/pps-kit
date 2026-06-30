@@ -89,6 +89,11 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `--expect-run-catalog` is set, lightweight scheduled-block materialization
   events/manifests/WAV hashes when `--expect-lightweight-materializations` is
   set, package `asset_strategy` consistency across phone-run sidecars,
+  phone-run response/top-up reconstruction evidence from
+  `phone_response_ledger.csv`, `phone_topup_plan.json`,
+  `phone_topup_materialization.json`, and `phone_topup_block.wav` when
+  `--expect-phone-topup-evidence` is set or lightweight materializations are
+  strict, with sidecar-vs-embedded completion comparisons and WAV hash checks,
   Controller-mode `phone_controller_runtime_status.json` /
   `phone_controller_command_outbox.jsonl`, PC-admin
   `pc_android_lsl_admin_status.json` /

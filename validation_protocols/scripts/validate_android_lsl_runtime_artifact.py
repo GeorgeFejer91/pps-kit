@@ -56,8 +56,31 @@ ANDROID_PHONE_PARTICIPANT_METADATA_SCHEMA = "pps-android-phone-participant-metad
 ANDROID_HAPTIC_CAPABILITY_SCHEMA = "pps-android-haptic-capability.v1"
 ANDROID_HAPTIC_CALIBRATION_SCHEMA = "pps-android-phone-haptic-calibration.v1"
 ANDROID_SCHEDULED_BLOCK_MATERIALIZATION_SCHEMA = "pps-android-phone-scheduled-block-materialization.v1"
+ANDROID_PHONE_RESPONSE_LEDGER_SCHEMA = "pps-android-phone-response-ledger.v1"
+ANDROID_PHONE_RESPONSE_SUMMARY_SCHEMA = "pps-android-phone-response-summary.v1"
+ANDROID_PHONE_TOPUP_PLAN_SCHEMA = "pps-android-phone-topup-plan.v1"
+ANDROID_PHONE_TOPUP_MATERIALIZATION_SCHEMA = "pps-android-phone-topup-materialization.v1"
 ANDROID_CONTROLLER_RUNTIME_STATUS_SCHEMA = "pps-android-controller-runtime-status.v1"
 ANDROID_CONTROLLER_COMMAND_ROW_SCHEMA = "pps-android-controller-command-row.v1"
+PHONE_RESPONSE_MIN_RT_MS = 100
+PHONE_RESPONSE_MAX_RT_MS = 1300
+PHONE_RESPONSE_POLICY = f"first_touch_{PHONE_RESPONSE_MIN_RT_MS}_{PHONE_RESPONSE_MAX_RT_MS}_ms_after_tactile"
+PHONE_TOPUP_SYNTHESIS_STRATEGY = "pcm_wav_concat_without_ffmpeg"
+PHONE_TOPUP_PLAN_STATUSES = {
+    "not_needed",
+    "skipped",
+    "failed",
+    "played",
+    "materialized_not_played",
+    "planned_not_played",
+}
+PHONE_TOPUP_MATERIALIZATION_STATUSES = {
+    "materialized",
+    "failed",
+    "not_needed",
+    "not_evaluated",
+    "skipped",
+}
 ANDROID_PHONE_EVENT_CODES = {
     "session_metadata": 8,
     "run_start": 1,
@@ -130,10 +153,15 @@ def validate_runtime_status(
     marker_mirror_rows: list[dict[str, Any]] | None = None,
     materialization_manifests: list[dict[str, Any]] | None = None,
     materialized_wav_hashes: dict[str, str] | None = None,
+    response_ledger_rows: list[dict[str, Any]] | None = None,
+    topup_plan: dict[str, Any] | None = None,
+    topup_materialization: dict[str, Any] | None = None,
+    topup_wav_hashes: dict[str, str] | None = None,
     expect_native_transport: bool = False,
     expect_command_acks: bool = False,
     expect_run_catalog: bool = False,
     expect_lightweight_materializations: bool = False,
+    expect_phone_topup_evidence: bool = False,
 ) -> AndroidLslValidationResult:
     failures: list[str] = []
     warnings: list[str] = []
@@ -233,6 +261,16 @@ def validate_runtime_status(
         failures=failures,
         warnings=warnings,
         expect_lightweight_materializations=expect_lightweight_materializations,
+    )
+    _validate_phone_response_topup_artifacts(
+        completion=completion,
+        response_ledger_rows=response_ledger_rows or [],
+        topup_plan=topup_plan,
+        topup_materialization=topup_materialization,
+        topup_wav_hashes=topup_wav_hashes or {},
+        failures=failures,
+        warnings=warnings,
+        expect_phone_topup_evidence=expect_phone_topup_evidence or expect_lightweight_materializations,
     )
 
     return AndroidLslValidationResult(
@@ -438,6 +476,7 @@ def validate_run_artifact(
     expect_command_acks: bool = False,
     expect_run_catalog: bool = False,
     expect_lightweight_materializations: bool = False,
+    expect_phone_topup_evidence: bool = False,
 ) -> AndroidLslValidationResult:
     loaded = _load_status_inputs(path)
     if loaded.get("kind") == "controller":
@@ -477,10 +516,15 @@ def validate_run_artifact(
         marker_mirror_rows=loaded.get("marker_mirror_rows") or [],
         materialization_manifests=loaded.get("materialization_manifests") or [],
         materialized_wav_hashes=loaded.get("materialized_wav_hashes") or {},
+        response_ledger_rows=loaded.get("response_ledger_rows") or [],
+        topup_plan=loaded.get("topup_plan"),
+        topup_materialization=loaded.get("topup_materialization"),
+        topup_wav_hashes=loaded.get("topup_wav_hashes") or {},
         expect_native_transport=expect_native_transport,
         expect_command_acks=expect_command_acks,
         expect_run_catalog=expect_run_catalog,
         expect_lightweight_materializations=expect_lightweight_materializations,
+        expect_phone_topup_evidence=expect_phone_topup_evidence,
     )
 
 
@@ -634,6 +678,15 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
             haptic_capability_members = [name for name in archive.namelist() if name.endswith("haptic_capability.json")]
             command_diary_members = [name for name in archive.namelist() if name.endswith("command_diary.jsonl")]
             marker_mirror_members = [name for name in archive.namelist() if name.endswith("lsl_marker_mirror.csv")]
+            response_ledger_members = [name for name in archive.namelist() if name.endswith("phone_response_ledger.csv")]
+            topup_plan_members = [name for name in archive.namelist() if name.endswith("phone_topup_plan.json")]
+            topup_materialization_members = [
+                name
+                for name in archive.namelist()
+                if name.endswith("phone_topup_materialization.json")
+                and "materialized_blocks/" not in name.replace("\\", "/")
+            ]
+            topup_wav_members = [name for name in archive.namelist() if name.endswith("phone_topup_block.wav")]
             materialization_members = [
                 name
                 for name in archive.namelist()
@@ -693,6 +746,25 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 marker_mirror_name = sorted(marker_mirror_members)[0]
                 archive.extract(marker_mirror_name, temp_root)
                 marker_mirror_rows = _read_csv(temp_root / marker_mirror_name)
+            response_ledger_rows: list[dict[str, Any]] = []
+            if response_ledger_members:
+                response_ledger_name = sorted(response_ledger_members)[0]
+                archive.extract(response_ledger_name, temp_root)
+                response_ledger_rows = _read_csv(temp_root / response_ledger_name)
+            topup_plan = None
+            if topup_plan_members:
+                topup_plan_name = sorted(topup_plan_members)[0]
+                archive.extract(topup_plan_name, temp_root)
+                topup_plan = _read_json(temp_root / topup_plan_name)
+            topup_materialization = None
+            if topup_materialization_members:
+                topup_materialization_name = sorted(topup_materialization_members)[0]
+                archive.extract(topup_materialization_name, temp_root)
+                topup_materialization = _read_json(temp_root / topup_materialization_name)
+            topup_wav_hashes = {
+                Path(member).name: _sha256_bytes(archive.read(member))
+                for member in topup_wav_members
+            }
             return {
                 "kind": "runner",
                 "status": _read_json(temp_root / status_name),
@@ -706,6 +778,10 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 "marker_mirror_rows": marker_mirror_rows,
                 "materialization_manifests": materialization_manifests,
                 "materialized_wav_hashes": materialized_wav_hashes,
+                "response_ledger_rows": response_ledger_rows,
+                "topup_plan": topup_plan,
+                "topup_materialization": topup_materialization,
+                "topup_wav_hashes": topup_wav_hashes,
             }
 
 
@@ -716,6 +792,10 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
     haptic_capability_path = path / "haptic_capability.json"
     command_diary_path = path / "command_diary.jsonl"
     marker_mirror_path = path / "lsl_marker_mirror.csv"
+    response_ledger_path = path / "phone_response_ledger.csv"
+    topup_plan_path = path / "phone_topup_plan.json"
+    topup_materialization_path = path / "phone_topup_materialization.json"
+    topup_wav_path = path / "phone_topup_block.wav"
     materialized_dir = path / "materialized_blocks"
     materialization_manifests: list[dict[str, Any]] = []
     materialized_wav_hashes: dict[str, str] = {}
@@ -733,6 +813,10 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
         "marker_mirror_rows": _read_csv(marker_mirror_path) if marker_mirror_path.is_file() else [],
         "materialization_manifests": materialization_manifests,
         "materialized_wav_hashes": materialized_wav_hashes,
+        "response_ledger_rows": _read_csv(response_ledger_path) if response_ledger_path.is_file() else [],
+        "topup_plan": _read_json(topup_plan_path) if topup_plan_path.is_file() else None,
+        "topup_materialization": _read_json(topup_materialization_path) if topup_materialization_path.is_file() else None,
+        "topup_wav_hashes": {topup_wav_path.name: _sha256_file(topup_wav_path)} if topup_wav_path.is_file() else {},
     }
 
 
@@ -1361,6 +1445,442 @@ def _validate_phone_marker_mirror(
         warnings.append("phone marker mirror was present without completion events; only marker self-consistency was checked")
 
 
+def _validate_phone_response_topup_artifacts(
+    *,
+    completion: dict[str, Any] | None,
+    response_ledger_rows: list[dict[str, Any]],
+    topup_plan: dict[str, Any] | None,
+    topup_materialization: dict[str, Any] | None,
+    topup_wav_hashes: dict[str, str],
+    failures: list[str],
+    warnings: list[str],
+    expect_phone_topup_evidence: bool,
+) -> None:
+    embedded_summary = (
+        completion.get("phone_response_summary")
+        if isinstance(completion, dict) and isinstance(completion.get("phone_response_summary"), dict)
+        else None
+    )
+    embedded_ledger = [
+        row
+        for row in list((completion or {}).get("phone_response_ledger") or [])
+        if isinstance(row, dict)
+    ]
+    embedded_plan = (
+        completion.get("phone_topup_plan")
+        if isinstance(completion, dict) and isinstance(completion.get("phone_topup_plan"), dict)
+        else None
+    )
+    embedded_materialization = (
+        completion.get("phone_topup_materialization")
+        if isinstance(completion, dict) and isinstance(completion.get("phone_topup_materialization"), dict)
+        else None
+    )
+
+    rows = response_ledger_rows or embedded_ledger
+    plan = topup_plan or embedded_plan
+    materialization = topup_materialization or embedded_materialization
+    has_any_artifact = bool(rows or embedded_summary or plan or materialization)
+    if not has_any_artifact:
+        if expect_phone_topup_evidence:
+            failures.append("phone response/top-up validation requires response ledger, top-up plan, and top-up materialization artifacts")
+        elif completion and isinstance(completion.get("events"), list):
+            warnings.append("phone run completion does not include response/top-up reconstruction artifacts")
+        return
+
+    if response_ledger_rows and embedded_ledger:
+        file_signature = [_response_ledger_signature(row) for row in response_ledger_rows]
+        embedded_signature = [_response_ledger_signature(row) for row in embedded_ledger]
+        if file_signature != embedded_signature:
+            failures.append("phone_response_ledger.csv rows differ from completion.json embedded phone_response_ledger")
+    elif embedded_ledger and not response_ledger_rows:
+        warnings.append("completion embeds phone_response_ledger but phone_response_ledger.csv sidecar is missing")
+
+    if topup_plan and embedded_plan:
+        _compare_metadata_fields(
+            topup_plan,
+            embedded_plan,
+            fields=[
+                "schema",
+                "status",
+                "synthesis_strategy",
+                "response_min_rt_ms",
+                "response_max_rt_ms",
+                "missed_trial_count",
+                "topup_trial_count",
+                "topup_attempted_count",
+                "topup_hit_count",
+                "final_unresolved_miss_count",
+            ],
+            label="phone_topup_plan sidecar",
+            other_label="completion phone_topup_plan",
+            failures=failures,
+        )
+        if [_topup_plan_trial_signature(row) for row in list(topup_plan.get("trials") or []) if isinstance(row, dict)] != [
+            _topup_plan_trial_signature(row) for row in list(embedded_plan.get("trials") or []) if isinstance(row, dict)
+        ]:
+            failures.append("phone_topup_plan.json trials differ from completion.json embedded phone_topup_plan")
+    elif embedded_plan and not topup_plan:
+        warnings.append("completion embeds phone_topup_plan but phone_topup_plan.json sidecar is missing")
+
+    if topup_materialization and embedded_materialization:
+        _compare_metadata_fields(
+            topup_materialization,
+            embedded_materialization,
+            fields=[
+                "schema",
+                "status",
+                "synthesis_strategy",
+                "reason",
+                "wav_filename",
+                "wav_sha256",
+                "sample_rate_hz",
+                "channel_count",
+                "bits_per_sample",
+                "frame_count",
+                "trial_count",
+                "tactile_cue_count",
+            ],
+            label="phone_topup_materialization sidecar",
+            other_label="completion phone_topup_materialization",
+            failures=failures,
+        )
+    elif embedded_materialization and not topup_materialization:
+        warnings.append("completion embeds phone_topup_materialization but phone_topup_materialization.json sidecar is missing")
+
+    if expect_phone_topup_evidence:
+        if embedded_summary is None:
+            failures.append("strict phone response/top-up validation requires completion phone_response_summary")
+        if not rows:
+            failures.append("strict phone response/top-up validation requires phone_response_ledger rows")
+        if plan is None:
+            failures.append("strict phone response/top-up validation requires phone_topup_plan")
+        if materialization is None:
+            failures.append("strict phone response/top-up validation requires phone_topup_materialization")
+
+    ledger_stats = _validate_phone_response_ledger(rows, failures) if rows else _empty_response_ledger_stats()
+    if embedded_summary is not None:
+        _validate_phone_response_summary(embedded_summary, ledger_stats, failures)
+    if plan is not None:
+        _validate_phone_topup_plan(plan, ledger_stats, failures)
+    if materialization is not None:
+        _validate_phone_topup_materialization(
+            materialization,
+            topup_plan=plan,
+            topup_wav_hashes=topup_wav_hashes,
+            completion=completion,
+            failures=failures,
+        )
+
+
+def _empty_response_ledger_stats() -> dict[str, int]:
+    return {
+        "ledger_row_count": 0,
+        "eligible_trial_count": 0,
+        "hit_count": 0,
+        "missed_count": 0,
+        "topup_rescue_count": 0,
+        "topup_attempted_count": 0,
+        "topup_hit_count": 0,
+        "topup_miss_count": 0,
+        "final_unresolved_miss_count": 0,
+    }
+
+
+def _validate_phone_response_ledger(rows: list[dict[str, Any]], failures: list[str]) -> dict[str, int]:
+    source_rows = 0
+    source_hits = 0
+    source_misses = 0
+    topup_eligible = 0
+    topup_rows = 0
+    topup_hits = 0
+    seen_keys: set[tuple[str, str, str]] = set()
+    for index, row in enumerate(rows, start=1):
+        prefix = f"phone response ledger row {index}"
+        if row.get("schema") != ANDROID_PHONE_RESPONSE_LEDGER_SCHEMA:
+            failures.append(f"{prefix} schema mismatch")
+        role = str(row.get("ledger_role") or "")
+        if role not in {"source_trial", "topup_rescue"}:
+            failures.append(f"{prefix} ledger_role must be source_trial or topup_rescue")
+        trial_uid = str(row.get("trial_uid") or "")
+        source_trial_uid = str(row.get("source_trial_uid") or "")
+        if role == "source_trial" and not trial_uid:
+            failures.append(f"{prefix} source_trial is missing trial_uid")
+        if role == "topup_rescue" and (not trial_uid or not source_trial_uid):
+            failures.append(f"{prefix} topup_rescue is missing trial_uid or source_trial_uid")
+        key = (role, trial_uid, source_trial_uid)
+        if key in seen_keys:
+            failures.append(f"{prefix} duplicates another response ledger row")
+        seen_keys.add(key)
+
+        hit = _parse_boolish(row.get("hit"), f"{prefix} hit", failures)
+        window_start = _safe_int(row.get("response_window_start_ms"))
+        window_end = _safe_int(row.get("response_window_end_ms"))
+        if window_start and window_end and window_end <= window_start:
+            failures.append(f"{prefix} response window end must be after start")
+        status = str(row.get("status") or "")
+        if not status:
+            failures.append(f"{prefix} is missing status")
+        if role == "source_trial":
+            source_rows += 1
+            if not str(row.get("block_id") or ""):
+                failures.append(f"{prefix} source_trial is missing block_id")
+            if hit is True:
+                source_hits += 1
+                if status != "hit":
+                    failures.append(f"{prefix} hit source_trial must use status='hit'")
+                _validate_rt_field(row.get("rt_ms"), f"{prefix} rt_ms", failures)
+            else:
+                source_misses += 1
+                if status not in {"missed_needs_topup", "missed_rescued_by_topup", "missed_topup_missed"}:
+                    failures.append(f"{prefix} missed source_trial status is not recognized")
+            if _parse_boolish(row.get("topup_eligible"), f"{prefix} topup_eligible", failures) is True:
+                topup_eligible += 1
+                if not str(row.get("building_block_asset_id") or ""):
+                    failures.append(f"{prefix} topup_eligible source trial is missing building_block_asset_id")
+        elif role == "topup_rescue":
+            topup_rows += 1
+            if not str(row.get("building_block_asset_id") or ""):
+                failures.append(f"{prefix} topup_rescue is missing building_block_asset_id")
+            if status not in {"topup_hit", "topup_miss"}:
+                failures.append(f"{prefix} topup_rescue status is not recognized")
+            if hit is True:
+                topup_hits += 1
+                _validate_rt_field(row.get("rt_ms"), f"{prefix} rt_ms", failures)
+            elif hit is False and status == "topup_hit":
+                failures.append(f"{prefix} status topup_hit requires hit=true")
+    topup_misses = topup_rows - topup_hits
+    return {
+        "ledger_row_count": len(rows),
+        "eligible_trial_count": source_rows,
+        "hit_count": source_hits,
+        "missed_count": source_misses,
+        "topup_rescue_count": topup_eligible,
+        "topup_attempted_count": topup_rows,
+        "topup_hit_count": topup_hits,
+        "topup_miss_count": topup_misses,
+        "final_unresolved_miss_count": max(source_misses - topup_hits, 0),
+    }
+
+
+def _validate_phone_response_summary(summary: dict[str, Any], stats: dict[str, int], failures: list[str]) -> None:
+    if summary.get("schema") != ANDROID_PHONE_RESPONSE_SUMMARY_SCHEMA:
+        failures.append("phone_response_summary schema mismatch")
+    if summary.get("response_policy") != PHONE_RESPONSE_POLICY:
+        failures.append("phone_response_summary response_policy mismatch")
+    for field in (
+        "eligible_trial_count",
+        "ledger_row_count",
+        "hit_count",
+        "topup_rescue_count",
+        "topup_attempted_count",
+        "topup_hit_count",
+        "topup_miss_count",
+        "final_rescued_hit_count",
+        "final_unresolved_miss_count",
+    ):
+        expected = stats["topup_hit_count"] if field == "final_rescued_hit_count" else stats.get(field)
+        if expected is None:
+            continue
+        observed = _safe_int(summary.get(field))
+        if observed != expected:
+            failures.append(f"phone_response_summary {field} expected {expected}, got {observed}")
+    missed = _safe_int(summary.get("missed_needs_topup_count"))
+    if missed != stats["missed_count"]:
+        failures.append(f"phone_response_summary missed_needs_topup_count expected {stats['missed_count']}, got {missed}")
+
+
+def _validate_phone_topup_plan(plan: dict[str, Any], stats: dict[str, int], failures: list[str]) -> None:
+    if plan.get("schema") != ANDROID_PHONE_TOPUP_PLAN_SCHEMA:
+        failures.append("phone_topup_plan schema mismatch")
+    status = str(plan.get("status") or "")
+    if status not in PHONE_TOPUP_PLAN_STATUSES:
+        failures.append("phone_topup_plan status is not recognized")
+    if plan.get("synthesis_strategy") != PHONE_TOPUP_SYNTHESIS_STRATEGY:
+        failures.append("phone_topup_plan synthesis_strategy must be pcm_wav_concat_without_ffmpeg")
+    if _safe_int(plan.get("response_min_rt_ms")) != PHONE_RESPONSE_MIN_RT_MS:
+        failures.append("phone_topup_plan response_min_rt_ms mismatch")
+    if _safe_int(plan.get("response_max_rt_ms")) != PHONE_RESPONSE_MAX_RT_MS:
+        failures.append("phone_topup_plan response_max_rt_ms mismatch")
+    trials = [row for row in list(plan.get("trials") or []) if isinstance(row, dict)]
+    if _safe_int(plan.get("topup_trial_count")) != len(trials):
+        failures.append("phone_topup_plan topup_trial_count differs from trials length")
+    if stats["eligible_trial_count"]:
+        expected = {
+            "missed_trial_count": stats["missed_count"],
+            "topup_trial_count": stats["topup_rescue_count"],
+            "topup_attempted_count": stats["topup_attempted_count"],
+            "topup_hit_count": stats["topup_hit_count"],
+            "final_unresolved_miss_count": stats["final_unresolved_miss_count"],
+        }
+        for field, value in expected.items():
+            if _safe_int(plan.get(field)) != value:
+                failures.append(f"phone_topup_plan {field} expected {value}, got {_safe_int(plan.get(field))}")
+    seen_source_trials: set[str] = set()
+    for index, row in enumerate(trials, start=1):
+        prefix = f"phone_topup_plan trial {index}"
+        if str(row.get("topup_role") or "") != "rescue":
+            failures.append(f"{prefix} topup_role must be rescue")
+        for field in ("source_block_id", "source_trial_uid", "building_block_asset_id"):
+            if not str(row.get(field) or ""):
+                failures.append(f"{prefix} is missing {field}")
+        source_trial_uid = str(row.get("source_trial_uid") or "")
+        if source_trial_uid in seen_source_trials:
+            failures.append(f"{prefix} duplicates source_trial_uid {source_trial_uid!r}")
+        seen_source_trials.add(source_trial_uid)
+    if status == "not_needed" and trials:
+        failures.append("phone_topup_plan status not_needed must not include rescue trials")
+    if status in {"played", "materialized_not_played", "planned_not_played"} and not trials:
+        failures.append(f"phone_topup_plan status {status} requires at least one rescue trial")
+
+
+def _validate_phone_topup_materialization(
+    materialization: dict[str, Any],
+    *,
+    topup_plan: dict[str, Any] | None,
+    topup_wav_hashes: dict[str, str],
+    completion: dict[str, Any] | None,
+    failures: list[str],
+) -> None:
+    if materialization.get("schema") != ANDROID_PHONE_TOPUP_MATERIALIZATION_SCHEMA:
+        failures.append("phone_topup_materialization schema mismatch")
+    status = str(materialization.get("status") or "")
+    if status not in PHONE_TOPUP_MATERIALIZATION_STATUSES:
+        failures.append("phone_topup_materialization status is not recognized")
+    if materialization.get("synthesis_strategy") != PHONE_TOPUP_SYNTHESIS_STRATEGY:
+        failures.append("phone_topup_materialization synthesis_strategy must be pcm_wav_concat_without_ffmpeg")
+    if status in {"failed", "skipped"} and not str(materialization.get("reason") or ""):
+        failures.append(f"phone_topup_materialization status {status} requires a reason")
+
+    events = [event for event in list((completion or {}).get("events") or []) if isinstance(event, dict)]
+    latest_event = [event for event in events if event.get("type") == "phone_topup_materialization"]
+    if latest_event:
+        event = latest_event[-1]
+        for field in ("schema", "status", "synthesis_strategy", "wav_filename", "wav_sha256", "trial_count", "tactile_cue_count"):
+            event_value = str(event.get(field) or "")
+            materialization_value = str(materialization.get(field) or "")
+            if event_value and materialization_value and event_value != materialization_value:
+                failures.append(f"phone_topup_materialization {field} differs from phone_topup_materialization event")
+
+    plan_status = str((topup_plan or {}).get("status") or "")
+    plan_trial_count = _safe_int((topup_plan or {}).get("topup_trial_count"))
+    if plan_status == "played" and status != "materialized":
+        failures.append("phone_topup_plan status played requires materialized phone_topup_materialization")
+    if plan_status == "materialized_not_played" and status != "materialized":
+        failures.append("phone_topup_plan status materialized_not_played requires materialized phone_topup_materialization")
+    if plan_status == "failed" and status != "failed":
+        failures.append("phone_topup_plan status failed requires failed phone_topup_materialization")
+    if plan_status == "skipped" and status != "skipped":
+        failures.append("phone_topup_plan status skipped requires skipped phone_topup_materialization")
+    if plan_status == "not_needed" and status not in {"not_needed", "not_evaluated"}:
+        failures.append("phone_topup_plan status not_needed requires not_needed phone_topup_materialization")
+    if plan_status == "played" and events:
+        has_topup_block_complete = any(
+            event.get("type") == "block_complete" and event.get("block_id") == "phone-topup-01"
+            for event in events
+        )
+        if not has_topup_block_complete:
+            failures.append("phone_topup_plan status played requires a phone-topup-01 block_complete event")
+
+    if status != "materialized":
+        return
+    wav_filename = str(materialization.get("wav_filename") or "")
+    wav_sha256 = str(materialization.get("wav_sha256") or "")
+    if not wav_filename:
+        failures.append("phone_topup_materialization materialized status is missing wav_filename")
+    if not wav_sha256:
+        failures.append("phone_topup_materialization materialized status is missing wav_sha256")
+    observed_hash = topup_wav_hashes.get(wav_filename)
+    if wav_filename and not observed_hash:
+        failures.append(f"phone_topup_materialization referenced WAV {wav_filename!r} is missing")
+    elif observed_hash and observed_hash != wav_sha256:
+        failures.append(f"phone_topup_materialization wav_sha256 does not match {wav_filename!r}")
+    for field in ("sample_rate_hz", "channel_count", "bits_per_sample", "frame_count", "duration_ms", "trial_count"):
+        if _safe_int(materialization.get(field)) <= 0:
+            failures.append(f"phone_topup_materialization materialized status requires positive {field}")
+    trials = [row for row in list(materialization.get("trials") or []) if isinstance(row, dict)]
+    if _safe_int(materialization.get("trial_count")) != len(trials):
+        failures.append("phone_topup_materialization trial_count differs from trials length")
+    if plan_trial_count and _safe_int(materialization.get("trial_count")) != plan_trial_count:
+        failures.append("phone_topup_materialization trial_count differs from phone_topup_plan")
+    for index, row in enumerate(trials, start=1):
+        prefix = f"phone_topup_materialization trial {index}"
+        for field in ("source_trial_uid", "topup_trial_uid", "building_block_asset_id", "topup_start_s", "topup_end_s", "topup_duration_s"):
+            if field not in row or row.get(field) is None or str(row.get(field)).strip() == "":
+                failures.append(f"{prefix} is missing {field}")
+
+
+def _validate_rt_field(value: Any, label: str, failures: list[str]) -> None:
+    rt_ms = _safe_int(value)
+    if not (PHONE_RESPONSE_MIN_RT_MS <= rt_ms <= PHONE_RESPONSE_MAX_RT_MS):
+        failures.append(f"{label} must be within {PHONE_RESPONSE_MIN_RT_MS}-{PHONE_RESPONSE_MAX_RT_MS} ms")
+
+
+def _parse_boolish(value: Any, label: str, failures: list[str]) -> bool | None:
+    if isinstance(value, bool):
+        return value
+    text = str(value if value is not None else "").strip().lower()
+    if text in {"true", "1", "yes"}:
+        return True
+    if text in {"false", "0", "no"}:
+        return False
+    if text in {"", "null", "none"}:
+        failures.append(f"{label} must be a boolean")
+        return None
+    failures.append(f"{label} must be a boolean")
+    return None
+
+
+def _response_ledger_signature(row: dict[str, Any]) -> tuple[str, ...]:
+    fields = (
+        "schema",
+        "ledger_role",
+        "source_trial_uid",
+        "trial_uid",
+        "block_id",
+        "trial_number",
+        "status",
+        "hit",
+        "rt_ms",
+        "topup_trial_uid",
+        "topup_hit",
+        "topup_rt_ms",
+        "building_block_asset_id",
+    )
+    return tuple(_normalized_artifact_value(row.get(field)) for field in fields)
+
+
+def _topup_plan_trial_signature(row: dict[str, Any]) -> tuple[str, ...]:
+    fields = (
+        "topup_role",
+        "source_block_id",
+        "source_block_index",
+        "source_trial_uid",
+        "source_trial_number",
+        "building_block_asset_id",
+        "trial_type",
+        "family",
+        "soa_ms",
+        "row_label",
+        "noise_type",
+        "duration_s",
+        "tactile_onset_s",
+        "response_window_onset_s",
+    )
+    return tuple(_normalized_artifact_value(row.get(field)) for field in fields)
+
+
+def _normalized_artifact_value(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    text = str(value).strip()
+    if text.lower() in {"true", "false"}:
+        return text.lower()
+    return text
+
+
 def _validate_lightweight_materializations(
     *,
     completion: dict[str, Any] | None,
@@ -1743,6 +2263,14 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="For building-block-only phone runs, fail unless every scheduled block has materialization event/JSON/WAV evidence.",
     )
+    parser.add_argument(
+        "--expect-phone-topup-evidence",
+        action="store_true",
+        help=(
+            "For phone-run artifacts, fail unless response ledger, top-up plan, "
+            "top-up materialization JSON, and any materialized top-up WAV hash evidence are present and consistent."
+        ),
+    )
     parser.add_argument("--output-dir", type=Path, help="Optional directory for JSON/Markdown validation reports.")
     args = parser.parse_args(argv)
 
@@ -1752,6 +2280,7 @@ def main(argv: list[str] | None = None) -> int:
         expect_command_acks=args.expect_command_acks,
         expect_run_catalog=args.expect_run_catalog,
         expect_lightweight_materializations=args.expect_lightweight_materializations,
+        expect_phone_topup_evidence=args.expect_phone_topup_evidence,
     )
     if args.output_dir:
         _write_report(result, args.output_dir)

@@ -134,6 +134,44 @@ def test_android_lsl_runtime_validator_accepts_lightweight_materialization_evide
     assert result.failures == []
 
 
+def test_android_lsl_runtime_validator_accepts_phone_topup_evidence(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+
+    result = validator.validate_run_artifact(run_dir, expect_phone_topup_evidence=True)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_rejects_phone_topup_wav_hash_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    (run_dir / "phone_topup_block.wav").write_bytes(b"RIFFchangedWAVE")
+
+    result = validator.validate_run_artifact(run_dir, expect_phone_topup_evidence=True)
+
+    assert result.ok is False
+    assert "phone_topup_materialization wav_sha256 does not match" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_phone_response_ledger_sidecar_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    ledger_path = run_dir / "phone_response_ledger.csv"
+    rows = _read_csv_rows(ledger_path)
+    rows[0]["status"] = "missed_needs_topup"
+    _write_marker_csv(ledger_path, rows)
+
+    result = validator.validate_run_artifact(run_dir, expect_phone_topup_evidence=True)
+
+    assert result.ok is False
+    assert "phone_response_ledger.csv rows differ" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_rejects_asset_strategy_drift(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -605,6 +643,8 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
     status["asset_strategy"] = "trial_building_blocks_only"
     wav_bytes = b"RIFF....WAVE"
     wav_sha256 = hashlib.sha256(wav_bytes).hexdigest()
+    topup_wav_bytes = b"RIFFtopupWAVE"
+    topup_wav_sha256 = hashlib.sha256(topup_wav_bytes).hexdigest()
     materialization = {
         "schema": "pps-android-phone-scheduled-block-materialization.v1",
         "status": "materialized",
@@ -624,6 +664,119 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
         "duration_ms": 1000,
         "trial_count": 1,
         "tactile_cue_count": 1,
+    }
+    response_ledger = [
+        {
+            "schema": "pps-android-phone-response-ledger.v1",
+            "ledger_role": "source_trial",
+            "block_id": "block-01",
+            "block_index": 1,
+            "trial_number": 1,
+            "trial_uid": "trial-001",
+            "cue_id": 1,
+            "scheduled_block_time_ms": 500,
+            "response_window_start_ms": 600,
+            "response_window_end_ms": 1800,
+            "hit": False,
+            "status": "missed_rescued_by_topup",
+            "rt_ms": "",
+            "tap_event_id": "",
+            "building_block_asset_id": "trial-asset-001",
+            "topup_eligible": True,
+            "topup_attempted": True,
+            "topup_trial_uid": "phone-topup-1-trial-001",
+            "topup_hit": True,
+            "topup_rt_ms": 200,
+            "topup_tap_event_id": 5,
+        },
+        {
+            "schema": "pps-android-phone-response-ledger.v1",
+            "ledger_role": "topup_rescue",
+            "source_trial_uid": "trial-001",
+            "source_trial_number": 1,
+            "trial_uid": "phone-topup-1-trial-001",
+            "trial_number": 1,
+            "block_id": "phone-topup-01",
+            "block_index": "",
+            "scheduled_block_time_ms": 500,
+            "response_window_start_ms": 600,
+            "response_window_end_ms": 1800,
+            "hit": True,
+            "status": "topup_hit",
+            "rt_ms": 200,
+            "tap_event_id": 5,
+            "building_block_asset_id": "trial-asset-001",
+        },
+    ]
+    response_summary = {
+        "schema": "pps-android-phone-response-summary.v1",
+        "response_policy": "first_touch_100_1300_ms_after_tactile",
+        "eligible_trial_count": 1,
+        "ledger_row_count": 2,
+        "hit_count": 0,
+        "missed_needs_topup_count": 1,
+        "topup_rescue_count": 1,
+        "topup_attempted_count": 1,
+        "topup_hit_count": 1,
+        "topup_miss_count": 0,
+        "final_rescued_hit_count": 1,
+        "final_unresolved_miss_count": 0,
+    }
+    topup_plan_trial = {
+        "topup_role": "rescue",
+        "source_block_id": "block-01",
+        "source_block_index": 1,
+        "source_trial_uid": "trial-001",
+        "source_trial_number": 1,
+        "building_block_asset_id": "trial-asset-001",
+        "trial_type": "audio_tactile",
+        "family": "standard",
+        "soa_ms": "100",
+        "row_label": "inhale",
+        "noise_type": "looming",
+        "duration_s": 1.0,
+        "tactile_onset_s": 0.5,
+        "response_window_onset_s": 0.5,
+    }
+    topup_plan = {
+        "schema": "pps-android-phone-topup-plan.v1",
+        "status": "played",
+        "synthesis_strategy": "pcm_wav_concat_without_ffmpeg",
+        "response_min_rt_ms": 100,
+        "response_max_rt_ms": 1300,
+        "missed_trial_count": 1,
+        "topup_trial_count": 1,
+        "topup_attempted_count": 1,
+        "topup_hit_count": 1,
+        "final_unresolved_miss_count": 0,
+        "trials": [topup_plan_trial],
+    }
+    topup_materialization_trial = {
+        **topup_plan_trial,
+        "topup_trial_number": 1,
+        "topup_trial_uid": "phone-topup-1-trial-001",
+        "topup_start_s": 0.0,
+        "topup_end_s": 1.0,
+        "topup_duration_s": 1.0,
+    }
+    topup_materialization = {
+        "schema": "pps-android-phone-topup-materialization.v1",
+        "status": "materialized",
+        "source_plan_schema": "pps-android-phone-topup-plan.v1",
+        "synthesis_strategy": "pcm_wav_concat_without_ffmpeg",
+        "package_id": "pkg-001",
+        "participant_id": "P001",
+        "wav_filename": "phone_topup_block.wav",
+        "wav_sha256": topup_wav_sha256,
+        "sample_rate_hz": 44100,
+        "channel_count": 2,
+        "bits_per_sample": 16,
+        "encoding": "PCM_16",
+        "frame_count": 44100,
+        "duration_ms": 1000,
+        "trial_count": 1,
+        "tactile_cue_count": 1,
+        "trials": [topup_materialization_trial],
     }
     package_manifest = {
         "schema": "pps-mobile-run-package.v2",
@@ -668,6 +821,9 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
     events = [_phone_event(1, "run_start")]
     if include_materialization_event:
         events.append(_phone_event(2, "phone_scheduled_block_materialization", **materialization))
+    events.append(_phone_event(3, "phone_topup_materialization", **topup_materialization))
+    events.append(_phone_event(4, "block_complete", block_id="phone-topup-01", block_index=2, trial_count=1))
+    events.append(_phone_event(5, "tap", block_id="phone-topup-01", block_index=2, trial_uid="phone-topup-1-trial-001", rt_ms=200))
     markers = [_phone_marker(event) for event in events]
     participant_metadata = _participant_metadata()
     haptic_capability = _haptic_capability()
@@ -685,6 +841,10 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
                 "lsl_marker_mirror": markers,
                 "participant_metadata": participant_metadata,
                 "haptic": haptic_capability,
+                "phone_response_summary": response_summary,
+                "phone_response_ledger": response_ledger,
+                "phone_topup_plan": topup_plan,
+                "phone_topup_materialization": topup_materialization,
             }
         ),
         encoding="utf-8",
@@ -692,6 +852,10 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
     (run_dir / "participant_metadata.json").write_text(json.dumps(participant_metadata), encoding="utf-8")
     (run_dir / "haptic_capability.json").write_text(json.dumps(haptic_capability), encoding="utf-8")
     _write_marker_csv(run_dir / "lsl_marker_mirror.csv", markers)
+    _write_marker_csv(run_dir / "phone_response_ledger.csv", response_ledger)
+    (run_dir / "phone_topup_plan.json").write_text(json.dumps(topup_plan), encoding="utf-8")
+    (run_dir / "phone_topup_materialization.json").write_text(json.dumps(topup_materialization), encoding="utf-8")
+    (run_dir / "phone_topup_block.wav").write_bytes(topup_wav_bytes)
     (materialized_dir / "phone_materialized_block_01.json").write_text(json.dumps(materialization), encoding="utf-8")
     (materialized_dir / "phone_materialized_block_01.wav").write_bytes(wav_bytes)
 
