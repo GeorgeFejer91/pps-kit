@@ -272,7 +272,10 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `discovery.broadcast_targets = ["255.255.255.255",
   "interface_ipv4_directed_broadcasts"]`; Android `CompanionDiscovery.kt`
   mirrors these checks before constructing a pairing URI from a user-supplied
-  QR/manual token.
+  QR/manual token. `RunnerCompanionDiscoveryAdvertiser.status()` now separates
+  the packet contract (`packet_broadcast_targets`) from concrete runtime UDP
+  destinations (`concrete_broadcast_targets` / `directed_broadcast_targets`) so
+  hotspot rehearsal artifacts can show both levels.
 - Published-study preload recreation gate: `profile_recreation.py`, `assets/preloads/`, `study_templates/`.
 - Core paper-audit read API: `peripersonal_space_toolkit.paper_audit`.
 - Behavioral PPS replication checks for collected/public derived CSVs:

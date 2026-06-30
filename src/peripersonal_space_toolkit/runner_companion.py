@@ -360,12 +360,20 @@ class RunnerCompanionDiscoveryAdvertiser:
             thread.join(timeout=max(0.0, float(timeout_s)))
 
     def status(self) -> dict[str, Any]:
+        concrete_targets = list(self.broadcast_targets)
+        directed_targets = [target for target in concrete_targets if target != DISCOVERY_LIMITED_BROADCAST_TARGET]
         return {
             "schema": "pps-runner-companion-discovery-advertiser-status.v1",
             "enabled": self._thread is not None and self._thread.is_alive(),
             "multicast_group": self.multicast_group,
             "port": self.port,
-            "broadcast_targets": list(self.broadcast_targets),
+            "packet_broadcast_targets": list(DISCOVERY_BROADCAST_TARGETS),
+            "broadcast_targets": concrete_targets,
+            "concrete_broadcast_targets": concrete_targets,
+            "limited_broadcast_target": DISCOVERY_LIMITED_BROADCAST_TARGET,
+            "directed_broadcast_fallback_declared": DISCOVERY_DIRECTED_BROADCAST_TARGET in DISCOVERY_BROADCAST_TARGETS,
+            "directed_broadcast_targets": directed_targets,
+            "directed_broadcast_target_count": len(directed_targets),
             "interval_s": self.interval_s,
             "sent_count": self.sent_count,
             "last_error": self.last_error,

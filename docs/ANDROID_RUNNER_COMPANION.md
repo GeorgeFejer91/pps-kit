@@ -77,7 +77,10 @@ Closing Focus Mode stops the companion service and invalidates that token.
   can reject weaker packets that do not advertise the directed-broadcast
   fallback. Android's pairing screen can listen for the packet on same-Wi-Fi or
   local phone-hotspot networks, including the broadcast fallbacks, but pairing
-  still requires scanning the QR or pasting the full token-bearing URI.
+  still requires scanning the QR or pasting the full token-bearing URI. PC
+  discovery status reports both `packet_broadcast_targets` and
+  `concrete_broadcast_targets`, keeping the parser contract distinct from the
+  machine-specific UDP destinations attempted during a rehearsal.
 - Health endpoint: `GET /api/runner/health` is public and non-sensitive.
 - All state and command endpoints require `X-PPS-Companion-Token`.
 - Phone-runtime package and upload endpoints also require

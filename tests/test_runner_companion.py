@@ -363,7 +363,15 @@ def test_service_discovery_payload_can_advertise_phone_export_transfer():
     assert payload["pairing"]["transfer_id"] == "transfer-001"
     assert payload["pairing"]["transport"] == "phone_hotspot"
     assert "token" not in payload["pairing"]
-    assert DISCOVERY_LIMITED_BROADCAST_TARGET in service.discovery.status()["broadcast_targets"]
+    discovery_status = service.discovery.status()
+    assert discovery_status["packet_broadcast_targets"] == [
+        DISCOVERY_LIMITED_BROADCAST_TARGET,
+        DISCOVERY_DIRECTED_BROADCAST_TARGET,
+    ]
+    assert DISCOVERY_LIMITED_BROADCAST_TARGET in discovery_status["concrete_broadcast_targets"]
+    assert discovery_status["directed_broadcast_fallback_declared"] is True
+    assert discovery_status["directed_broadcast_target_count"] == len(discovery_status["directed_broadcast_targets"])
+    assert DISCOVERY_LIMITED_BROADCAST_TARGET not in discovery_status["directed_broadcast_targets"]
 
 
 def test_health_is_public_but_snapshot_requires_token():

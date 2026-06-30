@@ -261,7 +261,11 @@ same_lan_or_local_hotspot`, multicast TTL `1`, modes `pc_runner` /
 phone-export discovery must carry a `transfer_id` while still omitting the
 token. The `discovery.broadcast_targets` field must advertise both
 `255.255.255.255` and `interface_ipv4_directed_broadcasts`, matching the PC
-advertiser's same-subnet fallback strategy and Android's parser gate.
+advertiser's same-subnet fallback strategy and Android's parser gate. The PC
+advertiser status now separates `packet_broadcast_targets` from
+`concrete_broadcast_targets`, so validation evidence can show the packet-level
+Android contract as well as the actual multicast/limited-broadcast/directed
+UDP destinations attempted on the current machine.
 
 Required validation levels:
 
