@@ -2,7 +2,8 @@
 
 This validation script intentionally uses visible Android UI labels plus ADB
 tap/text input. It proves what an operator can do through the app surface and
-also records the current boundary for Android LSL command control.
+also records whether the current source tree has the optional native Android
+LSL runner/controller hooks needed for later live network validation.
 """
 
 from __future__ import annotations
@@ -335,7 +336,15 @@ class ValidationBridge:
                 },
                 "native_android_lsl_required": True,
                 "current_android_source_behavior": "local_lsl_marker_mirror",
-                "supported_commands": ["start_experiment", "pause_experiment", "resume_experiment"],
+                "supported_commands": [
+                    "start_experiment",
+                    "pause",
+                    "resume",
+                    "continue_instruction",
+                    "stop_after_block",
+                    "request_snapshot",
+                    "operator_note",
+                ],
             },
         }
 
@@ -625,21 +634,92 @@ def run_lsl_roundtrip(output_dir: Path, *, count: int) -> dict[str, Any]:
 
 
 def android_lsl_capability_assessment() -> dict[str, Any]:
-    android_sources = list((REPO_ROOT / "android" / "runner-companion" / "app" / "src" / "main").rglob("*.kt"))
-    source_text = "\n".join(path.read_text(encoding="utf-8", errors="ignore") for path in android_sources)
-    native_markers = ["liblsl", "LSLCommandInlet", "StreamInlet", "StreamOutlet", "pylsl"]
+    project_root = REPO_ROOT / "android" / "runner-companion"
+    app_root = project_root / "app"
+    android_sources = list((app_root / "src" / "main").rglob("*.kt"))
+    source_by_name = {path.name: path.read_text(encoding="utf-8", errors="ignore") for path in android_sources}
+    source_text = "\n".join(source_by_name.values())
+    native_markers = ["liblsl", "StreamInlet", "StreamOutlet", "PhoneNativeLslBridge", "PhoneLslControllerTransport"]
     found_markers = [marker for marker in native_markers if marker in source_text]
+    native_bridge = source_by_name.get("PhoneNativeLslBridge.kt", "")
+    controller_commands = source_by_name.get("PhoneControllerCommands.kt", "")
+    main_activity = source_by_name.get("MainActivity.kt", "")
+    lsl_protocol = source_by_name.get("PhoneLslProtocol.kt", "")
+    build_gradle = (project_root / "build.gradle.kts").read_text(encoding="utf-8", errors="ignore")
+    app_build_gradle = (app_root / "build.gradle.kts").read_text(encoding="utf-8", errors="ignore")
+    aar_path = app_root / "libs" / "liblsl-Android.aar"
+    runner_marker_outlets = all(
+        token in native_bridge
+        for token in [
+            "openMarkerTransport",
+            "PHONE_LSL_RICH_MARKER_STREAM_NAME",
+            "PHONE_LSL_NUMERIC_TRIGGER_STREAM_NAME",
+            "pushMarker",
+            "ReflectivePhoneLslMarkerTransport",
+        ]
+    )
+    runner_command_receiver = all(
+        token in native_bridge + main_activity
+        for token in [
+            "openCommandTransport",
+            "pullCommandSample",
+            "sendAck",
+            "pollNativeCommands",
+            "recordNativeCommandAckLocked",
+            "PPSCommandSignalsV1",
+            "PPSCommandAcksV1",
+        ]
+    )
+    controller_command_sender = all(
+        token in native_bridge + controller_commands
+        for token in [
+            "openControllerTransport",
+            "sendCommand",
+            "pullAckSample",
+            "writePhoneControllerCommandOutbox",
+            "native_lsl_controller_with_local_outbox",
+        ]
+    )
+    token_gated_commands = all(
+        token in lsl_protocol + main_activity + controller_commands
+        for token in [
+            "token_required",
+            "expectedCommandToken",
+            "phoneCommandAckForSample",
+            "optString(\"token\")",
+        ]
+    )
+    optional_aar_hook = 'file("libs/liblsl-Android.aar")' in app_build_gradle and "implementation(files(optionalLiblslAndroidAar))" in app_build_gradle
+    source_supported = runner_marker_outlets and runner_command_receiver and controller_command_sender and token_gated_commands and optional_aar_hook
+    live_state = (
+        "source_supported_aar_present_requires_live_network_validation"
+        if source_supported and aar_path.is_file()
+        else "source_supported_default_build_local_mirror_only"
+        if source_supported
+        else "source_missing_native_lsl_hooks"
+    )
     return {
         "name": "android_native_lsl_capability",
-        "passed": False,
-        "expected_to_pass": False,
+        "passed": source_supported,
+        "expected_to_pass": True,
         "native_lsl_symbols_found": found_markers,
-        "runner_to_android_lsl_control_supported_now": False,
-        "second_android_app_lsl_control_supported_now": False,
+        "liblsl_aar_present": aar_path.is_file(),
+        "optional_aar_gradle_hook_present": optional_aar_hook,
+        "runner_marker_outlets_supported_by_source": runner_marker_outlets,
+        "runner_command_receiver_supported_by_source": runner_command_receiver,
+        "controller_command_sender_supported_by_source": controller_command_sender,
+        "token_gated_command_ack_supported_by_source": token_gated_commands,
+        "runner_to_android_lsl_control_supported_by_source": runner_command_receiver,
+        "second_android_app_lsl_control_supported_by_source": controller_command_sender,
+        "live_native_lsl_control_available_in_this_build": source_supported and aar_path.is_file(),
+        "live_validation_state": live_state,
+        "native_lsl_runtime_requires_local_aar": True,
+        "build_gradle_seen": "com.android.application" in build_gradle or "com.android.application" in app_build_gradle,
         "reason": (
-            "The Android app currently declares the PPS LSL contract and writes a local "
-            "PPSMarkersV2-shaped marker mirror, but it does not bundle liblsl, open LSL "
-            "command inlets, emit live LSL outlets, or expose a second Android controller app."
+            "The Android source now contains optional native liblsl marker, command receiver, "
+            "ack, and controller-sender hooks. Default builds remain local-mirror/outbox only "
+            "unless android/runner-companion/app/libs/liblsl-Android.aar is supplied, and live "
+            "network/XDF validation is still required before treating Android LSL as proven."
         ),
     }
 
@@ -703,7 +783,14 @@ def main(argv: list[str] | None = None) -> int:
             "pc_runner_control_http_ui": "pass" if any(r.get("name") == "pc_runner_control_ui" and r.get("passed") for r in results) else "fail_or_skipped",
             "phone_local_full_experiment_ui": "pass" if any(r.get("name") == "phone_runtime_ui" and r.get("passed") for r in results) else "fail_or_skipped",
             "host_lsl_command_ack": "pass" if any(r.get("name") == "host_lsl_command_ack_roundtrip" and r.get("passed") for r in results) else "fail_or_skipped",
-            "android_live_lsl_control": "not_implemented_expected_failure",
+            "android_live_lsl_control": next(
+                (
+                    str(r.get("live_validation_state"))
+                    for r in results
+                    if r.get("name") == "android_native_lsl_capability"
+                ),
+                "not_assessed",
+            ),
         },
     }
     _write_json(output_dir / "android_companion_emulator_ui_stress_report.json", report)

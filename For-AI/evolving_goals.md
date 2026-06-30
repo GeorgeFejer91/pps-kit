@@ -438,6 +438,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   authority, and stores the same payload in
   `phone_controller_command_outbox.jsonl`; Runner mode already acknowledges
   the command as an operator diary/snapshot action.
+- The Android emulator UI stress harness no longer reports Android live LSL
+  control as an unimplemented expected failure. It now checks the current source
+  tree for optional native marker outlets, command receiver/ack, Controller
+  sender, token-gating, and the Gradle `liblsl-Android.aar` hook; default builds
+  report `source_supported_default_build_local_mirror_only`, while AAR builds
+  still require live network/XDF validation before Android LSL is treated as
+  proven. The harness validation fixture now advertises the current command set:
+  Start/Pause/Resume/Continue/Stop-after-block/Snapshot/Note.
 - Android phone-owned mode now includes a device-limited phone-vibrator
   calibration workflow. `PhoneHapticCalibration.kt` runs an ascending
   perceptual threshold check over fixed percent levels when Android reports

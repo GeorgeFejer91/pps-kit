@@ -198,6 +198,11 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   trigger-code sequence, but remains network LSL evidence rather than physical
   timing proof.
 - Android emulator validation policy: the AVD viewport is the fixed phone-screen truth. Do not use window resizing, widening, or repeated placement scripts to make the Android companion UI pass; flicker, hidden controls, scrolling burden, and clipped buttons are product findings. `windows/Set_Companion_Emulation_Layout.ps1` now places only the PC runner window, deliberately leaves Android emulator windows untouched, and treats old `-KeepForSeconds` calls as non-polling compatibility input. `focus_app.py` still honors `PPS_FOCUS_VALIDATION_DISPLAY`, `PPS_FOCUS_VALIDATION_RUNNER_WIDTH`, and `PPS_FOCUS_VALIDATION_WINDOW_RECT` for the PC runner window, and `PPS_FOCUS_VALIDATION_PARTICIPANT_RESPONSES_ONLY=1` keeps app-driven companion command tests from being preempted by validation auto-start/continue helpers.
+- Android emulator stress reporting lives in
+  `validation_protocols/scripts/run_android_companion_emulator_ui_stress.py`.
+  It now reports optional native Android LSL source capability and local AAR
+  presence separately from live network proof, so default builds should be read
+  as source-supported/local-mirror-only rather than as failed live LSL runs.
 - Companion discovery contract: `runner_companion.py` owns the
   `pps-runner-companion-discovery.v1` payload builder/validator and UDP
   advertiser. Discovery remains token-free and local-only: same-LAN or local

@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import importlib.util
+import sys
 from pathlib import Path
 
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
 ANDROID_SOURCE = (
-    Path(__file__).resolve().parents[1]
+    REPO_ROOT
     / "android"
     / "runner-companion"
     / "app"
@@ -19,6 +22,17 @@ ANDROID_SOURCE = (
 
 def _source(name: str) -> str:
     return (ANDROID_SOURCE / name).read_text(encoding="utf-8")
+
+
+def _load_python_script(relative_path: str):
+    path = REPO_ROOT / relative_path
+    module_name = path.stem
+    spec = importlib.util.spec_from_file_location(module_name, path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
 
 
 def test_android_phone_runtime_preserves_mobile_package_asset_strategy() -> None:
@@ -234,6 +248,29 @@ def test_android_runner_mode_local_controls_use_command_diary_path() -> None:
     assert "commandId = commandId" in main_activity
     assert "fun isPlaybackPaused(): Boolean = playbackGate.isPaused()" in main_activity
     assert "fun hasActiveBlock(): Boolean = activeBlock != null" in main_activity
+
+
+def test_android_emulator_stress_reports_native_lsl_source_capability() -> None:
+    stress = _load_python_script("validation_protocols/scripts/run_android_companion_emulator_ui_stress.py")
+    report = stress.android_lsl_capability_assessment()
+    source = (REPO_ROOT / "validation_protocols" / "scripts" / "run_android_companion_emulator_ui_stress.py").read_text(
+        encoding="utf-8"
+    )
+
+    assert report["passed"] is True
+    assert report["runner_marker_outlets_supported_by_source"] is True
+    assert report["runner_command_receiver_supported_by_source"] is True
+    assert report["controller_command_sender_supported_by_source"] is True
+    assert report["token_gated_command_ack_supported_by_source"] is True
+    assert report["native_lsl_runtime_requires_local_aar"] is True
+    assert report["live_validation_state"] in {
+        "source_supported_default_build_local_mirror_only",
+        "source_supported_aar_present_requires_live_network_validation",
+    }
+    assert "not_implemented_expected_failure" not in source
+    assert '"pause_experiment"' not in source
+    assert '"resume_experiment"' not in source
+    assert '"stop_after_block"' in source
 
 
 def test_android_phone_run_writes_phone_owned_min_max_export() -> None:

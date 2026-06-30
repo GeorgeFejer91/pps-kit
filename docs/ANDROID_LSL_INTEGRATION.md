@@ -283,7 +283,12 @@ Required validation levels:
     completed phone-owned runs or PC-side mobile completion upload mirrors when
     the `1.Data_min`/`2.Data_max` phone export layer should be present.
 3. Emulator smoke test: install APK, run a phone-owned package, export ZIP, and
-   validate `lsl_runtime_status.json`.
+   validate `lsl_runtime_status.json`. The
+   `run_android_companion_emulator_ui_stress.py` report now treats Android live
+   LSL as a source-capability/AAR-presence assessment: default builds should
+   report `source_supported_default_build_local_mirror_only`, while validation
+   builds with the ignored AAR should report that live network validation is
+   still required.
 4. Native LSL network test with the AAR/JNI integration: resolve Android
    `PPSMarkersV2` / `PPSTriggerCodes` from the PC, send a token-gated
    `PPSCommandSignalsV1` command before or during playback, receive the matching
