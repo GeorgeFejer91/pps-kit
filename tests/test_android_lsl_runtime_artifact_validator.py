@@ -611,6 +611,59 @@ def test_android_lsl_runtime_validator_rejects_invalid_haptic_capability(tmp_pat
     assert "recommended_amplitude" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_haptic_threshold_drift_from_participant_metadata(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    metadata_path = run_dir / "participant_metadata.json"
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    metadata["tactile_threshold_percent"] = "30"
+    metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
+    _update_completion_payload(run_dir, participant_metadata=metadata)
+
+    result = validator.validate_run_artifact(run_dir)
+
+    assert result.ok is False
+    assert "tactile_threshold_percent differs from haptic_capability recommended_threshold_percent" in "\n".join(
+        result.failures
+    )
+
+
+def test_android_lsl_runtime_validator_rejects_haptic_amplitude_mapping_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    haptic_path = run_dir / "haptic_capability.json"
+    haptic = json.loads(haptic_path.read_text(encoding="utf-8"))
+    haptic["recommended_amplitude"] = 52
+    haptic["calibration_result"]["recommended_amplitude"] = 52
+    haptic_path.write_text(json.dumps(haptic), encoding="utf-8")
+    _update_completion_payload(run_dir, haptic=haptic)
+
+    result = validator.validate_run_artifact(run_dir)
+
+    assert result.ok is False
+    assert "haptic_capability recommended_amplitude does not match tactile_threshold_percent" in "\n".join(
+        result.failures
+    )
+
+
+def test_android_lsl_runtime_validator_rejects_haptic_response_amplitude_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    haptic_path = run_dir / "haptic_capability.json"
+    haptic = json.loads(haptic_path.read_text(encoding="utf-8"))
+    haptic["calibration_result"]["responses"][1]["amplitude"] = 50
+    haptic_path.write_text(json.dumps(haptic), encoding="utf-8")
+    _update_completion_payload(run_dir, haptic=haptic)
+
+    result = validator.validate_run_artifact(run_dir)
+
+    assert result.ok is False
+    assert "calibration_result response 2 amplitude does not match threshold_percent" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_loads_lightweight_materialization_from_zip(tmp_path: Path):
     source_dir = tmp_path / "phone-run-source"
     source_dir.mkdir()
@@ -1340,6 +1393,13 @@ def _android_csv_cell(value: object) -> str:
 def _read_csv_rows(path: Path) -> list[dict]:
     with path.open(newline="", encoding="utf-8") as handle:
         return [dict(row) for row in csv.DictReader(handle)]
+
+
+def _update_completion_payload(run_dir: Path, **updates) -> None:
+    completion_path = run_dir / "completion.json"
+    completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    completion.update(updates)
+    completion_path.write_text(json.dumps(completion), encoding="utf-8")
 
 
 def _participant_metadata() -> dict:

@@ -99,6 +99,12 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   must advertise both inventory sidecars with the expected schema and
   `self_included=false`, giving validators a stable pointer to the file diary
   without creating a self-hashing loop.
+- Phone-owned participant/haptic sidecars are validated as one calibration
+  contract: when `participant_metadata.json` says the tactile threshold came
+  from Android haptic calibration, `haptic_capability.json` must carry a
+  matching `pps-android-phone-haptic-calibration.v1` result, matching threshold
+  and status fields, response-row evidence, and the deterministic
+  threshold-percent-to-amplitude mapping used for phone vibration cues.
 - Completed phone-owned run folders now also write
   `phone_owned_data_export.json` and an app-private `phone_owned_exports/`
   snapshot. `1.Data_min/` contains a participant CSV and

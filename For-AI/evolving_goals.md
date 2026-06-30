@@ -112,6 +112,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   discoverable stream names. Android FFmpeg-style synthesis remains feasible via
   native builds, but the preferred PPS top-up path is a deterministic PCM WAV
   assembler rather than FFmpegKit, because FFmpegKit is retired.
+- Android phone-run haptic calibration evidence is now cross-validated as one
+  reconstruction contract. If participant metadata says
+  `tactile_threshold_source=android_haptic_calibration`, the validator requires
+  matching `haptic_capability.json` calibration result/status/threshold fields,
+  response rows with coherent threshold-percent/amplitude values, and the
+  deterministic percent-to-`VibrationEffect` amplitude mapping. These are still
+  phone-vibrator working thresholds, not physical vibration-strength proof.
 - The Android phone-owned playback path now parses prepared block WAV files as
   PCM, plays them with AudioTrack instead of MediaPlayer, and schedules
   vibration cues from the AudioTrack playback head instead of coroutine

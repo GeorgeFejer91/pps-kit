@@ -143,7 +143,9 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   phone-owned `phone_owned_data_export.json` plus app-private or PC-upload
   mirrored `phone_owned_exports/1.Data_min` and `2.Data_max` snapshots when
   `--expect-phone-owned-data-export` is set,
-  phone-run `participant_metadata.json` and `haptic_capability.json` sidecars,
+  phone-run `participant_metadata.json` and `haptic_capability.json` sidecars
+  plus Android haptic calibration threshold/status/amplitude-response
+  consistency,
   phone-run `artifact_file_inventory.json` / `.csv` sidecar advertisement from
   completion/latest-events JSON and strict inventory sidecar presence,
   PC-monitor `pc_android_lsl_monitor_report.json` /

@@ -191,6 +191,10 @@ with a PC-side LSL monitor. Participant and haptic sidecars are also checked
 when present: `participant_metadata.json` must use metadata-payload-only privacy
 and match embedded/catalog run identity, while `haptic_capability.json` must
 declare the vibrator/amplitude policy and any calibration result consistently.
+When participant metadata says the threshold came from Android haptic
+calibration, strict validation also requires the haptic calibration result to
+match the participant threshold/status and, on amplitude-controlled devices, the
+deterministic threshold-percent-to-`VibrationEffect` amplitude mapping.
 For strict app-private participant/session catalog reconstruction, add
 `--expect-run-catalog --expect-run-catalog-index`; this requires the per-run
 `phone_run_catalog_entry.json`, the exported/global
@@ -341,8 +345,11 @@ the first felt level as `pps-android-phone-haptic-calibration.v1`, copies that
 percent into participant metadata, and uses the mapped `VibrationEffect`
 amplitude for phone vibration cues. On phones with a vibrator but no amplitude
 control, the app records a binary detection-only calibration and uses
-default-amplitude pulses. These values are phone-vibrator working thresholds,
-not calibrated physical vibration-strength or Woojer timing measurements.
+default-amplitude pulses. The run-artifact validator cross-checks the
+participant metadata threshold, haptic sidecar recommendation, calibration
+result, response rows, and amplitude mapping. These values are phone-vibrator
+working thresholds, not calibrated physical vibration-strength or Woojer timing
+measurements.
 
 FFmpeg-style synthesis is technically possible on Android through native FFmpeg
 builds, but the app does not depend on FFmpegKit because that wrapper project is

@@ -2218,6 +2218,8 @@ def _validate_participant_and_haptic_metadata(
             warnings.append("phone run artifact does not include haptic capability metadata")
     else:
         _validate_haptic_capability(haptic, failures)
+    if participant is not None:
+        _validate_participant_haptic_alignment(participant, haptic, failures)
 
 
 def _validate_participant_metadata(
@@ -2294,8 +2296,11 @@ def _validate_haptic_capability(haptic: dict[str, Any], failures: list[str]) -> 
     if calibration is not None:
         if calibration.get("schema") != ANDROID_HAPTIC_CALIBRATION_SCHEMA:
             failures.append("haptic_capability calibration_result schema mismatch")
-        if not str(calibration.get("status") or "").strip():
+        status = str(calibration.get("status") or "").strip()
+        if not status:
             failures.append("haptic_capability calibration_result is missing status")
+        elif status not in {"threshold_detected", "binary_detected", "not_detected_at_max", "no_vibrator"}:
+            failures.append("haptic_capability calibration_result status is not recognized")
         if "recommended_threshold_percent" in calibration and calibration.get("recommended_threshold_percent") not in (None, ""):
             value = _safe_float(calibration.get("recommended_threshold_percent"))
             if value != value or value < 0.0 or value > 100.0:
@@ -2307,6 +2312,122 @@ def _validate_haptic_capability(haptic: dict[str, Any], failures: list[str]) -> 
         responses = calibration.get("responses")
         if responses is not None and not isinstance(responses, list):
             failures.append("haptic_capability calibration_result responses must be an array")
+        elif isinstance(responses, list):
+            _validate_haptic_calibration_responses(
+                calibration=calibration,
+                has_amplitude_control=haptic.get("has_amplitude_control") is True,
+                failures=failures,
+            )
+
+
+def _validate_participant_haptic_alignment(
+    participant: dict[str, Any],
+    haptic: dict[str, Any] | None,
+    failures: list[str],
+) -> None:
+    if str(participant.get("tactile_threshold_source") or "").strip() != "android_haptic_calibration":
+        return
+    if haptic is None:
+        failures.append("android haptic calibration participant metadata requires haptic_capability metadata")
+        return
+    calibration = haptic.get("calibration_result") if isinstance(haptic.get("calibration_result"), dict) else None
+    if calibration is None:
+        failures.append("android haptic calibration participant metadata requires haptic_capability calibration_result")
+        return
+
+    participant_threshold = _safe_float(participant.get("tactile_threshold_percent"))
+    haptic_threshold = _safe_float(haptic.get("recommended_threshold_percent"))
+    calibration_threshold = _safe_float(calibration.get("recommended_threshold_percent"))
+    if _is_number(participant_threshold) and _is_number(haptic_threshold) and not _same_number(participant_threshold, haptic_threshold):
+        failures.append("participant_metadata tactile_threshold_percent differs from haptic_capability recommended_threshold_percent")
+    if _is_number(participant_threshold) and _is_number(calibration_threshold) and not _same_number(participant_threshold, calibration_threshold):
+        failures.append("participant_metadata tactile_threshold_percent differs from haptic calibration_result recommended_threshold_percent")
+
+    participant_status = str(participant.get("tactile_threshold_calibration_status") or "").strip()
+    haptic_status = str(haptic.get("calibration_status") or "").strip()
+    calibration_status = str(calibration.get("status") or "").strip()
+    if participant_status and calibration_status and participant_status != calibration_status:
+        failures.append("participant_metadata tactile threshold calibration status differs from haptic calibration_result")
+    if haptic_status and calibration_status and haptic_status != calibration_status:
+        failures.append("haptic_capability calibration_status differs from calibration_result status")
+
+    has_amplitude_control = haptic.get("has_amplitude_control") is True
+    haptic_amplitude = haptic.get("recommended_amplitude")
+    calibration_amplitude = calibration.get("recommended_amplitude")
+    if has_amplitude_control and _is_number(participant_threshold) and participant_threshold > 0.0:
+        expected = _phone_haptic_amplitude_from_percent(participant_threshold)
+        if haptic_amplitude not in (None, "") and _safe_int(haptic_amplitude, fallback=0) != expected:
+            failures.append("haptic_capability recommended_amplitude does not match tactile_threshold_percent")
+        if calibration_amplitude not in (None, "") and _safe_int(calibration_amplitude, fallback=0) != expected:
+            failures.append("haptic calibration_result recommended_amplitude does not match tactile_threshold_percent")
+    elif has_amplitude_control is False:
+        if haptic_amplitude not in (None, "") and _safe_int(haptic_amplitude, fallback=0) != -1:
+            failures.append("haptic_capability recommended_amplitude must use default amplitude without amplitude control")
+        if calibration_amplitude not in (None, "") and _safe_int(calibration_amplitude, fallback=0) != -1:
+            failures.append("haptic calibration_result recommended_amplitude must use default amplitude without amplitude control")
+
+
+def _validate_haptic_calibration_responses(
+    *,
+    calibration: dict[str, Any],
+    has_amplitude_control: bool,
+    failures: list[str],
+) -> None:
+    responses = [row for row in list(calibration.get("responses") or []) if isinstance(row, dict)]
+    raw_responses = calibration.get("responses") if isinstance(calibration.get("responses"), list) else []
+    if len(responses) != len(raw_responses):
+        failures.append("haptic_capability calibration_result responses must contain only objects")
+    felt_rows: list[dict[str, Any]] = []
+    for index, row in enumerate(responses, start=1):
+        prefix = f"haptic_capability calibration_result response {index}"
+        trial_index = _safe_int(row.get("trial_index"), fallback=0)
+        if trial_index != index:
+            failures.append(f"{prefix} trial_index must be sequential")
+        threshold = _safe_float(row.get("threshold_percent"))
+        if not _is_number(threshold) or threshold < 1.0 or threshold > 100.0:
+            failures.append(f"{prefix} threshold_percent must be between 1 and 100")
+        amplitude = _safe_int(row.get("amplitude"), fallback=0)
+        if amplitude != -1 and not (1 <= amplitude <= 255):
+            failures.append(f"{prefix} amplitude must be -1 or 1..255")
+        if has_amplitude_control and _is_number(threshold) and amplitude != _phone_haptic_amplitude_from_percent(threshold):
+            failures.append(f"{prefix} amplitude does not match threshold_percent")
+        if has_amplitude_control is False and amplitude != -1:
+            failures.append(f"{prefix} amplitude must use default amplitude without amplitude control")
+        felt = row.get("felt")
+        if not isinstance(felt, bool):
+            failures.append(f"{prefix} felt must be boolean")
+        elif felt:
+            felt_rows.append(row)
+
+    status = str(calibration.get("status") or "").strip()
+    if status in {"threshold_detected", "binary_detected"}:
+        if not felt_rows:
+            failures.append("haptic_capability calibration_result detected status requires at least one felt response")
+        else:
+            first_felt = felt_rows[0]
+            threshold = _safe_float(first_felt.get("threshold_percent"))
+            amplitude = _safe_int(first_felt.get("amplitude"), fallback=0)
+            recommended_threshold = _safe_float(calibration.get("recommended_threshold_percent"))
+            recommended_amplitude = _safe_int(calibration.get("recommended_amplitude"), fallback=0)
+            if _is_number(threshold) and _is_number(recommended_threshold) and not _same_number(threshold, recommended_threshold):
+                failures.append("haptic_capability calibration_result recommended_threshold_percent must match first felt response")
+            if recommended_amplitude != amplitude:
+                failures.append("haptic_capability calibration_result recommended_amplitude must match first felt response")
+    elif status == "not_detected_at_max" and felt_rows:
+        failures.append("haptic_capability calibration_result not_detected_at_max must not include felt responses")
+
+
+def _is_number(value: float) -> bool:
+    return value == value and value not in (float("inf"), float("-inf"))
+
+
+def _same_number(left: float, right: float, *, tolerance: float = 1e-6) -> bool:
+    return abs(left - right) <= tolerance
+
+
+def _phone_haptic_amplitude_from_percent(percent: float) -> int:
+    clamped = min(max(float(percent), 1.0), 100.0)
+    return min(max(int(clamped / 100.0 * 255.0 + 0.5), 1), 255)
 
 
 def _compare_metadata_fields(
