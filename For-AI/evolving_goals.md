@@ -76,9 +76,10 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   fallback, allowed modes (`pc_runner`, `phone_export`), allowed transports
   (`lan`, `phone_hotspot`, `wifi_direct`), phone-export `transfer_id`, and
   privacy flags proving no pairing token, participant demographics, or
-  participant-coded stream names are present. Android discovery parsing mirrors
-  these checks before rebuilding a pairing URI from a user-supplied QR/manual
-  token.
+  participant-coded stream names are present. It now also recursively rejects
+  hidden token, participant/demographic/identifier, and LSL stream/source-name
+  fields anywhere in the JSON packet. Android discovery parsing mirrors these
+  checks before rebuilding a pairing URI from a user-supplied QR/manual token.
 
 ## 2026-06-29
 

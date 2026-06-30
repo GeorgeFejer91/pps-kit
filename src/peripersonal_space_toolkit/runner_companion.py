@@ -32,6 +32,31 @@ DISCOVERY_NETWORK_SCOPE = "same_lan_or_local_hotspot"
 DISCOVERY_TOKEN_DELIVERY = "qr_or_manual_uri_only"
 DISCOVERY_ALLOWED_MODES = frozenset({"pc_runner", "phone_export"})
 DISCOVERY_ALLOWED_TRANSPORTS = frozenset({"lan", "phone_hotspot", "wifi_direct"})
+DISCOVERY_FORBIDDEN_TOKEN_FIELDS = frozenset(
+    {"token", "companion_token", "pairing_token", "bearer_token", "x_pps_companion_token"}
+)
+DISCOVERY_FORBIDDEN_PARTICIPANT_FIELDS = frozenset(
+    {
+        "age",
+        "gender",
+        "handedness",
+        "sex",
+        "threshold",
+        "tactile_threshold",
+        "haptic_threshold",
+        "participant_metadata",
+        "participant_demographics",
+        "demographics",
+        "participant_id",
+        "participant_code",
+        "participant_name",
+        "subject_id",
+        "subject_code",
+    }
+)
+DISCOVERY_FORBIDDEN_STREAM_FIELDS = frozenset(
+    {"stream_name", "stream_names", "lsl_stream_name", "lsl_stream_names", "source_id", "source_ids"}
+)
 
 
 class CompanionCommandError(RuntimeError):
@@ -210,6 +235,7 @@ def validate_companion_discovery_payload(payload: dict[str, Any]) -> None:
 
     if not isinstance(payload, dict):
         raise ValueError("Discovery payload must be a JSON object.")
+    _validate_companion_discovery_privacy_fields(payload)
     if payload.get("schema") != DISCOVERY_SCHEMA:
         raise ValueError("Discovery payload schema mismatch.")
     if payload.get("service") != DISCOVERY_SERVICE:
@@ -262,6 +288,22 @@ def validate_companion_discovery_payload(payload: dict[str, Any]) -> None:
         raise ValueError("Discovery privacy must declare contains_participant_demographics=false.")
     if privacy.get("stream_names_are_generic") is not True:
         raise ValueError("Discovery privacy must declare generic stream names.")
+
+
+def _validate_companion_discovery_privacy_fields(value: Any) -> None:
+    if isinstance(value, dict):
+        for key, child in value.items():
+            normalized = str(key).strip().lower().replace("-", "_")
+            if normalized in DISCOVERY_FORBIDDEN_TOKEN_FIELDS:
+                raise ValueError("Discovery payloads must not contain pairing tokens.")
+            if normalized in DISCOVERY_FORBIDDEN_PARTICIPANT_FIELDS:
+                raise ValueError("Discovery payloads must not contain participant demographics or identifiers.")
+            if normalized in DISCOVERY_FORBIDDEN_STREAM_FIELDS:
+                raise ValueError("Discovery payloads must not contain LSL stream names.")
+            _validate_companion_discovery_privacy_fields(child)
+    elif isinstance(value, list):
+        for child in value:
+            _validate_companion_discovery_privacy_fields(child)
 
 
 def companion_discovery_payload_json(payload: dict[str, Any]) -> str:

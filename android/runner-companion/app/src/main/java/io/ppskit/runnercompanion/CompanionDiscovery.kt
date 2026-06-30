@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.wifi.WifiManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import org.json.JSONObject
 import java.net.DatagramPacket
 import java.net.InetAddress
@@ -20,6 +21,25 @@ internal const val COMPANION_DISCOVERY_NETWORK_SCOPE = "same_lan_or_local_hotspo
 internal const val COMPANION_DISCOVERY_TOKEN_DELIVERY = "qr_or_manual_uri_only"
 private val companionDiscoveryModes = setOf("pc_runner", "phone_export")
 private val companionDiscoveryTransports = setOf("lan", "phone_hotspot", "wifi_direct")
+private val companionDiscoveryTokenFields = setOf("token", "companion_token", "pairing_token", "bearer_token", "x_pps_companion_token")
+private val companionDiscoveryParticipantFields = setOf(
+    "age",
+    "gender",
+    "handedness",
+    "sex",
+    "threshold",
+    "tactile_threshold",
+    "haptic_threshold",
+    "participant_metadata",
+    "participant_demographics",
+    "demographics",
+    "participant_id",
+    "participant_code",
+    "participant_name",
+    "subject_id",
+    "subject_code",
+)
+private val companionDiscoveryStreamFields = setOf("stream_name", "stream_names", "lsl_stream_name", "lsl_stream_names", "source_id", "source_ids")
 
 internal data class CompanionDiscoveryAdvertisement(
     val host: String,
@@ -61,6 +81,7 @@ internal data class CompanionDiscoveryAdvertisement(
     companion object {
         fun parse(raw: String): CompanionDiscoveryAdvertisement {
             val root = JSONObject(raw.trim())
+            assertNoDiscoveryPrivacyLeakage(root)
             require(root.optString("schema") == COMPANION_DISCOVERY_SCHEMA) { "Unsupported discovery schema." }
             require(root.optString("service") == COMPANION_DISCOVERY_SERVICE) { "Unsupported discovery service." }
             require(root.optString("network_scope") == COMPANION_DISCOVERY_NETWORK_SCOPE) { "Unsupported discovery network scope." }
@@ -106,6 +127,27 @@ internal data class CompanionDiscoveryAdvertisement(
 
         fun parseOrNull(raw: String?): CompanionDiscoveryAdvertisement? =
             raw?.let { runCatching { parse(it) }.getOrNull() }
+    }
+}
+
+private fun assertNoDiscoveryPrivacyLeakage(value: Any?) {
+    when (value) {
+        is JSONObject -> {
+            val keys = value.keys()
+            while (keys.hasNext()) {
+                val key = keys.next()
+                val normalized = key.trim().lowercase().replace("-", "_")
+                require(normalized !in companionDiscoveryTokenFields) { "Discovery payload must not contain a pairing token." }
+                require(normalized !in companionDiscoveryParticipantFields) { "Discovery payload must not contain participant demographics or identifiers." }
+                require(normalized !in companionDiscoveryStreamFields) { "Discovery payload must not contain LSL stream names." }
+                assertNoDiscoveryPrivacyLeakage(value.opt(key))
+            }
+        }
+        is JSONArray -> {
+            for (index in 0 until value.length()) {
+                assertNoDiscoveryPrivacyLeakage(value.opt(index))
+            }
+        }
     }
 }
 

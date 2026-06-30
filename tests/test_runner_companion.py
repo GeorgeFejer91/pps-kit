@@ -267,11 +267,35 @@ def test_discovery_payload_json_rejects_token_leakage():
         companion_discovery_payload_json(payload)
 
 
+def test_discovery_payload_json_rejects_nested_token_leakage():
+    payload = build_companion_discovery_payload(host="127.0.0.1", port=8767, session_id="session-001")
+    payload["debug"] = {"companion_token": "secret"}
+
+    with pytest.raises(ValueError, match="pairing tokens"):
+        companion_discovery_payload_json(payload)
+
+
 def test_discovery_payload_json_rejects_demographic_privacy_leakage():
     payload = build_companion_discovery_payload(host="127.0.0.1", port=8767, session_id="session-001")
     payload["privacy"]["contains_participant_demographics"] = True
 
     with pytest.raises(ValueError, match="participant_demographics=false"):
+        companion_discovery_payload_json(payload)
+
+
+def test_discovery_payload_json_rejects_hidden_participant_identifier():
+    payload = build_companion_discovery_payload(host="127.0.0.1", port=8767, session_id="session-001")
+    payload["debug"] = {"participant_id": "P001"}
+
+    with pytest.raises(ValueError, match="participant demographics or identifiers"):
+        companion_discovery_payload_json(payload)
+
+
+def test_discovery_payload_json_rejects_hidden_lsl_stream_names():
+    payload = build_companion_discovery_payload(host="127.0.0.1", port=8767, session_id="session-001")
+    payload["debug"] = {"lsl_stream_name": "P001_PPSMarkersV2"}
+
+    with pytest.raises(ValueError, match="LSL stream names"):
         companion_discovery_payload_json(payload)
 
 

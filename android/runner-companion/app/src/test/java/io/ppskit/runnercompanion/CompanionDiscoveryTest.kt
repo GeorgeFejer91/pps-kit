@@ -126,6 +126,33 @@ class CompanionDiscoveryTest {
     }
 
     @Test
+    fun rejectsDiscoveryAdvertisementWithHiddenTokenField() {
+        val advertisement = discoveryAdvertisementWithExtraRootField(
+            """"diagnostics": {"companion_token": "secret"},""",
+        )
+
+        assertNull(CompanionDiscoveryAdvertisement.parseOrNull(advertisement))
+    }
+
+    @Test
+    fun rejectsDiscoveryAdvertisementWithHiddenParticipantIdentifier() {
+        val advertisement = discoveryAdvertisementWithExtraRootField(
+            """"diagnostics": {"participant_id": "P001"},""",
+        )
+
+        assertNull(CompanionDiscoveryAdvertisement.parseOrNull(advertisement))
+    }
+
+    @Test
+    fun rejectsDiscoveryAdvertisementWithHiddenStreamName() {
+        val advertisement = discoveryAdvertisementWithExtraRootField(
+            """"diagnostics": {"lsl_stream_name": "P001_PPSMarkersV2"},""",
+        )
+
+        assertNull(CompanionDiscoveryAdvertisement.parseOrNull(advertisement))
+    }
+
+    @Test
     fun rejectsDiscoveryAdvertisementWithUnknownTransport() {
         val advertisement = """
             {
@@ -158,4 +185,35 @@ class CompanionDiscoveryTest {
 
         assertNull(CompanionDiscoveryAdvertisement.parseOrNull(advertisement))
     }
+
+    private fun discoveryAdvertisementWithExtraRootField(extraRootField: String): String =
+        """
+        {
+          "schema": "$COMPANION_DISCOVERY_SCHEMA",
+          "service": "$COMPANION_DISCOVERY_SERVICE",
+          "network_scope": "$COMPANION_DISCOVERY_NETWORK_SCOPE",
+          $extraRootField
+          "discovery": {
+            "udp_multicast_group": "$COMPANION_DISCOVERY_MULTICAST_GROUP",
+            "udp_port": $COMPANION_DISCOVERY_PORT,
+            "also_sent_as_limited_broadcast": true,
+            "ttl": 1
+          },
+          "privacy": {
+            "contains_pairing_token": false,
+            "contains_participant_demographics": false,
+            "stream_names_are_generic": true
+          },
+          "pairing": {
+            "scheme": "pps-companion",
+            "host": "192.168.43.1",
+            "port": 8767,
+            "session_id": "session-001",
+            "mode": "pc_runner",
+            "transport": "lan",
+            "token_required": true,
+            "token_delivery": "qr_or_manual_uri_only"
+          }
+        }
+        """.trimIndent()
 }

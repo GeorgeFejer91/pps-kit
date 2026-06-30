@@ -161,9 +161,10 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   advertiser. Discovery remains token-free and local-only: same-LAN or local
   phone hotspot scope, multicast `239.255.77.83:48767`, limited-broadcast
   fallback, TTL 1, modes `pc_runner`/`phone_export`, transports
-  `lan`/`phone_hotspot`/`wifi_direct`, and no participant demographics or
-  participant-coded stream names. Android `CompanionDiscovery.kt` mirrors these
-  checks before constructing a pairing URI from a user-supplied QR/manual token.
+  `lan`/`phone_hotspot`/`wifi_direct`, and no pairing-token, participant/
+  demographic, participant-identifier, or LSL stream/source-name fields anywhere
+  in the packet. Android `CompanionDiscovery.kt` mirrors these checks before
+  constructing a pairing URI from a user-supplied QR/manual token.
 - Published-study preload recreation gate: `profile_recreation.py`, `assets/preloads/`, `study_templates/`.
 - Core paper-audit read API: `peripersonal_space_toolkit.paper_audit`.
 - Behavioral PPS replication checks for collected/public derived CSVs:

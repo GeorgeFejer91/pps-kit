@@ -127,6 +127,10 @@ def test_android_companion_discovery_preserves_local_hotspot_privacy_contract() 
     assert 'optBoolean("contains_pairing_token", true)' in discovery
     assert 'optBoolean("contains_participant_demographics", true)' in discovery
     assert 'optBoolean("stream_names_are_generic", false)' in discovery
+    assert "assertNoDiscoveryPrivacyLeakage(root)" in discovery
+    assert "companionDiscoveryTokenFields" in discovery
+    assert "companionDiscoveryParticipantFields" in discovery
+    assert "companionDiscoveryStreamFields" in discovery
     assert "createMulticastLock" in discovery
     assert "MulticastSocket(null)" in discovery
 

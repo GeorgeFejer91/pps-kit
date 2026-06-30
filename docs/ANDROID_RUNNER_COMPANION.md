@@ -62,8 +62,11 @@ Closing Focus Mode stops the companion service and invalidates that token.
   `239.255.77.83:48767` and limited broadcast `255.255.255.255:48767`. The
   packet advertises host, port, session id, mode, transport, and whether a
   token is required; it never contains `X-PPS-Companion-Token`, participant
-  demographics, or stream names with participant metadata. The packet contract
-  is intentionally local-only: `network_scope` is
+  demographics, participant identifiers, or LSL stream/source names. PC
+  serialization and Android parsing recursively reject hidden token,
+  participant/demographic, or stream-name fields even if the privacy flags claim
+  the packet is safe. The packet contract is intentionally local-only:
+  `network_scope` is
   `same_lan_or_local_hotspot`, multicast TTL is `1`, accepted modes are
   `pc_runner` and `phone_export`, and accepted transports are `lan`,
   `phone_hotspot`, and `wifi_direct`. Phone-export discovery must include a
