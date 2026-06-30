@@ -1481,6 +1481,7 @@ def _mobile_runtime_upload_lsl_runtime_status(
     haptic_capability = _json_dict(payload.get("haptic")) or _json_dict(payload.get("haptic_capability"))
     defaults = {
         "schema": "pps-android-lsl-runtime-status.v1",
+        "role": "runner",
         "package_id": str(manifest.get("package_id") or mobile_package_id(package)),
         "run_id": str(run_id or ""),
         "participant_id": str(manifest.get("participant_id") or getattr(package, "participant_id", "") or ""),
@@ -1588,6 +1589,7 @@ def _mobile_runtime_lsl_stream_descriptions(
         "runtime_authority": str((manifest.get("lsl") or {}).get("runtime_authority") or "android_phone")
         if isinstance(manifest.get("lsl"), dict)
         else "android_phone",
+        "role": "runner",
         "privacy": {
             "default": str((manifest.get("lsl") or {}).get("privacy_default") or "metadata_payload_only")
             if isinstance(manifest.get("lsl"), dict)

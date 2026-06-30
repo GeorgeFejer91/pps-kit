@@ -210,6 +210,7 @@ internal fun phoneLslRuntimeStatus(
     }
     val status = JSONObject()
         .put("schema", PHONE_LSL_RUNTIME_STATUS_SCHEMA)
+        .put("role", "runner")
         .put("package_id", runPackage.packageId)
         .put("run_id", runId)
         .put("participant_id", runPackage.participantId)
@@ -275,6 +276,7 @@ internal fun phoneLslStreamDescriptions(
     return JSONObject()
         .put("schema", "pps-android-lsl-stream-descriptions.v1")
         .put("runtime_authority", runPackage.lsl.runtimeAuthority.ifBlank { "android_phone" })
+        .put("role", "runner")
         .put("privacy", JSONObject()
             .put("default", runPackage.lsl.privacyDefault.ifBlank { "metadata_payload_only" })
             .put("demographics_in_stream_name", false)

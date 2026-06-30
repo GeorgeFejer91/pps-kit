@@ -306,6 +306,7 @@ class PhoneLslProtocolTest {
         )
 
         assertEquals(PHONE_LSL_RUNTIME_STATUS_SCHEMA, status.getString("schema"))
+        assertEquals("runner", status.getString("role"))
         assertEquals("local_lsl_marker_mirror", status.getString("current_android_source_behavior"))
         assertFalse(status.getBoolean("native_transport_available"))
         assertTrue(status.getString("reason").contains("liblsl_android_class_unavailable"))
@@ -318,6 +319,7 @@ class PhoneLslProtocolTest {
 
         val descriptions = status.getJSONObject("stream_descriptions")
         assertEquals("pps-android-lsl-stream-descriptions.v1", descriptions.getString("schema"))
+        assertEquals("runner", descriptions.getString("role"))
         assertFalse(descriptions.getJSONObject("privacy").getBoolean("demographics_in_stream_name"))
 
         val richMarkers = descriptions.getJSONObject("rich_markers")

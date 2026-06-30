@@ -31,6 +31,7 @@ def test_android_lsl_runtime_validator_accepts_current_non_native_status(tmp_pat
 
     assert result.ok is True
     assert result.failures == []
+    assert result.status["role"] == "runner"
     assert result.status["current_android_source_behavior"] == "local_lsl_marker_mirror"
 
 
@@ -54,6 +55,21 @@ def test_android_lsl_runtime_validator_rejects_command_channel_drift(tmp_path: P
 
     assert result.ok is False
     assert "command channel order" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_runner_role_drift(tmp_path: Path):
+    status = _status(native=False)
+    status["role"] = "controller"
+    status["stream_descriptions"]["role"] = "controller"
+    status_path = tmp_path / "lsl_runtime_status.json"
+    status_path.write_text(json.dumps(status), encoding="utf-8")
+
+    result = validator.validate_run_artifact(status_path)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "lsl_runtime_status must declare role='runner'" in failures
+    assert "Android LSL stream descriptions must declare role='runner'" in failures
 
 
 def test_android_lsl_runtime_validator_requires_stream_descriptions_in_strict_mode(tmp_path: Path):
@@ -4107,6 +4123,7 @@ def _write_phone_owned_data_export(run_dir: Path) -> None:
 def _status(*, native: bool) -> dict:
     return {
         "schema": "pps-android-lsl-runtime-status.v1",
+        "role": "runner",
         "native_transport_available": native,
         "native_marker_transport_enabled": native,
         "command_receiver_available": native,
@@ -4183,6 +4200,7 @@ def _stream_descriptions() -> dict:
     return {
         "schema": "pps-android-lsl-stream-descriptions.v1",
         "runtime_authority": "android_phone",
+        "role": "runner",
         "privacy": {
             "default": "metadata_payload_only",
             "participant_demographics_location": "metadata_and_payload_artifacts",

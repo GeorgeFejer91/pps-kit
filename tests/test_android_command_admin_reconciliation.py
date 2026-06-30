@@ -510,7 +510,7 @@ def _ack_sample(
 
 
 def _write_phone_run(run_dir: Path, command_rows: list[dict]) -> None:
-    status = {"schema": "pps-android-lsl-runtime-status.v1"}
+    status = {"schema": "pps-android-lsl-runtime-status.v1", "role": "runner"}
     (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
     (run_dir / "completion.json").write_text(
         json.dumps({"lsl_runtime_status": status, "command_diary": command_rows}),

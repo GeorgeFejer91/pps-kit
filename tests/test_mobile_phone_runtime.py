@@ -507,6 +507,7 @@ def test_mobile_runtime_upload_enriches_sparse_lsl_status_for_artifact_validatio
 
     run_dir = Path(result["artifact_dir"])
     status = json.loads((run_dir / "lsl_runtime_status.json").read_text(encoding="utf-8"))
+    assert status["role"] == "runner"
     assert status["streams"] == {
         "rich_markers": "PPSMarkersV2",
         "numeric_triggers": "PPSTriggerCodes",
@@ -516,6 +517,7 @@ def test_mobile_runtime_upload_enriches_sparse_lsl_status_for_artifact_validatio
     assert status["command_protocol"]["command_schema"] == "pps-lsl-command.v1"
     assert status["command_protocol"]["token_required"] is True
     assert status["privacy"]["demographics_in_stream_name"] is False
+    assert status["stream_descriptions"]["role"] == "runner"
     assert status["stream_descriptions"]["rich_markers"]["source_id"] == "pps-android-markers-v2-validated-run"
     rich_metadata = json.loads(status["stream_descriptions"]["rich_markers"]["session_metadata_json"])
     assert rich_metadata["package_asset_strategy"] == manifest["reconstruction"]["package_asset_strategy"]

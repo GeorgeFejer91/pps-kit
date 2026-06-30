@@ -649,6 +649,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   the future native LSL bridge a tested UI/outbox contract for another phone to
   control a runner phone, but it still does not send live LSL samples until the
   liblsl Android transport is wired.
+- Runner-mode `lsl_runtime_status.json` and root
+  `pps-android-lsl-stream-descriptions.v1` now explicitly declare
+  `role="runner"`, and the PC-side mobile upload mirror backfills the same
+  role labels when sparse Android uploads are saved. Strict artifact validation
+  rejects runner status/stream-description role drift, matching the existing
+  Controller/PC-admin/monitor role checks.
 - Android native LSL transport now has an optional local-AAR bridge boundary.
   `android/runner-companion/app/libs/liblsl-Android.aar` is ignored by Git but,
   when supplied for a local validation build, Gradle includes it and

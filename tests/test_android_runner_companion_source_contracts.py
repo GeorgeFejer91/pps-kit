@@ -99,6 +99,7 @@ def test_android_lsl_runtime_status_exports_stream_descriptions() -> None:
     assert "phoneLslStreamDescriptions" in lsl_protocol
     assert 'phoneLslStreamDescriptions(runPackage, runId, participantMetadata, hapticCapability)' in lsl_protocol
     assert "phoneLslSessionMetadataJson" in lsl_protocol
+    assert '.put("role", "runner")' in lsl_protocol
     assert '.put("session_metadata_json", sessionMetadataJson)' in lsl_protocol
     assert "phoneParticipantMetadataSummary" in lsl_protocol
     assert "phoneHapticCapabilitySummary" in lsl_protocol

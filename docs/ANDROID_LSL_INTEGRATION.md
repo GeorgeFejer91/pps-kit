@@ -108,11 +108,12 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   remaining scheduled phone blocks plus phone top-up, and closes the run with
   `completion_reason=stopped_after_block`.
 - Phone-owned run folders and ZIP exports include `lsl_runtime_status.json`.
-  That status includes `stream_descriptions` using
+  That status declares `role="runner"` and includes `stream_descriptions` using
   `pps-android-lsl-stream-descriptions.v1`: stream names, LSL roles, channel
   formats/counts, PC-compatible channel labels, source IDs/source patterns,
-  nominal rates, marker version, and the privacy rule that demographics stay
-  out of discoverable stream names. The rich-marker and numeric-trigger
+  nominal rates, marker version, a root `role="runner"` label, and the privacy
+  rule that demographics stay out of discoverable stream names. The rich-marker
+  and numeric-trigger
   `session_metadata_json` descriptions now also include compact
   `participant_metadata_summary` and `haptic_capability_summary` objects when
   available, so age/handedness/gender/tactile-threshold policy and the

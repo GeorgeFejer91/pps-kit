@@ -254,6 +254,8 @@ def validate_runtime_status(
     warnings: list[str] = []
     if status.get("schema") != ANDROID_LSL_RUNTIME_STATUS_SCHEMA:
         failures.append("lsl_runtime_status schema mismatch")
+    if status.get("role") != "runner":
+        failures.append("lsl_runtime_status must declare role='runner'")
 
     streams = status.get("streams") if isinstance(status.get("streams"), dict) else {}
     for key, expected in EXPECTED_STREAMS.items():
@@ -1686,6 +1688,8 @@ def _validate_android_lsl_stream_descriptions(
         return
     if descriptions.get("schema") != ANDROID_LSL_STREAM_DESCRIPTIONS_SCHEMA:
         failures.append("Android LSL stream descriptions schema mismatch")
+    if descriptions.get("role") != "runner":
+        failures.append("Android LSL stream descriptions must declare role='runner'")
     privacy = descriptions.get("privacy") if isinstance(descriptions.get("privacy"), dict) else {}
     if privacy.get("demographics_in_stream_name") is not False:
         failures.append("Android LSL stream descriptions must keep demographics out of stream names")
