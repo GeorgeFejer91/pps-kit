@@ -59,6 +59,16 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   the claim to software/profile materialization rather than physical timing,
   Woojer mechanical onset, tactile perception, individualized spatial
   perception, or exact reuse of private original-author stimuli.
+- Completed a bibliography metadata pass for the BRM manuscript. Clear
+  Crossref/title matches were used to replace draft-style `and others` entries
+  and the two `Source to be verified` profile-recreation records; DOI,
+  volume/issue, page, and article-number fields were added where available, and
+  the Amiel front/rear Cortex record now uses the Crossref 2026 issue metadata
+  while retaining the existing BibTeX key. The manuscript compiled to a 21-page
+  PDF with only box-layout warnings, generated LaTeX artifacts were removed
+  after verification, and the remaining submission placeholders are author
+  email, affiliation, funding, competing interests, ethics wording, and release
+  DOI.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

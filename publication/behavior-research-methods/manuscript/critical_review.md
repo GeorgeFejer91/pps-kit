@@ -135,3 +135,35 @@ Methods manuscript draft. It is a working audit, not manuscript text.
   journal submission should still add at least one hardware/output validation
   table or figure if the paper is going to claim timing performance on a
   specific lab setup.
+
+## Iteration 5: Bibliography Metadata Pass
+
+### Main Critiques
+
+- The paper was improving structurally, but the reference list still looked
+  draft-like because many cited records used `and others`, incomplete
+  volume/page fields, or source-pointer placeholders.
+- Two profile-recreation references used `Source to be verified`, which is not
+  acceptable in a journal manuscript even if the entries mainly support the
+  evidence matrix.
+
+### Resolution In This Revision
+
+- Replaced placeholder author lists in the cited reference set with verified
+  author lists where Crossref/title metadata matched clearly.
+- Added DOI, volume, issue, page, or article-number metadata for the main PPS,
+  tactile, software-methods, randomization, HRTF/rendering, and validation
+  references where available.
+- Corrected the Amiel front/rear Cortex record to its Crossref issue metadata
+  (`year = 2026`, volume 194, pages 220--238) while retaining the existing
+  citation key for source compatibility.
+- Replaced the two `Source to be verified` records with publisher-style entries
+  for the Canzoneri tool-use paper and the Serino body/full-body PPS paper.
+
+### Residual Concerns
+
+- Author email, affiliation, funding, competing-interest text, release DOI, and
+  ethics wording still require human/project owner confirmation before
+  submission.
+- Some older or standards-style records still have sparse metadata, but no
+  placeholder author or `Source to be verified` strings remain in the BibTeX.
