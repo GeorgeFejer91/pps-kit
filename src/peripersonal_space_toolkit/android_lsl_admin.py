@@ -62,6 +62,7 @@ class AndroidLslAdminSendResult:
 def build_android_lsl_admin_payload(
     *,
     token: str,
+    target_session_id: str = "",
     package_id: str = "",
     participant_id: str = "",
     part_number: str = "",
@@ -72,6 +73,7 @@ def build_android_lsl_admin_payload(
     payload.update(
         {
             "token": str(token),
+            "target_session_id": str(target_session_id or payload.get("target_session_id", "")),
             "package_id": str(package_id or payload.get("package_id", "")),
             "participant_id": str(participant_id or payload.get("participant_id", "")),
             "target_part_number": str(part_number or payload.get("target_part_number", "")),
@@ -183,6 +185,7 @@ def send_android_lsl_command(
 
     payload = build_android_lsl_admin_payload(
         token=clean_token,
+        target_session_id=clean_session,
         package_id=package_id,
         participant_id=participant_id,
         part_number=part_number,

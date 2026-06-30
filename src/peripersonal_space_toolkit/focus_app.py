@@ -14699,6 +14699,8 @@ def _phone_transfer_lsl_admin_context(
         "package_id": package_id,
         "participant_id": str(getattr(active_package, "participant_id", "") or participant_id or ""),
         "part_number": str(getattr(active_package, "part_number", "") or ""),
+        "target_part_session_id": str(getattr(active_package, "part_session_id", "") or ""),
+        "target_session_group_id": str(getattr(active_package, "session_group_id", "") or ""),
         "output_dir": str(output_runner_logs_dir(Path(output_root)) / "android_lsl_admin" / safe_transfer),
     }
 
@@ -14729,8 +14731,17 @@ def _send_phone_transfer_lsl_admin_command(
         "output_dir": Path(str(context.get("output_dir") or "")),
         "require_ack": bool(require_ack),
     }
-    if extra_payload:
-        kwargs["extra_payload"] = dict(extra_payload)
+    payload_extra = dict(extra_payload or {})
+    for payload_field, context_field in (
+        ("target_session_id", "target_session_id"),
+        ("target_part_session_id", "target_part_session_id"),
+        ("target_session_group_id", "target_session_group_id"),
+    ):
+        value = str(context.get(context_field) or "").strip()
+        if value:
+            payload_extra[payload_field] = value
+    if payload_extra:
+        kwargs["extra_payload"] = payload_extra
     result = send_android_lsl_command(**kwargs)
     return dict(result.row)
 

@@ -4076,6 +4076,8 @@ def test_phone_transfer_lsl_admin_context_prefers_part_session_and_runner_logs(t
     assert context["package_id"] == "part-001-part01"
     assert context["participant_id"] == "P321"
     assert context["part_number"] == "01"
+    assert context["target_part_session_id"] == "part-001"
+    assert context["target_session_group_id"] == "group-001"
     assert str(output_runner_logs_dir(tmp_path) / "android_lsl_admin" / "transfer_001") == context["output_dir"]
 
 
@@ -4088,6 +4090,8 @@ def test_phone_transfer_lsl_admin_command_sends_expected_context(tmp_path: Path,
         "package_id": "pkg-001",
         "participant_id": "P321",
         "part_number": "01",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
         "output_dir": str(tmp_path / "pc-admin"),
     }
     calls: list[dict[str, object]] = []
@@ -4109,6 +4113,11 @@ def test_phone_transfer_lsl_admin_command_sends_expected_context(tmp_path: Path,
             "package_id": "pkg-001",
             "participant_id": "P321",
             "part_number": "01",
+            "extra_payload": {
+                "target_session_id": "part-001",
+                "target_part_session_id": "part-001",
+                "target_session_group_id": "group-001",
+            },
             "output_dir": tmp_path / "pc-admin",
             "require_ack": True,
         }
@@ -4124,6 +4133,8 @@ def test_phone_transfer_lsl_admin_command_forwards_operator_note(tmp_path: Path,
         "package_id": "pkg-001",
         "participant_id": "P321",
         "part_number": "01",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
         "output_dir": str(tmp_path / "pc-admin"),
     }
     calls: list[dict[str, object]] = []
@@ -4143,7 +4154,12 @@ def test_phone_transfer_lsl_admin_command_forwards_operator_note(tmp_path: Path,
 
     assert row["status"] == "ack_applied"
     assert calls[-1]["command"] == "operator_note"
-    assert calls[-1]["extra_payload"] == {"note": "participant asked for a pause"}
+    assert calls[-1]["extra_payload"] == {
+        "note": "participant asked for a pause",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+    }
 
 
 def test_launcher_resume_shortcut_opens_environment_operations(tmp_path: Path, monkeypatch):

@@ -50,6 +50,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   or unsafe acks from making the PC helper claim that a phone command was
   successfully applied, while preserving the bad ack sample in the outbox for
   reconstruction.
+- PC-admin command payloads now carry `target_session_id` by default, and the
+  Focus Mode Send-to-Phone LSL control bridge forwards split-run
+  `target_part_session_id` plus `target_session_group_id` from the active
+  mobile package. That gives Android acks, PC-admin outboxes, and offline
+  command reconciliation the same non-secret part/session identity spine as the
+  phone-owned run package.
 - Receiver-side Android native command diary rows now preserve
   `command_channels` and the exact received `PPSCommandSignalsV1`
   `command_sample` alongside the outgoing ack evidence. Strict phone-run

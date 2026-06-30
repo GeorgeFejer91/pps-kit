@@ -60,6 +60,7 @@ class _FakeAckInlet:
 def test_build_android_lsl_admin_payload_keeps_token_in_command_payload():
     payload = admin.build_android_lsl_admin_payload(
         token="secret",
+        target_session_id="part-001",
         package_id="pkg-001",
         participant_id="P001",
         part_number="1",
@@ -67,6 +68,7 @@ def test_build_android_lsl_admin_payload_keeps_token_in_command_payload():
     )
 
     assert payload["token"] == "secret"
+    assert payload["target_session_id"] == "part-001"
     assert payload["package_id"] == "pkg-001"
     assert payload["participant_id"] == "P001"
     assert payload["target_part_number"] == "1"
@@ -114,7 +116,9 @@ def test_send_android_lsl_command_writes_auditable_ack_row(tmp_path, monkeypatch
     assert result.row["command_sample"][0] == "pps-lsl-command.v1"
     assert result.row["command_sample"][1] == "cmd-1"
     assert result.row["command_sample"][2] == "part-001"
-    assert json.loads(result.row["command_sample"][6])["token"] == "secret"
+    command_payload = json.loads(result.row["command_sample"][6])
+    assert command_payload["token"] == "secret"
+    assert command_payload["target_session_id"] == "part-001"
     assert result.row["ack_sample"] == ack_to_sample(_FakeAckInlet.ack)
     outbox_rows = (tmp_path / admin.PC_ANDROID_LSL_ADMIN_OUTBOX).read_text(encoding="utf-8").strip().splitlines()
     assert len(outbox_rows) == 1
