@@ -121,9 +121,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   optional `pyxdf`, classifying recognized Android LSL streams into the PC
   monitor row schema before reconciliation. It now also reconciles captured
   `PPSCommandSignalsV1` rows against `PPSCommandAcksV1` rows by `command_id`,
-  `session_id`, and ack payload command/package identity when both streams are
-  present, so two-way PC/controller administration evidence can be audited from
-  one monitor/XDF capture.
+  `session_id`, and ack payload command/package/target identity when both
+  streams are present, so two-way PC/controller administration evidence can be
+  audited from one monitor/XDF capture. Command/ack reconciliation now compares
+  the non-secret target identity fields echoed by Android acks (`package_id`,
+  `participant_id`, target session, target part session, session group, and
+  target part number) against the captured command-signal payload whenever those
+  fields are present, so an external monitor/XDF capture can catch split-part
+  targeting drift.
 - Added an offline sender/receiver command-admin reconciliation gate for
   two-phone and PC-to-phone administration rehearsals.
   `validation_protocols/scripts/reconcile_android_command_admin_with_phone_run.py`

@@ -144,7 +144,7 @@ def test_reconcile_android_lsl_monitor_accepts_matching_command_ack_pair():
         _monitor_command_row(command_id="cmd-1", command="pause"),
         _monitor_ack_row(
             command_id="cmd-1",
-            payload={"command": "pause", "package_id": "pkg-001", "run_id": "phone-run-001"},
+            payload={"command": "pause", **_target_identity_payload(), "run_id": "phone-run-001"},
         ),
     ]
 
@@ -182,7 +182,11 @@ def test_reconcile_android_lsl_monitor_reports_command_ack_payload_drift():
     phone_markers = [_phone_marker(event_id="1", event_type="session_metadata", event_code="8")]
     monitor_rows = [
         _monitor_rich_row(phone_markers[0], timestamp=1.0),
-        _monitor_command_row(command_id="cmd-2", command="stop_after_block"),
+        _monitor_command_row(
+            command_id="cmd-2",
+            command="stop_after_block",
+            payload={"token": "secret", "package_id": "pkg-001"},
+        ),
         _monitor_ack_row(
             command_id="cmd-2",
             payload={"command": "pause", "package_id": "pkg-other"},
@@ -200,6 +204,30 @@ def test_reconcile_android_lsl_monitor_reports_command_ack_payload_drift():
     assert summary["mismatch_count"] == 2
     assert {item["field"] for item in summary["mismatches"]} == {"payload.command", "payload.package_id"}
     assert "command/ack pairs have 2 mismatches" in "\n".join(result.report["failures"])
+
+
+def test_reconcile_android_lsl_monitor_reports_command_ack_target_identity_drift():
+    phone_markers = [_phone_marker(event_id="1", event_type="session_metadata", event_code="8")]
+    ack_payload = {"command": "start_experiment", **_target_identity_payload()}
+    ack_payload["target_part_session_id"] = "part-999"
+    monitor_rows = [
+        _monitor_rich_row(phone_markers[0], timestamp=1.0),
+        _monitor_command_row(command_id="cmd-target", command="start_experiment"),
+        _monitor_ack_row(command_id="cmd-target", payload=ack_payload),
+    ]
+
+    result = reconciler.reconcile_android_lsl_monitor(
+        phone_markers,
+        monitor_rows,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is False
+    summary = result.report["command_ack_pair_summary"]
+    assert summary["mismatch_count"] == 1
+    assert summary["mismatches"][0]["field"] == "payload.target_part_session_id"
+    assert summary["mismatches"][0]["expected"] == "part-001"
+    assert summary["mismatches"][0]["observed"] == "part-999"
 
 
 def test_loaders_accept_phone_run_folder_and_monitor_folder(tmp_path: Path):
@@ -309,6 +337,17 @@ def _monitor_numeric_row(code: int, *, timestamp: float) -> dict:
     )
 
 
+def _target_identity_payload() -> dict[str, str]:
+    return {
+        "package_id": "pkg-001",
+        "participant_id": "P001",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+        "target_part_number": "1",
+    }
+
+
 def _monitor_command_row(*, command_id: str, command: str, payload: dict | None = None) -> dict:
     return monitor.build_android_lsl_monitor_row(
         stream_key="command_signals",
@@ -319,7 +358,7 @@ def _monitor_command_row(*, command_id: str, command: str, payload: dict | None 
                 sender_id="pc_runner",
                 command=command,
                 issued_lsl_time=1.0,
-                payload=payload or {"token": "secret", "package_id": "pkg-001"},
+                payload=payload or {"token": "secret", **_target_identity_payload()},
             )
         ),
         lsl_timestamp=1.0,

@@ -350,9 +350,11 @@ PC-captured rich markers against the phone marker mirror by event id, visible
 marker fields, and semantic `payload_json` equality, preserving the
 `session_metadata` reconstruction payload through the external monitor/XDF
 path. When command signals and acks are both captured, it also reconciles
-`command_id`, `session_id`, and ack payload command/package identity. It accepts
-either `pc_android_lsl_monitor_events.jsonl` or a LabRecorder `.xdf` file when
-the optional `pyxdf` dependency is installed.
+`command_id`, `session_id`, and ack payload command/package/target identity,
+including non-secret split-part fields echoed by Android acknowledgements when
+they are present in the source command payload. It accepts either
+`pc_android_lsl_monitor_events.jsonl` or a LabRecorder `.xdf` file when the
+optional `pyxdf` dependency is installed.
 
 For new phone-owned run exports, also require the catalog entry:
 
@@ -445,7 +447,11 @@ To compare the PC-observed monitor rows against the phone's local
 
 This reconciliation checks whether the PC saw the same rich marker event ids,
 metadata fields, and numeric trigger-code sequence that the phone wrote locally
-in `trigger_codes.csv`.
+in `trigger_codes.csv`. With `--expect-command-acks`, it also checks that
+observed command acknowledgements echo the command name plus any source command
+payload `package_id`, `participant_id`, target session, target part session,
+session group, and target part number fields that define which phone-owned part
+was administered.
 It is still network LSL evidence, not physical vibration/audio timing proof.
 
 Until that strict validator passes together with external LSL/XDF capture, the

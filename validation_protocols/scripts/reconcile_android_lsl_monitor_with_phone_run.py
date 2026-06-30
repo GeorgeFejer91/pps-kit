@@ -30,6 +30,14 @@ from peripersonal_space_toolkit.android_lsl_monitor import (  # noqa: E402
 RECONCILIATION_SCHEMA = "pps-android-lsl-monitor-reconciliation.v1"
 REPORT_JSON = "android_lsl_monitor_reconciliation.json"
 REPORT_MD = "android_lsl_monitor_reconciliation.md"
+COMMAND_ACK_PAYLOAD_IDENTITY_FIELDS = (
+    "package_id",
+    "participant_id",
+    "target_session_id",
+    "target_part_session_id",
+    "target_session_group_id",
+    "target_part_number",
+)
 
 
 @dataclass(frozen=True)
@@ -361,20 +369,24 @@ def _command_ack_pair_summary(command_rows: list[dict[str, Any]], ack_rows: list
             mismatches.append(_command_ack_mismatch(command_id, "session_id", command_session, ack_session))
 
         command_name = _clean(command_row.get("command"))
+        command_payload = _payload_object(command_row.get("payload_json"))
         ack_payload = _payload_object(ack_row.get("payload_json"))
+        ack_status = _clean(ack_row.get("ack_status"))
         payload_command = _clean(ack_payload.get("command"))
         if payload_command and command_name and payload_command != command_name:
             mismatches.append(_command_ack_mismatch(command_id, "payload.command", command_name, payload_command))
-        elif command_name and _clean(ack_row.get("ack_status")) == "applied" and not payload_command:
+        elif command_name and ack_status == "applied" and not payload_command:
             mismatches.append(_command_ack_mismatch(command_id, "payload.command", command_name, ""))
 
-        command_payload = _payload_object(command_row.get("payload_json"))
-        expected_package = _clean(command_payload.get("package_id"))
-        observed_package = _clean(ack_payload.get("package_id"))
-        if expected_package and observed_package and expected_package != observed_package:
-            mismatches.append(_command_ack_mismatch(command_id, "payload.package_id", expected_package, observed_package))
-        elif expected_package and _clean(ack_row.get("ack_status")) == "applied" and not observed_package:
-            mismatches.append(_command_ack_mismatch(command_id, "payload.package_id", expected_package, ""))
+        for field in COMMAND_ACK_PAYLOAD_IDENTITY_FIELDS:
+            _append_command_ack_payload_mismatch(
+                mismatches,
+                command_id,
+                field,
+                command_payload,
+                ack_payload,
+                ack_status=ack_status,
+            )
 
     return {
         "command_signal_count": len(command_rows),
@@ -397,6 +409,25 @@ def _command_ack_mismatch(command_id: str, field: str, expected: str, observed: 
         "expected": expected,
         "observed": observed,
     }
+
+
+def _append_command_ack_payload_mismatch(
+    mismatches: list[dict[str, Any]],
+    command_id: str,
+    field: str,
+    command_payload: dict[str, Any],
+    ack_payload: dict[str, Any],
+    *,
+    ack_status: str,
+) -> None:
+    expected = _clean(command_payload.get(field))
+    if not expected:
+        return
+    observed = _clean(ack_payload.get(field))
+    if observed and expected != observed:
+        mismatches.append(_command_ack_mismatch(command_id, f"payload.{field}", expected, observed))
+    elif ack_status == "applied" and not observed:
+        mismatches.append(_command_ack_mismatch(command_id, f"payload.{field}", expected, ""))
 
 
 def _first_mismatch_index(left: list[str], right: list[str]) -> int | None:

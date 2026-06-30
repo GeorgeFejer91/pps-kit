@@ -139,8 +139,10 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   requester/source-behavior fields) while excluding pairing tokens; explicit
   package or split-part identity drift is rejected before state changes. The
   command-admin reconciler compares those echoed target payload fields between
-  sender outbox and receiver command diary. Controller runtime status now also
-  includes
+  sender outbox and receiver command diary; the PC monitor/XDF reconciler now
+  checks the same non-secret command/ack target identity fields when both
+  command-signal and acknowledgement streams are captured. Controller runtime
+  status now also includes
   `pps-android-lsl-stream-descriptions.v1` descriptions for the controller
   command-signal outlet and command-ack inlet, and strict controller validation
   checks those roles, source identity/patterns, privacy, and PC-compatible
