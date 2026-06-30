@@ -46,7 +46,10 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   data chunks into `materialized_blocks/phone_materialized_block_XX.wav`,
   recalculating trial/cue timing from frame counts, and recording
   `phone_scheduled_block_materialization` before the same AudioTrack
-  playback-head cue scheduler runs.
+  playback-head cue scheduler runs. Source-contract tests pin this path and
+  phone top-up to deterministic PCM concatenation with explicit format,
+  sample-rate, channel-count, bit-depth, and block-alignment guards rather than
+  FFmpeg/FFmpegKit.
 - Lightweight phone package export/validation lives in
   `mobile_phone_runtime.py`. `include_block_audio=False` produces
   `asset_strategy = trial_building_blocks_only` manifests, keeps block

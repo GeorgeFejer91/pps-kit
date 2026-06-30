@@ -219,6 +219,32 @@ def test_android_phone_runtime_uses_audiotrack_timing_not_mediaplayer() -> None:
     assert "MediaPlayer" not in all_sources
 
 
+def test_android_phone_topup_uses_deterministic_pcm_concat_without_ffmpeg() -> None:
+    assembler = _source("PhoneTopupAssembler.kt")
+    response_review = _source("PhoneResponseReview.kt")
+    main_activity = _source("MainActivity.kt")
+
+    assert "internal fun materializePhoneTopupBlock" in assembler
+    assert "internal fun materializePhoneScheduledBlock" in assembler
+    assert "writeConcatenatedPcmWav" in assembler
+    assert "writeConcatenatedScheduledPcmWav" in assembler
+    assert "readPhonePcmWavInfo(sourceFile)" in assembler
+    for mismatch_guard in [
+        "formatTag == reference.formatTag",
+        "sampleRateHz == reference.sampleRateHz",
+        "channelCount == reference.channelCount",
+        "bitsPerSample == reference.bitsPerSample",
+        "blockAlignBytes == reference.blockAlignBytes",
+    ]:
+        assert mismatch_guard in assembler
+    assert '.put("synthesis_strategy", "pcm_wav_concat_without_ffmpeg")' in assembler
+    assert '.put("synthesis_strategy", "pcm_wav_concat_without_ffmpeg")' in response_review
+    assert '.put("synthesis_strategy", "pcm_wav_concat_without_ffmpeg")' in main_activity
+    assert "FFmpegKit" not in assembler
+    assert "MobileFFmpeg" not in assembler
+    assert "ProcessBuilder" not in assembler
+
+
 def test_android_companion_discovery_preserves_local_hotspot_privacy_contract() -> None:
     discovery = _source("CompanionDiscovery.kt")
 
