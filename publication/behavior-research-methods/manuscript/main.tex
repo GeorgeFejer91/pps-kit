@@ -331,9 +331,50 @@ The first use case runs the bundled \code{study5\_box\_breathing\_pps} profile. 
 
 The second use case recreates one published profile, such as \code{canzoneri\_2012\_dynamic\_sounds}, \code{matsuda\_2021\_four\_directions}, or \code{roussel\_2025\_dynaspace\_mobile\_pps}. The aim is not to claim full equivalence to the original apparatus, but to demonstrate how the toolkit represents reported timing, SOA/distance anchors, direction labels, baselines, catch trials, and missing-parameter caveats.
 
+Table~\ref{tab:profile-families} gives the profile-family map that should accompany this use case. The same rows are stored in \code{profile\_family\_examples.csv} so that the manuscript claim can be audited outside the PDF. The table is deliberately conservative: it says what the toolkit can represent procedurally, and it keeps exact replication conditional on source-paper review, rights clearance, apparatus reconstruction, and local validation.
+
+\begin{table}[t]
+\caption{Published-method families represented or scaffolded by PPS Toolkit profiles.}
+\label{tab:profile-families}
+\footnotesize
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.18\textwidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.27\textwidth}}
+\toprule
+Profile family & Toolkit representation & Procedural caveat \\
+\midrule
+Canonical dynamic looming & Dynamic-sounds profiles represent approaching/receding noise-like sources, tactile SOA anchors, control timing, auditory catches, and sigmoid-style summaries from classic audio-tactile PPS work \citep{Canzoneri2012,Farne2002}. & Original apparatus, exact sounds, and participant-level effects remain source-specific. \\
+Baseline and expectancy correction & Segment 3 and the analysis layer represent tactile-only, stationary/fixed-distance, auditory-only catch, and baseline-corrected facilitation variants \citep{Hobeika2019,Holmes2020}. & Corrections change the estimand and cannot be treated as a universal repair for fragile or small effects. \\
+Directional/body-frame variants & Direction-aware profiles represent front, rear, left, right, and quadrant mappings, plus direction-coupled baselines where reported \citep{Matsuda2021,Teraoka2024,Amiel2025}. & Apparatus geometry, participant-facing direction, and perceived source location must be verified before exact-recreation language is used. \\
+Mobile and DynaSpace-style burst trains & Burst-train source metadata, lateral trajectory anchors, fixed comparators, and mobile-profile notes support smartphone/DynaSpace-style recreations \citep{Roussel2025,Hobeika2019}. & Smartphone timing and haptic evidence do not automatically transfer to PC audio-interface, Woojer, or LabRecorder routes. \\
+Affective, rough, and ecological sounds & Imported-source profiles preserve source identity, roughness/valence/ecological labels, hashes, and substitution notes \citep{Taffou2021,Ferri2015,Bahadori2021}. & Rights clearance and perceptual equivalence checks are required before redistributing or substituting stimuli. \\
+Action, full-body, and immersive variants & Scaffold profiles can store action context, volumetric labels, HRTF/scene metadata, and runner-validation notes for walking or VR-like work \citep{Noel2015,Lerner2021}. & Exact recreation requires locomotion, VR scene, body geometry, spatial rendering, and response apparatus validation. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 \subsection{Timing and Output Evidence}
 
 The third use case demonstrates the evidence-tier distinction. A software-only run verifies manifest-to-event-log reconstruction. A digital audio evidence WAV verifies mixed sample content. An electrical loopback route estimates audio-interface skew or trigger visibility when loopback hardware is connected. A tactile threshold report documents the perceptual preset. These outputs should not be collapsed into a single timing claim. The final paper should state which tiers were run on the publication hardware and which remain future validation.
+
+\subsection{Operator Procedure and Evidence Handoff}
+
+A second procedural gap is the participant-session script. The toolkit should be described not only as Segments 0--6, but as an operator workflow in which each action produces a bounded evidence object. Table~\ref{tab:operator-procedure} is the compact procedure that should be followed by the publication example and by laboratories adapting the toolkit.
+
+\begin{table}[t]
+\caption{Operator procedure and evidence handoff for a publishable PPS Toolkit run.}
+\label{tab:operator-procedure}
+\footnotesize
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.16\textwidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.25\textwidth} >{\raggedright\arraybackslash}p{0.22\textwidth}}
+\toprule
+Stage & Operator action & Written evidence & Boundary \\
+\midrule
+Pre-run setup & Select profile/package, participant code, part order, output route, response target, loopback, LabRecorder, and top-up settings before playback is enabled. & Setup metadata, copied profile snapshot, route settings, package manifest, and optional capture configuration. & Confirms intended administration, not physical timing or perception. \\
+Output and calibration & Run audio/tactile checks; complete the participant tactile-threshold assay when used; keep accepted calibration separate from trial rows. & Tactile calibration JSON/CSV/report, output settings, route notes, and threshold confirmation counters. & A perceptual preset is not a mechanical actuator-onset measurement. \\
+Execution & Present instructions, start blocks, preserve deterministic block order, log clicks, markers, pauses, recenter actions, misses, adaptive-threshold events, and top-up decisions. & Participant CSV rows, event logs, LSL mirrors, LabRecorder/XDF files when enabled, top-up ledgers, adaptive-threshold artifacts, and audio evidence WAVs when enabled. & Software and electrical evidence must be interpreted by tier; top-up rows do not erase original misses. \\
+Post-run review & Inspect completion status, response quality, baseline coverage, low-N warnings, timing evidence, and exploratory model fits before sharing deidentified outputs. & Analysis catalog, response summaries, assumption checks, model-fit tables, validation reports, and archive manifests. & Instant analysis is operator feedback unless a preregistered confirmatory analysis is supplied. \\
+Sharing & Publish design/profile, validation, and deidentified participant layers separately with hashes and rights notes. & Release tag or DOI, source commit, design archive, validation archive, data dictionary, and materials availability statement. & Copyrighted stimuli, private outputs, local SOFA files, and proprietary vendor tools stay outside the public license unless rights are explicit. \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \subsection{Post-run Analysis Review}
 

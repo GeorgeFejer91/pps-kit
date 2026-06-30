@@ -612,3 +612,42 @@ Methods manuscript draft. It is a working audit, not manuscript text.
 - The reader-guide table improves navigability, but it still depends on the
   final release archive and validation artifacts being supplied before
   submission.
+
+## Iteration 17: Procedural-method Gap Pass
+
+### Main Critiques
+
+- The manuscript presented PPS Toolkit as a full design-run-recreation suite,
+  but the published-profile recreation claim was still too compressed. It named
+  example profiles without mapping the main methodological families to the
+  procedural controls and caveats that make each family runnable or only
+  scaffolded.
+- The validation section described four use cases, but it did not yet provide a
+  compact participant-session procedure. A reviewer could infer setup,
+  calibration, execution, top-up, and post-run review from separate sections,
+  but the paper needed a single operator handoff table.
+- The largest procedural risk was wording: profile recreation must not sound
+  like exact replication of original apparatus, copyrighted sounds, perceived
+  spatial position, or participant-level effects.
+
+### Resolution In This Revision
+
+- Added `profile_family_examples.csv`, mapping six published-method families to
+  toolkit representations, represented decisions, caveats, citation keys, and
+  profile/template identifiers.
+- Added a manuscript profile-family table covering canonical dynamic looming,
+  baseline/expectancy correction, directional/body-frame variants,
+  mobile/DynaSpace burst trains, affective/ecological sounds, and
+  action/full-body/immersive variants.
+- Added an `Operator Procedure and Evidence Handoff` subsection with a table
+  spanning pre-run setup, output/calibration, execution, post-run review, and
+  sharing. Each stage names the written evidence and the boundary of the claim.
+- Updated the readiness audit and manuscript README so the new profile-family
+  map is tracked as source evidence rather than manuscript-only prose.
+
+### Residual Concerns
+
+- The new procedural tables make the methods package more reviewable, but final
+  submission still needs profile-by-profile source checks, release archive
+  links, and hardware/perceptual validation artifacts before exact replication
+  or timing/tactile claims are made.

@@ -174,6 +174,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   variation, new-task construction, published-profile recreation, run evidence,
   and reporting/sharing. The submission-readiness audit now tracks this
   tutorial orientation as source-ready.
+- Continued the BRM manuscript self-review loop with a procedural-method gap
+  pass. `profile_family_examples.csv` now maps six published PPS method
+  families to toolkit representations and caveats, and `main.tex` includes a
+  matching profile-family table so profile recreation is distinguished from
+  exact apparatus/stimulus replication. The validation/use-case section also
+  includes an operator procedure and evidence handoff table covering pre-run
+  setup, output/calibration, execution, post-run review, and sharing, with
+  explicit evidence boundaries for each stage.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

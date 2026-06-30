@@ -15,6 +15,8 @@ manuscript for PPS Toolkit.
   visible Segment 0-6 controls either to evidence-matrix rows or to explicit
   non-method roles such as navigation, folder inspection, documentation, or
   modal workflow mechanics.
+- `profile_family_examples.csv`: source-pointer map from common published PPS
+  method families to toolkit profile/scaffold representations and caveats.
 - `validation_evidence.csv`: committed source-pointer summary of validation
   evidence used in the draft; generated raw reports remain under ignored
   validation folders.
@@ -46,6 +48,9 @@ workflow explicitly asks for an archived submission snapshot.
 - `gui_control_coverage.csv` is an interface coverage ledger, not a second
   literature matrix. It exists to show which visible controls are scientific
   design decisions and which are ordinary suite/navigation mechanics.
+- `profile_family_examples.csv` is a profile-family map, not a claim that every
+  listed paradigm has been exactly replicated with original apparatus and
+  stimuli.
 - `submission_readiness_audit.md` is a maintenance/readiness ledger, not
   manuscript prose. It should remain honest about the distinction between a
   source-ready draft and a final submission package.
