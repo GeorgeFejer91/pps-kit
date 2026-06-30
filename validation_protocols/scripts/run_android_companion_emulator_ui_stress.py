@@ -783,10 +783,16 @@ def main(argv: list[str] | None = None) -> int:
     )
     device = AndroidDevice(adb=args.adb, serial=args.serial, output_dir=output_dir)
 
-    results: list[dict[str, Any]] = []
+    results: list[dict[str, Any]] = [
+        android_emulator_viewport_policy_assessment(),
+        android_lsl_capability_assessment(),
+    ]
     started = time.time()
-    service.start()
+    service_started = False
+    fatal_error: dict[str, str] | None = None
     try:
+        service.start()
+        service_started = True
         device.wait_booted()
         pc_pairing_uri = build_pairing_uri(host="10.0.2.2", port=port, session_id="android-ui-stress", token=TOKEN)
         phone_pairing_uri = pc_pairing_uri
@@ -796,10 +802,19 @@ def main(argv: list[str] | None = None) -> int:
             results.append(run_phone_runtime_ui(device, phone_pairing_uri, bridge, output_dir))
         if not args.skip_lsl_roundtrip:
             results.append(run_lsl_roundtrip(output_dir, count=max(1, int(args.lsl_count))))
-        results.append(android_emulator_viewport_policy_assessment())
-        results.append(android_lsl_capability_assessment())
+    except Exception as exc:  # noqa: BLE001 - validation artifacts must capture early device/setup failures.
+        fatal_error = {"type": type(exc).__name__, "message": str(exc)}
+        results.append(
+            {
+                "name": "android_emulator_ui_stress_exception",
+                "passed": False,
+                "error_type": fatal_error["type"],
+                "message": fatal_error["message"],
+            }
+        )
     finally:
-        service.stop()
+        if service_started:
+            service.stop()
 
     passed = all(bool(item.get("passed")) or item.get("expected_to_pass") is False for item in results)
     strict_passed = all(bool(item.get("passed")) for item in results)
@@ -813,6 +828,7 @@ def main(argv: list[str] | None = None) -> int:
         "companion_port": port,
         "artifact_dir": str(output_dir),
         "results": results,
+        "fatal_error": fatal_error,
         "interpretation": {
             "pc_runner_control_http_ui": "pass" if any(r.get("name") == "pc_runner_control_ui" and r.get("passed") for r in results) else "fail_or_skipped",
             "phone_local_full_experiment_ui": "pass" if any(r.get("name") == "phone_runtime_ui" and r.get("passed") for r in results) else "fail_or_skipped",

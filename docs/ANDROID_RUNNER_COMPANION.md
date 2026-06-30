@@ -554,7 +554,9 @@ are accepted for compatibility but no longer start a persistent placement loop.
 `run_android_companion_emulator_ui_stress.py` now adds an
 `android_emulator_fixed_viewport_policy` result to its report so validation
 artifacts explicitly prove the stress harness did not use resize, density,
-rotation, or desktop window-placement commands to make the UI pass.
+rotation, or desktop window-placement commands to make the UI pass. The report
+writes this policy and the native-LSL source capability assessment before any
+ADB boot/UI step, so early emulator failures still leave a readable artifact.
 Passive runs also enable the validation-only synthetic click shortcut
 `Ctrl+Alt+Shift+F12`, which logs one in-target runner response through the
 normal controller path without moving the PC mouse.

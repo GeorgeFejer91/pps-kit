@@ -257,7 +257,9 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `android_emulator_fixed_viewport_policy` result proving the harness did not
   use AVD size/density/rotation or desktop window-placement commands, so default
   builds should be read as source-supported/local-mirror-only rather than as
-  failed live LSL runs.
+  failed live LSL runs. The policy and source-capability assessments are added
+  before ADB boot/UI work, and early exceptions are written as
+  `android_emulator_ui_stress_exception` results instead of losing the report.
 - Companion discovery contract: `runner_companion.py` owns the
   `pps-runner-companion-discovery.v1` payload builder/validator and UDP
   advertiser. Discovery remains token-free and local-only: same-LAN or local

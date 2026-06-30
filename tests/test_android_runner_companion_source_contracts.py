@@ -373,6 +373,11 @@ def test_android_emulator_stress_reports_native_lsl_source_capability() -> None:
     assert viewport_report["passed"] is True
     assert viewport_report["policy"] == "fixed_avd_viewport_no_resize_no_reposition"
     assert viewport_report["forbidden_commands_found"] == []
+    assert "results: list[dict[str, Any]] = [" in source
+    assert "android_emulator_viewport_policy_assessment()," in source
+    assert "android_lsl_capability_assessment()," in source
+    assert '"name": "android_emulator_ui_stress_exception"' in source
+    assert '"fatal_error": fatal_error' in source
     assert report["live_validation_state"] in {
         "source_supported_default_build_local_mirror_only",
         "source_supported_aar_present_requires_live_network_validation",
