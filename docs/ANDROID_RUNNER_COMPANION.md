@@ -390,10 +390,10 @@ stored `payload` object differs from the serialized command-sample payload, and
 it requires nonblank note text for `operator_note`.
 
 The PC runner's Send To Phone window mirrors that administration path. After a
-phone package is prepared it can send Start, Pause, Resume, Snapshot, Stop After
-Block, and Note over `pps-android-lsl-command`; the Note command requires text
-in the operator-note field and writes the same `operator_note` payload evidence
-as the Android Controller mode.
+phone package is prepared it can send Start, Pause, Resume, Continue, Snapshot,
+Stop After Block, and Note over `pps-android-lsl-command`; the Note command
+requires text in the operator-note field and writes the same `operator_note`
+payload evidence as the Android Controller mode.
 
 Android vibration calibration is device-limited. The phone-run metadata panel
 now includes a `Haptic Calibration` control. On phones with amplitude control it

@@ -28,7 +28,9 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   prepared, using the prepared package part-session id as the default command
   target. The strip and CLI both support `operator_note`; note text is stored
   in the token-gated command payload and then validated against the persisted
-  command sample.
+  command sample. The strip exposes the same core runner commands as Android
+  Controller mode: Start, Pause, Resume, Continue, Snapshot, Stop After Block,
+  and Note.
 - The PC-side helper `pps-android-lsl-monitor` resolves Android
   `PPSMarkersV2`, `PPSTriggerCodes`, `PPSCommandAcksV1`, and
   `PPSCommandSignalsV1` streams for a bounded monitoring window and writes

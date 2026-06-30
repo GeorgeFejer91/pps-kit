@@ -4011,7 +4011,15 @@ def test_phone_transfer_window_initial_layout_renders(tmp_path: Path, monkeypatc
             assert lsl_note is not None
             assert lsl_send is not None
             commands = [lsl_command.itemData(index) for index in range(lsl_command.count())]
-            assert "operator_note" in commands
+            assert commands == [
+                "start_experiment",
+                "pause",
+                "resume",
+                "continue_instruction",
+                "request_snapshot",
+                "stop_after_block",
+                "operator_note",
+            ]
             assert lsl_note.isEnabled() is False
             assert lsl_send.isEnabled() is False
             assert dialog.findChild(q["QLabel"], "companionQrCode") is not None

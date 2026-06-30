@@ -465,9 +465,10 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `PPSCommandAcksV1` rows for PC-runner-to-phone rehearsals. The native
   runner's `Send To Phone` window now exposes a Phone LSL Control strip after
   package preparation; it targets the prepared package part-session id by
-  default, sends Start/Pause/Resume/Snapshot/Stop-after-block/Note through the
-  same helper on a worker thread, requires note text for `operator_note`, and
-  saves the PC-admin outbox/status under runner logs for that phone transfer.
+  default, sends Start/Pause/Resume/Continue/Snapshot/Stop-after-block/Note
+  through the same helper on a worker thread, requires note text for
+  `operator_note`, and saves the PC-admin outbox/status under runner logs for
+  that phone transfer.
 - PC-side Android LSL monitor validation now checks observed
   `PPSCommandSignalsV1` payloads rather than only command ids/names. Monitor
   event rows must preserve row `payload_json` consistent with the serialized

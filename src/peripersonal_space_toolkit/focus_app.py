@@ -14877,6 +14877,7 @@ def _run_phone_transfer_window(
         ("Start", "start_experiment"),
         ("Pause", "pause"),
         ("Resume", "resume"),
+        ("Continue", "continue_instruction"),
         ("Snapshot", "request_snapshot"),
         ("Stop After Block", "stop_after_block"),
         ("Note", "operator_note"),
