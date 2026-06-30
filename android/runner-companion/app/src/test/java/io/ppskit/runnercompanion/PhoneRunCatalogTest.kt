@@ -219,6 +219,22 @@ class PhoneRunCatalogTest {
         assertTrue(masterCsv.isFile)
         assertTrue(dataMaxRunDir.resolve("completion.json").isFile)
         assertTrue(dataMaxRunDir.resolve("phone_owned_data_export.json").isFile)
+        val portablePaths = export.getJSONObject("portable_paths")
+        assertEquals(".", portablePaths.getString("archive_run_root"))
+        assertEquals("phone_owned_exports", portablePaths.getString("phone_owned_exports_root"))
+        assertEquals("phone_owned_exports/1.Data_min/P001.csv", portablePaths.getString("data_min_participant_csv"))
+        assertEquals(
+            "phone_owned_exports/1.Data_min/master_successful_participants.csv",
+            portablePaths.getString("data_min_master_successful_participants_csv"),
+        )
+        assertEquals(
+            "phone_owned_exports/2.Data_max/P001/runs/phone-run-001",
+            portablePaths.getString("data_max_run_dir"),
+        )
+        assertEquals(
+            "phone_owned_exports/2.Data_max/P001/runs/phone-run-001/phone_owned_data_export.json",
+            portablePaths.getString("data_max_phone_owned_data_export"),
+        )
         val rows = participantCsv.readLines(Charsets.UTF_8)
         assertEquals(PHONE_DATA_MIN_FIELDNAMES.joinToString(","), rows.first())
         assertEquals(4, rows.size)

@@ -4394,6 +4394,11 @@ def _validate_phone_owned_data_export(
         failures.append("phone-owned data export must keep demographics out of stream names")
     if privacy.get("participant_names_exported") is not False:
         failures.append("phone-owned data export must not export participant names")
+    _validate_phone_owned_export_portable_paths(
+        export,
+        failures=failures,
+        expect_phone_owned_data_export=expect_phone_owned_data_export,
+    )
     fieldnames = export.get("data_min_fieldnames") if isinstance(export.get("data_min_fieldnames"), list) else []
     if fieldnames and [str(item) for item in fieldnames] != PHONE_DATA_MIN_FIELDNAMES:
         failures.append("phone-owned data export data_min_fieldnames differ from the 17-column PC runner schema")
@@ -4459,6 +4464,65 @@ def _validate_phone_owned_data_export(
         )
         failures.extend(f"Data_max mirror {message}" for message in data_max_failures)
         warnings.extend(f"Data_max mirror {message}" for message in data_max_warnings)
+
+
+def _validate_phone_owned_export_portable_paths(
+    export: dict[str, Any],
+    *,
+    failures: list[str],
+    expect_phone_owned_data_export: bool,
+) -> None:
+    paths = export.get("portable_paths")
+    if not isinstance(paths, dict):
+        if expect_phone_owned_data_export:
+            failures.append("phone-owned data export portable_paths is required for archive reconstruction")
+        return
+    participant_id = _metadata_value(export.get("participant_id"))
+    run_id = _metadata_value(export.get("run_id"))
+    expected_paths = {
+        "archive_run_root": ".",
+        "phone_owned_data_export": "phone_owned_data_export.json",
+        "phone_owned_exports_root": "phone_owned_exports",
+        "data_min_master_successful_participants_csv": "phone_owned_exports/1.Data_min/master_successful_participants.csv",
+    }
+    if participant_id:
+        expected_paths["data_min_participant_csv"] = f"phone_owned_exports/1.Data_min/{participant_id}.csv"
+    if participant_id and run_id:
+        data_max_run_dir = f"phone_owned_exports/2.Data_max/{participant_id}/runs/{run_id}"
+        expected_paths.update(
+            {
+                "data_max_run_dir": data_max_run_dir,
+                "data_max_completion_json": f"{data_max_run_dir}/completion.json",
+                "data_max_phone_owned_data_export": f"{data_max_run_dir}/phone_owned_data_export.json",
+                "data_max_artifact_file_inventory": f"{data_max_run_dir}/artifact_file_inventory.json",
+                "data_max_artifact_file_inventory_csv": f"{data_max_run_dir}/artifact_file_inventory.csv",
+            }
+        )
+    for field, expected in expected_paths.items():
+        observed = _metadata_value(paths.get(field))
+        if not observed:
+            if expect_phone_owned_data_export:
+                failures.append(f"phone-owned data export portable_paths is missing {field}")
+            continue
+        _validate_portable_archive_path(observed, label=f"phone-owned data export portable_paths {field}", failures=failures)
+        if observed != expected:
+            failures.append(f"phone-owned data export portable_paths {field} expected {expected}, got {observed}")
+    for field, raw_value in paths.items():
+        value = _metadata_value(raw_value)
+        if value:
+            _validate_portable_archive_path(value, label=f"phone-owned data export portable_paths {field}", failures=failures)
+
+
+def _validate_portable_archive_path(value: str, *, label: str, failures: list[str]) -> None:
+    if value == ".":
+        return
+    if "\\" in value:
+        failures.append(f"{label} must use forward slashes")
+    if value.startswith("/") or value.startswith("./") or ":" in value:
+        failures.append(f"{label} must be a portable relative archive path")
+    parts = [part for part in value.replace("\\", "/").split("/") if part]
+    if not parts or any(part == ".." for part in parts):
+        failures.append(f"{label} must not contain parent-directory traversal")
 
 
 def _validate_phone_run_artifact_file_inventory(

@@ -39,6 +39,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   evidence carries the same raw command sample into the newly launched run
   artifact. This is a stronger offline artifact proof; live LSL/XDF and
   physical timing validation remain separate gates.
+- Android phone-owned `phone_owned_data_export.json` now carries a
+  `portable_paths` map with archive-relative locations for
+  `phone_owned_exports/1.Data_min`, the participant/master public CSVs, and the
+  `2.Data_max/<participant>/runs/<run_id>` mirror plus its completion/export
+  and inventory files. Strict phone-owned export validation requires this map
+  and rejects absolute paths, backslash paths, parent traversal, or participant
+  / run-id drift. The existing app-private absolute paths remain for local UI
+  convenience, but archive reconstruction no longer depends on them.
 
 - The local HTML dashboard launcher now treats `/api/health` as the fast
   already-running probe before falling back to `/api/state`. This prevents a

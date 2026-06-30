@@ -585,6 +585,58 @@ def test_android_lsl_runtime_validator_accepts_phone_owned_data_export(tmp_path:
     assert result.failures == []
 
 
+def test_android_lsl_runtime_validator_requires_phone_owned_export_portable_paths(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    _write_phone_owned_data_export(run_dir)
+    export_path = run_dir / "phone_owned_data_export.json"
+    export = json.loads(export_path.read_text(encoding="utf-8"))
+    export.pop("portable_paths")
+    export_path.write_text(json.dumps(export), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_phone_owned_data_export=True)
+
+    assert result.ok is False
+    assert "phone-owned data export portable_paths is required for archive reconstruction" in "\n".join(
+        result.failures
+    )
+
+
+def test_android_lsl_runtime_validator_rejects_phone_owned_export_portable_path_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    _write_phone_owned_data_export(run_dir)
+    export_path = run_dir / "phone_owned_data_export.json"
+    export = json.loads(export_path.read_text(encoding="utf-8"))
+    export["portable_paths"]["data_max_run_dir"] = "phone_owned_exports/2.Data_max/P999/runs/other-run"
+    export_path.write_text(json.dumps(export), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_phone_owned_data_export=True)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "phone-owned data export portable_paths data_max_run_dir expected" in failures
+
+
+def test_android_lsl_runtime_validator_rejects_absolute_phone_owned_export_portable_path(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    _write_phone_owned_data_export(run_dir)
+    export_path = run_dir / "phone_owned_data_export.json"
+    export = json.loads(export_path.read_text(encoding="utf-8"))
+    export["portable_paths"]["data_min_participant_csv"] = "C:/private/P001.csv"
+    export_path.write_text(json.dumps(export), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_phone_owned_data_export=True)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "phone-owned data export portable_paths data_min_participant_csv must be a portable relative archive path" in failures
+
+
 def test_android_lsl_runtime_validator_requires_phone_owned_data_export_when_expected(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -3022,6 +3074,18 @@ def _write_phone_owned_data_export(run_dir: Path) -> None:
         "data_min_row_count": len(rows),
         "data_max_run_dir": str(data_max),
         "data_max_source_run_dir": str(run_dir),
+        "portable_paths": {
+            "archive_run_root": ".",
+            "phone_owned_data_export": "phone_owned_data_export.json",
+            "phone_owned_exports_root": "phone_owned_exports",
+            "data_min_participant_csv": "phone_owned_exports/1.Data_min/P001.csv",
+            "data_min_master_successful_participants_csv": "phone_owned_exports/1.Data_min/master_successful_participants.csv",
+            "data_max_run_dir": f"phone_owned_exports/2.Data_max/P001/runs/{run_dir.name}",
+            "data_max_completion_json": f"phone_owned_exports/2.Data_max/P001/runs/{run_dir.name}/completion.json",
+            "data_max_phone_owned_data_export": f"phone_owned_exports/2.Data_max/P001/runs/{run_dir.name}/phone_owned_data_export.json",
+            "data_max_artifact_file_inventory": f"phone_owned_exports/2.Data_max/P001/runs/{run_dir.name}/artifact_file_inventory.json",
+            "data_max_artifact_file_inventory_csv": f"phone_owned_exports/2.Data_max/P001/runs/{run_dir.name}/artifact_file_inventory.csv",
+        },
         "privacy": {
             "scope": "app_private_phone_owned_export",
             "demographics_in_stream_name": False,

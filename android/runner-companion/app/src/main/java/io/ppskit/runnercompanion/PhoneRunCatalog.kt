@@ -8,6 +8,7 @@ internal const val PHONE_RUN_CATALOG_ENTRY_SCHEMA = "pps-android-phone-run-catal
 internal const val PHONE_RUN_CATALOG_SCHEMA = "pps-android-phone-run-catalog.v1"
 internal const val PHONE_RUN_CATALOG_WRITE_SCHEMA = "pps-android-phone-run-catalog-write.v1"
 internal const val PHONE_OWNED_DATA_EXPORT_SCHEMA = "pps-android-phone-owned-data-export.v1"
+private const val PHONE_OWNED_EXPORTS_ARCHIVE_ROOT = "phone_owned_exports"
 internal val PHONE_DATA_MIN_FIELDNAMES = listOf(
     "participant_id",
     "session_id",
@@ -140,6 +141,8 @@ internal fun writePhoneOwnedDataExport(
     val participantCsv = File(dataMinDir, "$participantId.csv")
     writePhoneDataMinCsv(participantCsv, rows)
     val masterCsv = refreshPhoneDataMinMaster(dataMinDir)
+    val dataMaxRunArchivePath = "$PHONE_OWNED_EXPORTS_ARCHIVE_ROOT/2.Data_max/$participantId/runs/$runId"
+    val exportFile = File(runDir, "phone_owned_data_export.json")
 
     val export = JSONObject()
         .put("schema", PHONE_OWNED_DATA_EXPORT_SCHEMA)
@@ -157,17 +160,31 @@ internal fun writePhoneOwnedDataExport(
         .put("data_min_row_count", rows.size)
         .put("data_max_run_dir", dataMaxRunDir.absolutePath)
         .put("data_max_source_run_dir", runDir.absolutePath)
+        .put("artifact_path", exportFile.absolutePath)
+        .put(
+            "portable_paths",
+            JSONObject()
+                .put("archive_run_root", ".")
+                .put("phone_owned_data_export", exportFile.name)
+                .put("phone_owned_exports_root", PHONE_OWNED_EXPORTS_ARCHIVE_ROOT)
+                .put("data_min_participant_csv", "$PHONE_OWNED_EXPORTS_ARCHIVE_ROOT/1.Data_min/${participantCsv.name}")
+                .put("data_min_master_successful_participants_csv", "$PHONE_OWNED_EXPORTS_ARCHIVE_ROOT/1.Data_min/${masterCsv.name}")
+                .put("data_max_run_dir", dataMaxRunArchivePath)
+                .put("data_max_completion_json", "$dataMaxRunArchivePath/completion.json")
+                .put("data_max_phone_owned_data_export", "$dataMaxRunArchivePath/${exportFile.name}")
+                .put("data_max_artifact_file_inventory", "$dataMaxRunArchivePath/artifact_file_inventory.json")
+                .put("data_max_artifact_file_inventory_csv", "$dataMaxRunArchivePath/artifact_file_inventory.csv"),
+        )
         .put("privacy", JSONObject()
             .put("scope", "app_private_phone_owned_export")
             .put("demographics_in_stream_name", false)
             .put("participant_names_exported", false))
 
-    val exportFile = File(runDir, "phone_owned_data_export.json")
     exportFile.writeText(export.toString(2), Charsets.UTF_8)
     dataMaxRunDir.deleteRecursively()
     dataMaxRunDir.parentFile?.mkdirs()
     runDir.copyRecursively(dataMaxRunDir, overwrite = true)
-    return export.put("artifact_path", exportFile.absolutePath)
+    return export
 }
 
 internal fun buildPhoneDataMinRows(

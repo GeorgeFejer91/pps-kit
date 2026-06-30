@@ -269,6 +269,7 @@ def test_android_companion_discovery_preserves_local_hotspot_privacy_contract() 
 
 def test_android_phone_run_zip_exports_catalog_snapshot() -> None:
     main_activity = _source("MainActivity.kt")
+    catalog = _source("PhoneRunCatalog.kt")
 
     assert "addPhoneRunCatalogSnapshot(output, context.filesDir)" in main_activity
     assert "addPhoneOwnedExportsSnapshot(output, context.filesDir)" in main_activity
@@ -276,6 +277,10 @@ def test_android_phone_run_zip_exports_catalog_snapshot() -> None:
     assert 'addZipEntries(output, catalogRoot, "phone_run_catalog")' in main_activity
     assert 'File(filesDir, "phone_owned_exports")' in main_activity
     assert 'addZipEntries(output, exportRoot, "phone_owned_exports")' in main_activity
+    assert '"portable_paths"' in catalog
+    assert '.put("phone_owned_exports_root", PHONE_OWNED_EXPORTS_ARCHIVE_ROOT)' in catalog
+    assert '.put("data_min_participant_csv", "$PHONE_OWNED_EXPORTS_ARCHIVE_ROOT/1.Data_min/${participantCsv.name}")' in catalog
+    assert '.put("data_max_run_dir", dataMaxRunArchivePath)' in catalog
 
 
 def test_android_phone_run_writes_plain_event_diary() -> None:
