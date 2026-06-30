@@ -149,7 +149,11 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   `artifact_file_inventory.json`, `artifact_file_inventory.csv`, and a PC-side
   `phone_owned_exports/1.Data_min` plus `2.Data_max` mirror. The inventory is
   generated after `completion.json` and before the `2.Data_max` copy so the PC
-  mirror can be rehashed like an exported phone run folder.
+  mirror can be rehashed like an exported phone run folder. The PC writer also
+  enriches sparse uploaded `lsl_runtime_status` objects with the package's
+  generic stream names, command/ack schema, privacy contract, and
+  `stream_descriptions`, without claiming native transport is available when
+  the phone did not report it.
 
 This layer is useful because it keeps the PC runner, Android runner mode, and
 Android controller mode on the same command/ack schema. Default builds are not

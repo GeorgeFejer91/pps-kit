@@ -17,6 +17,7 @@ from peripersonal_space_toolkit.mobile_phone_runtime import (
 )
 from peripersonal_space_toolkit.output_layout import output_runner_logs_dir
 from peripersonal_space_toolkit.session_runner import RunBlock, RunPackage
+from validation_protocols.scripts.validate_android_lsl_runtime_artifact import validate_run_artifact
 
 
 def _package(tmp_path: Path) -> RunPackage:
@@ -127,6 +128,45 @@ def _package(tmp_path: Path) -> RunPackage:
             )
         ],
     )
+
+
+def _session_metadata_package_payload(manifest: dict[str, object]) -> dict[str, object]:
+    reconstruction = manifest["reconstruction"]
+    assert isinstance(reconstruction, dict)
+    return {
+        "package_id": manifest["package_id"],
+        "asset_strategy": manifest["asset_strategy"],
+        "schedule_hash": reconstruction["schedule_hash"],
+        "participant_roster_count": len(manifest["participant_roster"]),
+        "randomization_seed": manifest["randomization_seed"],
+        "source_segment_hashes": manifest["source_segment_hashes"],
+        "study_hierarchy": reconstruction["study_hierarchy"],
+    }
+
+
+def _phone_marker_from_event(package: RunPackage, event: dict[str, object]) -> dict[str, object]:
+    event_type = str(event["type"])
+    event_code = {"session_metadata": 8, "run_complete": 2}.get(event_type, 500)
+    return {
+        "marker_version": "2.0",
+        "event_id": event["event_id"],
+        "event_type": event_type,
+        "event_code": event_code,
+        "trigger_key": event_type,
+        "marker_name": f"P001_{event_type}",
+        "session_id": package.session_id,
+        "participant_id": package.participant_id,
+        "session_group_id": "",
+        "part_session_id": "",
+        "part_number": "",
+        "block_index": "",
+        "trial_uid": "",
+        "sample_index": "",
+        "timestamp_quality": "android_elapsed_realtime",
+        "phone_unix_ms": event["phone_unix_ms"],
+        "phone_elapsed_realtime_ms": event["phone_elapsed_realtime_ms"],
+        "payload_json": json.dumps(event, sort_keys=True),
+    }
 
 
 def test_mobile_package_manifest_exports_assets_trials_and_phone_tactile_cues(tmp_path):
@@ -403,6 +443,67 @@ def test_mobile_runtime_upload_writes_runner_log_artifacts(tmp_path):
     assert completion_row["sha256"] == hashlib.sha256(artifact.read_bytes()).hexdigest()
     inventory_csv_rows = list(csv.DictReader((artifact.parent / "artifact_file_inventory.csv").open(encoding="utf-8")))
     assert {row["relative_path"] for row in inventory_csv_rows} == inventory_paths
+
+
+def test_mobile_runtime_upload_enriches_sparse_lsl_status_for_artifact_validation(tmp_path):
+    package = _package(tmp_path)
+    output_root = tmp_path / "output"
+    manifest = build_mobile_package_manifest(package)
+    session_metadata_event = {
+        "type": "session_metadata",
+        "event_id": 1,
+        "package_id": mobile_package_id(package),
+        "run_id": "validated-run",
+        "phone_unix_ms": 1_780_000_000_000,
+        "phone_elapsed_realtime_ms": 1000,
+        "package": _session_metadata_package_payload(manifest),
+    }
+    run_complete_event = {
+        "type": "run_complete",
+        "event_id": 2,
+        "package_id": mobile_package_id(package),
+        "run_id": "validated-run",
+        "phone_unix_ms": 1_780_000_001_000,
+        "phone_elapsed_realtime_ms": 2000,
+        "completion_reason": "completed",
+    }
+    events = [session_metadata_event, run_complete_event]
+    payload = {
+        "package_id": mobile_package_id(package),
+        "events": events,
+        "lsl_marker_mirror": [_phone_marker_from_event(package, event) for event in events],
+        "lsl_runtime_status": {
+            "schema": "pps-android-lsl-runtime-status.v1",
+            "native_transport_available": False,
+            "current_android_source_behavior": "local_lsl_marker_mirror",
+        },
+    }
+
+    result = write_mobile_runtime_events(
+        package,
+        output_root=output_root,
+        run_id="validated-run",
+        payload=payload,
+        complete=True,
+    )
+
+    run_dir = Path(result["artifact_dir"])
+    status = json.loads((run_dir / "lsl_runtime_status.json").read_text(encoding="utf-8"))
+    assert status["streams"] == {
+        "rich_markers": "PPSMarkersV2",
+        "numeric_triggers": "PPSTriggerCodes",
+        "command_signals": "PPSCommandSignalsV1",
+        "command_acks": "PPSCommandAcksV1",
+    }
+    assert status["command_protocol"]["command_schema"] == "pps-lsl-command.v1"
+    assert status["command_protocol"]["token_required"] is True
+    assert status["privacy"]["demographics_in_stream_name"] is False
+    assert status["stream_descriptions"]["rich_markers"]["source_id"] == "pps-android-markers-v2-validated-run"
+
+    validation = validate_run_artifact(run_dir, expect_artifact_inventory=True, expect_event_diary=True)
+
+    assert validation.ok is True
+    assert validation.failures == []
 
 
 def test_mobile_runtime_completion_upload_mirrors_phone_owned_response_export(tmp_path):

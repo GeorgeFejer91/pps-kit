@@ -49,7 +49,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `phone_owned_exports/1.Data_min/` and `2.Data_max/` mirror under
   `runner_logs/mobile_phone_runtime/<participant>/<package_id>/` so uploaded
   phone-run completions can be reconstructed and rehashed even when the phone is
-  the timing owner.
+  the timing owner. When an older/sparse upload omits detailed
+  `lsl_runtime_status` fields, the PC mirror backfills generic stream names,
+  command/ack schemas, channel labels, privacy fields, and stream descriptions
+  from the v2 package manifest while preserving the phone's native-transport
+  availability/status; empty participant/haptic metadata objects are no longer
+  advertised as valid sidecars.
 - Android phone-run artifact validation now treats response and top-up
   reconstruction as strict evidence when requested. The Android validator loads
   `phone_response_ledger.csv`, `phone_topup_plan.json`,

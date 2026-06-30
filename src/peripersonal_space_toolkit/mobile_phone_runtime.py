@@ -13,7 +13,16 @@ from pathlib import Path
 from collections.abc import Sequence
 from typing import Any
 
+from .lsl_command_ack import (
+    ACK_SCHEMA,
+    COMMAND_SCHEMA,
+    LSL_ACK_CHANNELS,
+    LSL_ACK_STREAM_NAME,
+    LSL_COMMAND_CHANNELS,
+    LSL_COMMAND_STREAM_NAME,
+)
 from .output_layout import _filesystem_path, output_runner_logs_dir
+from .timing_events import LSL_MARKER_CHANNELS, LSL_NUMERIC_STREAM_NAME, LSL_STREAM_NAME, MARKER_VERSION
 
 
 MOBILE_PACKAGE_LIST_SCHEMA = "pps-mobile-run-package-list.v2"
@@ -104,7 +113,7 @@ MOBILE_REQUIRED_LSL_STREAM_NAMES = {
     "command_signals": "PPSCommandSignalsV1",
     "command_acks": "PPSCommandAcksV1",
 }
-MOBILE_REQUIRED_PHONE_COMMANDS = {
+MOBILE_REQUIRED_PHONE_COMMAND_ORDER = [
     "start_experiment",
     "start_part",
     "pause",
@@ -113,6 +122,9 @@ MOBILE_REQUIRED_PHONE_COMMANDS = {
     "stop_after_block",
     "request_snapshot",
     "operator_note",
+]
+MOBILE_REQUIRED_PHONE_COMMANDS = {
+    *MOBILE_REQUIRED_PHONE_COMMAND_ORDER,
 }
 
 
@@ -360,16 +372,7 @@ def build_mobile_package_manifest(
         },
         "session_metadata_policy": "Emit one session_metadata marker before run_start and mirror every marker to local CSV/JSON.",
         "command_policy": "Commands must carry the pairing token and receive an applied/rejected acknowledgement after local state transition.",
-        "supported_commands": [
-            "start_experiment",
-            "start_part",
-            "pause",
-            "resume",
-            "continue_instruction",
-            "stop_after_block",
-            "request_snapshot",
-            "operator_note",
-        ],
+        "supported_commands": list(MOBILE_REQUIRED_PHONE_COMMAND_ORDER),
         "native_android_lsl_required": True,
         "current_android_source_behavior": "local_lsl_marker_mirror",
     }
@@ -651,6 +654,8 @@ def write_mobile_runtime_events(
         [dict(item) for item in list(payload.get("trigger_codes") or marker_rows) if isinstance(item, dict)]
     )
     command_rows = [dict(item) for item in list(payload.get("command_diary") or []) if isinstance(item, dict)]
+    participant_metadata = _json_dict(payload.get("participant_metadata"))
+    haptic_metadata = _json_dict(payload.get("haptic")) or _json_dict(payload.get("haptic_capability"))
     response_summary = _json_dict(payload.get("phone_response_summary"))
     response_ledger_rows = _json_dict_rows(payload.get("phone_response_ledger"))
     topup_plan = _json_dict(payload.get("phone_topup_plan"))
@@ -668,6 +673,12 @@ def write_mobile_runtime_events(
     reconstruction_artifact_path = out_dir / "reconstruction_contract.json"
     with open(_filesystem_path(reconstruction_artifact_path), "w", encoding="utf-8") as handle:
         handle.write(json.dumps(reconstruction_artifact, indent=2, sort_keys=True, default=str) + "\n")
+    lsl_runtime_status = _mobile_runtime_upload_lsl_runtime_status(
+        package,
+        payload=payload,
+        manifest=run_package_manifest,
+        run_id=clean_run_id,
+    )
     event_path = out_dir / "events.jsonl"
     if events:
         with open(_filesystem_path(event_path), "a", encoding="utf-8") as handle:
@@ -683,6 +694,7 @@ def write_mobile_runtime_events(
         "schema": MOBILE_RUNTIME_ARTIFACT_SCHEMA,
         "accepted_at": accepted_at,
         "complete": bool(complete),
+        "completed": bool(complete),
         "package_id": package_id,
         "run_id": clean_run_id,
         "participant_id": str(getattr(package, "participant_id", "") or ""),
@@ -698,8 +710,7 @@ def write_mobile_runtime_events(
             "filename": reconstruction_artifact_path.name,
             "schema": MOBILE_PHONE_RUN_RECONSTRUCTION_ARTIFACT_SCHEMA,
         },
-        "participant_metadata": dict(payload.get("participant_metadata") or {}),
-        "lsl_runtime_status": dict(payload.get("lsl_runtime_status") or {}),
+        "lsl_runtime_status": lsl_runtime_status,
         "lsl_marker_mirror": marker_rows,
         "trigger_codes": trigger_code_rows,
         "command_diary": command_rows,
@@ -714,6 +725,10 @@ def write_mobile_runtime_events(
             "command_diary_jsonl": str(out_dir / "command_diary.jsonl"),
         },
     }
+    if participant_metadata:
+        artifact["participant_metadata"] = participant_metadata
+    if haptic_metadata:
+        artifact["haptic"] = haptic_metadata
     if artifact["lsl_runtime_status"]:
         lsl_status_path = out_dir / "lsl_runtime_status.json"
         with open(_filesystem_path(lsl_status_path), "w", encoding="utf-8") as handle:
@@ -1444,6 +1459,261 @@ def _mobile_runtime_upload_reconstruction_artifact(
             if isinstance(block, dict)
         ],
     }
+
+
+def _mobile_runtime_upload_lsl_runtime_status(
+    package: Any,
+    *,
+    payload: dict[str, Any],
+    manifest: dict[str, Any],
+    run_id: str,
+) -> dict[str, Any]:
+    uploaded = _json_dict(payload.get("lsl_runtime_status"))
+    lsl = manifest.get("lsl") if isinstance(manifest.get("lsl"), dict) else {}
+    reconstruction = manifest.get("reconstruction") if isinstance(manifest.get("reconstruction"), dict) else {}
+    streams = _mobile_runtime_lsl_streams(lsl)
+    native_available = bool(uploaded.get("native_transport_available", False))
+    marker_enabled = bool(uploaded.get("native_marker_transport_enabled", False))
+    receiver_available = bool(uploaded.get("command_receiver_available", False))
+    reason = "" if marker_enabled and receiver_available else "native_lsl_transport_not_fully_enabled"
+    participant_metadata = _json_dict(payload.get("participant_metadata"))
+    haptic_capability = _json_dict(payload.get("haptic")) or _json_dict(payload.get("haptic_capability"))
+    defaults = {
+        "schema": "pps-android-lsl-runtime-status.v1",
+        "package_id": str(manifest.get("package_id") or mobile_package_id(package)),
+        "run_id": str(run_id or ""),
+        "participant_id": str(manifest.get("participant_id") or getattr(package, "participant_id", "") or ""),
+        "session_id": str(manifest.get("session_id") or getattr(package, "session_id", "") or ""),
+        "session_group_id": str(manifest.get("session_group_id") or getattr(package, "session_group_id", "") or ""),
+        "part_session_id": str(manifest.get("part_session_id") or getattr(package, "part_session_id", "") or ""),
+        "part_number": manifest.get("part_number", getattr(package, "part_number", "")),
+        "asset_strategy": str(manifest.get("asset_strategy") or reconstruction.get("package_asset_strategy") or ""),
+        "runtime_authority": str(lsl.get("runtime_authority") or "android_phone"),
+        "native_android_lsl_required": bool(lsl.get("native_android_lsl_required", True)),
+        "native_transport": "liblsl",
+        "native_transport_available": native_available,
+        "native_marker_transport_enabled": marker_enabled,
+        "native_marker_timestamp_strategy": "android_elapsed_realtime_plus_open_lsl_clock_offset",
+        "command_receiver_available": receiver_available,
+        "current_android_source_behavior": str(lsl.get("current_android_source_behavior") or "local_lsl_marker_mirror"),
+        "reason": reason,
+        "native_bridge": {
+            "required_local_aar": "android/runner-companion/app/libs/liblsl-Android.aar",
+            "stream_names": dict(streams),
+            "marker_channels": list(LSL_MARKER_CHANNELS),
+            "command_channels": list(LSL_COMMAND_CHANNELS),
+            "ack_channels": list(LSL_ACK_CHANNELS),
+        },
+        "streams": streams,
+        "command_protocol": {
+            "command_schema": COMMAND_SCHEMA,
+            "ack_schema": ACK_SCHEMA,
+            "command_channels": list(LSL_COMMAND_CHANNELS),
+            "ack_channels": list(LSL_ACK_CHANNELS),
+            "supported_commands": [
+                str(item)
+                for item in _json_list(lsl.get("supported_commands"))
+                if str(item).strip()
+            ] or list(MOBILE_REQUIRED_PHONE_COMMAND_ORDER),
+            "token_required": True,
+            "token_payload_fields": ["token", "companion_token"],
+        },
+        "privacy": {
+            "default": str(lsl.get("privacy_default") or "metadata_payload_only"),
+            "participant_demographics_location": "metadata_and_payload_artifacts",
+            "demographics_in_stream_name": False,
+        },
+        "stream_descriptions": _mobile_runtime_lsl_stream_descriptions(
+            manifest=manifest,
+            streams=streams,
+            run_id=run_id,
+            participant_metadata=participant_metadata,
+            haptic_capability=haptic_capability,
+        ),
+    }
+    participant_summary = _mobile_runtime_participant_metadata_summary(participant_metadata)
+    if participant_summary:
+        defaults["participant_metadata_summary"] = participant_summary
+    haptic_summary = _mobile_runtime_haptic_capability_summary(haptic_capability)
+    if haptic_summary:
+        defaults["haptic_capability_summary"] = haptic_summary
+    status = _deep_fill_missing(dict(uploaded), defaults)
+    if not str(status.get("reason") or "").strip() and not (
+        bool(status.get("native_marker_transport_enabled")) and bool(status.get("command_receiver_available"))
+    ):
+        status["reason"] = reason
+    return status
+
+
+def _mobile_runtime_lsl_streams(lsl: dict[str, Any]) -> dict[str, str]:
+    stream_names = lsl.get("stream_names") if isinstance(lsl.get("stream_names"), dict) else {}
+    return {
+        "rich_markers": str(stream_names.get("rich_markers") or LSL_STREAM_NAME),
+        "numeric_triggers": str(stream_names.get("numeric_triggers") or LSL_NUMERIC_STREAM_NAME),
+        "command_signals": str(stream_names.get("command_signals") or LSL_COMMAND_STREAM_NAME),
+        "command_acks": str(stream_names.get("command_acks") or LSL_ACK_STREAM_NAME),
+    }
+
+
+def _mobile_runtime_lsl_stream_descriptions(
+    *,
+    manifest: dict[str, Any],
+    streams: dict[str, str],
+    run_id: str,
+    participant_metadata: dict[str, Any],
+    haptic_capability: dict[str, Any],
+) -> dict[str, Any]:
+    run_token = _safe_lsl_source_token(run_id)
+    session_metadata_json = json.dumps(
+        _mobile_runtime_lsl_session_metadata(
+            manifest,
+            participant_metadata=participant_metadata,
+            haptic_capability=haptic_capability,
+        ),
+        sort_keys=True,
+        default=str,
+    )
+    common_identity = {
+        "session_id": str(manifest.get("session_id") or ""),
+        "participant_id": str(manifest.get("participant_id") or ""),
+        "session_group_id": str(manifest.get("session_group_id") or ""),
+        "part_session_id": str(manifest.get("part_session_id") or ""),
+        "part_number": manifest.get("part_number", ""),
+        "run_id": str(run_id or ""),
+        "session_metadata_json": session_metadata_json,
+    }
+    return {
+        "schema": "pps-android-lsl-stream-descriptions.v1",
+        "runtime_authority": str((manifest.get("lsl") or {}).get("runtime_authority") or "android_phone")
+        if isinstance(manifest.get("lsl"), dict)
+        else "android_phone",
+        "privacy": {
+            "default": str((manifest.get("lsl") or {}).get("privacy_default") or "metadata_payload_only")
+            if isinstance(manifest.get("lsl"), dict)
+            else "metadata_payload_only",
+            "demographics_in_stream_name": False,
+            "participant_demographics_location": "metadata_and_payload_artifacts",
+        },
+        "rich_markers": {
+            "name": streams["rich_markers"],
+            "type": "Markers",
+            "role": "outlet",
+            "channel_format": "string",
+            "channel_count": len(LSL_MARKER_CHANNELS),
+            "nominal_srate_hz": 0.0,
+            "source_id": f"pps-android-markers-v2-{run_token}",
+            "marker_version": MARKER_VERSION,
+            "channel_labels": list(LSL_MARKER_CHANNELS),
+            **common_identity,
+        },
+        "numeric_triggers": {
+            "name": streams["numeric_triggers"],
+            "type": "TriggerCodes",
+            "role": "outlet",
+            "channel_format": "int32",
+            "channel_count": 1,
+            "nominal_srate_hz": 0.0,
+            "source_id": f"pps-android-trigger-codes-{run_token}",
+            "channel_labels": ["event_code"],
+            **common_identity,
+        },
+        "command_signals": {
+            "name": streams["command_signals"],
+            "type": "CommandSignals",
+            "role": "inlet",
+            "channel_format": "string",
+            "channel_count": len(LSL_COMMAND_CHANNELS),
+            "nominal_srate_hz": 0.0,
+            "source_id_pattern": "pps-*-command-signals-v1-*",
+            "channel_labels": list(LSL_COMMAND_CHANNELS),
+            "token_required": True,
+        },
+        "command_acks": {
+            "name": streams["command_acks"],
+            "type": "CommandAcks",
+            "role": "outlet",
+            "channel_format": "string",
+            "channel_count": len(LSL_ACK_CHANNELS),
+            "nominal_srate_hz": 0.0,
+            "source_id": f"pps-android-command-acks-v1-{run_token}",
+            "channel_labels": list(LSL_ACK_CHANNELS),
+        },
+    }
+
+
+def _mobile_runtime_lsl_session_metadata(
+    manifest: dict[str, Any],
+    *,
+    participant_metadata: dict[str, Any],
+    haptic_capability: dict[str, Any],
+) -> dict[str, Any]:
+    reconstruction = manifest.get("reconstruction") if isinstance(manifest.get("reconstruction"), dict) else {}
+    lsl = manifest.get("lsl") if isinstance(manifest.get("lsl"), dict) else {}
+    payload: dict[str, Any] = {
+        "package_id": str(manifest.get("package_id") or ""),
+        "asset_strategy": str(manifest.get("asset_strategy") or reconstruction.get("package_asset_strategy") or ""),
+        "schedule_hash": str(reconstruction.get("schedule_hash") or ""),
+        "participant_roster_count": len(_json_list(manifest.get("participant_roster"))),
+        "randomization_seed": str(manifest.get("randomization_seed") or ""),
+        "source_segment_hashes": dict(manifest.get("source_segment_hashes") or {}),
+        "privacy_default": str(lsl.get("privacy_default") or "metadata_payload_only"),
+        "demographics_in_stream_name": False,
+    }
+    participant_summary = _mobile_runtime_participant_metadata_summary(participant_metadata)
+    if participant_summary:
+        payload["participant_metadata_summary"] = participant_summary
+    haptic_summary = _mobile_runtime_haptic_capability_summary(haptic_capability)
+    if haptic_summary:
+        payload["haptic_capability_summary"] = haptic_summary
+    return payload
+
+
+def _mobile_runtime_participant_metadata_summary(metadata: dict[str, Any]) -> dict[str, Any]:
+    if not metadata:
+        return {}
+    return {
+        "schema": "pps-android-lsl-participant-metadata-summary.v1",
+        "participant_id": str(metadata.get("participant_id") or ""),
+        "session_id": str(metadata.get("session_id") or ""),
+        "session_group_id": str(metadata.get("session_group_id") or ""),
+        "part_session_id": str(metadata.get("part_session_id") or ""),
+        "part_number": str(metadata.get("part_number") or ""),
+        "age_years": str(metadata.get("age_years") or ""),
+        "handedness": str(metadata.get("handedness") or ""),
+        "gender": str(metadata.get("gender") or ""),
+        "tactile_threshold_percent": metadata.get("tactile_threshold_percent"),
+        "tactile_threshold_source": str(metadata.get("tactile_threshold_source") or ""),
+        "tactile_threshold_calibration_status": str(metadata.get("tactile_threshold_calibration_status") or ""),
+        "stream_privacy": str(metadata.get("stream_privacy") or "metadata_payload_only"),
+    }
+
+
+def _mobile_runtime_haptic_capability_summary(haptic: dict[str, Any]) -> dict[str, Any]:
+    if not haptic:
+        return {}
+    return {
+        "schema": "pps-android-lsl-haptic-capability-summary.v1",
+        "has_vibrator": bool(haptic.get("has_vibrator", False)),
+        "has_amplitude_control": bool(haptic.get("has_amplitude_control", False)),
+        "calibration_policy": str(haptic.get("calibration_policy") or ""),
+        "calibration_status": str(haptic.get("calibration_status") or ""),
+        "recommended_threshold_percent": haptic.get("recommended_threshold_percent"),
+        "recommended_amplitude": haptic.get("recommended_amplitude"),
+    }
+
+
+def _deep_fill_missing(target: dict[str, Any], defaults: dict[str, Any]) -> dict[str, Any]:
+    for key, value in defaults.items():
+        if key not in target or target.get(key) in (None, ""):
+            target[key] = value
+            continue
+        if isinstance(target.get(key), dict) and isinstance(value, dict):
+            target[key] = _deep_fill_missing(dict(target[key]), value)
+    return target
+
+
+def _safe_lsl_source_token(value: Any) -> str:
+    return re.sub(r"[^A-Za-z0-9._-]+", "-", str(value or "")).strip("-._") or "phone-run"
 
 
 def _write_mobile_runtime_artifact_file_inventory(
