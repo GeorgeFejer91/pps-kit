@@ -2303,6 +2303,9 @@ private class PhoneRunSession(
                         .put("asset_count", runPackage.assets.size)
                         .put("building_block_count", runPackage.buildingBlocks.size)
                         .put("schedule_hash", runPackage.reconstruction.scheduleHash)
+                        .put("participant_roster_count", runPackage.participantRoster.size)
+                        .put("randomization_seed", runPackage.randomizationSeed)
+                        .put("source_segment_hashes", runPackage.sourceSegmentHashes.toJsonObject())
                         .put("study_hierarchy", jsonStringArray(runPackage.reconstruction.studyHierarchy)),
                 )
                 .put(

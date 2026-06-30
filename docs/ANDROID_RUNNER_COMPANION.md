@@ -293,7 +293,11 @@ per-run backup mirror. The phone preserves the package `asset_strategy` across
 the parsed model, LSL runtime status, native LSL stream description metadata,
 reconstruction snapshot, and phone run catalog so a lightweight
 `trial_building_blocks_only` run can be distinguished from a prepared-block WAV
-compatibility run during later reconstruction. It also carries the Segment 0-6
+compatibility run during later reconstruction. The first `session_metadata`
+marker and native LSL stream-description `session_metadata_json` also carry the
+package provenance summary: schedule hash, participant roster count,
+randomization seed, and source segment hash summary. It also carries the
+Segment 0-6
 hierarchy into the session metadata marker payload and
 `reconstruction_contract.json`, letting strict validation reject hierarchy drift
 inside phone-owned artifacts. Participant age, handedness,

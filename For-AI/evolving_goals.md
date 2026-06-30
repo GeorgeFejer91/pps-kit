@@ -168,7 +168,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `validate_mobile_package_manifest()` rejects participant-roster drift and
   source block/run-setup hash drift when this evidence is present. Android
   parses these fields in `MobileRuntimeModels.kt` and writes summary copies in
-  phone-owned reconstruction/catalog artifacts.
+  phone-owned reconstruction/catalog artifacts. The first `session_metadata`
+  event and native LSL stream-description `session_metadata_json` now also carry
+  the provenance summary so a single marker stream can expose the package's
+  source randomization/order evidence without depending only on private app
+  files.
 - Android phone-run artifact validation can now prove the lightweight replay
   path after the fact. `validate_android_lsl_runtime_artifact.py
   --expect-lightweight-materializations` reads run folders or exported ZIPs,

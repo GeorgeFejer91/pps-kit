@@ -56,6 +56,27 @@ def test_android_phone_runtime_preserves_reconstruction_hierarchy_in_artifacts()
     assert '.put("source_run_setup_manifest_path", runPackage.reconstruction.sourceRunSetupManifestPath)' in main_activity
 
 
+def test_android_phone_session_metadata_preserves_source_provenance() -> None:
+    models = _source("MobileRuntimeModels.kt")
+    main_activity = _source("MainActivity.kt")
+    native_bridge = _source("PhoneNativeLslBridge.kt")
+    catalog = _source("PhoneRunCatalog.kt")
+
+    assert "val participantRoster: List<String>" in models
+    assert "val randomizationSeed: String" in models
+    assert "data class MobileSourceSegmentHashes" in models
+    assert 'participantRoster = root.optJSONArray("participant_roster").toStringList()' in models
+    assert 'randomizationSeed = root.optString("randomization_seed", "")' in models
+    assert 'sourceSegmentHashes = root.optJSONObject("source_segment_hashes").toMobileSourceSegmentHashes()' in models
+
+    for source in [main_activity, native_bridge, catalog]:
+        assert '.put("participant_roster_count", runPackage.participantRoster.size)' in source
+        assert '.put("randomization_seed", runPackage.randomizationSeed)' in source
+        assert '.put("source_segment_hashes", runPackage.sourceSegmentHashes.toJsonObject())' in source
+
+    assert '.put("schedule_hash", runPackage.reconstruction.scheduleHash)' in native_bridge
+
+
 def test_android_lsl_runtime_status_exports_stream_descriptions() -> None:
     lsl_protocol = _source("PhoneLslProtocol.kt")
 

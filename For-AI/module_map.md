@@ -62,7 +62,10 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   runtime status, stream description metadata, local reconstruction snapshots,
   and `PhoneRunCatalog.kt` entries so offline reviewers can distinguish
   lightweight building-block materializations from prepared WAV replay and
-  trace them back to the source randomization/order evidence.
+  trace them back to the source randomization/order evidence. The
+  `session_metadata` event and native LSL stream-description
+  `session_metadata_json` carry the same provenance summary for marker-stream
+  reconstruction.
 - Optional native Android LSL marker/command transport lives in
   `PhoneNativeLslBridge.kt`. A local ignored
   `android/runner-companion/app/libs/liblsl-Android.aar` is included by Gradle
