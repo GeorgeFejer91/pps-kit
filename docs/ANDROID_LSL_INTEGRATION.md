@@ -55,6 +55,11 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   remaining scheduled phone blocks plus phone top-up, and closes the run with
   `completion_reason=stopped_after_block`.
 - Phone-owned run folders and ZIP exports include `lsl_runtime_status.json`.
+  That status includes `stream_descriptions` using
+  `pps-android-lsl-stream-descriptions.v1`: stream names, LSL roles, channel
+  formats/counts, PC-compatible channel labels, source IDs/source patterns,
+  nominal rates, marker version, and the privacy rule that demographics stay
+  out of discoverable stream names.
 - Phone-owned run folders and ZIP exports also include
   `phone_run_catalog_entry.json`. The app-private
   `phone_run_catalog/<participant>/runs.jsonl` and
@@ -131,6 +136,10 @@ mirror and the expected numeric `trigger_codes.csv` mirror, resolve runner-side
 `PPSCommandSignalsV1`, emit `PPSCommandAcksV1` for handled commands, and create
 controller-side `PPSCommandSignalsV1` outlets with optional `PPSCommandAcksV1`
 ack polling.
+The artifact-level `stream_descriptions` contract records those same
+outlets/inlets in `lsl_runtime_status.json`, so validation can detect
+channel-order, stream-role, or source-identity drift before a run is treated as
+reconstructable native LSL evidence.
 
 Phone marker timestamps use
 `android_elapsed_realtime_plus_open_lsl_clock_offset`: the app samples
@@ -198,6 +207,12 @@ Use strict mode only after native transport exists:
 ```powershell
 .\.venv\Scripts\python.exe validation_protocols\scripts\validate_android_lsl_runtime_artifact.py <phone-run-dir> --expect-native-transport
 ```
+
+Strict native validation requires enabled native marker and command transport
+plus `stream_descriptions` for the rich marker, numeric trigger, command
+signal, and command ack streams. The descriptions must preserve the
+PC-compatible channel orders and keep participant demographics out of
+discoverable stream names.
 
 For new phone-owned run exports, also require the catalog entry:
 

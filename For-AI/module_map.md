@@ -16,9 +16,14 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `PhoneLslProtocol.kt`. It mirrors the PC runner command/ack channel order,
   token-gates `PPSCommandSignalsV1` samples, emits applied/rejected
   `PPSCommandAcksV1` samples after local handlers return, writes
-  `lsl_runtime_status.json` for phone-owned runs, and separates bridge,
-  marker-transport, and command-transport status. `MainActivity.kt` owns the
-  Runner-mode idle command listener that acks native `start_experiment` /
+  `lsl_runtime_status.json` for phone-owned runs, includes
+  `pps-android-lsl-stream-descriptions.v1` stream descriptions for the marker,
+  trigger, command-signal, and command-ack LSL streams, and separates bridge,
+  marker-transport, and command-transport status. The phone-run artifact
+  validator now treats those stream descriptions as strict native
+  reconstruction evidence, including PC-compatible channel order, source IDs,
+  and the privacy rule that demographics stay out of stream names.
+  `MainActivity.kt` owns the Runner-mode idle command listener that acks native `start_experiment` /
   `start_part` before launching the selected synced package. Default builds without the
   local liblsl AAR still report native transport unavailable; do not present
   local marker mirrors or protocol unit tests as live Android LSL evidence.
@@ -84,7 +89,7 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
 - Android native LSL integration guidance is tracked in
   `docs/ANDROID_LSL_INTEGRATION.md`. The phone-run artifact validator lives at
   `validation_protocols/scripts/validate_android_lsl_runtime_artifact.py` and
-  checks `lsl_runtime_status.json`, embedded completion status,
+  checks `lsl_runtime_status.json`, Android LSL stream descriptions, embedded completion status,
   phone-run `phone_run_catalog_entry.json` when present or when
   `--expect-run-catalog` is set, app-private `phone_run_catalog/index.json`,
   participant `runs.jsonl`, and `latest_run.json` when

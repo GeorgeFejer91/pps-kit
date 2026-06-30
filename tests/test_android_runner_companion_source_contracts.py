@@ -44,6 +44,26 @@ def test_android_phone_runtime_preserves_mobile_package_asset_strategy() -> None
     assert '.put("package_asset_strategy", runPackage.reconstruction.packageAssetStrategy)' in catalog
 
 
+def test_android_lsl_runtime_status_exports_stream_descriptions() -> None:
+    lsl_protocol = _source("PhoneLslProtocol.kt")
+
+    assert "phoneLslStreamDescriptions" in lsl_protocol
+    assert '.put("stream_descriptions", phoneLslStreamDescriptions(runPackage, runId))' in lsl_protocol
+    assert '"pps-android-lsl-stream-descriptions.v1"' in lsl_protocol
+    assert '"PPSMarkersV2"' in lsl_protocol
+    assert '"PPSTriggerCodes"' in lsl_protocol
+    assert '"PPSCommandSignalsV1"' in lsl_protocol
+    assert '"PPSCommandAcksV1"' in lsl_protocol
+    assert '"pps-android-markers-v2-$runToken"' in lsl_protocol
+    assert '"pps-android-trigger-codes-$runToken"' in lsl_protocol
+    assert '"pps-android-command-acks-v1-$runToken"' in lsl_protocol
+    assert '"pps-*-command-signals-v1-*"' in lsl_protocol
+    assert '.put("channel_labels", stringArray(PHONE_LSL_MARKER_CHANNELS))' in lsl_protocol
+    assert '.put("channel_labels", stringArray(PHONE_LSL_COMMAND_CHANNELS))' in lsl_protocol
+    assert '.put("channel_labels", stringArray(PHONE_LSL_ACK_CHANNELS))' in lsl_protocol
+    assert '.put("demographics_in_stream_name", false)' in lsl_protocol
+
+
 def test_android_phone_runtime_uses_audiotrack_timing_not_mediaplayer() -> None:
     playback = _source("PhoneAudioPlayback.kt")
     main_activity = _source("MainActivity.kt")

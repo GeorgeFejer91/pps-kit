@@ -64,6 +64,7 @@ ANDROID_PHONE_TOPUP_MATERIALIZATION_SCHEMA = "pps-android-phone-topup-materializ
 ANDROID_PHONE_OWNED_DATA_EXPORT_SCHEMA = "pps-android-phone-owned-data-export.v1"
 ANDROID_CONTROLLER_RUNTIME_STATUS_SCHEMA = "pps-android-controller-runtime-status.v1"
 ANDROID_CONTROLLER_COMMAND_ROW_SCHEMA = "pps-android-controller-command-row.v1"
+ANDROID_LSL_STREAM_DESCRIPTIONS_SCHEMA = "pps-android-lsl-stream-descriptions.v1"
 ANDROID_AUDIO_TIMING_STRATEGY = "audiotrack_pcm_wav_playback_head"
 ANDROID_CUE_AUDIO_SCHEDULER = "audiotrack_playback_head"
 PHONE_RESPONSE_MIN_RT_MS = 100
@@ -211,6 +212,13 @@ def validate_runtime_status(
     for key, expected in EXPECTED_STREAMS.items():
         if streams.get(key) != expected:
             failures.append(f"stream {key} expected {expected!r}, got {streams.get(key)!r}")
+    _validate_android_lsl_stream_descriptions(
+        status=status,
+        streams=streams,
+        failures=failures,
+        warnings=warnings,
+        expect_native_transport=expect_native_transport,
+    )
 
     protocol = status.get("command_protocol") if isinstance(status.get("command_protocol"), dict) else {}
     _validate_command_protocol(protocol, failures)
@@ -253,6 +261,10 @@ def validate_runtime_status(
             embedded_streams = embedded.get("streams") if isinstance(embedded.get("streams"), dict) else {}
             if embedded_streams and embedded_streams != streams:
                 failures.append("completion.json embedded LSL streams differ from lsl_runtime_status.json")
+            embedded_descriptions = embedded.get("stream_descriptions") if isinstance(embedded.get("stream_descriptions"), dict) else {}
+            descriptions = status.get("stream_descriptions") if isinstance(status.get("stream_descriptions"), dict) else {}
+            if embedded_descriptions and descriptions and embedded_descriptions != descriptions:
+                failures.append("completion.json embedded LSL stream descriptions differ from lsl_runtime_status.json")
         else:
             warnings.append("completion/latest-events artifact does not embed lsl_runtime_status")
 
@@ -1203,6 +1215,101 @@ def _duplicate_ints(values: list[int]) -> list[int]:
             duplicates.append(value)
         seen.add(value)
     return duplicates
+
+
+def _validate_android_lsl_stream_descriptions(
+    *,
+    status: dict[str, Any],
+    streams: dict[str, Any],
+    failures: list[str],
+    warnings: list[str],
+    expect_native_transport: bool,
+) -> None:
+    descriptions = status.get("stream_descriptions") if isinstance(status.get("stream_descriptions"), dict) else None
+    if descriptions is None:
+        message = "Android LSL stream descriptions are missing"
+        if expect_native_transport:
+            failures.append(message)
+        elif status.get("native_transport_available") is True:
+            warnings.append(f"{message}; rerun with --expect-native-transport for strict checks")
+        return
+    if descriptions.get("schema") != ANDROID_LSL_STREAM_DESCRIPTIONS_SCHEMA:
+        failures.append("Android LSL stream descriptions schema mismatch")
+    privacy = descriptions.get("privacy") if isinstance(descriptions.get("privacy"), dict) else {}
+    if privacy.get("demographics_in_stream_name") is not False:
+        failures.append("Android LSL stream descriptions must keep demographics out of stream names")
+    expected = {
+        "rich_markers": {
+            "name": streams.get("rich_markers") or EXPECTED_STREAMS["rich_markers"],
+            "type": "Markers",
+            "role": "outlet",
+            "channel_format": "string",
+            "channel_count": len(LSL_MARKER_CHANNELS),
+            "channel_labels": list(LSL_MARKER_CHANNELS),
+            "source_id_prefix": "pps-android-markers-v2-",
+            "marker_version": MARKER_VERSION,
+        },
+        "numeric_triggers": {
+            "name": streams.get("numeric_triggers") or EXPECTED_STREAMS["numeric_triggers"],
+            "type": "TriggerCodes",
+            "role": "outlet",
+            "channel_format": "int32",
+            "channel_count": 1,
+            "channel_labels": ["event_code"],
+            "source_id_prefix": "pps-android-trigger-codes-",
+        },
+        "command_signals": {
+            "name": streams.get("command_signals") or EXPECTED_STREAMS["command_signals"],
+            "type": "CommandSignals",
+            "role": "inlet",
+            "channel_format": "string",
+            "channel_count": len(LSL_COMMAND_CHANNELS),
+            "channel_labels": list(LSL_COMMAND_CHANNELS),
+            "source_id_pattern": "pps-*-command-signals-v1-*",
+            "token_required": True,
+        },
+        "command_acks": {
+            "name": streams.get("command_acks") or EXPECTED_STREAMS["command_acks"],
+            "type": "CommandAcks",
+            "role": "outlet",
+            "channel_format": "string",
+            "channel_count": len(LSL_ACK_CHANNELS),
+            "channel_labels": list(LSL_ACK_CHANNELS),
+            "source_id_prefix": "pps-android-command-acks-v1-",
+        },
+    }
+    for key, spec in expected.items():
+        row = descriptions.get(key) if isinstance(descriptions.get(key), dict) else None
+        if row is None:
+            failures.append(f"Android LSL stream description {key} is missing")
+            continue
+        for field in ("name", "type", "role", "channel_format"):
+            if str(row.get(field) or "") != str(spec[field]):
+                failures.append(
+                    f"Android LSL stream description {key}.{field} expected {spec[field]!r}, got {row.get(field)!r}"
+                )
+        if _clean_int(row.get("channel_count")) != int(spec["channel_count"]):
+            failures.append(
+                f"Android LSL stream description {key}.channel_count expected {spec['channel_count']}, got {row.get('channel_count')!r}"
+            )
+        labels = [str(item) for item in row.get("channel_labels") or []] if isinstance(row.get("channel_labels"), list) else []
+        if labels != list(spec["channel_labels"]):
+            failures.append(f"Android LSL stream description {key}.channel_labels differ from the PC-compatible channel order")
+        nominal = _safe_float(row.get("nominal_srate_hz"), fallback=-1.0)
+        if nominal != 0.0:
+            failures.append(f"Android LSL stream description {key}.nominal_srate_hz must be 0.0 for irregular marker/command streams")
+        if "source_id_prefix" in spec:
+            source_id = str(row.get("source_id") or "")
+            if not source_id.startswith(str(spec["source_id_prefix"])):
+                failures.append(f"Android LSL stream description {key}.source_id must start with {spec['source_id_prefix']!r}")
+        if "source_id_pattern" in spec and str(row.get("source_id_pattern") or "") != str(spec["source_id_pattern"]):
+            failures.append(
+                f"Android LSL stream description {key}.source_id_pattern expected {spec['source_id_pattern']!r}"
+            )
+        if "marker_version" in spec and str(row.get("marker_version") or "") != str(spec["marker_version"]):
+            failures.append(f"Android LSL stream description {key}.marker_version expected {spec['marker_version']!r}")
+        if "token_required" in spec and row.get("token_required") is not spec["token_required"]:
+            failures.append(f"Android LSL stream description {key}.token_required must be true")
 
 
 def _validate_command_protocol(protocol: dict[str, Any], failures: list[str], *, token_field: str = "token_required") -> None:

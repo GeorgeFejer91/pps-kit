@@ -115,6 +115,31 @@ class PhoneLslProtocolTest {
         assertEquals("PPSCommandSignalsV1", status.getJSONObject("streams").getString("command_signals"))
         assertFalse(status.getJSONObject("privacy").getBoolean("demographics_in_stream_name"))
         assertTrue(status.getJSONObject("command_protocol").getBoolean("token_required"))
+
+        val descriptions = status.getJSONObject("stream_descriptions")
+        assertEquals("pps-android-lsl-stream-descriptions.v1", descriptions.getString("schema"))
+        assertFalse(descriptions.getJSONObject("privacy").getBoolean("demographics_in_stream_name"))
+
+        val richMarkers = descriptions.getJSONObject("rich_markers")
+        assertEquals("PPSMarkersV2", richMarkers.getString("name"))
+        assertEquals("Markers", richMarkers.getString("type"))
+        assertEquals("outlet", richMarkers.getString("role"))
+        assertEquals("string", richMarkers.getString("channel_format"))
+        assertEquals(PHONE_LSL_MARKER_CHANNELS.size, richMarkers.getInt("channel_count"))
+        assertEquals(
+            "payload_json",
+            richMarkers.getJSONArray("channel_labels").getString(PHONE_LSL_MARKER_CHANNELS.size - 1),
+        )
+
+        val numericTriggers = descriptions.getJSONObject("numeric_triggers")
+        assertEquals("PPSTriggerCodes", numericTriggers.getString("name"))
+        assertEquals("int32", numericTriggers.getString("channel_format"))
+        assertEquals("event_code", numericTriggers.getJSONArray("channel_labels").getString(0))
+
+        val commandSignals = descriptions.getJSONObject("command_signals")
+        assertEquals("inlet", commandSignals.getString("role"))
+        assertEquals(PHONE_LSL_COMMAND_CHANNELS.size, commandSignals.getInt("channel_count"))
+        assertTrue(commandSignals.getBoolean("token_required"))
     }
 
     @Test
@@ -140,6 +165,12 @@ class PhoneLslProtocolTest {
         assertTrue(status.getBoolean("command_receiver_available"))
         assertEquals("native_lsl_markers_and_commands_with_local_mirror", status.getString("current_android_source_behavior"))
         assertTrue(status.getJSONObject("native_bridge").getJSONObject("command_transport").getBoolean("enabled"))
+        assertTrue(
+            status.getJSONObject("stream_descriptions")
+                .getJSONObject("command_acks")
+                .getString("source_id")
+                .startsWith("pps-android-command-acks-v1-phone-run-002"),
+        )
     }
 
     @Test

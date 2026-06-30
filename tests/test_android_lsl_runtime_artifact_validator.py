@@ -53,6 +53,30 @@ def test_android_lsl_runtime_validator_rejects_command_channel_drift(tmp_path: P
     assert "command channel order" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_requires_stream_descriptions_in_strict_mode(tmp_path: Path):
+    status = _status(native=True)
+    status.pop("stream_descriptions")
+    status_path = tmp_path / "lsl_runtime_status.json"
+    status_path.write_text(json.dumps(status), encoding="utf-8")
+
+    result = validator.validate_run_artifact(status_path, expect_native_transport=True)
+
+    assert result.ok is False
+    assert "Android LSL stream descriptions are missing" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_stream_description_drift(tmp_path: Path):
+    status = _status(native=True)
+    status["stream_descriptions"]["rich_markers"]["channel_labels"] = ["marker_version"]
+    status_path = tmp_path / "lsl_runtime_status.json"
+    status_path.write_text(json.dumps(status), encoding="utf-8")
+
+    result = validator.validate_run_artifact(status_path, expect_native_transport=True)
+
+    assert result.ok is False
+    assert "rich_markers.channel_labels" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_requires_command_transport_in_strict_mode(tmp_path: Path):
     status = _status(native=True)
     status["native_bridge"]["command_transport"]["enabled"] = False
@@ -1291,6 +1315,7 @@ def _status(*, native: bool) -> dict:
             "command_signals": "PPSCommandSignalsV1",
             "command_acks": "PPSCommandAcksV1",
         },
+        "stream_descriptions": _stream_descriptions(),
         "command_protocol": {
             "command_schema": "pps-lsl-command.v1",
             "ack_schema": "pps-lsl-command-ack.v1",
@@ -1346,6 +1371,60 @@ def _status(*, native: bool) -> dict:
             "default": "metadata_payload_only",
             "participant_demographics_location": "metadata_and_payload_artifacts",
             "demographics_in_stream_name": False,
+        },
+    }
+
+
+def _stream_descriptions() -> dict:
+    return {
+        "schema": "pps-android-lsl-stream-descriptions.v1",
+        "runtime_authority": "android_phone",
+        "privacy": {
+            "default": "metadata_payload_only",
+            "participant_demographics_location": "metadata_and_payload_artifacts",
+            "demographics_in_stream_name": False,
+        },
+        "rich_markers": {
+            "name": "PPSMarkersV2",
+            "type": "Markers",
+            "role": "outlet",
+            "channel_format": "string",
+            "channel_count": len(validator.LSL_MARKER_CHANNELS),
+            "nominal_srate_hz": 0.0,
+            "source_id": "pps-android-markers-v2-phone-run-001",
+            "marker_version": "2.0",
+            "channel_labels": list(validator.LSL_MARKER_CHANNELS),
+        },
+        "numeric_triggers": {
+            "name": "PPSTriggerCodes",
+            "type": "TriggerCodes",
+            "role": "outlet",
+            "channel_format": "int32",
+            "channel_count": 1,
+            "nominal_srate_hz": 0.0,
+            "source_id": "pps-android-trigger-codes-phone-run-001",
+            "channel_labels": ["event_code"],
+        },
+        "command_signals": {
+            "name": "PPSCommandSignalsV1",
+            "type": "CommandSignals",
+            "role": "inlet",
+            "channel_format": "string",
+            "channel_count": len(validator.LSL_COMMAND_CHANNELS),
+            "nominal_srate_hz": 0.0,
+            "source_id_pattern": "pps-*-command-signals-v1-*",
+            "channel_labels": list(validator.LSL_COMMAND_CHANNELS),
+            "token_required": True,
+        },
+        "command_acks": {
+            "name": "PPSCommandAcksV1",
+            "type": "CommandAcks",
+            "role": "outlet",
+            "channel_format": "string",
+            "channel_count": len(validator.LSL_ACK_CHANNELS),
+            "nominal_srate_hz": 0.0,
+            "source_id": "pps-android-command-acks-v1-phone-run-001",
+            "channel_labels": list(validator.LSL_ACK_CHANNELS),
         },
     }
 

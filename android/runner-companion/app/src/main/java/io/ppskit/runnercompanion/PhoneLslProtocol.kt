@@ -228,6 +228,7 @@ internal fun phoneLslRuntimeStatus(
                 .put("command_signals", commandName)
                 .put("command_acks", ackName),
         )
+        .put("stream_descriptions", phoneLslStreamDescriptions(runPackage, runId))
         .put(
             "command_protocol",
             JSONObject()
@@ -245,6 +246,71 @@ internal fun phoneLslRuntimeStatus(
                 .put("default", runPackage.lsl.privacyDefault.ifBlank { "metadata_payload_only" })
                 .put("participant_demographics_location", "metadata_and_payload_artifacts")
                 .put("demographics_in_stream_name", false),
+        )
+}
+
+internal fun phoneLslStreamDescriptions(runPackage: MobileRunPackage, runId: String): JSONObject {
+    val richName = runPackage.lsl.richMarkersName.ifBlank { PHONE_LSL_RICH_MARKER_STREAM_NAME }
+    val numericName = runPackage.lsl.numericTriggersName.ifBlank { PHONE_LSL_NUMERIC_TRIGGER_STREAM_NAME }
+    val commandName = runPackage.lsl.commandSignalsName.ifBlank { PHONE_LSL_COMMAND_STREAM_NAME }
+    val ackName = runPackage.lsl.commandAcksName.ifBlank { PHONE_LSL_ACK_STREAM_NAME }
+    val runToken = phoneLslSourceIdToken(runId)
+    return JSONObject()
+        .put("schema", "pps-android-lsl-stream-descriptions.v1")
+        .put("runtime_authority", runPackage.lsl.runtimeAuthority.ifBlank { "android_phone" })
+        .put("privacy", JSONObject()
+            .put("default", runPackage.lsl.privacyDefault.ifBlank { "metadata_payload_only" })
+            .put("demographics_in_stream_name", false)
+            .put("participant_demographics_location", "metadata_and_payload_artifacts"))
+        .put(
+            "rich_markers",
+            JSONObject()
+                .put("name", richName)
+                .put("type", "Markers")
+                .put("role", "outlet")
+                .put("channel_format", "string")
+                .put("channel_count", PHONE_LSL_MARKER_CHANNELS.size)
+                .put("nominal_srate_hz", 0.0)
+                .put("source_id", "pps-android-markers-v2-$runToken")
+                .put("marker_version", PHONE_LSL_MARKER_VERSION)
+                .put("channel_labels", stringArray(PHONE_LSL_MARKER_CHANNELS)),
+        )
+        .put(
+            "numeric_triggers",
+            JSONObject()
+                .put("name", numericName)
+                .put("type", "TriggerCodes")
+                .put("role", "outlet")
+                .put("channel_format", "int32")
+                .put("channel_count", 1)
+                .put("nominal_srate_hz", 0.0)
+                .put("source_id", "pps-android-trigger-codes-$runToken")
+                .put("channel_labels", stringArray(listOf("event_code"))),
+        )
+        .put(
+            "command_signals",
+            JSONObject()
+                .put("name", commandName)
+                .put("type", "CommandSignals")
+                .put("role", "inlet")
+                .put("channel_format", "string")
+                .put("channel_count", PHONE_LSL_COMMAND_CHANNELS.size)
+                .put("nominal_srate_hz", 0.0)
+                .put("source_id_pattern", "pps-*-command-signals-v1-*")
+                .put("channel_labels", stringArray(PHONE_LSL_COMMAND_CHANNELS))
+                .put("token_required", true),
+        )
+        .put(
+            "command_acks",
+            JSONObject()
+                .put("name", ackName)
+                .put("type", "CommandAcks")
+                .put("role", "outlet")
+                .put("channel_format", "string")
+                .put("channel_count", PHONE_LSL_ACK_CHANNELS.size)
+                .put("nominal_srate_hz", 0.0)
+                .put("source_id", "pps-android-command-acks-v1-$runToken")
+                .put("channel_labels", stringArray(PHONE_LSL_ACK_CHANNELS)),
         )
 }
 
@@ -369,6 +435,9 @@ private fun jsonObjectFromString(raw: String): JSONObject =
     } catch (error: Exception) {
         throw IllegalArgumentException("Command payload JSON must be an object.", error)
     }
+
+private fun phoneLslSourceIdToken(value: String): String =
+    value.replace(Regex("[^A-Za-z0-9._-]+"), "-").trim('-', '.', '_').ifBlank { "phone-run" }
 
 private fun stringArray(values: List<String>): JSONArray =
     JSONArray().also { array -> values.forEach { array.put(it) } }

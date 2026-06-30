@@ -163,7 +163,11 @@ block/order consistency, reusable building-block references, asset availability,
 AudioTrack playback-head timing contract, privacy-safe Android LSL stream names,
 required phone command set, and the phone-run `asset_strategy` consistency
 across status, manifest, reconstruction, completion, and catalog artifacts. It
-also checks `lsl_marker_mirror.csv` or embedded `lsl_marker_mirror` rows against
+also checks `lsl_runtime_status.json` `stream_descriptions` when present, and
+requires them in strict native mode, so `PPSMarkersV2`, `PPSTriggerCodes`,
+`PPSCommandSignalsV1`, and `PPSCommandAcksV1` keep their expected LSL roles,
+formats, source identities, and PC-compatible channel order. The validator also
+checks `lsl_marker_mirror.csv` or embedded `lsl_marker_mirror` rows against
 completion events, marker payload JSON, Android phone event codes, and duplicate
 event ids so local phone evidence stays reconstructable even before comparing it
 with a PC-side LSL monitor. Participant and haptic sidecars are also checked
