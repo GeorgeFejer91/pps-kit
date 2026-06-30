@@ -311,7 +311,9 @@ Required validation levels:
    `pc_android_lsl_monitor_events.jsonl` artifacts from
    `pps-android-lsl-monitor`. Controller and PC-admin outbox rows are checked
    for exact row-payload versus command-sample-payload consistency, including
-   required `operator_note` note text when that command is used.
+   required `operator_note` note text when that command is used; the serialized
+   command-sample payload must contain `token` or `companion_token`, not only
+   the surrounding row metadata.
     Phone-run `command_diary.jsonl` rows are also checked against matching
     `operator_command` events and native `PPSCommandAcksV1` samples: strict ack
     validation requires the ack payload to match the diary payload and preserve
@@ -437,6 +439,11 @@ Use the same sender/receiver reconciliation for PC-admin rehearsals:
 ```powershell
 .\.venv\Scripts\python.exe validation_protocols\scripts\reconcile_android_command_admin_with_phone_run.py <pc_android_lsl_command_outbox.jsonl-or-dir> <phone-run-dir-or-zip> --expect-native-sends --expect-command-acks
 ```
+
+That reconciliation checks the sender row payload against the serialized
+`PPSCommandSignalsV1` sample payload and fails if the actual sample omitted the
+pairing token, then compares the resulting command and ack evidence with the
+Runner phone's `native_lsl` command diary.
 
 To monitor whether another PC can observe the Android runner's LSL evidence
 stream while commands are being sent:

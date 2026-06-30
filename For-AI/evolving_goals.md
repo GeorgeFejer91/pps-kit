@@ -23,6 +23,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   inside the Data Max mirror itself. Missing listed files, extra mirrored files,
   or post-copy SHA-256/size drift now fail `--expect-phone-owned-data-export`
   instead of only checking that similarly named sidecars exist.
+- Android command-admin sender/receiver reconciliation now verifies the
+  serialized `PPSCommandSignalsV1` command sample payload, not only the outbox
+  row metadata. The reconciler fails if the sample payload omits
+  `token`/`companion_token` or drifts from the stored sender payload, while
+  still rejecting any `PPSCommandAcksV1` payload that echoes pairing tokens.
 
 - The local HTML dashboard launcher now treats `/api/health` as the fast
   already-running probe before falling back to `/api/state`. This prevents a

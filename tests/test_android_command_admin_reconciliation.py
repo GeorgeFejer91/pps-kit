@@ -107,6 +107,41 @@ def test_reconcile_android_command_admin_reports_ack_payload_drift():
     assert "ack_payload" in fields
 
 
+def test_reconcile_android_command_admin_rejects_command_sample_missing_pairing_token():
+    sender = _sender_row()
+    sample_payload = json.loads(sender["command_sample"][6])
+    sample_payload.pop("token")
+    sender["command_sample"][6] = json.dumps(sample_payload, sort_keys=True)
+
+    result = reconciler.reconcile_command_admin_with_phone_run(
+        [sender],
+        [_phone_command_row()],
+        expect_native_sends=True,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is False
+    fields = {item["field"] for item in result.report["mismatches"]}
+    assert "command_sample_payload.token_missing" in fields
+    assert "sender_payload" in fields
+
+
+def test_reconcile_android_command_admin_rejects_sender_payload_sample_drift():
+    sender = _sender_row()
+    sender["payload"]["target_part_number"] = "2"
+
+    result = reconciler.reconcile_command_admin_with_phone_run(
+        [sender],
+        [_phone_command_row()],
+        expect_native_sends=True,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is False
+    fields = {item["field"] for item in result.report["mismatches"]}
+    assert "sender_payload" in fields
+
+
 def test_reconcile_android_command_admin_rejects_ack_payload_token_echo():
     sender = _sender_row()
     phone = _phone_command_row()

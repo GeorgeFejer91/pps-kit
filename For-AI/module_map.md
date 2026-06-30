@@ -125,7 +125,9 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   Runner phone `command_diary.jsonl` by command id, target session, sender id,
   command, package identity, and exact `PPSCommandAcksV1` sample so two-phone
   or PC-to-phone command rehearsals have an offline artifact gate before live
-  XDF/physical validation claims.
+  XDF/physical validation claims. The reconciler also compares the sender row
+  payload with the serialized `PPSCommandSignalsV1` payload and requires the
+  actual sample payload to contain `token` or `companion_token`.
 - Android controller-role scaffolding lives in `PhoneControllerCommands.kt` and
   the `Runner` / `Controller` toggle inside `PhoneRuntimeScreen`. Controller
   mode writes token-gated command samples to
@@ -151,7 +153,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   echoes; the phone-run command diary validator applies the same token-exclusion
   rule to native ack samples. The command-admin reconciler compares those echoed
   target payload fields
-  between sender outbox and receiver command diary and rejects ack payload
+  between sender outbox and receiver command diary, requires the serialized
+  command sample payload to be token-bearing, and rejects ack payload
   pairing-token echoes even when both sides match; the PC monitor/XDF reconciler
   now checks the same non-secret command/ack target identity fields when both
   command-signal and acknowledgement streams are captured, and it rejects

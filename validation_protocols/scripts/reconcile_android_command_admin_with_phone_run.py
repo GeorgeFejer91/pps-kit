@@ -188,6 +188,20 @@ def _compare_sender_phone_command_pair(
         return mismatches
     if sample[0] != COMMAND_SCHEMA:
         mismatches.append(_mismatch(command_id, "command_sample.schema", COMMAND_SCHEMA, sample[0]))
+    sender_payload = sender.get("payload") if isinstance(sender.get("payload"), dict) else {}
+    if not _payload_has_pairing_token(sample_payload):
+        mismatches.append(
+            _mismatch(
+                command_id,
+                "command_sample_payload.token_missing",
+                "token or companion_token present in serialized PPSCommandSignalsV1 payload",
+                "missing",
+            )
+        )
+    if sender_payload and sample_payload and _canonical_json(sender_payload) != _canonical_json(sample_payload):
+        mismatches.append(_mismatch(command_id, "sender_payload", sender_payload, sample_payload))
+    if str(sample[4] or "") == "operator_note" and not _clean(sample_payload.get("note")):
+        mismatches.append(_mismatch(command_id, "command_sample_payload.note", "nonblank operator note", sample_payload.get("note")))
     _compare_field(mismatches, command_id, "command", _first_nonblank(sender.get("command"), sample[4]), phone.get("command"))
     _compare_field(mismatches, command_id, "session_id", sample[2], phone.get("session_id"))
     _compare_field(mismatches, command_id, "sender_id", sample[3], phone.get("sender_id"))
