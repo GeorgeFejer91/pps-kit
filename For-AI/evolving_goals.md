@@ -132,6 +132,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   compiles to a 27-page PDF with no unresolved citation/reference, rerun,
   float-too-large, or overfull-box warnings after this pass; generated LaTeX
   artifacts and the PDF were removed afterward.
+- Continued the BRM manuscript self-review loop with a title and entry-point
+  parsimony pass. The title now names PPS Toolkit as a suite for designing,
+  running, and recreating audio-tactile PPS experiments rather than only a
+  design/validation workflow, and the `Design, Run, and Recreation Pathway`
+  section now uses a practical three-entry-point table for new-study design,
+  published-profile recreation, and native acquisition. The Springer `sn-apa`
+  source compiles to a 27-page PDF with no unresolved citation/reference,
+  rerun, float-too-large, or overfull-box warnings after this pass; generated
+  LaTeX artifacts and the PDF were removed afterward.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

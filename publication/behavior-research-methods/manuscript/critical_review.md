@@ -418,3 +418,41 @@ Methods manuscript draft. It is a working audit, not manuscript text.
 - Gate completion validates artifact consistency and provenance only. It does
   not validate hardware timing, tactile mechanical onset, acoustic output, or
   the theoretical adequacy of the selected PPS design.
+
+## Iteration 12: BRM Title And Entry-point Parsimony Pass
+
+### Main Critiques
+
+- The manuscript had been reframed as a full design-run-recreation suite, but
+  the title still called PPS Toolkit a `design and validation workflow`. That
+  under-described the runner and published-profile recreation components.
+- The `Design, Run, and Recreation Pathway` section had the right content but
+  compressed three entry points, runner responsibilities, archive layers, and
+  evidence limits into two long paragraphs. That was less parsimonious than a
+  BRM methods/tutorial reader needs.
+- A narrow Consensus search on behavioral software papers again emphasized the
+  common BRM/software-article pattern: name the usable tool, describe practical
+  entry points, keep task logic inspectable, and state validation boundaries.
+  The official BRM scope pages also reinforced that the article should read as
+  practical reusable methodology rather than a theory-only review.
+
+### Resolution In This Revision
+
+- Changed the title to `PPS Toolkit: A suite for designing, running, and
+  recreating audio-tactile peripersonal-space experiments`.
+- Replaced the dense entry-point paragraph with Table `Three practical entry
+  points through PPS Toolkit`, separating new-study design, published-profile
+  recreation, and native acquisition.
+- Tightened the archive-layer paragraph so each sentence has one main job:
+  design archive, profile-recreation archive, validation archive, participant
+  archive, and conditional suite claim.
+- Recompiled the Springer `sn-apa` manuscript to a 27-page PDF with no
+  unresolved citations/references, rerun warnings, float-too-large warnings, or
+  overfull boxes in the final log scan; generated LaTeX artifacts and the PDF
+  were removed afterward.
+
+### Residual Concerns
+
+- The practical pathway is clearer, but the final submission still needs final
+  release metadata and a publication-hardware validation archive before it can
+  make strong claims about timing on a specific lab setup.

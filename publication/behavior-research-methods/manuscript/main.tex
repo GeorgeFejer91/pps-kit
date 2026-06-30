@@ -17,7 +17,7 @@
 
 \begin{document}
 
-\title[PPS Toolkit for audio-tactile PPS experiments]{PPS Toolkit: A reproducible design and validation workflow for audio-tactile peripersonal-space experiments}
+\title[PPS Toolkit suite for audio-tactile PPS experiments]{PPS Toolkit: A suite for designing, running, and recreating audio-tactile peripersonal-space experiments}
 
 \author*[1]{\fnm{George} \sur{Fejer}}\email{author.email@example.com}
 
@@ -209,9 +209,24 @@ Analysis & Response integrity summary, baseline method, included trials, exclusi
 
 \section{Design, Run, and Recreation Pathway}
 
-A BRM methods paper should leave readers with an executable path, not only a conceptual argument. For \toolkit{}, that path has three entry points. In the new-design path, researchers start from a custom project, define auditory sources and trajectories, assemble trial rows, choose baseline and catch logic, and accept a block schedule before running. In the published-profile path, researchers open a bundled profile, inspect its citation, verification status, represented fields, and missing-parameter caveats, and then copy it into an editable project if they want to adapt or extend it. In the acquisition path, the accepted design is handed to the native Focus Mode runner, which owns participant setup, output checks, tactile calibration, synchronized playback, response logging, LSL/LabRecorder/event mirrors, optional loopback evidence, top-up handling, and post-run analysis outputs. This suite framing matters: the contribution is not only a dashboard for designing stimuli, but a design-run-recreation system for turning PPS methods into executable and inspectable experiments. It mirrors the broader expectation in behavioral software papers that graphical tools should lower programming barriers while keeping timing, task logic, and open-science materials inspectable \citep{AnwylIrvine2018,Peirce2019,Akam2022}.
+A BRM methods paper should leave readers with an executable path, not only a conceptual argument. For \toolkit{}, that path has three entry points. This suite framing matters: the contribution is not only a dashboard for designing stimuli, but a design-run-recreation system for turning PPS methods into executable and inspectable experiments. It mirrors the broader expectation in behavioral software papers that graphical tools should lower programming barriers while keeping timing, task logic, and open-science materials inspectable \citep{AnwylIrvine2018,Peirce2019,Akam2022}.
 
-The resulting package should be archived in layers. A design archive contains the profile snapshot, manifest chain, source hashes, accepted block CSVs, and the evidence matrix row(s) that justify unusual choices. A profile-recreation archive adds the source-paper pointer, the represented parameters, the missing or approximated fields, and any statement about whether the profile is a faithful implementation, a partial scaffold, or a local proxy for unavailable original assets. A validation archive contains the exact software run, operating-system and hardware route, local event logs, digital audio evidence, optional LSL/XDF captures, and optional electrical loopback reports. A participant archive, if shared, contains only deidentified analysis-ready rows plus the declared response-window, exclusion, baseline, and model-fitting rules. Keeping these layers separate is not clerical overhead: computational reproducibility studies show that research assets can be public but still difficult to execute, and simulation/validation tools can reveal experiment errors before participant data are interpreted \citep{Ellis2024,DeLeeuw2022}. For PPS Toolkit, the practical suite claim is therefore conditional: another lab should be able to design a new task, recreate a reported paradigm as an auditable profile, and run the accepted design through the native evidence pipeline, but any new hardware route, tactile actuator, HRTF choice, original-stimulus substitution, or participant population must still be validated locally.
+\begin{table}[t]
+\caption{Three practical entry points through PPS Toolkit.}
+\label{tab:entrypoints}
+\footnotesize
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.18\textwidth} >{\raggedright\arraybackslash}p{0.22\textwidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.22\textwidth}}
+\toprule
+Entry point & Starting object & Primary toolkit actions & Evidence boundary \\
+\midrule
+New-study design & Custom project & Define auditory sources and trajectories, assemble sequence rows, choose baseline/catch logic, set repetitions, and accept block CSVs. & Produces a design archive; it does not prove participant effects. \\
+Published-profile recreation & Bundled profile & Inspect citation, verification status, represented fields, and caveats; copy into an editable project when adapting the profile. & A profile is an implementation scaffold unless original methods and assets are fully verified. \\
+Native acquisition & Accepted Segment 6 package & Launch Focus Mode for setup, output checks, tactile calibration, synchronized playback, response logging, LSL/LabRecorder/event mirrors, optional loopback, top-up, and analysis artifacts. & Runner evidence is separate from hardware timing, tactile mechanics, and participant perception. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The resulting package should be archived in layers. A design archive contains the profile snapshot, manifest chain, source hashes, accepted block CSVs, and the evidence matrix row(s) that justify unusual choices. A profile-recreation archive adds the source-paper pointer, represented parameters, missing or approximated fields, and a statement about whether the profile is faithful, partial, or a local proxy. A validation archive contains the software run, operating-system and hardware route, local event logs, digital audio evidence, optional LSL/XDF captures, and optional electrical loopback reports. A participant archive, if shared, contains only deidentified analysis-ready rows plus declared response-window, exclusion, baseline, and model-fitting rules. Keeping these layers separate is not clerical overhead: computational reproducibility studies show that research assets can be public but still difficult to execute, and simulation/validation tools can reveal experiment errors before participant data are interpreted \citep{Ellis2024,DeLeeuw2022}. For PPS Toolkit, the practical suite claim is therefore conditional: another lab should be able to design a new task, recreate a reported paradigm as an auditable profile, and run the accepted design through the native evidence pipeline, but any new hardware route, tactile actuator, HRTF choice, original-stimulus substitution, or participant population must still be validated locally.
 
 \section{Technical Method}
 
