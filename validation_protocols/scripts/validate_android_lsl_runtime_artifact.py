@@ -332,7 +332,14 @@ def validate_runtime_status(
         warnings=warnings,
         expect_lightweight_materializations=expect_lightweight_materializations,
     )
-    _validate_phone_run_catalog_entry(status, catalog_entry, failures, warnings, expect_run_catalog=expect_run_catalog)
+    _validate_phone_run_catalog_entry(
+        status,
+        catalog_entry,
+        completion,
+        failures,
+        warnings,
+        expect_run_catalog=expect_run_catalog,
+    )
     _validate_phone_run_provenance_consistency(
         completion=completion,
         package_manifest=package_manifest,
@@ -2329,6 +2336,7 @@ def _validate_phone_run_reconstruction_artifact(
 def _validate_phone_run_catalog_entry(
     status: dict[str, Any],
     catalog_entry: dict[str, Any] | None,
+    completion: dict[str, Any] | None,
     failures: list[str],
     warnings: list[str],
     *,
@@ -2370,6 +2378,32 @@ def _validate_phone_run_catalog_entry(
         if status_field in status and catalog_field in catalog_entry:
             if bool(catalog_entry.get(catalog_field)) != bool(status.get(status_field)):
                 failures.append(f"phone run catalog entry {catalog_field} differs from lsl_runtime_status")
+    summary = completion.get("summary") if isinstance(completion, dict) and isinstance(completion.get("summary"), dict) else {}
+    count_fields = {
+        "event_count": "total_event_count",
+        "lsl_marker_mirror_count": "lsl_marker_mirror_count",
+        "command_diary_count": "command_diary_count",
+        "native_lsl_pushed_count": "native_lsl_pushed_count",
+        "native_lsl_failed_count": "native_lsl_failed_count",
+        "native_lsl_rich_marker_pushed_count": "native_lsl_rich_marker_pushed_count",
+        "native_lsl_rich_marker_failed_count": "native_lsl_rich_marker_failed_count",
+        "native_lsl_numeric_trigger_pushed_count": "native_lsl_numeric_trigger_pushed_count",
+        "native_lsl_numeric_trigger_failed_count": "native_lsl_numeric_trigger_failed_count",
+        "native_lsl_command_received_count": "native_lsl_command_received_count",
+        "native_lsl_command_ack_count": "native_lsl_command_ack_count",
+        "native_lsl_command_ack_failed_count": "native_lsl_command_ack_failed_count",
+        "native_lsl_command_rejected_count": "native_lsl_command_rejected_count",
+    }
+    for catalog_field, summary_field in count_fields.items():
+        if summary_field not in summary:
+            continue
+        expected = _safe_int(summary.get(summary_field), fallback=-1)
+        if catalog_field not in catalog_entry:
+            failures.append(f"phone run catalog entry is missing {catalog_field} from completion summary")
+            continue
+        observed = _safe_int(catalog_entry.get(catalog_field), fallback=-1)
+        if observed != expected:
+            failures.append(f"phone run catalog entry {catalog_field} expected {expected}, got {observed}")
     if not str(catalog_entry.get("artifact_file") or "").strip():
         failures.append("phone run catalog entry is missing artifact_file")
     reconstruction = catalog_entry.get("reconstruction") if isinstance(catalog_entry.get("reconstruction"), dict) else {}
@@ -2653,6 +2687,30 @@ def _compare_phone_run_catalog_entry(
         expected_value = _catalog_text(expected.get(field))
         observed_value = _catalog_text(observed.get(field))
         if expected_value and observed_value and expected_value != observed_value:
+            failures.append(f"{label} {field} differs from phone_run_catalog_entry.json")
+    for field in (
+        "event_count",
+        "command_diary_count",
+        "lsl_marker_mirror_count",
+        "native_lsl_pushed_count",
+        "native_lsl_failed_count",
+        "native_lsl_rich_marker_pushed_count",
+        "native_lsl_rich_marker_failed_count",
+        "native_lsl_numeric_trigger_pushed_count",
+        "native_lsl_numeric_trigger_failed_count",
+        "native_lsl_command_received_count",
+        "native_lsl_command_ack_count",
+        "native_lsl_command_ack_failed_count",
+        "native_lsl_command_rejected_count",
+    ):
+        if field not in expected:
+            continue
+        if field not in observed:
+            failures.append(f"{label} {field} is missing from phone_run_catalog_entry.json counts")
+            continue
+        expected_value = _safe_int(expected.get(field), fallback=-1)
+        observed_value = _safe_int(observed.get(field), fallback=-1)
+        if observed_value != expected_value:
             failures.append(f"{label} {field} differs from phone_run_catalog_entry.json")
     for field in ("participant_roster_count", "randomization_seed"):
         expected_value = _catalog_text(expected.get(field))

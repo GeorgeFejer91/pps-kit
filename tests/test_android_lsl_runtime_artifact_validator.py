@@ -223,6 +223,67 @@ def test_android_lsl_runtime_validator_rejects_phone_run_catalog_identity_drift(
     assert "part_session_id differs" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_phone_run_catalog_summary_count_drift(tmp_path: Path):
+    status = _status(native=True)
+    status.update(_catalog_identity())
+    summary = {
+        "total_event_count": 13,
+        "lsl_marker_mirror_count": 13,
+        "command_diary_count": 1,
+        "native_lsl_pushed_count": 13,
+        "native_lsl_failed_count": 0,
+        "native_lsl_rich_marker_pushed_count": 13,
+        "native_lsl_rich_marker_failed_count": 0,
+        "native_lsl_numeric_trigger_pushed_count": 13,
+        "native_lsl_numeric_trigger_failed_count": 0,
+        "native_lsl_command_received_count": 1,
+        "native_lsl_command_ack_count": 1,
+        "native_lsl_command_ack_failed_count": 0,
+        "native_lsl_command_rejected_count": 0,
+    }
+    catalog = _catalog_entry(native=True)
+    catalog["command_diary_count"] = 1
+    catalog["native_lsl_command_received_count"] = 1
+    catalog["native_lsl_command_ack_count"] = 0
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
+    (run_dir / "completion.json").write_text(
+        json.dumps({"lsl_runtime_status": status, "summary": summary}),
+        encoding="utf-8",
+    )
+    (run_dir / "phone_run_catalog_entry.json").write_text(json.dumps(catalog), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_run_catalog=True)
+
+    assert result.ok is False
+    assert "phone run catalog entry native_lsl_command_ack_count expected 1, got 0" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_phone_run_catalog_index_zero_count_drift(tmp_path: Path):
+    files_dir = tmp_path / "files"
+    run_dir = files_dir / "phone_runs" / "phone-run-001"
+    run_dir.mkdir(parents=True)
+    status = _status(native=False)
+    status.update(_catalog_identity())
+    catalog = _catalog_entry(native=False)
+    drifted = {**catalog, "native_lsl_command_ack_count": 1}
+    (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
+    (run_dir / "phone_run_catalog_entry.json").write_text(json.dumps(catalog), encoding="utf-8")
+    _write_phone_run_catalog_root(files_dir, drifted)
+
+    result = validator.validate_run_artifact(
+        run_dir,
+        expect_run_catalog=True,
+        expect_run_catalog_index=True,
+    )
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "phone run catalog runs.jsonl native_lsl_command_ack_count differs" in failures
+    assert "phone run catalog latest_run.json native_lsl_command_ack_count differs" in failures
+
+
 def test_android_lsl_runtime_validator_loads_phone_run_catalog_from_zip(tmp_path: Path):
     status = _status(native=True)
     status.update(_catalog_identity())
@@ -2976,12 +3037,26 @@ def _catalog_identity() -> dict:
 
 
 def _catalog_entry(*, native: bool) -> dict:
+    marker_count = 13
     return {
         "schema": "pps-android-phone-run-catalog-entry.v1",
         **_catalog_identity(),
         "completed": True,
         "completion_reason": "completed",
         "artifact_file": "completion.json",
+        "event_count": marker_count,
+        "command_diary_count": 0,
+        "lsl_marker_mirror_count": marker_count,
+        "native_lsl_pushed_count": marker_count if native else 0,
+        "native_lsl_failed_count": 0,
+        "native_lsl_rich_marker_pushed_count": marker_count if native else 0,
+        "native_lsl_rich_marker_failed_count": 0,
+        "native_lsl_numeric_trigger_pushed_count": marker_count if native else 0,
+        "native_lsl_numeric_trigger_failed_count": 0,
+        "native_lsl_command_received_count": 0,
+        "native_lsl_command_ack_count": 0,
+        "native_lsl_command_ack_failed_count": 0,
+        "native_lsl_command_rejected_count": 0,
         "native_lsl_transport_available": native,
         "native_lsl_marker_transport_enabled": native,
         "native_lsl_command_receiver_available": native,

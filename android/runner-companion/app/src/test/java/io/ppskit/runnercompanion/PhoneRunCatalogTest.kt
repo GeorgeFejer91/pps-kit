@@ -76,6 +76,16 @@ class PhoneRunCatalogTest {
 
         val completedSummary = JSONObject(partialSummary.toString())
             .put("total_event_count", 4)
+            .put("native_lsl_pushed_count", 4)
+            .put("native_lsl_failed_count", 0)
+            .put("native_lsl_rich_marker_pushed_count", 4)
+            .put("native_lsl_rich_marker_failed_count", 0)
+            .put("native_lsl_numeric_trigger_pushed_count", 4)
+            .put("native_lsl_numeric_trigger_failed_count", 0)
+            .put("native_lsl_command_received_count", 1)
+            .put("native_lsl_command_ack_count", 1)
+            .put("native_lsl_command_ack_failed_count", 0)
+            .put("native_lsl_command_rejected_count", 0)
             .put("completion_reason", "completed")
         val completedEntry = buildPhoneRunCatalogEntry(
             runPackage = runPackage,
@@ -104,6 +114,10 @@ class PhoneRunCatalogTest {
         assertEquals(2, perRunEntry.getInt("participant_roster_count"))
         assertEquals("segment5hash", perRunEntry.getJSONObject("source_segment_hashes").getString("source_segment5_manifest_sha256"))
         assertEquals("30", perRunEntry.getJSONObject("participant_metadata_summary").getString("age_years"))
+        assertEquals(4, perRunEntry.getInt("native_lsl_pushed_count"))
+        assertEquals(1, perRunEntry.getInt("native_lsl_command_received_count"))
+        assertEquals(1, perRunEntry.getInt("native_lsl_command_ack_count"))
+        assertEquals(0, perRunEntry.getInt("native_lsl_command_rejected_count"))
         assertFalse(perRunEntry.getJSONObject("privacy").getBoolean("demographics_in_stream_name"))
 
         val rows = participantRunsFile.readLines(Charsets.UTF_8).filter { it.isNotBlank() }

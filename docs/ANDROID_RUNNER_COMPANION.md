@@ -216,7 +216,8 @@ For strict app-private participant/session catalog reconstruction, add
 `phone_run_catalog_entry.json`, the exported/global
 `phone_run_catalog/index.json`, each participant `runs.jsonl`, and
 `latest_run.json` to agree on run identity, latest-run pointers, artifact file,
-native LSL status booleans, and reconstruction schedule hash.
+event/marker/command/native-ack counts, native LSL status booleans, and
+reconstruction schedule hash.
 For strict phone event diary reconstruction, add `--expect-event-diary`; this
 requires `events.csv` to be present and to match the embedded
 `completion.json`/`latest_events.json` event list by event id, event type,
@@ -343,8 +344,9 @@ Phone-owned local artifacts now include `participant_metadata.json`,
 includes snapshots of the app-private `phone_run_catalog/` and
 `phone_owned_exports/` trees when present. The catalog snapshot includes the
 global `index.json`, participant `runs.jsonl`, and `latest_run.json` pointers
-used to reconstruct which phone-owned runs happened for each participant. The
-phone-owned export snapshot carries the minimal public CSV layer and the rich
+used to reconstruct which phone-owned runs happened for each participant,
+including event, marker, command-diary, native marker-push, and native
+command-ack counts. The phone-owned export snapshot carries the minimal public CSV layer and the rich
 per-run backup mirror. The phone preserves the package `asset_strategy` across
 the parsed model, LSL runtime status, JSON/native LSL stream description metadata,
 reconstruction snapshot, and phone run catalog so a lightweight

@@ -112,8 +112,9 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   `phone_run_catalog/index.json` files keep a participant/run diary across
   phone-owned sessions so completed and partial phone runs can be traced back
   to package ids, part-session ids, reconstruction hashes, local artifact
-  filenames, command-diary counts, LSL status, and privacy-safe participant
-  metadata summaries.
+  filenames, event/marker/command-diary counts, native marker push counts,
+  native command received/ack/rejected counts, LSL status, and privacy-safe
+  participant metadata summaries.
 - Phone-owned run folders also include `artifact_file_inventory.json` plus
   `artifact_file_inventory.csv`. The inventory excludes itself, but lists the
   rest of the run-folder files with relative paths, byte sizes, SHA-256 hashes,

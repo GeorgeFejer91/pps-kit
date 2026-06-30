@@ -4,6 +4,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 
 ## 2026-06-30
 
+- Android phone-run catalog entries now preserve the completion summary's
+  event count, marker mirror count, command diary count, native marker push
+  counters, and native command received/ack/failed/rejected counters. The
+  Android artifact validator compares those catalog fields against
+  `completion.json` `summary` when present and propagates the same comparison
+  through app-private `phone_run_catalog/runs.jsonl` and `latest_run.json`, so
+  the participant/session catalog cannot silently lose LSL administration
+  evidence.
+
 - The local HTML dashboard launcher now treats `/api/health` as the fast
   already-running probe before falling back to `/api/state`. This prevents a
   warmed but slow state snapshot from making the launcher misclassify an
