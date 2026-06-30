@@ -436,6 +436,21 @@ def test_android_lsl_runtime_validator_rejects_asset_strategy_drift(tmp_path: Pa
     assert "asset_strategy differs across phone run artifacts" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_reconstruction_hierarchy_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    artifact_path = run_dir / "reconstruction_contract.json"
+    artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+    artifact["reconstruction"]["study_hierarchy"] = ["study_profile", "phone_runtime_package"]
+    artifact_path.write_text(json.dumps(artifact), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_lightweight_materializations=True)
+
+    assert result.ok is False
+    assert "reconstruction_contract study_hierarchy" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_requires_status_strategy_for_strict_lightweight_runs(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -1208,6 +1223,21 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
                 "sha256": "source-sha",
             }
         ],
+        "building_blocks": [
+            {
+                "asset_id": "trial-asset-001",
+                "role": "trial_building_block",
+                "filename": "trial.wav",
+                "sha256": "source-sha",
+                "trial_type": "audio_tactile",
+                "family": "audio_tactile",
+                "row_label": "inhale",
+                "soa_ms": "100",
+                "noise_type": "white",
+                "duration_s": 1.0,
+                "tactile_onset_s": 0.5,
+            }
+        ],
         "blocks": [
             {
                 "block_id": "block-01",
@@ -1220,7 +1250,14 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
                 "tactile_cue_count": 1,
             }
         ],
-        "reconstruction": {"package_asset_strategy": "trial_building_blocks_only"},
+        "reconstruction": {
+            "package_asset_strategy": "trial_building_blocks_only",
+            "study_hierarchy": validator.ANDROID_REQUIRED_STUDY_HIERARCHY,
+            "schedule_hash": "schedulehash",
+            "building_block_count": 1,
+            "block_count": 1,
+            "trial_count": 1,
+        },
     }
     reconstruction_artifact = {
         "schema": "pps-mobile-phone-run-reconstruction.v1",
@@ -1229,6 +1266,8 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
         "asset_strategy": "trial_building_blocks_only",
         "reconstruction": {
             "package_asset_strategy": "trial_building_blocks_only",
+            "study_hierarchy": validator.ANDROID_REQUIRED_STUDY_HIERARCHY,
+            "source_run_setup_manifest_path": "run_setup.json",
             "schedule_hash": "schedulehash",
             "building_block_count": 1,
             "block_count": 1,

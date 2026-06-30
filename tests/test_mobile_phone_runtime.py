@@ -108,6 +108,7 @@ def test_mobile_package_manifest_exports_assets_trials_and_phone_tactile_cues(tm
 
     assert manifest["schema"] == MOBILE_PACKAGE_SCHEMA
     assert manifest["reconstruction"]["schema"] == "pps-mobile-reconstruction-contract.v1"
+    assert manifest["reconstruction"]["study_hierarchy"][6] == "segment_6_participant_part_order"
     assert manifest["lsl"]["stream_names"]["rich_markers"] == "PPSMarkersV2"
     assert manifest["building_blocks"][0]["role"] == "trial_building_block"
     assert manifest["schedule"]["execution_order"] == ["block-01"]

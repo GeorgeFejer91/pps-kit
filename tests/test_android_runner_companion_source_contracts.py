@@ -44,6 +44,18 @@ def test_android_phone_runtime_preserves_mobile_package_asset_strategy() -> None
     assert '.put("package_asset_strategy", runPackage.reconstruction.packageAssetStrategy)' in catalog
 
 
+def test_android_phone_runtime_preserves_reconstruction_hierarchy_in_artifacts() -> None:
+    models = _source("MobileRuntimeModels.kt")
+    main_activity = _source("MainActivity.kt")
+
+    assert "val studyHierarchy: List<String>" in models
+    assert "val sourceRunSetupManifestPath: String" in models
+    assert 'studyHierarchy = optJSONArray("study_hierarchy").toStringList()' in models
+    assert 'sourceRunSetupManifestPath = optString("source_run_setup_manifest_path", "")' in models
+    assert '.put("study_hierarchy", jsonStringArray(runPackage.reconstruction.studyHierarchy))' in main_activity
+    assert '.put("source_run_setup_manifest_path", runPackage.reconstruction.sourceRunSetupManifestPath)' in main_activity
+
+
 def test_android_lsl_runtime_status_exports_stream_descriptions() -> None:
     lsl_protocol = _source("PhoneLslProtocol.kt")
 

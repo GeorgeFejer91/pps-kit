@@ -18,7 +18,8 @@ class CompanionDiscoveryTest {
               "discovery": {
                 "udp_multicast_group": "$COMPANION_DISCOVERY_MULTICAST_GROUP",
                 "udp_port": $COMPANION_DISCOVERY_PORT,
-                "also_sent_as_limited_broadcast": true
+                "also_sent_as_limited_broadcast": true,
+                "ttl": 1
               },
               "pairing": {
                 "scheme": "pps-companion",

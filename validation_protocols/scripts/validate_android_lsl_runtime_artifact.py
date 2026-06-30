@@ -122,6 +122,17 @@ ANDROID_PHONE_EVENT_CODES = {
     "phone_stop_after_block_boundary": 45,
 }
 ANDROID_UNKNOWN_EVENT_CODE = 500
+ANDROID_REQUIRED_STUDY_HIERARCHY = [
+    "study_profile",
+    "segment_1_audio_ingredients",
+    "segment_2_trial_sequence_designs",
+    "segment_3_tactile_baseline_catch_trials",
+    "segment_4_trial_repetition_pool",
+    "segment_5_block_csv_preview",
+    "segment_6_participant_part_order",
+    "phone_runtime_package",
+    "phone_runtime_events",
+]
 EXPECTED_STREAMS = {
     "rich_markers": "PPSMarkersV2",
     "numeric_triggers": "PPSTriggerCodes",
@@ -274,6 +285,15 @@ def validate_runtime_status(
         catalog_entry=catalog_entry,
         package_manifest=package_manifest,
         reconstruction_artifact=reconstruction_artifact,
+        failures=failures,
+        warnings=warnings,
+        expect_lightweight_materializations=expect_lightweight_materializations,
+    )
+    _validate_phone_run_reconstruction_artifact(
+        status=status,
+        package_manifest=package_manifest,
+        reconstruction_artifact=reconstruction_artifact,
+        catalog_entry=catalog_entry,
         failures=failures,
         warnings=warnings,
         expect_lightweight_materializations=expect_lightweight_materializations,
@@ -1228,6 +1248,10 @@ def _metadata_value(value: Any) -> str:
     return str(value).strip()
 
 
+def _json_list(value: Any) -> list[Any]:
+    return list(value) if isinstance(value, list) else []
+
+
 def _duplicate_ints(values: list[int]) -> list[int]:
     seen: set[int] = set()
     duplicates: list[int] = []
@@ -1684,6 +1708,85 @@ def _validate_asset_strategy_consistency(
         and not str(status.get("asset_strategy") or "").strip()
     ):
         warnings.append("run package declares asset_strategy but lsl_runtime_status does not mirror it")
+
+
+def _validate_phone_run_reconstruction_artifact(
+    *,
+    status: dict[str, Any],
+    package_manifest: dict[str, Any] | None,
+    reconstruction_artifact: dict[str, Any] | None,
+    catalog_entry: dict[str, Any] | None,
+    failures: list[str],
+    warnings: list[str],
+    expect_lightweight_materializations: bool,
+) -> None:
+    if not reconstruction_artifact:
+        message = "reconstruction_contract.json is missing"
+        if expect_lightweight_materializations:
+            failures.append(f"{message} from lightweight phone-run artifact")
+        elif package_manifest:
+            warnings.append(f"{message}; rerun with --expect-lightweight-materializations for strict checks")
+        return
+    if reconstruction_artifact.get("schema") != "pps-mobile-phone-run-reconstruction.v1":
+        failures.append("reconstruction_contract schema mismatch")
+
+    for field in ("package_id", "participant_id", "session_id", "session_group_id", "part_session_id", "part_number"):
+        expected = _metadata_value(status.get(field))
+        observed = _metadata_value(reconstruction_artifact.get(field))
+        if expected and observed and expected != observed:
+            failures.append(f"reconstruction_contract {field} differs from lsl_runtime_status")
+
+    reconstruction = (
+        reconstruction_artifact.get("reconstruction")
+        if isinstance(reconstruction_artifact.get("reconstruction"), dict)
+        else {}
+    )
+    if not reconstruction:
+        failures.append("reconstruction_contract reconstruction payload is missing")
+        return
+
+    hierarchy = [str(item) for item in _json_list(reconstruction.get("study_hierarchy"))]
+    if hierarchy != ANDROID_REQUIRED_STUDY_HIERARCHY:
+        failures.append("reconstruction_contract study_hierarchy must preserve Segment 0-6 -> phone runtime order")
+
+    manifest_reconstruction = (
+        package_manifest.get("reconstruction")
+        if isinstance(package_manifest, dict) and isinstance(package_manifest.get("reconstruction"), dict)
+        else {}
+    )
+    manifest_hierarchy = [str(item) for item in _json_list(manifest_reconstruction.get("study_hierarchy"))]
+    if manifest_hierarchy and hierarchy and hierarchy != manifest_hierarchy:
+        failures.append("reconstruction_contract study_hierarchy differs from run_package_manifest")
+
+    schedule_hash = _metadata_value(reconstruction.get("schedule_hash"))
+    manifest_hash = _metadata_value(manifest_reconstruction.get("schedule_hash"))
+    if manifest_hash and schedule_hash and schedule_hash != manifest_hash:
+        failures.append("reconstruction_contract schedule_hash differs from run_package_manifest")
+    catalog_reconstruction = (
+        catalog_entry.get("reconstruction")
+        if isinstance(catalog_entry, dict) and isinstance(catalog_entry.get("reconstruction"), dict)
+        else {}
+    )
+    catalog_hash = _metadata_value(catalog_reconstruction.get("schedule_hash"))
+    if catalog_hash and schedule_hash and schedule_hash != catalog_hash:
+        failures.append("reconstruction_contract schedule_hash differs from phone_run_catalog_entry")
+
+    if isinstance(package_manifest, dict):
+        expected_counts = {
+            "building_block_count": len(_json_list(package_manifest.get("building_blocks"))),
+            "block_count": len(_json_list(package_manifest.get("blocks"))),
+            "trial_count": sum(
+                len(_json_list(block.get("trials")))
+                for block in _json_list(package_manifest.get("blocks"))
+                if isinstance(block, dict)
+            ),
+        }
+        for field, expected_count in expected_counts.items():
+            if field in reconstruction and _clean_int(reconstruction.get(field)) != expected_count:
+                failures.append(f"reconstruction_contract {field} differs from run_package_manifest")
+
+    if not _metadata_value(reconstruction.get("source_run_setup_sha256")):
+        warnings.append("reconstruction_contract source_run_setup_sha256 is missing")
 
 
 def _validate_phone_run_catalog_entry(

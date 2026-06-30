@@ -142,7 +142,8 @@ Synced v2 packages include:
 - optional reusable Segment 3 trial WAV assets with role
   `trial_building_block`, used by lightweight scheduled-block replay and
   phone top-up logic
-- `reconstruction` metadata with source Segment 6 hashes and schedule hash
+- `reconstruction` metadata with the Segment 0-6 hierarchy, source Segment 6
+  hashes, and schedule hash
 - `lsl` metadata declaring `PPSMarkersV2`, `PPSTriggerCodes`,
   `PPSCommandSignalsV1`, and `PPSCommandAcksV1`
 
@@ -161,8 +162,9 @@ is present or any scheduled block cannot be reconstructed from
 The validator checks the Segment 0-6 to phone-runtime hierarchy, schedule hash,
 block/order consistency, reusable building-block references, asset availability,
 AudioTrack playback-head timing contract, privacy-safe Android LSL stream names,
-required phone command set, and the phone-run `asset_strategy` consistency
-across status, manifest, reconstruction, completion, and catalog artifacts. It
+required phone command set, and the phone-run `asset_strategy` plus
+`reconstruction_contract.json` consistency across status, manifest,
+reconstruction, completion, and catalog artifacts. It
 also checks `lsl_runtime_status.json` `stream_descriptions` when present, and
 requires them in strict native mode, so `PPSMarkersV2`, `PPSTriggerCodes`,
 `PPSCommandSignalsV1`, and `PPSCommandAcksV1` keep their expected LSL roles,
@@ -240,7 +242,10 @@ per-run backup mirror. The phone preserves the package `asset_strategy` across
 the parsed model, LSL runtime status, native LSL stream description metadata,
 reconstruction snapshot, and phone run catalog so a lightweight
 `trial_building_blocks_only` run can be distinguished from a prepared-block WAV
-compatibility run during later reconstruction. Participant age, handedness,
+compatibility run during later reconstruction. It also carries the Segment 0-6
+hierarchy into the session metadata marker payload and
+`reconstruction_contract.json`, letting strict validation reject hierarchy drift
+inside phone-owned artifacts. Participant age, handedness,
 gender, and tactile threshold stay in metadata and marker payloads rather than
 discoverable LSL stream names.
 

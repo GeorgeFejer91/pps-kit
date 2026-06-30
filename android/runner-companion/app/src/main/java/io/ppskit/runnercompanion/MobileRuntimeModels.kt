@@ -81,6 +81,8 @@ data class MobileReconstructionContract(
     val fallbackExecutionStrategy: String,
     val preferredLightweightStrategy: String,
     val packageAssetStrategy: String,
+    val studyHierarchy: List<String>,
+    val sourceRunSetupManifestPath: String,
     val sourceRunSetupSha256: String,
     val scheduleHash: String,
     val buildingBlockCount: Int,
@@ -88,7 +90,7 @@ data class MobileReconstructionContract(
     val trialCount: Int,
 ) {
     companion object {
-        val empty = MobileReconstructionContract("", "", "", "", "", "", "", 0, 0, 0)
+        val empty = MobileReconstructionContract("", "", "", "", "", emptyList(), "", "", "", 0, 0, 0)
     }
 }
 
@@ -252,6 +254,8 @@ private fun JSONObject?.toMobileReconstructionContract(): MobileReconstructionCo
         fallbackExecutionStrategy = optString("fallback_execution_strategy", ""),
         preferredLightweightStrategy = optString("preferred_lightweight_strategy", ""),
         packageAssetStrategy = optString("package_asset_strategy", ""),
+        studyHierarchy = optJSONArray("study_hierarchy").toStringList(),
+        sourceRunSetupManifestPath = optString("source_run_setup_manifest_path", ""),
         sourceRunSetupSha256 = optString("source_run_setup_sha256", ""),
         scheduleHash = optString("schedule_hash", ""),
         buildingBlockCount = optInt("building_block_count", 0),

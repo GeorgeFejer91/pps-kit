@@ -66,6 +66,11 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   formats/counts, PC-compatible channel labels, source IDs/source patterns,
   nominal rates, marker version, and the privacy rule that demographics stay
   out of discoverable stream names.
+- Phone-owned run folders and ZIP exports include `reconstruction_contract.json`.
+  The phone copies the v2 package's Segment 0-6 hierarchy, schedule hash,
+  source setup hash/path, asset strategy, reusable building-block catalog, and
+  scheduled-block references into that artifact so strict validators can reject
+  hierarchy or schedule drift after the run leaves the phone.
 - Phone-owned run folders and ZIP exports also include
   `phone_run_catalog_entry.json`. The app-private
   `phone_run_catalog/<participant>/runs.jsonl` and

@@ -2229,7 +2229,8 @@ private class PhoneRunSession(
                         .put("block_count", runPackage.blocks.size)
                         .put("asset_count", runPackage.assets.size)
                         .put("building_block_count", runPackage.buildingBlocks.size)
-                        .put("schedule_hash", runPackage.reconstruction.scheduleHash),
+                        .put("schedule_hash", runPackage.reconstruction.scheduleHash)
+                        .put("study_hierarchy", jsonStringArray(runPackage.reconstruction.studyHierarchy)),
                 )
                 .put(
                     "lsl",
@@ -3078,6 +3079,8 @@ private fun phoneRunReconstructionArtifact(runPackage: MobileRunPackage, manifes
                 .put("fallback_execution_strategy", runPackage.reconstruction.fallbackExecutionStrategy)
                 .put("preferred_lightweight_strategy", runPackage.reconstruction.preferredLightweightStrategy)
                 .put("package_asset_strategy", runPackage.reconstruction.packageAssetStrategy)
+                .put("study_hierarchy", jsonStringArray(runPackage.reconstruction.studyHierarchy))
+                .put("source_run_setup_manifest_path", runPackage.reconstruction.sourceRunSetupManifestPath)
                 .put("source_run_setup_sha256", runPackage.reconstruction.sourceRunSetupSha256)
                 .put("schedule_hash", runPackage.reconstruction.scheduleHash)
                 .put("building_block_count", runPackage.reconstruction.buildingBlockCount)

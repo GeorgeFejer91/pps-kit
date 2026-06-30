@@ -53,6 +53,19 @@ class MobilePackageParserTest {
                 "authority": "android_phone",
                 "fallback_execution_strategy": "prepared_block_wavs",
                 "preferred_lightweight_strategy": "replay_schedule_from_trial_building_blocks",
+                "package_asset_strategy": "trial_building_blocks_only",
+                "study_hierarchy": [
+                  "study_profile",
+                  "segment_1_audio_ingredients",
+                  "segment_2_trial_sequence_designs",
+                  "segment_3_tactile_baseline_catch_trials",
+                  "segment_4_trial_repetition_pool",
+                  "segment_5_block_csv_preview",
+                  "segment_6_participant_part_order",
+                  "phone_runtime_package",
+                  "phone_runtime_events"
+                ],
+                "source_run_setup_manifest_path": "runs/setup.json",
                 "source_run_setup_sha256": "runhash",
                 "schedule_hash": "schedulehash",
                 "building_block_count": 1,
@@ -110,6 +123,9 @@ class MobilePackageParserTest {
         assertEquals("abc", manifest.asset("block-01-audio")?.sha256)
         assertEquals("trial-1", manifest.buildingBlocks.first().assetId)
         assertEquals("schedulehash", manifest.reconstruction.scheduleHash)
+        assertEquals("trial_building_blocks_only", manifest.reconstruction.packageAssetStrategy)
+        assertEquals("segment_6_participant_part_order", manifest.reconstruction.studyHierarchy[6])
+        assertEquals("runs/setup.json", manifest.reconstruction.sourceRunSetupManifestPath)
         assertEquals("PPSMarkersV2", manifest.lsl.richMarkersName)
         assertTrue(manifest.lsl.supportedCommands.contains("pause"))
         assertTrue(manifest.rawManifestJson.contains("\"package_id\""))
