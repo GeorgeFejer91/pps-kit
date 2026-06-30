@@ -93,6 +93,7 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `phone_controller_command_outbox.jsonl`, PC-admin
   `pc_android_lsl_admin_status.json` /
   `pc_android_lsl_command_outbox.jsonl`, command/ack schema/channel order,
+  phone-run `command_diary.jsonl` / embedded command diary native ack rows,
   PC-monitor `pc_android_lsl_monitor_report.json` /
   `pc_android_lsl_monitor_events.jsonl`, token requirement, privacy boundary,
   strict native-transport/send/observed-stream evidence, and optional

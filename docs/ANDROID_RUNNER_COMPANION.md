@@ -152,6 +152,10 @@ block/order consistency, reusable building-block references, asset availability,
 AudioTrack playback-head timing contract, privacy-safe Android LSL stream names,
 required phone command set, and the phone-run `asset_strategy` consistency
 across status, manifest, reconstruction, completion, and catalog artifacts.
+When validating PC-runner or Controller-phone administration, add
+`--expect-command-acks`; for phone-run artifacts this now requires
+`command_diary.jsonl` or embedded `command_diary` rows with native
+`PPSCommandAcksV1` samples and matching `operator_command` events.
 
 Phone-owned local artifacts now include `participant_metadata.json`,
 `haptic_capability.json`, `events.csv`, `lsl_marker_mirror.csv`,

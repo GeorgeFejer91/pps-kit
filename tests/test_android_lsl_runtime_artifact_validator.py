@@ -291,6 +291,138 @@ def test_android_lsl_runtime_validator_can_require_pc_admin_acks(tmp_path: Path)
     assert "expected to receive a matching command ack" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_accepts_phone_run_command_diary_ack_evidence(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_phone_run_with_native_command_diary(run_dir)
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_requires_phone_run_command_diary_when_acks_expected(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    status = _status(native=True)
+    status.update(_catalog_identity())
+    (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
+    (run_dir / "completion.json").write_text(json.dumps({"lsl_runtime_status": status}), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    assert "requires command_diary rows" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_requires_phone_run_ack_sent_in_strict_mode(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_phone_run_with_native_command_diary(run_dir, ack_sent=False)
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    assert "expected to send a PPSCommandAcksV1 sample" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_requires_phone_run_operator_command_event_for_ack_evidence(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_phone_run_with_native_command_diary(run_dir, include_operator_event=False)
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    assert "requires matching operator_command events" in "\n".join(result.failures)
+
+
+def _write_phone_run_with_native_command_diary(
+    run_dir: Path,
+    *,
+    ack_sent: bool = True,
+    include_operator_event: bool = True,
+) -> None:
+    status = _status(native=True)
+    status.update(_catalog_identity())
+    row = _phone_native_command_row(ack_sent=ack_sent)
+    events = [{"type": "run_start", "package_id": "pkg-001"}]
+    if include_operator_event:
+        events.append(
+            {
+                "type": "operator_command",
+                "command_id": row["command_id"],
+                "command_source": "native_lsl",
+                "sender_id": row["sender_id"],
+                "command": row["command"],
+                "status": row["status"],
+                "reason": row["reason"],
+                "ack_sent": row["ack_sent"],
+                "payload": row["payload"],
+            }
+        )
+    (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
+    (run_dir / "completion.json").write_text(
+        json.dumps(
+            {
+                "lsl_runtime_status": status,
+                "events": events,
+                "command_diary": [row],
+            }
+        ),
+        encoding="utf-8",
+    )
+    (run_dir / "command_diary.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+
+def _phone_native_command_row(*, ack_sent: bool = True) -> dict:
+    ack_sample = [
+        "pps-lsl-command-ack.v1",
+        "cmd-phone-001",
+        "part-001",
+        "android_phone",
+        "applied",
+        "phone_playback_paused",
+        "42.010000000",
+        "42.020000000",
+        "42.030000000",
+        json.dumps({"command": "pause", "state_changed": True}),
+    ]
+    return {
+        "schema": "pps-android-command-diary.v1",
+        "command_id": "cmd-phone-001",
+        "command_source": "native_lsl",
+        "sender_id": "pc_runner",
+        "session_id": "part-001",
+        "command": "pause",
+        "status": "applied",
+        "reason": "phone_playback_paused",
+        "payload": {"command": "pause", "state_changed": True},
+        "package_id": "pkg-001",
+        "run_id": "phone-run-001",
+        "received_lsl_time": 42.01,
+        "applied_lsl_time": 42.02,
+        "ack_lsl_time": 42.03,
+        "ack_sent": ack_sent,
+        "ack_channels": [
+            "schema",
+            "command_id",
+            "session_id",
+            "receiver_id",
+            "status",
+            "reason",
+            "received_lsl_time",
+            "applied_lsl_time",
+            "ack_lsl_time",
+            "payload_json",
+        ],
+        "ack_sample": ack_sample,
+        "phone_unix_ms": 1780000000000,
+        "phone_elapsed_realtime_ms": 123456,
+    }
+
+
 def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event: bool = True) -> None:
     status = _status(native=False)
     status["asset_strategy"] = "trial_building_blocks_only"

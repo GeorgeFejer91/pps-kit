@@ -120,6 +120,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   manifest, reconstruction, completion, and catalog sidecars, and strict
   lightweight-materialization validation requires it in the status and package
   manifest contract.
+- Android phone-run command administration evidence is now validated from the
+  receiver side. `validate_android_lsl_runtime_artifact.py --expect-command-acks`
+  loads `command_diary.jsonl` from run folders/ZIPs, falls back to embedded
+  `completion.json` command diary rows, and requires native `native_lsl`
+  command rows to carry valid `PPSCommandAcksV1` samples, matching ack times,
+  `ack_sent=true`, and corresponding `operator_command` events. This makes
+  PC-runner/controller-to-phone LSL administration auditable from the phone run
+  artifact, not only from sender outboxes.
 - Android phone-owned runs now derive a phone-local tactile response ledger
   using the shared 100-1300 ms post-tactile response window and write
   `phone_response_ledger.csv` plus `phone_topup_plan.json` into the local run

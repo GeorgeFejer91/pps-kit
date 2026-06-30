@@ -103,9 +103,11 @@ def validate_runtime_status(
     catalog_entry: dict[str, Any] | None = None,
     package_manifest: dict[str, Any] | None = None,
     reconstruction_artifact: dict[str, Any] | None = None,
+    command_diary_rows: list[dict[str, Any]] | None = None,
     materialization_manifests: list[dict[str, Any]] | None = None,
     materialized_wav_hashes: dict[str, str] | None = None,
     expect_native_transport: bool = False,
+    expect_command_acks: bool = False,
     expect_run_catalog: bool = False,
     expect_lightweight_materializations: bool = False,
 ) -> AndroidLslValidationResult:
@@ -174,6 +176,14 @@ def validate_runtime_status(
         expect_lightweight_materializations=expect_lightweight_materializations,
     )
     _validate_phone_run_catalog_entry(status, catalog_entry, failures, warnings, expect_run_catalog=expect_run_catalog)
+    _validate_phone_command_diary(
+        status=status,
+        completion=completion,
+        command_diary_rows=command_diary_rows or [],
+        failures=failures,
+        warnings=warnings,
+        expect_command_acks=expect_command_acks,
+    )
     _validate_lightweight_materializations(
         completion=completion,
         package_manifest=package_manifest,
@@ -420,9 +430,11 @@ def validate_run_artifact(
         catalog_entry=loaded.get("catalog_entry"),
         package_manifest=loaded.get("package_manifest"),
         reconstruction_artifact=loaded.get("reconstruction_artifact"),
+        command_diary_rows=loaded.get("command_diary_rows") or [],
         materialization_manifests=loaded.get("materialization_manifests") or [],
         materialized_wav_hashes=loaded.get("materialized_wav_hashes") or {},
         expect_native_transport=expect_native_transport,
+        expect_command_acks=expect_command_acks,
         expect_run_catalog=expect_run_catalog,
         expect_lightweight_materializations=expect_lightweight_materializations,
     )
@@ -574,6 +586,7 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
             catalog_members = [name for name in archive.namelist() if name.endswith(ANDROID_PHONE_RUN_CATALOG_ENTRY)]
             package_manifest_members = [name for name in archive.namelist() if name.endswith("run_package_manifest.json")]
             reconstruction_members = [name for name in archive.namelist() if name.endswith(ANDROID_PHONE_RUN_RECONSTRUCTION_ARTIFACT)]
+            command_diary_members = [name for name in archive.namelist() if name.endswith("command_diary.jsonl")]
             materialization_members = [
                 name
                 for name in archive.namelist()
@@ -613,6 +626,11 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 Path(member).name: _sha256_bytes(archive.read(member))
                 for member in materialized_wav_members
             }
+            command_diary_rows: list[dict[str, Any]] = []
+            if command_diary_members:
+                command_diary_name = sorted(command_diary_members)[0]
+                archive.extract(command_diary_name, temp_root)
+                command_diary_rows = _read_jsonl(temp_root / command_diary_name)
             return {
                 "kind": "runner",
                 "status": _read_json(temp_root / status_name),
@@ -620,6 +638,7 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 "catalog_entry": catalog_entry,
                 "package_manifest": package_manifest,
                 "reconstruction_artifact": reconstruction_artifact,
+                "command_diary_rows": command_diary_rows,
                 "materialization_manifests": materialization_manifests,
                 "materialized_wav_hashes": materialized_wav_hashes,
             }
@@ -628,6 +647,7 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
 def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
     package_manifest_path = path / "run_package_manifest.json"
     reconstruction_artifact_path = path / ANDROID_PHONE_RUN_RECONSTRUCTION_ARTIFACT
+    command_diary_path = path / "command_diary.jsonl"
     materialized_dir = path / "materialized_blocks"
     materialization_manifests: list[dict[str, Any]] = []
     materialized_wav_hashes: dict[str, str] = {}
@@ -639,6 +659,7 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
     return {
         "package_manifest": _read_json(package_manifest_path) if package_manifest_path.is_file() else None,
         "reconstruction_artifact": _read_json(reconstruction_artifact_path) if reconstruction_artifact_path.is_file() else None,
+        "command_diary_rows": _read_jsonl(command_diary_path) if command_diary_path.is_file() else [],
         "materialization_manifests": materialization_manifests,
         "materialized_wav_hashes": materialized_wav_hashes,
     }
@@ -821,6 +842,121 @@ def _validate_phone_run_catalog_entry(
     reconstruction = catalog_entry.get("reconstruction") if isinstance(catalog_entry.get("reconstruction"), dict) else {}
     if not str(reconstruction.get("schedule_hash") or "").strip():
         warnings.append("phone run catalog entry does not include a reconstruction schedule_hash")
+
+
+def _validate_phone_command_diary(
+    *,
+    status: dict[str, Any],
+    completion: dict[str, Any] | None,
+    command_diary_rows: list[dict[str, Any]],
+    failures: list[str],
+    warnings: list[str],
+    expect_command_acks: bool,
+) -> None:
+    embedded_rows = [
+        row
+        for row in list((completion or {}).get("command_diary") or [])
+        if isinstance(row, dict)
+    ]
+    rows = command_diary_rows or embedded_rows
+    if not rows:
+        if expect_command_acks:
+            failures.append("phone-run command ack validation requires command_diary rows")
+        return
+    if command_diary_rows and embedded_rows:
+        file_ids = [str(row.get("command_id") or "") for row in command_diary_rows]
+        embedded_ids = [str(row.get("command_id") or "") for row in embedded_rows]
+        if file_ids != embedded_ids:
+            failures.append("command_diary.jsonl command ids differ from completion.json embedded command_diary")
+
+    operator_events = [
+        event
+        for event in list((completion or {}).get("events") or [])
+        if isinstance(event, dict) and event.get("type") == "operator_command"
+    ]
+    event_by_command_id = {
+        str(event.get("command_id") or ""): event
+        for event in operator_events
+        if str(event.get("command_id") or "").strip()
+    }
+    native_rows = 0
+    native_ack_rows = 0
+    for index, row in enumerate(rows, start=1):
+        prefix = f"phone command diary row {index}"
+        if row.get("schema") != "pps-android-command-diary.v1":
+            failures.append(f"{prefix} schema mismatch")
+        command_id = str(row.get("command_id") or "")
+        command = str(row.get("command") or "")
+        command_source = str(row.get("command_source") or "")
+        row_status = str(row.get("status") or "")
+        if not command_id:
+            failures.append(f"{prefix} is missing command_id")
+        if not command:
+            failures.append(f"{prefix} is missing command")
+        if command_source not in {"native_lsl", "phone_ui_or_runtime"}:
+            failures.append(f"{prefix} command_source must be native_lsl or phone_ui_or_runtime")
+        if row_status not in {"applied", "rejected"}:
+            failures.append(f"{prefix} status must be applied or rejected")
+        if status.get("package_id") and row.get("package_id") and str(row.get("package_id")) != str(status.get("package_id")):
+            failures.append(f"{prefix} package_id differs from lsl_runtime_status")
+        if status.get("run_id") and row.get("run_id") and str(row.get("run_id")) != str(status.get("run_id")):
+            failures.append(f"{prefix} run_id differs from lsl_runtime_status")
+        if command_id and operator_events:
+            event = event_by_command_id.get(command_id)
+            if event is None:
+                failures.append(f"{prefix} is missing matching operator_command event")
+            else:
+                if command and str(event.get("command") or "") != command:
+                    failures.append(f"{prefix} command differs from matching operator_command event")
+                if row_status and str(event.get("status") or "") != row_status:
+                    failures.append(f"{prefix} status differs from matching operator_command event")
+                if command_source == "native_lsl" and str(event.get("command_source") or "") != "native_lsl":
+                    failures.append(f"{prefix} native_lsl source differs from matching operator_command event")
+
+        if command_source != "native_lsl":
+            continue
+        native_rows += 1
+        ack_channels = list(row.get("ack_channels") or [])
+        if ack_channels and ack_channels != list(LSL_ACK_CHANNELS):
+            failures.append(f"{prefix} ack channel order mismatch")
+        ack_sample = list(row.get("ack_sample") or [])
+        if len(ack_sample) != len(LSL_ACK_CHANNELS):
+            failures.append(f"{prefix} ack sample channel count mismatch")
+        else:
+            native_ack_rows += 1
+            if ack_sample[0] != ACK_SCHEMA:
+                failures.append(f"{prefix} ack sample schema mismatch")
+            if command_id and ack_sample[1] != command_id:
+                failures.append(f"{prefix} ack command_id does not match diary command_id")
+            if row.get("session_id") and ack_sample[2] != row.get("session_id"):
+                failures.append(f"{prefix} ack session_id differs from diary row")
+            if row_status and ack_sample[4] != row_status:
+                failures.append(f"{prefix} ack status differs from diary row")
+            row_reason = str(row.get("reason") or "")
+            if ack_sample[5] != row_reason:
+                failures.append(f"{prefix} ack reason differs from diary row")
+            for time_index, field in ((6, "received_lsl_time"), (7, "applied_lsl_time"), (8, "ack_lsl_time")):
+                try:
+                    sample_value = float(ack_sample[time_index])
+                    row_value = float(row.get(field))
+                except (TypeError, ValueError):
+                    failures.append(f"{prefix} {field} is not numeric")
+                    continue
+                if abs(sample_value - row_value) > 1e-6:
+                    failures.append(f"{prefix} ack {field} differs from diary row")
+            _parse_json_object(str(ack_sample[9] or "{}"), f"{prefix} ack payload", failures)
+        if expect_command_acks and row.get("ack_sent") is not True:
+            failures.append(f"{prefix} was expected to send a PPSCommandAcksV1 sample")
+
+    if expect_command_acks:
+        if native_rows <= 0:
+            failures.append("phone-run command ack validation expected at least one native_lsl command diary row")
+        elif not operator_events:
+            failures.append("phone-run command ack validation requires matching operator_command events")
+        if native_ack_rows <= 0:
+            failures.append("phone-run command ack validation expected at least one PPSCommandAcksV1 ack sample")
+    elif native_rows > 0 and native_ack_rows <= 0:
+        warnings.append("native_lsl command diary rows do not include ack samples; rerun with --expect-command-acks for strict checks")
 
 
 def _validate_lightweight_materializations(
@@ -1194,7 +1330,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--expect-command-acks",
         action="store_true",
-        help="For controller, PC-admin, or monitor artifacts, fail unless matching command acknowledgements are present.",
+        help=(
+            "For phone-run, controller, PC-admin, or monitor artifacts, fail unless matching "
+            "command acknowledgement evidence is present."
+        ),
     )
     parser.add_argument("--expect-run-catalog", action="store_true", help="For phone-run artifacts, fail unless phone_run_catalog_entry.json is present and consistent.")
     parser.add_argument(
