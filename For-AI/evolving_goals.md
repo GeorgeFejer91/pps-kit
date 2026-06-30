@@ -87,6 +87,16 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   participant-ear SPL. The matrix now has 41 rows. The Springer `sn-apa` source
   compiles to a 24-page PDF with no unresolved citation/reference or rerun
   warnings; generated LaTeX artifacts and the PDF were removed afterward.
+- Continued the BRM manuscript self-review loop with a dashboard-boundary and
+  open-practices pass. The draft now states the dashboard View/Edit/read-only
+  and hosted/static-preview versus local-companion/native-runner acquisition
+  boundary, adds that boundary to `evidence_matrix.csv` and the reporting
+  checklist, splits the condensed matrix into two readable tables, and adds an
+  `Open Practices Statement` immediately before the references. The evidence
+  matrix now has 42 rows. The Springer `sn-apa` source compiles to a 25-page PDF
+  with no unresolved citation/reference, rerun, float-too-large, or overfull-box
+  warnings after this pass; generated LaTeX artifacts and the PDF were removed
+  afterward.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

@@ -243,3 +243,46 @@ Methods manuscript draft. It is a working audit, not manuscript text.
 - The current paper should avoid saying the default estimated Komplete/HD 560S
   profile is calibrated. It is a reporting scaffold until a measured
   `loudness_profile.json` or equivalent artifact exists.
+
+## Iteration 8: BRM Open-Practices and Dashboard-Boundary Pass
+
+### Main Critiques
+
+- The draft had Code/Data/Materials declarations, but it did not yet include a
+  distinct Open Practices Statement immediately before the references, which is
+  expected in the current Behavior Research Methods submission workflow.
+- The evidence matrix covered Segment 0 profiles and Segment 6 runner handoff,
+  but it did not explicitly name the dashboard's View/Edit/read-only/hosted
+  boundary as a GUI design decision.
+- That omission matters because the public dashboard can inspect and download
+  source-pointer artifacts, while local mutation and participant acquisition
+  require the local companion and native runner. Without that distinction, a
+  reader could mistake hosted preview parity for timing or tactile evidence.
+
+### Resolution In This Revision
+
+- Added a manuscript paragraph under `Profiles and Project Registry` explaining
+  that bundled profiles open in view mode, editable copies are local projects,
+  hosted/static pages are previews, and timing-sensitive acquisition belongs to
+  the native runner.
+- Added a condensed-table row and a full `evidence_matrix.csv` row for
+  `Dashboard mode: view, edit, hosted preview, and local acquisition boundary`.
+- Split the condensed design-decision matrix into design/stimulus and
+  runner/analysis tables so the new row remains readable without an oversized
+  LaTeX float.
+- Added a `Dashboard state and execution boundary` row to the reporting
+  checklist so future PPS Toolkit studies report whether a claim comes from
+  preview, editable design artifacts, or native acquisition.
+- Added an `Open Practices Statement` before the bibliography. It states that
+  the current draft reports software rather than new participant data, lists the
+  source artifacts intended for release, and says future participant or
+  hardware-validation claims need archived redistributable artifacts, hashes,
+  analysis scripts, and deidentified data.
+
+### Residual Concerns
+
+- The Open Practices Statement still needs final release metadata: repository
+  URL, release tag, archived DOI, exact commit, and any final validation archive
+  DOI.
+- The dashboard-boundary language is now clearer, but it does not replace
+  publication-hardware timing, acoustic, tactile, or participant validation.

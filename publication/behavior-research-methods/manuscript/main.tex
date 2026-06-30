@@ -61,6 +61,8 @@ Segment 0 defines the study context. Bundled profiles provide reusable starting 
 
 Custom projects create their own local registry folders and manifests. The public repository deliberately excludes local participant outputs, private generated assets, raw downloaded papers, local SOFA files, and unlicensed third-party stimuli. This boundary supports open software reuse while avoiding accidental publication of data or assets that do not belong in a methods package.
 
+The dashboard also separates inspection from mutation and acquisition. Bundled profiles open in a view mode so researchers can inspect citations, paths, and previews before copying a design into an editable local project. Hosted/static pages can preview finished profiles and export source-pointer randomization artifacts, but they do not run timing-sensitive trials or write participant folders. This boundary follows the same lesson as general experiment builders: graphical interfaces can lower barriers and improve reuse \citep{AnwylIrvine2018,Peirce2019}, but response-time and audio timing claims still require the actual browser, operating system, audio route, and hardware configuration to be validated \citep{Bridges2020,Ellis2024}.
+
 \subsection{Auditory Ingredients}
 
 Segment 1 separates source construction from trial scheduling. Researchers can generate a looming noise source, import a custom source that should be spatialized, or preserve a custom audio clip such as an instruction or speech segment. Generated looming currently exposes two source modes. \emph{Burst train} maps to the toolkit's DynaSpace-derived Gaussian burst-train profile; \emph{Smooth linear} maps to a continuous-noise profile. The toggle exists because the field does not use one auditory source form. Older and canonical dynamic-sound tasks used noise-like looming stimuli \citep{Canzoneri2012,Farne2002}, while recent mobile/DynaSpace workflows emphasize salient burst trains and validated phone timing \citep{Roussel2025}. Other PPS work uses roughness, affective sounds, ecological sounds, or semantic sounds whose defensive or action-preparation value is part of the manipulation \citep{Taffou2021,Bahadori2021}.
@@ -95,23 +97,37 @@ The runner writes a minimal public-data layer and a reconstructive private/sessi
 
 \section{Design-decision Evidence Matrix}
 
-Table~\ref{tab:matrix} summarizes the manuscript-level matrix. The complete editable source is provided as \code{evidence\_matrix.csv}. The matrix is not a formal systematic review. It is a source-pointer scaffold: each row connects a visible toolkit control to methodological variation in the literature, a design rationale, and a caveat that should be preserved in reporting.
+Tables~\ref{tab:matrix-core} and \ref{tab:matrix-runner} summarize the manuscript-level matrix. The complete editable source is provided as \code{evidence\_matrix.csv}. The matrix is not a formal systematic review. It is a source-pointer scaffold: each row connects a visible toolkit control to methodological variation in the literature, a design rationale, and a caveat that should be preserved in reporting.
 
 \begin{table}[t]
-\caption{Condensed design-decision matrix for PPS Toolkit. The accompanying CSV contains the full row-level audit for Segment 0-6 controls and runner decisions.}
-\label{tab:matrix}
+\caption{Condensed design-decision matrix for PPS Toolkit: design and stimulus layers. The accompanying CSV contains the full row-level audit for Segment 0-6 controls and runner decisions.}
+\label{tab:matrix-core}
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.16\textwidth} >{\raggedright\arraybackslash}p{0.22\textwidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.17\textwidth}}
 \toprule
 Decision cluster & Toolkit control & Literature variation and rationale & Main caveat \\
 \midrule
+Dashboard mode and execution boundary & View/Edit mode; read-only bundled profiles; hosted/static preview; local companion/native runner & Experiment builders improve reuse, but timing-sensitive behavioral software must keep runnable assets and validation evidence inspectable \citep{AnwylIrvine2018,Peirce2019,Bridges2020,Ellis2024}. & A hosted preview is not acquisition or timing evidence. \\
 Auditory source form & Burst-train or smooth generated sources; imported custom sounds & PPS studies use continuous noise, burst trains, rough sounds, and affective/ecological sounds \citep{Canzoneri2012,Farne2002,Hug2019,Taffou2021,Roussel2025}. & Source mode is not a control condition unless it is explicitly crossed and analyzed. \\
 Loudness and gain law & Segment 1 loudness contract; start/end level policy; instruction offset; peak ceiling & Auditory distance judgments depend on level, source spectrum, reverberation, and normalization choices \citep{Zahorik2002,Kolarik2015,Spagnol2017,Arend2021Level}. & Estimated SPL is not a substitute for measured acoustic calibration. \\
 Trajectory and spatial frame & Distance, azimuth, elevation, direction, duration, speed & Front/rear/left/right, walking, and 3D tasks show that PPS is body-relative and direction-sensitive \citep{Matsuda2021,Noel2015,Teraoka2024,Amiel2025}. & Binaural trajectories approximate apparatus geometry; unsupported social or VR context remains metadata. \\
 Spatial rendering & SOFA/FABIAN reference path and 3DTI-compatible manifests & Near-field HRTFs, renderer interpolation, and open binaural engines matter for peribody distances \citep{Salvador2018,CuevasRodriguez2019,Hoene2017}. & Generic rendering is not individualized localization evidence. \\
 Trial sequence design & Row/family builder, ordered audio boxes, alternatives, jitter & PPS timing often combines task instructions, sound onset, SOA, and response windows; expectancy is a known confound \citep{Hobeika2019,Holmes2020}. & Some papers require ITI or apparatus details not yet exposed as first-class controls. \\
 Baseline and control logic & Tactile-only, stationary/fixed-distance, min/max anchor, full-SOA, catch files & Baseline practice differs across Canzoneri-style controls, Hobeika fixed-distance correction, Teraoka tactile-only baselines, and critique of missing controls \citep{Canzoneri2012,Hobeika2019,Teraoka2024,Holmes2020}. & No baseline is universally correct; manuscripts must justify the chosen correction. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[t]
+\caption{Condensed design-decision matrix for PPS Toolkit: runner, randomization, and analysis layers.}
+\label{tab:matrix-runner}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.16\textwidth} >{\raggedright\arraybackslash}p{0.22\textwidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.17\textwidth}}
+\toprule
+Decision cluster & Toolkit control & Literature variation and rationale & Main caveat \\
+\midrule
 Tactile calibration and misses & Pre-run threshold assay; run-local adaptive nudge after repeated misses & Vibrotactile thresholds vary with method, reliability, and adaptation \citep{Merchel2020,Mikkelsen2020,Morioka2002,Goble1993,Pate2024}. & Pilot miss-rate observations are anecdotal until tied to traceable artifacts. \\
 Randomization and blocks & Repetition pools, seeded distribution, block acceptance, participant permutations & Reproducible experiment-builder workflows benefit from saved schedules and auditable randomization \citep{AnwylIrvine2018,Peirce2019,Ellis2024}. & Randomization artifacts do not replace preregistration or power analysis. \\
 Analysis choices & Raw RT curves, baseline-corrected facilitation, sigmoid, log-decay, linear fits & Canonical sigmoid boundaries and logarithmic/linear distance arguments coexist with small-effect and control-condition critiques \citep{Canzoneri2012,Hobeika2019,Holmes2020}. & Instant analysis is exploratory operator feedback, not confirmatory inference. \\
@@ -171,6 +187,7 @@ The evidence matrix is intended to support reporting, not merely development. Ta
 Topic & Report from toolkit artifacts & Boundary to state \\
 \midrule
 Profile and provenance & Profile id, project id, profile citation, verification status, design manifest hash, and local asset exceptions. & A profile is a represented implementation, not proof of exact original-apparatus equivalence. \\
+Dashboard state and execution boundary & View/Edit state, bundled or custom profile status, hosted/static versus local-companion mode, and whether acquisition was run in the native runner. & Read-only preview, editable design work, and timing-sensitive acquisition are different evidence states. \\
 Auditory source and trajectory & Source mode, imported or generated asset hashes, start/end distance, azimuth, elevation, duration, speed, looming/receding label, and body-relative frame. & Source class and trajectory are manipulations; do not relabel them as controls unless crossed in the design. \\
 Spatial rendering & SOFA/HRTF resource, renderer path or engine, trajectory sample table, channel layout, and renderer QC files. & Renderer provenance does not establish individualized localization, externalization, or perceived distance. \\
 Auditory level & Loudness policy, start/end SPL targets, instruction offset, peak ceiling, gain-law mode, hardware estimate or measured calibration file. & Estimated SPL and measured participant-ear SPL are different evidence layers. \\
@@ -228,7 +245,7 @@ Validation is organized around four reusable use cases. In the present draft the
 Validation item & Result summary & Evidence layer & Boundary \\
 \midrule
 Protocol 12 published-profile recreation interface matrix & On 30 June 2026, the scripted matrix passed 30/30 required criteria: seven ready published profiles passed gates and materialized through Segment 6, and two blocked samples were blocked as expected. & Software/profile materialization and runner-handoff artifacts. & Does not prove physical timing, Woojer mechanical onset, tactile perception, individualized spatial perception, or exact reuse of private original-author stimuli. \\
-Springer source compile check & The manuscript source compiled with the preserved Springer Nature template to a 24-page PDF with no unresolved citations or references after this revision. & Publication source integrity. & Does not validate runtime behavior or participant-level scientific claims. \\
+Springer source compile check & The manuscript source compiled with the preserved Springer Nature template to a 25-page PDF with no unresolved citations or references after this revision. & Publication source integrity. & Does not validate runtime behavior or participant-level scientific claims. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -289,6 +306,9 @@ To be completed before submission.
 
 \subsection*{Author contributions}
 To be completed before submission.
+
+\section*{Open Practices Statement}
+This draft reports software and reusable methods rather than a new participant experiment, and no new participant dataset is analyzed. The manuscript source, evidence matrix, validation-evidence summary, study-template source pointers, and toolkit code are intended to be shared in the public repository with the final release tag, archived DOI, and exact paper commit added before submission. Generated local validation reports, participant folders, raw downloaded papers, proprietary sounds, and private acquisition outputs are not committed. Any final version that reports participant or hardware-validation results should archive the redistributable validation artifacts, hashes, analysis scripts, and deidentified data needed to reproduce those claims.
 
 \bibliography{references}
 
