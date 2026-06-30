@@ -104,7 +104,9 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   It compares phone `lsl_marker_mirror.csv` rows with PC-captured
   `PPSMarkersV2` rows by event id, marker fields, numeric trigger sequence, and
   canonicalized rich-marker `payload_json`, so external monitor/XDF evidence
-  must preserve the same `session_metadata` reconstruction payload.
+  must preserve the same `session_metadata` reconstruction payload. The loader
+  accepts PC monitor JSONL/report artifacts and LabRecorder `.xdf` files when
+  optional `pyxdf` is available.
 - Android controller-role scaffolding lives in `PhoneControllerCommands.kt` and
   the `Runner` / `Controller` toggle inside `PhoneRuntimeScreen`. Controller
   mode writes token-gated command samples to

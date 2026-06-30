@@ -4,6 +4,7 @@ import csv
 import importlib.util
 import json
 import sys
+import types
 from pathlib import Path
 
 from peripersonal_space_toolkit import android_lsl_monitor as monitor
@@ -156,6 +157,47 @@ def test_loaders_accept_phone_run_folder_and_monitor_folder(tmp_path: Path):
     assert result.ok is True
     assert result.report["phone_marker_count"] == 1
     assert result.report["monitor_rich_marker_count"] == 1
+
+
+def test_load_monitor_rows_accepts_labrecorder_xdf(monkeypatch):
+    phone_markers = [
+        _phone_marker(event_id="1", event_type="session_metadata", event_code="8"),
+        _phone_marker(event_id="2", event_type="block_start", event_code="10"),
+    ]
+
+    def fake_load_xdf(_path: str):
+        return (
+            [
+                {
+                    "info": {"name": ["PPSMarkersV2"], "type": ["Markers"], "source_id": ["pps-android-markers-v2-test"]},
+                    "time_series": [
+                        [phone_markers[0].get(label, "") for label in LSL_MARKER_CHANNELS],
+                        [phone_markers[1].get(label, "") for label in LSL_MARKER_CHANNELS],
+                    ],
+                    "time_stamps": [1.0, 2.0],
+                },
+                {
+                    "info": {"name": ["PPSTriggerCodes"], "type": ["Markers"], "source_id": ["pps-android-trigger-codes-test"]},
+                    "time_series": [[8], [10]],
+                    "time_stamps": [1.0, 2.0],
+                },
+            ],
+            {},
+        )
+
+    monkeypatch.setitem(sys.modules, "pyxdf", types.SimpleNamespace(load_xdf=fake_load_xdf))
+
+    monitor_rows = reconciler.load_monitor_rows(Path("android_capture.xdf"))
+    result = reconciler.reconcile_android_lsl_monitor(
+        phone_markers,
+        monitor_rows,
+        expect_numeric_triggers=True,
+    )
+
+    assert result.ok is True
+    assert result.report["monitor_rich_marker_count"] == 2
+    assert result.report["monitor_numeric_trigger_count"] == 2
+    assert result.report["numeric_trigger_summary"]["sequence_matches_phone_markers"] is True
 
 
 def _phone_marker(

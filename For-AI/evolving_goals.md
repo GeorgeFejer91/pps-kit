@@ -110,7 +110,9 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   This means event-id and trigger-code agreement is no longer enough: if the
   external monitor/XDF path mutates or drops the `session_metadata`
   reconstruction payload, `reconcile_android_lsl_monitor_with_phone_run.py`
-  fails.
+  fails. The same script now accepts LabRecorder `.xdf` files directly through
+  optional `pyxdf`, classifying recognized Android LSL streams into the PC
+  monitor row schema before reconciliation.
 
 ## 2026-06-29
 

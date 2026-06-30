@@ -22,6 +22,8 @@ from peripersonal_space_toolkit.android_lsl_monitor import (  # noqa: E402
     PC_ANDROID_LSL_MONITOR_EVENTS,
     PC_ANDROID_LSL_MONITOR_REPORT,
     PC_ANDROID_LSL_MONITOR_ROW_SCHEMA,
+    STREAM_DEFINITIONS,
+    build_android_lsl_monitor_row,
 )
 
 
@@ -205,6 +207,8 @@ def load_monitor_rows(path: Path) -> list[dict[str, Any]]:
         raise FileNotFoundError(f"Missing {PC_ANDROID_LSL_MONITOR_EVENTS} in {path}")
     if path.suffix.lower() == ".jsonl":
         return _read_jsonl(path)
+    if path.suffix.lower() == ".xdf":
+        return _load_monitor_rows_from_xdf(path)
     data = _read_json(path)
     if data.get("schema") == PC_ANDROID_LSL_MONITOR_ROW_SCHEMA:
         return [data]
@@ -224,6 +228,79 @@ def _markers_from_json(data: dict[str, Any]) -> list[dict[str, Any]]:
     if not isinstance(rows, list):
         raise ValueError("JSON artifact does not contain lsl_marker_mirror array")
     return [dict(row) for row in rows if isinstance(row, dict)]
+
+
+def _load_monitor_rows_from_xdf(path: Path) -> list[dict[str, Any]]:
+    try:
+        import pyxdf  # type: ignore
+    except Exception as exc:  # noqa: BLE001 - optional validation dependency.
+        raise RuntimeError("pyxdf is required to read LabRecorder/XDF Android LSL monitor artifacts") from exc
+
+    streams, _header = pyxdf.load_xdf(str(path))
+    rows: list[dict[str, Any]] = []
+    for stream in streams or []:
+        if not isinstance(stream, dict):
+            continue
+        info = stream.get("info") if isinstance(stream.get("info"), dict) else {}
+        stream_key = _stream_key_from_xdf_info(info)
+        if not stream_key:
+            continue
+        samples = _as_list(stream.get("time_series"))
+        timestamps = _as_list(stream.get("time_stamps"))
+        source_id = _xdf_info_value(info, "source_id")
+        stream_name = _xdf_info_value(info, "name")
+        for index, sample in enumerate(samples):
+            sample_values = _as_sample_values(sample)
+            timestamp = timestamps[index] if index < len(timestamps) else 0.0
+            rows.append(
+                build_android_lsl_monitor_row(
+                    stream_key=stream_key,
+                    sample=sample_values,
+                    lsl_timestamp=_safe_float(timestamp, default=0.0),
+                    source_id=source_id,
+                    stream_name=stream_name,
+                )
+            )
+    return rows
+
+
+def _stream_key_from_xdf_info(info: dict[str, Any]) -> str:
+    stream_name = _xdf_info_value(info, "name")
+    stream_type = _xdf_info_value(info, "type")
+    for key, definition in STREAM_DEFINITIONS.items():
+        if stream_name == str(definition["stream_name"]):
+            return key
+    for key, definition in STREAM_DEFINITIONS.items():
+        if stream_type and stream_type == str(definition["stream_type"]):
+            return key
+    return ""
+
+
+def _xdf_info_value(info: dict[str, Any], key: str) -> str:
+    raw = info.get(key)
+    if isinstance(raw, list):
+        raw = raw[0] if raw else ""
+    return "" if raw is None else str(raw)
+
+
+def _as_list(value: Any) -> list[Any]:
+    if value is None:
+        return []
+    if hasattr(value, "tolist"):
+        converted = value.tolist()
+        return converted if isinstance(converted, list) else [converted]
+    if isinstance(value, list):
+        return value
+    if isinstance(value, tuple):
+        return list(value)
+    return [value]
+
+
+def _as_sample_values(sample: Any) -> list[Any]:
+    values = _as_list(sample)
+    if len(values) == 1 and isinstance(values[0], list):
+        return values[0]
+    return values
 
 
 def _numeric_summary(phone_markers: list[dict[str, Any]], numeric_rows: list[dict[str, Any]]) -> dict[str, Any]:
@@ -311,6 +388,13 @@ def _clean_code(value: Any) -> str:
         return str(int(float(raw)))
     except ValueError:
         return raw
+
+
+def _safe_float(value: Any, *, default: float) -> float:
+    try:
+        return float(str(value).strip())
+    except (TypeError, ValueError):
+        return default
 
 
 def _canonical_payload_json(value: Any) -> str:

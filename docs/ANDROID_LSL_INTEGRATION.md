@@ -311,7 +311,8 @@ numeric trigger, command-signal, and command-ack inlets. When
 PC-captured rich markers against the phone marker mirror by event id, visible
 marker fields, and semantic `payload_json` equality, preserving the
 `session_metadata` reconstruction payload through the external monitor/XDF
-path.
+path. It accepts either `pc_android_lsl_monitor_events.jsonl` or a LabRecorder
+`.xdf` file when the optional `pyxdf` dependency is installed.
 
 For new phone-owned run exports, also require the catalog entry:
 
