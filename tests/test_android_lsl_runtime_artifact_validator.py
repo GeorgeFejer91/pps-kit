@@ -535,6 +535,21 @@ def test_android_lsl_runtime_validator_requires_phone_owned_data_export_when_exp
     assert "phone-owned data export is missing" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_data_max_reconstruction_spine_gap(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    _write_phone_owned_data_export(run_dir)
+    data_max_file = tmp_path / "phone_owned_exports" / "2.Data_max" / "P001" / "runs" / run_dir.name / "reconstruction_contract.json"
+    data_max_file.unlink()
+
+    result = validator.validate_run_artifact(run_dir, expect_phone_owned_data_export=True)
+
+    assert result.ok is False
+    assert "strict phone-owned data export Data_max copy is missing reconstruction files" in "\n".join(result.failures)
+    assert "reconstruction_contract.json" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_accepts_artifact_file_inventory(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -2739,7 +2754,10 @@ def _write_phone_owned_data_export(run_dir: Path) -> None:
             writer.writerows(rows)
     data_max = export_root / "2.Data_max" / "P001" / "runs" / run_dir.name
     data_max.mkdir(parents=True)
-    (data_max / "completion.json").write_text((run_dir / "completion.json").read_text(encoding="utf-8"), encoding="utf-8")
+    for filename in sorted({"completion.json", *validator.PHONE_DATA_MAX_REQUIRED_RECONSTRUCTION_FILES}):
+        source = run_dir / filename
+        if source.is_file():
+            (data_max / filename).write_bytes(source.read_bytes())
     export = {
         "schema": "pps-android-phone-owned-data-export.v1",
         "participant_id": "P001",

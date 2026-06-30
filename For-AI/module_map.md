@@ -233,7 +233,11 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `--expect-trigger-code-mirror` is set,
   phone-owned `phone_owned_data_export.json` plus app-private or PC-upload
   mirrored `phone_owned_exports/1.Data_min` and `2.Data_max` snapshots when
-  `--expect-phone-owned-data-export` is set,
+  `--expect-phone-owned-data-export` is set; strict Data Max validation now
+  requires the mirrored run folder to include the reconstruction spine files
+  (`lsl_runtime_status.json`, `events.csv`, `run_package_manifest.json`,
+  `reconstruction_contract.json`, marker/trigger mirrors, participant metadata,
+  haptic capability, and completion/latest-events evidence),
   phone-run `participant_metadata.json` and `haptic_capability.json` sidecars
   plus Android haptic calibration threshold/status/amplitude-response
   consistency, including no-vibrator, binary-detection, and amplitude-control

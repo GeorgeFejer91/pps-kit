@@ -110,6 +110,16 @@ PHONE_DATA_MIN_FIELDNAMES = [
     "hit_miss",
     "reaction_time_ms",
 ]
+PHONE_DATA_MAX_REQUIRED_RECONSTRUCTION_FILES = {
+    "lsl_runtime_status.json",
+    "events.csv",
+    "run_package_manifest.json",
+    ANDROID_PHONE_RUN_RECONSTRUCTION_ARTIFACT,
+    "lsl_marker_mirror.csv",
+    "trigger_codes.csv",
+    "participant_metadata.json",
+    "haptic_capability.json",
+}
 ANDROID_PHONE_EVENT_CODES = {
     "session_metadata": 8,
     "run_start": 1,
@@ -212,6 +222,7 @@ def validate_runtime_status(
     phone_data_min_master_header: list[str] | None = None,
     phone_data_min_master_rows: list[dict[str, Any]] | None = None,
     phone_data_max_has_completion: bool = False,
+    phone_data_max_files: list[str] | None = None,
     expect_native_transport: bool = False,
     expect_command_acks: bool = False,
     expect_run_catalog: bool = False,
@@ -422,6 +433,7 @@ def validate_runtime_status(
         data_min_master_header=phone_data_min_master_header or [],
         data_min_master_rows=phone_data_min_master_rows or [],
         data_max_has_completion=phone_data_max_has_completion,
+        data_max_files=phone_data_max_files or [],
         completion=completion,
         response_ledger_rows=response_ledger_rows or [],
         failures=failures,
@@ -744,6 +756,7 @@ def validate_run_artifact(
         phone_data_min_master_header=loaded.get("phone_data_min_master_header") or [],
         phone_data_min_master_rows=loaded.get("phone_data_min_master_rows") or [],
         phone_data_max_has_completion=bool(loaded.get("phone_data_max_has_completion")),
+        phone_data_max_files=loaded.get("phone_data_max_files") or [],
         expect_native_transport=expect_native_transport,
         expect_command_acks=expect_command_acks,
         expect_run_catalog=expect_run_catalog,
@@ -952,6 +965,14 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 if "phone_owned_exports/2.Data_max/" in name.replace("\\", "/")
                 and (name.endswith("completion.json") or name.endswith("latest_events.json"))
             ]
+            data_max_file_names = sorted(
+                {
+                    Path(name.replace("\\", "/")).name
+                    for name in archive.namelist()
+                    if "phone_owned_exports/2.Data_max/" in name.replace("\\", "/")
+                    and not name.replace("\\", "/").endswith("/")
+                }
+            )
             topup_plan_members = [name for name in archive.namelist() if name.endswith("phone_topup_plan.json")]
             topup_materialization_members = [
                 name
@@ -1128,6 +1149,7 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 "phone_data_min_master_header": phone_data_min_master_header,
                 "phone_data_min_master_rows": phone_data_min_master_rows,
                 "phone_data_max_has_completion": bool(data_max_completion_members),
+                "phone_data_max_files": data_max_file_names,
                 "topup_plan": topup_plan,
                 "topup_materialization": topup_materialization,
                 "topup_wav_hashes": topup_wav_hashes,
@@ -1163,10 +1185,12 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
     phone_data_min_master_header: list[str] = []
     phone_data_min_master_rows: list[dict[str, Any]] = []
     phone_data_max_has_completion = False
+    phone_data_max_files: list[str] = []
     if export_root:
         phone_data_min_header, phone_data_min_rows = _load_phone_data_min_rows(export_root)
         phone_data_min_master_header, phone_data_min_master_rows = _load_phone_data_min_master_rows(export_root)
         phone_data_max_has_completion = _phone_data_max_has_completion(export_root)
+        phone_data_max_files = _phone_data_max_files(export_root)
 
     sidecars = {
         "package_manifest": _read_json(package_manifest_path) if package_manifest_path.is_file() else None,
@@ -1189,6 +1213,7 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
         "phone_data_min_master_header": phone_data_min_master_header,
         "phone_data_min_master_rows": phone_data_min_master_rows,
         "phone_data_max_has_completion": phone_data_max_has_completion,
+        "phone_data_max_files": phone_data_max_files,
         "topup_plan": _read_json(topup_plan_path) if topup_plan_path.is_file() else None,
         "topup_materialization": _read_json(topup_materialization_path) if topup_materialization_path.is_file() else None,
         "topup_wav_hashes": {topup_wav_path.name: _sha256_file(topup_wav_path)} if topup_wav_path.is_file() else {},
@@ -1259,6 +1284,13 @@ def _load_phone_data_min_master_rows(export_root: Path) -> tuple[list[str], list
 def _phone_data_max_has_completion(export_root: Path) -> bool:
     data_max = export_root / "2.Data_max"
     return any(data_max.glob("*/runs/*/completion.json")) or any(data_max.glob("*/runs/*/latest_events.json"))
+
+
+def _phone_data_max_files(export_root: Path) -> list[str]:
+    data_max = export_root / "2.Data_max"
+    if not data_max.is_dir():
+        return []
+    return sorted({path.name for path in data_max.rglob("*") if path.is_file()})
 
 
 def _load_phone_run_catalog_root(root: Path) -> dict[str, Any]:
@@ -4100,6 +4132,7 @@ def _validate_phone_owned_data_export(
     data_min_master_header: list[str],
     data_min_master_rows: list[dict[str, Any]],
     data_max_has_completion: bool,
+    data_max_files: list[str],
     completion: dict[str, Any] | None,
     response_ledger_rows: list[dict[str, Any]],
     failures: list[str],
@@ -4164,6 +4197,13 @@ def _validate_phone_owned_data_export(
             failures.append(f"phone-owned master CSV is missing participant trial_uids: {sorted(missing_in_master)}")
     if expect_phone_owned_data_export and not data_max_has_completion:
         failures.append("strict phone-owned data export requires a 2.Data_max run-folder completion copy")
+    if expect_phone_owned_data_export:
+        missing_data_max = sorted(PHONE_DATA_MAX_REQUIRED_RECONSTRUCTION_FILES - set(data_max_files))
+        if missing_data_max:
+            failures.append(
+                "strict phone-owned data export Data_max copy is missing reconstruction files: "
+                + ", ".join(missing_data_max)
+            )
 
 
 def _validate_phone_run_artifact_file_inventory(

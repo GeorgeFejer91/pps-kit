@@ -133,7 +133,11 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   snapshot. `1.Data_min/` contains a participant CSV and
   `master_successful_participants.csv` with the same 17-column public schema as
   the PC runner, while `2.Data_max/<participant>/runs/<run_id>/` mirrors the
-  rich reconstructive phone-run folder.
+  rich reconstructive phone-run folder. Strict export validation requires that
+  Data Max mirror to carry the core phone reconstruction spine: runtime status,
+  event diary, package manifest, reconstruction contract, local marker and
+  trigger-code mirrors, participant metadata, haptic capability, and
+  completion/latest-events evidence.
 - Controller-mode outboxes include `phone_controller_runtime_status.json`.
   Default builds record `current_android_source_behavior=local_controller_outbox_only`;
   native builds record `native_lsl_controller_with_local_outbox` when the
