@@ -28,12 +28,15 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   prepared, using the prepared package part-session id as the default command
   target.
 - The PC-side helper `pps-android-lsl-monitor` resolves Android
-  `PPSMarkersV2`, `PPSTriggerCodes`, and `PPSCommandAcksV1` streams for a
-  bounded monitoring window and writes `pc_android_lsl_monitor_events.jsonl`,
+  `PPSMarkersV2`, `PPSTriggerCodes`, `PPSCommandAcksV1`, and
+  `PPSCommandSignalsV1` streams for a bounded monitoring window and writes
+  `pc_android_lsl_monitor_events.jsonl`,
   `pc_android_lsl_monitor_report.json`, and
   `pc_android_lsl_monitor_status.json`. This is the intended lightweight
   "watch the phone runner from another PC" seam before a full LabRecorder/XDF
-  capture.
+  capture. Its embedded status includes `stream_descriptions` for all four
+  observed inlets, preserving the same channel-order and privacy contract as
+  the phone, controller, and PC-admin artifacts.
 - Commands are token-gated through `token` or `companion_token` in
   `payload_json` before any local handler runs.
 - Acks are shaped as applied/rejected command acknowledgements after the local
@@ -222,7 +225,9 @@ discoverable stream names. Controller-mode strict validation similarly requires
 stream descriptions for the Android controller command-signal outlet and
 command-ack inlet before button presses count as reconstructable native LSL
 evidence. PC-admin strict validation requires the same evidence for the PC
-command-signal outlet and Android command-ack inlet.
+command-signal outlet and Android command-ack inlet. PC-monitor strict
+validation requires observer-side stream descriptions for the rich marker,
+numeric trigger, command-signal, and command-ack inlets.
 
 For new phone-owned run exports, also require the catalog entry:
 
@@ -270,6 +275,10 @@ stream while commands are being sent:
 ```powershell
 .\.venv\Scripts\pps-android-lsl-monitor.exe --duration-s 30 --require-markers --require-triggers --require-acks --output-dir artifacts\android_lsl_monitor\rehearsal_001
 ```
+
+Add `--require-commands` when the rehearsal is expected to capture a PC-runner
+or Controller-phone `PPSCommandSignalsV1` command stream in addition to the
+phone runner's acknowledgement stream.
 
 Then validate the monitor report:
 

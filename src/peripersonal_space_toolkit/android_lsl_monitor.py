@@ -14,8 +14,10 @@ from .lsl_command_ack import (
     COMMAND_SCHEMA,
     LSL_ACK_CHANNELS,
     LSL_ACK_STREAM_NAME,
+    LSL_ACK_STREAM_TYPE,
     LSL_COMMAND_CHANNELS,
     LSL_COMMAND_STREAM_NAME,
+    LSL_COMMAND_STREAM_TYPE,
     LSLCommandAckError,
 )
 from .timing_events import (
@@ -52,10 +54,17 @@ STREAM_DEFINITIONS: dict[str, dict[str, Any]] = {
     },
     "command_acks": {
         "stream_name": LSL_ACK_STREAM_NAME,
-        "stream_type": "CommandAcks",
+        "stream_type": LSL_ACK_STREAM_TYPE,
         "channel_format": "string",
         "channel_labels": list(LSL_ACK_CHANNELS),
         "first_channel_schema": ACK_SCHEMA,
+    },
+    "command_signals": {
+        "stream_name": LSL_COMMAND_STREAM_NAME,
+        "stream_type": LSL_COMMAND_STREAM_TYPE,
+        "channel_format": "string",
+        "channel_labels": list(LSL_COMMAND_CHANNELS),
+        "first_channel_schema": COMMAND_SCHEMA,
     },
 }
 
@@ -84,8 +93,8 @@ def android_lsl_monitor_status() -> dict[str, Any]:
         "streams": {
             key: str(definition["stream_name"])
             for key, definition in STREAM_DEFINITIONS.items()
-        }
-        | {"command_signals": LSL_COMMAND_STREAM_NAME},
+        },
+        "stream_descriptions": pc_android_lsl_monitor_stream_descriptions(),
         "marker_protocol": {
             "marker_version": MARKER_VERSION,
             "rich_marker_channels": list(LSL_MARKER_CHANNELS),
@@ -106,6 +115,67 @@ def android_lsl_monitor_status() -> dict[str, Any]:
         "evidence_boundary": (
             "network_lsl_monitoring_only_not_physical_timing_or_labrecorder_persistence_proof"
         ),
+    }
+
+
+def pc_android_lsl_monitor_stream_descriptions() -> dict[str, Any]:
+    """Describe the LSL streams a PC monitor can observe without creating participant-coded names."""
+
+    return {
+        "schema": "pps-android-lsl-stream-descriptions.v1",
+        "runtime_authority": "pc_runner",
+        "role": "pc_android_lsl_monitor",
+        "native_transport": "liblsl",
+        "privacy": {
+            "default": "metadata_payload_only",
+            "demographics_in_stream_name": False,
+            "participant_demographics_location": "metadata_and_payload_artifacts",
+        },
+        "rich_markers": {
+            "name": LSL_STREAM_NAME,
+            "type": LSL_STREAM_TYPE,
+            "role": "inlet",
+            "channel_format": "string",
+            "channel_count": len(LSL_MARKER_CHANNELS),
+            "nominal_srate_hz": 0.0,
+            "source_id_pattern": "pps-android-markers-v2-*",
+            "marker_version": MARKER_VERSION,
+            "channel_labels": list(LSL_MARKER_CHANNELS),
+        },
+        "numeric_triggers": {
+            "name": LSL_NUMERIC_STREAM_NAME,
+            "type": LSL_NUMERIC_STREAM_TYPE,
+            "role": "inlet",
+            "channel_format": "int32",
+            "channel_count": 1,
+            "nominal_srate_hz": 0.0,
+            "source_id_pattern": "pps-android-trigger-codes-*",
+            "channel_labels": ["event_code"],
+        },
+        "command_acks": {
+            "name": LSL_ACK_STREAM_NAME,
+            "type": LSL_ACK_STREAM_TYPE,
+            "role": "inlet",
+            "channel_format": "string",
+            "channel_count": len(LSL_ACK_CHANNELS),
+            "nominal_srate_hz": 0.0,
+            "source_id_pattern": "pps-android-command-acks-v1-*",
+            "channel_labels": list(LSL_ACK_CHANNELS),
+        },
+        "command_signals": {
+            "name": LSL_COMMAND_STREAM_NAME,
+            "type": LSL_COMMAND_STREAM_TYPE,
+            "role": "inlet",
+            "channel_format": "string",
+            "channel_count": len(LSL_COMMAND_CHANNELS),
+            "nominal_srate_hz": 0.0,
+            "source_id_patterns": [
+                "pps-command-signals-v1-*-*",
+                "pps-android-controller-signals-v1-*-*",
+            ],
+            "channel_labels": list(LSL_COMMAND_CHANNELS),
+            "token_required": True,
+        },
     }
 
 
@@ -144,6 +214,8 @@ def build_android_lsl_monitor_row(
         row["event_code"] = _safe_int(values[0] if values else "", default=0)
     elif stream_key == "command_acks":
         row.update(_command_ack_summary(values))
+    elif stream_key == "command_signals":
+        row.update(_command_signal_summary(values))
     return row
 
 
@@ -167,6 +239,8 @@ def build_android_lsl_monitor_report(
     part_session_ids: set[str] = set()
     participant_ids: set[str] = set()
     commands_acked: set[str] = set()
+    commands_observed: set[str] = set()
+    command_names: dict[str, int] = {}
     command_ack_statuses: dict[str, int] = {}
     for row in rows:
         key = str(row.get("stream_key") or "")
@@ -189,6 +263,10 @@ def build_android_lsl_monitor_report(
             commands_acked.add(command_id)
             ack_status = str(row.get("ack_status") or "").strip() or "unknown"
             command_ack_statuses[ack_status] = command_ack_statuses.get(ack_status, 0) + 1
+        if key == "command_signals" and command_id:
+            commands_observed.add(command_id)
+            command_name = str(row.get("command") or "").strip() or "unknown"
+            command_names[command_name] = command_names.get(command_name, 0) + 1
 
     required = list(required_streams or [])
     missing_required = [key for key in required if counts.get(key, 0) <= 0]
@@ -210,6 +288,8 @@ def build_android_lsl_monitor_report(
         "observed_session_ids": sorted(session_ids),
         "observed_part_session_ids": sorted(part_session_ids),
         "observed_participant_ids": sorted(participant_ids),
+        "observed_command_signal_ids": sorted(commands_observed),
+        "observed_command_names": command_names,
         "observed_command_ack_ids": sorted(commands_acked),
         "observed_command_ack_statuses": command_ack_statuses,
         "resolve_status": dict(resolve_status or {}),
@@ -409,6 +489,19 @@ def _command_ack_summary(values: list[Any]) -> dict[str, Any]:
     }
 
 
+def _command_signal_summary(values: list[Any]) -> dict[str, Any]:
+    padded = [str(value) for value in values] + [""] * max(0, len(LSL_COMMAND_CHANNELS) - len(values))
+    return {
+        "command_schema": padded[0],
+        "command_id": padded[1],
+        "session_id": padded[2],
+        "sender_id": padded[3],
+        "command": padded[4],
+        "issued_lsl_time": _safe_float(padded[5], default=0.0),
+        "payload_json": padded[6],
+    }
+
+
 def _load_pylsl() -> Any:
     try:
         import pylsl  # type: ignore
@@ -482,6 +575,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--require-markers", action="store_true", help="Fail unless PPSMarkersV2 samples are observed.")
     parser.add_argument("--require-triggers", action="store_true", help="Fail unless PPSTriggerCodes samples are observed.")
     parser.add_argument("--require-acks", action="store_true", help="Fail unless PPSCommandAcksV1 samples are observed.")
+    parser.add_argument("--require-commands", action="store_true", help="Fail unless PPSCommandSignalsV1 samples are observed.")
     args = parser.parse_args(argv)
 
     required: list[str] = []
@@ -491,6 +585,8 @@ def main(argv: list[str] | None = None) -> int:
         required.append("numeric_triggers")
     if args.require_acks:
         required.append("command_acks")
+    if args.require_commands:
+        required.append("command_signals")
     result = monitor_android_lsl_streams(
         duration_s=args.duration_s,
         output_dir=args.output_dir,

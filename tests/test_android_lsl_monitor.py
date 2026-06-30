@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 from peripersonal_space_toolkit import android_lsl_monitor as monitor
-from peripersonal_space_toolkit.lsl_command_ack import LSLCommandAck, ack_to_sample
+from peripersonal_space_toolkit.lsl_command_ack import LSLCommandAck, LSLCommandSignal, ack_to_sample, command_to_sample
 from peripersonal_space_toolkit.timing_events import LSL_MARKER_CHANNELS, MARKER_VERSION
 
 
@@ -68,10 +68,15 @@ def test_write_android_lsl_monitor_artifacts_and_report(tmp_path: Path):
             ),
             lsl_timestamp=1.4,
         ),
+        monitor.build_android_lsl_monitor_row(
+            stream_key="command_signals",
+            sample=_command_signal_sample(command_id="cmd-2", command="pause"),
+            lsl_timestamp=1.5,
+        ),
     ]
     report = monitor.build_android_lsl_monitor_report(
         rows,
-        required_streams=["rich_markers", "numeric_triggers", "command_acks"],
+        required_streams=["rich_markers", "numeric_triggers", "command_acks", "command_signals"],
         output_dir=tmp_path,
     )
 
@@ -86,9 +91,13 @@ def test_write_android_lsl_monitor_artifacts_and_report(tmp_path: Path):
         "rich_markers": 1,
         "numeric_triggers": 1,
         "command_acks": 1,
+        "command_signals": 1,
     }
     assert saved_report["observed_session_ids"] == ["part-001", "session-001"]
     assert saved_report["observed_command_ack_ids"] == ["cmd-1"]
+    assert saved_report["observed_command_signal_ids"] == ["cmd-2"]
+    assert saved_report["observed_command_names"] == {"pause": 1}
+    assert saved_report["status"]["stream_descriptions"]["command_signals"]["role"] == "inlet"
 
 
 def test_validator_accepts_pc_android_lsl_monitor_artifact(tmp_path: Path):
@@ -120,10 +129,15 @@ def test_validator_accepts_pc_android_lsl_monitor_artifact(tmp_path: Path):
             ),
             lsl_timestamp=1.4,
         ),
+        monitor.build_android_lsl_monitor_row(
+            stream_key="command_signals",
+            sample=_command_signal_sample(command_id="cmd-1", command="start_experiment"),
+            lsl_timestamp=1.5,
+        ),
     ]
     report = monitor.build_android_lsl_monitor_report(
         rows,
-        required_streams=["rich_markers", "numeric_triggers", "command_acks"],
+        required_streams=["rich_markers", "numeric_triggers", "command_acks", "command_signals"],
         output_dir=tmp_path,
     )
     monitor.write_android_lsl_monitor_artifacts(tmp_path, rows, report=report)
@@ -139,6 +153,51 @@ def test_validator_accepts_pc_android_lsl_monitor_artifact(tmp_path: Path):
     assert result.status["role"] == "pc_android_lsl_monitor"
 
 
+def test_build_android_lsl_monitor_row_extracts_command_signal_fields():
+    row = monitor.build_android_lsl_monitor_row(
+        stream_key="command_signals",
+        sample=_command_signal_sample(command_id="cmd-3", command="resume"),
+        lsl_timestamp=2.0,
+        source_id="pc-runner",
+    )
+
+    assert row["stream_name"] == "PPSCommandSignalsV1"
+    assert row["command_schema"] == "pps-lsl-command.v1"
+    assert row["command_id"] == "cmd-3"
+    assert row["session_id"] == "part-001"
+    assert row["sender_id"] == "pc_runner"
+    assert row["command"] == "resume"
+    assert json.loads(row["payload_json"])["token"] == "secret"
+
+
+def test_validator_rejects_pc_monitor_stream_description_drift(tmp_path: Path):
+    rows = [
+        monitor.build_android_lsl_monitor_row(
+            stream_key="rich_markers",
+            sample=_rich_marker_sample(event_type="block_start", event_code="10"),
+            lsl_timestamp=1.0,
+        ),
+        monitor.build_android_lsl_monitor_row(
+            stream_key="numeric_triggers",
+            sample=[10],
+            lsl_timestamp=1.1,
+        ),
+        monitor.build_android_lsl_monitor_row(
+            stream_key="command_signals",
+            sample=_command_signal_sample(command_id="cmd-4", command="pause"),
+            lsl_timestamp=1.2,
+        ),
+    ]
+    report = monitor.build_android_lsl_monitor_report(rows, required_streams=[], output_dir=tmp_path)
+    report["status"]["stream_descriptions"]["command_signals"]["role"] = "outlet"
+    monitor.write_android_lsl_monitor_artifacts(tmp_path, rows, report=report)
+
+    result = validator.validate_run_artifact(tmp_path, expect_native_transport=True)
+
+    assert result.ok is False
+    assert "command_signals.role" in "\n".join(result.failures)
+
+
 def test_validator_requires_monitor_samples_in_strict_mode(tmp_path: Path):
     monitor.write_android_lsl_monitor_artifacts(
         tmp_path,
@@ -151,6 +210,19 @@ def test_validator_requires_monitor_samples_in_strict_mode(tmp_path: Path):
     assert result.ok is False
     assert "expected at least one PPSMarkersV2 sample" in "\n".join(result.failures)
     assert "missing required streams" in "\n".join(result.failures)
+
+
+def _command_signal_sample(*, command_id: str, command: str) -> list[str]:
+    return command_to_sample(
+        LSLCommandSignal(
+            command_id=command_id,
+            session_id="part-001",
+            sender_id="pc_runner",
+            command=command,
+            issued_lsl_time=1.5,
+            payload={"token": "secret", "package_id": "pkg-001"},
+        )
+    )
 
 
 def _rich_marker_sample(*, event_type: str, event_code: str) -> list[str]:

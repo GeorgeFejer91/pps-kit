@@ -262,6 +262,14 @@ records the block-boundary stop, skips remaining scheduled phone blocks and
 phone top-up, and closes the local run artifacts with
 `completion_reason=stopped_after_block`.
 
+PC-side monitoring with `pps-android-lsl-monitor` observes
+`PPSMarkersV2`, `PPSTriggerCodes`, `PPSCommandSignalsV1`, and
+`PPSCommandAcksV1` during rehearsals. Its report/status pair now carries
+`stream_descriptions` for those four observer-side inlets, and monitor event
+rows extract command-signal ids, sender ids, command names, and payload JSON so
+PC-runner or Controller-phone commands can be reconstructed together with the
+phone runner's acknowledgements.
+
 Controller mode always writes `phone_controller_command_outbox.jsonl` as the
 local audit trail. In a native liblsl validation build it also keeps a
 `PPSCommandSignalsV1` outlet open while Controller mode is selected, sends button

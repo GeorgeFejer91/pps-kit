@@ -535,6 +535,13 @@ def validate_pc_monitor_report(
             failures.append("PC monitor marker_version does not match PPSMarkersV2")
         if list(marker_protocol.get("rich_marker_channels") or []) != list(LSL_MARKER_CHANNELS):
             failures.append("PC monitor rich marker channel order does not match PPSMarkersV2")
+        _validate_pc_monitor_lsl_stream_descriptions(
+            status=status,
+            streams=streams,
+            failures=failures,
+            warnings=warnings,
+            expect_native_transport=expect_native_transport,
+        )
     else:
         failures.append("PC Android LSL monitor report is missing embedded status")
 
@@ -549,7 +556,7 @@ def validate_pc_monitor_report(
 
     effective_counts = dict(stream_counts)
     if rows:
-        effective_counts = {key: 0 for key in ("rich_markers", "numeric_triggers", "command_acks")}
+        effective_counts = {key: 0 for key in ("rich_markers", "numeric_triggers", "command_acks", "command_signals")}
         for row in rows:
             key = str(row.get("stream_key") or "")
             if key in effective_counts:
@@ -1479,6 +1486,110 @@ def _validate_pc_admin_lsl_stream_descriptions(
             )
         if "token_required" in spec and row.get("token_required") is not spec["token_required"]:
             failures.append(f"PC Android LSL admin stream description {key}.token_required must be true")
+
+
+def _validate_pc_monitor_lsl_stream_descriptions(
+    *,
+    status: dict[str, Any],
+    streams: dict[str, Any],
+    failures: list[str],
+    warnings: list[str],
+    expect_native_transport: bool,
+) -> None:
+    descriptions = status.get("stream_descriptions") if isinstance(status.get("stream_descriptions"), dict) else None
+    if descriptions is None:
+        message = "PC Android LSL monitor stream descriptions are missing"
+        if expect_native_transport:
+            failures.append(message)
+        else:
+            warnings.append(f"{message}; rerun with --expect-native-transport for strict checks")
+        return
+    if descriptions.get("schema") != ANDROID_LSL_STREAM_DESCRIPTIONS_SCHEMA:
+        failures.append("PC Android LSL monitor stream descriptions schema mismatch")
+    if descriptions.get("role") != "pc_android_lsl_monitor":
+        failures.append("PC Android LSL monitor stream descriptions must declare role='pc_android_lsl_monitor'")
+    if descriptions.get("native_transport") != "liblsl":
+        failures.append("PC Android LSL monitor stream descriptions must declare native_transport='liblsl'")
+    privacy = descriptions.get("privacy") if isinstance(descriptions.get("privacy"), dict) else {}
+    if privacy.get("demographics_in_stream_name") is not False:
+        failures.append("PC Android LSL monitor stream descriptions must keep demographics out of stream names")
+    expected = {
+        "rich_markers": {
+            "name": streams.get("rich_markers") or EXPECTED_PC_MONITOR_STREAMS["rich_markers"],
+            "type": "Markers",
+            "role": "inlet",
+            "channel_format": "string",
+            "channel_count": len(LSL_MARKER_CHANNELS),
+            "channel_labels": list(LSL_MARKER_CHANNELS),
+            "source_id_pattern": "pps-android-markers-v2-*",
+            "marker_version": MARKER_VERSION,
+        },
+        "numeric_triggers": {
+            "name": streams.get("numeric_triggers") or EXPECTED_PC_MONITOR_STREAMS["numeric_triggers"],
+            "type": "TriggerCodes",
+            "role": "inlet",
+            "channel_format": "int32",
+            "channel_count": 1,
+            "channel_labels": ["event_code"],
+            "source_id_pattern": "pps-android-trigger-codes-*",
+        },
+        "command_acks": {
+            "name": streams.get("command_acks") or EXPECTED_PC_MONITOR_STREAMS["command_acks"],
+            "type": "CommandAcks",
+            "role": "inlet",
+            "channel_format": "string",
+            "channel_count": len(LSL_ACK_CHANNELS),
+            "channel_labels": list(LSL_ACK_CHANNELS),
+            "source_id_pattern": "pps-android-command-acks-v1-*",
+        },
+        "command_signals": {
+            "name": streams.get("command_signals") or EXPECTED_PC_MONITOR_STREAMS["command_signals"],
+            "type": "CommandSignals",
+            "role": "inlet",
+            "channel_format": "string",
+            "channel_count": len(LSL_COMMAND_CHANNELS),
+            "channel_labels": list(LSL_COMMAND_CHANNELS),
+            "source_id_patterns": [
+                "pps-command-signals-v1-*-*",
+                "pps-android-controller-signals-v1-*-*",
+            ],
+            "token_required": True,
+        },
+    }
+    for key, spec in expected.items():
+        row = descriptions.get(key) if isinstance(descriptions.get(key), dict) else None
+        if row is None:
+            failures.append(f"PC Android LSL monitor stream description {key} is missing")
+            continue
+        for field in ("name", "type", "role", "channel_format"):
+            if str(row.get(field) or "") != str(spec[field]):
+                failures.append(
+                    f"PC Android LSL monitor stream description {key}.{field} expected {spec[field]!r}, got {row.get(field)!r}"
+                )
+        if _clean_int(row.get("channel_count")) != int(spec["channel_count"]):
+            failures.append(
+                f"PC Android LSL monitor stream description {key}.channel_count expected {spec['channel_count']}, got {row.get('channel_count')!r}"
+            )
+        labels = [str(item) for item in row.get("channel_labels") or []] if isinstance(row.get("channel_labels"), list) else []
+        if labels != list(spec["channel_labels"]):
+            failures.append(f"PC Android LSL monitor stream description {key}.channel_labels differ from the PC-compatible channel order")
+        nominal = _safe_float(row.get("nominal_srate_hz"), fallback=-1.0)
+        if nominal != 0.0:
+            failures.append(f"PC Android LSL monitor stream description {key}.nominal_srate_hz must be 0.0 for irregular marker/command streams")
+        if "source_id_pattern" in spec and str(row.get("source_id_pattern") or "") != str(spec["source_id_pattern"]):
+            failures.append(
+                f"PC Android LSL monitor stream description {key}.source_id_pattern expected {spec['source_id_pattern']!r}"
+            )
+        if "source_id_patterns" in spec:
+            observed_patterns = [str(item) for item in row.get("source_id_patterns") or []] if isinstance(row.get("source_id_patterns"), list) else []
+            if observed_patterns != list(spec["source_id_patterns"]):
+                failures.append(
+                    f"PC Android LSL monitor stream description {key}.source_id_patterns expected {spec['source_id_patterns']!r}"
+                )
+        if "marker_version" in spec and str(row.get("marker_version") or "") != str(spec["marker_version"]):
+            failures.append(f"PC Android LSL monitor stream description {key}.marker_version expected {spec['marker_version']!r}")
+        if "token_required" in spec and row.get("token_required") is not spec["token_required"]:
+            failures.append(f"PC Android LSL monitor stream description {key}.token_required must be true")
 
 
 def _validate_command_protocol(protocol: dict[str, Any], failures: list[str], *, token_field: str = "token_required") -> None:
@@ -3317,6 +3428,24 @@ def _validate_pc_monitor_event_row(row: dict[str, Any], *, row_index: int, failu
             failures.append(f"{prefix} command ack schema mismatch")
         if row.get("command_id") and sample[1] != row.get("command_id"):
             failures.append(f"{prefix} command_id differs from ack sample")
+    elif stream_key == "command_signals":
+        if row.get("stream_name") != LSL_COMMAND_STREAM_NAME:
+            failures.append(f"{prefix} command signal stream_name mismatch")
+        if channel_labels != list(LSL_COMMAND_CHANNELS):
+            failures.append(f"{prefix} command signal channel order mismatch")
+        if len(sample) != len(LSL_COMMAND_CHANNELS):
+            failures.append(f"{prefix} command signal sample channel count mismatch")
+            return
+        if sample[0] != COMMAND_SCHEMA:
+            failures.append(f"{prefix} command signal schema mismatch")
+        if row.get("command_id") and sample[1] != row.get("command_id"):
+            failures.append(f"{prefix} command_id differs from command signal sample")
+        if row.get("session_id") and sample[2] != row.get("session_id"):
+            failures.append(f"{prefix} session_id differs from command signal sample")
+        if row.get("sender_id") and sample[3] != row.get("sender_id"):
+            failures.append(f"{prefix} sender_id differs from command signal sample")
+        if row.get("command") and sample[4] != row.get("command"):
+            failures.append(f"{prefix} command differs from command signal sample")
     else:
         failures.append(f"{prefix} unsupported stream_key {stream_key!r}")
 
