@@ -221,7 +221,51 @@ def test_build_android_lsl_monitor_row_extracts_command_signal_fields():
     assert row["session_id"] == "part-001"
     assert row["sender_id"] == "pc_runner"
     assert row["command"] == "resume"
+    assert row["package_id"] == "pkg-001"
+    assert row["participant_id"] == "P001"
+    assert row["target_session_id"] == "part-001"
+    assert row["target_part_session_id"] == "part-001"
+    assert row["target_session_group_id"] == "group-001"
+    assert row["target_part_number"] == "1"
     assert json.loads(row["payload_json"])["token"] == "secret"
+
+
+def test_build_android_lsl_monitor_row_extracts_command_ack_target_identity():
+    row = monitor.build_android_lsl_monitor_row(
+        stream_key="command_acks",
+        sample=ack_to_sample(
+            LSLCommandAck(
+                command_id="cmd-ack-identity",
+                session_id="part-001",
+                receiver_id="android_runner",
+                status="applied",
+                reason="ok",
+                received_lsl_time=2.01,
+                applied_lsl_time=2.02,
+                ack_lsl_time=2.03,
+                payload={
+                    "command": "pause",
+                    "package_id": "pkg-001",
+                    "participant_id": "P001",
+                    "target_session_id": "part-001",
+                    "target_part_session_id": "part-001",
+                    "target_session_group_id": "group-001",
+                    "target_part_number": "1",
+                },
+            )
+        ),
+        lsl_timestamp=2.03,
+        source_id="android-phone",
+    )
+
+    assert row["stream_name"] == "PPSCommandAcksV1"
+    assert row["command_id"] == "cmd-ack-identity"
+    assert row["package_id"] == "pkg-001"
+    assert row["participant_id"] == "P001"
+    assert row["target_session_id"] == "part-001"
+    assert row["target_part_session_id"] == "part-001"
+    assert row["target_session_group_id"] == "group-001"
+    assert row["target_part_number"] == "1"
 
 
 def test_build_android_lsl_monitor_row_preserves_operator_note_payload():
@@ -337,7 +381,16 @@ def _command_signal_sample(
             sender_id="pc_runner",
             command=command,
             issued_lsl_time=1.5,
-            payload=payload or {"token": "secret", "package_id": "pkg-001"},
+            payload=payload
+            or {
+                "token": "secret",
+                "package_id": "pkg-001",
+                "participant_id": "P001",
+                "target_session_id": "part-001",
+                "target_part_session_id": "part-001",
+                "target_session_group_id": "group-001",
+                "target_part_number": "1",
+            },
         )
     )
 

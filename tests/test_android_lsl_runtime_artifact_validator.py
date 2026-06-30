@@ -1753,6 +1753,44 @@ def test_android_lsl_runtime_validator_rejects_pc_monitor_ack_payload_token_echo
     assert "PC monitor event row 2 command ack payload must not echo the pairing token" in failures
 
 
+def test_android_lsl_runtime_validator_rejects_pc_monitor_command_signal_row_target_identity_drift():
+    rows = [_pc_monitor_command_row(command_id="cmd-monitor-signal-drift", command="pause")]
+    rows[0]["target_part_session_id"] = "part-999"
+    report = monitor.build_android_lsl_monitor_report(rows)
+
+    result = validator.validate_pc_monitor_report(report, event_rows=rows, expect_command_acks=False)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "PC monitor event row 1 payload target_part_session_id differs from monitor row" in failures
+
+
+def test_android_lsl_runtime_validator_rejects_pc_monitor_command_ack_row_target_identity_drift():
+    rows = [
+        _pc_monitor_ack_row(
+            command_id="cmd-monitor-ack-drift",
+            command="pause",
+            payload={
+                "command": "pause",
+                "package_id": "pkg-001",
+                "participant_id": "P001",
+                "target_session_id": "part-001",
+                "target_part_session_id": "part-001",
+                "target_session_group_id": "group-001",
+                "target_part_number": "1",
+            },
+        )
+    ]
+    rows[0]["target_session_group_id"] = "group-999"
+    report = monitor.build_android_lsl_monitor_report(rows)
+
+    result = validator.validate_pc_monitor_report(report, event_rows=rows, expect_command_acks=False)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "PC monitor event row 1 payload target_session_group_id differs from monitor row" in failures
+
+
 def test_android_lsl_runtime_validator_accepts_phone_run_command_diary_ack_evidence(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -3743,7 +3781,16 @@ def _pc_monitor_command_row(*, command_id: str, command: str, payload: dict | No
             sender_id="pc_runner",
             command=command,
             issued_lsl_time=42.0,
-            payload=payload or {"token": "secret", "package_id": "pkg-001"},
+            payload=payload
+            or {
+                "token": "secret",
+                "package_id": "pkg-001",
+                "participant_id": "P001",
+                "target_session_id": "part-001",
+                "target_part_session_id": "part-001",
+                "target_session_group_id": "group-001",
+                "target_part_number": "1",
+            },
         )
     )
     return monitor.build_android_lsl_monitor_row(

@@ -42,6 +42,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   that echo `token` or `companion_token`. This keeps noisy monitor/XDF captures
   from being accepted as two-way administration evidence when they only contain
   orphan acknowledgements.
+- PC Android LSL monitor rows now flatten the same non-secret command target
+  identity (`package_id`, `participant_id`, target session, target part
+  session, session group, and part number) from observed `PPSCommandSignalsV1`
+  and `PPSCommandAcksV1` payloads. Strict monitor validation compares those row
+  fields back against the raw sample payload so external monitor/XDF audit
+  tables cannot drift from the captured command sample.
 - PC-to-Android LSL admin sends now validate the received
   `PPSCommandAcksV1` sample before reporting live success. A same-command-id
   ack is recorded but marked `invalid_ack` if its `session_id` or echoed target

@@ -5441,6 +5441,8 @@ def _validate_pc_monitor_event_row(row: dict[str, Any], *, row_index: int, failu
             and _canonical_json(payload) != _canonical_json(row_payload)
         ):
             failures.append(f"{prefix} payload_json differs from command ack sample payload")
+        if payload is not None:
+            _validate_pc_monitor_payload_identity(payload, row=row, prefix=prefix, failures=failures)
     elif stream_key == "command_signals":
         if row.get("stream_name") != LSL_COMMAND_STREAM_NAME:
             failures.append(f"{prefix} command signal stream_name mismatch")
@@ -5477,8 +5479,35 @@ def _validate_pc_monitor_event_row(row: dict[str, Any], *, row_index: int, failu
             and _canonical_json(payload) != _canonical_json(row_payload)
         ):
             failures.append(f"{prefix} payload_json differs from command signal sample payload")
+        if payload is not None:
+            _validate_pc_monitor_payload_identity(payload, row=row, prefix=prefix, failures=failures)
     else:
         failures.append(f"{prefix} unsupported stream_key {stream_key!r}")
+
+
+def _validate_pc_monitor_payload_identity(
+    payload: dict[str, Any],
+    *,
+    row: dict[str, Any],
+    prefix: str,
+    failures: list[str],
+) -> None:
+    for field in (
+        "package_id",
+        "participant_id",
+        "target_session_id",
+        "target_part_session_id",
+        "target_session_group_id",
+        "target_part_number",
+    ):
+        row_value = _metadata_value(row.get(field))
+        if not row_value:
+            continue
+        payload_value = _metadata_value(payload.get(field))
+        if not payload_value:
+            failures.append(f"{prefix} payload is missing {field}")
+        elif payload_value != row_value:
+            failures.append(f"{prefix} payload {field} differs from monitor row")
 
 
 def _parse_json_object(raw: str, label: str, failures: list[str]) -> dict[str, Any] | None:

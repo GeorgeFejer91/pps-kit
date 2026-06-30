@@ -479,7 +479,8 @@ def _rich_marker_summary(values: list[Any]) -> dict[str, Any]:
 
 def _command_ack_summary(values: list[Any]) -> dict[str, Any]:
     padded = [str(value) for value in values] + [""] * max(0, len(LSL_ACK_CHANNELS) - len(values))
-    return {
+    payload_json = padded[9]
+    row = {
         "ack_schema": padded[0],
         "command_id": padded[1],
         "session_id": padded[2],
@@ -489,21 +490,47 @@ def _command_ack_summary(values: list[Any]) -> dict[str, Any]:
         "received_lsl_time": _safe_float(padded[6], default=0.0),
         "applied_lsl_time": _safe_float(padded[7], default=0.0),
         "ack_lsl_time": _safe_float(padded[8], default=0.0),
-        "payload_json": padded[9],
+        "payload_json": payload_json,
     }
+    row.update(_command_payload_identity_summary(payload_json))
+    return row
 
 
 def _command_signal_summary(values: list[Any]) -> dict[str, Any]:
     padded = [str(value) for value in values] + [""] * max(0, len(LSL_COMMAND_CHANNELS) - len(values))
-    return {
+    payload_json = padded[6]
+    row = {
         "command_schema": padded[0],
         "command_id": padded[1],
         "session_id": padded[2],
         "sender_id": padded[3],
         "command": padded[4],
         "issued_lsl_time": _safe_float(padded[5], default=0.0),
-        "payload_json": padded[6],
+        "payload_json": payload_json,
     }
+    row.update(_command_payload_identity_summary(payload_json))
+    return row
+
+
+def _command_payload_identity_summary(payload_json: str) -> dict[str, str]:
+    try:
+        payload = json.loads(payload_json or "{}")
+    except json.JSONDecodeError:
+        payload = {}
+    if not isinstance(payload, dict):
+        payload = {}
+    fields = (
+        "package_id",
+        "participant_id",
+        "target_session_id",
+        "target_part_session_id",
+        "target_session_group_id",
+        "target_part_number",
+        "requested_by",
+        "current_android_source_behavior",
+        "current_pc_source_behavior",
+    )
+    return {field: str(payload.get(field) or "") for field in fields if str(payload.get(field) or "").strip()}
 
 
 def _load_pylsl() -> Any:
