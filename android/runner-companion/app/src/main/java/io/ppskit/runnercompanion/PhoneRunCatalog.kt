@@ -47,7 +47,7 @@ internal fun buildPhoneRunCatalogEntry(
         .put("gender", participantMetadata.optString("gender", ""))
         .put("tactile_threshold_percent", participantMetadata.opt("tactile_threshold_percent") ?: JSONObject.NULL)
         .put("tactile_threshold_source", participantMetadata.optString("tactile_threshold_source", ""))
-    return JSONObject()
+    val entry = JSONObject()
         .put("schema", PHONE_RUN_CATALOG_ENTRY_SCHEMA)
         .put("updated_unix_ms", now)
         .put("run_id", runId)
@@ -91,6 +91,10 @@ internal fun buildPhoneRunCatalogEntry(
             .put("building_block_count", runPackage.buildingBlocks.size)
             .put("block_count", runPackage.blocks.size)
             .put("trial_count", runPackage.blocks.sumOf { it.trialCount }))
+    lslRuntimeStatus.optJSONObject("haptic_capability_summary")?.let { summary ->
+        entry.put("haptic_capability_summary", JSONObject(summary.toString()))
+    }
+    return entry
 }
 
 internal fun writePhoneRunCatalog(filesDir: File, runDir: File, entry: JSONObject): JSONObject {

@@ -2873,6 +2873,31 @@ def _compare_phone_run_catalog_entry(
     observed_hash = _catalog_text(observed_reconstruction.get("schedule_hash"))
     if expected_hash and observed_hash and expected_hash != observed_hash:
         failures.append(f"{label} reconstruction.schedule_hash differs from phone_run_catalog_entry.json")
+    expected_haptic = (
+        expected.get("haptic_capability_summary")
+        if isinstance(expected.get("haptic_capability_summary"), dict)
+        else {}
+    )
+    observed_haptic = (
+        observed.get("haptic_capability_summary")
+        if isinstance(observed.get("haptic_capability_summary"), dict)
+        else {}
+    )
+    if expected_haptic:
+        for field in (
+            "has_vibrator",
+            "has_amplitude_control",
+            "calibration_policy",
+            "calibration_status",
+            "recommended_threshold_percent",
+            "recommended_amplitude",
+        ):
+            expected_value = _catalog_text(expected_haptic.get(field))
+            observed_value = _catalog_text(observed_haptic.get(field))
+            if expected_value and observed_value and expected_value != observed_value:
+                failures.append(f"{label} haptic_capability_summary.{field} differs from phone_run_catalog_entry.json")
+            elif expected_value and not observed_value:
+                failures.append(f"{label} haptic_capability_summary.{field} is missing from phone_run_catalog_entry.json")
 
 
 def _first_nonblank(*values: Any) -> str:
@@ -2970,6 +2995,8 @@ def _validate_participant_and_haptic_metadata(
             warnings.append("phone run artifact does not include haptic capability metadata")
     else:
         _validate_haptic_capability(haptic, failures)
+        if catalog_entry:
+            _validate_catalog_haptic_summary(catalog_entry, haptic, failures)
     if participant is not None:
         _validate_participant_haptic_alignment(participant, haptic, failures)
 
@@ -3075,6 +3102,43 @@ def _validate_haptic_capability(haptic: dict[str, Any], failures: list[str]) -> 
                 has_amplitude_control=haptic.get("has_amplitude_control") is True,
                 failures=failures,
             )
+
+
+def _validate_catalog_haptic_summary(
+    catalog_entry: dict[str, Any],
+    haptic: dict[str, Any],
+    failures: list[str],
+) -> None:
+    summary = (
+        catalog_entry.get("haptic_capability_summary")
+        if isinstance(catalog_entry.get("haptic_capability_summary"), dict)
+        else None
+    )
+    if summary is None:
+        failures.append("phone run catalog haptic_capability_summary is missing")
+        return
+    for field in ("has_vibrator", "has_amplitude_control"):
+        if field not in summary:
+            failures.append(f"phone run catalog haptic_capability_summary is missing {field}")
+        elif bool(summary.get(field)) is not bool(haptic.get(field)):
+            failures.append(f"phone run catalog haptic_capability_summary {field} differs from haptic_capability")
+    for field in ("calibration_policy", "calibration_status"):
+        expected = _metadata_value(haptic.get(field))
+        observed = _metadata_value(summary.get(field))
+        if expected and not observed:
+            failures.append(f"phone run catalog haptic_capability_summary is missing {field}")
+        elif expected and observed != expected:
+            failures.append(f"phone run catalog haptic_capability_summary {field} differs from haptic_capability")
+    for field in ("recommended_threshold_percent", "recommended_amplitude"):
+        if haptic.get(field) in (None, ""):
+            continue
+        if field not in summary or summary.get(field) in (None, ""):
+            failures.append(f"phone run catalog haptic_capability_summary is missing {field}")
+            continue
+        expected = _safe_float(haptic.get(field))
+        observed = _safe_float(summary.get(field))
+        if not _same_number(expected, observed):
+            failures.append(f"phone run catalog haptic_capability_summary {field} differs from haptic_capability")
 
 
 def _validate_participant_haptic_alignment(

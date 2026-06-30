@@ -516,6 +516,23 @@ def test_android_lsl_runtime_validator_rejects_stream_description_haptic_summary
     )
 
 
+def test_android_lsl_runtime_validator_rejects_catalog_haptic_summary_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    catalog_path = run_dir / "phone_run_catalog_entry.json"
+    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    catalog["haptic_capability_summary"]["recommended_amplitude"] = 200
+    catalog_path.write_text(json.dumps(catalog), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_run_catalog=True)
+
+    assert result.ok is False
+    assert "phone run catalog haptic_capability_summary recommended_amplitude differs from haptic_capability" in "\n".join(
+        result.failures
+    )
+
+
 def test_android_lsl_runtime_validator_rejects_session_metadata_marker_participant_drift(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -3273,6 +3290,7 @@ def _status(*, native: bool) -> dict:
             "command_acks": "PPSCommandAcksV1",
         },
         "stream_descriptions": _stream_descriptions(),
+        "haptic_capability_summary": _lsl_haptic_capability_summary(_haptic_capability()),
         "command_protocol": {
             "command_schema": "pps-lsl-command.v1",
             "ack_schema": "pps-lsl-command-ack.v1",
@@ -3432,6 +3450,7 @@ def _catalog_entry(*, native: bool) -> dict:
             "handedness": "right",
             "gender": "prefer_not_to_say",
         },
+        "haptic_capability_summary": _lsl_haptic_capability_summary(_haptic_capability()),
         "privacy": {
             "scope": "app_private_local_catalog",
             "demographics_in_stream_name": False,

@@ -89,6 +89,8 @@ def test_android_phone_session_metadata_preserves_source_provenance() -> None:
         assert '.put("source_segment_hashes", runPackage.sourceSegmentHashes.toJsonObject())' in source
 
     assert "phoneLslSessionMetadataJson(runPackage" in native_bridge
+    assert 'lslRuntimeStatus.optJSONObject("haptic_capability_summary")' in catalog
+    assert '.put("haptic_capability_summary", JSONObject(summary.toString()))' in catalog
 
 
 def test_android_lsl_runtime_status_exports_stream_descriptions() -> None:

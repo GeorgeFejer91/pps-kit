@@ -12,6 +12,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   through app-private `phone_run_catalog/runs.jsonl` and `latest_run.json`, so
   the participant/session catalog cannot silently lose LSL administration
   evidence.
+- Android phone-run catalog entries also preserve the privacy-safe
+  `haptic_capability_summary` from LSL runtime status. Strict artifact
+  validation compares catalog haptic summary fields against
+  `haptic_capability.json` / completion haptic metadata and propagates drift
+  checks through app-private `phone_run_catalog/runs.jsonl` and
+  `latest_run.json`, so tactile calibration evidence stays visible at the
+  catalog layer.
 - Strict Android phone-owned `2.Data_max` validation now requires the mirrored
   run folder to preserve the operator/administration reconstruction sidecars as
   well as the low-level marker/event files: `command_diary.jsonl`,

@@ -222,7 +222,9 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   participant `runs.jsonl`, and `latest_run.json` when
   `--expect-run-catalog-index` is set, including event/marker/command-diary
   counts plus native marker-push and command received/ack/rejected counts
-  against completion `summary`, phone-run `events.csv` event-diary
+  against completion `summary` and privacy-safe haptic calibration summaries
+  against `haptic_capability.json`/completion haptic metadata, phone-run
+  `events.csv` event-diary
   rows against embedded completion/latest-events when `--expect-event-diary`
   is set, completion `summary` local diary counts against event, marker, and
   command diary artifacts when present, phone-run `artifact_file_inventory.json` file/size/SHA-256 evidence

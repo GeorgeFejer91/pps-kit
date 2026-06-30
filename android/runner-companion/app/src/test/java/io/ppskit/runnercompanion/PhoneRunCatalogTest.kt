@@ -56,6 +56,17 @@ class PhoneRunCatalogTest {
             .put("native_transport_available", true)
             .put("native_marker_transport_enabled", true)
             .put("command_receiver_available", true)
+            .put(
+                "haptic_capability_summary",
+                JSONObject()
+                    .put("schema", "pps-android-lsl-haptic-capability-summary.v1")
+                    .put("has_vibrator", true)
+                    .put("has_amplitude_control", true)
+                    .put("calibration_policy", "amplitude_percent_supported")
+                    .put("calibration_status", "threshold_detected")
+                    .put("recommended_threshold_percent", 42.0)
+                    .put("recommended_amplitude", 107),
+            )
         val partialSummary = JSONObject()
             .put("total_event_count", 2)
             .put("command_diary_count", 1)
@@ -114,6 +125,7 @@ class PhoneRunCatalogTest {
         assertEquals(2, perRunEntry.getInt("participant_roster_count"))
         assertEquals("segment5hash", perRunEntry.getJSONObject("source_segment_hashes").getString("source_segment5_manifest_sha256"))
         assertEquals("30", perRunEntry.getJSONObject("participant_metadata_summary").getString("age_years"))
+        assertEquals(107, perRunEntry.getJSONObject("haptic_capability_summary").getInt("recommended_amplitude"))
         assertEquals(4, perRunEntry.getInt("native_lsl_pushed_count"))
         assertEquals(1, perRunEntry.getInt("native_lsl_command_received_count"))
         assertEquals(1, perRunEntry.getInt("native_lsl_command_ack_count"))
