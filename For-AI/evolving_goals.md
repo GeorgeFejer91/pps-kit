@@ -4,6 +4,295 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 
 ## 2026-06-30
 
+- Added `publication/behavior-research-methods/` as the tracked manuscript
+  workspace for a planned Springer Nature `Behavior Research Methods`
+  submission about PPS Toolkit. The folder preserves the official Springer
+  Nature LaTeX author template ZIP and extracted `sn-article-template` files,
+  records the download URL/date/SHA-256, points drafters toward the `sn-apa`
+  option for the journal, and keeps the template outside the PPS Toolkit MIT
+  license grant in third-party license notes.
+- Added the first full BRM methods/software manuscript draft under
+  `publication/behavior-research-methods/manuscript/`. The draft uses the
+  Springer `sn-apa` class path through `latexmkrc`, cites Consensus-derived PPS,
+  HRTF/spatial-rendering, tactile-threshold, and BRM software-methods papers in
+  `references.bib`, and includes a 40-row `evidence_matrix.csv` mapping visible
+  Segment 0-6 and Focus Mode design decisions to literature variation, toolkit
+  controls, caveats, and profile/template ids. The paper is framed as an
+  evidence-matrix methods/software article rather than a formal meta-analysis;
+  tactile hit-rate decline is retained only as anecdotal motivation unless
+  traceable run artifacts are later supplied. A local compile check succeeded
+  with MiKTeX after installing missing template dependencies (`sttools`,
+  `threeparttable`, `appendix`, `wrapfig`, `amscls`, `apacite`, and `natbib`);
+  generated LaTeX build artifacts and the compiled PDF were removed before
+  staging.
+- Refined the BRM manuscript through a tracked self-review pass recorded in
+  `publication/behavior-research-methods/manuscript/critical_review.md`. The
+  revision adds a `Contribution and Journal Fit` section, expands the prose
+  rationale for Segment 0-6 and Focus Mode design decisions after the evidence
+  matrix, and adds additional software/timing/rendering citations for pyControl,
+  experiment simulation, web/behavioral timing checks, and near-field auditory
+  cue plausibility (`Akam2022`, `DeLeeuw2022`, `Bridges2020`, `Arend2021`).
+  The draft still treats pilot tactile hit-rate decline as anecdotal motivation
+  only, distinguishes software scheduling/marker evidence from electrical
+  loopback and mechanical/perceptual tactile validation, and compiles cleanly to
+  an 18-page PDF with generated build artifacts removed afterward.
+- Continued the BRM manuscript critique/revision loop with a third self-review
+  pass. The draft now adds a `Reporting Checklist` table, converts the condensed
+  evidence matrix from `longtable` to a cleaner `tabularx` float, strengthens
+  constrained-randomization discussion with `Jadoul2023` and `French2009`,
+  sharpens tactile adaptation/recovery language with `Leung2005`, corrects the
+  Ferri affective-sound bibliography record, and rewrites the validation section
+  as four reproducible protocols rather than a future to-do list. The evidence
+  matrix remains 40 rows, the manuscript folder is ASCII-clean, and the
+  Springer `sn-apa` source compiles to a 20-page PDF with no unresolved
+  citations/references or table overfull/splitting warnings; generated LaTeX
+  artifacts and PDF were removed afterward.
+- Added a current validation evidence snapshot for the BRM manuscript. Protocol
+  12 was run with
+  `python validation_protocols/scripts/run_profile_recreation_interface_matrix.py --output-dir artifacts/validation_runs/brm_profile_recreation_20260630`
+  and passed 30/30 required criteria: seven ready published profiles passed
+  gates and materialized through Segment 6, while two blocked samples were
+  blocked as expected. The raw generated report remains under ignored
+  `artifacts/validation_runs/`; the committed source-pointer summary is
+  `publication/behavior-research-methods/manuscript/validation_evidence.csv`,
+  and `main.tex` now includes a validation evidence table that explicitly limits
+  the claim to software/profile materialization rather than physical timing,
+  Woojer mechanical onset, tactile perception, individualized spatial
+  perception, or exact reuse of private original-author stimuli.
+- Completed a bibliography metadata pass for the BRM manuscript. Clear
+  Crossref/title matches were used to replace draft-style `and others` entries
+  and the two `Source to be verified` profile-recreation records; DOI,
+  volume/issue, page, and article-number fields were added where available, and
+  the Amiel front/rear Cortex record now uses the Crossref 2026 issue metadata
+  while retaining the existing BibTeX key. The manuscript compiled to a 21-page
+  PDF with only box-layout warnings, generated LaTeX artifacts were removed
+  after verification, and the remaining submission placeholders are author
+  email, affiliation, funding, competing interests, ethics wording, and release
+  DOI.
+- Continued the BRM manuscript self-review loop with a near-field rendering
+  caveat pass. A Consensus/Crossref gap check added `Parseihian2014`,
+  `Kan2009`, and `Spagnol2017` to the HRTF/spatial-audio evidence base, the
+  spatial-rendering prose and evidence-matrix row now state more explicitly
+  that SOFA/FABIAN/3DTI provenance does not prove perceived distance,
+  externalization, front/back localization, or individualized HRTF validity, and
+  `critical_review.md` records this as Iteration 6. The Springer `sn-apa`
+  source compiles to a 22-page PDF with no unresolved citation/reference or
+  rerun warnings; generated LaTeX artifacts and the PDF were removed afterward.
+- Continued the BRM manuscript self-review loop with a loudness-contract and
+  gain-law pass. Segment 1 `Loudness Contract` is now represented as a
+  first-class design decision in `main.tex` and the full evidence matrix: the
+  paper cites auditory-distance and level-normalization work (`Zahorik2002`,
+  `Kolarik2015`, `Arend2021Level`, plus `Spagnol2017`) and separates estimated
+  hardware SPL, measured acoustic calibration, digital output evidence, and
+  participant-ear SPL. The matrix now has 41 rows. The Springer `sn-apa` source
+  compiles to a 24-page PDF with no unresolved citation/reference or rerun
+  warnings; generated LaTeX artifacts and the PDF were removed afterward.
+- Continued the BRM manuscript self-review loop with a dashboard-boundary and
+  open-practices pass. The draft now states the dashboard View/Edit/read-only
+  and hosted/static-preview versus local-companion/native-runner acquisition
+  boundary, adds that boundary to `evidence_matrix.csv` and the reporting
+  checklist, splits the condensed matrix into two readable tables, and adds an
+  `Open Practices Statement` immediately before the references. The evidence
+  matrix now has 42 rows. The Springer `sn-apa` source compiles to a 25-page PDF
+  with no unresolved citation/reference, rerun, float-too-large, or overfull-box
+  warnings after this pass; generated LaTeX artifacts and the PDF were removed
+  afterward.
+- Continued the BRM manuscript self-review loop with a response-window and
+  classification pass. Focus Mode's current tactile response rule is now named
+  as a first-class methods decision: clicks are credited only from 100 to 1300 ms
+  after tactile onset, early/late clicks remain logged but uncredited, the next
+  trial start does not truncate an open tactile-response deadline, catch trials
+  distinguish false alarms from correct no-responses, and top-up preserves
+  selected click identifiers. `main.tex`, the reporting checklist, and
+  `evidence_matrix.csv` now describe that rule as audit provenance rather than
+  tactile-perception or PPS-effect validation. The matrix now has 43 rows. The
+  Springer `sn-apa` source compiles to a 25-page PDF with no unresolved
+  citation/reference, rerun, float-too-large, or overfull-box warnings after this
+  pass; generated LaTeX artifacts and the PDF were removed afterward.
+- Continued the BRM manuscript self-review loop with a design-run-recreation
+  suite pass. User feedback clarified that the paper should present PPS Toolkit
+  as a full suite for designing, running, and replicating/recreating other PPS
+  experiments, not only as a reusable design artifact. `main.tex` now names the
+  suite in the abstract, contribution framing, and conclusion, and has a
+  `Design, Run, and Recreation Pathway` section after the reporting checklist.
+  The section gives three entry points (new-study design, published-profile
+  recreation, and native acquisition) and separates design, profile-recreation,
+  validation, and deidentified participant archive layers. This strengthens the
+  paper's methods/tutorial fit without adding participant-effect claims.
+- Continued the BRM manuscript self-review loop with a GUI gate/artifact
+  boundary pass. A dashboard-label audit found that visible apply/bake/accept
+  and prepare controls were described indirectly but not represented as their
+  own methods decision. `main.tex`, the reporting checklist, and
+  `evidence_matrix.csv` now state that `Apply`, `Bake`, `Accept Blocks`,
+  `Prepare Output Folder`, and `Save Design and Start Experiment Runner`
+  materialize durable artifacts, upstream hashes, stale-state boundaries, and
+  runner handoff packages. The matrix now has 44 rows and still treats gate
+  completion as artifact consistency/provenance evidence, not hardware timing,
+  tactile-onset, or PPS-effect validation. The Springer `sn-apa` source
+  compiles to a 27-page PDF with no unresolved citation/reference, rerun,
+  float-too-large, or overfull-box warnings after this pass; generated LaTeX
+  artifacts and the PDF were removed afterward.
+- Continued the BRM manuscript self-review loop with a title and entry-point
+  parsimony pass. The title now names PPS Toolkit as a suite for designing,
+  running, and recreating audio-tactile PPS experiments rather than only a
+  design/validation workflow, and the `Design, Run, and Recreation Pathway`
+  section now uses a practical three-entry-point table for new-study design,
+  published-profile recreation, and native acquisition. The Springer `sn-apa`
+  source compiles to a 27-page PDF with no unresolved citation/reference,
+  rerun, float-too-large, or overfull-box warnings after this pass; generated
+  LaTeX artifacts and the PDF were removed afterward.
+- Continued the BRM manuscript self-review loop with a GUI control coverage
+  pass. Added `publication/behavior-research-methods/manuscript/gui_control_coverage.csv`
+  as a 64-row source-level audit of visible dashboard controls, mapping
+  literature-bearing Segment 0-6 decisions and suite execution gates back to
+  existing evidence-matrix rows while explicitly classifying navigation,
+  documentation, camera controls, folder openers, refresh actions, and modal
+  mechanics as non-method UI. The manuscript now distinguishes
+  `evidence_matrix.csv` as the literature-bearing design-decision scaffold from
+  the control-level coverage ledger, and the manuscript README documents the
+  boundary.
+- Continued the BRM manuscript self-review loop with a parsimony and
+  archive-layer pass. A paragraph-length audit found the remaining dense prose
+  in the design-run-recreation pathway; `main.tex` now replaces that block with
+  a `Recommended archive layers for PPS Toolkit studies` table separating
+  design, profile-recreation, validation, and deidentified participant archives.
+  The response-classification technical-method paragraph was also split so the
+  100-1300 ms tactile-onset response rule is separate from the interpretive
+  reason response probability must be visible before RT curves are read.
+- Added `publication/behavior-research-methods/manuscript/submission_readiness_audit.md`
+  as a source-level requirement audit for the BRM manuscript. The audit protects
+  the user-requested full-suite framing--designing new studies, recreating or
+  scaffolding published paradigms, running native acquisition, validating
+  evidence layers, and reviewing exploratory analyses--while marking remaining
+  final-submission blockers such as release DOI/commit, author/declaration
+  metadata, publication-hardware validation, and traceable artifacts for any
+  quantified tactile hit-rate claims.
+- Continued the BRM manuscript self-review loop with a tutorial reader-guide
+  pass. `main.tex` now includes a `Tutorial Use of the Manuscript and Source
+  Package` subsection and reader-guide table that maps practical BRM-reader
+  questions to the manuscript sections and source artifacts for design
+  variation, new-task construction, published-profile recreation, run evidence,
+  and reporting/sharing. The submission-readiness audit now tracks this
+  tutorial orientation as source-ready.
+- Continued the BRM manuscript self-review loop with a procedural-method gap
+  pass. `profile_family_examples.csv` now maps six published PPS method
+  families to toolkit representations and caveats, and `main.tex` includes a
+  matching profile-family table so profile recreation is distinguished from
+  exact apparatus/stimulus replication. The validation/use-case section also
+  includes an operator procedure and evidence handoff table covering pre-run
+  setup, output/calibration, execution, post-run review, and sharing, with
+  explicit evidence boundaries for each stage.
+- Continued the BRM manuscript self-review loop with a same-journal comparator
+  pass. `brm_comparator_articles.csv` now records BRM software/toolbox,
+  hosting/sharing, tutorial, and timing-validation comparator articles, and
+  `main.tex` includes a compact `Behavior Research Methods` comparator table in
+  the journal-fit section. The table makes explicit that PPS Toolkit should
+  follow BRM software-paper conventions: state the barrier, show the tool, walk
+  through runnable examples, separate validation tiers, and preserve reuse
+  boundaries.
+- Continued the BRM manuscript self-review loop with a figure/source-material
+  plan pass. `figure_source_plan.csv` now maps the recommended final figures to
+  their source artifacts, supported claims, and boundaries, and `main.tex`
+  includes a matching table. Final figures should be generated from
+  redistributable toolkit screenshots, manifests, schemas, validation outputs,
+  and deidentified sample artifacts, not copyrighted source-paper figures or
+  private participant data.
+- Continued the BRM manuscript self-review loop with a procedural gap register
+  pass. `procedural_gap_register.csv` now lists the reviewer-facing procedural
+  methods that still need final artifacts or explicit caveats: auditory
+  eligibility and headphone/listening checks, route-specific timing and
+  synchronization, tactile mechanical/perceptual delivery, spatial-audio
+  perception/HRTF assumptions, and profile recreation/rights/analysis
+  governance. `main.tex` includes a matching table in the validation/use-cases
+  section and adds same-journal BRM citations for auditory synchronization,
+  web timing, headphone screening, web psychoacoustics, touchscreen/keyboard
+  timing, and browser/mobile tactile delivery.
+- Continued the BRM manuscript self-review loop with a paragraph-parsimony pass.
+  Dense prose paragraphs in the introduction, contribution framing, toolkit
+  overview, evidence-matrix explanation, Segment 0/1/3 rationale, spatial
+  rendering caveat, evidence-tier explanation, and discussion were split so each
+  paragraph carries a clearer single job. `critical_review.md` records the
+  density audit; remaining long manuscript blocks are mainly table rows, with a
+  final human copy edit still required after release links, declarations,
+  figures, and validation artifacts are added.
+- Continued the BRM manuscript self-review loop with a same-journal
+  sensory-suite comparator pass. `brm_comparator_articles.csv` and the
+  manuscript comparator table now include BRM examples for browser tactile
+  delivery, PsySuite, the cognitive-hearing OpenSesame extension, Titta, and
+  Mousetrap, so the article model covers calibration/setup interfaces,
+  synchronous I/O or LSL, device-specific validation limits, and analysis
+  handoff in addition to general experiment-builder style.
+- Continued the BRM manuscript self-review loop with a dashboard control
+  recheck pass. `dashboard_control_recheck_20260630.md` records a source-level
+  audit of the current local dashboard worktree against
+  `gui_control_coverage.csv`; the only detected dirty-dashboard label/status
+  change was a not-ready readiness-badge glyph/styling change, which remains
+  operational UI rather than a new literature-bearing PPS design decision.
+- Continued the BRM manuscript self-review loop with a claim-boundary audit
+  pass. `claim_boundary_audit.csv` maps major manuscript claims to current
+  evidence, safe phrasing, unsafe or premature phrasing, and the artifact needed
+  before stronger claims can be made, protecting suite, recreation, validation,
+  HRTF, tactile, and analysis language from overclaiming.
+- Continued the BRM manuscript self-review loop with a same-journal article
+  recommendation pass. `brm_recommended_article_models.csv` records
+  article-level BRM comparators for PPS Toolkit, including suite/toolbox,
+  experiment-builder, multimodal/tactile calibration, route/device validation,
+  analysis-handoff, embodied-threat, and interoperability models, with style
+  transfer notes and caveats for each.
+- Verified the source-pointer-only same-journal article recommendations through
+  Consensus/Crossref matches and promoted them to manuscript bibliography keys:
+  adaptive Titta calibration, Tobii EyeX device evaluation, PyTrack, VRthreat,
+  and Psynteract now appear in `references.bib`, the comparator table, and
+  `brm_recommended_article_models.csv`. These remain style/reporting models,
+  not evidence that PPS Toolkit has equivalent validation maturity.
+- Added an implementation-derived output schema/data dictionary for the BRM
+  manuscript. `output_schema_dictionary.csv` documents public `1.Data_min`
+  exports, the private/rich `2.Data_max` reconstruction mirror, session
+  manifests, prepared block evidence, event/marker/XDF files, tactile
+  calibration/top-up/adaptive-threshold artifacts, exploratory analysis outputs,
+  and private demographics sidecars. `main.tex` now includes a compact
+  output/archive-boundary table so the full-suite paper distinguishes public
+  data, reconstruction evidence, validation evidence, tactile safeguards, and
+  exploratory analysis rather than implying all generated artifacts are public
+  or equally validating.
+- Added a permanent Windows PDF render path for the BRM manuscript.
+  `publication/behavior-research-methods/manuscript/render_pdf.ps1` sets the
+  local Springer template paths, runs the `pdflatex`/`bibtex`/rerun sequence,
+  checks for unresolved references/citations, and cleans auxiliary files by
+  default; `render_pdf.cmd` is the manuscript-local double-click wrapper.
+  `windows/Render_BRM_Manuscript_PDF.ps1` and
+  `windows/Render_BRM_Manuscript_PDF.cmd` are the permanent repo-root PC entry
+  points. The renderer now repeats final `pdflatex` passes when LaTeX reports
+  changed labels/citations. Use this route on this PC because MiKTeX
+  `latexmk.exe` currently cannot find Perl.
+- Added a per-profile recreation claim-state pass for the BRM manuscript.
+  `profile_recreation_audit.csv` now covers all current preload profiles and
+  separates unpublished local examples, published verified run-ready profiles,
+  the partial-but-materializable Serino peri-trunk scaffold, missing-parameter
+  scaffolds, and structural-gap scaffolds. `main.tex` includes a compact
+  claim-state table so the suite can be described as recreating/scaffolding
+  published paradigms without implying exact original-apparatus, private-asset,
+  or participant-effect replication for every profile.
+- Segment 1 generated-source mode is now a pair of proportional waveform button
+  widgets rather than a text-only toggle. `Burst train` remains the default
+  `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation
+  `Hobeika et al. (2020)`; the legacy `continuous_noise` profile is presented
+  to researchers as `Smooth linear` / `Smooth linear approach`, avoiding the
+  word `control` so it is not mistaken for an experimental control condition.
+  The SVG generator writes synchronized copies under both package `assets/` and
+  dashboard static assets for publication/documentation reuse and local GUI
+  rendering.
+- Focus Mode participant runs now use a run-local adaptive tactile threshold
+  safeguard in addition to the pre-run participant calibration. The runner
+  always tracks tactile hit/miss state internally, even when missed-trial top-up
+  playback is disabled. After every two tactile misses, including top-up misses,
+  it raises the live Output 3/4 level by the calibration confirmation bin
+  (+0.01% Output 3/4) up to the existing 0.5% cap, emits a
+  `tactile_threshold_adapted` event/progress payload, updates the Focus Mode
+  Output 3/4 controls without overwriting the saved calibration JSON or
+  persistent runner setting, and writes `adaptive_tactile_threshold_summary.json`
+  plus `adaptive_tactile_threshold_adjustments.csv` under the run's runner-log
+  folder for reconstruction.
 - Android phone-run catalog entries now preserve the completion summary's
   event count, marker mirror count, command diary count, native marker push
   counters, and native command received/ack/failed/rejected counters. The
@@ -708,6 +997,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   planned rescue source/building-block sequence, and report contiguous
   top-up trial start/end/duration timing so a lightweight phone top-up can be
   reconstructed without trusting only the final WAV hash.
+- Strict phone event-diary validation now requires every phone command diary row
+  to have its matching `operator_command` event mirror, including local
+  `phone_ui` and `phone_runtime` rows. Loose validation still warns for older
+  artifacts, but new strict run folders must prove what was pressed or
+  internally commanded in both `command_diary.jsonl` and the event diary.
 - The phone-owned AudioTrack pause gate now keeps polling native Android LSL
   commands while playback is paused. A `pause` command therefore no longer
   traps the runner inside the paused audio wait loop; a PC runner or second
@@ -1362,10 +1656,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 
 - Adopted the DynaSpace/Hobeika plus 3DTI/SOFA best-of-both-worlds protocol as the PPS-kit golden standard for newly generated looming stimuli. Generated-noise looming bakes should default to `dynaspace_gaussian_burst_train`: broadband Gaussian white-noise bursts, 30 ms burst duration, 10 ms rise/fall, 95 ms target onset period, 300 ms onset, duration-derived burst count, and symmetric equal spacing fitted to the configured active window. The DynaSpace smartphone profile still derives 33 bursts from its measured 3.07 s active burst window, but 33 is not a universal renderer default. HRTF spectrum, ILD, ITD, near-field behavior, distance attenuation, propagation delay, future trajectory angles, and optional room/DRR/IACC cues remain renderer-owned through 3DTI/SOFA or the Python SOFA/FABIAN preview path. Published-study templates may override this only when the source paper/app specifies another waveform or apparatus constraint, and the exception must be documented in metadata. The persistent standard is now `For-AI/looming_stimulus_generation_standard.md`; the source audit, Consensus browser/MCP export, implementation rationale, and PDF report live under `docs/dynaspace_spectral_feature_audit/`.
 - Segment 1 now exposes generated-source mode as a two-option toggle:
-  `Burst train` and `Continuous`. `Burst train` is the default and maps to
-  `dynaspace_gaussian_burst_train`; `Continuous` is an explicit
-  `continuous_noise` opt-out. Missing generated looming source profiles are
-  normalized to burst train during design load/save/render and source-manifest
+  `Burst train` and `Smooth linear`. `Burst train` is the default and maps to
+  `dynaspace_gaussian_burst_train`; `Smooth linear` is the researcher-facing
+  label for the explicit `continuous_noise` non-burst option. Missing generated
+  looming source profiles are normalized to burst train during
+  design load/save/render and source-manifest
   export, while the backend accepts only these two generated-noise modes for
   dashboard bakes. The full committed preload catalog was force-rebuilt so
   bundled generated-noise WAVs, hashes, QC rows, and source manifests carry the

@@ -1808,6 +1808,65 @@ def test_focus_mode_output_volume_sliders_persist_and_apply_to_engine(tmp_path: 
     window.dialog.close()
 
 
+def test_focus_mode_adaptive_threshold_progress_updates_live_output_without_saving_calibration(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    state_root = tmp_path / "dashboard_state"
+    monkeypatch.setattr(focus_app, "DEFAULT_DASHBOARD_STATE_ROOT", state_root)
+    focus_app._persist_output_channel_volumes(72, 0.35, state_root=state_root)
+
+    class FakeEngine:
+        def __init__(self) -> None:
+            self.audio_volume = 1.0
+            self.tactile_volume = 1.0
+
+        def set_main_volume(self, value: float) -> None:
+            self.audio_volume = float(value)
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+    )
+    engine = FakeEngine()
+    window.controller = SimpleNamespace(audio_engine=engine)
+    window._latest_tactile_calibration = {
+        "participant_id": "P001",
+        "recommended_output_34_percent": 0.35,
+        "final_output_34_percent": 0.35,
+    }
+    window.dialog.show()
+    app.processEvents()
+
+    window._handle_tactile_threshold_adapted(
+        {
+            "ui_event": "tactile_threshold_adapted",
+            "old_output_34_percent": 0.35,
+            "new_output_34_percent": 0.36,
+            "triggering_miss_count": 2,
+            "message": "Tactile threshold nudged to Output 3/4 0.36% after 2 tactile misses.",
+        }
+    )
+    app.processEvents()
+
+    assert window.output_34_volume_percent == pytest.approx(0.36)
+    assert window.output_34_volume_percent_box.value() == pytest.approx(0.36)
+    assert engine.tactile_volume == pytest.approx(0.0036)
+    assert window._latest_tactile_calibration["recommended_output_34_percent"] == pytest.approx(0.35)
+    settings = json.loads((state_root / "focus_runner_settings.v1.json").read_text(encoding="utf-8"))
+    assert settings["output_3_4_volume_percent"] == pytest.approx(0.35)
+    assert "0.36%" in window.event_label.text()
+    window.dialog.close()
+
+
 def test_focus_mode_output_test_buttons_use_standard_assets_and_current_gains(tmp_path: Path):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:

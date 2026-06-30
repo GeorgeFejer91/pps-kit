@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import csv
 import json
+import xml.etree.ElementTree as ET
+from importlib.resources import files
 from pathlib import Path
 
 import pytest
@@ -67,6 +69,25 @@ def test_packaged_app_icons_exist():
         asset = package_asset(filename)
         assert asset.is_file()
         assert len(asset.read_bytes()) > 100
+
+
+def test_packaged_noise_mode_svgs_exist_and_parse():
+    for filename in (
+        "looming_burst_train_waveform.svg",
+        "looming_smooth_linear_approach_waveform.svg",
+    ):
+        for asset in (
+            package_asset(filename),
+            files("peripersonal_space_toolkit.dashboard").joinpath(filename),
+        ):
+            assert asset.is_file()
+            text = asset.read_text(encoding="utf-8")
+            root = ET.fromstring(text)
+            assert root.tag.endswith("svg")
+            assert root.attrib["viewBox"] == "0 0 960 360"
+            assert text.count("<path") >= 5
+            assert "PEAK ENVELOPE" in text
+            assert "CONTINUOUS NOISE CONTROL" not in text
 
 
 def test_default_design_matches_four_second_study5_timing():

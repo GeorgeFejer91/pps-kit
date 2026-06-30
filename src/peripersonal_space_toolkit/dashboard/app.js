@@ -2723,7 +2723,7 @@ function renderNoiseTable() {
   for (const noise of state.design.noises || []) {
     const selectedNoise = String(noise.noise_type || "pink").toLowerCase();
     const sourceProfile = String(noise.source_profile || GOLD_STANDARD_SOURCE_PROFILE);
-    const sourceProfileLabel = sourceProfile === CONTINUOUS_SOURCE_PROFILE ? "Continuous" : "Burst train";
+    const sourceProfileLabel = sourceProfile === CONTINUOUS_SOURCE_PROFILE ? "Smooth linear" : "Burst train";
     const wav = renderedWavForLabel(noise.label || `${noiseTypeLabel(selectedNoise)} noise`);
     const localPath = noise.prebaked_path || wav?.path || "";
     const card = document.createElement("div");

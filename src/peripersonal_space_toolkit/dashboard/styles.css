@@ -2268,15 +2268,113 @@ select:focus {
 
 .source-mode-row {
   display: grid;
-  grid-template-columns: minmax(88px, 0.35fr) minmax(210px, 1fr);
-  gap: 8px;
-  align-items: center;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(88px, 120px) minmax(0, 1fr);
+  gap: 10px;
+  align-items: stretch;
 }
 
 .source-mode-row > span {
+  align-self: center;
   color: var(--muted);
   font-size: 12px;
   font-weight: 700;
+}
+
+.source-mode-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+.source-mode-widget {
+  display: block;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.source-mode-widget input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.source-mode-widget-body {
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 6px;
+  height: 100%;
+  min-width: 0;
+  padding: 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: 7px;
+  background: #ffffff;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+.source-mode-widget img {
+  display: block;
+  width: 100%;
+  height: clamp(90px, 10vw, 124px);
+  min-width: 0;
+  border: 1px solid #d7dfd7;
+  border-radius: 5px;
+  background: #f4f5f1;
+  object-fit: contain;
+}
+
+.source-mode-widget-copy {
+  display: flex;
+  min-width: 0;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  line-height: 1.2;
+}
+
+.source-mode-widget-copy strong {
+  min-width: 0;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.source-mode-widget-copy span {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.source-mode-widget:hover .source-mode-widget-body,
+.source-mode-widget:focus-within .source-mode-widget-body {
+  border-color: #9fb9ac;
+  box-shadow: 0 0 0 2px rgba(36, 107, 85, 0.11);
+}
+
+.source-mode-widget:has(input:checked) .source-mode-widget-body {
+  border-color: var(--primary);
+  background: #f3faf6;
+  box-shadow: inset 0 0 0 1px rgba(36, 107, 85, 0.48);
+}
+
+@media (max-width: 760px) {
+  .source-mode-row {
+    grid-template-columns: 1fr;
+  }
+
+  .source-mode-choice-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .source-mode-widget img {
+    height: 112px;
+  }
 }
 
 .segmented-control.compact {

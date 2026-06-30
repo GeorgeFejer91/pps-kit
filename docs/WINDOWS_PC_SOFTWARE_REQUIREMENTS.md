@@ -121,14 +121,29 @@ with `pyxdf`, and reconciles the captured samples against local marker logs.
 
 ## Report-Build Tooling
 
-The internal validation report is LaTeX:
+The internal validation report and the Behavior Research Methods manuscript are
+LaTeX:
 
 - Required command: `pdflatex`
 - Current lab PC: MiKTeX `pdflatex.exe` found in the user MiKTeX install.
 - Official source: <https://miktex.org/download>
 
+The manuscript has a permanent repo-root Windows render path:
+
+```powershell
+.\windows\Render_BRM_Manuscript_PDF.ps1
+```
+
+That wrapper delegates to
+`publication\behavior-research-methods\manuscript\render_pdf.ps1`, which sets
+the Springer template path, runs `pdflatex`/`bibtex`/reruns, checks the LaTeX
+log for unresolved citations/references, repeats extra final passes when labels
+or citations changed, and leaves the ignored local `main.pdf` beside the
+manuscript source for review.
+
 The LaTeX tooling is not needed for participant playback, but it is required to
-rebuild `artifacts/validation_runs/report_build/latency_reliability_validations.pdf`.
+rebuild the BRM manuscript PDF and
+`artifacts/validation_runs/report_build/latency_reliability_validations.pdf`.
 
 ## Woojer And Tactile Tooling
 

@@ -13584,6 +13584,9 @@ class FocusModeWindow:
                 if dict(payload).get("ui_event") == "topup_completion":
                     self._handle_topup_completion(dict(payload))
                     continue
+                if dict(payload).get("ui_event") == "tactile_threshold_adapted":
+                    self._handle_tactile_threshold_adapted(dict(payload))
+                    continue
                 duration = float(payload.get("duration_s") or 0.0)
                 elapsed = float(payload.get("elapsed_s") or 0.0)
                 display_index = _payload_display_block_index(dict(payload))
@@ -13666,6 +13669,24 @@ class FocusModeWindow:
         self._refresh_target_global_bounds()
         self._tick_tactile_clock()
         self._refresh_experiment_control_minimum_height()
+
+    def _handle_tactile_threshold_adapted(self, payload: dict[str, Any]) -> None:
+        try:
+            percent = _coerce_tactile_output_percent(float(payload.get("new_output_34_percent")))
+        except (TypeError, ValueError):
+            return
+        self._set_output_volume("output_3_4", percent, persist=False)
+        message = str(payload.get("message") or "").strip()
+        if not message:
+            message = f"Tactile threshold nudged to Output 3/4 {percent:g}%."
+        self.event_label.setText(message)
+        _append_output_diary_event(
+            "tactile_threshold_adapted_visible",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            payload=dict(payload),
+            create=True,
+        )
 
     def _handle_topup_draft(self, payload: dict[str, Any]) -> None:
         self.topup_draft_items = [dict(item) for item in list(payload.get("missed_trials") or []) if isinstance(item, dict)]
@@ -13800,6 +13821,15 @@ class FocusModeWindow:
                 f"{topup_summary.get('missed_needs_topup_count', 0)} misses, "
                 f"{topup_summary.get('topup_attempt_count', 0)} attempts)"
             )
+        adaptive_summary = dict(getattr(result, "adaptive_tactile_threshold_summary", {}) or {})
+        if adaptive_summary:
+            lines.append(
+                "Adaptive tactile threshold: "
+                f"{adaptive_summary.get('initial_output_34_percent', '')}% -> "
+                f"{adaptive_summary.get('final_output_34_percent', '')}% "
+                f"({adaptive_summary.get('total_misses', 0)} misses, "
+                f"{adaptive_summary.get('adjustment_count', 0)} nudges)"
+            )
         lines.append(f"Session folder: {result.session_dir}")
         lines.append(f"Events CSV: {result.events_csv}")
         if result.capture_options.get("write_internal_xdf", True):
@@ -13833,6 +13863,7 @@ class FocusModeWindow:
                 "session_metadata_path": str(getattr(result, "session_metadata_path", "") or ""),
                 "recording_paths": [str(path) for path in list(getattr(result, "recording_paths", []) or [])],
                 "topup_summary": dict(topup_summary),
+                "adaptive_tactile_threshold_summary": dict(adaptive_summary),
                 "operator_completion_message": operator_message,
                 "warnings": list(getattr(result, "warnings", []) or []),
             },

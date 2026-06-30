@@ -28,16 +28,16 @@ In the HTML dashboard study selector, `study5_box_breathing_pps` should appear a
 
 ## Segment 1 Generated Source Mode
 
-Segment 1 `Generate Looming Noise` now has a `Source mode` segmented control.
-`Burst train` is the default and writes `source_profile:
-dynaspace_gaussian_burst_train`; `Continuous` writes `source_profile:
-continuous_noise` as an explicit opt-out. The browser records only the
-researcher decision. The local backend validates the two supported modes,
-normalizes burst-train parameters, clears stale burst parameters for
-continuous-noise bakes, and then owns WAV generation.
+Segment 1 `Generate Looming Noise` now has a visual `Source mode` widget pair
+using the bundled waveform SVGs. `Burst train` is the default and writes
+`source_profile: dynaspace_gaussian_burst_train`; `Smooth linear` writes
+`source_profile: continuous_noise` as an explicit non-burst option. The browser
+records only the researcher decision. The local backend validates the two
+supported modes, normalizes burst-train parameters, clears stale burst
+parameters for smooth-linear bakes, and then owns WAV generation.
 
 Existing generated source cards display a compact `Burst train` or
-`Continuous` chip and keep the saved `source_profile`,
+`Smooth linear` chip and keep the saved `source_profile`,
 `source_profile_parameters`, and `motion_mode` fields in hidden form state.
 Missing generated looming source profiles should resolve to `Burst train` when
 designs are loaded/saved/rendered, while imported/fixed custom clips remain

@@ -2551,6 +2551,84 @@ def test_session_runner_emits_live_topup_draft_after_response_window(tmp_path: P
     assert any(row["is_topup"].lower() == "true" for row in participant_rows)
 
 
+def test_session_runner_adapts_tactile_threshold_when_topup_disabled(tmp_path: Path):
+    design = _compact_design()
+    design.protocol = replace(design.protocol, repetitions_per_condition=2)
+    package = prepare_run_package(
+        design,
+        "P001",
+        render_dir=_render_dir(tmp_path),
+        session_root=tmp_path / "sessions",
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+    engine = _MockAudioEngine()
+    engine.progress_values = [0.0, 20.0]
+    controller = SessionRunnerController(
+        package,
+        audio_engine=engine,
+        enable_topup=False,
+        runner_metadata={
+            "playback_output_levels": {
+                "schema": "pps-output-channel-volumes.v1",
+                "output_3_4_percent": 0.1,
+            }
+        },
+    )
+    progress: list[dict[str, object]] = []
+
+    result = controller.run(progress_callback=progress.append)
+
+    assert result.completed
+    assert result.topup_summary["topup_outcome"] == "disabled"
+    adaptive_payloads = [payload for payload in progress if payload.get("ui_event") == "tactile_threshold_adapted"]
+    assert len(adaptive_payloads) == 1
+    assert adaptive_payloads[0]["new_output_34_percent"] == pytest.approx(0.11)
+    assert engine.tactile_volume == pytest.approx(0.0011)
+    assert result.adaptive_tactile_threshold_summary["total_misses"] == 2
+    assert result.adaptive_tactile_threshold_summary["tracked_tactile_trials"] == 2
+    assert result.adaptive_tactile_threshold_summary["current_miss_rate"] == pytest.approx(1.0)
+    assert result.adaptive_tactile_threshold_summary["adjustment_count"] == 1
+    assert result.analysis_outputs["adaptive_tactile_threshold_summary"].exists()
+    assert result.analysis_outputs["adaptive_tactile_threshold_adjustments"].exists()
+    with result.events_csv.open(newline="", encoding="utf-8") as handle:
+        event_rows = list(csv.DictReader(handle))
+    assert [row["event_type"] for row in event_rows].count("tactile_threshold_adapted") == 1
+
+
+def test_session_runner_counts_topup_misses_for_adaptive_threshold(tmp_path: Path):
+    run_manifest = _segment_run_setup_fixture(tmp_path)
+    package = prepare_segment_run_package(
+        run_manifest,
+        "P001",
+        session_root=tmp_path / "sessions",
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+    engine = _MockAudioEngine()
+    engine.progress_values = [0.0, 20.0]
+    controller = SessionRunnerController(
+        package,
+        audio_engine=engine,
+        enable_topup=True,
+        runner_metadata={
+            "playback_output_levels": {
+                "schema": "pps-output-channel-volumes.v1",
+                "output_3_4_percent": 0.1,
+            }
+        },
+    )
+    progress: list[dict[str, object]] = []
+
+    result = controller.run(progress_callback=progress.append, event_callback=lambda _message: None)
+
+    assert result.completed
+    adaptive_payloads = [payload for payload in progress if payload.get("ui_event") == "tactile_threshold_adapted"]
+    assert len(adaptive_payloads) == 1
+    assert adaptive_payloads[0]["triggering_is_topup"] is True
+    assert adaptive_payloads[0]["new_output_34_percent"] == pytest.approx(0.11)
+    assert result.adaptive_tactile_threshold_summary["total_misses"] >= 2
+    assert result.adaptive_tactile_threshold_summary["adjustment_count"] == 1
+
+
 def test_session_runner_logs_instruction_events_without_trial_response(tmp_path: Path):
     design = _compact_design()
     package = prepare_run_package(

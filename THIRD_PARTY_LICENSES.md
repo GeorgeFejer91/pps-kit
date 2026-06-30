@@ -96,6 +96,26 @@ CameraX, ML Kit barcode scanning, OkHttp, Kotlin coroutines, and JUnit are
 resolved from Maven repositories during build and are not vendored in this
 source tree.
 
+## Springer Nature LaTeX Author Template
+
+- Project: Springer Nature LaTeX author template
+- Source page: https://www.springernature.com/gp/authors/campaigns/latex-author-support
+- Overleaf entry:
+  https://www.overleaf.com/latex/templates/springer-nature-latex-template/myxmhdsbzkyd
+- Downloaded package:
+  `publication/behavior-research-methods/springer-nature-latex-template-dec-2024.zip`
+- Extracted files:
+  `publication/behavior-research-methods/springer-nature-latex-template/`
+- Download date: 2026-06-30
+- ZIP SHA-256:
+  `812E76DCAA9C28DC1BFF1FB6065D51729B67D4EA140552A05088317414A3ECAE`
+
+These are third-party author-support materials for preparing Springer Nature
+journal submissions, added for the Behavior Research Methods manuscript
+workspace. The template files retain their upstream notices; for example,
+`sn-jnl.cls` declares LaTeX Project Public License terms for the generated class
+source. The template package is not part of the PPS Toolkit MIT license grant.
+
 ## Redistributable HRTF Candidates
 
 The GUI study profiles preload trajectory, timing, and noise parameters. HRTF

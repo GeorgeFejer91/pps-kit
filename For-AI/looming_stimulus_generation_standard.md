@@ -76,9 +76,9 @@ As of 2026-06-29, this is system-wide behavior for generated looming sources:
   exported into source/preload manifests
 - explicit `source_profile: "continuous_noise"` is the only supported
   continuous-noise opt-out for generated sources
-- Segment 1 exposes this choice as a `Source mode` segmented control, with
-  `Burst train` selected by default and `Continuous` available for deliberate
-  control/legacy bakes
+- Segment 1 exposes this choice as a `Source mode` waveform-widget pair, with
+  `Burst train` selected by default and `Smooth linear` available for
+  deliberate non-burst legacy bakes
 - preload catalog rebuilds should regenerate generated-noise WAVs and QC rows
   after renderer/default-source-profile changes so bundled profiles match the
   current toolkit standard
