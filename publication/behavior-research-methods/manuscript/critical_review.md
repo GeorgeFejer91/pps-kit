@@ -816,3 +816,33 @@ Methods manuscript draft. It is a working audit, not manuscript text.
   validation gaps. Final submission still needs route-specific hardware timing,
   tactile delivery/perceptual artifacts, and final release metadata before
   strong route or tactile claims can be made.
+
+## Iteration 23: Dashboard Control Recheck Pass
+
+### Main Critiques
+
+- The manuscript claims that visible Segment 0-6 GUI decisions are represented
+  in the evidence/control ledgers. That claim can drift if the dashboard changes
+  while the paper is being drafted.
+- The current worktree had uncommitted dashboard edits. Even if those edits were
+  not part of the manuscript change set, the source-level coverage claim needed
+  a fresh check against the current dashboard labels.
+- The audit needed to distinguish scientific design controls from operational
+  status indicators, especially because readiness badges are visible to users.
+
+### Resolution In This Revision
+
+- Added `dashboard_control_recheck_20260630.md`, a source-level recheck of the
+  current local dashboard source against `gui_control_coverage.csv`.
+- The recheck found no new literature-bearing PPS design control. The visible
+  dirty-dashboard label/status change is a not-ready readiness-badge glyph and
+  styling change, already covered by the left-rail readiness-badge row.
+- Updated `gui_control_coverage.csv`, the manuscript README, and
+  `submission_readiness_audit.md` so this point-in-time recheck is discoverable.
+
+### Residual Concerns
+
+- This is not screenshot-based visual validation and not user-click workflow
+  validation. If dashboard controls change before submission, rerun the source
+  audit and, for GUI/readiness claims, use the project-required visual and
+  click-validation workflows.

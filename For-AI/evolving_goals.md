@@ -222,6 +222,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   Mousetrap, so the article model covers calibration/setup interfaces,
   synchronous I/O or LSL, device-specific validation limits, and analysis
   handoff in addition to general experiment-builder style.
+- Continued the BRM manuscript self-review loop with a dashboard control
+  recheck pass. `dashboard_control_recheck_20260630.md` records a source-level
+  audit of the current local dashboard worktree against
+  `gui_control_coverage.csv`; the only detected dirty-dashboard label/status
+  change was a not-ready readiness-badge glyph/styling change, which remains
+  operational UI rather than a new literature-bearing PPS design decision.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

@@ -15,6 +15,10 @@ manuscript for PPS Toolkit.
   visible Segment 0-6 controls either to evidence-matrix rows or to explicit
   non-method roles such as navigation, folder inspection, documentation, or
   modal workflow mechanics.
+- `dashboard_control_recheck_20260630.md`: source-level recheck against the
+  current local dashboard source confirming that the observed not-ready badge
+  glyph/layout change is operational UI and does not introduce a new
+  literature-bearing PPS design decision.
 - `brm_comparator_articles.csv`: source-pointer table of same-journal BRM
   software, toolbox, tutorial, sharing, and timing-validation papers used as
   article-style comparators.
@@ -56,6 +60,9 @@ workflow explicitly asks for an archived submission snapshot.
 - `gui_control_coverage.csv` is an interface coverage ledger, not a second
   literature matrix. It exists to show which visible controls are scientific
   design decisions and which are ordinary suite/navigation mechanics.
+- `dashboard_control_recheck_20260630.md` is a point-in-time source audit of
+  the local dashboard worktree. It is not GUI usability validation and should be
+  rerun if dashboard controls change before submission.
 - `brm_comparator_articles.csv` is a style and journal-fit audit, not a claim
   that PPS Toolkit has the same maturity, user base, or validation scope as the
   comparator tools.
