@@ -94,6 +94,12 @@ def test_write_android_lsl_monitor_artifacts_and_report(tmp_path: Path):
         "command_signals": 1,
     }
     assert saved_report["observed_session_ids"] == ["part-001", "session-001"]
+    assert saved_report["observed_command_package_ids"] == ["pkg-001"]
+    assert saved_report["observed_command_participant_ids"] == ["P001"]
+    assert saved_report["observed_command_target_session_ids"] == ["part-001"]
+    assert saved_report["observed_command_target_part_session_ids"] == ["part-001"]
+    assert saved_report["observed_command_target_session_group_ids"] == ["group-001"]
+    assert saved_report["observed_command_target_part_numbers"] == ["1"]
     assert saved_report["observed_command_ack_ids"] == ["cmd-1"]
     assert saved_report["observed_command_signal_ids"] == ["cmd-2"]
     assert saved_report["observed_command_signal_ids_without_ack"] == ["cmd-2"]

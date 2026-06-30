@@ -131,10 +131,13 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   rows also flatten non-secret command target identity from observed command
   and ack payloads, and strict artifact validation checks those fields against
   the raw sample payload so monitor audit tables cannot drift from captured
-  command samples. Payload drift is reported with redacted placeholders so
-  pairing secrets stay out of validation artifacts. Ack payloads that echo
-  pairing tokens remain invalid, and strict artifact validation rejects orphan
-  `PPSCommandAcksV1` ids that lack captured `PPSCommandSignalsV1` rows.
+  command samples. Monitor reports also aggregate those target identity sets,
+  and the validator recomputes them from event rows so report summaries cannot
+  drift from the JSONL evidence. Payload drift is reported with redacted
+  placeholders so pairing secrets stay out of validation artifacts. Ack payloads
+  that echo pairing tokens remain invalid, and strict artifact validation
+  rejects orphan `PPSCommandAcksV1` ids that lack captured
+  `PPSCommandSignalsV1` rows.
 - Sender/receiver command-admin reconciliation is in
   `validation_protocols/scripts/reconcile_android_command_admin_with_phone_run.py`.
   It compares Android Controller or PC-admin native command outboxes against the

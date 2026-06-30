@@ -1791,6 +1791,18 @@ def test_android_lsl_runtime_validator_rejects_pc_monitor_command_ack_row_target
     assert "PC monitor event row 1 payload target_session_group_id differs from monitor row" in failures
 
 
+def test_android_lsl_runtime_validator_rejects_pc_monitor_report_target_identity_drift():
+    rows = [_pc_monitor_command_row(command_id="cmd-monitor-report-drift", command="pause")]
+    report = monitor.build_android_lsl_monitor_report(rows)
+    report["observed_command_target_part_session_ids"] = ["part-999"]
+
+    result = validator.validate_pc_monitor_report(report, event_rows=rows, expect_command_acks=False)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "PC monitor report observed_command_target_part_session_ids differs from monitor event rows" in failures
+
+
 def test_android_lsl_runtime_validator_accepts_phone_run_command_diary_ack_evidence(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()

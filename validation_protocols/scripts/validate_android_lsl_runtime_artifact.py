@@ -659,6 +659,8 @@ def validate_pc_monitor_report(
         failures.append("PC monitor strict validation requires monitor event rows")
     for index, row in enumerate(rows, start=1):
         _validate_pc_monitor_event_row(row, row_index=index, failures=failures)
+    if rows:
+        _validate_pc_monitor_report_identity_summaries(report, rows=rows, failures=failures)
 
     effective_counts = dict(stream_counts)
     if rows:
@@ -715,6 +717,43 @@ def validate_pc_monitor_report(
         failures=failures,
         warnings=warnings,
     )
+
+
+def _validate_pc_monitor_report_identity_summaries(
+    report: dict[str, Any],
+    *,
+    rows: list[dict[str, Any]],
+    failures: list[str],
+) -> None:
+    summary_fields = {
+        "observed_command_package_ids": ("package_id",),
+        "observed_command_participant_ids": ("participant_id",),
+        "observed_command_target_session_ids": ("target_session_id",),
+        "observed_command_target_part_session_ids": ("target_part_session_id",),
+        "observed_command_target_session_group_ids": ("target_session_group_id",),
+        "observed_command_target_part_numbers": ("target_part_number",),
+    }
+    command_rows = [
+        row
+        for row in rows
+        if str(row.get("stream_key") or "") in {"command_signals", "command_acks"}
+    ]
+    for report_field, row_fields in summary_fields.items():
+        observed = sorted(
+            {
+                value
+                for row in command_rows
+                for field in row_fields
+                for value in [_metadata_value(row.get(field))]
+                if value
+            }
+        )
+        if isinstance(report.get(report_field), list):
+            reported = [str(item) for item in report.get(report_field) or []]
+        else:
+            reported = []
+        if reported != observed:
+            failures.append(f"PC monitor report {report_field} differs from monitor event rows")
 
 
 def validate_run_artifact(

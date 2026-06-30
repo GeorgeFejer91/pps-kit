@@ -48,6 +48,10 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   and `PPSCommandAcksV1` payloads. Strict monitor validation compares those row
   fields back against the raw sample payload so external monitor/XDF audit
   tables cannot drift from the captured command sample.
+- PC Android LSL monitor reports now aggregate the same command target identity
+  sets from observed command/ack rows, and strict validation recomputes them
+  from the JSONL rows. Report-level summaries therefore cannot drift from the
+  monitor event rows used to reconstruct phone/PC command administration.
 - PC-to-Android LSL admin sends now validate the received
   `PPSCommandAcksV1` sample before reporting live success. A same-command-id
   ack is recorded but marked `invalid_ack` if its `session_id` or echoed target

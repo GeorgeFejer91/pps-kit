@@ -238,6 +238,12 @@ def build_android_lsl_monitor_report(
     session_ids: set[str] = set()
     part_session_ids: set[str] = set()
     participant_ids: set[str] = set()
+    command_package_ids: set[str] = set()
+    command_participant_ids: set[str] = set()
+    command_target_session_ids: set[str] = set()
+    command_target_part_session_ids: set[str] = set()
+    command_target_session_group_ids: set[str] = set()
+    command_target_part_numbers: set[str] = set()
     commands_acked: set[str] = set()
     commands_observed: set[str] = set()
     command_names: dict[str, int] = {}
@@ -259,6 +265,18 @@ def build_android_lsl_monitor_report(
             if value:
                 target.add(value)
         command_id = str(row.get("command_id") or "").strip()
+        if key in {"command_signals", "command_acks"}:
+            for field, target in (
+                ("package_id", command_package_ids),
+                ("participant_id", command_participant_ids),
+                ("target_session_id", command_target_session_ids),
+                ("target_part_session_id", command_target_part_session_ids),
+                ("target_session_group_id", command_target_session_group_ids),
+                ("target_part_number", command_target_part_numbers),
+            ):
+                value = str(row.get(field) or "").strip()
+                if value:
+                    target.add(value)
         if key == "command_acks" and command_id:
             commands_acked.add(command_id)
             ack_status = str(row.get("ack_status") or "").strip() or "unknown"
@@ -290,6 +308,12 @@ def build_android_lsl_monitor_report(
         "observed_session_ids": sorted(session_ids),
         "observed_part_session_ids": sorted(part_session_ids),
         "observed_participant_ids": sorted(participant_ids),
+        "observed_command_package_ids": sorted(command_package_ids),
+        "observed_command_participant_ids": sorted(command_participant_ids),
+        "observed_command_target_session_ids": sorted(command_target_session_ids),
+        "observed_command_target_part_session_ids": sorted(command_target_part_session_ids),
+        "observed_command_target_session_group_ids": sorted(command_target_session_group_ids),
+        "observed_command_target_part_numbers": sorted(command_target_part_numbers),
         "observed_command_signal_ids": sorted(commands_observed),
         "observed_command_names": command_names,
         "observed_command_ack_ids": sorted(commands_acked),
