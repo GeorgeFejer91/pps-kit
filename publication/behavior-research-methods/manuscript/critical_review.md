@@ -683,3 +683,36 @@ Methods manuscript draft. It is a working audit, not manuscript text.
 - The comparator pass strengthens journal fit, but the draft still needs final
   copy editing to keep the added table from making the introduction feel too
   front-loaded once figures and release links are added.
+
+## Iteration 19: Figure and Source-material Plan Pass
+
+### Main Critiques
+
+- The manuscript now has strong textual and tabular scaffolds, but a BRM
+  software/toolkit submission will likely need figures that show the workflow,
+  controls, evidence tiers, and analysis surfaces.
+- The previous draft mentioned figures only as a limitation, which left a gap:
+  it did not say which figures should be generated, what artifacts should
+  support them, or what each figure is allowed to prove.
+- Without a source-material plan, future figure creation could accidentally use
+  copyrighted paper figures, private participant records, local SOFA files, or
+  screenshots whose source state cannot be reconstructed.
+
+### Resolution In This Revision
+
+- Added `figure_source_plan.csv`, mapping six recommended figures to manuscript
+  roles, source artifacts, supported claims, and boundaries.
+- Added a `Figure and Source-material Plan` subsection in the validation/use
+  cases section. The table covers workflow, design matrix, auditory/stimulus
+  choices, evidence tiers, tactile/operator safeguards, and exploratory
+  post-run analysis.
+- Updated the readiness audit and manuscript README so final figures remain
+  tied to redistributable toolkit artifacts rather than copyrighted or private
+  materials.
+
+### Residual Concerns
+
+- The plan does not generate final artwork. Before submission, the actual
+  figures still need to be rendered from release-state screenshots, manifests,
+  schemas, validation reports, and deidentified sample outputs, then visually
+  checked for readability in the Springer layout.

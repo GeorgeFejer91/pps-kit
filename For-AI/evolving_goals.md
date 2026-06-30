@@ -190,6 +190,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   follow BRM software-paper conventions: state the barrier, show the tool, walk
   through runnable examples, separate validation tiers, and preserve reuse
   boundaries.
+- Continued the BRM manuscript self-review loop with a figure/source-material
+  plan pass. `figure_source_plan.csv` now maps the recommended final figures to
+  their source artifacts, supported claims, and boundaries, and `main.tex`
+  includes a matching table. Final figures should be generated from
+  redistributable toolkit screenshots, manifests, schemas, validation outputs,
+  and deidentified sample artifacts, not copyrighted source-paper figures or
+  private participant data.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

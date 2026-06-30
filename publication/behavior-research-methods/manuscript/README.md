@@ -20,6 +20,8 @@ manuscript for PPS Toolkit.
   article-style comparators.
 - `profile_family_examples.csv`: source-pointer map from common published PPS
   method families to toolkit profile/scaffold representations and caveats.
+- `figure_source_plan.csv`: planned figure/source-artifact map for the final
+  submission, including the evidence boundary for each figure.
 - `validation_evidence.csv`: committed source-pointer summary of validation
   evidence used in the draft; generated raw reports remain under ignored
   validation folders.
@@ -57,6 +59,9 @@ workflow explicitly asks for an archived submission snapshot.
 - `profile_family_examples.csv` is a profile-family map, not a claim that every
   listed paradigm has been exactly replicated with original apparatus and
   stimuli.
+- `figure_source_plan.csv` is a publication-preparation scaffold, not generated
+  figure evidence. Final figures must be generated from redistributable toolkit
+  artifacts and should cite or archive the exact source files used.
 - `submission_readiness_audit.md` is a maintenance/readiness ledger, not
   manuscript prose. It should remain honest about the distinction between a
   source-ready draft and a final submission package.

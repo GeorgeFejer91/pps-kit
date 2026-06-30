@@ -398,6 +398,28 @@ Sharing & Publish design/profile, validation, and deidentified participant layer
 
 The fourth use case loads a completed sample or deidentified run and shows the instant-analysis outputs: response integrity, baseline assumption, PPS assumption, model-fit families, low-N warnings, and artifact paths. The key validation criterion is not that the sample produces a strong PPS effect. It is that the analysis labels its own limits, preserves baseline metadata, and prevents exploratory operator feedback from becoming a hidden confirmatory pipeline.
 
+\subsection{Figure and Source-material Plan}
+
+BRM software papers are often easier to evaluate when figures show both the tool workflow and the evidence boundary. For the final submission, every figure should be generated from redistributable toolkit artifacts rather than copyrighted source-paper figures, private participant records, or local generated files that cannot be shared. Table~\ref{tab:figure-plan} lists the recommended figure set and the source artifacts that should be attached or cited. The same plan is stored in \code{figure\_source\_plan.csv}.
+
+\begin{table}[t]
+\caption{Recommended figure set and source artifacts for the final submission.}
+\label{tab:figure-plan}
+\footnotesize
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.15\textwidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.28\textwidth} >{\raggedright\arraybackslash}p{0.22\textwidth}}
+\toprule
+Figure & Role in paper & Source artifacts & Boundary \\
+\midrule
+Workflow & Show Segments 0--6 from profile selection to runner handoff. & Segment manifests, dashboard screenshots, accepted blocks, and package examples. & Workflow evidence, not timing or behavioral validation. \\
+Design matrix & Show how GUI decisions map to heterogeneous PPS methods. & \code{evidence\_matrix.csv}, \code{gui\_control\_coverage.csv}, and \code{profile\_family\_examples.csv}. & Structured evidence map, not PRISMA/meta-analysis. \\
+Stimulus choices & Illustrate burst-train versus smooth sources, fixed baselines, and trajectory/direction alternatives. & Redistributable waveform summaries, source manifests, trajectory manifests, and source-mode SVGs. & Does not prove perceptual equivalence to private original stimuli. \\
+Evidence tiers & Explain SOFA/HRTF rendering, multichannel output, LSL/event mirrors, audio evidence, and loopback tiers. & Renderer metadata, route settings, event logs, and validation summaries. & Does not prove individualized localization or tactile mechanical onset. \\
+Operator safeguards & Show calibration, misses, adaptive threshold nudges, top-up, and post-run review. & Calibration schema, adaptive-threshold artifacts, top-up ledgers, and operator-procedure table. & Safeguard documentation, not proof of habituation correction. \\
+Exploratory analysis & Show response quality, baseline checks, model alternatives, low-N warnings, and artifact review. & Deidentified sample outputs and instant-analysis CSV/JSON schemas. & Exploratory review, not confirmatory PPS inference. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 \section{Discussion}
 
 \toolkit{} addresses a recurring problem in audio-tactile PPS research: many design differences are theoretically meaningful, but the software used to implement them often makes those decisions hard to inspect. The toolkit does not flatten the field into one standard paradigm. Instead, it makes heterogeneity explicit. A researcher can choose burst-train or smooth looming sources, front or rear trajectories, tactile-only or stationary baselines, one-part or pre/post schedules, and sigmoid or graded model summaries. The important constraint is that each choice becomes a manifest entry, a CSV row, a hash, or a caveat rather than an undocumented runtime assumption.
