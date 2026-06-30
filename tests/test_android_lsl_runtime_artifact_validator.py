@@ -2306,6 +2306,22 @@ def test_android_lsl_runtime_validator_rejects_phone_run_ack_payload_token_echo(
     assert "phone command diary row 1 ack payload must not echo the pairing token" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_phone_run_ack_receiver_role_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    row = _phone_native_command_row()
+    ack_payload = json.loads(row["ack_sample"][9])
+    ack_payload["receiver_role"] = "controller"
+    row["payload"] = dict(ack_payload)
+    row["ack_sample"][9] = json.dumps(ack_payload)
+    _write_phone_run_with_native_command_diary(run_dir, row=row)
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    assert "phone command diary row 1 ack payload receiver_role must be runner" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_rejects_operator_command_payload_drift(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -2579,6 +2595,7 @@ def _phone_native_command_row(*, ack_sent: bool = True) -> dict:
     command_sample = _phone_command_sample("cmd-phone-001", "pc_runner", "pause", issued_lsl_time="42.000000000")
     payload = {
         "command": "pause",
+        "receiver_role": "runner",
         "package_id": "pkg-001",
         "participant_id": "P001",
         "target_session_id": "part-001",
@@ -2661,6 +2678,7 @@ def _phone_native_rejected_command_row() -> dict:
     command_sample[6] = json.dumps(command_payload)
     payload = {
         "schema": "pps-android-phone-command-rejection.v1",
+        "receiver_role": "runner",
         "status": "rejected",
         "reason": "invalid_token",
         "rejected_before_handler": True,
@@ -2771,6 +2789,7 @@ def _phone_native_handler_rejected_command_row() -> dict:
     }
     payload = {
         "schema": "pps-android-phone-command-handler-rejection.v1",
+        "receiver_role": "runner",
         "status": "rejected",
         "reason": "no_active_phone_block_to_pause",
         "rejected_before_handler": False,
@@ -2879,6 +2898,7 @@ def _phone_native_malformed_command_row() -> dict:
     ]
     payload = {
         "schema": "pps-android-phone-command-sample-rejection.v1",
+        "receiver_role": "runner",
         "status": "rejected",
         "reason": "invalid_command_sample",
         "parse_error": "Unsupported LSL command sample schema.",
@@ -2982,6 +3002,7 @@ def _phone_native_request_snapshot_command_row() -> dict:
     )
     payload = {
         "schema": "pps-android-phone-runtime-command-state.v1",
+        "receiver_role": "runner",
         "command": "request_snapshot",
         "run_id": "phone-run-001",
         "package_id": "pkg-001",
@@ -3085,6 +3106,7 @@ def _phone_native_start_command_row() -> dict:
     )
     payload = {
         "command": "start_experiment",
+        "receiver_role": "runner",
         "package_id": "pkg-001",
         "participant_id": "P001",
         "target_session_id": "part-001",

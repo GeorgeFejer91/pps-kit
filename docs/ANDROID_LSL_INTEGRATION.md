@@ -48,7 +48,8 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
 - Commands are token-gated through `token` or `companion_token` in
   `payload_json` before any local handler runs.
 - Acks are shaped as applied/rejected command acknowledgements after the local
-  handler returns. Ack payloads echo only non-secret accepted target identity
+  handler returns. Phone-run ack payloads identify the receiver as
+  `receiver_role="runner"` and echo only non-secret accepted target identity
   fields from the command sample (`package_id`, `participant_id`,
   `target_session_id`, `target_part_session_id`, `target_session_group_id`,
   `target_part_number`, and requester/source-behavior fields); pairing tokens
@@ -343,9 +344,10 @@ Required validation levels:
    contain `token` or `companion_token`, not only the surrounding row metadata.
     Phone-run `command_diary.jsonl` rows are also checked against matching
     `operator_command` events and native `PPSCommandAcksV1` samples: strict ack
-    validation requires the ack payload to match the diary payload and preserve
-    the applied command plus package identity, with run id required for
-    active-run control commands. It also compares completion `summary`
+    validation requires the ack payload to match the diary payload, declare
+    `receiver_role=runner`, and preserve the applied command plus package
+    identity, with run id required for active-run control commands. It also
+    compares completion `summary`
     command counters against the native command diary: received commands,
     sent acks, failed ack sends, and rejected commands must match the
     `native_lsl` rows.

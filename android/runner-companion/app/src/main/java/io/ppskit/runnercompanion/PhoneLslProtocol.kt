@@ -521,6 +521,9 @@ private val PHONE_COMMAND_ACK_ECHO_PAYLOAD_FIELDS = listOf(
 
 private fun phoneCommandAckPayload(signal: PhoneLslCommandSignal, basePayload: JSONObject): JSONObject {
     val payload = JSONObject(basePayload.toString())
+    if (!payload.has("receiver_role")) {
+        payload.put("receiver_role", "runner")
+    }
     if (!payload.has("command")) {
         payload.put("command", signal.command)
     }
@@ -574,6 +577,7 @@ private fun phoneMalformedCommandSampleAckPayload(
 ): JSONObject =
     JSONObject()
         .put("schema", PHONE_LSL_COMMAND_SAMPLE_REJECTION_PAYLOAD_SCHEMA)
+        .put("receiver_role", "runner")
         .put("status", "rejected")
         .put("reason", reason)
         .put("parse_error", parseError)

@@ -25,7 +25,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   validator now treats those stream descriptions as strict native
   reconstruction evidence, including PC-compatible channel order, source IDs,
   and the privacy rule that demographics stay out of stream names. Phone-run
-  command diaries distinguish `phone_ui`, `phone_runtime`, and `native_lsl`
+  command ack payloads now declare `receiver_role="runner"`, command diaries
+  distinguish `phone_ui`, `phone_runtime`, and `native_lsl`
   command sources and mirror each row as an `operator_command` event so direct
   Android button presses and received LSL commands reconstruct through the same
   event/marker path. Native receiver rows now preserve `command_channels` plus

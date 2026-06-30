@@ -689,6 +689,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `lsl_runtime_status.json` now separates bridge, marker transport, and command
   transport details; strict validation requires the native command receiver and
   enabled `native_bridge.command_transport` as well as marker transport.
+- Phone-run `PPSCommandAcksV1` payloads now declare
+  `receiver_role="runner"` for applied, pre-handler rejected, handler-rejected,
+  request-snapshot, idle-start, and malformed-command acknowledgements. Strict
+  phone-run command-diary validation rejects receiver-role drift, so raw ack
+  samples can be classified as Runner-phone evidence without relying only on
+  filenames or UI state.
 - The phone-owned AudioTrack pause gate now keeps polling native Android LSL
   commands while playback is paused. A `pause` command therefore no longer
   traps the runner inside the paused audio wait loop; a PC runner or second

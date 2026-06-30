@@ -3827,6 +3827,8 @@ def _validate_phone_command_ack_payload(
         or _metadata_value(ack_payload.get("companion_token"))
     ):
         failures.append(f"{prefix} ack payload must not echo the pairing token")
+    if _metadata_value(ack_payload.get("receiver_role")) != "runner":
+        failures.append(f"{prefix} ack payload receiver_role must be runner")
     if command == "invalid_lsl_command":
         _validate_phone_command_sample_rejection_payload(
             ack_payload,

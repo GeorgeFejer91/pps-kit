@@ -164,6 +164,7 @@ def test_android_command_acks_echo_nonsecret_target_identity() -> None:
     assert '"token"' not in echo_allow_list
     assert '"companion_token"' not in echo_allow_list
     assert "private fun phoneCommandAckPayload" in lsl_protocol
+    assert '.put("receiver_role", "runner")' in lsl_protocol
     assert "phoneCommandAckPayload(signal, result.payload)" in lsl_protocol
     assert "private fun phoneRejectedCommandAckPayload" in lsl_protocol
     assert "payload = phoneRejectedCommandAckPayload(signal, runPackage, rejection)" in lsl_protocol
