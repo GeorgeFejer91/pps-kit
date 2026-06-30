@@ -47,6 +47,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   and rejects absolute paths, backslash paths, parent traversal, or participant
   / run-id drift. The existing app-private absolute paths remain for local UI
   convenience, but archive reconstruction no longer depends on them.
+- The PC mobile-runtime upload mirror now writes the same
+  `phone_owned_data_export.json` `portable_paths` map when accepting completed
+  phone-owned uploads with a response ledger. The on-disk PC mirror export file
+  also includes its `artifact_path`, so the returned API payload and saved
+  reconstruction artifact no longer differ on that field.
 
 - The local HTML dashboard launcher now treats `/api/health` as the fast
   already-running probe before falling back to `/api/state`. This prevents a

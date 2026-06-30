@@ -1775,15 +1775,18 @@ def _write_phone_owned_upload_export(
     data_min_dir = export_root / "1.Data_min"
     participant_id = _safe_phone_export_name(str(getattr(package, "participant_id", "") or "participant"))
     participant_csv = data_min_dir / f"{participant_id}.csv"
-    data_max_run_dir = export_root / "2.Data_max" / participant_id / "runs" / _safe_phone_export_name(run_id)
+    cleaned_run_id = _safe_phone_export_name(run_id)
+    data_max_run_dir = export_root / "2.Data_max" / participant_id / "runs" / cleaned_run_id
     rows = _phone_data_min_rows_from_response_ledger(package, response_ledger_rows)
     _write_phone_data_min_csv(participant_csv, rows)
     master_csv = _refresh_phone_data_min_master(data_min_dir)
+    data_max_archive_path = f"phone_owned_exports/2.Data_max/{participant_id}/runs/{cleaned_run_id}"
+    export_path = out_dir / "phone_owned_data_export.json"
     export = {
         "schema": MOBILE_PHONE_OWNED_DATA_EXPORT_SCHEMA,
         "accepted_at": accepted_at,
         "participant_id": participant_id,
-        "run_id": _safe_phone_export_name(run_id),
+        "run_id": cleaned_run_id,
         "package_id": mobile_package_id(package),
         "session_id": str(getattr(package, "session_id", "") or ""),
         "part_session_id": str(getattr(package, "part_session_id", "") or ""),
@@ -1797,16 +1800,29 @@ def _write_phone_owned_upload_export(
         "data_min_row_count": len(rows),
         "data_max_run_dir": str(data_max_run_dir),
         "data_max_source_run_dir": str(out_dir),
+        "artifact_path": str(export_path),
+        "portable_paths": {
+            "archive_run_root": ".",
+            "phone_owned_data_export": export_path.name,
+            "phone_owned_exports_root": "phone_owned_exports",
+            "data_min_participant_csv": f"phone_owned_exports/1.Data_min/{participant_csv.name}",
+            "data_min_master_successful_participants_csv": (
+                f"phone_owned_exports/1.Data_min/{master_csv.name}"
+            ),
+            "data_max_run_dir": data_max_archive_path,
+            "data_max_completion_json": f"{data_max_archive_path}/completion.json",
+            "data_max_phone_owned_data_export": f"{data_max_archive_path}/{export_path.name}",
+            "data_max_artifact_file_inventory": f"{data_max_archive_path}/artifact_file_inventory.json",
+            "data_max_artifact_file_inventory_csv": f"{data_max_archive_path}/artifact_file_inventory.csv",
+        },
         "privacy": {
             "scope": "pc_mobile_runtime_phone_owned_upload_mirror",
             "demographics_in_stream_name": False,
             "participant_names_exported": False,
         },
     }
-    export_path = out_dir / "phone_owned_data_export.json"
     with open(_filesystem_path(export_path), "w", encoding="utf-8") as handle:
         handle.write(json.dumps(export, indent=2, sort_keys=True, default=str) + "\n")
-    export["artifact_path"] = str(export_path)
     return export
 
 

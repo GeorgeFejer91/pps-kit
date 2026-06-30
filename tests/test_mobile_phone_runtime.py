@@ -618,6 +618,27 @@ def test_mobile_runtime_completion_upload_mirrors_phone_owned_response_export(tm
     export = json.loads((run_dir / "phone_owned_data_export.json").read_text(encoding="utf-8"))
     assert export["schema"] == "pps-android-phone-owned-data-export.v1"
     assert export["pc_upload_mirror"] is True
+    assert export["artifact_path"] == str(run_dir / "phone_owned_data_export.json")
+    assert export["portable_paths"] == {
+        "archive_run_root": ".",
+        "phone_owned_data_export": "phone_owned_data_export.json",
+        "phone_owned_exports_root": "phone_owned_exports",
+        "data_min_participant_csv": "phone_owned_exports/1.Data_min/P001.csv",
+        "data_min_master_successful_participants_csv": (
+            "phone_owned_exports/1.Data_min/master_successful_participants.csv"
+        ),
+        "data_max_run_dir": "phone_owned_exports/2.Data_max/P001/runs/phone-run-001",
+        "data_max_completion_json": "phone_owned_exports/2.Data_max/P001/runs/phone-run-001/completion.json",
+        "data_max_phone_owned_data_export": (
+            "phone_owned_exports/2.Data_max/P001/runs/phone-run-001/phone_owned_data_export.json"
+        ),
+        "data_max_artifact_file_inventory": (
+            "phone_owned_exports/2.Data_max/P001/runs/phone-run-001/artifact_file_inventory.json"
+        ),
+        "data_max_artifact_file_inventory_csv": (
+            "phone_owned_exports/2.Data_max/P001/runs/phone-run-001/artifact_file_inventory.csv"
+        ),
+    }
     data_min_rows = list(csv.DictReader(Path(export["data_min_participant_csv"]).open(encoding="utf-8")))
     assert len(data_min_rows) == 1
     assert data_min_rows[0]["participant_id"] == "P001"
