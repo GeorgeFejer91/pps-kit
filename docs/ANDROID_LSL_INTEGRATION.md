@@ -137,8 +137,10 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   rich reconstructive phone-run folder. Strict export validation requires that
   Data Max mirror to carry the core phone reconstruction spine: runtime status,
   event diary, package manifest, reconstruction contract, local marker and
-  trigger-code mirrors, participant metadata, haptic capability, artifact file
-  inventory JSON/CSV, and completion/latest-events evidence.
+  trigger-code mirrors, command diary, response/top-up sidecars, phone-run
+  catalog entry, phone-owned export manifest, participant metadata, haptic
+  capability, artifact file inventory JSON/CSV, and completion/latest-events
+  evidence.
 - Controller-mode outboxes include `phone_controller_runtime_status.json`.
   Default builds record `current_android_source_behavior=local_controller_outbox_only`;
   native builds record `native_lsl_controller_with_local_outbox` when the

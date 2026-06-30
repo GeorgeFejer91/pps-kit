@@ -238,9 +238,10 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `--expect-phone-owned-data-export` is set; strict Data Max validation now
   requires the mirrored run folder to include the reconstruction spine files
   (`lsl_runtime_status.json`, `events.csv`, `run_package_manifest.json`,
-  `reconstruction_contract.json`, marker/trigger mirrors, participant metadata,
-  haptic capability, artifact inventory JSON/CSV, and completion/latest-events
-  evidence),
+  `reconstruction_contract.json`, marker/trigger mirrors, command diary,
+  response/top-up sidecars, phone-run catalog entry, phone-owned export
+  manifest, participant metadata, haptic capability, artifact inventory
+  JSON/CSV, and completion/latest-events evidence),
   phone-run `participant_metadata.json` and `haptic_capability.json` sidecars
   plus Android haptic calibration threshold/status/amplitude-response
   consistency, including no-vibrator, binary-detection, and amplitude-control

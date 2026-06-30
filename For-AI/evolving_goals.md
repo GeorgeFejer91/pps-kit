@@ -12,6 +12,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   through app-private `phone_run_catalog/runs.jsonl` and `latest_run.json`, so
   the participant/session catalog cannot silently lose LSL administration
   evidence.
+- Strict Android phone-owned `2.Data_max` validation now requires the mirrored
+  run folder to preserve the operator/administration reconstruction sidecars as
+  well as the low-level marker/event files: `command_diary.jsonl`,
+  `phone_response_ledger.csv`, `phone_topup_plan.json`,
+  `phone_topup_materialization.json`, `phone_run_catalog_entry.json`, and
+  `phone_owned_data_export.json` must be present in the Data Max run copy.
 
 - The local HTML dashboard launcher now treats `/api/health` as the fast
   already-running probe before falling back to `/api/state`. This prevents a

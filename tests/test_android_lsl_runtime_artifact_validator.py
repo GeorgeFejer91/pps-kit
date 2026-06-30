@@ -626,6 +626,36 @@ def test_android_lsl_runtime_validator_rejects_data_max_inventory_gap(tmp_path: 
     assert "artifact_file_inventory.csv" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_data_max_command_diary_gap(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    _write_phone_owned_data_export(run_dir)
+    data_max_file = tmp_path / "phone_owned_exports" / "2.Data_max" / "P001" / "runs" / run_dir.name / "command_diary.jsonl"
+    data_max_file.unlink()
+
+    result = validator.validate_run_artifact(run_dir, expect_phone_owned_data_export=True)
+
+    assert result.ok is False
+    assert "strict phone-owned data export Data_max copy is missing reconstruction files" in "\n".join(result.failures)
+    assert "command_diary.jsonl" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_data_max_catalog_gap(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    _write_phone_owned_data_export(run_dir)
+    data_max_file = tmp_path / "phone_owned_exports" / "2.Data_max" / "P001" / "runs" / run_dir.name / "phone_run_catalog_entry.json"
+    data_max_file.unlink()
+
+    result = validator.validate_run_artifact(run_dir, expect_phone_owned_data_export=True)
+
+    assert result.ok is False
+    assert "strict phone-owned data export Data_max copy is missing reconstruction files" in "\n".join(result.failures)
+    assert "phone_run_catalog_entry.json" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_accepts_artifact_file_inventory(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -2757,8 +2787,32 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
         ),
         encoding="utf-8",
     )
+    catalog = _catalog_entry(native=native)
+    catalog["asset_strategy"] = "trial_building_blocks_only"
+    catalog["event_count"] = summary["total_event_count"]
+    catalog["lsl_marker_mirror_count"] = summary["lsl_marker_mirror_count"]
+    catalog["command_diary_count"] = summary["command_diary_count"]
+    catalog["native_lsl_pushed_count"] = summary["native_lsl_pushed_count"]
+    catalog["native_lsl_failed_count"] = summary["native_lsl_failed_count"]
+    catalog["native_lsl_rich_marker_pushed_count"] = summary["native_lsl_rich_marker_pushed_count"]
+    catalog["native_lsl_rich_marker_failed_count"] = summary["native_lsl_rich_marker_failed_count"]
+    catalog["native_lsl_numeric_trigger_pushed_count"] = summary["native_lsl_numeric_trigger_pushed_count"]
+    catalog["native_lsl_numeric_trigger_failed_count"] = summary["native_lsl_numeric_trigger_failed_count"]
+    catalog["native_lsl_command_received_count"] = summary["native_lsl_command_received_count"]
+    catalog["native_lsl_command_ack_count"] = summary["native_lsl_command_ack_count"]
+    catalog["native_lsl_command_ack_failed_count"] = summary["native_lsl_command_ack_failed_count"]
+    catalog["native_lsl_command_rejected_count"] = summary["native_lsl_command_rejected_count"]
+    catalog["reconstruction"] = {
+        "package_asset_strategy": "trial_building_blocks_only",
+        "schedule_hash": "schedulehash",
+        "building_block_count": 1,
+        "block_count": 1,
+        "trial_count": 1,
+    }
+    (run_dir / "phone_run_catalog_entry.json").write_text(json.dumps(catalog), encoding="utf-8")
     (run_dir / "participant_metadata.json").write_text(json.dumps(participant_metadata), encoding="utf-8")
     (run_dir / "haptic_capability.json").write_text(json.dumps(haptic_capability), encoding="utf-8")
+    (run_dir / "command_diary.jsonl").write_text("", encoding="utf-8")
     _write_android_events_csv(run_dir / "events.csv", events)
     _write_marker_csv(run_dir / "lsl_marker_mirror.csv", markers)
     _write_trigger_codes_csv(run_dir / "trigger_codes.csv", markers)
