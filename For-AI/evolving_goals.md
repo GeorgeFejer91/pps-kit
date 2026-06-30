@@ -189,6 +189,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `ack_sent=true`, and corresponding `operator_command` events. This makes
   PC-runner/controller-to-phone LSL administration auditable from the phone run
   artifact, not only from sender outboxes.
+- Android phone-run command diary validation now also reconciles duplicate
+  command diary copies. When `command_diary.jsonl` and embedded
+  completion/latest-events `command_diary` rows are both present, the validator
+  compares schema, source, status, payload, ack evidence, timing, and identity
+  fields for each command id so the phone's local command log cannot silently
+  diverge from the exported completion snapshot.
 - Android phone-owned local UI actions are now reconstructable from the same
   command diary path. `MainActivity.kt` records local Runner-mode start button
   presses as `command_source=phone_ui`, internal phone-runtime materialization

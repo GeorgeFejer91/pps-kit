@@ -208,9 +208,13 @@ run/package identity, phone timestamps, duplicate-id checks, and primitive
 event fields. This is the quick human-readable log of what the phone runtime
 did before the richer marker/XDF checks.
 Phone-run command diaries are also checked against matching `operator_command`
-events when present, including the command source. New runs should distinguish
-`phone_ui`, `phone_runtime`, and `native_lsl`; the validator still accepts the
-older `phone_ui_or_runtime` label for historical artifacts.
+events when present, including the command source. When both
+`command_diary.jsonl` and embedded `completion.json`/`latest_events.json`
+`command_diary` rows are present, the validator checks that schema, source,
+status, payload, ack evidence, timing, and identity fields agree for each
+command id. New runs should distinguish `phone_ui`, `phone_runtime`, and
+`native_lsl`; the validator still accepts the older `phone_ui_or_runtime` label
+for historical artifacts.
 For strict run-folder file reconstruction, add `--expect-artifact-inventory`;
 this requires `artifact_file_inventory.json` to list every run-folder file
 except the inventory sidecars themselves with relative paths, byte sizes, and

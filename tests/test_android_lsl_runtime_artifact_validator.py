@@ -1049,6 +1049,40 @@ def test_android_lsl_runtime_validator_requires_phone_command_source_to_match_op
     assert "command_source differs from matching operator_command event" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_embedded_command_diary_status_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_phone_run_with_command_diary(run_dir, _phone_ui_command_row())
+    completion_path = run_dir / "completion.json"
+    completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    completion["command_diary"][0]["status"] = "rejected"
+    completion_path.write_text(json.dumps(completion), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir)
+
+    assert result.ok is False
+    assert "command_diary.jsonl row 1 status differs from completion.json embedded command_diary" in "\n".join(
+        result.failures
+    )
+
+
+def test_android_lsl_runtime_validator_rejects_embedded_command_diary_payload_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_phone_run_with_native_command_diary(run_dir)
+    completion_path = run_dir / "completion.json"
+    completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    completion["command_diary"][0]["payload"]["state_changed"] = False
+    completion_path.write_text(json.dumps(completion), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    assert "command_diary.jsonl row 1 payload differs from completion.json embedded command_diary" in "\n".join(
+        result.failures
+    )
+
+
 def _write_phone_run_with_command_diary(
     run_dir: Path,
     row: dict,

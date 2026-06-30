@@ -137,7 +137,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   PC-monitor observed command-signal payload token/note evidence and
   payload_json versus sample-payload consistency plus observed command/ack id
   pairing under `--expect-command-acks`,
-  phone-run `command_diary.jsonl` / embedded command diary native ack rows,
+  phone-run `command_diary.jsonl` / embedded command diary native ack rows and
+  sidecar-vs-embedded command field consistency,
   phone-run `lsl_marker_mirror.csv` / embedded marker mirror reconstruction,
   phone-run `trigger_codes.csv` expected local `PPSTriggerCodes` sequence when
   `--expect-trigger-code-mirror` is set,

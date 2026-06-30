@@ -2559,6 +2559,13 @@ def _validate_phone_command_diary(
         embedded_ids = [str(row.get("command_id") or "") for row in embedded_rows]
         if file_ids != embedded_ids:
             failures.append("command_diary.jsonl command ids differ from completion.json embedded command_diary")
+        for index, (file_row, embedded_row) in enumerate(zip(command_diary_rows, embedded_rows), start=1):
+            _compare_command_diary_rows(
+                file_row,
+                embedded_row,
+                row_index=index,
+                failures=failures,
+            )
 
     operator_events = [
         event
@@ -2653,6 +2660,47 @@ def _validate_phone_command_diary(
             failures.append("phone-run command ack validation expected at least one PPSCommandAcksV1 ack sample")
     elif native_rows > 0 and native_ack_rows <= 0:
         warnings.append("native_lsl command diary rows do not include ack samples; rerun with --expect-command-acks for strict checks")
+
+
+def _compare_command_diary_rows(
+    file_row: dict[str, Any],
+    embedded_row: dict[str, Any],
+    *,
+    row_index: int,
+    failures: list[str],
+) -> None:
+    fields = [
+        "schema",
+        "command_id",
+        "command_source",
+        "sender_id",
+        "session_id",
+        "command",
+        "status",
+        "reason",
+        "payload",
+        "package_id",
+        "run_id",
+        "received_lsl_time",
+        "applied_lsl_time",
+        "ack_lsl_time",
+        "ack_sent",
+        "ack_channels",
+        "ack_sample",
+    ]
+    for field in fields:
+        file_present = field in file_row and file_row.get(field) is not None
+        embedded_present = field in embedded_row and embedded_row.get(field) is not None
+        if not file_present and not embedded_present:
+            continue
+        if _command_diary_value(file_row.get(field)) != _command_diary_value(embedded_row.get(field)):
+            failures.append(f"command_diary.jsonl row {row_index} {field} differs from completion.json embedded command_diary")
+
+
+def _command_diary_value(value: Any) -> str:
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, sort_keys=True, separators=(",", ":"), default=str)
+    return _metadata_value(value)
 
 
 def _validate_phone_marker_mirror(
