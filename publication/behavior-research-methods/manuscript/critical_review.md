@@ -167,3 +167,41 @@ Methods manuscript draft. It is a working audit, not manuscript text.
   submission.
 - Some older or standards-style records still have sparse metadata, but no
   placeholder author or `Source to be verified` strings remain in the BibTeX.
+
+## Iteration 6: Near-field Rendering Caveat Pass
+
+### Main Critiques
+
+- The manuscript correctly said that HRTF/SOFA/3DTI metadata are provenance
+  rather than proof of perceived distance, but the caveat was still too general
+  for a PPS methods paper. Readers could infer that a near-field renderer solves
+  the perceptual-distance problem as long as the renderer is open source.
+- The evidence matrix's spatial-rendering row cited renderer and dataset
+  sources, but it did not yet cite near-field perceptual studies showing why
+  rendered nearby sources need separate validation.
+- The validation table still reported the older 20-page compile result even
+  though the near-field reference pass now compiles to a 22-page PDF.
+
+### Resolution In This Revision
+
+- Added near-field rendering/perception citations for real-versus-virtual
+  nearby sources, distance-variation filtering, and nearby-source filter models
+  (`Parseihian2014`, `Kan2009`, `Spagnol2017`).
+- Revised the design-decision and technical-method HRTF paragraphs so the
+  reader sees exactly why PPS Toolkit records renderer metadata without
+  claiming individualized localization, externalization, front/back accuracy, or
+  absolute perceived distance.
+- Updated the evidence matrix's spatial-rendering row to include the new
+  validation citations and a stronger caveat.
+- Updated the validation table's compile summary from 20 to 22 pages so it
+  matches the current successful Springer build.
+
+### Residual Concerns
+
+- This pass improves the argument but does not add new physical validation.
+  Before submission, any claim about timing performance on a specific lab setup
+  still needs publication-hardware evidence and artifact hashes.
+- The draft is now less likely to overclaim spatial audio, but a final paper
+  that uses a specific SOFA/HRIR file should still name the exact file, version,
+  license, renderer command/path, trajectory sample table, and any perceptual
+  localization or externalization check that was actually run.

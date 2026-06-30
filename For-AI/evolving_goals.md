@@ -69,6 +69,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   after verification, and the remaining submission placeholders are author
   email, affiliation, funding, competing interests, ethics wording, and release
   DOI.
+- Continued the BRM manuscript self-review loop with a near-field rendering
+  caveat pass. A Consensus/Crossref gap check added `Parseihian2014`,
+  `Kan2009`, and `Spagnol2017` to the HRTF/spatial-audio evidence base, the
+  spatial-rendering prose and evidence-matrix row now state more explicitly
+  that SOFA/FABIAN/3DTI provenance does not prove perceived distance,
+  externalization, front/back localization, or individualized HRTF validity, and
+  `critical_review.md` records this as Iteration 6. The Springer `sn-apa`
+  source compiles to a 22-page PDF with no unresolved citation/reference or
+  rerun warnings; generated LaTeX artifacts and the PDF were removed afterward.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation
