@@ -94,6 +94,9 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `phone_topup_materialization.json`, and `phone_topup_block.wav` when
   `--expect-phone-topup-evidence` is set or lightweight materializations are
   strict, with sidecar-vs-embedded completion comparisons and WAV hash checks,
+  phone-run AudioTrack timing evidence from `block_start` and `vibration_cue`
+  events when `--expect-audiotrack-timing-evidence` is set, including
+  playback-head scheduler fields and coherent cue-jitter metadata,
   Controller-mode `phone_controller_runtime_status.json` /
   `phone_controller_command_outbox.jsonl`, PC-admin
   `pc_android_lsl_admin_status.json` /

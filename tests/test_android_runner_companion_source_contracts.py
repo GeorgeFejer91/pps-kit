@@ -42,3 +42,17 @@ def test_android_phone_runtime_preserves_mobile_package_asset_strategy() -> None
     assert '.put("asset_strategy", mobilePackageAssetStrategy(runPackage))' in native_bridge
     assert '.put("asset_strategy", mobilePackageAssetStrategy(runPackage))' in catalog
     assert '.put("package_asset_strategy", runPackage.reconstruction.packageAssetStrategy)' in catalog
+
+
+def test_android_phone_runtime_uses_audiotrack_timing_not_mediaplayer() -> None:
+    playback = _source("PhoneAudioPlayback.kt")
+    main_activity = _source("MainActivity.kt")
+    all_sources = "\n".join(path.read_text(encoding="utf-8") for path in ANDROID_SOURCE.glob("*.kt"))
+
+    assert "import android.media.AudioTrack" in playback
+    assert "internal suspend fun playBlockAudioWithAudioTrack" in playback
+    assert "playbackHeadPosition" in playback
+    assert "PhoneAudioCueDelivery" in playback
+    assert '.put("audio_timing_strategy", "audiotrack_pcm_wav_playback_head")' in main_activity
+    assert '.put("audio_scheduler", "audiotrack_playback_head")' in main_activity
+    assert "MediaPlayer" not in all_sources

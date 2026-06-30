@@ -159,6 +159,14 @@ with a PC-side LSL monitor. Participant and haptic sidecars are also checked
 when present: `participant_metadata.json` must use metadata-payload-only privacy
 and match embedded/catalog run identity, while `haptic_capability.json` must
 declare the vibrator/amplitude policy and any calibration result consistently.
+For phone-owned timing reconstruction, add
+`--expect-audiotrack-timing-evidence`; this requires `block_start` events to
+declare `audio_timing_strategy = audiotrack_pcm_wav_playback_head` with positive
+PCM WAV facts, and `vibration_cue` events to carry playback-head scheduler
+fields (`scheduled_audio_frame`, `audio_playback_head_frame`,
+`audio_delivery_elapsed_realtime_ms`, and cue jitter). The validator checks that
+frame jitter and millisecond jitter agree with the block sample rate. This is
+phone-runtime timing evidence, not a physical audio/vibration onset claim.
 For phone-owned response and top-up reconstruction, add
 `--expect-phone-topup-evidence`; this requires `phone_response_ledger.csv` or
 embedded `phone_response_ledger`, `phone_topup_plan.json`, the

@@ -62,6 +62,8 @@ ANDROID_PHONE_TOPUP_PLAN_SCHEMA = "pps-android-phone-topup-plan.v1"
 ANDROID_PHONE_TOPUP_MATERIALIZATION_SCHEMA = "pps-android-phone-topup-materialization.v1"
 ANDROID_CONTROLLER_RUNTIME_STATUS_SCHEMA = "pps-android-controller-runtime-status.v1"
 ANDROID_CONTROLLER_COMMAND_ROW_SCHEMA = "pps-android-controller-command-row.v1"
+ANDROID_AUDIO_TIMING_STRATEGY = "audiotrack_pcm_wav_playback_head"
+ANDROID_CUE_AUDIO_SCHEDULER = "audiotrack_playback_head"
 PHONE_RESPONSE_MIN_RT_MS = 100
 PHONE_RESPONSE_MAX_RT_MS = 1300
 PHONE_RESPONSE_POLICY = f"first_touch_{PHONE_RESPONSE_MIN_RT_MS}_{PHONE_RESPONSE_MAX_RT_MS}_ms_after_tactile"
@@ -162,6 +164,7 @@ def validate_runtime_status(
     expect_run_catalog: bool = False,
     expect_lightweight_materializations: bool = False,
     expect_phone_topup_evidence: bool = False,
+    expect_audiotrack_timing_evidence: bool = False,
 ) -> AndroidLslValidationResult:
     failures: list[str] = []
     warnings: list[str] = []
@@ -252,6 +255,13 @@ def validate_runtime_status(
         failures=failures,
         warnings=warnings,
         expect_native_transport=expect_native_transport,
+    )
+    _validate_phone_audiotrack_timing_evidence(
+        completion=completion,
+        package_manifest=package_manifest,
+        failures=failures,
+        warnings=warnings,
+        expect_audiotrack_timing_evidence=expect_audiotrack_timing_evidence,
     )
     _validate_lightweight_materializations(
         completion=completion,
@@ -477,6 +487,7 @@ def validate_run_artifact(
     expect_run_catalog: bool = False,
     expect_lightweight_materializations: bool = False,
     expect_phone_topup_evidence: bool = False,
+    expect_audiotrack_timing_evidence: bool = False,
 ) -> AndroidLslValidationResult:
     loaded = _load_status_inputs(path)
     if loaded.get("kind") == "controller":
@@ -525,6 +536,7 @@ def validate_run_artifact(
         expect_run_catalog=expect_run_catalog,
         expect_lightweight_materializations=expect_lightweight_materializations,
         expect_phone_topup_evidence=expect_phone_topup_evidence,
+        expect_audiotrack_timing_evidence=expect_audiotrack_timing_evidence,
     )
 
 
@@ -1445,6 +1457,176 @@ def _validate_phone_marker_mirror(
         warnings.append("phone marker mirror was present without completion events; only marker self-consistency was checked")
 
 
+def _validate_phone_audiotrack_timing_evidence(
+    *,
+    completion: dict[str, Any] | None,
+    package_manifest: dict[str, Any] | None,
+    failures: list[str],
+    warnings: list[str],
+    expect_audiotrack_timing_evidence: bool,
+) -> None:
+    events = [
+        event
+        for event in list((completion or {}).get("events") or [])
+        if isinstance(event, dict)
+    ]
+    if not events:
+        if expect_audiotrack_timing_evidence:
+            failures.append("AudioTrack timing validation requires completion events")
+        return
+
+    block_starts = [event for event in events if event.get("type") == "block_start"]
+    cue_events = [event for event in events if event.get("type") == "vibration_cue"]
+    if not block_starts:
+        if expect_audiotrack_timing_evidence:
+            failures.append("AudioTrack timing validation requires block_start events")
+        return
+    blocks_by_key: dict[tuple[str, str], dict[str, Any]] = {}
+    for index, event in enumerate(block_starts, start=1):
+        prefix = f"AudioTrack block_start event {index}"
+        key = _phone_event_block_key(event)
+        if key in blocks_by_key:
+            failures.append(f"{prefix} duplicates block identity {key}")
+        else:
+            blocks_by_key[key] = event
+        strategy = str(event.get("audio_timing_strategy") or "")
+        if strategy != ANDROID_AUDIO_TIMING_STRATEGY:
+            if expect_audiotrack_timing_evidence or strategy:
+                failures.append(f"{prefix} audio_timing_strategy must be {ANDROID_AUDIO_TIMING_STRATEGY}")
+            continue
+        _validate_positive_int_fields(
+            event,
+            fields=[
+                "audio_sample_rate_hz",
+                "audio_channel_count",
+                "audio_bits_per_sample",
+                "audio_frame_count",
+                "audio_duration_ms",
+                "audio_data_size_bytes",
+            ],
+            label=prefix,
+            failures=failures,
+            require_all=expect_audiotrack_timing_evidence,
+        )
+        sample_rate = _safe_int(event.get("audio_sample_rate_hz"))
+        frame_count = _safe_int(event.get("audio_frame_count"))
+        duration_ms = _safe_int(event.get("audio_duration_ms"))
+        if sample_rate > 0 and frame_count > 0 and duration_ms > 0:
+            expected_duration_ms = round(frame_count * 1000.0 / sample_rate)
+            if abs(duration_ms - expected_duration_ms) > 2:
+                failures.append(f"{prefix} audio_duration_ms differs from frame_count/sample_rate")
+
+    expected_cue_count = _package_manifest_tactile_cue_count(package_manifest)
+    if expect_audiotrack_timing_evidence:
+        if expected_cue_count > 0 and len(cue_events) < expected_cue_count:
+            failures.append(
+                f"AudioTrack timing validation expected at least {expected_cue_count} vibration_cue events, got {len(cue_events)}"
+            )
+        elif expected_cue_count == 0 and not cue_events:
+            warnings.append("AudioTrack timing strict mode found no tactile cues declared or observed")
+
+    for index, event in enumerate(cue_events, start=1):
+        prefix = f"AudioTrack vibration_cue event {index}"
+        scheduler = str(event.get("audio_scheduler") or "")
+        if scheduler != ANDROID_CUE_AUDIO_SCHEDULER:
+            if expect_audiotrack_timing_evidence or scheduler:
+                failures.append(f"{prefix} audio_scheduler must be {ANDROID_CUE_AUDIO_SCHEDULER}")
+            continue
+        _validate_positive_int_fields(
+            event,
+            fields=[
+                "audio_delivery_elapsed_realtime_ms",
+            ],
+            label=prefix,
+            failures=failures,
+            require_all=expect_audiotrack_timing_evidence,
+        )
+        _validate_nonnegative_int_fields(
+            event,
+            fields=[
+                "scheduled_audio_frame",
+                "audio_playback_head_frame",
+                "audio_cue_jitter_frames",
+            ],
+            label=prefix,
+            failures=failures,
+            require_all=expect_audiotrack_timing_evidence,
+        )
+        scheduled_frame = _safe_int(event.get("scheduled_audio_frame"), fallback=-1)
+        head_frame = _safe_int(event.get("audio_playback_head_frame"), fallback=-1)
+        jitter_frames = _safe_int(event.get("audio_cue_jitter_frames"), fallback=-1)
+        if scheduled_frame >= 0 and head_frame >= 0:
+            if head_frame < scheduled_frame:
+                failures.append(f"{prefix} audio_playback_head_frame precedes scheduled_audio_frame")
+            expected_jitter = head_frame - scheduled_frame
+            if jitter_frames >= 0 and jitter_frames != expected_jitter:
+                failures.append(f"{prefix} audio_cue_jitter_frames differs from playback_head-scheduled frame")
+
+        block = blocks_by_key.get(_phone_event_block_key(event))
+        if block is None:
+            if expect_audiotrack_timing_evidence:
+                failures.append(f"{prefix} has no matching block_start event")
+            continue
+        sample_rate = _safe_int(block.get("audio_sample_rate_hz"))
+        jitter_ms = _safe_float(event.get("audio_cue_jitter_ms"))
+        if sample_rate > 0 and jitter_frames >= 0 and jitter_ms == jitter_ms:
+            expected_jitter_ms = jitter_frames * 1000.0 / sample_rate
+            if abs(jitter_ms - expected_jitter_ms) > 0.25:
+                failures.append(f"{prefix} audio_cue_jitter_ms differs from frame jitter and sample rate")
+
+
+def _phone_event_block_key(event: dict[str, Any]) -> tuple[str, str]:
+    return (str(event.get("block_id") or ""), str(event.get("block_index") or ""))
+
+
+def _package_manifest_tactile_cue_count(package_manifest: dict[str, Any] | None) -> int:
+    if not isinstance(package_manifest, dict):
+        return 0
+    count = 0
+    for block in list(package_manifest.get("blocks") or []):
+        if not isinstance(block, dict):
+            continue
+        if isinstance(block.get("tactile_cues"), list):
+            count += len(block.get("tactile_cues") or [])
+        else:
+            count += _safe_int(block.get("tactile_cue_count"))
+    return count
+
+
+def _validate_positive_int_fields(
+    row: dict[str, Any],
+    *,
+    fields: list[str],
+    label: str,
+    failures: list[str],
+    require_all: bool,
+) -> None:
+    for field in fields:
+        if field not in row or str(row.get(field) if row.get(field) is not None else "").strip() == "":
+            if require_all:
+                failures.append(f"{label} is missing {field}")
+            continue
+        if _safe_int(row.get(field)) <= 0:
+            failures.append(f"{label} {field} must be positive")
+
+
+def _validate_nonnegative_int_fields(
+    row: dict[str, Any],
+    *,
+    fields: list[str],
+    label: str,
+    failures: list[str],
+    require_all: bool,
+) -> None:
+    for field in fields:
+        if field not in row or str(row.get(field) if row.get(field) is not None else "").strip() == "":
+            if require_all:
+                failures.append(f"{label} is missing {field}")
+            continue
+        if _safe_int(row.get(field), fallback=-1) < 0:
+            failures.append(f"{label} {field} must be nonnegative")
+
+
 def _validate_phone_response_topup_artifacts(
     *,
     completion: dict[str, Any] | None,
@@ -2271,6 +2453,14 @@ def main(argv: list[str] | None = None) -> int:
             "top-up materialization JSON, and any materialized top-up WAV hash evidence are present and consistent."
         ),
     )
+    parser.add_argument(
+        "--expect-audiotrack-timing-evidence",
+        action="store_true",
+        help=(
+            "For phone-run artifacts, fail unless block_start and vibration_cue events carry "
+            "AudioTrack playback-head timing fields and coherent frame/jitter metadata."
+        ),
+    )
     parser.add_argument("--output-dir", type=Path, help="Optional directory for JSON/Markdown validation reports.")
     args = parser.parse_args(argv)
 
@@ -2281,6 +2471,7 @@ def main(argv: list[str] | None = None) -> int:
         expect_run_catalog=args.expect_run_catalog,
         expect_lightweight_materializations=args.expect_lightweight_materializations,
         expect_phone_topup_evidence=args.expect_phone_topup_evidence,
+        expect_audiotrack_timing_evidence=args.expect_audiotrack_timing_evidence,
     )
     if args.output_dir:
         _write_report(result, args.output_dir)

@@ -40,6 +40,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `--expect-lightweight-materializations` now enables it automatically so
   building-block-only phone runs prove both scheduled-block replay and the
   missed-trial top-up chain.
+- Android phone-run artifact validation now has a strict
+  `--expect-audiotrack-timing-evidence` gate. It checks completed phone-run
+  events for `block_start` rows using
+  `audio_timing_strategy = audiotrack_pcm_wav_playback_head`, positive PCM WAV
+  facts, and `vibration_cue` rows with
+  `audio_scheduler = audiotrack_playback_head`, scheduled/playback-head frames,
+  elapsed delivery time, and coherent frame/ms cue jitter. This proves the
+  exported artifact carries phone-runtime playback-head timing metadata; it is
+  still not physical audio/vibration onset evidence.
 
 ## 2026-06-29
 
