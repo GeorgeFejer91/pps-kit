@@ -10,6 +10,8 @@ manuscript for PPS Toolkit.
   repo paper-audit notes, and Springer/software policy pointers.
 - `evidence_matrix.csv`: source-pointer design-decision matrix mapping visible
   PPS Toolkit GUI/runner controls to literature variation and caveats.
+- `critical_review.md`: self-review audit recording critique points and
+  revision decisions for the manuscript draft.
 - `latexmkrc`: local build configuration that points LaTeX/BibTeX at the
   preserved Springer Nature template under
   `../springer-nature-latex-template/sn-article-template/`.

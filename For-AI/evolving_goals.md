@@ -25,6 +25,17 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `threeparttable`, `appendix`, `wrapfig`, `amscls`, `apacite`, and `natbib`);
   generated LaTeX build artifacts and the compiled PDF were removed before
   staging.
+- Refined the BRM manuscript through a tracked self-review pass recorded in
+  `publication/behavior-research-methods/manuscript/critical_review.md`. The
+  revision adds a `Contribution and Journal Fit` section, expands the prose
+  rationale for Segment 0-6 and Focus Mode design decisions after the evidence
+  matrix, and adds additional software/timing/rendering citations for pyControl,
+  experiment simulation, web/behavioral timing checks, and near-field auditory
+  cue plausibility (`Akam2022`, `DeLeeuw2022`, `Bridges2020`, `Arend2021`).
+  The draft still treats pilot tactile hit-rate decline as anecdotal motivation
+  only, distinguishes software scheduling/marker evidence from electrical
+  loopback and mechanical/perceptual tactile validation, and compiles cleanly to
+  an 18-page PDF with generated build artifacts removed afterward.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation
