@@ -71,6 +71,7 @@ ANDROID_CONTROLLER_RUNTIME_STATUS_SCHEMA = "pps-android-controller-runtime-statu
 ANDROID_CONTROLLER_COMMAND_ROW_SCHEMA = "pps-android-controller-command-row.v1"
 ANDROID_LSL_STREAM_DESCRIPTIONS_SCHEMA = "pps-android-lsl-stream-descriptions.v1"
 ANDROID_COMMAND_REJECTION_PAYLOAD_SCHEMA = "pps-android-phone-command-rejection.v1"
+ANDROID_COMMAND_SAMPLE_REJECTION_PAYLOAD_SCHEMA = "pps-android-phone-command-sample-rejection.v1"
 ANDROID_AUDIO_TIMING_STRATEGY = "audiotrack_pcm_wav_playback_head"
 ANDROID_CUE_AUDIO_SCHEDULER = "audiotrack_playback_head"
 PHONE_RESPONSE_MIN_RT_MS = 100
@@ -3740,6 +3741,13 @@ def _validate_phone_command_sample(
     failures: list[str],
     expect_command_acks: bool,
 ) -> None:
+    if _metadata_value(row.get("command")) == "invalid_lsl_command":
+        _validate_phone_malformed_command_sample_evidence(
+            command_sample,
+            prefix=prefix,
+            failures=failures,
+        )
+        return
     if len(command_sample) != len(LSL_COMMAND_CHANNELS):
         failures.append(f"{prefix} command sample channel count mismatch")
         return
@@ -3815,6 +3823,13 @@ def _validate_phone_command_ack_payload(
     ):
         failures.append(f"{prefix} ack payload must not echo the pairing token")
     if command == "invalid_lsl_command":
+        _validate_phone_command_sample_rejection_payload(
+            ack_payload,
+            row=row,
+            reason=_metadata_value(row.get("reason")),
+            prefix=prefix,
+            failures=failures,
+        )
         return
     payload_command = _metadata_value(ack_payload.get("command"))
     if not payload_command:
@@ -3912,6 +3927,99 @@ def _validate_phone_runtime_snapshot_payload(
     ):
         if not isinstance(ack_payload.get(field), bool):
             failures.append(f"{prefix} request_snapshot ack payload {field} must be boolean")
+
+
+def _validate_phone_malformed_command_sample_evidence(
+    command_sample: list[Any],
+    *,
+    prefix: str,
+    failures: list[str],
+) -> None:
+    if (
+        len(command_sample) == len(LSL_COMMAND_CHANNELS)
+        and command_sample[0] == COMMAND_SCHEMA
+        and _json_object_or_none(str(command_sample[6] or "{}")) is not None
+    ):
+        failures.append(f"{prefix} invalid_lsl_command row carries a valid PPSCommandSignalsV1 sample")
+
+
+def _validate_phone_command_sample_rejection_payload(
+    ack_payload: dict[str, Any],
+    *,
+    row: dict[str, Any],
+    reason: str,
+    prefix: str,
+    failures: list[str],
+) -> None:
+    if _metadata_value(ack_payload.get("schema")) != ANDROID_COMMAND_SAMPLE_REJECTION_PAYLOAD_SCHEMA:
+        failures.append(f"{prefix} malformed command ack payload schema mismatch")
+    if _metadata_value(ack_payload.get("status")) != "rejected":
+        failures.append(f"{prefix} malformed command ack payload status must be rejected")
+    payload_reason = _metadata_value(ack_payload.get("reason"))
+    if not payload_reason:
+        failures.append(f"{prefix} malformed command ack payload is missing reason")
+    elif reason and payload_reason != reason:
+        failures.append(f"{prefix} malformed command ack payload reason differs from ack reason")
+    if ack_payload.get("rejected_before_handler") is not True:
+        failures.append(f"{prefix} malformed command ack payload rejected_before_handler must be true")
+    if _metadata_value(ack_payload.get("command")) != "invalid_lsl_command":
+        failures.append(f"{prefix} malformed command ack payload command must be invalid_lsl_command")
+
+    command_sample = list(row.get("command_sample") or [])
+    expected_count = _safe_int(ack_payload.get("expected_channel_count"), fallback=-1)
+    if expected_count != len(LSL_COMMAND_CHANNELS):
+        failures.append(f"{prefix} malformed command ack payload expected_channel_count mismatch")
+    raw_count = _safe_int(ack_payload.get("raw_sample_channel_count"), fallback=-1)
+    if raw_count != len(command_sample):
+        failures.append(f"{prefix} malformed command ack payload raw_sample_channel_count differs from diary sample")
+    if _metadata_value(ack_payload.get("malformed_sample_id")) != _metadata_value(row.get("command_id")):
+        failures.append(f"{prefix} malformed command ack payload malformed_sample_id differs from diary command_id")
+
+    sample_fields = (
+        ("raw_sample_schema", 0),
+        ("raw_command_id", 1),
+        ("raw_session_id", 2),
+        ("raw_sender_id", 3),
+        ("raw_command", 4),
+        ("raw_issued_lsl_time", 5),
+    )
+    for payload_field, sample_index in sample_fields:
+        expected = _metadata_value(command_sample[sample_index]) if sample_index < len(command_sample) else ""
+        if _metadata_value(ack_payload.get(payload_field)) != expected:
+            failures.append(f"{prefix} malformed command ack payload {payload_field} differs from diary sample")
+
+    if "parse_error" not in ack_payload:
+        failures.append(f"{prefix} malformed command ack payload is missing parse_error")
+    supported = ack_payload.get("supported_commands")
+    if not isinstance(supported, list) or not supported:
+        failures.append(f"{prefix} malformed command ack payload supported_commands must be a nonempty array")
+
+    preview = ack_payload.get("raw_sample_preview")
+    if not isinstance(preview, list):
+        failures.append(f"{prefix} malformed command ack payload raw_sample_preview must be an array")
+    else:
+        if len(preview) != len(command_sample):
+            failures.append(f"{prefix} malformed command ack payload raw_sample_preview length mismatch")
+        for index, value in enumerate(command_sample[: len(preview)]):
+            expected = "<redacted>" if index >= 6 and _metadata_value(value) else _metadata_value(value)
+            if _metadata_value(preview[index]) != expected:
+                failures.append(f"{prefix} malformed command ack payload raw_sample_preview differs at channel {index}")
+                break
+    if any(_metadata_value(value) for value in command_sample[6:]) and ack_payload.get("raw_payload_redacted") is not True:
+        failures.append(f"{prefix} malformed command ack payload raw_payload_redacted must be true")
+
+    for row_field, payload_field in (
+        ("package_id", "package_id"),
+        ("participant_id", "participant_id"),
+        ("session_id", "session_id"),
+        ("target_part_session_id", "part_session_id"),
+        ("target_session_group_id", "session_group_id"),
+        ("target_part_number", "part_number"),
+    ):
+        row_value = _metadata_value(row.get(row_field))
+        payload_value = _metadata_value(ack_payload.get(payload_field))
+        if row_value and payload_value and row_value != payload_value:
+            failures.append(f"{prefix} malformed command ack payload {payload_field} differs from diary row")
 
 
 def _validate_phone_command_rejection_payload(

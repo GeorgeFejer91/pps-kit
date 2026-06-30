@@ -208,7 +208,12 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   receiver identity, requested target identity, rejection reason,
   `rejected_before_handler`, and supported commands; strict phone-run,
   Controller/PC-admin, and monitor validation reject incomplete rejected-ack
-  payloads. Controller runtime
+  payloads. Malformed command samples that fail before `PPSCommandSignalsV1`
+  parsing now use `pps-android-phone-command-sample-rejection.v1` payloads with
+  stable synthetic ids when needed, receiver identity, raw non-secret sample
+  diagnostics, and a redacted raw-sample preview; strict phone-run validation
+  treats that as the only accepted `invalid_lsl_command` native row path.
+  Controller runtime
   status now also includes
   `pps-android-lsl-stream-descriptions.v1` descriptions for the controller
   command-signal outlet and command-ack inlet, and strict controller validation
@@ -284,8 +289,10 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   sidecar-vs-embedded command field consistency, required receiver-side
   `PPSCommandSignalsV1` `command_sample` evidence in strict ack mode, native
   ack payload versus command diary payload consistency with pairing-token
-  exclusion, strict version/field checks for `request_snapshot`
-  `pps-android-phone-runtime-command-state.v1` ack state reports, and command
+  exclusion, strict version/field checks for malformed-sample
+  `pps-android-phone-command-sample-rejection.v1`, `request_snapshot`
+  `pps-android-phone-runtime-command-state.v1`, and rejected-command
+  `pps-android-phone-command-rejection.v1` ack state reports, and command
   diary payload versus
   `operator_command` event payload consistency,
   phone-run `lsl_marker_mirror.csv` / embedded marker mirror reconstruction,

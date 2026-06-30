@@ -2,6 +2,7 @@ package io.ppskit.runnercompanion
 
 import org.json.JSONArray
 import org.json.JSONObject
+import java.security.MessageDigest
 
 internal const val PHONE_LSL_RUNTIME_STATUS_SCHEMA = "pps-android-lsl-runtime-status.v1"
 internal const val PHONE_LSL_MARKER_VERSION = "2.0"
@@ -12,6 +13,7 @@ internal const val PHONE_LSL_ACK_SCHEMA = "pps-lsl-command-ack.v1"
 internal const val PHONE_LSL_COMMAND_STREAM_NAME = "PPSCommandSignalsV1"
 internal const val PHONE_LSL_ACK_STREAM_NAME = "PPSCommandAcksV1"
 internal const val PHONE_LSL_COMMAND_REJECTION_PAYLOAD_SCHEMA = "pps-android-phone-command-rejection.v1"
+internal const val PHONE_LSL_COMMAND_SAMPLE_REJECTION_PAYLOAD_SCHEMA = "pps-android-phone-command-sample-rejection.v1"
 
 internal val PHONE_LSL_MARKER_CHANNELS = listOf(
     "marker_version",
@@ -408,16 +410,34 @@ internal fun phoneCommandAckForSample(
     val signal = try {
         phoneCommandFromSample(sample)
     } catch (error: IllegalArgumentException) {
+        val rawValues = sample.map { it?.toString() ?: "" }
+        val fallbackCommandId = rawValues.getOrNull(1).orEmpty().ifBlank {
+            "invalid-lsl-command-${redactedSampleHash(rawValues).take(12)}"
+        }
+        val fallbackSessionId = rawValues.getOrNull(2).orEmpty().ifBlank {
+            runPackage.partSessionId
+                .ifBlank { runPackage.sessionId }
+                .ifBlank { runPackage.sessionGroupId }
+                .ifBlank { runPackage.packageId }
+        }
+        val reason = "invalid_command_sample"
         return PhoneLslCommandAck(
-            commandId = "",
-            sessionId = "",
+            commandId = fallbackCommandId,
+            sessionId = fallbackSessionId,
             receiverId = receiverId,
             status = "rejected",
-            reason = error.message ?: "invalid_command_sample",
+            reason = reason,
             receivedLslTime = receivedLslTime,
             appliedLslTime = appliedLslTime,
             ackLslTime = ackLslTime,
-            payload = JSONObject().put("error", "invalid_command_sample"),
+            payload = phoneMalformedCommandSampleAckPayload(
+                rawValues = rawValues,
+                runPackage = runPackage,
+                commandId = fallbackCommandId,
+                sessionId = fallbackSessionId,
+                reason = reason,
+                parseError = error.message ?: error::class.java.simpleName,
+            ),
         )
     }
     return phoneCommandAckForSignal(
@@ -535,6 +555,40 @@ private fun phoneRejectedCommandAckPayload(
             .put("supported_commands", stringArray(supportedPhoneCommands(runPackage))),
     )
 
+private fun phoneMalformedCommandSampleAckPayload(
+    rawValues: List<String>,
+    runPackage: MobileRunPackage,
+    commandId: String,
+    sessionId: String,
+    reason: String,
+    parseError: String,
+): JSONObject =
+    JSONObject()
+        .put("schema", PHONE_LSL_COMMAND_SAMPLE_REJECTION_PAYLOAD_SCHEMA)
+        .put("status", "rejected")
+        .put("reason", reason)
+        .put("parse_error", parseError)
+        .put("rejected_before_handler", true)
+        .put("command", "invalid_lsl_command")
+        .put("malformed_sample_id", commandId)
+        .put("package_id", runPackage.packageId)
+        .put("participant_id", runPackage.participantId)
+        .put("session_id", sessionId)
+        .put("part_session_id", runPackage.partSessionId)
+        .put("session_group_id", runPackage.sessionGroupId)
+        .put("part_number", runPackage.partNumber)
+        .put("raw_sample_channel_count", rawValues.size)
+        .put("expected_channel_count", PHONE_LSL_COMMAND_CHANNELS.size)
+        .put("raw_sample_schema", rawValues.getOrNull(0).orEmpty())
+        .put("raw_command_id", rawValues.getOrNull(1).orEmpty())
+        .put("raw_session_id", rawValues.getOrNull(2).orEmpty())
+        .put("raw_sender_id", rawValues.getOrNull(3).orEmpty())
+        .put("raw_command", rawValues.getOrNull(4).orEmpty())
+        .put("raw_issued_lsl_time", rawValues.getOrNull(5).orEmpty())
+        .put("raw_payload_redacted", rawValues.drop(6).any { it.isNotBlank() })
+        .put("raw_sample_preview", stringArray(redactedCommandSamplePreview(rawValues)))
+        .put("supported_commands", stringArray(supportedPhoneCommands(runPackage)))
+
 private fun phoneCommandRejection(
     signal: PhoneLslCommandSignal,
     runPackage: MobileRunPackage,
@@ -594,6 +648,17 @@ private fun jsonObjectFromString(raw: String): JSONObject =
 
 private fun phoneLslSourceIdToken(value: String): String =
     value.replace(Regex("[^A-Za-z0-9._-]+"), "-").trim('-', '.', '_').ifBlank { "phone-run" }
+
+private fun redactedCommandSamplePreview(values: List<String>): List<String> =
+    values.mapIndexed { index, value ->
+        if (index >= 6 && value.isNotBlank()) "<redacted>" else value
+    }
+
+private fun redactedSampleHash(values: List<String>): String {
+    val digest = MessageDigest.getInstance("SHA-256")
+    digest.update(redactedCommandSamplePreview(values).joinToString("\u001F").toByteArray(Charsets.UTF_8))
+    return digest.digest().joinToString("") { "%02x".format(it) }
+}
 
 private fun stringArray(values: List<String>): JSONArray =
     JSONArray().also { array -> values.forEach { array.put(it) } }

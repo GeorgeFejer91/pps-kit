@@ -154,6 +154,16 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `rejected_before_handler`, receiver/requested identity fields, or supported
   command list, so bypassing the standalone artifact validator cannot turn
   incomplete rejection evidence into a passing two-phone/PC-monitor audit.
+- Malformed Android `PPSCommandSignalsV1` samples that fail before command
+  parsing now receive their own structured rejected ack rather than a bare
+  invalid-command row. Runner mode emits
+  `pps-android-phone-command-sample-rejection.v1` payloads with a stable
+  synthetic command id when needed, receiver/package identity, expected/raw
+  channel counts, raw non-secret channel diagnostics, supported commands, and a
+  redacted raw-sample preview that never echoes the token-bearing payload
+  channel. Strict phone-run validation recognizes this as the one allowed
+  `invalid_lsl_command` path and rejects malformed-sample ack payloads that lose
+  the schema, reason, redaction, or diary/sample consistency.
 - Android phone-owned `phone_owned_data_export.json` now carries a
   `portable_paths` map with archive-relative locations for
   `phone_owned_exports/1.Data_min`, the participant/master public CSVs, and the

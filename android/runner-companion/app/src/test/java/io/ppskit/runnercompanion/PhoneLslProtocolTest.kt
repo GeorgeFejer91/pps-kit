@@ -84,6 +84,54 @@ class PhoneLslProtocolTest {
     }
 
     @Test
+    fun malformedCommandSampleProducesVersionedRejectedAckWithoutTokenEcho() {
+        val runPackage = packageWithLslCommands()
+        var handlerRan = false
+        val malformedSample = listOf(
+            "bad-schema",
+            "",
+            "",
+            "pc-runner",
+            "pause",
+            "42.0",
+            """{"token":"secret","package_id":"pkg-001"}""",
+        )
+
+        val ack = phoneCommandAckForSample(
+            sample = malformedSample,
+            runPackage = runPackage,
+            expectedToken = "secret",
+            receivedLslTime = 42.1,
+            appliedLslTime = 42.2,
+            ackLslTime = 42.3,
+        ) {
+            handlerRan = true
+            PhoneLslCommandApplicationResult()
+        }
+        val ackSample = phoneAckToSample(ack)
+        val payload = ack.payload
+
+        assertEquals("rejected", ack.status)
+        assertEquals("invalid_command_sample", ack.reason)
+        assertTrue(ack.commandId.startsWith("invalid-lsl-command-"))
+        assertEquals("part-001", ack.sessionId)
+        assertEquals(ack.commandId, ackSample[1])
+        assertEquals(ack.sessionId, ackSample[2])
+        assertEquals(PHONE_LSL_COMMAND_SAMPLE_REJECTION_PAYLOAD_SCHEMA, payload.getString("schema"))
+        assertEquals("invalid_lsl_command", payload.getString("command"))
+        assertEquals(ack.commandId, payload.getString("malformed_sample_id"))
+        assertEquals("bad-schema", payload.getString("raw_sample_schema"))
+        assertEquals("pc-runner", payload.getString("raw_sender_id"))
+        assertEquals(PHONE_LSL_COMMAND_CHANNELS.size, payload.getInt("expected_channel_count"))
+        assertEquals(malformedSample.size, payload.getInt("raw_sample_channel_count"))
+        assertEquals("<redacted>", payload.getJSONArray("raw_sample_preview").getString(6))
+        assertTrue(payload.getBoolean("raw_payload_redacted"))
+        assertFalse(payload.has("token"))
+        assertFalse(payload.toString().contains("secret"))
+        assertFalse(handlerRan)
+    }
+
+    @Test
     fun validCommandProducesAppliedAckAfterHandlerPayload() {
         val runPackage = packageWithLslCommands()
         val signal = PhoneLslCommandSignal(

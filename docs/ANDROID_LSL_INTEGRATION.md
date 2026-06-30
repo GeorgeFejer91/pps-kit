@@ -60,6 +60,14 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   package/session identity, requested target identity, rejection reason,
   `rejected_before_handler=true`, and supported commands while still excluding
   pairing tokens.
+- If a received command sample is malformed before it can be parsed as
+  `PPSCommandSignalsV1`, Runner mode still emits a reconstructable rejected ack.
+  The ack carries a stable raw-sample-derived command id when the incoming
+  sample lacks one and uses the `pps-android-phone-command-sample-rejection.v1`
+  payload. That payload records non-secret raw channel diagnostics, the receiver
+  package/session identity, expected channel count, parser error, supported
+  commands, and a redacted raw-sample preview; the command payload channel is
+  never echoed into the ack payload because it may contain pairing tokens.
 - Phone-owned command diaries now distinguish `phone_ui`,
   `phone_runtime`, and `native_lsl` command sources. Local Runner-mode start
   buttons plus local Pause, Resume, and Stop After Block controls write
