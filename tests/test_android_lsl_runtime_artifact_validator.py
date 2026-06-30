@@ -778,6 +778,22 @@ def test_android_lsl_runtime_validator_rejects_audiotrack_cue_frame_outside_bloc
     assert "scheduled_audio_frame exceeds block audio_frame_count" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_audiotrack_delivery_elapsed_before_playback_head(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    completion_path = run_dir / "completion.json"
+    completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    cue = next(event for event in completion["events"] if event["type"] == "vibration_cue")
+    cue["audio_delivery_elapsed_realtime_ms"] = 123500
+    completion_path.write_text(json.dumps(completion), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_audiotrack_timing_evidence=True)
+
+    assert result.ok is False
+    assert "audio_delivery_elapsed_realtime_ms is too early for playback_head_frame" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_rejects_phone_topup_wav_hash_drift(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -1822,7 +1838,7 @@ def _phone_audiotrack_playback_start_event(event_id: int, *, block_id: str, bloc
         block_index=block_index,
         block_label=block_label,
         audio_timing_strategy="audiotrack_pcm_wav_playback_head",
-        audio_playback_start_elapsed_realtime_ms=123456 + event_id,
+        audio_playback_start_elapsed_realtime_ms=123466 + event_id,
         audio_start_playback_head_frame=0,
         audio_playback_start_state="playing",
         audio_track_buffer_size_frames=11025,
@@ -1847,7 +1863,7 @@ def _phone_audiotrack_cue_event(event_id: int, *, block_id: str, block_index: in
         audio_scheduler="audiotrack_playback_head",
         scheduled_audio_frame=22050,
         audio_playback_head_frame=22060,
-        audio_delivery_elapsed_realtime_ms=123500,
+        audio_delivery_elapsed_realtime_ms=124020,
         audio_cue_jitter_frames=10,
         audio_cue_jitter_ms=10 * 1000.0 / 44100,
     )

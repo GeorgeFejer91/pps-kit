@@ -214,6 +214,7 @@ def test_android_phone_runtime_uses_audiotrack_timing_not_mediaplayer() -> None:
     assert '.put("audio_playback_start_state", start.playStateLabel)' in main_activity
     assert '.put("audio_track_buffer_size_frames", start.bufferSizeFrames)' in main_activity
     assert '.put("audio_scheduler", "audiotrack_playback_head")' in main_activity
+    assert '.put("audio_delivery_elapsed_realtime_ms", delivery.deliveryElapsedRealtimeMs)' in main_activity
     assert '"audio_playback_start" -> 12' in main_activity
     assert "MediaPlayer" not in all_sources
 

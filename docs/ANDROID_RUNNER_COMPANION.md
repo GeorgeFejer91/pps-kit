@@ -280,7 +280,9 @@ PCM WAV facts, every block to have a matching `audio_playback_start` event after
 the playback-start marker follows its block start, the track reports `playing`,
 buffer bytes match the PCM frame format, the scheduled frame agrees with rounded
 scheduled block time and sample rate, cue frames stay inside the block frame
-count, and frame jitter and millisecond jitter agree with the block sample rate.
+count, frame jitter and millisecond jitter agree with the block sample rate, and
+cue delivery elapsed time is late enough for the reported playback-head frame
+since the matching `audio_playback_start`.
 This is phone-runtime timing evidence, not a physical audio/vibration onset
 claim.
 For phone-owned response and top-up reconstruction, add

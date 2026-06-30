@@ -3746,6 +3746,20 @@ def _validate_phone_audiotrack_timing_evidence(
             expected_jitter_ms = jitter_frames * 1000.0 / sample_rate
             if abs(jitter_ms - expected_jitter_ms) > 0.25:
                 failures.append(f"{prefix} audio_cue_jitter_ms differs from frame jitter and sample rate")
+        playback_start = playback_start_by_key.get(_phone_event_block_key(event))
+        if playback_start is not None and sample_rate > 0:
+            delivery_elapsed_ms = _safe_int(event.get("audio_delivery_elapsed_realtime_ms"), fallback=-1)
+            start_elapsed_ms = _safe_int(playback_start.get("audio_playback_start_elapsed_realtime_ms"), fallback=-1)
+            start_frame = _safe_int(playback_start.get("audio_start_playback_head_frame"), fallback=-1)
+            if head_frame >= 0 and start_frame >= 0 and head_frame < start_frame:
+                failures.append(f"{prefix} audio_playback_head_frame precedes audio_start_playback_head_frame")
+            if delivery_elapsed_ms >= 0 and start_elapsed_ms >= 0:
+                if delivery_elapsed_ms < start_elapsed_ms:
+                    failures.append(f"{prefix} audio_delivery_elapsed_realtime_ms precedes matching audio_playback_start")
+                if head_frame >= 0 and start_frame >= 0 and head_frame >= start_frame:
+                    min_elapsed_ms = (head_frame - start_frame) * 1000.0 / sample_rate
+                    if (delivery_elapsed_ms - start_elapsed_ms) + 50.0 < min_elapsed_ms:
+                        failures.append(f"{prefix} audio_delivery_elapsed_realtime_ms is too early for playback_head_frame since audio_playback_start")
 
 
 def _phone_event_block_key(event: dict[str, Any]) -> tuple[str, str]:
