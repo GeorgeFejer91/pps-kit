@@ -190,6 +190,36 @@ def test_android_lsl_runtime_validator_rejects_phone_marker_mirror_drift(tmp_pat
     assert "payload type differs from marker event_type" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_participant_metadata_privacy_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    metadata_path = run_dir / "participant_metadata.json"
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    metadata["stream_privacy"] = "discoverable_stream_name"
+    metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir)
+
+    assert result.ok is False
+    assert "stream_privacy" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_invalid_haptic_capability(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    haptic_path = run_dir / "haptic_capability.json"
+    haptic = json.loads(haptic_path.read_text(encoding="utf-8"))
+    haptic["recommended_amplitude"] = 999
+    haptic_path.write_text(json.dumps(haptic), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir)
+
+    assert result.ok is False
+    assert "recommended_amplitude" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_loads_lightweight_materialization_from_zip(tmp_path: Path):
     source_dir = tmp_path / "phone-run-source"
     source_dir.mkdir()
@@ -380,6 +410,8 @@ def _write_phone_run_with_native_command_diary(
             )
         )
     markers = [_phone_marker(event) for event in events]
+    participant_metadata = _participant_metadata()
+    haptic_capability = _haptic_capability()
     (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
     (run_dir / "completion.json").write_text(
         json.dumps(
@@ -387,11 +419,15 @@ def _write_phone_run_with_native_command_diary(
                 "lsl_runtime_status": status,
                 "events": events,
                 "lsl_marker_mirror": markers,
+                "participant_metadata": participant_metadata,
+                "haptic": haptic_capability,
                 "command_diary": [row],
             }
         ),
         encoding="utf-8",
     )
+    (run_dir / "participant_metadata.json").write_text(json.dumps(participant_metadata), encoding="utf-8")
+    (run_dir / "haptic_capability.json").write_text(json.dumps(haptic_capability), encoding="utf-8")
     (run_dir / "command_diary.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
     _write_marker_csv(run_dir / "lsl_marker_mirror.csv", markers)
 
@@ -517,6 +553,53 @@ def _read_csv_rows(path: Path) -> list[dict]:
         return [dict(row) for row in csv.DictReader(handle)]
 
 
+def _participant_metadata() -> dict:
+    return {
+        "schema": "pps-android-phone-participant-metadata.v1",
+        "participant_id": "P001",
+        "session_id": "session-001",
+        "session_group_id": "group-001",
+        "part_session_id": "part-001",
+        "part_number": "01",
+        "age_years": "30",
+        "handedness": "right",
+        "gender": "prefer_not_to_say",
+        "tactile_threshold_percent": "20",
+        "tactile_threshold_source": "android_haptic_calibration",
+        "stream_privacy": "metadata_payload_only",
+        "tactile_threshold_calibration_schema": "pps-android-phone-haptic-calibration.v1",
+        "tactile_threshold_calibration_status": "threshold_detected",
+    }
+
+
+def _haptic_capability() -> dict:
+    calibration = {
+        "schema": "pps-android-phone-haptic-calibration.v1",
+        "status": "threshold_detected",
+        "calibration_policy": "ascending_detection_threshold_percent",
+        "has_vibrator": True,
+        "has_amplitude_control": True,
+        "recommended_threshold_percent": 20,
+        "recommended_amplitude": 51,
+        "responses": [
+            {"trial_index": 1, "threshold_percent": 5, "amplitude": 13, "felt": False},
+            {"trial_index": 2, "threshold_percent": 20, "amplitude": 51, "felt": True},
+        ],
+    }
+    return {
+        "schema": "pps-android-haptic-capability.v1",
+        "has_vibrator": True,
+        "has_amplitude_control": True,
+        "calibration_policy": "amplitude_percent_supported",
+        "device_model": "test-phone",
+        "android_sdk": 30,
+        "calibration_result": calibration,
+        "calibration_status": "threshold_detected",
+        "recommended_threshold_percent": 20,
+        "recommended_amplitude": 51,
+    }
+
+
 def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event: bool = True) -> None:
     status = _status(native=False)
     status["asset_strategy"] = "trial_building_blocks_only"
@@ -586,6 +669,8 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
     if include_materialization_event:
         events.append(_phone_event(2, "phone_scheduled_block_materialization", **materialization))
     markers = [_phone_marker(event) for event in events]
+    participant_metadata = _participant_metadata()
+    haptic_capability = _haptic_capability()
     materialized_dir = run_dir / "materialized_blocks"
     materialized_dir.mkdir()
     (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
@@ -598,10 +683,14 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
                 "package": {"asset_strategy": "trial_building_blocks_only"},
                 "events": events,
                 "lsl_marker_mirror": markers,
+                "participant_metadata": participant_metadata,
+                "haptic": haptic_capability,
             }
         ),
         encoding="utf-8",
     )
+    (run_dir / "participant_metadata.json").write_text(json.dumps(participant_metadata), encoding="utf-8")
+    (run_dir / "haptic_capability.json").write_text(json.dumps(haptic_capability), encoding="utf-8")
     _write_marker_csv(run_dir / "lsl_marker_mirror.csv", markers)
     (materialized_dir / "phone_materialized_block_01.json").write_text(json.dumps(materialization), encoding="utf-8")
     (materialized_dir / "phone_materialized_block_01.wav").write_bytes(wav_bytes)

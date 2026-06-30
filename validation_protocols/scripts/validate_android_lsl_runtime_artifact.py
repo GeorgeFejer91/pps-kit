@@ -52,6 +52,9 @@ ANDROID_LSL_RUNTIME_STATUS_SCHEMA = "pps-android-lsl-runtime-status.v1"
 ANDROID_PHONE_RUN_CATALOG_ENTRY_SCHEMA = "pps-android-phone-run-catalog-entry.v1"
 ANDROID_PHONE_RUN_CATALOG_ENTRY = "phone_run_catalog_entry.json"
 ANDROID_PHONE_RUN_RECONSTRUCTION_ARTIFACT = "reconstruction_contract.json"
+ANDROID_PHONE_PARTICIPANT_METADATA_SCHEMA = "pps-android-phone-participant-metadata.v1"
+ANDROID_HAPTIC_CAPABILITY_SCHEMA = "pps-android-haptic-capability.v1"
+ANDROID_HAPTIC_CALIBRATION_SCHEMA = "pps-android-phone-haptic-calibration.v1"
 ANDROID_SCHEDULED_BLOCK_MATERIALIZATION_SCHEMA = "pps-android-phone-scheduled-block-materialization.v1"
 ANDROID_CONTROLLER_RUNTIME_STATUS_SCHEMA = "pps-android-controller-runtime-status.v1"
 ANDROID_CONTROLLER_COMMAND_ROW_SCHEMA = "pps-android-controller-command-row.v1"
@@ -121,6 +124,8 @@ def validate_runtime_status(
     catalog_entry: dict[str, Any] | None = None,
     package_manifest: dict[str, Any] | None = None,
     reconstruction_artifact: dict[str, Any] | None = None,
+    participant_metadata: dict[str, Any] | None = None,
+    haptic_capability: dict[str, Any] | None = None,
     command_diary_rows: list[dict[str, Any]] | None = None,
     marker_mirror_rows: list[dict[str, Any]] | None = None,
     materialization_manifests: list[dict[str, Any]] | None = None,
@@ -195,6 +200,15 @@ def validate_runtime_status(
         expect_lightweight_materializations=expect_lightweight_materializations,
     )
     _validate_phone_run_catalog_entry(status, catalog_entry, failures, warnings, expect_run_catalog=expect_run_catalog)
+    _validate_participant_and_haptic_metadata(
+        status=status,
+        completion=completion,
+        catalog_entry=catalog_entry,
+        participant_metadata=participant_metadata,
+        haptic_capability=haptic_capability,
+        failures=failures,
+        warnings=warnings,
+    )
     _validate_phone_command_diary(
         status=status,
         completion=completion,
@@ -457,6 +471,8 @@ def validate_run_artifact(
         catalog_entry=loaded.get("catalog_entry"),
         package_manifest=loaded.get("package_manifest"),
         reconstruction_artifact=loaded.get("reconstruction_artifact"),
+        participant_metadata=loaded.get("participant_metadata"),
+        haptic_capability=loaded.get("haptic_capability"),
         command_diary_rows=loaded.get("command_diary_rows") or [],
         marker_mirror_rows=loaded.get("marker_mirror_rows") or [],
         materialization_manifests=loaded.get("materialization_manifests") or [],
@@ -614,6 +630,8 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
             catalog_members = [name for name in archive.namelist() if name.endswith(ANDROID_PHONE_RUN_CATALOG_ENTRY)]
             package_manifest_members = [name for name in archive.namelist() if name.endswith("run_package_manifest.json")]
             reconstruction_members = [name for name in archive.namelist() if name.endswith(ANDROID_PHONE_RUN_RECONSTRUCTION_ARTIFACT)]
+            participant_metadata_members = [name for name in archive.namelist() if name.endswith("participant_metadata.json")]
+            haptic_capability_members = [name for name in archive.namelist() if name.endswith("haptic_capability.json")]
             command_diary_members = [name for name in archive.namelist() if name.endswith("command_diary.jsonl")]
             marker_mirror_members = [name for name in archive.namelist() if name.endswith("lsl_marker_mirror.csv")]
             materialization_members = [
@@ -647,6 +665,16 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 reconstruction_name = sorted(reconstruction_members)[0]
                 archive.extract(reconstruction_name, temp_root)
                 reconstruction_artifact = _read_json(temp_root / reconstruction_name)
+            participant_metadata = None
+            if participant_metadata_members:
+                participant_metadata_name = sorted(participant_metadata_members)[0]
+                archive.extract(participant_metadata_name, temp_root)
+                participant_metadata = _read_json(temp_root / participant_metadata_name)
+            haptic_capability = None
+            if haptic_capability_members:
+                haptic_capability_name = sorted(haptic_capability_members)[0]
+                archive.extract(haptic_capability_name, temp_root)
+                haptic_capability = _read_json(temp_root / haptic_capability_name)
             materialization_manifests: list[dict[str, Any]] = []
             for member in sorted(materialization_members):
                 archive.extract(member, temp_root)
@@ -672,6 +700,8 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 "catalog_entry": catalog_entry,
                 "package_manifest": package_manifest,
                 "reconstruction_artifact": reconstruction_artifact,
+                "participant_metadata": participant_metadata,
+                "haptic_capability": haptic_capability,
                 "command_diary_rows": command_diary_rows,
                 "marker_mirror_rows": marker_mirror_rows,
                 "materialization_manifests": materialization_manifests,
@@ -682,6 +712,8 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
 def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
     package_manifest_path = path / "run_package_manifest.json"
     reconstruction_artifact_path = path / ANDROID_PHONE_RUN_RECONSTRUCTION_ARTIFACT
+    participant_metadata_path = path / "participant_metadata.json"
+    haptic_capability_path = path / "haptic_capability.json"
     command_diary_path = path / "command_diary.jsonl"
     marker_mirror_path = path / "lsl_marker_mirror.csv"
     materialized_dir = path / "materialized_blocks"
@@ -695,6 +727,8 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
     return {
         "package_manifest": _read_json(package_manifest_path) if package_manifest_path.is_file() else None,
         "reconstruction_artifact": _read_json(reconstruction_artifact_path) if reconstruction_artifact_path.is_file() else None,
+        "participant_metadata": _read_json(participant_metadata_path) if participant_metadata_path.is_file() else None,
+        "haptic_capability": _read_json(haptic_capability_path) if haptic_capability_path.is_file() else None,
         "command_diary_rows": _read_jsonl(command_diary_path) if command_diary_path.is_file() else [],
         "marker_mirror_rows": _read_csv(marker_mirror_path) if marker_mirror_path.is_file() else [],
         "materialization_manifests": materialization_manifests,
@@ -746,6 +780,21 @@ def _clean_int(value: Any) -> int:
         return int(float(str(value).strip()))
     except (TypeError, ValueError):
         return 0
+
+
+def _safe_float(value: Any, *, fallback: float = float("nan")) -> float:
+    try:
+        return float(str(value).strip())
+    except (TypeError, ValueError):
+        return fallback
+
+
+def _metadata_value(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    return str(value).strip()
 
 
 def _duplicate_ints(values: list[int]) -> list[int]:
@@ -901,6 +950,196 @@ def _validate_phone_run_catalog_entry(
     reconstruction = catalog_entry.get("reconstruction") if isinstance(catalog_entry.get("reconstruction"), dict) else {}
     if not str(reconstruction.get("schedule_hash") or "").strip():
         warnings.append("phone run catalog entry does not include a reconstruction schedule_hash")
+
+
+def _validate_participant_and_haptic_metadata(
+    *,
+    status: dict[str, Any],
+    completion: dict[str, Any] | None,
+    catalog_entry: dict[str, Any] | None,
+    participant_metadata: dict[str, Any] | None,
+    haptic_capability: dict[str, Any] | None,
+    failures: list[str],
+    warnings: list[str],
+) -> None:
+    embedded_participant = (
+        completion.get("participant_metadata")
+        if isinstance(completion, dict) and isinstance(completion.get("participant_metadata"), dict)
+        else None
+    )
+    embedded_haptic = (
+        completion.get("haptic")
+        if isinstance(completion, dict) and isinstance(completion.get("haptic"), dict)
+        else None
+    )
+    participant = participant_metadata or embedded_participant
+    haptic = haptic_capability or embedded_haptic
+    if participant_metadata and embedded_participant:
+        _compare_metadata_fields(
+            participant_metadata,
+            embedded_participant,
+            fields=[
+                "schema",
+                "participant_id",
+                "session_id",
+                "session_group_id",
+                "part_session_id",
+                "part_number",
+                "age_years",
+                "handedness",
+                "gender",
+                "tactile_threshold_percent",
+                "tactile_threshold_source",
+                "stream_privacy",
+                "tactile_threshold_calibration_schema",
+                "tactile_threshold_calibration_status",
+            ],
+            label="participant_metadata sidecar",
+            other_label="completion participant_metadata",
+            failures=failures,
+        )
+    elif embedded_participant and not participant_metadata:
+        warnings.append("completion embeds participant_metadata but participant_metadata.json sidecar is missing")
+    if haptic_capability and embedded_haptic:
+        _compare_metadata_fields(
+            haptic_capability,
+            embedded_haptic,
+            fields=[
+                "schema",
+                "has_vibrator",
+                "has_amplitude_control",
+                "calibration_policy",
+                "device_model",
+                "android_sdk",
+                "calibration_status",
+                "recommended_threshold_percent",
+                "recommended_amplitude",
+            ],
+            label="haptic_capability sidecar",
+            other_label="completion haptic",
+            failures=failures,
+        )
+    elif embedded_haptic and not haptic_capability:
+        warnings.append("completion embeds haptic capability but haptic_capability.json sidecar is missing")
+
+    if participant is None:
+        if completion and isinstance(completion.get("events"), list):
+            warnings.append("phone run artifact does not include participant metadata")
+    else:
+        _validate_participant_metadata(status, catalog_entry, participant, failures, warnings)
+
+    if haptic is None:
+        if completion and isinstance(completion.get("events"), list):
+            warnings.append("phone run artifact does not include haptic capability metadata")
+    else:
+        _validate_haptic_capability(haptic, failures)
+
+
+def _validate_participant_metadata(
+    status: dict[str, Any],
+    catalog_entry: dict[str, Any] | None,
+    participant: dict[str, Any],
+    failures: list[str],
+    warnings: list[str],
+) -> None:
+    if participant.get("schema") != ANDROID_PHONE_PARTICIPANT_METADATA_SCHEMA:
+        failures.append("participant_metadata schema mismatch")
+    if participant.get("stream_privacy") != "metadata_payload_only":
+        failures.append("participant_metadata stream_privacy must be metadata_payload_only")
+    forbidden_name_fields = [field for field in ("name", "participant_name", "full_name") if str(participant.get(field) or "").strip()]
+    if forbidden_name_fields:
+        failures.append(f"participant_metadata must not include direct name fields: {', '.join(forbidden_name_fields)}")
+    for field in ("participant_id", "session_id", "session_group_id", "part_session_id", "part_number"):
+        status_value = str(status.get(field) or "").strip()
+        metadata_value = str(participant.get(field) or "").strip()
+        if status_value and metadata_value and status_value != metadata_value:
+            failures.append(f"participant_metadata {field} differs from lsl_runtime_status")
+    source = str(participant.get("tactile_threshold_source") or "").strip()
+    if source and source not in {"manual_entry", "android_haptic_calibration"}:
+        failures.append("participant_metadata tactile_threshold_source is not recognized")
+    threshold = participant.get("tactile_threshold_percent")
+    threshold_text = str(threshold if threshold is not None else "").strip()
+    if threshold_text:
+        value = _safe_float(threshold)
+        if value != value or value < 0.0 or value > 100.0:
+            failures.append("participant_metadata tactile_threshold_percent must be between 0 and 100")
+    elif source == "android_haptic_calibration":
+        failures.append("android haptic calibration participant metadata requires tactile_threshold_percent")
+    if source == "android_haptic_calibration":
+        if participant.get("tactile_threshold_calibration_schema") != ANDROID_HAPTIC_CALIBRATION_SCHEMA:
+            failures.append("participant_metadata tactile_threshold_calibration_schema mismatch")
+        if not str(participant.get("tactile_threshold_calibration_status") or "").strip():
+            failures.append("participant_metadata is missing tactile_threshold_calibration_status")
+    if catalog_entry:
+        summary = catalog_entry.get("participant_metadata_summary") if isinstance(catalog_entry.get("participant_metadata_summary"), dict) else {}
+        for field in ("participant_id", "age_years", "handedness", "gender", "tactile_threshold_percent", "tactile_threshold_source"):
+            metadata_value = str(participant.get(field) or "").strip()
+            summary_value = str(summary.get(field) or "").strip()
+            if metadata_value and summary_value and metadata_value != summary_value:
+                failures.append(f"phone run catalog participant_metadata_summary {field} differs from participant_metadata")
+        privacy = catalog_entry.get("privacy") if isinstance(catalog_entry.get("privacy"), dict) else {}
+        if privacy.get("demographics_in_stream_name") is not False:
+            failures.append("phone run catalog privacy must keep demographics out of stream names")
+    else:
+        warnings.append("participant metadata cannot be compared to phone run catalog summary because catalog entry is missing")
+
+
+def _validate_haptic_capability(haptic: dict[str, Any], failures: list[str]) -> None:
+    if haptic.get("schema") != ANDROID_HAPTIC_CAPABILITY_SCHEMA:
+        failures.append("haptic_capability schema mismatch")
+    for field in ("has_vibrator", "has_amplitude_control"):
+        if not isinstance(haptic.get(field), bool):
+            failures.append(f"haptic_capability {field} must be boolean")
+    policy = str(haptic.get("calibration_policy") or "")
+    if policy not in {"amplitude_percent_supported", "binary_detection_only"}:
+        failures.append("haptic_capability calibration_policy is not recognized")
+    if haptic.get("has_amplitude_control") is True and policy != "amplitude_percent_supported":
+        failures.append("haptic_capability amplitude control requires amplitude_percent_supported policy")
+    if haptic.get("has_amplitude_control") is False and policy != "binary_detection_only":
+        failures.append("haptic_capability no-amplitude devices must use binary_detection_only policy")
+    if "recommended_threshold_percent" in haptic and haptic.get("recommended_threshold_percent") not in (None, ""):
+        value = _safe_float(haptic.get("recommended_threshold_percent"))
+        if value != value or value < 0.0 or value > 100.0:
+            failures.append("haptic_capability recommended_threshold_percent must be between 0 and 100")
+    if "recommended_amplitude" in haptic and haptic.get("recommended_amplitude") not in (None, ""):
+        amplitude = _safe_int(haptic.get("recommended_amplitude"))
+        if amplitude != -1 and not (1 <= amplitude <= 255):
+            failures.append("haptic_capability recommended_amplitude must be -1 or 1..255")
+    calibration = haptic.get("calibration_result") if isinstance(haptic.get("calibration_result"), dict) else None
+    if calibration is not None:
+        if calibration.get("schema") != ANDROID_HAPTIC_CALIBRATION_SCHEMA:
+            failures.append("haptic_capability calibration_result schema mismatch")
+        if not str(calibration.get("status") or "").strip():
+            failures.append("haptic_capability calibration_result is missing status")
+        if "recommended_threshold_percent" in calibration and calibration.get("recommended_threshold_percent") not in (None, ""):
+            value = _safe_float(calibration.get("recommended_threshold_percent"))
+            if value != value or value < 0.0 or value > 100.0:
+                failures.append("haptic_capability calibration_result recommended_threshold_percent must be between 0 and 100")
+        if "recommended_amplitude" in calibration:
+            amplitude = _safe_int(calibration.get("recommended_amplitude"))
+            if amplitude != -1 and not (1 <= amplitude <= 255):
+                failures.append("haptic_capability calibration_result recommended_amplitude must be -1 or 1..255")
+        responses = calibration.get("responses")
+        if responses is not None and not isinstance(responses, list):
+            failures.append("haptic_capability calibration_result responses must be an array")
+
+
+def _compare_metadata_fields(
+    left: dict[str, Any],
+    right: dict[str, Any],
+    *,
+    fields: list[str],
+    label: str,
+    other_label: str,
+    failures: list[str],
+) -> None:
+    for field in fields:
+        left_present = field in left and left.get(field) is not None
+        right_present = field in right and right.get(field) is not None
+        if not left_present and not right_present:
+            continue
+        if _metadata_value(left.get(field)) != _metadata_value(right.get(field)):
+            failures.append(f"{label} {field} differs from {other_label}")
 
 
 def _validate_phone_command_diary(

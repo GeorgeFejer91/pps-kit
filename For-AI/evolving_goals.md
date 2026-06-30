@@ -134,6 +134,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   JSON, Android phone event-code mappings, duplicate event ids, and required
   marker fields. This keeps the local PPSMarkersV2-shaped mirror auditable
   before a PC-side LSL monitor/XDF comparison is available.
+- Android phone-run participant and haptic evidence is now validator-visible.
+  `validate_android_lsl_runtime_artifact.py` loads `participant_metadata.json`
+  and `haptic_capability.json` from run folders/ZIPs, falls back to embedded
+  `completion.json` metadata, compares sidecars to embedded copies, enforces
+  `metadata_payload_only` participant privacy, checks run identity/catalog
+  consistency, and validates vibrator/amplitude calibration result bounds.
 - Android phone-owned runs now derive a phone-local tactile response ledger
   using the shared 100-1300 ms post-tactile response window and write
   `phone_response_ledger.csv` plus `phone_topup_plan.json` into the local run
