@@ -80,6 +80,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   count, and playback-start buffer bytes matching the block PCM frame format.
   This proves the exported artifact carries phone-runtime playback-head timing
   metadata; it is still not physical audio/vibration onset evidence.
+- Strict native Android LSL validation now checks completed phone-run `summary`
+  marker-push counts when marker evidence is present. With
+  `--expect-native-transport`, a phone run must report
+  `native_lsl_pushed_count == lsl_marker_mirror_count` and
+  `native_lsl_failed_count == 0`, so local `PPSMarkersV2` /
+  `PPSTriggerCodes` mirror files cannot be mistaken for complete native LSL
+  broadcast evidence if the native outlet path dropped samples.
 - Companion discovery is now a stricter local-network contract rather than a
   best-effort loose JSON shape. PC discovery payload serialization validates
   `schema`, `service`, `network_scope = same_lan_or_local_hotspot`, multicast

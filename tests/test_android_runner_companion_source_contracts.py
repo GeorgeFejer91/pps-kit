@@ -258,6 +258,9 @@ def test_android_phone_run_writes_plain_event_diary() -> None:
     assert 'writePhoneEventsCsv(File(dir, "lsl_marker_mirror.csv"), lslMarkers)' in main_activity
     assert 'writePhoneTriggerCodesCsv(File(dir, "trigger_codes.csv"), lslMarkers)' in main_activity
     assert "private fun writePhoneTriggerCodesCsv" in main_activity
+    assert '.put("lsl_marker_mirror_count", lslMarkers.size)' in main_activity
+    assert '.put("native_lsl_pushed_count", nativeLslPushedCount)' in main_activity
+    assert '.put("native_lsl_failed_count", nativeLslFailedCount)' in main_activity
 
 
 def test_android_phone_run_writes_artifact_file_inventory() -> None:

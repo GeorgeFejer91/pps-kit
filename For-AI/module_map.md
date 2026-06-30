@@ -162,6 +162,9 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `docs/ANDROID_LSL_INTEGRATION.md`. The phone-run artifact validator lives at
   `validation_protocols/scripts/validate_android_lsl_runtime_artifact.py` and
   checks `lsl_runtime_status.json`, Android LSL stream descriptions, embedded completion status,
+  strict native marker-push completeness from completion `summary`
+  (`native_lsl_pushed_count == lsl_marker_mirror_count` and
+  `native_lsl_failed_count == 0`) when marker evidence is present,
   phone-run `phone_run_catalog_entry.json` when present or when
   `--expect-run-catalog` is set, app-private `phone_run_catalog/index.json`,
   participant `runs.jsonl`, and `latest_run.json` when

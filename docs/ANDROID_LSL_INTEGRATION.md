@@ -336,7 +336,11 @@ Strict native validation requires enabled native marker and command transport
 plus `stream_descriptions` for the rich marker, numeric trigger, command
 signal, and command ack streams. The descriptions must preserve the
 PC-compatible channel orders and keep participant demographics out of
-discoverable stream names. Controller-mode strict validation similarly requires
+discoverable stream names. For completed phone-run artifacts that include a
+marker mirror, strict native validation also requires the completion `summary`
+to show that `native_lsl_pushed_count` equals the local marker mirror count and
+that `native_lsl_failed_count` is zero, proving every local rich/numeric marker
+pair was handed to the native LSL outlet path. Controller-mode strict validation similarly requires
 stream descriptions for the Android controller command-signal outlet and
 command-ack inlet before button presses count as reconstructable native LSL
 evidence. PC-admin strict validation requires the same evidence for the PC

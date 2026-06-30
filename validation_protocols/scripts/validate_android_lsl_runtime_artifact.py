@@ -276,6 +276,14 @@ def validate_runtime_status(
     elif not str(status.get("reason") or "").strip():
         failures.append("missing reason for unavailable native Android LSL transport")
 
+    _validate_native_lsl_marker_push_completeness(
+        completion=completion,
+        marker_mirror_rows=marker_mirror_rows or [],
+        failures=failures,
+        expect_native_transport=expect_native_transport,
+        marker_enabled=marker_enabled,
+    )
+
     if completion:
         embedded = completion.get("lsl_runtime_status")
         if isinstance(embedded, dict):
@@ -1410,6 +1418,45 @@ def _duplicate_ints(values: list[int]) -> list[int]:
             duplicates.append(value)
         seen.add(value)
     return duplicates
+
+
+def _validate_native_lsl_marker_push_completeness(
+    *,
+    completion: dict[str, Any] | None,
+    marker_mirror_rows: list[dict[str, Any]],
+    failures: list[str],
+    expect_native_transport: bool,
+    marker_enabled: bool,
+) -> None:
+    if not (expect_native_transport and marker_enabled):
+        return
+    embedded_markers = (
+        completion.get("lsl_marker_mirror")
+        if isinstance(completion, dict) and isinstance(completion.get("lsl_marker_mirror"), list)
+        else []
+    )
+    marker_count = len(marker_mirror_rows) if marker_mirror_rows else len(embedded_markers)
+    if marker_count <= 0:
+        return
+    summary = (
+        completion.get("summary")
+        if isinstance(completion, dict) and isinstance(completion.get("summary"), dict)
+        else None
+    )
+    if summary is None:
+        failures.append("strict native Android LSL validation requires completion summary for marker push counts")
+        return
+    summary_marker_count = _safe_int(summary.get("lsl_marker_mirror_count"), fallback=-1)
+    if summary_marker_count != marker_count:
+        failures.append(f"completion summary lsl_marker_mirror_count expected {marker_count}, got {summary_marker_count}")
+    if summary.get("native_lsl_marker_transport_enabled") is not True:
+        failures.append("completion summary native_lsl_marker_transport_enabled must be true")
+    pushed_count = _safe_int(summary.get("native_lsl_pushed_count"), fallback=-1)
+    if pushed_count != marker_count:
+        failures.append(f"completion summary native_lsl_pushed_count expected {marker_count}, got {pushed_count}")
+    failed_count = _safe_int(summary.get("native_lsl_failed_count"), fallback=-1)
+    if failed_count != 0:
+        failures.append(f"completion summary native_lsl_failed_count expected 0, got {failed_count}")
 
 
 def _validate_android_lsl_stream_descriptions(

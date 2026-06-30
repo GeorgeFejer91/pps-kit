@@ -243,7 +243,11 @@ For strict local numeric-trigger reconstruction, add
 and to match the `event_id`, `event_code`, `event_type`, `trigger_key`, and
 phone elapsed-time sequence implied by `lsl_marker_mirror.csv`. This is the
 phone-local expected `PPSTriggerCodes` mirror used before or alongside PC-side
-LSL/XDF monitor reconciliation.
+LSL/XDF monitor reconciliation. When `--expect-native-transport` is used on a
+completed phone-run folder with marker evidence, strict validation also checks
+the completion `summary`: `native_lsl_pushed_count` must equal the local marker
+mirror count and `native_lsl_failed_count` must be zero, so native Android LSL
+claims cannot hide dropped rich/numeric marker pushes.
 For lightweight scheduled-block reconstruction, add
 `--expect-lightweight-materializations`; this requires every
 `trial_building_blocks_only` package block to have a

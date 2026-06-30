@@ -89,6 +89,35 @@ def test_android_lsl_runtime_validator_requires_command_transport_in_strict_mode
     assert "command_transport is not enabled" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_accepts_native_marker_push_completeness(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir, native=True)
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_rejects_native_marker_push_count_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir, native=True)
+    completion_path = run_dir / "completion.json"
+    completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    completion["summary"]["native_lsl_pushed_count"] = 1
+    completion["summary"]["native_lsl_failed_count"] = 2
+    completion_path.write_text(json.dumps(completion), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True)
+
+    assert result.ok is False
+    failures = "\n".join(result.failures)
+    assert "completion summary native_lsl_pushed_count expected" in failures
+    assert "completion summary native_lsl_failed_count expected 0, got 2" in failures
+
+
 def test_android_lsl_runtime_validator_accepts_phone_run_catalog_entry(tmp_path: Path):
     status = _status(native=False)
     status.update(_catalog_identity())
@@ -1428,6 +1457,19 @@ def _write_phone_run_with_native_command_diary(
             )
         )
     markers = [_phone_marker(event) for event in events]
+    summary = {
+        "total_event_count": len(events),
+        "lsl_marker_mirror_count": len(markers),
+        "native_lsl_transport_available": True,
+        "native_lsl_marker_transport_enabled": True,
+        "native_lsl_command_receiver_available": True,
+        "native_lsl_pushed_count": len(markers),
+        "native_lsl_failed_count": 0,
+        "native_lsl_command_received_count": 1,
+        "native_lsl_command_ack_count": 1 if ack_sent else 0,
+        "native_lsl_command_ack_failed_count": 0 if ack_sent else 1,
+        "native_lsl_command_rejected_count": 0 if row["status"] == "applied" else 1,
+    }
     (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
     (run_dir / "completion.json").write_text(
         json.dumps(
@@ -1435,6 +1477,7 @@ def _write_phone_run_with_native_command_diary(
                 "lsl_runtime_status": status,
                 "events": events,
                 "lsl_marker_mirror": markers,
+                "summary": summary,
                 "participant_metadata": participant_metadata,
                 "haptic": haptic_capability,
                 "command_diary": [row],
@@ -2015,8 +2058,8 @@ def _update_stream_description_session_metadata(
         row["session_metadata_json"] = metadata_json
 
 
-def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event: bool = True) -> None:
-    status = _status(native=False)
+def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event: bool = True, native: bool = False) -> None:
+    status = _status(native=native)
     status["asset_strategy"] = "trial_building_blocks_only"
     wav_bytes = b"RIFF....WAVE"
     wav_sha256 = hashlib.sha256(wav_bytes).hexdigest()
@@ -2081,7 +2124,7 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
             "topup_trial_uid": "phone-topup-1-trial-001",
             "topup_hit": True,
             "topup_rt_ms": 200,
-            "topup_tap_event_id": 10,
+            "topup_tap_event_id": 12,
         },
         {
             "schema": "pps-android-phone-response-ledger.v1",
@@ -2262,6 +2305,21 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
         )
     )
     markers = [_phone_marker(event) for event in events]
+    summary = {
+        "total_event_count": len(events),
+        "lsl_marker_mirror_count": len(markers),
+        "native_lsl_transport_available": native,
+        "native_lsl_marker_transport_enabled": native,
+        "native_lsl_command_receiver_available": native,
+        "native_lsl_timestamp_strategy": "android_elapsed_realtime_plus_open_lsl_clock_offset",
+        "native_lsl_clock_offset_s": 0.0,
+        "native_lsl_pushed_count": len(markers) if native else 0,
+        "native_lsl_failed_count": 0,
+        "native_lsl_command_received_count": 0,
+        "native_lsl_command_ack_count": 0,
+        "native_lsl_command_ack_failed_count": 0,
+        "native_lsl_command_rejected_count": 0,
+    }
     materialized_dir = run_dir / "materialized_blocks"
     materialized_dir.mkdir()
     (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
@@ -2274,6 +2332,7 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
                 "package": {"asset_strategy": "trial_building_blocks_only"},
                 "events": events,
                 "lsl_marker_mirror": markers,
+                "summary": summary,
                 "participant_metadata": participant_metadata,
                 "haptic": haptic_capability,
                 "phone_response_summary": response_summary,
