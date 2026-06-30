@@ -38,6 +38,7 @@ COMMAND_ACK_PAYLOAD_IDENTITY_FIELDS = (
     "target_session_group_id",
     "target_part_number",
 )
+COMMAND_ACK_PAIRING_TOKEN_FIELDS = ("token", "companion_token")
 
 
 @dataclass(frozen=True)
@@ -360,6 +361,10 @@ def _command_ack_pair_summary(command_rows: list[dict[str, Any]], ack_rows: list
     missing_ack = sorted(set(command_ids) - set(ack_ids), key=_event_id_sort_key)
     ack_without_command = sorted(set(ack_ids) - set(command_ids), key=_event_id_sort_key) if command_rows else []
     mismatches: list[dict[str, Any]] = []
+    for ack_row in ack_rows:
+        ack_payload = _payload_object(ack_row.get("payload_json"))
+        for field in _ack_pairing_token_fields(ack_payload):
+            mismatches.append(_command_ack_mismatch(_command_id(ack_row), f"payload.{field}", "", "<redacted>"))
     for command_id in sorted(set(command_ids) & set(ack_ids), key=_event_id_sort_key):
         command_row = command_by_id[command_id]
         ack_row = ack_by_id[command_id]
@@ -428,6 +433,10 @@ def _append_command_ack_payload_mismatch(
         mismatches.append(_command_ack_mismatch(command_id, f"payload.{field}", expected, observed))
     elif ack_status == "applied" and not observed:
         mismatches.append(_command_ack_mismatch(command_id, f"payload.{field}", expected, ""))
+
+
+def _ack_pairing_token_fields(payload: dict[str, Any]) -> list[str]:
+    return [field for field in COMMAND_ACK_PAIRING_TOKEN_FIELDS if _clean(payload.get(field))]
 
 
 def _first_mismatch_index(left: list[str], right: list[str]) -> int | None:

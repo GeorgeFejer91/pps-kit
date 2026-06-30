@@ -468,6 +468,8 @@ command, package identity, non-secret target payload fields, and exact
 token. This is the offline artifact proof that a controller button press or PC
 helper command was received and acknowledged by the phone runner; it is still
 separate from live network/XDF and physical timing proof.
+The PC monitor/XDF reconciler applies the same ack-token privacy rule to
+externally observed `PPSCommandAcksV1` rows.
 
 The PC runner's Send To Phone window mirrors that administration path. After a
 phone package is prepared it can send Start, Pause, Resume, Continue, Snapshot,

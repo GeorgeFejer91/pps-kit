@@ -206,6 +206,31 @@ def test_reconcile_android_lsl_monitor_reports_command_ack_payload_drift():
     assert "command/ack pairs have 2 mismatches" in "\n".join(result.report["failures"])
 
 
+def test_reconcile_android_lsl_monitor_rejects_command_ack_token_echo():
+    phone_markers = [_phone_marker(event_id="1", event_type="session_metadata", event_code="8")]
+    monitor_rows = [
+        _monitor_rich_row(phone_markers[0], timestamp=1.0),
+        _monitor_command_row(command_id="cmd-token", command="pause"),
+        _monitor_ack_row(
+            command_id="cmd-token",
+            payload={"command": "pause", **_target_identity_payload(), "token": "secret"},
+        ),
+    ]
+
+    result = reconciler.reconcile_android_lsl_monitor(
+        phone_markers,
+        monitor_rows,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is False
+    summary = result.report["command_ack_pair_summary"]
+    assert summary["mismatch_count"] == 1
+    assert summary["mismatches"][0]["field"] == "payload.token"
+    assert summary["mismatches"][0]["observed"] == "<redacted>"
+    assert "secret" not in json.dumps(result.report)
+
+
 def test_reconcile_android_lsl_monitor_reports_command_ack_target_identity_drift():
     phone_markers = [_phone_marker(event_id="1", event_type="session_metadata", event_code="8")]
     ack_payload = {"command": "start_experiment", **_target_identity_payload()}

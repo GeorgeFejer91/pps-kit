@@ -154,7 +154,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   between sender outbox and receiver command diary and rejects ack payload
   pairing-token echoes even when both sides match; the PC monitor/XDF reconciler
   now checks the same non-secret command/ack target identity fields when both
-  command-signal and acknowledgement streams are captured. Controller runtime
+  command-signal and acknowledgement streams are captured, and it rejects
+  observed ack payloads that echo `token` or `companion_token`. Controller runtime
   status now also includes
   `pps-android-lsl-stream-descriptions.v1` descriptions for the controller
   command-signal outlet and command-ack inlet, and strict controller validation

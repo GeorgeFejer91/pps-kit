@@ -461,7 +461,8 @@ in `trigger_codes.csv`. With `--expect-command-acks`, it also checks that
 observed command acknowledgements echo the command name plus any source command
 payload `package_id`, `participant_id`, target session, target part session,
 session group, and target part number fields that define which phone-owned part
-was administered.
+was administered, while rejecting ack payloads that echo `token` or
+`companion_token`.
 It is still network LSL evidence, not physical vibration/audio timing proof.
 
 Until that strict validator passes together with external LSL/XDF capture, the
