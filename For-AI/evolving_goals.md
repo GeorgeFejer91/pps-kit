@@ -154,8 +154,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   commands, handler completion status, and the handler's non-secret payload
   under `handler_payload`, so cases such as Pause with no active phone block are
   reconstructable without being mislabeled as token/package/session failures.
-  Strict phone-run validation plus the command-admin and PC-monitor
-  reconcilers now accept and enforce this handler-side rejection family.
+  Strict phone-run validation, Controller/PC-admin sender-outbox validation,
+  and the command-admin/PC-monitor reconcilers now accept and enforce this
+  handler-side rejection family. PC-admin sender rows also persist
+  `ack_valid`, `ack_validation_status`, and `ack_validation_reason` when an ack
+  is received, matching Android Controller rows so a valid `ack_rejected`
+  response remains distinguishable from a malformed or spoofed ack.
 - The Android sender/receiver command-admin reconciler and PC-monitor
   reconciler now enforce the same rejected-ack contract directly. Direct
   reconciliation runs fail when a rejected `PPSCommandAcksV1` payload omits the

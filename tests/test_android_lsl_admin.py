@@ -125,6 +125,9 @@ def test_send_android_lsl_command_writes_auditable_ack_row(tmp_path, monkeypatch
     assert result.row["status"] == "ack_applied"
     assert result.row["native_lsl_sent"] is True
     assert result.row["ack_received"] is True
+    assert result.row["ack_valid"] is True
+    assert result.row["ack_validation_status"] == "valid_ack"
+    assert result.row["ack_validation_reason"] == ""
     assert result.row["command_sample"][0] == "pps-lsl-command.v1"
     assert result.row["command_sample"][1] == "cmd-1"
     assert result.row["command_sample"][2] == "part-001"
@@ -153,6 +156,79 @@ def test_send_android_lsl_command_writes_auditable_ack_row(tmp_path, monkeypatch
     assert descriptions["command_acks"]["role"] == "inlet"
     assert descriptions["command_acks"]["source_id_pattern"] == "pps-command-acks-v1-*-*"
     assert descriptions["command_acks"]["channel_labels"] == list(admin.LSL_ACK_CHANNELS)
+
+
+def test_send_android_lsl_command_records_handler_rejection_as_valid_ack(tmp_path, monkeypatch):
+    _FakeCommandOutlet.sent_signals.clear()
+    _FakeAckInlet.ack = LSLCommandAck(
+        command_id="cmd-handler-reject",
+        session_id="part-001",
+        receiver_id="android_phone",
+        status="rejected",
+        reason="no_active_phone_block_to_pause",
+        received_lsl_time=10.1,
+        applied_lsl_time=10.2,
+        ack_lsl_time=10.3,
+        payload={
+            "schema": "pps-android-phone-command-handler-rejection.v1",
+            "status": "rejected",
+            "reason": "no_active_phone_block_to_pause",
+            "rejected_before_handler": False,
+            "handler_completed": True,
+            "command": "pause",
+            "package_id": "pkg-001",
+            "participant_id": "P001",
+            "session_id": "phone-session-001",
+            "part_session_id": "part-001",
+            "session_group_id": "group-001",
+            "part_number": "1",
+            "target_session_id": "part-001",
+            "target_part_session_id": "part-001",
+            "target_session_group_id": "group-001",
+            "target_part_number": "1",
+            "requested_by": "pc_runner_lsl_admin",
+            "current_pc_source_behavior": "pc_native_lsl_admin_with_local_outbox",
+            "requested_session_id": "part-001",
+            "requested_package_id": "pkg-001",
+            "requested_participant_id": "P001",
+            "requested_target_session_id": "part-001",
+            "requested_target_part_session_id": "part-001",
+            "requested_target_session_group_id": "group-001",
+            "requested_target_part_number": "1",
+            "handler_payload_schema": "pps-android-phone-runtime-command-state.v1",
+            "handler_payload": {
+                "schema": "pps-android-phone-runtime-command-state.v1",
+                "command": "pause",
+                "run_id": "phone-run-001",
+            },
+            "supported_commands": ["start_experiment", "pause", "resume"],
+        },
+    )
+    monkeypatch.setattr(admin, "LSLCommandOutlet", _FakeCommandOutlet)
+    monkeypatch.setattr(admin, "LSLCommandAckInlet", _FakeAckInlet)
+
+    result = admin.send_android_lsl_command(
+        target_session_id="part-001",
+        token="secret",
+        command="pause",
+        command_id="cmd-handler-reject",
+        package_id="pkg-001",
+        participant_id="P001",
+        target_part_session_id="part-001",
+        target_session_group_id="group-001",
+        part_number="1",
+        output_dir=tmp_path,
+        require_ack=True,
+    )
+
+    assert result.ok is False
+    assert result.row["status"] == "ack_rejected"
+    assert result.row["reason"] == "no_active_phone_block_to_pause"
+    assert result.row["ack_received"] is True
+    assert result.row["ack_valid"] is True
+    assert result.row["ack_validation_status"] == "valid_ack"
+    assert result.row["ack_validation_reason"] == ""
+    assert result.row["ack_sample"] == ack_to_sample(_FakeAckInlet.ack)
 
 
 def test_send_android_lsl_command_can_require_ack(tmp_path, monkeypatch):
@@ -206,6 +282,8 @@ def test_send_android_lsl_command_rejects_ack_session_drift(tmp_path, monkeypatc
     assert result.row["status"] == "invalid_ack"
     assert result.row["ack_received"] is True
     assert result.row["ack_sample"] == ack_to_sample(_FakeAckInlet.ack)
+    assert result.row["ack_valid"] is False
+    assert result.row["ack_validation_status"] == "invalid_ack"
     assert "session_id does not match" in result.row["reason"]
 
 
@@ -237,6 +315,8 @@ def test_send_android_lsl_command_rejects_ack_token_echo(tmp_path, monkeypatch):
     assert result.ok is False
     assert result.row["status"] == "invalid_ack"
     assert result.row["ack_received"] is True
+    assert result.row["ack_valid"] is False
+    assert result.row["ack_validation_status"] == "invalid_ack"
     assert "pairing token" in result.row["reason"]
 
 
@@ -274,7 +354,41 @@ def test_send_android_lsl_command_rejects_missing_ack_identity(tmp_path, monkeyp
     assert result.ok is False
     assert result.row["status"] == "invalid_ack"
     assert result.row["ack_received"] is True
+    assert result.row["ack_valid"] is False
+    assert result.row["ack_validation_status"] == "invalid_ack"
     assert "missing package_id" in result.row["reason"]
+
+
+def test_send_android_lsl_command_rejects_unrecognized_ack_status(tmp_path, monkeypatch):
+    _FakeCommandOutlet.sent_signals.clear()
+    _FakeAckInlet.ack = LSLCommandAck(
+        command_id="cmd-unknown-status",
+        session_id="part-001",
+        receiver_id="android_phone",
+        status="queued",
+        reason="ambiguous",
+        received_lsl_time=10.1,
+        applied_lsl_time=10.2,
+        ack_lsl_time=10.3,
+        payload={"command": "pause", "target_session_id": "part-001"},
+    )
+    monkeypatch.setattr(admin, "LSLCommandOutlet", _FakeCommandOutlet)
+    monkeypatch.setattr(admin, "LSLCommandAckInlet", _FakeAckInlet)
+
+    result = admin.send_android_lsl_command(
+        target_session_id="part-001",
+        token="secret",
+        command="pause",
+        command_id="cmd-unknown-status",
+        output_dir=tmp_path,
+        require_ack=True,
+    )
+
+    assert result.ok is False
+    assert result.row["status"] == "invalid_ack"
+    assert result.row["ack_valid"] is False
+    assert result.row["ack_validation_status"] == "invalid_ack"
+    assert "status is not recognized" in result.row["ack_validation_reason"]
 
 
 def test_send_android_lsl_operator_note_requires_note():

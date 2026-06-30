@@ -5799,7 +5799,7 @@ def _validate_controller_outbox_row(
                 ack_sample=ack_sample,
                 failures=failures,
             )
-            _validate_controller_ack_validation_fields(
+            _validate_outbox_ack_validation_fields(
                 prefix,
                 row=row,
                 command_sample=sample,
@@ -5862,6 +5862,14 @@ def _validate_pc_admin_outbox_row(
             if ack_sample[1] != sample[1]:
                 failures.append(f"{prefix} ack command_id does not match command sample")
             _validate_outbox_ack_payload(
+                prefix,
+                row=row,
+                command_sample=sample,
+                command_payload=payload,
+                ack_sample=ack_sample,
+                failures=failures,
+            )
+            _validate_outbox_ack_validation_fields(
                 prefix,
                 row=row,
                 command_sample=sample,
@@ -5935,12 +5943,21 @@ def _validate_outbox_ack_payload(
     if command == "request_snapshot" and ack_command == "request_snapshot":
         _validate_phone_runtime_snapshot_payload(ack_payload, prefix=prefix, failures=failures)
     if _metadata_value(ack_sample[4]) == "rejected":
-        _validate_phone_command_rejection_payload(
-            ack_payload,
-            reason=_metadata_value(ack_sample[5]),
-            prefix=prefix,
-            failures=failures,
-        )
+        if _metadata_value(ack_payload.get("schema")) == ANDROID_COMMAND_HANDLER_REJECTION_PAYLOAD_SCHEMA:
+            _validate_phone_command_handler_rejection_payload(
+                ack_payload,
+                row=row,
+                reason=_metadata_value(ack_sample[5]),
+                prefix=prefix,
+                failures=failures,
+            )
+        else:
+            _validate_phone_command_rejection_payload(
+                ack_payload,
+                reason=_metadata_value(ack_sample[5]),
+                prefix=prefix,
+                failures=failures,
+            )
 
     identity_fields = (
         "target_session_id",
@@ -5964,7 +5981,7 @@ def _validate_outbox_ack_payload(
             failures.append(f"{prefix} ack payload {field} differs from command sample")
 
 
-def _validate_controller_ack_validation_fields(
+def _validate_outbox_ack_validation_fields(
     prefix: str,
     *,
     row: dict[str, Any],

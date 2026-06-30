@@ -128,6 +128,26 @@ class PhoneControllerCommandsTest {
     }
 
     @Test
+    fun controllerAckValidationAcceptsHandlerRejectedAck() {
+        val signal = controllerSignal()
+        val payload = controllerAckPayload(signal)
+            .put("schema", PHONE_LSL_COMMAND_HANDLER_REJECTION_PAYLOAD_SCHEMA)
+            .put("status", "rejected")
+            .put("reason", "no_active_phone_block_to_pause")
+            .put("rejected_before_handler", false)
+            .put("handler_completed", true)
+            .put("handler_payload", JSONObject().put("command", "pause"))
+        val ack = controllerAck(signal, payload = payload).copy(
+            status = "rejected",
+            reason = "no_active_phone_block_to_pause",
+        )
+
+        val reason = validateControllerAckForSignal(signal, ack)
+
+        assertEquals(null, reason)
+    }
+
+    @Test
     fun controllerAckValidationRejectsStaleSessionOrCommandDrift() {
         val signal = controllerSignal()
         val wrongSessionAck = controllerAck(signal).copy(sessionId = "other-session")

@@ -330,8 +330,12 @@ Required validation levels:
    `pc_android_lsl_monitor_events.jsonl` artifacts from
    `pps-android-lsl-monitor`. Controller and PC-admin outbox rows are checked
    for exact row-payload versus command-sample-payload consistency, including
-   required `operator_note` note text when that command is used; rejected ack
-   payloads must carry either the pre-handler
+   required `operator_note` note text when that command is used. When sender
+   rows include `ack_valid`, `ack_validation_status`, and
+   `ack_validation_reason`, those fields are recomputed from the stored
+   `PPSCommandAcksV1` sample so a handler-side command rejection remains a
+   valid ack while stale/session-drifted/token-echoing acks remain invalid.
+   Rejected ack payloads must carry either the pre-handler
    `pps-android-phone-command-rejection.v1` schema or the handler-side
    `pps-android-phone-command-handler-rejection.v1` schema with
    requested/receiver identity; the serialized command-sample payload must
@@ -448,7 +452,12 @@ Snapshot/Stop-after-block/Note commands after package preparation. The Note
 command requires text in the operator-note field and sends it as
 `operator_note`. The window stores the same PC-admin outbox/status artifacts
 under runner logs for that phone transfer, including the row-derived command
-source ID in `pc_android_lsl_admin_status.json`.
+source ID in `pc_android_lsl_admin_status.json`. PC-admin rows that receive an
+ack now also persist `ack_valid`, `ack_validation_status`, and
+`ack_validation_reason`; `ack_rejected` with
+`pps-android-phone-command-handler-rejection.v1` is valid acknowledgement
+evidence even though the requested state change was rejected by the phone
+runtime.
 
 Then validate the PC-admin outbox/status pair:
 

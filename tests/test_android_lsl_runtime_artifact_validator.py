@@ -1648,6 +1648,57 @@ def test_android_lsl_runtime_validator_accepts_controller_rejected_ack_payload(t
     assert result.failures == []
 
 
+def test_android_lsl_runtime_validator_accepts_controller_handler_rejected_ack_payload(tmp_path: Path):
+    controller_dir = tmp_path / "phone-controller"
+    controller_dir.mkdir()
+    (controller_dir / "phone_controller_runtime_status.json").write_text(json.dumps(_controller_status(native=True)), encoding="utf-8")
+    row = _controller_row(native_sent=True, ack_received=True)
+    command_payload = dict(row["payload"])
+    ack_payload = {
+        "schema": "pps-android-phone-command-handler-rejection.v1",
+        "status": "rejected",
+        "reason": "no_active_phone_block_to_pause",
+        "rejected_before_handler": False,
+        "handler_completed": True,
+        "command": row["command"],
+        "package_id": command_payload["package_id"],
+        "participant_id": command_payload["participant_id"],
+        "session_id": "session-001",
+        "part_session_id": command_payload["target_part_session_id"],
+        "session_group_id": command_payload["target_session_group_id"],
+        "part_number": command_payload["target_part_number"],
+        "target_session_id": command_payload["target_session_id"],
+        "target_part_session_id": command_payload["target_part_session_id"],
+        "target_session_group_id": command_payload["target_session_group_id"],
+        "target_part_number": command_payload["target_part_number"],
+        "requested_by": command_payload["requested_by"],
+        "current_android_source_behavior": command_payload["current_android_source_behavior"],
+        "requested_session_id": command_payload["target_session_id"],
+        "requested_package_id": command_payload["package_id"],
+        "requested_participant_id": command_payload["participant_id"],
+        "requested_target_session_id": command_payload["target_session_id"],
+        "requested_target_part_session_id": command_payload["target_part_session_id"],
+        "requested_target_session_group_id": command_payload["target_session_group_id"],
+        "requested_target_part_number": command_payload["target_part_number"],
+        "handler_payload_schema": "pps-android-phone-runtime-command-state.v1",
+        "handler_payload": {
+            "schema": "pps-android-phone-runtime-command-state.v1",
+            "command": row["command"],
+            "run_id": "phone-run-001",
+        },
+        "supported_commands": ["start_experiment", "pause", "resume"],
+    }
+    row["ack_sample"][4] = "rejected"
+    row["ack_sample"][5] = "no_active_phone_block_to_pause"
+    row["ack_sample"][9] = json.dumps(ack_payload)
+    (controller_dir / "phone_controller_command_outbox.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+    result = validator.validate_run_artifact(controller_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
 def test_android_lsl_runtime_validator_rejects_controller_ack_validation_metadata_drift(tmp_path: Path):
     controller_dir = tmp_path / "phone-controller"
     controller_dir.mkdir()
@@ -1864,6 +1915,79 @@ def test_android_lsl_runtime_validator_rejects_pc_admin_ack_payload_token_echo(t
 
     assert result.ok is False
     assert "PC admin outbox row 1 ack payload must not echo the pairing token" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_accepts_pc_admin_handler_rejected_ack_payload(tmp_path: Path):
+    admin_dir = tmp_path / "pc-android-admin"
+    admin_dir.mkdir()
+    (admin_dir / "pc_android_lsl_admin_status.json").write_text(json.dumps(_pc_admin_status()), encoding="utf-8")
+    row = _pc_admin_row(native_sent=True, ack_received=True)
+    command_payload = dict(row["payload"])
+    ack_payload = {
+        "schema": "pps-android-phone-command-handler-rejection.v1",
+        "status": "rejected",
+        "reason": "no_active_phone_block_to_pause",
+        "rejected_before_handler": False,
+        "handler_completed": True,
+        "command": row["command"],
+        "package_id": command_payload["package_id"],
+        "participant_id": command_payload["participant_id"],
+        "session_id": "session-001",
+        "part_session_id": command_payload["target_part_session_id"],
+        "session_group_id": command_payload["target_session_group_id"],
+        "part_number": command_payload["target_part_number"],
+        "target_session_id": command_payload["target_session_id"],
+        "target_part_session_id": command_payload["target_part_session_id"],
+        "target_session_group_id": command_payload["target_session_group_id"],
+        "target_part_number": command_payload["target_part_number"],
+        "requested_by": command_payload["requested_by"],
+        "current_pc_source_behavior": command_payload["current_pc_source_behavior"],
+        "requested_session_id": command_payload["target_session_id"],
+        "requested_package_id": command_payload["package_id"],
+        "requested_participant_id": command_payload["participant_id"],
+        "requested_target_session_id": command_payload["target_session_id"],
+        "requested_target_part_session_id": command_payload["target_part_session_id"],
+        "requested_target_session_group_id": command_payload["target_session_group_id"],
+        "requested_target_part_number": command_payload["target_part_number"],
+        "handler_payload_schema": "pps-android-phone-runtime-command-state.v1",
+        "handler_payload": {
+            "schema": "pps-android-phone-runtime-command-state.v1",
+            "command": row["command"],
+            "run_id": "phone-run-001",
+        },
+        "supported_commands": ["start_experiment", "pause", "resume"],
+    }
+    row["ok"] = False
+    row["status"] = "ack_rejected"
+    row["reason"] = "no_active_phone_block_to_pause"
+    row["ack_status"] = "rejected"
+    row["ack_reason"] = "no_active_phone_block_to_pause"
+    row["ack_sample"][4] = "rejected"
+    row["ack_sample"][5] = "no_active_phone_block_to_pause"
+    row["ack_sample"][9] = json.dumps(ack_payload)
+    (admin_dir / "pc_android_lsl_command_outbox.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+    result = validator.validate_run_artifact(admin_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_rejects_pc_admin_ack_validation_metadata_drift(tmp_path: Path):
+    admin_dir = tmp_path / "pc-android-admin"
+    admin_dir.mkdir()
+    (admin_dir / "pc_android_lsl_admin_status.json").write_text(json.dumps(_pc_admin_status()), encoding="utf-8")
+    row = _pc_admin_row(native_sent=True, ack_received=True)
+    row["ack_validation_status"] = "invalid_ack"
+    row["ack_validation_reason"] = "session_mismatch"
+    (admin_dir / "pc_android_lsl_command_outbox.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+    result = validator.validate_run_artifact(admin_dir, expect_native_transport=True, expect_command_acks=True)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "PC admin outbox row 1 ack_validation_status expected valid_ack, got invalid_ack" in failures
+    assert "PC admin outbox row 1 ack_validation_reason expected '', got 'session_mismatch'" in failures
 
 
 def test_android_lsl_runtime_validator_accepts_pc_monitor_command_ack_pair():
@@ -4508,6 +4632,7 @@ def _pc_admin_row(*, native_sent: bool, ack_received: bool) -> dict:
         "ack_required": ack_received,
         "ack_received": ack_received,
         "ack_status": "applied" if ack_received else "",
+        "ack_reason": "",
         "command_channels": [
             "schema",
             "command_id",
@@ -4536,6 +4661,9 @@ def _pc_admin_row(*, native_sent: bool, ack_received: bool) -> dict:
     if ack_received:
         ack_payload = {key: value for key, value in command_payload.items() if key not in {"token", "companion_token"}}
         ack_payload.update({"command": "pause", "target_session_id": "part-001"})
+        row["ack_valid"] = True
+        row["ack_validation_status"] = "valid_ack"
+        row["ack_validation_reason"] = ""
         row["ack_sample"] = [
             "pps-lsl-command-ack.v1",
             command_id,

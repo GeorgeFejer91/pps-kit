@@ -103,6 +103,7 @@ def build_android_lsl_admin_row(
 ) -> dict[str, Any]:
     command_sample = command_to_sample(signal)
     ack_sample = ack_to_sample(ack) if ack is not None else []
+    ack_valid = ack is not None and not ack_error
     ok = bool(native_lsl_sent and (ack is not None or not require_ack))
     if ack is not None:
         if ack_error:
@@ -122,7 +123,7 @@ def build_android_lsl_admin_row(
     else:
         status = "send_failed"
         reason = ack_error or "Command was not sent over LSL."
-    return {
+    row = {
         "schema": PC_ANDROID_LSL_ADMIN_ROW_SCHEMA,
         "ok": ok,
         "status": status,
@@ -153,6 +154,15 @@ def build_android_lsl_admin_row(
         "ack_sample": ack_sample,
         "payload": dict(signal.payload),
     }
+    if ack is not None:
+        row.update(
+            {
+                "ack_valid": ack_valid,
+                "ack_validation_status": "valid_ack" if ack_valid else "invalid_ack",
+                "ack_validation_reason": "" if ack_valid else ack_error,
+            }
+        )
+    return row
 
 
 def send_android_lsl_command(
@@ -357,6 +367,8 @@ def _validate_ack_for_signal(signal: LSLCommandSignal, ack: LSLCommandAck) -> st
         return "Received command ack id does not match the sent command id."
     if ack.session_id != signal.session_id:
         return "Received command ack session_id does not match the sent command session_id."
+    if ack.status not in {"applied", "rejected"}:
+        return "Received command ack status is not recognized."
     payload = dict(ack.payload or {})
     if str(payload.get("token") or payload.get("companion_token") or "").strip():
         return "Received command ack payload echoed the pairing token."
