@@ -397,6 +397,18 @@ def test_android_runner_mode_local_controls_use_command_diary_path() -> None:
     assert "fun hasActiveBlock(): Boolean = activeBlock != null" in main_activity
 
 
+def test_android_request_snapshot_ack_payload_is_versioned_monitor_state() -> None:
+    main_activity = _source("MainActivity.kt")
+
+    assert '"request_snapshot" -> PhoneLslCommandApplicationResult(' in main_activity
+    assert '.put("schema", "pps-android-phone-runtime-command-state.v1")' in main_activity
+    assert '.put("run_state", completionReason)' in main_activity
+    assert '.put("active_block_label", block?.label.orEmpty())' in main_activity
+    assert '.put("lsl_marker_mirror_count", lslMarkers.size)' in main_activity
+    assert '.put("command_diary_count", commandDiary.size)' in main_activity
+    assert '.put("phone_stop_after_block_request_count", phoneStopAfterBlockRequestCount)' in main_activity
+
+
 def test_android_emulator_stress_reports_native_lsl_source_capability() -> None:
     stress = _load_python_script("validation_protocols/scripts/run_android_companion_emulator_ui_stress.py")
     report = stress.android_lsl_capability_assessment()

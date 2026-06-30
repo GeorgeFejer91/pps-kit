@@ -129,6 +129,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   evidence carries the same raw command sample into the newly launched run
   artifact. This is a stronger offline artifact proof; live LSL/XDF and
   physical timing validation remain separate gates.
+- Android phone-run `request_snapshot` command acknowledgements now use the
+  versioned `pps-android-phone-runtime-command-state.v1` payload. The ack
+  payload carries run lifecycle, active block identity/counts/elapsed time,
+  event/marker/command diary counts, tap counts, pause/resume counts,
+  stop-after-block/top-up flags, and Android wall/elapsed clocks, so a PC
+  monitor or Controller phone can reconstruct the Runner phone's current
+  software state from `PPSCommandAcksV1` and command diaries without parsing
+  private UI state. Strict phone-run and sender outbox validation now rejects
+  unversioned or incomplete `request_snapshot` ack payloads.
 - Android phone-owned `phone_owned_data_export.json` now carries a
   `portable_paths` map with archive-relative locations for
   `phone_owned_exports/1.Data_min`, the participant/master public CSVs, and the

@@ -117,8 +117,12 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   pause/resume through the phone-owned `AudioTrack` pause gate during active
   blocks, and applies stop-after-block by finishing the current block, recording
   `phone_stop_after_block_request` / `phone_stop_after_block_boundary`, and
-  skipping remaining phone blocks plus phone top-up. Strict native validation
-  must require both
+  skipping remaining phone blocks plus phone top-up. Native `request_snapshot`
+  acks carry the versioned `pps-android-phone-runtime-command-state.v1` payload
+  with run lifecycle, active block, event/marker/command counts, tap counts,
+  pause/resume/stop-after-block/top-up flags, and Android wall/elapsed clocks
+  for PC or Controller-phone monitoring. Strict native validation must require
+  both
   `native_marker_transport_enabled=true` and `command_receiver_available=true`
   plus enabled bridge transport details.
 - PC monitor reconciliation is in
@@ -270,7 +274,9 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   sidecar-vs-embedded command field consistency, required receiver-side
   `PPSCommandSignalsV1` `command_sample` evidence in strict ack mode, native
   ack payload versus command diary payload consistency with pairing-token
-  exclusion, and command diary payload versus
+  exclusion, strict version/field checks for `request_snapshot`
+  `pps-android-phone-runtime-command-state.v1` ack state reports, and command
+  diary payload versus
   `operator_command` event payload consistency,
   phone-run `lsl_marker_mirror.csv` / embedded marker mirror reconstruction,
   phone-run `trigger_codes.csv` expected local `PPSTriggerCodes` sequence when

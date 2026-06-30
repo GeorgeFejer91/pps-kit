@@ -2919,15 +2919,25 @@ private class PhoneRunSession(
         )
     }
 
-    private fun nativeCommandStatePayloadLocked(command: String): JSONObject =
-        JSONObject()
+    private fun nativeCommandStatePayloadLocked(command: String): JSONObject {
+        val block = activeBlock
+        return JSONObject()
+            .put("schema", "pps-android-phone-runtime-command-state.v1")
             .put("command", command)
             .put("run_id", runId)
             .put("package_id", packageId)
-            .put("active_block_id", activeBlock?.blockId.orEmpty())
-            .put("active_block_index", activeBlock?.index ?: JSONObject.NULL)
+            .put("run_state", completionReason)
+            .put("started_unix_ms", startedUnixMs)
+            .put("completed_unix_ms", if (completedUnixMs > 0L) completedUnixMs else JSONObject.NULL)
+            .put("active_block_id", block?.blockId.orEmpty())
+            .put("active_block_index", block?.index ?: JSONObject.NULL)
+            .put("active_block_label", block?.label.orEmpty())
+            .put("active_block_trial_count", block?.trialCount ?: JSONObject.NULL)
             .put("active_block_elapsed_ms", currentBlockElapsedMs())
             .put("event_count", events.size)
+            .put("pending_event_count", pendingEvents.size)
+            .put("lsl_marker_mirror_count", lslMarkers.size)
+            .put("command_diary_count", commandDiary.size)
             .put("tap_count", tapCount)
             .put("valid_tap_count", validTapCount)
             .put("paused", playbackGate.isPaused())
@@ -2940,6 +2950,7 @@ private class PhoneRunSession(
             .put("block_paused_accumulated_ms", blockPausedAccumulatedMs + currentLivePauseDurationMs())
             .put("phone_unix_ms", System.currentTimeMillis())
             .put("phone_elapsed_realtime_ms", SystemClock.elapsedRealtime())
+    }
 
     private fun recordNativeCommandAckLocked(
         signal: PhoneLslCommandSignal?,

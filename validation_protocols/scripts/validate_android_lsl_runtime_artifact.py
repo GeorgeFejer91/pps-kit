@@ -3820,6 +3820,8 @@ def _validate_phone_command_ack_payload(
         failures.append(f"{prefix} ack payload is missing command")
     elif payload_command != command:
         failures.append(f"{prefix} ack payload command differs from diary row")
+    if command == "request_snapshot" and payload_command == "request_snapshot":
+        _validate_phone_runtime_snapshot_payload(ack_payload, prefix=prefix, failures=failures)
 
     row_package_id = _metadata_value(row.get("package_id"))
     payload_package_id = _metadata_value(ack_payload.get("package_id"))
@@ -3854,6 +3856,54 @@ def _validate_phone_command_ack_payload(
                 failures.append(f"{prefix} ack payload run_id differs from diary row")
         elif expect_command_acks:
             failures.append(f"{prefix} ack payload is missing run_id")
+
+
+def _validate_phone_runtime_snapshot_payload(
+    ack_payload: dict[str, Any],
+    *,
+    prefix: str,
+    failures: list[str],
+) -> None:
+    if _metadata_value(ack_payload.get("schema")) != "pps-android-phone-runtime-command-state.v1":
+        failures.append(f"{prefix} request_snapshot ack payload schema mismatch")
+    for field in (
+        "run_id",
+        "package_id",
+        "run_state",
+        "active_block_id",
+        "active_block_label",
+    ):
+        if field not in ack_payload:
+            failures.append(f"{prefix} request_snapshot ack payload is missing {field}")
+    for field in (
+        "started_unix_ms",
+        "active_block_elapsed_ms",
+        "event_count",
+        "pending_event_count",
+        "lsl_marker_mirror_count",
+        "command_diary_count",
+        "tap_count",
+        "valid_tap_count",
+        "phone_pause_count",
+        "phone_resume_count",
+        "phone_stop_after_block_request_count",
+        "block_paused_accumulated_ms",
+        "phone_unix_ms",
+        "phone_elapsed_realtime_ms",
+    ):
+        if field not in ack_payload:
+            failures.append(f"{prefix} request_snapshot ack payload is missing {field}")
+            continue
+        if _safe_int(ack_payload.get(field), fallback=-1) < 0:
+            failures.append(f"{prefix} request_snapshot ack payload {field} must be a nonnegative integer")
+    for field in (
+        "paused",
+        "stop_after_block_requested",
+        "stop_after_block_boundary_recorded",
+        "phone_topup_skipped_by_stop_after_block",
+    ):
+        if not isinstance(ack_payload.get(field), bool):
+            failures.append(f"{prefix} request_snapshot ack payload {field} must be boolean")
 
 
 def _compare_command_diary_rows(
@@ -5642,6 +5692,8 @@ def _validate_outbox_ack_payload(
         failures.append(f"{prefix} ack payload is missing command")
     elif command and ack_command != command:
         failures.append(f"{prefix} ack payload command differs from command sample")
+    if command == "request_snapshot" and ack_command == "request_snapshot":
+        _validate_phone_runtime_snapshot_payload(ack_payload, prefix=prefix, failures=failures)
 
     identity_fields = (
         "target_session_id",

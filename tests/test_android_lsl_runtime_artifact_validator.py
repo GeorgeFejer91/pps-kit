@@ -1924,6 +1924,34 @@ def test_android_lsl_runtime_validator_accepts_phone_run_command_diary_ack_evide
     assert result.failures == []
 
 
+def test_android_lsl_runtime_validator_accepts_phone_run_request_snapshot_ack_payload(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_phone_run_with_native_command_diary(run_dir, row=_phone_native_request_snapshot_command_row())
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_rejects_phone_run_request_snapshot_payload_schema_gap(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    row = _phone_native_request_snapshot_command_row()
+    payload = dict(row["payload"])
+    payload.pop("schema")
+    row["payload"] = payload
+    row["ack_sample"][9] = json.dumps(payload)
+    _write_phone_run_with_native_command_diary(run_dir, row=row)
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True, expect_command_acks=True)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "request_snapshot ack payload schema mismatch" in failures
+
+
 def test_android_lsl_runtime_validator_accepts_idle_native_start_command_evidence(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -2350,6 +2378,109 @@ def _phone_native_command_row(*, ack_sent: bool = True) -> dict:
         "ack_sample": ack_sample,
         "phone_unix_ms": 1780000000000,
         "phone_elapsed_realtime_ms": 123456,
+    }
+
+
+def _phone_native_request_snapshot_command_row() -> dict:
+    command_sample = _phone_command_sample(
+        "cmd-phone-snapshot-001",
+        "pc_runner",
+        "request_snapshot",
+        issued_lsl_time="43.000000000",
+    )
+    payload = {
+        "schema": "pps-android-phone-runtime-command-state.v1",
+        "command": "request_snapshot",
+        "run_id": "phone-run-001",
+        "package_id": "pkg-001",
+        "participant_id": "P001",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+        "target_part_number": "1",
+        "run_state": "in_progress",
+        "started_unix_ms": 1780000000000,
+        "completed_unix_ms": None,
+        "active_block_id": "block-01",
+        "active_block_index": 1,
+        "active_block_label": "Block 01",
+        "active_block_trial_count": 1,
+        "active_block_elapsed_ms": 500,
+        "event_count": 8,
+        "pending_event_count": 0,
+        "lsl_marker_mirror_count": 8,
+        "command_diary_count": 0,
+        "tap_count": 1,
+        "valid_tap_count": 1,
+        "paused": False,
+        "phone_pause_count": 0,
+        "phone_resume_count": 0,
+        "stop_after_block_requested": False,
+        "phone_stop_after_block_request_count": 0,
+        "stop_after_block_boundary_recorded": False,
+        "phone_topup_skipped_by_stop_after_block": False,
+        "block_paused_accumulated_ms": 0,
+        "phone_unix_ms": 1780000000100,
+        "phone_elapsed_realtime_ms": 123556,
+    }
+    ack_sample = [
+        "pps-lsl-command-ack.v1",
+        "cmd-phone-snapshot-001",
+        "part-001",
+        "android_phone",
+        "applied",
+        "snapshot_recorded_in_ack_payload",
+        "43.010000000",
+        "43.020000000",
+        "43.030000000",
+        json.dumps(payload),
+    ]
+    return {
+        "schema": "pps-android-command-diary.v1",
+        "command_id": "cmd-phone-snapshot-001",
+        "command_source": "native_lsl",
+        "sender_id": "pc_runner",
+        "session_id": "part-001",
+        "command": "request_snapshot",
+        "status": "applied",
+        "reason": "snapshot_recorded_in_ack_payload",
+        "payload": dict(payload),
+        "package_id": "pkg-001",
+        "participant_id": "P001",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+        "target_part_number": "1",
+        "run_id": "phone-run-001",
+        "received_lsl_time": 43.01,
+        "applied_lsl_time": 43.02,
+        "ack_lsl_time": 43.03,
+        "ack_sent": True,
+        "command_channels": [
+            "schema",
+            "command_id",
+            "session_id",
+            "sender_id",
+            "command",
+            "issued_lsl_time",
+            "payload_json",
+        ],
+        "command_sample": command_sample,
+        "ack_channels": [
+            "schema",
+            "command_id",
+            "session_id",
+            "receiver_id",
+            "status",
+            "reason",
+            "received_lsl_time",
+            "applied_lsl_time",
+            "ack_lsl_time",
+            "payload_json",
+        ],
+        "ack_sample": ack_sample,
+        "phone_unix_ms": 1780000000100,
+        "phone_elapsed_realtime_ms": 123556,
     }
 
 
