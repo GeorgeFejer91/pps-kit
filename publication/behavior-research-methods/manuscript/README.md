@@ -35,7 +35,15 @@ manuscript for PPS Toolkit.
   scaffolds, unpublished local examples, missing-parameter blockers, and
   toolkit structural gaps.
 - `figure_source_plan.csv`: planned figure/source-artifact map for the final
-  submission, including the evidence boundary for each figure.
+  submission, including the generated PNG path and evidence boundary for each
+  figure.
+- `figures/generate_figures.py`: deterministic Pillow generator for
+  source-owned schematic manuscript figures.
+- `figures/figure*.png`: redistributable schematic figures generated from the
+  tracked script. They summarize toolkit workflow, evidence ledgers, stimulus
+  alternatives, evidence tiers, tactile safeguards, and exploratory analysis
+  surfaces without using private participant data or copyrighted source-paper
+  figures.
 - `procedural_gap_register.csv`: procedural gap register listing the screening,
   timing, tactile-delivery, spatial-perception, rights, and analysis-governance
   evidence that should be closed or caveated before final submission.
@@ -125,9 +133,11 @@ workflow explicitly asks for an archived submission snapshot.
   what each preload profile may safely claim, but it is not a rights clearance,
   apparatus reconstruction, perceptual validation, or proof of original-study
   effects.
-- `figure_source_plan.csv` is a publication-preparation scaffold, not generated
-  figure evidence. Final figures must be generated from redistributable toolkit
-  artifacts and should cite or archive the exact source files used.
+- `figure_source_plan.csv` records the planned figure set and the current
+  generated PNG path for each source-owned schematic. The schematic figures
+  support workflow and evidence-boundary explanation only; they are not
+  screenshots of validated runtime behavior, hardware timing evidence, tactile
+  mechanical evidence, or participant-effect evidence.
 - `procedural_gap_register.csv` is a reviewer-facing readiness scaffold, not a
   claim that those procedural validations have already been completed.
 - `output_schema_dictionary.csv` documents current output artifacts for

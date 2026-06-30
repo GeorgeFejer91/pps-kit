@@ -281,6 +281,16 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   possible and speaks in present-tense article voice while preserving caveats
   around release metadata, measured SPL, publication-hardware validation,
   profile-recreation limits, and the two-miss tactile safeguard.
+- Continued the BRM manuscript critical loop with a source-owned figure
+  integration pass. `figures/generate_figures.py` now deterministically
+  generates six redistributable schematic PNGs for workflow, design-decision
+  mapping, stimulus/trajectory/baseline alternatives, spatial-rendering and
+  output evidence tiers, tactile safeguards, and exploratory post-run analysis.
+  `main.tex` includes those figures with captions that keep each claim boundary
+  explicit, and `figure_source_plan.csv`, the manuscript README, the readiness
+  audit, and `critical_review.md` now distinguish these schematics from
+  release-state screenshots, hardware validation plots, tactile mechanical
+  evidence, or participant-effect figures.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

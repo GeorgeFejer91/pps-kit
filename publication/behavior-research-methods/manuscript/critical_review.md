@@ -1085,3 +1085,45 @@ Methods manuscript draft. It is a working audit, not manuscript text.
   a figure-generation script from toolkit artifacts, because the prose now
   repeatedly promises figure/source-material boundaries but the final figures
   are not yet present.
+
+## Iteration 31: Source-owned Figure Integration Pass
+
+### Main Critiques
+
+- The paper had a figure/source-material plan, but the manuscript still asked
+  readers to imagine the workflow, design-decision map, evidence tiers, tactile
+  safeguards, and analysis surfaces from prose and tables alone. That made the
+  article less like a practical BRM software/methods paper.
+- The figure plan also needed to become reproducible without importing
+  copyrighted source-paper figures, private participant records, local SOFA
+  files, or generated lab outputs that cannot be shared.
+- Any figure pass could easily overstate validation if it made schematic
+  diagrams look like empirical timing or participant-effect evidence.
+
+### Resolution In This Revision
+
+- Added `figures/generate_figures.py`, a deterministic Pillow script that
+  creates six redistributable schematic PNG figures for the manuscript.
+- Generated and inserted figures for the Segment 0--6 workflow, the
+  design-decision evidence map, stimulus/trajectory/baseline alternatives, the
+  HRTF-to-output evidence chain, tactile calibration/miss safeguards, and the
+  exploratory post-run analysis surfaces.
+- Added short prose bridges and captions in `main.tex` that state each
+  figure's evidential boundary. The captions distinguish workflow/provenance
+  explanation from timing validation, tactile mechanical evidence, perceived
+  spatialization, adaptive-threshold efficacy, and confirmatory PPS inference.
+- Updated `figure_source_plan.csv`, the manuscript README, and
+  `submission_readiness_audit.md` so the source package records both the
+  generated figure files and the remaining need for release-state screenshots
+  or validation-output figures before final submission.
+
+### Residual Concerns
+
+- The current figures are schematics, not runtime screenshots or empirical
+  validation plots. They improve manuscript readability and claim discipline,
+  but they do not close the final release-hardware, participant-data, or
+  publication-supplement figure requirements.
+- The final submission should still consider replacing or supplementing one or
+  more schematics with release-state dashboard/runner screenshots, validation
+  evidence plots, and deidentified sample-analysis visuals once those artifacts
+  are frozen.

@@ -104,9 +104,27 @@ That structure mirrors the way researchers reason about PPS paradigms: choose th
 
 The workflow contains seven visible segments numbered 0 to 6. Segment 0 selects a bundled profile or creates a custom project. Segment 1 creates or imports auditory ingredients. Segment 2 arranges those ingredients into within-trial sequence families. Segment 3 inserts tactile cues and creates baseline or catch files. Segment 4 expands the final trial assets into a repetition pool. Segment 5 distributes the pool into inspectable block CSV files. Segment 6 creates participant-level block-order plans, prepares the output folder, and launches the native runner.
 
+Figure~\ref{fig:workflow} summarizes this segmented design and the archive layers it creates. The figure is schematic: it documents the workflow and evidence boundary rather than claiming behavioral validity.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/figure1_workflow_segments.png}
+\caption{PPS Toolkit workflow from profile selection to native runner handoff. The source-owned schematic shows how Segments 0--6 turn design choices into manifests, hashes, generated assets, accepted block schedules, runner packages, and output layers. It supports the suite-workflow claim, but it is not timing, tactile-mechanical, or participant-effect evidence.}
+\label{fig:workflow}
+\end{figure}
+
 Each segment records the upstream manifest hash it consumed so stale downstream artifacts can be detected rather than silently reused.
 
 This segmented design is not only a user-interface preference. It is a reproducibility control. PPS experiments are sensitive to choices that can be difficult to recover after the fact: whether the sound was continuous or burst-like, whether an apparent baseline was tactile-only or stationary-auditory, whether catch trials used the same auditory file without channel 3, whether randomization preserved trial-family order, or whether the runner increased tactile output after repeated misses. By making these choices visible and persistent, the toolkit turns design heterogeneity into a reportable methods feature.
+
+Figure~\ref{fig:decision-map} gives the manuscript-level map from visible controls to reportable PPS method decisions. It separates scientific design decisions from ordinary interface mechanics and points readers back to the editable source ledgers.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/figure2_design_decision_map.png}
+\caption{Design-decision evidence map. Literature-bearing GUI and runner controls are grouped by the kind of PPS method choice they alter and are linked to editable source ledgers. The map is a source-pointer audit scaffold, not a PRISMA-style review or effect-size meta-analysis.}
+\label{fig:decision-map}
+\end{figure}
 
 The visible \emph{Apply}, \emph{Bake}, \emph{Accept}, \emph{Prepare}, and \emph{Start Experiment Runner} actions are therefore part of the method. They are the points at which a displayed choice becomes a durable artifact: a project registry entry, source manifest, generated WAV, sequence manifest, baseline/catch file set, repetition-pool CSV, accepted block schedule, participant-order file, or runner handoff package.
 
@@ -131,6 +149,15 @@ The source-mode toggle exists because the field does not use one auditory source
 Segment 1 also exposes a loudness contract rather than leaving every source with an implicit gain. This matters because auditory distance perception is strongly shaped by sound level, direct-to-reverberant ratio, source spectrum, and source type \citep{Zahorik2002,Kolarik2015}. In nearby virtual sound studies, intensity can overshadow subtler HRTF distance cues, and level-normalization choices can themselves become consequential cues \citep{Spagnol2017,Arend2021Level}. PPS Toolkit therefore records the intended start/end SPL policy, instruction offset, peak ceiling, and whether the value is estimated or physically measured. The current default hardware estimate is a convenience profile, not publication-grade acoustic calibration.
 
 Segment 1 also records the source trajectory: start and end distance, azimuth, elevation, duration, hold periods, and derived path/speed. The purpose is to preserve the body-relative frame. Front, rear, left, and right directions can lead to different PPS profiles \citep{Matsuda2021,Teraoka2024,Amiel2025}; walking or action remapping can change the effective boundary \citep{Noel2015}; and VR/3D paradigms can treat PPS as a volumetric rather than single-axis function \citep{Lerner2021}. A single file named \code{looming.wav} is therefore insufficient. The trajectory samples, source hashes, and renderer metadata are part of the stimulus.
+
+Figure~\ref{fig:stimulus-alternatives} shows the three stimulus decisions that are easiest to conflate: source form, body-relative trajectory, and baseline/catch structure. PPS Toolkit stores them separately because each one changes the interpretation of an audio-tactile RT curve.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/figure3_stimulus_alternatives.png}
+\caption{Stimulus and trajectory alternatives represented in PPS Toolkit. The figure illustrates burst-train versus smooth generated sources, body-relative trajectory metadata, and alternative target, baseline, catch, or no-baseline structures. It is a procedural schematic and does not claim perceptual equivalence to original source-paper stimuli.}
+\label{fig:stimulus-alternatives}
+\end{figure}
 
 \subsection{Within-trial Sequences}
 
@@ -184,7 +211,7 @@ Tables~\ref{tab:matrix-core} and \ref{tab:matrix-runner} summarize the manuscrip
 
 The source package also includes \code{gui\_control\_coverage.csv}. That file audits the visible dashboard surface at the control level and distinguishes scientific design decisions from execution gates, artifact-review displays, suite boundaries, and ordinary navigation or documentation controls. This distinction is important for the suite claim.
 
-Camera presets, modal close buttons, folder openers, documentation tabs, and refresh controls support inspection and operation, but they are not treated as PPS design decisions unless they change provenance, materialization state, acquisition boundary, or runner handoff. Conversely, controls that alter source form, trajectory, SOA, baseline, repetition, block order, participant structure, instruction behavior, or runner preparation are mapped back to the evidence matrix and reporting checklist.
+Camera presets, modal close buttons, folder openers, documentation tabs, and refresh controls support inspection and operation, but they are not treated as PPS design decisions unless they change provenance, materialization state, acquisition boundary, or runner handoff. Conversely, controls that alter source form, trajectory, SOA, baseline, repetition, block order, participant structure, instruction behavior, or runner preparation are mapped back to the evidence matrix and reporting checklist, as summarized in Figure~\ref{fig:decision-map}.
 
 \begin{table}[t]
 \caption{Condensed design-decision matrix for PPS Toolkit: design and stimulus layers. The accompanying CSV contains the full row-level audit for Segment 0-6 controls and runner decisions.}
@@ -365,6 +392,15 @@ The toolkit separates four evidence tiers. First, software schedule evidence rec
 
 These tiers answer different questions. Electrical loopback can check an audio-interface route; it does not measure Woojer mechanical vibration onset or tactile sensation. Local audio evidence can prove what samples were mixed; it does not prove what a participant felt.
 
+Figure~\ref{fig:evidence-tiers} lays out this evidence chain visually. The important point for reporting is that HRTF provenance, event timing, audio-buffer evidence, loopback evidence, and tactile perceptual evidence should not be collapsed into one validation label.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/figure4_evidence_tiers.png}
+\caption{Spatial-rendering and output-evidence chain. The schematic separates HRTF/SOFA provenance, rendering, multichannel package construction, native route settings, event mirrors, digital audio evidence, electrical loopback, and tactile perceptual evidence. These tiers support different claims and should be reported separately.}
+\label{fig:evidence-tiers}
+\end{figure}
+
 Response classification is another part of the runtime method rather than an afterthought. The current Focus Mode runner assigns participant clicks to tactile onsets using a tactile-onset-anchored valid window from 100 to 1300 ms. Earlier clicks and later clicks remain in the event record, but they are not credited as valid tactile responses; the next trial start does not shorten a still-open tactile response deadline. Catch trials are classified separately as correct no-responses or false alarms, and missed standard trials can be marked for optional top-up with selected click identifiers preserved.
 
 These rules make response probability, anticipations, late responses, and rescue trials visible before any RT curve is interpreted. That visibility matters because response probability and trial composition can influence apparent near-far benefits \citep{Holmes2020}. The rules remain operational defaults that require preregistration or explicit justification in a confirmatory study.
@@ -377,6 +413,15 @@ The procedure is motivated by tactile psychophysics: vibrotactile thresholds var
 
 The runner also implements a narrow run-local safeguard. After every two tactile misses, including top-up misses, the live Output 3/4 level is raised by 0.01 percentage points up to the 0.5\% cap. The runner logs \code{tactile\_threshold\_adapted} events and writes \code{adaptive\_tactile\_threshold\_summary.json} and \code{adaptive\_tactile\_threshold\_adjustments.csv} under the runner-log folder.
 
+Figure~\ref{fig:tactile-safeguards} summarizes the tactile-safeguard pathway. It is included because threshold calibration, missed trials, adaptive output changes, and top-up can otherwise disappear from the methods narrative even though they affect response probability.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/figure5_tactile_safeguards.png}
+\caption{Operator safeguards for tactile delivery. The figure shows the threshold assay, task blocks, miss counter, adaptive nudge, top-up ledger, adaptive-threshold artifacts, and analysis review as logged procedural steps. The adaptive nudge is presented as an operator safeguard, not as validated correction for tactile habituation or changing sensitivity.}
+\label{fig:tactile-safeguards}
+\end{figure}
+
 This rule is an operator safeguard, not a validated correction for tactile habituation. The user's observation that hit rates fell during a long calibrated task is retained only as anecdotal motivation for this safeguard until a traceable dataset and analysis artifact are attached.
 
 \subsection{Analysis Outputs}
@@ -384,6 +429,15 @@ This rule is an operator safeguard, not a validated correction for tactile habit
 The post-run analysis layer is explicitly exploratory. It displays response quality first: tactile hits, tactile misses, catch correct no-responses, catch false alarms, and top-up rows when present. It then displays basic assumption checks and model fits. Baseline-corrected curves use one tactile-only or baseline mean per displayed condition scope, pooled across baseline SOAs, and store \code{baseline\_correction\_method=condition\_mean\_pooled\_soa}, \code{baseline\_n}, and \code{baseline\_source\_soas\_ms}. If no usable baseline exists, plots and fits fall back to raw mean reaction time.
 
 Model choices include sigmoid, logarithmic-decay, and linear fits. This is important because the field contains both a boundary metaphor, often expressed with sigmoid fits \citep{Canzoneri2012}, and arguments that sound propagation and logarithmic distance sampling may support a graded rather than in-or-out interpretation \citep{Hobeika2019}. Model comparison in the runner uses AICc/Delta AICc where valid, but it is a quick review aid. Confirmatory inference requires a preregistered analysis plan, adequate cell counts, and decisions about exclusion, response windows, baseline correction, and model family made before observing the data.
+
+Figure~\ref{fig:analysis-surfaces} shows how the instant-analysis layer is organized around response quality before assumptions and models. This ordering is deliberate: a convincing curve is not interpretable unless hit rates, catch behavior, baseline coverage, and low-N cells are visible.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/figure6_analysis_surfaces.png}
+\caption{Exploratory post-run analysis surfaces. The schematic summarizes response-quality displays, baseline/PPS assumption checks, model-fit alternatives, low-N cues, and artifact-review outputs. These surfaces are operator feedback and source navigation, not confirmatory PPS inference.}
+\label{fig:analysis-surfaces}
+\end{figure}
 
 \section{Validation and Use Cases}
 
