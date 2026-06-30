@@ -220,7 +220,10 @@ write the same phone-owned data-export sidecars and mirror tree under
 When validating PC-runner or Controller-phone administration, add
 `--expect-command-acks`; for phone-run artifacts this now requires
 `command_diary.jsonl` or embedded `command_diary` rows with native
-`PPSCommandAcksV1` samples and matching `operator_command` events.
+`PPSCommandAcksV1` samples and matching `operator_command` events. PC-runner
+administration status also includes `stream_descriptions` for the PC
+command-signal outlet and Android command-ack inlet, including the row-derived
+command source ID when an outbox row has been written.
 
 Phone-owned local artifacts now include `participant_metadata.json`,
 `haptic_capability.json`, `events.csv`, `lsl_marker_mirror.csv`,

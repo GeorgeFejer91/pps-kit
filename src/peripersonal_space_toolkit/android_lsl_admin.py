@@ -14,9 +14,13 @@ from .lsl_command_ack import (
     ACK_SCHEMA,
     COMMAND_SCHEMA,
     LSL_ACK_CHANNELS,
+    LSL_ACK_SOURCE_ID_PREFIX,
     LSL_ACK_STREAM_NAME,
+    LSL_ACK_STREAM_TYPE,
     LSL_COMMAND_CHANNELS,
+    LSL_COMMAND_SOURCE_ID_PREFIX,
     LSL_COMMAND_STREAM_NAME,
+    LSL_COMMAND_STREAM_TYPE,
     LSLCommandAck,
     LSLCommandAckError,
     LSLCommandAckInlet,
@@ -229,13 +233,13 @@ def write_android_lsl_admin_artifacts(output_dir: Path, row: dict[str, Any]) -> 
     outbox_path = output_dir / PC_ANDROID_LSL_ADMIN_OUTBOX
     with outbox_path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(row, sort_keys=True) + "\n")
-    status = android_lsl_admin_status()
+    status = android_lsl_admin_status(row=row)
     status_path = output_dir / PC_ANDROID_LSL_ADMIN_STATUS
     status_path.write_text(json.dumps(status, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return outbox_path, status_path
 
 
-def android_lsl_admin_status() -> dict[str, Any]:
+def android_lsl_admin_status(row: dict[str, Any] | None = None) -> dict[str, Any]:
     return {
         "schema": PC_ANDROID_LSL_ADMIN_STATUS_SCHEMA,
         "role": "pc_android_lsl_admin",
@@ -245,6 +249,7 @@ def android_lsl_admin_status() -> dict[str, Any]:
             "command_signals": LSL_COMMAND_STREAM_NAME,
             "command_acks": LSL_ACK_STREAM_NAME,
         },
+        "stream_descriptions": pc_android_lsl_admin_stream_descriptions(row=row),
         "command_protocol": {
             "command_schema": COMMAND_SCHEMA,
             "ack_schema": ACK_SCHEMA,
@@ -253,6 +258,48 @@ def android_lsl_admin_status() -> dict[str, Any]:
             "supported_commands": list(ANDROID_ADMIN_COMMANDS),
             "token_required": True,
             "token_payload_fields": ["token", "companion_token"],
+        },
+    }
+
+
+def pc_android_lsl_admin_stream_descriptions(row: dict[str, Any] | None = None) -> dict[str, Any]:
+    target_session_id = str((row or {}).get("target_session_id") or "")
+    sender_id = str((row or {}).get("sender_id") or "")
+    command_source_id = ""
+    if target_session_id and sender_id:
+        command_source_id = f"{LSL_COMMAND_SOURCE_ID_PREFIX}-{target_session_id}-{sender_id}"
+    return {
+        "schema": "pps-android-lsl-stream-descriptions.v1",
+        "runtime_authority": "pc_runner",
+        "role": "pc_android_lsl_admin",
+        "native_transport": "liblsl",
+        "target_session_id": target_session_id,
+        "sender_id": sender_id,
+        "privacy": {
+            "default": "metadata_payload_only",
+            "demographics_in_stream_name": False,
+            "participant_demographics_location": "metadata_and_payload_artifacts",
+        },
+        "command_signals": {
+            "name": str((row or {}).get("command_stream") or LSL_COMMAND_STREAM_NAME),
+            "type": LSL_COMMAND_STREAM_TYPE,
+            "role": "outlet",
+            "channel_format": "string",
+            "channel_count": len(LSL_COMMAND_CHANNELS),
+            "nominal_srate_hz": 0.0,
+            **({"source_id": command_source_id} if command_source_id else {"source_id_pattern": f"{LSL_COMMAND_SOURCE_ID_PREFIX}-*-*"}),
+            "channel_labels": list(LSL_COMMAND_CHANNELS),
+            "token_required": True,
+        },
+        "command_acks": {
+            "name": str((row or {}).get("ack_stream") or LSL_ACK_STREAM_NAME),
+            "type": LSL_ACK_STREAM_TYPE,
+            "role": "inlet",
+            "channel_format": "string",
+            "channel_count": len(LSL_ACK_CHANNELS),
+            "nominal_srate_hz": 0.0,
+            "source_id_pattern": f"{LSL_ACK_SOURCE_ID_PREFIX}-*-*",
+            "channel_labels": list(LSL_ACK_CHANNELS),
         },
     }
 

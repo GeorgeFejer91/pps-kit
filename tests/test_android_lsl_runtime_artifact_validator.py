@@ -637,6 +637,40 @@ def test_android_lsl_runtime_validator_accepts_pc_admin_outbox_artifact(tmp_path
     assert result.status["role"] == "pc_android_lsl_admin"
 
 
+def test_android_lsl_runtime_validator_requires_pc_admin_stream_descriptions_in_strict_mode(tmp_path: Path):
+    admin_dir = tmp_path / "pc-android-admin"
+    admin_dir.mkdir()
+    status = _pc_admin_status()
+    status.pop("stream_descriptions")
+    (admin_dir / "pc_android_lsl_admin_status.json").write_text(json.dumps(status), encoding="utf-8")
+    (admin_dir / "pc_android_lsl_command_outbox.jsonl").write_text(
+        json.dumps(_pc_admin_row(native_sent=True, ack_received=True)) + "\n",
+        encoding="utf-8",
+    )
+
+    result = validator.validate_run_artifact(admin_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    assert "PC Android LSL admin stream descriptions are missing" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_pc_admin_stream_description_drift(tmp_path: Path):
+    admin_dir = tmp_path / "pc-android-admin"
+    admin_dir.mkdir()
+    status = _pc_admin_status()
+    status["stream_descriptions"]["command_signals"]["role"] = "inlet"
+    (admin_dir / "pc_android_lsl_admin_status.json").write_text(json.dumps(status), encoding="utf-8")
+    (admin_dir / "pc_android_lsl_command_outbox.jsonl").write_text(
+        json.dumps(_pc_admin_row(native_sent=True, ack_received=True)) + "\n",
+        encoding="utf-8",
+    )
+
+    result = validator.validate_run_artifact(admin_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    assert "command_signals.role" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_requires_pc_admin_rows_in_strict_mode(tmp_path: Path):
     status_path = tmp_path / "pc_android_lsl_admin_status.json"
     status_path.write_text(json.dumps(_pc_admin_status()), encoding="utf-8")
@@ -1695,6 +1729,7 @@ def _pc_admin_status() -> dict:
             "command_signals": "PPSCommandSignalsV1",
             "command_acks": "PPSCommandAcksV1",
         },
+        "stream_descriptions": _pc_admin_stream_descriptions(),
         "command_protocol": {
             "command_schema": "pps-lsl-command.v1",
             "ack_schema": "pps-lsl-command-ack.v1",
@@ -1722,6 +1757,43 @@ def _pc_admin_status() -> dict:
             "supported_commands": ["start_experiment", "pause", "resume"],
             "token_required": True,
             "token_payload_fields": ["token", "companion_token"],
+        },
+    }
+
+
+def _pc_admin_stream_descriptions() -> dict:
+    return {
+        "schema": "pps-android-lsl-stream-descriptions.v1",
+        "runtime_authority": "pc_runner",
+        "role": "pc_android_lsl_admin",
+        "native_transport": "liblsl",
+        "target_session_id": "part-001",
+        "sender_id": "pc_runner",
+        "privacy": {
+            "default": "metadata_payload_only",
+            "participant_demographics_location": "metadata_and_payload_artifacts",
+            "demographics_in_stream_name": False,
+        },
+        "command_signals": {
+            "name": "PPSCommandSignalsV1",
+            "type": "CommandSignals",
+            "role": "outlet",
+            "channel_format": "string",
+            "channel_count": len(validator.LSL_COMMAND_CHANNELS),
+            "nominal_srate_hz": 0.0,
+            "source_id": "pps-command-signals-v1-part-001-pc_runner",
+            "channel_labels": list(validator.LSL_COMMAND_CHANNELS),
+            "token_required": True,
+        },
+        "command_acks": {
+            "name": "PPSCommandAcksV1",
+            "type": "CommandAcks",
+            "role": "inlet",
+            "channel_format": "string",
+            "channel_count": len(validator.LSL_ACK_CHANNELS),
+            "nominal_srate_hz": 0.0,
+            "source_id_pattern": "pps-command-acks-v1-*-*",
+            "channel_labels": list(validator.LSL_ACK_CHANNELS),
         },
     }
 

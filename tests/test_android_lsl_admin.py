@@ -113,6 +113,16 @@ def test_send_android_lsl_command_writes_auditable_ack_row(tmp_path, monkeypatch
     assert json.loads(outbox_rows[0])["command_id"] == "cmd-1"
     status = json.loads((tmp_path / admin.PC_ANDROID_LSL_ADMIN_STATUS).read_text(encoding="utf-8"))
     assert status["schema"] == admin.PC_ANDROID_LSL_ADMIN_STATUS_SCHEMA
+    descriptions = status["stream_descriptions"]
+    assert descriptions["schema"] == "pps-android-lsl-stream-descriptions.v1"
+    assert descriptions["role"] == "pc_android_lsl_admin"
+    assert descriptions["privacy"]["demographics_in_stream_name"] is False
+    assert descriptions["command_signals"]["role"] == "outlet"
+    assert descriptions["command_signals"]["source_id"] == "pps-command-signals-v1-part-001-pc_runner"
+    assert descriptions["command_signals"]["channel_labels"] == list(admin.LSL_COMMAND_CHANNELS)
+    assert descriptions["command_acks"]["role"] == "inlet"
+    assert descriptions["command_acks"]["source_id_pattern"] == "pps-command-acks-v1-*-*"
+    assert descriptions["command_acks"]["channel_labels"] == list(admin.LSL_ACK_CHANNELS)
 
 
 def test_send_android_lsl_command_can_require_ack(tmp_path, monkeypatch):
@@ -142,6 +152,8 @@ def test_android_lsl_admin_status_matches_command_ack_protocol():
 
     assert status["streams"]["command_signals"] == "PPSCommandSignalsV1"
     assert status["streams"]["command_acks"] == "PPSCommandAcksV1"
+    assert status["stream_descriptions"]["command_signals"]["source_id_pattern"] == "pps-command-signals-v1-*-*"
+    assert status["stream_descriptions"]["command_acks"]["source_id_pattern"] == "pps-command-acks-v1-*-*"
     assert status["command_protocol"]["command_schema"] == "pps-lsl-command.v1"
     assert status["command_protocol"]["ack_schema"] == ACK_SCHEMA
     assert status["command_protocol"]["token_required"] is True

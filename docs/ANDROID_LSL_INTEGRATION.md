@@ -20,10 +20,13 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   `PPSCommandSignalsV1` samples from the runner/PC environment, waits for
   `PPSCommandAcksV1` when requested, and writes
   `pc_android_lsl_command_outbox.jsonl` plus
-  `pc_android_lsl_admin_status.json`. The native runner's `Send To Phone`
-  window exposes the same helper as a small Phone LSL Control strip after a
-  package bridge is prepared, using the prepared package part-session id as the
-  default command target.
+  `pc_android_lsl_admin_status.json`. The status includes
+  `stream_descriptions` for the PC command-signal outlet and Android command-ack
+  inlet, including source IDs/patterns and the same privacy boundary used by the
+  Android artifacts. The native runner's `Send To Phone` window exposes the
+  same helper as a small Phone LSL Control strip after a package bridge is
+  prepared, using the prepared package part-session id as the default command
+  target.
 - The PC-side helper `pps-android-lsl-monitor` resolves Android
   `PPSMarkersV2`, `PPSTriggerCodes`, and `PPSCommandAcksV1` streams for a
   bounded monitoring window and writes `pc_android_lsl_monitor_events.jsonl`,
@@ -218,7 +221,8 @@ PC-compatible channel orders and keep participant demographics out of
 discoverable stream names. Controller-mode strict validation similarly requires
 stream descriptions for the Android controller command-signal outlet and
 command-ack inlet before button presses count as reconstructable native LSL
-evidence.
+evidence. PC-admin strict validation requires the same evidence for the PC
+command-signal outlet and Android command-ack inlet.
 
 For new phone-owned run exports, also require the catalog entry:
 
@@ -251,7 +255,8 @@ Android runner is idle with a synced package or actively playing a block:
 
 The `Send To Phone` window can send the same Start/Pause/Resume/Snapshot/
 Stop-after-block commands after package preparation. It stores the same
-PC-admin outbox/status artifacts under runner logs for that phone transfer.
+PC-admin outbox/status artifacts under runner logs for that phone transfer,
+including the row-derived command source ID in `pc_android_lsl_admin_status.json`.
 
 Then validate the PC-admin outbox/status pair:
 
