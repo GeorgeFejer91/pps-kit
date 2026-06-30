@@ -941,3 +941,32 @@ Methods manuscript draft. It is a working audit, not manuscript text.
 
 - The generated `main.pdf` remains a local review artifact and should not be
   committed unless an explicit release snapshot is requested.
+
+## Iteration 27: Verified Article-Model Bibliography Pass
+
+### Main Critiques
+
+- The same-journal article recommendation ledger had useful style guidance, but
+  several rows were still source-pointer-only. That made the recommendations
+  less useful for manuscript prose and increased the risk that future edits
+  would cite article models without verified bibliography metadata.
+- The BRM comparator table also underused the article-level models for adaptive
+  calibration, low-cost device evaluation, analysis handoff, domain-specific
+  threat tooling, and cross-platform interoperability.
+
+### Resolution In This Revision
+
+- Added verified BibTeX entries for adaptive Titta calibration, Tobii EyeX
+  evaluation, PyTrack, VRthreat, and Psynteract using Consensus/Crossref
+  matches and stable DOI metadata.
+- Converted the corresponding `brm_recommended_article_models.csv` rows from
+  `Consensus source pointer` to manuscript citation keys.
+- Expanded the manuscript comparator table so the article models now support
+  route suitability, adaptive calibration boundaries, analysis handoff, and
+  external-tool/interoperability language directly in the draft.
+
+### Residual Concerns
+
+- These article models guide BRM style and reporting boundaries. They do not
+  prove that PPS Toolkit has the same validation maturity, hardware coverage,
+  user base, or empirical evidence as the comparator systems.

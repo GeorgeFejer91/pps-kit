@@ -93,8 +93,9 @@ workflow explicitly asks for an archived submission snapshot.
   comparator tools.
 - `brm_recommended_article_models.csv` preserves article-level reading/style
   recommendations for drafting. It is not a systematic corpus, and source
-  pointer rows should be converted to verified bibliography entries before
-  their papers are cited directly in manuscript prose.
+  pointer rows added in future passes should be converted to verified
+  bibliography entries before their papers are cited directly in manuscript
+  prose.
 - `profile_family_examples.csv` is a profile-family map, not a claim that every
   listed paradigm has been exactly replicated with original apparatus and
   stimuli.

@@ -239,6 +239,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   experiment-builder, multimodal/tactile calibration, route/device validation,
   analysis-handoff, embodied-threat, and interoperability models, with style
   transfer notes and caveats for each.
+- Verified the source-pointer-only same-journal article recommendations through
+  Consensus/Crossref matches and promoted them to manuscript bibliography keys:
+  adaptive Titta calibration, Tobii EyeX device evaluation, PyTrack, VRthreat,
+  and Psynteract now appear in `references.bib`, the comparator table, and
+  `brm_recommended_article_models.csv`. These remain style/reporting models,
+  not evidence that PPS Toolkit has equivalent validation maturity.
 - Added a permanent Windows PDF render path for the BRM manuscript.
   `publication/behavior-research-methods/manuscript/render_pdf.ps1` sets the
   local Springer template paths, runs the `pdflatex`/`bibtex`/rerun sequence,
