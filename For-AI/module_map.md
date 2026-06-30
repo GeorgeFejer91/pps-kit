@@ -99,6 +99,12 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   must require both
   `native_marker_transport_enabled=true` and `command_receiver_available=true`
   plus enabled bridge transport details.
+- PC monitor reconciliation is in
+  `validation_protocols/scripts/reconcile_android_lsl_monitor_with_phone_run.py`.
+  It compares phone `lsl_marker_mirror.csv` rows with PC-captured
+  `PPSMarkersV2` rows by event id, marker fields, numeric trigger sequence, and
+  canonicalized rich-marker `payload_json`, so external monitor/XDF evidence
+  must preserve the same `session_metadata` reconstruction payload.
 - Android controller-role scaffolding lives in `PhoneControllerCommands.kt` and
   the `Runner` / `Controller` toggle inside `PhoneRuntimeScreen`. Controller
   mode writes token-gated command samples to

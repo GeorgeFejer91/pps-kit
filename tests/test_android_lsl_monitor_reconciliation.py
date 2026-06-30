@@ -82,6 +82,60 @@ def test_reconcile_android_lsl_monitor_reports_numeric_sequence_drift():
     assert "numeric trigger sequence" in "\n".join(result.report["failures"])
 
 
+def test_reconcile_android_lsl_monitor_accepts_semantically_matching_payload_json():
+    phone_markers = [
+        _phone_marker(
+            event_id="1",
+            event_type="session_metadata",
+            event_code="8",
+            payload={
+                "type": "session_metadata",
+                "participant_metadata": {"handedness": "right", "age_years": 29},
+            },
+        ),
+    ]
+    monitor_row = _monitor_rich_row(phone_markers[0], timestamp=1.0)
+    monitor_row["payload_json"] = json.dumps(
+        {
+            "participant_metadata": {"age_years": 29, "handedness": "right"},
+            "type": "session_metadata",
+        }
+    )
+
+    result = reconciler.reconcile_android_lsl_monitor(phone_markers, [monitor_row])
+
+    assert result.ok is True
+    assert result.report["field_mismatch_count"] == 0
+
+
+def test_reconcile_android_lsl_monitor_reports_payload_json_drift():
+    phone_markers = [
+        _phone_marker(
+            event_id="1",
+            event_type="session_metadata",
+            event_code="8",
+            payload={
+                "type": "session_metadata",
+                "participant_metadata": {"handedness": "right", "age_years": 29},
+            },
+        ),
+    ]
+    monitor_row = _monitor_rich_row(phone_markers[0], timestamp=1.0)
+    monitor_row["payload_json"] = json.dumps(
+        {
+            "type": "session_metadata",
+            "participant_metadata": {"handedness": "left", "age_years": 29},
+        }
+    )
+
+    result = reconciler.reconcile_android_lsl_monitor(phone_markers, [monitor_row])
+
+    assert result.ok is False
+    assert result.report["field_mismatch_count"] == 1
+    assert result.report["field_mismatches"][0]["field"] == "payload_json"
+    assert "rich markers have 1 field mismatches" in "\n".join(result.report["failures"])
+
+
 def test_loaders_accept_phone_run_folder_and_monitor_folder(tmp_path: Path):
     phone_dir = tmp_path / "phone-run"
     phone_dir.mkdir()
@@ -104,7 +158,13 @@ def test_loaders_accept_phone_run_folder_and_monitor_folder(tmp_path: Path):
     assert result.report["monitor_rich_marker_count"] == 1
 
 
-def _phone_marker(*, event_id: str, event_type: str, event_code: str) -> dict[str, str]:
+def _phone_marker(
+    *,
+    event_id: str,
+    event_type: str,
+    event_code: str,
+    payload: dict | None = None,
+) -> dict[str, str]:
     return {
         "marker_version": MARKER_VERSION,
         "event_id": event_id,
@@ -121,7 +181,7 @@ def _phone_marker(*, event_id: str, event_type: str, event_code: str) -> dict[st
         "trial_uid": "",
         "sample_index": "",
         "timestamp_quality": "android_elapsed_realtime",
-        "payload_json": json.dumps({"type": event_type}, sort_keys=True),
+        "payload_json": json.dumps(payload or {"type": event_type}, sort_keys=True),
     }
 
 

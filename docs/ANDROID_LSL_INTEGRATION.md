@@ -307,7 +307,11 @@ validation requires observer-side stream descriptions for the rich marker,
 numeric trigger, command-signal, and command-ack inlets. When
 `--expect-command-acks` is used on a PC-monitor artifact, each observed
 `PPSCommandSignalsV1` command id must have a matching observed
-`PPSCommandAcksV1` ack id.
+`PPSCommandAcksV1` ack id. The separate monitor reconciliation script compares
+PC-captured rich markers against the phone marker mirror by event id, visible
+marker fields, and semantic `payload_json` equality, preserving the
+`session_metadata` reconstruction payload through the external monitor/XDF
+path.
 
 For new phone-owned run exports, also require the catalog entry:
 

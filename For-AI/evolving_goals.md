@@ -105,6 +105,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   rejects drift inside the `session_metadata` marker payload when participant
   metadata, haptic calibration/capability, or package provenance differs from
   the sidecars/manifests.
+- PC-side Android LSL monitor reconciliation now compares captured rich-marker
+  `payload_json` values against the phone marker mirror using canonical JSON.
+  This means event-id and trigger-code agreement is no longer enough: if the
+  external monitor/XDF path mutates or drops the `session_metadata`
+  reconstruction payload, `reconcile_android_lsl_monitor_with_phone_run.py`
+  fails.
 
 ## 2026-06-29
 

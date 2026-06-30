@@ -358,7 +358,12 @@ against the serialized sample payload, and requires note text when the observed
 command is `operator_note`. With `--expect-command-acks`, strict monitor
 validation also requires every observed command-signal id to have a matching
 ack id, and the report exposes unmatched ids in both directions for debugging
-PC-runner or Controller-phone rehearsals.
+PC-runner or Controller-phone rehearsals. The offline
+`reconcile_android_lsl_monitor_with_phone_run.py` script compares PC-captured
+rich marker rows back to the phone `lsl_marker_mirror.csv`, including semantic
+`payload_json` equality, so a captured `session_metadata` payload cannot drift
+away from the phone-owned reconstruction payload without a reconciliation
+failure.
 
 Controller mode always writes `phone_controller_command_outbox.jsonl` as the
 local audit trail. In a native liblsl validation build it also keeps a

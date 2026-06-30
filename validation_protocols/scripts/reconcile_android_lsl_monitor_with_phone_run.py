@@ -108,6 +108,17 @@ def reconcile_android_lsl_monitor(
                         "observed": observed,
                     }
                 )
+        expected_payload = _canonical_payload_json(phone.get("payload_json"))
+        observed_payload = _canonical_payload_json(rich.get("payload_json"))
+        if expected_payload != observed_payload:
+            mismatches.append(
+                {
+                    "event_id": event_id,
+                    "field": "payload_json",
+                    "expected": expected_payload,
+                    "observed": observed_payload,
+                }
+            )
     if mismatches:
         failures.append(f"PC monitor rich markers have {len(mismatches)} field mismatches")
 
@@ -300,6 +311,17 @@ def _clean_code(value: Any) -> str:
         return str(int(float(raw)))
     except ValueError:
         return raw
+
+
+def _canonical_payload_json(value: Any) -> str:
+    raw = _clean(value)
+    if not raw:
+        return ""
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError:
+        return raw
+    return json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
 
 def _write_report(result: AndroidLslMonitorReconciliation, output_dir: Path) -> None:
