@@ -125,6 +125,11 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   optional `pyxdf` is available. It also pairs captured `PPSCommandSignalsV1`
   and `PPSCommandAcksV1` samples by `command_id`, flags missing/extra acks, and
   compares ack payload command/package identity to the source command payload.
+  Captured command-signal payloads must carry `token` or `companion_token`,
+  `operator_note` commands must include a nonblank `note`, and the summarized
+  row `payload_json` must match the raw LSL sample payload channel; payload
+  drift is reported with redacted placeholders so pairing secrets stay out of
+  validation artifacts. Ack payloads that echo pairing tokens remain invalid.
 - Sender/receiver command-admin reconciliation is in
   `validation_protocols/scripts/reconcile_android_command_admin_with_phone_run.py`.
   It compares Android Controller or PC-admin native command outboxes against the

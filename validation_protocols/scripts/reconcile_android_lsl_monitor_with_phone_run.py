@@ -39,6 +39,7 @@ COMMAND_ACK_PAYLOAD_IDENTITY_FIELDS = (
     "target_part_number",
 )
 COMMAND_ACK_PAIRING_TOKEN_FIELDS = ("token", "companion_token")
+COMMANDS_REQUIRING_NOTE = {"operator_note"}
 
 
 @dataclass(frozen=True)
@@ -361,6 +362,8 @@ def _command_ack_pair_summary(command_rows: list[dict[str, Any]], ack_rows: list
     missing_ack = sorted(set(command_ids) - set(ack_ids), key=_event_id_sort_key)
     ack_without_command = sorted(set(ack_ids) - set(command_ids), key=_event_id_sort_key) if command_rows else []
     mismatches: list[dict[str, Any]] = []
+    for command_row in command_rows:
+        _append_command_signal_payload_mismatches(mismatches, command_row)
     for ack_row in ack_rows:
         ack_payload = _payload_object(ack_row.get("payload_json"))
         for field in _ack_pairing_token_fields(ack_payload):
@@ -407,6 +410,31 @@ def _command_ack_pair_summary(command_rows: list[dict[str, Any]], ack_rows: list
     }
 
 
+def _append_command_signal_payload_mismatches(mismatches: list[dict[str, Any]], command_row: dict[str, Any]) -> None:
+    command_id = _command_id(command_row)
+    sample_payload, has_sample_payload = _sample_payload_json(command_row, fallback_index=6)
+    if has_sample_payload:
+        row_payload = _canonical_payload_json(command_row.get("payload_json"))
+        raw_sample_payload = _canonical_payload_json(sample_payload)
+        if row_payload != raw_sample_payload:
+            mismatches.append(
+                _command_ack_mismatch(
+                    command_id,
+                    "payload_json.sample",
+                    "<sample_payload>",
+                    "<row_payload>",
+                )
+            )
+
+    command_payload = _payload_object(sample_payload if has_sample_payload else command_row.get("payload_json"))
+    if not _payload_has_pairing_token(command_payload):
+        mismatches.append(_command_ack_mismatch(command_id, "payload.token", "<required>", ""))
+
+    command_name = _clean(command_row.get("command"))
+    if command_name in COMMANDS_REQUIRING_NOTE and not _clean(command_payload.get("note")):
+        mismatches.append(_command_ack_mismatch(command_id, "payload.note", "<required_for_operator_note>", ""))
+
+
 def _command_ack_mismatch(command_id: str, field: str, expected: str, observed: str) -> dict[str, Any]:
     return {
         "command_id": command_id,
@@ -437,6 +465,25 @@ def _append_command_ack_payload_mismatch(
 
 def _ack_pairing_token_fields(payload: dict[str, Any]) -> list[str]:
     return [field for field in COMMAND_ACK_PAIRING_TOKEN_FIELDS if _clean(payload.get(field))]
+
+
+def _payload_has_pairing_token(payload: dict[str, Any]) -> bool:
+    return bool(_ack_pairing_token_fields(payload))
+
+
+def _sample_payload_json(row: dict[str, Any], *, fallback_index: int) -> tuple[Any, bool]:
+    sample = row.get("sample")
+    if not isinstance(sample, list):
+        return "", False
+    labels = row.get("channel_labels")
+    index = fallback_index
+    if isinstance(labels, list):
+        normalized = [str(label) for label in labels]
+        if "payload_json" in normalized:
+            index = normalized.index("payload_json")
+    if 0 <= index < len(sample):
+        return sample[index], True
+    return "", True
 
 
 def _first_mismatch_index(left: list[str], right: list[str]) -> int | None:

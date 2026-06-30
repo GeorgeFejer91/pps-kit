@@ -28,6 +28,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   row metadata. The reconciler fails if the sample payload omits
   `token`/`companion_token` or drifts from the stored sender payload, while
   still rejecting any `PPSCommandAcksV1` payload that echoes pairing tokens.
+- PC monitor/XDF command reconciliation now applies the same command-signal
+  strictness to observed `PPSCommandSignalsV1` rows: captured command payloads
+  must contain `token` or `companion_token`, `operator_note` commands must carry
+  a nonblank `note`, and the row `payload_json` must match the raw LSL sample
+  payload channel. Payload drift reports are redacted so pairing tokens do not
+  leak into validation artifacts; `PPSCommandAcksV1` payloads still fail if they
+  echo a pairing token.
 - Receiver-side Android native command diary rows now preserve
   `command_channels` and the exact received `PPSCommandSignalsV1`
   `command_sample` alongside the outgoing ack evidence. Strict phone-run

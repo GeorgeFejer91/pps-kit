@@ -160,6 +160,111 @@ def test_reconcile_android_lsl_monitor_accepts_matching_command_ack_pair():
     assert result.report["command_ack_pair_summary"]["mismatch_count"] == 0
 
 
+def test_reconcile_android_lsl_monitor_rejects_command_signal_without_token():
+    phone_markers = [_phone_marker(event_id="1", event_type="session_metadata", event_code="8")]
+    monitor_rows = [
+        _monitor_rich_row(phone_markers[0], timestamp=1.0),
+        _monitor_command_row(
+            command_id="cmd-no-token",
+            command="pause",
+            payload=_target_identity_payload(),
+        ),
+        _monitor_ack_row(
+            command_id="cmd-no-token",
+            payload={"command": "pause", **_target_identity_payload()},
+        ),
+    ]
+
+    result = reconciler.reconcile_android_lsl_monitor(
+        phone_markers,
+        monitor_rows,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is False
+    summary = result.report["command_ack_pair_summary"]
+    assert summary["mismatch_count"] == 1
+    assert summary["mismatches"][0]["field"] == "payload.token"
+    assert summary["mismatches"][0]["expected"] == "<required>"
+
+
+def test_reconcile_android_lsl_monitor_accepts_command_signal_with_companion_token():
+    phone_markers = [_phone_marker(event_id="1", event_type="session_metadata", event_code="8")]
+    command_payload = {"companion_token": "pairing-secret", **_target_identity_payload()}
+    monitor_rows = [
+        _monitor_rich_row(phone_markers[0], timestamp=1.0),
+        _monitor_command_row(command_id="cmd-companion-token", command="resume", payload=command_payload),
+        _monitor_ack_row(
+            command_id="cmd-companion-token",
+            payload={"command": "resume", **_target_identity_payload()},
+        ),
+    ]
+
+    result = reconciler.reconcile_android_lsl_monitor(
+        phone_markers,
+        monitor_rows,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is True
+    assert result.report["command_ack_pair_summary"]["mismatch_count"] == 0
+
+
+def test_reconcile_android_lsl_monitor_rejects_operator_note_without_note_payload():
+    phone_markers = [_phone_marker(event_id="1", event_type="session_metadata", event_code="8")]
+    monitor_rows = [
+        _monitor_rich_row(phone_markers[0], timestamp=1.0),
+        _monitor_command_row(command_id="cmd-note", command="operator_note"),
+        _monitor_ack_row(
+            command_id="cmd-note",
+            payload={"command": "operator_note", **_target_identity_payload()},
+        ),
+    ]
+
+    result = reconciler.reconcile_android_lsl_monitor(
+        phone_markers,
+        monitor_rows,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is False
+    summary = result.report["command_ack_pair_summary"]
+    assert summary["mismatch_count"] == 1
+    assert summary["mismatches"][0]["field"] == "payload.note"
+    assert summary["mismatches"][0]["expected"] == "<required_for_operator_note>"
+
+
+def test_reconcile_android_lsl_monitor_reports_command_signal_sample_payload_drift():
+    phone_markers = [_phone_marker(event_id="1", event_type="session_metadata", event_code="8")]
+    command_row = _monitor_command_row(command_id="cmd-sample-drift", command="pause")
+    command_row["sample"][6] = json.dumps(
+        {"token": "alternate-secret", **_target_identity_payload()},
+        sort_keys=True,
+    )
+    monitor_rows = [
+        _monitor_rich_row(phone_markers[0], timestamp=1.0),
+        command_row,
+        _monitor_ack_row(
+            command_id="cmd-sample-drift",
+            payload={"command": "pause", **_target_identity_payload()},
+        ),
+    ]
+
+    result = reconciler.reconcile_android_lsl_monitor(
+        phone_markers,
+        monitor_rows,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is False
+    summary = result.report["command_ack_pair_summary"]
+    assert summary["mismatch_count"] == 1
+    assert summary["mismatches"][0]["field"] == "payload_json.sample"
+    assert summary["mismatches"][0]["expected"] == "<sample_payload>"
+    assert summary["mismatches"][0]["observed"] == "<row_payload>"
+    assert "secret" not in json.dumps(summary)
+
+
 def test_reconcile_android_lsl_monitor_reports_command_without_ack():
     phone_markers = [_phone_marker(event_id="1", event_type="session_metadata", event_code="8")]
     monitor_rows = [
