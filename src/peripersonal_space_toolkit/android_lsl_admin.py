@@ -154,6 +154,7 @@ def send_android_lsl_command(
     command_stream_name: str = LSL_COMMAND_STREAM_NAME,
     ack_stream_name: str = LSL_ACK_STREAM_NAME,
     extra_payload: dict[str, Any] | None = None,
+    note: str = "",
     output_dir: Path | str | None = None,
     consumer_timeout_s: float = 2.0,
     ack_timeout_s: float = 1.5,
@@ -168,12 +169,19 @@ def send_android_lsl_command(
     if not clean_token:
         raise ValueError("token is required for Android LSL admin commands.")
 
+    payload_extra = dict(extra_payload or {})
+    clean_note = str(note or "").strip()
+    if clean_note:
+        payload_extra["note"] = clean_note
+    if command == "operator_note" and not str(payload_extra.get("note") or "").strip():
+        raise ValueError("operator_note requires --note or a payload_json note.")
+
     payload = build_android_lsl_admin_payload(
         token=clean_token,
         package_id=package_id,
         participant_id=participant_id,
         part_number=part_number,
-        extra_payload=extra_payload,
+        extra_payload=payload_extra,
     )
     native_lsl_sent = False
     consumer_ready = False
@@ -343,27 +351,32 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--sender-id", default="pc_runner")
     parser.add_argument("--command-id", default="")
     parser.add_argument("--payload-json", type=_json_payload, default={})
+    parser.add_argument("--note", default="", help="Operator note text for the operator_note command.")
     parser.add_argument("--output-dir", type=Path, default=Path("artifacts/android_lsl_admin"))
     parser.add_argument("--consumer-timeout-s", type=float, default=2.0)
     parser.add_argument("--ack-timeout-s", type=float, default=1.5)
     parser.add_argument("--require-ack", action="store_true")
     args = parser.parse_args(argv)
 
-    result = send_android_lsl_command(
-        target_session_id=args.session_id,
-        token=args.token,
-        command=args.command,
-        package_id=args.package_id,
-        participant_id=args.participant_id,
-        part_number=args.part_number,
-        sender_id=args.sender_id,
-        command_id=args.command_id or None,
-        extra_payload=args.payload_json,
-        output_dir=args.output_dir,
-        consumer_timeout_s=args.consumer_timeout_s,
-        ack_timeout_s=args.ack_timeout_s,
-        require_ack=args.require_ack,
-    )
+    try:
+        result = send_android_lsl_command(
+            target_session_id=args.session_id,
+            token=args.token,
+            command=args.command,
+            package_id=args.package_id,
+            participant_id=args.participant_id,
+            part_number=args.part_number,
+            sender_id=args.sender_id,
+            command_id=args.command_id or None,
+            extra_payload=args.payload_json,
+            note=args.note,
+            output_dir=args.output_dir,
+            consumer_timeout_s=args.consumer_timeout_s,
+            ack_timeout_s=args.ack_timeout_s,
+            require_ack=args.require_ack,
+        )
+    except ValueError as exc:
+        parser.error(str(exc))
     print(json.dumps(result.row, indent=2, sort_keys=True))
     return 0 if result.ok else 1
 

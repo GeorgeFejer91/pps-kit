@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from peripersonal_space_toolkit import android_lsl_admin as admin
 from peripersonal_space_toolkit.lsl_command_ack import (
     ACK_SCHEMA,
@@ -145,6 +147,57 @@ def test_send_android_lsl_command_can_require_ack(tmp_path, monkeypatch):
     assert result.row["status"] == "missing_ack"
     assert result.row["native_lsl_sent"] is True
     assert result.row["ack_received"] is False
+
+
+def test_send_android_lsl_operator_note_requires_note():
+    with pytest.raises(ValueError, match="operator_note requires"):
+        admin.send_android_lsl_command(
+            target_session_id="part-001",
+            token="secret",
+            command="operator_note",
+        )
+
+
+def test_android_lsl_admin_cli_rejects_operator_note_without_note(capsys):
+    with pytest.raises(SystemExit) as exc_info:
+        admin.main(["operator_note", "--session-id", "part-001", "--token", "secret"])
+
+    assert exc_info.value.code == 2
+    assert "operator_note requires" in capsys.readouterr().err
+
+
+def test_send_android_lsl_operator_note_writes_note_payload(tmp_path, monkeypatch):
+    _FakeCommandOutlet.sent_signals.clear()
+    _FakeAckInlet.ack = LSLCommandAck(
+        command_id="cmd-note-1",
+        session_id="part-001",
+        receiver_id="android_phone",
+        status="applied",
+        reason="operator_note_recorded",
+        received_lsl_time=10.1,
+        applied_lsl_time=10.2,
+        ack_lsl_time=10.3,
+        payload={"note": "participant asked for a pause"},
+    )
+    monkeypatch.setattr(admin, "LSLCommandOutlet", _FakeCommandOutlet)
+    monkeypatch.setattr(admin, "LSLCommandAckInlet", _FakeAckInlet)
+
+    result = admin.send_android_lsl_command(
+        target_session_id="part-001",
+        token="secret",
+        command="operator_note",
+        command_id="cmd-note-1",
+        note="participant asked for a pause",
+        output_dir=tmp_path,
+        require_ack=True,
+    )
+
+    assert result.ok is True
+    assert result.row["command"] == "operator_note"
+    payload = json.loads(result.row["command_sample"][6])
+    assert payload["token"] == "secret"
+    assert payload["note"] == "participant asked for a pause"
+    assert result.row["payload"]["note"] == "participant asked for a pause"
 
 
 def test_android_lsl_admin_status_matches_command_ack_protocol():

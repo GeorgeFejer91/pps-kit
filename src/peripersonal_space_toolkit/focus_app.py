@@ -14708,6 +14708,7 @@ def _send_phone_transfer_lsl_admin_command(
     command: str,
     *,
     require_ack: bool,
+    extra_payload: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     target_session_id = str(context.get("target_session_id") or "").strip()
     token = str(context.get("token") or "").strip()
@@ -14718,16 +14719,19 @@ def _send_phone_transfer_lsl_admin_command(
         raise ValueError("Phone LSL pairing token is missing.")
     if not clean_command:
         raise ValueError("Phone LSL command is missing.")
-    result = send_android_lsl_command(
-        target_session_id=target_session_id,
-        token=token,
-        command=clean_command,
-        package_id=str(context.get("package_id") or ""),
-        participant_id=str(context.get("participant_id") or ""),
-        part_number=str(context.get("part_number") or ""),
-        output_dir=Path(str(context.get("output_dir") or "")),
-        require_ack=bool(require_ack),
-    )
+    kwargs: dict[str, Any] = {
+        "target_session_id": target_session_id,
+        "token": token,
+        "command": clean_command,
+        "package_id": str(context.get("package_id") or ""),
+        "participant_id": str(context.get("participant_id") or ""),
+        "part_number": str(context.get("part_number") or ""),
+        "output_dir": Path(str(context.get("output_dir") or "")),
+        "require_ack": bool(require_ack),
+    }
+    if extra_payload:
+        kwargs["extra_payload"] = dict(extra_payload)
+    result = send_android_lsl_command(**kwargs)
     return dict(result.row)
 
 
@@ -14875,8 +14879,13 @@ def _run_phone_transfer_window(
         ("Resume", "resume"),
         ("Snapshot", "request_snapshot"),
         ("Stop After Block", "stop_after_block"),
+        ("Note", "operator_note"),
     ]:
         lsl_command_combo.addItem(label, command)
+    lsl_note_field = q["QLineEdit"]("")
+    lsl_note_field.setObjectName("phoneTransferLslOperatorNoteField")
+    lsl_note_field.setPlaceholderText("Operator note")
+    lsl_note_field.setToolTip("Sent only with the Note command as the operator_note payload.")
     lsl_require_ack_checkbox = q["QCheckBox"]("Require Ack")
     lsl_require_ack_checkbox.setObjectName("phoneTransferLslRequireAckCheckbox")
     lsl_require_ack_checkbox.setChecked(True)
@@ -14892,6 +14901,7 @@ def _run_phone_transfer_window(
     lsl_command_layout.addWidget(lsl_require_ack_checkbox)
     lsl_command_layout.addWidget(lsl_send_button)
     panel_layout.addWidget(_field_row(q, "Command", lsl_command_row))
+    panel_layout.addWidget(_field_row(q, "Note", lsl_note_field))
     lsl_status_label = q["QLabel"]("Prepare a package to enable PC-to-phone LSL commands.")
     lsl_status_label.setObjectName("mutedLabel")
     lsl_status_label.setWordWrap(True)
@@ -14945,9 +14955,11 @@ def _run_phone_transfer_window(
         _refresh_lsl_admin_controls()
 
     def _set_lsl_busy(busy: bool) -> None:
-        lsl_command_combo.setEnabled(not busy and bool(service_state.get("lsl_admin_context")))
-        lsl_require_ack_checkbox.setEnabled(not busy and bool(service_state.get("lsl_admin_context")))
-        lsl_send_button.setEnabled(not busy and bool(service_state.get("lsl_admin_context")))
+        enabled = not busy and bool(service_state.get("lsl_admin_context"))
+        lsl_command_combo.setEnabled(enabled)
+        lsl_require_ack_checkbox.setEnabled(enabled)
+        lsl_send_button.setEnabled(enabled)
+        lsl_note_field.setEnabled(enabled and str(lsl_command_combo.currentData() or "") == "operator_note")
         if busy:
             lsl_status_label.setText("Sending LSL command...")
 
@@ -14958,9 +14970,11 @@ def _run_phone_transfer_window(
         worker = lsl_admin_thread.get("thread")
         busy = worker is not None and worker.is_alive()
         enabled = bool(target and context.get("token") and service_state.get("service") is not None and not busy)
+        note_enabled = enabled and str(lsl_command_combo.currentData() or "") == "operator_note"
         lsl_command_combo.setEnabled(enabled)
         lsl_require_ack_checkbox.setEnabled(enabled)
         lsl_send_button.setEnabled(enabled)
+        lsl_note_field.setEnabled(note_enabled)
         if not target and not busy:
             lsl_status_label.setText("Prepare a package to enable PC-to-phone LSL commands.")
 
@@ -15090,6 +15104,14 @@ def _run_phone_transfer_window(
             lsl_status_label.setText("Prepare a package before sending LSL commands.")
             _refresh_lsl_admin_controls()
             return
+        extra_payload: dict[str, Any] = {}
+        if command == "operator_note":
+            note = str(lsl_note_field.text() or "").strip()
+            if not note:
+                lsl_status_label.setText("Type an operator note before sending the Note command.")
+                _refresh_lsl_admin_controls()
+                return
+            extra_payload["note"] = note
         _set_lsl_busy(True)
 
         def _worker() -> None:
@@ -15098,6 +15120,7 @@ def _run_phone_transfer_window(
                     context,
                     command=command,
                     require_ack=bool(lsl_require_ack_checkbox.isChecked()),
+                    extra_payload=extra_payload,
                 )
             except Exception as exc:  # noqa: BLE001 - surfaced in the dialog status.
                 preparation_messages.put(("lsl_admin_error", str(exc)))
@@ -15184,11 +15207,14 @@ def _run_phone_transfer_window(
                 if outbox_path:
                     detail += f". Audit: {outbox_path}"
                 lsl_status_label.setText(detail)
+                if command == "operator_note" and status.startswith("ack_"):
+                    lsl_note_field.clear()
                 _refresh_lsl_admin_controls()
 
     profile_combo.currentIndexChanged.connect(lambda _index: _refresh_participant_options())
     prepare_button.clicked.connect(_start_preparation)
     lsl_send_button.clicked.connect(_send_lsl_admin_command)
+    lsl_command_combo.currentIndexChanged.connect(lambda _index: _refresh_lsl_admin_controls())
     stop_button.clicked.connect(_stop_service)
     close_button.clicked.connect(dialog.accept)
     timer = q["QTimer"](dialog)

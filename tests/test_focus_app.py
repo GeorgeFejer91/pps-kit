@@ -4004,10 +4004,15 @@ def test_phone_transfer_window_initial_layout_renders(tmp_path: Path, monkeypatc
             assert dialog.findChild(q["QPushButton"], "phoneTransferStopButton") is not None
             lsl_target = dialog.findChild(q["QLineEdit"], "phoneTransferLslTargetField")
             lsl_command = dialog.findChild(q["QComboBox"], "phoneTransferLslCommandCombo")
+            lsl_note = dialog.findChild(q["QLineEdit"], "phoneTransferLslOperatorNoteField")
             lsl_send = dialog.findChild(q["QPushButton"], "phoneTransferLslSendButton")
             assert lsl_target is not None
             assert lsl_command is not None
+            assert lsl_note is not None
             assert lsl_send is not None
+            commands = [lsl_command.itemData(index) for index in range(lsl_command.count())]
+            assert "operator_note" in commands
+            assert lsl_note.isEnabled() is False
             assert lsl_send.isEnabled() is False
             assert dialog.findChild(q["QLabel"], "companionQrCode") is not None
             assert dialog.findChild(q["QLineEdit"], "phoneTransferPairingUriField") is not None
@@ -4100,6 +4105,37 @@ def test_phone_transfer_lsl_admin_command_sends_expected_context(tmp_path: Path,
             "require_ack": True,
         }
     ]
+
+
+def test_phone_transfer_lsl_admin_command_forwards_operator_note(tmp_path: Path, monkeypatch):
+    from peripersonal_space_toolkit import focus_app
+
+    context = {
+        "target_session_id": "part-001",
+        "token": "secret-token",
+        "package_id": "pkg-001",
+        "participant_id": "P321",
+        "part_number": "01",
+        "output_dir": str(tmp_path / "pc-admin"),
+    }
+    calls: list[dict[str, object]] = []
+
+    def fake_send_android_lsl_command(**kwargs):
+        calls.append(dict(kwargs))
+        return SimpleNamespace(row={"status": "ack_applied", "command": kwargs["command"], "outbox_path": "outbox.jsonl"})
+
+    monkeypatch.setattr(focus_app, "send_android_lsl_command", fake_send_android_lsl_command)
+
+    row = focus_app._send_phone_transfer_lsl_admin_command(
+        context,
+        "operator_note",
+        require_ack=True,
+        extra_payload={"note": "participant asked for a pause"},
+    )
+
+    assert row["status"] == "ack_applied"
+    assert calls[-1]["command"] == "operator_note"
+    assert calls[-1]["extra_payload"] == {"note": "participant asked for a pause"}
 
 
 def test_launcher_resume_shortcut_opens_environment_operations(tmp_path: Path, monkeypatch):

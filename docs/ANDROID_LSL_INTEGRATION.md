@@ -26,7 +26,9 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   Android artifacts. The native runner's `Send To Phone` window exposes the
   same helper as a small Phone LSL Control strip after a package bridge is
   prepared, using the prepared package part-session id as the default command
-  target.
+  target. The strip and CLI both support `operator_note`; note text is stored
+  in the token-gated command payload and then validated against the persisted
+  command sample.
 - The PC-side helper `pps-android-lsl-monitor` resolves Android
   `PPSMarkersV2`, `PPSTriggerCodes`, `PPSCommandAcksV1`, and
   `PPSCommandSignalsV1` streams for a bounded monitoring window and writes
@@ -291,12 +293,15 @@ Android runner is idle with a synced package or actively playing a block:
 .\.venv\Scripts\pps-android-lsl-command.exe pause --session-id <part_session_id> --token <pairing-token> --require-ack
 .\.venv\Scripts\pps-android-lsl-command.exe resume --session-id <part_session_id> --token <pairing-token> --require-ack
 .\.venv\Scripts\pps-android-lsl-command.exe stop_after_block --session-id <part_session_id> --token <pairing-token> --require-ack
+.\.venv\Scripts\pps-android-lsl-command.exe operator_note --session-id <part_session_id> --token <pairing-token> --note "participant asked for a pause" --require-ack
 ```
 
 The `Send To Phone` window can send the same Start/Pause/Resume/Snapshot/
-Stop-after-block commands after package preparation. It stores the same
-PC-admin outbox/status artifacts under runner logs for that phone transfer,
-including the row-derived command source ID in `pc_android_lsl_admin_status.json`.
+Stop-after-block/Note commands after package preparation. The Note command
+requires text in the operator-note field and sends it as `operator_note`. The
+window stores the same PC-admin outbox/status artifacts under runner logs for
+that phone transfer, including the row-derived command source ID in
+`pc_android_lsl_admin_status.json`.
 
 Then validate the PC-admin outbox/status pair:
 
