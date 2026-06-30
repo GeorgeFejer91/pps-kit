@@ -23,6 +23,9 @@ the extracted copy so the template can be refreshed or compared later.
 - `springer-nature-latex-template/sn-article-template/`: extracted Springer
   Nature article template, class file, bibliography styles, sample manuscript,
   and user manual.
+- `manuscript/`: PPS Toolkit Behavior Research Methods draft sources, including
+  the Springer `sn-apa` manuscript, BibTeX file, build config, and
+  design-decision evidence matrix.
 
 For this journal, start from
 `springer-nature-latex-template/sn-article-template/sn-article.tex` and check
@@ -44,6 +47,10 @@ Existing repository manuscript fragments that may be useful when drafting:
 
 - `methods.tex`
 - `methods_references.bib`
+
+The current draft under `manuscript/` is intentionally a methods/software paper
+and not a formal meta-analysis. It treats tactile hit-rate decline as anecdotal
+design motivation unless future traceable run artifacts are supplied.
 
 ## Boundary
 

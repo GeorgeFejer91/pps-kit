@@ -11,6 +11,20 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   records the download URL/date/SHA-256, points drafters toward the `sn-apa`
   option for the journal, and keeps the template outside the PPS Toolkit MIT
   license grant in third-party license notes.
+- Added the first full BRM methods/software manuscript draft under
+  `publication/behavior-research-methods/manuscript/`. The draft uses the
+  Springer `sn-apa` class path through `latexmkrc`, cites Consensus-derived PPS,
+  HRTF/spatial-rendering, tactile-threshold, and BRM software-methods papers in
+  `references.bib`, and includes a 40-row `evidence_matrix.csv` mapping visible
+  Segment 0-6 and Focus Mode design decisions to literature variation, toolkit
+  controls, caveats, and profile/template ids. The paper is framed as an
+  evidence-matrix methods/software article rather than a formal meta-analysis;
+  tactile hit-rate decline is retained only as anecdotal motivation unless
+  traceable run artifacts are later supplied. A local compile check succeeded
+  with MiKTeX after installing missing template dependencies (`sttools`,
+  `threeparttable`, `appendix`, `wrapfig`, `amscls`, `apacite`, and `natbib`);
+  generated LaTeX build artifacts and the compiled PDF were removed before
+  staging.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation
