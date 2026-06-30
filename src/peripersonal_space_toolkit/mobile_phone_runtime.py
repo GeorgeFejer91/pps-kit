@@ -1789,6 +1789,7 @@ def _write_phone_owned_upload_export(
         "run_id": cleaned_run_id,
         "package_id": mobile_package_id(package),
         "session_id": str(getattr(package, "session_id", "") or ""),
+        "session_group_id": str(getattr(package, "session_group_id", "") or ""),
         "part_session_id": str(getattr(package, "part_session_id", "") or ""),
         "part_number": _package_part_number(package),
         "phone_owned_session": True,

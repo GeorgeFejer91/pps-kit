@@ -4561,6 +4561,14 @@ def _validate_phone_owned_data_export(
         failures=failures,
         expect_phone_owned_data_export=expect_phone_owned_data_export,
     )
+    _validate_phone_owned_export_identity(
+        export=export,
+        status=status,
+        completion=completion,
+        data_max_completion=data_max_completion,
+        failures=failures,
+        expect_phone_owned_data_export=expect_phone_owned_data_export,
+    )
     fieldnames = export.get("data_min_fieldnames") if isinstance(export.get("data_min_fieldnames"), list) else []
     if fieldnames and [str(item) for item in fieldnames] != PHONE_DATA_MIN_FIELDNAMES:
         failures.append("phone-owned data export data_min_fieldnames differ from the 17-column PC runner schema")
@@ -4626,6 +4634,67 @@ def _validate_phone_owned_data_export(
         )
         failures.extend(f"Data_max mirror {message}" for message in data_max_failures)
         warnings.extend(f"Data_max mirror {message}" for message in data_max_warnings)
+
+
+def _validate_phone_owned_export_identity(
+    *,
+    export: dict[str, Any],
+    status: dict[str, Any],
+    completion: dict[str, Any] | None,
+    data_max_completion: dict[str, Any] | None,
+    failures: list[str],
+    expect_phone_owned_data_export: bool,
+) -> None:
+    identity_fields = (
+        "participant_id",
+        "run_id",
+        "package_id",
+        "session_id",
+        "session_group_id",
+        "part_session_id",
+        "part_number",
+    )
+    if expect_phone_owned_data_export:
+        missing_fields = [field for field in identity_fields if field not in export]
+        if missing_fields:
+            failures.append(
+                "phone-owned data export is missing identity fields: "
+                + ", ".join(missing_fields)
+            )
+
+    sources: list[tuple[str, dict[str, Any], tuple[str, ...]]] = []
+
+    def add_source(label: str, payload: Any, fields: tuple[str, ...]) -> None:
+        if isinstance(payload, dict):
+            sources.append((label, payload, fields))
+
+    participant_fields = (
+        "participant_id",
+        "session_id",
+        "session_group_id",
+        "part_session_id",
+        "part_number",
+    )
+    add_source("lsl_runtime_status", status, identity_fields)
+    if isinstance(completion, dict):
+        add_source("completion lsl_runtime_status", completion.get("lsl_runtime_status"), identity_fields)
+        add_source("completion package", completion.get("package"), identity_fields)
+        add_source("completion participant_metadata", completion.get("participant_metadata"), participant_fields)
+    if isinstance(data_max_completion, dict):
+        add_source("Data_max completion lsl_runtime_status", data_max_completion.get("lsl_runtime_status"), identity_fields)
+        add_source("Data_max completion package", data_max_completion.get("package"), identity_fields)
+        add_source("Data_max completion participant_metadata", data_max_completion.get("participant_metadata"), participant_fields)
+
+    for label, payload, fields in sources:
+        for field in fields:
+            expected = _metadata_value(payload.get(field))
+            if not expected:
+                continue
+            observed = _metadata_value(export.get(field))
+            if not observed:
+                failures.append(f"phone-owned data export {field} is missing value from {label}")
+            elif observed != expected:
+                failures.append(f"phone-owned data export {field} differs from {label}")
 
 
 def _validate_phone_owned_export_portable_paths(

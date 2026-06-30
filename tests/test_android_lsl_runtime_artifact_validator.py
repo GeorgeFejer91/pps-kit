@@ -598,11 +598,30 @@ def test_android_lsl_runtime_validator_accepts_phone_owned_data_export(tmp_path:
     run_dir.mkdir()
     _write_lightweight_phone_run(run_dir)
     _write_phone_owned_data_export(run_dir)
+    export = json.loads((run_dir / "phone_owned_data_export.json").read_text(encoding="utf-8"))
 
     result = validator.validate_run_artifact(run_dir, expect_phone_owned_data_export=True)
 
+    assert export["session_group_id"] == "group-001"
     assert result.ok is True
     assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_rejects_phone_owned_export_session_group_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    _write_phone_owned_data_export(run_dir)
+    export_path = run_dir / "phone_owned_data_export.json"
+    export = json.loads(export_path.read_text(encoding="utf-8"))
+    export["session_group_id"] = "group-999"
+    export_path.write_text(json.dumps(export), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_phone_owned_data_export=True)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "phone-owned data export session_group_id differs from completion participant_metadata" in failures
 
 
 def test_android_lsl_runtime_validator_requires_phone_owned_export_portable_paths(tmp_path: Path):
@@ -3238,6 +3257,7 @@ def _write_phone_owned_data_export(run_dir: Path) -> None:
         "run_id": run_dir.name,
         "package_id": "pkg-001",
         "session_id": "session-001",
+        "session_group_id": "group-001",
         "part_session_id": "part-001",
         "part_number": "01",
         "phone_owned_session": True,

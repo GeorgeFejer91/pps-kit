@@ -422,5 +422,6 @@ def test_android_phone_run_writes_phone_owned_min_max_export() -> None:
     assert '"master_successful_participants.csv"' in catalog
     assert '"participant_id",' in catalog
     assert '"reaction_time_ms",' in catalog
+    assert '.put("session_group_id", runPackage.sessionGroupId)' in catalog
     assert "writePhoneOwnedDataExport(" in main_activity
     assert '.put("phone_owned_data_export_path", dataExport?.optString("artifact_path").orEmpty())' in main_activity

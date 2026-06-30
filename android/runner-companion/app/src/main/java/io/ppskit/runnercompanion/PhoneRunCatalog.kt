@@ -154,6 +154,7 @@ internal fun writePhoneOwnedDataExport(
         .put("run_id", runId)
         .put("package_id", runPackage.packageId)
         .put("session_id", runPackage.sessionId)
+        .put("session_group_id", runPackage.sessionGroupId)
         .put("part_session_id", runPackage.partSessionId)
         .put("part_number", runPackage.partNumber)
         .put("phone_owned_session", true)

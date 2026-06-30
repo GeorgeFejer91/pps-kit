@@ -223,6 +223,7 @@ class PhoneRunCatalogTest {
         )
 
         assertEquals(PHONE_OWNED_DATA_EXPORT_SCHEMA, export.getString("schema"))
+        assertEquals("group-001", export.getString("session_group_id"))
         assertEquals(3, export.getInt("data_min_row_count"))
         val participantCsv = File(export.getString("data_min_participant_csv"))
         val masterCsv = File(export.getString("data_min_master_successful_participants_csv"))

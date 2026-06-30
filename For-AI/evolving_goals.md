@@ -125,6 +125,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   phone-owned uploads with a response ledger. The on-disk PC mirror export file
   also includes its `artifact_path`, so the returned API payload and saved
   reconstruction artifact no longer differ on that field.
+- Android phone-owned `phone_owned_data_export.json` and PC mobile-runtime
+  upload mirrors now preserve `session_group_id` alongside run/session/part
+  identity. Strict Android phone-run validation compares that export identity
+  against completion/status/participant metadata when present, so split
+  phone-owned Data Max reconstruction keeps the group stitching identity and
+  rejects session-group drift.
 
 - The local HTML dashboard launcher now treats `/api/health` as the fast
   already-running probe before falling back to `/api/state`. This prevents a

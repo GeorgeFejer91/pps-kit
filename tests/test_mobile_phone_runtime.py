@@ -522,7 +522,7 @@ def test_mobile_runtime_upload_enriches_sparse_lsl_status_for_artifact_validatio
 
 
 def test_mobile_runtime_completion_upload_mirrors_phone_owned_response_export(tmp_path):
-    package = _package(tmp_path)
+    package = _split_package(tmp_path)
     output_root = tmp_path / "output"
     manifest = build_mobile_package_manifest(package)
     building_block_asset_id = manifest["blocks"][0]["trials"][0]["building_block_asset_id"]
@@ -618,6 +618,7 @@ def test_mobile_runtime_completion_upload_mirrors_phone_owned_response_export(tm
     export = json.loads((run_dir / "phone_owned_data_export.json").read_text(encoding="utf-8"))
     assert export["schema"] == "pps-android-phone-owned-data-export.v1"
     assert export["pc_upload_mirror"] is True
+    assert export["session_group_id"] == "group-001"
     assert export["artifact_path"] == str(run_dir / "phone_owned_data_export.json")
     assert export["portable_paths"] == {
         "archive_run_root": ".",
