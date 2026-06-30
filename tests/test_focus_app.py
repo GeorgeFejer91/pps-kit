@@ -4013,6 +4013,7 @@ def test_phone_transfer_window_initial_layout_renders(tmp_path: Path, monkeypatc
             commands = [lsl_command.itemData(index) for index in range(lsl_command.count())]
             assert commands == [
                 "start_experiment",
+                "start_part",
                 "pause",
                 "resume",
                 "continue_instruction",

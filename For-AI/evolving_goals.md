@@ -61,6 +61,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   applied ack missing `command`, `target_session_id`, or any nonblank expected
   package/participant/part/requester/source field is recorded but marked
   `invalid_ack`, matching the strict offline outbox validator.
+- Focus Mode Send-to-Phone LSL control and Android Controller mode now expose
+  `start_part` as `Start Part` alongside `start_experiment` as `Start Full`.
+  `start_part` launches the selected/synced package part, while
+  `start_experiment` remains the full synced-order command for multi-part phone
+  runs.
 - Receiver-side Android native command diary rows now preserve
   `command_channels` and the exact received `PPSCommandSignalsV1`
   `command_sample` alongside the outgoing ack evidence. Strict phone-run

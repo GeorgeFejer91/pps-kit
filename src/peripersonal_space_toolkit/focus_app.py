@@ -14885,7 +14885,8 @@ def _run_phone_transfer_window(
     lsl_command_combo = q["QComboBox"]()
     lsl_command_combo.setObjectName("phoneTransferLslCommandCombo")
     for label, command in [
-        ("Start", "start_experiment"),
+        ("Start Full", "start_experiment"),
+        ("Start Part", "start_part"),
         ("Pause", "pause"),
         ("Resume", "resume"),
         ("Continue", "continue_instruction"),

@@ -185,6 +185,8 @@ def test_android_controller_runtime_status_exports_stream_descriptions() -> None
     assert '"inlet"' in controller_commands
     assert '"pps-android-controller-signals-v1-$sessionToken-$controllerToken"' in controller_commands
     assert '"pps-*-command-acks-v1-*"' in controller_commands
+    assert '"start_part"' in controller_commands
+    assert '"start_part" to "Start Part"' in main_activity
     assert '"stop_after_block"' in controller_commands
     assert '"stop_after_block" to "Stop After Block"' in main_activity
     assert '"operator_note"' in controller_commands

@@ -142,7 +142,7 @@ internal fun phoneControllerRuntimeStatus(
     controllerTransportStatus: PhoneNativeLslBridgeStatus? = null,
 ): JSONObject {
     val supportedCommands = runPackage?.lsl?.supportedCommands?.takeIf { it.isNotEmpty() }
-        ?: listOf("start_experiment", "pause", "resume", "continue_instruction", "stop_after_block", "request_snapshot", "operator_note")
+        ?: listOf("start_experiment", "start_part", "pause", "resume", "continue_instruction", "stop_after_block", "request_snapshot", "operator_note")
     val controllerEnabled = controllerTransportStatus?.enabled == true
     return JSONObject()
         .put("schema", PHONE_CONTROLLER_RUNTIME_STATUS_SCHEMA)
