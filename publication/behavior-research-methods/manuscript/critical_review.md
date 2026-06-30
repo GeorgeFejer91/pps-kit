@@ -543,3 +543,39 @@ Methods manuscript draft. It is a working audit, not manuscript text.
   external artifacts.
 - The response-window default is clearer, but confirmatory studies still need a
   preregistered or study-specific justification for the exact response window.
+
+## Iteration 15: Submission-readiness Audit Pass
+
+### Main Critiques
+
+- The manuscript had become much clearer as a full design-run-recreation suite,
+  but there was no single source-level artifact mapping the original request to
+  the current draft state.
+- Without that ledger, a compiling manuscript could be mistaken for a
+  submission-ready package even though several final artifacts are still
+  missing: release DOI, exact paper commit, author/declaration metadata, and
+  publication-hardware validation.
+- The suite framing also needs a durable guardrail. Future edits should not
+  shrink the article back to a dashboard-only paper or let profile recreation
+  imply exact replication of private stimuli and apparatus details.
+
+### Resolution In This Revision
+
+- Added `submission_readiness_audit.md`, a requirement-by-requirement readiness
+  ledger with `source-ready`, `partially supported`, `not claimed`, and
+  `blocked until artifact` statuses.
+- The audit explicitly states that PPS Toolkit is being presented as a suite for
+  designing, recreating/scaffolding, running, validating, and reviewing
+  audio-tactile PPS experiments.
+- The audit also states that the current source is not final-submission ready
+  until release metadata, human declarations, and final validation artifacts are
+  supplied.
+- Updated the manuscript README and workspace README so future agents know the
+  audit is a maintenance/readiness artifact rather than manuscript prose.
+
+### Residual Concerns
+
+- The readiness audit improves project governance, not scientific evidence.
+  Hardware timing, tactile perception, and any quantified participant hit-rate
+  claims still require traceable external artifacts before the final paper can
+  make those claims.

@@ -159,6 +159,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   The response-classification technical-method paragraph was also split so the
   100-1300 ms tactile-onset response rule is separate from the interpretive
   reason response probability must be visible before RT curves are read.
+- Added `publication/behavior-research-methods/manuscript/submission_readiness_audit.md`
+  as a source-level requirement audit for the BRM manuscript. The audit protects
+  the user-requested full-suite framing--designing new studies, recreating or
+  scaffolding published paradigms, running native acquisition, validating
+  evidence layers, and reviewing exploratory analyses--while marking remaining
+  final-submission blockers such as release DOI/commit, author/declaration
+  metadata, publication-hardware validation, and traceable artifacts for any
+  quantified tactile hit-rate claims.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

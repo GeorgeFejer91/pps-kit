@@ -18,6 +18,9 @@ manuscript for PPS Toolkit.
 - `validation_evidence.csv`: committed source-pointer summary of validation
   evidence used in the draft; generated raw reports remain under ignored
   validation folders.
+- `submission_readiness_audit.md`: source-level checklist mapping the requested
+  BRM methods/software-paper goals to the current draft, including explicit
+  source-ready, partial, not-claimed, and blocked-until-artifact statuses.
 - `critical_review.md`: self-review audit recording critique points and
   revision decisions for the manuscript draft.
 - `latexmkrc`: local build configuration that points LaTeX/BibTeX at the
@@ -43,6 +46,9 @@ workflow explicitly asks for an archived submission snapshot.
 - `gui_control_coverage.csv` is an interface coverage ledger, not a second
   literature matrix. It exists to show which visible controls are scientific
   design decisions and which are ordinary suite/navigation mechanics.
+- `submission_readiness_audit.md` is a maintenance/readiness ledger, not
+  manuscript prose. It should remain honest about the distinction between a
+  source-ready draft and a final submission package.
 - The tactile hit-rate decline noted during pilot use is treated only as
   anecdotal design motivation until traceable runner artifacts are attached.
 - No copyrighted paper PDFs, participant outputs, local SOFA files, or private

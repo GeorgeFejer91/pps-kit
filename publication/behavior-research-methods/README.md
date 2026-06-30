@@ -25,7 +25,8 @@ the extracted copy so the template can be refreshed or compared later.
   and user manual.
 - `manuscript/`: PPS Toolkit Behavior Research Methods draft sources, including
   the Springer `sn-apa` manuscript, BibTeX file, build config, and
-  design-decision evidence matrix.
+  design-decision evidence matrix, GUI-control coverage audit, validation
+  evidence summary, and submission-readiness audit.
 
 For this journal, start from
 `springer-nature-latex-template/sn-article-template/sn-article.tex` and check
@@ -50,7 +51,13 @@ Existing repository manuscript fragments that may be useful when drafting:
 
 The current draft under `manuscript/` is intentionally a methods/software paper
 and not a formal meta-analysis. It treats tactile hit-rate decline as anecdotal
-design motivation unless future traceable run artifacts are supplied.
+design motivation unless future traceable run artifacts are supplied. It frames
+PPS Toolkit as a suite for designing new audio-tactile PPS experiments,
+recreating published paradigms as auditable profiles, running accepted designs
+through the native acquisition pipeline, validating evidence layers, and
+reviewing exploratory analyses. The local submission-readiness audit tracks
+which parts are source-ready and which still require final release metadata,
+hardware-validation artifacts, or human-supplied declaration details.
 
 ## Boundary
 
