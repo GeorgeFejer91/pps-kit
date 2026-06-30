@@ -314,7 +314,10 @@ that Data Max copy to include the core reconstruction spine:
 `phone_topup_materialization.json`, `phone_run_catalog_entry.json`,
 `phone_owned_data_export.json`, `participant_metadata.json`, `haptic_capability.json`,
 `artifact_file_inventory.json`, `artifact_file_inventory.csv`, and a completion
-or latest-events artifact.
+or latest-events artifact. It also reloads the mirrored
+`artifact_file_inventory.json` for the current run and rehashes the copied
+Data Max files, so post-copy tampering, missing listed files, or extra copied
+files fail the strict export gate.
 PC-side mobile completion uploads with embedded Android response ledgers now
 write the same phone-owned data-export sidecars and mirror tree under
 `runner_logs/mobile_phone_runtime/<participant>/<package_id>/phone_owned_exports/`.

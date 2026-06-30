@@ -140,7 +140,9 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   trigger-code mirrors, command diary, response/top-up sidecars, phone-run
   catalog entry, phone-owned export manifest, participant metadata, haptic
   capability, artifact file inventory JSON/CSV, and completion/latest-events
-  evidence.
+  evidence. The validator loads the copied Data Max inventory for the current
+  run and rehashes the mirrored files themselves, so the backup mirror must
+  match its own file diary rather than only contain similarly named sidecars.
 - Controller-mode outboxes include `phone_controller_runtime_status.json`.
   Default builds record `current_android_source_behavior=local_controller_outbox_only`;
   native builds record `native_lsl_controller_with_local_outbox` when the

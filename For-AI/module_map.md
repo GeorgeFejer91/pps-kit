@@ -241,7 +241,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `reconstruction_contract.json`, marker/trigger mirrors, command diary,
   response/top-up sidecars, phone-run catalog entry, phone-owned export
   manifest, participant metadata, haptic capability, artifact inventory
-  JSON/CSV, and completion/latest-events evidence),
+  JSON/CSV, and completion/latest-events evidence), and rehashes the copied
+  Data Max inventory against the mirrored files for the current run id,
   phone-run `participant_metadata.json` and `haptic_capability.json` sidecars
   plus Android haptic calibration threshold/status/amplitude-response
   consistency, including no-vibrator, binary-detection, and amplitude-control

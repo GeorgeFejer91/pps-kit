@@ -231,6 +231,10 @@ def validate_runtime_status(
     phone_data_min_master_rows: list[dict[str, Any]] | None = None,
     phone_data_max_has_completion: bool = False,
     phone_data_max_files: list[str] | None = None,
+    phone_data_max_completion: dict[str, Any] | None = None,
+    phone_data_max_inventory: dict[str, Any] | None = None,
+    phone_data_max_inventory_sidecars: dict[str, dict[str, Any]] | None = None,
+    phone_data_max_file_hashes: dict[str, dict[str, Any]] | None = None,
     expect_native_transport: bool = False,
     expect_command_acks: bool = False,
     expect_run_catalog: bool = False,
@@ -442,6 +446,7 @@ def validate_runtime_status(
         expect_phone_topup_evidence=expect_phone_topup_evidence or expect_lightweight_materializations,
     )
     _validate_phone_owned_data_export(
+        status=status,
         export=phone_owned_data_export,
         data_min_header=phone_data_min_header or [],
         data_min_rows=phone_data_min_rows or [],
@@ -449,6 +454,10 @@ def validate_runtime_status(
         data_min_master_rows=phone_data_min_master_rows or [],
         data_max_has_completion=phone_data_max_has_completion,
         data_max_files=phone_data_max_files or [],
+        data_max_completion=phone_data_max_completion,
+        data_max_inventory=phone_data_max_inventory,
+        data_max_inventory_sidecars=phone_data_max_inventory_sidecars or {},
+        data_max_file_hashes=phone_data_max_file_hashes or {},
         completion=completion,
         response_ledger_rows=response_ledger_rows or [],
         failures=failures,
@@ -772,6 +781,10 @@ def validate_run_artifact(
         phone_data_min_master_rows=loaded.get("phone_data_min_master_rows") or [],
         phone_data_max_has_completion=bool(loaded.get("phone_data_max_has_completion")),
         phone_data_max_files=loaded.get("phone_data_max_files") or [],
+        phone_data_max_completion=loaded.get("phone_data_max_completion"),
+        phone_data_max_inventory=loaded.get("phone_data_max_inventory"),
+        phone_data_max_inventory_sidecars=loaded.get("phone_data_max_inventory_sidecars") or {},
+        phone_data_max_file_hashes=loaded.get("phone_data_max_file_hashes") or {},
         expect_native_transport=expect_native_transport,
         expect_command_acks=expect_command_acks,
         expect_run_catalog=expect_run_catalog,
@@ -790,14 +803,15 @@ def _load_status_inputs(path: Path) -> dict[str, Any]:
     if path.is_dir():
         status_path = path / "lsl_runtime_status.json"
         if status_path.is_file():
+            status = _read_json(status_path)
             completion_path = path / "completion.json"
             if not completion_path.is_file():
                 completion_path = path / "latest_events.json"
             catalog_path = path / ANDROID_PHONE_RUN_CATALOG_ENTRY
-            sidecars = _load_phone_run_sidecars_from_dir(path)
+            sidecars = _load_phone_run_sidecars_from_dir(path, run_id=str(status.get("run_id") or ""))
             return {
                 "kind": "runner",
-                "status": _read_json(status_path),
+                "status": status,
                 "completion": _read_json(completion_path) if completion_path.is_file() else None,
                 "catalog_entry": _read_json(catalog_path) if catalog_path.is_file() else None,
                 **sidecars,
@@ -857,7 +871,7 @@ def _load_status_inputs(path: Path) -> dict[str, Any]:
     data = _read_json(path)
     if data.get("schema") == ANDROID_LSL_RUNTIME_STATUS_SCHEMA:
         catalog_path = path.with_name(ANDROID_PHONE_RUN_CATALOG_ENTRY)
-        sidecars = _load_phone_run_sidecars_from_dir(path.parent)
+        sidecars = _load_phone_run_sidecars_from_dir(path.parent, run_id=str(data.get("run_id") or ""))
         completion_path = path.with_name("completion.json")
         if not completion_path.is_file():
             completion_path = path.with_name("latest_events.json")
@@ -910,7 +924,7 @@ def _load_status_inputs(path: Path) -> dict[str, Any]:
             "status": embedded,
             "completion": data,
             "catalog_entry": catalog_entry,
-            **_load_phone_run_sidecars_from_dir(path.parent),
+            **_load_phone_run_sidecars_from_dir(path.parent, run_id=str(embedded.get("run_id") or "")),
         }
     raise ValueError(
         f"{path} is not an Android LSL status, completion, controller status, controller outbox, "
@@ -988,6 +1002,12 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                     and not name.replace("\\", "/").endswith("/")
                 }
             )
+            data_max_inventory_members = [
+                name
+                for name in archive.namelist()
+                if "phone_owned_exports/2.Data_max/" in name.replace("\\", "/")
+                and name.endswith(ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY)
+            ]
             topup_plan_members = [name for name in archive.namelist() if name.endswith("phone_topup_plan.json")]
             topup_materialization_members = [
                 name
@@ -1007,6 +1027,8 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 if "materialized_blocks/" in name.replace("\\", "/") and name.endswith(".wav")
             ]
             archive.extract(status_name, temp_root)
+            status = _read_json(temp_root / status_name)
+            run_id = str(status.get("run_id") or "")
             completion = None
             if completion_members:
                 completion_name = sorted(completion_members)[0]
@@ -1122,6 +1144,25 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 data_min_master_name = sorted(data_min_master_members)[0]
                 archive.extract(data_min_master_name, temp_root)
                 phone_data_min_master_header, phone_data_min_master_rows = _read_csv_with_header(temp_root / data_min_master_name)
+            phone_data_max_completion = None
+            if data_max_completion_members:
+                data_max_completion_name = _prefer_phone_data_max_member(data_max_completion_members, run_id)
+                archive.extract(data_max_completion_name, temp_root)
+                phone_data_max_completion = _read_json(temp_root / data_max_completion_name)
+            phone_data_max_inventory = None
+            phone_data_max_inventory_sidecars: dict[str, dict[str, Any]] = {}
+            phone_data_max_file_hashes: dict[str, dict[str, Any]] = {}
+            if data_max_inventory_members:
+                data_max_inventory_name = _prefer_phone_data_max_member(data_max_inventory_members, run_id)
+                archive.extract(data_max_inventory_name, temp_root)
+                phone_data_max_inventory = _read_json(temp_root / data_max_inventory_name)
+                data_max_inventory_prefix = str(Path(data_max_inventory_name.replace("\\", "/")).parent).replace("\\", "/")
+                if data_max_inventory_prefix == ".":
+                    data_max_inventory_prefix = ""
+                elif data_max_inventory_prefix:
+                    data_max_inventory_prefix += "/"
+                phone_data_max_inventory_sidecars = _phone_run_inventory_sidecars_from_zip(archive, data_max_inventory_prefix)
+                phone_data_max_file_hashes = _phone_run_file_hashes_from_zip(archive, data_max_inventory_prefix)
             topup_plan = None
             if topup_plan_members:
                 topup_plan_name = sorted(topup_plan_members)[0]
@@ -1138,7 +1179,7 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
             }
             return {
                 "kind": "runner",
-                "status": _read_json(temp_root / status_name),
+                "status": status,
                 "completion": completion,
                 "catalog_entry": catalog_entry,
                 "catalog_index": catalog_index,
@@ -1165,13 +1206,17 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 "phone_data_min_master_rows": phone_data_min_master_rows,
                 "phone_data_max_has_completion": bool(data_max_completion_members),
                 "phone_data_max_files": data_max_file_names,
+                "phone_data_max_completion": phone_data_max_completion,
+                "phone_data_max_inventory": phone_data_max_inventory,
+                "phone_data_max_inventory_sidecars": phone_data_max_inventory_sidecars,
+                "phone_data_max_file_hashes": phone_data_max_file_hashes,
                 "topup_plan": topup_plan,
                 "topup_materialization": topup_materialization,
                 "topup_wav_hashes": topup_wav_hashes,
             }
 
 
-def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
+def _load_phone_run_sidecars_from_dir(path: Path, *, run_id: str = "") -> dict[str, Any]:
     package_manifest_path = path / "run_package_manifest.json"
     reconstruction_artifact_path = path / ANDROID_PHONE_RUN_RECONSTRUCTION_ARTIFACT
     participant_metadata_path = path / "participant_metadata.json"
@@ -1201,11 +1246,25 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
     phone_data_min_master_rows: list[dict[str, Any]] = []
     phone_data_max_has_completion = False
     phone_data_max_files: list[str] = []
+    phone_data_max_completion: dict[str, Any] | None = None
+    phone_data_max_inventory: dict[str, Any] | None = None
+    phone_data_max_inventory_sidecars: dict[str, dict[str, Any]] = {}
+    phone_data_max_file_hashes: dict[str, dict[str, Any]] = {}
     if export_root:
         phone_data_min_header, phone_data_min_rows = _load_phone_data_min_rows(export_root)
         phone_data_min_master_header, phone_data_min_master_rows = _load_phone_data_min_master_rows(export_root)
         phone_data_max_has_completion = _phone_data_max_has_completion(export_root)
         phone_data_max_files = _phone_data_max_files(export_root)
+        data_max_run_dir = _phone_data_max_run_dir(export_root, run_id=run_id)
+        if data_max_run_dir is not None:
+            data_max_completion_path = data_max_run_dir / "completion.json"
+            if not data_max_completion_path.is_file():
+                data_max_completion_path = data_max_run_dir / "latest_events.json"
+            phone_data_max_completion = _read_json(data_max_completion_path) if data_max_completion_path.is_file() else None
+            data_max_inventory_path = data_max_run_dir / ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY
+            phone_data_max_inventory = _read_json(data_max_inventory_path) if data_max_inventory_path.is_file() else None
+            phone_data_max_inventory_sidecars = _phone_run_inventory_sidecars_from_dir(data_max_run_dir)
+            phone_data_max_file_hashes = _phone_run_file_hashes_from_dir(data_max_run_dir)
 
     sidecars = {
         "package_manifest": _read_json(package_manifest_path) if package_manifest_path.is_file() else None,
@@ -1229,6 +1288,10 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
         "phone_data_min_master_rows": phone_data_min_master_rows,
         "phone_data_max_has_completion": phone_data_max_has_completion,
         "phone_data_max_files": phone_data_max_files,
+        "phone_data_max_completion": phone_data_max_completion,
+        "phone_data_max_inventory": phone_data_max_inventory,
+        "phone_data_max_inventory_sidecars": phone_data_max_inventory_sidecars,
+        "phone_data_max_file_hashes": phone_data_max_file_hashes,
         "topup_plan": _read_json(topup_plan_path) if topup_plan_path.is_file() else None,
         "topup_materialization": _read_json(topup_materialization_path) if topup_materialization_path.is_file() else None,
         "topup_wav_hashes": {topup_wav_path.name: _sha256_file(topup_wav_path)} if topup_wav_path.is_file() else {},
@@ -1306,6 +1369,32 @@ def _phone_data_max_files(export_root: Path) -> list[str]:
     if not data_max.is_dir():
         return []
     return sorted({path.name for path in data_max.rglob("*") if path.is_file()})
+
+
+def _phone_data_max_run_dir(export_root: Path, *, run_id: str = "") -> Path | None:
+    data_max = export_root / "2.Data_max"
+    if not data_max.is_dir():
+        return None
+    candidates = [
+        path
+        for path in sorted(data_max.glob("*/runs/*"))
+        if path.is_dir() and ((path / "completion.json").is_file() or (path / "latest_events.json").is_file())
+    ]
+    if run_id:
+        for candidate in candidates:
+            if candidate.name == run_id:
+                return candidate
+    return candidates[0] if candidates else None
+
+
+def _prefer_phone_data_max_member(members: list[str], run_id: str) -> str:
+    sorted_members = sorted(members)
+    if run_id:
+        needle = f"/runs/{run_id}/"
+        for member in sorted_members:
+            if needle in member.replace("\\", "/"):
+                return member
+    return sorted_members[0]
 
 
 def _load_phone_run_catalog_root(root: Path) -> dict[str, Any]:
@@ -4206,6 +4295,7 @@ def _validate_phone_response_topup_artifacts(
 
 def _validate_phone_owned_data_export(
     *,
+    status: dict[str, Any],
     export: dict[str, Any] | None,
     data_min_header: list[str],
     data_min_rows: list[dict[str, Any]],
@@ -4213,6 +4303,10 @@ def _validate_phone_owned_data_export(
     data_min_master_rows: list[dict[str, Any]],
     data_max_has_completion: bool,
     data_max_files: list[str],
+    data_max_completion: dict[str, Any] | None,
+    data_max_inventory: dict[str, Any] | None,
+    data_max_inventory_sidecars: dict[str, dict[str, Any]],
+    data_max_file_hashes: dict[str, dict[str, Any]],
     completion: dict[str, Any] | None,
     response_ledger_rows: list[dict[str, Any]],
     failures: list[str],
@@ -4284,6 +4378,20 @@ def _validate_phone_owned_data_export(
                 "strict phone-owned data export Data_max copy is missing reconstruction files: "
                 + ", ".join(missing_data_max)
             )
+        data_max_failures: list[str] = []
+        data_max_warnings: list[str] = []
+        _validate_phone_run_artifact_file_inventory(
+            status=status,
+            completion=data_max_completion or completion,
+            inventory=data_max_inventory,
+            inventory_sidecars=data_max_inventory_sidecars,
+            observed_files=data_max_file_hashes,
+            failures=data_max_failures,
+            warnings=data_max_warnings,
+            expect_artifact_inventory=True,
+        )
+        failures.extend(f"Data_max mirror {message}" for message in data_max_failures)
+        warnings.extend(f"Data_max mirror {message}" for message in data_max_warnings)
 
 
 def _validate_phone_run_artifact_file_inventory(

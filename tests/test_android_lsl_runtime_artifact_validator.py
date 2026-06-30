@@ -656,6 +656,20 @@ def test_android_lsl_runtime_validator_rejects_data_max_catalog_gap(tmp_path: Pa
     assert "phone_run_catalog_entry.json" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_data_max_inventory_hash_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    _write_phone_owned_data_export(run_dir)
+    data_max_file = tmp_path / "phone_owned_exports" / "2.Data_max" / "P001" / "runs" / run_dir.name / "events.csv"
+    data_max_file.write_text("tampered\n", encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_phone_owned_data_export=True)
+
+    assert result.ok is False
+    assert "Data_max mirror artifact_file_inventory.json sha256 mismatch for events.csv" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_accepts_artifact_file_inventory(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -2940,10 +2954,10 @@ def _write_phone_owned_data_export(run_dir: Path) -> None:
     (run_dir / "phone_owned_data_export.json").write_text(json.dumps(export), encoding="utf-8")
     _write_artifact_file_inventory(run_dir)
     data_max.mkdir(parents=True)
-    for filename in sorted({"completion.json", *validator.PHONE_DATA_MAX_REQUIRED_RECONSTRUCTION_FILES}):
-        source = run_dir / filename
-        if source.is_file():
-            (data_max / filename).write_bytes(source.read_bytes())
+    for source in sorted(path for path in run_dir.rglob("*") if path.is_file()):
+        target = data_max / source.relative_to(run_dir)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(source.read_bytes())
 
 
 def _status(*, native: bool) -> dict:

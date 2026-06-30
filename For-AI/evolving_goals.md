@@ -18,6 +18,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `phone_response_ledger.csv`, `phone_topup_plan.json`,
   `phone_topup_materialization.json`, `phone_run_catalog_entry.json`, and
   `phone_owned_data_export.json` must be present in the Data Max run copy.
+- Strict Android `2.Data_max` validation also loads the copied
+  `artifact_file_inventory.json` for the current run id and rehashes the files
+  inside the Data Max mirror itself. Missing listed files, extra mirrored files,
+  or post-copy SHA-256/size drift now fail `--expect-phone-owned-data-export`
+  instead of only checking that similarly named sidecars exist.
 
 - The local HTML dashboard launcher now treats `/api/health` as the fast
   already-running probe before falling back to `/api/state`. This prevents a
