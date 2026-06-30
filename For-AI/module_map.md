@@ -109,6 +109,13 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   optional `pyxdf` is available. It also pairs captured `PPSCommandSignalsV1`
   and `PPSCommandAcksV1` samples by `command_id`, flags missing/extra acks, and
   compares ack payload command/package identity to the source command payload.
+- Sender/receiver command-admin reconciliation is in
+  `validation_protocols/scripts/reconcile_android_command_admin_with_phone_run.py`.
+  It compares Android Controller or PC-admin native command outboxes against the
+  Runner phone `command_diary.jsonl` by command id, target session, sender id,
+  command, package identity, and exact `PPSCommandAcksV1` sample so two-phone
+  or PC-to-phone command rehearsals have an offline artifact gate before live
+  XDF/physical validation claims.
 - Android controller-role scaffolding lives in `PhoneControllerCommands.kt` and
   the `Runner` / `Controller` toggle inside `PhoneRuntimeScreen`. Controller
   mode writes token-gated command samples to

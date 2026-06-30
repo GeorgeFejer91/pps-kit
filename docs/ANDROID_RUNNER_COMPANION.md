@@ -402,6 +402,16 @@ LSL artifact validator rejects Controller or PC-admin command outbox rows whose
 stored `payload` object differs from the serialized command-sample payload, and
 it requires nonblank note text for `operator_note`.
 
+For two-phone or PC-to-phone rehearsals, run
+`validation_protocols/scripts/reconcile_android_command_admin_with_phone_run.py`
+after the sender outbox and Runner phone folder/ZIP exist. It compares
+Controller or PC-admin native-sent command rows against the Runner phone's
+`native_lsl` command diary rows by `command_id`, target session, sender id,
+command, package identity, and exact `PPSCommandAcksV1` sample. This is the
+offline artifact proof that a controller button press or PC helper command was
+received and acknowledged by the phone runner; it is still separate from live
+network/XDF and physical timing proof.
+
 The PC runner's Send To Phone window mirrors that administration path. After a
 phone package is prepared it can send Start, Pause, Resume, Continue, Snapshot,
 Stop After Block, and Note over `pps-android-lsl-command`; the Note command

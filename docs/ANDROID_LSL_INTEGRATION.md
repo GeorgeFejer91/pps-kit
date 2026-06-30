@@ -354,6 +354,15 @@ a matching acknowledgement, validate the Controller outbox as well:
 .\.venv\Scripts\python.exe validation_protocols\scripts\validate_android_lsl_runtime_artifact.py <phone_controller_command_outbox.jsonl> --expect-native-transport --expect-command-acks
 ```
 
+Then reconcile the Controller sender artifact against the Runner phone's run
+folder or exported ZIP. This proves the sender outbox and receiver
+`command_diary.jsonl` agree on the same native command ids, target session,
+sender id, command, package identity, and `PPSCommandAcksV1` sample:
+
+```powershell
+.\.venv\Scripts\python.exe validation_protocols\scripts\reconcile_android_command_admin_with_phone_run.py <phone_controller_command_outbox.jsonl-or-dir> <phone-run-dir-or-zip> --expect-native-sends --expect-command-acks
+```
+
 For a PC-to-phone command check, send commands from the PC helper while the
 Android runner is idle with a synced package or actively playing a block:
 
@@ -376,6 +385,12 @@ Then validate the PC-admin outbox/status pair:
 
 ```powershell
 .\.venv\Scripts\python.exe validation_protocols\scripts\validate_android_lsl_runtime_artifact.py <pc_android_lsl_command_outbox.jsonl> --expect-native-transport --expect-command-acks
+```
+
+Use the same sender/receiver reconciliation for PC-admin rehearsals:
+
+```powershell
+.\.venv\Scripts\python.exe validation_protocols\scripts\reconcile_android_command_admin_with_phone_run.py <pc_android_lsl_command_outbox.jsonl-or-dir> <phone-run-dir-or-zip> --expect-native-sends --expect-command-acks
 ```
 
 To monitor whether another PC can observe the Android runner's LSL evidence

@@ -124,6 +124,16 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `session_id`, and ack payload command/package identity when both streams are
   present, so two-way PC/controller administration evidence can be audited from
   one monitor/XDF capture.
+- Added an offline sender/receiver command-admin reconciliation gate for
+  two-phone and PC-to-phone administration rehearsals.
+  `validation_protocols/scripts/reconcile_android_command_admin_with_phone_run.py`
+  loads Android Controller or PC-admin command outboxes plus a Runner phone run
+  folder/ZIP, then compares native-sent command ids, target sessions, sender
+  ids, commands, package identity, and exact `PPSCommandAcksV1` samples against
+  the phone-run `native_lsl` command diary. This proves sender and receiver
+  artifacts agree before claiming that a controller button press or PC helper
+  command was applied by the phone runner; live LSL/XDF and physical timing
+  validation remain separate gates.
 
 ## 2026-06-29
 

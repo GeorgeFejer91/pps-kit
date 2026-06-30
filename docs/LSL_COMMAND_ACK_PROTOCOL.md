@@ -135,6 +135,18 @@ python validation_protocols/scripts/reconcile_android_lsl_monitor_with_phone_run
 That reconciliation compares the phone-local `lsl_marker_mirror.csv` against
 the PC-observed rich marker rows and numeric trigger sequence.
 
+When the claim is specifically that a Controller phone or the PC admin helper
+sent commands that the Runner phone applied, reconcile the sender outbox
+directly against the Runner phone artifact:
+
+```powershell
+python validation_protocols/scripts/reconcile_android_command_admin_with_phone_run.py <phone_controller_or_pc_admin_outbox_or_dir> <phone-run-dir-or-zip> --expect-native-sends --expect-command-acks
+```
+
+This compares native-sent command ids, target sessions, sender ids, command
+names, package identity, and exact `PPSCommandAcksV1` samples between the
+sender outbox and the phone-run `command_diary.jsonl`.
+
 ## References
 
 - [Lab Streaming Layer overview](https://labstreaminglayer.org/)
