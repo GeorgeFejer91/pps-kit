@@ -56,6 +56,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   mobile package. That gives Android acks, PC-admin outboxes, and offline
   command reconciliation the same non-secret part/session identity spine as the
   phone-owned run package.
+- Live PC-admin ack validation now also requires the ack payload to include the
+  expected echoed non-secret identity fields, not only avoid mismatches. An
+  applied ack missing `command`, `target_session_id`, or any nonblank expected
+  package/participant/part/requester/source field is recorded but marked
+  `invalid_ack`, matching the strict offline outbox validator.
 - Receiver-side Android native command diary rows now preserve
   `command_channels` and the exact received `PPSCommandSignalsV1`
   `command_sample` alongside the outgoing ack evidence. Strict phone-run

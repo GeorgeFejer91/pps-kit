@@ -92,6 +92,8 @@ def test_send_android_lsl_command_writes_auditable_ack_row(tmp_path, monkeypatch
             "package_id": "pkg-001",
             "participant_id": "P001",
             "target_session_id": "part-001",
+            "requested_by": "pc_runner_lsl_admin",
+            "current_pc_source_behavior": "pc_native_lsl_admin_with_local_outbox",
             "state_changed": True,
         },
     )
@@ -222,6 +224,43 @@ def test_send_android_lsl_command_rejects_ack_token_echo(tmp_path, monkeypatch):
     assert "pairing token" in result.row["reason"]
 
 
+def test_send_android_lsl_command_rejects_missing_ack_identity(tmp_path, monkeypatch):
+    _FakeCommandOutlet.sent_signals.clear()
+    _FakeAckInlet.ack = LSLCommandAck(
+        command_id="cmd-missing-identity",
+        session_id="part-001",
+        receiver_id="android_phone",
+        status="applied",
+        reason="missing_package",
+        received_lsl_time=10.1,
+        applied_lsl_time=10.2,
+        ack_lsl_time=10.3,
+        payload={
+            "command": "pause",
+            "target_session_id": "part-001",
+            "requested_by": "pc_runner_lsl_admin",
+            "current_pc_source_behavior": "pc_native_lsl_admin_with_local_outbox",
+        },
+    )
+    monkeypatch.setattr(admin, "LSLCommandOutlet", _FakeCommandOutlet)
+    monkeypatch.setattr(admin, "LSLCommandAckInlet", _FakeAckInlet)
+
+    result = admin.send_android_lsl_command(
+        target_session_id="part-001",
+        token="secret",
+        command="pause",
+        command_id="cmd-missing-identity",
+        package_id="pkg-001",
+        output_dir=tmp_path,
+        require_ack=True,
+    )
+
+    assert result.ok is False
+    assert result.row["status"] == "invalid_ack"
+    assert result.row["ack_received"] is True
+    assert "missing package_id" in result.row["reason"]
+
+
 def test_send_android_lsl_operator_note_requires_note():
     with pytest.raises(ValueError, match="operator_note requires"):
         admin.send_android_lsl_command(
@@ -250,7 +289,13 @@ def test_send_android_lsl_operator_note_writes_note_payload(tmp_path, monkeypatc
         received_lsl_time=10.1,
         applied_lsl_time=10.2,
         ack_lsl_time=10.3,
-        payload={"command": "operator_note", "note": "participant asked for a pause"},
+        payload={
+            "command": "operator_note",
+            "target_session_id": "part-001",
+            "requested_by": "pc_runner_lsl_admin",
+            "current_pc_source_behavior": "pc_native_lsl_admin_with_local_outbox",
+            "note": "participant asked for a pause",
+        },
     )
     monkeypatch.setattr(admin, "LSLCommandOutlet", _FakeCommandOutlet)
     monkeypatch.setattr(admin, "LSLCommandAckInlet", _FakeAckInlet)

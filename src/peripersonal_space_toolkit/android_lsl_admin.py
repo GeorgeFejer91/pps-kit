@@ -350,7 +350,9 @@ def _validate_ack_for_signal(signal: LSLCommandSignal, ack: LSLCommandAck) -> st
     if str(payload.get("token") or payload.get("companion_token") or "").strip():
         return "Received command ack payload echoed the pairing token."
     payload_command = str(payload.get("command") or "").strip()
-    if payload_command and payload_command != signal.command:
+    if not payload_command:
+        return "Received command ack payload is missing command."
+    if payload_command != signal.command:
         return "Received command ack payload command does not match the sent command."
     expected_payload = dict(signal.payload or {})
     identity_fields = (
@@ -365,10 +367,16 @@ def _validate_ack_for_signal(signal: LSLCommandSignal, ack: LSLCommandAck) -> st
     for field in identity_fields:
         expected = str(expected_payload.get(field) or "").strip()
         observed = str(payload.get(field) or "").strip()
-        if expected and observed and observed != expected:
+        if not expected:
+            continue
+        if not observed:
+            return f"Received command ack payload is missing {field}."
+        if observed != expected:
             return f"Received command ack payload {field} does not match the sent command."
     target_session = str(payload.get("target_session_id") or "").strip()
-    if target_session and target_session != signal.session_id:
+    if not target_session:
+        return "Received command ack payload is missing target_session_id."
+    if target_session != signal.session_id:
         return "Received command ack payload target_session_id does not match the sent command."
     return ""
 
