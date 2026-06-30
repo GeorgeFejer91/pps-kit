@@ -179,6 +179,12 @@ class PhoneControllerCommandsTest {
         val descriptions = status.getJSONObject("stream_descriptions")
         assertEquals("pps-android-lsl-stream-descriptions.v1", descriptions.getString("schema"))
         assertEquals("controller", descriptions.getString("role"))
+        assertEquals("pkg-001", descriptions.getString("package_id"))
+        assertEquals("P001", descriptions.getString("participant_id"))
+        assertEquals("part-001", descriptions.getString("target_session_id"))
+        assertEquals("part-001", descriptions.getString("target_part_session_id"))
+        assertEquals("group-001", descriptions.getString("target_session_group_id"))
+        assertEquals("1", descriptions.getString("target_part_number"))
         assertFalse(descriptions.getJSONObject("privacy").getBoolean("demographics_in_stream_name"))
 
         val commandSignals = descriptions.getJSONObject("command_signals")

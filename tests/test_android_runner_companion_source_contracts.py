@@ -178,10 +178,20 @@ def test_android_controller_runtime_status_exports_stream_descriptions() -> None
     assert "private fun resolvePhoneControllerTarget" in controller_commands
     assert "summary.partSessionId.ifBlank { summary.sessionId }" in controller_commands
     assert '.put("stream_descriptions", phoneControllerLslStreamDescriptions(pairing, runPackage, summary))' in controller_commands
+    controller_descriptions = controller_commands.split(
+        "internal fun phoneControllerLslStreamDescriptions",
+        maxsplit=1,
+    )[1].split("private data class PhoneControllerTarget", maxsplit=1)[0]
     assert '.put("target_session_id", target.sessionId)' in controller_commands
     assert '.put("target_part_session_id", target.partSessionId)' in controller_commands
     assert '.put("target_session_group_id", target.sessionGroupId)' in controller_commands
     assert '.put("target_part_number", target.partNumber)' in controller_commands
+    assert '.put("package_id", target.packageId)' in controller_descriptions
+    assert '.put("participant_id", target.participantId)' in controller_descriptions
+    assert '.put("target_session_id", target.sessionId)' in controller_descriptions
+    assert '.put("target_part_session_id", target.partSessionId)' in controller_descriptions
+    assert '.put("target_session_group_id", target.sessionGroupId)' in controller_descriptions
+    assert '.put("target_part_number", target.partNumber)' in controller_descriptions
     assert "selectedSummary?.partSessionId" in main_activity
     assert '"pps-android-lsl-stream-descriptions.v1"' in controller_commands
     assert '"android_controller"' in controller_commands

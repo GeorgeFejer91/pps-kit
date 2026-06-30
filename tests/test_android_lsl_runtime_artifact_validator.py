@@ -1476,6 +1476,21 @@ def test_android_lsl_runtime_validator_rejects_controller_private_stream_identif
     assert "age_years" in failures
 
 
+def test_android_lsl_runtime_validator_rejects_controller_stream_description_identity_drift(tmp_path: Path):
+    controller_dir = tmp_path / "phone-controller"
+    controller_dir.mkdir()
+    status = _controller_status(native=True)
+    status["stream_descriptions"]["target_session_group_id"] = "session-group-999"
+    (controller_dir / "phone_controller_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
+
+    result = validator.validate_run_artifact(controller_dir, expect_native_transport=True)
+
+    assert result.ok is False
+    assert "Android controller LSL stream descriptions target_session_group_id differs from runtime status" in "\n".join(
+        result.failures
+    )
+
+
 def test_android_lsl_runtime_validator_requires_native_controller_send_in_strict_mode(tmp_path: Path):
     controller_dir = tmp_path / "phone-controller"
     controller_dir.mkdir()
@@ -3544,6 +3559,10 @@ def _controller_status(*, native: bool) -> dict:
         "session_id": "session-001",
         "package_id": "pkg-001",
         "participant_id": "P001",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "session-group-001",
+        "target_part_number": "1",
         "role": "controller",
         "native_transport": "liblsl",
         "native_transport_available": native,
@@ -3608,8 +3627,12 @@ def _controller_stream_descriptions() -> dict:
         "schema": "pps-android-lsl-stream-descriptions.v1",
         "runtime_authority": "android_controller",
         "role": "controller",
-        "target_session_id": "part-001",
+        "package_id": "pkg-001",
         "participant_id": "P001",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "session-group-001",
+        "target_part_number": "1",
         "privacy": {
             "default": "metadata_payload_only",
             "participant_demographics_location": "metadata_and_payload_artifacts",

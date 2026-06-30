@@ -2039,6 +2039,20 @@ def _validate_android_controller_lsl_stream_descriptions(
         failures.append("Android controller LSL stream descriptions schema mismatch")
     if descriptions.get("role") != "controller":
         failures.append("Android controller LSL stream descriptions must declare role='controller'")
+    for field in (
+        "package_id",
+        "participant_id",
+        "target_session_id",
+        "target_part_session_id",
+        "target_session_group_id",
+        "target_part_number",
+    ):
+        expected_value = _metadata_value(status.get(field))
+        observed_value = _metadata_value(descriptions.get(field))
+        if expected_value and observed_value and observed_value != expected_value:
+            failures.append(f"Android controller LSL stream descriptions {field} differs from runtime status")
+        elif expected_value and expect_native_transport and not observed_value:
+            failures.append(f"Android controller LSL stream descriptions is missing {field}")
     privacy = descriptions.get("privacy") if isinstance(descriptions.get("privacy"), dict) else {}
     if privacy.get("demographics_in_stream_name") is not False:
         failures.append("Android controller LSL stream descriptions must keep demographics out of stream names")

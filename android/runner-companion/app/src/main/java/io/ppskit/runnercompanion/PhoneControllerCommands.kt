@@ -215,8 +215,12 @@ internal fun phoneControllerLslStreamDescriptions(
         .put("schema", "pps-android-lsl-stream-descriptions.v1")
         .put("runtime_authority", "android_controller")
         .put("role", "controller")
-        .put("target_session_id", target.sessionId)
+        .put("package_id", target.packageId)
         .put("participant_id", target.participantId)
+        .put("target_session_id", target.sessionId)
+        .put("target_part_session_id", target.partSessionId)
+        .put("target_session_group_id", target.sessionGroupId)
+        .put("target_part_number", target.partNumber)
         .put(
             "privacy",
             JSONObject()

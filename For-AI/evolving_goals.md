@@ -105,6 +105,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `ack_validation_reason`; the UI surfaces these as invalid acks instead of a
   reassuring sent state. Strict controller outbox validation recomputes those
   validation fields from the raw command/ack samples.
+- Android Controller-mode `pps-android-lsl-stream-descriptions.v1` now carries
+  the full privacy-safe target identity (`package_id`, `participant_id`,
+  `target_session_id`, `target_part_session_id`,
+  `target_session_group_id`, and `target_part_number`) at the stream-description
+  root. Strict controller validation compares those fields against
+  `phone_controller_runtime_status.json`, so a phone or PC observer can
+  reconstruct which package/part the command outlet is targeting before parsing
+  token-bearing command samples.
 - Focus Mode Send-to-Phone LSL control and Android Controller mode now expose
   `start_part` as `Start Part` alongside `start_experiment` as `Start Full`.
   `start_part` launches the selected/synced package part, while
