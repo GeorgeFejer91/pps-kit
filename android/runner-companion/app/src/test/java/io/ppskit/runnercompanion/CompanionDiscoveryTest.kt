@@ -19,6 +19,10 @@ class CompanionDiscoveryTest {
                 "udp_multicast_group": "$COMPANION_DISCOVERY_MULTICAST_GROUP",
                 "udp_port": $COMPANION_DISCOVERY_PORT,
                 "also_sent_as_limited_broadcast": true,
+                "broadcast_targets": [
+                  "$COMPANION_DISCOVERY_LIMITED_BROADCAST_TARGET",
+                  "$COMPANION_DISCOVERY_DIRECTED_BROADCAST_TARGET"
+                ],
                 "ttl": 1
               },
               "pairing": {
@@ -67,6 +71,10 @@ class CompanionDiscoveryTest {
                 "udp_multicast_group": "$COMPANION_DISCOVERY_MULTICAST_GROUP",
                 "udp_port": $COMPANION_DISCOVERY_PORT,
                 "also_sent_as_limited_broadcast": true,
+                "broadcast_targets": [
+                  "$COMPANION_DISCOVERY_LIMITED_BROADCAST_TARGET",
+                  "$COMPANION_DISCOVERY_DIRECTED_BROADCAST_TARGET"
+                ],
                 "ttl": 1
               },
               "privacy": {
@@ -102,6 +110,10 @@ class CompanionDiscoveryTest {
                 "udp_multicast_group": "$COMPANION_DISCOVERY_MULTICAST_GROUP",
                 "udp_port": $COMPANION_DISCOVERY_PORT,
                 "also_sent_as_limited_broadcast": true,
+                "broadcast_targets": [
+                  "$COMPANION_DISCOVERY_LIMITED_BROADCAST_TARGET",
+                  "$COMPANION_DISCOVERY_DIRECTED_BROADCAST_TARGET"
+                ],
                 "ttl": 1
               },
               "privacy": {
@@ -163,6 +175,10 @@ class CompanionDiscoveryTest {
                 "udp_multicast_group": "$COMPANION_DISCOVERY_MULTICAST_GROUP",
                 "udp_port": $COMPANION_DISCOVERY_PORT,
                 "also_sent_as_limited_broadcast": true,
+                "broadcast_targets": [
+                  "$COMPANION_DISCOVERY_LIMITED_BROADCAST_TARGET",
+                  "$COMPANION_DISCOVERY_DIRECTED_BROADCAST_TARGET"
+                ],
                 "ttl": 1
               },
               "privacy": {
@@ -186,6 +202,23 @@ class CompanionDiscoveryTest {
         assertNull(CompanionDiscoveryAdvertisement.parseOrNull(advertisement))
     }
 
+    @Test
+    fun rejectsDiscoveryAdvertisementWithoutDirectedBroadcastFallback() {
+        val advertisement = discoveryAdvertisementWithExtraRootField(
+            """"diagnostics": {"note": "safe"},""",
+        ).replace(
+            """
+            "broadcast_targets": [
+              "$COMPANION_DISCOVERY_LIMITED_BROADCAST_TARGET",
+              "$COMPANION_DISCOVERY_DIRECTED_BROADCAST_TARGET"
+            ],
+            """.trimIndent(),
+            """"broadcast_targets": ["$COMPANION_DISCOVERY_LIMITED_BROADCAST_TARGET"],""",
+        )
+
+        assertNull(CompanionDiscoveryAdvertisement.parseOrNull(advertisement))
+    }
+
     private fun discoveryAdvertisementWithExtraRootField(extraRootField: String): String =
         """
         {
@@ -197,6 +230,10 @@ class CompanionDiscoveryTest {
             "udp_multicast_group": "$COMPANION_DISCOVERY_MULTICAST_GROUP",
             "udp_port": $COMPANION_DISCOVERY_PORT,
             "also_sent_as_limited_broadcast": true,
+            "broadcast_targets": [
+              "$COMPANION_DISCOVERY_LIMITED_BROADCAST_TARGET",
+              "$COMPANION_DISCOVERY_DIRECTED_BROADCAST_TARGET"
+            ],
             "ttl": 1
           },
           "privacy": {

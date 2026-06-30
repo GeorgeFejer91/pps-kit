@@ -82,6 +82,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   hidden token, participant/demographic/identifier, and LSL stream/source-name
   fields anywhere in the JSON packet. Android discovery parsing mirrors these
   checks before rebuilding a pairing URI from a user-supplied QR/manual token.
+- Companion discovery now advertises and attempts a stronger Wi-Fi/local-hotspot
+  fallback than limited broadcast alone. The token-free packet requires
+  `discovery.broadcast_targets = ["255.255.255.255",
+  "interface_ipv4_directed_broadcasts"]`; the PC advertiser still sends
+  multicast but also sends to limited broadcast plus best-effort private or
+  link-local `/24` directed broadcasts derived from local IPv4 adapters, such
+  as the common phone-hotspot `192.168.43.255` target. Android rejects discovery
+  packets that omit the directed-broadcast fallback while keeping the same
+  no-token/no-demographics/no-stream-name privacy boundary.
 
 ## 2026-06-29
 
@@ -312,13 +321,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   becomes the strict gate after liblsl is actually linked.
 - The PC companion bridge now emits token-free
   `pps-runner-companion-discovery.v1` UDP advertisements to multicast
-  `239.255.77.83:48767` and limited broadcast `255.255.255.255:48767`, so
-  Android phones on same-Wi-Fi or a local phone hotspot can discover the bridge
-  endpoint without reading the QR first. Discovery packets contain host/port,
-  session id, mode, and transport only; they never carry the companion token,
-  demographics, or participant-coded stream names. Android parses and listens
-  for the packet from the pairing screen, but authorization still requires the
-  QR/manual token-bearing pairing URI.
+  `239.255.77.83:48767`, limited broadcast `255.255.255.255:48767`, and
+  best-effort same-subnet directed broadcasts, so Android phones on same-Wi-Fi
+  or a local phone hotspot can discover the bridge endpoint without reading the
+  QR first. Discovery packets contain host/port, session id, mode, and
+  transport only; they never carry the companion token, demographics, or
+  participant-coded stream names. Android parses and listens for the packet
+  from the pairing screen, but authorization still requires the QR/manual
+  token-bearing pairing URI.
 - Android phone-owned mode now exposes an explicit `Runner` / `Controller`
   role toggle. Runner mode keeps the local phone playback/tap-response controls.
   Controller mode hides local run controls and produces token-gated

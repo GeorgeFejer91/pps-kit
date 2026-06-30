@@ -19,6 +19,8 @@ internal const val COMPANION_DISCOVERY_MULTICAST_GROUP = "239.255.77.83"
 internal const val COMPANION_DISCOVERY_PORT = 48767
 internal const val COMPANION_DISCOVERY_NETWORK_SCOPE = "same_lan_or_local_hotspot"
 internal const val COMPANION_DISCOVERY_TOKEN_DELIVERY = "qr_or_manual_uri_only"
+internal const val COMPANION_DISCOVERY_LIMITED_BROADCAST_TARGET = "255.255.255.255"
+internal const val COMPANION_DISCOVERY_DIRECTED_BROADCAST_TARGET = "interface_ipv4_directed_broadcasts"
 private val companionDiscoveryModes = setOf("pc_runner", "phone_export")
 private val companionDiscoveryTransports = setOf("lan", "phone_hotspot", "wifi_direct")
 private val companionDiscoveryTokenFields = setOf("token", "companion_token", "pairing_token", "bearer_token", "x_pps_companion_token")
@@ -90,6 +92,9 @@ internal data class CompanionDiscoveryAdvertisement(
             require(discovery.optString("udp_multicast_group") == COMPANION_DISCOVERY_MULTICAST_GROUP) { "Discovery multicast group mismatch." }
             require(discovery.optInt("udp_port", 0) == COMPANION_DISCOVERY_PORT) { "Discovery UDP port mismatch." }
             require(discovery.optBoolean("also_sent_as_limited_broadcast", false)) { "Discovery broadcast fallback is missing." }
+            val broadcastTargets = discovery.optJSONArray("broadcast_targets")?.toStringSet().orEmpty()
+            require(COMPANION_DISCOVERY_LIMITED_BROADCAST_TARGET in broadcastTargets) { "Discovery limited broadcast target is missing." }
+            require(COMPANION_DISCOVERY_DIRECTED_BROADCAST_TARGET in broadcastTargets) { "Discovery directed broadcast fallback is missing." }
             require(discovery.optInt("ttl", 0) == 1) { "Discovery TTL must be local-network only." }
             val privacy = root.optJSONObject("privacy") ?: throw IllegalArgumentException("Discovery privacy metadata is missing.")
             require(!privacy.optBoolean("contains_pairing_token", true)) { "Discovery privacy reports pairing-token leakage." }
@@ -150,6 +155,12 @@ private fun assertNoDiscoveryPrivacyLeakage(value: Any?) {
         }
     }
 }
+
+private fun JSONArray.toStringSet(): Set<String> =
+    (0 until length()).mapNotNull { index ->
+        val value = optString(index).trim()
+        if (value.isBlank()) null else value
+    }.toSet()
 
 internal suspend fun listenForCompanionDiscoveryOnce(
     context: Context,

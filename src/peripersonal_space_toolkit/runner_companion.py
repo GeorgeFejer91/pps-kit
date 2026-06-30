@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import ipaddress
 import json
 from dataclasses import dataclass
 from io import BytesIO
@@ -30,6 +31,9 @@ DISCOVERY_PORT = 48767
 DISCOVERY_INTERVAL_S = 1.0
 DISCOVERY_NETWORK_SCOPE = "same_lan_or_local_hotspot"
 DISCOVERY_TOKEN_DELIVERY = "qr_or_manual_uri_only"
+DISCOVERY_LIMITED_BROADCAST_TARGET = "255.255.255.255"
+DISCOVERY_DIRECTED_BROADCAST_TARGET = "interface_ipv4_directed_broadcasts"
+DISCOVERY_BROADCAST_TARGETS = (DISCOVERY_LIMITED_BROADCAST_TARGET, DISCOVERY_DIRECTED_BROADCAST_TARGET)
 DISCOVERY_ALLOWED_MODES = frozenset({"pc_runner", "phone_export"})
 DISCOVERY_ALLOWED_TRANSPORTS = frozenset({"lan", "phone_hotspot", "wifi_direct"})
 DISCOVERY_FORBIDDEN_TOKEN_FIELDS = frozenset(
@@ -207,6 +211,7 @@ def build_companion_discovery_payload(
             "udp_multicast_group": DISCOVERY_MULTICAST_GROUP,
             "udp_port": DISCOVERY_PORT,
             "also_sent_as_limited_broadcast": True,
+            "broadcast_targets": list(DISCOVERY_BROADCAST_TARGETS),
             "ttl": 1,
         },
         "pairing": {
@@ -251,6 +256,15 @@ def validate_companion_discovery_payload(payload: dict[str, Any]) -> None:
         raise ValueError("Discovery UDP port mismatch.")
     if discovery.get("also_sent_as_limited_broadcast") is not True:
         raise ValueError("Discovery payload must declare limited-broadcast fallback.")
+    broadcast_targets = discovery.get("broadcast_targets")
+    if not isinstance(broadcast_targets, list) or not all(
+        isinstance(target, str) and target.strip() for target in broadcast_targets
+    ):
+        raise ValueError("Discovery payload must declare broadcast targets.")
+    if DISCOVERY_LIMITED_BROADCAST_TARGET not in broadcast_targets:
+        raise ValueError("Discovery payload must include the limited broadcast target.")
+    if DISCOVERY_DIRECTED_BROADCAST_TARGET not in broadcast_targets:
+        raise ValueError("Discovery payload must include directed interface broadcast fallback.")
     if int(discovery.get("ttl") or 0) != 1:
         raise ValueError("Discovery multicast TTL must be 1 for local-network scope.")
 
@@ -326,6 +340,7 @@ class RunnerCompanionDiscoveryAdvertiser:
         self.multicast_group = str(multicast_group)
         self.port = int(port)
         self.interval_s = max(0.25, float(interval_s))
+        self.broadcast_targets = _companion_discovery_broadcast_targets()
         self.sent_count = 0
         self.last_error = ""
         self._stop = threading.Event()
@@ -350,6 +365,7 @@ class RunnerCompanionDiscoveryAdvertiser:
             "enabled": self._thread is not None and self._thread.is_alive(),
             "multicast_group": self.multicast_group,
             "port": self.port,
+            "broadcast_targets": list(self.broadcast_targets),
             "interval_s": self.interval_s,
             "sent_count": self.sent_count,
             "last_error": self.last_error,
@@ -368,19 +384,71 @@ class RunnerCompanionDiscoveryAdvertiser:
 
     def _send(self, data: bytes) -> None:
         errors: list[str] = []
+        sent_any = False
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as udp:
             udp.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 1)
             try:
                 udp.sendto(data, (self.multicast_group, self.port))
+                sent_any = True
             except Exception as exc:  # noqa: BLE001 - try limited broadcast below.
                 errors.append(f"multicast: {exc}")
             udp.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-            try:
-                udp.sendto(data, ("255.255.255.255", self.port))
-            except Exception as exc:  # noqa: BLE001 - surfaced as nonfatal advertiser status.
-                errors.append(f"broadcast: {exc}")
-        if len(errors) >= 2:
+            for target in self.broadcast_targets:
+                try:
+                    udp.sendto(data, (target, self.port))
+                    sent_any = True
+                except Exception as exc:  # noqa: BLE001 - surfaced as nonfatal advertiser status.
+                    errors.append(f"broadcast {target}: {exc}")
+        if not sent_any:
             raise RuntimeError("; ".join(errors))
+
+
+def _companion_discovery_broadcast_targets() -> tuple[str, ...]:
+    """Return limited plus best-effort same-subnet broadcast destinations."""
+
+    targets = {DISCOVERY_LIMITED_BROADCAST_TARGET}
+    targets.update(_best_effort_directed_broadcast_targets())
+    return tuple(sorted(targets))
+
+
+def _best_effort_directed_broadcast_targets(local_ipv4_addresses: tuple[str, ...] | None = None) -> tuple[str, ...]:
+    """Derive common /24 directed broadcasts for private local IPv4 adapters."""
+
+    targets: set[str] = set()
+    for raw_address in local_ipv4_addresses or _local_ipv4_addresses():
+        try:
+            address = ipaddress.ip_address(str(raw_address).strip())
+        except ValueError:
+            continue
+        if address.version != 4 or address.is_loopback or address.is_unspecified or address.is_multicast:
+            continue
+        if not address.is_private and not address.is_link_local:
+            continue
+        octets = str(address).split(".")
+        if len(octets) != 4:
+            continue
+        octets[-1] = "255"
+        target = ".".join(octets)
+        if target != str(address):
+            targets.add(target)
+    return tuple(sorted(targets))
+
+
+def _local_ipv4_addresses() -> tuple[str, ...]:
+    addresses: set[str] = set()
+    try:
+        for info in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET):
+            if len(info) >= 5 and len(info[4]) >= 1:
+                addresses.add(str(info[4][0]))
+    except OSError:
+        pass
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as probe:
+            probe.connect(("8.8.8.8", 80))
+            addresses.add(str(probe.getsockname()[0]))
+    except OSError:
+        pass
+    return tuple(sorted(addresses))
 
 
 def pairing_qr_png_bytes(uri: str) -> bytes:

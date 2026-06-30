@@ -149,6 +149,9 @@ def test_android_companion_discovery_preserves_local_hotspot_privacy_contract() 
     assert 'COMPANION_DISCOVERY_TOKEN_DELIVERY = "qr_or_manual_uri_only"' in discovery
     assert 'setOf("lan", "phone_hotspot", "wifi_direct")' in discovery
     assert 'optBoolean("also_sent_as_limited_broadcast", false)' in discovery
+    assert 'COMPANION_DISCOVERY_LIMITED_BROADCAST_TARGET = "255.255.255.255"' in discovery
+    assert 'COMPANION_DISCOVERY_DIRECTED_BROADCAST_TARGET = "interface_ipv4_directed_broadcasts"' in discovery
+    assert 'optJSONArray("broadcast_targets")' in discovery
     assert 'optInt("ttl", 0) == 1' in discovery
     assert 'optBoolean("contains_pairing_token", true)' in discovery
     assert 'optBoolean("contains_participant_demographics", true)' in discovery

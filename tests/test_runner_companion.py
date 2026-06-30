@@ -7,6 +7,8 @@ import pytest
 
 from peripersonal_space_toolkit.dashboard_backend.security import TOKEN_HEADER
 from peripersonal_space_toolkit.runner_companion import (
+    DISCOVERY_DIRECTED_BROADCAST_TARGET,
+    DISCOVERY_LIMITED_BROADCAST_TARGET,
     DISCOVERY_SCHEMA,
     HEALTH_SCHEMA,
     SNAPSHOT_SCHEMA,
@@ -19,6 +21,7 @@ from peripersonal_space_toolkit.runner_companion import (
     create_runner_companion_app,
     pairing_qr_png_bytes,
     validate_companion_discovery_payload,
+    _best_effort_directed_broadcast_targets,
 )
 from peripersonal_space_toolkit.mobile_phone_runtime import (
     MOBILE_PACKAGE_LIST_SCHEMA,
@@ -233,6 +236,10 @@ def test_discovery_payload_advertises_endpoint_without_pairing_token():
     assert payload["schema"] == DISCOVERY_SCHEMA
     assert payload["network_scope"] == "same_lan_or_local_hotspot"
     assert payload["discovery"]["also_sent_as_limited_broadcast"] is True
+    assert payload["discovery"]["broadcast_targets"] == [
+        DISCOVERY_LIMITED_BROADCAST_TARGET,
+        DISCOVERY_DIRECTED_BROADCAST_TARGET,
+    ]
     assert payload["pairing"]["host"] == "192.168.43.1"
     assert payload["pairing"]["token_required"] is True
     assert payload["pairing"]["token_delivery"] == "qr_or_manual_uri_only"
@@ -253,6 +260,10 @@ def test_discovery_payload_validates_same_lan_or_hotspot_contract():
     assert payload["network_scope"] == "same_lan_or_local_hotspot"
     assert payload["discovery"]["udp_multicast_group"] == "239.255.77.83"
     assert payload["discovery"]["udp_port"] == 48767
+    assert payload["discovery"]["broadcast_targets"] == [
+        "255.255.255.255",
+        "interface_ipv4_directed_broadcasts",
+    ]
     assert payload["discovery"]["ttl"] == 1
     assert payload["privacy"]["contains_pairing_token"] is False
     assert payload["privacy"]["contains_participant_demographics"] is False
@@ -309,6 +320,22 @@ def test_discovery_payload_json_rejects_unknown_transport():
         )
 
 
+def test_discovery_payload_json_rejects_missing_directed_broadcast_fallback():
+    payload = build_companion_discovery_payload(host="127.0.0.1", port=8767, session_id="session-001")
+    payload["discovery"]["broadcast_targets"] = ["255.255.255.255"]
+
+    with pytest.raises(ValueError, match="directed interface broadcast"):
+        companion_discovery_payload_json(payload)
+
+
+def test_discovery_best_effort_directed_broadcast_targets_ignore_public_and_loopback_addresses():
+    targets = _best_effort_directed_broadcast_targets(
+        ("127.0.0.1", "8.8.8.8", "192.168.43.1", "10.0.2.15", "169.254.7.33", "not-an-ip"),
+    )
+
+    assert targets == ("10.0.2.255", "169.254.7.255", "192.168.43.255")
+
+
 def test_discovery_payload_json_requires_transfer_id_for_phone_export():
     with pytest.raises(ValueError, match="require a transfer_id"):
         build_companion_discovery_payload(
@@ -336,6 +363,7 @@ def test_service_discovery_payload_can_advertise_phone_export_transfer():
     assert payload["pairing"]["transfer_id"] == "transfer-001"
     assert payload["pairing"]["transport"] == "phone_hotspot"
     assert "token" not in payload["pairing"]
+    assert DISCOVERY_LIMITED_BROADCAST_TARGET in service.discovery.status()["broadcast_targets"]
 
 
 def test_health_is_public_but_snapshot_requires_token():
