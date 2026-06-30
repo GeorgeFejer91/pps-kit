@@ -259,8 +259,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `publication/behavior-research-methods/manuscript/render_pdf.ps1` sets the
   local Springer template paths, runs the `pdflatex`/`bibtex`/rerun sequence,
   checks for unresolved references/citations, and cleans auxiliary files by
-  default; `render_pdf.cmd` is the stable double-click/PC wrapper. Use this
-  route on this PC because MiKTeX `latexmk.exe` currently cannot find Perl.
+  default; `render_pdf.cmd` is the manuscript-local double-click wrapper.
+  `windows/Render_BRM_Manuscript_PDF.ps1` and
+  `windows/Render_BRM_Manuscript_PDF.cmd` are the permanent repo-root PC entry
+  points. The renderer now repeats final `pdflatex` passes when LaTeX reports
+  changed labels/citations. Use this route on this PC because MiKTeX
+  `latexmk.exe` currently cannot find Perl.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

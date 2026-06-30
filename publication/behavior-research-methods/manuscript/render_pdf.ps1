@@ -2,7 +2,8 @@ param(
     [string]$Main = "main.tex",
     [switch]$OpenPdf,
     [switch]$KeepAux,
-    [switch]$UseLatexMk
+    [switch]$UseLatexMk,
+    [int]$MaxPdflatexReruns = 5
 )
 
 $ErrorActionPreference = "Stop"
@@ -14,6 +15,10 @@ $MainPath = Join-Path $ScriptDir $Main
 
 if (-not (Test-Path -LiteralPath $MainPath -PathType Leaf)) {
     throw "Cannot find manuscript source: $MainPath"
+}
+
+if ($MaxPdflatexReruns -lt 2) {
+    throw "MaxPdflatexReruns must be at least 2 so bibliography and cross-reference passes can settle."
 }
 
 function Add-TexPath {
@@ -60,6 +65,26 @@ function Remove-AuxFiles {
     }
 }
 
+function Test-LogForPattern {
+    param(
+        [string]$Path,
+        [string[]]$Patterns
+    )
+
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        return $false
+    }
+
+    $log = Get-Content -LiteralPath $Path -Raw
+    foreach ($pattern in $Patterns) {
+        if ($log -match $pattern) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
 Push-Location $ScriptDir
 try {
     Add-TexPath -Name "TEXINPUTS" -Value "$TemplateDir//"
@@ -72,10 +97,25 @@ try {
     if ($UseLatexMk) {
         Invoke-Step "latexmk" @("-pdf", $Main)
     } else {
+        $rerunPatterns = @(
+            "Package natbib Warning: Citation\(s\) may have changed",
+            "Label\(s\) may have changed",
+            "Rerun to get cross-references right"
+        )
+
         Invoke-Step "pdflatex" @("-interaction=nonstopmode", "-halt-on-error", $Main)
         Invoke-Step "bibtex" @($baseName)
-        Invoke-Step "pdflatex" @("-interaction=nonstopmode", "-halt-on-error", $Main)
-        Invoke-Step "pdflatex" @("-interaction=nonstopmode", "-halt-on-error", $Main)
+
+        $pass = 0
+        $needsRerun = $true
+        while ($needsRerun -and $pass -lt $MaxPdflatexReruns) {
+            $pass += 1
+            Invoke-Step "pdflatex" @("-interaction=nonstopmode", "-halt-on-error", $Main)
+            $needsRerun = Test-LogForPattern -Path $logPath -Patterns $rerunPatterns
+            if ($needsRerun -and $pass -lt $MaxPdflatexReruns) {
+                Write-Host ">> LaTeX requested another reference pass ($pass/$MaxPdflatexReruns)."
+            }
+        }
     }
 
     if (-not (Test-Path -LiteralPath $pdfPath -PathType Leaf)) {
@@ -83,7 +123,6 @@ try {
     }
 
     if (Test-Path -LiteralPath $logPath -PathType Leaf) {
-        $log = Get-Content -LiteralPath $logPath -Raw
         $badPatterns = @(
             "LaTeX Warning: There were undefined references",
             "Package natbib Warning: There were undefined citations",
@@ -92,7 +131,7 @@ try {
             "Rerun to get cross-references right"
         )
         foreach ($pattern in $badPatterns) {
-            if ($log -match $pattern) {
+            if (Test-LogForPattern -Path $logPath -Patterns @($pattern)) {
                 throw "PDF was created, but the LaTeX log still requests attention: $pattern"
             }
         }

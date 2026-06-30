@@ -51,6 +51,10 @@ manuscript for PPS Toolkit.
   Springer template paths, runs the manual `pdflatex`/`bibtex`/rerun sequence,
   validates the log, and leaves `main.pdf` for local review.
 - `render_pdf.cmd`: double-clickable wrapper around `render_pdf.ps1`.
+- `../../../windows/Render_BRM_Manuscript_PDF.ps1` and
+  `../../../windows/Render_BRM_Manuscript_PDF.cmd`: permanent repo-root PC
+  entry points that delegate to `render_pdf.ps1` without requiring the user to
+  `cd` into this manuscript folder.
 - `.gitignore`: ignores local LaTeX render outputs, including `main.pdf`, so
   repeated PC renders do not pollute the tracked manuscript source set.
 - `latexmkrc`: local build configuration that points LaTeX/BibTeX at the
@@ -65,11 +69,21 @@ From this folder:
 .\render_pdf.ps1
 ```
 
+From the repository root, use the permanent PC path:
+
+```powershell
+.\windows\Render_BRM_Manuscript_PDF.ps1
+```
+
 The script sets the Springer template path, runs `pdflatex`/`bibtex`/reruns on
-Windows, verifies that no unresolved references remain, and removes auxiliary
+Windows, repeats extra `pdflatex` passes when LaTeX says labels or citations
+changed, verifies that no unresolved references remain, and removes auxiliary
 build files by default while leaving `main.pdf` for local review. Use
-`.\render_pdf.cmd` for a stable double-clickable PC entry point, `-OpenPdf` to
-open the rendered PDF, or `-KeepAux` when debugging LaTeX.
+`.\render_pdf.cmd` from this folder or
+`.\windows\Render_BRM_Manuscript_PDF.cmd` from the repository root for a stable
+double-clickable PC entry point, `-OpenPdf` to open the rendered PDF, or
+`-KeepAux` when debugging LaTeX. Use `-MaxPdflatexReruns <n>` only when a large
+table/refactor needs more than the default five final passes.
 
 `latexmk -pdf main.tex` remains supported when MiKTeX has a Perl engine
 installed; on this PC, `render_pdf.ps1` is the durable build path because
