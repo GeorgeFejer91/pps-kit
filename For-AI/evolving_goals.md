@@ -382,16 +382,23 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `pc_android_lsl_command_outbox.jsonl` plus
   `pc_android_lsl_admin_status.json`. This is the PC counterpart to Android
   Controller mode and is the intended non-UI sender seam for PC-runner-to-phone
-  start/pause/resume/snapshot/operator-note validation. The Android LSL artifact validator
-  now accepts the PC-admin status/outbox pair as a first-class artifact type,
-  verifies the same command/ack schema/channel order and token payload, can
-  require recorded native LSL sends, and can require matching
+  start/pause/resume/snapshot/operator-note validation. The Android LSL
+  artifact validator now accepts the PC-admin status/outbox pair as a
+  first-class artifact type, verifies the same command/ack schema/channel order
+  and token payload, can require recorded native LSL sends, and can require matching
   `PPSCommandAcksV1` rows for PC-runner-to-phone rehearsals. The native
   runner's `Send To Phone` window now exposes a Phone LSL Control strip after
   package preparation; it targets the prepared package part-session id by
   default, sends Start/Pause/Resume/Snapshot/Stop-after-block/Note through the
   same helper on a worker thread, requires note text for `operator_note`, and
   saves the PC-admin outbox/status under runner logs for that phone transfer.
+- PC-side Android LSL monitor validation now checks observed
+  `PPSCommandSignalsV1` payloads rather than only command ids/names. Monitor
+  event rows must preserve row `payload_json` consistent with the serialized
+  command sample payload, command-signal payloads must carry the pairing token,
+  and observed `operator_note` commands must include nonblank note text. This
+  lets a PC observer artifact prove what command payload was visible on the
+  network, not only what the sender outbox says it attempted to send.
 - Android phone-owned runs now maintain an app-private participant/session
   catalog in addition to each run folder. Every partial and completed
   `writeLocalArtifact` call writes `phone_run_catalog_entry.json` into the run

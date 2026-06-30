@@ -170,6 +170,64 @@ def test_build_android_lsl_monitor_row_extracts_command_signal_fields():
     assert json.loads(row["payload_json"])["token"] == "secret"
 
 
+def test_build_android_lsl_monitor_row_preserves_operator_note_payload():
+    row = monitor.build_android_lsl_monitor_row(
+        stream_key="command_signals",
+        sample=_command_signal_sample(
+            command_id="cmd-note-1",
+            command="operator_note",
+            payload={"token": "secret", "package_id": "pkg-001", "note": "participant asked for a pause"},
+        ),
+        lsl_timestamp=2.1,
+        source_id="pc-runner",
+    )
+
+    assert row["command"] == "operator_note"
+    payload = json.loads(row["payload_json"])
+    assert payload["token"] == "secret"
+    assert payload["note"] == "participant asked for a pause"
+
+
+def test_validator_rejects_pc_monitor_operator_note_payload_drift(tmp_path: Path):
+    rows = [
+        monitor.build_android_lsl_monitor_row(
+            stream_key="command_signals",
+            sample=_command_signal_sample(command_id="cmd-note-2", command="operator_note"),
+            lsl_timestamp=2.2,
+        ),
+    ]
+    rows[0]["payload_json"] = json.dumps(
+        {"token": "secret", "package_id": "pkg-001", "note": "participant asked for a pause"},
+        sort_keys=True,
+    )
+    report = monitor.build_android_lsl_monitor_report(rows, required_streams=[], output_dir=tmp_path)
+    monitor.write_android_lsl_monitor_artifacts(tmp_path, rows, report=report)
+
+    result = validator.validate_run_artifact(tmp_path)
+
+    assert result.ok is False
+    failures = "\n".join(result.failures)
+    assert "operator_note command signal payload is missing note" in failures
+    assert "payload_json differs from command signal sample payload" in failures
+
+
+def test_validator_rejects_pc_monitor_command_signal_without_token(tmp_path: Path):
+    rows = [
+        monitor.build_android_lsl_monitor_row(
+            stream_key="command_signals",
+            sample=_command_signal_sample(command_id="cmd-no-token", command="pause", payload={"package_id": "pkg-001"}),
+            lsl_timestamp=2.3,
+        ),
+    ]
+    report = monitor.build_android_lsl_monitor_report(rows, required_streams=[], output_dir=tmp_path)
+    monitor.write_android_lsl_monitor_artifacts(tmp_path, rows, report=report)
+
+    result = validator.validate_run_artifact(tmp_path)
+
+    assert result.ok is False
+    assert "command signal payload is missing the pairing token" in "\n".join(result.failures)
+
+
 def test_validator_rejects_pc_monitor_stream_description_drift(tmp_path: Path):
     rows = [
         monitor.build_android_lsl_monitor_row(
@@ -212,7 +270,12 @@ def test_validator_requires_monitor_samples_in_strict_mode(tmp_path: Path):
     assert "missing required streams" in "\n".join(result.failures)
 
 
-def _command_signal_sample(*, command_id: str, command: str) -> list[str]:
+def _command_signal_sample(
+    *,
+    command_id: str,
+    command: str,
+    payload: dict[str, str] | None = None,
+) -> list[str]:
     return command_to_sample(
         LSLCommandSignal(
             command_id=command_id,
@@ -220,7 +283,7 @@ def _command_signal_sample(*, command_id: str, command: str) -> list[str]:
             sender_id="pc_runner",
             command=command,
             issued_lsl_time=1.5,
-            payload={"token": "secret", "package_id": "pkg-001"},
+            payload=payload or {"token": "secret", "package_id": "pkg-001"},
         )
     )
 

@@ -318,7 +318,10 @@ stream while commands are being sent:
 
 Add `--require-commands` when the rehearsal is expected to capture a PC-runner
 or Controller-phone `PPSCommandSignalsV1` command stream in addition to the
-phone runner's acknowledgement stream.
+phone runner's acknowledgement stream. Monitor validation now parses observed
+command-signal payloads, requires a pairing token, checks the row `payload_json`
+against the serialized sample payload, and requires nonblank note text for
+observed `operator_note` commands.
 
 Then validate the monitor report:
 

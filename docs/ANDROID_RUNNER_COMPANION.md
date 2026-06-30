@@ -294,7 +294,10 @@ PC-side monitoring with `pps-android-lsl-monitor` observes
 `stream_descriptions` for those four observer-side inlets, and monitor event
 rows extract command-signal ids, sender ids, command names, and payload JSON so
 PC-runner or Controller-phone commands can be reconstructed together with the
-phone runner's acknowledgements.
+phone runner's acknowledgements. Strict monitor validation now parses observed
+command-signal payloads, requires token evidence, compares row `payload_json`
+against the serialized sample payload, and requires note text when the observed
+command is `operator_note`.
 
 Controller mode always writes `phone_controller_command_outbox.jsonl` as the
 local audit trail. In a native liblsl validation build it also keeps a

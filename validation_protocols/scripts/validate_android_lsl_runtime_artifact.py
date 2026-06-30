@@ -3758,6 +3758,24 @@ def _validate_pc_monitor_event_row(row: dict[str, Any], *, row_index: int, failu
             failures.append(f"{prefix} sender_id differs from command signal sample")
         if row.get("command") and sample[4] != row.get("command"):
             failures.append(f"{prefix} command differs from command signal sample")
+        payload = _parse_json_object(
+            str(sample[6] or "{}"),
+            f"{prefix} command signal payload",
+            failures,
+        )
+        row_payload = _parse_json_object(str(row.get("payload_json") or "{}"), f"{prefix} payload_json", failures)
+        if payload is not None:
+            token = str(payload.get("token") or payload.get("companion_token") or "")
+            if not token:
+                failures.append(f"{prefix} command signal payload is missing the pairing token")
+            if str(sample[4] or "") == "operator_note" and not str(payload.get("note") or "").strip():
+                failures.append(f"{prefix} operator_note command signal payload is missing note")
+        if (
+            payload is not None
+            and row_payload is not None
+            and _canonical_json(payload) != _canonical_json(row_payload)
+        ):
+            failures.append(f"{prefix} payload_json differs from command signal sample payload")
     else:
         failures.append(f"{prefix} unsupported stream_key {stream_key!r}")
 
