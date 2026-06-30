@@ -375,3 +375,46 @@ Methods manuscript draft. It is a working audit, not manuscript text.
 - The design-run-recreation pathway is a manuscript-level guide; the final
   public repository should also expose the same path in human-facing
   documentation.
+
+## Iteration 11: GUI Gate And Artifact Boundary Pass
+
+### Main Critiques
+
+- A fresh GUI-label audit found that the manuscript described segment hashes and
+  artifact layers, but the evidence matrix did not name the visible
+  `Apply Profile/Create Project Folder`, `Bake`, `Accept Blocks`, `Prepare
+  Output Folder`, and `Save Design and Start Experiment Runner` controls as
+  their own methodological boundary.
+- That omission mattered because the user's core framing is a full suite for
+  designing, running, and recreating experiments. The bake/apply/prepare gates
+  are what turn an inspectable design into executable source WAVs, sequence
+  manifests, baseline/catch assets, repetition pools, accepted block schedules,
+  participant-order plans, and runner packages.
+- A Consensus search for BRM-style behavioral software reproducibility and
+  experiment builders reinforced the point: reusable tools should lower
+  programming barriers while preserving timing/task logic, self-documenting
+  task definitions, operational research assets, and pre-data validation.
+
+### Resolution In This Revision
+
+- Added a full `evidence_matrix.csv` row for `Dashboard workflow: apply, bake,
+  accept, and prepare gates`, bringing the matrix to 44 source-pointer rows.
+- Added a condensed matrix row for `Artifact materialization gates`.
+- Added a PPS Toolkit overview paragraph explaining that `Apply`, `Bake`,
+  `Accept`, `Prepare`, and `Start Experiment Runner` actions are methods gates:
+  they materialize durable artifacts and mark downstream products stale after
+  upstream changes.
+- Added a reporting-checklist row requiring manuscripts or shared profiles to
+  report applied profile/project id, Segment 1-6 bake/prepare actions, consumed
+  upstream hashes, written manifests, accepted block state, stale warnings, and
+  runner handoff package id.
+- Recompiled the Springer `sn-apa` manuscript to a 27-page PDF with no
+  unresolved citations/references, rerun warnings, float-too-large warnings, or
+  overfull boxes in the final log scan; generated LaTeX artifacts and the PDF
+  were removed afterward.
+
+### Residual Concerns
+
+- Gate completion validates artifact consistency and provenance only. It does
+  not validate hardware timing, tactile mechanical onset, acoustic output, or
+  the theoretical adequacy of the selected PPS design.

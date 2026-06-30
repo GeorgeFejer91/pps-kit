@@ -119,6 +119,19 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   recreation, and native acquisition) and separates design, profile-recreation,
   validation, and deidentified participant archive layers. This strengthens the
   paper's methods/tutorial fit without adding participant-effect claims.
+- Continued the BRM manuscript self-review loop with a GUI gate/artifact
+  boundary pass. A dashboard-label audit found that visible apply/bake/accept
+  and prepare controls were described indirectly but not represented as their
+  own methods decision. `main.tex`, the reporting checklist, and
+  `evidence_matrix.csv` now state that `Apply`, `Bake`, `Accept Blocks`,
+  `Prepare Output Folder`, and `Save Design and Start Experiment Runner`
+  materialize durable artifacts, upstream hashes, stale-state boundaries, and
+  runner handoff packages. The matrix now has 44 rows and still treats gate
+  completion as artifact consistency/provenance evidence, not hardware timing,
+  tactile-onset, or PPS-effect validation. The Springer `sn-apa` source
+  compiles to a 27-page PDF with no unresolved citation/reference, rerun,
+  float-too-large, or overfull-box warnings after this pass; generated LaTeX
+  artifacts and the PDF were removed afterward.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation
