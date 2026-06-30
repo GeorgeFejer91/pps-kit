@@ -89,6 +89,11 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   to package ids, part-session ids, reconstruction hashes, local artifact
   filenames, command-diary counts, LSL status, and privacy-safe participant
   metadata summaries.
+- Phone-owned run folders also include `artifact_file_inventory.json` plus
+  `artifact_file_inventory.csv`. The inventory excludes itself, but lists the
+  rest of the run-folder files with relative paths, byte sizes, SHA-256 hashes,
+  and modification timestamps so ZIP exports and app-private folders can be
+  checked for missing, extra, or tampered files.
 - Completed phone-owned run folders now also write
   `phone_owned_data_export.json` and an app-private `phone_owned_exports/`
   snapshot. `1.Data_min/` contains a participant CSV and
@@ -212,7 +217,10 @@ Required validation levels:
     `pps-android-lsl-command`, and PC-monitor
     `pc_android_lsl_monitor_report.json` /
     `pc_android_lsl_monitor_events.jsonl` artifacts from
-    `pps-android-lsl-monitor`. Add `--expect-phone-owned-data-export` for
+    `pps-android-lsl-monitor`. Add `--expect-artifact-inventory` for new
+    phone-run folders/ZIPs where the file inventory should prove relative
+    paths, byte sizes, and SHA-256 hashes. Add
+    `--expect-phone-owned-data-export` for
     completed phone-owned runs or PC-side mobile completion upload mirrors when
     the `1.Data_min`/`2.Data_max` phone export layer should be present.
 3. Emulator smoke test: install APK, run a phone-owned package, export ZIP, and

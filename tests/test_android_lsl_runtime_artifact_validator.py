@@ -272,6 +272,31 @@ def test_android_lsl_runtime_validator_requires_phone_owned_data_export_when_exp
     assert "phone-owned data export is missing" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_accepts_artifact_file_inventory(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    _write_artifact_file_inventory(run_dir)
+
+    result = validator.validate_run_artifact(run_dir, expect_artifact_inventory=True)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_rejects_artifact_file_inventory_hash_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    _write_artifact_file_inventory(run_dir)
+    (run_dir / "events.csv").write_text("tampered\n", encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_artifact_inventory=True)
+
+    assert result.ok is False
+    assert "sha256 mismatch for events.csv" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_accepts_phone_event_diary(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -1493,6 +1518,47 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
     (run_dir / "phone_topup_block.wav").write_bytes(topup_wav_bytes)
     (materialized_dir / "phone_materialized_block_01.json").write_text(json.dumps(materialization), encoding="utf-8")
     (materialized_dir / "phone_materialized_block_01.wav").write_bytes(wav_bytes)
+
+
+def _write_artifact_file_inventory(run_dir: Path) -> None:
+    completion_path = run_dir / "completion.json"
+    completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    completion["completed"] = True
+    completion["artifact_file_inventory_artifact"] = {
+        "filename": "artifact_file_inventory.json",
+        "csv_filename": "artifact_file_inventory.csv",
+        "schema": "pps-android-phone-run-artifact-file-inventory.v1",
+        "self_included": False,
+    }
+    completion_path.write_text(json.dumps(completion), encoding="utf-8")
+    rows = []
+    for path in sorted(item for item in run_dir.rglob("*") if item.is_file()):
+        rel = path.relative_to(run_dir).as_posix()
+        if rel in {"artifact_file_inventory.json", "artifact_file_inventory.csv"}:
+            continue
+        rows.append(
+            {
+                "relative_path": rel,
+                "size_bytes": path.stat().st_size,
+                "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                "modified_unix_ms": int(path.stat().st_mtime * 1000),
+            }
+        )
+    inventory = {
+        "schema": "pps-android-phone-run-artifact-file-inventory.v1",
+        "run_id": "phone-run-001",
+        "package_id": "pkg-001",
+        "complete": True,
+        "generated_unix_ms": 1780000000000,
+        "self_included": False,
+        "file_count": len(rows),
+        "files": rows,
+    }
+    (run_dir / "artifact_file_inventory.json").write_text(json.dumps(inventory), encoding="utf-8")
+    with (run_dir / "artifact_file_inventory.csv").open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=["relative_path", "size_bytes", "sha256", "modified_unix_ms"])
+        writer.writeheader()
+        writer.writerows(rows)
 
 
 def _write_phone_owned_data_export(run_dir: Path) -> None:

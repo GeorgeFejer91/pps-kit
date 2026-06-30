@@ -153,6 +153,10 @@ private enum class PhoneRuntimeRole {
     Controller,
 }
 
+private const val PHONE_RUN_ARTIFACT_FILE_INVENTORY_SCHEMA = "pps-android-phone-run-artifact-file-inventory.v1"
+private const val PHONE_RUN_ARTIFACT_FILE_INVENTORY_JSON = "artifact_file_inventory.json"
+private const val PHONE_RUN_ARTIFACT_FILE_INVENTORY_CSV = "artifact_file_inventory.csv"
+
 private data class PhoneStartCommandEvidence(
     val signal: PhoneLslCommandSignal,
     val ack: PhoneLslCommandAck,
@@ -2820,6 +2824,8 @@ private class PhoneRunSession(
         val topupMaterializationFile = File(dir, "phone_topup_materialization.json")
         val artifactFile = File(dir, if (complete) "completion.json" else "latest_events.json")
         val dataExportArtifactFile = File(dir, "phone_owned_data_export.json")
+        val artifactInventoryJsonFile = File(dir, PHONE_RUN_ARTIFACT_FILE_INVENTORY_JSON)
+        val artifactInventoryCsvFile = File(dir, PHONE_RUN_ARTIFACT_FILE_INVENTORY_CSV)
         val topupMaterialization = if (complete && phoneTopupSkippedByStopAfterBlock) {
             JSONObject()
                 .put("schema", "pps-android-phone-topup-materialization.v1")
@@ -2902,6 +2908,14 @@ private class PhoneRunSession(
                     .put("schema", PHONE_OWNED_DATA_EXPORT_SCHEMA)
                     .put("written_when_complete", true),
             )
+            .put(
+                "artifact_file_inventory_artifact",
+                JSONObject()
+                    .put("filename", artifactInventoryJsonFile.name)
+                    .put("csv_filename", artifactInventoryCsvFile.name)
+                    .put("schema", PHONE_RUN_ARTIFACT_FILE_INVENTORY_SCHEMA)
+                    .put("self_included", false),
+            )
             .put("lsl_runtime_status", JSONObject(lslRuntimeStatus.toString()))
             .put("events", eventsArray)
             .put("lsl_marker_mirror", JSONArray().also { array -> lslMarkers.forEach { array.put(JSONObject(it.toString())) } })
@@ -2938,6 +2952,19 @@ private class PhoneRunSession(
             null
         }
         if (complete) closeNativeLslTransportLocked()
+        val artifactInventory = writePhoneRunArtifactFileInventory(
+            runDir = dir,
+            runId = runId,
+            packageId = packageId,
+            complete = complete,
+        )
+        if (complete) {
+            dataExport?.optString("data_max_run_dir", "")
+                ?.takeIf { it.isNotBlank() }
+                ?.let { dataMaxRunDir ->
+                    copyPhoneRunArtifactInventory(File(dataMaxRunDir), artifactInventoryJsonFile, artifactInventoryCsvFile)
+                }
+        }
         return JSONObject()
             .put("schema", if (complete) "pps-mobile-run-complete.v1" else "pps-mobile-run-events.v1")
             .put("status", if (complete) "saved" else "saved_partial")
@@ -2952,6 +2979,8 @@ private class PhoneRunSession(
             .put("response_ledger_path", responseLedgerFile.absolutePath)
             .put("topup_plan_path", topupPlanFile.absolutePath)
             .put("topup_materialization_path", topupMaterializationFile.absolutePath)
+            .put("artifact_file_inventory_path", artifactInventory.optString("artifact_path"))
+            .put("artifact_file_inventory_csv_path", artifactInventory.optString("csv_path"))
             .put("catalog_entry_path", catalogWrite.optString("entry_path"))
             .put("catalog_participant_runs_path", catalogWrite.optString("participant_runs_path"))
             .put("catalog_index_path", catalogWrite.optString("index_path"))
@@ -3446,6 +3475,69 @@ private fun writeCommandDiaryJsonl(path: File, rows: List<JSONObject>) {
         Charsets.UTF_8,
     )
 }
+
+private fun writePhoneRunArtifactFileInventory(
+    runDir: File,
+    runId: String,
+    packageId: String,
+    complete: Boolean,
+): JSONObject {
+    val jsonFile = File(runDir, PHONE_RUN_ARTIFACT_FILE_INVENTORY_JSON)
+    val csvFile = File(runDir, PHONE_RUN_ARTIFACT_FILE_INVENTORY_CSV)
+    val files = phoneRunInventoryFiles(runDir, jsonFile, csvFile)
+    val rows = files.map { file ->
+        JSONObject()
+            .put("relative_path", phoneRunRelativePath(runDir, file))
+            .put("size_bytes", file.length())
+            .put("sha256", sha256File(file))
+            .put("modified_unix_ms", file.lastModified())
+    }
+    val inventory = JSONObject()
+        .put("schema", PHONE_RUN_ARTIFACT_FILE_INVENTORY_SCHEMA)
+        .put("run_id", runId)
+        .put("package_id", packageId)
+        .put("complete", complete)
+        .put("generated_unix_ms", System.currentTimeMillis())
+        .put("self_included", false)
+        .put("file_count", rows.size)
+        .put("files", JSONArray().also { array -> rows.forEach { array.put(JSONObject(it.toString())) } })
+    jsonFile.writeText(inventory.toString(2), Charsets.UTF_8)
+    csvFile.writeText(
+        buildString {
+            append("relative_path,size_bytes,sha256,modified_unix_ms\n")
+            rows.forEach { row ->
+                append(
+                    listOf(
+                        row.optString("relative_path"),
+                        row.optLong("size_bytes").toString(),
+                        row.optString("sha256"),
+                        row.optLong("modified_unix_ms").toString(),
+                    ).joinToString(",") { csvCell(it) },
+                )
+                append("\n")
+            }
+        },
+        Charsets.UTF_8,
+    )
+    return JSONObject(inventory.toString())
+        .put("artifact_path", jsonFile.absolutePath)
+        .put("csv_path", csvFile.absolutePath)
+}
+
+private fun copyPhoneRunArtifactInventory(targetRunDir: File, jsonFile: File, csvFile: File) {
+    if (!targetRunDir.isDirectory) return
+    if (jsonFile.isFile) jsonFile.copyTo(File(targetRunDir, jsonFile.name), overwrite = true)
+    if (csvFile.isFile) csvFile.copyTo(File(targetRunDir, csvFile.name), overwrite = true)
+}
+
+private fun phoneRunInventoryFiles(runDir: File, jsonFile: File, csvFile: File): List<File> =
+    runDir.walkTopDown()
+        .filter { file -> file.isFile && file.canonicalFile != jsonFile.canonicalFile && file.canonicalFile != csvFile.canonicalFile }
+        .sortedBy { file -> phoneRunRelativePath(runDir, file) }
+        .toList()
+
+private fun phoneRunRelativePath(root: File, file: File): String =
+    file.relativeTo(root).invariantSeparatorsPath
 
 private fun exportPhoneRunZip(context: Context, runDir: File): File {
     require(runDir.isDirectory) { "No completed phone session is available to export." }

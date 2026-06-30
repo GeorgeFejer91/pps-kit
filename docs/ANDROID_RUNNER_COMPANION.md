@@ -98,8 +98,10 @@ protected context in
 `Experiment_context_folder_DO_NOT_DELETE/runner_logs/mobile_phone_runtime/
 <participant>/<package_id>/<run_id>/`. The uploaded `events.jsonl`,
 `events.csv`, `lsl_marker_mirror.csv`, `trigger_codes.csv`,
-`command_diary.jsonl`, `lsl_runtime_status.json`, and `completion.json` files
-are local experiment artifacts and are not committed. Completion uploads that
+`command_diary.jsonl`, `artifact_file_inventory.json`,
+`artifact_file_inventory.csv`, `lsl_runtime_status.json`, and
+`completion.json` files are local experiment artifacts and are not committed.
+Completion uploads that
 carry Android response/top-up reconstruction fields also write
 `phone_response_ledger.csv`, `phone_topup_plan.json`,
 `phone_topup_materialization.json`, `phone_owned_data_export.json`, and a
@@ -202,6 +204,10 @@ Phone-run command diaries are also checked against matching `operator_command`
 events when present, including the command source. New runs should distinguish
 `phone_ui`, `phone_runtime`, and `native_lsl`; the validator still accepts the
 older `phone_ui_or_runtime` label for historical artifacts.
+For strict run-folder file reconstruction, add `--expect-artifact-inventory`;
+this requires `artifact_file_inventory.json` to list every run-folder file
+except the inventory sidecars themselves with relative paths, byte sizes, and
+SHA-256 hashes that match the folder or ZIP contents.
 For strict local numeric-trigger reconstruction, add
 `--expect-trigger-code-mirror`; this requires `trigger_codes.csv` to be present
 and to match the `event_id`, `event_code`, `event_type`, `trigger_key`, and
@@ -243,7 +249,8 @@ command source ID when an outbox row has been written.
 
 Phone-owned local artifacts now include `participant_metadata.json`,
 `haptic_capability.json`, `events.csv`, `lsl_marker_mirror.csv`,
-`trigger_codes.csv`, `command_diary.jsonl`, `lsl_runtime_status.json`, `phone_response_ledger.csv`,
+`trigger_codes.csv`, `command_diary.jsonl`, `artifact_file_inventory.json`,
+`artifact_file_inventory.csv`, `lsl_runtime_status.json`, `phone_response_ledger.csv`,
 `phone_topup_plan.json`, `phone_topup_materialization.json`, any
 `phone_topup_block.wav`, reconstruction/package snapshots, and
 `completion.json` in the exported phone session ZIP. The exported ZIP also

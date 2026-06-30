@@ -194,6 +194,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   records that evidence through the native command diary path instead of
   labeling the run start as `phone_ui`. This closes a receiver-side audit gap
   for PC-runner/controller-phone remote starts.
+- Android phone-owned run folders now write `artifact_file_inventory.json` and
+  `artifact_file_inventory.csv` after the run sidecars are present. The
+  inventory excludes its own JSON/CSV files, but lists all other run-folder
+  files by relative path, byte size, SHA-256 hash, and modification timestamp;
+  completed Data_max copies receive the same inventory sidecars. The Android
+  artifact validator supports `--expect-artifact-inventory` and also fails new
+  completion artifacts that advertise the inventory but omit it or contain
+  mismatched file hashes.
 - The same validator now loads `lsl_marker_mirror.csv` from phone-run folders
   or exported ZIPs, falls back to embedded `completion.json` marker rows, and
   checks marker mirror reconstructability against completion events, payload

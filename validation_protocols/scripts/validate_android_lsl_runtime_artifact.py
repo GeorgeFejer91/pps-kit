@@ -62,6 +62,9 @@ ANDROID_PHONE_RESPONSE_SUMMARY_SCHEMA = "pps-android-phone-response-summary.v1"
 ANDROID_PHONE_TOPUP_PLAN_SCHEMA = "pps-android-phone-topup-plan.v1"
 ANDROID_PHONE_TOPUP_MATERIALIZATION_SCHEMA = "pps-android-phone-topup-materialization.v1"
 ANDROID_PHONE_OWNED_DATA_EXPORT_SCHEMA = "pps-android-phone-owned-data-export.v1"
+ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY_SCHEMA = "pps-android-phone-run-artifact-file-inventory.v1"
+ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY = "artifact_file_inventory.json"
+ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY_CSV = "artifact_file_inventory.csv"
 ANDROID_CONTROLLER_RUNTIME_STATUS_SCHEMA = "pps-android-controller-runtime-status.v1"
 ANDROID_CONTROLLER_COMMAND_ROW_SCHEMA = "pps-android-controller-command-row.v1"
 ANDROID_LSL_STREAM_DESCRIPTIONS_SCHEMA = "pps-android-lsl-stream-descriptions.v1"
@@ -198,6 +201,8 @@ def validate_runtime_status(
     topup_materialization: dict[str, Any] | None = None,
     topup_wav_hashes: dict[str, str] | None = None,
     phone_owned_data_export: dict[str, Any] | None = None,
+    artifact_file_inventory: dict[str, Any] | None = None,
+    artifact_file_hashes: dict[str, dict[str, Any]] | None = None,
     phone_data_min_header: list[str] | None = None,
     phone_data_min_rows: list[dict[str, Any]] | None = None,
     phone_data_min_master_header: list[str] | None = None,
@@ -213,6 +218,7 @@ def validate_runtime_status(
     expect_phone_topup_evidence: bool = False,
     expect_audiotrack_timing_evidence: bool = False,
     expect_phone_owned_data_export: bool = False,
+    expect_artifact_inventory: bool = False,
 ) -> AndroidLslValidationResult:
     failures: list[str] = []
     warnings: list[str] = []
@@ -387,6 +393,15 @@ def validate_runtime_status(
         failures=failures,
         warnings=warnings,
         expect_phone_owned_data_export=expect_phone_owned_data_export,
+    )
+    _validate_phone_run_artifact_file_inventory(
+        status=status,
+        completion=completion,
+        inventory=artifact_file_inventory,
+        observed_files=artifact_file_hashes or {},
+        failures=failures,
+        warnings=warnings,
+        expect_artifact_inventory=expect_artifact_inventory,
     )
 
     return AndroidLslValidationResult(
@@ -619,6 +634,7 @@ def validate_run_artifact(
     expect_phone_topup_evidence: bool = False,
     expect_audiotrack_timing_evidence: bool = False,
     expect_phone_owned_data_export: bool = False,
+    expect_artifact_inventory: bool = False,
 ) -> AndroidLslValidationResult:
     loaded = _load_status_inputs(path)
     if loaded.get("kind") == "controller":
@@ -668,6 +684,8 @@ def validate_run_artifact(
         topup_materialization=loaded.get("topup_materialization"),
         topup_wav_hashes=loaded.get("topup_wav_hashes") or {},
         phone_owned_data_export=loaded.get("phone_owned_data_export"),
+        artifact_file_inventory=loaded.get("artifact_file_inventory"),
+        artifact_file_hashes=loaded.get("artifact_file_hashes") or {},
         phone_data_min_header=loaded.get("phone_data_min_header") or [],
         phone_data_min_rows=loaded.get("phone_data_min_rows") or [],
         phone_data_min_master_header=loaded.get("phone_data_min_master_header") or [],
@@ -683,6 +701,7 @@ def validate_run_artifact(
         expect_phone_topup_evidence=expect_phone_topup_evidence,
         expect_audiotrack_timing_evidence=expect_audiotrack_timing_evidence,
         expect_phone_owned_data_export=expect_phone_owned_data_export,
+        expect_artifact_inventory=expect_artifact_inventory,
     )
 
 
@@ -855,6 +874,13 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
             trigger_code_members = [name for name in archive.namelist() if name.endswith("trigger_codes.csv")]
             response_ledger_members = [name for name in archive.namelist() if name.endswith("phone_response_ledger.csv")]
             data_export_members = [name for name in archive.namelist() if name.endswith("phone_owned_data_export.json")]
+            artifact_inventory_members = [
+                name
+                for name in archive.namelist()
+                if name.endswith(ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY)
+                and "phone_owned_exports/" not in name.replace("\\", "/")
+                and "phone_run_catalog/" not in name.replace("\\", "/")
+            ]
             data_min_members = [
                 name
                 for name in archive.namelist()
@@ -979,6 +1005,18 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 data_export_name = sorted(data_export_members)[0]
                 archive.extract(data_export_name, temp_root)
                 phone_owned_data_export = _read_json(temp_root / data_export_name)
+            artifact_file_inventory = None
+            artifact_file_hashes: dict[str, dict[str, Any]] = {}
+            if artifact_inventory_members:
+                inventory_name = sorted(artifact_inventory_members)[0]
+                archive.extract(inventory_name, temp_root)
+                artifact_file_inventory = _read_json(temp_root / inventory_name)
+                inventory_prefix = str(Path(inventory_name.replace("\\", "/")).parent).replace("\\", "/")
+                if inventory_prefix == ".":
+                    inventory_prefix = ""
+                elif inventory_prefix:
+                    inventory_prefix += "/"
+                artifact_file_hashes = _phone_run_file_hashes_from_zip(archive, inventory_prefix)
             phone_data_min_header: list[str] = []
             phone_data_min_rows: list[dict[str, Any]] = []
             for member in sorted(data_min_members):
@@ -1027,6 +1065,8 @@ def _load_from_zip(path: Path) -> dict[str, Any]:
                 "materialized_wav_hashes": materialized_wav_hashes,
                 "response_ledger_rows": response_ledger_rows,
                 "phone_owned_data_export": phone_owned_data_export,
+                "artifact_file_inventory": artifact_file_inventory,
+                "artifact_file_hashes": artifact_file_hashes,
                 "phone_data_min_header": phone_data_min_header,
                 "phone_data_min_rows": phone_data_min_rows,
                 "phone_data_min_master_header": phone_data_min_master_header,
@@ -1049,6 +1089,7 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
     trigger_code_path = path / "trigger_codes.csv"
     response_ledger_path = path / "phone_response_ledger.csv"
     data_export_path = path / "phone_owned_data_export.json"
+    artifact_inventory_path = path / ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY
     topup_plan_path = path / "phone_topup_plan.json"
     topup_materialization_path = path / "phone_topup_materialization.json"
     topup_wav_path = path / "phone_topup_block.wav"
@@ -1084,6 +1125,8 @@ def _load_phone_run_sidecars_from_dir(path: Path) -> dict[str, Any]:
         "materialized_wav_hashes": materialized_wav_hashes,
         "response_ledger_rows": _read_csv(response_ledger_path) if response_ledger_path.is_file() else [],
         "phone_owned_data_export": _read_json(data_export_path) if data_export_path.is_file() else None,
+        "artifact_file_inventory": _read_json(artifact_inventory_path) if artifact_inventory_path.is_file() else None,
+        "artifact_file_hashes": _phone_run_file_hashes_from_dir(path),
         "phone_data_min_header": phone_data_min_header,
         "phone_data_min_rows": phone_data_min_rows,
         "phone_data_min_master_header": phone_data_min_master_header,
@@ -1179,6 +1222,46 @@ def _load_phone_run_catalog_root(root: Path) -> dict[str, Any]:
         "catalog_runs_rows": catalog_runs_rows,
         "catalog_latest_entries": catalog_latest_entries,
     }
+
+
+def _phone_run_file_hashes_from_dir(path: Path) -> dict[str, dict[str, Any]]:
+    rows: dict[str, dict[str, Any]] = {}
+    if not path.is_dir():
+        return rows
+    for file_path in sorted(item for item in path.rglob("*") if item.is_file()):
+        rel = file_path.relative_to(path).as_posix()
+        if rel in {ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY, ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY_CSV}:
+            continue
+        rows[rel] = {
+            "size_bytes": file_path.stat().st_size,
+            "sha256": _sha256_file(file_path),
+        }
+    return rows
+
+
+def _phone_run_file_hashes_from_zip(archive: zipfile.ZipFile, prefix: str) -> dict[str, dict[str, Any]]:
+    rows: dict[str, dict[str, Any]] = {}
+    for info in archive.infolist():
+        if info.is_dir():
+            continue
+        name = info.filename.replace("\\", "/")
+        if prefix:
+            if not name.startswith(prefix):
+                continue
+            rel = name[len(prefix):]
+        else:
+            if name.startswith("phone_run_catalog/") or name.startswith("phone_owned_exports/"):
+                continue
+            rel = name
+        if not rel or "/" in rel and rel.startswith("../"):
+            continue
+        if rel in {ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY, ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY_CSV}:
+            continue
+        rows[rel] = {
+            "size_bytes": info.file_size,
+            "sha256": _sha256_bytes(archive.read(info.filename)),
+        }
+    return rows
 
 
 def _sha256_file(path: Path) -> str:
@@ -2947,6 +3030,91 @@ def _validate_phone_owned_data_export(
         failures.append("strict phone-owned data export requires a 2.Data_max run-folder completion copy")
 
 
+def _validate_phone_run_artifact_file_inventory(
+    *,
+    status: dict[str, Any],
+    completion: dict[str, Any] | None,
+    inventory: dict[str, Any] | None,
+    observed_files: dict[str, dict[str, Any]],
+    failures: list[str],
+    warnings: list[str],
+    expect_artifact_inventory: bool,
+) -> None:
+    advertised = isinstance((completion or {}).get("artifact_file_inventory_artifact"), dict)
+    if not inventory:
+        if expect_artifact_inventory or advertised:
+            failures.append("phone-run artifact file inventory is required but missing")
+        return
+    if inventory.get("schema") != ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY_SCHEMA:
+        failures.append("artifact_file_inventory.json schema mismatch")
+    if inventory.get("self_included") is not False:
+        failures.append("artifact_file_inventory.json must declare self_included=false")
+    if status.get("run_id") and str(inventory.get("run_id") or "") != str(status.get("run_id")):
+        failures.append("artifact_file_inventory.json run_id differs from lsl_runtime_status")
+    if status.get("package_id") and str(inventory.get("package_id") or "") != str(status.get("package_id")):
+        failures.append("artifact_file_inventory.json package_id differs from lsl_runtime_status")
+    files = [row for row in list(inventory.get("files") or []) if isinstance(row, dict)]
+    if int(inventory.get("file_count") or -1) != len(files):
+        failures.append("artifact_file_inventory.json file_count does not match files length")
+    if not files:
+        failures.append("artifact_file_inventory.json has no file rows")
+        return
+
+    by_path: dict[str, dict[str, Any]] = {}
+    for index, row in enumerate(files, start=1):
+        prefix = f"artifact inventory row {index}"
+        rel = str(row.get("relative_path") or "").replace("\\", "/")
+        if not rel:
+            failures.append(f"{prefix} is missing relative_path")
+            continue
+        if rel in by_path:
+            failures.append(f"{prefix} duplicates relative_path {rel}")
+        by_path[rel] = row
+        if rel in {ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY, ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY_CSV}:
+            failures.append(f"{prefix} must not list the inventory sidecar itself")
+        sha = str(row.get("sha256") or "")
+        if len(sha) != 64 or any(char not in "0123456789abcdef" for char in sha.lower()):
+            failures.append(f"{prefix} sha256 is not a lowercase 64-character digest")
+        try:
+            size = int(row.get("size_bytes"))
+        except (TypeError, ValueError):
+            failures.append(f"{prefix} size_bytes is not an integer")
+            size = -1
+        if size < 0:
+            failures.append(f"{prefix} size_bytes must be non-negative")
+
+    required_names = {"lsl_runtime_status.json", "events.csv", "run_package_manifest.json", ANDROID_PHONE_RUN_RECONSTRUCTION_ARTIFACT}
+    if completion and completion.get("completed") is True:
+        required_names.add("completion.json")
+    elif completion:
+        required_names.add("latest_events.json")
+    for name in sorted(required_names):
+        if name not in by_path:
+            failures.append(f"artifact_file_inventory.json is missing required file {name}")
+
+    if observed_files:
+        missing_from_inventory = sorted(set(observed_files) - set(by_path))
+        missing_on_disk = sorted(set(by_path) - set(observed_files))
+        if missing_from_inventory:
+            failures.append(f"artifact_file_inventory.json is missing observed files: {', '.join(missing_from_inventory[:8])}")
+        if missing_on_disk:
+            failures.append(f"artifact_file_inventory.json lists files absent from artifact: {', '.join(missing_on_disk[:8])}")
+        for rel in sorted(set(observed_files) & set(by_path)):
+            row = by_path[rel]
+            observed = observed_files[rel]
+            if str(row.get("sha256") or "") != str(observed.get("sha256") or ""):
+                failures.append(f"artifact_file_inventory.json sha256 mismatch for {rel}")
+            try:
+                expected_size = int(row.get("size_bytes"))
+                observed_size = int(observed.get("size_bytes"))
+            except (TypeError, ValueError):
+                continue
+            if expected_size != observed_size:
+                failures.append(f"artifact_file_inventory.json size mismatch for {rel}")
+    elif expect_artifact_inventory:
+        warnings.append("artifact file inventory present but current artifact files could not be rehashed")
+
+
 def _empty_response_ledger_stats() -> dict[str, int]:
     return {
         "ledger_row_count": 0,
@@ -3697,6 +3865,11 @@ def main(argv: list[str] | None = None) -> int:
             "and a 2.Data_max run-folder completion copy are present and internally consistent."
         ),
     )
+    parser.add_argument(
+        "--expect-artifact-inventory",
+        action="store_true",
+        help="For phone-run artifacts, fail unless artifact_file_inventory.json is present and matches file sizes/hashes.",
+    )
     parser.add_argument("--output-dir", type=Path, help="Optional directory for JSON/Markdown validation reports.")
     args = parser.parse_args(argv)
 
@@ -3712,6 +3885,7 @@ def main(argv: list[str] | None = None) -> int:
         expect_phone_topup_evidence=args.expect_phone_topup_evidence,
         expect_audiotrack_timing_evidence=args.expect_audiotrack_timing_evidence,
         expect_phone_owned_data_export=args.expect_phone_owned_data_export,
+        expect_artifact_inventory=args.expect_artifact_inventory,
     )
     if args.output_dir:
         _write_report(result, args.output_dir)

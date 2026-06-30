@@ -143,6 +143,18 @@ def test_android_phone_run_writes_plain_event_diary() -> None:
     assert "private fun writePhoneTriggerCodesCsv" in main_activity
 
 
+def test_android_phone_run_writes_artifact_file_inventory() -> None:
+    main_activity = _source("MainActivity.kt")
+
+    assert 'PHONE_RUN_ARTIFACT_FILE_INVENTORY_SCHEMA = "pps-android-phone-run-artifact-file-inventory.v1"' in main_activity
+    assert 'PHONE_RUN_ARTIFACT_FILE_INVENTORY_JSON = "artifact_file_inventory.json"' in main_activity
+    assert 'PHONE_RUN_ARTIFACT_FILE_INVENTORY_CSV = "artifact_file_inventory.csv"' in main_activity
+    assert "writePhoneRunArtifactFileInventory(" in main_activity
+    assert '"artifact_file_inventory_artifact"' in main_activity
+    assert '.put("relative_path", phoneRunRelativePath(runDir, file))' in main_activity
+    assert '.put("sha256", sha256File(file))' in main_activity
+
+
 def test_android_phone_run_command_diary_separates_local_ui_runtime_and_native_sources() -> None:
     main_activity = _source("MainActivity.kt")
 
