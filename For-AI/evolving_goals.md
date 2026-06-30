@@ -47,6 +47,18 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   Springer `sn-apa` source compiles to a 20-page PDF with no unresolved
   citations/references or table overfull/splitting warnings; generated LaTeX
   artifacts and PDF were removed afterward.
+- Added a current validation evidence snapshot for the BRM manuscript. Protocol
+  12 was run with
+  `python validation_protocols/scripts/run_profile_recreation_interface_matrix.py --output-dir artifacts/validation_runs/brm_profile_recreation_20260630`
+  and passed 30/30 required criteria: seven ready published profiles passed
+  gates and materialized through Segment 6, while two blocked samples were
+  blocked as expected. The raw generated report remains under ignored
+  `artifacts/validation_runs/`; the committed source-pointer summary is
+  `publication/behavior-research-methods/manuscript/validation_evidence.csv`,
+  and `main.tex` now includes a validation evidence table that explicitly limits
+  the claim to software/profile materialization rather than physical timing,
+  Woojer mechanical onset, tactile perception, individualized spatial
+  perception, or exact reuse of private original-author stimuli.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

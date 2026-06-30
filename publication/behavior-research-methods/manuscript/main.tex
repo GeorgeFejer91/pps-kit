@@ -205,7 +205,21 @@ Model choices include sigmoid, logarithmic-decay, and linear fits. This is impor
 
 \section{Validation and Use Cases}
 
-Validation is organized around four reusable use cases. In the present draft they are specified as reproducible protocols rather than as new participant-level findings. A submitted version should attach the exact run folders, hashes, screenshots, and hardware notes generated for the publication release.
+Validation is organized around four reusable use cases. In the present draft they are specified as reproducible protocols rather than as new participant-level findings. A submitted version should attach the exact run folders, hashes, screenshots, and hardware notes generated for the publication release. The current source-pointer summary is stored in \code{validation\_evidence.csv}; Table~\ref{tab:validation} reports the evidence available for this draft without committing raw generated artifacts.
+
+\begin{table}[t]
+\caption{Current validation evidence summarized for the manuscript draft.}
+\label{tab:validation}
+\footnotesize
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.22\textwidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.22\textwidth} >{\raggedright\arraybackslash}p{0.24\textwidth}}
+\toprule
+Validation item & Result summary & Evidence layer & Boundary \\
+\midrule
+Protocol 12 published-profile recreation interface matrix & On 30 June 2026, the scripted matrix passed 30/30 required criteria: seven ready published profiles passed gates and materialized through Segment 6, and two blocked samples were blocked as expected. & Software/profile materialization and runner-handoff artifacts. & Does not prove physical timing, Woojer mechanical onset, tactile perception, individualized spatial perception, or exact reuse of private original-author stimuli. \\
+Springer source compile check & The manuscript source compiled with the preserved Springer Nature template to a 20-page PDF with no unresolved citations or references after this revision. & Publication source integrity. & Does not validate runtime behavior or participant-level scientific claims. \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \subsection{Study 5-style Workflow}
 

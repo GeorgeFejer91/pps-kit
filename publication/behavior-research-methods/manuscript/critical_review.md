@@ -102,3 +102,36 @@ Methods manuscript draft. It is a working audit, not manuscript text.
   from a redistributable run.
 - Several bibliography records still use abbreviated author lists. That is
   acceptable for drafting but not for final journal submission.
+
+## Iteration 4: Validation Evidence Snapshot
+
+### Main Critiques
+
+- The validation section was clearer after Iteration 3, but still did not give
+  the reader a concrete current validation result. It specified what should be
+  validated, while BRM readers will expect at least one reproducible tool-output
+  snapshot.
+- The manuscript must not compensate for this by overstating validation. A
+  profile-materialization script is useful evidence for the design workflow, but
+  it is not physical timing, tactile mechanics, or perceptual validation.
+
+### Resolution In This Revision
+
+- Ran Protocol 12 with:
+  `python validation_protocols/scripts/run_profile_recreation_interface_matrix.py --output-dir artifacts/validation_runs/brm_profile_recreation_20260630`.
+- Added `validation_evidence.csv` as a committed source-pointer summary rather
+  than committing raw generated reports.
+- Added a manuscript validation table reporting the fresh Protocol 12 result:
+  30/30 required criteria passed, seven ready published profiles materialized
+  through Segment 6, and two blocked samples were blocked as expected.
+- Kept the validation boundary explicit: this is software/profile
+  materialization evidence, not physical timing, Woojer mechanical onset,
+  perceptual tactile validity, individualized spatial perception, or exact
+  reuse of private original-author stimuli.
+
+### Residual Concerns
+
+- The validation section now has one concrete current evidence table. Final
+  journal submission should still add at least one hardware/output validation
+  table or figure if the paper is going to claim timing performance on a
+  specific lab setup.
