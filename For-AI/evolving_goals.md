@@ -4,6 +4,17 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 
 ## 2026-06-30
 
+- Focus Mode participant runs now use a run-local adaptive tactile threshold
+  safeguard in addition to the pre-run participant calibration. The runner
+  always tracks tactile hit/miss state internally, even when missed-trial top-up
+  playback is disabled. After every two tactile misses, including top-up misses,
+  it raises the live Output 3/4 level by the calibration confirmation bin
+  (+0.01% Output 3/4) up to the existing 0.5% cap, emits a
+  `tactile_threshold_adapted` event/progress payload, updates the Focus Mode
+  Output 3/4 controls without overwriting the saved calibration JSON or
+  persistent runner setting, and writes `adaptive_tactile_threshold_summary.json`
+  plus `adaptive_tactile_threshold_adjustments.csv` under the run's runner-log
+  folder for reconstruction.
 - Android phone-run catalog entries now preserve the completion summary's
   event count, marker mirror count, command diary count, native marker push
   counters, and native command received/ack/failed/rejected counters. The

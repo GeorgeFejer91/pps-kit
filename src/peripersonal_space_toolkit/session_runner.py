@@ -47,6 +47,10 @@ from .session_analysis import analyze_session_events, format_analysis_summary, w
 from .session_events import SessionEventLogger
 from .runner_diary import append_diary_entry, ensure_output_diary, find_output_diary
 from .labrecorder_capture import LabRecorderCapture, LabRecorderCaptureError, find_labrecorder_cli
+from .tactile_threshold_adaptation import (
+    AdaptiveTactileThresholdController,
+    adaptive_threshold_initial_output_34_percent,
+)
 from .tactile_latency import tactile_drive_onset_s, woojer_tactile_latency_policy
 from .timing_events import TimingEventHub, TriggerDictionary
 from .timing_schedule import BlockEventSchedule
@@ -364,6 +368,7 @@ class SessionRunResult:
     session_metadata_path: Path | None = None
     capture_options: dict[str, Any] = field(default_factory=dict)
     topup_summary: dict[str, Any] = field(default_factory=dict)
+    adaptive_tactile_threshold_summary: dict[str, Any] = field(default_factory=dict)
     operator_completion_message: str = ""
 
 
@@ -3022,16 +3027,17 @@ class SessionRunnerController:
         self._verbose_events_dir = _package_verbose_events_dir(package)
         self._analytics_dir = _package_analytics_dir(package)
         self._topup_dir = self._runner_log_dir / "topup"
-        self.topup_ledger = (
-            TopUpLedger(
-                self._topup_dir,
-                participant_id=package.participant_id,
-                session_id=package.session_id,
-            )
-            if enable_topup
-            else None
-        )
         self._runner_metadata_input = dict(runner_metadata or {})
+        self._tactile_response_ledger = TopUpLedger(
+            self._topup_dir,
+            participant_id=package.participant_id,
+            session_id=package.session_id,
+        )
+        self.topup_ledger = self._tactile_response_ledger if enable_topup else None
+        self._adaptive_tactile_threshold = AdaptiveTactileThresholdController(
+            initial_output_34_percent=adaptive_threshold_initial_output_34_percent(self._runner_metadata_input)
+        )
+        self._runner_metadata_input["adaptive_tactile_threshold"] = self._adaptive_tactile_threshold.policy_payload()
         self._part_identity = {
             key: value
             for key, value in _package_part_identity(package).items()
@@ -3502,6 +3508,7 @@ class SessionRunnerController:
             session_metadata_path=self._session_metadata_path,
             capture_options=self.capture_options.as_dict(),
             topup_summary=dict(self._topup_summary),
+            adaptive_tactile_threshold_summary=self._adaptive_tactile_threshold.summary(),
             operator_completion_message=self._operator_completion_message,
         )
         _append_package_diary_event(
@@ -3520,6 +3527,7 @@ class SessionRunnerController:
                 "recording_paths": [str(path) for path in result.recording_paths],
                 "analysis_outputs": {key: str(value) for key, value in result.analysis_outputs.items()},
                 "topup_summary": dict(result.topup_summary),
+                "adaptive_tactile_threshold_summary": dict(result.adaptive_tactile_threshold_summary),
                 "operator_completion_message": result.operator_completion_message,
                 "warnings": list(result.warnings),
             },
@@ -3548,6 +3556,7 @@ class SessionRunnerController:
                 data_collected=bool(result.completed and not result.interrupted),
                 session_dir=str(self.package.session_dir),
                 topup_summary=dict(result.topup_summary),
+                adaptive_tactile_threshold_summary=dict(result.adaptive_tactile_threshold_summary),
                 operator_completion_message=result.operator_completion_message,
             )
             update_runner_settings(
@@ -3787,10 +3796,52 @@ class SessionRunnerController:
 
     def _handle_logged_event(self, event: Any) -> None:
         self._participant_trial_writer.observe_event(event)
+        self._tactile_response_ledger.observe_event(event)
+        self._apply_adaptive_tactile_threshold(progress_callback=self._progress_callback)
         if self.topup_ledger is None:
             return
-        self.topup_ledger.observe_event(event)
         self._emit_topup_draft(self._progress_callback, expire=False)
+
+    def _expire_tactile_response_windows(
+        self,
+        *,
+        progress_callback: ProgressCallback | None = None,
+        now_unix: float | None = None,
+    ) -> None:
+        self._tactile_response_ledger.expire_due(float(now_unix if now_unix is not None else time.time()))
+        self._apply_adaptive_tactile_threshold(progress_callback=progress_callback)
+
+    def _apply_adaptive_tactile_threshold(self, *, progress_callback: ProgressCallback | None = None) -> None:
+        self._adaptive_tactile_threshold.update_counts_from_entries(self._tactile_response_ledger.entries)
+        adjustments = self._adaptive_tactile_threshold.observe_missed_entries(
+            self._tactile_response_ledger.missed_entries(include_topup=True)
+        )
+        if not adjustments:
+            return
+        for adjustment in adjustments:
+            new_percent = float(adjustment.get("new_output_34_percent") or 0.0)
+            engine = self.audio_engine
+            if engine is not None:
+                try:
+                    setattr(engine, "tactile_volume", new_percent / 100.0)
+                except Exception as exc:
+                    self._run_warnings.append(f"Adaptive tactile threshold could not be applied to audio engine: {exc}")
+            summary = self._adaptive_tactile_threshold.summary()
+            message = (
+                f"Tactile threshold nudged to Output 3/4 {new_percent:g}% "
+                f"after {adjustment.get('triggering_miss_count')} tactile misses."
+            )
+            payload = {
+                **adjustment,
+                "message": message,
+                "adaptive_tactile_threshold": summary,
+            }
+            self.events.log("tactile_threshold_adapted", **payload)
+            if progress_callback is not None:
+                try:
+                    progress_callback({"ui_event": "tactile_threshold_adapted", **payload})
+                except Exception:
+                    pass
 
     def _persist_topup_state(self, *, part_number: int | str | None = None) -> None:
         if self.topup_ledger is None:
@@ -3809,10 +3860,13 @@ class SessionRunnerController:
         part_number: int | str | None = None,
         now_unix: float | None = None,
     ) -> None:
+        if expire:
+            self._expire_tactile_response_windows(
+                progress_callback=progress_callback,
+                now_unix=float(now_unix if now_unix is not None else time.time()),
+            )
         if self.topup_ledger is None or progress_callback is None:
             return
-        if expire:
-            self.topup_ledger.expire_due(float(now_unix if now_unix is not None else time.time()))
         payload = self._topup_draft_payload(part_number=part_number)
         signature = json.dumps(
             {
@@ -4133,6 +4187,7 @@ class SessionRunnerController:
             return True
         self.events.flush_callback_events()
         self.topup_ledger.finalize_open_trials(part_number=part_number)
+        self._apply_adaptive_tactile_threshold(progress_callback=progress_callback)
         self._persist_topup_state(part_number=part_number)
         misses = self.topup_ledger.missed_entries(include_topup=False, part_number=part_number)
         repeat_blocks = _part1_topup_repeat_blocks(self.package, part_number=part_number)
@@ -4269,6 +4324,10 @@ class SessionRunnerController:
         wired_loopback_started = self._start_wired_loopback_recording(engine, wired_loopback_path, block)
 
         def _progress(elapsed_s: float, current_block: RunBlock = block) -> None:
+            self._expire_tactile_response_windows(
+                progress_callback=progress_callback,
+                now_unix=block_start_unix + float(elapsed_s or 0.0),
+            )
             if progress_callback:
                 current_display_index = _as_int(
                     current_block.metadata.get("display_block_index", current_block.metadata.get("play_order_index")),
@@ -4355,6 +4414,7 @@ class SessionRunnerController:
         self._accepting_responses = False
         self.events.log("block_end", block_number=block.index, block_label=block.label, completed=ok, is_topup=True)
         self.topup_ledger.finalize_open_trials(part_number=part_number)
+        self._apply_adaptive_tactile_threshold(progress_callback=progress_callback)
         self._persist_topup_state(part_number=part_number)
         if not ok:
             self._run_warnings.append("Top-up block was interrupted before completion.")
@@ -4754,8 +4814,10 @@ class SessionRunnerController:
     def _write_outputs(self) -> None:
         self.events.flush_callback_events()
         topup_outputs: dict[str, Path] = {}
+        self._tactile_response_ledger.finalize_open_trials()
+        self._apply_adaptive_tactile_threshold()
+        adaptive_outputs = self._adaptive_tactile_threshold.write_outputs(self._runner_log_dir)
         if self.topup_ledger is not None:
-            self.topup_ledger.finalize_open_trials()
             topup_outputs = self.topup_ledger.write_outputs()
             topup_outputs["topup_block_manifest_draft"] = write_topup_draft_manifest(self._topup_dir, self.topup_ledger)
             topup_manifest_csv = self._topup_dir / "topup_block_manifest.csv"
@@ -4816,6 +4878,7 @@ class SessionRunnerController:
         if self.capture_options.write_analysis_csvs:
             self._analysis_outputs.update(write_analysis_csvs(analysis, self._analytics_dir, self.package.session_id))
             self._analysis_outputs["timing_qc"] = _write_timing_qc_csv(self.logger.events, self._analytics_dir / f"{self.package.session_id}_timing_qc.csv")
+        self._analysis_outputs.update(adaptive_outputs)
         self._analysis_outputs.update(topup_outputs)
         if self.capture_options.write_lsl_marker_mirror:
             self._analysis_outputs["lsl_markers"] = lsl_markers_csv
@@ -4877,6 +4940,7 @@ class SessionRunnerController:
             "hit_count": int(self._topup_summary.get("hit_count") or 0),
             "missed_needs_topup_count": int(self._topup_summary.get("missed_needs_topup_count") or 0),
             "topup_attempt_count": int(self._topup_summary.get("topup_attempt_count") or 0),
+            "adaptive_tactile_threshold_summary": self._adaptive_tactile_threshold.summary(),
             "operator_completion_message": self._operator_completion_message
             or self._build_operator_completion_message(completed=completed, interrupted=interrupted),
             "analysis_outputs": {key: str(value) for key, value in self._analysis_outputs.items()},
@@ -5299,6 +5363,7 @@ def _build_runner_session_metadata(
             "local_audio_evidence_wav_label": "Fail-safe local audio evidence WAV",
             "playback_output_levels": _json_ready(raw.get("playback_output_levels") or {}),
             "tactile_calibration": _json_ready(raw.get("tactile_calibration") or {}),
+            "adaptive_tactile_threshold": _json_ready(raw.get("adaptive_tactile_threshold") or {}),
         },
         "lsl_status_at_start": dict(lsl_status or {}),
         "session_paths": _session_metadata_paths(package),
