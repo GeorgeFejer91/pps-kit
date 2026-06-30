@@ -78,6 +78,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `critical_review.md` records this as Iteration 6. The Springer `sn-apa`
   source compiles to a 22-page PDF with no unresolved citation/reference or
   rerun warnings; generated LaTeX artifacts and the PDF were removed afterward.
+- Continued the BRM manuscript self-review loop with a loudness-contract and
+  gain-law pass. Segment 1 `Loudness Contract` is now represented as a
+  first-class design decision in `main.tex` and the full evidence matrix: the
+  paper cites auditory-distance and level-normalization work (`Zahorik2002`,
+  `Kolarik2015`, `Arend2021Level`, plus `Spagnol2017`) and separates estimated
+  hardware SPL, measured acoustic calibration, digital output evidence, and
+  participant-ear SPL. The matrix now has 41 rows. The Springer `sn-apa` source
+  compiles to a 24-page PDF with no unresolved citation/reference or rerun
+  warnings; generated LaTeX artifacts and the PDF were removed afterward.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

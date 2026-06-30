@@ -205,3 +205,41 @@ Methods manuscript draft. It is a working audit, not manuscript text.
   that uses a specific SOFA/HRIR file should still name the exact file, version,
   license, renderer command/path, trajectory sample table, and any perceptual
   localization or externalization check that was actually run.
+
+## Iteration 7: Loudness Contract and Gain-law Pass
+
+### Main Critiques
+
+- The manuscript acknowledged trajectory, HRTF, tactile threshold, and output
+  levels, but it did not yet make the Segment 1 `Loudness Contract` a distinct
+  GUI design decision.
+- This was a substantive gap because auditory distance and looming perception
+  can be driven by level, gain envelopes, source spectrum, reverberation, and
+  normalization choices. A PPS methods paper should not imply that a reported
+  start/end distance is enough if the level law is hidden.
+- The current toolkit default uses an estimated Komplete Audio 6 MK2 / HD 560S
+  playback-chain policy. The paper needed clearer language that this is a
+  convenience profile, not publication-grade participant-ear SPL.
+
+### Resolution In This Revision
+
+- Added a loudness/gain-law row to the condensed manuscript table and the full
+  `evidence_matrix.csv`.
+- Added auditory-distance and level-normalization citations
+  (`Zahorik2002`, `Kolarik2015`, `Arend2021Level`) and connected them to the
+  existing near-field citation `Spagnol2017`.
+- Revised the abstract, introduction, Segment 1 overview, design-decision prose,
+  reporting checklist, and technical method to name loudness policy as
+  first-class provenance.
+- Added a new `Auditory Level and Loudness Policy` technical-method subsection
+  that separates estimated hardware SPL, measured acoustic calibration, digital
+  output evidence, and physical participant-ear SPL.
+
+### Residual Concerns
+
+- The manuscript now reports the intended loudness contract, but final
+  participant-level SPL claims still require direct acoustic measurement on the
+  publication hardware route.
+- The current paper should avoid saying the default estimated Komplete/HD 560S
+  profile is calibrated. It is a reporting scaffold until a measured
+  `loudness_profile.json` or equivalent artifact exists.
