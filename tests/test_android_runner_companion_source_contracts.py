@@ -122,6 +122,7 @@ def test_android_lsl_runtime_status_exports_stream_descriptions() -> None:
     assert '.put("package_asset_strategy", runPackage.reconstruction.packageAssetStrategy)' in lsl_protocol
     assert '.put("study_hierarchy", stringArray(runPackage.reconstruction.studyHierarchy))' in lsl_protocol
     assert '.put("source_run_setup_manifest_path", runPackage.reconstruction.sourceRunSetupManifestPath)' in lsl_protocol
+    assert '.put("source_run_setup_sha256", runPackage.reconstruction.sourceRunSetupSha256)' in lsl_protocol
     assert '.put("demographics_in_stream_name", false)' in lsl_protocol
 
 

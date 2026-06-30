@@ -148,11 +148,14 @@ def _session_metadata_package_payload(manifest: dict[str, object]) -> dict[str, 
     return {
         "package_id": manifest["package_id"],
         "asset_strategy": manifest["asset_strategy"],
+        "package_asset_strategy": reconstruction["package_asset_strategy"],
         "schedule_hash": reconstruction["schedule_hash"],
         "participant_roster_count": len(manifest["participant_roster"]),
         "randomization_seed": manifest["randomization_seed"],
         "source_segment_hashes": manifest["source_segment_hashes"],
         "study_hierarchy": reconstruction["study_hierarchy"],
+        "source_run_setup_manifest_path": reconstruction["source_run_setup_manifest_path"],
+        "source_run_setup_sha256": reconstruction["source_run_setup_sha256"],
     }
 
 
@@ -514,6 +517,13 @@ def test_mobile_runtime_upload_enriches_sparse_lsl_status_for_artifact_validatio
     assert status["command_protocol"]["token_required"] is True
     assert status["privacy"]["demographics_in_stream_name"] is False
     assert status["stream_descriptions"]["rich_markers"]["source_id"] == "pps-android-markers-v2-validated-run"
+    rich_metadata = json.loads(status["stream_descriptions"]["rich_markers"]["session_metadata_json"])
+    assert rich_metadata["package_asset_strategy"] == manifest["reconstruction"]["package_asset_strategy"]
+    assert rich_metadata["study_hierarchy"] == manifest["reconstruction"]["study_hierarchy"]
+    assert rich_metadata["source_run_setup_manifest_path"] == manifest["reconstruction"]["source_run_setup_manifest_path"]
+    assert rich_metadata["source_run_setup_sha256"] == manifest["reconstruction"]["source_run_setup_sha256"]
+    numeric_metadata = json.loads(status["stream_descriptions"]["numeric_triggers"]["session_metadata_json"])
+    assert numeric_metadata == rich_metadata
 
     validation = validate_run_artifact(run_dir, expect_artifact_inventory=True, expect_event_diary=True)
 

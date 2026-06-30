@@ -499,6 +499,27 @@ def test_android_lsl_runtime_validator_rejects_stream_description_hierarchy_drif
     )
 
 
+def test_android_lsl_runtime_validator_rejects_stream_description_setup_sha_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    _inject_phone_run_provenance(run_dir)
+    status_path = run_dir / "lsl_runtime_status.json"
+    status = json.loads(status_path.read_text(encoding="utf-8"))
+    metadata = json.loads(status["stream_descriptions"]["numeric_triggers"]["session_metadata_json"])
+    metadata["source_run_setup_sha256"] = "wrong"
+    status["stream_descriptions"]["numeric_triggers"]["session_metadata_json"] = json.dumps(metadata)
+    status_path.write_text(json.dumps(status), encoding="utf-8")
+    _update_completion_payload(run_dir, lsl_runtime_status=status)
+
+    result = validator.validate_run_artifact(run_dir, expect_run_catalog=True)
+
+    assert result.ok is False
+    assert "Android LSL stream description numeric_triggers.session_metadata_json source_run_setup_sha256 differs" in "\n".join(
+        result.failures
+    )
+
+
 def test_android_lsl_runtime_validator_rejects_stream_description_participant_summary_drift(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -2519,6 +2540,7 @@ def _phone_session_metadata_event(
             "source_segment_hashes": _phone_run_source_hash_summary(_phone_run_source_segment_hashes()),
             "study_hierarchy": validator.ANDROID_REQUIRED_STUDY_HIERARCHY,
             "source_run_setup_manifest_path": "run_setup.json",
+            "source_run_setup_sha256": "runhash",
         },
         lsl_runtime_status=status or _status(native=False),
     )
@@ -2788,6 +2810,7 @@ def _inject_phone_run_provenance(
     catalog["reconstruction"]["package_asset_strategy"] = "trial_building_blocks_only"
     catalog["reconstruction"]["study_hierarchy"] = validator.ANDROID_REQUIRED_STUDY_HIERARCHY
     catalog["reconstruction"]["source_run_setup_manifest_path"] = "run_setup.json"
+    catalog["reconstruction"]["source_run_setup_sha256"] = "runhash"
     (run_dir / "phone_run_catalog_entry.json").write_text(json.dumps(catalog), encoding="utf-8")
 
     completion_path = run_dir / "completion.json"
@@ -2804,6 +2827,7 @@ def _inject_phone_run_provenance(
         "source_segment_hashes": session_source_hashes or phone_source_hashes,
         "study_hierarchy": validator.ANDROID_REQUIRED_STUDY_HIERARCHY,
         "source_run_setup_manifest_path": "run_setup.json",
+        "source_run_setup_sha256": "runhash",
     }
     completion.setdefault("package", {}).update(package_payload)
     events = [event for event in completion.get("events", []) if isinstance(event, dict)]
@@ -2830,6 +2854,7 @@ def _stream_session_metadata_json(
     package_asset_strategy: str = "trial_building_blocks_only",
     study_hierarchy: list[str] | None = None,
     source_run_setup_manifest_path: str = "run_setup.json",
+    source_run_setup_sha256: str = "runhash",
     participant_metadata: dict | None = None,
     haptic_capability: dict | None = None,
 ) -> str:
@@ -2843,6 +2868,7 @@ def _stream_session_metadata_json(
         "source_segment_hashes": source_hashes or _phone_run_source_hash_summary(_phone_run_source_segment_hashes()),
         "study_hierarchy": study_hierarchy or validator.ANDROID_REQUIRED_STUDY_HIERARCHY,
         "source_run_setup_manifest_path": source_run_setup_manifest_path,
+        "source_run_setup_sha256": source_run_setup_sha256,
         "privacy_default": "metadata_payload_only",
         "demographics_in_stream_name": False,
     }
@@ -3106,6 +3132,7 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
             "package_asset_strategy": "trial_building_blocks_only",
             "study_hierarchy": validator.ANDROID_REQUIRED_STUDY_HIERARCHY,
             "source_run_setup_manifest_path": "run_setup.json",
+            "source_run_setup_sha256": "runhash",
             "schedule_hash": "schedulehash",
             "building_block_count": 1,
             "block_count": 1,
@@ -3121,6 +3148,7 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
             "package_asset_strategy": "trial_building_blocks_only",
             "study_hierarchy": validator.ANDROID_REQUIRED_STUDY_HIERARCHY,
             "source_run_setup_manifest_path": "run_setup.json",
+            "source_run_setup_sha256": "runhash",
             "schedule_hash": "schedulehash",
             "building_block_count": 1,
             "block_count": 1,
@@ -3213,6 +3241,7 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
         "package_asset_strategy": "trial_building_blocks_only",
         "study_hierarchy": validator.ANDROID_REQUIRED_STUDY_HIERARCHY,
         "source_run_setup_manifest_path": "run_setup.json",
+        "source_run_setup_sha256": "runhash",
         "schedule_hash": "schedulehash",
         "building_block_count": 1,
         "block_count": 1,

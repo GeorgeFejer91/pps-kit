@@ -236,6 +236,7 @@ class PhoneLslProtocolTest {
             "runs/setup.json",
             richSessionMetadata.getString("source_run_setup_manifest_path"),
         )
+        assertEquals("runhash", richSessionMetadata.getString("source_run_setup_sha256"))
         assertFalse(richSessionMetadata.getBoolean("demographics_in_stream_name"))
         val participantSummary = richSessionMetadata.getJSONObject("participant_metadata_summary")
         assertEquals("pps-android-lsl-participant-metadata-summary.v1", participantSummary.getString("schema"))
@@ -373,7 +374,8 @@ class PhoneLslProtocolTest {
                   "segment_6_participant_part_order",
                   "phone_runtime_package"
                 ],
-                "source_run_setup_manifest_path": "runs/setup.json"
+                "source_run_setup_manifest_path": "runs/setup.json",
+                "source_run_setup_sha256": "runhash"
               },
               "lsl": {
                 "schema": "pps-mobile-lsl-contract.v1",

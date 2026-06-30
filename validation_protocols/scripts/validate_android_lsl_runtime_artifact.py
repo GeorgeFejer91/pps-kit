@@ -2641,6 +2641,9 @@ def _phone_run_provenance_from_manifest(package_manifest: dict[str, Any] | None)
     source_run_setup_manifest_path = _metadata_value(reconstruction.get("source_run_setup_manifest_path"))
     if source_run_setup_manifest_path:
         expected["source_run_setup_manifest_path"] = source_run_setup_manifest_path
+    source_run_setup_sha256 = _metadata_value(reconstruction.get("source_run_setup_sha256"))
+    if source_run_setup_sha256:
+        expected["source_run_setup_sha256"] = source_run_setup_sha256
     return expected
 
 
@@ -2665,6 +2668,7 @@ def _phone_run_payload_has_provenance(payload: dict[str, Any]) -> bool:
             "package_asset_strategy",
             "study_hierarchy",
             "source_run_setup_manifest_path",
+            "source_run_setup_sha256",
         )
     )
 
@@ -2720,6 +2724,14 @@ def _validate_phone_run_provenance_payload(
             failures.append(f"{label} source_run_setup_manifest_path is missing from run_package_manifest provenance")
         elif observed_setup_path != expected_setup_path:
             failures.append(f"{label} source_run_setup_manifest_path differs from run_package_manifest")
+
+    expected_setup_sha256 = _metadata_value(expected.get("source_run_setup_sha256"))
+    if expected_setup_sha256:
+        observed_setup_sha256 = _phone_run_provenance_field(payload, "source_run_setup_sha256")
+        if not observed_setup_sha256:
+            failures.append(f"{label} source_run_setup_sha256 is missing from run_package_manifest provenance")
+        elif observed_setup_sha256 != expected_setup_sha256:
+            failures.append(f"{label} source_run_setup_sha256 differs from run_package_manifest")
 
 
 def _phone_run_provenance_field(payload: dict[str, Any], field: str) -> str:

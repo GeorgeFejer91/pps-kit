@@ -1657,6 +1657,12 @@ def _mobile_runtime_lsl_session_metadata(
         "participant_roster_count": len(_json_list(manifest.get("participant_roster"))),
         "randomization_seed": str(manifest.get("randomization_seed") or ""),
         "source_segment_hashes": dict(manifest.get("source_segment_hashes") or {}),
+        "package_asset_strategy": str(
+            reconstruction.get("package_asset_strategy") or manifest.get("asset_strategy") or ""
+        ),
+        "study_hierarchy": [str(item) for item in _json_list(reconstruction.get("study_hierarchy"))],
+        "source_run_setup_manifest_path": str(reconstruction.get("source_run_setup_manifest_path") or ""),
+        "source_run_setup_sha256": str(reconstruction.get("source_run_setup_sha256") or ""),
         "privacy_default": str(lsl.get("privacy_default") or "metadata_payload_only"),
         "demographics_in_stream_name": False,
     }

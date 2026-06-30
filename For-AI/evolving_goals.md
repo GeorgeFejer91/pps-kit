@@ -289,6 +289,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   accepting nested reconstruction fields in sidecar artifacts, so native
   `PPSMarkersV2`/`PPSTriggerCodes` stream descriptions preserve the Segment
   0-6 reconstruction spine without relying only on private app files.
+- Android and PC-upload-mirrored phone-run LSL `session_metadata_json` now also
+  carries `source_run_setup_sha256` when the v2 package reconstruction contract
+  provides it. The PC mobile-runtime sparse-status fallback rebuilds
+  `package_asset_strategy`, `study_hierarchy`, source setup path, and setup
+  SHA into rich-marker/numeric-trigger stream descriptions, and strict Android
+  artifact validation rejects stream/session/catalog drift on the setup SHA.
 - PC-side Android LSL monitor reconciliation now compares captured rich-marker
   `payload_json` values against the phone marker mirror using canonical JSON.
   This means event-id and trigger-code agreement is no longer enough: if the

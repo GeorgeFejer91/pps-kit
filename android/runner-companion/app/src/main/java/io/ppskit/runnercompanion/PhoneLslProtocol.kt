@@ -356,6 +356,7 @@ internal fun phoneLslSessionMetadataJson(
         .put("source_segment_hashes", runPackage.sourceSegmentHashes.toJsonObject())
         .put("study_hierarchy", stringArray(runPackage.reconstruction.studyHierarchy))
         .put("source_run_setup_manifest_path", runPackage.reconstruction.sourceRunSetupManifestPath)
+        .put("source_run_setup_sha256", runPackage.reconstruction.sourceRunSetupSha256)
         .put("privacy_default", runPackage.lsl.privacyDefault.ifBlank { "metadata_payload_only" })
         .put("demographics_in_stream_name", false)
     phoneParticipantMetadataSummary(participantMetadata)?.let { payload.put("participant_metadata_summary", it) }

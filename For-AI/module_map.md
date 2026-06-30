@@ -80,13 +80,16 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `lsl_runtime_status.json` rich-marker/numeric-trigger stream descriptions
   carry the same `session_metadata_json` provenance summary for marker-stream
   reconstruction, including the package asset strategy, Segment 0-6
-  `study_hierarchy`, and source run-setup manifest path.
+  `study_hierarchy`, source run-setup manifest path, and source setup SHA-256.
   `validate_android_lsl_runtime_artifact.py` now enforces that package
   provenance across `run_package_manifest.json`, the `session_metadata` event
   package payload, `reconstruction_contract.json`,
   `phone_run_catalog_entry.json`, and stream-description metadata, comparing the
   roster count, randomization seed, Segment 6/5 hashes, phone-side source block
-  CSV count, package asset strategy, study hierarchy, and source setup path.
+  CSV count, package asset strategy, study hierarchy, source setup path, and
+  source setup SHA-256. PC upload mirrors that backfill sparse
+  `lsl_runtime_status` payloads must preserve the same stream-description
+  `session_metadata_json` fields from the v2 manifest reconstruction contract.
   Rich-marker and numeric-trigger stream descriptions also
   carry compact `participant_metadata_summary` and
   `haptic_capability_summary` objects when the phone has those sidecars; the
