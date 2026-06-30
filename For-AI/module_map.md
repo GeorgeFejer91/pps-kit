@@ -172,7 +172,11 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   (`package_id`, `participant_id`, target session/part/group/part-number, and
   requester/source-behavior fields) while excluding pairing tokens; explicit
   package, target-session, or split-part identity drift is rejected before state
-  changes. The
+  changes. Runner command diary rows flatten the same non-secret target
+  identity beside the raw received command/ack samples, and strict validation
+  compares those row fields against command payloads, ack payloads, embedded
+  completion diary rows, and matching `operator_command` events when present.
+  The
   strict Controller/PC-admin outbox validator now parses stored command and ack
   samples, rejects row-versus-command-payload target identity drift, and
   requires that same non-secret ack payload identity while rejecting pairing-token

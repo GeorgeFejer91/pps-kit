@@ -1853,6 +1853,23 @@ def test_android_lsl_runtime_validator_rejects_phone_run_received_command_sample
     assert "phone command diary row 1 command sample sender_id differs from diary row" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_phone_run_received_command_target_identity_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    row = _phone_native_command_row()
+    command_payload = json.loads(row["command_sample"][6])
+    command_payload["target_session_id"] = "part-999"
+    row["command_sample"][6] = json.dumps(command_payload)
+    _write_phone_run_with_native_command_diary(run_dir, row=row)
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    assert "phone command diary row 1 command payload target_session_id differs from diary row" in "\n".join(
+        result.failures
+    )
+
+
 def test_android_lsl_runtime_validator_rejects_phone_run_ack_payload_drift(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -2157,6 +2174,11 @@ def _phone_native_command_row(*, ack_sent: bool = True) -> dict:
     payload = {
         "command": "pause",
         "package_id": "pkg-001",
+        "participant_id": "P001",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+        "target_part_number": "1",
         "run_id": "phone-run-001",
         "state_changed": True,
     }
@@ -2183,6 +2205,11 @@ def _phone_native_command_row(*, ack_sent: bool = True) -> dict:
         "reason": "phone_playback_paused",
         "payload": dict(payload),
         "package_id": "pkg-001",
+        "participant_id": "P001",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+        "target_part_number": "1",
         "run_id": "phone-run-001",
         "received_lsl_time": 42.01,
         "applied_lsl_time": 42.02,
@@ -2223,6 +2250,17 @@ def _phone_native_start_command_row() -> dict:
         "start_experiment",
         issued_lsl_time="41.000000000",
     )
+    payload = {
+        "command": "start_experiment",
+        "package_id": "pkg-001",
+        "participant_id": "P001",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+        "target_part_number": "1",
+        "idle_runner_listener": True,
+        "state_changed": True,
+    }
     ack_sample = [
         "pps-lsl-command-ack.v1",
         "cmd-phone-start-001",
@@ -2233,14 +2271,7 @@ def _phone_native_start_command_row() -> dict:
         "41.010000000",
         "41.020000000",
         "41.030000000",
-        json.dumps(
-            {
-                "command": "start_experiment",
-                "package_id": "pkg-001",
-                "idle_runner_listener": True,
-                "state_changed": True,
-            }
-        ),
+        json.dumps(payload),
     ]
     return {
         "schema": "pps-android-command-diary.v1",
@@ -2251,13 +2282,13 @@ def _phone_native_start_command_row() -> dict:
         "command": "start_experiment",
         "status": "applied",
         "reason": "starting_phone_run",
-        "payload": {
-            "command": "start_experiment",
-            "package_id": "pkg-001",
-            "idle_runner_listener": True,
-            "state_changed": True,
-        },
+        "payload": dict(payload),
         "package_id": "pkg-001",
+        "participant_id": "P001",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+        "target_part_number": "1",
         "run_id": "phone-run-001",
         "received_lsl_time": 41.01,
         "applied_lsl_time": 41.02,

@@ -3455,6 +3455,18 @@ def _validate_phone_command_diary(
                 if "payload" in row and "payload" in event:
                     if _canonical_json(row.get("payload")) != _canonical_json(event.get("payload")):
                         failures.append(f"{prefix} payload differs from matching operator_command event")
+                for field in (
+                    "package_id",
+                    "participant_id",
+                    "target_session_id",
+                    "target_part_session_id",
+                    "target_session_group_id",
+                    "target_part_number",
+                ):
+                    row_value = _metadata_value(row.get(field))
+                    event_value = _metadata_value(event.get(field))
+                    if row_value and event_value and row_value != event_value:
+                        failures.append(f"{prefix} {field} differs from matching operator_command event")
 
         if command_source != "native_lsl":
             continue
@@ -3463,6 +3475,8 @@ def _validate_phone_command_diary(
             native_rejected_rows += 1
         if row.get("ack_sent") is True:
             native_ack_sent_rows += 1
+        if expect_command_acks and not _metadata_value(row.get("target_session_id")):
+            failures.append(f"{prefix} expected to flatten target_session_id for native LSL reconstruction")
         command_channels = list(row.get("command_channels") or [])
         if command_channels and command_channels != list(LSL_COMMAND_CHANNELS):
             failures.append(f"{prefix} command channel order mismatch")
@@ -3616,6 +3630,22 @@ def _validate_phone_command_sample(
                 failures.append(f"{prefix} command payload package_id differs from diary row")
         elif expect_command_acks:
             failures.append(f"{prefix} command payload is missing package_id")
+    for field in (
+        "participant_id",
+        "target_session_id",
+        "target_part_session_id",
+        "target_session_group_id",
+        "target_part_number",
+    ):
+        row_value = _metadata_value(row.get(field))
+        if not row_value:
+            continue
+        payload_value = _metadata_value(command_payload.get(field))
+        if payload_value:
+            if payload_value != row_value:
+                failures.append(f"{prefix} command payload {field} differs from diary row")
+        elif expect_command_acks:
+            failures.append(f"{prefix} command payload is missing {field}")
 
 
 def _validate_phone_command_ack_payload(
@@ -3652,6 +3682,22 @@ def _validate_phone_command_ack_payload(
                 failures.append(f"{prefix} ack payload package_id differs from diary row")
         elif expect_command_acks and status == "applied":
             failures.append(f"{prefix} ack payload is missing package_id")
+    for field in (
+        "participant_id",
+        "target_session_id",
+        "target_part_session_id",
+        "target_session_group_id",
+        "target_part_number",
+    ):
+        row_value = _metadata_value(row.get(field))
+        if not row_value:
+            continue
+        payload_value = _metadata_value(ack_payload.get(field))
+        if payload_value:
+            if payload_value != row_value:
+                failures.append(f"{prefix} ack payload {field} differs from diary row")
+        elif expect_command_acks and status == "applied":
+            failures.append(f"{prefix} ack payload is missing {field}")
 
     row_run_id = _metadata_value(row.get("run_id"))
     payload_run_id = _metadata_value(ack_payload.get("run_id"))
@@ -3681,6 +3727,11 @@ def _compare_command_diary_rows(
         "reason",
         "payload",
         "package_id",
+        "participant_id",
+        "target_session_id",
+        "target_part_session_id",
+        "target_session_group_id",
+        "target_part_number",
         "run_id",
         "received_lsl_time",
         "applied_lsl_time",

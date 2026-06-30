@@ -70,6 +70,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `target_session_id` that is not one of the current package/session/group/part
   identifiers, matching the existing package, part-session, session-group, and
   part-number drift checks before any phone-side state change.
+- Android phone-run command diary rows now flatten the non-secret command
+  target identity (`participant_id`, target session, target part session,
+  session group, and part number) alongside the raw received command and ack
+  samples. Strict validation compares those row fields against the command
+  payload, ack payload, embedded completion diary, and matching
+  `operator_command` event when present, so the receiver-side diary is
+  reconstructable without parsing only the nested LSL samples.
 - Android Controller outboxes and PC-admin outboxes now flatten non-secret
   target identity fields (`target_part_session_id`,
   `target_session_group_id`, and `target_part_number`) into the saved row/status

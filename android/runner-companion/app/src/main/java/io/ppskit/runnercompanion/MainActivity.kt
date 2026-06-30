@@ -2694,6 +2694,9 @@ private class PhoneRunSession(
     ) {
         val sessionId = participantMetadata.optString("part_session_id")
             .ifBlank { participantMetadata.optString("session_id", "") }
+        val targetPartSessionId = participantMetadata.optString("part_session_id", "")
+        val targetSessionGroupId = participantMetadata.optString("session_group_id", "")
+        val targetPartNumber = participantMetadata.optString("part_number", "")
         val row = JSONObject()
             .put("schema", "pps-android-command-diary.v1")
             .put("command_id", commandId.ifBlank { "phone-${commandDiary.size + 1}" })
@@ -2705,6 +2708,11 @@ private class PhoneRunSession(
             .put("reason", reason)
             .put("payload", JSONObject(payload.toString()))
             .put("package_id", packageId)
+            .put("participant_id", participantMetadata.optString("participant_id", ""))
+            .put("target_session_id", sessionId)
+            .put("target_part_session_id", targetPartSessionId)
+            .put("target_session_group_id", targetSessionGroupId)
+            .put("target_part_number", targetPartNumber)
             .put("run_id", runId)
             .put("ack_sent", false)
             .put("phone_unix_ms", System.currentTimeMillis())
@@ -2720,6 +2728,12 @@ private class PhoneRunSession(
                 .put("status", status)
                 .put("reason", reason)
                 .put("ack_sent", false)
+                .put("package_id", packageId)
+                .put("participant_id", participantMetadata.optString("participant_id", ""))
+                .put("target_session_id", sessionId)
+                .put("target_part_session_id", targetPartSessionId)
+                .put("target_session_group_id", targetSessionGroupId)
+                .put("target_part_number", targetPartNumber)
                 .put("payload", JSONObject(payload.toString())),
             )
     }
@@ -2930,6 +2944,15 @@ private class PhoneRunSession(
         val receivedCommandSample = commandSample.ifEmpty { signal?.rawSample.orEmpty() }
         val command = signal?.command ?: "invalid_lsl_command"
         val commandId = ack.commandId.ifBlank { signal?.commandId ?: "native-${commandDiary.size + 1}" }
+        val signalPayload = signal?.payload ?: JSONObject()
+        val targetSessionId = signalPayload.optString("target_session_id")
+            .ifBlank { ack.sessionId }
+        val targetPartSessionId = signalPayload.optString("target_part_session_id")
+            .ifBlank { participantMetadata.optString("part_session_id", "") }
+        val targetSessionGroupId = signalPayload.optString("target_session_group_id")
+            .ifBlank { participantMetadata.optString("session_group_id", "") }
+        val targetPartNumber = signalPayload.optString("target_part_number")
+            .ifBlank { participantMetadata.optString("part_number", "") }
         val row = JSONObject()
             .put("schema", "pps-android-command-diary.v1")
             .put("command_id", commandId)
@@ -2941,6 +2964,11 @@ private class PhoneRunSession(
             .put("reason", ack.reason)
             .put("payload", JSONObject(ack.payload.toString()))
             .put("package_id", packageId)
+            .put("participant_id", participantMetadata.optString("participant_id", ""))
+            .put("target_session_id", targetSessionId)
+            .put("target_part_session_id", targetPartSessionId)
+            .put("target_session_group_id", targetSessionGroupId)
+            .put("target_part_number", targetPartNumber)
             .put("run_id", runId)
             .put("received_lsl_time", ack.receivedLslTime)
             .put("applied_lsl_time", ack.appliedLslTime)
@@ -2963,6 +2991,12 @@ private class PhoneRunSession(
                 .put("status", ack.status)
                 .put("reason", ack.reason)
                 .put("ack_sent", ackSent)
+                .put("package_id", packageId)
+                .put("participant_id", participantMetadata.optString("participant_id", ""))
+                .put("target_session_id", targetSessionId)
+                .put("target_part_session_id", targetPartSessionId)
+                .put("target_session_group_id", targetSessionGroupId)
+                .put("target_part_number", targetPartNumber)
                 .put("command_channels", jsonStringArray(PHONE_LSL_COMMAND_CHANNELS))
                 .put("command_sample", jsonStringArray(receivedCommandSample))
                 .put("payload", JSONObject(ack.payload.toString())),

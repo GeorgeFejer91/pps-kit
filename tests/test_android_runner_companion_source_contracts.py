@@ -351,6 +351,11 @@ def test_android_phone_run_command_diary_separates_local_ui_runtime_and_native_s
     assert "commandSample = startCommandEvidence.commandSample" in main_activity
     assert ".put(\"command_channels\", jsonStringArray(PHONE_LSL_COMMAND_CHANNELS))" in main_activity
     assert ".put(\"command_sample\", jsonStringArray(receivedCommandSample))" in main_activity
+    assert '.put("participant_id", participantMetadata.optString("participant_id", ""))' in main_activity
+    assert '.put("target_session_id", targetSessionId)' in main_activity
+    assert '.put("target_part_session_id", targetPartSessionId)' in main_activity
+    assert '.put("target_session_group_id", targetSessionGroupId)' in main_activity
+    assert '.put("target_part_number", targetPartNumber)' in main_activity
 
 
 def test_android_runner_mode_local_controls_use_command_diary_path() -> None:
