@@ -1040,3 +1040,48 @@ Methods manuscript draft. It is a working audit, not manuscript text.
 - A run-ready profile is still not an original-apparatus replication. Exact
   recreation requires original methods/assets or a validated and explicitly
   reported approximation.
+
+## Iteration 30: Consensus Spot-check and Manuscript Voice Pass
+
+### Main Critiques
+
+- The manuscript had become evidence-rich, but several sections still read like
+  internal planning notes. Phrases such as "the final paper should" and "the
+  manuscript needs to" weaken the BRM article voice even when the underlying
+  caveat is correct.
+- A targeted Consensus spot-check was needed before further polishing, because
+  the next revision should not merely make the prose smoother; it should verify
+  that the strongest boundaries still match the literature. The check focused
+  on three places where overclaiming would be easiest: BRM software-tool
+  validation style, PPS baseline/expectancy logic, and vibrotactile threshold
+  and adaptation evidence.
+
+### Resolution In This Revision
+
+- Ran targeted Consensus searches for behavioral-software/tool validation
+  models, audio-tactile PPS baseline and expectancy controls, and vibrotactile
+  threshold/adaptation evidence. The results reinforced the existing structure:
+  software papers should separate workflow, openness, timing evidence, and
+  reusable materials; PPS baseline choices change the estimand; and tactile
+  threshold/adaptation language should stay conservative unless run artifacts
+  are supplied.
+- Rewrote planning-language paragraphs in `main.tex` into present-tense
+  manuscript prose. The revised sections now describe HRTF provenance, tactile
+  calibration, archive layers, validation tiers, operator procedure, procedural
+  gaps, figure sourcing, limitations, and declarations as article content
+  rather than as instructions to a future writer.
+- Preserved the substantive caveats: profile recreation remains conditional,
+  participant-ear SPL requires measured calibration, timing evidence remains
+  tiered, and the two-miss tactile-output nudge remains a logged safeguard
+  rather than a validated psychophysical correction.
+
+### Residual Concerns
+
+- The manuscript still contains intentionally incomplete declaration fields and
+  release placeholders. Those are not prose-quality defects; they require human
+  author metadata, repository release data, DOI/archive links, funding,
+  competing-interest, and ethics language.
+- The next high-value paper pass should create final redistributable figures or
+  a figure-generation script from toolkit artifacts, because the prose now
+  repeatedly promises figure/source-material boundaries but the final figures
+  are not yet present.

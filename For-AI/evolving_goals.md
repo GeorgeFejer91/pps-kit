@@ -273,6 +273,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   claim-state table so the suite can be described as recreating/scaffolding
   published paradigms without implying exact original-apparatus, private-asset,
   or participant-effect replication for every profile.
+- Continued the BRM manuscript critical loop with a Consensus spot-check and
+  manuscript-voice pass. Targeted Consensus searches rechecked three high-risk
+  evidence boundaries: BRM software/tool validation style, PPS
+  baseline/expectancy logic, and vibrotactile threshold/adaptation evidence.
+  `main.tex` now removes internal planning-language from the paper body where
+  possible and speaks in present-tense article voice while preserving caveats
+  around release metadata, measured SPL, publication-hardware validation,
+  profile-recreation limits, and the two-miss tactile safeguard.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation
