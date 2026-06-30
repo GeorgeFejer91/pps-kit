@@ -363,9 +363,12 @@ PC-runner or Controller-phone rehearsals. The offline
 rich marker rows back to the phone `lsl_marker_mirror.csv`, including semantic
 `payload_json` equality, so a captured `session_metadata` payload cannot drift
 away from the phone-owned reconstruction payload without a reconciliation
-failure. The same reconciler can load LabRecorder `.xdf` captures directly via
-the optional `pyxdf` dependency and converts recognized Android LSL streams into
-the durable PC monitor row schema before comparison.
+failure. When the same monitor capture includes command signals and command
+acks, the reconciler also pairs them by `command_id`, detects missing or extra
+acks, and compares ack payload command/package identity against the original
+command payload. The same reconciler can load LabRecorder `.xdf` captures
+directly via the optional `pyxdf` dependency and converts recognized Android
+LSL streams into the durable PC monitor row schema before comparison.
 
 Controller mode always writes `phone_controller_command_outbox.jsonl` as the
 local audit trail. In a native liblsl validation build it also keeps a

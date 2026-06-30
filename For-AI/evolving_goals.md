@@ -112,7 +112,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   reconstruction payload, `reconcile_android_lsl_monitor_with_phone_run.py`
   fails. The same script now accepts LabRecorder `.xdf` files directly through
   optional `pyxdf`, classifying recognized Android LSL streams into the PC
-  monitor row schema before reconciliation.
+  monitor row schema before reconciliation. It now also reconciles captured
+  `PPSCommandSignalsV1` rows against `PPSCommandAcksV1` rows by `command_id`,
+  `session_id`, and ack payload command/package identity when both streams are
+  present, so two-way PC/controller administration evidence can be audited from
+  one monitor/XDF capture.
 
 ## 2026-06-29
 

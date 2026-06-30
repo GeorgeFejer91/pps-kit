@@ -8,7 +8,7 @@ import types
 from pathlib import Path
 
 from peripersonal_space_toolkit import android_lsl_monitor as monitor
-from peripersonal_space_toolkit.lsl_command_ack import LSLCommandAck, ack_to_sample
+from peripersonal_space_toolkit.lsl_command_ack import LSLCommandAck, LSLCommandSignal, ack_to_sample, command_to_sample
 from peripersonal_space_toolkit.timing_events import LSL_MARKER_CHANNELS, MARKER_VERSION
 
 
@@ -137,6 +137,71 @@ def test_reconcile_android_lsl_monitor_reports_payload_json_drift():
     assert "rich markers have 1 field mismatches" in "\n".join(result.report["failures"])
 
 
+def test_reconcile_android_lsl_monitor_accepts_matching_command_ack_pair():
+    phone_markers = [_phone_marker(event_id="1", event_type="session_metadata", event_code="8")]
+    monitor_rows = [
+        _monitor_rich_row(phone_markers[0], timestamp=1.0),
+        _monitor_command_row(command_id="cmd-1", command="pause"),
+        _monitor_ack_row(
+            command_id="cmd-1",
+            payload={"command": "pause", "package_id": "pkg-001", "run_id": "phone-run-001"},
+        ),
+    ]
+
+    result = reconciler.reconcile_android_lsl_monitor(
+        phone_markers,
+        monitor_rows,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is True
+    assert result.report["monitor_command_signal_count"] == 1
+    assert result.report["command_ack_pair_summary"]["command_ids_without_ack"] == []
+    assert result.report["command_ack_pair_summary"]["mismatch_count"] == 0
+
+
+def test_reconcile_android_lsl_monitor_reports_command_without_ack():
+    phone_markers = [_phone_marker(event_id="1", event_type="session_metadata", event_code="8")]
+    monitor_rows = [
+        _monitor_rich_row(phone_markers[0], timestamp=1.0),
+        _monitor_command_row(command_id="cmd-missing", command="resume"),
+    ]
+
+    result = reconciler.reconcile_android_lsl_monitor(
+        phone_markers,
+        monitor_rows,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is False
+    assert result.report["command_ack_pair_summary"]["command_ids_without_ack"] == ["cmd-missing"]
+    assert "command signals are missing matching ack ids" in "\n".join(result.report["failures"])
+
+
+def test_reconcile_android_lsl_monitor_reports_command_ack_payload_drift():
+    phone_markers = [_phone_marker(event_id="1", event_type="session_metadata", event_code="8")]
+    monitor_rows = [
+        _monitor_rich_row(phone_markers[0], timestamp=1.0),
+        _monitor_command_row(command_id="cmd-2", command="stop_after_block"),
+        _monitor_ack_row(
+            command_id="cmd-2",
+            payload={"command": "pause", "package_id": "pkg-other"},
+        ),
+    ]
+
+    result = reconciler.reconcile_android_lsl_monitor(
+        phone_markers,
+        monitor_rows,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is False
+    summary = result.report["command_ack_pair_summary"]
+    assert summary["mismatch_count"] == 2
+    assert {item["field"] for item in summary["mismatches"]} == {"payload.command", "payload.package_id"}
+    assert "command/ack pairs have 2 mismatches" in "\n".join(result.report["failures"])
+
+
 def test_loaders_accept_phone_run_folder_and_monitor_folder(tmp_path: Path):
     phone_dir = tmp_path / "phone-run"
     phone_dir.mkdir()
@@ -244,7 +309,24 @@ def _monitor_numeric_row(code: int, *, timestamp: float) -> dict:
     )
 
 
-def _monitor_ack_row(*, command_id: str) -> dict:
+def _monitor_command_row(*, command_id: str, command: str, payload: dict | None = None) -> dict:
+    return monitor.build_android_lsl_monitor_row(
+        stream_key="command_signals",
+        sample=command_to_sample(
+            LSLCommandSignal(
+                command_id=command_id,
+                session_id="part-001",
+                sender_id="pc_runner",
+                command=command,
+                issued_lsl_time=1.0,
+                payload=payload or {"token": "secret", "package_id": "pkg-001"},
+            )
+        ),
+        lsl_timestamp=1.0,
+    )
+
+
+def _monitor_ack_row(*, command_id: str, payload: dict | None = None) -> dict:
     return monitor.build_android_lsl_monitor_row(
         stream_key="command_acks",
         sample=ack_to_sample(
@@ -257,7 +339,7 @@ def _monitor_ack_row(*, command_id: str) -> dict:
                 received_lsl_time=1.0,
                 applied_lsl_time=1.1,
                 ack_lsl_time=1.2,
-                payload={},
+                payload=payload or {},
             )
         ),
         lsl_timestamp=1.2,

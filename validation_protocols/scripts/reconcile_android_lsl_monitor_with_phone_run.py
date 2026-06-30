@@ -52,6 +52,7 @@ def reconcile_android_lsl_monitor(
 ) -> AndroidLslMonitorReconciliation:
     rich_rows = [row for row in monitor_rows if row.get("stream_key") == "rich_markers"]
     numeric_rows = [row for row in monitor_rows if row.get("stream_key") == "numeric_triggers"]
+    command_rows = [row for row in monitor_rows if row.get("stream_key") == "command_signals"]
     ack_rows = [row for row in monitor_rows if row.get("stream_key") == "command_acks"]
     failures: list[str] = []
     warnings: list[str] = []
@@ -135,6 +136,29 @@ def reconcile_android_lsl_monitor(
         "ack_status_counts": dict(Counter(str(row.get("ack_status") or "unknown") for row in ack_rows)),
         "ack_command_ids": sorted({str(row.get("command_id") or "") for row in ack_rows if row.get("command_id")}),
     }
+    command_pair_summary = _command_ack_pair_summary(command_rows, ack_rows)
+    if expect_command_acks and command_pair_summary["command_ids_without_ack"]:
+        failures.append(
+            "PC monitor command signals are missing matching ack ids: "
+            + ", ".join(command_pair_summary["command_ids_without_ack"][:10])
+        )
+    if command_rows and command_pair_summary["ack_ids_without_command"]:
+        failures.append(
+            "PC monitor command acks are missing matching command signal ids: "
+            + ", ".join(command_pair_summary["ack_ids_without_command"][:10])
+        )
+    if command_pair_summary["duplicate_command_signal_ids"]:
+        failures.append(
+            "PC monitor has duplicate command signal ids: "
+            + ", ".join(command_pair_summary["duplicate_command_signal_ids"][:10])
+        )
+    if command_pair_summary["duplicate_command_ack_ids"]:
+        failures.append(
+            "PC monitor has duplicate command ack ids: "
+            + ", ".join(command_pair_summary["duplicate_command_ack_ids"][:10])
+        )
+    if command_pair_summary["mismatch_count"]:
+        failures.append(f"PC monitor command/ack pairs have {command_pair_summary['mismatch_count']} mismatches")
 
     report = {
         "schema": RECONCILIATION_SCHEMA,
@@ -144,6 +168,7 @@ def reconcile_android_lsl_monitor(
         "phone_marker_count": len(phone_markers),
         "monitor_rich_marker_count": len(rich_rows),
         "monitor_numeric_trigger_count": len(numeric_rows),
+        "monitor_command_signal_count": len(command_rows),
         "monitor_command_ack_count": len(ack_rows),
         "compared_event_count": len(set(phone_ids) & set(rich_ids)),
         "missing_event_ids": missing,
@@ -156,6 +181,7 @@ def reconcile_android_lsl_monitor(
         "monitor_event_type_counts": dict(Counter(str(row.get("event_type") or "") for row in rich_rows)),
         "numeric_trigger_summary": numeric_summary,
         "command_ack_summary": ack_summary,
+        "command_ack_pair_summary": command_pair_summary,
         "failures": failures,
         "warnings": warnings,
         "evidence_boundary": (
@@ -318,6 +344,61 @@ def _numeric_summary(phone_markers: list[dict[str, Any]], numeric_rows: list[dic
     }
 
 
+def _command_ack_pair_summary(command_rows: list[dict[str, Any]], ack_rows: list[dict[str, Any]]) -> dict[str, Any]:
+    command_ids = [_command_id(row) for row in command_rows if _command_id(row)]
+    ack_ids = [_command_id(row) for row in ack_rows if _command_id(row)]
+    command_by_id = _rows_by_command_id(command_rows)
+    ack_by_id = _rows_by_command_id(ack_rows)
+    missing_ack = sorted(set(command_ids) - set(ack_ids), key=_event_id_sort_key)
+    ack_without_command = sorted(set(ack_ids) - set(command_ids), key=_event_id_sort_key) if command_rows else []
+    mismatches: list[dict[str, Any]] = []
+    for command_id in sorted(set(command_ids) & set(ack_ids), key=_event_id_sort_key):
+        command_row = command_by_id[command_id]
+        ack_row = ack_by_id[command_id]
+        command_session = _clean(command_row.get("session_id"))
+        ack_session = _clean(ack_row.get("session_id"))
+        if command_session and ack_session and command_session != ack_session:
+            mismatches.append(_command_ack_mismatch(command_id, "session_id", command_session, ack_session))
+
+        command_name = _clean(command_row.get("command"))
+        ack_payload = _payload_object(ack_row.get("payload_json"))
+        payload_command = _clean(ack_payload.get("command"))
+        if payload_command and command_name and payload_command != command_name:
+            mismatches.append(_command_ack_mismatch(command_id, "payload.command", command_name, payload_command))
+        elif command_name and _clean(ack_row.get("ack_status")) == "applied" and not payload_command:
+            mismatches.append(_command_ack_mismatch(command_id, "payload.command", command_name, ""))
+
+        command_payload = _payload_object(command_row.get("payload_json"))
+        expected_package = _clean(command_payload.get("package_id"))
+        observed_package = _clean(ack_payload.get("package_id"))
+        if expected_package and observed_package and expected_package != observed_package:
+            mismatches.append(_command_ack_mismatch(command_id, "payload.package_id", expected_package, observed_package))
+        elif expected_package and _clean(ack_row.get("ack_status")) == "applied" and not observed_package:
+            mismatches.append(_command_ack_mismatch(command_id, "payload.package_id", expected_package, ""))
+
+    return {
+        "command_signal_count": len(command_rows),
+        "ack_count": len(ack_rows),
+        "command_signal_ids": sorted(set(command_ids), key=_event_id_sort_key),
+        "ack_ids": sorted(set(ack_ids), key=_event_id_sort_key),
+        "command_ids_without_ack": missing_ack,
+        "ack_ids_without_command": ack_without_command,
+        "duplicate_command_signal_ids": _duplicates(command_ids),
+        "duplicate_command_ack_ids": _duplicates(ack_ids),
+        "mismatch_count": len(mismatches),
+        "mismatches": mismatches[:100],
+    }
+
+
+def _command_ack_mismatch(command_id: str, field: str, expected: str, observed: str) -> dict[str, Any]:
+    return {
+        "command_id": command_id,
+        "field": field,
+        "expected": expected,
+        "observed": observed,
+    }
+
+
 def _first_mismatch_index(left: list[str], right: list[str]) -> int | None:
     for index, (left_value, right_value) in enumerate(zip(left, right), start=1):
         if left_value != right_value:
@@ -363,8 +444,21 @@ def _rows_by_event_id(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     return result
 
 
+def _rows_by_command_id(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    result: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        command_id = _command_id(row)
+        if command_id and command_id not in result:
+            result[command_id] = row
+    return result
+
+
 def _event_id(row: dict[str, Any]) -> str:
     return _clean(row.get("event_id"))
+
+
+def _command_id(row: dict[str, Any]) -> str:
+    return _clean(row.get("command_id"))
 
 
 def _event_id_sort_key(value: str) -> tuple[int, int | str]:
@@ -408,6 +502,17 @@ def _canonical_payload_json(value: Any) -> str:
     return json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
 
+def _payload_object(value: Any) -> dict[str, Any]:
+    raw = _clean(value)
+    if not raw:
+        return {}
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
 def _write_report(result: AndroidLslMonitorReconciliation, output_dir: Path) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     report_json = output_dir / REPORT_JSON
@@ -421,6 +526,7 @@ def _write_report(result: AndroidLslMonitorReconciliation, output_dir: Path) -> 
         f"- Phone markers: `{report.get('phone_marker_count')}`",
         f"- Monitor rich markers: `{report.get('monitor_rich_marker_count')}`",
         f"- Monitor numeric triggers: `{report.get('monitor_numeric_trigger_count')}`",
+        f"- Monitor command signals: `{report.get('monitor_command_signal_count')}`",
         f"- Monitor command acks: `{report.get('monitor_command_ack_count')}`",
         f"- Compared events: `{report.get('compared_event_count')}`",
         "",

@@ -106,7 +106,9 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   canonicalized rich-marker `payload_json`, so external monitor/XDF evidence
   must preserve the same `session_metadata` reconstruction payload. The loader
   accepts PC monitor JSONL/report artifacts and LabRecorder `.xdf` files when
-  optional `pyxdf` is available.
+  optional `pyxdf` is available. It also pairs captured `PPSCommandSignalsV1`
+  and `PPSCommandAcksV1` samples by `command_id`, flags missing/extra acks, and
+  compares ack payload command/package identity to the source command payload.
 - Android controller-role scaffolding lives in `PhoneControllerCommands.kt` and
   the `Runner` / `Controller` toggle inside `PhoneRuntimeScreen`. Controller
   mode writes token-gated command samples to
