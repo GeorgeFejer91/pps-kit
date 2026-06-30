@@ -2023,7 +2023,7 @@ private suspend fun runPhonePackage(
         withContext(Dispatchers.IO) { session.writeLocalArtifact(context, runPackage, complete = true) }
     } else {
         onStatus("Uploading")
-        client.awaitPostMobileComplete(session.runId, session.drainPayload(complete = true))
+        client.awaitPostMobileComplete(session.runId, session.drainPayload(complete = true, runPackage = runPackage))
     }
 }
 
@@ -2710,7 +2710,7 @@ private class PhoneRunSession(
     }
 
     @Synchronized
-    fun drainPayload(complete: Boolean = false): JSONObject {
+    fun drainPayload(complete: Boolean = false, runPackage: MobileRunPackage? = null): JSONObject {
         val eventsArray = JSONArray()
         pendingEvents.forEach { eventsArray.put(JSONObject(it.toString())) }
         pendingEvents.clear()
@@ -2726,6 +2726,16 @@ private class PhoneRunSession(
             .put("lsl_marker_mirror", JSONArray().also { array -> lslMarkers.forEach { array.put(JSONObject(it.toString())) } })
             .put("command_diary", JSONArray().also { array -> commandDiary.forEach { array.put(JSONObject(it.toString())) } })
             .put("summary", summaryLocked())
+        if (complete && runPackage != null) {
+            val responseReview = buildPhoneResponseReview(runPackage, events.map { JSONObject(it.toString()) })
+            payload
+                .put("phone_response_summary", JSONObject(responseReview.summary.toString()))
+                .put("phone_response_ledger", JSONArray().also { array ->
+                    responseReview.ledgerRows.forEach { array.put(JSONObject(it.toString())) }
+                })
+                .put("phone_topup_plan", JSONObject(responseReview.topupPlan.toString()))
+                .put("phone_topup_materialization", latestTopupMaterializationLocked())
+        }
         if (complete) closeNativeLslTransportLocked()
         return payload
     }
@@ -2910,6 +2920,30 @@ private class PhoneRunSession(
         } else {
             0L
         }
+
+    private fun latestTopupMaterializationLocked(): JSONObject {
+        val event = events.asReversed().firstOrNull { it.optString("type") == "phone_topup_materialization" }
+        if (event != null) {
+            return JSONObject(event.toString()).also { materialization ->
+                listOf(
+                    "type",
+                    "event_id",
+                    "package_id",
+                    "run_id",
+                    "phone_unix_ms",
+                    "phone_elapsed_realtime_ms",
+                ).forEach { materialization.remove(it) }
+            }
+        }
+        if (phoneTopupSkippedByStopAfterBlock) {
+            return JSONObject()
+                .put("schema", "pps-android-phone-topup-materialization.v1")
+                .put("status", "skipped")
+                .put("synthesis_strategy", "pcm_wav_concat_without_ffmpeg")
+                .put("reason", "stop_after_block_requested")
+        }
+        return notNeededPhoneTopupMaterialization()
+    }
 
     private fun addEventLocked(type: String, payload: JSONObject) {
         val eventId = events.size + 1

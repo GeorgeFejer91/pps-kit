@@ -97,7 +97,12 @@ protected context in
 <participant>/<package_id>/<run_id>/`. The uploaded `events.jsonl`,
 `events.csv`, `lsl_marker_mirror.csv`, `trigger_codes.csv`,
 `command_diary.jsonl`, `lsl_runtime_status.json`, and `completion.json` files
-are local experiment artifacts and are not committed.
+are local experiment artifacts and are not committed. Completion uploads that
+carry Android response/top-up reconstruction fields also write
+`phone_response_ledger.csv`, `phone_topup_plan.json`,
+`phone_topup_materialization.json`, `phone_owned_data_export.json`, and a
+PC-side `phone_owned_exports/1.Data_min` plus `2.Data_max` mirror beside the
+uploaded run folder.
 
 ## Run Experiment On Phone
 
@@ -205,6 +210,9 @@ an app-private `phone_owned_exports/1.Data_min/` participant CSV plus
 `master_successful_participants.csv` with the same 17-column public schema used
 by the PC runner, and a `phone_owned_exports/2.Data_max/<participant>/runs/`
 copy of the reconstructive phone-run folder.
+PC-side mobile completion uploads with embedded Android response ledgers now
+write the same phone-owned data-export sidecars and mirror tree under
+`runner_logs/mobile_phone_runtime/<participant>/<package_id>/phone_owned_exports/`.
 When validating PC-runner or Controller-phone administration, add
 `--expect-command-acks`; for phone-run artifacts this now requires
 `command_diary.jsonl` or embedded `command_diary` rows with native

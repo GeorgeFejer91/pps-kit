@@ -38,6 +38,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   reconstructive run folder. ZIP export includes this `phone_owned_exports/`
   snapshot when present, and the Android artifact validator can enforce it with
   `--expect-phone-owned-data-export`.
+- Android completion uploads to the PC companion now include
+  `phone_response_summary`, `phone_response_ledger`, `phone_topup_plan`, and
+  `phone_topup_materialization` when the run package is available. The PC
+  `mobile_phone_runtime.py` upload writer persists those fields as sidecars and
+  derives a PC-side `phone_owned_data_export.json` plus
+  `phone_owned_exports/1.Data_min/` and `2.Data_max/` mirror under
+  `runner_logs/mobile_phone_runtime/<participant>/<package_id>/` so uploaded
+  phone-run completions can be reconstructed even when the phone is the timing
+  owner.
 - Android phone-run artifact validation now treats response and top-up
   reconstruction as strict evidence when requested. The Android validator loads
   `phone_response_ledger.csv`, `phone_topup_plan.json`,

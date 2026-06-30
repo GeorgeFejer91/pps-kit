@@ -77,6 +77,10 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   observed.
 - PC-side phone uploads preserve `lsl_runtime_status.json` beside
   `lsl_marker_mirror.csv`, `trigger_codes.csv`, and `command_diary.jsonl`.
+  Completion uploads that include Android response/top-up reconstruction fields
+  also write `phone_response_ledger.csv`, `phone_topup_plan.json`,
+  `phone_topup_materialization.json`, `phone_owned_data_export.json`, and a
+  PC-side `phone_owned_exports/1.Data_min` plus `2.Data_max` mirror.
 
 This layer is useful because it keeps the PC runner, Android runner mode, and
 Android controller mode on the same command/ack schema. Default builds are not
@@ -176,8 +180,8 @@ Required validation levels:
     `pc_android_lsl_monitor_report.json` /
     `pc_android_lsl_monitor_events.jsonl` artifacts from
     `pps-android-lsl-monitor`. Add `--expect-phone-owned-data-export` for
-    completed phone-owned runs when the local `1.Data_min`/`2.Data_max` phone
-    export layer should be present.
+    completed phone-owned runs or PC-side mobile completion upload mirrors when
+    the `1.Data_min`/`2.Data_max` phone export layer should be present.
 3. Emulator smoke test: install APK, run a phone-owned package, export ZIP, and
    validate `lsl_runtime_status.json`.
 4. Native LSL network test with the AAR/JNI integration: resolve Android

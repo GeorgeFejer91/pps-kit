@@ -6,6 +6,7 @@ import csv
 import hashlib
 import json
 import re
+import shutil
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -24,6 +25,51 @@ MOBILE_RUN_COMPLETE_SCHEMA = "pps-mobile-run-complete.v1"
 MOBILE_RUNTIME_ARTIFACT_SCHEMA = "pps-mobile-runtime-artifact.v1"
 MOBILE_RECONSTRUCTION_SCHEMA = "pps-mobile-reconstruction-contract.v1"
 MOBILE_LSL_CONTRACT_SCHEMA = "pps-mobile-lsl-contract.v1"
+MOBILE_PHONE_OWNED_DATA_EXPORT_SCHEMA = "pps-android-phone-owned-data-export.v1"
+PHONE_DATA_MIN_FIELDNAMES = [
+    "participant_id",
+    "session_id",
+    "part_session_id",
+    "part_number",
+    "block_number",
+    "block_label",
+    "trial_number",
+    "trial_number_global",
+    "trial_uid",
+    "condition",
+    "phase",
+    "noise_type",
+    "trial_type",
+    "soa_ms",
+    "response_given",
+    "hit_miss",
+    "reaction_time_ms",
+]
+PHONE_RESPONSE_LEDGER_FIELDNAMES = [
+    "schema",
+    "ledger_role",
+    "source_trial_uid",
+    "source_trial_number",
+    "trial_uid",
+    "trial_number",
+    "block_id",
+    "block_index",
+    "cue_id",
+    "scheduled_block_time_ms",
+    "response_window_start_ms",
+    "response_window_end_ms",
+    "status",
+    "hit",
+    "rt_ms",
+    "tap_event_id",
+    "building_block_asset_id",
+    "topup_eligible",
+    "topup_attempted",
+    "topup_trial_uid",
+    "topup_hit",
+    "topup_rt_ms",
+    "topup_tap_event_id",
+]
 MOBILE_RUNTIME_LIMITATIONS = [
     "Phone runtime plays prepared PCM block WAVs locally through Android AudioTrack and records phone touch timestamps.",
     "Phone vibration is driven by Android vibrator timing and is not equivalent to the PC tactile audio output.",
@@ -577,6 +623,10 @@ def write_mobile_runtime_events(
         [dict(item) for item in list(payload.get("trigger_codes") or marker_rows) if isinstance(item, dict)]
     )
     command_rows = [dict(item) for item in list(payload.get("command_diary") or []) if isinstance(item, dict)]
+    response_summary = _json_dict(payload.get("phone_response_summary"))
+    response_ledger_rows = _json_dict_rows(payload.get("phone_response_ledger"))
+    topup_plan = _json_dict(payload.get("phone_topup_plan"))
+    topup_materialization = _json_dict(payload.get("phone_topup_materialization"))
     event_path = out_dir / "events.jsonl"
     if events:
         with open(_filesystem_path(event_path), "a", encoding="utf-8") as handle:
@@ -620,9 +670,52 @@ def write_mobile_runtime_events(
     _write_lsl_marker_mirror_csv(out_dir / "lsl_marker_mirror.csv", marker_rows)
     _write_trigger_codes_csv(out_dir / "trigger_codes.csv", trigger_code_rows)
     _write_command_diary(out_dir / "command_diary.jsonl", command_rows)
+    if response_summary:
+        artifact["phone_response_summary"] = response_summary
+    if response_ledger_rows:
+        response_ledger_path = out_dir / "phone_response_ledger.csv"
+        _write_rows_csv(
+            response_ledger_path,
+            response_ledger_rows,
+            _dynamic_fieldnames(response_ledger_rows, preferred=PHONE_RESPONSE_LEDGER_FIELDNAMES),
+        )
+        artifact["phone_response_ledger"] = response_ledger_rows
+        artifact["paths"]["phone_response_ledger_csv"] = str(response_ledger_path)
+    if topup_plan:
+        topup_plan_path = out_dir / "phone_topup_plan.json"
+        with open(_filesystem_path(topup_plan_path), "w", encoding="utf-8") as handle:
+            handle.write(json.dumps(topup_plan, indent=2, sort_keys=True, default=str) + "\n")
+        artifact["phone_topup_plan"] = topup_plan
+        artifact["paths"]["phone_topup_plan_json"] = str(topup_plan_path)
+    if topup_materialization:
+        topup_materialization_path = out_dir / "phone_topup_materialization.json"
+        with open(_filesystem_path(topup_materialization_path), "w", encoding="utf-8") as handle:
+            handle.write(json.dumps(topup_materialization, indent=2, sort_keys=True, default=str) + "\n")
+        artifact["phone_topup_materialization"] = topup_materialization
+        artifact["paths"]["phone_topup_materialization_json"] = str(topup_materialization_path)
+    phone_owned_data_export = None
+    if complete and response_ledger_rows:
+        phone_owned_data_export = _write_phone_owned_upload_export(
+            package,
+            out_dir=out_dir,
+            run_id=clean_run_id,
+            response_ledger_rows=response_ledger_rows,
+            accepted_at=accepted_at,
+        )
+        artifact["phone_owned_data_export"] = phone_owned_data_export
+        artifact["paths"]["phone_owned_data_export_json"] = str(out_dir / "phone_owned_data_export.json")
+        artifact["paths"]["phone_owned_data_min_participant_csv"] = str(
+            phone_owned_data_export.get("data_min_participant_csv") or ""
+        )
+        artifact["paths"]["phone_owned_data_min_master_csv"] = str(
+            phone_owned_data_export.get("data_min_master_successful_participants_csv") or ""
+        )
+        artifact["paths"]["phone_owned_data_max_run_dir"] = str(phone_owned_data_export.get("data_max_run_dir") or "")
     artifact_path = out_dir / ("completion.json" if complete else "latest_events_upload.json")
     with open(_filesystem_path(artifact_path), "w", encoding="utf-8") as handle:
         handle.write(json.dumps(artifact, indent=2, sort_keys=True, default=str) + "\n")
+    if phone_owned_data_export:
+        _copy_phone_owned_data_max(out_dir, Path(str(phone_owned_data_export.get("data_max_run_dir") or "")))
     return {
         "schema": MOBILE_RUN_COMPLETE_SCHEMA if complete else MOBILE_RUN_EVENTS_SCHEMA,
         "status": "accepted",
@@ -1042,6 +1135,206 @@ def _write_command_diary(path: Path, rows: list[dict[str, Any]]) -> None:
     with open(_filesystem_path(path), "w", encoding="utf-8") as handle:
         for row in rows:
             handle.write(json.dumps(row, sort_keys=True, default=str) + "\n")
+
+
+def _write_phone_owned_upload_export(
+    package: Any,
+    *,
+    out_dir: Path,
+    run_id: str,
+    response_ledger_rows: list[dict[str, Any]],
+    accepted_at: str,
+) -> dict[str, Any]:
+    export_root = out_dir.parent / "phone_owned_exports"
+    data_min_dir = export_root / "1.Data_min"
+    participant_id = _safe_phone_export_name(str(getattr(package, "participant_id", "") or "participant"))
+    participant_csv = data_min_dir / f"{participant_id}.csv"
+    data_max_run_dir = export_root / "2.Data_max" / participant_id / "runs" / _safe_phone_export_name(run_id)
+    rows = _phone_data_min_rows_from_response_ledger(package, response_ledger_rows)
+    _write_phone_data_min_csv(participant_csv, rows)
+    master_csv = _refresh_phone_data_min_master(data_min_dir)
+    export = {
+        "schema": MOBILE_PHONE_OWNED_DATA_EXPORT_SCHEMA,
+        "accepted_at": accepted_at,
+        "participant_id": participant_id,
+        "run_id": _safe_phone_export_name(run_id),
+        "package_id": mobile_package_id(package),
+        "session_id": str(getattr(package, "session_id", "") or ""),
+        "part_session_id": str(getattr(package, "part_session_id", "") or ""),
+        "part_number": _package_part_number(package),
+        "phone_owned_session": True,
+        "pc_upload_mirror": True,
+        "data_min_schema": "pps-data-min-publication-trials.v1",
+        "data_min_fieldnames": list(PHONE_DATA_MIN_FIELDNAMES),
+        "data_min_participant_csv": str(participant_csv),
+        "data_min_master_successful_participants_csv": str(master_csv),
+        "data_min_row_count": len(rows),
+        "data_max_run_dir": str(data_max_run_dir),
+        "data_max_source_run_dir": str(out_dir),
+        "privacy": {
+            "scope": "pc_mobile_runtime_phone_owned_upload_mirror",
+            "demographics_in_stream_name": False,
+            "participant_names_exported": False,
+        },
+    }
+    export_path = out_dir / "phone_owned_data_export.json"
+    with open(_filesystem_path(export_path), "w", encoding="utf-8") as handle:
+        handle.write(json.dumps(export, indent=2, sort_keys=True, default=str) + "\n")
+    export["artifact_path"] = str(export_path)
+    return export
+
+
+def _copy_phone_owned_data_max(out_dir: Path, data_max_run_dir: Path) -> None:
+    if not str(data_max_run_dir):
+        return
+    if data_max_run_dir.exists():
+        shutil.rmtree(_filesystem_path(data_max_run_dir))
+    data_max_run_dir.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(_filesystem_path(out_dir), _filesystem_path(data_max_run_dir))
+
+
+def _phone_data_min_rows_from_response_ledger(
+    package: Any,
+    response_ledger_rows: list[dict[str, Any]],
+) -> list[dict[str, str]]:
+    trial_lookup = _mobile_trial_lookup(package)
+    max_block_index = max(
+        [_int(getattr(block, "index", 0), 0) for block in list(getattr(package, "blocks", []) or [])] or [0]
+    )
+    rows: list[dict[str, str]] = []
+    global_index = 1
+    for ledger_row in response_ledger_rows:
+        role = str(ledger_row.get("ledger_role") or "source_trial")
+        if role not in {"source_trial", "topup_rescue"}:
+            continue
+        source_trial_uid = (
+            str(ledger_row.get("source_trial_uid") or "").strip()
+            if role == "topup_rescue"
+            else str(ledger_row.get("trial_uid") or "").strip()
+        )
+        block, trial = trial_lookup.get(source_trial_uid, (None, {}))
+        hit = _truthy(ledger_row.get("hit"))
+        trial_type = str(trial.get("trial_type") or "")
+        family = str(trial.get("family") or "")
+        block_index = max_block_index + 1 if role == "topup_rescue" else _int(
+            ledger_row.get("block_index") or getattr(block, "index", 0),
+            0,
+        )
+        row = {
+            "participant_id": str(getattr(package, "participant_id", "") or ""),
+            "session_id": str(getattr(package, "session_id", "") or ""),
+            "part_session_id": str(getattr(package, "part_session_id", "") or ""),
+            "part_number": _package_part_number(package),
+            "block_number": str(block_index),
+            "block_label": (
+                "Phone top-up"
+                if role == "topup_rescue"
+                else str(getattr(block, "label", "") or ledger_row.get("block_id") or "")
+            ),
+            "trial_number": str(ledger_row.get("trial_number") or trial.get("trial_number") or ""),
+            "trial_number_global": str(global_index),
+            "trial_uid": str(ledger_row.get("trial_uid") or ""),
+            "condition": family or trial_type,
+            "phase": _normalize_phone_data_min_phase(trial.get("row_label")),
+            "noise_type": str(trial.get("noise_type") or ""),
+            "trial_type": trial_type,
+            "soa_ms": str(trial.get("soa_ms") or ""),
+            "response_given": "true" if hit else "false",
+            "hit_miss": "Hit" if hit else "Miss",
+            "reaction_time_ms": str(ledger_row.get("rt_ms") or ""),
+        }
+        rows.append(row)
+        global_index += 1
+    return rows
+
+
+def _mobile_trial_lookup(package: Any) -> dict[str, tuple[Any, dict[str, Any]]]:
+    lookup: dict[str, tuple[Any, dict[str, Any]]] = {}
+    for block in list(getattr(package, "blocks", []) or []):
+        trials, _cues = _block_trial_payloads(block)
+        for trial in trials:
+            trial_uid = str(trial.get("trial_uid") or "").strip()
+            if trial_uid:
+                lookup[trial_uid] = (block, trial)
+    return lookup
+
+
+def _write_phone_data_min_csv(path: Path, rows: list[dict[str, str]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(_filesystem_path(path), "w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=PHONE_DATA_MIN_FIELDNAMES, extrasaction="ignore")
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({field: row.get(field, "") for field in PHONE_DATA_MIN_FIELDNAMES})
+
+
+def _refresh_phone_data_min_master(data_min_dir: Path) -> Path:
+    master_csv = data_min_dir / "master_successful_participants.csv"
+    data_min_dir.mkdir(parents=True, exist_ok=True)
+    participant_csvs = [
+        path for path in sorted(data_min_dir.glob("*.csv"), key=lambda item: item.name.lower())
+        if path.name != master_csv.name
+    ]
+    with open(_filesystem_path(master_csv), "w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=PHONE_DATA_MIN_FIELDNAMES, extrasaction="ignore")
+        writer.writeheader()
+        for participant_csv in participant_csvs:
+            try:
+                with open(_filesystem_path(participant_csv), newline="", encoding="utf-8-sig") as input_handle:
+                    for row in csv.DictReader(input_handle):
+                        writer.writerow({field: row.get(field, "") for field in PHONE_DATA_MIN_FIELDNAMES})
+            except Exception:
+                continue
+    return master_csv
+
+
+def _json_dict_rows(value: Any) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        return []
+    return [dict(row) for row in value if isinstance(row, dict)]
+
+
+def _json_dict(value: Any) -> dict[str, Any]:
+    return dict(value) if isinstance(value, dict) else {}
+
+
+def _dynamic_fieldnames(rows: list[dict[str, Any]], *, preferred: list[str] | tuple[str, ...] = ()) -> list[str]:
+    fieldnames: list[str] = []
+    for key in preferred:
+        if key not in fieldnames:
+            fieldnames.append(str(key))
+    for row in rows:
+        for key in row:
+            if key not in fieldnames:
+                fieldnames.append(str(key))
+    return fieldnames
+
+
+def _safe_phone_export_name(value: str) -> str:
+    clean = re.sub(r"[^A-Za-z0-9._-]+", "-", str(value or "")).strip("-._")
+    return clean or "participant"
+
+
+def _package_part_number(package: Any) -> str:
+    value = getattr(package, "part_number", "")
+    return "" if value in (None, "") else str(value)
+
+
+def _normalize_phone_data_min_phase(value: Any) -> str:
+    text = str(value or "").strip()
+    lowered = text.lower()
+    if lowered in {"inhale", "inhalation", "inspiration"}:
+        return "Inhale"
+    if lowered in {"exhale", "exhalation", "expiration"}:
+        return "Exhale"
+    return text
+
+
+def _truthy(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    text = str(value or "").strip().lower()
+    return text in {"1", "true", "yes", "y", "hit"}
 
 
 def _write_rows_csv(path: Path, rows: list[dict[str, Any]], fieldnames: list[str]) -> None:

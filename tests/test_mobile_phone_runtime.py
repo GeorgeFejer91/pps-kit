@@ -317,3 +317,114 @@ def test_mobile_runtime_upload_writes_runner_log_artifacts(tmp_path):
     assert (artifact.parent / "command_diary.jsonl").read_text(encoding="utf-8").count("\n") == 1
     assert loaded["lsl_runtime_status"]["schema"] == "pps-android-lsl-runtime-status.v1"
     assert (artifact.parent / "lsl_runtime_status.json").is_file()
+
+
+def test_mobile_runtime_completion_upload_mirrors_phone_owned_response_export(tmp_path):
+    package = _package(tmp_path)
+    output_root = tmp_path / "output"
+    manifest = build_mobile_package_manifest(package)
+    building_block_asset_id = manifest["blocks"][0]["trials"][0]["building_block_asset_id"]
+    response_ledger = [
+        {
+            "schema": "pps-android-phone-response-ledger.v1",
+            "ledger_role": "source_trial",
+            "block_id": "block-01",
+            "block_index": 1,
+            "trial_number": 1,
+            "trial_uid": "trial-a",
+            "cue_id": 1,
+            "scheduled_block_time_ms": 3250,
+            "response_window_start_ms": 3350,
+            "response_window_end_ms": 4550,
+            "hit": True,
+            "status": "hit",
+            "rt_ms": 250,
+            "tap_event_id": 2,
+            "building_block_asset_id": building_block_asset_id,
+            "topup_eligible": False,
+            "topup_attempted": False,
+            "topup_trial_uid": "",
+            "topup_hit": "",
+            "topup_rt_ms": "",
+            "topup_tap_event_id": "",
+        }
+    ]
+    payload = {
+        "package_id": mobile_package_id(package),
+        "participant_metadata": {"participant_id": "P001", "age_years": "30"},
+        "events": [
+            {"type": "run_complete", "completion_reason": "completed"},
+        ],
+        "lsl_runtime_status": {
+            "schema": "pps-android-lsl-runtime-status.v1",
+            "native_transport_available": False,
+            "current_android_source_behavior": "local_lsl_marker_mirror",
+        },
+        "phone_response_summary": {
+            "schema": "pps-android-phone-response-summary.v1",
+            "response_policy": "first_touch_100_1300_ms_after_tactile",
+            "eligible_trial_count": 1,
+            "ledger_row_count": 1,
+            "hit_count": 1,
+            "missed_needs_topup_count": 0,
+            "topup_rescue_count": 0,
+            "topup_attempted_count": 0,
+            "topup_hit_count": 0,
+            "topup_miss_count": 0,
+            "final_rescued_hit_count": 0,
+            "final_unresolved_miss_count": 0,
+        },
+        "phone_response_ledger": response_ledger,
+        "phone_topup_plan": {
+            "schema": "pps-android-phone-topup-plan.v1",
+            "status": "not_needed",
+            "synthesis_strategy": "pcm_wav_concat_without_ffmpeg",
+            "response_min_rt_ms": 100,
+            "response_max_rt_ms": 1300,
+            "missed_trial_count": 0,
+            "topup_trial_count": 0,
+            "topup_attempted_count": 0,
+            "topup_hit_count": 0,
+            "final_unresolved_miss_count": 0,
+            "trials": [],
+        },
+        "phone_topup_materialization": {
+            "schema": "pps-android-phone-topup-materialization.v1",
+            "status": "not_needed",
+            "synthesis_strategy": "pcm_wav_concat_without_ffmpeg",
+            "reason": "no_phone_topup_trials",
+        },
+    }
+
+    result = write_mobile_runtime_events(
+        package,
+        output_root=output_root,
+        run_id="phone-run-001",
+        payload=payload,
+        complete=True,
+    )
+
+    artifact = Path(result["artifact_path"])
+    run_dir = artifact.parent
+    loaded = json.loads(artifact.read_text(encoding="utf-8"))
+    assert loaded["phone_response_summary"]["ledger_row_count"] == 1
+    assert loaded["phone_response_ledger"][0]["trial_uid"] == "trial-a"
+    assert (run_dir / "phone_response_ledger.csv").is_file()
+    assert (run_dir / "phone_topup_plan.json").is_file()
+    assert (run_dir / "phone_topup_materialization.json").is_file()
+
+    export = json.loads((run_dir / "phone_owned_data_export.json").read_text(encoding="utf-8"))
+    assert export["schema"] == "pps-android-phone-owned-data-export.v1"
+    assert export["pc_upload_mirror"] is True
+    data_min_rows = list(csv.DictReader(Path(export["data_min_participant_csv"]).open(encoding="utf-8")))
+    assert len(data_min_rows) == 1
+    assert data_min_rows[0]["participant_id"] == "P001"
+    assert data_min_rows[0]["trial_uid"] == "trial-a"
+    assert data_min_rows[0]["phase"] == "Inhale"
+    assert data_min_rows[0]["response_given"] == "true"
+    assert data_min_rows[0]["hit_miss"] == "Hit"
+    master_rows = list(csv.DictReader(Path(export["data_min_master_successful_participants_csv"]).open(encoding="utf-8")))
+    assert [row["trial_uid"] for row in master_rows] == ["trial-a"]
+    data_max_run_dir = Path(export["data_max_run_dir"])
+    assert (data_max_run_dir / "completion.json").is_file()
+    assert (data_max_run_dir / "phone_owned_data_export.json").is_file()
