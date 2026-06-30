@@ -331,3 +331,47 @@ Methods manuscript draft. It is a working audit, not manuscript text.
   preregistered for confirmatory participant studies.
 - Response classification improves auditability, but it does not validate
   tactile perception, hardware timing, or the presence of a PPS effect.
+
+## Iteration 10: Design-Run-Recreation Suite Pass
+
+### Main Critiques
+
+- The manuscript was strong on design rationale and reporting checklists, but
+  the reader-facing suite path was still distributed across the overview,
+  reporting checklist, validation use cases, and declarations.
+- That made the draft slightly less BRM-like than it should be. A software or
+  methods article should tell a reader how to design new experiments, recreate
+  published paradigms, run accepted designs, validate outputs, and archive the
+  tool's outputs, not only why the tool was designed that way.
+- User feedback clarified that the manuscript should present PPS Toolkit as a
+  full suite for designing, running, and replicating or recreating other
+  experiments, not merely as a reusable design artifact.
+- A fresh Consensus search on BRM software tools and reproducibility reinforced
+  this standard: reusable behavioral tools should reduce programming barriers
+  while preserving timing/task logic and making public assets executable rather
+  than merely available.
+
+### Resolution In This Revision
+
+- Revised the abstract, introduction, contribution framing, pathway section, and
+  conclusion so they describe PPS Toolkit as a design-run-recreation suite.
+- Replaced the narrower `Reader Reuse Pathway` with `Design, Run, and
+  Recreation Pathway`. The section now gives three entry points: new-design,
+  published-profile recreation, and native acquisition.
+- Expanded the archive-layer language to distinguish design archives,
+  profile-recreation archives, validation archives, and deidentified participant
+  archives. It states that new hardware routes, tactile actuators, HRTFs,
+  original-stimulus substitutions, and participant populations still require
+  local validation.
+- Recompiled the Springer `sn-apa` manuscript to a 25-page PDF. The final log
+  scan found no unresolved citations/references, rerun warnings, float-too-large
+  warnings, or overfull boxes; generated LaTeX artifacts and the PDF were
+  removed afterward.
+
+### Residual Concerns
+
+- The manuscript still needs final release metadata and at least one
+  publication-hardware validation archive before submission.
+- The design-run-recreation pathway is a manuscript-level guide; the final
+  public repository should also expose the same path in human-facing
+  documentation.

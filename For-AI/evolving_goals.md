@@ -109,6 +109,16 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   Springer `sn-apa` source compiles to a 25-page PDF with no unresolved
   citation/reference, rerun, float-too-large, or overfull-box warnings after this
   pass; generated LaTeX artifacts and the PDF were removed afterward.
+- Continued the BRM manuscript self-review loop with a design-run-recreation
+  suite pass. User feedback clarified that the paper should present PPS Toolkit
+  as a full suite for designing, running, and replicating/recreating other PPS
+  experiments, not only as a reusable design artifact. `main.tex` now names the
+  suite in the abstract, contribution framing, and conclusion, and has a
+  `Design, Run, and Recreation Pathway` section after the reporting checklist.
+  The section gives three entry points (new-study design, published-profile
+  recreation, and native acquisition) and separates design, profile-recreation,
+  validation, and deidentified participant archive layers. This strengthens the
+  paper's methods/tutorial fit without adding participant-effect claims.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation
