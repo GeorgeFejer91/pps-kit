@@ -4,6 +4,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 
 ## 2026-06-30
 
+- The local HTML dashboard launcher now treats `/api/health` as the fast
+  already-running probe before falling back to `/api/state`. This prevents a
+  warmed but slow state snapshot from making the launcher misclassify an
+  existing companion as dead and then fail with a duplicate port bind on
+  `127.0.0.1:8766`.
+
 - Added the approved second Study 5 profile `study5_dynaspace_lateral_45_pps`. It keeps original Study 5 inhale/exhale and Segment 6 run-instruction assets, but uses two DynaSpace/Hobeika-style white burst-train source cards with source-level trajectory snapshots at left -45 degrees and right +45 degrees. The profile uses smartphone DynaSpace anchors (`105, 1625, 2385, 2765, 2955, 3050` ms; `640, 320, 160, 80, 40, 20` cm), 3.85 s total source WAVs, stationary-burst baselines at each side-specific snapshot, and Segment 4 repetitions audio-tactile `5.0`, baseline `2.5`, catch `6.0` to preserve 204 rows with equal inhale/exhale and left/right counts. The canonical `study5_box_breathing_pps` remains the first/default dashboard Study 5 profile.
 - Native Experiment Runner outputs now use a two-tier acquisition-root contract:
   `1.Data_min/` is the OSF/publication-ready participant trial export, and

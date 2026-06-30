@@ -62,6 +62,48 @@ def test_windows_no_console_kwargs_requests_hidden_console_on_windows():
 from peripersonal_space_toolkit.runner_diary import read_diary_entries
 
 
+class _UrlopenResponse:
+    def __init__(self, status: int = 200):
+        self.status = status
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_args):
+        return False
+
+
+def test_running_dashboard_url_uses_fast_health_probe(monkeypatch):
+    calls = []
+
+    def fake_urlopen(url, timeout):
+        calls.append((url, timeout))
+        return _UrlopenResponse()
+
+    monkeypatch.setattr(dashboard_app.urllib.request, "urlopen", fake_urlopen)
+
+    assert dashboard_app._running_dashboard_url("127.0.0.1", 8766) == "http://127.0.0.1:8766/"
+    assert calls == [("http://127.0.0.1:8766/api/health", 1.5)]
+
+
+def test_running_dashboard_url_falls_back_to_state_probe(monkeypatch):
+    calls = []
+
+    def fake_urlopen(url, timeout):
+        calls.append((url, timeout))
+        if url.endswith("/api/health"):
+            raise OSError("old dashboard does not expose health")
+        return _UrlopenResponse()
+
+    monkeypatch.setattr(dashboard_app.urllib.request, "urlopen", fake_urlopen)
+
+    assert dashboard_app._running_dashboard_url("127.0.0.1", 8766) == "http://127.0.0.1:8766/"
+    assert calls == [
+        ("http://127.0.0.1:8766/api/health", 1.5),
+        ("http://127.0.0.1:8766/api/state", 1.5),
+    ]
+
+
 def _compact_design():
     design = default_design()
     design.noises = design.noises[:1]

@@ -8664,12 +8664,13 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 def _running_dashboard_url(host: str, port: int) -> str | None:
     url = f"http://{host}:{port}/"
-    try:
-        with urllib.request.urlopen(f"{url}api/state", timeout=1.5) as response:
-            if response.status == 200:
-                return url
-    except Exception:
-        return None
+    for endpoint in ("api/health", "api/state"):
+        try:
+            with urllib.request.urlopen(f"{url}{endpoint}", timeout=1.5) as response:
+                if response.status == 200:
+                    return url
+        except Exception:
+            continue
     return None
 
 
