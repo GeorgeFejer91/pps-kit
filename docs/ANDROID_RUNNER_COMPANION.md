@@ -412,6 +412,13 @@ part number, but never the pairing token. Commands that explicitly name a
 different package or split-part identity are rejected before the phone applies a
 local state change.
 
+In native liblsl builds, Runner mode resolves up to eight visible
+`PPSCommandSignalsV1` streams and polls every opened command inlet, so a PC
+helper and one or more Controller phones can coexist on the same Wi-Fi/LSL
+network. Controller mode also resolves multiple `PPSCommandAcksV1` streams when
+waiting for the matching ack. The command token, target session, package, and
+split-part fields remain the acceptance gate after a sample is received.
+
 For two-phone or PC-to-phone rehearsals, run
 `validation_protocols/scripts/reconcile_android_command_admin_with_phone_run.py`
 after the sender outbox and Runner phone folder/ZIP exist. It compares

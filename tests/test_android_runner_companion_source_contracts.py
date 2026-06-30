@@ -120,6 +120,22 @@ def test_android_lsl_runtime_status_exports_stream_descriptions() -> None:
     assert '.put("demographics_in_stream_name", false)' in lsl_protocol
 
 
+def test_android_native_lsl_bridge_resolves_multiple_command_and_ack_streams() -> None:
+    native_bridge = _source("PhoneNativeLslBridge.kt")
+
+    assert "PHONE_NATIVE_LSL_MAX_COMMAND_STREAMS = 8" in native_bridge
+    assert "fun resolveStreams(name: String, maximum: Int, timeoutS: Double): List<Any>" in native_bridge
+    assert "resolveStreams(" in native_bridge
+    assert "maximum = PHONE_NATIVE_LSL_MAX_COMMAND_STREAMS" in native_bridge
+    assert "commandInlets = commandInlets" in native_bridge
+    assert "private val commandInlets: List<Any>" in native_bridge
+    assert "for ((index, inlet) in commandInlets.withIndex())" in native_bridge
+    assert "if (index == 0) timeoutS else 0.0" in native_bridge
+    assert "private var ackInlets: List<Any> = emptyList()" in native_bridge
+    assert "for ((index, inlet) in ackInlets.withIndex())" in native_bridge
+    assert ".put(\"max_command_streams_resolved\", PHONE_NATIVE_LSL_MAX_COMMAND_STREAMS)" in native_bridge
+
+
 def test_android_command_acks_echo_nonsecret_target_identity() -> None:
     lsl_protocol = _source("PhoneLslProtocol.kt")
 

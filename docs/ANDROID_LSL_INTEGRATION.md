@@ -200,7 +200,13 @@ command resolution at run start, retries command-stream resolution during
 playback when liblsl is available but no command stream was found, keeps a
 controller command outlet alive while Controller mode is selected, uses one
 command/ack sample per push, and sends a command ack only after the local
-Android handler has accepted or rejected the state transition.
+Android handler has accepted or rejected the state transition. Runner mode now
+resolves up to eight visible `PPSCommandSignalsV1` streams by name and polls all
+opened command inlets, so a PC helper and one or more Controller phones can
+coexist on the same LSL network. Controller mode likewise resolves multiple
+`PPSCommandAcksV1` streams when polling for the matching ack. Token, session,
+package, and split-part validation still decide whether any sampled command is
+accepted.
 
 The app is already wired for the local AAR path. Put a locally built or release
 downloaded `liblsl-Android.aar` at:
@@ -215,9 +221,9 @@ present, `PhoneNativeLslBridge.kt` can create the rich `PPSMarkersV2` and
 numeric `PPSTriggerCodes` outlets, append PC-compatible channel metadata, push
 every local marker mirror row to native LSL while preserving the local rich CSV
 mirror and the expected numeric `trigger_codes.csv` mirror, resolve runner-side
-`PPSCommandSignalsV1`, emit `PPSCommandAcksV1` for handled commands, and create
-controller-side `PPSCommandSignalsV1` outlets with optional `PPSCommandAcksV1`
-ack polling.
+`PPSCommandSignalsV1` streams from multiple senders, emit `PPSCommandAcksV1` for
+handled commands, and create controller-side `PPSCommandSignalsV1` outlets with
+optional multi-stream `PPSCommandAcksV1` ack polling.
 The artifact-level `stream_descriptions` contract records those same
 outlets/inlets in `lsl_runtime_status.json`, including rich-marker and
 numeric-trigger `session_metadata_json` copies of package schedule/provenance

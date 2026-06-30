@@ -153,6 +153,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   target fields are absent or different in the receiver phone-run command
   diary/ack payload, tightening two-phone and PC-to-phone reconstruction
   evidence without claiming live network/XDF or physical timing proof.
+- Native Android command reception now resolves and polls multiple LSL command
+  streams instead of binding Runner mode to the first visible
+  `PPSCommandSignalsV1` stream. With the local liblsl AAR present, Runner mode
+  opens up to eight command inlets and polls all of them, letting a PC helper
+  and one or more Controller phones coexist on the same Wi-Fi/LSL network while
+  token/session/package/split-part checks remain the acceptance gate. Controller
+  mode also resolves multiple `PPSCommandAcksV1` streams when waiting for a
+  matching ack. This is source-level native bridge support; live network/XDF
+  and physical timing validation are still separate proof layers.
 
 ## 2026-06-29
 

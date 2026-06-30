@@ -45,6 +45,7 @@ class PhoneNativeLslBridgeTest {
         assertEquals("PPSTriggerCodes", status.getJSONObject("stream_names").getString("numeric_triggers"))
         assertTrue(status.isNull("command_transport"))
         assertTrue(status.isNull("controller_transport"))
+        assertEquals(8, status.getInt("max_command_streams_resolved"))
         assertEquals("marker_version", status.getJSONArray("marker_channels").getString(0))
         assertEquals("payload_json", status.getJSONArray("marker_channels").getString(PHONE_LSL_MARKER_CHANNELS.size - 1))
         assertEquals("schema", status.getJSONArray("command_channels").getString(0))

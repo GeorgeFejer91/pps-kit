@@ -87,9 +87,11 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   when present; the bridge reflects `edu.ucsd.sccn.LSL`, creates
   `PPSMarkersV2`/`PPSTriggerCodes` outlets before `session_metadata`, pushes
   every local marker mirror row while preserving CSV artifacts, resolves
-  `PPSCommandSignalsV1`, retries command-stream resolution during active phone
-  playback if needed, emits token-gated `PPSCommandAcksV1`, and creates a
-  controller-side `PPSCommandSignalsV1` outlet with optional
+  up to eight visible `PPSCommandSignalsV1` command streams, retries command
+  stream resolution during active phone playback if needed, polls every opened
+  command inlet so PC-admin and Controller-phone senders can coexist on the same
+  LSL network, emits token-gated `PPSCommandAcksV1`, and creates a
+  controller-side `PPSCommandSignalsV1` outlet with optional multi-stream
   `PPSCommandAcksV1` polling while Controller mode is selected. The current
   phone command handler records snapshot/note/continue actions, applies
   pause/resume through the phone-owned `AudioTrack` pause gate during active
