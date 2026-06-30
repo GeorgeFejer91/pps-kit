@@ -60,10 +60,15 @@ Closing Focus Mode stops the companion service and invalidates that token.
   `239.255.77.83:48767` and limited broadcast `255.255.255.255:48767`. The
   packet advertises host, port, session id, mode, transport, and whether a
   token is required; it never contains `X-PPS-Companion-Token`, participant
-  demographics, or stream names with participant metadata. Android's pairing
-  screen can listen for the packet on same-Wi-Fi or local phone-hotspot
-  networks, but pairing still requires scanning the QR or pasting the full
-  token-bearing URI.
+  demographics, or stream names with participant metadata. The packet contract
+  is intentionally local-only: `network_scope` is
+  `same_lan_or_local_hotspot`, multicast TTL is `1`, accepted modes are
+  `pc_runner` and `phone_export`, and accepted transports are `lan`,
+  `phone_hotspot`, and `wifi_direct`. Phone-export discovery must include a
+  `transfer_id`, but still omits the token. Android's pairing screen can listen
+  for the packet on same-Wi-Fi or local phone-hotspot networks, including the
+  limited-broadcast fallback, but pairing still requires scanning the QR or
+  pasting the full token-bearing URI.
 - Health endpoint: `GET /api/runner/health` is public and non-sensitive.
 - All state and command endpoints require `X-PPS-Companion-Token`.
 - Phone-runtime package and upload endpoints also require

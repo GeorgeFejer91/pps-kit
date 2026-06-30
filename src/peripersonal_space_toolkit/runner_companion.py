@@ -24,9 +24,14 @@ HEALTH_SCHEMA = "pps-runner-companion-health.v1"
 PAIRING_SCHEMA_VERSION = "1"
 PHONE_EXPORT_PAIRING_SCHEMA_VERSION = "2"
 DISCOVERY_SCHEMA = "pps-runner-companion-discovery.v1"
+DISCOVERY_SERVICE = "pps-runner-companion"
 DISCOVERY_MULTICAST_GROUP = "239.255.77.83"
 DISCOVERY_PORT = 48767
 DISCOVERY_INTERVAL_S = 1.0
+DISCOVERY_NETWORK_SCOPE = "same_lan_or_local_hotspot"
+DISCOVERY_TOKEN_DELIVERY = "qr_or_manual_uri_only"
+DISCOVERY_ALLOWED_MODES = frozenset({"pc_runner", "phone_export"})
+DISCOVERY_ALLOWED_TRANSPORTS = frozenset({"lan", "phone_hotspot", "wifi_direct"})
 
 
 class CompanionCommandError(RuntimeError):
@@ -161,12 +166,18 @@ def build_companion_discovery_payload(
     clean_mode = str(mode or "pc_runner")
     clean_transport = str(transport or "lan")
     clean_transfer_id = str(transfer_id or "").strip()
+    if clean_mode not in DISCOVERY_ALLOWED_MODES:
+        raise ValueError(f"Unsupported companion discovery mode: {clean_mode}")
+    if clean_transport not in DISCOVERY_ALLOWED_TRANSPORTS:
+        raise ValueError(f"Unsupported companion discovery transport: {clean_transport}")
+    if clean_mode == "phone_export" and not clean_transfer_id:
+        raise ValueError("Phone-export discovery payloads require a transfer_id.")
     payload: dict[str, Any] = {
         "schema": DISCOVERY_SCHEMA,
-        "service": "pps-runner-companion",
+        "service": DISCOVERY_SERVICE,
         "service_name": str(service_name or "PPS Runner Companion"),
         "generated_unix_ms": int(time.time() * 1000),
-        "network_scope": "same_lan_or_local_hotspot",
+        "network_scope": DISCOVERY_NETWORK_SCOPE,
         "discovery": {
             "udp_multicast_group": DISCOVERY_MULTICAST_GROUP,
             "udp_port": DISCOVERY_PORT,
@@ -181,7 +192,7 @@ def build_companion_discovery_payload(
             "mode": clean_mode,
             "transport": clean_transport,
             "token_required": True,
-            "token_delivery": "qr_or_manual_uri_only",
+            "token_delivery": DISCOVERY_TOKEN_DELIVERY,
         },
         "privacy": {
             "contains_pairing_token": False,
@@ -194,12 +205,67 @@ def build_companion_discovery_payload(
     return payload
 
 
-def companion_discovery_payload_json(payload: dict[str, Any]) -> str:
+def validate_companion_discovery_payload(payload: dict[str, Any]) -> None:
+    """Validate the token-free LAN discovery packet contract before broadcast."""
+
+    if not isinstance(payload, dict):
+        raise ValueError("Discovery payload must be a JSON object.")
+    if payload.get("schema") != DISCOVERY_SCHEMA:
+        raise ValueError("Discovery payload schema mismatch.")
+    if payload.get("service") != DISCOVERY_SERVICE:
+        raise ValueError("Discovery payload service mismatch.")
+    if payload.get("network_scope") != DISCOVERY_NETWORK_SCOPE:
+        raise ValueError("Discovery payload network scope must be same_lan_or_local_hotspot.")
     if "token" in payload or "companion_token" in payload:
         raise ValueError("Discovery payloads must not contain pairing tokens.")
+    discovery = payload.get("discovery") if isinstance(payload.get("discovery"), dict) else {}
+    if discovery.get("udp_multicast_group") != DISCOVERY_MULTICAST_GROUP:
+        raise ValueError("Discovery multicast group mismatch.")
+    if int(discovery.get("udp_port") or 0) != DISCOVERY_PORT:
+        raise ValueError("Discovery UDP port mismatch.")
+    if discovery.get("also_sent_as_limited_broadcast") is not True:
+        raise ValueError("Discovery payload must declare limited-broadcast fallback.")
+    if int(discovery.get("ttl") or 0) != 1:
+        raise ValueError("Discovery multicast TTL must be 1 for local-network scope.")
+
     pairing = payload.get("pairing") if isinstance(payload.get("pairing"), dict) else {}
+    if not pairing:
+        raise ValueError("Discovery pairing metadata is missing.")
     if "token" in pairing or "companion_token" in pairing:
         raise ValueError("Discovery pairing metadata must not contain pairing tokens.")
+    if pairing.get("scheme") != PAIRING_SCHEME:
+        raise ValueError("Discovery pairing scheme mismatch.")
+    if not str(pairing.get("host") or "").strip():
+        raise ValueError("Discovery pairing host is missing.")
+    port = int(pairing.get("port") or 0)
+    if port < 1 or port > 65535:
+        raise ValueError("Discovery pairing port is invalid.")
+    if not str(pairing.get("session_id") or "").strip():
+        raise ValueError("Discovery pairing session_id is missing.")
+    mode = str(pairing.get("mode") or "pc_runner")
+    transport = str(pairing.get("transport") or "lan")
+    if mode not in DISCOVERY_ALLOWED_MODES:
+        raise ValueError("Discovery pairing mode is unsupported.")
+    if transport not in DISCOVERY_ALLOWED_TRANSPORTS:
+        raise ValueError("Discovery pairing transport is unsupported.")
+    if mode == "phone_export" and not str(pairing.get("transfer_id") or "").strip():
+        raise ValueError("Phone-export discovery pairing metadata requires transfer_id.")
+    if pairing.get("token_required") is not True:
+        raise ValueError("Discovery pairing metadata must require a token.")
+    if pairing.get("token_delivery") != DISCOVERY_TOKEN_DELIVERY:
+        raise ValueError("Discovery pairing token_delivery must be qr_or_manual_uri_only.")
+
+    privacy = payload.get("privacy") if isinstance(payload.get("privacy"), dict) else {}
+    if privacy.get("contains_pairing_token") is not False:
+        raise ValueError("Discovery privacy must declare contains_pairing_token=false.")
+    if privacy.get("contains_participant_demographics") is not False:
+        raise ValueError("Discovery privacy must declare contains_participant_demographics=false.")
+    if privacy.get("stream_names_are_generic") is not True:
+        raise ValueError("Discovery privacy must declare generic stream names.")
+
+
+def companion_discovery_payload_json(payload: dict[str, Any]) -> str:
+    validate_companion_discovery_payload(payload)
     return json.dumps(payload, sort_keys=True, separators=(",", ":"))
 
 

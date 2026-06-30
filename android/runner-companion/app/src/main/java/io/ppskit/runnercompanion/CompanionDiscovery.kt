@@ -13,8 +13,13 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 internal const val COMPANION_DISCOVERY_SCHEMA = "pps-runner-companion-discovery.v1"
+internal const val COMPANION_DISCOVERY_SERVICE = "pps-runner-companion"
 internal const val COMPANION_DISCOVERY_MULTICAST_GROUP = "239.255.77.83"
 internal const val COMPANION_DISCOVERY_PORT = 48767
+internal const val COMPANION_DISCOVERY_NETWORK_SCOPE = "same_lan_or_local_hotspot"
+internal const val COMPANION_DISCOVERY_TOKEN_DELIVERY = "qr_or_manual_uri_only"
+private val companionDiscoveryModes = setOf("pc_runner", "phone_export")
+private val companionDiscoveryTransports = setOf("lan", "phone_hotspot", "wifi_direct")
 
 internal data class CompanionDiscoveryAdvertisement(
     val host: String,
@@ -57,24 +62,44 @@ internal data class CompanionDiscoveryAdvertisement(
         fun parse(raw: String): CompanionDiscoveryAdvertisement {
             val root = JSONObject(raw.trim())
             require(root.optString("schema") == COMPANION_DISCOVERY_SCHEMA) { "Unsupported discovery schema." }
+            require(root.optString("service") == COMPANION_DISCOVERY_SERVICE) { "Unsupported discovery service." }
+            require(root.optString("network_scope") == COMPANION_DISCOVERY_NETWORK_SCOPE) { "Unsupported discovery network scope." }
             require(!root.has("token") && !root.has("companion_token")) { "Discovery payload must not contain a pairing token." }
+            val discovery = root.optJSONObject("discovery") ?: throw IllegalArgumentException("Discovery transport metadata is missing.")
+            require(discovery.optString("udp_multicast_group") == COMPANION_DISCOVERY_MULTICAST_GROUP) { "Discovery multicast group mismatch." }
+            require(discovery.optInt("udp_port", 0) == COMPANION_DISCOVERY_PORT) { "Discovery UDP port mismatch." }
+            require(discovery.optBoolean("also_sent_as_limited_broadcast", false)) { "Discovery broadcast fallback is missing." }
+            require(discovery.optInt("ttl", 0) == 1) { "Discovery TTL must be local-network only." }
+            val privacy = root.optJSONObject("privacy") ?: throw IllegalArgumentException("Discovery privacy metadata is missing.")
+            require(!privacy.optBoolean("contains_pairing_token", true)) { "Discovery privacy reports pairing-token leakage." }
+            require(!privacy.optBoolean("contains_participant_demographics", true)) { "Discovery privacy reports participant-demographic leakage." }
+            require(privacy.optBoolean("stream_names_are_generic", false)) { "Discovery privacy must keep stream names generic." }
             val pairing = root.optJSONObject("pairing") ?: throw IllegalArgumentException("Discovery pairing metadata is missing.")
             require(!pairing.has("token") && !pairing.has("companion_token")) { "Discovery pairing metadata must not contain a pairing token." }
+            require(pairing.optString("scheme", "pps-companion") == "pps-companion") { "Discovery pairing scheme mismatch." }
             val host = pairing.optString("host").trim()
             val port = pairing.optInt("port", 0)
             val sessionId = pairing.optString("session_id").trim()
+            val mode = pairing.optString("mode", "pc_runner").ifBlank { "pc_runner" }
+            val transport = pairing.optString("transport", "lan").ifBlank { "lan" }
+            val transferId = pairing.optString("transfer_id", "")
             require(host.isNotEmpty()) { "Discovery host is missing." }
             require(port in 1..65535) { "Discovery port is invalid." }
             require(sessionId.isNotEmpty()) { "Discovery session id is missing." }
+            require(mode in companionDiscoveryModes) { "Discovery mode is unsupported." }
+            require(transport in companionDiscoveryTransports) { "Discovery transport is unsupported." }
+            require(pairing.optBoolean("token_required", false)) { "Discovery pairing must require a token." }
+            require(pairing.optString("token_delivery") == COMPANION_DISCOVERY_TOKEN_DELIVERY) { "Discovery token delivery mismatch." }
+            require(mode != "phone_export" || transferId.isNotBlank()) { "Phone-export discovery requires transfer_id." }
             return CompanionDiscoveryAdvertisement(
                 host = host,
                 port = port,
                 sessionId = sessionId,
-                mode = pairing.optString("mode", "pc_runner").ifBlank { "pc_runner" },
-                transferId = pairing.optString("transfer_id", ""),
-                transport = pairing.optString("transport", "lan").ifBlank { "lan" },
+                mode = mode,
+                transferId = transferId,
+                transport = transport,
                 serviceName = root.optString("service_name", "PPS Runner Companion").ifBlank { "PPS Runner Companion" },
-                networkScope = root.optString("network_scope", "same_lan_or_local_hotspot"),
+                networkScope = root.optString("network_scope", COMPANION_DISCOVERY_NETWORK_SCOPE),
                 tokenRequired = pairing.optBoolean("token_required", true),
             )
         }

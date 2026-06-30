@@ -141,7 +141,12 @@ The companion pairing layer now has its own token-free discovery packet:
 `239.255.77.83:48767` and limited broadcast `255.255.255.255:48767`. This is a
 LAN/local-hotspot convenience for finding the bridge endpoint only. It does not
 carry the companion token, participant demographics, or non-generic stream
-names; QR/manual URI pairing remains the authorization step.
+names; QR/manual URI pairing remains the authorization step. The payload is
+validated on both sides as local-only: `network_scope =
+same_lan_or_local_hotspot`, multicast TTL `1`, modes `pc_runner` /
+`phone_export`, transports `lan` / `phone_hotspot` / `wifi_direct`, and
+phone-export discovery must carry a `transfer_id` while still omitting the
+token.
 
 Required validation levels:
 

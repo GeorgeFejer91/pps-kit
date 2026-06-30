@@ -49,6 +49,16 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   elapsed delivery time, and coherent frame/ms cue jitter. This proves the
   exported artifact carries phone-runtime playback-head timing metadata; it is
   still not physical audio/vibration onset evidence.
+- Companion discovery is now a stricter local-network contract rather than a
+  best-effort loose JSON shape. PC discovery payload serialization validates
+  `schema`, `service`, `network_scope = same_lan_or_local_hotspot`, multicast
+  group `239.255.77.83`, UDP port `48767`, local TTL `1`, limited-broadcast
+  fallback, allowed modes (`pc_runner`, `phone_export`), allowed transports
+  (`lan`, `phone_hotspot`, `wifi_direct`), phone-export `transfer_id`, and
+  privacy flags proving no pairing token, participant demographics, or
+  participant-coded stream names are present. Android discovery parsing mirrors
+  these checks before rebuilding a pairing URI from a user-supplied QR/manual
+  token.
 
 ## 2026-06-29
 

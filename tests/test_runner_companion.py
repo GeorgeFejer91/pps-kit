@@ -18,6 +18,7 @@ from peripersonal_space_toolkit.runner_companion import (
     companion_discovery_payload_json,
     create_runner_companion_app,
     pairing_qr_png_bytes,
+    validate_companion_discovery_payload,
 )
 from peripersonal_space_toolkit.mobile_phone_runtime import (
     MOBILE_PACKAGE_LIST_SCHEMA,
@@ -239,12 +240,59 @@ def test_discovery_payload_advertises_endpoint_without_pairing_token():
     assert '"token":' not in raw
 
 
+def test_discovery_payload_validates_same_lan_or_hotspot_contract():
+    payload = build_companion_discovery_payload(
+        host="192.168.43.1",
+        port=8767,
+        session_id="session-001",
+        transport="phone_hotspot",
+    )
+
+    validate_companion_discovery_payload(payload)
+
+    assert payload["network_scope"] == "same_lan_or_local_hotspot"
+    assert payload["discovery"]["udp_multicast_group"] == "239.255.77.83"
+    assert payload["discovery"]["udp_port"] == 48767
+    assert payload["discovery"]["ttl"] == 1
+    assert payload["privacy"]["contains_pairing_token"] is False
+    assert payload["privacy"]["contains_participant_demographics"] is False
+    assert payload["privacy"]["stream_names_are_generic"] is True
+
+
 def test_discovery_payload_json_rejects_token_leakage():
     payload = build_companion_discovery_payload(host="127.0.0.1", port=8767, session_id="session-001")
     payload["pairing"]["token"] = "secret"
 
     with pytest.raises(ValueError, match="pairing tokens"):
         companion_discovery_payload_json(payload)
+
+
+def test_discovery_payload_json_rejects_demographic_privacy_leakage():
+    payload = build_companion_discovery_payload(host="127.0.0.1", port=8767, session_id="session-001")
+    payload["privacy"]["contains_participant_demographics"] = True
+
+    with pytest.raises(ValueError, match="participant_demographics=false"):
+        companion_discovery_payload_json(payload)
+
+
+def test_discovery_payload_json_rejects_unknown_transport():
+    with pytest.raises(ValueError, match="Unsupported companion discovery transport"):
+        build_companion_discovery_payload(
+            host="127.0.0.1",
+            port=8767,
+            session_id="session-001",
+            transport="public_internet",
+        )
+
+
+def test_discovery_payload_json_requires_transfer_id_for_phone_export():
+    with pytest.raises(ValueError, match="require a transfer_id"):
+        build_companion_discovery_payload(
+            host="127.0.0.1",
+            port=8767,
+            session_id="session-001",
+            mode="phone_export",
+        )
 
 
 def test_service_discovery_payload_can_advertise_phone_export_transfer():

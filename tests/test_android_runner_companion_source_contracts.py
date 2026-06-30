@@ -56,3 +56,18 @@ def test_android_phone_runtime_uses_audiotrack_timing_not_mediaplayer() -> None:
     assert '.put("audio_timing_strategy", "audiotrack_pcm_wav_playback_head")' in main_activity
     assert '.put("audio_scheduler", "audiotrack_playback_head")' in main_activity
     assert "MediaPlayer" not in all_sources
+
+
+def test_android_companion_discovery_preserves_local_hotspot_privacy_contract() -> None:
+    discovery = _source("CompanionDiscovery.kt")
+
+    assert 'COMPANION_DISCOVERY_NETWORK_SCOPE = "same_lan_or_local_hotspot"' in discovery
+    assert 'COMPANION_DISCOVERY_TOKEN_DELIVERY = "qr_or_manual_uri_only"' in discovery
+    assert 'setOf("lan", "phone_hotspot", "wifi_direct")' in discovery
+    assert 'optBoolean("also_sent_as_limited_broadcast", false)' in discovery
+    assert 'optInt("ttl", 0) == 1' in discovery
+    assert 'optBoolean("contains_pairing_token", true)' in discovery
+    assert 'optBoolean("contains_participant_demographics", true)' in discovery
+    assert 'optBoolean("stream_names_are_generic", false)' in discovery
+    assert "createMulticastLock" in discovery
+    assert "MulticastSocket(null)" in discovery
