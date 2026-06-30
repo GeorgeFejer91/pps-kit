@@ -772,6 +772,82 @@ def test_android_lsl_runtime_validator_requires_phone_run_operator_command_event
     assert "requires matching operator_command events" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_accepts_phone_ui_command_diary_source(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_phone_run_with_command_diary(run_dir, _phone_ui_command_row())
+
+    result = validator.validate_run_artifact(run_dir)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
+def test_android_lsl_runtime_validator_requires_phone_command_source_to_match_operator_event(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_phone_run_with_command_diary(
+        run_dir,
+        _phone_ui_command_row(),
+        operator_command_source="phone_runtime",
+    )
+
+    result = validator.validate_run_artifact(run_dir)
+
+    assert result.ok is False
+    assert "command_source differs from matching operator_command event" in "\n".join(result.failures)
+
+
+def _write_phone_run_with_command_diary(
+    run_dir: Path,
+    row: dict,
+    *,
+    operator_command_source: str | None = None,
+) -> None:
+    status = _status(native=False)
+    status.update(_catalog_identity())
+    event_source = operator_command_source if operator_command_source is not None else row["command_source"]
+    events = [
+        _phone_event(1, "session_metadata"),
+        _phone_event(2, "run_start"),
+        _phone_event(
+            3,
+            "operator_command",
+            command_id=row["command_id"],
+            command_source=event_source,
+            sender_id=row["sender_id"],
+            command=row["command"],
+            status=row["status"],
+            reason=row["reason"],
+            ack_sent=row["ack_sent"],
+            payload=row["payload"],
+        ),
+    ]
+    markers = [_phone_marker(event) for event in events]
+    participant_metadata = _participant_metadata()
+    haptic_capability = _haptic_capability()
+    (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
+    (run_dir / "completion.json").write_text(
+        json.dumps(
+            {
+                "lsl_runtime_status": status,
+                "events": events,
+                "lsl_marker_mirror": markers,
+                "participant_metadata": participant_metadata,
+                "haptic": haptic_capability,
+                "command_diary": [row],
+            }
+        ),
+        encoding="utf-8",
+    )
+    _write_android_events_csv(run_dir / "events.csv", events)
+    (run_dir / "participant_metadata.json").write_text(json.dumps(participant_metadata), encoding="utf-8")
+    (run_dir / "haptic_capability.json").write_text(json.dumps(haptic_capability), encoding="utf-8")
+    (run_dir / "command_diary.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
+    _write_marker_csv(run_dir / "lsl_marker_mirror.csv", markers)
+    _write_trigger_codes_csv(run_dir / "trigger_codes.csv", markers)
+
+
 def _write_phone_run_with_native_command_diary(
     run_dir: Path,
     *,
@@ -864,6 +940,31 @@ def _phone_native_command_row(*, ack_sent: bool = True) -> dict:
             "payload_json",
         ],
         "ack_sample": ack_sample,
+        "phone_unix_ms": 1780000000000,
+        "phone_elapsed_realtime_ms": 123456,
+    }
+
+
+def _phone_ui_command_row() -> dict:
+    return {
+        "schema": "pps-android-command-diary.v1",
+        "command_id": "phone-1",
+        "command_source": "phone_ui",
+        "sender_id": "android_phone_ui",
+        "session_id": "part-001",
+        "command": "start_experiment",
+        "status": "applied",
+        "reason": "",
+        "payload": {
+            "package_id": "pkg-001",
+            "block_count": 6,
+            "phone_owned_session": True,
+            "operator_action": "start_phone_run",
+            "operator_payload": {},
+        },
+        "package_id": "pkg-001",
+        "run_id": "phone-run-001",
+        "ack_sent": False,
         "phone_unix_ms": 1780000000000,
         "phone_elapsed_realtime_ms": 123456,
     }

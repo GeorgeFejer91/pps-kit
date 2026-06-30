@@ -143,6 +143,19 @@ def test_android_phone_run_writes_plain_event_diary() -> None:
     assert "private fun writePhoneTriggerCodesCsv" in main_activity
 
 
+def test_android_phone_run_command_diary_separates_local_ui_runtime_and_native_sources() -> None:
+    main_activity = _source("MainActivity.kt")
+
+    assert 'commandSource: String = "phone_runtime"' in main_activity
+    assert '.put("command_source", commandSource)' in main_activity
+    assert '.put("sender_id", senderId)' in main_activity
+    assert 'commandSource = "phone_ui"' in main_activity
+    assert 'senderId = "android_phone_ui"' in main_activity
+    assert 'startCommandAction = "start_phone_run"' in main_activity
+    assert 'startCommandAction = "start_full_experiment_part"' in main_activity
+    assert '.put("command_source", "native_lsl")' in main_activity
+
+
 def test_android_phone_run_writes_phone_owned_min_max_export() -> None:
     main_activity = _source("MainActivity.kt")
     catalog = _source("PhoneRunCatalog.kt")

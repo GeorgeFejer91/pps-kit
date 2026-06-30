@@ -566,6 +566,7 @@ private fun PhoneRuntimeScreen(
                     },
                     onBlock = { label -> activeBlockLabel = label },
                     onProgress = { progress -> runProgress = progress },
+                    startCommandAction = "start_phone_run",
                 )
                 status = "Complete"
                 lastRunDir = result.optString("artifact_dir", "")
@@ -618,6 +619,10 @@ private fun PhoneRuntimeScreen(
                         },
                         onBlock = { label -> activeBlockLabel = label },
                         onProgress = { progress -> runProgress = progress },
+                        startCommandAction = "start_full_experiment_part",
+                        startCommandPayload = JSONObject()
+                            .put("full_experiment_part_index", index + 1)
+                            .put("full_experiment_part_count", runPackages.size),
                     )
                     artifacts.add(result.optString("artifact_path", ""))
                     result.optString("artifact_dir", "").takeIf { it.isNotBlank() }?.let { artifactDirs.add(it) }
@@ -1898,16 +1903,22 @@ private suspend fun runPhonePackage(
     onStatus: (String) -> Unit,
     onBlock: (String) -> Unit,
     onProgress: (String) -> Unit,
+    startCommandAction: String = "start_phone_run",
+    startCommandPayload: JSONObject = JSONObject(),
 ): JSONObject {
+    session.addRunStart(runPackage)
     session.recordCommand(
         command = "start_experiment",
         status = "applied",
         payload = JSONObject()
             .put("package_id", runPackage.packageId)
             .put("block_count", runPackage.blocks.size)
-            .put("phone_owned_session", phoneOwnedSession),
+            .put("phone_owned_session", phoneOwnedSession)
+            .put("operator_action", startCommandAction)
+            .put("operator_payload", JSONObject(startCommandPayload.toString())),
+        commandSource = "phone_ui",
+        senderId = "android_phone_ui",
     )
-    session.addRunStart(runPackage)
     session.pollNativeCommands(runPackage)
     if (phoneOwnedSession) {
         withContext(Dispatchers.IO) { session.writeLocalArtifact(context, runPackage, complete = false) }
@@ -2450,17 +2461,29 @@ private class PhoneRunSession(
     }
 
     @Synchronized
-    fun recordCommand(command: String, status: String, reason: String = "", payload: JSONObject = JSONObject()) {
+    fun recordCommand(
+        command: String,
+        status: String,
+        reason: String = "",
+        payload: JSONObject = JSONObject(),
+        commandSource: String = "phone_runtime",
+        senderId: String = commandSource,
+    ) {
+        val sessionId = participantMetadata.optString("part_session_id")
+            .ifBlank { participantMetadata.optString("session_id", "") }
         val row = JSONObject()
             .put("schema", "pps-android-command-diary.v1")
             .put("command_id", "phone-${commandDiary.size + 1}")
-            .put("command_source", "phone_ui_or_runtime")
+            .put("command_source", commandSource)
+            .put("sender_id", senderId)
+            .put("session_id", sessionId)
             .put("command", command)
             .put("status", status)
             .put("reason", reason)
             .put("payload", JSONObject(payload.toString()))
             .put("package_id", packageId)
             .put("run_id", runId)
+            .put("ack_sent", false)
             .put("phone_unix_ms", System.currentTimeMillis())
             .put("phone_elapsed_realtime_ms", SystemClock.elapsedRealtime())
         commandDiary.add(row)
@@ -2468,9 +2491,12 @@ private class PhoneRunSession(
             "operator_command",
             JSONObject()
                 .put("command_id", row.optString("command_id"))
+                .put("command_source", commandSource)
+                .put("sender_id", senderId)
                 .put("command", command)
                 .put("status", status)
                 .put("reason", reason)
+                .put("ack_sent", false)
                 .put("payload", JSONObject(payload.toString())),
         )
     }

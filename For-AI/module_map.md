@@ -22,7 +22,11 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   marker-transport, and command-transport status. The phone-run artifact
   validator now treats those stream descriptions as strict native
   reconstruction evidence, including PC-compatible channel order, source IDs,
-  and the privacy rule that demographics stay out of stream names.
+  and the privacy rule that demographics stay out of stream names. Phone-run
+  command diaries distinguish `phone_ui`, `phone_runtime`, and `native_lsl`
+  command sources and mirror each row as an `operator_command` event so direct
+  Android button presses and received LSL commands reconstruct through the same
+  event/marker path.
   `MainActivity.kt` owns the Runner-mode idle command listener that acks native `start_experiment` /
   `start_part` before launching the selected synced package. Default builds without the
   local liblsl AAR still report native transport unavailable; do not present

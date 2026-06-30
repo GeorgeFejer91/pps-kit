@@ -2314,6 +2314,7 @@ def _validate_phone_command_diary(
         for event in operator_events
         if str(event.get("command_id") or "").strip()
     }
+    command_sources = {"native_lsl", "phone_ui", "phone_runtime", "phone_ui_or_runtime"}
     native_rows = 0
     native_ack_rows = 0
     for index, row in enumerate(rows, start=1):
@@ -2328,8 +2329,11 @@ def _validate_phone_command_diary(
             failures.append(f"{prefix} is missing command_id")
         if not command:
             failures.append(f"{prefix} is missing command")
-        if command_source not in {"native_lsl", "phone_ui_or_runtime"}:
-            failures.append(f"{prefix} command_source must be native_lsl or phone_ui_or_runtime")
+        if command_source not in command_sources:
+            failures.append(
+                f"{prefix} command_source must be one of "
+                f"{', '.join(sorted(command_sources))}"
+            )
         if row_status not in {"applied", "rejected"}:
             failures.append(f"{prefix} status must be applied or rejected")
         if status.get("package_id") and row.get("package_id") and str(row.get("package_id")) != str(status.get("package_id")):
@@ -2345,8 +2349,9 @@ def _validate_phone_command_diary(
                     failures.append(f"{prefix} command differs from matching operator_command event")
                 if row_status and str(event.get("status") or "") != row_status:
                     failures.append(f"{prefix} status differs from matching operator_command event")
-                if command_source == "native_lsl" and str(event.get("command_source") or "") != "native_lsl":
-                    failures.append(f"{prefix} native_lsl source differs from matching operator_command event")
+                event_source = str(event.get("command_source") or "")
+                if command_source in command_sources and event_source and event_source != command_source:
+                    failures.append(f"{prefix} command_source differs from matching operator_command event")
 
         if command_source != "native_lsl":
             continue

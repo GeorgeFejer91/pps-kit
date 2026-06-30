@@ -25,8 +25,10 @@ also carries a reconstruction contract: Segment 6 source hashes, block order,
 trial identities, a reusable trial-building-block asset catalog when
 `Trial_File_Path` is available, and the Android phone LSL contract. The current
 Android build writes a PPSMarkersV2-shaped local marker mirror and command diary
-beside the phone event log; live native LSL broadcast is the next integration
-step and requires a pinned liblsl Android native layer.
+beside the phone event log. The command diary mirrors each row into an
+`operator_command` event and separates local UI actions (`phone_ui`), internal
+runtime actions (`phone_runtime`), and native LSL commands (`native_lsl`); live
+native LSL broadcast still requires a pinned liblsl Android native layer.
 
 ## Pairing
 
@@ -118,6 +120,11 @@ After pairing, choose `Run Experiment On Phone`.
 - `Start Full Experiment` runs all synced packages in listed order, so a synced
   Study 5 pre/post preparation plays Part 1 and Part 2 on the phone and uploads
   a completion artifact for each part.
+- Each local start button press is recorded in `command_diary.jsonl` as
+  `command_source=phone_ui` and mirrored as an `operator_command` event. Runtime
+  bookkeeping such as scheduled-block or top-up materialization uses
+  `command_source=phone_runtime`, while PC/controller LSL commands use
+  `command_source=native_lsl` with ack evidence when native LSL is enabled.
 
 Packages served from the native runner's `Send To Phone` entry point are
 lightweight by default: they omit prepared `block_audio` assets and transfer
@@ -188,6 +195,10 @@ requires `events.csv` to be present and to match the embedded
 run/package identity, phone timestamps, duplicate-id checks, and primitive
 event fields. This is the quick human-readable log of what the phone runtime
 did before the richer marker/XDF checks.
+Phone-run command diaries are also checked against matching `operator_command`
+events when present, including the command source. New runs should distinguish
+`phone_ui`, `phone_runtime`, and `native_lsl`; the validator still accepts the
+older `phone_ui_or_runtime` label for historical artifacts.
 For strict local numeric-trigger reconstruction, add
 `--expect-trigger-code-mirror`; this requires `trigger_codes.csv` to be present
 and to match the `event_id`, `event_code`, `event_type`, `trigger_key`, and

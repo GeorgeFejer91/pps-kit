@@ -41,6 +41,12 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   `payload_json` before any local handler runs.
 - Acks are shaped as applied/rejected command acknowledgements after the local
   handler returns.
+- Phone-owned command diaries now distinguish `phone_ui`,
+  `phone_runtime`, and `native_lsl` command sources. Local Runner-mode start
+  buttons write `phone_ui` rows, internal scheduled-block/top-up bookkeeping
+  writes `phone_runtime` rows, and every row is mirrored into an
+  `operator_command` marker so the local artifact can reconstruct both received
+  LSL commands and direct phone UI actions.
 - When the ignored local `liblsl-Android.aar` is present, Runner mode opens
   long-lived `PPSMarkersV2` / `PPSTriggerCodes` outlets and attempts to resolve
   a `PPSCommandSignalsV1` stream. If command resolution succeeds, it opens a

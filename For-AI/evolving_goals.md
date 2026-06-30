@@ -179,6 +179,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `ack_sent=true`, and corresponding `operator_command` events. This makes
   PC-runner/controller-to-phone LSL administration auditable from the phone run
   artifact, not only from sender outboxes.
+- Android phone-owned local UI actions are now reconstructable from the same
+  command diary path. `MainActivity.kt` records local Runner-mode start button
+  presses as `command_source=phone_ui`, internal phone-runtime materialization
+  and completion bookkeeping as `command_source=phone_runtime`, and native
+  receiver commands as `command_source=native_lsl`; each row is mirrored to an
+  `operator_command` event, and the Android runtime artifact validator checks
+  that command-source labels match the event mirror while still accepting
+  historical `phone_ui_or_runtime` rows.
 - The same validator now loads `lsl_marker_mirror.csv` from phone-run folders
   or exported ZIPs, falls back to embedded `completion.json` marker rows, and
   checks marker mirror reconstructability against completion events, payload
