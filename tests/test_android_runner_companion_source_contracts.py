@@ -295,6 +295,12 @@ def test_android_phone_run_command_diary_separates_local_ui_runtime_and_native_s
     assert "startCommandEvidence: PhoneStartCommandEvidence? = null" in main_activity
     assert "startSignal = commandSignal" in main_activity
     assert "PhoneStartCommandEvidence(signal = it, ack = ack, ackSent = ackSent)" in main_activity
+    assert "startFullPhoneExperiment(fullRunPackagesAfterAck, evidence)" in main_activity
+    assert 'reason = "starting_full_phone_experiment"' in main_activity
+    assert '.put("full_experiment_synced", fullExperimentSynced)' in main_activity
+    assert 'commandSource = startCommandSource' in main_activity
+    assert 'senderId = startCommandSenderId' in main_activity
+    assert 'startCommandSource = if (startCommandEvidence != null && index > 0) "phone_runtime" else "phone_ui"' in main_activity
     assert "session.recordNativeCommandAckEvidence(" in main_activity
     assert 'commandSource: String = "phone_runtime"' in main_activity
     assert '.put("command_source", commandSource)' in main_activity

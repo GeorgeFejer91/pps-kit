@@ -367,9 +367,14 @@ native `PPSMarkersV2` / `PPSTriggerCodes` outlets and can resolve
 is idle with a synced selected package, it also keeps a native idle command
 listener open so a PC runner or Controller phone can send `start_experiment` /
 `start_part` and receive an ack before the phone launches the same run path as
-the local Start button. Current active-run command handling records
-snapshot/note/continue actions, applies pause/resume through the phone-owned
-`AudioTrack` pause gate during active phone blocks, and records
+the local buttons. For a multi-part preparation with every listed package synced,
+idle `start_experiment` launches the full synced package order; if only one
+package is available it starts that selected package, while `start_part` always
+targets the selected synced package. Incomplete multi-part syncs are rejected
+with full/synced package counts in the ack payload rather than silently starting
+only Part 01. Current active-run command handling records snapshot/note/continue
+actions, applies pause/resume through the phone-owned `AudioTrack` pause gate
+during active phone blocks, and records
 `phone_playback_pause` / `phone_playback_resume` diary and marker-mirror events.
 The local Runner-mode Pause and Resume buttons call the same phone-owned pause
 gate and write the same command diary/operator-command evidence with

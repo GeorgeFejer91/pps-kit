@@ -624,7 +624,7 @@ private fun PhoneRuntimeScreen(
         return true
     }
 
-    fun startFullPhoneExperiment(runPackages: List<MobileRunPackage>): Boolean {
+    fun startFullPhoneExperiment(runPackages: List<MobileRunPackage>, startCommandEvidence: PhoneStartCommandEvidence? = null): Boolean {
         if (running || syncing || runPackages.isEmpty()) return false
         if (!connected && !phoneOwnedSession && runPackages.none { it.phoneOwnedSession }) return false
         running = true
@@ -660,7 +660,12 @@ private fun PhoneRuntimeScreen(
                         startCommandAction = "start_full_experiment_part",
                         startCommandPayload = JSONObject()
                             .put("full_experiment_part_index", index + 1)
-                            .put("full_experiment_part_count", runPackages.size),
+                            .put("full_experiment_part_count", runPackages.size)
+                            .put("remote_start_command_id", startCommandEvidence?.signal?.commandId ?: "")
+                            .put("remote_start_command", startCommandEvidence?.signal?.command ?: ""),
+                        startCommandSource = if (startCommandEvidence != null && index > 0) "phone_runtime" else "phone_ui",
+                        startCommandSenderId = if (startCommandEvidence != null && index > 0) "android_phone_runtime" else "android_phone_ui",
+                        startCommandEvidence = if (index == 0) startCommandEvidence else null,
                     )
                     artifacts.add(result.optString("artifact_path", ""))
                     result.optString("artifact_dir", "").takeIf { it.isNotBlank() }?.let { artifactDirs.add(it) }
@@ -753,6 +758,9 @@ private fun PhoneRuntimeScreen(
         syncing,
         connected,
         phoneOwnedSession,
+        packages.size,
+        syncedPackages.size,
+        fullExperimentSynced,
         pairing.token,
     ) {
         val runPackage = selectedManifest
@@ -779,6 +787,8 @@ private fun PhoneRuntimeScreen(
                         val signal = runCatching { phoneCommandFromSample(sample.sample) }.getOrNull()
                         var startSignal: PhoneLslCommandSignal? = null
                         var startAfterAck = false
+                        var startFullAfterAck = false
+                        var fullRunPackagesAfterAck: List<MobileRunPackage> = emptyList()
                         val receivedClock = sample.timestamp.takeIf { it > 0.0 } ?: activeTransport.localClock()
                         val ack = phoneCommandAckForSample(
                             sample = sample.sample,
@@ -791,8 +801,30 @@ private fun PhoneRuntimeScreen(
                         ) { commandSignal ->
                             when (commandSignal.command) {
                                 "start_experiment", "start_part" -> {
-                                    val canStart = runPackage.mobileRunnable && !running && !syncing && (connected || phoneOwnedSession || runPackage.phoneOwnedSession)
-                                    if (canStart) {
+                                    val orderedSyncedPackages = packages.mapNotNull { syncedPackages[it.packageId] }
+                                    val selectedCanStart = runPackage.mobileRunnable && !running && !syncing && (connected || phoneOwnedSession || runPackage.phoneOwnedSession)
+                                    val fullCanStart = commandSignal.command == "start_experiment" &&
+                                        packages.size > 1 &&
+                                        fullExperimentSynced &&
+                                        orderedSyncedPackages.isNotEmpty() &&
+                                        orderedSyncedPackages.all { it.mobileRunnable && (connected || phoneOwnedSession || it.phoneOwnedSession) }
+                                    if (fullCanStart) {
+                                        startFullAfterAck = true
+                                        startSignal = commandSignal
+                                        fullRunPackagesAfterAck = orderedSyncedPackages
+                                        PhoneLslCommandApplicationResult(
+                                            status = "applied",
+                                            reason = "starting_full_phone_experiment",
+                                            payload = JSONObject()
+                                                .put("command", commandSignal.command)
+                                                .put("package_id", runPackage.packageId)
+                                                .put("selected_package_id", runPackage.packageId)
+                                                .put("synced_package_count", orderedSyncedPackages.size)
+                                                .put("full_experiment_part_count", orderedSyncedPackages.size)
+                                                .put("idle_runner_listener", true)
+                                                .put("state_changed", true),
+                                        )
+                                    } else if (selectedCanStart && (commandSignal.command == "start_part" || packages.size <= 1)) {
                                         startAfterAck = true
                                         startSignal = commandSignal
                                         PhoneLslCommandApplicationResult(
@@ -814,6 +846,9 @@ private fun PhoneRuntimeScreen(
                                                 .put("mobile_runnable", runPackage.mobileRunnable)
                                                 .put("connected", connected)
                                                 .put("phone_owned_session", phoneOwnedSession || runPackage.phoneOwnedSession)
+                                                .put("full_experiment_synced", fullExperimentSynced)
+                                                .put("package_count", packages.size)
+                                                .put("synced_package_count", orderedSyncedPackages.size)
                                                 .put("running", running)
                                                 .put("syncing", syncing),
                                         )
@@ -852,6 +887,11 @@ private fun PhoneRuntimeScreen(
                         if (startAfterAck) {
                             val evidence = startSignal?.let { PhoneStartCommandEvidence(signal = it, ack = ack, ackSent = ackSent) }
                             startPhoneRun(runPackage, evidence)
+                            return@LaunchedEffect
+                        }
+                        if (startFullAfterAck) {
+                            val evidence = startSignal?.let { PhoneStartCommandEvidence(signal = it, ack = ack, ackSent = ackSent) }
+                            startFullPhoneExperiment(fullRunPackagesAfterAck, evidence)
                             return@LaunchedEffect
                         }
                     }
@@ -2021,6 +2061,8 @@ private suspend fun runPhonePackage(
     onProgress: (String) -> Unit,
     startCommandAction: String = "start_phone_run",
     startCommandPayload: JSONObject = JSONObject(),
+    startCommandSource: String = "phone_ui",
+    startCommandSenderId: String = "android_phone_ui",
     startCommandEvidence: PhoneStartCommandEvidence? = null,
 ): JSONObject {
     session.addRunStart(runPackage)
@@ -2040,8 +2082,8 @@ private suspend fun runPhonePackage(
                 .put("phone_owned_session", phoneOwnedSession)
                 .put("operator_action", startCommandAction)
                 .put("operator_payload", JSONObject(startCommandPayload.toString())),
-            commandSource = "phone_ui",
-            senderId = "android_phone_ui",
+            commandSource = startCommandSource,
+            senderId = startCommandSenderId,
         )
     }
     session.pollNativeCommands(runPackage)

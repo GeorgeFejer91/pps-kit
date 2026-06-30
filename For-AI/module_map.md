@@ -30,9 +30,13 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   commands now carry their received signal, ack sample, and `ack_sent` outcome
   into the newly launched `PhoneRunSession` so remotely started phone runs are
   recorded as `native_lsl` receiver-side command evidence rather than local UI
-  starts.
+  starts. For multi-part preparations, idle `start_experiment` now requires the
+  full listed package set to be synced and then launches that full synced order;
+  `start_part` remains the selected-package path, and incomplete multi-part
+  starts are rejected with package/sync counts in the ack payload instead of
+  silently launching only Part 01.
   `MainActivity.kt` owns the Runner-mode idle command listener that acks native `start_experiment` /
-  `start_part` before launching the selected synced package. Default builds without the
+  `start_part` before launching the selected synced package or full synced package order. Default builds without the
   local liblsl AAR still report native transport unavailable; do not present
   local marker mirrors or protocol unit tests as live Android LSL evidence.
 - Android phone-owned scheduled-block and top-up PCM materialization lives in
