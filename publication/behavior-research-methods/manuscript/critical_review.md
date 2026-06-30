@@ -1127,3 +1127,32 @@ Methods manuscript draft. It is a working audit, not manuscript text.
   more schematics with release-state dashboard/runner screenshots, validation
   evidence plots, and deidentified sample-analysis visuals once those artifacts
   are frozen.
+
+## Iteration 32: Figure-plan Consistency Pass
+
+### Main Critiques
+
+- After the source-owned figure integration pass, the manuscript still contained
+  a `Figure and Source-material Plan` subsection written as if the figures were
+  only recommended future artifacts. That was internally inconsistent with the
+  six generated PNG figures now included in the draft.
+- The claim-boundary audit had the same slight lag: it protected against
+  copyrighted figures and private participant data, but it did not yet state
+  that the draft contains tracked schematic figures with explicit boundaries.
+
+### Resolution In This Revision
+
+- Rewrote the `Figure and Source-material Plan` subsection in `main.tex` to
+  describe the current schematic figure set, the tracked generator, and the
+  role of future release-state screenshots or validation-output figures.
+- Updated the figure-plan table so each row points to the current generated PNG
+  or the ledgers backing the schematic, rather than only to proposed future
+  source materials.
+- Updated `claim_boundary_audit.csv` so figure/material claims now distinguish
+  current schematic figures from stronger release-state visual evidence.
+
+### Residual Concerns
+
+- The edit closes an internal consistency gap only. It still does not provide
+  publication-hardware validation plots, deidentified empirical analysis
+  figures, author metadata, release DOI, or final declaration text.

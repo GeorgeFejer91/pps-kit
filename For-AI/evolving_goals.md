@@ -291,6 +291,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   audit, and `critical_review.md` now distinguish these schematics from
   release-state screenshots, hardware validation plots, tactile mechanical
   evidence, or participant-effect figures.
+- Followed up the BRM figure pass with a manuscript consistency correction:
+  the `Figure and Source-material Plan` subsection and `claim_boundary_audit.csv`
+  now describe the current generated schematic figure set and tracked source
+  files, rather than framing all figures as future recommendations. The same
+  boundary remains: stronger release-state screenshots, validation-output plots,
+  or deidentified analysis figures still need archived source files, hashes,
+  and visual QA before final submission.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation
