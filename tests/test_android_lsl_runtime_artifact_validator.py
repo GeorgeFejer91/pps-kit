@@ -303,6 +303,27 @@ def test_android_lsl_runtime_validator_rejects_catalog_index_provenance_drift(tm
     assert "phone run catalog latest_run.json randomization_seed differs from phone_run_catalog_entry.json" in failures
 
 
+def test_android_lsl_runtime_validator_rejects_stream_description_metadata_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    _inject_phone_run_provenance(run_dir)
+    status_path = run_dir / "lsl_runtime_status.json"
+    status = json.loads(status_path.read_text(encoding="utf-8"))
+    metadata = json.loads(status["stream_descriptions"]["rich_markers"]["session_metadata_json"])
+    metadata["randomization_seed"] = "wrong-seed"
+    status["stream_descriptions"]["rich_markers"]["session_metadata_json"] = json.dumps(metadata)
+    status_path.write_text(json.dumps(status), encoding="utf-8")
+    _update_completion_payload(run_dir, lsl_runtime_status=status)
+
+    result = validator.validate_run_artifact(run_dir, expect_run_catalog=True)
+
+    assert result.ok is False
+    assert "Android LSL stream description rich_markers.session_metadata_json randomization_seed differs" in "\n".join(
+        result.failures
+    )
+
+
 def test_android_lsl_runtime_validator_accepts_phone_topup_evidence(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -1714,6 +1735,16 @@ def _inject_phone_run_provenance(
     manifest["source_segment_hashes"] = manifest_source_hashes
     manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
 
+    status_path = run_dir / "lsl_runtime_status.json"
+    status = json.loads(status_path.read_text(encoding="utf-8"))
+    _update_stream_description_session_metadata(
+        status,
+        participant_roster_count=len(roster),
+        randomization_seed="seed-123",
+        source_hashes=phone_source_hashes,
+    )
+    status_path.write_text(json.dumps(status), encoding="utf-8")
+
     reconstruction_path = run_dir / "reconstruction_contract.json"
     reconstruction = json.loads(reconstruction_path.read_text(encoding="utf-8"))
     reconstruction["participant_roster_count"] = len(roster)
@@ -1731,6 +1762,7 @@ def _inject_phone_run_provenance(
 
     completion_path = run_dir / "completion.json"
     completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    completion["lsl_runtime_status"] = status
     package_payload = {
         "package_id": "pkg-001",
         "participant_id": "P001",
@@ -1751,6 +1783,46 @@ def _inject_phone_run_provenance(
     _write_android_events_csv(run_dir / "events.csv", events)
     _write_marker_csv(run_dir / "lsl_marker_mirror.csv", markers)
     _write_trigger_codes_csv(run_dir / "trigger_codes.csv", markers)
+
+
+def _stream_session_metadata_json(
+    *,
+    participant_roster_count: int = 0,
+    randomization_seed: str = "",
+    source_hashes: dict | None = None,
+) -> str:
+    return json.dumps(
+        {
+            "package_id": "pkg-001",
+            "asset_strategy": "trial_building_blocks_only",
+            "schedule_hash": "schedulehash",
+            "participant_roster_count": participant_roster_count,
+            "randomization_seed": randomization_seed,
+            "source_segment_hashes": source_hashes or _phone_run_source_hash_summary(_phone_run_source_segment_hashes()),
+            "privacy_default": "metadata_payload_only",
+            "demographics_in_stream_name": False,
+        }
+    )
+
+
+def _update_stream_description_session_metadata(
+    status: dict,
+    *,
+    participant_roster_count: int,
+    randomization_seed: str,
+    source_hashes: dict,
+) -> None:
+    descriptions = status.get("stream_descriptions") if isinstance(status.get("stream_descriptions"), dict) else {}
+    metadata_json = _stream_session_metadata_json(
+        participant_roster_count=participant_roster_count,
+        randomization_seed=randomization_seed,
+        source_hashes=source_hashes,
+    )
+    for key in ("rich_markers", "numeric_triggers"):
+        row = descriptions.get(key) if isinstance(descriptions.get(key), dict) else None
+        if row is None:
+            continue
+        row["session_metadata_json"] = metadata_json
 
 
 def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event: bool = True) -> None:
@@ -2235,6 +2307,8 @@ def _stream_descriptions() -> dict:
             "nominal_srate_hz": 0.0,
             "source_id": "pps-android-markers-v2-phone-run-001",
             "marker_version": "2.0",
+            **_catalog_identity(),
+            "session_metadata_json": _stream_session_metadata_json(),
             "channel_labels": list(validator.LSL_MARKER_CHANNELS),
         },
         "numeric_triggers": {
@@ -2245,6 +2319,8 @@ def _stream_descriptions() -> dict:
             "channel_count": 1,
             "nominal_srate_hz": 0.0,
             "source_id": "pps-android-trigger-codes-phone-run-001",
+            **_catalog_identity(),
+            "session_metadata_json": _stream_session_metadata_json(),
             "channel_labels": ["event_code"],
         },
         "command_signals": {

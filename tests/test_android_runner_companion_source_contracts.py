@@ -82,6 +82,8 @@ def test_android_lsl_runtime_status_exports_stream_descriptions() -> None:
 
     assert "phoneLslStreamDescriptions" in lsl_protocol
     assert '.put("stream_descriptions", phoneLslStreamDescriptions(runPackage, runId))' in lsl_protocol
+    assert "phoneLslSessionMetadataJson" in lsl_protocol
+    assert '.put("session_metadata_json", sessionMetadataJson)' in lsl_protocol
     assert '"pps-android-lsl-stream-descriptions.v1"' in lsl_protocol
     assert '"PPSMarkersV2"' in lsl_protocol
     assert '"PPSTriggerCodes"' in lsl_protocol
@@ -94,6 +96,9 @@ def test_android_lsl_runtime_status_exports_stream_descriptions() -> None:
     assert '.put("channel_labels", stringArray(PHONE_LSL_MARKER_CHANNELS))' in lsl_protocol
     assert '.put("channel_labels", stringArray(PHONE_LSL_COMMAND_CHANNELS))' in lsl_protocol
     assert '.put("channel_labels", stringArray(PHONE_LSL_ACK_CHANNELS))' in lsl_protocol
+    assert '.put("participant_roster_count", runPackage.participantRoster.size)' in lsl_protocol
+    assert '.put("randomization_seed", runPackage.randomizationSeed)' in lsl_protocol
+    assert '.put("source_segment_hashes", runPackage.sourceSegmentHashes.toJsonObject())' in lsl_protocol
     assert '.put("demographics_in_stream_name", false)' in lsl_protocol
 
 

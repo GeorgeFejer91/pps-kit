@@ -255,6 +255,7 @@ internal fun phoneLslStreamDescriptions(runPackage: MobileRunPackage, runId: Str
     val commandName = runPackage.lsl.commandSignalsName.ifBlank { PHONE_LSL_COMMAND_STREAM_NAME }
     val ackName = runPackage.lsl.commandAcksName.ifBlank { PHONE_LSL_ACK_STREAM_NAME }
     val runToken = phoneLslSourceIdToken(runId)
+    val sessionMetadataJson = phoneLslSessionMetadataJson(runPackage)
     return JSONObject()
         .put("schema", "pps-android-lsl-stream-descriptions.v1")
         .put("runtime_authority", runPackage.lsl.runtimeAuthority.ifBlank { "android_phone" })
@@ -273,6 +274,13 @@ internal fun phoneLslStreamDescriptions(runPackage: MobileRunPackage, runId: Str
                 .put("nominal_srate_hz", 0.0)
                 .put("source_id", "pps-android-markers-v2-$runToken")
                 .put("marker_version", PHONE_LSL_MARKER_VERSION)
+                .put("session_id", runPackage.sessionId)
+                .put("participant_id", runPackage.participantId)
+                .put("session_group_id", runPackage.sessionGroupId)
+                .put("part_session_id", runPackage.partSessionId)
+                .put("part_number", runPackage.partNumber)
+                .put("run_id", runId)
+                .put("session_metadata_json", sessionMetadataJson)
                 .put("channel_labels", stringArray(PHONE_LSL_MARKER_CHANNELS)),
         )
         .put(
@@ -285,6 +293,13 @@ internal fun phoneLslStreamDescriptions(runPackage: MobileRunPackage, runId: Str
                 .put("channel_count", 1)
                 .put("nominal_srate_hz", 0.0)
                 .put("source_id", "pps-android-trigger-codes-$runToken")
+                .put("session_id", runPackage.sessionId)
+                .put("participant_id", runPackage.participantId)
+                .put("session_group_id", runPackage.sessionGroupId)
+                .put("part_session_id", runPackage.partSessionId)
+                .put("part_number", runPackage.partNumber)
+                .put("run_id", runId)
+                .put("session_metadata_json", sessionMetadataJson)
                 .put("channel_labels", stringArray(listOf("event_code"))),
         )
         .put(
@@ -313,6 +328,18 @@ internal fun phoneLslStreamDescriptions(runPackage: MobileRunPackage, runId: Str
                 .put("channel_labels", stringArray(PHONE_LSL_ACK_CHANNELS)),
         )
 }
+
+internal fun phoneLslSessionMetadataJson(runPackage: MobileRunPackage): String =
+    JSONObject()
+        .put("package_id", runPackage.packageId)
+        .put("asset_strategy", mobilePackageAssetStrategy(runPackage))
+        .put("schedule_hash", runPackage.reconstruction.scheduleHash)
+        .put("participant_roster_count", runPackage.participantRoster.size)
+        .put("randomization_seed", runPackage.randomizationSeed)
+        .put("source_segment_hashes", runPackage.sourceSegmentHashes.toJsonObject())
+        .put("privacy_default", runPackage.lsl.privacyDefault.ifBlank { "metadata_payload_only" })
+        .put("demographics_in_stream_name", false)
+        .toString()
 
 internal fun phoneCommandAckForSample(
     sample: List<Any?>,

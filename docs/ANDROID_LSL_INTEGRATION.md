@@ -185,8 +185,10 @@ mirror and the expected numeric `trigger_codes.csv` mirror, resolve runner-side
 controller-side `PPSCommandSignalsV1` outlets with optional `PPSCommandAcksV1`
 ack polling.
 The artifact-level `stream_descriptions` contract records those same
-outlets/inlets in `lsl_runtime_status.json`, so validation can detect
-channel-order, stream-role, or source-identity drift before a run is treated as
+outlets/inlets in `lsl_runtime_status.json`, including rich-marker and
+numeric-trigger `session_metadata_json` copies of package schedule/provenance
+metadata. Validation can therefore detect channel-order, stream-role,
+source-identity, or stream-metadata drift before a run is treated as
 reconstructable native LSL evidence.
 
 Phone marker timestamps use

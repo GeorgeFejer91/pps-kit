@@ -130,11 +130,22 @@ class PhoneLslProtocolTest {
             "payload_json",
             richMarkers.getJSONArray("channel_labels").getString(PHONE_LSL_MARKER_CHANNELS.size - 1),
         )
+        assertEquals("phone-run-001", richMarkers.getString("run_id"))
+        val richSessionMetadata = JSONObject(richMarkers.getString("session_metadata_json"))
+        assertEquals("pkg-001", richSessionMetadata.getString("package_id"))
+        assertEquals("seed-123", richSessionMetadata.getString("randomization_seed"))
+        assertEquals(2, richSessionMetadata.getInt("participant_roster_count"))
+        assertEquals(
+            "segment5hash",
+            richSessionMetadata.getJSONObject("source_segment_hashes").getString("source_segment5_manifest_sha256"),
+        )
+        assertFalse(richSessionMetadata.getBoolean("demographics_in_stream_name"))
 
         val numericTriggers = descriptions.getJSONObject("numeric_triggers")
         assertEquals("PPSTriggerCodes", numericTriggers.getString("name"))
         assertEquals("int32", numericTriggers.getString("channel_format"))
         assertEquals("event_code", numericTriggers.getJSONArray("channel_labels").getString(0))
+        assertEquals(richMarkers.getString("session_metadata_json"), numericTriggers.getString("session_metadata_json"))
 
         val commandSignals = descriptions.getJSONObject("command_signals")
         assertEquals("inlet", commandSignals.getString("role"))
@@ -222,8 +233,24 @@ class PhoneLslProtocolTest {
               "session_group_id": "group-001",
               "part_session_id": "part-001",
               "part_number": "1",
+              "participant_roster": ["P001", "P002"],
+              "randomization_seed": "seed-123",
+              "source_segment_hashes": {
+                "schema": "pps-mobile-source-segment-hashes.v1",
+                "source_run_setup_manifest_sha256": "runhash",
+                "source_segment5_manifest_sha256": "segment5hash",
+                "segment6_order_csv_sha256": "orderhash",
+                "segment5_block_csvs": [
+                  {"block_id": "block-01", "sha256": "blockhash"}
+                ]
+              },
               "mobile_runnable": true,
               "phone_owned_session": true,
+              "reconstruction": {
+                "schema": "pps-mobile-reconstruction-contract.v2",
+                "package_asset_strategy": "trial_building_blocks_only",
+                "schedule_hash": "schedulehash"
+              },
               "lsl": {
                 "schema": "pps-mobile-lsl-contract.v1",
                 "runtime_authority": "android_phone",

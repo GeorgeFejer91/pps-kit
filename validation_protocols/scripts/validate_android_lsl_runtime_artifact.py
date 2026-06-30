@@ -233,6 +233,7 @@ def validate_runtime_status(
     _validate_android_lsl_stream_descriptions(
         status=status,
         streams=streams,
+        package_manifest=package_manifest,
         failures=failures,
         warnings=warnings,
         expect_native_transport=expect_native_transport,
@@ -1408,6 +1409,7 @@ def _validate_android_lsl_stream_descriptions(
     *,
     status: dict[str, Any],
     streams: dict[str, Any],
+    package_manifest: dict[str, Any] | None,
     failures: list[str],
     warnings: list[str],
     expect_native_transport: bool,
@@ -1497,6 +1499,96 @@ def _validate_android_lsl_stream_descriptions(
             failures.append(f"Android LSL stream description {key}.marker_version expected {spec['marker_version']!r}")
         if "token_required" in spec and row.get("token_required") is not spec["token_required"]:
             failures.append(f"Android LSL stream description {key}.token_required must be true")
+
+    _validate_android_lsl_session_metadata_descriptions(
+        status=status,
+        descriptions=descriptions,
+        package_manifest=package_manifest,
+        failures=failures,
+        warnings=warnings,
+        expect_native_transport=expect_native_transport,
+    )
+
+
+def _validate_android_lsl_session_metadata_descriptions(
+    *,
+    status: dict[str, Any],
+    descriptions: dict[str, Any],
+    package_manifest: dict[str, Any] | None,
+    failures: list[str],
+    warnings: list[str],
+    expect_native_transport: bool,
+) -> None:
+    expected_provenance = _phone_run_provenance_from_manifest(package_manifest)
+    require_metadata = expect_native_transport or bool(expected_provenance)
+    manifest_reconstruction = (
+        package_manifest.get("reconstruction")
+        if isinstance(package_manifest, dict) and isinstance(package_manifest.get("reconstruction"), dict)
+        else {}
+    )
+    manifest_schedule_hash = _metadata_value(manifest_reconstruction.get("schedule_hash"))
+    manifest_asset_strategy = _metadata_value(package_manifest.get("asset_strategy")) if isinstance(package_manifest, dict) else ""
+    status_asset_strategy = _metadata_value(status.get("asset_strategy"))
+
+    for key in ("rich_markers", "numeric_triggers"):
+        row = descriptions.get(key) if isinstance(descriptions.get(key), dict) else {}
+        raw_metadata = _metadata_value(row.get("session_metadata_json"))
+        if not raw_metadata:
+            message = f"Android LSL stream description {key}.session_metadata_json is missing"
+            if require_metadata:
+                failures.append(message)
+            else:
+                warnings.append(f"{message}; native LSL reconstruction metadata cannot be checked")
+            continue
+
+        metadata = _parse_json_object(
+            raw_metadata,
+            f"Android LSL stream description {key}.session_metadata_json",
+            failures,
+        )
+        if metadata is None:
+            continue
+
+        for field in ("session_id", "participant_id", "session_group_id", "part_session_id", "part_number", "run_id"):
+            expected_value = _metadata_value(status.get(field))
+            observed_value = _metadata_value(row.get(field))
+            if expected_value:
+                if not observed_value and require_metadata:
+                    failures.append(f"Android LSL stream description {key}.{field} is missing")
+                elif observed_value and observed_value != expected_value:
+                    failures.append(f"Android LSL stream description {key}.{field} differs from lsl_runtime_status")
+
+        for field in ("package_id",):
+            expected_value = _metadata_value(status.get(field))
+            observed_value = _metadata_value(metadata.get(field))
+            if expected_value and observed_value and observed_value != expected_value:
+                failures.append(f"Android LSL stream description {key}.session_metadata_json {field} differs from lsl_runtime_status")
+            elif expected_value and require_metadata and not observed_value:
+                failures.append(f"Android LSL stream description {key}.session_metadata_json is missing {field}")
+
+        observed_asset_strategy = _metadata_value(metadata.get("asset_strategy"))
+        expected_asset_strategy = status_asset_strategy or manifest_asset_strategy
+        if expected_asset_strategy and observed_asset_strategy and observed_asset_strategy != expected_asset_strategy:
+            failures.append(f"Android LSL stream description {key}.session_metadata_json asset_strategy differs from run metadata")
+        elif expected_asset_strategy and require_metadata and not observed_asset_strategy:
+            failures.append(f"Android LSL stream description {key}.session_metadata_json is missing asset_strategy")
+
+        observed_schedule_hash = _metadata_value(metadata.get("schedule_hash"))
+        if manifest_schedule_hash and observed_schedule_hash and observed_schedule_hash != manifest_schedule_hash:
+            failures.append(f"Android LSL stream description {key}.session_metadata_json schedule_hash differs from run_package_manifest")
+        elif manifest_schedule_hash and require_metadata and not observed_schedule_hash:
+            failures.append(f"Android LSL stream description {key}.session_metadata_json is missing schedule_hash")
+
+        if metadata.get("demographics_in_stream_name") is not False:
+            failures.append(f"Android LSL stream description {key}.session_metadata_json must keep demographics out of stream names")
+
+        if expected_provenance:
+            _validate_phone_run_provenance_payload(
+                f"Android LSL stream description {key}.session_metadata_json",
+                metadata,
+                expected_provenance,
+                failures,
+            )
 
 
 def _validate_android_controller_lsl_stream_descriptions(

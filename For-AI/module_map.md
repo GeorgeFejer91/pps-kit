@@ -63,14 +63,15 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   and `PhoneRunCatalog.kt` entries so offline reviewers can distinguish
   lightweight building-block materializations from prepared WAV replay and
   trace them back to the source randomization/order evidence. The
-  `session_metadata` event and native LSL stream-description
-  `session_metadata_json` carry the same provenance summary for marker-stream
+  `session_metadata` event, native liblsl XML descriptions, and exported
+  `lsl_runtime_status.json` rich-marker/numeric-trigger stream descriptions
+  carry the same `session_metadata_json` provenance summary for marker-stream
   reconstruction. `validate_android_lsl_runtime_artifact.py` now enforces that
   package provenance across `run_package_manifest.json`, the `session_metadata`
-  event package payload, `reconstruction_contract.json`, and
-  `phone_run_catalog_entry.json`, comparing the roster count,
-  randomization seed, Segment 6/5 hashes, and phone-side source block CSV
-  count.
+  event package payload, `reconstruction_contract.json`,
+  `phone_run_catalog_entry.json`, and stream-description metadata, comparing the
+  roster count, randomization seed, Segment 6/5 hashes, and phone-side source
+  block CSV count.
 - Optional native Android LSL marker/command transport lives in
   `PhoneNativeLslBridge.kt`. A local ignored
   `android/runner-companion/app/libs/liblsl-Android.aar` is included by Gradle

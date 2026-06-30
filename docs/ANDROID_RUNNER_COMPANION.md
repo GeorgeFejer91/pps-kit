@@ -297,15 +297,17 @@ global `index.json`, participant `runs.jsonl`, and `latest_run.json` pointers
 used to reconstruct which phone-owned runs happened for each participant. The
 phone-owned export snapshot carries the minimal public CSV layer and the rich
 per-run backup mirror. The phone preserves the package `asset_strategy` across
-the parsed model, LSL runtime status, native LSL stream description metadata,
+the parsed model, LSL runtime status, JSON/native LSL stream description metadata,
 reconstruction snapshot, and phone run catalog so a lightweight
 `trial_building_blocks_only` run can be distinguished from a prepared-block WAV
 compatibility run during later reconstruction. The first `session_metadata`
-marker and native LSL stream-description `session_metadata_json` also carry the
-package provenance summary: schedule hash, participant roster count,
-randomization seed, and source segment hash summary. It also carries the
-Segment 0-6
-hierarchy into the session metadata marker payload and
+marker and rich-marker/numeric-trigger stream-description
+`session_metadata_json` also carry the package provenance summary: schedule
+hash, participant roster count, randomization seed, and source segment hash
+summary. Strict artifact validation checks that the exported
+`lsl_runtime_status.json` stream descriptions match the package provenance
+whenever native evidence or provenance-bearing packages are expected. The app
+also carries the Segment 0-6 hierarchy into the session metadata marker payload and
 `reconstruction_contract.json`, letting strict validation reject hierarchy drift
 inside phone-owned artifacts. Participant age, handedness,
 gender, and tactile threshold stay in metadata and marker payloads rather than
