@@ -607,6 +607,23 @@ def validate_pc_monitor_report(
 
     if expect_command_acks and int(effective_counts.get("command_acks") or 0) <= 0:
         failures.append("PC monitor strict ack validation expected at least one PPSCommandAcksV1 sample")
+    if expect_command_acks and rows:
+        observed_command_ids = {
+            str(row.get("command_id") or "").strip()
+            for row in rows
+            if str(row.get("stream_key") or "") == "command_signals" and str(row.get("command_id") or "").strip()
+        }
+        acked_command_ids = {
+            str(row.get("command_id") or "").strip()
+            for row in rows
+            if str(row.get("stream_key") or "") == "command_acks" and str(row.get("command_id") or "").strip()
+        }
+        missing_acks = sorted(observed_command_ids - acked_command_ids)
+        if missing_acks:
+            failures.append(
+                "PC monitor strict ack validation missing acks for observed command ids: "
+                + ", ".join(missing_acks)
+            )
 
     missing_required = list(report.get("missing_required_streams") or [])
     if missing_required:

@@ -399,6 +399,12 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   and observed `operator_note` commands must include nonblank note text. This
   lets a PC observer artifact prove what command payload was visible on the
   network, not only what the sender outbox says it attempted to send.
+- PC-side Android LSL monitor reports now record unmatched command ids in both
+  directions: observed `PPSCommandSignalsV1` ids without matching
+  `PPSCommandAcksV1` ids, and ack ids without observed command signals. Strict
+  monitor validation with `--expect-command-acks` fails when an observed command
+  signal lacks a matching observed ack, so monitor-only rehearsals cannot pass
+  from unrelated command and ack samples.
 - Android phone-owned runs now maintain an app-private participant/session
   catalog in addition to each run folder. Every partial and completed
   `writeLocalArtifact` call writes `phone_run_catalog_entry.json` into the run

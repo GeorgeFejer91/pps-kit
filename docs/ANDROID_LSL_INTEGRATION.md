@@ -263,7 +263,10 @@ command-ack inlet before button presses count as reconstructable native LSL
 evidence. PC-admin strict validation requires the same evidence for the PC
 command-signal outlet and Android command-ack inlet. PC-monitor strict
 validation requires observer-side stream descriptions for the rich marker,
-numeric trigger, command-signal, and command-ack inlets.
+numeric trigger, command-signal, and command-ack inlets. When
+`--expect-command-acks` is used on a PC-monitor artifact, each observed
+`PPSCommandSignalsV1` command id must have a matching observed
+`PPSCommandAcksV1` ack id.
 
 For new phone-owned run exports, also require the catalog entry:
 
@@ -321,7 +324,10 @@ or Controller-phone `PPSCommandSignalsV1` command stream in addition to the
 phone runner's acknowledgement stream. Monitor validation now parses observed
 command-signal payloads, requires a pairing token, checks the row `payload_json`
 against the serialized sample payload, and requires nonblank note text for
-observed `operator_note` commands.
+observed `operator_note` commands. Monitor reports also list
+`observed_command_signal_ids_without_ack` and
+`observed_command_ack_ids_without_signal` so a rehearsal can show exactly which
+commands were visible without matching receiver acknowledgement evidence.
 
 Then validate the monitor report:
 

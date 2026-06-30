@@ -96,6 +96,8 @@ def test_write_android_lsl_monitor_artifacts_and_report(tmp_path: Path):
     assert saved_report["observed_session_ids"] == ["part-001", "session-001"]
     assert saved_report["observed_command_ack_ids"] == ["cmd-1"]
     assert saved_report["observed_command_signal_ids"] == ["cmd-2"]
+    assert saved_report["observed_command_signal_ids_without_ack"] == ["cmd-2"]
+    assert saved_report["observed_command_ack_ids_without_signal"] == ["cmd-1"]
     assert saved_report["observed_command_names"] == {"pause": 1}
     assert saved_report["status"]["stream_descriptions"]["command_signals"]["role"] == "inlet"
 
@@ -151,6 +153,58 @@ def test_validator_accepts_pc_android_lsl_monitor_artifact(tmp_path: Path):
     assert result.ok is True
     assert result.failures == []
     assert result.status["role"] == "pc_android_lsl_monitor"
+
+
+def test_validator_requires_pc_monitor_ack_for_observed_command_signal(tmp_path: Path):
+    rows = [
+        monitor.build_android_lsl_monitor_row(
+            stream_key="rich_markers",
+            sample=_rich_marker_sample(event_type="block_start", event_code="10"),
+            lsl_timestamp=1.0,
+        ),
+        monitor.build_android_lsl_monitor_row(
+            stream_key="numeric_triggers",
+            sample=[10],
+            lsl_timestamp=1.1,
+        ),
+        monitor.build_android_lsl_monitor_row(
+            stream_key="command_acks",
+            sample=ack_to_sample(
+                LSLCommandAck(
+                    command_id="cmd-other",
+                    session_id="part-001",
+                    receiver_id="android_runner",
+                    status="applied",
+                    reason="started",
+                    received_lsl_time=1.2,
+                    applied_lsl_time=1.3,
+                    ack_lsl_time=1.4,
+                    payload={},
+                )
+            ),
+            lsl_timestamp=1.4,
+        ),
+        monitor.build_android_lsl_monitor_row(
+            stream_key="command_signals",
+            sample=_command_signal_sample(command_id="cmd-expected", command="start_experiment"),
+            lsl_timestamp=1.5,
+        ),
+    ]
+    report = monitor.build_android_lsl_monitor_report(
+        rows,
+        required_streams=["rich_markers", "numeric_triggers", "command_acks", "command_signals"],
+        output_dir=tmp_path,
+    )
+    monitor.write_android_lsl_monitor_artifacts(tmp_path, rows, report=report)
+
+    result = validator.validate_run_artifact(
+        tmp_path,
+        expect_native_transport=True,
+        expect_command_acks=True,
+    )
+
+    assert result.ok is False
+    assert "missing acks for observed command ids: cmd-expected" in "\n".join(result.failures)
 
 
 def test_build_android_lsl_monitor_row_extracts_command_signal_fields():

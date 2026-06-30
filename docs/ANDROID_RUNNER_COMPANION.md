@@ -297,7 +297,10 @@ PC-runner or Controller-phone commands can be reconstructed together with the
 phone runner's acknowledgements. Strict monitor validation now parses observed
 command-signal payloads, requires token evidence, compares row `payload_json`
 against the serialized sample payload, and requires note text when the observed
-command is `operator_note`.
+command is `operator_note`. With `--expect-command-acks`, strict monitor
+validation also requires every observed command-signal id to have a matching
+ack id, and the report exposes unmatched ids in both directions for debugging
+PC-runner or Controller-phone rehearsals.
 
 Controller mode always writes `phone_controller_command_outbox.jsonl` as the
 local audit trail. In a native liblsl validation build it also keeps a

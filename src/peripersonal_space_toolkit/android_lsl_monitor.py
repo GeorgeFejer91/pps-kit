@@ -270,6 +270,8 @@ def build_android_lsl_monitor_report(
 
     required = list(required_streams or [])
     missing_required = [key for key in required if counts.get(key, 0) <= 0]
+    observed_without_ack = sorted(commands_observed - commands_acked)
+    ack_without_observed_command = sorted(commands_acked - commands_observed)
     output_root = Path(output_dir).resolve() if output_dir is not None else None
     return {
         "schema": PC_ANDROID_LSL_MONITOR_REPORT_SCHEMA,
@@ -291,6 +293,8 @@ def build_android_lsl_monitor_report(
         "observed_command_signal_ids": sorted(commands_observed),
         "observed_command_names": command_names,
         "observed_command_ack_ids": sorted(commands_acked),
+        "observed_command_signal_ids_without_ack": observed_without_ack,
+        "observed_command_ack_ids_without_signal": ack_without_observed_command,
         "observed_command_ack_statuses": command_ack_statuses,
         "resolve_status": dict(resolve_status or {}),
         "status": status,
