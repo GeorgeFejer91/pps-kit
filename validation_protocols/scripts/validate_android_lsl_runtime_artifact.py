@@ -7,6 +7,7 @@ import csv
 import hashlib
 import json
 import math
+import re
 import sys
 import tempfile
 import zipfile
@@ -1574,6 +1575,13 @@ def _validate_android_lsl_stream_descriptions(
             failures.append(f"Android LSL stream description {key}.marker_version expected {spec['marker_version']!r}")
         if "token_required" in spec and row.get("token_required") is not spec["token_required"]:
             failures.append(f"Android LSL stream description {key}.token_required must be true")
+        _validate_android_lsl_identifier_privacy(
+            key=key,
+            row=row,
+            participant_metadata=participant_metadata,
+            haptic_capability=haptic_capability,
+            failures=failures,
+        )
 
     _validate_android_lsl_session_metadata_descriptions(
         status=status,
@@ -1585,6 +1593,69 @@ def _validate_android_lsl_stream_descriptions(
         warnings=warnings,
         expect_native_transport=expect_native_transport,
     )
+
+
+def _validate_android_lsl_identifier_privacy(
+    *,
+    key: str,
+    row: dict[str, Any],
+    participant_metadata: dict[str, Any] | None,
+    haptic_capability: dict[str, Any] | None,
+    failures: list[str],
+) -> None:
+    for field in ("name", "source_id", "source_id_pattern"):
+        value = _metadata_value(row.get(field))
+        if not value:
+            continue
+        leaked = _android_lsl_identifier_leak_labels(
+            value,
+            participant_metadata=participant_metadata,
+            haptic_capability=haptic_capability,
+        )
+        if leaked:
+            labels = ", ".join(leaked)
+            failures.append(
+                f"Android LSL stream description {key}.{field} must not encode "
+                f"participant/demographic/haptic identifiers: {labels}"
+            )
+
+
+def _android_lsl_identifier_leak_labels(
+    value: str,
+    *,
+    participant_metadata: dict[str, Any] | None,
+    haptic_capability: dict[str, Any] | None,
+) -> list[str]:
+    lowered = value.lower()
+    tokens = {token for token in re.split(r"[^a-z0-9]+", lowered) if token}
+    leaks: list[str] = []
+    participant = participant_metadata or {}
+    haptic = haptic_capability or {}
+
+    participant_id = _metadata_value(participant.get("participant_id")).lower()
+    if participant_id and participant_id in tokens:
+        leaks.append("participant_id")
+
+    labeled_hints = {
+        "participant_id": ("participant_id", "participant-id", "participantid", "participant"),
+        "age_years": ("age_years", "age-years", "ageyears", "age"),
+        "handedness": ("handedness", "handed"),
+        "gender": ("gender",),
+        "haptic": ("haptic", "vibrator", "amplitude"),
+        "tactile_threshold": ("tactile_threshold", "tactile-threshold", "threshold"),
+    }
+    for label, hints in labeled_hints.items():
+        if any(hint in lowered for hint in hints) and label not in leaks:
+            leaks.append(label)
+
+    threshold = _metadata_value(
+        participant.get("tactile_threshold_percent")
+        if participant
+        else haptic.get("recommended_threshold_percent")
+    )
+    if threshold and "threshold" in lowered and "tactile_threshold" not in leaks:
+        leaks.append("tactile_threshold")
+    return leaks
 
 
 def _validate_android_lsl_session_metadata_descriptions(

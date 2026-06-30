@@ -77,6 +77,25 @@ def test_android_lsl_runtime_validator_rejects_stream_description_drift(tmp_path
     assert "rich_markers.channel_labels" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_private_identifiers_in_stream_source_id(tmp_path: Path):
+    status = _status(native=True)
+    status["stream_descriptions"]["rich_markers"][
+        "source_id"
+    ] = "pps-android-markers-v2-participant_id-P001-age-32-gender-female-threshold-40"
+    status_path = tmp_path / "lsl_runtime_status.json"
+    status_path.write_text(json.dumps(status), encoding="utf-8")
+
+    result = validator.validate_run_artifact(status_path, expect_native_transport=True)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "rich_markers.source_id must not encode participant/demographic/haptic identifiers" in failures
+    assert "participant_id" in failures
+    assert "age_years" in failures
+    assert "gender" in failures
+    assert "tactile_threshold" in failures
+
+
 def test_android_lsl_runtime_validator_requires_command_transport_in_strict_mode(tmp_path: Path):
     status = _status(native=True)
     status["native_bridge"]["command_transport"]["enabled"] = False

@@ -170,7 +170,9 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
 - Android native LSL integration guidance is tracked in
   `docs/ANDROID_LSL_INTEGRATION.md`. The phone-run artifact validator lives at
   `validation_protocols/scripts/validate_android_lsl_runtime_artifact.py` and
-  checks `lsl_runtime_status.json`, Android LSL stream descriptions, embedded completion status,
+  checks `lsl_runtime_status.json`, Android LSL stream descriptions including
+  generic stream/source identifiers with no participant/demographic/haptic
+  labels, embedded completion status,
   strict native marker-push completeness from completion `summary`
   (`native_lsl_pushed_count == lsl_marker_mirror_count` and
   `native_lsl_failed_count == 0`, plus matching per-stream rich-marker and

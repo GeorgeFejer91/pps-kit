@@ -187,7 +187,7 @@ source provenance roster/seed/hash consistency across the package manifest,
 `session_metadata` event package payload, `reconstruction_contract.json`, and
 `phone_run_catalog_entry.json`, block/order consistency, reusable
 building-block references, asset availability, AudioTrack playback-head timing
-contract, privacy-safe Android LSL stream names, required phone command set,
+contract, privacy-safe Android LSL stream names/source ids, required phone command set,
 and the phone-run `asset_strategy` plus `reconstruction_contract.json`
 consistency across status, manifest, reconstruction, completion, and catalog
 artifacts. It
@@ -195,6 +195,8 @@ also checks `lsl_runtime_status.json` `stream_descriptions` when present, and
 requires them in strict native mode, so `PPSMarkersV2`, `PPSTriggerCodes`,
 `PPSCommandSignalsV1`, and `PPSCommandAcksV1` keep their expected LSL roles,
 formats, source identities, and PC-compatible channel order. The validator also
+rejects participant, age, handedness, gender, or tactile-threshold labels in
+stream names, source ids, and source-id patterns. It also
 checks `lsl_marker_mirror.csv` or embedded `lsl_marker_mirror` rows against
 completion events, marker payload JSON, Android phone event codes, and duplicate
 event ids so local phone evidence stays reconstructable even before comparing it
@@ -357,9 +359,9 @@ match `participant_metadata.json`, `haptic_capability.json`, and any
 usable reconstruction anchor rather than only an event echo. The app also
 carries the Segment 0-6 hierarchy into the session metadata marker payload and
 `reconstruction_contract.json`, letting strict validation reject hierarchy drift
-inside phone-owned artifacts. Participant age, handedness,
-gender, and tactile threshold stay in metadata and marker payloads rather than
-discoverable LSL stream names.
+inside phone-owned artifacts. Participant age, handedness, gender, and tactile
+threshold stay in metadata and marker payloads rather than discoverable LSL
+stream names, source ids, or source-id patterns.
 
 Default Android builds do not ship liblsl. If a local validation build adds the
 ignored `android/runner-companion/app/libs/liblsl-Android.aar`, runner mode opens
