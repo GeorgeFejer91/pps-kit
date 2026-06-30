@@ -1,0 +1,3 @@
+# Preserve the third-party Springer Nature template package exactly as downloaded.
+springer-nature-latex-template-dec-2024.zip -text -diff
+springer-nature-latex-template/** -text -diff

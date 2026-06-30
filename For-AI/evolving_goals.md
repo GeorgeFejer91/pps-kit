@@ -4,6 +4,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 
 ## 2026-06-30
 
+- Added `publication/behavior-research-methods/` as the tracked manuscript
+  workspace for a planned Springer Nature `Behavior Research Methods`
+  submission about PPS Toolkit. The folder preserves the official Springer
+  Nature LaTeX author template ZIP and extracted `sn-article-template` files,
+  records the download URL/date/SHA-256, points drafters toward the `sn-apa`
+  option for the journal, and keeps the template outside the PPS Toolkit MIT
+  license grant in third-party license notes.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation
