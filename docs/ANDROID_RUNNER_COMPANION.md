@@ -95,8 +95,9 @@ Phone-runtime uploads are written under the selected acquisition folder's
 protected context in
 `Experiment_context_folder_DO_NOT_DELETE/runner_logs/mobile_phone_runtime/
 <participant>/<package_id>/<run_id>/`. The uploaded `events.jsonl`,
-`events.csv`, and `completion.json` files are local experiment artifacts and are
-not committed.
+`events.csv`, `lsl_marker_mirror.csv`, `trigger_codes.csv`,
+`command_diary.jsonl`, `lsl_runtime_status.json`, and `completion.json` files
+are local experiment artifacts and are not committed.
 
 ## Run Experiment On Phone
 

@@ -213,9 +213,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   order, supported commands, token requirements, and the privacy boundary that
   demographics remain metadata/payload artifacts rather than stream names. The
   PC mobile-runtime upload writer preserves this Android LSL runtime status
-  beside uploaded marker mirrors. This does not yet make Android a live LSL
-  broadcaster or receiver; that still requires the pinned liblsl Android layer
-  and emulator/physical network validation.
+  beside uploaded marker mirrors and now also writes the expected
+  `PPSTriggerCodes` numeric sequence as `trigger_codes.csv` in the PC-copy
+  artifact folder. This does not yet make Android a live LSL broadcaster or
+  receiver; that still requires the pinned liblsl Android layer and
+  emulator/physical network validation.
 - The native Android LSL integration route is now documented in
   `docs/ANDROID_LSL_INTEGRATION.md`, including the official liblsl Android/AAR
   path, Android Wi-Fi/multicast caveats, and validation levels from protocol

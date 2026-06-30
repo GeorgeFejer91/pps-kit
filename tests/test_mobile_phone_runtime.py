@@ -248,8 +248,23 @@ def test_mobile_runtime_upload_writes_runner_log_artifacts(tmp_path):
             {"type": "tap", "trial_uid": "trial-a", "elapsed_ms": 3500, "rt_ms": 250},
         ],
         "lsl_marker_mirror": [
-            {"event_type": "block_start", "event_id": 1, "participant_id": "P001"},
-            {"event_type": "tap", "event_id": 2, "participant_id": "P001", "trial_uid": "trial-a"},
+            {
+                "event_type": "block_start",
+                "event_id": 1,
+                "event_code": 110,
+                "trigger_key": "block_start",
+                "participant_id": "P001",
+                "phone_elapsed_realtime_ms": 1000,
+            },
+            {
+                "event_type": "tap",
+                "event_id": 2,
+                "event_code": 310,
+                "trigger_key": "tap_response",
+                "participant_id": "P001",
+                "trial_uid": "trial-a",
+                "phone_elapsed_realtime_ms": 3500,
+            },
         ],
         "command_diary": [
             {"command": "start_experiment", "status": "applied"},
@@ -280,6 +295,25 @@ def test_mobile_runtime_upload_writes_runner_log_artifacts(tmp_path):
     assert (artifact.parent / "events.jsonl").read_text(encoding="utf-8").count("\n") == 2
     assert (artifact.parent / "events.csv").is_file()
     assert (artifact.parent / "lsl_marker_mirror.csv").is_file()
+    trigger_rows = list(csv.DictReader((artifact.parent / "trigger_codes.csv").open(encoding="utf-8")))
+    assert [row["event_code"] for row in trigger_rows] == ["110", "310"]
+    assert [row["trigger_key"] for row in trigger_rows] == ["block_start", "tap_response"]
+    assert loaded["trigger_codes"] == [
+        {
+            "event_id": 1,
+            "event_code": 110,
+            "event_type": "block_start",
+            "trigger_key": "block_start",
+            "phone_elapsed_realtime_ms": 1000,
+        },
+        {
+            "event_id": 2,
+            "event_code": 310,
+            "event_type": "tap",
+            "trigger_key": "tap_response",
+            "phone_elapsed_realtime_ms": 3500,
+        },
+    ]
     assert (artifact.parent / "command_diary.jsonl").read_text(encoding="utf-8").count("\n") == 1
     assert loaded["lsl_runtime_status"]["schema"] == "pps-android-lsl-runtime-status.v1"
     assert (artifact.parent / "lsl_runtime_status.json").is_file()

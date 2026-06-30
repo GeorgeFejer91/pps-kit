@@ -572,6 +572,11 @@ def write_mobile_runtime_events(
     out_dir.mkdir(parents=True, exist_ok=True)
     accepted_at = _utc_now()
     events = [dict(item) for item in list(payload.get("events") or []) if isinstance(item, dict)]
+    marker_rows = [dict(item) for item in list(payload.get("lsl_marker_mirror") or events) if isinstance(item, dict)]
+    trigger_code_rows = _trigger_code_rows_from_markers(
+        [dict(item) for item in list(payload.get("trigger_codes") or marker_rows) if isinstance(item, dict)]
+    )
+    command_rows = [dict(item) for item in list(payload.get("command_diary") or []) if isinstance(item, dict)]
     event_path = out_dir / "events.jsonl"
     if events:
         with open(_filesystem_path(event_path), "a", encoding="utf-8") as handle:
@@ -595,13 +600,15 @@ def write_mobile_runtime_events(
         "phone_payload": payload,
         "participant_metadata": dict(payload.get("participant_metadata") or {}),
         "lsl_runtime_status": dict(payload.get("lsl_runtime_status") or {}),
-        "lsl_marker_mirror": list(payload.get("lsl_marker_mirror") or []),
-        "command_diary": list(payload.get("command_diary") or []),
+        "lsl_marker_mirror": marker_rows,
+        "trigger_codes": trigger_code_rows,
+        "command_diary": command_rows,
         "paths": {
             "directory": str(out_dir),
             "events_jsonl": str(event_path),
             "events_csv": str(out_dir / "events.csv"),
             "lsl_marker_mirror_csv": str(out_dir / "lsl_marker_mirror.csv"),
+            "trigger_codes_csv": str(out_dir / "trigger_codes.csv"),
             "command_diary_jsonl": str(out_dir / "command_diary.jsonl"),
         },
     }
@@ -610,8 +617,9 @@ def write_mobile_runtime_events(
         with open(_filesystem_path(lsl_status_path), "w", encoding="utf-8") as handle:
             handle.write(json.dumps(artifact["lsl_runtime_status"], indent=2, sort_keys=True, default=str) + "\n")
         artifact["paths"]["lsl_runtime_status_json"] = str(lsl_status_path)
-    _write_lsl_marker_mirror_csv(out_dir / "lsl_marker_mirror.csv", list(payload.get("lsl_marker_mirror") or events))
-    _write_command_diary(out_dir / "command_diary.jsonl", list(payload.get("command_diary") or []))
+    _write_lsl_marker_mirror_csv(out_dir / "lsl_marker_mirror.csv", marker_rows)
+    _write_trigger_codes_csv(out_dir / "trigger_codes.csv", trigger_code_rows)
+    _write_command_diary(out_dir / "command_diary.jsonl", command_rows)
     artifact_path = out_dir / ("completion.json" if complete else "latest_events_upload.json")
     with open(_filesystem_path(artifact_path), "w", encoding="utf-8") as handle:
         handle.write(json.dumps(artifact, indent=2, sort_keys=True, default=str) + "\n")
@@ -1000,6 +1008,32 @@ def _write_lsl_marker_mirror_csv(path: Path, markers: list[dict[str, Any]]) -> N
         "payload_json",
     ]
     _write_rows_csv(path, markers, fieldnames)
+
+
+def _trigger_code_rows_from_markers(markers: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for marker in markers:
+        rows.append(
+            {
+                "event_id": marker.get("event_id", ""),
+                "event_code": marker.get("event_code", ""),
+                "event_type": marker.get("event_type", ""),
+                "trigger_key": marker.get("trigger_key", ""),
+                "phone_elapsed_realtime_ms": marker.get("phone_elapsed_realtime_ms", ""),
+            }
+        )
+    return rows
+
+
+def _write_trigger_codes_csv(path: Path, rows: list[dict[str, Any]]) -> None:
+    fieldnames = [
+        "event_id",
+        "event_code",
+        "event_type",
+        "trigger_key",
+        "phone_elapsed_realtime_ms",
+    ]
+    _write_rows_csv(path, rows, fieldnames)
 
 
 def _write_command_diary(path: Path, rows: list[dict[str, Any]]) -> None:
