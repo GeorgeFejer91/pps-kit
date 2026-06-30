@@ -26,7 +26,11 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   command diaries distinguish `phone_ui`, `phone_runtime`, and `native_lsl`
   command sources and mirror each row as an `operator_command` event so direct
   Android button presses and received LSL commands reconstruct through the same
-  event/marker path.
+  event/marker path. Idle Runner-mode `start_experiment` / `start_part`
+  commands now carry their received signal, ack sample, and `ack_sent` outcome
+  into the newly launched `PhoneRunSession` so remotely started phone runs are
+  recorded as `native_lsl` receiver-side command evidence rather than local UI
+  starts.
   `MainActivity.kt` owns the Runner-mode idle command listener that acks native `start_experiment` /
   `start_part` before launching the selected synced package. Default builds without the
   local liblsl AAR still report native transport unavailable; do not present

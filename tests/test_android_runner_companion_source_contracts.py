@@ -146,6 +146,11 @@ def test_android_phone_run_writes_plain_event_diary() -> None:
 def test_android_phone_run_command_diary_separates_local_ui_runtime_and_native_sources() -> None:
     main_activity = _source("MainActivity.kt")
 
+    assert "private data class PhoneStartCommandEvidence" in main_activity
+    assert "startCommandEvidence: PhoneStartCommandEvidence? = null" in main_activity
+    assert "startSignal = commandSignal" in main_activity
+    assert "PhoneStartCommandEvidence(signal = it, ack = ack, ackSent = ackSent)" in main_activity
+    assert "session.recordNativeCommandAckEvidence(" in main_activity
     assert 'commandSource: String = "phone_runtime"' in main_activity
     assert '.put("command_source", commandSource)' in main_activity
     assert '.put("sender_id", senderId)' in main_activity

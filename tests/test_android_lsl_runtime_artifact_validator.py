@@ -736,6 +736,17 @@ def test_android_lsl_runtime_validator_accepts_phone_run_command_diary_ack_evide
     assert result.failures == []
 
 
+def test_android_lsl_runtime_validator_accepts_idle_native_start_command_evidence(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_phone_run_with_native_command_diary(run_dir, row=_phone_native_start_command_row())
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is True
+    assert result.failures == []
+
+
 def test_android_lsl_runtime_validator_requires_phone_run_command_diary_when_acks_expected(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -853,10 +864,11 @@ def _write_phone_run_with_native_command_diary(
     *,
     ack_sent: bool = True,
     include_operator_event: bool = True,
+    row: dict | None = None,
 ) -> None:
     status = _status(native=True)
     status.update(_catalog_identity())
-    row = _phone_native_command_row(ack_sent=ack_sent)
+    row = row or _phone_native_command_row(ack_sent=ack_sent)
     events = [_phone_event(1, "run_start")]
     if include_operator_event:
         events.append(
@@ -927,6 +939,65 @@ def _phone_native_command_row(*, ack_sent: bool = True) -> dict:
         "applied_lsl_time": 42.02,
         "ack_lsl_time": 42.03,
         "ack_sent": ack_sent,
+        "ack_channels": [
+            "schema",
+            "command_id",
+            "session_id",
+            "receiver_id",
+            "status",
+            "reason",
+            "received_lsl_time",
+            "applied_lsl_time",
+            "ack_lsl_time",
+            "payload_json",
+        ],
+        "ack_sample": ack_sample,
+        "phone_unix_ms": 1780000000000,
+        "phone_elapsed_realtime_ms": 123456,
+    }
+
+
+def _phone_native_start_command_row() -> dict:
+    ack_sample = [
+        "pps-lsl-command-ack.v1",
+        "cmd-phone-start-001",
+        "part-001",
+        "android_phone_idle_runner",
+        "applied",
+        "starting_phone_run",
+        "41.010000000",
+        "41.020000000",
+        "41.030000000",
+        json.dumps(
+            {
+                "command": "start_experiment",
+                "package_id": "pkg-001",
+                "idle_runner_listener": True,
+                "state_changed": True,
+            }
+        ),
+    ]
+    return {
+        "schema": "pps-android-command-diary.v1",
+        "command_id": "cmd-phone-start-001",
+        "command_source": "native_lsl",
+        "sender_id": "pc_runner",
+        "session_id": "part-001",
+        "command": "start_experiment",
+        "status": "applied",
+        "reason": "starting_phone_run",
+        "payload": {
+            "command": "start_experiment",
+            "package_id": "pkg-001",
+            "idle_runner_listener": True,
+            "state_changed": True,
+        },
+        "package_id": "pkg-001",
+        "run_id": "phone-run-001",
+        "received_lsl_time": 41.01,
+        "applied_lsl_time": 41.02,
+        "ack_lsl_time": 41.03,
+        "ack_sent": True,
         "ack_channels": [
             "schema",
             "command_id",

@@ -55,7 +55,11 @@ ignored `liblsl-Android.aar` to enable native LSL behavior.
   the handler returns.
 - When Runner mode is idle with a synced selected package, the native command
   listener acknowledges `start_experiment`/`start_part` and then launches the
-  phone run. During active playback, those start commands are acknowledged as
+  phone run. The start command signal, ack sample, and `ack_sent` outcome are
+  carried into the new `PhoneRunSession` and written as a `native_lsl`
+  `command_diary.jsonl` row plus matching `operator_command` event, so a
+  remotely started phone run is reconstructable from the receiver artifact.
+  During active playback, those start commands are acknowledged as
   already-running no-ops; `continue_instruction`, `request_snapshot`, and
   `operator_note` are diary/snapshot actions, and `pause`/`resume` go through
   the phone-owned `AudioTrack` pause gate during active phone blocks.

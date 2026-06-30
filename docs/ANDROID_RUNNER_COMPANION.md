@@ -124,7 +124,10 @@ After pairing, choose `Run Experiment On Phone`.
   `command_source=phone_ui` and mirrored as an `operator_command` event. Runtime
   bookkeeping such as scheduled-block or top-up materialization uses
   `command_source=phone_runtime`, while PC/controller LSL commands use
-  `command_source=native_lsl` with ack evidence when native LSL is enabled.
+  `command_source=native_lsl` with ack evidence when native LSL is enabled. If
+  the phone is started remotely through the idle Runner-mode LSL listener, the
+  resulting run artifact records the remote `start_experiment`/`start_part`
+  signal and ack as `native_lsl`, not as a local phone UI start.
 
 Packages served from the native runner's `Send To Phone` entry point are
 lightweight by default: they omit prepared `block_audio` assets and transfer

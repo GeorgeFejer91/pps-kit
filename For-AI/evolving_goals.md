@@ -187,6 +187,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   `operator_command` event, and the Android runtime artifact validator checks
   that command-source labels match the event mirror while still accepting
   historical `phone_ui_or_runtime` rows.
+- Idle Runner-mode native `start_experiment` / `start_part` commands are now
+  carried into the launched phone run artifact. The Android listener preserves
+  the received `PPSCommandSignalsV1` signal, generated `PPSCommandAcksV1` ack
+  sample, and `ack_sent` result in `PhoneStartCommandEvidence`; `runPhonePackage`
+  records that evidence through the native command diary path instead of
+  labeling the run start as `phone_ui`. This closes a receiver-side audit gap
+  for PC-runner/controller-phone remote starts.
 - The same validator now loads `lsl_marker_mirror.csv` from phone-run folders
   or exported ZIPs, falls back to embedded `completion.json` marker rows, and
   checks marker mirror reconstructability against completion events, payload

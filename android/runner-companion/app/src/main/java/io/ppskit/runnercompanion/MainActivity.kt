@@ -153,6 +153,12 @@ private enum class PhoneRuntimeRole {
     Controller,
 }
 
+private data class PhoneStartCommandEvidence(
+    val signal: PhoneLslCommandSignal,
+    val ack: PhoneLslCommandAck,
+    val ackSent: Boolean,
+)
+
 private fun modeForPairing(pairing: PairingInfo): CompanionMode? =
     if (pairing.isPhoneExport) CompanionMode.RunExperimentOnPhone else null
 
@@ -540,7 +546,7 @@ private fun PhoneRuntimeScreen(
             expectedCommandToken = pairing.token,
         )
 
-    fun startPhoneRun(runPackage: MobileRunPackage): Boolean {
+    fun startPhoneRun(runPackage: MobileRunPackage, startCommandEvidence: PhoneStartCommandEvidence? = null): Boolean {
         if (running || syncing || !runPackage.mobileRunnable) return false
         if (!connected && !phoneOwnedSession && !runPackage.phoneOwnedSession) return false
         val activeSession = newPhoneRunSession(runPackage)
@@ -567,6 +573,7 @@ private fun PhoneRuntimeScreen(
                     onBlock = { label -> activeBlockLabel = label },
                     onProgress = { progress -> runProgress = progress },
                     startCommandAction = "start_phone_run",
+                    startCommandEvidence = startCommandEvidence,
                 )
                 status = "Complete"
                 lastRunDir = result.optString("artifact_dir", "")
@@ -716,6 +723,7 @@ private fun PhoneRuntimeScreen(
                     repeat(4) {
                         val sample = withContext(Dispatchers.IO) { activeTransport.pullCommandSample(timeoutS = 0.0) } ?: return@repeat
                         val signal = runCatching { phoneCommandFromSample(sample.sample) }.getOrNull()
+                        var startSignal: PhoneLslCommandSignal? = null
                         var startAfterAck = false
                         val receivedClock = sample.timestamp.takeIf { it > 0.0 } ?: activeTransport.localClock()
                         val ack = phoneCommandAckForSample(
@@ -732,6 +740,7 @@ private fun PhoneRuntimeScreen(
                                     val canStart = runPackage.mobileRunnable && !running && !syncing && (connected || phoneOwnedSession || runPackage.phoneOwnedSession)
                                     if (canStart) {
                                         startAfterAck = true
+                                        startSignal = commandSignal
                                         PhoneLslCommandApplicationResult(
                                             status = "applied",
                                             reason = "starting_phone_run",
@@ -787,7 +796,8 @@ private fun PhoneRuntimeScreen(
                             },
                         )
                         if (startAfterAck) {
-                            startPhoneRun(runPackage)
+                            val evidence = startSignal?.let { PhoneStartCommandEvidence(signal = it, ack = ack, ackSent = ackSent) }
+                            startPhoneRun(runPackage, evidence)
                             return@LaunchedEffect
                         }
                     }
@@ -1905,20 +1915,29 @@ private suspend fun runPhonePackage(
     onProgress: (String) -> Unit,
     startCommandAction: String = "start_phone_run",
     startCommandPayload: JSONObject = JSONObject(),
+    startCommandEvidence: PhoneStartCommandEvidence? = null,
 ): JSONObject {
     session.addRunStart(runPackage)
-    session.recordCommand(
-        command = "start_experiment",
-        status = "applied",
-        payload = JSONObject()
-            .put("package_id", runPackage.packageId)
-            .put("block_count", runPackage.blocks.size)
-            .put("phone_owned_session", phoneOwnedSession)
-            .put("operator_action", startCommandAction)
-            .put("operator_payload", JSONObject(startCommandPayload.toString())),
-        commandSource = "phone_ui",
-        senderId = "android_phone_ui",
-    )
+    if (startCommandEvidence != null) {
+        session.recordNativeCommandAckEvidence(
+            signal = startCommandEvidence.signal,
+            ack = startCommandEvidence.ack,
+            ackSent = startCommandEvidence.ackSent,
+        )
+    } else {
+        session.recordCommand(
+            command = "start_experiment",
+            status = "applied",
+            payload = JSONObject()
+                .put("package_id", runPackage.packageId)
+                .put("block_count", runPackage.blocks.size)
+                .put("phone_owned_session", phoneOwnedSession)
+                .put("operator_action", startCommandAction)
+                .put("operator_payload", JSONObject(startCommandPayload.toString())),
+            commandSource = "phone_ui",
+            senderId = "android_phone_ui",
+        )
+    }
     session.pollNativeCommands(runPackage)
     if (phoneOwnedSession) {
         withContext(Dispatchers.IO) { session.writeLocalArtifact(context, runPackage, complete = false) }
@@ -2499,6 +2518,15 @@ private class PhoneRunSession(
                 .put("ack_sent", false)
                 .put("payload", JSONObject(payload.toString())),
         )
+    }
+
+    @Synchronized
+    fun recordNativeCommandAckEvidence(
+        signal: PhoneLslCommandSignal,
+        ack: PhoneLslCommandAck,
+        ackSent: Boolean,
+    ) {
+        recordNativeCommandAckLocked(signal, ack, ackSent)
     }
 
     private fun applyNativePhoneCommandLocked(signal: PhoneLslCommandSignal): PhoneLslCommandApplicationResult =
