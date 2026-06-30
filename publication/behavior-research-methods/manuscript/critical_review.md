@@ -970,3 +970,37 @@ Methods manuscript draft. It is a working audit, not manuscript text.
 - These article models guide BRM style and reporting boundaries. They do not
   prove that PPS Toolkit has the same validation maturity, hardware coverage,
   user base, or empirical evidence as the comparator systems.
+
+## Iteration 28: Output Schema and Data Dictionary Pass
+
+### Main Critiques
+
+- The manuscript described the runner as producing a minimal public data layer
+  and a richer reconstruction layer, but it did not yet provide a source-level
+  dictionary that named the files, fields, release status, and evidence role.
+- This was a procedural-method gap for a BRM software paper. Reviewers need to
+  know not only that artifacts exist, but which artifacts can be shared, which
+  artifacts are private, and which artifacts support timing, tactile,
+  reconstruction, or exploratory-analysis claims.
+
+### Resolution In This Revision
+
+- Added `output_schema_dictionary.csv`, an implementation-derived dictionary
+  covering public `1.Data_min` CSVs, the `2.Data_max` reconstruction mirror,
+  participant-trial fields, session manifests, prepared block evidence,
+  verbose event logs, LSL/XDF/trigger artifacts, tactile calibration, top-up,
+  adaptive-threshold artifacts, exploratory analysis outputs, and private
+  demographics sidecars.
+- Added a compact output schema/archive-boundary table to `main.tex` so the
+  manuscript itself distinguishes public response summaries, rich
+  reconstruction, prepared playback evidence, event/marker evidence, tactile
+  safeguards, and exploratory review outputs.
+- Updated the README, readiness audit, and claim-boundary audit so future
+  revisions keep the output dictionary aligned with runner schema changes.
+
+### Residual Concerns
+
+- The dictionary is a source-level planning artifact. Before submission, it
+  must be rechecked against the exact release runner and any archived example
+  run; public release still requires deidentification, local-path review,
+  rights review, and validation hashes.

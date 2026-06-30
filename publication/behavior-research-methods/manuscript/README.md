@@ -35,6 +35,10 @@ manuscript for PPS Toolkit.
 - `procedural_gap_register.csv`: procedural gap register listing the screening,
   timing, tactile-delivery, spatial-perception, rights, and analysis-governance
   evidence that should be closed or caveated before final submission.
+- `output_schema_dictionary.csv`: source-level dictionary for the runner's
+  public `1.Data_min` exports, richer `2.Data_max` reconstruction layer,
+  event/marker/timing evidence, tactile calibration/top-up/adaptive-threshold
+  artifacts, exploratory analysis outputs, and private metadata sidecars.
 - `validation_evidence.csv`: committed source-pointer summary of validation
   evidence used in the draft; generated raw reports remain under ignored
   validation folders.
@@ -104,6 +108,10 @@ workflow explicitly asks for an archived submission snapshot.
   artifacts and should cite or archive the exact source files used.
 - `procedural_gap_register.csv` is a reviewer-facing readiness scaffold, not a
   claim that those procedural validations have already been completed.
+- `output_schema_dictionary.csv` documents current output artifacts for
+  publication planning. It is not a guarantee that every artifact is public:
+  release status still depends on deidentification, rights, path/privacy review,
+  and the evidence tier each artifact supports.
 - `submission_readiness_audit.md` is a maintenance/readiness ledger, not
   manuscript prose. It should remain honest about the distinction between a
   source-ready draft and a final submission package.

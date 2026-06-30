@@ -245,6 +245,16 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   and Psynteract now appear in `references.bib`, the comparator table, and
   `brm_recommended_article_models.csv`. These remain style/reporting models,
   not evidence that PPS Toolkit has equivalent validation maturity.
+- Added an implementation-derived output schema/data dictionary for the BRM
+  manuscript. `output_schema_dictionary.csv` documents public `1.Data_min`
+  exports, the private/rich `2.Data_max` reconstruction mirror, session
+  manifests, prepared block evidence, event/marker/XDF files, tactile
+  calibration/top-up/adaptive-threshold artifacts, exploratory analysis outputs,
+  and private demographics sidecars. `main.tex` now includes a compact
+  output/archive-boundary table so the full-suite paper distinguishes public
+  data, reconstruction evidence, validation evidence, tactile safeguards, and
+  exploratory analysis rather than implying all generated artifacts are public
+  or equally validating.
 - Added a permanent Windows PDF render path for the BRM manuscript.
   `publication/behavior-research-methods/manuscript/render_pdf.ps1` sets the
   local Springer template paths, runs the `pdflatex`/`bibtex`/rerun sequence,
