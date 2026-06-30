@@ -308,8 +308,9 @@ copy of the reconstructive phone-run folder. Strict validation now requires
 that Data Max copy to include the core reconstruction spine:
 `lsl_runtime_status.json`, `events.csv`, `run_package_manifest.json`,
 `reconstruction_contract.json`, `lsl_marker_mirror.csv`, `trigger_codes.csv`,
-`participant_metadata.json`, `haptic_capability.json`, and a completion or
-latest-events artifact.
+`participant_metadata.json`, `haptic_capability.json`,
+`artifact_file_inventory.json`, `artifact_file_inventory.csv`, and a completion
+or latest-events artifact.
 PC-side mobile completion uploads with embedded Android response ledgers now
 write the same phone-owned data-export sidecars and mirror tree under
 `runner_logs/mobile_phone_runtime/<participant>/<package_id>/phone_owned_exports/`.

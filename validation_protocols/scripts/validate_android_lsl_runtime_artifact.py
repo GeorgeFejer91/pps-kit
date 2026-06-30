@@ -119,6 +119,8 @@ PHONE_DATA_MAX_REQUIRED_RECONSTRUCTION_FILES = {
     "trigger_codes.csv",
     "participant_metadata.json",
     "haptic_capability.json",
+    ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY,
+    ANDROID_PHONE_RUN_ARTIFACT_FILE_INVENTORY_CSV,
 }
 ANDROID_PHONE_EVENT_CODES = {
     "session_metadata": 8,
