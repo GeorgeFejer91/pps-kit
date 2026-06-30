@@ -1004,3 +1004,39 @@ Methods manuscript draft. It is a working audit, not manuscript text.
   must be rechecked against the exact release runner and any archived example
   run; public release still requires deidentification, local-path review,
   rights review, and validation hashes.
+
+## Iteration 29: Profile Recreation Claim-State Pass
+
+### Main Critiques
+
+- The manuscript now presents PPS Toolkit as a suite for designing, running,
+  and recreating or scaffolding published PPS paradigms. That framing is
+  accurate only if readers can see which specific profiles are run-ready and
+  which remain blocked by missing parameters, rights, apparatus geometry, or
+  unsupported toolkit structures.
+- The existing profile-family table was useful, but family-level language can
+  accidentally make a blocked profile sound as mature as a verified,
+  materializable profile.
+
+### Resolution In This Revision
+
+- Added `profile_recreation_audit.csv`, a per-profile claim ledger covering all
+  current preload profiles. It distinguishes unpublished local examples,
+  published verified run-ready profiles, the partial-but-materializable
+  Serino peri-trunk scaffold, missing-parameter scaffolds, and structural-gap
+  scaffolds.
+- Added a compact manuscript table summarizing these profile claim states and
+  pointing readers to the CSV for the full per-profile ledger.
+- Updated the README, readiness audit, and claim-boundary audit so exact
+  recreation language remains conditional on final profile-specific source
+  review, rights clearance, apparatus notes, and release-state materialization
+  evidence.
+
+### Residual Concerns
+
+- The new ledger is derived from the current preload manifests and status JSON.
+  It should be regenerated or manually rechecked after any profile, template,
+  source-asset, or dashboard materialization change.
+- A run-ready profile is still not an original-apparatus replication. Exact
+  recreation requires original methods/assets or a validated and explicitly
+  reported approximation.

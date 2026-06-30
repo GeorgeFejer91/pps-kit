@@ -30,6 +30,10 @@ manuscript for PPS Toolkit.
   transfer, limits, and Consensus source pointers.
 - `profile_family_examples.csv`: source-pointer map from common published PPS
   method families to toolkit profile/scaffold representations and caveats.
+- `profile_recreation_audit.csv`: per-profile claim ledger for current preload
+  profiles, separating published run-ready profiles, partial materializable
+  scaffolds, unpublished local examples, missing-parameter blockers, and
+  toolkit structural gaps.
 - `figure_source_plan.csv`: planned figure/source-artifact map for the final
   submission, including the evidence boundary for each figure.
 - `procedural_gap_register.csv`: procedural gap register listing the screening,
@@ -117,6 +121,10 @@ workflow explicitly asks for an archived submission snapshot.
 - `profile_family_examples.csv` is a profile-family map, not a claim that every
   listed paradigm has been exactly replicated with original apparatus and
   stimuli.
+- `profile_recreation_audit.csv` is a current-source claim ledger. It records
+  what each preload profile may safely claim, but it is not a rights clearance,
+  apparatus reconstruction, perceptual validation, or proof of original-study
+  effects.
 - `figure_source_plan.csv` is a publication-preparation scaffold, not generated
   figure evidence. Final figures must be generated from redistributable toolkit
   artifacts and should cite or archive the exact source files used.

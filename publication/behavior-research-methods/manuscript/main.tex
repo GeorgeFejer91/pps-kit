@@ -431,6 +431,25 @@ Action, full-body, and immersive variants & Scaffold profiles can store action c
 \end{tabularx}
 \end{table}
 
+The family table is not enough by itself, because a family-level label can hide whether a particular profile is run-ready, a local example, or only a placeholder for a method that the current toolkit cannot yet execute faithfully. The source package therefore includes \code{profile\_recreation\_audit.csv}, a per-profile ledger derived from \code{assets/preloads/profile\_recreation\_status.json} and each profile's \code{profile\_parameters\_manifest.json}. In the current source state, the ledger separates 23 preload profiles into two local runnable examples, seven published run-ready profiles, and published scaffolds blocked by missing parameters, unsupported apparatus structures, or both.
+
+\begin{table}[t]
+\caption{Per-profile recreation claim states used in the manuscript source package.}
+\label{tab:profile-recreation-audit}
+\footnotesize
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.18\textwidth} >{\raggedright\arraybackslash}p{0.28\textwidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.23\textwidth}}
+\toprule
+Audit class & Examples in current ledger & Allowed claim & Claim boundary \\
+\midrule
+Published verified run-ready & Roussel/DynaSpace mobile, Matsuda four-direction, Barumerli arm-movement, Noel bodily-self, and Pfeiffer lateral peri-head profiles. & The profile represents encoded source, trajectory, SOA, tactile, baseline/catch, repetition, and runner-handoff fields and can materialize through Segment 6. & It is still not proof of original hardware, participant perception, unpublished source assets, or participant-level effects. \\
+Partial but materializable & \code{serino\_2015\_peri\_trunk\_exp1}. & The current GUI can run the encoded audio-tactile scaffold, and Protocol 12-style materialization can test the handoff. & Final publication should keep the partial-source-audit caveat unless the remaining apparatus/source checks are closed. \\
+Unpublished local examples & \code{study5\_box\_breathing\_pps} and \code{study5\_dynaspace\_lateral\_45\_pps}. & These profiles demonstrate the suite workflow for design, materialization, runner handoff, and validation-layer reporting. & They are not published-study recreations and should not be used as literature replication evidence. \\
+Missing-parameter scaffolds & Tool-use, amputation/prosthesis, Ferri affective/ecological, walking, synchronous-training, and social-face examples. & The profile records a source-paper pointer and the fields currently known or approximated. & It should not be called recreation-ready until missing trial counts, timing tables, gain envelopes, tactile calibration, response-capture, or rights fields are encoded. \\
+Structural-gap scaffolds & Canonical Canzoneri dynamic-sounds, echolocation, wheelchair, 3D/VR, front/back speaker-array, peri-hand coordinate, and rear/threat examples. & The profile is useful for identifying the method family and the toolkit feature gap. & Exact recreation requires new toolkit support or a validated approximation for speaker arrays, body-scaled 3D rendering, direction-coupled baselines, lateral hand frames, rear hemifields, or HRTF/source rights. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 \subsection{Timing and Output Evidence}
 
 The third use case demonstrates the evidence-tier distinction. A software-only run verifies manifest-to-event-log reconstruction. A digital audio evidence WAV verifies mixed sample content. An electrical loopback route estimates audio-interface skew or trigger visibility when loopback hardware is connected. A tactile threshold report documents the perceptual preset. These outputs should not be collapsed into a single timing claim. The final paper should state which tiers were run on the publication hardware and which remain future validation.

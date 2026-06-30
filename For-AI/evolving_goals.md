@@ -265,6 +265,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   points. The renderer now repeats final `pdflatex` passes when LaTeX reports
   changed labels/citations. Use this route on this PC because MiKTeX
   `latexmk.exe` currently cannot find Perl.
+- Added a per-profile recreation claim-state pass for the BRM manuscript.
+  `profile_recreation_audit.csv` now covers all current preload profiles and
+  separates unpublished local examples, published verified run-ready profiles,
+  the partial-but-materializable Serino peri-trunk scaffold, missing-parameter
+  scaffolds, and structural-gap scaffolds. `main.tex` includes a compact
+  claim-state table so the suite can be described as recreating/scaffolding
+  published paradigms without implying exact original-apparatus, private-asset,
+  or participant-effect replication for every profile.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation
