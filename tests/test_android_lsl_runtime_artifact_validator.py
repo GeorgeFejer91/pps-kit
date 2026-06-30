@@ -607,6 +607,26 @@ def test_android_lsl_runtime_validator_rejects_phone_event_diary_drift(tmp_path:
     assert "events.csv row 1 type differs from completion event" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_completion_summary_diary_count_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    completion_path = run_dir / "completion.json"
+    completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    completion["summary"]["total_event_count"] = 1
+    completion["summary"]["lsl_marker_mirror_count"] = 2
+    completion["summary"]["command_diary_count"] = 3
+    completion_path.write_text(json.dumps(completion), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_event_diary=True)
+
+    assert result.ok is False
+    failures = "\n".join(result.failures)
+    assert "completion summary total_event_count expected" in failures
+    assert "completion summary lsl_marker_mirror_count expected" in failures
+    assert "completion summary command_diary_count expected 0, got 3" in failures
+
+
 def test_android_lsl_runtime_validator_accepts_trigger_code_mirror(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()
@@ -1491,6 +1511,7 @@ def _write_phone_run_with_native_command_diary(
         "native_lsl_command_ack_count": 1 if ack_sent else 0,
         "native_lsl_command_ack_failed_count": 0 if ack_sent else 1,
         "native_lsl_command_rejected_count": 0 if row["status"] == "applied" else 1,
+        "command_diary_count": 1,
     }
     (run_dir / "lsl_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
     (run_dir / "completion.json").write_text(
@@ -2341,6 +2362,7 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
         "native_lsl_command_ack_count": 0,
         "native_lsl_command_ack_failed_count": 0,
         "native_lsl_command_rejected_count": 0,
+        "command_diary_count": 0,
     }
     materialized_dir = run_dir / "materialized_blocks"
     materialized_dir.mkdir()

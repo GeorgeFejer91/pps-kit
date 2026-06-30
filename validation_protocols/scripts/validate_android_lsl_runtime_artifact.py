@@ -360,6 +360,15 @@ def validate_runtime_status(
         warnings=warnings,
         expect_command_acks=expect_command_acks,
     )
+    _validate_phone_completion_summary_counts(
+        completion=completion,
+        event_rows=event_rows or [],
+        marker_mirror_rows=marker_mirror_rows or [],
+        command_diary_rows=command_diary_rows or [],
+        failures=failures,
+        expect_event_diary=expect_event_diary,
+        expect_command_acks=expect_command_acks,
+    )
     _validate_phone_marker_mirror(
         status=status,
         completion=completion,
@@ -2917,6 +2926,43 @@ def _validate_phone_event_diary(
             expected = _csv_scalar(expected_value)
             if observed != expected:
                 failures.append(f"{prefix} {field} differs from completion event")
+
+
+def _validate_phone_completion_summary_counts(
+    *,
+    completion: dict[str, Any] | None,
+    event_rows: list[dict[str, Any]],
+    marker_mirror_rows: list[dict[str, Any]],
+    command_diary_rows: list[dict[str, Any]],
+    failures: list[str],
+    expect_event_diary: bool,
+    expect_command_acks: bool,
+) -> None:
+    if not isinstance(completion, dict):
+        return
+    summary = completion.get("summary") if isinstance(completion.get("summary"), dict) else None
+    embedded_events = [row for row in list(completion.get("events") or []) if isinstance(row, dict)]
+    embedded_markers = [row for row in list(completion.get("lsl_marker_mirror") or []) if isinstance(row, dict)]
+    embedded_commands = [row for row in list(completion.get("command_diary") or []) if isinstance(row, dict)]
+    if summary is None:
+        if expect_event_diary and embedded_events:
+            failures.append("completion summary is missing for phone-run diary count validation")
+        return
+
+    expected_counts = {
+        "total_event_count": len(event_rows) if event_rows else len(embedded_events),
+        "lsl_marker_mirror_count": len(marker_mirror_rows) if marker_mirror_rows else len(embedded_markers),
+        "command_diary_count": len(command_diary_rows) if command_diary_rows else len(embedded_commands),
+    }
+    for field, expected in expected_counts.items():
+        if expected <= 0 and field not in summary:
+            continue
+        observed = _safe_int(summary.get(field), fallback=-1)
+        if observed != expected:
+            failures.append(f"completion summary {field} expected {expected}, got {observed}")
+
+    if expect_command_acks and expected_counts["command_diary_count"] > 0 and "command_diary_count" not in summary:
+        failures.append("completion summary is missing command_diary_count")
 
 
 def _primitive_event_fields(event: dict[str, Any]) -> dict[str, Any]:

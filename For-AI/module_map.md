@@ -172,7 +172,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   participant `runs.jsonl`, and `latest_run.json` when
   `--expect-run-catalog-index` is set, phone-run `events.csv` event-diary
   rows against embedded completion/latest-events when `--expect-event-diary`
-  is set, phone-run `artifact_file_inventory.json` file/size/SHA-256 evidence
+  is set, completion `summary` local diary counts against event, marker, and
+  command diary artifacts when present, phone-run `artifact_file_inventory.json` file/size/SHA-256 evidence
   against actual folder or ZIP contents when `--expect-artifact-inventory` is
   set or the completion advertises the sidecar, lightweight scheduled-block materialization
   events/manifests/WAV hashes plus materialized trial UID/building-block

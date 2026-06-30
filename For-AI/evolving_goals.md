@@ -93,6 +93,10 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   sent-ack, failed-ack, and rejected-command counts to match the diary so a
   valid-looking `PPSCommandAcksV1` sample cannot hide summary-level dropped or
   failed native ack accounting.
+- Phone-run local diary validation now cross-checks completion `summary` counts
+  against the actual event, marker mirror, and command diary artifacts whenever
+  that summary is present. `total_event_count`, `lsl_marker_mirror_count`, and
+  `command_diary_count` are no longer trusted as standalone claims.
 - Companion discovery is now a stricter local-network contract rather than a
   best-effort loose JSON shape. PC discovery payload serialization validates
   `schema`, `service`, `network_scope = same_lan_or_local_hotspot`, multicast

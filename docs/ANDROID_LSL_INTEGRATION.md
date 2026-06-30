@@ -313,6 +313,9 @@ Required validation levels:
     `--expect-phone-owned-data-export` for
     completed phone-owned runs or PC-side mobile completion upload mirrors when
     the `1.Data_min`/`2.Data_max` phone export layer should be present.
+    For completed phone-run artifacts with a `summary`, validator count fields
+    (`total_event_count`, `lsl_marker_mirror_count`, and `command_diary_count`)
+    must match the corresponding event, marker, and command diary rows.
 3. Emulator smoke test: install APK, run a phone-owned package, export ZIP, and
    validate `lsl_runtime_status.json`. The
    `run_android_companion_emulator_ui_stress.py` report now treats Android live

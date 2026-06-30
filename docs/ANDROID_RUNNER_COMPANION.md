@@ -216,8 +216,11 @@ For strict phone event diary reconstruction, add `--expect-event-diary`; this
 requires `events.csv` to be present and to match the embedded
 `completion.json`/`latest_events.json` event list by event id, event type,
 run/package identity, phone timestamps, duplicate-id checks, and primitive
-event fields. This is the quick human-readable log of what the phone runtime
-did before the richer marker/XDF checks.
+event fields. When a completion `summary` is present, its
+`total_event_count`, `lsl_marker_mirror_count`, and `command_diary_count` must
+also match the event, marker, and command diary artifacts. This is the quick
+human-readable log of what the phone runtime did before the richer marker/XDF
+checks.
 Phone-run command diaries are also checked against matching `operator_command`
 events when present, including the command source and payload. When both
 `command_diary.jsonl` and embedded `completion.json`/`latest_events.json`
