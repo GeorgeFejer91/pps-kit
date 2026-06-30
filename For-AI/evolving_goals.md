@@ -56,6 +56,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   mobile package. That gives Android acks, PC-admin outboxes, and offline
   command reconciliation the same non-secret part/session identity spine as the
   phone-owned run package.
+- Android Controller outboxes and PC-admin outboxes now flatten non-secret
+  target identity fields (`target_part_session_id`,
+  `target_session_group_id`, and `target_part_number`) into the saved row/status
+  layer in addition to the token-bearing command payload. Strict artifact
+  validation compares those row fields back against the serialized
+  `PPSCommandSignalsV1` payload, so a quick audit table cannot drift from the
+  actual LSL command sample.
 - Live PC-admin ack validation now also requires the ack payload to include the
   expected echoed non-secret identity fields, not only avoid mismatches. An
   applied ack missing `command`, `target_session_id`, or any nonblank expected

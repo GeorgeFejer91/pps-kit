@@ -176,6 +176,9 @@ def test_android_controller_runtime_status_exports_stream_descriptions() -> None
     assert "summary.partSessionId.ifBlank { summary.sessionId }" in controller_commands
     assert '.put("stream_descriptions", phoneControllerLslStreamDescriptions(pairing, runPackage, summary))' in controller_commands
     assert '.put("target_session_id", target.sessionId)' in controller_commands
+    assert '.put("target_part_session_id", target.partSessionId)' in controller_commands
+    assert '.put("target_session_group_id", target.sessionGroupId)' in controller_commands
+    assert '.put("target_part_number", target.partNumber)' in controller_commands
     assert "selectedSummary?.partSessionId" in main_activity
     assert '"pps-android-lsl-stream-descriptions.v1"' in controller_commands
     assert '"android_controller"' in controller_commands

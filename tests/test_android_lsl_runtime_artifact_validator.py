@@ -1511,6 +1511,22 @@ def test_android_lsl_runtime_validator_rejects_controller_ack_payload_identity_d
     assert "controller outbox row 1 ack payload package_id differs from command sample" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_controller_row_target_identity_drift(tmp_path: Path):
+    controller_dir = tmp_path / "phone-controller"
+    controller_dir.mkdir()
+    (controller_dir / "phone_controller_runtime_status.json").write_text(json.dumps(_controller_status(native=True)), encoding="utf-8")
+    row = _controller_row(native_sent=True, ack_received=True)
+    row["target_part_session_id"] = "part-999"
+    (controller_dir / "phone_controller_command_outbox.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+    result = validator.validate_run_artifact(controller_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    assert "controller outbox row 1 command payload target_part_session_id differs from outbox row" in "\n".join(
+        result.failures
+    )
+
+
 def test_android_lsl_runtime_validator_rejects_controller_operator_note_missing_from_sample(tmp_path: Path):
     controller_dir = tmp_path / "phone-controller"
     controller_dir.mkdir()
@@ -1662,6 +1678,22 @@ def test_android_lsl_runtime_validator_rejects_pc_admin_payload_drift(tmp_path: 
 
     assert result.ok is False
     assert "PC admin outbox row 1 row payload differs from command sample payload" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_pc_admin_row_target_identity_drift(tmp_path: Path):
+    admin_dir = tmp_path / "pc-android-admin"
+    admin_dir.mkdir()
+    (admin_dir / "pc_android_lsl_admin_status.json").write_text(json.dumps(_pc_admin_status()), encoding="utf-8")
+    row = _pc_admin_row(native_sent=True, ack_received=True)
+    row["target_session_group_id"] = "session-group-999"
+    (admin_dir / "pc_android_lsl_command_outbox.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+    result = validator.validate_run_artifact(admin_dir, expect_native_transport=True, expect_command_acks=True)
+
+    assert result.ok is False
+    assert "PC admin outbox row 1 command payload target_session_group_id differs from outbox row" in "\n".join(
+        result.failures
+    )
 
 
 def test_android_lsl_runtime_validator_rejects_pc_admin_ack_payload_token_echo(tmp_path: Path):
@@ -3499,6 +3531,9 @@ def _controller_row(*, native_sent: bool, ack_received: bool) -> dict:
         "package_id": "pkg-001",
         "participant_id": "P001",
         "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "session-group-001",
+        "target_part_number": "1",
         "native_transport_available": native_sent,
         "native_controller_transport_enabled": native_sent,
         "native_lsl_sent": native_sent,
@@ -3619,6 +3654,9 @@ def _pc_admin_row(*, native_sent: bool, ack_received: bool) -> dict:
         "token": "secret",
         "package_id": "pkg-001",
         "participant_id": "P001",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "session-group-001",
         "target_part_number": "1",
         "requested_by": "pc_runner_lsl_admin",
         "current_pc_source_behavior": "pc_native_lsl_admin_with_local_outbox",
@@ -3640,6 +3678,9 @@ def _pc_admin_row(*, native_sent: bool, ack_received: bool) -> dict:
         "command_id": command_id,
         "command": "pause",
         "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "session-group-001",
+        "target_part_number": "1",
         "sender_id": "pc_runner",
         "package_id": "pkg-001",
         "participant_id": "P001",

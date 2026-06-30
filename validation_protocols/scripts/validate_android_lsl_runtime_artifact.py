@@ -5283,6 +5283,22 @@ def _validate_command_outbox_payload(
         failures.append(f"{prefix} row payload differs from command sample payload")
     if command == "operator_note" and not str(payload.get("note") or "").strip():
         failures.append(f"{prefix} operator_note command payload is missing note")
+    for field in (
+        "package_id",
+        "participant_id",
+        "target_session_id",
+        "target_part_session_id",
+        "target_session_group_id",
+        "target_part_number",
+    ):
+        row_value = _metadata_value(row.get(field))
+        if not row_value:
+            continue
+        payload_value = _metadata_value(payload.get(field))
+        if not payload_value:
+            failures.append(f"{prefix} command payload is missing {field}")
+        elif payload_value != row_value:
+            failures.append(f"{prefix} command payload {field} differs from outbox row")
 
 
 def _validate_outbox_ack_payload(

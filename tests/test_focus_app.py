@@ -4113,6 +4113,8 @@ def test_phone_transfer_lsl_admin_command_sends_expected_context(tmp_path: Path,
             "command": "pause",
             "package_id": "pkg-001",
             "participant_id": "P321",
+            "target_part_session_id": "part-001",
+            "target_session_group_id": "group-001",
             "part_number": "01",
             "extra_payload": {
                 "target_session_id": "part-001",

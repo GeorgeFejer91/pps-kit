@@ -65,6 +65,8 @@ def build_android_lsl_admin_payload(
     target_session_id: str = "",
     package_id: str = "",
     participant_id: str = "",
+    target_part_session_id: str = "",
+    target_session_group_id: str = "",
     part_number: str = "",
     requested_by: str = "pc_runner_lsl_admin",
     extra_payload: dict[str, Any] | None = None,
@@ -76,6 +78,8 @@ def build_android_lsl_admin_payload(
             "target_session_id": str(target_session_id or payload.get("target_session_id", "")),
             "package_id": str(package_id or payload.get("package_id", "")),
             "participant_id": str(participant_id or payload.get("participant_id", "")),
+            "target_part_session_id": str(target_part_session_id or payload.get("target_part_session_id", "")),
+            "target_session_group_id": str(target_session_group_id or payload.get("target_session_group_id", "")),
             "target_part_number": str(part_number or payload.get("target_part_number", "")),
             "requested_by": requested_by,
             "current_pc_source_behavior": "pc_native_lsl_admin_with_local_outbox",
@@ -126,6 +130,9 @@ def build_android_lsl_admin_row(
         "command_id": signal.command_id,
         "command": signal.command,
         "target_session_id": signal.session_id,
+        "target_part_session_id": signal.payload.get("target_part_session_id", ""),
+        "target_session_group_id": signal.payload.get("target_session_group_id", ""),
+        "target_part_number": signal.payload.get("target_part_number", ""),
         "sender_id": signal.sender_id,
         "package_id": package_id or signal.payload.get("package_id", ""),
         "participant_id": participant_id or signal.payload.get("participant_id", ""),
@@ -155,6 +162,8 @@ def send_android_lsl_command(
     command: str,
     package_id: str = "",
     participant_id: str = "",
+    target_part_session_id: str = "",
+    target_session_group_id: str = "",
     part_number: str = "",
     sender_id: str = "pc_runner",
     command_id: str | None = None,
@@ -188,6 +197,8 @@ def send_android_lsl_command(
         target_session_id=clean_session,
         package_id=package_id,
         participant_id=participant_id,
+        target_part_session_id=target_part_session_id,
+        target_session_group_id=target_session_group_id,
         part_number=part_number,
         extra_payload=payload_extra,
     )
@@ -397,6 +408,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--token", required=True, help="Pairing token for the Android receiver.")
     parser.add_argument("--package-id", default="")
     parser.add_argument("--participant-id", default="")
+    parser.add_argument("--target-part-session-id", default="")
+    parser.add_argument("--target-session-group-id", default="")
     parser.add_argument("--part-number", default="")
     parser.add_argument("--sender-id", default="pc_runner")
     parser.add_argument("--command-id", default="")
@@ -415,6 +428,8 @@ def main(argv: list[str] | None = None) -> int:
             command=args.command,
             package_id=args.package_id,
             participant_id=args.participant_id,
+            target_part_session_id=args.target_part_session_id,
+            target_session_group_id=args.target_session_group_id,
             part_number=args.part_number,
             sender_id=args.sender_id,
             command_id=args.command_id or None,

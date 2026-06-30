@@ -63,6 +63,8 @@ def test_build_android_lsl_admin_payload_keeps_token_in_command_payload():
         target_session_id="part-001",
         package_id="pkg-001",
         participant_id="P001",
+        target_part_session_id="part-001",
+        target_session_group_id="group-001",
         part_number="1",
         extra_payload={"note": "hello"},
     )
@@ -71,6 +73,8 @@ def test_build_android_lsl_admin_payload_keeps_token_in_command_payload():
     assert payload["target_session_id"] == "part-001"
     assert payload["package_id"] == "pkg-001"
     assert payload["participant_id"] == "P001"
+    assert payload["target_part_session_id"] == "part-001"
+    assert payload["target_session_group_id"] == "group-001"
     assert payload["target_part_number"] == "1"
     assert payload["note"] == "hello"
     assert payload["current_pc_source_behavior"] == "pc_native_lsl_admin_with_local_outbox"
@@ -92,6 +96,9 @@ def test_send_android_lsl_command_writes_auditable_ack_row(tmp_path, monkeypatch
             "package_id": "pkg-001",
             "participant_id": "P001",
             "target_session_id": "part-001",
+            "target_part_session_id": "part-001",
+            "target_session_group_id": "group-001",
+            "target_part_number": "1",
             "requested_by": "pc_runner_lsl_admin",
             "current_pc_source_behavior": "pc_native_lsl_admin_with_local_outbox",
             "state_changed": True,
@@ -106,6 +113,9 @@ def test_send_android_lsl_command_writes_auditable_ack_row(tmp_path, monkeypatch
         command="start_experiment",
         package_id="pkg-001",
         participant_id="P001",
+        target_part_session_id="part-001",
+        target_session_group_id="group-001",
+        part_number="1",
         command_id="cmd-1",
         output_dir=tmp_path,
         require_ack=True,
@@ -121,6 +131,12 @@ def test_send_android_lsl_command_writes_auditable_ack_row(tmp_path, monkeypatch
     command_payload = json.loads(result.row["command_sample"][6])
     assert command_payload["token"] == "secret"
     assert command_payload["target_session_id"] == "part-001"
+    assert command_payload["target_part_session_id"] == "part-001"
+    assert command_payload["target_session_group_id"] == "group-001"
+    assert command_payload["target_part_number"] == "1"
+    assert result.row["target_part_session_id"] == "part-001"
+    assert result.row["target_session_group_id"] == "group-001"
+    assert result.row["target_part_number"] == "1"
     assert result.row["ack_sample"] == ack_to_sample(_FakeAckInlet.ack)
     outbox_rows = (tmp_path / admin.PC_ANDROID_LSL_ADMIN_OUTBOX).read_text(encoding="utf-8").strip().splitlines()
     assert len(outbox_rows) == 1

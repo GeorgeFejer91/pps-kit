@@ -14727,6 +14727,8 @@ def _send_phone_transfer_lsl_admin_command(
         "command": clean_command,
         "package_id": str(context.get("package_id") or ""),
         "participant_id": str(context.get("participant_id") or ""),
+        "target_part_session_id": str(context.get("target_part_session_id") or ""),
+        "target_session_group_id": str(context.get("target_session_group_id") or ""),
         "part_number": str(context.get("part_number") or ""),
         "output_dir": Path(str(context.get("output_dir") or "")),
         "require_ack": bool(require_ack),
