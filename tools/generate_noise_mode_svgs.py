@@ -9,6 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSET_DIR = ROOT / "src" / "peripersonal_space_toolkit" / "assets"
+DASHBOARD_DIR = ROOT / "src" / "peripersonal_space_toolkit" / "dashboard"
 
 WIDTH = 960
 HEIGHT = 360
@@ -293,18 +294,23 @@ def main() -> None:
         GraphicSpec(
             filename="looming_smooth_linear_approach_waveform.svg",
             title="Smooth Linear Approach",
-            subtitle="Continuous noise with one smooth rising approach envelope.",
-            label="CONTINUOUS NOISE CONTROL",
+            subtitle="Smooth noise with one rising approach envelope.",
+            label="Smooth linear approach",
             mode="linear",
             description=(
-                "A stylized Audacity-like waveform for the PPS-kit continuous-noise source mode: "
+                "A stylized Audacity-like waveform for the PPS-kit smooth-linear source mode: "
                 "uninterrupted noise grows smoothly from far and quiet to near and loud."
             ),
         ),
     ]
+    output_dirs = (ASSET_DIR, DASHBOARD_DIR)
     for spec in specs:
-        (ASSET_DIR / spec.filename).write_text(render_svg(spec), encoding="utf-8", newline="\n")
-        print(f"Wrote {ASSET_DIR / spec.filename}")
+        svg = render_svg(spec)
+        for output_dir in output_dirs:
+            output_dir.mkdir(parents=True, exist_ok=True)
+            path = output_dir / spec.filename
+            path.write_text(svg, encoding="utf-8", newline="\n")
+            print(f"Wrote {path}")
 
 
 if __name__ == "__main__":

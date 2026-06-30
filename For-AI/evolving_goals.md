@@ -4,6 +4,15 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 
 ## 2026-06-30
 
+- Segment 1 generated-source mode is now a pair of proportional waveform button
+  widgets rather than a text-only toggle. `Burst train` remains the default
+  `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation
+  `Hobeika et al. (2020)`; the legacy `continuous_noise` profile is presented
+  to researchers as `Smooth linear` / `Smooth linear approach`, avoiding the
+  word `control` so it is not mistaken for an experimental control condition.
+  The SVG generator writes synchronized copies under both package `assets/` and
+  dashboard static assets for publication/documentation reuse and local GUI
+  rendering.
 - Focus Mode participant runs now use a run-local adaptive tactile threshold
   safeguard in addition to the pre-run participant calibration. The runner
   always tracks tactile hit/miss state internally, even when missed-trial top-up
@@ -1378,10 +1387,11 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 
 - Adopted the DynaSpace/Hobeika plus 3DTI/SOFA best-of-both-worlds protocol as the PPS-kit golden standard for newly generated looming stimuli. Generated-noise looming bakes should default to `dynaspace_gaussian_burst_train`: broadband Gaussian white-noise bursts, 30 ms burst duration, 10 ms rise/fall, 95 ms target onset period, 300 ms onset, duration-derived burst count, and symmetric equal spacing fitted to the configured active window. The DynaSpace smartphone profile still derives 33 bursts from its measured 3.07 s active burst window, but 33 is not a universal renderer default. HRTF spectrum, ILD, ITD, near-field behavior, distance attenuation, propagation delay, future trajectory angles, and optional room/DRR/IACC cues remain renderer-owned through 3DTI/SOFA or the Python SOFA/FABIAN preview path. Published-study templates may override this only when the source paper/app specifies another waveform or apparatus constraint, and the exception must be documented in metadata. The persistent standard is now `For-AI/looming_stimulus_generation_standard.md`; the source audit, Consensus browser/MCP export, implementation rationale, and PDF report live under `docs/dynaspace_spectral_feature_audit/`.
 - Segment 1 now exposes generated-source mode as a two-option toggle:
-  `Burst train` and `Continuous`. `Burst train` is the default and maps to
-  `dynaspace_gaussian_burst_train`; `Continuous` is an explicit
-  `continuous_noise` opt-out. Missing generated looming source profiles are
-  normalized to burst train during design load/save/render and source-manifest
+  `Burst train` and `Smooth linear`. `Burst train` is the default and maps to
+  `dynaspace_gaussian_burst_train`; `Smooth linear` is the researcher-facing
+  label for the explicit `continuous_noise` non-burst option. Missing generated
+  looming source profiles are normalized to burst train during
+  design load/save/render and source-manifest
   export, while the backend accepts only these two generated-noise modes for
   dashboard bakes. The full committed preload catalog was force-rebuilt so
   bundled generated-noise WAVs, hashes, QC rows, and source manifests carry the
