@@ -205,7 +205,7 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   phone-run AudioTrack timing evidence from `block_start`,
   `audio_playback_start`, and `vibration_cue` events when
   `--expect-audiotrack-timing-evidence` is set, including playback-head origin,
-  track state, buffer-size, scheduler fields,
+  track state, block PCM byte-size/encoding geometry, buffer-size, scheduler fields,
   scheduled-frame/block-time/frame-count coherence, delivery elapsed-time lower
   bounds against playback-head progress, and coherent cue-jitter metadata,
   phone-run `reconstruction_contract.json` Segment 0-6 hierarchy and

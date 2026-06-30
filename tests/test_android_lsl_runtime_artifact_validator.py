@@ -780,6 +780,38 @@ def test_android_lsl_runtime_validator_rejects_audiotrack_strategy_drift(tmp_pat
     assert "audio_timing_strategy must be audiotrack_pcm_wav_playback_head" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_audiotrack_pcm_size_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    completion_path = run_dir / "completion.json"
+    completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    block_start = next(event for event in completion["events"] if event["type"] == "block_start")
+    block_start["audio_data_size_bytes"] = 123
+    completion_path.write_text(json.dumps(completion), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_audiotrack_timing_evidence=True)
+
+    assert result.ok is False
+    assert "audio_data_size_bytes differs from frame_count and PCM frame format" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_audiotrack_encoding_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir)
+    completion_path = run_dir / "completion.json"
+    completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    block_start = next(event for event in completion["events"] if event["type"] == "block_start")
+    block_start["audio_encoding"] = "mediaplayer_decoded"
+    completion_path.write_text(json.dumps(completion), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_audiotrack_timing_evidence=True)
+
+    assert result.ok is False
+    assert "audio_encoding must be pcm_16bit" in "\n".join(result.failures)
+
+
 def test_android_lsl_runtime_validator_rejects_missing_audiotrack_playback_start(tmp_path: Path):
     run_dir = tmp_path / "phone-run"
     run_dir.mkdir()

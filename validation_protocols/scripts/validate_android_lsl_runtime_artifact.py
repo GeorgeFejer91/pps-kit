@@ -3782,8 +3782,22 @@ def _validate_phone_audiotrack_timing_evidence(
             require_all=expect_audiotrack_timing_evidence,
         )
         sample_rate = _safe_int(event.get("audio_sample_rate_hz"))
+        channel_count = _safe_int(event.get("audio_channel_count"))
+        bits_per_sample = _safe_int(event.get("audio_bits_per_sample"))
         frame_count = _safe_int(event.get("audio_frame_count"))
         duration_ms = _safe_int(event.get("audio_duration_ms"))
+        data_size_bytes = _safe_int(event.get("audio_data_size_bytes"))
+        if channel_count > 0 and bits_per_sample > 0:
+            expected_encoding = f"pcm_{bits_per_sample}bit"
+            encoding = str(event.get("audio_encoding") or "")
+            if encoding != expected_encoding:
+                if expect_audiotrack_timing_evidence or encoding:
+                    failures.append(f"{prefix} audio_encoding must be {expected_encoding}")
+            if bits_per_sample % 8 != 0:
+                failures.append(f"{prefix} audio_bits_per_sample must be byte-aligned PCM")
+            bytes_per_frame = channel_count * bits_per_sample // 8
+            if frame_count > 0 and data_size_bytes > 0 and data_size_bytes != frame_count * bytes_per_frame:
+                failures.append(f"{prefix} audio_data_size_bytes differs from frame_count and PCM frame format")
         if sample_rate > 0 and frame_count > 0 and duration_ms > 0:
             expected_duration_ms = round(frame_count * 1000.0 / sample_rate)
             if abs(duration_ms - expected_duration_ms) > 2:
