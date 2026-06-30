@@ -159,6 +159,9 @@ Synced v2 packages include:
   phone top-up logic
 - `reconstruction` metadata with the Segment 0-6 hierarchy, source Segment 6
   hashes, and schedule hash
+- provenance metadata with `participant_roster`, `randomization_seed`, and
+  `source_segment_hashes` for the Segment 6 setup manifest, Segment 6 order
+  CSV, accepted Segment 5 manifest, and source block CSV hashes
 - `lsl` metadata declaring `PPSMarkersV2`, `PPSTriggerCodes`,
   `PPSCommandSignalsV1`, and `PPSCommandAcksV1`
 
@@ -175,8 +178,9 @@ is present or any scheduled block cannot be reconstructed from
 `trial_building_block` assets.
 
 The validator checks the Segment 0-6 to phone-runtime hierarchy, schedule hash,
-block/order consistency, reusable building-block references, asset availability,
-AudioTrack playback-head timing contract, privacy-safe Android LSL stream names,
+source provenance roster/seed/hash consistency, block/order consistency,
+reusable building-block references, asset availability, AudioTrack
+playback-head timing contract, privacy-safe Android LSL stream names,
 required phone command set, and the phone-run `asset_strategy` plus
 `reconstruction_contract.json` consistency across status, manifest,
 reconstruction, completion, and catalog artifacts. It

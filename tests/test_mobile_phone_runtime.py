@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 from pathlib import Path
 
@@ -79,6 +80,28 @@ def _package(tmp_path: Path) -> RunPackage:
                 "Source_SHA256": "",
             }
         )
+    segment5_manifest = tmp_path / "segment5_manifest.json"
+    segment5_manifest.write_text(json.dumps({"randomization_seed": "seed-123"}), encoding="utf-8")
+    segment5_hash = hashlib.sha256(segment5_manifest.read_bytes()).hexdigest()
+    order_csv = tmp_path / "segment6_order.csv"
+    with order_csv.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=["participant_id", "phase", "block_index"])
+        writer.writeheader()
+        writer.writerow({"participant_id": "P001", "phase": "part_01", "block_index": "1"})
+    source_run_setup_manifest = tmp_path / "source_run_setup_manifest.json"
+    source_run_setup_manifest.write_text(
+        json.dumps(
+            {
+                "schema": "pps-experiment-run-setup.v1",
+                "prepared": True,
+                "csv_path": str(order_csv),
+                "total_block_runs": 1,
+                "source_segment5_manifest": str(segment5_manifest),
+                "source_segment5_manifest_sha256": segment5_hash,
+            }
+        ),
+        encoding="utf-8",
+    )
     return RunPackage(
         participant_id="P001",
         session_id="session-001",
@@ -88,6 +111,7 @@ def _package(tmp_path: Path) -> RunPackage:
         protocol_path=tmp_path / "protocol.json",
         manifest_path=tmp_path / "session_manifest.json",
         render_manifest_path=None,
+        source_run_setup_manifest_path=source_run_setup_manifest,
         blocks=[
             RunBlock(
                 index=1,
@@ -96,6 +120,10 @@ def _package(tmp_path: Path) -> RunPackage:
                 wav_path=wav,
                 trial_count=2,
                 duration_s=10.0,
+                metadata={
+                    "source_block_csv_path": str(block_manifest),
+                    "source_block_csv_sha256": hashlib.sha256(block_manifest.read_bytes()).hexdigest(),
+                },
             )
         ],
     )
@@ -112,6 +140,10 @@ def test_mobile_package_manifest_exports_assets_trials_and_phone_tactile_cues(tm
     assert manifest["lsl"]["stream_names"]["rich_markers"] == "PPSMarkersV2"
     assert manifest["building_blocks"][0]["role"] == "trial_building_block"
     assert manifest["schedule"]["execution_order"] == ["block-01"]
+    assert manifest["participant_roster"] == ["P001"]
+    assert manifest["randomization_seed"] == "seed-123"
+    assert manifest["source_segment_hashes"]["schema"] == "pps-mobile-source-segment-hashes.v1"
+    assert manifest["source_segment_hashes"]["segment5_block_csvs"][0]["block_id"] == "block-01"
     assert manifest["package_id"] == mobile_package_id(package)
     assert manifest["mobile_runnable"] is True
     assert manifest["runtime"]["audio_playback_strategy"] == "audiotrack_pcm_wav_playback_head"
@@ -197,7 +229,29 @@ def test_mobile_package_validation_accepts_strict_phone_owned_hierarchy(tmp_path
     assert result.failures == []
     assert result.summary["block_count"] == 1
     assert result.summary["building_block_count"] == 1
+    assert result.summary["participant_roster_count"] == 1
+    assert result.summary["randomization_seed"] == "seed-123"
     assert result.summary["schedule_hash"] == manifest["reconstruction"]["schedule_hash"]
+
+
+def test_mobile_package_validation_rejects_source_provenance_drift(tmp_path):
+    package = _package(tmp_path)
+    manifest = build_mobile_package_manifest(package, phone_owned_session=True)
+    manifest["participant_roster"] = ["P002"]
+    manifest["source_segment_hashes"]["source_run_setup_manifest_sha256"] = "wrong"
+    manifest["source_segment_hashes"]["segment5_block_csvs"][0]["sha256"] = "wrong"
+
+    result = validate_mobile_package_manifest(
+        manifest,
+        require_phone_owned_session=True,
+        require_building_blocks=True,
+    )
+
+    assert result.ok is False
+    failures = "\n".join(result.failures)
+    assert "participant_roster" in failures
+    assert "source_run_setup_manifest_sha256" in failures
+    assert "SHA-256 differs from schedule.blocks" in failures
 
 
 def test_mobile_package_validation_rejects_hierarchy_and_schedule_drift(tmp_path):

@@ -50,13 +50,19 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   requires every scheduled trial to reference an available
   `trial_building_block`, and is enforced by
   `validate_mobile_phone_package.py --require-lightweight-scheduled-blocks`.
+  The v2 manifest now also carries explicit package provenance:
+  `participant_roster`, `randomization_seed`, and `source_segment_hashes` for
+  the source Segment 6 setup manifest/order CSV, accepted Segment 5 manifest,
+  and scheduled source block CSV hashes; `validate_mobile_package_manifest()`
+  rejects roster/source-hash drift when those fields are present.
   `_PhoneTransferBridge` in `focus_app.py` uses this lightweight path for the
   native runner's `Send To Phone` transfer bridge; regular Focus Mode companion
   packages still default to prepared block WAV assets. Android parses this
-  strategy in `MobileRuntimeModels.kt` and preserves it in runtime status,
-  stream description metadata, local reconstruction snapshots, and
-  `PhoneRunCatalog.kt` entries so offline reviewers can distinguish
-  lightweight building-block materializations from prepared WAV replay.
+  strategy plus provenance in `MobileRuntimeModels.kt` and preserves it in
+  runtime status, stream description metadata, local reconstruction snapshots,
+  and `PhoneRunCatalog.kt` entries so offline reviewers can distinguish
+  lightweight building-block materializations from prepared WAV replay and
+  trace them back to the source randomization/order evidence.
 - Optional native Android LSL marker/command transport lives in
   `PhoneNativeLslBridge.kt`. A local ignored
   `android/runner-companion/app/libs/liblsl-Android.aar` is included by Gradle

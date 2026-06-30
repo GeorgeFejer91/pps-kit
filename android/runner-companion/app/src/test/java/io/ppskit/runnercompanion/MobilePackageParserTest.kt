@@ -48,6 +48,17 @@ class MobilePackageParserTest {
               "title": "Participant P001",
               "mobile_runnable": true,
               "phone_owned_session": true,
+              "participant_roster": ["P001", "P002"],
+              "randomization_seed": "seed-123",
+              "source_segment_hashes": {
+                "schema": "pps-mobile-source-segment-hashes.v1",
+                "source_run_setup_manifest_sha256": "runhash",
+                "source_segment5_manifest_sha256": "segment5hash",
+                "segment6_order_csv_sha256": "orderhash",
+                "segment5_block_csvs": [
+                  {"block_id": "block-01", "sha256": "blockhash"}
+                ]
+              },
               "reconstruction": {
                 "schema": "pps-mobile-reconstruction-contract.v1",
                 "authority": "android_phone",
@@ -116,6 +127,11 @@ class MobilePackageParserTest {
         assertEquals("pkg-001", manifest.packageId)
         assertEquals("group-001", manifest.sessionGroupId)
         assertTrue(manifest.phoneOwnedSession)
+        assertEquals(listOf("P001", "P002"), manifest.participantRoster)
+        assertEquals("seed-123", manifest.randomizationSeed)
+        assertEquals("pps-mobile-source-segment-hashes.v1", manifest.sourceSegmentHashes.schema)
+        assertEquals("segment5hash", manifest.sourceSegmentHashes.sourceSegment5ManifestSha256)
+        assertEquals(1, manifest.sourceSegmentHashes.segment5BlockCsvCount)
         assertEquals("block-01-audio", manifest.blocks.first().audioAssetId)
         assertEquals("trial-a", manifest.blocks.first().trials.first().trialUid)
         assertEquals("trial-1", manifest.blocks.first().trials.first().buildingBlockAssetId)

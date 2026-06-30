@@ -3193,6 +3193,9 @@ private fun phoneRunReconstructionArtifact(runPackage: MobileRunPackage, manifes
         .put("part_number", runPackage.partNumber)
         .put("asset_strategy", mobilePackageAssetStrategy(runPackage))
         .put("run_package_manifest_sha256", manifestSha256)
+        .put("participant_roster_count", runPackage.participantRoster.size)
+        .put("randomization_seed", runPackage.randomizationSeed)
+        .put("source_segment_hashes", runPackage.sourceSegmentHashes.toJsonObject())
         .put(
             "reconstruction",
             JSONObject()

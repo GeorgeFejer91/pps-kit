@@ -25,6 +25,7 @@ MOBILE_RUN_COMPLETE_SCHEMA = "pps-mobile-run-complete.v1"
 MOBILE_RUNTIME_ARTIFACT_SCHEMA = "pps-mobile-runtime-artifact.v1"
 MOBILE_RECONSTRUCTION_SCHEMA = "pps-mobile-reconstruction-contract.v1"
 MOBILE_LSL_CONTRACT_SCHEMA = "pps-mobile-lsl-contract.v1"
+MOBILE_SOURCE_SEGMENT_HASHES_SCHEMA = "pps-mobile-source-segment-hashes.v1"
 MOBILE_PHONE_OWNED_DATA_EXPORT_SCHEMA = "pps-android-phone-owned-data-export.v1"
 PHONE_DATA_MIN_FIELDNAMES = [
     "participant_id",
@@ -171,6 +172,8 @@ def build_mobile_package_list(
                 "trial_count": sum(int(block.get("trial_count") or 0) for block in manifest.get("blocks") or []),
                 "asset_count": len(manifest.get("assets") or []),
                 "total_asset_bytes": sum(int(asset.get("size_bytes") or 0) for asset in manifest.get("assets") or []),
+                "participant_roster_count": len(manifest.get("participant_roster") or []),
+                "randomization_seed": str(manifest.get("randomization_seed") or ""),
                 "mobile_runnable": bool(manifest.get("mobile_runnable")),
                 "phone_owned_session": bool(manifest.get("phone_owned_session")),
                 "warnings": list(manifest.get("warnings") or []),
@@ -284,6 +287,11 @@ def build_mobile_package_manifest(
         warnings.append("Lightweight package cannot materialize every scheduled block from trial_building_block assets.")
     source_run_setup = getattr(package, "source_run_setup_manifest_path", None)
     source_run_setup_sha256 = _sha256(Path(source_run_setup)) if source_run_setup and Path(source_run_setup).is_file() else ""
+    provenance = _mobile_source_provenance(
+        package,
+        schedule_blocks=schedule_blocks,
+        source_run_setup_sha256=source_run_setup_sha256,
+    )
     session_group_id = str(getattr(package, "session_group_id", "") or "")
     part_session_id = str(getattr(package, "part_session_id", "") or getattr(package, "session_id", "") or "")
     part_number = getattr(package, "part_number", None)
@@ -373,6 +381,9 @@ def build_mobile_package_manifest(
         "assets": assets,
         "building_blocks": building_blocks,
         "asset_strategy": asset_strategy,
+        "participant_roster": provenance["participant_roster"],
+        "randomization_seed": provenance["randomization_seed"],
+        "source_segment_hashes": provenance["source_segment_hashes"],
         "schedule": {
             "blocks": schedule_blocks,
             "execution_order": [block["block_id"] for block in schedule_blocks],
@@ -536,10 +547,13 @@ def validate_mobile_package_manifest(
             failures.append(f"building block {asset_id!r} must have role='trial_building_block'")
 
     _validate_schedule_building_blocks(schedule_blocks, building_block_by_id, failures, require_building_blocks=require_building_blocks)
+    _validate_source_provenance(manifest, schedule_blocks, failures, warnings)
     _validate_reconstruction_contract(manifest, schedule_blocks, blocks, building_blocks, failures, warnings)
     _validate_lsl_contract(manifest, failures, warnings)
     _validate_runtime_contract(manifest, failures)
 
+    participant_roster = [str(item) for item in _json_list(manifest.get("participant_roster"))]
+    source_segment_hashes = manifest.get("source_segment_hashes") if isinstance(manifest.get("source_segment_hashes"), dict) else {}
     summary = {
         "schema": schema,
         "package_id": str(manifest.get("package_id") or ""),
@@ -555,6 +569,10 @@ def validate_mobile_package_manifest(
             [asset for asset in assets if isinstance(asset, dict) and str(asset.get("role") or "") == "trial_building_block"]
         ),
         "building_block_count": len(building_blocks),
+        "participant_roster_count": len(participant_roster),
+        "randomization_seed": str(manifest.get("randomization_seed") or ""),
+        "source_segment_hash_schema": str(source_segment_hashes.get("schema") or "") if source_segment_hashes else "",
+        "source_segment_block_csv_count": len(_json_list(source_segment_hashes.get("segment5_block_csvs"))) if source_segment_hashes else 0,
         "schedule_hash": str((manifest.get("reconstruction") or {}).get("schedule_hash") or "") if isinstance(manifest.get("reconstruction"), dict) else "",
         "mobile_runnable": bool(manifest.get("mobile_runnable")),
         "lightweight_scheduled_blocks": bool(blocks) and len(block_audio_assets) == 0 and all(
@@ -862,6 +880,59 @@ def _validate_schedule_building_blocks(
                 failures.append(f"schedule block {block.get('block_id') or index} has an empty building-block asset id")
 
 
+def _validate_source_provenance(
+    manifest: dict[str, Any],
+    schedule_blocks: list[Any],
+    failures: list[str],
+    warnings: list[str],
+) -> None:
+    participant_roster = [str(item).strip() for item in _json_list(manifest.get("participant_roster")) if str(item).strip()]
+    if len(participant_roster) != len(set(participant_roster)):
+        failures.append("participant_roster contains duplicate participant ids")
+    participant_id = str(manifest.get("participant_id") or "").strip()
+    if participant_roster and participant_id and participant_id not in participant_roster:
+        failures.append("participant_roster does not include package participant_id")
+    if not participant_roster:
+        warnings.append("participant_roster is missing from mobile package provenance")
+
+    if not str(manifest.get("randomization_seed") or "").strip():
+        warnings.append("randomization_seed is missing from mobile package provenance")
+
+    source_segment_hashes = manifest.get("source_segment_hashes") if isinstance(manifest.get("source_segment_hashes"), dict) else {}
+    if not source_segment_hashes:
+        warnings.append("source_segment_hashes is missing from mobile package provenance")
+        return
+    if source_segment_hashes.get("schema") != MOBILE_SOURCE_SEGMENT_HASHES_SCHEMA:
+        failures.append("source_segment_hashes schema mismatch")
+    reconstruction = manifest.get("reconstruction") if isinstance(manifest.get("reconstruction"), dict) else {}
+    source_hash = str(source_segment_hashes.get("source_run_setup_manifest_sha256") or "").strip()
+    reconstruction_hash = str(reconstruction.get("source_run_setup_sha256") or "").strip()
+    if source_hash and reconstruction_hash and source_hash != reconstruction_hash:
+        failures.append("source_segment_hashes source_run_setup_manifest_sha256 differs from reconstruction")
+
+    schedule_by_id = {
+        str(block.get("block_id") or ""): block
+        for block in schedule_blocks
+        if isinstance(block, dict)
+    }
+    for index, row in enumerate(_json_list(source_segment_hashes.get("segment5_block_csvs")), start=1):
+        if not isinstance(row, dict):
+            failures.append(f"source_segment_hashes segment5_block_csvs row {index} is not a JSON object")
+            continue
+        block_id = str(row.get("block_id") or "")
+        if not block_id:
+            failures.append(f"source_segment_hashes segment5_block_csvs row {index} is missing block_id")
+            continue
+        schedule_block = schedule_by_id.get(block_id)
+        if schedule_block is None:
+            failures.append(f"source_segment_hashes references unknown schedule block {block_id!r}")
+            continue
+        observed_hash = str(row.get("sha256") or "").strip()
+        expected_hash = str(schedule_block.get("source_block_csv_sha256") or "").strip()
+        if observed_hash and expected_hash and observed_hash != expected_hash:
+            failures.append(f"source_segment_hashes block {block_id} SHA-256 differs from schedule.blocks")
+
+
 def _validate_reconstruction_contract(
     manifest: dict[str, Any],
     schedule_blocks: list[Any],
@@ -952,6 +1023,109 @@ def _trial_needs_building_block(trial: dict[str, Any]) -> bool:
 
 def _json_list(value: Any) -> list[Any]:
     return list(value) if isinstance(value, list) else []
+
+
+def _mobile_source_provenance(
+    package: Any,
+    *,
+    schedule_blocks: list[dict[str, Any]],
+    source_run_setup_sha256: str,
+) -> dict[str, Any]:
+    source_run_setup = Path(getattr(package, "source_run_setup_manifest_path", "") or "")
+    source_run_setup_text = str(getattr(package, "source_run_setup_manifest_path", "") or "")
+    source_run_setup_manifest = _read_json_object(source_run_setup) if source_run_setup.is_file() else {}
+    order_csv_path = _resolve_relative_source_path(source_run_setup_manifest.get("csv_path"), source_run_setup.parent)
+    order_rows = _read_csv_dicts(order_csv_path) if order_csv_path.is_file() else []
+    participant_roster = _unique_ordered(
+        str(row.get("participant_id") or row.get("Participant_ID") or "").strip()
+        for row in order_rows
+    )
+    participant_id = str(getattr(package, "participant_id", "") or "").strip()
+    if participant_id and participant_id not in participant_roster:
+        participant_roster.append(participant_id)
+
+    source_segment5_manifest = _resolve_relative_source_path(
+        source_run_setup_manifest.get("source_segment5_manifest"),
+        source_run_setup.parent,
+    )
+    source_segment5_manifest_sha256 = str(source_run_setup_manifest.get("source_segment5_manifest_sha256") or "").strip()
+    if not source_segment5_manifest_sha256 and source_segment5_manifest.is_file():
+        source_segment5_manifest_sha256 = _sha256(source_segment5_manifest)
+    segment5_manifest = _read_json_object(source_segment5_manifest) if source_segment5_manifest.is_file() else {}
+    randomization_seed = str(
+        source_run_setup_manifest.get("randomization_seed")
+        or segment5_manifest.get("randomization_seed")
+        or ""
+    )
+
+    block_csvs = []
+    for block in schedule_blocks:
+        path_text = str(block.get("source_block_csv_path") or "").strip()
+        hash_text = str(block.get("source_block_csv_sha256") or "").strip()
+        if not path_text and not hash_text:
+            continue
+        block_csvs.append(
+            {
+                "block_id": str(block.get("block_id") or ""),
+                "index": int(block.get("index") or 0),
+                "path": path_text,
+                "sha256": hash_text,
+            }
+        )
+
+    source_segment_hashes = {
+        "schema": MOBILE_SOURCE_SEGMENT_HASHES_SCHEMA,
+        "source_run_setup_manifest": source_run_setup_text,
+        "source_run_setup_manifest_sha256": source_run_setup_sha256,
+        "source_segment5_manifest": str(source_segment5_manifest) if source_segment5_manifest != source_run_setup.parent else "",
+        "source_segment5_manifest_sha256": source_segment5_manifest_sha256,
+        "segment6_order_csv": str(order_csv_path) if order_csv_path != source_run_setup.parent else "",
+        "segment6_order_csv_sha256": _sha256(order_csv_path) if order_csv_path.is_file() else "",
+        "segment5_block_csvs": block_csvs,
+    }
+    return {
+        "participant_roster": participant_roster,
+        "randomization_seed": randomization_seed,
+        "source_segment_hashes": source_segment_hashes,
+    }
+
+
+def _read_json_object(path: Path) -> dict[str, Any]:
+    try:
+        with open(_filesystem_path(path), "r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+    except Exception:
+        return {}
+    return dict(payload) if isinstance(payload, dict) else {}
+
+
+def _read_csv_dicts(path: Path) -> list[dict[str, str]]:
+    try:
+        with open(_filesystem_path(path), newline="", encoding="utf-8-sig") as handle:
+            return [dict(row) for row in csv.DictReader(handle)]
+    except Exception:
+        return []
+
+
+def _resolve_relative_source_path(value: Any, base_dir: Path) -> Path:
+    text = str(value or "").strip()
+    if not text:
+        return base_dir
+    path = Path(text).expanduser()
+    if path.is_absolute():
+        return path
+    return base_dir / path
+
+
+def _unique_ordered(values: Any) -> list[str]:
+    seen: set[str] = set()
+    result: list[str] = []
+    for value in values:
+        text = str(value or "").strip()
+        if text and text not in seen:
+            result.append(text)
+            seen.add(text)
+    return result
 
 
 def _building_block_from_trial(trial: dict[str, Any]) -> tuple[str, dict[str, Any] | None]:

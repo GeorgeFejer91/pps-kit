@@ -40,6 +40,9 @@ data class MobileRunPackage(
     val blocks: List<MobileBlock>,
     val assets: List<MobileAsset>,
     val buildingBlocks: List<MobileBuildingBlock>,
+    val participantRoster: List<String>,
+    val randomizationSeed: String,
+    val sourceSegmentHashes: MobileSourceSegmentHashes,
     val reconstruction: MobileReconstructionContract,
     val lsl: MobileLslContract,
     val mobileRunnable: Boolean,
@@ -48,6 +51,26 @@ data class MobileRunPackage(
     val rawManifestJson: String = "",
 ) {
     fun asset(assetId: String): MobileAsset? = assets.firstOrNull { it.assetId == assetId }
+}
+
+data class MobileSourceSegmentHashes(
+    val schema: String,
+    val sourceRunSetupManifestSha256: String,
+    val sourceSegment5ManifestSha256: String,
+    val segment6OrderCsvSha256: String,
+    val segment5BlockCsvCount: Int,
+) {
+    fun toJsonObject(): JSONObject =
+        JSONObject()
+            .put("schema", schema)
+            .put("source_run_setup_manifest_sha256", sourceRunSetupManifestSha256)
+            .put("source_segment5_manifest_sha256", sourceSegment5ManifestSha256)
+            .put("segment6_order_csv_sha256", segment6OrderCsvSha256)
+            .put("segment5_block_csv_count", segment5BlockCsvCount)
+
+    companion object {
+        val empty = MobileSourceSegmentHashes("", "", "", "", 0)
+    }
 }
 
 data class MobileAsset(
@@ -178,6 +201,9 @@ object MobilePackageParser {
             blocks = root.optJSONArray("blocks").toMobileBlocks(),
             assets = root.optJSONArray("assets").toMobileAssets(),
             buildingBlocks = root.optJSONArray("building_blocks").toMobileBuildingBlocks(),
+            participantRoster = root.optJSONArray("participant_roster").toStringList(),
+            randomizationSeed = root.optString("randomization_seed", ""),
+            sourceSegmentHashes = root.optJSONObject("source_segment_hashes").toMobileSourceSegmentHashes(),
             reconstruction = root.optJSONObject("reconstruction").toMobileReconstructionContract(),
             lsl = root.optJSONObject("lsl").toMobileLslContract(),
             mobileRunnable = root.optBoolean("mobile_runnable", false),
@@ -244,6 +270,17 @@ private fun JSONArray?.toMobileBuildingBlocks(): List<MobileBuildingBlock> {
             responseWindowOnsetS = item.optNullableDouble("response_window_onset_s"),
         )
     }
+}
+
+private fun JSONObject?.toMobileSourceSegmentHashes(): MobileSourceSegmentHashes {
+    if (this == null) return MobileSourceSegmentHashes.empty
+    return MobileSourceSegmentHashes(
+        schema = optString("schema", ""),
+        sourceRunSetupManifestSha256 = optString("source_run_setup_manifest_sha256", ""),
+        sourceSegment5ManifestSha256 = optString("source_segment5_manifest_sha256", ""),
+        segment6OrderCsvSha256 = optString("segment6_order_csv_sha256", ""),
+        segment5BlockCsvCount = optJSONArray("segment5_block_csvs")?.length() ?: optInt("segment5_block_csv_count", 0),
+    )
 }
 
 private fun JSONObject?.toMobileReconstructionContract(): MobileReconstructionContract {

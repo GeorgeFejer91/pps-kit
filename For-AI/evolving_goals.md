@@ -161,6 +161,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   package path still serves prepared block WAVs for compatibility. The mobile
   package validator can enforce this path with
   `--require-lightweight-scheduled-blocks`.
+- Mobile v2 phone packages now carry explicit Segment 6/Segment 5 provenance:
+  `participant_roster`, `randomization_seed`, and
+  `source_segment_hashes` for the run-setup manifest, order CSV, accepted
+  Segment 5 manifest, and scheduled source block CSV hashes.
+  `validate_mobile_package_manifest()` rejects participant-roster drift and
+  source block/run-setup hash drift when this evidence is present. Android
+  parses these fields in `MobileRuntimeModels.kt` and writes summary copies in
+  phone-owned reconstruction/catalog artifacts.
 - Android phone-run artifact validation can now prove the lightweight replay
   path after the fact. `validate_android_lsl_runtime_artifact.py
   --expect-lightweight-materializations` reads run folders or exported ZIPs,

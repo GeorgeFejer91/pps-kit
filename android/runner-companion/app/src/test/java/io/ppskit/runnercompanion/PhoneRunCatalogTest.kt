@@ -28,6 +28,15 @@ class PhoneRunCatalogTest {
               "title": "Participant P001",
               "mobile_runnable": true,
               "phone_owned_session": true,
+              "participant_roster": ["P001", "P002"],
+              "randomization_seed": "seed-123",
+              "source_segment_hashes": {
+                "schema": "pps-mobile-source-segment-hashes.v1",
+                "source_run_setup_manifest_sha256": "runhash",
+                "source_segment5_manifest_sha256": "segment5hash",
+                "segment6_order_csv_sha256": "orderhash",
+                "segment5_block_csvs": [{"block_id": "block-01", "sha256": "blockhash"}]
+              },
               "reconstruction": {"schedule_hash": "schedulehash"},
               "assets": [],
               "building_blocks": [{"asset_id": "trial-a"}],
@@ -91,6 +100,9 @@ class PhoneRunCatalogTest {
         assertEquals(PHONE_RUN_CATALOG_ENTRY_SCHEMA, perRunEntry.getString("schema"))
         assertTrue(perRunEntry.getBoolean("completed"))
         assertEquals("completion.json", perRunEntry.getString("artifact_file"))
+        assertEquals("seed-123", perRunEntry.getString("randomization_seed"))
+        assertEquals(2, perRunEntry.getInt("participant_roster_count"))
+        assertEquals("segment5hash", perRunEntry.getJSONObject("source_segment_hashes").getString("source_segment5_manifest_sha256"))
         assertEquals("30", perRunEntry.getJSONObject("participant_metadata_summary").getString("age_years"))
         assertFalse(perRunEntry.getJSONObject("privacy").getBoolean("demographics_in_stream_name"))
 
