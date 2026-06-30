@@ -25,6 +25,7 @@ from peripersonal_space_toolkit.dashboard_app import DashboardController, create
 from peripersonal_space_toolkit.design import (
     AudioFileSpec,
     NoiseDefinition,
+    PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
     ProtocolSpec,
     default_design,
     design_from_dict,
@@ -32,6 +33,7 @@ from peripersonal_space_toolkit.design import (
     load_design,
     point_from_distance_rotation_height,
     save_design,
+    gold_standard_looming_source_parameters,
     trajectory_point_at_time,
 )
 from peripersonal_space_toolkit.render_backend import (
@@ -58,6 +60,48 @@ def test_windows_no_console_kwargs_requests_hidden_console_on_windows():
     else:
         assert kwargs == {}
 from peripersonal_space_toolkit.runner_diary import read_diary_entries
+
+
+class _UrlopenResponse:
+    def __init__(self, status: int = 200):
+        self.status = status
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_args):
+        return False
+
+
+def test_running_dashboard_url_uses_fast_health_probe(monkeypatch):
+    calls = []
+
+    def fake_urlopen(url, timeout):
+        calls.append((url, timeout))
+        return _UrlopenResponse()
+
+    monkeypatch.setattr(dashboard_app.urllib.request, "urlopen", fake_urlopen)
+
+    assert dashboard_app._running_dashboard_url("127.0.0.1", 8766) == "http://127.0.0.1:8766/"
+    assert calls == [("http://127.0.0.1:8766/api/health", 1.5)]
+
+
+def test_running_dashboard_url_falls_back_to_state_probe(monkeypatch):
+    calls = []
+
+    def fake_urlopen(url, timeout):
+        calls.append((url, timeout))
+        if url.endswith("/api/health"):
+            raise OSError("old dashboard does not expose health")
+        return _UrlopenResponse()
+
+    monkeypatch.setattr(dashboard_app.urllib.request, "urlopen", fake_urlopen)
+
+    assert dashboard_app._running_dashboard_url("127.0.0.1", 8766) == "http://127.0.0.1:8766/"
+    assert calls == [
+        ("http://127.0.0.1:8766/api/health", 1.5),
+        ("http://127.0.0.1:8766/api/state", 1.5),
+    ]
 
 
 def _compact_design():
@@ -211,7 +255,7 @@ def test_dashboard_static_assets_are_packaged():
     public_index = (public_root / "index.html").read_text(encoding="utf-8")
     public_docs = (public_root / "documentation" / "index.html").read_text(encoding="utf-8")
     public_download = (public_root / "download" / "index.html").read_text(encoding="utf-8")
-    static_version = "20260624-study5-profile-refresh"
+    static_version = "20260629-stationary-baseline"
     assert f'href="styles.css?v={static_version}"' in html
     assert f'src="hardware_pixel_art.js?v={static_version}"' in html
     assert f'src="app.js?v={static_version}"' in html
@@ -405,6 +449,7 @@ def test_dashboard_static_assets_are_packaged():
     assert "Minimum SOA anchor" in html
     assert "Maximum SOA anchor" in html
     assert "Full SOA tactile-only" in html
+    assert "Full SOA stationary bursts" in html
     assert "Custom timings" in html
     assert 'id="baseline-custom-audio-tactile"' in html
     assert 'id="bake-trial-files"' in html
@@ -727,7 +772,7 @@ def test_dashboard_creates_profile_and_custom_project_folders(tmp_path: Path):
     study_manifest = json.loads(study_manifest_path.read_text(encoding="utf-8"))
     assert study_manifest["schema"] == "pps-dashboard-study-settings-manifest.v1"
     assert study_manifest["gui_settings_inventory"]["baseline_strategy"]["segment"] == "3_tactile_and_baseline_trials"
-    assert study_manifest["default_settings"]["baseline_generation"]["strategy"] == "tactile_only"
+    assert study_manifest["default_settings"]["baseline_generation"]["strategy"] == "stationary_burst"
     segments = state["project_segments"]
     assert segments["0_profile"]["status"] == "ready"
     assert Path(segments["0_profile"]["study_manifest_path"]).name == "study_manifest.json"
@@ -920,14 +965,18 @@ def test_dashboard_gui_to_3dti_config_handoff_stress_grid(tmp_path: Path):
         assert loaded.trajectory.propagation_speed_mps == pytest.approx(expected_path_length / controls["movement_duration_s"])
         assert config["design"] == state["design"]
         assert config["source"]["seed"] == loaded.protocol.random_seed
-        assert config["source"]["noises"] == [
-                {
-                    "label": f"Stress source {index}",
-                    "noise_type": noise_types[index - 1],
-                    "tone_type": noise_types[index - 1],
-                    "gain": pytest.approx(0.25 + index * 0.1),
-                }
-            ]
+        assert len(config["source"]["noises"]) == 1
+        config_noise = config["source"]["noises"][0]
+        assert config_noise["label"] == f"Stress source {index}"
+        assert config_noise["noise_type"] == noise_types[index - 1]
+        assert config_noise["tone_type"] == noise_types[index - 1]
+        assert config_noise["gain"] == pytest.approx(0.25 + index * 0.1)
+        assert config_noise["motion_mode"] == "looming"
+        assert config_noise["source_profile"] == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+        assert config_noise["source_profile_parameters"]["burst_count_mode"] == "duration_derived"
+        assert config_noise["source_profile_parameters"]["active_window_s"] == pytest.approx(
+            controls["movement_duration_s"]
+        )
         assert config["protocol"]["soa_values_ms"] == soas
         assert config["protocol"]["spatial_values_cm"] == spatial
         assert config["trajectory"]["start_hold_s"] == pytest.approx(controls["start_hold_s"])
@@ -1130,7 +1179,7 @@ def test_dashboard_loads_unpublished_study5_preload_with_instruction_events(tmp_
     assert protocol["include_catch_trials"] is True
     assert protocol["catch_trial_percentage"] == 0.0
     assert protocol["include_baseline_trials"] is True
-    assert protocol["baseline_strategy"] == "tactile_only"
+    assert protocol["baseline_strategy"] == "stationary_burst"
     assert protocol["baseline_custom_trial_mode"] == "tactile_only"
     assert protocol["baseline_soa_values_ms"] == []
     assert protocol["trial_pool_repetition_defaults"] == {
@@ -1164,7 +1213,7 @@ def test_dashboard_loads_unpublished_study5_preload_with_instruction_events(tmp_
         "catch": 6,
     }
     assert study_manifest["gui_settings_inventory"]["include_catch_trials"]["value"] is True
-    assert study_manifest["gui_settings_inventory"]["baseline_strategy"]["value"] == "tactile_only"
+    assert study_manifest["gui_settings_inventory"]["baseline_strategy"]["value"] == "stationary_burst"
     assert study_manifest["gui_settings_inventory"]["trial_pool_family_repetitions"]["value"]["baseline"] == 3
 
     strips = design["protocol"]["trial_strips"]
@@ -1251,6 +1300,55 @@ def test_dashboard_startup_replaces_stale_study5_working_copy(tmp_path: Path):
         looming = next(element for element in strip["elements"] if element["kind"] == "looming_stimulus")
         assert looming["source_labels"] == ["Pink frontal", "White frontal"]
     assert not (stale_segment5_dir / "stale_block_preview_marker.txt").exists()
+
+
+def test_dashboard_startup_overwrites_stale_study5_canonical_ingredient(tmp_path: Path):
+    design_path = tmp_path / "design.json"
+    save_design(_compact_design(), design_path)
+    render_dir = _render_dir(tmp_path)
+    registry_root = tmp_path / "dashboard_projects" / "0_study_project_registry"
+    controller = DashboardController(
+        design_path=design_path,
+        render_dir=render_dir,
+        session_root=tmp_path / "sessions",
+        import_dir=tmp_path / "imports",
+        preview_dir=tmp_path / "previews",
+        project_registry_root=registry_root,
+    )
+    loaded = controller.load_template("study5_box_breathing_pps")
+    project_dir = Path(loaded["project"]["project_dir"])
+    segment1_dir = Path(loaded["project"]["segment_folders"]["1_core_audio_ingredients"])
+    ingredient_manifest = _read_json_file(segment1_dir / "stimulus_ingredients_manifest.json")
+    pink_row = next(item for item in ingredient_manifest["ingredients"] if item["label"] == "Pink frontal")
+    pink_path = Path(pink_row["path"])
+    source_path = Path(pink_row["provenance"]["source_catalog_path"])
+    expected_hash = dashboard_app._local_file_sha256(source_path)
+
+    sf.write(pink_path, np.zeros((441, 1), dtype=np.float32), 44100)
+    assert dashboard_app._local_file_sha256(pink_path) != expected_hash
+    sidecar = pink_path.with_name(f"{pink_path.stem}__2{pink_path.suffix}")
+    dashboard_app._copy_file(source_path, sidecar)
+    stale_segment5_dir = project_dir / "5_block_csv_preview"
+    stale_segment5_dir.mkdir(parents=True, exist_ok=True)
+    (stale_segment5_dir / "stale_block_preview_marker.txt").write_text("stale downstream", encoding="utf-8")
+
+    restarted = DashboardController(
+        design_path=design_path,
+        render_dir=render_dir,
+        session_root=tmp_path / "sessions",
+        import_dir=tmp_path / "imports",
+        preview_dir=tmp_path / "previews",
+        project_registry_root=registry_root,
+    )
+    state = restarted.snapshot()
+    pink_noise = next(item for item in state["design"]["noises"] if item["label"] == "Pink frontal")
+
+    assert Path(pink_noise["prebaked_path"]) == pink_path
+    assert dashboard_app._local_file_sha256(pink_path) == expected_hash
+    assert not sidecar.exists()
+    assert not (stale_segment5_dir / "stale_block_preview_marker.txt").exists()
+    refreshed_manifest = _read_json_file(segment1_dir / "stimulus_ingredients_manifest.json")
+    assert refreshed_manifest["ingredient_count"] == 4
 
 
 def test_dashboard_blocks_runner_launch_for_incomplete_published_profile(tmp_path: Path):
@@ -1473,13 +1571,13 @@ def test_dashboard_validates_full_study5_segment0_to_3_pipeline(tmp_path: Path):
     catch_wav, catch_sr = sf.read(dashboard_app._soundfile_path(catch_row["file_path"]), dtype="float32", always_2d=True)
     assert baseline_sr == baseline_row["sample_rate_hz"]
     assert baseline_wav.shape[1] == 3
-    assert baseline_row["baseline_mode"] == "tactile_only"
+    assert baseline_row["baseline_mode"] == "stationary_burst"
     assert baseline_row["channel_role_map"]["3"] == "tactile cue"
-    assert "baseline_no_looming" in Path(baseline_row["file_path"]).name
+    assert "baseline_stationary_burst" in Path(baseline_row["file_path"]).name
     looming_onset_frame = int(round(float(baseline_row["looming_segment_onset_s"]) * baseline_sr))
     assert looming_onset_frame > 0
     assert np.max(np.abs(baseline_wav[:looming_onset_frame, :2])) > 0.01
-    assert np.max(np.abs(baseline_wav[looming_onset_frame:, :2])) == pytest.approx(0.0)
+    assert np.max(np.abs(baseline_wav[looming_onset_frame:, :2])) > 0.01
     assert np.max(np.abs(baseline_wav[:, 2])) > 0.01
     assert catch_sr == catch_row["sample_rate_hz"]
     assert catch_wav.shape[1] == 2
@@ -2215,6 +2313,13 @@ def test_dashboard_bake_stimulus_job_adds_source_after_render(tmp_path: Path, mo
         qc.write_text("", encoding="utf-8")
         tactile.write_text("", encoding="utf-8")
         assert label == "Manual blue"
+        assert design_data["noises"][0]["source_profile"] == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+        assert design_data["noises"][0]["source_profile_parameters"]["burst_count_mode"] == "duration_derived"
+        assert design_data["noises"][0]["source_profile_parameters"]["target_period_s"] == pytest.approx(0.095)
+        assert (
+            design_data["noises"][0]["source_profile_parameters"]["active_window_source"]
+            == "trajectory_movement_duration"
+        )
         assert seed == custom["design"]["protocol"]["random_seed"]
         assert engine == "python-sofa-reference"
         assert include_tactile is False
@@ -2261,6 +2366,8 @@ def test_dashboard_bake_stimulus_job_adds_source_after_render(tmp_path: Path, mo
     assert ingredient_manifest["schema"] == "pps-core-audio-ingredients.v1"
     assert ingredient_manifest["ingredients"][0]["descriptor"] == "manual_blue_looming10ms"
     assert baked_noise["noise_type"] == "blue"
+    assert baked_noise["source_profile"] == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+    assert baked_noise["source_profile_parameters"] == gold_standard_looming_source_parameters()
     assert baked_noise["trajectory_snapshot"]["start_distance_cm"] == pytest.approx(95.0)
     assert baked_noise["trajectory_snapshot"]["end_distance_cm"] == pytest.approx(15.0)
     assert baked_noise["trajectory_snapshot"]["start_rotation_deg"] == pytest.approx(270.0)
@@ -2270,6 +2377,68 @@ def test_dashboard_bake_stimulus_job_adds_source_after_render(tmp_path: Path, mo
     assert state["custom_workflow"]["ready_to_render"] is False
     assert state["custom_workflow"]["current_step"] == "trials"
     assert "Bake Segment 2 trial sequences." in state["custom_workflow"]["missing"]
+
+
+def test_dashboard_bake_generated_noise_can_use_continuous_source_mode(tmp_path: Path, monkeypatch):
+    client = _client(tmp_path)
+    custom = client.post("/api/templates/__custom__/load").json()
+    custom["design"]["name"] = "Continuous source bake"
+    custom["design"]["protocol"]["soa_values_ms"] = [300]
+    custom["design"]["protocol"]["spatial_values_cm"] = [100.0]
+    custom["design"]["protocol"]["include_baseline_trials"] = False
+    custom["design"]["protocol"]["baseline_strategy"] = "none"
+
+    def fake_render(design_path, output_dir, *, seed, engine="auto", include_tactile=True, **_kwargs):
+        design_data = json.loads(Path(design_path).read_text(encoding="utf-8"))
+        wav_path = Path(output_dir) / "looming_continuous_blue.wav"
+        sf.write(wav_path, np.zeros((441, 2), dtype=np.float32), 44100)
+        manifest = Path(output_dir) / "render_manifest.json"
+        qc = Path(output_dir) / "render_qc.csv"
+        tactile = Path(output_dir) / "render_tactile_events.csv"
+        manifest.write_text(
+            json.dumps({"status": "rendered_reference", "wav_outputs": [{"path": str(wav_path), "sha256": "test"}]}),
+            encoding="utf-8",
+        )
+        qc.write_text("", encoding="utf-8")
+        tactile.write_text("", encoding="utf-8")
+        assert design_data["noises"][0]["source_profile"] == "continuous_noise"
+        assert design_data["noises"][0]["source_profile_parameters"] == {}
+        assert seed == custom["design"]["protocol"]["random_seed"]
+        assert engine == "python-sofa-reference"
+        assert include_tactile is False
+        return RenderResult(
+            "rendered_reference",
+            0,
+            Path(output_dir),
+            Path(design_path),
+            manifest,
+            qc,
+            wav_paths=(wav_path,),
+            tactile_events_path=tactile,
+        )
+
+    monkeypatch.setattr(dashboard_app.render_backend, "render_design_with_3dti", fake_render)
+    job = client.post(
+        "/api/stimulus/bake",
+        json={
+            "participant_id": "",
+            "design": custom["design"],
+            "bake_recipe": {
+                "kind": "generated_noise",
+                "noise_type": "blue",
+                "label": "Continuous blue",
+                "source_profile": "continuous_noise",
+                "source_profile_parameters": gold_standard_looming_source_parameters(),
+            },
+        },
+    ).json()
+    done = _wait_job(client, job["job_id"])
+    state = client.get("/api/state").json()
+
+    assert done["status"] == "succeeded"
+    baked_noise = next(noise for noise in state["design"]["noises"] if noise["label"] == "Continuous blue")
+    assert baked_noise["source_profile"] == "continuous_noise"
+    assert baked_noise["source_profile_parameters"] == {}
 
 
 def test_dashboard_batch_bakes_trial_sequence_row_variant_folders(tmp_path: Path):

@@ -6,7 +6,7 @@
       "label": "Looming sound",
       "path": "assets/preloads/noel_2015_bodily_self/02_looming_stimuli/looming_Looming_sound.wav",
       "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/noel_2015_bodily_self/02_looming_stimuli/looming_Looming_sound.wav",
-      "sha256": "8e4f54c9c7a1203a23f7692768ebe76131a387aa9d0760d32bcbad9494cecbaa",
+      "sha256": "7fe751308d5152d6b7f70531ebff566916419a140de4733c58e4a7f0206add9e",
       "duration_s": 1.14,
       "sample_rate": 44100,
       "channels": 2,
@@ -42,6 +42,17 @@
           "y_m": 0.15,
           "z_m": 0.0
         }
+      },
+      "source_profile": "dynaspace_gaussian_burst_train",
+      "source_profile_parameters": {
+        "burst_count_mode": "duration_derived",
+        "burst_duration_s": 0.03,
+        "rise_fall_s": 0.01,
+        "target_period_s": 0.095,
+        "onset_s": 0.3,
+        "active_window_source": "trajectory_movement_duration",
+        "spacing_policy": "symmetric_fit",
+        "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
       }
     }
   ]

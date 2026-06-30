@@ -6,11 +6,17 @@ __pycache__/
 .venv-*/
 build/
 dist/
+android/**/.gradle/
+android/**/.kotlin/
+android/**/build/
+android/runner-companion/app/libs/*.aar
+!android/runner-companion/app/libs/README.md
 *.egg-info/
 configs/stimulus_design.generated.json
 models/
 artifacts/
 local_data/
+inst_user_settings.tmp
 Example-configs/
 *.aup3
 *.aup3-shm

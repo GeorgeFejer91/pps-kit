@@ -21,7 +21,17 @@ if (-not $Version) {
 
 $Go = Get-Command go -ErrorAction SilentlyContinue
 if (-not $Go) {
+    $FallbackGo = "C:\Program Files\Go\bin\go.exe"
+    if (Test-Path -LiteralPath $FallbackGo) {
+        $Go = Get-Item -LiteralPath $FallbackGo
+    }
+}
+if (-not $Go) {
     throw "Go is required to build the lightweight downloader. Install Go for Windows, then rerun windows\Build_PPS_Downloader.ps1."
+}
+$GoExe = $Go.Source
+if (-not $GoExe) {
+    $GoExe = $Go.FullName
 }
 
 New-Item -ItemType Directory -Force -Path $DistDir | Out-Null
@@ -36,7 +46,7 @@ try {
             throw "PPS icon not found: $IconPath"
         }
         Write-Host "Embedding PPS icon resource..."
-        & $Go.Source run github.com/akavel/rsrc@latest -ico $IconPath -o $Syso
+        & $GoExe run github.com/akavel/rsrc@latest -ico $IconPath -o $Syso
         if ($LASTEXITCODE -ne 0) {
             throw "Could not generate Windows icon resource for downloader."
         }
@@ -45,7 +55,7 @@ try {
     Write-Host "Building PPS lightweight downloader..."
     $env:CGO_ENABLED = "0"
     $LdFlags = "-s -w -H=windowsgui -X main.defaultManifestURL=$ManifestUrl -X main.buildVersion=$Version"
-    & $Go.Source build -trimpath -ldflags $LdFlags -o $VersionedExe .
+    & $GoExe build -trimpath -ldflags $LdFlags -o $VersionedExe .
     if ($LASTEXITCODE -ne 0) {
         exit $LASTEXITCODE
     }

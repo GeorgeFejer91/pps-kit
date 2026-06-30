@@ -177,7 +177,7 @@
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "baseline_mode",
       "status": "reported",
-      "value": "tactile_only",
+      "value": "stationary_burst",
       "note": "Baseline strategy is encoded."
     },
     {

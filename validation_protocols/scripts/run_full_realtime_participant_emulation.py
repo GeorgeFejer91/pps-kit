@@ -38,6 +38,7 @@ VALIDATION_LANE_AUTO = "auto"
 VALIDATION_LANE_SOFTWARE_ONLY = "software-only"
 VALIDATION_LANE_FULL_STACK = "full-stack"
 OS_MOUSE_BACKENDS = {"pynput", "win32", "pyautogui"}
+PASSIVE_MOUSE_BACKEND = "none"
 WIRED_LOOPBACK_OFF = "off"
 WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY = "output4-tactile-proxy"
 
@@ -234,6 +235,14 @@ def _build_runner_command(args: argparse.Namespace, *, runner: Path, screenshot_
                 str(screenshot_path),
             ]
         )
+    companion_advertise_ip = str(getattr(args, "companion_advertise_ip", "") or "").strip()
+    if companion_advertise_ip:
+        command.extend(["--companion-advertise-ip", companion_advertise_ip])
+    companion_port = int(getattr(args, "companion_port", 8767) or 8767)
+    if companion_port != 8767:
+        command.extend(["--companion-port", str(companion_port)])
+    if bool(getattr(args, "validation_windowed", False)):
+        command.append("--validation-windowed")
     wired_loopback = str(getattr(args, "wired_loopback", WIRED_LOOPBACK_OFF) or WIRED_LOOPBACK_OFF)
     if wired_loopback != WIRED_LOOPBACK_OFF:
         command.extend(["--wired-loopback", wired_loopback])
@@ -252,6 +261,8 @@ def _build_runner_command(args: argparse.Namespace, *, runner: Path, screenshot_
                 str(float(getattr(args, "labrecorder_stop_timeout_s", 8.0))),
             ]
         )
+    else:
+        command.append("--no-external-labrecorder")
     if not _standard_capture_requested(args):
         command.extend(["--no-lsl", "--no-internal-xdf", "--no-backup-recording"])
     else:
@@ -281,20 +292,41 @@ def _configure_validation_env(args: argparse.Namespace, *, output_dir: Path, foc
         env.pop("PPS_FOCUS_VALIDATION_REALTIME_AUDIO", None)
         env.pop("PPS_FOCUS_VALIDATION_FAST_AUDIO", None)
         env.pop("PPS_FOCUS_VALIDATION_AUDIO_CHUNK_FRAMES", None)
-    env["PPS_FOCUS_VALIDATION_PARTICIPANT_EMULATOR"] = "1"
-    env["PPS_FOCUS_VALIDATION_AUTO_APPROVE_TOPUP"] = "1"
-    env["PPS_FOCUS_VALIDATION_MOUSE_BACKEND"] = str(args.mouse_backend)
-    if str(args.mouse_backend) in OS_MOUSE_BACKENDS:
-        env.setdefault("PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON", sys.executable)
+    mouse_backend = str(args.mouse_backend)
+    env["PPS_FOCUS_VALIDATION_MOUSE_BACKEND"] = mouse_backend
+    if mouse_backend == PASSIVE_MOUSE_BACKEND:
+        env.pop("PPS_FOCUS_VALIDATION_PARTICIPANT_EMULATOR", None)
+        env.pop("PPS_FOCUS_VALIDATION_AUTO_APPROVE_TOPUP", None)
+        env.pop("PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON", None)
+        env["PPS_FOCUS_VALIDATION_DISABLE_MOUSE_CAPTURE"] = "1"
+        env["PPS_FOCUS_VALIDATION_DISABLE_CURSOR_RECENTER"] = "1"
+        env["PPS_FOCUS_VALIDATION_ENABLE_SYNTHETIC_CLICK_SHORTCUT"] = "1"
+        env["PPS_FOCUS_VALIDATION_AUTO_CLOSE_MS"] = str(max(1000, int(float(args.timeout_s) * 1000)))
     else:
+        env["PPS_FOCUS_VALIDATION_PARTICIPANT_EMULATOR"] = "1"
+        env["PPS_FOCUS_VALIDATION_AUTO_APPROVE_TOPUP"] = "1"
+        env.pop("PPS_FOCUS_VALIDATION_DISABLE_MOUSE_CAPTURE", None)
+        env.pop("PPS_FOCUS_VALIDATION_DISABLE_CURSOR_RECENTER", None)
+        env.pop("PPS_FOCUS_VALIDATION_ENABLE_SYNTHETIC_CLICK_SHORTCUT", None)
+    if mouse_backend in OS_MOUSE_BACKENDS:
+        env.setdefault("PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON", sys.executable)
+    elif mouse_backend != PASSIVE_MOUSE_BACKEND:
         env.pop("PPS_FOCUS_VALIDATION_EXTERNAL_CLICK_PYTHON", None)
     env["PPS_FOCUS_VALIDATION_PARTICIPANT_SEED"] = str(int(args.seed))
     env["PPS_FOCUS_VALIDATION_PARTICIPANT_MISS_RATE"] = str(float(args.miss_rate))
     env["PPS_FOCUS_VALIDATION_PARTICIPANT_MIN_MISSES"] = str(int(args.min_misses))
+    env["PPS_FOCUS_VALIDATION_PARTICIPANT_ID"] = str(args.participant_id)
     env["PPS_FOCUS_VALIDATION_REPORT"] = str(focus_report_path)
+    env["PPS_FOCUS_VALIDATION_COMPANION_PAIRING_REPORT"] = str(output_dir / "companion_pairing_report.json")
     env["PPS_FOCUS_VALIDATION_OUTPUT_ROOT"] = str(output_dir / "runner_sessions")
     env["PPS_FOCUS_VALIDATION_PROFILE"] = str(args.profile)
-    if bool(getattr(args, "launch_via_environment_gate", False)):
+    if bool(getattr(args, "validation_windowed", False)):
+        env.setdefault("PPS_FOCUS_VALIDATION_DISPLAY", "left")
+        env.setdefault("PPS_FOCUS_VALIDATION_RUNNER_WIDTH", "820")
+    else:
+        env.pop("PPS_FOCUS_VALIDATION_DISPLAY", None)
+        env.pop("PPS_FOCUS_VALIDATION_RUNNER_WIDTH", None)
+    if bool(getattr(args, "launch_via_environment_gate", False)) and mouse_backend != PASSIVE_MOUSE_BACKEND:
         env["PPS_FOCUS_VALIDATION_LAUNCHER_AUTO_CLICK"] = "1"
         env["PPS_FOCUS_VALIDATION_LAUNCHER_REPORT"] = str(output_dir / "launcher_validation_report.json")
     else:
@@ -718,7 +750,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--miss-rate", type=float, default=0.06)
     parser.add_argument("--min-misses", type=int, default=8)
     parser.add_argument("--seed", type=int, default=20260615)
-    parser.add_argument("--mouse-backend", default="pynput", choices=["pynput", "win32", "pyautogui", "qtest"])
+    parser.add_argument(
+        "--mouse-backend",
+        default="pynput",
+        choices=["none", "pynput", "win32", "pyautogui", "qtest"],
+        help="Use none for passive visible companion/screenshot checks that must not move or click the PC mouse.",
+    )
     parser.add_argument(
         "--launch-via-environment-gate",
         action="store_true",
@@ -756,6 +793,13 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default=None,
         help="Validation override passed as PPS_AUDIO_DEVICE_INDEX to force a specific sounddevice output index.",
     )
+    parser.add_argument(
+        "--companion-advertise-ip",
+        default="",
+        help="Optional host/IP encoded in the runner companion QR payload, such as 10.0.2.2 for Android emulator checks.",
+    )
+    parser.add_argument("--companion-port", type=int, default=8767)
+    parser.add_argument("--validation-windowed", action="store_true", help="Show Focus Mode as a normal window during visible validations.")
     parser.add_argument(
         "--wired-loopback",
         default=WIRED_LOOPBACK_OFF,

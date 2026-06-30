@@ -83,6 +83,19 @@ these are copied beside the renderer executable by
 Three.js is used only for the embedded trajectory preview. Its license text is
 included with the vendored files.
 
+## Gradle Wrapper
+
+- Project: Gradle
+- Repository: https://github.com/gradle/gradle
+- Vendored file: `android/runner-companion/gradle/wrapper/gradle-wrapper.jar`
+- License: Apache License 2.0
+
+The Android runner companion source uses the Gradle wrapper to reproduce the
+requested Gradle version. Android app dependencies such as AndroidX Compose,
+CameraX, ML Kit barcode scanning, OkHttp, Kotlin coroutines, and JUnit are
+resolved from Maven repositories during build and are not vendored in this
+source tree.
+
 ## Redistributable HRTF Candidates
 
 The GUI study profiles preload trajectory, timing, and noise parameters. HRTF

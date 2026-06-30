@@ -80,6 +80,23 @@ an equivalent visual artifact under an ignored validation folder, and explicitly
 check for nonblank output, clipping, overlap, text visibility, panel placement,
 and adaptive behavior across the target screen sizes when screen size matters.
 
+## Android Emulator Validation Rule
+
+Android emulator validation must treat the emulator as a fixed-size phone
+screen. Do not resize, enlarge, repeatedly reposition, or otherwise manipulate
+the emulator window to make the UI pass; smartphones have fixed viewports, and
+flicker/reflow from window manipulation invalidates the usability signal. Run
+ADB/uiautomator/button-press checks against the AVD's configured screen size,
+capture screenshots at that size, and treat scrolling, clipping, cramped
+controls, or hidden buttons as app/product findings to fix or document. Do not
+run validation automation that moves or resizes Android emulator windows; manual
+desktop arrangement by the human operator is outside the validation signal, and
+the target remains the phone viewport, not a stretched desktop pane. Do not run
+persistent desktop placement loops against Android emulator windows.
+`windows/Set_Companion_Emulation_Layout.ps1` intentionally leaves emulator
+windows untouched and accepts old `-KeepForSeconds` arguments only as inert
+compatibility input.
+
 ## Preload Catalog Storage Rule
 
 Preload profile storage should mirror the dashboard workflow instead of becoming a flat asset bucket. Every preload profile should have a folder under `assets/preloads/<template_id>/` with segment folders matching the HTML GUI stages: `01_profile/`, `02_looming_stimuli/`, `03_baseline_strategy/`, `04_trial_designer/`, and `05_run_setup/`. Put prebaked auditory-only profile WAVs and source/trajectory metadata in `02_looming_stimuli/`, profile/citation metadata in `01_profile/`, baseline/catch defaults in `03_baseline_strategy/`, trial-row/SOA/snippet metadata in `04_trial_designer/`, and participant/randomization defaults in `05_run_setup/`. Rebuild this cabinet and the inventory with `tools/build_preload_catalog.py` whenever preload templates, source labels, trajectory metadata, or bundled WAVs change.

@@ -4,6 +4,7 @@ param(
     [string]$ZenodoDoi = "",
     [switch]$SkipAudit,
     [switch]$SkipRunnerBuild,
+    [switch]$SkipDashboardBuild,
     [switch]$SkipDownloaderBuild
 )
 
@@ -45,6 +46,17 @@ function Copy-RepoItem {
     }
 }
 
+function Get-BuildPython {
+    $Python = Join-Path $Root ".venv\Scripts\python.exe"
+    if (-not (Test-Path -LiteralPath $Python)) {
+        powershell -ExecutionPolicy Bypass -File (Join-Path $Root "windows\Setup_Windows_App.ps1")
+    }
+    if (-not (Test-Path -LiteralPath $Python)) {
+        throw "Python environment was not created at $Python"
+    }
+    return $Python
+}
+
 if (-not $Version) {
     $Version = Get-ProjectVersion
 }
@@ -52,7 +64,8 @@ if (-not $Version) {
 New-Item -ItemType Directory -Force -Path $DistDir | Out-Null
 
 if (-not $SkipAudit) {
-    & python (Join-Path $Root "tools\release_audit.py")
+    $Python = Get-BuildPython
+    & $Python (Join-Path $Root "tools\release_audit.py")
     if ($LASTEXITCODE -ne 0) {
         exit $LASTEXITCODE
     }
@@ -64,6 +77,15 @@ if (-not $SkipRunnerBuild) {
         exit $LASTEXITCODE
     }
 }
+
+if (-not $SkipDashboardBuild) {
+    & powershell -ExecutionPolicy Bypass -File (Join-Path $Root "windows\Build_Dashboard_Launcher_Exe.ps1")
+    if ($LASTEXITCODE -ne 0) {
+        exit $LASTEXITCODE
+    }
+}
+
+$Python = Get-BuildPython
 
 $StageName = "PPS-Toolkit-v$Version-offline-lab-windows-x64"
 $StageRoot = Join-Path $DistDir "$StageName.stage.$(Get-Date -Format 'yyyyMMddHHmmss')"
@@ -80,9 +102,10 @@ $Items = @(
     "pyproject.toml",
     "index.html",
     ".nojekyll",
+    "android",
     "configs",
     "docs",
-    "For-AI",
+    "installer_protocols",
     "src",
     "study_templates",
     "assets",
@@ -111,8 +134,22 @@ else {
     Write-Warning "Packaged Focus Mode runner was not found at dist\PPSExperimentRunner."
 }
 
+$DashboardLauncherDir = Join-Path $Root "dist\PPSDashboardLauncher"
+if (Test-Path -LiteralPath $DashboardLauncherDir) {
+    $DashboardLauncherDestination = Join-Path $StageRoot "dist\PPSDashboardLauncher"
+    New-Item -ItemType Directory -Force -Path $DashboardLauncherDestination | Out-Null
+    & robocopy $DashboardLauncherDir $DashboardLauncherDestination /E /NFL /NDL /NJH /NJS /NP | Out-Null
+    if ($LASTEXITCODE -ge 8) {
+        throw "robocopy failed while copying packaged dashboard launcher with exit code $LASTEXITCODE"
+    }
+    $global:LASTEXITCODE = 0
+}
+else {
+    Write-Warning "Packaged dashboard launcher was not found at dist\PPSDashboardLauncher."
+}
+
 $PackageInventoryPath = Join-Path $StageRoot "pps_package_inventory.v1.json"
-& python (Join-Path $Root "tools\package_inventory.py") --stage-root $StageRoot --output $PackageInventoryPath --strict
+& $Python (Join-Path $Root "tools\package_inventory.py") --stage-root $StageRoot --output $PackageInventoryPath --strict
 if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
@@ -120,7 +157,7 @@ if ($LASTEXITCODE -ne 0) {
 if (Test-Path -LiteralPath $HeavyZip) {
     Remove-Item -LiteralPath $HeavyZip -Force
 }
-& python (Join-Path $Root "tools\make_offline_lab_zip.py") --source-dir $StageRoot --output $HeavyZip
+& $Python (Join-Path $Root "tools\make_offline_lab_zip.py") --source-dir $StageRoot --output $HeavyZip
 if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
@@ -147,7 +184,7 @@ $ManifestArgs = @(
 if ($ZenodoDoi) {
     $ManifestArgs += @("--zenodo-doi", $ZenodoDoi)
 }
-& python @ManifestArgs
+& $Python @ManifestArgs
 if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }

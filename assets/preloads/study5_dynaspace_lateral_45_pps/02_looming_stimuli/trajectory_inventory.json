@@ -1,0 +1,80 @@
+{
+  "schema": "pps-preload-trajectory-inventory.v1",
+  "template_id": "study5_dynaspace_lateral_45_pps",
+  "trajectories": [
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "DynaSpace looming left 45",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 639.9999,
+        "end_distance_cm": 19.9999,
+        "start_rotation_deg": 315.0,
+        "end_rotation_deg": 315.0,
+        "movement_duration_s": 2.945,
+        "start_hold_s": 0.105,
+        "end_hold_s": 0.8,
+        "path_length_m": 6.2,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": -4.525483,
+          "y_m": 4.525483,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": -0.141421,
+          "y_m": 0.141421,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "DynaSpace looming left 45"
+      ],
+      "tone_types": [
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/study5_dynaspace_lateral_45_pps/02_looming_stimuli/looming_DynaSpace_looming_left_45.wav"
+      ]
+    },
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "DynaSpace looming right 45",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 639.9999,
+        "end_distance_cm": 19.9999,
+        "start_rotation_deg": 45.0,
+        "end_rotation_deg": 45.0,
+        "movement_duration_s": 2.945,
+        "start_hold_s": 0.105,
+        "end_hold_s": 0.8,
+        "path_length_m": 6.2,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 4.525483,
+          "y_m": 4.525483,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.141421,
+          "y_m": 0.141421,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "DynaSpace looming right 45"
+      ],
+      "tone_types": [
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/study5_dynaspace_lateral_45_pps/02_looming_stimuli/looming_DynaSpace_looming_right_45.wav"
+      ]
+    }
+  ]
+}

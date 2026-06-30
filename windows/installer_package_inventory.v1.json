@@ -23,6 +23,20 @@
       "source": "collected from PySide6 by windows/PPSExperimentRunner.spec"
     },
     {
+      "kind": "generated_binary",
+      "path": "dist/PPSDashboardLauncher/PPSDashboardLauncher.exe",
+      "required": true,
+      "role": "packaged offline/local HTML dashboard and companion launcher",
+      "source": "built by windows/Build_Dashboard_Launcher_Exe.ps1"
+    },
+    {
+      "kind": "generated_directory",
+      "path": "dist/PPSDashboardLauncher",
+      "required": true,
+      "role": "PyInstaller onedir dashboard launcher resources",
+      "source": "built by windows/Build_Dashboard_Launcher_Exe.ps1"
+    },
+    {
       "kind": "installer_source",
       "path": "windows/downloader",
       "required": true,
@@ -41,6 +55,34 @@
       "path": "windows/Build_PPS_Distribution.ps1",
       "required": true,
       "role": "builds the offline lab ZIP and download manifest",
+      "source": "tracked"
+    },
+    {
+      "kind": "launcher_build_script",
+      "path": "windows/Build_Dashboard_Launcher_Exe.ps1",
+      "required": true,
+      "role": "builds PPSDashboardLauncher.exe",
+      "source": "tracked"
+    },
+    {
+      "kind": "android_build_script",
+      "path": "windows/Build_Android_Companion.ps1",
+      "required": true,
+      "role": "builds the native Android runner companion debug APK from source",
+      "source": "tracked"
+    },
+    {
+      "kind": "android_validation_support",
+      "path": "windows/Set_Companion_Emulation_Layout.ps1",
+      "required": true,
+      "role": "places the runner on the designated validation screen while leaving the Android emulator fixed-size",
+      "source": "tracked"
+    },
+    {
+      "kind": "android_source_tree",
+      "path": "android/runner-companion",
+      "required": true,
+      "role": "native Kotlin/Compose runner companion source and Gradle wrapper",
       "source": "tracked"
     },
     {
@@ -112,6 +154,13 @@
       "required": true,
       "role": "repo-visible installer package inventory definition",
       "source": "tracked/generated from tools/package_inventory.py"
+    },
+    {
+      "kind": "installer_protocol_tree",
+      "path": "installer_protocols",
+      "required": true,
+      "role": "release build, content orchestration, verification, and missing-link protocols",
+      "source": "tracked"
     },
     {
       "kind": "dashboard_asset_tree",
@@ -282,10 +331,10 @@
   "schema": "pps-installer-package-inventory.v1",
   "stage_root": "",
   "summary": {
-    "item_count": 39,
+    "item_count": 46,
     "missing_required_count": 0,
     "optional_absent_count": 0,
     "optional_item_count": 2,
-    "required_item_count": 37
+    "required_item_count": 44
   }
 }

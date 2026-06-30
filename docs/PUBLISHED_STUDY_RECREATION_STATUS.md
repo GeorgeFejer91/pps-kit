@@ -24,11 +24,13 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 | Profile | Variant | Status | Main reasons |
 |---|---|---|---|
 | study5_box_breathing_pps | - | ready | All required current-GUI fields are present and materializable. |
+| roussel_2025_dynaspace_mobile_pps | - | ready | All required current-GUI fields are present and materializable. |
 | matsuda_2021_four_directions | - | ready | All required current-GUI fields are present and materializable. |
 | barumerli_2026_arm_movement_exp1 | A | ready | All required current-GUI fields are present and materializable. |
 | barumerli_2026_arm_movement_exp2 | B | ready | All required current-GUI fields are present and materializable. |
 | noel_2015_bodily_self | - | ready | All required current-GUI fields are present and materializable. |
 | pfeiffer_2018_lateral_perihead_left_to_right | - | ready | All required current-GUI fields are present and materializable. |
+| study5_dynaspace_lateral_45_pps | - | ready | All required current-GUI fields are present and materializable. |
 | serino_2015_peri_trunk_exp1 | C | ready | All required current-GUI fields are present and materializable. |
 
 ## Missing publication parameters

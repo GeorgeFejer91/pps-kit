@@ -4,7 +4,7 @@ from pathlib import Path
 from importlib.util import find_spec
 import os
 
-from PyInstaller.utils.hooks import collect_data_files
+from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
 
 root = Path.cwd().resolve()
@@ -26,6 +26,12 @@ datas = collect_data_files(
         "viewer/vendor/three/*",
     ],
 )
+companion_hiddenimports = (
+    collect_submodules("h11")
+    + collect_submodules("sniffio")
+    + collect_submodules("uvicorn.protocols.http")
+    + collect_submodules("uvicorn.protocols.websockets")
+)
 
 pyside_spec = find_spec("PySide6")
 if pyside_spec and pyside_spec.submodule_search_locations:
@@ -36,6 +42,10 @@ if pyside_spec and pyside_spec.submodule_search_locations:
             datas.append((str(plugin_dir), f"PySide6/plugins/{plugin_name}"))
 
 for source, target in (
+    (
+        root / "assets" / "0. Head-Related Impulse Response (HRIR) model",
+        "assets/0. Head-Related Impulse Response (HRIR) model",
+    ),
     (root / "assets" / "preloads", "assets/preloads"),
     (root / "assets" / "breathing", "assets/breathing"),
     (root / "assets" / "click", "assets/click"),
@@ -50,7 +60,24 @@ a = Analysis(
     pathex=[str(src_root)],
     binaries=[],
     datas=datas,
-    hiddenimports=["PySide6.QtTest", "pyautogui", "pynput.mouse", "soundfile"],
+    hiddenimports=[
+        "PySide6.QtTest",
+        "fastapi",
+        "PIL.Image",
+        "pyautogui",
+        "pynput.mouse",
+        "qrcode",
+        "soundfile",
+        "uvicorn.lifespan.on",
+        "uvicorn.loops.asyncio",
+        "uvicorn.loops.auto",
+        "uvicorn.protocols.http.auto",
+        "uvicorn.protocols.http.h11_impl",
+        "uvicorn.protocols.websockets.auto",
+        "uvicorn.protocols.websockets.websockets_impl",
+        "websockets",
+    ]
+    + companion_hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

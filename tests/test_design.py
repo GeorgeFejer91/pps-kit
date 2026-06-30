@@ -14,11 +14,13 @@ from peripersonal_space_toolkit.design import (
     DEFAULT_SOFA_FILE,
     DEFAULT_TRAJECTORY_PLANE_HEIGHT_M,
     NoiseDefinition,
+    PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
     ProtocolSpec,
     horizontal_point_from_distance_rotation,
     block_trial_rows,
     default_design,
     design_from_dict,
+    design_to_dict,
     experiment_schedule_rows,
     export_protocol_csv,
     export_trajectory_csv,
@@ -27,6 +29,7 @@ from peripersonal_space_toolkit.design import (
     point_from_distance_rotation_height,
     protocol_summary,
     save_design,
+    gold_standard_looming_source_parameters,
     trajectory_point_at_time,
     trajectory_points,
     trajectory_points_with_holds,
@@ -44,6 +47,8 @@ from peripersonal_space_toolkit.render_backend import (
     THREEDTI_COMMIT,
     app_to_3dti_coordinates,
     build_render_config,
+    _dynaspace_burst_onsets,
+    _generate_dynaspace_burst_train,
     load_render_design,
     postprocess_native_manifest,
     render_design_with_3dti,
@@ -69,6 +74,14 @@ def test_default_design_matches_four_second_study5_timing():
     assert validate_design(design) == []
     assert design.trajectory.movement_duration_s == 3.0
     assert design.trajectory.total_duration_s == 4.0
+    assert [noise.source_profile for noise in design.noises] == [
+        PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
+        PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
+    ]
+    assert all(
+        noise.source_profile_parameters["burst_count_mode"] == "duration_derived"
+        for noise in design.noises
+    )
     points = trajectory_points(design.trajectory, samples=5)
     assert points[0]["radius_m"] == pytest.approx(1.1)
     assert points[-1]["radius_m"] == pytest.approx(0.1)
@@ -343,6 +356,156 @@ def test_3dti_render_config_preserves_app_coordinate_convention(tmp_path: Path):
     }
 
 
+def test_source_profile_round_trips_and_reaches_render_config(tmp_path: Path):
+    design = default_design()
+    design.noises = design.noises[:1]
+    design.noises[0].source_profile = PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+    design.noises[0].source_profile_parameters = gold_standard_looming_source_parameters({"onset_s": 0.125})
+
+    loaded = design_from_dict(design_to_dict(design))
+    config = build_render_config(loaded, seed=987, output_dir=tmp_path)
+
+    assert loaded.noises[0].source_profile == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+    assert loaded.noises[0].source_profile_parameters["burst_count_mode"] == "duration_derived"
+    assert loaded.noises[0].source_profile_parameters["onset_s"] == pytest.approx(0.125)
+    assert config["source"]["noises"][0]["source_profile"] == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+    assert config["source"]["noises"][0]["source_profile_parameters"]["target_period_s"] == pytest.approx(0.095)
+    assert config["source"]["noises"][0]["source_profile_parameters"]["active_window_s"] == pytest.approx(
+        design.trajectory.movement_duration_s
+    )
+    assert (
+        config["source"]["noises"][0]["source_profile_parameters"]["active_window_s_source"]
+        == "trajectory.movement_duration_s"
+    )
+
+
+def test_continuous_noise_source_profile_is_explicit_opt_out(tmp_path: Path):
+    design = default_design()
+    design.noises = [
+        NoiseDefinition("Continuous pink", "pink", source_profile="continuous_noise")
+    ]
+
+    loaded = design_from_dict(design_to_dict(design))
+    config = build_render_config(loaded, seed=4321, output_dir=tmp_path)
+
+    assert loaded.noises[0].source_profile == "continuous_noise"
+    assert loaded.noises[0].source_profile_parameters == {}
+    assert config["source"]["noises"][0]["source_profile"] == "continuous_noise"
+    assert "source_profile_parameters" not in config["source"]["noises"][0]
+
+
+def test_dynaspace_burst_train_derives_symmetric_spacing_from_active_window():
+    import numpy as np
+
+    sample_rate = 10_000
+    samples = int(round(0.800 * sample_rate))
+    parameters = gold_standard_looming_source_parameters(
+        {
+            "active_window_s": 0.475,
+            "burst_duration_s": 0.030,
+            "onset_s": 0.100,
+            "rise_fall_s": 0.002,
+            "target_period_s": 0.095,
+        }
+    )
+
+    onsets, resolved = _dynaspace_burst_onsets(samples=samples, sample_rate=sample_rate, parameters=parameters)
+    source = _generate_dynaspace_burst_train("white", samples, sample_rate, 123, parameters)
+    active_indices = np.flatnonzero(np.abs(source) > 1e-8)
+    breaks = np.where(np.diff(active_indices) > int(round(0.010 * sample_rate)))[0]
+    starts = np.r_[active_indices[0], active_indices[breaks + 1]]
+    stops = np.r_[active_indices[breaks], active_indices[-1]]
+
+    assert len(onsets) == 6
+    assert resolved["actual_period_s"] == pytest.approx(0.089, abs=1e-9)
+    assert onsets[0] == pytest.approx(0.100)
+    assert onsets[-1] + resolved["burst_duration_s"] == pytest.approx(0.575)
+    assert len(starts) == 6
+    assert np.median(np.diff(starts) / sample_rate) == pytest.approx(0.089, abs=1.0 / sample_rate)
+    assert (stops[-1] + 1) / sample_rate <= 0.575 + (1.0 / sample_rate)
+
+
+def test_dynaspace_burst_train_keeps_legacy_fixed_interval_parameters():
+    onsets, resolved = _dynaspace_burst_onsets(
+        samples=10_000,
+        sample_rate=10_000,
+        parameters={
+            "burst_count": 4,
+            "burst_duration_s": 0.020,
+            "inter_burst_interval_s": 0.080,
+            "onset_s": 0.050,
+        },
+    )
+
+    assert resolved["spacing_policy"] == "fixed_period_truncate"
+    assert resolved["actual_period_s"] == pytest.approx(0.100)
+    assert onsets == pytest.approx([0.050, 0.150, 0.250, 0.350])
+
+
+def test_dynaspace_burst_train_source_profile_renders_pulsed_audio(tmp_path: Path):
+    import numpy as np
+    import soundfile as sf
+    from scipy import signal
+
+    design = default_design()
+    design.noises = [
+        NoiseDefinition(
+            label="DynaSpace burst source",
+            noise_type="white",
+            azimuth_deg=-45.0,
+            motion_mode="stationary",
+            source_profile=PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
+            source_profile_parameters=gold_standard_looming_source_parameters(
+                {
+                    "burst_count": 6,
+                    "burst_count_mode": "fixed",
+                    "active_window_s": 0.505,
+                    "onset_s": 0.100,
+                    "rise_fall_s": 0.005,
+                }
+            ),
+        )
+    ]
+    design.trajectory.path_length_m = 0.2
+    design.trajectory.propagation_speed_mps = 1.0
+    design.trajectory.padding_pre_s = 0.1
+    design.trajectory.padding_post_s = 0.4
+    design.protocol.soa_values_ms = [150]
+    design.protocol.spatial_values_cm = [100.0]
+
+    design_path = tmp_path / "dynaspace_burst.design.json"
+    output_dir = tmp_path / "rendered"
+    save_design(design, design_path)
+    result = render_design_with_3dti(
+        design_path,
+        output_dir,
+        seed=31415,
+        engine="python-sofa-reference",
+        include_tactile=False,
+    )
+
+    assert result.status == "rendered_reference"
+    audio, sample_rate = sf.read(result.wav_paths[0], always_2d=True)
+    mono = np.mean(audio[:, :2], axis=1)
+    frame = int(round(0.020 * sample_rate))
+    hop = int(round(0.0025 * sample_rate))
+    rms = np.array(
+        [
+            np.sqrt(np.mean(mono[start : start + frame] * mono[start : start + frame]))
+            for start in range(0, len(mono) - frame, hop)
+        ]
+    )
+    peaks, _properties = signal.find_peaks(rms, distance=int(round(0.060 * sample_rate / hop)), prominence=np.max(rms) * 0.08)
+    peak_times = peaks * hop / sample_rate
+
+    assert len(peaks) >= 5
+    assert np.median(np.diff(peak_times[:6])) == pytest.approx(0.095, abs=0.018)
+    with result.qc_path.open(newline="", encoding="utf-8") as f:
+        qc_rows = list(csv.DictReader(f))
+    assert qc_rows[0]["source_profile"] == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+    assert '"burst_count": 6' in qc_rows[0]["source_profile_parameters"]
+
+
 def test_gui_style_saved_design_round_trip_controls_noise_trajectory_and_soas(tmp_path: Path):
     base = default_design()
     base.name = "Custom GUI looming profile"
@@ -399,9 +562,20 @@ def test_gui_style_saved_design_round_trip_controls_noise_trajectory_and_soas(tm
     assert loaded.protocol.soa_values_ms == [120, 480]
     assert loaded.protocol.spatial_values_cm == [95.0, 15.0]
     assert loaded.protocol.repetitions_per_condition == 3
-    assert config["source"]["noises"] == [
-        {"label": "GUI pink test", "noise_type": "pink", "tone_type": "pink", "gain": 0.7}
-    ]
+    assert len(config["source"]["noises"]) == 1
+    config_noise = config["source"]["noises"][0]
+    assert config_noise["label"] == "GUI pink test"
+    assert config_noise["noise_type"] == "pink"
+    assert config_noise["tone_type"] == "pink"
+    assert config_noise["gain"] == pytest.approx(0.7)
+    assert config_noise["motion_mode"] == "looming"
+    assert config_noise["source_profile"] == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+    assert config_noise["source_profile_parameters"]["burst_count_mode"] == "duration_derived"
+    assert config_noise["source_profile_parameters"]["active_window_s"] == pytest.approx(2.5)
+    assert (
+        config_noise["source_profile_parameters"]["active_window_s_source"]
+        == "trajectory.movement_duration_s"
+    )
     assert config["protocol"]["soa_values_ms"] == [120, 480]
     assert config["protocol"]["spatial_values_cm"] == [95.0, 15.0]
     assert [event["soa_ms"] for event in config["tactile"]["events"]] == [120, 480]
@@ -530,7 +704,7 @@ def test_auto_render_writes_reference_wav_with_binaural_and_tactile_channels(tmp
     design.trajectory.end_y_m = 0.05
     design.trajectory.end_z_m = 0.0
     design.trajectory.path_length_m = 0.8
-    design.trajectory.propagation_speed_mps = 4.0
+    design.trajectory.propagation_speed_mps = 1.0
     design.trajectory.padding_pre_s = 0.0
     design.trajectory.padding_post_s = 0.0
     design.protocol.soa_values_ms = [50]
@@ -553,7 +727,7 @@ def test_auto_render_writes_reference_wav_with_binaural_and_tactile_channels(tmp
     assert result.tactile_events_path and result.tactile_events_path.exists()
     audio, sample_rate = sf.read(result.wav_paths[0], always_2d=True)
     assert sample_rate == 44100
-    assert audio.shape == (8820, 3)
+    assert audio.shape == (35280, 3)
     assert np.max(np.abs(audio[:, 0])) > 0.01
     assert np.max(np.abs(audio[:, 1])) > 0.01
     onset = int(0.05 * sample_rate)

@@ -30,7 +30,11 @@ from .loudness import (
     normalize_loudness_policy,
 )
 from .output_layout import (
+    output_data_max_participant_dir,
     output_data_analytics_dir,
+    output_data_min_dir,
+    output_data_min_master_csv,
+    output_data_min_participant_csv,
     output_metadata_dir,
     output_prepared_blocks_dir,
     output_runner_logs_dir,
@@ -38,6 +42,7 @@ from .output_layout import (
     output_verbose_events_dir,
 )
 from .analysis_catalog import refresh_analysis_browser_outputs
+from .response_policy import TACTILE_RESPONSE_MAX_RT_S, TACTILE_RESPONSE_MIN_RT_S, TACTILE_RESPONSE_RULE_LABEL
 from .session_analysis import analyze_session_events, format_analysis_summary, write_analysis_csvs
 from .session_events import SessionEventLogger
 from .runner_diary import append_diary_entry, ensure_output_diary, find_output_diary
@@ -75,13 +80,33 @@ SEGMENT_BLOCK_PREVIEW_SCHEMA = "pps-block-csv-preview.v1"
 LAST_EXPERIMENT_SCHEMA = "pps-last-experiment.v1"
 PREPARED_SESSION_QUEUE_SCHEMA = "pps-prepared-session-queue.v1"
 BLOCK_WAV_CACHE_SCHEMA = "pps-session-block-cache.v1"
-BLOCK_WAV_CACHE_VERSION = "2026-06-23.woojer-compensation.v1"
+BLOCK_WAV_CACHE_VERSION = "2026-06-29.source-file-content.v1"
 RESPONSE_MARKER_GAIN = 0.05
 EXTERNAL_LABRECORDER_FINAL_MARKER_SETTLE_S = 1.0
 LAUNCHABLE_ACTIVITY_EVENTS = {"run_setup_prepared", "session_prepared", "runner_launched"}
 PARTICIPANT_TRIAL_CSV_SUFFIX = "_trials.csv"
 EXTERNAL_LABRECORDER_SCOPE_PART = "part"
 EXTERNAL_LABRECORDER_SCOPE_SESSION_GROUP = "session_group_same_window"
+PART1_TOPUP_REPEAT_BLOCK_INDEXES = (1, 2)
+DATA_MIN_FIELDNAMES = [
+    "participant_id",
+    "session_id",
+    "part_session_id",
+    "part_number",
+    "block_number",
+    "block_label",
+    "trial_number",
+    "trial_number_global",
+    "trial_uid",
+    "condition",
+    "phase",
+    "noise_type",
+    "trial_type",
+    "soa_ms",
+    "response_given",
+    "hit_miss",
+    "reaction_time_ms",
+]
 
 
 def _package_output_root(package: "RunPackage") -> Path:
@@ -208,6 +233,35 @@ def _audio_evidence_path(package: "RunPackage", block: "RunBlock") -> Path:
 
 def _wired_loopback_path(package: "RunPackage", block: "RunBlock") -> Path:
     return Path(package.session_dir) / f"block_{int(block.index):02d}_wired_loopback_input4.wav"
+
+
+def _data_max_context_leaf(package: "RunPackage") -> Path:
+    if _package_is_split_part(package):
+        return Path(package.session_group_id) / package.part_folder_name
+    return Path(package.session_id)
+
+
+def _data_max_session_leaf(package: "RunPackage") -> Path:
+    return output_data_max_participant_dir(_package_output_root(package), package.participant_id) / "sessions" / _data_max_context_leaf(package)
+
+
+def _data_max_group_session_dir(package: "RunPackage") -> Path:
+    participant_root = output_data_max_participant_dir(_package_output_root(package), package.participant_id)
+    if _package_is_split_part(package):
+        return participant_root / "sessions" / package.session_group_id
+    return participant_root / "sessions" / package.session_id
+
+
+def _data_max_runner_logs_leaf(package: "RunPackage") -> Path:
+    return output_data_max_participant_dir(_package_output_root(package), package.participant_id) / "runner_logs" / _data_max_context_leaf(package)
+
+
+def _data_max_analysis_leaf(package: "RunPackage") -> Path:
+    return output_data_max_participant_dir(_package_output_root(package), package.participant_id) / "analysis_outputs" / _data_max_context_leaf(package)
+
+
+def _data_max_prepared_blocks_leaf(package: "RunPackage") -> Path:
+    return output_data_max_participant_dir(_package_output_root(package), package.participant_id) / "prepared_blocks" / _data_max_context_leaf(package) / "blocks"
 
 
 WIRED_LOOPBACK_OFF = "off"
@@ -408,8 +462,8 @@ class ParticipantTrialCsvWriter:
         *,
         package: RunPackage,
         participant_metadata: dict[str, Any] | None = None,
-        min_rt_s: float = 0.1,
-        max_rt_s: float = 4.0,
+        min_rt_s: float = TACTILE_RESPONSE_MIN_RT_S,
+        max_rt_s: float = TACTILE_RESPONSE_MAX_RT_S,
     ):
         self.path = Path(path)
         self.package = package
@@ -419,6 +473,7 @@ class ParticipantTrialCsvWriter:
         self._trial_states: dict[tuple[str, str], dict[str, Any]] = {}
         self._clicks: list[dict[str, Any]] = []
         self._written_keys: set[tuple[str, str]] = set()
+        self._used_click_ids: set[Any] = set()
         self._lock = threading.RLock()
         self._write_header()
 
@@ -444,6 +499,7 @@ class ParticipantTrialCsvWriter:
             self._trial_states = {}
             self._clicks = []
             self._written_keys = set()
+            self._used_click_ids = set()
             self._write_header()
             for event in sorted(
                 (_flat_event_row(item) for item in events),
@@ -458,8 +514,17 @@ class ParticipantTrialCsvWriter:
                     state = self._trial_states.setdefault(key, {"events": {}, "base": dict(event)})
                     state["events"][event_type] = dict(event)
                     state["base"].update({name: value for name, value in event.items() if value not in (None, "")})
-                    if event_type == "trial_end":
-                        self._append_resolved_trial(key, state)
+            states = sorted(
+                self._trial_states.items(),
+                key=lambda item: (
+                    _as_float(item[1].get("events", {}).get("trial_start", {}).get("unix_time"), default=0.0),
+                    _as_float(item[1].get("events", {}).get("trial_end", {}).get("unix_time"), default=0.0),
+                    item[0],
+                ),
+            )
+            for key, state in states:
+                if "trial_end" in state.get("events", {}):
+                    self._append_resolved_trial(key, state)
             return self.path
 
     def _write_header(self) -> None:
@@ -483,6 +548,9 @@ class ParticipantTrialCsvWriter:
             writer = csv.DictWriter(handle, fieldnames=PARTICIPANT_TRIAL_FIELDNAMES)
             writer.writerow(row)
         self._written_keys.add(key)
+        response_event_id = row.get("response_event_id", "")
+        if response_event_id not in (None, ""):
+            self._used_click_ids.add(response_event_id)
 
     def _resolved_trial_row(self, state: dict[str, Any]) -> dict[str, Any]:
         events = dict(state.get("events", {}) or {})
@@ -521,7 +589,7 @@ class ParticipantTrialCsvWriter:
             rt_ms = f"{(click_unix - tactile_unix) * 1000.0:.3f}"
         if tactile_present:
             outcome = "Hit" if valid_response else "Miss"
-            correctness_rule = "response within 4 s tactile response window"
+            correctness_rule = f"response within {TACTILE_RESPONSE_RULE_LABEL}"
         elif catch_trial:
             outcome = "Miss" if response_given else "Hit"
             correctness_rule = "withhold response during catch/audio-only trial"
@@ -584,10 +652,14 @@ class ParticipantTrialCsvWriter:
     ) -> tuple[dict[str, Any], bool, bool]:
         start = response_window_unix if response_window_unix > 0.0 else trial_start_unix
         end = trial_end_unix if trial_end_unix > start else start + self.max_rt_s
+        if tactile_present and tactile_unix > 0.0:
+            start = min(start, tactile_unix) if start > 0.0 else tactile_unix
+            end = max(end, tactile_unix + self.max_rt_s)
         candidates = [
             click
             for click in self._clicks
-            if _truthy(click.get("in_target", True))
+            if click.get("event_id") not in self._used_click_ids
+            and _truthy(click.get("in_target", True))
             and _truthy(click.get("during_playback", True))
             and str(_row_value(click, "block_number", "block_index", default="")).strip() == block_number
             and start <= _as_float(click.get("unix_time"), default=0.0) <= end
@@ -598,7 +670,7 @@ class ParticipantTrialCsvWriter:
         if tactile_present:
             tactile_start = tactile_unix if tactile_unix > 0.0 else start
             valid_start = tactile_start + self.min_rt_s
-            valid_end = min(end, tactile_start + self.max_rt_s)
+            valid_end = tactile_start + self.max_rt_s
             for click in candidates:
                 click_time = _as_float(click.get("unix_time"), default=0.0)
                 if valid_start <= click_time <= valid_end:
@@ -607,6 +679,307 @@ class ParticipantTrialCsvWriter:
         if catch_trial:
             return candidates[0], False, True
         return candidates[0], False, True
+
+
+def _normalize_data_min_phase(value: Any) -> str:
+    text = str(value or "").strip()
+    lowered = text.lower()
+    if "inhale" in lowered:
+        return "Inhale"
+    if "exhale" in lowered:
+        return "Exhale"
+    return text
+
+
+def _normalize_data_min_bool(value: Any) -> str:
+    return "true" if _truthy(value) else "false"
+
+
+def _normalize_data_min_outcome(value: Any) -> str:
+    text = str(value or "").strip()
+    lowered = text.lower()
+    if "miss" in lowered:
+        return "Miss"
+    if "hit" in lowered:
+        return "Hit"
+    return text
+
+
+def _is_data_min_filler_or_debug(row: dict[str, Any]) -> bool:
+    role = str(_row_value(row, "topup_role", "Topup_Role", default="")).strip().lower()
+    trial_type = str(_row_value(row, "trial_type", "Trial_Type", default="")).strip().lower()
+    family = str(_row_value(row, "family", "Family", default="")).strip().lower()
+    if role in {"filler", "debug"}:
+        return True
+    if trial_type in {"filler", "debug"} or family in {"filler", "debug"}:
+        return True
+    return False
+
+
+def _data_min_row_from_rich(row: dict[str, Any], *, trial_number_global: int) -> dict[str, Any]:
+    return {
+        "participant_id": _row_value(row, "participant_id", "Participant_ID", default=""),
+        "session_id": _row_value(row, "session_id", "Session_ID", default=""),
+        "part_session_id": _row_value(row, "part_session_id", "Part_Session_ID", default=""),
+        "part_number": _row_value(row, "part_number", "Part_Number", default=""),
+        "block_number": _row_value(row, "block_number", "block_index", "Block_Number", default=""),
+        "block_label": _row_value(row, "block_label", "Block_Label", default=""),
+        "trial_number": _row_value(row, "trial_number", "trial_index", "Trial_Number", default=""),
+        "trial_number_global": str(trial_number_global),
+        "trial_uid": _row_value(row, "trial_uid", "Trial_UID", default=""),
+        "condition": _row_value(row, "condition", "Condition", default=""),
+        "phase": _normalize_data_min_phase(_row_value(row, "respiratory_phase", "phase", "Row_Label", default="")),
+        "noise_type": _row_value(row, "noise_type", "Noise_Type", "noise_label", default=""),
+        "trial_type": _row_value(row, "trial_type", "Trial_Type", default=""),
+        "soa_ms": _row_value(row, "soa_ms", "SOA_ms", default=""),
+        "response_given": _normalize_data_min_bool(_row_value(row, "response_given", "Response_Given", default=False)),
+        "hit_miss": _normalize_data_min_outcome(_row_value(row, "outcome", "hit_miss", "Hit_Miss", default="")),
+        "reaction_time_ms": _row_value(row, "rt_ms", "RT_ms", "reaction_time_ms", default=""),
+    }
+
+
+def _data_min_rows_from_participant_trials(paths: Iterable[Path]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    global_index = 1
+    for path in paths:
+        for row in _read_csv_rows(path):
+            if _is_data_min_filler_or_debug(row):
+                continue
+            rows.append(_data_min_row_from_rich(row, trial_number_global=global_index))
+            global_index += 1
+    return rows
+
+
+def _write_data_min_csv(path: Path, rows: list[dict[str, Any]]) -> Path:
+    _mkdir(path.parent)
+    with open(_filesystem_path(path), "w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=DATA_MIN_FIELDNAMES, extrasaction="ignore")
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({field: row.get(field, "") for field in DATA_MIN_FIELDNAMES})
+    return path
+
+
+def _data_min_csv_header(path: Path) -> list[str]:
+    try:
+        with open(_filesystem_path(path), newline="", encoding="utf-8") as handle:
+            reader = csv.reader(handle)
+            return next(reader, [])
+    except Exception:
+        return []
+
+
+def _is_data_min_participant_csv(path: Path, output_root: Path) -> bool:
+    master_name = output_data_min_master_csv(output_root).name
+    return path.name != master_name and path.suffix.lower() == ".csv" and _data_min_csv_header(path) == DATA_MIN_FIELDNAMES
+
+
+def _data_min_participant_csvs(output_root: Path) -> list[Path]:
+    data_min = output_data_min_dir(output_root)
+    return [path for path in sorted(data_min.glob("*.csv"), key=lambda item: item.name.lower()) if _is_data_min_participant_csv(path, output_root)]
+
+
+def _prune_data_min_dir(output_root: Path) -> None:
+    data_min = output_data_min_dir(output_root)
+    if not _path_exists(data_min):
+        return
+    master_name = output_data_min_master_csv(output_root).name
+    try:
+        children = list(Path(data_min).iterdir())
+    except Exception:
+        return
+    for child in children:
+        if child.name == master_name:
+            continue
+        if child.is_file() and _is_data_min_participant_csv(child, output_root):
+            continue
+        try:
+            if child.is_dir():
+                shutil.rmtree(_filesystem_path(child))
+            else:
+                child.unlink()
+        except Exception:
+            continue
+
+
+def _refresh_data_min_master_csv(output_root: Path) -> Path:
+    participant_csvs = _data_min_participant_csvs(output_root)
+    master = output_data_min_master_csv(output_root)
+    _mkdir(master.parent)
+    with open(_filesystem_path(master), "w", newline="", encoding="utf-8") as output:
+        writer = csv.DictWriter(output, fieldnames=DATA_MIN_FIELDNAMES, extrasaction="ignore")
+        writer.writeheader()
+        for participant_csv in participant_csvs:
+            for row in _read_csv_rows(participant_csv):
+                writer.writerow({field: row.get(field, "") for field in DATA_MIN_FIELDNAMES})
+    return master
+
+
+def _package_group_completed(package: "RunPackage") -> bool:
+    if not _package_is_split_part(package):
+        return True
+    manifest = _load_json(_session_group_manifest_path(package))
+    parts = [part for part in manifest.get("parts", []) if isinstance(part, dict)] if isinstance(manifest, dict) else []
+    if not parts:
+        return False
+    return all(bool(part.get("completed")) for part in parts)
+
+
+def _participant_trial_paths_for_completed_package(package: "RunPackage") -> list[Path]:
+    if not _package_is_split_part(package):
+        return [_participant_trials_csv_path(package)] if _path_is_file(_participant_trials_csv_path(package)) else []
+    if not _package_group_completed(package):
+        return []
+    manifest = _load_json(_session_group_manifest_path(package))
+    paths: list[Path] = []
+    for part in sorted(manifest.get("parts", []), key=lambda item: _as_int(item.get("part_number"), default=0)):
+        try:
+            part_package = load_run_package(Path(str(part.get("session_manifest_path") or "")))
+        except Exception:
+            continue
+        trials = _participant_trials_csv_path(part_package)
+        if _path_is_file(trials):
+            paths.append(trials)
+    return paths
+
+
+def write_data_min_publication_outputs(package: "RunPackage") -> dict[str, Path]:
+    paths = _participant_trial_paths_for_completed_package(package)
+    if not paths:
+        return {}
+    output_root = _package_output_root(package)
+    participant_csv = output_data_min_participant_csv(output_root, package.participant_id)
+    rows = _data_min_rows_from_participant_trials(paths)
+    _write_data_min_csv(participant_csv, rows)
+    _prune_data_min_dir(output_root)
+    master_csv = _refresh_data_min_master_csv(output_root)
+    return {
+        "data_min_participant_csv": participant_csv,
+        "data_min_master_successful_participants_csv": master_csv,
+    }
+
+
+def _copy_existing_path(source: Path, destination: Path) -> Path | None:
+    if not source or not _path_exists(source):
+        return None
+    try:
+        if _path_is_file(source):
+            _mkdir(destination.parent)
+            shutil.copy2(_filesystem_path(source), _filesystem_path(destination))
+            return destination
+        _mkdir(destination)
+        shutil.copytree(_filesystem_path(source), _filesystem_path(destination), dirs_exist_ok=True)
+        return destination
+    except Exception:
+        return None
+
+
+def _copy_directory_contents(source: Path, destination: Path) -> None:
+    if not source or not _path_exists(source):
+        return
+    _mkdir(destination)
+    try:
+        for child in sorted(Path(source).iterdir(), key=lambda item: item.name):
+            _copy_existing_path(child, destination / child.name)
+    except Exception:
+        return
+
+
+def mirror_data_max_outputs(package: "RunPackage", *, analysis_outputs: dict[str, Path] | None = None) -> dict[str, Path]:
+    participant_root = output_data_max_participant_dir(_package_output_root(package), package.participant_id)
+    participant_label = participant_root.name
+    demographics_dir = participant_root / f"{participant_label}_demographics"
+    calibration_dir = participant_root / f"{participant_label}_tactile-calibration"
+    session_leaf = _data_max_session_leaf(package)
+    runner_logs_leaf = _data_max_runner_logs_leaf(package)
+    analysis_leaf = _data_max_analysis_leaf(package)
+    prepared_leaf = _data_max_prepared_blocks_leaf(package)
+    outputs: dict[str, Path] = {"data_max_participant_dir": participant_root, "data_max_session_dir": session_leaf}
+
+    for directory in (
+        demographics_dir,
+        calibration_dir,
+        participant_root / "sessions",
+        participant_root / "prepared_blocks",
+        participant_root / "analysis_outputs",
+        participant_root / "runner_logs",
+    ):
+        _mkdir(directory)
+
+    _copy_directory_contents(Path(package.session_dir), session_leaf)
+    session_sources = [
+        package.manifest_path,
+        package.design_path,
+        package.protocol_path,
+        _loudness_manifest_path(package),
+        _session_metadata_path(package),
+        _verbose_events_csv_path(package),
+        _verbose_events_xdf_path(package),
+        _lsl_markers_csv_path(package),
+        _lsl_markers_xdf_path(package),
+        _trigger_dictionary_path(package),
+    ]
+    if _package_is_split_part(package):
+        session_sources.append(_part_completion_status_path(package))
+    for source in session_sources:
+        copied = _copy_existing_path(Path(source), session_leaf / Path(source).name) if source else None
+        if copied is not None:
+            outputs[f"data_max_{Path(source).stem}"] = copied
+
+    if _package_is_split_part(package):
+        group_manifest = _session_group_manifest_path(package)
+        copied = _copy_existing_path(group_manifest, _data_max_group_session_dir(package) / group_manifest.name)
+        if copied is not None:
+            outputs["data_max_session_group_manifest"] = copied
+
+    _copy_directory_contents(_package_runner_log_dir(package), runner_logs_leaf)
+    _copy_directory_contents(_package_analytics_dir(package), analysis_leaf)
+    _copy_directory_contents(_package_prepared_blocks_dir(package), prepared_leaf)
+    if analysis_outputs:
+        for key, source in analysis_outputs.items():
+            source_path = Path(source)
+            if not _path_exists(source_path):
+                continue
+            if source_path.parent == _package_analytics_dir(package):
+                copied = _copy_existing_path(source_path, analysis_leaf / source_path.name)
+            else:
+                copied = _copy_existing_path(source_path, session_leaf / source_path.name)
+            if copied is not None:
+                outputs[f"data_max_{key}"] = copied
+
+    output_root = _package_output_root(package)
+    raw_participant_id = str(package.participant_id or "").strip()
+    calibration_sources = [
+        output_root / raw_participant_id / f"{raw_participant_id}_tactile-calibration",
+        output_root / participant_label / f"{participant_label}_tactile-calibration",
+    ]
+    seen_calibration_sources: set[Path] = set()
+    for source in calibration_sources:
+        source = Path(source)
+        if source in seen_calibration_sources:
+            continue
+        seen_calibration_sources.add(source)
+        if _path_exists(source):
+            _copy_directory_contents(source, calibration_dir)
+            outputs["data_max_tactile_calibration_dir"] = calibration_dir
+            break
+
+    metadata = _load_json(_session_metadata_path(package))
+    participant_metadata = metadata.get("participant", {}) if isinstance(metadata, dict) else {}
+    if isinstance(participant_metadata, dict) and participant_metadata:
+        payload = {
+            "schema": "pps-private-participant-demographics.v1",
+            "participant_id": package.participant_id,
+            "session_id": package.session_id,
+            "session_group_id": package.session_group_id,
+            "part_session_id": package.part_session_id,
+            "part_number": package.part_number,
+            "participant": participant_metadata,
+        }
+        _write_json_file(demographics_dir / "participant_metadata.private.json", payload)
+        _write_json_file(demographics_dir / "setup_submission.private.json", payload)
+        outputs["data_max_demographics_dir"] = demographics_dir
+    return outputs
 
 
 ProgressCallback = Callable[[dict[str, Any]], None]
@@ -1372,6 +1745,31 @@ def _prepared_session_sources_current(package: RunPackage, run_setup_manifest_pa
                 f"Prepared block {block.index} trial count is stale: "
                 f"{block.trial_count} prepared vs {len(source_rows)} source rows."
             )
+        prepared_csv = _session_package_path(package, block.manifest_path)
+        try:
+            prepared_rows = _read_csv_rows(prepared_csv)
+        except Exception as exc:
+            return False, f"Prepared block manifest cannot be read: {exc}"
+        if len(prepared_rows) != int(block.trial_count):
+            return False, (
+                f"Prepared block {block.index} manifest row count is stale: "
+                f"{block.trial_count} expected vs {len(prepared_rows)} prepared rows."
+            )
+        ordered_source_rows = sorted(source_rows, key=lambda row: _as_int(row.get("block_trial_index"), default=0))
+        for source_row, prepared_row in zip(ordered_source_rows, prepared_rows):
+            trial_path = _resolve_relative_path(
+                _row_value(source_row, "Trial_File_Path", "trial_file_path", default=""),
+                source_csv.parent,
+            )
+            if not _path_exists(trial_path):
+                return False, f"Prepared block {block.index} source trial WAV is missing: {trial_path}"
+            current_hash = _sha256_file(trial_path)
+            declared_hash = str(_row_value(source_row, "Source_SHA256", "source_sha256", default="")).strip()
+            prepared_hash = str(_row_value(prepared_row, "Source_SHA256", "source_sha256", default="")).strip()
+            if declared_hash and declared_hash != current_hash:
+                return False, f"Prepared block {block.index} is stale because a source trial WAV changed: {trial_path}"
+            if prepared_hash and prepared_hash != current_hash:
+                return False, f"Prepared block {block.index} is stale because a source trial WAV changed: {trial_path}"
     return True, "Prepared local audio package is available."
 
 
@@ -1709,12 +2107,13 @@ def _segment_block_cache_key(
     row_payload: list[dict[str, str]] = []
     for row in ordered_rows:
         trial_path = _resolve_relative_path(_row_value(row, "trial_file_path", "Trial_File_Path", default=""), source_csv.parent)
-        expected_hash = str(_row_value(row, "source_sha256", "Source_SHA256", default="")).strip()
-        actual_hash = expected_hash or (_sha256_file(trial_path) if _path_exists(trial_path) else "")
+        declared_hash = str(_row_value(row, "source_sha256", "Source_SHA256", default="")).strip()
+        actual_hash = _sha256_file(trial_path) if _path_exists(trial_path) else ""
         row_payload.append(
             {
                 "trial_file_path": str(trial_path.resolve()) if trial_path else "",
                 "source_sha256": actual_hash,
+                "declared_source_sha256": declared_hash,
                 "block_trial_index": str(_row_value(row, "block_trial_index", "Block_Trial_Index", default="")),
                 "family": str(_row_value(row, "family", "Family", default="")),
                 "soa_ms": str(_row_value(row, "soa_ms", "SOA_ms", default="")),
@@ -1832,6 +2231,20 @@ def _read_valid_block_cache(
     trials = manifest.get("trials", [])
     if not isinstance(trials, list) or len(trials) != len(source_rows):
         return None
+    ordered_rows = sorted(source_rows, key=lambda row: _as_int(row.get("block_trial_index"), default=0))
+    for row, cached in zip(ordered_rows, trials):
+        if not isinstance(cached, dict):
+            return None
+        trial_path = _resolve_relative_path(_row_value(row, "trial_file_path", "Trial_File_Path", default=""), source_csv.parent)
+        if not _path_exists(trial_path):
+            return None
+        current_hash = _sha256_file(trial_path)
+        declared_hash = str(_row_value(row, "source_sha256", "Source_SHA256", default="")).strip()
+        cached_hash = str(cached.get("source_sha256") or "").strip()
+        if declared_hash and declared_hash != current_hash:
+            return None
+        if cached_hash != current_hash:
+            return None
     return wav_path, manifest
 
 
@@ -3066,6 +3479,8 @@ class SessionRunnerController:
             self._operator_completion_message = self._build_operator_completion_message(completed=completed, interrupted=interrupted)
             self._write_part_completion_status(completed=completed, interrupted=interrupted)
             self._refresh_analysis_browser_outputs(completed=completed, interrupted=interrupted)
+            self._mirror_data_max_outputs()
+            self._refresh_data_min_outputs(completed=completed, interrupted=interrupted)
             if owns_engine and self.audio_engine is not None and hasattr(self.audio_engine, "shutdown"):
                 self.audio_engine.shutdown()
 
@@ -3145,6 +3560,24 @@ class SessionRunnerController:
         except Exception:
             pass
         return result
+
+    def _mirror_data_max_outputs(self) -> None:
+        try:
+            outputs = mirror_data_max_outputs(self.package, analysis_outputs=self._analysis_outputs)
+        except Exception as exc:  # noqa: BLE001 - backup organization must not hide run completion.
+            self._run_warnings.append(f"2.Data_max mirror failed: {exc}")
+            return
+        self._analysis_outputs.update(outputs)
+
+    def _refresh_data_min_outputs(self, *, completed: bool, interrupted: bool) -> None:
+        if not completed or interrupted:
+            return
+        try:
+            outputs = write_data_min_publication_outputs(self.package)
+        except Exception as exc:  # noqa: BLE001 - public export must not hide run completion.
+            self._run_warnings.append(f"1.Data_min export failed: {exc}")
+            return
+        self._analysis_outputs.update(outputs)
 
     def _write_external_labrecorder_report(self, payload: dict[str, Any]) -> None:
         _write_json_file(self._external_labrecorder_report_path, payload)
@@ -3702,7 +4135,8 @@ class SessionRunnerController:
         self.topup_ledger.finalize_open_trials(part_number=part_number)
         self._persist_topup_state(part_number=part_number)
         misses = self.topup_ledger.missed_entries(include_topup=False, part_number=part_number)
-        if not misses:
+        repeat_blocks = _part1_topup_repeat_blocks(self.package, part_number=part_number)
+        if not misses and not repeat_blocks:
             payload = self._record_topup_outcome(
                 "not_needed",
                 part_number=part_number,
@@ -3727,6 +4161,7 @@ class SessionRunnerController:
                 phase_label=phase_label,
                 display_block_index=display_block_index,
                 display_block_count=display_block_count,
+                repeat_blocks=repeat_blocks,
             )
         except Exception as exc:
             self.events.log("topup_block_materialize_failed", missed_trial_count=len(misses), part_number="" if part_number is None else _part_suffix(part_number), phase_label=phase_label, message=str(exc))
@@ -3757,6 +4192,9 @@ class SessionRunnerController:
             "topup_trial_count": block.trial_count,
             "rescue_trial_count": int(block.metadata.get("rescue_trial_count", 0) or 0),
             "filler_trial_count": int(block.metadata.get("filler_trial_count", 0) or 0),
+            "repeat_trial_count": int(block.metadata.get("repeat_trial_count", 0) or 0),
+            "topup_source_mode": str(block.metadata.get("topup_source_mode") or ""),
+            "repeat_block_indexes": block.metadata.get("repeat_block_indexes") or [],
             "part_number": "" if part_number is None else _part_suffix(part_number),
             "phase_label": phase_label,
             "manifest_path": str(block.manifest_path),
@@ -4017,6 +4455,7 @@ class SessionRunnerController:
         phase_label: str = "",
         display_block_index: int | None = None,
         display_block_count: int | None = None,
+        repeat_blocks: list[RunBlock] | None = None,
     ) -> tuple[RunBlock, dict[str, Path]]:
         try:
             import numpy as np
@@ -4024,53 +4463,68 @@ class SessionRunnerController:
         except ImportError as exc:
             raise RuntimeError("Install numpy and soundfile to prepare a top-up block.") from exc
 
-        source_by_uid, row_order, rows_by_label = _topup_source_index(self.package, part_number=part_number)
-        if not row_order:
-            row_order = sorted({str(getattr(entry, "row_label", "") or "row") for entry in misses})
-        missed_uids = {str(getattr(entry, "trial_uid", "") or "") for entry in misses}
-        hit_entries = self.topup_ledger.hit_entries(include_topup=False, part_number=part_number) if self.topup_ledger is not None else []
-        hit_filler_by_label: dict[str, list[tuple[dict[str, Any], Path, RunBlock]]] = {}
-        for entry in hit_entries:
-            source = source_by_uid.get(str(entry.trial_uid))
-            if source is None:
-                continue
-            label = _topup_row_label(source[0]) or str(entry.row_label or "")
-            hit_filler_by_label.setdefault(label, []).append(source)
-
-        miss_queues: dict[str, list[tuple[Any, dict[str, Any], Path, RunBlock]]] = {}
-        for entry in misses:
-            source = source_by_uid.get(str(entry.trial_uid))
-            if source is None:
-                source = (_topup_entry_source_row(entry), self.package.session_dir, self.package.blocks[-1] if self.package.blocks else _empty_topup_source_block())
-            label = _topup_row_label(source[0]) or str(getattr(entry, "row_label", "") or "row")
-            if label not in row_order:
-                row_order.append(label)
-            miss_queues.setdefault(label, []).append((entry, source[0], source[1], source[2]))
-
-        filler_index_by_label: dict[str, int] = {}
-
-        def _filler_for(label: str) -> tuple[dict[str, Any], Path, RunBlock] | None:
-            candidates = hit_filler_by_label.get(label) or [
-                item for item in rows_by_label.get(label, []) if str(item[0].get("Trial_UID") or "") not in missed_uids
-            ] or rows_by_label.get(label, [])
-            if not candidates:
-                return None
-            index = filler_index_by_label.get(label, 0)
-            filler_index_by_label[label] = index + 1
-            return candidates[index % len(candidates)]
-
+        repeat_blocks = list(repeat_blocks or [])
+        repeat_mode = bool(repeat_blocks)
         emitted: list[tuple[str, Any | None, dict[str, Any], Path, RunBlock]] = []
-        while any(queue for queue in miss_queues.values()):
-            for label in row_order:
-                queue = miss_queues.get(label, [])
-                if queue:
-                    entry, row, base_dir, source_block = queue.pop(0)
-                    emitted.append(("rescue", entry, row, base_dir, source_block))
-                elif any(queue for queue in miss_queues.values()):
-                    filler = _filler_for(label)
-                    if filler is not None:
-                        row, base_dir, source_block = filler
-                        emitted.append(("filler", None, row, base_dir, source_block))
+        if repeat_mode:
+            row_order: list[str] = []
+            for source_block in repeat_blocks:
+                source_rows = _read_csv_rows(source_block.manifest_path)
+                if not source_rows:
+                    raise ValueError(f"Top-up repeat source block has no rows: {source_block.manifest_path}")
+                for source_row in source_rows:
+                    row = dict(source_row)
+                    label = _topup_row_label(row) or "row"
+                    if label not in row_order:
+                        row_order.append(label)
+                    emitted.append(("repeat", None, row, source_block.manifest_path.parent, source_block))
+        else:
+            source_by_uid, row_order, rows_by_label = _topup_source_index(self.package, part_number=part_number)
+            if not row_order:
+                row_order = sorted({str(getattr(entry, "row_label", "") or "row") for entry in misses})
+            missed_uids = {str(getattr(entry, "trial_uid", "") or "") for entry in misses}
+            hit_entries = self.topup_ledger.hit_entries(include_topup=False, part_number=part_number) if self.topup_ledger is not None else []
+            hit_filler_by_label: dict[str, list[tuple[dict[str, Any], Path, RunBlock]]] = {}
+            for entry in hit_entries:
+                source = source_by_uid.get(str(entry.trial_uid))
+                if source is None:
+                    continue
+                label = _topup_row_label(source[0]) or str(entry.row_label or "")
+                hit_filler_by_label.setdefault(label, []).append(source)
+
+            miss_queues: dict[str, list[tuple[Any, dict[str, Any], Path, RunBlock]]] = {}
+            for entry in misses:
+                source = source_by_uid.get(str(entry.trial_uid))
+                if source is None:
+                    source = (_topup_entry_source_row(entry), self.package.session_dir, self.package.blocks[-1] if self.package.blocks else _empty_topup_source_block())
+                label = _topup_row_label(source[0]) or str(getattr(entry, "row_label", "") or "row")
+                if label not in row_order:
+                    row_order.append(label)
+                miss_queues.setdefault(label, []).append((entry, source[0], source[1], source[2]))
+
+            filler_index_by_label: dict[str, int] = {}
+
+            def _filler_for(label: str) -> tuple[dict[str, Any], Path, RunBlock] | None:
+                candidates = hit_filler_by_label.get(label) or [
+                    item for item in rows_by_label.get(label, []) if str(item[0].get("Trial_UID") or "") not in missed_uids
+                ] or rows_by_label.get(label, [])
+                if not candidates:
+                    return None
+                index = filler_index_by_label.get(label, 0)
+                filler_index_by_label[label] = index + 1
+                return candidates[index % len(candidates)]
+
+            while any(queue for queue in miss_queues.values()):
+                for label in row_order:
+                    queue = miss_queues.get(label, [])
+                    if queue:
+                        entry, row, base_dir, source_block = queue.pop(0)
+                        emitted.append(("rescue", entry, row, base_dir, source_block))
+                    elif any(queue for queue in miss_queues.values()):
+                        filler = _filler_for(label)
+                        if filler is not None:
+                            row, base_dir, source_block = filler
+                            emitted.append(("filler", None, row, base_dir, source_block))
         if not emitted:
             raise ValueError("No missed tactile rows were available for top-up block generation.")
 
@@ -4078,9 +4532,20 @@ class SessionRunnerController:
         display_index = _as_int(display_block_index, default=block_index)
         display_count = _as_int(display_block_count, default=display_index)
         part_label = _part_suffix(part_number)
-        multi_part = len(_package_part_numbers(self.package)) > 1
-        block_label = f"Part {part_label} top-up missed tactile trials" if multi_part and part_label else "Top-up missed tactile trials"
-        block_stem = f"Block_{block_index:02d}_{'part' + part_label + '_' if multi_part and part_label else ''}topup_missed_trials"
+        multi_part = _package_is_split_part(self.package) or len(_package_part_numbers(self.package)) > 1
+        repeat_indexes = _repeat_block_indexes(repeat_blocks)
+        repeat_label = ", ".join(f"{index:02d}" for index in repeat_indexes)
+        repeat_stem = "_".join(f"{index:02d}" for index in repeat_indexes)
+        if repeat_mode:
+            block_label = (
+                f"Part {part_label} top-up repeat blocks {repeat_label}"
+                if multi_part and part_label
+                else f"Top-up repeat blocks {repeat_label}"
+            )
+            block_stem = f"Block_{block_index:02d}_{'part' + part_label + '_' if multi_part and part_label else ''}topup_repeat_blocks_{repeat_stem}"
+        else:
+            block_label = f"Part {part_label} top-up missed tactile trials" if multi_part and part_label else "Top-up missed tactile trials"
+            block_stem = f"Block_{block_index:02d}_{'part' + part_label + '_' if multi_part and part_label else ''}topup_missed_trials"
         wav_path = _package_prepared_blocks_dir(self.package) / f"{block_stem}.wav"
         manifest_stem = f"topup_block_part{part_label}_manifest" if multi_part and part_label else "topup_block_manifest"
         csv_path = self._topup_dir / f"{manifest_stem}.csv"
@@ -4161,14 +4626,23 @@ class SessionRunnerController:
             row["Block_Label"] = block_label
             row["Is_Topup"] = "true"
             row["Topup_Role"] = role
-            row["Primary_Analysis_Included"] = "true" if role == "rescue" else "false"
+            row["Primary_Analysis_Included"] = "true" if role in {"rescue", "repeat"} else "false"
             row["Source_Trial_UID"] = source_uid
             row["Original_Trial_UID"] = source_uid
             row["Topup_Source_Ledger_ID"] = "" if entry is None else getattr(entry, "ledger_id", "")
             row["Topup_Source_Block_Number"] = _row_value(source_row, "Block_Number", "block_number", default=getattr(entry, "block_number", ""))
             row["Topup_Source_Trial_Number"] = _row_value(source_row, "Trial_Number", "trial_number", default=getattr(entry, "trial_number", ""))
-            row["Topup_Attempt_Number"] = 2 if role == "rescue" else 1
-            row["Topup_Rescue_Analysis_Role"] = "primary_rescue" if role == "rescue" else "row_structure_filler"
+            row["Topup_Attempt_Number"] = 2 if role in {"rescue", "repeat"} else 1
+            row["Topup_Rescue_Analysis_Role"] = (
+                "primary_rescue" if role == "rescue" else ("block_repeat" if role == "repeat" else "row_structure_filler")
+            )
+            if role == "repeat":
+                row["Topup_Repeat_Source_Block_Index"] = _as_int(
+                    source_block.metadata.get("part_block_number", source_block.index),
+                    default=source_block.index,
+                )
+                row["Topup_Repeat_Source_Block_Label"] = source_block.label
+                row["Topup_Repeat_Source_Block_Manifest"] = str(source_block.manifest_path)
             trial_rows.append(row)
             frame_cursor = trial_end_sample
 
@@ -4199,9 +4673,13 @@ class SessionRunnerController:
                     "display_block_count": display_count,
                     "block_label": block_label,
                     "row_order": row_order,
+                    "topup_source_mode": "repeat_blocks" if repeat_mode else "missed_trials",
+                    "repeat_block_indexes": repeat_indexes,
+                    "repeat_block_manifest_paths": [str(block.manifest_path) for block in repeat_blocks],
                     "missed_trial_count": len(misses),
                     "rescue_trial_count": sum(1 for row in trial_rows if row.get("Topup_Role") == "rescue"),
                     "filler_trial_count": sum(1 for row in trial_rows if row.get("Topup_Role") == "filler"),
+                    "repeat_trial_count": sum(1 for row in trial_rows if row.get("Topup_Role") == "repeat"),
                     "csv_path": str(csv_path),
                     "wav_path": str(wav_path),
                     "rows": _json_ready(trial_rows),
@@ -4227,8 +4705,12 @@ class SessionRunnerController:
                 "part_number": _as_int(_row_value(trial_rows[0], "Part_Number", default=1), default=1) if trial_rows else 1,
                 "sample_rate_hz": sample_rate,
                 "channels": target_channels,
+                "topup_source_mode": "repeat_blocks" if repeat_mode else "missed_trials",
+                "repeat_block_indexes": repeat_indexes,
+                "repeat_block_manifest_paths": [str(block.manifest_path) for block in repeat_blocks],
                 "rescue_trial_count": sum(1 for row in trial_rows if row.get("Topup_Role") == "rescue"),
                 "filler_trial_count": sum(1 for row in trial_rows if row.get("Topup_Role") == "filler"),
+                "repeat_trial_count": sum(1 for row in trial_rows if row.get("Topup_Role") == "repeat"),
                 "topup_manifest_json": str(json_path),
                 "topup_part_number": "" if part_number is None else part_label,
                 "topup_phase_label": phase_label,
@@ -4291,7 +4773,7 @@ class SessionRunnerController:
                 key = f"topup_block_manifest_json_part{match.group(1)}" if match else part_json.stem
                 topup_outputs[key] = part_json
             topup_block_dir = _package_prepared_blocks_dir(self.package)
-            for topup_wav in sorted(topup_block_dir.glob("*topup_missed_trials.wav")):
+            for topup_wav in sorted(topup_block_dir.glob("*topup*.wav")):
                 match = re.search(r"_part([^_]+)_topup", topup_wav.stem)
                 if match:
                     topup_outputs[f"topup_block_wav_part{match.group(1)}"] = topup_wav
@@ -4816,6 +5298,7 @@ def _build_runner_session_metadata(
             "lsl_event_protocol_standard": True,
             "local_audio_evidence_wav_label": "Fail-safe local audio evidence WAV",
             "playback_output_levels": _json_ready(raw.get("playback_output_levels") or {}),
+            "tactile_calibration": _json_ready(raw.get("tactile_calibration") or {}),
         },
         "lsl_status_at_start": dict(lsl_status or {}),
         "session_paths": _session_metadata_paths(package),
@@ -5250,6 +5733,38 @@ def _timeline_trial_segments(schedule: BlockEventSchedule | None) -> list[dict[s
             }
         )
     return segments
+
+
+def _part1_topup_repeat_blocks(
+    package: RunPackage,
+    *,
+    part_number: int | str | None,
+) -> list[RunBlock]:
+    """Return the part-local blocks that should be replayed by the Part 1 top-up."""
+    if _part_suffix(part_number) != "1":
+        return []
+    if not _package_is_split_part(package) or _package_split_part_count(package) < 2:
+        return []
+    wanted = {int(index) for index in PART1_TOPUP_REPEAT_BLOCK_INDEXES}
+    matches: dict[int, RunBlock] = {}
+    for block in package.blocks:
+        if _truthy(block.metadata.get("is_topup_block")):
+            continue
+        if _block_part_key(block) != "1":
+            continue
+        part_block_index = _as_int(block.metadata.get("part_block_number", block.index), default=block.index)
+        if part_block_index in wanted:
+            matches[int(part_block_index)] = block
+    if set(matches) != wanted:
+        return []
+    return [matches[index] for index in PART1_TOPUP_REPEAT_BLOCK_INDEXES]
+
+
+def _repeat_block_indexes(blocks: list[RunBlock]) -> list[int]:
+    return [
+        _as_int(block.metadata.get("part_block_number", block.index), default=block.index)
+        for block in blocks
+    ]
 
 
 def _topup_source_index(

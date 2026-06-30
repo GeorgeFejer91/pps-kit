@@ -2,13 +2,915 @@
 
 This file is the dated project memory. Add a new dated entry when a chat or implementation changes project direction, product behavior, or release constraints.
 
+## 2026-06-30
+
+- Android phone-run catalog entries now preserve the completion summary's
+  event count, marker mirror count, command diary count, native marker push
+  counters, and native command received/ack/failed/rejected counters. The
+  Android artifact validator compares those catalog fields against
+  `completion.json` `summary` when present and propagates the same comparison
+  through app-private `phone_run_catalog/runs.jsonl` and `latest_run.json`, so
+  the participant/session catalog cannot silently lose LSL administration
+  evidence.
+- Android phone-run catalog entries also preserve the privacy-safe
+  `haptic_capability_summary` from LSL runtime status. Strict artifact
+  validation compares catalog haptic summary fields against
+  `haptic_capability.json` / completion haptic metadata and propagates drift
+  checks through app-private `phone_run_catalog/runs.jsonl` and
+  `latest_run.json`, so tactile calibration evidence stays visible at the
+  catalog layer.
+- Strict Android phone-owned `2.Data_max` validation now requires the mirrored
+  run folder to preserve the operator/administration reconstruction sidecars as
+  well as the low-level marker/event files: `command_diary.jsonl`,
+  `phone_response_ledger.csv`, `phone_topup_plan.json`,
+  `phone_topup_materialization.json`, `phone_run_catalog_entry.json`, and
+  `phone_owned_data_export.json` must be present in the Data Max run copy.
+- Strict Android `2.Data_max` validation also loads the copied
+  `artifact_file_inventory.json` for the current run id and rehashes the files
+  inside the Data Max mirror itself. Missing listed files, extra mirrored files,
+  or post-copy SHA-256/size drift now fail `--expect-phone-owned-data-export`
+  instead of only checking that similarly named sidecars exist.
+- Android command-admin sender/receiver reconciliation now verifies the
+  serialized `PPSCommandSignalsV1` command sample payload, not only the outbox
+  row metadata. The reconciler fails if the sample payload omits
+  `token`/`companion_token` or drifts from the stored sender payload, while
+  still rejecting any `PPSCommandAcksV1` payload that echoes pairing tokens.
+- PC monitor/XDF command reconciliation now applies the same command-signal
+  strictness to observed `PPSCommandSignalsV1` rows: captured command payloads
+  must contain `token` or `companion_token`, `operator_note` commands must carry
+  a nonblank `note`, and the row `payload_json` must match the raw LSL sample
+  payload channel. Payload drift reports are redacted so pairing tokens do not
+  leak into validation artifacts; `PPSCommandAcksV1` payloads still fail if they
+  echo a pairing token.
+- Strict PC-monitor artifact validation now requires observed command acks to
+  have matching captured command-signal ids when `--expect-command-acks` is in
+  force, requires at least one captured `PPSCommandSignalsV1` sample, checks
+  ack `payload_json` against the raw ack sample payload, and rejects ack payloads
+  that echo `token` or `companion_token`. This keeps noisy monitor/XDF captures
+  from being accepted as two-way administration evidence when they only contain
+  orphan acknowledgements.
+- PC Android LSL monitor rows now flatten the same non-secret command target
+  identity (`package_id`, `participant_id`, target session, target part
+  session, session group, and part number) from observed `PPSCommandSignalsV1`
+  and `PPSCommandAcksV1` payloads. Strict monitor validation compares those row
+  fields back against the raw sample payload so external monitor/XDF audit
+  tables cannot drift from the captured command sample.
+- PC Android LSL monitor reports now aggregate the same command target identity
+  sets from observed command/ack rows, and strict validation recomputes them
+  from the JSONL rows. Report-level summaries therefore cannot drift from the
+  monitor event rows used to reconstruct phone/PC command administration.
+- PC-to-Android LSL admin sends now validate the received
+  `PPSCommandAcksV1` sample before reporting live success. A same-command-id
+  ack is recorded but marked `invalid_ack` if its `session_id` or echoed target
+  identity conflicts with the sent command, if its payload command conflicts,
+  or if the ack payload echoes `token` / `companion_token`. This prevents stale
+  or unsafe acks from making the PC helper claim that a phone command was
+  successfully applied, while preserving the bad ack sample in the outbox for
+  reconstruction.
+- PC-admin command payloads now carry `target_session_id` by default, and the
+  Focus Mode Send-to-Phone LSL control bridge forwards split-run
+  `target_part_session_id` plus `target_session_group_id` from the active
+  mobile package. That gives Android acks, PC-admin outboxes, and offline
+  command reconciliation the same non-secret part/session identity spine as the
+  phone-owned run package.
+- Android Runner-mode command gating now rejects an explicit payload
+  `target_session_id` that is not one of the current package/session/group/part
+  identifiers, matching the existing package, part-session, session-group, and
+  part-number drift checks before any phone-side state change.
+- Android phone-run command diary rows now flatten the non-secret command
+  target identity (`participant_id`, target session, target part session,
+  session group, and part number) alongside the raw received command and ack
+  samples. Strict validation compares those row fields against the command
+  payload, ack payload, embedded completion diary, and matching
+  `operator_command` event when present, so the receiver-side diary is
+  reconstructable without parsing only the nested LSL samples.
+- Android Controller outboxes and PC-admin outboxes now flatten non-secret
+  target identity fields (`target_part_session_id`,
+  `target_session_group_id`, and `target_part_number`) into the saved row/status
+  layer in addition to the token-bearing command payload. Strict artifact
+  validation compares those row fields back against the serialized
+  `PPSCommandSignalsV1` payload, so a quick audit table cannot drift from the
+  actual LSL command sample.
+- Live PC-admin ack validation now also requires the ack payload to include the
+  expected echoed non-secret identity fields, not only avoid mismatches. An
+  applied ack missing `command`, `target_session_id`, or any nonblank expected
+  package/participant/part/requester/source field is recorded but marked
+  `invalid_ack`, matching the strict offline outbox validator.
+- Android Controller-mode live ack handling now applies the same same-command
+  `PPSCommandAcksV1` validation before reporting a sent command as cleanly
+  acknowledged. Same-command acks with stale session ids, wrong commands,
+  missing echoed non-secret target identity, or token echoes are preserved in
+  `phone_controller_command_outbox.jsonl` but marked with `ack_valid=false`,
+  `ack_validation_status=invalid_ack`, and a concrete
+  `ack_validation_reason`; the UI surfaces these as invalid acks instead of a
+  reassuring sent state. Strict controller outbox validation recomputes those
+  validation fields from the raw command/ack samples.
+- Android Controller-mode `pps-android-lsl-stream-descriptions.v1` now carries
+  the full privacy-safe target identity (`package_id`, `participant_id`,
+  `target_session_id`, `target_part_session_id`,
+  `target_session_group_id`, and `target_part_number`) at the stream-description
+  root. Strict controller validation compares those fields against
+  `phone_controller_runtime_status.json`, so a phone or PC observer can
+  reconstruct which package/part the command outlet is targeting before parsing
+  token-bearing command samples.
+- Focus Mode Send-to-Phone LSL control and Android Controller mode now expose
+  `start_part` as `Start Part` alongside `start_experiment` as `Start Full`.
+  `start_part` launches the selected/synced package part, while
+  `start_experiment` remains the full synced-order command for multi-part phone
+  runs.
+- Receiver-side Android native command diary rows now preserve
+  `command_channels` and the exact received `PPSCommandSignalsV1`
+  `command_sample` alongside the outgoing ack evidence. Strict phone-run
+  validation requires that received sample, checks its channel/schema/identity
+  fields and token-bearing payload, and compares file versus embedded command
+  diary copies. The offline command-admin reconciler now compares the sender's
+  serialized command sample against the phone-run received sample before
+  accepting a matched ack pair. Idle native `start_experiment` / `start_part`
+  evidence carries the same raw command sample into the newly launched run
+  artifact. This is a stronger offline artifact proof; live LSL/XDF and
+  physical timing validation remain separate gates.
+- Android phone-run `request_snapshot` command acknowledgements now use the
+  versioned `pps-android-phone-runtime-command-state.v1` payload. The ack
+  payload carries run lifecycle, active block identity/counts/elapsed time,
+  event/marker/command diary counts, tap counts, pause/resume counts,
+  stop-after-block/top-up flags, and Android wall/elapsed clocks, so a PC
+  monitor or Controller phone can reconstruct the Runner phone's current
+  software state from `PPSCommandAcksV1` and command diaries without parsing
+  private UI state. Strict phone-run and sender outbox validation now rejects
+  unversioned or incomplete `request_snapshot` ack payloads.
+- Rejected Android native command acknowledgements now use the versioned
+  `pps-android-phone-command-rejection.v1` payload before the local handler is
+  allowed to run. The payload preserves receiver package/session identity,
+  requested package/participant/target-part identity, the rejection reason,
+  `rejected_before_handler=true`, and the supported command list while still
+  excluding pairing tokens. Strict phone-run, Controller/PC-admin outbox, and
+  PC-monitor validation reject incomplete rejected-ack payloads, so bad
+  controller/PC commands remain reconstructable instead of becoming bare
+  `rejected` status rows.
+- Parsed Android native commands that pass pre-handler gates but are rejected by
+  the phone runtime now use
+  `pps-android-phone-command-handler-rejection.v1` payloads. These acks preserve
+  `rejected_before_handler=false`, receiver/requested identity, supported
+  commands, handler completion status, and the handler's non-secret payload
+  under `handler_payload`, so cases such as Pause with no active phone block are
+  reconstructable without being mislabeled as token/package/session failures.
+  Strict phone-run validation, Controller/PC-admin sender-outbox validation,
+  and the command-admin/PC-monitor reconcilers now accept and enforce this
+  handler-side rejection family. PC-admin sender rows also persist
+  `ack_valid`, `ack_validation_status`, and `ack_validation_reason` when an ack
+  is received, matching Android Controller rows so a valid `ack_rejected`
+  response remains distinguishable from a malformed or spoofed ack.
+- The Android sender/receiver command-admin reconciler and PC-monitor
+  reconciler now enforce the same rejected-ack contract directly. Direct
+  reconciliation runs fail when a rejected `PPSCommandAcksV1` payload omits the
+  `pps-android-phone-command-rejection.v1` schema, reason,
+  `rejected_before_handler`, receiver/requested identity fields, or supported
+  command list, so bypassing the standalone artifact validator cannot turn
+  incomplete rejection evidence into a passing two-phone/PC-monitor audit.
+- Malformed Android `PPSCommandSignalsV1` samples that fail before command
+  parsing now receive their own structured rejected ack rather than a bare
+  invalid-command row. Runner mode emits
+  `pps-android-phone-command-sample-rejection.v1` payloads with a stable
+  synthetic command id when needed, receiver/package identity, expected/raw
+  channel counts, raw non-secret channel diagnostics, supported commands, and a
+  redacted raw-sample preview that never echoes the token-bearing payload
+  channel. Strict phone-run validation recognizes this as the one allowed
+  `invalid_lsl_command` path and rejects malformed-sample ack payloads that lose
+  the schema, reason, redaction, or diary/sample consistency.
+- Android phone-owned `phone_owned_data_export.json` now carries a
+  `portable_paths` map with archive-relative locations for
+  `phone_owned_exports/1.Data_min`, the participant/master public CSVs, and the
+  `2.Data_max/<participant>/runs/<run_id>` mirror plus its completion/export
+  and inventory files. Strict phone-owned export validation requires this map
+  and rejects absolute paths, backslash paths, parent traversal, or participant
+  / run-id drift. The existing app-private absolute paths remain for local UI
+  convenience, but archive reconstruction no longer depends on them.
+- The PC mobile-runtime upload mirror now writes the same
+  `phone_owned_data_export.json` `portable_paths` map when accepting completed
+  phone-owned uploads with a response ledger. The on-disk PC mirror export file
+  also includes its `artifact_path`, so the returned API payload and saved
+  reconstruction artifact no longer differ on that field.
+- Android phone-owned `phone_owned_data_export.json` and PC mobile-runtime
+  upload mirrors now preserve `session_group_id` alongside run/session/part
+  identity. Strict Android phone-run validation compares that export identity
+  against completion/status/participant metadata when present, so split
+  phone-owned Data Max reconstruction keeps the group stitching identity and
+  rejects session-group drift.
+
+- The local HTML dashboard launcher now treats `/api/health` as the fast
+  already-running probe before falling back to `/api/state`. This prevents a
+  warmed but slow state snapshot from making the launcher misclassify an
+  existing companion as dead and then fail with a duplicate port bind on
+  `127.0.0.1:8766`.
+
+- Added the approved second Study 5 profile `study5_dynaspace_lateral_45_pps`. It keeps original Study 5 inhale/exhale and Segment 6 run-instruction assets, but uses two DynaSpace/Hobeika-style white burst-train source cards with source-level trajectory snapshots at left -45 degrees and right +45 degrees. The profile uses smartphone DynaSpace anchors (`105, 1625, 2385, 2765, 2955, 3050` ms; `640, 320, 160, 80, 40, 20` cm), 3.85 s total source WAVs, stationary-burst baselines at each side-specific snapshot, and Segment 4 repetitions audio-tactile `5.0`, baseline `2.5`, catch `6.0` to preserve 204 rows with equal inhale/exhale and left/right counts. The canonical `study5_box_breathing_pps` remains the first/default dashboard Study 5 profile.
+- Native Experiment Runner outputs now use a two-tier acquisition-root contract:
+  `1.Data_min/` is the OSF/publication-ready participant trial export, and
+  `2.Data_max/` is the participant-organized reconstruction/backup mirror.
+  Android phone-owned completed runs now have an app-private analogue rather
+  than using the PC acquisition root directly.
+- `1.Data_min/` must contain only `P###.csv` participant files plus
+  `master_successful_participants.csv`. Each participant file has exactly the
+  17-column curated schema
+  `participant_id,session_id,part_session_id,part_number,block_number,block_label,trial_number,trial_number_global,trial_uid,condition,phase,noise_type,trial_type,soa_ms,response_given,hit_miss,reaction_time_ms`.
+  The exporter reads the rich runner participant-trials CSV, not
+  `analysis_ready_trials` or final-outcome replacement tables, so original
+  missed trials remain present even when later real top-up repeat/rescue rows
+  repair the condition. Only filler/debug rows are excluded.
+- Completed one-part participants write `1.Data_min/P###.csv` at run end.
+  Split participants write the public file only after all required parts are
+  complete; interrupted or incomplete runs stay out of `1.Data_min`.
+  Refreshing the master file concatenates only CSVs that already match the
+  public 17-column schema, and the runner prunes stray README/manifest/log/data
+  dictionary files from the minimal folder.
+- `2.Data_max/P###/` now receives the rich reconstructive mirror: canonical
+  `P###_demographics/`, `P###_tactile-calibration/`, `sessions/...`,
+  `prepared_blocks/`, `analysis_outputs/`, and `runner_logs/` folders, with
+  session manifests, rich trial CSVs, event/LSL/XDF/trigger/session metadata,
+  WAV evidence, top-up ledgers, prepared blocks, calibration artifacts, and
+  private setup metadata kept there rather than in `1.Data_min/`.
+- Completed Android phone-owned runs now write `phone_owned_data_export.json`
+  and update app-private `phone_owned_exports/1.Data_min/` plus
+  `phone_owned_exports/2.Data_max/`. The phone `1.Data_min` participant CSV and
+  `master_successful_participants.csv` use the same 17-column public schema as
+  the PC runner, derived from the phone response ledger and package schedule;
+  the phone `2.Data_max/<participant>/runs/<run_id>/` mirror copies the rich
+  reconstructive run folder. ZIP export includes this `phone_owned_exports/`
+  snapshot when present, and the Android artifact validator can enforce it with
+  `--expect-phone-owned-data-export`.
+- Android completion uploads to the PC companion now include
+  `phone_response_summary`, `phone_response_ledger`, `phone_topup_plan`, and
+  `phone_topup_materialization` when the run package is available. The PC
+  `mobile_phone_runtime.py` upload writer persists those fields as sidecars,
+  writes `run_package_manifest.json`, `reconstruction_contract.json`,
+  `artifact_file_inventory.json`, and `artifact_file_inventory.csv`, and derives
+  a PC-side `phone_owned_data_export.json` plus
+  `phone_owned_exports/1.Data_min/` and `2.Data_max/` mirror under
+  `runner_logs/mobile_phone_runtime/<participant>/<package_id>/` so uploaded
+  phone-run completions can be reconstructed and rehashed even when the phone is
+  the timing owner. When an older/sparse upload omits detailed
+  `lsl_runtime_status` fields, the PC mirror backfills generic stream names,
+  command/ack schemas, channel labels, privacy fields, and stream descriptions
+  from the v2 package manifest while preserving the phone's native-transport
+  availability/status; empty participant/haptic metadata objects are no longer
+  advertised as valid sidecars.
+- Android phone-run artifact validation now treats response and top-up
+  reconstruction as strict evidence when requested. The Android validator loads
+  `phone_response_ledger.csv`, `phone_topup_plan.json`,
+  `phone_topup_materialization.json`, and `phone_topup_block.wav` from local run
+  folders or exported ZIPs, compares sidecars against embedded completion
+  copies, checks the shared 100-1300 ms response-window policy and summary
+  counts, validates rescue-plan status/count consistency, and verifies
+  materialized top-up WAV SHA-256 hashes. The new
+  `--expect-phone-topup-evidence` flag enables this gate directly, and
+  `--expect-lightweight-materializations` now enables it automatically so
+  building-block-only phone runs prove both scheduled-block replay and the
+  missed-trial top-up chain.
+- Android phone-run artifact validation now has a strict
+  `--expect-audiotrack-timing-evidence` gate. It checks completed phone-run
+  events for `block_start` rows using
+  `audio_timing_strategy = audiotrack_pcm_wav_playback_head`, positive PCM WAV
+  facts, one `audio_playback_start` row per block after `AudioTrack.play()` with
+  playback-head origin, track state, and buffer-size fields, and `vibration_cue`
+  rows with
+  `audio_scheduler = audiotrack_playback_head`, scheduled/playback-head frames,
+  elapsed delivery time, coherent frame/ms cue jitter, scheduled-frame versus
+  scheduled-block-time/sample-rate alignment, cue frames inside the block frame
+  count, and playback-start buffer bytes matching the block PCM frame format.
+  This proves the exported artifact carries phone-runtime playback-head timing
+  metadata; it is still not physical audio/vibration onset evidence.
+- Strict native Android LSL validation now checks completed phone-run `summary`
+  marker-push counts when marker evidence is present. With
+  `--expect-native-transport`, a phone run must report
+  `native_lsl_pushed_count == lsl_marker_mirror_count` and
+  `native_lsl_failed_count == 0`, so local `PPSMarkersV2` /
+  `PPSTriggerCodes` mirror files cannot be mistaken for complete native LSL
+  broadcast evidence if the native outlet path dropped samples.
+- Strict native command-ack validation now compares completion `summary`
+  command counters against `native_lsl` command diary rows when
+  `--expect-command-acks` is set. The validator requires received-command,
+  sent-ack, failed-ack, and rejected-command counts to match the diary so a
+  valid-looking `PPSCommandAcksV1` sample cannot hide summary-level dropped or
+  failed native ack accounting.
+- Phone-run local diary validation now cross-checks completion `summary` counts
+  against the actual event, marker mirror, and command diary artifacts whenever
+  that summary is present. `total_event_count`, `lsl_marker_mirror_count`, and
+  `command_diary_count` are no longer trusted as standalone claims.
+- Companion discovery is now a stricter local-network contract rather than a
+  best-effort loose JSON shape. PC discovery payload serialization validates
+  `schema`, `service`, `network_scope = same_lan_or_local_hotspot`, multicast
+  group `239.255.77.83`, UDP port `48767`, local TTL `1`, limited-broadcast
+  fallback, allowed modes (`pc_runner`, `phone_export`), allowed transports
+  (`lan`, `phone_hotspot`, `wifi_direct`), phone-export `transfer_id`, and
+  privacy flags proving no pairing token, participant demographics, or
+  participant-coded stream names are present. It now also recursively rejects
+  hidden token, participant/demographic/identifier, and LSL stream/source-name
+  fields anywhere in the JSON packet. Android discovery parsing mirrors these
+  checks before rebuilding a pairing URI from a user-supplied QR/manual token.
+- Companion discovery now advertises and attempts a stronger Wi-Fi/local-hotspot
+  fallback than limited broadcast alone. The token-free packet requires
+  `discovery.broadcast_targets = ["255.255.255.255",
+  "interface_ipv4_directed_broadcasts"]`; the PC advertiser still sends
+  multicast but also sends to limited broadcast plus best-effort private or
+  link-local `/24` directed broadcasts derived from local IPv4 adapters, such
+  as the common phone-hotspot `192.168.43.255` target. Android rejects discovery
+  packets that omit the directed-broadcast fallback while keeping the same
+  no-token/no-demographics/no-stream-name privacy boundary.
+- Android LSL stream-description reconstruction now carries compact
+  participant/haptic summaries in addition to package provenance. The phone
+  passes `participant_metadata.json` and `haptic_capability.json` into
+  `phoneLslRuntimeStatus(...)` and the optional native liblsl marker transport;
+  rich-marker and numeric-trigger `session_metadata_json` now include
+  `participant_metadata_summary` and `haptic_capability_summary` while keeping
+  discoverable stream names generic. Full calibration response rows remain in
+  the haptic sidecar and first `session_metadata` marker payload. The Android
+  runtime artifact validator rejects summary drift against participant/haptic
+  sidecars, so LSL metadata, local artifacts, and native XML descriptions stay
+  aligned. The validator now also opens `lsl_marker_mirror.csv` itself and
+  rejects drift inside the `session_metadata` marker payload when participant
+  metadata, haptic calibration/capability, or package provenance differs from
+  the sidecars/manifests.
+- Android phone-run LSL `session_metadata_json` now carries
+  `package_asset_strategy`, `study_hierarchy`, and
+  `source_run_setup_manifest_path` alongside schedule/source hashes. Strict
+  validation compares these fields against `run_package_manifest.json` while
+  accepting nested reconstruction fields in sidecar artifacts, so native
+  `PPSMarkersV2`/`PPSTriggerCodes` stream descriptions preserve the Segment
+  0-6 reconstruction spine without relying only on private app files.
+- Android and PC-upload-mirrored phone-run LSL `session_metadata_json` now also
+  carries `source_run_setup_sha256` when the v2 package reconstruction contract
+  provides it. The PC mobile-runtime sparse-status fallback rebuilds
+  `package_asset_strategy`, `study_hierarchy`, source setup path, and setup
+  SHA into rich-marker/numeric-trigger stream descriptions, and strict Android
+  artifact validation rejects stream/session/catalog drift on the setup SHA.
+- PC-side Android LSL monitor reconciliation now compares captured rich-marker
+  `payload_json` values against the phone marker mirror using canonical JSON.
+  This means event-id and trigger-code agreement is no longer enough: if the
+  external monitor/XDF path mutates or drops the `session_metadata`
+  reconstruction payload, `reconcile_android_lsl_monitor_with_phone_run.py`
+  fails. The same script now accepts LabRecorder `.xdf` files directly through
+  optional `pyxdf`, classifying recognized Android LSL streams into the PC
+  monitor row schema before reconciliation. It now also reconciles captured
+  `PPSCommandSignalsV1` rows against `PPSCommandAcksV1` rows by `command_id`,
+  `session_id`, and ack payload command/package/target identity when both
+  streams are present, so two-way PC/controller administration evidence can be
+  audited from one monitor/XDF capture. Command/ack reconciliation now compares
+  the non-secret target identity fields echoed by Android acks (`package_id`,
+  `participant_id`, target session, target part session, session group, and
+  target part number) against the captured command-signal payload whenever those
+  fields are present, so an external monitor/XDF capture can catch split-part
+  targeting drift.
+- Added an offline sender/receiver command-admin reconciliation gate for
+  two-phone and PC-to-phone administration rehearsals.
+  `validation_protocols/scripts/reconcile_android_command_admin_with_phone_run.py`
+  loads Android Controller or PC-admin command outboxes plus a Runner phone run
+  folder/ZIP, then compares native-sent command ids, target sessions, sender
+  ids, commands, package identity, and exact `PPSCommandAcksV1` samples against
+  the phone-run `native_lsl` command diary. This proves sender and receiver
+  artifacts agree before claiming that a controller button press or PC helper
+  command was applied by the phone runner; live LSL/XDF and physical timing
+  validation remain separate gates.
+- Android Controller mode now targets unsynced split packages from package-list
+  identity instead of falling back to the broad pairing/transfer session. The
+  PC `pps-mobile-run-package-list.v2` rows include `session_group_id`,
+  `part_session_id`, and `part_number`; Android `MobilePackageSummary` parses
+  them; and Controller command rows, samples, payloads, and stream descriptions
+  resolve target identity from synced manifest first, then summary, then pairing
+  session. This lets a second phone send Start/Pause/Resume/Continue/Snapshot,
+  Stop After Block, or Operator Note to the exact part session that Runner mode
+  is listening on before the Controller phone has downloaded the full manifest.
+- Runner-mode Android command acknowledgements now carry reconstructive,
+  non-secret accepted target identity in their ack/diary payloads. The phone
+  echoes package id, participant id, target session, part session, session
+  group, part number, and requester/source-behavior fields from the accepted
+  command sample, but never echoes `token` or `companion_token`. Explicit
+  package/part/session-group/part-number drift is rejected before the local
+  state transition. The offline command-admin reconciler now fails if sender
+  target fields are absent or different in the receiver phone-run command
+  diary/ack payload, tightening two-phone and PC-to-phone reconstruction
+  evidence without claiming live network/XDF or physical timing proof.
+- Native Android command reception now resolves and polls multiple LSL command
+  streams instead of binding Runner mode to the first visible
+  `PPSCommandSignalsV1` stream. With the local liblsl AAR present, Runner mode
+  opens up to eight command inlets and polls all of them, letting a PC helper
+  and one or more Controller phones coexist on the same Wi-Fi/LSL network while
+  token/session/package/split-part checks remain the acceptance gate. Controller
+  mode also resolves multiple `PPSCommandAcksV1` streams when waiting for a
+  matching ack. This is source-level native bridge support; live network/XDF
+  and physical timing validation are still separate proof layers.
+
+## 2026-06-29
+
+- Android companion emulator validation must preserve the emulator's fixed AVD
+  phone viewport. Agents should not resize, widen, or repeatedly reposition the
+  emulator window to make UI checks pass; flicker, hidden controls, scrolling
+  burden, and clipped buttons are validation findings about the app. Validation
+  automation must leave the emulator window alone; the target viewport remains
+  the phone screen size.
+- The active Display 2 placement loop that resized the Android emulator every
+  500 ms was stopped, and `windows/Set_Companion_Emulation_Layout.ps1` now
+  leaves Android emulator windows untouched. Old `-KeepForSeconds` calls are
+  accepted only as inert compatibility input, with no persistent polling loop.
+- Android phone-owned runtime planning has moved into a first implementation
+  slice. Mobile package export now emits `pps-mobile-run-package.v2` and
+  `pps-mobile-run-package-list.v2`, with legacy v1 accepted by Android. The v2
+  manifest keeps prepared block WAV replay as the compatibility execution path
+  while adding a reconstruction contract, Segment 6/source schedule hashes,
+  optional downloadable `trial_building_block` assets derived from
+  `Trial_File_Path`, and an Android LSL contract for `PPSMarkersV2`,
+  `PPSTriggerCodes`, `PPSCommandSignalsV1`, and `PPSCommandAcksV1`. The Android
+  app now collects phone-run age/handedness/gender/tactile-threshold metadata,
+  records haptic capability including amplitude-control availability, writes
+  `participant_metadata.json`, `haptic_capability.json`,
+  `lsl_marker_mirror.csv`, and `command_diary.jsonl` beside phone-owned
+  `events.csv`/`completion.json`, and includes those artifacts in phone ZIP
+  exports. This is still a local marker-mirror and reconstruction contract; live
+  native Android LSL broadcast requires a pinned liblsl Android integration.
+  Participant demographics stay in metadata/payloads by default rather than
+  discoverable stream names. Android FFmpeg-style synthesis remains feasible via
+  native builds, but the preferred PPS top-up path is a deterministic PCM WAV
+  assembler rather than FFmpegKit, because FFmpegKit is retired.
+- Android phone-run haptic calibration evidence is now cross-validated as one
+  reconstruction contract. If participant metadata says
+  `tactile_threshold_source=android_haptic_calibration`, the validator requires
+  matching `haptic_capability.json` calibration result/status/threshold fields,
+  response rows with coherent threshold-percent/amplitude values, and the
+  deterministic percent-to-`VibrationEffect` amplitude mapping. These are still
+  phone-vibrator working thresholds, not physical vibration-strength proof.
+- The Android phone-owned playback path now parses prepared block WAV files as
+  PCM, plays them with AudioTrack instead of MediaPlayer, and schedules
+  vibration cues from the AudioTrack playback head instead of coroutine
+  wall-clock delays. Phone-owned block/cue artifacts now record sample rate,
+  channel count, bit depth, frame count, duration, scheduled audio frame,
+  playback-head delivery frame, and cue jitter. This improves the local
+  reconstruction/timing spine for prepared WAV replay, but it is still
+  phone-runtime evidence only until physical-device validation and native
+  Android LSL broadcast are wired and audited.
+- Phone-owned Android run folders now keep a full `run_package_manifest.json`
+  snapshot and a compact `reconstruction_contract.json` beside
+  `events.csv`, `lsl_marker_mirror.csv`, `command_diary.jsonl`,
+  participant metadata, and haptic capability artifacts. ZIP exports therefore
+  carry enough package/schedule/asset identity to reconstruct the run without
+  asking the PC bridge for its original manifest.
+- Mobile v2 manifests now explicitly link scheduled trial rows back to reusable
+  `trial_building_block` assets through `building_block_asset_id`, and schedule
+  blocks mirror those ids in play order. Android parses this field and includes
+  the building-block catalog plus per-block trial asset-id order in its local
+  reconstruction artifact. This is the schema prerequisite for deterministic
+  phone-side missed-trial/top-up WAV assembly without FFmpeg.
+- Android phone-owned scheduled-block playback now has a lightweight fallback
+  path: when the prepared `block_audio` WAV is absent but each trial references
+  a synced `trial_building_block` WAV, `PhoneTopupAssembler.kt` materializes
+  `materialized_blocks/phone_materialized_block_XX.wav` by deterministic PCM
+  concatenation, recalculates block-relative trial/cue timing from source WAV
+  frame counts, writes
+  `pps-android-phone-scheduled-block-materialization.v1`, and records a
+  `phone_scheduled_block_materialization` marker/diary event before AudioTrack
+  playback. The default prepared block WAV path is unchanged.
+- The native runner's `Send To Phone` bridge now serves building-block-only v2
+  packages by default. `build_mobile_package_manifest(...,
+  include_block_audio=False)` omits `block_audio` assets while preserving each
+  block's compatibility `audio_asset_id`, sets `asset_strategy =
+  trial_building_blocks_only`, requires every scheduled trial to reference an
+  available reusable `trial_building_block`, and lets Android's scheduled-block
+  materialization fallback own playback. The regular Focus Mode companion
+  package path still serves prepared block WAVs for compatibility. The mobile
+  package validator can enforce this path with
+  `--require-lightweight-scheduled-blocks`.
+- Mobile v2 phone packages now carry explicit Segment 6/Segment 5 provenance:
+  `participant_roster`, `randomization_seed`, and
+  `source_segment_hashes` for the run-setup manifest, order CSV, accepted
+  Segment 5 manifest, and scheduled source block CSV hashes.
+  `validate_mobile_package_manifest()` rejects participant-roster drift and
+  source block/run-setup hash drift when this evidence is present. Android
+  parses these fields in `MobileRuntimeModels.kt` and writes summary copies in
+  phone-owned reconstruction/catalog artifacts. The first `session_metadata`
+  event, native liblsl stream XML, and the exported
+  `lsl_runtime_status.json` rich-marker/numeric-trigger stream descriptions now
+  also carry `session_metadata_json`, so a single marker/trigger stream can
+  expose the package's source randomization/order evidence without depending
+  only on private app files. The Android runtime artifact validator now rejects
+  provenance drift across `run_package_manifest.json`, the `session_metadata`
+  package payload, `reconstruction_contract.json`, `phone_run_catalog_entry.json`,
+  and stream-description `session_metadata_json`, comparing the package roster
+  count, randomization seed, Segment 6/5 hashes, and compact source block CSV
+  count used by the phone app.
+- Android phone-run artifact validation can now prove the lightweight replay
+  path after the fact. `validate_android_lsl_runtime_artifact.py
+  --expect-lightweight-materializations` reads run folders or exported ZIPs,
+  loads `run_package_manifest.json`, `completion.json`, and
+  `materialized_blocks/`, then requires every `trial_building_blocks_only`
+  scheduled block to have a matching
+  `phone_scheduled_block_materialization` event, materialization JSON manifest,
+  generated WAV whose SHA-256 matches the recorded reconstruction hash, and a
+  materialized trial sequence whose `trial_uid`, sequential `trial_number`, and
+  `building_block_asset_id` order matches `run_package_manifest.json`.
+- Android now preserves the mobile package `asset_strategy` through its parsed
+  Kotlin model and all phone-owned reconstruction surfaces: session metadata
+  diary, `completion.json`/`latest_events.json` package summary,
+  `run_package_manifest.json` fallback snapshots, `reconstruction_contract.json`,
+  `lsl_runtime_status.json`, native LSL stream description metadata, and
+  `phone_run_catalog_entry.json`. This keeps building-block-only
+  `trial_building_blocks_only` runs distinguishable from prepared-block WAV
+  compatibility runs during offline reconstruction. The Android run artifact
+  validator now checks that strategy for consistency across the status,
+  manifest, reconstruction, completion, and catalog sidecars, and strict
+  lightweight-materialization validation requires it in the status and package
+  manifest contract.
+- Android phone-run command administration evidence is now validated from the
+  receiver side. `validate_android_lsl_runtime_artifact.py --expect-command-acks`
+  loads `command_diary.jsonl` from run folders/ZIPs, falls back to embedded
+  `completion.json` command diary rows, and requires native `native_lsl`
+  command rows to carry valid `PPSCommandAcksV1` samples, matching ack times,
+  `ack_sent=true`, and corresponding `operator_command` events. This makes
+  PC-runner/controller-to-phone LSL administration auditable from the phone run
+  artifact, not only from sender outboxes. The strict ack path now also parses
+  the ack sample payload, requires it to match the command diary payload, and
+  checks that applied native acks preserve the command plus package identity
+  and, for active-run control commands, the phone `run_id`.
+- Android phone-run command diary validation now also reconciles duplicate
+  command diary copies. When `command_diary.jsonl` and embedded
+  completion/latest-events `command_diary` rows are both present, the validator
+  compares schema, source, status, payload, ack evidence, timing, and identity
+  fields for each command id, and compares the command diary payload with the
+  matching `operator_command` event payload, so the phone's local command log
+  cannot silently diverge from the exported completion or marker snapshot.
+- Android phone-owned local UI actions are now reconstructable from the same
+  command diary path. `MainActivity.kt` records local Runner-mode start button
+  presses plus local Runner-mode Pause, Resume, and Stop After Block controls
+  as `command_source=phone_ui`, internal phone-runtime materialization and
+  completion bookkeeping as `command_source=phone_runtime`, and native receiver
+  commands as `command_source=native_lsl`; each row is mirrored to an
+  `operator_command` event, and the Android runtime artifact validator checks
+  that command-source labels match the event mirror while still accepting
+  historical `phone_ui_or_runtime` rows.
+- Idle Runner-mode native `start_experiment` / `start_part` commands are now
+  carried into the launched phone run artifact. The Android listener preserves
+  the received `PPSCommandSignalsV1` signal, generated `PPSCommandAcksV1` ack
+  sample, and `ack_sent` result in `PhoneStartCommandEvidence`; `runPhonePackage`
+  records that evidence through the native command diary path instead of
+  labeling the run start as `phone_ui`. This closes a receiver-side audit gap
+  for PC-runner/controller-phone remote starts.
+- Android phone-owned run folders now write `artifact_file_inventory.json` and
+  `artifact_file_inventory.csv` after the run sidecars are present. The
+  inventory excludes its own JSON/CSV files, but lists all other run-folder
+  files by relative path, byte size, SHA-256 hash, and modification timestamp;
+  completed Data_max copies receive the same inventory sidecars. The Android
+  artifact validator supports `--expect-artifact-inventory` and also fails new
+  completion artifacts that advertise the inventory but omit it or contain
+  mismatched file hashes.
+- The same validator now loads `lsl_marker_mirror.csv` from phone-run folders
+  or exported ZIPs, falls back to embedded `completion.json` marker rows, and
+  checks marker mirror reconstructability against completion events, payload
+  JSON, Android phone event-code mappings, duplicate event ids, and required
+  marker fields. This keeps the local PPSMarkersV2-shaped mirror auditable
+  before a PC-side LSL monitor/XDF comparison is available.
+- Android phone-run participant and haptic evidence is now validator-visible.
+  `validate_android_lsl_runtime_artifact.py` loads `participant_metadata.json`
+  and `haptic_capability.json` from run folders/ZIPs, falls back to embedded
+  `completion.json` metadata, compares sidecars to embedded copies, enforces
+  `metadata_payload_only` participant privacy, checks run identity/catalog
+  consistency, and validates vibrator/amplitude calibration result bounds.
+- Android phone-owned runs now derive a phone-local tactile response ledger
+  using the shared 100-1300 ms post-tactile response window and write
+  `phone_response_ledger.csv` plus `phone_topup_plan.json` into the local run
+  folder/ZIP. The plan marks missed tactile trials as rescue candidates and
+  points each one to its reusable `trial_building_block` asset id with
+  `synthesis_strategy = pcm_wav_concat_without_ffmpeg`. This is still a
+  planned-not-played top-up artifact; the phone does not yet assemble and play
+  the rescue WAV automatically.
+- Android can now materialize a phone-side top-up WAV artifact without FFmpeg:
+  `PhoneTopupAssembler.kt` validates that the selected trial building-block
+  WAVs share a PCM format, concatenates their data chunks into
+  `phone_topup_block.wav`, writes `phone_topup_materialization.json`, and keeps
+  a generated top-up block schedule/cue map. Completed phone-run artifacts now
+  attempt this materialization and record `not_needed`, `materialized`, or
+  `failed` with a concrete reason. Automatic playback/analysis integration of
+  the materialized top-up block remains pending.
+- Android phone-owned runs now attempt one materialized phone top-up phase
+  immediately after all standard package blocks complete. If missed tactile
+  trials have reusable building-block WAVs, the app materializes
+  `phone_topup_block.wav`, plays it through the same AudioTrack playback-head
+  cue scheduler, records `phone_topup_materialization`, top-up block start/cue/
+  tap/block-complete events, and writes the updated diary/artifacts before
+  final run completion. The phone-local response review now appends
+  `topup_rescue` rows to `phone_response_ledger.csv`, marks source misses as
+  `missed_rescued_by_topup` or `missed_topup_missed`, sets the top-up plan
+  status to `played` after the phone top-up block completes, and stores
+  `topup_hit_count`, `final_rescued_hit_count`, and
+  `final_unresolved_miss_count` in the phone response summary. This is still
+  phone-runtime response evidence, not physical vibration/audio proof.
+- Android now has a strict phone-side LSL command/status protocol layer even
+  before the native transport is linked. `PhoneLslProtocol.kt` mirrors the PC
+  runner `PPSCommandSignalsV1` / `PPSCommandAcksV1` string-sample field order,
+  token-gates commands with `token` / `companion_token`, rejects wrong-session,
+  wrong-token, and unsupported-command samples before a handler runs, and builds
+  applied/rejected ack samples after local application. Every phone-owned run
+  now writes `lsl_runtime_status.json` and embeds the same object in
+  `latest_events.json` / `completion.json`; the status explicitly reports
+  `native_transport_available=false`,
+  `reason=native_liblsl_android_layer_not_present`, stream names, channel
+  order, supported commands, token requirements, and the privacy boundary that
+  demographics remain metadata/payload artifacts rather than stream names. The
+  PC mobile-runtime upload writer preserves this Android LSL runtime status
+  beside uploaded marker mirrors and now also writes the expected
+  `PPSTriggerCodes` numeric sequence as `trigger_codes.csv` in the PC-copy
+  artifact folder. This does not yet make Android a live LSL broadcaster or
+  receiver; that still requires the pinned liblsl Android layer and
+  emulator/physical network validation.
+- The native Android LSL integration route is now documented in
+  `docs/ANDROID_LSL_INTEGRATION.md`, including the official liblsl Android/AAR
+  path, Android Wi-Fi/multicast caveats, and validation levels from protocol
+  unit tests through physical-phone LabRecorder/XDF capture. The new validator
+  `validation_protocols/scripts/validate_android_lsl_runtime_artifact.py`
+  accepts a phone run folder, exported ZIP, `completion.json`, or
+  `lsl_runtime_status.json`; by default it verifies the current non-native
+  marker-mirror status and command/ack schema, while `--expect-native-transport`
+  becomes the strict gate after liblsl is actually linked.
+- The PC companion bridge now emits token-free
+  `pps-runner-companion-discovery.v1` UDP advertisements to multicast
+  `239.255.77.83:48767`, limited broadcast `255.255.255.255:48767`, and
+  best-effort same-subnet directed broadcasts, so Android phones on same-Wi-Fi
+  or a local phone hotspot can discover the bridge endpoint without reading the
+  QR first. Discovery packets contain host/port, session id, mode, and
+  transport only; they never carry the companion token, demographics, or
+  participant-coded stream names. Android parses and listens for the packet
+  from the pairing screen, but authorization still requires the QR/manual
+  token-bearing pairing URI.
+- Android phone-owned mode now exposes an explicit `Runner` / `Controller`
+  role toggle. Runner mode keeps the local phone playback/tap-response controls.
+  Controller mode hides local run controls and produces token-gated
+  `PPSCommandSignalsV1` command samples for `start_experiment`, `pause`,
+  `resume`, `continue_instruction`, and `request_snapshot` into
+  `phone_controller_command_outbox.jsonl`, with
+  `phone_controller_runtime_status.json` marking
+  `native_transport_available=false` and
+  `current_android_source_behavior=local_controller_outbox_only`. This gives
+  the future native LSL bridge a tested UI/outbox contract for another phone to
+  control a runner phone, but it still does not send live LSL samples until the
+  liblsl Android transport is wired.
+- Runner-mode `lsl_runtime_status.json` and root
+  `pps-android-lsl-stream-descriptions.v1` now explicitly declare
+  `role="runner"`, and the PC-side mobile upload mirror backfills the same
+  role labels when sparse Android uploads are saved. Strict artifact validation
+  rejects runner status/stream-description role drift, matching the existing
+  Controller/PC-admin/monitor role checks.
+- Android native LSL transport now has an optional local-AAR bridge boundary.
+  `android/runner-companion/app/libs/liblsl-Android.aar` is ignored by Git but,
+  when supplied for a local validation build, Gradle includes it and
+  `PhoneNativeLslBridge.kt` reflects the official Java binding classes
+  (`edu.ucsd.sccn.LSL`) to create long-lived rich `PPSMarkersV2` and numeric
+  `PPSTriggerCodes` outlets. Phone-owned sessions open those outlets before the
+  `session_metadata` marker and push every local marker mirror row through the
+  native bridge while still writing `lsl_marker_mirror.csv`. Native marker
+  timestamps map Android `elapsedRealtime` event times into the liblsl
+  `local_clock()` domain using an outlet-open offset and are labeled
+  `android_elapsed_realtime_plus_open_lsl_clock_offset`; this remains
+  phone-runtime evidence until XDF and physical timing validation pass. Without
+  the AAR, the bridge is a no-op and `lsl_runtime_status.json` records
+  `liblsl_android_class_unavailable`; strict validation now also requires
+  `native_marker_transport_enabled=true`, not only class availability.
+- The optional Android native LSL bridge now also owns the runner-side command
+  receiver boundary. With the local liblsl AAR present, phone-owned runner
+  sessions attempt to resolve `PPSCommandSignalsV1`, open `PPSCommandAcksV1`,
+  poll token-gated command samples during AudioTrack playback, retry command
+  stream resolution while the run is active if no command stream was initially
+  found, and write every applied/rejected ack sample into `command_diary.jsonl`
+  plus the ordinary marker mirror. `request_snapshot`, `operator_note`,
+  `continue_instruction`, and already-running start commands are acknowledged as
+  local diary/snapshot actions; `pause` and `resume` now apply a phone-owned
+  AudioTrack pause gate during active blocks, write `phone_playback_pause` /
+  `phone_playback_resume` events, and keep block elapsed time pause-adjusted in
+  command payloads and artifacts. `stop_after_block` now applies a phone-owned
+  block-boundary stop policy: it records `phone_stop_after_block_request`,
+  finishes the current AudioTrack block without truncating audio, records
+  `phone_stop_after_block_boundary`, skips remaining phone blocks plus phone
+  top-up, and closes artifacts with `completion_reason=stopped_after_block`.
+  `lsl_runtime_status.json` now separates bridge, marker transport, and command
+  transport details; strict validation requires the native command receiver and
+  enabled `native_bridge.command_transport` as well as marker transport.
+- Phone-run `PPSCommandAcksV1` payloads now declare
+  `receiver_role="runner"` for applied, pre-handler rejected, handler-rejected,
+  request-snapshot, idle-start, and malformed-command acknowledgements. Strict
+  phone-run command-diary validation rejects receiver-role drift, so raw ack
+  samples can be classified as Runner-phone evidence without relying only on
+  filenames or UI state.
+- Controller-mode and PC-admin live ack validation, strict controller/PC-admin
+  outbox validation, PC monitor event validation, and both command-admin and
+  monitor reconciliation scripts now require the same `receiver_role="runner"`
+  payload field on observed `PPSCommandAcksV1` samples. This makes the
+  controller-vs-runner hierarchy auditable after two-phone or PC-to-phone LSL
+  rehearsals instead of treating runner identity as a UI-only assumption.
+- Strict phone top-up artifact validation now compares
+  `phone_topup_materialization.json` trial signatures against both the embedded
+  completion materialization and `phone_topup_plan.json`. Materialized top-up
+  WAV evidence must reference `pps-android-phone-topup-plan.v1`, keep the
+  planned rescue source/building-block sequence, and report contiguous
+  top-up trial start/end/duration timing so a lightweight phone top-up can be
+  reconstructed without trusting only the final WAV hash.
+- The phone-owned AudioTrack pause gate now keeps polling native Android LSL
+  commands while playback is paused. A `pause` command therefore no longer
+  traps the runner inside the paused audio wait loop; a PC runner or second
+  phone Controller can send `resume` and have it applied during the pause,
+  with the existing pause-adjusted block elapsed-time accounting preserved.
+- Android Runner mode now exposes local active-run Pause, Resume, and Stop After
+  Block buttons instead of relying only on a PC helper or second Controller
+  phone for administration. These buttons call the same phone-owned
+  AudioTrack/pause-gate and clean block-boundary stop paths used by native LSL
+  commands, then write `command_source=phone_ui` command diary rows mirrored as
+  `operator_command` marker events.
+- Android Runner mode now has a native idle command-listener boundary for
+  validation builds with the local liblsl AAR. When a selected package is synced
+  and the phone is idle, Runner mode resolves `PPSCommandSignalsV1`, emits a
+  token-gated `PPSCommandAcksV1` response to `start_experiment` / `start_part`,
+  and then launches the same single-package phone-run path as the local Start
+  button. Other active-run commands are rejected while idle except
+  `request_snapshot`, which returns an idle status payload.
+- Android Controller mode now has the matching optional native sender boundary.
+  It still writes `phone_controller_command_outbox.jsonl` and
+  `phone_controller_runtime_status.json` as the durable audit trail in every
+  build, but with the local liblsl AAR present it keeps a controller-side
+  `PPSCommandSignalsV1` outlet open while Controller mode is selected, sends
+  button-press commands over native LSL, polls for matching
+  `PPSCommandAcksV1` samples, and records native send/ack outcomes in each
+  outbox row. The Controller screen now includes Stop After Block when
+  `stop_after_block` is advertised, so a second Android phone can request the
+  same clean block-boundary stop as the PC helper. Default builds remain
+  `local_controller_outbox_only`.
+- Android Controller mode now also exposes `operator_note` when the selected
+  package advertises it. The Controller UI keeps this as a compact single-line
+  note field plus send button, writes the note into the
+  `PPSCommandSignalsV1` payload while preserving token/session metadata
+  authority, and stores the same payload in
+  `phone_controller_command_outbox.jsonl`; Runner mode already acknowledges
+  the command as an operator diary/snapshot action.
+- The Android emulator UI stress harness no longer reports Android live LSL
+  control as an unimplemented expected failure. It now checks the current source
+  tree for optional native marker outlets, command receiver/ack, Controller
+  sender, token-gating, and the Gradle `liblsl-Android.aar` hook; default builds
+  report `source_supported_default_build_local_mirror_only`, while AAR builds
+  still require live network/XDF validation before Android LSL is treated as
+  proven. The harness validation fixture now advertises the current command set:
+  Start/Pause/Resume/Continue/Stop-after-block/Snapshot/Note.
+- Android phone-owned mode now includes a device-limited phone-vibrator
+  calibration workflow. `PhoneHapticCalibration.kt` runs an ascending
+  perceptual threshold check over fixed percent levels when Android reports
+  amplitude control, records binary detection-only status otherwise, writes
+  `pps-android-phone-haptic-calibration.v1` into haptic metadata/artifacts,
+  copies the recommended percent into participant metadata with
+  `tactile_threshold_source=android_haptic_calibration`, and uses the mapped
+  amplitude for phone vibration cues. This is a phone-vibrator working
+  threshold only, not Woojer/physical vibration timing evidence.
+- The Android LSL artifact validator now treats Controller-mode evidence as a
+  first-class artifact type. In addition to phone-run folders/ZIPs and
+  `lsl_runtime_status.json`, `validate_android_lsl_runtime_artifact.py` accepts
+  `phone_controller_runtime_status.json` and
+  `phone_controller_command_outbox.jsonl`, verifies the PC-compatible
+  command/ack channel order and token payload, rejects Controller/PC-admin
+  row-payload versus command-sample-payload drift, requires nonblank
+  `operator_note` note payloads, can require native controller sends with
+  `--expect-native-transport`, and can require matching acks with
+  `--expect-command-acks`. Use this for non-emulator audits of the
+  phone-to-phone controller contract before claiming live Android LSL evidence.
+- The PC side now has a reusable Android LSL administration sender. The
+  `android_lsl_admin.py` module and `pps-android-lsl-command` entry point send
+  token-gated `PPSCommandSignalsV1` samples from the runner/PC environment,
+  optionally require matching `PPSCommandAcksV1`, and persist
+  `pc_android_lsl_command_outbox.jsonl` plus
+  `pc_android_lsl_admin_status.json`. This is the PC counterpart to Android
+  Controller mode and is the intended non-UI sender seam for PC-runner-to-phone
+  start/pause/resume/snapshot/operator-note validation. The Android LSL
+  artifact validator now accepts the PC-admin status/outbox pair as a
+  first-class artifact type, verifies the same command/ack schema/channel order
+  and token payload, can require recorded native LSL sends, and can require matching
+  `PPSCommandAcksV1` rows for PC-runner-to-phone rehearsals. The native
+  runner's `Send To Phone` window now exposes a Phone LSL Control strip after
+  package preparation; it targets the prepared package part-session id by
+  default, sends Start/Pause/Resume/Continue/Snapshot/Stop-after-block/Note
+  through the same helper on a worker thread, requires note text for
+  `operator_note`, and saves the PC-admin outbox/status under runner logs for
+  that phone transfer.
+- PC-side Android LSL monitor validation now checks observed
+  `PPSCommandSignalsV1` payloads rather than only command ids/names. Monitor
+  event rows must preserve row `payload_json` consistent with the serialized
+  command sample payload, command-signal payloads must carry the pairing token,
+  and observed `operator_note` commands must include nonblank note text. This
+  lets a PC observer artifact prove what command payload was visible on the
+  network, not only what the sender outbox says it attempted to send.
+- PC-side Android LSL monitor reports now record unmatched command ids in both
+  directions: observed `PPSCommandSignalsV1` ids without matching
+  `PPSCommandAcksV1` ids, and ack ids without observed command signals. Strict
+  monitor validation with `--expect-command-acks` fails when an observed command
+  signal lacks a matching observed ack, so monitor-only rehearsals cannot pass
+  from unrelated command and ack samples.
+- Android phone-owned runs now maintain an app-private participant/session
+  catalog in addition to each run folder. Every partial and completed
+  `writeLocalArtifact` call writes `phone_run_catalog_entry.json` into the run
+  folder/ZIP and upserts the same run into
+  `phone_run_catalog/<participant>/runs.jsonl`, `latest_run.json`, and the
+  global `phone_run_catalog/index.json`. Catalog entries carry package id,
+  session/part-session ids, reconstruction schedule hash, artifact filenames,
+  command diary and marker counts, native LSL status booleans, completion
+  reason, and privacy-safe participant metadata summaries; they explicitly keep
+  demographics out of stream names.
+- Strict Android phone-run artifact inventory validation now also checks the
+  completion/latest-events `artifact_file_inventory_artifact` pointer. The
+  inventory rows still exclude `artifact_file_inventory.json` and
+  `artifact_file_inventory.csv` to avoid self-hashing, but the validator
+  separately requires the advertised JSON/CSV filenames, schema, and
+  `self_included=false` contract to match present sidecars in folders or ZIPs.
+- The Android LSL artifact validator now understands the phone-run catalog
+  entry. `validate_android_lsl_runtime_artifact.py` loads
+  `phone_run_catalog_entry.json` from phone-run folders and ZIPs, checks schema,
+  privacy, identity fields, native LSL status booleans, and artifact filename
+  consistency, and can fail missing catalog entries with
+  `--expect-run-catalog` for new phone-owned exports.
+- Android phone-owned ZIP export now includes an app-private
+  `phone_run_catalog/` snapshot when present, not only the run-local
+  `phone_run_catalog_entry.json`. The Android LSL artifact validator can now
+  load that snapshot from ZIPs or the real app-private sibling folder layout
+  and enforce it with `--expect-run-catalog-index`, checking global
+  `index.json`, participant `runs.jsonl`, and `latest_run.json` against the
+  current phone-run identity and per-run catalog entry.
+- Android phone-run artifact validation can now treat the plain event diary as
+  a strict reconstruction sidecar. `validate_android_lsl_runtime_artifact.py
+  --expect-event-diary` loads `events.csv` from run folders or ZIPs, checks
+  duplicate event IDs, required phone timestamp/run identity fields, and
+  primitive field consistency against embedded `completion.json` /
+  `latest_events.json` events. This gives operators a CSV audit trail of what
+  the phone runtime did, separate from marker mirrors and command diaries.
+- Android phone-owned runs now write a local numeric trigger-code mirror,
+  `trigger_codes.csv`, beside `lsl_marker_mirror.csv`. It records the
+  `event_id`, `event_code`, `event_type`, `trigger_key`, and phone elapsed-time
+  sequence that the optional native bridge pushes to `PPSTriggerCodes`.
+  `validate_android_lsl_runtime_artifact.py --expect-trigger-code-mirror` loads
+  that mirror from folders or ZIPs and compares it to the rich marker mirror so
+  phone-local numeric-trigger reconstruction can be checked before PC monitor or
+  LabRecorder/XDF evidence.
+- Study 5 future participants now use salient DynaSpace-style looming burst
+  stimuli as the standard approaching audio-tactile sources and full-SOA
+  stationary burst baselines instead of the previous no-looming/tactile-only
+  baseline WAVs. The bundled Study 5 profile normalizes to
+  `baseline_strategy = stationary_burst`; Segment 3 baseline WAVs use
+  `baseline_stationary_burst_...` stems, preserve instruction/jitter audio,
+  replace looming components with stationary burst-rendered source audio, and
+  keep tactile cues on channel 3 for every main SOA. The current local P016
+  package was regenerated in the active runner output root after this change,
+  and stale P016 no-looming package artifacts were removed from that active
+  root.
+- For split Study 5-style runs, the Part 1 missed-trial top-up slot now
+  materializes and plays a repeated-block top-up from part-local blocks 01 and
+  02 when both prepared blocks are present. The repeated rows are marked
+  `Is_Topup=true`, `Topup_Role=repeat`, preserve source block/trial
+  provenance, and remain primary-analysis-included as explicit repeated
+  acquisition rows. If Part 1 blocks 01/02 are unavailable, the runner falls
+  back to the existing missed-tactile rescue top-up behavior.
+- Focus Mode tactile calibration is now a participant-specific adaptive tactile detection-threshold assay instead of a quick working-level check, and was tightened after participants detected stimuli at 0.5% Output 3/4. Output 3/4 is capped at 0.5% in the UI, saved runner settings, calibration metadata, and calibration application path; older latest-calibration values above the cap are clamped when loaded. The visible `Tactile Threshold` button remains available after participant/package selection and before setup submission, uses the same tactile output route, accepts ordinary left-click responses through the global mouse listener or bullseye target without writing normal trial responses or LSL trial markers, and runs `two_down_one_up_detection_threshold.v2`: one familiarization pulse at the 0.5% cap, then a 2-down/1-up transformed staircase over 0.01/0.015/0.02/0.03/0.05/0.075/0.1/0.15/0.2/0.3/0.4/0.5% Output 3/4. The staircase targets approximately 70.7% tactile detection, interleaves catch trials every four signal trials until at least three catches are collected, stops after six reversals plus the catch minimum, and estimates threshold as the mean of the last four reversal levels; repeated detections at the 0.01% floor can produce a lower-bound-censored staircase estimate. After staircase convergence, a final confirmation phase starts at that estimate and must pass 10 consecutive tactile hits plus 5 clean confirmation catch trials before saving a participant preset. Confirmation misses reset the hit streak and raise the candidate by +0.01% up to the 0.5% cap; catch false alarms show the red `Only press when you feel the tactile pulse.` warning, reset the clean-catch streak without changing intensity, and fail the attempt on the third cumulative false alarm. Reports now use the shared tactile response window (valid 100-1300 ms after tactile onset), randomized onset-to-onset ITI jitter (1800-2600 ms), the 120-event cap, max Output 3/4 percent, staircase/reversal metadata, confirmation counters, response/recenter coordinates, `detection_threshold_output_34_percent` for the staircase estimate, and `recommended_output_34_percent` / legacy-compatible `final_output_34_percent` for the confirmed task level.
+- Focus Mode opens a modeless `Tactile Calibration Monitor` window during the assay. It shows the current phase/trial/intensity, moves the Output 3/4 slider as each candidate amplitude is tested, provides a large click target, recent response classification, reversal/catch status, a compact trial timeline, and a trial table. The calibration worker requests one-shot cursor recentering to the monitor target on the Qt UI thread before each trial; this recentering is logged in calibration trials and is separate from the normal in-run tactile-cue recenter controller.
+- `PPSExperimentRunner.exe` now has a fourth first-screen decision, `Send To Phone`, alongside resume-last, resume-custom, and start-new. This opens a transfer dashboard that prepares the selected profile/participant into runner-shaped packages, starts a transfer-only companion bridge, and shows a v2 `pps-companion://pair?...mode=phone_export` QR so the Android app can sync the active and sibling split packages without starting a laptop-owned Focus Mode session.
+- Android `Run Experiment On Phone` now treats v2 phone-export pairings as phone-owned sessions. The app opens directly into the phone runtime, downloads and verifies package assets, can run the full split experiment locally, stores phone-side event/completion artifacts under app-private storage, and can export the last session as a ZIP for later retrieval. PC-runner LSL, LabRecorder, Woojer, wired-loopback, and instant-analysis guarantees remain available only in `PC Runner Control` / laptop-owned Focus Mode runs.
+- Same-Wi-Fi LAN is the primary phone-transfer bridge. The runner exposes a Wi-Fi Direct fallback selection and Windows availability/status check, but this PC reports legacy hosted-network support as unavailable; treat Wi-Fi Direct as a manually joined direct-link fallback, not an automatic Windows hotspot setup.
+- The native `PPSExperimentRunner.exe` post-run `PPS Instant Analysis` popup replaced the old visible participant run quality badge with a top response-quality panel. The panel is intentionally simple and descriptive: all-trials tactile hits/misses and catch correct/false-alarm rates are shown as four metric cards plus two horizontal stacked bars above the PPS curves, including top-up rows when present. The panel reads the runner participant-trials CSV when available and falls back to analysis response/final-outcome rows. `recording_quality_gate.v1.json` remains a saved artifact and participant-pool inclusion mechanism, but it is no longer the primary operator feedback widget in the popup.
+- The native post-run popup now has a Level 2 `Basic PPS Assumptions` panel between response quality and PPS curves. `session_analysis.py` writes `basic_assumption_checks.v1.json`; `analysis_catalog.py` and `analysis_review.py` load it for participant and participant-pool datasets. The artifact runs two single trial-level OLS/HC3 checks on `log(RT_ms)` with centered proximity ranks and estimable nuisance fixed effects (`part_number`, `respiratory_phase`, `noise_type`): a pragmatic baseline flatness slope check and a directional audio-tactile-by-proximity interaction check. The UI reduces those to two red/green buttons (`Baseline Assumption`, `Peripersonal Space Assumption`) with tooltips and compact beta/slope detail dialogs. Missing older artifacts intentionally show red/insufficient rather than crashing. This is immediate operator QC, not confirmatory participant-level inference.
+- The native instant-analysis popup is now a three-layer stacked review instead of one crowded first viewport: `1 Response`, `2 Assumptions`, and `3 Model Fit` jump buttons scroll within the same parent dialog. Level 1 owns only response quality, Level 2 owns the two PPS assumption buttons plus an inline slope preview, and Level 3 owns PPS curves/model controls and the collapsed `More` analysis views. Keep this as one modeless parent window, not three independent OS windows.
+
+## 2026-06-26
+
+- Focus Mode initially added a fast participant-specific Woojer/tactile working-level calibration workflow for Output 3/4. That quick protocol was superseded on 2026-06-29 by the tactile detection-threshold assay described above. The persistence location and rule still apply: accepted calibrations are stored under `<output_root>/<participant_id>/<participant_id>_tactile-calibration/`, update `latest_tactile_calibration.json`, immediately set the Output 3/4 UI field, reload per participant, and are copied into session metadata when a run starts; failed/aborted attempts keep timestamped report/CSV evidence but do not change the latest pointer or output level.
+- The native `PPSExperimentRunner.exe` first screen was split away from the old combined pick-folder/start-new path into a deliberate session gate. The original split had `Resume Last Session`, `Resume Custom Session`, and `Start New Session`; as of 2026-06-29 it also has `Send To Phone` for phone-owned package transfer. Resume-last adopts remembered runner settings/diary context, resume-custom opens only a session-folder picker and scans PPS diary/bridge metadata before opening the operations screen, and start-new is the only path that prompts for parent folder, experiment profile, and session name before creating the timestamped environment and preloading `P001`.
+- LSL command/acknowledgement support is now an optional protocol layer rather than a replacement for runner authority. `peripersonal_space_toolkit.lsl_command_ack` defines two long-lived irregular string streams, `PPSCommandSignalsV1` and `PPSCommandAcksV1`, keyed by command id. The receiver emits an `applied` or `rejected` ack only after its local handler returns, so the ack confirms local receiver state transition over LSL while hardware/XDF proof still comes from the existing marker mirror, LabRecorder, and loopback validation layers. `validation_protocols/scripts/run_lsl_command_ack_roundtrip.py` validates real local `pylsl` round trips and reports sender round-trip, receive delay, handler duration, and ack-after-apply latency.
+- Focus Mode now has a local Android runner companion v1. The runner hosts `runner_companion.py` on LAN port `8767` by default while Focus Mode is open, displays a QR code with `pps-companion://pair?...`, and protects snapshot/command APIs with a per-run `X-PPS-Companion-Token`. The phone can submit the existing participant setup fields, start Part 01 or Part 02 only when `allowed_commands` permits it, request separate Pause/Resume commands through the existing Focus Mode control path, continue non-Part-02 instruction gates, and display live timeline/clock state. Runner close/cleanup, participant switching, output tests, playback, timing, LSL, LabRecorder, ledgers, top-up, and analysis remain laptop-only.
+- Android companion QR/deep-link pairing is now robust to emulator-style decoded-URI injection and repeated scan attempts: `MainActivity` is `singleTop`, incoming `pps-companion://pair?...` intents update the existing Compose state, and the CameraX/ML Kit scanner disposes its camera analyzer/executor when the scan surface leaves composition.
+- The companion pairing surface is now a dedicated Focus Mode tab named `Companion Android App (Experimental)`. It contains the QR code plus endpoint/pairing URI and keeps Data Logging focused on participant setup and recording choices.
+- The companion snapshot contract is additive and sequence-based: authorized snapshots include server wall/perf clocks, allowed commands, participant/setup status, part/run/block status, run plan rows, active-block timing anchors, timeline trial rows, tactile cues, cue-linked click markers/RTs, click counts, top-up draft count, and current instruction gate. The Android app extrapolates elapsed time only while the last snapshot says the block is running and not paused or instruction-waiting; offline estimates are capped at block duration and marked stale until WebSocket reconnect resyncs.
+- The Android companion live view is now landscape-first (`sensorLandscape`) and visual rather than log-heavy: it draws current-block trial bands, tactile cue ticks, runner-confirmed playhead, mouse-click dots, cue-to-click RT connectors, and recent RT chips. Pause and Resume are separate mutually exclusive snapshot-gated buttons, and the app never shows paused/playing optimistically after a tap; the visible state changes only from the runner command response or WebSocket snapshot.
+- The Android companion landscape live layout now prioritizes timeline resolution: once setup is complete, status/commands collapse into a top strip and the block timeline uses the full phone width. Visible emulator companion checks should use passive validation (`--mouse-backend none`) or direct snapshot/API checks when the PC is in use; passive mode disables both autoclick helpers and Focus Mode's global response-click listener, while OS mouse backends are reserved for unattended validation runs where pointer control is available.
+- The Android companion timeline is now duration- and density-adaptive rather than tuned to the short validation fixture. `TimelineLayoutModel` chooses readable tick labels for sub-minute, 2-minute, 10-15 minute, and hour-scale blocks, formats long durations as `m:ss`/`h:mm:ss`, hides trial labels when long blocks make individual trials too narrow, and reduces marker size/connectors for dense cue/click streams. The snapshot parser tolerates additive/future timeline aliases such as `start_time_s`, `duration_s`, `display_label`, `tactile_time_s`, and `click_time_s`, and derives tactile/click counts when a future runner omits the `counts` summary. Android unit tests now cover 2-minute and 15-minute block displays plus flexible timeline row fields.
+- The Android companion timeline now adds inline per-trial tactile SOA annotations below the trial bands and response-time labels above cue-linked click dots when the timeline has enough space/density. Dense event streams and too-narrow trial intervals suppress those labels instead of overlapping. Compact landscape mode drops duplicate live-panel title/status chips so the chart rows remain visible; ADB visual validation with a fake companion WebSocket snapshot is under `artifacts/validation_runs/android_companion_inline_annotations_20260626_164306/`.
+- Historical companion emulator validation on this PC was left-display scoped with `windows/Set_Companion_Emulation_Layout.ps1` on Windows display `2` / `DISPLAY2` (`-1920,5 1920x1032` working area), but the old idea of giving the emulator a wider slice for timeline resolution is superseded by the fixed-AVD-viewport rule above. Passive validation enables the validation-only `Ctrl+Alt+Shift+F12` shortcut to synthesize one in-target response through the runner controller without moving the mouse.
+- Passive companion validation now also suppresses Focus Mode tactile-cue cursor recenter movement through `PPS_FOCUS_VALIDATION_DISABLE_CURSOR_RECENTER=1` / `PPS_FOCUS_VALIDATION_DISABLE_MOUSE_CAPTURE=1`; recenter records remain in the focus report as `recorded_intent` with intended coordinates, but no `pyautogui` or Qt cursor move is attempted. Windowed Focus Mode launches can set `PPS_FOCUS_VALIDATION_DISPLAY=left` and `PPS_FOCUS_VALIDATION_RUNNER_WIDTH=820` (or exact `PPS_FOCUS_VALIDATION_WINDOW_RECT`) so the runner opens directly on Display 2 before the external layout script adjusts the side-by-side emulator view.
+- The Display 2 companion layout helper can place the PC runner without stealing focus, but it no longer moves or resizes Android emulator windows and no longer runs a persistent placement loop. For app-command rehearsals, `PPS_FOCUS_VALIDATION_PARTICIPANT_RESPONSES_ONLY=1` keeps the validation participant emulator limited to in-run response clicks; Android or the companion API must still submit setup, start parts, continue gates, and request Pause/Resume. The Android landscape setup form now collapses as soon as the runner-confirmed snapshot says setup is ready, keeping the Start/Pause/Resume command strip and timeline visible without overlap.
+- Current visible evidence for the no-mouse companion run is under `artifacts/validation_runs/android_companion_display2_relaunch_20260626_161750/`: the packaged runner was rebuilt, pinned to `DISPLAY2` beside the Android emulator, and the app-issued Start/Pause/Resume sequence produced runner-confirmed snapshots (`Running -> Paused -> Running` with allowed commands flipping `pause/resume`). The completed software-only run wrote 16 tactile onsets, 16 mouse clicks, 16 response markers, one `operator_pause`, one `operator_resume`, `topup_not_needed`, plus `events.csv`/`events.xdf` and `lsl_markers.csv`/`lsl_markers.xdf`. Screenshot `display2_side_by_side_placement_raise.png` verifies the runner and emulator visible side by side on Display 2 without mouse control.
+- The Android companion WebSocket client now automatically reconnects after network drops using the existing pairing token and a capped retry delay. A reconnect opens a new WebSocket and ignores stale callbacks from closed sockets, so the app can clear the offline-estimate banner and resync from the runner without scanning the QR code again.
+- A visible side-by-side emulator rehearsal exposed a post-completion companion timeout: Focus Mode stopped the same Qt timer that drains companion HTTP/WebSocket bridge calls after a completed run, leaving the Android app offline while the runner displayed the instant-analysis review. The timer now remains active while the companion service exists, and bridge timeouts on health/snapshot are returned as structured HTTP errors instead of generic 500s.
+- Direct packaged `--profile` validation now honors `PPS_FOCUS_VALIDATION_OUTPUT_ROOT`, so clean validation launches materialize participant packages under the requested artifact output instead of silently reusing the operator's remembered dashboard output folder. The full realtime validation harness also writes a validation-only companion pairing report containing the current pairing URI, can advertise an emulator host such as `10.0.2.2`, can launch Focus Mode windowed for side-by-side emulator checks, and explicitly passes `--no-external-labrecorder` unless external LabRecorder validation is requested.
+- Current local evidence for the Android companion plus LSL path: `validation_protocols/scripts/run_lsl_command_ack_roundtrip.py --count 20` passed with 20/20 applied acks and sub-millisecond local round-trip measurements on this PC, and `artifacts/validation_runs/android_companion_full_mock_20260626_135016/` contains emulator screenshots for QR/deep-link pairing, running-block timeline display, offline estimate during a network drop, and patched automatic reconnect/resync during the packaged realtime mock. This is still software-only/validation-realtime evidence unless the run is repeated in the full-stack hardware lane with Komplete ASIO, wired loopback, and LabRecorder proof.
+- Release packaging now treats `android/runner-companion/` and `windows/Build_Android_Companion.ps1` as tracked source/build materials for the offline lab package, while generated APKs, Android `build/`, and `.gradle/` outputs remain ignored unless a release explicitly attaches a reviewed APK artifact. The runner PyInstaller build installs the Python `web` extra and includes hidden imports for FastAPI, uvicorn WebSocket support, websockets, QR generation, and Pillow.
+
 ## 2026-06-25
 
 - Focus Mode now makes zero-miss top-up an explicit completed state instead of a quiet skip. When a part finishes with top-up enabled but no missed tactile trials, `SessionRunnerController` emits `ui_event = "topup_completion"` with `topup_outcome = "not_needed"`, writes the outcome/counts/operator message into `part_completion_status.json`, carries the same summary on `SessionRunResult`, and the Focus Mode UI shows the no-top-up-needed status while continuing into the auto-loaded Part 02 / `Start Part 02` handoff.
+- Installer distribution direction is now locked back to the GitHub + Zenodo topology for the current release: GitHub hosts `PPS-Toolkit-Downloader.exe` and `pps_download_manifest.v1.json`, while Zenodo hosts `PPS-Toolkit-vX.Y.Z-offline-lab-windows-x64.zip`. The installed payload must include `dist/PPSDashboardLauncher/PPSDashboardLauncher.exe` as the Python-free local HTML dashboard/companion launcher, `dist/PPSExperimentRunner/PPSExperimentRunner.exe` as the native runner, and `installer_protocols/` as the end-user-visible build/verification/missing-link protocol lane. `For-AI/` is source-repo project memory only and should not be copied into the end-user install payload.
+- Fresh installer smoke testing exposed two packaged-dashboard details that are now part of the launcher contract: frozen dashboard/viewer static assets must be resolved to concrete filesystem paths before Starlette mounts them, and windowed PyInstaller launches must provide log-backed stdout/stderr so `uvicorn` logging can initialize. Check `local_data/logs/pps_dashboard_launcher.log` and `pps_dashboard_launcher_stream.log` when `PPSDashboardLauncher.exe --no-browser --port <port>` does not answer `/api/health`.
+- Fresh localhost downloader smoke now proves the lightweight install path on this PC. A current `dist/` manifest/payload was served from `http://127.0.0.1:8788/`, `PPS-Toolkit-Downloader.exe` installed into `local_data\installer_smoke\installed` with exit code `0`, the cached downloaded ZIP matched manifest size/SHA256, package inventory had `missing_required_count = 0`, `For-AI/` was absent, installed `PPSDashboardLauncher.exe --no-browser --port 8799` returned `/api/health status=ok`, and installed `PPSExperimentRunner.exe --help` exited `0`. Public proof still needs actual GitHub Release and Zenodo URLs. Downloader safety note: a custom `--install-dir` must not already exist unless it is under the default `%LOCALAPPDATA%\PPS Toolkit\versions` root, because existing custom directories are intentionally refused even with `--force`.
+- Optional Android emulator verification is now documented as a separate installer protocol. The 2026-06-25 fresh-PC attempt installed local Android SDK command-line tools, platform-tools, emulator, build-tools, x86_64 ATD/Google APIs images, an ARM64 ATD image, and a 32-bit API 30 ATD image under ignored `local_data/`. Current x86_64 images were blocked by missing acceleration in this non-elevated shell, and ARM64 was rejected on the x86_64 host. A non-admin fallback using Google's archived emulator `32.1.11.0` booted `emulator-5620` as Android 11/API 30 x86 with `sys.boot_completed=1`, but Android WebView/browser page rendering was not completed before the active goal shifted back to Windows downloader proof. Do not treat the visible physical `Quest_3S` ADB device as emulator evidence unless physical-device validation is explicitly requested.
+- Tactile response selection now uses a shared tactile-onset policy across top-up, offline `session_analysis.py`, Focus Mode timeline click coloring, and final participant-trial CSV reconstruction: valid in-target playback clicks are >=100 ms and <=1300 ms after tactile onset. Clicks <100 ms or >1300 ms after tactile onset remain logged but are not credited, and `trial_end`/next `trial_start` no longer shorten the response window. Protocol 11's controlled response matrix now tests +99 ms reject, +100 ms accept, +1300 ms accept, >1300 ms reject, and next-`trial_start` acceptance inside the previous tactile onset's 100-1300 ms window.
 - Focus Mode split-package handoff now automatically loads the prepared Part 02 child package after a completed Part 01 in the same runner window. The visible `Load Part 2` button was removed; after Part 01 outputs are finalized, the runner restores the submitted participant setup/capture state when possible, preserves same-window LabRecorder handoff state, and leaves the red primary action enabled as `Start Part 02`. Operators can still close after Part 01 and relaunch later, where the launcher/status path opens Part 02 directly. Validation auto-clickers now keep polling for later enabled primary start buttons so mouse-driven runner checks continue through the auto-loaded Part 02 state.
 - Study 5 split-session validation treats Part 01 + Part 02 as one session-group artifact. Focus Mode validation reports include `session_group_manifest`, `expected_part_count`, `completed_part_count`, `all_parts_completed`, `parts[]`, `events_csvs`, aggregate event/scoped counts, and per-part snapshots. Validation automation must continue through the auto-loaded Part 02 state and click the real `Start Part 02` primary action; packaged UI validators require all split parts complete, 12 standard block ends, and 408 standard trial starts/ends. Protocol 11 artifact/readiness scripts understand session-group manifests and Windows long paths for split parts, including WAV inspection through `_filesystem_path()`.
 - Current validation evidence: packaged standalone UI mouse validation passed in `artifacts/validation_runs/packaged_full_mock_ui_20260625_split_validation_r3/`; the completed P050 software participant-emulation dataset in `artifacts/validation_runs/full_mock_packaged_software_20260625_split_validation_pynput/` produced both split parts and passed the Protocol 11 session-group artifact audit after the long-path WAV fix (`protocol11_artifact_audit_20260625_p050_participant_emulation_r2`). These artifacts predate the no-`Load Part 2` handoff and remain development evidence only; final acceptance still needs a clean full-stack hardware run with Komplete ASIO/local audio evidence and unique selected response IDs.
 - Direct packaged `--profile` validation with a fresh `PPS_FOCUS_VALIDATION_OUTPUT_ROOT` can stall before Focus opens while materializing a clean profile environment. The reliable clean-preparation path is the launcher/environment gate; future work should either make direct profile materialization honor isolated validation roots end-to-end or route full realtime participant emulation through the launcher while preserving the requested participant ID instead of launcher default `P001`.
+- Post-pull packaged-runner validation refreshed the local operator executable after pulling `origin/main` through `3fd29a50`. `windows/Build_Experiment_Runner_Exe.ps1` rebuilt `dist/PPSExperimentRunner/PPSExperimentRunner.exe` and passed the packaged Qt runtime check. The stale pre-rebuild executable still emitted the old validation label `Load Part 2`, causing the packaged UI smoke to fail even though both split parts completed; the rebuilt executable passed `artifacts/validation_runs/packaged_full_mock_ui_20260625_post_rebuild/` with `Start Part 02` recorded, 2/2 parts complete, 12/12 standard block ends, 408 standard trial starts/ends, and 360 standard tactile cues. The longer packaged software-only full mock acquisition passed at `artifacts/validation_runs/full_mock_packaged_software_20260625_post_rebuild/` with 2/2 parts complete, 14 total block ends including top-ups, 408 standard trial starts/ends, 360 standard tactile cues, 338 standard response clicks, 22 deliberate misses, 22 top-up rescued hits, and 728 mouse clicks/response markers. Critical caveats: the launcher/environment-gate path still selected `P001` despite the requested `P049`; the full realtime validation harness stalled after Part 02 setup submission until a manual UI click on the visible `Start Part 02` button was sent; and because this was the `software-only` / `validation-realtime` lane, it correctly reports `final_condition_ready=false` with `recording_unavailable` and `wired_loopback_unavailable` events. Before unattended collection-readiness claims, fix the Part 02 auto-click continuation and participant-ID preservation in the launcher-gate validation path, then rerun the full-stack hardware lane with ASIO/local audio evidence, wired loopback, and LabRecorder evidence.
+- Follow-up packaged-runner validation fixed the two automation blockers found in the post-pull run. Focus Mode validation now preserves the requested participant through launcher auto-mode by using `PPS_FOCUS_VALIDATION_PARTICIPANT_ID`, and the participant emulator keeps polling across split-part result boundaries so an enabled `Start Part 02` control is clicked before the Part 01 result is treated as terminal. `windows/Build_Experiment_Runner_Exe.ps1` rebuilt `dist/PPSExperimentRunner/PPSExperimentRunner.exe` after these source changes and the packaged Qt/runtime `--help` checks passed. Current evidence: packaged quick smoke `artifacts/validation_runs/packaged_full_mock_ui_20260625_latest_exe_crosspart_poll/` passed with launcher-selected `P049`, 2/2 parts complete, `Start Part 02` recorded, 408 standard trial starts/ends, and 360 standard tactile cues. Full realtime software-only participant emulation `artifacts/validation_runs/full_mock_packaged_software_20260625_latest_exe_crosspart_poll/` passed unattended with `P049_20260625_221207`, 2/2 parts complete, 12 standard block ends, 408 standard trial starts/ends, 360 standard tactile cues, 22 planned/observed misses, 22 top-up rescue rows, 23 top-up trials, and no failures. Remaining caveat: this is still `software-only` / `validation-realtime` evidence (`final_condition_ready=false`); final collection readiness still needs the full-stack hardware lane with ASIO/local audio evidence, wired loopback, and LabRecorder proof.
 
 ## 2026-06-24
 
@@ -19,14 +921,14 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 - Immediate PPS analysis now treats baseline correction as a condition-scope mean pooled across baseline SOAs, matching the literature-facing plan for tactile-only/unimodal baseline use. Curve artifacts carry `baseline_correction_method=condition_mean_pooled_soa`, `baseline_n`, and `baseline_source_soas_ms`; `facilitation_ms` remains `baseline_mean_rt_ms - audio_tactile_mean_rt_ms`, while sessions without usable baseline rows still fall back to `mean_rt_ms`. The quick popup labels corrected plots as `Baseline-corrected facilitation (ms)` and reports that the baseline was pooled across SOAs within condition.
 - Focus Mode `PPS Instant Analysis` is now plot-first after a completed participant run. The default dialog shows a strict `Participant Run Quality: PASS/FAIL` badge for serious exclusion criteria only, a multi-curve PPS plot, three condition-lens buttons (`2 x 2`, part-only, state-only), three model buttons (`Sigmoid`, `Log decay`, `Linear`), and a collapsed `More` section for the legacy detailed review. Immediate analysis now writes additive condition-lens artifacts (`*_condition_lens_curve_points.csv`, `*_condition_lens_model_fits.csv`, `*_condition_lens_model_fit_comparison.csv`, `condition_lens_triage_summary.json`) plus `recording_quality_gate.v1.json`. Model button triage uses AICc/Delta AICc tiers when valid, while sigmoid boundary-shift cues remain separate from model-family support. The pass/fail grade must remain a data-quality eligibility gate only and must not encode whether a PPS effect is strong or whether sigmoid wins.
 - The post-run analysis browser is now acquisition-folder scoped. `Data_Analytics/analysis_catalog.v1.json` indexes selectable saved datasets, the popup adds an `analysisDatasetCombo`, and split-part participants only become selectable after all required parts complete; Part 1 still writes part artifacts but does not open a participant-level popup. The GUI-selectable derived layer now lives directly under `Data_Analytics/<participant_id>/` for each participant and `Data_Analytics/participant_pool/` for the pooled aggregate. Raw run and split-part source traces remain in their session/group leaves, such as `Data_Analytics/<session_id>/` or `Data_Analytics/<session_group_id>/part_0N/`, but are cataloged as nonselectable source entries. The participant-pool aggregate is rebuilt from the participant folders, includes only participant datasets with `recording_quality_gate.v1.json` status `PASS`, and lists failed participants individually but excludes them from the PASS-only pool. Pool curves are participant-balanced: participant-level condition/SOA means are computed before averaging across participants, so high-trial participants do not dominate. Group model support is exploratory and only marked supported when the participant-balanced group winner, strong group AICc tier, and participant-level majority winner agree; otherwise the model cue is mixed.
-- Focus Mode runner setup now uses a two-tab shell. `Data Logging` is the initial tab and owns participant setup, capture/output toggles, and session settings; `Experiment Control` stays disabled until `Submit setup` validates/saves the setup, creates the session/controller metadata layer, and then automatically switches to the control tab. The participant response panel in `Experiment Control` is now only the centered bullseye response target. `Start Run`, `Pause`, `Stop`, and instruction continuation live in the experimenter control panel, while Output Levels and Output Summary sit in a separate output stack beside the response target; there is no visible in-panel `Close` button.
+- Focus Mode runner setup now uses a two-tab shell. `Data Logging` is the initial tab and owns participant setup, capture/output toggles, and session settings; `Experiment Control` stays disabled until `Submit setup` validates/saves the setup, creates the session/controller metadata layer, and then automatically switches to the control tab. The participant response panel in `Experiment Control` is now only the centered bullseye response target. `Start Run`, separate mutually exclusive `Pause` and `Resume`, and instruction continuation live in the experimenter control panel, while Output Levels and Output Summary sit in a separate output stack beside the response target; there is no visible in-panel `Stop` or `Close` button.
 - Focus Mode timeline display now treats `Type` and `Noise` lane labels as required trial identity labels rather than optional repeated text. The painter still shrinks/elides to prevent overlap, but it should not suppress a trial's type or noise merely because the value repeats. Catch/audio-only trials render SOA as `N/A` in the timeline even when prepared block CSVs keep `SOA_ms = 0` for internal schedule compatibility. The schedule adapter also classifies trial kind from either `Trial_Type` or lowercase Segment 5 `family`, so raw Segment 5 preview rows preserve type/noise/SOA identity but catch/audio-only rows cannot emit tactile events just because old lowercase timing metadata is present.
 - Focus Mode missed-trial top-up now treats the submitted setup checkbox as the operator's enablement decision. When `Top up missed tactile trials at part end` is checked at setup submission, the prepared top-up block auto-approves internally and plays seamlessly at the part boundary without opening a second permission dialog; unchecking the setup option remains the way to disable top-up entirely. Validation reports keep a compatibility `validation_topup_approvals` record with mode `setup_checkbox_auto_play` to document the automatic handoff.
 - Focus Mode response logging now records active-run left clicks globally through a `pynput` listener, not only clicks that land on the centered bullseye target or elsewhere in the runner window. The Qt window event filter remains as an offscreen/fallback path. The existing `mouse_click` event payload remains the response source and uses `in_target=false` for off-target/global clicks and `in_target=true` for bullseye clicks; the runner timeline click lane is updated for every recorded playback click, while response pairing/top-up logic continues to select only in-target playback clicks and retain off-target clicks in the raw event/marker/timing evidence.
 - Focus Mode Output Levels are the master routed-output gains for Komplete playback paths, not only setup metadata. `Output 1/2` is applied in the audio callback to instruction clips, block audio, output tests, and any shared-engine auditory background playback; `Output 3/4` is applied to tactile block channels, the output-4 tactile mirror, test tactile playback, and response-marker pulses. Callback-level regression tests cover instruction, block, response-marker, and background paths so future playback changes cannot bypass the participant-comfort sliders.
 - Focus Mode Output Levels now support fine-grained decimal participant-comfort calibration. The output controls keep the same saved setting keys, but percent values may be decimals rather than whole numbers; the sliders use 0.001% internal steps and the adjacent percent entry boxes allow exact manual values such as sub-1% tactile output levels. Output 3/4 decimal values continue to scale tactile output 3 plus the output-4 mirror and are applied to Test Tactile and normal playback. On constrained runner screens, Output Levels are prioritized over Output Summary so the comfort controls remain visible.
 - Runner-owned LabRecorder capture now treats stream selection as `select_all_visible_network_streams`: after the runner's required `PPSMarkersV2` and `PPSTriggerCodes` source IDs are discoverable, LabRecorder refreshes its network stream list and sends RCS `select all` before starting, so external visible LSL streams are included by default in the same full-session XDF. The capture report records the selection mode, refresh count, started stream count, and footer stream expectation. Focus Mode runner-window exit is the one exception to the protected recorder lifecycle: closing the runner releases pending instruction/top-up waits and asks `SessionRunnerController` to close/terminate the owned LabRecorder child immediately, while normal session teardown keeps the final-marker settle path.
-- Focus Mode Output Levels now includes `Test Audio` and `Test Tactile` controls under the output-volume sliders. `Test Audio` plays the bundled spoken `assets/breathing/runner_output_test_audio.wav` through Output 1/2 at the current headphone gain; `Test Tactile` plays `assets/tactile/runner_output_test_tactile.wav`, a 3-channel file with four tactile cue pulses one second apart on channel 3, through the normal block-routing path so Output 3 gain and the Output 4 tactile mirror are exercised together. The buttons are intended for pre-run comfort/channel checks and are disabled during active playback.
+- Focus Mode Output Levels now includes `Test Audio` and `Test Tactile` controls under the output-volume sliders. `Test Audio` plays one Study 5 pink frontal `dynaspace_gaussian_burst_train` looming stimulus from `assets/preloads/study5_box_breathing_pps/02_looming_stimuli/looming_Pink_frontal.wav` through Output 1/2 at the current headphone gain; `Test Tactile` plays `assets/tactile/runner_output_test_tactile.wav`, a 3-channel file with four tactile cue pulses one second apart on channel 3, through the normal block-routing path so Output 3 gain and the Output 4 tactile mirror are exercised together. The buttons are intended for pre-run comfort/channel checks and are disabled during active playback.
 - Focus Mode now exposes participant-comfort output controls in the `Experiment Control` tab's output stack beside the response target: `Output 1/2` scales the Komplete headphone pair, and `Output 3/4` scales the tactile channel plus its output-4 mirror/response-marker pulse path. The settings are saved immediately in `local_data/dashboard_state/focus_runner_settings.v1.json`, loaded as the defaults for the next runner session, applied to the live `AudioEngine` during setup/playback, and copied into runner diary/session metadata as `playback_output_levels`.
 - Focus Mode participant setup now maintains a local acquisition-folder participant ledger at `Experiment_context_folder_DO_NOT_DELETE/project_state/participant_ledger.v1.json`. The runner saves submitted name/age/handedness/gender/name-sharing setup per participant, restores those fields when returning to that participant in the same output environment, and shows a compact selected/other-participant data-collected summary beside the Segment 6 participant selector. The selector remains backed by the prepared Segment 6 participant list but now has explicit up/down step buttons for moving through P001, P002, etc.
 - Added the Study 5 pink/white full acceptance rehearsal contract as executable validation. `validation_protocols/scripts/audit_study5_baseline_propagation.py` hard-fails stale `baseline_silent` artifacts and verifies that Segment 3, Segment 4, Segment 5, and optional prepared participant block WAVs preserve inhale/exhale instruction audio in baseline trials, silence only the looming interval on auditory channels 1-2, retain tactile channel 3, keep catch trials tactile-silent, and maintain the 34-trial block/row alternation contract. `validation_protocols/scripts/run_study5_full_acceptance_rehearsal.py` sequences runner-window closure, packaged runner rebuild, targeted Study 5/static/profile gates, GUI mouse validation, fresh P050 package audit, full hardware rehearsal, Protocol 11 readiness, wired loopback/XDF drift, and final baseline propagation evidence into `acceptance_summary.json/md`.
@@ -36,7 +938,7 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 - Packaged Study 5 UI mouse validation should set `PPS_FOCUS_VALIDATION_OUTPUT_ROOT` so the runner-created environment lives under the validation evidence directory. The first launcher gate's validation auto-environment path should force/add the requested profile, retry initiation briefly, and write a launcher validation report before rejecting if the gate cannot start; otherwise packaged/offscreen failures turn into silent timeouts with no click evidence.
 - Runner-initiated Study 5 acquisition must not reuse old local registry artifacts. `baseline_silent` files or CSV/JSON references in generated Study 5 Segment 3-6 folders now mark the profile project stale, launcher materialization explicitly clears stale profile outputs, and saved active Study 5 designs that point at deleted copied instruction assets are replaced with the bundled original instruction paths before rebaking.
 - The standalone `PPSExperimentRunner.exe` environment gate was hardened after a visible launcher could sit on `Ready to create ...` without useful operator feedback. The gate now shows an immediate "Creating data collection environment..." state when `Initiate New Data Collection Environment` is clicked, surfaces startup exceptions in the status label, allows Enter from the output/session fields to start when required fields are valid, and keeps mouse-click regression coverage for creating the environment before opening participant operations.
-- Segment 3 tactile-only baseline baking now treats Study 5 baselines as no-looming trials rather than no-instruction trials. For component sequence designs, the baseline WAV preserves fixed/non-looming instruction audio such as inhale/exhale cues, silences only the looming/stimulus component on auditory channels 1-2, and keeps the tactile cue on channel 3. Generated baseline stems use `baseline_no_looming_...` to avoid implying that the breathing instructions are silent.
+- Segment 3 tactile-only baseline baking treats explicit `tactile_only` baselines as no-looming trials rather than no-instruction trials. For component sequence designs, that legacy baseline WAV preserves fixed/non-looming instruction audio such as inhale/exhale cues, silences only the looming/stimulus component on auditory channels 1-2, and keeps the tactile cue on channel 3. Generated legacy tactile-only baseline stems use `baseline_no_looming_...` to avoid implying that the breathing instructions are silent. This is no longer the Study 5 default as of 2026-06-29; Study 5 now uses stationary-burst baselines.
 - Tightened Study 5 HTML dashboard profile refresh behavior after the white/pink source-pool change. Saved default-profile designs and materialized local `profile_study5_box_breathing_pps` working copies are now compared against the committed Study 5 contract (Pink/White sources, two looming source labels in Segment 2 rows, full-SOA tactile baseline, and Segment 4 repetitions `audio_tactile=6.0`, `baseline=3.0`, `catch=6.0`). Stale local profile artifacts are cleared before the profile context is rewritten, and connected read-only profile inspection overlays committed static Segment 2-5 preview data when local generated artifacts are missing or stale. Segment 4/5 inspection should therefore show the 204-row Study 5 pool and six 34-trial blocks rather than any noncanonical local preview. The dashboard/public cache version is now `20260624-study5-profile-refresh`.
 - Added a Study 5 original-instruction transcript library under `assets/preloads/study5_box_breathing_pps/05_run_setup/`, covering the five run-level instruction clips plus the within-trial inhale/exhale fixed cues. The JSON file is the machine-readable source and the Markdown companion is for human review; both point back to `assets/breathing/original_study5/spoken_assets_manifest.json` and preserve ASR provenance/review notes.
 
@@ -56,7 +958,7 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 - Implemented the Study 5 loudness-control policy across renderer, HTML dashboard, segment manifests, and runner session manifests. Segment 1 now exposes a `Loudness Contract` instead of visible per-source gain: default estimated SPL is 55->75 dB SPL with a linear-dB active movement ramp, constant pre/post trajectory holds, -6 dB fixed instruction-clip offset, Komplete Audio 6 MK2 maximum headphone output, Sennheiser HD 560S, ASIO route, runner volume 100%, and explicit `estimated_not_measured` status. Designs with `study_profile_reference_parameters.loudness_policy` disable hidden peak normalization and direct-path distance gain in the Python SOFA/FABIAN renderer, scale the final 500 ms active-movement calibration window to the intended ramp-window RMS target, and fail if the audio peak exceeds the policy ceiling. Segment 2 fixed instruction clips are attenuated during sequence assembly without editing source assets. Segment 2 and Segment 6 become stale when loudness policy/provenance changes, so downstream propagation requires rebaking rather than silently reusing old WAVs.
 - Follow-up loudness protocol implementation refined the calibration contract: the 0.5 s pre/post trajectory holds stay constant but are excluded from calibration, Segment 6 and runner session package creation now write standalone `loudness_manifest.json` files, and runner preflight messages warn when the policy is estimated or deviates from ASIO/Komplete/HD 560S/max-knob/100% runner-volume assumptions.
 - Segment 5 block generation now uses seeded Gellermann-style randomization while preserving Segment 2/3 row order as the hard within-block scaffold. Local backend manifests record `randomization_strategy = seeded_gellermann_row_order_preserving` and `max_consecutive_same_feature = 2`; static/hosted preloads derive already-randomized Segment 5 previews in the browser and expose `Download Randomization` for CSV/manifest export without requiring local file writes. The dashboard/public wrappers now use cache version `20260624-study5-profile-refresh`.
-- Study 5 now has one repository profile: stable ID `study5_box_breathing_pps`, canonical white/pink contents. Do not restore a second Study 5 profile. The remaining Study 5 preload contains `Pink frontal` and `White frontal` looming sources plus `Inhale instruction` and `Exhale instruction` fixed clips, keeps the Study 5 timing/SOA/baseline/catch/block/run defaults, and uses Segment 4 family repetitions audio-tactile `6.0`, baseline `3.0`, catch `6.0` to preserve 204 rows and six 34-trial blocks.
+- Study 5's default repository profile is stable ID `study5_box_breathing_pps`, canonical white/pink contents. The default preload contains `Pink frontal` and `White frontal` looming sources plus `Inhale instruction` and `Exhale instruction` fixed clips, keeps the Study 5 timing/SOA/baseline/catch/block/run defaults, and uses Segment 4 family repetitions audio-tactile `6.0`, baseline `3.0`, catch `6.0` to preserve 204 rows and six 34-trial blocks. Later approved Study 5 variants must not displace this default.
 - Added a Desktop full mock rehearsal workflow for Study 5. `validation_protocols/scripts/run_desktop_full_mock_rehearsal.py` creates a fresh timestamped acquisition folder under the operator-selected Desktop parent, preloads the selected participant with standard capture and optional `output4-tactile-proxy` wired loopback, then delegates the actual run to the full realtime participant emulator. The default rehearsal identity is profile `study5_box_breathing_pps`, participant `P050`, hardware/full-stack lane, packaged runner, OS mouse backend `pynput`, strict Study 5 readiness audit, and a 7200 s timeout.
 - The full realtime participant emulator now accepts `--wired-loopback off|output4-tactile-proxy`, `--external-labrecorder`, `--labrecorder-cli`, and LabRecorder timeout flags, passes them through to Focus Mode, and records the requested modes in launch, preparation, focus, environment, and top-level validation reports. External LabRecorder validation is no longer orchestrated as a wrapper-started process; the runner owns the LabRecorder subprocess.
 - Full mock rehearsal external LabRecorder capture is continuous across the session and runner-owned. `SessionRunnerController` creates the dual session-lifetime LSL outlets before playback, waits until the exact `source_id` values for `PPSMarkersV2` and `PPSTriggerCodes` resolve, starts `LabRecorder.exe` as a minimized child process, controls it through the LabRecorder RCS socket, and only then allows instruction/block playback. `--labrecorder-cli` is still the discovery path for the installed LabRecorder bundle. The runner writes the native external XDF to the participant session folder as `<session_id>_external_labrecorder.xdf` and writes `external_labrecorder_capture_report.json` under context runner logs; the Desktop rehearsal writes external-XDF and cross-stream reconciliation reports under the validation report folder. Block identity comes from LSL marker fields rather than per-block LabRecorder restarts.
@@ -122,7 +1024,7 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 - Formalized `validation_protocols/protocols/11_exhaustive_emulated_participant_runner_stress_test.md` as the next pre-participant operational validation checklist. Protocol 11 keeps the real packaged Focus Mode / `SessionRunnerController` workflow under test while using controlled emulated response plans to cover launch/session resolution, stimulus assembly, sample-exact event schedules, response-boundary pairing, instruction continuation, part-aware top-up, analysis outputs, LSL/trigger options, capture-off combinations, and operator failure modes. Use non-participant IDs and ignored validation output folders only; treat passing Protocol 11 as software/operations evidence, not hardware latency, Woojer mechanical-onset, participant-comprehension, or scientific PPS evidence.
 - The public Documentation tab now follows the intended reader path: Background, Project, Software Flow, Stimulus Generation, Lab Route, Design Workflow, Native Runtime, Published Profiles, and Public Release. Keep `Published Profiles` near the end, after the architecture, combined spatialization/renderer explanation, hardware, designer, and runner sections, so readers can evaluate emulatable studies with the full toolkit context rather than encountering the study table immediately after the intro.
 - Added `validation_protocols/scripts/validate_protocol11_emulated_runner_artifacts.py` as the offline artifact gate for Protocol 11. The validator takes a completed real runner session folder and optional JSON/CSV response plan keyed by `trial_uid`, then writes `protocol11_emulated_runner_artifact_audit.json/md` with section-level pass/fail criteria for session resolution, block WAV/sample schedule integrity, event counts and timestamp quality, response-plan hit/miss/RT reconciliation, response-marker/timing-QC links, instruction/top-up expectations, enabled output files, LSL marker mirrors, trigger dictionary, and operator failure-mode expectations. `tests/test_validation_protocols.py::test_protocol11_artifact_auditor_accepts_one_block_runner_outputs` proves it can audit a real `SessionRunnerController` one-block stress output.
-- Added `validation_protocols/scripts/run_protocol11_controlled_response_matrix.py` as the deterministic Protocol 11 boundary-response scenario. It prepares a real Segment 5/6-style package, runs `SessionRunnerController`, advances instructions through target double-clicks without creating phantom responses, includes catch and baseline rows, injects exact response-plan clicks for +99 ms reject, +100 ms accept, +4.0 s accept, >4.0 s reject, out-of-target, double-click, miss, and next-`trial_start` boundary cases, then runs the Protocol 11 artifact gate. The response pairing, live timeline, and top-up ledger now treat clicks at or after the next `trial_start` as ineligible for the previous tactile onset, while the +4.0 s response deadline remains inclusive when no next trial starts first. Analysis and top-up select the first in-target playback click from tactile onset +100 ms through `min(tactile onset +4.0 s, next trial_start)`; later double/random clicks remain logged but cannot overwrite the selected response.
+- Added `validation_protocols/scripts/run_protocol11_controlled_response_matrix.py` as the deterministic Protocol 11 boundary-response scenario. It prepares a real Segment 5/6-style package, runs `SessionRunnerController`, advances instructions through target double-clicks without creating phantom responses, includes catch and baseline rows, injects exact response-plan clicks for +99 ms reject, +100 ms accept, +1300 ms accept, >1300 ms reject, out-of-target, double-click, miss, and next-`trial_start` acceptance cases, then runs the Protocol 11 artifact gate. Analysis, the live timeline, final participant-trial CSV reconstruction, and top-up select the first in-target playback click from tactile onset +100 ms through tactile onset +1300 ms; trial end and the next `trial_start` do not shorten this window, and later double/random clicks remain logged but cannot overwrite the selected response.
 - The active validation objective now requires full realtime Study 5 runner readiness before real participants: run the experiment runner under realtime real-run conditions, perform visual and data verification, confirm expected-versus-observed outputs, verify every local/recorded data source for reliability/precision/accuracy, and prove both XDF data and the local recorder/audio-evidence path are working and mutually reliable. Current progress added `validation_protocols/scripts/run_protocol11_capture_options_matrix.py`, which verifies `SessionCaptureOptions` output policies across standard local-recording-enabled, events-only, internal-XDF-only, analysis-without-XDF/LSL, and marker-mirror-only tiny controller sessions. This is necessary output-policy evidence, but it is not the final realtime Study 5 hardware/local-recorder/XDF reconciliation proof.
 - Added `validation_protocols/scripts/audit_protocol11_study5_readiness.py` as the Protocol 11 Study 5 evidence aggregator for completed packaged-runner validation folders. It loads `events.xdf` and `lsl_markers.xdf` with `pyxdf`, reconciles local event/marker CSVs and trigger dictionaries, validates nonblank Focus Mode screenshots, checks block WAV geometry plus manifest sample-column recomputation, audits the 4-channel Komplete ASIO local audio-evidence WAV/sidecar, consumes response-marker loopback reports, verifies the analysis CSV family and RT tolerance against the emulated click plan, and reports whether the artifact is truly full Study 5 realtime evidence. The existing one-block real-ASIO rehearsal passes this audit as scoped local-recorder/XDF evidence, while the strict final flags (`--require-full-study5 --require-realtime`) correctly fail it because the artifact is not a full 12-block realtime Study 5 run.
 - The full realtime participant-emulation harness now has an explicit final-readiness mode: `run_full_realtime_participant_emulation.py --audio-mode hardware --strict-study5-readiness`. Strict mode uses the normal hardware ASIO path rather than the validation fake-audio engine, refuses to disable LSL/internal XDF/local audio-evidence capture, captures a Focus Mode screenshot, writes `packaged_runner_process_launch.json` and `preparation_report.json`, annotates `focus_validation_report.json` with hardware realtime scope, then invokes the Study 5 readiness audit. The audit now checks every per-block audio-evidence WAV/sidecar instead of only one file and can generate the LSL/XDF/audio reconciliation plus local audio-evidence response-marker recovery reports when they are missing. The final goal remains open until that strict hardware full-run artifact passes.
@@ -132,8 +1034,8 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 - `windows\Build_Experiment_Runner_Exe.ps1` now retries PyInstaller once without embedding the branded `.ico` if the standard branded build fails. The retry sets `PPS_EXPERIMENT_RUNNER_DISABLE_ICON=1`, and `windows\PPSExperimentRunner.spec` maps that flag to `icon="NONE"`. This is a packaging fallback for Defender/BeginUpdateResource false positives only; the normal branded icon remains the first build path, and iconless packaged evidence still does not replace the required full packaged-runner hardware validation.
 - The source hardware retry for `P013` failed the same way. Device enumeration was unstable across processes: the failed Focus Mode run selected `[26] Komplete Audio ASIO Driver`, while immediate hidden-process probes and the readiness preflight saw the working ASIO endpoint at `[28]`. Added `PPS_AUDIO_DEVICE_INDEX` support in `runner.find_output_device()` plus `run_full_realtime_participant_emulation.py --audio-device-index N` so strict validation can force the currently verified Komplete ASIO endpoint after a `pps-audio-stress --device-query "Komplete Audio ASIO" --dry-run --channels 4` check.
 - Follow-up ASIO diagnostics showed that minimal `AudioEngine` stream creation succeeds on the Qt/main thread but fails with `Failed to load ASIO driver` from a background worker thread. Focus Mode now creates the real `AudioEngine` and persistent tactile response-marker stream on the UI thread, injects that engine into `SessionRunnerController`, and treats response-marker stream startup failure as a clear audio initialization failure before playback. This is intended to preserve UI responsiveness while preventing the controller worker from creating the Komplete ASIO stream itself.
-- Focus Mode layout readiness now has an explicit adaptive height contract. `FocusLayoutProfile` records minimum and initial `Experiment Control` panel heights, the runner exposes `layout_validation_snapshot()` and `layout_validation_failures()` for geometry audits, and `run_focus_runner_layout_validation.py --offscreen` consumes those methods while checking nonblank screenshots, text visibility, lower-panel placement, constrained-screen tabs, resizable splitters, data/settings column placement, and the runner keyboard shortcut map. Data Logging and Experiment Settings are split into two columns when screen width permits, including wide-but-short Windows desktop layouts; genuinely narrow constrained layouts stack them and use compact run-plan text with the full plan in the tooltip. Protocol 11 readiness must include native screenshot verification as well as offscreen validation before a real participant run. Automation/operator shortcuts are Space/Return/Enter for start or instruction continuation, Ctrl+P for pause/resume, Ctrl+Shift+S for stop, Alt+1/Alt+2 for part selection, Ctrl+T for top-up preview, and Ctrl+W for close.
-- The top-up ledger now compares block, part, and top-up context before binding a click to a tactile entry. This prevents a top-up-block click from retroactively turning an older original miss into a hit when emulated/fake-audio timestamps are close. The current 4 s top-up stress artifact at `artifacts/validation_runs/topup_missed_trial_stress_4s_current/` passes 3/3 scenarios with 9/9 deliberate misses rescued and 2 filler rows only in the row-imbalanced scenario.
+- Focus Mode layout readiness now has an explicit adaptive height contract. `FocusLayoutProfile` records minimum and initial `Experiment Control` panel heights, the runner exposes `layout_validation_snapshot()` and `layout_validation_failures()` for geometry audits, and `run_focus_runner_layout_validation.py --offscreen` consumes those methods while checking nonblank screenshots, text visibility, lower-panel placement, constrained-screen tabs, resizable splitters, data/settings column placement, and the runner keyboard shortcut map. Data Logging and Experiment Settings are split into two columns when screen width permits, including wide-but-short Windows desktop layouts; genuinely narrow constrained layouts stack them and use compact run-plan text with the full plan in the tooltip. Protocol 11 readiness must include native screenshot verification as well as offscreen validation before a real participant run. Automation/operator shortcuts are Space/Return/Enter for start or instruction continuation, Ctrl+P for whichever of Pause/Resume is currently enabled, Alt+1/Alt+2 for part selection, Ctrl+T for top-up preview, and Ctrl+W for close.
+- The top-up ledger now compares block, part, and top-up context before binding a click to a tactile entry. This prevents a top-up-block click from retroactively turning an older original miss into a hit when emulated/fake-audio timestamps are close. The historical 4 s top-up stress artifact at `artifacts/validation_runs/topup_missed_trial_stress_4s_current/` passed 3/3 scenarios with 9/9 deliberate misses rescued and 2 filler rows only in the row-imbalanced scenario, but current top-up eligibility is governed by the 100-1300 ms tactile-onset response policy.
 - Interim source-run hardware evidence after the UI-thread ASIO fix: a direct one-block `SessionRunnerController` smoke and a visible Focus Mode source launch both opened Komplete ASIO device `[28]`, started the persistent response-marker stream, played a 2 s 4-channel block in realtime, emitted `audio_sample_zero`, scheduled trial markers, final-boundary `trial_end`, `events.csv`, `events.xdf`, marker mirrors, trigger dictionary, metadata, and analysis CSVs, with `timestamp_quality = dac_time_sample_exact` for the scheduled markers and no `timing_anchor_fallback`. The visual artifact is `artifacts/validation_runs/focus_ui_asio_smoke_after_fix_20260616/focus_screenshot.png`, and the completed session is `local_data/sessions/PVFOCUSUI_20260616_focus_ui_smoke_after_fix/`. This was source-mode one-block evidence with live LSL output and backup/local recorder disabled, so it did not by itself satisfy final Protocol 11 readiness; the later full packaged Study 5 artifact below supersedes it for packaged operational readiness.
 - The strict full packaged Study 5 realtime artifact `artifacts/validation_runs/full_study5_packaged_hardware_strict_20260616_1108/` now passes the current Protocol 11 readiness audit at `protocol11_study5_readiness_audit_current/protocol11_study5_readiness_audit.json` with 30/30 required criteria and `full_study5_realtime_ready=true`. The source problem behind the earlier failure was the readiness auditor, not the runner: it compared raw `mouse_click` counts to the clean standard-click plan and required every visible OS-click RT to satisfy the deterministic max tolerance. The audit now models top-up and messy participants at source level: raw playback clicks remain logged and response-marker paired, selected analysis response IDs must be unique logged mouse events, original hits match the standard-click plan, top-up rescues match planned original misses, and visible OS-click RTs pass when p95 is within the strict tolerance and max is within a bounded OS-click tolerance. The passing artifact includes 14 hardware-played blocks, XDF/mirror/trigger outputs, 14 Komplete ASIO local audio-evidence WAV/sidecar sets, screenshot evidence, LSL/XDF/audio reconciliation, 338 original hits, 22 planned original misses, 28 top-up hits, 22 final rescues, and 6 extra raw OS-click events excluded from analysis selection. This is packaged operational runner-readiness evidence for the current machine/run, not Woojer mechanical-onset or scientific PPS validation.
 
@@ -269,7 +1171,7 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 - Filename policy is now content-descriptive but minimal. Segment 1 ingredients use label plus duration and optional source/motion descriptor, Segment 2 variants concatenate component descriptors plus `jitter...` when present and `total...`, and Segment 3 files use sequence identity plus `soa...`, compact tactile duration such as `tac120ms`, `total...`, and `ch3`. Row numbers, row labels, full source paths, hashes, and long provenance belong in folders/manifests, not repeated inside every WAV filename.
 - Segment 3 now always writes 3-channel trial WAVs with left/right auditory channels in channels 1/2 and the tactile cue in channel 3. Tactile-only baselines silence channels 1/2 while keeping the tactile cue in channel 3. Segment 2 validates Segment 1 source paths/hashes/durations when ingredients are registered, Segment 3 validates Segment 2 paths/hashes/durations, and session prep prefers the new Segment 3 manifest before falling back to legacy folders.
 - Segment-button generation flow is now explicit in the HTML dashboard and backend. Segment 0 exposes `Apply Profile / Create Project Folder`; Segment 1 exposes `Bake Ingredient`; Segment 2 exposes `Bake Trial Sequences`; Segment 3 exposes `Bake Baseline/Tactile Trials`; Segment 4 exposes `Bake Trial Pool CSV`. `/api/state.project_segments` reports each Segment 0-4 folder path, manifest path, manifest existence, WAV/file or CSV counts, ready/missing/stale status, expected counts, and the last validation message. Each Segment keeps an `Open Folder` action, but generic registry feedback panels with `Status`/`Variants`/`WAVs`/`Folder`/`Message` summary rows are not part of the decision hierarchy and should not appear in any segment. Hidden downstream baking was removed: Segment 1 no longer bakes Segment 2, Segment 3 refuses to bake until Segment 2 has a current validated manifest, and Segment 4 refuses stale/missing Segment 3 manifests.
-- Study 5 profile activation now materializes four writable Segment 1 working-copy ingredients under `profile_study5_box_breathing_pps/1_core_audio_ingredients/`: two frontal looming preload WAVs plus `Inhale instruction` and `Exhale instruction`. The active design points at these writable copies while the ingredient manifest preserves provenance back to read-only preload/breathing assets. The expected Study 5 Segment 0-4 validation path is Segment 1 = 4 WAVs, Segment 2 = 4 sequence WAVs from 2 rows x 2 looming sources, Segment 3 = 20 target audio-tactile WAVs, 20 full-SOA tactile-only baseline WAVs, and 4 audio-only catch WAVs in two row folders. Segment 4 preloads Study 5 with decimal family repetitions: audio-tactile `6.0`, baseline `3.0`, and catch `6.0`, yielding 204 CSV rows (120 audio-tactile, 60 baseline, 24 catch). Explicit all-folder overrides, such as setting every Segment 3 leaf folder to 6, remain valid integer behavior. Study 5 row `baseline_percentage` and `catch_percentage` scheduling values remain `0.0`; Segment 3/4 file and CSV generation are separate from later block scheduling.
+- Study 5 profile activation now materializes four writable Segment 1 working-copy ingredients under `profile_study5_box_breathing_pps/1_core_audio_ingredients/`: two frontal looming preload WAVs plus `Inhale instruction` and `Exhale instruction`. The active design points at these writable copies while the ingredient manifest preserves provenance back to read-only preload/breathing assets. The expected Study 5 Segment 0-4 validation path is Segment 1 = 4 WAVs, Segment 2 = 4 sequence WAVs from 2 rows x 2 looming sources, Segment 3 = 20 target audio-tactile WAVs, 20 full-SOA stationary-burst baseline WAVs, and 4 audio-only catch WAVs in two row folders. Segment 4 preloads Study 5 with decimal family repetitions: audio-tactile `6.0`, baseline `3.0`, and catch `6.0`, yielding 204 CSV rows (120 audio-tactile, 60 baseline, 24 catch). Explicit all-folder overrides, such as setting every Segment 3 leaf folder to 6, remain valid integer behavior. Study 5 row `baseline_percentage` and `catch_percentage` scheduling values remain `0.0`; Segment 3/4 file and CSV generation are separate from later block scheduling.
 - User-provided historical Study 5 CSVs are explanatory reference examples only and must not become fixtures, hard-coded schedules, or runtime inputs. They clarified the desired block-generation behavior, but the GUI implementation is driven by generated Segment 3 manifests and Segment 4 repetition settings. Segment 5 balanced block generation consumes the Segment 4 CSV pool and must preserve Segment 2/3 row order as hard sequence structure inside every block. For Study 5 the rows must cycle inhale/exhale/inhale/exhale; the algorithm can randomize the concrete trial chosen for each row slot, but it must not freely shuffle inhale and exhale rows. Within each preserved row family, it minimizes divergence across family, SOA, source lineage, and sequence identity. For Study 5, equal trial counts imply equal block playback duration because all final trial files are duration-matched.
 - Segment 5 Block CSV Preview is now an implemented artifact stage rather than an empty placeholder. It consumes the Segment 4 trial-pool CSV, writes individual `5_block_csv_preview/block_XX.csv` files plus `block_csv_preview_manifest.json`, and renders one collapsible color-coded CSV preview per generated block. The first block preview opens by default and each block summary shows a triangle/caret affordance. Segment 5 uses exactly two bottom decision buttons: `Regenerate Blocks` reruns the row-order-preserving randomization with a fresh seed and overwrites the current unaccepted block CSV candidates; `Accept Blocks` renames those files to `block_XX_final.csv`, marks the manifest accepted, locks Segment 5 against further CSV changes, and unlocks Segment 6. Once accepted, the same control becomes `Edit Blocks`, which restores working `block_XX.csv` names and clears the accepted flag. `Download Randomization` belongs outside the bottom decision-button footer. Block CSVs include separate recurring-feature columns for family, row, SOA, noise type, sequence, duration, and WAV identity; SOA uses one continuous gradient color scale while family, row, and noise use categorical colors. Source lineage can remain an internal balancing feature, but it should not be shown as its own Segment 5 CSV/preview column unless explicitly requested.
 - Segment 6 is now the final visible HTML dashboard segment. The empty Segment 7 Review page was removed. Segment 6 has only planned participant count, 1-part versus 2-part experiment structure, a block-permutation preview table, `Regenerate Sequence`, and the final `Save Design and Start Experiment Runner` button. Its early compatibility launch behavior is superseded by the later 2026-06-12 Focus Mode handoff entry.
@@ -332,7 +1234,7 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 
 ## 2026-06-14
 
-- Stabilized the packaged standalone Experiment Runner on the lab PC after the Focus Mode UI was observed spilling below the Windows taskbar. Focus Mode now uses taskbar-aware maximized mode instead of true fullscreen, reduces rigid panel/button/output heights, shortens the displayed session-folder row with the full path as a tooltip, and computes its initial size from Qt's available screen geometry when available. The goal is mouse-only reachability of the CLICK target, Start/Pause/Stop/Close controls, and instruction-continuation controls on ordinary desktop screens.
+- Stabilized the packaged standalone Experiment Runner on the lab PC after the Focus Mode UI was observed spilling below the Windows taskbar. Focus Mode now uses taskbar-aware maximized mode instead of true fullscreen, reduces rigid panel/button/output heights, shortens the displayed session-folder row with the full path as a tooltip, and computes its initial size from Qt's available screen geometry when available. The goal is mouse-only reachability of the CLICK target, Start plus separate Pause/Resume controls, and instruction-continuation controls on ordinary desktop screens, with runner termination handled by the normal title-bar close path.
 - The native Experiment Runner layout is now a resizable, functionally segmented Focus Mode surface rather than a fixed stacked sidebar. `focus_layout.py` renders screen-aware typography, contrast, and minimum control sizes; `focus_app.py` separates `Experiment Running`, `Data Selection`, `Settings`, and `Data Processing` with draggable `QSplitter` handles on ordinary desktop screens. Constrained screens switch the operator side to Data/Settings tabs so fields remain legible instead of being vertically crushed. The accepted visual artifact is `artifacts/validation_runs/focus_runner_layout_resizable_pc_final3/`: it rendered the actual PC maximized path plus 1024x600, 1280x720, 1366x768, 1920x1080, and 2560x1440 scenarios, including splitter-resize variants, against a realistic 12-block/five-instruction fixture with no clipping or contrast failures. The rebuilt packaged runner was visually checked with its internal Qt grab at `artifacts/validation_runs/packaged_runner_resizable_visual/packaged_runner_manual_start_qt_grab.png`. Mouse evidence includes source-level `artifacts/validation_runs/focus_mode_click_path_resizable_final/` with 10/10 Qt target clicks and packaged offscreen fast-audio `artifacts/validation_runs/packaged_runner_resizable_click/packaged_focus_click_report.json`, which completed 12/12 blocks, 408/408 trial starts/ends, 27 instruction starts, 24 continuations, and `session_end = 1`.
 - Split runtime paths into readable resources and writable experiment state. `runtime_paths.repo_root()` can point at bundled PyInstaller `_internal` resources, but `runtime_paths.writable_root()` must own generated `local_data/`, `artifacts/`, dashboard state, designs, sessions, and registry folders. Session runner and dashboard defaults now use the writable root for outputs. A stale old `dist\PPSExperimentRunner\_internal\local_data` tree had to be deleted with an extended-path delete before rebuilding; future packaged builds should not regenerate live session/project state inside `_internal`.
 - Rebuilt `dist\PPSExperimentRunner\PPSExperimentRunner.exe` and revalidated the standalone finished-profile path in the background with mouse-click emulation. The accepted packaged artifact is `artifacts/validation_runs/packaged_runner_stabilized_screen_fit/`: launcher selected `study5_box_breathing_pps`, clicked `Run Selected Profile`, wrote the session under repo `local_data\sessions\P001_20260614_193336`, completed 12/12 blocks, 408/408 trial starts/ends, 27 instruction starts, and 24 instruction continuations with exit code 0. The source/offscreen layout screenshot and mouse validation artifact is `artifacts/validation_runs/standalone_runner_layout_after_screen_fit/`.
@@ -352,7 +1254,7 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 - Focus Mode now renders the runner play-order plan by part, including optional part-end top-up slots when missed-trial top-up is enabled. The GUI uses display/play-order numbering for operator-facing chips and progress rather than raw source block IDs, so Study 5's first part-end top-up appears as Block 7 and the second part-end top-up appears as Block 14 while timing and analysis identifiers remain stable.
 - Focus Mode now recenters the OS cursor to the middle of the `CLICK` target once per planned tactile cue, 500 ms before tactile onset, using a Qt UI-thread timer and an installed `pyautogui` movement backend with Qt cursor positioning as a fallback. The `CLICK` target is intentionally compact by default, with `focus_layout.py` bounding its height per screen class instead of letting it fill the response panel. Recenter never clicks and is gated off during instructions, paused/stopped states, and after block completion; offscreen/headless validation records recenter intents instead of moving the real cursor. Validation coverage includes `tests/test_focus_timeline.py`, runner schedule-payload coverage in `tests/test_session_runner.py`, Focus Mode smoke/layout assertions, offscreen layout validation at `artifacts/validation_runs/focus_runner_timeline_layout_current/`, and direct Study 5 fake-audio Focus Mode validation at `artifacts/validation_runs/study5_focus_timeline_direct_current/`, which recorded 360 planned tactile cues and 360 recenter intents.
 - Focus Mode now uses a centered fixed square bullseye field for participant responses instead of a horizontally stretching `CLICK` button. The target keeps the same click signal and cursor-recenter center point, but its dimensions are fixed by the active screen profile so resizing splitters cannot reshape the response field.
-- Focus Mode now keeps the surrounding participant response box itself compact and square, with Start/Pause/Stop/Close arranged in a two-row control cluster so the whole response area can be previewed without taking over the runner. On non-constrained screens, Data Selection and Settings are sibling panels to the right of that square response box rather than a stacked panel tied to response sizing, and Experiment Control plus Output Summary are independent bottom-row panels separated by their own splitter. The Focus Mode window now prefers the available screen width and the constrained layout uses a smaller square response profile to keep controls visible on 1024x600-class screens. Layout validation now checks these independent panels and splitter child counts in the Blender-like workspace grid.
+- Focus Mode now keeps the surrounding participant response box itself compact and square, with Start, separate Pause/Resume, and instruction continuation arranged in the experimenter control area so the whole response area can be previewed without taking over the runner. On non-constrained screens, Data Selection and Settings are sibling panels to the right of that square response box rather than a stacked panel tied to response sizing, and Experiment Control plus Output Summary are independent bottom-row panels separated by their own splitter. The Focus Mode window now prefers the available screen width and the constrained layout uses a smaller square response profile to keep controls visible on 1024x600-class screens. Layout validation now checks these independent panels and splitter child counts in the Blender-like workspace grid.
 - The former Focus Mode `Data Processing` panel is now `Experiment Control`. It renders block-order boxes that highlight the current block during playback and the next unplayed block before playback, and its timeline is now multi-row: clip/source identity, trial/respiratory identity such as inhale/exhale, planned tactile dots, recorded participant-click markers, and the playback cursor. `SessionRunnerController` block-schedule progress payloads now include both `tactile_events` and `trial_segments`; those fields are display/recenter metadata only and do not become timing authorities.
 - Experiment Control block-order boxes are now clickable. A clicked standard block previews its trial composition in the timeline rows below the block strip using the same block schedule parser as live playback, while clicked top-up slots remain selectable and explain their missed-trial provenance. The live timeline cursor is now a vertical red bar, and the block strip paints a red active-block marker; preview display state is separate from the live recenter/timing state so operators can inspect block composition without changing playback scheduling.
 - Focus Mode now makes the optional name-sharing control visually salient: `Include name in LSL/session markers (opt-in)` is rendered as a bordered soft-green checkbox with a larger indicator in Participant Setup, while the default remains unchecked and real names are still omitted from LSL/session-start metadata unless explicitly enabled.
@@ -372,6 +1274,7 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 - The Documentation Hardware section now shows Komplete Audio 6 MK2 and Woojer Strap 4 as clickable producer cards using generated ASCILINE-style static pixel canvases (`hardware_pixel_art.js`) rather than normal image tags. Keep those canvases compact, centered, and non-upscaled so the source images do not look stretched. Keep hardware producer cards opening external producer pages in a new tab, and preserve the global dashboard rule that external HTTP(S) links set `target="_blank"` with `rel="noopener noreferrer"`.
 - The Documentation Hardware architecture diagram routes Komplete Audio 6 MK2 output through a CSS-only branch connector, with Channels 1+2 feeding headphones and Channel 3 feeding the Woojer Strap 4. Keep the hardware tier as text plus compact pixel-art canvases rather than SVG connector artwork, and keep the root/documentation/download Pages wrappers cache-busted with the same dashboard asset version.
 - Refreshed the visible packaged standalone runner OS-click validation after the current Windows display scaling exposed stale hard-coded launcher click fractions. `validation_protocols/scripts/run_study5_end_to_end_ui_mouse_validation.py --packaged-standalone-app --packaged-visible-os-clicks` now sets the Python validation process DPI-aware, clicks the current Study/profile and `Run Selected Profile` controls, captures after-click screenshots, and records `click_mode = visible_win32_os_mouse_events`. The accepted artifact is `artifacts/validation_runs/manual_packaged_runner_os_mouse_20260615_final/`: 3 visible Win32 launcher clicks selected `study5_box_breathing_pps`, the packaged runner wrote a real `P005` session manifest, Focus Mode recorded the validation `Start Run` click, exited 0, completed 12/12 blocks, emitted 408/408 trial starts/ends, 27 instruction starts, 24 instruction continuations, and 360/360 planned tactile recenter records. This is UI/software readiness evidence for the packaged runner path, not hardware loopback evidence.
+- Packaged Study 5 offscreen validation now snapshots validation cue/recenter state at each split-part completion before loading the next part and yields briefly between synthetic cue-lead progress callbacks in the fake validation audio engine. This keeps strict recenter checks meaningful for software/UI validation while leaving real audio playback unchanged.
 - Follow-up lossless WAV/playback validation separated digital assembly from hardware playback. A direct probe of the current Segment 2/3 assembly path confirmed that a mono instruction followed by stereo looming audio bakes to exact 2-channel output with no channel collapse or sample-count drift, and the 3-channel tactile merge preserved the first two audio channels exactly within PCM tolerance. Focused runner tests for output evidence, timing-event anchoring, and session runner behavior passed. The current Anaconda PC environment is not ready for publication-grade real-output playback validation: `audit_pc_software_requirements.py` wrote `artifacts/validation_runs/software_audit_lossless_playback_20260615/` with `komplete_asio_ready = false`, `sounddevice 0.4.6`, no ASIO devices visible, and missing GUI/web extras in that interpreter. `audio_device_stress` could open only the legacy 2-channel MME Komplete endpoint; Komplete WDM-KS device 40 failed with `Invalid device` and Komplete WASAPI device 20 failed even at 2 channels with `Invalid number of channels`. Do not claim the full actual WAV playback layer is validated on this PC until the official NI ASIO endpoint is visible to PortAudio/sounddevice and `run_one_block_actual_condition_validation.py` plus `compare_recording_layers.py` pass on a real one-block direct-loopback run.
 - Dashboard trial-sequence baking now enforces a UI-wide stereo/binaural invariant rather than a Study 5-specific patch. Segment 2 always writes stereo sequence WAVs: mono fixed clips are duplicated to channels 1 and 2, stereo looming sources preserve both channels, wider inputs are trimmed to the first auditory pair, and jitter silence is stereo. Segment 2 validation rejects non-stereo sequence variants; Segment 3 validation rejects catch files unless they are stereo audio-only. Segment 3's 3-channel writer accepts ffmpeg merges only when the merged output proves channels 1 and 2 still match the source binaural pair and channel 3 matches the tactile cue, otherwise it falls back to direct Python channel stacking. The accepted UI/waveform artifact is `artifacts/validation_runs/s5_stereo_fix_ui/`: mouse-click validation passed through Segment 6 and Focus Mode, and `waveform_binaural_audit/binaural_waveform_audit.md` reports 8/8 Segment 2 variants stereo, 8/8 catch files stereo, 40/40 audio-tactile files preserving source left/right with max diff 0.0, 12/12 runner blocks matching trial WAVs, 288/288 looming events, 360/360 tactile events, and 48/48 catch rows with channel-2 audio.
 - The Windows install/download protocol now treats ASIO dependencies explicitly. The PPS download manifest has `external_dependencies`: Native Instruments Komplete Audio ASIO is provider-page/manual because NI's public EULA does not grant blanket mirroring/redistribution rights, while FlexASIO from publisher Etienne Dechamps may be hash-pinned and cached only as an optional diagnostic fallback. `windows\Setup_Windows_App.ps1` runs the PC software audit after Python dependency install and opens the official NI driver page if Komplete ASIO is not visible. The downloader opens provider pages for non-redistributable dependencies and refuses `auto_download` unless redistribution/caching permission plus URL/filename/SHA256 are declared. The Focus Mode launcher now runs an audio readiness preflight, shows why the native 3+ channel Komplete ASIO route is missing, and exposes `Audio Driver Instructions`; generic ASIO/FlexASIO remains explicitly unvalidated for publication timing until route identity, latency, and interchannel skew are revalidated.
@@ -436,6 +1339,69 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
 - The shared LabRecorder/XDF stress and reconciliation helper also needs long-path-safe handling because Gate 4 reuses its CSV/report writers for external XDF post-processing under the deep desktop-rehearsal validation folder. `run_labrecorder_lsl_xdf_stress.py` now uses the shared long-path helper for output creation, LabRecorder stdout/stderr/report writes, marker CSV reads, rich/numeric XDF sample CSVs, and XDF loading so completed Study 5 hardware rehearsals can finish post-run reconciliation instead of failing on Windows path depth.
 - Protocol 11 readiness audits are part of the same full-acceptance path-depth contract. `audit_protocol11_study5_readiness.py` now uses long-path-safe helpers for focus/launch/session/analysis CSV/JSON reads, XDF/WAV/screenshot inspection, response-marker report discovery, audio evidence globbing, computed reconciliation output, and final Protocol 11 JSON/Markdown writes so final hardware rehearsals can be audited in place under deep validation roots.
 - Study 5 response windows can legitimately extend past the next trial start for late-SOA tactile cues. The runner top-up ledger and offline `session_analysis.py` now keep response windows open until the configured tactile response deadline instead of truncating at the next trial boundary, and Protocol 11 treats top-up as a runtime rescue mechanism: final readiness requires the 360-row standard tactile pool to be fully covered with unique/logged selected click IDs, not exact equality between planned OS-click counts and final selected responses. Protocol 11's real OS-click p95 RT default is now 40 ms, while max RT error remains bounded, and standard trials rescued in top-up are excluded from original-click RT-plan comparisons. Focus Mode screenshot capture also writes through the long-path helper so future packaged full-acceptance runs should produce the required `focus_screenshot.png`.
+
+## 2026-06-28
+
+- Added the published smartphone/DynaSpace PPS validation preload `roussel_2025_dynaspace_mobile_pps`. It encodes the Sensors 2025 Android app task as a left 45-degree looming source moving from 640 cm to 20 cm over 2.945 s with tactile anchors at 105/1625/2385/2765/2955/3050 ms, plus a fixed 640 cm comparator, 48 audio-tactile trials, 24 no-vibration catch trials, and the app's practice/recorded-trial provenance. Public preload WAVs are toolkit-generated FABIAN/SOFA broadband proxies; the original Android `bursttrainlooming.wav` and `bursttrainfixe.wav` are recorded only as metadata/hashes because redistribution rights were not verified.
+- Added `docs/dynaspace_spectral_feature_audit/` with a TeX/PDF report, reproducible measurement script, derived metrics, and figures comparing the raw DynaSpace smartphone WAV features with the current PPS-kit proxy WAVs. The audit finds that useful DynaSpace features should be adopted as explicit parameters, especially a 33-burst Gaussian white-noise train with about 95 ms burst spacing, DynaSpace trajectory anchors, calibrated rising level, and optional reverb/externalization QC. HRTF spectrum, ILD, ITD, near-field behavior, distance attenuation, propagation delay, and future trajectory angles should remain owned by 3DTI/SOFA rather than copied from baked raw audio. The current proxy is runnable but not DynaSpace-equivalent: it is continuous, higher-RMS, less bright, more interaurally coherent, and has an unresolved channel/coordinate-sign mismatch. Do not redistribute the raw Android WAVs; use the derived report and metrics as the public audit artifact.
+- Added `mobile_pps_replication.py` plus
+  `validation_protocols/scripts/analyze_mobile_pps_replication.py` to test
+  whether collected PPS CSV data reproduce basic smartphone/mobile PPS
+  behavioral assumptions: response integrity, low catch false alarms, rare
+  anticipations, audio-tactile facilitation versus tactile-only baseline,
+  SOA/distance approach gradients, collapsed SOA model shape, and
+  sigmoid-boundary viability. The script accepts one CSV or scans a collection
+  folder for OSF-style `master_successful_participants.csv`, pps-kit
+  `analysis_ready_trials.csv`, `final_trial_outcomes.csv`, or participant
+  `*_trials.csv` files and writes ignored validation reports. Treat this as a
+  behavioral replication/data-shape check against the smartphone-methods anchor,
+  not as hardware timing, raw WAV decoding, LSL/XDF, or exact published-profile
+  recreation evidence.
+
+## 2026-06-29
+
+- Adopted the DynaSpace/Hobeika plus 3DTI/SOFA best-of-both-worlds protocol as the PPS-kit golden standard for newly generated looming stimuli. Generated-noise looming bakes should default to `dynaspace_gaussian_burst_train`: broadband Gaussian white-noise bursts, 30 ms burst duration, 10 ms rise/fall, 95 ms target onset period, 300 ms onset, duration-derived burst count, and symmetric equal spacing fitted to the configured active window. The DynaSpace smartphone profile still derives 33 bursts from its measured 3.07 s active burst window, but 33 is not a universal renderer default. HRTF spectrum, ILD, ITD, near-field behavior, distance attenuation, propagation delay, future trajectory angles, and optional room/DRR/IACC cues remain renderer-owned through 3DTI/SOFA or the Python SOFA/FABIAN preview path. Published-study templates may override this only when the source paper/app specifies another waveform or apparatus constraint, and the exception must be documented in metadata. The persistent standard is now `For-AI/looming_stimulus_generation_standard.md`; the source audit, Consensus browser/MCP export, implementation rationale, and PDF report live under `docs/dynaspace_spectral_feature_audit/`.
+- Segment 1 now exposes generated-source mode as a two-option toggle:
+  `Burst train` and `Continuous`. `Burst train` is the default and maps to
+  `dynaspace_gaussian_burst_train`; `Continuous` is an explicit
+  `continuous_noise` opt-out. Missing generated looming source profiles are
+  normalized to burst train during design load/save/render and source-manifest
+  export, while the backend accepts only these two generated-noise modes for
+  dashboard bakes. The full committed preload catalog was force-rebuilt so
+  bundled generated-noise WAVs, hashes, QC rows, and source manifests carry the
+  current source-profile standard.
+- Segment 1 generated-source bakes now pass long-path-safe `\\?\` filesystem
+  `Path` objects into the renderer after explicitly ensuring the ingredient
+  folder exists. This protects deep dashboard project folders, including pytest
+  temp roots and installed repo-shaped workspaces, from Windows MAX_PATH
+  failures when writing or reading `stimulus_design.bake_*.json`.
+- Focus Mode Output Levels now reserves explicit height and vertical spacing
+  for the `Test Audio`/`Test Tactile` row plus the disabled/enabled
+  `Tactile Threshold` row. In the submitted-setup `LSL Ready` state, ordinary
+  output tests and participant-specific tactile threshold calibration must
+  remain enabled and unobstructed before playback starts. Compact and
+  constrained runner profiles hide the optional Output Summary panel so the
+  tactile test controls stay visible inside the window.
+- Bundled profile audio propagation now treats Segment 1 working copies as
+  generated canonical files, not durable sources. Profile materialization
+  overwrites deterministic ingredient filenames from the bundled catalog,
+  removes stale `__N` sidecar copies for the same descriptor, and falls back to
+  the catalog source whenever a saved design points inside the generated
+  Segment 1 folder. Startup/template load marks a project stale when catalog
+  hashes differ from canonical Segment 1 copies and clears downstream Segment
+  2-6 products before rematerializing. The experiment-runner block cache now
+  includes actual trial WAV content hashes in its cache key, validates cached
+  trial hashes before reuse, and prepared-session status rejects packages whose
+  source trial WAVs changed even if the Segment 5 CSV wrapper did not.
+- Packaged runner resource resolution must use `runtime_paths.repo_root()` for
+  bundled read-only assets and `runtime_paths.writable_root()` for generated
+  outputs. PyInstaller one-dir builds may report `_MEIPASS` as either
+  `_internal` or the outer executable directory, so `runtime_paths.repo_root()`
+  explicitly checks both. Renderer-relative assets, including the FABIAN SOFA
+  file and source WAVs, now resolve through that shared resource root; do not
+  reintroduce `Path(__file__).parents[2]` as a packaged asset root in runner
+  code paths.
+
 ## Active Implementation Backlog
 
 - Hide randomization strategy, block-order strategy, max-consecutive-same-type, and seed from the main Trial Assembler UI.

@@ -28,6 +28,7 @@ from peripersonal_space_toolkit.dashboard_app import _stimulus_trajectory_snapsh
 from peripersonal_space_toolkit.design import (
     AudioFileSpec,
     NoiseDefinition,
+    apply_trajectory_snapshot_to_trajectory,
     audio_file_summary,
     block_trial_rows,
     cartesian_to_spherical,
@@ -67,7 +68,14 @@ NOISE_TYPES = ("pink", "blue", "white", "brown", "violet")
 def main() -> int:
     parser = argparse.ArgumentParser(description="Build all preload profile folders and asset inventory.")
     parser.add_argument("--force", action="store_true", help="Regenerate WAVs even if the target files already exist.")
+    parser.add_argument(
+        "--force-template",
+        action="append",
+        default=[],
+        help="Regenerate WAVs only for the named template id while still rebuilding the full catalog metadata.",
+    )
     args = parser.parse_args()
+    force_template_ids = set(args.force_template or [])
     PRELOAD_ROOT.mkdir(parents=True, exist_ok=True)
     BUILD_ROOT.mkdir(parents=True, exist_ok=True)
 
@@ -78,7 +86,7 @@ def main() -> int:
     for template in templates:
         profile, profile_parameters = build_profile_catalog(
             template,
-            force=args.force,
+            force=args.force or template.template_id in force_template_ids,
             variant_label=variant_labels.get(template.template_id, ""),
         )
         profiles.append(profile)
@@ -269,8 +277,10 @@ def asset_metadata(
         source_kind=source_kind,
         noise_type=tone_type,
     )
+    if getattr(source, "motion_mode", "looming") == "stationary":
+        snapshot = stationary_snapshot(snapshot)
     rel_path = rel(path)
-    return {
+    metadata = {
         "label": source.label,
         "path": rel_path,
         "url": f"{BASE_URL}/{template.template_id}/02_looming_stimuli/{path.name}",
@@ -287,6 +297,32 @@ def asset_metadata(
         "include_tactile": False,
         "trajectory_snapshot": snapshot,
     }
+    if isinstance(source, NoiseDefinition):
+        source_profile = getattr(source, "source_profile", "")
+        source_profile_parameters = dict(getattr(source, "source_profile_parameters", {}) or {})
+        if source_profile:
+            metadata["source_profile"] = source_profile
+        if source_profile_parameters:
+            metadata["source_profile_parameters"] = source_profile_parameters
+    return metadata
+
+
+def stationary_snapshot(snapshot: dict[str, Any]) -> dict[str, Any]:
+    """Represent a fixed-source preload without reusing the moving endpoint."""
+
+    stationary = dict(snapshot)
+    start = dict(stationary.get("start") or {})
+    stationary.update(
+        {
+            "end_distance_cm": stationary.get("start_distance_cm", 0.0),
+            "end_rotation_deg": stationary.get("start_rotation_deg", 0.0),
+            "movement_duration_s": 0.0,
+            "path_length_m": 0.0,
+            "path_direction": "stationary",
+            "end": start,
+        }
+    )
+    return stationary
 
 
 def source_direction_variants(template: StudyTemplate, design: Any, source: NoiseDefinition) -> list[dict[str, Any]]:
@@ -389,6 +425,7 @@ def source_variant(
     label: str | None = None,
 ) -> dict[str, Any]:
     variant_design = design_from_dict(design_to_dict(design))
+    apply_trajectory_snapshot_to_trajectory(variant_design.trajectory, dict(source.trajectory_snapshot or {}))
     if transform == "identity":
         pass
     elif transform == "reverse":

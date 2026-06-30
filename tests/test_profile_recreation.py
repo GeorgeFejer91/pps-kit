@@ -20,6 +20,7 @@ from peripersonal_space_toolkit.templates import DEFAULT_STUDY_TEMPLATE_ID, load
 
 ROOT = Path(__file__).resolve().parents[1]
 VALIDATION_SCRIPT_DIR = ROOT / "validation_protocols" / "scripts"
+STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID = "study5_dynaspace_lateral_45_pps"
 
 
 def _load_validation_script(name: str):
@@ -38,7 +39,7 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     template_ids = {template.template_id for template in templates}
     status = json.loads((root / "assets" / "preloads" / "profile_recreation_status.json").read_text(encoding="utf-8"))
 
-    assert len(templates) == 21
+    assert len(templates) == 23
     assert status["schema"] == PROFILE_RECREATION_STATUS_SCHEMA
     assert status["profile_count"] == len(templates)
     assert {profile["template_id"] for profile in status["profiles"]} == template_ids
@@ -107,7 +108,16 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert study5["segment_0_to_4_profile_checks_passed"] is True
     assert study5["missing_parameter_count"] == 0
     assert study5["unsupported_structure_count"] == 0
-    assert len(status["categories"]["gui_recreatable"]) == 7
+    assert len(status["categories"]["gui_recreatable"]) == 9
+
+    study5_lateral = profiles[STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID]
+    assert study5_lateral["primary_category"] == "gui_recreatable"
+    assert study5_lateral["publication_status"] == "unpublished_lab_profile"
+    assert study5_lateral["runner_readiness"] == "ready"
+    assert study5_lateral["profile_checks_passed"] is True
+    assert study5_lateral["segment_0_to_4_profile_checks_passed"] is True
+    assert study5_lateral["missing_parameter_count"] == 0
+    assert study5_lateral["unsupported_structure_count"] == 0
 
     pfeiffer = profiles["pfeiffer_2018_lateral_perihead_left_to_right"]
     assert pfeiffer["primary_category"] == "gui_recreatable"
@@ -119,6 +129,15 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert serino_trunk["primary_category"] == "gui_recreatable"
     assert serino_trunk["profile_checks_passed"] is True
     assert serino_trunk["segment_0_to_4_profile_checks_passed"] is True
+
+    dynaspace = profiles["roussel_2025_dynaspace_mobile_pps"]
+    assert dynaspace["primary_category"] == "gui_recreatable"
+    assert dynaspace["publication_status"] == "published"
+    assert dynaspace["runner_readiness"] == "ready"
+    assert dynaspace["profile_checks_passed"] is True
+    assert dynaspace["segment_0_to_4_profile_checks_passed"] is True
+    assert dynaspace["missing_parameter_count"] == 0
+    assert dynaspace["unsupported_structure_count"] == 0
 
     canzoneri = profiles["canzoneri_2012_dynamic_sounds"]
     assert canzoneri["template_id"] in status["categories"]["missing_publication_parameters"]
@@ -151,7 +170,7 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert "Ordinary trial randomization and block order" in report
 
     tex_report = (root / "docs" / "audit_report.tex").read_text(encoding="utf-8")
-    assert "Published-paper profiles passing checks & 6" in tex_report
+    assert "Published-paper profiles passing checks & 7" in tex_report
     assert "study5" in tex_report and "box" in tex_report and "breathing" in tex_report
     assert "No visible GUI progress indicator" in tex_report
     assert "Clinical populations, interventions, non-audiotactile stimuli" in tex_report
@@ -210,8 +229,10 @@ def test_protocol12_matrix_targets_ready_published_profiles_and_blocked_samples(
     blocked_samples = matrix._default_blocked_samples(status, exclude=set(ready_published))
 
     assert DEFAULT_STUDY_TEMPLATE_ID not in ready_published
+    assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID not in ready_published
     assert DEFAULT_STUDY_TEMPLATE_ID in ready_all
-    assert len(ready_published) == 6
+    assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID in ready_all
+    assert len(ready_published) == 7
     assert set(ready_published) < set(ready_all)
     assert len(blocked_samples) == 2
 

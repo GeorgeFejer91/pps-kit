@@ -18,6 +18,15 @@ Fresh-clone-safe checks for routine code changes:
 - run a focused pytest subset covering release inventory, package metadata, seed data, CLI smoke tests, Focus runner launch contracts, and the paper-audit package seam
 - run `git diff --check`
 
+Android runner companion changes should also run:
+
+```powershell
+android\runner-companion\gradlew.bat testDebugUnitTest assembleDebug
+```
+
+This is separate from `tools\check_all.ps1` because it requires JDK 17,
+Android SDK 37, and first-run Gradle dependency resolution.
+
 ## Standard
 
 Standard runs Quick plus the full tracked-file pytest suite. It may take longer than five minutes on this Windows workstation and should be used before structural merges or releases.

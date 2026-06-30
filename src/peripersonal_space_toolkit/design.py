@@ -32,6 +32,7 @@ SUPPORTED_BASELINE_STRATEGIES = (
     "max_anchor",
     "min_max",
     "tactile_only",
+    "stationary_burst",
     "soa_zero",
     "sound_offset",
     "custom",
@@ -42,12 +43,64 @@ SUPPORTED_BLOCK_ORDER_RANDOMIZATION = ("counterbalanced_rotation", "seeded_rando
 DEFAULT_SOFA_FILE = "assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa"
 DEFAULT_TRAJECTORY_PLANE_HEIGHT_M = 0.0
 DEFAULT_TRAJECTORY_PLANE_LABEL = "listener head/ear center plane"
+PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE = "dynaspace_gaussian_burst_train"
+PPS_LOOMING_GOLD_STANDARD_SOURCE_PARAMETERS: dict[str, Any] = {
+    "burst_count_mode": "duration_derived",
+    "burst_duration_s": 0.030,
+    "rise_fall_s": 0.010,
+    "target_period_s": 0.095,
+    "onset_s": 0.300,
+    "active_window_source": "trajectory_movement_duration",
+    "spacing_policy": "symmetric_fit",
+    "standard_basis": (
+        "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found "
+        "33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and "
+        "equal symmetric spacing from the configured active window so future trajectories can "
+        "change duration without truncating the final burst. Consensus evidence supports "
+        "broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
+    ),
+}
 DISTANCE_CM_MIN = 1.0
 DISTANCE_CM_MAX = 1000.0
 ROTATION_DEG_MIN = -180.0
 ROTATION_DEG_MAX = 180.0
 DISPLAY_ROTATION_DEG_MIN = 0.0
 DISPLAY_ROTATION_DEG_MAX = 360.0
+
+
+def gold_standard_looming_source_parameters(overrides: dict[str, Any] | None = None) -> dict[str, Any]:
+    parameters = dict(PPS_LOOMING_GOLD_STANDARD_SOURCE_PARAMETERS)
+    if overrides:
+        parameters.update(overrides)
+    return parameters
+
+
+def should_apply_gold_standard_looming_source_profile(noise: "NoiseDefinition") -> bool:
+    """Return whether a generated source should inherit the toolkit looming source standard."""
+
+    if str(noise.source_profile or "").strip():
+        return False
+    if str(noise.motion_mode or "looming").strip().lower() == "stationary":
+        return False
+    return str(noise.noise_type or "").strip().lower() in SUPPORTED_NOISE_TYPES
+
+
+def apply_gold_standard_looming_source_profile(noise: "NoiseDefinition") -> "NoiseDefinition":
+    source_profile = str(noise.source_profile or "").strip()
+    if source_profile == "continuous_noise":
+        noise.source_profile_parameters = {}
+    elif source_profile == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE:
+        noise.source_profile_parameters = gold_standard_looming_source_parameters(noise.source_profile_parameters)
+    elif should_apply_gold_standard_looming_source_profile(noise):
+        noise.source_profile = PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+        noise.source_profile_parameters = gold_standard_looming_source_parameters(noise.source_profile_parameters)
+    return noise
+
+
+def normalize_generated_looming_source_profiles(design: "StimulusDesign") -> "StimulusDesign":
+    for noise in design.noises:
+        apply_gold_standard_looming_source_profile(noise)
+    return design
 
 
 @dataclass
@@ -74,6 +127,8 @@ class NoiseDefinition:
     azimuth_deg: float = 0.0
     elevation_deg: float = 0.0
     gain: float = 1.0
+    source_profile: str = ""
+    source_profile_parameters: dict[str, Any] = field(default_factory=dict)
     prebaked_path: str = ""
     sequence_order: int = 0
     motion_mode: str = "looming"
@@ -184,16 +239,19 @@ class StimulusDesign:
 
 
 def default_design() -> StimulusDesign:
-    return StimulusDesign(
-        sofa_file=DEFAULT_SOFA_FILE,
-        noises=[
-            NoiseDefinition("Pink frontal", "pink", 0.0),
-            NoiseDefinition("White frontal", "white", 0.0),
-        ]
+    return normalize_generated_looming_source_profiles(
+        StimulusDesign(
+            sofa_file=DEFAULT_SOFA_FILE,
+            noises=[
+                NoiseDefinition("Pink frontal", "pink", 0.0),
+                NoiseDefinition("White frontal", "white", 0.0),
+            ],
+        )
     )
 
 
 def design_to_dict(design: StimulusDesign) -> dict[str, Any]:
+    normalize_generated_looming_source_profiles(design)
     return asdict(design)
 
 
@@ -302,18 +360,20 @@ def design_from_dict(data: dict[str, Any]) -> StimulusDesign:
             or protocol_data.get("catch_trials_exact") not in (None, 0, "")
         )
     protocol = ProtocolSpec(**protocol_data)
-    return StimulusDesign(
-        name=data.get("name", "Study 5 PPS white/pink design"),
-        study_profile_id=data.get("study_profile_id", ""),
-        study_profile_title=data.get("study_profile_title", ""),
-        study_profile_notes=data.get("study_profile_notes", ""),
-        study_profile_reference_parameters=dict(data.get("study_profile_reference_parameters", {})),
-        sofa_file=data.get("sofa_file") or DEFAULT_SOFA_FILE,
-        noises=noises,
-        custom_looming_files=custom_looming_files,
-        prestimulus_files=prestimulus_files,
-        trajectory=trajectory,
-        protocol=protocol,
+    return normalize_generated_looming_source_profiles(
+        StimulusDesign(
+            name=data.get("name", "Study 5 PPS white/pink design"),
+            study_profile_id=data.get("study_profile_id", ""),
+            study_profile_title=data.get("study_profile_title", ""),
+            study_profile_notes=data.get("study_profile_notes", ""),
+            study_profile_reference_parameters=dict(data.get("study_profile_reference_parameters", {})),
+            sofa_file=data.get("sofa_file") or DEFAULT_SOFA_FILE,
+            noises=noises,
+            custom_looming_files=custom_looming_files,
+            prestimulus_files=prestimulus_files,
+            trajectory=trajectory,
+            protocol=protocol,
+        )
     )
 
 
@@ -446,6 +506,74 @@ def point_from_distance_rotation_height(
         "y_m": horizontal_radius_m * math.cos(az),
         "z_m": z_m,
     }
+
+
+def apply_trajectory_snapshot_to_trajectory(spec: TrajectorySpec, snapshot: dict[str, Any]) -> bool:
+    """Apply a source-level trajectory snapshot to a mutable trajectory spec."""
+
+    if not isinstance(snapshot, dict) or not snapshot:
+        return False
+
+    def snapshot_float(key: str, fallback: float) -> float:
+        try:
+            value = snapshot.get(key, fallback)
+            return float(fallback if value in (None, "") else value)
+        except (TypeError, ValueError):
+            return float(fallback)
+
+    def snapshot_point(key: str) -> dict[str, float] | None:
+        point = snapshot.get(key)
+        if not isinstance(point, dict):
+            return None
+        try:
+            return {
+                "x_m": float(point["x_m"]),
+                "y_m": float(point["y_m"]),
+                "z_m": float(point.get("z_m", 0.0)),
+            }
+        except (KeyError, TypeError, ValueError):
+            return None
+
+    start = snapshot_point("start")
+    end = snapshot_point("end")
+    if start is None or end is None:
+        start = point_from_distance_rotation_height(
+            snapshot_float("start_distance_cm", spec.start_radius_m * 100.0),
+            snapshot_float("start_rotation_deg", azimuth_to_display_rotation_deg(spec.azimuth_start_deg)),
+            snapshot_float("start_height_cm", 0.0),
+        )
+        end = point_from_distance_rotation_height(
+            snapshot_float("end_distance_cm", spec.end_radius_m * 100.0),
+            snapshot_float("end_rotation_deg", azimuth_to_display_rotation_deg(spec.azimuth_end_deg)),
+            snapshot_float("end_height_cm", 0.0),
+        )
+
+    start_spherical = cartesian_to_spherical(start["x_m"], start["y_m"], start["z_m"])
+    end_spherical = cartesian_to_spherical(end["x_m"], end["y_m"], end["z_m"])
+    path_length = snapshot_float(
+        "path_length_m",
+        math.dist((start["x_m"], start["y_m"], start["z_m"]), (end["x_m"], end["y_m"], end["z_m"])),
+    )
+    movement_duration_s = snapshot_float("movement_duration_s", spec.movement_duration_s)
+
+    spec.coordinate_mode = str(snapshot.get("coordinate_mode") or "cartesian")
+    spec.path_direction = str(snapshot.get("path_direction") or "custom")
+    spec.start_x_m = start["x_m"]
+    spec.start_y_m = start["y_m"]
+    spec.start_z_m = start["z_m"]
+    spec.end_x_m = end["x_m"]
+    spec.end_y_m = end["y_m"]
+    spec.end_z_m = end["z_m"]
+    spec.start_radius_m = float(start_spherical["radius_m"])
+    spec.end_radius_m = float(end_spherical["radius_m"])
+    spec.azimuth_start_deg = float(start_spherical["azimuth_deg"])
+    spec.azimuth_end_deg = float(end_spherical["azimuth_deg"])
+    spec.elevation_deg = float(start_spherical["elevation_deg"])
+    spec.path_length_m = max(0.0, float(path_length))
+    spec.propagation_speed_mps = spec.path_length_m / movement_duration_s if movement_duration_s > 0 else 0.0
+    spec.padding_pre_s = max(0.0, snapshot_float("start_hold_s", spec.padding_pre_s))
+    spec.padding_post_s = max(0.0, snapshot_float("end_hold_s", spec.padding_post_s))
+    return True
 
 
 def trajectory_endpoints_xyz(spec: TrajectorySpec) -> tuple[dict[str, float], dict[str, float]]:
@@ -1424,6 +1552,15 @@ def protocol_sound_sources(design: StimulusDesign) -> list[dict[str, Any]]:
 
 
 def _sound_source_from_noise(noise: NoiseDefinition) -> dict[str, Any]:
+    source_profile = str(noise.source_profile or "").strip()
+    source_profile_parameters = dict(noise.source_profile_parameters)
+    if should_apply_gold_standard_looming_source_profile(noise):
+        source_profile = PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+        source_profile_parameters = gold_standard_looming_source_parameters(source_profile_parameters)
+    elif source_profile == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE:
+        source_profile_parameters = gold_standard_looming_source_parameters(source_profile_parameters)
+    elif source_profile == "continuous_noise":
+        source_profile_parameters = {}
     return {
         "label": noise.label,
         "noise_type": noise.noise_type,
@@ -1431,9 +1568,12 @@ def _sound_source_from_noise(noise: NoiseDefinition) -> dict[str, Any]:
         "azimuth_deg": noise.azimuth_deg,
         "elevation_deg": noise.elevation_deg,
         "gain": noise.gain,
+        "source_profile": source_profile,
+        "source_profile_parameters": source_profile_parameters,
         "source_path": noise.prebaked_path,
         "prebaked_path": noise.prebaked_path,
         "source_kind": "procedural_noise",
+        "motion_mode": noise.motion_mode,
         "trajectory_snapshot": dict(noise.trajectory_snapshot),
     }
 

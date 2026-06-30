@@ -18,15 +18,34 @@ Top-level source-card labels are parent decisions for Segment 2 trial-sequence a
 
 The backend also prunes stale custom-design `trial_strips[*].elements[*].source_labels` during save, so direct/API payloads cannot persist labels for deleted sources. Bundled profile preloads remain unchanged and read-only until copied.
 
-## Study 5 White/Pink Canonical Profile
+## Study 5 Bundled Profiles
 
-The tracked preload `study5_box_breathing_pps` is the only Study 5 lab profile in the repository. Its stable ID is retained for compatibility, but its source pool is now the canonical white/pink version: exactly `Pink frontal` and `White frontal` looming sources plus `Inhale instruction` and `Exhale instruction` fixed clips from the original Study 5 audio. The profile retains the Study 5 SOAs, trajectory, instruction audio, baseline/catch settings, block/run defaults, and total trial-budget logic. Because the looming source pool has two noises, Segment 4 family repetitions are scaled to audio-tactile `6.0`, baseline `3.0`, and catch `6.0`; this preserves 204 planned rows and six 34-trial blocks.
+The tracked preload `study5_box_breathing_pps` remains the first/default Study 5 lab profile in the repository. Its stable ID is retained for compatibility, and its source pool is the canonical white/pink version: exactly `Pink frontal` and `White frontal` salient looming burst sources plus `Inhale instruction` and `Exhale instruction` fixed clips from the original Study 5 audio. The profile retains the Study 5 SOAs, trajectory, instruction audio, stationary-burst baseline/catch settings, block/run defaults, and total trial-budget logic. Segment 3 baselines use `baseline_strategy = stationary_burst`: fixed instruction/jitter audio stays in place, looming segments are replaced by stationary rendered burst audio, and tactile cues remain on channel 3 at every main SOA. Because the looming source pool has two noises, Segment 4 family repetitions are scaled to audio-tactile `6.0`, baseline `3.0`, and catch `6.0`; this preserves 204 planned rows and six 34-trial blocks.
 
-In the HTML dashboard study selector, `study5_box_breathing_pps` should appear as the first/default bundled Study 5 profile. Do not add or restore a second Study 5 profile.
+The approved second Study 5 profile is `study5_dynaspace_lateral_45_pps`. It keeps the original Study 5 breathing clips and run-instruction workflow, but replaces the frontal white/pink looming pool with two DynaSpace/Hobeika-style white-noise burst-train sources: `DynaSpace looming left 45` and `DynaSpace looming right 45`. These source cards carry their own trajectory snapshots: 640 cm to 20 cm, 3.85 s total, 0.105 s pre-hold, 2.945 s movement, 0.8 s post-hold, six smartphone anchors at SOAs `105, 1625, 2385, 2765, 2955, 3050` ms, and left/right display rotations 315 and 45 degrees. Segment 3 still uses stationary-burst baselines, now fixed at the matching left/right source snapshots. Segment 4 repetitions are audio-tactile `5.0`, baseline `2.5`, and catch `6.0`, producing 204 planned rows with equal inhale/exhale and left/right counts.
+
+In the HTML dashboard study selector, `study5_box_breathing_pps` should appear as the first/default bundled Study 5 profile, and `study5_dynaspace_lateral_45_pps` should remain available as the lateral DynaSpace Study 5 variant.
+
+## Segment 1 Generated Source Mode
+
+Segment 1 `Generate Looming Noise` now has a `Source mode` segmented control.
+`Burst train` is the default and writes `source_profile:
+dynaspace_gaussian_burst_train`; `Continuous` writes `source_profile:
+continuous_noise` as an explicit opt-out. The browser records only the
+researcher decision. The local backend validates the two supported modes,
+normalizes burst-train parameters, clears stale burst parameters for
+continuous-noise bakes, and then owns WAV generation.
+
+Existing generated source cards display a compact `Burst train` or
+`Continuous` chip and keep the saved `source_profile`,
+`source_profile_parameters`, and `motion_mode` fields in hidden form state.
+Missing generated looming source profiles should resolve to `Burst train` when
+designs are loaded/saved/rendered, while imported/fixed custom clips remain
+outside this generated-noise toggle.
 
 ## Static Profile Segment 3-5 Previews
 
-Hosted/static mode cannot write WAVs or CSVs, but finished bundled profiles must still show the same downstream decisions that the local companion would materialize. `staticStateForTemplate()` therefore derives read-only virtual Segment 3 trial files, Segment 4 repetition-pool rows, and already-randomized Segment 5 block previews from the committed profile parameters. Study 5 should show 44 virtual Segment 3 WAVs, 204 planned Segment 4 pool rows, and 6 accepted static block previews of 34 trials each. Static previews must use the same seeded, row-order-preserving Gellermann-style block scheduler concept as the local companion and expose `Download Randomization` for the browser-generated CSV/manifest. The local companion still performs actual file/CSV materialization when launching or preparing a run.
+Hosted/static mode cannot write WAVs or CSVs, but finished bundled profiles must still show the same downstream decisions that the local companion would materialize. `staticStateForTemplate()` therefore derives read-only virtual Segment 3 trial files, Segment 4 repetition-pool rows, and already-randomized Segment 5 block previews from the committed profile parameters. Canonical Study 5 should show 44 virtual Segment 3 WAVs, 204 planned Segment 4 pool rows, and 6 accepted static block previews of 34 trials each. The lateral DynaSpace Study 5 profile should show 52 virtual Segment 3 WAVs, 204 planned Segment 4 pool rows, and the same six 34-trial block previews. Static previews must use the same seeded, row-order-preserving Gellermann-style block scheduler concept as the local companion and expose `Download Randomization` for the browser-generated CSV/manifest. The local companion still performs actual file/CSV materialization when launching or preparing a run.
 
 ## Static Preview Parity Audit
 

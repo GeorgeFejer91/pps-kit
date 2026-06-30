@@ -1,0 +1,478 @@
+{
+  "dynaspace_raw_looming": {
+    "label": "dynaspace_raw_looming",
+    "path_hint": "bursttrainlooming.wav",
+    "sha256": "610c9a9c22329f6dfb4a37917cfdead552042e6d2f2987dacc418385e7570da2",
+    "sample_rate_hz": 48000,
+    "dtype": "int16",
+    "channels": 2,
+    "frames": 184800,
+    "duration_s": 3.85,
+    "peak_dbfs": -3.186186028831806,
+    "rms_dbfs": -37.28168983386075,
+    "crest_factor_db": 34.09550380502894,
+    "dc_offset_by_channel": [
+      1.602668266791802e-05,
+      4.9229576474144346e-05
+    ],
+    "clipped_samples": 0,
+    "frame_rms": {
+      "frame_ms": 20.0,
+      "hop_ms": 10.0,
+      "max_dbfs": -21.655265965247416,
+      "min_dbfs": -88.1000218008354
+    },
+    "active_rms_summary": {
+      "threshold_dbfs": -85.0,
+      "percent_active": 84.89583333333334,
+      "first_active_s": 0.3,
+      "last_active_s": 3.55,
+      "p10_dbfs": -57.959627945886155,
+      "p50_dbfs": -51.831287180645816,
+      "p90_dbfs": -39.76405742015652,
+      "p90_minus_p10_db": 18.195570525729636,
+      "first_dbfs": -58.770765927881364,
+      "last_dbfs": -81.12080752683438,
+      "linear_slope_db_per_s": 4.3089501838834385
+    },
+    "burst_structure": {
+      "detector": "20ms_rms_2p5ms_hop_find_peaks_prominence_3db_min_spacing_55ms",
+      "count": 33,
+      "first_10_onsets_s": [
+        0.301788,
+        0.397407,
+        0.491387,
+        0.587494,
+        0.681291,
+        0.776641,
+        0.872904,
+        0.966489,
+        1.060896,
+        1.157262
+      ],
+      "first_10_peak_times_s": [
+        0.3175,
+        0.4125,
+        0.5075,
+        0.6025,
+        0.6975,
+        0.7925,
+        0.8875,
+        0.9825,
+        1.0775,
+        1.1725
+      ],
+      "median_duration_ms": 55.24787332696349,
+      "median_ioi_ms": 94.99999999999997,
+      "durations_ms_first_10": [
+        71.346,
+        66.584,
+        73.19,
+        71.341,
+        69.754,
+        69.716,
+        67.789,
+        68.147,
+        66.679,
+        66.753
+      ]
+    },
+    "spectral": {
+      "centroid_hz": 10948.002293551459,
+      "rolloff_85_hz": 18169.921875,
+      "rolloff_95_hz": 19910.15625,
+      "flatness": 0.30809091787023657,
+      "spectral_slope_db_per_octave_100_16000": -0.2579282680325601,
+      "band_relative_db": {
+        "20-100": -21.496694100204397,
+        "100-250": -13.111115619386172,
+        "250-500": -13.81725444409836,
+        "500-1000": -9.991603457719151,
+        "1000-2000": -10.404006442205581,
+        "2000-4000": -5.490142243888808,
+        "4000-8000": -3.121093979215991,
+        "8000-16000": 0.0,
+        "16000-Nyquist": -0.5396957157094222
+      }
+    },
+    "binaural": {
+      "lag_us": 187.5,
+      "iacc_abs": 0.22851705897271954,
+      "iacc_signed": 0.22851705897271954,
+      "ild_left_minus_right_db": -6.340011803882302,
+      "pearson_lr": 0.03246532169625654,
+      "moving_100ms": {
+        "window_count": 76,
+        "ild_min_db": -7.784262051868829,
+        "ild_max_db": 0.4795025413081113,
+        "ild_first_db": 0.1456534888748146,
+        "ild_last_db": 0.2378339238964254,
+        "itd_min_us": -1000.0,
+        "itd_max_us": 541.6666666666666,
+        "itd_first_us": -354.1666666666667,
+        "itd_last_us": 541.6666666666666,
+        "iacc_min": 0.042505141147350066,
+        "iacc_max": 0.26938204829256923,
+        "iacc_first": 0.09338510253521164,
+        "iacc_last": 0.06605182597808862
+      }
+    }
+  },
+  "dynaspace_raw_fixed": {
+    "label": "dynaspace_raw_fixed",
+    "path_hint": "bursttrainfixe.wav",
+    "sha256": "56f8afff1b0985a0e3585bdb525f3a76c0bd1f57cf711a667bcbfa03b1f69fe1",
+    "sample_rate_hz": 48000,
+    "dtype": "int16",
+    "channels": 2,
+    "frames": 184800,
+    "duration_s": 3.85,
+    "peak_dbfs": -33.48180929009726,
+    "rms_dbfs": -53.25498528548003,
+    "crest_factor_db": 19.773175995382772,
+    "dc_offset_by_channel": [
+      -5.159749613179789e-06,
+      5.929955156334551e-06
+    ],
+    "clipped_samples": 0,
+    "frame_rms": {
+      "frame_ms": 20.0,
+      "hop_ms": 10.0,
+      "max_dbfs": -51.73876616786744,
+      "min_dbfs": -88.1000218008354
+    },
+    "active_rms_summary": {
+      "threshold_dbfs": -85.0,
+      "percent_active": 84.375,
+      "first_active_s": 0.3,
+      "last_active_s": 3.53,
+      "p10_dbfs": -60.676917749991865,
+      "p50_dbfs": -55.708263233352326,
+      "p90_dbfs": -52.58987187887234,
+      "p90_minus_p10_db": 8.087045871119528,
+      "first_dbfs": -58.770765927881364,
+      "last_dbfs": -84.41811710205165,
+      "linear_slope_db_per_s": -1.1556517932917323
+    },
+    "burst_structure": {
+      "detector": "20ms_rms_2p5ms_hop_find_peaks_prominence_3db_min_spacing_55ms",
+      "count": 33,
+      "first_10_onsets_s": [
+        0.29633,
+        0.397412,
+        0.491507,
+        0.587588,
+        0.681122,
+        0.776776,
+        0.873335,
+        0.966464,
+        1.061806,
+        1.157693
+      ],
+      "first_10_peak_times_s": [
+        0.3175,
+        0.4125,
+        0.5075,
+        0.6025,
+        0.6975,
+        0.7925,
+        0.8875,
+        0.9825,
+        1.0775,
+        1.1725
+      ],
+      "median_duration_ms": 69.93317511734517,
+      "median_ioi_ms": 94.99999999999997,
+      "durations_ms_first_10": [
+        3159.649,
+        66.573,
+        73.082,
+        71.947,
+        71.877,
+        70.927,
+        69.338,
+        72.051,
+        68.302,
+        69.824
+      ]
+    },
+    "spectral": {
+      "centroid_hz": 9318.988115795151,
+      "rolloff_85_hz": 17753.90625,
+      "rolloff_95_hz": 19845.703125,
+      "flatness": 0.4478953321713003,
+      "spectral_slope_db_per_octave_100_16000": -1.0006447158063707,
+      "band_relative_db": {
+        "20-100": -16.459889560801546,
+        "100-250": -12.80486008809663,
+        "250-500": -9.856771243526083,
+        "500-1000": -9.822828236696838,
+        "1000-2000": -6.184119182071653,
+        "2000-4000": -3.2997169617622397,
+        "4000-8000": -1.0190189729976726,
+        "8000-16000": 0.0,
+        "16000-Nyquist": -0.9243254746827251
+      }
+    },
+    "binaural": {
+      "lag_us": 187.5,
+      "iacc_abs": 0.13225738536081513,
+      "iacc_signed": 0.13225738536081513,
+      "ild_left_minus_right_db": -4.260257843618043,
+      "pearson_lr": 0.03175546817729141,
+      "moving_100ms": {
+        "window_count": 76,
+        "ild_min_db": -7.237040391219428,
+        "ild_max_db": 0.41069968977144433,
+        "ild_first_db": 0.1456534888748146,
+        "ild_last_db": 0.2378339238964254,
+        "itd_min_us": -1000.0,
+        "itd_max_us": 541.6666666666666,
+        "itd_first_us": -354.1666666666667,
+        "itd_last_us": 541.6666666666666,
+        "iacc_min": 0.042505141147350066,
+        "iacc_max": 0.2279541858913468,
+        "iacc_first": 0.09338510253521164,
+        "iacc_last": 0.06605182597808862
+      }
+    }
+  },
+  "pps_proxy_looming": {
+    "label": "pps_proxy_looming",
+    "path_hint": "looming_DynaSpace_proxy_looming_burst_train.wav",
+    "sha256": "e193ce4cad8a46ec822063984328671269eabd8e37ba75d5389a550b0f0fbdcf",
+    "sample_rate_hz": 44100,
+    "dtype": "int16",
+    "channels": 2,
+    "frames": 169785,
+    "duration_s": 3.85,
+    "peak_dbfs": -0.9149141945731412,
+    "rms_dbfs": -31.331710361409662,
+    "crest_factor_db": 30.41679616683652,
+    "dc_offset_by_channel": [
+      5.2625364776592455e-05,
+      4.968513717716524e-05
+    ],
+    "clipped_samples": 0,
+    "frame_rms": {
+      "frame_ms": 20.0,
+      "hop_ms": 10.0,
+      "max_dbfs": -17.50872096107985,
+      "min_dbfs": -240.0
+    },
+    "active_rms_summary": {
+      "threshold_dbfs": -85.0,
+      "percent_active": 39.32291666666667,
+      "first_active_s": 0.3,
+      "last_active_s": 3.38,
+      "p10_dbfs": -61.58197676772183,
+      "p50_dbfs": -45.78428511523395,
+      "p90_dbfs": -27.92128107959861,
+      "p90_minus_p10_db": 33.66069568812321,
+      "first_dbfs": -57.02923271445457,
+      "last_dbfs": -74.92353492383693,
+      "linear_slope_db_per_s": 8.328409127775512
+    },
+    "burst_structure": {
+      "detector": "20ms_rms_2p5ms_hop_find_peaks_prominence_3db_min_spacing_55ms",
+      "count": 33,
+      "first_10_onsets_s": [
+        0.291026,
+        0.38583,
+        0.480671,
+        0.575483,
+        0.670316,
+        0.765136,
+        0.859929,
+        0.954794,
+        1.049685,
+        1.146483
+      ],
+      "first_10_peak_times_s": [
+        0.316803,
+        0.409093,
+        0.506372,
+        0.601156,
+        0.695941,
+        0.790726,
+        0.88551,
+        0.980295,
+        1.075079,
+        1.169864
+      ],
+      "median_duration_ms": 53.91438299291819,
+      "median_ioi_ms": 94.78458049886623,
+      "durations_ms_first_10": [
+        53.929,
+        53.912,
+        53.858,
+        53.844,
+        53.799,
+        55.999,
+        56.148,
+        55.99,
+        55.973,
+        53.968
+      ]
+    },
+    "spectral": {
+      "centroid_hz": 8107.1661592402415,
+      "rolloff_85_hz": 14470.3125,
+      "rolloff_95_hz": 15514.6728515625,
+      "flatness": 0.22139546036497856,
+      "spectral_slope_db_per_octave_100_16000": 0.3183570078996211,
+      "band_relative_db": {
+        "20-100": -25.448126132117235,
+        "100-250": -23.517762219296614,
+        "250-500": -20.68472337823003,
+        "500-1000": -21.210204781513053,
+        "1000-2000": -13.99782564580052,
+        "2000-4000": -1.71532288152948,
+        "4000-8000": -0.7605498100495233,
+        "8000-16000": 0.0,
+        "16000-Nyquist": -9.896135688158342
+      }
+    },
+    "binaural": {
+      "lag_us": -362.81179138321994,
+      "iacc_abs": 0.7032022473749167,
+      "iacc_signed": 0.7032022473749167,
+      "ild_left_minus_right_db": 12.609593957493594,
+      "pearson_lr": -0.14541725349432244,
+      "moving_100ms": {
+        "window_count": 76,
+        "ild_min_db": -240.0,
+        "ild_max_db": 13.114088361851262,
+        "ild_first_db": -240.0,
+        "ild_last_db": -240.0,
+        "itd_min_us": -362.81179138321994,
+        "itd_max_us": -362.81179138321994,
+        "itd_first_us": NaN,
+        "itd_last_us": NaN,
+        "iacc_min": 0.6466272785926485,
+        "iacc_max": 0.7514922165371801,
+        "iacc_first": NaN,
+        "iacc_last": NaN
+      }
+    }
+  },
+  "pps_proxy_fixed": {
+    "label": "pps_proxy_fixed",
+    "path_hint": "looming_DynaSpace_proxy_fixed_640_cm_burst_train.wav",
+    "sha256": "56b7c6f88d093d8731915a72781993c3fab44e80434a1b2ab36f3134f9b8908a",
+    "sample_rate_hz": 44100,
+    "dtype": "int16",
+    "channels": 2,
+    "frames": 169785,
+    "duration_s": 3.85,
+    "peak_dbfs": -0.9152087163722664,
+    "rms_dbfs": -24.641687544019476,
+    "crest_factor_db": 23.72647882764721,
+    "dc_offset_by_channel": [
+      -9.001323997537327e-06,
+      -8.801090867218099e-06
+    ],
+    "clipped_samples": 0,
+    "frame_rms": {
+      "frame_ms": 20.0,
+      "hop_ms": 10.0,
+      "max_dbfs": -18.45253371493954,
+      "min_dbfs": -240.0
+    },
+    "active_rms_summary": {
+      "threshold_dbfs": -85.0,
+      "percent_active": 42.96875,
+      "first_active_s": 0.3,
+      "last_active_s": 3.38,
+      "p10_dbfs": -62.90856529032659,
+      "p50_dbfs": -24.750468347211342,
+      "p90_dbfs": -20.70927882410222,
+      "p90_minus_p10_db": 42.19928646622437,
+      "first_dbfs": -28.813940446001848,
+      "last_dbfs": -77.00257215124626,
+      "linear_slope_db_per_s": -0.15091276875233905
+    },
+    "burst_structure": {
+      "detector": "20ms_rms_2p5ms_hop_find_peaks_prominence_3db_min_spacing_55ms",
+      "count": 33,
+      "first_10_onsets_s": [
+        0.290981,
+        0.385779,
+        0.480596,
+        0.575446,
+        0.670385,
+        0.76532,
+        0.860212,
+        0.955022,
+        1.049893,
+        1.146451
+      ],
+      "first_10_peak_times_s": [
+        0.316803,
+        0.411587,
+        0.506372,
+        0.601156,
+        0.695941,
+        0.790726,
+        0.88551,
+        0.980295,
+        1.075079,
+        1.172358
+      ],
+      "median_duration_ms": 53.76563596717276,
+      "median_ioi_ms": 94.78458049886618,
+      "durations_ms_first_10": [
+        53.686,
+        53.725,
+        53.697,
+        53.629,
+        53.493,
+        55.57,
+        55.575,
+        55.609,
+        55.521,
+        53.766
+      ]
+    },
+    "spectral": {
+      "centroid_hz": 8172.726296976705,
+      "rolloff_85_hz": 14464.92919921875,
+      "rolloff_95_hz": 15600.8056640625,
+      "flatness": 0.22664192868306454,
+      "spectral_slope_db_per_octave_100_16000": 0.25493597202164286,
+      "band_relative_db": {
+        "20-100": -24.499190831172516,
+        "100-250": -23.742511621382356,
+        "250-500": -20.40614494500997,
+        "500-1000": -20.144245925383725,
+        "1000-2000": -14.825609972938988,
+        "2000-4000": -1.7129155079853895,
+        "4000-8000": -0.9392041316483553,
+        "8000-16000": 0.0,
+        "16000-Nyquist": -9.850975858362798
+      }
+    },
+    "binaural": {
+      "lag_us": -362.81179138321994,
+      "iacc_abs": 0.6903987386674408,
+      "iacc_signed": 0.6903987386674408,
+      "ild_left_minus_right_db": 12.701160484934215,
+      "pearson_lr": -0.11609720271058094,
+      "moving_100ms": {
+        "window_count": 76,
+        "ild_min_db": -240.0,
+        "ild_max_db": 13.058006353135438,
+        "ild_first_db": -240.0,
+        "ild_last_db": -240.0,
+        "itd_min_us": -362.81179138321994,
+        "itd_max_us": -362.81179138321994,
+        "itd_first_us": NaN,
+        "itd_last_us": NaN,
+        "iacc_min": 0.6464947771587556,
+        "iacc_max": 0.726599568395654,
+        "iacc_first": NaN,
+        "iacc_last": NaN
+      }
+    }
+  }
+}

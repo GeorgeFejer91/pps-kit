@@ -1,0 +1,12 @@
+feature,dynaspace_raw_looming,pps_proxy_looming,interpretation
+duration_s,3.85,3.85,match window length before timing offsets
+sample_rate_hz,48000,44100,raw Android file differs from 44.1 kHz profile
+peak_dbfs,-3.186186028831806,-0.9149141945731412,proxy is normalized closer to full scale
+rms_dbfs,-37.28168983386075,-31.331710361409662,proxy is much higher average level
+crest_factor_db,34.09550380502894,30.41679616683652,raw file has stronger pulse-like crest
+burst_count,33,33,post-implementation proxy now matches the 33-burst temporal structure
+active_p90_minus_p10_db,18.195570525729636,33.66069568812321,proxy carries a larger smooth gain ramp
+spectral_centroid_hz,10948.002293551459,8107.1661592402415,raw file is higher and brighter
+ild_left_minus_right_db,-6.340011803882302,12.609593957493594,sign and magnitude differ; coordinate/channel convention needs audit
+itd_lag_us,187.5,-362.81179138321994,lag differs materially
+iacc_abs,0.22851705897271954,0.7032022473749167,"raw file is far more decorrelated, consistent with room/reverb rendering"

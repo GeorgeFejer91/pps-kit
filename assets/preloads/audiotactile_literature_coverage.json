@@ -111,17 +111,17 @@
   "coverage_summary": {
     "literature_record_count": 74,
     "literature_record_category_counts": {
-      "covered_runnable_profile": 5,
+      "covered_runnable_profile": 6,
       "covered_blocked_missing_publication_parameters": 7,
       "covered_blocked_toolkit_structure": 7,
       "not_yet_templated_requires_toolkit_structure": 29,
       "not_yet_templated_missing_publication_parameters": 21,
       "candidate_needs_full_text_task_audit": 0,
-      "adjacent_out_of_scope": 5
+      "adjacent_out_of_scope": 4
     },
-    "current_template_count": 21,
-    "current_profile_check_pass_count": 7,
-    "published_profile_check_pass_count": 6,
+    "current_template_count": 22,
+    "current_profile_check_pass_count": 8,
+    "published_profile_check_pass_count": 7,
     "current_templates_with_missing_publication_parameters": 12,
     "current_templates_with_toolkit_structural_gaps": 7,
     "holmes_2020_reported_articles": 23,
@@ -462,6 +462,12 @@
     {
       "template_id": "study5_box_breathing_pps",
       "published": false,
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": []
+    },
+    {
+      "template_id": "roussel_2025_dynaspace_mobile_pps",
+      "published": true,
       "current_recreation_category": "gui_recreatable",
       "primary_constraint_ids": []
     },
@@ -1937,10 +1943,12 @@
       "source_basis": [
         "pubmed_post_2020_audio_tactile_pps_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "adjacent_out_of_scope",
-      "audiotactile_task_family": "methods/device paper rather than a distinct PPS profile",
-      "can_recreate_audiotactile_components_now": false,
+      "current_template_ids": [
+        "roussel_2025_dynaspace_mobile_pps"
+      ],
+      "coverage_category": "covered_runnable_profile",
+      "audiotactile_task_family": "smartphone DynaSpace looming versus fixed audio-tactile PPS validation task",
+      "can_recreate_audiotactile_components_now": true,
       "blocking_constraint_ids": [],
       "missing_publication_parameters": []
     },

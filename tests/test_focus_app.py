@@ -8,6 +8,7 @@ import threading
 import time
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
 
 import numpy as np
 import pytest
@@ -23,7 +24,15 @@ from peripersonal_space_toolkit.output_layout import (
     output_project_state_dir,
     output_runner_logs_dir,
 )
-from peripersonal_space_toolkit.session_runner import RUN_PACKAGE_SCHEMA, SessionCaptureOptions, load_run_package
+from peripersonal_space_toolkit.session_runner import RUN_PACKAGE_SCHEMA, RunBlock, RunPackage, SessionCaptureOptions, load_run_package
+from peripersonal_space_toolkit.tactile_calibration.schema import (
+    CALIBRATION_SCHEMA,
+    CONFIRMATION_REQUIRED_CLEAN_CATCHES,
+    CONFIRMATION_REQUIRED_CONSECUTIVE_HITS,
+    PROTOCOL_NAME,
+    VALID_RESPONSE_END_MS,
+    VALID_RESPONSE_START_MS,
+)
 
 
 def _write_minimal_session_manifest(
@@ -88,6 +97,66 @@ def test_timeline_soa_display_marks_catch_trials_not_applicable():
     assert focus_app._timeline_row_label_optional("Type") is False
     assert focus_app._timeline_row_label_optional("Noise") is False
     assert focus_app._timeline_row_label_optional("SOA") is True
+
+
+def test_phone_transfer_bridge_serves_lightweight_building_block_packages(tmp_path: Path):
+    from peripersonal_space_toolkit import focus_app
+
+    wav = tmp_path / "trial.wav"
+    wav.write_bytes(b"RIFF....WAVE")
+    block_manifest = tmp_path / "block_01.csv"
+    block_manifest.write_text(
+        "\n".join(
+            [
+                "Trial_Number,Trial_UID,Trial_Type,Family,SOA_ms,Row_Label,Noise_Type,Trial_Start_S,Trial_Duration_S,Trial_End_S,Tactile_Onset_S,Response_Window_Onset_S,Trial_File_Path,Source_SHA256",
+                f"1,trial-a,audio_tactile,audio_tactile,300,inhale,white,0.000,4.000,4.000,1.250,1.250,{wav},",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    package = RunPackage(
+        participant_id="P001",
+        session_id="session-001",
+        created_at="2026-06-30T00:00:00Z",
+        session_dir=tmp_path / "sessions" / "P001" / "session-001",
+        design_path=tmp_path / "design.json",
+        protocol_path=tmp_path / "protocol.json",
+        manifest_path=tmp_path / "session_manifest.json",
+        render_manifest_path=None,
+        blocks=[
+            RunBlock(
+                index=1,
+                label="Block 01",
+                manifest_path=block_manifest,
+                wav_path=tmp_path / "full_block.wav",
+                trial_count=1,
+                duration_s=4.0,
+            )
+        ],
+    )
+    bridge = focus_app._PhoneTransferBridge(
+        packages=[package],
+        transfer_id="transfer-001",
+        profile_id="study5",
+        participant_id="P001",
+        port=8767,
+    )
+
+    listing = bridge.mobile_packages()
+    package_id = listing["active_package_id"]
+    manifest = bridge.mobile_package_manifest(package_id)
+    assets = {asset["asset_id"]: asset for asset in manifest["assets"]}
+    building_block_asset_id = manifest["blocks"][0]["trials"][0]["building_block_asset_id"]
+    path, media_type = bridge.mobile_package_asset_path(package_id, building_block_asset_id)
+
+    assert bridge.health()["mobile_runtime"]["mobile_runnable"] is True
+    assert listing["packages"][0]["asset_count"] == 1
+    assert manifest["asset_strategy"] == "trial_building_blocks_only"
+    assert {asset["role"] for asset in manifest["assets"]} == {"trial_building_block"}
+    assert "block-01-audio" not in assets
+    assert path == str(wav)
+    assert media_type == "audio/wav"
 
 
 def test_validation_external_mouse_click_uses_helper_python(monkeypatch):
@@ -421,11 +490,88 @@ def _write_analysis_review_outputs(session_dir: Path) -> dict[str, Path]:
         + "\n",
         encoding="utf-8",
     )
+    assumption_checks = analysis_dir / "basic_assumption_checks.v1.json"
+    assumption_checks.write_text(
+        json.dumps(
+            {
+                "schema": "pps-basic-assumption-checks.v1",
+                "alpha": 0.05,
+                "outcome": "log_rt_ms",
+                "proximity_coding": {
+                    "method": "centered_soa_rank",
+                    "orientation": "sorted_unique_soa_as_far_to_near",
+                    "levels": [100.0, 200.0, 400.0, 800.0],
+                    "scores_by_soa_ms": {"100": -1.5, "200": -0.5, "400": 0.5, "800": 1.5},
+                },
+                "baseline_assumption": {
+                    "label": "Baseline Assumption",
+                    "status": "PASS",
+                    "passed": True,
+                    "summary": "No significant baseline proximity/SOA trend was detected; pragmatic baseline flatness was accepted.",
+                    "beta": -0.001,
+                    "p_two_sided": 0.72,
+                    "df_resid": 18,
+                    "coverage": {"n": 12, "distinct_soa_count": 4, "counts_by_soa_ms": {"100": 3, "200": 3, "400": 3, "800": 3}},
+                },
+                "peripersonal_space_assumption": {
+                    "label": "Peripersonal Space Assumption",
+                    "status": "PASS",
+                    "passed": True,
+                    "summary": "Audio-tactile RTs sped up from far to near more than baseline, with the predicted significant interaction.",
+                    "interaction_beta": -0.12,
+                    "p_one_sided_negative": 0.012,
+                    "df_resid": 28,
+                    "baseline_slope_beta": -0.001,
+                    "audio_tactile_slope_beta": -0.121,
+                    "baseline_far_to_near_speedup_ms": 2.0,
+                    "audio_tactile_far_to_near_speedup_ms": 68.0,
+                    "pps_far_to_near_gain_ms": 66.0,
+                    "coverage": {
+                        "baseline": {"n": 12, "distinct_soa_count": 4, "counts_by_soa_ms": {"100": 3, "200": 3, "400": 3, "800": 3}},
+                        "audio_tactile": {"n": 24, "distinct_soa_count": 4, "counts_by_soa_ms": {"100": 6, "200": 6, "400": 6, "800": 6}},
+                    },
+                },
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    participant_trials = session_dir / f"{session_id}_trials.csv"
+    trial_header = (
+        "trial_uid,trial_number,trial_type,stimulus_modality,tactile_present,catch_trial,response_given,"
+        "outcome,hit,part_number,condition,respiratory_phase,noise_type,soa_ms,rt_ms,is_topup,topup_role"
+    )
+    trial_rows = [
+        "T001,1,Audio-Tactile,audio_tactile,true,false,true,Hit,true,1,,Inhale,pink,100,310,false,",
+        "T002,2,Audio-Tactile,audio_tactile,true,false,true,Hit,true,1,,Inhale,pink,200,300,false,",
+        "T003,3,Baseline,tactile,true,false,true,Hit,true,1,,Inhale,pink,,330,false,",
+        "T004,4,Audio-Tactile,audio_tactile,true,false,false,Miss,false,1,,Inhale,pink,400,,false,",
+        "TU001,5,Audio-Tactile,audio_tactile,true,false,true,Hit,true,1,,Inhale,pink,800,280,true,rescue",
+        "C001,6,Catch,audio,false,true,false,Hit,true,1,,Inhale,pink,,,false,",
+        "C002,7,Catch,audio,false,true,false,Hit,true,1,,Inhale,pink,,,false,",
+        "C003,8,Catch,audio,false,true,false,Hit,true,1,,Inhale,pink,,,false,",
+        "C004,9,Catch,audio,false,true,true,Miss,false,1,,Inhale,pink,,,false,",
+    ]
+    participant_trials.write_text("\n".join([trial_header, *trial_rows]) + "\n", encoding="utf-8")
+    responses = analysis_dir / f"{session_id}_responses.csv"
+    final_trial_outcomes = analysis_dir / f"{session_id}_final_trial_outcomes.csv"
+    response_header = "trial_uid,trial_type,hit,part_number,condition,respiratory_phase,noise_type,soa_ms,rt_ms,is_topup,topup_role"
+    response_rows = [
+        "T001,Audio-Tactile,true,1,,Inhale,pink,100,310,false,",
+        "T002,Audio-Tactile,true,1,,Inhale,pink,200,300,false,",
+        "T003,Baseline,true,1,,Inhale,pink,,330,false,",
+        "T004,Audio-Tactile,false,1,,Inhale,pink,400,,false,",
+        "TU001,Audio-Tactile,true,1,,Inhale,pink,800,280,true,rescue",
+    ]
+    responses.write_text("\n".join([response_header, *response_rows]) + "\n", encoding="utf-8")
+    final_trial_outcomes.write_text("\n".join([response_header, *response_rows]) + "\n", encoding="utf-8")
     summary = analysis_dir / f"{session_id}_summary.csv"
     summary.write_text(
         "scope,aggregation_mode,n,hit_rate\n"
-        f"{scope},separate_parts,4,1.0\n"
-        f"{pooled_scope},pooled_parts,8,1.0\n",
+        f"{scope},separate_parts,5,0.8\n"
+        f"{pooled_scope},pooled_parts,10,0.8\n",
         encoding="utf-8",
     )
     behavior = analysis_dir / "data_behavior_by_scope.csv"
@@ -460,6 +606,10 @@ def _write_analysis_review_outputs(session_dir: Path) -> dict[str, Path]:
         "condition_lens_model_fit_comparison": condition_comparison,
         "condition_lens_triage_summary": condition_triage,
         "recording_quality_gate": quality_gate,
+        "basic_assumption_checks": assumption_checks,
+        "participant_trials": participant_trials,
+        "responses": responses,
+        "final_trial_outcomes": final_trial_outcomes,
         "data_behavior_by_scope": behavior,
         "exploratory_quality_summary": behavior_summary,
     }
@@ -608,7 +758,7 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert window.mode_tabs.tabText(window.data_logging_tab_index) == "Data Logging"
     assert window.mode_tabs.tabText(window.experiment_control_tab_index) == "Experiment Control"
     assert window.mode_tabs.currentIndex() == window.data_logging_tab_index
-    assert not window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
+    assert window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
     assert "Data Logging / Experiment Settings" in joined
     assert "Data Logging" in joined
     assert "Experiment Control" in joined
@@ -643,8 +793,8 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert not window.participant_increment_button.isEnabled()
     assert not window.participant_decrement_button.isEnabled()
     assert window.participant_status_summary_label.objectName() == "participantLedgerSummary"
-    assert "P001: setup not saved; data not collected" in window.participant_status_summary_label.text()
-    assert "unlock Experiment Control" in window.setup_status_label.text()
+    assert "P001: setup not saved; tactile threshold not calibrated; data not collected" in window.participant_status_summary_label.text()
+    assert "unlock start controls" in window.setup_status_label.text()
     assert not window.part_buttons["1"].isEnabled()
     assert not window.part_buttons["2"].isEnabled()
     assert window.preview_display_block_index is None
@@ -661,17 +811,21 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert window.output_12_volume_slider.minimum() == 0
     assert window.output_12_volume_slider.maximum() == 100_000
     assert window.output_34_volume_slider.minimum() == 0
-    assert window.output_34_volume_slider.maximum() == 100_000
+    assert window.output_34_volume_slider.maximum() == 500
     assert window.output_12_volume_percent_box.objectName() == "output12VolumePercentBox"
     assert window.output_34_volume_percent_box.objectName() == "output34VolumePercentBox"
     assert window.output_34_volume_percent_box.decimals() == 3
     assert window.output_34_volume_percent_box.singleStep() == pytest.approx(0.001)
+    assert window.output_34_volume_percent_box.maximum() == pytest.approx(0.5)
     assert window.test_audio_button.objectName() == "testAudioOutputButton"
     assert window.test_tactile_button.objectName() == "testTactileOutputButton"
+    assert window.tactile_calibration_button.objectName() == "tactileCalibrationButton"
+    assert "Threshold" in window.tactile_calibration_button.text()
     assert not window.output_12_volume_slider.isEnabled()
     assert not window.output_34_volume_slider.isEnabled()
     assert not window.test_audio_button.isEnabled()
     assert not window.test_tactile_button.isEnabled()
+    assert window.tactile_calibration_button.isEnabled()
     assert window.backup_recording_checkbox.objectName() == "failSafeRecordingCheckbox"
     assert window.wired_loopback_checkbox.objectName() == "wiredLoopbackCheckbox"
     assert window.external_labrecorder_checkbox.objectName() == "externalLabRecorderCheckbox"
@@ -689,6 +843,7 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     QTest.mouseClick(window.setup_submit_button, q["Qt"].MouseButton.LeftButton)
     app.processEvents()
     assert window.demographics_submitted
+    assert window.tactile_calibration_button.isEnabled()
     assert window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
     assert window.mode_tabs.currentIndex() == window.experiment_control_tab_index
     assert window.part_buttons["1"].isEnabled()
@@ -711,6 +866,9 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     output_stack_rect = _widget_rect(window.output_stack_cell, window.dialog)
     output_levels_rect = _widget_rect(window.output_levels_panel, window.dialog)
     output_rect = _widget_rect(window.output_panel, window.dialog)
+    test_audio_rect = _widget_rect(window.test_audio_button, window.dialog)
+    test_tactile_rect = _widget_rect(window.test_tactile_button, window.dialog)
+    tactile_threshold_rect = _widget_rect(window.tactile_calibration_button, window.dialog)
     response_cell_rect = _widget_rect(window.response_cell, window.dialog)
     processing_rect = _widget_rect(window.processing_panel, window.dialog)
     run_controls_rect = _widget_rect(window.run_controls_widget, window.dialog)
@@ -723,6 +881,11 @@ def test_focus_mode_shell_visual_smoke(tmp_path: Path):
     assert output_stack_rect["x"] >= response_rect["right"]
     assert output_levels_rect["x"] >= output_stack_rect["x"]
     assert output_levels_rect["right"] <= output_stack_rect["right"]
+    assert test_audio_rect["height"] >= window.layout_profile.button_min_height
+    assert test_tactile_rect["height"] >= window.layout_profile.button_min_height
+    assert test_audio_rect["bottom"] < tactile_threshold_rect["y"]
+    assert test_tactile_rect["bottom"] < tactile_threshold_rect["y"]
+    assert tactile_threshold_rect["bottom"] <= output_levels_rect["bottom"]
     if window.output_panel.isVisible():
         assert output_rect["y"] >= output_levels_rect["bottom"]
         assert output_rect["x"] >= output_stack_rect["x"]
@@ -1005,7 +1168,7 @@ def test_focus_mode_setup_submit_prepares_controller_before_start(tmp_path: Path
 
     assert not window.start_button.isEnabled()
     assert window.mode_tabs.currentIndex() == window.data_logging_tab_index
-    assert not window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
+    assert window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
     assert window.start() is None
     assert not created
 
@@ -1027,6 +1190,137 @@ def test_focus_mode_setup_submit_prepares_controller_before_start(tmp_path: Path
     assert window.mode_tabs.currentIndex() == window.experiment_control_tab_index
     assert not window.participant_name_input.isEnabled()
     assert not window.setup_submit_button.isEnabled()
+    window.dialog.close()
+
+
+def test_focus_mode_companion_setup_and_commands_use_existing_ui_paths(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    created: list[dict[str, object]] = []
+    controllers: list[object] = []
+
+    class FakeController:
+        def __init__(self, package_obj, *, capture_options=None, runner_metadata=None, **_kwargs):
+            self.package = package_obj
+            self.capture_options = capture_options
+            self.runner_metadata = dict(runner_metadata or {})
+            self.audio_engine = None
+            self.calls: list[str] = []
+            created.append(self.runner_metadata)
+            controllers.append(self)
+
+        def pause(self) -> None:
+            self.calls.append("pause")
+
+        def resume(self) -> None:
+            self.calls.append("resume")
+
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+        controller_factory=FakeController,
+        companion_enabled=False,
+    )
+    window.dialog.show()
+    app.processEvents()
+
+    snapshot = window._companion_submit_setup(
+        {
+            "participant_code": "P001",
+            "participant_name": "Phone Participant",
+            "age": "31",
+            "handedness": "left",
+            "gender": "prefer_not_to_say",
+            "name_sharing_opt_in": True,
+        }
+    )
+
+    assert snapshot["setup"]["submitted"] is True
+    assert created[-1]["participant_name"] == "Phone Participant"
+    assert created[-1]["include_name_in_lsl"] is True
+    ledger = json.loads(focus_app.participant_ledger_path(tmp_path).read_text(encoding="utf-8"))
+    assert ledger["participants"]["P001"]["participant_name"] == "Phone Participant"
+    assert ledger["participants"]["P001"]["include_name_in_lsl"] is True
+    assert "start_part_1" in snapshot["allowed_commands"]
+
+    starts: list[str] = []
+    window.start = lambda: starts.append("start")  # type: ignore[method-assign]
+    start_snapshot = window._companion_start_part(1)
+    assert starts == ["start"]
+    assert start_snapshot["schema"] == focus_app.SNAPSHOT_SCHEMA
+
+    window._run_active = True
+    window.controller = controllers[-1]
+    window.pause_button.setEnabled(True)
+    window.resume_button.setEnabled(False)
+    pause_snapshot = window._companion_set_paused(True)
+    assert controllers[-1].calls == ["pause"]
+    assert pause_snapshot["run_status"]["paused"] is True
+    assert window.pause_button.isEnabled() is False
+    assert window.resume_button.isEnabled() is True
+    assert "resume" in pause_snapshot["allowed_commands"]
+    resume_snapshot = window._companion_set_paused(False)
+    assert controllers[-1].calls == ["pause", "resume"]
+    assert resume_snapshot["run_status"]["paused"] is False
+    assert window.pause_button.isEnabled() is True
+    assert window.resume_button.isEnabled() is False
+    assert "pause" in resume_snapshot["allowed_commands"]
+
+    gate = {"context": {"instruction_label": "Gate", "button_label": "Continue"}, "approved": False, "event": threading.Event()}
+    window.pending_instruction_request = gate
+    continue_snapshot = window._companion_continue_instruction()
+    assert gate["approved"] is True
+    assert gate["event"].is_set()
+    assert window.pending_instruction_request is None
+    assert continue_snapshot["instruction_gate"]["waiting"] is False
+    window.result = SimpleNamespace(completed=True)
+    assert window._companion_snapshot()["allowed_commands"] == []
+    window.dialog.close()
+
+
+def test_focus_mode_companion_tab_shows_pairing_qr(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+        companion_advertise_ip="10.0.2.2",
+    )
+    window.dialog.show()
+    app.processEvents()
+
+    assert window.mode_tabs.tabText(window.companion_tab_index) == "Companion Android App (Experimental)"
+    window.mode_tabs.setCurrentIndex(window.companion_tab_index)
+    app.processEvents()
+
+    assert window.mode_tabs.currentIndex() == window.companion_tab_index
+    qr_label = window.companion_panel.findChild(q["QLabel"], "companionQrCode")
+    assert qr_label is not None
+    pixmap = qr_label.pixmap()
+    assert pixmap is not None and not pixmap.isNull()
+    uri_field = window.companion_panel.findChild(q["QLineEdit"], "companionPairingUriField")
+    assert uri_field is not None
+    assert uri_field.text().startswith("pps-companion://pair?")
+    assert "host=10.0.2.2" in uri_field.text()
     window.dialog.close()
 
 
@@ -1092,8 +1386,351 @@ def test_focus_mode_participant_setup_ledger_restores_submitted_fields(tmp_path:
     assert restored.handedness_combo.currentData() == "right"
     assert restored.gender_combo.currentData() == "male"
     assert restored.include_name_lsl_checkbox.isChecked()
-    assert "P001: setup saved; data not collected" in restored.participant_status_summary_label.text()
+    assert "P001: setup saved; tactile threshold not calibrated; data not collected" in restored.participant_status_summary_label.text()
     restored.dialog.close()
+
+
+def test_focus_mode_loads_participant_tactile_calibration_into_output_field(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+        from peripersonal_space_toolkit.tactile_calibration.persistence import save_calibration_attempt
+    except Exception as exc:  # pragma: no cover - depends on optional GUI smoke dependencies
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    save_calibration_attempt(
+        output_root=tmp_path,
+        participant_id="P001",
+        timestamp="20260626_130000",
+        report={
+            "schema": CALIBRATION_SCHEMA,
+            "participant_id": "P001",
+            "created_at": "2026-06-26T13:00:00",
+            "protocol": PROTOCOL_NAME,
+            "accepted": True,
+            "status": "accepted",
+            "final_output_34_percent": 42.5,
+            "detection_threshold_output_34_percent": 42.5,
+            "recommended_output_34_percent": 42.5,
+            "validation_hit_rate": 1.0,
+            "validation_false_alarm_rate": 0.0,
+        },
+        trials=[],
+    )
+
+    created: list[dict[str, object]] = []
+
+    class FakeController:
+        def __init__(self, package_obj, *, runner_metadata=None, **_kwargs):
+            self.package = package_obj
+            self.runner_metadata = dict(runner_metadata or {})
+            self.audio_engine = None
+            created.append(self.runner_metadata)
+
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+        controller_factory=FakeController,
+    )
+    window.dialog.show()
+    app.processEvents()
+
+    assert window.output_34_volume_percent == pytest.approx(0.5)
+    assert window.output_34_volume_percent_box.value() == pytest.approx(0.5)
+    assert "tactile threshold 0.5%" in window.participant_status_summary_label.text()
+    metadata = window._runner_metadata()
+    assert metadata["tactile_calibration"]["final_output_34_percent"] == pytest.approx(0.5)
+    assert metadata["tactile_calibration"]["recommended_output_34_percent"] == pytest.approx(0.5)
+    assert metadata["tactile_calibration"]["max_output_34_percent"] == pytest.approx(0.5)
+
+    _fill_required_setup(window)
+    assert window._submit_participant_setup()
+    assert created[-1]["tactile_calibration"]["final_output_34_percent"] == pytest.approx(0.5)
+    assert window.tactile_calibration_button.isEnabled()
+    window.dialog.close()
+
+
+def test_focus_mode_calibration_clicks_do_not_reach_trial_response_logger(tmp_path: Path):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI smoke dependencies
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+
+    class FakeController:
+        def __init__(self):
+            self.logged = []
+
+        def log_click(self, **payload):
+            self.logged.append(payload)
+
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+    )
+    window.dialog.show()
+    app.processEvents()
+
+    fake_controller = FakeController()
+    window.controller = fake_controller
+    now = time.perf_counter()
+    window._tactile_calibration_active = True
+    window._tactile_calibration_collector.start_trial(
+        trial_index=1,
+        phase="staircase",
+        level_percent=35.0,
+        is_catch=False,
+        estimated_onset_perf=now - 0.2,
+        valid_start_perf=now - 0.1,
+        valid_end_perf=now + 1.0,
+    )
+    window._click()
+
+    response = window._tactile_calibration_collector.wait_for_response(until_perf=now + 0.1)
+    assert response is not None
+    assert fake_controller.logged == []
+
+    now = time.perf_counter()
+    window._tactile_calibration_collector.start_trial(
+        trial_index=2,
+        phase="staircase",
+        level_percent=35.0,
+        is_catch=False,
+        estimated_onset_perf=now - 0.2,
+        valid_start_perf=now - 0.1,
+        valid_end_perf=now + 1.0,
+    )
+    window._handle_global_response_mouse_click(123, 456)
+
+    global_response = window._tactile_calibration_collector.wait_for_response(until_perf=now + 0.1)
+    assert global_response is not None
+    assert fake_controller.logged == []
+    window.dialog.close()
+
+
+def test_focus_mode_calibrate_tactile_button_click_saves_and_applies_value(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from PIL import Image, ImageStat
+        from peripersonal_space_toolkit import focus_app
+        from peripersonal_space_toolkit.tactile_calibration.persistence import load_latest_calibration
+    except Exception as exc:  # pragma: no cover - depends on optional GUI smoke dependencies
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    class FakeCalibrationRunner:
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+
+        def run(self):
+            return {
+                "report": {
+                    "schema": CALIBRATION_SCHEMA,
+                    "participant_id": self.kwargs["participant_id"],
+                    "created_at": "2026-06-26T15:00:00",
+                    "completed_at": "2026-06-26T15:00:02",
+                    "protocol": PROTOCOL_NAME,
+                    "accepted": True,
+                    "status": "accepted",
+                    "message": "Accepted confirmed tactile task level at Output 3/4 0.36%.",
+                    "threshold_method": "two_down_one_up_transformed_adaptive_staircase_with_catches",
+                    "final_output_34_percent": 0.36,
+                    "detection_threshold_output_34_percent": 0.35,
+                    "recommended_output_34_percent": 0.36,
+                    "confirmation_level_output_34_percent": 0.36,
+                    "timing": {
+                        "valid_response_start_ms": VALID_RESPONSE_START_MS,
+                        "valid_response_end_ms": VALID_RESPONSE_END_MS,
+                    },
+                    "adaptive_staircase": {
+                        "target_detection_rate": 0.7071067811865476,
+                        "down_after_hits": 2,
+                        "up_after_misses": 1,
+                        "stop_reversals": 6,
+                        "reversals_to_average": 4,
+                        "minimum_catch_trials": 3,
+                        "max_false_alarms": 3,
+                    },
+                    "confirmation_criteria": {
+                        "required_consecutive_hits": CONFIRMATION_REQUIRED_CONSECUTIVE_HITS,
+                        "required_clean_catches": CONFIRMATION_REQUIRED_CLEAN_CATCHES,
+                        "level_increment_percent": 0.01,
+                        "max_false_alarms": 3,
+                    },
+                    "staircase_summary": {
+                        "target_detection_rate": 0.7071067811865476,
+                        "hits": 14,
+                        "misses": 6,
+                        "signal_trials": 20,
+                        "false_alarms": 0,
+                        "catch_trials": 3,
+                        "reversals": 6,
+                        "reversal_levels_percent": [0.5, 0.35, 0.25, 0.35, 0.25, 0.35],
+                        "reversal_levels_used_percent": [0.25, 0.35, 0.25, 0.35],
+                        "hit_rate": 0.7,
+                        "false_alarm_rate": 0.0,
+                    },
+                    "confirmation_summary": {
+                        "hits": 10,
+                        "misses": 1,
+                        "signal_trials": 11,
+                        "false_alarms": 0,
+                        "catch_trials": 5,
+                        "clean_catches": 5,
+                        "consecutive_hits": 10,
+                        "hit_rate": 10 / 11,
+                        "false_alarm_rate": 0.0,
+                        "confirmed_output_34_percent": 0.36,
+                        "passed": True,
+                    },
+                    "staircase_hit_rate": 0.7,
+                    "confirmation_hit_rate": 10 / 11,
+                    "validation_hit_rate": 10 / 11,
+                    "validation_false_alarm_rate": 0.0,
+                },
+                "trials": [
+                    {
+                        "trial_index": 1,
+                        "phase": "staircase",
+                        "level_percent": 0.35,
+                        "staircase_index": 5,
+                        "staircase_direction": "down",
+                        "is_catch": False,
+                        "valid_response": True,
+                        "trial_outcome": "hit",
+                    }
+                ],
+            }
+
+    monkeypatch.setattr(focus_app, "TactileCalibrationRunner", FakeCalibrationRunner)
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+    )
+    window._output_test_engine = lambda: object()
+    window.dialog.show()
+    app.processEvents()
+
+    _fill_required_setup(window)
+    assert window._submit_participant_setup()
+    app.processEvents()
+    assert window.mode_tabs.currentIndex() == window.experiment_control_tab_index
+    assert window.start_button.isEnabled()
+    assert window.tactile_calibration_button.isEnabled()
+    QTest.mouseClick(window.tactile_calibration_button, q["Qt"].MouseButton.LeftButton)
+    deadline = time.time() + 2.0
+    while time.time() < deadline and window._tactile_calibration_active:
+        app.processEvents()
+        window._drain()
+        time.sleep(0.01)
+    app.processEvents()
+    window._drain()
+
+    assert not window._tactile_calibration_active
+    assert window.output_34_volume_percent == pytest.approx(0.36)
+    assert window.tactile_calibration_monitor_dialog is not None
+    assert window.tactile_calibration_monitor_dialog.isVisible()
+    assert window.tactile_calibration_monitor_dialog.close_button.isEnabled()
+    assert window.tactile_calibration_monitor_dialog.close_button.text() == "Continue"
+    assert "Calibration yielded a value" in window.tactile_calibration_monitor_dialog.status_label.text()
+    assert "0.360%" in window.tactile_calibration_monitor_dialog.status_label.text()
+    assert "Final hits: 10/10" in window.tactile_calibration_monitor_dialog.confirmation_hits_label.text()
+    assert "Clean catches: 5/5" in window.tactile_calibration_monitor_dialog.confirmation_catches_label.text()
+    screenshot = tmp_path / "tactile_calibration_monitor.png"
+    assert window.tactile_calibration_monitor_dialog.grab().save(str(screenshot))
+    image = Image.open(screenshot).convert("RGB")
+    assert max(ImageStat.Stat(image).stddev) > 0.0
+    deadline = time.time() + 3.0
+    while time.time() < deadline:
+        app.processEvents()
+        window._drain()
+        time.sleep(0.01)
+    app.processEvents()
+    assert window.tactile_calibration_monitor_dialog is not None
+    QTest.mouseClick(window.tactile_calibration_monitor_dialog.close_button, q["Qt"].MouseButton.LeftButton)
+    app.processEvents()
+    assert window.tactile_calibration_monitor_dialog is None
+    assert window.mode_tabs.currentIndex() == window.experiment_control_tab_index
+    assert window.start_button.isEnabled()
+    latest = load_latest_calibration(tmp_path, "P001")
+    assert latest is not None
+    assert latest["final_output_34_percent"] == pytest.approx(0.36)
+    assert latest["recommended_output_34_percent"] == pytest.approx(0.36)
+    assert latest["detection_threshold_output_34_percent"] == pytest.approx(0.35)
+    assert "tactile calibration successful" in window.event_label.text()
+    assert "Ready to start" in window.event_label.text()
+    window.dialog.close()
+
+
+def test_tactile_calibration_monitor_catch_false_alarm_shows_red_warning(monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication, QDialog
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI smoke dependencies
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    owner_dialog = QDialog()
+    returned: list[bool] = []
+    owner = SimpleNamespace(
+        dialog=owner_dialog,
+        _record_tactile_calibration_target_click=lambda _source: None,
+        _abort_tactile_calibration=lambda: None,
+        _return_from_successful_tactile_calibration=lambda: returned.append(True),
+    )
+    monitor = focus_app._create_tactile_calibration_monitor_dialog(q, owner, "P001")
+    monitor.show()
+    app.processEvents()
+    monitor.update_progress(
+        {
+            "trial_index": 1,
+            "phase": "confirmation",
+            "level_percent": 0.35,
+            "is_catch": True,
+            "max_calibration_events": 120,
+        }
+    )
+    monitor.finish_trial(
+        {
+            "trial_index": 1,
+            "phase": "confirmation",
+            "level_percent": 0.35,
+            "is_catch": True,
+            "response_present": True,
+            "valid_response": True,
+            "trial_outcome": "false_alarm",
+            "warning": "Only press when you feel the tactile pulse.",
+            "confirmation_consecutive_hits": 3,
+            "confirmation_clean_catches": 0,
+        }
+    )
+    app.processEvents()
+
+    assert monitor.warning_label.isVisible()
+    assert monitor.warning_label.text() == "Only press when you feel the tactile pulse."
+    assert "#b3261e" in monitor.target_panel.styleSheet()
+    assert "Clean catches: 0/5" in monitor.confirmation_catches_label.text()
+    monitor.close()
+    owner_dialog.close()
 
 
 def test_focus_mode_output_volume_sliders_persist_and_apply_to_engine(tmp_path: Path, monkeypatch):
@@ -1222,13 +1859,14 @@ def test_focus_mode_output_test_buttons_use_standard_assets_and_current_gains(tm
 
     window.output_12_volume_percent_box.setValue(41)
     window.output_34_volume_percent_box.setValue(23)
+    assert window.output_34_volume_percent_box.value() == pytest.approx(0.5)
     QTest.mouseClick(window.test_audio_button, q["Qt"].MouseButton.LeftButton)
     app.processEvents()
     window._drain()
 
     assert engine.instruction_paths == [str(focus_app.OUTPUT_TEST_AUDIO_PATH)]
     assert engine.audio_volume == pytest.approx(0.41)
-    assert engine.tactile_volume == pytest.approx(0.23)
+    assert engine.tactile_volume == pytest.approx(0.005)
     assert window.test_audio_button.isEnabled()
     assert "Test Audio complete" in window.event_label.text()
 
@@ -1253,14 +1891,38 @@ def test_focus_mode_output_test_buttons_use_standard_assets_and_current_gains(tm
 def test_runner_output_test_assets_match_expected_routes_and_levels():
     from peripersonal_space_toolkit import focus_app
 
-    audio, audio_sr = sf.read(focus_app.OUTPUT_TEST_AUDIO_PATH, dtype="float32")
+    audio, audio_sr = sf.read(focus_app.OUTPUT_TEST_AUDIO_PATH, dtype="float32", always_2d=True)
     audio_arr = audio if audio.ndim > 1 else audio[:, None]
     tactile, tactile_sr = sf.read(focus_app.OUTPUT_TEST_TACTILE_PATH, dtype="float32")
 
-    assert audio_sr == 22050
-    assert 1.5 <= audio_arr.shape[0] / audio_sr <= 3.0
-    assert 0.15 <= float(np.sqrt(np.mean(np.square(audio_arr)))) <= 0.22
-    assert float(np.max(np.abs(audio_arr))) <= 0.90
+    repo = Path(__file__).resolve().parents[1]
+    expected_rel = Path("assets") / "preloads" / focus_app.STUDY5_PROFILE_ID / "02_looming_stimuli" / "looming_Pink_frontal.wav"
+    assert focus_app.OUTPUT_TEST_AUDIO_PATH == repo / expected_rel
+    source_manifest = json.loads((repo / expected_rel.parent / "stimulus_sources.json").read_text(encoding="utf-8"))
+    source_entry = next(asset for asset in source_manifest["assets"] if asset["label"] == "Pink frontal")
+    assert Path(str(source_entry["path"])) == expected_rel
+    assert source_entry["source_profile"] == "dynaspace_gaussian_burst_train"
+    source_params = source_entry["source_profile_parameters"]
+    assert source_params["burst_count_mode"] == "duration_derived"
+    assert source_params["target_period_s"] == pytest.approx(0.095)
+    assert source_params["burst_duration_s"] == pytest.approx(0.030)
+
+    assert audio_sr == 44100
+    assert audio_arr.shape[1] == 2
+    assert audio_arr.shape[0] / audio_sr == pytest.approx(4.0)
+    assert float(np.max(np.abs(audio_arr))) <= 0.901
+    squared_mono = np.mean(np.square(audio_arr), axis=1)
+    window = max(1, int(round(0.005 * audio_sr)))
+    envelope = np.sqrt(np.convolve(squared_mono, np.ones(window, dtype=np.float32) / window, mode="same"))
+    active = envelope > max(1e-5, float(np.max(envelope)) * 0.15)
+    assert 0.03 <= float(np.mean(active)) <= 0.20
+    raw_starts = np.flatnonzero(np.diff(active.astype(np.int8), prepend=0) == 1)
+    burst_starts: list[int] = []
+    minimum_gap = int(round(0.040 * audio_sr))
+    for start in raw_starts:
+        if not burst_starts or int(start) - burst_starts[-1] >= minimum_gap:
+            burst_starts.append(int(start))
+    assert 25 <= len(burst_starts) <= 40
 
     assert tactile_sr == 44100
     assert tactile.ndim == 2
@@ -1339,6 +2001,8 @@ def test_focus_mode_participant_dropdown_switches_loaded_package(tmp_path: Path,
     except Exception as exc:  # pragma: no cover - depends on optional GUI deps
         pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
 
+    from peripersonal_space_toolkit.tactile_calibration.persistence import save_calibration_attempt
+
     q = focus_app._require_qt()
     app = QApplication.instance() or QApplication([])
     run_setup = tmp_path / "6_experiment_run_setup" / "experiment_run_setup_manifest.json"
@@ -1349,6 +2013,25 @@ def test_focus_mode_participant_dropdown_switches_loaded_package(tmp_path: Path,
     )
     package_p002 = load_run_package(
         _write_minimal_session_manifest(tmp_path, participant_id="P002", source_run_setup_manifest_path=run_setup)
+    )
+    save_calibration_attempt(
+        output_root=tmp_path,
+        participant_id="P002",
+        timestamp="20260626_140000",
+        report={
+            "schema": CALIBRATION_SCHEMA,
+            "participant_id": "P002",
+            "created_at": "2026-06-26T14:00:00",
+            "protocol": PROTOCOL_NAME,
+            "accepted": True,
+            "status": "accepted",
+                "final_output_34_percent": 0.35,
+                "detection_threshold_output_34_percent": 0.35,
+                "recommended_output_34_percent": 0.35,
+            "validation_hit_rate": 1.0,
+            "validation_false_alarm_rate": 0.0,
+        },
+        trials=[],
     )
     prepared: list[str] = []
 
@@ -1407,7 +2090,8 @@ def test_focus_mode_participant_dropdown_switches_loaded_package(tmp_path: Path,
     assert not window.include_name_lsl_checkbox.isChecked()
     assert window.participant_decrement_button.isEnabled()
     assert not window.participant_increment_button.isEnabled()
-    assert "P002: setup not saved; data collected" in window.participant_status_summary_label.text()
+    assert window.output_34_volume_percent == pytest.approx(0.35)
+    assert "P002: setup not saved; tactile threshold 0.35%; data collected" in window.participant_status_summary_label.text()
     assert window.progress_label.text() == "Waiting to start"
     window.dialog.close()
 
@@ -1767,9 +2451,10 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     assert window.target_button.maximumHeight() == profile.target_min_height
     assert window.include_name_lsl_checkbox.minimumHeight() >= profile.button_min_height + 8
     assert window.output_summary.minimumHeight() == profile.output_min_height
-    assert window.mode_tabs.count() == 2
+    assert window.mode_tabs.count() == 3
     assert window.mode_tabs.currentIndex() == window.data_logging_tab_index
-    assert not window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
+    assert window.mode_tabs.tabText(window.companion_tab_index) == "Companion Android App (Experimental)"
+    assert window.mode_tabs.isTabEnabled(window.experiment_control_tab_index)
     data_rect = _widget_rect(window.data_logging_column, window.dialog)
     settings_rect = _widget_rect(window.experiment_settings_column, window.dialog)
     if window.data_settings_columns_mode == "stacked":
@@ -1792,7 +2477,7 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
     assert window.mode_tabs.currentIndex() == window.experiment_control_tab_index
     snapshot = window.layout_validation_snapshot()
     content_min = snapshot["experiment_control_debug"]["content_min_height"]
-    assert snapshot["splitters"]["mode_tabs"]["count"] == 2
+    assert snapshot["splitters"]["mode_tabs"]["count"] == 3
     assert snapshot["splitters"]["mode_tabs"]["experiment_control_enabled"] is True
     assert window.processing_panel.minimumHeight() >= profile.experiment_control_min_height
     assert window.processing_panel.minimumHeight() >= content_min
@@ -1815,7 +2500,7 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
         window.run_controls_widget,
         window.start_button,
         window.pause_button,
-        window.stop_button,
+        window.resume_button,
         window.processing_panel,
         window.output_levels_panel,
         window.part_selector_widget,
@@ -1828,6 +2513,7 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
         visible_widgets.append(window.topup_draft_widget)
     if window.block_preview_label.isVisible():
         visible_widgets.append(window.block_preview_label)
+    assert not window.stop_button.isVisible()
     for widget in visible_widgets:
         _assert_widget_inside_dialog(widget, window.dialog)
 
@@ -1851,7 +2537,7 @@ def test_focus_mode_shell_layout_profile_keeps_controls_visible(tmp_path: Path, 
         assert output_rect["x"] >= output_stack_rect["x"]
         assert output_rect["right"] <= output_stack_rect["right"]
     else:
-        assert window.layout_profile.screen_class == "constrained"
+        assert window.layout_profile.screen_class in {"constrained", "compact"}
     assert processing_rect["y"] >= run_rect["bottom"]
     assert processing_rect["width"] >= workspace_rect["width"] - 8
     assert not window.layout_validation_failures()
@@ -2263,11 +2949,10 @@ def test_focus_mode_operator_keyboard_shortcuts_control_ui(tmp_path: Path):
 
     shortcut_map = window.keyboard_shortcut_map()
     assert shortcut_map["pause_resume"] == ["Ctrl+P"]
-    assert shortcut_map["stop"] == ["Ctrl+Shift+S"]
+    assert "stop" not in shortcut_map
     assert shortcut_map["select_part_2"] == ["Alt+2"]
     assert set(window.operator_action_shortcuts) >= {
         "pause_resume",
-        "stop",
         "close",
         "select_part_1",
         "select_part_2",
@@ -2289,20 +2974,19 @@ def test_focus_mode_operator_keyboard_shortcuts_control_ui(tmp_path: Path):
 
     fake = FakeController()
     window.controller = fake  # type: ignore[assignment]
+    window._run_active = True
+    window._run_paused = False
     window.pause_button.setEnabled(True)
-    window.stop_button.setEnabled(True)
+    window.resume_button.setEnabled(False)
     ctrl = q["Qt"].KeyboardModifier.ControlModifier
-    ctrl_shift = q["Qt"].KeyboardModifier.ControlModifier | q["Qt"].KeyboardModifier.ShiftModifier
     alt = q["Qt"].KeyboardModifier.AltModifier
 
     QTest.keyClick(window.dialog, q["Qt"].Key.Key_P, ctrl)
     app.processEvents()
     QTest.keyClick(window.dialog, q["Qt"].Key.Key_P, ctrl)
     app.processEvents()
-    QTest.keyClick(window.dialog, q["Qt"].Key.Key_S, ctrl_shift)
-    app.processEvents()
 
-    assert fake.calls == ["pause", "resume", "stop"]
+    assert fake.calls == ["pause", "resume"]
 
     QTest.keyClick(window.dialog, q["Qt"].Key.Key_2, alt)
     app.processEvents()
@@ -2313,6 +2997,55 @@ def test_focus_mode_operator_keyboard_shortcuts_control_ui(tmp_path: Path):
     selected = window._run_plan_item_by_number(window.selected_display_block_index or 0)
     assert selected is not None
     assert selected["kind"] == "topup"
+    window.dialog.close()
+
+
+def test_focus_mode_validation_synthetic_click_shortcut_is_opt_in(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_focus_preview_session_manifest(tmp_path))
+
+    monkeypatch.delenv("PPS_FOCUS_VALIDATION_ENABLE_SYNTHETIC_CLICK_SHORTCUT", raising=False)
+    default_window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+    )
+    assert "validation_synthetic_click" not in default_window.keyboard_shortcut_map()
+    default_window.dialog.close()
+
+    monkeypatch.setenv("PPS_FOCUS_VALIDATION_ENABLE_SYNTHETIC_CLICK_SHORTCUT", "1")
+    window = focus_app.FocusModeWindow(
+        q,
+        package,
+        capture_options=SessionCaptureOptions(enable_lsl=False, start_backup_recording=False),
+    )
+    window.dialog.show()
+    app.processEvents()
+    assert window.keyboard_shortcut_map()["validation_synthetic_click"] == ["Ctrl+Alt+Shift+F12"]
+    assert "validation_synthetic_click" in window.operator_action_shortcuts
+
+    class FakeController:
+        def __init__(self) -> None:
+            self.clicks: list[dict[str, Any]] = []
+
+        def log_click(self, **payload: Any) -> None:
+            self.clicks.append(dict(payload))
+
+    fake = FakeController()
+    window.controller = fake  # type: ignore[assignment]
+    window._run_active = True
+    window._handle_validation_synthetic_click_shortcut()
+
+    assert len(fake.clicks) == 1
+    assert fake.clicks[0]["in_target"] is True
     window.dialog.close()
 
 
@@ -2530,20 +3263,82 @@ def test_focus_mode_opens_post_run_analysis_review_dialog(tmp_path: Path, monkey
     grouping_combo = dialog.findChild(q["QComboBox"], "analysisGroupingCombo")
     overview_table = dialog.findChild(q["QTableWidget"], "analysisOverviewTable")
     details = dialog.findChild(q["QTextEdit"], "analysisDetailsText")
-    quality_badge = dialog.findChild(q["QLabel"], "analysisQualityBadge")
+    level1_panel = dialog.findChild(q["QFrame"], "analysisLevel1Panel")
+    level2_panel = dialog.findChild(q["QFrame"], "analysisLevel2Panel")
+    level3_panel = dialog.findChild(q["QFrame"], "analysisLevel3Panel")
+    response_panel = dialog.findChild(q["QFrame"], "analysisResponseQualityPanel")
+    assumption_panel = dialog.findChild(q["QFrame"], "analysisAssumptionPanel")
+    baseline_assumption_button = dialog.findChild(q["QPushButton"], "analysisBaselineAssumptionButton")
+    pps_assumption_button = dialog.findChild(q["QPushButton"], "analysisPpsAssumptionButton")
+    assumption_preview_plot = dialog.findChild(q["QWidget"], "analysisAssumptionPreviewPlot")
+    response_bars = dialog.findChild(q["QWidget"], "analysisResponseQualityBars")
+    tactile_hits_percent = dialog.findChild(q["QLabel"], "analysisResponseMetricTactileHitsPercent")
+    tactile_hits_count = dialog.findChild(q["QLabel"], "analysisResponseMetricTactileHitsCount")
+    tactile_misses_percent = dialog.findChild(q["QLabel"], "analysisResponseMetricTactileMissesPercent")
+    catch_correct_percent = dialog.findChild(q["QLabel"], "analysisResponseMetricCatchCorrectPercent")
+    catch_false_alarm_percent = dialog.findChild(q["QLabel"], "analysisResponseMetricCatchFalseAlarmsPercent")
+    catch_false_alarm_count = dialog.findChild(q["QLabel"], "analysisResponseMetricCatchFalseAlarmsCount")
     triage_hint = dialog.findChild(q["QLabel"], "analysisTriageHint")
     analysis_plot = dialog.findChild(q["QWidget"], "analysisCurvePlot")
     more_button = dialog.findChild(q["QPushButton"], "analysisMoreButton")
+    level_nav_buttons = [button for button in dialog.findChildren(q["QPushButton"], "analysisLevelNavButton")]
     condition_buttons = [button for button in dialog.findChildren(q["QPushButton"], "analysisConditionLensButton")]
     quick_model_buttons = [button for button in dialog.findChildren(q["QPushButton"], "analysisModelButton")]
     assert dataset_combo is not None and dataset_combo.count() == 1
-    assert quality_badge is not None and "Participant Run Quality: PASS" in quality_badge.text()
+    assert level1_panel is not None
+    assert level2_panel is not None
+    assert level3_panel is not None
+    assert [button.text() for button in level_nav_buttons] == ["1 Response", "2 Assumptions", "3 Model Fit"]
+    assert response_panel is not None
+    assert assumption_panel is not None
+    assert assumption_preview_plot is not None
+    assert baseline_assumption_button is not None and baseline_assumption_button.text() == "Baseline Assumption"
+    assert pps_assumption_button is not None and pps_assumption_button.text() == "Peripersonal Space Assumption"
+    assert "#238d5a" in baseline_assumption_button.styleSheet()
+    assert "#238d5a" in pps_assumption_button.styleSheet()
+    assert "two-sided p" in baseline_assumption_button.toolTip()
+    assert "one-sided p" in pps_assumption_button.toolTip()
+    assert response_bars is not None
+    assert tactile_hits_percent is not None and tactile_hits_percent.text() == "80.0%"
+    assert tactile_hits_count is not None and tactile_hits_count.text() == "4 / 5"
+    assert tactile_misses_percent is not None and tactile_misses_percent.text() == "20.0%"
+    assert catch_correct_percent is not None and catch_correct_percent.text() == "75.0%"
+    assert catch_false_alarm_percent is not None and catch_false_alarm_percent.text() == "25.0%"
+    assert catch_false_alarm_count is not None and catch_false_alarm_count.text() == "1 / 4"
     assert triage_hint is not None and "AICc support" in triage_hint.text()
     assert "Baseline: pooled across SOAs within condition" in triage_hint.text()
     assert analysis_plot is not None and getattr(analysis_plot, "metric_label", "") == "Baseline-corrected facilitation (ms)"
+    assert _widget_rect(level1_panel, dialog)["bottom"] <= _widget_rect(level2_panel, dialog)["y"]
+    assert _widget_rect(level2_panel, dialog)["bottom"] <= _widget_rect(level3_panel, dialog)["y"]
+    assert _widget_rect(level1_panel, dialog)["y"] <= _widget_rect(response_panel, dialog)["y"] <= _widget_rect(level1_panel, dialog)["bottom"]
+    assert _widget_rect(level2_panel, dialog)["y"] <= _widget_rect(assumption_panel, dialog)["y"] <= _widget_rect(level2_panel, dialog)["bottom"]
+    assert _widget_rect(level2_panel, dialog)["y"] <= _widget_rect(assumption_preview_plot, dialog)["y"] <= _widget_rect(level2_panel, dialog)["bottom"]
+    assert _widget_rect(level3_panel, dialog)["y"] <= _widget_rect(analysis_plot, dialog)["y"] <= _widget_rect(level3_panel, dialog)["bottom"]
+    scrollbar = window.analysis_review_dialog.scroll_area.verticalScrollBar()
+    level3_nav = next(button for button in level_nav_buttons if button.text() == "3 Model Fit")
+    level1_nav = next(button for button in level_nav_buttons if button.text() == "1 Response")
+    level3_nav.click()
+    app.processEvents()
+    model_scroll_value = scrollbar.value()
+    assert model_scroll_value > 0
+    assert level3_nav.isChecked()
+    level1_nav.click()
+    app.processEvents()
+    assert scrollbar.value() < model_scroll_value
+    assert level1_nav.isChecked()
+    pps_assumption_button.click()
+    app.processEvents()
+    assumption_dialog = window.analysis_review_dialog.assumption_detail_dialog
+    assert assumption_dialog is not None and assumption_dialog.isVisible()
+    assumption_plot = assumption_dialog.findChild(q["QWidget"], "analysisAssumptionBetaPlot")
+    assumption_summary = assumption_dialog.findChild(q["QLabel"], "analysisAssumptionDetailSummary")
+    assert assumption_plot is not None
+    assert assumption_summary is not None and "Green:" in assumption_summary.text()
+    assert assumption_dialog.grab().size().width() > 0
+    assumption_dialog.close()
     assert {button.text() for button in condition_buttons} == {"2 x 2", "Part 1 | Part 2", "Inhale | Exhale"}
     assert {button.text() for button in quick_model_buttons} == {"Sigmoid", "Log decay", "Linear"}
-    assert details is not None and "Participant Run Quality: PASS" in details.toPlainText()
+    assert details is not None and "Condition lens: two_by_two" in details.toPlainText()
     state_button = next(button for button in condition_buttons if button.text() == "Inhale | Exhale")
     state_button.click()
     app.processEvents()
@@ -2620,6 +3415,51 @@ def test_analysis_review_dialog_switches_saved_datasets(tmp_path: Path, monkeypa
         + "\n",
         encoding="utf-8",
     )
+    outputs_2["participant_trials"].write_text(
+        "\n".join(
+            [
+                (
+                    "trial_uid,trial_number,trial_type,stimulus_modality,tactile_present,catch_trial,response_given,"
+                    "outcome,hit,part_number,condition,respiratory_phase,noise_type,soa_ms,rt_ms,is_topup,topup_role"
+                ),
+                "T001,1,Audio-Tactile,audio_tactile,true,false,true,Hit,true,1,,Inhale,pink,100,310,false,",
+                "T002,2,Audio-Tactile,audio_tactile,true,false,false,Miss,false,1,,Inhale,pink,200,,false,",
+                "C001,3,Catch,audio,false,true,false,Hit,true,1,,Inhale,pink,,,false,",
+                "C002,4,Catch,audio,false,true,true,Miss,false,1,,Inhale,pink,,,false,",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    outputs_2["basic_assumption_checks"].write_text(
+        json.dumps(
+            {
+                "schema": "pps-basic-assumption-checks.v1",
+                "baseline_assumption": {
+                    "status": "FAIL",
+                    "summary": "Baseline RTs showed a significant proximity/SOA trend, so the pragmatic flatness check failed.",
+                    "beta": -0.08,
+                    "p_two_sided": 0.01,
+                    "coverage": {"n": 6, "distinct_soa_count": 2},
+                },
+                "peripersonal_space_assumption": {
+                    "status": "FAIL",
+                    "summary": "The audio-tactile proximity interaction had the predicted sign but was not significant at one-sided p<.05.",
+                    "interaction_beta": -0.01,
+                    "p_one_sided_negative": 0.34,
+                    "pps_far_to_near_gain_ms": 4.0,
+                    "coverage": {
+                        "baseline": {"n": 6, "distinct_soa_count": 2},
+                        "audio_tactile": {"n": 12, "distinct_soa_count": 3},
+                    },
+                },
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     entries = [
         {
             "dataset_id": "participant:P001",
@@ -2651,15 +3491,66 @@ def test_analysis_review_dialog_switches_saved_datasets(tmp_path: Path, monkeypa
     dialog.show()
     app.processEvents()
     dataset_combo = dialog.findChild(q["QComboBox"], "analysisDatasetCombo")
-    quality_badge = dialog.findChild(q["QLabel"], "analysisQualityBadge")
+    tactile_hits_percent = dialog.findChild(q["QLabel"], "analysisResponseMetricTactileHitsPercent")
+    catch_false_alarm_percent = dialog.findChild(q["QLabel"], "analysisResponseMetricCatchFalseAlarmsPercent")
+    pps_assumption_button = dialog.findChild(q["QPushButton"], "analysisPpsAssumptionButton")
     assert dataset_combo is not None and dataset_combo.count() == 2
-    assert quality_badge is not None and "PASS" in quality_badge.text()
+    assert tactile_hits_percent is not None and tactile_hits_percent.text() == "80.0%"
+    assert catch_false_alarm_percent is not None and catch_false_alarm_percent.text() == "25.0%"
+    assert pps_assumption_button is not None and "#238d5a" in pps_assumption_button.styleSheet()
 
     dataset_combo.setCurrentIndex(dataset_combo.findData("participant:P002"))
     app.processEvents()
 
     assert dialog_controller.current_dataset_id == "participant:P002"
-    assert "FAIL" in quality_badge.text()
+    assert tactile_hits_percent.text() == "50.0%"
+    assert catch_false_alarm_percent.text() == "50.0%"
+    assert "#d9544b" in pps_assumption_button.styleSheet()
+    assert "not significant" in pps_assumption_button.toolTip()
+    dialog.close()
+
+
+def test_analysis_review_dialog_missing_assumption_artifact_falls_back_to_red(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+        from peripersonal_space_toolkit.analysis_catalog import load_analysis_dataset
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    outputs = _write_analysis_review_outputs(tmp_path / "P003")
+    outputs["basic_assumption_checks"].unlink()
+    entry = {
+        "dataset_id": "participant:P003",
+        "dataset_kind": "participant",
+        "dataset_label": "P003",
+        "participant_id": "P003",
+        "quality_status": "PASS",
+        "analysis_dir": str(tmp_path / "P003" / "analysis"),
+        "outputs": {key: str(value) for key, value in outputs.items()},
+    }
+
+    dialog_controller = focus_app.AnalysisReviewDialog(q, None, load_analysis_dataset(entry), dataset_entries=[entry], selected_dataset_id="participant:P003")
+    dialog = dialog_controller.dialog
+    dialog.show()
+    app.processEvents()
+
+    baseline_button = dialog.findChild(q["QPushButton"], "analysisBaselineAssumptionButton")
+    pps_button = dialog.findChild(q["QPushButton"], "analysisPpsAssumptionButton")
+    assumption_preview_plot = dialog.findChild(q["QWidget"], "analysisAssumptionPreviewPlot")
+    assert baseline_button is not None and "#d9544b" in baseline_button.styleSheet()
+    assert pps_button is not None and "#d9544b" in pps_button.styleSheet()
+    assert assumption_preview_plot is not None
+    assert "basic_assumption_checks.v1.json was not available" in pps_button.toolTip()
+    pps_button.click()
+    app.processEvents()
+    assumption_dialog = dialog_controller.assumption_detail_dialog
+    assert assumption_dialog is not None and assumption_dialog.isVisible()
+    assert assumption_dialog.findChild(q["QWidget"], "analysisAssumptionBetaPlot") is not None
+    assumption_dialog.close()
     dialog.close()
 
 
@@ -2730,7 +3621,61 @@ def test_focus_mode_recenter_uses_pyautogui_backend(tmp_path: Path, monkeypatch)
     window.dialog.close()
 
 
-def test_tactile_timeline_uses_four_second_response_window():
+def test_focus_mode_validation_no_mouse_records_recenter_intent(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+        from peripersonal_space_toolkit.focus_timeline import TactileTimelineCue
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI smoke dependencies unavailable: {exc}")
+
+    moves: list[tuple[int, int, int]] = []
+
+    class FakePyAutoGUI:
+        FAILSAFE = True
+        PAUSE = 0.1
+
+        @staticmethod
+        def moveTo(x, y, duration=0):
+            moves.append((int(x), int(y), int(duration)))
+
+    monkeypatch.setitem(sys.modules, "pyautogui", FakePyAutoGUI)
+    monkeypatch.setenv("PPS_FOCUS_VALIDATION_DISABLE_MOUSE_CAPTURE", "1")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    package = load_run_package(_write_minimal_session_manifest(tmp_path))
+    window = focus_app.FocusModeWindow(q, package)
+    window.dialog.show()
+    app.processEvents()
+    monkeypatch.setattr(window, "_offscreen_platform", lambda: False)
+
+    cue = TactileTimelineCue(cue_id=1, trial_number=1, trial_uid="T001", time_s=4.0)
+    window._move_cursor_to_target(cue)
+
+    record = window.recenter_records[-1]
+    assert moves == []
+    assert record["mode"] == "recorded_intent"
+    assert record["cursor_move_suppressed"] is True
+    assert "cursor recenter disabled" in record["backend_warning"]
+    window.dialog.close()
+
+
+def test_validation_window_rect_from_env(monkeypatch):
+    from peripersonal_space_toolkit import focus_app
+
+    monkeypatch.setenv("PPS_FOCUS_VALIDATION_WINDOW_RECT", "-1920,5,820,1032")
+    assert focus_app._validation_window_rect_from_env() == (-1920, 5, 820, 1032)
+
+    monkeypatch.setenv("PPS_FOCUS_VALIDATION_WINDOW_RECT", "-1920,5,-1,1032")
+    assert focus_app._validation_window_rect_from_env() is None
+
+    monkeypatch.setenv("PPS_FOCUS_VALIDATION_WINDOW_RECT", "not,a,rect")
+    assert focus_app._validation_window_rect_from_env() is None
+
+
+def test_tactile_timeline_uses_tactile_onset_response_window():
     from peripersonal_space_toolkit.focus_timeline import TactileTimelineState
 
     state = TactileTimelineState()
@@ -2741,11 +3686,11 @@ def test_tactile_timeline_uses_four_second_response_window():
         ],
     )
 
-    accepted = state.record_click(5.0, trial_uid="T001")
-    rejected = state.record_click(5.002, trial_uid="T001")
+    accepted = state.record_click(2.3, trial_uid="T001")
+    rejected = state.record_click(2.302, trial_uid="T001")
 
     assert accepted.response_status == "tactile_response"
-    assert accepted.rt_s == pytest.approx(4.0)
+    assert accepted.rt_s == pytest.approx(1.3)
     assert rejected.response_status == "off_cue"
 
 
@@ -2766,7 +3711,7 @@ def test_validation_realtime_audio_engine_waits_for_buffer_deadlines(tmp_path: P
     assert engine.played_block_durations_s == pytest.approx([duration_s])
 
 
-def test_launcher_first_screen_is_environment_gate():
+def test_launcher_first_screen_is_four_option_environment_gate(tmp_path: Path, monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
         from PIL import Image, ImageStat
@@ -2778,6 +3723,29 @@ def test_launcher_first_screen_is_environment_gate():
     q = focus_app._require_qt()
     app = QApplication.instance() or QApplication([])
     errors: list[BaseException] = []
+    remembered = tmp_path / "remembered"
+    remembered.mkdir()
+
+    monkeypatch.setattr(
+        focus_app,
+        "load_profile_runner_settings",
+        lambda **_kwargs: {
+            "active_profile_id": focus_app.STUDY5_PROFILE_ID,
+            "active_output_folder": str(remembered),
+            "participant_id": "P001",
+        },
+    )
+    monkeypatch.setattr(
+        focus_app,
+        "load_runner_settings",
+        lambda *args, **kwargs: {
+            "last_experiment_name": "Study 5 gate test",
+            "last_profile_id": focus_app.STUDY5_PROFILE_ID,
+            "last_participant_id": "P001",
+        },
+    )
+    monkeypatch.setattr(focus_app, "finished_profile_options", lambda: [(focus_app.STUDY5_PROFILE_ID, "Study 5")])
+    monkeypatch.setattr(focus_app, "current_runner_diary_path", lambda: None)
 
     def inspect_launcher() -> None:
         try:
@@ -2799,27 +3767,46 @@ def test_launcher_first_screen_is_environment_gate():
             assert session_field.property("gateState") == "locked"
             step_label = dialog.findChild(q["QLabel"], "gateStepLabel")
             assert step_label is not None
-            assert "Step 1" in step_label.text()
+            assert "Send To Phone" in step_label.text()
             assert step_label.property("attention") == "current"
-            choose_button = dialog.findChild(q["QPushButton"], "chooseOutputFolderButton")
-            assert choose_button is not None
-            assert choose_button.text().startswith("2 ")
-            assert choose_button.property("decisionTone") == "folder"
-            initiate_button = dialog.findChild(q["QPushButton"], "initiateEnvironmentButton")
-            assert initiate_button is not None
-            assert not initiate_button.isEnabled()
-            assert initiate_button.property("attention") == "locked"
-            resume_button = dialog.findChild(q["QPushButton"], "resumeExperimentButton")
+            resume_button = dialog.findChild(q["QPushButton"], "resumeLastSessionButton")
             assert resume_button is not None
-            assert resume_button.text().startswith("1 ")
+            assert resume_button.text() == "1 Resume Last Session"
             assert resume_button.property("decisionTone") == "resume"
-            assert 'QPushButton[attention="current"][decisionTone="resume"]' in dialog.styleSheet()
-            resume_swatch = Path.cwd() / ".pytest_cache" / "launcher_resume_button.png"
-            assert resume_button.grab().save(str(resume_swatch))
-            resume_image = Image.open(resume_swatch).convert("RGB")
-            resume_mean = ImageStat.Stat(resume_image).mean
-            assert resume_mean[1] > resume_mean[0]
-            assert resume_mean[2] > resume_mean[0]
+            custom_button = dialog.findChild(q["QPushButton"], "resumeCustomSessionButton")
+            assert custom_button is not None
+            assert custom_button.text() == "2 Resume Custom Session"
+            assert custom_button.property("decisionTone") == "custom"
+            start_button = dialog.findChild(q["QPushButton"], "startNewSessionButton")
+            assert start_button is not None
+            assert start_button.text() == "3 Start New Session"
+            assert start_button.property("decisionTone") == "start"
+            phone_button = dialog.findChild(q["QPushButton"], "sendToPhoneButton")
+            assert phone_button is not None
+            assert phone_button.text() == "4 Send To Phone"
+            assert phone_button.property("decisionTone") == "phone"
+            assert dialog.findChild(q["QPushButton"], "initiateEnvironmentButton") is None
+            assert dialog.findChild(q["QPushButton"], "chooseOutputFolderButton") is None
+            for key in ("1", "2", "3", "4"):
+                assert [
+                    shortcut
+                    for shortcut in dialog.findChildren(q["QShortcut"])
+                    if shortcut.key().toString() == key
+                ]
+            assert 'decisionTone="start"' in dialog.styleSheet()
+            swatch_dir = Path.cwd() / ".pytest_cache"
+            swatch_dir.mkdir(parents=True, exist_ok=True)
+            means = []
+            for name, button in (
+                ("resume", resume_button),
+                ("custom", custom_button),
+                ("start", start_button),
+                ("phone", phone_button),
+            ):
+                path = swatch_dir / f"launcher_{name}_button.png"
+                assert button.grab().save(str(path))
+                means.append(tuple(round(value, 1) for value in ImageStat.Stat(Image.open(path).convert("RGB")).mean))
+            assert len({tuple(int(value // 8) for value in mean) for mean in means}) == 4
             labels = _collect_widget_texts(dialog, q["QLabel"])
             assert labels.index("Output Folder") < labels.index("Experiment Profile")
             assert labels.index("Experiment Profile") < labels.index("Session Name")
@@ -2830,6 +3817,7 @@ def test_launcher_first_screen_is_environment_gate():
             assert "Generate Audio Assets" not in button_labels
             assert "Generate Range" not in button_labels
             assert "Run Selected Profile" not in button_labels
+            assert "Initiate New Data Collection Environment" not in button_labels
             screenshot = Path.cwd() / ".pytest_cache" / "launcher_environment_gate.png"
             screenshot.parent.mkdir(parents=True, exist_ok=True)
             assert dialog.grab().save(str(screenshot))
@@ -2857,6 +3845,324 @@ def test_launcher_first_screen_is_environment_gate():
 
     assert exit_code == 1
     assert errors == []
+
+
+def test_launcher_send_to_phone_click_opens_transfer_window(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    for widget in app.topLevelWidgets():
+        widget.close()
+        widget.deleteLater()
+    app.processEvents()
+    errors: list[BaseException] = []
+    calls: list[dict[str, object]] = []
+    capture_options = SessionCaptureOptions(enable_lsl=False, write_internal_xdf=False, start_backup_recording=False)
+
+    monkeypatch.setattr(
+        focus_app,
+        "load_profile_runner_settings",
+        lambda **_kwargs: {
+            "active_profile_id": focus_app.STUDY5_PROFILE_ID,
+            "active_output_folder": str(tmp_path),
+            "participant_id": "P321",
+        },
+    )
+    monkeypatch.setattr(
+        focus_app,
+        "load_runner_settings",
+        lambda *args, **kwargs: {
+            "last_experiment_name": "Study 5 phone transfer",
+            "last_profile_id": focus_app.STUDY5_PROFILE_ID,
+            "last_participant_id": "P321",
+        },
+    )
+    monkeypatch.setattr(focus_app, "finished_profile_options", lambda: [(focus_app.STUDY5_PROFILE_ID, "Study 5")])
+    monkeypatch.setattr(focus_app, "current_runner_diary_path", lambda: None)
+
+    def fake_phone_transfer_window(**kwargs):
+        calls.append(kwargs)
+        return 77
+
+    monkeypatch.setattr(focus_app, "_run_phone_transfer_window", fake_phone_transfer_window)
+
+    def reject_if_still_open() -> None:
+        if calls or errors:
+            return
+        errors.append(AssertionError("Launcher Send To Phone click test timed out before handoff."))
+        for widget in app.topLevelWidgets():
+            if widget.windowTitle() == "PPS Experiment Runner":
+                widget.reject()
+
+    def click_send_to_phone() -> None:
+        try:
+            dialogs = [widget for widget in app.topLevelWidgets() if widget.windowTitle() == "PPS Experiment Runner"]
+            assert dialogs
+            dialog = dialogs[0]
+            phone_button = dialog.findChild(q["QPushButton"], "sendToPhoneButton")
+            assert phone_button is not None
+            assert phone_button.isEnabled()
+            QTest.mouseClick(phone_button, q["Qt"].MouseButton.LeftButton)
+        except BaseException as exc:  # noqa: BLE001 - surfaced after modal exits
+            errors.append(exc)
+            for widget in app.topLevelWidgets():
+                if widget.windowTitle() == "PPS Experiment Runner":
+                    widget.reject()
+
+    q["QTimer"].singleShot(50, click_send_to_phone)
+    q["QTimer"].singleShot(1000, reject_if_still_open)
+    exit_code = focus_app.run_launcher_window(
+        capture_options=capture_options,
+        participant_id="P321",
+        initial_message="phone transfer click",
+        companion_host="0.0.0.0",
+        companion_port=8877,
+        companion_advertise_ip="192.168.1.50",
+    )
+    for widget in app.topLevelWidgets():
+        widget.close()
+        widget.deleteLater()
+    app.processEvents()
+
+    assert errors == []
+    assert exit_code == 77
+    assert len(calls) == 1
+    assert calls[0]["capture_options"] is capture_options
+    assert calls[0]["companion_enabled"] is True
+    assert calls[0]["companion_host"] == "0.0.0.0"
+    assert calls[0]["companion_port"] == 8877
+    assert calls[0]["companion_advertise_ip"] == "192.168.1.50"
+    assert calls[0]["participant_id"] == "P321"
+
+
+def test_phone_transfer_window_initial_layout_renders(tmp_path: Path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    try:
+        from PIL import Image, ImageStat
+        from PySide6.QtWidgets import QApplication
+        from peripersonal_space_toolkit import focus_app
+    except Exception as exc:  # pragma: no cover - depends on optional GUI deps
+        pytest.skip(f"Optional GUI dependencies unavailable: {exc}")
+
+    q = focus_app._require_qt()
+    app = QApplication.instance() or QApplication([])
+    for widget in app.topLevelWidgets():
+        widget.close()
+        widget.deleteLater()
+    app.processEvents()
+    errors: list[BaseException] = []
+
+    monkeypatch.setattr(
+        focus_app,
+        "load_profile_runner_settings",
+        lambda **_kwargs: {
+            "active_profile_id": focus_app.STUDY5_PROFILE_ID,
+            "active_output_folder": str(tmp_path),
+            "participant_id": "P001",
+        },
+    )
+    monkeypatch.setattr(
+        focus_app,
+        "load_runner_settings",
+        lambda *args, **kwargs: {
+            "last_experiment_name": "Study 5 phone transfer",
+            "last_profile_id": focus_app.STUDY5_PROFILE_ID,
+            "last_participant_id": "P001",
+        },
+    )
+    monkeypatch.setattr(focus_app, "current_runner_diary_path", lambda: None)
+    monkeypatch.setattr(focus_app, "finished_profile_options", lambda: [(focus_app.STUDY5_PROFILE_ID, "Study 5")])
+    monkeypatch.setattr(focus_app, "profile_participant_ids", lambda _profile: ["P001", "P002"])
+    monkeypatch.setattr(
+        focus_app,
+        "_windows_wifi_direct_status",
+        lambda: {"message": "Wi-Fi Direct test status.", "available": True},
+    )
+
+    def inspect_transfer_window() -> None:
+        try:
+            dialogs = [
+                widget
+                for widget in app.topLevelWidgets()
+                if widget.windowTitle() == "PPS Experiment Runner - Send To Phone"
+            ]
+            assert dialogs
+            dialog = dialogs[0]
+            assert dialog.findChild(q["QComboBox"], "phoneTransferProfileCombo") is not None
+            participant_combo = dialog.findChild(q["QComboBox"], "phoneTransferParticipantCombo")
+            assert participant_combo is not None
+            assert participant_combo.count() == 2
+            assert dialog.findChild(q["QComboBox"], "phoneTransferTransportCombo") is not None
+            assert dialog.findChild(q["QPushButton"], "phoneTransferPrepareButton") is not None
+            assert dialog.findChild(q["QPushButton"], "phoneTransferStopButton") is not None
+            lsl_target = dialog.findChild(q["QLineEdit"], "phoneTransferLslTargetField")
+            lsl_command = dialog.findChild(q["QComboBox"], "phoneTransferLslCommandCombo")
+            lsl_note = dialog.findChild(q["QLineEdit"], "phoneTransferLslOperatorNoteField")
+            lsl_send = dialog.findChild(q["QPushButton"], "phoneTransferLslSendButton")
+            assert lsl_target is not None
+            assert lsl_command is not None
+            assert lsl_note is not None
+            assert lsl_send is not None
+            commands = [lsl_command.itemData(index) for index in range(lsl_command.count())]
+            assert commands == [
+                "start_experiment",
+                "start_part",
+                "pause",
+                "resume",
+                "continue_instruction",
+                "request_snapshot",
+                "stop_after_block",
+                "operator_note",
+            ]
+            assert lsl_note.isEnabled() is False
+            assert lsl_send.isEnabled() is False
+            assert dialog.findChild(q["QLabel"], "companionQrCode") is not None
+            assert dialog.findChild(q["QLineEdit"], "phoneTransferPairingUriField") is not None
+            screenshot = Path.cwd() / ".pytest_cache" / "phone_transfer_window.png"
+            screenshot.parent.mkdir(parents=True, exist_ok=True)
+            assert dialog.grab().save(str(screenshot))
+            image = Image.open(screenshot).convert("RGB")
+            assert image.width >= 760
+            assert image.height >= 620
+            assert max(ImageStat.Stat(image).stddev) > 0.0
+        except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
+            errors.append(exc)
+        finally:
+            for widget in app.topLevelWidgets():
+                if widget.windowTitle() == "PPS Experiment Runner - Send To Phone":
+                    widget.reject()
+
+    q["QTimer"].singleShot(50, inspect_transfer_window)
+    exit_code = focus_app._run_phone_transfer_window(
+        participant_id="P001",
+        initial_message="layout proof",
+    )
+    for widget in app.topLevelWidgets():
+        widget.close()
+        widget.deleteLater()
+    app.processEvents()
+
+    assert exit_code == 1
+    assert errors == []
+
+
+def test_phone_transfer_lsl_admin_context_prefers_part_session_and_runner_logs(tmp_path: Path):
+    from peripersonal_space_toolkit import focus_app
+
+    package = SimpleNamespace(
+        participant_id="P321",
+        session_id="session-001",
+        session_group_id="group-001",
+        part_session_id="part-001",
+        part_number="01",
+    )
+
+    context = focus_app._phone_transfer_lsl_admin_context(
+        [package],
+        transfer_id="transfer-001",
+        token="secret-token",
+        output_root=tmp_path,
+        participant_id="P321",
+    )
+
+    assert context["target_session_id"] == "part-001"
+    assert context["token"] == "secret-token"
+    assert context["package_id"] == "part-001-part01"
+    assert context["participant_id"] == "P321"
+    assert context["part_number"] == "01"
+    assert context["target_part_session_id"] == "part-001"
+    assert context["target_session_group_id"] == "group-001"
+    assert str(output_runner_logs_dir(tmp_path) / "android_lsl_admin" / "transfer_001") == context["output_dir"]
+
+
+def test_phone_transfer_lsl_admin_command_sends_expected_context(tmp_path: Path, monkeypatch):
+    from peripersonal_space_toolkit import focus_app
+
+    context = {
+        "target_session_id": "part-001",
+        "token": "secret-token",
+        "package_id": "pkg-001",
+        "participant_id": "P321",
+        "part_number": "01",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+        "output_dir": str(tmp_path / "pc-admin"),
+    }
+    calls: list[dict[str, object]] = []
+
+    def fake_send_android_lsl_command(**kwargs):
+        calls.append(dict(kwargs))
+        return SimpleNamespace(row={"status": "ack_applied", "command": kwargs["command"], "outbox_path": "outbox.jsonl"})
+
+    monkeypatch.setattr(focus_app, "send_android_lsl_command", fake_send_android_lsl_command)
+
+    row = focus_app._send_phone_transfer_lsl_admin_command(context, "pause", require_ack=True)
+
+    assert row["status"] == "ack_applied"
+    assert calls == [
+        {
+            "target_session_id": "part-001",
+            "token": "secret-token",
+            "command": "pause",
+            "package_id": "pkg-001",
+            "participant_id": "P321",
+            "target_part_session_id": "part-001",
+            "target_session_group_id": "group-001",
+            "part_number": "01",
+            "extra_payload": {
+                "target_session_id": "part-001",
+                "target_part_session_id": "part-001",
+                "target_session_group_id": "group-001",
+            },
+            "output_dir": tmp_path / "pc-admin",
+            "require_ack": True,
+        }
+    ]
+
+
+def test_phone_transfer_lsl_admin_command_forwards_operator_note(tmp_path: Path, monkeypatch):
+    from peripersonal_space_toolkit import focus_app
+
+    context = {
+        "target_session_id": "part-001",
+        "token": "secret-token",
+        "package_id": "pkg-001",
+        "participant_id": "P321",
+        "part_number": "01",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+        "output_dir": str(tmp_path / "pc-admin"),
+    }
+    calls: list[dict[str, object]] = []
+
+    def fake_send_android_lsl_command(**kwargs):
+        calls.append(dict(kwargs))
+        return SimpleNamespace(row={"status": "ack_applied", "command": kwargs["command"], "outbox_path": "outbox.jsonl"})
+
+    monkeypatch.setattr(focus_app, "send_android_lsl_command", fake_send_android_lsl_command)
+
+    row = focus_app._send_phone_transfer_lsl_admin_command(
+        context,
+        "operator_note",
+        require_ack=True,
+        extra_payload={"note": "participant asked for a pause"},
+    )
+
+    assert row["status"] == "ack_applied"
+    assert calls[-1]["command"] == "operator_note"
+    assert calls[-1]["extra_payload"] == {
+        "note": "participant asked for a pause",
+        "target_session_id": "part-001",
+        "target_part_session_id": "part-001",
+        "target_session_group_id": "group-001",
+    }
 
 
 def test_launcher_resume_shortcut_opens_environment_operations(tmp_path: Path, monkeypatch):
@@ -2924,7 +4230,7 @@ def test_launcher_resume_shortcut_opens_environment_operations(tmp_path: Path, m
                 for widget in app.topLevelWidgets()
                 if widget.windowTitle() == "PPS Experiment Runner"
                 and widget.isVisible()
-                and widget.findChild(q["QPushButton"], "resumeExperimentButton") is not None
+                and widget.findChild(q["QPushButton"], "resumeLastSessionButton") is not None
             ]
             if not dialogs and resume_attempts["count"] < 20:
                 resume_attempts["count"] += 1
@@ -2933,7 +4239,7 @@ def test_launcher_resume_shortcut_opens_environment_operations(tmp_path: Path, m
             assert dialogs
             dialog = dialogs[0]
             assert dialog.findChild(q["QComboBox"], "participantCombo") is None
-            resume = dialog.findChild(q["QPushButton"], "resumeExperimentButton")
+            resume = dialog.findChild(q["QPushButton"], "resumeLastSessionButton")
             assert resume is not None
             assert resume.isEnabled()
             resume_shortcuts = [
@@ -2967,7 +4273,7 @@ def test_launcher_resume_shortcut_opens_environment_operations(tmp_path: Path, m
     assert calls[0]["participant_id"] == "P001"
 
 
-def test_launcher_pick_empty_folder_unlocks_required_fields_and_initiate(tmp_path: Path, monkeypatch):
+def test_launcher_resume_custom_rejects_empty_folder_without_new_session_prompts(tmp_path: Path, monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
         from PIL import Image, ImageStat
@@ -2982,8 +4288,8 @@ def test_launcher_pick_empty_folder_unlocks_required_fields_and_initiate(tmp_pat
     errors: list[BaseException] = []
     remembered = tmp_path / "remembered"
     remembered.mkdir()
-    new_parent = tmp_path / "fresh_parent"
-    new_parent.mkdir()
+    empty_folder = tmp_path / "empty_folder"
+    empty_folder.mkdir()
 
     monkeypatch.setattr(
         focus_app,
@@ -3005,60 +4311,41 @@ def test_launcher_pick_empty_folder_unlocks_required_fields_and_initiate(tmp_pat
     )
     monkeypatch.setattr(focus_app, "finished_profile_options", lambda: [(focus_app.STUDY5_PROFILE_ID, "Study 5")])
     monkeypatch.setattr(focus_app, "current_runner_diary_path", lambda: None)
-    monkeypatch.setattr(q["QFileDialog"], "getExistingDirectory", lambda *args, **kwargs: str(new_parent))
+    monkeypatch.setattr(q["QFileDialog"], "getExistingDirectory", lambda *args, **kwargs: str(empty_folder))
 
-    def pick_folder_and_inspect() -> None:
+    def pick_empty_folder_and_inspect() -> None:
         try:
             dialogs = [widget for widget in app.topLevelWidgets() if widget.windowTitle() == "PPS Experiment Runner"]
             assert dialogs
             dialog = dialogs[0]
-            initial_choose_button = dialog.findChild(q["QPushButton"], "chooseOutputFolderButton")
-            assert initial_choose_button is not None
-            QTest.mouseClick(initial_choose_button, q["Qt"].MouseButton.LeftButton)
+            custom_button = dialog.findChild(q["QPushButton"], "resumeCustomSessionButton")
+            assert custom_button is not None
+            QTest.mouseClick(custom_button, q["Qt"].MouseButton.LeftButton)
             app.processEvents()
 
             output_field = dialog.findChild(q["QLineEdit"], "outputFolderField")
             profile_combo = dialog.findChild(q["QComboBox"], "environmentProfileCombo")
             session_field = dialog.findChild(q["QLineEdit"], "sessionNameField")
-            initiate_button = dialog.findChild(q["QPushButton"], "initiateEnvironmentButton")
-            resume_button = dialog.findChild(q["QPushButton"], "resumeExperimentButton")
-            choose_button = dialog.findChild(q["QPushButton"], "chooseOutputFolderButton")
+            start_dialog = dialog.findChild(q["QDialog"], "startNewSessionDialog")
+            message_label = dialog.findChild(q["QLabel"], "gateStatusLabel")
             assert output_field is not None
             assert profile_combo is not None
             assert session_field is not None
-            assert initiate_button is not None
-            assert resume_button is not None
-            assert choose_button is not None
+            assert message_label is not None
+            assert start_dialog is None
+            assert Path(output_field.text()) == remembered
+            assert output_field.isReadOnly()
+            assert not profile_combo.isEnabled()
+            assert session_field.isReadOnly()
+            assert "No PPS session metadata" in message_label.text()
 
-            assert Path(output_field.text()) == new_parent
-            assert not output_field.isReadOnly()
-            assert profile_combo.isEnabled()
-            assert not session_field.isReadOnly()
-            assert output_field.property("gateState") == "complete"
-            assert profile_combo.property("gateState") == "needed"
-            assert session_field.property("gateState") == "needed"
-            assert not resume_button.isEnabled()
-            assert not initiate_button.isEnabled()
-            assert initiate_button.property("attention") == "locked"
-            assert choose_button.property("attention") == "complete"
-
-            screenshot = Path.cwd() / ".pytest_cache" / "launcher_gate_new_parent_required.png"
+            screenshot = Path.cwd() / ".pytest_cache" / "launcher_gate_custom_empty_rejected.png"
             screenshot.parent.mkdir(parents=True, exist_ok=True)
             assert dialog.grab().save(str(screenshot))
             image = Image.open(screenshot).convert("RGB")
             assert image.width >= 760
             assert image.height >= 480
             assert max(ImageStat.Stat(image).stddev) > 0.0
-
-            profile_index = profile_combo.findData(focus_app.STUDY5_PROFILE_ID)
-            assert profile_index >= 0
-            profile_combo.setCurrentIndex(profile_index)
-            session_field.setText("Salience Pilot")
-            app.processEvents()
-            assert profile_combo.property("gateState") == "complete"
-            assert session_field.property("gateState") == "complete"
-            assert initiate_button.isEnabled()
-            assert initiate_button.property("attention") == "go"
         except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
             errors.append(exc)
         finally:
@@ -3066,7 +4353,7 @@ def test_launcher_pick_empty_folder_unlocks_required_fields_and_initiate(tmp_pat
                 if widget.windowTitle() == "PPS Experiment Runner":
                     widget.reject()
 
-    q["QTimer"].singleShot(50, pick_folder_and_inspect)
+    q["QTimer"].singleShot(50, pick_empty_folder_and_inspect)
     exit_code = focus_app.run_launcher_window(
         capture_options=SessionCaptureOptions(enable_lsl=False, write_internal_xdf=False, start_backup_recording=False),
         participant_id="P001",
@@ -3080,7 +4367,7 @@ def test_launcher_pick_empty_folder_unlocks_required_fields_and_initiate(tmp_pat
     assert errors == []
 
 
-def test_launcher_initiate_button_creates_environment_and_opens_operations(tmp_path: Path, monkeypatch):
+def test_launcher_start_new_session_modal_creates_environment_and_opens_operations(tmp_path: Path, monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
         from PySide6.QtTest import QTest
@@ -3154,40 +4441,59 @@ def test_launcher_initiate_button_creates_environment_and_opens_operations(tmp_p
             if widget.windowTitle() == "PPS Experiment Runner":
                 widget.reject()
 
-    def pick_folder_and_initiate() -> None:
+    def fill_start_new_dialog() -> None:
         try:
-            dialogs = [widget for widget in app.topLevelWidgets() if widget.windowTitle() == "PPS Experiment Runner"]
+            dialogs = [widget for widget in app.topLevelWidgets() if widget.objectName() == "startNewSessionDialog"]
             assert dialogs
-            dialog = dialogs[0]
-            choose_button = dialog.findChild(q["QPushButton"], "chooseOutputFolderButton")
-            profile_combo = dialog.findChild(q["QComboBox"], "environmentProfileCombo")
-            session_field = dialog.findChild(q["QLineEdit"], "sessionNameField")
-            initiate_button = dialog.findChild(q["QPushButton"], "initiateEnvironmentButton")
-            message_label = dialog.findChild(q["QLabel"], "gateStatusLabel")
-            assert choose_button is not None
+            setup_dialog = dialogs[0]
+            parent_button = setup_dialog.findChild(q["QPushButton"], "newSessionParentButton")
+            parent_field = setup_dialog.findChild(q["QLineEdit"], "newSessionParentField")
+            profile_combo = setup_dialog.findChild(q["QComboBox"], "newSessionProfileCombo")
+            session_field = setup_dialog.findChild(q["QLineEdit"], "newSessionNameField")
+            create_button = setup_dialog.findChild(q["QPushButton"], "createNewSessionButton")
+            assert parent_button is not None
+            assert parent_field is not None
             assert profile_combo is not None
             assert session_field is not None
-            assert initiate_button is not None
-            assert message_label is not None
+            assert create_button is not None
 
-            QTest.mouseClick(choose_button, q["Qt"].MouseButton.LeftButton)
+            QTest.mouseClick(parent_button, q["Qt"].MouseButton.LeftButton)
             app.processEvents()
+            assert Path(parent_field.text()) == new_parent
             profile_index = profile_combo.findData(focus_app.STUDY5_PROFILE_ID)
             assert profile_index >= 0
             profile_combo.setCurrentIndex(profile_index)
             session_field.setText("hoi")
             app.processEvents()
-            assert initiate_button.isEnabled()
-            QTest.mouseClick(initiate_button, q["Qt"].MouseButton.LeftButton)
-            app.processEvents()
-            assert calls or "Creating data collection environment" in message_label.text()
+            assert create_button.isEnabled()
+            screenshot = Path.cwd() / ".pytest_cache" / "launcher_start_new_session_dialog.png"
+            screenshot.parent.mkdir(parents=True, exist_ok=True)
+            assert setup_dialog.grab().save(str(screenshot))
+            QTest.mouseClick(create_button, q["Qt"].MouseButton.LeftButton)
         except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
             errors.append(exc)
             for widget in app.topLevelWidgets():
                 if widget.windowTitle() == "PPS Experiment Runner":
                     widget.reject()
 
-    q["QTimer"].singleShot(50, pick_folder_and_initiate)
+    def click_start_new() -> None:
+        try:
+            dialogs = [widget for widget in app.topLevelWidgets() if widget.windowTitle() == "PPS Experiment Runner"]
+            assert dialogs
+            dialog = dialogs[0]
+            start_button = dialog.findChild(q["QPushButton"], "startNewSessionButton")
+            assert start_button is not None
+            assert dialog.findChild(q["QDialog"], "startNewSessionDialog") is None
+            q["QTimer"].singleShot(100, fill_start_new_dialog)
+            QTest.mouseClick(start_button, q["Qt"].MouseButton.LeftButton)
+            app.processEvents()
+        except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
+            errors.append(exc)
+            for widget in app.topLevelWidgets():
+                if widget.windowTitle() == "PPS Experiment Runner":
+                    widget.reject()
+
+    q["QTimer"].singleShot(50, click_start_new)
     q["QTimer"].singleShot(3000, reject_if_still_open)
     exit_code = focus_app.run_launcher_window(
         capture_options=SessionCaptureOptions(enable_lsl=False, write_internal_xdf=False, start_backup_recording=False),
@@ -3209,7 +4515,7 @@ def test_launcher_initiate_button_creates_environment_and_opens_operations(tmp_p
     assert operation_calls[0]["participant_id"] == "P001"
 
 
-def test_launcher_existing_folder_keeps_fields_locked_and_resumes_selected_environment(tmp_path: Path, monkeypatch):
+def test_launcher_resume_custom_session_folder_opens_operations_immediately(tmp_path: Path, monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
         from PIL import Image, ImageStat
@@ -3291,49 +4597,10 @@ def test_launcher_existing_folder_keeps_fields_locked_and_resumes_selected_envir
             dialogs = [widget for widget in app.topLevelWidgets() if widget.windowTitle() == "PPS Experiment Runner"]
             assert dialogs
             dialog = dialogs[0]
-            choose_button = dialog.findChild(q["QPushButton"], "chooseOutputFolderButton")
-            assert choose_button is not None
-            QTest.mouseClick(choose_button, q["Qt"].MouseButton.LeftButton)
+            custom_button = dialog.findChild(q["QPushButton"], "resumeCustomSessionButton")
+            assert custom_button is not None
+            QTest.mouseClick(custom_button, q["Qt"].MouseButton.LeftButton)
             app.processEvents()
-
-            output_field = dialog.findChild(q["QLineEdit"], "outputFolderField")
-            profile_combo = dialog.findChild(q["QComboBox"], "environmentProfileCombo")
-            session_field = dialog.findChild(q["QLineEdit"], "sessionNameField")
-            resume_button = dialog.findChild(q["QPushButton"], "resumeExperimentButton")
-            initiate_button = dialog.findChild(q["QPushButton"], "initiateEnvironmentButton")
-            message_label = dialog.findChild(q["QLabel"], "gateStatusLabel")
-            assert output_field is not None
-            assert profile_combo is not None
-            assert session_field is not None
-            assert resume_button is not None
-            assert initiate_button is not None
-            assert message_label is not None
-
-            assert Path(output_field.text()) == existing_env
-            assert output_field.isReadOnly()
-            assert not profile_combo.isEnabled()
-            assert session_field.isReadOnly()
-            assert output_field.property("gateState") == "locked"
-            assert profile_combo.property("gateState") == "locked"
-            assert session_field.property("gateState") == "locked"
-            assert profile_combo.currentData() == focus_app.STUDY5_PROFILE_ID
-            assert session_field.text() == "Existing Salience Study"
-            assert "Existing experiment environment found" in message_label.text()
-            assert resume_button.isEnabled()
-            assert resume_button.property("attention") == "current"
-            assert not initiate_button.isEnabled()
-
-            screenshot = Path.cwd() / ".pytest_cache" / "launcher_gate_existing_environment.png"
-            screenshot.parent.mkdir(parents=True, exist_ok=True)
-            assert dialog.grab().save(str(screenshot))
-            image = Image.open(screenshot).convert("RGB")
-            assert image.width >= 760
-            assert image.height >= 480
-            assert max(ImageStat.Stat(image).stddev) > 0.0
-
-            dialog.activateWindow()
-            dialog.setFocus(q["Qt"].FocusReason.ShortcutFocusReason)
-            QTest.keyClick(dialog, q["Qt"].Key.Key_1)
         except BaseException as exc:  # noqa: BLE001 - surfaced after the modal exits
             errors.append(exc)
             for widget in app.topLevelWidgets():
@@ -3812,6 +5079,58 @@ def test_prepare_profile_focus_session_uses_finished_profile_gate(tmp_path: Path
     assert calls["participant_id"] == "P123"
     assert calls["queue"]["participant_id"] == "P123"
     assert calls["settings"]["profile_id"] == "study5_box_breathing_pps"
+
+
+def test_prepare_profile_focus_session_honors_validation_output_root(tmp_path: Path, monkeypatch):
+    from peripersonal_space_toolkit import focus_app
+
+    validation_root = tmp_path / "validation_runner_sessions"
+    remembered_root = tmp_path / "remembered_dashboard_output"
+    manifest = validation_root / "P124_run" / "session_manifest.json"
+    manifest.parent.mkdir(parents=True)
+    manifest.write_text("{}", encoding="utf-8")
+    run_setup = tmp_path / "profile" / "6_experiment_run_setup" / "experiment_run_setup_manifest.json"
+    run_setup.parent.mkdir(parents=True)
+    run_setup.write_text("{}", encoding="utf-8")
+    calls: dict[str, object] = {}
+
+    monkeypatch.setenv("PPS_FOCUS_VALIDATION_OUTPUT_ROOT", str(validation_root))
+    monkeypatch.setattr(focus_app, "active_output_folder", lambda **_kwargs: remembered_root)
+    monkeypatch.setattr(
+        focus_app,
+        "_materialize_profile_run_setup",
+        lambda profile_id, progress_callback=None: (
+            SimpleNamespace(design_path=tmp_path / "design.json"),
+            SimpleNamespace(),
+            run_setup,
+        ),
+    )
+    monkeypatch.setattr(focus_app, "claim_prepared_session", lambda *_args, **_kwargs: None)
+
+    def fake_prepare_segment_run_package(run_setup_path, participant_id, **kwargs):
+        calls["run_setup_path"] = run_setup_path
+        calls["participant_id"] = participant_id
+        calls["prepare_kwargs"] = dict(kwargs)
+        return SimpleNamespace(
+            manifest_path=manifest,
+            source_run_setup_manifest_path=run_setup,
+            session_dir=manifest.parent,
+            blocks=[object()],
+        )
+
+    monkeypatch.setattr(focus_app, "prepare_segment_run_package", fake_prepare_segment_run_package)
+    monkeypatch.setattr(focus_app, "record_prepared_session_queue", lambda **kwargs: calls.setdefault("queue", kwargs))
+    monkeypatch.setattr(focus_app, "record_experiment_activity", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        focus_app,
+        "resolve_profile_entry",
+        lambda *_args, **_kwargs: {"kind": "bundled", "dashboard_project_id": "profile_study5_box_breathing_pps"},
+    )
+    monkeypatch.setattr(focus_app, "update_profile_runner_settings", lambda **kwargs: calls.setdefault("settings", kwargs))
+
+    assert focus_app.prepare_profile_focus_session("study5_box_breathing_pps", "P124") == manifest
+    assert calls["prepare_kwargs"]["session_root"] == validation_root
+    assert calls["settings"]["output_folder"] == validation_root
 
 
 def test_runner_output_project_setting_creates_timestamped_folder(tmp_path: Path, monkeypatch):

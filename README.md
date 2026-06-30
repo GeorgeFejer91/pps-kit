@@ -63,17 +63,28 @@ harnesses, but direct Python/module runner invocation exits with retirement
 guidance instead of opening Focus Mode. The build runs a Qt runtime preflight
 and fails if the Windows Qt platform plugin is not packaged.
 
+Focus Mode also hosts a token-gated Android runner companion service on the
+local LAN by default. The QR pairing panel in the runner lets a trusted phone
+submit setup fields, start Part 01/Part 02 when the runner allows it, continue
+instruction gates, and display the live timeline without becoming the timing
+authority. See [docs/ANDROID_RUNNER_COMPANION.md](docs/ANDROID_RUNNER_COMPANION.md).
+
 Optional: build the lightweight release downloader and offline-lab distribution
-manifest:
+manifest. Public Windows releases use a GitHub-hosted downloader plus a
+Zenodo-hosted payload:
 
 ```powershell
+.\windows\Build_Experiment_Runner_Exe.ps1
+.\windows\Build_Dashboard_Launcher_Exe.ps1
 .\windows\Build_PPS_Downloader.ps1
-python tools\make_download_manifest.py --payload dist\PPS-Toolkit-v0.1.0-offline-lab-windows-x64.zip --payload-url "https://zenodo.org/records/<record>/files/PPS-Toolkit-v0.1.0-offline-lab-windows-x64.zip?download=1"
+.\windows\Build_PPS_Distribution.ps1 -Version 0.1.0 -ZenodoPayloadUrl "https://zenodo.org/records/<record>/files/PPS-Toolkit-v0.1.0-offline-lab-windows-x64.zip?download=1" -ZenodoDoi "10.5281/zenodo.<record>"
 ```
 
 `PPS-Toolkit-Downloader.exe` is the small GitHub-hosted bootstrapper and must
 stay below 100 MiB. The heavyweight offline lab ZIP belongs on Zenodo and is
-verified by `pps_download_manifest.v1.json` before extraction or launch.
+verified by `pps_download_manifest.v1.json` before extraction or launch. The
+installed dashboard opens through `dist\PPSDashboardLauncher\PPSDashboardLauncher.exe`
+so end users do not need Python for the local GUI.
 
 The same HTML interface can also be published as a static GitHub Pages site.
 In that mode, start the trusted local companion backend first:
@@ -159,12 +170,14 @@ pps-analyze --sample
 
 `pps-dashboard` starts a local-only browser dashboard at `127.0.0.1` for researcher-facing design, render, prepare, and review decisions. The dashboard uses a fixed one-page navigation rail, adjustable preview/panel sizing controls, and a sequential custom-design workflow that blocks run actions until the minimum runnable experiment profile is filled in. The existing Qt designer remains available as `pps-design`; the only active operator experiment runner is the packaged native `dist\PPSExperimentRunner\PPSExperimentRunner.exe`.
 
-`PPSExperimentRunner.exe` opens the resume experiment decision gate by default,
-using the ignored local resume ledger in `local_data\dashboard_state\` to show
-the remembered data-collection environment. Explicit `--session-manifest`,
-`--last-experiment`, `--latest-dashboard-setup`, and `--profile` launches are
-reserved for dashboard handoff, validation, and scripted workflows that
-intentionally bypass that first gate.
+`PPSExperimentRunner.exe` opens a three-choice session gate by default:
+`Resume Last Session` reopens the remembered environment from
+`local_data\dashboard_state\`, `Resume Custom Session` asks for an existing
+session folder and scans its diary/bridge metadata, and `Start New Session`
+opens the only setup dialog for parent folder, profile, and session name.
+Explicit `--session-manifest`, `--last-experiment`, `--latest-dashboard-setup`,
+and `--profile` launches are reserved for dashboard handoff, validation, and
+scripted workflows that intentionally bypass that first gate.
 
 Verify the bundled Pfeiffer-style profile and render handoff:
 
@@ -193,13 +206,14 @@ lightweight `PPS-Toolkit-Downloader.exe`; Zenodo hosts the heavyweight
 `PPS-Toolkit-vX.Y.Z-offline-lab-windows-x64.zip`. The downloader reads
 `pps_download_manifest.v1.json`, downloads the Zenodo payload, verifies SHA256,
 extracts to `%LOCALAPPDATA%\PPS Toolkit\versions\vX.Y.Z`, creates shortcuts, and
-launches the dashboard only after verification. See
+launches the packaged dashboard only after verification. See
 [docs/PPS_DOWNLOADS.md](docs/PPS_DOWNLOADS.md).
 
 The repo contains the installer package source in `windows\downloader\` and the
 tracked offline-package inventory at `windows\installer_package_inventory.v1.json`;
 release binaries and ZIPs are generated into ignored `dist\` for GitHub
-Releases/Zenodo.
+Releases/Zenodo. Installer build and missing-link protocols live in
+`installer_protocols\`.
 
 ## Repository Layout
 
@@ -210,10 +224,12 @@ assets\0. Head-Related...\FABIAN_HRIR_measured_HATO_0.sofa
                          Bundled standardized FABIAN/TU HRIR resource
 assets\master_blocks\    Study block templates
 assets\preloads\         Profile file-cabinet catalogs and prebaked looming WAVs
+android\runner-companion\ Native Kotlin/Compose Android phone companion source
 configs\                 Example experiment and stimulus-design configs
 data\sample\             Deidentified sample analysis CSVs
 docs\                    Hardware setup, replication, privacy, Windows, protocol, and paradigm notes
 For-AI\                  Project memory and required context for future AI agents
+installer_protocols\     Installer build, content, smoke-test, and missing-link protocols
 src\                     Python package and command entry points
 study_templates\         Literature-backed preloadable study profiles
 tests\                   Smoke and release-readiness tests

@@ -10,9 +10,11 @@ import json
 import math
 import os
 import queue
+import subprocess
 import sys
 import threading
 import time
+from concurrent.futures import Future, TimeoutError as FutureTimeoutError
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Callable, Iterable
@@ -79,7 +81,7 @@ from .analysis_review import (
     prediction_points_for_scope,
     prediction_series_for_scope,
     raw_points_for_scope,
-    recording_quality_status,
+    response_quality_summary,
     scope_comparison_row,
     scopes_for_part_mode,
 )
@@ -108,6 +110,28 @@ from .runner_diary import (
     runner_settings_path as _runner_settings_path,
     slugify_identifier,
     update_runner_settings as _update_runner_settings,
+)
+from .runner_companion import (
+    DEFAULT_COMPANION_HOST,
+    DEFAULT_COMPANION_PORT,
+    HEALTH_SCHEMA,
+    SNAPSHOT_SCHEMA,
+    CompanionCommandError,
+    RunnerCompanionConfig,
+    RunnerCompanionService,
+    build_pairing_uri,
+    choose_lan_ipv4,
+    generate_companion_token,
+    pairing_qr_png_bytes,
+)
+from .android_lsl_admin import send_android_lsl_command
+from .mobile_phone_runtime import (
+    MobileRuntimePackageError,
+    build_mobile_package_list,
+    build_mobile_package_manifest,
+    mobile_asset_path,
+    mobile_package_id,
+    write_mobile_runtime_events,
 )
 from .session_runner import (
     DEFAULT_DASHBOARD_STATE_ROOT,
@@ -156,6 +180,18 @@ from .profile_memory import (
     update_runner_settings as update_profile_runner_settings,
 )
 from .runtime_paths import repo_root
+from .tactile_calibration import (
+    CALIBRATION_SCHEMA,
+    CONFIRMATION_REQUIRED_CLEAN_CATCHES,
+    CONFIRMATION_REQUIRED_CONSECUTIVE_HITS,
+    PROTOCOL_NAME as TACTILE_CALIBRATION_PROTOCOL_NAME,
+    TACTILE_OUTPUT_34_MAX_PERCENT,
+    TactileCalibrationRunner,
+    VALID_RESPONSE_END_MS,
+    VALID_RESPONSE_START_MS,
+    load_latest_calibration,
+    save_calibration_attempt,
+)
 
 
 DEFAULT_FOCUS_PROFILE_DESIGN_PATH = DEFAULT_DASHBOARD_STATE_ROOT / "focus_profile_runner_design.json"
@@ -177,8 +213,16 @@ OUTPUT_12_VOLUME_PERCENT_KEY = "output_1_2_volume_percent"
 OUTPUT_34_VOLUME_PERCENT_KEY = "output_3_4_volume_percent"
 OUTPUT_CHANNEL_VOLUME_SETTINGS_KEY = "output_channel_volumes"
 OUTPUT_CHANNEL_VOLUME_SCHEMA = "pps-output-channel-volumes.v1"
-OUTPUT_TEST_AUDIO_PATH = repo_root() / "assets" / "breathing" / "runner_output_test_audio.wav"
+OUTPUT_TEST_AUDIO_PATH = (
+    repo_root()
+    / "assets"
+    / "preloads"
+    / STUDY5_PROFILE_ID
+    / "02_looming_stimuli"
+    / "looming_Pink_frontal.wav"
+)
 OUTPUT_TEST_TACTILE_PATH = repo_root() / "assets" / "tactile" / "runner_output_test_tactile.wav"
+TACTILE_CALIBRATION_SOURCE_PULSE_PATH = repo_root() / "assets" / "tactile" / "default_tactile_cue.wav"
 
 
 def _timeline_segment_value(segment: Any, key: str) -> Any:
@@ -456,44 +500,49 @@ OUTPUT_VOLUME_SLIDER_SCALE = 1000
 OUTPUT_VOLUME_PERCENT_DECIMALS = 3
 OUTPUT_VOLUME_PERCENT_STEP = 0.001
 
-
-def _coerce_volume_percent(value: Any, *, default: float = 100.0) -> float:
+def _coerce_volume_percent(value: Any, *, default: float = 100.0, maximum: float = 100.0) -> float:
     try:
         number = float(value)
     except (TypeError, ValueError):
         number = float(default)
     if not math.isfinite(number):
         number = float(default)
-    return round(max(0.0, min(100.0, number)), OUTPUT_VOLUME_PERCENT_DECIMALS)
+    maximum_value = max(0.0, float(maximum))
+    return round(max(0.0, min(maximum_value, number)), OUTPUT_VOLUME_PERCENT_DECIMALS)
 
 
-def _volume_percent_to_slider_value(value: Any) -> int:
-    return int(round(_coerce_volume_percent(value) * OUTPUT_VOLUME_SLIDER_SCALE))
+def _coerce_tactile_output_percent(value: Any, *, default: float = TACTILE_OUTPUT_34_MAX_PERCENT) -> float:
+    return _coerce_volume_percent(value, default=default, maximum=TACTILE_OUTPUT_34_MAX_PERCENT)
 
 
-def _slider_value_to_volume_percent(value: Any) -> float:
+def _volume_percent_to_slider_value(value: Any, *, maximum: float = 100.0) -> int:
+    return int(round(_coerce_volume_percent(value, maximum=maximum) * OUTPUT_VOLUME_SLIDER_SCALE))
+
+
+def _slider_value_to_volume_percent(value: Any, *, maximum: float = 100.0) -> float:
     try:
         number = float(value)
     except (TypeError, ValueError):
-        number = 100.0 * OUTPUT_VOLUME_SLIDER_SCALE
+        number = float(maximum) * OUTPUT_VOLUME_SLIDER_SCALE
     if not math.isfinite(number):
-        number = 100.0 * OUTPUT_VOLUME_SLIDER_SCALE
-    return _coerce_volume_percent(number / OUTPUT_VOLUME_SLIDER_SCALE)
+        number = float(maximum) * OUTPUT_VOLUME_SLIDER_SCALE
+    return _coerce_volume_percent(number / OUTPUT_VOLUME_SLIDER_SCALE, maximum=maximum)
 
 
-def _output_volume_gain(percent: Any) -> float:
-    return _coerce_volume_percent(percent) / 100.0
+def _output_volume_gain(percent: Any, *, maximum: float = 100.0) -> float:
+    return _coerce_volume_percent(percent, maximum=maximum) / 100.0
 
 
 def _output_channel_volume_payload(output_12_percent: Any, output_34_percent: Any) -> dict[str, Any]:
     output_12 = _coerce_volume_percent(output_12_percent)
-    output_34 = _coerce_volume_percent(output_34_percent)
+    output_34 = _coerce_tactile_output_percent(output_34_percent)
     return {
         "schema": OUTPUT_CHANNEL_VOLUME_SCHEMA,
         "output_1_2_percent": output_12,
         "output_3_4_percent": output_34,
         "output_1_2_linear_gain": _output_volume_gain(output_12),
-        "output_3_4_linear_gain": _output_volume_gain(output_34),
+        "output_3_4_linear_gain": _output_volume_gain(output_34, maximum=TACTILE_OUTPUT_34_MAX_PERCENT),
+        "output_3_4_max_percent": TACTILE_OUTPUT_34_MAX_PERCENT,
     }
 
 
@@ -509,7 +558,7 @@ def _load_output_channel_volume_percentages(state_root: Path | None = None) -> t
         "output_3_4_percent",
         settings.get(OUTPUT_34_VOLUME_PERCENT_KEY, settings.get("tactile_volume_percent", 100)),
     )
-    return _coerce_volume_percent(output_12), _coerce_volume_percent(output_34)
+    return _coerce_volume_percent(output_12), _coerce_tactile_output_percent(output_34)
 
 
 def _persist_output_channel_volumes(
@@ -519,7 +568,7 @@ def _persist_output_channel_volumes(
     state_root: Path | None = None,
 ) -> dict[str, Any]:
     output_12 = _coerce_volume_percent(output_12_percent)
-    output_34 = _coerce_volume_percent(output_34_percent)
+    output_34 = _coerce_tactile_output_percent(output_34_percent)
     return update_runner_settings(
         DEFAULT_DASHBOARD_STATE_ROOT if state_root is None else state_root,
         **{
@@ -686,6 +735,10 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--profile", default="", help="Load a finished study/profile preload directly in the runner, for example study5_box_breathing_pps.")
     parser.add_argument("--participant-id", default="", help="Participant ID to materialize when using --latest-dashboard-setup.")
     parser.add_argument("--manual-start", action="store_true", help="Open the runner window but wait for Start Run before playback.")
+    parser.add_argument("--no-companion", action="store_true", help="Do not start the LAN phone companion service.")
+    parser.add_argument("--companion-host", default=DEFAULT_COMPANION_HOST, help="Host interface for the phone companion service.")
+    parser.add_argument("--companion-port", type=int, default=DEFAULT_COMPANION_PORT, help="LAN port for the phone companion service.")
+    parser.add_argument("--companion-advertise-ip", default="", help="Explicit IP address to put in the phone companion QR code.")
     parser.add_argument("--no-lsl", action="store_true", help="Do not create live LSL marker outlets for this run.")
     parser.add_argument("--no-internal-xdf", action="store_true", help="Do not write the local events.xdf mirror.")
     parser.add_argument("--no-analysis-csv", action="store_true", help="Do not write immediate analysis CSV outputs.")
@@ -730,13 +783,14 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--validation-screenshot", type=Path, help=argparse.SUPPRESS)
     parser.add_argument("--validation-auto-close-ms", type=int, default=None, help=argparse.SUPPRESS)
+    parser.add_argument("--validation-windowed", action="store_true", help=argparse.SUPPRESS)
     return parser
 
 
 def _require_qt() -> dict[str, Any]:
     try:
-        from PySide6.QtCore import QEvent, QPoint, QTimer, Qt, QUrl, Signal
-        from PySide6.QtGui import QBrush, QColor, QCursor, QDesktopServices, QFont, QFontDatabase, QFontMetrics, QIcon, QKeySequence, QPainter, QPainterPath, QPen, QShortcut
+        from PySide6.QtCore import QEvent, QLocale, QPoint, QSize, QTimer, Qt, QUrl, Signal
+        from PySide6.QtGui import QBrush, QColor, QCursor, QDesktopServices, QFont, QFontDatabase, QFontMetrics, QIcon, QKeySequence, QPainter, QPainterPath, QPen, QPixmap, QShortcut
         from PySide6.QtWidgets import (
             QApplication,
             QCheckBox,
@@ -778,6 +832,7 @@ def _require_qt() -> dict[str, Any]:
         "QDialog": QDialog,
         "QDoubleSpinBox": QDoubleSpinBox,
         "QEvent": QEvent,
+        "QLocale": QLocale,
         "QFileDialog": QFileDialog,
         "QFrame": QFrame,
         "QFont": QFont,
@@ -794,7 +849,9 @@ def _require_qt() -> dict[str, Any]:
         "QPainter": QPainter,
         "QPainterPath": QPainterPath,
         "QPen": QPen,
+        "QPixmap": QPixmap,
         "QPoint": QPoint,
+        "QSize": QSize,
         "QProgressBar": QProgressBar,
         "QPushButton": QPushButton,
         "QScrollArea": QScrollArea,
@@ -1416,6 +1473,7 @@ def _show_audio_dependency_dialog(
     dialog.resize(dialog_width, dialog_height)
     dialog.setMinimumSize(min_width, min_height)
     dialog.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
+    _prepare_validation_window_placement(q, dialog)
 
     layout = q["QVBoxLayout"](dialog)
     layout.setContentsMargins(14, 14, 14, 14)
@@ -2017,11 +2075,25 @@ def _output_volume_slider_row(
     object_name: str,
     tooltip: str,
     on_change: Callable[[float], None],
+    maximum_percent: float = 100.0,
 ) -> tuple[Any, Any, Any]:
+    max_percent = max(0.0, float(maximum_percent))
+
     class VolumePercentSpinBox(q["QDoubleSpinBox"]):
         def __init__(self) -> None:
             super().__init__()
             self.lineEdit().installEventFilter(self)
+
+        def valueFromText(self, text: str) -> float:  # noqa: N802 - Qt override
+            clean = str(text or "").replace("%", "").strip().replace(",", ".")
+            try:
+                value = float(clean)
+            except ValueError:
+                return float(self.value())
+            return _coerce_volume_percent(value, maximum=max_percent) if math.isfinite(value) else float(self.value())
+
+        def textFromValue(self, value: float) -> str:  # noqa: N802 - Qt override
+            return f"{_coerce_volume_percent(value, maximum=max_percent):.{OUTPUT_VOLUME_PERCENT_DECIMALS}f}"
 
         def _commit_text_value(self) -> None:
             text = self.lineEdit().text().replace("%", "").strip().replace(",", ".")
@@ -2031,7 +2103,7 @@ def _output_volume_slider_row(
                 self.interpretText()
                 return
             if math.isfinite(value):
-                self.setValue(_coerce_volume_percent(value))
+                self.setValue(_coerce_volume_percent(value, maximum=max_percent))
             else:
                 self.interpretText()
 
@@ -2061,21 +2133,22 @@ def _output_volume_slider_row(
     key.setObjectName("metricLabel")
     slider = q["QSlider"](q["Qt"].Orientation.Horizontal)
     slider.setObjectName(object_name)
-    slider.setRange(0, 100 * OUTPUT_VOLUME_SLIDER_SCALE)
+    slider.setRange(0, int(round(max_percent * OUTPUT_VOLUME_SLIDER_SCALE)))
     slider.setSingleStep(1)
     slider.setPageStep(10)
     slider.setTickInterval(100)
     slider.setToolTip(tooltip)
-    slider.setValue(_volume_percent_to_slider_value(value))
+    slider.setValue(_volume_percent_to_slider_value(value, maximum=max_percent))
     slider.setMinimumWidth(120)
     percent = VolumePercentSpinBox()
     percent.setObjectName(object_name.replace("Slider", "PercentBox"))
-    percent.setRange(0.0, 100.0)
+    percent.setRange(0.0, max_percent)
     percent.setDecimals(OUTPUT_VOLUME_PERCENT_DECIMALS)
     percent.setSingleStep(OUTPUT_VOLUME_PERCENT_STEP)
     percent.setSuffix("%")
+    percent.setLocale(q["QLocale"].c())
     percent.setKeyboardTracking(False)
-    percent.setValue(_coerce_volume_percent(value))
+    percent.setValue(_coerce_volume_percent(value, maximum=max_percent))
     percent.setMinimumWidth(78)
     percent.setMaximumWidth(96)
     percent.setToolTip(tooltip)
@@ -2084,15 +2157,15 @@ def _output_volume_slider_row(
     layout.addWidget(percent)
 
     def _slider_changed(changed: int) -> None:
-        percent_value = _slider_value_to_volume_percent(changed)
+        percent_value = _slider_value_to_volume_percent(changed, maximum=max_percent)
         previous = percent.blockSignals(True)
         percent.setValue(percent_value)
         percent.blockSignals(previous)
         on_change(percent_value)
 
     def _percent_changed(changed: float) -> None:
-        percent_value = _coerce_volume_percent(changed)
-        slider_value = _volume_percent_to_slider_value(percent_value)
+        percent_value = _coerce_volume_percent(changed, maximum=max_percent)
+        slider_value = _volume_percent_to_slider_value(percent_value, maximum=max_percent)
         previous = slider.blockSignals(True)
         slider.setValue(slider_value)
         slider.blockSignals(previous)
@@ -2101,6 +2174,336 @@ def _output_volume_slider_row(
     slider.valueChanged.connect(_slider_changed)
     percent.valueChanged.connect(_percent_changed)
     return row, slider, percent
+
+
+def _format_tactile_percent(value: Any) -> str:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return ""
+    if not math.isfinite(number):
+        return ""
+    return f"{number:.3f}%"
+
+
+def _create_tactile_calibration_timeline_widget(q: dict[str, Any]) -> Any:
+    class TactileCalibrationTimelineWidget(q["QWidget"]):
+        def __init__(self) -> None:
+            super().__init__()
+            self.events: list[dict[str, Any]] = []
+            self.max_events = 60
+            self.setMinimumHeight(74)
+            self.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Fixed)
+
+        def set_events(self, events: list[dict[str, Any]], *, max_events: int) -> None:
+            self.events = [dict(event) for event in events]
+            self.max_events = max(1, int(max_events or 1))
+            self.update()
+
+        def paintEvent(self, event: Any) -> None:  # noqa: N802 - Qt API
+            super().paintEvent(event)
+            painter = q["QPainter"](self)
+            try:
+                painter.setRenderHint(q["QPainter"].RenderHint.Antialiasing, True)
+                rect = self.rect()
+                painter.fillRect(rect, q["QColor"]("#f7fafc"))
+                left = 12
+                right = max(left + 1, rect.width() - 12)
+                mid_y = rect.height() // 2
+                painter.setPen(q["QPen"](q["QColor"]("#b7c3d0"), 2))
+                painter.drawLine(left, mid_y, right, mid_y)
+                for event_record in self.events:
+                    try:
+                        index = int(event_record.get("trial_index") or 0)
+                    except Exception:
+                        index = 0
+                    if index <= 0:
+                        continue
+                    frac = min(1.0, max(0.0, (index - 1) / max(1, self.max_events - 1)))
+                    x = int(round(left + frac * (right - left)))
+                    is_catch = bool(event_record.get("is_catch"))
+                    outcome = str(event_record.get("trial_outcome") or "").strip().lower()
+                    current = bool(event_record.get("current"))
+                    if "false_alarm" in outcome:
+                        color = "#b42318"
+                    elif outcome in {"hit", "correct_reject"}:
+                        color = "#16794c"
+                    elif outcome in {"miss", "catch_response_out_of_window"}:
+                        color = "#d47c00"
+                    elif is_catch:
+                        color = "#64748b"
+                    else:
+                        color = "#2563eb"
+                    radius = 6 if current else 4
+                    painter.setBrush(q["QBrush"](q["QColor"](color)))
+                    painter.setPen(q["QPen"](q["QColor"]("#ffffff"), 1))
+                    painter.drawEllipse(q["QPoint"](x, mid_y), radius, radius)
+                painter.setPen(q["QPen"](q["QColor"]("#475569"), 1))
+                painter.drawText(12, rect.height() - 8, f"0 / {self.max_events} event cap")
+            finally:
+                painter.end()
+
+    return TactileCalibrationTimelineWidget()
+
+
+def _create_tactile_calibration_monitor_dialog(q: dict[str, Any], owner: Any, participant: str) -> Any:
+    class TactileCalibrationMonitorDialog(q["QDialog"]):
+        def __init__(self) -> None:
+            super().__init__(owner.dialog)
+            self.setWindowTitle(f"Tactile Calibration Monitor - {participant}")
+            self.setModal(False)
+            self.setObjectName("tactileCalibrationMonitor")
+            self.events: list[dict[str, Any]] = []
+            self.current_row_by_trial: dict[int, int] = {}
+            self._accepted_assay = False
+            self.resize(760, 620)
+
+            root = q["QVBoxLayout"](self)
+            root.setContentsMargins(14, 14, 14, 14)
+            root.setSpacing(10)
+
+            self.status_label = q["QLabel"]("Preparing tactile threshold assay")
+            self.status_label.setObjectName("sectionTitle")
+            self.status_label.setWordWrap(True)
+            root.addWidget(self.status_label)
+
+            self.target_panel = q["QFrame"]()
+            self.target_panel.setObjectName("tactileCalibrationTargetPanel")
+            target_layout = q["QVBoxLayout"](self.target_panel)
+            target_layout.setContentsMargins(8, 8, 8, 8)
+            target_layout.setSpacing(8)
+            target_layout.addWidget(_subtitle(q, "Participant Response Target"))
+            self.target_button = _create_response_target_button(q, DEFAULT_FOCUS_LAYOUT_PROFILE)
+            self.target_button.setObjectName("tactileCalibrationTargetButton")
+            self.target_button.setEnabled(True)
+            self.target_button.clicked.connect(lambda _checked=False: owner._record_tactile_calibration_target_click("calibration_monitor_target"))
+            target_layout.addWidget(self.target_button, 0, q["Qt"].AlignmentFlag.AlignHCenter)
+            self.warning_label = q["QLabel"]("")
+            self.warning_label.setObjectName("tactileCalibrationWarning")
+            self.warning_label.setWordWrap(True)
+            self.warning_label.setStyleSheet("color: #991b1b; font-weight: 700;")
+            self.warning_label.setVisible(False)
+            target_layout.addWidget(self.warning_label)
+            root.addWidget(self.target_panel)
+
+            metrics = q["QFrame"]()
+            metrics_layout = q["QGridLayout"](metrics)
+            metrics_layout.setContentsMargins(0, 0, 0, 0)
+            metrics_layout.setHorizontalSpacing(12)
+            metrics_layout.setVerticalSpacing(6)
+            self.intensity_label = q["QLabel"]("Intensity: --")
+            self.window_label = q["QLabel"]("Response window: --")
+            self.reversal_label = q["QLabel"]("Reversals: 0")
+            self.response_label = q["QLabel"]("Last response: --")
+            self.confirmation_hits_label = q["QLabel"](
+                f"Final hits: 0/{CONFIRMATION_REQUIRED_CONSECUTIVE_HITS}"
+            )
+            self.confirmation_catches_label = q["QLabel"](
+                f"Clean catches: 0/{CONFIRMATION_REQUIRED_CLEAN_CATCHES}"
+            )
+            for label in (
+                self.intensity_label,
+                self.window_label,
+                self.reversal_label,
+                self.response_label,
+                self.confirmation_hits_label,
+                self.confirmation_catches_label,
+            ):
+                label.setObjectName("metricValue")
+                label.setWordWrap(True)
+            self.intensity_bar = q["QProgressBar"]()
+            self.intensity_bar.setRange(0, int(round(TACTILE_OUTPUT_34_MAX_PERCENT * OUTPUT_VOLUME_SLIDER_SCALE)))
+            self.intensity_bar.setTextVisible(True)
+            self.intensity_bar.setValue(0)
+            metrics_layout.addWidget(self.intensity_label, 0, 0)
+            metrics_layout.addWidget(self.window_label, 0, 1)
+            metrics_layout.addWidget(self.reversal_label, 1, 0)
+            metrics_layout.addWidget(self.response_label, 1, 1)
+            metrics_layout.addWidget(self.confirmation_hits_label, 2, 0)
+            metrics_layout.addWidget(self.confirmation_catches_label, 2, 1)
+            metrics_layout.addWidget(self.intensity_bar, 3, 0, 1, 2)
+            root.addWidget(metrics)
+
+            self.timeline = _create_tactile_calibration_timeline_widget(q)
+            root.addWidget(self.timeline)
+
+            self.table = q["QTableWidget"](0, 6)
+            self.table.setObjectName("tactileCalibrationTrialTable")
+            self.table.setHorizontalHeaderLabels(["#", "Phase", "Level", "Pulse", "Response", "Outcome"])
+            self.table.setEditTriggers(q["QTableWidget"].EditTrigger.NoEditTriggers)
+            self.table.verticalHeader().setVisible(False)
+            self.table.horizontalHeader().setSectionResizeMode(q["QHeaderView"].ResizeMode.Stretch)
+            root.addWidget(self.table, 1)
+
+            buttons = q["QHBoxLayout"]()
+            buttons.addStretch(1)
+            self.abort_button = q["QPushButton"]("Abort")
+            self.abort_button.setObjectName("dangerButton")
+            self.abort_button.clicked.connect(lambda _checked=False: owner._abort_tactile_calibration())
+            self.close_button = q["QPushButton"]("Close")
+            self.close_button.setEnabled(False)
+            self.close_button.clicked.connect(self._close_or_continue)
+            buttons.addWidget(self.abort_button)
+            buttons.addWidget(self.close_button)
+            root.addLayout(buttons)
+
+        def _close_or_continue(self) -> None:
+            if self._accepted_assay:
+                owner._return_from_successful_tactile_calibration()
+            else:
+                self.accept()
+
+        def _set_catch_warning(self, active: bool, text: str = "") -> None:
+            if active:
+                self.target_panel.setStyleSheet(
+                    "QFrame#tactileCalibrationTargetPanel { "
+                    "border: 2px solid #b3261e; border-radius: 6px; background: #fff1f2; }"
+                )
+                self.warning_label.setText(text or "Only press when you feel the tactile pulse.")
+                self.warning_label.setVisible(True)
+            else:
+                self.target_panel.setStyleSheet("")
+                self.warning_label.setText("")
+                self.warning_label.setVisible(False)
+
+        def update_confirmation(self, payload: dict[str, Any]) -> None:
+            def _count(key: str) -> int:
+                try:
+                    return max(0, int(payload.get(key) or 0))
+                except Exception:
+                    return 0
+
+            hits = _count("confirmation_consecutive_hits")
+            catches = _count("confirmation_clean_catches")
+            self.confirmation_hits_label.setText(
+                f"Final hits: {hits}/{CONFIRMATION_REQUIRED_CONSECUTIVE_HITS}"
+            )
+            self.confirmation_catches_label.setText(
+                f"Clean catches: {catches}/{CONFIRMATION_REQUIRED_CLEAN_CATCHES}"
+            )
+            warning = str(payload.get("warning") or "").strip()
+            if warning:
+                self._set_catch_warning(True, warning)
+
+        def update_progress(self, payload: dict[str, Any]) -> None:
+            trial_index = int(payload.get("trial_index") or 0)
+            level = payload.get("level_percent", "")
+            is_catch = bool(payload.get("is_catch"))
+            message = str(payload.get("message") or "Tactile calibration running")
+            self._set_catch_warning(False)
+            self.status_label.setText(message)
+            self.intensity_label.setText(f"Intensity: {_format_tactile_percent(level)} Output 3/4")
+            try:
+                self.intensity_bar.setValue(int(round(float(level) * OUTPUT_VOLUME_SLIDER_SCALE)))
+            except Exception:
+                self.intensity_bar.setValue(0)
+            self.intensity_bar.setFormat(_format_tactile_percent(level))
+            self.window_label.setText(
+                f"Response window: {VALID_RESPONSE_START_MS:.0f}-{VALID_RESPONSE_END_MS:.0f} ms after pulse onset"
+            )
+            reversal = payload.get("reversal_index", "")
+            self.reversal_label.setText(f"Reversals: {reversal if str(reversal) else 0}")
+            if str(payload.get("phase") or "") == "confirmation":
+                self.update_confirmation(payload)
+            if trial_index:
+                event_record = {
+                    "trial_index": trial_index,
+                    "phase": str(payload.get("phase") or ""),
+                    "level_percent": level,
+                    "is_catch": is_catch,
+                    "current": True,
+                }
+                for event_item in self.events:
+                    event_item["current"] = False
+                self.events.append(event_record)
+                row = self.table.rowCount()
+                self.current_row_by_trial[trial_index] = row
+                self.table.insertRow(row)
+                values = [
+                    trial_index,
+                    str(payload.get("phase") or ""),
+                    _format_tactile_percent(level),
+                    "Catch" if is_catch else "Pulse",
+                    "Waiting",
+                    "",
+                ]
+                for column, value in enumerate(values):
+                    self.table.setItem(row, column, q["QTableWidgetItem"](str(value)))
+                self.table.scrollToBottom()
+            self.timeline.set_events(self.events, max_events=int(payload.get("max_calibration_events") or 60))
+
+        def record_response(self, payload: dict[str, Any]) -> None:
+            trial_index = int(payload.get("trial_index") or 0)
+            valid = bool(payload.get("valid_response"))
+            latency = payload.get("response_latency_ms", "")
+            try:
+                latency_text = f"{float(latency):.0f} ms"
+            except Exception:
+                latency_text = "out of window"
+            source = str(payload.get("response_source") or payload.get("source") or "mouse")
+            self.response_label.setText(
+                f"Last response: {'valid' if valid else 'ignored'} {latency_text} ({source})"
+            )
+            row = self.current_row_by_trial.get(trial_index)
+            if row is not None:
+                self.table.setItem(row, 4, q["QTableWidgetItem"]("valid " + latency_text if valid else "ignored"))
+
+        def finish_trial(self, trial: dict[str, Any]) -> None:
+            trial_index = int(trial.get("trial_index") or 0)
+            outcome = str(trial.get("trial_outcome") or "")
+            if str(trial.get("phase") or "") == "confirmation":
+                self.update_confirmation(trial)
+            warning = str(trial.get("warning") or "").strip()
+            if warning or outcome == "false_alarm":
+                self._set_catch_warning(True, warning or "Only press when you feel the tactile pulse.")
+            row = self.current_row_by_trial.get(trial_index)
+            if row is not None:
+                self.table.setItem(row, 5, q["QTableWidgetItem"](outcome))
+                if not bool(trial.get("response_present")):
+                    self.table.setItem(row, 4, q["QTableWidgetItem"]("none"))
+            for event_item in self.events:
+                if int(event_item.get("trial_index") or 0) == trial_index:
+                    event_item.update({"current": False, "trial_outcome": outcome})
+            self.timeline.set_events(self.events, max_events=int(getattr(self.timeline, "max_events", 60)))
+
+        def finish_assay(self, report: dict[str, Any]) -> None:
+            accepted = bool(report.get("accepted"))
+            self._accepted_assay = accepted
+            final_value = report.get("recommended_output_34_percent", report.get("final_output_34_percent", ""))
+            final_text = _format_tactile_percent(final_value)
+            summary = dict(report.get("staircase_summary") or {})
+            confirmation = dict(report.get("confirmation_summary") or {})
+            reversals = summary.get("reversals", "")
+            if accepted:
+                self._set_catch_warning(False)
+                self.status_label.setText(
+                    f"Calibration yielded a value of {final_text} Output 3/4.\n"
+                    "This value has been saved as part of the data log and implemented as the preset for this participant.\n"
+                    "You may now continue with the experiment."
+                )
+                if final_text:
+                    self.intensity_label.setText(f"Accepted threshold: {final_text} Output 3/4")
+                    self.intensity_bar.setFormat(final_text)
+                    try:
+                        self.intensity_bar.setValue(int(round(float(final_value) * OUTPUT_VOLUME_SLIDER_SCALE)))
+                    except Exception:
+                        pass
+            else:
+                self.status_label.setText(str(report.get("message") or "Calibration failed"))
+            if str(reversals):
+                self.reversal_label.setText(f"Reversals: {reversals}")
+            if confirmation:
+                self.update_confirmation(
+                    {
+                        "confirmation_consecutive_hits": confirmation.get("consecutive_hits", ""),
+                        "confirmation_clean_catches": confirmation.get("clean_catches", ""),
+                    }
+                )
+            self.abort_button.setEnabled(False)
+            self.close_button.setText("Continue" if accepted else "Close")
+            self.close_button.setEnabled(True)
+
+    return TactileCalibrationMonitorDialog()
 
 
 def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
@@ -2468,6 +2871,260 @@ def _create_analysis_curve_plot_widget(q: dict[str, Any]) -> Any:
     return AnalysisCurvePlotWidget()
 
 
+def _create_response_quality_bars_widget(q: dict[str, Any]) -> Any:
+    class ResponseQualityBarsWidget(q["QWidget"]):
+        def __init__(self) -> None:
+            super().__init__()
+            self.summary: dict[str, Any] = {}
+            self.setMinimumHeight(188)
+            self.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Minimum)
+
+        def set_summary(self, summary: dict[str, Any]) -> None:
+            self.summary = dict(summary or {})
+            self.update()
+
+        def paintEvent(self, _event: Any) -> None:  # noqa: N802 - Qt API
+            painter = q["QPainter"](self)
+            try:
+                painter.setRenderHint(q["QPainter"].RenderHint.Antialiasing, True)
+                painter.fillRect(self.rect(), q["QColor"]("#ffffff"))
+                width = max(1, int(self.width()))
+                height = max(1, int(self.height()))
+                left = 186 if width >= 820 else 150
+                right = 164 if width >= 820 else 128
+                top = 40
+                bar_height = 32
+                row_gap = max(58, int((height - top - 24) / 2))
+                bar_left = left
+                bar_right = max(bar_left + 120, width - right)
+                bar_width = max(1, bar_right - bar_left)
+
+                title_font = q["QFont"](painter.font())
+                title_font.setPointSizeF(10.5)
+                title_font.setBold(True)
+                painter.setFont(title_font)
+                painter.setPen(q["QPen"](q["QColor"]("#182231")))
+                painter.drawText(16, 8, width - 32, 22, q["Qt"].AlignmentFlag.AlignLeft, "Response Quality")
+
+                tick_font = q["QFont"](painter.font())
+                tick_font.setPointSizeF(8.5)
+                tick_font.setBold(False)
+                painter.setFont(tick_font)
+                painter.setPen(q["QPen"](q["QColor"]("#7a8794")))
+                grid_pen = q["QPen"](q["QColor"]("#e4ebf2"))
+                grid_pen.setWidth(1)
+                for tick in (0, 25, 50, 75, 100):
+                    x = int(bar_left + bar_width * tick / 100.0)
+                    painter.setPen(grid_pen)
+                    painter.drawLine(x, top - 3, x, min(height - 18, top + row_gap + bar_height + 3))
+                    painter.setPen(q["QPen"](q["QColor"]("#7a8794")))
+                    painter.drawText(x - 22, top - 25, 44, 16, q["Qt"].AlignmentFlag.AlignCenter, f"{tick}%")
+
+                rows = [
+                    (
+                        "Tactile cue trials",
+                        "Hit",
+                        "Miss",
+                        dict((self.summary.get("tactile") or {})),
+                        "hits",
+                        "misses",
+                        "hit_rate",
+                    ),
+                    (
+                        "Catch trials",
+                        "Correct no-response",
+                        "False alarm",
+                        dict((self.summary.get("catch") or {})),
+                        "correct",
+                        "false_alarms",
+                        "correct_rate",
+                    ),
+                ]
+                label_font = q["QFont"](painter.font())
+                label_font.setPointSizeF(10.0)
+                label_font.setBold(True)
+                sub_font = q["QFont"](painter.font())
+                sub_font.setPointSizeF(8.8)
+                value_font = q["QFont"](painter.font())
+                value_font.setPointSizeF(13.0)
+                value_font.setBold(True)
+                side_font = q["QFont"](painter.font())
+                side_font.setPointSizeF(8.8)
+
+                for index, (label, good_label, bad_label, payload, good_key, bad_key, rate_key) in enumerate(rows):
+                    y = top + index * row_gap
+                    total = int(payload.get("total") or 0)
+                    good = int(payload.get(good_key) or 0)
+                    bad = int(payload.get(bad_key) or 0)
+                    good_rate = payload.get(rate_key)
+                    good_fraction = max(0.0, min(1.0, float(good_rate))) if good_rate is not None else 0.0
+                    good_width = int(round(bar_width * good_fraction)) if total else 0
+
+                    painter.setFont(label_font)
+                    painter.setPen(q["QPen"](q["QColor"]("#182231")))
+                    painter.drawText(16, y + 2, left - 26, 22, q["Qt"].AlignmentFlag.AlignLeft, label)
+                    painter.setFont(sub_font)
+                    painter.setPen(q["QPen"](q["QColor"]("#5b6674")))
+                    painter.drawText(16, y + 27, left - 26, 18, q["Qt"].AlignmentFlag.AlignLeft, good_label)
+                    painter.setPen(q["QPen"](q["QColor"]("#238d5a" if total else "#7a8794")))
+                    painter.drawText(16, y + 47, left - 26, 18, q["Qt"].AlignmentFlag.AlignLeft, _analysis_count_text(good, total))
+
+                    painter.setPen(q["QPen"](q["QColor"]("#e25d55" if total else "#d7dee5")))
+                    painter.setBrush(q["QBrush"](q["QColor"]("#e25d55" if total else "#e9edf2")))
+                    painter.drawRoundedRect(bar_left, y + 8, bar_width, bar_height, 13, 13)
+                    if total and good_width > 0:
+                        painter.setPen(q["QPen"](q["QColor"]("#2aa164")))
+                        painter.setBrush(q["QBrush"](q["QColor"]("#2aa164")))
+                        painter.drawRoundedRect(bar_left, y + 8, min(bar_width, good_width), bar_height, 13, 13)
+
+                    painter.setFont(value_font)
+                    if total:
+                        painter.setPen(q["QPen"](q["QColor"]("#ffffff" if good_width > 74 else "#182231")))
+                        value_x = bar_left if good_width > 74 else bar_left + 8
+                        value_w = good_width if good_width > 74 else min(bar_width, 112)
+                        painter.drawText(value_x, y + 8, max(1, value_w), bar_height, q["Qt"].AlignmentFlag.AlignCenter, _analysis_rate_text(good_rate))
+                    else:
+                        painter.setPen(q["QPen"](q["QColor"]("#5b6674")))
+                        painter.drawText(bar_left, y + 8, bar_width, bar_height, q["Qt"].AlignmentFlag.AlignCenter, "No trials")
+
+                    side_x = bar_right + 18
+                    side_w = max(92, width - side_x - 18)
+                    painter.setPen(q["QPen"](q["QColor"]("#f0b7b2" if total else "#d7dee5")))
+                    painter.setBrush(q["QBrush"](q["QColor"]("#fff2f0" if total else "#f6f8fa")))
+                    painter.drawRoundedRect(side_x, y + 8, side_w, bar_height, 7, 7)
+                    painter.setFont(side_font)
+                    painter.setPen(q["QPen"](q["QColor"]("#5b6674")))
+                    painter.drawText(side_x + 10, y + 10, side_w - 20, 14, q["Qt"].AlignmentFlag.AlignLeft, bad_label)
+                    painter.setPen(q["QPen"](q["QColor"]("#d9544b" if total else "#7a8794")))
+                    painter.drawText(side_x + 10, y + 25, side_w - 20, 14, q["Qt"].AlignmentFlag.AlignLeft, _analysis_count_text(bad, total))
+                    painter.drawText(side_x + 10, y + 16, side_w - 20, 22, q["Qt"].AlignmentFlag.AlignRight, _analysis_rate_text((bad / total) if total else None))
+            finally:
+                painter.end()
+
+    return ResponseQualityBarsWidget()
+
+
+def _create_assumption_beta_plot_widget(q: dict[str, Any]) -> Any:
+    class AssumptionBetaPlotWidget(q["QWidget"]):
+        def __init__(self) -> None:
+            super().__init__()
+            self.kind = "pps"
+            self.payload: dict[str, Any] = {}
+            self.setMinimumHeight(174)
+            self.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Minimum)
+
+        def set_payload(self, kind: str, payload: dict[str, Any]) -> None:
+            self.kind = str(kind or "pps")
+            self.payload = dict(payload or {})
+            self.update()
+
+        def paintEvent(self, _event: Any) -> None:  # noqa: N802 - Qt API
+            painter = q["QPainter"](self)
+            try:
+                painter.setRenderHint(q["QPainter"].RenderHint.Antialiasing, True)
+                painter.fillRect(self.rect(), q["QColor"]("#ffffff"))
+                width = max(1, int(self.width()))
+                height = max(1, int(self.height()))
+                left = 118
+                right = 28
+                top = 28
+                bottom = 40
+                plot_width = max(1, width - left - right)
+                plot_height = max(1, height - top - bottom)
+                values = self._values()
+                finite = [value for _label, value, _color in values if value is not None and math.isfinite(float(value))]
+                if not finite:
+                    painter.setPen(q["QPen"](q["QColor"]("#647067")))
+                    painter.drawText(self.rect(), q["Qt"].AlignmentFlag.AlignCenter, "Insufficient evidence")
+                    return
+                span = max(max(abs(value) for value in finite), 0.001)
+                x_min = -span * 1.18
+                x_max = span * 1.18
+
+                def _x(value: float) -> int:
+                    return int(round(left + (value - x_min) / (x_max - x_min) * plot_width))
+
+                zero_x = _x(0.0)
+                grid_pen = q["QPen"](q["QColor"]("#d9dfd6"))
+                grid_pen.setWidth(1)
+                painter.setPen(grid_pen)
+                for index in range(5):
+                    x = left + int(round(plot_width * index / 4))
+                    painter.drawLine(x, top, x, top + plot_height)
+                axis_pen = q["QPen"](q["QColor"]("#647067"))
+                axis_pen.setWidth(2)
+                painter.setPen(axis_pen)
+                painter.drawLine(left, top + plot_height, width - right, top + plot_height)
+                painter.drawLine(zero_x, top, zero_x, top + plot_height)
+
+                title_font = q["QFont"](painter.font())
+                title_font.setPointSizeF(10.0)
+                title_font.setBold(True)
+                painter.setFont(title_font)
+                painter.setPen(q["QPen"](q["QColor"]("#202621")))
+                painter.drawText(8, 6, width - 16, 18, q["Qt"].AlignmentFlag.AlignLeft, "Proximity slope beta on log(RT)")
+
+                label_font = q["QFont"](painter.font())
+                label_font.setPointSizeF(9.0)
+                label_font.setBold(True)
+                value_font = q["QFont"](painter.font())
+                value_font.setPointSizeF(8.6)
+                row_gap = plot_height / max(1, len(values))
+                for index, (label, value, color) in enumerate(values):
+                    y_center = top + int(round(row_gap * (index + 0.5)))
+                    painter.setFont(label_font)
+                    painter.setPen(q["QPen"](q["QColor"]("#202621")))
+                    painter.drawText(8, y_center - 10, left - 18, 20, int(q["Qt"].AlignmentFlag.AlignRight | q["Qt"].AlignmentFlag.AlignVCenter), label)
+                    if value is None or not math.isfinite(float(value)):
+                        painter.setPen(q["QPen"](q["QColor"]("#647067")))
+                        painter.drawText(left, y_center - 10, plot_width, 20, q["Qt"].AlignmentFlag.AlignCenter, "n/a")
+                        continue
+                    value = float(value)
+                    x_value = _x(value)
+                    bar_left = min(zero_x, x_value)
+                    bar_width = max(3, abs(x_value - zero_x))
+                    painter.setPen(q["QPen"](q["QColor"](color)))
+                    painter.setBrush(q["QBrush"](q["QColor"](color)))
+                    painter.drawRoundedRect(bar_left, y_center - 10, bar_width, 20, 6, 6)
+                    painter.setFont(value_font)
+                    painter.setPen(q["QPen"](q["QColor"]("#202621")))
+                    text_x = x_value + 8 if value >= 0 else x_value - 78
+                    painter.drawText(text_x, y_center - 9, 70, 18, q["Qt"].AlignmentFlag.AlignCenter, _fmt_analysis_value(value))
+                painter.setFont(value_font)
+                painter.setPen(q["QPen"](q["QColor"]("#647067")))
+                painter.drawText(left, height - 26, plot_width, 18, q["Qt"].AlignmentFlag.AlignCenter, "negative = faster RTs with greater proximity")
+            finally:
+                painter.end()
+
+        def _values(self) -> list[tuple[str, float | None, str]]:
+            if self.kind == "baseline":
+                return [("Baseline", _analysis_float(self.payload.get("beta")), "#4b5fa8")]
+            return [
+                ("Baseline", _analysis_float(self.payload.get("baseline_slope_beta")), "#4b5fa8"),
+                ("Audio-Tactile", _analysis_float(self.payload.get("audio_tactile_slope_beta")), "#246b55"),
+            ]
+
+    return AssumptionBetaPlotWidget()
+
+
+def _analysis_rate_text(rate: Any) -> str:
+    if rate is None:
+        return "N/A"
+    try:
+        return f"{float(rate) * 100.0:.1f}%"
+    except (TypeError, ValueError):
+        return "N/A"
+
+
+def _analysis_count_text(count: Any, total: Any) -> str:
+    try:
+        count_int = int(count or 0)
+        total_int = int(total or 0)
+    except (TypeError, ValueError):
+        return "0 / 0"
+    return f"{count_int} / {total_int}"
+
+
 class AnalysisReviewDialog:
     """Read-only post-run model-fit review dialog."""
 
@@ -2495,6 +3152,12 @@ class AnalysisReviewDialog:
         self.part_mode_buttons: dict[str, Any] = {}
         self.view_buttons: dict[str, Any] = {}
         self.plot_toggles: dict[str, Any] = {}
+        self.response_metric_labels: dict[str, tuple[Any, Any]] = {}
+        self.assumption_buttons: dict[str, Any] = {}
+        self.analysis_level_panels: dict[str, Any] = {}
+        self.analysis_level_buttons: dict[str, Any] = {}
+        self.current_analysis_level = "level1"
+        self.assumption_detail_dialog = None
         self.dialog = q["QDialog"](parent)
         _enable_standard_window_controls(q, self.dialog)
         self.dialog.setWindowTitle("PPS Instant Analysis")
@@ -2549,6 +3212,44 @@ QFrame#analysisTogglePanel {
     border: 1px solid #d9dfd6;
     border-radius: 6px;
 }
+QFrame#analysisLevelNavPanel {
+    background: #ffffff;
+    border: 1px solid #bcc7bd;
+    border-radius: 6px;
+}
+QPushButton#analysisLevelNavButton {
+    border: 0;
+    border-left: 1px solid #d9dfd6;
+    border-radius: 0;
+    background: #ffffff;
+    color: #202621;
+    padding: 7px 12px;
+    min-height: 30px;
+    font-weight: 800;
+}
+QPushButton#analysisLevelNavButton:hover {
+    background: #f3f6f2;
+}
+QPushButton#analysisLevelNavButton:checked {
+    background: #246b55;
+    color: #ffffff;
+}
+QFrame#analysisLevel1Panel,
+QFrame#analysisLevel2Panel,
+QFrame#analysisLevel3Panel {
+    background: #ffffff;
+    border: 1px solid #cfd8cf;
+    border-radius: 8px;
+}
+QLabel#analysisLevelTitle {
+    color: #182231;
+    font-size: 18px;
+    font-weight: 900;
+}
+QLabel#analysisLevelSubtitle {
+    color: #647067;
+    font-weight: 650;
+}
 QPushButton#analysisSegmentButton {
     border: 0;
     border-radius: 0;
@@ -2577,15 +3278,48 @@ QCheckBox#analysisPlotToggle {
 QCheckBox#analysisPlotToggle:disabled {
     color: #9ba59d;
 }
-QLabel#analysisQualityReason,
 QLabel#analysisTriageHint {
     color: #4f5b52;
     font-weight: 650;
 }
-QLabel#analysisQualityBadge {
-    border-radius: 6px;
-    padding: 6px 10px;
+QFrame#analysisResponseQualityPanel {
+    background: #ffffff;
+    border: 1px solid #cddbea;
+    border-radius: 8px;
+}
+QFrame#analysisResponseMetricGood {
+    background: #eaf7f0;
+    border: 1px solid #c9ead8;
+    border-radius: 7px;
+}
+QFrame#analysisResponseMetricBad {
+    background: #fff0ee;
+    border: 1px solid #f0c4be;
+    border-radius: 7px;
+}
+QLabel#analysisResponseMetricTitle {
+    color: #5b6674;
+    font-weight: 650;
+}
+QLabel#analysisResponseMetricGoodPercent {
+    color: #1b7550;
     font-weight: 900;
+}
+QLabel#analysisResponseMetricBadPercent {
+    color: #bf4741;
+    font-weight: 900;
+}
+QLabel#analysisResponseMetricCount {
+    color: #182231;
+    font-weight: 850;
+}
+QWidget#analysisResponseQualityBars {
+    background: #ffffff;
+}
+QFrame#analysisAssumptionPanel {
+    background: #ffffff;
+    border: 1px solid #d9dfd6;
+    border-radius: 8px;
 }
 QPushButton#analysisConditionLensButton,
 QPushButton#analysisModelButton,
@@ -2655,9 +3389,7 @@ QTextEdit#analysisDetailsText {
         header.setObjectName("appTitle")
         root.addWidget(header)
 
-        subtitle = q["QLabel"](
-            "Plot-first triage for this participant run. The quality grade is a strict data-exclusion gate; model and condition colors are exploratory cues."
-        )
+        subtitle = q["QLabel"]("Participant Run Feedback")
         subtitle.setObjectName("mutedLabel")
         subtitle.setWordWrap(True)
         root.addWidget(subtitle)
@@ -2674,24 +3406,43 @@ QTextEdit#analysisDetailsText {
         dataset_row.addWidget(self.dataset_combo, 1)
         root.addLayout(dataset_row)
 
-        quality_row = q["QHBoxLayout"]()
-        quality_row.setContentsMargins(0, 0, 0, 0)
-        quality_row.setSpacing(8)
-        self.quality_badge = q["QLabel"]("Participant Run Quality: UNKNOWN")
-        self.quality_badge.setObjectName("analysisQualityBadge")
-        self.quality_reason = q["QLabel"]("")
-        self.quality_reason.setObjectName("analysisQualityReason")
-        self.quality_reason.setWordWrap(True)
-        quality_row.addWidget(self.quality_badge, 0)
-        quality_row.addWidget(self.quality_reason, 1)
-        root.addLayout(quality_row)
+        self.analysis_level_nav_panel = self._build_analysis_level_navigation()
+        root.addWidget(self.analysis_level_nav_panel)
+
+        self.level1_panel, level1_layout = self._build_analysis_level_panel(
+            "level1",
+            "Level 1: Response Quality",
+            "Did the participant respond adequately?",
+        )
+        self.response_quality_panel = self._build_response_quality_panel()
+        level1_layout.addWidget(self.response_quality_panel)
+        root.addWidget(self.level1_panel)
+
+        self.level2_panel, level2_layout = self._build_analysis_level_panel(
+            "level2",
+            "Level 2: Basic PPS Assumptions",
+            "Did this run meet the minimal baseline and distance-dependent facilitation checks?",
+        )
+        self.assumption_panel = self._build_basic_assumption_panel()
+        level2_layout.addWidget(self.assumption_panel)
+        self.assumption_preview_plot = _create_assumption_beta_plot_widget(q)
+        self.assumption_preview_plot.setObjectName("analysisAssumptionPreviewPlot")
+        self.assumption_preview_plot.setMinimumHeight(170)
+        level2_layout.addWidget(self.assumption_preview_plot)
+        root.addWidget(self.level2_panel)
+
+        self.level3_panel, level3_layout = self._build_analysis_level_panel(
+            "level3",
+            "Level 3: PPS Model Fit",
+            "What shape does the participant's PPS response curve appear to have?",
+        )
 
         plot_panel, plot_layout = _panel(q, "PPS Response Curves")
         self.plot_widget = _create_analysis_curve_plot_widget(q)
         self.plot_widget.setObjectName("analysisCurvePlot")
         self.plot_widget.setMinimumHeight(260)
         plot_layout.addWidget(self.plot_widget)
-        root.addWidget(plot_panel, 1)
+        level3_layout.addWidget(plot_panel)
 
         condition_row = q["QHBoxLayout"]()
         condition_row.setContentsMargins(0, 0, 0, 0)
@@ -2708,7 +3459,7 @@ QTextEdit#analysisDetailsText {
             self.condition_lens_buttons[lens] = button
             condition_row.addWidget(button)
         condition_row.addStretch(1)
-        root.addLayout(condition_row)
+        level3_layout.addLayout(condition_row)
 
         model_row = q["QHBoxLayout"]()
         model_row.setContentsMargins(0, 0, 0, 0)
@@ -2725,18 +3476,18 @@ QTextEdit#analysisDetailsText {
             self.quick_model_buttons[model] = button
             model_row.addWidget(button)
         model_row.addStretch(1)
-        root.addLayout(model_row)
+        level3_layout.addLayout(model_row)
 
         self.triage_hint = q["QLabel"]("")
         self.triage_hint.setObjectName("analysisTriageHint")
         self.triage_hint.setWordWrap(True)
-        root.addWidget(self.triage_hint)
+        level3_layout.addWidget(self.triage_hint)
 
         self.more_button = q["QPushButton"]("More")
         self.more_button.setObjectName("analysisMoreButton")
         self.more_button.setCheckable(True)
         self.more_button.toggled.connect(self._set_more_visible)
-        root.addWidget(self.more_button, 0)
+        level3_layout.addWidget(self.more_button, 0)
 
         self.more_container = q["QWidget"]()
         self.more_container.setObjectName("analysisMoreContainer")
@@ -2744,7 +3495,7 @@ QTextEdit#analysisDetailsText {
         more_root = q["QVBoxLayout"](self.more_container)
         more_root.setContentsMargins(0, 0, 0, 0)
         more_root.setSpacing(8)
-        root.addWidget(self.more_container, 0)
+        level3_layout.addWidget(self.more_container, 0)
 
         view_row = q["QHBoxLayout"]()
         view_row.setContentsMargins(0, 0, 0, 0)
@@ -2882,6 +3633,7 @@ QTextEdit#analysisDetailsText {
         detail_layout.addWidget(self.detail_text)
         body.addWidget(detail_panel)
         body.setSizes([112, 180])
+        root.addWidget(self.level3_panel)
 
         buttons = q["QHBoxLayout"]()
         buttons.setContentsMargins(12, 8, 12, 12)
@@ -2902,6 +3654,337 @@ QTextEdit#analysisDetailsText {
         self._reload_scopes_for_part_mode()
         self._populate_overview_table()
         self._refresh_quick_button_styles()
+
+    def _build_analysis_level_navigation(self) -> Any:
+        q = self.q
+        panel = q["QFrame"]()
+        panel.setObjectName("analysisLevelNavPanel")
+        layout = q["QHBoxLayout"](panel)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        for level_key, label in (
+            ("level1", "1 Response"),
+            ("level2", "2 Assumptions"),
+            ("level3", "3 Model Fit"),
+        ):
+            button = q["QPushButton"](label)
+            button.setObjectName("analysisLevelNavButton")
+            button.setCheckable(True)
+            button.setChecked(level_key == self.current_analysis_level)
+            button.clicked.connect(lambda _checked=False, selected_level=level_key: self._scroll_to_analysis_level(selected_level))
+            self.analysis_level_buttons[level_key] = button
+            layout.addWidget(button, 1)
+        return panel
+
+    def _build_analysis_level_panel(self, level_key: str, title_text: str, subtitle_text: str) -> tuple[Any, Any]:
+        q = self.q
+        panel = q["QFrame"]()
+        number = "".join(char for char in str(level_key) if char.isdigit()) or "1"
+        panel.setObjectName(f"analysisLevel{number}Panel")
+        layout = q["QVBoxLayout"](panel)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(8)
+        title = q["QLabel"](title_text)
+        title.setObjectName("analysisLevelTitle")
+        title.setWordWrap(True)
+        layout.addWidget(title)
+        subtitle = q["QLabel"](subtitle_text)
+        subtitle.setObjectName("analysisLevelSubtitle")
+        subtitle.setWordWrap(True)
+        layout.addWidget(subtitle)
+        self.analysis_level_panels[level_key] = panel
+        return panel, layout
+
+    def _scroll_to_analysis_level(self, level_key: str) -> None:
+        level_key = str(level_key or "level1")
+        panel = self.analysis_level_panels.get(level_key)
+        if panel is None:
+            return
+        self.current_analysis_level = level_key
+        self._refresh_analysis_level_buttons()
+        try:
+            self.scroll_area.ensureWidgetVisible(panel, 0, 8)
+        except Exception:
+            pass
+
+    def _refresh_analysis_level_buttons(self) -> None:
+        for level_key, button in self.analysis_level_buttons.items():
+            if button.isChecked() != (level_key == self.current_analysis_level):
+                button.setChecked(level_key == self.current_analysis_level)
+
+    def _build_response_quality_panel(self) -> Any:
+        q = self.q
+        panel = q["QFrame"]()
+        panel.setObjectName("analysisResponseQualityPanel")
+        layout = q["QVBoxLayout"](panel)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(10)
+
+        header_row = q["QHBoxLayout"]()
+        header_row.setContentsMargins(0, 0, 0, 0)
+        header_row.setSpacing(8)
+        title = q["QLabel"]("Response Quality")
+        title.setObjectName("appSectionTitle")
+        header_row.addWidget(title, 0)
+        header_row.addStretch(1)
+        all_trials = q["QLabel"]("All trials")
+        all_trials.setAlignment(q["Qt"].AlignmentFlag.AlignCenter)
+        all_trials.setStyleSheet(
+            "background: #eef5fb; color: #2f4f6f; border: 1px solid #c4d8eb; "
+            "border-radius: 14px; padding: 4px 16px; font-weight: 750;"
+        )
+        header_row.addWidget(all_trials, 0)
+        layout.addLayout(header_row)
+
+        metrics = q["QGridLayout"]()
+        metrics.setContentsMargins(0, 0, 0, 0)
+        metrics.setHorizontalSpacing(8)
+        metrics.setVerticalSpacing(8)
+        for column, (key, title_text, tone) in enumerate(
+            (
+                ("tactile_hits", "Tactile hits", "good"),
+                ("tactile_misses", "Tactile misses", "bad"),
+                ("catch_correct", "Catch correct", "good"),
+                ("catch_false_alarms", "Catch false alarms", "bad"),
+            )
+        ):
+            metrics.addWidget(self._build_response_metric_card(key, title_text, tone), 0, column)
+            metrics.setColumnStretch(column, 1)
+        layout.addLayout(metrics)
+
+        self.response_quality_bars = _create_response_quality_bars_widget(q)
+        self.response_quality_bars.setObjectName("analysisResponseQualityBars")
+        layout.addWidget(self.response_quality_bars)
+        return panel
+
+    def _build_response_metric_card(self, key: str, title_text: str, tone: str) -> Any:
+        q = self.q
+        card = q["QFrame"]()
+        card.setObjectName("analysisResponseMetricGood" if tone == "good" else "analysisResponseMetricBad")
+        layout = q["QVBoxLayout"](card)
+        layout.setContentsMargins(12, 10, 12, 10)
+        layout.setSpacing(4)
+        title = q["QLabel"](title_text)
+        title.setObjectName("analysisResponseMetricTitle")
+        percent = q["QLabel"]("N/A")
+        percent.setObjectName(f"analysisResponseMetric{''.join(part.capitalize() for part in key.split('_'))}Percent")
+        percent.setAlignment(self.q["Qt"].AlignmentFlag.AlignRight)
+        percent.setStyleSheet(
+            "font-size: 24px; font-weight: 900; color: "
+            + ("#1b7550;" if tone == "good" else "#bf4741;")
+        )
+        count = q["QLabel"]("0 / 0")
+        count.setObjectName(f"analysisResponseMetric{''.join(part.capitalize() for part in key.split('_'))}Count")
+        count.setStyleSheet("font-size: 14px; font-weight: 850; color: #182231;")
+        row = q["QHBoxLayout"]()
+        row.setContentsMargins(0, 0, 0, 0)
+        row.setSpacing(8)
+        row.addWidget(title, 1)
+        row.addWidget(percent, 0)
+        layout.addLayout(row)
+        layout.addWidget(count)
+        self.response_metric_labels[key] = (percent, count)
+        return card
+
+    def _build_basic_assumption_panel(self) -> Any:
+        q = self.q
+        panel = q["QFrame"]()
+        panel.setObjectName("analysisAssumptionPanel")
+        layout = q["QVBoxLayout"](panel)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(8)
+
+        title = q["QLabel"]("Basic PPS Assumptions")
+        title.setObjectName("appSectionTitle")
+        layout.addWidget(title)
+
+        row = q["QHBoxLayout"]()
+        row.setContentsMargins(0, 0, 0, 0)
+        row.setSpacing(8)
+        for key, label, object_name in (
+            ("baseline", "Baseline Assumption", "analysisBaselineAssumptionButton"),
+            ("pps", "Peripersonal Space Assumption", "analysisPpsAssumptionButton"),
+        ):
+            button = q["QPushButton"](label)
+            button.setObjectName(object_name)
+            button.setMinimumHeight(48)
+            button.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Fixed)
+            button.clicked.connect(lambda _checked=False, selected_key=key: self._open_assumption_details(selected_key))
+            self.assumption_buttons[key] = button
+            row.addWidget(button, 1)
+        layout.addLayout(row)
+        return panel
+
+    def _refresh_response_quality_panel(self) -> None:
+        summary = response_quality_summary(self.data)
+        tactile = dict(summary.get("tactile") or {})
+        catch = dict(summary.get("catch") or {})
+        payloads = {
+            "tactile_hits": (tactile.get("hits", 0), tactile.get("total", 0), tactile.get("hit_rate")),
+            "tactile_misses": (tactile.get("misses", 0), tactile.get("total", 0), tactile.get("miss_rate")),
+            "catch_correct": (catch.get("correct", 0), catch.get("total", 0), catch.get("correct_rate")),
+            "catch_false_alarms": (catch.get("false_alarms", 0), catch.get("total", 0), catch.get("false_alarm_rate")),
+        }
+        for key, (count, total, rate) in payloads.items():
+            labels = self.response_metric_labels.get(key)
+            if labels is None:
+                continue
+            percent_label, count_label = labels
+            percent_label.setText(_analysis_rate_text(rate))
+            count_label.setText(_analysis_count_text(count, total))
+        self.response_quality_bars.set_summary(summary)
+
+    def _refresh_assumption_panel(self) -> None:
+        for key, button in self.assumption_buttons.items():
+            payload = self._assumption_payload(key)
+            passed = str(payload.get("status") or "").strip().upper() == "PASS"
+            button.setText("Baseline Assumption" if key == "baseline" else "Peripersonal Space Assumption")
+            button.setToolTip(self._assumption_tooltip(key, payload))
+            self._style_assumption_button(button, passed=passed)
+        if hasattr(self, "assumption_preview_plot"):
+            self.assumption_preview_plot.set_payload("pps", self._assumption_payload("pps"))
+
+    def _assumption_payload(self, key: str) -> dict[str, Any]:
+        checks = getattr(self.data, "assumption_checks", {}) or {}
+        if not isinstance(checks, dict) or not checks:
+            return {
+                "status": "FAIL",
+                "summary": "Insufficient evidence: basic_assumption_checks.v1.json was not available.",
+                "reason_code": "missing_artifact",
+                "coverage": {},
+            }
+        if key == "baseline":
+            payload = checks.get("baseline_assumption")
+        else:
+            payload = checks.get("peripersonal_space_assumption") or checks.get("pps_assumption")
+        if isinstance(payload, dict):
+            return dict(payload)
+        return {
+            "status": "FAIL",
+            "summary": "Insufficient evidence: this assumption result was not available in the saved artifact.",
+            "reason_code": "missing_result",
+            "coverage": {},
+        }
+
+    def _style_assumption_button(self, button: Any, *, passed: bool) -> None:
+        background = "#238d5a" if passed else "#d9544b"
+        border = "#1b7550" if passed else "#bf4741"
+        hover = "#2aa164" if passed else "#e25d55"
+        button.setStyleSheet(
+            "QPushButton {"
+            f"background: {background}; border: 1px solid {border}; color: #ffffff; "
+            "border-radius: 7px; padding: 8px 12px; font-size: 15px; font-weight: 900;"
+            "}"
+            "QPushButton:hover {"
+            f"background: {hover};"
+            "}"
+        )
+
+    def _assumption_tooltip(self, key: str, payload: dict[str, Any]) -> str:
+        summary = str(payload.get("summary") or "Insufficient evidence.").strip()
+        if key == "baseline":
+            beta = payload.get("beta")
+            p_value = payload.get("p_two_sided")
+            p_label = "two-sided p"
+        else:
+            beta = payload.get("interaction_beta")
+            p_value = payload.get("p_one_sided_negative")
+            p_label = "one-sided p"
+        lines = [
+            summary,
+            f"beta={_fmt_analysis_value(beta)}; {p_label}={_fmt_analysis_value(p_value)}",
+            self._assumption_coverage_text(key, payload),
+        ]
+        if key != "baseline":
+            lines.append(f"far-to-near gain={_fmt_analysis_value(payload.get('pps_far_to_near_gain_ms'))} ms")
+        return "\n".join(line for line in lines if line)
+
+    def _assumption_coverage_text(self, key: str, payload: dict[str, Any]) -> str:
+        coverage = payload.get("coverage") if isinstance(payload.get("coverage"), dict) else {}
+        if key == "baseline":
+            return f"coverage: baseline n={coverage.get('n', 0)}, SOA levels={coverage.get('distinct_soa_count', 0)}"
+        baseline = dict(coverage.get("baseline") or {})
+        audio = dict(coverage.get("audio_tactile") or {})
+        return (
+            f"coverage: baseline n={baseline.get('n', 0)}, SOA levels={baseline.get('distinct_soa_count', 0)}; "
+            f"audio-tactile n={audio.get('n', 0)}, SOA levels={audio.get('distinct_soa_count', 0)}"
+        )
+
+    def _open_assumption_details(self, key: str) -> None:
+        q = self.q
+        payload = self._assumption_payload(key)
+        dialog = q["QDialog"](self.dialog)
+        dialog.setObjectName("analysisAssumptionDetailsDialog")
+        dialog.setWindowTitle("Baseline Assumption" if key == "baseline" else "Peripersonal Space Assumption")
+        dialog.setModal(False)
+        dialog.resize(560, 430)
+        dialog.setStyleSheet(
+            _focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE)
+            + """
+QDialog {
+    background: #f4f5f1;
+}
+QFrame#analysisAssumptionDetailPanel {
+    background: #ffffff;
+    border: 1px solid #d9dfd6;
+    border-radius: 8px;
+}
+"""
+        )
+        root = q["QVBoxLayout"](dialog)
+        root.setContentsMargins(12, 12, 12, 12)
+        root.setSpacing(8)
+        panel = q["QFrame"]()
+        panel.setObjectName("analysisAssumptionDetailPanel")
+        panel_layout = q["QVBoxLayout"](panel)
+        panel_layout.setContentsMargins(12, 12, 12, 12)
+        panel_layout.setSpacing(8)
+        title = q["QLabel"]("Baseline Assumption" if key == "baseline" else "Peripersonal Space Assumption")
+        title.setObjectName("appSectionTitle")
+        panel_layout.addWidget(title)
+        summary = q["QLabel"](self._assumption_detail_sentence(key, payload))
+        summary.setObjectName("analysisAssumptionDetailSummary")
+        summary.setWordWrap(True)
+        panel_layout.addWidget(summary)
+        stats = q["QLabel"](self._assumption_detail_stats(key, payload))
+        stats.setObjectName("mutedLabel")
+        stats.setWordWrap(True)
+        panel_layout.addWidget(stats)
+        plot = _create_assumption_beta_plot_widget(q)
+        plot.setObjectName("analysisAssumptionBetaPlot")
+        plot.set_payload("baseline" if key == "baseline" else "pps", payload)
+        panel_layout.addWidget(plot)
+        root.addWidget(panel, 1)
+        button_row = q["QHBoxLayout"]()
+        button_row.addStretch(1)
+        close = q["QPushButton"]("Close")
+        close.clicked.connect(dialog.close)
+        button_row.addWidget(close)
+        root.addLayout(button_row)
+        self.assumption_detail_dialog = dialog
+        dialog.show()
+        dialog.raise_()
+
+    def _assumption_detail_sentence(self, key: str, payload: dict[str, Any]) -> str:
+        status = str(payload.get("status") or "").strip().upper()
+        summary = str(payload.get("summary") or "Insufficient evidence for this assumption check.").strip()
+        prefix = "Green:" if status == "PASS" else "Red:"
+        return f"{prefix} {summary}"
+
+    def _assumption_detail_stats(self, key: str, payload: dict[str, Any]) -> str:
+        coverage = self._assumption_coverage_text(key, payload)
+        if key == "baseline":
+            return (
+                f"baseline beta={_fmt_analysis_value(payload.get('beta'))}; "
+                f"two-sided p={_fmt_analysis_value(payload.get('p_two_sided'))}; "
+                f"{coverage}; df={_fmt_analysis_value(payload.get('df_resid'))}"
+            )
+        return (
+            f"interaction beta={_fmt_analysis_value(payload.get('interaction_beta'))}; "
+            f"one-sided p={_fmt_analysis_value(payload.get('p_one_sided_negative'))}; "
+            f"far-to-near gain={_fmt_analysis_value(payload.get('pps_far_to_near_gain_ms'))} ms; "
+            f"{coverage}; df={_fmt_analysis_value(payload.get('df_resid'))}"
+        )
 
     def _populate_dataset_combo(self) -> None:
         if not hasattr(self, "dataset_combo"):
@@ -2951,8 +4034,16 @@ QTextEdit#analysisDetailsText {
         if not data.has_analysis_tables:
             self.triage_hint.setText("Selected analysis dataset has no plotted analysis tables.")
             return
+        if self.assumption_detail_dialog is not None:
+            try:
+                self.assumption_detail_dialog.close()
+            except Exception:
+                pass
+            self.assumption_detail_dialog = None
         self.data = data
         self.current_dataset_id = dataset_id
+        self.current_analysis_level = "level1"
+        self._refresh_analysis_level_buttons()
         self.current_part_mode = data.default_part_mode
         self.current_condition_lens = default_condition_lens(data)
         self.current_quick_model = default_condition_model(data)
@@ -3034,20 +4125,7 @@ QTextEdit#analysisDetailsText {
             return "#a4631b"
         return "#9ba59d"
 
-    def _refresh_quality_badge(self) -> None:
-        status, reason = recording_quality_status(self.data)
-        label = str(getattr(self.data, "quality_label", "") or "Participant Run Quality")
-        self.quality_badge.setText(f"{label}: {status}")
-        if status == "PASS":
-            self.quality_badge.setStyleSheet("background: #dceee5; color: #174f3e; border: 1px solid #8dc3aa;")
-        elif status == "FAIL":
-            self.quality_badge.setStyleSheet("background: #f4dddd; color: #7b2323; border: 1px solid #d39a9a;")
-        else:
-            self.quality_badge.setStyleSheet("background: #ecefeb; color: #4f5b52; border: 1px solid #bcc7bd;")
-        self.quality_reason.setText(reason)
-
     def _refresh_quick(self) -> None:
-        self._refresh_quality_badge()
         observed_series = condition_lens_observed_series(self.data, self.current_condition_lens)
         if not observed_series and scopes_for_part_mode(self.data, self.current_part_mode):
             self.quick_mode = False
@@ -3081,9 +4159,7 @@ QTextEdit#analysisDetailsText {
         self.detail_text.setPlainText(self._quick_detail_text())
 
     def _quick_detail_text(self) -> str:
-        status, reason = recording_quality_status(self.data)
-        quality_label = str(getattr(self.data, "quality_label", "") or "Participant Run Quality")
-        lines = [f"{quality_label}: {status}", reason]
+        lines: list[str] = []
         if str(getattr(self.data, "dataset_kind", "") or "") == DATASET_KIND_POOL:
             lines.append(
                 f"Pool inclusion: {getattr(self.data, 'pool_included_count', 0)} PASS participant(s), "
@@ -3098,11 +4174,6 @@ QTextEdit#analysisDetailsText {
             wins = summary.get("model_wins_by_subcondition", {})
             if isinstance(wins, dict) and wins:
                 lines.append("Model wins by subcondition: " + ", ".join(f"{key} {value}" for key, value in sorted(wins.items())))
-        failures = self.data.recording_quality_gate.get("failures", [])
-        if isinstance(failures, list) and failures:
-            lines.append("")
-            lines.append("Serious exclusion criteria")
-            lines.extend(f"- {row.get('message', '')} ({row.get('evidence', '')})" for row in failures[:8] if isinstance(row, dict))
         return "\n".join(line for line in lines if line is not None)
 
     def _set_view(self, view: str) -> None:
@@ -3199,6 +4270,8 @@ QTextEdit#analysisDetailsText {
         self.q["QDesktopServices"].openUrl(self.q["QUrl"].fromLocalFile(str(target)))
 
     def _refresh(self) -> None:
+        self._refresh_response_quality_panel()
+        self._refresh_assumption_panel()
         if self.quick_mode:
             self._refresh_quick_button_styles()
             self._refresh_quick()
@@ -4556,10 +5629,16 @@ def prepare_last_or_latest_focus_session(
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> Path:
     """Open the last launchable session, falling back to the newest prepared setup."""
-    output_root = Path(session_root) if session_root is not None else active_output_folder(
-        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
-        fallback=DEFAULT_SESSION_ROOT,
-    )
+    validation_output_root = os.environ.get("PPS_FOCUS_VALIDATION_OUTPUT_ROOT", "").strip()
+    if session_root is not None:
+        output_root = Path(session_root)
+    elif validation_output_root:
+        output_root = Path(validation_output_root).expanduser()
+    else:
+        output_root = active_output_folder(
+            state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+            fallback=DEFAULT_SESSION_ROOT,
+        )
     pointer = load_last_experiment_pointer()
     session_text = str(pointer.get("session_manifest_path") or "").strip()
     session_manifest = Path(session_text) if session_text else Path()
@@ -4938,6 +6017,16 @@ def _read_json_dict(path: Any) -> dict[str, Any]:
     except Exception:
         return {}
     return data if isinstance(data, dict) else {}
+
+
+def _json_ready(value: Any) -> Any:
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, dict):
+        return {str(key): _json_ready(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_json_ready(item) for item in value]
+    return value
 
 
 def participant_ledger_path(output_root: Path | str) -> Path:
@@ -5492,10 +6581,16 @@ def prepare_profile_focus_session(
                 "timestamp_unix": time.time(),
             }
         )
-    output_root = Path(session_root) if session_root is not None else active_output_folder(
-        state_root=DEFAULT_DASHBOARD_STATE_ROOT,
-        fallback=DEFAULT_SESSION_ROOT,
-    )
+    validation_output_root = os.environ.get("PPS_FOCUS_VALIDATION_OUTPUT_ROOT", "").strip()
+    if session_root is not None:
+        output_root = Path(session_root)
+    elif validation_output_root:
+        output_root = Path(validation_output_root).expanduser()
+    else:
+        output_root = active_output_folder(
+            state_root=DEFAULT_DASHBOARD_STATE_ROOT,
+            fallback=DEFAULT_SESSION_ROOT,
+        )
     environment = _environment_design_and_run_setup(profile, output_root)
     if environment is not None:
         design, run_setup_manifest_path = environment
@@ -5578,6 +6673,126 @@ def _env_int(name: str) -> int | None:
         return int(value)
     except ValueError:
         return None
+
+
+def _validation_no_mouse_mode() -> bool:
+    return (
+        _env_flag("PPS_FOCUS_VALIDATION_DISABLE_MOUSE_CAPTURE")
+        or _env_flag("PPS_FOCUS_VALIDATION_DISABLE_CURSOR_RECENTER")
+        or _env_flag("PPS_FOCUS_VALIDATION_NO_MOUSE")
+    )
+
+
+def _validation_window_rect_from_env() -> tuple[int, int, int, int] | None:
+    value = os.environ.get("PPS_FOCUS_VALIDATION_WINDOW_RECT", "").strip()
+    if not value:
+        return None
+    parts = [part.strip() for part in value.replace(";", ",").split(",")]
+    if len(parts) != 4:
+        return None
+    try:
+        x, y, width, height = (int(float(part)) for part in parts)
+    except ValueError:
+        return None
+    if width <= 0 or height <= 0:
+        return None
+    return x, y, width, height
+
+
+def _validation_window_rect_for_display(q: dict[str, Any]) -> tuple[int, int, int, int] | None:
+    explicit = _validation_window_rect_from_env()
+    if explicit is not None:
+        return explicit
+    display = os.environ.get("PPS_FOCUS_VALIDATION_DISPLAY", "").strip().lower()
+    if not display:
+        return None
+    app = q["QApplication"].instance()
+    if app is None or not hasattr(app, "screens"):
+        return None
+    try:
+        screens = list(app.screens())
+    except Exception:
+        screens = []
+    if not screens:
+        return None
+
+    def _screen_area(screen: Any) -> Any:
+        try:
+            return screen.availableGeometry()
+        except Exception:
+            return screen.geometry()
+
+    def _screen_name(screen: Any) -> str:
+        try:
+            return str(screen.name()).strip().lower()
+        except Exception:
+            return ""
+
+    selected = None
+    if display == "primary":
+        try:
+            selected = app.primaryScreen()
+        except Exception:
+            selected = None
+    elif display in {"left", "display2", "2"}:
+        if display in {"display2", "2"}:
+            selected = next(
+                (screen for screen in screens if _screen_name(screen).endswith("display2")),
+                None,
+            )
+        if selected is None:
+            selected = min(screens, key=lambda screen: int(_screen_area(screen).x()))
+    elif display == "right":
+        selected = max(screens, key=lambda screen: int(_screen_area(screen).x()))
+    else:
+        selected = next((screen for screen in screens if _screen_name(screen) == display), None)
+    if selected is None:
+        return None
+
+    area = _screen_area(selected)
+    x = int(area.x())
+    y = int(area.y())
+    area_width = max(1, int(area.width()))
+    area_height = max(1, int(area.height()))
+    requested_width = _env_int("PPS_FOCUS_VALIDATION_RUNNER_WIDTH") or 820
+    width = max(560, min(int(requested_width), int(area_width * 0.48), area_width))
+    height = area_height
+    return x, y, width, height
+
+
+def _apply_window_rect(dialog: Any, rect: tuple[int, int, int, int] | None) -> None:
+    if rect is None:
+        return
+    x, y, width, height = rect
+    try:
+        dialog.setGeometry(int(x), int(y), int(width), int(height))
+    except Exception:
+        pass
+    try:
+        dialog.move(int(x), int(y))
+        dialog.resize(int(width), int(height))
+    except Exception:
+        pass
+
+
+def _prepare_validation_window_placement(
+    q: dict[str, Any],
+    dialog: Any,
+    rect: tuple[int, int, int, int] | None = None,
+) -> tuple[int, int, int, int] | None:
+    resolved = rect if rect is not None else _validation_window_rect_for_display(q)
+    if resolved is None:
+        return None
+    _apply_window_rect(dialog, resolved)
+    try:
+        for delay_ms in (0, 200, 500, 1000, 2000):
+            q["QTimer"].singleShot(
+                delay_ms,
+                lambda resolved=resolved: _apply_window_rect(dialog, resolved),
+            )
+    except Exception:
+        pass
+    return resolved
 
 
 def _path_is_within(path: str | Path, root: str | Path) -> bool:
@@ -5711,6 +6926,9 @@ class _ValidationFastAudioEngine:
                 )
                 for lead_time in lead_times:
                     progress_callback(lead_time)
+                    # Let the Qt drain timer process each synthetic cue before the next block replaces the timeline.
+                    time.sleep(0.005)
+                time.sleep(0.150)
         cursor = 0
         while cursor < frames_total and not self._stop_requested.is_set():
             frames = min(self.chunk_frames, frames_total - cursor)
@@ -6216,12 +7434,14 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
     topup_delay_max_ms = max(topup_delay_min_ms, _env_float("PPS_FOCUS_VALIDATION_TOPUP_DELAY_MAX_MS", 500.0))
     trial_end_margin_ms = max(0.0, _env_float("PPS_FOCUS_VALIDATION_TRIAL_END_MARGIN_MS", 650.0))
     backend_requested = os.environ.get("PPS_FOCUS_VALIDATION_MOUSE_BACKEND", "win32").strip().lower() or "win32"
+    responses_only = _env_flag("PPS_FOCUS_VALIDATION_PARTICIPANT_RESPONSES_ONLY")
     records: list[dict[str, Any]] = []
     scheduled_events: set[str] = set()
     scheduled_response_keys: set[str] = set()
     completed_events: set[str] = set()
     pending: list[dict[str, Any]] = []
     start_gate_state: dict[str, Any] = {}
+    part2_gate_state: dict[str, Any] = {}
     miss_keys: set[str] | None = None
     instruction_attempts: dict[int, tuple[int, float]] = {}
     loaded_manifest_state = {"path": str(getattr(window.package, "manifest_path", ""))}
@@ -6291,6 +7511,8 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
             pass
 
     def _submit_mock_setup_if_needed() -> None:
+        if responses_only:
+            return
         if bool(getattr(window, "demographics_submitted", False)):
             return
         try:
@@ -6315,6 +7537,7 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
         completed_events.clear()
         pending.clear()
         start_gate_state.clear()
+        part2_gate_state.clear()
         instruction_attempts.clear()
 
     def _reset_if_loaded_package_changed() -> None:
@@ -6581,6 +7804,8 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
         return "qtest"
 
     def _continue_instruction_if_needed() -> None:
+        if responses_only:
+            return
         request = window.pending_instruction_request
         if request is None:
             return
@@ -6601,17 +7826,7 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
             except Exception:
                 part2_pending = False
         if part2_pending:
-            button = getattr(window, "start_part2_button", None)
-            if button is not None and button.isEnabled():
-                backend = _click_widget(button, "Start Part 02", preferred_backend="qtest")
-                records.append(
-                    {
-                        "label": "Start Part 02",
-                        "mode": "part_transition",
-                        "backend": backend,
-                        "timestamp_unix": time.time(),
-                    }
-                )
+            _click_part2_start_gate(source="instruction")
             return
         backend = _press_primary_key(f"instruction: {label}")
         records.append(
@@ -6622,6 +7837,49 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
                 "timestamp_unix": time.time(),
             }
         )
+
+    def _part2_start_gate_ready() -> bool:
+        check_part2 = getattr(window, "_part2_start_gate_pending", None)
+        if callable(check_part2):
+            try:
+                if bool(check_part2()):
+                    return True
+            except Exception:
+                pass
+        for widget in (getattr(window, "start_part2_button", None), getattr(window, "start_button", None)):
+            try:
+                label = str(widget.text() or "")
+            except Exception:
+                label = ""
+            if widget is not None and widget.isEnabled() and label.strip() in {"Start Part 02", "Start Part 2"}:
+                return True
+        return False
+
+    def _click_part2_start_gate(*, source: str) -> bool:
+        if responses_only:
+            return False
+        if not _part2_start_gate_ready():
+            return False
+        now = time.perf_counter()
+        last_attempt = float(part2_gate_state.get("last_attempt_monotonic") or 0.0)
+        if now - last_attempt < 0.5:
+            return False
+        part2_gate_state["last_attempt_monotonic"] = now
+        for widget in (getattr(window, "start_part2_button", None), getattr(window, "start_button", None)):
+            if widget is None or not widget.isEnabled():
+                continue
+            backend = _click_widget(widget, "Start Part 02", preferred_backend="qtest")
+            records.append(
+                {
+                    "label": "Start Part 02",
+                    "mode": "part_transition",
+                    "source": source,
+                    "backend": backend,
+                    "timestamp_unix": time.time(),
+                }
+            )
+            return True
+        return False
 
     def _schedule_tactile_events() -> None:
         controller = window.controller
@@ -6793,13 +8051,19 @@ def _install_validation_participant_emulator(q: dict[str, Any], window: "FocusMo
             )
 
     def _poll() -> None:
+        _reset_if_loaded_package_changed()
+        if _click_part2_start_gate(source="result_boundary"):
+            q["QTimer"].singleShot(20, _poll)
+            return
         if window.result is not None:
             _validation_capture_part_snapshot(window, label="before_accept")
             q["QTimer"].singleShot(1000, window.dialog.accept)
             return
-        _reset_if_loaded_package_changed()
         _submit_mock_setup_if_needed()
+        part2_clicked = _click_part2_start_gate(source="poll")
         if (
+            not responses_only and
+            not part2_clicked and
             window.start_button.isEnabled()
             and _validation_start_gate_ready(records, start_gate_state, source="participant_emulator")
         ):
@@ -6983,6 +8247,347 @@ def _write_validation_launcher_report(
         handle.write(json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
 
+class _FocusCompanionBridge:
+    """Marshals companion API calls onto the Focus Mode Qt/UI thread."""
+
+    def __init__(self, window: "FocusModeWindow") -> None:
+        self.window = window
+
+    def _call(self, callback: Callable[[], dict[str, Any]], *, timeout_s: float = 5.0) -> dict[str, Any]:
+        if threading.get_ident() == getattr(self.window, "_ui_thread_id", None):
+            return callback()
+        future: Future[dict[str, Any]] = Future()
+        self.window._companion_command_queue.put((future, callback))
+        try:
+            return future.result(timeout=max(0.1, float(timeout_s)))
+        except FutureTimeoutError as exc:
+            raise CompanionCommandError(
+                "Focus Mode did not answer the companion request in time.",
+                status_code=503,
+                reason="ui_timeout",
+            ) from exc
+
+    def health(self) -> dict[str, Any]:
+        return self._call(self.window._companion_health, timeout_s=2.0)
+
+    def snapshot(self) -> dict[str, Any]:
+        return self._call(self.window._companion_snapshot, timeout_s=2.0)
+
+    def submit_setup(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._call(lambda: self.window._companion_submit_setup(payload), timeout_s=10.0)
+
+    def continue_instruction(self) -> dict[str, Any]:
+        return self._call(self.window._companion_continue_instruction, timeout_s=5.0)
+
+    def start_part(self, part_number: int) -> dict[str, Any]:
+        return self._call(lambda: self.window._companion_start_part(part_number), timeout_s=5.0)
+
+    def pause(self) -> dict[str, Any]:
+        return self._call(lambda: self.window._companion_set_paused(True), timeout_s=5.0)
+
+    def resume(self) -> dict[str, Any]:
+        return self._call(lambda: self.window._companion_set_paused(False), timeout_s=5.0)
+
+    def mobile_packages(self) -> dict[str, Any]:
+        return self._call(self.window._companion_mobile_packages, timeout_s=10.0)
+
+    def mobile_package_manifest(self, package_id: str) -> dict[str, Any]:
+        return self._call(lambda: self.window._companion_mobile_package_manifest(package_id), timeout_s=30.0)
+
+    def mobile_package_asset_path(self, package_id: str, asset_id: str) -> tuple[str, str]:
+        payload = self._call(
+            lambda: self.window._companion_mobile_package_asset_path(package_id, asset_id),
+            timeout_s=5.0,
+        )
+        return str(payload.get("path") or ""), str(payload.get("media_type") or "application/octet-stream")
+
+    def mobile_run_events(self, run_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._call(lambda: self.window._companion_mobile_run_events(run_id, payload), timeout_s=10.0)
+
+    def mobile_run_complete(self, run_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._call(lambda: self.window._companion_mobile_run_complete(run_id, payload), timeout_s=10.0)
+
+
+def _windows_wifi_direct_status() -> dict[str, Any]:
+    status = {
+        "available": False,
+        "adapter_detected": False,
+        "hosted_network_supported": False,
+        "wireless_display_supported": False,
+        "message": "Wi-Fi Direct status was not checked.",
+    }
+    try:
+        completed = subprocess.run(
+            ["netsh", "wlan", "show", "drivers"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=4,
+        )
+    except Exception as exc:  # noqa: BLE001 - status-only diagnostic
+        status["message"] = f"Wi-Fi Direct check unavailable: {exc}"
+        return status
+    output = str(completed.stdout or completed.stderr or "")
+    lower = output.lower()
+    status["wireless_display_supported"] = "wireless display supported" in lower and "yes" in lower
+    status["hosted_network_supported"] = "hosted network supported" in lower and "yes" in lower
+    try:
+        adapters = subprocess.run(
+            [
+                "powershell",
+                "-NoProfile",
+                "-Command",
+                "Get-CimInstance -ClassName Win32_NetworkAdapter | "
+                "Where-Object { $_.Name -match 'Wi-Fi Direct' } | "
+                "Select-Object -ExpandProperty Name",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=4,
+        )
+        status["adapter_detected"] = bool(str(adapters.stdout or "").strip())
+    except Exception:
+        status["adapter_detected"] = False
+    status["available"] = bool(status["adapter_detected"] or status["wireless_display_supported"])
+    if status["available"]:
+        status["message"] = (
+            "Wi-Fi Direct-capable Windows adapter detected. Use this fallback after the phone and PC are "
+            "joined to the same direct link; same-Wi-Fi LAN remains the primary transfer path."
+        )
+    else:
+        status["message"] = "No usable Windows Wi-Fi Direct adapter was detected. Use same-Wi-Fi LAN or the manual URI."
+    if "hosted network supported" in lower and not status["hosted_network_supported"]:
+        status["message"] += " Legacy hosted-network commands are not supported by this driver."
+    return status
+
+
+class _PhoneTransferBridge:
+    """Companion bridge for phone-owned experiment transfer without PC playback."""
+
+    def __init__(
+        self,
+        *,
+        packages: list[Any],
+        transfer_id: str,
+        profile_id: str,
+        participant_id: str,
+        port: int,
+    ) -> None:
+        self.packages = list(packages)
+        self.transfer_id = str(transfer_id or "")
+        self.profile_id = str(profile_id or "")
+        self.participant_id = str(participant_id or "")
+        self.port = int(port)
+        self.sequence = 0
+
+    def health(self) -> dict[str, Any]:
+        package_list = build_mobile_package_list(self.packages, phone_owned_session=True, include_block_audio=False)
+        package_rows = list(package_list.get("packages") or [])
+        return {
+            "schema": HEALTH_SCHEMA,
+            "service": "pps-phone-transfer",
+            "status": "ok",
+            "session_id": self.transfer_id,
+            "participant_id": self.participant_id,
+            "profile_id": self.profile_id,
+            "port": self.port,
+            "transfer_mode": "phone_export",
+            "mobile_runtime": {
+                "enabled": True,
+                "phone_owned_session": True,
+                "package_count": len(package_rows),
+                "active_package_id": str(package_list.get("active_package_id") or ""),
+                "mobile_runnable": bool(package_rows) and all(bool(item.get("mobile_runnable")) for item in package_rows),
+            },
+        }
+
+    def snapshot(self) -> dict[str, Any]:
+        self.sequence += 1
+        return {
+            "schema": SNAPSHOT_SCHEMA,
+            "sequence": self.sequence,
+            "server_unix_ms": int(time.time() * 1000),
+            "server_perf_counter_s": time.perf_counter(),
+            "connection_state": "phone_export_ready",
+            "allowed_commands": [],
+            "participant": {
+                "participant_id": self.participant_id,
+                "session_id": self.transfer_id,
+                "selected_participant_id": self.participant_id,
+            },
+            "setup": {
+                "submitted": True,
+                "ready": True,
+                "participant_name_present": False,
+                "name_sharing_opt_in": False,
+                "age": "",
+                "handedness": "",
+                "gender": "",
+            },
+            "part_status": {"available_parts": [], "selected_part": "", "current_package_part": "", "pending_start_part": ""},
+            "run_status": {
+                "running": False,
+                "paused": False,
+                "complete": False,
+                "state_label": "Phone export ready",
+                "event_label": "Phone owns the run session.",
+            },
+            "active_block": {"active": False, "running": False, "paused": False, "instruction_waiting": False},
+            "timeline": {"trial_rows": [], "tactile_cues": [], "clicks": [], "counts": {}},
+            "topup": {"draft_count": 0},
+            "instruction_gate": {"waiting": False, "part2_start_gate": False, "instruction_label": "", "button_label": ""},
+        }
+
+    def _phone_export_only(self) -> dict[str, Any]:
+        raise CompanionCommandError(
+            "This QR serves phone-owned experiment packages only.",
+            status_code=409,
+            reason="phone_export_only",
+        )
+
+    def submit_setup(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._phone_export_only()
+
+    def continue_instruction(self) -> dict[str, Any]:
+        return self._phone_export_only()
+
+    def start_part(self, part_number: int) -> dict[str, Any]:
+        return self._phone_export_only()
+
+    def pause(self) -> dict[str, Any]:
+        return self._phone_export_only()
+
+    def resume(self) -> dict[str, Any]:
+        return self._phone_export_only()
+
+    def mobile_packages(self) -> dict[str, Any]:
+        return build_mobile_package_list(self.packages, phone_owned_session=True, include_block_audio=False)
+
+    def mobile_package_manifest(self, package_id: str) -> dict[str, Any]:
+        package = self._package_for_id(package_id)
+        if package is None:
+            raise CompanionCommandError(status_code=404, reason="mobile_package_not_found")
+        return build_mobile_package_manifest(package, phone_owned_session=True, include_block_audio=False)
+
+    def mobile_package_asset_path(self, package_id: str, asset_id: str) -> tuple[str, str]:
+        package = self._package_for_id(package_id)
+        if package is None:
+            raise CompanionCommandError(status_code=404, reason="mobile_package_not_found")
+        try:
+            path = mobile_asset_path(package, package_id, asset_id)
+        except MobileRuntimePackageError as exc:
+            raise CompanionCommandError(str(exc), status_code=404, reason="mobile_asset_not_found") from exc
+        return str(path), "audio/wav"
+
+    def mobile_run_events(self, run_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "schema": "pps-mobile-run-events.v1",
+            "status": "accepted_phone_owned_no_pc_copy",
+            "run_id": str(run_id or ""),
+            "event_count": len(list((payload or {}).get("events") or [])),
+        }
+
+    def mobile_run_complete(self, run_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "schema": "pps-mobile-run-complete.v1",
+            "status": "accepted_phone_owned_no_pc_copy",
+            "run_id": str(run_id or ""),
+            "event_count": len(list((payload or {}).get("events") or [])),
+        }
+
+    def _package_for_id(self, package_id: str) -> Any | None:
+        clean = str(package_id or "").strip()
+        for package in self.packages:
+            if mobile_package_id(package) == clean:
+                return package
+        return None
+
+
+class _FocusTactileCalibrationCollector:
+    """Thread-safe target-click collector for tactile calibration trials."""
+
+    def __init__(self) -> None:
+        self._condition = threading.Condition()
+        self._trial: dict[str, Any] | None = None
+        self._first_response: dict[str, Any] | None = None
+        self._valid_response: dict[str, Any] | None = None
+
+    def start_trial(
+        self,
+        *,
+        trial_index: int,
+        phase: str,
+        level_percent: float,
+        is_catch: bool,
+        estimated_onset_perf: float,
+        valid_start_perf: float,
+        valid_end_perf: float,
+    ) -> None:
+        with self._condition:
+            self._trial = {
+                "trial_index": int(trial_index),
+                "phase": str(phase),
+                "level_percent": float(level_percent),
+                "is_catch": bool(is_catch),
+                "estimated_onset_perf": float(estimated_onset_perf),
+                "valid_start_perf": float(valid_start_perf),
+                "valid_end_perf": float(valid_end_perf),
+            }
+            self._first_response = None
+            self._valid_response = None
+            self._condition.notify_all()
+
+    def record_click(
+        self,
+        *,
+        in_target: bool = True,
+        x: int | None = None,
+        y: int | None = None,
+        source: str = "",
+    ) -> dict[str, Any] | None:
+        now = time.perf_counter()
+        with self._condition:
+            trial = dict(self._trial or {})
+            if not trial:
+                return None
+            valid = float(trial["valid_start_perf"]) <= now <= float(trial["valid_end_perf"])
+            response = {
+                "trial_index": int(trial.get("trial_index") or 0),
+                "response_perf": now,
+                "response_latency_ms": (now - float(trial["estimated_onset_perf"])) * 1000.0,
+                "valid_response": bool(valid),
+                "response_x": "" if x is None else int(x),
+                "response_y": "" if y is None else int(y),
+                "response_in_target": bool(in_target),
+                "response_source": str(source or ""),
+            }
+            if self._first_response is None:
+                self._first_response = dict(response)
+            if valid and self._valid_response is None:
+                self._valid_response = dict(response)
+                self._condition.notify_all()
+            return response
+
+    def wait_for_response(self, *, until_perf: float) -> dict[str, Any] | None:
+        with self._condition:
+            while self._valid_response is None:
+                remaining = float(until_perf) - time.perf_counter()
+                if remaining <= 0:
+                    break
+                self._condition.wait(timeout=min(0.1, remaining))
+            if self._valid_response is not None:
+                return dict(self._valid_response)
+            return None if self._first_response is None else dict(self._first_response)
+
+    def finish_trial(self) -> None:
+        with self._condition:
+            self._trial = None
+            self._first_response = None
+            self._valid_response = None
+            self._condition.notify_all()
+
+
 class FocusModeWindow:
     """Dashboard-styled native participant runner window."""
 
@@ -6995,6 +8600,10 @@ class FocusModeWindow:
         enable_missed_trial_topup: bool = True,
         controller_factory: Callable[..., Any] | None = None,
         layout_profile: FocusLayoutProfile | None = None,
+        companion_enabled: bool = True,
+        companion_host: str = DEFAULT_COMPANION_HOST,
+        companion_port: int = DEFAULT_COMPANION_PORT,
+        companion_advertise_ip: str = "",
     ) -> None:
         self.q = q
         self.package = package
@@ -7004,6 +8613,35 @@ class FocusModeWindow:
         self.output_12_volume_percent, self.output_34_volume_percent = _load_output_channel_volume_percentages()
         self.controller_factory = controller_factory
         self.messages: queue.Queue[tuple[str, Any]] = queue.Queue()
+        self._ui_thread_id = threading.get_ident()
+        self._companion_command_queue: queue.Queue[tuple[Future[dict[str, Any]], Callable[[], dict[str, Any]]]] = queue.Queue()
+        self._companion_sequence = 0
+        self._companion_snapshot_signature = ""
+        self.companion_enabled = bool(companion_enabled)
+        self.companion_config = RunnerCompanionConfig(
+            host=str(companion_host or DEFAULT_COMPANION_HOST),
+            port=int(companion_port or DEFAULT_COMPANION_PORT),
+            advertise_ip=str(companion_advertise_ip or choose_lan_ipv4() or ""),
+        )
+        self.companion_token = generate_companion_token()
+        self.companion_service: RunnerCompanionService | None = None
+        self.companion_pairing_uri = build_pairing_uri(
+            host=self.companion_config.advertised_host,
+            port=self.companion_config.port,
+            session_id=str(getattr(package, "session_id", "") or ""),
+            token=self.companion_token,
+        )
+        self._validation_companion_pairing_report = os.environ.get(
+            "PPS_FOCUS_VALIDATION_COMPANION_PAIRING_REPORT", ""
+        ).strip()
+        self.companion_qr_png: bytes = b""
+        self.companion_tab_index = -1
+        self.companion_status_message = "Phone companion is disabled." if not self.companion_enabled else "Phone companion starting."
+        if self.companion_enabled:
+            try:
+                self.companion_qr_png = pairing_qr_png_bytes(self.companion_pairing_uri)
+            except Exception as exc:
+                self.companion_status_message = f"Phone companion QR unavailable: {exc}"
         self.controller: SessionRunnerController | None = None
         self._continuous_external_labrecorder_state: dict[str, Any] | None = None
         self._owned_audio_engine: Any | None = None
@@ -7023,7 +8661,15 @@ class FocusModeWindow:
         self.participant_statuses: dict[str, dict[str, Any]] = {}
         self._run_active = False
         self._run_paused = False
+        self._experiment_control_ready = False
         self._output_test_active = False
+        self._tactile_calibration_active = False
+        self._tactile_calibration_worker: threading.Thread | None = None
+        self._tactile_calibration_cancel_event: threading.Event | None = None
+        self._tactile_calibration_started_global_listener = False
+        self._tactile_calibration_collector = _FocusTactileCalibrationCollector()
+        self.tactile_calibration_monitor_dialog: Any | None = None
+        self._latest_tactile_calibration: dict[str, Any] = {}
         self._timeline_perf_anchor: float | None = None
         self.timeline_state = TactileTimelineState()
         self.timeline_preview_state = TactileTimelineState()
@@ -7190,17 +8836,21 @@ class FocusModeWindow:
         self.start_button.setObjectName("startButton")
         self.start_button.setEnabled(False)
         self.pause_button = q["QPushButton"]("Pause")
-        self.stop_button = q["QPushButton"]("Stop")
+        self.resume_button = q["QPushButton"]("Resume")
+        self.stop_button = q["QPushButton"]("Stop", self.dialog)
         self.stop_button.setObjectName("dangerButton")
+        self.stop_button.setVisible(False)
         self.close_button = q["QPushButton"]("Close", self.dialog)
         self.close_button.setVisible(False)
         self.pause_button.setEnabled(False)
+        self.resume_button.setEnabled(False)
         self.stop_button.setEnabled(False)
-        for button in (self.start_button, self.pause_button, self.stop_button, self.close_button):
+        for button in (self.start_button, self.pause_button, self.resume_button, self.stop_button, self.close_button):
             button.setAutoDefault(False)
             button.setDefault(False)
         self.start_button.clicked.connect(self.start)
-        self.pause_button.clicked.connect(self._toggle_pause)
+        self.pause_button.clicked.connect(self._pause)
+        self.resume_button.clicked.connect(self._resume)
         self.stop_button.clicked.connect(self._stop)
         self.close_button.clicked.connect(self._close)
         self._install_primary_action_shortcuts()
@@ -7210,9 +8860,20 @@ class FocusModeWindow:
         self.output_levels_panel = output_levels_panel
         output_levels_panel.setMinimumWidth(profile.response_panel_side)
         output_levels_panel.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Fixed)
-        output_levels_panel_min_height = max(124, (profile.input_min_height * 4) + (profile.panel_margin * 2) + profile.panel_spacing)
+        output_levels_heading_height = max(16, profile.input_min_height - 8)
+        output_test_button_min_height = profile.button_min_height + 4
+        output_test_spacing = max(10, profile.panel_spacing)
+        output_test_stack_min_height = (output_test_button_min_height * 2) + output_test_spacing
+        output_levels_panel_min_height = max(
+            150,
+            output_levels_heading_height
+            + (profile.input_min_height * 2)
+            + output_test_stack_min_height
+            + (profile.panel_margin * 2)
+            + (profile.panel_spacing * 3),
+        )
         output_levels_panel.setMinimumHeight(output_levels_panel_min_height)
-        output_levels_panel.setMaximumHeight(max(output_levels_panel_min_height, 156))
+        output_levels_panel.setMaximumHeight(output_levels_panel_min_height)
         (
             output_12_row,
             self.output_12_volume_slider,
@@ -7234,25 +8895,42 @@ class FocusModeWindow:
             label="Output 3/4",
             value=self.output_34_volume_percent,
             object_name="output34VolumeSlider",
-            tooltip="Linear gain for tactile output 3 and its output 4 mirror.",
+            tooltip="Linear gain for tactile output 3 and its output 4 mirror. Capped at 0.5% for participant comfort.",
             on_change=lambda value: self._set_output_volume("output_3_4", value),
+            maximum_percent=TACTILE_OUTPUT_34_MAX_PERCENT,
         )
         output_levels_layout.addWidget(output_12_row)
         output_levels_layout.addWidget(output_34_row)
-        output_test_controls = q["QHBoxLayout"]()
+        output_test_controls = q["QGridLayout"]()
         output_test_controls.setContentsMargins(0, 0, 0, 0)
-        output_test_controls.setSpacing(6)
+        output_test_controls.setHorizontalSpacing(6)
+        output_test_controls.setVerticalSpacing(output_test_spacing)
         self.test_audio_button = q["QPushButton"]("Test Audio")
         self.test_audio_button.setObjectName("testAudioOutputButton")
-        self.test_audio_button.setToolTip("Play the standardized spoken test through Komplete outputs 1/2 using the current Output 1/2 level.")
+        self.test_audio_button.setMinimumHeight(output_test_button_min_height)
+        self.test_audio_button.setToolTip("Play one Study 5 pink frontal looming burst-train stimulus through Komplete outputs 1/2 using the current Output 1/2 level.")
         self.test_audio_button.clicked.connect(lambda _checked=False: self._run_output_test("audio"))
         self.test_tactile_button = q["QPushButton"]("Test Tactile")
         self.test_tactile_button.setObjectName("testTactileOutputButton")
-        self.test_tactile_button.setToolTip("Play four standardized tactile pulses one second apart through output 3, mirrored to output 4, using the current Output 3/4 level.")
+        self.test_tactile_button.setMinimumHeight(output_test_button_min_height)
+        self.test_tactile_button.setToolTip("Play four standardized tactile pulses one second apart through output 3, mirrored to output 4, using the capped current Output 3/4 level.")
         self.test_tactile_button.clicked.connect(lambda _checked=False: self._run_output_test("tactile"))
-        output_test_controls.addWidget(self.test_audio_button)
-        output_test_controls.addWidget(self.test_tactile_button)
+        self.tactile_calibration_button = q["QPushButton"]("Tactile Threshold")
+        self.tactile_calibration_button.setObjectName("tactileCalibrationButton")
+        self.tactile_calibration_button.setMinimumHeight(output_test_button_min_height)
+        self.tactile_calibration_button.setToolTip(
+            "Run the participant-specific 2-down/1-up tactile threshold staircase. Verbally instruct the participant to press the mouse whenever a tactile pulse is felt."
+        )
+        self.tactile_calibration_button.clicked.connect(lambda _checked=False: self._run_tactile_calibration())
+        output_test_controls.setColumnStretch(0, 1)
+        output_test_controls.setColumnStretch(1, 1)
+        output_test_controls.setRowMinimumHeight(0, output_test_button_min_height)
+        output_test_controls.setRowMinimumHeight(1, output_test_button_min_height)
+        output_test_controls.addWidget(self.test_audio_button, 0, 0)
+        output_test_controls.addWidget(self.test_tactile_button, 0, 1)
+        output_test_controls.addWidget(self.tactile_calibration_button, 1, 0, 1, 2)
         output_levels_layout.addLayout(output_test_controls)
+        self._pre_run_controls.append(self.tactile_calibration_button)
 
         output_panel, output_layout = _panel(q, "Output Summary", profile=profile)
         self.output_panel = output_panel
@@ -7274,7 +8952,7 @@ class FocusModeWindow:
         self.output_summary.setSizePolicy(q["QSizePolicy"].Policy.Expanding, q["QSizePolicy"].Policy.Expanding)
         self.output_summary.setPlainText("Session outputs will appear here after the run.")
         output_layout.addWidget(self.output_summary)
-        show_output_summary_panel = profile.screen_class != "constrained"
+        show_output_summary_panel = profile.screen_class not in {"constrained", "compact"}
         output_panel.setVisible(show_output_summary_panel)
         output_stack_cell = q["QWidget"]()
         output_stack_cell.setObjectName("outputStackCell")
@@ -7428,10 +9106,11 @@ class FocusModeWindow:
         self.setup_submit_button.setMinimumHeight(profile.button_min_height)
         self.setup_submit_button.clicked.connect(self._submit_participant_setup)
         data_logging_layout.addWidget(self.setup_submit_button)
-        self.setup_status_label = q["QLabel"]("Submit setup to unlock Experiment Control.")
+        self.setup_status_label = q["QLabel"]("Submit setup to unlock start controls.")
         self.setup_status_label.setObjectName("mutedLabel")
         self.setup_status_label.setWordWrap(True)
         data_logging_layout.addWidget(self.setup_status_label)
+
         self._pre_run_controls.extend(
             [
                 self.participant_code_combo,
@@ -7535,6 +9214,31 @@ class FocusModeWindow:
         data_layout.addStretch(1)
         self.data_logging_tab_index = self.mode_tabs.addTab(data_panel, "Data Logging")
 
+        companion_panel, companion_layout = _panel(q, "Companion Android App (Experimental)", profile=profile)
+        self.companion_panel = companion_panel
+        companion_layout.setSpacing(max(10, profile.panel_spacing))
+        self.companion_status_label = q["QLabel"](self.companion_status_message)
+        self.companion_status_label.setObjectName("mutedLabel")
+        self.companion_status_label.setWordWrap(True)
+        companion_layout.addWidget(self.companion_status_label)
+        self.companion_qr_label = q["QLabel"]("")
+        self.companion_qr_label.setObjectName("companionQrCode")
+        self.companion_qr_label.setFixedSize(320, 320)
+        self.companion_qr_label.setAlignment(q["Qt"].AlignmentFlag.AlignCenter)
+        companion_layout.addWidget(self.companion_qr_label, 0, q["Qt"].AlignmentFlag.AlignHCenter)
+        self.companion_endpoint_label = q["QLabel"]("")
+        self.companion_endpoint_label.setObjectName("metricValue")
+        self.companion_endpoint_label.setWordWrap(True)
+        companion_layout.addWidget(self.companion_endpoint_label)
+        self.companion_uri_field = q["QLineEdit"]("")
+        self.companion_uri_field.setObjectName("companionPairingUriField")
+        self.companion_uri_field.setReadOnly(True)
+        self.companion_uri_field.setToolTip("Pairing URI encoded in the QR code.")
+        companion_layout.addWidget(self.companion_uri_field)
+        companion_layout.addStretch(1)
+        self.companion_tab_index = self.mode_tabs.addTab(companion_panel, "Companion Android App (Experimental)")
+        self._refresh_companion_panel()
+
         self.processing_splitter = None
 
         processing_panel, progress_layout = _panel(q, "Experiment Control", profile=profile)
@@ -7556,7 +9260,7 @@ class FocusModeWindow:
         run_controls_layout.setSpacing(6)
         run_controls_layout.addWidget(self.start_button)
         run_controls_layout.addWidget(self.pause_button)
-        run_controls_layout.addWidget(self.stop_button)
+        run_controls_layout.addWidget(self.resume_button)
         run_controls_layout.addWidget(self.instruction_button)
         run_controls_layout.addStretch(1)
         progress_layout.addWidget(self.run_controls_widget)
@@ -7661,7 +9365,7 @@ class FocusModeWindow:
         progress_layout.addStretch(1)
         self.workspace_splitter.addWidget(processing_panel)
         self.experiment_control_tab_index = self.mode_tabs.addTab(self.experiment_control_tab, "Experiment Control")
-        self.mode_tabs.setTabEnabled(self.experiment_control_tab_index, False)
+        self.mode_tabs.setTabEnabled(self.experiment_control_tab_index, True)
         self.mode_tabs.setCurrentIndex(self.data_logging_tab_index)
 
         self.workspace_splitter.setStretchFactor(0, 1)
@@ -7688,7 +9392,9 @@ class FocusModeWindow:
         self._refresh_run_plan(select_default=True)
         self._install_operator_action_shortcuts()
         self._apply_participant_ledger_to_fields(self.package.participant_id)
+        self._apply_latest_tactile_calibration(self.package.participant_id, show_message=False)
         self._refresh_participant_ledger_summary()
+        self._set_experiment_control_tab_ready(False)
 
     def _set_experiment_control_tab_ready(self, ready: bool, *, switch: bool = False) -> None:
         tabs = getattr(self, "mode_tabs", None)
@@ -7696,18 +9402,713 @@ class FocusModeWindow:
             return
         index = int(getattr(self, "experiment_control_tab_index", 1))
         if 0 <= index < tabs.count():
-            tabs.setTabEnabled(index, bool(ready))
+            tabs.setTabEnabled(index, True)
+            self._experiment_control_ready = bool(ready)
+            self._set_output_level_controls_enabled(bool(ready))
+            if getattr(self, "part_buttons", None):
+                self._refresh_part_controls()
             if ready and switch:
                 tabs.setCurrentIndex(index)
-            elif not ready and tabs.currentIndex() == index:
-                data_index = int(getattr(self, "data_logging_tab_index", 0))
-                if 0 <= data_index < tabs.count():
-                    tabs.setCurrentIndex(data_index)
 
     def _set_setup_status_message(self, message: str) -> None:
         label = getattr(self, "setup_status_label", None)
         if label is not None:
             label.setText(str(message or ""))
+
+    def _tactile_calibration_allowed(self) -> bool:
+        thread_alive = bool(self.thread is not None and self.thread.is_alive())
+        setup_state_safe = (
+            (not self.demographics_submitted and self.controller is None)
+            or (self.demographics_submitted and self.controller is not None)
+        )
+        return bool(
+            getattr(self, "tactile_calibration_button", None) is not None
+            and setup_state_safe
+            and not self._run_active
+            and not thread_alive
+            and not self._output_test_active
+            and not self._tactile_calibration_active
+            and bool(str(getattr(self.package, "participant_id", "") or "").strip())
+        )
+
+    def _set_tactile_calibration_button_enabled(self) -> None:
+        button = getattr(self, "tactile_calibration_button", None)
+        if button is not None:
+            button.setEnabled(self._tactile_calibration_allowed())
+
+    def _current_tactile_calibration_metadata(self) -> dict[str, Any]:
+        selected = self._selected_participant_code() or str(getattr(self.package, "participant_id", "") or "")
+        current = dict(self._latest_tactile_calibration or {})
+        if str(current.get("participant_id") or "") != str(selected):
+            loaded = load_latest_calibration(self.output_root, selected)
+            current = dict(loaded or {})
+        if not current:
+            return {}
+        keys = {
+            "schema",
+            "participant_id",
+            "accepted",
+            "status",
+            "created_at",
+            "protocol",
+            "threshold_method",
+            "threshold_definition",
+            "final_output_34_percent",
+            "detection_threshold_output_34_percent",
+            "recommended_output_34_percent",
+            "confirmation_level_output_34_percent",
+            "staircase_target_detection_rate",
+            "staircase_reversals",
+            "staircase_reversal_levels_percent",
+            "staircase_reversal_levels_used_percent",
+            "staircase_signal_trials",
+            "staircase_hits",
+            "staircase_misses",
+            "staircase_hit_rate",
+            "staircase_false_alarm_rate",
+            "staircase_catch_trials",
+            "staircase_catch_false_alarms",
+            "confirmation_hits",
+            "confirmation_misses",
+            "confirmation_consecutive_hits",
+            "confirmation_clean_catches",
+            "confirmation_catch_trials",
+            "confirmation_catch_false_alarms",
+            "confirmation_required_consecutive_hits",
+            "confirmation_required_clean_catches",
+            "confirmation_signal_trials",
+            "catch_false_alarms",
+            "catch_trials",
+            "confirmation_hit_rate",
+            "confirmation_false_alarm_rate",
+            "validation_hit_rate",
+            "validation_false_alarm_rate",
+            "trial_count",
+            "timing",
+            "adaptive_staircase",
+            "staircase_criteria",
+            "confirmation_criteria",
+            "report_path",
+            "trials_csv_path",
+            "latest_path",
+        }
+        payload = {key: current.get(key, "") for key in keys if key in current}
+        for percent_key in (
+            "final_output_34_percent",
+            "detection_threshold_output_34_percent",
+            "recommended_output_34_percent",
+            "confirmation_level_output_34_percent",
+        ):
+            if percent_key in payload:
+                try:
+                    payload[percent_key] = _coerce_tactile_output_percent(float(payload.get(percent_key)))
+                except (TypeError, ValueError):
+                    payload[percent_key] = payload.get(percent_key, "")
+        if payload:
+            payload["max_output_34_percent"] = TACTILE_OUTPUT_34_MAX_PERCENT
+        return payload
+
+    def _apply_latest_tactile_calibration(self, participant_id: str | None = None, *, show_message: bool = True) -> bool:
+        participant = str(participant_id or self._selected_participant_code() or self.package.participant_id or "").strip()
+        latest = load_latest_calibration(self.output_root, participant)
+        if latest is None:
+            self._latest_tactile_calibration = {}
+            return False
+        raw_percent = float(latest.get("recommended_output_34_percent", latest["final_output_34_percent"]))
+        percent = _coerce_tactile_output_percent(raw_percent)
+        self._latest_tactile_calibration = dict(latest)
+        if percent != raw_percent:
+            self._latest_tactile_calibration["legacy_recommended_output_34_percent_before_cap"] = raw_percent
+            for percent_key in (
+                "final_output_34_percent",
+                "detection_threshold_output_34_percent",
+                "recommended_output_34_percent",
+                "confirmation_level_output_34_percent",
+            ):
+                if percent_key in self._latest_tactile_calibration:
+                    self._latest_tactile_calibration[percent_key] = percent
+            self._latest_tactile_calibration["max_output_34_percent"] = TACTILE_OUTPUT_34_MAX_PERCENT
+        self._set_output_volume("output_3_4", percent)
+        if show_message and hasattr(self, "event_label"):
+            if percent != raw_percent:
+                self.event_label.setText(
+                    f"{participant}: loaded tactile threshold {raw_percent:g}%, clamped to {percent:g}%"
+                )
+            else:
+                self.event_label.setText(f"{participant}: loaded tactile threshold {percent:g}%")
+        return True
+
+    def _refresh_companion_panel(self) -> None:
+        status_label = getattr(self, "companion_status_label", None)
+        if status_label is not None:
+            status_label.setText(str(self.companion_status_message or ""))
+        endpoint_label = getattr(self, "companion_endpoint_label", None)
+        if endpoint_label is not None:
+            if self.companion_enabled:
+                endpoint_label.setText(
+                    f"http://{self.companion_config.advertised_host}:{self.companion_config.port}"
+                )
+                endpoint_label.setToolTip(self.companion_pairing_uri)
+            else:
+                endpoint_label.setText("Disabled for this run.")
+                endpoint_label.setToolTip("")
+        uri_field = getattr(self, "companion_uri_field", None)
+        if uri_field is not None:
+            uri_field.setText(self.companion_pairing_uri if self.companion_enabled else "")
+        self._refresh_companion_qr_label(getattr(self, "companion_qr_label", None), size=320)
+
+    def _refresh_companion_qr_label(self, qr_label: Any | None, *, size: int | None = None) -> None:
+        if qr_label is None:
+            return
+        if not self.companion_enabled:
+            qr_label.setText("Off")
+            qr_label.setPixmap(self.q["QPixmap"]())
+            return
+        if not self.companion_qr_png:
+            qr_label.setText("QR unavailable")
+            qr_label.setPixmap(self.q["QPixmap"]())
+            return
+        pixmap = self.q["QPixmap"]()
+        if pixmap.loadFromData(self.companion_qr_png):
+            qr_label.setText("")
+            target_size = qr_label.size()
+            if size is not None:
+                target_size = self.q["QSize"](int(size), int(size))
+            qr_label.setPixmap(
+                pixmap.scaled(
+                    target_size,
+                    self.q["Qt"].AspectRatioMode.KeepAspectRatio,
+                    self.q["Qt"].TransformationMode.SmoothTransformation,
+                )
+            )
+        else:
+            qr_label.setText("QR unavailable")
+            qr_label.setPixmap(self.q["QPixmap"]())
+
+    def _refresh_companion_pairing_payload(self) -> None:
+        self.companion_pairing_uri = build_pairing_uri(
+            host=self.companion_config.advertised_host,
+            port=self.companion_config.port,
+            session_id=str(getattr(self.package, "session_id", "") or ""),
+            token=self.companion_token,
+        )
+        if self.companion_enabled:
+            try:
+                self.companion_qr_png = pairing_qr_png_bytes(self.companion_pairing_uri)
+                if not str(self.companion_status_message or "").strip():
+                    self.companion_status_message = "Phone companion ready."
+            except Exception as exc:
+                self.companion_qr_png = b""
+                self.companion_status_message = f"Phone companion QR unavailable: {exc}"
+        self._write_validation_companion_pairing_report(service_started=self.companion_service is not None)
+        self._refresh_companion_panel()
+
+    def _write_validation_companion_pairing_report(self, *, service_started: bool) -> None:
+        path_text = str(getattr(self, "_validation_companion_pairing_report", "") or "").strip()
+        if not path_text:
+            return
+        path = Path(path_text).expanduser()
+        payload = {
+            "schema": "pps-focus-mode-validation-companion-pairing.v1",
+            "created_at": datetime.now().isoformat(timespec="seconds"),
+            "companion_enabled": bool(self.companion_enabled),
+            "service_started": bool(service_started),
+            "status_message": str(self.companion_status_message or ""),
+            "endpoint": f"http://{self.companion_config.advertised_host}:{self.companion_config.port}",
+            "pairing_uri": str(self.companion_pairing_uri or ""),
+            "session_id": str(getattr(self.package, "session_id", "") or ""),
+            "session_group_id": str(getattr(self.package, "session_group_id", "") or ""),
+            "part_session_id": str(getattr(self.package, "part_session_id", "") or ""),
+            "participant_id": str(getattr(self.package, "participant_id", "") or ""),
+            "token_header": "X-PPS-Companion-Token",
+            "validation_only": True,
+        }
+        os.makedirs(_output_filesystem_path(path.parent), exist_ok=True)
+        with open(_output_filesystem_path(path), "w", encoding="utf-8") as handle:
+            handle.write(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+
+    def _start_companion_service(self) -> None:
+        if not self.companion_enabled:
+            self.companion_status_message = "Phone companion is disabled."
+            self._refresh_companion_panel()
+            return
+        if self.companion_service is not None:
+            return
+        self._refresh_companion_pairing_payload()
+        bridge = _FocusCompanionBridge(self)
+        try:
+            self.companion_service = RunnerCompanionService(
+                bridge,
+                token=self.companion_token,
+                config=self.companion_config,
+            )
+            self.companion_service.start()
+            self.companion_status_message = "Scan to pair a trusted phone on this LAN."
+        except Exception as exc:
+            self.companion_service = None
+            self.companion_status_message = f"Phone companion could not start: {exc}"
+        self._write_validation_companion_pairing_report(service_started=self.companion_service is not None)
+        self._refresh_companion_panel()
+
+    def _stop_companion_service(self) -> None:
+        service = self.companion_service
+        self.companion_service = None
+        if service is None:
+            return
+        try:
+            service.stop()
+        finally:
+            self.companion_status_message = "Phone companion stopped."
+            self._refresh_companion_panel()
+
+    def _drain_companion_commands(self) -> None:
+        while not self._companion_command_queue.empty():
+            future, callback = self._companion_command_queue.get_nowait()
+            if future.cancelled():
+                continue
+            try:
+                future.set_result(callback())
+            except Exception as exc:  # noqa: BLE001 - propagate API failures to the HTTP thread.
+                future.set_exception(exc)
+
+    def _companion_health(self) -> dict[str, Any]:
+        return {
+            "schema": HEALTH_SCHEMA,
+            "service": "pps-runner-companion",
+            "status": "ok" if self.companion_enabled else "disabled",
+            "snapshot_schema": SNAPSHOT_SCHEMA,
+            "session_id": str(getattr(self.package, "session_id", "") or ""),
+            "participant_id": str(getattr(self.package, "participant_id", "") or ""),
+            "port": int(self.companion_config.port),
+            "token_header": "X-PPS-Companion-Token",
+            "mobile_runtime": self._companion_mobile_runtime_payload(),
+        }
+
+    def _companion_mobile_runtime_payload(self) -> dict[str, Any]:
+        try:
+            package_list = build_mobile_package_list(self._companion_mobile_available_packages())
+        except Exception as exc:  # noqa: BLE001 - surfaced as a phone capability warning.
+            return {
+                "enabled": False,
+                "package_count": 0,
+                "active_package_id": "",
+                "mobile_runnable": False,
+                "warnings": [str(exc)],
+            }
+        packages = list(package_list.get("packages") or [])
+        active = dict(packages[0]) if packages else {}
+        return {
+            "enabled": True,
+            "package_count": len(packages),
+            "active_package_id": str(package_list.get("active_package_id") or ""),
+            "mobile_runnable": bool(active.get("mobile_runnable")),
+            "warnings": list(active.get("warnings") or []),
+            "runtime_limitations": list(active.get("runtime_limitations") or []),
+        }
+
+    def _companion_mobile_packages(self) -> dict[str, Any]:
+        return build_mobile_package_list(self._companion_mobile_available_packages())
+
+    def _companion_mobile_package_manifest(self, package_id: str) -> dict[str, Any]:
+        package = self._companion_mobile_package_for_id(package_id)
+        if package is None:
+            raise CompanionCommandError(status_code=404, reason="mobile_package_not_found")
+        return build_mobile_package_manifest(package)
+
+    def _companion_mobile_package_asset_path(self, package_id: str, asset_id: str) -> dict[str, Any]:
+        package = self._companion_mobile_package_for_id(package_id)
+        if package is None:
+            raise CompanionCommandError(status_code=404, reason="mobile_package_not_found")
+        try:
+            path = mobile_asset_path(package, package_id, asset_id)
+        except MobileRuntimePackageError as exc:
+            raise CompanionCommandError(str(exc), status_code=404, reason="mobile_asset_not_found") from exc
+        return {"path": str(path), "media_type": "audio/wav"}
+
+    def _companion_mobile_run_events(self, run_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        package = self._companion_mobile_package_for_id(str(payload.get("package_id") or ""))
+        if package is None:
+            raise CompanionCommandError(status_code=404, reason="mobile_package_not_found")
+        try:
+            result = write_mobile_runtime_events(
+                package,
+                output_root=_package_output_root(package),
+                run_id=run_id,
+                payload=dict(payload or {}),
+                complete=False,
+            )
+        except MobileRuntimePackageError as exc:
+            raise CompanionCommandError(str(exc), status_code=409, reason="mobile_runtime_upload_rejected") from exc
+        _append_output_diary_event(
+            "mobile_phone_runtime_events_uploaded",
+            package=package,
+            payload={
+                "run_id": result.get("run_id", ""),
+                "package_id": result.get("package_id", ""),
+                "event_count": result.get("event_count", 0),
+                "artifact_path": result.get("artifact_path", ""),
+            },
+        )
+        return result
+
+    def _companion_mobile_run_complete(self, run_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        package = self._companion_mobile_package_for_id(str(payload.get("package_id") or ""))
+        if package is None:
+            raise CompanionCommandError(status_code=404, reason="mobile_package_not_found")
+        try:
+            result = write_mobile_runtime_events(
+                package,
+                output_root=_package_output_root(package),
+                run_id=run_id,
+                payload=dict(payload or {}),
+                complete=True,
+            )
+        except MobileRuntimePackageError as exc:
+            raise CompanionCommandError(str(exc), status_code=409, reason="mobile_runtime_upload_rejected") from exc
+        _append_output_diary_event(
+            "mobile_phone_runtime_completed",
+            package=package,
+            payload={
+                "run_id": result.get("run_id", ""),
+                "package_id": result.get("package_id", ""),
+                "event_count": result.get("event_count", 0),
+                "artifact_path": result.get("artifact_path", ""),
+            },
+        )
+        return result
+
+    def _companion_mobile_available_packages(self) -> list[Any]:
+        packages: list[Any] = [self.package]
+        seen = {mobile_package_id(self.package)}
+        for raw_path in list(getattr(self.package, "sibling_part_manifest_paths", []) or []):
+            try:
+                sibling = load_run_package(Path(raw_path))
+            except Exception:
+                continue
+            package_id = mobile_package_id(sibling)
+            if package_id in seen:
+                continue
+            seen.add(package_id)
+            packages.append(sibling)
+        return packages
+
+    def _companion_mobile_package_for_id(self, package_id: str) -> Any | None:
+        clean = str(package_id or "").strip()
+        for package in self._companion_mobile_available_packages():
+            if mobile_package_id(package) == clean:
+                return package
+        return None
+
+    def _companion_select_combo_data(self, combo: Any, value: str) -> bool:
+        clean = str(value or "").strip()
+        index = combo.findData(clean)
+        if index < 0:
+            for candidate in range(combo.count()):
+                if str(combo.itemText(candidate) or "").strip().lower() == clean.lower():
+                    index = candidate
+                    break
+        if index < 0:
+            return False
+        combo.setCurrentIndex(index)
+        return True
+
+    def _companion_allowed_commands(self) -> list[str]:
+        allowed: list[str] = []
+        if bool(self.result is not None and bool(getattr(self.result, "completed", False))):
+            return allowed
+        thread_alive = bool(self.thread is not None and self.thread.is_alive())
+        setup_allowed = bool(not self._run_active and not thread_alive)
+        if setup_allowed:
+            allowed.append("setup")
+        if self.pending_instruction_request is not None and not self._part2_start_gate_pending():
+            allowed.append("continue_instruction")
+        if self.demographics_submitted and self.controller is not None and not thread_alive:
+            start_key = self._start_button_part_key()
+            if start_key == "1" and not self._part2_start_gate_pending():
+                allowed.append("start_part_1")
+            if start_key == "2" or self._part2_start_gate_pending():
+                allowed.append("start_part_2")
+        pause_button = getattr(self, "pause_button", None)
+        resume_button = getattr(self, "resume_button", None)
+        if self.controller is not None and self._run_active:
+            if bool(self._run_paused):
+                if resume_button is not None and resume_button.isEnabled():
+                    allowed.append("resume")
+            elif pause_button is not None and pause_button.isEnabled():
+                allowed.append("pause")
+        return allowed
+
+    def _companion_setup_payload(self) -> dict[str, Any]:
+        failures = self._participant_setup_failures() if not self.demographics_submitted else []
+        return {
+            "submitted": bool(self.demographics_submitted),
+            "ready": bool(self.demographics_submitted and self.controller is not None),
+            "required_missing": failures,
+            "participant_code": self._selected_participant_code() or str(getattr(self.package, "participant_id", "") or ""),
+            "participant_name": str(self.participant_name_input.text() or ""),
+            "participant_name_present": bool(str(self.participant_name_input.text() or "").strip()),
+            "name_sharing_opt_in": bool(self.include_name_lsl_checkbox.isChecked()),
+            "age": str(self.age_input.text() or ""),
+            "handedness": str(self.handedness_combo.currentData() or ""),
+            "gender": str(self.gender_combo.currentData() or ""),
+        }
+
+    def _companion_run_plan_payload(self) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        active = self.active_display_block_index
+        completed = set(getattr(self, "completed_display_block_indices", set()) or set())
+        for item in list(getattr(self, "all_block_plan_items", []) or []):
+            row = dict(item)
+            try:
+                number = int(row.get("number") or 0)
+            except (TypeError, ValueError):
+                number = 0
+            if active is not None and number == int(active):
+                status = "active"
+            elif number in completed:
+                status = "complete"
+            else:
+                status = "pending"
+            row["status"] = status
+            rows.append(row)
+        return rows
+
+    def _companion_active_block_payload(self, *, server_perf_counter_s: float) -> dict[str, Any]:
+        state = self.timeline_state
+        elapsed = max(0.0, float(state.elapsed_s or 0.0))
+        duration = max(0.0, float(state.duration_s or 0.0))
+        if duration > 0:
+            elapsed = min(elapsed, duration)
+        anchor = self._timeline_perf_anchor
+        if anchor is None:
+            anchor = server_perf_counter_s - elapsed
+        return {
+            "active": bool(state.active),
+            "part_number": str(state.part_number or ""),
+            "phase_label": str(state.phase_label or ""),
+            "block_index": str(state.block_index or ""),
+            "block_label": str(state.block_label or ""),
+            "display_block_index": self.active_display_block_index,
+            "duration_s": duration,
+            "elapsed_s": elapsed,
+            "last_anchor_server_perf_counter_s": float(anchor),
+            "running": bool(self._run_active and state.active),
+            "paused": bool(self._run_paused),
+            "instruction_waiting": bool(self.pending_instruction_request is not None),
+        }
+
+    def _companion_timeline_payload(self) -> dict[str, Any]:
+        state = self.timeline_state
+        trial_rows = [
+            {
+                "trial_number": segment.trial_number,
+                "trial_uid": segment.trial_uid,
+                "start_s": segment.start_s,
+                "end_s": segment.end_s,
+                "clip_label": segment.clip_label,
+                "trial_label": segment.trial_label,
+                "noise_type": segment.noise_type,
+                "soa_ms": segment.soa_ms,
+                "family": segment.family,
+            }
+            for segment in state.trial_segments
+        ]
+        instruction_rows = [
+            {
+                "slot": segment.slot,
+                "label": segment.label,
+                "start_s": segment.start_s,
+                "end_s": segment.end_s,
+                "color": segment.color,
+            }
+            for segment in state.instruction_segments
+        ]
+        cues = [
+            {
+                "cue_id": cue.cue_id,
+                "trial_number": cue.trial_number,
+                "trial_uid": cue.trial_uid,
+                "time_s": cue.time_s,
+                "sample_index": cue.sample_index,
+                "soa_ms": cue.soa_ms,
+                "family": cue.family,
+                "row_label": cue.row_label,
+                "clip_label": cue.clip_label,
+                "trial_label": cue.trial_label,
+                "noise_type": cue.noise_type,
+                "recentered": cue.recentered,
+                "status": state.cue_status(cue),
+            }
+            for cue in state.cues
+        ]
+        clicks = [
+            {
+                "click_id": marker.click_id,
+                "time_s": marker.time_s,
+                "trial_uid": marker.trial_uid,
+                "response_status": marker.response_status,
+                "cue_id": marker.cue_id,
+                "cue_trial_uid": marker.cue_trial_uid,
+                "rt_s": marker.rt_s,
+            }
+            for marker in state.click_markers
+        ]
+        return {
+            "trial_rows": trial_rows,
+            "instruction_rows": instruction_rows,
+            "tactile_cues": cues,
+            "clicks": clicks,
+            "counts": {
+                "tactile_total": len(state.cues),
+                "tactile_passed": state.passed_count(),
+                "clicks": state.click_count(),
+                "recentered": state.recentered_count(),
+                "planned_tactile_cues": int(getattr(self, "planned_tactile_cue_count", 0) or 0),
+            },
+        }
+
+    def _companion_instruction_gate_payload(self) -> dict[str, Any]:
+        request = self.pending_instruction_request
+        if request is None:
+            return {"waiting": False}
+        context = dict(request.get("context") or {})
+        return {
+            "waiting": True,
+            "request_id": id(request),
+            "part2_start_gate": bool(self._part2_start_gate_pending()),
+            "instruction_label": str(context.get("instruction_label") or "instruction"),
+            "button_label": str(context.get("button_label") or "Continue"),
+            "next_action": str(context.get("next_action") or ""),
+            "context": context,
+        }
+
+    def _companion_snapshot(self) -> dict[str, Any]:
+        self._tick_tactile_clock()
+        server_perf = time.perf_counter()
+        state_payload = {
+            "connection_state": "online",
+            "allowed_commands": self._companion_allowed_commands(),
+            "participant": {
+                "participant_id": str(getattr(self.package, "participant_id", "") or ""),
+                "selected_participant_id": self._selected_participant_code(),
+                "session_id": str(getattr(self.package, "session_id", "") or ""),
+                "session_group_id": str(getattr(self.package, "session_group_id", "") or ""),
+                "part_session_id": str(getattr(self.package, "part_session_id", "") or ""),
+            },
+            "setup": self._companion_setup_payload(),
+            "part_status": {
+                "available_parts": self._available_part_keys(),
+                "selected_part": self._ensure_selected_part_key(),
+                "current_package_part": self._current_package_part_key(),
+                "pending_start_part": self._pending_start_part_key(),
+            },
+            "run_status": {
+                "state_label": str(self.run_state_chip.text() if hasattr(self, "run_state_chip") else ""),
+                "progress_label": str(self.progress_label.text() if hasattr(self, "progress_label") else ""),
+                "event_label": str(self.event_label.text() if hasattr(self, "event_label") else ""),
+                "running": bool(self._run_active),
+                "paused": bool(self._run_paused),
+                "thread_alive": bool(self.thread is not None and self.thread.is_alive()),
+                "complete": bool(self.result is not None and bool(getattr(self.result, "completed", False))),
+            },
+            "run_plan": self._companion_run_plan_payload(),
+            "active_block": self._companion_active_block_payload(server_perf_counter_s=server_perf),
+            "timeline": self._companion_timeline_payload(),
+            "topup": {
+                "enabled": bool(self._topup_slots_enabled_for_plan()),
+                "draft_count": len(self._visible_topup_draft_items()),
+            },
+            "instruction_gate": self._companion_instruction_gate_payload(),
+            "mobile_runtime": self._companion_mobile_runtime_payload(),
+        }
+        signature = json.dumps(state_payload, sort_keys=True, default=str)
+        if signature != self._companion_snapshot_signature:
+            self._companion_sequence += 1
+            self._companion_snapshot_signature = signature
+        return {
+            "schema": SNAPSHOT_SCHEMA,
+            "sequence": int(self._companion_sequence),
+            "server_unix_ms": int(time.time() * 1000),
+            "server_perf_counter_s": server_perf,
+            **state_payload,
+        }
+
+    def _companion_submit_setup(self, payload: dict[str, Any]) -> dict[str, Any]:
+        if self._run_active or (self.thread is not None and self.thread.is_alive()):
+            raise CompanionCommandError(reason="setup_locked_while_running")
+        participant_code = str(payload.get("participant_code") or payload.get("participant_id") or "").strip()
+        selected = self._selected_participant_code() or str(getattr(self.package, "participant_id", "") or "")
+        if participant_code and participant_code != selected:
+            raise CompanionCommandError(reason="participant_switching_is_laptop_only")
+        name = str(payload.get("participant_name") or payload.get("name") or "").strip()
+        age = str(payload.get("age") or payload.get("age_years") or "").strip()
+        handedness = str(payload.get("handedness") or "").strip()
+        gender = str(payload.get("gender") or "").strip()
+        share_name = bool(
+            payload.get("name_sharing_opt_in")
+            if "name_sharing_opt_in" in payload
+            else payload.get("include_name_in_lsl", payload.get("share_participant_name", False))
+        )
+        self.participant_name_input.setText(name)
+        self.age_input.setText(age)
+        self.include_name_lsl_checkbox.setChecked(share_name)
+        if handedness and not self._companion_select_combo_data(self.handedness_combo, handedness):
+            raise CompanionCommandError(reason="invalid_handedness")
+        if gender and not self._companion_select_combo_data(self.gender_combo, gender):
+            raise CompanionCommandError(reason="invalid_gender")
+        if not self._submit_participant_setup():
+            raise CompanionCommandError(reason="setup_incomplete")
+        return self._companion_snapshot()
+
+    def _companion_continue_instruction(self) -> dict[str, Any]:
+        if self.pending_instruction_request is None:
+            raise CompanionCommandError(reason="no_instruction_gate")
+        if self._part2_start_gate_pending():
+            raise CompanionCommandError(reason="use_start_part_2")
+        if not self._approve_pending_instruction_continue(source="phone companion"):
+            raise CompanionCommandError(reason="continue_instruction_failed")
+        return self._companion_snapshot()
+
+    def _companion_start_part(self, part_number: int) -> dict[str, Any]:
+        part = int(part_number)
+        thread_alive = bool(self.thread is not None and self.thread.is_alive())
+        if part == 2 and self._part2_start_gate_pending():
+            self._start_part2_gate(source="phone companion")
+            return self._companion_snapshot()
+        if thread_alive or self._run_active:
+            raise CompanionCommandError(reason="run_already_active")
+        if not self.demographics_submitted or self.controller is None:
+            raise CompanionCommandError(reason="setup_required")
+        target_key = str(part)
+        if target_key not in self._available_part_keys() and target_key != self._start_button_part_key():
+            raise CompanionCommandError(reason="part_not_available")
+        if target_key != self._start_button_part_key():
+            self._select_part_key(target_key, preview_first=True)
+        if target_key != self._start_button_part_key():
+            raise CompanionCommandError(reason=f"start_part_{part}_not_available")
+        if not self.start_button.isEnabled() and not self._part2_start_gate_pending():
+            raise CompanionCommandError(reason=f"start_part_{part}_not_allowed")
+        self.start()
+        return self._companion_snapshot()
+
+    def _companion_set_paused(self, paused: bool) -> dict[str, Any]:
+        desired = bool(paused)
+        pause_button = getattr(self, "pause_button", None)
+        resume_button = getattr(self, "resume_button", None)
+        if self.controller is None or not self._run_active:
+            raise CompanionCommandError(reason="pause_not_allowed")
+        if bool(self._run_paused) == desired:
+            return self._companion_snapshot()
+        active_button = pause_button if desired else resume_button
+        if active_button is None or not active_button.isEnabled():
+            raise CompanionCommandError(reason="pause_not_allowed")
+        if desired:
+            self._pause()
+        else:
+            self._resume()
+        if bool(self._run_paused) != desired:
+            raise CompanionCommandError(reason="pause_state_not_changed")
+        return self._companion_snapshot()
 
     def _install_response_click_filter(self) -> None:
         app = self.q["QApplication"].instance()
@@ -7763,6 +10164,16 @@ class FocusModeWindow:
 
     def _start_global_response_click_listener(self) -> bool:
         if self._offscreen_platform():
+            return False
+        if _env_flag("PPS_FOCUS_VALIDATION_DISABLE_MOUSE_CAPTURE"):
+            self._global_response_click_listener_error = "disabled_by_validation"
+            _append_output_diary_event(
+                "global_response_click_listener_disabled",
+                package=self.package,
+                capture_options=self.capture_options.as_dict(),
+                payload={"reason": "PPS_FOCUS_VALIDATION_DISABLE_MOUSE_CAPTURE"},
+                create=True,
+            )
             return False
         with self._global_response_click_listener_lock:
             if self._global_response_click_listener is not None:
@@ -7826,6 +10237,17 @@ class FocusModeWindow:
         except Exception:
             pass
 
+    def _start_tactile_calibration_response_listener(self) -> None:
+        with self._global_response_click_listener_lock:
+            already_running = self._global_response_click_listener is not None
+        started = self._start_global_response_click_listener()
+        self._tactile_calibration_started_global_listener = bool(started and not already_running)
+
+    def _stop_tactile_calibration_response_listener(self) -> None:
+        if self._tactile_calibration_started_global_listener:
+            self._stop_global_response_click_listener()
+        self._tactile_calibration_started_global_listener = False
+
     def _object_is_target_button(self, watched: Any) -> bool:
         current = watched
         while current is not None:
@@ -7853,6 +10275,31 @@ class FocusModeWindow:
             return False
         self._refresh_target_global_bounds()
         return self._cached_target_contains_global_xy(x, y)
+
+    def _tactile_calibration_target_widget(self) -> Any | None:
+        monitor = getattr(self, "tactile_calibration_monitor_dialog", None)
+        target = getattr(monitor, "target_button", None) if monitor is not None else None
+        if target is not None and target.isVisible():
+            return target
+        return getattr(self, "target_button", None)
+
+    def _tactile_calibration_target_center(self) -> tuple[int | None, int | None, str]:
+        target = self._tactile_calibration_target_widget()
+        if target is None:
+            return None, None, "unavailable"
+        return _widget_screen_center(target)
+
+    def _tactile_calibration_contains_global_xy(self, x: int | None, y: int | None) -> bool:
+        if x is None or y is None:
+            return False
+        target = self._tactile_calibration_target_widget()
+        if target is None:
+            return False
+        try:
+            point = target.mapFromGlobal(self.q["QPoint"](int(x), int(y)))
+            return bool(target.rect().contains(point))
+        except Exception:
+            return self._target_contains_global_xy(x, y)
 
     def _target_last_click_global_xy(self) -> tuple[int | None, int | None]:
         value = getattr(self.target_button, "last_click_global_pos", None)
@@ -8012,6 +10459,23 @@ class FocusModeWindow:
         )
 
     def _handle_global_response_mouse_click(self, x: Any, y: Any) -> None:
+        if self._tactile_calibration_active:
+            clean_x, clean_y = self._normalize_response_click_xy(x, y)
+            in_target = self._tactile_calibration_contains_global_xy(clean_x, clean_y)
+            payload = self._tactile_calibration_collector.record_click(
+                in_target=in_target,
+                x=clean_x,
+                y=clean_y,
+                source="global_mouse_listener",
+            )
+            if payload:
+                self.messages.put(
+                    (
+                        "tactile_calibration_click",
+                        payload,
+                    )
+                )
+            return
         if not self._run_active or self.controller is None or self.pending_instruction_request is not None:
             return
         clean_x, clean_y = self._normalize_response_click_xy(x, y)
@@ -8086,7 +10550,7 @@ class FocusModeWindow:
         available = set(self._available_part_keys())
         selected = self._ensure_selected_part_key()
         for part_key, button in getattr(self, "part_buttons", {}).items():
-            enabled = part_key in available
+            enabled = part_key in available and bool(getattr(self, "_experiment_control_ready", False))
             button.setEnabled(enabled)
             button.setChecked(enabled and part_key == selected)
             if enabled:
@@ -8840,6 +11304,7 @@ class FocusModeWindow:
             self.participant_decrement_button.setEnabled(can_change and index > 0)
         if hasattr(self, "participant_increment_button"):
             self.participant_increment_button.setEnabled(can_change and 0 <= index < count - 1)
+        self._set_tactile_calibration_button_enabled()
 
     def _participant_ledger_entry_for(self, participant_id: str) -> dict[str, Any]:
         entry = participant_ledger_entry(self.output_root, participant_id)
@@ -8884,6 +11349,7 @@ class FocusModeWindow:
             "handedness": str(runner_metadata.get("handedness") or ""),
             "gender": str(runner_metadata.get("gender") or ""),
             "include_name_in_lsl": bool(runner_metadata.get("include_name_in_lsl")),
+            "tactile_calibration": _json_ready(runner_metadata.get("tactile_calibration") or {}),
             "submitted_at": now,
             "updated_at": now,
             "session_id": str(getattr(self.package, "session_id", "") or ""),
@@ -8912,6 +11378,14 @@ class FocusModeWindow:
         selected = self._selected_participant_code() or str(getattr(self.package, "participant_id", "") or "").strip()
         status = statuses.get(selected, {})
         setup_text = "setup saved" if self._participant_ledger_entry_for(selected) else "setup not saved"
+        calibration = load_latest_calibration(self.output_root, selected)
+        if calibration:
+            percent = _coerce_tactile_output_percent(
+                calibration.get("recommended_output_34_percent", calibration["final_output_34_percent"])
+            )
+            calibration_text = f"tactile threshold {percent:g}%"
+        else:
+            calibration_text = "tactile threshold not calibrated"
         data_text = self._participant_data_summary(status)
         collected_others = [
             participant
@@ -8925,7 +11399,7 @@ class FocusModeWindow:
             other_text = f"Other completed: {preview}."
         else:
             other_text = "No other completed data."
-        self.participant_status_summary_label.setText(f"{selected}: {setup_text}; {data_text}. {other_text}")
+        self.participant_status_summary_label.setText(f"{selected}: {setup_text}; {calibration_text}; {data_text}. {other_text}")
 
     def _populate_participant_code_combo(self, preferred: str = "") -> None:
         if not hasattr(self, "participant_code_combo"):
@@ -9091,6 +11565,8 @@ class FocusModeWindow:
         self._clear_participant_details()
         self._refresh_loaded_package_display()
         self._populate_participant_code_combo(self.package.participant_id)
+        self._apply_participant_ledger_to_fields(self.package.participant_id)
+        self._refresh_companion_pairing_payload()
         if hasattr(self, "mode_tabs"):
             self._set_experiment_control_tab_ready(False)
             self.mode_tabs.setCurrentIndex(self.data_logging_tab_index)
@@ -9098,6 +11574,9 @@ class FocusModeWindow:
             self.timer.start(100)
         if message and hasattr(self, "event_label"):
             self.event_label.setText(message)
+        self._apply_latest_tactile_calibration(self.package.participant_id, show_message=False)
+        self._refresh_participant_ledger_summary()
+        self._set_tactile_calibration_button_enabled()
         _append_output_diary_event(
             "runner_part_package_loaded",
             package=self.package,
@@ -9123,7 +11602,7 @@ class FocusModeWindow:
                 combo.setCurrentIndex(0)
         if hasattr(self, "setup_submit_button"):
             self.setup_submit_button.setEnabled(True)
-        self._set_setup_status_message("Submit setup to unlock Experiment Control.")
+            self._set_setup_status_message("Submit setup to unlock start controls.")
 
     def _refresh_loaded_package_display(self) -> None:
         profile = self.layout_profile
@@ -9258,7 +11737,7 @@ class FocusModeWindow:
         if engine is None:
             return
         audio_gain = _output_volume_gain(self.output_12_volume_percent)
-        tactile_gain = _output_volume_gain(self.output_34_volume_percent)
+        tactile_gain = _output_volume_gain(self.output_34_volume_percent, maximum=TACTILE_OUTPUT_34_MAX_PERCENT)
         setter = getattr(engine, "set_main_volume", None)
         if callable(setter):
             try:
@@ -9269,8 +11748,8 @@ class FocusModeWindow:
             setattr(engine, "audio_volume", audio_gain)
         setattr(engine, "tactile_volume", tactile_gain)
 
-    def _set_output_volume(self, target: str, value: float) -> None:
-        percent = _coerce_volume_percent(value)
+    def _set_output_volume(self, target: str, value: float, *, persist: bool = True) -> None:
+        percent = _coerce_tactile_output_percent(value) if target == "output_3_4" else _coerce_volume_percent(value)
         if target == "output_1_2":
             self.output_12_volume_percent = percent
             if hasattr(self, "output_12_volume_slider"):
@@ -9285,7 +11764,9 @@ class FocusModeWindow:
             self.output_34_volume_percent = percent
             if hasattr(self, "output_34_volume_slider"):
                 previous = self.output_34_volume_slider.blockSignals(True)
-                self.output_34_volume_slider.setValue(_volume_percent_to_slider_value(percent))
+                self.output_34_volume_slider.setValue(
+                    _volume_percent_to_slider_value(percent, maximum=TACTILE_OUTPUT_34_MAX_PERCENT)
+                )
                 self.output_34_volume_slider.blockSignals(previous)
             if hasattr(self, "output_34_volume_percent_box"):
                 previous = self.output_34_volume_percent_box.blockSignals(True)
@@ -9295,17 +11776,31 @@ class FocusModeWindow:
         controller_engine = getattr(self.controller, "audio_engine", None) if self.controller is not None else None
         if controller_engine is not self._owned_audio_engine:
             self._apply_output_volumes_to_engine(controller_engine)
-        _persist_output_channel_volumes(
-            self.output_12_volume_percent,
-            self.output_34_volume_percent,
-        )
+        if persist:
+            _persist_output_channel_volumes(
+                self.output_12_volume_percent,
+                self.output_34_volume_percent,
+            )
 
     def _set_output_test_buttons_enabled(self, enabled: bool) -> None:
-        enabled = bool(enabled) and not self._run_active and not self._output_test_active
+        enabled = bool(enabled) and not self._run_active and not self._output_test_active and not self._tactile_calibration_active
         for button_name in ("test_audio_button", "test_tactile_button"):
             button = getattr(self, button_name, None)
             if button is not None:
                 button.setEnabled(enabled)
+        self._set_tactile_calibration_button_enabled()
+
+    def _set_output_level_controls_enabled(self, enabled: bool) -> None:
+        for control_name in (
+            "output_12_volume_slider",
+            "output_12_volume_percent_box",
+            "output_34_volume_slider",
+            "output_34_volume_percent_box",
+        ):
+            control = getattr(self, control_name, None)
+            if control is not None:
+                control.setEnabled(bool(enabled))
+        self._set_output_test_buttons_enabled(bool(enabled))
 
     def _window_geometry_payload(self, geometry: Any | None = None) -> dict[str, int]:
         rect = geometry if geometry is not None else self.dialog.geometry()
@@ -9502,6 +11997,316 @@ class FocusModeWindow:
             create=True,
         )
 
+    def _tactile_calibration_package_context(self) -> dict[str, Any]:
+        return {
+            "run_setup_manifest_path": str(getattr(self.package, "source_run_setup_manifest_path", "") or ""),
+            "session_id": str(getattr(self.package, "session_id", "") or ""),
+            "session_group_id": str(getattr(self.package, "session_group_id", "") or ""),
+            "part_session_id": str(getattr(self.package, "part_session_id", "") or ""),
+            "part_number": str(getattr(self.package, "part_number", "") or ""),
+        }
+
+    def _open_tactile_calibration_monitor(self, participant: str) -> None:
+        existing = getattr(self, "tactile_calibration_monitor_dialog", None)
+        if existing is not None:
+            try:
+                existing.close()
+            except Exception:
+                pass
+        monitor = _create_tactile_calibration_monitor_dialog(self.q, self, participant)
+        self.tactile_calibration_monitor_dialog = monitor
+        def _clear_monitor_reference(_code: int, monitor_ref: Any = monitor) -> None:
+            if getattr(self, "tactile_calibration_monitor_dialog", None) is monitor_ref:
+                self.tactile_calibration_monitor_dialog = None
+
+        try:
+            monitor.finished.connect(_clear_monitor_reference)
+        except Exception:
+            pass
+        monitor.show()
+        try:
+            monitor.raise_()
+            monitor.activateWindow()
+        except Exception:
+            pass
+
+    def _abort_tactile_calibration(self) -> None:
+        if self._tactile_calibration_cancel_event is not None:
+            self._tactile_calibration_cancel_event.set()
+        self.event_label.setText("Tactile threshold assay abort requested.")
+        monitor = getattr(self, "tactile_calibration_monitor_dialog", None)
+        if monitor is not None:
+            try:
+                monitor.status_label.setText("Abort requested; waiting for the current trial to finish.")
+                monitor.abort_button.setEnabled(False)
+            except Exception:
+                pass
+
+    def _request_tactile_calibration_recenter_from_worker(self, payload: dict[str, Any]) -> dict[str, Any]:
+        if threading.get_ident() == self._ui_thread_id:
+            return self._move_cursor_to_tactile_calibration_target(payload)
+        future: Future[dict[str, Any]] = Future()
+        self.messages.put(("tactile_calibration_recenter", {"context": dict(payload), "future": future}))
+        try:
+            return dict(future.result(timeout=1.0))
+        except Exception as exc:
+            return {"mode": "recenter_timeout", "error": str(exc), **dict(payload)}
+
+    def _return_from_successful_tactile_calibration(self) -> None:
+        monitor = getattr(self, "tactile_calibration_monitor_dialog", None)
+        if monitor is not None:
+            try:
+                monitor.accept()
+            except Exception:
+                try:
+                    monitor.close()
+                except Exception:
+                    pass
+            if getattr(self, "tactile_calibration_monitor_dialog", None) is monitor:
+                self.tactile_calibration_monitor_dialog = None
+        try:
+            self.mode_tabs.setCurrentIndex(self.experiment_control_tab_index)
+        except Exception:
+            pass
+        try:
+            self.dialog.raise_()
+            self.dialog.activateWindow()
+        except Exception:
+            pass
+        focus_target = self.start_button if self.start_button.isEnabled() else self.tactile_calibration_button
+        try:
+            focus_target.setFocus()
+        except Exception:
+            pass
+
+    def _run_tactile_calibration(self) -> bool:
+        if not self._tactile_calibration_allowed():
+            thread_alive = bool(self.thread is not None and self.thread.is_alive())
+            if self._output_test_active:
+                self.event_label.setText("Wait for the current output test before running the tactile threshold assay.")
+            elif self._tactile_calibration_active:
+                self.event_label.setText("Tactile threshold assay is already running.")
+            elif self._run_active or thread_alive:
+                self.event_label.setText("Tactile threshold assay is available before experiment playback starts.")
+            else:
+                self.event_label.setText("Select or submit a participant before running the tactile threshold assay.")
+            return False
+        try:
+            engine = self._output_test_engine()
+        except Exception as exc:
+            self.event_label.setText(f"Tactile threshold assay could not initialize audio: {exc}")
+            return False
+        if engine is None:
+            self.event_label.setText("Tactile threshold assay could not initialize audio.")
+            return False
+        participant = self._selected_participant_code() or self.package.participant_id
+        cancel_event = threading.Event()
+        self._tactile_calibration_cancel_event = cancel_event
+        self._tactile_calibration_active = True
+        self._set_output_test_buttons_enabled(False)
+        self.target_button.setEnabled(True)
+        self._refresh_target_global_bounds()
+        self._open_tactile_calibration_monitor(participant)
+        self._start_tactile_calibration_response_listener()
+        self.event_label.setText(
+            "Adaptive tactile threshold assay running: instruct participant to press the mouse when a tactile pulse is felt."
+        )
+        playback_before = self._output_channel_volume_payload()
+        output_12_percent = self.output_12_volume_percent
+        _append_output_diary_event(
+            "tactile_calibration_started",
+            package=self.package,
+            participant_id=participant,
+            capture_options=self.capture_options.as_dict(),
+            payload={
+                "protocol": TACTILE_CALIBRATION_PROTOCOL_NAME,
+                "playback_output_levels_before": playback_before,
+            },
+            create=True,
+        )
+
+        def _progress(payload: dict[str, Any]) -> None:
+            self.messages.put(("tactile_calibration_progress", dict(payload)))
+
+        def _failure_report(message: str) -> dict[str, Any]:
+            now = datetime.now().isoformat(timespec="seconds")
+            return {
+                "schema": CALIBRATION_SCHEMA,
+                "participant_id": participant,
+                "created_at": now,
+                "completed_at": now,
+                "protocol": TACTILE_CALIBRATION_PROTOCOL_NAME,
+                "accepted": False,
+                "status": "failed",
+                "message": message,
+                "final_output_34_percent": "",
+                "detection_threshold_output_34_percent": "",
+                "recommended_output_34_percent": "",
+                "staircase_hit_rate": "",
+                "staircase_false_alarm_rate": "",
+                "staircase_summary": {},
+                "adaptive_staircase": {},
+                "validation_hit_rate": "",
+                "validation_false_alarm_rate": "",
+                "output_root": str(self.output_root),
+                "playback_output_levels_before": playback_before,
+                **self._tactile_calibration_package_context(),
+            }
+
+        def _worker() -> None:
+            runner: TactileCalibrationRunner | None = None
+            try:
+                runner = TactileCalibrationRunner(
+                    audio_engine=engine,
+                    response_collector=self._tactile_calibration_collector,
+                    participant_id=participant,
+                    output_root=self.output_root,
+                    source_pulse_path=TACTILE_CALIBRATION_SOURCE_PULSE_PATH,
+                    current_output_34_percent=self.output_34_volume_percent,
+                    playback_output_levels_before=playback_before,
+                    package_context=self._tactile_calibration_package_context(),
+                    progress_callback=_progress,
+                    recenter_callback=self._request_tactile_calibration_recenter_from_worker,
+                    cancel_event=cancel_event,
+                )
+                result = runner.run()
+                report = dict(result.get("report") or {})
+                trials = [dict(trial) for trial in list(result.get("trials") or [])]
+            except Exception as exc:
+                report = _failure_report(str(exc))
+                trials = [] if runner is None else [dict(trial) for trial in runner.trials]
+            if bool(report.get("accepted")):
+                try:
+                    final_percent = float(
+                        report.get("recommended_output_34_percent", report.get("final_output_34_percent"))
+                    )
+                except (TypeError, ValueError):
+                    final_percent = self.output_34_volume_percent
+                report["playback_output_levels_after"] = _output_channel_volume_payload(output_12_percent, final_percent)
+            else:
+                report["playback_output_levels_after"] = playback_before
+            try:
+                paths = save_calibration_attempt(
+                    output_root=self.output_root,
+                    participant_id=participant,
+                    report=report,
+                    trials=trials,
+                )
+                path_payload = {key: str(value) for key, value in paths.items()}
+            except Exception as exc:
+                report["accepted"] = False
+                report["status"] = "failed"
+                report["message"] = f"{report.get('message') or 'Threshold assay failed'}; could not save artifacts: {exc}"
+                path_payload = {}
+            self.messages.put(
+                (
+                    "tactile_calibration_done",
+                    {
+                        "participant_id": participant,
+                        "report": report,
+                        "trials": trials,
+                        "paths": path_payload,
+                    },
+                )
+            )
+
+        self._tactile_calibration_worker = threading.Thread(target=_worker, name="pps-tactile-calibration", daemon=True)
+        self._tactile_calibration_worker.start()
+        return True
+
+    def _handle_tactile_calibration_progress(self, payload: dict[str, Any]) -> None:
+        message = str(payload.get("message") or "Adaptive tactile threshold assay running")
+        self.event_label.setText(message)
+        monitor = getattr(self, "tactile_calibration_monitor_dialog", None)
+        if str(payload.get("ui_event") or "") == "confirmation_update":
+            if "next_level_percent" in payload:
+                try:
+                    self._set_output_volume("output_3_4", float(payload.get("next_level_percent")), persist=False)
+                except Exception:
+                    pass
+            if monitor is not None:
+                try:
+                    monitor.update_confirmation(payload)
+                except Exception:
+                    pass
+            return
+        if str(payload.get("ui_event") or "") == "trial_complete":
+            if monitor is not None:
+                try:
+                    monitor.finish_trial(payload)
+                except Exception:
+                    pass
+            return
+        if "level_percent" in payload:
+            try:
+                self._set_output_volume("output_3_4", float(payload.get("level_percent")), persist=False)
+            except Exception:
+                pass
+        if monitor is not None:
+            try:
+                monitor.update_progress(payload)
+            except Exception:
+                pass
+
+    def _handle_tactile_calibration_done(self, payload: dict[str, Any]) -> None:
+        self._tactile_calibration_active = False
+        self._tactile_calibration_cancel_event = None
+        self._stop_tactile_calibration_response_listener()
+        self._tactile_calibration_collector.finish_trial()
+        self.target_button.setEnabled(False)
+        self._set_output_level_controls_enabled(bool(self.demographics_submitted))
+        participant = str(payload.get("participant_id") or self.package.participant_id)
+        report = dict(payload.get("report") or {})
+        paths = dict(payload.get("paths") or {})
+        accepted = bool(report.get("accepted"))
+        if accepted:
+            try:
+                final_percent = float(report.get("recommended_output_34_percent", report.get("final_output_34_percent")))
+            except (TypeError, ValueError):
+                final_percent = self.output_34_volume_percent
+            self._set_output_volume("output_3_4", final_percent)
+            latest = load_latest_calibration(self.output_root, participant)
+            self._latest_tactile_calibration = dict(latest or {})
+            ready_text = "Ready to start the experiment." if self.start_button.isEnabled() else "Submit setup to start the experiment."
+            self.event_label.setText(
+                f"{participant}: tactile calibration successful at {final_percent:g}% Output 3/4. {ready_text}"
+            )
+        else:
+            message = str(report.get("message") or "threshold assay did not pass")
+            self.event_label.setText(f"{participant}: tactile threshold failed - {message}")
+            playback_before = dict(report.get("playback_output_levels_before") or {})
+            if "output_3_4_percent" in playback_before:
+                self._set_output_volume("output_3_4", playback_before.get("output_3_4_percent"))
+        monitor = getattr(self, "tactile_calibration_monitor_dialog", None)
+        if monitor is not None:
+            try:
+                monitor.finish_assay(report)
+            except Exception:
+                pass
+        self._refresh_participant_ledger_summary()
+        _append_output_diary_event(
+            "tactile_calibration_finished",
+            package=self.package,
+            participant_id=participant,
+            capture_options=self.capture_options.as_dict(),
+            payload={
+                "accepted": accepted,
+                "status": str(report.get("status") or ""),
+                "message": str(report.get("message") or ""),
+                "final_output_34_percent": report.get("final_output_34_percent", ""),
+                "detection_threshold_output_34_percent": report.get("detection_threshold_output_34_percent", ""),
+                "recommended_output_34_percent": report.get("recommended_output_34_percent", ""),
+                "staircase_summary": _json_ready(report.get("staircase_summary") or {}),
+                "adaptive_staircase": _json_ready(report.get("adaptive_staircase") or {}),
+                "confirmation_summary": _json_ready(report.get("confirmation_summary") or {}),
+                "timing": _json_ready(report.get("timing") or {}),
+                "report_path": str(paths.get("report_path") or report.get("report_path") or ""),
+                "trials_csv_path": str(paths.get("trials_csv_path") or report.get("trials_csv_path") or ""),
+                "latest_path": str(paths.get("latest_path") or ""),
+            },
+            create=True,
+        )
+
     def _runner_metadata(self) -> dict[str, Any]:
         return {
             "participant_code": self._selected_participant_code() or self.package.participant_id,
@@ -9511,6 +12316,7 @@ class FocusModeWindow:
             "handedness": self.handedness_combo.currentData() or "",
             "gender": self.gender_combo.currentData() or "",
             "playback_output_levels": self._output_channel_volume_payload(),
+            "tactile_calibration": self._current_tactile_calibration_metadata(),
         }
 
     def start_next_participant_prewarm(self) -> None:
@@ -9654,6 +12460,18 @@ class FocusModeWindow:
         self.controller = None
 
     def _handle_dialog_finished(self, _code: int) -> None:
+        cancel_event = getattr(self, "_tactile_calibration_cancel_event", None)
+        if cancel_event is not None:
+            cancel_event.set()
+        monitor = getattr(self, "tactile_calibration_monitor_dialog", None)
+        if monitor is not None:
+            try:
+                monitor.close()
+            except Exception:
+                pass
+            self.tactile_calibration_monitor_dialog = None
+        self._stop_tactile_calibration_response_listener()
+        self._stop_companion_service()
         self._remove_response_click_filter()
         self._stop_global_response_click_listener()
         self._stop()
@@ -9735,6 +12553,8 @@ class FocusModeWindow:
         self.demographics_submitted = True
         self._apply_output_volumes_to_engine(getattr(self.controller, "audio_engine", None))
         self._freeze_pre_run_controls()
+        self._set_tactile_calibration_button_enabled()
+        self._refresh_part_controls()
         ledger_path_text = ""
         ledger_error = ""
         try:
@@ -9789,15 +12609,17 @@ class FocusModeWindow:
                 pass
 
     def keyboard_shortcut_map(self) -> dict[str, list[str]]:
-        return {
+        shortcuts = {
             "start_or_continue": ["Space", "Return", "Enter"],
             "pause_resume": ["Ctrl+P"],
-            "stop": ["Ctrl+Shift+S"],
             "close": ["Ctrl+W"],
             "select_part_1": ["Alt+1"],
             "select_part_2": ["Alt+2"],
             "select_topup_preview": ["Ctrl+T"],
         }
+        if _env_flag("PPS_FOCUS_VALIDATION_ENABLE_SYNTHETIC_CLICK_SHORTCUT"):
+            shortcuts["validation_synthetic_click"] = ["Ctrl+Alt+Shift+F12"]
+        return shortcuts
 
     def _install_operator_action_shortcuts(self) -> None:
         q = self.q
@@ -9810,8 +12632,6 @@ class FocusModeWindow:
 
         for sequence in self.keyboard_shortcut_map()["pause_resume"]:
             _add("pause_resume", sequence, self._handle_pause_resume_shortcut)
-        for sequence in self.keyboard_shortcut_map()["stop"]:
-            _add("stop", sequence, self._handle_stop_shortcut)
         for sequence in self.keyboard_shortcut_map()["close"]:
             _add("close", sequence, self._handle_close_shortcut)
         for sequence in self.keyboard_shortcut_map()["select_part_1"]:
@@ -9820,10 +12640,14 @@ class FocusModeWindow:
             _add("select_part_2", sequence, lambda key="2": self._handle_part_shortcut(key))
         for sequence in self.keyboard_shortcut_map()["select_topup_preview"]:
             _add("select_topup_preview", sequence, self._handle_topup_preview_shortcut)
+        for sequence in self.keyboard_shortcut_map().get("validation_synthetic_click", []):
+            _add("validation_synthetic_click", sequence, self._handle_validation_synthetic_click_shortcut)
 
     def _handle_pause_resume_shortcut(self) -> None:
         if self.pause_button.isEnabled():
-            self._toggle_pause()
+            self._pause()
+        elif self.resume_button.isEnabled():
+            self._resume()
 
     def _handle_stop_shortcut(self) -> None:
         if self.stop_button.isEnabled():
@@ -9840,6 +12664,27 @@ class FocusModeWindow:
     def _handle_topup_preview_shortcut(self) -> None:
         if self._topup_slots_enabled_for_plan():
             self._select_current_part_topup_slot()
+
+    def _handle_validation_synthetic_click_shortcut(self) -> None:
+        if not _env_flag("PPS_FOCUS_VALIDATION_ENABLE_SYNTHETIC_CLICK_SHORTCUT"):
+            return
+        if self.controller is None or not self._run_active or self.pending_instruction_request is not None:
+            return
+        self._refresh_target_global_bounds()
+        bounds = self._target_global_bounds
+        if bounds is None:
+            x = y = None
+        else:
+            left, top, right, bottom = bounds
+            x = int(round((left + right) / 2))
+            y = int(round((top + bottom) / 2))
+        self._log_response_click(
+            x=x,
+            y=y,
+            in_target=True,
+            diary_event_type="validation_synthetic_target_clicked",
+            source="validation_hotkey_ctrl_alt_shift_f12",
+        )
 
     def _dialog_relative_rect(self, widget: Any) -> dict[str, int]:
         top_left = widget.mapTo(self.dialog, widget.rect().topLeft())
@@ -9868,6 +12713,7 @@ class FocusModeWindow:
             "run_controls_widget": self.run_controls_widget,
             "start_button": self.start_button,
             "pause_button": self.pause_button,
+            "resume_button": self.resume_button,
             "stop_button": self.stop_button,
         }
         if getattr(self, "data_selection_panel", None) is not None:
@@ -9953,10 +12799,25 @@ class FocusModeWindow:
                 f"window {dialog['width']}x{dialog['height']} exceeds available "
                 f"{profile.available_width}x{profile.available_height}"
             )
+        experiment_control_debug = snapshot.get("experiment_control_debug") or {}
         for name, rect in widgets.items():
             if not bool(widget_visibility.get(name, True)):
                 continue
-            if rect["x"] < 0 or rect["y"] < 0 or rect["right"] > dialog["width"] or rect["bottom"] > dialog["height"]:
+            overflow_left = max(0, -int(rect.get("x", 0)))
+            overflow_top = max(0, -int(rect.get("y", 0)))
+            overflow_right = max(0, int(rect.get("right", 0)) - int(dialog["width"]))
+            overflow_bottom = max(0, int(rect.get("bottom", 0)) - int(dialog["height"]))
+            lower_panel_chrome_only = (
+                name == "processing_panel"
+                and overflow_left == 0
+                and overflow_top == 0
+                and overflow_right == 0
+                and 0 < overflow_bottom <= max(1, int(profile.root_margin))
+                and not list(experiment_control_debug.get("clipped_widgets") or [])
+                and not list(experiment_control_debug.get("too_short_widgets") or [])
+                and not list(experiment_control_debug.get("overlap_pairs") or [])
+            )
+            if (overflow_left or overflow_top or overflow_right or overflow_bottom) and not lower_panel_chrome_only:
                 failures.append(f"{name} is clipped outside the dialog: {rect}")
         target = widgets.get("target_button", {})
         target_visible = bool(widget_visibility.get("target_button", True))
@@ -9969,7 +12830,6 @@ class FocusModeWindow:
                 "processing_panel is shorter than the profile minimum "
                 f"{profile.experiment_control_min_height}px: {processing}"
             )
-        experiment_control_debug = snapshot.get("experiment_control_debug") or {}
         content_min_height = int(experiment_control_debug.get("content_min_height") or 0)
         if processing and processing_visible and content_min_height and processing.get("height", 0) < content_min_height:
             failures.append(
@@ -10211,12 +13071,12 @@ class FocusModeWindow:
         self._refresh_start_part2_button()
         self._refresh_start_button_label()
         self._set_primary_action_shortcuts_enabled(False)
-        self.pause_button.setEnabled(True)
-        self.stop_button.setEnabled(True)
-        self.target_button.setEnabled(True)
-        self._last_response_click_signature = None
         self._run_active = True
         self._run_paused = False
+        self._refresh_pause_resume_buttons()
+        self.stop_button.setEnabled(False)
+        self.target_button.setEnabled(True)
+        self._last_response_click_signature = None
         self._lock_experiment_window_geometry()
         self._refresh_target_global_bounds()
         self._start_global_response_click_listener()
@@ -10380,6 +13240,9 @@ class FocusModeWindow:
         self._continuous_external_labrecorder_state = None
 
     def _click(self) -> None:
+        if self._tactile_calibration_active:
+            self._record_tactile_calibration_target_click("focus_target")
+            return
         if self.pending_instruction_request is not None:
             if self._part2_start_gate_pending():
                 self.event_label.setText("Use Start Part 02 to continue to Part 02.")
@@ -10392,30 +13255,62 @@ class FocusModeWindow:
         x, y = self._target_last_click_global_xy()
         self._log_response_click(x=x, y=y, in_target=True, diary_event_type="target_clicked", source="qt_response_target")
 
+    def _record_tactile_calibration_target_click(self, source: str) -> None:
+        if not self._tactile_calibration_active:
+            return
+        x, y, _coordinate_source = self._tactile_calibration_target_center()
+        payload = self._tactile_calibration_collector.record_click(
+            in_target=True,
+            x=x,
+            y=y,
+            source=source,
+        )
+        if payload:
+            self.messages.put(("tactile_calibration_click", payload))
+            self.event_label.setText(
+                "Tactile threshold response recorded."
+                if bool(payload.get("valid_response"))
+                else "Tactile threshold click outside the response window."
+            )
+
     def _continue_instruction_button(self) -> None:
         if self._part2_start_gate_pending():
             self.event_label.setText("Use Start Part 02 to continue to Part 02.")
             return
         self._approve_pending_instruction_continue(source="button")
 
-    def _toggle_pause(self) -> None:
-        if self.controller is None:
+    def _refresh_pause_resume_buttons(self) -> None:
+        pause_enabled = bool(self.controller is not None and self._run_active and not self._run_paused)
+        resume_enabled = bool(self.controller is not None and self._run_active and self._run_paused)
+        self.pause_button.setEnabled(pause_enabled)
+        self.resume_button.setEnabled(resume_enabled)
+
+    def _pause(self) -> None:
+        if self.controller is None or not self._run_active or self._run_paused:
+            self._refresh_pause_resume_buttons()
             return
-        if self.pause_button.text() == "Pause":
-            self.controller.pause()
-            self.pause_button.setText("Resume")
-            self._run_paused = True
-            self.run_state_chip.setText("Paused")
-            self.progress_label.setText("Paused")
-            event_type = "pause_clicked"
-        else:
-            self.controller.resume()
-            self.pause_button.setText("Pause")
-            self._run_paused = False
-            self.run_state_chip.setText("Running")
-            event_type = "resume_clicked"
+        self.controller.pause()
+        self._run_paused = True
+        self._refresh_pause_resume_buttons()
+        self.run_state_chip.setText("Paused")
+        self.progress_label.setText("Paused")
         _append_output_diary_event(
-            event_type,
+            "pause_clicked",
+            package=self.package,
+            capture_options=self.capture_options.as_dict(),
+            create=True,
+        )
+
+    def _resume(self) -> None:
+        if self.controller is None or not self._run_active or not self._run_paused:
+            self._refresh_pause_resume_buttons()
+            return
+        self.controller.resume()
+        self._run_paused = False
+        self._refresh_pause_resume_buttons()
+        self.run_state_chip.setText("Running")
+        _append_output_diary_event(
+            "resume_clicked",
             package=self.package,
             capture_options=self.capture_options.as_dict(),
             create=True,
@@ -10430,6 +13325,7 @@ class FocusModeWindow:
             create=True,
         )
         self._run_active = False
+        self._refresh_pause_resume_buttons()
         self._stop_global_response_click_listener()
         stop = getattr(self.controller, "stop", None)
         if callable(stop):
@@ -10565,7 +13461,14 @@ class FocusModeWindow:
     def _move_cursor_to_target(self, cue: TactileTimelineCue) -> None:
         x, y, coordinate_source = _widget_screen_center(self.target_button)
         offscreen = self._offscreen_platform()
-        mode = "recorded_intent" if offscreen else self._move_os_cursor_to_global_center(x, y)
+        no_mouse_mode = _validation_no_mouse_mode()
+        self._last_recenter_backend_warning = ""
+        if offscreen or no_mouse_mode:
+            mode = "recorded_intent"
+            if no_mouse_mode and not offscreen:
+                self._last_recenter_backend_warning = "cursor recenter disabled by validation no-mouse mode"
+        else:
+            mode = self._move_os_cursor_to_global_center(x, y)
         record = {
             "cue_id": cue.cue_id,
             "trial_number": cue.trial_number,
@@ -10577,9 +13480,39 @@ class FocusModeWindow:
             "x": x,
             "y": y,
         }
+        if no_mouse_mode:
+            record["cursor_move_suppressed"] = True
         if self._last_recenter_backend_warning:
             record["backend_warning"] = self._last_recenter_backend_warning
         self.recenter_records.append(record)
+
+    def _move_cursor_to_tactile_calibration_target(self, context: dict[str, Any] | None = None) -> dict[str, Any]:
+        x, y, coordinate_source = self._tactile_calibration_target_center()
+        offscreen = self._offscreen_platform()
+        no_mouse_mode = _validation_no_mouse_mode()
+        self._last_recenter_backend_warning = ""
+        if x is None or y is None:
+            mode = "target_unavailable"
+        elif offscreen or no_mouse_mode:
+            mode = "recorded_intent"
+            if no_mouse_mode and not offscreen:
+                self._last_recenter_backend_warning = "cursor recenter disabled by validation no-mouse mode"
+        else:
+            mode = self._move_os_cursor_to_global_center(int(x), int(y))
+        record = {
+            "source": "tactile_calibration",
+            "mode": mode,
+            "coordinate_source": coordinate_source,
+            "x": "" if x is None else int(x),
+            "y": "" if y is None else int(y),
+            **dict(context or {}),
+        }
+        if no_mouse_mode:
+            record["cursor_move_suppressed"] = True
+        if self._last_recenter_backend_warning:
+            record["backend_warning"] = self._last_recenter_backend_warning
+        self.recenter_records.append(record)
+        return record
 
     def _move_os_cursor_to_global_center(self, x: int, y: int) -> str:
         self._last_recenter_backend_warning = ""
@@ -10638,6 +13571,7 @@ class FocusModeWindow:
             pass
 
     def _drain(self) -> None:
+        self._drain_companion_commands()
         while not self.messages.empty():
             kind, payload = self.messages.get_nowait()
             if kind == "progress":
@@ -10682,6 +13616,30 @@ class FocusModeWindow:
                     self._activate_response_target_window()
             elif kind == "response_click":
                 self._apply_response_click_to_ui(dict(payload))
+            elif kind == "tactile_calibration_click":
+                response_payload = dict(payload)
+                self.event_label.setText(
+                    "Tactile threshold response recorded."
+                    if bool(response_payload.get("valid_response"))
+                    else "Tactile threshold click outside the response window."
+                )
+                monitor = getattr(self, "tactile_calibration_monitor_dialog", None)
+                if monitor is not None:
+                    try:
+                        monitor.record_response(response_payload)
+                    except Exception:
+                        pass
+            elif kind == "tactile_calibration_recenter":
+                recenter_payload = dict(payload)
+                future = recenter_payload.get("future")
+                try:
+                    result = self._move_cursor_to_tactile_calibration_target(
+                        dict(recenter_payload.get("context") or {})
+                    )
+                except Exception as exc:
+                    result = {"mode": "failed", "error": str(exc)}
+                if hasattr(future, "set_result"):
+                    future.set_result(result)
             elif kind == "prewarm_progress":
                 self.prewarm_label.setText(f"Next {payload.get('participant_id')}: {payload.get('message')}")
             elif kind == "prewarm":
@@ -10699,6 +13657,10 @@ class FocusModeWindow:
                 self._handle_instruction_continue(payload)
             elif kind == "output_test_done":
                 self._handle_output_test_done(payload)
+            elif kind == "tactile_calibration_progress":
+                self._handle_tactile_calibration_progress(dict(payload))
+            elif kind == "tactile_calibration_done":
+                self._handle_tactile_calibration_done(dict(payload))
             elif kind == "done":
                 self._handle_done(payload)
         self._refresh_target_global_bounds()
@@ -10808,6 +13770,7 @@ class FocusModeWindow:
             self.block_plan_widget.update()
         self.target_button.setEnabled(False)
         self.pause_button.setEnabled(False)
+        self.resume_button.setEnabled(False)
         self.stop_button.setEnabled(False)
         self.start_button.setEnabled(False)
         self._set_output_test_buttons_enabled(True)
@@ -10875,9 +13838,15 @@ class FocusModeWindow:
             },
             create=True,
         )
+        if _env_flag("PPS_FOCUS_VALIDATION_REPORT") or _env_flag("PPS_FOCUS_VALIDATION_AUTO_CLICK"):
+            try:
+                _validation_capture_part_snapshot(self, label="part_complete")
+            except Exception:
+                pass
         self._maybe_open_analysis_review(result)
         self._shutdown_owned_audio_engine()
-        self.timer.stop()
+        if self.companion_service is None:
+            self.timer.stop()
         if _package_is_split_part(self.package) and bool(result.completed):
             self._auto_load_next_split_part_after_completion(completion_message=operator_message)
 
@@ -10934,6 +13903,9 @@ class FocusModeWindow:
         os.makedirs(_output_filesystem_path(path.parent), exist_ok=True)
         self.dialog.grab().save(_output_filesystem_path(path))
 
+    def _apply_validation_window_rect(self, rect: tuple[int, int, int, int] | None) -> None:
+        _apply_window_rect(self.dialog, rect)
+
     def exec(
         self,
         *,
@@ -10942,6 +13914,7 @@ class FocusModeWindow:
         auto_close_ms: int | None = None,
         screenshot_path: Path | None = None,
     ) -> int:
+        self._start_companion_service()
         if auto_start:
             self.q["QTimer"].singleShot(350, self.start)
         if screenshot_path is not None:
@@ -10950,12 +13923,16 @@ class FocusModeWindow:
             self.q["QTimer"].singleShot(int(auto_close_ms), self.dialog.accept)
         if not _env_flag("PPS_FOCUS_DISABLE_PREWARM"):
             self.q["QTimer"].singleShot(700, self.start_next_participant_prewarm)
+        validation_rect = None if fullscreen else _validation_window_rect_for_display(self.q)
+        _prepare_validation_window_placement(self.q, self.dialog, validation_rect)
         if fullscreen and hasattr(self.dialog, "showMaximized"):
             self.dialog.showMaximized()
         elif fullscreen and hasattr(self.dialog, "showFullScreen"):
             self.dialog.showFullScreen()
         else:
             self.dialog.show()
+        if validation_rect is not None:
+            self._apply_validation_window_rect(validation_rect)
         self.dialog.exec()
         return int(self.exit_code)
 
@@ -10965,6 +13942,10 @@ def run_focus_window(
     *,
     capture_options: SessionCaptureOptions | None = None,
     enable_missed_trial_topup: bool = True,
+    companion_enabled: bool = True,
+    companion_host: str = DEFAULT_COMPANION_HOST,
+    companion_port: int = DEFAULT_COMPANION_PORT,
+    companion_advertise_ip: str = "",
     manual_start: bool = False,
     fullscreen: bool = True,
     auto_close_ms: int | None = None,
@@ -11010,6 +13991,10 @@ def run_focus_window(
         capture_options=capture_options,
         enable_missed_trial_topup=enable_missed_trial_topup,
         controller_factory=controller_factory,
+        companion_enabled=companion_enabled,
+        companion_host=companion_host,
+        companion_port=companion_port,
+        companion_advertise_ip=companion_advertise_ip,
     )
     apply_qt_app_icon(q, app=app, window=window.dialog)
     validation_clicks: list[dict[str, Any]] = []
@@ -11045,6 +14030,10 @@ def run_launcher_window(
     *,
     capture_options: SessionCaptureOptions | None = None,
     enable_missed_trial_topup: bool = True,
+    companion_enabled: bool = True,
+    companion_host: str = DEFAULT_COMPANION_HOST,
+    companion_port: int = DEFAULT_COMPANION_PORT,
+    companion_advertise_ip: str = "",
     participant_id: str = "",
     initial_message: str = "",
 ) -> int:
@@ -11063,8 +14052,10 @@ def run_launcher_window(
         or diary_context.get("profile_id")
         or STUDY5_PROFILE_ID
     ).strip()
+    validation_participant = os.environ.get("PPS_FOCUS_VALIDATION_PARTICIPANT_ID", "").strip()
     initial_participant = str(
-        participant_id
+        validation_participant
+        or participant_id
         or runner_settings.get("participant_id")
         or diary_settings.get("last_participant_id")
         or diary_context.get("participant_id")
@@ -11101,9 +14092,9 @@ def run_launcher_window(
     dialog.setMinimumSize(760, 480)
     dialog.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
     apply_qt_app_icon(q, app=app, window=dialog)
+    _prepare_validation_window_placement(q, dialog)
 
-    selected_action: dict[str, Any] = {"open_environment": False}
-    setup_mode: dict[str, bool] = {"enabled": False}
+    selected_action: dict[str, Any] = {"open_environment": False, "phone_transfer": False}
     initializing: dict[str, bool] = {"busy": False}
     gate_shortcuts: dict[str, Any] = {}
     messages: queue.Queue[tuple[str, Any]] = queue.Queue()
@@ -11112,13 +14103,13 @@ def run_launcher_window(
     layout.setContentsMargins(16, 16, 16, 16)
     layout.setSpacing(14)
     panel, panel_layout = _panel(q, "Experiment Environment")
-    heading = q["QLabel"](
-        "Resume an existing data collection environment, or pick a folder and start a fresh timestamped environment."
-    )
+    heading = q["QLabel"]("Choose how to open a PPS data collection session.")
     heading.setObjectName("mutedLabel")
     heading.setWordWrap(True)
     panel_layout.addWidget(heading)
-    step_label = q["QLabel"]("Step 1: Choose 1 Resume or 2 Pick Output Folder / Start New Session.")
+    step_label = q["QLabel"](
+        "Choose 1 Resume Last Session, 2 Resume Custom Session, 3 Start New Session, or 4 Send To Phone."
+    )
     step_label.setObjectName("gateStepLabel")
     step_label.setWordWrap(True)
     panel_layout.addWidget(step_label)
@@ -11150,7 +14141,7 @@ def run_launcher_window(
 
     message = q["QLabel"](
         initial_message
-        or "Current decision: press 1 to resume a ready environment, or press 2 to pick an output folder."
+        or "Current decision: resume from memory, choose a session folder to scan, or start a new session."
     )
     message.setObjectName("gateStatusLabel")
     message.setWordWrap(True)
@@ -11162,22 +14153,24 @@ def run_launcher_window(
     panel_layout.addWidget(progress)
 
     buttons = q["QHBoxLayout"]()
-    resume_button = q["QPushButton"]("1 Resume Experiment")
-    resume_button.setObjectName("resumeExperimentButton")
+    resume_button = q["QPushButton"]("1 Resume Last Session")
+    resume_button.setObjectName("resumeLastSessionButton")
     resume_button.setProperty("class", "primary")
     resume_button.setProperty("decisionTone", "resume")
-    choose_folder_button = q["QPushButton"]("2 Pick Output Folder / Start New Session")
-    choose_folder_button.setObjectName("chooseOutputFolderButton")
-    choose_folder_button.setProperty("decisionTone", "folder")
-    initiate_button = q["QPushButton"]("Initiate New Data Collection Environment")
-    initiate_button.setObjectName("initiateEnvironmentButton")
-    initiate_button.setEnabled(False)
-    initiate_button.setDefault(True)
-    initiate_button.setAutoDefault(True)
+    resume_custom_button = q["QPushButton"]("2 Resume Custom Session")
+    resume_custom_button.setObjectName("resumeCustomSessionButton")
+    resume_custom_button.setProperty("decisionTone", "custom")
+    start_new_button = q["QPushButton"]("3 Start New Session")
+    start_new_button.setObjectName("startNewSessionButton")
+    start_new_button.setProperty("decisionTone", "start")
+    phone_button = q["QPushButton"]("4 Send To Phone")
+    phone_button.setObjectName("sendToPhoneButton")
+    phone_button.setProperty("decisionTone", "phone")
     close_button = q["QPushButton"]("Close")
     buttons.addWidget(resume_button)
-    buttons.addWidget(choose_folder_button)
-    buttons.addWidget(initiate_button)
+    buttons.addWidget(resume_custom_button)
+    buttons.addWidget(start_new_button)
+    buttons.addWidget(phone_button)
     buttons.addStretch(1)
     buttons.addWidget(close_button)
     panel_layout.addLayout(buttons)
@@ -11226,59 +14219,46 @@ def run_launcher_window(
             profile_combo.blockSignals(was_blocked)
 
     def _decision_shortcuts_enabled() -> bool:
-        return (not initializing["busy"]) and (not setup_mode["enabled"])
+        return not initializing["busy"]
 
     def _update_decision_shortcuts() -> None:
         resume_shortcut = gate_shortcuts.get("resume")
-        choose_shortcut = gate_shortcuts.get("choose")
+        custom_shortcut = gate_shortcuts.get("custom")
+        start_shortcut = gate_shortcuts.get("start")
+        phone_shortcut = gate_shortcuts.get("phone")
         if resume_shortcut is not None:
             resume_shortcut.setEnabled(_decision_shortcuts_enabled() and _resume_ready())
-        if choose_shortcut is not None:
-            choose_shortcut.setEnabled(_decision_shortcuts_enabled())
+        if custom_shortcut is not None:
+            custom_shortcut.setEnabled(_decision_shortcuts_enabled())
+        if start_shortcut is not None:
+            start_shortcut.setEnabled(_decision_shortcuts_enabled())
+        if phone_shortcut is not None:
+            phone_shortcut.setEnabled(_decision_shortcuts_enabled())
 
     def _refresh_gate_attention() -> None:
-        errors = _validation_errors()
-        if setup_mode["enabled"]:
-            if errors:
-                step_label.setText("Step 2: Fill the highlighted required fields.")
-                _set_attention(step_label, "current")
-            else:
-                step_label.setText("Step 3: Create the data collection environment.")
-                _set_attention(step_label, "complete")
-            _set_widget_gate_state(output_folder_input, "complete" if _selected_parent().is_dir() else "needed")
-            _set_widget_gate_state(profile_combo, "complete" if _selected_profile() else "needed")
-            _set_widget_gate_state(session_name_input, "complete" if _session_slug() else "needed")
-            _set_attention(resume_button, "locked")
-            _set_attention(choose_folder_button, "complete")
-            _set_attention(initiate_button, "go" if not errors else "locked")
-            _set_attention(message, "complete" if not errors else "current")
-        else:
-            step_label.setText("Step 1: Choose 1 Resume or 2 Pick Output Folder / Start New Session.")
-            _set_attention(step_label, "current")
-            _set_widget_gate_state(output_folder_input, "locked")
-            _set_widget_gate_state(profile_combo, "locked")
-            _set_widget_gate_state(session_name_input, "locked")
-            if _resume_ready():
-                _set_attention(resume_button, "current")
-                _set_attention(
-                    choose_folder_button,
-                    "available" if active_environment.get("kind") == "existing_environment" else "current",
-                )
-            else:
-                _set_attention(resume_button, "locked")
-                _set_attention(choose_folder_button, "current")
-            _set_attention(initiate_button, "locked")
-            _set_attention(message, "current")
+        step_label.setText(
+            "Choose 1 Resume Last Session, 2 Resume Custom Session, 3 Start New Session, or 4 Send To Phone."
+        )
+        _set_attention(step_label, "current")
+        _set_widget_gate_state(output_folder_input, "locked")
+        _set_widget_gate_state(profile_combo, "locked")
+        _set_widget_gate_state(session_name_input, "locked")
+        _set_attention(resume_button, "current" if _resume_ready() else "locked")
+        _set_attention(resume_custom_button, "available")
+        _set_attention(start_new_button, "available")
+        _set_attention(phone_button, "available")
+        _set_attention(message, "current")
         _update_decision_shortcuts()
 
     def _set_environment_busy(busy: bool) -> None:
         initializing["busy"] = busy
         resume_button.setEnabled((not busy) and _resume_ready())
-        choose_folder_button.setEnabled(not busy)
-        initiate_button.setEnabled((not busy) and _can_initiate())
+        resume_custom_button.setEnabled(not busy)
+        start_new_button.setEnabled(not busy)
+        phone_button.setEnabled(not busy)
         close_button.setEnabled(not busy)
         output_folder_input.setEnabled(not busy)
-        profile_combo.setEnabled((not busy) and setup_mode["enabled"])
+        profile_combo.setEnabled(False)
         session_name_input.setEnabled(not busy)
         copy_button.setEnabled(not busy)
         progress.setVisible(busy)
@@ -11289,59 +14269,7 @@ def run_launcher_window(
             progress.setValue(0)
         _refresh_gate_attention()
 
-    def _validation_errors() -> list[str]:
-        if not setup_mode["enabled"]:
-            return []
-        parent = _selected_parent()
-        if not output_folder_input.text().strip():
-            return ["Choose an output parent folder."]
-        if not parent.is_dir():
-            return ["Output folder must be an existing folder."]
-        if not _selected_profile():
-            return ["Choose an experiment profile."]
-        if not _session_slug():
-            return ["Enter a Windows-safe session name."]
-        return []
-
-    def _can_initiate() -> bool:
-        return setup_mode["enabled"] and not _validation_errors()
-
-    def _refresh_initiate_state() -> None:
-        errors = _validation_errors()
-        initiate_button.setEnabled((not initializing["busy"]) and setup_mode["enabled"] and not errors)
-        if setup_mode["enabled"]:
-            if errors:
-                message.setText(errors[0])
-            else:
-                preview = _selected_parent() / f"{_session_slug()}_<timestamp>"
-                message.setText(f"Ready to create {preview}.")
-        output_folder_input.setToolTip(output_folder_input.text().strip())
-        _refresh_gate_attention()
-
-    def _unlock_for_new_environment(parent: Path) -> None:
-        setup_mode["enabled"] = True
-        active_environment.update(
-            {
-                "root": Path(parent).expanduser(),
-                "profile_id": "",
-                "participant_id": "P001",
-                "session_name": "",
-                "runner_diary_path": None,
-                "kind": "new_parent",
-            }
-        )
-        output_folder_input.setReadOnly(False)
-        output_folder_input.setText(str(parent))
-        profile_combo.setEnabled(True)
-        profile_combo.setCurrentIndex(0)
-        session_name_input.setReadOnly(False)
-        session_name_input.setText("")
-        resume_button.setEnabled(False)
-        message.setText("New output parent selected. Experiment Profile and Session Name are now required.")
-        _refresh_initiate_state()
-
     def _lock_for_existing_environment(context: dict[str, Any]) -> None:
-        setup_mode["enabled"] = False
         root = Path(context.get("root") or initial_output_root).expanduser()
         profile_id = str(context.get("profile_id") or initial_profile or "").strip()
         participant = str(context.get("participant_id") or initial_participant or "P001").strip()
@@ -11364,22 +14292,22 @@ def run_launcher_window(
         session_name_input.setReadOnly(True)
         session_name_input.setText(session_name)
         resume_button.setEnabled(_resume_ready())
-        initiate_button.setEnabled(False)
         markers = ", ".join(context.get("markers") or ["environment marker"])
-        message.setText(f"Existing experiment environment found ({markers}). Press 1 or click Resume Experiment.")
+        message.setText(f"Existing session environment found ({markers}).")
         _refresh_gate_attention()
 
-    def _select_output_folder(folder: Path) -> None:
+    def _classify_custom_session_folder(folder: Path) -> dict[str, Any]:
         context = _classify_launcher_output_folder(
             folder,
-            fallback_profile_id=initial_profile,
-            fallback_session_name=initial_session_name,
+            fallback_profile_id="",
+            fallback_session_name="",
             fallback_participant_id=initial_participant,
         )
-        if context.get("kind") == "existing_environment":
-            _lock_for_existing_environment(context)
-        else:
-            _unlock_for_new_environment(Path(context.get("root") or folder))
+        if context.get("kind") != "existing_environment":
+            raise ValueError("No PPS session metadata was found in that folder. Use Start New Session for empty folders.")
+        if not str(context.get("profile_id") or "").strip():
+            raise ValueError("That folder has PPS metadata but no experiment profile. Choose a complete PPS session folder.")
+        return context
 
     def _copy_output_path() -> None:
         try:
@@ -11388,20 +14316,28 @@ def run_launcher_window(
         except Exception as exc:
             message.setText(f"Could not copy path: {exc}")
 
-    def _choose_parent_folder() -> None:
+    def _choose_custom_session_folder() -> None:
         current_root = Path(str(active_environment.get("root") or initial_output_root)).expanduser()
         start_folder = current_root if current_root.is_dir() else DEFAULT_SESSION_ROOT
-        parent = q["QFileDialog"].getExistingDirectory(
+        folder = q["QFileDialog"].getExistingDirectory(
             dialog,
-            "Choose Output Folder",
+            "Choose Session Folder",
             str(start_folder),
         )
-        if parent:
-            _select_output_folder(Path(parent))
+        if not folder:
+            return
+        try:
+            context = _classify_custom_session_folder(Path(folder))
+        except Exception as exc:
+            message.setText(str(exc))
+            _refresh_gate_attention()
+            return
+        _lock_for_existing_environment(context)
+        _resume_environment(event_type="resume_custom_session_clicked")
 
-    def _resume_environment() -> None:
+    def _resume_environment(*, event_type: str = "resume_last_session_clicked") -> None:
         if not _resume_ready():
-            message.setText("No remembered experiment environment is ready. Choose a new output folder first.")
+            message.setText("No remembered session is ready. Use Resume Custom Session or Start New Session.")
             return
         output_root = Path(active_environment.get("root") or initial_output_root).expanduser().resolve()
         profile_id = str(active_environment.get("profile_id") or initial_profile or "").strip()
@@ -11424,7 +14360,7 @@ def run_launcher_window(
             capture_options=_capture_options_for_launcher(),
         )
         _append_output_diary_event(
-            "resume_experiment_clicked",
+            event_type,
             session_root=output_root,
             experiment_name=session_name,
             profile_id=profile_id,
@@ -11435,16 +14371,21 @@ def run_launcher_window(
         selected_action["open_environment"] = True
         dialog.accept()
 
-    def _start_environment_initialization_impl() -> None:
-        errors = _validation_errors()
-        if errors:
-            message.setText(errors[0])
+    def _start_environment_initialization(parent: Path, profile_id: str, session_name: str) -> None:
+        parent = Path(parent).expanduser()
+        profile = str(profile_id or "").strip()
+        label = str(session_name or "").strip()
+        if not parent.is_dir():
+            message.setText("Choose an existing output parent folder.")
             return
-        parent = _selected_parent()
-        profile_id = _selected_profile()
-        session_name = _session_name()
+        if not profile:
+            message.setText("Choose an experiment profile.")
+            return
+        if not slugify_identifier(label, fallback=""):
+            message.setText("Enter a Windows-safe session name.")
+            return
         _set_environment_busy(True)
-        message.setText("Creating data collection environment...")
+        message.setText("Creating new session environment...")
 
         def _progress_callback(payload: dict[str, Any]) -> None:
             messages.put(("progress", dict(payload)))
@@ -11453,8 +14394,8 @@ def run_launcher_window(
             try:
                 result = initiate_data_collection_environment(
                     parent_folder=parent,
-                    profile_id=profile_id,
-                    session_name=session_name,
+                    profile_id=profile,
+                    session_name=label,
                     participant_id="P001",
                     capture_options=capture_options,
                     progress_callback=_progress_callback,
@@ -11466,20 +14407,141 @@ def run_launcher_window(
 
         threading.Thread(target=_worker, name="pps-environment-init", daemon=True).start()
 
-    def _start_environment_initialization() -> None:
-        try:
-            _start_environment_initialization_impl()
-        except Exception as exc:
-            message.setText(f"Could not start data collection environment: {exc}")
-            _set_environment_busy(False)
+    def _new_session_default_parent() -> Path:
+        current_root = Path(str(active_environment.get("root") or initial_output_root)).expanduser()
+        if current_root.is_dir() and current_root.name:
+            return current_root.parent if current_root.parent.is_dir() else current_root
+        return DEFAULT_SESSION_ROOT
 
-    def _try_start_environment_from_keyboard() -> None:
-        if initializing["busy"]:
+    def _open_start_new_session_dialog() -> dict[str, Any] | None:
+        setup_dialog = q["QDialog"](dialog)
+        setup_dialog.setObjectName("startNewSessionDialog")
+        setup_dialog.setWindowTitle("Start New Session")
+        setup_dialog.resize(640, 260)
+        setup_dialog.setMinimumSize(560, 240)
+        setup_dialog.setStyleSheet(dialog.styleSheet())
+        _prepare_validation_window_placement(q, setup_dialog)
+        setup_layout = q["QVBoxLayout"](setup_dialog)
+        setup_layout.setContentsMargins(16, 16, 16, 16)
+        setup_layout.setSpacing(12)
+
+        intro = q["QLabel"]("Define the local parent folder, experiment profile, and session name.")
+        intro.setObjectName("mutedLabel")
+        intro.setWordWrap(True)
+        setup_layout.addWidget(intro)
+
+        parent_input = q["QLineEdit"](str(_new_session_default_parent()))
+        parent_input.setObjectName("newSessionParentField")
+        parent_input.setReadOnly(True)
+        parent_button = q["QPushButton"]("Choose Parent Folder")
+        parent_button.setObjectName("newSessionParentButton")
+        parent_widget = q["QWidget"]()
+        parent_layout = q["QHBoxLayout"](parent_widget)
+        parent_layout.setContentsMargins(0, 0, 0, 0)
+        parent_layout.setSpacing(8)
+        parent_layout.addWidget(parent_input, 1)
+        parent_layout.addWidget(parent_button)
+        setup_layout.addWidget(_field_row(q, "Parent Folder", parent_widget))
+
+        new_profile_combo = _combo(q, editable_profile_options, current=initial_profile)
+        new_profile_combo.setObjectName("newSessionProfileCombo")
+        setup_layout.addWidget(_field_row(q, "Experiment Profile", new_profile_combo))
+
+        new_session_name = q["QLineEdit"]("")
+        new_session_name.setObjectName("newSessionNameField")
+        new_session_name.setPlaceholderText("My Experiment")
+        setup_layout.addWidget(_field_row(q, "Session Name", new_session_name))
+
+        status = q["QLabel"]("")
+        status.setObjectName("newSessionStatusLabel")
+        status.setWordWrap(True)
+        setup_layout.addWidget(status)
+
+        action_row = q["QHBoxLayout"]()
+        create_button = q["QPushButton"]("Start Session")
+        create_button.setObjectName("createNewSessionButton")
+        create_button.setProperty("class", "primary")
+        cancel_button = q["QPushButton"]("Cancel")
+        action_row.addStretch(1)
+        action_row.addWidget(create_button)
+        action_row.addWidget(cancel_button)
+        setup_layout.addLayout(action_row)
+
+        result: dict[str, Any] = {}
+
+        def _new_session_errors() -> list[str]:
+            parent = Path(parent_input.text().strip()).expanduser()
+            if not parent_input.text().strip():
+                return ["Choose an output parent folder."]
+            if not parent.is_dir():
+                return ["Parent folder must already exist."]
+            if not str(new_profile_combo.currentData() or "").strip():
+                return ["Choose an experiment profile."]
+            if not slugify_identifier(new_session_name.text().strip(), fallback=""):
+                return ["Enter a Windows-safe session name."]
+            return []
+
+        def _refresh_new_session_state() -> None:
+            errors = _new_session_errors()
+            create_button.setEnabled(not errors)
+            if errors:
+                status.setText(errors[0])
+            else:
+                preview = Path(parent_input.text().strip()).expanduser() / f"{slugify_identifier(new_session_name.text(), fallback='session')}_<timestamp>"
+                status.setText(f"Ready to create {preview}.")
+
+        def _choose_new_parent() -> None:
+            current = Path(parent_input.text().strip()).expanduser()
+            folder = q["QFileDialog"].getExistingDirectory(
+                setup_dialog,
+                "Choose Parent Folder",
+                str(current if current.is_dir() else DEFAULT_SESSION_ROOT),
+            )
+            if folder:
+                parent_input.setText(str(Path(folder)))
+                _refresh_new_session_state()
+
+        def _accept_new_session() -> None:
+            errors = _new_session_errors()
+            if errors:
+                status.setText(errors[0])
+                return
+            result.update(
+                {
+                    "parent": Path(parent_input.text().strip()).expanduser(),
+                    "profile_id": str(new_profile_combo.currentData() or "").strip(),
+                    "session_name": new_session_name.text().strip(),
+                }
+            )
+            setup_dialog.accept()
+
+        parent_button.clicked.connect(_choose_new_parent)
+        parent_input.textChanged.connect(lambda _text: _refresh_new_session_state())
+        new_profile_combo.currentIndexChanged.connect(lambda _index: _refresh_new_session_state())
+        new_session_name.textChanged.connect(lambda _text: _refresh_new_session_state())
+        new_session_name.returnPressed.connect(_accept_new_session)
+        create_button.clicked.connect(_accept_new_session)
+        cancel_button.clicked.connect(setup_dialog.reject)
+        _refresh_new_session_state()
+
+        if setup_dialog.exec() != q["QDialog"].DialogCode.Accepted:
+            return None
+        return result
+
+    def _start_new_session() -> None:
+        result = _open_start_new_session_dialog()
+        if not result:
             return
-        if _can_initiate():
-            initiate_button.click()
-        else:
-            _refresh_initiate_state()
+        _start_environment_initialization(
+            Path(result["parent"]),
+            str(result["profile_id"]),
+            str(result["session_name"]),
+        )
+
+    def _send_to_phone() -> None:
+        selected_action["phone_transfer"] = True
+        selected_action["open_environment"] = False
+        dialog.accept()
 
     def _drain_environment_messages() -> None:
         while not messages.empty():
@@ -11498,7 +14560,6 @@ def run_launcher_window(
             elif kind == "error":
                 message.setText(str(payload))
                 _set_environment_busy(False)
-                _refresh_initiate_state()
             elif kind == "done":
                 root_text = str(payload.get("environment_root") or "").strip()
                 if root_text:
@@ -11512,49 +14573,56 @@ def run_launcher_window(
                             "kind": "existing_environment",
                         }
                     )
+                    _lock_for_existing_environment(active_environment)
                 selected_action["open_environment"] = True
                 message.setText("Environment ready.")
                 dialog.accept()
 
     def _focus_is_editing_gate_text() -> bool:
-        focus = app.focusWidget()
-        return bool(
-            focus in (output_folder_input, session_name_input)
-            and focus.isEnabled()
-            and hasattr(focus, "isReadOnly")
-            and not focus.isReadOnly()
-        )
+        return False
 
     def _resume_shortcut_activated() -> None:
         if _focus_is_editing_gate_text() or not _decision_shortcuts_enabled() or not resume_button.isEnabled():
             return
         resume_button.click()
 
-    def _choose_shortcut_activated() -> None:
-        if _focus_is_editing_gate_text() or not _decision_shortcuts_enabled() or not choose_folder_button.isEnabled():
+    def _custom_shortcut_activated() -> None:
+        if _focus_is_editing_gate_text() or not _decision_shortcuts_enabled() or not resume_custom_button.isEnabled():
             return
-        choose_folder_button.click()
+        resume_custom_button.click()
+
+    def _start_shortcut_activated() -> None:
+        if _focus_is_editing_gate_text() or not _decision_shortcuts_enabled() or not start_new_button.isEnabled():
+            return
+        start_new_button.click()
+
+    def _phone_shortcut_activated() -> None:
+        if _focus_is_editing_gate_text() or not _decision_shortcuts_enabled() or not phone_button.isEnabled():
+            return
+        phone_button.click()
 
     timer = q["QTimer"](dialog)
     timer.timeout.connect(_drain_environment_messages)
     timer.start(100)
 
-    output_folder_input.textChanged.connect(lambda _text: _refresh_initiate_state())
-    output_folder_input.returnPressed.connect(_try_start_environment_from_keyboard)
-    profile_combo.currentIndexChanged.connect(lambda _index: _refresh_initiate_state())
-    session_name_input.textChanged.connect(lambda _text: _refresh_initiate_state())
-    session_name_input.returnPressed.connect(_try_start_environment_from_keyboard)
     copy_button.clicked.connect(_copy_output_path)
-    choose_folder_button.clicked.connect(_choose_parent_folder)
-    resume_button.clicked.connect(_resume_environment)
-    initiate_button.clicked.connect(lambda _checked=False: _start_environment_initialization())
+    resume_custom_button.clicked.connect(_choose_custom_session_folder)
+    resume_button.clicked.connect(lambda _checked=False: _resume_environment(event_type="resume_last_session_clicked"))
+    start_new_button.clicked.connect(_start_new_session)
+    phone_button.clicked.connect(_send_to_phone)
     close_button.clicked.connect(dialog.reject)
     gate_shortcuts["resume"] = q["QShortcut"](q["QKeySequence"]("1"), dialog)
     gate_shortcuts["resume"].setContext(q["Qt"].ShortcutContext.ApplicationShortcut)
     gate_shortcuts["resume"].activated.connect(_resume_shortcut_activated)
-    gate_shortcuts["choose"] = q["QShortcut"](q["QKeySequence"]("2"), dialog)
-    gate_shortcuts["choose"].setContext(q["Qt"].ShortcutContext.ApplicationShortcut)
-    gate_shortcuts["choose"].activated.connect(_choose_shortcut_activated)
+    gate_shortcuts["custom"] = q["QShortcut"](q["QKeySequence"]("2"), dialog)
+    gate_shortcuts["custom"].setContext(q["Qt"].ShortcutContext.ApplicationShortcut)
+    gate_shortcuts["custom"].activated.connect(_custom_shortcut_activated)
+    gate_shortcuts["start"] = q["QShortcut"](q["QKeySequence"]("3"), dialog)
+    gate_shortcuts["start"].setContext(q["Qt"].ShortcutContext.ApplicationShortcut)
+    gate_shortcuts["start"].activated.connect(_start_shortcut_activated)
+    gate_shortcuts["phone"] = q["QShortcut"](q["QKeySequence"]("4"), dialog)
+    gate_shortcuts["phone"].setContext(q["Qt"].ShortcutContext.ApplicationShortcut)
+    gate_shortcuts["phone"].activated.connect(_phone_shortcut_activated)
     resume_button.setEnabled(_resume_ready())
     _refresh_gate_attention()
 
@@ -11562,56 +14630,627 @@ def run_launcher_window(
         target_profile = os.environ.get("PPS_FOCUS_VALIDATION_PROFILE", STUDY5_PROFILE_ID).strip() or STUDY5_PROFILE_ID
         parent = Path(os.environ.get("PPS_FOCUS_VALIDATION_OUTPUT_ROOT", "") or DEFAULT_SESSION_ROOT).expanduser()
         os.makedirs(_output_filesystem_path(parent), exist_ok=True)
-        _unlock_for_new_environment(parent)
-        _set_profile_combo_current(target_profile)
-        session_name_input.setText("Study 5 validation")
-
-        def _try_initiate(attempt: int = 0) -> None:
-            _refresh_initiate_state()
-            if initiate_button.isEnabled():
-                initiate_button.click()
-                return
-            if attempt < 20:
-                q["QTimer"].singleShot(250, lambda: _try_initiate(attempt + 1))
-                return
-            launcher_report_path = os.environ.get("PPS_FOCUS_VALIDATION_LAUNCHER_REPORT", "").strip()
-            if launcher_report_path:
-                _write_validation_launcher_report(
-                    Path(launcher_report_path),
-                    selected_manifest=None,
-                    exit_code=1,
-                    profile_count=len(profile_options),
-                    selected_profile=str(profile_combo.currentData() or ""),
-                    validation_clicks=[
-                        {
-                            "label": "auto environment initiation unavailable",
-                            "timestamp_unix": time.time(),
-                            "selected_profile": str(profile_combo.currentData() or ""),
-                            "message": "; ".join(_validation_errors()) or "Initiate button stayed disabled.",
-                        }
-                    ],
-                )
-            dialog.reject()
-
-        q["QTimer"].singleShot(250, _try_initiate)
+        _start_environment_initialization(parent, target_profile, "Study 5 validation")
 
     if _env_flag("PPS_FOCUS_VALIDATION_LAUNCHER_AUTO_CLICK"):
         q["QTimer"].singleShot(200, _validation_auto_environment)
 
     accepted = dialog.exec() == q["QDialog"].DialogCode.Accepted
+    if accepted and selected_action.get("phone_transfer"):
+        return _run_phone_transfer_window(
+            capture_options=capture_options,
+            companion_enabled=companion_enabled,
+            companion_host=companion_host,
+            companion_port=companion_port,
+            companion_advertise_ip=companion_advertise_ip,
+            participant_id=str(active_environment.get("participant_id") or initial_participant or "P001"),
+        )
     if not accepted or not selected_action.get("open_environment"):
         return 1
     return _run_environment_operations_window(
         capture_options=capture_options,
         enable_missed_trial_topup=enable_missed_trial_topup,
+        companion_enabled=companion_enabled,
+        companion_host=companion_host,
+        companion_port=companion_port,
+        companion_advertise_ip=companion_advertise_ip,
         participant_id=str(active_environment.get("participant_id") or initial_participant or "P001"),
     )
+
+
+def _phone_transfer_packages_for_manifest(manifest_path: Path) -> list[Any]:
+    package = load_run_package(Path(manifest_path))
+    packages: list[Any] = [package]
+    seen = {mobile_package_id(package)}
+    for raw_path in list(getattr(package, "sibling_part_manifest_paths", []) or []):
+        try:
+            sibling = load_run_package(Path(raw_path))
+        except Exception:
+            continue
+        package_id = mobile_package_id(sibling)
+        if package_id in seen:
+            continue
+        seen.add(package_id)
+        packages.append(sibling)
+    return packages
+
+
+def _phone_transfer_lsl_admin_context(
+    packages: list[Any],
+    *,
+    transfer_id: str,
+    token: str,
+    output_root: Path,
+    participant_id: str,
+) -> dict[str, str]:
+    active_package = packages[0] if packages else None
+    package_id = mobile_package_id(active_package) if active_package is not None else ""
+    target_session_id = (
+        str(getattr(active_package, "part_session_id", "") or "").strip()
+        or str(getattr(active_package, "session_id", "") or "").strip()
+        or str(getattr(active_package, "session_group_id", "") or "").strip()
+        or package_id
+        or str(transfer_id or "").strip()
+    )
+    safe_transfer = slugify_identifier(str(transfer_id or target_session_id or "phone-transfer"), fallback="phone-transfer")
+    return {
+        "target_session_id": target_session_id,
+        "token": str(token or ""),
+        "package_id": package_id,
+        "participant_id": str(getattr(active_package, "participant_id", "") or participant_id or ""),
+        "part_number": str(getattr(active_package, "part_number", "") or ""),
+        "target_part_session_id": str(getattr(active_package, "part_session_id", "") or ""),
+        "target_session_group_id": str(getattr(active_package, "session_group_id", "") or ""),
+        "output_dir": str(output_runner_logs_dir(Path(output_root)) / "android_lsl_admin" / safe_transfer),
+    }
+
+
+def _send_phone_transfer_lsl_admin_command(
+    context: dict[str, str],
+    command: str,
+    *,
+    require_ack: bool,
+    extra_payload: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    target_session_id = str(context.get("target_session_id") or "").strip()
+    token = str(context.get("token") or "").strip()
+    clean_command = str(command or "").strip()
+    if not target_session_id:
+        raise ValueError("Phone LSL target session id is missing.")
+    if not token:
+        raise ValueError("Phone LSL pairing token is missing.")
+    if not clean_command:
+        raise ValueError("Phone LSL command is missing.")
+    kwargs: dict[str, Any] = {
+        "target_session_id": target_session_id,
+        "token": token,
+        "command": clean_command,
+        "package_id": str(context.get("package_id") or ""),
+        "participant_id": str(context.get("participant_id") or ""),
+        "target_part_session_id": str(context.get("target_part_session_id") or ""),
+        "target_session_group_id": str(context.get("target_session_group_id") or ""),
+        "part_number": str(context.get("part_number") or ""),
+        "output_dir": Path(str(context.get("output_dir") or "")),
+        "require_ack": bool(require_ack),
+    }
+    payload_extra = dict(extra_payload or {})
+    for payload_field, context_field in (
+        ("target_session_id", "target_session_id"),
+        ("target_part_session_id", "target_part_session_id"),
+        ("target_session_group_id", "target_session_group_id"),
+    ):
+        value = str(context.get(context_field) or "").strip()
+        if value:
+            payload_extra[payload_field] = value
+    if payload_extra:
+        kwargs["extra_payload"] = payload_extra
+    result = send_android_lsl_command(**kwargs)
+    return dict(result.row)
+
+
+def _run_phone_transfer_window(
+    *,
+    capture_options: SessionCaptureOptions | None = None,
+    companion_enabled: bool = True,
+    companion_host: str = DEFAULT_COMPANION_HOST,
+    companion_port: int = DEFAULT_COMPANION_PORT,
+    companion_advertise_ip: str = "",
+    participant_id: str = "",
+    initial_message: str = "",
+) -> int:
+    q = _require_qt()
+    set_windows_app_user_model_id("PPS.Toolkit.FocusMode")
+    app = q["QApplication"].instance() or q["QApplication"](sys.argv[:1])
+    app.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
+
+    dialog = q["QDialog"]()
+    _enable_standard_window_controls(q, dialog)
+    dialog.setWindowTitle("PPS Experiment Runner - Send To Phone")
+    dialog.resize(920, 720)
+    dialog.setMinimumSize(760, 620)
+    dialog.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
+    apply_qt_app_icon(q, app=app, window=dialog)
+    _prepare_validation_window_placement(q, dialog)
+
+    runner_settings = load_profile_runner_settings(state_root=DEFAULT_DASHBOARD_STATE_ROOT, default_output_folder=DEFAULT_SESSION_ROOT)
+    initial_settings = load_runner_settings()
+    initial_diary = current_runner_diary_path()
+    initial_diary_context = latest_diary_context(initial_diary) if initial_diary is not None else {}
+    initial_profile = str(
+        runner_settings.get("active_profile_id")
+        or initial_settings.get("last_profile_id")
+        or initial_diary_context.get("profile_id")
+        or STUDY5_PROFILE_ID
+    ).strip()
+    initial_participant = str(
+        participant_id
+        or runner_settings.get("participant_id")
+        or initial_settings.get("last_participant_id")
+        or initial_diary_context.get("participant_id")
+        or "P001"
+    ).strip()
+    output_root_state: dict[str, Path] = {
+        "path": Path(runner_settings.get("active_output_folder") or current_runner_session_root()).expanduser()
+    }
+    service_state: dict[str, Any] = {
+        "service": None,
+        "packages": [],
+        "pairing_uri": "",
+        "qr_png": b"",
+        "transfer_id": "",
+        "token": "",
+        "lsl_admin_context": {},
+    }
+    preparation_messages: queue.Queue[tuple[str, Any]] = queue.Queue()
+    preparation_cancel = threading.Event()
+    preparation_thread: dict[str, threading.Thread | None] = {"thread": None}
+    lsl_admin_thread: dict[str, threading.Thread | None] = {"thread": None}
+
+    layout = q["QVBoxLayout"](dialog)
+    layout.setContentsMargins(16, 16, 16, 16)
+    layout.setSpacing(12)
+    panel, panel_layout = _panel(q, "Send Experiment To Phone")
+    heading = q["QLabel"](
+        "Prepare the selected profile for a phone-owned run. The PC only serves the study package; "
+        "the Android app stores the experiment session locally."
+    )
+    heading.setObjectName("mutedLabel")
+    heading.setWordWrap(True)
+    panel_layout.addWidget(heading)
+
+    profile_options = finished_profile_options()
+    available_profiles = {profile_id for profile_id, _label in profile_options}
+    profile_combo = _combo(q, profile_options, current=initial_profile if initial_profile in available_profiles else STUDY5_PROFILE_ID)
+    profile_combo.setObjectName("phoneTransferProfileCombo")
+    if profile_combo.currentIndex() < 0 and profile_options:
+        profile_combo.setCurrentIndex(0)
+    panel_layout.addWidget(_field_row(q, "Experiment Profile", profile_combo))
+
+    participant_combo = q["QComboBox"]()
+    participant_combo.setObjectName("phoneTransferParticipantCombo")
+    panel_layout.addWidget(_field_row(q, "Phone Schedule", participant_combo))
+
+    output_folder_input = q["QLineEdit"](str(output_root_state["path"]))
+    output_folder_input.setObjectName("phoneTransferOutputFolderField")
+    output_folder_input.setReadOnly(True)
+    output_folder_input.setToolTip("Used only as a staging/cache location for prepared phone assets.")
+    panel_layout.addWidget(_field_row(q, "Asset Staging Folder", output_folder_input))
+
+    transport_combo = q["QComboBox"]()
+    transport_combo.setObjectName("phoneTransferTransportCombo")
+    transport_combo.addItem("Same Wi-Fi LAN", "lan")
+    transport_combo.addItem("Wi-Fi Direct fallback", "wifi_direct")
+    panel_layout.addWidget(_field_row(q, "Bridge", transport_combo))
+
+    wifi_status = _windows_wifi_direct_status()
+    wifi_label = q["QLabel"](str(wifi_status.get("message") or ""))
+    wifi_label.setObjectName("mutedLabel")
+    wifi_label.setWordWrap(True)
+    panel_layout.addWidget(wifi_label)
+
+    message = q["QLabel"](initial_message or "Choose a profile and schedule, then prepare the phone package.")
+    message.setObjectName("mutedLabel")
+    message.setWordWrap(True)
+    panel_layout.addWidget(message)
+    progress = q["QProgressBar"]()
+    progress.setRange(0, 1000)
+    progress.setValue(0)
+    progress.setVisible(False)
+    panel_layout.addWidget(progress)
+
+    package_label = q["QLabel"]("No phone package prepared yet.")
+    package_label.setObjectName("metricValue")
+    package_label.setWordWrap(True)
+    panel_layout.addWidget(package_label)
+
+    qr_label = q["QLabel"]("")
+    qr_label.setObjectName("companionQrCode")
+    qr_label.setFixedSize(320, 320)
+    qr_label.setAlignment(q["Qt"].AlignmentFlag.AlignCenter)
+    panel_layout.addWidget(qr_label, 0, q["Qt"].AlignmentFlag.AlignHCenter)
+    endpoint_label = q["QLabel"]("")
+    endpoint_label.setObjectName("metricValue")
+    endpoint_label.setWordWrap(True)
+    panel_layout.addWidget(endpoint_label)
+    uri_field = q["QLineEdit"]("")
+    uri_field.setObjectName("phoneTransferPairingUriField")
+    uri_field.setReadOnly(True)
+    panel_layout.addWidget(uri_field)
+
+    panel_layout.addWidget(_subtitle(q, "Phone LSL Control"))
+    lsl_target_field = q["QLineEdit"]("")
+    lsl_target_field.setObjectName("phoneTransferLslTargetField")
+    lsl_target_field.setReadOnly(True)
+    lsl_target_field.setPlaceholderText("Prepare package first")
+    lsl_target_field.setToolTip("Target session id used for token-gated PPSCommandSignalsV1 commands.")
+    panel_layout.addWidget(_field_row(q, "Target", lsl_target_field))
+    lsl_command_combo = q["QComboBox"]()
+    lsl_command_combo.setObjectName("phoneTransferLslCommandCombo")
+    for label, command in [
+        ("Start Full", "start_experiment"),
+        ("Start Part", "start_part"),
+        ("Pause", "pause"),
+        ("Resume", "resume"),
+        ("Continue", "continue_instruction"),
+        ("Snapshot", "request_snapshot"),
+        ("Stop After Block", "stop_after_block"),
+        ("Note", "operator_note"),
+    ]:
+        lsl_command_combo.addItem(label, command)
+    lsl_note_field = q["QLineEdit"]("")
+    lsl_note_field.setObjectName("phoneTransferLslOperatorNoteField")
+    lsl_note_field.setPlaceholderText("Operator note")
+    lsl_note_field.setToolTip("Sent only with the Note command as the operator_note payload.")
+    lsl_require_ack_checkbox = q["QCheckBox"]("Require Ack")
+    lsl_require_ack_checkbox.setObjectName("phoneTransferLslRequireAckCheckbox")
+    lsl_require_ack_checkbox.setChecked(True)
+    lsl_require_ack_checkbox.setToolTip("Wait for a matching PPSCommandAcksV1 sample and mark the local row failed if none arrives.")
+    lsl_send_button = q["QPushButton"]("Send LSL")
+    lsl_send_button.setObjectName("phoneTransferLslSendButton")
+    lsl_send_button.setToolTip("Send the selected token-gated LSL command to the prepared Android phone runner.")
+    lsl_command_row = q["QWidget"]()
+    lsl_command_layout = q["QHBoxLayout"](lsl_command_row)
+    lsl_command_layout.setContentsMargins(0, 0, 0, 0)
+    lsl_command_layout.setSpacing(8)
+    lsl_command_layout.addWidget(lsl_command_combo, 1)
+    lsl_command_layout.addWidget(lsl_require_ack_checkbox)
+    lsl_command_layout.addWidget(lsl_send_button)
+    panel_layout.addWidget(_field_row(q, "Command", lsl_command_row))
+    panel_layout.addWidget(_field_row(q, "Note", lsl_note_field))
+    lsl_status_label = q["QLabel"]("Prepare a package to enable PC-to-phone LSL commands.")
+    lsl_status_label.setObjectName("mutedLabel")
+    lsl_status_label.setWordWrap(True)
+    panel_layout.addWidget(lsl_status_label)
+
+    buttons = q["QHBoxLayout"]()
+    prepare_button = q["QPushButton"]("Prepare And Show QR")
+    prepare_button.setObjectName("phoneTransferPrepareButton")
+    prepare_button.setProperty("class", "primary")
+    stop_button = q["QPushButton"]("Stop Bridge")
+    stop_button.setObjectName("phoneTransferStopButton")
+    stop_button.setEnabled(False)
+    close_button = q["QPushButton"]("Close")
+    buttons.addWidget(prepare_button)
+    buttons.addWidget(stop_button)
+    buttons.addStretch(1)
+    buttons.addWidget(close_button)
+    panel_layout.addLayout(buttons)
+    layout.addWidget(panel)
+
+    def _current_profile() -> str:
+        return str(profile_combo.currentData() or "").strip()
+
+    def _selected_participant() -> str:
+        return str(participant_combo.currentData() or "").strip()
+
+    def _refresh_participant_options(preferred: str = "") -> None:
+        profile = _current_profile()
+        participants = profile_participant_ids(profile) if profile else []
+        current = preferred or _selected_participant() or initial_participant or "P001"
+        participant_combo.blockSignals(True)
+        participant_combo.clear()
+        for participant in participants:
+            participant_combo.addItem(participant, participant)
+        index = participant_combo.findData(current)
+        participant_combo.setCurrentIndex(index if index >= 0 else (0 if participants else -1))
+        participant_combo.blockSignals(False)
+        prepare_button.setEnabled(bool(profile and participants and companion_enabled))
+
+    def _set_busy(busy: bool) -> None:
+        profile_combo.setEnabled(not busy)
+        participant_combo.setEnabled(not busy)
+        transport_combo.setEnabled(not busy)
+        prepare_button.setEnabled((not busy) and companion_enabled and bool(_current_profile()) and bool(_selected_participant()))
+        close_button.setEnabled(not busy)
+        stop_button.setEnabled((not busy) and service_state.get("service") is not None)
+        progress.setVisible(busy)
+        progress.setRange(0, 0 if busy else 1000)
+        if not busy:
+            progress.setValue(0)
+        _refresh_lsl_admin_controls()
+
+    def _set_lsl_busy(busy: bool) -> None:
+        enabled = not busy and bool(service_state.get("lsl_admin_context"))
+        lsl_command_combo.setEnabled(enabled)
+        lsl_require_ack_checkbox.setEnabled(enabled)
+        lsl_send_button.setEnabled(enabled)
+        lsl_note_field.setEnabled(enabled and str(lsl_command_combo.currentData() or "") == "operator_note")
+        if busy:
+            lsl_status_label.setText("Sending LSL command...")
+
+    def _refresh_lsl_admin_controls() -> None:
+        context = dict(service_state.get("lsl_admin_context") or {})
+        target = str(context.get("target_session_id") or "")
+        lsl_target_field.setText(target)
+        worker = lsl_admin_thread.get("thread")
+        busy = worker is not None and worker.is_alive()
+        enabled = bool(target and context.get("token") and service_state.get("service") is not None and not busy)
+        note_enabled = enabled and str(lsl_command_combo.currentData() or "") == "operator_note"
+        lsl_command_combo.setEnabled(enabled)
+        lsl_require_ack_checkbox.setEnabled(enabled)
+        lsl_send_button.setEnabled(enabled)
+        lsl_note_field.setEnabled(note_enabled)
+        if not target and not busy:
+            lsl_status_label.setText("Prepare a package to enable PC-to-phone LSL commands.")
+
+    def _refresh_qr() -> None:
+        uri = str(service_state.get("pairing_uri") or "")
+        uri_field.setText(uri)
+        endpoint_label.setText("")
+        if uri:
+            endpoint_label.setText(f"Bridge ready at http://{config.advertised_host}:{config.port}")
+        pixmap = q["QPixmap"]()
+        qr_png = service_state.get("qr_png") or b""
+        if qr_png and pixmap.loadFromData(qr_png):
+            qr_label.setText("")
+            qr_label.setPixmap(
+                pixmap.scaled(
+                    q["QSize"](320, 320),
+                    q["Qt"].AspectRatioMode.KeepAspectRatio,
+                    q["Qt"].TransformationMode.SmoothTransformation,
+                )
+            )
+        else:
+            qr_label.setPixmap(q["QPixmap"]())
+            qr_label.setText("QR appears after preparation")
+
+    def _stop_service() -> None:
+        service = service_state.get("service")
+        service_state["service"] = None
+        service_state["token"] = ""
+        service_state["lsl_admin_context"] = {}
+        if service is not None:
+            try:
+                service.stop()
+            except Exception:
+                pass
+        stop_button.setEnabled(False)
+        if service is not None:
+            message.setText("Phone bridge stopped.")
+        _refresh_lsl_admin_controls()
+
+    config = RunnerCompanionConfig(
+        host=str(companion_host or DEFAULT_COMPANION_HOST),
+        port=int(companion_port or DEFAULT_COMPANION_PORT),
+        advertise_ip=str(companion_advertise_ip or choose_lan_ipv4() or ""),
+    )
+
+    def _start_service(packages: list[Any]) -> None:
+        _stop_service()
+        token = generate_companion_token()
+        profile = _current_profile()
+        participant = _selected_participant()
+        transfer_id = slugify_identifier(
+            f"{profile}-{participant}-phone-{datetime.now().strftime('%Y%m%d-%H%M%S')}",
+            fallback=f"phone-{int(time.time())}",
+        )
+        transport = str(transport_combo.currentData() or "lan")
+        pairing_uri = build_pairing_uri(
+            host=config.advertised_host,
+            port=config.port,
+            session_id=transfer_id,
+            token=token,
+            mode="phone_export",
+            transfer_id=transfer_id,
+            transport=transport,
+        )
+        bridge = _PhoneTransferBridge(
+            packages=packages,
+            transfer_id=transfer_id,
+            profile_id=profile,
+            participant_id=participant,
+            port=config.port,
+        )
+        lsl_admin_context = _phone_transfer_lsl_admin_context(
+            packages,
+            transfer_id=transfer_id,
+            token=token,
+            output_root=output_root_state["path"],
+            participant_id=participant,
+        )
+        service = RunnerCompanionService(
+            bridge,
+            token=token,
+            config=config,
+            discovery_mode="phone_export",
+            discovery_transfer_id=transfer_id,
+            discovery_transport=transport,
+        )
+        service.start()
+        service_state.update(
+            {
+                "service": service,
+                "packages": packages,
+                "pairing_uri": pairing_uri,
+                "qr_png": pairing_qr_png_bytes(pairing_uri),
+                "transfer_id": transfer_id,
+                "token": token,
+                "lsl_admin_context": lsl_admin_context,
+            }
+        )
+        total_bytes = sum(
+            int(asset.get("size_bytes") or 0)
+            for package in packages
+            for asset in build_mobile_package_manifest(package, phone_owned_session=True, include_block_audio=False).get("assets", [])
+        )
+        package_label.setText(
+            f"{len(packages)} phone package(s) ready, {total_bytes / (1024 * 1024):.1f} MiB assets. "
+            "Scan with the Android companion and choose Run Experiment On Phone."
+        )
+        if transport == "wifi_direct":
+            message.setText("Wi-Fi Direct fallback selected. Join the phone and PC to the same direct link, then scan this QR.")
+        else:
+            message.setText("Same-Wi-Fi bridge ready. Scan this QR from the Android companion.")
+        stop_button.setEnabled(True)
+        lsl_status_label.setText(
+            f"LSL target ready: {lsl_admin_context.get('target_session_id', '')}. "
+            "Use after the Android phone has synced this package."
+        )
+        _refresh_qr()
+        _refresh_lsl_admin_controls()
+
+    def _send_lsl_admin_command() -> None:
+        active = lsl_admin_thread.get("thread")
+        if active is not None and active.is_alive():
+            return
+        context = dict(service_state.get("lsl_admin_context") or {})
+        command = str(lsl_command_combo.currentData() or "").strip()
+        if not command or not context.get("target_session_id") or not context.get("token"):
+            lsl_status_label.setText("Prepare a package before sending LSL commands.")
+            _refresh_lsl_admin_controls()
+            return
+        extra_payload: dict[str, Any] = {}
+        if command == "operator_note":
+            note = str(lsl_note_field.text() or "").strip()
+            if not note:
+                lsl_status_label.setText("Type an operator note before sending the Note command.")
+                _refresh_lsl_admin_controls()
+                return
+            extra_payload["note"] = note
+        _set_lsl_busy(True)
+
+        def _worker() -> None:
+            try:
+                row = _send_phone_transfer_lsl_admin_command(
+                    context,
+                    command=command,
+                    require_ack=bool(lsl_require_ack_checkbox.isChecked()),
+                    extra_payload=extra_payload,
+                )
+            except Exception as exc:  # noqa: BLE001 - surfaced in the dialog status.
+                preparation_messages.put(("lsl_admin_error", str(exc)))
+            else:
+                preparation_messages.put(("lsl_admin_done", row))
+
+        worker = threading.Thread(target=_worker, name="pps-phone-transfer-lsl-admin", daemon=True)
+        lsl_admin_thread["thread"] = worker
+        worker.start()
+
+    def _progress_callback(payload: dict[str, Any]) -> None:
+        if preparation_cancel.is_set():
+            raise RuntimeError("Preparation cancelled.")
+        preparation_messages.put(("progress", dict(payload)))
+
+    def _start_preparation() -> None:
+        active = preparation_thread.get("thread")
+        if active is not None and active.is_alive():
+            return
+        if not companion_enabled:
+            message.setText("Phone companion bridge is disabled for this launch.")
+            return
+        profile = _current_profile()
+        participant = _selected_participant()
+        if not profile or not participant:
+            message.setText("Choose a profile and phone schedule first.")
+            return
+        preparation_cancel.clear()
+        _set_busy(True)
+        message.setText("Preparing phone package...")
+
+        def _worker() -> None:
+            try:
+                manifest = prepare_profile_focus_session(
+                    profile,
+                    participant,
+                    session_root=output_root_state["path"],
+                    progress_callback=_progress_callback,
+                )
+                packages = _phone_transfer_packages_for_manifest(Path(manifest))
+            except Exception as exc:
+                preparation_messages.put(("error", str(exc)))
+            else:
+                preparation_messages.put(("done", packages))
+
+        worker = threading.Thread(target=_worker, name="pps-phone-transfer-prep", daemon=True)
+        preparation_thread["thread"] = worker
+        worker.start()
+
+    def _drain_messages() -> None:
+        while not preparation_messages.empty():
+            kind, payload = preparation_messages.get_nowait()
+            if kind == "progress":
+                total = int(payload.get("total") or 0)
+                current = int(payload.get("current") or 0)
+                if total > 0:
+                    progress.setRange(0, 1000)
+                    progress.setValue(int(max(0.0, min(1.0, current / total)) * 1000))
+                else:
+                    progress.setRange(0, 0)
+                detail = str(payload.get("detail") or payload.get("phase") or "").strip()
+                message.setText(f"{payload.get('message') or 'Preparing phone package'}: {detail}" if detail else str(payload.get("message") or "Preparing phone package"))
+            elif kind == "error":
+                message.setText(str(payload))
+                _set_busy(False)
+            elif kind == "done":
+                try:
+                    _start_service(list(payload or []))
+                except Exception as exc:
+                    message.setText(f"Phone bridge could not start: {exc}")
+                _set_busy(False)
+            elif kind == "lsl_admin_error":
+                lsl_status_label.setText(f"LSL command failed before send: {payload}")
+                _refresh_lsl_admin_controls()
+            elif kind == "lsl_admin_done":
+                row = dict(payload or {})
+                status = str(row.get("status") or "unknown")
+                command = str(row.get("command") or "")
+                outbox_path = str(row.get("outbox_path") or service_state.get("lsl_admin_context", {}).get("output_dir") or "")
+                ack = str(row.get("ack_status") or "")
+                detail = f"{command}: {status}"
+                if ack:
+                    detail += f" ({ack})"
+                if outbox_path:
+                    detail += f". Audit: {outbox_path}"
+                lsl_status_label.setText(detail)
+                if command == "operator_note" and status.startswith("ack_"):
+                    lsl_note_field.clear()
+                _refresh_lsl_admin_controls()
+
+    profile_combo.currentIndexChanged.connect(lambda _index: _refresh_participant_options())
+    prepare_button.clicked.connect(_start_preparation)
+    lsl_send_button.clicked.connect(_send_lsl_admin_command)
+    lsl_command_combo.currentIndexChanged.connect(lambda _index: _refresh_lsl_admin_controls())
+    stop_button.clicked.connect(_stop_service)
+    close_button.clicked.connect(dialog.accept)
+    timer = q["QTimer"](dialog)
+    timer.timeout.connect(_drain_messages)
+    timer.start(100)
+    _refresh_participant_options(initial_participant)
+    _refresh_qr()
+    _refresh_lsl_admin_controls()
+    accepted = dialog.exec() == q["QDialog"].DialogCode.Accepted
+    _stop_service()
+    return 0 if accepted else 1
 
 
 def _run_environment_operations_window(
     *,
     capture_options: SessionCaptureOptions | None = None,
     enable_missed_trial_topup: bool = True,
+    companion_enabled: bool = True,
+    companion_host: str = DEFAULT_COMPANION_HOST,
+    companion_port: int = DEFAULT_COMPANION_PORT,
+    companion_advertise_ip: str = "",
     participant_id: str = "",
     initial_message: str = "",
 ) -> int:
@@ -11627,6 +15266,7 @@ def _run_environment_operations_window(
     dialog.setMinimumSize(760, 520)
     dialog.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
     apply_qt_app_icon(q, app=app, window=dialog)
+    _prepare_validation_window_placement(q, dialog)
 
     selected_manifest: dict[str, Path | None] = {"path": None}
     runner_settings = load_profile_runner_settings(state_root=DEFAULT_DASHBOARD_STATE_ROOT, default_output_folder=DEFAULT_SESSION_ROOT)
@@ -11639,8 +15279,10 @@ def _run_environment_operations_window(
         or initial_diary_context.get("profile_id")
         or STUDY5_PROFILE_ID
     ).strip()
+    validation_participant = os.environ.get("PPS_FOCUS_VALIDATION_PARTICIPANT_ID", "").strip()
     initial_participant = str(
-        participant_id
+        validation_participant
+        or participant_id
         or runner_settings.get("participant_id")
         or initial_settings.get("last_participant_id")
         or initial_diary_context.get("participant_id")
@@ -12174,6 +15816,10 @@ def _run_environment_operations_window(
             index = profile_combo.findData(target)
             if index >= 0:
                 profile_combo.setCurrentIndex(index)
+        requested_participant = initial_participant or "P001"
+        participant_index = participant_combo.findData(requested_participant)
+        if participant_index >= 0:
+            participant_combo.setCurrentIndex(participant_index)
         if profile_combo.isEnabled():
             QTest.mouseClick(profile_combo, q["Qt"].MouseButton.LeftButton)
             validation_launcher_clicks.append(
@@ -12181,6 +15827,7 @@ def _run_environment_operations_window(
                     "label": "click Study/profile selector",
                     "timestamp_unix": time.time(),
                     "selected_profile": str(profile_combo.currentData() or ""),
+                    "selected_participant": _selected_participant(),
                 }
             )
         else:
@@ -12189,6 +15836,7 @@ def _run_environment_operations_window(
                     "label": "click Study/profile selector",
                     "timestamp_unix": time.time(),
                     "selected_profile": str(profile_combo.currentData() or ""),
+                    "selected_participant": _selected_participant(),
                     "mode": "locked_environment_profile",
                 }
             )
@@ -12204,6 +15852,7 @@ def _run_environment_operations_window(
                     "label": "click Run Selected Profile",
                     "timestamp_unix": time.time(),
                     "selected_profile": str(profile_combo.currentData() or ""),
+                    "selected_participant": _selected_participant(),
                 }
             )
 
@@ -12227,6 +15876,10 @@ def _run_environment_operations_window(
         selected_manifest["path"],
         capture_options=capture_options,
         enable_missed_trial_topup=enable_missed_trial_topup,
+        companion_enabled=companion_enabled,
+        companion_host=companion_host,
+        companion_port=companion_port,
+        companion_advertise_ip=companion_advertise_ip,
         manual_start=True,
         fullscreen=True,
     )
@@ -12246,6 +15899,12 @@ def _run_environment_operations_window(
 def main(argv: list[str] | None = None) -> int:
     args = build_arg_parser().parse_args(argv)
     options = _capture_options_from_args(args)
+    companion_kwargs = {
+        "companion_enabled": not bool(args.no_companion),
+        "companion_host": args.companion_host,
+        "companion_port": int(args.companion_port),
+        "companion_advertise_ip": args.companion_advertise_ip,
+    }
     single_instance = _acquire_runner_single_instance()
     if not single_instance.acquired:
         _show_runner_single_instance_notice(single_instance.message)
@@ -12255,6 +15914,7 @@ def main(argv: list[str] | None = None) -> int:
             return run_launcher_window(
                 capture_options=options,
                 enable_missed_trial_topup=args.enable_missed_trial_topup,
+                **companion_kwargs,
                 participant_id=args.participant_id,
             )
         if args.session_manifest is not None:
@@ -12262,7 +15922,9 @@ def main(argv: list[str] | None = None) -> int:
                 args.session_manifest,
                 capture_options=options,
                 enable_missed_trial_topup=args.enable_missed_trial_topup,
+                **companion_kwargs,
                 manual_start=args.manual_start,
+                fullscreen=not bool(args.validation_windowed),
                 auto_close_ms=args.validation_auto_close_ms,
                 screenshot_path=args.validation_screenshot,
             )
@@ -12273,6 +15935,7 @@ def main(argv: list[str] | None = None) -> int:
                 return run_launcher_window(
                     capture_options=options,
                     enable_missed_trial_topup=args.enable_missed_trial_topup,
+                    **companion_kwargs,
                     participant_id=args.participant_id,
                     initial_message=str(exc),
                 )
@@ -12280,7 +15943,9 @@ def main(argv: list[str] | None = None) -> int:
                 manifest,
                 capture_options=options,
                 enable_missed_trial_topup=args.enable_missed_trial_topup,
+                **companion_kwargs,
                 manual_start=args.manual_start,
+                fullscreen=not bool(args.validation_windowed),
                 auto_close_ms=args.validation_auto_close_ms,
                 screenshot_path=args.validation_screenshot,
             )
@@ -12291,6 +15956,7 @@ def main(argv: list[str] | None = None) -> int:
                 return run_launcher_window(
                     capture_options=options,
                     enable_missed_trial_topup=args.enable_missed_trial_topup,
+                    **companion_kwargs,
                     participant_id=args.participant_id,
                     initial_message=str(exc),
                 )
@@ -12298,6 +15964,7 @@ def main(argv: list[str] | None = None) -> int:
                 manifest,
                 capture_options=options,
                 enable_missed_trial_topup=args.enable_missed_trial_topup,
+                **companion_kwargs,
                 manual_start=args.manual_start,
                 auto_close_ms=args.validation_auto_close_ms,
                 screenshot_path=args.validation_screenshot,
@@ -12305,6 +15972,7 @@ def main(argv: list[str] | None = None) -> int:
         return run_launcher_window(
             capture_options=options,
             enable_missed_trial_topup=args.enable_missed_trial_topup,
+            **companion_kwargs,
             participant_id=args.participant_id,
         )
     finally:

@@ -23,7 +23,10 @@ from typing import Any
 from .design import (
     CUSTOM_AUDIO_NOISE_TYPE,
     DEFAULT_SOFA_FILE,
+    PPS_LOOMING_GOLD_STANDARD_SOURCE_PARAMETERS,
+    PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
     StimulusDesign,
+    gold_standard_looming_source_parameters,
     cartesian_to_spherical,
     design_from_dict,
     design_to_dict,
@@ -44,10 +47,11 @@ from .loudness import (
     relative_loudness_envelope,
     rms_dbfs_to_estimated_spl,
 )
+from .runtime_paths import repo_root
 from .subprocess_utils import windows_no_console_kwargs
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = repo_root()
 THIRD_PARTY_3DTI_DIR = REPO_ROOT / "third_party" / "3dti_AudioToolkit"
 THREEDTI_REPOSITORY = "https://github.com/3DTune-In/3dti_AudioToolkit"
 THREEDTI_COMMIT = "6bfee08705675308a8c348b4c3a4d582586d2f99"
@@ -143,7 +147,14 @@ def _noise_rows(design: StimulusDesign) -> list[dict[str, Any]]:
             "noise_type": source["noise_type"],
             "tone_type": source.get("tone_type", source["noise_type"]),
             "gain": source.get("gain", 1.0),
+            "motion_mode": source.get("motion_mode", "looming"),
         }
+        source_profile = source.get("source_profile", "")
+        source_profile_parameters = source.get("source_profile_parameters", {})
+        if source_profile:
+            row["source_profile"] = source_profile
+        if source_profile_parameters:
+            row["source_profile_parameters"] = source_profile_parameters
         if source.get("source_path"):
             row["source_path"] = source.get("source_path", "")
         if source.get("prebaked_path"):
@@ -158,6 +169,63 @@ def _noise_rows(design: StimulusDesign) -> list[dict[str, Any]]:
                 }
             )
         rows.append(row)
+    return rows
+
+
+def _trajectory_profiled_noise_rows(design: StimulusDesign) -> list[dict[str, Any]]:
+    rows = _noise_rows(design)
+    for row in rows:
+        profile = str(row.get("source_profile", "")).strip()
+        if (
+            not profile
+            and str(row.get("source_kind", "procedural_noise")) != "imported_audio"
+            and str(row.get("motion_mode", "looming")).strip().lower() != "stationary"
+        ):
+            row["source_profile"] = PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE
+            row["source_profile_parameters"] = gold_standard_looming_source_parameters(
+                row.get("source_profile_parameters") if isinstance(row.get("source_profile_parameters"), dict) else {}
+            )
+            profile = row["source_profile"]
+        if profile.lower() != PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE:
+            continue
+        raw_parameters = dict(row.get("source_profile_parameters") or {})
+        legacy_fixed_count = (
+            "burst_count" in raw_parameters
+            and "burst_count_mode" not in raw_parameters
+            and "spacing_policy" not in raw_parameters
+            and "active_window_s" not in raw_parameters
+        )
+        if legacy_fixed_count:
+            row["source_profile_parameters"] = raw_parameters
+            continue
+        parameters = dict(PPS_LOOMING_GOLD_STANDARD_SOURCE_PARAMETERS)
+        if raw_parameters and "standard_basis" not in raw_parameters:
+            parameters.pop("standard_basis", None)
+        parameters.update(raw_parameters)
+        if "active_window_s" in parameters:
+            row["source_profile_parameters"] = parameters
+            continue
+        active_window_source = str(
+            parameters.get(
+                "active_window_source",
+                PPS_LOOMING_GOLD_STANDARD_SOURCE_PARAMETERS.get("active_window_source", "trajectory_movement_duration"),
+            )
+        )
+        if active_window_source == "trajectory_movement_duration":
+            parameters["active_window_s"] = float(design.trajectory.movement_duration_s)
+            parameters["active_window_s_source"] = "trajectory.movement_duration_s"
+        elif active_window_source == "trajectory_movement_window":
+            onset_s = max(
+                0.0,
+                float(parameters.get("onset_s", PPS_LOOMING_GOLD_STANDARD_SOURCE_PARAMETERS.get("onset_s", 0.0))),
+            )
+            movement_end_s = float(design.trajectory.padding_pre_s + design.trajectory.movement_duration_s)
+            parameters["active_window_s"] = max(0.0, movement_end_s - onset_s)
+            parameters["active_window_s_source"] = "trajectory.padding_pre_s + trajectory.movement_duration_s - onset_s"
+        elif active_window_source == "trajectory_total_duration":
+            parameters["active_window_s"] = float(design.trajectory.total_duration_s)
+            parameters["active_window_s_source"] = "trajectory.total_duration_s"
+        row["source_profile_parameters"] = parameters
     return rows
 
 
@@ -309,6 +377,183 @@ def _generate_noise(noise_type: str, samples: int, sample_rate: int, seed: int) 
         raise ValueError(f"Unsupported noise type: {noise_type}")
     peak = float(np.max(np.abs(result))) if samples else 0.0
     return result / peak if peak > 0 else result
+
+
+def _raised_cosine_edge(length: int, edge: int) -> "Any":
+    import numpy as np
+
+    envelope = np.ones(length, dtype=float)
+    if length <= 0 or edge <= 0:
+        return envelope
+    edge = min(edge, max(1, length // 2))
+    phase = np.linspace(0.0, np.pi, edge, endpoint=False)
+    attack = 0.5 - 0.5 * np.cos(phase)
+    envelope[:edge] = attack
+    envelope[-edge:] = attack[::-1]
+    return envelope
+
+
+def _profile_float(params: dict[str, Any], defaults: dict[str, Any], key: str, fallback: float) -> float:
+    value = params.get(key, defaults.get(key, fallback))
+    if value is None:
+        value = fallback
+    return float(value)
+
+
+def _dynaspace_burst_onsets(
+    *,
+    samples: int,
+    sample_rate: int,
+    parameters: dict[str, Any] | None = None,
+) -> tuple[list[float], dict[str, Any]]:
+    params = parameters if isinstance(parameters, dict) else {}
+    defaults = PPS_LOOMING_GOLD_STANDARD_SOURCE_PARAMETERS
+    burst_duration_s = max(0.001, _profile_float(params, defaults, "burst_duration_s", 0.030))
+    rise_fall_s = max(0.0, _profile_float(params, defaults, "rise_fall_s", 0.010))
+    requested_onset_s = max(0.0, _profile_float(params, defaults, "onset_s", 0.300))
+    if "target_period_s" in params:
+        target_period_s = max(0.001, float(params["target_period_s"]))
+    elif "inter_burst_interval_s" in params:
+        inter_burst_interval_s = max(0.0, float(params["inter_burst_interval_s"]))
+        target_period_s = burst_duration_s + inter_burst_interval_s
+    elif "target_period_s" in defaults:
+        target_period_s = max(0.001, _profile_float(params, defaults, "target_period_s", 0.095))
+    else:
+        inter_burst_interval_s = max(0.0, _profile_float(params, defaults, "inter_burst_interval_s", 0.065))
+        target_period_s = burst_duration_s + inter_burst_interval_s
+    total_duration_s = samples / float(sample_rate)
+    burst_fit_duration_s = min(burst_duration_s, total_duration_s) if total_duration_s > 0 else 0.0
+    latest_audible_onset_s = max(0.0, total_duration_s - burst_fit_duration_s)
+    onset_s = min(requested_onset_s, latest_audible_onset_s)
+    end_margin_s = max(0.0, _profile_float(params, defaults, "end_margin_s", 0.0))
+    active_window_value = params.get("active_window_s", defaults.get("active_window_s"))
+    if active_window_value is None:
+        active_window_s = max(0.0, total_duration_s - onset_s - end_margin_s)
+    else:
+        active_window_s = max(0.0, float(active_window_value))
+        active_window_s = min(active_window_s, max(0.0, total_duration_s - onset_s))
+
+    legacy_fixed_period = (
+        "burst_count" in params
+        and "burst_count_mode" not in params
+        and "spacing_policy" not in params
+        and "active_window_s" not in params
+    )
+    burst_count_mode = (
+        str(params.get("burst_count_mode", defaults.get("burst_count_mode", "duration_derived"))).strip().lower()
+    )
+    if "burst_count" in params and "burst_count_mode" not in params:
+        burst_count_mode = "fixed"
+    spacing_policy = (
+        str(params.get("spacing_policy", defaults.get("spacing_policy", "symmetric_fit"))).strip().lower()
+    )
+    if legacy_fixed_period:
+        spacing_policy = "fixed_period_truncate"
+
+    if spacing_policy == "fixed_period_truncate":
+        burst_count = max(1, int(params.get("burst_count", defaults.get("burst_count", 1))))
+        onsets = [onset_s + index * target_period_s for index in range(burst_count)]
+        onsets = [value for value in onsets if value < total_duration_s]
+        resolved = {
+            "burst_count": len(onsets),
+            "burst_duration_s": burst_duration_s,
+            "rise_fall_s": rise_fall_s,
+            "target_period_s": target_period_s,
+            "actual_period_s": target_period_s if len(onsets) > 1 else 0.0,
+            "onset_s": onset_s,
+            "active_window_s": active_window_s,
+            "spacing_policy": spacing_policy,
+            "burst_count_mode": burst_count_mode,
+        }
+        if requested_onset_s != onset_s:
+            resolved["requested_onset_s"] = requested_onset_s
+            resolved["onset_fit_policy"] = "clamped_to_available_duration"
+        return onsets, resolved
+
+    span_s = max(0.0, active_window_s - burst_duration_s)
+    if burst_count_mode in {"fixed", "explicit"} and "burst_count" in params:
+        burst_count = max(1, int(params["burst_count"]))
+    else:
+        periods = int(math.floor((span_s / target_period_s) + 0.5)) if target_period_s > 0 and span_s > 0 else 0
+        burst_count = max(1, periods + 1)
+
+    allow_overlap = bool(params.get("allow_burst_overlap", defaults.get("allow_burst_overlap", False)))
+    if not allow_overlap and burst_count > 1 and span_s > 0:
+        minimum_period_s = max(
+            burst_duration_s,
+            float(params.get("minimum_period_s", defaults.get("minimum_period_s", burst_duration_s))),
+        )
+        max_without_overlap = max(1, int(math.floor(span_s / minimum_period_s)) + 1)
+        burst_count = min(burst_count, max_without_overlap)
+
+    if burst_count <= 1:
+        onsets = [onset_s + (span_s * 0.5)]
+        actual_period_s = 0.0
+    else:
+        actual_period_s = span_s / float(burst_count - 1)
+        onsets = [onset_s + index * actual_period_s for index in range(burst_count)]
+
+    onsets = [value for value in onsets if value < total_duration_s]
+    resolved = {
+        "burst_count": len(onsets),
+        "burst_duration_s": burst_duration_s,
+        "rise_fall_s": rise_fall_s,
+        "target_period_s": target_period_s,
+        "actual_period_s": actual_period_s,
+        "onset_s": onset_s,
+        "active_window_s": active_window_s,
+        "spacing_policy": spacing_policy,
+        "burst_count_mode": burst_count_mode,
+    }
+    if requested_onset_s != onset_s:
+        resolved["requested_onset_s"] = requested_onset_s
+        resolved["onset_fit_policy"] = "clamped_to_available_duration"
+    return onsets, resolved
+
+
+def _generate_dynaspace_burst_train(
+    noise_type: str,
+    samples: int,
+    sample_rate: int,
+    seed: int,
+    parameters: dict[str, Any] | None = None,
+) -> "Any":
+    import numpy as np
+
+    params = parameters if isinstance(parameters, dict) else {}
+    burst_onsets_s, resolved = _dynaspace_burst_onsets(samples=samples, sample_rate=sample_rate, parameters=params)
+    burst_duration_s = float(resolved["burst_duration_s"])
+    rise_fall_s = float(resolved["rise_fall_s"])
+    source = np.zeros(samples, dtype=float)
+    burst_samples = max(1, int(round(burst_duration_s * sample_rate)))
+    edge_samples = int(round(rise_fall_s * sample_rate))
+    envelope = _raised_cosine_edge(burst_samples, edge_samples)
+
+    for index, burst_onset_s in enumerate(burst_onsets_s):
+        start = int(round(burst_onset_s * sample_rate))
+        stop = min(samples, start + burst_samples)
+        if stop <= start:
+            continue
+        burst = _generate_noise(noise_type, stop - start, sample_rate, seed + index * 37)
+        source[start:stop] += burst * envelope[: stop - start]
+
+    peak = float(np.max(np.abs(source))) if samples else 0.0
+    return source / peak if peak > 0 else source
+
+
+def _generate_procedural_source(source: dict[str, Any], samples: int, sample_rate: int, seed: int) -> "Any":
+    profile = str(source.get("source_profile") or "").strip().lower()
+    if profile in {"", "continuous_noise", "procedural_noise"}:
+        return _generate_noise(source["noise_type"], samples, sample_rate, seed)
+    if profile == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE:
+        return _generate_dynaspace_burst_train(
+            source["noise_type"],
+            samples,
+            sample_rate,
+            seed,
+            source.get("source_profile_parameters"),
+        )
+    raise ValueError(f"Unsupported source profile: {source.get('source_profile')}")
 
 
 def _loudness_control_enabled(config: dict[str, Any]) -> bool:
@@ -659,7 +904,7 @@ def build_render_config(
     sofa_path = repo_relative_path(sofa_file)
     head_diameter_m = _listener_head_diameter_m(design)
     head_radius_m = head_diameter_m / 2.0
-    sources = _noise_rows(design)
+    sources = _trajectory_profiled_noise_rows(design)
     imported_source_count = sum(1 for source in sources if source.get("source_kind") == "imported_audio")
     tactile_events = _tactile_events(design) if include_tactile else []
     reference_parameters = design.study_profile_reference_parameters if isinstance(design.study_profile_reference_parameters, dict) else {}
@@ -834,6 +1079,8 @@ def write_render_qc(path: Path, rows: list[dict[str, Any]]) -> None:
         "status",
         "noise_label",
         "noise_type",
+        "source_profile",
+        "source_profile_parameters",
         "source_kind",
         "source_render_mode",
         "source_path",
@@ -985,7 +1232,7 @@ def render_with_python_sofa_reference(config: dict[str, Any], output_dir: Path, 
             }
         else:
             dry_seed = int(config["source"]["seed"]) + noise_index * 1009
-            dry = _generate_noise(noise["noise_type"], total_samples, sample_rate, dry_seed)
+            dry = _generate_procedural_source(noise, total_samples, sample_rate, dry_seed)
         loudness_metadata: dict[str, Any] = {}
         if _loudness_control_enabled(config):
             dry = _apply_loudness_envelope(dry, config["loudness_policy"], sample_rate)
@@ -1026,6 +1273,8 @@ def render_with_python_sofa_reference(config: dict[str, Any], output_dir: Path, 
                 "status": "rendered_reference",
                 "noise_label": noise["label"],
                 "noise_type": noise["noise_type"],
+                "source_profile": noise.get("source_profile", ""),
+                "source_profile_parameters": json.dumps(noise.get("source_profile_parameters", {}), sort_keys=True),
                 "source_kind": source_kind,
                 **imported_metadata,
                 "duration_s": f"{total_samples / sample_rate:.6f}",

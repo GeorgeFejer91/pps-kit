@@ -100,6 +100,7 @@ def test_dashboard_static_assets_keep_numbered_baseline_and_block_segments():
     assert "Minimum SOA anchor" in html
     assert "Maximum SOA anchor" in html
     assert "Full SOA tactile-only" in html
+    assert "Full SOA stationary bursts" in html
     assert "Custom timings" in html
     assert 'id="baseline-custom-audio-tactile"' in html
     assert 'id="bake-trial-files"' in html

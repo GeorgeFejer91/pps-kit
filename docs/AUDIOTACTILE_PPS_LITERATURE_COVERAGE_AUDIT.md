@@ -15,7 +15,7 @@ The Holmes consensus-corpus screening trail is `assets/preloads/audiotactile_hol
 The PubMed screening audit trail is `assets/preloads/audiotactile_pubmed_screening.json`, with the supplemental PubMed query-variant trail in `assets/preloads/audiotactile_pubmed_query_variant_screening.json`.
 The OpenAlex broad-screen trail is `assets/preloads/audiotactile_openalex_broad_screening.json`, with per-hit screening decisions in `assets/preloads/audiotactile_openalex_candidate_screening.json`. The additional query-variant exhaustiveness screen is `assets/preloads/audiotactile_openalex_query_variant_screening.json`. The live web sanity trail is `assets/preloads/audiotactile_web_sanity_screening.json`.
 
-Current ledger size: 74 literature records. Across the separate preload gate, 8 profile variants currently pass runnable checks. In the broader literature ledger, 29 not-yet-templated records expose toolkit-structure gaps, 21 not-yet-templated records are structurally close but lack extracted/published PPS-task parameters, and 5 records are adjacent/out of scope. The previous generic candidate bucket is now cleared: tracked records are classified by whether the PPS task is runnable, missing exact task details, blocked by an unsupported task structure, or not actually an audiotactile PPS target.
+Current ledger size: 74 literature records. Across the separate preload gate, 8 profile variants currently pass runnable checks. In the broader literature ledger, 29 not-yet-templated records expose toolkit-structure gaps, 21 not-yet-templated records are structurally close but lack extracted/published PPS-task parameters, and 4 records are adjacent/out of scope. The previous generic candidate bucket is now cleared: tracked records are classified by whether the PPS task is runnable, missing exact task details, blocked by an unsupported task structure, or not actually an audiotactile PPS target.
 
 ## Evidence Base
 
@@ -49,16 +49,16 @@ The PubMed screen is fully accounted for in the machine-readable screening file:
 
 | Screen decision | Count |
 |---|---:|
-| Current runnable profile | 4 |
+| Current runnable profile | 5 |
 | Current blocked profile | 6 |
 | Included task needing exact PPS-task extraction | 22 |
 | Candidate requiring toolkit structure | 6 |
 | Candidate requiring static near/far support | 1 |
 | Duplicate correction | 1 |
-| Review/theory/commentary/methods-only exclusion | 5 |
+| Review/theory/commentary/methods-only exclusion | 4 |
 | Adjacent non-PPS or non-audiotactile exclusion | 3 |
 
-The count of runnable PubMed records is lower than the runnable published-template count because the 2026 Lamia paper maps to two runnable experiment variants in the toolkit. Across the whole screen, 39 records are included/current/candidate-like PPS task records and 9 are exclusions, duplicate corrections, or adjacent non-task hits.
+The count of runnable PubMed records is lower than the runnable published-template count because the 2026 Lamia paper maps to two runnable experiment variants in the toolkit. Across the whole screen, 40 records are included/current/candidate-like PPS task records and 8 are exclusions, duplicate corrections, or adjacent non-task hits.
 
 An OpenAlex title/abstract sanity route was also run with broader queries. It confirmed several existing records, corrected the Ferri 2015, Galli 2015, and PNAS interoception/exteroception DOI/source mappings, and added or checked `social_perception_2017`, `lower_limb_pps_2017`, `newborn_boundaries_2019`, `ronga_2021_newborn_erp`, `ferri_2015_jneurosci_itv`, `taffou_2021_auditory_roughness`, `novel_two_phase_audio_tactile_2025`, and `looming_duration_2025`. A follow-up pass promoted `serino_2018_mixed_reality_pps`, `amemiya_2017_pseudowalking_footsole`, and `serino_2011_professional_fencers`, linked obvious preprint/source/duplicate hits to existing records, and retained the lower-limb record as an adjacent false positive after source checking because it uses a visuo-tactile lower-limb task rather than an audiotactile PPS task. The main OpenAlex broad route retrieved all 755 records for `audio-tactile peripersonal space`; its automated candidate triage is stored at `artifacts/literature_audit/openalex_broad_candidate_triage.json` and now links 47 of 103 candidate-like hits to coverage records. The remaining 56 candidate-like hits are explicitly screened in `assets/preloads/audiotactile_openalex_candidate_screening.json` as visual-tactile/non-auditory, auditory-only/no-tactile, non-PPS audiotactile/haptic, review/model/theory, or grey-literature/source records rather than unresolved tasks.
 
@@ -74,13 +74,14 @@ The current profile gate covers 22 templates:
 
 | Outcome | Count | Meaning |
 |---|---:|---|
-| GUI-recreatable | 7 | Current Segment 0-4 profile parameters are complete; Segment 5-6 are native toolkit generation/handoff. Six are published profiles; the canonical Study 5 white/pink profile is the unpublished lab profile. |
+| GUI-recreatable | 8 | Current Segment 0-4 profile parameters are complete; Segment 5-6 are native toolkit generation/handoff. Seven are published profiles; the canonical Study 5 white/pink profile is the unpublished lab profile. |
 | Missing publication parameters | 12 | The task looks structurally expressible, but published or encoded details are insufficient. |
 | Toolkit structural gap | 7 | The task uses a trial, audio, tactile, response, timing, coordinate, or apparatus feature that the toolkit schema does not yet model. |
 
 Runnable published-paper profiles today:
 
 - `matsuda_2021_four_directions`
+- `roussel_2025_dynaspace_mobile_pps`
 - `barumerli_2026_arm_movement_exp1`
 - `barumerli_2026_arm_movement_exp2`
 - `noel_2015_bodily_self`
@@ -162,7 +163,7 @@ This table is generated from `assets/preloads/audiotactile_literature_coverage.j
 | Matsuda et al. (2021) | front, rear, left, and right approaching/receding audio-tactile PPS task | GUI-recreatable now | Current profile passes the Segment 0-4 audiotactile recreation gate. |
 | Lerner et al. (2021) | VR 3D audio-tactile PPS boundary estimation | Template exists; toolkit structure gap | Toolkit/task constraints: `body_scaled_distance_units`, `unity_3d_tune_in_engine_behavior` Missing/extract: exact Unity/3D Tune-In stimulus engine behavior |
 | Lamia, Shabani, & Candidi (2026) | looming/receding audio-tactile task with arm-movement context | GUI-recreatable now | Current profile passes the Segment 0-4 audiotactile recreation gate. |
-| Using Android smartphones to collect RTs to multisensory stimuli (2025) | methods/device paper rather than a distinct PPS profile | Adjacent/out of scope | Excluded or adjacent to this audit target. |
+| Using Android smartphones to collect RTs to multisensory stimuli (2025) | smartphone DynaSpace looming versus fixed audio-tactile PPS validation task | GUI-recreatable now | Current DynaSpace profile passes the Segment 0-4 audiotactile recreation gate; original Android WAVs are provenance only and the public preload uses generated proxy WAVs. |
 | Spiousas et al. (2025) | auditory reachability judgments without tactile stimulus/response | Adjacent/out of scope | Excluded or adjacent to this audit target. |
 | Barumerli et al. (2026 semantic looming) | auditory looming-distance and motor-preparation task without tactile stimulus/response | Adjacent/out of scope | Excluded or adjacent to this audit target. |
 | Rossi Sebastiano et al. (2022) | visuo-tactile PPS task, not an audio-tactile profile | Adjacent/out of scope | Excluded or adjacent to this audit target. |
@@ -273,7 +274,7 @@ Some search hits should not become audiotactile PPS preloads:
 - Barumerli et al. 2026 semantic looming is auditory looming-distance/motor-preparation PPS without a tactile stimulus/response task.
 - Rossi Sebastiano et al. 2022 is visuo-tactile, not audio-tactile.
 - Stone et al. 2017/2018 lower-limb PPS boundary work was a broad-screen false positive for this audit because the checked task is visuo-tactile, not audiotactile.
-- Smartphone RT methods papers are useful implementation references, not published PPS task profiles.
+- The 2025 Android/DynaSpace smartphone methods paper is now represented as `roussel_2025_dynaspace_mobile_pps` because its app source exposes a runnable audio-tactile looming-versus-fixed validation task; other generic methods-only records remain implementation references rather than toolkit profiles.
 
 ## Standardization Priority
 

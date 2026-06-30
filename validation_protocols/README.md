@@ -109,6 +109,8 @@ python .\validation_protocols\scripts\audit_pc_software_requirements.py
 python .\validation_protocols\scripts\emulate_mouse_clicks.py --count 10 --interval-s 0.5 --armed
 python .\validation_protocols\scripts\summarize_validation_run.py --session-dir local_data\sessions\P001_YYYYMMDD_HHMMSS
 python .\validation_protocols\scripts\build_validation_evidence_audit.py --output-dir validation_protocols\reports\evidence_audit
+python .\validation_protocols\scripts\analyze_mobile_pps_replication.py --input path\to\master_successful_participants.csv --output-dir artifacts\validation_runs\mobile_pps_replication_current
+python .\validation_protocols\scripts\analyze_mobile_pps_replication.py --input path\to\collected_pps_data_folder --output-dir artifacts\validation_runs\mobile_pps_replication_current
 ```
 
 Hardware playback scripts default to amplitude `0.05` and refuse amplitudes
@@ -169,6 +171,17 @@ Separate these quantities in every report:
   and immediately yield `events.csv`, loadable `events.xdf`, `lsl_markers.csv`,
   `trigger_dictionary.json`, timing QC, and `*_analysis_ready_trials.csv`.
   This remains a software preflight when it uses the fake audio engine.
+- Mobile-style PPS behavioral replication: whether collected trial-level PPS
+  data show the basic smartphone/DynaSpace-style behavioral assumptions:
+  acceptable hit/catch/anticipation integrity, faster audio-tactile responses
+  than matched tactile-only baseline, SOA/distance-dependent approach trends,
+  and defensible or non-defensible sigmoid boundary fits. The helper
+  `analyze_mobile_pps_replication.py` can analyze one CSV or scan a collection
+  folder for OSF-style `master_successful_participants.csv`, pps-kit
+  `analysis_ready_trials.csv`, `final_trial_outcomes.csv`, or participant
+  `*_trials.csv` files. This is a behavioral data-shape check; it does not
+  validate hardware timing, raw WAV decoding, LSL/XDF persistence, or physical
+  tactile onset.
 - One-block actual-condition runner evidence: whether an actual Segment 5/6
   prepared experimental block, administered as one block through the runner,
   yields complete sample-exact event logs, XDF/LSL mirror outputs, trigger
@@ -203,8 +216,8 @@ Separate these quantities in every report:
   plans. `run_protocol11_controlled_response_matrix.py` is the deterministic
   boundary-response scenario: it prepares a real Segment 5/6 session package,
   runs `SessionRunnerController`, exercises instruction target clicks, catch
-  and baseline rows, out-of-target and double clicks, +99 ms/+100 ms/+4.0 s/
-  >4.0 s response pairing, and a click exactly at the next `trial_start`, then
+  and baseline rows, out-of-target and double clicks, +99 ms/+100 ms/+1300 ms/
+  >1300 ms response pairing, and a click exactly at the next `trial_start`, then
   feeds the resulting session to the artifact gate. `run_protocol11_capture_options_matrix.py`
   is the local output-policy gate for capture variants: it verifies events-only,
   internal-XDF-only, analysis-without-XDF/LSL, marker-mirror-only, and standard

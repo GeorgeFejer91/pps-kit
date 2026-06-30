@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 import json
 import wave
 from pathlib import Path
@@ -8,14 +9,27 @@ import pytest
 
 from peripersonal_space_toolkit import dashboard_app
 from peripersonal_space_toolkit.dashboard_app import DashboardController
-from peripersonal_space_toolkit.design import block_trial_rows, default_design, save_design, validate_design
+from peripersonal_space_toolkit.design import (
+    PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
+    block_trial_rows,
+    default_design,
+    save_design,
+    validate_design,
+)
 from peripersonal_space_toolkit.preload_inventory import load_preload_inventory, profile_asset_status
 from peripersonal_space_toolkit.templates import DEFAULT_STUDY_TEMPLATE_ID, load_templates, study_template_citation_label
 
-def _study5_template():
+STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID = "study5_dynaspace_lateral_45_pps"
+
+
+def _study5_template_by_id(template_id: str):
     root = Path(__file__).resolve().parents[1]
     templates = load_templates(root / "study_templates")
-    return next(template for template in templates if template.template_id == DEFAULT_STUDY_TEMPLATE_ID)
+    return next(template for template in templates if template.template_id == template_id)
+
+
+def _study5_template():
+    return _study5_template_by_id(DEFAULT_STUDY_TEMPLATE_ID)
 
 
 def test_study5_is_first_default_preload():
@@ -25,15 +39,20 @@ def test_study5_is_first_default_preload():
     assert templates[0].template_id == DEFAULT_STUDY_TEMPLATE_ID
 
 
-def test_white_pink_profile_is_the_only_study5_protocol():
+def test_white_pink_profile_remains_default_with_lateral_study5_variant_available():
     root = Path(__file__).resolve().parents[1]
     templates = load_templates(root / "study_templates")
 
     study5_templates = [template for template in templates if "study5" in template.template_id]
-    assert [template.template_id for template in study5_templates] == [DEFAULT_STUDY_TEMPLATE_ID]
+    assert [template.template_id for template in study5_templates] == [
+        DEFAULT_STUDY_TEMPLATE_ID,
+        STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID,
+    ]
     label = study_template_citation_label(study5_templates[0])
     assert "Study 5 white/pink protocol" in label
     assert "White and pink looming sources" in label
+    lateral_label = study_template_citation_label(study5_templates[1])
+    assert "DynaSpace lateral 45 protocol" in lateral_label
 
 
 def test_dashboard_starts_from_study5_when_no_deliberate_profile_is_saved(tmp_path: Path):
@@ -134,7 +153,7 @@ def test_dashboard_replaces_noncanonical_study5_saved_profile_on_load(tmp_path: 
     assert "outdated trial rows" not in state["design"]["study_profile_notes"]
     assert state["design"]["protocol"]["include_catch_trials"] is True
     assert state["design"]["protocol"]["include_baseline_trials"] is True
-    assert state["design"]["protocol"]["baseline_strategy"] == "tactile_only"
+    assert state["design"]["protocol"]["baseline_strategy"] == "stationary_burst"
     assert state["design"]["protocol"]["baseline_custom_trial_mode"] == "tactile_only"
     assert state["design"]["protocol"]["baseline_soa_values_ms"] == []
     assert state["design"]["protocol"]["trial_pool_repetition_defaults"] == {
@@ -143,6 +162,50 @@ def test_dashboard_replaces_noncanonical_study5_saved_profile_on_load(tmp_path: 
         "baseline": 3.0,
         "catch": 6.0,
     }
+
+
+def test_dashboard_can_load_study5_dynaspace_lateral_profile(tmp_path: Path):
+    controller = DashboardController(
+        design_path=tmp_path / "design.json",
+        render_dir=tmp_path / "render",
+        session_root=tmp_path / "sessions",
+        import_dir=tmp_path / "imports",
+        project_registry_root=tmp_path / "projects",
+    )
+
+    state = controller.load_template(STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID)
+
+    assert state["selected_template"] == STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID
+    assert state["design"]["study_profile_id"] == STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID
+    assert [asset["label"] for asset in state["design"]["noises"]] == [
+        "DynaSpace looming left 45",
+        "DynaSpace looming right 45",
+    ]
+    assert "Pink frontal" not in {asset["label"] for asset in state["design"]["noises"]}
+    assert state["design"]["protocol"]["trial_pool_repetition_defaults"] == {
+        "default": 5.0,
+        "audio_tactile": 5.0,
+        "baseline": 2.5,
+        "catch": 6.0,
+    }
+    assert state["preload_inventory"]["status"] == "ready"
+    assert state["preload_inventory"]["asset_count"] == 2
+    assert state["project"]["project_id"] == "profile_study5_dynaspace_lateral_45_pps"
+
+    ingredient_manifest = json.loads(
+        (
+            Path(state["project"]["project_dir"])
+            / "1_core_audio_ingredients"
+            / "stimulus_ingredients_manifest.json"
+        ).read_text(encoding="utf-8")
+    )
+    labels = {item["label"] for item in ingredient_manifest["ingredients"]}
+    assert {
+        "DynaSpace looming left 45",
+        "DynaSpace looming right 45",
+        "Inhale instruction",
+        "Exhale instruction",
+    } <= labels
 
 
 def test_unpublished_study5_template_preloads_breathing_assets_and_filmstrip():
@@ -159,7 +222,7 @@ def test_unpublished_study5_template_preloads_breathing_assets_and_filmstrip():
     assert design.protocol.include_catch_trials is True
     assert design.protocol.catch_trial_percentage == pytest.approx(0.0)
     assert design.protocol.include_baseline_trials is True
-    assert design.protocol.baseline_strategy == "tactile_only"
+    assert design.protocol.baseline_strategy == "stationary_burst"
     assert design.protocol.baseline_custom_trial_mode == "tactile_only"
     assert design.protocol.baseline_soa_values_ms == []
     assert design.protocol.trial_pool_repetition_defaults == {
@@ -210,6 +273,11 @@ def test_unpublished_study5_template_preloads_breathing_assets_and_filmstrip():
         assert slot["continue_mode"] == continue_mode
         assert slot["source"] == "original_study5"
     assert [asset.label for asset in design.noises] == ["Pink frontal", "White frontal"]
+    assert [asset.source_profile for asset in design.noises] == [
+        PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
+        PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
+    ]
+    assert all(asset.source_profile_parameters["burst_count_mode"] == "duration_derived" for asset in design.noises)
     assert design.custom_looming_files == []
 
     for clip in design.prestimulus_files:
@@ -326,6 +394,10 @@ def test_study5_profile_keeps_trial_budget_with_two_sources():
     assert design.name == "Study 5 PPS box-breathing white/pink design"
     assert [asset.label for asset in design.noises] == ["Pink frontal", "White frontal"]
     assert [asset.noise_type for asset in design.noises] == ["pink", "white"]
+    assert [asset.source_profile for asset in design.noises] == [
+        PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
+        PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
+    ]
     assert all(DEFAULT_STUDY_TEMPLATE_ID in asset.prebaked_path for asset in design.noises)
     assert design.protocol.trial_pool_repetition_defaults == {
         "default": 6.0,
@@ -362,3 +434,110 @@ def test_study5_profile_keeps_trial_budget_with_two_sources():
     rows = block_trial_rows(design)
     noncatch = [row for row in rows if row["trial_type"] == "Audio-Tactile"]
     assert len(noncatch) == design.protocol.blocks * 2 * len(design.noises) * len(design.protocol.soa_values_ms)
+
+
+def test_study5_dynaspace_lateral_profile_balances_side_phase_and_trial_budget():
+    root = Path(__file__).resolve().parents[1]
+    template = _study5_template_by_id(STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID)
+    design = template.design
+
+    assert template.title == "Study 5 DynaSpace lateral 45 profile"
+    assert template.verification_status == "verified"
+    assert design.study_profile_reference_parameters["customized_from_profile_id"] == DEFAULT_STUDY_TEMPLATE_ID
+    assert design.study_profile_reference_parameters["smartphone_reference_profile_id"] == "roussel_2025_dynaspace_mobile_pps"
+    assert "left -45 degrees and right +45 degrees" in design.study_profile_reference_parameters[
+        "trajectory_balance_policy"
+    ]
+    assert "equal left/right counts" in design.study_profile_reference_parameters["trajectory_balance_policy"]
+    assert design.protocol.soa_values_ms == [105, 1625, 2385, 2765, 2955, 3050]
+    assert design.protocol.spatial_values_cm == [640.0, 320.0, 160.0, 80.0, 40.0, 20.0]
+    assert design.protocol.trial_pool_repetition_defaults == {
+        "default": 5.0,
+        "audio_tactile": 5.0,
+        "baseline": 2.5,
+        "catch": 6.0,
+    }
+    assert design.protocol.auditory_motion_directions == ["source_trajectory"]
+    assert design.protocol.respiratory_phases == ["Inhale", "Exhale"]
+    assert dashboard_app._run_setup_settings(design)["experiment_structure"] == "pre_post"
+
+    assert [asset.label for asset in design.noises] == [
+        "DynaSpace looming left 45",
+        "DynaSpace looming right 45",
+    ]
+    assert [asset.noise_type for asset in design.noises] == ["white", "white"]
+    assert [asset.source_profile for asset in design.noises] == [
+        PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
+        PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
+    ]
+    assert all(asset.source_profile_parameters["active_window_s"] == pytest.approx(3.07) for asset in design.noises)
+    assert all(STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID in asset.prebaked_path for asset in design.noises)
+
+    left_snapshot = design.noises[0].trajectory_snapshot
+    right_snapshot = design.noises[1].trajectory_snapshot
+    assert left_snapshot["start_rotation_deg"] == pytest.approx(315.0)
+    assert right_snapshot["start_rotation_deg"] == pytest.approx(45.0)
+    assert left_snapshot["start_distance_cm"] == pytest.approx(640.0, abs=0.001)
+    assert right_snapshot["start_distance_cm"] == pytest.approx(640.0, abs=0.001)
+    assert left_snapshot["end_distance_cm"] == pytest.approx(20.0, abs=0.001)
+    assert right_snapshot["end_distance_cm"] == pytest.approx(20.0, abs=0.001)
+    assert left_snapshot["movement_duration_s"] == pytest.approx(2.945)
+    assert right_snapshot["movement_duration_s"] == pytest.approx(2.945)
+    assert left_snapshot["start"]["x_m"] < 0
+    assert right_snapshot["start"]["x_m"] > 0
+    assert left_snapshot["end"]["x_m"] < 0
+    assert right_snapshot["end"]["x_m"] > 0
+
+    for asset in design.noises:
+        path = root / asset.prebaked_path
+        assert path.exists()
+        with wave.open(str(path), "rb") as wav:
+            assert wav.getframerate() == 44100
+            assert wav.getnchannels() == 2
+            assert wav.getnframes() / wav.getframerate() == pytest.approx(3.85)
+
+    inventory = load_preload_inventory(root)
+    asset_status = profile_asset_status(STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID, inventory=inventory, repo_root=root)
+    assert asset_status["status"] == "ready"
+    assert asset_status["asset_count"] == 2
+    assert all(asset["sha256_ok"] is True for asset in asset_status["assets"])
+
+    trial_design = json.loads(
+        (
+            root
+            / "assets"
+            / "preloads"
+            / STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID
+            / "04_trial_designer"
+            / "trial_design.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert trial_design["preview_trial_count"] == 144
+
+    assert validate_design(design) == []
+    rows = block_trial_rows(design)
+    noncatch = [row for row in rows if row["trial_type"] == "Audio-Tactile"]
+    assert len(noncatch) == 144
+    assert Counter(row["trial_type_label"] for row in noncatch) == {
+        "Inhale trial type": 72,
+        "Exhale trial type": 72,
+    }
+    assert Counter(row["noise_label"] for row in noncatch) == {
+        "DynaSpace looming left 45": 72,
+        "DynaSpace looming right 45": 72,
+    }
+
+    segment3_audio_tactile = 2 * len(design.noises) * len(design.protocol.soa_values_ms)
+    segment3_baseline = segment3_audio_tactile
+    segment3_catch = 2 * len(design.noises)
+    assert segment3_audio_tactile == 24
+    assert segment3_baseline == 24
+    assert segment3_catch == 4
+
+    reps = design.protocol.trial_pool_repetition_defaults
+    expected_segment4_rows = (
+        int(segment3_audio_tactile * reps["audio_tactile"])
+        + int(segment3_baseline * reps["baseline"])
+        + int(segment3_catch * reps["catch"])
+    )
+    assert expected_segment4_rows == 204

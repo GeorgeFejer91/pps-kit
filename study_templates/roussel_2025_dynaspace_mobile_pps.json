@@ -1,0 +1,283 @@
+{
+  "template_id": "roussel_2025_dynaspace_mobile_pps",
+  "title": "DynaSpace smartphone PPS validation profile",
+  "citation": "Roussel, A., et al. (2025). Using Android Smartphones to Collect Precise Measures of Reaction Times to Multisensory Stimuli. Sensors, 25(19), 6072.",
+  "source_url": "https://doi.org/10.3390/s25196072",
+  "doi": "10.3390/s25196072",
+  "verification_status": "verified",
+  "notes": "Smartphone/DynaSpace audio-tactile PPS validation profile. The profile encodes the reported left-hemispace looming trajectory, fixed 640 cm comparator, six tactile timing anchors, no-vibration catch trials, and 72 recorded-trial distribution from the paper and app source. Bundled preload WAVs are toolkit-generated DynaSpace-style Gaussian white-noise burst trains rendered with the PPS Toolkit FABIAN/SOFA path; the original Android bursttrain WAVs are recorded as provenance but not redistributed.",
+  "reference_parameters": {
+    "profile_type": "published_mobile_dynaspace_pps_validation",
+    "publication_status": "published",
+    "paper_role": "smartphone methods validation using an audio-tactile PPS-style looming versus fixed-source task",
+    "source_app_name": "DynaSpace",
+    "source_app_repo": "https://forge-2.ircam.fr/roussel/dynaspace/",
+    "source_app_project": "DynaSpaceIrcam",
+    "source_code_parameters": {
+      "main_activity": "DynaSpaceIrcam/app/src/main/java/com/example/osc/MainActivity.kt",
+      "randomization_source": "DynaSpaceIrcam/app/src/main/cpp/rand.cpp",
+      "audio_player_source": "DynaSpaceIrcam/app/src/main/cpp/WavAudioPlayer.cpp",
+      "max_runs_including_practice": 77,
+      "practice_trial_count": 5,
+      "recorded_trial_count": 72,
+      "time_array_ms": [105, 1625, 2385, 2765, 2955, 3050, 0],
+      "noncatch_java_delay_offset_ms": 300,
+      "cpp_vibration_sleep_offset_ms": 50,
+      "source_code_vibration_duration_ms": 60,
+      "paper_reported_vibration_duration_ms": 50,
+      "vibration_amplitude_android": 255,
+      "restart_delay_range_ms": [700, 1100],
+      "restart_delay_offset_ms": 300,
+      "restart_delay_effective_range_ms": [1000, 1400],
+      "recorded_condition_distribution": {
+        "looming_audio_tactile": 24,
+        "fixed_audio_tactile": 24,
+        "looming_no_vibration_catch": 12,
+        "fixed_no_vibration_catch": 12
+      }
+    },
+    "original_audio_assets": [
+      {
+        "label": "Android looming burst train",
+        "filename": "bursttrainlooming.wav",
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "frames": 184800,
+        "duration_s": 3.85,
+        "subtype": "PCM_16",
+        "sha256": "610c9a9c22329f6dfb4a37917cfdead552042e6d2f2987dacc418385e7570da2",
+        "redistributed_in_pps_toolkit": false
+      },
+      {
+        "label": "Android fixed burst train",
+        "filename": "bursttrainfixe.wav",
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "frames": 184800,
+        "duration_s": 3.85,
+        "subtype": "PCM_16",
+        "sha256": "56f8afff1b0985a0e3585bdb525f3a76c0bd1f57cf711a667bcbfa03b1f69fe1",
+        "redistributed_in_pps_toolkit": false
+      }
+    ],
+    "stimulus_asset_policy": "The public PPS Toolkit profile does not redistribute the Android app's raw WAVs. The preload catalog bakes 44.1 kHz toolkit-generated DynaSpace-style burst-train sources through the existing FABIAN/SOFA renderer so the profile remains runnable and publication-safe.",
+    "original_audio_engine": "Max/MSP Spat with LISTEN HRTFs for source creation, then Android Oboe playback in the DynaSpace app",
+    "toolkit_audio_engine": "PPS Toolkit 3DTI-compatible Python SOFA/FABIAN reference renderer",
+    "toolkit_renderer_sample_rate_hz": 44100,
+    "original_android_wav_sample_rate_hz": 48000,
+    "toolkit_source_type": "Gaussian white-noise burst-train dry source rendered through FABIAN/SOFA",
+    "source_asset_equivalence": "trajectory, condition logic, 33-burst temporal structure, and approximate 95 ms burst spacing are matched; exact Android noise seed, Spat/LISTEN renderer, room response, phone transducer response, and motor mechanics are not bit-matched",
+    "stimulus_generation_operating_protocol": {
+      "schema": "pps-dynaspace-consensus-generation-v1",
+      "decision": "Adopt the DynaSpace/Hobeika burst-train dry source as the smartphone-profile source profile while delegating spatialization to the 3DTI/SOFA renderer.",
+      "evidence_basis": [
+        "Raw DynaSpace WAV audit detected 33 bursts with about 95 ms median inter-onset interval.",
+        "Hobeika lineage reports Gaussian white-noise bursts with 30 ms duration, 10 ms rise/fall, and 65 ms inter-burst interval.",
+        "Consensus searches supported broadband onset transients for localization/salience and supported HRTF/ILD/ITD/reverb/near-field cues as renderer-level spatial properties.",
+        "Consensus searches warned that rising intensity alone can produce looming salience, so matched-level controls remain necessary for causal inference."
+      ],
+      "dry_source_profile": "dynaspace_gaussian_burst_train",
+      "spatialization_policy": "Render HRTF, ILD, ITD, near-field, distance attenuation, future trajectory angle, and optional room/DRR/IACC cues through 3DTI/SOFA rather than hard-coding them into the dry source.",
+      "control_policy": "Keep the DynaSpace replication contrast available, and add matched-level control variants for inference-focused future studies."
+    },
+    "auditory_conditions": [
+      {
+        "label": "looming",
+        "movement": "left 45-degree approach",
+        "start_distance_cm": 640,
+        "end_distance_cm": 20,
+        "trajectory_start_time_ms": 105,
+        "trajectory_end_time_ms": 3050,
+        "derived_speed_mps": 2.1052631579,
+        "azimuth_deg_toolkit_signed": -45.0,
+        "elevation_deg": 0.0
+      },
+      {
+        "label": "fixed",
+        "movement": "stationary comparator",
+        "distance_cm": 640,
+        "azimuth_deg_toolkit_signed": -45.0,
+        "elevation_deg": 0.0
+      }
+    ],
+    "trajectory_anchor_table": [
+      {"anchor": "T1", "soa_ms": 105, "distance_cm": 640},
+      {"anchor": "T2", "soa_ms": 1625, "distance_cm": 320},
+      {"anchor": "T3", "soa_ms": 2385, "distance_cm": 160},
+      {"anchor": "T4", "soa_ms": 2765, "distance_cm": 80},
+      {"anchor": "T5", "soa_ms": 2955, "distance_cm": 40},
+      {"anchor": "T6", "soa_ms": 3050, "distance_cm": 20}
+    ],
+    "no_vibration_catch_code": {
+      "time_array_value_ms": 0,
+      "semantic": "auditory-only catch trial with no phone vibration",
+      "toolkit_family": "Catch"
+    },
+    "primary_analysis_contrast": "looming audio-tactile RT pattern compared with fixed-source audio-tactile RT pattern across matched vibration timing anchors",
+    "baseline_policy": "No tactile-only baseline is encoded for this profile because the smartphone task's main validation contrast is looming versus fixed sound with no-vibration catches.",
+    "trajectory_override_policy": "Future variants should change azimuth_start_deg and azimuth_end_deg together for another constant-bearing approach angle, or provide cartesian endpoints for curved or non-radial paths while preserving the same anchor-table logic.",
+    "participants_recruited": 20,
+    "participants_analyzed_reported": 18,
+    "profile_check_complete": true
+  },
+  "design": {
+    "name": "DynaSpace smartphone PPS validation design",
+    "sofa_file": "assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa",
+    "noises": [
+      {
+        "label": "DynaSpace proxy looming burst train",
+        "noise_type": "white",
+        "azimuth_deg": -45.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0,
+        "source_profile": "dynaspace_gaussian_burst_train",
+        "source_profile_parameters": {
+          "burst_count_mode": "duration_derived",
+          "burst_duration_s": 0.03,
+          "rise_fall_s": 0.01,
+          "target_period_s": 0.095,
+          "onset_s": 0.3,
+          "active_window_s": 3.07,
+          "active_window_source": "raw_dynaspace_active_burst_window",
+          "spacing_policy": "symmetric_fit",
+          "evidence_basis": "Raw DynaSpace WAV audit detected 33 peaks with about 95 ms median IOI. Hobeika lineage reports 30 ms Gaussian white-noise bursts, 10 ms rise/fall, and 65 ms inter-burst interval; PPS-kit derives burst count from the active window and target IOI instead of hard-coding 33."
+        },
+        "sequence_order": 1,
+        "motion_mode": "looming"
+      },
+      {
+        "label": "DynaSpace proxy fixed 640 cm burst train",
+        "noise_type": "white",
+        "azimuth_deg": -45.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0,
+        "source_profile": "dynaspace_gaussian_burst_train",
+        "source_profile_parameters": {
+          "burst_count_mode": "duration_derived",
+          "burst_duration_s": 0.03,
+          "rise_fall_s": 0.01,
+          "target_period_s": 0.095,
+          "onset_s": 0.3,
+          "active_window_s": 3.07,
+          "active_window_source": "raw_dynaspace_active_burst_window",
+          "spacing_policy": "symmetric_fit",
+          "evidence_basis": "Raw DynaSpace WAV audit detected 33 peaks with about 95 ms median IOI. Hobeika lineage reports 30 ms Gaussian white-noise bursts, 10 ms rise/fall, and 65 ms inter-burst interval; PPS-kit derives burst count from the active window and target IOI instead of hard-coding 33."
+        },
+        "sequence_order": 2,
+        "motion_mode": "stationary"
+      }
+    ],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "trajectory": {
+      "start_radius_m": 6.4,
+      "end_radius_m": 0.2,
+      "path_direction": "approach",
+      "coordinate_mode": "polar",
+      "path_length_m": 6.2,
+      "propagation_speed_mps": 2.1052631579,
+      "azimuth_start_deg": -45.0,
+      "azimuth_end_deg": -45.0,
+      "elevation_deg": 0.0,
+      "padding_pre_s": 0.105,
+      "padding_post_s": 0.8,
+      "sample_rate": 44100,
+      "use_inverse_square": true
+    },
+    "protocol": {
+      "repetitions_per_condition": 4,
+      "soa_values_ms": [105, 1625, 2385, 2765, 2955, 3050],
+      "spatial_values_cm": [640.0, 320.0, 160.0, 80.0, 40.0, 20.0],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": ["left_45_approach"],
+      "tactile_sites": ["handheld smartphone vibration"],
+      "include_catch_trials": true,
+      "catch_trial_percentage": 33.333333,
+      "catch_trials_exact": 24,
+      "include_baseline_trials": false,
+      "baseline_strategy": "none",
+      "baseline_trial_percentage": 0.0,
+      "baseline_soa_values_ms": [],
+      "baseline_custom_trial_mode": "tactile_only",
+      "respiratory_phases": ["Any"],
+      "blocks": 1,
+      "block_specs": [
+        {
+          "label": "DynaSpace recorded 72-trial block",
+          "stimulus_types": ["Audio-Tactile", "Catch"]
+        }
+      ],
+      "trial_randomization_strategy": "balanced_shuffle",
+      "block_order_randomization": "fixed",
+      "max_consecutive_same_trial_type": 6,
+      "trial_strips": [
+        {
+          "strip_id": "dynaspace-looming-row",
+          "label": "DynaSpace looming source",
+          "audio_tactile_percentage": 66.666667,
+          "catch_percentage": 33.333333,
+          "baseline_percentage": 0.0,
+          "elements": [
+            {
+              "element_id": "dynaspace-looming-source",
+              "kind": "looming_stimulus",
+              "label": "DynaSpace proxy looming burst train",
+              "source_label": "DynaSpace proxy looming burst train",
+              "source_labels": ["DynaSpace proxy looming burst train"],
+              "randomized": true
+            }
+          ]
+        },
+        {
+          "strip_id": "dynaspace-fixed-row",
+          "label": "DynaSpace fixed 640 cm source",
+          "audio_tactile_percentage": 66.666667,
+          "catch_percentage": 33.333333,
+          "baseline_percentage": 0.0,
+          "elements": [
+            {
+              "element_id": "dynaspace-fixed-source",
+              "kind": "looming_stimulus",
+              "label": "DynaSpace proxy fixed 640 cm burst train",
+              "source_label": "DynaSpace proxy fixed 640 cm burst train",
+              "source_labels": ["DynaSpace proxy fixed 640 cm burst train"],
+              "randomized": true
+            }
+          ]
+        }
+      ],
+      "participants": 20,
+      "random_seed": 20251001
+    }
+  },
+  "provenance": [
+    {
+      "field": "paper identity",
+      "source": "Sensors 2025 article DOI 10.3390/s25196072 and PubMed PMID 41094896 identify the smartphone RT methods paper."
+    },
+    {
+      "field": "app source",
+      "source": "DynaSpace source repository at https://forge-2.ircam.fr/roussel/dynaspace/ contains the Android DynaSpaceIrcam app used for the task."
+    },
+    {
+      "field": "SOA anchors and catch code",
+      "source": "MainActivity.kt defines timeArray = [105, 1625, 2385, 2765, 2955, 3050, 0], with the zero value used as a no-vibration catch."
+    },
+    {
+      "field": "trial distribution",
+      "source": "rand.cpp creates 48 recorded audio-tactile rows across two sound modes, six timing values, and four repeats, plus 24 no-vibration catch rows; five practice rows are prepended."
+    },
+    {
+      "field": "audio assets",
+      "source": "The Android raw assets bursttrainlooming.wav and bursttrainfixe.wav are stereo 48 kHz PCM_16 files with 184800 frames, i.e. 3.85 s duration."
+    },
+    {
+      "field": "vibration implementation",
+      "source": "WavAudioPlayer.cpp schedules phone vibration after the requested delay plus a 50 ms sleep offset and calls the Android vibrator for 60 ms when the delay is nonzero."
+    },
+    {
+      "field": "toolkit recreation policy",
+      "source": "The PPS Toolkit public preload uses generated broadband proxy WAVs through the bundled FABIAN/SOFA renderer and records the original Android WAVs as non-redistributed provenance."
+    }
+  ]
+}

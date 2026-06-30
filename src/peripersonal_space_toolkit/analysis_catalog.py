@@ -474,6 +474,9 @@ def _entry_for_analysis_dir(output_root: Path, analysis_dir: Path) -> dict[str, 
     participant_id = _first_value(rows, "participant_id", "Participant_ID")
     session_id = _session_id_from_stem(Path(analysis_ready).name)
     rel_parts = analysis_dir.relative_to(output_data_analytics_dir(output_root)).parts
+    participant_trials = _participant_trials_for_analysis_dir(output_root, rel_parts, session_id)
+    if participant_trials is not None:
+        outputs["participant_trials"] = participant_trials
     dataset_kind = DATASET_KIND_PARTICIPANT
     selectable = True
     session_group_id = ""
@@ -554,6 +557,13 @@ def _is_top_level_participant_analysis_dir(output_root: Path, analysis_dir: Path
     return bool(participant and analysis_dir.name == _safe_path_name(participant))
 
 
+def _participant_trials_for_analysis_dir(output_root: Path, rel_parts: tuple[str, ...], session_id: str) -> Path | None:
+    if not rel_parts or not session_id:
+        return None
+    candidate = output_runner_logs_dir(output_root).joinpath(*rel_parts) / f"{session_id}_trials.csv"
+    return candidate if candidate.is_file() else None
+
+
 def _participant_analysis_exists(output_root: Path, participant_id: str) -> bool:
     participant = str(participant_id or "").strip()
     if not participant:
@@ -607,6 +617,7 @@ def _outputs_for_analysis_dir(analysis_dir: Path) -> dict[str, Path]:
     fixed = {
         "condition_lens_triage_summary": "condition_lens_triage_summary.json",
         "recording_quality_gate": "recording_quality_gate.v1.json",
+        "basic_assumption_checks": "basic_assumption_checks.v1.json",
         "data_behavior_by_scope": "data_behavior_by_scope.csv",
         "exploratory_quality_summary": "exploratory_quality_summary.json",
     }

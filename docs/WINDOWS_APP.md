@@ -24,12 +24,30 @@ Create a desktop shortcut:
 .\windows\Create_Desktop_Shortcut.ps1
 ```
 
-The shortcut uses the packaged PPS Toolkit icon and opens the standard local
-browser dashboard. It also creates a `PPS Experiment Runner` shortcut that opens
-the standalone Experiment Runner picker for resuming a session, choosing a
-session manifest, or launching a finished study/profile preset. The Qt designer
-and native Focus Mode set the same icon at runtime so their window/taskbar
-entries do not fall back to the generic Python icon.
+The source shortcut uses the packaged PPS Toolkit icon and opens the standard
+local browser dashboard through the Python development environment. Finished
+installer builds use `dist\PPSDashboardLauncher\PPSDashboardLauncher.exe`
+instead, so installed end users can open the local dashboard and companion
+without Python. The shortcut also creates a `PPS Experiment Runner` shortcut
+that opens the standalone Experiment Runner picker for resuming the last
+session, resuming a chosen session folder from metadata, or starting a new
+session from a parent folder/profile/name dialog. The Qt designer and native
+Focus Mode set the same icon at runtime so their
+window/taskbar entries do not fall back to the generic Python icon.
+
+Build the packaged local dashboard launcher:
+
+```powershell
+.\windows\Build_Dashboard_Launcher_Exe.ps1
+```
+
+The build writes `dist\PPSDashboardLauncher\PPSDashboardLauncher.exe` as an
+onedir app that starts the local companion backend and opens the browser UI.
+When frozen, launcher startup and server logs are written under
+`local_data\logs\pps_dashboard_launcher.log` and
+`local_data\logs\pps_dashboard_launcher_stream.log` so installer smoke tests
+can diagnose failures even though the executable uses the Windows GUI
+subsystem.
 
 Build the native participant runner as a Windows program when you want the
 runner to appear as its own app rather than as Python:
@@ -45,13 +63,34 @@ embedded. This exe is the only active operator experiment runner. The
 fails with build instructions if it is missing; it does not fall back to a
 Python module runner, and direct module launch exits with retirement guidance.
 With no batch arguments, the wrapper opens the standalone Experiment Runner
-resume decision gate. Running `PPSExperimentRunner.exe` directly with no
-arguments must show the same first window, where the researcher chooses whether
-to resume the remembered experiment environment or initiate a fresh data
-collection environment. Explicit flags such as `--session-manifest`,
-`--last-experiment`, `--latest-dashboard-setup`, and `--profile` are reserved
-for dashboard handoff, validation, and scripted workflows that intentionally
-bypass that gate.
+session decision gate. Running `PPSExperimentRunner.exe` directly with no
+arguments must show the same first window with three bottom choices:
+`Resume Last Session`, `Resume Custom Session`, and `Start New Session`.
+The custom resume path asks only for the session folder and scans PPS diary and
+bridge metadata. The new-session path is the only path that opens a setup dialog
+for parent folder, experiment profile, and session name. Explicit flags such as
+`--session-manifest`, `--last-experiment`, `--latest-dashboard-setup`, and
+`--profile` are reserved for dashboard handoff, validation, and scripted
+workflows that intentionally bypass that gate.
+
+Focus Mode starts a local Android companion service by default on LAN port
+`8767` and shows an unobtrusive `Companion Android App (Experimental)` tab with
+the QR pairing code. The service is protected by a per-run
+`X-PPS-Companion-Token`; the laptop remains the timing and command authority.
+The phone can request setup submission, Start Part 01/02, separate Pause and
+Resume commands, and instruction continuation only when the runner advertises
+those commands. The Pause and Resume controls are mutually exclusive and the
+phone shows play/pause state only after a runner snapshot confirms it. Use
+`--no-companion` to disable it, or `--companion-host`, `--companion-port`, and
+`--companion-advertise-ip` when the laptop has multiple network interfaces.
+See [Android Runner Companion](ANDROID_RUNNER_COMPANION.md) for phone pairing,
+firewall, privacy, and APK build steps.
+
+Build the native Android companion debug APK:
+
+```powershell
+.\windows\Build_Android_Companion.ps1
+```
 
 For finished public releases, build the lightweight downloader separately:
 
@@ -62,7 +101,8 @@ For finished public releases, build the lightweight downloader separately:
 That creates a small `dist\PPS-Toolkit-Downloader.exe` intended for GitHub
 release upload. The full offline lab ZIP is built separately and hosted on
 Zenodo; the downloader verifies its SHA256 from `pps_download_manifest.v1.json`
-before extracting to `%LOCALAPPDATA%\PPS Toolkit\versions\`. See
+before extracting to `%LOCALAPPDATA%\PPS Toolkit\versions\` and launching the
+packaged dashboard launcher. See
 [PPS Download Distribution](PPS_DOWNLOADS.md).
 
 Open the Qt stimulus design layer for comparison:

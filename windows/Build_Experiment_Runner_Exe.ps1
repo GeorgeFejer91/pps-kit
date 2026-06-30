@@ -11,7 +11,7 @@ if (-not (Test-Path $Python)) {
   powershell -ExecutionPolicy Bypass -File (Join-Path $Root "windows\Setup_Windows_App.ps1")
 }
 
-& $Python -m pip install -e ".[gui,lsl,xdf,package]"
+& $Python -m pip install -e ".[gui,web,lsl,xdf,package]"
 if ($LASTEXITCODE -ne 0) {
   throw "Editable package install failed with exit code $LASTEXITCODE"
 }

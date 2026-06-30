@@ -60,16 +60,17 @@ def repo_root() -> Path:
 
     executable_dir = _frozen_executable_dir()
     if executable_dir is not None:
+        meipass = getattr(sys, "_MEIPASS", "")
+        frozen_resource_candidates = [Path(meipass)] if meipass else []
+        frozen_resource_candidates.append(executable_dir / "_internal")
         candidates.extend(
-            [
+            frozen_resource_candidates
+            + [
                 executable_dir,
                 executable_dir.parent,
                 _development_workspace_from_exe(executable_dir),
             ]
         )
-        meipass = getattr(sys, "_MEIPASS", "")
-        if meipass:
-            candidates.append(Path(meipass))
 
     candidates.append(_source_root())
     candidates = _dedupe(candidates)

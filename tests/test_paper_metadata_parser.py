@@ -46,11 +46,11 @@ def test_paper_audit_package_summarizes_core_pipeline_without_source_artifacts()
 
     assert summary["schema"] == "pps-paper-audit-profile-candidate-summary.v1"
     assert summary["record_count"] == 74
-    assert summary["category_counts"]["covered_runnable_profile"] == 5
-    assert len(summary["runnable_profile_records"]) == 5
+    assert summary["category_counts"]["covered_runnable_profile"] == 6
+    assert len(summary["runnable_profile_records"]) == 6
     assert len(summary["missing_parameter_records"]) == 28
     assert len(summary["toolkit_structure_gap_records"]) == 36
-    assert len(summary["adjacent_out_of_scope_records"]) == 5
+    assert len(summary["adjacent_out_of_scope_records"]) == 4
     assert blockers
     assert summary["blocker_counts"] == blockers
     assert "raw PDFs" in summary["copyright_boundary"]
@@ -82,8 +82,8 @@ def test_paper_metadata_audit_covers_literature_database():
     assert sum(summary["pdf_status_counts"].values()) == 74
     assert sum(summary["supplement_status_counts"].values()) == 74
     assert sum(summary["extraction_status_counts"].values()) == 74
-    assert summary["pdf_status_counts"].get("not_applicable") == 5
-    assert summary["supplement_status_counts"].get("not_applicable") == 5
+    assert summary["pdf_status_counts"].get("not_applicable") == 4
+    assert summary["supplement_status_counts"].get("not_applicable") == 4
     assert sum(summary["automated_evidence_status_counts"].values()) == 74
     assert summary["automated_evidence_field_total"] == sum(
         int(record["automated_evidence_mining"]["field_count"]) for record in audit_records
@@ -398,7 +398,7 @@ def test_missing_pdf_request_list_tracks_main_pdfs_and_supplements():
         if record["coverage_category"] != "adjacent_out_of_scope"
     }
 
-    assert len(in_scope_ids) == 69
+    assert len(in_scope_ids) == 70
     by_record: dict[str, set[str]] = {}
     for request in requests:
         by_record.setdefault(request["record_id"], set()).add(request["requested_item"])

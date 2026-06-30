@@ -5,7 +5,9 @@ const activePolls = new Set();
 let activeNavFrame = 0;
 const CUSTOM_TEMPLATE_ID = "__custom__";
 const DEFAULT_STUDY_TEMPLATE_ID = "study5_box_breathing_pps";
-const STATIC_RESOURCE_VERSION = "20260624-study5-profile-refresh";
+const STATIC_RESOURCE_VERSION = "20260629-burst-source-mode";
+const GOLD_STANDARD_SOURCE_PROFILE = "dynaspace_gaussian_burst_train";
+const CONTINUOUS_SOURCE_PROFILE = "continuous_noise";
 const BLOCK_RANDOMIZATION_STRATEGY = "seeded_gellermann_row_order_preserving";
 const BLOCK_RANDOMIZATION_MAX_CONSECUTIVE_FEATURE = 2;
 const BLOCK_CSV_DOWNLOAD_COLUMNS = [
@@ -271,6 +273,10 @@ const BASELINE_STRATEGY_NOTES = {
   tactile_only: {
     label: "Full SOA tactile-only",
     note: "Fixed clips and jitter are preserved, looming segments are silenced, and tactile is added at every SOA."
+  },
+  stationary_burst: {
+    label: "Full SOA stationary bursts",
+    note: "Fixed clips and jitter are preserved, looming segments are replaced by stationary burst trains, and tactile is added at every SOA."
   },
   min_max: {
     label: "Minimum + maximum SOA anchors",
@@ -2688,12 +2694,23 @@ function renderBakePanel() {
     status.textContent = "No source staged";
     status.className = "status-label required";
     button.disabled = true;
+    const sourceModeControl = $("generated-source-mode-control");
+    if (sourceModeControl) sourceModeControl.hidden = true;
     return;
   }
   const label = pendingBakeRecipe.label || pendingBakeRecipe.audio?.label || noiseTypeLabel(pendingBakeRecipe.noise_type);
   $("bake-label").value = label || "";
   if ($("bake-gain")) $("bake-gain").value = 1;
   pendingBakeRecipe.loudness_policy = collectLoudnessPolicy();
+  const sourceModeControl = $("generated-source-mode-control");
+  if (sourceModeControl) {
+    const isGenerated = pendingBakeRecipe.kind === "generated_noise";
+    sourceModeControl.hidden = !isGenerated;
+    if (isGenerated) {
+      pendingBakeRecipe.source_profile = pendingBakeRecipe.source_profile || GOLD_STANDARD_SOURCE_PROFILE;
+      setGeneratedSourceProfileControl(pendingBakeRecipe.source_profile);
+    }
+  }
   const kind = pendingBakeRecipe.kind === "imported_audio" ? audioRoleTitle(pendingBakeRecipe.render_mode) : `${noiseTypeLabel(pendingBakeRecipe.noise_type)} noise`;
   status.textContent = `Staged: ${kind}`;
   status.className = "status-label ready";
@@ -2705,6 +2722,8 @@ function renderNoiseTable() {
   list.innerHTML = "";
   for (const noise of state.design.noises || []) {
     const selectedNoise = String(noise.noise_type || "pink").toLowerCase();
+    const sourceProfile = String(noise.source_profile || GOLD_STANDARD_SOURCE_PROFILE);
+    const sourceProfileLabel = sourceProfile === CONTINUOUS_SOURCE_PROFILE ? "Continuous" : "Burst train";
     const wav = renderedWavForLabel(noise.label || `${noiseTypeLabel(selectedNoise)} noise`);
     const localPath = noise.prebaked_path || wav?.path || "";
     const card = document.createElement("div");
@@ -2722,6 +2741,12 @@ function renderNoiseTable() {
       ${stimulusTrajectoryHiddenFields(noise, selectedNoise, "generated_noise")}
       <input data-field="prebaked_path" type="hidden" value="${escapeAttr(localPath)}">
       <input data-field="gain" type="hidden" value="${Number(noise.gain || 1)}">
+      <input data-field="motion_mode" type="hidden" value="${escapeAttr(noise.motion_mode || "looming")}">
+      <input data-field="source_profile" type="hidden" value="${escapeAttr(sourceProfile)}">
+      <input data-field="source_profile_parameters" type="hidden" value="${escapeAttr(JSON.stringify(noise.source_profile_parameters || {}))}">
+      <div class="source-card-meta">
+        <span class="source-mode-chip">${escapeHtml(sourceProfileLabel)}</span>
+      </div>
       <div class="source-card-fields">
         <div class="field-row">
           <label>Label</label>
@@ -3904,6 +3929,9 @@ function baselineAnchorSpecsFromInputs() {
   if (strategy === "tactile_only") {
     return soaValues.map((soa) => ({ label: "full SOA tactile-only", soa_ms: soa, mode: "tactile_only" }));
   }
+  if (strategy === "stationary_burst") {
+    return soaValues.map((soa) => ({ label: "full SOA stationary burst", soa_ms: soa, mode: "stationary_burst" }));
+  }
   if (strategy === "custom") {
     const mode = $("baseline-custom-audio-tactile")?.checked ? "audio_tactile" : "tactile_only";
     return parseIntegerList($("baseline-soa-values").value).map((soa) => ({ label: "custom", soa_ms: soa, mode }));
@@ -4078,9 +4106,11 @@ function strategyFromBaselineCheckboxes(changedInput = null) {
   if (changed === "none" && changedInput.checked) return "none";
   if (changed === "custom" && changedInput.checked) return "custom";
   if (changed === "tactile_only" && changedInput.checked) return "tactile_only";
+  if (changed === "stationary_burst" && changedInput.checked) return "stationary_burst";
   checked.delete("none");
   checked.delete("custom");
   checked.delete("tactile_only");
+  checked.delete("stationary_burst");
   const wantsMin = checked.has("min_anchor");
   const wantsMax = checked.has("max_anchor");
   if (wantsMin && wantsMax) return "min_max";
@@ -5583,6 +5613,9 @@ function collectNoises() {
       elevation_deg: Number(field("elevation_deg").value || 0),
       gain: Number(field("gain").value || 1),
       prebaked_path: field("prebaked_path")?.value.trim() || "",
+      source_profile: field("source_profile")?.value.trim() || GOLD_STANDARD_SOURCE_PROFILE,
+      source_profile_parameters: readJsonField(field("source_profile_parameters")) || {},
+      motion_mode: field("motion_mode")?.value.trim() || "looming",
       trajectory_snapshot: readJsonField(field("trajectory_snapshot"))
     };
   });
@@ -6710,6 +6743,17 @@ function clampNumber(value, min, max, fallback) {
   return Math.min(max, Math.max(min, value));
 }
 
+function selectedGeneratedSourceProfile() {
+  const selected = document.querySelector('input[name="generated-source-mode"]:checked')?.value || GOLD_STANDARD_SOURCE_PROFILE;
+  return selected === CONTINUOUS_SOURCE_PROFILE ? CONTINUOUS_SOURCE_PROFILE : GOLD_STANDARD_SOURCE_PROFILE;
+}
+
+function setGeneratedSourceProfileControl(profile) {
+  const value = profile === CONTINUOUS_SOURCE_PROFILE ? CONTINUOUS_SOURCE_PROFILE : GOLD_STANDARD_SOURCE_PROFILE;
+  const input = document.querySelector(`input[name="generated-source-mode"][value="${value}"]`);
+  if (input) input.checked = true;
+}
+
 function stageGeneratedNoise(noiseType = "pink") {
   const type = PROCEDURAL_NOISE_TYPES.some((item) => item.value === noiseType) ? noiseType : "pink";
   const label = `${noiseTypeLabel(type)} noise`;
@@ -6718,6 +6762,7 @@ function stageGeneratedNoise(noiseType = "pink") {
     noise_type: type,
     label,
     gain: 1,
+    source_profile: selectedGeneratedSourceProfile(),
     loudness_policy: collectLoudnessPolicy()
   };
   $("bake-label").value = label;
@@ -6745,6 +6790,12 @@ function collectBakeRecipe() {
   recipe.label = $("bake-label").value.trim() || recipe.label || "Baked stimulus";
   recipe.gain = 1;
   recipe.loudness_policy = collectLoudnessPolicy();
+  if (recipe.kind === "generated_noise") {
+    recipe.source_profile = selectedGeneratedSourceProfile();
+    recipe.source_profile_parameters = recipe.source_profile === GOLD_STANDARD_SOURCE_PROFILE
+      ? (recipe.source_profile_parameters || {})
+      : {};
+  }
   if (recipe.audio) {
     recipe.audio = {
       ...recipe.audio,
@@ -6764,7 +6815,10 @@ function addNoiseRow(noiseType = "pink") {
     noise_type: type,
     azimuth_deg: 0,
     elevation_deg: 0,
-    gain: 1
+    gain: 1,
+    source_profile: GOLD_STANDARD_SOURCE_PROFILE,
+    source_profile_parameters: {},
+    motion_mode: "looming"
   });
   renderNoiseTable();
   refreshAssemblyTargetOptions();
@@ -7092,6 +7146,17 @@ function wireEvents() {
   $("bake-label").addEventListener("input", () => {
     if (pendingBakeRecipe) pendingBakeRecipe.label = $("bake-label").value.trim();
   });
+  for (const input of document.querySelectorAll('input[name="generated-source-mode"]')) {
+    input.addEventListener("change", () => {
+      if (pendingBakeRecipe?.kind === "generated_noise") {
+        pendingBakeRecipe.source_profile = selectedGeneratedSourceProfile();
+        if (pendingBakeRecipe.source_profile !== GOLD_STANDARD_SOURCE_PROFILE) {
+          pendingBakeRecipe.source_profile_parameters = {};
+        }
+        renderBakePanel();
+      }
+    });
+  }
   for (const id of ["loudness-start-spl", "loudness-end-spl", "instruction-offset-db", "estimated-full-scale-spl", "audio-peak-ceiling-dbfs"]) {
     $(id)?.addEventListener("input", () => {
       updateLoudnessDerived();

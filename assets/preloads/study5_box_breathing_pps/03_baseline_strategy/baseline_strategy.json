@@ -1,7 +1,7 @@
 {
   "schema": "pps-preload-baseline-segment.v1",
   "template_id": "study5_box_breathing_pps",
-  "baseline_strategy": "tactile_only",
+  "baseline_strategy": "stationary_burst",
   "include_baseline_trials": true,
   "baseline_trial_percentage": 0.0,
   "baseline_soa_values_ms": [],

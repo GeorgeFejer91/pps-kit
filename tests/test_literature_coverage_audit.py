@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[1]
 COVERAGE_PATH = ROOT / "assets" / "preloads" / "audiotactile_literature_coverage.json"
@@ -32,17 +34,17 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["schema"] == "pps-audiotactile-literature-coverage.v1"
     assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 74
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
-        "covered_runnable_profile": 5,
+        "covered_runnable_profile": 6,
         "covered_blocked_missing_publication_parameters": 7,
         "covered_blocked_toolkit_structure": 7,
         "not_yet_templated_requires_toolkit_structure": 29,
         "not_yet_templated_missing_publication_parameters": 21,
         "candidate_needs_full_text_task_audit": 0,
-        "adjacent_out_of_scope": 5,
+        "adjacent_out_of_scope": 4,
     }
     assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 22
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == 8
-    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 6
+    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 7
     assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 7
     assert coverage["coverage_summary"]["pubmed_screened_records"] == 48
     assert coverage["coverage_summary"]["openalex_broad_candidate_like_hits"] == 103
@@ -108,7 +110,7 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         for entry in coverage["current_template_coverage"]
         if entry["published"] and entry["current_recreation_category"] == "gui_recreatable"
     ]
-    assert len(published_ready) == 6
+    assert len(published_ready) == 7
 
 
 def test_literature_coverage_constraints_focus_on_task_execution():
@@ -228,6 +230,12 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["serino_2015_peri_trunk_exp1"]["coverage_category"] == "covered_runnable_profile"
     assert records["serino_2015_peri_trunk_exp1"]["can_recreate_audiotactile_components_now"] is True
     assert records["serino_2015_peri_trunk_exp1"]["blocking_constraint_ids"] == []
+    assert records["smartphone_rt_methods_2025"]["coverage_category"] == "covered_runnable_profile"
+    assert records["smartphone_rt_methods_2025"]["current_template_ids"] == [
+        "roussel_2025_dynaspace_mobile_pps"
+    ]
+    assert records["smartphone_rt_methods_2025"]["can_recreate_audiotactile_components_now"] is True
+    assert records["smartphone_rt_methods_2025"]["blocking_constraint_ids"] == []
     assert records["serino_2015_peri_hand_exp3"]["blocking_constraint_ids"] == [
         "body_part_anchored_coordinate_frames"
     ]
@@ -359,11 +367,13 @@ def test_pubmed_screening_trail_covers_every_record_and_links_inclusions():
 
     excluded = [record for record in records if record["decision"].startswith("excluded_")]
     included = [record for record in records if record["decision"].startswith("included_")]
-    assert len(excluded) == 9
-    assert len(included) == 39
+    assert len(excluded) == 8
+    assert len(included) == 40
 
 
 def test_pubmed_abstract_cache_uses_screened_doi_values():
+    if not PUBMED_ABSTRACTS_PATH.exists():
+        pytest.skip("Ignored PubMed abstract cache is not present in this checkout.")
     abstracts = json.loads(PUBMED_ABSTRACTS_PATH.read_text(encoding="utf-8"))
     screening = json.loads(SCREENING_PATH.read_text(encoding="utf-8"))
     screened_by_pmid = {record["pmid"]: record for record in screening["records"]}

@@ -379,6 +379,9 @@ class FastUiAudioEngine:
                 )
                 for lead_time in lead_times:
                     progress_callback(lead_time)
+                    # Let the Qt drain timer process each synthetic cue before the next block replaces the timeline.
+                    time.sleep(0.005)
+                time.sleep(0.150)
         cursor = 0
         while cursor < frames_total and not self._stop_requested.is_set():
             frames = min(self.chunk_frames, frames_total - cursor)
@@ -1016,6 +1019,7 @@ def _run_packaged_standalone_app_background_validation(args: argparse.Namespace)
     env["PPS_FOCUS_VALIDATION_PROFILE"] = STUDY5_TEMPLATE_ID
     env["PPS_FOCUS_VALIDATION_AUTO_CLOSE_MS"] = str(int(float(args.timeout_s) * 1000))
     env["PPS_FOCUS_VALIDATION_OUTPUT_ROOT"] = str(output_dir / "packaged_sessions")
+    env["PPS_FOCUS_VALIDATION_PARTICIPANT_ID"] = str(args.participant_id)
     env["PPS_FOCUS_VALIDATION_REPORT"] = str(focus_report_path)
     env["PPS_FOCUS_VALIDATION_LAUNCHER_REPORT"] = str(launcher_report_path)
 
@@ -1140,6 +1144,7 @@ def _run_packaged_standalone_app_validation(args: argparse.Namespace) -> int:
     env["PPS_FOCUS_VALIDATION_AUTO_CLICK"] = "1"
     env["PPS_FOCUS_VALIDATION_AUTO_APPROVE_TOPUP"] = "1"
     env["PPS_FOCUS_VALIDATION_AUTO_CLOSE_MS"] = str(int(float(args.timeout_s) * 1000))
+    env["PPS_FOCUS_VALIDATION_PARTICIPANT_ID"] = str(args.participant_id)
     env["PPS_FOCUS_VALIDATION_REPORT"] = str(focus_report_path)
 
     stdout_path = output_dir / "packaged_runner_os_mouse_stdout.log"

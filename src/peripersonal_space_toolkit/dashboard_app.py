@@ -33,9 +33,11 @@ from .design import (
     BlockSpec,
     CUSTOM_AUDIO_NOISE_TYPE,
     NoiseDefinition,
+    PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
     SUPPORTED_BASELINE_STRATEGIES,
     SUPPORTED_NOISE_TYPES,
     StimulusDesign,
+    apply_trajectory_snapshot_to_trajectory,
     azimuth_to_display_rotation_deg,
     audio_file_summary,
     block_trial_rows,
@@ -44,6 +46,7 @@ from .design import (
     design_from_dict,
     design_to_dict,
     expand_trial_strip_source_labels,
+    gold_standard_looming_source_parameters,
     has_trial_strips,
     load_design,
     participant_block_orders,
@@ -90,6 +93,8 @@ from .profile_memory import (
     refresh_project_dependency_hashes,
     update_runner_settings as update_profile_runner_settings,
 )
+
+
 from .templates import (
     DEFAULT_STUDY_TEMPLATE_ID,
     StudyTemplate,
@@ -110,6 +115,37 @@ from .runner_diary import (
     runner_settings_path as diary_runner_settings_path,
     update_runner_settings as update_diary_runner_settings,
 )
+
+
+def _package_static_dir(package_name: str, package_relative: str) -> Path:
+    resource = files(package_name)
+    if isinstance(resource, Path):
+        return resource
+
+    relative_path = Path(*package_relative.split("/"))
+    candidates: list[Path] = []
+    for path in getattr(resource, "_paths", ()):
+        candidates.append(Path(path))
+
+    pyinstaller_root = getattr(sys, "_MEIPASS", "")
+    if pyinstaller_root:
+        candidates.append(Path(pyinstaller_root) / relative_path)
+
+    if getattr(sys, "frozen", False):
+        candidates.append(Path(sys.executable).resolve().parent / "_internal" / relative_path)
+
+    toolkit_root = os.environ.get("PPS_TOOLKIT_ROOT")
+    if toolkit_root:
+        root = Path(toolkit_root)
+        candidates.append(root / "src" / relative_path)
+        candidates.append(root / "dist" / "PPSDashboardLauncher" / "_internal" / relative_path)
+
+    for candidate in candidates:
+        if candidate.is_dir():
+            return candidate
+
+    checked = ", ".join(str(candidate) for candidate in candidates) or str(resource)
+    raise RuntimeError(f"Static resource directory for {package_name} was not found. Checked: {checked}")
 
 
 REPO_ROOT = repo_root()
@@ -1197,10 +1233,11 @@ class DashboardController:
         def _bake() -> dict[str, Any]:
             _ensure_dir(ingredient_dir)
             design_path = ingredient_dir / f"stimulus_design.bake_{_slug(label)}.json"
+            _ensure_dir(design_path.parent)
             _save_design_file(bake_design, design_path)
             result = render_backend.render_design_with_3dti(
-                design_path,
-                ingredient_dir,
+                Path(_filesystem_path(design_path)),
+                Path(_filesystem_path(ingredient_dir)),
                 seed=seed,
                 engine="python-sofa-reference",
                 include_tactile=False,
@@ -2056,8 +2093,14 @@ def create_app(
             allow_headers=["Content-Type", TOKEN_HEADER],
             allow_credentials=False,
         )
-    dashboard_dir = files("peripersonal_space_toolkit.dashboard")
-    viewer_dir = files("peripersonal_space_toolkit.viewer")
+    dashboard_dir = _package_static_dir(
+        "peripersonal_space_toolkit.dashboard",
+        "peripersonal_space_toolkit/dashboard",
+    )
+    viewer_dir = _package_static_dir(
+        "peripersonal_space_toolkit.viewer",
+        "peripersonal_space_toolkit/viewer",
+    )
 
     @app.get("/")
     def index() -> Any:
@@ -3216,15 +3259,16 @@ def _record_ingredient_file(
         "sha256": _local_file_sha256(path),
     }
     manifest = _load_ingredient_manifest(project)
-    rows = [
-        item
-        for item in manifest.get("ingredients", [])
-        if str(item.get("path") or "") != str(path)
-        and not (
-            str(item.get("descriptor") or "") == descriptor
-            and str(item.get("sha256") or "") == row["sha256"]
-        )
-    ]
+    rows = []
+    for item in manifest.get("ingredients", []):
+        item_path = str(item.get("path") or "")
+        if item_path and not _path_exists(Path(item_path)):
+            continue
+        if item_path == str(path):
+            continue
+        if str(item.get("descriptor") or "") == descriptor and str(item.get("sha256") or "") == row["sha256"]:
+            continue
+        rows.append(item)
     rows.append(row)
     manifest = {
         "schema": INGREDIENT_MANIFEST_SCHEMA,
@@ -4900,6 +4944,11 @@ def _baseline_anchor_specs(design: StimulusDesign) -> list[dict[str, Any]]:
             {"anchor_label": f"full_soa_{soa_ms}ms", "soa_ms": soa_ms, "mode": "tactile_only"}
             for soa_ms in soas
         ]
+    if strategy == "stationary_burst":
+        return [
+            {"anchor_label": f"stationary_burst_{soa_ms}ms", "soa_ms": soa_ms, "mode": "stationary_burst"}
+            for soa_ms in soas
+        ]
     if strategy == "custom":
         return [
             {"anchor_label": f"custom_{soa_ms}ms", "soa_ms": soa_ms, "mode": mode}
@@ -4974,7 +5023,10 @@ def _trial_bake_file_stem(
     baseline_mode: str = "",
 ) -> str:
     if family == "baseline":
-        mode = "no_looming" if baseline_mode == "tactile_only" else "audio"
+        mode = {
+            "tactile_only": "no_looming",
+            "stationary_burst": "stationary_burst",
+        }.get(baseline_mode, "audio")
         descriptor = _compact_trial_content_descriptor(variant, max_length=28)
         stem = f"baseline_{mode}_{descriptor}_soa{_duration_token(soa_ms)}_tac{_duration_token(tactile_duration_ms)}_total{_duration_token(total_duration_ms)}_ch3"
     elif family == "catch":
@@ -5153,12 +5205,122 @@ def _silence_segment_for_baseline(
     return bool(segment.get("is_looming_stimulus")) or kind == "looming_stimulus" or role == "looming_stimulus"
 
 
+def _source_noise_by_label(design: StimulusDesign, label: str) -> NoiseDefinition | None:
+    key = _source_key(label)
+    for noise in design.noises:
+        if _source_key(noise.label) == key:
+            return noise
+    return None
+
+
+def _stationary_burst_seed(label: str, noise_type: str) -> int:
+    digest = hashlib.sha256(f"stationary-burst-baseline:{label}:{noise_type}".encode("utf-8")).hexdigest()
+    return int(digest[:8], 16)
+
+
+def _stationary_burst_source_for_segment(
+    design: StimulusDesign,
+    segment: dict[str, Any],
+    work_dir: Path,
+    cache: dict[str, Path],
+) -> Path:
+    label = str(segment.get("label") or "").strip()
+    key = _source_key(label)
+    if key in cache:
+        return cache[key]
+    noise = _source_noise_by_label(design, label)
+    if noise is None:
+        raise ValueError(f"Stationary-burst baseline could not find a generated source named {label!r}.")
+    noise_type = str(noise.noise_type or "").strip().lower()
+    if noise_type not in SUPPORTED_NOISE_TYPES:
+        raise ValueError(f"Stationary-burst baseline requires a generated noise source, not {noise_type or 'unknown'}: {label}.")
+
+    source_profile = str(noise.source_profile or PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE).strip()
+    source_parameters = dict(noise.source_profile_parameters or {})
+    if source_profile == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE:
+        source_parameters = gold_standard_looming_source_parameters(source_parameters)
+
+    stationary_design = _copy_design(design)
+    apply_trajectory_snapshot_to_trajectory(stationary_design.trajectory, dict(noise.trajectory_snapshot or {}))
+    stationary_design.name = f"{design.name} stationary baseline {label}".strip()
+    stationary_design.noises = [
+        NoiseDefinition(
+            label=label,
+            noise_type=noise_type,
+            azimuth_deg=noise.azimuth_deg,
+            elevation_deg=noise.elevation_deg,
+            gain=1.0,
+            source_profile=source_profile,
+            source_profile_parameters=source_parameters,
+            sequence_order=1,
+            motion_mode="stationary",
+            trajectory_snapshot=dict(noise.trajectory_snapshot or {}),
+        )
+    ]
+    stationary_design.custom_looming_files = []
+    stationary_design.prestimulus_files = []
+    stationary_design.protocol.soa_values_ms = [0]
+    stationary_design.protocol.spatial_values_cm = [float(design.trajectory.start_radius_m) * 100.0]
+    stationary_design.protocol.include_catch_trials = False
+    stationary_design.protocol.include_baseline_trials = False
+
+    source_dir = work_dir / "stationary_burst_sources" / _descriptor_label(label)
+    _ensure_dir(source_dir)
+    design_path = source_dir / "stationary_burst.design.json"
+    _write_text_file(design_path, json.dumps(design_to_dict(stationary_design), indent=2), encoding="utf-8")
+    result = render_backend.render_design_with_3dti(
+        Path(_filesystem_path(design_path)),
+        Path(_filesystem_path(source_dir)),
+        seed=_stationary_burst_seed(label, noise_type),
+        engine="python-sofa-reference",
+        include_tactile=False,
+    )
+    if not result.wav_paths:
+        raise RuntimeError(f"Stationary-burst baseline render produced no WAV for {label}.")
+    cache[key] = Path(result.wav_paths[0])
+    return cache[key]
+
+
+def _fit_audio_to_duration(data: Any, sample_rate: int, duration_s: float) -> Any:
+    import numpy as np
+
+    target_frames = max(0, int(round(max(0.0, duration_s) * sample_rate)))
+    if target_frames <= 0:
+        return np.zeros((0, data.shape[1] if getattr(data, "ndim", 0) == 2 else 2), dtype="float32")
+    if data.shape[0] > target_frames:
+        return data[:target_frames, :]
+    if data.shape[0] < target_frames:
+        padding = np.zeros((target_frames - data.shape[0], data.shape[1]), dtype=data.dtype)
+        return np.concatenate([data, padding], axis=0)
+    return data
+
+
+def _stationary_burst_replacements_for_segments(
+    design: StimulusDesign,
+    segments: list[dict[str, Any]],
+    work_dir: Path,
+    cache: dict[str, Path],
+) -> dict[str, Path]:
+    replacements: dict[str, Path] = {}
+    for segment in segments:
+        if not _silence_segment_for_baseline(
+            segment,
+            silence_all_audio=False,
+            silence_looming_audio=True,
+        ):
+            continue
+        path = _stationary_burst_source_for_segment(design, segment, work_dir, cache)
+        replacements[_source_key(str(segment.get("label") or ""))] = path
+    return replacements
+
+
 def _write_audio_from_segments(
     path: Path,
     segments: list[dict[str, Any]],
     *,
     silence_all_audio: bool,
     silence_looming_audio: bool = False,
+    looming_replacement_paths: dict[str, Path] | None = None,
 ) -> float:
     import numpy as np
     import soundfile as sf
@@ -5175,10 +5337,19 @@ def _write_audio_from_segments(
         )
         source_text = str(segment.get("path") or "").strip()
         source_path = Path(source_text) if source_text else Path()
+        replacement_path = None
+        if should_silence and looming_replacement_paths is not None:
+            replacement_path = looming_replacement_paths.get(_source_key(str(segment.get("label") or "")))
+            if replacement_path is not None:
+                source_path = Path(replacement_path)
+                source_text = str(source_path)
+                should_silence = False
         if source_text and _path_exists(source_path) and not should_silence:
             data, rate = _read_stereo_audio(source_path, target_sample_rate=sample_rate)
             if not sample_rate:
                 sample_rate = rate
+            if replacement_path is not None:
+                data = _fit_audio_to_duration(data, sample_rate, duration_s)
             chunks.append(data * max(0.0, float(segment.get("gain", 1.0))))
         else:
             if not sample_rate:
@@ -5227,6 +5398,7 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
     work_dir = root / "_work"
     file_rows: list[dict[str, Any]] = []
     row_summaries: dict[tuple[str, int, str], dict[str, Any]] = {}
+    stationary_burst_cache: dict[str, Path] = {}
 
     def record_row_summary(family: str, row_index: int, row_label: str, row_folder: Path) -> None:
         key = (family, row_index, str(row_folder))
@@ -5391,6 +5563,22 @@ def _bake_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) ->
                     anchor_label = str(anchor.get("anchor_label") or f"soa_{soa_ms}ms")
                     if mode == "audio_tactile":
                         baseline_source_path = source_path
+                    elif mode == "stationary_burst":
+                        source_stem = _descriptor_label(f"baseline_stationary_source_{variant_key}_soa{soa_ms:04d}ms")
+                        baseline_source_path = work_dir / f"{source_stem}.wav"
+                        stationary_replacements = _stationary_burst_replacements_for_segments(
+                            design,
+                            segments,
+                            work_dir,
+                            stationary_burst_cache,
+                        )
+                        _write_audio_from_segments(
+                            baseline_source_path,
+                            segments,
+                            silence_all_audio=False,
+                            silence_looming_audio=True,
+                            looming_replacement_paths=stationary_replacements,
+                        )
                     else:
                         source_stem = _descriptor_label(f"baseline_source_{variant_key}_soa{soa_ms:04d}ms")
                         baseline_source_path = work_dir / f"{source_stem}.wav"
@@ -6530,12 +6718,23 @@ def _design_for_bake_recipe(design: StimulusDesign, recipe: dict[str, Any], labe
         noise_type = str(recipe.get("noise_type") or "").strip().lower()
         if noise_type not in SUPPORTED_NOISE_TYPES:
             raise ValueError(f"Unsupported generated-noise type: {noise_type or 'missing'}")
+        source_profile = str(recipe.get("source_profile") or PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE).strip()
+        if source_profile not in {PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE, "continuous_noise"}:
+            raise ValueError(f"Unsupported generated-noise source mode: {source_profile or 'missing'}")
+        raw_source_parameters = recipe.get("source_profile_parameters")
+        source_profile_parameters = raw_source_parameters if isinstance(raw_source_parameters, dict) else {}
+        if source_profile == PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE:
+            source_profile_parameters = gold_standard_looming_source_parameters(source_profile_parameters)
+        else:
+            source_profile_parameters = {}
         source = {
             "label": label,
             "noise_type": noise_type,
             "azimuth_deg": 0.0,
             "elevation_deg": 0.0,
             "gain": max(0.01, _float(recipe.get("gain"), 1.0)),
+            "source_profile": source_profile,
+            "source_profile_parameters": dict(source_profile_parameters),
             "motion_mode": "looming",
         }
         bake_design.noises = [NoiseDefinition(**source)]
@@ -6983,7 +7182,7 @@ def _normalize_study5_full_soa_baseline_defaults(design: StimulusDesign) -> Stim
     design.protocol.include_baseline_trials = True
     design.protocol.include_catch_trials = True
     design.protocol.catch_trial_percentage = 0.0
-    design.protocol.baseline_strategy = "tactile_only"
+    design.protocol.baseline_strategy = "stationary_burst"
     design.protocol.baseline_custom_trial_mode = "tactile_only"
     design.protocol.baseline_soa_values_ms = []
     for strip in design.protocol.trial_strips:
@@ -7438,9 +7637,86 @@ def _study5_profile_contract_signature(design: StimulusDesign) -> dict[str, Any]
     }
 
 
+def _study_profile_catalog_asset_requirements(design: StimulusDesign) -> list[tuple[str, dict[str, Any], str]]:
+    assets = _preload_assets_by_label(design.study_profile_id)
+    if not assets:
+        return []
+    requirements: list[tuple[str, dict[str, Any], str]] = []
+    for noise in design.noises:
+        asset = assets.get(_source_key(noise.label))
+        if asset:
+            requirements.append((noise.label, asset, "looming"))
+    for audio in design.custom_looming_files:
+        asset = assets.get(_source_key(audio.label))
+        if asset:
+            requirements.append((audio.label, asset, audio.motion_mode or "looming"))
+    for audio in design.prestimulus_files:
+        asset = assets.get(_source_key(audio.label))
+        if asset:
+            requirements.append((audio.label, asset, "stationary"))
+    return requirements
+
+
+def _canonical_ingredient_target_path(
+    context: DashboardProjectContext,
+    *,
+    label: str,
+    asset: dict[str, Any],
+    motion_mode: str,
+) -> Path | None:
+    source_text = str(asset.get("path") or "").strip()
+    if not source_text:
+        return None
+    source_path = _resolve_dashboard_local_path(source_text)
+    if not _path_exists(source_path):
+        return None
+    duration_ms = _audio_file_duration_ms(source_path)
+    descriptor = _descriptor_label(_ingredient_descriptor(label, duration_ms, motion_mode=motion_mode))
+    return context.segment1_dir / f"{descriptor}{source_path.suffix or '.wav'}"
+
+
+def _study_profile_catalog_assets_stale(context: DashboardProjectContext, design: StimulusDesign) -> bool:
+    requirements = _study_profile_catalog_asset_requirements(design)
+    if not requirements:
+        return False
+    manifest = _load_ingredient_manifest(context) if _path_exists(_ingredient_manifest_path(context)) else {"ingredients": []}
+    ingredients = manifest.get("ingredients", []) if isinstance(manifest.get("ingredients"), list) else []
+    existing_project = _path_exists(context.profile_dir / "active_design.json") or _project_has_generated_outputs(context.project_dir)
+    for label, asset, motion_mode in requirements:
+        expected_hash = str(asset.get("sha256") or "").strip()
+        if not expected_hash:
+            continue
+        target = _canonical_ingredient_target_path(context, label=label, asset=asset, motion_mode=motion_mode)
+        if target is None:
+            continue
+        if not _path_exists(target):
+            if existing_project:
+                return True
+            continue
+        try:
+            if _local_file_sha256(target) != expected_hash:
+                return True
+        except OSError:
+            return True
+        matching_rows = [
+            item
+            for item in ingredients
+            if _source_key(str(item.get("label") or "")) == _source_key(label)
+            and str(item.get("path") or "") == str(target)
+        ]
+        if matching_rows:
+            provenance = dict(matching_rows[-1].get("provenance") or {})
+            recorded_hash = str(provenance.get("source_catalog_sha256") or "").strip()
+            if recorded_hash and recorded_hash != expected_hash:
+                return True
+    return False
+
+
 def _profile_project_contract_stale(context: DashboardProjectContext, design: StimulusDesign) -> bool:
     if _is_custom_design(design) or not str(design.study_profile_id or "").strip():
         return False
+    if _study_profile_catalog_assets_stale(context, design):
+        return True
     if design.study_profile_id == DEFAULT_STUDY_TEMPLATE_ID and _study5_project_has_stale_baseline_artifacts(context):
         return True
     active_design_path = context.profile_dir / "active_design.json"
@@ -7777,7 +8053,47 @@ def _clear_segment6_generated_outputs(segment6_dir: Path) -> None:
             os.unlink(_filesystem_path(child))
 
 
-def _copy_materialize_ingredient_audio_file(path: Path, target_dir: Path, label: str, *, motion_mode: str = "") -> Path:
+def _remove_canonical_ingredient_siblings(target_dir: Path, descriptor: str, suffix: str, keep: Path) -> None:
+    for candidate in target_dir.glob(f"{descriptor}*{suffix}"):
+        if candidate.resolve() == keep.resolve():
+            continue
+        if candidate.stem == descriptor or candidate.stem.startswith(f"{descriptor}__"):
+            try:
+                os.unlink(_filesystem_path(candidate))
+            except OSError:
+                pass
+
+
+def _study_profile_custom_clip_asset(design: StimulusDesign, label: str) -> dict[str, Any]:
+    params = dict(design.study_profile_reference_parameters or {})
+    for item in params.get("custom_clip_assets", []):
+        if isinstance(item, dict) and _source_key(str(item.get("label") or "")) == _source_key(label):
+            return dict(item)
+    return {}
+
+
+def _profile_materialization_source_path(
+    current_path: str | Path,
+    project: DashboardProjectContext,
+    asset: dict[str, Any],
+) -> Path:
+    source_path = _resolve_dashboard_local_path(current_path)
+    catalog_text = str(asset.get("path") or "").strip()
+    if catalog_text:
+        catalog_path = _resolve_dashboard_local_path(catalog_text)
+        if _path_exists(catalog_path) and (not _path_exists(source_path) or _path_is_within(source_path, project.segment1_dir)):
+            return catalog_path
+    return source_path
+
+
+def _copy_materialize_ingredient_audio_file(
+    path: Path,
+    target_dir: Path,
+    label: str,
+    *,
+    motion_mode: str = "",
+    overwrite_canonical: bool = False,
+) -> Path:
     source = Path(path)
     if not _path_exists(source):
         raise FileNotFoundError(f"Profile source audio is missing: {source}")
@@ -7786,6 +8102,18 @@ def _copy_materialize_ingredient_audio_file(path: Path, target_dir: Path, label:
     suffix = source.suffix or ".wav"
     descriptor = _descriptor_label(stem)
     target = target_dir / f"{descriptor}{suffix}"
+    if overwrite_canonical:
+        _ensure_dir(target_dir)
+        try:
+            source_hash = _local_file_sha256(source)
+            target_hash = _local_file_sha256(target) if _path_exists(target) else ""
+            if source.resolve() != target.resolve() and source_hash != target_hash:
+                _copy_file(source, target)
+        except OSError:
+            if source.resolve() != target.resolve():
+                _copy_file(source, target)
+        _remove_canonical_ingredient_siblings(target_dir, descriptor, suffix, target)
+        return target
     try:
         source_hash = _local_file_sha256(source)
         for candidate in sorted(target_dir.glob(f"{descriptor}*{suffix}")):
@@ -7807,14 +8135,15 @@ def _copy_materialize_ingredient_audio_file(path: Path, target_dir: Path, label:
 def _materialize_study_profile_segment1_ingredients(project: DashboardProjectContext, design: StimulusDesign) -> None:
     assets = _preload_assets_by_label(design.study_profile_id)
     for noise in design.noises:
-        source_path = _resolve_dashboard_local_path(noise.prebaked_path)
         asset = assets.get(_source_key(noise.label), {})
+        source_path = _profile_materialization_source_path(noise.prebaked_path, project, asset)
         trajectory_snapshot = noise.trajectory_snapshot or dict(asset.get("trajectory_snapshot") or {})
         target_path = _copy_materialize_ingredient_audio_file(
             source_path,
             project.segment1_dir,
             noise.label,
             motion_mode="looming",
+            overwrite_canonical=True,
         )
         noise.prebaked_path = str(target_path)
         if trajectory_snapshot:
@@ -7834,14 +8163,15 @@ def _materialize_study_profile_segment1_ingredients(project: DashboardProjectCon
             },
         )
     for audio in design.custom_looming_files:
-        source_path = _resolve_dashboard_local_path(audio.path)
         asset = assets.get(_source_key(audio.label), {})
+        source_path = _profile_materialization_source_path(audio.path, project, asset)
         trajectory_snapshot = audio.trajectory_snapshot or dict(asset.get("trajectory_snapshot") or {})
         target_path = _copy_materialize_ingredient_audio_file(
             source_path,
             project.segment1_dir,
             audio.label,
             motion_mode=audio.motion_mode or "looming",
+            overwrite_canonical=True,
         )
         info = _audio_file_info(target_path)
         audio.path = str(target_path)
@@ -7867,12 +8197,14 @@ def _materialize_study_profile_segment1_ingredients(project: DashboardProjectCon
             },
         )
     for audio in design.prestimulus_files:
-        source_path = _resolve_dashboard_local_path(audio.path)
+        asset = assets.get(_source_key(audio.label), {}) or _study_profile_custom_clip_asset(design, audio.label)
+        source_path = _profile_materialization_source_path(audio.path, project, asset)
         target_path = _copy_materialize_ingredient_audio_file(
             source_path,
             project.segment1_dir,
             audio.label,
             motion_mode="stationary",
+            overwrite_canonical=True,
         )
         info = _audio_file_info(target_path)
         audio.path = str(target_path)
@@ -7888,6 +8220,7 @@ def _materialize_study_profile_segment1_ingredients(project: DashboardProjectCon
             motion_mode="stationary",
             provenance={
                 "source_catalog_path": str(source_path),
+                "source_catalog_sha256": str(asset.get("sha256") or ""),
                 "read_only_catalog": True,
                 "loudness_policy": loudness_policy_for_design(design),
             },
@@ -7940,10 +8273,11 @@ def _study_settings_manifest(context: DashboardProjectContext, design: StimulusD
                 for element in strip.elements
             ],
         })
+    full_soa_baseline = str(protocol.baseline_strategy or "").strip().lower() in {"tactile_only", "stationary_burst"}
     baseline_note = (
         "Empty baseline_soa_values_ms means full-SOA baseline generation uses the main soa_values_ms list."
         if protocol.include_baseline_trials
-        and str(protocol.baseline_strategy or "").strip().lower() == "tactile_only"
+        and full_soa_baseline
         and not protocol.baseline_soa_values_ms
         else ""
     )
@@ -8151,7 +8485,7 @@ def _study_settings_manifest(context: DashboardProjectContext, design: StimulusD
                 "effective_soa_values_ms": [int(anchor["soa_ms"]) for anchor in baseline_anchors],
                 "full_soa_uses_main_soa_values": bool(
                     protocol.include_baseline_trials
-                    and str(protocol.baseline_strategy or "").strip().lower() == "tactile_only"
+                    and full_soa_baseline
                     and not protocol.baseline_soa_values_ms
                 ),
             },
@@ -8330,12 +8664,13 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 def _running_dashboard_url(host: str, port: int) -> str | None:
     url = f"http://{host}:{port}/"
-    try:
-        with urllib.request.urlopen(f"{url}api/state", timeout=1.5) as response:
-            if response.status == 200:
-                return url
-    except Exception:
-        return None
+    for endpoint in ("api/health", "api/state"):
+        try:
+            with urllib.request.urlopen(f"{url}{endpoint}", timeout=1.5) as response:
+                if response.status == 200:
+                    return url
+        except Exception:
+            continue
     return None
 
 
