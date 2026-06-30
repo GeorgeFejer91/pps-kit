@@ -253,7 +253,13 @@ LSL/XDF monitor reconciliation. When `--expect-native-transport` is used on a
 completed phone-run folder with marker evidence, strict validation also checks
 the completion `summary`: `native_lsl_pushed_count` must equal the local marker
 mirror count and `native_lsl_failed_count` must be zero, so native Android LSL
-claims cannot hide dropped rich/numeric marker pushes.
+claims cannot hide dropped rich/numeric marker pushes. Strict native validation
+also checks the per-stream counters:
+`native_lsl_rich_marker_pushed_count` and
+`native_lsl_numeric_trigger_pushed_count` must each equal the marker mirror
+count, while their failed counters must be zero. This prevents a partial
+rich-marker-only or trigger-only push from being treated as a complete native
+broadcast.
 For lightweight scheduled-block reconstruction, add
 `--expect-lightweight-materializations`; this requires every
 `trial_building_blocks_only` package block to have a

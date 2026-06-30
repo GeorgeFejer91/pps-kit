@@ -1466,6 +1466,16 @@ def _validate_native_lsl_marker_push_completeness(
     failed_count = _safe_int(summary.get("native_lsl_failed_count"), fallback=-1)
     if failed_count != 0:
         failures.append(f"completion summary native_lsl_failed_count expected 0, got {failed_count}")
+    per_stream_expectations = {
+        "native_lsl_rich_marker_pushed_count": marker_count,
+        "native_lsl_numeric_trigger_pushed_count": marker_count,
+        "native_lsl_rich_marker_failed_count": 0,
+        "native_lsl_numeric_trigger_failed_count": 0,
+    }
+    for field, expected in per_stream_expectations.items():
+        observed = _safe_int(summary.get(field), fallback=-1)
+        if observed != expected:
+            failures.append(f"completion summary {field} expected {expected}, got {observed}")
 
 
 def _validate_android_lsl_stream_descriptions(

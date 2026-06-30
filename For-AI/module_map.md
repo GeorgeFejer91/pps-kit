@@ -86,7 +86,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   `android/runner-companion/app/libs/liblsl-Android.aar` is included by Gradle
   when present; the bridge reflects `edu.ucsd.sccn.LSL`, creates
   `PPSMarkersV2`/`PPSTriggerCodes` outlets before `session_metadata`, pushes
-  every local marker mirror row while preserving CSV artifacts, resolves
+  every local marker mirror row while preserving CSV artifacts, records separate
+  rich-marker and numeric-trigger native push/failure counters, resolves
   up to eight visible `PPSCommandSignalsV1` command streams, retries command
   stream resolution during active phone playback if needed, polls every opened
   command inlet so PC-admin and Controller-phone senders can coexist on the same
@@ -166,7 +167,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   checks `lsl_runtime_status.json`, Android LSL stream descriptions, embedded completion status,
   strict native marker-push completeness from completion `summary`
   (`native_lsl_pushed_count == lsl_marker_mirror_count` and
-  `native_lsl_failed_count == 0`) when marker evidence is present,
+  `native_lsl_failed_count == 0`, plus matching per-stream rich-marker and
+  numeric-trigger pushed/failed counters) when marker evidence is present,
   strict native command summary counts against `native_lsl` command diary rows
   when `--expect-command-acks` is set,
   phone-run `phone_run_catalog_entry.json` when present or when

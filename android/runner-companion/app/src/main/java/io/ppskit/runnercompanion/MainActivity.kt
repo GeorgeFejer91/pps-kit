@@ -2329,6 +2329,10 @@ private class PhoneRunSession(
     private var nativeLslClockOffsetS: Double = 0.0
     private var nativeLslPushedCount: Int = 0
     private var nativeLslFailedCount: Int = 0
+    private var nativeLslRichMarkerPushedCount: Int = 0
+    private var nativeLslRichMarkerFailedCount: Int = 0
+    private var nativeLslNumericTriggerPushedCount: Int = 0
+    private var nativeLslNumericTriggerFailedCount: Int = 0
     private var nativeLslCommandReceivedCount: Int = 0
     private var nativeLslCommandAckCount: Int = 0
     private var nativeLslCommandAckFailedCount: Int = 0
@@ -3236,7 +3240,18 @@ private class PhoneRunSession(
             .takeIf { it.isFinite() }
             ?.let { (it / 1000.0) + nativeLslClockOffsetS }
             ?: transport.localClock()
-        if (transport.pushMarker(marker, timestamp)) {
+        val result = transport.pushMarker(marker, timestamp)
+        if (result.richMarkerPushed) {
+            nativeLslRichMarkerPushedCount += 1
+        } else {
+            nativeLslRichMarkerFailedCount += 1
+        }
+        if (result.numericTriggerPushed) {
+            nativeLslNumericTriggerPushedCount += 1
+        } else {
+            nativeLslNumericTriggerFailedCount += 1
+        }
+        if (result.pushedBoth) {
             nativeLslPushedCount += 1
         } else {
             nativeLslFailedCount += 1
@@ -3302,6 +3317,10 @@ private class PhoneRunSession(
             .put("native_lsl_clock_offset_s", nativeLslClockOffsetS)
             .put("native_lsl_pushed_count", nativeLslPushedCount)
             .put("native_lsl_failed_count", nativeLslFailedCount)
+            .put("native_lsl_rich_marker_pushed_count", nativeLslRichMarkerPushedCount)
+            .put("native_lsl_rich_marker_failed_count", nativeLslRichMarkerFailedCount)
+            .put("native_lsl_numeric_trigger_pushed_count", nativeLslNumericTriggerPushedCount)
+            .put("native_lsl_numeric_trigger_failed_count", nativeLslNumericTriggerFailedCount)
             .put("native_lsl_command_received_count", nativeLslCommandReceivedCount)
             .put("native_lsl_command_ack_count", nativeLslCommandAckCount)
             .put("native_lsl_command_ack_failed_count", nativeLslCommandAckFailedCount)

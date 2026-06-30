@@ -118,6 +118,24 @@ def test_android_lsl_runtime_validator_rejects_native_marker_push_count_drift(tm
     assert "completion summary native_lsl_failed_count expected 0, got 2" in failures
 
 
+def test_android_lsl_runtime_validator_rejects_native_numeric_trigger_push_count_drift(tmp_path: Path):
+    run_dir = tmp_path / "phone-run"
+    run_dir.mkdir()
+    _write_lightweight_phone_run(run_dir, native=True)
+    completion_path = run_dir / "completion.json"
+    completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    completion["summary"]["native_lsl_numeric_trigger_pushed_count"] = 1
+    completion["summary"]["native_lsl_numeric_trigger_failed_count"] = 1
+    completion_path.write_text(json.dumps(completion), encoding="utf-8")
+
+    result = validator.validate_run_artifact(run_dir, expect_native_transport=True)
+
+    assert result.ok is False
+    failures = "\n".join(result.failures)
+    assert "completion summary native_lsl_numeric_trigger_pushed_count expected" in failures
+    assert "completion summary native_lsl_numeric_trigger_failed_count expected 0, got 1" in failures
+
+
 def test_android_lsl_runtime_validator_accepts_phone_run_catalog_entry(tmp_path: Path):
     status = _status(native=False)
     status.update(_catalog_identity())
@@ -1546,6 +1564,10 @@ def _write_phone_run_with_native_command_diary(
         "native_lsl_command_receiver_available": True,
         "native_lsl_pushed_count": len(markers),
         "native_lsl_failed_count": 0,
+        "native_lsl_rich_marker_pushed_count": len(markers),
+        "native_lsl_rich_marker_failed_count": 0,
+        "native_lsl_numeric_trigger_pushed_count": len(markers),
+        "native_lsl_numeric_trigger_failed_count": 0,
         "native_lsl_command_received_count": 1,
         "native_lsl_command_ack_count": 1 if ack_sent else 0,
         "native_lsl_command_ack_failed_count": 0 if ack_sent else 1,
@@ -2397,6 +2419,10 @@ def _write_lightweight_phone_run(run_dir: Path, *, include_materialization_event
         "native_lsl_clock_offset_s": 0.0,
         "native_lsl_pushed_count": len(markers) if native else 0,
         "native_lsl_failed_count": 0,
+        "native_lsl_rich_marker_pushed_count": len(markers) if native else 0,
+        "native_lsl_rich_marker_failed_count": 0,
+        "native_lsl_numeric_trigger_pushed_count": len(markers) if native else 0,
+        "native_lsl_numeric_trigger_failed_count": 0,
         "native_lsl_command_received_count": 0,
         "native_lsl_command_ack_count": 0,
         "native_lsl_command_ack_failed_count": 0,

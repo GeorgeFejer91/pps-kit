@@ -261,6 +261,13 @@ def test_android_phone_run_writes_plain_event_diary() -> None:
     assert '.put("lsl_marker_mirror_count", lslMarkers.size)' in main_activity
     assert '.put("native_lsl_pushed_count", nativeLslPushedCount)' in main_activity
     assert '.put("native_lsl_failed_count", nativeLslFailedCount)' in main_activity
+    assert '.put("native_lsl_rich_marker_pushed_count", nativeLslRichMarkerPushedCount)' in main_activity
+    assert '.put("native_lsl_rich_marker_failed_count", nativeLslRichMarkerFailedCount)' in main_activity
+    assert '.put("native_lsl_numeric_trigger_pushed_count", nativeLslNumericTriggerPushedCount)' in main_activity
+    assert '.put("native_lsl_numeric_trigger_failed_count", nativeLslNumericTriggerFailedCount)' in main_activity
+    assert "PhoneLslMarkerPushResult" in _source("PhoneNativeLslBridge.kt")
+    assert "result.richMarkerPushed" in main_activity
+    assert "result.numericTriggerPushed" in main_activity
     assert '.put("native_lsl_command_received_count", nativeLslCommandReceivedCount)' in main_activity
     assert '.put("native_lsl_command_ack_count", nativeLslCommandAckCount)' in main_activity
     assert '.put("native_lsl_command_ack_failed_count", nativeLslCommandAckFailedCount)' in main_activity

@@ -27,7 +27,15 @@ internal interface PhoneNativeLslBridge {
 internal interface PhoneLslMarkerTransport : AutoCloseable {
     val status: PhoneNativeLslBridgeStatus
     fun localClock(): Double
-    fun pushMarker(marker: JSONObject, timestamp: Double = localClock()): Boolean
+    fun pushMarker(marker: JSONObject, timestamp: Double = localClock()): PhoneLslMarkerPushResult
+}
+
+internal data class PhoneLslMarkerPushResult(
+    val richMarkerPushed: Boolean,
+    val numericTriggerPushed: Boolean,
+) {
+    val pushedBoth: Boolean
+        get() = richMarkerPushed && numericTriggerPushed
 }
 
 internal interface PhoneLslCommandTransport : AutoCloseable {
@@ -103,7 +111,8 @@ private class MissingPhoneNativeLslBridge(private val status: PhoneNativeLslBrid
 
 private class NoopPhoneLslMarkerTransport(override val status: PhoneNativeLslBridgeStatus) : PhoneLslMarkerTransport {
     override fun localClock(): Double = System.nanoTime() / 1_000_000_000.0
-    override fun pushMarker(marker: JSONObject, timestamp: Double): Boolean = false
+    override fun pushMarker(marker: JSONObject, timestamp: Double): PhoneLslMarkerPushResult =
+        PhoneLslMarkerPushResult(richMarkerPushed = false, numericTriggerPushed = false)
     override fun close() = Unit
 }
 
@@ -462,10 +471,10 @@ private class ReflectivePhoneLslMarkerTransport(
 ) : PhoneLslMarkerTransport {
     override fun localClock(): Double = bridge.localClock()
 
-    override fun pushMarker(marker: JSONObject, timestamp: Double): Boolean {
+    override fun pushMarker(marker: JSONObject, timestamp: Double): PhoneLslMarkerPushResult {
         val richOk = bridge.pushStringSample(richOutlet, phoneMarkerToRichSample(marker), timestamp)
         val numericOk = bridge.pushIntSample(numericOutlet, intArrayOf(phoneMarkerTriggerCode(marker)), timestamp)
-        return richOk && numericOk
+        return PhoneLslMarkerPushResult(richMarkerPushed = richOk, numericTriggerPushed = numericOk)
     }
 
     override fun close() {
