@@ -395,13 +395,15 @@ PC-side monitoring with `pps-android-lsl-monitor` observes
 `stream_descriptions` for those four observer-side inlets, and monitor event
 rows extract command-signal ids, sender ids, command names, and payload JSON so
 PC-runner or Controller-phone commands can be reconstructed together with the
-phone runner's acknowledgements. Strict monitor validation now parses observed
-command-signal payloads, requires token evidence, compares row `payload_json`
-against the serialized sample payload, and requires note text when the observed
-command is `operator_note`. With `--expect-command-acks`, strict monitor
-validation also requires every observed command-signal id to have a matching
-ack id, and the report exposes unmatched ids in both directions for debugging
-PC-runner or Controller-phone rehearsals. The offline
+phone runner's acknowledgements. Strict monitor validation rejects private
+participant/demographic/haptic labels in stream names, source ids, and
+source-id patterns, parses observed command-signal payloads, requires token
+evidence, compares row `payload_json` against the serialized sample payload, and
+requires note text when the observed command is `operator_note`. With
+`--expect-command-acks`, strict monitor validation also requires every observed
+command-signal id to have a matching ack id, and the report exposes unmatched
+ids in both directions for debugging PC-runner or Controller-phone rehearsals.
+The offline
 `reconcile_android_lsl_monitor_with_phone_run.py` script compares PC-captured
 rich marker rows back to the phone `lsl_marker_mirror.csv`, including semantic
 `payload_json` equality, so a captured `session_metadata` payload cannot drift
@@ -422,7 +424,8 @@ presses over LSL, polls for matching `PPSCommandAcksV1` samples, and records the
 native send/ack result in the outbox row plus
 `phone_controller_runtime_status.json`. That status includes controller
 `stream_descriptions` for the command-signal outlet and command-ack inlet, so
-strict validation can reject channel-order or source-identity drift before
+strict validation can reject channel-order, private identifier, or
+source-identity drift before
 controller button presses are treated as live LSL evidence. Controller target
 identity is resolved from the synced manifest first, then from the package-list
 summary fields `session_group_id`, `part_session_id`, and `part_number`, and

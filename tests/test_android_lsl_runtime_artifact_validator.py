@@ -96,6 +96,30 @@ def test_android_lsl_runtime_validator_rejects_private_identifiers_in_stream_sou
     assert "tactile_threshold" in failures
 
 
+def test_android_lsl_runtime_validator_rejects_private_identifiers_in_source_id_patterns() -> None:
+    failures: list[str] = []
+
+    validator._validate_android_lsl_identifier_privacy(  # noqa: SLF001 - regression for monitor descriptor lists.
+        key="command_signals",
+        row={
+            "source_id_patterns": [
+                "pps-command-signals-v1-*-*",
+                "pps-android-controller-signals-v1-participant-P001-haptic-threshold-*",
+            ],
+        },
+        participant_metadata=None,
+        haptic_capability=None,
+        failures=failures,
+        label_prefix="PC Android LSL monitor stream description",
+    )
+
+    failures_text = "\n".join(failures)
+    assert "PC Android LSL monitor stream description command_signals.source_id_patterns" in failures_text
+    assert "participant_id" in failures_text
+    assert "haptic" in failures_text
+    assert "tactile_threshold" in failures_text
+
+
 def test_android_lsl_runtime_validator_requires_command_transport_in_strict_mode(tmp_path: Path):
     status = _status(native=True)
     status["native_bridge"]["command_transport"]["enabled"] = False
@@ -1108,6 +1132,24 @@ def test_android_lsl_runtime_validator_rejects_controller_stream_description_dri
     assert "command_signals.role" in "\n".join(result.failures)
 
 
+def test_android_lsl_runtime_validator_rejects_controller_private_stream_identifier(tmp_path: Path):
+    controller_dir = tmp_path / "phone-controller"
+    controller_dir.mkdir()
+    status = _controller_status(native=True)
+    status["stream_descriptions"]["command_signals"][
+        "source_id"
+    ] = "pps-android-controller-signals-v1-participant-P001-age-31"
+    (controller_dir / "phone_controller_runtime_status.json").write_text(json.dumps(status), encoding="utf-8")
+
+    result = validator.validate_run_artifact(controller_dir, expect_native_transport=True)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "Android controller LSL stream description command_signals.source_id must not encode" in failures
+    assert "participant_id" in failures
+    assert "age_years" in failures
+
+
 def test_android_lsl_runtime_validator_requires_native_controller_send_in_strict_mode(tmp_path: Path):
     controller_dir = tmp_path / "phone-controller"
     controller_dir.mkdir()
@@ -1233,6 +1275,28 @@ def test_android_lsl_runtime_validator_requires_pc_admin_stream_descriptions_in_
 
     assert result.ok is False
     assert "PC Android LSL admin stream descriptions are missing" in "\n".join(result.failures)
+
+
+def test_android_lsl_runtime_validator_rejects_pc_admin_private_stream_identifier(tmp_path: Path):
+    admin_dir = tmp_path / "pc-android-admin"
+    admin_dir.mkdir()
+    status = _pc_admin_status()
+    status["stream_descriptions"]["command_signals"][
+        "source_id"
+    ] = "pps-command-signals-v1-participant-P001-gender-female"
+    (admin_dir / "pc_android_lsl_admin_status.json").write_text(json.dumps(status), encoding="utf-8")
+    (admin_dir / "pc_android_lsl_command_outbox.jsonl").write_text(
+        json.dumps(_pc_admin_row(native_sent=True, ack_received=True)) + "\n",
+        encoding="utf-8",
+    )
+
+    result = validator.validate_run_artifact(admin_dir, expect_native_transport=True, expect_command_acks=True)
+
+    failures = "\n".join(result.failures)
+    assert result.ok is False
+    assert "PC Android LSL admin stream description command_signals.source_id must not encode" in failures
+    assert "participant_id" in failures
+    assert "gender" in failures
 
 
 def test_android_lsl_runtime_validator_rejects_pc_admin_stream_description_drift(tmp_path: Path):

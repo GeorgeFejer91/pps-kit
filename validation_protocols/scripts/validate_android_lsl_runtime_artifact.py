@@ -1602,22 +1602,26 @@ def _validate_android_lsl_identifier_privacy(
     participant_metadata: dict[str, Any] | None,
     haptic_capability: dict[str, Any] | None,
     failures: list[str],
+    label_prefix: str = "Android LSL stream description",
 ) -> None:
-    for field in ("name", "source_id", "source_id_pattern"):
-        value = _metadata_value(row.get(field))
-        if not value:
-            continue
-        leaked = _android_lsl_identifier_leak_labels(
-            value,
-            participant_metadata=participant_metadata,
-            haptic_capability=haptic_capability,
-        )
-        if leaked:
-            labels = ", ".join(leaked)
-            failures.append(
-                f"Android LSL stream description {key}.{field} must not encode "
-                f"participant/demographic/haptic identifiers: {labels}"
+    for field in ("name", "source_id", "source_id_pattern", "source_id_patterns"):
+        raw_value = row.get(field)
+        values = raw_value if isinstance(raw_value, list) else [raw_value]
+        for item in values:
+            value = _metadata_value(item)
+            if not value:
+                continue
+            leaked = _android_lsl_identifier_leak_labels(
+                value,
+                participant_metadata=participant_metadata,
+                haptic_capability=haptic_capability,
             )
+            if leaked:
+                labels = ", ".join(leaked)
+                failures.append(
+                    f"{label_prefix} {key}.{field} must not encode "
+                    f"participant/demographic/haptic identifiers: {labels}"
+                )
 
 
 def _android_lsl_identifier_leak_labels(
@@ -1906,6 +1910,14 @@ def _validate_android_controller_lsl_stream_descriptions(
             )
         if "token_required" in spec and row.get("token_required") is not spec["token_required"]:
             failures.append(f"Android controller LSL stream description {key}.token_required must be true")
+        _validate_android_lsl_identifier_privacy(
+            key=key,
+            row=row,
+            participant_metadata=None,
+            haptic_capability=None,
+            failures=failures,
+            label_prefix="Android controller LSL stream description",
+        )
 
 
 def _validate_pc_admin_lsl_stream_descriptions(
@@ -1985,6 +1997,14 @@ def _validate_pc_admin_lsl_stream_descriptions(
             )
         if "token_required" in spec and row.get("token_required") is not spec["token_required"]:
             failures.append(f"PC Android LSL admin stream description {key}.token_required must be true")
+        _validate_android_lsl_identifier_privacy(
+            key=key,
+            row=row,
+            participant_metadata=None,
+            haptic_capability=None,
+            failures=failures,
+            label_prefix="PC Android LSL admin stream description",
+        )
 
 
 def _validate_pc_monitor_lsl_stream_descriptions(
@@ -2089,6 +2109,14 @@ def _validate_pc_monitor_lsl_stream_descriptions(
             failures.append(f"PC Android LSL monitor stream description {key}.marker_version expected {spec['marker_version']!r}")
         if "token_required" in spec and row.get("token_required") is not spec["token_required"]:
             failures.append(f"PC Android LSL monitor stream description {key}.token_required must be true")
+        _validate_android_lsl_identifier_privacy(
+            key=key,
+            row=row,
+            participant_metadata=None,
+            haptic_capability=None,
+            failures=failures,
+            label_prefix="PC Android LSL monitor stream description",
+        )
 
 
 def _validate_command_protocol(protocol: dict[str, Any], failures: list[str], *, token_field: str = "token_required") -> None:

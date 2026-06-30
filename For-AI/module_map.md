@@ -210,7 +210,9 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   schedule/count consistency,
   Controller-mode `phone_controller_runtime_status.json` /
   `phone_controller_command_outbox.jsonl` including controller LSL stream
-  descriptions, PC-admin stream descriptions, PC-monitor stream descriptions,
+  descriptions, PC-admin stream descriptions, PC-monitor stream descriptions
+  with private participant/demographic/haptic identifier rejection across stream
+  names/source ids/source-id patterns,
   `pc_android_lsl_admin_status.json` /
   `pc_android_lsl_command_outbox.jsonl`, command/ack schema/channel order,
   Controller/PC-admin row-payload versus command-sample-payload consistency,
