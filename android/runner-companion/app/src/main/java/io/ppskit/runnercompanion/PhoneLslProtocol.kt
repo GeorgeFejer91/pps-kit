@@ -534,6 +534,10 @@ private fun phoneCommandRejection(
     if (payloadPackageId.isNotBlank() && runPackage.packageId.isNotBlank() && payloadPackageId != runPackage.packageId) {
         return "package_mismatch"
     }
+    val targetSessionId = signal.payload.optString("target_session_id")
+    if (targetSessionId.isNotBlank() && validSessions.isNotEmpty() && targetSessionId !in validSessions) {
+        return "target_session_mismatch"
+    }
     val targetPartSessionId = signal.payload.optString("target_part_session_id")
     if (targetPartSessionId.isNotBlank() && runPackage.partSessionId.isNotBlank() && targetPartSessionId != runPackage.partSessionId) {
         return "part_session_mismatch"

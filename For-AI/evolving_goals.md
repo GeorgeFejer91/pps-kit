@@ -66,6 +66,10 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   mobile package. That gives Android acks, PC-admin outboxes, and offline
   command reconciliation the same non-secret part/session identity spine as the
   phone-owned run package.
+- Android Runner-mode command gating now rejects an explicit payload
+  `target_session_id` that is not one of the current package/session/group/part
+  identifiers, matching the existing package, part-session, session-group, and
+  part-number drift checks before any phone-side state change.
 - Android Controller outboxes and PC-admin outboxes now flatten non-secret
   target identity fields (`target_part_session_id`,
   `target_session_group_id`, and `target_part_number`) into the saved row/status

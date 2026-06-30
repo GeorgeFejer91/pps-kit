@@ -171,7 +171,8 @@ This is the compact navigation map for future agents. Read it after `For-AI/READ
   echo non-secret accepted target identity from the command sample
   (`package_id`, `participant_id`, target session/part/group/part-number, and
   requester/source-behavior fields) while excluding pairing tokens; explicit
-  package or split-part identity drift is rejected before state changes. The
+  package, target-session, or split-part identity drift is rejected before state
+  changes. The
   strict Controller/PC-admin outbox validator now parses stored command and ack
   samples, rejects row-versus-command-payload target identity drift, and
   requires that same non-secret ack payload identity while rejecting pairing-token

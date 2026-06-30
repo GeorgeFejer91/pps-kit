@@ -156,6 +156,7 @@ def test_android_command_acks_echo_nonsecret_target_identity() -> None:
     assert "private fun phoneCommandAckPayload" in lsl_protocol
     assert "phoneCommandAckPayload(signal, result.payload)" in lsl_protocol
     assert 'return "package_mismatch"' in lsl_protocol
+    assert 'return "target_session_mismatch"' in lsl_protocol
     assert 'return "part_session_mismatch"' in lsl_protocol
 
 
