@@ -215,6 +215,13 @@ This file is the dated project memory. Add a new dated entry when a chat or impl
   density audit; remaining long manuscript blocks are mainly table rows, with a
   final human copy edit still required after release links, declarations,
   figures, and validation artifacts are added.
+- Continued the BRM manuscript self-review loop with a same-journal
+  sensory-suite comparator pass. `brm_comparator_articles.csv` and the
+  manuscript comparator table now include BRM examples for browser tactile
+  delivery, PsySuite, the cognitive-hearing OpenSesame extension, Titta, and
+  Mousetrap, so the article model covers calibration/setup interfaces,
+  synchronous I/O or LSL, device-specific validation limits, and analysis
+  handoff in addition to general experiment-builder style.
 - Segment 1 generated-source mode is now a pair of proportional waveform button
   widgets rather than a text-only toggle. `Burst train` remains the default
   `dynaspace_gaussian_burst_train` mode and uses the shortform visible citation

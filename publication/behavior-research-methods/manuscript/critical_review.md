@@ -784,3 +784,35 @@ Methods manuscript draft. It is a working audit, not manuscript text.
   article in the journal style. Final submission should still receive a human
   copy edit after release links, author metadata, and validation artifacts are
   finalized.
+
+## Iteration 22: Same-journal Sensory-suite Comparator Pass
+
+### Main Critiques
+
+- The comparator table already anchored the draft in BRM experiment-builder and
+  timing-validation conventions, but it underweighted the papers most similar
+  to PPS Toolkit's claim to be a full sensory suite.
+- For reviewers, the closest stylistic neighbors are not only Gorilla,
+  PsychoPy2, or OpenSesame. They also include BRM papers where calibration
+  screens, device-specific limits, synchronous I/O, modality-specific timing,
+  response capture, and analysis handoff are part of the method.
+- Without those comparators, the manuscript could sound like it was presenting a
+  GUI for designing PPS experiments, rather than a design-run-validation-analysis
+  workflow whose evidence layers have to travel together.
+
+### Resolution In This Revision
+
+- Added a `Multimodal sensory and calibration suites` row to
+  `brm_comparator_articles.csv` and to the manuscript's BRM comparator table.
+- Added same-journal comparator citations for browser tactile delivery,
+  PsySuite, the cognitive-hearing OpenSesame extension, Titta, and Mousetrap.
+- The row now states that PPS Toolkit should be read as a route-aware suite:
+  dashboard controls, runner route, validation artifacts, calibration evidence,
+  and analysis outputs must be reported together.
+
+### Residual Concerns
+
+- This improves the article-style model, but it does not close the underlying
+  validation gaps. Final submission still needs route-specific hardware timing,
+  tactile delivery/perceptual artifacts, and final release metadata before
+  strong route or tactile claims can be made.
